@@ -21,6 +21,8 @@ export const invalid = [
   <g animation={draw({ at: 0, over: 1 })} />,
   // @ts-expect-error feTurbulence takes no CSS channels
   <feTurbulence animation={enter({ at: 0, over: 1 })} />,
+  // @ts-expect-error feDisplacementMap animates displace, not the CSS scale channel
+  <feDisplacementMap animation={motion().to({ scale: 2 }, 1)} />,
   // @ts-expect-error misspelled channel
   motion().to({ opcity: 1 }, 1),
   // @ts-expect-error wiggle needs a seed

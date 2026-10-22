@@ -133,6 +133,12 @@ describe("effects", () => {
     expect(svg).toContain('[filter="url(#f1)"]{filter:url(#f1s)}');
   });
 
+  test("displace animates feDisplacementMap's scale attribute, starting from the attribute's value", () => {
+    const warp = def.filter({}, <feDisplacementMap in="SourceGraphic" scale={3} animation={motion().at(1).to({ displace: 9 }, 1, ease.linear)} />);
+    const svg = scene(<rect width={10} height={10} filter={warp} />);
+    expect(svg).toContain('<animate attributeName="scale" values="3;3;9;9" keyTimes="0;0.1;0.2;1"');
+  });
+
   test("blur compiles to a generated filter whose stdDeviation animates with SMIL", () => {
     const svg = scene(<rect width={10} height={10} animation={enter({ at: 1, over: 1 }, { blur: 4 })} />);
     expect(svg).toMatch(/<feGaussianBlur stdDeviation="0">\s*<animate attributeName="stdDeviation" values="4;4;0;0" keyTimes="0;0.1;0.2;1" calcMode="spline"/);
