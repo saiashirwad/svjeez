@@ -1,194 +1,53 @@
+import { attributeName } from "./attributes";
+import { isRef, type AnyRef } from "./defs";
 import { escapeAttr, escapeText, kebab, num } from "./format";
-import type { AnimationRequest } from "./types";
+import { isMotion, type Motion } from "./motion";
 
-export type Child =
-  | SvgNode
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | readonly Child[];
+export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
 
-export type ChildInput = Child | readonly Child[];
-
-export interface ElementProps {
-  children?: ChildInput;
-  animation?: AnimationRequest;
-  /** Joins arrays with spaces; falsy entries are dropped. */
-  class?: string | readonly (string | false | null | undefined)[];
-  style?: string | Record<string, string | number | undefined>;
-  [attribute: string]: unknown;
-}
+/** Refs stay objects until render assigns ids. */
+export type AttrValue = string | AnyRef;
 
 export type SvgNode =
   | {
-      kind: "element";
-      tag: string;
-      attrs: Record<string, string>;
-      children: SvgNode[];
-      animation?: AnimationRequest;
+      readonly kind: "element";
+      readonly tag: string;
+      readonly attrs: Readonly<Record<string, AttrValue>>;
+      readonly children: readonly SvgNode[];
+      /** The `animation` stack, outermost first. Never serialized. */
+      readonly motions: readonly Motion[];
     }
-  | { kind: "text"; value: string }
-  | { kind: "raw"; value: string }
-  | { kind: "fragment"; children: SvgNode[] };
+  | { readonly kind: "text"; readonly value: string }
+  | { readonly kind: "raw"; readonly value: string }
+  | { readonly kind: "fragment"; readonly children: readonly SvgNode[] };
+
+export type Element = Extract<SvgNode, { kind: "element" }>;
 
 const TEXT_TAGS = new Set(["text", "tspan", "title", "desc"]);
-const RAW_TEXT_TAGS = new Set(["style", "script"]);
+const RAW_TEXT_TAGS = new Set(["style"]);
 
-/** SVG attributes whose canonical spelling is camelCase. */
-const CAMEL_ATTRS = new Set([
-  "viewBox",
-  "preserveAspectRatio",
-  "pathLength",
-  "gradientUnits",
-  "gradientTransform",
-  "patternUnits",
-  "patternTransform",
-  "patternContentUnits",
-  "clipPathUnits",
-  "maskUnits",
-  "maskContentUnits",
-  "filterUnits",
-  "primitiveUnits",
-  "markerUnits",
-  "markerWidth",
-  "markerHeight",
-  "refX",
-  "refY",
-  "startOffset",
-  "textLength",
-  "lengthAdjust",
-  "spreadMethod",
-  "stdDeviation",
-  "baseFrequency",
-  "numOctaves",
-  "stitchTiles",
-  "tableValues",
-  "kernelMatrix",
-  "kernelUnitLength",
-  "preserveAlpha",
-  "surfaceScale",
-  "specularConstant",
-  "specularExponent",
-  "diffuseConstant",
-  "limitingConeAngle",
-  "pointsAtX",
-  "pointsAtY",
-  "pointsAtZ",
-  "xChannelSelector",
-  "yChannelSelector",
-  "edgeMode",
-  "targetX",
-  "targetY",
-  "keyPoints",
-  "keySplines",
-  "keyTimes",
-  "calcMode",
-  "repeatCount",
-  "repeatDur",
-  "attributeName",
-  "attributeType",
-  "baseProfile",
-  "zoomAndPan",
-  "externalResourcesRequired",
-  "requiredExtensions",
-  "requiredFeatures",
-  "systemLanguage",
-  "viewTarget",
-  "panose1",
-  "horizAdvX",
-  "horizOriginX",
-  "vertAdvY",
-  "vertOriginY",
-  "unitsPerEm",
-  "capHeight",
-  "xHeight",
-  "accentHeight",
-  "underlinePosition",
-  "underlineThickness",
-  "strikethroughPosition",
-  "strikethroughThickness",
-  "overlinePosition",
-  "overlineThickness",
-  "unicodeRange",
-]);
+export const element = (
+  tag: string,
+  attrs: Readonly<Record<string, AttrValue>> = {},
+  children: readonly SvgNode[] = [],
+  motions: readonly Motion[] = [],
+): Element => ({ kind: "element", tag, attrs, children, motions });
 
-const SPECIAL_ATTRS: Record<string, string> = {
-  className: "class",
-  xlinkHref: "xlink:href",
-  xlinkTitle: "xlink:title",
-  xmlSpace: "xml:space",
-  xmlLang: "xml:lang",
-  xmlnsXlink: "xmlns:xlink",
-};
+export const raw = (value: string): SvgNode => ({ kind: "raw", value });
 
-const normalizeAttrName = (name: string): string => {
-  if (SPECIAL_ATTRS[name]) return SPECIAL_ATTRS[name];
-  if (name.includes("-") || name.includes(":")) return name;
-  if (CAMEL_ATTRS.has(name)) return name;
-  return kebab(name);
-};
-
-const styleToString = (style: Record<string, string | number | undefined>): string =>
-  Object.entries(style)
-    .filter(([, value]) => value !== undefined)
-    .map(([property, value]) => `${kebab(property)}:${value}`)
-    .join(";");
-
-const normalizeAttrValue = (name: string, value: unknown): string | undefined => {
-  if (value === undefined || value === null || value === false) return undefined;
-  if (name === "class" || name === "className") {
-    const parts = Array.isArray(value) ? value : [value];
-    const joined = parts.filter(Boolean).join(" ").trim();
-    return joined || undefined;
-  }
-  if (name === "style") {
-    if (typeof value === "string") return value || undefined;
-    if (value && typeof value === "object") return styleToString(value as Record<string, string | number | undefined>) || undefined;
-    throw new Error(`The style attribute must be a string or object.`);
-  }
-  if (name === "dangerouslySetInnerHTML") {
-    throw new Error("Use raw() for unescaped SVG content instead of dangerouslySetInnerHTML.");
-  }
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return num(value);
-  if (value === true) return "true";
-  if (Array.isArray(value)) return value.map((entry) => String(entry)).join(" ");
-  throw new Error(`Unsupported value for attribute "${name}": ${String(value)}`);
-};
-
-export const normalizeAttrs = (props: Record<string, unknown>): Record<string, string> => {
-  const attrs: Record<string, string> = {};
-  for (const [rawName, rawValue] of Object.entries(props)) {
-    if (rawName === "children" || rawName === "animation" || rawName === "key" || rawName === "ref") continue;
-    const name = normalizeAttrName(rawName);
-    const value = normalizeAttrValue(rawName, rawValue);
-    if (value !== undefined && value !== "") attrs[name] = value;
-  }
-  return attrs;
-};
-
-const normalizeChildren = (input: unknown, preserveWhitespace: boolean): SvgNode[] => {
+export const children = (input: unknown, preserveWhitespace = false): SvgNode[] => {
   const out: SvgNode[] = [];
   const visit = (value: unknown): void => {
     if (value === null || value === undefined || value === false || value === true) return;
-    if (Array.isArray(value)) {
-      for (const item of value) visit(item);
-      return;
-    }
+    if (Array.isArray(value)) return value.forEach(visit);
     if (typeof value === "string") {
-      if (!preserveWhitespace && value.trim() === "") return;
-      out.push({ kind: "text", value });
+      if (preserveWhitespace || value.trim() !== "") out.push({ kind: "text", value });
       return;
     }
-    if (typeof value === "number") {
-      out.push({ kind: "text", value: num(value) });
-      return;
-    }
+    if (typeof value === "number") return void out.push({ kind: "text", value: num(value) });
     if (typeof value === "object" && "kind" in value) {
-      out.push(value as SvgNode);
-      return;
+      const child = value as SvgNode;
+      return child.kind === "fragment" ? child.children.forEach(visit) : void out.push(child);
     }
     throw new Error(`Unsupported SVG child: ${String(value)}`);
   };
@@ -196,57 +55,48 @@ const normalizeChildren = (input: unknown, preserveWhitespace: boolean): SvgNode
   return out;
 };
 
-export interface NodeProps extends ElementProps {}
-
-/**
- * Create an SVG element. `animation` is metadata for the Scene and is never
- * serialized; `children` can be supplied here or as the third argument.
- */
-export const node = (tag: string, props: NodeProps = {}, children?: ChildInput): SvgNode => {
-  const { animation, children: propChildren, ...rest } = props;
-  const content = children !== undefined ? children : propChildren;
-  return {
-    kind: "element",
-    tag,
-    attrs: normalizeAttrs(rest),
-    children: normalizeChildren(content, TEXT_TAGS.has(tag)),
-    animation,
-  };
+const style = (value: unknown): string => {
+  if (typeof value === "string") return value;
+  return Object.entries(value as Record<string, string | number | undefined>)
+    .filter(([, entry]) => entry !== undefined)
+    .map(([property, entry]) => `${kebab(property)}:${entry}`)
+    .join(";");
 };
 
-export const raw = (value: string): SvgNode => ({ kind: "raw", value });
-export const fragment = (children: ChildInput): SvgNode => ({
-  kind: "fragment",
-  children: normalizeChildren(children, false),
-});
-export const comment = (value: string): SvgNode => raw(`<!-- ${value} -->`);
-
-export const withAnimation = (node: SvgNode, animation: AnimationRequest): SvgNode => {
-  if (node.kind !== "element") throw new Error("Only SVG elements can carry animations.");
-  return { ...node, animation };
+const attrValue = (prop: string, value: unknown): AttrValue | undefined => {
+  if (value === undefined || value === null || value === false) return undefined;
+  if (prop === "class") return (Array.isArray(value) ? value : [value]).filter(Boolean).join(" ") || undefined;
+  if (prop === "style") return style(value) || undefined;
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return num(value);
+  if (isRef(value)) return value;
+  throw new Error(`Unsupported value for ${prop}: ${String(value)}`);
 };
 
-export const cloneNode = (node: SvgNode): SvgNode => {
-  switch (node.kind) {
-    case "element":
-      return {
-        kind: "element",
-        tag: node.tag,
-        attrs: { ...node.attrs },
-        children: node.children.map(cloneNode),
-        ...(node.animation ? { animation: node.animation } : {}),
-      };
-    case "fragment":
-      return { kind: "fragment", children: node.children.map(cloneNode) };
-    case "text":
-    case "raw":
-      return { ...node };
+const stack = (value: unknown): Motion[] =>
+  (Array.isArray(value) ? value : [value]).filter((entry): entry is Motion => {
+    if (!entry) return false;
+    if (!isMotion(entry)) throw new Error("animation takes motions built with motion() or a recipe.");
+    return true;
+  });
+
+/** Build an element from typed JSX props, mapping prop names through the attribute table. */
+export const node = (tag: string, props: Record<string, unknown>): Element => {
+  const attrs: Record<string, AttrValue> = {};
+  for (const [prop, value] of Object.entries(props)) {
+    if (prop === "children" || prop === "animation" || prop === "key") continue;
+    const resolved = attrValue(prop, value);
+    if (resolved !== undefined) attrs[attributeName(tag, prop)] = resolved;
   }
+  return element(tag, attrs, children(props.children, TEXT_TAGS.has(tag)), stack(props.animation));
 };
 
-const serializeAttrs = (attrs: Record<string, string>): string =>
+const serializeAttrs = (attrs: Readonly<Record<string, AttrValue>>): string =>
   Object.entries(attrs)
-    .map(([name, value]) => ` ${name}="${escapeAttr(value)}"`)
+    .map(([name, value]) => {
+      if (typeof value !== "string") throw new Error(`Unresolved ref in ${name}.`);
+      return ` ${name}="${escapeAttr(value)}"`;
+    })
     .join("");
 
 const inline = (node: SvgNode, rawText = false): string => {
@@ -260,18 +110,14 @@ const inline = (node: SvgNode, rawText = false): string => {
     case "element": {
       const open = `<${node.tag}${serializeAttrs(node.attrs)}`;
       if (node.children.length === 0) return `${open}/>`;
-      const isRaw = RAW_TEXT_TAGS.has(node.tag);
-      return `${open}>${node.children.map((child) => inline(child, isRaw || rawText)).join("")}</${node.tag}>`;
+      const isRaw = rawText || RAW_TEXT_TAGS.has(node.tag);
+      return `${open}>${node.children.map((child) => inline(child, isRaw)).join("")}</${node.tag}>`;
     }
   }
 };
 
-export interface SerializeOptions {
-  indent?: string;
-}
-
-const serializeNode = (node: SvgNode, depth: number, indent: string): string => {
-  const pad = indent.repeat(depth);
+const serializeNode = (node: SvgNode, depth: number): string => {
+  const pad = "  ".repeat(depth);
   switch (node.kind) {
     case "text":
       return pad + escapeText(node.value);
@@ -279,69 +125,15 @@ const serializeNode = (node: SvgNode, depth: number, indent: string): string => 
       return pad + node.value;
     case "fragment":
       return node.children
-        .map((child) => serializeNode(child, depth, indent))
+        .map((child) => serializeNode(child, depth))
         .filter(Boolean)
         .join("\n");
     case "element": {
-      const open = `${pad}<${node.tag}${serializeAttrs(node.attrs)}`;
-      if (node.children.length === 0) return `${open}/>`;
-      if (TEXT_TAGS.has(node.tag)) {
-        return `${open}>${node.children.map((child) => inline(child)).join("")}</${node.tag}>`;
-      }
-      if (RAW_TEXT_TAGS.has(node.tag)) {
-        return `${open}>${node.children.map((child) => inline(child, true)).join("")}</${node.tag}>`;
-      }
-      const children = node.children.map((child) => serializeNode(child, depth + 1, indent)).join("\n");
-      return `${open}>\n${children}\n${pad}</${node.tag}>`;
+      if (node.children.length === 0 || TEXT_TAGS.has(node.tag) || RAW_TEXT_TAGS.has(node.tag)) return pad + inline(node);
+      const inner = node.children.map((child) => serializeNode(child, depth + 1)).join("\n");
+      return `${pad}<${node.tag}${serializeAttrs(node.attrs)}>\n${inner}\n${pad}</${node.tag}>`;
     }
   }
 };
 
-export const serialize = (node: SvgNode, options: SerializeOptions = {}): string =>
-  serializeNode(node, 0, options.indent ?? "  ");
-
-/** Element helpers. Hyphenated attributes and camelCase SVG attributes both work. */
-const tag =
-  (name: string) =>
-  (props: NodeProps = {}, children?: ChildInput): SvgNode =>
-    node(name, props, children);
-
-export const svg = tag("svg");
-export const g = tag("g");
-export const defs = tag("defs");
-export const rect = tag("rect");
-export const circle = tag("circle");
-export const ellipse = tag("ellipse");
-export const line = tag("line");
-export const path = tag("path");
-export const polygon = tag("polygon");
-export const polyline = tag("polyline");
-export const use = tag("use");
-export const symbol = tag("symbol");
-export const marker = tag("marker");
-export const mask = tag("mask");
-export const clipPath = tag("clipPath");
-export const pattern = tag("pattern");
-export const linearGradient = tag("linearGradient");
-export const radialGradient = tag("radialGradient");
-export const stop = tag("stop");
-export const filter = tag("filter");
-export const feDropShadow = tag("feDropShadow");
-export const feGaussianBlur = tag("feGaussianBlur");
-export const feBlend = tag("feBlend");
-export const feMerge = tag("feMerge");
-export const feMergeNode = tag("feMergeNode");
-export const title = (content: ChildInput, props: NodeProps = {}): SvgNode =>
-  node("title", props, content);
-export const desc = (content: ChildInput, props: NodeProps = {}): SvgNode =>
-  node("desc", props, content);
-export const image = tag("image");
-
-export const text = (content: ChildInput, props: NodeProps = {}): SvgNode =>
-  node("text", props, content);
-
-export const tspan = (content: ChildInput, props: NodeProps = {}): SvgNode =>
-  node("tspan", props, content);
-
-export const style = (css: string, props: NodeProps = {}): SvgNode =>
-  node("style", props, raw(`\n${css}\n`));
+export const serialize = (node: SvgNode): string => serializeNode(node, 0);

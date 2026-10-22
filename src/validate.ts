@@ -54,7 +54,9 @@ export const validateSvg = (source: string): ValidationResult => {
   }
 
   const animated = new Set<string>();
-  for (const name of collect(source, /animation-name:\s*([A-Za-z0-9_-]+)/g)) animated.add(name);
+  for (const list of collect(source, /animation-name:\s*([^;}]+)/g)) {
+    for (const name of list.split(",")) animated.add(name.trim());
+  }
   for (const name of collect(source, /\banimation:\s*([A-Za-z0-9_-]+)/g)) {
     if (!["none", "initial", "inherit", "unset", "revert"].includes(name)) animated.add(name);
   }

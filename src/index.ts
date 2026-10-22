@@ -1,5 +1,9 @@
-export * from "./types";
-export * from "./svg";
-export * from "./anim";
-export * from "./scene";
-export * from "./validate";
+export { render, type RenderOptions } from "./render";
+export { motion, ease, type Motion, type Stack, type Span, type Seconds, type Ease } from "./motion";
+export { enter, exit, draw, shake, wiggle, type WiggleOptions } from "./recipes";
+export { def, type Ref, type DefTag } from "./defs";
+export { fx } from "./fx";
+export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
+export type { Channel, Values } from "./channels";
+export type { SvgNode, Child } from "./svg";
+export { validateSvg } from "./validate";

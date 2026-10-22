@@ -1,3 +1,4 @@
+import type { Color } from "svg-motion";
 import type { Tally } from "./game";
 
 export const C = {
@@ -11,13 +12,10 @@ export const C = {
   win: "#FFD166",
 } as const;
 
-export const TALLY: Record<Tally, { color: string; label: string; caption: string }> = {
+export const TALLY: Record<Tally, { color: Color; label: string; caption: string }> = {
   x: { color: "#FF4FA3", label: "X", caption: "X WINS" },
   o: { color: "#36E2D3", label: "O", caption: "O WINS" },
   draw: { color: "#A99CFF", label: "DRAW", caption: "DRAW" },
 };
 
-export const CSS = `
-.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
-.pop{transform-box:fill-box;transform-origin:center}
-`.trim();
+export const CSS = `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}`;

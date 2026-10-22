@@ -1,11 +1,10 @@
-import { anim, drawWindow, EASE, frame, revealWindow, Scene, type Frame, type SvgNode } from "svg-motion";
+import { def, draw, ease, enter, exit, fx, motion, render, shake, type Attrs, type Color, type Motion, type SvgNode } from "svg-motion";
 import { schedule, tally, type Cell, type Game, type Move, type Script, type Tally } from "./game";
 import { C, CSS, TALLY } from "./theme";
 
 const W = 480;
 const H = 600;
 const BOARD = { x: 60, y: 120, cell: 120 };
-const POP = "cubic-bezier(.34,1.56,.64,1)";
 
 const SCRIPTS: Script[] = [
   { first: "x", cells: [4, 1, 0, 8, 6, 2, 3] },
@@ -21,43 +20,33 @@ const center = (cell: Cell) => ({
   y: BOARD.y + Math.floor(cell / 3) * BOARD.cell + BOARD.cell / 2,
 });
 
-const stroke = (color: string, width: number) => ({
+const ink = (color: Color, width: number): Attrs<"path"> => ({
   fill: "none",
   stroke: color,
   strokeWidth: width,
   strokeLinecap: "round",
-  pathLength: 1,
-  strokeDasharray: 1,
 });
 
-function Defs(): SvgNode {
-  return (
-    <>
-      <linearGradient id="bg" x1={0} y1={0} x2={0} y2={1}>
-        <stop offset={0} stopColor={C.bgTop} />
-        <stop offset={1} stopColor={C.bgBottom} />
-      </linearGradient>
-      <radialGradient id="magenta" cx=".1" cy=".05" r=".7">
-        <stop offset={0} stopColor={C.magentaGlow} stopOpacity=".16" />
-        <stop offset={1} stopColor={C.magentaGlow} stopOpacity="0" />
-      </radialGradient>
-      <radialGradient id="cyan" cx=".95" cy="1" r=".7">
-        <stop offset={0} stopColor={C.cyanGlow} stopOpacity=".12" />
-        <stop offset={1} stopColor={C.cyanGlow} stopOpacity="0" />
-      </radialGradient>
-      <filter id="glow" filterUnits="userSpaceOnUse" x={0} y={0} width={W} height={H}>
-        <feGaussianBlur stdDeviation={5} result="blur" />
-        <feMerge>
-          <feMergeNode in="blur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-      <clipPath id="card">
-        <rect width={W} height={H} rx={24} />
-      </clipPath>
-    </>
-  );
-}
+const bg = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
+  <>
+    <stop offset={0} stopColor={C.bgTop} />
+    <stop offset={1} stopColor={C.bgBottom} />
+  </>
+));
+const magenta = def.radialGradient({ cx: 0.1, cy: 0.05, r: 0.7 }, (
+  <>
+    <stop offset={0} stopColor={C.magentaGlow} stopOpacity={0.16} />
+    <stop offset={1} stopColor={C.magentaGlow} stopOpacity={0} />
+  </>
+));
+const cyan = def.radialGradient({ cx: 0.95, cy: 1, r: 0.7 }, (
+  <>
+    <stop offset={0} stopColor={C.cyanGlow} stopOpacity={0.12} />
+    <stop offset={1} stopColor={C.cyanGlow} stopOpacity={0} />
+  </>
+));
+const glow = fx.glow({ blur: 5 });
+const card = def.clipPath({}, <rect width={W} height={H} rx={24} />);
 
 function Grid(): SvgNode {
   const { x, y, cell } = BOARD;
@@ -71,46 +60,30 @@ function Grid(): SvgNode {
   return (
     <>
       {lines.map((d, index) => (
-        <path
-          d={d}
-          {...stroke(C.grid, 3)}
-          animation={anim(`grid-${index}`, drawWindow({ in: [0.1 + index * 0.12, 0.7 + index * 0.12] }))}
-        />
+        <path d={d} {...ink(C.grid, 3)} animation={draw({ at: 0.1 + index * 0.12, over: 0.6 })} />
       ))}
     </>
   );
 }
 
-const emphasis = (game: Game, move: Move): Frame[] => {
+const emphasis = (game: Game, move: Move): Motion<"scale" | "opacity"> => {
   const r = game.resolveAt;
-  const rest = { opacity: 1, scale: 1 };
   const { outcome } = game;
   if (outcome.kind === "win" && outcome.player === move.player && outcome.line.includes(move.cell)) {
-    return [frame(r + 0.3, rest, POP), frame(r + 0.55, { opacity: 1, scale: 1.14 }), frame(r + 0.9, rest)];
+    return motion().at(r + 0.3).to({ scale: 1.14 }, 0.25, ease.pop).to({ scale: 1 }, 0.35);
   }
-  return [frame(r, rest), frame(r + 0.4, { opacity: outcome.kind === "draw" ? 0.5 : 0.25, scale: 0.92 })];
+  return motion().at(r).to({ opacity: outcome.kind === "draw" ? 0.5 : 0.25, scale: 0.92 }, 0.4);
 };
 
 function Mark({ game, move, order }: { game: Game; move: Move; order: number }): SvgNode {
   const { x, y } = center(move.cell);
-  const name = `g${game.index}-${move.cell}`;
-  const clear = game.clearAt + order * 0.04;
-  const out: [number, number] = [clear, clear + 0.3];
   const r = 30;
   return (
-    <g class="pop" filter="url(#glow)" animation={anim(`em-${name}`, emphasis(game, move))}>
+    <g filter={glow} animation={[emphasis(game, move), exit({ at: game.clearAt + order * 0.04, over: 0.3 })]}>
       {move.player === "x" ? (
         <>
-          <path
-            d={`M${x - r} ${y - r}L${x + r} ${y + r}`}
-            {...stroke(TALLY.x.color, 9)}
-            animation={anim(`x-${name}-a`, drawWindow({ in: [move.at, move.at + 0.24], out }))}
-          />
-          <path
-            d={`M${x + r} ${y - r}L${x - r} ${y + r}`}
-            {...stroke(TALLY.x.color, 9)}
-            animation={anim(`x-${name}-b`, drawWindow({ in: [move.at + 0.16, move.at + 0.4], out }))}
-          />
+          <path d={`M${x - r} ${y - r}L${x + r} ${y + r}`} {...ink(TALLY.x.color, 9)} animation={draw({ at: move.at, over: 0.24 })} />
+          <path d={`M${x + r} ${y - r}L${x - r} ${y + r}`} {...ink(TALLY.x.color, 9)} animation={draw({ at: move.at + 0.16, over: 0.24 })} />
         </>
       ) : (
         <circle
@@ -118,8 +91,8 @@ function Mark({ game, move, order }: { game: Game; move: Move; order: number }):
           cy={y}
           r={r + 2}
           transform={`rotate(-90 ${x} ${y})`}
-          {...stroke(TALLY.o.color, 9)}
-          animation={anim(`o-${name}`, drawWindow({ in: [move.at, move.at + 0.4], out }))}
+          {...ink(TALLY.o.color, 9)}
+          animation={draw({ at: move.at, over: 0.4 })}
         />
       )}
     </g>
@@ -138,37 +111,33 @@ function WinLine({ game }: { game: Game }): SvgNode | null {
   return (
     <path
       d={`M${from.x - dx} ${from.y - dy}L${to.x + dx} ${to.y + dy}`}
-      filter="url(#glow)"
-      {...stroke(C.win, 7)}
-      animation={anim(`win-${game.index}`, drawWindow({
-        in: [game.resolveAt, game.resolveAt + 0.45],
-        out: [game.clearAt, game.clearAt + 0.35],
-      }))}
+      filter={glow}
+      {...ink(C.win, 7)}
+      animation={draw({ at: game.resolveAt, over: 0.45 }).at(game.clearAt).to({ opacity: 0 }, 0.35)}
     />
   );
 }
 
-const cursorFrames = (): Frame[] => {
-  const look = (move: Move, opacity: number) => ({ ...center(move.cell), opacity, color: TALLY[move.player].color });
-  const frames: Frame[] = [];
+const look = (move: Move) => ({ ...center(move.cell), color: TALLY[move.player].color });
+
+function cursorMotion(): Motion<"opacity" | "x" | "y" | "color"> {
+  const opening = GAMES[0]?.moves[0];
+  if (!opening) throw new Error("No moves to follow.");
+  let track: Motion<"opacity" | "x" | "y" | "color"> = motion({ opacity: 0, ...look(opening) });
   for (const game of GAMES) {
     const [first, ...rest] = game.moves;
     if (!first) continue;
-    frames.push(frame(game.start, look(first, 0)), frame(game.start + 0.3, look(first, 1)));
-    let previous = first;
-    for (const move of rest) {
-      frames.push(frame(move.at - 0.4, look(previous, 1), EASE.inOut), frame(move.at - 0.1, look(move, 1)));
-      previous = move;
-    }
-    frames.push(frame(previous.at + 0.2, look(previous, 1)), frame(previous.at + 0.5, look(previous, 0)));
+    track = track.at(game.start).set(look(first)).to({ opacity: 1 }, 0.3);
+    for (const move of rest) track = track.at(move.at - 0.4).to(look(move), 0.3, ease.inOut);
+    track = track.at((rest.at(-1) ?? first).at + 0.2).to({ opacity: 0 }, 0.3);
   }
-  return frames;
-};
+  return track;
+}
 
 function Cursor(): SvgNode {
   const half = BOARD.cell / 2 - 12;
   return (
-    <g animation={anim("cursor", cursorFrames())}>
+    <g animation={cursorMotion()}>
       <rect
         x={-half}
         y={-half}
@@ -176,40 +145,27 @@ function Cursor(): SvgNode {
         height={half * 2}
         rx={16}
         fill="currentColor"
-        fillOpacity=".07"
+        fillOpacity={0.07}
         stroke="currentColor"
-        strokeOpacity=".55"
+        strokeOpacity={0.55}
         strokeWidth={1.5}
       />
     </g>
   );
 }
 
-const shakeFrames = (): Frame[] | undefined => {
-  const draws = GAMES.filter((game) => game.outcome.kind === "draw");
-  if (draws.length === 0) return undefined;
-  return draws.flatMap(({ resolveAt: r }) =>
-    [0, -8, 7, -5, 3, 0].map((x, step) => frame(r + 0.1 + step * 0.08, { x })),
-  );
-};
-
 function Score({ who, x, anchor }: { who: Tally; x: number; anchor: "start" | "middle" | "end" }): SvgNode {
   const { color, label } = TALLY[who];
   const ticks = GAMES.filter((game) => tally(game.outcome) === who).map((game) => game.resolveAt + 0.5);
-  const digit = (value: number) => {
-    const enter = ticks[value - 1];
+  const digit = (value: number): Motion<"opacity" | "y"> => {
+    const arrive = ticks[value - 1];
     const leave = ticks[value];
-    return anim(`score-${who}-${value}`, revealWindow({
-      in: enter === undefined ? undefined : [enter, enter + 0.35],
-      out: leave === undefined ? undefined : [leave, leave + 0.25],
-      from: { opacity: 0, y: 12 },
-      to: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: -12 },
-    }));
+    const shown = arrive === undefined ? motion() : enter({ at: arrive, over: 0.35 }, { opacity: 0, y: 12 });
+    return leave === undefined ? shown : shown.at(leave).to({ opacity: 0, y: -12 }, 0.25);
   };
   return (
     <>
-      <text x={x} y={56} class="mono" fontSize={11} letterSpacing={3} fill={color} fillOpacity=".7" textAnchor={anchor}>
+      <text x={x} y={56} class="mono" fontSize={11} letterSpacing={3} fill={color} fillOpacity={0.7} textAnchor={anchor}>
         {label}
       </text>
       {[0, ...ticks].map((_, value) => (
@@ -221,7 +177,7 @@ function Score({ who, x, anchor }: { who: Tally; x: number; anchor: "start" | "m
           fontWeight={600}
           fill={color}
           textAnchor={anchor}
-          filter="url(#glow)"
+          filter={glow}
           animation={digit(value)}
         >
           {value}
@@ -242,14 +198,8 @@ function Caption({ game }: { game: Game }): SvgNode {
       letterSpacing={4}
       fill={color}
       textAnchor="middle"
-      filter="url(#glow)"
-      animation={anim(`caption-${game.index}`, revealWindow({
-        in: [game.resolveAt + 0.5, game.resolveAt + 0.85],
-        out: [game.clearAt, game.clearAt + 0.3],
-        from: { opacity: 0, y: 8 },
-        to: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: 0 },
-      }))}
+      filter={glow}
+      animation={enter({ at: game.resolveAt + 0.5, over: 0.35 }, { opacity: 0, y: 8 }).at(game.clearAt).to({ opacity: 0 }, 0.3)}
     >
       {caption}
     </text>
@@ -261,17 +211,10 @@ function History(): SvgNode {
     <>
       {GAMES.map((game) => {
         const cx = W / 2 + (game.index - (GAMES.length - 1) / 2) * 18;
-        const at = game.resolveAt + 0.5;
         return (
           <>
             <circle cx={cx} cy={566} r={4} fill="none" stroke={C.faint} />
-            <circle
-              cx={cx}
-              cy={566}
-              r={4}
-              fill={TALLY[tally(game.outcome)].color}
-              animation={anim(`history-${game.index}`, revealWindow({ in: [at, at + 0.3] }))}
-            />
+            <circle cx={cx} cy={566} r={4} fill={TALLY[tally(game.outcome)].color} animation={enter({ at: game.resolveAt + 0.5, over: 0.3 })} />
           </>
         );
       })}
@@ -279,31 +222,29 @@ function History(): SvgNode {
   );
 }
 
+const draws = GAMES.filter((game) => game.outcome.kind === "draw");
+
 export function buildNeon(): string {
-  const film = new Scene({
-    width: W,
-    height: H,
-    duration: D,
-    title: "Neon tic-tac-toe",
-    desc: "Three games of tic-tac-toe on a neon board. X wins down the left column, O wins along the bottom row, and the third game is a draw. A scoreboard and a row of dots keep track.",
-    css: CSS,
-    reducedMotion: { at: GAMES[0]!.resolveAt + 1.2 },
-    comment: "Generated by svg-motion. Edit examples/neon/index.tsx instead of this file.",
-  });
-
-  const shake = shakeFrames();
-
-  film.defs(<Defs />);
-  film.add(
-    <g clipPath="url(#card)">
-      <rect width={W} height={H} fill="url(#bg)" />
-      <rect width={W} height={H} fill="url(#magenta)" />
-      <rect width={W} height={H} fill="url(#cyan)" />
-      <g animation={anim("film", revealWindow({ in: [0, 0.4], out: [END, END + 0.5] }))}>
+  return render(
+    {
+      width: W,
+      height: H,
+      duration: D,
+      title: "Neon tic-tac-toe",
+      desc: "Three games of tic-tac-toe on a neon board. X wins down the left column, O wins along the bottom row, and the third game is a draw. A scoreboard and a row of dots keep track.",
+      css: CSS,
+      reducedMotion: { at: GAMES[0]!.resolveAt + 1.2 },
+      comment: "Generated by svg-motion. Edit examples/neon/index.tsx instead of this file.",
+    },
+    <g clipPath={card}>
+      <rect width={W} height={H} fill={bg} />
+      <rect width={W} height={H} fill={magenta} />
+      <rect width={W} height={H} fill={cyan} />
+      <g animation={enter({ at: 0, over: 0.4 }).at(END).to({ opacity: 0 }, 0.5)}>
         <Score who="x" x={BOARD.x} anchor="start" />
         <Score who="draw" x={W / 2} anchor="middle" />
         <Score who="o" x={W - BOARD.x} anchor="end" />
-        <g animation={shake && anim("shake", shake, { timing: EASE.linear })}>
+        <g animation={draws.map((game) => shake({ at: game.resolveAt + 0.1, over: 0.4 }, { x: 8 }))}>
           <Grid />
           <Cursor />
           {GAMES.map((game) => (
@@ -318,8 +259,6 @@ export function buildNeon(): string {
       </g>
     </g>,
   );
-
-  return film.render();
 }
 
 export default buildNeon;

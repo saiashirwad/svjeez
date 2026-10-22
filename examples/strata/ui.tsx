@@ -1,38 +1,41 @@
-import type { AnimationRequest, ChildInput, NodeProps, SvgNode } from "svg-motion";
+import { draw, ease, enter, motion, type Attrs, type Child, type Color, type Motion, type Span, type SvgNode } from "svg-motion";
+import { float } from "./defs";
 import { C } from "./theme";
 
-export const ui = (size: number, fill: string, extra: NodeProps = {}): NodeProps => ({
+export const ui = (size: number, fill: Color, extra: Attrs<"text"> = {}): Attrs<"text"> => ({
   class: "ui",
-  "font-size": size,
+  fontSize: size,
   fill,
   ...extra,
 });
 
-export const mono = (size: number, fill: string, extra: NodeProps = {}): NodeProps => ({
+export const mono = (size: number, fill: Color, extra: Attrs<"text"> = {}): Attrs<"text"> => ({
   class: "mono",
-  "font-size": size,
+  fontSize: size,
   fill,
   ...extra,
 });
 
-export const serif = (size: number, fill: string, extra: NodeProps = {}): NodeProps => ({
+export const serif = (size: number, fill: Color, extra: Attrs<"text"> = {}): Attrs<"text"> => ({
   class: "ser",
-  "font-size": size,
+  fontSize: size,
   fill,
   ...extra,
 });
+
+type Reveal = Motion<"opacity" | "y">;
 
 export interface TreeRowProps {
-  animation: AnimationRequest;
+  animation: Reveal;
   x: number;
   y: number;
   bulletX: number;
   r: number;
-  fill: string;
+  fill: Color;
   size?: number;
-  color?: string;
+  color?: Color;
   weight?: number;
-  children: ChildInput;
+  children: Child;
 }
 
 export function TreeRow(props: TreeRowProps): SvgNode {
@@ -43,7 +46,7 @@ export function TreeRow(props: TreeRowProps): SvgNode {
         x={props.x}
         y={props.y}
         {...ui(props.size ?? 14, props.color ?? C.text)}
-        font-weight={props.weight}
+        fontWeight={props.weight}
       >
         {props.children}
       </text>
@@ -56,13 +59,13 @@ export function AgentAvatar(props: {
   cy: number;
   r: number;
   initial: string;
-  color: string;
+  color: Color;
   size?: number;
 }): SvgNode {
   const size = props.size ?? 8;
   return (
     <g>
-      <circle cx={props.cx} cy={props.cy} r={props.r} fill={props.color} fill-opacity={0.13} stroke={props.color} stroke-opacity={0.34} />
+      <circle cx={props.cx} cy={props.cy} r={props.r} fill={props.color} fillOpacity={0.13} stroke={props.color} strokeOpacity={0.34} />
       <text
         x={props.cx}
         y={props.cy + size * 0.35}
@@ -78,11 +81,11 @@ export function MiniAvatar(props: {
   cx: number;
   cy: number;
   initial: string;
-  color: string;
+  color: Color;
 }): SvgNode {
   return (
     <g>
-      <circle cx={props.cx} cy={props.cy} r={6.5} fill={props.color} fill-opacity={0.12} stroke={props.color} stroke-opacity={0.32} />
+      <circle cx={props.cx} cy={props.cy} r={6.5} fill={props.color} fillOpacity={0.12} stroke={props.color} strokeOpacity={0.32} />
       <text x={props.cx} y={props.cy + 2.5} {...mono(7, props.color, { textAnchor: "middle" })}>
         {props.initial}
       </text>
@@ -96,7 +99,7 @@ export function CardHeader(props: {
   name: string;
   role: string;
   meta: string;
-  color: string;
+  color: Color;
 }): SvgNode {
   const { y, color } = props;
   return (
@@ -111,11 +114,11 @@ export function CardHeader(props: {
 }
 
 export function CardShell(props: {
-  animation: AnimationRequest;
+  animation: Reveal;
   y: number;
   h: number;
-  children: ChildInput;
-  stroke?: string;
+  children: Child;
+  stroke?: Color;
   x?: number;
   w?: number;
   r?: number;
@@ -130,7 +133,7 @@ export function CardShell(props: {
         rx={props.r ?? 12}
         fill={C.card}
         stroke={props.stroke ?? C.lineSoft}
-        filter="url(#float)"
+        filter={float}
       />
       {props.children}
     </g>
@@ -141,38 +144,47 @@ export function Thread(props: {
   d: string;
   endX: number;
   endY: number;
-  color: string;
-  animation: AnimationRequest;
+  color: Color;
+  on: Span;
+  off: Span;
   strokeOpacity?: number;
 }): SvgNode {
+  const { on, off } = props;
   return (
     <>
       <path
         d={props.d}
-        pathLength={1}
         stroke={props.color}
-        stroke-opacity={props.strokeOpacity ?? 0.38}
-        stroke-width={1}
-        stroke-dasharray={1}
+        strokeOpacity={props.strokeOpacity ?? 0.38}
+        strokeWidth={1}
         fill="none"
-        animation={props.animation}
+        animation={draw(on).at(off.at).to({ opacity: 0 }, off.over)}
       />
       <circle
         cx={props.endX}
         cy={props.endY}
         r={2.2}
         fill={props.color}
-        fill-opacity={0.7}
-        animation={props.animation}
+        fillOpacity={0.7}
+        animation={enter(on).at(off.at).to({ opacity: 0 }, off.over)}
       />
     </>
   );
 }
 
+const EASE_IN_OUT = ease.bezier(0.42, 0, 0.58, 1);
+
+const pulse = (index: number) =>
+  motion({ opacity: 0.22 })
+    .at(index * 0.18)
+    .to({ opacity: 1 }, 0.5075, EASE_IN_OUT)
+    .to({ opacity: 0.22 }, 0.5075, EASE_IN_OUT)
+    .loop(1.45);
+
 export function PulseDots(props: {
   x: number;
   y: number;
-  color: string;
+  color: Color;
   count?: number;
   gap?: number;
   r?: number;
@@ -186,8 +198,7 @@ export function PulseDots(props: {
           cy={props.y}
           r={props.r ?? 1.7}
           fill={props.color}
-          class="pulse"
-          style={{ animationDelay: `${index * 0.18}s` }}
+          animation={pulse(index)}
         />
       ))}
     </>
