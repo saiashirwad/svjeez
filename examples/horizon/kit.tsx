@@ -68,11 +68,11 @@ export const heat = (t: number): Color => {
 };
 
 /**
- * Bloom for world-space layers. The world's origin is the canvas center, so the library's default
- * canvas-sized region would sit a quarter-screen off; this one is the canvas around that origin.
+ * Bloom for world-space layers, whose origin is the canvas center. The region is `reach` around that
+ * origin: blur cost scales with its area, so keep it to what the layer can actually cover.
  */
-export const glow = (blur: number, strength = 1): Ref<"filter"> =>
-  def.filter({ filterUnits: "userSpaceOnUse", x: -W / 2, y: -H / 2, width: W, height: H }, (
+export const glow = (blur: number, strength: number, reach: { readonly x: number; readonly y: number }): Ref<"filter"> =>
+  def.filter({ filterUnits: "userSpaceOnUse", x: -reach.x, y: -reach.y, width: 2 * reach.x, height: 2 * reach.y }, (
     <>
       <feGaussianBlur stdDeviation={blur} result="blur" />
       <feMerge>

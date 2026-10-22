@@ -1,4 +1,4 @@
-import { def, ease, fx, motion, wiggle, type Color, type SvgNode } from "svg-motion";
+import { def, ease, motion, wiggle, type Color, type SvgNode } from "svg-motion";
 import { C, D, H, T, W, random } from "./kit";
 
 const depth = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
@@ -50,7 +50,13 @@ const STARS = Array.from({ length: 220 }, (_, i) => ({
   twinkle: i % 6 === 0,
 }));
 
-const flare = fx.glow({ blur: 3 });
+/** A soft sprite instead of a blur filter: a canvas-wide filter over the whole sky costs a few fps. */
+const halo = def.radialGradient({}, (
+  <>
+    <stop offset={0} stopColor={C.star} stopOpacity={0.5} />
+    <stop offset={1} stopColor={C.star} stopOpacity={0} />
+  </>
+));
 
 const sparkle = (x: number, y: number, r: number): string =>
   `M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z`;
@@ -67,11 +73,12 @@ export function Stars(): SvgNode {
           animation={twinkle ? wiggle({ opacity: 0.7 }, { seed: `star-${i}`, rate: 3, ease: ease.hold, period: D / 2 }) : undefined}
         />
       ))}
-      <g fill={C.star} filter={flare}>
-        {STARS.filter((star) => star.r > 1.35).map(({ x, y }, i) => (
-          <path d={sparkle(x, y, 7)} animation={wiggle({ opacity: 0.5, scale: 0.3 }, { seed: `flare-${i}`, rate: 1, period: D / 2 })} />
-        ))}
-      </g>
+      {STARS.filter((star) => star.r > 1.35).map(({ x, y }, i) => (
+        <g animation={wiggle({ opacity: 0.5, scale: 0.3 }, { seed: `flare-${i}`, rate: 1, period: D / 2 })}>
+          <circle cx={x} cy={y} r={9} fill={halo} />
+          <path d={sparkle(x, y, 7)} fill={C.star} />
+        </g>
+      ))}
     </>
   );
 }

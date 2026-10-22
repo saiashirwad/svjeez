@@ -20,7 +20,7 @@ const RING: readonly Ring[] = Array.from({ length: RINGS }, (_, i) => {
   const t = i / (RINGS - 1);
   const r = INNER + (OUTER - INNER) * t ** 1.25;
   const dash = Array.from({ length: 8 }, () => Math.round(6 + rand() * 70)).join(" ");
-  return { r, t, width: 1 + rand() * 3.5 * (1 - t * 0.5), dash, laps: Math.max(1, Math.round(8 * (INNER / r) ** 1.5)) };
+  return { r, t, width: 1.4 + rand() * 4.5 * (1 - t * 0.5), dash, laps: Math.max(1, Math.round(8 * (INNER / r) ** 1.5)) };
 });
 
 const far = def.clipPath({}, <rect x={-OUTER - 120} y={-OUTER - 120} width={2 * OUTER + 240} height={OUTER + 120} />);
@@ -39,7 +39,7 @@ const doppler = def.mask(
   <rect x={-OUTER - 120} y={-OUTER - 120} width={2 * OUTER + 240} height={2 * OUTER + 240} fill={beam} />,
 );
 
-const warm = glow(6, 2);
+const warm = glow(6, 2, { x: 370, y: 160 });
 
 /** Matter forms the disk outside-in and is swallowed with it. */
 const arrive = (t: number) => T.accrete + (1 - t) * 1.3;

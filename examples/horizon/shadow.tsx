@@ -1,10 +1,10 @@
 import { def, draw, ease, motion, wiggle, type SvgNode } from "svg-motion";
-import { C, D, T, envelope, glow, phased, pivot } from "./kit";
+import { C, D, H, T, envelope, glow, phased, pivot } from "./kit";
 
 const SHADOW = 57;
 
-const hot = glow(4, 2);
-const cold = glow(5, 2);
+const hot = glow(4, 2, { x: 130, y: 120 });
+const cold = glow(5, 2, { x: 150, y: H / 2 + 20 });
 
 const lensed = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
   <>
@@ -23,8 +23,9 @@ const arch = (rx: number, ry: number, over: boolean): string =>
  * fall in, the light it bends sweeps out past the edges of the screen with it.
  */
 export function Shadow(): SvgNode {
-  const life = motion({ scale: 0, opacity: 1 })
+  const life = motion({ scale: 0.01, opacity: 0 })
     .at(T.open)
+    .set({ opacity: 1 })
     .to({ scale: 1 }, 0.9, ease.pop)
     .at(T.fall)
     .to({ scale: 13 }, 1.1, ease.in)
@@ -77,11 +78,11 @@ function Jet({ dir }: { dir: 1 | -1 }): SvgNode {
 /** Relativistic jets along the spin axis, perpendicular to the tilted disk. */
 export function Jets(): SvgNode {
   return (
-    <g filter={cold}>
-      <g
-        transform="rotate(-12)"
-        animation={[envelope(T.ignite, T.collapse, 0.1), wiggle({ opacity: 0.3 }, { seed: "jet", rate: 18, ease: ease.hold, period: D / 8 })]}
-      >
+    <g
+      filter={cold}
+      animation={[envelope(T.ignite, T.collapse, 0.1), wiggle({ opacity: 0.3 }, { seed: "jet", rate: 18, ease: ease.hold, period: D / 8 })]}
+    >
+      <g transform="rotate(-12)">
         <Jet dir={-1} />
         <Jet dir={1} />
       </g>

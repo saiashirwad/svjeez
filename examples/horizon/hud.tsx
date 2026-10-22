@@ -203,7 +203,7 @@ export function Flash(): SvgNode {
       width={W}
       height={H}
       fill={C.white}
-      animation={motion({ opacity: 0 }).at(T.ignite).to({ opacity: 0.55 }, 0.05).to({ opacity: 0 }, 0.9)}
+      animation={motion({ opacity: 0 }).at(T.ignite).to({ opacity: 0.3 }, 0.04).to({ opacity: 0 }, 0.6)}
     />
   );
 }
