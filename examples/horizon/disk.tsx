@@ -1,5 +1,5 @@
 import { def, draw, ease, motion, type SvgNode } from "svg-motion";
-import { C, D, T, TILT, glow, heat, phased, pivot, random } from "./kit";
+import { C, D, T, TILT, heat, phased, pivot, random } from "./kit";
 
 const INNER = 78;
 const OUTER = 330;
@@ -39,7 +39,18 @@ const doppler = def.mask(
   <rect x={-OUTER - 120} y={-OUTER - 120} width={2 * OUTER + 240} height={2 * OUTER + 240} fill={beam} />,
 );
 
-const warm = glow(6, 2, { x: 370, y: 160 });
+/**
+ * The disk's glow, painted rather than filtered. A blur over the spinning rings re-runs every frame,
+ * and Safari drops to about 10 fps under it; a still gradient costs nothing.
+ */
+const haze = def.radialGradient({}, (
+  <>
+    <stop offset={0.2} stopColor="#FFF1D0" stopOpacity={0.45} />
+    <stop offset={0.4} stopColor="#FFB25C" stopOpacity={0.25} />
+    <stop offset={0.7} stopColor="#C72E4F" stopOpacity={0.1} />
+    <stop offset={1} stopColor="#4B1638" stopOpacity={0} />
+  </>
+));
 
 /** Matter forms the disk outside-in and is swallowed with it. */
 const arrive = (t: number) => T.accrete + (1 - t) * 1.3;
@@ -116,16 +127,30 @@ const swallow = motion({ opacity: 1, scale: 1, rotate: 0 })
 /** Half the disk: the far half goes behind the shadow, the near half in front of it. */
 export function Disk({ half }: { half: "far" | "near" }): SvgNode {
   return (
-    <g filter={warm}>
-      <g transform={TILT}>
-        <g clipPath={half === "far" ? far : near} mask={doppler}>
-          <g animation={swallow}>
-            {RING.map((ring) => (
-              <Band ring={ring} />
-            ))}
-            <Debris />
-          </g>
+    <g transform={TILT}>
+      <g clipPath={half === "far" ? far : near} mask={doppler}>
+        <g animation={swallow}>
+          {RING.map((ring) => (
+            <Band ring={ring} />
+          ))}
         </g>
+      </g>
+    </g>
+  );
+}
+
+/** The glow and the debris, drawn once behind the shadow. Neither needs the near copy's overlap. */
+export function Aura(): SvgNode {
+  return (
+    <g transform={TILT}>
+      <g animation={swallow}>
+        <circle
+          r={OUTER + 40}
+          fill={haze}
+          mask={doppler}
+          animation={motion({ opacity: 0 }).at(T.accrete + 0.4).to({ opacity: 1 }, 1.6).at(T.black).set({ opacity: 0 })}
+        />
+        <Debris />
       </g>
     </g>
   );

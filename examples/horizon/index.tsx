@@ -1,5 +1,5 @@
 import { ease, motion, render, shake } from "svg-motion";
-import { Disk, Shock } from "./disk";
+import { Aura, Disk, Shock } from "./disk";
 import { Flash, Hud, Lens, Reticle, Title } from "./hud";
 import { D, H, T, W } from "./kit";
 import { Jets, Shadow } from "./shadow";
@@ -33,6 +33,7 @@ export function buildHorizon(): string {
         <Stars />
         <g transform={`translate(${W / 2} ${H / 2})`}>
           <Disk half="far" />
+          <Aura />
           <Jets />
           <Shadow />
           <Disk half="near" />

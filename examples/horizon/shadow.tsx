@@ -1,5 +1,5 @@
 import { def, draw, ease, motion, wiggle, type SvgNode } from "svg-motion";
-import { C, D, H, T, envelope, glow, phased, pivot } from "./kit";
+import { C, D, H, T, envelope, glow, pivot } from "./kit";
 
 const SHADOW = 57;
 
@@ -56,6 +56,9 @@ const beam = (dir: 1 | -1) =>
     </>
   ));
 
+/** Plasma knots: one dashed line marching one dash-pitch per loop, read as a stream of particles. */
+const PITCH = 70;
+
 function Jet({ dir }: { dir: 1 | -1 }): SvgNode {
   const stroke = beam(dir);
   const length = dir * 560;
@@ -63,14 +66,13 @@ function Jet({ dir }: { dir: 1 | -1 }): SvgNode {
     <g fill="none" stroke={stroke} strokeLinecap="round">
       <path d={`M0 ${dir * 58}V${length}`} strokeWidth={14} opacity={0.18} />
       <path d={`M0 ${dir * 58}V${length}`} strokeWidth={2.4} animation={draw({ at: T.ignite, over: 0.35 })} />
-      {Array.from({ length: 9 }, (_, k) => (
-        <path
-          d={`M0 0V${dir * 18}`}
-          strokeWidth={1.6}
-          stroke={C.white}
-          animation={phased(0.6, (k * 0.6) / 9, (u) => ({ y: dir * (64 + 420 * u ** 1.4), opacity: Math.min(1, (1 - u) * 2) }), 6)}
-        />
-      ))}
+      <path
+        d={`M0 ${dir * (58 - PITCH)}V${length}`}
+        strokeWidth={1.6}
+        stroke={C.white}
+        strokeDasharray={`16 ${PITCH - 16}`}
+        animation={motion({ y: 0 }).to({ y: dir * PITCH }, 0.1, ease.linear).loop(0.1)}
+      />
     </g>
   );
 }

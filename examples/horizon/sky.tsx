@@ -1,5 +1,5 @@
 import { def, ease, motion, wiggle, type Color, type SvgNode } from "svg-motion";
-import { C, D, H, T, W, random } from "./kit";
+import { C, D, H, T, W, pivot, random } from "./kit";
 
 const depth = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
   <>
@@ -83,40 +83,37 @@ export function Stars(): SvgNode {
   );
 }
 
-const STREAKS = Array.from({ length: 90 }, () => {
-  const angle = rand() * Math.PI * 2;
-  const from = 20 + rand() * 70;
-  const length = 30 + rand() * 90;
-  return {
-    cos: Math.cos(angle),
-    sin: Math.sin(angle),
-    from,
-    length,
-    at: T.fall + rand() * 0.9,
-    over: 0.5 + rand() * 0.4,
-    width: 0.6 + rand() * 1.6,
-  };
-});
+const WAVES = Array.from({ length: 6 }, (_, w) => ({
+  at: T.fall + w * 0.16,
+  over: 0.6 + rand() * 0.3,
+  streaks: Array.from({ length: 15 }, () => {
+    const angle = rand() * Math.PI * 2;
+    const from = 20 + rand() * 60;
+    return { cos: Math.cos(angle), sin: Math.sin(angle), from, to: from + 8 + rand() * 22, width: 0.6 + rand() * 1.6 };
+  }),
+}));
 
-/** Falling in: starlight streaks past from the center. */
+/**
+ * Falling in: starlight streaks past from the center. Each wave is one group scaling out from the
+ * origin, so 90 streaks cost 6 animations; non-scaling strokes keep them thin as they stretch.
+ */
 export function Warp(): SvgNode {
-  const reach = 640;
   return (
     <g stroke="#DCE6FF" strokeLinecap="round">
-      {STREAKS.map(({ cos, sin, from, length, at, over, width }) => (
-        <line
-          x1={cos * from}
-          y1={sin * from}
-          x2={cos * (from + length)}
-          y2={sin * (from + length)}
-          strokeWidth={width}
-          animation={motion({ x: 0, y: 0, opacity: 0 })
+      {WAVES.map(({ at, over, streaks }) => (
+        <g
+          style={pivot}
+          animation={motion({ scale: 1, opacity: 0 })
             .at(at)
-            .to({ x: cos * reach, y: sin * reach }, over, ease.in)
+            .to({ scale: 8 }, over, ease.in)
             .at(at)
             .to({ opacity: 0.9 }, 0.12)
             .to({ opacity: 0 }, over - 0.12, ease.in)}
-        />
+        >
+          {streaks.map(({ cos, sin, from, to, width }) => (
+            <line x1={cos * from} y1={sin * from} x2={cos * to} y2={sin * to} strokeWidth={width} style={{ vectorEffect: "non-scaling-stroke" }} />
+          ))}
+        </g>
       ))}
     </g>
   );
