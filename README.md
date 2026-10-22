@@ -4,7 +4,7 @@ Animated SVGs, written in TSX.
 
 ![A black hole forms, ignites, and swallows the camera](dist/horizon.svg)
 
-You describe what moves and when. `render()` compiles it into one standalone `.svg` made of CSS keyframes, with a little SMIL inside filters and no JavaScript. It plays anywhere an image does, including this README.
+You write the scene in TSX and say what moves and when. `render()` compiles it into one standalone `.svg`. The output uses CSS keyframes, plus SMIL inside filters, and no JavaScript. It plays anywhere an image does, including this README.
 
 ## Try it
 
@@ -48,6 +48,6 @@ const svg = render(
 await Bun.write("hello.svg", svg);
 ```
 
-The path strokes itself on, then the dot pops in and starts to pulse.
+The curve draws on over 1.2 seconds. Then the dot pops in and pulses once a second.
 
-Time in a motion is a cursor. `.at(t)` moves it. `.to(values, over, ease)` transitions from the current values and moves the cursor to the end. `.set(values)` is a hard cut, and `.loop(period)` repeats. Between transitions, every value holds.
+Time in a motion is a cursor. `.at(t)` moves it. `.to(values, over, ease)` transitions from the current values and moves the cursor to the end. `.set(values)` is a hard cut, and `.loop(period)` repeats the motion every `period` seconds. Between transitions, every value holds.
