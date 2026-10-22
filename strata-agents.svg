@@ -85,16 +85,16 @@
   @keyframes kMenu{0%,21.9%{opacity:0;transform:translateY(6px)}23.2%,27.9%{opacity:1;transform:translateY(0)}28.8%,100%{opacity:0;transform:translateY(0)}}
   @keyframes kMenuRow{0%,22.7%{opacity:0;transform:translateY(3px)}24%,100%{opacity:1;transform:translateY(0)}}
   @keyframes kSel{0%,24.1%{opacity:0}25.1%,28.2%{opacity:1}28.8%,100%{opacity:0}}
-  @keyframes kStatus{0%,28.8%{opacity:0;transform:translateY(4px)}29.7%,31.8%{opacity:1;transform:translateY(0)}32.6%,100%{opacity:0}}
+  @keyframes kStatus{0%,28.8%{opacity:0;transform:translateY(4px)}29.7%,33.6%{opacity:1;transform:translateY(0)}34.4%,100%{opacity:0}}
 
   /* ---------- scout reply ---------- */
-  @keyframes kScoutCard{0%,31.3%{opacity:0;transform:translateY(8px)}32.7%,54.7%{opacity:1;transform:translateY(0)}55.7%,100%{opacity:0;transform:translateY(0)}}
-  @keyframes kThink{0%,32.5%{opacity:0}33.3%,37.2%{opacity:1}38%,100%{opacity:0}}
-  @keyframes kAns1{0%,37.2%{opacity:0;transform:translateY(3px)}38.3%,100%{opacity:1;transform:translateY(0)}}
-  @keyframes kAns2{0%,38.4%{opacity:0;transform:translateY(3px)}39.5%,100%{opacity:1;transform:translateY(0)}}
-  @keyframes kAns3{0%,39.6%{opacity:0;transform:translateY(3px)}40.7%,100%{opacity:1;transform:translateY(0)}}
-  @keyframes kSrc{0%,41.2%{opacity:0;transform:translateY(3px)}42.4%,100%{opacity:1;transform:translateY(0)}}
-  @keyframes kBtn{0%,43.4%{opacity:0}44.4%,47.1%{opacity:1}47.6%,100%{opacity:0}}
+  @keyframes kScoutCard{0%,34%{opacity:0;transform:translateY(8px)}35.4%,54.7%{opacity:1;transform:translateY(0)}55.7%,100%{opacity:0;transform:translateY(0)}}
+  @keyframes kThink{0%,35.4%{opacity:0}36.2%,38.2%{opacity:1}38.8%,100%{opacity:0}}
+  @keyframes kAns1{0%,38.2%{opacity:0;transform:translateY(3px)}39.2%,100%{opacity:1;transform:translateY(0)}}
+  @keyframes kAns2{0%,39.3%{opacity:0;transform:translateY(3px)}40.3%,100%{opacity:1;transform:translateY(0)}}
+  @keyframes kAns3{0%,40.4%{opacity:0;transform:translateY(3px)}41.4%,100%{opacity:1;transform:translateY(0)}}
+  @keyframes kSrc{0%,41.8%{opacity:0;transform:translateY(3px)}43%,100%{opacity:1;transform:translateY(0)}}
+  @keyframes kBtn{0%,43.8%{opacity:0}44.8%,47.1%{opacity:1}47.6%,100%{opacity:0}}
   @keyframes kDone{0%,47.1%{opacity:0}47.8%,54.6%{opacity:1}55.2%,100%{opacity:0}}
   @keyframes kChildS{0%,47.2%{opacity:0;transform:translateY(5px)}48.2%,100%{opacity:1;transform:translateY(0)}}
   @keyframes kRailS{0%,47.4%{opacity:0;stroke-dashoffset:1}48%{opacity:.55;stroke-dashoffset:1}49.4%,100%{opacity:.55;stroke-dashoffset:0}}
@@ -138,6 +138,7 @@
 
   /* ---------- close ---------- */
   @keyframes kCloseMargin{0%,92%{opacity:0;transform:translateY(6px)}93.2%,99.1%{opacity:1;transform:translateY(0)}99.8%,100%{opacity:0;transform:translateY(0)}}
+  @keyframes kIndexIn{0%,1.4%{opacity:0}3.4%,99.3%{opacity:1}99.9%,100%{opacity:0}}
 
   @media (prefers-reduced-motion:reduce){
     .a,.blink,.pulse{animation-delay:-22s!important;animation-play-state:paused!important}
@@ -230,7 +231,7 @@
   </g>
 
   <!-- index -->
-  <g>
+  <g class="a" style="animation-name:kIndexIn">
     <line x1="48" y1="560" x2="320" y2="560" stroke="#EDE6D8" stroke-opacity=".08"/>
     <text x="48" y="584" class="mono" font-size="8.5" letter-spacing="2" fill="#5D554A">IN THIS OUTLINE</text>
 
