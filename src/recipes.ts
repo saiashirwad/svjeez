@@ -41,8 +41,8 @@ export function shake<V extends Values<Shake>>(at: Span, amplitude: Exact<V, Sha
   const count = Math.max(2, Math.round(over * (options.rate ?? 12)));
   const swing = (k: number): Values<Shake> =>
     Object.fromEntries(Object.entries(amplitude as Values<Shake>).map(([channel, amp]) => [channel, k === count ? 0 : (k % 2 ? -1 : 1) * amp * (1 - k / count)]));
-  let track: Motion = motion().at(start);
-  for (let k = 1; k <= count; k++) track = track.to(swing(k), over / count, ease.linear);
+  let track: Motion = motion();
+  for (let k = 1; k <= count; k++) track = track.at(start + ((k - 1) * over) / count).to(swing(k), over / count, ease.linear);
   return track as Motion<keyof V & Shake>;
 }
 
@@ -83,6 +83,6 @@ export function wiggle<V extends Values<RestChannel>>(amplitude: Exact<V, RestCh
   });
   const at = (i: number): Values<RestChannel> => Object.fromEntries(channels.map((channel, c) => [channel, samples[c]![i % count]]));
   let track: Motion = motion(at(0));
-  for (let i = 1; i <= count; i++) track = track.to(at(i), period / count, options.ease ?? ease.inOut);
+  for (let i = 1; i <= count; i++) track = track.at(((i - 1) * period) / count).to(at(i), period / count, options.ease ?? ease.inOut);
   return track.loop(period) as Motion<keyof V & RestChannel>;
 }

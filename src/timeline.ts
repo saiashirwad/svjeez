@@ -38,7 +38,7 @@ export const keysOf = (initial: Values, segments: readonly Step[], period: Secon
     }
     current = next;
   }
-  if (keys.at(-1)!.t < period) keys.push({ t: period, values: current, ease: ease.out });
+  if (keys.at(-1)!.t < period - 1e-9) keys.push({ t: period, values: current, ease: ease.out });
   return keys;
 };
 
