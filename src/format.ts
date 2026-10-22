@@ -10,12 +10,6 @@ export const num = (value: number, places = 3): string => {
   return String(round(value, places));
 };
 
-/** CSS lengths are unitless when passed as strings, pixels when passed as numbers. */
-export const length = (value: string | number): string =>
-  typeof value === "number" ? `${num(value)}px` : value;
-
-export const pct = (value: number): string => `${num(value, 3)}%`;
-
 const escape = (value: string): string =>
   value
     .replaceAll("&", "&amp;")
@@ -32,7 +26,3 @@ export const kebab = (property: string): string => {
   if (property.startsWith("--") || property.includes("-")) return property;
   return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
 };
-
-/** Readable CSS from a frame's declarations. */
-export const declarations = (entries: Array<[string, string]>): string =>
-  entries.map(([property, value]) => `${property}:${value}`).join(";");

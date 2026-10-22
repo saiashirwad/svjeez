@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { validateSvg } from "../src";
+import { validateSvg } from "svg-motion";
 
 describe("validation", () => {
   test("accepts a minimal valid scene", () => {

@@ -1,4 +1,4 @@
-import { cssDeclarations, type Channel, type Values } from "./channels";
+import { cssDeclarations, formatValue, type Channel, type Values } from "./channels";
 import { num } from "./format";
 import { ease, type Ease, type Seconds, type Step } from "./motion";
 
@@ -93,8 +93,6 @@ export const cssKeyframes = (lane: string, keys: readonly Key[], period: Seconds
   return { body: [...blocks].map(([block, list]) => `${list.join(",")}{${block}}`).join(""), timing: laneTiming };
 };
 
-const format = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
-
 const lerp = (from: Values[Channel], to: Values[Channel], amount: number): Values[Channel] =>
   typeof from === "number" && typeof to === "number" ? from + (to - from) * amount : amount < 1 ? from : to;
 
@@ -123,7 +121,7 @@ export const smilAttributes = (attribute: string, channel: Channel, keys: readon
   const spline = !discrete && points.slice(0, -1).some((point) => point.spline !== "0 0 1 1");
   return {
     attributeName: attribute,
-    values: points.map((point) => format(point.value)).join(";"),
+    values: points.map((point) => formatValue(point.value)).join(";"),
     keyTimes: points.map((point) => num(point.t / period, 5)).join(";"),
     ...(discrete ? { calcMode: "discrete" } : spline ? { calcMode: "spline", keySplines: points.slice(0, -1).map((point) => point.spline).join(";") } : {}),
     dur: `${num(duration)}s`,

@@ -1,5 +1,5 @@
-import { backendOf, laneOf, spec, type Backend, type Channel, type Values } from "./channels";
-import { isRef, refNode, type AnyRef } from "./defs";
+import { backendOf, formatValue, laneOf, spec, type Backend, type Channel, type Values } from "./channels";
+import { isRef, refNode, type AnyRef, type DefTag } from "./defs";
 import { num } from "./format";
 import { dataOf, type Motion } from "./motion";
 import { element, type AttrValue, type Element, type SvgNode } from "./svg";
@@ -27,7 +27,9 @@ interface Lane {
 
 interface State {
   readonly canvas: Canvas;
-  readonly ids: Map<AnyRef | string, string>;
+  readonly ids: Map<AnyRef, string>;
+  /** Generated blur filters, keyed by their lane, so identical blurs share one def. */
+  readonly blurs: Map<string, string>;
   readonly counters: Map<string, number>;
   readonly defs: SvgNode[];
   readonly keyframes: Map<string, string>;
@@ -39,7 +41,7 @@ interface State {
 
 const MAX_KEYS = 2000;
 
-const PREFIX: Record<string, string> = {
+const PREFIX: Record<DefTag, string> = {
   filter: "f",
   linearGradient: "g",
   radialGradient: "g",
@@ -85,7 +87,7 @@ const refId = (state: State, ref: AnyRef): string => {
   const known = state.ids.get(ref);
   if (known) return known;
   const def = refNode(ref) as Element;
-  const id = nextName(state, PREFIX[def.tag] ?? "d");
+  const id = nextName(state, PREFIX[def.tag as DefTag]);
   state.ids.set(ref, id);
   const region = def.tag === "filter" && !REGION.some((name) => name in def.attrs) ? canvasRegion(state.canvas) : {};
   addDef(state, walk(state, { ...def, attrs: { id, ...region, ...def.attrs } }) as Element);
@@ -199,17 +201,15 @@ const local = (state: State, lane: Lane): number => {
   return ((at % lane.snapped) / lane.snapped) * lane.period;
 };
 
-const formatValue = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
-
 const animate = (attribute: string, lane: Lane): SvgNode =>
   element("animate", smilAttributes(attribute, lane.channels[0]!, lane.keys, lane.period, lane.snapped));
 
 const blurFilter = (state: State, lane: Lane): string => {
   const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}`;
-  const known = state.ids.get(signature);
+  const known = state.blurs.get(signature);
   if (known) return known;
   const id = nextName(state, "f");
-  state.ids.set(signature, id);
+  state.blurs.set(signature, id);
   const still = formatValue(valueAt(lane.keys, local(state, lane)).blur);
   const blur = element("feGaussianBlur", { stdDeviation: still }, [animate("stdDeviation", lane)]);
   addDef(state, element("filter", { id, ...canvasRegion(state.canvas) }, [blur]));
@@ -276,6 +276,7 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas): Compiled =
   const state: State = {
     canvas,
     ids: new Map(),
+    blurs: new Map(),
     counters: new Map(),
     defs: [],
     keyframes: new Map(),

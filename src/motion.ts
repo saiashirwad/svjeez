@@ -56,7 +56,7 @@ export interface MotionData {
 
 declare const motionChannels: unique symbol;
 
-type Exact<V, Allowed extends PropertyKey> = V & { readonly [P in Exclude<keyof V, Allowed>]: never };
+export type Exact<V, Allowed extends PropertyKey> = V & { readonly [P in Exclude<keyof V, Allowed>]: never };
 
 /**
  * One layer of animation for one element. Immutable. `K` is the set of channels it touches, so the

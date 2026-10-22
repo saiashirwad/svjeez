@@ -42,6 +42,7 @@ describe("requirements", () => {
   test("draw adds pathLength and dasharray to its element", () => {
     const svg = scene(<path d="M0 0H10" stroke="#fff" animation={draw({ at: 0, over: 1 })} />);
     expect(svg).toContain('pathLength="1" stroke-dasharray="1"');
+    expect(keyframes(svg)).toEqual(["0%{stroke-dashoffset:1;visibility:hidden}10%,100%{stroke-dashoffset:0;visibility:visible}"]);
   });
 
   test("draw refuses an author value that would break it", () => {
@@ -115,6 +116,10 @@ describe("effects", () => {
     const shaky = (seed: string) => scene(<rect width={10} height={10} animation={wiggle({ x: 2, rotate: 3 }, { seed, ease: ease.hold })} />);
     expect(shaky("a")).toBe(shaky("a"));
     expect(shaky("a")).not.toBe(shaky("b"));
+  });
+
+  test("a wiggle whose rate divides its period unevenly still renders", () => {
+    expect(() => scene(<rect width={10} height={10} animation={wiggle({ x: 3 }, { seed: 1, rate: 12 })} />)).not.toThrow();
   });
 
   test("a filter primitive channel compiles to SMIL, with a still twin for reduced motion", () => {

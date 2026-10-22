@@ -90,15 +90,16 @@ export const laneOf = (tag: string, channel: Channel): string => {
   return backendOf(tag, channel) === "smil" ? row.attr ?? channel : row.lane;
 };
 
-const n = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
+/** A channel value as CSS or SVG text. */
+export const formatValue = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
 
 /** CSS declarations for one key of a lane. `translate` packs x and y. */
 export const cssDeclarations = (lane: string, values: Values): string => {
   switch (lane) {
     case "translate":
-      return `translate:${n(values.x ?? 0)}px ${n(values.y ?? 0)}px`;
+      return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
     case "rotate":
-      return `rotate:${n(values.rotate)}deg`;
+      return `rotate:${formatValue(values.rotate)}deg`;
     case "draw": {
       const drawn = values.draw ?? 0;
       return `stroke-dashoffset:${num(1 - drawn)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
@@ -106,7 +107,7 @@ export const cssDeclarations = (lane: string, values: Values): string => {
     default: {
       const [channel] = Object.keys(values) as Channel[];
       if (!channel) throw new Error(`Lane ${lane} has no value.`);
-      return `${lane}:${n(values[channel])}`;
+      return `${lane}:${formatValue(values[channel])}`;
     }
   }
 };

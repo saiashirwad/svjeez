@@ -1,7 +1,6 @@
 import { clamp, spec, type RestChannel, type Values } from "./channels";
-import { ease, motion, type Ease, type Motion, type Seconds, type Span } from "./motion";
+import { ease, motion, type Ease, type Exact, type Motion, type Seconds, type Span } from "./motion";
 
-type Exact<V, Allowed extends PropertyKey> = V & { readonly [P in Exclude<keyof V, Allowed>]: never };
 type Shake = "x" | "y" | "rotate";
 
 const span = ({ at, over }: Span, what: string): Span => {
