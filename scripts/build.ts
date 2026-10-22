@@ -1,10 +1,12 @@
 import { validateSvg } from "svg-motion";
 import { buildStrata } from "../examples/strata";
 import { buildTicTacToe } from "../examples/tictactoe";
+import { buildNeon } from "../examples/neon";
 
 const targets: Array<[string, () => string]> = [
   ["strata-agents.svg", buildStrata],
   ["tictactoe.svg", buildTicTacToe],
+  ["tictactoe-neon.svg", buildNeon],
 ];
 
 const xmllint = Bun.which("xmllint");
