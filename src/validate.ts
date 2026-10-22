@@ -13,6 +13,33 @@ const collect = (source: string, pattern: RegExp, group = 1): string[] => {
 };
 
 /**
+ * A filter re-renders whenever anything under it moves. Safari ran one scene at 10 fps with a blur over
+ * 79 animated elements and at 60 fps with 20 under another, so the line sits between.
+ */
+const FILTERED_ANIMATION_LIMIT = 40;
+
+const filteredAnimation = (source: string): string[] => {
+  const warnings: string[] = [];
+  const open: { tag: string; filter?: string; animated: number }[] = [];
+  for (const [, closing, tag, attrs = "", selfClosing] of source.matchAll(/<(\/?)([A-Za-z][\w-]*)([^>]*?)(\/?)>/g)) {
+    if (closing) {
+      const element = open.pop();
+      if (element?.filter && element.animated >= FILTERED_ANIMATION_LIMIT) {
+        warnings.push(
+          `<${element.tag} filter="${element.filter}"> sits over ${element.animated} animated elements and re-renders every frame; Safari can drop far below 60 fps. Paint the glow with a gradient, or filter something that holds still.`,
+        );
+      }
+      continue;
+    }
+    if (tag === "animate" || /\bclass="(?:[^"]*\s)?a(?:\s[^"]*)?"/.test(attrs)) {
+      for (const ancestor of open) if (ancestor.filter) ancestor.animated++;
+    }
+    if (!selfClosing) open.push({ tag: tag!, filter: /\bfilter="([^"]+)"/.exec(attrs)?.[1], animated: 0 });
+  }
+  return warnings;
+};
+
+/**
  * Structural checks for generated SVG. This is intentionally lightweight; the
  * build script additionally runs xmllint when it is available.
  */
@@ -66,6 +93,8 @@ export const validateSvg = (source: string): ValidationResult => {
   for (const name of keyframeSet) {
     if (!animated.has(name)) warnings.push(`@keyframes "${name}" is never referenced.`);
   }
+
+  warnings.push(...filteredAnimation(source));
 
   return { errors, warnings };
 };
