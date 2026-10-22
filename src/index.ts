@@ -3,6 +3,7 @@ export { motion, ease, type Motion, type Stack, type Span, type Seconds, type Ea
 export { enter, exit, draw, shake, wiggle, type WiggleOptions } from "./recipes";
 export { def, type Ref, type DefTag } from "./defs";
 export { fx } from "./fx";
+export { el } from "./el";
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 export type { Channel, Values } from "./channels";
 export type { SvgNode, Child } from "./svg";

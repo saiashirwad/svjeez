@@ -123,6 +123,19 @@ const fade = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
 
 `render` emits a def only if something uses it, with a generated id.
 
+## el
+
+```tsx
+const { circle, g } = el;
+
+g({ opacity: 0.5 }, [
+  circle({ cx: 12, cy: 34, r: 4, animation: enter({ at: 0, over: 1 }) }),
+  el.text({ x: 4, y: 10 }, "hi"),
+]);
+```
+
+Same props and children as JSX, as plain calls.
+
 ## Effects
 
 ```tsx

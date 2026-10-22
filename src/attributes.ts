@@ -189,6 +189,8 @@ const ELEMENTS = {
 
 export type Tag = keyof typeof ELEMENTS;
 
+export const TAGS = Object.keys(ELEMENTS) as Tag[];
+
 type ValueOf<A> = A extends Attr<infer V> ? V : never;
 
 type ClassValue = string | readonly (string | false | null | undefined)[];

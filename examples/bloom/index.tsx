@@ -1,4 +1,4 @@
-import { def, draw, ease, enter, fx, motion, render, wiggle, type Color, type Motion, type SvgNode, type Values } from "svg-motion";
+import { def, draw, ease, el, enter, fx, motion, render, wiggle, type Color, type Motion, type SvgNode, type Values } from "svg-motion";
 
 const W = 600;
 const H = 600;
@@ -197,14 +197,12 @@ function Pollen(): SvgNode {
     <g fill={C.gold}>
       {Array.from({ length: 18 }, (_, i) => {
         const { x, y } = point(214 + (i % 3) * 14, i * 137.508);
-        return (
-          <circle
-            cx={x}
-            cy={y}
-            r={i % 4 === 0 ? 1.8 : 1.1}
-            animation={[lifetime(0.6 + (i % 5) * 0.12), wiggle({ x: 7, y: 7, opacity: 0.7 }, { seed: `pollen-${i}`, rate: 1.5, period: D / 2 })]}
-          />
-        );
+        return el.circle({
+          cx: x,
+          cy: y,
+          r: i % 4 === 0 ? 1.8 : 1.1,
+          animation: [lifetime(0.6 + (i % 5) * 0.12), wiggle({ x: 7, y: 7, opacity: 0.7 }, { seed: `pollen-${i}`, rate: 1.5, period: D / 2 })],
+        });
       })}
     </g>
   );

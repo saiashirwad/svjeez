@@ -19,9 +19,9 @@ export const jsxs = jsx;
 
 export const jsxDEV = (type: string | typeof Fragment | Component, props: Record<string, unknown> | null): SvgNode => jsx(type, props);
 
-type Intrinsic<T extends Tag> = Attrs<T> & { readonly children?: Child; readonly key?: string | number } & (T extends AnimatedTag
-    ? { readonly animation?: Stack<TagChannels<T>> }
-    : {});
+export type ElementProps<T extends Tag> = Attrs<T> & (T extends AnimatedTag ? { readonly animation?: Stack<TagChannels<T>> } : {});
+
+type Intrinsic<T extends Tag> = ElementProps<T> & { readonly children?: Child; readonly key?: string | number };
 
 export namespace JSX {
   export type Element = SvgNode;
