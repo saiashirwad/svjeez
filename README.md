@@ -10,8 +10,6 @@ You describe what moves and when. `render()` compiles it into one standalone `.s
 
 ```sh
 bun install
-bun run build               # every example into dist/
-bun run build bloom horizon # just these
 bun test
 bun run typecheck
 ```
@@ -73,22 +71,8 @@ Attributes are typed per tag, and `animation` accepts only the channels a tag ca
 motion().to({ opcity: 1 }, 1)               // misspelled channel
 ```
 
-## Examples
-
-| Example | What it shows |
-| --- | --- |
-| [`tictactoe`](examples/tictactoe) | One game: X forks the board and wins. The smallest example. |
-| [`neon`](examples/neon) | Three games on a glowing board with a scoreboard. |
-| [`effects`](examples/effects) | Six tiles, one effect each: blur, jitter, drift, hand-drawn boil, flicker, and a spinner. |
-| [`bloom`](examples/bloom) | A rosette that draws itself open, with comets and drifting pollen. |
-| [`strata`](examples/strata) | A product demo: a note builds as an outline while an agent answers in the margin. |
-| [`horizon`](examples/horizon) | A black hole forms, fires its jets, and the camera falls in. |
-| [`manifold`](examples/manifold) | Two hundred 3D points flow from a sphere to a torus to a trefoil knot. |
-
-Each example builds to `dist/<name>.svg`.
-
 ## Good to know
 
 - A `.loop(period)` snaps so that it divides `duration`, so every loop stays in step with the scene.
 - Under `prefers-reduced-motion`, the scene freezes 85% of the way through. Pass `reducedMotion: { at }` to pick the frame, or `false` to turn it off.
-- A filter over moving content reruns every frame. A blur over Horizon's spinning disk held Safari at 10 fps. A gradient glow in its place runs at 60. `validateSvg` warns when a filter sits over 40 or more animated elements.
+- A filter over moving content reruns every frame, and Safari slows down sharply under one. Paint glows with gradients where you can. `validateSvg` warns when a filter sits over 40 or more animated elements.
