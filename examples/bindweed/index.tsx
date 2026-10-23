@@ -832,6 +832,267 @@ const Foreground = (): SvgNode => (
 );
 
 // ---------------------------------------------------------------------------
+// A dacha garden outside Moscow: birches, a grey picket fence, chamomile, cornflowers, dandelion clocks
+
+const hash = (seed: number): number => {
+  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+const BIRCH_BARK = def.linearGradient({ x1: 0, y1: 0, x2: 1, y2: 0 }, (
+  <>
+    <stop offset={0} stopColor="#BDB8A8" />
+    <stop offset={0.35} stopColor="#F2EFE5" />
+    <stop offset={0.7} stopColor="#E3DFD2" />
+    <stop offset={1} stopColor="#AFAA99" />
+  </>
+));
+
+const birchBlur = def.filter({ x: "-60%", y: "-5%", width: "220%", height: "110%" }, <feGaussianBlur stdDeviation={2.4} />);
+
+const BIRCHES = [
+  { x: 46, width: 30, lean: 14, opacity: 0.72 },
+  { x: 124, width: 14, lean: -8, opacity: 0.42 },
+  { x: 756, width: 24, lean: -12, opacity: 0.6 },
+] as const;
+
+const Birch = ({ x, width, lean, opacity, index }: (typeof BIRCHES)[number] & { readonly index: number }): SvgNode => {
+  const along = (t: number): P => ({ x: x + lean * t * t, y: 1012 - t * 1060 });
+  const girth = (t: number): number => width * (1 - t * 0.35);
+  const marks = Array.from({ length: 18 }, (_, i) => {
+    const t = (i + hash(index * 31 + i)) / 18;
+    const point = along(t);
+    const side = hash(index * 17 + i * 13) > 0.5 ? 1 : -1;
+    const reach = girth(t) * (0.25 + hash(index * 7 + i) * 0.45);
+    const edge = point.x + (side * girth(t)) / 2;
+    return (
+      <path
+        key={i}
+        d={`M${n(edge)} ${n(point.y)}Q${n(edge - side * reach * 0.5)} ${n(point.y - 1.5)} ${n(edge - side * reach)} ${n(point.y + 0.5)}`}
+        fill="none"
+        stroke="#57544B"
+        strokeWidth={1.2 + hash(index + i * 3) * 2.2}
+        strokeLinecap="round"
+        opacity={0.72}
+      />
+    );
+  });
+  return (
+    <g filter={birchBlur} opacity={opacity}>
+      <path d={ribbon(Array.from({ length: 9 }, (_, i) => along(i / 8)), (t) => girth(t))} fill={BIRCH_BARK} />
+      {marks}
+    </g>
+  );
+};
+
+const BIRCH_SPRAYS = [
+  { from: { x: -10, y: -10 }, spine: [{ x: 40, y: 30 }, { x: 78, y: 92 }, { x: 96, y: 168 }, { x: 102, y: 236 }], seed: "spray-1" },
+  { from: { x: 30, y: -14 }, spine: [{ x: 96, y: 18 }, { x: 150, y: 70 }, { x: 178, y: 136 }, { x: 186, y: 188 }], seed: "spray-2" },
+  { from: { x: -12, y: 60 }, spine: [{ x: 22, y: 104 }, { x: 44, y: 170 }, { x: 52, y: 250 }, { x: 50, y: 312 }], seed: "spray-3" },
+] as const;
+
+const sprayBlur = def.filter({}, <feGaussianBlur stdDeviation={1.3} />);
+
+const BirchSpray = ({ from, spine, seed }: (typeof BIRCH_SPRAYS)[number]): SvgNode => {
+  const points = [from, ...spine];
+  const leaves = points.slice(1).flatMap((point, i) => {
+    const prev = points[i]!;
+    return Array.from({ length: 4 }, (_, j) => {
+      const t = (j + 0.5) / 4;
+      const x = prev.x + (point.x - prev.x) * t;
+      const y = prev.y + (point.y - prev.y) * t;
+      const side = (i * 4 + j) % 2 ? 1 : -1;
+      const angle = 90 + side * (30 + hash(i * 9 + j) * 25);
+      return (
+        <path
+          key={`${i}-${j}`}
+          d="M0 0Q3 -3.6 9 0Q3 3.6 0 0Z"
+          fill={hash(i * 5 + j * 3) > 0.5 ? "#A3B485" : "#8FA474"}
+          transform={`translate(${n(x)} ${n(y)}) rotate(${n(angle)}) scale(${n(1 + hash(i + j * 11) * 0.5)})`}
+        />
+      );
+    });
+  });
+  return (
+    <g style={{ transformBox: "view-box", transformOrigin: `${from.x}px ${from.y}px` }} animation={wiggle({ rotate: 1.4 }, { seed, rate: 0.5, period: 24 })}>
+      <path d={smoothPath(points)} fill="none" stroke="#7A7465" strokeWidth={1} strokeLinecap="round" />
+      {leaves}
+      <path d={`M${n(spine[3].x)} ${n(spine[3].y)}l1 14`} stroke="#A49A72" strokeWidth={2.6} strokeLinecap="round" />
+    </g>
+  );
+};
+
+const FENCE_TOP = 748;
+const PICKETS = Array.from({ length: 22 }, (_, i) => ({
+  x: -10 + i * 38 + (hash(i + 90) - 0.5) * 8,
+  width: 22 + hash(i + 5) * 6,
+  top: FENCE_TOP + (hash(i + 40) - 0.5) * 18,
+  tilt: (hash(i + 70) - 0.5) * 2.6,
+  tone: hash(i + 11),
+}));
+
+const fenceBlur = def.filter({}, <feGaussianBlur stdDeviation={2.2} />);
+
+const Fence = (): SvgNode => (
+  <g filter={fenceBlur} opacity={0.3}>
+    <rect x={0} y={FENCE_TOP + 40} width={W} height={10} fill="#ABA796" />
+    {PICKETS.map((picket, i) => {
+      const { x, width, top, tilt, tone } = picket;
+      return (
+        <g key={i} transform={`rotate(${n(tilt)} ${n(x + width / 2)} 1010)`}>
+          <path d={`M${n(x)} 1010V${n(top + 9)}L${n(x + width / 2)} ${n(top)}L${n(x + width)} ${n(top + 9)}V1010Z`} fill={tone > 0.66 ? "#BDB6A4" : tone > 0.33 ? "#C8C2B1" : "#D1CCBD"} />
+          <path d={`M${n(x + width * 0.3)} ${n(top + 14)}V1010M${n(x + width * 0.68)} ${n(top + 22)}V1010`} stroke="#A9A493" strokeWidth={0.6} opacity={0.5} />
+          <path d={`M${n(x + 1.2)} ${n(top + 9)}V1010`} stroke="#E4E1D5" strokeWidth={1.2} opacity={0.7} />
+        </g>
+      );
+    })}
+  </g>
+);
+
+interface Flower {
+  readonly x: number;
+  readonly y: number;
+  readonly size: number;
+  readonly tilt: number;
+  readonly seed: string;
+}
+
+const flowerStem = ({ x, y }: Flower): readonly P[] => {
+  const base = x + (hash(x) - 0.5) * 30;
+  return [
+    { x: base, y: 1014 },
+    { x: base + (x - base) * 0.4 + (hash(y) - 0.5) * 8, y: y + (1014 - y) * 0.55 },
+    { x, y },
+  ];
+};
+
+const Swaying = ({ flower, children }: { readonly flower: Flower; readonly children: SvgNode }): SvgNode => {
+  const stem = flowerStem(flower);
+  const node = stem[1]!;
+  const side = hash(flower.x + flower.y) > 0.5 ? 1 : -1;
+  return (
+    <g style={{ transformBox: "view-box", transformOrigin: `${n(flower.x)}px 1014px` }} animation={grassSway(flower.seed, 1.3)}>
+      <path d={smoothPath(stem)} fill="none" stroke="#8DA173" strokeWidth={1.2} strokeLinecap="round" />
+      <path d="M0 0Q9 -2 20 -12Q8 -1 0 0Z" fill="#93A779" transform={`translate(${n(node.x)} ${n(node.y)}) scale(${side} 1)`} />
+      <g transform={`translate(${n(flower.x)} ${n(flower.y)}) rotate(${n(flower.tilt)})`}>{children}</g>
+    </g>
+  );
+};
+
+const chamomileRay = (r: number, angle: number): string => {
+  const p = (reach: number, theta: number): string => `${n(Math.cos(theta) * reach)} ${n(Math.sin(theta) * reach * 0.5 + reach * 0.12)}`;
+  return `M${p(r * 0.28, angle - 0.1)}Q${p(r * 1.02, angle - 0.13)} ${p(r * 1.06, angle)}Q${p(r * 1.02, angle + 0.13)} ${p(r * 0.28, angle + 0.1)}Z`;
+};
+
+const Chamomile = (flower: Flower): SvgNode => (
+  <Swaying flower={flower}>
+    <>
+      {Array.from({ length: 15 }, (_, i) => (
+        <path key={i} d={chamomileRay(flower.size, (i / 15) * TAU + hash(i) * 0.1)} fill="#FFFEF8" stroke="#E2DCCF" strokeWidth={0.5} />
+      ))}
+      <ellipse cx={0} cy={-1.5} rx={flower.size * 0.32} ry={flower.size * 0.26} fill="#E7BC52" />
+      <ellipse cx={-flower.size * 0.08} cy={-flower.size * 0.18} rx={flower.size * 0.14} ry={flower.size * 0.08} fill="#F6DC8C" opacity={0.8} />
+    </>
+  </Swaying>
+);
+
+const CORNFLOWER_FLORET = "M0 0L-2.4 -9.5L-1.5 -11L-0.6 -10L0.3 -11.4L1.2 -10.1L2.2 -11L2.6 -9.4Z";
+
+const Cornflower = (flower: Flower): SvgNode => (
+  <Swaying flower={flower}>
+    <g transform={`scale(${flower.size / 12})`}>
+      {Array.from({ length: 9 }, (_, i) => {
+        const angle = -84 + i * 21;
+        return <path key={i} d={CORNFLOWER_FLORET} fill={i % 2 ? "#6F8FD0" : "#7E9CD8"} transform={`translate(0 -3) rotate(${angle}) scale(${1 - Math.abs(angle) / 260})`} />;
+      })}
+      <circle cx={0} cy={-4} r={2.4} fill="#4E4B86" />
+      <ellipse cx={0} cy={2.2} rx={3.4} ry={4.6} fill="#7C9064" />
+      <path d="M-2.4 0.6Q0 2 2.4 0.6M-2.6 3Q0 4.4 2.6 3M-2 5.2Q0 6.2 2 5.2" fill="none" stroke="#C8D2B4" strokeWidth={0.5} opacity={0.8} />
+    </g>
+  </Swaying>
+);
+
+const DandelionClock = (flower: Flower): SvgNode => (
+  <Swaying flower={flower}>
+    <g opacity={0.8}>
+      {Array.from({ length: 34 }, (_, i) => {
+        const angle = (i / 34) * TAU + hash(i + 3) * 0.08;
+        const tip = polar(flower.size * (0.9 + hash(i) * 0.12), angle);
+        return (
+          <g key={i}>
+            <path d={`M0 0L${n(tip.x)} ${n(tip.y)}`} stroke="#F2EFE4" strokeWidth={0.4} />
+            <circle cx={tip.x} cy={tip.y} r={1.3} fill="#FFFFFF" opacity={0.7} />
+          </g>
+        );
+      })}
+      <circle cx={0} cy={0} r={2} fill="#C9BD94" />
+    </g>
+  </Swaying>
+);
+
+const CHAMOMILE: readonly Flower[] = [
+  { x: 612, y: 880, size: 20, tilt: -6, seed: "chamomile-1" },
+  { x: 660, y: 850, size: 23, tilt: 4, seed: "chamomile-2" },
+  { x: 706, y: 902, size: 17, tilt: 8, seed: "chamomile-3" },
+  { x: 752, y: 862, size: 19, tilt: -4, seed: "chamomile-4" },
+  { x: 640, y: 936, size: 15, tilt: 2, seed: "chamomile-5" },
+  { x: 214, y: 864, size: 18, tilt: -5, seed: "chamomile-6" },
+  { x: 256, y: 892, size: 14, tilt: 6, seed: "chamomile-7" },
+];
+
+const CORNFLOWERS: readonly Flower[] = [
+  { x: 690, y: 818, size: 19, tilt: 8, seed: "cornflower-1" },
+  { x: 578, y: 912, size: 16, tilt: -10, seed: "cornflower-2" },
+  { x: 138, y: 878, size: 17, tilt: -6, seed: "cornflower-3" },
+];
+
+const CLOCKS: readonly Flower[] = [
+  { x: 176, y: 822, size: 19, tilt: 0, seed: "clock-1" },
+  { x: 730, y: 828, size: 16, tilt: 0, seed: "clock-2" },
+];
+
+const SEEDS = [
+  { x: 190, y: 812, dx: 120, rise: 210, delay: 0.5 },
+  { x: 166, y: 816, dx: 90, rise: 260, delay: 4.2 },
+  { x: 740, y: 820, dx: -70, rise: 240, delay: 2.4 },
+  { x: 722, y: 822, dx: -110, rise: 190, delay: 6.6 },
+] as const;
+
+const DriftingSeed = ({ x, y, dx, rise, delay }: (typeof SEEDS)[number]): SvgNode => {
+  const drift = motion({ opacity: 0, x: 0, y: 0 })
+    .at(delay)
+    .to({ opacity: 0.9, x: dx * 0.12, y: -rise * 0.12 }, 3, ease.out)
+    .to({ opacity: 0.75, x: dx * 0.75, y: -rise * 0.78 }, 10, ease.inOut)
+    .to({ opacity: 0, x: dx, y: -rise }, 4, ease.in)
+    .loop(D);
+  const tumble = wiggle({ rotate: 14 }, { seed: `seed-${x}-${delay}`, rate: 0.6, period: 24 });
+  return (
+    <g animation={drift}>
+      <g transform={`translate(${x} ${y})`}>
+        <g animation={tumble} style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}>
+          <path d="M0 0V-8M0 -8L-3.4 -10.6M0 -8L-1.8 -11.6M0 -8V-12M0 -8L1.8 -11.6M0 -8L3.4 -10.6" fill="none" stroke="#FBF9F0" strokeWidth={0.5} strokeLinecap="round" />
+          <ellipse cx={0} cy={0.8} rx={0.6} ry={1.4} fill="#A99C72" />
+        </g>
+      </g>
+    </g>
+  );
+};
+
+const Garden = (): SvgNode => (
+  <>
+    {CLOCKS.map((flower) => (
+      <DandelionClock key={flower.seed} {...flower} />
+    ))}
+    {CORNFLOWERS.map((flower) => (
+      <Cornflower key={flower.seed} {...flower} />
+    ))}
+    {CHAMOMILE.map((flower) => (
+      <Chamomile key={flower.seed} {...flower} />
+    ))}
+  </>
+);
+
+// ---------------------------------------------------------------------------
 // Scene
 
 const dewGlint = motion({ opacity: 0.55 })
@@ -936,8 +1197,8 @@ export function buildBindweed(): string {
       width: W,
       height: H,
       duration: D,
-      title: "Field bindweed at first light",
-      desc: "Field bindweed, Convolvulus arvensis, twines around a dry grass stalk in a quiet summer meadow. Pale trumpet flowers open one after another with the morning light, then fold closed again, while arrow-shaped leaves and seed motes drift in the still air.",
+      title: "Bindweed in a summer garden",
+      desc: "Field bindweed, Convolvulus arvensis, twines up a dry grass stalk in a quiet dacha garden outside Moscow. Pale trumpet flowers open one after another with the morning light and fold closed again. Birches lean in from the edges, an old grey fence rests behind, and chamomile, cornflowers and dandelion clocks stand in the grass while dandelion seeds drift past.",
       css: CSS,
       reducedMotion: { at: 12.8 },
       comment: "Generated by svg-motion. Edit examples/bindweed/index.tsx instead of this file.",
@@ -952,6 +1213,15 @@ export function buildBindweed(): string {
       {SHAFTS.map((shaft) => (
         <Shaft key={shaft.x} {...shaft} />
       ))}
+      {BIRCHES.map((birch, index) => (
+        <Birch key={birch.x} {...birch} index={index} />
+      ))}
+      <g filter={sprayBlur} opacity={0.6}>
+        {BIRCH_SPRAYS.map((spray) => (
+          <BirchSpray key={spray.seed} {...spray} />
+        ))}
+      </g>
+      <Fence />
       <rect y={724} width={W} height={276} fill={MEADOW} />
       <Meadow />
       <FarBlooms />
@@ -968,7 +1238,11 @@ export function buildBindweed(): string {
         <Vine />
       </g>
 
+      <Garden />
       <Foreground />
+      {SEEDS.map((seed) => (
+        <DriftingSeed key={`${seed.x}-${seed.delay}`} {...seed} />
+      ))}
 
       <g>
         {MOTES.map((mote, index) => (

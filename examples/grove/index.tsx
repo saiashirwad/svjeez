@@ -51,11 +51,11 @@ const scatter = (): readonly Stand[] => {
   const pick = random(1009);
   const stands: Stand[] = [];
   const placed: Spot[] = [];
-  for (let attempt = 0; attempt < 700 && stands.length < 62; attempt++) {
-    const x = (pick() * 2 - 1) * 5.6;
-    const z = (pick() * 2 - 1) * 5.6;
-    if (!clear(x, z, 0.12)) continue;
-    if (placed.some((spot) => Math.hypot(spot.x - x, spot.z - z) < 0.38)) continue;
+  for (let attempt = 0; attempt < 900 && stands.length < 88; attempt++) {
+    const x = (pick() * 2 - 1) * 5.4;
+    const z = (pick() * 2 - 1) * 5.4;
+    if (!clear(x, z, 0.1)) continue;
+    if (placed.some((spot) => Math.hypot(spot.x - x, spot.z - z) < 0.3)) continue;
     placed.push({ x, z });
     stands.push(tuft(ground(x, z), 2000 + stands.length));
   }
