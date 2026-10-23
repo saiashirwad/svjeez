@@ -1,4 +1,4 @@
-import { def, ease, motion, render, sampled, type Color, type Motion, type SvgNode } from "svg-motion";
+import { def, ease, el, motion, render, sampled, type Color, type Motion, type SvgNode } from "svg-motion";
 import { height, knot, lerp, project, seat, sphere, type Camera, type Point, type Seat, type Surface } from "./space";
 
 const W = 800;
@@ -112,22 +112,23 @@ function Floor(): SvgNode {
     }).join("") + "Z";
   const center = project(CAMERA, 0, { x: 0, y: FLOOR, z: 0 });
   const glowAt = (r: number) => project(CAMERA, 0, { x: r, y: FLOOR, z: 0 });
+  const glow = el.ellipse({
+    cx: center.x,
+    cy: center.y,
+    rx: glowAt(220).x,
+    ry: glowAt(220).x * Math.sin(CAMERA.pitch),
+    fill: underglow,
+    animation: motion({ opacity: 0.7 }).to({ opacity: 1 }, D / 6, ease.inOut).to({ opacity: 0.7 }, D / 6, ease.inOut).loop(D / 3),
+  });
   return (
     <>
-      <ellipse
-        cx={center.x}
-        cy={center.y}
-        rx={glowAt(220).x}
-        ry={glowAt(220).x * Math.sin(CAMERA.pitch)}
-        fill={underglow}
-        animation={motion({ opacity: 0.7 }).to({ opacity: 1 }, D / 6, ease.inOut).to({ opacity: 0.7 }, D / 6, ease.inOut).loop(D / 3)}
-      />
+      {glow}
       <g fill="none" stroke={C.grid} strokeWidth={0.8}>
         {radii.map((r, k) => {
           const rest = round(0.32 * (1 - k / radii.length), 2);
           let pulse: Motion<"opacity"> = motion({ opacity: rest });
           for (const at of PULSES) pulse = pulse.at(at + k * 0.09).to({ opacity: 0.85 }, 0.12).to({ opacity: rest }, 0.9, ease.inOut);
-          return <path d={ring(r)} animation={pulse} />;
+          return el.path({ d: ring(r), animation: pulse });
         })}
       </g>
     </>
@@ -139,7 +140,7 @@ function Cloud(): SvgNode {
     <>
       {Array.from({ length: DOTS }, (_, i) => {
         const s = seat(i, DOTS);
-        return <circle r={2.2} fill={tint(s.along)} animation={flight(s)} />;
+        return el.circle({ r: 2.2, fill: tint(s.along), animation: flight(s) });
       })}
     </>
   );
@@ -162,11 +163,12 @@ function Title(): SvgNode {
       <text x={CX} y={62} class="sans" fontSize={26} fontWeight={300} letterSpacing={14} fill={C.word} textAnchor="middle">
         MANIFOLD
       </text>
-      {ACTS.map((act, i) => (
-        <text x={CX} y={90} class="mono" fontSize={10} letterSpacing={3} fill={C.label} textAnchor="middle" animation={captionMotion(STARTS[i]!, act.hold)}>
-          {act.caption}
-        </text>
-      ))}
+      {ACTS.map((act, i) =>
+        el.text(
+          { x: CX, y: 90, class: "mono", fontSize: 10, letterSpacing: 3, fill: C.label, textAnchor: "middle", animation: captionMotion(STARTS[i]!, act.hold) },
+          act.caption,
+        ),
+      )}
     </>
   );
 }
