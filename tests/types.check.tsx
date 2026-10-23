@@ -25,6 +25,7 @@ export const valid = [
     <circle r={2} style={{ [px]: 0.5, [py]: -0.5, [tint]: "#f80" }} />
   </g>,
   voxel.scene({ camera: eye, blocks: [{ at: [0, 0, 0], skin: { side: stone, top: stone }, from: 1, animation: enter({ at: 1, over: 1 }, { y: -8 }) }] }),
+  motion(eye.project([1, 2, 3])).to(eye.project([4, 0, 1]), 1),
   css`.dot{translate:calc(${px} * cos(${yaw}) * ${60}px) 0}`,
   css`.dot{translate:${add(length(100), mul(length(60), px, cos(yaw)))} ${length(sub(mul(py, sin(yaw)), 1))}}`,
   css`.dot{scale:${div(720, add(720, mul(px, sin(angle(22)))))};opacity:${clamp(0.15, sub(0.95, div(px, 300)), 1)}}`,

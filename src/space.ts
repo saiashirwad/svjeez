@@ -3,10 +3,8 @@ export type Degrees = number;
 /** World coordinates in blocks, y up. */
 export type Vec3 = readonly [x: number, y: number, z: number];
 
-export interface Point {
-  readonly x: number;
-  readonly y: number;
-}
+/** A type alias, not an interface, so a projection can go straight into `motion()`. */
+export type Point = { readonly x: number; readonly y: number };
 
 export interface CameraOptions {
   /** Turn about y. 45 looks from +x +z. */
