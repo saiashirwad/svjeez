@@ -12,7 +12,7 @@
       <stop offset="1" stop-color="#9F8CFF" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <style>
+  <style><![CDATA[
 .sans{font-family:"Inter","SF Pro Display",system-ui,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace}
 
 .a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -1327,7 +1327,7 @@
 @keyframes k976{0%,54.167%{translate:0px 6px}58.333%{translate:0px 0px}85%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.333%,100%{translate:0px -6px}}
 .m333{animation-name:k975,k976}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-8s!important;animation-play-state:paused!important}}
-</style>
+]]></style>
   <rect width="800" height="600" fill="url(#g1)"/>
   <g transform="translate(400 300)">
     <ellipse cx="0" cy="178.034" rx="264.021" ry="98.904" fill="url(#g2)" class="a m1"/>

@@ -45,7 +45,7 @@
       <feDropShadow dx="0" dy="10" stdDeviation="13" flood-color="#000" flood-opacity="0.38"/>
     </filter>
   </defs>
-  <style>
+  <style><![CDATA[
 .ui{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif}
 .ser{font-family:ui-serif,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;letter-spacing:-.4px}
 .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.1px}
@@ -266,7 +266,7 @@
 @keyframes k130{0%,0.385%{translate:0px 10px}2.615%,100%{translate:0px 0px}}
 .m84{animation-name:k129,k130}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-22s!important;animation-play-state:paused!important}}
-</style>
+]]></style>
   <g clip-path="url(#c1)">
     <rect width="1200" height="760" fill="url(#g1)"/>
     <rect width="1200" height="760" fill="url(#p1)"/>

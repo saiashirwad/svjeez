@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 480" width="440" height="480" role="img" aria-labelledby="t d">
   <title id="t">Tic-tac-toe</title>
   <desc id="d">X takes the center, forks the board, and wins down the left column.</desc>
-  <style>
+  <style><![CDATA[
 .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;letter-spacing:2px}
 
 .a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -44,7 +44,7 @@
 @keyframes k19{0%,97%,100%{opacity:0}2%,92%{opacity:1}}
 .m18{animation-name:k19}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-8.3s!important;animation-play-state:paused!important}}
-</style>
+]]></style>
   <rect width="440" height="480" rx="20" fill="#0B0907"/>
   <g class="a m18">
     <path d="M160 40V400" fill="none" stroke="#2E2820" stroke-width="4" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m1"/>

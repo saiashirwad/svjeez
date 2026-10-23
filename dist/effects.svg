@@ -29,7 +29,7 @@
       </feMerge>
     </filter>
   </defs>
-  <style>
+  <style><![CDATA[
 .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
 
 .a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -53,7 +53,7 @@
 @keyframes k10{0%,100%{scale:1}50%{scale:1.6}}
 .m8{animation-name:k10;animation-duration:0.75s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3s!important;animation-play-state:paused!important}[filter="url(#f1)"]{filter:url(#f1s)}[filter="url(#f2)"]{filter:url(#f2s)}}
-</style>
+]]></style>
   <rect width="660" height="420" fill="#0E0B16"/>
   <g transform="translate(20 20)">
     <rect width="200" height="180" rx="14" fill="#161224" stroke="#2A2340"/>

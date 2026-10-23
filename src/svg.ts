@@ -99,6 +99,8 @@ const serializeAttrs = (attrs: Readonly<Record<string, AttrValue>>): string =>
     })
     .join("");
 
+const cdata = (text: string): string => `<![CDATA[${text.replaceAll("]]>", "]]]]><![CDATA[>")}]]>`;
+
 const inline = (node: SvgNode, rawText = false): string => {
   switch (node.kind) {
     case "text":
@@ -110,8 +112,8 @@ const inline = (node: SvgNode, rawText = false): string => {
     case "element": {
       const open = `<${node.tag}${serializeAttrs(node.attrs)}`;
       if (node.children.length === 0) return `${open}/>`;
-      const isRaw = rawText || RAW_TEXT_TAGS.has(node.tag);
-      return `${open}>${node.children.map((child) => inline(child, isRaw)).join("")}</${node.tag}>`;
+      const inner = node.children.map((child) => inline(child, rawText || RAW_TEXT_TAGS.has(node.tag))).join("");
+      return `${open}>${RAW_TEXT_TAGS.has(node.tag) ? cdata(inner) : inner}</${node.tag}>`;
     }
   }
 };

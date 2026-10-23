@@ -100,7 +100,7 @@
       <feGaussianBlur stdDeviation="0"/>
     </filter>
   </defs>
-  <style>
+  <style><![CDATA[
 .sans{font-family:"Inter","SF Pro Display",system-ui,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace}
 
 .a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -265,7 +265,7 @@
 @keyframes k95{0%,27.5%,81.875%,100%{opacity:0}38.75%{opacity:1}71.875%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
 .m65{animation-name:k95}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-4s!important;animation-play-state:paused!important}[filter="url(#f3)"]{filter:url(#f3s)}[filter="url(#f4)"]{filter:url(#f4s)}[filter="url(#f5)"]{filter:url(#f5s)}[filter="url(#f6)"]{filter:url(#f6s)}[filter="url(#f7)"]{filter:url(#f7s)}}
-</style>
+]]></style>
   <rect width="600" height="600" fill="url(#g1)"/>
   <rect width="600" height="600" fill="url(#p1)" mask="url(#m1)"/>
   <rect width="600" height="600" fill="url(#g3)"/>

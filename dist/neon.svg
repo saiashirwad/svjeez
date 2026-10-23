@@ -26,7 +26,7 @@
       </feMerge>
     </filter>
   </defs>
-  <style>
+  <style><![CDATA[
 .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
 
 .a{animation-duration:25.95s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -214,7 +214,7 @@
 @keyframes k100{0%,98.844%,100%{opacity:0}1.541%,96.917%{opacity:1}}
 .m82{animation-name:k100}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.07s!important;animation-play-state:paused!important}}
-</style>
+]]></style>
   <g clip-path="url(#c1)">
     <rect width="480" height="600" fill="url(#g1)"/>
     <rect width="480" height="600" fill="url(#g2)"/>

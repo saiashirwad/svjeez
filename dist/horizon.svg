@@ -151,7 +151,7 @@
       <stop offset="1" stop-color="#000" stop-opacity="0.7"/>
     </radialGradient>
   </defs>
-  <style>
+  <style><![CDATA[
 .sans{font-family:"Inter","SF Pro Display",system-ui,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:10px}
 
 .a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -894,7 +894,7 @@
 @keyframes k426{0%,48.333%,76.667%,100%{opacity:0}53.333%{opacity:1}71.667%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
 .m312{animation-name:k426}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-6.5s!important;animation-play-state:paused!important}[filter="url(#f3)"]{filter:url(#f3s)}[filter="url(#f4)"]{filter:url(#f4s)}[filter="url(#f5)"]{filter:url(#f5s)}[filter="url(#f6)"]{filter:url(#f6s)}[filter="url(#f7)"]{filter:url(#f7s)}[filter="url(#f8)"]{filter:url(#f8s)}[filter="url(#f9)"]{filter:url(#f9s)}}
-</style>
+]]></style>
   <rect width="960" height="540" fill="url(#g1)"/>
   <g style="transform-box:view-box;transform-origin:480px 270px" class="a m174">
     <rect x="-40" y="-40" width="1040" height="620" fill="url(#g2)"/>
