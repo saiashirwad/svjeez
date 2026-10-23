@@ -1,4 +1,4 @@
-import { def, type Child, type Color, type SvgNode } from "svg-motion";
+import { def, el, type Child, type Color, type SvgNode } from "svg-motion";
 import { Frost } from "./hole";
 import { C, FRAME, ui } from "./theme";
 
@@ -23,7 +23,7 @@ const ICONS = {
 } as const;
 
 function Icon({ d, x, y, color }: { d: string; x: number; y: number; color: Color }): SvgNode {
-  return <path d={d} transform={`translate(${x} ${y})`} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />;
+  return el.path({ d, transform: `translate(${x} ${y})`, fill: "none", stroke: color, strokeWidth: 1.4, strokeLinecap: "round", strokeLinejoin: "round" });
 }
 
 const NAV = [
@@ -50,18 +50,16 @@ function Sidebar(): SvgNode {
       {NAV.map(({ icon, label, active }, i) => {
         const y = 808 + i * 40;
         const color = active ? C.link : "#A9A6BC";
-        return (
-          <g>
-            <Icon d={icon} x={157} y={y} color={color} />
-            <text x={177} y={y + 5} {...ui(13.5, color, { fontWeight: 500, fillOpacity: active ? 1 : 0.7 })}>{label}</text>
-          </g>
-        );
+        return el.g({}, [
+          Icon({ d: icon, x: 157, y, color }),
+          el.text({ x: 177, y: y + 5, ...ui(13.5, color, { fontWeight: 500, fillOpacity: active ? 1 : 0.7 }) }, label),
+        ]);
       })}
 
       <text x={145} y={985} {...ui(12, "#FFFFFF", { fillOpacity: 0.3 })}>Pinned notes</text>
-      {PINNED.map((label, i) => (
-        <text x={145} y={1028 + i * 40} {...ui(13.5, "#FFFFFF", { fillOpacity: 0.45 })}>{label}</text>
-      ))}
+      {PINNED.map((label, i) =>
+        el.text({ x: 145, y: 1028 + i * 40, ...ui(13.5, "#FFFFFF", { fillOpacity: 0.45 }) }, label),
+      )}
     </g>
   );
 }
@@ -99,7 +97,7 @@ const TOPS = NOTE.reduce<number[]>((tops, line) => [...tops, (tops.at(-1) ?? 790
 
 const runs = (line: Line): Child =>
   line.runs.map((run) =>
-    typeof run === "string" ? run : <tspan class="u" fill={C.link}>{run.link}</tspan>,
+    typeof run === "string" ? run : el.tspan({ class: "u", fill: C.link }, run.link),
   );
 
 function Note(): SvgNode {
@@ -119,12 +117,10 @@ function Note(): SvgNode {
       {NOTE.map((line, i) => {
         const y = TOPS[i]!;
         const x = 497 + line.depth * 20;
-        return (
-          <g>
-            {!line.wrap && <circle cx={x - 18.5} cy={y - 4.5} r={2} fill="#FFF" fillOpacity={0.4} />}
-            <text x={x} y={y} {...ui(13.5, "#FFFFFF", { fillOpacity: line.depth === 2 ? 0.6 : 0.75 })}>{runs(line)}</text>
-          </g>
-        );
+        return el.g({}, [
+          !line.wrap && el.circle({ cx: x - 18.5, cy: y - 4.5, r: 2, fill: "#FFF", fillOpacity: 0.4 }),
+          el.text({ x, y, ...ui(13.5, "#FFFFFF", { fillOpacity: line.depth === 2 ? 0.6 : 0.75 }) }, runs(line)),
+        ]);
       })}
     </g>
   );
@@ -153,29 +149,30 @@ function Calendar(): SvgNode {
         <path d="M1289 737L1293 741L1289 745" />
       </g>
 
-      {DAYS.map((day, i) => (
-        <text x={column(i)} y={803} {...ui(13, "#FFFFFF", { fillOpacity: 0.7, fontWeight: 500, textAnchor: "middle" })}>{day}</text>
-      ))}
+      {DAYS.map((day, i) =>
+        el.text({ x: column(i), y: 803, ...ui(13, "#FFFFFF", { fillOpacity: 0.7, fontWeight: 500, textAnchor: "middle" }) }, day),
+      )}
       <line x1={1001} y1={822.5} x2={1318} y2={822.5} stroke="#FFF" strokeOpacity={0.06} />
 
       <rect x={1267} y={831} width={32} height={32} rx={6} fill={C.select} />
-      {MONTH.map(({ day, outside }, i) => (
-        <text
-          x={column(i % 7)}
-          y={852 + Math.floor(i / 7) * 40}
-          {...ui(13, "#FFFFFF", { fillOpacity: outside ? 0.25 : day === 2 ? 1 : 0.6, textAnchor: "middle" })}
-        >
-          {day}
-        </text>
-      ))}
+      {MONTH.map(({ day, outside }, i) =>
+        el.text(
+          {
+            x: column(i % 7),
+            y: 852 + Math.floor(i / 7) * 40,
+            ...ui(13, "#FFFFFF", { fillOpacity: outside ? 0.25 : day === 2 ? 1 : 0.6, textAnchor: "middle" }),
+          },
+          day,
+        ),
+      )}
 
       <text x={1024} y={1061} {...ui(12, "#FFFFFF", { fillOpacity: 0.3 })}>Note actions</text>
-      {ACTIONS.map(({ icon, label }, i) => (
-        <g>
-          <Icon d={icon} x={1036} y={1099 + i * 40} color="#A9A6BC" />
-          <text x={1055} y={1104 + i * 40} {...ui(13.5, "#FFFFFF", { fillOpacity: 0.55, fontWeight: 500 })}>{label}</text>
-        </g>
-      ))}
+      {ACTIONS.map(({ icon, label }, i) =>
+        el.g({}, [
+          Icon({ d: icon, x: 1036, y: 1099 + i * 40, color: "#A9A6BC" }),
+          el.text({ x: 1055, y: 1104 + i * 40, ...ui(13.5, "#FFFFFF", { fillOpacity: 0.55, fontWeight: 500 }) }, label),
+        ]),
+      )}
     </g>
   );
 }
@@ -203,18 +200,16 @@ const knobEdge = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
 
 function Play(): SvgNode {
   const cy = Y + 302;
-  return (
-    <g>
-      <circle cx={720} cy={cy} r={55.5} fill="#FFF" fillOpacity={0.02} stroke="#FFF" strokeOpacity={0.05} />
-      <circle cx={720} cy={cy} r={40} fill="#1A1530" fillOpacity={0.6} />
-      <circle cx={720} cy={cy} r={39.5} fill={knob} stroke={knobEdge} />
-      <path
-        d="M17.9 10.26C19.26 11.02 19.26 12.98 17.9 13.74L7.98 19.32C6.65 20.07 5 19.11 5 17.58V6.42C5 4.89 6.65 3.93 7.98 4.68Z"
-        transform={`translate(${720 - 11.5} ${cy - 12}) scale(0.95)`}
-        fill="#FFF"
-      />
-    </g>
-  );
+  return el.g({}, [
+    el.circle({ cx: 720, cy, r: 55.5, fill: "#FFF", fillOpacity: 0.02, stroke: "#FFF", strokeOpacity: 0.05 }),
+    el.circle({ cx: 720, cy, r: 40, fill: "#1A1530", fillOpacity: 0.6 }),
+    el.circle({ cx: 720, cy, r: 39.5, fill: knob, stroke: knobEdge }),
+    el.path({
+      d: "M17.9 10.26C19.26 11.02 19.26 12.98 17.9 13.74L7.98 19.32C6.65 20.07 5 19.11 5 17.58V6.42C5 4.89 6.65 3.93 7.98 4.68Z",
+      transform: `translate(${720 - 11.5} ${cy - 12}) scale(0.95)`,
+      fill: "#FFF",
+    }),
+  ]);
 }
 
 export function AppWindow(): SvgNode {
