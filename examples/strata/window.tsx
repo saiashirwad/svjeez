@@ -1,4 +1,4 @@
-import { enter, motion, type SvgNode } from "svg-motion";
+import { el, enter, motion, type SvgNode } from "svg-motion";
 import { cardTop, noteClip, panelWash, shadow } from "./defs";
 import { C } from "./theme";
 import { mono, ui } from "./ui";
@@ -23,16 +23,15 @@ export function AppWindow(): SvgNode {
         Field notes <tspan fill="#3D372E">/</tspan> <tspan fill={C.noteInk}>Retention</tspan>
       </text>
 
-      {[C.sage, C.lavender, C.blue].map((color, index) => (
-        <circle
-          key={`presence-${index}`}
-          cx={1002 + index * 12}
-          cy={118}
-          r={3}
-          fill={color}
-          animation={motion({ opacity: 0.4 }).at(19.66 + index * 0.24).to({ opacity: 0.95 }, 0.24).to({ opacity: 0.4 }, 0.5)}
-        />
-      ))}
+      {[C.sage, C.lavender, C.blue].map((color, index) =>
+        el.circle({
+          cx: 1002 + index * 12,
+          cy: 118,
+          r: 3,
+          fill: color,
+          animation: motion({ opacity: 0.4 }).at(19.66 + index * 0.24).to({ opacity: 0.95 }, 0.24).to({ opacity: 0.4 }, 0.5),
+        }),
+      )}
       <text x={1120} y={121} {...mono(8.5, C.faint, { letterSpacing: 1.4, textAnchor: "end" })}>3 AGENTS</text>
 
       <g animation={enter({ at: 0.26, over: 0.47 }, { opacity: 0, y: 6 }).at(25.79).to({ opacity: 0 }, 0.16)}>

@@ -1,4 +1,4 @@
-import { enter, type SvgNode } from "svg-motion";
+import { el, enter, type SvgNode } from "svg-motion";
 import { float } from "./defs";
 import { C } from "./theme";
 import { AgentAvatar, CardHeader, CardShell, MiniAvatar, PulseDots, Thread, mono, serif, ui } from "./ui";
@@ -68,14 +68,14 @@ function Menu(): SvgNode {
       <text x={1104} y={441} {...mono(7.5, C.faintest, { textAnchor: "end" })}>ESC</text>
       <line x1={852} y1={450} x2={1104} y2={450} stroke={C.lineSoft} />
 
-      {MENU_ROWS.map((row, index) => (
-        <g key={`menu-row-${index}`} animation={enter({ at: 5.9 + index * 0.12, over: 0.34 }, { opacity: 0, y: 3 })}>
-          <MiniAvatar cx={854} cy={row.cy} initial={row.initial} color={row.color} />
-          <text x={row.x} y={row.cy - 1} {...ui(11, C.ink, { fontWeight: 600 })}>{row.name}</text>
-          <text x={row.x} y={row.cy + 11} {...ui(8.5, C.dim)}>{row.role}</text>
-          <text x={1104} y={row.cy + 5} {...ui(8.5, C.faint, { textAnchor: "end" })}>{row.note}</text>
-        </g>
-      ))}
+      {MENU_ROWS.map((row, index) =>
+        el.g({ animation: enter({ at: 5.9 + index * 0.12, over: 0.34 }, { opacity: 0, y: 3 }) }, [
+          MiniAvatar({ cx: 854, cy: row.cy, initial: row.initial, color: row.color }),
+          el.text({ x: row.x, y: row.cy - 1, ...ui(11, C.ink, { fontWeight: 600 }) }, row.name),
+          el.text({ x: row.x, y: row.cy + 11, ...ui(8.5, C.dim) }, row.role),
+          el.text({ x: 1104, y: row.cy + 5, ...ui(8.5, C.faint, { textAnchor: "end" }) }, row.note),
+        ]),
+      )}
 
       <g animation={enter({ at: 6.27, over: 0.26 }).at(7.33).to({ opacity: 0 }, 0.14)}>
         <rect x={844} y={458} width={268} height={36} rx={7} fill={C.sage} fillOpacity={0.08} stroke={C.sage} strokeOpacity={0.24} />
@@ -155,12 +155,12 @@ function AtlasCard(): SvgNode {
       <g animation={slide(15.39)}>
         <text x={852} y={570} {...mono(8.5, "#8C7FAE", { letterSpacing: 1.4 })}>PLAN · 3 NODES</text>
       </g>
-      {PLAN_ROWS.map((row, index) => (
-        <g key={`plan-card-${index}`} animation={slide(row.at)}>
-          <text x={852} y={row.y} {...mono(7.5, "#8C7FAE")}>{row.number}</text>
-          <text x={870} y={row.y} {...ui(10.5, C.text)}>{row.label}</text>
-        </g>
-      ))}
+      {PLAN_ROWS.map((row) =>
+        el.g({ animation: slide(row.at) }, [
+          el.text({ x: 852, y: row.y, ...mono(7.5, "#8C7FAE") }, row.number),
+          el.text({ x: 870, y: row.y, ...ui(10.5, C.text) }, row.label),
+        ]),
+      )}
 
       <g animation={enter({ at: 15.39, over: 0.26 }).at(16.48).to({ opacity: 0 }, 0.13)}>
         <PulseDots x={856} y={649} count={1} color={C.lavender} />

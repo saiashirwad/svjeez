@@ -1,4 +1,4 @@
-import { enter, exit, type Child, type SvgNode } from "svg-motion";
+import { el, enter, exit, type Child, type SvgNode } from "svg-motion";
 import { bg, cool, grid, vignette, warm } from "./defs";
 import { C } from "./theme";
 import { mono, serif, ui } from "./ui";
@@ -54,20 +54,10 @@ export function Header(): SvgNode {
 
       {Array.from({ length: 6 }, (_, index) => {
         const x = 1000 + index * 26;
-        return (
-          <g key={`tick-${index}`}>
-            <rect x={x} y={38} width={20} height={2.5} rx={1.25} fill="#211C16" />
-            <rect
-              x={x}
-              y={38}
-              width={20}
-              height={2.5}
-              rx={1.25}
-              fill={C.gold}
-              animation={TICK_MOTION[index]}
-            />
-          </g>
-        );
+        return el.g({}, [
+          el.rect({ x, y: 38, width: 20, height: 2.5, rx: 1.25, fill: "#211C16" }),
+          el.rect({ x, y: 38, width: 20, height: 2.5, rx: 1.25, fill: C.gold, animation: TICK_MOTION[index] }),
+        ]);
       })}
 
       <line x1={48} y1={68} x2={1152} y2={68} stroke={C.rule} strokeOpacity={0.08} />
@@ -120,15 +110,15 @@ const COPY_SCENES: CopyScene[] = [
 export function Copy(): SvgNode {
   return (
     <>
-      {COPY_SCENES.map((scene, index) => (
-        <g key={`copy-${index}`} animation={COPY_MOTION[index]}>
-          <text x={48} y={124} {...mono(9.5, C.gold, { fontWeight: 600, letterSpacing: 2.2 })}>{scene.kicker}</text>
-          <text x={48} y={170} {...serif(33, C.ink)}>{scene.lines[0]}</text>
-          <text x={48} y={209} {...serif(33, C.ink)}>{scene.lines[1]}</text>
-          <text x={48} y={246} {...ui(12.5, C.muted)}>{scene.sub[0]}</text>
-          <text x={48} y={264} {...ui(12.5, C.muted)}>{scene.sub[1]}</text>
-        </g>
-      ))}
+      {COPY_SCENES.map((scene, index) =>
+        el.g({ animation: COPY_MOTION[index] }, [
+          el.text({ x: 48, y: 124, ...mono(9.5, C.gold, { fontWeight: 600, letterSpacing: 2.2 }) }, scene.kicker),
+          el.text({ x: 48, y: 170, ...serif(33, C.ink) }, scene.lines[0]),
+          el.text({ x: 48, y: 209, ...serif(33, C.ink) }, scene.lines[1]),
+          el.text({ x: 48, y: 246, ...ui(12.5, C.muted) }, scene.sub[0]),
+          el.text({ x: 48, y: 264, ...ui(12.5, C.muted) }, scene.sub[1]),
+        ]),
+      )}
     </>
   );
 }
@@ -148,23 +138,19 @@ export function Index(): SvgNode {
 
       {INDEX_ROWS.map((row, index) => {
         const y = 608 + index * 24;
-        return (
-          <g key={`index-row-${index}`}>
-            <text x={48} y={y} {...mono(8.5, C.faint)}>{row.number}</text>
-            <text x={68} y={y} {...ui(11.5, "#9A9082")}>{row.label}</text>
-            <text x={320} y={y} {...ui(9, C.faint, { textAnchor: "end" })}>{row.note}</text>
-          </g>
-        );
+        return el.g({}, [
+          el.text({ x: 48, y, ...mono(8.5, C.faint) }, row.number),
+          el.text({ x: 68, y, ...ui(11.5, "#9A9082") }, row.label),
+          el.text({ x: 320, y, ...ui(9, C.faint, { textAnchor: "end" }) }, row.note),
+        ]);
       })}
 
       {INDEX_ROWS.map((row, index) => {
         const y = 608 + index * 24;
-        return (
-          <g key={`index-active-${index}`} animation={ACTIVE_MOTION[index]}>
-            <text x={48} y={y} {...mono(8.5, C.gold)}>{row.number}</text>
-            <text x={68} y={y} {...ui(11.5, C.gold)}>{row.label}</text>
-          </g>
-        );
+        return el.g({ animation: ACTIVE_MOTION[index] }, [
+          el.text({ x: 48, y, ...mono(8.5, C.gold) }, row.number),
+          el.text({ x: 68, y, ...ui(11.5, C.gold) }, row.label),
+        ]);
       })}
     </g>
   );

@@ -1,4 +1,4 @@
-import { draw, ease, enter, motion, type Attrs, type Child, type Color, type Motion, type Span, type SvgNode } from "svg-motion";
+import { draw, ease, el, enter, motion, type Attrs, type Child, type Color, type Motion, type Span, type SvgNode } from "svg-motion";
 import { float } from "./defs";
 import { C } from "./theme";
 
@@ -39,19 +39,10 @@ export interface TreeRowProps {
 }
 
 export function TreeRow(props: TreeRowProps): SvgNode {
-  return (
-    <g animation={props.animation}>
-      <circle cx={props.bulletX} cy={props.y - 5} r={props.r} fill={props.fill} />
-      <text
-        x={props.x}
-        y={props.y}
-        {...ui(props.size ?? 14, props.color ?? C.text)}
-        fontWeight={props.weight}
-      >
-        {props.children}
-      </text>
-    </g>
-  );
+  return el.g({ animation: props.animation }, [
+    el.circle({ cx: props.bulletX, cy: props.y - 5, r: props.r, fill: props.fill }),
+    el.text({ x: props.x, y: props.y, ...ui(props.size ?? 14, props.color ?? C.text), fontWeight: props.weight }, props.children),
+  ]);
 }
 
 export function AgentAvatar(props: {
@@ -63,18 +54,10 @@ export function AgentAvatar(props: {
   size?: number;
 }): SvgNode {
   const size = props.size ?? 8;
-  return (
-    <g>
-      <circle cx={props.cx} cy={props.cy} r={props.r} fill={props.color} fillOpacity={0.13} stroke={props.color} strokeOpacity={0.34} />
-      <text
-        x={props.cx}
-        y={props.cy + size * 0.35}
-        {...mono(size, props.color, { textAnchor: "middle" })}
-      >
-        {props.initial}
-      </text>
-    </g>
-  );
+  return el.g({}, [
+    el.circle({ cx: props.cx, cy: props.cy, r: props.r, fill: props.color, fillOpacity: 0.13, stroke: props.color, strokeOpacity: 0.34 }),
+    el.text({ x: props.cx, y: props.cy + size * 0.35, ...mono(size, props.color, { textAnchor: "middle" }) }, props.initial),
+  ]);
 }
 
 export function MiniAvatar(props: {
@@ -83,14 +66,10 @@ export function MiniAvatar(props: {
   initial: string;
   color: Color;
 }): SvgNode {
-  return (
-    <g>
-      <circle cx={props.cx} cy={props.cy} r={6.5} fill={props.color} fillOpacity={0.12} stroke={props.color} strokeOpacity={0.32} />
-      <text x={props.cx} y={props.cy + 2.5} {...mono(7, props.color, { textAnchor: "middle" })}>
-        {props.initial}
-      </text>
-    </g>
-  );
+  return el.g({}, [
+    el.circle({ cx: props.cx, cy: props.cy, r: 6.5, fill: props.color, fillOpacity: 0.12, stroke: props.color, strokeOpacity: 0.32 }),
+    el.text({ x: props.cx, y: props.cy + 2.5, ...mono(7, props.color, { textAnchor: "middle" }) }, props.initial),
+  ]);
 }
 
 export function CardHeader(props: {
@@ -102,15 +81,13 @@ export function CardHeader(props: {
   color: Color;
 }): SvgNode {
   const { y, color } = props;
-  return (
-    <g>
-      <AgentAvatar cx={858} cy={y + 26} r={9.5} initial={props.initial} color={color} />
-      <text x={874} y={y + 24} {...ui(11.5, C.ink, { fontWeight: 600 })}>{props.name}</text>
-      <text x={874} y={y + 35} {...ui(8.5, C.dim)}>{props.role}</text>
-      <text x={1104} y={y + 24} {...mono(7.5, C.faint, { textAnchor: "end" })}>{props.meta}</text>
-      <line x1={852} y1={y + 44} x2={1104} y2={y + 44} stroke={C.lineSoft} />
-    </g>
-  );
+  return el.g({}, [
+    AgentAvatar({ cx: 858, cy: y + 26, r: 9.5, initial: props.initial, color }),
+    el.text({ x: 874, y: y + 24, ...ui(11.5, C.ink, { fontWeight: 600 }) }, props.name),
+    el.text({ x: 874, y: y + 35, ...ui(8.5, C.dim) }, props.role),
+    el.text({ x: 1104, y: y + 24, ...mono(7.5, C.faint, { textAnchor: "end" }) }, props.meta),
+    el.line({ x1: 852, y1: y + 44, x2: 1104, y2: y + 44, stroke: C.lineSoft }),
+  ]);
 }
 
 export function CardShell(props: {
@@ -123,21 +100,19 @@ export function CardShell(props: {
   w?: number;
   r?: number;
 }): SvgNode {
-  return (
-    <g animation={props.animation}>
-      <rect
-        x={props.x ?? 836}
-        y={props.y}
-        width={props.w ?? 284}
-        height={props.h}
-        rx={props.r ?? 12}
-        fill={C.card}
-        stroke={props.stroke ?? C.lineSoft}
-        filter={float}
-      />
-      {props.children}
-    </g>
-  );
+  return el.g({ animation: props.animation }, [
+    el.rect({
+      x: props.x ?? 836,
+      y: props.y,
+      width: props.w ?? 284,
+      height: props.h,
+      rx: props.r ?? 12,
+      fill: C.card,
+      stroke: props.stroke ?? C.lineSoft,
+      filter: float,
+    }),
+    props.children,
+  ]);
 }
 
 export function Thread(props: {
@@ -152,22 +127,22 @@ export function Thread(props: {
   const { on, off } = props;
   return (
     <>
-      <path
-        d={props.d}
-        stroke={props.color}
-        strokeOpacity={props.strokeOpacity ?? 0.38}
-        strokeWidth={1}
-        fill="none"
-        animation={draw(on).at(off.at).to({ opacity: 0 }, off.over)}
-      />
-      <circle
-        cx={props.endX}
-        cy={props.endY}
-        r={2.2}
-        fill={props.color}
-        fillOpacity={0.7}
-        animation={enter(on).at(off.at).to({ opacity: 0 }, off.over)}
-      />
+      {el.path({
+        d: props.d,
+        stroke: props.color,
+        strokeOpacity: props.strokeOpacity ?? 0.38,
+        strokeWidth: 1,
+        fill: "none",
+        animation: draw(on).at(off.at).to({ opacity: 0 }, off.over),
+      })}
+      {el.circle({
+        cx: props.endX,
+        cy: props.endY,
+        r: 2.2,
+        fill: props.color,
+        fillOpacity: 0.7,
+        animation: enter(on).at(off.at).to({ opacity: 0 }, off.over),
+      })}
     </>
   );
 }
@@ -192,15 +167,9 @@ export function PulseDots(props: {
   const count = props.count ?? 3;
   return (
     <>
-      {Array.from({ length: count }, (_, index) => (
-        <circle
-          cx={props.x + index * (props.gap ?? 7)}
-          cy={props.y}
-          r={props.r ?? 1.7}
-          fill={props.color}
-          animation={pulse(index)}
-        />
-      ))}
+      {Array.from({ length: count }, (_, index) =>
+        el.circle({ cx: props.x + index * (props.gap ?? 7), cy: props.y, r: props.r ?? 1.7, fill: props.color, animation: pulse(index) }),
+      )}
     </>
   );
 }
