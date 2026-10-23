@@ -1,5 +1,5 @@
 import { ease, el, enter, wiggle, type SvgNode } from "svg-motion";
-import { BARK, BLOSSOM, BLUSH, CAM, CREAM, D, FERN, GOLD, GRASS, OAK, PERIWINKLE, STONE, T, alpha, at, clamp, hazed, lerp, mix, random, tone } from "./kit";
+import { BARK, BIRCH, BLOSSOM, BLUSH, CAM, CREAM, D, FERN, GOLD, GRASS, OAK, PERIWINKLE, STONE, T, alpha, at, clamp, hazed, lerp, mix, random, tone } from "./kit";
 import { edge, leaf as leafPath, smooth, tapered, type P2 } from "./draw";
 import { layer, type Part } from "./paint";
 import { TAU, add, bend, cross, dot, lit, mul, perpendicular, sub, unit, type Vec3 } from "./space";

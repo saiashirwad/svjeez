@@ -79,9 +79,9 @@ export function Stars(): SvgNode {
 
 const sunHalo = def.radialGradient({}, (
   <>
-    <stop offset={0} stopColor={C.sun} stopOpacity={0.5} />
-    <stop offset={0.28} stopColor={C.sun} stopOpacity={0.26} />
-    <stop offset={0.6} stopColor={C.sun} stopOpacity={0.08} />
+    <stop offset={0} stopColor={C.sun} stopOpacity={0.55} />
+    <stop offset={0.18} stopColor={C.sun} stopOpacity={0.24} />
+    <stop offset={0.46} stopColor={C.sun} stopOpacity={0.08} />
     <stop offset={1} stopColor={C.sun} stopOpacity={0} />
   </>
 ));
