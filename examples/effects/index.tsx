@@ -1,4 +1,4 @@
-import { draw, ease, enter, fx, motion, render, wiggle, type Child, type SvgNode } from "svg-motion";
+import { draw, ease, el, enter, fx, motion, render, wiggle, type Child, type SvgNode } from "svg-motion";
 
 const W = 660;
 const H = 420;
@@ -21,15 +21,11 @@ const glow = fx.glow({ blur: 4 });
 const boil = fx.boil({ strength: 2.5, rate: 8 });
 
 function Tile({ col, row, label, children }: { col: number; row: number; label: string; children: Child }): SvgNode {
-  return (
-    <g transform={`translate(${20 + col * 210} ${20 + row * 200})`}>
-      <rect width={200} height={180} rx={14} fill={C.tile} stroke={C.edge} />
-      <text x={16} y={162} class="mono" fontSize={11} letterSpacing={1.5} fill={C.label}>
-        {label}
-      </text>
-      {children}
-    </g>
-  );
+  return el.g({ transform: `translate(${20 + col * 210} ${20 + row * 200})` }, [
+    el.rect({ width: 200, height: 180, rx: 14, fill: C.tile, stroke: C.edge }),
+    el.text({ x: 16, y: 162, class: "mono", fontSize: 11, letterSpacing: 1.5, fill: C.label }, label),
+    children,
+  ]);
 }
 
 const star = (cx: number, cy: number, r: number) =>
