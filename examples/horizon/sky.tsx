@@ -1,4 +1,4 @@
-import { def, ease, motion, wiggle, type Color, type SvgNode } from "svg-motion";
+import { def, ease, el, motion, wiggle, type Color, type SvgNode } from "svg-motion";
 import { C, D, H, T, W, pivot, random } from "./kit";
 
 const depth = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
@@ -64,21 +64,21 @@ const sparkle = (x: number, y: number, r: number): string =>
 export function Stars(): SvgNode {
   return (
     <>
-      {STARS.map(({ x, y, r, tint, twinkle }, i) => (
-        <circle
-          cx={x}
-          cy={y}
-          r={r}
-          fill={tint}
-          animation={twinkle ? wiggle({ opacity: 0.7 }, { seed: `star-${i}`, rate: 3, ease: ease.hold, period: D / 2 }) : undefined}
-        />
-      ))}
-      {STARS.filter((star) => star.r > 1.35).map(({ x, y }, i) => (
-        <g animation={wiggle({ opacity: 0.5, scale: 0.3 }, { seed: `flare-${i}`, rate: 1, period: D / 2 })}>
-          <circle cx={x} cy={y} r={9} fill={halo} />
-          <path d={sparkle(x, y, 7)} fill={C.star} />
-        </g>
-      ))}
+      {STARS.map(({ x, y, r, tint, twinkle }, i) =>
+        el.circle({
+          cx: x,
+          cy: y,
+          r,
+          fill: tint,
+          animation: twinkle ? wiggle({ opacity: 0.7 }, { seed: `star-${i}`, rate: 3, ease: ease.hold, period: D / 2 }) : undefined,
+        }),
+      )}
+      {STARS.filter((star) => star.r > 1.35).map(({ x, y }, i) =>
+        el.g({ animation: wiggle({ opacity: 0.5, scale: 0.3 }, { seed: `flare-${i}`, rate: 1, period: D / 2 }) }, [
+          el.circle({ cx: x, cy: y, r: 9, fill: halo }),
+          el.path({ d: sparkle(x, y, 7), fill: C.star }),
+        ]),
+      )}
     </>
   );
 }
@@ -100,21 +100,22 @@ const WAVES = Array.from({ length: 6 }, (_, w) => ({
 export function Warp(): SvgNode {
   return (
     <g stroke="#DCE6FF" strokeLinecap="round">
-      {WAVES.map(({ at, over, streaks }) => (
-        <g
-          style={pivot}
-          animation={motion({ scale: 1, opacity: 0 })
-            .at(at)
-            .to({ scale: 8 }, over, ease.in)
-            .at(at)
-            .to({ opacity: 0.9 }, 0.12)
-            .to({ opacity: 0 }, over - 0.12, ease.in)}
-        >
-          {streaks.map(({ cos, sin, from, to, width }) => (
-            <line x1={cos * from} y1={sin * from} x2={cos * to} y2={sin * to} strokeWidth={width} style={{ vectorEffect: "non-scaling-stroke" }} />
-          ))}
-        </g>
-      ))}
+      {WAVES.map(({ at, over, streaks }) =>
+        el.g(
+          {
+            style: pivot,
+            animation: motion({ scale: 1, opacity: 0 })
+              .at(at)
+              .to({ scale: 8 }, over, ease.in)
+              .at(at)
+              .to({ opacity: 0.9 }, 0.12)
+              .to({ opacity: 0 }, over - 0.12, ease.in),
+          },
+          streaks.map(({ cos, sin, from, to, width }) =>
+            el.line({ x1: cos * from, y1: sin * from, x2: cos * to, y2: sin * to, strokeWidth: width, style: { vectorEffect: "non-scaling-stroke" } }),
+          ),
+        ),
+      )}
     </g>
   );
 }

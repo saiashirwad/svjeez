@@ -1,4 +1,4 @@
-import { def, ease, motion, type Channel, type Color, type Motion, type Ref, type Values } from "svg-motion";
+import { def, ease, el, motion, type Channel, type Color, type Motion, type Ref, type Values } from "svg-motion";
 
 export const W = 960;
 export const H = 540;
@@ -76,9 +76,7 @@ export const glow = (blur: number, strength: number, reach: { readonly x: number
     <>
       <feGaussianBlur stdDeviation={blur} result="blur" />
       <feMerge>
-        {Array.from({ length: strength }, () => (
-          <feMergeNode in="blur" />
-        ))}
+        {Array.from({ length: strength }, () => el.feMergeNode({ in: "blur" }))}
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </>

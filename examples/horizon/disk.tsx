@@ -1,4 +1,4 @@
-import { def, draw, ease, motion, type SvgNode } from "svg-motion";
+import { def, draw, ease, el, motion, type SvgNode } from "svg-motion";
 import { C, D, T, TILT, heat, phased, pivot, random } from "./kit";
 
 const INNER = 78;
@@ -55,35 +55,32 @@ const haze = def.radialGradient({}, (
 /** Matter forms the disk outside-in and is swallowed with it. */
 const arrive = (t: number) => T.accrete + (1 - t) * 1.3;
 
-function Band({ ring }: { ring: Ring }): SvgNode {
-  const { r, t, width, dash, laps } = ring;
+const band = ({ r, t, width, dash, laps }: Ring): SvgNode[] => {
   const color = heat(t);
   const fade = 0.95 - t * 0.6;
-  return (
-    <>
-      <circle
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={width * 0.6}
-        opacity={fade * 0.45}
-        animation={draw({ at: arrive(t), over: 1 }).at(T.black).set({ draw: 0 })}
-      />
-      <circle
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={width}
-        strokeDasharray={dash}
-        strokeLinecap="round"
-        animation={[
-          motion({ opacity: 0 }).at(arrive(t) + 0.3).to({ opacity: fade }, 0.9).at(T.black).set({ opacity: 0 }),
-          motion({ rotate: 0 }).to({ rotate: 360 }, D / laps, ease.linear).loop(D / laps),
-        ]}
-      />
-    </>
-  );
-}
+  return [
+    el.circle({
+      r,
+      fill: "none",
+      stroke: color,
+      strokeWidth: width * 0.6,
+      opacity: fade * 0.45,
+      animation: draw({ at: arrive(t), over: 1 }).at(T.black).set({ draw: 0 }),
+    }),
+    el.circle({
+      r,
+      fill: "none",
+      stroke: color,
+      strokeWidth: width,
+      strokeDasharray: dash,
+      strokeLinecap: "round",
+      animation: [
+        motion({ opacity: 0 }).at(arrive(t) + 0.3).to({ opacity: fade }, 0.9).at(T.black).set({ opacity: 0 }),
+        motion({ rotate: 0 }).to({ rotate: 360 }, D / laps, ease.linear).loop(D / laps),
+      ],
+    }),
+  ];
+};
 
 const DEBRIS = Array.from({ length: 34 }, (_, i) => ({
   r: OUTER + 20 + rand() * 90,
@@ -99,19 +96,17 @@ function Debris(): SvgNode {
     <g fill={C.white}>
       {DEBRIS.map(({ r, angle, period, offset, size }) => {
         const a = (angle * Math.PI) / 180;
-        return (
-          <circle
-            cx={Math.cos(a) * r}
-            cy={Math.sin(a) * r}
-            r={size}
-            style={pivot}
-            animation={phased(period, offset, (u) => ({
-              rotate: 320 * u,
-              scale: 1 - 0.8 * u * u,
-              opacity: Math.min(1, u * 6, (1 - u) * 5),
-            }))}
-          />
-        );
+        return el.circle({
+          cx: Math.cos(a) * r,
+          cy: Math.sin(a) * r,
+          r: size,
+          style: pivot,
+          animation: phased(period, offset, (u) => ({
+            rotate: 320 * u,
+            scale: 1 - 0.8 * u * u,
+            opacity: Math.min(1, u * 6, (1 - u) * 5),
+          })),
+        });
       })}
     </g>
   );
@@ -130,9 +125,7 @@ export function Disk({ half }: { half: "far" | "near" }): SvgNode {
     <g transform={TILT}>
       <g clipPath={half === "far" ? far : near} mask={doppler}>
         <g animation={swallow}>
-          {RING.map((ring) => (
-            <Band ring={ring} />
-          ))}
+          {RING.map(band)}
         </g>
       </g>
     </g>

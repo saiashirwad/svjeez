@@ -1,4 +1,4 @@
-import { def, draw, ease, enter, motion, wiggle, type SvgNode } from "svg-motion";
+import { def, draw, ease, el, enter, motion, wiggle, type SvgNode } from "svg-motion";
 import { C, D, H, T, W, envelope, on } from "./kit";
 
 /** `.mono` is 10px, and every monospace face here advances 0.6em. */
@@ -8,13 +8,7 @@ const LINE = 14;
 function Typed({ x, y, text, at, dim = false }: { x: number; y: number; text: string; at: number; dim?: boolean }): SvgNode {
   return (
     <g class="mono" fill={dim ? C.hudDim : C.hud}>
-      {[...text].map((char, i) =>
-        char === " " ? null : (
-          <text x={x + i * ADVANCE} y={y} animation={on(at + i * 0.022)}>
-            {char}
-          </text>
-        ),
-      )}
+      {[...text].map((char, i) => (char === " " ? null : el.text({ x: x + i * ADVANCE, y, animation: on(at + i * 0.022) }, char)))}
     </g>
   );
 }
@@ -27,11 +21,7 @@ function Wheel({ x, y, labels, period }: { x: number; y: number; labels: readonl
   return (
     <g clipPath={window}>
       <g animation={motion({ y: 0 }).to({ y: -count * LINE }, period, ease.steps(count)).loop(period)}>
-        {[...labels, labels[0]!].map((label, k) => (
-          <text x={x} y={y + k * LINE}>
-            {label}
-          </text>
-        ))}
+        {[...labels, labels[0]!].map((label, k) => el.text({ x, y: y + k * LINE }, label))}
       </g>
     </g>
   );
@@ -66,15 +56,15 @@ function Flux({ x, y }: { x: number; y: number }): SvgNode {
     <>
       <Typed x={x} y={y - 36} text="HAWKING FLUX" at={T.hud + 0.6} dim />
       <g clipPath={window} fill={C.hud}>
-        {Array.from({ length: bars }, (_, i) => (
-          <rect
-            x={x + i * 5}
-            y={y - 14}
-            width={3}
-            height={40}
-            animation={wiggle({ y: 13 }, { seed: `flux-${i}`, rate: 9, ease: ease.hold, period: D / 4 })}
-          />
-        ))}
+        {Array.from({ length: bars }, (_, i) =>
+          el.rect({
+            x: x + i * 5,
+            y: y - 14,
+            width: 3,
+            height: 40,
+            animation: wiggle({ y: 13 }, { seed: `flux-${i}`, rate: 9, ease: ease.hold, period: D / 4 }),
+          }),
+        )}
       </g>
     </>
   );
@@ -91,9 +81,7 @@ function Brackets(): SvgNode {
   ];
   return (
     <g fill="none" stroke={C.hud} strokeWidth={1.2}>
-      {corners.map((d, i) => (
-        <path d={d} animation={draw({ at: T.hud + i * 0.06, over: 0.4 })} />
-      ))}
+      {corners.map((d, i) => el.path({ d, animation: draw({ at: T.hud + i * 0.06, over: 0.4 }) }))}
     </g>
   );
 }
@@ -153,9 +141,7 @@ export function Reticle(): SvgNode {
     <g fill="none" stroke={C.hud} animation={envelope(T.hud + 0.3, T.collapse - 0.2, 0.4)}>
       <circle r={150} strokeWidth={1} strokeDasharray="1 5" opacity={0.5} animation={motion({ rotate: 0 }).to({ rotate: 90 }, D, ease.linear)} />
       <circle r={190} strokeWidth={0.6} strokeDasharray="40 8 2 8" opacity={0.3} animation={motion({ rotate: 0 }).to({ rotate: -60 }, D, ease.linear)} />
-      {ticks.map((d, i) => (
-        <path d={d} strokeWidth={1.2} animation={draw({ at: T.hud + 0.4 + i * 0.08, over: 0.3 })} />
-      ))}
+      {ticks.map((d, i) => el.path({ d, strokeWidth: 1.2, animation: draw({ at: T.hud + 0.4 + i * 0.08, over: 0.3 }) }))}
       <path d={arc(-40, 40, 178)} strokeWidth={1.4} animation={draw({ at: T.hud + 0.6, over: 0.6 }, ease.inOut)} />
       <path d={arc(140, 220, 178)} strokeWidth={1.4} animation={draw({ at: T.hud + 0.6, over: 0.6 }, ease.inOut)} />
     </g>
@@ -171,22 +157,23 @@ export function Title(): SvgNode {
     <>
       {[...word].map((letter, i) => {
         const spread = Math.abs(i - middle) * 0.07;
-        return letter === " " ? null : (
-          <text
-            x={left + i * pitch}
-            y={H - 72}
-            class="sans"
-            fontSize={30}
-            fontWeight={200}
-            fill={C.white}
-            textAnchor="middle"
-            animation={enter({ at: T.title + spread, over: 1.1 }, { opacity: 0, blur: 12, y: 10 })
-              .at(T.collapse - 0.3 + spread / 2)
-              .to({ opacity: 0, blur: 14, y: -6 }, 0.6, ease.in)}
-          >
-            {letter}
-          </text>
-        );
+        return letter === " "
+          ? null
+          : el.text(
+              {
+                x: left + i * pitch,
+                y: H - 72,
+                class: "sans",
+                fontSize: 30,
+                fontWeight: 200,
+                fill: C.white,
+                textAnchor: "middle",
+                animation: enter({ at: T.title + spread, over: 1.1 }, { opacity: 0, blur: 12, y: 10 })
+                  .at(T.collapse - 0.3 + spread / 2)
+                  .to({ opacity: 0, blur: 14, y: -6 }, 0.6, ease.in),
+              },
+              letter,
+            );
       })}
       <g animation={envelope(T.title + 0.8, T.collapse - 0.2, 0.6)}>
         <text x={W / 2} y={H - 46} class="mono" letterSpacing={6} fill={C.hudDim} textAnchor="middle">
