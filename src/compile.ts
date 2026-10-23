@@ -1,6 +1,7 @@
-import { backendOf, formatValue, laneOf, spec, type Backend, type Channel, type Values } from "./channels";
+import { backendOf, formatValue, laneOf, spec, valueOf, type Backend, type Channel, type Target, type TargetValue, type TargetValues } from "./channels";
 import { isRef, refNode, type AnyRef, type DefTag } from "./defs";
 import { num } from "./format";
+import { isCss, isProperty, propertyRule, type Css, type Property } from "./properties";
 import { dataOf, type Motion } from "./motion";
 import { element, type AttrValue, type Element, type SvgNode } from "./svg";
 import { BASE_TIMING, cssKeyframes, keysOf, smilAttributes, snapPeriod, valueAt, type Key } from "./timeline";
@@ -17,7 +18,7 @@ export interface Canvas {
 interface Lane {
   readonly key: string;
   readonly backend: Backend;
-  readonly channels: readonly Channel[];
+  readonly channels: readonly Target[];
   readonly keys: readonly Key[];
   readonly period: number;
   readonly snapped: number;
@@ -30,6 +31,8 @@ interface State {
   readonly ids: Map<AnyRef, string>;
   /** Generated blur filters, keyed by their lane, so identical blurs share one def. */
   readonly blurs: Map<string, string>;
+  readonly properties: Map<Property, string>;
+  readonly registrations: string[];
   readonly counters: Map<string, number>;
   readonly defs: SvgNode[];
   readonly keyframes: Map<string, string>;
@@ -94,21 +97,34 @@ const refId = (state: State, ref: AnyRef): string => {
   return id;
 };
 
+const propertyName = (state: State, key: Property): string => {
+  const known = state.properties.get(key);
+  if (known) return known;
+  const name = nextName(state, "--p");
+  state.properties.set(key, name);
+  state.registrations.push(propertyRule(name, key));
+  return name;
+};
+
+const resolveCss = (state: State, text: Css): string =>
+  text.parts.map((part) => (typeof part === "string" ? part : propertyName(state, part.property))).join("");
+
 const resolveAttrs = (state: State, attrs: Element["attrs"]): Record<string, AttrValue> =>
   Object.fromEntries(
     Object.entries(attrs).map(([name, value]) => {
+      if (isCss(value)) return [name, resolveCss(state, value)];
       if (!isRef(value)) return [name, value];
       const id = refId(state, value);
       return [name, name === "href" ? `#${id}` : `url(#${id})`];
     }),
   );
 
-const startValue = (el: Element, channel: Channel, backend: Backend, given: Values[Channel]): Values[Channel] => {
+const startValue = (el: Element, channel: Target, backend: Backend, given: TargetValue | undefined): TargetValue => {
   const row = spec(channel);
   if (given !== undefined) return given;
   if (backend !== "smil" && row.identity !== undefined) return row.identity;
   const attr = row.attr && el.attrs[row.attr];
-  if (typeof attr === "string") return typeof row.value === "number" ? Number(attr) : (attr as Values[Channel]);
+  if (typeof attr === "string") return typeof row.value === "number" ? Number(attr) : (attr as TargetValue);
   throw new Error(`${channel} on <${el.tag}> has no starting value. Pass it to motion({ ${channel}: … }) or set the attribute.`);
 };
 
@@ -117,8 +133,8 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   const { duration } = state.canvas;
   const period = data.period ?? duration;
   const snapped = data.period === undefined ? duration : snapPeriod(data.period, duration);
-  const touched = [...new Set([...Object.keys(data.initial), ...data.steps.flatMap((step) => Object.keys(step.values))])] as Channel[];
-  const groups = new Map<string, Channel[]>();
+  const touched = [...new Set([...Object.keys(data.initial), ...data.steps.flatMap((step) => Object.keys(step.values))])] as Target[];
+  const groups = new Map<string, Target[]>();
   for (const channel of touched) {
     if (!(spec(channel).tags as readonly string[]).includes(el.tag)) throw new Error(`<${el.tag}> cannot animate ${channel}.`);
     const key = laneOf(el.tag, channel);
@@ -126,8 +142,8 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   }
   return [...groups].map(([key, channels]) => {
     const backend = backendOf(el.tag, channels[0]!);
-    const pick = (values: Values): Values => Object.fromEntries(channels.filter((c) => c in values).map((c) => [c, values[c]]));
-    const initial = Object.fromEntries(channels.map((c) => [c, startValue(el, c, backend, data.initial[c])]));
+    const pick = (values: TargetValues) => Object.fromEntries(channels.filter((c) => c in values).map((c) => [c, valueOf(values, c)])) as TargetValues;
+    const initial = Object.fromEntries(channels.map((c) => [c, startValue(el, c, backend, valueOf(data.initial, c))])) as TargetValues;
     const segments = data.steps.filter((step) => channels.some((c) => c in step.values)).map((step) => ({ ...step, values: pick(step.values) }));
     const last = Math.max(0, ...segments.map((step) => step.start + step.over));
     if (last > period + 1e-9) throw new Error(`A motion on <${el.tag}> runs until ${num(last)}s, past the ${num(duration)}s scene.`);
@@ -176,7 +192,7 @@ const keyframesName = (state: State, body: string, label?: string): string => {
 
 const className = (state: State, lanes: readonly Lane[]): string => {
   const { duration } = state.canvas;
-  const frames = lanes.map((lane) => ({ lane, ...cssKeyframes(lane.key, lane.keys, lane.period) }));
+  const frames = lanes.map((lane) => ({ lane, ...cssKeyframes(isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.keys, lane.period) }));
   const names = frames.map(({ lane, body }) => keyframesName(state, body, lane.label));
   const durations = lanes.map((lane) => `${num(lane.snapped)}s`);
   const timings = frames.map((frame) => frame.timing);
@@ -202,7 +218,7 @@ const local = (state: State, lane: Lane): number => {
 };
 
 const animate = (attribute: string, lane: Lane): SvgNode =>
-  element("animate", smilAttributes(attribute, lane.channels[0]!, lane.keys, lane.period, lane.snapped));
+  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped));
 
 const blurFilter = (state: State, lane: Lane): string => {
   const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}`;
@@ -237,7 +253,7 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
     pin(attrs, target, lane);
     if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane)})`;
     if (lane.backend === "smil") {
-      attrs[lane.key] = formatValue(valueAt(lane.keys, local(state, lane))[lane.channels[0]!]);
+      attrs[lane.key] = formatValue(valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel]);
       children.push(animate(lane.key, lane));
     }
   }
@@ -272,11 +288,13 @@ export interface Compiled {
 }
 
 /** Walk the tree once: refs become ids and <defs>, motions become classes, keyframes, wrappers and <animate>s. */
-export const compile = (content: readonly SvgNode[], canvas: Canvas): Compiled => {
+export const compile = (content: readonly SvgNode[], canvas: Canvas, author: string | Css = ""): Compiled => {
   const state: State = {
     canvas,
     ids: new Map(),
     blurs: new Map(),
+    properties: new Map(),
+    registrations: [],
     counters: new Map(),
     defs: [],
     keyframes: new Map(),
@@ -286,11 +304,12 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas): Compiled =
     pivot: false,
   };
   const body = content.map((node) => walk(state, node));
+  const authored = (isCss(author) ? resolveCss(state, author) : author).trim();
   const base = `.a{animation-duration:${num(canvas.duration)}s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:${BASE_TIMING}}`;
   const freeze =
     canvas.stillAt === undefined || (state.rules.length === 0 && state.stills.length === 0)
       ? ""
       : `@media (prefers-reduced-motion:reduce){${state.rules.length > 0 ? `.a{animation-delay:-${num(canvas.stillAt)}s!important;animation-play-state:paused!important}` : ""}${state.stills.join("")}}`;
-  const css = [state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
-  return { body, defs: state.defs, css };
+  const generated = [...state.registrations, state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
+  return { body, defs: state.defs, css: [authored, generated].filter(Boolean).join("\n\n") };
 };

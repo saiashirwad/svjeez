@@ -1,6 +1,7 @@
 import { compile } from "./compile";
 import { num } from "./format";
 import type { Seconds } from "./motion";
+import type { Css } from "./properties";
 import { children, element, raw, serialize, type Child } from "./svg";
 import { validateSvg } from "./validate";
 
@@ -11,8 +12,8 @@ export interface RenderOptions {
   readonly desc?: string;
   /** One loop in seconds. Every motion lives on this timeline, or on a loop that divides it. */
   readonly duration: Seconds;
-  /** Fonts and page classes. */
-  readonly css?: string;
+  /** Fonts and page classes. Build it with `css` to read declared properties. */
+  readonly css?: string | Css;
   /** Freeze frame for prefers-reduced-motion. Default: 85% through. */
   readonly reducedMotion?: { readonly at: Seconds } | false;
   /** Comment above the root element. */
@@ -26,8 +27,7 @@ export const render = (options: RenderOptions, content: Child): string => {
   if (!(duration > 0)) throw new Error("render() needs a positive duration.");
   const stillAt =
     options.reducedMotion === false ? undefined : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
-  const compiled = compile(children(content), { width, height, duration, stillAt });
-  const css = [options.css?.trim(), compiled.css].filter(Boolean).join("\n\n");
+  const { css, ...compiled } = compile(children(content), { width, height, duration, stillAt }, options.css);
   const root = element(
     "svg",
     {

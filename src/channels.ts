@@ -1,5 +1,6 @@
 import type { Color, Tag } from "./attributes";
 import { num } from "./format";
+import { declarationOf, formatProperty, isProperty, type Property, type PropertyValues } from "./properties";
 
 const SHAPES = ["path", "line", "polyline", "polygon", "circle", "ellipse", "rect"] as const;
 const GRAPHICS = ["g", "use", "text", "image", ...SHAPES] as const;
@@ -18,7 +19,7 @@ interface Spec {
   readonly lane: string;
   readonly composition: Composition;
   /** The at-rest value. Channels without one start from motion(initial) or the element's own attribute. */
-  readonly identity?: number;
+  readonly identity?: number | Color;
   readonly range?: readonly [number, number];
   /** Serialized attribute this channel reads its rest value from, and animates via SMIL on fe* tags. */
   readonly attr?: string;
@@ -63,20 +64,34 @@ export type NumericChannel = { [C in Channel]: Table[C]["value"] extends number 
 /** Channels with an at-rest value: what enter, exit, shake and wiggle move. */
 export type RestChannel = { [C in Channel]: Table[C] extends { readonly identity: number } ? C : never }[Channel];
 export type AnimatedTag = Table[Channel]["tags"][number];
-/** Which channels a tag may animate, derived from the table. */
-export type TagChannels<T extends Tag> = { [C in Channel]: T extends Table[C]["tags"][number] ? C : never }[Channel];
+export type Target = Channel | Property;
+export type TargetValues = Values & PropertyValues;
+export type TargetValue = number | Color;
 
-export const spec = (channel: Channel): Spec => CHANNELS[channel];
+export const valueOf = (values: TargetValues, target: Target): TargetValue | undefined =>
+  (values as Partial<Record<Target, TargetValue>>)[target];
+
+/** Filter primitives animate through SMIL, which cannot reach a custom property. */
+type StyledTag = Exclude<AnimatedTag, `fe${string}`>;
+export type TagChannels<T extends Tag> = { [C in Channel]: T extends Table[C]["tags"][number] ? C : never }[Channel] | (T extends StyledTag ? Property : never);
+
+const STYLED = [...new Set(Object.values(CHANNELS).flatMap((row): readonly Tag[] => row.tags))].filter((tag) => !tag.startsWith("fe"));
+
+export const spec = (target: Target): Spec => {
+  if (!isProperty(target)) return CHANNELS[target];
+  const { initial } = declarationOf(target);
+  return { value: initial, tags: STYLED, lane: target, composition: "replace", identity: initial };
+};
 
 export const isChannel = (name: string): name is Channel => Object.hasOwn(CHANNELS, name);
 
 /** Filter primitives cannot take CSS, so every fe* lane is a SMIL attribute lane. */
 export type Backend = "css" | "smil" | "blur";
 
-export const backendOf = (tag: string, channel: Channel): Backend =>
+export const backendOf = (tag: string, channel: Target): Backend =>
   tag.startsWith("fe") ? "smil" : channel === "blur" ? "blur" : "css";
 
-export const laneOf = (tag: string, channel: Channel): string => {
+export const laneOf = (tag: string, channel: Target): string => {
   const row = spec(channel);
   return backendOf(tag, channel) === "smil" ? row.attr ?? channel : row.lane;
 };
@@ -85,7 +100,7 @@ export const laneOf = (tag: string, channel: Channel): string => {
 export const formatValue = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
 
 /** CSS declarations for one key of a lane. `translate` packs x and y. */
-export const cssDeclarations = (lane: string, values: Values): string => {
+export const cssDeclarations = (lane: string, values: TargetValues): string => {
   switch (lane) {
     case "translate":
       return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
@@ -96,9 +111,10 @@ export const cssDeclarations = (lane: string, values: Values): string => {
       return `stroke-dashoffset:${num(1 - drawn)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
     }
     default: {
-      const [channel] = Object.keys(values) as Channel[];
-      if (!channel) throw new Error(`Lane ${lane} has no value.`);
-      return `${lane}:${formatValue(values[channel])}`;
+      const [target] = Object.keys(values) as Target[];
+      if (!target) throw new Error(`Lane ${lane} has no value.`);
+      const value = valueOf(values, target)!;
+      return `${lane}:${isProperty(target) ? formatProperty(target, value) : formatValue(value)}`;
     }
   }
 };

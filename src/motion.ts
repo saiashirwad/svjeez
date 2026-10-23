@@ -1,4 +1,5 @@
-import { isChannel, spec, type Channel, type Values } from "./channels";
+import { isChannel, spec, valueOf, type Target, type TargetValues } from "./channels";
+import { declarationOf, isProperty } from "./properties";
 
 export type Seconds = number;
 
@@ -43,11 +44,11 @@ export interface Step {
   /** 0 for a hard cut. */
   readonly over: Seconds;
   readonly ease: Ease;
-  readonly values: Values;
+  readonly values: TargetValues;
 }
 
 export interface MotionData {
-  readonly initial: Values;
+  readonly initial: TargetValues;
   readonly steps: readonly Step[];
   readonly cursor: Seconds;
   readonly period?: Seconds;
@@ -65,15 +66,15 @@ export type Exact<V, Allowed extends PropertyKey> = V & { readonly [P in Exclude
  * Time is a cursor: `at` moves it, `to` and `set` start at it and advance it. Between transitions
  * every channel holds its value.
  */
-export interface Motion<K extends Channel = Channel> {
+export interface Motion<K extends Target = Target> {
   readonly [motionChannels]?: K;
   /** Move the cursor to an absolute time on the scene timeline, or on the loop after `.loop`. */
   at(time: Seconds): Motion<K>;
   wait(duration: Seconds): Motion<K>;
   /** Transition from the current values to `values`, starting at the cursor. `ease` (default `ease.out`) shapes this transition. */
-  to<const V extends Values>(values: Exact<V, Channel>, over: Seconds, curve?: Ease): Motion<K | (keyof V & Channel)>;
+  to<const V extends TargetValues>(values: Exact<V, Target>, over: Seconds, curve?: Ease): Motion<K | (keyof V & Target)>;
   /** Hard cut at the cursor. */
-  set<const V extends Values>(values: Exact<V, Channel>): Motion<K | (keyof V & Channel)>;
+  set<const V extends TargetValues>(values: Exact<V, Target>): Motion<K | (keyof V & Target)>;
   /** Repeat every `period` seconds. Render snaps the period so it divides the scene duration. */
   loop(period: Seconds): Motion<K>;
   /** Readable keyframe and class names. Never needs to be unique. */
@@ -81,19 +82,20 @@ export interface Motion<K extends Channel = Channel> {
 }
 
 /** Stack layers on one element. Index 0 is outermost. Falsy entries are dropped. */
-export type Stack<K extends Channel = Channel> = Motion<K> | readonly (Motion<K> | false | null | undefined)[];
+export type Stack<K extends Target = Target> = Motion<K> | readonly (Motion<K> | false | null | undefined)[];
 
 const time = (value: Seconds, what: string): Seconds => {
   if (!Number.isFinite(value) || value < 0) throw new Error(`${what} must be a finite, non-negative number of seconds, got ${value}.`);
   return value;
 };
 
-const checkValues = (values: Values): Values => {
+const checkValues = (values: TargetValues): TargetValues => {
   const keys = Object.keys(values);
   if (keys.length === 0) throw new Error("A transition needs at least one channel.");
   for (const key of keys) {
-    if (!isChannel(key)) throw new Error(`"${key}" is not an animatable channel.`);
-    const value = values[key];
+    if (isProperty(key)) declarationOf(key);
+    else if (!isChannel(key)) throw new Error(`"${key}" is not an animatable channel.`);
+    const value = valueOf(values, key as Target);
     if (typeof value === "number" && !Number.isFinite(value)) throw new Error(`${key} must be finite, got ${value}.`);
   }
   return values;
@@ -104,8 +106,8 @@ const end = (step: Step): Seconds => step.start + step.over;
 /** Float slack for contiguous steps built from divided periods. */
 const EPSILON = 1e-9;
 
-const sharedLane = (a: Values, b: Values): Channel | undefined =>
-  (Object.keys(a) as Channel[]).find((c) => (Object.keys(b) as Channel[]).some((d) => spec(c).lane === spec(d).lane));
+const sharedLane = (a: TargetValues, b: TargetValues): Target | undefined =>
+  (Object.keys(a) as Target[]).find((c) => (Object.keys(b) as Target[]).some((d) => spec(c).lane === spec(d).lane));
 
 class Track implements Motion {
   constructor(readonly data: MotionData) {}
@@ -122,12 +124,12 @@ class Track implements Motion {
     return this.with({ cursor: this.data.cursor + time(duration, "wait()") });
   }
 
-  to(values: Values, over: Seconds, curve: Ease = ease.out): Track {
+  to(values: TargetValues, over: Seconds, curve: Ease = ease.out): Track {
     if (!(time(over, "to() duration") > 0)) throw new Error("to() needs a positive duration. Use set() for a cut.");
     return this.push({ start: this.data.cursor, over, ease: curve, values: checkValues(values) });
   }
 
-  set(values: Values): Track {
+  set(values: TargetValues): Track {
     return this.push({ start: this.data.cursor, over: 0, ease: ease.hold, values: checkValues(values) });
   }
 
@@ -159,7 +161,7 @@ class Track implements Motion {
 }
 
 /** Start a motion. `initial` is each channel's value before its first transition. */
-export function motion<const V extends Values = {}>(initial?: Exact<V, Channel>): Motion<keyof V & Channel> {
+export function motion<const V extends TargetValues = {}>(initial?: Exact<V, Target>): Motion<keyof V & Target> {
   return new Track({ initial: initial ?? {}, steps: [], cursor: 0 });
 }
 

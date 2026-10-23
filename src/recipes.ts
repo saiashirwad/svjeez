@@ -10,7 +10,7 @@ const span = ({ at, over }: Span, what: string): Span => {
 };
 
 const rest = (values: Values<RestChannel>): Values<RestChannel> =>
-  Object.fromEntries(Object.keys(values).map((channel) => [channel, spec(channel as RestChannel).identity]));
+  Object.fromEntries(Object.keys(values).map((channel) => [channel, CHANNELS[channel as RestChannel].identity]));
 
 /** Arrive from `from` to rest. Without `from` it is a fade-in. */
 export function enter(at: Span, from?: undefined, curve?: Ease): Motion<"opacity">;
@@ -77,7 +77,7 @@ export function wiggle<V extends Values<RestChannel>>(amplitude: Exact<V, RestCh
   const channels = (Object.keys(amplitude) as RestChannel[]).sort();
   const samples = channels.map((channel) => {
     const amp = (amplitude as Values<RestChannel>)[channel] ?? 0;
-    const base = spec(channel).identity ?? 0;
+    const base = CHANNELS[channel].identity;
     return Array.from({ length: count }, () => clamp(channel, base + amp * (random() * 2 - 1)));
   });
   const at = (i: number): Values<RestChannel> => Object.fromEntries(channels.map((channel, c) => [channel, samples[c]![i % count]]));

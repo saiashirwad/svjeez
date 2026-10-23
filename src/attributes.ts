@@ -1,4 +1,5 @@
 import type { PaintServer, Ref } from "./defs";
+import type { PropertyValues } from "./properties";
 
 export type NamedColor =
   | "black"
@@ -194,7 +195,7 @@ export const TAGS = Object.keys(ELEMENTS) as Tag[];
 type ValueOf<A> = A extends Attr<infer V> ? V : never;
 
 type ClassValue = string | readonly (string | false | null | undefined)[];
-type StyleValue = string | { readonly [property: string]: string | number | undefined };
+type StyleValue = string | ({ readonly [property: string]: string | number | undefined } & PropertyValues);
 
 interface Common {
   readonly class?: ClassValue;

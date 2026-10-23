@@ -2,6 +2,7 @@ export { render, type RenderOptions } from "./render";
 export { motion, ease, type Motion, type Stack, type Span, type Seconds, type Ease } from "./motion";
 export { enter, exit, draw, shake, wiggle, sampled, type WiggleOptions, type SampledOptions } from "./recipes";
 export { def, type Ref, type DefTag } from "./defs";
+export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./properties";
 export { fx } from "./fx";
 export { el } from "./el";
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";

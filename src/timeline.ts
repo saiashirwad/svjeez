@@ -1,4 +1,4 @@
-import { cssDeclarations, formatValue, type Channel, type Values } from "./channels";
+import { cssDeclarations, formatValue, valueOf, type Channel, type Target, type TargetValues, type Values } from "./channels";
 import { num } from "./format";
 import { ease, type Ease, type Seconds, type Step } from "./motion";
 
@@ -8,17 +8,17 @@ import { ease, type Ease, type Seconds, type Step } from "./motion";
  */
 export interface Key {
   readonly t: Seconds;
-  readonly values: Values;
+  readonly values: TargetValues;
   readonly ease: Ease;
 }
 
 /** Snap a loop so it divides the scene and every loop stays in lockstep with it. */
 export const snapPeriod = (period: Seconds, duration: Seconds): Seconds => duration / Math.max(1, Math.round(duration / period));
 
-const same = (a: Values, b: Values): boolean => (Object.keys(a) as Channel[]).every((channel) => a[channel] === b[channel]);
+const same = (a: TargetValues, b: TargetValues): boolean => (Object.keys(a) as Target[]).every((target) => valueOf(a, target) === valueOf(b, target));
 
 /** One lane's history as keys over 0..period. Holds are implicit; a cut becomes a hold that jumps. */
-export const keysOf = (initial: Values, segments: readonly Step[], period: Seconds): Key[] => {
+export const keysOf = (initial: TargetValues, segments: readonly Step[], period: Seconds): Key[] => {
   const keys: Key[] = [{ t: 0, values: initial, ease: ease.out }];
   const nudge = period * 1e-5;
   let current = initial;
@@ -48,7 +48,7 @@ const moving = (keys: readonly Key[], index: number): boolean => {
 };
 
 /** Value of a lane at local time `t`, snapped to the key at or before it. */
-export const valueAt = (keys: readonly Key[], t: Seconds): Values => keys.findLast((key) => key.t <= t + 1e-9)!.values;
+export const valueAt = (keys: readonly Key[], t: Seconds): TargetValues => keys.findLast((key) => key.t <= t + 1e-9)!.values;
 
 const short = (value: number): string => num(value).replace(/^(-?)0\./, "$1.");
 

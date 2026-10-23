@@ -2,11 +2,12 @@ import { attributeName } from "./attributes";
 import { isRef, type AnyRef } from "./defs";
 import { escapeAttr, escapeText, kebab, num } from "./format";
 import { isMotion, type Motion } from "./motion";
+import { Css, formatProperty, isProperty, type CssPart } from "./properties";
 
 export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
 
 /** Refs stay objects until render assigns ids. */
-export type AttrValue = string | AnyRef;
+export type AttrValue = string | AnyRef | Css;
 
 export type SvgNode =
   | {
@@ -55,12 +56,15 @@ export const children = (input: unknown, preserveWhitespace = false): SvgNode[] 
   return out;
 };
 
-const style = (value: unknown): string => {
+const style = (value: unknown): string | Css => {
   if (typeof value === "string") return value;
-  return Object.entries(value as Record<string, string | number | undefined>)
+  const parts = Object.entries(value as Record<string, string | number | undefined>)
     .filter(([, entry]) => entry !== undefined)
-    .map(([property, entry]) => `${kebab(property)}:${entry}`)
-    .join(";");
+    .flatMap(([name, entry], index): CssPart[] => [
+      index > 0 ? ";" : "",
+      ...(isProperty(name) ? [{ property: name }, `:${formatProperty(name, entry!)}`] : [`${kebab(name)}:${entry}`]),
+    ]);
+  return parts.every((part) => typeof part === "string") ? parts.join("") : new Css(parts);
 };
 
 const attrValue = (prop: string, value: unknown): AttrValue | undefined => {
