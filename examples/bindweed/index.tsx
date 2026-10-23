@@ -326,9 +326,11 @@ const Leaf = ({ x, y, angle, scale, stalk, seed, mirror = false, dark = false, d
 
 const leafAt = (site: LeafSite): LeafProps => {
   const anchor = vinePoint(site.y);
-  const angle = sideOf(site.y) > 0 ? site.droop : 180 - site.droop;
-  return { ...site, x: anchor.x, y: anchor.y, angle, mirror: sideOf(site.y) > 0 ? site.mirror : !site.mirror };
+  const right = sideOf(site.y) > 0;
+  return { ...site, x: anchor.x, y: anchor.y, angle: right ? site.droop : 180 - site.droop, mirror: right ? site.mirror : !site.mirror };
 };
+
+const LEAVES = LEAF_SITES.map(leafAt);
 
 // ---------------------------------------------------------------------------
 // Flowers
@@ -457,10 +459,9 @@ const corolla = (radius: number, lift: number, tint: "white" | "blush"): SvgNode
 };
 
 const bloomFace = (radius: number, tint: "white" | "blush", turn: number, seed: number): SvgNode => {
-  const squash = SQUASH;
   const bands = Array.from({ length: 5 }, (_, i) => {
     const angle = turn - Math.PI / 2 + (i / 5) * TAU;
-    return <path key={i} d={petalBand(radius, angle, squash)} fill={tint === "white" ? C.whiteBand : C.blushBand} fillOpacity={tint === "white" ? 0.22 : 0.3} />;
+    return <path key={i} d={petalBand(radius, angle, SQUASH)} fill={tint === "white" ? C.whiteBand : C.blushBand} fillOpacity={tint === "white" ? 0.22 : 0.3} />;
   });
   const stamens = Array.from({ length: 5 }, (_, i) => {
     const angle = turn + 0.42 + (i / 5) * TAU;
@@ -468,20 +469,20 @@ const bloomFace = (radius: number, tint: "white" | "blush", turn: number, seed: 
     const tip = polar(radius * 0.23, angle);
     return (
       <g key={i}>
-        <path d={`M${n(base.x)} ${n(base.y)}L${n(tip.x)} ${n(tip.y * squash)}`} stroke="#E7CE8D" strokeWidth={0.9} strokeOpacity={0.75} />
-        <circle cx={tip.x} cy={tip.y * squash} r={radius * 0.024} fill="#D8AD58" fillOpacity={0.9} />
+        <path d={`M${n(base.x)} ${n(base.y)}L${n(tip.x)} ${n(tip.y * SQUASH)}`} stroke="#E7CE8D" strokeWidth={0.9} strokeOpacity={0.75} />
+        <circle cx={tip.x} cy={tip.y * SQUASH} r={radius * 0.024} fill="#D8AD58" fillOpacity={0.9} />
       </g>
     );
   });
   return (
     <g filter={petalShadow}>
-      <path d={rimPath(radius, turn, squash, seed)} fill={tint === "white" ? WHITE_FACE : BLUSH_FACE} stroke="#E9CED2" strokeWidth={0.8} strokeOpacity={0.56} />
+      <path d={rimPath(radius, turn, SQUASH, seed)} fill={tint === "white" ? WHITE_FACE : BLUSH_FACE} stroke="#E9CED2" strokeWidth={0.8} strokeOpacity={0.56} />
       {bands}
       <circle cx={0} cy={0} r={radius * 0.355} fill={THROAT} fillOpacity={0.82} />
       <circle cx={0} cy={0} r={radius * 0.105} fill="#EFC66C" fillOpacity={0.55} />
       {stamens}
       <path
-        d={rimPath(radius * 0.9, turn + 0.16, squash, seed + 5)}
+        d={rimPath(radius * 0.9, turn + 0.16, SQUASH, seed + 5)}
         fill="none"
         stroke="#FFFDF7"
         strokeWidth={1.1}
@@ -1174,13 +1175,12 @@ const Vine = (): SvgNode => (
       </g>
     ))}
 
-    {LEAF_SITES.map((site) => (
-      <Leaf key={site.seed} {...leafAt(site)} />
+    {LEAVES.map((leaf) => (
+      <Leaf key={leaf.seed} {...leaf} />
     ))}
-    {LEAF_SITES.map((site) => {
-      const node = vinePoint(site.y);
-      return <ellipse key={site.seed} cx={node.x} cy={node.y} rx={2.3} ry={1.7} fill={C.leafDeep} />;
-    })}
+    {LEAVES.map((leaf) => (
+      <ellipse key={leaf.seed} cx={leaf.x} cy={leaf.y} rx={2.3} ry={1.7} fill={C.leafDeep} />
+    ))}
 
     {BUDS.map((bud) => (
       <Bud key={bud.seed} {...bud} />

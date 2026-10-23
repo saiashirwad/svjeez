@@ -1,13 +1,12 @@
-import { def, el, type Color, type SvgNode } from "svg-motion";
-import { CAM, C, MOSS, ORIGIN, ROCK, alpha, at, clamp, hazed, lit, mix, random, tone } from "./kit";
-import { disc, smooth, tapered } from "./draw";
+import { def, el, type SvgNode } from "svg-motion";
+import { MOSS, ORIGIN, ROCK, at, clamp, hazed, mix, random, tone } from "./kit";
+import { disc, polygon, smooth, tapered } from "./draw";
 import { layer, type Part } from "./paint";
 import { TAU, add, cross, mul, sub, unit, type Vec3 } from "./space";
 
 export const R = 6.0;
 
 const SECTORS = 56;
-const LAYERS = 9;
 const SKIRT = 11;
 
 const rng = random(4242);
@@ -76,7 +75,7 @@ const skirt = (): Part[] => {
       parts.push({
         depth,
         node: el.path({
-          d: `M${points.map((p) => `${p.x} ${p.y}`).join("L")}Z`,
+          d: polygon(points),
           fill: hazed(color, depth),
           stroke: hazed(color, depth),
           strokeWidth: 0.6,
@@ -153,12 +152,13 @@ const surface = (): { readonly fill: SvgNode; readonly detail: SvgNode } => {
     );
   }
 
+  const outline = topPath();
   return {
     fill: el.g({}, [
-      el.path({ d: topPath(), fill: topFill }),
-      el.path({ d: topPath(), fill: topShade }),
+      el.path({ d: outline, fill: topFill }),
+      el.path({ d: outline, fill: topShade }),
     ]),
-    detail: el.g({}, [...patches, el.path({ d: topPath(), fill: "none", stroke: "#a8c97d", strokeWidth: 1, opacity: 0.26 })]),
+    detail: el.g({}, [...patches, el.path({ d: outline, fill: "none", stroke: "#a8c97d", strokeWidth: 1, opacity: 0.26 })]),
   };
 };
 
@@ -184,7 +184,7 @@ const fringe = (): { readonly back: Part[]; readonly front: Part[] } => {
     const depth = points.reduce((sum, p) => sum + p.depth, 0) / 3;
     const part: Part = {
       depth,
-      node: el.path({ d: `M${points.map((p) => `${p.x} ${p.y}`).join("L")}Z`, fill: tone(MOSS, 0.14 + rng() * 0.32), opacity: 0.95 }),
+      node: el.path({ d: polygon(points), fill: tone(MOSS, 0.14 + rng() * 0.32), opacity: 0.95 }),
     };
     (depth > center.depth ? front : back).push(part);
   }

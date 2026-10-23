@@ -1,6 +1,6 @@
 import { ease, motion, render } from "svg-motion";
 import { D, H, W, random } from "./kit";
-import { island, edgeRadius, ground } from "./island";
+import { island, inside, ground } from "./island";
 import { birch, blossom, fallenPetals, fern, flowers, oak, seed as seedGlow, stones, tuft, type Stand } from "./flora";
 import { layer } from "./paint";
 import { Backdrop, Birds, Clouds, Fireflies, Foreground, Mist, Moon, Motes, Petals, Shadow, Stars, Sun } from "./sky";
@@ -26,7 +26,7 @@ const occupied: readonly (readonly [Spot, number])[] = [
 ];
 
 const clear = (x: number, z: number, margin: number): boolean =>
-  Math.hypot(x, z) < edgeRadius(Math.atan2(z, x)) - 0.35 && occupied.every(([spot, radius]) => !inReach(spot, x, z, radius + margin));
+  inside(x, z, 0.35) && occupied.every(([spot, radius]) => !inReach(spot, x, z, radius + margin));
 
 const FERNS: readonly Spot[] = [
   { x: 0.75, z: 2.35 },

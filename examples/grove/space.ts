@@ -7,7 +7,6 @@ export const dot = (a: Vec3, b: Vec3): number => a[0] * b[0] + a[1] * b[1] + a[2
 export const cross = (a: Vec3, b: Vec3): Vec3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 export const len = (a: Vec3): number => Math.hypot(a[0], a[1], a[2]);
 export const unit = (a: Vec3): Vec3 => mul(a, 1 / (len(a) || 1));
-export const mix3 = (a: Vec3, b: Vec3, t: number): Vec3 => add(a, mul(sub(b, a), t));
 
 /** Turn `a` toward the side of `bias` by `angle` radians. */
 export const bend = (a: Vec3, axis: Vec3, bias: Vec3, angle: number): Vec3 => {
@@ -52,7 +51,5 @@ export const project = ({ yaw, pitch, unit: scale }: Camera, [x, y, z]: Vec3): P
 export const LIGHT = unit([-0.55, 0.78, 0.32]);
 
 export const lit = (normal: Vec3): number => Math.abs(dot(unit(normal), LIGHT));
-
-export const polar = (radius: number, angle: number, y = 0): Vec3 => [Math.cos(angle) * radius, y, Math.sin(angle) * radius];
 
 export { TAU };

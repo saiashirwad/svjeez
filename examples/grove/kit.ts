@@ -86,7 +86,10 @@ export const random = (seed: number) => () => {
 export const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
 export const clamp = (value: number, low = 0, high = 1): number => Math.min(high, Math.max(low, value));
 
-export const rgb = (color: string): readonly [number, number, number] => [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16)) as unknown as readonly [number, number, number];
+export const rgb = (color: string): readonly [number, number, number] => {
+  const hex = (i: number): number => parseInt(color.slice(i, i + 2), 16);
+  return [hex(1), hex(3), hex(5)];
+};
 
 export const mix = (a: string, b: string, t: number): Color => {
   const [ar, ag, ab] = rgb(a);

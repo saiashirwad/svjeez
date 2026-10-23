@@ -106,10 +106,8 @@ export const cssDeclarations = (lane: string, values: TargetValues): string => {
       return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
     case "rotate":
       return `rotate:${formatValue(values.rotate)}deg`;
-    case "visibility": {
-      const opacity = valueOf(values, "opacity");
-      return `visibility:${opacity === 0 ? "hidden" : "visible"}`;
-    }
+    case "visibility":
+      return `visibility:${values.opacity === 0 ? "hidden" : "visible"}`;
     case "draw": {
       const drawn = values.draw ?? 0;
       return `stroke-dashoffset:${num(1 - drawn)};visibility:${drawn > 0 ? "visible" : "hidden"}`;

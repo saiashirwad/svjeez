@@ -110,14 +110,20 @@ const MARGIN = 280;
 const wind = (cells: number) => CAMERA.project([cells, 0, -cells]);
 const TRAVEL = (W + 2 * MARGIN) / wind(1).x;
 
+const CELLS = Array.from({ length: 6400 }, (_, i): readonly [number, number] => [(i % 80) - 40, Math.floor(i / 80) - 40]);
+
 /** The cell on the cloud layer that lands nearest a screen point. */
 const cellNear = ([sx, sy]: readonly [number, number]): readonly [number, number] => {
-  const cells = Array.from({ length: 6400 }, (_, i): readonly [number, number] => [(i % 80) - 40, Math.floor(i / 80) - 40]);
   const miss = ([x, z]: readonly [number, number]) => {
     const p = CAMERA.project([x, SKY_HEIGHT, z]);
     return Math.hypot(p.x + ORIGIN.x - sx, p.y + ORIGIN.y - sy);
   };
-  return cells.reduce((best, cell) => (miss(cell) < miss(best) ? cell : best));
+  let [best, bestMiss] = [CELLS[0]!, miss(CELLS[0]!)];
+  for (const cell of CELLS) {
+    const distance = miss(cell);
+    if (distance < bestMiss) [best, bestMiss] = [cell, distance];
+  }
+  return best;
 };
 
 export function Clouds(): SvgNode {
@@ -127,7 +133,7 @@ export function Clouds(): SvgNode {
         const pick = random(40 + k);
         const [x0, z0] = cellNear([-MARGIN, at[1]]);
         const cells = Array.from({ length: size * 4 }, (_, i): readonly [number, number] => [i % size, Math.floor(i / size)]).filter(
-          ([a, b]) => (b === 1 || b === 2) && a > 0 && a < size - 1 ? true : a > 0 && a < size - 1 && pick() > 0.45,
+          ([a, b]) => a > 0 && a < size - 1 && (b === 1 || b === 2 || pick() > 0.45),
         );
         const drift = motion(wind(phase * TRAVEL))
           .to(wind(TRAVEL), (1 - phase) * D, ease.linear)

@@ -14,8 +14,8 @@ export interface Block {
   readonly from?: Seconds;
   /** Gone from this time. Default never. */
   readonly until?: Seconds;
-  /** Moves the block's `<use>` on the scene timeline, on top of the `from`/`until` toggle. */
-  readonly animation?: Stack<TagChannels<"use">>;
+  /** Moves the block's `<use>` on the scene timeline. `from`/`until` own opacity, so this cannot animate it. */
+  readonly animation?: Stack<Exclude<TagChannels<"use">, "opacity">>;
 }
 
 export interface Scene {
@@ -65,29 +65,41 @@ const check = ({ at, from = 0, until = Infinity }: Block): void => {
 
 const FACES = Object.keys(SIDES) as Face[];
 
-const covers = (cover: Block, block: Block): boolean =>
-  cover.animation === undefined &&
-  FACES.every((side) => isOpaque(resolve(cover.skin, side))) &&
-  (cover.from ?? 0) <= (block.from ?? 0) &&
-  (cover.until ?? Infinity) >= (block.until ?? Infinity);
-
-/** A block hidden behind its three camera-facing neighbors for its whole life can never be seen. */
-const buried = (cells: ReadonlyMap<string, readonly Block[]>, [fx, , fz]: Facing) => (block: Block): boolean => {
-  const [x, y, z] = block.at;
-  const near: Vec3[] = [[x, y + 1, z], ...(fx === 0 ? [] : [[x + fx, y, z] as const]), ...(fz === 0 ? [] : [[x, y, z + fz] as const])];
-  return block.animation === undefined && near.every((cell) => cells.get(cellKey(cell))?.some((cover) => covers(cover, block)));
-};
-
 export type { Camera, Vec3 } from "./space";
 export type { Face, Skin, Texture } from "./texture";
 
 const scene = ({ camera: view, blocks }: Scene): SvgNode => {
   blocks.forEach(check);
   const facing = facingOf(view);
+  const [fx, , fz] = facing;
+  const faces = visibleFaces(facing);
   const cells = Map.groupBy(blocks, (block) => cellKey(block.at));
+
+  const opaque = new Map<Skin, boolean>();
+  const solid = (skin: Skin): boolean => {
+    const known = opaque.get(skin);
+    if (known !== undefined) return known;
+    const all = FACES.every((side) => isOpaque(resolve(skin, side)));
+    opaque.set(skin, all);
+    return all;
+  };
+
+  const covers = (cover: Block, block: Block): boolean =>
+    cover.animation === undefined &&
+    solid(cover.skin) &&
+    (cover.from ?? 0) <= (block.from ?? 0) &&
+    (cover.until ?? Infinity) >= (block.until ?? Infinity);
+
+  /** A block hidden behind its three camera-facing neighbors for its whole life can never be seen. */
+  const buried = (block: Block): boolean => {
+    const [x, y, z] = block.at;
+    const near: Vec3[] = [[x, y + 1, z], ...(fx === 0 ? [] : [[x + fx, y, z] as const]), ...(fz === 0 ? [] : [[x, y, z + fz] as const])];
+    return block.animation === undefined && near.every((cell) => cells.get(cellKey(cell))?.some((cover) => covers(cover, block)));
+  };
+
   const symbols = new Map<string, Ref<"symbol">>();
   const symbolOf = (skin: Skin): Ref<"symbol"> => {
-    const sides = visibleFaces(facing).map((side) => [side, resolve(skin, side)] as const);
+    const sides = faces.map((side) => [side, resolve(skin, side)] as const);
     const key = sides.map(([, tex]) => idOf(tex)).join();
     const known = symbols.get(key);
     if (known) return known;
@@ -101,14 +113,19 @@ const scene = ({ camera: view, blocks }: Scene): SvgNode => {
     symbols.set(key, symbol);
     return symbol;
   };
-  const depth = ({ at }: Block) => facing[0] * at[0] + facing[1] * at[1] + facing[2] * at[2];
-  const isBuried = buried(cells, facing);
-  const visible = blocks.filter((block) => !isBuried(block)).sort((a, b) => depth(a) - depth(b));
+
+  const depth = ({ at }: Block): number => fx * at[0] + facing[1] * at[1] + fz * at[2];
+  const visible = blocks
+    .filter((block) => !buried(block))
+    .map((block) => ({ block, depth: depth(block) }))
+    .sort((a, b) => a.depth - b.depth)
+    .map(({ block }) => block);
+
   return el.g(
     {},
     visible.map((block) => {
       const { x, y } = view.project(block.at);
-      return el.use({ href: symbolOf(block.skin), x, y, animation: [lifetime(block.from ?? 0, block.until ?? Infinity), ...[block.animation].flat()] });
+      return el.use({ href: symbolOf(block.skin), x, y, animation: [lifetime(block.from ?? 0, block.until ?? Infinity), block.animation].flat() });
     }),
   );
 };

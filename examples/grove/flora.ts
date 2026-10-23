@@ -1,6 +1,6 @@
-import { ease, el, enter, wiggle, type SvgNode } from "svg-motion";
+import { ease, el, enter, wiggle, type Color, type SvgNode } from "svg-motion";
 import { BARK, BIRCH, BLOSSOM, BLUSH, CAM, CREAM, D, FERN, GOLD, GRASS, OAK, PERIWINKLE, STONE, T, alpha, at, clamp, hazed, lerp, mix, random, tone } from "./kit";
-import { edge, leaf as leafPath, smooth, tapered, type P2 } from "./draw";
+import { edge, leaf as leafPath, polygon, smooth, tapered, type P2 } from "./draw";
 import { layer, type Part } from "./paint";
 import { TAU, add, bend, cross, dot, lit, mul, perpendicular, sub, unit, type Vec3 } from "./space";
 
@@ -224,7 +224,7 @@ const limbNode = (rng: Rng, spec: Species, limb: Limb): SvgNode => {
   return el.g({}, [shape, shine]);
 };
 
-const leafColor = (spec: Species, rng: Rng, normal: Vec3, height: number, depth: number, below: boolean): string => {
+const leafColor = (spec: Species, rng: Rng, normal: Vec3, height: number, depth: number, below: boolean): Color => {
   if (spec.id === "blossom" && rng() < 0.08) return hazed(mix(tone(CREAM, 0.8 + rng() * 0.2), "#ffffff", 0.25), depth);
   const face = Math.max(0, dot(unit(normal), unit([-0.5, 0.72, 0.48])));
   const shade = clamp(0.22 + face * 0.56 + height * 0.16 - (below ? 0.06 : 0) + (rng() - 0.5) * 0.12);
@@ -488,7 +488,7 @@ export const tuft = (base: Vec3, seed: number): Stand => {
       points.push(at(add(add(mul(base, (1 - t) * (1 - t)), mul(mid, 2 * (1 - t) * t)), mul(tip, t * t))));
       widths.push(Math.max(0.3, (1.1 + rng() * 1.1) * (1 - t * 0.82)));
     }
-    const bright = i === 0 ? false : i === 1 ? true : rng() < 0.42;
+    const bright = i === 1 || (i !== 0 && rng() < 0.42);
     (bright ? light : dark).push(tapered(points, widths));
   }
   const spot = at(base);
@@ -532,8 +532,8 @@ export const stones = (base: Vec3, seed: number): Stand => {
       const j = (k + 1) % ring;
       const quad = [bottomScreen[k]!, bottomScreen[j]!, topScreen[j]!, topScreen[k]!];
       const face = unit(cross(sub(top[j]!, top[k]!), sub(top[k]!, bottom[k]!)));
-      const depth = (at(top[k]!).depth + at(bottom[j]!).depth) / 2;
-      parts.push({ depth, node: el.path({ d: `M${quad.map((p) => `${p.x} ${p.y}`).join("L")}Z`, fill: hazed(tone(STONE, 0.18 + lit(face) * 0.5 + rng() * 0.1), depth) }) });
+      const depth = (topScreen[k]!.depth + bottomScreen[j]!.depth) / 2;
+      parts.push({ depth, node: el.path({ d: polygon(quad), fill: hazed(tone(STONE, 0.18 + lit(face) * 0.5 + rng() * 0.1), depth) }) });
     }
     parts.push({ depth: at(center).depth + 0.5, node: el.path({ d: smooth(topScreen, true), fill: hazed(tone(STONE, 0.55 + rng() * 0.2), at(center).depth) }) });
   }

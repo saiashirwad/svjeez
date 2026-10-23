@@ -1,7 +1,7 @@
-import { def, ease, el, enter, motion, sampled, wiggle, type Color, type Motion, type Seconds, type SvgNode } from "svg-motion";
-import { C, D, H, ORIGIN, T, W, alpha, at, clamp, hazed, lerp, mix, random } from "./kit";
+import { def, ease, el, motion, sampled, wiggle, type Color, type Motion, type Seconds, type SvgNode } from "svg-motion";
+import { C, D, H, ORIGIN, W, alpha, at, clamp, lerp, mix, random } from "./kit";
 import { leaf as leafPath } from "./draw";
-import { TAU, type Vec3 } from "./space";
+import { TAU } from "./space";
 
 type Keys = readonly (readonly [Seconds, Color])[];
 
@@ -359,15 +359,15 @@ export function Petals(): SvgNode {
 }
 
 const BIRDS = [
-  { dy: 0, phase: 0, size: 1.15, period: 0.56 },
-  { dy: 12, phase: -0.06, size: 0.9, period: 0.7 },
-  { dy: -9, phase: 0.09, size: 0.72, period: 0.8 },
+  { dy: 0, size: 1.15, period: 0.56 },
+  { dy: 12, size: 0.9, period: 0.7 },
+  { dy: -9, size: 0.72, period: 0.8 },
 ] as const;
 
 export function Birds(): SvgNode {
   return (
     <>
-      {BIRDS.map(({ dy, phase, size, period }, i) => {
+      {BIRDS.map(({ dy, size, period }, i) => {
         const flight = sampled(
           (t) => {
             const u = clamp((t - 7.4 - i * 0.4) / 9.2);

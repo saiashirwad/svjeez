@@ -23,17 +23,54 @@ export type Face = "top" | "north" | "south" | "east" | "west";
 /** Every face resolves: a bare texture covers all five, and any face not named falls back to `side`. */
 export type Skin = Texture | ({ readonly side: Texture } & { readonly [F in Face]?: Texture });
 
+const HEX = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
+
+/** The 8-digit forms carry alpha; `#rgb` and `#rrggbb` are always solid. */
+const alphaOf = (color: Hex): number => (color.length === 9 ? parseInt(color.slice(7), 16) : 255);
+
+/** One path per color, so a shade only has to change the fills. */
+const runs = (rows: readonly (readonly (Hex | null)[])[], color: Hex): string =>
+  rows
+    .flatMap((row, y) => {
+      const out: string[] = [];
+      for (let x = 0; x < row.length; x++) {
+        if (row[x] !== color) continue;
+        const start = x;
+        while (row[x + 1] === color) x++;
+        out.push(`M${start} ${y}h${x - start + 1}v1h${start - x - 1}z`);
+      }
+      return out;
+    })
+    .join("");
+
 class Grid {
   private static count = 0;
   readonly id = Grid.count++;
   readonly opaque: boolean;
+  /** Colors in first-appearance order. */
+  readonly colors: readonly Hex[];
+  /** The commonest color, which backs a solid texture so no seam shows between runs. */
+  readonly base: Hex | undefined;
+  readonly paths: ReadonlyMap<Hex, string>;
 
   constructor(
     readonly width: number,
     readonly height: number,
     readonly rows: readonly (readonly (Hex | null)[])[],
   ) {
-    this.opaque = rows.every((row) => row.every((pixel) => pixel !== null && channels(pixel)[3] === 255));
+    const tally = new Map<Hex, number>();
+    let solid = true;
+    for (const row of rows) {
+      for (const pixel of row) {
+        if (pixel === null || alphaOf(pixel) !== 255) solid = false;
+        if (pixel !== null) tally.set(pixel, (tally.get(pixel) ?? 0) + 1);
+      }
+    }
+    const colors = [...tally.keys()];
+    this.opaque = solid;
+    this.colors = colors;
+    this.base = solid ? colors.reduce((best, color) => (tally.get(color)! > tally.get(best)! ? color : best)) : undefined;
+    this.paths = new Map(colors.map((color) => [color, runs(rows, color)]));
   }
 }
 
@@ -43,8 +80,6 @@ export const idOf = (texture: Texture): number => gridOf(texture).id;
 
 /** Whether every pixel is solid, so a block wearing it hides what is behind it. */
 export const isOpaque = (texture: Texture): boolean => gridOf(texture).opaque;
-
-const HEX = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
 
 const channels = (color: Hex): readonly [number, number, number, number] => {
   const digits = color.slice(1);
@@ -80,34 +115,19 @@ export const texture = (palette: Palette, art: string): Texture => {
 
 export const resolve = (skin: Skin, face: Face): Texture => ("side" in skin ? (skin[face] ?? skin.side) : skin);
 
-const runs = (grid: Grid, color: Hex): string =>
-  grid.rows
-    .flatMap((row, y) => {
-      const out: string[] = [];
-      for (let x = 0; x < row.length; x++) {
-        if (row[x] !== color) continue;
-        const start = x;
-        while (row[x + 1] === color) x++;
-        out.push(`M${start} ${y}h${x - start + 1}v1h${start - x - 1}z`);
-      }
-      return out;
-    })
-    .join("");
-
 const faded = new WeakMap<Grid, Map<number, Ref<"symbol">>>();
 
 /** The texture in pixel units, darkened by `shade`. An opaque one sits on its commonest color, so no seam shows between runs. */
 const symbolOf = (grid: Grid, shade: number): Ref<"symbol"> => {
-  const known = faded.get(grid)?.get(shade);
+  let shades = faded.get(grid);
+  if (!shades) faded.set(grid, (shades = new Map()));
+  const known = shades.get(shade);
   if (known) return known;
-  const colors = [...new Set(grid.rows.flat().filter((pixel): pixel is Hex => pixel !== null))];
-  const count = (color: Hex) => grid.rows.flat().filter((pixel) => pixel === color).length;
-  const base = grid.opaque ? colors.reduce((best, color) => (count(color) > count(best) ? color : best)) : undefined;
   const symbol = def.symbol({ style: "overflow:visible" }, [
-    base && el.rect({ width: grid.width, height: grid.height, fill: shaded(base, shade) }),
-    colors.filter((color) => color !== base).map((color) => el.path({ d: runs(grid, color), fill: shaded(color, shade) })),
+    grid.base && el.rect({ width: grid.width, height: grid.height, fill: shaded(grid.base, shade) }),
+    grid.colors.filter((color) => color !== grid.base).map((color) => el.path({ d: grid.paths.get(color)!, fill: shaded(color, shade) })),
   ]);
-  faded.set(grid, (faded.get(grid) ?? new Map()).set(shade, symbol));
+  shades.set(shade, symbol);
   return symbol;
 };
 

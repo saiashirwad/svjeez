@@ -6,7 +6,7 @@ import { SKIN } from "./textures";
 const FAR = 2 * (GRID - 1);
 
 /** How near the camera a column is, 0 at the far corner and 1 at the near one. */
-const nearness = ({ x, z }: Column | { readonly x: number; readonly z: number }): number => (x + z) / FAR;
+const nearness = ({ x, z }: { readonly x: number; readonly z: number }): number => (x + z) / FAR;
 
 const jitter = (x: number, z: number): number => 0.1 * Math.floor(random(x * 97 + z)() * 3);
 
@@ -19,10 +19,8 @@ const DROP = 18;
 const SINK = 90;
 
 /** Drop in with a bounce at `from`, sink away before `until`. */
-const life = (from: Seconds, until: Seconds, drops = true): Motion<"y"> => {
-  const arrive = drops ? motion({ y: -DROP }).at(from).to({ y: 0 }, 0.35, ease.pop) : motion({ y: 0 });
-  return arrive.at(until - 0.5).to({ y: SINK }, 0.5, ease.in);
-};
+const life = (from: Seconds, until: Seconds): Motion<"y"> =>
+  motion({ y: -DROP }).at(from).to({ y: 0 }, 0.35, ease.pop).at(until - 0.5).to({ y: SINK }, 0.5, ease.in);
 
 const sinks = (until: Seconds): Motion<"y"> => motion({ y: 0 }).at(until - 0.5).to({ y: SINK }, 0.5, ease.in);
 
@@ -101,22 +99,26 @@ const spots = (): readonly Column[] => {
 
 export const TREES = spots();
 
-const leafCells = (): readonly (readonly [number, number, number])[] => [
+const range = (low: number, high: number): number[] => Array.from({ length: high - low + 1 }, (_, i) => low + i);
+
+const LEAF_CELLS: readonly (readonly [number, number, number])[] = [
   ...[0, 1].flatMap((y) => range(-2, 2).flatMap((dx) => range(-2, 2).filter((dz) => !(Math.abs(dx) === 2 && Math.abs(dz) === 2)).map((dz) => [dx, y, dz] as const))),
   ...range(-1, 1).flatMap((dx) => range(-1, 1).map((dz) => [dx, 2, dz] as const)),
   ...range(-1, 1).flatMap((dx) => range(-1, 1).filter((dz) => Math.abs(dx) + Math.abs(dz) <= 1).map((dz) => [dx, 3, dz] as const)),
 ];
 
-const range = (low: number, high: number): number[] => Array.from({ length: high - low + 1 }, (_, i) => low + i);
+/** The topmost leaves, one per column of the canopy, where snow settles. */
+const CROWN_TOPS = LEAF_CELLS.filter(([dx, y, dz]) => !LEAF_CELLS.some(([ox, oy, oz]) => ox === dx && oz === dz && oy > y));
+
+/** How long after the fall starts the block at `y` drops out of the canopy. */
+const fallsAt = (top: number, y: number): Seconds => tenth(BEAT.fall + (top + 7 - y) * 0.08);
 
 const tree = ({ x, z, top }: Column, start: Seconds): Block[] => {
-  const goes = (y: number): Seconds => tenth(BEAT.fall + (top + 7 - y) * 0.08);
+  const goes = (y: number): Seconds => fallsAt(top, y);
   const trunk = built(range(0, 3).map((i): Part => ({ at: [x, top + i, z], skin: SKIN.log })), start + 0.8, 0.45, ([, y]) => goes(y));
   const canopyStart = start + 3;
   const crown = built(
-    leafCells()
-      .filter(([dx, y, dz]) => !(dx === 0 && dz === 0 && y === 0))
-      .map(([dx, y, dz]): Part => ({ at: [x + dx, top + 3 + y, z + dz], skin: SKIN.leaves })),
+    LEAF_CELLS.filter(([dx, y, dz]) => !(dx === 0 && dz === 0 && y === 0)).map(([dx, y, dz]): Part => ({ at: [x + dx, top + 3 + y, z + dz], skin: SKIN.leaves })),
     canopyStart,
     0.04,
     ([, y]) => goes(y),
@@ -125,13 +127,11 @@ const tree = ({ x, z, top }: Column, start: Seconds): Block[] => {
 };
 
 const crownTops = ({ x, z, top }: Column): Block[] =>
-  leafCells()
-    .filter(([dx, y, dz]) => !leafCells().some(([ox, oy, oz]) => ox === dx && oz === dz && oy > y))
-    .map(([dx, y, dz]): Block => {
-      const at: Vec3 = [x + dx, top + 3 + y, z + dz];
-      const until = tenth(BEAT.fall + (top + 7 - at[1]) * 0.08);
-      return { at, skin: SKIN.snowCap, from: tenth(BEAT.snow + 1.5 + (1 - nearness({ x: at[0], z: at[2] })) * 3), until, animation: sinks(until) };
-    });
+  CROWN_TOPS.map(([dx, y, dz]): Block => {
+    const at: Vec3 = [x + dx, top + 3 + y, z + dz];
+    const until = fallsAt(top, at[1]);
+    return { at, skin: SKIN.snowCap, from: tenth(BEAT.snow + 1.5 + (1 - nearness({ x: at[0], z: at[2] })) * 3), until, animation: sinks(until) };
+  });
 
 const flowers = (): Block[] => {
   const free = COLUMNS.filter(
