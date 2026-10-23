@@ -9,25 +9,18 @@ const PAINTED = ["g", "use", "text", "tspan", ...SHAPES] as const;
 const number = 0 as number;
 const color = "" as Color;
 
-/** How a lane stacks: `nest` composes like a wrapper <g> would; `replace` lives on the element itself. */
 type Composition = "nest" | "replace";
 
 interface Spec {
   readonly value: number | Color;
   readonly tags: readonly Tag[];
-  /** One lane is one @keyframes or one <animate>. x and y share `translate`. On fe* tags the lane is `attr`. */
   readonly lane: string;
   readonly composition: Composition;
-  /** The at-rest value. Channels without one start from motion(initial) or the element's own attribute. */
   readonly identity?: number | Color;
   readonly range?: readonly [number, number];
-  /** Serialized attribute this channel reads its rest value from, and animates via SMIL on fe* tags. */
   readonly attr?: string;
-  /** Hard requirements: the element must carry exactly these attributes. */
   readonly pins?: Readonly<Record<string, string>>;
-  /** Soft requirement: pivot on the element's own center unless its style says otherwise. */
   readonly pivot?: true;
-  /** Static attributes that force this lane onto a wrapper. */
   readonly collidesWith?: readonly string[];
   /** Tags where this lane always lands on a wrapper (WebKit ignores fill-box on bare <text>). */
   readonly wrapsOn?: readonly Tag[];
@@ -61,7 +54,6 @@ type Table = typeof CHANNELS;
 export type Channel = keyof Table;
 export type Values<K extends Channel = Channel> = { readonly [P in K]?: Table[P]["value"] };
 export type NumericChannel = { [C in Channel]: Table[C]["value"] extends number ? C : never }[Channel];
-/** Channels with an at-rest value: what enter, exit, shake and wiggle move. */
 export type RestChannel = { [C in Channel]: Table[C] extends { readonly identity: number } ? C : never }[Channel];
 export type AnimatedTag = Table[Channel]["tags"][number];
 export type Target = Channel | Property;
@@ -96,10 +88,8 @@ export const laneOf = (tag: string, channel: Target): string => {
   return backendOf(tag, channel) === "smil" ? row.attr ?? channel : row.lane;
 };
 
-/** A channel value as CSS or SVG text. */
 export const formatValue = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
 
-/** CSS declarations for one key of a lane. `translate` packs x and y. */
 export const cssDeclarations = (lane: string, values: TargetValues): string => {
   switch (lane) {
     case "translate":

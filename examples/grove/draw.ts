@@ -13,10 +13,8 @@ const n = (value: number): string => {
 export const xy = ({ x, y }: P2): string => `${n(x)} ${n(y)}`;
 export const mid = (a: P2, b: P2): P2 => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
 
-/** A closed polygon through the points. */
 export const polygon = (points: readonly P2[]): string => `M${points.map(xy).join("L")}Z`;
 
-/** Lines through the points, rounded at every corner. */
 export const smooth = (points: readonly P2[], closed = false): string => {
   if (points.length < 2) return "";
   if (closed) {
@@ -34,7 +32,6 @@ export const smooth = (points: readonly P2[], closed = false): string => {
   return `${d}L${xy(points[points.length - 1]!)}`;
 };
 
-/** A stroke with a width that changes along its length. */
 export const tapered = (points: readonly P2[], widths: readonly number[]): string => {
   const left: P2[] = [];
   const right: P2[] = [];
@@ -54,7 +51,6 @@ export const tapered = (points: readonly P2[], widths: readonly number[]): strin
   return smooth([...left, ...right.reverse()], true);
 };
 
-/** An offset ribbon along a centerline, used for a lit edge on a limb. */
 export const edge = (points: readonly P2[], widths: readonly number[], offset: number, width: number): string => {
   const left: P2[] = [];
   const right: P2[] = [];
@@ -75,11 +71,9 @@ export const edge = (points: readonly P2[], widths: readonly number[], offset: n
   return smooth([...left, ...right.reverse()], true);
 };
 
-/** A leaf: pointed at both ends, fullest just past the middle. */
 export const leaf = (base: P2, tip: P2, flank: P2, flank2: P2): string =>
   `M${xy(base)}Q${xy(flank)} ${xy(tip)}Q${xy(flank2)} ${xy(base)}Z`;
 
-/** A flat disc in world space, sampled into a smooth screen outline. */
 export const disc = (center: Vec3, u: Vec3, v: Vec3, radius: number, project: (p: Vec3) => P2, steps = 14): string => {
   const points = Array.from({ length: steps }, (_, i) => {
     const angle = (i / steps) * Math.PI * 2;

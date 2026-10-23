@@ -13,7 +13,6 @@ function Typed({ x, y, text, at, dim = false }: { x: number; y: number; text: st
   );
 }
 
-/** An odometer wheel: `labels` scroll past a one-line window, one per `period / labels.length`. */
 function Wheel({ x, y, labels, period }: { x: number; y: number; labels: readonly string[]; period: number }): SvgNode {
   const width = labels[0]!.length * ADVANCE;
   const window = def.clipPath({}, el.rect({ x, y: y - LINE + 3, width, height: LINE }));
@@ -29,7 +28,6 @@ function Wheel({ x, y, labels, period }: { x: number; y: number; labels: readonl
 
 const digits = (count: number, pad = 1) => Array.from({ length: count }, (_, k) => String(k).padStart(pad, "0"));
 
-/** The scene clock, read off the loop itself. */
 function Clock({ x, y }: { x: number; y: number }): SvgNode {
   return el.g({ class: "mono", fill: C.white }, [
     el.text({ x, y }, "T+"),
@@ -102,7 +100,6 @@ function Scan(): SvgNode {
   );
 }
 
-/** Everything bolted to the lens rather than the sky. */
 export function Hud(): SvgNode {
   return (
     <g animation={envelope(T.hud, T.collapse, 0.3)}>
@@ -119,7 +116,6 @@ export function Hud(): SvgNode {
   );
 }
 
-/** Rings and ticks around the shadow, in world space so the camera carries them. */
 export function Reticle(): SvgNode {
   const ticks = [0, 90, 180, 270].map((deg) => {
     const a = (deg * Math.PI) / 180;

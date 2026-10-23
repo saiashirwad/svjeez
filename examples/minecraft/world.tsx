@@ -5,12 +5,10 @@ import { SKIN } from "./textures";
 
 const FAR = 2 * (GRID - 1);
 
-/** How near the camera a column is, 0 at the far corner and 1 at the near one. */
 const nearness = ({ x, z }: { readonly x: number; readonly z: number }): number => (x + z) / FAR;
 
 const jitter = (x: number, z: number): number => 0.1 * Math.floor(random(x * 97 + z)() * 3);
 
-/** The world builds from the near corner outward, so every cube lands behind a neighbor that is already up, and it leaves the other way. */
 const risesAt = (column: Column): number => tenth(BEAT.rise + (1 - nearness(column)) * (BEAT.risen - BEAT.rise) + jitter(column.x, column.z));
 const leavesAt = (column: Column): number => tenth(BEAT.void + nearness(column) * (BEAT.voided - BEAT.void));
 const snowsAt = (column: Column): number => tenth(BEAT.snow + 1 + (1 - nearness(column)) * (BEAT.snowed - BEAT.snow - 1) + jitter(column.x, column.z));
@@ -18,7 +16,6 @@ const snowsAt = (column: Column): number => tenth(BEAT.snow + 1 + (1 - nearness(
 const DROP = 18;
 const SINK = 90;
 
-/** Drop in with a bounce at `from`, sink away before `until`. */
 const life = (from: Seconds, until: Seconds): Motion<"y"> =>
   motion({ y: -DROP }).at(from).to({ y: 0 }, 0.35, ease.pop).at(until - 0.5).to({ y: SINK }, 0.5, ease.in);
 
@@ -65,7 +62,6 @@ interface Part {
   readonly skin: Block["skin"];
 }
 
-/** Parts built one after another from `start`, `step` apart, and gone in a sweep from the top down. */
 const built = (parts: readonly Part[], start: Seconds, step: Seconds, gone: (at: Vec3) => Seconds): Block[] =>
   parts.map(({ at, skin }, i): Block => {
     const [from, until] = [tenth(start + i * step), gone(at)];
@@ -107,10 +103,8 @@ const LEAF_CELLS: readonly (readonly [number, number, number])[] = [
   ...range(-1, 1).flatMap((dx) => range(-1, 1).filter((dz) => Math.abs(dx) + Math.abs(dz) <= 1).map((dz) => [dx, 3, dz] as const)),
 ];
 
-/** The topmost leaves, one per column of the canopy, where snow settles. */
 const CROWN_TOPS = LEAF_CELLS.filter(([dx, y, dz]) => !LEAF_CELLS.some(([ox, oy, oz]) => ox === dx && oz === dz && oy > y));
 
-/** How long after the fall starts the block at `y` drops out of the canopy. */
 const fallsAt = (top: number, y: number): Seconds => tenth(BEAT.fall + (top + 7 - y) * 0.08);
 
 const tree = ({ x, z, top }: Column, start: Seconds): Block[] => {
@@ -180,13 +174,11 @@ const lantern = (): Block[] => {
 
 const goes = (): Seconds => tenth(BEAT.fall + 0.4);
 
-/** Lit lamps lie over the dark ones, so a window glows by being swapped, not recolored. */
 const lit = (): Block[] => {
   const lamps: readonly Vec3[] = [...windows.map(([i, j]) => hutAt(i, j, PLOT.top + 1)), [POST.x, POST.top + 1, POST.z]];
   return lamps.map((at): Block => ({ at, skin: SKIN.lampOn, from: BEAT.lights, until: BEAT.lightsOut }));
 };
 
-/** Face centers of the lamps, where their glow belongs. */
 export const LIGHTS: readonly Vec3[] = [
   ...windows.map(([i, j]): Vec3 => (i === 4 ? [PLOT.x + 5, PLOT.top + 1.5, PLOT.z + j + 0.5] : [PLOT.x + i + 0.5, PLOT.top + 1.5, PLOT.z + 5])),
   [POST.x + 1, POST.top + 1.5, POST.z + 0.5],

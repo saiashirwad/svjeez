@@ -31,7 +31,6 @@ interface Side {
   readonly v: Vec3;
 }
 
-/** Texture x runs along `u` and texture y along `v`, seen from outside the cube. Brightness follows Minecraft. */
 const SIDES: Readonly<Record<Face, Side>> = {
   top: { shade: 1, origin: [0, 1, 0], u: [1, 0, 0], v: [0, 0, 1] },
   south: { shade: 0.8, origin: [0, 1, 1], u: [1, 0, 0], v: [0, -1, 0] },
@@ -90,7 +89,6 @@ const scene = ({ camera: view, blocks }: Scene): SvgNode => {
     (cover.from ?? 0) <= (block.from ?? 0) &&
     (cover.until ?? Infinity) >= (block.until ?? Infinity);
 
-  /** A block hidden behind its three camera-facing neighbors for its whole life can never be seen. */
   const buried = (block: Block): boolean => {
     const [x, y, z] = block.at;
     const near: Vec3[] = [[x, y + 1, z], ...(fx === 0 ? [] : [[x + fx, y, z] as const]), ...(fz === 0 ? [] : [[x, y, z + fz] as const])];

@@ -1,4 +1,3 @@
-// Compile-time contract, checked by `bun run typecheck`. Each @ts-expect-error must fail for the reason named.
 import { calc, css, def, draw, ease, el, enter, fx, motion, sampled, voxel, wiggle, type Calc, type SyntaxOf } from "svg-motion";
 
 const bg = def.linearGradient({}, <stop offset={0} stopColor="#000" />);

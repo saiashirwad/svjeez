@@ -46,5 +46,4 @@ const boil = ({ strength = 3, rate = 10, seed = 1, detail = 0.04 }: Boil = {}): 
   );
 };
 
-/** Effects for people who don't speak filter primitives. Each is a few lines over def.filter. */
 export const fx = { glow, boil } as const;

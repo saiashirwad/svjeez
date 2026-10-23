@@ -12,10 +12,6 @@ const collect = (source: string, pattern: RegExp, group = 1): string[] => {
   return values;
 };
 
-/**
- * A filter re-renders whenever anything under it moves. Safari ran one scene at 10 fps with a blur over
- * 79 animated elements and at 60 fps with 20 under another, so the line sits between.
- */
 const FILTERED_ANIMATION_LIMIT = 40;
 
 const filteredAnimation = (source: string): string[] => {
@@ -39,10 +35,6 @@ const filteredAnimation = (source: string): string[] => {
   return warnings;
 };
 
-/**
- * Structural checks for generated SVG. This is intentionally lightweight; the
- * build script additionally runs xmllint when it is available.
- */
 export const validateSvg = (source: string): ValidationResult => {
   const errors: string[] = [];
   const warnings: string[] = [];

@@ -6,16 +6,13 @@ export const D = 60;
 
 export const CAMERA = voxel.camera({ yaw: 45, pitch: 30, unit: 26 });
 
-/** Cells per island side. */
 export const GRID = 14;
 
-/** Where the world's origin lands on the canvas, so the island's middle sits a little below center. */
 export const ORIGIN = (() => {
   const mid = CAMERA.project([GRID / 2, 2, GRID / 2]);
   return { x: W / 2 - mid.x, y: 350 - mid.y };
 })();
 
-/** The story, in seconds. Everything else is timed against these. */
 export const BEAT = {
   rise: 0.8,
   risen: 9.2,
@@ -62,5 +59,4 @@ export const random = (seed: number) => () => {
 export const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
 export const clamp = (value: number, low = 0, high = 1): number => Math.min(high, Math.max(low, value));
 
-/** Times land on a tenth of a second, so blocks that share a beat share their keyframes. */
 export const tenth = (t: number): number => Math.round(t * 10) / 10;

@@ -10,7 +10,6 @@ type Rng = () => number;
 
 export interface Stand {
   readonly node: SvgNode;
-  /** Base depth, for sorting whole plants against each other. */
   readonly depth: number;
 }
 
@@ -334,7 +333,6 @@ export const oak = (base: Vec3): Stand => tree(OAK_TREE, base, 71);
 export const birch = (base: Vec3): Stand => tree(BIRCH_TREE, base, 173);
 export const blossom = (base: Vec3): Stand => tree(BLOSSOM_TREE, base, 281);
 
-/** A fern: curved fronds with paired pinnae, drawn as real leaves in 3D. */
 export const fern = (base: Vec3, seed: number): Stand => {
   const rng = random(seed);
   const parts: Part[] = [];
@@ -398,7 +396,6 @@ const FLOWERS: Record<FlowerKind, { readonly petals: readonly string[]; readonly
   blue: { petals: PERIWINKLE, eye: GOLD },
 };
 
-/** A small stand of flowers, each on its own arcing stem. */
 export const flowers = (base: Vec3, seed: number, kind: FlowerKind): Stand => {
   const rng = random(seed);
   const palette = FLOWERS[kind];
@@ -468,7 +465,6 @@ export const flowers = (base: Vec3, seed: number, kind: FlowerKind): Stand => {
   return { node, depth: spot.depth };
 };
 
-/** A tuft of grass blades: one ribbon per blade, two tones per tuft. */
 export const tuft = (base: Vec3, seed: number): Stand => {
   const rng = random(seed);
   const blades = 9 + Math.floor(rng() * 6);
@@ -508,7 +504,6 @@ export const tuft = (base: Vec3, seed: number): Stand => {
   return { node, depth: spot.depth };
 };
 
-/** A few flat, faceted stones resting on the moss. */
 export const stones = (base: Vec3, seed: number): Stand => {
   const rng = random(seed);
   const parts: Part[] = [];
@@ -544,7 +539,6 @@ export const stones = (base: Vec3, seed: number): Stand => {
   };
 };
 
-/** The seed that starts the story: a warm bead that sinks into the moss. */
 export const seed = (base: Vec3): Stand => {
   const spot = at(base);
   const node = el.g(
@@ -558,7 +552,6 @@ export const seed = (base: Vec3): Stand => {
   return { node, depth: spot.depth + 3 };
 };
 
-/** Scattered fallen blossom petals, lying flat on the moss. */
 export const fallenPetals = (base: Vec3, seed: number): Stand => {
   const rng = random(seed);
   const parts: Part[] = [];

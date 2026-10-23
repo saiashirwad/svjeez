@@ -3,7 +3,6 @@ export type Degrees = number;
 /** World coordinates in blocks, y up. */
 export type Vec3 = readonly [x: number, y: number, z: number];
 
-/** A type alias, not an interface, so a projection can go straight into `motion()`. */
 export type Point = { readonly x: number; readonly y: number };
 
 export interface CameraOptions {
@@ -21,7 +20,6 @@ export interface Camera extends CameraOptions {
   project(p: Vec3): Point;
 }
 
-/** +1 where larger coordinates are nearer the camera, -1 where farther, 0 edge-on. */
 export type Facing = readonly [-1 | 0 | 1, -1 | 0 | 1, -1 | 0 | 1];
 
 const EDGE_ON = 1e-9;

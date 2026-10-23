@@ -35,7 +35,6 @@ const point = (radius: number, degrees: number) => {
 
 const xy = ({ x, y }: { x: number; y: number }) => `${x.toFixed(2)} ${y.toFixed(2)}`;
 
-/** A lens from the center out to `reach`, `width` wide at its fattest, pointing at `degrees`. */
 const petal = (reach: number, width: number, degrees: number): string => {
   const flare = (Math.atan2(width, reach / 2) * 180) / Math.PI;
   const control = Math.hypot(width, reach / 2);
@@ -81,7 +80,6 @@ const vignette = def.radialGradient({ cx: 0.5, cy: 0.45, r: 0.55 }, (
 const dots = def.pattern({ width: 22, height: 22, patternUnits: "userSpaceOnUse" }, <circle cx={11} cy={11} r={0.9} fill={C.dust} />);
 const fadeEdges = def.mask({}, <rect width={W} height={H} fill={vignette} />);
 
-/** Opens with the bloom and closes with it. */
 const lifetime = (delay: number, from: Values<"opacity" | "scale"> = { opacity: 0 }) =>
   enter({ at: OPEN + delay, over: 0.9 }, from).at(CLOSE + 0.4 - delay / 2).to(from, 0.8, ease.in);
 
@@ -156,7 +154,6 @@ function Orbit({ radius, period, turns, tail, color, delay }: { radius: number; 
   ]);
 }
 
-/** Rings that leave the core while it is lit. Each ripple lives exactly one `every`, so its pulses never overlap. */
 function Ripple({ phase }: { phase: number }): SvgNode {
   const every = 1.8;
   let wave: Motion<"scale" | "opacity"> = motion({ scale: 0.2, opacity: 0 });
@@ -187,7 +184,6 @@ function Core(): SvgNode {
   );
 }
 
-/** Pollen on a golden-angle spiral, each drifting on its own seed. */
 function Pollen(): SvgNode {
   return (
     <g fill={C.gold}>

@@ -3,9 +3,7 @@ import { GRID, random } from "./kit";
 export interface Column {
   readonly x: number;
   readonly z: number;
-  /** Cells up to but not including this height are ground. */
   readonly top: number;
-  /** How far the island hangs below y = 0. */
   readonly depth: number;
   readonly kind: "grass" | "sand" | "stone" | "lake";
 }
@@ -28,7 +26,6 @@ const noise = (field: readonly number[], x: number, z: number): number => {
 
 export const LAKE = { x: 3.4, z: 9.4, radius: 2.2 } as const;
 export const HILL = { x: 10, z: 3, radius: 2.8 } as const;
-/** The flat 5x5 plot the hut stands on, at its south-west corner. */
 export const PLOT = { x: 5, z: 3, size: 5, top: 3 } as const;
 
 const reach = (x: number, z: number, around: { readonly x: number; readonly z: number }) => Math.hypot(x - around.x, z - around.z);

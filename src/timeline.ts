@@ -2,22 +2,16 @@ import { cssDeclarations, formatValue, valueOf, type Channel, type Target, type 
 import { num } from "./format";
 import { ease, type Ease, type Seconds, type Step } from "./motion";
 
-/**
- * Backend-neutral keyframe: `ease` shapes the segment that STARTS here. This file is the only place
- * that knows it; authors pass an ease to the transition it shapes.
- */
 export interface Key {
   readonly t: Seconds;
   readonly values: TargetValues;
   readonly ease: Ease;
 }
 
-/** Snap a loop so it divides the scene and every loop stays in lockstep with it. */
 export const snapPeriod = (period: Seconds, duration: Seconds): Seconds => duration / Math.max(1, Math.round(duration / period));
 
 const same = (a: TargetValues, b: TargetValues): boolean => (Object.keys(a) as Target[]).every((target) => valueOf(a, target) === valueOf(b, target));
 
-/** One lane's history as keys over 0..period. Holds are implicit; a cut becomes a hold that jumps. */
 export const keysOf = (initial: TargetValues, segments: readonly Step[], period: Seconds): Key[] => {
   const keys: Key[] = [{ t: 0, values: initial, ease: ease.out }];
   const nudge = period * 1e-5;
@@ -47,7 +41,6 @@ const moving = (keys: readonly Key[], index: number): boolean => {
   return next !== undefined && !same(keys[index]!.values, next.values);
 };
 
-/** Value of a lane at local time `t`, snapped to the key at or before it. */
 export const valueAt = (keys: readonly Key[], t: Seconds): TargetValues => keys.findLast((key) => key.t <= t + 1e-9)!.values;
 
 const short = (value: number): string => num(value).replace(/^(-?)0\./, "$1.");
@@ -73,10 +66,6 @@ const percents = (keys: readonly Key[], period: Seconds): string[] => {
   throw new Error(`Two keys are too close to tell apart on a ${num(period)}s timeline: ${keys.map((key) => key.t).join(", ")}.`);
 };
 
-/**
- * CSS keyframes body for one lane. The most common ease is hoisted to the lane's timing; keys with
- * the same declarations share one selector list.
- */
 export const cssKeyframes = (lane: string, keys: readonly Key[], period: Seconds): { body: string; timing: string } => {
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
@@ -96,7 +85,6 @@ export const cssKeyframes = (lane: string, keys: readonly Key[], period: Seconds
 const lerp = (from: Values[Channel], to: Values[Channel], amount: number): Values[Channel] =>
   typeof from === "number" && typeof to === "number" ? from + (to - from) * amount : amount < 1 ? from : to;
 
-/** SMIL <animate> attributes for one attribute lane, from the same keys the CSS backend reads. */
 export const smilAttributes = (attribute: string, channel: Channel, keys: readonly Key[], period: Seconds, duration: Seconds): Record<string, string> => {
   const movingKeys = keys.filter((_, index) => moving(keys, index));
   const discrete = movingKeys.length > 0 && movingKeys.every((key) => key.ease.kind === "steps");

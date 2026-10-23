@@ -6,7 +6,6 @@ import { Css, formatProperty, isProperty, type CssPart } from "./properties";
 
 export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
 
-/** Refs stay objects until render assigns ids. */
 export type AttrValue = string | AnyRef | Css;
 
 export type SvgNode =
@@ -84,7 +83,6 @@ const stack = (value: unknown): Motion[] =>
     return true;
   });
 
-/** Build an element from typed JSX props, mapping prop names through the attribute table. */
 export const node = (tag: string, props: Record<string, unknown>): Element => {
   const attrs: Record<string, AttrValue> = {};
   for (const [prop, value] of Object.entries(props)) {

@@ -69,7 +69,6 @@ type Run = string | { readonly link: string };
 interface Line {
   readonly depth: 0 | 1 | 2;
   readonly runs: readonly Run[];
-  /** A wrapped continuation of the bullet above. */
   readonly wrap?: true;
 }
 
@@ -92,7 +91,6 @@ const NOTE: readonly Line[] = [
   { depth: 2, runs: ["We recommend you splitting your personal and work notes into two graphs."] },
 ];
 
-/** Baselines: 32px between bullets, 24px for a wrapped line. */
 const TOPS = NOTE.reduce<number[]>((tops, line) => [...tops, (tops.at(-1) ?? 790) + (line.wrap ? 24 : 32)], []);
 
 const runs = (line: Line): Child =>
@@ -128,7 +126,6 @@ function Note(): SvgNode {
 
 const DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] as const;
 
-/** April 2023, Monday first: it opens on a Saturday, after the last five days of March. */
 const MONTH = Array.from({ length: 35 }, (_, i) => (i < 5 ? { day: 27 + i, outside: true } : { day: i - 4, outside: false }));
 
 const ACTIONS = [

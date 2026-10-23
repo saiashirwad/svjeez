@@ -10,7 +10,6 @@ const CSS = [
   `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:10px}`,
 ].join("");
 
-/** The camera pushes in through the act, kicks at ignition, and resets while the screen is black. */
 const push = motion({ scale: 1 }).at(T.hud).to({ scale: 1.1 }, T.collapse - T.hud, ease.inOut).at(T.black).set({ scale: 1 });
 const kick = shake({ at: T.ignite, over: 0.9 }, { x: 9, y: 6, rotate: 0.8 }, { rate: 22 });
 

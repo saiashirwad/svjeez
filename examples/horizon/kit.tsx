@@ -4,7 +4,6 @@ export const W = 960;
 export const H = 540;
 export const D = 12;
 
-/** The acts, in order. Everything else is timed against these. */
 export const T = {
   accrete: 0.5,
   open: 1.8,
@@ -18,7 +17,6 @@ export const T = {
   dawn: 10.8,
 } as const;
 
-/** The disk plane: tipped toward us and rolled slightly, in the world's coordinates. */
 export const TILT = "rotate(-12) scale(1 0.22)";
 
 /** Pivot on the local origin instead of the element's own box. */
@@ -58,7 +56,6 @@ const HEAT: readonly (readonly [number, string])[] = [
   [1, "#4B1638"],
 ];
 
-/** Blackbody-ish ramp from the hot inner edge (0) to the cold rim (1). */
 export const heat = (t: number): Color => {
   const upper = HEAT.findIndex(([at]) => at >= t);
   if (upper <= 0) return HEAT[0]![1] as Color;
@@ -82,18 +79,11 @@ export const glow = (blur: number, strength: number, reach: { readonly x: number
     </>
   ));
 
-/** Hold until `at`, cut on. */
 export const on = (at: number): Motion<"opacity"> => motion({ opacity: 0 }).at(at).set({ opacity: 1 });
 
-/** Fade in over `over`, hold, fade out at `off`. */
 export const envelope = (at: number, off: number, over = 0.4): Motion<"opacity"> =>
   motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over).at(off).to({ opacity: 0 }, over, ease.in);
 
-/**
- * A loop that starts `offset` seconds into its own cycle, so copies of one motion run out of step.
- * `at(u)` gives the values at progress u ∈ [0, 1]; it is sampled into `pieces` linear segments with a
- * cut where the cycle wraps.
- */
 export const phased = <K extends Channel>(period: number, offset: number, at: (u: number) => Values<K>, pieces = 8): Motion<K> => {
   const shift = ((offset % period) + period) % period;
   const progress = (t: number) => ((t + shift) % period) / period;

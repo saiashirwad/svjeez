@@ -5,7 +5,6 @@ import { TAU } from "./space";
 
 type Keys = readonly (readonly [Seconds, Color])[];
 
-/** Hold the first color, then ease to each next one by its time. */
 const grade = (first: Color, keys: Keys): Motion<"stopColor"> => {
   let track = motion({ stopColor: first });
   let from = 0;
@@ -161,7 +160,6 @@ export function Clouds(): SvgNode {
   );
 }
 
-/** Soft mist below the island. */
 export function Mist(): SvgNode {
   const haze = def.radialGradient({}, (
     <>
@@ -189,7 +187,6 @@ export function Shadow(): SvgNode {
   return <ellipse cx={ORIGIN.x - 6} cy={604} rx={286} ry={30} fill={shade} />;
 }
 
-/** Tiny islands adrift in the haze, quiet enough not to compete. */
 const FAR_ISLES = [
   { x: 168, y: 306, scale: 0.5, phase: 0.4, tree: 1 },
   { x: 818, y: 256, scale: 0.36, phase: 2.8, tree: 0 },
@@ -240,7 +237,6 @@ const MOTE_FIELDS = [
   { cx: 330, cy: 404, rx: 26, ry: 10, phase: 4.4, count: 8 },
 ] as const;
 
-/** Golden dust in the light, and brighter fireflies after dusk. */
 export function Motes(): SvgNode {
   const pick = random(313);
   const day = motion({ opacity: 0 }).at(4.6).to({ opacity: 1 }, 3).at(21.2).to({ opacity: 0.2 }, 2.4);
@@ -321,7 +317,6 @@ export function Fireflies(): SvgNode {
 const blossomBase = at([-3.85, 0, -1.55]);
 const PETAL_COLORS = ["#f7cfc3", "#f3b4ab", "#ffe7d2", "#eaa0a0"] as const;
 
-/** Petals shaken loose from the blossom tree, each on its own fall. */
 export function Petals(): SvgNode {
   const pick = random(931);
   return (
@@ -399,7 +394,6 @@ export function Birds(): SvgNode {
   );
 }
 
-/** A screen-space leaf, for the foreground silhouette. */
 const screenLeaf = (x: number, y: number, angle: number, length: number, width: number): string => {
   const dx = Math.cos(angle);
   const dy = Math.sin(angle);
@@ -411,7 +405,6 @@ const screenLeaf = (x: number, y: number, angle: number, length: number, width: 
   return leafPath(base, tip, { x: waist.x + nx * width * 0.5, y: waist.y + ny * width * 0.5 }, { x: waist.x - nx * width * 0.5, y: waist.y - ny * width * 0.5 });
 };
 
-/** A dark branch and leaves at the top-right, softly framing the grove. */
 export function Foreground(): SvgNode {
   const sway = wiggle({ rotate: 0.55, x: 0.9 }, { seed: "foreground", rate: 0.45, period: D });
   const dark = "#0d2925";

@@ -4,10 +4,6 @@ export interface Point {
   readonly z: number;
 }
 
-/**
- * Where one dot sits on every surface: `along` the shape's spine and `around` it, both in [0, 1).
- * Every surface turns `along` into two laps of longitude, so a dot keeps its bearing through a morph.
- */
 export interface Seat {
   readonly along: number;
   readonly around: number;
@@ -18,7 +14,6 @@ export type Surface = (seat: Seat) => Point;
 const TAU = Math.PI * 2;
 const GOLDEN = (Math.sqrt(5) - 1) / 2;
 
-/** The i-th of n seats. Stepping `around` by the golden ratio spreads any n evenly. */
 export const seat = (i: number, n: number): Seat => ({ along: (i + 0.5) / n, around: (i * GOLDEN) % 1 });
 
 const add = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
@@ -29,7 +24,6 @@ const unit = (a: Point): Point => times(a, 1 / Math.hypot(a.x, a.y, a.z));
 
 export const lerp = (a: Point, b: Point, t: number): Point => add(a, times(add(b, times(a, -1)), t));
 
-/** `around` folded into a height in [-1, 1], top first. Uniform in height, so uniform on the sphere. */
 export const height = (around: number): number => 1 - 4 * Math.abs(around - 0.5);
 
 export const sphere = (radius: number): Surface => ({ along, around }) => {
@@ -45,7 +39,6 @@ export interface Knot {
   readonly thickness: number;
 }
 
-/** A tube around a (2, 3) torus knot. With no wobble the spine is a circle and the tube is a torus. */
 export const knot = ({ radius, wobble, thickness }: Knot): Surface => ({ along, around }) => {
   const spine = (s: number): Point => {
     const lon = 2 * TAU * s;
@@ -64,20 +57,16 @@ export const knot = ({ radius, wobble, thickness }: Knot): Surface => ({ along, 
 export interface Camera {
   readonly pitch: number;
   readonly distance: number;
-  /** Screen pixels per world unit at the origin's depth. */
   readonly zoom: number;
 }
 
 export interface Projected {
   readonly x: number;
   readonly y: number;
-  /** Distance in front of the origin's depth; negative is nearer. */
   readonly depth: number;
-  /** Perspective size relative to a dot at the origin's depth. */
   readonly size: number;
 }
 
-/** Turn the world by `yaw` radians about its vertical axis, tip it toward the camera by `pitch`, and project. */
 export const project = ({ pitch, distance, zoom }: Camera, yaw: number, p: Point): Projected => {
   const x = p.x * Math.cos(yaw) - p.z * Math.sin(yaw);
   const z = p.x * Math.sin(yaw) + p.z * Math.cos(yaw);

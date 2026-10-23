@@ -7,16 +7,13 @@ export const D = 28;
 
 export const CAM: Camera = { yaw: 34, pitch: 27, unit: 43 };
 
-/** Where the island's middle lands on the canvas. */
 export const ORIGIN = { x: 486, y: 462 } as const;
 
-/** World → canvas pixels. */
 export const at = (p: Vec3): Projected => {
   const q = project(CAM, p);
   return { x: q.x + ORIGIN.x, y: q.y + ORIGIN.y, depth: q.depth };
 };
 
-/** The story, in seconds. */
 export const T = {
   seed: 0.7,
   grow: 1.2,
@@ -103,9 +100,7 @@ export const alpha = (color: string, a: number): Color => {
   return `rgba(${r},${g},${b},${a})` as Color;
 };
 
-/** A color from a ramp at 0..1. */
 export const tone = (ramp: readonly string[], t: number): Color => ramp[Math.round(clamp(t) * (ramp.length - 1))] as Color;
 
-/** How much a surface at this world depth fades into the haze. */
 export const fog = (depth: number): number => clamp(0.01 + (depth + 12) * 0.007, 0, 0.11);
 export const hazed = (color: string, depth: number): Color => mix(color, C.haze, fog(depth));

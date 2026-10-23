@@ -2,10 +2,8 @@ import type { Attrs, Color } from "svg-motion";
 
 export const W = 1440;
 export const H = 1160;
-/** One turn of the star field. The rings turn 270° in the same time, which their 8-fold dots hide. */
 export const D = 70;
 
-/** Center of the black hole, its rings and its stars. */
 export const O = { x: 720, y: 741 } as const;
 
 export const C = {
@@ -33,5 +31,4 @@ export const random = (seed: number) => () => {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 
-/** The app window's outer edge. Its 8px inset frames the screenshot area. */
 export const FRAME = { x: 112, y: 697, width: 1216, height: 766 } as const;

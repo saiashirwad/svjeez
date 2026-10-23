@@ -13,7 +13,6 @@ const rng = random(4242);
 
 export const edgeRadius = (angle: number): number => R * (1 + 0.045 * Math.sin(3 * angle + 1.3) + 0.028 * Math.sin(7 * angle + 4.1) + 0.016 * Math.sin(11 * angle - 1.7));
 
-/** A gentle mossy mound, highest around the oak's roots. */
 export const height = (x: number, z: number): number => {
   const d = clamp(Math.hypot(x, z) / R);
   const mound = 0.42 * Math.exp(-(((x + 1.1) ** 2 + (z - 0.2) ** 2) / 7)) + 0.22 * Math.exp(-(((x - 2.7) ** 2 + (z + 1.7) ** 2) / 5));
@@ -56,7 +55,6 @@ const skirtPoint = (angle: number, layer: number): Vec3 => {
   return ring(angle, radius, y);
 };
 
-/** The underside: stacked, jagged bands of rock, each lit by the same low sun. */
 const skirt = (): Part[] => {
   const parts: Part[] = [];
   for (let l = 0; l < SKIRT; l++) {
@@ -114,7 +112,6 @@ const skirt = (): Part[] => {
   return parts;
 };
 
-/** The moss itself: one soft surface with a few broad, broken patches. */
 const surface = (): { readonly fill: SvgNode; readonly detail: SvgNode } => {
   const patch = random(77);
   const patches: SvgNode[] = [];
@@ -162,7 +159,6 @@ const surface = (): { readonly fill: SvgNode; readonly detail: SvgNode } => {
   };
 };
 
-/** The grassy fringe spilling over the rim. */
 const fringe = (): { readonly back: Part[]; readonly front: Part[] } => {
   const edge = topEdge();
   const center = at([0, 0, 0]);
@@ -191,7 +187,6 @@ const fringe = (): { readonly back: Part[]; readonly front: Part[] } => {
   return { back, front };
 };
 
-/** The island: a mossy cap, a banded rock underside, and the roots of the world. */
 export const island = (): SvgNode => {
   const surfaceNode = surface();
   const skirtParts = skirt();
@@ -199,5 +194,4 @@ export const island = (): SvgNode => {
   return el.g({}, [layer([...skirtParts, ...rim.back]), surfaceNode.fill, surfaceNode.detail, layer(rim.front)]);
 };
 
-/** Full island bounds, for scattering plants. */
 export const inside = (x: number, z: number, margin = 0.6): boolean => Math.hypot(x, z) < edgeRadius(Math.atan2(z, x)) - margin;

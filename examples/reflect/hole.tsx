@@ -1,7 +1,6 @@
 import { def, ease, el, motion, sampled, wiggle, type SvgNode } from "svg-motion";
 import { C, D, FRAME, O, random } from "./theme";
 
-/** Rotate about the hole's center, which is the local origin inside `translate(O)`. */
 const pivot = { transformBox: "view-box", transformOrigin: "0 0" } as const;
 
 const centered = `translate(${O.x} ${O.y})`;
@@ -13,13 +12,11 @@ const vignette = def.radialGradient({}, (
   </>
 ));
 
-/** The black hole's own soft edge: a 1440×810 ellipse, opaque to 61% of its radius. */
 const fade = def.mask(
   { maskUnits: "userSpaceOnUse", x: 0, y: 344, width: 1440, height: 810 },
   <rect x={0} y={344} width={1440} height={810} fill={vignette} />,
 );
 
-/** Only each ring's crown shows: 60% at 9% of its height, gone by 30%. */
 const crown = (r: number) => {
   const box = { x: -r - 8, y: -r - 8, width: 2 * r + 16, height: 2 * r + 16 };
   const ramp = def.linearGradient({ gradientUnits: "userSpaceOnUse", x1: 0, y1: -r, x2: 0, y2: r }, [
@@ -35,7 +32,6 @@ const ORBITS = [
   { r: 208, opacity: 1, turns: false },
 ] as const;
 
-/** 270° per scene: a multiple of the dots' 45° spacing, so the loop seam is invisible. */
 const orbit = motion({ rotate: 0 }).to({ rotate: 270 }, D, ease.linear);
 
 export function Orbits(): SvgNode {
@@ -60,7 +56,6 @@ export function Orbits(): SvgNode {
 
 const rand = random(2023);
 
-/** The star field's radial mask: a ring from 27% to 100% of its 350px radius, brightest at 48%. */
 const ringAlpha = (u: number): number => {
   if (u < 0.2708 || u > 1) return 0;
   if (u < 0.4792) return (u - 0.2708) / (0.4792 - 0.2708);
@@ -84,7 +79,6 @@ const STARS = Array.from({ length: 150 }, (_, i) => {
   };
 }).filter((star) => star.alpha > 0.04);
 
-/** Lights up in the first tenth of its cycle, then drifts off and shrinks to half. */
 const twinkle = ({ period, phase, dx, dy }: (typeof STARS)[number]) =>
   sampled(
     (t) => {
@@ -108,10 +102,6 @@ export function Stars(): SvgNode {
   );
 }
 
-/**
- * The lensed photon rings and the shadow inside them, as one radial gradient. A gradient is soft for
- * free; a blur over the turning shimmer would re-run every frame.
- */
 const lensing = def.radialGradient({ gradientUnits: "userSpaceOnUse", cx: 0, cy: 0, r: 170 }, (
   <>
     <stop offset={0} stopColor="#2E1478" />
@@ -156,7 +146,6 @@ const SHIMMER = [
   { r: 138, width: 7, color: "#B58CFF", opacity: 0.15, turns: -3, dash: "60 90 140 50" },
 ] as const;
 
-/** Matter streaming around the photon rings: dashed strokes, each lapping a whole number of times per scene. */
 function Shimmer(): SvgNode {
   return (
     <g fill="none" strokeLinecap="round">
@@ -179,7 +168,6 @@ function Shimmer(): SvgNode {
 
 const above = def.clipPath({}, <rect width={1440} height={FRAME.y + 8} />);
 
-/** The part of the hole above the app window, in focus. */
 export function Hole(): SvgNode {
   return (
     <g clipPath={above}>
@@ -222,10 +210,6 @@ const spill = def.radialGradient({}, (
   </>
 ));
 
-/**
- * The rest of the hole, seen through the window's frosted glass. Painted pre-blurred: a real blur
- * behind the window would re-run whenever anything under it moves.
- */
 export function Frost(): SvgNode {
   return (
     <g clipPath={glass} animation={wiggle({ opacity: 0.1 }, { seed: "frost", rate: 0.4, period: D / 5 })}>

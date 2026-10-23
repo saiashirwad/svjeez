@@ -9,7 +9,6 @@ const CY = 300;
 
 const DOTS = 320;
 const FLOOR = -160;
-/** Share of a morph the dots spend waiting their turn, top first. */
 const SPREAD = 0.4;
 const TAU = Math.PI * 2;
 
@@ -32,7 +31,6 @@ interface Act {
   readonly surface: Surface;
   readonly caption: string;
   readonly hold: number;
-  /** Seconds to become the next act's surface. */
   readonly morph: number;
 }
 
@@ -57,10 +55,8 @@ const shapeAt = (s: Seat, t: number): Point => {
   return lerp(act.surface(s), next.surface(s), smooth(clamp((progress - lag) / (1 - SPREAD))));
 };
 
-/** Near dots are bright, far ones sink into the dark. */
 const fog = (depth: number) => clamp(0.95 - ((depth + 150) / 300) * 0.75, 0.15, 1);
 
-/** The camera circles once a loop while every dot flows one lap along its shape the other way. */
 const flight = (s: Seat) =>
   sampled(
     (t) => {
@@ -79,7 +75,6 @@ const mix = (a: string, b: string, t: number): Color =>
 
 const PALETTE = [C.cyan, C.violet, C.pink] as const;
 
-/** Three bands of color along the spine, so the flow reads. */
 const tint = (along: number): Color => {
   const u = (along * PALETTE.length) % PALETTE.length;
   const k = Math.floor(u);
@@ -102,7 +97,6 @@ const underglow = def.radialGradient({}, (
 
 const PULSES = ACTS.map((act, i) => STARTS[i]! + act.hold);
 
-/** Circles on the floor stay circles as the camera yaws, so they are drawn once. Each morph sends a pulse out across them. */
 function Floor(): SvgNode {
   const radii = Array.from({ length: 9 }, (_, k) => 60 + k * 40);
   const ring = (r: number) =>
@@ -146,7 +140,6 @@ function Cloud(): SvgNode {
   );
 }
 
-/** Each caption rises in as its shape settles and lifts out when the next morph begins. */
 const captionMotion = (start: number, hold: number): Motion<"opacity" | "y"> => {
   const shown = { opacity: 1, y: 0 };
   const below = { opacity: 0, y: 6 };

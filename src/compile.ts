@@ -10,11 +10,9 @@ export interface Canvas {
   readonly width: number;
   readonly height: number;
   readonly duration: number;
-  /** Freeze time for prefers-reduced-motion; undefined turns it off. */
   readonly stillAt?: number;
 }
 
-/** One lane of one motion, resolved against the element it animates. */
 interface Lane {
   readonly key: string;
   readonly backend: Backend;
@@ -23,7 +21,6 @@ interface Lane {
   readonly period: number;
   readonly snapped: number;
   readonly nest: boolean;
-  /** A step 0/1 opacity lane: visibility is cheaper to animate and looks the same. */
   readonly discrete: boolean;
   readonly label?: string;
 }
@@ -31,7 +28,6 @@ interface Lane {
 interface State {
   readonly canvas: Canvas;
   readonly ids: Map<AnyRef, string>;
-  /** Generated blur filters, keyed by their lane, so identical blurs share one def. */
   readonly blurs: Map<string, string>;
   readonly properties: Map<Property, string>;
   readonly registrations: string[];
@@ -130,7 +126,6 @@ const startValue = (el: Element, channel: Target, backend: Backend, given: Targe
   throw new Error(`${channel} on <${el.tag}> has no starting value. Pass it to motion({ ${channel}: … }) or set the attribute.`);
 };
 
-/** Every key is 0 or 1 and every change is a single step, so opacity and visibility are interchangeable. */
 const isDiscrete = (keys: readonly Key[]): boolean =>
   keys.every((key, index) => {
     const value = key.values.opacity;
@@ -185,11 +180,6 @@ const collides = (el: Element, lane: Lane): boolean =>
     return row.collidesWith?.some((name) => name in el.attrs) || (row.wrapsOn as readonly string[] | undefined)?.includes(el.tag);
   });
 
-/**
- * `animation={[a, b]}` renders as if index 0 were the outermost <g>. Replace lanes act on the element.
- * Nest lanes land first-fit, innermost motion first: on the current target if their lanes are free and
- * no static attribute collides, else on a new wrapper that becomes the current target.
- */
 const placeLanes = (el: Element, layers: readonly Lane[][]): Lane[][] => {
   const shells: Lane[][] = [[]];
   const taken = (shell: Lane[], key: string) => shell.some((lane) => lane.key === key);
@@ -316,7 +306,6 @@ export interface Compiled {
   readonly css: string;
 }
 
-/** Walk the tree once: refs become ids and <defs>, motions become classes, keyframes, wrappers and <animate>s. */
 export const compile = (content: readonly SvgNode[], canvas: Canvas, author: string | Css = ""): Compiled => {
   const state: State = {
     canvas,

@@ -5,7 +5,6 @@ import { LIGHTS } from "./world";
 
 type Keys = readonly (readonly [Seconds, Color])[];
 
-/** Hold the first color, then ease to each next one by its time. */
 function grade(first: Color, keys: Keys): Motion<"stopColor"> {
   let track = motion({ stopColor: first });
   let from = 0;
@@ -58,7 +57,6 @@ const halo = (color: Color) =>
     </>
   ));
 
-/** The sun is up from its rise to its set a lap of the loop later, so it is already high at t = 0. */
 const SUN_UP = D - BEAT.sunRise + BEAT.night;
 
 const sunPath = (t: Seconds) => {
@@ -106,13 +104,11 @@ const CLOUDS = [
 const SKY_HEIGHT = 12;
 const MARGIN = 280;
 
-/** A cloud slides along the world's x - z diagonal, which the camera sees as straight across. */
 const wind = (cells: number) => CAMERA.project([cells, 0, -cells]);
 const TRAVEL = (W + 2 * MARGIN) / wind(1).x;
 
 const CELLS = Array.from({ length: 6400 }, (_, i): readonly [number, number] => [(i % 80) - 40, Math.floor(i / 80) - 40]);
 
-/** The cell on the cloud layer that lands nearest a screen point. */
 const cellNear = ([sx, sy]: readonly [number, number]): readonly [number, number] => {
   const miss = ([x, z]: readonly [number, number]) => {
     const p = CAMERA.project([x, SKY_HEIGHT, z]);
@@ -159,7 +155,6 @@ const dark = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
   </>
 ));
 
-/** Warm light at dusk and again at dawn, then the dark between, over everything but the stars and the glow. */
 export function Night(): SvgNode {
   const evening = motion({ opacity: 0 })
     .at(BEAT.dusk).to({ opacity: 0.45 }, BEAT.dim - BEAT.dusk, ease.inOut)
@@ -183,7 +178,6 @@ const lamplight = def.radialGradient({}, (
   </>
 ));
 
-/** Drawn above the dark, so the windows and the lantern stay warm. */
 export function Glow(): SvgNode {
   const lit = motion({ opacity: 0 }).at(BEAT.lights).to({ opacity: 1 }, BEAT.sunset - BEAT.lights).at(BEAT.lightsOut).to({ opacity: 0 }, 1.5, ease.inOut);
   return (
@@ -200,7 +194,6 @@ const FLAKES = 120;
 const FLAKE_TOP = 24;
 const GROUND = 3;
 
-/** A flake waits offscreen for its turn, falls for `fall` seconds, fades as it lands, and rests unseen until the loop restarts. */
 const flake = (x: number, z: number, wait: Seconds, fall: Seconds, period: Seconds, phase: number) =>
   sampled(
     (t) => {
@@ -234,7 +227,6 @@ const shade = def.radialGradient({}, (
   </>
 ));
 
-/** The island's shadow on the haze below it. */
 export function Shadow(): SvgNode {
   const { x, y } = CAMERA.project([GRID / 2, -6, GRID / 2]);
   const life = motion({ opacity: 0 }).at(BEAT.rise).to({ opacity: 1 }, 4).at(BEAT.void).to({ opacity: 0 }, 4);

@@ -4,7 +4,6 @@ const round = (n: number, places = 3): number => {
   return Object.is(value, -0) ? 0 : value;
 };
 
-/** Compact, deterministic number formatting for SVG and CSS output. */
 export const num = (value: number, places = 3): string => {
   if (!Number.isFinite(value)) throw new Error(`Expected a finite number, received ${value}`);
   return String(round(value, places));
@@ -21,7 +20,6 @@ export const escapeText = (value: string): string => escape(value);
 export const escapeAttr = (value: string): string =>
   escape(value).replaceAll('"', "&quot;");
 
-/** CSS property names use kebab-case; preserve custom properties and vendor prefixes. */
 export const kebab = (property: string): string => {
   if (property.startsWith("--") || property.includes("-")) return property;
   return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);

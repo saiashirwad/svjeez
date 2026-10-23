@@ -28,7 +28,6 @@ const HEX = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
 /** The 8-digit forms carry alpha; `#rgb` and `#rrggbb` are always solid. */
 const alphaOf = (color: Hex): number => (color.length === 9 ? parseInt(color.slice(7), 16) : 255);
 
-/** One path per color, so a shade only has to change the fills. */
 const runs = (rows: readonly (readonly (Hex | null)[])[], color: Hex): string =>
   rows
     .flatMap((row, y) => {
@@ -47,9 +46,7 @@ class Grid {
   private static count = 0;
   readonly id = Grid.count++;
   readonly opaque: boolean;
-  /** Colors in first-appearance order. */
   readonly colors: readonly Hex[];
-  /** The commonest color, which backs a solid texture so no seam shows between runs. */
   readonly base: Hex | undefined;
   readonly paths: ReadonlyMap<Hex, string>;
 
@@ -78,7 +75,6 @@ const gridOf = (texture: Texture): Grid => texture as unknown as Grid;
 
 export const idOf = (texture: Texture): number => gridOf(texture).id;
 
-/** Whether every pixel is solid, so a block wearing it hides what is behind it. */
 export const isOpaque = (texture: Texture): boolean => gridOf(texture).opaque;
 
 const channels = (color: Hex): readonly [number, number, number, number] => {
@@ -131,10 +127,6 @@ const symbolOf = (grid: Grid, shade: number): Ref<"symbol"> => {
   return symbol;
 };
 
-/**
- * The texture on the screen parallelogram `origin`, `origin + u`, `origin + v`, grown by `bleed` of an edge on every
- * side so faces that abut leave no antialiased seam.
- */
 export const face = (texture: Texture, shade: number, origin: Point, u: Point, v: Point, bleed: number): SvgNode => {
   const grid = gridOf(texture);
   const grow = 1 + 2 * bleed;

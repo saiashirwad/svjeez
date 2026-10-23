@@ -91,10 +91,6 @@ const WAVES = Array.from({ length: 6 }, (_, w) => ({
   }),
 }));
 
-/**
- * Falling in: starlight streaks past from the center. Each wave is one group scaling out from the
- * origin, so 90 streaks cost 6 animations; non-scaling strokes keep them thin as they stretch.
- */
 export function Warp(): SvgNode {
   return (
     <g stroke="#DCE6FF" strokeLinecap="round">

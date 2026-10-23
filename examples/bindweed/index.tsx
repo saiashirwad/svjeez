@@ -42,7 +42,6 @@ const n = (value: number): string => (Math.round(value * 10) / 10).toString();
 
 const at = (points: readonly P[], index: number): P => points[Math.max(0, Math.min(points.length - 1, index))]!;
 
-/** A smooth Catmull-Rom path through points. Closed paths return to the first point. */
 const smoothPath = (points: readonly P[], closed = false): string => {
   if (points.length === 0) return "";
   const wrapped = (index: number): P => points[closed ? (index + points.length) % points.length : Math.max(0, Math.min(points.length - 1, index))]!;
@@ -59,9 +58,6 @@ const smoothPath = (points: readonly P[], closed = false): string => {
 };
 
 const polar = (radius: number, angle: number): P => ({ x: Math.cos(angle) * radius, y: Math.sin(angle) * radius });
-
-// ---------------------------------------------------------------------------
-// The meadow stalk and the vine that winds around it
 
 const clamp01 = (t: number): number => Math.max(0, Math.min(1, t));
 
@@ -180,9 +176,6 @@ const shootTip = ((): string => {
   ];
   return smoothPath([before, end, ...hook.map((offset) => ({ x: end.x + offset.x, y: end.y + offset.y }))]);
 })();
-
-// ---------------------------------------------------------------------------
-// Leaves
 
 interface LeafSite {
   readonly y: number;
@@ -331,9 +324,6 @@ const leafAt = (site: LeafSite): LeafProps => {
 };
 
 const LEAVES = LEAF_SITES.map(leafAt);
-
-// ---------------------------------------------------------------------------
-// Flowers
 
 const WHITE_FACE = def.radialGradient({ cx: 0.5, cy: 0.48, r: 0.72 }, (
   <>
@@ -620,9 +610,6 @@ const Bud = ({ stem, size, seed }: BudProps): SvgNode => (
   </g>
 );
 
-// ---------------------------------------------------------------------------
-// Atmosphere
-
 const BG = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
   <>
     <stop offset={0} stopColor={C.paperTop} />
@@ -831,9 +818,6 @@ const Foreground = (): SvgNode => (
     ))}
   </g>
 );
-
-// ---------------------------------------------------------------------------
-// A dacha garden outside Moscow: birches, a grey picket fence, chamomile, cornflowers, dandelion clocks
 
 const hash = (seed: number): number => {
   const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
@@ -1092,9 +1076,6 @@ const Garden = (): SvgNode => (
     ))}
   </>
 );
-
-// ---------------------------------------------------------------------------
-// Scene
 
 const dewGlint = motion({ opacity: 0.55 })
   .at(2)

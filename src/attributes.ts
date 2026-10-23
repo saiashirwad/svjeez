@@ -85,7 +85,6 @@ const GRADIENT = {
   gradientTransform: attr<string>("gradientTransform"),
 } as const;
 
-/** One table: JSX prop name → serialized attribute name and value type, per tag. */
 const ELEMENTS = {
   g: PRESENTATION,
   path: { ...SHAPE, d: attr<string>("d") },

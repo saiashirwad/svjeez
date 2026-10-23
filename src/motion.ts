@@ -41,7 +41,6 @@ export const ease = {
 
 export interface Step {
   readonly start: Seconds;
-  /** 0 for a hard cut. */
   readonly over: Seconds;
   readonly ease: Ease;
   readonly values: TargetValues;
@@ -103,7 +102,6 @@ const checkValues = (values: TargetValues): TargetValues => {
 
 const end = (step: Step): Seconds => step.start + step.over;
 
-/** Float slack for contiguous steps built from divided periods. */
 const EPSILON = 1e-9;
 
 const sharedLane = (a: TargetValues, b: TargetValues): Target | undefined =>

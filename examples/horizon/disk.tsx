@@ -10,7 +10,6 @@ interface Ring {
   readonly t: number;
   readonly width: number;
   readonly dash: string;
-  /** Turns per scene. Keplerian: the inner edge laps the rim about eight times. */
   readonly laps: number;
 }
 
@@ -26,7 +25,6 @@ const RING: readonly Ring[] = Array.from({ length: RINGS }, (_, i) => {
 const far = def.clipPath({}, <rect x={-OUTER - 120} y={-OUTER - 120} width={2 * OUTER + 240} height={OUTER + 120} />);
 const near = def.clipPath({}, <rect x={-OUTER - 120} y={0} width={2 * OUTER + 240} height={OUTER + 120} />);
 
-/** Doppler beaming: the side rushing toward us is brighter. */
 const beam = def.linearGradient({ x1: 0, y1: 0, x2: 1, y2: 0 }, (
   <>
     <stop offset={0} stopColor="white" />
@@ -52,7 +50,6 @@ const haze = def.radialGradient({}, (
   </>
 ));
 
-/** Matter forms the disk outside-in and is swallowed with it. */
 const arrive = (t: number) => T.accrete + (1 - t) * 1.3;
 
 const band = ({ r, t, width, dash, laps }: Ring): SvgNode[] => {
@@ -90,7 +87,6 @@ const DEBRIS = Array.from({ length: 34 }, (_, i) => ({
   size: 1.4 + rand() * 1.8,
 }));
 
-/** Stray matter spiralling in, out of step with itself. */
 function Debris(): SvgNode {
   return (
     <g fill={C.white}>
@@ -119,7 +115,6 @@ const swallow = motion({ opacity: 1, scale: 1, rotate: 0 })
   .set({ scale: 1, rotate: 0 })
   .to({ opacity: 1 }, 1);
 
-/** Half the disk: the far half goes behind the shadow, the near half in front of it. */
 export function Disk({ half }: { half: "far" | "near" }): SvgNode {
   return (
     <g transform={TILT}>
@@ -132,7 +127,6 @@ export function Disk({ half }: { half: "far" | "near" }): SvgNode {
   );
 }
 
-/** The glow and the debris, drawn once behind the shadow. Neither needs the near copy's overlap. */
 export function Aura(): SvgNode {
   return (
     <g transform={TILT}>
@@ -149,7 +143,6 @@ export function Aura(): SvgNode {
   );
 }
 
-/** The ignition shockwave, riding out along the disk plane and across the screen. */
 export function Shock(): SvgNode {
   const burst = (scale: number, over: number) =>
     motion({ scale: 1, opacity: 0 })

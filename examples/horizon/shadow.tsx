@@ -14,14 +14,9 @@ const lensed = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
   </>
 ));
 
-/** An elliptical arc over the top (`over`) or under the bottom of the shadow. */
 const arch = (rx: number, ry: number, over: boolean): string =>
   `M${-rx} ${over ? 4 : -4}A${rx} ${ry} 0 0 ${over ? 1 : 0} ${rx} ${over ? 4 : -4}`;
 
-/**
- * The shadow, its photon ring, and the far disk bent over the top by lensing. One group, so when we
- * fall in, the light it bends sweeps out past the edges of the screen with it.
- */
 export function Shadow(): SvgNode {
   const life = motion({ scale: 0.01, opacity: 0 })
     .at(T.open)
@@ -56,7 +51,6 @@ const beam = (dir: 1 | -1) =>
     </>
   ));
 
-/** Plasma knots: one dashed line marching one dash-pitch per loop, read as a stream of particles. */
 const PITCH = 70;
 
 function Jet({ dir }: { dir: 1 | -1 }): SvgNode {
@@ -75,7 +69,6 @@ function Jet({ dir }: { dir: 1 | -1 }): SvgNode {
   ]);
 }
 
-/** Relativistic jets along the spin axis, perpendicular to the tilted disk. */
 export function Jets(): SvgNode {
   return (
     <g
