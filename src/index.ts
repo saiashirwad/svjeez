@@ -10,3 +10,4 @@ export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 export type { Channel, Values } from "./channels";
 export type { SvgNode, Child } from "./svg";
 export { validateSvg } from "./validate";
+export { voxel, type Block, type Scene, type Camera, type Vec3, type Skin, type Face, type Texture } from "./voxel";
