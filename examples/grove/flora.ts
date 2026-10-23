@@ -334,8 +334,8 @@ export const fern = (base: Vec3, seed: number): Stand => {
   for (let f = 0; f < fronds; f++) {
     const azimuth = start + (f / fronds) * TAU + (rng() - 0.5) * 0.3;
     const dir: Vec3 = [Math.cos(azimuth), 0, Math.sin(azimuth)];
-    const reach = 1.15 + rng() * 0.6;
-    const lift = 0.95 + rng() * 0.5;
+    const reach = 1.45 + rng() * 0.75;
+    const lift = 1.15 + rng() * 0.6;
     const mid = add(base, add(mul(dir, reach * 0.48), [0, lift * 0.92, 0]));
     const tip = add(base, add(mul(dir, reach), [0, lift * 0.36, 0]));
     const spine = Array.from({ length: 8 }, (_, i) => {
@@ -352,7 +352,7 @@ export const fern = (base: Vec3, seed: number): Stand => {
         const tangent = unit(sub(pointAt(spine, Math.min(1, t + 0.02)), pointAt(spine, Math.max(0, t - 0.02))));
         const across = unit(cross(tangent, UP));
         const facing = unit(add(add(mul(across, side * 0.94), mul(tangent, 0.26)), mul(UP, 0.12)));
-        const pinna = (0.17 + 0.22 * (1 - t)) * (0.7 + rng() * 0.5);
+        const pinna = (0.24 + 0.28 * (1 - t)) * (0.7 + rng() * 0.45);
         const flank = unit(cross(facing, UP));
         const basePoint = add(point, mul(across, side * 0.02));
         const tipPoint = add(basePoint, mul(facing, pinna));
@@ -462,23 +462,24 @@ export const flowers = (base: Vec3, seed: number, kind: FlowerKind): Stand => {
 /** A tuft of grass blades: one ribbon per blade, two tones per tuft. */
 export const tuft = (base: Vec3, seed: number): Stand => {
   const rng = random(seed);
-  const blades = 6 + Math.floor(rng() * 5);
+  const blades = 9 + Math.floor(rng() * 6);
   const dark: string[] = [];
   const light: string[] = [];
   for (let i = 0; i < blades; i++) {
     const azimuth = rng() * TAU;
-    const height = 0.42 + rng() * 0.62;
-    const bendAmount = 0.12 + rng() * 0.36;
+    const accent = i < 2 ? 1.5 : 1;
+    const height = (0.16 + rng() * 0.3) * accent;
+    const bendAmount = 0.05 + rng() * 0.16;
     const tip = add(base, [Math.cos(azimuth) * bendAmount, height, Math.sin(azimuth) * bendAmount]);
-    const mid = add(base, [Math.cos(azimuth) * bendAmount * 2.1, height * 0.58, Math.sin(azimuth) * bendAmount * 2.1]);
+    const mid = add(base, [Math.cos(azimuth) * bendAmount * 1.8, height * 0.56, Math.sin(azimuth) * bendAmount * 1.8]);
     const points: P2[] = [];
     const widths: number[] = [];
     for (let k = 0; k < 5; k++) {
       const t = k / 4;
       points.push(at(add(add(mul(base, (1 - t) * (1 - t)), mul(mid, 2 * (1 - t) * t)), mul(tip, t * t))));
-      widths.push(Math.max(0.35, (2.4 + rng() * 1.6) * (1 - t * 0.86)));
+      widths.push(Math.max(0.3, (1.1 + rng() * 1.1) * (1 - t * 0.82)));
     }
-    const bright = i === 0 ? false : i === 1 ? true : rng() < 0.44;
+    const bright = i === 0 ? false : i === 1 ? true : rng() < 0.42;
     (bright ? light : dark).push(tapered(points, widths));
   }
   const spot = at(base);

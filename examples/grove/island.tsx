@@ -87,57 +87,57 @@ const skirt = (): Part[] => {
     }
   }
 
-  const tip: Vec3[] = Array.from({ length: SECTORS }, (_, s) => {
+  const cap: Vec3[] = Array.from({ length: SECTORS }, (_, s) => {
     const angle = (s / SECTORS) * TAU;
-    return ring(angle, 0.32 * edgeRadius(angle), -5.05 - 0.35 * Math.sin(angle * 3 + 1));
+    return ring(angle, 0.12 * edgeRadius(angle), -4.35 - 0.18 * Math.sin(angle * 3 + 1));
   });
-  parts.push({ depth: at([0, -5, 0]).depth, node: el.path({ d: smooth(tip.map(at), true), fill: "#172628", stroke: "#172628", strokeWidth: 0.8 }) });
+  parts.push({ depth: at([0, -4.3, 0]).depth, node: el.path({ d: smooth(cap.map(at), true), fill: "#0d191b", stroke: "#0d191b", strokeWidth: 0.8 }) });
 
-  for (let i = 0; i < 7; i++) {
-    const angle = (i / 7) * TAU + 0.4;
-    const start = ring(angle, edgeRadius(angle) * (0.5 + rng() * 0.24), -2.8 - rng() * 0.9);
-    const end = add(start, [Math.cos(angle) * (0.2 + rng() * 0.3), -1.1 - rng() * 1.5, Math.sin(angle) * (0.2 + rng() * 0.3)]);
-    const mid = add(start, [Math.cos(angle) * 0.8, -0.5, Math.sin(angle) * 0.8]);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * TAU + 0.7;
+    const start = ring(angle, edgeRadius(angle) * (0.28 + rng() * 0.2), -2.4 - rng() * 0.8);
+    const mid = add(start, [Math.cos(angle) * 0.24, -0.5 - rng() * 0.4, Math.sin(angle) * 0.24]);
+    const end = add(start, [Math.cos(angle) * (0.42 + rng() * 0.2), -1.1 - rng() * 0.9, Math.sin(angle) * (0.42 + rng() * 0.2)]);
     const points = [start, mid, end].map(at);
     const depth = points.reduce((sum, p) => sum + p.depth, 0) / 3;
     parts.push({
       depth,
-      node: el.path({ d: tapered(points, [5.2, 3.4, 1.1]), fill: "#3c2f24", opacity: 0.9 }),
+      node: el.path({ d: tapered(points, [3.2, 1.8, 0.4]), fill: "#221c16", opacity: 0.9 }),
     });
   }
   return parts;
 };
 
-/** The moss itself: one soft surface with a few broader patches and contour lines. */
+/** The moss itself: one soft surface with a few broad, broken patches. */
 const surface = (): { readonly fill: SvgNode; readonly detail: SvgNode } => {
-  const edge = topEdge();
   const patch = random(77);
   const patches: SvgNode[] = [];
-  for (let i = 0; i < 52; i++) {
+  for (let i = 0; i < 28; i++) {
     const angle = patch() * TAU;
-    const radius = Math.sqrt(patch()) * R * 0.9;
+    const radius = Math.sqrt(patch()) * R * 0.88;
     const center = ground(Math.cos(angle) * radius, Math.sin(angle) * radius);
-    const size = 0.22 + patch() * 0.78;
+    const size = 0.24 + patch() * 0.6;
     const toneIndex = patch();
-    const dirt = toneIndex > 0.94;
-    const color = dirt ? mix("#6a5a3e", tone(MOSS, 0.25), 0.35) : tone(MOSS, 0.14 + toneIndex * 0.62);
-    patches.push(el.path({ d: disc(center, [1, 0, 0], [0, 0, 1], size, at, 9), fill: color, opacity: 0.22 + patch() * 0.25 }));
+    const dirt = toneIndex > 0.95;
+    const color = dirt ? mix("#5f5038", tone(MOSS, 0.24), 0.4) : tone(MOSS, 0.1 + toneIndex * 0.55);
+    for (let lobe = 0; lobe < 3; lobe++) {
+      const shift = 0.5 * size;
+      const offset = ground(Math.cos(angle + lobe * 2.1) * shift, Math.sin(angle + lobe * 2.1) * shift);
+      patches.push(
+        el.path({
+          d: disc(add(center, [offset[0] * 0.4, 0, offset[2] * 0.4]), [1, 0, 0], [0, 0, 1], size * (0.45 + patch() * 0.3), at, 8),
+          fill: color,
+          opacity: 0.12 + patch() * 0.16,
+        }),
+      );
+    }
   }
 
-  const contours: SvgNode[] = [0.46, 0.68, 0.84].map((fraction, i) => {
-    const points = Array.from({ length: 64 }, (_, s) => {
-      const angle = (s / 64) * TAU;
-      const radius = R * fraction * (1 + 0.028 * Math.sin(angle * 5 + i));
-      return at(ground(Math.cos(angle) * radius, Math.sin(angle) * radius));
-    });
-    return el.path({ d: smooth(points, true), fill: "none", stroke: "#c6dfa0", strokeWidth: 0.9, opacity: 0.16 - i * 0.03 });
-  });
-
-  for (let i = 0; i < 8; i++) {
-    const angle = (i / 8) * TAU + 0.3;
-    const radius = R * (0.9 + rng() * 0.06);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * TAU + 0.3;
+    const radius = R * (0.9 + rng() * 0.05);
     const center = ground(Math.cos(angle) * radius, Math.sin(angle) * radius);
-    patches.push(el.path({ d: disc(center, [1, 0, 0], [0, 0, 1], 0.35 + rng() * 0.5, at, 8), fill: "#6b5a3d", opacity: 0.26 }));
+    patches.push(el.path({ d: disc(center, [1, 0, 0], [0, 0, 1], 0.25 + rng() * 0.35, at, 8), fill: "#5d4d35", opacity: 0.16 }));
   }
 
   return {
@@ -145,11 +145,7 @@ const surface = (): { readonly fill: SvgNode; readonly detail: SvgNode } => {
       el.path({ d: topPath(), fill: topFill }),
       el.path({ d: topPath(), fill: topShade }),
     ]),
-    detail: el.g({}, [
-      ...patches,
-      ...contours,
-      el.path({ d: topPath(), fill: "none", stroke: "#b8d68f", strokeWidth: 1.3, opacity: 0.55 }),
-    ]),
+    detail: el.g({}, [...patches, el.path({ d: topPath(), fill: "none", stroke: "#a8c97d", strokeWidth: 1.1, opacity: 0.42 })]),
   };
 };
 
@@ -165,17 +161,17 @@ const fringe = (): { readonly back: Part[]; readonly front: Part[] } => {
     const top = edge[s]!;
     const next = edge[(s + 1) % SECTORS]!;
     const out = unit([Math.cos(angle), 0, Math.sin(angle)]);
-    const width = 0.12 + rng() * 0.22;
-    const drop = 0.12 + rng() * 0.5;
+    const width = 0.09 + rng() * 0.16;
+    const drop = 0.08 + rng() * 0.34;
     const tangent = unit(sub(next, top));
     const p0 = add(top, mul(tangent, -width / 2));
     const p1 = add(top, mul(tangent, width / 2));
-    const tip = add(add(top, mul(out, 0.1 + rng() * 0.18)), [0, -drop, 0]);
+    const tip = add(add(top, mul(out, 0.06 + rng() * 0.12)), [0, -drop, 0]);
     const points = [p0, p1, tip].map(at);
     const depth = points.reduce((sum, p) => sum + p.depth, 0) / 3;
     const part: Part = {
       depth,
-      node: el.path({ d: `M${points.map((p) => `${p.x} ${p.y}`).join("L")}Z`, fill: tone(MOSS, 0.2 + rng() * 0.4), opacity: 0.95 }),
+      node: el.path({ d: `M${points.map((p) => `${p.x} ${p.y}`).join("L")}Z`, fill: tone(MOSS, 0.14 + rng() * 0.32), opacity: 0.95 }),
     };
     (depth > center.depth ? front : back).push(part);
   }
