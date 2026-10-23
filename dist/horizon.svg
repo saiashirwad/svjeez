@@ -623,202 +623,202 @@
 .m179{animation-name:k287}
 @keyframes k288{0%,26.5%{stroke-dashoffset:1;visibility:hidden}29.833%,100%{stroke-dashoffset:0;visibility:visible}}
 .m180{animation-name:k288}
-@keyframes k289{0%{opacity:0}26.667%,100%{opacity:1}}
+@keyframes k289{0%{visibility:hidden}26.667%,100%{visibility:visible}}
 .m181{animation-name:k289;animation-timing-function:steps(1)}
-@keyframes k290{0%{opacity:0}26.85%,100%{opacity:1}}
+@keyframes k290{0%{visibility:hidden}26.85%,100%{visibility:visible}}
 .m182{animation-name:k290;animation-timing-function:steps(1)}
-@keyframes k291{0%{opacity:0}27.033%,100%{opacity:1}}
+@keyframes k291{0%{visibility:hidden}27.033%,100%{visibility:visible}}
 .m183{animation-name:k291;animation-timing-function:steps(1)}
-@keyframes k292{0%{opacity:0}27.4%,100%{opacity:1}}
+@keyframes k292{0%{visibility:hidden}27.4%,100%{visibility:visible}}
 .m184{animation-name:k292;animation-timing-function:steps(1)}
-@keyframes k293{0%{opacity:0}27.583%,100%{opacity:1}}
+@keyframes k293{0%{visibility:hidden}27.583%,100%{visibility:visible}}
 .m185{animation-name:k293;animation-timing-function:steps(1)}
-@keyframes k294{0%{opacity:0}27.95%,100%{opacity:1}}
+@keyframes k294{0%{visibility:hidden}27.95%,100%{visibility:visible}}
 .m186{animation-name:k294;animation-timing-function:steps(1)}
-@keyframes k295{0%{opacity:0}28.133%,100%{opacity:1}}
+@keyframes k295{0%{visibility:hidden}28.133%,100%{visibility:visible}}
 .m187{animation-name:k295;animation-timing-function:steps(1)}
-@keyframes k296{0%{opacity:0}28.5%,100%{opacity:1}}
+@keyframes k296{0%{visibility:hidden}28.5%,100%{visibility:visible}}
 .m188{animation-name:k296;animation-timing-function:steps(1)}
-@keyframes k297{0%{opacity:0}28.683%,100%{opacity:1}}
+@keyframes k297{0%{visibility:hidden}28.683%,100%{visibility:visible}}
 .m189{animation-name:k297;animation-timing-function:steps(1)}
-@keyframes k298{0%{opacity:0}28.867%,100%{opacity:1}}
+@keyframes k298{0%{visibility:hidden}28.867%,100%{visibility:visible}}
 .m190{animation-name:k298;animation-timing-function:steps(1)}
-@keyframes k299{0%{opacity:0}29.05%,100%{opacity:1}}
+@keyframes k299{0%{visibility:hidden}29.05%,100%{visibility:visible}}
 .m191{animation-name:k299;animation-timing-function:steps(1)}
-@keyframes k300{0%{opacity:0}29.233%,100%{opacity:1}}
+@keyframes k300{0%{visibility:hidden}29.233%,100%{visibility:visible}}
 .m192{animation-name:k300;animation-timing-function:steps(1)}
-@keyframes k301{0%{opacity:0}29.6%,100%{opacity:1}}
+@keyframes k301{0%{visibility:hidden}29.6%,100%{visibility:visible}}
 .m193{animation-name:k301;animation-timing-function:steps(1)}
-@keyframes k302{0%{opacity:0}29.783%,100%{opacity:1}}
+@keyframes k302{0%{visibility:hidden}29.783%,100%{visibility:visible}}
 .m194{animation-name:k302;animation-timing-function:steps(1)}
-@keyframes k303{0%{opacity:0}29.967%,100%{opacity:1}}
+@keyframes k303{0%{visibility:hidden}29.967%,100%{visibility:visible}}
 .m195{animation-name:k303;animation-timing-function:steps(1)}
-@keyframes k304{0%{opacity:0}30.15%,100%{opacity:1}}
+@keyframes k304{0%{visibility:hidden}30.15%,100%{visibility:visible}}
 .m196{animation-name:k304;animation-timing-function:steps(1)}
-@keyframes k305{0%{opacity:0}30.333%,100%{opacity:1}}
+@keyframes k305{0%{visibility:hidden}30.333%,100%{visibility:visible}}
 .m197{animation-name:k305;animation-timing-function:steps(1)}
-@keyframes k306{0%{opacity:0}30.517%,100%{opacity:1}}
+@keyframes k306{0%{visibility:hidden}30.517%,100%{visibility:visible}}
 .m198{animation-name:k306;animation-timing-function:steps(1)}
-@keyframes k307{0%{opacity:0}30.7%,100%{opacity:1}}
+@keyframes k307{0%{visibility:hidden}30.7%,100%{visibility:visible}}
 .m199{animation-name:k307;animation-timing-function:steps(1)}
-@keyframes k308{0%{opacity:0}31.067%,100%{opacity:1}}
+@keyframes k308{0%{visibility:hidden}31.067%,100%{visibility:visible}}
 .m200{animation-name:k308;animation-timing-function:steps(1)}
-@keyframes k309{0%{opacity:0}31.25%,100%{opacity:1}}
+@keyframes k309{0%{visibility:hidden}31.25%,100%{visibility:visible}}
 .m201{animation-name:k309;animation-timing-function:steps(1)}
-@keyframes k310{0%{opacity:0}31.433%,100%{opacity:1}}
+@keyframes k310{0%{visibility:hidden}31.433%,100%{visibility:visible}}
 .m202{animation-name:k310;animation-timing-function:steps(1)}
-@keyframes k311{0%{opacity:0}31.617%,100%{opacity:1}}
+@keyframes k311{0%{visibility:hidden}31.617%,100%{visibility:visible}}
 .m203{animation-name:k311;animation-timing-function:steps(1)}
-@keyframes k312{0%{opacity:0}31.8%,100%{opacity:1}}
+@keyframes k312{0%{visibility:hidden}31.8%,100%{visibility:visible}}
 .m204{animation-name:k312;animation-timing-function:steps(1)}
-@keyframes k313{0%{opacity:0}29.167%,100%{opacity:1}}
+@keyframes k313{0%{visibility:hidden}29.167%,100%{visibility:visible}}
 .m205{animation-name:k313;animation-timing-function:steps(1)}
-@keyframes k314{0%{opacity:0}29.35%,100%{opacity:1}}
+@keyframes k314{0%{visibility:hidden}29.35%,100%{visibility:visible}}
 .m206{animation-name:k314;animation-timing-function:steps(1)}
-@keyframes k315{0%{opacity:0}29.533%,100%{opacity:1}}
+@keyframes k315{0%{visibility:hidden}29.533%,100%{visibility:visible}}
 .m207{animation-name:k315;animation-timing-function:steps(1)}
-@keyframes k316{0%{opacity:0}29.9%,100%{opacity:1}}
+@keyframes k316{0%{visibility:hidden}29.9%,100%{visibility:visible}}
 .m208{animation-name:k316;animation-timing-function:steps(1)}
-@keyframes k317{0%{opacity:0}30.083%,100%{opacity:1}}
+@keyframes k317{0%{visibility:hidden}30.083%,100%{visibility:visible}}
 .m209{animation-name:k317;animation-timing-function:steps(1)}
-@keyframes k318{0%{opacity:0}30.267%,100%{opacity:1}}
+@keyframes k318{0%{visibility:hidden}30.267%,100%{visibility:visible}}
 .m210{animation-name:k318;animation-timing-function:steps(1)}
-@keyframes k319{0%{opacity:0}30.45%,100%{opacity:1}}
+@keyframes k319{0%{visibility:hidden}30.45%,100%{visibility:visible}}
 .m211{animation-name:k319;animation-timing-function:steps(1)}
-@keyframes k320{0%{opacity:0}30.633%,100%{opacity:1}}
+@keyframes k320{0%{visibility:hidden}30.633%,100%{visibility:visible}}
 .m212{animation-name:k320;animation-timing-function:steps(1)}
-@keyframes k321{0%{opacity:0}30.817%,100%{opacity:1}}
+@keyframes k321{0%{visibility:hidden}30.817%,100%{visibility:visible}}
 .m213{animation-name:k321;animation-timing-function:steps(1)}
-@keyframes k322{0%{opacity:0}31%,100%{opacity:1}}
+@keyframes k322{0%{visibility:hidden}31%,100%{visibility:visible}}
 .m214{animation-name:k322;animation-timing-function:steps(1)}
-@keyframes k323{0%{opacity:0}31.183%,100%{opacity:1}}
+@keyframes k323{0%{visibility:hidden}31.183%,100%{visibility:visible}}
 .m215{animation-name:k323;animation-timing-function:steps(1)}
-@keyframes k324{0%{opacity:0}31.367%,100%{opacity:1}}
+@keyframes k324{0%{visibility:hidden}31.367%,100%{visibility:visible}}
 .m216{animation-name:k324;animation-timing-function:steps(1)}
-@keyframes k325{0%{opacity:0}31.55%,100%{opacity:1}}
+@keyframes k325{0%{visibility:hidden}31.55%,100%{visibility:visible}}
 .m217{animation-name:k325;animation-timing-function:steps(1)}
-@keyframes k326{0%{opacity:0}32.1%,100%{opacity:1}}
+@keyframes k326{0%{visibility:hidden}32.1%,100%{visibility:visible}}
 .m218{animation-name:k326;animation-timing-function:steps(1)}
-@keyframes k327{0%{opacity:0}32.283%,100%{opacity:1}}
+@keyframes k327{0%{visibility:hidden}32.283%,100%{visibility:visible}}
 .m219{animation-name:k327;animation-timing-function:steps(1)}
-@keyframes k328{0%{opacity:0}32.467%,100%{opacity:1}}
+@keyframes k328{0%{visibility:hidden}32.467%,100%{visibility:visible}}
 .m220{animation-name:k328;animation-timing-function:steps(1)}
-@keyframes k329{0%{opacity:0}32.833%,100%{opacity:1}}
+@keyframes k329{0%{visibility:hidden}32.833%,100%{visibility:visible}}
 .m221{animation-name:k329;animation-timing-function:steps(1)}
-@keyframes k330{0%{opacity:0}33.017%,100%{opacity:1}}
+@keyframes k330{0%{visibility:hidden}33.017%,100%{visibility:visible}}
 .m222{animation-name:k330;animation-timing-function:steps(1)}
-@keyframes k331{0%{opacity:0}33.2%,100%{opacity:1}}
+@keyframes k331{0%{visibility:hidden}33.2%,100%{visibility:visible}}
 .m223{animation-name:k331;animation-timing-function:steps(1)}
-@keyframes k332{0%{opacity:0}33.75%,100%{opacity:1}}
+@keyframes k332{0%{visibility:hidden}33.75%,100%{visibility:visible}}
 .m224{animation-name:k332;animation-timing-function:steps(1)}
-@keyframes k333{0%{opacity:0}33.933%,100%{opacity:1}}
+@keyframes k333{0%{visibility:hidden}33.933%,100%{visibility:visible}}
 .m225{animation-name:k333;animation-timing-function:steps(1)}
-@keyframes k334{0%{opacity:0}34.117%,100%{opacity:1}}
+@keyframes k334{0%{visibility:hidden}34.117%,100%{visibility:visible}}
 .m226{animation-name:k334;animation-timing-function:steps(1)}
-@keyframes k335{0%{opacity:0}34.3%,100%{opacity:1}}
+@keyframes k335{0%{visibility:hidden}34.3%,100%{visibility:visible}}
 .m227{animation-name:k335;animation-timing-function:steps(1)}
-@keyframes k336{0%{opacity:0}27.5%,100%{opacity:1}}
+@keyframes k336{0%{visibility:hidden}27.5%,100%{visibility:visible}}
 .m228{animation-name:k336;animation-timing-function:steps(1)}
-@keyframes k337{0%{opacity:0}27.683%,100%{opacity:1}}
+@keyframes k337{0%{visibility:hidden}27.683%,100%{visibility:visible}}
 .m229{animation-name:k337;animation-timing-function:steps(1)}
-@keyframes k338{0%{opacity:0}27.867%,100%{opacity:1}}
+@keyframes k338{0%{visibility:hidden}27.867%,100%{visibility:visible}}
 .m230{animation-name:k338;animation-timing-function:steps(1)}
-@keyframes k339{0%{opacity:0}28.05%,100%{opacity:1}}
+@keyframes k339{0%{visibility:hidden}28.05%,100%{visibility:visible}}
 .m231{animation-name:k339;animation-timing-function:steps(1)}
-@keyframes k340{0%{opacity:0}28.6%,100%{opacity:1}}
+@keyframes k340{0%{visibility:hidden}28.6%,100%{visibility:visible}}
 .m232{animation-name:k340;animation-timing-function:steps(1)}
-@keyframes k341{0%{opacity:0}28.783%,100%{opacity:1}}
+@keyframes k341{0%{visibility:hidden}28.783%,100%{visibility:visible}}
 .m233{animation-name:k341;animation-timing-function:steps(1)}
-@keyframes k342{0%{opacity:0}28.967%,100%{opacity:1}}
+@keyframes k342{0%{visibility:hidden}28.967%,100%{visibility:visible}}
 .m234{animation-name:k342;animation-timing-function:steps(1)}
-@keyframes k343{0%{opacity:0}29.15%,100%{opacity:1}}
+@keyframes k343{0%{visibility:hidden}29.15%,100%{visibility:visible}}
 .m235{animation-name:k343;animation-timing-function:steps(1)}
-@keyframes k344{0%{opacity:0}29.333%,100%{opacity:1}}
+@keyframes k344{0%{visibility:hidden}29.333%,100%{visibility:visible}}
 .m236{animation-name:k344;animation-timing-function:steps(1)}
-@keyframes k345{0%{opacity:0}29.517%,100%{opacity:1}}
+@keyframes k345{0%{visibility:hidden}29.517%,100%{visibility:visible}}
 .m237{animation-name:k345;animation-timing-function:steps(1)}
-@keyframes k346{0%{opacity:0}29.7%,100%{opacity:1}}
+@keyframes k346{0%{visibility:hidden}29.7%,100%{visibility:visible}}
 .m238{animation-name:k346;animation-timing-function:steps(1)}
-@keyframes k347{0%{opacity:0}30.067%,100%{opacity:1}}
+@keyframes k347{0%{visibility:hidden}30.067%,100%{visibility:visible}}
 .m239{animation-name:k347;animation-timing-function:steps(1)}
-@keyframes k348{0%{opacity:0}30.25%,100%{opacity:1}}
+@keyframes k348{0%{visibility:hidden}30.25%,100%{visibility:visible}}
 .m240{animation-name:k348;animation-timing-function:steps(1)}
-@keyframes k349{0%{opacity:0}30.433%,100%{opacity:1}}
+@keyframes k349{0%{visibility:hidden}30.433%,100%{visibility:visible}}
 .m241{animation-name:k349;animation-timing-function:steps(1)}
-@keyframes k350{0%{opacity:0}30.617%,100%{opacity:1}}
+@keyframes k350{0%{visibility:hidden}30.617%,100%{visibility:visible}}
 .m242{animation-name:k350;animation-timing-function:steps(1)}
-@keyframes k351{0%{opacity:0}28.75%,100%{opacity:1}}
+@keyframes k351{0%{visibility:hidden}28.75%,100%{visibility:visible}}
 .m243{animation-name:k351;animation-timing-function:steps(1)}
-@keyframes k352{0%{opacity:0}28.933%,100%{opacity:1}}
+@keyframes k352{0%{visibility:hidden}28.933%,100%{visibility:visible}}
 .m244{animation-name:k352;animation-timing-function:steps(1)}
-@keyframes k353{0%{opacity:0}29.117%,100%{opacity:1}}
+@keyframes k353{0%{visibility:hidden}29.117%,100%{visibility:visible}}
 .m245{animation-name:k353;animation-timing-function:steps(1)}
-@keyframes k354{0%{opacity:0}29.3%,100%{opacity:1}}
+@keyframes k354{0%{visibility:hidden}29.3%,100%{visibility:visible}}
 .m246{animation-name:k354;animation-timing-function:steps(1)}
-@keyframes k355{0%{opacity:0}29.85%,100%{opacity:1}}
+@keyframes k355{0%{visibility:hidden}29.85%,100%{visibility:visible}}
 .m247{animation-name:k355;animation-timing-function:steps(1)}
-@keyframes k356{0%{opacity:0}30.033%,100%{opacity:1}}
+@keyframes k356{0%{visibility:hidden}30.033%,100%{visibility:visible}}
 .m248{animation-name:k356;animation-timing-function:steps(1)}
-@keyframes k357{0%{opacity:0}30.4%,100%{opacity:1}}
+@keyframes k357{0%{visibility:hidden}30.4%,100%{visibility:visible}}
 .m249{animation-name:k357;animation-timing-function:steps(1)}
-@keyframes k358{0%{opacity:0}30.767%,100%{opacity:1}}
+@keyframes k358{0%{visibility:hidden}30.767%,100%{visibility:visible}}
 .m250{animation-name:k358;animation-timing-function:steps(1)}
-@keyframes k359{0%{opacity:0}30.95%,100%{opacity:1}}
+@keyframes k359{0%{visibility:hidden}30.95%,100%{visibility:visible}}
 .m251{animation-name:k359;animation-timing-function:steps(1)}
-@keyframes k360{0%{opacity:0}31.133%,100%{opacity:1}}
+@keyframes k360{0%{visibility:hidden}31.133%,100%{visibility:visible}}
 .m252{animation-name:k360;animation-timing-function:steps(1)}
-@keyframes k361{0%{opacity:0}31.317%,100%{opacity:1}}
+@keyframes k361{0%{visibility:hidden}31.317%,100%{visibility:visible}}
 .m253{animation-name:k361;animation-timing-function:steps(1)}
-@keyframes k362{0%{opacity:0}31.5%,100%{opacity:1}}
+@keyframes k362{0%{visibility:hidden}31.5%,100%{visibility:visible}}
 .m254{animation-name:k362;animation-timing-function:steps(1)}
 @keyframes k363{0%{translate:0px 0px}100%{translate:0px -168px}}
 .m255{animation-name:k363;animation-timing-function:steps(12)}
 @keyframes k364{0%{translate:0px 0px}100%{translate:0px -140px}}
 .m256{animation-name:k364;animation-duration:1s;animation-timing-function:steps(10)}
 .m257{animation-name:k364;animation-duration:0.1s;animation-timing-function:steps(10)}
-@keyframes k365{0%{opacity:0}30.833%,100%{opacity:1}}
+@keyframes k365{0%{visibility:hidden}30.833%,100%{visibility:visible}}
 .m258{animation-name:k365;animation-timing-function:steps(1)}
-@keyframes k366{0%{opacity:0}31.017%,100%{opacity:1}}
+@keyframes k366{0%{visibility:hidden}31.017%,100%{visibility:visible}}
 .m259{animation-name:k366;animation-timing-function:steps(1)}
-@keyframes k367{0%{opacity:0}31.2%,100%{opacity:1}}
+@keyframes k367{0%{visibility:hidden}31.2%,100%{visibility:visible}}
 .m260{animation-name:k367;animation-timing-function:steps(1)}
-@keyframes k368{0%{opacity:0}31.75%,100%{opacity:1}}
+@keyframes k368{0%{visibility:hidden}31.75%,100%{visibility:visible}}
 .m261{animation-name:k368;animation-timing-function:steps(1)}
-@keyframes k369{0%{opacity:0}31.933%,100%{opacity:1}}
+@keyframes k369{0%{visibility:hidden}31.933%,100%{visibility:visible}}
 .m262{animation-name:k369;animation-timing-function:steps(1)}
-@keyframes k370{0%{opacity:0}32.117%,100%{opacity:1}}
+@keyframes k370{0%{visibility:hidden}32.117%,100%{visibility:visible}}
 .m263{animation-name:k370;animation-timing-function:steps(1)}
-@keyframes k371{0%{opacity:0}32.3%,100%{opacity:1}}
+@keyframes k371{0%{visibility:hidden}32.3%,100%{visibility:visible}}
 .m264{animation-name:k371;animation-timing-function:steps(1)}
-@keyframes k372{0%{opacity:0}32.483%,100%{opacity:1}}
+@keyframes k372{0%{visibility:hidden}32.483%,100%{visibility:visible}}
 .m265{animation-name:k372;animation-timing-function:steps(1)}
-@keyframes k373{0%{opacity:0}32.667%,100%{opacity:1}}
+@keyframes k373{0%{visibility:hidden}32.667%,100%{visibility:visible}}
 .m266{animation-name:k373;animation-timing-function:steps(1)}
-@keyframes k374{0%{opacity:0}33.033%,100%{opacity:1}}
+@keyframes k374{0%{visibility:hidden}33.033%,100%{visibility:visible}}
 .m267{animation-name:k374;animation-timing-function:steps(1)}
-@keyframes k375{0%{opacity:0}33.217%,100%{opacity:1}}
+@keyframes k375{0%{visibility:hidden}33.217%,100%{visibility:visible}}
 .m268{animation-name:k375;animation-timing-function:steps(1)}
-@keyframes k376{0%{opacity:0}30%,100%{opacity:1}}
+@keyframes k376{0%{visibility:hidden}30%,100%{visibility:visible}}
 .m269{animation-name:k376;animation-timing-function:steps(1)}
-@keyframes k377{0%{opacity:0}30.183%,100%{opacity:1}}
+@keyframes k377{0%{visibility:hidden}30.183%,100%{visibility:visible}}
 .m270{animation-name:k377;animation-timing-function:steps(1)}
-@keyframes k378{0%{opacity:0}30.367%,100%{opacity:1}}
+@keyframes k378{0%{visibility:hidden}30.367%,100%{visibility:visible}}
 .m271{animation-name:k378;animation-timing-function:steps(1)}
-@keyframes k379{0%{opacity:0}30.55%,100%{opacity:1}}
+@keyframes k379{0%{visibility:hidden}30.55%,100%{visibility:visible}}
 .m272{animation-name:k379;animation-timing-function:steps(1)}
-@keyframes k380{0%{opacity:0}30.733%,100%{opacity:1}}
+@keyframes k380{0%{visibility:hidden}30.733%,100%{visibility:visible}}
 .m273{animation-name:k380;animation-timing-function:steps(1)}
-@keyframes k381{0%{opacity:0}30.917%,100%{opacity:1}}
+@keyframes k381{0%{visibility:hidden}30.917%,100%{visibility:visible}}
 .m274{animation-name:k381;animation-timing-function:steps(1)}
-@keyframes k382{0%{opacity:0}31.1%,100%{opacity:1}}
+@keyframes k382{0%{visibility:hidden}31.1%,100%{visibility:visible}}
 .m275{animation-name:k382;animation-timing-function:steps(1)}
-@keyframes k383{0%{opacity:0}31.467%,100%{opacity:1}}
+@keyframes k383{0%{visibility:hidden}31.467%,100%{visibility:visible}}
 .m276{animation-name:k383;animation-timing-function:steps(1)}
-@keyframes k384{0%{opacity:0}31.65%,100%{opacity:1}}
+@keyframes k384{0%{visibility:hidden}31.65%,100%{visibility:visible}}
 .m277{animation-name:k384;animation-timing-function:steps(1)}
-@keyframes k385{0%{opacity:0}31.833%,100%{opacity:1}}
+@keyframes k385{0%{visibility:hidden}31.833%,100%{visibility:visible}}
 .m278{animation-name:k385;animation-timing-function:steps(1)}
-@keyframes k386{0%{opacity:0}32.017%,100%{opacity:1}}
+@keyframes k386{0%{visibility:hidden}32.017%,100%{visibility:visible}}
 .m279{animation-name:k386;animation-timing-function:steps(1)}
 @keyframes k387{0%,100%{translate:0px 2.829px}3.704%{translate:0px -10.131px}7.407%{translate:0px -4.192px}11.111%{translate:0px -1.209px}14.815%{translate:0px 0.189px}18.519%{translate:0px -4.055px}22.222%{translate:0px 6.75px}25.926%{translate:0px 1.058px}29.63%{translate:0px -12.086px}33.333%{translate:0px -7.116px}37.037%{translate:0px -3.469px}40.741%{translate:0px 5.286px}44.444%{translate:0px -8.232px}48.148%{translate:0px 1.348px}51.852%{translate:0px 8.802px}55.556%{translate:0px 11.879px}59.259%{translate:0px 6.282px}62.963%{translate:0px 7.897px}66.667%{translate:0px 10.994px}70.37%{translate:0px -8.138px}74.074%{translate:0px 11.192px}77.778%{translate:0px 11.353px}81.481%{translate:0px -2.616px}85.185%{translate:0px -12.491px}88.889%{translate:0px -6.846px}92.593%{translate:0px -6.71px}96.296%{translate:0px -12.517px}}
 .m280{animation-name:k387;animation-duration:3s;animation-timing-function:steps(1)}

@@ -127,7 +127,7 @@
 .m30{animation-name:k44}
 @keyframes k45{0%,18.385%{translate:0px 0px}21.192%,100%{translate:266px 0px}}
 .m31{animation-name:k45;animation-timing-function:steps(38)}
-@keyframes k46{0%{opacity:1}50%,100%{opacity:0}}
+@keyframes k46{0%{visibility:visible}50%,100%{visibility:hidden}}
 .m32{animation-name:k46;animation-duration:1.083s;animation-timing-function:steps(1)}
 @keyframes k47{0%,18.077%,21.692%,100%{opacity:0}18.385%,21.308%{opacity:1}}
 .m33{animation-name:k47}

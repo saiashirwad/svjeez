@@ -173,7 +173,7 @@
 @keyframes k42{0%,16.667%,33.333%,50%,100%{opacity:1}66.667%{opacity:0.994}83.333%{opacity:0.5}}
 @keyframes k43{0%,100%{translate:0.391px -4.18px}16.667%{translate:-3.27px 3.197px}33.333%{translate:1.896px 0.547px}50%{translate:-4.663px -6.052px}66.667%{translate:-6.517px 4.508px}83.333%{translate:0.731px -1.788px}}
 .m26{animation-name:k42,k43;animation-duration:4s,4s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k44{0%,16.667%,33.333%,50%,66.667%,83.333%,100%{opacity:1}}
+@keyframes k44{0%,16.667%,33.333%,50%,66.667%,83.333%,100%{visibility:visible}}
 @keyframes k45{0%,100%{translate:4.242px -4.989px}16.667%{translate:6.401px 3.876px}33.333%{translate:3.276px -6.442px}50%{translate:3.845px 0.848px}66.667%{translate:-4.342px -3.974px}83.333%{translate:-1.065px -0.627px}}
 .m27{animation-name:k44,k45;animation-duration:4s,4s;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
 @keyframes k46{0%,16.667%,50%,100%{opacity:1}33.333%{opacity:0.954}66.667%{opacity:0.447}83.333%{opacity:0.429}}

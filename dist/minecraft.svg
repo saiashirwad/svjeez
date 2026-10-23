@@ -470,1101 +470,1101 @@
 .m22{animation-name:k23;animation-timing-function:linear}
 @keyframes k24{0%,1.333%,95.333%,100%{opacity:0}8%,88.667%{opacity:1}}
 .m23{animation-name:k24}
-@keyframes k25{0%,89.667%,100%{opacity:0}13.667%{opacity:1}}
+@keyframes k25{0%,89.667%,100%{visibility:hidden}13.667%{visibility:visible}}
 .m24{animation-name:k25;animation-timing-function:steps(1)}
-@keyframes k26{0%,89.667%,100%{opacity:0}14%{opacity:1}}
+@keyframes k26{0%,89.667%,100%{visibility:hidden}14%{visibility:visible}}
 .m25{animation-name:k26;animation-timing-function:steps(1)}
-@keyframes k27{0%,90%,100%{opacity:0}13.333%{opacity:1}}
+@keyframes k27{0%,90%,100%{visibility:hidden}13.333%{visibility:visible}}
 .m26{animation-name:k27;animation-timing-function:steps(1)}
 @keyframes k28{0%,88.833%{translate:0px 0px}89.667%,100%{translate:0px 90px}}
 .m27{animation-name:k28,k25;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k29{0%,90%,100%{opacity:0}13.5%{opacity:1}}
+@keyframes k29{0%,90%,100%{visibility:hidden}13.5%{visibility:visible}}
 .m28{animation-name:k29;animation-timing-function:steps(1)}
 .m29{animation-name:k28,k26;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k30{0%,90%,100%{opacity:0}13.167%{opacity:1}}
+@keyframes k30{0%,90%,100%{visibility:hidden}13.167%{visibility:visible}}
 .m30{animation-name:k30;animation-timing-function:steps(1)}
 @keyframes k31{0%,89.167%{translate:0px 0px}90%,100%{translate:0px 90px}}
 .m31{animation-name:k31,k27;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k32{0%,90.333%,100%{opacity:0}12.833%{opacity:1}}
+@keyframes k32{0%,90.333%,100%{visibility:hidden}12.833%{visibility:visible}}
 .m32{animation-name:k32;animation-timing-function:steps(1)}
 @keyframes k33{0%,14.167%{translate:0px -18px}14.75%{translate:0px 0px}88.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}89.667%,100%{translate:0px 90px}}
-@keyframes k34{0%,80.833%,100%{opacity:0}14.167%{opacity:1}}
+@keyframes k34{0%,80.833%,100%{visibility:hidden}14.167%{visibility:visible}}
 .m33{animation-name:k33,k34;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m34{animation-name:k31,k29;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k35{0%,14.5%{translate:0px -18px}15.083%{translate:0px 0px}88.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}89.667%,100%{translate:0px 90px}}
-@keyframes k36{0%,81.167%,100%{opacity:0}14.5%{opacity:1}}
+@keyframes k36{0%,81.167%,100%{visibility:hidden}14.5%{visibility:visible}}
 .m35{animation-name:k35,k36;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m36{animation-name:k31,k30;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k37{0%,90.333%,100%{opacity:0}12.667%{opacity:1}}
+@keyframes k37{0%,90.333%,100%{visibility:hidden}12.667%{visibility:visible}}
 .m37{animation-name:k37;animation-timing-function:steps(1)}
-@keyframes k38{0%,90.333%,100%{opacity:0}13%{opacity:1}}
+@keyframes k38{0%,90.333%,100%{visibility:hidden}13%{visibility:visible}}
 .m38{animation-name:k38;animation-timing-function:steps(1)}
-@keyframes k39{0%,89.667%,100%{opacity:0}80.833%{opacity:1}}
+@keyframes k39{0%,89.667%,100%{visibility:hidden}80.833%{visibility:visible}}
 .m39{animation-name:k28,k39;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k40{0%,89.667%,100%{opacity:0}81.167%{opacity:1}}
+@keyframes k40{0%,89.667%,100%{visibility:hidden}81.167%{visibility:visible}}
 .m40{animation-name:k28,k40;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k41{0%,90.667%,100%{opacity:0}12.167%{opacity:1}}
+@keyframes k41{0%,90.667%,100%{visibility:hidden}12.167%{visibility:visible}}
 .m41{animation-name:k41;animation-timing-function:steps(1)}
 @keyframes k42{0%,13.833%{translate:0px -18px}14.417%{translate:0px 0px}89.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90%,100%{translate:0px 90px}}
-@keyframes k43{0%,80.833%,100%{opacity:0}13.833%{opacity:1}}
+@keyframes k43{0%,80.833%,100%{visibility:hidden}13.833%{visibility:visible}}
 .m42{animation-name:k42,k43;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k44{0%,89.5%{translate:0px 0px}90.333%,100%{translate:0px 90px}}
 .m43{animation-name:k44,k32;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k45{0%,90.667%,100%{opacity:0}12.333%{opacity:1}}
+@keyframes k45{0%,90.667%,100%{visibility:hidden}12.333%{visibility:visible}}
 .m44{animation-name:k45;animation-timing-function:steps(1)}
 @keyframes k46{0%,14%{translate:0px -18px}14.583%{translate:0px 0px}89.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90%,100%{translate:0px 90px}}
-@keyframes k47{0%,81%,100%{opacity:0}14%{opacity:1}}
+@keyframes k47{0%,81%,100%{visibility:hidden}14%{visibility:visible}}
 .m45{animation-name:k46,k47;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k48{0%,13.667%{translate:0px -18px}14.25%{translate:0px 0px}89.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90%,100%{translate:0px 90px}}
-@keyframes k49{0%,80.667%,100%{opacity:0}13.667%{opacity:1}}
+@keyframes k49{0%,80.667%,100%{visibility:hidden}13.667%{visibility:visible}}
 .m46{animation-name:k48,k49;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m47{animation-name:k44,k37;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k50{0%,90.667%,100%{opacity:0}12.5%{opacity:1}}
+@keyframes k50{0%,90.667%,100%{visibility:hidden}12.5%{visibility:visible}}
 .m48{animation-name:k50;animation-timing-function:steps(1)}
 .m49{animation-name:k44,k38;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k51{0%,90%,100%{opacity:0}80.833%{opacity:1}}
+@keyframes k51{0%,90%,100%{visibility:hidden}80.833%{visibility:visible}}
 .m50{animation-name:k31,k51;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k52{0%,90%,100%{opacity:0}81%{opacity:1}}
+@keyframes k52{0%,90%,100%{visibility:hidden}81%{visibility:visible}}
 .m51{animation-name:k31,k52;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k53{0%,90%,100%{opacity:0}80.667%{opacity:1}}
+@keyframes k53{0%,90%,100%{visibility:hidden}80.667%{visibility:visible}}
 .m52{animation-name:k31,k53;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k54{0%,89.833%{translate:0px 0px}90.667%,100%{translate:0px 90px}}
 .m53{animation-name:k54,k41;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k55{0%,91.167%,100%{opacity:0}11.833%{opacity:1}}
+@keyframes k55{0%,91.167%,100%{visibility:hidden}11.833%{visibility:visible}}
 .m54{animation-name:k55;animation-timing-function:steps(1)}
 @keyframes k56{0%,13.333%{translate:0px -18px}13.917%{translate:0px 0px}89.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.333%,100%{translate:0px 90px}}
-@keyframes k57{0%,80.5%,100%{opacity:0}13.333%{opacity:1}}
+@keyframes k57{0%,80.5%,100%{visibility:hidden}13.333%{visibility:visible}}
 .m55{animation-name:k56,k57;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m56{animation-name:k54,k45;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k58{0%,91.167%,100%{opacity:0}11.667%{opacity:1}}
+@keyframes k58{0%,91.167%,100%{visibility:hidden}11.667%{visibility:visible}}
 .m57{animation-name:k58;animation-timing-function:steps(1)}
 @keyframes k59{0%,13.167%{translate:0px -18px}13.75%{translate:0px 0px}89.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.333%,100%{translate:0px 90px}}
-@keyframes k60{0%,80.333%,100%{opacity:0}13.167%{opacity:1}}
+@keyframes k60{0%,80.333%,100%{visibility:hidden}13.167%{visibility:visible}}
 .m58{animation-name:k59,k60;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m59{animation-name:k54,k50;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k61{0%,13.5%{translate:0px -18px}14.083%{translate:0px 0px}89.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.333%,100%{translate:0px 90px}}
-@keyframes k62{0%,80.667%,100%{opacity:0}13.5%{opacity:1}}
+@keyframes k62{0%,80.667%,100%{visibility:hidden}13.5%{visibility:visible}}
 .m60{animation-name:k61,k62;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k63{0%,91.167%,100%{opacity:0}11.5%{opacity:1}}
+@keyframes k63{0%,91.167%,100%{visibility:hidden}11.5%{visibility:visible}}
 .m61{animation-name:k63;animation-timing-function:steps(1)}
 @keyframes k64{0%,31.833%{translate:0px -18px}32.417%{translate:0px 0px}88.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}89.333%,100%{translate:0px 90px}}
-@keyframes k65{0%,89.333%,100%{opacity:0}31.833%{opacity:1}}
+@keyframes k65{0%,89.333%,100%{visibility:hidden}31.833%{visibility:visible}}
 .m62{animation-name:k64,k65;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k66{0%,90.333%,100%{opacity:0}80.5%{opacity:1}}
+@keyframes k66{0%,90.333%,100%{visibility:hidden}80.5%{visibility:visible}}
 .m63{animation-name:k44,k66;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k67{0%,90.333%,100%{opacity:0}80.333%{opacity:1}}
+@keyframes k67{0%,90.333%,100%{visibility:hidden}80.333%{visibility:visible}}
 .m64{animation-name:k44,k67;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k68{0%,90.333%,100%{opacity:0}80.667%{opacity:1}}
+@keyframes k68{0%,90.333%,100%{visibility:hidden}80.667%{visibility:visible}}
 .m65{animation-name:k44,k68;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k69{0%,12.667%{translate:0px -18px}13.25%{translate:0px 0px}89.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.667%,100%{translate:0px 90px}}
-@keyframes k70{0%,80.167%,100%{opacity:0}12.667%{opacity:1}}
+@keyframes k70{0%,80.167%,100%{visibility:hidden}12.667%{visibility:visible}}
 .m66{animation-name:k69,k70;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k71{0%,90.333%{translate:0px 0px}91.167%,100%{translate:0px 90px}}
 .m67{animation-name:k71,k55;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k72{0%,91.5%,100%{opacity:0}11.167%{opacity:1}}
+@keyframes k72{0%,91.5%,100%{visibility:hidden}11.167%{visibility:visible}}
 .m68{animation-name:k72;animation-timing-function:steps(1)}
 @keyframes k73{0%,12.833%{translate:0px -18px}13.417%{translate:0px 0px}89.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.667%,100%{translate:0px 90px}}
-@keyframes k74{0%,80.333%,100%{opacity:0}12.833%{opacity:1}}
+@keyframes k74{0%,80.333%,100%{visibility:hidden}12.833%{visibility:visible}}
 .m69{animation-name:k73,k74;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k75{0%,91.5%,100%{opacity:0}11.333%{opacity:1}}
+@keyframes k75{0%,91.5%,100%{visibility:hidden}11.333%{visibility:visible}}
 .m70{animation-name:k75;animation-timing-function:steps(1)}
 .m71{animation-name:k71,k58;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k76{0%,13%{translate:0px -18px}13.583%{translate:0px 0px}89.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.667%,100%{translate:0px 90px}}
-@keyframes k77{0%,80.5%,100%{opacity:0}13%{opacity:1}}
+@keyframes k77{0%,80.5%,100%{visibility:hidden}13%{visibility:visible}}
 .m72{animation-name:k76,k77;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k78{0%,92.167%,100%{opacity:0}10.333%{opacity:1}}
+@keyframes k78{0%,92.167%,100%{visibility:hidden}10.333%{visibility:visible}}
 .m73{animation-name:k78;animation-timing-function:steps(1)}
 .m74{animation-name:k71,k63;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k79{0%,91.5%,100%{opacity:0}11%{opacity:1}}
+@keyframes k79{0%,91.5%,100%{visibility:hidden}11%{visibility:visible}}
 .m75{animation-name:k79;animation-timing-function:steps(1)}
-@keyframes k80{0%,92.167%,100%{opacity:0}10.167%{opacity:1}}
+@keyframes k80{0%,92.167%,100%{visibility:hidden}10.167%{visibility:visible}}
 .m76{animation-name:k80;animation-timing-function:steps(1)}
-@keyframes k81{0%,91.833%,100%{opacity:0}10.5%{opacity:1}}
+@keyframes k81{0%,91.833%,100%{visibility:hidden}10.5%{visibility:visible}}
 .m77{animation-name:k81;animation-timing-function:steps(1)}
-@keyframes k82{0%,90.667%,100%{opacity:0}80.167%{opacity:1}}
+@keyframes k82{0%,90.667%,100%{visibility:hidden}80.167%{visibility:visible}}
 .m78{animation-name:k54,k82;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k83{0%,90.667%,100%{opacity:0}80.333%{opacity:1}}
+@keyframes k83{0%,90.667%,100%{visibility:hidden}80.333%{visibility:visible}}
 .m79{animation-name:k54,k83;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k84{0%,90.667%,100%{opacity:0}80.5%{opacity:1}}
+@keyframes k84{0%,90.667%,100%{visibility:hidden}80.5%{visibility:visible}}
 .m80{animation-name:k54,k84;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k85{0%,12.333%{translate:0px -18px}12.917%{translate:0px 0px}90.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.167%,100%{translate:0px 90px}}
-@keyframes k86{0%,80.167%,100%{opacity:0}12.333%{opacity:1}}
+@keyframes k86{0%,80.167%,100%{visibility:hidden}12.333%{visibility:visible}}
 .m81{animation-name:k85,k86;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k87{0%,90.667%{translate:0px 0px}91.5%,100%{translate:0px 90px}}
 .m82{animation-name:k87,k72;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m83{animation-name:k87,k75;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k88{0%,91.833%,100%{opacity:0}10.833%{opacity:1}}
+@keyframes k88{0%,91.833%,100%{visibility:hidden}10.833%{visibility:visible}}
 .m84{animation-name:k88;animation-timing-function:steps(1)}
 @keyframes k89{0%,12.167%{translate:0px -18px}12.75%{translate:0px 0px}90.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.167%,100%{translate:0px 90px}}
-@keyframes k90{0%,80%,100%{opacity:0}12.167%{opacity:1}}
+@keyframes k90{0%,80%,100%{visibility:hidden}12.167%{visibility:visible}}
 .m85{animation-name:k89,k90;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k91{0%,91.833%,100%{opacity:0}10.667%{opacity:1}}
+@keyframes k91{0%,91.833%,100%{visibility:hidden}10.667%{visibility:visible}}
 .m86{animation-name:k91;animation-timing-function:steps(1)}
 @keyframes k92{0%,12%{translate:0px -18px}12.583%{translate:0px 0px}90.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.167%,100%{translate:0px 90px}}
-@keyframes k93{0%,79.833%,100%{opacity:0}12%{opacity:1}}
+@keyframes k93{0%,79.833%,100%{visibility:hidden}12%{visibility:visible}}
 .m87{animation-name:k92,k93;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m88{animation-name:k87,k79;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k94{0%,92.167%,100%{opacity:0}10%{opacity:1}}
+@keyframes k94{0%,92.167%,100%{visibility:hidden}10%{visibility:visible}}
 .m89{animation-name:k94;animation-timing-function:steps(1)}
 @keyframes k95{0%,28.333%{translate:0px -18px}28.917%{translate:0px 0px}87.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.333%,100%{translate:0px 90px}}
-@keyframes k96{0%,88.333%,100%{opacity:0}28.333%{opacity:1}}
+@keyframes k96{0%,88.333%,100%{visibility:hidden}28.333%{visibility:visible}}
 .m90{animation-name:k95,k96;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k97{0%,32%{translate:0px -18px}32.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k98{0%,87.833%,100%{opacity:0}32%{opacity:1}}
+@keyframes k98{0%,87.833%,100%{visibility:hidden}32%{visibility:visible}}
 .m91{animation-name:k97,k98;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k99{0%,32.167%{translate:0px -18px}32.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k100{0%,87.833%,100%{opacity:0}32.167%{opacity:1}}
+@keyframes k100{0%,87.833%,100%{visibility:hidden}32.167%{visibility:visible}}
 .m92{animation-name:k99,k100;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k101{0%,33%{translate:0px -18px}33.583%{translate:0px 0px}89.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90%,100%{translate:0px 90px}}
-@keyframes k102{0%,90%,100%{opacity:0}33%{opacity:1}}
+@keyframes k102{0%,90%,100%{visibility:hidden}33%{visibility:visible}}
 .m93{animation-name:k101,k102;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k103{0%,91.167%,100%{opacity:0}80.167%{opacity:1}}
+@keyframes k103{0%,91.167%,100%{visibility:hidden}80.167%{visibility:visible}}
 .m94{animation-name:k71,k103;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k104{0%,91.167%,100%{opacity:0}80%{opacity:1}}
+@keyframes k104{0%,91.167%,100%{visibility:hidden}80%{visibility:visible}}
 .m95{animation-name:k71,k104;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k105{0%,91.167%,100%{opacity:0}79.833%{opacity:1}}
+@keyframes k105{0%,91.167%,100%{visibility:hidden}79.833%{visibility:visible}}
 .m96{animation-name:k71,k105;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k106{0%,11.667%{translate:0px -18px}12.25%{translate:0px 0px}90.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.5%,100%{translate:0px 90px}}
-@keyframes k107{0%,79.833%,100%{opacity:0}11.667%{opacity:1}}
+@keyframes k107{0%,79.833%,100%{visibility:hidden}11.667%{visibility:visible}}
 .m97{animation-name:k106,k107;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k108{0%,91%{translate:0px 0px}91.833%,100%{translate:0px 90px}}
 .m98{animation-name:k108,k81;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k109{0%,11.833%{translate:0px -18px}12.417%{translate:0px 0px}90.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.5%,100%{translate:0px 90px}}
-@keyframes k110{0%,80%,100%{opacity:0}11.833%{opacity:1}}
+@keyframes k110{0%,80%,100%{visibility:hidden}11.833%{visibility:visible}}
 .m99{animation-name:k109,k110;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m100{animation-name:k108,k88;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k111{0%,92.5%,100%{opacity:0}9.667%{opacity:1}}
+@keyframes k111{0%,92.5%,100%{visibility:hidden}9.667%{visibility:visible}}
 .m101{animation-name:k111;animation-timing-function:steps(1)}
 .m102{animation-name:k108,k91;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k112{0%,92.833%,100%{opacity:0}9.167%{opacity:1}}
+@keyframes k112{0%,92.833%,100%{visibility:hidden}9.167%{visibility:visible}}
 .m103{animation-name:k112;animation-timing-function:steps(1)}
 @keyframes k113{0%,11.5%{translate:0px -18px}12.083%{translate:0px 0px}90.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.5%,100%{translate:0px 90px}}
-@keyframes k114{0%,79.667%,100%{opacity:0}11.5%{opacity:1}}
+@keyframes k114{0%,79.667%,100%{visibility:hidden}11.5%{visibility:visible}}
 .m104{animation-name:k113,k114;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k115{0%,93.167%,100%{opacity:0}8.667%{opacity:1}}
+@keyframes k115{0%,93.167%,100%{visibility:hidden}8.667%{visibility:visible}}
 .m105{animation-name:k115;animation-timing-function:steps(1)}
-@keyframes k116{0%,91.5%,100%{opacity:0}11.833%{opacity:1}}
+@keyframes k116{0%,91.5%,100%{visibility:hidden}11.833%{visibility:visible}}
 .m106{animation-name:k109,k116;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k117{0%,93.167%,100%{opacity:0}8.5%{opacity:1}}
+@keyframes k117{0%,93.167%,100%{visibility:hidden}8.5%{visibility:visible}}
 .m107{animation-name:k117;animation-timing-function:steps(1)}
 @keyframes k118{0%,91.333%{translate:0px 0px}92.167%,100%{translate:0px 90px}}
 .m108{animation-name:k118,k94;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k119{0%,29.167%{translate:0px -18px}29.75%{translate:0px 0px}87.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.167%,100%{translate:0px 90px}}
-@keyframes k120{0%,88.167%,100%{opacity:0}29.167%{opacity:1}}
+@keyframes k120{0%,88.167%,100%{visibility:hidden}29.167%{visibility:visible}}
 .m109{animation-name:k119,k120;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k121{0%,32.333%{translate:0px -18px}32.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k122{0%,87.833%,100%{opacity:0}32.333%{opacity:1}}
+@keyframes k122{0%,87.833%,100%{visibility:hidden}32.333%{visibility:visible}}
 .m110{animation-name:k121,k122;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k123{0%,32.5%{translate:0px -18px}33.083%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k124{0%,87.833%,100%{opacity:0}32.5%{opacity:1}}
+@keyframes k124{0%,87.833%,100%{visibility:hidden}32.5%{visibility:visible}}
 .m111{animation-name:k123,k124;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k125{0%,33.333%{translate:0px -18px}33.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k126{0%,87.667%,100%{opacity:0}33.333%{opacity:1}}
+@keyframes k126{0%,87.667%,100%{visibility:hidden}33.333%{visibility:visible}}
 .m112{animation-name:k125,k126;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k127{0%,33.5%{translate:0px -18px}34.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k128{0%,87.667%,100%{opacity:0}33.5%{opacity:1}}
+@keyframes k128{0%,87.667%,100%{visibility:hidden}33.5%{visibility:visible}}
 .m113{animation-name:k127,k128;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k129{0%,91.5%,100%{opacity:0}79.833%{opacity:1}}
+@keyframes k129{0%,91.5%,100%{visibility:hidden}79.833%{visibility:visible}}
 .m114{animation-name:k87,k129;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k130{0%,91.5%,100%{opacity:0}80%{opacity:1}}
+@keyframes k130{0%,91.5%,100%{visibility:hidden}80%{visibility:visible}}
 .m115{animation-name:k87,k130;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k131{0%,91.5%,100%{opacity:0}79.667%{opacity:1}}
+@keyframes k131{0%,91.5%,100%{visibility:hidden}79.667%{visibility:visible}}
 .m116{animation-name:k87,k131;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k132{0%,86.833%{translate:0px 0px}87.667%,100%{translate:0px 90px}}
-@keyframes k133{0%,87.667%,100%{opacity:0}80.333%{opacity:1}}
+@keyframes k133{0%,87.667%,100%{visibility:hidden}80.333%{visibility:visible}}
 .m117{animation-name:k132,k133;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k134{0%,11%{translate:0px -18px}11.583%{translate:0px 0px}91%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.833%,100%{translate:0px 90px}}
-@keyframes k135{0%,79.333%,100%{opacity:0}11%{opacity:1}}
+@keyframes k135{0%,79.333%,100%{visibility:hidden}11%{visibility:visible}}
 .m118{animation-name:k134,k135;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k136{0%,11.333%{translate:0px -18px}11.917%{translate:0px 0px}91%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.833%,100%{translate:0px 90px}}
-@keyframes k137{0%,79.667%,100%{opacity:0}11.333%{opacity:1}}
+@keyframes k137{0%,79.667%,100%{visibility:hidden}11.333%{visibility:visible}}
 .m119{animation-name:k136,k137;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m120{animation-name:k118,k78;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k138{0%,92.5%,100%{opacity:0}9.5%{opacity:1}}
+@keyframes k138{0%,92.5%,100%{visibility:hidden}9.5%{visibility:visible}}
 .m121{animation-name:k138;animation-timing-function:steps(1)}
-@keyframes k139{0%,92.833%,100%{opacity:0}8.833%{opacity:1}}
+@keyframes k139{0%,92.833%,100%{visibility:hidden}8.833%{visibility:visible}}
 .m122{animation-name:k139;animation-timing-function:steps(1)}
 @keyframes k140{0%,11.167%{translate:0px -18px}11.75%{translate:0px 0px}91%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.833%,100%{translate:0px 90px}}
-@keyframes k141{0%,79.5%,100%{opacity:0}11.167%{opacity:1}}
+@keyframes k141{0%,79.5%,100%{visibility:hidden}11.167%{visibility:visible}}
 .m123{animation-name:k140,k141;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k142{0%,92.5%,100%{opacity:0}9.333%{opacity:1}}
+@keyframes k142{0%,92.5%,100%{visibility:hidden}9.333%{visibility:visible}}
 .m124{animation-name:k142;animation-timing-function:steps(1)}
-@keyframes k143{0%,91.833%,100%{opacity:0}11.167%{opacity:1}}
+@keyframes k143{0%,91.833%,100%{visibility:hidden}11.167%{visibility:visible}}
 .m125{animation-name:k140,k143;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m126{animation-name:k118,k80;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k144{0%,91.833%,100%{opacity:0}11%{opacity:1}}
+@keyframes k144{0%,91.833%,100%{visibility:hidden}11%{visibility:visible}}
 .m127{animation-name:k134,k144;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k145{0%,10.5%{translate:0px -18px}11.083%{translate:0px 0px}91.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.167%,100%{translate:0px 90px}}
-@keyframes k146{0%,92.167%,100%{opacity:0}10.5%{opacity:1}}
+@keyframes k146{0%,92.167%,100%{visibility:hidden}10.5%{visibility:visible}}
 .m128{animation-name:k145,k146;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k147{0%,91.667%{translate:0px 0px}92.5%,100%{translate:0px 90px}}
 .m129{animation-name:k147,k111;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k148{0%,93.167%,100%{opacity:0}8.333%{opacity:1}}
+@keyframes k148{0%,93.167%,100%{visibility:hidden}8.333%{visibility:visible}}
 .m130{animation-name:k148;animation-timing-function:steps(1)}
-@keyframes k149{0%,92.833%,100%{opacity:0}9%{opacity:1}}
+@keyframes k149{0%,92.833%,100%{visibility:hidden}9%{visibility:visible}}
 .m131{animation-name:k149;animation-timing-function:steps(1)}
 @keyframes k150{0%,29.833%{translate:0px -18px}30.417%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k151{0%,88%,100%{opacity:0}29.833%{opacity:1}}
+@keyframes k151{0%,88%,100%{visibility:hidden}29.833%{visibility:visible}}
 .m132{animation-name:k150,k151;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k152{0%,32.667%{translate:0px -18px}33.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k153{0%,87.833%,100%{opacity:0}32.667%{opacity:1}}
+@keyframes k153{0%,87.833%,100%{visibility:hidden}32.667%{visibility:visible}}
 .m133{animation-name:k152,k153;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k154{0%,32.833%{translate:0px -18px}33.417%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k155{0%,87.833%,100%{opacity:0}32.833%{opacity:1}}
+@keyframes k155{0%,87.833%,100%{visibility:hidden}32.833%{visibility:visible}}
 .m134{animation-name:k154,k155;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k156{0%,33.667%{translate:0px -18px}34.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k157{0%,87.667%,100%{opacity:0}33.667%{opacity:1}}
+@keyframes k157{0%,87.667%,100%{visibility:hidden}33.667%{visibility:visible}}
 .m135{animation-name:k156,k157;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k158{0%,33.833%{translate:0px -18px}34.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k159{0%,87.667%,100%{opacity:0}33.833%{opacity:1}}
+@keyframes k159{0%,87.667%,100%{visibility:hidden}33.833%{visibility:visible}}
 .m136{animation-name:k158,k159;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k160{0%,40%{translate:0px -18px}40.583%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k161{0%,88%,100%{opacity:0}40%{opacity:1}}
+@keyframes k161{0%,88%,100%{visibility:hidden}40%{visibility:visible}}
 .m137{animation-name:k160,k161;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k162{0%,91.833%,100%{opacity:0}79.333%{opacity:1}}
+@keyframes k162{0%,91.833%,100%{visibility:hidden}79.333%{visibility:visible}}
 .m138{animation-name:k108,k162;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k163{0%,91.833%,100%{opacity:0}79.667%{opacity:1}}
+@keyframes k163{0%,91.833%,100%{visibility:hidden}79.667%{visibility:visible}}
 .m139{animation-name:k108,k163;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k164{0%,91.833%,100%{opacity:0}79.5%{opacity:1}}
+@keyframes k164{0%,91.833%,100%{visibility:hidden}79.5%{visibility:visible}}
 .m140{animation-name:k108,k164;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k165{0%,87.667%,100%{opacity:0}80%{opacity:1}}
+@keyframes k165{0%,87.667%,100%{visibility:hidden}80%{visibility:visible}}
 .m141{animation-name:k132,k165;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k166{0%,79.167%,100%{opacity:0}10.5%{opacity:1}}
+@keyframes k166{0%,79.167%,100%{visibility:hidden}10.5%{visibility:visible}}
 .m142{animation-name:k145,k166;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k167{0%,10.833%{translate:0px -18px}11.417%{translate:0px 0px}91.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.167%,100%{translate:0px 90px}}
-@keyframes k168{0%,79.5%,100%{opacity:0}10.833%{opacity:1}}
+@keyframes k168{0%,79.5%,100%{visibility:hidden}10.833%{visibility:visible}}
 .m143{animation-name:k167,k168;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m144{animation-name:k147,k138;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m145{animation-name:k147,k142;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k169{0%,93.5%,100%{opacity:0}8.167%{opacity:1}}
+@keyframes k169{0%,93.5%,100%{visibility:hidden}8.167%{visibility:visible}}
 .m146{animation-name:k169;animation-timing-function:steps(1)}
 @keyframes k170{0%,10.667%{translate:0px -18px}11.25%{translate:0px 0px}91.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.167%,100%{translate:0px 90px}}
-@keyframes k171{0%,92.167%,100%{opacity:0}10.667%{opacity:1}}
+@keyframes k171{0%,92.167%,100%{visibility:hidden}10.667%{visibility:visible}}
 .m147{animation-name:k170,k171;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k172{0%,10.167%{translate:0px -18px}10.75%{translate:0px 0px}91.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.5%,100%{translate:0px 90px}}
-@keyframes k173{0%,92.5%,100%{opacity:0}10.167%{opacity:1}}
+@keyframes k173{0%,92.5%,100%{visibility:hidden}10.167%{visibility:visible}}
 .m148{animation-name:k172,k173;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k174{0%,92%{translate:0px 0px}92.833%,100%{translate:0px 90px}}
 .m149{animation-name:k174,k139;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m150{animation-name:k174,k112;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m151{animation-name:k174,k149;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k175{0%,14.833%{translate:0px -6px}15.833%,100%{translate:0px 0px}}
-@keyframes k176{0%,76.333%,100%{opacity:0}14.833%{opacity:1}}
+@keyframes k176{0%,76.333%,100%{visibility:hidden}14.833%{visibility:visible}}
 .m152{animation-name:k175,k176;animation-timing-function:cubic-bezier(.23,1,.32,1),steps(1)}
-@keyframes k177{0%,92.167%,100%{opacity:0}76.333%{opacity:1}}
+@keyframes k177{0%,92.167%,100%{visibility:hidden}76.333%{visibility:visible}}
 .m153{animation-name:k118,k177;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k178{0%,30.667%{translate:0px -18px}31.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k179{0%,87.833%,100%{opacity:0}30.667%{opacity:1}}
+@keyframes k179{0%,87.833%,100%{visibility:hidden}30.667%{visibility:visible}}
 .m154{animation-name:k178,k179;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k180{0%,34%{translate:0px -18px}34.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k181{0%,87.667%,100%{opacity:0}34%{opacity:1}}
+@keyframes k181{0%,87.667%,100%{visibility:hidden}34%{visibility:visible}}
 .m155{animation-name:k180,k181;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k182{0%,34.167%{translate:0px -18px}34.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k183{0%,87.667%,100%{opacity:0}34.167%{opacity:1}}
+@keyframes k183{0%,87.667%,100%{visibility:hidden}34.167%{visibility:visible}}
 .m156{animation-name:k182,k183;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k184{0%,34.667%{translate:0px -18px}35.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k185{0%,87.667%,100%{opacity:0}34.667%{opacity:1}}
+@keyframes k185{0%,87.667%,100%{visibility:hidden}34.667%{visibility:visible}}
 .m157{animation-name:k184,k185;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k186{0%,39.5%{translate:0px -18px}40.083%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k187{0%,88%,100%{opacity:0}39.5%{opacity:1}}
+@keyframes k187{0%,88%,100%{visibility:hidden}39.5%{visibility:visible}}
 .m158{animation-name:k186,k187;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k188{0%,39.667%{translate:0px -18px}40.25%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k189{0%,88%,100%{opacity:0}39.667%{opacity:1}}
+@keyframes k189{0%,88%,100%{visibility:hidden}39.667%{visibility:visible}}
 .m159{animation-name:k188,k189;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k190{0%,42.167%{translate:0px -18px}42.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k191{0%,87.833%,100%{opacity:0}42.167%{opacity:1}}
+@keyframes k191{0%,87.833%,100%{visibility:hidden}42.167%{visibility:visible}}
 .m160{animation-name:k190,k191;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k192{0%,92.167%,100%{opacity:0}79.167%{opacity:1}}
+@keyframes k192{0%,92.167%,100%{visibility:hidden}79.167%{visibility:visible}}
 .m161{animation-name:k118,k192;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k193{0%,92.167%,100%{opacity:0}79.5%{opacity:1}}
+@keyframes k193{0%,92.167%,100%{visibility:hidden}79.5%{visibility:visible}}
 .m162{animation-name:k118,k193;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k194{0%,87.667%,100%{opacity:0}79.833%{opacity:1}}
+@keyframes k194{0%,87.667%,100%{visibility:hidden}79.833%{visibility:visible}}
 .m163{animation-name:k132,k194;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k195{0%,10%{translate:0px -18px}10.583%{translate:0px 0px}91.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.5%,100%{translate:0px 90px}}
-@keyframes k196{0%,79%,100%{opacity:0}10%{opacity:1}}
+@keyframes k196{0%,79%,100%{visibility:hidden}10%{visibility:visible}}
 .m164{animation-name:k195,k196;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k197{0%,9.833%{translate:0px -18px}10.417%{translate:0px 0px}91.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.5%,100%{translate:0px 90px}}
-@keyframes k198{0%,78.833%,100%{opacity:0}9.833%{opacity:1}}
+@keyframes k198{0%,78.833%,100%{visibility:hidden}9.833%{visibility:visible}}
 .m165{animation-name:k197,k198;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k199{0%,79.167%,100%{opacity:0}10.167%{opacity:1}}
+@keyframes k199{0%,79.167%,100%{visibility:hidden}10.167%{visibility:visible}}
 .m166{animation-name:k172,k199;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k200{0%,92.5%,100%{opacity:0}10%{opacity:1}}
+@keyframes k200{0%,92.5%,100%{visibility:hidden}10%{visibility:visible}}
 .m167{animation-name:k195,k200;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k201{0%,9.333%{translate:0px -18px}9.917%{translate:0px 0px}92%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.833%,100%{translate:0px 90px}}
-@keyframes k202{0%,92.833%,100%{opacity:0}9.333%{opacity:1}}
+@keyframes k202{0%,92.833%,100%{visibility:hidden}9.333%{visibility:visible}}
 .m168{animation-name:k201,k202;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k203{0%,92.333%{translate:0px 0px}93.167%,100%{translate:0px 90px}}
 .m169{animation-name:k203,k115;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k204{0%,9.667%{translate:0px -18px}10.25%{translate:0px 0px}92%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.833%,100%{translate:0px 90px}}
-@keyframes k205{0%,92.833%,100%{opacity:0}9.667%{opacity:1}}
+@keyframes k205{0%,92.833%,100%{visibility:hidden}9.667%{visibility:visible}}
 .m170{animation-name:k204,k205;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m171{animation-name:k203,k148;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k206{0%,93.833%,100%{opacity:0}7.5%{opacity:1}}
+@keyframes k206{0%,93.833%,100%{visibility:hidden}7.5%{visibility:visible}}
 .m172{animation-name:k206;animation-timing-function:steps(1)}
 @keyframes k207{0%,9.5%{translate:0px -18px}10.083%{translate:0px 0px}92%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}92.833%,100%{translate:0px 90px}}
-@keyframes k208{0%,92.833%,100%{opacity:0}9.5%{opacity:1}}
+@keyframes k208{0%,92.833%,100%{visibility:hidden}9.5%{visibility:visible}}
 .m173{animation-name:k207,k208;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m174{animation-name:k203,k117;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k209{0%,93.833%,100%{opacity:0}7.667%{opacity:1}}
+@keyframes k209{0%,93.833%,100%{visibility:hidden}7.667%{visibility:visible}}
 .m175{animation-name:k209;animation-timing-function:steps(1)}
 @keyframes k210{0%,14.5%{translate:0px -6px}15.5%,100%{translate:0px 0px}}
-@keyframes k211{0%,76.167%,100%{opacity:0}14.5%{opacity:1}}
+@keyframes k211{0%,76.167%,100%{visibility:hidden}14.5%{visibility:visible}}
 .m176{animation-name:k210,k211;animation-timing-function:cubic-bezier(.23,1,.32,1),steps(1)}
-@keyframes k212{0%,92.5%,100%{opacity:0}76.167%{opacity:1}}
+@keyframes k212{0%,92.5%,100%{visibility:hidden}76.167%{visibility:visible}}
 .m177{animation-name:k147,k212;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k213{0%,23.333%{translate:0px -18px}23.917%{translate:0px 0px}87.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.333%,100%{translate:0px 90px}}
-@keyframes k214{0%,88.333%,100%{opacity:0}23.333%{opacity:1}}
+@keyframes k214{0%,88.333%,100%{visibility:hidden}23.333%{visibility:visible}}
 .m178{animation-name:k213,k214;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k215{0%,27%{translate:0px -18px}27.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k216{0%,87.833%,100%{opacity:0}27%{opacity:1}}
+@keyframes k216{0%,87.833%,100%{visibility:hidden}27%{visibility:visible}}
 .m179{animation-name:k215,k216;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k217{0%,27.167%{translate:0px -18px}27.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k218{0%,87.833%,100%{opacity:0}27.167%{opacity:1}}
+@keyframes k218{0%,87.833%,100%{visibility:hidden}27.167%{visibility:visible}}
 .m180{animation-name:k217,k218;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k219{0%,33%{translate:0px -18px}33.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k220{0%,87.833%,100%{opacity:0}33%{opacity:1}}
+@keyframes k220{0%,87.833%,100%{visibility:hidden}33%{visibility:visible}}
 .m181{animation-name:k219,k220;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k221{0%,33.167%{translate:0px -18px}33.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k222{0%,87.833%,100%{opacity:0}33.167%{opacity:1}}
+@keyframes k222{0%,87.833%,100%{visibility:hidden}33.167%{visibility:visible}}
 .m182{animation-name:k221,k222;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k223{0%,34.333%{translate:0px -18px}34.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k224{0%,87.667%,100%{opacity:0}34.333%{opacity:1}}
+@keyframes k224{0%,87.667%,100%{visibility:hidden}34.333%{visibility:visible}}
 .m183{animation-name:k223,k224;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k225{0%,34.833%{translate:0px -18px}35.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k226{0%,87.667%,100%{opacity:0}34.833%{opacity:1}}
+@keyframes k226{0%,87.667%,100%{visibility:hidden}34.833%{visibility:visible}}
 .m184{animation-name:k225,k226;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k227{0%,35%{translate:0px -18px}35.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k228{0%,87.667%,100%{opacity:0}35%{opacity:1}}
+@keyframes k228{0%,87.667%,100%{visibility:hidden}35%{visibility:visible}}
 .m185{animation-name:k227,k228;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k229{0%,39.167%{translate:0px -18px}39.75%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k230{0%,88%,100%{opacity:0}39.167%{opacity:1}}
+@keyframes k230{0%,88%,100%{visibility:hidden}39.167%{visibility:visible}}
 .m186{animation-name:k229,k230;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k231{0%,39.333%{translate:0px -18px}39.917%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k232{0%,88%,100%{opacity:0}39.333%{opacity:1}}
+@keyframes k232{0%,88%,100%{visibility:hidden}39.333%{visibility:visible}}
 .m187{animation-name:k231,k232;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k233{0%,41.833%{translate:0px -18px}42.417%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k234{0%,87.833%,100%{opacity:0}41.833%{opacity:1}}
+@keyframes k234{0%,87.833%,100%{visibility:hidden}41.833%{visibility:visible}}
 .m188{animation-name:k233,k234;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k235{0%,42%{translate:0px -18px}42.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k236{0%,87.833%,100%{opacity:0}42%{opacity:1}}
+@keyframes k236{0%,87.833%,100%{visibility:hidden}42%{visibility:visible}}
 .m189{animation-name:k235,k236;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k237{0%,42.833%{translate:0px -18px}43.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k238{0%,87.667%,100%{opacity:0}42.833%{opacity:1}}
+@keyframes k238{0%,87.667%,100%{visibility:hidden}42.833%{visibility:visible}}
 .m190{animation-name:k237,k238;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k239{0%,92.5%,100%{opacity:0}79%{opacity:1}}
+@keyframes k239{0%,92.5%,100%{visibility:hidden}79%{visibility:visible}}
 .m191{animation-name:k147,k239;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k240{0%,92.5%,100%{opacity:0}78.833%{opacity:1}}
+@keyframes k240{0%,92.5%,100%{visibility:hidden}78.833%{visibility:visible}}
 .m192{animation-name:k147,k240;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k241{0%,92.5%,100%{opacity:0}79.167%{opacity:1}}
+@keyframes k241{0%,92.5%,100%{visibility:hidden}79.167%{visibility:visible}}
 .m193{animation-name:k147,k241;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k242{0%,78.833%,100%{opacity:0}9.5%{opacity:1}}
+@keyframes k242{0%,78.833%,100%{visibility:hidden}9.5%{visibility:visible}}
 .m194{animation-name:k207,k242;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k243{0%,78.667%,100%{opacity:0}9.333%{opacity:1}}
+@keyframes k243{0%,78.667%,100%{visibility:hidden}9.333%{visibility:visible}}
 .m195{animation-name:k201,k243;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k244{0%,79%,100%{opacity:0}9.667%{opacity:1}}
+@keyframes k244{0%,79%,100%{visibility:hidden}9.667%{visibility:visible}}
 .m196{animation-name:k204,k244;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k245{0%,93.5%,100%{opacity:0}7.833%{opacity:1}}
+@keyframes k245{0%,93.5%,100%{visibility:hidden}7.833%{visibility:visible}}
 .m197{animation-name:k245;animation-timing-function:steps(1)}
-@keyframes k246{0%,94.167%,100%{opacity:0}7%{opacity:1}}
+@keyframes k246{0%,94.167%,100%{visibility:hidden}7%{visibility:visible}}
 .m198{animation-name:k246;animation-timing-function:steps(1)}
 @keyframes k247{0%,9.167%{translate:0px -18px}9.75%{translate:0px 0px}92.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.167%,100%{translate:0px 90px}}
-@keyframes k248{0%,93.167%,100%{opacity:0}9.167%{opacity:1}}
+@keyframes k248{0%,93.167%,100%{visibility:hidden}9.167%{visibility:visible}}
 .m199{animation-name:k247,k248;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k249{0%,93.5%,100%{opacity:0}8%{opacity:1}}
+@keyframes k249{0%,93.5%,100%{visibility:hidden}8%{visibility:visible}}
 .m200{animation-name:k249;animation-timing-function:steps(1)}
 @keyframes k250{0%,8.833%{translate:0px -18px}9.417%{translate:0px 0px}92.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.167%,100%{translate:0px 90px}}
-@keyframes k251{0%,93.167%,100%{opacity:0}8.833%{opacity:1}}
+@keyframes k251{0%,93.167%,100%{visibility:hidden}8.833%{visibility:visible}}
 .m201{animation-name:k250,k251;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k252{0%,92.667%{translate:0px 0px}93.5%,100%{translate:0px 90px}}
 .m202{animation-name:k252,k169;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k253{0%,94.167%,100%{opacity:0}6.667%{opacity:1}}
+@keyframes k253{0%,94.167%,100%{visibility:hidden}6.667%{visibility:visible}}
 .m203{animation-name:k253;animation-timing-function:steps(1)}
 @keyframes k254{0%,9%{translate:0px -18px}9.583%{translate:0px 0px}92.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.167%,100%{translate:0px 90px}}
-@keyframes k255{0%,93.167%,100%{opacity:0}9%{opacity:1}}
+@keyframes k255{0%,93.167%,100%{visibility:hidden}9%{visibility:visible}}
 .m204{animation-name:k254,k255;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k256{0%,93.833%,100%{opacity:0}7.333%{opacity:1}}
+@keyframes k256{0%,93.833%,100%{visibility:hidden}7.333%{visibility:visible}}
 .m205{animation-name:k256;animation-timing-function:steps(1)}
-@keyframes k257{0%,92.833%,100%{opacity:0}76.167%{opacity:1}}
+@keyframes k257{0%,92.833%,100%{visibility:hidden}76.167%{visibility:visible}}
 .m206{animation-name:k174,k257;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k258{0%,14%{translate:0px -6px}15%,100%{translate:0px 0px}}
-@keyframes k259{0%,75.833%,100%{opacity:0}14%{opacity:1}}
+@keyframes k259{0%,75.833%,100%{visibility:hidden}14%{visibility:visible}}
 .m207{animation-name:k258,k259;animation-timing-function:cubic-bezier(.23,1,.32,1),steps(1)}
-@keyframes k260{0%,92.833%,100%{opacity:0}75.833%{opacity:1}}
+@keyframes k260{0%,92.833%,100%{visibility:hidden}75.833%{visibility:visible}}
 .m208{animation-name:k174,k260;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k261{0%,24.167%{translate:0px -18px}24.75%{translate:0px 0px}87.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.167%,100%{translate:0px 90px}}
-@keyframes k262{0%,88.167%,100%{opacity:0}24.167%{opacity:1}}
+@keyframes k262{0%,88.167%,100%{visibility:hidden}24.167%{visibility:visible}}
 .m209{animation-name:k261,k262;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k263{0%,27.333%{translate:0px -18px}27.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k264{0%,87.833%,100%{opacity:0}27.333%{opacity:1}}
+@keyframes k264{0%,87.833%,100%{visibility:hidden}27.333%{visibility:visible}}
 .m210{animation-name:k263,k264;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k265{0%,27.5%{translate:0px -18px}28.083%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k266{0%,87.833%,100%{opacity:0}27.5%{opacity:1}}
+@keyframes k266{0%,87.833%,100%{visibility:hidden}27.5%{visibility:visible}}
 .m211{animation-name:k265,k266;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k267{0%,28.333%{translate:0px -18px}28.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k268{0%,87.667%,100%{opacity:0}28.333%{opacity:1}}
+@keyframes k268{0%,87.667%,100%{visibility:hidden}28.333%{visibility:visible}}
 .m212{animation-name:k267,k268;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k269{0%,28.5%{translate:0px -18px}29.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k270{0%,87.667%,100%{opacity:0}28.5%{opacity:1}}
+@keyframes k270{0%,87.667%,100%{visibility:hidden}28.5%{visibility:visible}}
 .m213{animation-name:k269,k270;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k271{0%,34.5%{translate:0px -18px}35.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k272{0%,87.667%,100%{opacity:0}34.5%{opacity:1}}
+@keyframes k272{0%,87.667%,100%{visibility:hidden}34.5%{visibility:visible}}
 .m214{animation-name:k271,k272;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k273{0%,35.167%{translate:0px -18px}35.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k274{0%,87.667%,100%{opacity:0}35.167%{opacity:1}}
+@keyframes k274{0%,87.667%,100%{visibility:hidden}35.167%{visibility:visible}}
 .m215{animation-name:k273,k274;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k275{0%,35.333%{translate:0px -18px}35.917%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k276{0%,87.5%,100%{opacity:0}35.333%{opacity:1}}
+@keyframes k276{0%,87.5%,100%{visibility:hidden}35.333%{visibility:visible}}
 .m216{animation-name:k275,k276;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k277{0%,38.833%{translate:0px -18px}39.417%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k278{0%,88%,100%{opacity:0}38.833%{opacity:1}}
+@keyframes k278{0%,88%,100%{visibility:hidden}38.833%{visibility:visible}}
 .m217{animation-name:k277,k278;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k279{0%,39%{translate:0px -18px}39.583%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k280{0%,88%,100%{opacity:0}39%{opacity:1}}
+@keyframes k280{0%,88%,100%{visibility:hidden}39%{visibility:visible}}
 .m218{animation-name:k279,k280;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k281{0%,41.333%{translate:0px -18px}41.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k282{0%,87.833%,100%{opacity:0}41.333%{opacity:1}}
+@keyframes k282{0%,87.833%,100%{visibility:hidden}41.333%{visibility:visible}}
 .m219{animation-name:k281,k282;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k283{0%,41.5%{translate:0px -18px}42.083%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k284{0%,87.833%,100%{opacity:0}41.5%{opacity:1}}
+@keyframes k284{0%,87.833%,100%{visibility:hidden}41.5%{visibility:visible}}
 .m220{animation-name:k283,k284;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k285{0%,43%{translate:0px -18px}43.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k286{0%,87.667%,100%{opacity:0}43%{opacity:1}}
+@keyframes k286{0%,87.667%,100%{visibility:hidden}43%{visibility:visible}}
 .m221{animation-name:k285,k286;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k287{0%,43.833%{translate:0px -18px}44.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k288{0%,87.667%,100%{opacity:0}43.833%{opacity:1}}
+@keyframes k288{0%,87.667%,100%{visibility:hidden}43.833%{visibility:visible}}
 .m222{animation-name:k287,k288;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k289{0%,92.833%,100%{opacity:0}78.833%{opacity:1}}
+@keyframes k289{0%,92.833%,100%{visibility:hidden}78.833%{visibility:visible}}
 .m223{animation-name:k174,k289;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k290{0%,92.833%,100%{opacity:0}78.667%{opacity:1}}
+@keyframes k290{0%,92.833%,100%{visibility:hidden}78.667%{visibility:visible}}
 .m224{animation-name:k174,k290;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k291{0%,92.833%,100%{opacity:0}79%{opacity:1}}
+@keyframes k291{0%,92.833%,100%{visibility:hidden}79%{visibility:visible}}
 .m225{animation-name:k174,k291;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k292{0%,87.667%,100%{opacity:0}79.5%{opacity:1}}
+@keyframes k292{0%,87.667%,100%{visibility:hidden}79.5%{visibility:visible}}
 .m226{animation-name:k132,k292;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k293{0%,87.667%,100%{opacity:0}79.667%{opacity:1}}
+@keyframes k293{0%,87.667%,100%{visibility:hidden}79.667%{visibility:visible}}
 .m227{animation-name:k132,k293;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k294{0%,86.667%{translate:0px 0px}87.5%,100%{translate:0px 90px}}
-@keyframes k295{0%,87.5%,100%{opacity:0}79.833%{opacity:1}}
+@keyframes k295{0%,87.5%,100%{visibility:hidden}79.833%{visibility:visible}}
 .m228{animation-name:k294,k295;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k296{0%,78.5%,100%{opacity:0}9%{opacity:1}}
+@keyframes k296{0%,78.5%,100%{visibility:hidden}9%{visibility:visible}}
 .m229{animation-name:k254,k296;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k297{0%,78.333%,100%{opacity:0}8.833%{opacity:1}}
+@keyframes k297{0%,78.333%,100%{visibility:hidden}8.833%{visibility:visible}}
 .m230{animation-name:k250,k297;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k298{0%,78.667%,100%{opacity:0}9.167%{opacity:1}}
+@keyframes k298{0%,78.667%,100%{visibility:hidden}9.167%{visibility:visible}}
 .m231{animation-name:k247,k298;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m232{animation-name:k252,k245;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k299{0%,94.5%,100%{opacity:0}6.5%{opacity:1}}
+@keyframes k299{0%,94.5%,100%{visibility:hidden}6.5%{visibility:visible}}
 .m233{animation-name:k299;animation-timing-function:steps(1)}
 .m234{animation-name:k252,k249;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k300{0%,8.667%{translate:0px -18px}9.25%{translate:0px 0px}92.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.5%,100%{translate:0px 90px}}
-@keyframes k301{0%,93.5%,100%{opacity:0}8.667%{opacity:1}}
+@keyframes k301{0%,93.5%,100%{visibility:hidden}8.667%{visibility:visible}}
 .m235{animation-name:k300,k301;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k302{0%,93%{translate:0px 0px}93.833%,100%{translate:0px 90px}}
 .m236{animation-name:k302,k209;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m237{animation-name:k302,k256;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k303{0%,94.167%,100%{opacity:0}6.833%{opacity:1}}
+@keyframes k303{0%,94.167%,100%{visibility:hidden}6.833%{visibility:visible}}
 .m238{animation-name:k303;animation-timing-function:steps(1)}
-@keyframes k304{0%,93.167%,100%{opacity:0}76.333%{opacity:1}}
+@keyframes k304{0%,93.167%,100%{visibility:hidden}76.333%{visibility:visible}}
 .m239{animation-name:k203,k304;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k305{0%,14.167%{translate:0px -6px}15.167%,100%{translate:0px 0px}}
-@keyframes k306{0%,75.833%,100%{opacity:0}14.167%{opacity:1}}
+@keyframes k306{0%,75.833%,100%{visibility:hidden}14.167%{visibility:visible}}
 .m240{animation-name:k305,k306;animation-timing-function:cubic-bezier(.23,1,.32,1),steps(1)}
-@keyframes k307{0%,93.167%,100%{opacity:0}75.833%{opacity:1}}
+@keyframes k307{0%,93.167%,100%{visibility:hidden}75.833%{visibility:visible}}
 .m241{animation-name:k203,k307;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k308{0%,24.833%{translate:0px -18px}25.417%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k309{0%,88%,100%{opacity:0}24.833%{opacity:1}}
+@keyframes k309{0%,88%,100%{visibility:hidden}24.833%{visibility:visible}}
 .m242{animation-name:k308,k309;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k310{0%,27.667%{translate:0px -18px}28.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k311{0%,87.833%,100%{opacity:0}27.667%{opacity:1}}
+@keyframes k311{0%,87.833%,100%{visibility:hidden}27.667%{visibility:visible}}
 .m243{animation-name:k310,k311;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k312{0%,27.833%{translate:0px -18px}28.417%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k313{0%,87.833%,100%{opacity:0}27.833%{opacity:1}}
+@keyframes k313{0%,87.833%,100%{visibility:hidden}27.833%{visibility:visible}}
 .m244{animation-name:k312,k313;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k314{0%,28.667%{translate:0px -18px}29.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k315{0%,87.667%,100%{opacity:0}28.667%{opacity:1}}
+@keyframes k315{0%,87.667%,100%{visibility:hidden}28.667%{visibility:visible}}
 .m245{animation-name:k314,k315;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k316{0%,28.833%{translate:0px -18px}29.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k317{0%,87.667%,100%{opacity:0}28.833%{opacity:1}}
+@keyframes k317{0%,87.667%,100%{visibility:hidden}28.833%{visibility:visible}}
 .m246{animation-name:k316,k317;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k318{0%,33.333%{translate:0px -18px}33.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k319{0%,87.833%,100%{opacity:0}33.333%{opacity:1}}
+@keyframes k319{0%,87.833%,100%{visibility:hidden}33.333%{visibility:visible}}
 .m247{animation-name:k318,k319;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k320{0%,35.5%{translate:0px -18px}36.083%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k321{0%,87.5%,100%{opacity:0}35.5%{opacity:1}}
+@keyframes k321{0%,87.5%,100%{visibility:hidden}35.5%{visibility:visible}}
 .m248{animation-name:k320,k321;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k322{0%,38.5%{translate:0px -18px}39.083%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k323{0%,88%,100%{opacity:0}38.5%{opacity:1}}
+@keyframes k323{0%,88%,100%{visibility:hidden}38.5%{visibility:visible}}
 .m249{animation-name:k322,k323;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k324{0%,38.667%{translate:0px -18px}39.25%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k325{0%,88%,100%{opacity:0}38.667%{opacity:1}}
+@keyframes k325{0%,88%,100%{visibility:hidden}38.667%{visibility:visible}}
 .m250{animation-name:k324,k325;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k326{0%,41%{translate:0px -18px}41.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k327{0%,87.833%,100%{opacity:0}41%{opacity:1}}
+@keyframes k327{0%,87.833%,100%{visibility:hidden}41%{visibility:visible}}
 .m251{animation-name:k326,k327;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k328{0%,41.167%{translate:0px -18px}41.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k329{0%,87.833%,100%{opacity:0}41.167%{opacity:1}}
+@keyframes k329{0%,87.833%,100%{visibility:hidden}41.167%{visibility:visible}}
 .m252{animation-name:k328,k329;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k330{0%,43.167%{translate:0px -18px}43.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k331{0%,87.667%,100%{opacity:0}43.167%{opacity:1}}
+@keyframes k331{0%,87.667%,100%{visibility:hidden}43.167%{visibility:visible}}
 .m253{animation-name:k330,k331;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k332{0%,44%{translate:0px -18px}44.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k333{0%,87.667%,100%{opacity:0}44%{opacity:1}}
+@keyframes k333{0%,87.667%,100%{visibility:hidden}44%{visibility:visible}}
 .m254{animation-name:k332,k333;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k334{0%,44.667%{translate:0px -18px}45.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k335{0%,87.667%,100%{opacity:0}44.667%{opacity:1}}
+@keyframes k335{0%,87.667%,100%{visibility:hidden}44.667%{visibility:visible}}
 .m255{animation-name:k334,k335;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k336{0%,93.167%,100%{opacity:0}78.5%{opacity:1}}
+@keyframes k336{0%,93.167%,100%{visibility:hidden}78.5%{visibility:visible}}
 .m256{animation-name:k203,k336;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k337{0%,93.167%,100%{opacity:0}78.333%{opacity:1}}
+@keyframes k337{0%,93.167%,100%{visibility:hidden}78.333%{visibility:visible}}
 .m257{animation-name:k203,k337;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k338{0%,93.167%,100%{opacity:0}78.667%{opacity:1}}
+@keyframes k338{0%,93.167%,100%{visibility:hidden}78.667%{visibility:visible}}
 .m258{animation-name:k203,k338;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k339{0%,87.667%,100%{opacity:0}79.333%{opacity:1}}
+@keyframes k339{0%,87.667%,100%{visibility:hidden}79.333%{visibility:visible}}
 .m259{animation-name:k132,k339;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k340{0%,87.5%,100%{opacity:0}79.667%{opacity:1}}
+@keyframes k340{0%,87.5%,100%{visibility:hidden}79.667%{visibility:visible}}
 .m260{animation-name:k294,k340;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k341{0%,78.333%,100%{opacity:0}8.667%{opacity:1}}
+@keyframes k341{0%,78.333%,100%{visibility:hidden}8.667%{visibility:visible}}
 .m261{animation-name:k300,k341;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k342{0%,8.333%{translate:0px -18px}8.917%{translate:0px 0px}92.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.5%,100%{translate:0px 90px}}
-@keyframes k343{0%,78%,100%{opacity:0}8.333%{opacity:1}}
+@keyframes k343{0%,78%,100%{visibility:hidden}8.333%{visibility:visible}}
 .m262{animation-name:k342,k343;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k344{0%,8.5%{translate:0px -18px}9.083%{translate:0px 0px}92.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.5%,100%{translate:0px 90px}}
-@keyframes k345{0%,93.5%,100%{opacity:0}8.5%{opacity:1}}
+@keyframes k345{0%,93.5%,100%{visibility:hidden}8.5%{visibility:visible}}
 .m263{animation-name:k344,k345;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k346{0%,94.833%,100%{opacity:0}5.667%{opacity:1}}
+@keyframes k346{0%,94.833%,100%{visibility:hidden}5.667%{visibility:visible}}
 .m264{animation-name:k346;animation-timing-function:steps(1)}
 .m265{animation-name:k302,k206;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k347{0%,94.833%,100%{opacity:0}6%{opacity:1}}
+@keyframes k347{0%,94.833%,100%{visibility:hidden}6%{visibility:visible}}
 .m266{animation-name:k347;animation-timing-function:steps(1)}
 @keyframes k348{0%,8.167%{translate:0px -18px}8.75%{translate:0px 0px}93%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.833%,100%{translate:0px 90px}}
-@keyframes k349{0%,93.833%,100%{opacity:0}8.167%{opacity:1}}
+@keyframes k349{0%,93.833%,100%{visibility:hidden}8.167%{visibility:visible}}
 .m267{animation-name:k348,k349;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k350{0%,7.833%{translate:0px -18px}8.417%{translate:0px 0px}93%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.833%,100%{translate:0px 90px}}
-@keyframes k351{0%,93.833%,100%{opacity:0}7.833%{opacity:1}}
+@keyframes k351{0%,93.833%,100%{visibility:hidden}7.833%{visibility:visible}}
 .m268{animation-name:k350,k351;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k352{0%,94.5%,100%{opacity:0}6.167%{opacity:1}}
+@keyframes k352{0%,94.5%,100%{visibility:hidden}6.167%{visibility:visible}}
 .m269{animation-name:k352;animation-timing-function:steps(1)}
 @keyframes k353{0%,14.667%{translate:0px -6px}15.667%,100%{translate:0px 0px}}
-@keyframes k354{0%,76.167%,100%{opacity:0}14.667%{opacity:1}}
+@keyframes k354{0%,76.167%,100%{visibility:hidden}14.667%{visibility:visible}}
 .m270{animation-name:k353,k354;animation-timing-function:cubic-bezier(.23,1,.32,1),steps(1)}
-@keyframes k355{0%,93.5%,100%{opacity:0}76.167%{opacity:1}}
+@keyframes k355{0%,93.5%,100%{visibility:hidden}76.167%{visibility:visible}}
 .m271{animation-name:k252,k355;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k356{0%,76%,100%{opacity:0}14.167%{opacity:1}}
+@keyframes k356{0%,76%,100%{visibility:hidden}14.167%{visibility:visible}}
 .m272{animation-name:k305,k356;animation-timing-function:cubic-bezier(.23,1,.32,1),steps(1)}
-@keyframes k357{0%,93.5%,100%{opacity:0}76%{opacity:1}}
+@keyframes k357{0%,93.5%,100%{visibility:hidden}76%{visibility:visible}}
 .m273{animation-name:k252,k357;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k358{0%,25.667%{translate:0px -18px}26.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k359{0%,87.833%,100%{opacity:0}25.667%{opacity:1}}
+@keyframes k359{0%,87.833%,100%{visibility:hidden}25.667%{visibility:visible}}
 .m274{animation-name:k358,k359;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k360{0%,29%{translate:0px -18px}29.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k361{0%,87.667%,100%{opacity:0}29%{opacity:1}}
+@keyframes k361{0%,87.667%,100%{visibility:hidden}29%{visibility:visible}}
 .m275{animation-name:k360,k361;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k362{0%,29.167%{translate:0px -18px}29.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k363{0%,87.667%,100%{opacity:0}29.167%{opacity:1}}
+@keyframes k363{0%,87.667%,100%{visibility:hidden}29.167%{visibility:visible}}
 .m276{animation-name:k362,k363;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k364{0%,29.667%{translate:0px -18px}30.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k365{0%,87.667%,100%{opacity:0}29.667%{opacity:1}}
+@keyframes k365{0%,87.667%,100%{visibility:hidden}29.667%{visibility:visible}}
 .m277{animation-name:k364,k365;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k366{0%,35.333%{translate:0px -18px}35.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k367{0%,87.667%,100%{opacity:0}35.333%{opacity:1}}
+@keyframes k367{0%,87.667%,100%{visibility:hidden}35.333%{visibility:visible}}
 .m278{animation-name:k366,k367;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k368{0%,35.667%{translate:0px -18px}36.25%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k369{0%,87.5%,100%{opacity:0}35.667%{opacity:1}}
+@keyframes k369{0%,87.5%,100%{visibility:hidden}35.667%{visibility:visible}}
 .m279{animation-name:k368,k369;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k370{0%,38%{translate:0px -18px}38.583%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k371{0%,88%,100%{opacity:0}38%{opacity:1}}
+@keyframes k371{0%,88%,100%{visibility:hidden}38%{visibility:visible}}
 .m280{animation-name:k370,k371;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k372{0%,38.333%{translate:0px -18px}38.917%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k373{0%,88%,100%{opacity:0}38.333%{opacity:1}}
+@keyframes k373{0%,88%,100%{visibility:hidden}38.333%{visibility:visible}}
 .m281{animation-name:k372,k373;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k374{0%,40.667%{translate:0px -18px}41.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k375{0%,87.833%,100%{opacity:0}40.667%{opacity:1}}
+@keyframes k375{0%,87.833%,100%{visibility:hidden}40.667%{visibility:visible}}
 .m282{animation-name:k374,k375;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k376{0%,40.833%{translate:0px -18px}41.417%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k377{0%,87.833%,100%{opacity:0}40.833%{opacity:1}}
+@keyframes k377{0%,87.833%,100%{visibility:hidden}40.833%{visibility:visible}}
 .m283{animation-name:k376,k377;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k378{0%,43.5%{translate:0px -18px}44.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k379{0%,87.667%,100%{opacity:0}43.5%{opacity:1}}
+@keyframes k379{0%,87.667%,100%{visibility:hidden}43.5%{visibility:visible}}
 .m284{animation-name:k378,k379;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k380{0%,44.167%{translate:0px -18px}44.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k381{0%,87.667%,100%{opacity:0}44.167%{opacity:1}}
+@keyframes k381{0%,87.667%,100%{visibility:hidden}44.167%{visibility:visible}}
 .m285{animation-name:k380,k381;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k382{0%,44.833%{translate:0px -18px}45.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k383{0%,87.667%,100%{opacity:0}44.833%{opacity:1}}
+@keyframes k383{0%,87.667%,100%{visibility:hidden}44.833%{visibility:visible}}
 .m286{animation-name:k382,k383;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k384{0%,45.667%{translate:0px -18px}46.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k385{0%,87.667%,100%{opacity:0}45.667%{opacity:1}}
+@keyframes k385{0%,87.667%,100%{visibility:hidden}45.667%{visibility:visible}}
 .m287{animation-name:k384,k385;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k386{0%,47.5%{translate:0px -18px}48.083%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k387{0%,87.5%,100%{opacity:0}47.5%{opacity:1}}
+@keyframes k387{0%,87.5%,100%{visibility:hidden}47.5%{visibility:visible}}
 .m288{animation-name:k386,k387;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k388{0%,93.5%,100%{opacity:0}78.333%{opacity:1}}
+@keyframes k388{0%,93.5%,100%{visibility:hidden}78.333%{visibility:visible}}
 .m289{animation-name:k252,k388;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k389{0%,93.5%,100%{opacity:0}78%{opacity:1}}
+@keyframes k389{0%,93.5%,100%{visibility:hidden}78%{visibility:visible}}
 .m290{animation-name:k252,k389;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k390{0%,87.667%,100%{opacity:0}79.167%{opacity:1}}
+@keyframes k390{0%,87.667%,100%{visibility:hidden}79.167%{visibility:visible}}
 .m291{animation-name:k132,k390;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k391{0%,87.5%,100%{opacity:0}79.5%{opacity:1}}
+@keyframes k391{0%,87.5%,100%{visibility:hidden}79.5%{visibility:visible}}
 .m292{animation-name:k294,k391;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k392{0%,93.333%{translate:0px 0px}94.167%,100%{translate:0px 90px}}
 .m293{animation-name:k392,k253;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k393{0%,94.5%,100%{opacity:0}6.333%{opacity:1}}
+@keyframes k393{0%,94.5%,100%{visibility:hidden}6.333%{visibility:visible}}
 .m294{animation-name:k393;animation-timing-function:steps(1)}
-@keyframes k394{0%,77.833%,100%{opacity:0}7.833%{opacity:1}}
+@keyframes k394{0%,77.833%,100%{visibility:hidden}7.833%{visibility:visible}}
 .m295{animation-name:k350,k394;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m296{animation-name:k392,k246;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k395{0%,94.833%,100%{opacity:0}5.833%{opacity:1}}
+@keyframes k395{0%,94.833%,100%{visibility:hidden}5.833%{visibility:visible}}
 .m297{animation-name:k395;animation-timing-function:steps(1)}
 .m298{animation-name:k392,k303;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k396{0%,8%{translate:0px -18px}8.583%{translate:0px 0px}93%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}93.833%,100%{translate:0px 90px}}
-@keyframes k397{0%,93.833%,100%{opacity:0}8%{opacity:1}}
+@keyframes k397{0%,93.833%,100%{visibility:hidden}8%{visibility:visible}}
 .m299{animation-name:k396,k397;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k398{0%,93.833%,100%{opacity:0}76.167%{opacity:1}}
+@keyframes k398{0%,93.833%,100%{visibility:hidden}76.167%{visibility:visible}}
 .m300{animation-name:k302,k398;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k399{0%,28%{translate:0px -18px}28.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k400{0%,87.833%,100%{opacity:0}28%{opacity:1}}
+@keyframes k400{0%,87.833%,100%{visibility:hidden}28%{visibility:visible}}
 .m301{animation-name:k399,k400;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k401{0%,28.167%{translate:0px -18px}28.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k402{0%,87.833%,100%{opacity:0}28.167%{opacity:1}}
+@keyframes k402{0%,87.833%,100%{visibility:hidden}28.167%{visibility:visible}}
 .m302{animation-name:k401,k402;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k403{0%,29.333%{translate:0px -18px}29.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k404{0%,87.667%,100%{opacity:0}29.333%{opacity:1}}
+@keyframes k404{0%,87.667%,100%{visibility:hidden}29.333%{visibility:visible}}
 .m303{animation-name:k403,k404;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k405{0%,29.833%{translate:0px -18px}30.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k406{0%,87.667%,100%{opacity:0}29.833%{opacity:1}}
+@keyframes k406{0%,87.667%,100%{visibility:hidden}29.833%{visibility:visible}}
 .m304{animation-name:k405,k406;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k407{0%,30%{translate:0px -18px}30.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k408{0%,87.667%,100%{opacity:0}30%{opacity:1}}
+@keyframes k408{0%,87.667%,100%{visibility:hidden}30%{visibility:visible}}
 .m305{animation-name:k407,k408;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k409{0%,37.833%{translate:0px -18px}38.417%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k410{0%,88%,100%{opacity:0}37.833%{opacity:1}}
+@keyframes k410{0%,88%,100%{visibility:hidden}37.833%{visibility:visible}}
 .m306{animation-name:k409,k410;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k411{0%,40.5%{translate:0px -18px}41.083%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k412{0%,87.833%,100%{opacity:0}40.5%{opacity:1}}
+@keyframes k412{0%,87.833%,100%{visibility:hidden}40.5%{visibility:visible}}
 .m307{animation-name:k411,k412;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k413{0%,42.5%{translate:0px -18px}43.083%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k414{0%,87.833%,100%{opacity:0}42.5%{opacity:1}}
+@keyframes k414{0%,87.833%,100%{visibility:hidden}42.5%{visibility:visible}}
 .m308{animation-name:k413,k414;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k415{0%,43.667%{translate:0px -18px}44.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k416{0%,87.667%,100%{opacity:0}43.667%{opacity:1}}
+@keyframes k416{0%,87.667%,100%{visibility:hidden}43.667%{visibility:visible}}
 .m309{animation-name:k415,k416;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k417{0%,44.333%{translate:0px -18px}44.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k418{0%,87.667%,100%{opacity:0}44.333%{opacity:1}}
+@keyframes k418{0%,87.667%,100%{visibility:hidden}44.333%{visibility:visible}}
 .m310{animation-name:k417,k418;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k419{0%,45.167%{translate:0px -18px}45.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k420{0%,87.667%,100%{opacity:0}45.167%{opacity:1}}
+@keyframes k420{0%,87.667%,100%{visibility:hidden}45.167%{visibility:visible}}
 .m311{animation-name:k419,k420;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k421{0%,45.833%{translate:0px -18px}46.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k422{0%,87.667%,100%{opacity:0}45.833%{opacity:1}}
+@keyframes k422{0%,87.667%,100%{visibility:hidden}45.833%{visibility:visible}}
 .m312{animation-name:k421,k422;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k423{0%,46.5%{translate:0px -18px}47.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k424{0%,87.667%,100%{opacity:0}46.5%{opacity:1}}
+@keyframes k424{0%,87.667%,100%{visibility:hidden}46.5%{visibility:visible}}
 .m313{animation-name:k423,k424;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k425{0%,47.667%{translate:0px -18px}48.25%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k426{0%,87.5%,100%{opacity:0}47.667%{opacity:1}}
+@keyframes k426{0%,87.5%,100%{visibility:hidden}47.667%{visibility:visible}}
 .m314{animation-name:k425,k426;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k427{0%,48%{translate:0px -18px}48.583%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k428{0%,87.5%,100%{opacity:0}48%{opacity:1}}
+@keyframes k428{0%,87.5%,100%{visibility:hidden}48%{visibility:visible}}
 .m315{animation-name:k427,k428;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k429{0%,93.833%,100%{opacity:0}77.833%{opacity:1}}
+@keyframes k429{0%,93.833%,100%{visibility:hidden}77.833%{visibility:visible}}
 .m316{animation-name:k302,k429;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k430{0%,82.5%,100%{opacity:0}56.667%{opacity:1}}
+@keyframes k430{0%,82.5%,100%{visibility:hidden}56.667%{visibility:visible}}
 .m317{animation-name:k430;animation-timing-function:steps(1)}
-@keyframes k431{0%,78.167%,100%{opacity:0}8.167%{opacity:1}}
+@keyframes k431{0%,78.167%,100%{visibility:hidden}8.167%{visibility:visible}}
 .m318{animation-name:k348,k431;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k432{0%,7.167%{translate:0px -18px}7.75%{translate:0px 0px}93.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.167%,100%{translate:0px 90px}}
-@keyframes k433{0%,77.5%,100%{opacity:0}7.167%{opacity:1}}
+@keyframes k433{0%,77.5%,100%{visibility:hidden}7.167%{visibility:visible}}
 .m319{animation-name:k432,k433;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k434{0%,93.667%{translate:0px 0px}94.5%,100%{translate:0px 90px}}
 .m320{animation-name:k434,k393;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m321{animation-name:k434,k352;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k435{0%,7.5%{translate:0px -18px}8.083%{translate:0px 0px}93.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.167%,100%{translate:0px 90px}}
-@keyframes k436{0%,77.833%,100%{opacity:0}7.5%{opacity:1}}
+@keyframes k436{0%,77.833%,100%{visibility:hidden}7.5%{visibility:visible}}
 .m322{animation-name:k435,k436;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k437{0%,7.333%{translate:0px -18px}7.917%{translate:0px 0px}93.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.167%,100%{translate:0px 90px}}
-@keyframes k438{0%,77.667%,100%{opacity:0}7.333%{opacity:1}}
+@keyframes k438{0%,77.667%,100%{visibility:hidden}7.333%{visibility:visible}}
 .m323{animation-name:k437,k438;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m324{animation-name:k434,k299;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k439{0%,94.167%,100%{opacity:0}7.167%{opacity:1}}
+@keyframes k439{0%,94.167%,100%{visibility:hidden}7.167%{visibility:visible}}
 .m325{animation-name:k432,k439;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k440{0%,94.167%,100%{opacity:0}7.333%{opacity:1}}
+@keyframes k440{0%,94.167%,100%{visibility:hidden}7.333%{visibility:visible}}
 .m326{animation-name:k437,k440;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k441{0%,95.167%,100%{opacity:0}5.5%{opacity:1}}
+@keyframes k441{0%,95.167%,100%{visibility:hidden}5.5%{visibility:visible}}
 .m327{animation-name:k441;animation-timing-function:steps(1)}
 @keyframes k442{0%,29.5%{translate:0px -18px}30.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k443{0%,87.667%,100%{opacity:0}29.5%{opacity:1}}
+@keyframes k443{0%,87.667%,100%{visibility:hidden}29.5%{visibility:visible}}
 .m328{animation-name:k442,k443;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k444{0%,30.167%{translate:0px -18px}30.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k445{0%,87.667%,100%{opacity:0}30.167%{opacity:1}}
+@keyframes k445{0%,87.667%,100%{visibility:hidden}30.167%{visibility:visible}}
 .m329{animation-name:k444,k445;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k446{0%,30.333%{translate:0px -18px}30.917%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k447{0%,87.5%,100%{opacity:0}30.333%{opacity:1}}
+@keyframes k447{0%,87.5%,100%{visibility:hidden}30.333%{visibility:visible}}
 .m330{animation-name:k446,k447;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k448{0%,37.5%{translate:0px -18px}38.083%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k449{0%,88%,100%{opacity:0}37.5%{opacity:1}}
+@keyframes k449{0%,88%,100%{visibility:hidden}37.5%{visibility:visible}}
 .m331{animation-name:k448,k449;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k450{0%,37.667%{translate:0px -18px}38.25%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k451{0%,88%,100%{opacity:0}37.667%{opacity:1}}
+@keyframes k451{0%,88%,100%{visibility:hidden}37.667%{visibility:visible}}
 .m332{animation-name:k450,k451;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k452{0%,42.333%{translate:0px -18px}42.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k453{0%,87.833%,100%{opacity:0}42.333%{opacity:1}}
+@keyframes k453{0%,87.833%,100%{visibility:hidden}42.333%{visibility:visible}}
 .m333{animation-name:k452,k453;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k454{0%,44.5%{translate:0px -18px}45.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k455{0%,87.667%,100%{opacity:0}44.5%{opacity:1}}
+@keyframes k455{0%,87.667%,100%{visibility:hidden}44.5%{visibility:visible}}
 .m334{animation-name:k454,k455;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k456{0%,45.333%{translate:0px -18px}45.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k457{0%,87.667%,100%{opacity:0}45.333%{opacity:1}}
+@keyframes k457{0%,87.667%,100%{visibility:hidden}45.333%{visibility:visible}}
 .m335{animation-name:k456,k457;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k458{0%,46%{translate:0px -18px}46.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k459{0%,87.667%,100%{opacity:0}46%{opacity:1}}
+@keyframes k459{0%,87.667%,100%{visibility:hidden}46%{visibility:visible}}
 .m336{animation-name:k458,k459;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k460{0%,46.667%{translate:0px -18px}47.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k461{0%,87.667%,100%{opacity:0}46.667%{opacity:1}}
+@keyframes k461{0%,87.667%,100%{visibility:hidden}46.667%{visibility:visible}}
 .m337{animation-name:k460,k461;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k462{0%,47.833%{translate:0px -18px}48.417%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k463{0%,87.5%,100%{opacity:0}47.833%{opacity:1}}
+@keyframes k463{0%,87.5%,100%{visibility:hidden}47.833%{visibility:visible}}
 .m338{animation-name:k462,k463;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k464{0%,48.167%{translate:0px -18px}48.75%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k465{0%,87.5%,100%{opacity:0}48.167%{opacity:1}}
+@keyframes k465{0%,87.5%,100%{visibility:hidden}48.167%{visibility:visible}}
 .m339{animation-name:k464,k465;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k466{0%,48.667%{translate:0px -18px}49.25%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k467{0%,87.5%,100%{opacity:0}48.667%{opacity:1}}
+@keyframes k467{0%,87.5%,100%{visibility:hidden}48.667%{visibility:visible}}
 .m340{animation-name:k466,k467;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k468{0%,93.833%,100%{opacity:0}78.167%{opacity:1}}
+@keyframes k468{0%,93.833%,100%{visibility:hidden}78.167%{visibility:visible}}
 .m341{animation-name:k302,k468;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k469{0%,94.167%,100%{opacity:0}77.5%{opacity:1}}
+@keyframes k469{0%,94.167%,100%{visibility:hidden}77.5%{visibility:visible}}
 .m342{animation-name:k392,k469;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k470{0%,94.167%,100%{opacity:0}77.833%{opacity:1}}
+@keyframes k470{0%,94.167%,100%{visibility:hidden}77.833%{visibility:visible}}
 .m343{animation-name:k392,k470;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k471{0%,94.167%,100%{opacity:0}77.667%{opacity:1}}
+@keyframes k471{0%,94.167%,100%{visibility:hidden}77.667%{visibility:visible}}
 .m344{animation-name:k392,k471;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k472{0%,87.667%,100%{opacity:0}78.667%{opacity:1}}
+@keyframes k472{0%,87.667%,100%{visibility:hidden}78.667%{visibility:visible}}
 .m345{animation-name:k132,k472;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k473{0%,87.667%,100%{opacity:0}78.833%{opacity:1}}
+@keyframes k473{0%,87.667%,100%{visibility:hidden}78.833%{visibility:visible}}
 .m346{animation-name:k132,k473;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k474{0%,87.5%,100%{opacity:0}79.167%{opacity:1}}
+@keyframes k474{0%,87.5%,100%{visibility:hidden}79.167%{visibility:visible}}
 .m347{animation-name:k294,k474;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k475{0%,6.833%{translate:0px -18px}7.417%{translate:0px 0px}93.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.5%,100%{translate:0px 90px}}
-@keyframes k476{0%,77.5%,100%{opacity:0}6.833%{opacity:1}}
+@keyframes k476{0%,77.5%,100%{visibility:hidden}6.833%{visibility:visible}}
 .m348{animation-name:k475,k476;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k477{0%,6.667%{translate:0px -18px}7.25%{translate:0px 0px}93.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.5%,100%{translate:0px 90px}}
-@keyframes k478{0%,77.333%,100%{opacity:0}6.667%{opacity:1}}
+@keyframes k478{0%,77.333%,100%{visibility:hidden}6.667%{visibility:visible}}
 .m349{animation-name:k477,k478;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k479{0%,94%{translate:0px 0px}94.833%,100%{translate:0px 90px}}
 .m350{animation-name:k479,k346;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m351{animation-name:k479,k395;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k480{0%,7%{translate:0px -18px}7.583%{translate:0px 0px}93.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.5%,100%{translate:0px 90px}}
-@keyframes k481{0%,77.667%,100%{opacity:0}7%{opacity:1}}
+@keyframes k481{0%,77.667%,100%{visibility:hidden}7%{visibility:visible}}
 .m352{animation-name:k480,k481;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k482{0%,95.667%,100%{opacity:0}4.5%{opacity:1}}
+@keyframes k482{0%,95.667%,100%{visibility:hidden}4.5%{visibility:visible}}
 .m353{animation-name:k482;animation-timing-function:steps(1)}
 .m354{animation-name:k479,k347;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k483{0%,95.167%,100%{opacity:0}5.333%{opacity:1}}
+@keyframes k483{0%,95.167%,100%{visibility:hidden}5.333%{visibility:visible}}
 .m355{animation-name:k483;animation-timing-function:steps(1)}
-@keyframes k484{0%,94.5%,100%{opacity:0}7%{opacity:1}}
+@keyframes k484{0%,94.5%,100%{visibility:hidden}7%{visibility:visible}}
 .m356{animation-name:k480,k484;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k485{0%,95.167%,100%{opacity:0}5.167%{opacity:1}}
+@keyframes k485{0%,95.167%,100%{visibility:hidden}5.167%{visibility:visible}}
 .m357{animation-name:k485;animation-timing-function:steps(1)}
-@keyframes k486{0%,95.667%,100%{opacity:0}4.667%{opacity:1}}
+@keyframes k486{0%,95.667%,100%{visibility:hidden}4.667%{visibility:visible}}
 .m358{animation-name:k486;animation-timing-function:steps(1)}
-@keyframes k487{0%,94.5%,100%{opacity:0}6.667%{opacity:1}}
+@keyframes k487{0%,94.5%,100%{visibility:hidden}6.667%{visibility:visible}}
 .m359{animation-name:k477,k487;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k488{0%,18.333%{translate:0px -18px}18.917%{translate:0px 0px}87.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.333%,100%{translate:0px 90px}}
-@keyframes k489{0%,88.333%,100%{opacity:0}18.333%{opacity:1}}
+@keyframes k489{0%,88.333%,100%{visibility:hidden}18.333%{visibility:visible}}
 .m360{animation-name:k488,k489;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k490{0%,22%{translate:0px -18px}22.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k491{0%,87.833%,100%{opacity:0}22%{opacity:1}}
+@keyframes k491{0%,87.833%,100%{visibility:hidden}22%{visibility:visible}}
 .m361{animation-name:k490,k491;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k492{0%,22.167%{translate:0px -18px}22.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k493{0%,87.833%,100%{opacity:0}22.167%{opacity:1}}
+@keyframes k493{0%,87.833%,100%{visibility:hidden}22.167%{visibility:visible}}
 .m362{animation-name:k492,k493;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k494{0%,28.333%{translate:0px -18px}28.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k495{0%,87.833%,100%{opacity:0}28.333%{opacity:1}}
+@keyframes k495{0%,87.833%,100%{visibility:hidden}28.333%{visibility:visible}}
 .m363{animation-name:k494,k495;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k496{0%,30.5%{translate:0px -18px}31.083%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k497{0%,87.5%,100%{opacity:0}30.5%{opacity:1}}
+@keyframes k497{0%,87.5%,100%{visibility:hidden}30.5%{visibility:visible}}
 .m364{animation-name:k496,k497;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k498{0%,37.333%{translate:0px -18px}37.917%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k499{0%,88%,100%{opacity:0}37.333%{opacity:1}}
+@keyframes k499{0%,88%,100%{visibility:hidden}37.333%{visibility:visible}}
 .m365{animation-name:k498,k499;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k500{0%,40.333%{translate:0px -18px}40.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k501{0%,87.833%,100%{opacity:0}40.333%{opacity:1}}
+@keyframes k501{0%,87.833%,100%{visibility:hidden}40.333%{visibility:visible}}
 .m366{animation-name:k500,k501;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k502{0%,42.667%{translate:0px -18px}43.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k503{0%,87.833%,100%{opacity:0}42.667%{opacity:1}}
+@keyframes k503{0%,87.833%,100%{visibility:hidden}42.667%{visibility:visible}}
 .m367{animation-name:k502,k503;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k504{0%,45.5%{translate:0px -18px}46.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k505{0%,87.667%,100%{opacity:0}45.5%{opacity:1}}
+@keyframes k505{0%,87.667%,100%{visibility:hidden}45.5%{visibility:visible}}
 .m368{animation-name:k504,k505;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k506{0%,46.167%{translate:0px -18px}46.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k507{0%,87.667%,100%{opacity:0}46.167%{opacity:1}}
+@keyframes k507{0%,87.667%,100%{visibility:hidden}46.167%{visibility:visible}}
 .m369{animation-name:k506,k507;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k508{0%,47%{translate:0px -18px}47.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k509{0%,87.667%,100%{opacity:0}47%{opacity:1}}
+@keyframes k509{0%,87.667%,100%{visibility:hidden}47%{visibility:visible}}
 .m370{animation-name:k508,k509;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k510{0%,48.333%{translate:0px -18px}48.917%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k511{0%,87.5%,100%{opacity:0}48.333%{opacity:1}}
+@keyframes k511{0%,87.5%,100%{visibility:hidden}48.333%{visibility:visible}}
 .m371{animation-name:k510,k511;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k512{0%,48.833%{translate:0px -18px}49.417%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k513{0%,87.5%,100%{opacity:0}48.833%{opacity:1}}
+@keyframes k513{0%,87.5%,100%{visibility:hidden}48.833%{visibility:visible}}
 .m372{animation-name:k512,k513;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k514{0%,49.167%{translate:0px -18px}49.75%{translate:0px 0px}86.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.333%,100%{translate:0px 90px}}
-@keyframes k515{0%,87.333%,100%{opacity:0}49.167%{opacity:1}}
+@keyframes k515{0%,87.333%,100%{visibility:hidden}49.167%{visibility:visible}}
 .m373{animation-name:k514,k515;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k516{0%,94.5%,100%{opacity:0}77.5%{opacity:1}}
+@keyframes k516{0%,94.5%,100%{visibility:hidden}77.5%{visibility:visible}}
 .m374{animation-name:k434,k516;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k517{0%,94.5%,100%{opacity:0}77.333%{opacity:1}}
+@keyframes k517{0%,94.5%,100%{visibility:hidden}77.333%{visibility:visible}}
 .m375{animation-name:k434,k517;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k518{0%,94.5%,100%{opacity:0}77.667%{opacity:1}}
+@keyframes k518{0%,94.5%,100%{visibility:hidden}77.667%{visibility:visible}}
 .m376{animation-name:k434,k518;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k519{0%,87.667%,100%{opacity:0}78.5%{opacity:1}}
+@keyframes k519{0%,87.667%,100%{visibility:hidden}78.5%{visibility:visible}}
 .m377{animation-name:k132,k519;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k520{0%,87.5%,100%{opacity:0}78.833%{opacity:1}}
+@keyframes k520{0%,87.5%,100%{visibility:hidden}78.833%{visibility:visible}}
 .m378{animation-name:k294,k520;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k521{0%,6.167%{translate:0px -18px}6.75%{translate:0px 0px}94%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.833%,100%{translate:0px 90px}}
-@keyframes k522{0%,77%,100%{opacity:0}6.167%{opacity:1}}
+@keyframes k522{0%,77%,100%{visibility:hidden}6.167%{visibility:visible}}
 .m379{animation-name:k521,k522;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k523{0%,6.333%{translate:0px -18px}6.917%{translate:0px 0px}94%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.833%,100%{translate:0px 90px}}
-@keyframes k524{0%,77.167%,100%{opacity:0}6.333%{opacity:1}}
+@keyframes k524{0%,77.167%,100%{visibility:hidden}6.333%{visibility:visible}}
 .m380{animation-name:k523,k524;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k525{0%,94.333%{translate:0px 0px}95.167%,100%{translate:0px 90px}}
 .m381{animation-name:k525,k441;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k526{0%,6.5%{translate:0px -18px}7.083%{translate:0px 0px}94%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}94.833%,100%{translate:0px 90px}}
-@keyframes k527{0%,77.333%,100%{opacity:0}6.5%{opacity:1}}
+@keyframes k527{0%,77.333%,100%{visibility:hidden}6.5%{visibility:visible}}
 .m382{animation-name:k526,k527;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m383{animation-name:k525,k483;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k528{0%,96%,100%{opacity:0}4.333%{opacity:1}}
+@keyframes k528{0%,96%,100%{visibility:hidden}4.333%{visibility:visible}}
 .m384{animation-name:k528;animation-timing-function:steps(1)}
-@keyframes k529{0%,95.667%,100%{opacity:0}4.833%{opacity:1}}
+@keyframes k529{0%,95.667%,100%{visibility:hidden}4.833%{visibility:visible}}
 .m385{animation-name:k529;animation-timing-function:steps(1)}
 .m386{animation-name:k525,k485;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k530{0%,19.167%{translate:0px -18px}19.75%{translate:0px 0px}87.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.167%,100%{translate:0px 90px}}
-@keyframes k531{0%,88.167%,100%{opacity:0}19.167%{opacity:1}}
+@keyframes k531{0%,88.167%,100%{visibility:hidden}19.167%{visibility:visible}}
 .m387{animation-name:k530,k531;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k532{0%,22.333%{translate:0px -18px}22.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k533{0%,87.833%,100%{opacity:0}22.333%{opacity:1}}
+@keyframes k533{0%,87.833%,100%{visibility:hidden}22.333%{visibility:visible}}
 .m388{animation-name:k532,k533;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k534{0%,22.5%{translate:0px -18px}23.083%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k535{0%,87.833%,100%{opacity:0}22.5%{opacity:1}}
+@keyframes k535{0%,87.833%,100%{visibility:hidden}22.5%{visibility:visible}}
 .m389{animation-name:k534,k535;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k536{0%,23.333%{translate:0px -18px}23.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k537{0%,87.667%,100%{opacity:0}23.333%{opacity:1}}
+@keyframes k537{0%,87.667%,100%{visibility:hidden}23.333%{visibility:visible}}
 .m390{animation-name:k536,k537;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k538{0%,23.5%{translate:0px -18px}24.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k539{0%,87.667%,100%{opacity:0}23.5%{opacity:1}}
+@keyframes k539{0%,87.667%,100%{visibility:hidden}23.5%{visibility:visible}}
 .m391{animation-name:k538,k539;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k540{0%,30.333%{translate:0px -18px}30.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k541{0%,87.667%,100%{opacity:0}30.333%{opacity:1}}
+@keyframes k541{0%,87.667%,100%{visibility:hidden}30.333%{visibility:visible}}
 .m392{animation-name:k540,k541;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k542{0%,30.667%{translate:0px -18px}31.25%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k543{0%,87.5%,100%{opacity:0}30.667%{opacity:1}}
+@keyframes k543{0%,87.5%,100%{visibility:hidden}30.667%{visibility:visible}}
 .m393{animation-name:k542,k543;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k544{0%,40.167%{translate:0px -18px}40.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k545{0%,87.833%,100%{opacity:0}40.167%{opacity:1}}
+@keyframes k545{0%,87.833%,100%{visibility:hidden}40.167%{visibility:visible}}
 .m394{animation-name:k544,k545;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k546{0%,46.333%{translate:0px -18px}46.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k547{0%,87.667%,100%{opacity:0}46.333%{opacity:1}}
+@keyframes k547{0%,87.667%,100%{visibility:hidden}46.333%{visibility:visible}}
 .m395{animation-name:k546,k547;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k548{0%,47.167%{translate:0px -18px}47.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k549{0%,87.667%,100%{opacity:0}47.167%{opacity:1}}
+@keyframes k549{0%,87.667%,100%{visibility:hidden}47.167%{visibility:visible}}
 .m396{animation-name:k548,k549;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k550{0%,49%{translate:0px -18px}49.583%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k551{0%,87.5%,100%{opacity:0}49%{opacity:1}}
+@keyframes k551{0%,87.5%,100%{visibility:hidden}49%{visibility:visible}}
 .m397{animation-name:k550,k551;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k552{0%,48.667%{translate:0px -18px}49.25%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k553{0%,88%,100%{opacity:0}48.667%{opacity:1}}
+@keyframes k553{0%,88%,100%{visibility:hidden}48.667%{visibility:visible}}
 .m398{animation-name:k552,k553;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k554{0%,94.833%,100%{opacity:0}77%{opacity:1}}
+@keyframes k554{0%,94.833%,100%{visibility:hidden}77%{visibility:visible}}
 .m399{animation-name:k479,k554;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k555{0%,94.833%,100%{opacity:0}77.167%{opacity:1}}
+@keyframes k555{0%,94.833%,100%{visibility:hidden}77.167%{visibility:visible}}
 .m400{animation-name:k479,k555;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k556{0%,94.833%,100%{opacity:0}77.333%{opacity:1}}
+@keyframes k556{0%,94.833%,100%{visibility:hidden}77.333%{visibility:visible}}
 .m401{animation-name:k479,k556;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k557{0%,87.667%,100%{opacity:0}78.333%{opacity:1}}
+@keyframes k557{0%,87.667%,100%{visibility:hidden}78.333%{visibility:visible}}
 .m402{animation-name:k132,k557;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k558{0%,87.5%,100%{opacity:0}78.667%{opacity:1}}
+@keyframes k558{0%,87.5%,100%{visibility:hidden}78.667%{visibility:visible}}
 .m403{animation-name:k294,k558;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k559{0%,6%{translate:0px -18px}6.583%{translate:0px 0px}94.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}95.167%,100%{translate:0px 90px}}
-@keyframes k560{0%,77.167%,100%{opacity:0}6%{opacity:1}}
+@keyframes k560{0%,77.167%,100%{visibility:hidden}6%{visibility:visible}}
 .m404{animation-name:k559,k560;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k561{0%,94.833%{translate:0px 0px}95.667%,100%{translate:0px 90px}}
 .m405{animation-name:k561,k482;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k562{0%,96%,100%{opacity:0}4.167%{opacity:1}}
+@keyframes k562{0%,96%,100%{visibility:hidden}4.167%{visibility:visible}}
 .m406{animation-name:k562;animation-timing-function:steps(1)}
 @keyframes k563{0%,5.833%{translate:0px -18px}6.417%{translate:0px 0px}94.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}95.167%,100%{translate:0px 90px}}
-@keyframes k564{0%,77%,100%{opacity:0}5.833%{opacity:1}}
+@keyframes k564{0%,77%,100%{visibility:hidden}5.833%{visibility:visible}}
 .m407{animation-name:k563,k564;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m408{animation-name:k561,k486;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m409{animation-name:k561,k529;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k565{0%,5.667%{translate:0px -18px}6.25%{translate:0px 0px}94.333%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}95.167%,100%{translate:0px 90px}}
-@keyframes k566{0%,76.833%,100%{opacity:0}5.667%{opacity:1}}
+@keyframes k566{0%,76.833%,100%{visibility:hidden}5.667%{visibility:visible}}
 .m410{animation-name:k565,k566;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k567{0%,96.333%,100%{opacity:0}3.833%{opacity:1}}
+@keyframes k567{0%,96.333%,100%{visibility:hidden}3.833%{visibility:visible}}
 .m411{animation-name:k567;animation-timing-function:steps(1)}
 @keyframes k568{0%,19.833%{translate:0px -18px}20.417%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k569{0%,88%,100%{opacity:0}19.833%{opacity:1}}
+@keyframes k569{0%,88%,100%{visibility:hidden}19.833%{visibility:visible}}
 .m412{animation-name:k568,k569;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k570{0%,22.667%{translate:0px -18px}23.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k571{0%,87.833%,100%{opacity:0}22.667%{opacity:1}}
+@keyframes k571{0%,87.833%,100%{visibility:hidden}22.667%{visibility:visible}}
 .m413{animation-name:k570,k571;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k572{0%,22.833%{translate:0px -18px}23.417%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k573{0%,87.833%,100%{opacity:0}22.833%{opacity:1}}
+@keyframes k573{0%,87.833%,100%{visibility:hidden}22.833%{visibility:visible}}
 .m414{animation-name:k572,k573;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k574{0%,23.667%{translate:0px -18px}24.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k575{0%,87.667%,100%{opacity:0}23.667%{opacity:1}}
+@keyframes k575{0%,87.667%,100%{visibility:hidden}23.667%{visibility:visible}}
 .m415{animation-name:k574,k575;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k576{0%,23.833%{translate:0px -18px}24.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k577{0%,87.667%,100%{opacity:0}23.833%{opacity:1}}
+@keyframes k577{0%,87.667%,100%{visibility:hidden}23.833%{visibility:visible}}
 .m416{animation-name:k576,k577;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k578{0%,31.333%{translate:0px -18px}31.917%{translate:0px 0px}88.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}89%,100%{translate:0px 90px}}
-@keyframes k579{0%,89%,100%{opacity:0}31.333%{opacity:1}}
+@keyframes k579{0%,89%,100%{visibility:hidden}31.333%{visibility:visible}}
 .m417{animation-name:k578,k579;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k580{0%,47.333%{translate:0px -18px}47.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k581{0%,87.667%,100%{opacity:0}47.333%{opacity:1}}
+@keyframes k581{0%,87.667%,100%{visibility:hidden}47.333%{visibility:visible}}
 .m418{animation-name:k580,k581;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k582{0%,49.167%{translate:0px -18px}49.75%{translate:0px 0px}87.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88%,100%{translate:0px 90px}}
-@keyframes k583{0%,88%,100%{opacity:0}49.167%{opacity:1}}
+@keyframes k583{0%,88%,100%{visibility:hidden}49.167%{visibility:visible}}
 .m419{animation-name:k582,k583;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k584{0%,95.167%,100%{opacity:0}77.167%{opacity:1}}
+@keyframes k584{0%,95.167%,100%{visibility:hidden}77.167%{visibility:visible}}
 .m420{animation-name:k525,k584;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k585{0%,95.167%,100%{opacity:0}77%{opacity:1}}
+@keyframes k585{0%,95.167%,100%{visibility:hidden}77%{visibility:visible}}
 .m421{animation-name:k525,k585;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k586{0%,95.167%,100%{opacity:0}76.833%{opacity:1}}
+@keyframes k586{0%,95.167%,100%{visibility:hidden}76.833%{visibility:visible}}
 .m422{animation-name:k525,k586;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k587{0%,87.667%,100%{opacity:0}78.167%{opacity:1}}
+@keyframes k587{0%,87.667%,100%{visibility:hidden}78.167%{visibility:visible}}
 .m423{animation-name:k132,k587;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k588{0%,5%{translate:0px -18px}5.583%{translate:0px 0px}94.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}95.667%,100%{translate:0px 90px}}
-@keyframes k589{0%,76.5%,100%{opacity:0}5%{opacity:1}}
+@keyframes k589{0%,76.5%,100%{visibility:hidden}5%{visibility:visible}}
 .m424{animation-name:k588,k589;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k590{0%,95.167%{translate:0px 0px}96%,100%{translate:0px 90px}}
 .m425{animation-name:k590,k562;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k591{0%,5.167%{translate:0px -18px}5.75%{translate:0px 0px}94.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}95.667%,100%{translate:0px 90px}}
-@keyframes k592{0%,76.667%,100%{opacity:0}5.167%{opacity:1}}
+@keyframes k592{0%,76.667%,100%{visibility:hidden}5.167%{visibility:visible}}
 .m426{animation-name:k591,k592;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 .m427{animation-name:k590,k528;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k593{0%,96.333%,100%{opacity:0}3.667%{opacity:1}}
+@keyframes k593{0%,96.333%,100%{visibility:hidden}3.667%{visibility:visible}}
 .m428{animation-name:k593;animation-timing-function:steps(1)}
 @keyframes k594{0%,5.333%{translate:0px -18px}5.917%{translate:0px 0px}94.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}95.667%,100%{translate:0px 90px}}
-@keyframes k595{0%,76.833%,100%{opacity:0}5.333%{opacity:1}}
+@keyframes k595{0%,76.833%,100%{visibility:hidden}5.333%{visibility:visible}}
 .m429{animation-name:k594,k595;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k596{0%,96.333%,100%{opacity:0}3.5%{opacity:1}}
+@keyframes k596{0%,96.333%,100%{visibility:hidden}3.5%{visibility:visible}}
 .m430{animation-name:k596;animation-timing-function:steps(1)}
 @keyframes k597{0%,20.667%{translate:0px -18px}21.25%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k598{0%,87.833%,100%{opacity:0}20.667%{opacity:1}}
+@keyframes k598{0%,87.833%,100%{visibility:hidden}20.667%{visibility:visible}}
 .m431{animation-name:k597,k598;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k599{0%,24%{translate:0px -18px}24.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k600{0%,87.667%,100%{opacity:0}24%{opacity:1}}
+@keyframes k600{0%,87.667%,100%{visibility:hidden}24%{visibility:visible}}
 .m432{animation-name:k599,k600;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k601{0%,24.167%{translate:0px -18px}24.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k602{0%,87.667%,100%{opacity:0}24.167%{opacity:1}}
+@keyframes k602{0%,87.667%,100%{visibility:hidden}24.167%{visibility:visible}}
 .m433{animation-name:k601,k602;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k603{0%,24.667%{translate:0px -18px}25.25%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k604{0%,87.667%,100%{opacity:0}24.667%{opacity:1}}
+@keyframes k604{0%,87.667%,100%{visibility:hidden}24.667%{visibility:visible}}
 .m434{animation-name:k603,k604;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k605{0%,34.167%{translate:0px -18px}34.75%{translate:0px 0px}89.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.667%,100%{translate:0px 90px}}
-@keyframes k606{0%,90.667%,100%{opacity:0}34.167%{opacity:1}}
+@keyframes k606{0%,90.667%,100%{visibility:hidden}34.167%{visibility:visible}}
 .m435{animation-name:k605,k606;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k607{0%,34.833%{translate:0px -18px}35.417%{translate:0px 0px}90.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91%,100%{translate:0px 90px}}
-@keyframes k608{0%,91%,100%{opacity:0}34.833%{opacity:1}}
+@keyframes k608{0%,91%,100%{visibility:hidden}34.833%{visibility:visible}}
 .m436{animation-name:k607,k608;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k609{0%,95.667%,100%{opacity:0}76.5%{opacity:1}}
+@keyframes k609{0%,95.667%,100%{visibility:hidden}76.5%{visibility:visible}}
 .m437{animation-name:k561,k609;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k610{0%,95.667%,100%{opacity:0}76.667%{opacity:1}}
+@keyframes k610{0%,95.667%,100%{visibility:hidden}76.667%{visibility:visible}}
 .m438{animation-name:k561,k610;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k611{0%,95.667%,100%{opacity:0}76.833%{opacity:1}}
+@keyframes k611{0%,95.667%,100%{visibility:hidden}76.833%{visibility:visible}}
 .m439{animation-name:k561,k611;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k612{0%,87.667%,100%{opacity:0}78%{opacity:1}}
+@keyframes k612{0%,87.667%,100%{visibility:hidden}78%{visibility:visible}}
 .m440{animation-name:k132,k612;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k613{0%,4.667%{translate:0px -18px}5.25%{translate:0px 0px}95.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}96%,100%{translate:0px 90px}}
-@keyframes k614{0%,76.5%,100%{opacity:0}4.667%{opacity:1}}
+@keyframes k614{0%,76.5%,100%{visibility:hidden}4.667%{visibility:visible}}
 .m441{animation-name:k613,k614;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k615{0%,4.833%{translate:0px -18px}5.417%{translate:0px 0px}95.167%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}96%,100%{translate:0px 90px}}
-@keyframes k616{0%,76.667%,100%{opacity:0}4.833%{opacity:1}}
+@keyframes k616{0%,76.667%,100%{visibility:hidden}4.833%{visibility:visible}}
 .m442{animation-name:k615,k616;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k617{0%,95.5%{translate:0px 0px}96.333%,100%{translate:0px 90px}}
 .m443{animation-name:k617,k593;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m444{animation-name:k617,k567;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 .m445{animation-name:k617,k596;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k618{0%,23%{translate:0px -18px}23.583%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k619{0%,87.833%,100%{opacity:0}23%{opacity:1}}
+@keyframes k619{0%,87.833%,100%{visibility:hidden}23%{visibility:visible}}
 .m446{animation-name:k618,k619;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k620{0%,23.167%{translate:0px -18px}23.75%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k621{0%,87.833%,100%{opacity:0}23.167%{opacity:1}}
+@keyframes k621{0%,87.833%,100%{visibility:hidden}23.167%{visibility:visible}}
 .m447{animation-name:k620,k621;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k622{0%,24.333%{translate:0px -18px}24.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k623{0%,87.667%,100%{opacity:0}24.333%{opacity:1}}
+@keyframes k623{0%,87.667%,100%{visibility:hidden}24.333%{visibility:visible}}
 .m448{animation-name:k622,k623;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k624{0%,24.833%{translate:0px -18px}25.417%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k625{0%,87.667%,100%{opacity:0}24.833%{opacity:1}}
+@keyframes k625{0%,87.667%,100%{visibility:hidden}24.833%{visibility:visible}}
 .m449{animation-name:k624,k625;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k626{0%,25%{translate:0px -18px}25.583%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k627{0%,87.667%,100%{opacity:0}25%{opacity:1}}
+@keyframes k627{0%,87.667%,100%{visibility:hidden}25%{visibility:visible}}
 .m450{animation-name:k626,k627;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k628{0%,30.667%{translate:0px -18px}31.25%{translate:0px 0px}87.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}88.667%,100%{translate:0px 90px}}
-@keyframes k629{0%,88.667%,100%{opacity:0}30.667%{opacity:1}}
+@keyframes k629{0%,88.667%,100%{visibility:hidden}30.667%{visibility:visible}}
 .m451{animation-name:k628,k629;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k630{0%,32.5%{translate:0px -18px}33.083%{translate:0px 0px}88.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}89.667%,100%{translate:0px 90px}}
-@keyframes k631{0%,89.667%,100%{opacity:0}32.5%{opacity:1}}
+@keyframes k631{0%,89.667%,100%{visibility:hidden}32.5%{visibility:visible}}
 .m452{animation-name:k630,k631;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k632{0%,96%,100%{opacity:0}76.5%{opacity:1}}
+@keyframes k632{0%,96%,100%{visibility:hidden}76.5%{visibility:visible}}
 .m453{animation-name:k590,k632;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k633{0%,96%,100%{opacity:0}76.667%{opacity:1}}
+@keyframes k633{0%,96%,100%{visibility:hidden}76.667%{visibility:visible}}
 .m454{animation-name:k590,k633;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k634{0%,4.167%{translate:0px -18px}4.75%{translate:0px 0px}95.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}96.333%,100%{translate:0px 90px}}
-@keyframes k635{0%,76.167%,100%{opacity:0}4.167%{opacity:1}}
+@keyframes k635{0%,76.167%,100%{visibility:hidden}4.167%{visibility:visible}}
 .m455{animation-name:k634,k635;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k636{0%,4.333%{translate:0px -18px}4.917%{translate:0px 0px}95.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}96.333%,100%{translate:0px 90px}}
-@keyframes k637{0%,76.333%,100%{opacity:0}4.333%{opacity:1}}
+@keyframes k637{0%,76.333%,100%{visibility:hidden}4.333%{visibility:visible}}
 .m456{animation-name:k636,k637;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k638{0%,4%{translate:0px -18px}4.583%{translate:0px 0px}95.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}96.333%,100%{translate:0px 90px}}
-@keyframes k639{0%,76%,100%{opacity:0}4%{opacity:1}}
+@keyframes k639{0%,76%,100%{visibility:hidden}4%{visibility:visible}}
 .m457{animation-name:k638,k639;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k640{0%,24.5%{translate:0px -18px}25.083%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k641{0%,87.667%,100%{opacity:0}24.5%{opacity:1}}
+@keyframes k641{0%,87.667%,100%{visibility:hidden}24.5%{visibility:visible}}
 .m458{animation-name:k640,k641;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k642{0%,25.167%{translate:0px -18px}25.75%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k643{0%,87.667%,100%{opacity:0}25.167%{opacity:1}}
+@keyframes k643{0%,87.667%,100%{visibility:hidden}25.167%{visibility:visible}}
 .m459{animation-name:k642,k643;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k644{0%,25.333%{translate:0px -18px}25.917%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k645{0%,87.5%,100%{opacity:0}25.333%{opacity:1}}
+@keyframes k645{0%,87.5%,100%{visibility:hidden}25.333%{visibility:visible}}
 .m460{animation-name:k644,k645;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k646{0%,33.667%{translate:0px -18px}34.25%{translate:0px 0px}89.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}90.333%,100%{translate:0px 90px}}
-@keyframes k647{0%,90.333%,100%{opacity:0}33.667%{opacity:1}}
+@keyframes k647{0%,90.333%,100%{visibility:hidden}33.667%{visibility:visible}}
 .m461{animation-name:k646,k647;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k648{0%,96.333%,100%{opacity:0}76.167%{opacity:1}}
+@keyframes k648{0%,96.333%,100%{visibility:hidden}76.167%{visibility:visible}}
 .m462{animation-name:k617,k648;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k649{0%,96.333%,100%{opacity:0}76.333%{opacity:1}}
+@keyframes k649{0%,96.333%,100%{visibility:hidden}76.333%{visibility:visible}}
 .m463{animation-name:k617,k649;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k650{0%,96.333%,100%{opacity:0}76%{opacity:1}}
+@keyframes k650{0%,96.333%,100%{visibility:hidden}76%{visibility:visible}}
 .m464{animation-name:k617,k650;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k651{0%,87.667%,100%{opacity:0}77.5%{opacity:1}}
+@keyframes k651{0%,87.667%,100%{visibility:hidden}77.5%{visibility:visible}}
 .m465{animation-name:k132,k651;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k652{0%,87.667%,100%{opacity:0}77.833%{opacity:1}}
+@keyframes k652{0%,87.667%,100%{visibility:hidden}77.833%{visibility:visible}}
 .m466{animation-name:k132,k652;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k653{0%,87.5%,100%{opacity:0}78%{opacity:1}}
+@keyframes k653{0%,87.5%,100%{visibility:hidden}78%{visibility:visible}}
 .m467{animation-name:k294,k653;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k654{0%,23.333%{translate:0px -18px}23.917%{translate:0px 0px}87%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.833%,100%{translate:0px 90px}}
-@keyframes k655{0%,87.833%,100%{opacity:0}23.333%{opacity:1}}
+@keyframes k655{0%,87.833%,100%{visibility:hidden}23.333%{visibility:visible}}
 .m468{animation-name:k654,k655;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k656{0%,25.5%{translate:0px -18px}26.083%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k657{0%,87.5%,100%{opacity:0}25.5%{opacity:1}}
+@keyframes k657{0%,87.5%,100%{visibility:hidden}25.5%{visibility:visible}}
 .m469{animation-name:k656,k657;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k658{0%,35.333%{translate:0px -18px}35.917%{translate:0px 0px}90.5%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.333%,100%{translate:0px 90px}}
-@keyframes k659{0%,91.333%,100%{opacity:0}35.333%{opacity:1}}
+@keyframes k659{0%,91.333%,100%{visibility:hidden}35.333%{visibility:visible}}
 .m470{animation-name:k658,k659;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k660{0%,87.667%,100%{opacity:0}77.333%{opacity:1}}
+@keyframes k660{0%,87.667%,100%{visibility:hidden}77.333%{visibility:visible}}
 .m471{animation-name:k132,k660;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k661{0%,87.5%,100%{opacity:0}77.833%{opacity:1}}
+@keyframes k661{0%,87.5%,100%{visibility:hidden}77.833%{visibility:visible}}
 .m472{animation-name:k294,k661;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k662{0%,25.333%{translate:0px -18px}25.917%{translate:0px 0px}86.833%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.667%,100%{translate:0px 90px}}
-@keyframes k663{0%,87.667%,100%{opacity:0}25.333%{opacity:1}}
+@keyframes k663{0%,87.667%,100%{visibility:hidden}25.333%{visibility:visible}}
 .m473{animation-name:k662,k663;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @keyframes k664{0%,25.667%{translate:0px -18px}26.25%{translate:0px 0px}86.667%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}87.5%,100%{translate:0px 90px}}
-@keyframes k665{0%,87.5%,100%{opacity:0}25.667%{opacity:1}}
+@keyframes k665{0%,87.5%,100%{visibility:hidden}25.667%{visibility:visible}}
 .m474{animation-name:k664,k665;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
-@keyframes k666{0%,87.667%,100%{opacity:0}77.167%{opacity:1}}
+@keyframes k666{0%,87.667%,100%{visibility:hidden}77.167%{visibility:visible}}
 .m475{animation-name:k132,k666;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
-@keyframes k667{0%,87.5%,100%{opacity:0}77.5%{opacity:1}}
+@keyframes k667{0%,87.5%,100%{visibility:hidden}77.5%{visibility:visible}}
 .m476{animation-name:k294,k667;animation-timing-function:cubic-bezier(.55,.06,.68,.19),steps(1)}
 @keyframes k668{0%,100%{scale:1}50%{scale:1.025}}
 @keyframes k669{0%,100%{translate:0px 0px}50%{translate:0px -5px}}

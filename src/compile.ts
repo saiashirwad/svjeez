@@ -23,6 +23,8 @@ interface Lane {
   readonly period: number;
   readonly snapped: number;
   readonly nest: boolean;
+  /** A step 0/1 opacity lane: visibility is cheaper to animate and looks the same. */
+  readonly discrete: boolean;
   readonly label?: string;
 }
 
@@ -128,6 +130,15 @@ const startValue = (el: Element, channel: Target, backend: Backend, given: Targe
   throw new Error(`${channel} on <${el.tag}> has no starting value. Pass it to motion({ ${channel}: … }) or set the attribute.`);
 };
 
+/** Every key is 0 or 1 and every change is a single step, so opacity and visibility are interchangeable. */
+const isDiscrete = (keys: readonly Key[]): boolean =>
+  keys.every((key, index) => {
+    const value = key.values.opacity;
+    if (value !== 0 && value !== 1) return false;
+    const next = keys[index + 1];
+    return next === undefined || next.values.opacity === value || (key.ease.kind === "steps" && key.ease.count === 1);
+  });
+
 const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   const data = dataOf(value);
   const { duration } = state.canvas;
@@ -149,7 +160,17 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
     if (last > period + 1e-9) throw new Error(`A motion on <${el.tag}> runs until ${num(last)}s, past the ${num(duration)}s scene.`);
     const keys = keysOf(initial, segments.sort((a, b) => a.start - b.start), period);
     if (keys.length > MAX_KEYS) throw new Error(`${key} on <${el.tag}> has ${keys.length} keys; the cap is ${MAX_KEYS}.`);
-    return { key, backend, channels, keys, period, snapped, nest: backend !== "smil" && spec(channels[0]!).composition === "nest", label: data.label };
+    return {
+      key,
+      backend,
+      channels,
+      keys,
+      period,
+      snapped,
+      nest: backend !== "smil" && spec(channels[0]!).composition === "nest",
+      discrete: key === "opacity" && el.attrs.opacity === undefined && el.attrs.style === undefined && isDiscrete(keys),
+      label: data.label,
+    };
   });
 };
 
@@ -192,7 +213,10 @@ const keyframesName = (state: State, body: string, label?: string): string => {
 
 const className = (state: State, lanes: readonly Lane[]): string => {
   const { duration } = state.canvas;
-  const frames = lanes.map((lane) => ({ lane, ...cssKeyframes(isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.keys, lane.period) }));
+  const frames = lanes.map((lane) => ({
+    lane,
+    ...cssKeyframes(lane.discrete ? "visibility" : isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.keys, lane.period),
+  }));
   const names = frames.map(({ lane, body }) => keyframesName(state, body, lane.label));
   const durations = lanes.map((lane) => `${num(lane.snapped)}s`);
   const timings = frames.map((frame) => frame.timing);

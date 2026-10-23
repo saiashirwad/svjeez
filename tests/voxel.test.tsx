@@ -28,11 +28,11 @@ const topColor = (svg: string, href: string): string => {
 const cellAt = (cells: readonly Vec3[]) => (use: { x: number; y: number }) =>
   cells.find((cell) => Math.abs(camera.project(cell).x - use.x) < 0.01 && Math.abs(camera.project(cell).y - use.y) < 0.01);
 
-const opacityAt = (svg: string, cls: string, t: number): number => {
+const presenceAt = (svg: string, cls: string, t: number): number => {
   const name = svg.match(new RegExp(`\\.${cls.split(" ").at(-1)}\\{animation-name:([\\w-]+)`))![1]!;
   const body = svg.match(new RegExp(`@keyframes ${name}\\{(.*)\\}$`, "m"))![1]!;
-  const keys = [...body.matchAll(/([\d.%,]+)\{opacity:([\d.]+)\}/g)].flatMap(([, percents, value]) =>
-    percents!.split(",").map((percent) => ({ at: (parseFloat(percent) / 100) * DURATION, value: Number(value) })),
+  const keys = [...body.matchAll(/([\d.%,]+)\{visibility:(hidden|visible)\}/g)].flatMap(([, percents, value]) =>
+    percents!.split(",").map((percent) => ({ at: (parseFloat(percent) / 100) * DURATION, value: value === "visible" ? 1 : 0 })),
   );
   return keys.filter((key) => key.at <= t).sort((a, b) => a.at - b.at).at(-1)!.value;
 };
@@ -57,7 +57,7 @@ describe("voxel.scene", () => {
   test("from and until toggle visibility at those times", () => {
     const svg = build([place([0, 0, 0], { from: 2, until: 6 })]);
     const cls = uses(svg)[0]!.cls!;
-    expect([0, 1.9, 2.1, 5.9, 6.1, 9.9].map((t) => opacityAt(svg, cls, t))).toEqual([0, 0, 1, 1, 0, 0]);
+    expect([0, 1.9, 2.1, 5.9, 6.1, 9.9].map((t) => presenceAt(svg, cls, t))).toEqual([0, 0, 1, 1, 0, 0]);
   });
 
   test("a block with no lifetime has no animation", () => {

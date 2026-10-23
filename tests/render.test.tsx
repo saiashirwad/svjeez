@@ -22,7 +22,23 @@ describe("motion timing", () => {
   test("a loop period snaps to divide the scene", () => {
     const svg = scene(<rect width={10} height={10} animation={motion({ opacity: 1 }).at(0.55).set({ opacity: 0 }).loop(1.1)} />);
     expect(svg).toContain("animation-duration:1.111s");
-    expect(keyframes(svg)).toEqual(["0%{opacity:1}50%,100%{opacity:0}"]);
+    expect(keyframes(svg)).toEqual(["0%{visibility:visible}50%,100%{visibility:hidden}"]);
+  });
+
+  test("a step 0/1 opacity is a visibility toggle, so the browser skips painting it", () => {
+    const svg = scene(<rect width={10} height={10} animation={motion({ opacity: 0 }).at(2).set({ opacity: 1 })} />);
+    expect(keyframes(svg)[0]).toContain("visibility:hidden");
+    expect(keyframes(svg)[0]).toContain("visibility:visible");
+    expect(svg).not.toContain("opacity:0");
+  });
+
+  test("a fade, a stepped fade, or a static opacity keeps animating opacity", () => {
+    const fade = scene(<rect width={10} height={10} animation={motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1)} />);
+    const stepped = scene(<rect width={10} height={10} animation={motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1, ease.steps(4))} />);
+    const pinned = scene(<rect width={10} height={10} opacity={0.5} animation={motion({ opacity: 0 }).at(2).set({ opacity: 1 })} />);
+    expect(keyframes(fade)[0]).toContain("opacity:");
+    expect(keyframes(stepped)[0]).toContain("opacity:");
+    expect(keyframes(pinned)[0]).toContain("opacity:");
   });
 
   test("identical lanes share one @keyframes and one class", () => {
