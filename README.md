@@ -129,6 +129,22 @@ const fade = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
 
 `render` emits a def only if something uses it, with a generated id.
 
+### Properties
+
+```tsx
+const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
+const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
+
+render(
+  { width: 200, height: 200, duration: 4, title: "Orbit", css: css`.dot{translate:calc(100px + 60px * ${px} * cos(${yaw})) 100px}` },
+  <g animation={motion().to({ [yaw]: 360 }, 4, ease.linear)}>
+    <circle class="dot" r={6} style={{ [px]: 1 }} />
+  </g>,
+);
+```
+
+A property is a key in motions and `style`, and a hole in `css`. Each value is checked against its syntax: `number`, `length` (px), `angle` (deg) or `color`.
+
 ## el
 
 ```tsx
