@@ -241,3 +241,10 @@ describe("output", () => {
     expect(wellFormed(render({ width: 10, height: 10, duration: 1, title: "T", css }, <rect width={1} height={1} />))).toBe(true);
   });
 });
+
+describe("timeline", () => {
+  test("a move that starts just after the previous one ends still renders", () => {
+    const track = motion({ opacity: 0 }).to({ opacity: 1 }, 0.333333).at(1 / 3).to({ opacity: 0 }, 0.5);
+    expect(() => scene(<rect animation={track} />, 2)).not.toThrow();
+  });
+});
