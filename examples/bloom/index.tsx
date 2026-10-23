@@ -110,12 +110,12 @@ function Ring({ count, reach, width, turn, stroke, delay }: { count: number; rea
   const gap = 0.07;
   return (
     <g fill="none" stroke={stroke} strokeWidth={1.4} strokeLinejoin="round">
-      {Array.from({ length: count }, (_, i) => (
-        <path
-          d={petal(reach, width, turn + (360 / count) * i - 90)}
-          animation={draw({ at: OPEN + delay + i * gap, over: 1 }).at(CLOSE + (count - 1 - i) * 0.04).to({ draw: 0 }, 0.7, ease.in)}
-        />
-      ))}
+      {Array.from({ length: count }, (_, i) =>
+        el.path({
+          d: petal(reach, width, turn + (360 / count) * i - 90),
+          animation: draw({ at: OPEN + delay + i * gap, over: 1 }).at(CLOSE + (count - 1 - i) * 0.04).to({ draw: 0 }, 0.7, ease.in),
+        }),
+      )}
     </g>
   );
 }
@@ -126,9 +126,7 @@ function Rosette(): SvgNode {
     <g animation={[spin(D, 0.25), breathe]}>
       <circle cx={CX} cy={CY} r={128} fill="none" stroke={C.violet} strokeWidth={1.5} strokeLinecap="round" strokeDasharray="0.1 9" opacity={0.6} />
       <g animation={lifetime(0.8, { opacity: 0, scale: 0.4 })}>
-        {Array.from({ length: 12 }, (_, i) => (
-          <path d={petal(112, 30, i * 30 - 90)} fill={halo} />
-        ))}
+        {Array.from({ length: 12 }, (_, i) => el.path({ d: petal(112, 30, i * 30 - 90), fill: halo }))}
       </g>
       <Ring count={12} reach={118} width={44} turn={0} stroke={outer} delay={0} />
       <Ring count={12} reach={78} width={30} turn={15} stroke={inner} delay={0.35} />
@@ -145,19 +143,17 @@ function Orbit({ radius, period, turns, tail, color, delay }: { radius: number; 
       <stop offset={1} stopColor={color} />
     </>
   ));
-  return (
-    <g animation={[spin(period, turns), lifetime(delay)]}>
-      <circle cx={CX} cy={CY} r={radius} fill="none" stroke={C.ring} strokeWidth={1} />
-      <path
-        d={`M${xy(end)}A${radius} ${radius} 0 0 ${turns === 1 ? 1 : 0} ${xy(head)}`}
-        fill="none"
-        stroke={trail}
-        strokeWidth={2.5}
-        strokeLinecap="round"
-      />
-      <circle cx={head.x} cy={head.y} r={3.5} fill={color} filter={glow} />
-    </g>
-  );
+  return el.g({ animation: [spin(period, turns), lifetime(delay)] }, [
+    el.circle({ cx: CX, cy: CY, r: radius, fill: "none", stroke: C.ring, strokeWidth: 1 }),
+    el.path({
+      d: `M${xy(end)}A${radius} ${radius} 0 0 ${turns === 1 ? 1 : 0} ${xy(head)}`,
+      fill: "none",
+      stroke: trail,
+      strokeWidth: 2.5,
+      strokeLinecap: "round",
+    }),
+    el.circle({ cx: head.x, cy: head.y, r: 3.5, fill: color, filter: glow }),
+  ]);
 }
 
 /** Rings that leave the core while it is lit. Each ripple lives exactly one `every`, so its pulses never overlap. */
@@ -173,7 +169,7 @@ function Ripple({ phase }: { phase: number }): SvgNode {
       .to({ opacity: 0.5 }, 0.15)
       .to({ opacity: 0 }, every - 0.15, ease.inOut);
   }
-  return <circle cx={CX} cy={CY} r={30} fill="none" stroke={C.core} strokeWidth={0.8} animation={wave} />;
+  return el.circle({ cx: CX, cy: CY, r: 30, fill: "none", stroke: C.core, strokeWidth: 0.8, animation: wave });
 }
 
 function Core(): SvgNode {
@@ -215,20 +211,21 @@ function Title(): SvgNode {
   const hidden = { opacity: 0, y: 12, blur: 8 } as const;
   return (
     <>
-      {[...word].map((letter, i) => (
-        <text
-          x={left + i * pitch}
-          y={534}
-          class="sans"
-          fontSize={30}
-          fontWeight={300}
-          fill={C.word}
-          textAnchor="middle"
-          animation={enter({ at: OPEN + 1.3 + i * 0.09, over: 0.9 }, hidden).at(CLOSE + i * 0.06).to({ opacity: 0, y: -10, blur: 8 }, 0.7, ease.in)}
-        >
-          {letter}
-        </text>
-      ))}
+      {[...word].map((letter, i) =>
+        el.text(
+          {
+            x: left + i * pitch,
+            y: 534,
+            class: "sans",
+            fontSize: 30,
+            fontWeight: 300,
+            fill: C.word,
+            textAnchor: "middle",
+            animation: enter({ at: OPEN + 1.3 + i * 0.09, over: 0.9 }, hidden).at(CLOSE + i * 0.06).to({ opacity: 0, y: -10, blur: 8 }, 0.7, ease.in),
+          },
+          letter,
+        ),
+      )}
       <text
         x={CX}
         y={564}
