@@ -116,8 +116,9 @@ const inline = (node: SvgNode, rawText = false): string => {
     case "element": {
       const open = `<${node.tag}${serializeAttrs(node.attrs)}`;
       if (node.children.length === 0) return `${open}/>`;
-      const inner = node.children.map((child) => inline(child, rawText || RAW_TEXT_TAGS.has(node.tag))).join("");
-      return `${open}>${RAW_TEXT_TAGS.has(node.tag) ? cdata(inner) : inner}</${node.tag}>`;
+      const isRaw = RAW_TEXT_TAGS.has(node.tag);
+      const inner = node.children.map((child) => inline(child, rawText || isRaw)).join("");
+      return `${open}>${isRaw ? cdata(inner) : inner}</${node.tag}>`;
     }
   }
 };
