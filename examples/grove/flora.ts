@@ -5,6 +5,7 @@ import { layer, type Part } from "./paint";
 import { TAU, add, bend, cross, dot, lit, mul, perpendicular, sub, unit, type Vec3 } from "./space";
 
 const UP: Vec3 = [0, 1, 0];
+const TOWARD = unit([Math.sin((CAM.yaw * Math.PI) / 180), 0, Math.cos((CAM.yaw * Math.PI) / 180)]);
 type Rng = () => number;
 
 export interface Stand {
@@ -57,7 +58,7 @@ const OAK_TREE: Species = {
   height: 10.8,
   trunk: 5.4,
   trunkRadius: 0.32,
-  primary: 3,
+  primary: 4,
   third: 0.35,
   spread: 0.6,
   ratio: 0.66,
@@ -65,10 +66,10 @@ const OAK_TREE: Species = {
   rise: 0.55,
   bend: 0.1,
   maxDepth: 3,
-  leafLength: 0.5,
-  leafWidth: 0.31,
+  leafLength: 0.46,
+  leafWidth: 0.34,
   leafCount: [26, 36],
-  cluster: 0.78,
+  cluster: 0.8,
   sway: 0.34,
   droop: 0,
   lean: [0.06, 1, -0.03],
@@ -78,25 +79,25 @@ const OAK_TREE: Species = {
 const BIRCH_TREE: Species = {
   id: "birch",
   bark: BARK.birch,
-  leaves: OAK,
-  height: 9.2,
-  trunk: 5.8,
-  trunkRadius: 0.17,
-  primary: 3,
+  leaves: BIRCH,
+  height: 10.2,
+  trunk: 6.4,
+  trunkRadius: 0.15,
+  primary: 4,
   third: 0.35,
-  spread: 0.34,
+  spread: 0.3,
   ratio: 0.5,
   shrink: 0.42,
-  rise: 0.8,
-  bend: 0.09,
+  rise: 0.72,
+  bend: 0.08,
   maxDepth: 3,
-  leafLength: 0.38,
-  leafWidth: 0.25,
-  leafCount: [24, 32],
-  cluster: 0.58,
-  sway: 0.7,
+  leafLength: 0.32,
+  leafWidth: 0.24,
+  leafCount: [22, 30],
+  cluster: 0.55,
+  sway: 0.66,
   droop: 0.02,
-  lean: [-0.18, 1, 0.08],
+  lean: [-0.14, 1, 0.06],
   leader: true,
 };
 
@@ -104,22 +105,22 @@ const BLOSSOM_TREE: Species = {
   id: "blossom",
   bark: BARK.blossom,
   leaves: BLOSSOM,
-  height: 6.6,
-  trunk: 3.5,
+  height: 6.4,
+  trunk: 3.4,
   trunkRadius: 0.24,
   primary: 4,
-  third: 0.5,
-  spread: 0.82,
-  ratio: 0.6,
+  third: 0.55,
+  spread: 0.9,
+  ratio: 0.64,
   shrink: 0.43,
-  rise: 0.36,
-  bend: 0.18,
+  rise: 0.42,
+  bend: 0.16,
   maxDepth: 3,
-  leafLength: 0.4,
-  leafWidth: 0.33,
-  leafCount: [24, 32],
-  cluster: 0.72,
-  sway: 0.78,
+  leafLength: 0.34,
+  leafWidth: 0.3,
+  leafCount: [26, 34],
+  cluster: 0.74,
+  sway: 0.76,
   droop: 0.02,
   lean: [0.15, 1, 0.14],
   leader: false,
@@ -185,7 +186,14 @@ const grow = (rng: Rng, spec: Species, start: Vec3, dir: Vec3, length: number, r
   } else if (depth === spec.maxDepth - 1) {
     crown(0.92, 0.76, 0.7);
   } else if (depth === 1) {
-    crown(0.9, 0.5, 0.5);
+    crown(0.9, 0.66, 0.6);
+  }
+  if (depth === 0) {
+    sites.push({
+      center: pointAt(points, 0.97),
+      radius: spec.cluster * 1.1,
+      count: Math.round(spec.leafCount[1] * 0.8),
+    });
   }
 };
 
@@ -217,8 +225,9 @@ const limbNode = (rng: Rng, spec: Species, limb: Limb): SvgNode => {
 };
 
 const leafColor = (spec: Species, rng: Rng, normal: Vec3, height: number, depth: number, below: boolean): string => {
+  if (spec.id === "blossom" && rng() < 0.08) return hazed(mix(tone(CREAM, 0.8 + rng() * 0.2), "#ffffff", 0.25), depth);
   const face = Math.max(0, dot(unit(normal), unit([-0.5, 0.72, 0.48])));
-  const shade = clamp(0.14 + face * 0.66 + height * 0.2 - (below ? 0.08 : 0) + (rng() - 0.5) * 0.16);
+  const shade = clamp(0.22 + face * 0.56 + height * 0.16 - (below ? 0.06 : 0) + (rng() - 0.5) * 0.12);
   return hazed(tone(spec.leaves, shade), depth);
 };
 
@@ -230,7 +239,7 @@ const leavesAt = (rng: Rng, spec: Species, site: ClusterSite, base: Vec3): Part[
     const reach = Math.sqrt(1 - z * z);
     const shell = unit([Math.cos(theta) * reach, z * 0.86 + 0.12, Math.sin(theta) * reach]);
     const center = add(site.center, add(mul(shell, site.radius * (0.36 + 0.64 * Math.cbrt(rng()))), [0, 0.02, 0]));
-    const normal = unit(add(shell, [(rng() - 0.5) * 0.34, 0.08, (rng() - 0.5) * 0.34]));
+    const normal = unit(add(add(shell, mul(TOWARD, i % 3 === 0 ? 0.55 : 0.24)), [(rng() - 0.5) * 0.24, 0.08, (rng() - 0.5) * 0.24]));
     const along = perpendicular(normal, UP);
     const across = unit(cross(normal, along));
     const twist = rng() * TAU;

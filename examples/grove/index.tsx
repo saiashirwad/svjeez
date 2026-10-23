@@ -3,7 +3,7 @@ import { D, H, W, random } from "./kit";
 import { island, edgeRadius, ground } from "./island";
 import { birch, blossom, fallenPetals, fern, flowers, oak, seed as seedGlow, stones, tuft, type Stand } from "./flora";
 import { layer } from "./paint";
-import { Backdrop, Birds, Clouds, FarIsles, Fireflies, Foreground, Mist, Moon, Motes, Petals, Shadow, Stars, Sun } from "./sky";
+import { Backdrop, Birds, Clouds, Fireflies, Foreground, Mist, Moon, Motes, Petals, Shadow, Stars, Sun } from "./sky";
 
 interface Spot {
   readonly x: number;
@@ -11,8 +11,8 @@ interface Spot {
 }
 
 const OAK = { x: -1.2, z: 0.6 } as const;
-const BIRCH = { x: 3.2, z: -1.5 } as const;
-const BLOSSOM = { x: -4.05, z: -1.05 } as const;
+const BIRCH = { x: 3.4, z: -1.8 } as const;
+const BLOSSOM = { x: -4.3, z: -1.4 } as const;
 
 const inReach = (spot: Spot, x: number, z: number, radius: number): boolean => Math.hypot(spot.x - x, spot.z - z) < radius;
 
@@ -96,7 +96,6 @@ export function buildGrove(): string {
       <Moon />
       <Sun />
       <Clouds />
-      <FarIsles />
       <Birds />
       <Mist />
       <Shadow />

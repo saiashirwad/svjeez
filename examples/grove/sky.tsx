@@ -208,7 +208,7 @@ export function FarIsles(): SvgNode {
           { duration: D, tolerance: { translate: 0.6 } },
         );
         return el.g({ animation: bob }, [
-          el.g({ transform: `translate(${x} ${y}) scale(${scale})`, opacity: 0.75 }, [
+          el.g({ transform: `scale(${scale})`, opacity: 0.6 }, [
             el.path({ d: "M-64 0C-42-12-16-14 0-13 20-13 48-8 63 0 42 8 20 10 0 9-20 10-44 7-64 0Z", fill: mix("#628b60", C.haze, 0.35) }),
             el.path({ d: "M-61 1C-46 8-26 13 0 12 27 13 47 8 60 1 47 22 30 38 16 52 5 62-2 76-6 84-10 67-15 58-25 45-40 26-53 15-61 1Z", fill: farRock }),
             el.path({ d: "M-48 4C-36 50-22 70-8 76-18 58-24 30-28 8Z", fill: mix("#8aa578", C.haze, 0.55), opacity: 0.35 }),
@@ -359,15 +359,15 @@ export function Petals(): SvgNode {
 }
 
 const BIRDS = [
-  { dy: 0, phase: 0, size: 1 },
-  { dy: 12, phase: -0.06, size: 0.8 },
-  { dy: -9, phase: 0.09, size: 0.7 },
+  { dy: 0, phase: 0, size: 1.15, period: 0.56 },
+  { dy: 12, phase: -0.06, size: 0.9, period: 0.7 },
+  { dy: -9, phase: 0.09, size: 0.72, period: 0.8 },
 ] as const;
 
 export function Birds(): SvgNode {
   return (
     <>
-      {BIRDS.map(({ dy, phase, size }, i) => {
+      {BIRDS.map(({ dy, phase, size, period }, i) => {
         const flight = sampled(
           (t) => {
             const u = clamp((t - 7.4 - i * 0.4) / 9.2);
@@ -379,14 +379,20 @@ export function Birds(): SvgNode {
           },
           { duration: D, tolerance: { translate: 1, opacity: 0.04 } },
         );
+        const wing = (side: 1 | -1) =>
+          motion({ rotate: -15 * side })
+            .to({ rotate: 17 * side }, period / 2, ease.inOut)
+            .to({ rotate: -15 * side }, period / 2, ease.inOut)
+            .loop(period);
+        const origin = (side: number) => ({ transformBox: "fill-box", transformOrigin: side === -1 ? "0% 100%" : "100% 100%" }) as const;
         return el.g({ animation: flight }, [
-          el.path({
-            d: `M${-8 * size} 0Q${-4 * size} ${-5 * size} 0 0Q${4 * size} ${-5 * size} ${8 * size} 0`,
-            fill: "none",
-            stroke: alpha(C.ink, 0.55),
-            strokeWidth: 1.2 * size,
-            strokeLinecap: "round",
-          }),
+          el.g({ animation: wing(-1), style: origin(-1) }, [
+            el.path({ d: `M0 0Q${-4.6 * size} ${-6.4 * size} ${-9.4 * size} ${-1.7 * size}Q${-4.8 * size} ${-2.2 * size} 0 0Z`, fill: alpha(C.ink, 0.68) }),
+          ]),
+          el.g({ animation: wing(1), style: origin(1) }, [
+            el.path({ d: `M0 0Q${4.6 * size} ${-6.4 * size} ${9.4 * size} ${-1.7 * size}Q${4.8 * size} ${-2.2 * size} 0 0Z`, fill: alpha(C.ink, 0.68) }),
+          ]),
+          el.path({ d: `M0 ${-0.6 * size}L0 ${2.6 * size}`, fill: "none", stroke: alpha(C.ink, 0.55), strokeWidth: 1.1 * size, strokeLinecap: "round" }),
         ]);
       })}
     </>

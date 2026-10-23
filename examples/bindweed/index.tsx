@@ -15,15 +15,15 @@ const C = {
   haze: "#A8B393",
   stalk: "#B5A57B",
   stalkLight: "#D8C9A2",
-  stem: "#6F895C",
-  stemBack: "#5B744F",
-  stemLight: "#AFBF94",
-  leaf: "#78935F",
-  leafDeep: "#5D7A53",
-  leafEdge: "#4E6848",
-  leafVein: "#B9C8A0",
-  sepals: "#7E9368",
-  sepalsDeep: "#637B54",
+  stem: "#7B926A",
+  stemBack: "#667B5E",
+  stemLight: "#C3CEAD",
+  leaf: "#7E986D",
+  leafDeep: "#6A8561",
+  leafEdge: "#61765A",
+  leafVein: "#C6D2B1",
+  sepals: "#879B74",
+  sepalsDeep: "#6A805D",
   flowerShadow: "#77634B",
   whiteBand: "#D8A3AE",
   blushBand: "#C58A98",
@@ -63,117 +63,207 @@ const polar = (radius: number, angle: number): P => ({ x: Math.cos(angle) * radi
 // ---------------------------------------------------------------------------
 // The meadow stalk and the vine that winds around it
 
-const axisX = (y: number): number => 424 + (1000 - y) * 0.012 + Math.sin((1000 - y) / 240) * 10;
-const vineRadius = (y: number): number => 48 - (900 - y) * 0.012;
-const vinePhase = (y: number): number => Math.PI + ((900 - y) * TAU) / 152;
-const vinePoint = (y: number): P => ({ x: axisX(y) + Math.cos(vinePhase(y)) * vineRadius(y), y });
-const vineAnchor = (y: number): P => vinePoint(y);
+const clamp01 = (t: number): number => Math.max(0, Math.min(1, t));
 
-const supportPath = smoothPath(Array.from({ length: 13 }, (_, i) => ({ x: axisX(1010 - i * 62), y: 1010 - i * 62 })));
+const SOIL_Y = 1008;
+const ROOT_Y = 900;
+const TIP_Y = 276;
+const PITCH = 160;
+
+const axisX = (y: number): number => 430 + (1000 - y) * 0.012 + Math.sin((1000 - y) / 230 + 0.5) * 12;
+const vineRadius = (y: number): number => 40 - (ROOT_Y - Math.min(y, ROOT_Y)) * 0.024;
+const vinePhase = (y: number): number => Math.PI + ((ROOT_Y - Math.min(y, ROOT_Y)) * TAU) / PITCH;
+const vinePoint = (y: number): P => {
+  const lean = (clamp01((y - ROOT_Y) / (SOIL_Y - ROOT_Y)) ** 2) * 34;
+  return { x: axisX(y) + Math.cos(vinePhase(y)) * vineRadius(y) - lean, y };
+};
+const inFront = (y: number): boolean => y >= ROOT_Y || Math.sin(vinePhase(y)) >= 0;
+const sideOf = (y: number): 1 | -1 => (vinePoint(y).x >= axisX(y) ? 1 : -1);
+const vineWidth = (y: number): number => 1.8 + clamp01((y - TIP_Y) / (SOIL_Y - TIP_Y)) * 1.6;
+
+const STALK_TOP = 214;
+const SUPPORT = Array.from({ length: 15 }, (_, i) => {
+  const y = 1012 - (i * (1012 - STALK_TOP)) / 14;
+  return { x: axisX(y), y };
+});
+const stalkWidth = (y: number): number => 1.2 + ((y - STALK_TOP) / (1012 - STALK_TOP)) * 2.6;
+const ribbon = (spine: readonly P[], width: (t: number) => number): string => {
+  const normal = (i: number): P => {
+    const a = at(spine, i - 1);
+    const b = at(spine, i + 1);
+    const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    return { x: -(b.y - a.y) / length, y: (b.x - a.x) / length };
+  };
+  const offset = (sign: 1 | -1) =>
+    spine.map((point, i) => {
+      const half = (width(i / (spine.length - 1)) / 2) * sign;
+      const normalAt = normal(i);
+      return { x: point.x + normalAt.x * half, y: point.y + normalAt.y * half };
+    });
+  return smoothPath([...offset(1), ...offset(-1).reverse()], true);
+};
+const supportTaper = ribbon(SUPPORT, (t) => stalkWidth(SUPPORT[Math.round(t * (SUPPORT.length - 1))]!.y));
+const STALK_NODES = [868, 676, 482] as const;
+const SHEATH = ((): string => {
+  const node = { x: axisX(STALK_NODES[0]), y: STALK_NODES[0] };
+  const spine = [
+    { x: 0, y: 0 },
+    { x: 10, y: -14 },
+    { x: 30, y: -28 },
+    { x: 56, y: -33 },
+    { x: 82, y: -27 },
+    { x: 100, y: -12 },
+    { x: 108, y: 4 },
+  ].map((offset) => ({ x: node.x - offset.x * 0.82, y: node.y + offset.y * 0.9 }));
+  return ribbon(spine, (t) => 6.5 * (1 - t) ** 0.8 + 0.3);
+})();
+const supportShine = smoothPath(SUPPORT.map((point) => ({ x: point.x - 0.5, y: point.y })));
+
+const SEEDHEAD = ((): readonly P[] => {
+  const top = SUPPORT[SUPPORT.length - 1]!;
+  return [
+    { x: 0, y: 0 },
+    { x: 3, y: -14 },
+    { x: 10, y: -30 },
+    { x: 19, y: -46 },
+    { x: 27, y: -61 },
+    { x: 31, y: -74 },
+    { x: 28, y: -84 },
+  ].map((offset) => ({ x: top.x + offset.x, y: top.y + offset.y }));
+})();
+
+interface Run {
+  readonly points: readonly P[];
+  readonly width: number;
+}
 
 interface Runs {
-  readonly front: readonly (readonly P[])[];
-  readonly back: readonly (readonly P[])[];
+  readonly front: readonly Run[];
+  readonly back: readonly Run[];
 }
 
 const vineRuns = (): Runs => {
-  const front: P[][] = [];
-  const back: P[][] = [];
+  const front: Run[] = [];
+  const back: Run[] = [];
   let run: P[] = [];
-  let wasFront = Math.sin(vinePhase(900)) >= 0;
-  for (let y = 900; y >= 260; y -= 7) {
+  let side = inFront(SOIL_Y);
+  const close = (): void => {
+    const width = vineWidth(run.reduce((sum, point) => sum + point.y, 0) / run.length);
+    (side ? front : back).push({ points: run, width });
+  };
+  for (let y = SOIL_Y; y >= TIP_Y; y -= 4) {
     const point = vinePoint(y);
-    const isFront = Math.sin(vinePhase(y)) >= 0;
-    if (isFront !== wasFront && run.length > 1) {
-      (wasFront ? front : back).push(run);
-      run = [];
-    }
-    wasFront = isFront;
     run.push(point);
+    if (inFront(y) !== side) {
+      close();
+      run = [point];
+      side = !side;
+    }
   }
-  if (run.length > 1) (wasFront ? front : back).push(run);
+  close();
   return { front, back };
 };
 
 const VINE = vineRuns();
-const baseStem = smoothPath([
-  { x: 268, y: 1004 },
-  { x: 287, y: 987 },
-  { x: 309, y: 971 },
-  { x: 333, y: 950 },
-  { x: 354, y: 928 },
-  { x: 369, y: 911 },
-  { x: 381, y: 900 },
-]);
 
-const topTendril = smoothPath([
-  { x: 424, y: 260 },
-  { x: 408, y: 242 },
-  { x: 390, y: 225 },
-  { x: 372, y: 212 },
-  { x: 356, y: 203 },
-  { x: 342, y: 200 },
-  { x: 331, y: 204 },
-  { x: 324, y: 214 },
-  { x: 325, y: 226 },
-  { x: 333, y: 233 },
-  { x: 343, y: 233 },
-  { x: 349, y: 226 },
-  { x: 348, y: 217 },
-  { x: 342, y: 213 },
-  { x: 336, y: 214 },
-]);
+const shootTip = ((): string => {
+  const end = vinePoint(TIP_Y);
+  const before = vinePoint(TIP_Y + 4);
+  const hook = [
+    { x: -6, y: -12 },
+    { x: -15, y: -25 },
+    { x: -28, y: -34 },
+    { x: -41, y: -36 },
+    { x: -50, y: -30 },
+    { x: -51, y: -21 },
+    { x: -45, y: -16 },
+  ];
+  return smoothPath([before, end, ...hook.map((offset) => ({ x: end.x + offset.x, y: end.y + offset.y }))]);
+})();
 
 // ---------------------------------------------------------------------------
 // Leaves
 
-const LEAF_SITES = [
-  { y: 824, angle: -23, scale: 1.08, flip: false, seed: "leaf-1", tone: 1 },
-  { y: 758, angle: 204, scale: 0.98, flip: true, seed: "leaf-2", tone: 0.9 },
-  { y: 672, angle: -13, scale: 0.92, flip: false, seed: "leaf-3", tone: 0.94 },
-  { y: 606, angle: 197, scale: 0.84, flip: true, seed: "leaf-4", tone: 0.86 },
-  { y: 520, angle: -29, scale: 1, flip: false, seed: "leaf-5", tone: 1 },
-  { y: 454, angle: 207, scale: 0.9, flip: true, seed: "leaf-6", tone: 0.92 },
-  { y: 302, angle: 194, scale: 0.82, flip: true, seed: "leaf-7", tone: 0.88 },
-] as const;
+interface LeafSite {
+  readonly y: number;
+  readonly droop: number;
+  readonly scale: number;
+  readonly stalk: number;
+  readonly mirror: boolean;
+  readonly seed: string;
+  readonly dark?: boolean;
+  readonly dew?: boolean;
+  readonly drip?: boolean;
+  readonly ladybird?: boolean;
+}
 
-const leafShape = [
-  { x: 18, y: 0 },
-  { x: 17, y: -7 },
-  { x: 13, y: -20 },
-  { x: 11, y: -27 },
-  { x: 23, y: -25 },
-  { x: 35, y: -19 },
-  { x: 46, y: -14 },
-  { x: 61, y: -8 },
-  { x: 78, y: 0 },
-  { x: 61, y: 8 },
-  { x: 46, y: 14 },
-  { x: 35, y: 19 },
-  { x: 23, y: 25 },
-  { x: 11, y: 27 },
-  { x: 13, y: 20 },
-  { x: 17, y: 7 },
-] as const;
+const LEAF_SITES: readonly LeafSite[] = [
+  { y: 902, droop: 30, scale: 0.96, stalk: 18, mirror: true, seed: "leaf-root", dark: true },
+  { y: 822, droop: 22, scale: 1.24, stalk: 24, mirror: false, seed: "leaf-1", dew: true },
+  { y: 742, droop: 16, scale: 1.16, stalk: 22, mirror: true, seed: "leaf-2", drip: true },
+  { y: 662, droop: 26, scale: 1.12, stalk: 26, mirror: true, seed: "leaf-3", dark: true, ladybird: true },
+  { y: 584, droop: 12, scale: 1.08, stalk: 22, mirror: false, seed: "leaf-4", dew: true },
+  { y: 504, droop: 36, scale: 1, stalk: 20, mirror: false, seed: "leaf-5" },
+  { y: 424, droop: 20, scale: 0.94, stalk: 20, mirror: true, seed: "leaf-6", dark: true, drip: true },
+  { y: 346, droop: 2, scale: 0.78, stalk: 18, mirror: false, seed: "leaf-7" },
+  { y: 284, droop: 14, scale: 0.56, stalk: 13, mirror: true, seed: "leaf-8" },
+];
 
-const leafD = smoothPath(leafShape, true);
+const leafD = smoothPath(
+  [
+    { x: 0, y: 0 },
+    { x: -4, y: -7 },
+    { x: -11, y: -15 },
+    { x: -12, y: -20 },
+    { x: -5, y: -20.5 },
+    { x: 7, y: -19 },
+    { x: 20, y: -16 },
+    { x: 33, y: -11.5 },
+    { x: 46, y: -6.5 },
+    { x: 57, y: -2.2 },
+    { x: 64, y: 0 },
+    { x: 57, y: 2.2 },
+    { x: 46, y: 6.5 },
+    { x: 33, y: 11.5 },
+    { x: 20, y: 16 },
+    { x: 7, y: 19 },
+    { x: -5, y: 20.5 },
+    { x: -12, y: 20 },
+    { x: -11, y: 15 },
+    { x: -4, y: 7 },
+  ],
+  true,
+);
+const leafShade = smoothPath(
+  [
+    { x: 64, y: 0 },
+    { x: 57, y: 2.2 },
+    { x: 46, y: 6.5 },
+    { x: 33, y: 11.5 },
+    { x: 20, y: 16 },
+    { x: 7, y: 19 },
+    { x: -5, y: 20.5 },
+    { x: -12, y: 20 },
+    { x: -11, y: 15 },
+    { x: -4, y: 7 },
+    { x: 0, y: 0 },
+    { x: 32, y: 0.3 },
+  ],
+  true,
+);
 const leafMidrib = smoothPath([
-  { x: 18, y: 0 },
-  { x: 38, y: 0.5 },
-  { x: 58, y: 0 },
-  { x: 77, y: 0 },
+  { x: 0, y: 0 },
+  { x: 20, y: 0.4 },
+  { x: 40, y: 0.2 },
+  { x: 57, y: 0 },
 ]);
-const leafVein = (x: number, y: number, tipX: number, tipY: number): string =>
-  smoothPath([
-    { x, y: y * 0.18 },
-    { x: tipX, y: tipY * 0.5 },
-    { x: tipX + 5, y: tipY },
-  ]);
 const leafVeins = [
-  { d: leafVein(32, 0, 42, -14), opacity: 0.42 },
-  { d: leafVein(46, 0, 54, -8), opacity: 0.34 },
-  { d: leafVein(33, 0, 42, 14), opacity: 0.38 },
-  { d: leafVein(48, 0, 55, 8), opacity: 0.3 },
+  { d: "M10 0Q18 -6 24 -13", opacity: 0.4 },
+  { d: "M25 0Q32 -5 38 -9", opacity: 0.34 },
+  { d: "M11 0Q19 6 25 13", opacity: 0.36 },
+  { d: "M26 0Q33 5 39 9", opacity: 0.28 },
+  { d: "M1 -1Q-4 -9 -8 -16", opacity: 0.3 },
+  { d: "M1 1Q-4 9 -8 16", opacity: 0.26 },
 ] as const;
 
 interface LeafProps {
@@ -181,36 +271,64 @@ interface LeafProps {
   readonly y: number;
   readonly angle: number;
   readonly scale: number;
+  readonly stalk: number;
   readonly seed: string;
+  readonly mirror?: boolean;
   readonly dark?: boolean;
   readonly dew?: boolean;
+  readonly drip?: boolean;
+  readonly ladybird?: boolean;
 }
 
-const Leaf = ({ x, y, angle, scale, seed, dark = false, dew = false }: LeafProps): SvgNode => (
-  <g style={{ transformBox: "view-box", transformOrigin: `${x}px ${y}px` }} animation={wiggle({ rotate: 1.5, y: 0.8 }, { seed, rate: 1.2, period: 12 })}>
-    <g transform={`translate(${n(x)} ${n(y)}) rotate(${n(angle)}) scale(${scale})`}>
-      <path d={leafD} fill={dark ? C.leafDeep : leafWash} stroke={C.leafEdge} strokeWidth={0.8} strokeOpacity={0.42} />
-      <path d={leafMidrib} fill="none" stroke={C.leafVein} strokeWidth={1.3} strokeOpacity={0.55} />
-      {leafVeins.map((vein, index) => (
-        <path key={index} d={vein.d} fill="none" stroke={C.leafVein} strokeWidth={0.75} strokeOpacity={vein.opacity} />
-      ))}
-      <path
-        d="M26 -11C39 -15 55 -11 70 -3"
-        fill="none"
-        stroke="#DCE7C9"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeOpacity={0.34}
-      />
-      {dew && (
-        <g>
-          <ellipse cx={51} cy={-3.5} rx={2.5} ry={3.4} fill="#FFFDF4" fillOpacity={0.55} />
-          <circle cx={50.2} cy={-4.6} r={0.7} fill="#FFFFFF" fillOpacity={0.9} />
-        </g>
-      )}
+const Ladybird = (): SvgNode => (
+  <g transform="translate(27 5) rotate(-8) scale(1.45)" animation={wiggle({ rotate: 6 }, { seed: "ladybird", rate: 0.4, period: 24 })} style={{ transformBox: "fill-box", transformOrigin: "center" }}>
+    <ellipse cx={0.6} cy={0.6} rx={4.6} ry={3.9} fill="#3E4A33" opacity={0.25} />
+    <path d="M3.6 -2.2Q6.6 0 3.6 2.2Z" fill="#2E2A26" />
+    <ellipse cx={0} cy={0} rx={4.3} ry={3.6} fill="#C9574A" />
+    <path d="M-4.3 0H4" stroke="#3A2C27" strokeWidth={0.45} strokeOpacity={0.7} />
+    <circle cx={1.6} cy={-1.7} r={0.85} fill="#2E2A26" />
+    <circle cx={1.6} cy={1.7} r={0.85} fill="#2E2A26" />
+    <circle cx={-1.8} cy={-1.9} r={0.7} fill="#2E2A26" />
+    <circle cx={-1.8} cy={1.9} r={0.7} fill="#2E2A26" />
+    <ellipse cx={1.2} cy={-1.4} rx={1.6} ry={0.7} fill="#FFF3E6" opacity={0.45} />
+  </g>
+);
+
+const Leaf = ({ x, y, angle, scale, stalk, seed, mirror = false, dark = false, dew = false, drip = false, ladybird = false }: LeafProps): SvgNode => (
+  <g style={{ transformBox: "view-box", transformOrigin: `${n(x)}px ${n(y)}px` }} animation={wiggle({ rotate: 2.2 }, { seed, rate: 0.6, period: 24 })}>
+    <g transform={`translate(${n(x)} ${n(y)}) rotate(${n(angle)}) scale(${scale} ${mirror ? -scale : scale})`}>
+      <path d={`M0 0Q${n(stalk * 0.5)} -3.5 ${n(stalk)} 0`} fill="none" stroke={C.stem} strokeWidth={1.5 / scale} strokeLinecap="round" />
+      <g transform={`translate(${n(stalk)} 0)`}>
+        <path d={leafD} fill={dark ? C.leafDeep : leafWash} stroke={C.leafEdge} strokeWidth={0.8} strokeOpacity={0.38} />
+        <path d={leafShade} fill={C.leafEdge} opacity={0.2} />
+        <path d={leafMidrib} fill="none" stroke={C.leafVein} strokeWidth={1.2} strokeOpacity={0.5} />
+        {leafVeins.map((vein, index) => (
+          <path key={index} d={vein.d} fill="none" stroke={C.leafVein} strokeWidth={0.7} strokeLinecap="round" strokeOpacity={vein.opacity} />
+        ))}
+        <path d="M6 -12C21 -13 38 -9 53 -3.4" fill="none" stroke="#E2EACF" strokeWidth={1.4} strokeLinecap="round" strokeOpacity={0.3} />
+        {dew && (
+          <g animation={dewGlint}>
+            <ellipse cx={34} cy={-3.2} rx={2.3} ry={3} fill="#FFFDF4" fillOpacity={0.6} />
+            <circle cx={33.3} cy={-4.2} r={0.7} fill="#FFFFFF" fillOpacity={0.95} />
+          </g>
+        )}
+        {drip && (
+          <g animation={dewGlint}>
+            <circle cx={65.5} cy={0} r={2.4 / scale} fill="#FBFCF3" fillOpacity={0.55} stroke="#A9B897" strokeWidth={0.4} strokeOpacity={0.5} />
+            <circle cx={65} cy={-0.6} r={0.6} fill="#FFFFFF" />
+          </g>
+        )}
+        {ladybird && <Ladybird />}
+      </g>
     </g>
   </g>
 );
+
+const leafAt = (site: LeafSite): LeafProps => {
+  const anchor = vinePoint(site.y);
+  const angle = sideOf(site.y) > 0 ? site.droop : 180 - site.droop;
+  return { ...site, x: anchor.x, y: anchor.y, angle, mirror: sideOf(site.y) > 0 ? site.mirror : !site.mirror };
+};
 
 // ---------------------------------------------------------------------------
 // Flowers
@@ -313,8 +431,33 @@ const budPath = (length: number, width: number): string =>
     true,
   );
 
+const SQUASH = 0.8;
+
+const TUBE = def.linearGradient({ x1: 0, y1: 1, x2: 0, y2: 0 }, (
+  <>
+    <stop offset={0} stopColor="#E3E3C6" />
+    <stop offset={0.35} stopColor="#F6F0E2" />
+    <stop offset={1} stopColor="#FDF8F2" />
+  </>
+));
+
+const corolla = (radius: number, lift: number, tint: "white" | "blush"): SvgNode => {
+  const rim = -lift + radius * SQUASH * 0.45;
+  const flare = radius * 0.72;
+  const side = (s: 1 | -1): string => `${n(s * 3.6)} -3C${n(s * 4.5)} ${n(-lift * 0.3)} ${n(s * flare * 0.3)} ${n(rim + 14)} ${n(s * flare)} ${n(rim)}`;
+  const stripe = (s: number): string => `M${n(s * 0.8)} -4C${n(s * 1.5)} ${n(-lift * 0.3)} ${n(s * flare * 0.22)} ${n(rim + 16)} ${n(s * flare * 0.62)} ${n(rim + 2)}`;
+  return (
+    <g>
+      <path d={`M${side(-1)}L${n(flare)} ${n(rim)}C${n(flare * 0.3)} ${n(rim + 14)} 4.5 ${n(-lift * 0.3)} 3.6 -3Z`} fill={TUBE} stroke="#E4D6CC" strokeWidth={0.6} strokeOpacity={0.6} />
+      {[-1, 0, 1].map((s) => (
+        <path key={s} d={stripe(s)} fill="none" stroke={tint === "white" ? C.whiteBand : C.blushBand} strokeWidth={s === 0 ? 2.2 : 1.6} strokeLinecap="round" strokeOpacity={0.3} />
+      ))}
+    </g>
+  );
+};
+
 const bloomFace = (radius: number, tint: "white" | "blush", turn: number, seed: number): SvgNode => {
-  const squash = 0.95;
+  const squash = SQUASH;
   const bands = Array.from({ length: 5 }, (_, i) => {
     const angle = turn - Math.PI / 2 + (i / 5) * TAU;
     return <path key={i} d={petalBand(radius, angle, squash)} fill={tint === "white" ? C.whiteBand : C.blushBand} fillOpacity={tint === "white" ? 0.22 : 0.3} />;
@@ -376,7 +519,7 @@ const Bloom = ({ x, y, lift, radius, angle, tint, turn, seed, openAt, openOver, 
     .at(closeAt + closeOver * 0.35)
     .to({ opacity: 1, scale: 1 }, closeOver * 0.65, ease.inOut)
     .loop(D);
-  const sway = wiggle({ rotate: 1.25, x: 1.1, y: 0.45 }, { seed, rate: 1, period: 8 });
+  const sway = wiggle({ rotate: 1.6 }, { seed, rate: 0.6, period: 24 });
   return (
     <g style={{ transformBox: "view-box", transformOrigin: `${x}px ${y}px` }} animation={sway}>
       <g transform={`translate(${n(x)} ${n(y)}) rotate(${n(angle)})`}>
@@ -388,6 +531,7 @@ const Bloom = ({ x, y, lift, radius, angle, tint, turn, seed, openAt, openOver, 
           <ellipse cx={radius * 0.2} cy={-radius * 1.06} rx={1.2} ry={2} fill="#FFFDF2" fillOpacity={0.75} />
         </g>
         <g style={{ transformBox: "fill-box", transformOrigin: "center" }} animation={opening}>
+          {corolla(radius, lift, tint)}
           <g transform={`translate(0 ${-lift})`}>{bloomFace(radius, tint, turn, openAt + radius)}</g>
         </g>
       </g>
@@ -395,18 +539,85 @@ const Bloom = ({ x, y, lift, radius, angle, tint, turn, seed, openAt, openOver, 
   );
 };
 
-const PEDICELS = [
-  { d: smoothPath([{ x: 462, y: 438 }, { x: 502, y: 447 }, { x: 526, y: 438 }, { x: 548, y: 424 }]), width: 2.1 },
-  { d: smoothPath([{ x: 411, y: 681 }, { x: 376, y: 695 }, { x: 351, y: 693 }, { x: 331, y: 682 }]), width: 1.9 },
-  { d: smoothPath([{ x: 454, y: 801 }, { x: 490, y: 808 }, { x: 520, y: 803 }, { x: 547, y: 790 }]), width: 1.8 },
+interface Pedicel {
+  readonly d: string;
+  readonly start: P;
+  readonly knee: P;
+  readonly tip: P;
+  readonly angle: number;
+}
+
+const pedicel = (fromY: number, tip: P): Pedicel => {
+  const start = vinePoint(fromY);
+  const reach = tip.x - start.x;
+  const bend = { x: tip.x - reach * 0.1, y: tip.y + 18 };
+  const knee = { x: start.x + reach * 0.42, y: Math.max(start.y, tip.y) + 8 };
+  const d = smoothPath([start, knee, bend, tip]);
+  const angle = (Math.atan2(tip.x - bend.x, bend.y - tip.y) * 180) / Math.PI;
+  return { d, start, knee, tip, angle };
+};
+
+const BLOOMS = [
+  {
+    stem: pedicel(504, { x: 552, y: 452 }),
+    lift: 76,
+    radius: 64,
+    tint: "white",
+    turn: 0.12,
+    seed: "hero-bloom",
+    openAt: 3.2,
+    openOver: 3.8,
+    closeAt: 17.8,
+    closeOver: 3.4,
+  },
+  {
+    stem: pedicel(742, { x: 318, y: 718 }),
+    lift: 58,
+    radius: 47,
+    tint: "blush",
+    turn: -0.18,
+    seed: "left-bloom",
+    openAt: 5.4,
+    openOver: 3.7,
+    closeAt: 18.7,
+    closeOver: 3.3,
+  },
+  {
+    stem: pedicel(822, { x: 560, y: 808 }),
+    lift: 51,
+    radius: 41,
+    tint: "white",
+    turn: 0.26,
+    seed: "low-bloom",
+    openAt: 7.4,
+    openOver: 3.5,
+    closeAt: 19.6,
+    closeOver: 3.2,
+  },
 ] as const;
 
-const PEDUNCLE = smoothPath([
-  { x: 408, y: 529 },
-  { x: 382, y: 538 },
-  { x: 358, y: 531 },
-  { x: 343, y: 514 },
-]);
+const BUDS = [
+  { stem: pedicel(424, { x: 352, y: 404 }), size: 38, seed: "bud-left" },
+  { stem: pedicel(584, { x: 376, y: 566 }), size: 26, seed: "bud-low" },
+  { stem: pedicel(346, { x: 482, y: 318 }), size: 22, seed: "bud-high" },
+] as const;
+
+interface BudProps {
+  readonly stem: Pedicel;
+  readonly size: number;
+  readonly seed: string;
+}
+
+const Bud = ({ stem, size, seed }: BudProps): SvgNode => (
+  <g style={{ transformBox: "view-box", transformOrigin: `${n(stem.tip.x)}px ${n(stem.tip.y)}px` }} animation={wiggle({ rotate: 2 }, { seed, rate: 0.6, period: 24 })}>
+    <g transform={`translate(${n(stem.tip.x)} ${n(stem.tip.y)}) rotate(${n(stem.angle)})`}>
+      <path d={sepalFan(size * 0.4, size * 0.15)} fill={C.sepalsDeep} />
+      <path d={budPath(size, size * 0.45)} fill={BUD_WASH} stroke="#DFC5CB" strokeWidth={0.65} strokeOpacity={0.55} />
+      <path d={`M-1 -4C${n(-size * 0.16)} ${n(-size * 0.4)} ${n(-size * 0.08)} ${n(-size * 0.7)} ${n(size * 0.05)} ${n(-size * 0.9)}`} fill="none" stroke="#E3C3CA" strokeWidth={0.9} strokeOpacity={0.58} strokeLinecap="round" />
+      <ellipse cx={size * 0.17} cy={-size * 0.92} rx={0.9} ry={1.5} fill="#FFFDF2" fillOpacity={0.7} />
+    </g>
+  </g>
+);
 
 // ---------------------------------------------------------------------------
 // Atmosphere
@@ -551,6 +762,75 @@ const BOKEH = [
   { x: 340, y: 152, r: 15, opacity: 0.1 },
 ] as const;
 
+const SHAFT = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
+  <>
+    <stop offset={0} stopColor={C.sunCore} stopOpacity={0.85} />
+    <stop offset={0.55} stopColor={C.sunCore} stopOpacity={0.35} />
+    <stop offset={1} stopColor={C.sunCore} stopOpacity={0} />
+  </>
+));
+
+const shaftBlur = def.filter({ x: "-50%", y: "-10%", width: "200%", height: "120%" }, <feGaussianBlur stdDeviation={14} />);
+
+const SHAFTS = [
+  { x: 600, width: 84, opacity: 0.42, delay: 0 },
+  { x: 700, width: 44, opacity: 0.34, delay: 7 },
+  { x: 500, width: 52, opacity: 0.26, delay: 11 },
+] as const;
+
+const Shaft = ({ x, width, opacity, delay }: (typeof SHAFTS)[number]): SvgNode => {
+  const breath = motion({ opacity: opacity * 0.55 })
+    .at(delay)
+    .to({ opacity }, 5, ease.inOut)
+    .to({ opacity: opacity * 0.55 }, 7, ease.inOut)
+    .loop(D);
+  return (
+    <g animation={breath}>
+      <rect x={x - width / 2} y={-60} width={width} height={1000} fill={SHAFT} filter={shaftBlur} transform={`rotate(24 ${x} -60)`} />
+    </g>
+  );
+};
+
+const FAR_BLOOMS = [
+  { x: 146, y: 862, r: 15, turn: 0.3, opacity: 0.5 },
+  { x: 236, y: 912, r: 10, turn: 1.1, opacity: 0.42 },
+  { x: 618, y: 792, r: 11, turn: 0.7, opacity: 0.4 },
+  { x: 700, y: 884, r: 19, turn: 0.1, opacity: 0.48 },
+  { x: 742, y: 712, r: 8, turn: 1.4, opacity: 0.32 },
+  { x: 548, y: 942, r: 9, turn: 0.9, opacity: 0.36 },
+] as const;
+
+const FarBlooms = (): SvgNode => (
+  <g filter={farBlur}>
+    {FAR_BLOOMS.map((bloom, index) => (
+      <g key={index} transform={`translate(${bloom.x} ${bloom.y})`} opacity={bloom.opacity}>
+        <path d={rimPath(bloom.r, bloom.turn, 0.62, index)} fill={index % 3 === 1 ? "#F6E1E4" : "#FFFDF6"} />
+        <ellipse cx={0} cy={0} rx={bloom.r * 0.3} ry={bloom.r * 0.2} fill="#F3D798" />
+      </g>
+    ))}
+  </g>
+);
+
+const farBlur = def.filter({}, <feGaussianBlur stdDeviation={2.6} />);
+
+const FOREGROUND = [
+  smoothPath([{ x: -6, y: 1015 }, { x: 10, y: 930 }, { x: 22, y: 850 }, { x: 46, y: 770 }]),
+  smoothPath([{ x: 806, y: 1015 }, { x: 784, y: 940 }, { x: 772, y: 870 }, { x: 742, y: 806 }]),
+  smoothPath([{ x: 770, y: 1015 }, { x: 760, y: 966 }, { x: 736, y: 930 }]),
+] as const;
+
+const deepBlur = def.filter({ x: "-50%", y: "-20%", width: "200%", height: "140%" }, <feGaussianBlur stdDeviation={5} />);
+
+const Foreground = (): SvgNode => (
+  <g filter={deepBlur} opacity={0.32}>
+    {FOREGROUND.map((d, index) => (
+      <g key={index} style={{ transformBox: "view-box", transformOrigin: "50% 100%" }} animation={grassSway(`front-${index}`, 1.2)}>
+        <path d={d} fill="none" stroke="#7F9568" strokeWidth={index === 2 ? 9 : 14} strokeLinecap="round" />
+      </g>
+    ))}
+  </g>
+);
+
 // ---------------------------------------------------------------------------
 // Scene
 
@@ -568,121 +848,85 @@ const Meadow = (): SvgNode => (
   </g>
 );
 
-const Vine = (): SvgNode => (
+const Stem = ({ d, width, color = C.stem }: { readonly d: string; readonly width: number; readonly color?: Color }): SvgNode => (
   <>
-    {VINE.back.map((run, index) => (
-      <path key={`back-${index}`} d={smoothPath(run)} fill="none" stroke={C.stemBack} strokeWidth={2.15} strokeLinecap="round" opacity={0.86} />
-    ))}
+    <path d={d} fill="none" stroke={color} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />
+    <path d={d} fill="none" stroke={C.stemLight} strokeWidth={width * 0.28} strokeLinecap="round" opacity={0.42} transform="translate(-0.4 -0.35)" />
+  </>
+);
 
-    <path d={supportPath} fill="none" stroke={C.stalk} strokeWidth={2.4} strokeLinecap="round" opacity={0.9} />
-    <path d={supportPath} fill="none" stroke={C.stalkLight} strokeWidth={0.8} strokeLinecap="round" opacity={0.8} transform="translate(-0.55 -0.4)" />
-    <g opacity={0.8}>
-      <path d={smoothPath([{ x: 431, y: 226 }, { x: 438, y: 209 }, { x: 456, y: 183 }, { x: 474, y: 158 }, { x: 469, y: 143 }])} fill="none" stroke={C.stalk} strokeWidth={1.15} strokeLinecap="round" />
-      {Array.from({ length: 7 }, (_, i) => {
-        const t = i / 6;
-        const x = 434 + t * 38;
-        const y = 221 - t * 70;
+const Stalk = (): SvgNode => (
+  <>
+    <path d={SHEATH} fill={C.stalkLight} stroke={C.stalk} strokeWidth={0.6} strokeOpacity={0.7} opacity={0.85} />
+    <path d={supportTaper} fill={C.stalk} opacity={0.92} />
+    <path d={supportShine} fill="none" stroke={C.stalkLight} strokeWidth={0.6} strokeLinecap="round" opacity={0.7} />
+    {STALK_NODES.map((y) => (
+      <ellipse key={y} cx={axisX(y)} cy={y} rx={stalkWidth(y) / 2 + 0.8} ry={2.3} fill="#9C8B60" opacity={0.8} />
+    ))}
+    {[598, 786].map((y) => (
+      <g key={y} animation={dewGlint}>
+        <circle cx={axisX(y) + stalkWidth(y) / 2 + 1.6} cy={y} r={2.1} fill="#FBFCF3" fillOpacity={0.6} stroke="#B5A57B" strokeWidth={0.35} strokeOpacity={0.5} />
+        <circle cx={axisX(y) + stalkWidth(y) / 2 + 1.1} cy={y - 0.7} r={0.55} fill="#FFFFFF" />
+      </g>
+    ))}
+    <g opacity={0.82}>
+      <path d={smoothPath(SEEDHEAD)} fill="none" stroke={C.stalk} strokeWidth={1.1} strokeLinecap="round" />
+      {SEEDHEAD.slice(1).map((point, i) => {
         const side = i % 2 ? 1 : -1;
+        const tip = { x: point.x + side * 11, y: point.y + 5 };
         return (
           <g key={i}>
-            <path d={`M${n(x)} ${n(y)}q${side * 7} -2 ${side * 12} ${6}`} fill="none" stroke={C.stalk} strokeWidth={0.85} strokeLinecap="round" />
-            <ellipse cx={x + side * 13} cy={y + 5.5} rx={2.7} ry={1.15} fill={C.stalkLight} transform={`rotate(${side * 28} ${x + side * 13} ${y + 5.5})`} />
+            <path d={`M${n(point.x)} ${n(point.y)}Q${n(point.x + side * 6)} ${n(point.y - 2)} ${n(tip.x)} ${n(tip.y)}`} fill="none" stroke={C.stalk} strokeWidth={0.8} strokeLinecap="round" />
+            <ellipse cx={tip.x + side * 2} cy={tip.y + 1} rx={2.8} ry={1.15} fill={C.stalkLight} transform={`rotate(${side * 30} ${n(tip.x + side * 2)} ${n(tip.y + 1)})`} />
           </g>
         );
       })}
     </g>
+  </>
+);
 
-    <path d={baseStem} fill="none" stroke={C.stem} strokeWidth={2.6} strokeLinecap="round" />
-    <path d={baseStem} fill="none" stroke={C.stemLight} strokeWidth={0.75} strokeLinecap="round" opacity={0.48} transform="translate(-0.4 -0.4)" />
+const Vine = (): SvgNode => (
+  <>
+    {VINE.back.map((run, index) => (
+      <path key={`back-${index}`} d={smoothPath(run.points)} fill="none" stroke={C.stemBack} strokeWidth={run.width * 0.9} strokeLinecap="round" opacity={0.85} />
+    ))}
 
-    <path d={topTendril} fill="none" stroke={C.stem} strokeWidth={1.5} strokeLinecap="round" opacity={0.9} />
+    <Stalk />
 
     {VINE.front.map((run, index) => (
-      <g key={`front-${index}`}>
-        <path d={smoothPath(run)} fill="none" stroke={C.stem} strokeWidth={2.55} strokeLinecap="round" />
-        <path d={smoothPath(run)} fill="none" stroke={C.stemLight} strokeWidth={0.72} strokeLinecap="round" opacity={0.44} transform="translate(-0.5 -0.35)" />
+      <Stem key={`front-${index}`} d={smoothPath(run.points)} width={run.width} />
+    ))}
+    <Stem d={shootTip} width={1.4} />
+    <Leaf x={vinePoint(TIP_Y).x - 45} y={TIP_Y - 16} angle={118} scale={0.32} stalk={8} seed="tip-leaf" dark />
+
+    {BLOOMS.map((bloom) => (
+      <Stem key={bloom.seed} d={bloom.stem.d} width={1.8} />
+    ))}
+    {BUDS.map((bud) => (
+      <Stem key={bud.seed} d={bud.stem.d} width={1.4} />
+    ))}
+
+    {[...BLOOMS, ...BUDS].map(({ stem, seed }) => (
+      <g key={seed} transform={`translate(${n(stem.knee.x)} ${n(stem.knee.y)})`} fill={C.sepals}>
+        <path d="M0 0Q-2 -4 -1 -8Q1 -4 0 0Z" transform="rotate(-24)" />
+        <path d="M0 0Q-2 -4 -1 -8Q1 -4 0 0Z" transform="rotate(30)" />
       </g>
     ))}
 
-    <Leaf x={318} y={962} angle={204} scale={0.7} seed="base-leaf" dark dew />
-    <Leaf x={359} y={205} angle={201} scale={0.54} seed="tip-leaf" dark />
-
+    {LEAF_SITES.map((site) => (
+      <Leaf key={site.seed} {...leafAt(site)} />
+    ))}
     {LEAF_SITES.map((site) => {
-      const anchor = vineAnchor(site.y);
-      return (
-        <Leaf
-          key={site.seed}
-          x={anchor.x}
-          y={anchor.y}
-          angle={site.angle}
-          scale={site.scale}
-          seed={site.seed}
-          dark={site.tone < 0.9}
-          dew={site.seed === "leaf-2" || site.seed === "leaf-5"}
-        />
-      );
+      const node = vinePoint(site.y);
+      return <ellipse key={site.seed} cx={node.x} cy={node.y} rx={2.3} ry={1.7} fill={C.leafDeep} />;
     })}
 
-    {PEDICELS.map((pedicel, index) => (
-      <g key={index}>
-        <path d={pedicel.d} fill="none" stroke={C.stem} strokeWidth={pedicel.width} strokeLinecap="round" />
-        <path d={pedicel.d} fill="none" stroke={C.stemLight} strokeWidth={0.55} strokeLinecap="round" opacity={0.4} transform="translate(-0.35 -0.35)" />
-      </g>
+    {BUDS.map((bud) => (
+      <Bud key={bud.seed} {...bud} />
     ))}
-    <path d={PEDUNCLE} fill="none" stroke={C.stem} strokeWidth={1.8} strokeLinecap="round" />
-    <path d={PEDUNCLE} fill="none" stroke={C.stemLight} strokeWidth={0.5} strokeLinecap="round" opacity={0.4} transform="translate(-0.35 -0.35)" />
-
-    <Bloom
-      x={548}
-      y={428}
-      lift={60}
-      radius={66}
-      angle={-6}
-      tint="white"
-      turn={0.12}
-      seed="hero-bloom"
-      openAt={3.2}
-      openOver={3.8}
-      closeAt={17.8}
-      closeOver={3.4}
-    />
-    <Bloom
-      x={331}
-      y={682}
-      lift={50}
-      radius={48}
-      angle={6}
-      tint="blush"
-      turn={-0.18}
-      seed="left-bloom"
-      openAt={5.4}
-      openOver={3.7}
-      closeAt={18.7}
-      closeOver={3.3}
-    />
-    <Bloom
-      x={547}
-      y={790}
-      lift={44}
-      radius={42}
-      angle={-4}
-      tint="white"
-      turn={0.26}
-      seed="low-bloom"
-      openAt={7.4}
-      openOver={3.5}
-      closeAt={19.6}
-      closeOver={3.2}
-    />
-
-    <g style={{ transformBox: "view-box", transformOrigin: "343px 514px" }} animation={wiggle({ rotate: 1.1, y: 0.6 }, { seed: "bud-sway", rate: 1, period: 8 })}>
-      <g transform="translate(343 514) rotate(-14)">
-        <path d={sepalFan(15, 5.5)} fill={C.sepalsDeep} />
-        <path d={budPath(38, 17)} fill={BUD_WASH} stroke="#DFC5CB" strokeWidth={0.65} strokeOpacity={0.55} />
-        <path d="M-1 -4C-6 -15 -3 -27 2 -34" fill="none" stroke="#E3C3CA" strokeWidth={0.9} strokeOpacity={0.58} strokeLinecap="round" />
-        <ellipse cx={6.5} cy={-35} rx={0.9} ry={1.5} fill="#FFFDF2" fillOpacity={0.7} />
-      </g>
-    </g>
+    {BLOOMS.map(({ stem, ...bloom }) => (
+      <Bloom key={bloom.seed} x={stem.tip.x} y={stem.tip.y} angle={stem.angle} {...bloom} />
+    ))}
   </>
 );
 
@@ -705,8 +949,12 @@ export function buildBindweed(): string {
         <circle cx={526} cy={332} r={174} fill={C.sunCore} opacity={0.5} filter={softBlur} />
         <circle cx={526} cy={332} r={116} fill={C.sunCore} opacity={0.38} filter={softBlur} />
       </g>
+      {SHAFTS.map((shaft) => (
+        <Shaft key={shaft.x} {...shaft} />
+      ))}
       <rect y={724} width={W} height={276} fill={MEADOW} />
       <Meadow />
+      <FarBlooms />
       <g>
         {BOKEH.map((dot, index) => (
           <circle key={index} cx={dot.x} cy={dot.y} r={dot.r} fill="#FBF1CE" opacity={dot.opacity} filter={softBlur} />
@@ -720,9 +968,7 @@ export function buildBindweed(): string {
         <Vine />
       </g>
 
-      <g animation={dewGlint}>
-        <circle cx={0} cy={0} r={1} fill="#FFFFFF" opacity={0} />
-      </g>
+      <Foreground />
 
       <g>
         {MOTES.map((mote, index) => (
