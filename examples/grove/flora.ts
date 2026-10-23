@@ -47,78 +47,82 @@ interface Species {
   readonly sway: number;
   readonly droop: number;
   readonly lean: Vec3;
+  readonly leader: boolean;
 }
 
 const OAK_TREE: Species = {
   id: "oak",
   bark: BARK.oak,
   leaves: OAK,
-  height: 9.4,
-  trunk: 4.5,
-  trunkRadius: 0.47,
+  height: 10.8,
+  trunk: 5.4,
+  trunkRadius: 0.32,
   primary: 3,
-  third: 0.25,
-  spread: 0.86,
-  ratio: 0.64,
-  shrink: 0.52,
-  rise: 0.24,
-  bend: 0.16,
+  third: 0.35,
+  spread: 0.6,
+  ratio: 0.66,
+  shrink: 0.43,
+  rise: 0.55,
+  bend: 0.1,
   maxDepth: 3,
-  leafLength: 0.44,
-  leafWidth: 0.19,
-  leafCount: [13, 18],
-  cluster: 0.52,
-  sway: 0.42,
-  droop: 0.02,
-  lean: [0.12, 1, -0.06],
+  leafLength: 0.5,
+  leafWidth: 0.31,
+  leafCount: [26, 36],
+  cluster: 0.78,
+  sway: 0.34,
+  droop: 0,
+  lean: [0.06, 1, -0.03],
+  leader: true,
 };
 
 const BIRCH_TREE: Species = {
   id: "birch",
   bark: BARK.birch,
   leaves: OAK,
-  height: 7.6,
-  trunk: 4.2,
-  trunkRadius: 0.24,
+  height: 9.2,
+  trunk: 5.8,
+  trunkRadius: 0.17,
   primary: 3,
-  third: 0.5,
-  spread: 0.52,
-  ratio: 0.6,
-  shrink: 0.5,
-  rise: 0.42,
-  bend: 0.1,
+  third: 0.35,
+  spread: 0.34,
+  ratio: 0.5,
+  shrink: 0.42,
+  rise: 0.8,
+  bend: 0.09,
   maxDepth: 3,
-  leafLength: 0.35,
-  leafWidth: 0.15,
-  leafCount: [10, 15],
-  cluster: 0.45,
-  sway: 0.68,
-  droop: 0.015,
-  lean: [-0.22, 1, 0.1],
+  leafLength: 0.38,
+  leafWidth: 0.25,
+  leafCount: [24, 32],
+  cluster: 0.58,
+  sway: 0.7,
+  droop: 0.02,
+  lean: [-0.18, 1, 0.08],
+  leader: true,
 };
 
 const BLOSSOM_TREE: Species = {
   id: "blossom",
   bark: BARK.blossom,
   leaves: BLOSSOM,
-  height: 5.7,
-  trunk: 2.9,
-  trunkRadius: 0.3,
+  height: 6.6,
+  trunk: 3.5,
+  trunkRadius: 0.24,
   primary: 4,
-  third: 0.65,
-  spread: 0.94,
+  third: 0.5,
+  spread: 0.82,
   ratio: 0.6,
-  shrink: 0.5,
-  rise: 0.18,
-  bend: 0.22,
+  shrink: 0.43,
+  rise: 0.36,
+  bend: 0.18,
   maxDepth: 3,
-  leafLength: 0.36,
-  leafWidth: 0.21,
-  leafCount: [8, 13],
-  cluster: 0.5,
-  sway: 0.82,
-  droop: 0.03,
-  lean: [0.2, 1, 0.18],
+  leafLength: 0.4,
+  leafWidth: 0.33,
+  leafCount: [24, 32],
+  cluster: 0.72,
+  sway: 0.78,
+  droop: 0.02,
+  lean: [0.15, 1, 0.14],
+  leader: false,
 };
 
 const directionAt = (points: readonly Vec3[], i: number): Vec3 => unit(sub(points[Math.min(points.length - 1, i + 1)]!, points[Math.max(0, i - 1)]!));
@@ -146,36 +150,42 @@ const grow = (rng: Rng, spec: Species, start: Vec3, dir: Vec3, length: number, r
   limbs.push({ points, radii, depth });
 
   if (depth < spec.maxDepth) {
+    if (depth === 0 && spec.leader) {
+      const index = steps - 2;
+      const leaderDir = unit(add(directionAt(points, index), mul(UP, 0.3)));
+      grow(rng, spec, pointAt(points, 0.9), leaderDir, length * 0.52, radii[index]! * 0.8, 1, limbs, sites);
+    }
     const count = depth === 0 ? spec.primary : 2 + (rng() < spec.third ? 1 : 0);
-    const from = depth === 0 ? 0.34 : 0.26;
+    const from = depth === 0 ? 0.46 : 0.24;
     const base = rng() * TAU;
     for (let k = 0; k < count; k++) {
-      const along = lerp(from, 0.94, (k + 0.3 + rng() * 0.4) / count);
+      const along = lerp(from, 0.9, (k + 0.3 + rng() * 0.4) / count);
       const index = clamp(Math.round(along * (steps - 1)), 1, steps - 2);
       const axis = directionAt(points, index);
       const side = perpendicular(axis, UP);
       const other = unit(cross(axis, side));
       const azimuth = base + (k / count) * TAU + rng() * 0.6;
       const bias = unit(add(mul(side, Math.cos(azimuth)), mul(other, Math.sin(azimuth))));
-      const child = unit(add(add(unit(bend(axis, axis, bias, spec.spread * (0.66 + rng() * 0.62))), mul(UP, spec.rise)), mul(UP, depth === 0 ? 0.1 : 0)));
+      const child = unit(add(add(unit(bend(axis, axis, bias, spec.spread * (0.66 + rng() * 0.62))), mul(UP, spec.rise)), mul(UP, depth === 0 ? 0.08 : 0)));
       const childLength = length * spec.ratio * (0.82 + rng() * 0.36);
       const childRadius = radii[index]! * spec.shrink * (0.88 + rng() * 0.24);
       grow(rng, spec, points[index]!, child, childLength, childRadius, depth + 1, limbs, sites);
     }
   }
 
-  const crown = (t: number, scale: number): void => {
+  const crown = (t: number, scale: number, fill = 1): void => {
     sites.push({
-      center: add(pointAt(points, t), mul(directionAt(points, Math.round(t * steps)), 0.13)),
+      center: add(pointAt(points, t), mul(directionAt(points, Math.round(t * steps)), 0.1)),
       radius: spec.cluster * scale * (0.82 + rng() * 0.36),
-      count: Math.round(lerp(spec.leafCount[0], spec.leafCount[1], rng())),
+      count: Math.max(4, Math.round(lerp(spec.leafCount[0], spec.leafCount[1], rng()) * fill)),
     });
   };
   if (depth === spec.maxDepth) {
     crown(1, 1);
-    crown(0.56 + rng() * 0.18, 0.7);
   } else if (depth === spec.maxDepth - 1) {
-    crown(0.6 + rng() * 0.22, 0.82);
+    crown(0.92, 0.76, 0.7);
+  } else if (depth === 1) {
+    crown(0.9, 0.5, 0.5);
   }
 };
 
@@ -193,7 +203,6 @@ const limbNode = (rng: Rng, spec: Species, limb: Limb): SvgNode => {
   const color = hazed(limbTone(rng, spec, limb.points), depth);
   const shape = el.path({ d: tapered(points, widths), fill: color });
   if (Math.max(...widths) < 5.5) return shape;
-  const p = points[Math.floor(points.length / 2)]!;
   const before = points[Math.max(0, Math.floor(points.length / 2) - 1)]!;
   const after = points[Math.min(points.length - 1, Math.floor(points.length / 2) + 1)]!;
   const tangent = { x: after.x - before.x, y: after.y - before.y };
@@ -201,39 +210,39 @@ const limbNode = (rng: Rng, spec: Species, limb: Limb): SvgNode => {
   const side = normal.x * -0.5 + normal.y * -0.9 > 0 ? 1 : -1;
   const shine = el.path({
     d: edge(points, widths, 0.34 * side, 0.15),
-    fill: hazed(tone(spec.bark, 0.78 + rng() * 0.16), depth),
-    opacity: 0.55,
+    fill: hazed(tone(spec.bark, 0.68 + rng() * 0.16), depth),
+    opacity: 0.5,
   });
-  void p;
   return el.g({}, [shape, shine]);
 };
 
 const leafColor = (spec: Species, rng: Rng, normal: Vec3, height: number, depth: number, below: boolean): string => {
-  const face = Math.abs(dot(unit(normal), unit([-0.42, 0.72, 0.55])));
-  const shade = clamp(0.24 + face * 0.62 + height * 0.14 - (below ? 0.14 : 0) + (rng() - 0.5) * 0.16);
+  const face = Math.max(0, dot(unit(normal), unit([-0.5, 0.72, 0.48])));
+  const shade = clamp(0.14 + face * 0.66 + height * 0.2 - (below ? 0.08 : 0) + (rng() - 0.5) * 0.16);
   return hazed(tone(spec.leaves, shade), depth);
 };
 
 const leavesAt = (rng: Rng, spec: Species, site: ClusterSite, base: Vec3): Part[] => {
   const out: Part[] = [];
-  const outward = unit([site.center[0] - base[0], 0, site.center[2] - base[2]]);
   for (let i = 0; i < site.count; i++) {
     const theta = rng() * TAU;
     const z = rng() * 2 - 1;
     const reach = Math.sqrt(1 - z * z);
-    const shell: Vec3 = [Math.cos(theta) * reach, z, Math.sin(theta) * reach];
-    const center = add(site.center, add(mul(shell, site.radius * Math.cbrt(rng())), [0, 0.02, 0]));
-    const face = shell[1] > 0.9 ? UP : outward;
-    const facing = unit(add(add(mul(shell, 0.9), mul(face, 0.34)), mul(UP, 0.24)));
-    const flank = unit(cross(facing, Math.abs(dot(facing, UP)) > 0.94 ? [0, 0, 1] : UP));
-    const length = spec.leafLength * (0.74 + rng() * 0.52);
-    const width = spec.leafWidth * (0.78 + rng() * 0.44);
+    const shell = unit([Math.cos(theta) * reach, z * 0.86 + 0.12, Math.sin(theta) * reach]);
+    const center = add(site.center, add(mul(shell, site.radius * (0.36 + 0.64 * Math.cbrt(rng()))), [0, 0.02, 0]));
+    const normal = unit(add(shell, [(rng() - 0.5) * 0.34, 0.08, (rng() - 0.5) * 0.34]));
+    const along = perpendicular(normal, UP);
+    const across = unit(cross(normal, along));
+    const twist = rng() * TAU;
+    const facing = unit(add(mul(along, Math.cos(twist)), mul(across, Math.sin(twist))));
+    const flank = unit(cross(normal, facing));
+    const length = spec.leafLength * (0.72 + rng() * 0.56);
+    const width = spec.leafWidth * (0.72 + rng() * 0.5);
     const basePoint = add(center, mul(facing, -length / 2));
-    const tip = add(center, add(mul(facing, length / 2), [0, -length * 0.06 * (1 + spec.droop * 8), 0]));
-    const waist = add(center, mul(facing, length * 0.07));
+    const tip = add(center, add(mul(facing, length / 2), [0, -length * (0.04 + spec.droop), 0]));
+    const waist = add(center, mul(facing, length * 0.08));
     const left = add(waist, mul(flank, width / 2));
     const right = sub(waist, mul(flank, width / 2));
-    const normal = cross(facing, flank);
     const height = clamp((center[1] - base[1]) / spec.height);
     const depth = at(center).depth;
     out.push({

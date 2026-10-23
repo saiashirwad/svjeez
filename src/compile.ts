@@ -168,7 +168,12 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
       period,
       snapped,
       nest: backend !== "smil" && spec(channels[0]!).composition === "nest",
-      discrete: key === "opacity" && el.attrs.opacity === undefined && el.attrs.style === undefined && isDiscrete(keys),
+      discrete:
+        key === "opacity" &&
+        el.attrs.opacity === undefined &&
+        el.attrs.visibility === undefined &&
+        el.attrs.style === undefined &&
+        isDiscrete(keys),
       label: data.label,
     };
   });

@@ -4,11 +4,11 @@ import { disc, smooth, tapered } from "./draw";
 import { layer, type Part } from "./paint";
 import { TAU, add, cross, mul, sub, unit, type Vec3 } from "./space";
 
-export const R = 6.55;
+export const R = 6.0;
 
 const SECTORS = 56;
 const LAYERS = 9;
-const SKIRT = 8;
+const SKIRT = 11;
 
 const rng = random(4242);
 
@@ -27,17 +27,17 @@ const ring = (angle: number, radius: number, y: number): Vec3 => [Math.cos(angle
 
 const topFill = def.linearGradient({ x1: 0.16, y1: 0.06, x2: 0.82, y2: 0.98 }, (
   <>
-    <stop offset={0} stopColor="#7ba160" />
-    <stop offset={0.42} stopColor="#5c8952" />
-    <stop offset={1} stopColor="#2f5a41" />
+    <stop offset={0} stopColor="#7da45f" />
+    <stop offset={0.4} stopColor="#4d7849" />
+    <stop offset={1} stopColor="#213f32" />
   </>
 ));
 
-const topShade = def.radialGradient({ gradientUnits: "userSpaceOnUse", cx: ORIGIN.x - 70, cy: ORIGIN.y - 44, r: 300 }, (
+const topShade = def.radialGradient({ gradientUnits: "userSpaceOnUse", cx: ORIGIN.x - 80, cy: ORIGIN.y - 50, r: 280 }, (
   <>
-    <stop offset={0} stopColor="#c3dd91" stopOpacity={0.34} />
-    <stop offset={0.55} stopColor="#8cb86c" stopOpacity={0.1} />
-    <stop offset={1} stopColor="#2f5a41" stopOpacity={0} />
+    <stop offset={0} stopColor="#d6e79f" stopOpacity={0.26} />
+    <stop offset={0.55} stopColor="#8cb86c" stopOpacity={0.08} />
+    <stop offset={1} stopColor="#1c3a2d" stopOpacity={0} />
   </>
 ));
 
@@ -60,19 +60,18 @@ const skirt = (): Part[] => {
       const a1 = ((s + 1) / SECTORS) * TAU;
       const point = (angle: number, layer: number): Vec3 => {
         const u = layer / SKIRT;
-        const jag = 1 + 0.05 * Math.sin(angle * 7 + layer * 1.8) + 0.028 * Math.sin(angle * 13 - layer * 0.8);
-        const radius = edgeRadius(angle + 0.12 * u) * (1 - 0.82 * u ** 1.12) * jag;
-        const y = -0.04 - 4.45 * u ** 1.06 - 0.14 * Math.sin(angle * 5 + layer * 0.7) * u;
+        const jag = 1 + 0.045 * Math.sin(angle * 7 + layer * 1.8) + 0.026 * Math.sin(angle * 13 - layer * 0.8);
+        const radius = edgeRadius(angle + 0.12 * u) * (1 - 0.84 * u ** 1.12) * jag;
+        const y = -0.05 - 4.12 * u ** 1.04 - 0.12 * Math.sin(angle * 5 + layer * 0.7) * u;
         return ring(angle, radius, y);
       };
       const corners = [point(a0, l), point(a1, l), point(a1, l + 1), point(a0, l + 1)] as const;
       const normal = unit(cross(sub(corners[1], corners[0]), sub(corners[2], corners[0])));
-      const outward = unit([(corners[0][0] + corners[2][0]) / 2, 0, (corners[0][2] + corners[2][2]) / 2]);
       const face = normal[1] < 0 ? mul(normal, -1) : normal;
       const light = Math.max(0, face[0] * -0.55 + face[1] * 0.78 + face[2] * 0.32);
-      const band = 0.18 + light * 0.42 + (l % 2) * 0.075 + rng() * 0.06;
-      const mossy = l < 2 && rng() < 0.32;
-      const color = mossy ? mix(tone(ROCK, band), tone(MOSS, 0.2 + band * 0.4), 0.55) : tone(ROCK, band);
+      const band = 0.12 + light * 0.42 + (l % 2) * 0.06 + rng() * 0.05;
+      const mossy = l < 2 && rng() < 0.34;
+      const color = mossy ? mix(tone(ROCK, band), tone(MOSS, 0.16 + band * 0.36), 0.5) : tone(ROCK, band);
       const points = corners.map(at);
       const depth = points.reduce((sum, p) => sum + p.depth, 0) / 4;
       parts.push({
