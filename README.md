@@ -145,6 +145,20 @@ render(
 
 A property is a key in motions and `style`, and a hole in `css`. Each value is checked against its syntax: `number`, `length` (px), `angle` (deg) or `color`.
 
+### Calc
+
+```tsx
+const { add, sub, mul, div, sin, cos, clamp, length, angle } = calc;
+
+css`.dot{translate:${add(length(100), mul(length(60), px, cos(yaw)))} 100px}`;
+// .dot{translate:calc(100px + 60px * var(--p1) * cos(var(--p2))) 100px}
+
+const z = add(mul(px, sin(yaw)), mul(pz, cos(yaw)));
+css`.dot{scale:${div(720, add(720, z))}}`;
+```
+
+Operands are numbers, properties and other `calc` expressions, and units are checked. In `mul` and `div`, only the first operand may be a length or angle. `length(60)` is `60px`, and `length(expr)` turns a number into px. Also `min` and `max`.
+
 ## el
 
 ```tsx
@@ -197,4 +211,6 @@ const { errors, warnings } = validateSvg(svg);
 <g animation={draw({ at: 0, over: 1 })} /> // error: a <g> has no stroke to draw
 <g clipPath={fade} />                       // error: a gradient is not a clip path
 motion().to({ opcity: 1 }, 1);              // error: misspelled channel
+calc.mul(calc.length(1), calc.length(2));   // error: a length times a length
+calc.cos(px);                               // error: cos takes an angle
 ```
