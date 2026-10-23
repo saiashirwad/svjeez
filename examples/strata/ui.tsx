@@ -82,7 +82,7 @@ export function CardHeader(props: {
 }): SvgNode {
   const { y, color } = props;
   return el.g({}, [
-    AgentAvatar({ cx: 858, cy: y + 26, r: 9.5, initial: props.initial, color }),
+    <AgentAvatar cx={858} cy={y + 26} r={9.5} initial={props.initial} color={color} />,
     el.text({ x: 874, y: y + 24, ...ui(11.5, C.ink, { fontWeight: 600 }) }, props.name),
     el.text({ x: 874, y: y + 35, ...ui(8.5, C.dim) }, props.role),
     el.text({ x: 1104, y: y + 24, ...mono(7.5, C.faint, { textAnchor: "end" }) }, props.meta),

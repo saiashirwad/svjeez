@@ -51,7 +51,7 @@ function Sidebar(): SvgNode {
         const y = 808 + i * 40;
         const color = active ? C.link : "#A9A6BC";
         return el.g({}, [
-          Icon({ d: icon, x: 157, y, color }),
+          <Icon d={icon} x={157} y={y} color={color} />,
           el.text({ x: 177, y: y + 5, ...ui(13.5, color, { fontWeight: 500, fillOpacity: active ? 1 : 0.7 }) }, label),
         ]);
       })}
@@ -169,7 +169,7 @@ function Calendar(): SvgNode {
       <text x={1024} y={1061} {...ui(12, "#FFFFFF", { fillOpacity: 0.3 })}>Note actions</text>
       {ACTIONS.map(({ icon, label }, i) =>
         el.g({}, [
-          Icon({ d: icon, x: 1036, y: 1099 + i * 40, color: "#A9A6BC" }),
+          <Icon d={icon} x={1036} y={1099 + i * 40} color="#A9A6BC" />,
           el.text({ x: 1055, y: 1104 + i * 40, ...ui(13.5, "#FFFFFF", { fillOpacity: 0.55, fontWeight: 500 }) }, label),
         ]),
       )}

@@ -70,7 +70,7 @@ function Menu(): SvgNode {
 
       {MENU_ROWS.map((row, index) =>
         el.g({ animation: enter({ at: 5.9 + index * 0.12, over: 0.34 }, { opacity: 0, y: 3 }) }, [
-          MiniAvatar({ cx: 854, cy: row.cy, initial: row.initial, color: row.color }),
+          <MiniAvatar cx={854} cy={row.cy} initial={row.initial} color={row.color} />,
           el.text({ x: row.x, y: row.cy - 1, ...ui(11, C.ink, { fontWeight: 600 }) }, row.name),
           el.text({ x: row.x, y: row.cy + 11, ...ui(8.5, C.dim) }, row.role),
           el.text({ x: 1104, y: row.cy + 5, ...ui(8.5, C.faint, { textAnchor: "end" }) }, row.note),
