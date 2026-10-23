@@ -1,18 +1,18 @@
-import { ease, motion, render, type SvgNode } from "svg-motion";
-import { D, H, W, at, random } from "./kit";
+import { ease, motion, render } from "svg-motion";
+import { D, H, W, random } from "./kit";
 import { island, edgeRadius, ground } from "./island";
 import { birch, blossom, fallenPetals, fern, flowers, oak, seed as seedGlow, stones, tuft, type Stand } from "./flora";
 import { layer } from "./paint";
-import { Backdrop, Birds, Clouds, FarIsles, Fireflies, Foreground, ForegroundGrass, Mist, Moon, Motes, Petals, Shadow, Stars, Sun, Tint } from "./sky";
+import { Backdrop, Birds, Clouds, FarIsles, Fireflies, Foreground, Mist, Moon, Motes, Petals, Shadow, Stars, Sun } from "./sky";
 
 interface Spot {
   readonly x: number;
   readonly z: number;
 }
 
-const OAK = { x: -1.25, z: 0.55 } as const;
-const BIRCH = { x: 3.05, z: -1.35 } as const;
-const BLOSSOM = { x: -4.15, z: -1.15 } as const;
+const OAK = { x: -1.2, z: 0.6 } as const;
+const BIRCH = { x: 3.2, z: -1.5 } as const;
+const BLOSSOM = { x: -4.05, z: -1.05 } as const;
 
 const inReach = (spot: Spot, x: number, z: number, radius: number): boolean => Math.hypot(spot.x - x, spot.z - z) < radius;
 
@@ -51,11 +51,11 @@ const scatter = (): readonly Stand[] => {
   const pick = random(1009);
   const stands: Stand[] = [];
   const placed: Spot[] = [];
-  for (let attempt = 0; attempt < 700 && stands.length < 84; attempt++) {
-    const x = (pick() * 2 - 1) * 6;
-    const z = (pick() * 2 - 1) * 6;
+  for (let attempt = 0; attempt < 700 && stands.length < 62; attempt++) {
+    const x = (pick() * 2 - 1) * 5.6;
+    const z = (pick() * 2 - 1) * 5.6;
     if (!clear(x, z, 0.12)) continue;
-    if (placed.some((spot) => Math.hypot(spot.x - x, spot.z - z) < 0.34)) continue;
+    if (placed.some((spot) => Math.hypot(spot.x - x, spot.z - z) < 0.38)) continue;
     placed.push({ x, z });
     stands.push(tuft(ground(x, z), 2000 + stands.length));
   }
@@ -107,9 +107,7 @@ export function buildGrove(): string {
       <Petals />
       <Motes />
       <Fireflies />
-      <Tint />
       <Foreground />
-      <ForegroundGrass />
     </>,
   );
 }

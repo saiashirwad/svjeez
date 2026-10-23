@@ -401,8 +401,8 @@ export const flowers = (base: Vec3, seed: number, kind: FlowerKind): Stand => {
   for (let i = 0; i < count; i++) {
     const azimuth = (i / count) * TAU + rng() * 0.8;
     const lean = 0.3 + rng() * 0.32;
-    const top = add(base, [Math.cos(azimuth) * lean, 0.95 + rng() * 0.55, Math.sin(azimuth) * lean]);
-    const mid = add(add(base, [0, 0.42 + rng() * 0.2, 0]), mul([Math.cos(azimuth), 0, Math.sin(azimuth)], lean * 0.36));
+    const top = add(base, [Math.cos(azimuth) * lean, 1.15 + rng() * 0.65, Math.sin(azimuth) * lean]);
+    const mid = add(add(base, [0, 0.5 + rng() * 0.22, 0]), mul([Math.cos(azimuth), 0, Math.sin(azimuth)], lean * 0.36));
     const stem = Array.from({ length: 6 }, (_, k) => {
       const t = k / 5;
       return add(add(mul(base, (1 - t) * (1 - t)), mul(mid, 2 * (1 - t) * t)), mul(top, t * t));
@@ -428,8 +428,8 @@ export const flowers = (base: Vec3, seed: number, kind: FlowerKind): Stand => {
     for (let p = 0; p < petals; p++) {
       const angle = (p / petals) * TAU + rng() * 0.16;
       const out = unit(add(mul(u, Math.cos(angle)), mul(v, Math.sin(angle))));
-      const petalLen = 0.14 + rng() * 0.07;
-      const petalWidth = petalLen * 0.56;
+      const petalLen = 0.18 + rng() * 0.09;
+      const petalWidth = petalLen * 0.58;
       const petalFlank = unit(cross(out, facing));
       const petalBase = add(top, mul(facing, 0.01));
       const petalTip = add(petalBase, mul(out, petalLen));

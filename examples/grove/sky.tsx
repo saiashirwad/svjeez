@@ -79,8 +79,9 @@ export function Stars(): SvgNode {
 
 const sunHalo = def.radialGradient({}, (
   <>
-    <stop offset={0} stopColor={C.sun} stopOpacity={0.55} />
-    <stop offset={0.42} stopColor={C.sun} stopOpacity={0.18} />
+    <stop offset={0} stopColor={C.sun} stopOpacity={0.5} />
+    <stop offset={0.28} stopColor={C.sun} stopOpacity={0.26} />
+    <stop offset={0.6} stopColor={C.sun} stopOpacity={0.08} />
     <stop offset={1} stopColor={C.sun} stopOpacity={0} />
   </>
 ));
@@ -99,9 +100,10 @@ const sunAt = (t: Seconds) => {
 
 export function Sun(): SvgNode {
   return el.g({ animation: sampled(sunAt, { duration: D, tolerance: { translate: 1, opacity: 0.02 } }) }, [
-    el.circle({ r: 154, fill: sunHalo }),
-    el.circle({ r: 46, fill: C.sun }),
-    el.circle({ r: 33, fill: C.sunCore }),
+    el.circle({ r: 210, fill: sunHalo, opacity: 0.55 }),
+    el.circle({ r: 132, fill: sunHalo }),
+    el.circle({ r: 44, fill: C.sun }),
+    el.circle({ r: 31, fill: C.sunCore }),
   ]);
 }
 
@@ -391,54 +393,51 @@ export function Birds(): SvgNode {
   );
 }
 
-/** A dark branch and leaves out of focus at the top-right, framing the grove. */
+/** A screen-space leaf, for the foreground silhouette. */
+const screenLeaf = (x: number, y: number, angle: number, length: number, width: number): string => {
+  const dx = Math.cos(angle);
+  const dy = Math.sin(angle);
+  const nx = -dy;
+  const ny = dx;
+  const base = { x: x - (dx * length) / 2, y: y - (dy * length) / 2 };
+  const tip = { x: x + (dx * length) / 2, y: y + (dy * length) / 2 };
+  const waist = { x: x + dx * length * 0.06, y: y + dy * length * 0.06 };
+  return leafPath(base, tip, { x: waist.x + nx * width * 0.5, y: waist.y + ny * width * 0.5 }, { x: waist.x - nx * width * 0.5, y: waist.y - ny * width * 0.5 });
+};
+
+/** A dark branch and leaves at the top-right, softly framing the grove. */
 export function Foreground(): SvgNode {
-  const sway = wiggle({ rotate: 0.8, x: 1.1 }, { seed: "foreground", rate: 0.5, period: D });
-  const dark = "#0a2221";
-  const darker = "#071918";
+  const sway = wiggle({ rotate: 0.55, x: 0.9 }, { seed: "foreground", rate: 0.45, period: D });
+  const dark = "#0d2925";
+  const deeper = "#071c1a";
+  const leaves = [
+    [884, 8, -1.25, 40, 14],
+    [906, 16, 0.35, 34, 12],
+    [928, 24, -0.9, 32, 11],
+    [860, 58, -2.2, 42, 15],
+    [846, 34, -0.2, 36, 12],
+    [898, 52, 1.4, 30, 11],
+    [878, 88, 2.1, 38, 13],
+    [852, 100, 0.3, 30, 11],
+    [834, 78, -2.6, 34, 12],
+    [940, 66, -1.6, 28, 10],
+  ] as const;
   return (
-    <g animation={sway} style={{ transformBox: "view-box", transformOrigin: "980px 30px" }}>
-      <path d="M980 22C928 26 880 56 842 94 822 116 802 130 778 136" fill="none" stroke={darker} strokeWidth={13} strokeLinecap="round" />
-      <path d="M880 54C872 36 856 24 838 20" fill="none" stroke={darker} strokeWidth={7} strokeLinecap="round" />
-      <path d="M916 34C930 18 944 12 964 10" fill="none" stroke={dark} strokeWidth={5} strokeLinecap="round" />
+    <g animation={sway} style={{ transformBox: "view-box", transformOrigin: "1010px -10px" }}>
+      <path d="M1010-10C950 6 906 34 872 72" fill="none" stroke={deeper} strokeWidth={9} strokeLinecap="round" />
+      <path d="M948 16C938 4 922 2 904 8" fill="none" stroke={deeper} strokeWidth={4.5} strokeLinecap="round" />
+      <path d="M916 38C902 54 892 72 884 92" fill="none" stroke={deeper} strokeWidth={4} strokeLinecap="round" />
+      <path d="M900 50C920 46 934 52 944 64" fill="none" stroke={dark} strokeWidth={3.2} strokeLinecap="round" />
       <g fill={dark}>
-        <path d={leafPath({ x: 838, y: 20 }, { x: 820, y: 2 }, { x: 826, y: 22 }, { x: 842, y: 30 })} />
-        <path d={leafPath({ x: 866, y: 40 }, { x: 882, y: 14 }, { x: 872, y: 30 }, { x: 866, y: 44 })} />
-        <path d={leafPath({ x: 902, y: 44 }, { x: 900, y: 14 }, { x: 914, y: 28 }, { x: 906, y: 46 })} />
-        <path d={leafPath({ x: 930, y: 26 }, { x: 952, y: 6 }, { x: 940, y: 22 }, { x: 930, y: 32 })} />
-        <path d={leafPath({ x: 794, y: 122 }, { x: 770, y: 102 }, { x: 782, y: 120 }, { x: 800, y: 132 })} />
-        <path d={leafPath({ x: 812, y: 124 }, { x: 826, y: 102 }, { x: 817, y: 120 }, { x: 808, y: 130 })} />
-        <path d={leafPath({ x: 852, y: 84 }, { x: 848, y: 60 }, { x: 858, y: 72 }, { x: 858, y: 88 })} />
+        {leaves.map(([x, y, angle, length, width]) => (
+          <path d={screenLeaf(x, y, angle, length, width)} />
+        ))}
       </g>
-      <g fill={darker} opacity={0.85}>
-        <path d={leafPath({ x: 886, y: 60 }, { x: 902, y: 40 }, { x: 892, y: 54 }, { x: 884, y: 64 })} />
-        <path d={leafPath({ x: 846, y: 104 }, { x: 826, y: 90 }, { x: 838, y: 102 }, { x: 850, y: 112 })} />
+      <g fill={deeper} opacity={0.85}>
+        <path d={screenLeaf(918, 12, 0.9, 30, 10)} />
+        <path d={screenLeaf(868, 46, 2.6, 26, 9)} />
+        <path d={screenLeaf(904, 82, -1.9, 24, 9)} />
       </g>
     </g>
   );
-}
-
-/** Out-of-focus grass at the bottom-left, to sit in front of the island's edge. */
-export function ForegroundGrass(): SvgNode {
-  const sway = wiggle({ rotate: -1.1, x: -1.2 }, { seed: "front-grass", rate: 0.7, period: D });
-  return (
-    <g animation={sway} style={{ transformBox: "view-box", transformOrigin: "20px 640px" }} fill="none" stroke="#081d1c" strokeLinecap="round">
-      <path d="M-8 650C24 560 66 518 122 492" strokeWidth={14} opacity={0.9} />
-      <path d="M34 650C52 576 84 536 136 514" strokeWidth={9} opacity={0.8} />
-      <path d="M62 650C82 584 108 552 156 538" strokeWidth={6} opacity={0.6} />
-      <path d="M-16 632C12 572 32 542 62 522" strokeWidth={5} opacity={0.5} />
-    </g>
-  );
-}
-
-/** A gentle wash of warm light before the camera, and a cool weight after dusk. */
-export function Tint(): SvgNode {
-  const glow = def.radialGradient({ gradientUnits: "userSpaceOnUse", cx: 450, cy: 360, r: 520 }, (
-    <>
-      <stop offset={0} stopColor="#ffd79a" stopOpacity={0} />
-      <stop offset={1} stopColor="#2a3f5e" stopOpacity={0.28} />
-    </>
-  ));
-  const mood = motion({ opacity: 0.2 }).to({ opacity: 0.55 }, 7, ease.inOut).at(17).to({ opacity: 0.35 }, 4, ease.inOut).at(22).to({ opacity: 0.75 }, 3, ease.inOut).at(D - 3).to({ opacity: 0.2 }, 3, ease.inOut);
-  return <rect width={W} height={H} fill={glow} animation={mood} style={{ mixBlendMode: "multiply" }} />;
 }
