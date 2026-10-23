@@ -1,5 +1,5 @@
 // Compile-time contract, checked by `bun run typecheck`. Each @ts-expect-error must fail for the reason named.
-import { calc, css, def, draw, ease, el, enter, fx, motion, sampled, wiggle, type Calc, type SyntaxOf } from "svg-motion";
+import { calc, css, def, draw, ease, el, enter, fx, motion, sampled, voxel, wiggle, type Calc, type SyntaxOf } from "svg-motion";
 
 const bg = def.linearGradient({}, <stop offset={0} stopColor="#000" />);
 const glow = fx.glow();
@@ -8,6 +8,8 @@ const px = def.property("px", { syntax: "number", inherits: false, initial: 0 })
 const py = def.property("py", { syntax: "number", inherits: false, initial: 0 });
 const tint = def.property("tint", { syntax: "color", inherits: false, initial: "#000" });
 const radius = def.property("radius", { syntax: "length", inherits: false, initial: 0 });
+const eye = voxel.camera({ yaw: 45, pitch: 30, unit: 24 });
+const stone = voxel.texture({ s: "#888" }, "s");
 const { add, sub, mul, div, sin, cos, clamp, max, length, angle } = calc;
 
 export const valid = [
@@ -22,6 +24,7 @@ export const valid = [
   <g animation={motion().to({ [yaw]: 360, opacity: 1 }, 12, ease.linear)}>
     <circle r={2} style={{ [px]: 0.5, [py]: -0.5, [tint]: "#f80" }} />
   </g>,
+  voxel.scene({ camera: eye, blocks: [{ at: [0, 0, 0], skin: { side: stone, top: stone }, from: 1, animation: enter({ at: 1, over: 1 }, { y: -8 }) }] }),
   css`.dot{translate:calc(${px} * cos(${yaw}) * ${60}px) 0}`,
   css`.dot{translate:${add(length(100), mul(length(60), px, cos(yaw)))} ${length(sub(mul(py, sin(yaw)), 1))}}`,
   css`.dot{scale:${div(720, add(720, mul(px, sin(angle(22)))))};opacity:${clamp(0.15, sub(0.95, div(px, 300)), 1)}}`,
@@ -79,6 +82,14 @@ export const invalid = [
   def.property("bad", { syntax: "angle", inherits: true, initial: "#fff" }),
   // @ts-expect-error a css hole takes a property, a number, or css, not a string
   css`.dot{fill:${"red"}}`,
+  // @ts-expect-error a block sits on three coordinates
+  voxel.scene({ camera: eye, blocks: [{ at: [0, 0], skin: stone }] }),
+  // @ts-expect-error a skin that names faces still needs a side to fall back on
+  voxel.scene({ camera: eye, blocks: [{ at: [0, 0, 0], skin: { top: stone } }] }),
+  // @ts-expect-error a block's <use> cannot draw
+  voxel.scene({ camera: eye, blocks: [{ at: [0, 0, 0], skin: stone, animation: draw({ at: 0, over: 1 }) }] }),
+  // @ts-expect-error a texture palette takes hex colors, which it can shade
+  voxel.texture({ s: "gray" }, "s"),
   // @ts-expect-error length × length
   mul(length(1), length(2)),
   // @ts-expect-error a length property times a length
