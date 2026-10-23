@@ -1,4 +1,4 @@
-import { def, draw, ease, enter, exit, fx, motion, render, shake, type Attrs, type Color, type Motion, type SvgNode } from "svg-motion";
+import { def, draw, ease, el, enter, exit, fx, motion, render, shake, type Attrs, type Color, type Motion, type SvgNode } from "svg-motion";
 import { schedule, tally, type Cell, type Game, type Move, type Script, type Tally } from "./game";
 import { C, CSS, TALLY } from "./theme";
 
@@ -59,9 +59,7 @@ function Grid(): SvgNode {
   ];
   return (
     <>
-      {lines.map((d, index) => (
-        <path d={d} {...ink(C.grid, 3)} animation={draw({ at: 0.1 + index * 0.12, over: 0.6 })} />
-      ))}
+      {lines.map((d, index) => el.path({ d, ...ink(C.grid, 3), animation: draw({ at: 0.1 + index * 0.12, over: 0.6 }) }))}
     </>
   );
 }
@@ -75,31 +73,21 @@ const emphasis = (game: Game, move: Move): Motion<"scale" | "opacity"> => {
   return motion().at(r).to({ opacity: outcome.kind === "draw" ? 0.5 : 0.25, scale: 0.92 }, 0.4);
 };
 
-function Mark({ game, move, order }: { game: Game; move: Move; order: number }): SvgNode {
+const mark = (game: Game, move: Move, order: number): SvgNode => {
   const { x, y } = center(move.cell);
   const r = 30;
-  return (
-    <g filter={glow} animation={[emphasis(game, move), exit({ at: game.clearAt + order * 0.04, over: 0.3 })]}>
-      {move.player === "x" ? (
-        <>
-          <path d={`M${x - r} ${y - r}L${x + r} ${y + r}`} {...ink(TALLY.x.color, 9)} animation={draw({ at: move.at, over: 0.24 })} />
-          <path d={`M${x + r} ${y - r}L${x - r} ${y + r}`} {...ink(TALLY.x.color, 9)} animation={draw({ at: move.at + 0.16, over: 0.24 })} />
-        </>
-      ) : (
-        <circle
-          cx={x}
-          cy={y}
-          r={r + 2}
-          transform={`rotate(-90 ${x} ${y})`}
-          {...ink(TALLY.o.color, 9)}
-          animation={draw({ at: move.at, over: 0.4 })}
-        />
-      )}
-    </g>
+  return el.g(
+    { filter: glow, animation: [emphasis(game, move), exit({ at: game.clearAt + order * 0.04, over: 0.3 })] },
+    move.player === "x"
+      ? [
+          el.path({ d: `M${x - r} ${y - r}L${x + r} ${y + r}`, ...ink(TALLY.x.color, 9), animation: draw({ at: move.at, over: 0.24 }) }),
+          el.path({ d: `M${x + r} ${y - r}L${x - r} ${y + r}`, ...ink(TALLY.x.color, 9), animation: draw({ at: move.at + 0.16, over: 0.24 }) }),
+        ]
+      : el.circle({ cx: x, cy: y, r: r + 2, transform: `rotate(-90 ${x} ${y})`, ...ink(TALLY.o.color, 9), animation: draw({ at: move.at, over: 0.4 }) }),
   );
-}
+};
 
-function WinLine({ game }: { game: Game }): SvgNode | null {
+const winLine = (game: Game): SvgNode | null => {
   if (game.outcome.kind !== "win") return null;
   const [first, , last] = game.outcome.line;
   const from = center(first);
@@ -108,15 +96,13 @@ function WinLine({ game }: { game: Game }): SvgNode | null {
   const reach = 46 / length;
   const dx = (to.x - from.x) * reach;
   const dy = (to.y - from.y) * reach;
-  return (
-    <path
-      d={`M${from.x - dx} ${from.y - dy}L${to.x + dx} ${to.y + dy}`}
-      filter={glow}
-      {...ink(C.win, 7)}
-      animation={draw({ at: game.resolveAt, over: 0.45 }).at(game.clearAt).to({ opacity: 0 }, 0.35)}
-    />
-  );
-}
+  return el.path({
+    d: `M${from.x - dx} ${from.y - dy}L${to.x + dx} ${to.y + dy}`,
+    filter: glow,
+    ...ink(C.win, 7),
+    animation: draw({ at: game.resolveAt, over: 0.45 }).at(game.clearAt).to({ opacity: 0 }, 0.35),
+  });
+};
 
 const look = (move: Move) => ({ ...center(move.cell), color: TALLY[move.player].color });
 
@@ -168,55 +154,40 @@ function Score({ who, x, anchor }: { who: Tally; x: number; anchor: "start" | "m
       <text x={x} y={56} class="mono" fontSize={11} letterSpacing={3} fill={color} fillOpacity={0.7} textAnchor={anchor}>
         {label}
       </text>
-      {[0, ...ticks].map((_, value) => (
-        <text
-          x={x}
-          y={92}
-          class="mono"
-          fontSize={32}
-          fontWeight={600}
-          fill={color}
-          textAnchor={anchor}
-          filter={glow}
-          animation={digit(value)}
-        >
-          {value}
-        </text>
-      ))}
+      {[0, ...ticks].map((_, value) =>
+        el.text({ x, y: 92, class: "mono", fontSize: 32, fontWeight: 600, fill: color, textAnchor: anchor, filter: glow, animation: digit(value) }, value),
+      )}
     </>
   );
 }
 
-function Caption({ game }: { game: Game }): SvgNode {
+const gameCaption = (game: Game): SvgNode => {
   const { color, caption } = TALLY[tally(game.outcome)];
-  return (
-    <text
-      x={W / 2}
-      y={532}
-      class="mono"
-      fontSize={15}
-      letterSpacing={4}
-      fill={color}
-      textAnchor="middle"
-      filter={glow}
-      animation={enter({ at: game.resolveAt + 0.5, over: 0.35 }, { opacity: 0, y: 8 }).at(game.clearAt).to({ opacity: 0 }, 0.3)}
-    >
-      {caption}
-    </text>
+  return el.text(
+    {
+      x: W / 2,
+      y: 532,
+      class: "mono",
+      fontSize: 15,
+      letterSpacing: 4,
+      fill: color,
+      textAnchor: "middle",
+      filter: glow,
+      animation: enter({ at: game.resolveAt + 0.5, over: 0.35 }, { opacity: 0, y: 8 }).at(game.clearAt).to({ opacity: 0 }, 0.3),
+    },
+    caption,
   );
-}
+};
 
 function History(): SvgNode {
   return (
     <>
       {GAMES.map((game) => {
         const cx = W / 2 + (game.index - (GAMES.length - 1) / 2) * 18;
-        return (
-          <>
-            <circle cx={cx} cy={566} r={4} fill="none" stroke={C.faint} />
-            <circle cx={cx} cy={566} r={4} fill={TALLY[tally(game.outcome)].color} animation={enter({ at: game.resolveAt + 0.5, over: 0.3 })} />
-          </>
-        );
+        return [
+          el.circle({ cx, cy: 566, r: 4, fill: "none", stroke: C.faint }),
+          el.circle({ cx, cy: 566, r: 4, fill: TALLY[tally(game.outcome)].color, animation: enter({ at: game.resolveAt + 0.5, over: 0.3 }) }),
+        ];
       })}
     </>
   );
@@ -247,14 +218,9 @@ export function buildNeon(): string {
         <g animation={draws.map((game) => shake({ at: game.resolveAt + 0.1, over: 0.4 }, { x: 8 }))}>
           <Grid />
           <Cursor />
-          {GAMES.map((game) => (
-            <>
-              {game.moves.map((move, order) => <Mark game={game} move={move} order={order} />)}
-              <WinLine game={game} />
-            </>
-          ))}
+          {GAMES.map((game) => [game.moves.map((move, order) => mark(game, move, order)), winLine(game)])}
         </g>
-        {GAMES.map((game) => <Caption game={game} />)}
+        {GAMES.map(gameCaption)}
         <History />
       </g>
     </g>,
