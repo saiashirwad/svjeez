@@ -5,10 +5,10 @@ export const W = 960;
 export const H = 640;
 export const D = 28;
 
-export const CAM: Camera = { yaw: 34, pitch: 27, unit: 42 };
+export const CAM: Camera = { yaw: 34, pitch: 27, unit: 43 };
 
 /** Where the island's middle lands on the canvas. */
-export const ORIGIN = { x: 486, y: 450 } as const;
+export const ORIGIN = { x: 486, y: 462 } as const;
 
 /** World → canvas pixels. */
 export const at = (p: Vec3): Projected => {
@@ -49,28 +49,28 @@ export const C = {
   duskBot: "#f0a070",
   sun: "#ffedbe",
   sunCore: "#fffbea",
-  haze: "#a9c8b9",
+  haze: "#7fa596",
   firefly: "#ffe9a6",
   pollen: "#ffdfae",
-  shadow: "#0a1c22",
+  shadow: "#081a20",
   ink: "#07181c",
   moon: "#e9f1df",
   star: "#e6f2df",
 } as const;
 
-export const MOSS = ["#1e3d31", "#2b5540", "#3a6f47", "#4f8a50", "#69a65b", "#8cc274", "#b0d68f"] as const;
-export const ROCK = ["#1a292b", "#263a3a", "#354c49", "#49605a", "#61786f", "#7f9588", "#9eb2a2"] as const;
-export const OAK = ["#16382d", "#204a36", "#2d633f", "#417f49", "#5c9d56", "#82ba68", "#b1d687"] as const;
-export const BIRCH = ["#274436", "#345a42", "#486f4d", "#618c5c", "#84ab74", "#aac991"] as const;
-export const BLOSSOM = ["#47272f", "#653a42", "#874e52", "#aa6667", "#cc8883", "#e8afa5", "#f7d4c6"] as const;
-export const FERN = ["#163c30", "#22533d", "#326b47", "#478752", "#64a160", "#8bbb78"] as const;
-export const GRASS = ["#1f4333", "#2d5b3f", "#407849", "#579656", "#76ae68", "#9ac985"] as const;
+export const MOSS = ["#143028", "#1c4230", "#275738", "#346d41", "#45834b", "#5b9c56", "#7ab66a"] as const;
+export const ROCK = ["#111f22", "#182a2d", "#213738", "#2c4544", "#395450", "#4a6660", "#5d7971"] as const;
+export const OAK = ["#0d241f", "#123128", "#193f2d", "#225236", "#2e6840", "#41814a", "#5d9c58", "#87bb70"] as const;
+export const BIRCH = ["#1b352b", "#264834", "#35603f", "#497d4e", "#65a060", "#8cbd7b"] as const;
+export const BLOSSOM = ["#3a1d24", "#552a32", "#743a3f", "#955154", "#b96d6a", "#d99289", "#f0b9aa", "#f8d8c6"] as const;
+export const FERN = ["#103027", "#184232", "#23583c", "#316d46", "#448552", "#60a161"] as const;
+export const GRASS = ["#183a2c", "#225038", "#306541", "#407d49", "#559756", "#73af68"] as const;
 export const BARK = {
-  oak: ["#2a1d17", "#3f2b1f", "#593e2a", "#755234", "#956d43", "#b38856"] as const,
-  birch: ["#484b45", "#6b6e64", "#929482", "#bcbba3", "#ded9bd"] as const,
-  blossom: ["#322428", "#4a3235", "#644642", "#826158", "#a07b6b"] as const,
+  oak: ["#1f1511", "#32231a", "#493224", "#614631", "#7c5b3d", "#98734d"] as const,
+  birch: ["#3e403c", "#5f6259", "#858778", "#adae98", "#d0cdb2"] as const,
+  blossom: ["#291c20", "#3f292c", "#573736", "#704840", "#8d5d4f"] as const,
 };
-export const STONE = ["#31413f", "#455754", "#5b6e68", "#74857b", "#91a192"] as const;
+export const STONE = ["#283534", "#394946", "#4d5f5a", "#64756b", "#7f9081"] as const;
 export const CREAM = ["#fff6da", "#ffe9b6", "#f8d493"] as const;
 export const BLUSH = ["#fbe2da", "#f3bbb4", "#e09096"] as const;
 export const PERIWINKLE = ["#e3edfb", "#c1d4ef", "#97b4dc"] as const;
@@ -104,5 +104,5 @@ export const alpha = (color: string, a: number): Color => {
 export const tone = (ramp: readonly string[], t: number): Color => ramp[Math.round(clamp(t) * (ramp.length - 1))] as Color;
 
 /** How much a surface at this world depth fades into the haze. */
-export const fog = (depth: number): number => clamp(0.02 + (depth + 12) * 0.012, 0, 0.2);
+export const fog = (depth: number): number => clamp(0.01 + (depth + 12) * 0.007, 0, 0.11);
 export const hazed = (color: string, depth: number): Color => mix(color, C.haze, fog(depth));
