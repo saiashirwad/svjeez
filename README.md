@@ -172,6 +172,35 @@ g({ opacity: 0.5 }, [
 
 Same props and children as JSX, as plain calls.
 
+## Voxels
+
+```tsx
+const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 }); // unit: px per block edge
+const grass = voxel.texture({ g: "#5DA03A", d: "#7A5534" }, `
+  gggg
+  gdgg
+  dddd
+  dddd
+`);
+
+<g transform="translate(300 160)">
+  {voxel.scene({
+    camera: view,
+    blocks: [
+      { at: [0, 0, 0], skin: { side: dirt, top: grass } },
+      { at: [1, 0, 0], skin: dirt, from: 3, until: 9 }, // pops in at 3s, gone at 9s
+      { at: [0, 1, 0], skin: dirt, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
+    ],
+  })}
+</g>;
+
+sampled((t) => view.project([2, 3 - t, 1]), { duration: 3, tolerance: { translate: 0.5 } }); // a free point
+```
+
+The scene is plain data: whole-cell blocks with an optional lifetime and motion. Blocks draw back to front, so order never depends on the array, except that blocks sharing a cell keep theirs (an overlay is a second block). A block hidden behind its three nearer neighbors for its whole life is left out, unless a neighbor is animated, has a transparent pixel, or lives a shorter time.
+
+A texture is pixel art, one character per palette color (`#rgb`, `#rrggbb` or `#rrggbbaa`, `null` for a hole). Each face is shaded like Minecraft and every block skin is one symbol. A skin is a texture, or `{ side, top, north, south, east, west }` with `side` as the fallback.
+
 ## Effects
 
 ```tsx
