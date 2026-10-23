@@ -1,4 +1,4 @@
-import { def, ease, motion, sampled, wiggle, type SvgNode } from "svg-motion";
+import { def, ease, el, motion, sampled, wiggle, type SvgNode } from "svg-motion";
 import { C, D, FRAME, O, random } from "./theme";
 
 /** Rotate about the hole's center, which is the local origin inside `translate(O)`. */
@@ -20,22 +20,14 @@ const fade = def.mask(
 );
 
 /** Only each ring's crown shows: 60% at 9% of its height, gone by 30%. */
-const crown = (r: number) =>
-  def.mask(
-    { maskUnits: "userSpaceOnUse", x: -r - 8, y: -r - 8, width: 2 * r + 16, height: 2 * r + 16 },
-    <rect
-      x={-r - 8}
-      y={-r - 8}
-      width={2 * r + 16}
-      height={2 * r + 16}
-      fill={def.linearGradient({ gradientUnits: "userSpaceOnUse", x1: 0, y1: -r, x2: 0, y2: r }, (
-        <>
-          <stop offset={0.0941} stopColor="#FFF" stopOpacity={0.6} />
-          <stop offset={0.2979} stopColor="#FFF" stopOpacity={0} />
-        </>
-      ))}
-    />,
-  );
+const crown = (r: number) => {
+  const box = { x: -r - 8, y: -r - 8, width: 2 * r + 16, height: 2 * r + 16 };
+  const ramp = def.linearGradient({ gradientUnits: "userSpaceOnUse", x1: 0, y1: -r, x2: 0, y2: r }, [
+    el.stop({ offset: 0.0941, stopColor: "#FFF", stopOpacity: 0.6 }),
+    el.stop({ offset: 0.2979, stopColor: "#FFF", stopOpacity: 0 }),
+  ]);
+  return def.mask({ maskUnits: "userSpaceOnUse", ...box }, el.rect({ ...box, fill: ramp }));
+};
 
 const ORBITS = [
   { r: 404, opacity: 1, turns: true },
@@ -50,16 +42,16 @@ export function Orbits(): SvgNode {
   return (
     <g mask={fade}>
       <g transform={centered}>
-        {ORBITS.map(({ r, opacity, turns }) => (
-          <g mask={crown(r)} opacity={opacity}>
-            <g style={pivot} animation={turns ? orbit : undefined} fill={C.violet} fillOpacity={0.04} stroke={C.violet} strokeOpacity={0.3}>
-              <circle r={r} />
-              {Array.from({ length: 8 }, (_, i) => (
-                <circle cx={r * Math.cos((i * Math.PI) / 4)} cy={r * Math.sin((i * Math.PI) / 4)} r={3} fillOpacity={0.01} />
-              ))}
-            </g>
-          </g>
-        ))}
+        {ORBITS.map(({ r, opacity, turns }) =>
+          el.g({ mask: crown(r), opacity }, [
+            el.g({ style: pivot, animation: turns ? orbit : undefined, fill: C.violet, fillOpacity: 0.04, stroke: C.violet, strokeOpacity: 0.3 }, [
+              el.circle({ r }),
+              ...Array.from({ length: 8 }, (_, i) =>
+                el.circle({ cx: r * Math.cos((i * Math.PI) / 4), cy: r * Math.sin((i * Math.PI) / 4), r: 3, fillOpacity: 0.01 }),
+              ),
+            ]),
+          ]),
+        )}
       </g>
     </g>
   );
@@ -106,11 +98,9 @@ export function Stars(): SvgNode {
     <g mask={fade}>
       <g transform={centered}>
         <g style={pivot} animation={motion({ rotate: 0 }).to({ rotate: -360 }, D, ease.linear)} fill="#FFF">
-          {STARS.map((star) => (
-            <g opacity={star.alpha}>
-              <circle cx={star.x} cy={star.y} r={1} animation={twinkle(star)} />
-            </g>
-          ))}
+          {STARS.map((star) =>
+            el.g({ opacity: star.alpha }, el.circle({ cx: star.x, cy: star.y, r: 1, animation: twinkle(star) })),
+          )}
         </g>
       </g>
     </g>
@@ -169,19 +159,19 @@ const SHIMMER = [
 function Shimmer(): SvgNode {
   return (
     <g fill="none" strokeLinecap="round">
-      {SHIMMER.map(({ r, width, color, opacity, turns, dash }) => (
-        <circle
-          r={r}
-          stroke={color}
-          strokeOpacity={opacity}
-          strokeWidth={width}
-          strokeDasharray={dash}
-          style={pivot}
-          animation={motion({ rotate: 0 })
+      {SHIMMER.map(({ r, width, color, opacity, turns, dash }) =>
+        el.circle({
+          r,
+          stroke: color,
+          strokeOpacity: opacity,
+          strokeWidth: width,
+          strokeDasharray: dash,
+          style: pivot,
+          animation: motion({ rotate: 0 })
             .to({ rotate: Math.sign(turns) * 360 }, D / Math.abs(turns), ease.linear)
-            .loop(D / Math.abs(turns))}
-        />
-      ))}
+            .loop(D / Math.abs(turns)),
+        }),
+      )}
     </g>
   );
 }
