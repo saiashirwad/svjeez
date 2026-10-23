@@ -76,4 +76,16 @@ describe("calc", () => {
     const values = rule.match(/\.dot\{translate:(.*)\}/)![1]!.split(/;\w+:| (?=calc\()/);
     expect(values.map((text) => text.match(/calc\(/g)?.length ?? 0)).toEqual([1, 1, 1, 0]);
   });
+
+  test("tiny literals keep their meaning instead of rounding to 0", () => {
+    expect(value(div(1, 0.0004))).toBe("calc(1 / 0.0004)");
+    expect(value(mul(px, 0.0004))).toBe("calc(var(--p1) * 0.0004)");
+    expect(value(mul(px, 1.23456789))).toBe("calc(var(--p1) * 1.23457)");
+    expect(value(length(0.00002))).toBe("0.00002px");
+  });
+
+  test("a literal that cannot be written is refused", () => {
+    expect(() => div(1, Number.NaN)).toThrow();
+    expect(() => style(css`.d{v:${div(1, Number.POSITIVE_INFINITY)}}`)).toThrow();
+  });
 });

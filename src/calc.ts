@@ -1,4 +1,4 @@
-import { num } from "./format";
+import { significant } from "./format";
 import { Css, unitOf, type CssPart, type Property, type Syntax, type SyntaxOf } from "./properties";
 
 type Dim = Exclude<Syntax, "color">;
@@ -44,7 +44,7 @@ const side = (node: Node, parent: Op, right: boolean): CssPart[] => {
 const lower = (node: Node): CssPart[] => {
   switch (node.kind) {
     case "literal":
-      return [`${num(node.value)}${unitOf(node.dim)}`];
+      return [`${significant(node.value)}${unitOf(node.dim)}`];
     case "var":
       return ["var(", { property: node.property }, ")"];
     case "op":
