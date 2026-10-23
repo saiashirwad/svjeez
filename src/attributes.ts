@@ -71,6 +71,8 @@ const TEXT = {
   letterSpacing: attr<Length>("letter-spacing"),
   textAnchor: attr<"start" | "middle" | "end">("text-anchor"),
   dominantBaseline: attr<"auto" | "middle" | "central" | "hanging">("dominant-baseline"),
+  textLength: attr<Length>("textLength"),
+  lengthAdjust: attr<"spacing" | "spacingAndGlyphs">("lengthAdjust"),
 } as const;
 
 const PRIMITIVE = {
