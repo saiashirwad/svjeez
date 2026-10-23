@@ -11,6 +11,8 @@ const SYNTAX = {
 export type Syntax = keyof typeof SYNTAX;
 export type SyntaxValue<S extends Syntax> = (typeof SYNTAX)[S]["value"];
 
+export const unitOf = (syntax: Syntax): string => SYNTAX[syntax].unit;
+
 /**
  * A registered custom property is its own key: `{ [yaw]: 90 }` in a motion or a style. The name and syntax
  * live in the literal type, so each value is checked against its syntax. Render gives it a short name per file.

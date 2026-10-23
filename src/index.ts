@@ -3,6 +3,7 @@ export { motion, ease, type Motion, type Stack, type Span, type Seconds, type Ea
 export { enter, exit, draw, shake, wiggle, sampled, type WiggleOptions, type SampledOptions } from "./recipes";
 export { def, type Ref, type DefTag } from "./defs";
 export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./properties";
+export { calc, type Calc } from "./calc";
 export { fx } from "./fx";
 export { el } from "./el";
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
