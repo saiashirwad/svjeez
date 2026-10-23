@@ -1,4 +1,4 @@
-import { def, type SvgNode } from "svg-motion";
+import { def, el, type SvgNode } from "svg-motion";
 import { C, H, W, ui } from "./theme";
 
 const aura = def.radialGradient({ gradientUnits: "userSpaceOnUse", cx: 720, cy: 239, r: 736, gradientTransform: "translate(720 239) scale(0.74 1) translate(-720 -239)" }, (
@@ -91,9 +91,9 @@ function Logo(): SvgNode {
       <ellipse rx={10.5} ry={4.2} strokeOpacity={0.55} transform="rotate(-28)" />
       <ellipse rx={4.6} ry={10.5} strokeOpacity={0.55} transform="rotate(-28)" />
       <path d="M-7 -6L3 -8L8 2L-1 8L-8 3Z" strokeOpacity={0.75} />
-      {[[-7, -6], [3, -8], [8, 2], [-1, 8], [-8, 3]].map(([x, y]) => (
-        <circle cx={x} cy={y} r={1.4} fill="#FFF" stroke="none" />
-      ))}
+      {[[-7, -6], [3, -8], [8, 2], [-1, 8], [-8, 3]].map(([x, y]) =>
+        el.circle({ cx: x, cy: y, r: 1.4, fill: "#FFF", stroke: "none" }),
+      )}
     </g>
   );
 }
@@ -114,9 +114,9 @@ export function Header(): SvgNode {
       <text x={120} y={49.5} {...ui(16, C.ink, { fontWeight: 500 })}>Reflect</text>
 
       <rect x={482.5} y={23.5} width={475} height={41} rx={20.5} fill="#FFF" fillOpacity={0.02} stroke="#FFF" strokeOpacity={0.08} />
-      {NAV.map(([label, x]) => (
-        <text x={x} y={49} {...ui(14, "#FFFFFF", { fillOpacity: 0.9, textAnchor: "middle" })}>{label}</text>
-      ))}
+      {NAV.map(([label, x]) =>
+        el.text({ x, y: 49, ...ui(14, "#FFFFFF", { fillOpacity: 0.9, textAnchor: "middle" }) }, label),
+      )}
 
       <text x={1245} y={49} {...ui(14, "#FFFFFF", { fontWeight: 500, textAnchor: "end" })}>Log in to Classic</text>
       <Button kind="primary" x={1269} y={26} width={98} label="Download" />
@@ -129,23 +129,21 @@ export function Header(): SvgNode {
 function Button(props: { kind: "primary" | "secondary"; x: number; y: number; width: number; label: string }): SvgNode {
   const { kind, x, y, width, label } = props;
   const primary = kind === "primary";
-  return (
-    <g>
-      <rect x={x} y={y} width={width} height={36} rx={8} fill={primary ? "#712FFF" : "#9382FF"} fillOpacity={primary ? 0.12 : 0.01} />
-      <rect x={x} y={y} width={width} height={36} rx={8} fill={primary ? primaryFill : secondaryFill} />
-      <rect
-        x={x + 0.5}
-        y={y + 0.5}
-        width={width - 1}
-        height={35}
-        rx={7.5}
-        fill="none"
-        stroke={primary ? primaryEdge : "#F3EEFF"}
-        strokeOpacity={primary ? 1 : 0.1}
-      />
-      <text x={x + width / 2} y={y + 23} {...ui(14, C.ink, { fontWeight: 500, textAnchor: "middle" })}>{label}</text>
-    </g>
-  );
+  return el.g({}, [
+    el.rect({ x, y, width, height: 36, rx: 8, fill: primary ? "#712FFF" : "#9382FF", fillOpacity: primary ? 0.12 : 0.01 }),
+    el.rect({ x, y, width, height: 36, rx: 8, fill: primary ? primaryFill : secondaryFill }),
+    el.rect({
+      x: x + 0.5,
+      y: y + 0.5,
+      width: width - 1,
+      height: 35,
+      rx: 7.5,
+      fill: "none",
+      stroke: primary ? primaryEdge : "#F3EEFF",
+      strokeOpacity: primary ? 1 : 0.1,
+    }),
+    el.text({ x: x + width / 2, y: y + 23, ...ui(14, C.ink, { fontWeight: 500, textAnchor: "middle" }) }, label),
+  ]);
 }
 
 const SPARKLES = [
@@ -168,9 +166,9 @@ function Badge(): SvgNode {
       <rect x={633} y={173} width={174} height={32} rx={16} fill={badgeGlow} />
       <rect x={633.5} y={173.5} width={173} height={31} rx={15.5} fill="none" stroke={prismEdge} />
       <g transform="translate(641 177)">
-        {SPARKLES.map((d) => (
-          <path d={d} fill={sparkleFill} />
-        ))}
+        {SPARKLES.map((d) =>
+          el.path({ d, fill: sparkleFill }),
+        )}
       </g>
       <text x={671} y={194} {...ui(14, "#FFFFFF", { fill: prism })}>Meet Reflect Open</text>
     </g>
