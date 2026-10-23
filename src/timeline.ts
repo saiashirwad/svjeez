@@ -26,7 +26,7 @@ export const keysOf = (initial: TargetValues, segments: readonly Step[], period:
     const next = { ...current, ...segment.values };
     const last = keys.at(-1)!;
     const contiguous = segment.start <= last.t + 1e-9;
-    if (segment.over > 0) {
+    if (segment.over >= nudge) {
       if (contiguous) keys[keys.length - 1] = { ...last, ease: segment.ease };
       else keys.push({ t: segment.start, values: current, ease: segment.ease });
       keys.push({ t: segment.start + segment.over, values: next, ease: ease.out });

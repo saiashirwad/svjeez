@@ -27,7 +27,6 @@ export const kebab = (property: string): string => {
   return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
 };
 
-/** Six significant digits, so a tiny literal never rounds to 0. */
 export const significant = (value: number): string => {
   if (!Number.isFinite(value)) throw new Error(`Expected a finite number, received ${value}`);
   return String(Number(value.toPrecision(6)));
