@@ -151,9 +151,7 @@ function Score({ who, x, anchor }: { who: Tally; x: number; anchor: "start" | "m
   };
   return (
     <>
-      <text x={x} y={56} class="mono" fontSize={11} letterSpacing={3} fill={color} fillOpacity={0.7} textAnchor={anchor}>
-        {label}
-      </text>
+      {el.text({ x, y: 56, class: "mono", fontSize: 11, letterSpacing: 3, fill: color, fillOpacity: 0.7, textAnchor: anchor }, label)}
       {[0, ...ticks].map((_, value) =>
         el.text({ x, y: 92, class: "mono", fontSize: 32, fontWeight: 600, fill: color, textAnchor: anchor, filter: glow, animation: digit(value) }, value),
       )}
