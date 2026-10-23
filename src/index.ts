@@ -1,6 +1,6 @@
 export { render, type RenderOptions } from "./render";
 export { motion, ease, type Motion, type Stack, type Span, type Seconds, type Ease } from "./motion";
-export { enter, exit, draw, shake, wiggle, type WiggleOptions } from "./recipes";
+export { enter, exit, draw, shake, wiggle, sampled, type WiggleOptions, type SampledOptions } from "./recipes";
 export { def, type Ref, type DefTag } from "./defs";
 export { fx } from "./fx";
 export { el } from "./el";

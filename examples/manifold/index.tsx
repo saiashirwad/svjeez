@@ -1,4 +1,4 @@
-import { def, ease, motion, render, type Color, type Motion, type SvgNode, type Values } from "svg-motion";
+import { def, ease, motion, render, sampled, type Color, type Motion, type SvgNode } from "svg-motion";
 import { height, knot, lerp, project, seat, sphere, type Camera, type Point, type Seat, type Surface } from "./space";
 
 const W = 800;
@@ -8,8 +8,6 @@ const CX = W / 2;
 const CY = 300;
 
 const DOTS = 320;
-/** Seconds between samples of a dot's path, before simplifying. */
-const SAMPLE = 0.05;
 const FLOOR = -160;
 /** Share of a morph the dots spend waiting their turn, top first. */
 const SPREAD = 0.4;
@@ -62,55 +60,15 @@ const shapeAt = (s: Seat, t: number): Point => {
 /** Near dots are bright, far ones sink into the dark. */
 const fog = (depth: number) => clamp(0.95 - ((depth + 150) / 300) * 0.75, 0.15, 1);
 
-const SAMPLES = Array.from({ length: D / SAMPLE + 1 }, (_, f) => f * SAMPLE);
-
-/** Ramer–Douglas–Peucker over time: the fewest samples whose straight-line replay stays within `tolerance` of all of them. */
-const simplify = (samples: readonly (readonly number[])[], tolerance: number): number[] => {
-  const kept = [0, samples.length - 1];
-  const split = (a: number, b: number): void => {
-    let worst = -1;
-    let error = tolerance;
-    for (let i = a + 1; i < b; i++) {
-      const u = (i - a) / (b - a);
-      const miss = Math.hypot(...samples[i]!.map((value, c) => value - (samples[a]![c]! + (samples[b]![c]! - samples[a]![c]!) * u)));
-      if (miss > error) [worst, error] = [i, miss];
-    }
-    if (worst < 0) return;
-    kept.push(worst);
-    split(a, worst);
-    split(worst, b);
-  };
-  split(0, samples.length - 1);
-  return kept.sort((a, b) => a - b);
-};
-
-type Lane = "x" | "y" | "scale" | "opacity";
-
-/** Sample one lane densely, then keep only the keys its shape needs: morphs come out dense, holds sparse. */
-const bake = <K extends Lane>(sample: (t: number) => Record<K, number>, tolerance: number): Motion<K> => {
-  const frames = SAMPLES.map(sample);
-  const channels = Object.keys(frames[0]!) as K[];
-  const kept = simplify(
-    frames.map((frame) => channels.map((channel) => frame[channel])),
-    tolerance,
-  );
-  let track: Motion<Lane> = motion(frames[0]! as Values<Lane>);
-  for (let j = 1; j < kept.length; j++) track = track.to(frames[kept[j]!]! as Values<Lane>, (kept[j]! - kept[j - 1]!) * SAMPLE, ease.linear);
-  return track as Motion<K>;
-};
-
 /** The camera circles once a loop while every dot flows one lap along its shape the other way. */
-const flight = (s: Seat): Motion<Lane>[] => {
-  const at = (t: number) => project(CAMERA, (-TAU * t) / D, shapeAt({ along: (s.along + t / D) % 1, around: s.around }, t));
-  return [
-    bake((t) => {
-      const { x, y } = at(t);
-      return { x: round(x, 1), y: round(y, 1) };
-    }, 1),
-    bake((t) => ({ scale: round(at(t).size, 3) }), 0.015),
-    bake((t) => ({ opacity: round(fog(at(t).depth), 3) }), 0.02),
-  ];
-};
+const flight = (s: Seat) =>
+  sampled(
+    (t) => {
+      const { x, y, size, depth } = project(CAMERA, (-TAU * t) / D, shapeAt({ along: (s.along + t / D) % 1, around: s.around }, t));
+      return { opacity: round(fog(depth), 3), scale: round(size, 3), x: round(x, 1), y: round(y, 1) };
+    },
+    { duration: D, tolerance: { translate: 1, scale: 0.015, opacity: 0.02 } },
+  );
 
 const rgb = (color: string) => [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16));
 

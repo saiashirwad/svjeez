@@ -95,6 +95,12 @@ shake({ at: 2, over: 0.5 }, { x: 6 });             // damped shake
 wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });  // seeded noise that loops
 ```
 
+```tsx
+sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), { duration: 12, tolerance: { translate: 1 } });
+```
+
+`sampled` bakes any function of time and keeps only the keys each lane needs to stay within its tolerance.
+
 ## Easing
 
 ```tsx
