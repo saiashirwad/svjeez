@@ -9,19 +9,17 @@ const depth = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
 ));
 
 const cloud = (cx: number, cy: number, colors: readonly [Color, Color, Color], opacity: number) =>
-  def.radialGradient({ cx, cy, r: 0.6 }, (
-    <>
-      <stop
-        offset={0}
-        stopOpacity={opacity}
-        animation={motion({ stopColor: colors[0] })
-          .to({ stopColor: colors[1] }, D / 3, ease.inOut)
-          .to({ stopColor: colors[2] }, D / 3, ease.inOut)
-          .to({ stopColor: colors[0] }, D / 3, ease.inOut)}
-      />
-      <stop offset={1} stopColor={C.void} stopOpacity={0} />
-    </>
-  ));
+  def.radialGradient({ cx, cy, r: 0.6 }, [
+    el.stop({
+      offset: 0,
+      stopOpacity: opacity,
+      animation: motion({ stopColor: colors[0] })
+        .to({ stopColor: colors[1] }, D / 3, ease.inOut)
+        .to({ stopColor: colors[2] }, D / 3, ease.inOut)
+        .to({ stopColor: colors[0] }, D / 3, ease.inOut),
+    }),
+    el.stop({ offset: 1, stopColor: C.void, stopOpacity: 0 }),
+  ]);
 
 const west = cloud(0.18, 0.3, ["#2B1E6B", "#123A6B", "#3A1450"], 0.55);
 const east = cloud(0.86, 0.78, ["#4A1630", "#2B1E6B", "#5A2A12"], 0.35);

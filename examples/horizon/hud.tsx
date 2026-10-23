@@ -16,14 +16,14 @@ function Typed({ x, y, text, at, dim = false }: { x: number; y: number; text: st
 /** An odometer wheel: `labels` scroll past a one-line window, one per `period / labels.length`. */
 function Wheel({ x, y, labels, period }: { x: number; y: number; labels: readonly string[]; period: number }): SvgNode {
   const width = labels[0]!.length * ADVANCE;
-  const window = def.clipPath({}, <rect x={x} y={y - LINE + 3} width={width} height={LINE} />);
+  const window = def.clipPath({}, el.rect({ x, y: y - LINE + 3, width, height: LINE }));
   const count = labels.length;
-  return (
-    <g clipPath={window}>
-      <g animation={motion({ y: 0 }).to({ y: -count * LINE }, period, ease.steps(count)).loop(period)}>
-        {[...labels, labels[0]!].map((label, k) => el.text({ x, y: y + k * LINE }, label))}
-      </g>
-    </g>
+  return el.g(
+    { clipPath: window },
+    el.g(
+      { animation: motion({ y: 0 }).to({ y: -count * LINE }, period, ease.steps(count)).loop(period) },
+      [...labels, labels[0]!].map((label, k) => el.text({ x, y: y + k * LINE }, label)),
+    ),
   );
 }
 
@@ -31,27 +31,19 @@ const digits = (count: number, pad = 1) => Array.from({ length: count }, (_, k) 
 
 /** The scene clock, read off the loop itself. */
 function Clock({ x, y }: { x: number; y: number }): SvgNode {
-  return (
-    <g class="mono" fill={C.white}>
-      <text x={x} y={y}>
-        T+
-      </text>
-      <Wheel x={x + 3 * ADVANCE} y={y} labels={digits(D, 2)} period={D} />
-      <text x={x + 5 * ADVANCE} y={y}>
-        .
-      </text>
-      <Wheel x={x + 6 * ADVANCE} y={y} labels={digits(10)} period={1} />
-      <Wheel x={x + 7 * ADVANCE} y={y} labels={digits(10)} period={0.1} />
-      <text x={x + 8 * ADVANCE} y={y} fill={C.hudDim}>
-        s
-      </text>
-    </g>
-  );
+  return el.g({ class: "mono", fill: C.white }, [
+    el.text({ x, y }, "T+"),
+    <Wheel x={x + 3 * ADVANCE} y={y} labels={digits(D, 2)} period={D} />,
+    el.text({ x: x + 5 * ADVANCE, y }, "."),
+    <Wheel x={x + 6 * ADVANCE} y={y} labels={digits(10)} period={1} />,
+    <Wheel x={x + 7 * ADVANCE} y={y} labels={digits(10)} period={0.1} />,
+    el.text({ x: x + 8 * ADVANCE, y, fill: C.hudDim }, "s"),
+  ]);
 }
 
 function Flux({ x, y }: { x: number; y: number }): SvgNode {
   const bars = 24;
-  const window = def.clipPath({}, <rect x={x} y={y - 28} width={bars * 5} height={28} />);
+  const window = def.clipPath({}, el.rect({ x, y: y - 28, width: bars * 5, height: 28 }));
   return (
     <>
       <Typed x={x} y={y - 36} text="HAWKING FLUX" at={T.hud + 0.6} dim />
