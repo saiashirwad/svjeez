@@ -122,21 +122,20 @@ function cursorMotion(): Motion<"opacity" | "x" | "y" | "color"> {
 
 function Cursor(): SvgNode {
   const half = BOARD.cell / 2 - 12;
-  return (
-    <g animation={cursorMotion()}>
-      <rect
-        x={-half}
-        y={-half}
-        width={half * 2}
-        height={half * 2}
-        rx={16}
-        fill="currentColor"
-        fillOpacity={0.07}
-        stroke="currentColor"
-        strokeOpacity={0.55}
-        strokeWidth={1.5}
-      />
-    </g>
+  return el.g(
+    { animation: cursorMotion() },
+    el.rect({
+      x: -half,
+      y: -half,
+      width: half * 2,
+      height: half * 2,
+      rx: 16,
+      fill: "currentColor",
+      fillOpacity: 0.07,
+      stroke: "currentColor",
+      strokeOpacity: 0.55,
+      strokeWidth: 1.5,
+    }),
   );
 }
 
@@ -213,11 +212,11 @@ export function buildNeon(): string {
         <Score who="x" x={BOARD.x} anchor="start" />
         <Score who="draw" x={W / 2} anchor="middle" />
         <Score who="o" x={W - BOARD.x} anchor="end" />
-        <g animation={draws.map((game) => shake({ at: game.resolveAt + 0.1, over: 0.4 }, { x: 8 }))}>
-          <Grid />
-          <Cursor />
-          {GAMES.map((game) => [game.moves.map((move, order) => mark(game, move, order)), winLine(game)])}
-        </g>
+        {el.g({ animation: draws.map((game) => shake({ at: game.resolveAt + 0.1, over: 0.4 }, { x: 8 })) }, [
+          <Grid />,
+          <Cursor />,
+          GAMES.map((game) => [game.moves.map((move, order) => mark(game, move, order)), winLine(game)]),
+        ])}
         {GAMES.map(gameCaption)}
         <History />
       </g>
