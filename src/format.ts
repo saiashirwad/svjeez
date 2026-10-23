@@ -29,5 +29,6 @@ export const kebab = (property: string): string => {
 
 export const significant = (value: number): string => {
   if (!Number.isFinite(value)) throw new Error(`Expected a finite number, received ${value}`);
-  return String(Number(value.toPrecision(6)));
+  const digits = value === 0 ? 6 : Math.floor(Math.log10(Math.abs(value))) + 4;
+  return String(Number(value.toPrecision(Math.min(100, Math.max(6, digits)))));
 };

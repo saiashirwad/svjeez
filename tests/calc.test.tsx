@@ -77,9 +77,11 @@ describe("calc", () => {
     expect(values.map((text) => text.match(/calc\(/g)?.length ?? 0)).toEqual([1, 1, 1, 0]);
   });
 
-  test("tiny literals keep their meaning instead of rounding to 0", () => {
+  test("literals keep their meaning, tiny or large", () => {
     expect(value(div(1, 0.0004))).toBe("calc(1 / 0.0004)");
     expect(value(mul(px, 0.0004))).toBe("calc(var(--p1) * 0.0004)");
+    expect(value(mul(length(12345.678), px))).toBe("calc(12345.678px * var(--p1))");
+    expect(value(mul(length(1234567.891), px))).toBe("calc(1234567.891px * var(--p1))");
     expect(value(mul(px, 1.23456789))).toBe("calc(var(--p1) * 1.23457)");
     expect(value(length(0.00002))).toBe("0.00002px");
   });
