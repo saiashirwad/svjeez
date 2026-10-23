@@ -166,9 +166,7 @@ function Badge(): SvgNode {
       <rect x={633} y={173} width={174} height={32} rx={16} fill={badgeGlow} />
       <rect x={633.5} y={173.5} width={173} height={31} rx={15.5} fill="none" stroke={prismEdge} />
       <g transform="translate(641 177)">
-        {SPARKLES.map((d) =>
-          el.path({ d, fill: sparkleFill }),
-        )}
+        {SPARKLES.map((d) => el.path({ d, fill: sparkleFill }))}
       </g>
       <text x={671} y={194} {...ui(14, "#FFFFFF", { fill: prism })}>Meet Reflect Open</text>
     </g>

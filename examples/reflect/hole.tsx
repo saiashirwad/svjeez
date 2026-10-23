@@ -43,14 +43,15 @@ export function Orbits(): SvgNode {
     <g mask={fade}>
       <g transform={centered}>
         {ORBITS.map(({ r, opacity, turns }) =>
-          el.g({ mask: crown(r), opacity }, [
+          el.g(
+            { mask: crown(r), opacity },
             el.g({ style: pivot, animation: turns ? orbit : undefined, fill: C.violet, fillOpacity: 0.04, stroke: C.violet, strokeOpacity: 0.3 }, [
               el.circle({ r }),
-              ...Array.from({ length: 8 }, (_, i) =>
+              Array.from({ length: 8 }, (_, i) =>
                 el.circle({ cx: r * Math.cos((i * Math.PI) / 4), cy: r * Math.sin((i * Math.PI) / 4), r: 3, fillOpacity: 0.01 }),
               ),
             ]),
-          ]),
+          ),
         )}
       </g>
     </g>
