@@ -1,4 +1,5 @@
-import { CHANNELS, clamp, spec, type NumericChannel, type RestChannel, type Values } from "./channels";
+import { CHANNELS, clamp, spec, type NumericChannel, type RestChannel, type TargetValues, type Values } from "./channels";
+import type { NumericProperty } from "./properties";
 import { ease, motion, type Ease, type Exact, type Motion, type Seconds, type Span } from "./motion";
 
 type Shake = "x" | "y" | "rotate";
@@ -88,10 +89,17 @@ export function wiggle<V extends Values<RestChannel>>(amplitude: Exact<V, RestCh
 
 type LaneOf<C extends NumericChannel> = (typeof CHANNELS)[C]["lane"];
 
-/** Per lane, the most the replay may stray from the samples, in the lane's own units. `x` and `y` share `translate`, measured as px distance. */
-type Tolerance = { readonly [L in LaneOf<NumericChannel>]?: number };
+type Sampled = NumericChannel | NumericProperty;
 
-type Covered<T extends Tolerance> = { readonly [C in NumericChannel as LaneOf<C> extends keyof T ? C : never]?: number };
+/**
+ * Per lane, the most the replay may stray from the samples, in the lane's own units. `x` and `y` share `translate`,
+ * measured as px distance. A property is its own lane.
+ */
+type Tolerance = { readonly [L in LaneOf<NumericChannel> | NumericProperty]?: number };
+
+type Covered<T extends Tolerance> = { readonly [C in NumericChannel as LaneOf<C> extends keyof T ? C : never]?: number } & {
+  readonly [P in keyof T & NumericProperty]?: number;
+};
 
 export interface SampledOptions<T extends Tolerance> {
   readonly duration: Seconds;
@@ -121,25 +129,25 @@ const ramerDouglasPeucker = (samples: readonly (readonly number[])[], tolerance:
 
 /**
  * Sample `(t) => values` densely, then keep only the keys each lane needs. Morphs come out dense and
- * holds sparse. Every channel returned needs a tolerance for its lane.
+ * holds sparse. Every channel or property returned needs a tolerance for its lane.
  */
 export function sampled<T extends Tolerance, V extends Covered<T>>(
   sample: (t: Seconds) => V & { readonly [P in Exclude<keyof V, keyof Covered<T>>]: never },
   options: SampledOptions<T>,
-): Motion<keyof V & NumericChannel> {
+): Motion<keyof V & Sampled> {
   const { duration, step = 0.05 } = options;
   if (!Number.isFinite(duration) || duration <= 0) throw new Error(`sampled() lasts ${duration}; it needs a positive duration.`);
   if (!Number.isFinite(step) || step <= 0) throw new Error(`sampled() steps by ${step}; it needs a positive step.`);
   const edge = duration * 1e-5;
   const times = Array.from({ length: Math.ceil((duration - edge) / step) }, (_, i) => i * step).concat(duration);
-  const frames = times.map(sample) as Values<NumericChannel>[];
-  const present = (frame: Values<NumericChannel>) => (Object.keys(frame) as NumericChannel[]).filter((channel) => Number.isFinite(frame[channel])).sort();
+  const frames = times.map(sample) as Partial<Record<Sampled, number>>[];
+  const present = (frame: Partial<Record<Sampled, number>>) => (Object.keys(frame) as Sampled[]).filter((channel) => Number.isFinite(frame[channel])).sort();
   const channels = present(frames[0]!);
   frames.forEach((frame, i) => {
     if (present(frame).join() !== channels.join()) throw new Error(`sampled() returned different channels at t=${times[i]} than at t=0; every sample needs the same keys, each a finite number.`);
   });
   const lanes = Map.groupBy(channels, (channel) => spec(channel).lane);
-  let track: Motion = motion(frames[0]! as Values);
+  let track: Motion = motion(frames[0]! as TargetValues);
   for (const [lane, members] of lanes) {
     const tolerance = (options.tolerance as Record<string, number | undefined>)[lane];
     if (tolerance === undefined || !(tolerance >= 0)) throw new Error(`sampled() needs a non-negative tolerance for \`${lane}\`, got ${tolerance}.`);
@@ -147,8 +155,8 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
     for (let j = 1; j < kept.length; j++) {
       const [from, to] = [kept[j - 1]!, kept[j]!];
       const values = Object.fromEntries(members.map((channel) => [channel, frames[to]![channel]]));
-      track = track.at(times[from]!).to(values as Values, times[to]! - times[from]!, ease.linear);
+      track = track.at(times[from]!).to(values as TargetValues, times[to]! - times[from]!, ease.linear);
     }
   }
-  return track as Motion<keyof V & NumericChannel>;
+  return track as Motion<keyof V & Sampled>;
 }

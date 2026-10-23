@@ -19,6 +19,7 @@ export const unitOf = (syntax: Syntax): string => SYNTAX[syntax].unit;
  */
 export type Property<N extends string = string, S extends Syntax = Syntax> = `--${N}:${S}`;
 export type SyntaxOf<P extends Property> = P extends `--${string}:${infer S extends Syntax}` ? S : never;
+export type NumericProperty = Property<string, Exclude<Syntax, "color">>;
 export type PropertyValues = { readonly [S in Syntax as Property<string, S>]?: SyntaxValue<S> };
 
 export interface Declaration<S extends Syntax = Syntax> {

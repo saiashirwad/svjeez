@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { render, sampled, type Motion } from "svg-motion";
+import { def, render, sampled, type Motion } from "svg-motion";
 
 interface Key {
   readonly at: number;
@@ -49,6 +49,16 @@ describe("sampled", () => {
     const svg = scene(sampled((t) => ({ ...circle(t), opacity: 0.5 }), { duration: PERIOD, tolerance: { translate: 1, opacity: 0.02 } }), PERIOD);
     expect(lane(svg, "opacity")).toEqual(["0%,100%{opacity:0.5}"]);
     expect(translateKeys(svg, PERIOD).length).toBeGreaterThan(2);
+  });
+
+  test("a property is its own lane with its own tolerance", () => {
+    const depth = def.property("depth", { syntax: "number", inherits: false, initial: 0 });
+    const flat = def.property("flat", { syntax: "number", inherits: false, initial: 0 });
+    const motion = sampled((t) => ({ ...circle(t), [depth]: circle(t).x, [flat]: 2 }), { duration: PERIOD, tolerance: { translate: 1, [depth]: 0.001, [flat]: 0.01 } });
+    const svg = render({ width: 100, height: 100, duration: PERIOD, title: "Test" }, <rect width={10} height={10} animation={motion} />);
+    const [depthLane] = lane(svg, "--p1");
+    expect(depthLane!.split("}").length).toBeGreaterThan(translateKeys(svg, PERIOD).length);
+    expect(lane(svg, "--p2")).toEqual(["0%,100%{--p2:2}"]);
   });
 
   test("a step that leaves a sliver before the end still renders", () => {
