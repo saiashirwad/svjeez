@@ -5,6 +5,7 @@ export { def, type Ref, type DefTag } from "./defs";
 export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./properties";
 export { calc, type Calc } from "./calc";
 export { fx } from "./fx";
+export { picture, Picture, type ImageFormat, type PictureProps } from "./picture";
 export { el } from "./el";
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 export type { Channel, Values } from "./channels";

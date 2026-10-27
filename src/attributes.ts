@@ -149,6 +149,7 @@ const ELEMENTS = {
   symbol: { viewBox: attr<string>("viewBox") },
   filter: {
     filterUnits: attr<Units>("filterUnits"),
+    colorInterpolationFilters: attr<"sRGB" | "linearRGB">("color-interpolation-filters"),
     x: attr<Length>("x"),
     y: attr<Length>("y"),
     width: attr<Length>("width"),
@@ -169,6 +170,11 @@ const ELEMENTS = {
     scale: attr<number>("scale"),
     xChannelSelector: attr<"R" | "G" | "B" | "A">("xChannelSelector"),
     yChannelSelector: attr<"R" | "G" | "B" | "A">("yChannelSelector"),
+  },
+  feColorMatrix: {
+    ...PRIMITIVE,
+    type: attr<"matrix" | "saturate" | "hueRotate" | "luminanceToAlpha">("type"),
+    values: attr<string>("values"),
   },
   feOffset: { ...PRIMITIVE, dx: attr<number>("dx"), dy: attr<number>("dy") },
   feFlood: { ...PRIMITIVE, floodColor: attr<Color>("flood-color"), floodOpacity: attr<number>("flood-opacity") },
