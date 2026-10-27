@@ -36,14 +36,17 @@ interface Vertex {
   readonly rank: number;
   readonly w: number;
   readonly h: number;
-  readonly group: number;
+  group: number;
   readonly up: number[];
   readonly down: number[];
   /** Segment ids, parallel to `up` and `down`. */
   readonly ins: number[];
   readonly outs: number[];
-  /** A backward edge's dummy in its end's own rank, kept just right of that end. */
+  /** A backward edge's dummy in its end's own rank, beside that end. */
   readonly anchor?: number;
+  /** For a backward edge's dummies: the edge, and once routed, the side its channel runs on. */
+  readonly back?: number;
+  outer?: "left" | "right";
   /** Room on the right for a self loop and its label. */
   loop: number;
 }
@@ -51,6 +54,10 @@ interface Vertex {
 const LOOP = 20;
 const PORT = 12;
 const TRACK = 14;
+/** Edges this close to straight are drawn straight. */
+const SNAP = 6;
+/** How far above its node a merging edge joins the others. */
+const MERGE = 16;
 /** Room a renderer may round off at each end of a straight run; labels stay clear of it. */
 export const BEND = 16;
 
@@ -90,21 +97,18 @@ export function layered(input: LayeredInput): Layered {
   const rank = longestPath(input.nodes.length, directed);
   const vertices: Vertex[] = input.nodes.map((n, i) => ({ node: i, rank: rank[i]!, ...size(n), group: groupOf[i]!, up: [], down: [], ins: [], outs: [], loop: 0 }));
   for (const e of edges) if (e.u === e.v) vertices[e.u]!.loop = Math.max(vertices[e.u]!.loop, LOOP + 4 + (e.label ? 8 + e.label.w : 0));
-  const dummy = (r: number, group: number, anchor?: number) => vertices.push({ rank: r, w: 0, h: 0, group, up: [], down: [], ins: [], outs: [], loop: 0, anchor }) - 1;
+  const dummy = (r: number, group: number, back?: number, anchor?: number) => vertices.push({ rank: r, w: 0, h: 0, group, up: [], down: [], ins: [], outs: [], loop: 0, anchor, back }) - 1;
   /** Per edge, its vertices top to bottom and, per consecutive pair, the segment id between ranks (none beside an anchor). */
   const chains = new Map<number, { chain: number[]; segments: (number | undefined)[] }>();
   const crossing: { a: number; b: number }[] = [];
-  /** Per node, the backward edges on its right side. */
-  const sides = input.nodes.map((): number[] => []);
   for (const e of directed) {
-    const back = reversed.has(e.i);
-    const shared = groupOf[e.u] === groupOf[e.v] ? groupOf[e.u]! : -1;
+    const back = reversed.has(e.i) ? e.i : undefined;
+    const shared = back === undefined && groupOf[e.u] === groupOf[e.v] ? groupOf[e.u]! : -1;
     const chain = [e.u];
-    if (back) chain.push(dummy(rank[e.u]!, groupOf[e.u]!, e.u));
-    for (let r = rank[e.u]! + 1; r < rank[e.v]!; r++) chain.push(dummy(r, shared));
-    if (back) chain.push(dummy(rank[e.v]!, groupOf[e.v]!, e.v));
+    if (back !== undefined) chain.push(dummy(rank[e.u]!, groupOf[e.u]!, back, e.u));
+    for (let r = rank[e.u]! + 1; r < rank[e.v]!; r++) chain.push(dummy(r, shared, back));
+    if (back !== undefined) chain.push(dummy(rank[e.v]!, groupOf[e.v]!, back, e.v));
     chain.push(e.v);
-    if (back) for (const end of [e.u, e.v]) sides[end]!.push(e.i);
     const segments = chain.slice(1).map((v, k) => {
       const a = chain[k]!;
       if (vertices[a]!.rank === vertices[v]!.rank) return undefined;
@@ -118,7 +122,15 @@ export function layered(input: LayeredInput): Layered {
     chains.set(e.i, { chain, segments });
   }
 
-  const { layers, key, groupKey } = order(vertices, Math.max(0, ...rank) + 1, groups.length);
+  const { layers, groupKey, base } = order(vertices, Math.max(0, ...rank) + 1, groups.length);
+  const key = outside(vertices, layers, base, [...reversed].map((i) => chains.get(i)!));
+  /** Per node, the backward edges leaving or entering each side. */
+  const sides = input.nodes.map(() => ({ left: [] as number[], right: [] as number[] }));
+  for (const i of reversed) {
+    const { chain } = chains.get(i)!;
+    const end = vertices[chain[1]!]!.outer ?? "right";
+    for (const node of [chain[0]!, chain.at(-1)!]) sides[node]![end].push(i);
+  }
   const xs = place(vertices, layers, key, groupKey, { nodeGap, groupPad, labels: groups.map((g) => g.label), lr });
 
   /** Each outgoing segment's x on the bottom of `v`, ordered by where its other end sits so they do not cross. */
@@ -130,28 +142,40 @@ export function layered(input: LayeredInput): Layered {
     return new Map(sorted.map(({ id }, k) => [id, xs.center[v]! + (k - (sorted.length - 1) / 2) * step]));
   };
   const outPorts = vertices.map((_, v) => ports(v));
-  /** Incoming edges share one port at the top center and merge just above it. */
-  const inPorts = vertices.map((v, i) => new Map(v.ins.map((id) => [id, xs.center[i]!])));
-  const ends = crossing.map(({ a, b }, id): Crossing => ({ id, xa: outPorts[a]!.get(id)!, xb: inPorts[b]!.get(id)! }));
+  /** Incoming edges share one port at the top center and merge just above it; one that would arrive within SNAP of straight comes in straight. */
+  const ends = crossing.map(({ a, b }, id): Crossing => {
+    const [xa, center] = [outPorts[a]!.get(id)!, xs.center[b]!];
+    const straight = vertices[b]!.node !== undefined && Math.abs(xa - center) <= Math.min(SNAP, vertices[b]!.w / 2);
+    return { id, xa, xb: straight ? xa : center };
+  });
+  const into = (c: Crossing) => crossing[c.id]!.b;
+  const merging = new Set(
+    ends.filter((c) => vertices[into(c)]!.node !== undefined && ends.some((d) => d !== c && into(d) === into(c) && Math.abs(d.xb - c.xb) < 0.5)).map((c) => c.id),
+  );
   const thick = layers.map((layer) => Math.max(0, ...layer.map((v) => vertices[v]!.h)));
-  const lanes = thick.slice(1).map((_, r) => tracks(ends.filter((c) => vertices[crossing[c.id]!.a]!.rank === r)));
+  const inGap = (r: number) => ends.filter((c) => vertices[crossing[c.id]!.a]!.rank === r);
+  const lanes = thick.slice(1).map((_, r) => tracks(inGap(r), merging));
+  const merges = lanes.map((_, r) => inGap(r).some((c) => merging.has(c.id) && Math.abs(c.xa - c.xb) > 0.5));
 
   const padTop = groups.map((g) => groupPad + (lr ? 0 : g.label.h + 4));
-  const tallest = lanes.map((_, r) =>
-    Math.max(0, ...directed.flatMap((e) => (e.label && !reversed.has(e.i) && chains.get(e.i)!.chain.some((v) => vertices[v]!.rank === r) && chains.get(e.i)!.chain.some((v) => vertices[v]!.rank === r + 1) ? [e.label.h] : []))),
-  );
+  const spans = (e: (typeof directed)[number], r: number) => chains.get(e.i)!.chain.some((v) => vertices[v]!.rank === r) && chains.get(e.i)!.chain.some((v) => vertices[v]!.rank === r + 1);
+  const tallest = lanes.map((_, r) => Math.max(0, ...directed.flatMap((e) => (e.label && !reversed.has(e.i) && spans(e, r) ? [e.label.h] : []))));
   const gaps = lanes.map(({ count }, r) => {
     const below = groups.reduce((m, _, g) => (xs.span[g]![1] === r ? Math.max(m, groupPad) : m), 0);
     const above = groups.reduce((m, _, g) => (xs.span[g]![0] === r + 1 ? Math.max(m, padTop[g]!) : m), 0);
-    return Math.max(rankGap, below + above + 16, Math.max(0, count - 1) * TRACK + 2 * (tallest[r]! > 0 ? tallest[r]! + 2 * BEND + 4 : 16));
+    const run = tallest[r]! > 0 ? tallest[r]! + 2 * BEND + 4 : BEND;
+    const spread = Math.max(0, count - 1) * TRACK;
+    return Math.max(rankGap, below + above + 16, merges[r] ? run + spread + MERGE : 2 * run + spread);
   });
   const top: number[] = [];
   thick.forEach((_, r) => top.push(r === 0 ? 0 : top[r - 1]! + thick[r - 1]! + gaps[r - 1]!));
   const bottom = (r: number) => top[r]! + thick[r]!;
+  /** Tracks sit centered in the gap, or with merges, the lowest one MERGE above the next rank. */
   const trackY = (id: number) => {
     const r = vertices[crossing[id]!.a]!.rank;
     const { track, count } = lanes[r]!;
-    return bottom(r) + gaps[r]! / 2 + ((track.get(id) ?? (count - 1) / 2) - (count - 1) / 2) * TRACK;
+    const k = track.get(id) ?? (count - 1) / 2;
+    return merges[r] ? top[r + 1]! - MERGE - (count - 1 - k) * TRACK : bottom(r) + gaps[r]! / 2 + (k - (count - 1) / 2) * TRACK;
   };
 
   const box = (v: number): Box => {
@@ -160,9 +184,10 @@ export function layered(input: LayeredInput): Layered {
   };
   const side = (v: number, edge: number): Point => {
     const b = box(v);
-    const list = sides[v]!;
+    const end = sides[v]!.left.includes(edge) ? "left" : "right";
+    const list = sides[v]![end];
     const step = Math.min(PORT, b.h / (list.length + 1));
-    return { x: b.x + b.w, y: b.y + b.h / 2 + (list.indexOf(edge) - (list.length - 1) / 2) * step };
+    return { x: end === "left" ? b.x : b.x + b.w, y: b.y + b.h / 2 + (list.indexOf(edge) - (list.length - 1) / 2) * step };
   };
 
   const routes = edges.map(({ i, u, v }): Point[] => {
@@ -299,13 +324,38 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
   const groupKey = Array.from({ length: groups }, (_, g) => mean(vertices.flatMap((v, i) => (v.group === g ? [settled[i]!] : []))) ?? 0);
   const base = (v: number) => (vertices[v]!.group >= 0 ? groupKey[vertices[v]!.group]! : settled[v]!);
   for (const layer of layers) sortLayer(layer, (v) => base(vertices[v]!.anchor ?? v), (v) => settled[v]!);
-  const key = (v: number) => {
-    const anchor = vertices[v]!.anchor;
-    if (anchor === undefined) return base(v);
-    const layer = layers[vertices[v]!.rank]!;
-    return base(anchor) + (layer.indexOf(v) - layer.indexOf(anchor)) * 1e-9;
+  return { layers, groupKey, base };
+};
+
+/**
+ * Sends each backward edge round the outside when both its ends sit at the same end of their ranks: its dummies move
+ * to that end of every rank it spans, shorter edges inside longer ones. Otherwise its dummies stay just right of its
+ * ends. Returns each vertex's sort key for placement.
+ */
+const outside = (vertices: Vertex[], layers: readonly number[][], base: (v: number) => number, backs: readonly { chain: readonly number[] }[]) => {
+  const spans = [...backs].sort((a, b) => a.chain.length - b.chain.length);
+  for (const { chain } of spans) {
+    const [top, bottom] = [chain[0]!, chain.at(-1)!];
+    const mine = new Set(chain.slice(1, -1));
+    const others = (v: number) => layers[vertices[v]!.rank]!.filter((u) => !mine.has(u) && !vertices[u]!.outer);
+    const at = (v: number, end: "left" | "right") => (end === "left" ? others(v)[0] : others(v).at(-1)) === v;
+    const end = (["right", "left"] as const).find((s) => at(top, s) && at(bottom, s));
+    if (!end) continue;
+    for (const v of chain.slice(1, -1)) {
+      vertices[v]!.outer = end;
+      vertices[v]!.group = -1;
+      const layer = layers[vertices[v]!.rank]! as number[];
+      layer.splice(layer.indexOf(v), 1);
+      if (end === "left") layer.unshift(v);
+      else layer.push(v);
+    }
+  }
+  return (v: number): number => {
+    const { outer, anchor, rank } = vertices[v]!;
+    const layer = layers[rank]!;
+    if (outer) return (outer === "left" ? -1 : 2) + layer.indexOf(v) * 1e-6;
+    return anchor === undefined ? base(v) : base(anchor) + (layer.indexOf(v) - layer.indexOf(anchor)) * 1e-9;
   };
-  return { layers, key, groupKey };
 };
 
 interface Item {
@@ -382,6 +432,13 @@ const place = (
   }
   const center = (v: number) => (vertices[v]!.group < 0 ? vx[v]! : gx[vertices[v]!.group]! + offset[v]!);
   const neighbours = (v: number) => [...vertices[v]!.up, ...vertices[v]!.down, ...(vertices[v]!.anchor === undefined ? [] : [vertices[v]!.anchor!])];
+  /** Long edges and one-to-one links pull hardest, so chains line up and run straight. */
+  const weight = (v: number, n: number) => {
+    const [a, b] = [vertices[v]!, vertices[n]!];
+    if ((a.node === undefined && b.node === undefined) || a.anchor === n) return 8;
+    const single = (a.up.length === 1 && a.up[0] === n && b.down.length === 1) || (a.down.length === 1 && a.down[0] === n && b.up.length === 1);
+    return single ? 4 : 1;
+  };
 
   const occurrences = new Map<string, { row: Item[]; k: number }[]>();
   for (const row of rows) row.forEach((it, k) => occurrences.set(`${it.kind}${it.id}`, [...(occurrences.get(`${it.kind}${it.id}`) ?? []), { row, k }]));
@@ -390,9 +447,12 @@ const place = (
     for (const it of sweep % 2 ? [...items].reverse() : items) {
       const pulls =
         it.kind === "v"
-          ? neighbours(it.id).map(center)
-          : vertices.flatMap((v, i) => (v.group === it.id ? neighbours(i).filter((n) => vertices[n]!.group !== it.id).map((n) => gx[it.id]! + center(n) - center(i)) : []));
-      const want = mean(pulls);
+          ? neighbours(it.id).map((n) => ({ at: center(n), weight: weight(it.id, n) }))
+          : vertices.flatMap((v, i) =>
+              v.group === it.id ? neighbours(i).filter((n) => vertices[n]!.group !== it.id).map((n) => ({ at: gx[it.id]! + center(n) - center(i), weight: weight(i, n) })) : [],
+            );
+      const total = pulls.reduce((sum, p) => sum + p.weight, 0);
+      const want = total === 0 ? undefined : pulls.reduce((sum, p) => sum + p.at * p.weight, 0) / total;
       if (want === undefined) continue;
       let [lo, hi] = [-Infinity, Infinity];
       for (const { row, k } of occurrences.get(`${it.kind}${it.id}`)!) {

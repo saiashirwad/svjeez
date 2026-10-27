@@ -4,7 +4,7 @@ import { adaptive, flowchart, tomorrow, tomorrowNight, travel } from "svjeez/ext
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
 
-const chart = flowchart(
+export const chart = flowchart(
   {
     nodes: {
       pr: { label: "PR opened", role: "input" },

@@ -62,21 +62,24 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
 
   const order = nodes.map((n) => n.id).sort((a, b) => laid.rank.get(a)! - laid.rank.get(b)! || cross(laid.boxes.get(a)!, spec.direction) - cross(laid.boxes.get(b)!, spec.direction));
   const step = reveal?.step ?? 0.4;
-  const shown = new Map(order.map((id, i) => [id, (reveal?.at ?? 0) + i * step]));
+  /** The first rank is there from the start, so no frame is empty; the rest follow in order. */
+  const later = order.filter((id) => laid.rank.get(id)! > 0);
+  const shown = new Map(order.map((id) => [id, later.includes(id) ? (reveal?.at ?? 0) + later.indexOf(id) * step : -Infinity]));
+  const appear = (id: string) => (reveal && shown.get(id)! >= 0 ? enter({ at: shown.get(id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined);
   const drawOver = Math.min(0.4, step);
-  const drawAt = (from: string, to: string) => Math.max(shown.get(from)!, shown.get(to)! - drawOver);
+  const drawAt = (from: string, to: string) => Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
 
   const node = el.g({ class: cls }, [
     groups.map(([id, g]) => {
       const b = laid.groups.get(id)!;
       const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
-      return el.g({ animation: reveal && enter({ at, over: 0.4 }) }, [
+      return el.g({ animation: reveal && at >= 0 ? enter({ at, over: 0.4 }) : undefined }, [
         el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 10, fill: "none", stroke: theme.base0E, strokeOpacity: 0.45, strokeDasharray: "4 3" }),
         el.text({ x: b.x + 12, y: b.y + 8 + small.fontSize, fontSize: small.fontSize, fill: theme.base04 }, g.label),
       ]);
     }),
     laid.lines.map((line) => arrow(line.points, { ...look, at: reveal && drawAt(line.from, line.to), over: drawOver })),
-    nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, look, reveal && enter({ at: shown.get(n.id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out))),
+    nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, look, appear(n.id))),
     laid.lines.map((line, i) => line.label && chip(line.label, edges[i]!.label!, small, reveal && motion({ opacity: 0 }).at(drawAt(line.from, line.to) + drawOver).to({ opacity: 1 }, 0.25))),
   ]);
   return { node, bounds: laid.bounds, get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])), ...paths(laid.lines, laid.boxes) };

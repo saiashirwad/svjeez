@@ -4,7 +4,7 @@ import { adaptive, state, tomorrow, tomorrowNight } from "svjeez/extras";
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
 
-const agent = state(
+export const agent = state(
   {
     states: {
       idle: "Idle",

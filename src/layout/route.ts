@@ -10,29 +10,45 @@ export interface Crossing {
 const SAME = 0.5;
 const CLEAR = 6;
 
+const overlaps = (c: Crossing, d: Crossing) =>
+  Math.min(c.xa, c.xb) - CLEAR < Math.max(d.xa, d.xb) + CLEAR && Math.min(d.xa, d.xb) - CLEAR < Math.max(c.xa, c.xb) + CLEAR;
+
 /**
- * Gives each bent crossing a horizontal track in the gap, numbered top to bottom: greedy interval colouring, where
- * two crossings meeting at one entry from opposite sides may share a track, and a crossing that leaves at the x where
- * another enters runs above it so their verticals never overlap.
+ * Whether `d` must run above `c` so neither crosses the other: of two jogs heading the same way, the one that starts
+ * further along turns first; and a jog that leaves at the x where another enters runs above it, or their verticals
+ * would overlap.
  */
-export const tracks = (crossings: readonly Crossing[]): { readonly track: ReadonlyMap<number, number>; readonly count: number } => {
-  const bent = crossings.filter((c) => Math.abs(c.xa - c.xb) > SAME).sort((a, b) => Math.min(a.xa, a.xb) - Math.min(b.xa, b.xb));
-  const above = new Map(bent.map((c) => [c.id, bent.filter((d) => d !== c && Math.abs(d.xa - c.xb) <= SAME)]));
-  const clash = (c: Crossing, d: Crossing) => {
-    const meet = Math.abs(c.xb - d.xb) <= SAME && (c.xa - c.xb) * (d.xa - d.xb) < 0;
-    return !meet && Math.min(c.xa, c.xb) - CLEAR < Math.max(d.xa, d.xb) + CLEAR && Math.min(d.xa, d.xb) - CLEAR < Math.max(c.xa, c.xb) + CLEAR;
-  };
+const over = (c: Crossing, d: Crossing): boolean => {
+  if (Math.abs(d.xa - c.xb) <= SAME) return true;
+  if (Math.abs(c.xa - d.xb) <= SAME || !overlaps(c, d)) return false;
+  const [cr, dr] = [c.xb > c.xa, d.xb > d.xa];
+  return cr === dr && (cr ? d.xa > c.xa : d.xa < c.xa);
+};
+
+/**
+ * Gives each bent crossing a horizontal track in the gap, numbered top to bottom: interval colouring in an order that
+ * keeps fans from crossing. Crossings in `merging` share an entry with another edge; they take the lowest tracks so
+ * they join it just above the arrowhead, and two meeting from opposite sides share a track.
+ */
+export const tracks = (crossings: readonly Crossing[], merging: ReadonlySet<number>): { readonly track: ReadonlyMap<number, number>; readonly count: number } => {
   const track = new Map<number, number>();
   const used: Crossing[][] = [];
-  const pending = [...bent];
-  while (pending.length > 0) {
-    const ready = pending.findIndex((c) => above.get(c.id)!.every((d) => track.has(d.id)));
-    const c = pending.splice(Math.max(0, ready), 1)[0]!;
-    let k = Math.max(0, ...above.get(c.id)!.flatMap((d) => (track.has(d.id) ? [track.get(d.id)! + 1] : [])));
-    while (used[k]?.some((d) => clash(c, d))) k++;
-    (used[k] ??= []).push(c);
-    track.set(c.id, k);
-  }
+  const colour = (list: readonly Crossing[], floor: number) => {
+    const pending = [...list].sort((a, b) => Math.min(a.xa, a.xb) - Math.min(b.xa, b.xb));
+    const above = (c: Crossing) => list.filter((d) => d !== c && over(c, d));
+    while (pending.length > 0) {
+      const ready = pending.findIndex((c) => above(c).every((d) => track.has(d.id)));
+      const c = pending.splice(Math.max(0, ready), 1)[0]!;
+      let k = Math.max(floor, ...above(c).flatMap((d) => (track.has(d.id) ? [track.get(d.id)! + 1] : [])));
+      const clash = (d: Crossing) => overlaps(c, d) && !(Math.abs(c.xb - d.xb) <= SAME && (c.xa - c.xb) * (d.xa - d.xb) < 0);
+      while (used[k]?.some(clash)) k++;
+      (used[k] ??= []).push(c);
+      track.set(c.id, k);
+    }
+  };
+  const bent = crossings.filter((c) => Math.abs(c.xa - c.xb) > SAME);
+  colour(bent.filter((c) => !merging.has(c.id)), 0);
+  colour(bent.filter((c) => merging.has(c.id)), used.length);
   return { track, count: used.length };
 };
 
