@@ -47,7 +47,7 @@ const captions = {
 };
 const tl = timeline(
   Object.fromEntries(Object.entries(captions).map(([name, text]) => [name, read(text, { settle: 2 })])) as Record<keyof typeof captions, number>,
-  { gap: 0.2, pace: 1.1 },
+  { gap: 0.15, pace: 0.7 },
 );
 
 const frame = rect(60, 40, 880, 500);
@@ -81,7 +81,7 @@ export default function build(): string {
       <g clipPath={clip}>
         <Camera
           frame={view}
-          over={0.9}
+          over={0.7}
           stops={[
             { at: tl.handle, view: lines(1, 9) },
             { at: tl.parse, view: lines(5, 12) },

@@ -30,62 +30,62 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 .mono,.mono text,.code text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
 .sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
 
-.a{animation-duration:22.8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:14.6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
 .fb{transform-box:fill-box;transform-origin:center}
-@keyframes k1{0%,21.554%,39.474%,40.351%,59.649%,60.526%,81.203%,82.08%,100%{opacity:1}22.87%,38.158%,41.667%,58.333%,61.842%,79.887%,83.396%,98.684%{opacity:0.25}}
+@keyframes k1{0%,21.575%,39.384%,40.411%,59.589%,60.616%,81.164%,82.192%,100%{opacity:1}23.63%,37.329%,42.466%,57.534%,62.671%,79.11%,84.247%,97.945%{opacity:0.25}}
 .m2{animation-name:k1}
-@keyframes k2{0%,21.554%,39.474%,100%{opacity:0}22.87%,38.158%{opacity:1}}
+@keyframes k2{0%,21.575%,39.384%,100%{opacity:0}23.63%,37.329%{opacity:1}}
 .m3{animation-name:k2}
-@keyframes k3{0%,40.351%,59.649%,100%{opacity:0}41.667%,58.333%{opacity:1}}
+@keyframes k3{0%,40.411%,59.589%,100%{opacity:0}42.466%,57.534%{opacity:1}}
 .m4{animation-name:k3}
-@keyframes k4{0%,60.526%,81.203%,100%{opacity:0}61.842%,79.887%{opacity:1}}
+@keyframes k4{0%,60.616%,81.164%,100%{opacity:0}62.671%,79.11%{opacity:1}}
 .m5{animation-name:k4}
-@keyframes k5{0%,82.08%,100%{opacity:0}83.396%,98.684%{opacity:1}}
+@keyframes k5{0%,82.192%,100%{opacity:0}84.247%,97.945%{opacity:1}}
 .m6{animation-name:k5}
-@keyframes k6{0%,21.554%{stroke-dashoffset:1;visibility:hidden}24.185%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k6{0%,21.575%{stroke-dashoffset:1;visibility:hidden}25.685%,100%{stroke-dashoffset:0;visibility:visible}}
 .m7{animation-name:k6}
-@keyframes k7{0%,24.185%{opacity:0}24.843%,100%{opacity:1}}
-@keyframes k8{0%,24.185%{scale:0.5}24.843%,100%{scale:1}}
+@keyframes k7{0%,25.685%{opacity:0}26.712%,100%{opacity:1}}
+@keyframes k8{0%,25.685%{scale:0.5}26.712%,100%{scale:1}}
 .m8{animation-name:k7,k8}
-@keyframes k9{0%,21.554%,39.474%,100%{opacity:0}22.431%,38.596%{opacity:1}}
+@keyframes k9{0%,21.575%,39.384%,100%{opacity:0}22.945%,38.014%{opacity:1}}
 .m9{animation-name:k9}
-@keyframes k10{0%,40.351%{stroke-dashoffset:1;visibility:hidden}42.982%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k10{0%,40.411%{stroke-dashoffset:1;visibility:hidden}44.521%,100%{stroke-dashoffset:0;visibility:visible}}
 .m10{animation-name:k10}
-@keyframes k11{0%,42.982%{opacity:0}43.64%,100%{opacity:1}}
-@keyframes k12{0%,42.982%{scale:0.5}43.64%,100%{scale:1}}
+@keyframes k11{0%,44.521%{opacity:0}45.548%,100%{opacity:1}}
+@keyframes k12{0%,44.521%{scale:0.5}45.548%,100%{scale:1}}
 .m11{animation-name:k11,k12}
-@keyframes k13{0%,40.351%,59.649%,100%{opacity:0}41.228%,58.772%{opacity:1}}
+@keyframes k13{0%,40.411%,59.589%,100%{opacity:0}41.781%,58.219%{opacity:1}}
 .m12{animation-name:k13}
-@keyframes k14{0%,60.526%{stroke-dashoffset:1;visibility:hidden}63.158%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k14{0%,60.616%{stroke-dashoffset:1;visibility:hidden}64.726%,100%{stroke-dashoffset:0;visibility:visible}}
 .m13{animation-name:k14}
-@keyframes k15{0%,63.158%{opacity:0}63.816%,100%{opacity:1}}
-@keyframes k16{0%,63.158%{scale:0.5}63.816%,100%{scale:1}}
+@keyframes k15{0%,64.726%{opacity:0}65.753%,100%{opacity:1}}
+@keyframes k16{0%,64.726%{scale:0.5}65.753%,100%{scale:1}}
 .m14{animation-name:k15,k16}
-@keyframes k17{0%,60.526%,81.203%,100%{opacity:0}61.404%,80.326%{opacity:1}}
+@keyframes k17{0%,60.616%,81.164%,100%{opacity:0}61.986%,79.795%{opacity:1}}
 .m15{animation-name:k17}
-@keyframes k18{0%,82.08%{stroke-dashoffset:1;visibility:hidden}84.712%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k18{0%,82.192%{stroke-dashoffset:1;visibility:hidden}86.301%,100%{stroke-dashoffset:0;visibility:visible}}
 .m16{animation-name:k18}
-@keyframes k19{0%,84.712%{opacity:0}85.37%,100%{opacity:1}}
-@keyframes k20{0%,84.712%{scale:0.5}85.37%,100%{scale:1}}
+@keyframes k19{0%,86.301%{opacity:0}87.329%,100%{opacity:1}}
+@keyframes k20{0%,86.301%{scale:0.5}87.329%,100%{scale:1}}
 .m17{animation-name:k19,k20}
-@keyframes k21{0%,82.08%,100%{opacity:0}82.957%,99.123%{opacity:1}}
+@keyframes k21{0%,82.192%,100%{opacity:0}83.562%,98.63%{opacity:1}}
 .m18{animation-name:k21}
-@keyframes k22{0%,21.554%{translate:0px 0px}25.501%,40.351%{translate:52.401px 37.21px}44.298%,60.526%{translate:52.401px -65.849px}64.474%,82.08%{translate:52.401px -168.907px}86.028%,100%{translate:52.401px -257.243px}}
-@keyframes k23{0%,21.554%{scale:1}25.501%,40.351%,44.298%,60.526%,64.474%,82.08%,86.028%,100%{scale:1.461}}
+@keyframes k22{0%,21.575%{translate:0px 0px}26.37%,40.411%{translate:52.401px 37.21px}45.205%,60.616%{translate:52.401px -65.849px}65.411%,82.192%{translate:52.401px -168.907px}86.986%,100%{translate:52.401px -257.243px}}
+@keyframes k23{0%,21.575%{scale:1}26.37%,40.411%,45.205%,60.616%,65.411%,82.192%,86.986%,100%{scale:1.461}}
 .m19{animation-name:k22,k23;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k24{0%,20.677%,100%{opacity:0}1.535%,19.142%{opacity:1}}
+@keyframes k24{0%,20.548%,100%{opacity:0}2.397%,18.151%{opacity:1}}
 .m20{animation-name:k24}
-@keyframes k25{0%,21.554%,39.474%,100%{opacity:0}23.089%,37.939%{opacity:1}}
+@keyframes k25{0%,21.575%,39.384%,100%{opacity:0}23.973%,36.986%{opacity:1}}
 .m21{animation-name:k25}
-@keyframes k26{0%,40.351%,59.649%,100%{opacity:0}41.886%,58.114%{opacity:1}}
+@keyframes k26{0%,40.411%,59.589%,100%{opacity:0}42.808%,57.192%{opacity:1}}
 .m22{animation-name:k26}
-@keyframes k27{0%,60.526%,81.203%,100%{opacity:0}62.061%,79.668%{opacity:1}}
+@keyframes k27{0%,60.616%,81.164%,100%{opacity:0}63.014%,78.767%{opacity:1}}
 .m23{animation-name:k27}
-@keyframes k28{0%,82.08%,100%{opacity:0}83.615%,98.465%{opacity:1}}
+@keyframes k28{0%,82.192%,100%{opacity:0}84.589%,97.603%{opacity:1}}
 .m24{animation-name:k28}
-@keyframes k29{0%,20.677%,100%{opacity:0}0.877%,19.799%{opacity:1}}
+@keyframes k29{0%,20.548%,100%{opacity:0}1.37%,19.178%{opacity:1}}
 .m25{animation-name:k29}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-15.8s!important;animation-play-state:paused!important}}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-10.85s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="1000" height="620" fill="var(--base01)"/>
   <g class="mono">
