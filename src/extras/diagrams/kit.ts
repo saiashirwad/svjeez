@@ -168,7 +168,7 @@ export const arrow = (points: readonly Point[], look: Look & { readonly color?: 
 };
 
 /** A text label on a knockout of the background color, so the line it sits on breaks around it. */
-export const chip = (b: Box, text: string, look: Look & { readonly fill?: Color; readonly ground?: Color }, animation?: Stack<"opacity">): SvgNode =>
+export const chip = (b: Box, text: string, look: Look & { readonly fill?: Color; readonly ground?: Color | "none" }, animation?: Stack<"opacity">): SvgNode =>
   el.g({ animation }, [
     el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 3, fill: look.ground ?? look.theme.base00 }),
     el.text({ x: b.x + b.w / 2, y: b.y + b.h / 2 + look.fontSize * 0.35, fontSize: look.fontSize, textAnchor: "middle", fill: look.fill ?? look.theme.base04 }, text),

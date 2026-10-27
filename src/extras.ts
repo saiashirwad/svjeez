@@ -13,5 +13,6 @@ export { terminal, type Command, type TerminalOptions } from "./extras/terminal"
 export { type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./extras/diagrams/kit";
 export { flowchart, type Flowchart, type FlowchartOptions, type FlowEdge, type FlowGroup } from "./extras/diagrams/flowchart";
 export { sequence, type Sequence, type SequenceMessage, type SequenceOptions } from "./extras/diagrams/sequence";
+export { lanes, type Lanes, type LanesOptions, type LaneEvent, type LaneLink, type LaneSpan } from "./extras/diagrams/lanes";
 export { tree, type TreeDiagram, type TreeOptions, type TreeSpec } from "./extras/diagrams/tree";
 export { state, type Checked, type StateIds, type StateMachine, type StateOptions, type StateSpec, type Transition, type Walk } from "./extras/diagrams/state";

@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1001.8 272" width="1001.8" height="272" role="img" aria-labelledby="t d">
+  <title id="t">Agent threads</title>
+  <desc id="d">Three agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}
+
+.a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%{width:0px}20%,100%{width:198px}}
+.m1{animation-name:k1;animation-timing-function:linear}
+@keyframes k2{0%{opacity:0}1.818%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,58.182%{width:0px}77.273%,100%{width:189px}}
+.m3{animation-name:k3;animation-timing-function:linear}
+@keyframes k4{0%,58.182%{opacity:0}60%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,9.091%{width:0px}41.818%,100%{width:324px}}
+.m5{animation-name:k5;animation-timing-function:linear}
+@keyframes k6{0%,9.091%{opacity:0}10.909%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,23.636%{width:0px}65.455%,100%{width:414px}}
+.m7{animation-name:k7;animation-timing-function:linear}
+@keyframes k8{0%,23.636%{opacity:0}25.455%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,8.182%{stroke-dashoffset:1;visibility:hidden}10.909%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,10.5%{opacity:0}10.909%,100%{opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,10.909%,100%{visibility:hidden}8.182%{visibility:visible}}
+@keyframes k12{0%,8.182%{translate:261.8px 77px}10.909%,100%{translate:261.8px 115px}}
+.m11{animation-name:k11,k12;animation-timing-function:steps(1),linear}
+@keyframes k13{0%,21.818%{stroke-dashoffset:1;visibility:hidden}24.545%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k13}
+@keyframes k14{0%,24.136%{opacity:0}24.545%,100%{opacity:1}}
+.m13{animation-name:k14}
+@keyframes k15{0%,24.545%,100%{visibility:hidden}21.818%{visibility:visible}}
+@keyframes k16{0%,21.818%{translate:396.8px 77px}24.545%,100%{translate:396.8px 171px}}
+.m14{animation-name:k15,k16;animation-timing-function:steps(1),linear}
+@keyframes k17{0%,41.818%{stroke-dashoffset:1;visibility:hidden}44.545%,100%{stroke-dashoffset:0;visibility:visible}}
+.m15{animation-name:k17}
+@keyframes k18{0%,44.136%{opacity:0}44.545%,100%{opacity:1}}
+.m16{animation-name:k18}
+@keyframes k19{0%,44.545%,100%{visibility:hidden}41.818%{visibility:visible}}
+@keyframes k20{0%,41.818%{translate:594.8px 115px}44.545%,100%{translate:594.8px 77px}}
+.m17{animation-name:k19,k20;animation-timing-function:steps(1),linear}
+@keyframes k21{0%,65.455%{stroke-dashoffset:1;visibility:hidden}68.182%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k21}
+@keyframes k22{0%,67.773%{opacity:0}68.182%,100%{opacity:1}}
+.m19{animation-name:k22}
+@keyframes k23{0%,68.182%,100%{visibility:hidden}65.455%{visibility:visible}}
+@keyframes k24{0%,65.455%{translate:828.8px 171px}68.182%,100%{translate:828.8px 77px}}
+.m20{animation-name:k23,k24;animation-timing-function:steps(1),linear}
+@keyframes k25{0%,16.364%{opacity:0}19.091%,100%{opacity:1}}
+@keyframes k26{0%,16.364%{scale:0.3}19.091%,100%{scale:1}}
+.m21{animation-name:k25,k26;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k27{0%,16.364%{opacity:0}18.636%,100%{opacity:1}}
+.m22{animation-name:k27}
+@keyframes k28{0%,30.909%{opacity:0}33.636%,100%{opacity:1}}
+@keyframes k29{0%,30.909%{scale:0.3}33.636%,100%{scale:1}}
+.m23{animation-name:k28,k29;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k30{0%,30.909%{opacity:0}33.182%,100%{opacity:1}}
+.m24{animation-name:k30}
+@keyframes k31{0%,32.727%{opacity:0}35.455%,100%{opacity:1}}
+@keyframes k32{0%,32.727%{scale:0.3}35.455%,100%{scale:1}}
+.m25{animation-name:k31,k32;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k33{0%,32.727%{opacity:0}35%,100%{opacity:1}}
+.m26{animation-name:k33}
+@keyframes k34{0%,47.273%{opacity:0}50%,100%{opacity:1}}
+@keyframes k35{0%,47.273%{scale:0.3}50%,100%{scale:1}}
+.m27{animation-name:k34,k35;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k36{0%,47.273%{opacity:0}49.545%,100%{opacity:1}}
+.m28{animation-name:k36}
+@keyframes k37{0%,60%{opacity:0}62.727%,100%{opacity:1}}
+@keyframes k38{0%,60%{scale:0.3}62.727%,100%{scale:1}}
+.m29{animation-name:k37,k38;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k39{0%,60%{opacity:0}62.273%,100%{opacity:1}}
+.m30{animation-name:k39}
+@keyframes k40{0%{translate:0px 0px}77.273%,100%{translate:765px 0px}}
+.m31{animation-name:k40;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <g class="mono">
+    <g>
+      <rect x="40" y="40" width="921.8" height="56" fill="var(--base01)" fill-opacity="0.5"/>
+      <circle cx="45" cy="68" r="4" fill="var(--base0B)"/>
+      <text x="56" y="72.9" font-size="14" fill="var(--base05)">TH-01 lead</text>
+      <path d="M180.8 68H945.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
+    </g>
+    <g>
+      <circle cx="45" cy="124" r="4" fill="var(--base0D)"/>
+      <text x="56" y="128.9" font-size="14" fill="var(--base05)">TH-02 search</text>
+      <path d="M180.8 124H945.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
+    </g>
+    <g>
+      <rect x="40" y="152" width="921.8" height="56" fill="var(--base01)" fill-opacity="0.5"/>
+      <circle cx="45" cy="180" r="4" fill="var(--base08)"/>
+      <text x="56" y="184.9" font-size="14" fill="var(--base05)">TH-03 build</text>
+      <path d="M180.8 180H945.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
+    </g>
+    <g>
+      <path d="M180.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="180.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">0s</text>
+    </g>
+    <g>
+      <path d="M270.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="270.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">1s</text>
+    </g>
+    <g>
+      <path d="M360.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="360.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">2s</text>
+    </g>
+    <g>
+      <path d="M450.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="450.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">3s</text>
+    </g>
+    <g>
+      <path d="M540.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="540.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">4s</text>
+    </g>
+    <g>
+      <path d="M630.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="630.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">5s</text>
+    </g>
+    <g>
+      <path d="M720.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="720.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">6s</text>
+    </g>
+    <g>
+      <path d="M810.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="810.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">7s</text>
+    </g>
+    <g>
+      <path d="M900.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
+      <text x="900.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">8s</text>
+    </g>
+    <g>
+      <rect x="180.8" y="59" width="198" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m1"/>
+      <text x="182.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m2">planning</text>
+    </g>
+    <g>
+      <rect x="756.8" y="59" width="189" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m3"/>
+      <text x="758.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m4">merge</text>
+    </g>
+    <g>
+      <rect x="270.8" y="115" width="324" height="18" rx="4" fill="var(--base0D)" fill-opacity="0.25" stroke="var(--base0D)" class="a m5"/>
+      <text x="272.8" y="147.9" font-size="11.9" fill="var(--base04)" class="a m6">researching</text>
+    </g>
+    <g>
+      <rect x="414.8" y="171" width="414" height="18" rx="4" fill="var(--base08)" fill-opacity="0.25" stroke="var(--base08)" class="a m7"/>
+      <text x="416.8" y="203.9" font-size="11.9" fill="var(--base04)" class="a m8">editing</text>
+    </g>
+    <g>
+      <g>
+        <path d="M261.8 77L261.8 108" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m9"/>
+        <path d="M261.8 115L257.8 107L265.8 107Z" fill="var(--base04)" class="a m10"/>
+      </g>
+      <circle r="4" fill="var(--base09)" class="a m11"/>
+    </g>
+    <g>
+      <g>
+        <path d="M396.8 77L396.8 164" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m12"/>
+        <path d="M396.8 171L392.8 163L400.8 163Z" fill="var(--base04)" class="a m13"/>
+      </g>
+      <circle r="4" fill="var(--base09)" class="a m14"/>
+    </g>
+    <g>
+      <g>
+        <path d="M594.8 115L594.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m15"/>
+        <path d="M594.8 77L598.8 85L590.8 85Z" fill="var(--base04)" class="a m16"/>
+      </g>
+      <circle r="4" fill="var(--base09)" class="a m17"/>
+    </g>
+    <g>
+      <g>
+        <path d="M828.8 171L828.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m18"/>
+        <path d="M828.8 77L832.8 85L824.8 85Z" fill="var(--base04)" class="a m19"/>
+      </g>
+      <circle r="4" fill="var(--base09)" class="a m20"/>
+    </g>
+    <g>
+      <path d="M342.8 114L352.8 124L342.8 134L332.8 124Z" fill="var(--base0D)" stroke="var(--base00)" class="a m21 fb"/>
+      <g class="a m22">
+        <rect x="323.52" y="91" width="38.56" height="18" rx="3" fill="none"/>
+        <text x="342.8" y="104.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">READ</text>
+      </g>
+    </g>
+    <g>
+      <path d="M486.8 114L496.8 124L486.8 134L476.8 124Z" fill="var(--base0C)" stroke="var(--base00)" class="a m23 fb"/>
+      <g class="a m24">
+        <rect x="471.09" y="91" width="31.42" height="18" rx="3" fill="none"/>
+        <text x="486.8" y="104.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">WEB</text>
+      </g>
+    </g>
+    <g>
+      <path d="M504.8 170L514.8 180L504.8 190L494.8 180Z" fill="var(--base0E)" stroke="var(--base00)" class="a m25 fb"/>
+      <g class="a m26">
+        <rect x="485.52" y="147" width="38.56" height="18" rx="3" fill="none"/>
+        <text x="504.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">EDIT</text>
+      </g>
+    </g>
+    <g>
+      <path d="M648.8 170L658.8 180L648.8 190L638.8 180Z" fill="var(--base0A)" stroke="var(--base00)" class="a m27 fb"/>
+      <g class="a m28">
+        <rect x="629.52" y="147" width="38.56" height="18" rx="3" fill="none"/>
+        <text x="648.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">TEST</text>
+      </g>
+    </g>
+    <g>
+      <path d="M774.8 170L784.8 180L774.8 190L764.8 180Z" fill="var(--base0E)" stroke="var(--base00)" class="a m29 fb"/>
+      <g class="a m30">
+        <rect x="755.52" y="147" width="38.56" height="18" rx="3" fill="none"/>
+        <text x="774.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">EDIT</text>
+      </g>
+    </g>
+    <path d="M180.8 40V208" stroke="var(--base09)" stroke-width="1.5" class="a m31"/>
+  </g>
+</svg>

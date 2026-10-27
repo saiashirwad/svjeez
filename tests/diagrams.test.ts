@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, render, type Rect, type SvgNode } from "svg-motion";
-import { flowchart, sequence, state } from "svjeez/extras";
+import { flowchart, lanes, sequence, state, tree } from "svjeez/extras";
 
 const valid = (node: SvgNode) => render({ width: 800, height: 600, duration: 10, title: "diagram" }, node);
 
@@ -121,6 +121,41 @@ describe("state", () => {
       expect(() => review.walk(["draft", "decision"], { at: 0 })).toThrow();
       expect(() => valid(el.g({}, [review.node, walk.node]))).not.toThrow();
     });
+  });
+});
+
+describe("tree", () => {
+  const team = tree({ nodes: { root: "Root", a: { label: "A", parent: "root" }, b: { label: "B", parent: "root", role: "tool" }, a1: { label: "A1", parent: "a" } } }, { reveal: { at: 1 } });
+
+  test("route runs from one node up through the common ancestor and down to the other", () => {
+    const trip = team.route("a1", "b");
+    expect(touches(trip[0]!, team.get("a1"))).toBe(true);
+    expect(touches(trip.at(-1)!, team.get("b"))).toBe(true);
+    expect(Math.min(...trip.map((p) => p.y))).toBeCloseTo(team.get("root").y + team.get("root").h, 6);
+  });
+
+  test("a parent sits centered over its children", () => {
+    expect(team.get("root").center.x).toBeCloseTo((team.get("a").center.x + team.get("b").center.x) / 2, 6);
+    expect(() => valid(team.node)).not.toThrow();
+  });
+});
+
+describe("lanes", () => {
+  const run = lanes(
+    {
+      lanes: { a: "A", b: { label: "B", role: "tool" } },
+      spans: [{ lane: "a", from: 0, to: 2, label: "busy" }],
+      events: [{ lane: "b", at: 1, label: "READ" }],
+      links: [{ from: "a", to: "b", at: 1.5 }],
+    },
+    { scale: 50, x: 10, y: 20, play: true },
+  );
+
+  test("x maps seconds onto the lane axis at the given scale", () => {
+    expect(run.x(2) - run.x(1)).toBe(50);
+    expect(run.x(0)).toBeGreaterThan(run.get("a").x);
+    expect(run.get("b").y).toBe(run.get("a").y + run.get("a").h);
+    expect(() => valid(run.node)).not.toThrow();
   });
 });
 
