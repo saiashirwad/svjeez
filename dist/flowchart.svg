@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 456.06 600.32" width="456.06" height="600.32" role="img" aria-labelledby="t d">
+  <title id="t">Review pipeline</title>
+  <desc id="d">A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}
+
+.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,11%{opacity:0}15%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,10.475%{opacity:0}11%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,11%{stroke-dashoffset:1;visibility:hidden}14.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,13.975%{opacity:0}14.5%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,14.5%{stroke-dashoffset:1;visibility:hidden}18%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,17.475%{opacity:0}18%,100%{opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,18%{stroke-dashoffset:1;visibility:hidden}21.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,20.975%{opacity:0}21.5%,100%{opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,25%{stroke-dashoffset:1;visibility:hidden}28.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k10}
+@keyframes k11{0%,27.975%{opacity:0}28.5%,100%{opacity:1}}
+.m11{animation-name:k11}
+@keyframes k12{0%,28.5%{stroke-dashoffset:1;visibility:hidden}32%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k12}
+@keyframes k13{0%,31.475%{opacity:0}32%,100%{opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,21.5%{stroke-dashoffset:1;visibility:hidden}25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m14{animation-name:k14}
+@keyframes k15{0%,24.475%{opacity:0}25%,100%{opacity:1}}
+.m15{animation-name:k15}
+@keyframes k16{0%,7.5%{opacity:0}11%,100%{opacity:1}}
+@keyframes k17{0%,7.5%{scale:0.9}11%,100%{scale:1}}
+.m16{animation-name:k16,k17}
+@keyframes k18{0%,11%{opacity:0}14.5%,100%{opacity:1}}
+@keyframes k19{0%,11%{scale:0.9}14.5%,100%{scale:1}}
+.m17{animation-name:k18,k19}
+@keyframes k20{0%,4%{opacity:0}7.5%,100%{opacity:1}}
+@keyframes k21{0%,4%{scale:0.9}7.5%,100%{scale:1}}
+.m18{animation-name:k20,k21}
+@keyframes k22{0%,14.5%{opacity:0}18%,100%{opacity:1}}
+@keyframes k23{0%,14.5%{scale:0.9}18%,100%{scale:1}}
+.m19{animation-name:k22,k23}
+@keyframes k24{0%,18%{opacity:0}21.5%,100%{opacity:1}}
+@keyframes k25{0%,18%{scale:0.9}21.5%,100%{scale:1}}
+.m20{animation-name:k24,k25}
+@keyframes k26{0%,21.5%{opacity:0}25%,100%{opacity:1}}
+@keyframes k27{0%,21.5%{scale:0.9}25%,100%{scale:1}}
+.m21{animation-name:k26,k27}
+@keyframes k28{0%,28.5%{opacity:0}32%,100%{opacity:1}}
+@keyframes k29{0%,28.5%{scale:0.9}32%,100%{scale:1}}
+.m22{animation-name:k28,k29}
+@keyframes k30{0%,25%{opacity:0}28.5%,100%{opacity:1}}
+@keyframes k31{0%,25%{scale:0.9}28.5%,100%{scale:1}}
+.m23{animation-name:k30,k31}
+@keyframes k32{0%,28.5%{opacity:0}31%,100%{opacity:1}}
+.m24{animation-name:k32}
+@keyframes k33{0%,32%{opacity:0}34.5%,100%{opacity:1}}
+.m25{animation-name:k33}
+@keyframes k34{0%,25%{opacity:0}27.5%,100%{opacity:1}}
+.m26{animation-name:k34}
+@keyframes k35{0%,79.161%,100%{visibility:hidden}40%{visibility:visible}}
+@keyframes k36{0%,40%{translate:315.43px 84px}43.313%{translate:315.43px 137px}45.75%{translate:315.43px 176px}47.25%{translate:315.43px 200px}47.625%{translate:321.43px 200px}49.125%{translate:321.43px 224px}51.591%{translate:315.43px 263px}54.591%{translate:315.43px 311px}57.057%{translate:309.43px 350px}58.557%{translate:309.43px 374px}59.307%{translate:297.43px 374px}60.807%{translate:297.43px 398px}64.537%{translate:291.43px 457.367px}66.243%{translate:291.43px 484.66px}77.619%{translate:109.4px 484.66px}79.161%,100%{translate:109.4px 509.32px}}
+.m27{animation-name:k35,k36;animation-timing-function:steps(1),linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <g class="mono">
+    <g class="a m1">
+      <rect x="214.8" y="106.72" width="201.26" height="453.6" rx="10" fill="var(--base0E)" fill-opacity="0.04" stroke="var(--base0E)" stroke-opacity="0.45" stroke-dasharray="4 3"/>
+      <text x="226.8" y="126.62" font-size="11.9" fill="var(--base04)">Review agent</text>
+    </g>
+    <g>
+      <path d="M315.42999999999995 84L315.42999999999995 130" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m2"/>
+      <path d="M315.42999999999995 137L311.42999999999995 129L319.42999999999995 129Z" fill="var(--base04)" class="a m3"/>
+    </g>
+    <g>
+      <path d="M315.42999999999995 176L315.42999999999995 200L321.42999999999995 200L321.42999999999995 217" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+      <path d="M321.42999999999995 224L317.42999999999995 216L325.42999999999995 216Z" fill="var(--base04)" class="a m5"/>
+    </g>
+    <g>
+      <path d="M142.57999999999998 89L142.57999999999998 113L178.79999999999995 113L178.79999999999995 200L309.42999999999995 200L309.42999999999995 217" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+      <path d="M309.42999999999995 224L305.42999999999995 216L313.42999999999995 216Z" fill="var(--base04)" class="a m5"/>
+    </g>
+    <g>
+      <path d="M315.42999999999995 263L315.42999999999995 304" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m6"/>
+      <path d="M315.42999999999995 311L311.42999999999995 303L319.42999999999995 303Z" fill="var(--base04)" class="a m7"/>
+    </g>
+    <g>
+      <path d="M309.42999999999995 350L309.42999999999995 374L297.42999999999995 374L297.42999999999995 391" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m8"/>
+      <path d="M297.42999999999995 398L293.42999999999995 390L301.42999999999995 390Z" fill="var(--base04)" class="a m9"/>
+    </g>
+    <g>
+      <path d="M303.42999999999995 457.36655811977914L303.42999999999995 484.66L309.42999999999995 484.66L309.42999999999995 502.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m10"/>
+      <path d="M309.42999999999995 509.32L305.42999999999995 501.32L313.42999999999995 501.32Z" fill="var(--base04)" class="a m11"/>
+    </g>
+    <g>
+      <path d="M321.42999999999995 509.32L321.42999999999995 484.66L404.05999999999995 484.66L404.05999999999995 374L321.42999999999995 374L321.42999999999995 357" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m12"/>
+      <path d="M321.42999999999995 350L325.42999999999995 358L317.42999999999995 358Z" fill="var(--base04)" class="a m13"/>
+    </g>
+    <g>
+      <path d="M291.42999999999995 457.36655811977914L291.42999999999995 484.66L109.39999999999999 484.66L109.39999999999999 502.31999999999994" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
+      <path d="M109.39999999999999 509.31999999999994L105.39999999999999 501.31999999999994L113.39999999999999 501.31999999999994Z" fill="var(--base04)" class="a m15"/>
+    </g>
+    <g class="a m16 fb">
+      <path d="M262.22999999999996 45H382.28L368.63 84H248.57999999999996Z" fill="var(--base00)"/>
+      <path d="M262.22999999999996 45H382.28L368.63 84H248.57999999999996Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="315.43" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">PR opened</text>
+    </g>
+    <g class="a m17 fb">
+      <path d="M248.82999999999996 137H382.03Q385.03 137 385.03 140V173Q385.03 176 382.03 176H248.82999999999996Q245.82999999999996 176 245.82999999999996 173V140Q245.82999999999996 137 248.82999999999996 137Z" fill="var(--base00)"/>
+      <path d="M248.82999999999996 137H382.03Q385.03 137 385.03 140V173Q385.03 176 382.03 176H248.82999999999996Q245.82999999999996 176 245.82999999999996 173V140Q245.82999999999996 137 248.82999999999996 137Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M253.82999999999996 137V176M377.03 137V176" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+      <text x="315.43" y="161.4" font-size="14" text-anchor="middle" fill="var(--base05)">Gather diff</text>
+    </g>
+    <g class="a m18 fb">
+      <path d="M72.57999999999997 45A70 5 0 0 1 212.57999999999998 45V84A70 5 0 0 1 72.57999999999997 84Z" fill="var(--base00)"/>
+      <path d="M72.57999999999997 45A70 5 0 0 1 212.57999999999998 45V84A70 5 0 0 1 72.57999999999997 84Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M72.57999999999997 45A70 5 0 0 0 212.57999999999998 45" stroke="var(--base0E)" fill="none"/>
+      <text x="142.58" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Review memory</text>
+    </g>
+    <g class="a m19 fb">
+      <path d="M245.02999999999994 224H385.8299999999999Q393.8299999999999 224 393.8299999999999 232V255Q393.8299999999999 263 385.8299999999999 263H245.02999999999994Q237.02999999999994 263 237.02999999999994 255V232Q237.02999999999994 224 245.02999999999994 224Z" fill="var(--base00)"/>
+      <path d="M245.02999999999994 224H385.8299999999999Q393.8299999999999 224 393.8299999999999 232V255Q393.8299999999999 263 385.8299999999999 263H245.02999999999994Q237.02999999999994 263 237.02999999999994 255V232Q237.02999999999994 224 245.02999999999994 224Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="315.43" y="248.4" font-size="14" text-anchor="middle" fill="var(--base05)">Analyze changes</text>
+    </g>
+    <g class="a m20 fb">
+      <path d="M248.82999999999996 311H382.03Q385.03 311 385.03 314V347Q385.03 350 382.03 350H248.82999999999996Q245.82999999999996 350 245.82999999999996 347V314Q245.82999999999996 311 248.82999999999996 311Z" fill="var(--base00)"/>
+      <path d="M248.82999999999996 311H382.03Q385.03 311 385.03 314V347Q385.03 350 382.03 350H248.82999999999996Q245.82999999999996 350 245.82999999999996 347V314Q245.82999999999996 311 248.82999999999996 311Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M253.82999999999996 311V350M377.03 311V350" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+      <text x="315.43" y="335.4" font-size="14" text-anchor="middle" fill="var(--base05)">Run linters</text>
+    </g>
+    <g class="a m21 fb">
+      <path d="M297.42999999999995 398L368.05999999999995 429L297.42999999999995 460L226.79999999999995 429Z" fill="var(--base00)"/>
+      <path d="M297.42999999999995 398L368.05999999999995 429L297.42999999999995 460L226.79999999999995 429Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="297.43" y="433.9" font-size="14" text-anchor="middle" fill="var(--base05)">Issues?</text>
+    </g>
+    <g class="a m22 fb">
+      <path d="M261.8299999999999 509.32H369.03Q377.03 509.32 377.03 517.3199999999999V540.3199999999999Q377.03 548.3199999999999 369.03 548.3199999999999H261.8299999999999Q253.82999999999996 548.3199999999999 253.82999999999996 540.3199999999999V517.3199999999999Q253.82999999999996 509.32 261.8299999999999 509.32Z" fill="var(--base00)"/>
+      <path d="M261.8299999999999 509.32H369.03Q377.03 509.32 377.03 517.3199999999999V540.3199999999999Q377.03 548.3199999999999 369.03 548.3199999999999H261.8299999999999Q253.82999999999996 548.3199999999999 253.82999999999996 540.3199999999999V517.3199999999999Q253.82999999999996 509.32 261.8299999999999 509.32Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="315.43" y="533.72" font-size="14" text-anchor="middle" fill="var(--base05)">Draft fixes</text>
+    </g>
+    <g class="a m23 fb">
+      <path d="M59.5 509.32H159.29999999999998A19.5 19.5 0 0 1 159.29999999999998 548.3199999999999H59.5A19.5 19.5 0 0 1 59.5 509.32Z" fill="var(--base00)"/>
+      <path d="M59.5 509.32H159.29999999999998A19.5 19.5 0 0 1 159.29999999999998 548.3199999999999H59.5A19.5 19.5 0 0 1 59.5 509.32Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="109.4" y="533.72" font-size="14" text-anchor="middle" fill="var(--base05)">Post review</text>
+    </g>
+    <g class="a m24">
+      <rect x="279.01" y="488.66" width="27.42" height="16.66" rx="3" fill="var(--base00)" fill-opacity="0.9"/>
+      <text x="292.72" y="501.155" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text>
+    </g>
+    <g class="a m25">
+      <rect x="324.43" y="488.66" width="48.84" height="16.66" rx="3" fill="var(--base00)" fill-opacity="0.9"/>
+      <text x="348.85" y="501.155" font-size="11.9" text-anchor="middle" fill="var(--base04)">re-run</text>
+    </g>
+    <g class="a m26">
+      <rect x="112.4" y="488.66" width="20.28" height="16.66" rx="3" fill="var(--base00)" fill-opacity="0.9"/>
+      <text x="122.54" y="501.155" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text>
+    </g>
+  </g>
+  <circle r="5" fill="var(--base09)" class="a m27"/>
+</svg>

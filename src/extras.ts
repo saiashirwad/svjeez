@@ -10,3 +10,5 @@ export { rect, type Rect, type Point, type Edge } from "./geometry";
 export { base16, tint, adaptive, defaultDark, defaultLight, tomorrowNight, tomorrow, type Base16, type Slot, type Role } from "./extras/theme";
 export { window, type WindowOptions } from "./extras/window";
 export { terminal, type Command, type TerminalOptions } from "./extras/terminal";
+export { type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./extras/diagrams/kit";
+export { flowchart, type Flowchart, type FlowchartOptions, type FlowEdge, type FlowGroup } from "./extras/diagrams/flowchart";

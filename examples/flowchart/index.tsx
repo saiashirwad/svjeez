@@ -1,0 +1,56 @@
+import { render } from "svg-motion";
+import { adaptive, flowchart, tomorrow, tomorrowNight, travel } from "svjeez/extras";
+
+const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
+const M = 40;
+
+const chart = flowchart(
+  {
+    nodes: {
+      pr: { label: "PR opened", role: "input" },
+      gather: { label: "Gather diff", role: "tool" },
+      memory: { label: "Review memory", role: "store" },
+      analyze: "Analyze changes",
+      lint: { label: "Run linters", role: "tool" },
+      issues: { label: "Issues?", role: "decision" },
+      fix: "Draft fixes",
+      post: { label: "Post review", role: "output" },
+    },
+    groups: {
+      agent: { label: "Review agent", nodes: ["gather", "analyze", "lint", "issues", "fix"] },
+    },
+    edges: [
+      ["pr", "gather"],
+      ["gather", "analyze"],
+      ["memory", "analyze"],
+      ["analyze", "lint"],
+      ["lint", "issues"],
+      ["issues", "fix", { label: "yes" }],
+      ["fix", "lint", { label: "re-run" }],
+      ["issues", "post", { label: "no" }],
+    ],
+  },
+  { theme, x: M, y: M, class: "mono", reveal: { at: 0.4, step: 0.35 } },
+);
+
+const trip = chart.route("pr", "post");
+const D = 10;
+
+export default function build(): string {
+  return render(
+    {
+      width: chart.bounds.w + 2 * M,
+      height: chart.bounds.h + 2 * M,
+      duration: D,
+      title: "Review pipeline",
+      desc: "A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.",
+      reducedMotion: { at: D - 1 },
+      css: [css, ".mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}"].join("\n"),
+    },
+    <>
+      <rect width="100%" height="100%" fill={theme.base00} />
+      {chart.node}
+      <circle r={5} fill={theme.base09} animation={travel(trip, { at: 4, speed: 160 })} />
+    </>,
+  );
+}
