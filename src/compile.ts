@@ -10,6 +10,8 @@ export interface Canvas {
   readonly width: number;
   readonly height: number;
   readonly duration: number;
+  /** Playback rate. Every emitted duration is divided by it; the timeline stays in scene seconds. */
+  readonly speed: number;
   readonly stillAt?: number;
 }
 
@@ -54,6 +56,8 @@ const PREFIX: Record<DefTag, string> = {
 };
 
 const REGION = ["filterUnits", "x", "y", "width", "height"];
+
+const seconds = (canvas: Canvas, scene: number): string => `${num(scene / canvas.speed)}s`;
 
 const nextName = (state: State, prefix: string): string => {
   const count = (state.counters.get(prefix) ?? 0) + 1;
@@ -213,7 +217,7 @@ const className = (state: State, lanes: readonly Lane[]): string => {
     ...cssKeyframes(lane.discrete ? "visibility" : isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.keys, lane.period),
   }));
   const names = frames.map(({ lane, body }) => keyframesName(state, body, lane.label));
-  const durations = lanes.map((lane) => `${num(lane.snapped)}s`);
+  const durations = lanes.map((lane) => seconds(state.canvas, lane.snapped));
   const timings = frames.map((frame) => frame.timing);
   const body = [
     `animation-name:${names.join(",")}`,
@@ -236,8 +240,8 @@ const local = (state: State, lane: Lane): number => {
   return ((at % lane.snapped) / lane.snapped) * lane.period;
 };
 
-const animate = (attribute: string, lane: Lane): SvgNode =>
-  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped));
+const animate = (state: State, attribute: string, lane: Lane): SvgNode =>
+  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped / state.canvas.speed));
 
 const blurFilter = (state: State, lane: Lane): string => {
   const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}`;
@@ -246,7 +250,7 @@ const blurFilter = (state: State, lane: Lane): string => {
   const id = nextName(state, "f");
   state.blurs.set(signature, id);
   const still = formatValue(valueAt(lane.keys, local(state, lane)).blur);
-  const blur = element("feGaussianBlur", { stdDeviation: still }, [animate("stdDeviation", lane)]);
+  const blur = element("feGaussianBlur", { stdDeviation: still }, [animate(state, "stdDeviation", lane)]);
   addDef(state, element("filter", { id, ...canvasRegion(state.canvas) }, [blur]));
   return id;
 };
@@ -273,7 +277,7 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
     if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane)})`;
     if (lane.backend === "smil") {
       attrs[lane.key] = formatValue(valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel]);
-      children.push(animate(lane.key, lane));
+      children.push(animate(state, lane.key, lane));
     }
   }
   const classes = [attrs.class, css.length > 0 && "a", css.length > 0 && className(state, css), pivot && "fb"].filter(Boolean);
@@ -323,11 +327,11 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
   };
   const body = content.map((node) => walk(state, node));
   const authored = (isCss(author) ? resolveCss(state, author) : author).trim();
-  const base = `.a{animation-duration:${num(canvas.duration)}s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:${BASE_TIMING}}`;
+  const base = `.a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:${BASE_TIMING}}`;
   const freeze =
     canvas.stillAt === undefined || (state.rules.length === 0 && state.stills.length === 0)
       ? ""
-      : `@media (prefers-reduced-motion:reduce){${state.rules.length > 0 ? `.a{animation-delay:-${num(canvas.stillAt)}s!important;animation-play-state:paused!important}` : ""}${state.stills.join("")}}`;
+      : `@media (prefers-reduced-motion:reduce){${state.rules.length > 0 ? `.a{animation-delay:-${seconds(canvas, canvas.stillAt)}!important;animation-play-state:paused!important}` : ""}${state.stills.join("")}}`;
   const generated = [...state.registrations, state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
   return { body, defs: state.defs, css: [authored, generated].filter(Boolean).join("\n\n") };
 };
