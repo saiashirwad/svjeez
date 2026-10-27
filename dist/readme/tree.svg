@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 215 160" width="215" height="160" role="img" aria-labelledby="t d">
+  <title id="t">Tree</title>
+  <desc id="d">A lead with two children revealed level by level, then a dot runs from Search up to Lead and down to Build.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+
+.a{animation-duration:5s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,4%{stroke-dashoffset:1;visibility:hidden}10%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,9.1%{opacity:0}10%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,10%{stroke-dashoffset:1;visibility:hidden}16%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,15.1%{opacity:0}16%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,10%{opacity:0}17%,100%{opacity:1}}
+@keyframes k6{0%,10%{scale:0.9}17%,100%{scale:1}}
+.m5{animation-name:k5,k6}
+@keyframes k7{0%,16%{opacity:0}23%,100%{opacity:1}}
+@keyframes k8{0%,16%{scale:0.9}23%,100%{scale:1}}
+.m6{animation-name:k7,k8}
+@keyframes k9{0%,57.103%,100%{visibility:hidden}40%{visibility:visible}}
+@keyframes k10{0%,40%{translate:61.7px 100px}40.5%{translate:61.7px 96px}41.212%{translate:63.752px 90.688px}42.067%{translate:69.161px 86.5px}43.115%{translate:76.808px 83.063px}44.276%{translate:85.575px 80px}45.437%{translate:94.342px 76.938px}46.485%{translate:101.989px 73.5px}47.34%{translate:107.398px 69.313px}48.052%,49.052%{translate:109.45px 64px}48.552%{translate:109.45px 60px}49.763%{translate:111.502px 69.313px}50.619%{translate:116.911px 73.5px}51.667%{translate:124.558px 76.938px}52.827%{translate:133.325px 80px}53.988%{translate:142.092px 83.063px}55.036%{translate:149.739px 86.5px}55.891%{translate:155.148px 90.688px}56.603%{translate:157.2px 96px}57.103%,100%{translate:157.2px 100px}}
+.m7{animation-name:k9,k10;animation-timing-function:steps(1),linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-4s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <g class="mono">
+    <g>
+      <path d="M109.45 60L109.45 64C109.45 80 61.7 80 61.7 91L61.7 93" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+      <path d="M61.7 100L57.7 92L65.7 92Z" fill="var(--base04)" class="a m2"/>
+    </g>
+    <g>
+      <path d="M109.45 60L109.45 64C109.45 80 157.2 80 157.2 91L157.2 93" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+      <path d="M157.2 100L153.2 92L161.2 92Z" fill="var(--base04)" class="a m4"/>
+    </g>
+    <g>
+      <path d="M87.55000000000001 24H131.35000000000002Q139.35000000000002 24 139.35000000000002 32V52Q139.35000000000002 60 131.35000000000002 60H87.55000000000001Q79.55000000000001 60 79.55000000000001 52V32Q79.55000000000001 24 87.55000000000001 24Z" fill="var(--base00)"/>
+      <path d="M87.55000000000001 24H131.35000000000002Q139.35000000000002 24 139.35000000000002 32V52Q139.35000000000002 60 131.35000000000002 60H87.55000000000001Q79.55000000000001 60 79.55000000000001 52V32Q79.55000000000001 24 87.55000000000001 24Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="109.45" y="46.55" font-size="13" text-anchor="middle" fill="var(--base05)">Lead</text>
+    </g>
+    <g class="a m5 fb">
+      <path d="M32 100H91.4Q99.4 100 99.4 108V128Q99.4 136 91.4 136H32Q24 136 24 128V108Q24 100 32 100Z" fill="var(--base00)"/>
+      <path d="M32 100H91.4Q99.4 100 99.4 108V128Q99.4 136 91.4 136H32Q24 136 24 128V108Q24 100 32 100Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="61.7" y="122.55" font-size="13" text-anchor="middle" fill="var(--base05)">Search</text>
+    </g>
+    <g class="a m6 fb">
+      <path d="M131.39999999999998 100H183Q191 100 191 108V128Q191 136 183 136H131.39999999999998Q123.39999999999999 136 123.39999999999999 128V108Q123.39999999999999 100 131.39999999999998 100Z" fill="var(--base00)"/>
+      <path d="M131.39999999999998 100H183Q191 100 191 108V128Q191 136 183 136H131.39999999999998Q123.39999999999999 136 123.39999999999999 128V108Q123.39999999999999 100 131.39999999999998 100Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="157.2" y="122.55" font-size="13" text-anchor="middle" fill="var(--base05)">Build</text>
+    </g>
+  </g>
+  <circle r="4" fill="var(--base09)" class="a m7"/>
+</svg>

@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 341.83 272.47" width="341.83" height="272.47" role="img" aria-labelledby="t d">
+  <title id="t">Sequence</title>
+  <desc id="d">A login sequence: the user posts to the API, the API selects from Postgres and gets a row back, then checks the hash.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+
+.a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,8.333%{stroke-dashoffset:1;visibility:hidden}16.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,15.417%{opacity:0}16.667%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,8.333%{opacity:0}12.5%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,21.667%{stroke-dashoffset:1;visibility:hidden}30%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,28.75%{opacity:0}30%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,21.667%{opacity:0}25.833%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,35%{opacity:0}43.333%,100%{opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,42.083%{opacity:0}43.333%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,35%{opacity:0}39.167%,100%{opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,48.333%{opacity:0}52.5%,100%{opacity:1}}
+.m10{animation-name:k10}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <g class="mono">
+    <path d="M53.9 65V248.47" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+    <path d="M168.82999999999998 65V248.47" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+    <path d="M272.33000000000004 70V248.47" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+    <g>
+      <path d="M32 29H75.8Q83.8 29 83.8 37V57Q83.8 65 75.8 65H32Q24 65 24 57V37Q24 29 32 29Z" fill="var(--base00)"/>
+      <path d="M32 29H75.8Q83.8 29 83.8 37V57Q83.8 65 75.8 65H32Q24 65 24 57V37Q24 29 32 29Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="53.9" y="51.55" font-size="13" text-anchor="middle" fill="var(--base05)">User</text>
+    </g>
+    <g>
+      <path d="M150.82999999999998 29H186.82999999999998Q194.82999999999998 29 194.82999999999998 37V57Q194.82999999999998 65 186.82999999999998 65H150.82999999999998Q142.82999999999998 65 142.82999999999998 57V37Q142.82999999999998 29 150.82999999999998 29Z" fill="var(--base00)"/>
+      <path d="M150.82999999999998 29H186.82999999999998Q194.82999999999998 29 194.82999999999998 37V57Q194.82999999999998 65 186.82999999999998 65H150.82999999999998Q142.82999999999998 65 142.82999999999998 57V37Q142.82999999999998 29 150.82999999999998 29Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="168.83" y="51.55" font-size="13" text-anchor="middle" fill="var(--base05)">API</text>
+    </g>
+    <g>
+      <path d="M226.83 29A45.5 5 0 0 1 317.83000000000004 29V65A45.5 5 0 0 1 226.83 65Z" fill="var(--base00)"/>
+      <path d="M226.83 29A45.5 5 0 0 1 317.83000000000004 29V65A45.5 5 0 0 1 226.83 65Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M226.83 29A45.5 5 0 0 0 317.83000000000004 29" stroke="var(--base0E)" fill="none"/>
+      <text x="272.33" y="54.05" font-size="13" text-anchor="middle" fill="var(--base05)">Postgres</text>
+    </g>
+    <g>
+      <g>
+        <path d="M53.9 115L161.83 115" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+        <path d="M168.82999999999998 115L160.82999999999998 119L160.82999999999998 111Z" fill="var(--base04)" class="a m2"/>
+      </g>
+      <g class="a m3">
+        <rect x="69.9" y="94" width="82.93" height="17" rx="3" fill="var(--base00)"/>
+        <text x="111.365" y="106.367" font-size="11.05" text-anchor="middle" fill="var(--base05)">POST /login</text>
+      </g>
+    </g>
+    <g>
+      <g>
+        <path d="M168.83 150L265.33 150" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+        <path d="M272.33000000000004 150L264.33000000000004 154L264.33000000000004 146Z" fill="var(--base04)" class="a m5"/>
+      </g>
+      <g class="a m6">
+        <rect x="195.69" y="129" width="49.78" height="17" rx="3" fill="var(--base00)"/>
+        <text x="220.58" y="141.368" font-size="11.05" text-anchor="middle" fill="var(--base05)">select</text>
+      </g>
+    </g>
+    <g>
+      <g>
+        <path d="M272.33 185L175.83 185" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m7"/>
+        <path d="M168.82999999999998 185L176.82999999999998 181L176.82999999999998 189Z" fill="var(--base04)" class="a m8"/>
+      </g>
+      <g class="a m9">
+        <rect x="205.635" y="164" width="29.89" height="17" rx="3" fill="var(--base00)"/>
+        <text x="220.58" y="176.368" font-size="11.05" text-anchor="middle" fill="var(--base05)">row</text>
+      </g>
+    </g>
+    <g class="a m10">
+      <rect x="125.68" y="199" width="86.3" height="27.47" rx="4" fill="var(--base00)"/>
+      <rect x="125.68" y="199" width="86.3" height="27.47" rx="4" fill="var(--base0A)" fill-opacity="0.12" stroke="var(--base0A)" stroke-opacity="0.7"/>
+      <text x="168.83" y="216.603" font-size="11.05" text-anchor="middle" fill="var(--base05)">hash check</text>
+    </g>
+  </g>
+</svg>

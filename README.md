@@ -52,6 +52,8 @@ const svg = render(
 await Bun.write("hello.svg", svg);
 ```
 
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/basic.svg" width="200" alt="A curve draws on, then a dot pops in" />
+
 ## Motions
 
 ```tsx
@@ -64,6 +66,8 @@ motion({ opacity: 0 }) // initial values
 ```
 
 Between transitions, every value holds.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/motion.svg" width="200" alt="A square fades in, holds, then shrinks away" />
 
 ### Channels
 
@@ -91,6 +95,8 @@ motion({ rotate: 0 }).to({ rotate: 360 }, 2, ease.linear).loop(2);
 
 Index 0 is the outermost, as if it were a wrapper `<g>`.
 
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/loops.svg" width="200" alt="A looping spinner and a wandering dot" />
+
 ## Recipes
 
 ```tsx
@@ -101,6 +107,8 @@ draw({ at: 0, over: 1.2 }); // stroke a shape on
 shake({ at: 2, over: 0.5 }, { x: 6 }); // damped shake
 wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 }); // seeded noise that loops
 ```
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/recipes.svg" width="600" alt="enter, enter from a blur, exit, draw, shake and wiggle" />
 
 ```tsx
 sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), {
@@ -123,6 +131,8 @@ ease.hold; // jumps at the end
 ease.steps(4);
 ease.bezier(0.2, 0.8, 0.2, 1);
 ```
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/easing.svg" width="420" alt="Eight dots crossing a track, one per easing" />
 
 ## Defs
 
@@ -165,6 +175,8 @@ render(
 ```
 
 A property is a key in motions and `style`, and a hole in `css`. Each value is checked against its syntax: `number`, `length` (px), `angle` (deg) or `color`.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/property.svg" width="200" alt="A dot orbiting, driven by an animated angle property" />
 
 ### Calc
 
@@ -221,13 +233,15 @@ const grass = voxel.texture(
     blocks: [
       { at: [0, 0, 0], skin: { side: dirt, top: grass } },
       { at: [1, 0, 0], skin: dirt, from: 3, until: 9 }, // pops in at 3s, gone at 9s
-      { at: [0, 1, 0], skin: dirt, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
+      { at: [0, 0, 1], skin: { side: dirt, top: grass }, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
     ],
   })}
 </g>;
 
 sampled((t) => view.project([2, 3 - t, 1]), { duration: 3, tolerance: { translate: 0.5 } }); // a free point
 ```
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/voxels.svg" width="200" alt="Three voxel blocks, one dropping in and one popping in" />
 
 The scene is plain data: whole-cell blocks with an optional lifetime and motion. Blocks draw back to front, so order never depends on the array, except that blocks sharing a cell keep theirs (an overlay is a second block). A block hidden behind its three nearer neighbors for its whole life is left out, unless a neighbor is animated, has a transparent pixel, or lives a shorter time.
 
@@ -239,6 +253,8 @@ A texture is pixel art, one character per palette color (`#rgb`, `#rrggbb` or `#
 <text filter={fx.glow({ blur: 4 })}>OPEN</text>
 <g filter={fx.boil({ strength: 2 })}>{/* ... */}</g>
 ```
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/effects.svg" width="320" alt="A glowing word and a boiling hand-drawn house" />
 
 ## Extras
 
@@ -298,6 +314,8 @@ const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, 
 
 `morph` moves the words that survive each change and fades the rest. Runs that share an id pair first, and when their text differs they cross-fade as they move. `timeline` lays out named scenes, `read` gives the seconds a caption needs, and `pace` scales every scene. `during(span)` fades anything in and out with a span. `Camera` pans and zooms each stop's view to fit inside a `frame` rect; clip it yourself. Annotations take a `class`, so their font comes from your CSS.
 
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/code.svg" width="360" alt="A call to sum morphs into a reduce and back, with a marker following it" />
+
 ### Terminals
 
 ```tsx
@@ -316,6 +334,8 @@ const session = terminal(
 
 typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end }
 ```
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/terminal.svg" width="440" alt="Two commands typed into a terminal window" />
 
 ### Diagrams
 
@@ -336,6 +356,8 @@ const trip = flow(chart.route("pr", "post"), { at: 4, style: "trace", arrive: tr
 
 `flowchart` lays nodes out in ranks with curved edges that never cross a node; `edge(a, b)` and `route(a, b)` return points along the drawn curves. `layers` splits `node` into edges `under` and nodes `over`, so a flow runs between them.
 
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/flowchart.svg" width="250" alt="A review flowchart revealed rank by rank, then traced" />
+
 `flow(points, { at, style })` runs something along a path: `dot`, `comet` (a head with a fading tail and halo), `trace` (lights the path as it goes, then fades) or `packet` (a labelled chip). `arrive: true` ripples a ring where it lands, and `end` is when it gets there. `walk({ token })` takes the same look options.
 
 ```tsx
@@ -346,6 +368,8 @@ const login = sequence(
 ```
 
 `sequence` draws one row per message or note; `message(i)` gives its arrow and its slot on the `play` timeline.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/sequence.svg" width="342" alt="A login sequence diagram playing message by message" />
 
 ```tsx
 const agent = state(
@@ -361,12 +385,16 @@ const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1 }); 
 
 `state` marks the initial state with a dot and sends final states to a bullseye; a state with `states` is a composite laid out inside its own box, and `walk` lights each state in turn while a token runs the transitions.
 
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/state.svg" width="178" alt="A state machine lighting each state in turn" />
+
 ```tsx
 const team = tree({ nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } }, { theme, reveal: { at: 0.5 } });
 team.route("a", "b"); // up through the common ancestor and down
 ```
 
 `tree` is a tidy tree with each parent centered over its children, revealed breadth-first.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/tree.svg" width="215" alt="A small tree revealed level by level" />
 
 ```tsx
 const run = lanes(
@@ -376,6 +404,8 @@ const run = lanes(
 ```
 
 `lanes` puts one row per lane on a time axis in seconds; `x(t)` maps a time to x, and `play` runs it in real time with a playhead. `visible(spans)` and `travel(points, { at })` are the time helpers the diagrams use: on during each span, and a token that runs a path at constant speed.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/lanes.svg" width="463" alt="Two lanes on a time axis played in real time" />
 
 ## Render
 

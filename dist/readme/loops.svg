@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" width="200" height="120" role="img" aria-labelledby="t d">
+  <title id="t">Loops and stacking</title>
+  <desc id="d">A ring spins on a two second loop beside a dot that fades in and then wanders.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+
+.a{animation-duration:4s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%{rotate:0deg}100%{rotate:360deg}}
+.m1{animation-name:k1;animation-duration:2s;animation-timing-function:linear}
+@keyframes k2{0%,100%{translate:-1.938px -2.323px}6.25%{translate:0.979px 3.147px}12.5%{translate:-0.22px -1.398px}18.75%{translate:3.884px 3.896px}25%{translate:1.822px 1.557px}31.25%{translate:-2.139px -1.048px}37.5%{translate:2.052px -0.299px}43.75%{translate:-1.062px 1.157px}50%{translate:0.768px -1.366px}56.25%{translate:2.733px -1.265px}62.5%{translate:2.235px -2.91px}68.75%{translate:3.599px -2.388px}75%{translate:3.805px -3.959px}81.25%{translate:0.269px 0.014px}87.5%{translate:0.717px -2.734px}93.75%{translate:-2.004px -1.527px}}
+@keyframes k3{0%{opacity:0}15%,100%{opacity:1}}
+.m2{animation-name:k2,k3;animation-duration:2s,4s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-1s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <g transform="translate(60 60)">
+    <circle r="24" fill="none" stroke="var(--base0C)" stroke-width="5" stroke-linecap="round" stroke-dasharray="50 101" class="a m1 fb"/>
+  </g>
+  <circle cx="140" cy="60" r="10" fill="var(--base0E)" class="a m2"/>
+</svg>

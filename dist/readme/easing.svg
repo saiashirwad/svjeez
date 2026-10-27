@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 232" width="420" height="232" role="img" aria-labelledby="t d">
+  <title id="t">Easing</title>
+  <desc id="d">Eight dots cross the same track, each with a different easing curve.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+
+.a{animation-duration:3s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,13.333%,86.667%,100%{translate:0px 0px}66.667%{translate:270px 0px;animation-timing-function:steps(1)}}
+.m1{animation-name:k1;animation-timing-function:linear}
+.m2{animation-name:k1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}
+.m3{animation-name:k1}
+.m4{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m5{animation-name:k1;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k2{0%,13.333%,86.667%,100%{translate:0px 0px}66.667%{translate:270px 0px}}
+.m6{animation-name:k2;animation-timing-function:steps(1)}
+.m7{animation-name:k1;animation-timing-function:steps(4)}
+.m8{animation-name:k1;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-2s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <text x="20" y="28" class="mono" font-size="11" fill="var(--base04)">linear</text>
+  <line x1="110" x2="380" y1="24" y2="24" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="24" r="6" fill="var(--base09)" class="a m1"/>
+  <text x="20" y="54" class="mono" font-size="11" fill="var(--base04)">in</text>
+  <line x1="110" x2="380" y1="50" y2="50" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="50" r="6" fill="var(--base09)" class="a m2"/>
+  <text x="20" y="80" class="mono" font-size="11" fill="var(--base04)">out</text>
+  <line x1="110" x2="380" y1="76" y2="76" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="76" r="6" fill="var(--base09)" class="a m3"/>
+  <text x="20" y="106" class="mono" font-size="11" fill="var(--base04)">inOut</text>
+  <line x1="110" x2="380" y1="102" y2="102" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="102" r="6" fill="var(--base09)" class="a m4"/>
+  <text x="20" y="132" class="mono" font-size="11" fill="var(--base04)">pop</text>
+  <line x1="110" x2="380" y1="128" y2="128" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="128" r="6" fill="var(--base09)" class="a m5"/>
+  <text x="20" y="158" class="mono" font-size="11" fill="var(--base04)">hold</text>
+  <line x1="110" x2="380" y1="154" y2="154" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="154" r="6" fill="var(--base09)" class="a m6"/>
+  <text x="20" y="184" class="mono" font-size="11" fill="var(--base04)">steps(4)</text>
+  <line x1="110" x2="380" y1="180" y2="180" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="180" r="6" fill="var(--base09)" class="a m7"/>
+  <text x="20" y="210" class="mono" font-size="11" fill="var(--base04)">bezier</text>
+  <line x1="110" x2="380" y1="206" y2="206" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="110" cy="206" r="6" fill="var(--base09)" class="a m8"/>
+</svg>

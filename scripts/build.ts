@@ -5,7 +5,8 @@ import { validateSvg } from "svg-motion";
 const ROOT = join(import.meta.dir, "..");
 const OUT = join(ROOT, "dist");
 
-const examples = [...new Bun.Glob("examples/*/index.tsx").scanSync(ROOT)].map((entry) => basename(dirname(entry))).sort();
+const readme = [...new Bun.Glob("examples/readme/*.tsx").scanSync(ROOT)].map((entry) => `readme/${basename(entry, ".tsx")}`);
+const examples = [...new Bun.Glob("examples/*/index.tsx").scanSync(ROOT)].map((entry) => basename(dirname(entry))).concat(readme).sort();
 const wanted = process.argv.slice(2);
 const unknown = wanted.filter((name) => !examples.includes(name));
 if (unknown.length > 0) {
@@ -23,7 +24,7 @@ const lint = (svg: string): string | undefined => {
 
 const build = async (name: string): Promise<boolean> => {
   try {
-    const { default: make } = (await import(join(ROOT, "examples", name, "index.tsx"))) as { default: () => string };
+    const { default: make } = (await import(join(ROOT, "examples", name.startsWith("readme/") ? `${name}.tsx` : join(name, "index.tsx")))) as { default: () => string };
     const svg = make();
     const { warnings } = validateSvg(svg);
     const problem = lint(svg);
@@ -40,7 +41,7 @@ const build = async (name: string): Promise<boolean> => {
   }
 };
 
-await mkdir(OUT, { recursive: true });
+await mkdir(join(OUT, "readme"), { recursive: true });
 const results = await Promise.all((wanted.length > 0 ? wanted : examples).map(build));
 if (!xmllint) console.warn("xmllint not installed, skipped");
 if (results.includes(false)) process.exit(1);

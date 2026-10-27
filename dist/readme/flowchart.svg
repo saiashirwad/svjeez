@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250.03 415" width="250.03" height="415" role="img" aria-labelledby="t d">
+  <title id="t">Flowchart</title>
+  <desc id="d">A review flowchart revealed rank by rank, then a trace runs from the opened PR to the posted review.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+
+.a{animation-duration:9s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,5.556%{opacity:0}10%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,1.111%{stroke-dashoffset:1;visibility:hidden}5.556%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,4.889%{opacity:0}5.556%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,5.556%{stroke-dashoffset:1;visibility:hidden}10%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,9.333%{opacity:0}10%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,10%{stroke-dashoffset:1;visibility:hidden}14.444%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,13.778%{opacity:0}14.444%,100%{opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,44.444%{stroke-dashoffset:1;visibility:hidden}59.343%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k9{0%,61.01%{opacity:1}67.677%,100%{opacity:0}}
+.m8{animation-name:k8,k9;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
+@keyframes k10{0%,59.343%,100%{visibility:hidden}44.444%{visibility:visible}}
+@keyframes k11{0%,44.444%{translate:101.2px 60px}46.869%{translate:101.2px 108px}48.687%{translate:101.2px 144px}51.111%{translate:101.2px 192px}53.99%{translate:101.2px 249px}59.343%,100%{translate:101.2px 355px}}
+.m9{animation-name:k10,k11;animation-timing-function:steps(1),linear}
+@keyframes k12{0%{opacity:0;animation-timing-function:steps(1)}59.343%{opacity:0.9}67.121%,100%{opacity:0}}
+@keyframes k13{0%,59.343%{scale:0.5}67.121%,100%{scale:3}}
+.m10{animation-name:k12,k13}
+@keyframes k14{0%,5.556%{opacity:0}9.444%,100%{opacity:1}}
+@keyframes k15{0%,5.556%{scale:0.9}9.444%,100%{scale:1}}
+.m11{animation-name:k14,k15}
+@keyframes k16{0%,10%{opacity:0}13.889%,100%{opacity:1}}
+@keyframes k17{0%,10%{scale:0.9}13.889%,100%{scale:1}}
+.m12{animation-name:k16,k17}
+@keyframes k18{0%,14.444%{opacity:0}18.333%,100%{opacity:1}}
+@keyframes k19{0%,14.444%{scale:0.9}18.333%,100%{scale:1}}
+.m13{animation-name:k18,k19}
+@keyframes k20{0%,14.444%{opacity:0}17.222%,100%{opacity:1}}
+.m14{animation-name:k20}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-3.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <g class="mono">
+    <g class="a m1">
+      <rect x="24" y="78.74" width="154.4" height="182.26" rx="10" fill="none" stroke="var(--base0E)" stroke-opacity="0.45" stroke-dasharray="4 3"/>
+      <text x="36" y="97.79" font-size="11.05" fill="var(--base04)">Review agent</text>
+    </g>
+    <g>
+      <path d="M101.2 60L101.2 101" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m2"/>
+      <path d="M101.2 108L97.2 100L105.2 100Z" fill="var(--base04)" class="a m3"/>
+    </g>
+    <g>
+      <path d="M101.2 144L101.2 185" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+      <path d="M101.2 192L97.2 184L105.2 184Z" fill="var(--base04)" class="a m5"/>
+    </g>
+    <g>
+      <path d="M101.2 249L101.2 348" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m6"/>
+      <path d="M101.2 355L97.2 347L105.2 347Z" fill="var(--base04)" class="a m7"/>
+    </g>
+    <g>
+      <path d="M161.13 220.5L204.4 220.5C209.9 220.5 214.4 216 214.4 210.5L214.4 136C214.4 130.5 209.9 126 204.4 126L173.4 126" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m6"/>
+      <path d="M166.4 126L174.4 122L174.4 130Z" fill="var(--base04)" class="a m7"/>
+    </g>
+  </g>
+  <g>
+    <path d="M101.2 60L101.2 108L101.2 144L101.2 192L101.2 249L101.2 355" fill="none" stroke="var(--base09)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m8"/>
+    <circle r="4.5" fill="var(--base09)" class="a m9"/>
+    <circle cx="101.2" cy="355" r="9" fill="none" stroke="var(--base09)" stroke-width="1.5" class="a m10 fb"/>
+  </g>
+  <g class="mono">
+    <g>
+      <path d="M51.8 24H163.20000000000002L150.60000000000002 60H39.199999999999996Z" fill="var(--base00)"/>
+      <path d="M51.8 24H163.20000000000002L150.60000000000002 60H39.199999999999996Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="101.2" y="46.55" font-size="13" text-anchor="middle" fill="var(--base05)">PR opened</text>
+    </g>
+    <g class="a m11 fb">
+      <path d="M39 108H163.4Q166.4 108 166.4 111V141Q166.4 144 163.4 144H39Q36 144 36 141V111Q36 108 39 108Z" fill="var(--base00)"/>
+      <path d="M39 108H163.4Q166.4 108 166.4 111V141Q166.4 144 163.4 144H39Q36 144 36 141V111Q36 108 39 108Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M44 108V144M158.4 108V144" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+      <text x="101.2" y="130.55" font-size="13" text-anchor="middle" fill="var(--base05)">Run linters</text>
+    </g>
+    <g class="a m12 fb">
+      <path d="M101.2 192L161.13 220.5L101.2 249L41.27 220.5Z" fill="var(--base00)"/>
+      <path d="M101.2 192L161.13 220.5L101.2 249L41.27 220.5Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="101.2" y="225.05" font-size="13" text-anchor="middle" fill="var(--base05)">Clean?</text>
+    </g>
+    <g class="a m13 fb">
+      <path d="M52 355H150.4Q158.4 355 158.4 363V383Q158.4 391 150.4 391H52Q44 391 44 383V363Q44 355 52 355Z" fill="var(--base00)"/>
+      <path d="M52 355H150.4Q158.4 355 158.4 363V383Q158.4 391 150.4 391H52Q44 391 44 383V363Q44 355 52 355Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="101.2" y="377.55" font-size="13" text-anchor="middle" fill="var(--base05)">Post review</text>
+    </g>
+    <g class="a m14">
+      <rect x="86.255" y="293.5" width="29.89" height="17" rx="3" fill="var(--base00)"/>
+      <text x="101.2" y="305.868" font-size="11.05" text-anchor="middle" fill="var(--base04)">yes</text>
+    </g>
+    <g class="a m14">
+      <rect x="202.77" y="164.75" width="23.26" height="17" rx="3" fill="var(--base00)"/>
+      <text x="214.4" y="177.118" font-size="11.05" text-anchor="middle" fill="var(--base04)">no</text>
+    </g>
+  </g>
+</svg>
