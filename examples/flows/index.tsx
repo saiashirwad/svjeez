@@ -1,5 +1,6 @@
 import { render } from "svjeez";
 import { adaptive, flow, tomorrow, tomorrowNight, type FlowOptions } from "svjeez/extras";
+import { mono } from "../fonts/faces";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const W = 800;
@@ -24,14 +25,14 @@ export default function build(): string {
       title: "Flows",
       desc: "Four ways a token can run a path: a dot, a comet with a fading tail, a trace that lights the path, and a labelled packet.",
       reducedMotion: { at: 2 },
-      css: [css, ".mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}"].join("\n"),
+      css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       {rows.map(([name, options], i) => {
         const points = wave(60 + i * ROW);
         return (
-          <g class="mono">
+          <g fontFamily={mono}>
             <text x={40} y={64 + i * ROW} fontSize={13} fill={theme.base04}>
               {name}
             </text>

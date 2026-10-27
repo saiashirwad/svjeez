@@ -1,6 +1,6 @@
 import { render } from "svjeez";
 import { state } from "svjeez/extras";
-import { CSS, theme } from "./kit";
+import { CSS, theme, mono } from "./kit";
 
 const M = 24;
 const agent = state(
@@ -9,7 +9,7 @@ const agent = state(
     initial: "idle",
     transitions: [["idle", "working", "task"], ["plan", "act"], ["act", "plan"], ["working", "done", "finish"]],
   },
-  { theme, x: M, y: M, class: "mono", fontSize: 13 },
+  { theme, x: M, y: M, font: mono, fontSize: 13 },
 );
 const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1 });
 

@@ -1,5 +1,6 @@
 import { render } from "svjeez";
 import { adaptive, tomorrow, tomorrowNight, travel, tree } from "svjeez/extras";
+import { mono } from "../fonts/faces";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
@@ -18,7 +19,7 @@ const team = tree(
       tests: { label: "TH-09 tests", parent: "ui", role: "tool" },
     },
   },
-  { theme, x: M, y: M, class: "mono", reveal: { at: 0.4, step: 0.3 } },
+  { theme, x: M, y: M, font: mono, reveal: { at: 0.4, step: 0.3 } },
 );
 
 const D = 9;
@@ -33,7 +34,7 @@ export default function build(): string {
       title: "Delegation tree",
       desc: "A lead agent's delegation tree revealed level by level, then a message runs from the docs thread to the tests thread through their common ancestor.",
       reducedMotion: { at: D - 1 },
-      css: [css, ".mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}"].join("\n"),
+      css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />

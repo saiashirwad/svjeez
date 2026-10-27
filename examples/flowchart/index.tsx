@@ -1,5 +1,6 @@
 import { render } from "svjeez";
 import { adaptive, flow, flowchart, tomorrow, tomorrowNight } from "svjeez/extras";
+import { mono } from "../fonts/faces";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
@@ -30,7 +31,7 @@ export const chart = flowchart(
       ["issues", "post", { label: "no" }],
     ],
   },
-  { theme, x: M, y: M, class: "mono", reveal: { at: 0.4, step: 0.35 } },
+  { theme, x: M, y: M, font: mono, reveal: { at: 0.4, step: 0.35 } },
 );
 
 const trip = flow(chart.route("pr", "post"), { at: 4, speed: 160, style: "trace", color: theme.base09, arrive: true });
@@ -45,7 +46,7 @@ export default function build(): string {
       title: "Review pipeline",
       desc: "A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.",
       reducedMotion: { at: D - 1 },
-      css: [css, ".mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}"].join("\n"),
+      css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />

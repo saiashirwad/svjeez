@@ -1,11 +1,11 @@
 import { render } from "svjeez";
 import { travel, tree } from "svjeez/extras";
-import { CSS, theme } from "./kit";
+import { CSS, theme, mono } from "./kit";
 
 const M = 24;
 const team = tree(
   { nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } },
-  { theme, x: M, y: M, class: "mono", fontSize: 13, reveal: { at: 0.5 } },
+  { theme, x: M, y: M, font: mono, fontSize: 13, reveal: { at: 0.5 } },
 );
 
 export default function build(): string {

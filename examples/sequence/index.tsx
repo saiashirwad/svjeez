@@ -1,5 +1,6 @@
 import { render } from "svjeez";
 import { adaptive, sequence, tomorrow, tomorrowNight, travel } from "svjeez/extras";
+import { mono } from "../fonts/faces";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
@@ -23,7 +24,7 @@ const login = sequence(
       ["api", "user", "200 + Set-Cookie", { reply: true }],
     ],
   },
-  { theme, x: M, y: M, class: "mono", play: { at: 0.6, step: 0.9 } },
+  { theme, x: M, y: M, font: mono, play: { at: 0.6, step: 0.9 } },
 );
 
 const D = 10;
@@ -38,7 +39,7 @@ export default function build(): string {
       title: "Login handshake",
       desc: "A sequence diagram of a login: the browser posts credentials, the API checks them against Postgres, has a token signed and returns it.",
       reducedMotion: { at: D - 1 },
-      css: [css, ".mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}"].join("\n"),
+      css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />

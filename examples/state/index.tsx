@@ -1,5 +1,6 @@
 import { render } from "svjeez";
 import { adaptive, state, tomorrow, tomorrowNight } from "svjeez/extras";
+import { mono } from "../fonts/faces";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
@@ -24,7 +25,7 @@ export const agent = state(
       ["working", "failed", "error"],
     ],
   },
-  { theme, x: M, y: M, class: "mono" },
+  { theme, x: M, y: M, font: mono },
 );
 
 const walk = agent.walk(["idle", "working", "planning", "acting", "planning", "acting", "waiting", "working", "planning", "acting", "done"], { at: 0.6, dwell: 0.8, token: { style: "comet", arrive: true } });
@@ -39,7 +40,7 @@ export default function build(): string {
       title: "Agent lifecycle",
       desc: "A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.",
       reducedMotion: { at: walk.end - 0.3 },
-      css: [css, ".mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}"].join("\n"),
+      css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />

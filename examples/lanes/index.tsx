@@ -1,5 +1,6 @@
 import { render } from "svjeez";
 import { adaptive, lanes, tomorrow, tomorrowNight } from "svjeez/extras";
+import { mono } from "../fonts/faces";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
@@ -32,7 +33,7 @@ const run = lanes(
       { from: "build", to: "lead", at: 7.2 },
     ],
   },
-  { theme, x: M, y: M, class: "mono", scale: 90, play: { at: 0 } },
+  { theme, x: M, y: M, font: mono, scale: 90, play: { at: 0 } },
 );
 
 const D = 11;
@@ -46,7 +47,7 @@ export default function build(): string {
       title: "Agent threads",
       desc: "Three agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.",
       reducedMotion: { at: 9 },
-      css: [css, ".mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}"].join("\n"),
+      css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
