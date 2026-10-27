@@ -491,11 +491,14 @@ Frames come from headless Chromium through `playwright-core`, an optional peer d
 ```sh
 bun install
 bun run dev examples/readme/basic.tsx   # writes .preview/basic.svg, serves it, reloads on change
+bun run render-png examples/readme/basic.tsx --times 0,1,2   # PNG frames into frames/
 bun run build                           # every example into dist/
 bun test && bun run typecheck
 ```
 
 The preview page plays the SVG inline with a scrubber, and shows the error when a build fails. It watches the module's folder and `src/`.
+
+Coding agents can start from [`AGENTS.md`](AGENTS.md) and [`skills/svjeez/SKILL.md`](skills/svjeez/SKILL.md), which teach the API, the common compile errors, and checking output with `svjeez render`.
 
 ## Type safety
 
