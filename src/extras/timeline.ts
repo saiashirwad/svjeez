@@ -1,4 +1,5 @@
-import { motion, type Motion, type Seconds, type Span } from "../motion";
+import type { Point } from "../geometry";
+import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 
 export type Timeline<K extends string> = { readonly [P in K]: Span } & {
   readonly duration: Seconds;
@@ -18,6 +19,34 @@ export interface TimelineOptions {
 export const during = ({ at, over }: Span, fade: Seconds = 0.3): Motion<"opacity"> => {
   const f = Math.min(fade, over / 2);
   return motion({ opacity: 0 }).at(at).to({ opacity: 1 }, f).at(at + over - f).to({ opacity: 0 }, f);
+};
+
+/** On during each `[from, to]`, off between. Spans closer than two fades merge, so fades never overlap. */
+export const visible = (spans: readonly (readonly [Seconds, Seconds])[], fade: Seconds = 0.15): Motion<"opacity"> =>
+  [...spans]
+    .sort((a, b) => a[0] - b[0])
+    .reduce<[Seconds, Seconds][]>((out, [a, b]) => {
+      const last = out.at(-1);
+      if (last && a - last[1] < fade * 2) last[1] = Math.max(last[1], b);
+      else out.push([a, b]);
+      return out;
+    }, [])
+    .reduce((track, [a, b]) => track.at(a).to({ opacity: 1 }, Math.min(fade, (b - a) / 2)).at(b).to({ opacity: 0 }, fade), motion({ opacity: 0 }));
+
+/**
+ * A token that appears at `at`, runs `points` at constant speed and vanishes at the end. Draw it at the origin.
+ * `over` fixes the trip's duration; otherwise `speed` in px/s sets it.
+ */
+export const travel = (points: readonly Point[], { at, speed = 300, over }: { readonly at: Seconds; readonly speed?: number; readonly over?: Seconds }): Motion<"x" | "y" | "opacity"> => {
+  const legs = points.slice(1).flatMap((point, i) => {
+    const length = Math.hypot(point.x - points[i]!.x, point.y - points[i]!.y);
+    return length > 0 ? [{ point, length }] : [];
+  });
+  const total = legs.reduce((sum, leg) => sum + leg.length, 0);
+  const duration = over ?? total / speed;
+  if (!(total > 0 && duration > 0)) throw new Error("travel() needs a path of positive length and a positive speed or duration.");
+  const start: Motion<"x" | "y" | "opacity"> = motion({ opacity: 0, x: points[0]!.x, y: points[0]!.y }).at(at).set({ opacity: 1 });
+  return legs.reduce((track, leg) => track.to({ x: leg.point.x, y: leg.point.y }, (duration * leg.length) / total, ease.linear), start).set({ opacity: 0 });
 };
 
 /** Seconds a viewer needs to read `text`: words / wps + settle, at least `min`. */

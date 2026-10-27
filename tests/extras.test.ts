@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { el, rect, render } from "svg-motion";
-import { Focus, Marker, adaptive, code, defaultDark, defaultLight, morph, read, terminal, timeline, window } from "svjeez/extras";
+import { Focus, Marker, adaptive, code, defaultDark, defaultLight, morph, read, terminal, timeline, travel, visible, window } from "svjeez/extras";
+import { dataOf, type Motion } from "../src/motion";
+import { keysOf, valueAt } from "../src/timeline";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -156,4 +158,21 @@ test("a run renamed under the same id cross-fades: both texts render, each anima
   const b = code([[["fn", "useReducer", "hook"]]]);
   const svg = render({ width: 100, height: 100, duration: 4, title: "morph" }, morph([a, b], { at: [{ at: 1, over: 1 }] }).node);
   for (const word of ["useState", "useReducer"]) expect(svg).toMatch(new RegExp(`<text[^>]*class="a [^"]*"[^>]*>${word}</text>`));
+});
+
+describe("time helpers", () => {
+  const at = (track: Motion, t: number) => valueAt(keysOf(dataOf(track).initial, dataOf(track).steps, 100), t);
+
+  test("visible is on during each span and stays on across gaps shorter than two fades", () => {
+    const track = visible([[5, 6], [1, 2], [2.2, 3]], 0.15);
+    expect([0.5, 1.5, 2.1, 2.5, 4, 5.5, 7].map((t) => at(track, t).opacity)).toEqual([0, 1, 1, 1, 0, 1, 0]);
+  });
+
+  test("travel crosses each leg at one speed, then hides", () => {
+    const track = travel([{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 300 }], { at: 1, speed: 100 });
+    expect(at(track, 0.5)).toMatchObject({ opacity: 0, x: 0, y: 0 });
+    expect(at(track, 2)).toMatchObject({ opacity: 1, x: 100, y: 0 });
+    expect(at(track, 5.5)).toMatchObject({ x: 100, y: 300, opacity: 0 });
+    expect(() => travel([{ x: 1, y: 1 }], { at: 0 })).toThrow();
+  });
 });

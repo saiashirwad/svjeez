@@ -1,4 +1,5 @@
 import { def, draw, ease, el, enter, motion, render, type Color, type Motion, type Point, type SvgNode } from "svg-motion";
+import { travel, visible } from "svjeez/extras";
 import { SPEED, end, graph, messages, type Kind, type Thread } from "./data";
 
 const W = 1280;
@@ -259,7 +260,7 @@ function Labels({ thread }: { thread: Thread }): SvgNode {
 
 // Nodes.
 
-/** Spans merged when they nearly touch, so fades never overlap. */
+/** Runs merged when they nearly touch, so ACTIVE counts a thread once across a short pause. */
 const merge = (spans: readonly (readonly [number, number])[], gap: number): [number, number][] =>
   spans.reduce<[number, number][]>((out, [a, b]) => {
     const last = out.at(-1);
@@ -267,13 +268,6 @@ const merge = (spans: readonly (readonly [number, number])[], gap: number): [num
     else out.push([a, b]);
     return out;
   }, []);
-
-const pulse = (spans: readonly (readonly [number, number])[], fade: number): Fade =>
-  merge(spans, fade * 2).reduce<Fade>((track, [a, b]) => {
-    const over = Math.min(fade, (b - a) / 2);
-    track = track.at(a).to({ opacity: 1 }, over);
-    return b + fade <= D ? track.at(b).to({ opacity: 0 }, fade) : track;
-  }, motion({ opacity: 0 }));
 
 const arrivals = new Map<number, number[]>();
 
@@ -284,7 +278,7 @@ function Beacon({ thread }: { thread: Thread }): SvgNode {
     return el.line({ x1: Math.cos(angle) * inner, y1: Math.sin(angle) * inner, x2: Math.cos(angle) * outer, y2: Math.sin(angle) * outer });
   });
   return (
-    <g animation={pulse(thread.runs, 0.15)}>
+    <g animation={visible(thread.runs, 0.15)}>
       <g stroke={C.ink} strokeWidth={1.5} strokeLinecap="square" animation={motion({ rotate: 0 }).to({ rotate: 360 }, 6, ease.linear).loop(6)}>
         {rays}
       </g>
@@ -303,7 +297,7 @@ function Node({ thread }: { thread: Thread }): SvgNode {
     <g>
       <g transform={`translate(${x} ${y})`}>
         <Beacon thread={thread} />
-        <rect x={-R - 7} y={-R - 7} width={2 * R + 14} height={2 * R + 14} fill="none" stroke={C.orange} strokeWidth={1.5} animation={pulse(flashes, 0.08)} />
+        <rect x={-R - 7} y={-R - 7} width={2 * R + 14} height={2 * R + 14} fill="none" stroke={C.orange} strokeWidth={1.5} animation={visible(flashes, 0.08)} />
         <circle
           r={R}
           fill={tint}
@@ -345,30 +339,20 @@ const PACE = 420;
 
 const flights = messages.map((message) => {
   const path = between(message.from, message.to);
-  const legs = path.slice(1).map((point, i) => ({ point, length: Math.hypot(point.x - path[i]!.x, point.y - path[i]!.y) }));
-  const total = legs.reduce((sum, leg) => sum + leg.length, 0);
+  const total = path.slice(1).reduce((sum, point, i) => sum + Math.hypot(point.x - path[i]!.x, point.y - path[i]!.y), 0);
   const over = Math.min(0.9, Math.max(0.35, total / PACE));
   const list = arrivals.get(message.to) ?? [];
   list.push(message.t + over);
   arrivals.set(message.to, list);
-  return { ...message, path, legs, total, over };
+  return { ...message, path, over };
 });
-
-const fly = (flight: (typeof flights)[number], delay: number): Motion<"opacity" | "x" | "y"> => {
-  const [start] = flight.path;
-  const track = flight.legs.reduce<Motion<"opacity" | "x" | "y">>(
-    (track, leg) => track.to({ x: leg.point.x, y: leg.point.y }, (flight.over * leg.length) / flight.total, ease.linear),
-    motion({ opacity: 0, x: start!.x, y: start!.y }).at(flight.t + delay).set({ opacity: 1 }),
-  );
-  return track.set({ opacity: 0 });
-};
 
 function Messages(): SvgNode {
   return (
     <g fill={C.orange}>
       {flights.map((flight) => [
-        el.rect({ x: -2.5, y: -2.5, width: 5, height: 5, opacity: 0.45, animation: fly(flight, 0.07) }),
-        el.rect({ x: -4, y: -4, width: 8, height: 8, animation: fly(flight, 0) }),
+        el.rect({ x: -2.5, y: -2.5, width: 5, height: 5, opacity: 0.45, animation: travel(flight.path, { at: flight.t + 0.07, over: flight.over }) }),
+        el.rect({ x: -4, y: -4, width: 8, height: 8, animation: travel(flight.path, { at: flight.t, over: flight.over }) }),
       ])}
     </g>
   );
