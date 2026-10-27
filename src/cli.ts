@@ -100,4 +100,4 @@ const COMMANDS: Record<string, (args: string[]) => Promise<void>> = { svg: svgCo
 
 const [command = "", ...args] = process.argv.slice(2);
 const run = COMMANDS[command] ?? (() => fail(USAGE));
-await run(args).catch((error: Error) => fail(error.message));
+await run(args).catch((error: Error) => fail(error.stack ?? error.message));
