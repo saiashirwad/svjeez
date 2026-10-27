@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
@@ -12,7 +13,7 @@ const USAGE = `usage:
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
 Times are playback seconds. Without --times, render takes --count frames (default 6) across one loop.
-Node cannot load .tsx: run \`bunx --bun svjeez\`, or pass an .svg or compiled .js file.`;
+On Node, .tsx files load through tsx when it is installed.`;
 
 const fail = (message: string): never => {
   console.error(message);
@@ -22,9 +23,20 @@ const fail = (message: string): never => {
 const loadSvg = async (file: string): Promise<string> => {
   const path = resolve(file);
   if (path.endsWith(".svg")) return readFile(path, "utf8");
-  const module = (await import(pathToFileURL(path).href).catch((error: Error & { code?: string }) => {
-    if (error.code === "ERR_UNKNOWN_FILE_EXTENSION") fail(`Node cannot load ${file}. Run \`bunx --bun svjeez\`, or compile it to .js first.`);
-    throw error;
+  const url = pathToFileURL(path).href;
+  const module = (await import(url).catch(async (error: Error & { code?: string }) => {
+    if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
+    // Node has no TSX loader of its own; use tsx when the project has it.
+    const tsx = (() => {
+      try {
+        return pathToFileURL(createRequire(join(process.cwd(), "package.json")).resolve("tsx/esm/api")).href;
+      } catch {
+        return "tsx/esm/api";
+      }
+    })();
+    const { register } = (await import(tsx).catch(() => fail(`Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`))) as { register: () => void };
+    register();
+    return import(url);
   })) as { default?: unknown };
   const value = typeof module.default === "function" ? await module.default() : module.default;
   if (typeof value !== "string") fail(`${file} must export default an SVG string, or a function that returns one.`);
