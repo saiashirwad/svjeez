@@ -1,6 +1,7 @@
 import type { TagChannels } from "./channels";
 import { def, type Ref } from "./defs";
 import type { Stack } from "./motion";
+import { num } from "./format";
 import type { SvgNode } from "./svg";
 
 export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
@@ -167,7 +168,7 @@ export const picture = Object.assign(
   },
 );
 
-const FIT = { contain: "xMidYMid meet", cover: "xMidYMid slice", fill: "none" } as const;
+const FITS = ["contain", "cover", "fill"] as const;
 
 export interface PictureProps {
   readonly src: Picture;
@@ -177,7 +178,7 @@ export interface PictureProps {
   readonly width?: number;
   readonly height?: number;
   /** How the image meets the frame. Default "cover". */
-  readonly fit?: keyof typeof FIT;
+  readonly fit?: (typeof FITS)[number];
   /** Corner radius of the frame in px. */
   readonly radius?: number;
   readonly filter?: Ref<"filter">;
@@ -186,18 +187,33 @@ export interface PictureProps {
   /** Alt text. Without it the picture is hidden from assistive tech. */
   readonly alt?: string;
   /** Moves the image inside a frame that stays put. To animate the whole picture, wrap it in an animated `<g>`. */
-  readonly animation?: Stack<TagChannels<"image">>;
+  readonly animation?: Stack<TagChannels<"g">>;
 }
+
+/** One symbol per picture, so drawing an image many times embeds its bytes once. Overflow stays visible, or the symbol would crop an image larger than the canvas. */
+const symbols = new WeakMap<Picture, Ref<"symbol">>();
+
+const symbolOf = (src: Picture): Ref<"symbol"> => {
+  let symbol = symbols.get(src);
+  if (!symbol) symbols.set(src, (symbol = def.symbol({ style: "overflow:visible" }, <image href={src.href} width={src.width} height={src.height} />)));
+  return symbol;
+};
 
 /** An embedded image in a fixed frame. `scale` on `animation` zooms about the frame's center, clipped to the frame. */
 export function Picture({ src, x, y, width, height, fit = "cover", radius, filter, opacity, class: className, alt, animation }: PictureProps): SvgNode {
   const w = width ?? (height === undefined ? src.width : (height * src.width) / src.height);
   const h = height ?? (width === undefined ? src.height : (width * src.height) / src.width);
-  const image = <image href={src.href} x={x} y={y} width={w} height={h} preserveAspectRatio={FIT[fit]} animation={animation} />;
-  const framed = radius || animation ? <g clipPath={def.clipPath({}, <rect x={x} y={y} width={w} height={h} rx={radius} />)}>{image}</g> : image;
+  const [sx, sy] = fit === "fill" ? [w / src.width, h / src.height] : Array(2).fill((fit === "cover" ? Math.max : Math.min)(w / src.width, h / src.height));
+  const placed = (
+    <g transform={`translate(${num(x + (w - src.width * sx) / 2, 4)} ${num(y + (h - src.height * sy) / 2, 4)}) scale(${num(sx, 6)} ${num(sy, 6)})`}>
+      <use href={symbolOf(src)} />
+    </g>
+  );
+  const moving = animation ? <g animation={animation}>{placed}</g> : placed;
+  const clipped = fit === "cover" || radius || animation ? <g clipPath={def.clipPath({}, <rect x={x} y={y} width={w} height={h} rx={radius} />)}>{moving}</g> : moving;
   return (
     <g filter={filter} opacity={opacity} class={className} role={alt === undefined ? undefined : "img"} aria-label={alt} aria-hidden={alt === undefined ? "true" : undefined}>
-      {framed}
+      {clipped}
     </g>
   );
 }
