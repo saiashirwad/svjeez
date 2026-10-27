@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498.8 846" width="498.8" height="846" role="img" aria-labelledby="t d">
+  <title id="t">Agent lifecycle</title>
+  <desc id="d">A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace}
+
+.a{animation-duration:19s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,3.158%,8.158%,100%{opacity:0}3.947%,7.368%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,9.952%,14.952%,61.321%,66.321%,100%{opacity:0}10.742%,14.163%,62.11%,65.531%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,16.005%,21.005%,32.23%,37.23%,67.373%,72.373%,100%{opacity:0}16.794%,20.215%,33.02%,36.441%,68.163%,71.584%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,22.799%,27.799%,39.025%,44.025%,74.168%,79.168%,100%{opacity:0}23.589%,27.01%,39.814%,43.235%,74.957%,78.378%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,46.771%,51.771%,100%{opacity:0}47.561%,50.982%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,84.511%,89.511%,100%{opacity:0}85.301%,88.722%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,9.952%,100%{visibility:hidden}7.368%{visibility:visible}}
+@keyframes k8{0%,7.368%{translate:158.61px 141px}8.278%{translate:158.61px 179px}8.405%{translate:158.61px 184.313px}8.505%{translate:158.61px 188.5px}8.587%{translate:158.61px 191.938px}8.66%{translate:158.61px 195px}8.734%{translate:158.61px 198.063px}8.816%{translate:158.61px 201.5px}8.916%{translate:158.61px 205.688px}9.043%{translate:158.61px 211px}9.952%,100%{translate:158.61px 249px}}
+.m7{animation-name:k7,k8;animation-timing-function:steps(1),linear}
+@keyframes k9{0%,16.005%,100%{visibility:hidden}14.163%{visibility:visible}}
+@keyframes k10{0%,14.163%{translate:127.4px 315px}16.005%,100%{translate:127.4px 363px}}
+.m8{animation-name:k9,k10;animation-timing-function:steps(1),linear}
+@keyframes k11{0%,22.799%,100%{visibility:hidden}20.215%{visibility:visible}}
+@keyframes k12{0%,20.215%{translate:127.4px 402px}22.799%,100%{translate:127.4px 510px}}
+.m9{animation-name:k11,k12;animation-timing-function:steps(1),linear}
+@keyframes k13{0%,32.23%,100%{visibility:hidden}27.01%{visibility:visible}}
+@keyframes k14{0%,27.01%{translate:198.8px 529.5px}27.632%{translate:224.8px 529.5px}27.68%{translate:226.809px 529.296px}27.727%{translate:228.683px 528.711px}27.773%{translate:230.381px 527.786px}27.819%{translate:231.863px 526.563px}27.865%{translate:233.086px 525.081px}27.911%{translate:234.011px 523.383px}27.958%{translate:234.596px 521.509px}28.007%{translate:234.8px 519.5px}29.143%{translate:234.8px 472px}29.272%{translate:233.898px 466.688px}29.387%{translate:231.519px 462.5px}29.502%{translate:228.155px 459.063px}29.62%{translate:224.3px 456px}29.738%{translate:220.445px 452.938px}29.853%{translate:217.081px 449.5px}29.968%{translate:214.702px 445.313px}30.097%{translate:213.8px 440px}31.233%{translate:213.8px 392.5px}31.282%{translate:213.596px 390.491px}31.329%{translate:213.011px 388.617px}31.375%{translate:212.086px 386.919px}31.421%{translate:210.863px 385.438px}31.467%{translate:209.381px 384.214px}31.513%{translate:207.683px 383.289px}31.56%{translate:205.809px 382.704px}31.608%{translate:203.8px 382.5px}32.23%,100%{translate:177.8px 382.5px}}
+.m10{animation-name:k13,k14;animation-timing-function:steps(1),linear}
+@keyframes k15{0%,39.025%,100%{visibility:hidden}36.441%{visibility:visible}}
+@keyframes k16{0%,36.441%{translate:127.4px 402px}39.025%,100%{translate:127.4px 510px}}
+.m11{animation-name:k15,k16;animation-timing-function:steps(1),linear}
+@keyframes k17{0%,46.771%,100%{visibility:hidden}43.235%{visibility:visible}}
+@keyframes k18{0%,43.235%{translate:146.61px 565px}44.144%{translate:146.61px 603px}44.274%{translate:145.458px 608.313px}44.398%{translate:142.421px 612.5px}44.53%{translate:138.127px 615.938px}44.668%{translate:133.205px 619px}44.807%{translate:128.283px 622.063px}44.938%{translate:123.989px 625.5px}45.062%{translate:120.952px 629.688px}45.192%{translate:119.8px 635px}46.771%,100%{translate:119.8px 701px}}
+.m12{animation-name:k17,k18;animation-timing-function:steps(1),linear}
+@keyframes k19{0%,61.321%,100%{visibility:hidden}50.982%{visibility:visible}}
+@keyframes k20{0%,50.982%{translate:199.6px 720.5px}51.46%{translate:219.6px 720.5px}51.608%{translate:224.913px 717.342px}51.831%{translate:229.1px 709.016px}52.124%{translate:232.538px 697.244px}52.455%{translate:235.6px 683.75px}52.786%{translate:238.663px 670.256px}53.08%{translate:242.1px 658.484px}53.303%{translate:246.288px 650.158px}53.451%{translate:251.6px 647px}54.686%{translate:303.22px 647px}54.734%{translate:305.229px 646.796px}54.781%{translate:307.103px 646.211px}54.827%{translate:308.801px 645.286px}54.873%{translate:310.283px 644.063px}54.919%{translate:311.506px 642.581px}54.965%{translate:312.431px 640.883px}55.012%{translate:313.016px 639.009px}55.061%{translate:313.22px 637px}60.324%{translate:313.22px 417px}60.372%{translate:313.016px 414.991px}60.419%{translate:312.431px 413.117px}60.465%{translate:311.506px 411.419px}60.511%{translate:310.283px 409.938px}60.557%{translate:308.801px 408.714px}60.604%{translate:307.103px 407.789px}60.65%{translate:305.229px 407.204px}60.699%{translate:303.22px 407px}61.321%,100%{translate:277.22px 407px}}
+.m13{animation-name:k19,k20;animation-timing-function:steps(1),linear}
+@keyframes k21{0%,67.373%,100%{visibility:hidden}65.531%{visibility:visible}}
+@keyframes k22{0%,65.531%{translate:127.4px 315px}67.373%,100%{translate:127.4px 363px}}
+.m14{animation-name:k21,k22;animation-timing-function:steps(1),linear}
+@keyframes k23{0%,74.168%,100%{visibility:hidden}71.584%{visibility:visible}}
+@keyframes k24{0%,71.584%{translate:127.4px 402px}74.168%,100%{translate:127.4px 510px}}
+.m15{animation-name:k23,k24;animation-timing-function:steps(1),linear}
+@keyframes k25{0%,84.511%,100%{visibility:hidden}78.378%{visibility:visible}}
+@keyframes k26{0%,78.378%{translate:158.61px 565px}79.287%{translate:158.61px 603px}79.484%{translate:164.909px 608.313px}79.894%{translate:181.515px 612.5px}80.462%{translate:204.992px 615.938px}81.11%{translate:231.905px 619px}81.758%{translate:258.818px 622.063px}82.325%{translate:282.295px 625.5px}82.735%{translate:298.901px 629.688px}82.932%{translate:305.2px 635px}84.511%,100%{translate:305.2px 701px}}
+.m16{animation-name:k25,k26;animation-timing-function:steps(1),linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-16.557s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base00)"/>
+  <g class="mono">
+    <g>
+      <rect x="125.01" y="102" width="67.2" height="39" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+      <text x="158.61" y="126.4" font-size="14" text-anchor="middle" fill="var(--base05)">Idle</text>
+    </g>
+    <g>
+      <rect x="40" y="249" width="237.22" height="316" rx="10" fill="var(--base01)" stroke="var(--base03)"/>
+      <path d="M40.00000000000007 285h237.22" stroke="var(--base03)"/>
+      <text x="158.61" y="271.9" font-size="14" text-anchor="middle" fill="var(--base05)">Working</text>
+    </g>
+    <g>
+      <rect x="40" y="701" width="159.6" height="39" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+      <text x="119.8" y="725.4" font-size="14" text-anchor="middle" fill="var(--base05)">Waiting on user</text>
+    </g>
+    <g>
+      <rect x="271.6" y="701" width="67.2" height="39" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+      <text x="305.2" y="725.4" font-size="14" text-anchor="middle" fill="var(--base05)">Done</text>
+    </g>
+    <g>
+      <rect x="374.8" y="701" width="84" height="39" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+      <text x="416.8" y="725.4" font-size="14" text-anchor="middle" fill="var(--base05)">Failed</text>
+    </g>
+    <g>
+      <rect x="77" y="363" width="100.8" height="39" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
+      <text x="127.4" y="387.4" font-size="14" text-anchor="middle" fill="var(--base05)">Planning</text>
+    </g>
+    <g>
+      <rect x="56" y="510" width="142.8" height="39" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
+      <text x="127.4" y="534.4" font-size="14" text-anchor="middle" fill="var(--base05)">Calling tools</text>
+    </g>
+    <g>
+      <path d="M158.61 54L158.61 95" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M158.60999992082833 102L154.60999992082833 94L162.60999992082833 94Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M158.61 141L158.61 179C158.61 195 158.61 195 158.61 211L158.61 242" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M158.61000000000007 249L154.61000000000007 241L162.61000000000007 241Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M146.61 565L146.61 603C146.61 619 119.8 619 119.8 635L119.8 694" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M119.8 701L115.8 693L123.8 693Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M199.6 720.5L219.6 720.5C235.6 720.5 235.6 647 251.6 647L303.22 647C308.72 647 313.22 642.5 313.22 637L313.22 417C313.22 411.5 308.72 407 303.22 407L284.22 407" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M277.2200000000001 407L285.2200000000001 403L285.2200000000001 411Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M158.61 565L158.61 603C158.61 619 305.2 619 305.2 635L305.2 694" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M305.2 701L301.2 693L309.2 693Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M170.61 565L170.61 617C170.61 633 416.8 633 416.8 649L416.8 694" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M416.8 701L412.8 693L420.8 693Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M305.2 740L305.2 748C305.2 764 361 764 361 779L361 781" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M361 788L357 780L365 780Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M416.8 740L416.8 748C416.8 764 361 764 361 779L361 781" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M361 788L357 780L365 780Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M127.4 315L127.4 356" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M127.40000000000008 363L123.40000000000008 355L131.4000000000001 355Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M127.4 402L127.4 503" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M127.40000000000008 510L123.40000000000008 502L131.4000000000001 502Z" fill="var(--base04)"/>
+    </g>
+    <g>
+      <path d="M198.8 529.5L224.8 529.5C230.3 529.5 234.8 525 234.8 519.5L234.8 472C234.8 456 213.8 456 213.8 440L213.8 392.5C213.8 387 209.3 382.5 203.8 382.5L184.8 382.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M177.80000000000007 382.5L185.80000000000007 378.5L185.80000000000007 386.5Z" fill="var(--base04)"/>
+    </g>
+    <circle cx="158.61" cy="47" r="7" fill="var(--base05)"/>
+    <circle cx="127.4" cy="308" r="7" fill="var(--base05)"/>
+    <g>
+      <circle cx="361" cy="797" r="9" fill="none" stroke="var(--base05)" stroke-width="1.5"/>
+      <circle cx="361" cy="797" r="5" fill="var(--base05)"/>
+    </g>
+    <g>
+      <rect x="139.33" y="159" width="38.56" height="18" rx="3" fill="var(--base00)"/>
+      <text x="158.61" y="172.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">task</text>
+    </g>
+    <g>
+      <rect x="104.09" y="651" width="31.42" height="18" rx="3" fill="var(--base00)"/>
+      <text x="119.8" y="664.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">ask</text>
+    </g>
+    <g>
+      <rect x="290.37" y="518" width="45.7" height="18" rx="3" fill="var(--base00)"/>
+      <text x="313.22" y="531.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">reply</text>
+    </g>
+    <g>
+      <rect x="278.78" y="651" width="52.84" height="18" rx="3" fill="var(--base00)"/>
+      <text x="305.2" y="664.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">finish</text>
+    </g>
+    <g>
+      <rect x="393.95" y="658" width="45.7" height="18" rx="3" fill="var(--base00)"/>
+      <text x="416.8" y="671.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">error</text>
+    </g>
+    <g>
+      <rect x="108.12" y="447" width="38.56" height="18" rx="3" fill="var(--base01)"/>
+      <text x="127.4" y="460.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">plan</text>
+    </g>
+    <g>
+      <rect x="208.38" y="483.75" width="52.84" height="18" rx="3" fill="var(--base01)"/>
+      <text x="234.8" y="496.915" font-size="11.9" text-anchor="middle" fill="var(--base05)">result</text>
+    </g>
+  </g>
+  <g>
+    <rect x="121.01" y="98" width="75.2" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m1"/>
+    <rect x="36" y="245" width="245.22" height="324" rx="13" fill="none" stroke="var(--base09)" stroke-width="2" class="a m2"/>
+    <rect x="73" y="359" width="108.8" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m3"/>
+    <rect x="52" y="506" width="150.8" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m4"/>
+    <rect x="36" y="697" width="167.6" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m5"/>
+    <rect x="267.6" y="697" width="75.2" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m6"/>
+    <circle r="5" fill="var(--base09)" class="a m7"/>
+    <circle r="5" fill="var(--base09)" class="a m8"/>
+    <circle r="5" fill="var(--base09)" class="a m9"/>
+    <circle r="5" fill="var(--base09)" class="a m10"/>
+    <circle r="5" fill="var(--base09)" class="a m11"/>
+    <circle r="5" fill="var(--base09)" class="a m12"/>
+    <circle r="5" fill="var(--base09)" class="a m13"/>
+    <circle r="5" fill="var(--base09)" class="a m14"/>
+    <circle r="5" fill="var(--base09)" class="a m15"/>
+    <circle r="5" fill="var(--base09)" class="a m16"/>
+  </g>
+</svg>

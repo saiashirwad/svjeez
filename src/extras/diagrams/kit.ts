@@ -6,6 +6,7 @@ import { motion, type Seconds, type Stack } from "../../motion";
 import { draw } from "../../recipes";
 import type { SvgNode } from "../../svg";
 import type { Base16, Slot } from "../theme";
+import { curve } from "./curve";
 
 /** What a node is, so the theme can draw it. */
 export type NodeRole = "task" | "input" | "output" | "tool" | "decision" | "store";
@@ -141,11 +142,9 @@ export const shape = (role: NodeRole, b: Box, label: string, look: Look, animati
   ]);
 };
 
-export const pathOf = (points: readonly Point[]): string => points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x} ${p.y}`).join("");
-
 const HEAD = 8;
 
-/** A polyline ending in a filled arrowhead. With `at`, the line draws on over `over` and the head lands as it finishes. */
+/** An orthogonal route drawn as a smooth curve ending in a filled arrowhead along its last run. With `at`, the line draws on over `over` and the head lands as it finishes. */
 export const arrow = (points: readonly Point[], look: Look & { readonly color?: Color; readonly dashed?: boolean; readonly at?: Seconds; readonly over?: Seconds }): SvgNode => {
   const color = look.color ?? look.theme.base04;
   const [a, b] = [points.at(-2)!, points.at(-1)!];
@@ -156,7 +155,7 @@ export const arrow = (points: readonly Point[], look: Look & { readonly color?: 
   const { at, over = 0.4 } = look;
   return el.g({}, [
     el.path({
-      d: pathOf(trimmed),
+      d: curve(trimmed).d,
       fill: "none",
       stroke: color,
       strokeWidth: 1.5,
@@ -168,12 +167,15 @@ export const arrow = (points: readonly Point[], look: Look & { readonly color?: 
   ]);
 };
 
-/** A small text label on a background chip, so it reads over lines. */
-export const chip = (b: Box, text: string, look: Look & { readonly fill?: Color }, animation?: Stack<"opacity">): SvgNode =>
+/** A text label on a knockout of the background color, so the line it sits on breaks around it. */
+export const chip = (b: Box, text: string, look: Look & { readonly fill?: Color; readonly ground?: Color }, animation?: Stack<"opacity">): SvgNode =>
   el.g({ animation }, [
-    el.rect({ x: b.x - 3, y: b.y, width: b.w + 6, height: b.h, rx: 3, fill: look.theme.base00, fillOpacity: 0.9 }),
+    el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 3, fill: look.ground ?? look.theme.base00 }),
     el.text({ x: b.x + b.w / 2, y: b.y + b.h / 2 + look.fontSize * 0.35, fontSize: look.fontSize, textAnchor: "middle", fill: look.fill ?? look.theme.base04 }, text),
   ]);
+
+/** The knockout box an inline edge label needs. */
+export const labelSize = (text: string, fontSize: number): Size => ({ w: textWidth(text, fontSize) + 10, h: Math.round(fontSize * 1.5) });
 
 /** Shifts layout geometry so `bounds` starts at `(x, y)`. */
 export const placer = (bounds: Box, x = 0, y = 0) => {

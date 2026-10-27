@@ -6,7 +6,8 @@ import { ease, motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
 import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
-import { arrow, chip, labelOf, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
+import { curve } from "./curve";
+import { arrow, chip, labelOf, labelSize, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
 export type FlowEdge<N extends string> = readonly [from: N, to: N] | readonly [from: N, to: N, options: { readonly label?: string }];
 
@@ -52,7 +53,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
     {
       direction: spec.direction,
       nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(n.role, n.label, fontSize) })),
-      edges: edges.map((e) => ({ ...e, label: e.label === undefined ? undefined : { w: textWidth(e.label, small.fontSize), h: small.fontSize * 1.4 } })),
+      edges: edges.map((e) => ({ ...e, label: e.label === undefined ? undefined : labelSize(e.label, small.fontSize) })),
       groups: groups.map(([id, g]) => ({ id, members: g.nodes, label: { w: textWidth(g.label, small.fontSize), h: small.fontSize * 1.2 } })),
     },
     roles,
@@ -70,7 +71,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
       const b = laid.groups.get(id)!;
       const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
       return el.g({ animation: reveal && enter({ at, over: 0.4 }) }, [
-        el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 10, fill: theme.base0E, fillOpacity: 0.04, stroke: theme.base0E, strokeOpacity: 0.45, strokeDasharray: "4 3" }),
+        el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 10, fill: "none", stroke: theme.base0E, strokeOpacity: 0.45, strokeDasharray: "4 3" }),
         el.text({ x: b.x + 12, y: b.y + 8 + small.fontSize, fontSize: small.fontSize, fill: theme.base04 }, g.label),
       ]);
     }),
@@ -95,8 +96,8 @@ export const lay = <N extends string>(
   const lines = out.edges.map((e) => {
     const points = e.points.map(at.point);
     const [from, to] = [boxes.get(e.from)!, boxes.get(e.to)!];
-    points[0] = onShape(roles.get(e.from)!, from, points[0]!, points[1]!);
-    points[points.length - 1] = onShape(roles.get(e.to)!, to, points.at(-1)!, points.at(-2)!);
+    points[0] = onShape(roles.get(e.from) ?? "task", from, points[0]!, points[1]!);
+    points[points.length - 1] = onShape(roles.get(e.to) ?? "task", to, points.at(-1)!, points.at(-2)!);
     return { from: e.from as N, to: e.to as N, points, label: e.label && at.box(e.label) };
   });
   return { boxes, lines, groups: new Map([...out.groups].map(([id, b]) => [id, at.box(b)])), rank: out.rank, bounds: at.bounds };
@@ -107,7 +108,7 @@ export const paths = <N extends string>(lines: Laid<N>["lines"], boxes: Readonly
   const edge = (from: N, to: N): Point[] => {
     const line = lines.find((l) => l.from === from && l.to === to);
     if (!line) throw new Error(`No edge from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);
-    return [...line.points];
+    return curve(line.points).samples;
   };
   const route = (from: N, to: N): Point[] => {
     if (from === to) return [boxes.get(from)!.center];
@@ -123,7 +124,7 @@ export const paths = <N extends string>(lines: Laid<N>["lines"], boxes: Readonly
     if (!via.has(to)) throw new Error(`No path from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);
     const hops: Laid<N>["lines"][number][] = [];
     for (let at: string = to; at !== from; at = hops[0]!.from) hops.unshift(via.get(at)!);
-    return hops.flatMap((line) => line.points);
+    return hops.flatMap((line) => curve(line.points).samples);
   };
   return { edge, route };
 };

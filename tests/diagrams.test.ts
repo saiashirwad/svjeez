@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { render, type Rect, type SvgNode } from "svg-motion";
-import { flowchart, sequence } from "svjeez/extras";
+import { el, render, type Rect, type SvgNode } from "svg-motion";
+import { flowchart, sequence, state } from "svjeez/extras";
 
 const valid = (node: SvgNode) => render({ width: 800, height: 600, duration: 10, title: "diagram" }, node);
 
@@ -64,3 +64,63 @@ describe("sequence", () => {
 
   test("renders valid SVG", () => expect(() => valid(seq.node)).not.toThrow());
 });
+
+describe("state", () => {
+  const machine = state({
+    states: { idle: "Idle", run: { label: "Running" }, done: { label: "Done", final: true } },
+    initial: "idle",
+    transitions: [["idle", "run", "start"], ["run", "idle", "pause"], ["run", "done"]],
+  });
+
+  test("walk lights each state for its dwell, with travel time between", () => {
+    const walk = machine.walk(["idle", "run", "idle", "run", "done"], { at: 1, dwell: 1, speed: 1e9 });
+    expect(walk.spans.idle.map((s) => s.at)).toEqual([1, expect.closeTo(3.7, 9)]);
+    expect(walk.spans.done[0]!.at).toBeCloseTo(1 + 4 * 1.35, 9);
+    expect(walk.end).toBeCloseTo(1 + 5 + 4 * 0.35, 9);
+    expect(() => valid(el.g({}, [machine.node, walk.node]))).not.toThrow();
+  });
+
+  test("walk throws when consecutive states have no transition", () => {
+    expect(() => machine.walk(["idle", "done"], { at: 0 })).toThrow();
+  });
+
+  test("the initial state sits below its marker and a final state above its bullseye", () => {
+    expect(machine.get("idle").y).toBeGreaterThan(machine.bounds.y + 14);
+    expect(machine.bounds.y + machine.bounds.h).toBeGreaterThan(machine.get("done").y + machine.get("done").h + 18);
+  });
+
+  describe("composite", () => {
+    const review = state({
+      states: {
+        draft: "Draft",
+        review: { label: "Review", states: { screening: "Screening", decision: "Decision" }, initial: "screening" },
+        published: { label: "Published", final: true },
+      },
+      initial: "draft",
+      transitions: [["draft", "review", "submit"], ["screening", "decision"], ["review", "draft", "rejected"], ["decision", "published", "approved"]],
+    });
+
+    test("inner states sit inside their container, below its header", () => {
+      for (const id of ["screening", "decision"] as const) {
+        expect(inside(review.get("review"), review.get(id))).toBe(true);
+        expect(review.get(id).y).toBeGreaterThan(review.get("review").y + 30);
+      }
+    });
+
+    test("a transition to the composite ends on its border; one from an inner state leaves the container", () => {
+      const into = review.edge("draft", "review").at(-1)!;
+      expect(into.y).toBeCloseTo(review.get("review").y, 6);
+      const out = review.edge("decision", "published");
+      expect(touches(out[0]!, review.get("review"))).toBe(true);
+      expect(inside(review.get("review"), review.get("published"))).toBe(false);
+    });
+
+    test("a walk enters a composite through its initial state and leaves through its transitions", () => {
+      const walk = review.walk(["draft", "review", "screening", "decision", "published"], { at: 0 });
+      expect(walk.spans.screening).toHaveLength(1);
+      expect(() => review.walk(["draft", "decision"], { at: 0 })).toThrow();
+      expect(() => valid(el.g({}, [review.node, walk.node]))).not.toThrow();
+    });
+  });
+});
+

@@ -4,7 +4,7 @@ import { sequence as layout } from "../../layout/sequence";
 import { motion, type Seconds, type Span } from "../../motion";
 import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
-import { arrow, chip, labelOf, lookup, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled } from "./kit";
+import { arrow, chip, labelOf, labelSize, lookup, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled } from "./kit";
 
 /** `[from, to, label]`, dashed with `{ reply: true }`; a message to its own sender loops on the right. */
 export type SequenceMessage<A extends string> =
@@ -33,7 +33,7 @@ export function sequence<const A extends Record<string, Labelled>>(
   const rows = spec.messages.map((m) =>
     "note" in m
       ? { kind: "note" as const, actor: m.note, text: m.text, size: { w: textWidth(m.text, small) + 20, h: small * 1.4 + 12 } }
-      : { kind: "message" as const, from: m[0], to: m[1], text: m[2], reply: m[3]?.reply ?? false, label: { w: textWidth(m[2], small), h: small * 1.3 } },
+      : { kind: "message" as const, from: m[0], to: m[1], text: m[2], reply: m[3]?.reply ?? false, label: labelSize(m[2], small) },
   );
   const out = layout({ actors: actors.map((a) => ({ id: a.id, ...sizeOf(a.role, a.label, fontSize) })), rows });
   const at = placer(out.bounds, options.x, options.y);

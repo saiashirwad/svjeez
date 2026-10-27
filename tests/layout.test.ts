@@ -98,6 +98,86 @@ describe("layered", () => {
     for (const e of out.edges) for (const b of out.nodes.values()) expect(overlap(e.label!, b)).toBe(false);
   });
 
+  test("edges both ways between two nodes take separate lines and labels", () => {
+    const label = { w: 40, h: 16 };
+    const out = layered({ nodes: nodes("a b c"), edges: [{ from: "a", to: "b", label }, { from: "b", to: "a", label }, { from: "a", to: "b", label }, { from: "b", to: "c" }] });
+    const [ab, ba, ab2] = out.edges;
+    expect(ab!.points).not.toEqual([...ba!.points].reverse());
+    expect(ab!.points).not.toEqual(ab2!.points);
+    expect([overlap(ab!.label!, ba!.label!), overlap(ab!.label!, ab2!.label!)]).toEqual([false, false]);
+  });
+
+  describe("edges keep clear of each other", () => {
+    const label = (text: string) => ({ w: text.length * 7.2, h: 17 });
+    const routed: Record<string, LayeredInput> = {
+      "state example": {
+        nodes: [
+          { id: "start", w: 14, h: 14 },
+          { id: "idle", w: 70, h: 39 },
+          { id: "planning", w: 101, h: 39 },
+          { id: "acting", w: 132, h: 39 },
+          { id: "waiting", w: 158, h: 39 },
+          { id: "done", w: 78, h: 47 },
+          { id: "failed", w: 94, h: 47 },
+        ],
+        edges: [
+          { from: "start", to: "idle" },
+          ...[["idle", "planning", "task"], ["planning", "acting", "plan"], ["acting", "planning", "result"], ["acting", "waiting", "ask"], ["waiting", "planning", "reply"], ["acting", "done", "finish"], ["acting", "failed", "error"]].map(([from, to, text]) => ({ from: from!, to: to!, label: label(text!) })),
+        ],
+      },
+      "decision fanning out": {
+        nodes: [{ id: "in", w: 90, h: 39 }, { id: "check", w: 120, h: 62 }, { id: "a", w: 80, h: 39 }, { id: "b", w: 110, h: 39 }, { id: "c", w: 80, h: 39 }, { id: "d", w: 90, h: 39 }, { id: "out", w: 90, h: 39 }],
+        edges: [
+          { from: "in", to: "check" },
+          ...["a", "b", "c", "d"].map((to) => ({ from: "check", to, label: label(`go ${to}`) })),
+          ...["a", "b", "c", "d"].map((from) => ({ from, to: "out" })),
+          { from: "d", to: "check", label: label("again") },
+        ],
+      },
+      "two-cycle": { nodes: nodes("a b"), edges: [{ from: "a", to: "b", label: label("go") }, { from: "b", to: "a", label: label("back") }] },
+      ...graphs,
+    };
+
+    const segments = (points: readonly Point[]) => points.slice(1).map((q, k) => [points[k]!, q] as const);
+    const collinear = ([a, b]: readonly [Point, Point], [c, d]: readonly [Point, Point]) => {
+      if (a.x === b.x && c.x === d.x && Math.abs(a.x - c.x) < 0.5) return Math.min(Math.max(a.y, b.y), Math.max(c.y, d.y)) - Math.max(Math.min(a.y, b.y), Math.min(c.y, d.y)) > 0.5;
+      if (a.y === b.y && c.y === d.y && Math.abs(a.y - c.y) < 0.5) return Math.min(Math.max(a.x, b.x), Math.max(c.x, d.x)) - Math.max(Math.min(a.x, b.x), Math.min(c.x, d.x)) > 0.5;
+      return false;
+    };
+    const through = ([p, q]: readonly [Point, Point], b: Box) =>
+      Math.max(p.x, q.x) > b.x + 0.5 && Math.min(p.x, q.x) < b.x + b.w - 0.5 && Math.max(p.y, q.y) > b.y + 0.5 && Math.min(p.y, q.y) < b.y + b.h - 0.5;
+
+    for (const [name, graph] of Object.entries(routed)) {
+      for (const direction of ["TB", "LR"] as const) {
+        const out = layered({ ...graph, direction });
+        const lines = out.edges.map((e) => ({ ...e, segments: segments(e.points) }));
+
+        test(`${name} ${direction}: no two edges share a stretch of line, except a final approach into one port`, () => {
+          const merging = (e: (typeof lines)[number], s: (typeof e.segments)[number], f: (typeof lines)[number], t: (typeof f.segments)[number]) => {
+            const [p, q] = [e.points.at(-1)!, f.points.at(-1)!];
+            return s === e.segments.at(-1) && t === f.segments.at(-1) && p.x === q.x && p.y === q.y;
+          };
+          for (const [i, e] of lines.entries())
+            for (const f of lines.slice(i + 1))
+              for (const s of e.segments) for (const t of f.segments) expect(`${e.from}>${e.to} / ${f.from}>${f.to}: ${collinear(s, t) && !merging(e, s, f, t)}`).toEndWith("false");
+        });
+
+        test(`${name} ${direction}: no edge runs through a node`, () => {
+          for (const e of lines) for (const [id, b] of out.nodes) for (const s of e.segments) expect(`${e.from}>${e.to} through ${id}: ${through(s, b)}`).toEndWith("false");
+        });
+
+        test(`${name} ${direction}: labels clear nodes, other labels and other edges`, () => {
+          const labelled = lines.filter((e) => e.label);
+          for (const e of labelled) {
+            for (const [id, b] of out.nodes) expect(`${e.from}>${e.to} label on ${id}: ${overlap(e.label!, b)}`).toEndWith("false");
+            for (const f of labelled) if (f !== e) expect(`${e.from}>${e.to} label on ${f.from}>${f.to} label: ${overlap(e.label!, f.label!)}`).toEndWith("false");
+            for (const f of lines) if (f !== e) for (const s of f.segments) expect(`${e.from}>${e.to} label on ${f.from}>${f.to}: ${through(s, e.label!)}`).toEndWith("false");
+          }
+        });
+      }
+    }
+  });
+
   test("unknown ids and a node in two groups throw", () => {
     expect(() => layered({ nodes: nodes("a"), edges: edges("a>b") })).toThrow();
     expect(() => layered({ nodes: nodes("a b"), edges: [], groups: [{ id: "x", members: ["a"], label: { w: 1, h: 1 } }, { id: "y", members: ["a"], label: { w: 1, h: 1 } }] })).toThrow();
