@@ -1,12 +1,13 @@
 import { attributeName } from "./attributes";
 import { isRef, type AnyRef } from "./defs";
+import { isFontValue, type FontValue } from "./font/font";
 import { escapeAttr, escapeText, kebab, num } from "./format";
 import { isMotion, type Motion } from "./motion";
 import { Css, formatProperty, isProperty, type CssPart } from "./properties";
 
 export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
 
-export type AttrValue = string | AnyRef | Css;
+export type AttrValue = string | AnyRef | Css | FontValue;
 
 export type SvgNode =
   | {
@@ -72,7 +73,7 @@ const attrValue = (prop: string, value: unknown): AttrValue | undefined => {
   if (prop === "style") return style(value) || undefined;
   if (typeof value === "string") return value;
   if (typeof value === "number") return num(value);
-  if (isRef(value)) return value;
+  if (isRef(value) || isFontValue(value)) return value;
   throw new Error(`Unsupported value for ${prop}: ${String(value)}`);
 };
 

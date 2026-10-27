@@ -6,6 +6,8 @@ export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./prop
 export { calc, type Calc } from "./calc";
 export { fx } from "./fx";
 export { picture, Picture, type ImageFormat, type PictureProps } from "./picture";
+export { font, type Font, type FontFamily, type FontFormat, type FontMetrics, type FontOptions, type FontStyle, type GlyphPath, type PathOptions, type TextPath } from "./font/font";
+export { Glyphs, type GlyphsProps } from "./glyphs";
 export { el } from "./el";
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 export type { Channel, Values } from "./channels";

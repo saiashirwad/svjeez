@@ -1,5 +1,6 @@
 import type { PaintServer, Ref } from "./defs";
 import type { PropertyValues } from "./properties";
+import type { FontValue } from "./font/font";
 
 export type NamedColor =
   | "black"
@@ -65,7 +66,7 @@ const TEXT = {
   y: attr<Length>("y"),
   dx: attr<Length>("dx"),
   dy: attr<Length>("dy"),
-  fontFamily: attr<string>("font-family"),
+  fontFamily: attr<string | FontValue>("font-family"),
   fontSize: attr<Length>("font-size"),
   fontStyle: attr<"normal" | "italic">("font-style"),
   fontWeight: attr<number | "normal" | "bold">("font-weight"),
@@ -87,7 +88,13 @@ const GRADIENT = {
 } as const;
 
 const ELEMENTS = {
-  g: PRESENTATION,
+  g: {
+    ...PRESENTATION,
+    fontFamily: attr<string | FontValue>("font-family"),
+    fontSize: attr<Length>("font-size"),
+    fontStyle: attr<"normal" | "italic">("font-style"),
+    fontWeight: attr<number | "normal" | "bold">("font-weight"),
+  },
   path: { ...SHAPE, d: attr<string>("d") },
   rect: {
     ...SHAPE,

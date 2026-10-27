@@ -1,5 +1,6 @@
 import { backendOf, formatValue, laneOf, spec, valueOf, type Backend, type Channel, type Target, type TargetValue, type TargetValues } from "./channels";
 import { isRef, refNode, type AnyRef, type DefTag } from "./defs";
+import { fontFaceRule, fontFaces, isFontValue, type Font, type FontValue } from "./font/font";
 import { num } from "./format";
 import { isCss, isProperty, propertyRule, type Css, type Property } from "./properties";
 import { dataOf, type Motion } from "./motion";
@@ -35,6 +36,9 @@ interface State {
   readonly blurs: Map<string, string>;
   readonly properties: Map<Property, string>;
   readonly registrations: string[];
+  /** Embedded faces by family name, weight and style, so two files never claim one slot. */
+  readonly fonts: Map<string, Font>;
+  readonly fontRules: string[];
   readonly counters: Map<string, number>;
   readonly defs: SvgNode[];
   readonly keyframes: Map<string, string>;
@@ -110,6 +114,20 @@ const propertyName = (state: State, key: Property): string => {
   return name;
 };
 
+/** Embed each face the first time a family uses it, and return the `font-family` value. */
+const fontFamily = (state: State, value: FontValue): string => {
+  const { family, faces } = fontFaces(value);
+  for (const { name, font } of faces) {
+    const slot = `'${name}' ${font.weight} ${font.style}`;
+    const taken = state.fonts.get(slot);
+    if (taken === font) continue;
+    if (taken) throw new Error(`Two different fonts claim ${slot}. Give one of them another family name with font(bytes, { family }).`);
+    state.fonts.set(slot, font);
+    state.fontRules.push(fontFaceRule(name, font));
+  }
+  return family;
+};
+
 const resolveCss = (state: State, text: Css): string =>
   text.parts.map((part) => (typeof part === "string" ? part : propertyName(state, part.property))).join("");
 
@@ -117,6 +135,7 @@ const resolveAttrs = (state: State, attrs: Element["attrs"]): Record<string, Att
   Object.fromEntries(
     Object.entries(attrs).map(([name, value]) => {
       if (isCss(value)) return [name, resolveCss(state, value)];
+      if (isFontValue(value)) return [name, fontFamily(state, value)];
       if (!isRef(value)) return [name, value];
       const id = refId(state, value);
       return [name, name === "href" ? `#${id}` : `url(#${id})`];
@@ -327,6 +346,8 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
     blurs: new Map(),
     properties: new Map(),
     registrations: [],
+    fonts: new Map(),
+    fontRules: [],
     counters: new Map(),
     defs: [],
     keyframes: new Map(),
@@ -342,6 +363,6 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
     canvas.stillAt === undefined || (state.rules.length === 0 && state.stills.length === 0)
       ? ""
       : `@media (prefers-reduced-motion:reduce){${state.rules.length > 0 ? `.a{animation-delay:-${seconds(canvas, canvas.stillAt)}!important;animation-play-state:paused!important}` : ""}${state.stills.join("")}}`;
-  const generated = [...state.registrations, state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
+  const generated = [...state.fontRules, ...state.registrations, state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
   return { body, defs: state.defs, css: [authored, generated].filter(Boolean).join("\n\n") };
 };

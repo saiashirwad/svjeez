@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
-import { Picture, def, ease, motion, picture, render, type SvgNode } from "svjeez";
+import { Picture, def, ease, font, motion, picture, render, type Child, type SvgNode } from "svjeez";
 import { renderFrames, systemColorScheme } from "svjeez/frames";
 
 const browser = await renderFrames(render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />), { times: [0] }).then(
@@ -147,5 +147,35 @@ describe.if(browser)("renderFrames", () => {
     expect(same(png, green)).toBe(true);
     expect(same(svg, red)).toBe(true);
     expect(same(png, svg)).toBe(false);
+  });
+});
+
+describe.if(browser)("embedded fonts", async () => {
+  const sans = await font.load(new URL("../examples/fonts/ABeeZee-Regular.ttf", import.meta.url));
+  const paint = async (child: Child) =>
+    (await renderFrames(render({ width: 240, height: 60, duration: 1, title: "Font" }, <g fill="#000">{child}</g>), { times: [0], colorScheme: "light", background: "#fff" })).frames[0]!.png;
+
+  test("an embedded font paints, rather than the fallback", async () => {
+    const embedded = await paint(<text x={10} y={40} fontSize={28} fontFamily={sans}>Wave AV</text>);
+    const fallback = await paint(<text x={10} y={40} fontSize={28} fontFamily="sans-serif">Wave AV</text>);
+    expect(same(embedded, fallback)).toBe(false);
+  });
+
+  test("measure() matches the browser's layout, kerning included", async () => {
+    const whole = await paint(<text x={10} y={40} fontSize={28} fontFamily={sans}>To AVA</text>);
+    const split = await paint(
+      <>
+        <text x={10} y={40} fontSize={28} fontFamily={sans}>To AV</text>
+        <text x={10 + sans.measure("To AVA", 28) - sans.measure("A", 28)} y={40} fontSize={28} fontFamily={sans}>A</text>
+      </>,
+    );
+    const unkerned = await paint(
+      <>
+        <text x={10} y={40} fontSize={28} fontFamily={sans}>To AV</text>
+        <text x={10 + sans.measure("To AV", 28)} y={40} fontSize={28} fontFamily={sans}>A</text>
+      </>,
+    );
+    expect(same(whole, split)).toBe(true);
+    expect(same(whole, unkerned)).toBe(false);
   });
 });
