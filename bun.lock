@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "svg-motion",
+      "name": "svjeez",
       "devDependencies": {
         "@types/bun": "latest",
         "playwright-core": "^1.64.1",
