@@ -26,6 +26,13 @@ describe("code", () => {
     ]);
   });
 
+  test("runs carry a role's theme color and an id that get() bounds", () => {
+    const named = code([["  ", ["fn", "f(a,", "call"]], [["fn", "b)", "call"], " x"]], { advance: 6, fontSize: 10, lineHeight: 2, theme: { fn: "#00f" } });
+    expect(named.words.map((w) => w.color)).toEqual(["#00f", "#00f", undefined]);
+    expect(named.get("call")).toMatchObject({ x: 0, y: 0, w: 36, h: 40 });
+    expect(() => code([[["kw", "if"]]], { theme: {} })).toThrow();
+  });
+
   test("a gutter shifts the code right by the digits plus two columns", () => {
     expect(code("a", { x: 10, advance: 6, gutter: true }).at(1, 1).x).toBe(28);
   });
@@ -50,6 +57,12 @@ describe("morph matching", () => {
       [2, 5],
     ]);
   });
+});
+
+test("morph pairs runs by id before content, so a renamed word moves instead of fading", () => {
+  const before = code([[["v", "count", "n"], " = 1"]], { theme: { v: "#fff" } }).words;
+  const after = code([["let ", ["v", "total", "n"], " = 1"]], { theme: { v: "#fff" } }).words;
+  expect(match(before, after)).toContainEqual([0, 1]);
 });
 
 describe("pacing", () => {

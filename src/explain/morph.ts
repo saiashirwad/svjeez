@@ -14,8 +14,20 @@ export interface MorphOptions {
 /**
  * Pairs `[i, j]` of words that carry over from `a` to `b`. The longest common subsequence of contents
  * anchors the order; leftovers pair by equal content, nearest first, so swapped words cross.
+ * Runs named with the same id pair first, in order, whatever their content.
  */
 export function match(a: readonly Word[], b: readonly Word[]): [number, number][] {
+  const named = a.flatMap((w, i): [number, number][] => {
+    if (w.id === undefined) return [];
+    const k = a.slice(0, i).filter((v) => v.id === w.id).length;
+    const j = b.findIndex((v, j) => v.id === w.id && b.slice(0, j).filter((u) => u.id === w.id).length === k);
+    return j < 0 ? [] : [[i, j]];
+  });
+  const [ia, ib] = [a.flatMap((_, i) => (named.some(([x]) => x === i) ? [] : [i])), b.flatMap((_, j) => (named.some(([, y]) => y === j) ? [] : [j]))];
+  return [...named, ...unnamed(ia.map((i) => a[i]!), ib.map((j) => b[j]!)).map(([i, j]): [number, number] => [ia[i]!, ib[j]!])];
+}
+
+const unnamed = (a: readonly Word[], b: readonly Word[]): [number, number][] => {
   const lcs = Array.from({ length: a.length + 1 }, () => new Uint32Array(b.length + 1));
   for (let i = a.length - 1; i >= 0; i--)
     for (let j = b.length - 1; j >= 0; j--) lcs[i]![j] = a[i]!.text === b[j]!.text ? 1 + lcs[i + 1]![j + 1]! : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
@@ -35,7 +47,7 @@ export function match(a: readonly Word[], b: readonly Word[]): [number, number][
     pairs.push(pair);
   }
   return pairs;
-}
+};
 
 interface Chain {
   readonly word: Word;

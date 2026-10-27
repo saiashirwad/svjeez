@@ -11,7 +11,12 @@ export interface Token {
   readonly fontStyle?: number;
 }
 
-export type Tokens = readonly (readonly Token[])[];
+/** `[role, text]` colored through `theme`, or `[role, text, id]` to name it for `get()` and exact morphs. */
+export type Run = readonly [role: string, text: string, id?: string];
+
+/** Plain text, a role-tagged run, or a Shiki-style token. */
+export type Piece = string | Run | Token;
+export type Tokens = readonly (readonly Piece[])[];
 
 export interface CodeOptions {
   readonly x?: number;
@@ -23,6 +28,8 @@ export interface CodeOptions {
   readonly advance?: number;
   readonly fontFamily?: string;
   readonly color?: Color;
+  /** Color for each role a run names. */
+  readonly theme?: Readonly<Record<string, Color>>;
   /** Line numbers, right-aligned two columns left of the code. */
   readonly gutter?: boolean;
 }
@@ -36,6 +43,7 @@ export interface Word {
   readonly y: number;
   readonly color?: Color;
   readonly fontStyle?: number;
+  readonly id?: string;
 }
 
 export interface Metrics {
@@ -60,6 +68,8 @@ export interface Code {
   readonly bounds: Rect;
   lines(first: number, last?: number): Rect;
   find(text: string, nth?: number): Rect;
+  /** Bounds of every run named `id`. */
+  get(id: string): Rect;
   at(line: number, column: number): Point;
 }
 
@@ -92,17 +102,25 @@ export function code(input: string | Tokens, options: CodeOptions = {}): Code {
   const { x = 0, y = 0, fontSize = 14, lineHeight = 1.6, fontFamily = "monospace", color, gutter = false } = options;
   const advance = options.advance ?? fontSize * 0.6;
   if (![fontSize, lineHeight, advance].every((v) => v > 0) || !Number.isFinite(x + y)) throw new Error("code() needs finite coordinates and positive metrics.");
-  const rows: Tokens = typeof input === "string" ? input.split("\n").map((content) => [{ content }]) : input;
+  const piece = (p: Piece): Token & { readonly id?: string } => {
+    if (typeof p === "string") return { content: p };
+    if (!Array.isArray(p)) return p as Token;
+    const [role, content, id] = p as Run;
+    const tint = options.theme?.[role];
+    if (options.theme && !tint) throw new Error(`code() theme has no color for role "${role}".`);
+    return { content, color: tint, id };
+  };
+  const rows = (typeof input === "string" ? input.split("\n").map((line) => [line]) : input).map((row) => row.map(piece));
   if (rows.some((row) => row.some((token) => /[\n\r\t]/.test(token.content)))) throw new Error("code() tokens must not contain line breaks or tabs.");
   const texts = rows.map((row) => row.map((token) => token.content).join(""));
   const m: Metrics = { origin: x + (gutter ? (String(rows.length).length + 2) * advance : 0), y, fontSize, height: fontSize * lineHeight, advance, fontFamily, color };
   const top = (line: number) => y + (line - 1) * m.height;
   const words = rows.flatMap((row, i) => {
     let column = 0;
-    return row.flatMap(({ content, color, fontStyle }) => {
+    return row.flatMap(({ content, color, fontStyle, id }) => {
       const placed = [...content.matchAll(/\S+/g)].map((run): Word => {
         const col = column + run.index;
-        return { text: run[0], line: i + 1, column: col + 1, x: m.origin + col * advance, y: top(i + 1), color, fontStyle };
+        return { text: run[0], line: i + 1, column: col + 1, x: m.origin + col * advance, y: top(i + 1), color, fontStyle, id };
       });
       column += content.length;
       return placed;
@@ -126,6 +144,11 @@ export function code(input: string | Tokens, options: CodeOptions = {}): Code {
     }
     throw new Error(`code.find() found ${seen} of ${JSON.stringify(needle)}, not ${nth}.`);
   };
+  const get = (id: string): Rect => {
+    const named = words.filter((w) => w.id === id);
+    if (named.length === 0) throw new Error(`code.get() found no run named ${JSON.stringify(id)}.`);
+    return named.map((w) => rect(w.x, w.y, w.text.length * advance, m.height)).reduce((a, b) => a.union(b));
+  };
   const node = el.g({}, [gutter && rows.map((_, i) => number(i + 1, m)), words.map((w) => text(w, m))]);
-  return { node, words, metrics: m, lineCount: rows.length, gutter, bounds: lines(1, rows.length), lines, find, at };
+  return { node, words, metrics: m, lineCount: rows.length, gutter, bounds: lines(1, rows.length), lines, find, get, at };
 }
