@@ -13,7 +13,9 @@
       "bun"
     ],
     "lib": [
-      "ESNext"
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
     ],
     "paths": {
       "svg-motion": [
