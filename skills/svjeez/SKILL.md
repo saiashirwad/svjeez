@@ -184,6 +184,8 @@ const outline = ink(d, pen({ size: 1.2 }));  // the outline as path data, to fil
 
 Tools: `pen({ size, taper })` is an even line with slightly thinned ends. `brush({ size, taper, pressure, wobble, seed })` swells mid-stroke and lifts to a point. `nib({ size, angle, thin })` is a broad calligraphy nib, thick across its edge and thin along it. `pencil({ size, seed })` is a fine line that wavers with the grain. A `seed` rerolls the wobble, and the same seed draws the same line. A tool is a plain `{ width(t, s, angle), drift?, size }` object, so you can write your own.
 
+Handwriting: `strokeFont.load(url)` reads a single-line SVG font (Hershey and EMS fonts, such as EMS Allure), and `hand.path(text, { size, x, y }).d` gives centerlines to ink with `<Stroke>`. A `d` with several subpaths reveals them all at once, so split it at each `M` and give each piece its own `draw` span, paced by its length, to write it stroke by stroke. `examples/hype` shows this.
+
 `draw={{ at, over }}` inks the stroke in along its path, through a mask, then swaps to an unmasked copy so it costs nothing once drawn. `animation` moves or fades the whole mark. The outline is filled, so `fill` and gradients work and `stroke` does not. Each path and tool pair embeds its outline once. `d` takes any SVG path data, arcs included.
 
 ## Extras

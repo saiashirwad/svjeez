@@ -7,6 +7,7 @@ export { calc, type Calc } from "./calc";
 export { fx } from "./fx";
 export { picture, Picture, type ImageFormat, type PictureProps } from "./picture";
 export { font, type Font, type FontFamily, type FontFormat, type FontMetrics, type FontOptions, type FontStyle, type GlyphPath, type PathOptions, type TextPath } from "./font/font";
+export { strokeFont, type StrokeFont } from "./font/stroke";
 export { Glyphs, type GlyphsProps } from "./glyphs";
 export { Stroke, ink, pen, brush, nib, pencil, type Tool, type StrokeProps, type PenOptions, type BrushOptions, type NibOptions, type PencilOptions } from "./ink/ink";
 export { el } from "./el";

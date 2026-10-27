@@ -1,10 +1,11 @@
-import { Glyphs, Stroke, brush, def, draw, ease, enter, font, motion, rect, render, sampled, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
+import { Glyphs, Stroke, brush, def, draw, ease, enter, font, motion, nib, rect, render, sampled, strokeFont, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
 import { Marker, adaptive, base16, code, cut, flow, flowchart, typewriter, window, type Piece } from "svjeez/extras";
 
 const W = 1280;
 const H = 720;
 
 const display = await font.load(new URL("../fonts/ArchivoBlack-Regular.ttf", import.meta.url));
+const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
 const mono = await font.load(new URL("../fonts/JetBrainsMono.ttf", import.meta.url), { fallback: ["ui-monospace", "Menlo", "monospace"], ligatures: false });
 
 // One accent on quiet neutrals, in both schemes. Slots follow base16: 00 page, 01 surface, 02 hairline, 03–07 text.
@@ -29,13 +30,6 @@ const C = {
 const rise = (at: number, over = 0.45, y = 16) => enter({ at, over }, { opacity: 0, y, blur: 6 }, ease.out);
 
 const centered = (text: string, size: number) => (W - display.measure(text, size)) / 2;
-
-const Kicker = ({ n, label }: { n: string; label: string }) => (
-  <text x={64} y={64} fontSize={13} letterSpacing={2.5} fill={C.soft}>
-    <tspan fill={C.accent}>{n}</tspan>
-    {`  —  ${label}`}
-  </text>
-);
 
 // ─── Shot 1: cold open. The install, alone on the page. ──────────────────────
 
@@ -211,7 +205,6 @@ const spinner = (
 
 const terminalShot = (
   <g animation={cut(TERM)}>
-    <Kicker n="01" label="YOU ASK CLAUDE" />
     <g animation={rise(TERM.at, 0.5, 20)}>
       {shell.node}
       <g clipPath={body}>
@@ -331,7 +324,6 @@ const lineRect = (first: number, last = first) => src.lines(first, last).pad(4);
 
 const codeShot = (
   <g animation={cut(CODE)}>
-    <Kicker n="02" label="CLAUDE WRITES TSX. SVJEEZ COMPILES IT." />
     <g animation={rise(CODE.at, 0.45, 20)}>
       {editor.node}
       <g animation={motion({ opacity: 0 }).at(landed(6) - 0.05).set({ opacity: 1 }).at(runAt).to({ opacity: 0 }, 0.3)}>
@@ -355,7 +347,7 @@ const codeShot = (
 
 // ─── Shot 4: montage. Four capabilities, one beat each. ──────────────────────
 
-const CARD = 1.9;
+const CARD = 2.1;
 const MONTAGE = { at: CODE.at + CODE.over, over: 4 * CARD };
 const card = (i: number) => ({ at: MONTAGE.at + i * CARD, over: CARD });
 
@@ -367,20 +359,21 @@ const Caption = ({ i, call, line }: { i: number; call: string; line: string }) =
   </g>
 );
 
-// a. sampled(): seven points on Lissajous curves, each a function of time baked into keyframes.
-const ORBIT = 2;
-const swarm = Array.from({ length: 5 }, (_, k) => {
-  const [a, b] = ([[1, 2], [3, 2], [2, 1], [3, 4], [1, 3], [5, 4], [2, 3]] as const)[k]!;
-  const phase = (k * Math.PI) / 7;
-  const at = (t: number) => ({ x: 340 * Math.sin((a * 2 * Math.PI * t) / ORBIT + phase), y: 160 * Math.sin((b * 2 * Math.PI * t) / ORBIT) });
-  const curve = Array.from({ length: 161 }, (_, i) => at((i / 160) * ORBIT)).map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(0)} ${p.y.toFixed(0)}`).join("");
-  return (
-    <>
-      <path d={curve} fill="none" stroke={C.hairline} strokeWidth={1} />
-      <circle r={k === 0 ? 7 : 5} fill={k === 0 ? C.accent : C.ink} animation={sampled(at, { duration: ORBIT, tolerance: { translate: 0.6 } }).loop(ORBIT)} />
-    </>
-  );
-});
+// a. sampled(): a damped spring, simulated. The weight and the plot's playhead share one function of time.
+const SPRING = { at: card(0).at + 0.25, over: 1.75, amp: 120, x: 300, y: 300, plot: { x: 470, w: 680 } };
+const spring = (t: number) => {
+  const s = Math.min(Math.max(t - SPRING.at, 0), SPRING.over);
+  return SPRING.amp * Math.exp(-2.6 * s) * Math.cos(2 * Math.PI * 2.1 * s);
+};
+const plotX = (t: number) => SPRING.plot.x + (Math.min(Math.max(t - SPRING.at, 0), SPRING.over) / SPRING.over) * SPRING.plot.w;
+const curve = Array.from({ length: 141 }, (_, i) => SPRING.at + (i / 140) * SPRING.over)
+  .map((t, i) => `${i ? "L" : "M"}${plotX(t).toFixed(1)} ${(SPRING.y + spring(t)).toFixed(1)}`)
+  .join("");
+const weight = sampled((t) => ({ y: spring(t) }), { duration: SPRING.at + SPRING.over + 0.1, step: 1 / 60, tolerance: { translate: 0.4 } });
+const playhead = sampled((t) => ({ x: plotX(t), y: SPRING.y + spring(t) }), { duration: SPRING.at + SPRING.over + 0.1, step: 1 / 60, tolerance: { translate: 0.4 } });
+// The plot reveals left to right with time, so its tip stays under the playhead.
+const traced = def.clipPath({}, <rect x={SPRING.plot.x - 4} y={0} width={4} height={H} animation={motion({ width: 4 }).at(SPRING.at).to({ width: SPRING.plot.w + 8 }, SPRING.over, ease.linear)} />);
+const anchored = def.clipPath({}, <rect x={SPRING.x - 60} y={110} width={120} height={500} />);
 
 // b. flowchart(): the loop this whole video is about.
 const chart = flowchart(
@@ -397,19 +390,45 @@ const comet = flow(chart.route("you", "svg"), { at: card(1).at + 0.75, over: 0.9
 const BIG = "SVG";
 const bigX = centered(BIG, 280);
 
-// d. <Stroke>: three brush strokes.
-const SWOOSH = [
-  { d: "M170 380C340 200 520 500 720 310S1010 200 1110 330", color: C.ink, size: 16, seed: 3 },
-  { d: "M200 460C390 340 560 540 780 420S1000 340 1090 440", color: C.accent, size: 10, seed: 7 },
-  { d: "M280 260C430 180 620 300 820 220S990 190 1040 240", color: C.soft, size: 6, seed: 11 },
-];
+// d. Data: weekly stars, bars growing from the baseline, then the trend drawn through their tops.
+const STARS = [42, 61, 55, 88, 120, 164, 230, 312];
+const BARS = { x: 250, base: 470, w: 56, gap: 44, scale: 1.05 };
+const barX = (i: number) => BARS.x + i * (BARS.w + BARS.gap);
+const trend = STARS.map((v, i) => `${i ? "L" : "M"}${barX(i) + BARS.w / 2} ${BARS.base - v * BARS.scale}`).join("");
+const bars = (
+  <>
+    <path d={`M${BARS.x - 30} ${BARS.base}H${barX(STARS.length - 1) + BARS.w + 30}`} stroke={C.hairline} />
+    {STARS.map((v, i) => (
+      <g transform={`translate(0 ${BARS.base}) scale(1 -1)`}>
+        <rect x={barX(i)} y={0} width={BARS.w} height={0} rx={3} fill={i === STARS.length - 1 ? C.accent : C.hairline} animation={motion({ height: 0 }).at(card(3).at + 0.15 + i * 0.07).to({ height: v * BARS.scale }, 0.55, ease.out)} />
+      </g>
+    ))}
+    <path d={trend} fill="none" stroke={C.ink} strokeWidth={2} strokeLinejoin="round" animation={draw({ at: card(3).at + 0.95, over: 0.7 }, ease.inOut)} />
+    {STARS.map((v, i) => (
+      <circle cx={barX(i) + BARS.w / 2} cy={BARS.base - v * BARS.scale} r={4} fill={C.page} stroke={C.ink} strokeWidth={2} animation={enter({ at: card(3).at + 0.95 + (i / (STARS.length - 1)) * 0.7, over: 0.2 }, { scale: 0 })} />
+    ))}
+    <g animation={rise(card(3).at + 1.6, 0.35, 6)}>
+      <text x={barX(STARS.length - 1) + BARS.w / 2} y={BARS.base - 312 * BARS.scale - 22} fontSize={18} textAnchor="middle" fill={C.accent}>312 ★</text>
+    </g>
+  </>
+);
 
 const montage = (
   <g animation={cut(MONTAGE)}>
-    <Kicker n="03" label="EVERYTHING MOVES" />
     <g animation={cut(card(0))}>
-      <g transform={`translate(${W / 2} ${H / 2 - 50})`}>{swarm}</g>
-      <Caption i={0} call="sampled(t => …)" line="any function of time, baked into keyframes" />
+      <path d={`M${SPRING.x - 40} 110H${SPRING.x + 40}`} stroke={C.muted} strokeWidth={2} />
+      <g clipPath={anchored}>
+        <g animation={weight}>
+          <path d={`M${SPRING.x} ${SPRING.y - 400}V${SPRING.y}`} stroke={C.muted} strokeWidth={2} />
+          <rect x={SPRING.x - 26} y={SPRING.y - 26} width={52} height={52} rx={8} fill={C.ink} />
+        </g>
+      </g>
+      <path d={`M${SPRING.plot.x} ${SPRING.y}H${SPRING.plot.x + SPRING.plot.w}`} stroke={C.hairline} strokeDasharray="3 5" />
+      <g clipPath={traced}>
+        <path d={curve} fill="none" stroke={C.accent} strokeWidth={2.5} strokeLinecap="round" />
+      </g>
+      <circle r={6} fill={C.accent} animation={playhead} />
+      <Caption i={0} call="sampled(t => spring(t))" line="real physics, baked into keyframes" />
     </g>
     <g animation={cut(card(1))}>
       {chart.layers.under}
@@ -423,10 +442,47 @@ const montage = (
       <Caption i={2} call="<Glyphs font={display} />" line="real fonts, as outlines you can draw on" />
     </g>
     <g animation={cut(card(3))}>
-      {SWOOSH.map((s, i) => (
-        <Stroke d={s.d} tool={brush({ size: s.size, seed: s.seed })} color={s.color} draw={{ at: card(3).at + 0.05 + i * 0.18, over: 0.9 }} />
-      ))}
-      <Caption i={3} call="<Stroke tool={brush()} />" line="hand-inked strokes: pen, brush, nib and pencil" />
+      {bars}
+      <Caption i={3} call="motion({ height }).to(…)" line="your numbers, animated right in the README" />
+    </g>
+  </g>
+);
+
+// ─── Shot 5: handwriting. A single-line script, inked with a nib, stroke by stroke. ──
+
+const HAND_AT = MONTAGE.at + MONTAGE.over;
+const WRITTEN = "Made by hand.";
+const HAND_SIZE = 150;
+const handX = (W - hand.measure(WRITTEN, HAND_SIZE)) / 2;
+const SPEED = 1500;
+/** Roughly how far the pen travels: along the control polygon, close enough to pace the writing. */
+const lengthOf = (d: string) => {
+  const xy = (d.match(/-?[\d.]+/g) ?? []).map(Number);
+  let sum = 0;
+  for (let i = 2; i + 1 < xy.length; i += 2) sum += Math.hypot(xy[i]! - xy[i - 2]!, xy[i + 1]! - xy[i - 1]!);
+  return sum;
+};
+/** Each stroke of the pen in turn, at one speed, with a breath between lifts. */
+const strokes = hand
+  .path(WRITTEN, { size: HAND_SIZE, x: handX, y: 360 })
+  .d.split(/(?=M)/)
+  .reduce<{ d: string; at: number; over: number }[]>((out, d) => {
+    const at = out.length ? out.at(-1)!.at + out.at(-1)!.over + 0.04 : HAND_AT + 0.35;
+    return [...out, { d, at, over: lengthOf(d) / SPEED }];
+  }, []);
+const inked = strokes.at(-1)!.at + strokes.at(-1)!.over;
+const HAND = { at: HAND_AT, over: inked - HAND_AT + 1.8 };
+const nibTool = nib({ size: 6, angle: 35, thin: 0.25 });
+
+const handwriting = (
+  <g animation={cut(HAND)}>
+    {strokes.map(({ d, at, over }) => (
+      <Stroke d={d} tool={nibTool} color={C.ink} draw={{ at, over }} ease={ease.linear} />
+    ))}
+    <Stroke d={`M${handX + 40} 452C${W / 2 - 100} 436 ${W / 2 + 200} 436 ${W - handX - 30} 446`} tool={brush({ size: 7, seed: 5 })} color={C.accent} draw={{ at: inked + 0.1, over: 0.5 }} />
+    <g animation={rise(HAND.at + 0.2, 0.4, 10)}>
+      <text x={64} y={H - 88} fontSize={30} fill={C.ink}>{"<Stroke tool={nib()} />"}</text>
+      <text x={64} y={H - 56} fontSize={14} fill={C.soft}>single-line fonts, inked stroke by stroke</text>
     </g>
   </g>
 );
@@ -439,11 +495,10 @@ const FACTS = [
   { lead: "CSS + SMIL.", rest: " That's it." },
 ] as const;
 const FACT = 64;
-const FACTS_SPAN = { at: MONTAGE.at + MONTAGE.over, over: 3.4 };
+const FACTS_SPAN = { at: HAND.at + HAND.over, over: 3.4 };
 
 const facts = (
   <g animation={cut(FACTS_SPAN)}>
-    <Kicker n="04" label="NOTHING RUNS IN THE BROWSER" />
     {FACTS.map((fact, i) => {
       const x = (W - display.measure(fact.lead + fact.rest, FACT)) / 2;
       const y = 270 + i * 110;
@@ -495,7 +550,7 @@ const finale = (size: string) => (
 
 /** A hairline progress bar along the bottom edge, one tick per shot. */
 const progress = (): SvgNode => {
-  const ticks = [TERM.at, CODE.at, MONTAGE.at, FACTS_SPAN.at, END_AT];
+  const ticks = [TERM.at, CODE.at, MONTAGE.at, HAND.at, FACTS_SPAN.at, END_AT];
   return (
     <g animation={motion({ opacity: 0 }).at(TERM.at).to({ opacity: 1 }, 0.4)}>
       <rect x={0} y={H - 3} width={W} height={3} fill={C.hairline} />
@@ -523,6 +578,7 @@ const scene = (size: string) =>
       {terminalShot}
       {codeShot}
       {montage}
+      {handwriting}
       {facts}
       {finale(size)}
       {progress()}
