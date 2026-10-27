@@ -40,11 +40,17 @@ export const seek = (time: Seconds): void => {
   }
 };
 
-/** Runs in the page: the longest CSS or SMIL animation, in seconds. */
+/** Runs in the page: one loop of the scene, the least common multiple of every CSS and SMIL period, in seconds. */
 export const loopLength = (): Seconds => {
-  const css = document.getAnimations().map((animation) => Number(animation.effect?.getTiming().duration) / 1000 || 0);
-  const smil = [...document.querySelectorAll("animate, animateTransform, animateMotion, set")].map((element) => parseFloat(element.getAttribute("dur") ?? "") || 0);
-  return Math.max(0, ...css, ...smil);
+  const css = document.getAnimations().map((animation) => Number(animation.effect?.getTiming().duration) || 0);
+  const smil = [...document.querySelectorAll("animate, animateTransform, animateMotion, set")].map((element) => parseFloat(element.getAttribute("dur") ?? "") * 1000 || 0);
+  const periods = [...css, ...smil].filter((ms) => ms > 0);
+  const longest = Math.max(0, ...periods);
+  for (let k = 1; k <= 1000; k++) {
+    const loop = longest * k;
+    if (periods.every((ms) => Math.abs(loop / ms - Math.round(loop / ms)) * ms < 1)) return loop / 1000;
+  }
+  return longest / 1000;
 };
 
 const launch = async (executablePath?: string) => {
@@ -69,13 +75,18 @@ const size = (svg: string): { width: number; height: number } => {
   return { width, height };
 };
 
+// Chromium cannot capture past 16384 device pixels on a side, so a big sheet renders at a lower scale.
+const MAX_CAPTURE = 16000;
+const GAP = 12;
+const CAPTION = 20;
+
 const label = (time: Seconds): string => `${Number(time.toFixed(3))}s`;
 
 const sheetHtml = (frames: readonly Frame[], width: number, columns: number): string => `<!doctype html>
 <style>
   :root { color-scheme: light dark; background: Canvas; font: 12px ui-monospace, Menlo, monospace }
-  body { margin: 0; padding: 12px; display: grid; grid-template-columns: repeat(${columns}, ${width}px); gap: 12px; width: max-content }
-  figure { margin: 0 } img { display: block; width: ${width}px; outline: 1px solid GrayText } figcaption { padding-top: 4px }
+  body { margin: 0; padding: ${GAP}px; display: grid; grid-template-columns: repeat(${columns}, ${width}px); gap: ${GAP}px; width: max-content }
+  figure { margin: 0 } img { display: block; width: ${width}px; outline: 1px solid GrayText } figcaption { height: ${CAPTION - 4}px; padding-top: 4px }
 </style>
 ${frames.map((frame) => `<figure><img src="data:image/png;base64,${Buffer.from(frame.png).toString("base64")}"><figcaption>t = ${label(frame.time)}</figcaption></figure>`).join("\n")}`;
 
@@ -83,6 +94,9 @@ ${frames.map((frame) => `<figure><img src="data:image/png;base64,${Buffer.from(f
 export const renderFrames = async (svg: string, options: FrameOptions): Promise<Frames> => {
   const { width, height } = size(svg);
   const scale = options.scale ?? 1;
+  if (!(scale > 0 && Number.isFinite(scale))) throw new Error(`scale must be a positive number, got ${scale}.`);
+  const columns = typeof options.sheet === "object" ? options.sheet.columns : undefined;
+  if (columns !== undefined && !(Number.isInteger(columns) && columns > 0)) throw new Error(`sheet columns must be a positive whole number, got ${columns}.`);
   const browser = await launch(options.executablePath);
   try {
     const page = await browser.newPage({ viewport: { width: Math.ceil(width), height: Math.ceil(height) }, deviceScaleFactor: scale, colorScheme: options.colorScheme ?? "light", reducedMotion: "no-preference" });
@@ -100,10 +114,11 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
       frames.push({ time, png: new Uint8Array(await stage.screenshot({ animations: "allow", omitBackground: true })) });
     }
     if (!options.sheet) return { duration, frames };
-    const columns = (typeof options.sheet === "object" && options.sheet.columns) || Math.min(frames.length, 4);
-    await page.setViewportSize({ width: 1, height: 1 });
-    await page.setContent(sheetHtml(frames, width, columns));
-    const sheet = new Uint8Array(await page.locator("body").screenshot());
+    const across = Math.min(columns ?? 4, frames.length);
+    const sheetSize = Math.max(across * (width + GAP) + GAP, Math.ceil(frames.length / across) * (height + GAP + CAPTION) + GAP);
+    const sheetPage = await browser.newPage({ viewport: { width: 1, height: 1 }, deviceScaleFactor: Math.min(scale, MAX_CAPTURE / sheetSize), colorScheme: options.colorScheme ?? "light" });
+    await sheetPage.setContent(sheetHtml(frames, width, across));
+    const sheet = new Uint8Array(await sheetPage.locator("body").screenshot());
     return { duration, frames, sheet };
   } finally {
     await browser.close();
