@@ -112,6 +112,32 @@ const fade = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, <><stop offset={
 
 Attributes are camelCase (`strokeWidth`, `textAnchor`, `strokeLinecap`) and the class attribute is `class`, not `className`.
 
+## Images
+
+Embed images as data URIs so the output stays one file. GitHub and Markdown show SVGs through `<img>`, which blocks external hrefs but allows `data:`.
+
+```tsx
+import { Picture, fx, motion, ease, picture } from "svjeez";
+
+const photo = await picture.load(new URL("./harbor.jpg", import.meta.url)); // path, file: or http(s) URL
+const logo = picture('<svg viewBox="0 0 40 40">...</svg>');                   // bytes or SVG markup, sync
+
+<Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" alt="A harbor at dusk" filter={fx.duotone({ dark: "#1b1464", light: "#ffb36b" })} />;
+<Picture src={photo} x={20} y={20} width={240} height={160} animation={motion({ scale: 1 }).to({ scale: 1.3 }, 6, ease.inOut)} />; // Ken Burns
+```
+
+`picture()` sniffs the format from the bytes (svg, png, jpeg, gif, webp), never the extension, and reads the intrinsic size from the header. It throws on anything else. `<Picture>` takes `x`, `y` and `width` and/or `height` (one given derives the other from the aspect ratio; none uses the intrinsic size), `fit` (`cover` default, `contain`, `fill`), `radius`, `filter`, `opacity`, `class` and `alt` (omit it and the picture is `aria-hidden`). `animation` moves the inner image while the frame stays put, so `scale` zooms about the frame's center, clipped to the frame. To animate the whole picture, wrap it in an animated `<g>`.
+
+Filters that suit photos: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })` (hex colors, maps luminance onto the ramp), `fx.blur({ blur })`, `fx.shadow({ dx, dy, blur, color, opacity })`.
+
+Before you embed:
+
+- Only SVG scales infinitely. Raster pixelates when scaled up, so prefer SVG, and export raster at 2x the drawn size.
+- base64 adds about 33%, and the whole file downloads before the first frame. Keep each image small, under 100 KB; `validateSvg` warns past 256 KB.
+- An embedded SVG is sealed. Web fonts, scripts and external refs do not load inside it, so outline its text. You cannot animate its parts. Its own CSS animations run when the outer SVG is inline in a page but freeze on the first frame through `<img>` (measured in Chromium), which is how GitHub shows it. Animate with `<Picture animation>` or a wrapping `<g>` instead.
+- Animated content under a filter on a large image re-renders every frame and is expensive.
+- You are redistributing the image's bytes. Check the licence.
+
 ## Extras
 
 Import from `svjeez/extras`. Every extra takes `theme`, `x`, `y`, `fontSize` and `class`, and returns `{ node, ... }`. Put `node` in the tree.
@@ -180,6 +206,8 @@ Runtime errors (thrown by `motion()` or `render()`):
 | `<rect> has no attribute "stroke-width"` | Use camelCase: `strokeWidth` |
 | `to() needs a positive duration. Use set() for a cut.` | `over` is a length; use `.set()` for an instant change |
 | `Two keys are too close to tell apart` | Space transitions further apart, or shorten `duration` |
+| `Unknown image format. picture() reads png, jpeg, gif, webp, svg.` | The bytes are not one of those (a path, HTML error page or AVIF) | Convert to a supported format; for a file or URL use `picture.load()` |
+| `<image href="photo.png"> will not load when the SVG is shown through <img>` (a validate error) | An external href | `await picture.load(path)` and draw it with `<Picture>` |
 | `Generated SVG is invalid` | Usually a hand-written `id` clashing with another; let `def` make ids |
 
 ## Render, look, fix

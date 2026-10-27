@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { def, ease, motion, render } from "svjeez";
+import { deflateSync } from "node:zlib";
+import { Picture, def, ease, motion, picture, render } from "svjeez";
 import { renderFrames, systemColorScheme } from "svjeez/frames";
 
 const browser = await renderFrames(render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />), { times: [0] }).then(
@@ -14,6 +15,32 @@ const browser = await renderFrames(render({ width: 4, height: 4, duration: 1, ti
 const pngSize = (png: Uint8Array) => {
   const view = new DataView(png.buffer, png.byteOffset);
   return { width: view.getUint32(16), height: view.getUint32(20) };
+};
+
+const solidPng = (width: number, height: number, [r, g, b]: [number, number, number]): Uint8Array => {
+  const crc = (bytes: Uint8Array) => {
+    let c = 0xffffffff;
+    for (const byte of bytes) {
+      c ^= byte;
+      for (let bit = 0; bit < 8; bit++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    }
+    return (c ^ 0xffffffff) >>> 0;
+  };
+  const chunk = (type: string, data: Uint8Array) => {
+    const body = Buffer.concat([Buffer.from(type), data]);
+    const out = Buffer.alloc(body.length + 8);
+    out.writeUInt32BE(data.length, 0);
+    body.copy(out, 4);
+    out.writeUInt32BE(crc(body), body.length + 4);
+    return out;
+  };
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header.set([8, 2], 8);
+  const row = Buffer.concat([Buffer.from([0]), Buffer.from(Array.from({ length: width }, () => [r, g, b]).flat())]);
+  const pixels = Buffer.concat(Array.from({ length: height }, () => row));
+  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(pixels)), chunk("IEND", Buffer.alloc(0))]);
 };
 
 const same = (a: Uint8Array, b: Uint8Array) => Buffer.from(a).equals(Buffer.from(b));
@@ -106,5 +133,19 @@ describe.if(browser)("renderFrames", () => {
 
   test("an SVG without a numeric size is rejected", async () => {
     expect(renderFrames('<svg xmlns="http://www.w3.org/2000/svg"/>', { times: [0] })).rejects.toThrow("numeric width and height");
+  });
+
+  test("an embedded raster and an embedded SVG paint their own colors", async () => {
+    const scene = (child: JSX.Element) => render({ width: 20, height: 20, duration: 1, title: "Embed" }, child);
+    const raster = picture(solidPng(8, 8, [0, 200, 0]));
+    const vector = picture('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="4" height="4" fill="#c80000"/></svg>');
+    const paint = async (child: JSX.Element) => (await renderFrames(scene(child), { times: [0], colorScheme: "light" })).frames[0]!.png;
+    const png = await paint(<Picture src={raster} x={0} y={0} width={20} height={20} />);
+    const svg = await paint(<Picture src={vector} x={0} y={0} width={20} height={20} />);
+    const green = await paint(<rect width={20} height={20} fill="#00c800" />);
+    const red = await paint(<rect width={20} height={20} fill="#c80000" />);
+    expect(same(png, green)).toBe(true);
+    expect(same(svg, red)).toBe(true);
+    expect(same(png, svg)).toBe(false);
   });
 });

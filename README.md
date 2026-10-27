@@ -278,6 +278,19 @@ Textures are pixel art. A skin can use one texture for every face or different t
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/effects.svg" width="320" alt="A glowing word and a boiling hand-drawn house" />
 
+Photo filters: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })`, `fx.blur({ blur })`, `fx.shadow({ dx, dy, blur, color, opacity })`.
+
+## Images
+
+Embed SVG or raster images as data URIs, so the output stays one file that GitHub shows through `<img>`.
+
+```tsx
+const photo = await picture.load(new URL("./harbor.jpg", import.meta.url)); // or picture(bytesOrSvgMarkup)
+<Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" alt="A harbor" />
+```
+
+`<Picture>` takes `fit` (`cover`, `contain`, `fill`), `radius`, `filter`, `opacity`, `alt`, and an `animation` that moves the image inside a fixed frame (a Ken Burns zoom). `validateSvg` rejects external image hrefs and warns on a data URI over 256 KB. Prefer SVG, which scales infinitely; embedded SVGs are sealed, so outline their text. Full notes are in the skill's Images section. See `examples/images`.
+
 ## Extras
 
 `svjeez/extras` adds code explainers, terminals and diagrams.
