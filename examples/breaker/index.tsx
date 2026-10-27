@@ -97,9 +97,8 @@ const listing = (source: string) => code(highlight(source), { x: 88, y: TOP + BA
 const editorFor = (c: ReturnType<typeof code>) => window(rect(64, TOP, 760, c.bounds.y + c.bounds.h + 16 - TOP), { theme, title: "breaker.ts", bar: BAR_H, class: "mono" });
 const source = listing(v1);
 const editor = editorFor(source);
-const shown = reveal(source, { at: tl.code.at + 0.6, blocks: [[2, 3], [5, 9], [10, 19], [21, 24]], step: 0.8 });
-const guardSpan = { at: shown.end + 0.4, over: 3 };
-const tripSpan = { at: guardSpan.at + guardSpan.over, over: tl.code.at + tl.code.over - guardSpan.at - guardSpan.over - 0.3 };
+const beat = timeline({ build: 3.8, guard: 3, trip: 3 }, { at: tl.code.at + 0.6, gap: 0.2 });
+const shown = reveal(source, { at: beat.build.at, blocks: [[2, 3], [5, 9], [10, 19], [21, 24]], step: 0.8 });
 
 // --- machine: the four states, walked once
 const machineSpec = {
@@ -116,8 +115,7 @@ const machineSpec = {
     ["half", "open", "failure"],
   ],
 } as const;
-const probe = state(machineSpec, { theme, fontSize: 15 });
-const machine = state(machineSpec, { theme, fontSize: 15, class: "mono", x: 820 - probe.bounds.w / 2, y: 130 });
+const machine = state(machineSpec, { theme, fontSize: 15, class: "mono", x: 820, y: 130, anchor: "top" });
 const walk = machine.walk(["closed", "open", "half", "open", "half", "closed"], { at: tl.machine.at + 0.8, dwell: 0.9, token: { style: "comet" } });
 
 // --- together: a sequence on the left, the machine beside it lighting as messages land
@@ -138,17 +136,22 @@ const story = sequence(
       ["breaker", "client", "quote", { reply: true }],
     ],
   },
-  { theme, fontSize: 14, class: "mono", x: 64, y: 120, play: { at: tl.together.at + 0.6, step: 1.15 } },
+  {
+    theme,
+    fontSize: 14,
+    class: "mono",
+    x: 64,
+    y: 120,
+    /** The wait before the probe gets its own pause. */
+    play: { at: [0, 1, 2, 3, 4.4, 5.4, 6.6, 8.6, 9.6, 10.6, 11.6].map((t) => tl.together.at + 0.6 + t) },
+  },
 );
 const mini = state(machineSpec, { theme, fontSize: 14, class: "mono", x: 760, y: 150 });
 const msg = (i: number) => story.message(i).span.at;
-const lit = {
-  closed: [[tl.together.at, msg(3)], [msg(10), tl.together.at + tl.together.over]],
-  open: [[msg(3), msg(7)]],
-  half: [[msg(7), msg(10)]],
-} as const;
+const synced = mini.walk(["closed", "open", "half", "closed"], { at: [tl.together.at, msg(3), msg(7), msg(10)], dwell: tl.together.at + tl.together.over - msg(10) });
 
 // --- timeline: the same story on a clock
+const zero = tl.timeline.at + 0.5;
 const clock = lanes(
   {
     lanes: { client: { label: "client", role: "input" }, breaker: { label: "breaker", role: "tool" }, service: { label: "service", role: "store" } },
@@ -176,12 +179,9 @@ const clock = lanes(
       { from: "breaker", to: "service", at: 6.2 },
     ],
   },
-  { theme, fontSize: 14, class: "mono", scale: 120, x: 64, y: 170 },
+  { theme, fontSize: 14, class: "mono", scale: 120, x: 64, y: 170, play: { at: zero } },
 );
-/** The lanes run on their own clock from 0, so the playhead and captions shift onto the scene by hand. */
-const zero = tl.timeline.at + 0.5;
-const sweep = motion({ x: 0 }).at(zero).to({ x: clock.x(8) - clock.x(0) }, 8, ease.linear);
-const beats = [
+const captions = [
   [0, 3, "Closed: every call waits out the timeout."],
   [3, 6, "Open: calls fail at once, the service gets a rest."],
   [6, 8, "Half-open: one probe succeeds, and traffic flows again."],
@@ -190,8 +190,8 @@ const beats = [
 // --- backoff: v1 morphs into v2
 const before = listing(v1);
 const after = listing(v2);
-const change = { at: tl.backoff.at + 1.5, over: 1 };
-const morphed = morph([before, after], { at: [change], gutter: true });
+const change = tl.backoff.at + 1.5;
+const morphed = morph([before, after], { at: [change], over: 1, gutter: true });
 
 // --- recap: what call() does, as a flowchart with a request traced through it
 const recapSpec = {
@@ -215,15 +215,7 @@ const recapSpec = {
       ["run", "count", { label: "threw" }],
     ],
 } as const;
-const recapProbe = flowchart(recapSpec, { theme, fontSize: 14 });
-const decide = flowchart(recapSpec, {
-  theme,
-  fontSize: 14,
-  class: "mono",
-  x: W / 2 - recapProbe.bounds.w / 2,
-  y: (STAGE.h + 40) / 2 - recapProbe.bounds.h / 2,
-  reveal: { at: tl.recap.at + 0.3, step: 0.25 },
-});
+const decide = flowchart(recapSpec, { theme, fontSize: 14, class: "mono", x: W / 2, y: (STAGE.h + 40) / 2, anchor: "center", reveal: { at: tl.recap.at + 0.3, step: 0.25 } });
 const trips = [
   flow(decide.route("call", "fail"), { at: tl.recap.at + 2.6, over: 1.8, style: "packet", label: "call()", color: theme.base08, arrive: true }),
   flow(decide.route("call", "ok"), { at: tl.recap.at + 4.8, over: 1.8, style: "trace", color: theme.base0B, arrive: true }),
@@ -273,18 +265,18 @@ export default function build(): string {
           <Focus
             dim={0.3}
             stops={[
-              { during: guardSpan, on: source.lines(6, 9).pad(2) },
-              { during: tripSpan, on: [source.lines(15, 18).pad(2), source.lines(21, 24).pad(2)] },
+              { during: beat.guard, on: source.lines(6, 9).pad(2) },
+              { during: beat.trip, on: [source.lines(15, 18).pad(2), source.lines(21, 24).pad(2)] },
             ]}
           >
             <g class="mono">{shown.node}</g>
           </Focus>
         </g>
         <g class="sans">
-          <Callout target={source.lines(6, 9)} side="right" during={guardSpan} color={theme.base0A} fontSize={14} width={22}>
+          <Callout target={source.lines(6, 9)} side="right" during={beat.guard} color={theme.base0A} fontSize={14} width={22}>
             While open, refuse until retryAt, then let one call through.
           </Callout>
-          <Callout target={source.get("trip")} side="right" during={tripSpan} color={theme.base08} fontSize={14} width={22}>
+          <Callout target={source.get("trip")} side="right" during={beat.trip} color={theme.base08} fontSize={14} width={22}>
             Three strikes, or any failure while half-open, trips it.
           </Callout>
         </g>
@@ -296,7 +288,7 @@ export default function build(): string {
         {walk.node}
         <g class="sans">
           {(["closed", "open", "half"] as const).map((s, i) => (
-            <text x={96} y={220 + i * 60} fontSize={18} fill={theme.base04} animation={visible(walk.spans[s].map((sp) => [sp.at, sp.at + sp.over] as const))}>
+            <text x={96} y={220 + i * 60} fontSize={18} fill={theme.base04} animation={visible(walk.spans[s])}>
               {{ closed: "Calls pass through.", open: "Calls fail instantly.", half: "One probe decides." }[s]}
             </text>
           ))}
@@ -307,21 +299,14 @@ export default function build(): string {
       <g animation={tl.show("together")}>
         {story.node}
         {mini.node}
-        {(["closed", "open", "half"] as const).map((s) => {
-          const b = mini.get(s).pad(4);
-          return <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={11} fill="none" stroke={theme.base09} strokeWidth={2} animation={visible(lit[s])} />;
-        })}
-        {flow(mini.edge("closed", "open"), { at: msg(3), over: 0.5, color: theme.base09 }).node}
-        {flow(mini.edge("open", "half"), { at: msg(7) - 0.5, over: 0.5, color: theme.base09 }).node}
-        {flow(mini.edge("half", "closed"), { at: msg(10) - 0.5, over: 0.5, color: theme.base09 }).node}
+        {synced.node}
       </g>
 
       <Heading scene="timeline">Eight seconds, on a clock</Heading>
       <g animation={tl.show("timeline")}>
         {clock.node}
-        <path d={`M${clock.x(0)} ${clock.bounds.y}V${clock.bounds.y + clock.bounds.h - 24}`} stroke={theme.base09} strokeWidth={1.5} animation={sweep} />
-        {beats.map(([from, to, text]) => (
-          <text x={clock.x(from)} y={clock.bounds.y + clock.bounds.h + 40} class="sans" fontSize={18} fill={theme.base05} animation={visible([[zero + from, zero + to]])}>
+        {captions.map(([from, to, text]) => (
+          <text x={clock.x(from)} y={clock.bounds.y + clock.bounds.h + 40} class="sans" fontSize={18} fill={theme.base05} animation={visible([{ at: zero + from, over: to - from }])}>
             {text}
           </text>
         ))}
@@ -332,7 +317,7 @@ export default function build(): string {
         {editorFor(after).node}
         <g class="mono">{morphed.node}</g>
         <g class="sans">
-          <Callout target={after.get("wait")} side="right" during={{ at: change.at + change.over + 0.3, over: 4 }} color={theme.base0B} fontSize={14} width={22}>
+          <Callout target={after.get("wait")} side="right" during={{ at: change + 1.3, over: 4 }} color={theme.base0B} fontSize={14} width={22}>
             Each trip waits longer than the last.
           </Callout>
         </g>
