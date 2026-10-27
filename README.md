@@ -27,7 +27,7 @@ error TS2345: Argument of type '"review"' is not assignable to parameter of type
 
 ## Installation
 
-Install svjeez and configure its JSX runtime. Its type checks need TypeScript 5.4 or later:
+Install svjeez and configure its JSX runtime. svjeez needs Node 20 or later, and its type checks need TypeScript 5.4 or later:
 
 ```sh
 npm install svjeez
