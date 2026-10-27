@@ -20,12 +20,20 @@ jobs:
       - run: bunx playwright-core install --with-deps chromium-headless-shell
       - run: bun run typecheck
       - run: bun test
+      - run: npm pack --dry-run
+
+  # dist/ is built on macOS. Linux libm differs in the last bit of Math.sin and friends, which changes some printed floats.
+  dist:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
       - run: bun run build
       - name: dist/ matches the examples
         run: |
           git add --intent-to-add dist
           git diff --exit-code --stat dist || { git diff --word-diff=plain --unified=0 dist | head -60; echo "::error::dist/ is stale. Run 'bun run build' and commit the result."; exit 1; }
-      - run: npm pack --dry-run
 
   node:
     runs-on: ubuntu-latest
