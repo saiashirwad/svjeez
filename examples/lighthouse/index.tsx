@@ -105,7 +105,8 @@ const camera = shots.slice(1).reduce<Motion<"x" | "y" | "scale">>((track, shot) 
 
 type Fade = Motion<"opacity">;
 
-// Labels: five slots around each node, the stalest slot taking the next event.
+// Labels: five slots around each node. The stalest slot takes the next event, unless its box would cover
+// another node or a label still showing there; with no slot clear, the event is skipped.
 
 type Slot = { readonly anchor: Point; readonly h: -1 | 1; readonly v: -1 | 0 | 1 };
 const SLOT = {
@@ -123,6 +124,34 @@ const FADE = 0.35;
 const GHOST = 0.3;
 const SCRAMBLE = 0.16;
 const GAP = 0.3;
+/** Longest a label shows, ghost included. */
+const LIFE = HOLD + LINGER + 2 * FADE;
+
+const LABEL = { size: 13, h: 22 };
+
+interface Box {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+}
+
+const boxOf = (at: Point, slot: Slot, kind: Kind): Box => {
+  const w = 30 + KINDS[kind].text.length * advance(LABEL.size);
+  const anchor = { x: at.x + slot.anchor.x, y: at.y + slot.anchor.y };
+  return { x: slot.h < 0 ? anchor.x - w : anchor.x, y: anchor.y - (slot.v === 0 ? LABEL.h / 2 : slot.v < 0 ? LABEL.h : 0), w, h: LABEL.h };
+};
+
+const hits = (a: Box, b: Box, pad = 4) => a.x < b.x + b.w + pad && b.x < a.x + a.w + pad && a.y < b.y + b.h + pad && b.y < a.y + a.h + pad;
+
+const slotsOf = (thread: Thread): Slot[] =>
+  thread.parent === undefined ? [SLOT.W, SLOT.NW, SLOT.SW, SLOT.NE, SLOT.SE] : [SLOT.NE, SLOT.E, SLOT.SE, SLOT.SW, SLOT.NW];
+
+/** Each node's circle, rays and name. */
+const bodies: Box[] = graph.map((thread) => {
+  const { x, y } = position[thread.index]!;
+  return { x: x - 36, y: y - 36, w: 72, h: R + 70 };
+});
 
 interface Shown {
   readonly t: number;
@@ -130,15 +159,28 @@ interface Shown {
   readonly next: number;
 }
 
-const schedule = (thread: Thread, slots: number): Shown[][] => {
-  const taken: { t: number; kind: Kind }[][] = Array.from({ length: slots }, () => []);
-  for (const label of thread.labels) {
-    const last = taken.map((slot) => slot.at(-1)?.t ?? -Infinity);
-    const stalest = last.indexOf(Math.min(...last));
-    if (last[stalest]! + GAP <= label.t) taken[stalest]!.push(label);
+const schedules: Shown[][][] = (() => {
+  const slots = graph.map(slotsOf);
+  const taken = graph.map((thread) => slots[thread.index]!.map((): { t: number; kind: Kind }[] => []));
+  const events = graph.flatMap((thread) => thread.labels.map((label) => ({ ...label, n: thread.index }))).sort((a, b) => a.t - b.t);
+  for (const { t, kind, n } of events) {
+    const showing = taken.flatMap((mine, other) =>
+      other === n
+        ? []
+        : mine.flatMap((slot, s) => {
+            const last = slot.at(-1);
+            return last && t < last.t + LIFE ? [boxOf(position[other]!, slots[other]![s]!, last.kind)] : [];
+          }),
+    );
+    const blocked = [...showing, ...bodies.filter((_, other) => other !== n && graph[other]!.born < t + LIFE)];
+    const pick = taken[n]!
+      .map((slot, s) => ({ s, last: slot.at(-1)?.t ?? -Infinity }))
+      .sort((a, b) => a.last - b.last)
+      .find(({ s, last }) => last + GAP <= t && !blocked.some((box) => hits(boxOf(position[n]!, slots[n]![s]!, kind), box)));
+    if (pick) taken[n]![pick.s]!.push({ t, kind });
   }
-  return taken.map((slot) => slot.map((label, i) => ({ ...label, next: slot[i + 1]?.t ?? Infinity })));
-};
+  return taken.map((mine) => mine.map((slot) => slot.map((label, i) => ({ ...label, next: slot[i + 1]?.t ?? Infinity }))));
+})();
 
 /** Full for HOLD, then a ghost for LINGER, cut short by whatever takes the slot next. */
 const presence = (shown: readonly Shown[]): Fade => {
@@ -173,13 +215,11 @@ const scrambled = (text: string, seed: number, keep: number): string =>
     })
     .join("");
 
-const LABEL = { size: 13, h: 22 };
-
 function Label({ at, slot, kind, shown, seed }: { at: Point; slot: Slot; kind: Kind; shown: readonly Shown[]; seed: number }): SvgNode {
   const { text, color } = KINDS[kind];
-  const w = 30 + text.length * advance(LABEL.size);
+  const { x, y, w } = boxOf(at, slot, kind);
+  const box = { x, y };
   const anchor = { x: at.x + slot.anchor.x, y: at.y + slot.anchor.y };
-  const box = { x: slot.h < 0 ? anchor.x - w : anchor.x, y: anchor.y - (slot.v === 0 ? LABEL.h / 2 : slot.v < 0 ? LABEL.h : 0) };
   const reach = Math.hypot(slot.anchor.x, slot.anchor.y);
   const base = { x: box.x + 22, y: box.y + LABEL.h / 2 + 4.5, fill: color };
   const starts = shown.map((s) => s.t);
@@ -203,11 +243,11 @@ function Label({ at, slot, kind, shown, seed }: { at: Point; slot: Slot; kind: K
 }
 
 function Labels({ thread }: { thread: Thread }): SvgNode {
-  const slots: Slot[] = thread.parent === undefined ? [SLOT.W, SLOT.NW, SLOT.SW, SLOT.NE, SLOT.SE] : [SLOT.NE, SLOT.E, SLOT.SE, SLOT.SW, SLOT.NW];
+  const slots = slotsOf(thread);
   const at = position[thread.index]!;
   return (
     <>
-      {schedule(thread, slots.length).flatMap((shown, s) =>
+      {schedules[thread.index]!.flatMap((shown, s) =>
         (Object.keys(KINDS) as Kind[]).map((kind) => {
           const mine = shown.filter((label) => label.kind === kind);
           return mine.length > 0 && <Label at={at} slot={slots[s]!} kind={kind} shown={mine} seed={thread.index * 31 + s * 7} />;
