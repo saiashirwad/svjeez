@@ -473,7 +473,7 @@ npx svjeez render scene.svg --count 8 --scale 2 --scheme dark
 npx svjeez svg scene.tsx --out scene.svg
 ```
 
-Times are playback seconds. Without `--times`, it takes `--count` frames (default 6) spread over one loop. `--sheet` also writes `sheet.png`, every frame on one labelled grid. On Node, a `.tsx` file loads through `tsx` if the project has it; under Bun, use `bunx --bun svjeez`.
+Times are playback seconds. Without `--times`, it takes `--count` frames (default 6) spread over one loop. Frames follow this machine's light or dark appearance, like a browser would; `--scheme light` or `--scheme dark` pins one. `--sheet` also writes `sheet.png`, every frame on one labelled grid. On Node, a `.tsx` file loads through `tsx` if the project has it; under Bun, use `bunx --bun svjeez`.
 
 The same thing is a function, for scripts and tools:
 

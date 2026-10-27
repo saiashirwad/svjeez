@@ -4,12 +4,12 @@ import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { renderFrames, type FrameTimes } from "./frames";
+import { renderFrames, type ColorScheme, type FrameTimes } from "./frames";
 import { validateSvg } from "./validate";
 
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg]
-  svjeez render <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--scheme light|dark] [--background css]
+  svjeez render <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--scheme system|light|dark] [--background css]
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
 Times are playback seconds. Without --times, render takes --count frames (default 6) across one loop.
@@ -83,13 +83,13 @@ const renderCommand = async (args: string[]): Promise<void> => {
       background: { type: "string" },
     },
   });
-  if (values.scheme !== undefined && values.scheme !== "light" && values.scheme !== "dark") fail(`--scheme is light or dark, got "${values.scheme}".`);
+  if (values.scheme !== undefined && !["system", "light", "dark"].includes(values.scheme)) fail(`--scheme is system, light or dark, got "${values.scheme}".`);
   const svg = await loadSvg(positionals[0] ?? fail(USAGE));
   report(svg);
-  const { duration, frames, sheet } = await renderFrames(svg, {
+  const { duration, colorScheme, frames, sheet } = await renderFrames(svg, {
     ...when(values.times, values.count),
     scale: number("scale", values.scale),
-    colorScheme: values.scheme as "light" | "dark" | undefined,
+    colorScheme: values.scheme as ColorScheme | "system" | undefined,
     background: values.background,
     sheet: values.sheet || values.columns !== undefined ? { columns: number("columns", values.columns) } : false,
   });
@@ -105,7 +105,7 @@ const renderCommand = async (args: string[]): Promise<void> => {
     written.push(join(values.out, "sheet.png"));
     await writeFile(join(values.out, "sheet.png"), sheet);
   }
-  console.log(`loop ${Number(duration.toFixed(3))}s\n${written.join("\n")}`);
+  console.log(`loop ${Number(duration.toFixed(3))}s, ${colorScheme}\n${written.join("\n")}`);
 };
 
 const COMMANDS: Record<string, (args: string[]) => Promise<void>> = { svg: svgCommand, render: renderCommand };

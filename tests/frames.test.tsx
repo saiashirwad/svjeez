@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { def, ease, motion, render } from "svjeez";
-import { renderFrames } from "../src/frames";
+import { renderFrames, systemColorScheme } from "svjeez/frames";
 
 const browser = await renderFrames(render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />), { times: [0] }).then(
   () => true,
@@ -85,6 +85,23 @@ describe.if(browser)("renderFrames", () => {
   test("a non-positive scale or column count is rejected", async () => {
     expect(renderFrames(fade, { times: [0], scale: 0 })).rejects.toThrow("scale");
     expect(renderFrames(fade, { times: [0], sheet: { columns: 1.5 } })).rejects.toThrow("columns");
+  });
+
+  test("frames follow the system color scheme unless told otherwise", async () => {
+    const svg = render(
+      { width: 20, height: 20, duration: 1, title: "Scheme", css: "rect{fill:#ffffff}@media (prefers-color-scheme:dark){rect{fill:#000000}}" },
+      <rect width={20} height={20} />,
+    );
+    const [light, dark, system, fallback] = await Promise.all([
+      renderFrames(svg, { times: [0], colorScheme: "light" }),
+      renderFrames(svg, { times: [0], colorScheme: "dark" }),
+      renderFrames(svg, { times: [0], colorScheme: "system" }),
+      renderFrames(svg, { times: [0] }),
+    ]);
+    expect(same(light.frames[0]!.png, dark.frames[0]!.png)).toBe(false);
+    expect(fallback.colorScheme).toBe(systemColorScheme());
+    expect(system.colorScheme).toBe(systemColorScheme());
+    expect(same(fallback.frames[0]!.png, (systemColorScheme() === "dark" ? dark : light).frames[0]!.png)).toBe(true);
   });
 
   test("an SVG without a numeric size is rejected", async () => {
