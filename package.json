@@ -25,13 +25,17 @@
       "import": "./package-dist/frames.js"
     }
   },
+  "bin": {
+    "svjeez": "./package-dist/cli.js"
+  },
   "scripts": {
     "build": "bun run scripts/build.ts",
     "dev": "bun run scripts/preview.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "build:package": "bun run scripts/package.ts",
-    "prepack": "bun run build:package"
+    "prepack": "bun run build:package",
+    "svjeez": "bun run src/cli.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
