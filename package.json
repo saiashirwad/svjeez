@@ -43,7 +43,7 @@
     "typescript": "latest"
   },
   "peerDependencies": {
-    "playwright-core": ">=1.40"
+    "playwright-core": ">=1.49"
   },
   "peerDependenciesMeta": {
     "playwright-core": {
