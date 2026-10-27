@@ -291,6 +291,21 @@ const photo = await picture.load(new URL("./harbor.jpg", import.meta.url)); // o
 
 `<Picture>` takes `fit` (`cover`, `contain`, `fill`), `radius`, `filter`, `opacity`, `alt`, and an `animation` that moves the image inside a fixed frame (a Ken Burns zoom). `validateSvg` warns on external image hrefs, which GitHub won't load, and on a data URI over 256 KB. Prefer SVG, which scales infinitely; embedded SVGs are sealed, so outline their text. Full notes are in the skill's Images section. See `examples/images`.
 
+## Fonts
+
+Embed a font as real text, measure text with it, or draw text as animated outlines.
+
+```tsx
+const display = await font.load(new URL("./ArchivoBlack-Regular.ttf", import.meta.url)); // or font(bytes)
+const body = font.family(await font.load("Body-Regular.ttf"), await font.load("Body-Italic.ttf"));
+
+<text x={20} y={60} fontFamily={body}>Selectable text in an embedded font</text>
+const w = display.measure("Wave!", 96); // px, matches the browser, kerning included
+<Glyphs font={display} text="Wave!" size={96} x={(W - w) / 2} y={140} animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />
+```
+
+A font is embedded once, and only if the tree uses it. `<Glyphs>` draws one path per glyph and embeds no font, which suits short animated titles. Extras take `font` and size their boxes by measuring. Full notes are in the skill's Fonts section. See `examples/fonts`.
+
 ## Extras
 
 `svjeez/extras` adds code explainers, terminals and diagrams.

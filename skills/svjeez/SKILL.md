@@ -139,11 +139,42 @@ Before you embed:
 - Animated content under a filter on a large image re-renders every frame and is expensive.
 - You are redistributing the image's bytes. Check the license.
 
+## Fonts
+
+Load a TTF or OTF the way you load an image, then use it three ways: as real text, to measure text, or as outlines.
+
+```tsx
+import { Glyphs, draw, font } from "svjeez";
+
+const display = await font.load(new URL("./ArchivoBlack-Regular.ttf", import.meta.url)); // or font(bytes), sync
+const body = font.family(await font.load(new URL("./Body-Regular.ttf", import.meta.url)), await font.load(new URL("./Body-Bold.ttf", import.meta.url)));
+
+<text x={20} y={60} fontFamily={body} fontWeight="bold">Real, selectable text</text>;   // also on <g>
+const w = display.measure("Title", 48);                                                  // px, kerning and ligatures included
+<Glyphs font={display} text="Wave!" size={96} x={(W - display.measure("Wave!", 96)) / 2} y={140} stroke="#FF5FA8" fill="none"
+  animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />;                         // one path per glyph
+```
+
+`font()` reads the format from the bytes (ttf, otf, woff, woff2) and the family, weight and style from the file; pass `{ family, weight, style, fallback }` to override. `font.family(...faces)` groups weights and styles under the first face's name, and `family.face(weight, style)` picks one the way the browser would. `fontFamily={font}` embeds each face as a data URI the first time the tree uses it, once, and writes the fallback after it (`monospace` for a fixed-pitch font, else `sans-serif`).
+
+`font.measure(text, size)` and `font.path(text, { size, x, y })` match Chromium's layout, standard ligatures and pair kerning included. `path` returns `{ d, width, glyphs }`, each glyph `{ char, d, x, advance }`. `font.metrics` gives ascent, descent, cap height and x-height in em. `<Glyphs>` draws one `<path>` per visible glyph inside a group labelled with the text. Its `animation` is a stack applied to every glyph, or a function of `(glyph, index)` for a stagger. To move the word as one, wrap it in an animated `<g>`.
+
+Extras take a `font` too: `code(src, { font })` (monospaced only; it sets the column width), every diagram, `<Callout>` and `flow` packet labels. Their boxes are then sized by measuring, instead of the 0.6em-per-character estimate.
+
+Before you embed:
+
+- A whole font downloads before the first frame. A Latin font is 50 to 150 KB as base64, and `validateSvg` warns past 256 KB. For a short title, `<Glyphs>` embeds no font: 20 characters cost a few KB.
+- Glyphs are outlines, not text. They are not selectable or searchable, the group's `aria-label` is all assistive tech reads, and they lose hinting, so keep small body text as `<text>`.
+- Measuring and outlines need the TTF or OTF file; WOFF and WOFF2 embed but throw on `measure` and `path`. `path` reads TrueType (`glyf`) outlines only, so an OTF with CFF outlines throws.
+- Shaping is for Latin text: no bidi, no contextual alternates, no mark positioning. Arabic or Indic text will not match the browser.
+- A character the font lacks draws from the fallback in `<text>` and as the `.notdef` box in `<Glyphs>`. `font.has(char)` tells you.
+- You are redistributing the font. Check its license; OFL fonts allow embedding.
+
 ## Extras
 
-Import from `svjeez/extras`. Every extra takes `theme`, `x`, `y`, `fontSize` and `class`, and returns `{ node, ... }`. Put `node` in the tree.
+Import from `svjeez/extras`. Every extra takes `theme`, `x`, `y`, `fontSize`, `font` and `class`, and returns `{ node, ... }`. Put `node` in the tree.
 
-**Themes.** `const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow })` gives colors as CSS variables (`theme.base00` background through `theme.base0F`) that follow the viewer's color scheme. Pass `css` to `render`. Diagram text inherits the page font, so add a font rule: `` css: `${css}\n.sans text{font-family:system-ui,sans-serif}` `` with `class: "sans"`.
+**Themes.** `const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow })` gives colors as CSS variables (`theme.base00` background through `theme.base0F`) that follow the viewer's color scheme. Pass `css` to `render`. Diagram text inherits the page font, so pass `font` or add a font rule: `` css: `${css}\n.sans text{font-family:system-ui,sans-serif}` `` with `class: "sans"`.
 
 **Code explainers.**
 
@@ -197,7 +228,7 @@ Type errors (from `tsc`):
 | `Type '{ className: string; }' is not assignable to type 'Intrinsic<"rect">'` | JSX here is SVG | Use `class` |
 | `Type '"c"' is not assignable to type '"a" \| "b"'` | Unknown id in a diagram spec or route | Use an id from `nodes` |
 
-Runtime errors (thrown by `motion()`, `render()` or `picture()`):
+Runtime errors (thrown by `motion()`, `render()`, `picture()` or `font()`):
 
 | Message | Fix |
 | --- | --- |
@@ -208,6 +239,10 @@ Runtime errors (thrown by `motion()`, `render()` or `picture()`):
 | `to() needs a positive duration. Use set() for a cut.` | `over` is a length; use `.set()` for an instant change |
 | `Two keys are too close to tell apart` | Space transitions further apart, or shorten `duration` |
 | `Unknown image format. picture() reads png, jpeg, gif, webp, svg.` | The bytes are something else, such as a path string, an HTML error page or AVIF. Convert the image, and pass a file or URL to `picture.load()` |
+| `Unknown font format. font() reads ttf, otf, woff, woff2.` | Pass the font file's bytes or `font.load(path)`. A `.ttc` collection throws its own error; extract one face |
+| `measure() needs the TTF or OTF file` | The font is WOFF or WOFF2. Load the TTF or OTF instead |
+| `Two different fonts claim 'Inter' 400 normal` | Two files share a family, weight and style. Rename one with `font(bytes, { family })` |
+| `code() needs a monospaced font` | Use a monospaced font for `code()`, and `<text fontFamily={font}>` for prose |
 | `Generated SVG is invalid` | Usually a hand-written `id` clashing with another; let `def` make ids |
 
 ## Render, look, fix
