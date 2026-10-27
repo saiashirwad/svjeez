@@ -304,7 +304,7 @@ const w = display.measure("Wave!", 96); // px, matches the browser, kerning incl
 <Glyphs font={display} text="Wave!" size={96} x={(W - w) / 2} y={140} animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />
 ```
 
-A font is embedded once, and only if the tree uses it. `<Glyphs>` draws one path per glyph and embeds no font, which suits short animated titles. Extras take `font` and size their boxes by measuring. Full notes are in the skill's Fonts section. See `examples/fonts`, and `examples/newspaper` for a front page with a drawn masthead and columns justified by measuring.
+A font is embedded once, and only if the tree uses it. `<Glyphs>` draws one path per glyph and embeds no font, which suits short animated titles. Extras take `font` and size their boxes by measuring. Full notes are in the skill's Fonts section. See `examples/fonts`, `examples/newspaper` for a front page with a drawn masthead and columns justified by measuring, and `examples/map` for a fantasy map with labels set along curves and a camera that follows a journey.
 
 ## Extras
 
