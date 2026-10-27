@@ -1,4 +1,5 @@
 /** @jsxImportSource svjeez */
+/** @jsxRuntime automatic */
 import { draw, ease, enter, motion, render, shake } from "svjeez";
 
 // A toast slides up, a check draws on, the badge shakes, then it all leaves and the loop restarts.

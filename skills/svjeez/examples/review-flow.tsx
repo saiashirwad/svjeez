@@ -1,4 +1,5 @@
 /** @jsxImportSource svjeez */
+/** @jsxRuntime automatic */
 import { render } from "svjeez";
 import { adaptive, flow, flowchart, tomorrow, tomorrowNight } from "svjeez/extras";
 

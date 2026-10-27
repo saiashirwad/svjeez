@@ -1,4 +1,5 @@
 /** @jsxImportSource svjeez */
+/** @jsxRuntime automatic */
 import { ease, motion, render, sampled, wiggle } from "svjeez";
 
 const D = 6;
