@@ -32,6 +32,7 @@
     "build": "bun run scripts/build.ts",
     "dev": "bun run scripts/preview.ts",
     "test": "bun test",
+    "test:node": "tsx scripts/node-check.ts",
     "typecheck": "tsc --noEmit",
     "build:package": "bun run scripts/package.ts",
     "prepack": "bun run build:package",
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",
+    "tsx": "^4.23.15",
     "typescript": "latest"
   },
   "peerDependencies": {

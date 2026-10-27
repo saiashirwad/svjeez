@@ -42,7 +42,7 @@ export interface Message {
   readonly to: number;
 }
 
-const raw = JSON.parse(readFileSync(join(import.meta.dir, "publication.json"), "utf8")) as {
+const raw = JSON.parse(readFileSync(join(import.meta.dirname, "publication.json"), "utf8")) as {
   readonly publications: readonly { readonly threads: readonly RawThread[] }[];
 };
 const threads = [...raw.publications[0]!.threads].sort((a, b) => a.created - b.created);
