@@ -1,61 +1,86 @@
 import { el } from "../el";
-import { motion, type Motion, type Span } from "../motion";
-import type { Color } from "../attributes";
+import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import type { SvgNode } from "../svg";
-import type { Layout, PlacedToken } from "./code";
+import { number, text, type Code, type Word } from "./code";
 
-/** Stable occurrence identities preserve repeated tokens while LCS keeps their relative order. */
-export function match(a: readonly PlacedToken[], b: readonly PlacedToken[]): readonly (readonly [number, number])[] {
-  const keys = (tokens: readonly PlacedToken[]) => {
-    const counts = new Map<string, number>();
-    return tokens.map(({ content }) => {
-      const n = (counts.get(content) ?? 0) + 1;
-      counts.set(content, n);
-      return JSON.stringify([content, n]);
-    });
-  };
-  const x = keys(a), y = keys(b);
-  const dp = Array.from({ length: x.length + 1 }, () => new Uint32Array(y.length + 1));
-  for (let i = x.length - 1; i >= 0; i--) for (let j = y.length - 1; j >= 0; j--)
-    dp[i]![j] = x[i] === y[j] ? 1 + dp[i + 1]![j + 1]! : Math.max(dp[i + 1]![j]!, dp[i]![j + 1]!);
+export interface MorphOptions {
+  /** One per transition: the move into `versions[i + 1]` starts at `at[i].at`. */
+  readonly at: readonly Span[];
+  readonly over?: Seconds;
+  /** Line numbers for the longest version, fading as lines come and go. */
+  readonly gutter?: boolean;
+}
+
+/**
+ * Pairs `[i, j]` of words that carry over from `a` to `b`. The longest common subsequence of contents
+ * anchors the order; leftovers pair by equal content, nearest first, so swapped words cross.
+ */
+export function match(a: readonly Word[], b: readonly Word[]): [number, number][] {
+  const lcs = Array.from({ length: a.length + 1 }, () => new Uint32Array(b.length + 1));
+  for (let i = a.length - 1; i >= 0; i--)
+    for (let j = b.length - 1; j >= 0; j--) lcs[i]![j] = a[i]!.text === b[j]!.text ? 1 + lcs[i + 1]![j + 1]! : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
   const pairs: [number, number][] = [];
-  let i = 0, j = 0;
-  while (i < x.length && j < y.length) {
-    if (x[i] === y[j]) { pairs.push([i++, j++]); continue; }
-    if (dp[i + 1]![j]! >= dp[i]![j + 1]!) i++; else j++;
+  for (let i = 0, j = 0; i < a.length && j < b.length; ) {
+    if (a[i]!.text === b[j]!.text) pairs.push([i++, j++]);
+    else if (lcs[i + 1]![j]! >= lcs[i]![j + 1]!) i++;
+    else j++;
+  }
+  const [usedA, usedB] = [new Set(pairs.map(([i]) => i)), new Set(pairs.map(([, j]) => j))];
+  const distance = ([i, j]: [number, number]) => Math.hypot(a[i]!.x - b[j]!.x, a[i]!.y - b[j]!.y);
+  const candidates = a.flatMap((w, i) => (usedA.has(i) ? [] : b.flatMap((v, j): [number, number][] => (usedB.has(j) || v.text !== w.text ? [] : [[i, j]]))));
+  for (const pair of candidates.sort((p, q) => distance(p) - distance(q))) {
+    if (usedA.has(pair[0]) || usedB.has(pair[1])) continue;
+    usedA.add(pair[0]);
+    usedB.add(pair[1]);
+    pairs.push(pair);
   }
   return pairs;
 }
 
-interface Chain { token: PlacedToken; layout: Layout; track: Motion<"x" | "y" | "opacity">; current: PlacedToken }
-export interface Morph { readonly node: SvgNode; step(index: number): Layout }
-export function morph(versions: readonly Layout[], options: { readonly at: readonly Span[]; readonly over: number }): Morph {
-  if (!versions.length || versions.length !== options.at.length || !Number.isFinite(options.over) || options.over <= 0) throw new Error("morph() needs versions, one span per version and a positive duration.");
-  const starts = options.at.map(s => s.at);
-  if (starts.some((n, i) => !Number.isFinite(n) || n < 0 || (i > 0 && n < starts[i - 1]! + options.over))) throw new Error("morph() transitions must be ordered and non-overlapping.");
-  const chains: Chain[] = [];
-  const make = (token: PlacedToken, layout: Layout, visible: boolean, start: number): Chain => {
-    const track = visible ? motion({ x: 0, y: 0, opacity: 1 }) : motion({ x: 0, y: 0, opacity: 0 }).at(start).to({ opacity: 1 }, options.over);
-    const chain = { token, current: token, layout, track }; chains.push(chain); return chain;
-  };
-  let active = versions[0]!.tokens.map(token => make(token, versions[0]!, starts[0] === 0, starts[0]!));
-  for (let step = 1; step < versions.length; step++) {
-    const before = versions[step - 1]!, after = versions[step]!, at = starts[step]!;
-    const pairs = match(before.tokens, after.tokens);
-    const byNew = new Map(pairs.map(([a, b]) => [b, a]));
-    const old = new Set(pairs.map(([a]) => a));
-    active.forEach((chain, i) => { if (!old.has(i)) chain.track = chain.track.at(at).to({ opacity: 0 }, options.over); });
-    active = after.tokens.map((token, i) => {
-      const previous = byNew.get(i);
-      if (previous === undefined) return make(token, after, false, at);
-      const chain = active[previous]!;
-      chain.track = chain.track.at(at).to({ x: token.x - chain.token.x, y: token.y - chain.token.y }, options.over);
-      chain.current = token;
+interface Chain {
+  readonly word: Word;
+  readonly code: Code;
+  track?: Motion<"x" | "y" | "opacity">;
+}
+
+/** Animate code from version to version: kept words move, removed words fade out, new words fade in. */
+export function morph(versions: readonly Code[], { at, over = 0.8, gutter = false }: MorphOptions): { readonly node: SvgNode } {
+  if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error("morph() needs versions, one span per transition and a positive duration.");
+  at.forEach((span, i) => {
+    if (i > 0 && span.at < at[i - 1]!.at + over) throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
+  });
+  const half = over / 2;
+  const born = (word: Word, code: Code, start?: Seconds): Chain => ({
+    word,
+    code,
+    track: start === undefined ? undefined : motion({ opacity: 0 }).at(start + half).to({ opacity: 1 }, half),
+  });
+  const chains = versions[0]!.words.map((word) => born(word, versions[0]!));
+  let live = chains.slice();
+  at.forEach(({ at: start }, i) => {
+    const [before, after] = [versions[i]!, versions[i + 1]!];
+    const pairs = match(before.words, after.words);
+    const kept = new Map(pairs.map(([a, b]) => [b, live[a]!]));
+    const gone = live.filter((_, a) => !pairs.some(([k]) => k === a));
+    for (const chain of gone) chain.track = (chain.track ?? motion<{}>()).at(start).to({ opacity: 0 }, half);
+    live = after.words.map((word, j) => {
+      const chain = kept.get(j);
+      if (!chain) return chains[chains.push(born(word, after, start)) - 1]!;
+      chain.track = (chain.track ?? motion<{}>()).at(start).to({ x: word.x - chain.word.x, y: word.y - chain.word.y }, over, ease.inOut);
       return chain;
     });
-  }
-  return {
-    node: el.g({}, chains.map(({ token: t, layout, track }) => el.text({ x: t.x, y: t.y + layout.options.fontSize, fontSize: layout.options.fontSize, fontFamily: "monospace", fill: t.color as Color | undefined, fontStyle: (t.fontStyle ?? 0) & 1 ? "italic" : undefined, fontWeight: (t.fontStyle ?? 0) & 2 ? "bold" : undefined, xmlSpace: "preserve", animation: track }, t.content))),
-    step(index) { const value = versions[index]; if (!value) throw new Error(`morph.step(): invalid index ${index}.`); return value; },
-  };
+  });
+  const numbers = gutter ? lineNumbers(versions, at, over) : [];
+  return { node: el.g({}, [numbers, chains.map((chain) => text(chain.word, chain.code.metrics, chain.track))]) };
 }
+
+const lineNumbers = (versions: readonly Code[], at: readonly Span[], over: Seconds): SvgNode[] =>
+  Array.from({ length: Math.max(...versions.map((v) => v.lineCount)) }, (_, i) => {
+    const shown = (v: Code) => i < v.lineCount;
+    let track = motion({ opacity: shown(versions[0]!) ? 1 : 0 });
+    at.forEach(({ at: start }, k) => {
+      const [was, is] = [shown(versions[k]!), shown(versions[k + 1]!)];
+      if (was !== is) track = track.at(is ? start + over / 2 : start).to({ opacity: is ? 1 : 0 }, over / 2);
+    });
+    return number(i + 1, versions[0]!.metrics, track);
+  });

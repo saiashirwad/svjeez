@@ -1,5 +1,5 @@
-import { def, draw, ease, motion, render, type Color } from "svg-motion";
-import { Arrow, Brace, Marker, Underline, code, morph, timeline, type Tokens } from "svjeez/explain";
+import { draw, ease, motion, rect, render, type Color } from "svg-motion";
+import { Arrow, Brace, Focus, Marker, Underline, code, morph, timeline, type Tokens } from "svjeez/explain";
 
 const W = 1200;
 const H = 550;
@@ -73,12 +73,10 @@ function reducer(count, action) {
 }`;
 
 const frame = { x: 40, y: 40, w: 700, h: 470 };
-const windowClip = def.clipPath({}, <rect x={frame.x} y={frame.y} width={frame.w} height={frame.h} rx={14} />);
 const settings = { x: 104, y: 112, fontSize: 16, lineHeight: 1.75 };
 const one = code(tokenize(before), settings);
 const two = code(tokenize(after), settings);
-const lineHeight = settings.fontSize * settings.lineHeight;
-const m = morph([one, two, one], { at: [tl.setup, tl.refactor, tl.rewind], over: 0.9 });
+const m = morph([one, two, one], { at: [tl.refactor, tl.rewind], over: 0.9, gutter: true });
 
 const panel = { x: 792, w: 360 };
 const copy: Record<(typeof slides)[number], { kicker: string; head: string[]; body: string[] }> = {
@@ -154,33 +152,6 @@ const progress = () => {
   );
 };
 
-const gutter = () =>
-  Array.from({ length: 13 }, (_, i) => (
-    <text
-      x={84}
-      y={settings.y + i * lineHeight + settings.fontSize}
-      class="mono"
-      fontSize={13}
-      textAnchor="end"
-      fill={C.gutter}
-      animation={i < 9 ? undefined : motion({ opacity: 0 }).at(tl.refactor.at).to({ opacity: 1 }, 0.9).at(tl.rewind.at).to({ opacity: 0 }, 0.9)}
-    >
-      {i + 1}
-    </text>
-  ));
-
-const spotlight = () => {
-  const line = one.lines(5);
-  const top = frame.y + 44;
-  const bottom = frame.y + frame.h;
-  return (
-    <g clipPath={windowClip} animation={tl.show("problem")}>
-      <rect x={frame.x} y={top} width={frame.w} height={line.y - top} fill={C.window} fillOpacity={0.72} />
-      <rect x={frame.x} y={line.y + line.h} width={frame.w} height={bottom - line.y - line.h} fill={C.window} fillOpacity={0.72} />
-    </g>
-  );
-};
-
 export default function build(): string {
   const rule = one.find("setCount(count + 1)");
   return render(
@@ -210,21 +181,19 @@ export default function build(): string {
         </text>
       </g>
 
-      <Marker
-        color={C.accent}
-        stops={[
-          { at: tl.setup, rect: one.lines(2).pad(5) },
-          { at: tl.problem, rect: rule.pad(4) },
-          { at: tl.refactor, rect: two.find("useReducer(reducer, 0)").pad(4) },
-          { at: tl.result, rect: two.find('dispatch("inc")').pad(4) },
-          { at: tl.rewind, rect: one.lines(2).pad(5) },
-        ]}
-      />
-      <g class="code">
-        {gutter()}
-        {m.node}
-      </g>
-      {spotlight()}
+      <Focus stops={[{ during: tl.problem, on: rect(frame.x, one.lines(5).y, frame.w, one.lines(5).h) }]} dim={0.28}>
+        <Marker
+          color={C.accent}
+          stops={[
+            { at: tl.setup, rect: one.lines(2).pad(5) },
+            { at: tl.problem, rect: rule.pad(4) },
+            { at: tl.refactor, rect: two.find("useReducer(reducer, 0)").pad(4) },
+            { at: tl.result, rect: two.find('dispatch("inc")').pad(4) },
+            { at: tl.rewind, rect: one.lines(2).pad(5) },
+          ]}
+        />
+        <g class="code">{m.node}</g>
+      </Focus>
 
       <g class="note">
         <Underline rect={one.find("count", 1)} during={{ at: tl.setup.at + 0.8, over: tl.setup.over - 0.8 }} color={C.accent} />
