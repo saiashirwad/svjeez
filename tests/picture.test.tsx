@@ -60,13 +60,41 @@ describe("picture", () => {
     expect(() => picture("<svg><rect/></svg>")).toThrow("no size");
   });
 
+  test("a JPEG turned a quarter by its EXIF orientation reports the size the browser draws", () => {
+    const exif = (orientation: number, little: boolean) => {
+      const u16 = (n: number) => (little ? [n & 0xff, n >> 8] : [n >> 8, n & 0xff]);
+      const tiff = [...(little ? [0x49, 0x49] : [0x4d, 0x4d]), ...u16(42), ...(little ? [8, 0, 0, 0] : [0, 0, 0, 8]), ...u16(1), ...u16(0x0112), ...u16(3), ...(little ? [1, 0, 0, 0] : [0, 0, 0, 1]), ...u16(orientation), 0, 0, 0, 0, 0, 0];
+      const app1 = [0x45, 0x78, 0x69, 0x66, 0, 0, ...tiff];
+      return bytes(0xff, 0xd8, 0xff, 0xe1, 0, app1.length + 2, ...app1, 0xff, 0xc0, 0, 17, 8, 0x00, 0x96, 0x01, 0x2c, 3, ...pad(9));
+    };
+    expect(picture(exif(6, false))).toMatchObject({ width: 150, height: 300 });
+    expect(picture(exif(8, true))).toMatchObject({ width: 150, height: 300 });
+    expect(picture(exif(3, true))).toMatchObject({ width: 300, height: 150 });
+  });
+
   test("SVG goes in as percent-encoded text and decodes back to the markup", () => {
     const markup = '<svg viewBox="0 0 10 10"><rect fill="#f00" width="10%" height="10"/></svg>';
     const { href } = picture(markup);
     expect(href.startsWith("data:image/svg+xml,")).toBe(true);
     expect(href).not.toContain("base64");
     expect(href).not.toMatch(/[<>"#]/);
-    expect(decodeURIComponent(href.slice("data:image/svg+xml,".length)).replaceAll("'", '"')).toBe(markup);
+    expect(decodeURIComponent(href.slice("data:image/svg+xml,".length))).toBe(markup);
+  });
+
+  test("text, quotes and whitespace inside an SVG survive embedding exactly", () => {
+    const markup = '<svg viewBox="0 0 10 10"><text xml:space="preserve">a="\t\tb</text>\n<rect fill="#00f" width="1" height="1"/></svg>';
+    expect(decodeURIComponent(picture(markup).href.slice("data:image/svg+xml,".length))).toBe(markup);
+  });
+
+  test("an SVG is only an SVG when the root element is <svg>", () => {
+    expect(() => picture('<!doctype html><html><body><svg width="16" height="16"></svg></body></html>')).toThrow("Unknown image format");
+    const prolog = `<?xml version="1.0"?>\n<!-- ${"license ".repeat(2000)} <svg width="1" height="1"> -->\n<!DOCTYPE svg>\n`;
+    expect(picture(`${prolog}<svg viewBox="0 0 100 50"/>`)).toMatchObject({ format: "svg", width: 100, height: 50 });
+  });
+
+  test("an SVG with one side and a viewBox derives the other from the viewBox ratio", () => {
+    expect(picture('<svg width="200" viewBox="0 0 20 10"/>')).toMatchObject({ width: 200, height: 100 });
+    expect(picture('<svg height="50" viewBox="0 0 20 10"/>')).toMatchObject({ width: 100, height: 50 });
   });
 
   test("an unknown format names the supported ones", () => {
@@ -167,11 +195,13 @@ describe("image filters", () => {
 describe("image validation", () => {
   const wrap = (inner: string) => `<svg viewBox="0 0 10 10">${inner}</svg>`;
 
-  test("an external image href is an error that points to picture.load", () => {
-    for (const tag of ['<image href="photo.png"/>', '<image xlink:href="https://x.test/a.png"/>', '<feImage href="a.png"/>', '<use href="sprite.svg#a"/>']) {
-      const { errors } = validateSvg(wrap(tag));
-      expect(errors.some((error) => error.includes("<img>") && error.includes("picture.load()"))).toBe(true);
+  test("an external image href warns and points to picture.load, without failing the render", () => {
+    for (const tag of ['<image href="photo.png"/>', '<image xlink:href="https://x.test/a.png"/>', '<feImage href="a.png"/>', '<use href="sprite.svg#a"/>', "<image href='a.png'/>", '<image x="1" href = "a.png"/>']) {
+      const { errors, warnings } = validateSvg(wrap(tag));
+      expect(errors).toEqual([]);
+      expect(warnings.some((warning) => warning.includes("<img>") && warning.includes("picture.load()"))).toBe(true);
     }
+    expect(() => render({ width: 10, height: 10, duration: 1, title: "x" }, <image href="photo.png" width={10} height={10} />)).not.toThrow();
   });
 
   test("fragment and data hrefs, and links, pass", () => {

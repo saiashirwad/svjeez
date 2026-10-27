@@ -9,7 +9,7 @@ export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 /** An image ready to embed: a data URI plus the intrinsic size read from its header. */
 export interface Picture {
   readonly href: `data:${string}`;
-  /** Intrinsic width in px. For SVG, the root width, else the viewBox width. */
+  /** Intrinsic width in px, after EXIF rotation. For SVG, the root width, else derived from the viewBox. */
   readonly width: number;
   readonly height: number;
   readonly format: ImageFormat;
@@ -42,10 +42,26 @@ const png: Codec = {
 const isSof = (marker: number): boolean => marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
 const hasNoLength = (marker: number): boolean => marker === 0x01 || (marker >= 0xd0 && marker <= 0xd9);
 
+/** EXIF Orientation (tag 0x0112) from an APP1 segment spanning `start` to `end`. Browsers apply it, and 5 to 8 turn the image a quarter. */
+const exifOrientation = (b: Uint8Array, start: number, end: number): number | undefined => {
+  if (end > b.length || !ascii(b, start, "Exif\0\0")) return undefined;
+  const tiff = start + 6;
+  const little = ascii(b, tiff, "II");
+  const u16 = (at: number) => (little ? le16(b, at) : be16(b, at));
+  const u32 = (at: number) => (little ? (le16(b, at) | (le16(b, at + 2) << 16)) >>> 0 : be16(b, at) * 65536 + be16(b, at + 2));
+  const ifd = tiff + u32(tiff + 4);
+  if (ifd + 2 > end) return undefined;
+  for (let entry = ifd + 2, count = u16(ifd); count > 0 && entry + 12 <= end; count--, entry += 12) {
+    if (u16(entry) === 0x0112) return u16(entry + 8);
+  }
+  return undefined;
+};
+
 const jpeg: Codec = {
   mime: "image/jpeg",
   matches: (b) => b.length >= 4 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
   size: (b) => {
+    let orientation = 1;
     let at = 2;
     while (at + 4 <= b.length) {
       if (b[at] !== 0xff || b[at + 1] === 0xff) {
@@ -53,7 +69,12 @@ const jpeg: Codec = {
         continue;
       }
       const marker = b[at + 1]!;
-      if (isSof(marker)) return at + 9 <= b.length ? { height: be16(b, at + 5), width: be16(b, at + 7) } : undefined;
+      if (marker === 0xe1) orientation = exifOrientation(b, at + 4, at + 2 + be16(b, at + 2)) ?? orientation;
+      if (isSof(marker)) {
+        if (at + 9 > b.length) return undefined;
+        const [height, width] = [be16(b, at + 5), be16(b, at + 7)];
+        return orientation >= 5 && orientation <= 8 ? { width: height, height: width } : { width, height };
+      }
       at += hasNoLength(marker) ? 2 : 2 + be16(b, at + 2);
     }
     return undefined;
@@ -80,7 +101,8 @@ const webp: Codec = {
   },
 };
 
-const SVG_ROOT = /<svg\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/;
+/** The root `<svg ...>` tag, after any BOM, XML declaration, comments, doctype and whitespace. Anything else before it is not an SVG file. */
+const SVG_ROOT = /^\uFEFF?(?:\s+|<\?xml[\s\S]*?\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>[]*(?:\[[\s\S]*?\])?\s*>)*<svg\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/i;
 
 const attribute = (attrs: string, name: string): string | undefined =>
   new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`).exec(attrs)?.slice(1).find((value) => value !== undefined);
@@ -96,13 +118,16 @@ const svgSize = (markup: string): Size | undefined => {
   const height = pixels(attribute(attrs, "height"));
   if (width && height) return { width, height };
   const box = attribute(attrs, "viewBox")?.trim().split(/[\s,]+/).map(Number);
-  if (box?.length === 4 && box[2]! > 0 && box[3]! > 0) return { width: box[2]!, height: box[3]! };
-  return undefined;
+  if (!(box?.length === 4 && box[2]! > 0 && box[3]! > 0)) return undefined;
+  const ratio = box[2]! / box[3]!;
+  if (width) return { width, height: width / ratio };
+  if (height) return { width: height * ratio, height };
+  return { width: box[2]!, height: box[3]! };
 };
 
 const svg: Codec = {
   mime: "image/svg+xml",
-  matches: (b) => SVG_ROOT.test(new TextDecoder().decode(b.subarray(0, 8192)).replace(/^﻿/, "")),
+  matches: (b) => SVG_ROOT.test(new TextDecoder().decode(b)),
   size: (b) => svgSize(new TextDecoder().decode(b)),
 };
 
@@ -115,19 +140,11 @@ const base64 = (bytes: Uint8Array): string => {
   return btoa(binary);
 };
 
-/** Percent-encode only what a data URI inside a double-quoted attribute cannot carry. Smaller than base64 and it gzips well. */
-const svgHref = (markup: string): `data:${string}` => {
-  const body = markup
-    .trim()
-    .replace(/[\r\n\t]+/g, " ")
-    .replace(/%/g, "%25")
-    .replace(/#/g, "%23")
-    .replace(/</g, "%3C")
-    .replace(/>/g, "%3E")
-    .replace(/="([^"']*)"/g, "='$1'")
-    .replace(/"/g, "%22");
-  return `data:image/svg+xml,${body}`;
-};
+/**
+ * Percent-encode only what a data URI inside a double-quoted attribute cannot carry. Smaller than base64 and it gzips well.
+ * Line breaks and tabs are encoded too, since attribute normalization would turn them into spaces.
+ */
+const svgHref = (markup: string): `data:${string}` => `data:image/svg+xml,${markup.trim().replace(/[%#<>"\r\n\t]/g, encodeURIComponent)}`;
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 

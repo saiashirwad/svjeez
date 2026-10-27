@@ -37,22 +37,21 @@ const filteredAnimation = (source: string): string[] => {
 
 const EMBED_WARN_BYTES = 256 * 1024;
 
-const imageHrefs = (source: string): { errors: string[]; warnings: string[] } => {
-  const errors: string[] = [];
+const imageHrefs = (source: string): string[] => {
   const warnings: string[] = [];
   for (const [, tag, attrs = ""] of source.matchAll(/<(image|feImage|use)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/g)) {
-    const href = /\s(?:xlink:)?href="([^"]*)"/.exec(attrs)?.[1];
+    const href = /\s(?:xlink:)?href\s*=\s*(?:"([^"]*)"|'([^']*)')/.exec(attrs)?.slice(1).find((value) => value !== undefined);
     if (href === undefined || href.startsWith("#") || href.startsWith("data:")) continue;
-    errors.push(
+    warnings.push(
       `<${tag} href="${href.length > 60 ? `${href.slice(0, 57)}...` : href}"> will not load when the SVG is shown through <img> (GitHub, Markdown). Embed the image as a data URI: load it with picture.load() and draw it with <Picture>.`,
     );
   }
-  for (const [, uri = ""] of source.matchAll(/\s(?:xlink:)?href="(data:[^"]*)"/g)) {
+  for (const [, uri = ""] of source.matchAll(/\s(?:xlink:)?href\s*=\s*"(data:[^"]*)"/g)) {
     if (uri.length > EMBED_WARN_BYTES) {
       warnings.push(`An embedded ${uri.slice(5, uri.search(/[;,]/))} image is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame. Resize it to the drawn size, or recompress it.`);
     }
   }
-  return { errors, warnings };
+  return warnings;
 };
 
 export const validateSvg = (source: string): ValidationResult => {
@@ -106,9 +105,7 @@ export const validateSvg = (source: string): ValidationResult => {
     if (!animated.has(name)) warnings.push(`@keyframes "${name}" is never referenced.`);
   }
 
-  const images = imageHrefs(source);
-  errors.push(...images.errors);
-  warnings.push(...images.warnings, ...filteredAnimation(source));
+  warnings.push(...imageHrefs(source), ...filteredAnimation(source));
 
   return { errors, warnings };
 };
