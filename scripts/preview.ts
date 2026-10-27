@@ -17,7 +17,24 @@ let state: { version: number; error?: string } = { version: 0 };
 const clients = new Set<ReadableStreamDefaultController>();
 
 // A fresh process per build, so edits to anything the module imports are picked up.
+// One build at a time; a change during a build queues exactly one more.
+let building: Promise<void> | undefined;
+let again = false;
 const build = async (): Promise<void> => {
+  if (building) {
+    again = true;
+    return building;
+  }
+  building = once();
+  await building;
+  building = undefined;
+  if (again) {
+    again = false;
+    await build();
+  }
+};
+
+const once = async (): Promise<void> => {
   const child = Bun.spawn([process.execPath, join(ROOT, "src/cli.ts"), "svg", source, "--out", target], { cwd: ROOT, stderr: "pipe" });
   const [code, stderr] = await Promise.all([child.exited, new Response(child.stderr).text()]);
   state = { version: state.version + 1, error: code === 0 ? undefined : stderr.trim() };
