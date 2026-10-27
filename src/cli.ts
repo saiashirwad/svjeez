@@ -9,7 +9,7 @@ import { validateSvg } from "./validate";
 
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg]
-  svjeez render <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4] [--scale 2] [--scheme light|dark] [--background css]
+  svjeez render <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--scheme light|dark] [--background css]
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
 Times are playback seconds. Without --times, render takes --count frames (default 6) across one loop.
@@ -51,7 +51,7 @@ const number = (flag: string, value: string | undefined): number | undefined => 
 
 const when = (times: string | undefined, count: string | undefined): FrameTimes => {
   if (times !== undefined && count !== undefined) fail("Pass --times or --count, not both.");
-  if (times !== undefined) return { times: times.split(",").map((time) => number("times", time.trim())!) };
+  if (times !== undefined) return { times: times.split(",").map((time) => (time.trim() === "" ? fail(`--times has an empty entry: "${times}".`) : number("times", time.trim())!)) };
   const frames = number("count", count) ?? 6;
   return Number.isInteger(frames) && frames > 0 ? { count: frames } : fail(`--count needs a positive whole number, got ${frames}.`);
 };
@@ -91,12 +91,12 @@ const renderCommand = async (args: string[]): Promise<void> => {
     scale: number("scale", values.scale),
     colorScheme: values.scheme as "light" | "dark" | undefined,
     background: values.background,
-    sheet: values.sheet ? { columns: number("columns", values.columns) } : false,
+    sheet: values.sheet || values.columns !== undefined ? { columns: number("columns", values.columns) } : false,
   });
   await mkdir(values.out, { recursive: true });
   const written = await Promise.all(
-    frames.map(async ({ time, png }) => {
-      const path = join(values.out, `frame-${time.toFixed(3).replace(".", "_")}s.png`);
+    frames.map(async ({ time, png }, index) => {
+      const path = join(values.out, `frame-${String(index).padStart(2, "0")}-${time.toFixed(3).replace(".", "_")}s.png`);
       await writeFile(path, png);
       return path;
     }),
