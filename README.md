@@ -71,6 +71,7 @@ Between transitions, every value holds.
 | --- | --- |
 | shapes, `g`, `text`, `use` | `opacity` `x` `y` `scale` `rotate` `blur` `fill` `stroke` `color` |
 | shapes | `draw` |
+| `rect`, `image` | `width` `height` |
 | `stop` | `stopColor` `stopOpacity` |
 | filter primitives | `stdDeviation` `baseFrequency` `seed` `displace` `dx` `dy` `floodColor` `floodOpacity` |
 
