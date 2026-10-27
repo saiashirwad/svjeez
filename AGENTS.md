@@ -2,7 +2,7 @@
 
 svjeez is a TypeScript library that compiles TSX scenes into one self-contained animated SVG. Motions become CSS keyframes, or SMIL on filter primitives. Nothing runs in the viewer's browser.
 
-To write a scene, read [`skills/svjeez/SKILL.md`](skills/svjeez/SKILL.md). It covers the `motion()` timeline, channels, easing, recipes, `sampled()`, the diagram and explainer APIs, compile errors and their fixes, and three worked examples. This file covers working on the library itself.
+To write a scene, read [`skills/svjeez/SKILL.md`](skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. It covers the `motion()` timeline, channels, easing, recipes, `sampled()`, the diagram and explainer APIs, compile errors and their fixes, and three worked examples. This file covers working on the library itself.
 
 ## Commands
 
@@ -26,7 +26,7 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
 - `src/frames.ts` and `src/cli.ts` rasterize frames. They are the only code that touches a browser.
 - `examples/` holds scenes. `dist/` is their committed output, which the README links to.
-- `skills/svjeez/` holds the scene-writing skill and its examples. `tests/skill.test.ts` renders the examples.
+- `skills/svjeez/` holds the scene-writing skill and its examples, published with the package. `tests/skill.test.ts` renders the examples. They carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
 ## Rules
 

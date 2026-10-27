@@ -60,6 +60,7 @@
     "url": "git+https://github.com/saiashirwad/svjeez.git"
   },
   "files": [
-    "package-dist"
+    "package-dist",
+    "skills"
   ]
 }

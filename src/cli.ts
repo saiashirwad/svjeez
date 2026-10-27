@@ -1,19 +1,21 @@
 #!/usr/bin/env node
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { join, relative, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { renderFrames, type ColorScheme, type FrameTimes } from "./frames";
 import { validateSvg } from "./validate";
 
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg]
+  svjeez skill [--install [--dir .claude/skills]]
   svjeez render <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--scheme system|light|dark] [--background css]
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
 Times are playback seconds. Without --times, render takes --count frames (default 6) across one loop.
-On Node, .tsx files load through tsx when it is installed.`;
+On Node, .tsx files load through tsx when it is installed.
+skill prints the agent skill for writing svjeez scenes; --install copies it, with its examples, into <dir>/svjeez.`;
 
 const fail = (message: string): never => {
   console.error(message);
@@ -108,7 +110,21 @@ const renderCommand = async (args: string[]): Promise<void> => {
   console.log(`loop ${Number(duration.toFixed(3))}s, ${colorScheme}\n${written.join("\n")}`);
 };
 
-const COMMANDS: Record<string, (args: string[]) => Promise<void>> = { svg: svgCommand, render: renderCommand };
+// package-dist/cli.js and src/cli.ts both sit one level under the package root.
+const SKILL = fileURLToPath(new URL("../skills/svjeez", import.meta.url));
+
+const skillCommand = async (args: string[]): Promise<void> => {
+  const { values } = parseArgs({ args, options: { install: { type: "boolean" }, dir: { type: "string", default: join(".claude", "skills") } } });
+  if (!values.install) {
+    process.stdout.write(await readFile(join(SKILL, "SKILL.md"), "utf8"));
+    return;
+  }
+  const target = resolve(values.dir, "svjeez");
+  await cp(SKILL, target, { recursive: true, force: true });
+  console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
+};
+
+const COMMANDS: Record<string, (args: string[]) => Promise<void>> = { svg: svgCommand, render: renderCommand, skill: skillCommand, skills: skillCommand };
 
 const [command = "", ...args] = process.argv.slice(2);
 const run = COMMANDS[command] ?? (() => fail(USAGE));

@@ -498,7 +498,7 @@ bun test && bun run typecheck
 
 The preview page plays the SVG inline with a scrubber, and shows the error when a build fails. It watches the module's folder and `src/`.
 
-Coding agents can start from [`AGENTS.md`](AGENTS.md) and [`skills/svjeez/SKILL.md`](skills/svjeez/SKILL.md), which teach the API, the common compile errors, and checking output with `svjeez render`.
+Coding agents can start from [`AGENTS.md`](AGENTS.md) and [`skills/svjeez/SKILL.md`](skills/svjeez/SKILL.md), which teach the API, the common compile errors, and checking output with `svjeez render`. The skill ships with the package: `npx svjeez skill` prints it, and `npx svjeez skill --install` copies it into `.claude/skills/svjeez` (pick another folder with `--dir`).
 
 ## Type safety
 
