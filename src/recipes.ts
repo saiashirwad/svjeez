@@ -1,3 +1,4 @@
+import { groupBy } from "./layout/group";
 import { CHANNELS, clamp, spec, type NumericChannel, type RestChannel, type TargetValues, type Values } from "./channels";
 import type { NumericProperty } from "./properties";
 import { ease, motion, type Ease, type Exact, type Motion, type Seconds, type Span } from "./motion";
@@ -146,7 +147,7 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   frames.forEach((frame, i) => {
     if (present(frame).join() !== channels.join()) throw new Error(`sampled() returned different channels at t=${times[i]} than at t=0; every sample needs the same keys, each a finite number.`);
   });
-  const lanes = Map.groupBy(channels, (channel) => spec(channel).lane);
+  const lanes = groupBy(channels, (channel) => spec(channel).lane);
   let track: Motion = motion(frames[0]! as TargetValues);
   for (const [lane, members] of lanes) {
     const tolerance = (options.tolerance as Record<string, number | undefined>)[lane];

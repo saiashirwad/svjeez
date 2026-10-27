@@ -1,3 +1,4 @@
+import { groupBy } from "./layout/group";
 import type { TagChannels } from "./channels";
 import { def, type Ref } from "./defs";
 import { el } from "./el";
@@ -72,7 +73,7 @@ const scene = ({ camera: view, blocks }: Scene): SvgNode => {
   const facing = facingOf(view);
   const [fx, , fz] = facing;
   const faces = visibleFaces(facing);
-  const cells = Map.groupBy(blocks, (block) => cellKey(block.at));
+  const cells = groupBy(blocks, (block) => cellKey(block.at));
 
   const opaque = new Map<Skin, boolean>();
   const solid = (skin: Skin): boolean => {

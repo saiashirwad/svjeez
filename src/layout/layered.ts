@@ -1,3 +1,4 @@
+import { groupBy } from "./group";
 import { around, flip, simplify, union, type Box, type Direction, type Point, type Size } from "./box";
 import { placeLabels, tracks, type Crossing } from "./route";
 
@@ -473,7 +474,7 @@ const place = (
     }
   }
   /** Innermost channels first: each backward edge's dummies share one x, just clear of everything inside them in every rank. */
-  const channels = Map.groupBy(rows.flatMap((row) => row.flatMap((it, k) => (outer(it) ? [{ it, row, k }] : []))), ({ it }) => vertices[it.id]!.back!);
+  const channels = groupBy(rows.flatMap((row) => row.flatMap((it, k) => (outer(it) ? [{ it, row, k }] : []))), ({ it }) => vertices[it.id]!.back!);
   const depth = (list: { row: Item[]; k: number }[]) => Math.min(...list.map(({ row, k }) => (vertices[row[k]!.id]!.outer === "left" ? row.length - k : k)));
   for (const list of [...channels.values()].sort((a, b) => depth(b) - depth(a))) {
     const left = vertices[list[0]!.it.id]!.outer === "left";
