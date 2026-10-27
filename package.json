@@ -1,21 +1,39 @@
 {
-  "name": "svg-motion",
-  "version": "0.1.0",
-  "private": true,
+  "name": "svjeez",
+  "version": "0.2.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./jsx-runtime": "./src/jsx-runtime.ts",
-    "./jsx-dev-runtime": "./src/jsx-dev-runtime.ts"
+    ".": {
+      "types": "./package-dist/index.d.ts",
+      "import": "./package-dist/index.js"
+    },
+    "./jsx-runtime": {
+      "types": "./package-dist/jsx-runtime.d.ts",
+      "import": "./package-dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./package-dist/jsx-dev-runtime.d.ts",
+      "import": "./package-dist/jsx-dev-runtime.js"
+    }
   },
   "scripts": {
     "build": "bun run scripts/build.ts",
     "dev": "bun run scripts/preview.ts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun run scripts/package.ts",
+    "prepack": "bun run build:package"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "latest"
-  }
+  },
+  "description": "Animated SVGs in TSX. One file out, no JavaScript.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git"
+  },
+  "files": [
+    "package-dist"
+  ]
 }

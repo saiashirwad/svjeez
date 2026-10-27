@@ -9,8 +9,28 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["bun"],
-    "lib": ["ESNext"]
+    "types": [
+      "bun"
+    ],
+    "lib": [
+      "ESNext"
+    ],
+    "paths": {
+      "svg-motion": [
+        "./src/index.ts"
+      ],
+      "svg-motion/jsx-runtime": [
+        "./src/jsx-runtime.ts"
+      ],
+      "svg-motion/jsx-dev-runtime": [
+        "./src/jsx-dev-runtime.ts"
+      ]
+    }
   },
-  "include": ["src", "examples", "scripts", "tests"]
+  "include": [
+    "src",
+    "examples",
+    "scripts",
+    "tests"
+  ]
 }
