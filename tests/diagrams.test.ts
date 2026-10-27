@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { render, type Rect, type SvgNode } from "svg-motion";
-import { flowchart } from "svjeez/extras";
+import { flowchart, sequence } from "svjeez/extras";
 
 const valid = (node: SvgNode) => render({ width: 800, height: 600, duration: 10, title: "diagram" }, node);
 
@@ -43,4 +43,24 @@ describe("flowchart", () => {
     expect(() => valid(chart.node)).not.toThrow();
     expect(() => valid(flowchart({ nodes: { a: "A" }, edges: [] }).node)).not.toThrow();
   });
+});
+
+describe("sequence", () => {
+  const seq = sequence(
+    {
+      actors: { user: "User", api: { label: "API" }, db: { label: "Postgres", role: "store" } },
+      messages: [["user", "api", "POST /login"], ["api", "db", "select"], ["db", "api", "row", { reply: true }], ["api", "api", "hash"], { note: "api", text: "ok" }],
+    },
+    { play: { at: 2, step: 0.5 } },
+  );
+
+  test("message i runs between the two lifelines in its play slot", () => {
+    const { span, points } = seq.message(1);
+    expect(span).toEqual({ at: 2.5, over: 0.5 });
+    expect(points.map((p) => p.x)).toEqual([seq.get("api").center.x, seq.get("db").center.x]);
+    expect(seq.message(2).points[0]!.y).toBeGreaterThan(points[0]!.y);
+    expect(() => seq.message(5)).toThrow();
+  });
+
+  test("renders valid SVG", () => expect(() => valid(seq.node)).not.toThrow());
 });

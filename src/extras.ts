@@ -12,3 +12,4 @@ export { window, type WindowOptions } from "./extras/window";
 export { terminal, type Command, type TerminalOptions } from "./extras/terminal";
 export { type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./extras/diagrams/kit";
 export { flowchart, type Flowchart, type FlowchartOptions, type FlowEdge, type FlowGroup } from "./extras/diagrams/flowchart";
+export { sequence, type Sequence, type SequenceMessage, type SequenceOptions } from "./extras/diagrams/sequence";
