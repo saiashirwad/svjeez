@@ -91,7 +91,7 @@ export function lanes<const L extends Record<string, Labelled>>(
       const tint = tintOf(theme, s.role ?? role(s.lane));
       return el.g({}, [
         el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 4, fill: tint, fillOpacity: 0.25, stroke: tint, animation: play ? motion({ width: 0 }).at(s.from).to({ width: b.w }, s.to - s.from, ease.linear) : undefined }),
-        s.label !== undefined && el.text({ x: b.x + 2, y: b.y + b.h + small + 3, fontSize: small, fill: theme.base04, animation: play ? enter({ at: s.from, over: 0.2 }) : undefined }, s.label),
+        s.label !== undefined && el.text({ x: b.x + 8, y: b.y + b.h + small + 3, fontSize: small, fill: theme.base04, animation: play ? enter({ at: s.from, over: 0.2 }) : undefined }, s.label),
       ]);
     }),
     links.map((l, i) => {

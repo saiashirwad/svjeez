@@ -1,0 +1,1734 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-labelledby="t d">
+  <title id="t">Circuit breakers</title>
+  <desc id="d">A seven-slide explainer: a circuit breaker's code typed out, its state machine walked, a sequence diagram synced to the machine, the story on a time axis, a refactor to backoff, and a flowchart traced.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="64" y="150" width="760" height="485"/>
+    </clipPath>
+    <mask id="m4">
+      <rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" class="a m5"/>
+      <g class="a m6">
+        <rect x="117.2" y="253" width="464.2" height="76.8" fill="#fff"/>
+      </g>
+      <g class="a m7">
+        <rect x="117.2" y="416.8" width="581.2" height="76.8" fill="#fff"/>
+        <rect x="117.2" y="526" width="308.2" height="76.8" fill="#fff"/>
+      </g>
+    </mask>
+    <clipPath id="c2">
+      <rect x="119.2" y="164" width="0" height="18.2" class="a m9"/>
+    </clipPath>
+    <clipPath id="c3">
+      <rect x="134.8" y="182.2" width="0" height="18.2" class="a m11"/>
+    </clipPath>
+    <clipPath id="c4">
+      <rect x="134.8" y="200.4" width="0" height="18.2" class="a m13"/>
+    </clipPath>
+    <clipPath id="c5">
+      <rect x="134.8" y="236.8" width="0" height="18.2" class="a m16"/>
+    </clipPath>
+    <clipPath id="c6">
+      <rect x="150.4" y="255" width="0" height="18.2" class="a m18"/>
+    </clipPath>
+    <clipPath id="c7">
+      <rect x="166" y="273.2" width="0" height="18.2" class="a m20"/>
+    </clipPath>
+    <clipPath id="c8">
+      <rect x="166" y="291.4" width="0" height="18.2" class="a m22"/>
+    </clipPath>
+    <clipPath id="c9">
+      <rect x="150.4" y="309.6" width="0" height="18.2" class="a m24"/>
+    </clipPath>
+    <clipPath id="c10">
+      <rect x="150.4" y="327.8" width="0" height="18.2" class="a m26"/>
+    </clipPath>
+    <clipPath id="c11">
+      <rect x="166" y="346" width="0" height="18.2" class="a m28"/>
+    </clipPath>
+    <clipPath id="c12">
+      <rect x="166" y="364.2" width="0" height="18.2" class="a m30"/>
+    </clipPath>
+    <clipPath id="c13">
+      <rect x="166" y="382.4" width="0" height="18.2" class="a m32"/>
+    </clipPath>
+    <clipPath id="c14">
+      <rect x="166" y="400.6" width="0" height="18.2" class="a m34"/>
+    </clipPath>
+    <clipPath id="c15">
+      <rect x="150.4" y="418.8" width="0" height="18.2" class="a m36"/>
+    </clipPath>
+    <clipPath id="c16">
+      <rect x="166" y="437" width="0" height="18.2" class="a m38"/>
+    </clipPath>
+    <clipPath id="c17">
+      <rect x="166" y="455.2" width="0" height="18.2" class="a m40"/>
+    </clipPath>
+    <clipPath id="c18">
+      <rect x="150.4" y="473.4" width="0" height="18.2" class="a m42"/>
+    </clipPath>
+    <clipPath id="c19">
+      <rect x="134.8" y="491.6" width="0" height="18.2" class="a m44"/>
+    </clipPath>
+    <clipPath id="c20">
+      <rect x="134.8" y="528" width="0" height="18.2" class="a m47"/>
+    </clipPath>
+    <clipPath id="c21">
+      <rect x="150.4" y="546.2" width="0" height="18.2" class="a m49"/>
+    </clipPath>
+    <clipPath id="c22">
+      <rect x="150.4" y="564.4" width="0" height="18.2" class="a m51"/>
+    </clipPath>
+    <clipPath id="c23">
+      <rect x="134.8" y="582.6" width="0" height="18.2" class="a m53"/>
+    </clipPath>
+    <clipPath id="c24">
+      <rect x="119.2" y="600.8" width="0" height="18.2" class="a m55"/>
+    </clipPath>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;font-variant-ligatures:none}
+.sans,.sans text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+
+.a{animation-duration:70s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,0.857%{stroke-dashoffset:1;visibility:hidden}2.571%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,7.143%,100%{opacity:0}0.429%,6.714%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,8%,23.714%,100%{opacity:0}8.429%,23.286%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,19.531%,23.286%,100%{opacity:1}19.959%,22.857%{opacity:0.3}}
+.m5{animation-name:k4}
+@keyframes k5{0%,19.531%,23.245%,100%{opacity:0}19.959%,22.816%{opacity:1}}
+.m6{animation-name:k5}
+@keyframes k6{0%,23.245%,23.286%,100%{opacity:0}23.265%{opacity:1}}
+.m7{animation-name:k6}
+@keyframes k7{0%{visibility:hidden}9.143%,100%{visibility:visible}}
+.m8{animation-name:k7;animation-timing-function:steps(1)}
+@keyframes k8{0%,9.143%{width:0px}9.449%,100%{width:117px}}
+.m9{animation-name:k8;animation-timing-function:steps(15)}
+@keyframes k9{0%{visibility:hidden}9.469%,100%{visibility:visible}}
+.m10{animation-name:k9;animation-timing-function:steps(1)}
+@keyframes k10{0%,9.469%{width:0px}9.959%,100%{width:187.2px}}
+.m11{animation-name:k10;animation-timing-function:steps(24)}
+@keyframes k11{0%{visibility:hidden}9.98%,100%{visibility:visible}}
+.m12{animation-name:k11;animation-timing-function:steps(1)}
+@keyframes k12{0%,9.98%{width:0px}10.245%,100%{width:101.4px}}
+.m13{animation-name:k12;animation-timing-function:steps(13)}
+@keyframes k13{0%{visibility:hidden}10.265%,100%{visibility:visible}}
+.m14{animation-name:k13;animation-timing-function:steps(1)}
+@keyframes k14{0%{visibility:hidden}10.286%,100%{visibility:visible}}
+.m15{animation-name:k14;animation-timing-function:steps(1)}
+@keyframes k15{0%,10.286%{width:0px}11.286%,100%{width:382.2px}}
+.m16{animation-name:k15;animation-timing-function:steps(49)}
+@keyframes k16{0%{visibility:hidden}11.306%,100%{visibility:visible}}
+.m17{animation-name:k16;animation-timing-function:steps(1)}
+@keyframes k17{0%,11.306%{width:0px}11.878%,100%{width:218.4px}}
+.m18{animation-name:k17;animation-timing-function:steps(28)}
+@keyframes k18{0%{visibility:hidden}11.898%,100%{visibility:visible}}
+.m19{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%,11.898%{width:0px}12.98%,100%{width:413.4px}}
+.m20{animation-name:k19;animation-timing-function:steps(53)}
+@keyframes k20{0%{visibility:hidden}13%,100%{visibility:visible}}
+.m21{animation-name:k20;animation-timing-function:steps(1)}
+@keyframes k21{0%,13%{width:0px}13.51%,100%{width:195px}}
+.m22{animation-name:k21;animation-timing-function:steps(25)}
+@keyframes k22{0%{visibility:hidden}13.531%,100%{visibility:visible}}
+.m23{animation-name:k22;animation-timing-function:steps(1)}
+@keyframes k23{0%,13.531%{width:0px}13.551%,100%{width:7.8px}}
+.m24{animation-name:k23;animation-timing-function:steps(1)}
+@keyframes k24{0%{visibility:hidden}13.571%,100%{visibility:visible}}
+.m25{animation-name:k24;animation-timing-function:steps(1)}
+@keyframes k25{0%,13.571%{width:0px}13.673%,100%{width:39px}}
+.m26{animation-name:k25;animation-timing-function:steps(5)}
+@keyframes k26{0%{visibility:hidden}13.694%,100%{visibility:visible}}
+.m27{animation-name:k26;animation-timing-function:steps(1)}
+@keyframes k27{0%,13.694%{width:0px}14.224%,100%{width:202.8px}}
+.m28{animation-name:k27;animation-timing-function:steps(26)}
+@keyframes k28{0%{visibility:hidden}14.245%,100%{visibility:visible}}
+.m29{animation-name:k28;animation-timing-function:steps(1)}
+@keyframes k29{0%,14.245%{width:0px}14.694%,100%{width:171.6px}}
+.m30{animation-name:k29;animation-timing-function:steps(22)}
+@keyframes k30{0%{visibility:hidden}14.714%,100%{visibility:visible}}
+.m31{animation-name:k30;animation-timing-function:steps(1)}
+@keyframes k31{0%,14.714%{width:0px}15.082%,100%{width:140.4px}}
+.m32{animation-name:k31;animation-timing-function:steps(18)}
+@keyframes k32{0%{visibility:hidden}15.102%,100%{visibility:visible}}
+.m33{animation-name:k32;animation-timing-function:steps(1)}
+@keyframes k33{0%,15.102%{width:0px}15.388%,100%{width:109.2px}}
+.m34{animation-name:k33;animation-timing-function:steps(14)}
+@keyframes k34{0%{visibility:hidden}15.408%,100%{visibility:visible}}
+.m35{animation-name:k34;animation-timing-function:steps(1)}
+@keyframes k35{0%,15.408%{width:0px}15.755%,100%{width:132.6px}}
+.m36{animation-name:k35;animation-timing-function:steps(17)}
+@keyframes k36{0%{visibility:hidden}15.776%,100%{visibility:visible}}
+.m37{animation-name:k36;animation-timing-function:steps(1)}
+@keyframes k37{0%,15.776%{width:0px}17.163%,100%{width:530.4px}}
+.m38{animation-name:k37;animation-timing-function:steps(68)}
+@keyframes k38{0%{visibility:hidden}17.184%,100%{visibility:visible}}
+.m39{animation-name:k38;animation-timing-function:steps(1)}
+@keyframes k39{0%,17.184%{width:0px}17.429%,100%{width:93.6px}}
+.m40{animation-name:k39;animation-timing-function:steps(12)}
+@keyframes k40{0%{visibility:hidden}17.449%,100%{visibility:visible}}
+.m41{animation-name:k40;animation-timing-function:steps(1)}
+@keyframes k41{0%,17.449%{width:0px}17.469%,100%{width:7.8px}}
+.m42{animation-name:k41;animation-timing-function:steps(1)}
+@keyframes k42{0%{visibility:hidden}17.49%,100%{visibility:visible}}
+.m43{animation-name:k42;animation-timing-function:steps(1)}
+@keyframes k43{0%,17.49%{width:0px}17.51%,100%{width:7.8px}}
+.m44{animation-name:k43;animation-timing-function:steps(1)}
+@keyframes k44{0%{visibility:hidden}17.531%,100%{visibility:visible}}
+.m45{animation-name:k44;animation-timing-function:steps(1)}
+@keyframes k45{0%{visibility:hidden}17.551%,100%{visibility:visible}}
+.m46{animation-name:k45;animation-timing-function:steps(1)}
+@keyframes k46{0%,17.551%{width:0px}17.714%,100%{width:62.4px}}
+.m47{animation-name:k46;animation-timing-function:steps(8)}
+@keyframes k47{0%{visibility:hidden}17.735%,100%{visibility:visible}}
+.m48{animation-name:k47;animation-timing-function:steps(1)}
+@keyframes k48{0%,17.735%{width:0px}18.143%,100%{width:156px}}
+.m49{animation-name:k48;animation-timing-function:steps(20)}
+@keyframes k49{0%{visibility:hidden}18.163%,100%{visibility:visible}}
+.m50{animation-name:k49;animation-timing-function:steps(1)}
+@keyframes k50{0%,18.163%{width:0px}18.878%,100%{width:273px}}
+.m51{animation-name:k50;animation-timing-function:steps(35)}
+@keyframes k51{0%{visibility:hidden}18.898%,100%{visibility:visible}}
+.m52{animation-name:k51;animation-timing-function:steps(1)}
+@keyframes k52{0%,18.898%{width:0px}18.918%,100%{width:7.8px}}
+.m53{animation-name:k52;animation-timing-function:steps(1)}
+@keyframes k53{0%{visibility:hidden}18.939%,100%{visibility:visible}}
+.m54{animation-name:k53;animation-timing-function:steps(1)}
+@keyframes k54{0%,18.939%{width:0px}18.959%,100%{width:7.8px}}
+.m55{animation-name:k54;animation-timing-function:steps(1)}
+@keyframes k55{0%{opacity:1}50%,100%{opacity:0}}
+.m56{animation-name:k55;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k56{0%,18.959%,100%{opacity:0}9.143%{opacity:1}}
+.m57{animation-name:k56;animation-timing-function:steps(1)}
+@keyframes k57{0%,18.959%,100%{visibility:hidden}9.143%{visibility:visible}}
+@keyframes k58{0%{translate:0px 0px}9.143%{translate:0px 0px;animation-timing-function:steps(15)}9.449%{translate:117px 0px}9.469%{translate:15.6px 18.2px;animation-timing-function:steps(24)}9.959%{translate:202.8px 18.2px}9.98%{translate:15.6px 36.4px;animation-timing-function:steps(13)}10.245%{translate:117px 36.4px}10.265%{translate:0px 54.6px}10.286%{translate:15.6px 72.8px;animation-timing-function:steps(49)}11.286%{translate:397.8px 72.8px}11.306%{translate:31.2px 91px;animation-timing-function:steps(28)}11.878%{translate:249.6px 91px}11.898%{translate:46.8px 109.2px;animation-timing-function:steps(53)}12.98%{translate:460.2px 109.2px}13%{translate:46.8px 127.4px;animation-timing-function:steps(25)}13.51%{translate:241.8px 127.4px}13.531%{translate:31.2px 145.6px}13.551%{translate:39px 145.6px}13.571%{translate:31.2px 163.8px;animation-timing-function:steps(5)}13.673%{translate:70.2px 163.8px}13.694%{translate:46.8px 182px;animation-timing-function:steps(26)}14.224%{translate:249.6px 182px}14.245%{translate:46.8px 200.2px;animation-timing-function:steps(22)}14.694%{translate:218.4px 200.2px}14.714%{translate:46.8px 218.4px;animation-timing-function:steps(18)}15.082%{translate:187.2px 218.4px}15.102%{translate:46.8px 236.6px;animation-timing-function:steps(14)}15.388%{translate:156px 236.6px}15.408%{translate:31.2px 254.8px;animation-timing-function:steps(17)}15.755%{translate:163.8px 254.8px}15.776%{translate:46.8px 273px;animation-timing-function:steps(68)}17.163%{translate:577.2px 273px}17.184%{translate:46.8px 291.2px;animation-timing-function:steps(12)}17.429%{translate:140.4px 291.2px}17.449%{translate:31.2px 309.4px}17.469%{translate:39px 309.4px}17.49%{translate:15.6px 327.6px}17.51%{translate:23.4px 327.6px}17.531%{translate:0px 345.8px}17.551%{translate:15.6px 364px;animation-timing-function:steps(8)}17.714%{translate:78px 364px}17.735%{translate:31.2px 382.2px;animation-timing-function:steps(20)}18.143%{translate:187.2px 382.2px}18.163%{translate:31.2px 400.4px;animation-timing-function:steps(35)}18.878%{translate:304.2px 400.4px}18.898%{translate:15.6px 418.6px}18.918%{translate:23.4px 418.6px}18.939%{translate:0px 436.8px}18.959%,100%{translate:7.8px 436.8px}}
+.m58{animation-name:k57,k58;animation-timing-function:steps(1),steps(1)}
+@keyframes k59{0%,19.531%,23.245%,100%{opacity:0}19.816%,22.959%{opacity:1}}
+.m59{animation-name:k59}
+@keyframes k60{0%,24.571%,37.429%,100%{opacity:0}25%,37%{opacity:1}}
+.m60{animation-name:k60}
+@keyframes k61{0%,25.714%,27.214%,38.46%,39.96%,100%{opacity:0}25.929%,27%,38.675%,39.746%{opacity:1}}
+.m61{animation-name:k61}
+@keyframes k62{0%,27.792%,29.292%,32.533%,34.033%,100%{opacity:0}28.006%,29.078%,32.748%,33.819%{opacity:1}}
+.m62{animation-name:k62}
+@keyframes k63{0%,29.849%,31.349%,34.591%,36.091%,100%{opacity:0}30.064%,31.135%,34.805%,35.877%{opacity:1}}
+.m63{animation-name:k63}
+@keyframes k64{0%,27.792%,100%{visibility:hidden}27%{visibility:visible}}
+@keyframes k65{0%,27%{translate:770.5px 234px}27.253%{translate:770.5px 273px}27.289%{translate:771.66px 278.313px}27.322%{translate:774.719px 282.5px}27.358%{translate:779.043px 285.938px}27.396%{translate:784px 289px}27.434%{translate:788.957px 292.063px}27.47%{translate:793.281px 295.5px}27.503%{translate:796.34px 299.688px}27.539%{translate:797.5px 305px}27.792%,100%{translate:797.5px 344px}}
+.m64{animation-name:k64,k65;animation-timing-function:steps(1),linear}
+@keyframes k66{0%,27.821%,100%{visibility:hidden}27.029%{visibility:visible}}
+@keyframes k67{0%,27.029%{translate:770.5px 234px}27.282%{translate:770.5px 273px}27.318%{translate:771.66px 278.313px}27.351%{translate:774.719px 282.5px}27.387%{translate:779.043px 285.938px}27.425%{translate:784px 289px}27.463%{translate:788.957px 292.063px}27.499%{translate:793.281px 295.5px}27.533%{translate:796.34px 299.688px}27.568%{translate:797.5px 305px}27.821%,100%{translate:797.5px 344px}}
+.m65{animation-name:k66,k67;animation-timing-function:steps(1),linear}
+@keyframes k68{0%,27.85%,100%{visibility:hidden}27.058%{visibility:visible}}
+@keyframes k69{0%,27.058%{translate:770.5px 234px}27.312%{translate:770.5px 273px}27.347%{translate:771.66px 278.313px}27.381%{translate:774.719px 282.5px}27.417%{translate:779.043px 285.938px}27.454%{translate:784px 289px}27.492%{translate:788.957px 292.063px}27.528%{translate:793.281px 295.5px}27.562%{translate:796.34px 299.688px}27.597%{translate:797.5px 305px}27.85%,100%{translate:797.5px 344px}}
+.m66{animation-name:k68,k69;animation-timing-function:steps(1),linear}
+@keyframes k70{0%,27.88%,100%{visibility:hidden}27.088%{visibility:visible}}
+@keyframes k71{0%,27.088%{translate:770.5px 234px}27.341%{translate:770.5px 273px}27.376%{translate:771.66px 278.313px}27.41%{translate:774.719px 282.5px}27.446%{translate:779.043px 285.938px}27.484%{translate:784px 289px}27.521%{translate:788.957px 292.063px}27.557%{translate:793.281px 295.5px}27.591%{translate:796.34px 299.688px}27.626%{translate:797.5px 305px}27.88%,100%{translate:797.5px 344px}}
+.m67{animation-name:k70,k71;animation-timing-function:steps(1),linear}
+@keyframes k72{0%,27.909%,100%{visibility:hidden}27.117%{visibility:visible}}
+@keyframes k73{0%,27.117%{translate:770.5px 234px}27.37%{translate:770.5px 273px}27.405%{translate:771.66px 278.313px}27.439%{translate:774.719px 282.5px}27.475%{translate:779.043px 285.938px}27.513%{translate:784px 289px}27.551%{translate:788.957px 292.063px}27.587%{translate:793.281px 295.5px}27.62%{translate:796.34px 299.688px}27.656%{translate:797.5px 305px}27.909%,100%{translate:797.5px 344px}}
+.m68{animation-name:k72,k73;animation-timing-function:steps(1),linear}
+@keyframes k74{0%,27.938%,100%{visibility:hidden}27.146%{visibility:visible}}
+@keyframes k75{0%,27.146%{translate:770.5px 234px}27.399%{translate:770.5px 273px}27.435%{translate:771.66px 278.313px}27.468%{translate:774.719px 282.5px}27.504%{translate:779.043px 285.938px}27.542%{translate:784px 289px}27.58%{translate:788.957px 292.063px}27.616%{translate:793.281px 295.5px}27.649%{translate:796.34px 299.688px}27.685%{translate:797.5px 305px}27.938%,100%{translate:797.5px 344px}}
+.m69{animation-name:k74,k75;animation-timing-function:steps(1),linear}
+@keyframes k76{0%,27.967%,100%{visibility:hidden}27.175%{visibility:visible}}
+@keyframes k77{0%,27.175%{translate:770.5px 234px}27.429%{translate:770.5px 273px}27.464%{translate:771.66px 278.313px}27.498%{translate:774.719px 282.5px}27.533%{translate:779.043px 285.938px}27.571%{translate:784px 289px}27.609%{translate:788.957px 292.063px}27.645%{translate:793.281px 295.5px}27.679%{translate:796.34px 299.688px}27.714%{translate:797.5px 305px}27.967%,100%{translate:797.5px 344px}}
+.m70{animation-name:k76,k77;animation-timing-function:steps(1),linear}
+@keyframes k78{0%,27.996%,100%{visibility:hidden}27.205%{visibility:visible}}
+@keyframes k79{0%,27.205%{translate:770.5px 234px}27.458%{translate:770.5px 273px}27.493%{translate:771.66px 278.313px}27.527%{translate:774.719px 282.5px}27.563%{translate:779.043px 285.938px}27.6%{translate:784px 289px}27.638%{translate:788.957px 292.063px}27.674%{translate:793.281px 295.5px}27.708%{translate:796.34px 299.688px}27.743%{translate:797.5px 305px}27.996%,100%{translate:797.5px 344px}}
+.m71{animation-name:k78,k79;animation-timing-function:steps(1),linear}
+@keyframes k80{0%,28.026%,100%{visibility:hidden}27.234%{visibility:visible}}
+@keyframes k81{0%,27.234%{translate:770.5px 234px}27.487%{translate:770.5px 273px}27.522%{translate:771.66px 278.313px}27.556%{translate:774.719px 282.5px}27.592%{translate:779.043px 285.938px}27.63%{translate:784px 289px}27.668%{translate:788.957px 292.063px}27.703%{translate:793.281px 295.5px}27.737%{translate:796.34px 299.688px}27.772%{translate:797.5px 305px}28.026%,100%{translate:797.5px 344px}}
+.m72{animation-name:k80,k81;animation-timing-function:steps(1),linear}
+@keyframes k82{0%,29.849%,100%{visibility:hidden}29.078%{visibility:visible}}
+@keyframes k83{0%,29.078%{translate:797.5px 386px}29.331%{translate:797.5px 425px}29.366%{translate:798.467px 430.313px}29.398%{translate:801.016px 434.5px}29.43%{translate:804.619px 437.938px}29.463%{translate:808.75px 441px}29.497%{translate:812.881px 444.063px}29.529%{translate:816.484px 447.5px}29.561%{translate:819.033px 451.688px}29.596%{translate:820px 457px}29.849%,100%{translate:820px 496px}}
+.m73{animation-name:k82,k83;animation-timing-function:steps(1),linear}
+@keyframes k84{0%,29.879%,100%{visibility:hidden}29.107%{visibility:visible}}
+@keyframes k85{0%,29.107%{translate:797.5px 386px}29.36%{translate:797.5px 425px}29.395%{translate:798.467px 430.313px}29.427%{translate:801.016px 434.5px}29.459%{translate:804.619px 437.938px}29.493%{translate:808.75px 441px}29.526%{translate:812.881px 444.063px}29.558%{translate:816.484px 447.5px}29.59%{translate:819.033px 451.688px}29.625%{translate:820px 457px}29.879%,100%{translate:820px 496px}}
+.m74{animation-name:k84,k85;animation-timing-function:steps(1),linear}
+@keyframes k86{0%,29.908%,100%{visibility:hidden}29.136%{visibility:visible}}
+@keyframes k87{0%,29.136%{translate:797.5px 386px}29.389%{translate:797.5px 425px}29.424%{translate:798.467px 430.313px}29.456%{translate:801.016px 434.5px}29.489%{translate:804.619px 437.938px}29.522%{translate:808.75px 441px}29.555%{translate:812.881px 444.063px}29.588%{translate:816.484px 447.5px}29.619%{translate:819.033px 451.688px}29.655%{translate:820px 457px}29.908%,100%{translate:820px 496px}}
+.m75{animation-name:k86,k87;animation-timing-function:steps(1),linear}
+@keyframes k88{0%,29.937%,100%{visibility:hidden}29.165%{visibility:visible}}
+@keyframes k89{0%,29.165%{translate:797.5px 386px}29.418%{translate:797.5px 425px}29.454%{translate:798.467px 430.313px}29.485%{translate:801.016px 434.5px}29.518%{translate:804.619px 437.938px}29.551%{translate:808.75px 441px}29.585%{translate:812.881px 444.063px}29.617%{translate:816.484px 447.5px}29.649%{translate:819.033px 451.688px}29.684%{translate:820px 457px}29.937%,100%{translate:820px 496px}}
+.m76{animation-name:k88,k89;animation-timing-function:steps(1),linear}
+@keyframes k90{0%,29.966%,100%{visibility:hidden}29.194%{visibility:visible}}
+@keyframes k91{0%,29.194%{translate:797.5px 386px}29.448%{translate:797.5px 425px}29.483%{translate:798.467px 430.313px}29.515%{translate:801.016px 434.5px}29.547%{translate:804.619px 437.938px}29.58%{translate:808.75px 441px}29.614%{translate:812.881px 444.063px}29.646%{translate:816.484px 447.5px}29.678%{translate:819.033px 451.688px}29.713%{translate:820px 457px}29.966%,100%{translate:820px 496px}}
+.m77{animation-name:k90,k91;animation-timing-function:steps(1),linear}
+@keyframes k92{0%,29.995%,100%{visibility:hidden}29.224%{visibility:visible}}
+@keyframes k93{0%,29.224%{translate:797.5px 386px}29.477%{translate:797.5px 425px}29.512%{translate:798.467px 430.313px}29.544%{translate:801.016px 434.5px}29.576%{translate:804.619px 437.938px}29.61%{translate:808.75px 441px}29.643%{translate:812.881px 444.063px}29.675%{translate:816.484px 447.5px}29.707%{translate:819.033px 451.688px}29.742%{translate:820px 457px}29.995%,100%{translate:820px 496px}}
+.m78{animation-name:k92,k93;animation-timing-function:steps(1),linear}
+@keyframes k94{0%,30.025%,100%{visibility:hidden}29.253%{visibility:visible}}
+@keyframes k95{0%,29.253%{translate:797.5px 386px}29.506%{translate:797.5px 425px}29.541%{translate:798.467px 430.313px}29.573%{translate:801.016px 434.5px}29.605%{translate:804.619px 437.938px}29.639%{translate:808.75px 441px}29.672%{translate:812.881px 444.063px}29.705%{translate:816.484px 447.5px}29.736%{translate:819.033px 451.688px}29.771%{translate:820px 457px}30.025%,100%{translate:820px 496px}}
+.m79{animation-name:k94,k95;animation-timing-function:steps(1),linear}
+@keyframes k96{0%,30.054%,100%{visibility:hidden}29.282%{visibility:visible}}
+@keyframes k97{0%,29.282%{translate:797.5px 386px}29.535%{translate:797.5px 425px}29.57%{translate:798.467px 430.313px}29.602%{translate:801.016px 434.5px}29.635%{translate:804.619px 437.938px}29.668%{translate:808.75px 441px}29.701%{translate:812.881px 444.063px}29.734%{translate:816.484px 447.5px}29.766%{translate:819.033px 451.688px}29.801%{translate:820px 457px}30.054%,100%{translate:820px 496px}}
+.m80{animation-name:k96,k97;animation-timing-function:steps(1),linear}
+@keyframes k98{0%,30.083%,100%{visibility:hidden}29.311%{visibility:visible}}
+@keyframes k99{0%,29.311%{translate:797.5px 386px}29.565%{translate:797.5px 425px}29.6%{translate:798.467px 430.313px}29.631%{translate:801.016px 434.5px}29.664%{translate:804.619px 437.938px}29.697%{translate:808.75px 441px}29.731%{translate:812.881px 444.063px}29.763%{translate:816.484px 447.5px}29.795%{translate:819.033px 451.688px}29.83%{translate:820px 457px}30.083%,100%{translate:820px 496px}}
+.m81{animation-name:k98,k99;animation-timing-function:steps(1),linear}
+@keyframes k100{0%,32.533%,100%{visibility:hidden}31.135%{visibility:visible}}
+@keyframes k101{0%,31.135%{translate:761.5px 517px}31.304%{translate:735.5px 517px}31.317%{translate:733.491px 516.796px}31.33%{translate:731.617px 516.211px}31.342%{translate:729.919px 515.286px}31.355%{translate:728.438px 514.063px}31.367%{translate:727.214px 512.581px}31.38%{translate:726.289px 510.883px}31.393%{translate:725.704px 509.009px}31.406%{translate:725.5px 507px}32.263%{translate:725.5px 375px}32.276%{translate:725.704px 372.991px}32.289%{translate:726.289px 371.117px}32.301%{translate:727.214px 369.419px}32.314%{translate:728.438px 367.938px}32.326%{translate:729.919px 366.714px}32.339%{translate:731.617px 365.789px}32.351%{translate:733.491px 365.204px}32.365%{translate:735.5px 365px}32.533%,100%{translate:761.5px 365px}}
+.m82{animation-name:k100,k101;animation-timing-function:steps(1),linear}
+@keyframes k102{0%,32.563%,100%{visibility:hidden}31.164%{visibility:visible}}
+@keyframes k103{0%,31.164%{translate:761.5px 517px}31.333%{translate:735.5px 517px}31.346%{translate:733.491px 516.796px}31.359%{translate:731.617px 516.211px}31.372%{translate:729.919px 515.286px}31.384%{translate:728.438px 514.063px}31.396%{translate:727.214px 512.581px}31.409%{translate:726.289px 510.883px}31.422%{translate:725.704px 509.009px}31.435%{translate:725.5px 507px}32.292%{translate:725.5px 375px}32.305%{translate:725.704px 372.991px}32.318%{translate:726.289px 371.117px}32.33%{translate:727.214px 369.419px}32.343%{translate:728.438px 367.938px}32.355%{translate:729.919px 366.714px}32.368%{translate:731.617px 365.789px}32.381%{translate:733.491px 365.204px}32.394%{translate:735.5px 365px}32.563%,100%{translate:761.5px 365px}}
+.m83{animation-name:k102,k103;animation-timing-function:steps(1),linear}
+@keyframes k104{0%,32.592%,100%{visibility:hidden}31.193%{visibility:visible}}
+@keyframes k105{0%,31.193%{translate:761.5px 517px}31.362%{translate:735.5px 517px}31.375%{translate:733.491px 516.796px}31.388%{translate:731.617px 516.211px}31.401%{translate:729.919px 515.286px}31.413%{translate:728.438px 514.063px}31.426%{translate:727.214px 512.581px}31.438%{translate:726.289px 510.883px}31.451%{translate:725.704px 509.009px}31.464%{translate:725.5px 507px}32.321%{translate:725.5px 375px}32.334%{translate:725.704px 372.991px}32.347%{translate:726.289px 371.117px}32.36%{translate:727.214px 369.419px}32.372%{translate:728.438px 367.938px}32.385%{translate:729.919px 366.714px}32.397%{translate:731.617px 365.789px}32.41%{translate:733.491px 365.204px}32.423%{translate:735.5px 365px}32.592%,100%{translate:761.5px 365px}}
+.m84{animation-name:k104,k105;animation-timing-function:steps(1),linear}
+@keyframes k106{0%,32.621%,100%{visibility:hidden}31.223%{visibility:visible}}
+@keyframes k107{0%,31.223%{translate:761.5px 517px}31.392%{translate:735.5px 517px}31.405%{translate:733.491px 516.796px}31.417%{translate:731.617px 516.211px}31.43%{translate:729.919px 515.286px}31.442%{translate:728.438px 514.063px}31.455%{translate:727.214px 512.581px}31.467%{translate:726.289px 510.883px}31.48%{translate:725.704px 509.009px}31.493%{translate:725.5px 507px}32.35%{translate:725.5px 375px}32.364%{translate:725.704px 372.991px}32.376%{translate:726.289px 371.117px}32.389%{translate:727.214px 369.419px}32.401%{translate:728.438px 367.938px}32.414%{translate:729.919px 366.714px}32.426%{translate:731.617px 365.789px}32.439%{translate:733.491px 365.204px}32.452%{translate:735.5px 365px}32.621%,100%{translate:761.5px 365px}}
+.m85{animation-name:k106,k107;animation-timing-function:steps(1),linear}
+@keyframes k108{0%,32.65%,100%{visibility:hidden}31.252%{visibility:visible}}
+@keyframes k109{0%,31.252%{translate:761.5px 517px}31.421%{translate:735.5px 517px}31.434%{translate:733.491px 516.796px}31.447%{translate:731.617px 516.211px}31.459%{translate:729.919px 515.286px}31.472%{translate:728.438px 514.063px}31.484%{translate:727.214px 512.581px}31.497%{translate:726.289px 510.883px}31.509%{translate:725.704px 509.009px}31.523%{translate:725.5px 507px}32.38%{translate:725.5px 375px}32.393%{translate:725.704px 372.991px}32.406%{translate:726.289px 371.117px}32.418%{translate:727.214px 369.419px}32.431%{translate:728.438px 367.938px}32.443%{translate:729.919px 366.714px}32.456%{translate:731.617px 365.789px}32.468%{translate:733.491px 365.204px}32.481%{translate:735.5px 365px}32.65%,100%{translate:761.5px 365px}}
+.m86{animation-name:k108,k109;animation-timing-function:steps(1),linear}
+@keyframes k110{0%,32.68%,100%{visibility:hidden}31.281%{visibility:visible}}
+@keyframes k111{0%,31.281%{translate:761.5px 517px}31.45%{translate:735.5px 517px}31.463%{translate:733.491px 516.796px}31.476%{translate:731.617px 516.211px}31.488%{translate:729.919px 515.286px}31.501%{translate:728.438px 514.063px}31.513%{translate:727.214px 512.581px}31.526%{translate:726.289px 510.883px}31.539%{translate:725.704px 509.009px}31.552%{translate:725.5px 507px}32.409%{translate:725.5px 375px}32.422%{translate:725.704px 372.991px}32.435%{translate:726.289px 371.117px}32.447%{translate:727.214px 369.419px}32.46%{translate:728.438px 367.938px}32.472%{translate:729.919px 366.714px}32.485%{translate:731.617px 365.789px}32.498%{translate:733.491px 365.204px}32.511%{translate:735.5px 365px}32.68%,100%{translate:761.5px 365px}}
+.m87{animation-name:k110,k111;animation-timing-function:steps(1),linear}
+@keyframes k112{0%,32.709%,100%{visibility:hidden}31.31%{visibility:visible}}
+@keyframes k113{0%,31.31%{translate:761.5px 517px}31.479%{translate:735.5px 517px}31.492%{translate:733.491px 516.796px}31.505%{translate:731.617px 516.211px}31.518%{translate:729.919px 515.286px}31.53%{translate:728.438px 514.063px}31.543%{translate:727.214px 512.581px}31.555%{translate:726.289px 510.883px}31.568%{translate:725.704px 509.009px}31.581%{translate:725.5px 507px}32.438%{translate:725.5px 375px}32.451%{translate:725.704px 372.991px}32.464%{translate:726.289px 371.117px}32.477%{translate:727.214px 369.419px}32.489%{translate:728.438px 367.938px}32.501%{translate:729.919px 366.714px}32.514%{translate:731.617px 365.789px}32.527%{translate:733.491px 365.204px}32.54%{translate:735.5px 365px}32.709%,100%{translate:761.5px 365px}}
+.m88{animation-name:k112,k113;animation-timing-function:steps(1),linear}
+@keyframes k114{0%,32.738%,100%{visibility:hidden}31.34%{visibility:visible}}
+@keyframes k115{0%,31.34%{translate:761.5px 517px}31.508%{translate:735.5px 517px}31.522%{translate:733.491px 516.796px}31.534%{translate:731.617px 516.211px}31.547%{translate:729.919px 515.286px}31.559%{translate:728.438px 514.063px}31.572%{translate:727.214px 512.581px}31.584%{translate:726.289px 510.883px}31.597%{translate:725.704px 509.009px}31.61%{translate:725.5px 507px}32.467%{translate:725.5px 375px}32.48%{translate:725.704px 372.991px}32.493%{translate:726.289px 371.117px}32.506%{translate:727.214px 369.419px}32.518%{translate:728.438px 367.938px}32.531%{translate:729.919px 366.714px}32.543%{translate:731.617px 365.789px}32.556%{translate:733.491px 365.204px}32.569%{translate:735.5px 365px}32.738%,100%{translate:761.5px 365px}}
+.m89{animation-name:k114,k115;animation-timing-function:steps(1),linear}
+@keyframes k116{0%,32.767%,100%{visibility:hidden}31.369%{visibility:visible}}
+@keyframes k117{0%,31.369%{translate:761.5px 517px}31.538%{translate:735.5px 517px}31.551%{translate:733.491px 516.796px}31.564%{translate:731.617px 516.211px}31.576%{translate:729.919px 515.286px}31.589%{translate:728.438px 514.063px}31.601%{translate:727.214px 512.581px}31.614%{translate:726.289px 510.883px}31.626%{translate:725.704px 509.009px}31.639%{translate:725.5px 507px}32.497%{translate:725.5px 375px}32.51%{translate:725.704px 372.991px}32.522%{translate:726.289px 371.117px}32.535%{translate:727.214px 369.419px}32.547%{translate:728.438px 367.938px}32.56%{translate:729.919px 366.714px}32.572%{translate:731.617px 365.789px}32.585%{translate:733.491px 365.204px}32.598%{translate:735.5px 365px}32.767%,100%{translate:761.5px 365px}}
+.m90{animation-name:k116,k117;animation-timing-function:steps(1),linear}
+@keyframes k118{0%,34.591%,100%{visibility:hidden}33.819%{visibility:visible}}
+@keyframes k119{0%,33.819%{translate:797.5px 386px}34.072%{translate:797.5px 425px}34.107%{translate:798.467px 430.313px}34.139%{translate:801.016px 434.5px}34.172%{translate:804.619px 437.938px}34.205%{translate:808.75px 441px}34.238%{translate:812.881px 444.063px}34.271%{translate:816.484px 447.5px}34.303%{translate:819.033px 451.688px}34.338%{translate:820px 457px}34.591%,100%{translate:820px 496px}}
+.m91{animation-name:k118,k119;animation-timing-function:steps(1),linear}
+@keyframes k120{0%,34.62%,100%{visibility:hidden}33.848%{visibility:visible}}
+@keyframes k121{0%,33.848%{translate:797.5px 386px}34.102%{translate:797.5px 425px}34.137%{translate:798.467px 430.313px}34.168%{translate:801.016px 434.5px}34.201%{translate:804.619px 437.938px}34.234%{translate:808.75px 441px}34.268%{translate:812.881px 444.063px}34.3%{translate:816.484px 447.5px}34.332%{translate:819.033px 451.688px}34.367%{translate:820px 457px}34.62%,100%{translate:820px 496px}}
+.m92{animation-name:k120,k121;animation-timing-function:steps(1),linear}
+@keyframes k122{0%,34.649%,100%{visibility:hidden}33.878%{visibility:visible}}
+@keyframes k123{0%,33.878%{translate:797.5px 386px}34.131%{translate:797.5px 425px}34.166%{translate:798.467px 430.313px}34.198%{translate:801.016px 434.5px}34.23%{translate:804.619px 437.938px}34.263%{translate:808.75px 441px}34.297%{translate:812.881px 444.063px}34.329%{translate:816.484px 447.5px}34.361%{translate:819.033px 451.688px}34.396%{translate:820px 457px}34.649%,100%{translate:820px 496px}}
+.m93{animation-name:k122,k123;animation-timing-function:steps(1),linear}
+@keyframes k124{0%,34.679%,100%{visibility:hidden}33.907%{visibility:visible}}
+@keyframes k125{0%,33.907%{translate:797.5px 386px}34.16%{translate:797.5px 425px}34.195%{translate:798.467px 430.313px}34.227%{translate:801.016px 434.5px}34.259%{translate:804.619px 437.938px}34.293%{translate:808.75px 441px}34.326%{translate:812.881px 444.063px}34.358%{translate:816.484px 447.5px}34.39%{translate:819.033px 451.688px}34.425%{translate:820px 457px}34.679%,100%{translate:820px 496px}}
+.m94{animation-name:k124,k125;animation-timing-function:steps(1),linear}
+@keyframes k126{0%,34.708%,100%{visibility:hidden}33.936%{visibility:visible}}
+@keyframes k127{0%,33.936%{translate:797.5px 386px}34.189%{translate:797.5px 425px}34.224%{translate:798.467px 430.313px}34.256%{translate:801.016px 434.5px}34.289%{translate:804.619px 437.938px}34.322%{translate:808.75px 441px}34.355%{translate:812.881px 444.063px}34.388%{translate:816.484px 447.5px}34.419%{translate:819.033px 451.688px}34.455%{translate:820px 457px}34.708%,100%{translate:820px 496px}}
+.m95{animation-name:k126,k127;animation-timing-function:steps(1),linear}
+@keyframes k128{0%,34.737%,100%{visibility:hidden}33.965%{visibility:visible}}
+@keyframes k129{0%,33.965%{translate:797.5px 386px}34.218%{translate:797.5px 425px}34.254%{translate:798.467px 430.313px}34.285%{translate:801.016px 434.5px}34.318%{translate:804.619px 437.938px}34.351%{translate:808.75px 441px}34.385%{translate:812.881px 444.063px}34.417%{translate:816.484px 447.5px}34.449%{translate:819.033px 451.688px}34.484%{translate:820px 457px}34.737%,100%{translate:820px 496px}}
+.m96{animation-name:k128,k129;animation-timing-function:steps(1),linear}
+@keyframes k130{0%,34.766%,100%{visibility:hidden}33.994%{visibility:visible}}
+@keyframes k131{0%,33.994%{translate:797.5px 386px}34.248%{translate:797.5px 425px}34.283%{translate:798.467px 430.313px}34.315%{translate:801.016px 434.5px}34.347%{translate:804.619px 437.938px}34.38%{translate:808.75px 441px}34.414%{translate:812.881px 444.063px}34.446%{translate:816.484px 447.5px}34.478%{translate:819.033px 451.688px}34.513%{translate:820px 457px}34.766%,100%{translate:820px 496px}}
+.m97{animation-name:k130,k131;animation-timing-function:steps(1),linear}
+@keyframes k132{0%,34.795%,100%{visibility:hidden}34.024%{visibility:visible}}
+@keyframes k133{0%,34.024%{translate:797.5px 386px}34.277%{translate:797.5px 425px}34.312%{translate:798.467px 430.313px}34.344%{translate:801.016px 434.5px}34.376%{translate:804.619px 437.938px}34.41%{translate:808.75px 441px}34.443%{translate:812.881px 444.063px}34.475%{translate:816.484px 447.5px}34.507%{translate:819.033px 451.688px}34.542%{translate:820px 457px}34.795%,100%{translate:820px 496px}}
+.m98{animation-name:k132,k133;animation-timing-function:steps(1),linear}
+@keyframes k134{0%,34.825%,100%{visibility:hidden}34.053%{visibility:visible}}
+@keyframes k135{0%,34.053%{translate:797.5px 386px}34.306%{translate:797.5px 425px}34.341%{translate:798.467px 430.313px}34.373%{translate:801.016px 434.5px}34.405%{translate:804.619px 437.938px}34.439%{translate:808.75px 441px}34.472%{translate:812.881px 444.063px}34.505%{translate:816.484px 447.5px}34.536%{translate:819.033px 451.688px}34.571%{translate:820px 457px}34.825%,100%{translate:820px 496px}}
+.m99{animation-name:k134,k135;animation-timing-function:steps(1),linear}
+@keyframes k136{0%,38.46%,100%{visibility:hidden}35.877%{visibility:visible}}
+@keyframes k137{0%,35.877%{translate:878.5px 517px}36.045%{translate:904.5px 517px}36.059%{translate:906.509px 516.796px}36.071%{translate:908.383px 516.211px}36.084%{translate:910.081px 515.286px}36.096%{translate:911.563px 514.063px}36.109%{translate:912.786px 512.581px}36.121%{translate:913.711px 510.883px}36.134%{translate:914.296px 509.009px}36.147%{translate:914.5px 507px}36.472%{translate:914.5px 457px}36.507%{translate:913.146px 451.688px}36.543%{translate:909.578px 447.5px}36.583%{translate:904.533px 444.063px}36.625%{translate:898.75px 441px}36.668%{translate:892.967px 437.938px}36.707%{translate:887.922px 434.5px}36.743%{translate:884.354px 430.313px}36.779%{translate:883px 425px}37.558%{translate:883px 305px}37.594%{translate:881.646px 299.688px}37.629%{translate:878.078px 295.5px}37.669%{translate:873.033px 292.063px}37.711%{translate:867.25px 289px}37.754%{translate:861.467px 285.938px}37.794%{translate:856.422px 282.5px}37.829%{translate:852.854px 278.313px}37.865%{translate:851.5px 273px}38.19%{translate:851.5px 223px}38.203%{translate:851.296px 220.991px}38.215%{translate:850.711px 219.117px}38.228%{translate:849.786px 217.419px}38.241%{translate:848.563px 215.938px}38.253%{translate:847.081px 214.714px}38.266%{translate:845.383px 213.789px}38.278%{translate:843.509px 213.204px}38.291%{translate:841.5px 213px}38.46%,100%{translate:815.5px 213px}}
+.m100{animation-name:k136,k137;animation-timing-function:steps(1),linear}
+@keyframes k138{0%,38.489%,100%{visibility:hidden}35.906%{visibility:visible}}
+@keyframes k139{0%,35.906%{translate:878.5px 517px}36.075%{translate:904.5px 517px}36.088%{translate:906.509px 516.796px}36.101%{translate:908.383px 516.211px}36.113%{translate:910.081px 515.286px}36.126%{translate:911.563px 514.063px}36.138%{translate:912.786px 512.581px}36.151%{translate:913.711px 510.883px}36.163%{translate:914.296px 509.009px}36.176%{translate:914.5px 507px}36.501%{translate:914.5px 457px}36.537%{translate:913.146px 451.688px}36.572%{translate:909.578px 447.5px}36.612%{translate:904.533px 444.063px}36.655%{translate:898.75px 441px}36.697%{translate:892.967px 437.938px}36.737%{translate:887.922px 434.5px}36.772%{translate:884.354px 430.313px}36.808%{translate:883px 425px}37.587%{translate:883px 305px}37.623%{translate:881.646px 299.688px}37.659%{translate:878.078px 295.5px}37.698%{translate:873.033px 292.063px}37.741%{translate:867.25px 289px}37.783%{translate:861.467px 285.938px}37.823%{translate:856.422px 282.5px}37.859%{translate:852.854px 278.313px}37.894%{translate:851.5px 273px}38.219%{translate:851.5px 223px}38.232%{translate:851.296px 220.991px}38.245%{translate:850.711px 219.117px}38.257%{translate:849.786px 217.419px}38.27%{translate:848.563px 215.938px}38.282%{translate:847.081px 214.714px}38.295%{translate:845.383px 213.789px}38.308%{translate:843.509px 213.204px}38.321%{translate:841.5px 213px}38.489%,100%{translate:815.5px 213px}}
+.m101{animation-name:k138,k139;animation-timing-function:steps(1),linear}
+@keyframes k140{0%,38.519%,100%{visibility:hidden}35.935%{visibility:visible}}
+@keyframes k141{0%,35.935%{translate:878.5px 517px}36.104%{translate:904.5px 517px}36.117%{translate:906.509px 516.796px}36.13%{translate:908.383px 516.211px}36.142%{translate:910.081px 515.286px}36.155%{translate:911.563px 514.063px}36.167%{translate:912.786px 512.581px}36.18%{translate:913.711px 510.883px}36.193%{translate:914.296px 509.009px}36.206%{translate:914.5px 507px}36.53%{translate:914.5px 457px}36.566%{translate:913.146px 451.688px}36.602%{translate:909.578px 447.5px}36.641%{translate:904.533px 444.063px}36.684%{translate:898.75px 441px}36.726%{translate:892.967px 437.938px}36.766%{translate:887.922px 434.5px}36.802%{translate:884.354px 430.313px}36.837%{translate:883px 425px}37.616%{translate:883px 305px}37.652%{translate:881.646px 299.688px}37.688%{translate:878.078px 295.5px}37.727%{translate:873.033px 292.063px}37.77%{translate:867.25px 289px}37.812%{translate:861.467px 285.938px}37.852%{translate:856.422px 282.5px}37.888%{translate:852.854px 278.313px}37.923%{translate:851.5px 273px}38.248%{translate:851.5px 223px}38.261%{translate:851.296px 220.991px}38.274%{translate:850.711px 219.117px}38.286%{translate:849.786px 217.419px}38.299%{translate:848.563px 215.938px}38.311%{translate:847.081px 214.714px}38.324%{translate:845.383px 213.789px}38.337%{translate:843.509px 213.204px}38.35%{translate:841.5px 213px}38.519%,100%{translate:815.5px 213px}}
+.m102{animation-name:k140,k141;animation-timing-function:steps(1),linear}
+@keyframes k142{0%,38.548%,100%{visibility:hidden}35.964%{visibility:visible}}
+@keyframes k143{0%,35.964%{translate:878.5px 517px}36.133%{translate:904.5px 517px}36.146%{translate:906.509px 516.796px}36.159%{translate:908.383px 516.211px}36.172%{translate:910.081px 515.286px}36.184%{translate:911.563px 514.063px}36.196%{translate:912.786px 512.581px}36.209%{translate:913.711px 510.883px}36.222%{translate:914.296px 509.009px}36.235%{translate:914.5px 507px}36.56%{translate:914.5px 457px}36.595%{translate:913.146px 451.688px}36.631%{translate:909.578px 447.5px}36.671%{translate:904.533px 444.063px}36.713%{translate:898.75px 441px}36.756%{translate:892.967px 437.938px}36.795%{translate:887.922px 434.5px}36.831%{translate:884.354px 430.313px}36.866%{translate:883px 425px}37.646%{translate:883px 305px}37.681%{translate:881.646px 299.688px}37.717%{translate:878.078px 295.5px}37.757%{translate:873.033px 292.063px}37.799%{translate:867.25px 289px}37.842%{translate:861.467px 285.938px}37.881%{translate:856.422px 282.5px}37.917%{translate:852.854px 278.313px}37.953%{translate:851.5px 273px}38.277%{translate:851.5px 223px}38.29%{translate:851.296px 220.991px}38.303%{translate:850.711px 219.117px}38.316%{translate:849.786px 217.419px}38.328%{translate:848.563px 215.938px}38.341%{translate:847.081px 214.714px}38.353%{translate:845.383px 213.789px}38.366%{translate:843.509px 213.204px}38.379%{translate:841.5px 213px}38.548%,100%{translate:815.5px 213px}}
+.m103{animation-name:k142,k143;animation-timing-function:steps(1),linear}
+@keyframes k144{0%,38.577%,100%{visibility:hidden}35.993%{visibility:visible}}
+@keyframes k145{0%,35.993%{translate:878.5px 517px}36.162%{translate:904.5px 517px}36.175%{translate:906.509px 516.796px}36.188%{translate:908.383px 516.211px}36.201%{translate:910.081px 515.286px}36.213%{translate:911.563px 514.063px}36.226%{translate:912.786px 512.581px}36.238%{translate:913.711px 510.883px}36.251%{translate:914.296px 509.009px}36.264%{translate:914.5px 507px}36.589%{translate:914.5px 457px}36.624%{translate:913.146px 451.688px}36.66%{translate:909.578px 447.5px}36.7%{translate:904.533px 444.063px}36.742%{translate:898.75px 441px}36.785%{translate:892.967px 437.938px}36.824%{translate:887.922px 434.5px}36.86%{translate:884.354px 430.313px}36.896%{translate:883px 425px}37.675%{translate:883px 305px}37.711%{translate:881.646px 299.688px}37.746%{translate:878.078px 295.5px}37.786%{translate:873.033px 292.063px}37.828%{translate:867.25px 289px}37.871%{translate:861.467px 285.938px}37.911%{translate:856.422px 282.5px}37.946%{translate:852.854px 278.313px}37.982%{translate:851.5px 273px}38.307%{translate:851.5px 223px}38.32%{translate:851.296px 220.991px}38.332%{translate:850.711px 219.117px}38.345%{translate:849.786px 217.419px}38.357%{translate:848.563px 215.938px}38.37%{translate:847.081px 214.714px}38.382%{translate:845.383px 213.789px}38.395%{translate:843.509px 213.204px}38.408%{translate:841.5px 213px}38.577%,100%{translate:815.5px 213px}}
+.m104{animation-name:k144,k145;animation-timing-function:steps(1),linear}
+@keyframes k146{0%,38.606%,100%{visibility:hidden}36.023%{visibility:visible}}
+@keyframes k147{0%,36.023%{translate:878.5px 517px}36.192%{translate:904.5px 517px}36.205%{translate:906.509px 516.796px}36.217%{translate:908.383px 516.211px}36.23%{translate:910.081px 515.286px}36.242%{translate:911.563px 514.063px}36.255%{translate:912.786px 512.581px}36.267%{translate:913.711px 510.883px}36.28%{translate:914.296px 509.009px}36.293%{translate:914.5px 507px}36.618%{translate:914.5px 457px}36.654%{translate:913.146px 451.688px}36.689%{translate:909.578px 447.5px}36.729%{translate:904.533px 444.063px}36.771%{translate:898.75px 441px}36.814%{translate:892.967px 437.938px}36.854%{translate:887.922px 434.5px}36.889%{translate:884.354px 430.313px}36.925%{translate:883px 425px}37.704%{translate:883px 305px}37.74%{translate:881.646px 299.688px}37.775%{translate:878.078px 295.5px}37.815%{translate:873.033px 292.063px}37.858%{translate:867.25px 289px}37.9%{translate:861.467px 285.938px}37.94%{translate:856.422px 282.5px}37.975%{translate:852.854px 278.313px}38.011%{translate:851.5px 273px}38.336%{translate:851.5px 223px}38.349%{translate:851.296px 220.991px}38.362%{translate:850.711px 219.117px}38.374%{translate:849.786px 217.419px}38.387%{translate:848.563px 215.938px}38.399%{translate:847.081px 214.714px}38.412%{translate:845.383px 213.789px}38.424%{translate:843.509px 213.204px}38.438%{translate:841.5px 213px}38.606%,100%{translate:815.5px 213px}}
+.m105{animation-name:k146,k147;animation-timing-function:steps(1),linear}
+@keyframes k148{0%,38.636%,100%{visibility:hidden}36.052%{visibility:visible}}
+@keyframes k149{0%,36.052%{translate:878.5px 517px}36.221%{translate:904.5px 517px}36.234%{translate:906.509px 516.796px}36.247%{translate:908.383px 516.211px}36.259%{translate:910.081px 515.286px}36.272%{translate:911.563px 514.063px}36.284%{translate:912.786px 512.581px}36.297%{translate:913.711px 510.883px}36.309%{translate:914.296px 509.009px}36.323%{translate:914.5px 507px}36.647%{translate:914.5px 457px}36.683%{translate:913.146px 451.688px}36.719%{translate:909.578px 447.5px}36.758%{translate:904.533px 444.063px}36.801%{translate:898.75px 441px}36.843%{translate:892.967px 437.938px}36.883%{translate:887.922px 434.5px}36.919%{translate:884.354px 430.313px}36.954%{translate:883px 425px}37.733%{translate:883px 305px}37.769%{translate:881.646px 299.688px}37.805%{translate:878.078px 295.5px}37.844%{translate:873.033px 292.063px}37.887%{translate:867.25px 289px}37.929%{translate:861.467px 285.938px}37.969%{translate:856.422px 282.5px}38.005%{translate:852.854px 278.313px}38.04%{translate:851.5px 273px}38.365%{translate:851.5px 223px}38.378%{translate:851.296px 220.991px}38.391%{translate:850.711px 219.117px}38.403%{translate:849.786px 217.419px}38.416%{translate:848.563px 215.938px}38.428%{translate:847.081px 214.714px}38.441%{translate:845.383px 213.789px}38.454%{translate:843.509px 213.204px}38.467%{translate:841.5px 213px}38.636%,100%{translate:815.5px 213px}}
+.m106{animation-name:k148,k149;animation-timing-function:steps(1),linear}
+@keyframes k150{0%,38.665%,100%{visibility:hidden}36.081%{visibility:visible}}
+@keyframes k151{0%,36.081%{translate:878.5px 517px}36.25%{translate:904.5px 517px}36.263%{translate:906.509px 516.796px}36.276%{translate:908.383px 516.211px}36.288%{translate:910.081px 515.286px}36.301%{translate:911.563px 514.063px}36.313%{translate:912.786px 512.581px}36.326%{translate:913.711px 510.883px}36.339%{translate:914.296px 509.009px}36.352%{translate:914.5px 507px}36.676%{translate:914.5px 457px}36.712%{translate:913.146px 451.688px}36.748%{translate:909.578px 447.5px}36.787%{translate:904.533px 444.063px}36.83%{translate:898.75px 441px}36.872%{translate:892.967px 437.938px}36.912%{translate:887.922px 434.5px}36.948%{translate:884.354px 430.313px}36.983%{translate:883px 425px}37.763%{translate:883px 305px}37.798%{translate:881.646px 299.688px}37.834%{translate:878.078px 295.5px}37.874%{translate:873.033px 292.063px}37.916%{translate:867.25px 289px}37.959%{translate:861.467px 285.938px}37.998%{translate:856.422px 282.5px}38.034%{translate:852.854px 278.313px}38.069%{translate:851.5px 273px}38.394%{translate:851.5px 223px}38.407%{translate:851.296px 220.991px}38.42%{translate:850.711px 219.117px}38.433%{translate:849.786px 217.419px}38.445%{translate:848.563px 215.938px}38.458%{translate:847.081px 214.714px}38.47%{translate:845.383px 213.789px}38.483%{translate:843.509px 213.204px}38.496%{translate:841.5px 213px}38.665%,100%{translate:815.5px 213px}}
+.m107{animation-name:k150,k151;animation-timing-function:steps(1),linear}
+@keyframes k152{0%,38.694%,100%{visibility:hidden}36.11%{visibility:visible}}
+@keyframes k153{0%,36.11%{translate:878.5px 517px}36.279%{translate:904.5px 517px}36.292%{translate:906.509px 516.796px}36.305%{translate:908.383px 516.211px}36.318%{translate:910.081px 515.286px}36.33%{translate:911.563px 514.063px}36.343%{translate:912.786px 512.581px}36.355%{translate:913.711px 510.883px}36.368%{translate:914.296px 509.009px}36.381%{translate:914.5px 507px}36.706%{translate:914.5px 457px}36.741%{translate:913.146px 451.688px}36.777%{translate:909.578px 447.5px}36.817%{translate:904.533px 444.063px}36.859%{translate:898.75px 441px}36.902%{translate:892.967px 437.938px}36.941%{translate:887.922px 434.5px}36.977%{translate:884.354px 430.313px}37.013%{translate:883px 425px}37.792%{translate:883px 305px}37.827%{translate:881.646px 299.688px}37.863%{translate:878.078px 295.5px}37.903%{translate:873.033px 292.063px}37.945%{translate:867.25px 289px}37.988%{translate:861.467px 285.938px}38.027%{translate:856.422px 282.5px}38.063%{translate:852.854px 278.313px}38.099%{translate:851.5px 273px}38.423%{translate:851.5px 223px}38.436%{translate:851.296px 220.991px}38.449%{translate:850.711px 219.117px}38.462%{translate:849.786px 217.419px}38.474%{translate:848.563px 215.938px}38.487%{translate:847.081px 214.714px}38.499%{translate:845.383px 213.789px}38.512%{translate:843.509px 213.204px}38.525%{translate:841.5px 213px}38.694%,100%{translate:815.5px 213px}}
+.m108{animation-name:k152,k153;animation-timing-function:steps(1),linear}
+@keyframes k154{0%,38.286%,59.714%,100%{opacity:0}38.714%,59.286%{opacity:1}}
+.m109{animation-name:k154}
+@keyframes k155{0%,39.143%{stroke-dashoffset:1;visibility:hidden}39.857%,100%{stroke-dashoffset:0;visibility:visible}}
+.m110{animation-name:k155}
+@keyframes k156{0%,39.75%{opacity:0}39.857%,100%{opacity:1}}
+.m111{animation-name:k156}
+@keyframes k157{0%,39.143%{opacity:0}39.5%,100%{opacity:1}}
+.m112{animation-name:k157}
+@keyframes k158{0%,40.786%{stroke-dashoffset:1;visibility:hidden}41.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m113{animation-name:k158}
+@keyframes k159{0%,41.393%{opacity:0}41.5%,100%{opacity:1}}
+.m114{animation-name:k159}
+@keyframes k160{0%,40.786%{opacity:0}41.143%,100%{opacity:1}}
+.m115{animation-name:k160}
+@keyframes k161{0%,42.429%{opacity:0}43.143%,100%{opacity:1}}
+.m116{animation-name:k161}
+@keyframes k162{0%,43.036%{opacity:0}43.143%,100%{opacity:1}}
+.m117{animation-name:k162}
+@keyframes k163{0%,42.429%{opacity:0}42.786%,100%{opacity:1}}
+.m118{animation-name:k163}
+@keyframes k164{0%,44.071%{opacity:0}44.429%,100%{opacity:1}}
+.m119{animation-name:k164}
+@keyframes k165{0%,45.714%{stroke-dashoffset:1;visibility:hidden}46.429%,100%{stroke-dashoffset:0;visibility:visible}}
+.m120{animation-name:k165}
+@keyframes k166{0%,46.321%{opacity:0}46.429%,100%{opacity:1}}
+.m121{animation-name:k166}
+@keyframes k167{0%,45.714%{opacity:0}46.071%,100%{opacity:1}}
+.m122{animation-name:k167}
+@keyframes k168{0%,47.357%{opacity:0}48.071%,100%{opacity:1}}
+.m123{animation-name:k168}
+@keyframes k169{0%,47.964%{opacity:0}48.071%,100%{opacity:1}}
+.m124{animation-name:k169}
+@keyframes k170{0%,47.357%{opacity:0}47.714%,100%{opacity:1}}
+.m125{animation-name:k170}
+@keyframes k171{0%,49%{opacity:0}49.357%,100%{opacity:1}}
+.m126{animation-name:k171}
+@keyframes k172{0%,50.643%{stroke-dashoffset:1;visibility:hidden}51.357%,100%{stroke-dashoffset:0;visibility:visible}}
+.m127{animation-name:k172}
+@keyframes k173{0%,51.25%{opacity:0}51.357%,100%{opacity:1}}
+.m128{animation-name:k173}
+@keyframes k174{0%,50.643%{opacity:0}51%,100%{opacity:1}}
+.m129{animation-name:k174}
+@keyframes k175{0%,52.286%{stroke-dashoffset:1;visibility:hidden}53%,100%{stroke-dashoffset:0;visibility:visible}}
+.m130{animation-name:k175}
+@keyframes k176{0%,52.893%{opacity:0}53%,100%{opacity:1}}
+.m131{animation-name:k176}
+@keyframes k177{0%,52.286%{opacity:0}52.643%,100%{opacity:1}}
+.m132{animation-name:k177}
+@keyframes k178{0%,53.929%{opacity:0}54.643%,100%{opacity:1}}
+.m133{animation-name:k178}
+@keyframes k179{0%,54.536%{opacity:0}54.643%,100%{opacity:1}}
+.m134{animation-name:k179}
+@keyframes k180{0%,53.929%{opacity:0}54.286%,100%{opacity:1}}
+.m135{animation-name:k180}
+@keyframes k181{0%,55.571%{opacity:0}56.286%,100%{opacity:1}}
+.m136{animation-name:k181}
+@keyframes k182{0%,56.179%{opacity:0}56.286%,100%{opacity:1}}
+.m137{animation-name:k182}
+@keyframes k183{0%,55.571%{opacity:0}55.929%,100%{opacity:1}}
+.m138{animation-name:k183}
+@keyframes k184{0%,38.286%,44.286%,55.571%,59.929%,100%{opacity:0}38.5%,44.071%,55.786%,59.714%{opacity:1}}
+.m139{animation-name:k184}
+@keyframes k185{0%,44.071%,50.857%,100%{opacity:0}44.286%,50.643%{opacity:1}}
+.m140{animation-name:k185}
+@keyframes k186{0%,50.643%,55.786%,100%{opacity:0}50.857%,55.571%{opacity:1}}
+.m141{animation-name:k186}
+@keyframes k187{0%,44.786%,100%{visibility:hidden}44.071%{visibility:visible}}
+@keyframes k188{0%,44.071%{translate:831.99px 251px}44.297%{translate:831.99px 289px}44.329%{translate:833.176px 294.313px}44.36%{translate:836.302px 298.5px}44.393%{translate:840.723px 301.938px}44.429%{translate:845.79px 305px}44.464%{translate:850.857px 308.063px}44.497%{translate:855.278px 311.5px}44.528%{translate:858.404px 315.688px}44.56%{translate:859.59px 321px}44.786%,100%{translate:859.59px 359px}}
+.m142{animation-name:k187,k188;animation-timing-function:steps(1),linear}
+@keyframes k189{0%,50.643%,100%{visibility:hidden}49.929%{visibility:visible}}
+@keyframes k190{0%,49.929%{translate:859.59px 398px}50.163%{translate:859.59px 436px}50.196%{translate:860.492px 441.313px}50.226%{translate:862.871px 445.5px}50.255%{translate:866.235px 448.938px}50.286%{translate:870.09px 452px}50.316%{translate:873.945px 455.063px}50.346%{translate:877.309px 458.5px}50.375%{translate:879.688px 462.688px}50.409%{translate:880.59px 468px}50.643%,100%{translate:880.59px 506px}}
+.m143{animation-name:k189,k190;animation-timing-function:steps(1),linear}
+@keyframes k191{0%,55.571%,100%{visibility:hidden}54.857%{visibility:visible}}
+@keyframes k192{0%,54.857%{translate:935.19px 525.5px}54.905%{translate:961.19px 525.5px}54.909%{translate:963.199px 525.296px}54.913%{translate:965.073px 524.711px}54.916%{translate:966.771px 523.786px}54.92%{translate:968.253px 522.563px}54.923%{translate:969.476px 521.081px}54.927%{translate:970.401px 519.383px}54.93%{translate:970.986px 517.509px}54.934%{translate:971.19px 515.5px}55.022%{translate:971.19px 468px}55.032%{translate:969.875px 462.688px}55.042%{translate:966.409px 458.5px}55.053%{translate:961.508px 455.063px}55.065%{translate:955.89px 452px}55.077%{translate:950.272px 448.938px}55.088%{translate:945.371px 445.5px}55.098%{translate:941.905px 441.313px}55.108%{translate:940.59px 436px}55.321%{translate:940.59px 321px}55.331%{translate:939.275px 315.688px}55.341%{translate:935.809px 311.5px}55.352%{translate:930.908px 308.063px}55.364%{translate:925.29px 305px}55.375%{translate:919.672px 301.938px}55.386%{translate:914.771px 298.5px}55.397%{translate:911.305px 294.313px}55.407%{translate:909.99px 289px}55.494%{translate:909.99px 241.5px}55.498%{translate:909.786px 239.491px}55.502%{translate:909.201px 237.617px}55.505%{translate:908.276px 235.919px}55.509%{translate:907.053px 234.438px}55.512%{translate:905.571px 233.214px}55.516%{translate:903.873px 232.289px}55.52%{translate:901.999px 231.704px}55.523%{translate:899.99px 231.5px}55.571%,100%{translate:873.99px 231.5px}}
+.m144{animation-name:k191,k192;animation-timing-function:steps(1),linear}
+@keyframes k193{0%,60.571%,73.429%,100%{opacity:0}61%,73%{opacity:1}}
+.m145{animation-name:k193}
+@keyframes k194{0%,61.286%{translate:0px 0px}72.714%,100%{translate:960px 0px}}
+.m146{animation-name:k194;animation-timing-function:linear}
+@keyframes k195{0%,61.286%,65.786%,100%{opacity:0}61.5%,65.571%{opacity:1}}
+.m147{animation-name:k195}
+@keyframes k196{0%,65.571%,70.071%,100%{opacity:0}65.786%,69.857%{opacity:1}}
+.m148{animation-name:k196}
+@keyframes k197{0%,69.857%,72.929%,100%{opacity:0}70.071%,72.714%{opacity:1}}
+.m149{animation-name:k197}
+@keyframes k198{0%,74.286%,85.714%,100%{opacity:0}74.714%,85.286%{opacity:1}}
+.m150{animation-name:k198}
+@keyframes k199{0%,100%{visibility:visible}}
+.m151{animation-name:k199}
+@keyframes k200{0%,77%{opacity:0}77.571%,100%{opacity:1}}
+.m152{animation-name:k200}
+@keyframes k201{0%,76.429%,77.571%,100%{translate:0px 0px}}
+.m153{animation-name:k201}
+@keyframes k202{0%,76.429%{translate:0px 0px}77.571%,100%{translate:0px 18.2px}}
+.m154{animation-name:k202;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k203{0%,76.429%{translate:0px 0px}77.571%,100%{translate:0px 36.4px}}
+.m155{animation-name:k203;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k204{0%,76.429%{opacity:1}77.571%,100%{opacity:0}}
+.m156{animation-name:k203,k204;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k205{0%,76.429%{translate:0px 0px}77.571%,100%{translate:-140.4px -145.6px}}
+.m157{animation-name:k205;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k206{0%,76.429%{translate:0px -36.4px}77.571%,100%{translate:0px 0px}}
+@keyframes k207{0%,76.429%{opacity:0}77.571%,100%{opacity:1}}
+.m158{animation-name:k206,k207;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k208{0%,78.286%,84%,100%{opacity:0}78.571%,83.714%{opacity:1}}
+.m159{animation-name:k208}
+@keyframes k209{0%,86.571%,98%,100%{opacity:0}87%,97.571%{opacity:1}}
+.m160{animation-name:k209}
+@keyframes k210{0%,86.643%{stroke-dashoffset:1;visibility:hidden}87%,100%{stroke-dashoffset:0;visibility:visible}}
+.m161{animation-name:k210}
+@keyframes k211{0%,86.946%{opacity:0}87%,100%{opacity:1}}
+.m162{animation-name:k211}
+@keyframes k212{0%,87.714%{stroke-dashoffset:1;visibility:hidden}88.071%,100%{stroke-dashoffset:0;visibility:visible}}
+.m163{animation-name:k212}
+@keyframes k213{0%,88.018%{opacity:0}88.071%,100%{opacity:1}}
+.m164{animation-name:k213}
+@keyframes k214{0%,87%{stroke-dashoffset:1;visibility:hidden}87.357%,100%{stroke-dashoffset:0;visibility:visible}}
+.m165{animation-name:k214}
+@keyframes k215{0%,87.304%{opacity:0}87.357%,100%{opacity:1}}
+.m166{animation-name:k215}
+@keyframes k216{0%,87.357%{stroke-dashoffset:1;visibility:hidden}87.714%,100%{stroke-dashoffset:0;visibility:visible}}
+.m167{animation-name:k216}
+@keyframes k217{0%,87.661%{opacity:0}87.714%,100%{opacity:1}}
+.m168{animation-name:k217}
+@keyframes k218{0%,88.071%{stroke-dashoffset:1;visibility:hidden}88.429%,100%{stroke-dashoffset:0;visibility:visible}}
+.m169{animation-name:k218}
+@keyframes k219{0%,88.375%{opacity:0}88.429%,100%{opacity:1}}
+.m170{animation-name:k219}
+@keyframes k220{0%,88.429%{stroke-dashoffset:1;visibility:hidden}88.786%,100%{stroke-dashoffset:0;visibility:visible}}
+.m171{animation-name:k220}
+@keyframes k221{0%,88.732%{opacity:0}88.786%,100%{opacity:1}}
+.m172{animation-name:k221}
+@keyframes k222{0%,92.857%,100%{visibility:hidden}90.286%{visibility:visible}}
+@keyframes k223{0%,90.286%{translate:151.735px 352.5px}90.509%{translate:206.56px 352.5px}90.938%{translate:312.147px 346.5px}91.193%{translate:374.88px 346.5px}91.216%{translate:380.193px 345.318px}91.237%{translate:384.38px 342.203px}91.26%{translate:387.818px 337.799px}91.284%{translate:390.88px 332.75px}91.308%{translate:393.943px 327.701px}91.33%{translate:397.38px 323.297px}91.351%{translate:401.568px 320.182px}91.374%{translate:406.88px 319px}91.583%{translate:458.3px 319px}92.236%{translate:618.894px 313px}92.857%,100%{translate:771.732px 313px}}
+.m173{animation-name:k222,k223;animation-timing-function:steps(1),linear}
+@keyframes k224{0%{opacity:0;animation-timing-function:steps(1)}92.857%{opacity:0.9}93.857%,100%{opacity:0}}
+@keyframes k225{0%,92.857%{scale:0.5}93.857%,100%{scale:3}}
+.m174{animation-name:k224,k225}
+@keyframes k226{0%,93.429%{stroke-dashoffset:1;visibility:hidden}96%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k227{0%,96.214%{opacity:1}97.071%,100%{opacity:0}}
+.m175{animation-name:k226,k227;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
+@keyframes k228{0%,96%,100%{visibility:hidden}93.429%{visibility:visible}}
+@keyframes k229{0%,93.429%{translate:151.735px 352.5px}93.567%{translate:206.56px 352.5px}93.834%{translate:312.147px 358.5px}93.992%{translate:374.88px 358.5px}94.006%{translate:380.193px 359.681px}94.019%{translate:384.38px 362.797px}94.033%{translate:387.818px 367.201px}94.048%{translate:390.88px 372.25px}94.063%{translate:393.943px 377.299px}94.077%{translate:397.38px 381.703px}94.09%{translate:401.568px 384.818px}94.104%{translate:406.88px 386px}95.075%{translate:791.74px 386px}95.406%{translate:922.54px 376.5px}95.624%{translate:1009.04px 376.5px}95.639%{translate:1014.353px 373.535px}95.662%{translate:1018.54px 365.719px}95.691%{translate:1021.978px 354.668px}95.724%{translate:1025.04px 342px}95.757%{translate:1028.103px 329.332px}95.786%{translate:1031.54px 318.281px}95.808%{translate:1035.728px 310.465px}95.824%{translate:1041.04px 307.5px}96%,100%{translate:1110.94px 307.5px}}
+.m176{animation-name:k228,k229;animation-timing-function:steps(1),linear}
+@keyframes k230{0%{opacity:0;animation-timing-function:steps(1)}96%{opacity:0.9}97%,100%{opacity:0}}
+@keyframes k231{0%,96%{scale:0.5}97%,100%{scale:3}}
+.m177{animation-name:k230,k231}
+@keyframes k232{0%,87%{opacity:0}87.5%,100%{opacity:1}}
+@keyframes k233{0%,87%{scale:0.9}87.5%,100%{scale:1}}
+.m178{animation-name:k232,k233}
+@keyframes k234{0%,87.357%{opacity:0}87.857%,100%{opacity:1}}
+@keyframes k235{0%,87.357%{scale:0.9}87.857%,100%{scale:1}}
+.m179{animation-name:k234,k235}
+@keyframes k236{0%,87.714%{opacity:0}88.214%,100%{opacity:1}}
+@keyframes k237{0%,87.714%{scale:0.9}88.214%,100%{scale:1}}
+.m180{animation-name:k236,k237}
+@keyframes k238{0%,88.071%{opacity:0}88.571%,100%{opacity:1}}
+@keyframes k239{0%,88.071%{scale:0.9}88.571%,100%{scale:1}}
+.m181{animation-name:k238,k239}
+@keyframes k240{0%,88.429%{opacity:0}88.929%,100%{opacity:1}}
+@keyframes k241{0%,88.429%{scale:0.9}88.929%,100%{scale:1}}
+.m182{animation-name:k240,k241}
+@keyframes k242{0%,88.786%{opacity:0}89.286%,100%{opacity:1}}
+@keyframes k243{0%,88.786%{scale:0.9}89.286%,100%{scale:1}}
+.m183{animation-name:k242,k243}
+@keyframes k244{0%,88.071%{opacity:0}88.429%,100%{opacity:1}}
+.m184{animation-name:k244}
+@keyframes k245{0%,87.357%{opacity:0}87.714%,100%{opacity:1}}
+.m185{animation-name:k245}
+@keyframes k246{0%,87.714%{opacity:0}88.071%,100%{opacity:1}}
+.m186{animation-name:k246}
+@keyframes k247{0%,88.429%{opacity:0}88.786%,100%{opacity:1}}
+.m187{animation-name:k247}
+@keyframes k248{0%,88.786%{opacity:0}89.143%,100%{opacity:1}}
+.m188{animation-name:k248}
+@keyframes k249{0%{width:0px}98%,100%{width:1152px}}
+.m189{animation-name:k249;animation-timing-function:linear}
+@keyframes k250{0%,7.143%,100%{opacity:0}0.286%,6.857%{opacity:1}}
+.m190{animation-name:k250}
+@keyframes k251{0%,8%,23.714%,100%{opacity:0}8.286%,23.429%{opacity:1}}
+.m191{animation-name:k251}
+@keyframes k252{0%,24.571%,37.429%,100%{opacity:0}24.857%,37.143%{opacity:1}}
+.m192{animation-name:k252}
+@keyframes k253{0%,38.286%,59.714%,100%{opacity:0}38.571%,59.429%{opacity:1}}
+.m193{animation-name:k253}
+@keyframes k254{0%,60.571%,73.429%,100%{opacity:0}60.857%,73.143%{opacity:1}}
+.m194{animation-name:k254}
+@keyframes k255{0%,74.286%,85.714%,100%{opacity:0}74.571%,85.429%{opacity:1}}
+.m195{animation-name:k255}
+@keyframes k256{0%,86.571%,98%,100%{opacity:0}86.857%,97.714%{opacity:1}}
+.m196{animation-name:k256}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-40.8s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="1280" height="720" fill="var(--base00)"/>
+  <g class="sans a m2">
+    <text x="640" y="300" font-size="64" font-weight="700" text-anchor="middle" fill="var(--base05)">Circuit breakers</text>
+    <text x="640" y="350" font-size="22" text-anchor="middle" fill="var(--base04)">Fail fast while a dependency is down, then check if it's back.</text>
+    <path d="M520 390h240" stroke="var(--base0A)" stroke-width="2" pathLength="1" stroke-dasharray="1" class="a m1"/>
+  </g>
+  <text x="64" y="78" class="sans a m3" font-size="30" font-weight="600" fill="var(--base05)">The whole thing is one class</text>
+  <g class="a m3">
+    <g class="mono">
+      <rect x="64" y="110" width="760" height="525" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+      <path d="M64 150h760" stroke="var(--base01)"/>
+      <circle cx="84" cy="130" r="5.5" fill="var(--base02)"/>
+      <circle cx="102" cy="130" r="5.5" fill="var(--base02)"/>
+      <circle cx="120" cy="130" r="5.5" fill="var(--base02)"/>
+      <text x="444" y="134" font-size="12" text-anchor="middle" fill="var(--base04)">breaker.ts</text>
+    </g>
+    <g clip-path="url(#c1)">
+      <g mask="url(#m4)">
+        <g class="mono">
+          <g>
+            <text x="103.6" y="177.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m8">1</text>
+            <g clip-path="url(#c2)">
+              <text x="119.2" y="177.65" font-family="monospace" font-size="13" fill="var(--base0E)">class</text>
+              <text x="166" y="177.65" font-family="monospace" font-size="13" fill="var(--base0A)">Breaker</text>
+              <text x="228.4" y="177.65" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            </g>
+            <text x="103.6" y="195.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m10">2</text>
+            <g clip-path="url(#c3)">
+              <text x="134.8" y="195.85" font-family="monospace" font-size="13" fill="var(--base05)">state</text>
+              <text x="173.8" y="195.85" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+              <text x="189.4" y="195.85" font-family="monospace" font-size="13" fill="var(--base0A)">State</text>
+              <text x="236.2" y="195.85" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="251.8" y="195.85" font-family="monospace" font-size="13" fill="var(--base0B)">"closed"</text>
+              <text x="314.2" y="195.85" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="214.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m12">3</text>
+            <g clip-path="url(#c4)">
+              <text x="134.8" y="214.05" font-family="monospace" font-size="13" fill="var(--base05)">failures</text>
+              <text x="205" y="214.05" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="220.6" y="214.05" font-family="monospace" font-size="13" fill="var(--base09)">0</text>
+              <text x="228.4" y="214.05" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="232.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m14">4</text>
+            <text x="103.6" y="250.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m15">5</text>
+            <g clip-path="url(#c5)">
+              <text x="134.8" y="250.45" font-family="monospace" font-size="13" fill="var(--base0E)">async</text>
+              <text x="181.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base05)">call</text>
+              <text x="212.8" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">&lt;</text>
+              <text x="220.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)">T</text>
+              <text x="228.4" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">&gt;(</text>
+              <text x="244" y="250.45" font-family="monospace" font-size="13" fill="var(--base05)">fn</text>
+              <text x="259.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+              <text x="275.2" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">()</text>
+              <text x="298.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">=&gt;</text>
+              <text x="322" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)">Promise</text>
+              <text x="376.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">&lt;</text>
+              <text x="384.4" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)">T</text>
+              <text x="392.2" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">&gt;):</text>
+              <text x="423.4" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)">Promise</text>
+              <text x="478" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">&lt;</text>
+              <text x="485.8" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)">T</text>
+              <text x="493.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">&gt;</text>
+              <text x="509.2" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            </g>
+            <text x="103.6" y="268.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m17">6</text>
+            <g clip-path="url(#c6)">
+              <text x="150.4" y="268.65" font-family="monospace" font-size="13" fill="var(--base0E)">if</text>
+              <text x="173.8" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+              <text x="181.6" y="268.65" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="212.8" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="220.6" y="268.65" font-family="monospace" font-size="13" fill="var(--base05)">state</text>
+              <text x="267.4" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)">===</text>
+              <text x="298.6" y="268.65" font-family="monospace" font-size="13" fill="var(--base0B)">"open"</text>
+              <text x="345.4" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+              <text x="361" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            </g>
+            <text x="103.6" y="286.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m19">7</text>
+            <g clip-path="url(#c7)">
+              <text x="166" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)">if</text>
+              <text x="189.4" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+              <text x="197.2" y="286.85" font-family="monospace" font-size="13" fill="var(--base0A)">Date</text>
+              <text x="228.4" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="236.2" y="286.85" font-family="monospace" font-size="13" fill="var(--base0D)">now</text>
+              <text x="259.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)">()</text>
+              <text x="283" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)">&lt;</text>
+              <text x="298.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="329.8" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="337.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base05)">retryAt</text>
+              <text x="392.2" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+              <text x="407.8" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)">throw</text>
+              <text x="454.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)">new</text>
+              <text x="485.8" y="286.85" font-family="monospace" font-size="13" fill="var(--base0A)">OpenError</text>
+              <text x="556" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)">();</text>
+            </g>
+            <text x="103.6" y="305.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m21">8</text>
+            <g clip-path="url(#c8)">
+              <text x="166" y="305.05" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="197.2" y="305.05" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="205" y="305.05" font-family="monospace" font-size="13" fill="var(--base05)">state</text>
+              <text x="251.8" y="305.05" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="267.4" y="305.05" font-family="monospace" font-size="13" fill="var(--base0B)">"half-open"</text>
+              <text x="353.2" y="305.05" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="323.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m23">9</text>
+            <g clip-path="url(#c9)">
+              <text x="150.4" y="323.25" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            </g>
+            <text x="103.6" y="341.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m25">10</text>
+            <g clip-path="url(#c10)">
+              <text x="150.4" y="341.45" font-family="monospace" font-size="13" fill="var(--base0E)">try</text>
+              <text x="181.6" y="341.45" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            </g>
+            <text x="103.6" y="359.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m27">11</text>
+            <g clip-path="url(#c11)">
+              <text x="166" y="359.65" font-family="monospace" font-size="13" fill="var(--base0E)">const</text>
+              <text x="212.8" y="359.65" font-family="monospace" font-size="13" fill="var(--base05)">result</text>
+              <text x="267.4" y="359.65" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="283" y="359.65" font-family="monospace" font-size="13" fill="var(--base0E)">await</text>
+              <text x="329.8" y="359.65" font-family="monospace" font-size="13" fill="var(--base0D)">fn</text>
+              <text x="345.4" y="359.65" font-family="monospace" font-size="13" fill="var(--base04)">();</text>
+            </g>
+            <text x="103.6" y="377.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m29">12</text>
+            <g clip-path="url(#c12)">
+              <text x="166" y="377.85" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="197.2" y="377.85" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="205" y="377.85" font-family="monospace" font-size="13" fill="var(--base05)">state</text>
+              <text x="251.8" y="377.85" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="267.4" y="377.85" font-family="monospace" font-size="13" fill="var(--base0B)">"closed"</text>
+              <text x="329.8" y="377.85" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="396.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m31">13</text>
+            <g clip-path="url(#c13)">
+              <text x="166" y="396.05" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="197.2" y="396.05" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="205" y="396.05" font-family="monospace" font-size="13" fill="var(--base05)">failures</text>
+              <text x="275.2" y="396.05" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="290.8" y="396.05" font-family="monospace" font-size="13" fill="var(--base09)">0</text>
+              <text x="298.6" y="396.05" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="414.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m33">14</text>
+            <g clip-path="url(#c14)">
+              <text x="166" y="414.25" font-family="monospace" font-size="13" fill="var(--base0E)">return</text>
+              <text x="220.6" y="414.25" font-family="monospace" font-size="13" fill="var(--base05)">result</text>
+              <text x="267.4" y="414.25" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="432.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m35">15</text>
+            <g clip-path="url(#c15)">
+              <text x="150.4" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+              <text x="166" y="432.45" font-family="monospace" font-size="13" fill="var(--base0E)">catch</text>
+              <text x="212.8" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+              <text x="220.6" y="432.45" font-family="monospace" font-size="13" fill="var(--base05)">error</text>
+              <text x="259.6" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+              <text x="275.2" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            </g>
+            <text x="103.6" y="450.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m37">16</text>
+            <g clip-path="url(#c16)">
+              <text x="166" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)">if</text>
+              <text x="189.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">(++</text>
+              <text x="212.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="244" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="251.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base05)">failures</text>
+              <text x="322" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">&gt;=</text>
+              <text x="345.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base09)">3</text>
+              <text x="361" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">||</text>
+              <text x="384.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="415.6" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="423.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base05)">state</text>
+              <text x="470.2" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">===</text>
+              <text x="501.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base0B)">"half-open"</text>
+              <text x="587.2" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+              <text x="602.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="634" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="641.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base0D)">trip</text>
+              <text x="673" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)">();</text>
+            </g>
+            <text x="103.6" y="468.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m39">17</text>
+            <g clip-path="url(#c17)">
+              <text x="166" y="468.85" font-family="monospace" font-size="13" fill="var(--base0E)">throw</text>
+              <text x="212.8" y="468.85" font-family="monospace" font-size="13" fill="var(--base05)">error</text>
+              <text x="251.8" y="468.85" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="487.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m41">18</text>
+            <g clip-path="url(#c18)">
+              <text x="150.4" y="487.05" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            </g>
+            <text x="103.6" y="505.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m43">19</text>
+            <g clip-path="url(#c19)">
+              <text x="134.8" y="505.25" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            </g>
+            <text x="103.6" y="523.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m45">20</text>
+            <text x="103.6" y="541.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m46">21</text>
+            <g clip-path="url(#c20)">
+              <text x="134.8" y="541.65" font-family="monospace" font-size="13" fill="var(--base0D)">trip</text>
+              <text x="166" y="541.65" font-family="monospace" font-size="13" fill="var(--base04)">()</text>
+              <text x="189.4" y="541.65" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            </g>
+            <text x="103.6" y="559.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m48">22</text>
+            <g clip-path="url(#c21)">
+              <text x="150.4" y="559.85" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="181.6" y="559.85" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="189.4" y="559.85" font-family="monospace" font-size="13" fill="var(--base05)">state</text>
+              <text x="236.2" y="559.85" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="251.8" y="559.85" font-family="monospace" font-size="13" fill="var(--base0B)">"open"</text>
+              <text x="298.6" y="559.85" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="578.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m50">23</text>
+            <g clip-path="url(#c22)">
+              <text x="150.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base0E)">this</text>
+              <text x="181.6" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="189.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base05)">retryAt</text>
+              <text x="251.8" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+              <text x="267.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base0A)">Date</text>
+              <text x="298.6" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+              <text x="306.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base0D)">now</text>
+              <text x="329.8" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)">()</text>
+              <text x="353.2" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)">+</text>
+              <text x="368.8" y="578.05" font-family="monospace" font-size="13" fill="var(--base0D)">30_000</text>
+              <text x="415.6" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            </g>
+            <text x="103.6" y="596.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m52">24</text>
+            <g clip-path="url(#c23)">
+              <text x="134.8" y="596.25" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            </g>
+            <text x="103.6" y="614.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m54">25</text>
+            <g clip-path="url(#c24)">
+              <text x="119.2" y="614.45" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            </g>
+            <g class="a m58">
+              <rect x="119.2" y="164.975" width="7.8" height="16.25" fill="var(--base05)" fill-opacity="0.8" class="a m56"/>
+              <rect x="119.2" y="164.975" width="7.8" height="16.25" fill="var(--base05)" fill-opacity="0.8" class="a m57"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <g class="sans">
+      <g class="a m59">
+        <path d="M599.4 291.4L579.4 291.4" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+        <rect x="599.4" y="254" width="196.4" height="74.8" rx="6" fill="var(--base0A)" fill-opacity="0.08" stroke="var(--base0A)" stroke-opacity="0.4"/>
+        <text x="609.4" y="276" font-size="14" fill="var(--base0A)">While open, refuse</text>
+        <text x="609.4" y="295.6" font-size="14" fill="var(--base0A)">until retryAt, then</text>
+        <text x="609.4" y="315.2" font-size="14" fill="var(--base0A)">let one call through.</text>
+      </g>
+      <g class="a m7">
+        <path d="M693.0000000000001 446.1L673.0000000000001 446.1" fill="none" stroke="var(--base08)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+        <rect x="693" y="408.7" width="196.4" height="74.8" rx="6" fill="var(--base08)" fill-opacity="0.08" stroke="var(--base08)" stroke-opacity="0.4"/>
+        <text x="703" y="430.7" font-size="14" fill="var(--base08)">Three strikes, or any</text>
+        <text x="703" y="450.3" font-size="14" fill="var(--base08)">failure while</text>
+        <text x="703" y="469.9" font-size="14" fill="var(--base08)">half-open, trips it.</text>
+      </g>
+    </g>
+  </g>
+  <text x="64" y="78" class="sans a m60" font-size="30" font-weight="600" fill="var(--base05)">Three states, four transitions</text>
+  <g class="a m60">
+    <g class="mono">
+      <g>
+        <rect x="725.5" y="192" width="90" height="42" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <text x="770.5" y="218.25" font-size="15" text-anchor="middle" fill="var(--base05)">Closed</text>
+      </g>
+      <g>
+        <rect x="761.5" y="344" width="72" height="42" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <text x="797.5" y="370.25" font-size="15" text-anchor="middle" fill="var(--base05)">Open</text>
+      </g>
+      <g>
+        <rect x="761.5" y="496" width="117" height="42" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <text x="820" y="522.25" font-size="15" text-anchor="middle" fill="var(--base05)">Half-open</text>
+      </g>
+      <g>
+        <path d="M770.5 144L770.5 185" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M770.5 192L766.5 184L774.5 184Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M770.5 234L770.5 273C770.5 289 797.5 289 797.5 305L797.5 337" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M797.5 344L793.5 336L801.5 336Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M797.5 386L797.5 425C797.5 441 820 441 820 457L820 489" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M820 496L816 488L824 488Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M878.5 517L904.5 517C910 517 914.5 512.5 914.5 507L914.5 457C914.5 441 883 441 883 425L883 305C883 289 851.5 289 851.5 273L851.5 223C851.5 217.5 847 213 841.5 213L822.5 213" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M815.5 213L823.5 209L823.5 217Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M761.5 517L735.5 517C730 517 725.5 512.5 725.5 507L725.5 375C725.5 369.5 730 365 735.5 365L754.5 365" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M761.5 365L753.5 369L753.5 361Z" fill="var(--base04)"/>
+      </g>
+      <circle cx="770.5" cy="137" r="7" fill="var(--base05)"/>
+      <g>
+        <rect x="727.25" y="252" width="86.5" height="19" rx="3" fill="var(--base00)"/>
+        <text x="770.5" y="265.963" font-size="12.75" text-anchor="middle" fill="var(--base05)">3 failures</text>
+      </g>
+      <g>
+        <rect x="738.95" y="404" width="117.1" height="19" rx="3" fill="var(--base00)"/>
+        <text x="797.5" y="417.963" font-size="12.75" text-anchor="middle" fill="var(--base05)">retryAt passed</text>
+      </g>
+      <g>
+        <rect x="882.725" y="469.5" width="63.55" height="19" rx="3" fill="var(--base00)"/>
+        <text x="914.5" y="483.463" font-size="12.75" text-anchor="middle" fill="var(--base05)">success</text>
+      </g>
+      <g>
+        <rect x="693.725" y="431.5" width="63.55" height="19" rx="3" fill="var(--base00)"/>
+        <text x="725.5" y="445.463" font-size="12.75" text-anchor="middle" fill="var(--base05)">failure</text>
+      </g>
+    </g>
+    <g>
+      <rect x="721.5" y="188" width="98" height="50" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m61"/>
+      <rect x="757.5" y="340" width="80" height="50" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m62"/>
+      <rect x="757.5" y="492" width="125" height="50" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m63"/>
+      <g>
+        <g opacity="0.22">
+          <circle r="12" fill="var(--base09)" class="a m64"/>
+        </g>
+        <g opacity="0.533">
+          <circle r="4.611" fill="var(--base09)" class="a m65"/>
+        </g>
+        <g opacity="0.467">
+          <circle r="4.222" fill="var(--base09)" class="a m66"/>
+        </g>
+        <g opacity="0.4">
+          <circle r="3.833" fill="var(--base09)" class="a m67"/>
+        </g>
+        <g opacity="0.333">
+          <circle r="3.444" fill="var(--base09)" class="a m68"/>
+        </g>
+        <g opacity="0.267">
+          <circle r="3.056" fill="var(--base09)" class="a m69"/>
+        </g>
+        <g opacity="0.2">
+          <circle r="2.667" fill="var(--base09)" class="a m70"/>
+        </g>
+        <g opacity="0.133">
+          <circle r="2.278" fill="var(--base09)" class="a m71"/>
+        </g>
+        <g opacity="0.067">
+          <circle r="1.889" fill="var(--base09)" class="a m72"/>
+        </g>
+        <circle r="5" fill="var(--base09)" class="a m64"/>
+      </g>
+      <g>
+        <g opacity="0.22">
+          <circle r="12" fill="var(--base09)" class="a m73"/>
+        </g>
+        <g opacity="0.533">
+          <circle r="4.611" fill="var(--base09)" class="a m74"/>
+        </g>
+        <g opacity="0.467">
+          <circle r="4.222" fill="var(--base09)" class="a m75"/>
+        </g>
+        <g opacity="0.4">
+          <circle r="3.833" fill="var(--base09)" class="a m76"/>
+        </g>
+        <g opacity="0.333">
+          <circle r="3.444" fill="var(--base09)" class="a m77"/>
+        </g>
+        <g opacity="0.267">
+          <circle r="3.056" fill="var(--base09)" class="a m78"/>
+        </g>
+        <g opacity="0.2">
+          <circle r="2.667" fill="var(--base09)" class="a m79"/>
+        </g>
+        <g opacity="0.133">
+          <circle r="2.278" fill="var(--base09)" class="a m80"/>
+        </g>
+        <g opacity="0.067">
+          <circle r="1.889" fill="var(--base09)" class="a m81"/>
+        </g>
+        <circle r="5" fill="var(--base09)" class="a m73"/>
+      </g>
+      <g>
+        <g opacity="0.22">
+          <circle r="12" fill="var(--base09)" class="a m82"/>
+        </g>
+        <g opacity="0.533">
+          <circle r="4.611" fill="var(--base09)" class="a m83"/>
+        </g>
+        <g opacity="0.467">
+          <circle r="4.222" fill="var(--base09)" class="a m84"/>
+        </g>
+        <g opacity="0.4">
+          <circle r="3.833" fill="var(--base09)" class="a m85"/>
+        </g>
+        <g opacity="0.333">
+          <circle r="3.444" fill="var(--base09)" class="a m86"/>
+        </g>
+        <g opacity="0.267">
+          <circle r="3.056" fill="var(--base09)" class="a m87"/>
+        </g>
+        <g opacity="0.2">
+          <circle r="2.667" fill="var(--base09)" class="a m88"/>
+        </g>
+        <g opacity="0.133">
+          <circle r="2.278" fill="var(--base09)" class="a m89"/>
+        </g>
+        <g opacity="0.067">
+          <circle r="1.889" fill="var(--base09)" class="a m90"/>
+        </g>
+        <circle r="5" fill="var(--base09)" class="a m82"/>
+      </g>
+      <g>
+        <g opacity="0.22">
+          <circle r="12" fill="var(--base09)" class="a m91"/>
+        </g>
+        <g opacity="0.533">
+          <circle r="4.611" fill="var(--base09)" class="a m92"/>
+        </g>
+        <g opacity="0.467">
+          <circle r="4.222" fill="var(--base09)" class="a m93"/>
+        </g>
+        <g opacity="0.4">
+          <circle r="3.833" fill="var(--base09)" class="a m94"/>
+        </g>
+        <g opacity="0.333">
+          <circle r="3.444" fill="var(--base09)" class="a m95"/>
+        </g>
+        <g opacity="0.267">
+          <circle r="3.056" fill="var(--base09)" class="a m96"/>
+        </g>
+        <g opacity="0.2">
+          <circle r="2.667" fill="var(--base09)" class="a m97"/>
+        </g>
+        <g opacity="0.133">
+          <circle r="2.278" fill="var(--base09)" class="a m98"/>
+        </g>
+        <g opacity="0.067">
+          <circle r="1.889" fill="var(--base09)" class="a m99"/>
+        </g>
+        <circle r="5" fill="var(--base09)" class="a m91"/>
+      </g>
+      <g>
+        <g opacity="0.22">
+          <circle r="12" fill="var(--base09)" class="a m100"/>
+        </g>
+        <g opacity="0.533">
+          <circle r="4.611" fill="var(--base09)" class="a m101"/>
+        </g>
+        <g opacity="0.467">
+          <circle r="4.222" fill="var(--base09)" class="a m102"/>
+        </g>
+        <g opacity="0.4">
+          <circle r="3.833" fill="var(--base09)" class="a m103"/>
+        </g>
+        <g opacity="0.333">
+          <circle r="3.444" fill="var(--base09)" class="a m104"/>
+        </g>
+        <g opacity="0.267">
+          <circle r="3.056" fill="var(--base09)" class="a m105"/>
+        </g>
+        <g opacity="0.2">
+          <circle r="2.667" fill="var(--base09)" class="a m106"/>
+        </g>
+        <g opacity="0.133">
+          <circle r="2.278" fill="var(--base09)" class="a m107"/>
+        </g>
+        <g opacity="0.067">
+          <circle r="1.889" fill="var(--base09)" class="a m108"/>
+        </g>
+        <circle r="5" fill="var(--base09)" class="a m100"/>
+      </g>
+    </g>
+    <g class="sans">
+      <text x="96" y="220" font-size="18" fill="var(--base04)" class="a m61">Calls pass through.</text>
+      <text x="96" y="280" font-size="18" fill="var(--base04)" class="a m62">Calls fail instantly.</text>
+      <text x="96" y="340" font-size="18" fill="var(--base04)" class="a m63">One probe decides.</text>
+    </g>
+  </g>
+  <text x="64" y="78" class="sans a m109" font-size="30" font-weight="600" fill="var(--base05)">The same story, message by message</text>
+  <g class="a m109">
+    <g class="mono">
+      <path d="M118.25 164V610.3199999999999" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+      <path d="M257.3 164V610.3199999999999" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+      <path d="M399.5 169V610.3199999999999" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+      <g>
+        <path d="M77.65 125H172.5L158.85 164H64Z" fill="var(--base00)"/>
+        <path d="M77.65 125H172.5L158.85 164H64Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="118.25" y="149.4" font-size="14" text-anchor="middle" fill="var(--base05)">Client</text>
+      </g>
+      <g>
+        <path d="M207.5 125H307.1Q310.1 125 310.1 128V161Q310.1 164 307.1 164H207.5Q204.5 164 204.5 161V128Q204.5 125 207.5 125Z" fill="var(--base00)"/>
+        <path d="M207.5 125H307.1Q310.1 125 310.1 128V161Q310.1 164 307.1 164H207.5Q204.5 164 204.5 161V128Q204.5 125 207.5 125Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M212.5 125V164M302.1 125V164" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+        <text x="257.3" y="149.4" font-size="14" text-anchor="middle" fill="var(--base05)">Breaker</text>
+      </g>
+      <g>
+        <path d="M342.1 125A57.400000000000006 5 0 0 1 456.90000000000003 125V164A57.400000000000006 5 0 0 1 342.1 164Z" fill="var(--base00)"/>
+        <path d="M342.1 125A57.400000000000006 5 0 0 1 456.90000000000003 125V164A57.400000000000006 5 0 0 1 342.1 164Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M342.1 125A57.400000000000006 5 0 0 0 456.90000000000003 125" stroke="var(--base0E)" fill="none"/>
+        <text x="399.5" y="151.9" font-size="14" text-anchor="middle" fill="var(--base05)">Quotes API</text>
+      </g>
+      <g>
+        <g>
+          <path d="M118.25 215L250.3 215" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m110"/>
+          <path d="M257.3 215L249.3 219L249.3 211Z" fill="var(--base04)" class="a m111"/>
+        </g>
+        <g class="a m112">
+          <rect x="161.355" y="193" width="52.84" height="18" rx="3" fill="var(--base00)"/>
+          <text x="187.775" y="206.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">call()</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M257.3 251L392.5 251" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m113"/>
+          <path d="M399.5 251L391.5 255L391.5 247Z" fill="var(--base04)" class="a m114"/>
+        </g>
+        <g class="a m115">
+          <rect x="287.7" y="229" width="81.4" height="18" rx="3" fill="var(--base00)"/>
+          <text x="328.4" y="242.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">GET /quote</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M399.5 287L264.3 287" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m116"/>
+          <path d="M257.3 287L265.3 283L265.3 291Z" fill="var(--base04)" class="a m117"/>
+        </g>
+        <g class="a m118">
+          <rect x="298.41" y="265" width="59.98" height="18" rx="3" fill="var(--base00)"/>
+          <text x="328.4" y="278.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">timeout</text>
+        </g>
+      </g>
+      <g class="a m119">
+        <rect x="186.61" y="301" width="141.38" height="28.66" rx="4" fill="var(--base00)"/>
+        <rect x="186.61" y="301" width="141.38" height="28.66" rx="4" fill="var(--base0A)" fill-opacity="0.12" stroke="var(--base0A)" stroke-opacity="0.7"/>
+        <text x="257.3" y="319.495" font-size="11.9" text-anchor="middle" fill="var(--base05)">3rd failure: trip</text>
+      </g>
+      <g>
+        <g>
+          <path d="M118.25 365.66L250.3 365.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m120"/>
+          <path d="M257.3 365.65999999999997L249.3 369.65999999999997L249.3 361.65999999999997Z" fill="var(--base04)" class="a m121"/>
+        </g>
+        <g class="a m122">
+          <rect x="161.355" y="343.66" width="52.84" height="18" rx="3" fill="var(--base00)"/>
+          <text x="187.775" y="356.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">call()</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M257.3 401.66L125.25 401.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m123"/>
+          <path d="M118.25 401.65999999999997L126.25 397.65999999999997L126.25 405.65999999999997Z" fill="var(--base04)" class="a m124"/>
+        </g>
+        <g class="a m125">
+          <rect x="150.645" y="379.66" width="74.26" height="18" rx="3" fill="var(--base00)"/>
+          <text x="187.775" y="392.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">OpenError</text>
+        </g>
+      </g>
+      <g class="a m126">
+        <rect x="215.17" y="415.66" width="84.26" height="28.66" rx="4" fill="var(--base00)"/>
+        <rect x="215.17" y="415.66" width="84.26" height="28.66" rx="4" fill="var(--base0A)" fill-opacity="0.12" stroke="var(--base0A)" stroke-opacity="0.7"/>
+        <text x="257.3" y="434.155" font-size="11.9" text-anchor="middle" fill="var(--base05)">30s later</text>
+      </g>
+      <g>
+        <g>
+          <path d="M118.25 480.32L250.3 480.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m127"/>
+          <path d="M257.3 480.31999999999994L249.3 484.31999999999994L249.3 476.31999999999994Z" fill="var(--base04)" class="a m128"/>
+        </g>
+        <g class="a m129">
+          <rect x="161.355" y="458.32" width="52.84" height="18" rx="3" fill="var(--base00)"/>
+          <text x="187.775" y="471.485" font-size="11.9" text-anchor="middle" fill="var(--base05)">call()</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M257.3 516.32L392.5 516.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m130"/>
+          <path d="M399.5 516.3199999999999L391.5 520.3199999999999L391.5 512.3199999999999Z" fill="var(--base04)" class="a m131"/>
+        </g>
+        <g class="a m132">
+          <rect x="305.55" y="494.32" width="45.7" height="18" rx="3" fill="var(--base00)"/>
+          <text x="328.4" y="507.485" font-size="11.9" text-anchor="middle" fill="var(--base05)">probe</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M399.5 552.32L264.3 552.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m133"/>
+          <path d="M257.3 552.3199999999999L265.3 548.3199999999999L265.3 556.3199999999999Z" fill="var(--base04)" class="a m134"/>
+        </g>
+        <g class="a m135">
+          <rect x="312.69" y="530.32" width="31.42" height="18" rx="3" fill="var(--base00)"/>
+          <text x="328.4" y="543.485" font-size="11.9" text-anchor="middle" fill="var(--base05)">200</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M257.3 588.32L125.25 588.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m136"/>
+          <path d="M118.25 588.3199999999999L126.25 584.3199999999999L126.25 592.3199999999999Z" fill="var(--base04)" class="a m137"/>
+        </g>
+        <g class="a m138">
+          <rect x="164.925" y="566.32" width="45.7" height="18" rx="3" fill="var(--base00)"/>
+          <text x="187.775" y="579.485" font-size="11.9" text-anchor="middle" fill="var(--base05)">quote</text>
+        </g>
+      </g>
+    </g>
+    <g class="mono">
+      <g>
+        <rect x="789.99" y="212" width="84" height="39" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <text x="831.99" y="236.4" font-size="14" text-anchor="middle" fill="var(--base05)">Closed</text>
+      </g>
+      <g>
+        <rect x="825.99" y="359" width="67.2" height="39" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <text x="859.59" y="383.4" font-size="14" text-anchor="middle" fill="var(--base05)">Open</text>
+      </g>
+      <g>
+        <rect x="825.99" y="506" width="109.2" height="39" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <text x="880.59" y="530.4" font-size="14" text-anchor="middle" fill="var(--base05)">Half-open</text>
+      </g>
+      <g>
+        <path d="M831.99 164L831.99 205" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M831.99 212L827.99 204L835.99 204Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M831.99 251L831.99 289C831.99 305 859.59 305 859.59 321L859.59 352" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M859.59 359L855.59 351L863.59 351Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M859.59 398L859.59 436C859.59 452 880.59 452 880.59 468L880.59 499" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M880.59 506L876.59 498L884.59 498Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M935.19 525.5L961.19 525.5C966.69 525.5 971.19 521 971.19 515.5L971.19 468C971.19 452 940.59 452 940.59 436L940.59 321C940.59 305 909.99 305 909.99 289L909.99 241.5C909.99 236 905.49 231.5 899.99 231.5L880.99 231.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M873.99 231.5L881.99 227.5L881.99 235.5Z" fill="var(--base04)"/>
+      </g>
+      <g>
+        <path d="M825.99 525.5L799.99 525.5C794.49 525.5 789.99 521 789.99 515.5L789.99 388.5C789.99 383 794.49 378.5 799.99 378.5L818.99 378.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M825.99 378.5L817.99 382.5L817.99 374.5Z" fill="var(--base04)"/>
+      </g>
+      <circle cx="831.99" cy="157" r="7" fill="var(--base05)"/>
+      <g>
+        <rect x="791.29" y="269" width="81.4" height="18" rx="3" fill="var(--base00)"/>
+        <text x="831.99" y="282.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">3 failures</text>
+      </g>
+      <g>
+        <rect x="804.61" y="416" width="109.96" height="18" rx="3" fill="var(--base00)"/>
+        <text x="859.59" y="429.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">retryAt passed</text>
+      </g>
+      <g>
+        <rect x="941.2" y="479.75" width="59.98" height="18" rx="3" fill="var(--base00)"/>
+        <text x="971.19" y="492.915" font-size="11.9" text-anchor="middle" fill="var(--base05)">success</text>
+      </g>
+      <g>
+        <rect x="760" y="443" width="59.98" height="18" rx="3" fill="var(--base00)"/>
+        <text x="789.99" y="456.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">failure</text>
+      </g>
+    </g>
+    <rect x="785.99" y="208" width="92" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m139"/>
+    <rect x="821.99" y="355" width="75.2" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m140"/>
+    <rect x="821.99" y="502" width="117.2" height="47" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m141"/>
+    <g>
+      <circle r="4.5" fill="var(--base09)" class="a m142"/>
+    </g>
+    <g>
+      <circle r="4.5" fill="var(--base09)" class="a m143"/>
+    </g>
+    <g>
+      <circle r="4.5" fill="var(--base09)" class="a m144"/>
+    </g>
+  </g>
+  <text x="64" y="78" class="sans a m145" font-size="30" font-weight="600" fill="var(--base05)">Eight seconds, on a clock</text>
+  <g class="a m145">
+    <g class="mono">
+      <g>
+        <rect x="64" y="175" width="1074.8" height="56" fill="var(--base01)" fill-opacity="0.5"/>
+        <circle cx="69" cy="203" r="4" fill="var(--base0B)"/>
+        <text x="80" y="207.9" font-size="14" fill="var(--base05)">client</text>
+        <path d="M162.8 203H1122.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+      <g>
+        <circle cx="69" cy="259" r="4" fill="var(--base08)"/>
+        <text x="80" y="263.9" font-size="14" fill="var(--base05)">breaker</text>
+        <path d="M162.8 259H1122.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+      <g>
+        <rect x="64" y="287" width="1074.8" height="56" fill="var(--base01)" fill-opacity="0.5"/>
+        <circle cx="69" cy="315" r="4" fill="var(--base0E)"/>
+        <text x="80" y="319.9" font-size="14" fill="var(--base05)">service</text>
+        <path d="M162.8 315H1122.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+      <g>
+        <path d="M162.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="162.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">0s</text>
+      </g>
+      <g>
+        <path d="M222.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="222.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">0.5s</text>
+      </g>
+      <g>
+        <path d="M282.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="282.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">1s</text>
+      </g>
+      <g>
+        <path d="M342.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="342.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">1.5s</text>
+      </g>
+      <g>
+        <path d="M402.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="402.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">2s</text>
+      </g>
+      <g>
+        <path d="M462.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="462.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">2.5s</text>
+      </g>
+      <g>
+        <path d="M522.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="522.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">3s</text>
+      </g>
+      <g>
+        <path d="M582.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="582.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">3.5s</text>
+      </g>
+      <g>
+        <path d="M642.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="642.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">4s</text>
+      </g>
+      <g>
+        <path d="M702.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="702.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">4.5s</text>
+      </g>
+      <g>
+        <path d="M762.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="762.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">5s</text>
+      </g>
+      <g>
+        <path d="M822.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="822.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">5.5s</text>
+      </g>
+      <g>
+        <path d="M882.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="882.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">6s</text>
+      </g>
+      <g>
+        <path d="M942.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="942.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">6.5s</text>
+      </g>
+      <g>
+        <path d="M1002.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="1002.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">7s</text>
+      </g>
+      <g>
+        <path d="M1062.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="1062.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">7.5s</text>
+      </g>
+      <g>
+        <path d="M1122.8 175V347" stroke="var(--base02)" stroke-opacity="0.6"/>
+        <text x="1122.8" y="359" font-size="11.9" text-anchor="middle" fill="var(--base04)">8s</text>
+      </g>
+      <g>
+        <rect x="162.8" y="250" width="360" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)"/>
+        <text x="170.8" y="282.9" font-size="11.9" fill="var(--base04)">closed</text>
+      </g>
+      <g>
+        <rect x="522.8" y="250" width="360" height="18" rx="4" fill="var(--base08)" fill-opacity="0.25" stroke="var(--base08)"/>
+        <text x="530.8" y="282.9" font-size="11.9" fill="var(--base04)">open</text>
+      </g>
+      <g>
+        <rect x="882.8" y="250" width="96" height="18" rx="4" fill="var(--base0A)" fill-opacity="0.25" stroke="var(--base0A)"/>
+        <text x="890.8" y="282.9" font-size="11.9" fill="var(--base04)">half</text>
+      </g>
+      <g>
+        <rect x="978.8" y="250" width="144" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)"/>
+        <text x="986.8" y="282.9" font-size="11.9" fill="var(--base04)">closed</text>
+      </g>
+      <g>
+        <rect x="186.8" y="306" width="336" height="18" rx="4" fill="var(--base08)" fill-opacity="0.25" stroke="var(--base08)"/>
+        <text x="194.8" y="338.9" font-size="11.9" fill="var(--base04)">down</text>
+      </g>
+      <g>
+        <g>
+          <path d="M222.8 212L222.8 243" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M222.8 250L218.8 242L226.8 242Z" fill="var(--base04)"/>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M342.8 212L342.8 243" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M342.8 250L338.8 242L346.8 242Z" fill="var(--base04)"/>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M462.8 212L462.8 243" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M462.8 250L458.8 242L466.8 242Z" fill="var(--base04)"/>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M642.8 250L642.8 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M642.8 212L646.8 220L638.8 220Z" fill="var(--base04)"/>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M762.8 250L762.8 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M762.8 212L766.8 220L758.8 220Z" fill="var(--base04)"/>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M906.8 268L906.8 299" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M906.8 306L902.8 298L910.8 298Z" fill="var(--base04)"/>
+        </g>
+      </g>
+      <g>
+        <path d="M282.8 305L292.8 315L282.8 325L272.8 315Z" fill="var(--base0E)" stroke="var(--base00)"/>
+        <g>
+          <rect x="252.81" y="282" width="59.98" height="18" rx="3" fill="none"/>
+          <text x="282.8" y="295.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">timeout</text>
+        </g>
+      </g>
+      <g>
+        <path d="M402.8 305L412.8 315L402.8 325L392.8 315Z" fill="var(--base0E)" stroke="var(--base00)"/>
+        <g>
+          <rect x="372.81" y="282" width="59.98" height="18" rx="3" fill="none"/>
+          <text x="402.8" y="295.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">timeout</text>
+        </g>
+      </g>
+      <g>
+        <path d="M522.8 305L532.8 315L522.8 325L512.8 315Z" fill="var(--base0E)" stroke="var(--base00)"/>
+        <g>
+          <rect x="492.81" y="282" width="59.98" height="18" rx="3" fill="none"/>
+          <text x="522.8" y="295.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">timeout</text>
+        </g>
+      </g>
+      <g>
+        <path d="M654.8 193L664.8 203L654.8 213L644.8 203Z" fill="var(--base0B)" stroke="var(--base00)"/>
+        <g>
+          <rect x="617.67" y="170" width="74.26" height="18" rx="3" fill="none"/>
+          <text x="654.8" y="183.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">OpenError</text>
+        </g>
+      </g>
+      <g>
+        <path d="M774.8 193L784.8 203L774.8 213L764.8 203Z" fill="var(--base0B)" stroke="var(--base00)"/>
+        <g>
+          <rect x="737.67" y="170" width="74.26" height="18" rx="3" fill="none"/>
+          <text x="774.8" y="183.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">OpenError</text>
+        </g>
+      </g>
+      <g>
+        <path d="M954.8 193L964.8 203L954.8 213L944.8 203Z" fill="var(--base0B)" stroke="var(--base00)"/>
+        <g>
+          <rect x="931.95" y="170" width="45.7" height="18" rx="3" fill="none"/>
+          <text x="954.8" y="183.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">quote</text>
+        </g>
+      </g>
+    </g>
+    <path d="M162.8 170V343" stroke="var(--base09)" stroke-width="1.5" class="a m146"/>
+    <text x="162.8" y="407" class="sans a m147" font-size="18" fill="var(--base05)">Closed: every call waits out the timeout.</text>
+    <text x="522.8" y="407" class="sans a m148" font-size="18" fill="var(--base05)">Open: calls fail at once, the service gets a rest.</text>
+    <text x="882.8" y="407" class="sans a m149" font-size="18" fill="var(--base05)">Half-open: one probe succeeds, and traffic flows again.</text>
+  </g>
+  <text x="64" y="78" class="sans a m150" font-size="30" font-weight="600" fill="var(--base05)">Backoff is a two-line change</text>
+  <g class="a m150">
+    <g class="mono">
+      <rect x="64" y="110" width="760" height="561.4" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+      <path d="M64 150h760" stroke="var(--base01)"/>
+      <circle cx="84" cy="130" r="5.5" fill="var(--base02)"/>
+      <circle cx="102" cy="130" r="5.5" fill="var(--base02)"/>
+      <circle cx="120" cy="130" r="5.5" fill="var(--base02)"/>
+      <text x="444" y="134" font-size="12" text-anchor="middle" fill="var(--base04)">breaker.ts</text>
+    </g>
+    <g class="mono">
+      <g>
+        <text x="103.6" y="177.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">1</text>
+        <text x="103.6" y="195.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">2</text>
+        <text x="103.6" y="214.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">3</text>
+        <text x="103.6" y="232.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">4</text>
+        <text x="103.6" y="250.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">5</text>
+        <text x="103.6" y="268.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">6</text>
+        <text x="103.6" y="286.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">7</text>
+        <text x="103.6" y="305.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">8</text>
+        <text x="103.6" y="323.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">9</text>
+        <text x="103.6" y="341.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">10</text>
+        <text x="103.6" y="359.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">11</text>
+        <text x="103.6" y="377.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">12</text>
+        <text x="103.6" y="396.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">13</text>
+        <text x="103.6" y="414.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">14</text>
+        <text x="103.6" y="432.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">15</text>
+        <text x="103.6" y="450.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">16</text>
+        <text x="103.6" y="468.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">17</text>
+        <text x="103.6" y="487.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">18</text>
+        <text x="103.6" y="505.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">19</text>
+        <text x="103.6" y="523.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">20</text>
+        <text x="103.6" y="541.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">21</text>
+        <text x="103.6" y="559.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">22</text>
+        <text x="103.6" y="578.05" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">23</text>
+        <text x="103.6" y="596.25" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">24</text>
+        <text x="103.6" y="614.45" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m151">25</text>
+        <text x="103.6" y="632.65" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m152">26</text>
+        <text x="103.6" y="650.85" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)" class="a m152">27</text>
+        <text x="119.2" y="177.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m153">class</text>
+        <text x="166" y="177.65" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m153">Breaker</text>
+        <text x="228.4" y="177.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m153">{</text>
+        <text x="134.8" y="195.85" font-family="monospace" font-size="13" fill="var(--base05)" class="a m153">state</text>
+        <text x="173.8" y="195.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m153">:</text>
+        <text x="189.4" y="195.85" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m153">State</text>
+        <text x="236.2" y="195.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m153">=</text>
+        <text x="251.8" y="195.85" font-family="monospace" font-size="13" fill="var(--base0B)" class="a m153">"closed"</text>
+        <text x="314.2" y="195.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m153">;</text>
+        <text x="134.8" y="214.05" font-family="monospace" font-size="13" fill="var(--base05)" class="a m153">failures</text>
+        <text x="205" y="214.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m153">=</text>
+        <text x="220.6" y="214.05" font-family="monospace" font-size="13" fill="var(--base09)" class="a m153">0</text>
+        <text x="228.4" y="214.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m153">;</text>
+        <text x="134.8" y="250.45" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">async</text>
+        <text x="181.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">call</text>
+        <text x="212.8" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">&lt;</text>
+        <text x="220.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m154">T</text>
+        <text x="228.4" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">&gt;(</text>
+        <text x="244" y="250.45" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">fn</text>
+        <text x="259.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">:</text>
+        <text x="275.2" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">()</text>
+        <text x="298.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">=&gt;</text>
+        <text x="322" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m154">Promise</text>
+        <text x="376.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">&lt;</text>
+        <text x="384.4" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m154">T</text>
+        <text x="392.2" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">&gt;):</text>
+        <text x="423.4" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m154">Promise</text>
+        <text x="478" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">&lt;</text>
+        <text x="485.8" y="250.45" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m154">T</text>
+        <text x="493.6" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">&gt;</text>
+        <text x="509.2" y="250.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">{</text>
+        <text x="150.4" y="268.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">if</text>
+        <text x="173.8" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">(</text>
+        <text x="181.6" y="268.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">this</text>
+        <text x="212.8" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">.</text>
+        <text x="220.6" y="268.65" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">state</text>
+        <text x="267.4" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">===</text>
+        <text x="298.6" y="268.65" font-family="monospace" font-size="13" fill="var(--base0B)" class="a m154">"open"</text>
+        <text x="345.4" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">)</text>
+        <text x="361" y="268.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">{</text>
+        <text x="166" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">if</text>
+        <text x="189.4" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">(</text>
+        <text x="197.2" y="286.85" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m154">Date</text>
+        <text x="228.4" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">.</text>
+        <text x="236.2" y="286.85" font-family="monospace" font-size="13" fill="var(--base0D)" class="a m154">now</text>
+        <text x="259.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">()</text>
+        <text x="283" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">&lt;</text>
+        <text x="298.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">this</text>
+        <text x="329.8" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">.</text>
+        <text x="337.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">retryAt</text>
+        <text x="392.2" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">)</text>
+        <text x="407.8" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">throw</text>
+        <text x="454.6" y="286.85" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">new</text>
+        <text x="485.8" y="286.85" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m154">OpenError</text>
+        <text x="556" y="286.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">();</text>
+        <text x="166" y="305.05" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">this</text>
+        <text x="197.2" y="305.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">.</text>
+        <text x="205" y="305.05" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">state</text>
+        <text x="251.8" y="305.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">=</text>
+        <text x="267.4" y="305.05" font-family="monospace" font-size="13" fill="var(--base0B)" class="a m154">"half-open"</text>
+        <text x="353.2" y="305.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">;</text>
+        <text x="150.4" y="323.25" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">}</text>
+        <text x="150.4" y="341.45" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">try</text>
+        <text x="181.6" y="341.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">{</text>
+        <text x="166" y="359.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">const</text>
+        <text x="212.8" y="359.65" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">result</text>
+        <text x="267.4" y="359.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">=</text>
+        <text x="283" y="359.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">await</text>
+        <text x="329.8" y="359.65" font-family="monospace" font-size="13" fill="var(--base0D)" class="a m154">fn</text>
+        <text x="345.4" y="359.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">();</text>
+        <text x="166" y="377.85" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">this</text>
+        <text x="197.2" y="377.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">.</text>
+        <text x="205" y="377.85" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">state</text>
+        <text x="251.8" y="377.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">=</text>
+        <text x="267.4" y="377.85" font-family="monospace" font-size="13" fill="var(--base0B)" class="a m154">"closed"</text>
+        <text x="329.8" y="377.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">;</text>
+        <text x="166" y="396.05" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m154">this</text>
+        <text x="197.2" y="396.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">.</text>
+        <text x="205" y="396.05" font-family="monospace" font-size="13" fill="var(--base05)" class="a m154">failures</text>
+        <text x="275.2" y="396.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">=</text>
+        <text x="290.8" y="396.05" font-family="monospace" font-size="13" fill="var(--base09)" class="a m154">0</text>
+        <text x="298.6" y="396.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m154">;</text>
+        <text x="166" y="414.25" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">return</text>
+        <text x="220.6" y="414.25" font-family="monospace" font-size="13" fill="var(--base05)" class="a m155">result</text>
+        <text x="267.4" y="414.25" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">;</text>
+        <text x="150.4" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">}</text>
+        <text x="166" y="432.45" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">catch</text>
+        <text x="212.8" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">(</text>
+        <text x="220.6" y="432.45" font-family="monospace" font-size="13" fill="var(--base05)" class="a m155">error</text>
+        <text x="259.6" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">)</text>
+        <text x="275.2" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">{</text>
+        <text x="166" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">if</text>
+        <text x="189.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">(++</text>
+        <text x="212.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">this</text>
+        <text x="244" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">.</text>
+        <text x="251.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base05)" class="a m155">failures</text>
+        <text x="322" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">&gt;=</text>
+        <text x="345.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base09)" class="a m155">3</text>
+        <text x="361" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">||</text>
+        <text x="384.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">this</text>
+        <text x="415.6" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">.</text>
+        <text x="423.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base05)" class="a m155">state</text>
+        <text x="470.2" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">===</text>
+        <text x="501.4" y="450.65" font-family="monospace" font-size="13" fill="var(--base0B)" class="a m155">"half-open"</text>
+        <text x="587.2" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">)</text>
+        <text x="602.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">this</text>
+        <text x="634" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">.</text>
+        <text x="641.8" y="450.65" font-family="monospace" font-size="13" fill="var(--base0D)" class="a m155">trip</text>
+        <text x="673" y="450.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">();</text>
+        <text x="166" y="468.85" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">throw</text>
+        <text x="212.8" y="468.85" font-family="monospace" font-size="13" fill="var(--base05)" class="a m155">error</text>
+        <text x="251.8" y="468.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">;</text>
+        <text x="150.4" y="487.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">}</text>
+        <text x="134.8" y="505.25" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">}</text>
+        <text x="134.8" y="541.65" font-family="monospace" font-size="13" fill="var(--base0D)" class="a m155">trip</text>
+        <text x="166" y="541.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">()</text>
+        <text x="189.4" y="541.65" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">{</text>
+        <text x="150.4" y="559.85" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">this</text>
+        <text x="181.6" y="559.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">.</text>
+        <text x="189.4" y="559.85" font-family="monospace" font-size="13" fill="var(--base05)" class="a m155">state</text>
+        <text x="236.2" y="559.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">=</text>
+        <text x="251.8" y="559.85" font-family="monospace" font-size="13" fill="var(--base0B)" class="a m155">"open"</text>
+        <text x="298.6" y="559.85" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">;</text>
+        <text x="150.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m155">this</text>
+        <text x="181.6" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">.</text>
+        <text x="189.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base05)" class="a m155">retryAt</text>
+        <text x="251.8" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">=</text>
+        <text x="267.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base0A)" class="a m155">Date</text>
+        <text x="298.6" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">.</text>
+        <text x="306.4" y="578.05" font-family="monospace" font-size="13" fill="var(--base0D)" class="a m155">now</text>
+        <text x="329.8" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">()</text>
+        <text x="353.2" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">+</text>
+        <text x="368.8" y="578.05" font-family="monospace" font-size="13" fill="var(--base0D)" class="a m156">30_000</text>
+        <text x="415.6" y="578.05" font-family="monospace" font-size="13" fill="var(--base04)" class="a m157">;</text>
+        <text x="134.8" y="596.25" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">}</text>
+        <text x="119.2" y="614.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m155">}</text>
+        <text x="134.8" y="232.25" font-family="monospace" font-size="13" fill="var(--base05)" class="a m152">trips</text>
+        <text x="181.6" y="232.25" font-family="monospace" font-size="13" fill="var(--base04)" class="a m152">=</text>
+        <text x="197.2" y="232.25" font-family="monospace" font-size="13" fill="var(--base09)" class="a m152">0</text>
+        <text x="205" y="232.25" font-family="monospace" font-size="13" fill="var(--base04)" class="a m152">;</text>
+        <text x="166" y="432.45" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m152">this</text>
+        <text x="197.2" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m152">.</text>
+        <text x="205" y="432.45" font-family="monospace" font-size="13" fill="var(--base05)" class="a m152">trips</text>
+        <text x="251.8" y="432.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m152">=</text>
+        <text x="267.4" y="432.45" font-family="monospace" font-size="13" fill="var(--base09)" class="a m152">0</text>
+        <text x="368.8" y="614.45" font-family="monospace" font-size="13" fill="var(--base0D)" class="a m158">backoff</text>
+        <text x="423.4" y="614.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m152">(</text>
+        <text x="431.2" y="614.45" font-family="monospace" font-size="13" fill="var(--base0E)" class="a m152">this</text>
+        <text x="462.4" y="614.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m152">.</text>
+        <text x="470.2" y="614.45" font-family="monospace" font-size="13" fill="var(--base05)" class="a m152">trips</text>
+        <text x="509.2" y="614.45" font-family="monospace" font-size="13" fill="var(--base04)" class="a m152">++);</text>
+      </g>
+    </g>
+    <g class="sans">
+      <g class="a m159">
+        <path d="M443.40000000000003 609.9L423.40000000000003 609.9" fill="none" stroke="var(--base0B)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+        <rect x="443.4" y="582.3" width="204.8" height="55.2" rx="6" fill="var(--base0B)" fill-opacity="0.08" stroke="var(--base0B)" stroke-opacity="0.4"/>
+        <text x="453.4" y="604.3" font-size="14" fill="var(--base0B)">Each trip waits longer</text>
+        <text x="453.4" y="623.9" font-size="14" fill="var(--base0B)">than the last.</text>
+      </g>
+    </g>
+  </g>
+  <text x="64" y="78" class="sans a m160" font-size="30" font-weight="600" fill="var(--base05)">call(), end to end</text>
+  <g class="a m160">
+    <g class="mono">
+      <g>
+        <path d="M151.73 352.5L199.56 352.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m161"/>
+        <path d="M206.56 352.49982529431577L198.56 356.49982529431577L198.56 348.49982529431577Z" fill="var(--base04)" class="a m162"/>
+      </g>
+      <g>
+        <path d="M312.15 358.5L374.88 358.5C390.88 358.5 390.88 386 406.88 386L784.74 386" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m163"/>
+        <path d="M791.7400000000001 386L783.7400000000001 390L783.7400000000001 382Z" fill="var(--base04)" class="a m164"/>
+      </g>
+      <g>
+        <path d="M312.15 346.5L374.88 346.5C390.88 346.5 390.88 319 406.88 319L451.3 319" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m165"/>
+        <path d="M458.30000000000007 319L450.30000000000007 323L450.30000000000007 315Z" fill="var(--base04)" class="a m166"/>
+      </g>
+      <g>
+        <path d="M618.89 313L764.73 313" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m167"/>
+        <path d="M771.7317130661305 313L763.7317130661305 317L763.7317130661305 309Z" fill="var(--base04)" class="a m168"/>
+      </g>
+      <g>
+        <path d="M618.89 325L687.52 325C703.52 325 703.52 382.5 719.52 382.5L784.74 382.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m163"/>
+        <path d="M791.7400000000001 382.5L783.7400000000001 386.5L783.7400000000001 378.5Z" fill="var(--base04)" class="a m164"/>
+      </g>
+      <g>
+        <path d="M922.54 376.5L1009.04 376.5C1025.04 376.5 1025.04 307.5 1041.04 307.5L1103.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m169"/>
+        <path d="M1110.94 307.5L1102.94 311.5L1102.94 303.5Z" fill="var(--base04)" class="a m170"/>
+      </g>
+      <g>
+        <path d="M922.54 388.5L1099.74 388.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m171"/>
+        <path d="M1106.74 388.5L1098.74 392.5L1098.74 384.5Z" fill="var(--base04)" class="a m172"/>
+      </g>
+    </g>
+    <g>
+      <g class="a m173">
+        <rect x="-26.8" y="-10" width="53.6" height="20" rx="10" fill="var(--base08)" fill-opacity="0.18" stroke="var(--base08)" stroke-width="1.25"/>
+        <text y="3.85" text-anchor="middle" font-size="11" fill="var(--base08)">call()</text>
+      </g>
+      <circle cx="771.732" cy="313" r="9" fill="none" stroke="var(--base08)" stroke-width="1.5" class="a m174 fb"/>
+    </g>
+    <g>
+      <path d="M151.73499999999999 352.49982529431577L206.56 352.49982529431577L312.1470967741935 358.49982529431577L374.88000000000005 358.49982529431577L380.19250000000005 359.6814734262006L384.3800000000001 362.7967275920789L387.8175000000001 367.20105244728614L390.88000000000005 372.2499126471579L393.94250000000005 377.29877284702957L397.3800000000001 381.70309770223685L401.56750000000005 384.81835186811514L406.88000000000005 386L791.7400000000001 386L922.5400000000002 376.5L1009.0400000000002 376.5L1014.3525000000002 373.53515625L1018.5400000000002 365.71875L1021.9775000000002 354.66796875L1025.0400000000002 342L1028.1025000000002 329.33203125L1031.5400000000002 318.28125L1035.7275000000002 310.46484375L1041.0400000000002 307.5L1110.94 307.5" fill="none" stroke="var(--base0B)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m175"/>
+      <circle r="4.5" fill="var(--base0B)" class="a m176"/>
+      <circle cx="1110.94" cy="307.5" r="9" fill="none" stroke="var(--base0B)" stroke-width="1.5" class="a m177 fb"/>
+    </g>
+    <g class="mono">
+      <g>
+        <path d="M46.90999999999999 332.99982529431577H158.56L144.91 371.99982529431577H33.25999999999999Z" fill="var(--base00)"/>
+        <path d="M46.90999999999999 332.99982529431577H158.56L144.91 371.99982529431577H33.25999999999999Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="95.91" y="357.4" font-size="14" text-anchor="middle" fill="var(--base05)">call(fn)</text>
+      </g>
+      <g class="a m178 fb">
+        <path d="M265.01 321.49982529431577L323.46000000000004 352.49982529431577L265.01 383.49982529431577L206.56 352.49982529431577Z" fill="var(--base00)"/>
+        <path d="M265.01 321.49982529431577L323.46000000000004 352.49982529431577L265.01 383.49982529431577L206.56 352.49982529431577Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="265.01" y="357.4" font-size="14" text-anchor="middle" fill="var(--base05)">open?</text>
+      </g>
+      <g class="a m179 fb">
+        <path d="M547.2 288L636.1000000000001 319L547.2 350L458.30000000000007 319Z" fill="var(--base00)"/>
+        <path d="M547.2 288L636.1000000000001 319L547.2 350L458.30000000000007 319Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="547.2" y="323.9" font-size="14" text-anchor="middle" fill="var(--base05)">retry due?</text>
+      </g>
+      <g class="a m180 fb">
+        <path d="M790.4400000000002 288H923.8400000000001A19.5 19.5 0 0 1 923.8400000000001 327H790.4400000000002A19.5 19.5 0 0 1 790.4400000000002 288Z" fill="var(--base00)"/>
+        <path d="M790.4400000000002 288H923.8400000000001A19.5 19.5 0 0 1 923.8400000000001 327H790.4400000000002A19.5 19.5 0 0 1 790.4400000000002 288Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="857.14" y="312.4" font-size="14" text-anchor="middle" fill="var(--base05)">throw OpenError</text>
+      </g>
+      <g class="a m181 fb">
+        <path d="M794.7400000000001 363H919.5400000000002Q922.5400000000002 363 922.5400000000002 366V399Q922.5400000000002 402 919.5400000000002 402H794.7400000000001Q791.7400000000001 402 791.7400000000001 399V366Q791.7400000000001 363 794.7400000000001 363Z" fill="var(--base00)"/>
+        <path d="M794.7400000000001 363H919.5400000000002Q922.5400000000002 363 922.5400000000002 366V399Q922.5400000000002 402 919.5400000000002 402H794.7400000000001Q791.7400000000001 402 791.7400000000001 399V366Q791.7400000000001 363 794.7400000000001 363Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M799.7400000000001 363V402M914.5400000000002 363V402" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+        <text x="857.14" y="387.4" font-size="14" text-anchor="middle" fill="var(--base05)">await fn()</text>
+      </g>
+      <g class="a m182 fb">
+        <path d="M1118.94 288H1234.54Q1242.54 288 1242.54 296V319Q1242.54 327 1234.54 327H1118.94Q1110.94 327 1110.94 319V296Q1110.94 288 1118.94 288Z" fill="var(--base00)"/>
+        <path d="M1118.94 288H1234.54Q1242.54 288 1242.54 296V319Q1242.54 327 1234.54 327H1118.94Q1110.94 327 1110.94 319V296Q1110.94 288 1118.94 288Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="1176.74" y="312.4" font-size="14" text-anchor="middle" fill="var(--base05)">close, reset</text>
+      </g>
+      <g class="a m183 fb">
+        <path d="M1114.74 363H1238.74Q1246.74 363 1246.74 371V394Q1246.74 402 1238.74 402H1114.74Q1106.74 402 1106.74 394V371Q1106.74 363 1114.74 363Z" fill="var(--base00)"/>
+        <path d="M1114.74 363H1238.74Q1246.74 363 1246.74 371V394Q1246.74 402 1238.74 402H1114.74Q1106.74 402 1106.74 394V371Q1106.74 363 1114.74 363Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="1176.74" y="387.4" font-size="14" text-anchor="middle" fill="var(--base05)">count failure</text>
+      </g>
+      <g class="a m184">
+        <rect x="579.17" y="377" width="24.28" height="18" rx="3" fill="var(--base00)"/>
+        <text x="591.31" y="390.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text>
+      </g>
+      <g class="a m185">
+        <rect x="341.46" y="337.5" width="31.42" height="18" rx="3" fill="var(--base00)"/>
+        <text x="357.17" y="350.665" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text>
+      </g>
+      <g class="a m186">
+        <rect x="691.38" y="304" width="24.28" height="18" rx="3" fill="var(--base00)"/>
+        <text x="703.52" y="317.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text>
+      </g>
+      <g class="a m184">
+        <rect x="654.1" y="316" width="31.42" height="18" rx="3" fill="var(--base00)"/>
+        <text x="669.81" y="329.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text>
+      </g>
+      <g class="a m187">
+        <rect x="961.65" y="367.5" width="24.28" height="18" rx="3" fill="var(--base00)"/>
+        <text x="973.79" y="380.665" font-size="11.9" text-anchor="middle" fill="var(--base04)">ok</text>
+      </g>
+      <g class="a m188">
+        <rect x="991.79" y="379.5" width="45.7" height="18" rx="3" fill="var(--base00)"/>
+        <text x="1014.64" y="392.665" font-size="11.9" text-anchor="middle" fill="var(--base04)">threw</text>
+      </g>
+    </g>
+  </g>
+  <g class="sans">
+    <rect x="64" y="680" width="1152" height="4" rx="2" fill="var(--base02)"/>
+    <rect x="64" y="680" width="1152" height="4" rx="2" fill="var(--base0A)" class="a m189"/>
+    <text x="66" y="702" font-size="12" fill="var(--base03)">title</text>
+    <text x="66" y="702" font-size="12" fill="var(--base05)" class="a m190">title</text>
+    <text x="1216" y="666" font-size="12" text-anchor="end" fill="var(--base04)" class="a m190">1 / 7</text>
+    <rect x="157.041" y="677" width="2" height="10" fill="var(--base00)"/>
+    <text x="160.041" y="702" font-size="12" fill="var(--base03)">code</text>
+    <text x="160.041" y="702" font-size="12" fill="var(--base05)" class="a m191">code</text>
+    <text x="1216" y="666" font-size="12" text-anchor="end" fill="var(--base04)" class="a m191">2 / 7</text>
+    <rect x="351.84" y="677" width="2" height="10" fill="var(--base00)"/>
+    <text x="354.84" y="702" font-size="12" fill="var(--base03)">machine</text>
+    <text x="354.84" y="702" font-size="12" fill="var(--base05)" class="a m192">machine</text>
+    <text x="1216" y="666" font-size="12" text-anchor="end" fill="var(--base04)" class="a m192">3 / 7</text>
+    <rect x="513.052" y="677" width="2" height="10" fill="var(--base00)"/>
+    <text x="516.052" y="702" font-size="12" fill="var(--base03)">together</text>
+    <text x="516.052" y="702" font-size="12" fill="var(--base05)" class="a m193">together</text>
+    <text x="1216" y="666" font-size="12" text-anchor="end" fill="var(--base04)" class="a m193">4 / 7</text>
+    <rect x="775.023" y="677" width="2" height="10" fill="var(--base00)"/>
+    <text x="778.023" y="702" font-size="12" fill="var(--base03)">timeline</text>
+    <text x="778.023" y="702" font-size="12" fill="var(--base05)" class="a m194">timeline</text>
+    <text x="1216" y="666" font-size="12" text-anchor="end" fill="var(--base04)" class="a m194">5 / 7</text>
+    <rect x="936.236" y="677" width="2" height="10" fill="var(--base00)"/>
+    <text x="939.236" y="702" font-size="12" fill="var(--base03)">backoff</text>
+    <text x="939.236" y="702" font-size="12" fill="var(--base05)" class="a m195">backoff</text>
+    <text x="1216" y="666" font-size="12" text-anchor="end" fill="var(--base04)" class="a m195">6 / 7</text>
+    <rect x="1080.656" y="677" width="2" height="10" fill="var(--base00)"/>
+    <text x="1083.656" y="702" font-size="12" fill="var(--base03)">recap</text>
+    <text x="1083.656" y="702" font-size="12" fill="var(--base05)" class="a m196">recap</text>
+    <text x="1216" y="666" font-size="12" text-anchor="end" fill="var(--base04)" class="a m196">7 / 7</text>
+  </g>
+</svg>

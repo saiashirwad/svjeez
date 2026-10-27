@@ -2,6 +2,7 @@ export { timeline, during, read, visible, travel, type Timeline, type TimelineOp
 export { code, type Code, type CodeOptions, type Token, type Tokens, type Run, type Piece, type Word, type Metrics } from "./extras/code";
 export { morph, type MorphOptions } from "./extras/morph";
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";
+export { reveal, type RevealOptions } from "./extras/reveal";
 export { Focus, type FocusStop } from "./extras/focus";
 export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
 export { Marker } from "./extras/marker";

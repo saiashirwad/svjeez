@@ -8,24 +8,28 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 
 .a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
 .fb{transform-box:fill-box;transform-origin:center}
-@keyframes k1{0%,16.667%{width:0px}66.667%,100%{width:240px}}
+@keyframes k1{0%{width:0px}16.667%,100%{width:80px}}
 .m1{animation-name:k1;animation-timing-function:linear}
-@keyframes k2{0%,16.667%{opacity:0}20%,100%{opacity:1}}
+@keyframes k2{0%{opacity:0}3.333%,100%{opacity:1}}
 .m2{animation-name:k2}
-@keyframes k3{0%,13.333%{stroke-dashoffset:1;visibility:hidden}18.333%,100%{stroke-dashoffset:0;visibility:visible}}
-.m3{animation-name:k3}
-@keyframes k4{0%,17.583%{opacity:0}18.333%,100%{opacity:1}}
+@keyframes k3{0%,16.667%{width:0px}66.667%,100%{width:240px}}
+.m3{animation-name:k3;animation-timing-function:linear}
+@keyframes k4{0%,16.667%{opacity:0}20%,100%{opacity:1}}
 .m4{animation-name:k4}
-@keyframes k5{0%,18.333%,100%{visibility:hidden}13.333%{visibility:visible}}
-@keyframes k6{0%,13.333%{translate:167px 61px}18.333%,100%{translate:167px 99px}}
-.m5{animation-name:k5,k6;animation-timing-function:steps(1),linear}
-@keyframes k7{0%,33.333%{opacity:0}38.333%,100%{opacity:1}}
-@keyframes k8{0%,33.333%{scale:0.3}38.333%,100%{scale:1}}
-.m6{animation-name:k7,k8;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k9{0%,33.333%{opacity:0}37.5%,100%{opacity:1}}
-.m7{animation-name:k9}
-@keyframes k10{0%{translate:0px 0px}66.667%,100%{translate:320px 0px}}
-.m8{animation-name:k10;animation-timing-function:linear}
+@keyframes k5{0%,16.667%{stroke-dashoffset:1;visibility:hidden}21.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,20.917%{opacity:0}21.667%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,21.667%,100%{visibility:hidden}16.667%{visibility:visible}}
+@keyframes k8{0%,16.667%{translate:183px 61px}21.667%,100%{translate:183px 99px}}
+.m7{animation-name:k7,k8;animation-timing-function:steps(1),linear}
+@keyframes k9{0%,33.333%{opacity:0}38.333%,100%{opacity:1}}
+@keyframes k10{0%,33.333%{scale:0.3}38.333%,100%{scale:1}}
+.m8{animation-name:k9,k10;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k11{0%,33.333%{opacity:0}37.5%,100%{opacity:1}}
+.m9{animation-name:k11}
+@keyframes k12{0%{translate:0px 0px}66.667%,100%{translate:320px 0px}}
+.m10{animation-name:k12;animation-timing-function:linear}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-4.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="100%" height="100%" fill="var(--base00)"/>
@@ -62,23 +66,27 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
       <text x="423" y="152" font-size="11.05" text-anchor="middle" fill="var(--base04)">4s</text>
     </g>
     <g>
-      <rect x="183" y="99" width="240" height="18" rx="4" fill="var(--base08)" fill-opacity="0.25" stroke="var(--base08)" class="a m1"/>
-      <text x="185" y="131.05" font-size="11.05" fill="var(--base04)" class="a m2">editing</text>
+      <rect x="103" y="43" width="80" height="18" rx="4" fill="var(--base0D)" fill-opacity="0.25" stroke="var(--base0D)" class="a m1"/>
+      <text x="111" y="75.05" font-size="11.05" fill="var(--base04)" class="a m2">plan</text>
+    </g>
+    <g>
+      <rect x="183" y="99" width="240" height="18" rx="4" fill="var(--base08)" fill-opacity="0.25" stroke="var(--base08)" class="a m3"/>
+      <text x="191" y="131.05" font-size="11.05" fill="var(--base04)" class="a m4">editing</text>
     </g>
     <g>
       <g>
-        <path d="M167 61L167 92" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
-        <path d="M167 99L163 91L171 91Z" fill="var(--base04)" class="a m4"/>
+        <path d="M183 61L183 92" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+        <path d="M183 99L179 91L187 91Z" fill="var(--base04)" class="a m6"/>
       </g>
-      <circle r="4" fill="var(--base09)" class="a m5"/>
+      <circle r="4" fill="var(--base09)" class="a m7"/>
     </g>
     <g>
-      <path d="M263 98L273 108L263 118L253 108Z" fill="var(--base08)" stroke="var(--base00)" class="a m6 fb"/>
-      <g class="a m7">
+      <path d="M263 98L273 108L263 118L253 108Z" fill="var(--base08)" stroke="var(--base00)" class="a m8 fb"/>
+      <g class="a m9">
         <rect x="244.74" y="76" width="36.52" height="17" rx="3" fill="none"/>
         <text x="263" y="88.367" font-size="11.05" text-anchor="middle" fill="var(--base05)">TEST</text>
       </g>
     </g>
-    <path d="M103 24V136" stroke="var(--base09)" stroke-width="1.5" class="a m8"/>
+    <path d="M103 24V136" stroke="var(--base09)" stroke-width="1.5" class="a m10"/>
   </g>
 </svg>

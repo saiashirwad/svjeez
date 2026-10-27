@@ -398,7 +398,7 @@ team.route("a", "b"); // up through the common ancestor and down
 
 ```tsx
 const run = lanes(
-  { lanes: { lead: "Lead", build: { label: "Build", role: "tool" } }, spans: [{ lane: "build", from: 1, to: 4, label: "editing" }], events: [{ lane: "build", at: 2, label: "TEST" }], links: [{ from: "lead", to: "build", at: 0.8 }] },
+  { lanes: { lead: "Lead", build: { label: "Build", role: "tool" } }, spans: [{ lane: "lead", from: 0, to: 1, label: "plan" }, { lane: "build", from: 1, to: 4, label: "editing" }], events: [{ lane: "build", at: 2, label: "TEST" }], links: [{ from: "lead", to: "build", at: 1 }] },
   { theme, scale: 80, play: true },
 );
 ```

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, rect, render } from "svg-motion";
-import { Focus, Marker, adaptive, code, defaultDark, defaultLight, morph, read, terminal, timeline, travel, visible, window } from "svjeez/extras";
+import { Focus, Marker, adaptive, code, defaultDark, defaultLight, morph, read, reveal, terminal, timeline, travel, visible, window } from "svjeez/extras";
 import { dataOf, type Motion } from "../src/motion";
 import { keysOf, valueAt } from "../src/timeline";
 import { fit } from "../src/extras/camera";
@@ -174,5 +174,27 @@ describe("time helpers", () => {
     expect(at(track, 2)).toMatchObject({ opacity: 1, x: 100, y: 0 });
     expect(at(track, 5.5)).toMatchObject({ x: 100, y: 300, opacity: 0 });
     expect(() => travel([{ x: 1, y: 1 }], { at: 0 })).toThrow();
+  });
+});
+
+describe("reveal", () => {
+  const source = code("class A {\n  a = 1;\n\n  b() {}\n}");
+
+  test("by default each paragraph enters in turn, a blank line joining the block after it", () => {
+    const shown = reveal(source, { at: 1, step: 0.5, over: 0.4 });
+    expect(shown.spans).toEqual([{ at: 1, over: 0.4 }, { at: 1.5, over: 0.4 }]);
+    expect(shown.end).toBeCloseTo(1.9, 9);
+  });
+
+  test("lines outside every block render unanimated, so a skeleton stays put", () => {
+    const svg = render({ width: 100, height: 100, duration: 4, title: "reveal" }, reveal(source, { at: 1, blocks: [[2], [4]] }).node);
+    expect(svg).toMatch(/<text(?![^>]*class=)[^>]*>class<\/text>/);
+    expect(svg).toMatch(/<g class="[^"]+"><text[^>]*>a<\/text>/);
+  });
+
+  test("one block per line with \"line\", and overlapping or out-of-range blocks throw", () => {
+    expect(reveal(source, { at: 0, blocks: "line" }).spans).toHaveLength(5);
+    expect(() => reveal(source, { at: 0, blocks: [[1, 2], [2, 3]] })).toThrow();
+    expect(() => reveal(source, { at: 0, blocks: [[4, 9]] })).toThrow();
   });
 });

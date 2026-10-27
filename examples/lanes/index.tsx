@@ -12,8 +12,9 @@ const run = lanes(
       build: { label: "TH-03 build", role: "tool" },
     },
     spans: [
-      { lane: "lead", from: 0, to: 2.2, label: "planning" },
-      { lane: "lead", from: 6.4, to: 8.5, label: "merge" },
+      { lane: "lead", from: 0, to: 2.6, label: "planning" },
+      { lane: "lead", from: 4.6, to: 5.6, label: "review" },
+      { lane: "lead", from: 7.2, to: 8.5, label: "merge" },
       { lane: "search", from: 1, to: 4.6, label: "researching" },
       { lane: "build", from: 2.6, to: 7.2, label: "editing" },
     ],
@@ -25,8 +26,8 @@ const run = lanes(
       { lane: "build", at: 6.6, label: "EDIT", role: "store" },
     ],
     links: [
-      { from: "lead", to: "search", at: 0.9 },
-      { from: "lead", to: "build", at: 2.4 },
+      { from: "lead", to: "search", at: 1 },
+      { from: "lead", to: "build", at: 2.6 },
       { from: "search", to: "lead", at: 4.6 },
       { from: "build", to: "lead", at: 7.2 },
     ],
