@@ -1,4 +1,4 @@
-import { Glyphs, Stroke, brush, draw, ease, enter, font, motion, rect, render, sampled, type Motion, type SvgNode } from "svjeez";
+import { Glyphs, Stroke, brush, def, draw, ease, enter, font, motion, rect, render, sampled, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
 import { Marker, adaptive, base16, code, cut, flow, flowchart, typewriter, window, type Piece } from "svjeez/extras";
 
 const W = 1280;
@@ -37,85 +37,175 @@ const Kicker = ({ n, label }: { n: string; label: string }) => (
   </text>
 );
 
-// ─── Shot 1: cold open. Three words, three beats. ────────────────────────────
+// ─── Shot 1: cold open. The install, alone on the page. ──────────────────────
 
-const COLD = { at: 0, over: 2.7 };
-const WORDS = ["Prompt.", "Animate.", "Ship."] as const;
-const BEAT = 0.8;
+const INSTALL_FS = 40;
+const INSTALL_CMD = "npm i svjeez";
+const installAt = (W - [...`$ ${INSTALL_CMD}`].length * INSTALL_FS * 0.6) / 2;
+const opening = typewriter(code([[["muted", "$"], " ", ["plain", INSTALL_CMD]]], { theme, font: mono, fontSize: INSTALL_FS, lineHeight: 1.4, x: installAt, y: H / 2 - 40 }), { at: 0.5, cps: 13, cursor: C.accent, blink: false });
+const enterAt = opening.end + 0.35;
+const COLD = { at: 0, over: enterAt + 1.9 };
 
 const coldOpen = (
   <g animation={cut(COLD)}>
-    {WORDS.map((word, i) => (
-      <g animation={cut({ at: 0, over: 0.3 + (i + 1) * BEAT })}>
-        <g animation={enter({ at: 0.3 + i * BEAT, over: 0.4 }, { opacity: 0, y: 40, blur: 12 }, ease.out)}>
-          <Glyphs font={display} text={word} size={150} x={centered(word, 150)} y={H / 2 + 52} fill={i === 2 ? C.accent : C.ink} />
-        </g>
+    <g animation={motion({ y: 0 }).at(enterAt).to({ y: -28 }, 0.5, ease.inOut)}>
+      {opening.node}
+      <g animation={rise(enterAt + 0.15, 0.45, 10)}>
+        <text x={installAt} y={H / 2 + 52} fontSize={20} fill={C.soft}>
+          added 1 package in 0.4s
+        </text>
       </g>
-    ))}
+      <g animation={rise(enterAt + 0.55, 0.45, 10)}>
+        <text x={installAt} y={H / 2 + 84} fontSize={20} fill={C.muted}>
+          <tspan fill={C.accent}>0</tspan>
+          {" dependencies. "}
+          <tspan fill={C.accent}>0</tspan>
+          {" bytes of runtime JS."}
+        </text>
+      </g>
+    </g>
   </g>
 );
 
 // ─── Shot 2: Claude Code builds the scene. ───────────────────────────────────
 
 const TERM_AT = COLD.at + COLD.over;
-const FS = 16;
+const FS = 15;
 const ROW = FS * 1.6;
+const CELL = FS * 0.6;
 const shell = window(rect(140, 96, 1000, 568), { theme, title: "~/launch — claude", dots: "traffic" });
-const left = shell.body.x + 28;
-const top = (row: number) => shell.body.y + 18 + row * ROW;
+const body = def.clipPath({}, <rect x={shell.body.x} y={shell.body.y} width={shell.body.w} height={shell.body.h - 6} />);
+const VISIBLE = Math.floor((shell.body.h - 18) / ROW);
+const left = shell.body.x + 24;
+const top = (row: number) => shell.body.y + 12 + row * ROW;
 const mid = (row: number) => top(row) + ROW / 2;
-const say = (pieces: readonly Piece[], row: number, indent = 0) => code([pieces], { theme, font: mono, fontSize: FS, lineHeight: 1.6, x: left + indent, y: top(row) });
+const sayAt = (pieces: readonly Piece[], row: number, x: number) => code([pieces], { theme, font: mono, fontSize: FS, lineHeight: 1.6, x, y: top(row) }).node;
+const say = (pieces: readonly Piece[], row: number, indent = 0) => sayAt(pieces, row, left + indent);
+const bold = (content: string, color: Color = C.ink): Piece => ({ content, color, fontStyle: 2 });
+const width = (text: string) => [...text].length * CELL;
 
-/** Claude's spinner: an eight-spoke asterisk. */
-const asterisk = (x: number, y: number, r: number, animation?: Motion<"rotate">) => (
+/** Claude's spinner glyph, drawn: a six-spoke asterisk that breathes as it turns. */
+const asterisk = (x: number, y: number, r: number, animation?: Stack<"rotate" | "scale">) => (
   <g transform={`translate(${x} ${y})`}>
     <path
-      d={[0, 1, 2, 3].map((i) => `M${(r * Math.cos((i * Math.PI) / 4)).toFixed(2)} ${(r * Math.sin((i * Math.PI) / 4)).toFixed(2)}L${(-r * Math.cos((i * Math.PI) / 4)).toFixed(2)} ${(-r * Math.sin((i * Math.PI) / 4)).toFixed(2)}`).join("")}
+      d={[0, 1, 2].map((i) => `M${(r * Math.cos((i * Math.PI) / 3)).toFixed(2)} ${(r * Math.sin((i * Math.PI) / 3)).toFixed(2)}L${(-r * Math.cos((i * Math.PI) / 3)).toFixed(2)} ${(-r * Math.sin((i * Math.PI) / 3)).toFixed(2)}`).join("")}
       stroke={C.accent}
-      strokeWidth={2.2}
+      strokeWidth={2.4}
       strokeLinecap="round"
       animation={animation}
     />
   </g>
 );
 
-const launch = typewriter(say([["blue", "❯"], " claude"], 0), { at: TERM_AT + 0.35, cps: 20, cursor: true, blink: false });
-const welcomeAt = launch.end + 0.2;
-const INPUT_ROW = 18.6;
-const ask = typewriter(say([["muted", ">"], " make our launch page pop with svjeez"], INPUT_ROW, 4), { at: welcomeAt + 0.45, cps: 34, cursor: true, blink: false });
-const SENT = ask.end + 0.25;
+/** The welcome mascot, built from the same block-character quadrants the terminal draws it with. */
+const MASCOT = [" ▐▛███▜▌ ", "▝▜█████▛▘", "  ▘▘ ▝▝  "];
+const QUADRANTS: Record<string, readonly number[]> = { "█": [0, 1, 2, 3], "▐": [1, 3], "▌": [0, 2], "▛": [0, 1, 2], "▜": [0, 1, 3], "▝": [1], "▘": [0] };
+const mascot = (x: number, row: number) =>
+  MASCOT.flatMap((line, r) =>
+    [...line].flatMap((ch, c) =>
+      (QUADRANTS[ch] ?? []).map((q) => <rect x={x + c * CELL + (q % 2) * (CELL / 2)} y={top(row + r) + Math.floor(q / 2) * (ROW / 2)} width={CELL / 2 + 0.3} height={ROW / 2 + 0.3} fill={C.accent} />),
+    ),
+  );
 
-type Step = { tool?: string; args?: string; text?: readonly Piece[]; result?: string; row: number; at: number; done: number };
-const STEPS: Step[] = [
-  { tool: "Read", args: "skills/svjeez/SKILL.md", result: "Read 299 lines", row: 6, at: SENT + 0.35, done: SENT + 0.75 },
-  { tool: "Write", args: "launch.tsx", result: "Wrote 13 lines to launch.tsx", row: 8, at: SENT + 0.95, done: SENT + 1.35 },
-  { tool: "Bash", args: "svjeez render launch.tsx --times 0,0.6,1.2,1.8 --sheet", result: "Wrote 4 frames and sheet.png", row: 10, at: SENT + 1.55, done: SENT + 2 },
-  { tool: "Read", args: "sheet.png", result: "Read image (48 KB)", row: 12, at: SENT + 2.2, done: SENT + 2.55 },
-  { text: ["The dot lands late at 1.2s. Tightening its ease."], row: 14.4, at: SENT + 2.85, done: SENT + 2.85 },
-];
-const DONE_AT = SENT + 3.4;
-const TERM = { at: TERM_AT, over: DONE_AT + 1.5 - TERM_AT };
+const BOX = { x: left - 8, w: shell.body.w - 32, top: 1.2, rows: 8 };
+const split = BOX.x + BOX.w * 0.56;
+const centerAt = (text: string, row: number, color: Piece) => sayAt([color], row, BOX.x + (split - BOX.x) / 2 - width(text) / 2);
+const welcome = (
+  <>
+    <rect x={BOX.x} y={top(BOX.top)} width={BOX.w} height={BOX.rows * ROW} rx={6} fill="none" stroke={C.accent} />
+    <rect x={BOX.x + 18} y={top(BOX.top) - 2} width={width(" Claude Code ") } height={4} fill={C.page} />
+    {sayAt([["number", " Claude Code "]], BOX.top - 0.5, BOX.x + 18)}
+    {centerAt("Welcome back!", BOX.top + 1, bold("Welcome back!"))}
+    {mascot(BOX.x + (split - BOX.x) / 2 - (9 * CELL) / 2, BOX.top + 2.4)}
+    {centerAt("Opus 5.5 · Claude Max", BOX.top + 5.6, ["muted", "Opus 5.5 · Claude Max"])}
+    {centerAt("~/launch", BOX.top + 6.6, ["muted", "~/launch"])}
+    <path d={`M${split} ${top(BOX.top + 0.6)}V${top(BOX.top + BOX.rows - 0.6)}`} stroke={C.accent} strokeOpacity={0.6} />
+    {sayAt([bold("Tips for getting started", C.accent)], BOX.top + 1, split + 24)}
+    {sayAt(["Run /init to create a CLAUDE.md file"], BOX.top + 2, split + 24)}
+    {sayAt(["with instructions for Claude"], BOX.top + 3, split + 24)}
+    <path d={`M${split + 24} ${mid(BOX.top + 4.2)}H${BOX.x + BOX.w - 24}`} stroke={C.accent} strokeOpacity={0.6} />
+    {sayAt([bold("Recent activity", C.accent)], BOX.top + 5, split + 24)}
+    {sayAt([["muted", "No recent activity"]], BOX.top + 6, split + 24)}
+  </>
+);
 
-const elbow = (row: number) => <path d={`M${left + 14} ${top(row) + 4}V${mid(row)}h9`} fill="none" stroke={C.muted} strokeWidth={1.3} />;
+const launch = typewriter(code([[["blue", "❯"], " claude"]], { theme, font: mono, fontSize: FS, lineHeight: 1.6, x: left, y: top(0) }), { at: TERM_AT + 0.35, cps: 18, cursor: true, blink: false });
+const welcomeAt = launch.end + 0.25;
+const PROMPT = "make our launch page pop with svjeez";
+const ask = typewriter(code([[["muted", ">"], " ", PROMPT]], { theme, font: mono, fontSize: FS, lineHeight: 1.6, x: left, y: 0 }), { at: welcomeAt + 0.5, cps: 32, cursor: true, blink: false });
+const SENT = ask.end + 0.3;
 
-const step = ({ tool, args, text, result, row, at, done }: Step) => (
-  <g animation={rise(at, 0.3, 6)}>
-    {tool ? (
-      <>
-        <circle cx={left + 5} cy={mid(row)} r={4.5} fill={C.muted} animation={motion({ opacity: 1 }).to({ opacity: 0.3 }, 0.2).to({ opacity: 1 }, 0.2).loop(0.4)} />
-        <circle cx={left + 5} cy={mid(row)} r={4.5} fill={C.green} animation={motion({ opacity: 0 }).at(done).set({ opacity: 1 })} />
-        {say([["plain", tool], ["muted", `(${args})`]], row, 20).node}
-        <g animation={motion({ opacity: 0 }).at(done).set({ opacity: 1 })}>
-          {elbow(row + 1)}
-          {say([["muted", result!]], row + 1, 36).node}
-        </g>
-      </>
-    ) : (
-      <>
-        <circle cx={left + 5} cy={mid(row)} r={4.5} fill={C.ink} />
-        {say(text!, row, 20).node}
-      </>
-    )}
+/** One transcript line: where it sits, when it shows, what it draws. */
+type Line = { row: number; at: number; node: SvgNode };
+const lines: Line[] = [];
+const line = (row: number, at: number, node: SvgNode) => lines.push({ row, at, node });
+
+const dot = (row: number, color: Color, pending?: { until: number }) =>
+  pending ? (
+    <>
+      <circle cx={left + 4} cy={mid(row)} r={4} fill={C.muted} animation={motion({ opacity: 1 }).to({ opacity: 0.25 }, 0.25).to({ opacity: 1 }, 0.25).loop(0.5)} />
+      <circle cx={left + 4} cy={mid(row)} r={4} fill={color} animation={motion({ opacity: 0 }).at(pending.until).set({ opacity: 1 })} />
+    </>
+  ) : (
+    <circle cx={left + 4} cy={mid(row)} r={4} fill={color} />
+  );
+const elbow = (row: number) => <path d={`M${left + 13} ${top(row) + 3}V${mid(row)}h8`} fill="none" stroke={C.muted} strokeWidth={1.2} />;
+
+const tool = (row: number, at: number, done: number, name: string, args: string, results: readonly (readonly Piece[])[]) => {
+  line(row, at, <>{dot(row, C.green, { until: done })}{say([bold(name), ["plain", `(${args})`]], row, 18)}</>);
+  results.forEach((pieces, i) => line(row + 1 + i, done, <>{i === 0 && elbow(row + 1)}{say(pieces, row + 1 + i, 36)}</>));
+};
+const reply = (row: number, at: number, pieces: readonly Piece[]) => line(row, at, <>{dot(row, C.ink)}{say(pieces, row, 18)}</>);
+
+line(0, TERM_AT + 0.35, launch.node);
+line(BOX.top + BOX.rows - 1, welcomeAt, welcome);
+line(BOX.top + BOX.rows + 0.4, SENT, (
+  <>
+    <rect x={left - 6} y={top(BOX.top + BOX.rows + 0.4)} width={width(`> ${PROMPT}`) + 12} height={ROW} rx={3} fill={C.surface} />
+    {say([["muted", ">"], " ", PROMPT], BOX.top + BOX.rows + 0.4)}
+  </>
+));
+const R = BOX.top + BOX.rows + 1.8;
+tool(R, SENT + 0.35, SENT + 0.75, "Read", "skills/svjeez/SKILL.md", [[["muted", "Read "], bold("299", C.muted), ["muted", " lines (ctrl+o to expand)"]]]);
+tool(R + 2.2, SENT + 0.95, SENT + 1.35, "Write", "launch.tsx", [
+  [["muted", "Wrote "], bold("13", C.muted), ["muted", " lines to "], bold("launch.tsx", C.muted)],
+  [["muted", "  1 "], ["keyword", "import"], " { draw, ease, enter, motion, render } ", ["keyword", "from"], " ", ["string", '"svjeez"'], ";"],
+  [["muted", "  2"]],
+  [["muted", "  3 "], ["keyword", "export default"], " () => ", ["fn", "render"], "("],
+  [["muted", "… +10 lines (ctrl+o to expand)"]],
+]);
+tool(R + 8.4, SENT + 1.6, SENT + 2.05, "Bash", "svjeez render launch.tsx --times 0,0.6,1.2,1.8 --sheet", [[["muted", "Wrote 4 frames and sheet.png"]]]);
+tool(R + 10.6, SENT + 2.25, SENT + 2.6, "Read", "sheet.png", [[["muted", "Read image (48KB)"]]]);
+reply(R + 12.8, SENT + 2.95, ["The dot lands late at 1.2s, so I tightened its ease."]);
+const DONE_AT = SENT + 3.5;
+reply(R + 14.2, DONE_AT, ["Done. ", bold("dist/launch.svg"), " is 18.4 KB, with 0 bytes of JavaScript."]);
+const TERM = { at: TERM_AT, over: DONE_AT + 1.6 - TERM_AT };
+
+// The input box follows the transcript down, and the whole session scrolls once it outgrows the window.
+const spinning = (t: number) => t >= SENT && t < DONE_AT;
+const bottom = (t: number) => Math.max(...lines.filter((l) => l.at <= t + 1e-6).map((l) => l.row + 1));
+const spinnerRow = (t: number) => bottom(t) + 0.4;
+const inputRow = (t: number) => bottom(t) + (spinning(t) ? 1.8 : 0.5);
+const scroll = (t: number) => Math.max(0, inputRow(t) + 2.6 - VISIBLE);
+const beats = [...new Set([welcomeAt, SENT, ...lines.map((l) => l.at), DONE_AT])].filter((t) => t >= welcomeAt).sort((a, b) => a - b);
+const follow = (y: (t: number) => number, over: number): Motion<"y"> =>
+  beats.reduce((track, t, i) => (i > 0 && y(t) !== y(beats[i - 1]!) ? track.at(t).to({ y: y(t) }, Math.min(over, (beats[i + 1] ?? Infinity) - t - 0.02), ease.out) : track), motion({ y: y(welcomeAt) }));
+
+const inputBox = (
+  <g animation={follow((t) => top(inputRow(t)), 0.15)}>
+    <path d={`M${left - 8} 0H${left - 8 + BOX.w}M${left - 8} ${ROW * 1.5}H${left - 8 + BOX.w}`} stroke={C.muted} strokeOpacity={0.7} />
+    <g transform={`translate(0 ${ROW * 0.25})`}>
+      <g animation={motion({ opacity: 1 }).at(SENT).set({ opacity: 0 })}>{ask.node}</g>
+      <g animation={motion({ opacity: 0 }).at(SENT).set({ opacity: 1 })}>{sayAt([["muted", ">"]], -(shell.body.y + 12) / ROW, left)}</g>
+    </g>
+    {sayAt([["muted", "? for shortcuts"]], 1.6 - (shell.body.y + 12) / ROW, left + 2)}
+  </g>
+);
+
+const spinner = (
+  <g animation={[motion({ opacity: 0 }).at(SENT).set({ opacity: 1 }).at(DONE_AT).set({ opacity: 0 }), follow((t) => top(spinnerRow(t)) - top(0), 0.15)]}>
+    {asterisk(left + 4, mid(0), 6, [motion({ rotate: 0 }).to({ rotate: 180 }, 1.5, ease.linear).loop(1.5), motion({ scale: 1 }).to({ scale: 0.6 }, 0.375, ease.inOut).to({ scale: 1 }, 0.375, ease.inOut).loop(0.75)])}
+    {say([["number", "Animating…"], ["muted", " (esc to interrupt · "], ["muted", "↓ 1.2k tokens)"]], 0, 18)}
   </g>
 );
 
@@ -124,26 +214,15 @@ const terminalShot = (
     <Kicker n="01" label="YOU ASK CLAUDE" />
     <g animation={rise(TERM.at, 0.5, 20)}>
       {shell.node}
-      {launch.node}
-      <g animation={rise(welcomeAt, 0.35, 6)}>
-        <rect x={left - 4} y={top(1.3)} width={470} height={ROW * 3.1} rx={8} fill="none" stroke={C.accent} />
-        {asterisk(left + 16, mid(1.6) + 4, 7)}
-        {say([["plain", "Welcome to Claude Code!"]], 1.6, 34).node}
-        {say([["muted", "/help for help · cwd: ~/launch"]], 2.7, 34).node}
+      <g clipPath={body}>
+        <g animation={follow((t) => -scroll(t) * ROW, 0.25)}>
+          {lines.map(({ at, node }) => (
+            <g animation={motion({ opacity: 0 }).at(at).set({ opacity: 1 })}>{node}</g>
+          ))}
+          {spinner}
+          <g animation={motion({ opacity: 0 }).at(welcomeAt).set({ opacity: 1 })}>{inputBox}</g>
+        </g>
       </g>
-      <g animation={rise(SENT, 0.3, 6)}>{say([["muted", ">"], ["plain", " make our launch page pop with svjeez"]], 4.4).node}</g>
-      {STEPS.map(step)}
-      <g animation={rise(DONE_AT, 0.4, 8)}>
-        <circle cx={left + 5} cy={mid(15.6)} r={4.5} fill={C.green} />
-        {say([["plain", "Done. "], ["green", "dist/launch.svg"], ["muted", " · 18.4 KB · 0 bytes of JavaScript"]], 15.6, 20).node}
-      </g>
-      <g animation={motion({ opacity: 0 }).at(SENT).set({ opacity: 1 }).at(DONE_AT).set({ opacity: 0 })}>
-        {asterisk(left + 6, mid(17.4), 6, motion({ rotate: 0 }).to({ rotate: 90 }, 0.6, ease.linear).loop(0.6))}
-        {say([["number", "Animating…"], ["muted", " (esc to interrupt)"]], 17.4, 20).node}
-      </g>
-      <rect x={left - 8} y={top(INPUT_ROW) - 3} width={shell.body.w - 40} height={ROW + 6} rx={6} fill="none" stroke={C.hairline} />
-      <g animation={motion({ opacity: 1 }).at(SENT).set({ opacity: 0 })}>{ask.node}</g>
-      <g animation={motion({ opacity: 0 }).at(SENT).set({ opacity: 1 })}>{say([["muted", ">"]], INPUT_ROW, 4).node}</g>
     </g>
   </g>
 );
