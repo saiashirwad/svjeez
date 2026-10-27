@@ -6,7 +6,8 @@ import { layered } from "../../layout/layered";
 import type { Seconds, Span } from "../../motion";
 import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
-import { travel, visible } from "../timeline";
+import { flow, type FlowOptions } from "../flow";
+import { visible } from "../timeline";
 import { curve } from "./curve";
 import { arrow, chip, labelSize, lookup, textWidth, type Diagram, type DiagramOptions } from "./kit";
 
@@ -40,6 +41,9 @@ export interface Walk<S extends string> {
   readonly end: Seconds;
 }
 
+/** How the walk's token looks; `at` and timing come from the walk. */
+export type WalkToken = Omit<FlowOptions, "at" | "over" | "speed">;
+
 export interface StateMachine<S extends string> extends Diagram<S> {
   /** The drawn line of the first transition `from` → `to`, sampled along its curve. */
   edge(from: S, to: S): Point[];
@@ -47,7 +51,7 @@ export interface StateMachine<S extends string> extends Diagram<S> {
    * An overlay that lights each state of `path` for `dwell` seconds, then runs a token to the next along a transition
    * from it or from a composite holding it, or into a composite's initial state. Throws if there is no such way.
    */
-  walk(path: readonly S[], options: { readonly at: Seconds; readonly dwell?: Seconds; readonly speed?: number }): Walk<S>;
+  walk(path: readonly S[], options: { readonly at: Seconds; readonly dwell?: Seconds; readonly speed?: number; readonly token?: WalkToken }): Walk<S>;
 }
 
 interface Node {
@@ -220,7 +224,7 @@ export function state<const S extends Record<string, StateSpec>>(
     bounds: rect(ox, oy, local.w, local.h),
     get: lookup("state()", boxes),
     edge,
-    walk: (path, { at, dwell = 1, speed = 220 }) => {
+    walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
       if (path.length === 0) throw new Error("walk() needs at least one state.");
       const lit = new Map<string, [Seconds, Seconds][]>();
       const tokens: SvgNode[] = [];
@@ -233,7 +237,7 @@ export function state<const S extends Record<string, StateSpec>>(
         const points = step(s, next);
         const length = points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
         const over = Math.max(0.35, length / speed);
-        tokens.push(el.circle({ r: 5, fill: theme.base09, animation: travel(points, { at: t, over }) }));
+        tokens.push(flow(points, { color: theme.base09, size: 5, ...token, at: t, over }).node);
         t += over;
       });
       const overlay = el.g({}, [

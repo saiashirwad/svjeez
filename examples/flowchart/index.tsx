@@ -1,5 +1,5 @@
 import { render } from "svg-motion";
-import { adaptive, flowchart, tomorrow, tomorrowNight, travel } from "svjeez/extras";
+import { adaptive, flow, flowchart, tomorrow, tomorrowNight } from "svjeez/extras";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
@@ -33,7 +33,7 @@ export const chart = flowchart(
   { theme, x: M, y: M, class: "mono", reveal: { at: 0.4, step: 0.35 } },
 );
 
-const trip = chart.route("pr", "post");
+const trip = flow(chart.route("pr", "post"), { at: 4, speed: 160, style: "trace", color: theme.base09, arrive: true });
 const D = 10;
 
 export default function build(): string {
@@ -49,8 +49,9 @@ export default function build(): string {
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      {chart.node}
-      <circle r={5} fill={theme.base09} animation={travel(trip, { at: 4, speed: 160 })} />
+      {chart.layers.under}
+      {trip.node}
+      {chart.layers.over}
     </>,
   );
 }

@@ -38,33 +38,39 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 .m14{animation-name:k14}
 @keyframes k15{0%,17.475%{opacity:0}18%,100%{opacity:1}}
 .m15{animation-name:k15}
-@keyframes k16{0%,4%{opacity:0}7.5%,100%{opacity:1}}
-@keyframes k17{0%,4%{scale:0.9}7.5%,100%{scale:1}}
-.m16{animation-name:k16,k17}
-@keyframes k18{0%,7.5%{opacity:0}11%,100%{opacity:1}}
-@keyframes k19{0%,7.5%{scale:0.9}11%,100%{scale:1}}
-.m17{animation-name:k18,k19}
-@keyframes k20{0%,11%{opacity:0}14.5%,100%{opacity:1}}
-@keyframes k21{0%,11%{scale:0.9}14.5%,100%{scale:1}}
+@keyframes k16{0%,40%{stroke-dashoffset:1;visibility:hidden}80.42%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k17{0%,81.92%{opacity:1}87.92%,100%{opacity:0}}
+.m16{animation-name:k16,k17;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
+@keyframes k18{0%,80.42%,100%{visibility:hidden}40%{visibility:visible}}
+@keyframes k19{0%,40%{translate:305.2px 84px}43.313%{translate:305.2px 137px}45.75%{translate:305.2px 176px}48.75%{translate:305.2px 224px}51.188%{translate:305.2px 263px}54.188%{translate:305.2px 311px}56.625%{translate:305.2px 350px}59.625%{translate:305.2px 398px}63.354%{translate:299.2px 457.367px}65.894%{translate:299.2px 498px}66.502%{translate:291.045px 503.313px}67.871%{translate:269.544px 507.5px}69.783%{translate:239.146px 510.938px}71.97%{translate:204.3px 514px}74.156%{translate:169.454px 517.063px}76.068%{translate:139.056px 520.5px}77.437%{translate:117.555px 524.688px}78.045%{translate:109.4px 530px}80.42%,100%{translate:109.4px 568px}}
+.m17{animation-name:k18,k19;animation-timing-function:steps(1),linear}
+@keyframes k20{0%{opacity:0;animation-timing-function:steps(1)}80.42%{opacity:0.9}87.42%,100%{opacity:0}}
+@keyframes k21{0%,80.42%{scale:0.5}87.42%,100%{scale:3}}
 .m18{animation-name:k20,k21}
-@keyframes k22{0%,14.5%{opacity:0}18%,100%{opacity:1}}
-@keyframes k23{0%,14.5%{scale:0.9}18%,100%{scale:1}}
+@keyframes k22{0%,4%{opacity:0}7.5%,100%{opacity:1}}
+@keyframes k23{0%,4%{scale:0.9}7.5%,100%{scale:1}}
 .m19{animation-name:k22,k23}
-@keyframes k24{0%,21.5%{opacity:0}25%,100%{opacity:1}}
-@keyframes k25{0%,21.5%{scale:0.9}25%,100%{scale:1}}
+@keyframes k24{0%,7.5%{opacity:0}11%,100%{opacity:1}}
+@keyframes k25{0%,7.5%{scale:0.9}11%,100%{scale:1}}
 .m20{animation-name:k24,k25}
-@keyframes k26{0%,18%{opacity:0}21.5%,100%{opacity:1}}
-@keyframes k27{0%,18%{scale:0.9}21.5%,100%{scale:1}}
+@keyframes k26{0%,11%{opacity:0}14.5%,100%{opacity:1}}
+@keyframes k27{0%,11%{scale:0.9}14.5%,100%{scale:1}}
 .m21{animation-name:k26,k27}
-@keyframes k28{0%,21.5%{opacity:0}24%,100%{opacity:1}}
-.m22{animation-name:k28}
-@keyframes k29{0%,25%{opacity:0}27.5%,100%{opacity:1}}
-.m23{animation-name:k29}
-@keyframes k30{0%,18%{opacity:0}20.5%,100%{opacity:1}}
-.m24{animation-name:k30}
-@keyframes k31{0%,80.42%,100%{visibility:hidden}40%{visibility:visible}}
-@keyframes k32{0%,40%{translate:305.2px 84px}43.313%{translate:305.2px 137px}45.75%{translate:305.2px 176px}48.75%{translate:305.2px 224px}51.188%{translate:305.2px 263px}54.188%{translate:305.2px 311px}56.625%{translate:305.2px 350px}59.625%{translate:305.2px 398px}63.354%{translate:299.2px 457.367px}65.894%{translate:299.2px 498px}66.502%{translate:291.045px 503.313px}67.871%{translate:269.544px 507.5px}69.783%{translate:239.146px 510.938px}71.97%{translate:204.3px 514px}74.156%{translate:169.454px 517.063px}76.068%{translate:139.056px 520.5px}77.437%{translate:117.555px 524.688px}78.045%{translate:109.4px 530px}80.42%,100%{translate:109.4px 568px}}
-.m25{animation-name:k31,k32;animation-timing-function:steps(1),linear}
+@keyframes k28{0%,14.5%{opacity:0}18%,100%{opacity:1}}
+@keyframes k29{0%,14.5%{scale:0.9}18%,100%{scale:1}}
+.m22{animation-name:k28,k29}
+@keyframes k30{0%,21.5%{opacity:0}25%,100%{opacity:1}}
+@keyframes k31{0%,21.5%{scale:0.9}25%,100%{scale:1}}
+.m23{animation-name:k30,k31}
+@keyframes k32{0%,18%{opacity:0}21.5%,100%{opacity:1}}
+@keyframes k33{0%,18%{scale:0.9}21.5%,100%{scale:1}}
+.m24{animation-name:k32,k33}
+@keyframes k34{0%,21.5%{opacity:0}24%,100%{opacity:1}}
+.m25{animation-name:k34}
+@keyframes k35{0%,25%{opacity:0}27.5%,100%{opacity:1}}
+.m26{animation-name:k35}
+@keyframes k36{0%,18%{opacity:0}20.5%,100%{opacity:1}}
+.m27{animation-name:k36}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="100%" height="100%" fill="var(--base00)"/>
@@ -105,12 +111,19 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
       <path d="M299.2 457.37L299.2 498C299.2 514 109.4 514 109.4 530L109.4 561" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
       <path d="M109.39999999999999 568L105.39999999999999 560L113.39999999999999 560Z" fill="var(--base04)" class="a m15"/>
     </g>
+  </g>
+  <g>
+    <path d="M305.2 84L305.2 137L305.2 176L305.2 224L305.2 263L305.2 311L305.2 350L305.2 398L299.2 457.36655811977914L299.2 498L291.04453125 503.3125L269.54375 507.5L239.14609375 510.9375L204.3 514L169.45390625 517.0625L139.05624999999998 520.5L117.55546874999999 524.6875L109.39999999999999 530L109.39999999999999 568" fill="none" stroke="var(--base09)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m16"/>
+    <circle r="4.5" fill="var(--base09)" class="a m17"/>
+    <circle cx="109.4" cy="568" r="9" fill="none" stroke="var(--base09)" stroke-width="1.5" class="a m18 fb"/>
+  </g>
+  <g class="mono">
     <g>
       <path d="M252 45H372.04999999999995L358.4 84H238.35Z" fill="var(--base00)"/>
       <path d="M252 45H372.04999999999995L358.4 84H238.35Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="305.2" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">PR opened</text>
     </g>
-    <g class="a m16 fb">
+    <g class="a m19 fb">
       <path d="M238.6 137H371.79999999999995Q374.79999999999995 137 374.79999999999995 140V173Q374.79999999999995 176 371.79999999999995 176H238.6Q235.6 176 235.6 173V140Q235.6 137 238.6 137Z" fill="var(--base00)"/>
       <path d="M238.6 137H371.79999999999995Q374.79999999999995 137 374.79999999999995 140V173Q374.79999999999995 176 371.79999999999995 176H238.6Q235.6 176 235.6 173V140Q235.6 137 238.6 137Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
       <path d="M243.6 137V176M366.79999999999995 137V176" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
@@ -122,44 +135,43 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
       <path d="M62.35000000000001 45A70 5 0 0 0 202.35000000000002 45" stroke="var(--base0E)" fill="none"/>
       <text x="132.35" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Review memory</text>
     </g>
-    <g class="a m17 fb">
+    <g class="a m20 fb">
       <path d="M234.79999999999998 224H375.6Q383.6 224 383.6 232V255Q383.6 263 375.6 263H234.79999999999998Q226.79999999999998 263 226.79999999999998 255V232Q226.79999999999998 224 234.79999999999998 224Z" fill="var(--base00)"/>
       <path d="M234.79999999999998 224H375.6Q383.6 224 383.6 232V255Q383.6 263 375.6 263H234.79999999999998Q226.79999999999998 263 226.79999999999998 255V232Q226.79999999999998 224 234.79999999999998 224Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="305.2" y="248.4" font-size="14" text-anchor="middle" fill="var(--base05)">Analyze changes</text>
     </g>
-    <g class="a m18 fb">
+    <g class="a m21 fb">
       <path d="M238.6 311H371.79999999999995Q374.79999999999995 311 374.79999999999995 314V347Q374.79999999999995 350 371.79999999999995 350H238.6Q235.6 350 235.6 347V314Q235.6 311 238.6 311Z" fill="var(--base00)"/>
       <path d="M238.6 311H371.79999999999995Q374.79999999999995 311 374.79999999999995 314V347Q374.79999999999995 350 371.79999999999995 350H238.6Q235.6 350 235.6 347V314Q235.6 311 238.6 311Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
       <path d="M243.6 311V350M366.79999999999995 311V350" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
       <text x="305.2" y="335.4" font-size="14" text-anchor="middle" fill="var(--base05)">Run linters</text>
     </g>
-    <g class="a m19 fb">
+    <g class="a m22 fb">
       <path d="M305.2 398L375.83 429L305.2 460L234.57 429Z" fill="var(--base00)"/>
       <path d="M305.2 398L375.83 429L305.2 460L234.57 429Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="305.2" y="433.9" font-size="14" text-anchor="middle" fill="var(--base05)">Issues?</text>
     </g>
-    <g class="a m20 fb">
+    <g class="a m23 fb">
       <path d="M251.6 568H358.79999999999995Q366.79999999999995 568 366.79999999999995 576V599Q366.79999999999995 607 358.79999999999995 607H251.6Q243.6 607 243.6 599V576Q243.6 568 251.6 568Z" fill="var(--base00)"/>
       <path d="M251.6 568H358.79999999999995Q366.79999999999995 568 366.79999999999995 576V599Q366.79999999999995 607 358.79999999999995 607H251.6Q243.6 607 243.6 599V576Q243.6 568 251.6 568Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="305.2" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Draft fixes</text>
     </g>
-    <g class="a m21 fb">
+    <g class="a m24 fb">
       <path d="M59.5 568H159.29999999999998A19.5 19.5 0 0 1 159.29999999999998 607H59.5A19.5 19.5 0 0 1 59.5 568Z" fill="var(--base00)"/>
       <path d="M59.5 568H159.29999999999998A19.5 19.5 0 0 1 159.29999999999998 607H59.5A19.5 19.5 0 0 1 59.5 568Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="109.4" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Post review</text>
     </g>
-    <g class="a m22">
+    <g class="a m25">
       <rect x="295.49" y="517" width="31.42" height="18" rx="3" fill="var(--base00)"/>
       <text x="311.2" y="530.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text>
     </g>
-    <g class="a m23">
+    <g class="a m26">
       <rect x="405.18" y="450" width="52.84" height="18" rx="3" fill="var(--base00)"/>
       <text x="431.6" y="463.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">re-run</text>
     </g>
-    <g class="a m24">
+    <g class="a m27">
       <rect x="97.26" y="532" width="24.28" height="18" rx="3" fill="var(--base00)"/>
       <text x="109.4" y="545.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text>
     </g>
   </g>
-  <circle r="5" fill="var(--base09)" class="a m25"/>
 </svg>

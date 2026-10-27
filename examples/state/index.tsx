@@ -27,7 +27,7 @@ export const agent = state(
   { theme, x: M, y: M, class: "mono" },
 );
 
-const walk = agent.walk(["idle", "working", "planning", "acting", "planning", "acting", "waiting", "working", "planning", "acting", "done"], { at: 0.6, dwell: 0.8 });
+const walk = agent.walk(["idle", "working", "planning", "acting", "planning", "acting", "waiting", "working", "planning", "acting", "done"], { at: 0.6, dwell: 0.8, token: { style: "comet", arrive: true } });
 const D = Math.ceil(walk.end + 1.5);
 
 export default function build(): string {

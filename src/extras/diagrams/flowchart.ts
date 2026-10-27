@@ -4,6 +4,7 @@ import type { Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
 import { ease, motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
+import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
 import { curve } from "./curve";
 import { arrow, chip, labelOf, labelSize, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
@@ -25,6 +26,8 @@ export interface Flowchart<N extends string, G extends string> extends Diagram<N
   edge(from: N, to: N): Point[];
   /** The shortest directed path through edges, as one polyline through each node on the way. */
   route(from: N, to: N): Point[];
+  /** `node` in two layers, groups and edges `under` the nodes and labels `over` them, so a flow can run between. */
+  readonly layers: { readonly under: SvgNode; readonly over: SvgNode };
 }
 
 /** Laid-out boxes and lines, shifted into place. */
@@ -68,7 +71,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   const drawOver = Math.min(0.4, step);
   const drawAt = (from: string, to: string) => Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
 
-  const node = el.g({ class: cls }, [
+  const under = el.g({ class: cls }, [
     groups.map(([id, g]) => {
       const b = laid.groups.get(id)!;
       const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
@@ -78,10 +81,12 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
       ]);
     }),
     laid.lines.map((line) => arrow(line.points, { ...look, at: reveal && drawAt(line.from, line.to), over: drawOver })),
+  ]);
+  const over = el.g({ class: cls }, [
     nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, look, appear(n.id))),
     laid.lines.map((line, i) => line.label && chip(line.label, edges[i]!.label!, small, reveal && motion({ opacity: 0 }).at(drawAt(line.from, line.to) + drawOver).to({ opacity: 1 }, 0.25))),
   ]);
-  return { node, bounds: laid.bounds, get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])), ...paths(laid.lines, laid.boxes) };
+  return { node: el.g({}, [under, over]), layers: { under, over }, bounds: laid.bounds, get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])), ...paths(laid.lines, laid.boxes) };
 }
 
 const cross = (b: Rect, direction: Direction = "TB") => (direction === "TB" ? b.x : b.y);

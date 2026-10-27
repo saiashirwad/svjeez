@@ -330,10 +330,13 @@ const chart = flowchart(
   },
   { theme, reveal: { at: 0.5 } },
 );
-<circle r={5} animation={travel(chart.route("pr", "post"), { at: 4 })} />;
+const trip = flow(chart.route("pr", "post"), { at: 4, style: "trace", arrive: true });
+<>{chart.layers.under}{trip.node}{chart.layers.over}</>;
 ```
 
-`flowchart` lays nodes out in ranks with curved edges that never cross a node; `edge(a, b)` and `route(a, b)` return points along the drawn curves.
+`flowchart` lays nodes out in ranks with curved edges that never cross a node; `edge(a, b)` and `route(a, b)` return points along the drawn curves. `layers` splits `node` into edges `under` and nodes `over`, so a flow runs between them.
+
+`flow(points, { at, style })` runs something along a path: `dot`, `comet` (a head with a fading tail and halo), `trace` (lights the path as it goes, then fades) or `packet` (a labelled chip). `arrive: true` ripples a ring where it lands, and `end` is when it gets there. `walk({ token })` takes the same look options.
 
 ```tsx
 const login = sequence(
