@@ -27,6 +27,7 @@ npm install svjeez
 ## Basic usage
 
 ```tsx
+import { writeFileSync } from "node:fs";
 import { draw, ease, enter, motion, render } from "svjeez";
 
 const svg = render(
@@ -49,8 +50,10 @@ const svg = render(
   </>,
 );
 
-await Bun.write("hello.svg", svg);
+writeFileSync("hello.svg", svg);
 ```
+
+Run it with Bun (`bun hello.tsx`) or on Node with [tsx](https://tsx.is) (`npx tsx hello.tsx`). For `tsc` to know `node:fs`, install `@types/node` and add `"types": ["node"]`.
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/basic.svg" width="200" alt="A curve draws on, then a dot pops in" />
 
@@ -438,6 +441,42 @@ render(
 ```tsx
 const { errors, warnings } = validateSvg(svg);
 ```
+
+## Frames
+
+`svjeez render` rasterizes an animation at chosen times, so you can check a moment without watching the loop. It takes an `.svg`, or a module whose default export is an SVG string or a function that returns one.
+
+```sh
+npm i -D playwright-core && npx playwright-core install chromium-headless-shell
+
+npx svjeez render scene.tsx --times 0,0.5,1,2 --out frames/ --sheet
+npx svjeez render scene.svg --count 8 --scale 2 --scheme dark
+npx svjeez svg scene.tsx --out scene.svg
+```
+
+Times are playback seconds. Without `--times`, it takes `--count` frames (default 6) spread over one loop. `--sheet` also writes `sheet.png`, every frame on one labelled grid. On Node, a `.tsx` file loads through `tsx` if the project has it; under Bun, use `bunx --bun svjeez`.
+
+The same thing is a function, for scripts and tools:
+
+```ts
+import { renderFrames } from "svjeez/frames";
+
+const { duration, frames, sheet } = await renderFrames(svg, { times: [0, 1.5], scale: 2, sheet: true });
+frames[0].png; // Uint8Array
+```
+
+Frames come from headless Chromium through `playwright-core`, an optional peer dependency. Every CSS and SMIL animation is paused and seeked to the time, so a frame is the same on every run.
+
+## Development
+
+```sh
+bun install
+bun run dev examples/readme/basic.tsx   # writes .preview/basic.svg, serves it, reloads on change
+bun run build                           # every example into dist/
+bun test && bun run typecheck
+```
+
+The preview page plays the SVG inline with a scrubber, and shows the error when a build fails. It watches the module's folder and `src/`.
 
 ## Type safety
 
