@@ -3,6 +3,14 @@
   "version": "0.4.1",
   "type": "module",
   "sideEffects": false,
+  "types": "./package-dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "package-dist/*.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": "./package-dist/index.d.ts",
