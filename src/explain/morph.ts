@@ -61,11 +61,15 @@ export function morph(versions: readonly Code[], { at, over = 0.8, gutter = fals
     const [before, after] = [versions[i]!, versions[i + 1]!];
     const pairs = match(before.words, after.words);
     const kept = new Map(pairs.map(([a, b]) => [b, live[a]!]));
-    const gone = live.filter((_, a) => !pairs.some(([k]) => k === a));
+    const stays = new Set(pairs.map(([a]) => a));
+    const gone = live.filter((_, a) => !stays.has(a));
     for (const chain of gone) chain.track = (chain.track ?? motion<{}>()).at(start).to({ opacity: 0 }, half);
     live = after.words.map((word, j) => {
       const chain = kept.get(j);
-      if (!chain) return chains[chains.push(born(word, after, start)) - 1]!;
+      if (!chain) {
+        chains.push(born(word, after, start));
+        return chains.at(-1)!;
+      }
       chain.track = (chain.track ?? motion<{}>()).at(start).to({ x: word.x - chain.word.x, y: word.y - chain.word.y }, over, ease.inOut);
       return chain;
     });
