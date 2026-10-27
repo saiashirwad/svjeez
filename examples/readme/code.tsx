@@ -1,4 +1,4 @@
-import { render } from "svg-motion";
+import { render } from "svjeez";
 import { Marker, code, morph, type Run, type Tokens } from "svjeez/extras";
 import { CSS, theme } from "./kit";
 

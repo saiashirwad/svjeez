@@ -1,4 +1,4 @@
-import { voxel } from "svg-motion";
+import { voxel } from "svjeez";
 
 export const W = 960;
 export const H = 600;

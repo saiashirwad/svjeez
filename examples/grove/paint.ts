@@ -1,4 +1,4 @@
-import { el, type SvgNode } from "svg-motion";
+import { el, type SvgNode } from "svjeez";
 
 export interface Part {
   readonly depth: number;

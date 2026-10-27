@@ -1,4 +1,4 @@
-import { el, enter, type SvgNode } from "svg-motion";
+import { el, enter, type SvgNode } from "svjeez";
 import { float } from "./defs";
 import { C } from "./theme";
 import { AgentAvatar, CardHeader, CardShell, MiniAvatar, PulseDots, Thread, mono, serif, ui } from "./ui";

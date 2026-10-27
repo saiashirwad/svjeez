@@ -1,4 +1,4 @@
-import { ease, enter, motion, render, wiggle } from "svg-motion";
+import { ease, enter, motion, render, wiggle } from "svjeez";
 import { CSS, theme } from "./kit";
 
 export default function build(): string {

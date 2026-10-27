@@ -1,4 +1,4 @@
-import { calc, css, def, draw, ease, el, enter, fx, motion, sampled, voxel, wiggle, type Calc, type SyntaxOf } from "svg-motion";
+import { calc, css, def, draw, ease, el, enter, fx, motion, sampled, voxel, wiggle, type Calc, type SyntaxOf } from "svjeez";
 import { flowchart, lanes, sequence, state, tree } from "svjeez/extras";
 
 const bg = def.linearGradient({}, <stop offset={0} stopColor="#000" />);

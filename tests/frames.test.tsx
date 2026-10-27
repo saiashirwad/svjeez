@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { def, ease, motion, render } from "svg-motion";
+import { def, ease, motion, render } from "svjeez";
 import { renderFrames } from "../src/frames";
 
 const browser = await renderFrames(render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />), { times: [0] }).then(

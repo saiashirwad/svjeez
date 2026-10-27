@@ -1,4 +1,4 @@
-import { ease, el, enter, wiggle, type Color, type SvgNode } from "svg-motion";
+import { ease, el, enter, wiggle, type Color, type SvgNode } from "svjeez";
 import { BARK, BIRCH, BLOSSOM, BLUSH, CAM, CREAM, D, FERN, GOLD, GRASS, OAK, PERIWINKLE, STONE, T, alpha, at, clamp, hazed, lerp, mix, random, tone } from "./kit";
 import { edge, leaf as leafPath, polygon, smooth, tapered, type P2 } from "./draw";
 import { layer, type Part } from "./paint";

@@ -1,4 +1,4 @@
-import { ease, enter, render, voxel } from "svg-motion";
+import { ease, enter, render, voxel } from "svjeez";
 import { CSS, theme } from "./kit";
 
 const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 });

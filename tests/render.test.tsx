@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { css, def, draw, ease, el, enter, exit, motion, render, wiggle, type Child } from "svg-motion";
+import { css, def, draw, ease, el, enter, exit, motion, render, wiggle, type Child } from "svjeez";
 
 const scene = (content: Child, duration = 10) => render({ width: 100, height: 100, duration, title: "Test" }, content);
 

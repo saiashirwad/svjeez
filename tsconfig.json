@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "jsxImportSource": "svg-motion",
+    "jsxImportSource": "svjeez",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
@@ -18,15 +18,6 @@
       "DOM.Iterable"
     ],
     "paths": {
-      "svg-motion": [
-        "./src/index.ts"
-      ],
-      "svg-motion/jsx-runtime": [
-        "./src/jsx-runtime.ts"
-      ],
-      "svg-motion/jsx-dev-runtime": [
-        "./src/jsx-dev-runtime.ts"
-      ],
       "svjeez": [
         "./src/index.ts"
       ],

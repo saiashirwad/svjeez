@@ -1,4 +1,4 @@
-import { rect, render } from "svg-motion";
+import { rect, render } from "svjeez";
 import { adaptive, terminal, tomorrow, tomorrowNight, window } from "svjeez/extras";
 
 const W = 960;

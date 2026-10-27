@@ -1,4 +1,4 @@
-import { ease, motion, type Block, type Motion, type Seconds, type Vec3 } from "svg-motion";
+import { ease, motion, type Block, type Motion, type Seconds, type Vec3 } from "svjeez";
 import { BEAT, GRID, random, tenth } from "./kit";
 import { COLUMNS, LAKE, PLOT, columnOf, type Column } from "./terrain";
 import { SKIN } from "./textures";

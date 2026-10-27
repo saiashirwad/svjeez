@@ -1,4 +1,4 @@
-import { render } from "svg-motion";
+import { render } from "svjeez";
 import { lanes } from "svjeez/extras";
 import { CSS, theme } from "./kit";
 

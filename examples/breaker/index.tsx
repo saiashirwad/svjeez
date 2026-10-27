@@ -1,4 +1,4 @@
-import { def, ease, motion, render } from "svg-motion";
+import { def, ease, motion, render } from "svjeez";
 import {
   Callout,
   Focus,

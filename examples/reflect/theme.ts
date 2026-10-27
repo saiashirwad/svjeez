@@ -1,4 +1,4 @@
-import type { Attrs, Color } from "svg-motion";
+import type { Attrs, Color } from "svjeez";
 
 export const W = 1440;
 export const H = 1160;

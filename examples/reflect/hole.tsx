@@ -1,4 +1,4 @@
-import { def, ease, el, motion, sampled, wiggle, type SvgNode } from "svg-motion";
+import { def, ease, el, motion, sampled, wiggle, type SvgNode } from "svjeez";
 import { C, D, FRAME, O, random } from "./theme";
 
 const pivot = { transformBox: "view-box", transformOrigin: "0 0" } as const;

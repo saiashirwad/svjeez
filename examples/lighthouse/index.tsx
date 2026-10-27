@@ -1,4 +1,4 @@
-import { def, draw, ease, el, enter, motion, render, type Color, type Motion, type Point, type SvgNode } from "svg-motion";
+import { def, draw, ease, el, enter, motion, render, type Color, type Motion, type Point, type SvgNode } from "svjeez";
 import { travel, visible } from "svjeez/extras";
 import { SPEED, end, graph, messages, type Kind, type Thread } from "./data";
 

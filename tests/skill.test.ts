@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
-import { validateSvg } from "svg-motion";
+import { validateSvg } from "svjeez";
 
 const dir = join(import.meta.dir, "../skills/svjeez/examples");
 

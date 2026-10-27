@@ -1,4 +1,4 @@
-import { render } from "svg-motion";
+import { render } from "svjeez";
 import { travel, tree } from "svjeez/extras";
 import { CSS, theme } from "./kit";
 

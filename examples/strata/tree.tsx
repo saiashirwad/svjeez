@@ -1,4 +1,4 @@
-import { draw, ease, enter, motion, type SvgNode } from "svg-motion";
+import { draw, ease, enter, motion, type SvgNode } from "svjeez";
 import { C } from "./theme";
 import { TreeRow, mono, ui } from "./ui";
 

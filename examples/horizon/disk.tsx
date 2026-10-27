@@ -1,4 +1,4 @@
-import { def, draw, ease, el, motion, type SvgNode } from "svg-motion";
+import { def, draw, ease, el, motion, type SvgNode } from "svjeez";
 import { C, D, T, TILT, heat, phased, pivot, random } from "./kit";
 
 const INNER = 78;

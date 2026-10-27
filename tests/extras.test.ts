@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { el, rect, render } from "svg-motion";
+import { el, rect, render } from "svjeez";
 import { Focus, Marker, adaptive, code, defaultDark, defaultLight, morph, read, reveal, terminal, timeline, travel, visible, window } from "svjeez/extras";
 import { dataOf, type Motion } from "../src/motion";
 import { keysOf, valueAt } from "../src/timeline";

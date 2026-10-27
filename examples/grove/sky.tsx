@@ -1,4 +1,4 @@
-import { def, ease, el, motion, sampled, wiggle, type Color, type Motion, type Seconds, type SvgNode } from "svg-motion";
+import { def, ease, el, motion, sampled, wiggle, type Color, type Motion, type Seconds, type SvgNode } from "svjeez";
 import { C, D, H, ORIGIN, W, alpha, at, clamp, lerp, mix, random } from "./kit";
 import { leaf as leafPath } from "./draw";
 import { TAU } from "./space";

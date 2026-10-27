@@ -1,4 +1,4 @@
-import { voxel, type Skin } from "svg-motion";
+import { voxel, type Skin } from "svjeez";
 
 const art = voxel.texture;
 

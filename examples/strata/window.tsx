@@ -1,4 +1,4 @@
-import { el, enter, motion, type SvgNode } from "svg-motion";
+import { el, enter, motion, type SvgNode } from "svjeez";
 import { cardTop, noteClip, panelWash, shadow } from "./defs";
 import { C } from "./theme";
 import { mono, ui } from "./ui";

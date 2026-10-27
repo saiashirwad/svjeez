@@ -1,4 +1,4 @@
-import { draw, enter, exit, render, shake, wiggle, type Child } from "svg-motion";
+import { draw, enter, exit, render, shake, wiggle, type Child } from "svjeez";
 import { CSS, theme } from "./kit";
 
 const W = 600;

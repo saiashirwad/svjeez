@@ -1,4 +1,4 @@
-import { def, el, type SvgNode } from "svg-motion";
+import { def, el, type SvgNode } from "svjeez";
 import { C, H, W, ui } from "./theme";
 
 const aura = def.radialGradient({ gradientUnits: "userSpaceOnUse", cx: 720, cy: 239, r: 736, gradientTransform: "translate(720 239) scale(0.74 1) translate(-720 -239)" }, (

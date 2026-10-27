@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { calc, css, def, render, type Css } from "svg-motion";
+import { calc, css, def, render, type Css } from "svjeez";
 
 const { add, sub, mul, div, sin, cos, clamp, min, max, length, angle } = calc;
 

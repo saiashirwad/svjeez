@@ -1,4 +1,4 @@
-import type { Color } from "svg-motion";
+import type { Color } from "svjeez";
 import type { Tally } from "./game";
 
 export const C = {

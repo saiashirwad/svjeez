@@ -1,4 +1,4 @@
-import { def, el, type SvgNode } from "svg-motion";
+import { def, el, type SvgNode } from "svjeez";
 import { MOSS, ORIGIN, ROCK, at, clamp, hazed, mix, random, tone } from "./kit";
 import { disc, polygon, smooth, tapered } from "./draw";
 import { layer, type Part } from "./paint";

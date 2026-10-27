@@ -1,4 +1,4 @@
-import { render } from "svg-motion";
+import { render } from "svjeez";
 import { adaptive, state, tomorrow, tomorrowNight } from "svjeez/extras";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });

@@ -1,4 +1,4 @@
-import { ease, motion, render, type Ease } from "svg-motion";
+import { ease, motion, render, type Ease } from "svjeez";
 import { CSS, theme } from "./kit";
 
 const curves: [string, Ease][] = [

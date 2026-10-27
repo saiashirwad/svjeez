@@ -1,4 +1,4 @@
-import { draw, ease, el, enter, motion, type Attrs, type Child, type Color, type Motion, type Span, type SvgNode } from "svg-motion";
+import { draw, ease, el, enter, motion, type Attrs, type Child, type Color, type Motion, type Span, type SvgNode } from "svjeez";
 import { float } from "./defs";
 import { C } from "./theme";
 

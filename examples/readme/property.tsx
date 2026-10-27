@@ -1,4 +1,4 @@
-import { css, def, ease, motion, render } from "svg-motion";
+import { css, def, ease, motion, render } from "svjeez";
 import { tomorrowNight as theme } from "svjeez/extras";
 
 const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });

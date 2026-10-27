@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { def, render, sampled, type Motion } from "svg-motion";
+import { def, render, sampled, type Motion } from "svjeez";
 
 interface Key {
   readonly at: number;

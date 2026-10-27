@@ -1,4 +1,4 @@
-import { draw, ease, motion, rect, render } from "svg-motion";
+import { draw, ease, motion, rect, render } from "svjeez";
 import { Arrow, Brace, Focus, Marker, Underline, base16, code, morph, timeline, tint, window, type Run, type Tokens } from "svjeez/extras";
 
 const W = 1200;

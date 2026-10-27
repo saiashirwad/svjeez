@@ -1,4 +1,4 @@
-import { def, ease, el, motion, sampled, voxel, wiggle, type Color, type Motion, type Seconds, type SvgNode } from "svg-motion";
+import { def, ease, el, motion, sampled, voxel, wiggle, type Color, type Motion, type Seconds, type SvgNode } from "svjeez";
 import { BEAT, C, CAMERA, D, GRID, H, ORIGIN, W, clamp, lerp, random } from "./kit";
 import { SKIN } from "./textures";
 import { LIGHTS } from "./world";

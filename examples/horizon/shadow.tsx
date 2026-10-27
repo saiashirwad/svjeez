@@ -1,4 +1,4 @@
-import { def, draw, ease, el, motion, wiggle, type SvgNode } from "svg-motion";
+import { def, draw, ease, el, motion, wiggle, type SvgNode } from "svjeez";
 import { C, D, H, T, envelope, glow, pivot } from "./kit";
 
 const SHADOW = 57;

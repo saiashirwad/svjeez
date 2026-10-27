@@ -1,4 +1,4 @@
-import { rect, render } from "svg-motion";
+import { rect, render } from "svjeez";
 import { terminal, window } from "svjeez/extras";
 import { CSS, theme } from "./kit";
 

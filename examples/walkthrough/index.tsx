@@ -1,4 +1,4 @@
-import { def, rect, render } from "svg-motion";
+import { def, rect, render } from "svjeez";
 import { Arrow, Callout, Camera, Focus, adaptive, code, during, read, timeline, tomorrow, tomorrowNight, window, type Run, type Tokens } from "svjeez/extras";
 
 const W = 1000;

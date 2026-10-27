@@ -1,4 +1,4 @@
-import { def, el, type Child, type Color, type SvgNode } from "svg-motion";
+import { def, el, type Child, type Color, type SvgNode } from "svjeez";
 import { Frost } from "./hole";
 import { C, FRAME, ui } from "./theme";
 

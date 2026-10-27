@@ -3,11 +3,11 @@ import type { AnimatedTag, TagChannels } from "./channels";
 import type { Stack } from "./motion";
 import { children, node, type Child, type SvgNode } from "./svg";
 
-export const Fragment = Symbol.for("svg-motion.fragment");
+export const Fragment = Symbol.for("svjeez.fragment");
 
 type Component = (props: Record<string, unknown>) => SvgNode | null;
 
-/** The automatic JSX runtime. Elements compile to the svg-motion AST; components are pure functions of props. */
+/** The automatic JSX runtime. Elements compile to the svjeez AST; components are pure functions of props. */
 export const jsx = (type: string | typeof Fragment | Component, props: Record<string, unknown> | null): SvgNode => {
   const values = props ?? {};
   if (type === Fragment) return { kind: "fragment", children: children(values.children) };

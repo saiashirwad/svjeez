@@ -1,6 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
-import { validateSvg } from "svg-motion";
+import { validateSvg } from "svjeez";
 
 const ROOT = join(import.meta.dir, "..");
 const OUT = join(ROOT, "dist");

@@ -1,4 +1,4 @@
-import { def, ease, el, motion, type Channel, type Color, type Motion, type Ref, type Values } from "svg-motion";
+import { def, ease, el, motion, type Channel, type Color, type Motion, type Ref, type Values } from "svjeez";
 
 export const W = 960;
 export const H = 540;

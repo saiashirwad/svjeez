@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { motion, render, voxel, type Block, type Vec3 } from "svg-motion";
+import { motion, render, voxel, type Block, type Vec3 } from "svjeez";
 
 const DURATION = 10;
 const camera = voxel.camera({ yaw: 45, pitch: 30, unit: 10 });

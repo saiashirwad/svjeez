@@ -1,4 +1,4 @@
-import { def, draw, ease, el, enter, motion, wiggle, type SvgNode } from "svg-motion";
+import { def, draw, ease, el, enter, motion, wiggle, type SvgNode } from "svjeez";
 import { C, D, H, T, W, envelope, on } from "./kit";
 
 /** `.mono` is 10px, and every monospace face here advances 0.6em. */

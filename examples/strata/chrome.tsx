@@ -1,4 +1,4 @@
-import { el, enter, exit, type Child, type SvgNode } from "svg-motion";
+import { el, enter, exit, type Child, type SvgNode } from "svjeez";
 import { bg, cool, grid, vignette, warm } from "./defs";
 import { C } from "./theme";
 import { mono, serif, ui } from "./ui";
