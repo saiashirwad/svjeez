@@ -34,6 +34,7 @@
     "typescript": "latest"
   },
   "description": "Animated SVGs in TSX. One file out, no JavaScript.",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/saiashirwad/svjeez.git"
