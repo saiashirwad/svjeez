@@ -317,6 +317,63 @@ const session = terminal(
 typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end }
 ```
 
+### Diagrams
+
+Each diagram takes a typed object, so a misspelled id is a compile error. It returns `{ node, get(id), bounds }` plus its own helpers, and takes `theme`, `x`, `y`, `fontSize` and `class` like the other extras. A node's `role` (`task`, `input`, `output`, `tool`, `decision`, `store`) picks its shape and theme color.
+
+```tsx
+const chart = flowchart(
+  {
+    nodes: { pr: { label: "PR opened", role: "input" }, lint: { label: "Run linters", role: "tool" }, ok: { label: "Clean?", role: "decision" }, post: "Post review" },
+    groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
+    edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
+  },
+  { theme, reveal: { at: 0.5 } },
+);
+<circle r={5} animation={travel(chart.route("pr", "post"), { at: 4 })} />;
+```
+
+`flowchart` lays nodes out in ranks with curved edges that never cross a node; `edge(a, b)` and `route(a, b)` return points along the drawn curves.
+
+```tsx
+const login = sequence(
+  { actors: { user: "User", api: "API", db: { label: "Postgres", role: "store" } }, messages: [["user", "api", "POST /login"], ["api", "db", "select"], ["db", "api", "row", { reply: true }], { note: "api", text: "hash check" }] },
+  { theme, play: { at: 0.5, step: 0.8 } },
+);
+```
+
+`sequence` draws one row per message or note; `message(i)` gives its arrow and its slot on the `play` timeline.
+
+```tsx
+const agent = state(
+  {
+    states: { idle: "Idle", working: { label: "Working", states: { plan: "Plan", act: "Act" }, initial: "plan" }, done: { label: "Done", final: true } },
+    initial: "idle",
+    transitions: [["idle", "working", "task"], ["plan", "act"], ["act", "plan"], ["working", "done", "finish"]],
+  },
+  { theme },
+);
+const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1 }); // { node, spans, end }
+```
+
+`state` marks the initial state with a dot and sends final states to a bullseye; a state with `states` is a composite laid out inside its own box, and `walk` lights each state in turn while a token runs the transitions.
+
+```tsx
+const team = tree({ nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } }, { theme, reveal: { at: 0.5 } });
+team.route("a", "b"); // up through the common ancestor and down
+```
+
+`tree` is a tidy tree with each parent centered over its children, revealed breadth-first.
+
+```tsx
+const run = lanes(
+  { lanes: { lead: "Lead", build: { label: "Build", role: "tool" } }, spans: [{ lane: "build", from: 1, to: 4, label: "editing" }], events: [{ lane: "build", at: 2, label: "TEST" }], links: [{ from: "lead", to: "build", at: 0.8 }] },
+  { theme, scale: 80, play: true },
+);
+```
+
+`lanes` puts one row per lane on a time axis in seconds; `x(t)` maps a time to x, and `play` runs it in real time with a playhead. `visible(spans)` and `travel(points, { at })` are the time helpers the diagrams use: on during each span, and a token that runs a path at constant speed.
+
 ## Render
 
 ```tsx
