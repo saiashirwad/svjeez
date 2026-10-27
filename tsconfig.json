@@ -27,8 +27,20 @@
       "svg-motion/jsx-dev-runtime": [
         "./src/jsx-dev-runtime.ts"
       ],
+      "svjeez": [
+        "./src/index.ts"
+      ],
+      "svjeez/jsx-runtime": [
+        "./src/jsx-runtime.ts"
+      ],
+      "svjeez/jsx-dev-runtime": [
+        "./src/jsx-dev-runtime.ts"
+      ],
       "svjeez/extras": [
         "./src/extras.ts"
+      ],
+      "svjeez/frames": [
+        "./src/frames.ts"
       ]
     }
   },
@@ -36,6 +48,7 @@
     "src",
     "examples",
     "scripts",
+    "skills",
     "tests"
   ]
 }
