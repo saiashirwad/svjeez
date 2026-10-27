@@ -1,5 +1,5 @@
 import { draw, ease, motion, rect, render, type Color } from "svg-motion";
-import { Arrow, Brace, Focus, Marker, Underline, code, morph, timeline, type Tokens } from "svjeez/explain";
+import { Arrow, Brace, Focus, Marker, Underline, code, morph, timeline, type Tokens } from "svjeez/extras";
 
 const W = 1200;
 const H = 550;

@@ -3,7 +3,7 @@ import { readdir, readFile, rm, writeFile } from "node:fs/promises";
 await rm("package-dist", { recursive: true, force: true });
 
 const result = await Bun.build({
-  entrypoints: ["./src/index.ts", "./src/explain.ts", "./src/jsx-runtime.ts", "./src/jsx-dev-runtime.ts"],
+  entrypoints: ["./src/index.ts", "./src/extras.ts", "./src/jsx-runtime.ts", "./src/jsx-dev-runtime.ts"],
   outdir: "./package-dist",
   target: "node",
   splitting: true,

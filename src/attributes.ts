@@ -20,6 +20,7 @@ export type Color =
   | `hsl(${string})`
   | `hsla(${string})`
   | `oklch(${string})`
+  | `var(--${string})`
   | "currentColor"
   | NamedColor;
 

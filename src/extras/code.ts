@@ -1,6 +1,7 @@
 import type { Color } from "../attributes";
 import { el } from "../el";
 import { rect, type Point, type Rect } from "../geometry";
+import { defaultDark, tint, type Base16, type Role } from "./theme";
 import type { Stack } from "../motion";
 import type { SvgNode } from "../svg";
 
@@ -11,8 +12,8 @@ export interface Token {
   readonly fontStyle?: number;
 }
 
-/** `[role, text]` colored through `theme`, or `[role, text, id]` to name it for `get()` and exact morphs. */
-export type Run = readonly [role: string, text: string, id?: string];
+/** `[role, text]` colored by the theme, or `[role, text, id]` to name it for `get()` and exact morphs. */
+export type Run = readonly [role: Role, text: string, id?: string];
 
 /** Plain text, a role-tagged run, or a Shiki-style token. */
 export type Piece = string | Run | Token;
@@ -27,9 +28,8 @@ export interface CodeOptions {
   /** Column width. Default 0.6 × fontSize. */
   readonly advance?: number;
   readonly fontFamily?: string;
-  readonly color?: Color;
-  /** Color for each role a run names. */
-  readonly theme?: Readonly<Record<string, Color>>;
+  /** Colors runs by role, plain text with `plain` and line numbers with `comment`. Default `defaultDark`. */
+  readonly theme?: Base16;
   /** Line numbers, right-aligned two columns left of the code. */
   readonly gutter?: boolean;
 }
@@ -55,7 +55,7 @@ export interface Metrics {
   readonly height: number;
   readonly advance: number;
   readonly fontFamily: string;
-  readonly color?: Color;
+  readonly theme: Base16;
 }
 
 /** Laid-out code. Lines and columns are 1-based. */
@@ -83,7 +83,7 @@ export const text = ({ text, x, y, color, fontStyle = 0 }: Word, m: Metrics, ani
       y: baseline(m, y),
       fontFamily: m.fontFamily,
       fontSize: m.fontSize,
-      fill: color ?? m.color,
+      fill: color ?? tint(m.theme, "plain"),
       fontStyle: fontStyle & 1 ? "italic" : undefined,
       fontWeight: fontStyle & 2 ? "bold" : undefined,
       animation,
@@ -94,26 +94,24 @@ export const text = ({ text, x, y, color, fontStyle = 0 }: Word, m: Metrics, ani
 /** Line number `n`, right-aligned in the gutter. */
 export const number = (n: number, m: Metrics, animation?: Stack<"x" | "y" | "opacity">): SvgNode =>
   el.text(
-    { x: m.origin - 2 * m.advance, y: baseline(m, m.y + (n - 1) * m.height), textAnchor: "end", fontFamily: m.fontFamily, fontSize: m.fontSize, fill: m.color ?? "#888", opacity: 0.4, animation },
+    { x: m.origin - 2 * m.advance, y: baseline(m, m.y + (n - 1) * m.height), textAnchor: "end", fontFamily: m.fontFamily, fontSize: m.fontSize, fill: tint(m.theme, "comment"), animation },
     String(n),
   );
 
 export function code(input: string | Tokens, options: CodeOptions = {}): Code {
-  const { x = 0, y = 0, fontSize = 14, lineHeight = 1.6, fontFamily = "monospace", color, gutter = false } = options;
+  const { x = 0, y = 0, fontSize = 14, lineHeight = 1.6, fontFamily = "monospace", theme = defaultDark, gutter = false } = options;
   const advance = options.advance ?? fontSize * 0.6;
   if (![fontSize, lineHeight, advance].every((v) => v > 0) || !Number.isFinite(x + y)) throw new Error("code() needs finite coordinates and positive metrics.");
   const piece = (p: Piece): Token & { readonly id?: string } => {
     if (typeof p === "string") return { content: p };
     if (!Array.isArray(p)) return p as Token;
     const [role, content, id] = p as Run;
-    const tint = options.theme?.[role];
-    if (options.theme && !tint) throw new Error(`code() theme has no color for role "${role}".`);
-    return { content, color: tint, id };
+    return { content, color: tint(theme, role), id };
   };
   const rows = (typeof input === "string" ? input.split("\n").map((line) => [line]) : input).map((row) => row.map(piece));
   if (rows.some((row) => row.some((token) => /[\n\r\t]/.test(token.content)))) throw new Error("code() tokens must not contain line breaks or tabs.");
   const texts = rows.map((row) => row.map((token) => token.content).join(""));
-  const m: Metrics = { origin: x + (gutter ? (String(rows.length).length + 2) * advance : 0), y, fontSize, height: fontSize * lineHeight, advance, fontFamily, color };
+  const m: Metrics = { origin: x + (gutter ? (String(rows.length).length + 2) * advance : 0), y, fontSize, height: fontSize * lineHeight, advance, fontFamily, theme };
   const top = (line: number) => y + (line - 1) * m.height;
   const words = rows.flatMap((row, i) => {
     let column = 0;

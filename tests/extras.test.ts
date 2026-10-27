@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { el, rect, render } from "svg-motion";
-import { Focus, Marker, code, read, timeline } from "svjeez/explain";
-import { fit } from "../src/explain/camera";
-import { match } from "../src/explain/morph";
+import { Focus, Marker, code, defaultDark, read, timeline } from "svjeez/extras";
+import { fit } from "../src/extras/camera";
+import { match } from "../src/extras/morph";
 
 describe("code", () => {
   const c = code([[{ content: "ab" }, { content: "cd" }], [{ content: "x cd" }]], { x: 10, y: 20, fontSize: 10, lineHeight: 2, advance: 6 });
@@ -27,10 +27,10 @@ describe("code", () => {
   });
 
   test("runs carry a role's theme color and an id that get() bounds", () => {
-    const named = code([["  ", ["fn", "f(a,", "call"]], [["fn", "b)", "call"], " x"]], { advance: 6, fontSize: 10, lineHeight: 2, theme: { fn: "#00f" } });
+    const theme = { ...defaultDark, base0D: "#00f" } as const;
+    const named = code([["  ", ["fn", "f(a,", "call"]], [["fn", "b)", "call"], " x"]], { advance: 6, fontSize: 10, lineHeight: 2, theme });
     expect(named.words.map((w) => w.color)).toEqual(["#00f", "#00f", undefined]);
     expect(named.get("call")).toMatchObject({ x: 0, y: 0, w: 36, h: 40 });
-    expect(() => code([[["kw", "if"]]], { theme: {} })).toThrow();
   });
 
   test("a gutter shifts the code right by the digits plus two columns", () => {
@@ -60,8 +60,8 @@ describe("morph matching", () => {
 });
 
 test("morph pairs runs by id before content, so a renamed word moves instead of fading", () => {
-  const before = code([[["v", "count", "n"], " = 1"]], { theme: { v: "#fff" } }).words;
-  const after = code([["let ", ["v", "total", "n"], " = 1"]], { theme: { v: "#fff" } }).words;
+  const before = code([[["variable", "count", "n"], " = 1"]]).words;
+  const after = code([["let ", ["variable", "total", "n"], " = 1"]]).words;
   expect(match(before, after)).toContainEqual([0, 1]);
 });
 

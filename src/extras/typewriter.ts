@@ -4,17 +4,20 @@ import { el } from "../el";
 import { ease, motion, type Motion, type Seconds } from "../motion";
 import type { SvgNode } from "../svg";
 import { number, text, type Code, type Metrics } from "./code";
+import { tint } from "./theme";
 
 export interface TypewriterOptions {
   readonly at: Seconds;
   /** Characters per second. */
   readonly cps?: number;
-  /** A block cursor that follows the typing and blinks when idle. `true` uses the code color. */
+  /** A block cursor that appears at `at` and follows the typing. `true` uses the plain text color. */
   readonly cursor?: boolean | Color;
+  /** Keep the cursor blinking after the last character. Default true; false hides it once typing ends. */
+  readonly blink?: boolean;
 }
 
 /** Type `code` out line by line, one character per step. A line costs its characters plus one for the newline. */
-export function typewriter(code: Code, { at, cps = 28, cursor = false }: TypewriterOptions): { readonly node: SvgNode; readonly end: Seconds } {
+export function typewriter(code: Code, { at, cps = 28, cursor = false, blink = true }: TypewriterOptions): { readonly node: SvgNode; readonly end: Seconds } {
   if (!(at >= 0 && cps > 0)) throw new Error("typewriter() needs a non-negative start and a positive cps.");
   const m = code.metrics;
   let t = at - 1 / cps;
@@ -34,12 +37,12 @@ export function typewriter(code: Code, { at, cps = 28, cursor = false }: Typewri
     const clip = def.clipPath({}, el.rect({ x: from, y: top, width: 0, height: m.height, animation: reveal }));
     return [numbered, el.g({ clipPath: clip }, words.map((w) => text(w, m)))];
   });
-  return { node: el.g({}, [rows, cursor && caret(lines, m, cursor === true ? (m.color ?? "#888") : cursor, at, t, cps)]), end: t };
+  return { node: el.g({}, [rows, cursor && caret(lines, m, cursor === true ? tint(m.theme, "plain") : cursor, at, t, cps, blink)]), end: t };
 }
 
 type Line = { readonly start: Seconds; readonly chars: number; readonly from: number; readonly top: number };
 
-const caret = (lines: readonly Line[], m: Metrics, color: Color, at: Seconds, end: Seconds, cps: number): SvgNode => {
+const caret = (lines: readonly Line[], m: Metrics, color: Color, at: Seconds, end: Seconds, cps: number, blink: boolean): SvgNode => {
   const { from: x, top: y } = lines[0]!;
   const path = lines.reduce<Motion<"x" | "y">>((track, { start, chars, from, top }) => {
     const placed = track.at(start).set({ x: from - x, y: top - y });
@@ -47,7 +50,8 @@ const caret = (lines: readonly Line[], m: Metrics, color: Color, at: Seconds, en
   }, motion({ x: 0, y: 0 }));
   const height = m.fontSize * 1.25;
   const block = (animation: Motion<"opacity">) => el.rect({ x, y: y + (m.height - height) / 2, width: m.advance, height, fill: color, fillOpacity: 0.8, animation });
-  return el.g({ animation: path }, [
+  const shown = motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+  return el.g({ animation: [path, blink ? shown : shown.at(end).set({ opacity: 0 })] }, [
     block(motion({ opacity: 1 }).at(0.5).set({ opacity: 0 }).loop(1)),
     block(motion({ opacity: 0 }).at(at).set({ opacity: 1 }).at(end).set({ opacity: 0 })),
   ]);

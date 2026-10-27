@@ -55,25 +55,25 @@ await Bun.write("hello.svg", svg);
 ## Motions
 
 ```tsx
-motion({ opacity: 0 })                          // initial values
-  .at(1)                                        // move the cursor to 1s
-  .to({ opacity: 1 }, 0.5)                      // fade in, cursor now at 1.5s
-  .wait(2)                                      // hold for 2s
+motion({ opacity: 0 }) // initial values
+  .at(1) // move the cursor to 1s
+  .to({ opacity: 1 }, 0.5) // fade in, cursor now at 1.5s
+  .wait(2) // hold for 2s
   .to({ opacity: 0, scale: 0.8 }, 0.4, ease.in)
-  .set({ scale: 1 });                           // hard cut
+  .set({ scale: 1 }); // hard cut
 ```
 
 Between transitions, every value holds.
 
 ### Channels
 
-| Tag | Channels |
-| --- | --- |
-| shapes, `g`, `text`, `use` | `opacity` `x` `y` `scale` `rotate` `blur` `fill` `stroke` `color` |
-| shapes | `draw` |
-| `rect`, `image` | `width` `height` |
-| `stop` | `stopColor` `stopOpacity` |
-| filter primitives | `stdDeviation` `baseFrequency` `seed` `displace` `dx` `dy` `floodColor` `floodOpacity` |
+| Tag                        | Channels                                                                               |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| shapes, `g`, `text`, `use` | `opacity` `x` `y` `scale` `rotate` `blur` `fill` `stroke` `color`                      |
+| shapes                     | `draw`                                                                                 |
+| `rect`, `image`            | `width` `height`                                                                       |
+| `stop`                     | `stopColor` `stopOpacity`                                                              |
+| filter primitives          | `stdDeviation` `baseFrequency` `seed` `displace` `dx` `dy` `floodColor` `floodOpacity` |
 
 ### Loops
 
@@ -94,16 +94,19 @@ Index 0 is the outermost, as if it were a wrapper `<g>`.
 ## Recipes
 
 ```tsx
-enter({ at: 0.5, over: 0.8 });                     // fade in
+enter({ at: 0.5, over: 0.8 }); // fade in
 enter({ at: 0.5, over: 0.8 }, { y: 20, blur: 6 }); // rise out of a blur
-exit({ at: 4, over: 0.4 });                        // fade out
-draw({ at: 0, over: 1.2 });                        // stroke a shape on
-shake({ at: 2, over: 0.5 }, { x: 6 });             // damped shake
-wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });  // seeded noise that loops
+exit({ at: 4, over: 0.4 }); // fade out
+draw({ at: 0, over: 1.2 }); // stroke a shape on
+shake({ at: 2, over: 0.5 }, { x: 6 }); // damped shake
+wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 }); // seeded noise that loops
 ```
 
 ```tsx
-sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), { duration: 12, tolerance: { translate: 1 } });
+sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), {
+  duration: 12,
+  tolerance: { translate: 1 },
+});
 ```
 
 `sampled` bakes any function of time and keeps only the keys each lane needs to stay within its tolerance.
@@ -124,12 +127,13 @@ ease.bezier(0.2, 0.8, 0.2, 1);
 ## Defs
 
 ```tsx
-const fade = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
+const fade = def.linearGradient(
+  { x1: 0, y1: 0, x2: 0, y2: 1 },
   <>
     <stop offset={0} stopColor="#fff" />
     <stop offset={1} stopColor="#fff" stopOpacity={0} />
-  </>
-));
+  </>,
+);
 
 <rect width={100} height={100} fill={fade} />;
 ```
@@ -143,7 +147,17 @@ const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 })
 const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
 
 render(
-  { width: 200, height: 200, duration: 4, title: "Orbit", css: css`.dot{translate:calc(100px + 60px * ${px} * cos(${yaw})) 100px}` },
+  {
+    width: 200,
+    height: 200,
+    duration: 4,
+    title: "Orbit",
+    css: css`
+      .dot {
+        translate: calc(100px + 60px * ${px} * cos(${yaw})) 100px;
+      }
+    `,
+  },
   <g animation={motion().to({ [yaw]: 360 }, 4, ease.linear)}>
     <circle class="dot" r={6} style={{ [px]: 1 }} />
   </g>,
@@ -157,11 +171,19 @@ A property is a key in motions and `style`, and a hole in `css`. Each value is c
 ```tsx
 const { add, sub, mul, div, sin, cos, clamp, length, angle } = calc;
 
-css`.dot{translate:${add(length(100), mul(length(60), px, cos(yaw)))} 100px}`;
+css`
+  .dot {
+    translate: ${add(length(100), mul(length(60), px, cos(yaw)))} 100px;
+  }
+`;
 // .dot{translate:calc(100px + 60px * var(--p1) * cos(var(--p2))) 100px}
 
 const z = add(mul(px, sin(yaw)), mul(pz, cos(yaw)));
-css`.dot{scale:${div(720, add(720, z))}}`;
+css`
+  .dot {
+    scale: ${div(720, add(720, z))};
+  }
+`;
 ```
 
 Operands are numbers, properties and other `calc` expressions, and units are checked. In `mul` and `div`, only the first operand may be a length or angle. `length(60)` is `60px`, and `length(expr)` turns a number into px. Also `min` and `max`.
@@ -183,12 +205,15 @@ Same props and children as JSX, as plain calls.
 
 ```tsx
 const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 }); // unit: px per block edge
-const grass = voxel.texture({ g: "#5DA03A", d: "#7A5534" }, `
+const grass = voxel.texture(
+  { g: "#5DA03A", d: "#7A5534" },
+  `
   gggg
   gdgg
   dddd
   dddd
-`);
+`,
+);
 
 <g transform="translate(300 160)">
   {voxel.scene({
@@ -218,9 +243,22 @@ A texture is pixel art, one character per palette color (`#rgb`, `#rrggbb` or `#
 ## Explain
 
 ```tsx
-import { Arrow, Callout, Focus, Marker, code, morph, read, timeline, typewriter } from "svjeez/explain";
+import {
+  Arrow,
+  Callout,
+  Focus,
+  Marker,
+  code,
+  morph,
+  read,
+  timeline,
+  typewriter,
+} from "svjeez/extras";
 
-const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
+const tl = timeline(
+  { intro: read("One piece of state"), change: 5, outro: 3 },
+  { gap: 0.5, pace: 1.2 },
+);
 const before = code(tokens, { x: 40, y: 60, fontSize: 16, gutter: true }); // a string, or Shiki-style token rows
 const after = code(nextTokens, { x: 40, y: 60, fontSize: 16, gutter: true });
 
@@ -228,8 +266,15 @@ const after = code(nextTokens, { x: 40, y: 60, fontSize: 16, gutter: true });
   <Focus stops={[{ during: tl.intro, on: before.lines(2) }]} dim={0.3}>
     {morph([before, after], { at: [tl.change], gutter: true }).node}
   </Focus>
-  <Marker stops={[{ at: tl.intro, rect: before.find("useState").pad(4) }, { at: tl.change, rect: after.lines(3, 5).pad(4) }]} />
-  <Callout target={after.find("dispatch")} side="right" during={tl.outro} class="note">Handlers send intent</Callout>
+  <Marker
+    stops={[
+      { at: tl.intro, rect: before.find("useState").pad(4) },
+      { at: tl.change, rect: after.lines(3, 5).pad(4) },
+    ]}
+  />
+  <Callout target={after.find("dispatch")} side="right" during={tl.outro} class="note">
+    Handlers send intent
+  </Callout>
 </>;
 
 typewriter(before, { at: 1, cps: 28, cursor: true }); // { node, end }
@@ -273,7 +318,3 @@ motion().to({ opcity: 1 }, 1);              // error: misspelled channel
 calc.mul(calc.length(1), calc.length(2));   // error: a length times a length
 calc.cos(px);                               // error: cos takes an angle
 ```
-
-## Publishing
-
-With Bun and npm installed, sign in with `npm login`, then run `npm publish`. The package is built automatically before publishing. For later releases, update the version in `package.json` first.

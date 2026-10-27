@@ -1,0 +1,12 @@
+export { timeline, during, read, type Timeline, type TimelineOptions } from "./extras/timeline";
+export { code, type Code, type CodeOptions, type Token, type Tokens, type Run, type Piece, type Word, type Metrics } from "./extras/code";
+export { morph, type MorphOptions } from "./extras/morph";
+export { typewriter, type TypewriterOptions } from "./extras/typewriter";
+export { Focus, type FocusStop } from "./extras/focus";
+export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
+export { Marker } from "./extras/marker";
+export { Camera, type CameraStop } from "./extras/camera";
+export { rect, type Rect, type Point, type Edge } from "./geometry";
+export { base16, tint, adaptive, defaultDark, defaultLight, tomorrowNight, tomorrow, type Base16, type Slot, type Role } from "./extras/theme";
+export { window, type WindowOptions } from "./extras/window";
+export { terminal, type Command, type TerminalOptions } from "./extras/terminal";
