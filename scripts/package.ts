@@ -3,7 +3,7 @@ import { readdir, readFile, rm, writeFile } from "node:fs/promises";
 await rm("package-dist", { recursive: true, force: true });
 
 const result = await Bun.build({
-  entrypoints: ["./src/index.ts", "./src/jsx-runtime.ts", "./src/jsx-dev-runtime.ts"],
+  entrypoints: ["./src/index.ts", "./src/explain.ts", "./src/jsx-runtime.ts", "./src/jsx-dev-runtime.ts"],
   outdir: "./package-dist",
   target: "node",
   splitting: true,
@@ -21,7 +21,7 @@ if (tsc.exitCode !== 0) {
 }
 
 // Node's ESM type resolution requires extensions on relative declaration imports.
-for (const file of await readdir("package-dist")) {
+for (const file of await readdir("package-dist", { recursive: true })) {
   if (!file.endsWith(".d.ts")) continue;
   const path = `package-dist/${file}`;
   const contents = await readFile(path, "utf8");

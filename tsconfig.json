@@ -24,6 +24,9 @@
       ],
       "svg-motion/jsx-dev-runtime": [
         "./src/jsx-dev-runtime.ts"
+      ],
+      "svjeez/explain": [
+        "./src/explain.ts"
       ]
     }
   },

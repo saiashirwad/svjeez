@@ -65,6 +65,8 @@ const TEXT = {
   dx: attr<Length>("dx"),
   dy: attr<Length>("dy"),
   fontFamily: attr<string>("font-family"),
+  xmlSpace: attr<"default" | "preserve">("xml:space"),
+  textDecoration: attr<"none" | "underline">("text-decoration"),
   fontSize: attr<Length>("font-size"),
   fontStyle: attr<"normal" | "italic">("font-style"),
   fontWeight: attr<number | "normal" | "bold">("font-weight"),

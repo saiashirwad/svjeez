@@ -278,7 +278,19 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
   }
   const classes = [attrs.class, css.length > 0 && "a", css.length > 0 && className(state, css), pivot && "fb"].filter(Boolean);
   if (classes.length > 0) attrs.class = classes.join(" ");
-  return element(target.tag, attrs, children);
+  const result = element(target.tag, attrs, children);
+  if (state.canvas.stillAt !== undefined && !target.tag.startsWith("fe") && lanes.some((lane) => lane.backend === "smil")) {
+    if (!state.stills.includes(".smil-live{display:none}.smil-still{display:inline}")) {
+      state.rules.push(".smil-still{display:none}");
+      state.stills.push(".smil-live{display:none}.smil-still{display:inline}");
+    }
+    const stillAttrs: Record<string, AttrValue> = { ...attrs, class: [attrs.class, "smil-still"].filter(Boolean).join(" ") };
+    const liveAttrs = { ...attrs, class: [attrs.class, "smil-live"].filter(Boolean).join(" ") };
+    // IDs belong to the visible animated element; avoid duplicating them in the still copy.
+    delete stillAttrs.id;
+    return element("g", {}, [element(target.tag, liveAttrs, children), element(target.tag, stillAttrs, target.children)]);
+  }
+  return result;
 };
 
 const place = (state: State, el: Element, motions: readonly Motion[]): Element => {

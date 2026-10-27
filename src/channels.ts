@@ -27,6 +27,12 @@ interface Spec {
 }
 
 export const CHANNELS = {
+  width: { value: number, tags: ["rect", "image"], lane: "width", composition: "replace", attr: "width", range: [0, Infinity] },
+  height: { value: number, tags: ["rect", "image"], lane: "height", composition: "replace", attr: "height", range: [0, Infinity] },
+  x1: { value: number, tags: ["line"], lane: "x1", composition: "replace", attr: "x1" },
+  y1: { value: number, tags: ["line"], lane: "y1", composition: "replace", attr: "y1" },
+  x2: { value: number, tags: ["line"], lane: "x2", composition: "replace", attr: "x2" },
+  y2: { value: number, tags: ["line"], lane: "y2", composition: "replace", attr: "y2" },
   opacity: { value: number, tags: GRAPHICS, lane: "opacity", composition: "nest", identity: 1, range: [0, 1], collidesWith: ["opacity"] },
   x: { value: number, tags: GRAPHICS, lane: "translate", composition: "nest", identity: 0 },
   y: { value: number, tags: GRAPHICS, lane: "translate", composition: "nest", identity: 0 },
@@ -81,7 +87,7 @@ export const isChannel = (name: string): name is Channel => Object.hasOwn(CHANNE
 export type Backend = "css" | "smil" | "blur";
 
 export const backendOf = (tag: string, channel: Target): Backend =>
-  tag.startsWith("fe") ? "smil" : channel === "blur" ? "blur" : "css";
+  (tag.startsWith("fe") || ["width", "height", "x1", "y1", "x2", "y2"].includes(channel)) ? "smil" : channel === "blur" ? "blur" : "css";
 
 export const laneOf = (tag: string, channel: Target): string => {
   const row = spec(channel);

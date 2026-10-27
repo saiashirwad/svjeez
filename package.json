@@ -14,6 +14,10 @@
     "./jsx-dev-runtime": {
       "types": "./package-dist/jsx-dev-runtime.d.ts",
       "import": "./package-dist/jsx-dev-runtime.js"
+    },
+    "./explain": {
+      "types": "./package-dist/explain.d.ts",
+      "import": "./package-dist/explain.js"
     }
   },
   "scripts": {
