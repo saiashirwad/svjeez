@@ -12,9 +12,11 @@
       },
       "peerDependencies": {
         "playwright-core": ">=1.49",
+        "typescript": ">=5.4",
       },
       "optionalPeers": [
         "playwright-core",
+        "typescript",
       ],
     },
   },

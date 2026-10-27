@@ -46,10 +46,14 @@
     "typescript": "latest"
   },
   "peerDependencies": {
-    "playwright-core": ">=1.49"
+    "playwright-core": ">=1.49",
+    "typescript": ">=5.4"
   },
   "peerDependenciesMeta": {
     "playwright-core": {
+      "optional": true
+    },
+    "typescript": {
       "optional": true
     }
   },
