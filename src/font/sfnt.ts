@@ -2,6 +2,7 @@
 export interface Sfnt {
   readonly view: DataView;
   readonly tables: ReadonlyMap<string, number>;
+  readonly lengths: ReadonlyMap<string, number>;
 }
 
 export const SFNT_TRUETYPE = 0x00010000;
@@ -26,15 +27,18 @@ export const required = (f: Sfnt, tag: string): number => {
 export const sfnt = (bytes: Uint8Array): Sfnt => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const tables = new Map<string, number>();
+  const lengths = new Map<string, number>();
   const count = view.getUint16(4);
   if (12 + 16 * count > bytes.length) throw new Error("This font is truncated: its table directory runs past the end of the file.");
   for (let i = 0; i < count; i++) {
     const record = 12 + 16 * i;
     const [offset, length] = [view.getUint32(record + 8), view.getUint32(record + 12)];
     if (offset + length > bytes.length) throw new Error("This font is truncated: a table runs past the end of the file.");
-    tables.set(String.fromCharCode(...bytes.subarray(record, record + 4)), offset);
+    const tag = String.fromCharCode(...bytes.subarray(record, record + 4));
+    tables.set(tag, offset);
+    lengths.set(tag, length);
   }
-  return { view, tables };
+  return { view, tables, lengths };
 };
 
 export interface Metrics {

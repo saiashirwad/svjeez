@@ -1,5 +1,6 @@
 import { contours, pathData } from "./glyf";
 import { shaper, type Shaper } from "./shape";
+import { subset } from "./subset";
 import { isFixedPitch, isItalic, metrics, name, sfnt, SFNT_CFF, SFNT_TRUETYPE, weightOf, type Metrics, type Sfnt } from "./sfnt";
 
 export type FontFormat = "ttf" | "otf" | "woff" | "woff2";
@@ -14,6 +15,11 @@ export interface FontOptions {
   readonly style?: FontStyle;
   /** Generic or installed families to fall back to. Default `monospace` for a fixed-pitch font, else `sans-serif`. */
   readonly fallback?: readonly string[];
+  /**
+   * Embed only the glyphs the scene's text uses. Default true. Applies to TrueType outlines (most .ttf files); OTF with
+   * CFF outlines, WOFF and WOFF2 embed whole. Turn it off if text is changed after rendering.
+   */
+  readonly subset?: boolean;
 }
 
 export interface PathOptions {
@@ -73,7 +79,10 @@ const hash = (bytes: Uint8Array): string => {
 /** A font file, embedded as a data URI. Pass it as `fontFamily`, measure text with it, or draw text as paths. */
 export class Font {
   readonly #sfnt: Sfnt | undefined;
+  readonly #bytes: Uint8Array;
+  readonly #subset: boolean;
   #shaper: Shaper | undefined;
+  readonly #embeds = new Map<string, `data:${string}`>();
   readonly family: string;
   readonly weight: number;
   readonly style: FontStyle;
@@ -86,6 +95,8 @@ export class Font {
   constructor(bytes: Uint8Array, format: FontFormat, options: FontOptions) {
     const readable = format === "ttf" || format === "otf" ? sfnt(bytes) : undefined;
     this.#sfnt = readable;
+    this.#bytes = bytes;
+    this.#subset = options.subset ?? true;
     this.format = format;
     this.family = options.family ?? (readable && name(readable, 16, 1)) ?? `font-${hash(bytes)}`;
     this.weight = options.weight ?? (readable ? weightOf(readable) : 400);
@@ -106,6 +117,25 @@ export class Font {
     return this.#shaper.shape(text);
   }
 
+  /**
+   * The data URI to embed for a scene whose text is `texts`: cut down to their glyphs when the font allows it, else
+   * the whole file. Each distinct text set is cut once.
+   */
+  embed(texts: readonly string[]): `data:${string}` {
+    const font = this.#sfnt;
+    if (!font || !this.#subset || font.tables.get("glyf") === undefined) return this.href;
+    const key = [...new Set(texts.flatMap((text) => [...text]))].sort().join("") + "\u0000" + texts.join("\u0000");
+    let href = this.#embeds.get(key);
+    if (!href) {
+      this.#shaper ??= shaper(font);
+      const shaped = this.#shaper;
+      const cut = subset(this.#bytes, font, shaped, shaped.kern, texts);
+      href = cut ? `data:font/ttf;base64,${base64(cut)}` : this.href;
+      this.#embeds.set(key, href);
+    }
+    return href;
+  }
+
   /** Ascent, descent, line gap, cap height and x-height in em. Multiply by the font size for px. */
   get metrics(): Metrics {
     return metrics(this.#readable("metrics"));
@@ -114,7 +144,7 @@ export class Font {
   /** Whether the font has a glyph for this character. The browser draws a missing one from the fallback font. */
   has(char: string): boolean {
     this.#shaper ??= shaper(this.#readable("has()"));
-    return this.#shaper.hasGlyph(char);
+    return this.#shaper.glyph(char) !== 0;
   }
 
   /** Advance width of one line of text in px, with ligatures and kerning as the browser applies them. */
@@ -186,8 +216,9 @@ export const fontFaces = (value: FontValue): { readonly family: string; readonly
   return { family: [cssString(name), ...fallback].join(", "), faces: faces.map((font) => ({ name, font })) };
 };
 
-export const fontFaceRule = (name: string, font: Font): string =>
-  `@font-face{font-family:${cssString(name)};src:url(${font.href}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${font.style}}`;
+/** The `@font-face` rule for a face, embedding only what `texts` need when the font can be cut down. */
+export const fontFaceRule = (name: string, font: Font, texts: readonly string[] = []): string =>
+  `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${font.style}}`;
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 

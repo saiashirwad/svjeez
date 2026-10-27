@@ -38,7 +38,9 @@ interface State {
   readonly registrations: string[];
   /** Embedded faces by family name, weight and style, so two different files never claim one slot. */
   readonly fonts: Map<string, Font>;
-  readonly fontRules: string[];
+  readonly faces: { readonly name: string; readonly font: Font }[];
+  /** Every run of text in the scene, so embedded fonts can be cut down to the glyphs it uses. */
+  readonly texts: string[];
   readonly counters: Map<string, number>;
   readonly defs: SvgNode[];
   readonly keyframes: Map<string, string>;
@@ -123,7 +125,7 @@ const fontFamily = (state: State, value: FontValue): string => {
     if (taken?.href === font.href) continue;
     if (taken) throw new Error(`Two different fonts claim ${slot}. Give one of them another family name with font(bytes, { family }).`);
     state.fonts.set(slot, font);
-    state.fontRules.push(fontFaceRule(name, font));
+    state.faces.push({ name, font });
   }
   return family;
 };
@@ -319,6 +321,8 @@ const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
 const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
   switch (node.kind) {
     case "text":
+      state.texts.push(node.value);
+      return node;
     case "raw":
       return node;
     case "fragment":
@@ -347,7 +351,8 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
     properties: new Map(),
     registrations: [],
     fonts: new Map(),
-    fontRules: [],
+    faces: [],
+    texts: [],
     counters: new Map(),
     defs: [],
     keyframes: new Map(),
@@ -363,6 +368,7 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
     canvas.stillAt === undefined || (state.rules.length === 0 && state.stills.length === 0)
       ? ""
       : `@media (prefers-reduced-motion:reduce){${state.rules.length > 0 ? `.a{animation-delay:-${seconds(canvas, canvas.stillAt)}!important;animation-play-state:paused!important}` : ""}${state.stills.join("")}}`;
-  const generated = [...state.fontRules, ...state.registrations, state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
+  const fontRules = state.faces.map(({ name, font }) => fontFaceRule(name, font, state.texts));
+  const generated = [...fontRules, ...state.registrations, state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
   return { body, defs: state.defs, css: [authored, generated].filter(Boolean).join("\n\n") };
 };

@@ -183,7 +183,9 @@ const kern = (f: Sfnt, subtable: number, first: number, second: number): number 
 
 export interface Shaper {
   readonly shape: (text: string) => readonly Placed[];
-  readonly hasGlyph: (char: string) => boolean;
+  readonly glyph: (char: string) => number;
+  /** Pair kerning between two glyphs in font units. */
+  readonly kern: (left: number, right: number) => number;
 }
 
 /**
@@ -195,26 +197,32 @@ export const shaper = (f: Sfnt): Shaper => {
   const ligatures = lookups(f, "GSUB", ["liga", "clig", "rlig"], 7).filter((l) => l.type === 4);
   const kerning = lookups(f, "GPOS", ["kern"], 9).filter((l) => l.type === 2);
   const legacyKern = kerning.length === 0 ? table(f, "kern") : undefined;
+  const pair = (left: number, right: number): number => {
+    let total = 0;
+    for (const { subtables } of kerning) {
+      for (const s of subtables) {
+        const k = kern(f, s, left, right);
+        if (k === undefined) continue;
+        total += k;
+        break;
+      }
+    }
+    if (legacyKern !== undefined) {
+      const placed: Placed[] = [{ glyph: left, chars: "", advance: 0 }, { glyph: right, chars: "", advance: 0 }];
+      applyKernTable(f, legacyKern, placed);
+      total += placed[0]!.advance;
+    }
+    return total;
+  };
   return {
-    hasGlyph: (char) => map(char.codePointAt(0)!) !== 0,
+    glyph: (char) => map(char.codePointAt(0)!),
+    kern: pair,
     shape: (text) => {
       const run: Placed[] = [...text].map((chars) => ({ glyph: map(chars.codePointAt(0)!), chars, advance: 0 }));
       for (const { subtables } of ligatures) {
         for (let i = 0; i < run.length; i++) for (const s of subtables) if (ligate(f, s, run, i)) break;
       }
-      const placed = run.map((p) => ({ ...p, advance: advance(f, p.glyph) }));
-      for (const { subtables } of kerning) {
-        for (let i = 0; i + 1 < placed.length; i++) {
-          for (const s of subtables) {
-            const k = kern(f, s, placed[i]!.glyph, placed[i + 1]!.glyph);
-            if (k === undefined) continue;
-            placed[i] = { ...placed[i]!, advance: placed[i]!.advance + k };
-            break;
-          }
-        }
-      }
-      if (legacyKern !== undefined) applyKernTable(f, legacyKern, placed);
-      return placed;
+      return run.map((p, i) => ({ ...p, advance: advance(f, p.glyph) + (i + 1 < run.length ? pair(p.glyph, run[i + 1]!.glyph) : 0) }));
     },
   };
 };

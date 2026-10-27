@@ -161,6 +161,13 @@ describe.if(browser)("embedded fonts", async () => {
     expect(same(embedded, fallback)).toBe(false);
   });
 
+  test("a font cut down to the scene's glyphs paints the same as the whole file", async () => {
+    const whole = font(await Bun.file(new URL("../examples/fonts/ABeeZee-Regular.ttf", import.meta.url)).bytes(), { subset: false });
+    const line = <text x={10} y={40} fontSize={28} fontFamily={sans}>To AVA, café!</text>;
+    const full = <text x={10} y={40} fontSize={28} fontFamily={whole}>To AVA, café!</text>;
+    expect(same(await paint(line), await paint(full))).toBe(true);
+  });
+
   test("measure() matches the browser's layout, kerning included", async () => {
     const whole = await paint(<text x={10} y={40} fontSize={28} fontFamily={sans}>To AVA</text>);
     const split = await paint(

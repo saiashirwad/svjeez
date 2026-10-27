@@ -157,6 +157,32 @@ describe("fontFamily", () => {
     ).toThrow("Two different fonts claim 'ABeeZee' 400 normal");
   });
 
+  test("embeds only the glyphs the scene's text uses", () => {
+    const embedded = (svg: string) => /url\(data:font\/ttf;base64,([^)]+)\)/.exec(svg)![1]!;
+    const cut = Buffer.from(embedded(scene(<text fontFamily={sans}>Hi</text>)), "base64");
+    expect(cut.length).toBeLessThan(sans.bytes / 4);
+    const parsed = font(cut);
+    expect(parsed).toMatchObject({ family: "ABeeZee", weight: 400 });
+    expect(parsed.has("H") && parsed.has("i")).toBe(true);
+    expect(parsed.has("Q")).toBe(false);
+    expect(parsed.measure("Hi", 40)).toBeCloseTo(sans.measure("Hi", 40), 6);
+  });
+
+  test("the cut keeps pair kerning among the glyphs it keeps", () => {
+    const cut = font(Buffer.from(/base64,([^)]+)\)/.exec(scene(<text fontFamily={sans}>AV To</text>))![1]!, "base64"));
+    expect(cut.measure("AV", 100)).toBeCloseTo(sans.measure("AV", 100), 6);
+    expect(cut.measure("To", 100)).toBeCloseTo(sans.measure("To", 100), 6);
+  });
+
+  test("text that forms ligatures embeds the whole font, so the browser can still form them", () => {
+    expect(scene(<text fontFamily={black}>fi</text>)).toContain(black.href);
+  });
+
+  test("subset: false embeds the whole file", async () => {
+    const whole = font(await readFile(fixture("ABeeZee-Regular")), { subset: false });
+    expect(scene(<text fontFamily={whole}>Hi</text>)).toContain(whole.href);
+  });
+
   test("a large embedded font warns", () => {
     const big = font(Uint8Array.from([...Buffer.from("wOF2"), ...new Array(200_000).fill(7)]), { family: "Big" });
     expect(validateSvg(scene(<text fontFamily={big}>Hi</text>)).warnings.join("\n")).toContain("An embedded font is");
@@ -218,7 +244,8 @@ describe("path", () => {
       }
     }
     const tables = new Map([["head", 0], ["loca", 64], ["glyf", 256]]);
-    expect(() => contours({ view, tables }, 0)).toThrow("too many components");
+    const lengths = new Map<string, number>();
+    expect(() => contours({ view, tables, lengths }, 0)).toThrow("too many components");
   });
 
   test("needs a positive size", () => {
