@@ -80,13 +80,14 @@ const hash = (bytes: Uint8Array): string => {
 export class Font {
   readonly #sfnt: Sfnt | undefined;
   readonly #bytes: Uint8Array;
-  readonly #subset: boolean;
   #shaper: Shaper | undefined;
   readonly #embeds = new Map<string, `data:${string}`>();
   readonly family: string;
   readonly weight: number;
   readonly style: FontStyle;
   readonly fallback: readonly string[];
+  /** Whether embedding cuts the font down to the glyphs a scene uses. See `FontOptions.subset`. */
+  readonly subset: boolean;
   readonly format: FontFormat;
   readonly href: `data:${string}`;
   /** Length of `href`, which is what the output pays each time the font is embedded. */
@@ -96,7 +97,7 @@ export class Font {
     const readable = format === "ttf" || format === "otf" ? sfnt(bytes) : undefined;
     this.#sfnt = readable;
     this.#bytes = bytes;
-    this.#subset = options.subset ?? true;
+    this.subset = options.subset ?? true;
     this.format = format;
     this.family = options.family ?? (readable && name(readable, 16, 1)) ?? `font-${hash(bytes)}`;
     this.weight = options.weight ?? (readable ? weightOf(readable) : 400);
@@ -123,7 +124,7 @@ export class Font {
    */
   embed(texts: readonly string[]): `data:${string}` {
     const font = this.#sfnt;
-    if (!font || !this.#subset || font.tables.get("glyf") === undefined) return this.href;
+    if (!font || !this.subset || font.tables.get("glyf") === undefined) return this.href;
     const key = [...new Set(texts.flatMap((text) => [...text]))].sort().join("") + "\u0000" + texts.join("\u0000");
     let href = this.#embeds.get(key);
     if (!href) {

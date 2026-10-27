@@ -90,41 +90,107 @@ const classOf = (f: Sfnt, at: number, glyph: number): number => {
   return 0;
 };
 
-/**
- * Subtables of the lookups that the given features turn on, in lookup order, for the Latin script or the default.
- * Extension lookups (GSUB 7, GPOS 9) are unwrapped to their real type.
- */
-const lookups = (f: Sfnt, tag: "GSUB" | "GPOS", features: readonly string[], extension: number): { type: number; subtables: number[] }[] => {
+interface Lookup {
+  readonly index: number;
+  readonly type: number;
+  readonly flag: number;
+  readonly subtables: readonly number[];
+}
+
+/** A lookup's type, flag and subtables, with an extension lookup (GSUB 7, GPOS 9) unwrapped to its real type. */
+const lookupAt = (f: Sfnt, lookupList: number, index: number, extension: number): Lookup => {
+  const lookup = lookupList + u16(f, lookupList + 2 + 2 * index);
+  const type = u16(f, lookup);
+  const flag = u16(f, lookup + 2);
+  const subtables = Array.from({ length: u16(f, lookup + 4) }, (_, i) => lookup + u16(f, lookup + 6 + 2 * i));
+  if (type !== extension) return { index, type, flag, subtables };
+  return { index, type: u16(f, subtables[0]! + 2), flag, subtables: subtables.map((s) => s + u32(f, s + 4)) };
+};
+
+const tagAt = (f: Sfnt, at: number): string => String.fromCharCode(...[0, 1, 2, 3].map((k) => f.view.getUint8(at + k)));
+
+/** Indices of the lookups that a language system's features turn on, for the features `wanted` accepts. */
+const langSysLookups = (f: Sfnt, featureList: number, langSys: number, wanted: (feature: string) => boolean, into: Set<number>): void => {
+  for (let i = 0, count = u16(f, langSys + 4); i < count; i++) {
+    const record = featureList + 2 + 6 * u16(f, langSys + 6 + 2 * i);
+    if (!wanted(tagAt(f, record))) continue;
+    const table = featureList + u16(f, record + 4);
+    for (let j = 0, n = u16(f, table + 2); j < n; j++) into.add(u16(f, table + 4 + 2 * j));
+  }
+};
+
+/** Subtables of the lookups that the given features turn on, in lookup order, for the Latin script or the default. */
+const lookups = (f: Sfnt, tag: "GSUB" | "GPOS", features: readonly string[], extension: number): Lookup[] => {
+  const at = table(f, tag);
+  if (at === undefined) return [];
+  const scripts = at + u16(f, at + 4);
+  const scriptRecords = Array.from({ length: u16(f, scripts) }, (_, i) => ({ tag: tagAt(f, scripts + 2 + 6 * i), at: scripts + u16(f, scripts + 2 + 6 * i + 4) }));
+  const script = scriptRecords.find((s) => s.tag === "latn") ?? scriptRecords.find((s) => s.tag === "DFLT") ?? scriptRecords[0];
+  if (!script || u16(f, script.at) === 0) return [];
+  const indices = new Set<number>();
+  langSysLookups(f, at + u16(f, at + 6), script.at + u16(f, script.at), (feature) => features.includes(feature), indices);
+  return [...indices].sort((a, b) => a - b).map((index) => lookupAt(f, at + u16(f, at + 8), index, extension));
+};
+
+/** Features a browser applies without being asked, in some script. */
+const DEFAULT_FEATURES = new Set(
+  "abvf abvm abvs akhn blwf blwm blws calt ccmp cfar cjct clig curs dist fin2 fin3 fina half haln init isol kern liga ljmo locl ltra ltrm mark med2 medi mkmk nukt pref pres pstf psts rclt rkrf rlig rphf rtla rtlm rvrn stch tjmo vatu vjmo".split(" "),
+);
+
+/** Every lookup a default feature turns on in any script's default language system, which is what text without `lang` gets. */
+const defaultLookups = (f: Sfnt, tag: "GSUB" | "GPOS", extension: number): Lookup[] => {
   const at = table(f, tag);
   if (at === undefined) return [];
   const scripts = at + u16(f, at + 4);
   const featureList = at + u16(f, at + 6);
-  const lookupList = at + u16(f, at + 8);
-  const scriptRecords = Array.from({ length: u16(f, scripts) }, (_, i) => ({
-    tag: String.fromCharCode(...[0, 1, 2, 3].map((k) => f.view.getUint8(scripts + 2 + 6 * i + k))),
-    at: scripts + u16(f, scripts + 2 + 6 * i + 4),
-  }));
-  const script = scriptRecords.find((s) => s.tag === "latn") ?? scriptRecords.find((s) => s.tag === "DFLT") ?? scriptRecords[0];
-  if (!script || u16(f, script.at) === 0) return [];
-  const langSys = script.at + u16(f, script.at);
   const indices = new Set<number>();
-  for (let i = 0, count = u16(f, langSys + 4); i < count; i++) {
-    const feature = u16(f, langSys + 6 + 2 * i);
-    const record = featureList + 2 + 6 * feature;
-    const name = String.fromCharCode(...[0, 1, 2, 3].map((k) => f.view.getUint8(record + k)));
-    if (!features.includes(name)) continue;
-    const table = featureList + u16(f, record + 4);
-    for (let j = 0, n = u16(f, table + 2); j < n; j++) indices.add(u16(f, table + 4 + 2 * j));
+  for (let i = 0, count = u16(f, scripts); i < count; i++) {
+    const script = scripts + u16(f, scripts + 2 + 6 * i + 4);
+    if (u16(f, script) !== 0) langSysLookups(f, featureList, script + u16(f, script), (feature) => DEFAULT_FEATURES.has(feature), indices);
   }
-  return [...indices]
-    .sort((a, b) => a - b)
-    .map((index) => {
-      const lookup = lookupList + u16(f, lookupList + 2 + 2 * index);
-      const type = u16(f, lookup);
-      const subtables = Array.from({ length: u16(f, lookup + 4) }, (_, i) => lookup + u16(f, lookup + 6 + 2 * i));
-      if (type !== extension) return { type, subtables };
-      return { type: u16(f, subtables[0]! + 2), subtables: subtables.map((s) => s + u32(f, s + 4)) };
-    });
+  return [...indices].map((index) => lookupAt(f, at + u16(f, at + 8), index, extension));
+};
+
+/** Lookup flags that make a rule skip glyphs by their GDEF class, so its sequence need not be contiguous in the text. */
+const SKIPS = 0xff1e;
+
+/**
+ * Whether a subtable could apply somewhere in these runs of glyphs. Format 3 contextual rules and reverse chaining are
+ * matched in place. Other contextual formats are judged by their first glyph, and rules that skip glyphs by every
+ * coverage meeting some glyph, which errs toward yes.
+ */
+const mayApply = (f: Sfnt, tag: "GSUB" | "GPOS", lookup: Lookup, subtable: number, runs: readonly (readonly number[])[]): boolean => {
+  const covers = (offset: number, glyph: number | undefined) => glyph !== undefined && coverage(f, subtable + offset, glyph) >= 0;
+  const meets = (offset: number) => runs.some((run) => run.some((glyph) => covers(offset, glyph)));
+  const list = (at: number): [number[], number] => {
+    const count = u16(f, at);
+    return [Array.from({ length: count }, (_, i) => u16(f, at + 2 + 2 * i)), at + 2 + 2 * count];
+  };
+  const format = u16(f, subtable);
+  let backtrack: number[] = [];
+  let input: number[];
+  let lookahead: number[] = [];
+  if (lookup.type === (tag === "GSUB" ? 5 : 7) && format === 3) {
+    input = Array.from({ length: u16(f, subtable + 2) }, (_, i) => u16(f, subtable + 6 + 2 * i));
+  } else if (lookup.type === (tag === "GSUB" ? 6 : 8) && format === 3) {
+    let next: number;
+    [backtrack, next] = list(subtable + 2);
+    [input, next] = list(next);
+    [lookahead] = list(next);
+  } else if (tag === "GSUB" && lookup.type === 8) {
+    input = [u16(f, subtable + 2)];
+    [backtrack] = list(subtable + 4);
+    [lookahead] = list(subtable + 6 + 2 * backtrack.length);
+  } else return meets(u16(f, subtable + 2));
+  if (lookup.flag & SKIPS) return [...backtrack, ...input, ...lookahead].every(meets);
+  return runs.some((run) =>
+    run.some(
+      (_, i) =>
+        input.every((c, k) => covers(c, run[i + k])) &&
+        backtrack.every((c, k) => covers(c, run[i - 1 - k])) &&
+        lookahead.every((c, k) => covers(c, run[i + input.length + k])),
+    ),
+  );
 };
 
 /** GSUB type 4: replace a run of glyphs with one ligature glyph. */
@@ -186,6 +252,11 @@ export interface Shaper {
   readonly glyph: (char: string) => number;
   /** Pair kerning between two glyphs in font units. */
   readonly kern: (left: number, right: number) => number;
+  /**
+   * Whether a browser could substitute or position these runs of glyphs, one per text, through a lookup this shaper
+   * does not apply: contextual alternates, mark positioning, the forms of another script. Errs toward yes.
+   */
+  readonly beyond: (runs: readonly (readonly number[])[]) => boolean;
 }
 
 /**
@@ -214,9 +285,16 @@ export const shaper = (f: Sfnt): Shaper => {
     }
     return total;
   };
+  const applied = new Set([...ligatures, ...kerning].map((l) => `${l.type === 4 ? "GSUB" : "GPOS"} ${l.index}`));
+  const others = (["GSUB", "GPOS"] as const).flatMap((tag) =>
+    defaultLookups(f, tag, tag === "GSUB" ? 7 : 9)
+      .filter((lookup) => !applied.has(`${tag} ${lookup.index}`))
+      .map((lookup) => ({ tag, lookup })),
+  );
   return {
     glyph: (char) => map(char.codePointAt(0)!),
     kern: pair,
+    beyond: (runs) => others.some(({ tag, lookup }) => lookup.subtables.some((s) => mayApply(f, tag, lookup, s, runs))),
     shape: (text) => {
       const run: Placed[] = [...text].map((chars) => ({ glyph: map(chars.codePointAt(0)!), chars, advance: 0 }));
       for (const { subtables } of ligatures) {

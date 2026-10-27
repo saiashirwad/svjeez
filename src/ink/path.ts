@@ -42,6 +42,7 @@ const quadratic = (p0: Pt, p1: Pt, p2: Pt, out: Pt[]): void => {
 
 /** SVG arc, endpoint form, flattened through its center form (SVG 1.1 appendix F.6). */
 const arc = (p0: Pt, rx: number, ry: number, rotation: number, large: number, sweep: number, p1: Pt, out: Pt[]): void => {
+  if (p0.x === p1.x && p0.y === p1.y) return;
   if (rx === 0 || ry === 0) {
     out.push(p1);
     return;
@@ -99,7 +100,7 @@ export const flatten = (d: string): Polyline[] => {
     if (args.length < count || args.some((a) => typeof a !== "number")) throw new Error(`Path command ${command} needs ${count} numbers.`);
     i += count;
     const at = (x: number, y: number): Pt => (relative ? { x: pen.x + x, y: pen.y + y } : { x, y });
-    const mirror = (): Pt => (control && /[csqt]/.test(previous) ? { x: 2 * pen.x - control.x, y: 2 * pen.y - control.y } : pen);
+    const mirror = (after: RegExp): Pt => (control && after.test(previous) ? { x: 2 * pen.x - control.x, y: 2 * pen.y - control.y } : pen);
     switch (lower) {
       case "m":
         end(false);
@@ -119,14 +120,14 @@ export const flatten = (d: string): Polyline[] => {
       }
       case "c":
       case "s": {
-        const [c1, c2, next] = lower === "c" ? [at(args[0]!, args[1]!), at(args[2]!, args[3]!), at(args[4]!, args[5]!)] : [mirror(), at(args[0]!, args[1]!), at(args[2]!, args[3]!)];
+        const [c1, c2, next] = lower === "c" ? [at(args[0]!, args[1]!), at(args[2]!, args[3]!), at(args[4]!, args[5]!)] : [mirror(/[cs]/), at(args[0]!, args[1]!), at(args[2]!, args[3]!)];
         cubic(pen, c1, c2, next, points);
         [pen, control] = [next, c2];
         break;
       }
       case "q":
       case "t": {
-        const [c1, next] = lower === "q" ? [at(args[0]!, args[1]!), at(args[2]!, args[3]!)] : [mirror(), at(args[0]!, args[1]!)];
+        const [c1, next] = lower === "q" ? [at(args[0]!, args[1]!), at(args[2]!, args[3]!)] : [mirror(/[qt]/), at(args[0]!, args[1]!)];
         quadratic(pen, c1, next, points);
         [pen, control] = [next, c1];
         break;

@@ -3,7 +3,7 @@ import type { Shaper } from "./shape";
 
 /**
  * Tables that go: variation data (the subset is the default instance), layout tables (kerning is rebuilt as a `kern`
- * table, and a scene whose text forms ligatures embeds the whole font instead), per-glyph device metrics, and the signature.
+ * table, and a scene whose text could meet any other lookup embeds the whole font instead), per-glyph device metrics, and the signature.
  */
 const DROP = new Set(["GSUB", "GPOS", "GDEF", "BASE", "JSTF", "MATH", "fvar", "gvar", "avar", "cvar", "HVAR", "VVAR", "MVAR", "STAT", "hdmx", "LTSH", "VDMX", "DSIG", "kern", "morx", "kerx"]);
 
@@ -60,9 +60,10 @@ const search = (count: number, size: number) => {
   return { range: power * size, selector: Math.log2(power), shift: count * size - power * size };
 };
 
-/** A format 4 cmap with one segment per character, plus the required final segment. */
+/** A format 4 cmap for the BMP characters, plus a format 12 one when any character lies beyond it. */
 const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
-  const segments = [...pairs.filter(([code]) => code < 0xffff)].sort((a, b) => a[0] - b[0]);
+  const sorted = [...pairs].sort((a, b) => a[0] - b[0]);
+  const segments = sorted.filter(([code]) => code < 0xffff);
   const count = segments.length + 1;
   const { range, selector, shift } = search(count, 2);
   const sub = new Writer().u16(4).u16(16 + 8 * count).u16(0).u16(count * 2).u16(range).u16(selector).u16(shift);
@@ -73,9 +74,16 @@ const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
   for (const [code, glyph] of segments) sub.u16((glyph - code) & 0xffff);
   sub.u16(1);
   for (let i = 0; i < count; i++) sub.u16(0);
-  const body = sub.done();
-  const head = new Writer().u16(0).u16(2).u16(0).u16(3).u32(20).u16(3).u16(1).u32(20).done();
-  return Uint8Array.from([...head, ...body]);
+  const bmp = sub.done();
+  if (sorted.every(([code]) => code <= 0xffff)) {
+    const head = new Writer().u16(0).u16(2).u16(0).u16(3).u32(20).u16(3).u16(1).u32(20).done();
+    return Uint8Array.from([...head, ...bmp]);
+  }
+  const full = new Writer().u16(12).u16(0).u32(16 + 12 * sorted.length).u32(0).u32(sorted.length);
+  for (const [code, glyph] of sorted) full.u32(code).u32(code).u32(glyph);
+  const at = 4 + 8 * 4 + bmp.length;
+  const head = new Writer().u16(0).u16(4).u16(0).u16(3).u32(36).u16(0).u16(4).u32(at).u16(3).u16(1).u32(36).u16(3).u16(10).u32(at).done();
+  return Uint8Array.from([...head, ...bmp, ...full.done()]);
 };
 
 /** A version 0 `kern` table with one format 0 subtable. Browsers fall back to it when a font has no GPOS. */
@@ -120,13 +128,15 @@ const assemble = (tables: Map<string, Uint8Array>): Uint8Array => {
 /**
  * The font cut down to the glyphs that `texts` use. Glyph ids stay as they are, so only the outlines of every other glyph
  * are dropped, the character map is rebuilt for these characters, and pair kerning among them moves to a `kern` table.
- * Returns undefined when the text forms ligatures, which a subset without GSUB would no longer draw.
+ * Returns undefined when the text forms ligatures or could meet any other layout lookup, such as contextual alternates
+ * or mark positioning, which a subset without GSUB and GPOS would no longer apply.
  */
 export const subset = (bytes: Uint8Array, f: Sfnt, shaper: Shaper, kerning: (left: number, right: number) => number, texts: readonly string[]): Uint8Array | undefined => {
   const chars = new Set(texts.flatMap((text) => [...text]));
   const mapped = [...chars].map((char) => [char.codePointAt(0)!, shaper.glyph(char)] as const).filter(([, glyph]) => glyph !== 0);
   for (const text of texts) if (shaper.shape(text).some((placed) => [...placed.chars].length > 1)) return undefined;
   const drawn = [...new Set(mapped.map(([, glyph]) => glyph))];
+  if (shaper.beyond(texts.map((text) => [...text].map(shaper.glyph)))) return undefined;
   const keep = withComponents(f, new Set([0, ...drawn]));
 
   const glyfData: number[] = [];

@@ -163,7 +163,7 @@ Extras take a `font` too: `code(src, { font })` (monospaced only; it sets the co
 
 Before you embed:
 
-- An embedded TrueType font is cut down to the glyphs the scene's text uses, often to a tenth of the file or less. Kerning moves to a `kern` table and variable fonts become their default instance. Text that forms ligatures embeds the whole font, so the browser can still form them, and so do OTF with CFF outlines, WOFF and WOFF2. Pass `{ subset: false }` to embed the whole file. `validateSvg` warns past 256 KB. For a short title, `<Glyphs>` embeds no font at all.
+- An embedded TrueType font is cut down to the glyphs the scene's text uses, often to a tenth of the file or less. Kerning moves to a `kern` table and variable fonts become their default instance. Text that forms ligatures, or could meet any other layout the browser applies, such as contextual alternates, combining marks or Arabic and Indic forms, embeds the whole font so the browser can still apply it. So do OTF with CFF outlines, WOFF and WOFF2. Pass `{ subset: false }` to embed the whole file. `validateSvg` warns past 256 KB. For a short title, `<Glyphs>` embeds no font at all.
 - Glyphs are outlines, not text. They are not selectable or searchable, the group's `aria-label` is all assistive tech reads, and they lose hinting, so keep small body text as `<text>`.
 - Measuring and outlines need the TTF or OTF file; WOFF and WOFF2 embed but throw on `measure` and `path`. `path` reads TrueType (`glyf`) outlines only, so an OTF with CFF outlines throws.
 - Shaping is for Latin text: no bidi, no contextual alternates, no mark positioning. Arabic or Indic text will not match the browser.

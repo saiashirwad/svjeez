@@ -3,6 +3,9 @@ import { readFile } from "node:fs/promises";
 import { Glyphs, draw, font, render, validateSvg, type Child } from "svjeez";
 import { Callout, code, flowchart } from "svjeez/extras";
 import { contours, pathData } from "../src/font/glyf";
+import { sfnt } from "../src/font/sfnt";
+import { shaper } from "../src/font/shape";
+import { subset } from "../src/font/subset";
 
 const fixture = (name: string) => new URL(`../examples/fonts/${name}.ttf`, import.meta.url);
 const sans = await font.load(fixture("ABeeZee-Regular"));
@@ -10,6 +13,7 @@ const italic = await font.load(fixture("ABeeZee-Italic"));
 const mono = await font.load(fixture("SpaceMono-Regular"));
 const monoBold = await font.load(fixture("SpaceMono-Bold"));
 const black = await font.load(fixture("ArchivoBlack-Regular"));
+const jetbrains = await font.load(fixture("JetBrainsMono"));
 
 const scene = (child: Child) => render({ width: 200, height: 100, duration: 1, title: "Fonts" }, child);
 const faces = (svg: string) => [...svg.matchAll(/@font-face\{font-family:([^;]+);[^}]*font-weight:(\d+);font-style:(\w+)\}/g)].map((m) => `${m[1]} ${m[2]} ${m[3]}`);
@@ -178,9 +182,38 @@ describe("fontFamily", () => {
     expect(scene(<text fontFamily={black}>fi</text>)).toContain(black.href);
   });
 
+  test("text that could meet contextual alternates or mark positioning embeds the whole font", () => {
+    expect(scene(<text fontFamily={jetbrains}>a // b</text>)).toContain(jetbrains.href);
+    expect(scene(<text fontFamily={sans}>{"e\u0301"}</text>)).toContain(sans.href);
+    expect(scene(<text fontFamily={jetbrains}>POST /login</text>)).not.toContain(jetbrains.href);
+  });
+
+  test("the cut maps characters beyond the BMP", async () => {
+    const bytes = new Uint8Array(await readFile(fixture("ABeeZee-Regular")));
+    const parsed = sfnt(bytes);
+    const real = shaper(parsed);
+    const clef = "\u{1d11e}";
+    const remapped = { ...real, glyph: (char: string) => real.glyph(char === clef ? "H" : char) };
+    const cut = font(subset(bytes, parsed, remapped, real.kern, [`${clef}i`])!);
+    expect(cut.has(clef) && cut.has("i")).toBe(true);
+    expect(cut.has("H")).toBe(false);
+  });
+
   test("subset: false embeds the whole file", async () => {
     const whole = font(await readFile(fixture("ABeeZee-Regular")), { subset: false });
     expect(scene(<text fontFamily={whole}>Hi</text>)).toContain(whole.href);
+  });
+
+  test("a later copy of the same file with subset: false still embeds it whole", async () => {
+    const whole = font(await readFile(fixture("ABeeZee-Regular")), { subset: false });
+    const svg = scene(
+      <>
+        <text fontFamily={sans}>A</text>
+        <text fontFamily={whole}>B</text>
+      </>,
+    );
+    expect(faces(svg)).toEqual(["'ABeeZee' 400 normal"]);
+    expect(svg).toContain(whole.href);
   });
 
   test("a large embedded font warns", () => {

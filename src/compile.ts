@@ -116,13 +116,19 @@ const propertyName = (state: State, key: Property): string => {
   return name;
 };
 
-/** Embed each face the first time a family uses it, and return the `font-family` value. */
+/** Embed each face the first time a family uses it, whole if any font with its bytes asks to, and return the `font-family` value. */
 const fontFamily = (state: State, value: FontValue): string => {
   const { family, faces } = fontFaces(value);
   for (const { name, font } of faces) {
     const slot = `'${name}' ${font.weight} ${font.style}`;
     const taken = state.fonts.get(slot);
-    if (taken?.href === font.href) continue;
+    if (taken?.href === font.href) {
+      if (taken.subset && !font.subset) {
+        state.fonts.set(slot, font);
+        state.faces.splice(state.faces.findIndex((face) => face.font === taken && face.name === name), 1, { name, font });
+      }
+      continue;
+    }
     if (taken) throw new Error(`Two different fonts claim ${slot}. Give one of them another family name with font(bytes, { family }).`);
     state.fonts.set(slot, font);
     state.faces.push({ name, font });
