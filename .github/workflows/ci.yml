@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -16,7 +21,11 @@ jobs:
       - run: bun run typecheck
       - run: bun test
       - run: bun run build
-      - run: bun run build:package
+      - name: dist/ matches the examples
+        run: |
+          git add --intent-to-add dist
+          git diff --exit-code --stat dist || { echo "::error::dist/ is stale. Run 'bun run build' and commit the result."; exit 1; }
+      - run: npm pack --dry-run
 
   node:
     runs-on: ubuntu-latest
