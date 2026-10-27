@@ -6,23 +6,23 @@
   "exports": {
     ".": {
       "types": "./package-dist/index.d.ts",
-      "import": "./package-dist/index.js"
+      "default": "./package-dist/index.js"
     },
     "./jsx-runtime": {
       "types": "./package-dist/jsx-runtime.d.ts",
-      "import": "./package-dist/jsx-runtime.js"
+      "default": "./package-dist/jsx-runtime.js"
     },
     "./jsx-dev-runtime": {
       "types": "./package-dist/jsx-dev-runtime.d.ts",
-      "import": "./package-dist/jsx-dev-runtime.js"
+      "default": "./package-dist/jsx-dev-runtime.js"
     },
     "./extras": {
       "types": "./package-dist/extras.d.ts",
-      "import": "./package-dist/extras.js"
+      "default": "./package-dist/extras.js"
     },
     "./frames": {
       "types": "./package-dist/frames.d.ts",
-      "import": "./package-dist/frames.js"
+      "default": "./package-dist/frames.js"
     }
   },
   "bin": {
