@@ -1,5 +1,6 @@
 import type { Color } from "../../attributes";
 import { el } from "../../el";
+import { regularFace, type FontValue } from "../../font/font";
 import { rect, type Edge, type Point, type Rect } from "../../geometry";
 import type { Box, Size } from "../../layout/box";
 import { motion, type Seconds, type Stack } from "../../motion";
@@ -32,7 +33,9 @@ export interface DiagramOptions {
   readonly anchor?: Anchor;
   /** Default 14. */
   readonly fontSize?: number;
-  /** On the root element, so fonts come from your CSS. */
+  /** Embedded on the root element, and labels are sized by measuring them in it. */
+  readonly font?: FontValue;
+  /** On the root element, so fonts can come from your CSS. */
   readonly class?: string;
 }
 
@@ -45,12 +48,12 @@ const SLOT: Record<NodeRole, Slot> = { task: "base0D", input: "base0B", output: 
 
 export const tintOf = (theme: Base16, role: NodeRole): Color => theme[SLOT[role]];
 
-/** Monospace: 0.6em per character. */
-export const textWidth = (text: string, fontSize: number): number => text.length * fontSize * 0.6;
+/** Measured with the font when there is one, else assumed monospace at 0.6em per character. */
+export const textWidth = (text: string, fontSize: number, font?: FontValue): number => (font ? regularFace(font).measure(text, fontSize) : text.length * fontSize * 0.6);
 
 /** The box a role needs around `label`. */
-export const sizeOf = (role: NodeRole, label: string, fontSize: number): Size => {
-  const [w, h] = [textWidth(label, fontSize) + fontSize * 2.2, Math.round(fontSize * 2.8)];
+export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: FontValue): Size => {
+  const [w, h] = [textWidth(label, fontSize, font) + fontSize * 2.2, Math.round(fontSize * 2.8)];
   switch (role) {
     case "input":
       return { w: w + h * 0.7, h };
@@ -59,7 +62,7 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number): Size =>
     case "tool":
       return { w: w + 16, h };
     case "decision":
-      return { w: textWidth(label, fontSize) * 1.45 + fontSize * 4, h: Math.round(fontSize * 4.4) };
+      return { w: textWidth(label, fontSize, font) * 1.45 + fontSize * 4, h: Math.round(fontSize * 4.4) };
     case "store":
       return { w, h: h + 10 };
     case "task":
@@ -180,7 +183,7 @@ export const chip = (b: Box, text: string, look: Look & { readonly fill?: Color;
   ]);
 
 /** The knockout box an inline edge label needs. */
-export const labelSize = (text: string, fontSize: number): Size => ({ w: textWidth(text, fontSize) + 10, h: Math.round(fontSize * 1.5) });
+export const labelSize = (text: string, fontSize: number, font?: FontValue): Size => ({ w: textWidth(text, fontSize, font) + 10, h: Math.round(fontSize * 1.5) });
 
 /** The top-left corner that puts `anchor` of a `w` by `h` box on `(x, y)`. */
 export const corner = (w: number, h: number, { x = 0, y = 0, anchor = "top-left" }: { readonly x?: number; readonly y?: number; readonly anchor?: Anchor }): Point => {

@@ -50,16 +50,16 @@ export function lanes<const L extends Record<string, Labelled>>(
   },
   options: LanesOptions,
 ): Lanes<keyof L & string> {
-  const { theme = defaultDark, fontSize = 14, class: cls, scale, play } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, scale, play } = options;
   /** Scene time of lane time `t`. */
   const when = (t: Seconds) => (play?.at ?? 0) + t;
   const small = fontSize * 0.85;
   const rows = Object.entries(spec.lanes as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
   const [spans, events, links] = [spec.spans ?? [], spec.events ?? [], spec.links ?? []];
   const out = layout({
-    lanes: rows.map((r) => ({ id: r.id, label: { w: textWidth(r.label, fontSize) + 16, h: fontSize } })),
+    lanes: rows.map((r) => ({ id: r.id, label: { w: textWidth(r.label, fontSize, font) + 16, h: fontSize } })),
     spans,
-    events: events.map((e) => ({ ...e, label: e.label === undefined ? undefined : labelSize(e.label, small) })),
+    events: events.map((e) => ({ ...e, label: e.label === undefined ? undefined : labelSize(e.label, small, font) })),
     links,
     scale,
     bar: BAR,
@@ -70,7 +70,7 @@ export function lanes<const L extends Record<string, Labelled>>(
   const x = (t: Seconds) => at.point({ x: out.x(t), y: 0 }).x;
   const role = (lane: string) => rows.find((r) => r.id === lane)!.role;
 
-  const node = el.g({ class: cls }, [
+  const node = el.g({ class: cls, fontFamily: font }, [
     rows.map((r, i) => {
       const b = boxes.get(r.id)!;
       const label = at.point(out.labels.get(r.id)!);

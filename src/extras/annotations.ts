@@ -2,6 +2,7 @@ import type { Color } from "../attributes";
 import { el } from "../el";
 import type { Edge, Point, Rect } from "../geometry";
 import { motion, type Span } from "../motion";
+import { regularFace, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
 import { during } from "./timeline";
@@ -28,18 +29,19 @@ export function Arrow({ from, to, bend = 0, during: span, color = ACCENT, class:
   ]);
 }
 
-/** A note box beside `target`, joined to it by a short leader. `width` is in characters. */
-export function Callout({ target, side = "right", during: span, children, color = ACCENT, fontSize = 14, width = 24, class: cls }: Common & { readonly target: Rect; readonly side?: Edge; readonly children: string; readonly fontSize?: number; readonly width?: number }): SvgNode {
+/** A note box beside `target`, joined to it by a short leader. `width` is in characters. With `font`, the box fits the measured lines. */
+export function Callout({ target, side = "right", during: span, children, color = ACCENT, fontSize = 14, font, width = 24, class: cls }: Common & { readonly target: Rect; readonly side?: Edge; readonly children: string; readonly fontSize?: number; readonly font?: FontValue; readonly width?: number }): SvgNode {
   const lines = children.split(/\s+/).filter(Boolean).reduce<string[]>((out, word) => {
     if (out.length > 0 && out.at(-1)!.length + 1 + word.length <= width) out[out.length - 1] += ` ${word}`;
     else out.push(word);
     return out;
   }, []);
-  const [w, h, gap] = [Math.max(0, ...lines.map((line) => line.length)) * fontSize * 0.6 + 20, lines.length * fontSize * 1.4 + 16, 20];
+  const lineWidth = (line: string) => (font ? regularFace(font).measure(line, fontSize) : line.length * fontSize * 0.6);
+  const [w, h, gap] = [Math.max(0, ...lines.map(lineWidth)) + 20, lines.length * fontSize * 1.4 + 16, 20];
   const x = side === "left" ? target.x - w - gap : side === "right" ? target.x + target.w + gap : target.center.x - w / 2;
   const y = side === "top" ? target.y - h - gap : side === "bottom" ? target.y + target.h + gap : target.center.y - h / 2;
   const [start, end] = [target.side(side, 0.5), { x: x + (side === "left" ? w : side === "right" ? 0 : w / 2), y: y + (side === "top" ? h : side === "bottom" ? 0 : h / 2) }];
-  return el.g({ class: cls, animation: during(span, 0.2) }, [
+  return el.g({ class: cls, fontFamily: font, animation: during(span, 0.2) }, [
     el.path({ d: `M${end.x} ${end.y}L${start.x} ${start.y}`, ...ink(color), strokeOpacity: 0.6 }),
     el.rect({ x, y, width: w, height: h, rx: 6, fill: color, fillOpacity: 0.08, stroke: color, strokeOpacity: 0.4 }),
     lines.map((line, i) => el.text({ x: x + 10, y: y + 8 + fontSize + i * fontSize * 1.4, fontSize, fill: color }, line)),

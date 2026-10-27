@@ -1,5 +1,6 @@
 import type { Color } from "../attributes";
 import { el } from "../el";
+import { regularFace, type Font, type FontValue } from "../font/font";
 import { rect, type Point, type Rect } from "../geometry";
 import { defaultDark, tint, type Base16, type Role } from "./theme";
 import type { Stack } from "../motion";
@@ -25,9 +26,11 @@ export interface CodeOptions {
   readonly fontSize?: number;
   /** Multiple of `fontSize`. */
   readonly lineHeight?: number;
-  /** Column width. Default 0.6 × fontSize. */
+  /** Column width. Default: measured from `font`, else 0.6 × fontSize. */
   readonly advance?: number;
   readonly fontFamily?: string;
+  /** A monospaced font to embed. Sets the family and the column width. */
+  readonly font?: FontValue;
   /** Colors runs by role, plain text with `plain` and line numbers with `comment`. Default `defaultDark`. */
   readonly theme?: Base16;
   /** Line numbers, right-aligned two columns left of the code. */
@@ -54,7 +57,7 @@ export interface Metrics {
   /** Line height in px. */
   readonly height: number;
   readonly advance: number;
-  readonly fontFamily: string;
+  readonly fontFamily: string | FontValue;
   readonly theme: Base16;
 }
 
@@ -98,9 +101,17 @@ export const number = (n: number, m: Metrics, animation?: Stack<"x" | "y" | "opa
     String(n),
   );
 
+/** Columns, typewriter and morph all step by one advance, so every glyph must share it. */
+const monospaceAdvance = (face: Font, fontSize: number): number => {
+  const [narrow, wide] = [face.measure("i", fontSize), face.measure("W", fontSize)];
+  if (Math.abs(narrow - wide) > 0.01) throw new Error(`code() needs a monospaced font, and ${face.family} is proportional. Draw prose with <text fontFamily={font}>.`);
+  return wide;
+};
+
 export function code(input: string | Tokens, options: CodeOptions = {}): Code {
-  const { x = 0, y = 0, fontSize = 14, lineHeight = 1.6, fontFamily = "monospace", theme = defaultDark, gutter = false } = options;
-  const advance = options.advance ?? fontSize * 0.6;
+  const { x = 0, y = 0, fontSize = 14, lineHeight = 1.6, font, theme = defaultDark, gutter = false } = options;
+  const fontFamily = font ?? options.fontFamily ?? "monospace";
+  const advance = options.advance ?? (font ? monospaceAdvance(regularFace(font), fontSize) : fontSize * 0.6);
   if (![fontSize, lineHeight, advance].every((v) => v > 0) || !Number.isFinite(x + y)) throw new Error("code() needs finite coordinates and positive metrics.");
   const piece = (p: Piece): Token & { readonly id?: string } => {
     if (typeof p === "string") return { content: p };

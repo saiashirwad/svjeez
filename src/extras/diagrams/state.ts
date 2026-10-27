@@ -110,7 +110,7 @@ export function state<const S extends Record<string, StateSpec>>(
   options: StateOptions = {},
 ): StateMachine<StateIds<S>> {
   type Id = StateIds<S>;
-  const { theme = defaultDark, fontSize = 14, class: cls, direction } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, direction } = options;
   const small = fontSize * 0.85;
   const header = Math.round(fontSize * 2.6);
   const nodes = new Map<string, Node>();
@@ -145,7 +145,7 @@ export function state<const S extends Record<string, StateSpec>>(
   const lay = (s: Scope): Local => {
     const inner = new Map(s.nodes.flatMap((n) => (n.inner ? [[n.id, lay(n.inner)] as const] : [])));
     const size = (n: Node) => {
-      const own = { w: textWidth(n.label, fontSize) + fontSize * 2.4, h: Math.round(fontSize * 2.8) };
+      const own = { w: textWidth(n.label, fontSize, font) + fontSize * 2.4, h: Math.round(fontSize * 2.8) };
       const box = inner.get(n.id);
       return box ? { w: Math.max(own.w, box.w + 2 * PAD), h: header + box.h + 2 * PAD } : own;
     };
@@ -156,7 +156,7 @@ export function state<const S extends Record<string, StateSpec>>(
       nodes: [{ id: START, w: DOT, h: DOT }, ...s.nodes.map((n) => ({ id: n.id, ...size(n) })), ...(finals.length > 0 ? [{ id: END, w: RING, h: RING }] : [])],
       edges: [
         { from: START, to: s.initial },
-        ...mine.map((t) => ({ from: t.from, to: t.to, label: t.label === undefined ? undefined : labelSize(t.label, small) })),
+        ...mine.map((t) => ({ from: t.from, to: t.to, label: t.label === undefined ? undefined : labelSize(t.label, small, font) })),
         ...finals.map((n) => ({ from: n.id, to: END })),
       ],
     });
@@ -191,7 +191,7 @@ export function state<const S extends Record<string, StateSpec>>(
     if (!n.inner) return el.g({}, [frame, title(b.center.y)]);
     return el.g({}, [frame, el.path({ d: `M${b.x} ${b.y + header}h${b.w}`, stroke: theme.base03 }), title(b.y + header / 2)]);
   };
-  const node = el.g({ class: cls }, [
+  const node = el.g({ class: cls, fontFamily: font }, [
     [...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawn),
     lines.map((l) => arrow(l.points, look)),
     local.dots.map((d) => el.circle({ cx: d.x + ox + d.w / 2, cy: d.y + oy + d.h / 2, r: DOT / 2, fill: theme.base05 })),

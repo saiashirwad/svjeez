@@ -27,12 +27,12 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   options: TreeOptions = {},
 ): TreeDiagram<keyof N & string> {
   type Id = keyof N & string;
-  const { theme = defaultDark, fontSize = 14, class: cls, reveal, direction } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, reveal, direction } = options;
   const look = { theme, fontSize };
   const nodes = Object.entries(spec.nodes as Record<string, TreeSpec<string>>).map(([id, s]) =>
     typeof s === "string" ? { id, label: s, role: "task" as NodeRole, parent: undefined } : { id, label: s.label, role: s.role ?? "task", parent: s.parent },
   );
-  const out = layout({ direction, nodes: nodes.map((n) => ({ id: n.id, parent: n.parent, ...sizeOf(n.role, n.label, fontSize) })) });
+  const out = layout({ direction, nodes: nodes.map((n) => ({ id: n.id, parent: n.parent, ...sizeOf(n.role, n.label, fontSize, font) })) });
   const at = placer(out.bounds, options);
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
   const edges = new Map(out.edges.map((e) => [e.to, e.points.map(at.point)]));
@@ -41,7 +41,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   const shown = new Map(out.order.map((id, i) => [id, i === 0 ? -Infinity : (reveal?.at ?? 0) + (i - 1) * step]));
   const over = Math.min(0.35, step);
 
-  const node = el.g({ class: cls }, [
+  const node = el.g({ class: cls, fontFamily: font }, [
     out.edges.map((e) => arrow(edges.get(e.to)!, { ...look, at: reveal && Math.max(0, shown.get(e.from)!, shown.get(e.to)! - over), over })),
     nodes.map((n) => shape(n.role, boxes.get(n.id)!, n.label, look, reveal && shown.get(n.id)! >= 0 ? enter({ at: shown.get(n.id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined)),
   ]);

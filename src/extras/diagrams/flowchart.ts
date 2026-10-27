@@ -44,7 +44,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   options: FlowchartOptions = {},
 ): Flowchart<keyof N & string, keyof G & string> {
   type Id = keyof N & string;
-  const { theme = defaultDark, fontSize = 14, class: cls, reveal } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, reveal } = options;
   const look = { theme, fontSize };
   const small = { theme, fontSize: fontSize * 0.85 };
   const nodes = Object.entries(spec.nodes as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
@@ -54,9 +54,9 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   const laid = lay<Id>(
     {
       direction: spec.direction,
-      nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(n.role, n.label, fontSize) })),
-      edges: edges.map((e) => ({ ...e, label: e.label === undefined ? undefined : labelSize(e.label, small.fontSize) })),
-      groups: groups.map(([id, g]) => ({ id, members: g.nodes, label: { w: textWidth(g.label, small.fontSize), h: small.fontSize * 1.2 } })),
+      nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(n.role, n.label, fontSize, font) })),
+      edges: edges.map((e) => ({ ...e, label: e.label === undefined ? undefined : labelSize(e.label, small.fontSize, font) })),
+      groups: groups.map(([id, g]) => ({ id, members: g.nodes, label: { w: textWidth(g.label, small.fontSize, font), h: small.fontSize * 1.2 } })),
     },
     roles,
     options,
@@ -71,7 +71,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   const drawOver = Math.min(0.4, step);
   const drawAt = (from: string, to: string) => Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
 
-  const under = el.g({ class: cls }, [
+  const under = el.g({ class: cls, fontFamily: font }, [
     groups.map(([id, g]) => {
       const b = laid.groups.get(id)!;
       const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
@@ -82,7 +82,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
     }),
     laid.lines.map((line) => arrow(line.points, { ...look, at: reveal && drawAt(line.from, line.to), over: drawOver })),
   ]);
-  const over = el.g({ class: cls }, [
+  const over = el.g({ class: cls, fontFamily: font }, [
     nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, look, appear(n.id))),
     laid.lines.map((line, i) => line.label && chip(line.label, edges[i]!.label!, small, reveal && motion({ opacity: 0 }).at(drawAt(line.from, line.to) + drawOver).to({ opacity: 1 }, 0.25))),
   ]);

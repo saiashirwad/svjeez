@@ -2,6 +2,7 @@ import type { Color } from "../attributes";
 import { el } from "../el";
 import type { Point } from "../geometry";
 import { ease, motion, type Seconds } from "../motion";
+import { regularFace, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
 import { travel } from "./timeline";
@@ -26,6 +27,8 @@ export interface FlowOptions {
   /** The packet's text. */
   readonly label?: string;
   readonly fontSize?: number;
+  /** Embedded for the packet label, which is sized by measuring it. */
+  readonly font?: FontValue;
   /** Packet text color; defaults to `color`. */
   readonly ink?: Color;
   /** Packet fill. Default transparent over a solid outline. */
@@ -77,10 +80,10 @@ export function flow(points: readonly Point[], options: FlowOptions): { readonly
       case "packet": {
         const text = options.label ?? "";
         const fontSize = options.fontSize ?? 11;
-        const [w, h] = [text.length * fontSize * 0.6 + 14, fontSize + 9];
+        const [w, h] = [(options.font ? regularFace(options.font).measure(text, fontSize) : text.length * fontSize * 0.6) + 14, fontSize + 9];
         return el.g({ animation: run() }, [
           el.rect({ x: -w / 2, y: -h / 2, width: w, height: h, rx: h / 2, fill: options.fill ?? color, fillOpacity: options.fill ? 1 : 0.18, stroke: color, strokeWidth: 1.25 }),
-          el.text({ y: fontSize * 0.35, textAnchor: "middle", fontSize, fill: options.ink ?? color }, text),
+          el.text({ y: fontSize * 0.35, textAnchor: "middle", fontSize, fontFamily: options.font, fill: options.ink ?? color }, text),
         ]);
       }
     }

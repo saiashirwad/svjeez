@@ -29,16 +29,16 @@ export function sequence<const A extends Record<string, Labelled>>(
   spec: { readonly actors: A; readonly messages: readonly SequenceMessage<NoInfer<keyof A & string>>[] },
   options: SequenceOptions = {},
 ): Sequence<keyof A & string> {
-  const { theme = defaultDark, fontSize = 14, class: cls, play } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, play } = options;
   const look = { theme, fontSize };
   const small = fontSize * 0.85;
   const actors = Object.entries(spec.actors as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
   const rows = spec.messages.map((m) =>
     "note" in m
-      ? { kind: "note" as const, actor: m.note, text: m.text, size: { w: textWidth(m.text, small) + 20, h: small * 1.4 + 12 } }
-      : { kind: "message" as const, from: m[0], to: m[1], text: m[2], reply: m[3]?.reply ?? false, label: labelSize(m[2], small) },
+      ? { kind: "note" as const, actor: m.note, text: m.text, size: { w: textWidth(m.text, small, font) + 20, h: small * 1.4 + 12 } }
+      : { kind: "message" as const, from: m[0], to: m[1], text: m[2], reply: m[3]?.reply ?? false, label: labelSize(m[2], small, font) },
   );
-  const out = layout({ actors: actors.map((a) => ({ id: a.id, ...sizeOf(a.role, a.label, fontSize) })), rows });
+  const out = layout({ actors: actors.map((a) => ({ id: a.id, ...sizeOf(a.role, a.label, fontSize, font) })), rows });
   const at = placer(out.bounds, options);
   const heads = new Map([...out.heads].map(([id, b]) => [id, at.box(b)]));
   const placed = out.rows.map((r) => ({ points: r.points.map(at.point), box: at.box(r.box) }));
@@ -48,7 +48,7 @@ export function sequence<const A extends Record<string, Labelled>>(
   const span = (i: number): Span => ({ at: times[i]!, over: i + 1 < times.length ? times[i + 1]! - times[i]! : step });
   const fade = (i: number) => play && motion({ opacity: 0 }).at(span(i).at).to({ opacity: 1 }, 0.25);
 
-  const node = el.g({ class: cls }, [
+  const node = el.g({ class: cls, fontFamily: font }, [
     [...out.lifelines].map(([, [a, b]]) => {
       const [p, q] = [at.point(a), at.point(b)];
       return el.path({ d: `M${p.x} ${p.y}V${q.y}`, stroke: theme.base03, strokeDasharray: "3 4", fill: "none" });
