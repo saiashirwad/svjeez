@@ -151,11 +151,17 @@ export class FontFamily {
     readonly fallback: readonly string[],
   ) {}
 
-  /** The face the browser would pick: the matching style, then the nearest weight. */
+  /** The face the browser would pick: the matching style, then the weight by CSS font matching. */
   face(weight = 400, style: FontStyle = "normal"): Font {
     const styled = this.faces.filter((face) => face.style === style);
     const pool = styled.length > 0 ? styled : this.faces;
-    return pool.reduce((best, face) => (Math.abs(face.weight - weight) < Math.abs(best.weight - weight) ? face : best));
+    const exact = pool.find((face) => face.weight === weight);
+    if (exact) return exact;
+    const lighter = pool.filter((face) => face.weight < weight).sort((a, b) => b.weight - a.weight);
+    const heavier = pool.filter((face) => face.weight > weight).sort((a, b) => a.weight - b.weight);
+    if (weight > 500) return heavier[0] ?? lighter[0]!;
+    if (weight < 400) return lighter[0] ?? heavier[0]!;
+    return heavier.find((face) => face.weight <= 500) ?? lighter[0] ?? heavier[0]!;
   }
 
   toString(): never {
@@ -170,7 +176,9 @@ export const isFontValue = (value: unknown): value is FontValue => value instanc
 /** The face a measuring helper should use for regular text. */
 export const regularFace = (value: FontValue): Font => (value instanceof Font ? value : value.face());
 
-const cssString = (text: string): string => `'${text.replace(/['\\]/g, "\\$&")}'`;
+/** A CSS string. Control characters are hex-escaped, since a raw newline would end the string and start a rule. */
+const cssString = (text: string): string =>
+  `'${text.replace(/['\\]/g, "\\$&").replace(/[\u0000-\u001f\u007f]/g, (char) => `\\${char.charCodeAt(0).toString(16)} `)}'`;
 
 /** The faces a `fontFamily` value embeds, each under the family name it is used with, and the attribute value. */
 export const fontFaces = (value: FontValue): { readonly family: string; readonly faces: readonly { readonly name: string; readonly font: Font }[] } => {

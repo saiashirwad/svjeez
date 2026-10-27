@@ -36,7 +36,7 @@ interface State {
   readonly blurs: Map<string, string>;
   readonly properties: Map<Property, string>;
   readonly registrations: string[];
-  /** Embedded faces by family name, weight and style, so two files never claim one slot. */
+  /** Embedded faces by family name, weight and style, so two different files never claim one slot. */
   readonly fonts: Map<string, Font>;
   readonly fontRules: string[];
   readonly counters: Map<string, number>;
@@ -120,7 +120,7 @@ const fontFamily = (state: State, value: FontValue): string => {
   for (const { name, font } of faces) {
     const slot = `'${name}' ${font.weight} ${font.style}`;
     const taken = state.fonts.get(slot);
-    if (taken === font) continue;
+    if (taken?.href === font.href) continue;
     if (taken) throw new Error(`Two different fonts claim ${slot}. Give one of them another family name with font(bytes, { family }).`);
     state.fonts.set(slot, font);
     state.fontRules.push(fontFaceRule(name, font));

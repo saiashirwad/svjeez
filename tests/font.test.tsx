@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { Glyphs, draw, font, render, validateSvg, type Child } from "svjeez";
 import { Callout, code, flowchart } from "svjeez/extras";
+import { contours, pathData } from "../src/font/glyf";
 
 const fixture = (name: string) => new URL(`../examples/fonts/${name}.ttf`, import.meta.url);
 const sans = await font.load(fixture("ABeeZee-Regular"));
@@ -85,6 +86,16 @@ describe("font.family", () => {
     expect(family.face(400, "italic")).toBe(mono);
   });
 
+  test("follows CSS weight matching when no face is exact", async () => {
+    const bytes = await readFile(fixture("ABeeZee-Regular"));
+    const at = (weight: number) => font(bytes, { family: "W", weight });
+    const [w300, w500, w1000] = [at(300), at(500), at(1000)];
+    expect(font.family(w300, w500).face(400)).toBe(w500);
+    expect(font.family(w300, w1000).face(600)).toBe(w1000);
+    expect(font.family(w500, w1000).face(350)).toBe(w500);
+    expect(font.family(w300, w1000).face(450)).toBe(w300);
+  });
+
   test("two faces in one weight and style slot are an error", () => {
     expect(() => font.family(sans, sans)).toThrow("two normal faces of weight 400");
   });
@@ -114,6 +125,24 @@ describe("fontFamily", () => {
 
   test("works on a group, so its text inherits the font", () => {
     expect(faces(scene(<g fontFamily={mono}><text>Hi</text></g>))).toEqual(["'Space Mono' 400 normal"]);
+  });
+
+  test("the same file loaded twice embeds once", async () => {
+    const again = await font.load(fixture("ABeeZee-Regular"));
+    const svg = scene(
+      <>
+        <text fontFamily={sans}>A</text>
+        <text fontFamily={again}>B</text>
+      </>,
+    );
+    expect(faces(svg)).toEqual(["'ABeeZee' 400 normal"]);
+  });
+
+  test("a family name cannot break out of the CSS string", async () => {
+    const hostile = font(await readFile(fixture("ABeeZee-Regular")), { family: "x\n;}svg *{display:none}/*" });
+    const style = /<style>([\s\S]*)<\/style>/.exec(scene(<text fontFamily={hostile}>Hi</text>))![1]!;
+    expect(style).toContain("@font-face{font-family:'x\\a ;}svg *{display:none}/*'");
+    expect(style).not.toContain("\n;}");
   });
 
   test("two different files claiming one family slot is an error", async () => {
@@ -162,6 +191,34 @@ describe("path", () => {
   test("a composite glyph such as é draws its base and its accent", () => {
     const contours = (d: string) => d.split("M").length - 1;
     expect(contours(sans.path("é", { size: 20 }).d)).toBeGreaterThan(contours(sans.path("e", { size: 20 }).d));
+  });
+
+  test("a contour of only off-curve points closes through implied on-curve midpoints", () => {
+    const ring = [
+      { x: 0, y: 10, on: false },
+      { x: 10, y: 0, on: false },
+      { x: 0, y: -10, on: false },
+      { x: -10, y: 0, on: false },
+    ];
+    expect(pathData([ring], 1, 0, 0)).toBe("M-5 -5Q0 -10 5 -5Q10 0 5 5Q0 10 -5 5Q-10 0 -5 -5Z");
+  });
+
+  test("composites that fan out exponentially throw instead of hanging", () => {
+    const [fanout, levels] = [10, 9];
+    const size = 10 + fanout * 6;
+    const view = new DataView(new ArrayBuffer(256 + size * levels + 16));
+    view.setInt16(50, 1);
+    for (let g = 0; g <= levels + 1; g++) view.setUint32(64 + 4 * g, Math.min(g, levels) * size);
+    for (let g = 0; g < levels; g++) {
+      view.setInt16(256 + g * size, -1);
+      for (let i = 0; i < fanout; i++) {
+        const at = 256 + g * size + 10 + 6 * i;
+        view.setUint16(at, (i < fanout - 1 ? 0x20 : 0) | 2);
+        view.setUint16(at + 2, g + 1);
+      }
+    }
+    const tables = new Map([["head", 0], ["loca", 64], ["glyf", 256]]);
+    expect(() => contours({ view, tables }, 0)).toThrow("too many components");
   });
 
   test("needs a positive size", () => {

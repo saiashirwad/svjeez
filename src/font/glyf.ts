@@ -49,9 +49,11 @@ const simple = (f: Sfnt, at: number, contours: number): Contour[] => {
 };
 
 const MORE = 0x20;
+/** A real glyph has a handful of components. A hostile font can fan them out exponentially through nesting. */
+const MAX_COMPONENTS = 4096;
 
 /** Contours of a glyph in font units, y up. Composite glyphs are flattened through each component's offset and matrix. */
-export const contours = (f: Sfnt, glyph: number, depth = 0): Contour[] => {
+export const contours = (f: Sfnt, glyph: number, depth = 0, budget = { components: MAX_COMPONENTS }): Contour[] => {
   const [at, end] = location(f, glyph);
   if (at === end) return [];
   const count = i16(f, at);
@@ -61,6 +63,7 @@ export const contours = (f: Sfnt, glyph: number, depth = 0): Contour[] => {
   let p = at + 10;
   for (let flags = MORE; flags & MORE; ) {
     flags = u16(f, p);
+    if (--budget.components < 0) throw new Error("This font's composite glyphs have too many components.");
     const component = u16(f, p + 2);
     p += 4;
     const words = flags & 1;
@@ -77,7 +80,7 @@ export const contours = (f: Sfnt, glyph: number, depth = 0): Contour[] => {
       [a, b, c, d] = [f2dot14(f, p), f2dot14(f, p + 2), f2dot14(f, p + 4), f2dot14(f, p + 6)];
       p += 8;
     }
-    for (const contour of contours(f, component, depth + 1)) result.push(contour.map(({ x, y, on }) => ({ x: a * x + c * y + dx, y: b * x + d * y + dy, on })));
+    for (const contour of contours(f, component, depth + 1, budget)) result.push(contour.map(({ x, y, on }) => ({ x: a * x + c * y + dx, y: b * x + d * y + dy, on })));
   }
   return result;
 };
@@ -95,7 +98,7 @@ export const pathData = (shapes: readonly Contour[], scale: number, x: number, y
     .filter((contour) => contour.length > 1)
     .map((contour) => {
       const first = contour.findIndex((p) => p.on);
-      const ring = first < 0 ? [mid(contour[0]!, contour[1]!), ...contour] : [...contour.slice(first), ...contour.slice(0, first)];
+      const ring = first < 0 ? [mid(contour.at(-1)!, contour[0]!), ...contour] : [...contour.slice(first), ...contour.slice(0, first)];
       const start = ring[0]!;
       let d = `M${px(start)}`;
       let control: Point | undefined;
