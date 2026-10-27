@@ -139,7 +139,14 @@ export function layered(input: LayeredInput): Layered {
     if (node === undefined) return new Map(outs.map((id) => [id, xs.center[v]!]));
     const sorted = down.map((o, k) => ({ o, id: outs[k]! })).sort((a, b) => xs.center[a.o]! - xs.center[b.o]! || a.id - b.id);
     const step = Math.min(PORT, vertices[v]!.w / (sorted.length + 1));
-    return new Map(sorted.map(({ id }, k) => [id, xs.center[v]! + (k - (sorted.length - 1) / 2) * step]));
+    const packed = sorted.map((_, k) => xs.center[v]! + (k - (sorted.length - 1) / 2) * step);
+    /** Two or more edges leave from above their targets as far as the node reaches, inset from its corners, in order and `step` apart. */
+    const reach = sorted.length < 2 ? 0 : Math.max(0, vertices[v]!.w / 2 - PORT * 1.5);
+    const [lo, hi] = [Math.min(xs.center[v]! - reach, packed[0]!), Math.max(xs.center[v]! + reach, packed.at(-1)!)];
+    const port = sorted.map(({ o }, k) => (reach === 0 ? packed[k]! : Math.min(hi, Math.max(lo, xs.center[o]!))));
+    for (let k = 1; k < port.length; k++) port[k] = Math.min(hi, Math.max(port[k]!, port[k - 1]! + step));
+    for (let k = port.length - 2; k >= 0; k--) port[k] = Math.min(port[k]!, port[k + 1]! - step);
+    return new Map(sorted.map(({ id }, k) => [id, port[k]!]));
   };
   const outPorts = vertices.map((_, v) => ports(v));
   /** Incoming edges share one port at the top center and merge just above it; one that would arrive within SNAP of straight comes in straight. */
@@ -443,8 +450,11 @@ const place = (
   const occurrences = new Map<string, { row: Item[]; k: number }[]>();
   for (const row of rows) row.forEach((it, k) => occurrences.set(`${it.kind}${it.id}`, [...(occurrences.get(`${it.kind}${it.id}`) ?? []), { row, k }]));
   const items = [...occurrences.values()].map((list) => list[0]!.row[list[0]!.k]!);
+  /** An outer channel's dummies take no part in the relaxation, so they never fence nodes in; they hug the row ends after. */
+  const outer = (it: Item) => it.kind === "v" && vertices[it.id]!.outer !== undefined;
   for (let sweep = 0; sweep < 60; sweep++) {
     for (const it of sweep % 2 ? [...items].reverse() : items) {
+      if (outer(it)) continue;
       const pulls =
         it.kind === "v"
           ? neighbours(it.id).map((n) => ({ at: center(n), weight: weight(it.id, n) }))
@@ -456,11 +466,21 @@ const place = (
       if (want === undefined) continue;
       let [lo, hi] = [-Infinity, Infinity];
       for (const { row, k } of occurrences.get(`${it.kind}${it.id}`)!) {
-        if (k > 0) lo = Math.max(lo, get(row[k - 1]!) + sep(row[k - 1]!, it));
-        if (k < row.length - 1) hi = Math.min(hi, get(row[k + 1]!) - sep(it, row[k + 1]!));
+        if (k > 0 && !outer(row[k - 1]!)) lo = Math.max(lo, get(row[k - 1]!) + sep(row[k - 1]!, it));
+        if (k < row.length - 1 && !outer(row[k + 1]!)) hi = Math.min(hi, get(row[k + 1]!) - sep(it, row[k + 1]!));
       }
       set(it, Math.min(hi, Math.max(lo, want)));
     }
+  }
+  /** Innermost channels first: each backward edge's dummies share one x, just clear of everything inside them in every rank. */
+  const channels = Map.groupBy(rows.flatMap((row) => row.flatMap((it, k) => (outer(it) ? [{ it, row, k }] : []))), ({ it }) => vertices[it.id]!.back!);
+  const depth = (list: { row: Item[]; k: number }[]) => Math.min(...list.map(({ row, k }) => (vertices[row[k]!.id]!.outer === "left" ? row.length - k : k)));
+  for (const list of [...channels.values()].sort((a, b) => depth(b) - depth(a))) {
+    const left = vertices[list[0]!.it.id]!.outer === "left";
+    const x = left
+      ? Math.min(...list.map(({ it, row, k }) => get(row[k + 1]!) - sep(it, row[k + 1]!)))
+      : Math.max(...list.map(({ it, row, k }) => get(row[k - 1]!) + sep(row[k - 1]!, it)));
+    for (const { it } of list) set(it, x);
   }
 
   const left = Math.min(...rows.flatMap((row) => row.map((it) => get(it) - it.l)));

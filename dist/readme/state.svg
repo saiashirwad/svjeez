@@ -39,7 +39,7 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
     </g>
     <g>
       <rect x="24" y="228" width="130.4" height="248" rx="10" fill="var(--base01)" stroke="var(--base03)"/>
-      <path d="M24 262h130.4" stroke="var(--base03)"/>
+      <path d="M24 262h130.39999999999998" stroke="var(--base03)"/>
       <text x="89.2" y="249.55" font-size="13" text-anchor="middle" fill="var(--base05)">Working</text>
     </g>
     <g>
@@ -56,15 +56,15 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
     </g>
     <g>
       <path d="M89.2 38L89.2 79" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M89.20000005637546 86L85.20000005637546 78L93.20000005637546 78Z" fill="var(--base04)"/>
+      <path d="M89.20000005637544 86L85.20000005637544 78L93.20000005637544 78Z" fill="var(--base04)"/>
     </g>
     <g>
       <path d="M89.2 122L89.2 221" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M89.20000005637546 228L85.20000005637546 220L93.20000005637546 220Z" fill="var(--base04)"/>
+      <path d="M89.20000005637544 228L85.20000005637544 220L93.20000005637544 220Z" fill="var(--base04)"/>
     </g>
     <g>
       <path d="M89.2 476L89.2 575" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M89.2 582L85.2 574L93.2 574Z" fill="var(--base04)"/>
+      <path d="M89.19999999999999 582L85.19999999999999 574L93.19999999999999 574Z" fill="var(--base04)"/>
     </g>
     <g>
       <path d="M89.2 618L89.2 659" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
@@ -72,15 +72,15 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
     </g>
     <g>
       <path d="M71.2 292L71.2 333" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M71.2 340L67.2 332L75.2 332Z" fill="var(--base04)"/>
+      <path d="M71.19999999999999 340L67.19999999999999 332L75.19999999999999 332Z" fill="var(--base04)"/>
     </g>
     <g>
       <path d="M71.2 376L71.2 417" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M71.2 424L67.2 416L75.2 416Z" fill="var(--base04)"/>
+      <path d="M71.19999999999999 424L67.19999999999999 416L75.19999999999999 416Z" fill="var(--base04)"/>
     </g>
     <g>
-      <path d="M98.5 442L118.5 442C134.5 442 134.5 400 136.45 400L136.45 400C137.52 400 138.4 399.12 138.4 398.05L138.4 368C138.4 362.5 133.9 358 128.4 358L109.4 358" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M102.4 358L110.4 354L110.4 362Z" fill="var(--base04)"/>
+      <path d="M98.5 442L128.4 442C133.9 442 138.4 437.5 138.4 432L138.4 368C138.4 362.5 133.9 358 128.4 358L109.4 358" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M102.39999999999999 358L110.39999999999999 354L110.39999999999999 362Z" fill="var(--base04)"/>
     </g>
     <circle cx="89.2" cy="31" r="7" fill="var(--base05)"/>
     <circle cx="71.2" cy="285" r="7" fill="var(--base05)"/>
