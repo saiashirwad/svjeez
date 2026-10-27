@@ -1,0 +1,248 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 673.76 430.25" width="673.76" height="430.25" role="img" aria-labelledby="t d">
+  <title id="t">svjeez: TSX to an animated flowchart</title>
+  <desc id="d">A flowchart spec written in TSX on the left; on the right each node appears as its line is highlighted, then a comet runs from the opened PR to the posted review.</desc>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+
+.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,19%{width:156px}23%,28%,41%,46%{width:186px}32%,37%{width:351px}50%,100%{width:283.5px}}
+@keyframes k2{0%,19%,23%,28%,32%,37%,41%,46%{height:27.875px}50%,100%{height:137.25px}}
+.m1{animation-name:k1,k2}
+@keyframes k3{0%,19%{translate:0px 0px}23%,28%{translate:0px 21.875px}32%,37%{translate:0px 43.75px}41%,46%{translate:0px 65.625px}50%,100%{translate:0px 109.375px}}
+.m2{animation-name:k3}
+@keyframes k4{0%,6%{stroke-dashoffset:1;visibility:hidden}10%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k4}
+@keyframes k5{0%,9.4%{opacity:0}10%,100%{opacity:1}}
+.m4{animation-name:k5}
+@keyframes k6{0%,15%{stroke-dashoffset:1;visibility:hidden}19%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k6}
+@keyframes k7{0%,18.4%{opacity:0}19%,100%{opacity:1}}
+.m6{animation-name:k7}
+@keyframes k8{0%,24%{stroke-dashoffset:1;visibility:hidden}28%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k8}
+@keyframes k9{0%,27.4%{opacity:0}28%,100%{opacity:1}}
+.m8{animation-name:k9}
+@keyframes k10{0%,19%{stroke-dashoffset:1;visibility:hidden}23%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k10}
+@keyframes k11{0%,22.4%{opacity:0}23%,100%{opacity:1}}
+.m10{animation-name:k11}
+@keyframes k12{0%,70.955%,100%{visibility:hidden}58%{visibility:visible}}
+@keyframes k13{0%,58%{translate:547.32px 72.625px}60.182%{translate:547.32px 120.625px}61.727%{translate:547.32px 154.625px}63.909%{translate:547.32px 202.625px}66.318%{translate:547.32px 255.625px}70.955%,100%{translate:547.32px 357.625px}}
+.m11{animation-name:k12,k13;animation-timing-function:steps(1),linear}
+@keyframes k14{0%,71.159%,100%{visibility:hidden}58.205%{visibility:visible}}
+@keyframes k15{0%,58.205%{translate:547.32px 72.625px}60.386%{translate:547.32px 120.625px}61.932%{translate:547.32px 154.625px}64.114%{translate:547.32px 202.625px}66.523%{translate:547.32px 255.625px}71.159%,100%{translate:547.32px 357.625px}}
+.m12{animation-name:k14,k15;animation-timing-function:steps(1),linear}
+@keyframes k16{0%,71.364%,100%{visibility:hidden}58.409%{visibility:visible}}
+@keyframes k17{0%,58.409%{translate:547.32px 72.625px}60.591%{translate:547.32px 120.625px}62.136%{translate:547.32px 154.625px}64.318%{translate:547.32px 202.625px}66.727%{translate:547.32px 255.625px}71.364%,100%{translate:547.32px 357.625px}}
+.m13{animation-name:k16,k17;animation-timing-function:steps(1),linear}
+@keyframes k18{0%,71.568%,100%{visibility:hidden}58.614%{visibility:visible}}
+@keyframes k19{0%,58.614%{translate:547.32px 72.625px}60.795%{translate:547.32px 120.625px}62.341%{translate:547.32px 154.625px}64.523%{translate:547.32px 202.625px}66.932%{translate:547.32px 255.625px}71.568%,100%{translate:547.32px 357.625px}}
+.m14{animation-name:k18,k19;animation-timing-function:steps(1),linear}
+@keyframes k20{0%,71.773%,100%{visibility:hidden}58.818%{visibility:visible}}
+@keyframes k21{0%,58.818%{translate:547.32px 72.625px}61%{translate:547.32px 120.625px}62.545%{translate:547.32px 154.625px}64.727%{translate:547.32px 202.625px}67.136%{translate:547.32px 255.625px}71.773%,100%{translate:547.32px 357.625px}}
+.m15{animation-name:k20,k21;animation-timing-function:steps(1),linear}
+@keyframes k22{0%,71.977%,100%{visibility:hidden}59.023%{visibility:visible}}
+@keyframes k23{0%,59.023%{translate:547.32px 72.625px}61.205%{translate:547.32px 120.625px}62.75%{translate:547.32px 154.625px}64.932%{translate:547.32px 202.625px}67.341%{translate:547.32px 255.625px}71.977%,100%{translate:547.32px 357.625px}}
+.m16{animation-name:k22,k23;animation-timing-function:steps(1),linear}
+@keyframes k24{0%,72.182%,100%{visibility:hidden}59.227%{visibility:visible}}
+@keyframes k25{0%,59.227%{translate:547.32px 72.625px}61.409%{translate:547.32px 120.625px}62.955%{translate:547.32px 154.625px}65.136%{translate:547.32px 202.625px}67.545%{translate:547.32px 255.625px}72.182%,100%{translate:547.32px 357.625px}}
+.m17{animation-name:k24,k25;animation-timing-function:steps(1),linear}
+@keyframes k26{0%,72.386%,100%{visibility:hidden}59.432%{visibility:visible}}
+@keyframes k27{0%,59.432%{translate:547.32px 72.625px}61.614%{translate:547.32px 120.625px}63.159%{translate:547.32px 154.625px}65.341%{translate:547.32px 202.625px}67.75%{translate:547.32px 255.625px}72.386%,100%{translate:547.32px 357.625px}}
+.m18{animation-name:k26,k27;animation-timing-function:steps(1),linear}
+@keyframes k28{0%,72.591%,100%{visibility:hidden}59.636%{visibility:visible}}
+@keyframes k29{0%,59.636%{translate:547.32px 72.625px}61.818%{translate:547.32px 120.625px}63.364%{translate:547.32px 154.625px}65.545%{translate:547.32px 202.625px}67.955%{translate:547.32px 255.625px}72.591%,100%{translate:547.32px 357.625px}}
+.m19{animation-name:k28,k29;animation-timing-function:steps(1),linear}
+@keyframes k30{0%{opacity:0;animation-timing-function:steps(1)}70.955%{opacity:0.9}77.955%,100%{opacity:0}}
+@keyframes k31{0%,70.955%{scale:0.5}77.955%,100%{scale:3}}
+.m20{animation-name:k30,k31}
+@keyframes k32{0%,10%{opacity:0}13.5%,100%{opacity:1}}
+@keyframes k33{0%,10%{scale:0.9}13.5%,100%{scale:1}}
+.m21{animation-name:k32,k33}
+@keyframes k34{0%,19%{opacity:0}22.5%,100%{opacity:1}}
+@keyframes k35{0%,19%{scale:0.9}22.5%,100%{scale:1}}
+.m22{animation-name:k34,k35}
+@keyframes k36{0%,28%{opacity:0}31.5%,100%{opacity:1}}
+@keyframes k37{0%,28%{scale:0.9}31.5%,100%{scale:1}}
+.m23{animation-name:k36,k37}
+@keyframes k38{0%,28%{opacity:0}30.5%,100%{opacity:1}}
+.m24{animation-name:k38}
+@keyframes k39{0%,23%{opacity:0}25.5%,100%{opacity:1}}
+.m25{animation-name:k39}
+@keyframes k40{0%,94%{opacity:1}99%,100%{opacity:0}}
+.m26{animation-name:k40}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-8.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="100%" height="100%" fill="var(--base01)"/>
+  <g class="a m26">
+    <g class="mono">
+      <rect x="24" y="24" width="420" height="382.25" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+      <path d="M24 64h420" stroke="var(--base01)"/>
+      <circle cx="44" cy="44" r="5.5" fill="var(--base02)"/>
+      <circle cx="62" cy="44" r="5.5" fill="var(--base02)"/>
+      <circle cx="80" cy="44" r="5.5" fill="var(--base02)"/>
+      <text x="234" y="48" font-size="12" text-anchor="middle" fill="var(--base04)">readme.tsx</text>
+    </g>
+    <g class="a m2">
+      <rect x="39" y="122.75" width="156" height="27.875" rx="6" fill="#f6c96b" fill-opacity="0.1" stroke="#f6c96b" stroke-opacity="0.4" stroke-width="1" class="a m1"/>
+    </g>
+    <g class="mono">
+      <g>
+        <text x="42" y="97.313" font-family="monospace" font-size="12.5" fill="var(--base0E)">const</text>
+        <text x="87" y="97.313" font-family="monospace" font-size="12.5" fill="var(--base05)">chart</text>
+        <text x="132" y="97.313" font-family="monospace" font-size="12.5" fill="var(--base04)">=</text>
+        <text x="147" y="97.313" font-family="monospace" font-size="12.5" fill="var(--base0D)">flowchart</text>
+        <text x="214.5" y="97.313" font-family="monospace" font-size="12.5" fill="var(--base04)">({</text>
+        <text x="57" y="119.188" font-family="monospace" font-size="12.5" fill="var(--base05)">nodes</text>
+        <text x="94.5" y="119.188" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="109.5" y="119.188" font-family="monospace" font-size="12.5" fill="var(--base04)">{</text>
+        <text x="72" y="141.063" font-family="monospace" font-size="12.5" fill="var(--base05)">pr</text>
+        <text x="87" y="141.063" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="102" y="141.063" font-family="monospace" font-size="12.5" fill="var(--base0B)">"PR</text>
+        <text x="132" y="141.063" font-family="monospace" font-size="12.5" fill="var(--base0B)">opened"</text>
+        <text x="184.5" y="141.063" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="72" y="162.938" font-family="monospace" font-size="12.5" fill="var(--base05)">lint</text>
+        <text x="102" y="162.938" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="117" y="162.938" font-family="monospace" font-size="12.5" fill="var(--base0B)">"Run</text>
+        <text x="154.5" y="162.938" font-family="monospace" font-size="12.5" fill="var(--base0B)">linters"</text>
+        <text x="214.5" y="162.938" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="72" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base05)">ok</text>
+        <text x="87" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="102" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base04)">{</text>
+        <text x="117" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base05)">label</text>
+        <text x="154.5" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="169.5" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base0B)">"Clean?"</text>
+        <text x="229.5" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="244.5" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base05)">role</text>
+        <text x="274.5" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="289.5" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base0B)">"decision"</text>
+        <text x="372" y="184.813" font-family="monospace" font-size="12.5" fill="var(--base04)">},</text>
+        <text x="72" y="206.688" font-family="monospace" font-size="12.5" fill="var(--base05)">post</text>
+        <text x="102" y="206.688" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="117" y="206.688" font-family="monospace" font-size="12.5" fill="var(--base0B)">"Post</text>
+        <text x="162" y="206.688" font-family="monospace" font-size="12.5" fill="var(--base0B)">review"</text>
+        <text x="214.5" y="206.688" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="57" y="228.563" font-family="monospace" font-size="12.5" fill="var(--base04)">},</text>
+        <text x="57" y="250.438" font-family="monospace" font-size="12.5" fill="var(--base05)">edges</text>
+        <text x="94.5" y="250.438" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="109.5" y="250.438" font-family="monospace" font-size="12.5" fill="var(--base04)">[</text>
+        <text x="72" y="272.313" font-family="monospace" font-size="12.5" fill="var(--base05)">[</text>
+        <text x="79.5" y="272.313" font-family="monospace" font-size="12.5" fill="var(--base0B)">"pr"</text>
+        <text x="109.5" y="272.313" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="124.5" y="272.313" font-family="monospace" font-size="12.5" fill="var(--base0B)">"lint"</text>
+        <text x="169.5" y="272.313" font-family="monospace" font-size="12.5" fill="var(--base04)">],</text>
+        <text x="72" y="294.188" font-family="monospace" font-size="12.5" fill="var(--base05)">[</text>
+        <text x="79.5" y="294.188" font-family="monospace" font-size="12.5" fill="var(--base0B)">"lint"</text>
+        <text x="124.5" y="294.188" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="139.5" y="294.188" font-family="monospace" font-size="12.5" fill="var(--base0B)">"ok"</text>
+        <text x="169.5" y="294.188" font-family="monospace" font-size="12.5" fill="var(--base04)">],</text>
+        <text x="72" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base05)">[</text>
+        <text x="79.5" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base0B)">"ok"</text>
+        <text x="109.5" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="124.5" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base0B)">"post"</text>
+        <text x="169.5" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="184.5" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base04)">{</text>
+        <text x="199.5" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base05)">label</text>
+        <text x="237" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="252" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base0B)">"yes"</text>
+        <text x="297" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base04)">}</text>
+        <text x="304.5" y="316.063" font-family="monospace" font-size="12.5" fill="var(--base04)">],</text>
+        <text x="72" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base05)">[</text>
+        <text x="79.5" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base0B)">"ok"</text>
+        <text x="109.5" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="124.5" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base0B)">"lint"</text>
+        <text x="169.5" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base04)">,</text>
+        <text x="184.5" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base04)">{</text>
+        <text x="199.5" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base05)">label</text>
+        <text x="237" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base04)">:</text>
+        <text x="252" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base0B)">"no"</text>
+        <text x="289.5" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base04)">}</text>
+        <text x="297" y="337.938" font-family="monospace" font-size="12.5" fill="var(--base04)">],</text>
+        <text x="57" y="359.813" font-family="monospace" font-size="12.5" fill="var(--base04)">],</text>
+        <text x="42" y="381.688" font-family="monospace" font-size="12.5" fill="var(--base04)">});</text>
+      </g>
+    </g>
+    <g class="mono">
+      <g>
+        <path d="M547.32 72.63L547.32 113.63" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+        <path d="M547.3199999999991 120.625L543.3199999999991 112.625L551.3199999999991 112.625Z" fill="var(--base04)" class="a m4"/>
+      </g>
+      <g>
+        <path d="M547.32 154.63L547.32 195.63" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+        <path d="M547.3199999999991 202.6250000000004L543.3199999999991 194.6250000000004L551.3199999999991 194.6250000000004Z" fill="var(--base04)" class="a m6"/>
+      </g>
+      <g>
+        <path d="M547.32 255.63L547.32 350.63" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m7"/>
+        <path d="M547.3199999999999 357.625L543.3199999999999 349.625L551.3199999999999 349.625Z" fill="var(--base04)" class="a m8"/>
+      </g>
+      <g>
+        <path d="M602.64 229.13L628.64 229.13C634.14 229.13 638.64 224.63 638.64 219.13L638.64 147.63C638.64 142.13 634.14 137.63 628.64 137.63L607.12 137.63" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m9"/>
+        <path d="M600.1199999999992 137.625L608.1199999999992 133.625L608.1199999999992 141.625Z" fill="var(--base04)" class="a m10"/>
+      </g>
+    </g>
+    <g>
+      <g opacity="0.22">
+        <circle r="10.8" fill="var(--base09)" class="a m11"/>
+      </g>
+      <g opacity="0.533">
+        <circle r="4.15" fill="var(--base09)" class="a m12"/>
+      </g>
+      <g opacity="0.467">
+        <circle r="3.8" fill="var(--base09)" class="a m13"/>
+      </g>
+      <g opacity="0.4">
+        <circle r="3.45" fill="var(--base09)" class="a m14"/>
+      </g>
+      <g opacity="0.333">
+        <circle r="3.1" fill="var(--base09)" class="a m15"/>
+      </g>
+      <g opacity="0.267">
+        <circle r="2.75" fill="var(--base09)" class="a m16"/>
+      </g>
+      <g opacity="0.2">
+        <circle r="2.4" fill="var(--base09)" class="a m17"/>
+      </g>
+      <g opacity="0.133">
+        <circle r="2.05" fill="var(--base09)" class="a m18"/>
+      </g>
+      <g opacity="0.067">
+        <circle r="1.7" fill="var(--base09)" class="a m19"/>
+      </g>
+      <circle r="4.5" fill="var(--base09)" class="a m11"/>
+      <circle cx="547.32" cy="357.625" r="9" fill="none" stroke="var(--base09)" stroke-width="1.5" class="a m20 fb"/>
+    </g>
+    <g class="mono">
+      <g>
+        <path d="M509.7199999999992 38.625H584.9199999999992Q592.9199999999992 38.625 592.9199999999992 46.625V64.625Q592.9199999999992 72.625 584.9199999999992 72.625H509.7199999999992Q501.7199999999992 72.625 501.7199999999992 64.625V46.625Q501.7199999999992 38.625 509.7199999999992 38.625Z" fill="var(--base00)"/>
+        <path d="M509.7199999999992 38.625H584.9199999999992Q592.9199999999992 38.625 592.9199999999992 46.625V64.625Q592.9199999999992 72.625 584.9199999999992 72.625H509.7199999999992Q501.7199999999992 72.625 501.7199999999992 64.625V46.625Q501.7199999999992 38.625 509.7199999999992 38.625Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="547.32" y="59.825" font-size="12" text-anchor="middle" fill="var(--base05)">PR opened</text>
+      </g>
+      <g class="a m21 fb">
+        <path d="M502.51999999999913 120.625H592.1199999999991Q600.1199999999991 120.625 600.1199999999991 128.625V146.625Q600.1199999999991 154.625 592.1199999999991 154.625H502.51999999999913Q494.51999999999913 154.625 494.51999999999913 146.625V128.625Q494.51999999999913 120.625 502.51999999999913 120.625Z" fill="var(--base00)"/>
+        <path d="M502.51999999999913 120.625H592.1199999999991Q600.1199999999991 120.625 600.1199999999991 128.625V146.625Q600.1199999999991 154.625 592.1199999999991 154.625H502.51999999999913Q494.51999999999913 154.625 494.51999999999913 146.625V128.625Q494.51999999999913 120.625 502.51999999999913 120.625Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="547.32" y="141.825" font-size="12" text-anchor="middle" fill="var(--base05)">Run linters</text>
+      </g>
+      <g class="a m22 fb">
+        <path d="M547.3199999999999 202.625L602.64 229.125L547.3199999999999 255.625L492 229.125Z" fill="var(--base00)"/>
+        <path d="M547.3199999999999 202.625L602.64 229.125L547.3199999999999 255.625L492 229.125Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="547.32" y="233.325" font-size="12" text-anchor="middle" fill="var(--base05)">Clean?</text>
+      </g>
+      <g class="a m23 fb">
+        <path d="M502.52000000000066 357.625H592.1200000000007Q600.1200000000007 357.625 600.1200000000007 365.625V383.625Q600.1200000000007 391.625 592.1200000000007 391.625H502.52000000000066Q494.52000000000066 391.625 494.52000000000066 383.625V365.625Q494.52000000000066 357.625 502.52000000000066 357.625Z" fill="var(--base00)"/>
+        <path d="M502.52000000000066 357.625H592.1200000000007Q600.1200000000007 357.625 600.1200000000007 365.625V383.625Q600.1200000000007 391.625 592.1200000000007 391.625H502.52000000000066Q494.52000000000066 391.625 494.52000000000066 383.625V365.625Q494.52000000000066 357.625 502.52000000000066 357.625Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="547.32" y="378.825" font-size="12" text-anchor="middle" fill="var(--base05)">Post review</text>
+      </g>
+      <g class="a m24">
+        <rect x="533.14" y="299.125" width="28.36" height="15" rx="3" fill="var(--base00)"/>
+        <text x="547.32" y="310.195" font-size="10.2" text-anchor="middle" fill="var(--base04)">yes</text>
+      </g>
+      <g class="a m25">
+        <rect x="627.52" y="175.875" width="22.24" height="15" rx="3" fill="var(--base00)"/>
+        <text x="638.64" y="186.945" font-size="10.2" text-anchor="middle" fill="var(--base04)">no</text>
+      </g>
+    </g>
+  </g>
+</svg>
