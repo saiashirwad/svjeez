@@ -55,7 +55,7 @@ interface Chain {
   track?: Motion<"x" | "y" | "opacity">;
 }
 
-/** Animate code from version to version: kept words move, removed words fade out, new words fade in. */
+/** Animate code from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move. */
 export function morph(versions: readonly Code[], { at, over = 0.8, gutter = false }: MorphOptions): { readonly node: SvgNode } {
   if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error("morph() needs versions, one span per transition and a positive duration.");
   at.forEach((span, i) => {
@@ -72,18 +72,22 @@ export function morph(versions: readonly Code[], { at, over = 0.8, gutter = fals
   at.forEach(({ at: start }, i) => {
     const [before, after] = [versions[i]!, versions[i + 1]!];
     const pairs = match(before.words, after.words);
-    const kept = new Map(pairs.map(([a, b]) => [b, live[a]!]));
+    const kept = new Map(pairs.map(([a, b]) => [b, a]));
     const stays = new Set(pairs.map(([a]) => a));
     const gone = live.filter((_, a) => !stays.has(a));
     for (const chain of gone) chain.track = (chain.track ?? motion<{}>()).at(start).to({ opacity: 0 }, half);
     live = after.words.map((word, j) => {
-      const chain = kept.get(j);
-      if (!chain) {
-        chains.push(born(word, after, start));
-        return chains.at(-1)!;
+      const a = kept.get(j);
+      if (a === undefined) return chains[chains.push(born(word, after, start)) - 1]!;
+      const [chain, from] = [live[a]!, before.words[a]!];
+      const to = { x: word.x - chain.word.x, y: word.y - chain.word.y };
+      if (from.text === word.text) {
+        chain.track = (chain.track ?? motion<{}>()).at(start).to(to, over, ease.inOut);
+        return chain;
       }
-      chain.track = (chain.track ?? motion<{}>()).at(start).to({ x: word.x - chain.word.x, y: word.y - chain.word.y }, over, ease.inOut);
-      return chain;
+      chain.track = (chain.track ?? motion<{}>()).at(start).to({ ...to, opacity: 0 }, over, ease.inOut);
+      const next: Chain = { word, code: after, track: motion({ x: from.x - word.x, y: from.y - word.y, opacity: 0 }).at(start).to({ x: 0, y: 0, opacity: 1 }, over, ease.inOut) };
+      return chains[chains.push(next) - 1]!;
     });
   });
   const numbers = gutter ? lineNumbers(versions, at, over) : [];

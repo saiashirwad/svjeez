@@ -60,7 +60,7 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
     <circle cx="100" cy="70" r="5.5" fill="var(--base08)"/>
     <circle cx="118" cy="70" r="5.5" fill="var(--base0A)"/>
     <circle cx="136" cy="70" r="5.5" fill="var(--base0B)"/>
-    <text x="480" y="74" font-size="12" text-anchor="middle" fill="var(--base03)">~/hello</text>
+    <text x="480" y="74" font-size="12" text-anchor="middle" fill="var(--base04)">~/hello</text>
   </g>
   <g class="mono">
     <g>

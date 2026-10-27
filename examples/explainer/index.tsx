@@ -1,81 +1,58 @@
-import { draw, ease, motion, rect, render, type Color } from "svg-motion";
-import { Arrow, Brace, Focus, Marker, Underline, code, morph, timeline, type Tokens } from "svjeez/extras";
+import { draw, ease, motion, rect, render } from "svg-motion";
+import { Arrow, Brace, Focus, Marker, Underline, base16, code, morph, timeline, tint, window, type Run, type Tokens } from "svjeez/extras";
 
 const W = 1200;
 const H = 550;
 
-const C = {
-  bg: "#0a0b0e",
-  window: "#111318",
-  edge: "#ffffff12",
-  bar: "#ffffff08",
-  text: "#d7dae0",
-  punct: "#626a7c",
-  keyword: "#8c95a8",
-  fn: "#ffc799",
-  string: "#99ffe4",
-  tag: "#a8b8ff",
-  gutter: "#3a404d",
-  head: "#f1f2f5",
-  body: "#8d95a6",
-  accent: "#ffc799",
-} as const satisfies Record<string, Color>;
+const theme = base16(
+  "#111318", "#1a1d24", "#23262e", "#3a404d", "#626a7c", "#d7dae0", "#f1f2f5", "#ffffff",
+  "#a8b8ff", "#99ffe4", "#ffc799", "#99ffe4", "#99ffe4", "#ffc799", "#8c95a8", "#ffc799",
+);
+const C = { bg: "#0a0b0e", head: theme.base06, body: "#8d95a6", accent: tint(theme, "fn"), dim: theme.base03 } as const;
 
 const tl = timeline({ setup: 4.5, problem: 5, refactor: 5, result: 6, rewind: 1.4 }, { gap: 0.6 });
 const slides = ["setup", "problem", "refactor", "result"] as const;
 
-const KEYWORDS = new Set(["function", "const", "return"]);
-const tokenize = (source: string): Tokens =>
-  source.split("\n").map((line) => {
-    const parts = line.match(/\s+|"[^"]*"|[A-Za-z_$][\w$]*|\d+|=>|===|[^\w\s]/g) ?? [];
-    return parts.map((content, i) => {
-      const next = parts.slice(i + 1).find((p) => p.trim());
-      const prev = parts.slice(0, i).findLast((p) => p.trim());
-      const color: Color = /^\s+$/.test(content)
-        ? C.text
-        : KEYWORDS.has(content)
-          ? C.keyword
-          : /^"/.test(content) || /^\d/.test(content)
-            ? C.string
-            : /^[A-Za-z_$]/.test(content) && (next === "(" || /^[A-Z]/.test(content))
-              ? C.fn
-              : /^[A-Za-z_$]/.test(content) && (prev === "<" || prev === "/")
-                ? C.tag
-                : /^[A-Za-z_$]/.test(content)
-                  ? C.text
-                  : C.punct;
-      return { content, color };
-    });
-  });
+const kw = (text: string): Run => ["keyword", text];
+const fn = (text: string, id?: string): Run => ["fn", text, id];
+const p = (text: string, id?: string): Run => ["punct", text, id];
+const str = (text: string): Run => ["string", text];
+const num = (text: string, id?: string): Run => ["number", text, id];
+const tag = (text: string): Run => ["tag", text];
 
-const before = `function Counter() {
-  const [count, setCount] = useState(0);
+const before: Tokens = [
+  [kw("function"), " ", fn("Counter"), p("() {")],
+  ["  ", kw("const"), " ", p("["), "count", p(","), " ", ["plain", "setCount", "setter"], p("]"), " ", p("="), " ", fn("useState", "hook"), p("("), num("0"), p(");")],
+  [],
+  ["  ", kw("return"), " ", p("(")],
+  ["    ", p("<"), tag("button"), " onClick", p("={() =>"), " ", fn("setCount", "rule"), p("(", "rule"), ["plain", "count", "rule"], " ", p("+", "rule"), " ", num("1", "rule"), p(")", "rule"), p("}>")],
+  ["      ", p("{"), "count", p("}")],
+  ["    ", p("</"), tag("button"), p(">")],
+  ["  ", p(");")],
+  [p("}")],
+];
 
-  return (
-    <button onClick={() => setCount(count + 1)}>
-      {count}
-    </button>
-  );
-}`;
+const after: Tokens = [
+  [kw("function"), " ", fn("Counter"), p("() {")],
+  ["  ", kw("const"), " ", p("["), "count", p(","), " ", ["plain", "dispatch", "setter"], p("]"), " ", p("="), " ", fn("useReducer", "hook"), p("("), "reducer", p(","), " ", num("0"), p(");")],
+  [],
+  ["  ", kw("return"), " ", p("(")],
+  ["    ", p("<"), tag("button"), " onClick", p("={() =>"), " ", fn("dispatch", "send"), p("(", "send"), str('"inc"'), p(")", "send"), p("}>")],
+  ["      ", p("{"), "count", p("}")],
+  ["    ", p("</"), tag("button"), p(">")],
+  ["  ", p(");")],
+  [p("}")],
+  [],
+  [kw("function"), " ", fn("reducer", "def"), p("("), "count", p(","), " action", p(")"), " ", p("{")],
+  ["  ", kw("return"), " action ", p("==="), " ", str('"inc"'), " ", p("?"), " count ", p("+"), " ", num("1"), " ", p(":"), " count", p(";")],
+  [p("}")],
+];
 
-const after = `function Counter() {
-  const [count, dispatch] = useReducer(reducer, 0);
-
-  return (
-    <button onClick={() => dispatch("inc")}>
-      {count}
-    </button>
-  );
-}
-
-function reducer(count, action) {
-  return action === "inc" ? count + 1 : count;
-}`;
-
-const frame = { x: 40, y: 40, w: 700, h: 470 };
-const settings = { x: 104, y: 112, fontSize: 16, lineHeight: 1.75 };
-const one = code(tokenize(before), settings);
-const two = code(tokenize(after), settings);
+const frame = rect(40, 40, 700, 470);
+const editor = window(frame, { theme, title: "Counter.tsx", class: "mono" });
+const settings = { x: 104, y: editor.body.y + 28, fontSize: 16, lineHeight: 1.75, theme };
+const one = code(before, settings);
+const two = code(after, settings);
 const m = morph([one, two, one], { at: [tl.refactor, tl.rewind], over: 0.9, gutter: true });
 
 const panel = { x: 792, w: 360 };
@@ -134,7 +111,7 @@ const progress = () => {
   return (
     <g>
       {slides.map((_, i) => (
-        <path d={`M${panel.x + i * (seg + gap)} ${y}h${seg}`} stroke="#ffffff14" strokeWidth={2} strokeLinecap="round" />
+        <path d={`M${panel.x + i * (seg + gap)} ${y}h${seg}`} stroke={theme.base02} strokeWidth={2} strokeLinecap="round" />
       ))}
       <g animation={motion({ opacity: 1 }).at(tl.rewind.at).to({ opacity: 0 }, 0.5)}>
         {slides.map((name, i) => (
@@ -153,7 +130,7 @@ const progress = () => {
 };
 
 export default function build(): string {
-  const rule = one.find("setCount(count + 1)");
+  const rule = one.get("rule");
   return render(
     {
       width: W,
@@ -170,16 +147,7 @@ export default function build(): string {
     <>
       <rect width={W} height={H} fill={C.bg} />
 
-      <g>
-        <rect x={frame.x} y={frame.y} width={frame.w} height={frame.h} rx={14} fill={C.window} stroke={C.edge} />
-        <path d={`M${frame.x} ${frame.y + 44}h${frame.w}`} stroke={C.edge} />
-        {[0, 1, 2].map((i) => (
-          <circle cx={frame.x + 22 + i * 18} cy={frame.y + 22} r={5.5} fill="#ffffff1c" />
-        ))}
-        <text x={frame.x + frame.w / 2} y={frame.y + 26.5} class="mono" fontSize={12} textAnchor="middle" fill={C.body}>
-          Counter.tsx
-        </text>
-      </g>
+      {editor.node}
 
       <Focus stops={[{ during: tl.problem, on: rect(frame.x, one.lines(5).y, frame.w, one.lines(5).h) }]} dim={0.28}>
         <Marker
@@ -188,7 +156,7 @@ export default function build(): string {
             { at: tl.setup, rect: one.lines(2).pad(5) },
             { at: tl.problem, rect: rule.pad(4) },
             { at: tl.refactor, rect: two.find("useReducer(reducer, 0)").pad(4) },
-            { at: tl.result, rect: two.find('dispatch("inc")').pad(4) },
+            { at: tl.result, rect: two.get("send").pad(4) },
             { at: tl.rewind, rect: one.lines(2).pad(5) },
           ]}
         />
@@ -201,10 +169,10 @@ export default function build(): string {
         <Arrow from={rule.pad(4).bottom} to={{ x: panel.x - 16, y: 317 }} bend={0.22} during={tl.problem} color={C.accent} />
         <Underline rect={two.find("useReducer")} during={tl.refactor} color={C.accent} />
         <Brace lines={two.lines(11, 13)} side="right" label="the rule" during={tl.result} color={C.accent} />
-        <Arrow from={two.find('dispatch("inc")').bottom} to={two.find("reducer", 2).top} bend={0.35} during={tl.result} color={C.accent} />
+        <Arrow from={two.get("send").bottom} to={two.get("def").top} bend={0.35} during={tl.result} color={C.accent} />
       </g>
 
-      <text x={panel.x} y={98} class="mono" fontSize={11} letterSpacing={2.2} fill={C.gutter}>
+      <text x={panel.x} y={98} class="mono" fontSize={11} letterSpacing={2.2} fill={C.dim}>
         REACT · REFACTOR
       </text>
       <text x={panel.x} y={124} class="sans" fontSize={15} fill={C.body}>

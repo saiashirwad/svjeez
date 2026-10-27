@@ -240,47 +240,82 @@ A texture is pixel art, one character per palette color (`#rgb`, `#rrggbb` or `#
 <g filter={fx.boil({ strength: 2 })}>{/* ... */}</g>
 ```
 
-## Explain
+## Extras
+
+`svjeez/extras` builds code explainers and terminal recordings on top of the core. Every export is a plain function or component, so a bundle keeps only what it imports.
+
+### Code
 
 ```tsx
-import {
-  Arrow,
-  Callout,
-  Focus,
-  Marker,
-  code,
-  morph,
-  read,
-  timeline,
-  typewriter,
-} from "svjeez/extras";
+import { code, tomorrowNight, type Run } from "svjeez/extras";
 
-const tl = timeline(
-  { intro: read("One piece of state"), change: 5, outro: 3 },
-  { gap: 0.5, pace: 1.2 },
+const kw = (text: string): Run => ["keyword", text];
+
+const src = code(
+  [
+    [kw("const"), " total ", ["punct", "="], " ", ["fn", "sum", "call"], ["punct", "("], "xs", ["punct", ");"]],
+    [kw("return"), " total", ["punct", ";"]],
+  ],
+  { x: 40, y: 60, fontSize: 16, gutter: true, theme: tomorrowNight },
 );
-const before = code(tokens, { x: 40, y: 60, fontSize: 16, gutter: true }); // a string, or Shiki-style token rows
-const after = code(nextTokens, { x: 40, y: 60, fontSize: 16, gutter: true });
+
+src.node;           // the rendered code
+src.get("call");    // Rect around every run with id "call"
+src.find("total");  // Rect around the first "total"
+src.lines(1, 2);    // Rect around lines 1-2
+src.at(2, 8);       // Point at line 2, column 8
+```
+
+A line is a list of pieces. A piece is plain text, a `[role, text]` run, a `[role, text, id]` run, or a Shiki-style `{ content, color, fontStyle }` token. The theme colors each run by its role (`keyword`, `fn`, `string`, `number`, `type`, `tag`, `variable`, `punct`, `comment`, `muted`, and the ANSI names `red` through `cyan`). An id names a run for `get()` and for `morph`.
+
+### Themes
+
+```tsx
+import { adaptive, base16, tomorrow, tomorrowNight } from "svjeez/extras";
+
+const custom = base16("#111318", "#1a1d24", /* 14 more, base00 to base0F */);
+const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
+render({ /* ... */ css }, content); // follows the viewer's light or dark mode
+```
+
+A theme is a base16 scheme. `defaultDark`, `defaultLight`, `tomorrowNight` and `tomorrow` are built in. `adaptive` turns a dark and light pair into one theme of CSS variables plus the CSS that switches them.
+
+### Explainers
+
+```tsx
+import { Arrow, Callout, Focus, Marker, morph, read, timeline } from "svjeez/extras";
+
+const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
 
 <>
   <Focus stops={[{ during: tl.intro, on: before.lines(2) }]} dim={0.3}>
     {morph([before, after], { at: [tl.change], gutter: true }).node}
   </Focus>
-  <Marker
-    stops={[
-      { at: tl.intro, rect: before.find("useState").pad(4) },
-      { at: tl.change, rect: after.lines(3, 5).pad(4) },
-    ]}
-  />
-  <Callout target={after.find("dispatch")} side="right" during={tl.outro} class="note">
-    Handlers send intent
-  </Callout>
+  <Marker stops={[{ at: tl.intro, rect: before.get("hook").pad(4) }, { at: tl.change, rect: after.get("hook").pad(4) }]} />
+  <Callout target={after.get("send")} side="right" during={tl.outro} class="note">Handlers send intent</Callout>
 </>;
-
-typewriter(before, { at: 1, cps: 28, cursor: true }); // { node, end }
 ```
 
-A `Code` knows its geometry: `bounds`, `lines(a, b?)`, `find(text, n?)` and `at(line, col)`, in canvas units for annotations, `Focus`, `Marker` and `Camera`. `morph` keeps words that survive a change and moves them, so reordered words cross rather than fade. `during(span)` fades anything in and out with a span. `Camera` fits each stop's view inside a `frame` rect; clip it yourself. Annotations take a `class`, so their font comes from your CSS.
+`morph` moves the words that survive each change and fades the rest. Runs that share an id pair first, and when their text differs they cross-fade as they move. `timeline` lays out named scenes, `read` gives the seconds a caption needs, and `pace` scales every scene. `during(span)` fades anything in and out with a span. `Camera` pans and zooms each stop's view to fit inside a `frame` rect; clip it yourself. Annotations take a `class`, so their font comes from your CSS.
+
+### Terminals
+
+```tsx
+import { terminal, typewriter, window } from "svjeez/extras";
+
+const shell = window(rect(80, 50, 800, 340), { theme, title: "~/hello", dots: "traffic" });
+const session = terminal(
+  [
+    { cmd: "bun add svjeez", output: [[["muted", "installed svjeez@0.2.0"]]] },
+    { cmd: "bun run build", output: [[["green", "✓"], " dist/hello.svg"]] },
+  ],
+  { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 16 },
+);
+
+<>{shell.node}{session.node}</>; // session.end is when the last command finishes
+
+typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end }
+```
 
 ## Render
 

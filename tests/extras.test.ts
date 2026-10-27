@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, rect, render } from "svg-motion";
-import { Focus, Marker, code, defaultDark, read, timeline } from "svjeez/extras";
+import { Focus, Marker, adaptive, code, defaultDark, defaultLight, morph, read, terminal, timeline, window } from "svjeez/extras";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -124,4 +124,36 @@ describe("reduced motion", () => {
     expect(frozen(svg, /<rect [^>]*width="120%"[^>]*class="a (m\d+)"/, "opacity", 50)).toBe("0.3");
     expect(frozen(svg, /<mask[^>]*>\s*<rect[^>]*\/>\s*<g class="a (m\d+)"/, "opacity", 50)).toBe("1");
   });
+});
+
+describe("themes", () => {
+  test("adaptive colors are variables that switch to the light scheme under prefers-color-scheme: light", () => {
+    const { theme, css } = adaptive({ dark: defaultDark, light: defaultLight });
+    expect(theme.base00).toBe("var(--base00)");
+    const [dark, light] = css.split("@media (prefers-color-scheme:light)");
+    expect(dark).toContain(`--base00:${defaultDark.base00}`);
+    expect(light).toContain(`--base00:${defaultLight.base00}`);
+  });
+});
+
+describe("terminal", () => {
+  const metrics = { x: 10, y: 20, fontSize: 10, lineHeight: 2, advance: 6 };
+
+  test("a session stacks each command and its output, and ends after the last command types", () => {
+    const shell = terminal([{ cmd: "ls", output: ["a", "b"] }, { cmd: "pwd" }], { ...metrics, at: 1, cps: 10, think: 0.5, gap: 0.5 });
+    expect(shell.bounds).toMatchObject({ x: 10, y: 20, h: 80 });
+    expect(shell.end).toBeCloseTo(1 + 0.4 + 0.5 + 0.12 + 0.5 + 0.5 + 0.5, 5);
+    expect(() => terminal([])).toThrow();
+  });
+
+  test("a window's body starts under its title bar", () => {
+    expect(window(rect(0, 0, 100, 80), { bar: 30 }).body).toMatchObject({ x: 0, y: 30, w: 100, h: 50 });
+  });
+});
+
+test("a run renamed under the same id cross-fades: both texts render, each animated", () => {
+  const a = code([[["fn", "useState", "hook"]]]);
+  const b = code([[["fn", "useReducer", "hook"]]]);
+  const svg = render({ width: 100, height: 100, duration: 4, title: "morph" }, morph([a, b], { at: [{ at: 1, over: 1 }] }).node);
+  for (const word of ["useState", "useReducer"]) expect(svg).toMatch(new RegExp(`<text[^>]*class="a [^"]*"[^>]*>${word}</text>`));
 });

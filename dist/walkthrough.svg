@@ -1,0 +1,306 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" width="1000" height="620" role="img" aria-labelledby="t d">
+  <title id="t">Request walkthrough</title>
+  <desc id="d">A camera walks through a Bun server: handle, then parse, auth and respond, each zoomed in turn.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="60" y="80" width="880" height="460" rx="12"/>
+    </clipPath>
+    <mask id="m1">
+      <rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" class="a m2"/>
+      <g class="a m3">
+        <rect x="113.2" y="174.6" width="292.6" height="104.75" fill="#fff"/>
+      </g>
+      <g class="a m4">
+        <rect x="113.2" y="194.75" width="253.6" height="24.15" fill="#fff"/>
+        <rect x="113.2" y="295.5" width="300.4" height="64.45" fill="#fff"/>
+      </g>
+      <g class="a m5">
+        <rect x="113.2" y="214.9" width="245.8" height="24.15" fill="#fff"/>
+        <rect x="113.2" y="376.1" width="386.2" height="104.75" fill="#fff"/>
+      </g>
+      <g class="a m6">
+        <rect x="113.2" y="235.05" width="230.2" height="24.15" fill="#fff"/>
+        <rect x="113.2" y="497" width="362.8" height="64.45" fill="#fff"/>
+      </g>
+    </mask>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
+@media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
+.mono,.mono text,.code text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+
+.a{animation-duration:22.8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,21.554%,39.474%,40.351%,59.649%,60.526%,81.203%,82.08%,100%{opacity:1}22.87%,38.158%,41.667%,58.333%,61.842%,79.887%,83.396%,98.684%{opacity:0.25}}
+.m2{animation-name:k1}
+@keyframes k2{0%,21.554%,39.474%,100%{opacity:0}22.87%,38.158%{opacity:1}}
+.m3{animation-name:k2}
+@keyframes k3{0%,40.351%,59.649%,100%{opacity:0}41.667%,58.333%{opacity:1}}
+.m4{animation-name:k3}
+@keyframes k4{0%,60.526%,81.203%,100%{opacity:0}61.842%,79.887%{opacity:1}}
+.m5{animation-name:k4}
+@keyframes k5{0%,82.08%,100%{opacity:0}83.396%,98.684%{opacity:1}}
+.m6{animation-name:k5}
+@keyframes k6{0%,21.554%{stroke-dashoffset:1;visibility:hidden}24.185%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k6}
+@keyframes k7{0%,24.185%{opacity:0}24.843%,100%{opacity:1}}
+@keyframes k8{0%,24.185%{scale:0.5}24.843%,100%{scale:1}}
+.m8{animation-name:k7,k8}
+@keyframes k9{0%,21.554%,39.474%,100%{opacity:0}22.431%,38.596%{opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,40.351%{stroke-dashoffset:1;visibility:hidden}42.982%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k10}
+@keyframes k11{0%,42.982%{opacity:0}43.64%,100%{opacity:1}}
+@keyframes k12{0%,42.982%{scale:0.5}43.64%,100%{scale:1}}
+.m11{animation-name:k11,k12}
+@keyframes k13{0%,40.351%,59.649%,100%{opacity:0}41.228%,58.772%{opacity:1}}
+.m12{animation-name:k13}
+@keyframes k14{0%,60.526%{stroke-dashoffset:1;visibility:hidden}63.158%,100%{stroke-dashoffset:0;visibility:visible}}
+.m13{animation-name:k14}
+@keyframes k15{0%,63.158%{opacity:0}63.816%,100%{opacity:1}}
+@keyframes k16{0%,63.158%{scale:0.5}63.816%,100%{scale:1}}
+.m14{animation-name:k15,k16}
+@keyframes k17{0%,60.526%,81.203%,100%{opacity:0}61.404%,80.326%{opacity:1}}
+.m15{animation-name:k17}
+@keyframes k18{0%,82.08%{stroke-dashoffset:1;visibility:hidden}84.712%,100%{stroke-dashoffset:0;visibility:visible}}
+.m16{animation-name:k18}
+@keyframes k19{0%,84.712%{opacity:0}85.37%,100%{opacity:1}}
+@keyframes k20{0%,84.712%{scale:0.5}85.37%,100%{scale:1}}
+.m17{animation-name:k19,k20}
+@keyframes k21{0%,82.08%,100%{opacity:0}82.957%,99.123%{opacity:1}}
+.m18{animation-name:k21}
+@keyframes k22{0%,21.554%{translate:0px 0px}25.501%,40.351%{translate:52.401px 37.21px}44.298%,60.526%{translate:52.401px -65.849px}64.474%,82.08%{translate:52.401px -168.907px}86.028%,100%{translate:52.401px -257.243px}}
+@keyframes k23{0%,21.554%{scale:1}25.501%,40.351%,44.298%,60.526%,64.474%,82.08%,86.028%,100%{scale:1.461}}
+.m19{animation-name:k22,k23;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k24{0%,20.677%,100%{opacity:0}1.535%,19.142%{opacity:1}}
+.m20{animation-name:k24}
+@keyframes k25{0%,21.554%,39.474%,100%{opacity:0}23.089%,37.939%{opacity:1}}
+.m21{animation-name:k25}
+@keyframes k26{0%,40.351%,59.649%,100%{opacity:0}41.886%,58.114%{opacity:1}}
+.m22{animation-name:k26}
+@keyframes k27{0%,60.526%,81.203%,100%{opacity:0}62.061%,79.668%{opacity:1}}
+.m23{animation-name:k27}
+@keyframes k28{0%,82.08%,100%{opacity:0}83.615%,98.465%{opacity:1}}
+.m24{animation-name:k28}
+@keyframes k29{0%,20.677%,100%{opacity:0}0.877%,19.799%{opacity:1}}
+.m25{animation-name:k29}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-15.8s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="1000" height="620" fill="var(--base01)"/>
+  <g class="mono">
+    <rect x="60" y="40" width="880" height="500" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M60 80h880" stroke="var(--base01)"/>
+    <circle cx="80" cy="60" r="5.5" fill="var(--base02)"/>
+    <circle cx="98" cy="60" r="5.5" fill="var(--base02)"/>
+    <circle cx="116" cy="60" r="5.5" fill="var(--base02)"/>
+    <text x="500" y="64" font-size="12" text-anchor="middle" fill="var(--base04)">server.ts</text>
+  </g>
+  <g clip-path="url(#c1)">
+    <g style="transform-origin:0 0;transform-box:view-box" class="a m19">
+      <g mask="url(#m1)">
+        <g class="code">
+          <g>
+            <text x="99.6" y="110.625" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">1</text>
+            <text x="99.6" y="130.775" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">2</text>
+            <text x="99.6" y="150.925" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">3</text>
+            <text x="99.6" y="171.075" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">4</text>
+            <text x="99.6" y="191.225" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">5</text>
+            <text x="99.6" y="211.375" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">6</text>
+            <text x="99.6" y="231.525" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">7</text>
+            <text x="99.6" y="251.675" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">8</text>
+            <text x="99.6" y="271.825" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">9</text>
+            <text x="99.6" y="291.975" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">10</text>
+            <text x="99.6" y="312.125" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">11</text>
+            <text x="99.6" y="332.275" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">12</text>
+            <text x="99.6" y="352.425" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">13</text>
+            <text x="99.6" y="372.575" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">14</text>
+            <text x="99.6" y="392.725" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">15</text>
+            <text x="99.6" y="412.875" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">16</text>
+            <text x="99.6" y="433.025" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">17</text>
+            <text x="99.6" y="453.175" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">18</text>
+            <text x="99.6" y="473.325" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">19</text>
+            <text x="99.6" y="493.475" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">20</text>
+            <text x="99.6" y="513.625" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">21</text>
+            <text x="99.6" y="533.775" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">22</text>
+            <text x="99.6" y="553.925" text-anchor="end" font-family="monospace" font-size="13" fill="var(--base03)">23</text>
+            <text x="115.2" y="110.625" font-family="monospace" font-size="13" fill="var(--base0E)">import</text>
+            <text x="169.8" y="110.625" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            <text x="185.4" y="110.625" font-family="monospace" font-size="13" fill="var(--base05)">serve</text>
+            <text x="232.2" y="110.625" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            <text x="247.8" y="110.625" font-family="monospace" font-size="13" fill="var(--base0E)">from</text>
+            <text x="286.8" y="110.625" font-family="monospace" font-size="13" fill="var(--base0B)">"bun"</text>
+            <text x="325.8" y="110.625" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            <text x="115.2" y="150.925" font-family="monospace" font-size="13" fill="var(--base0D)">serve</text>
+            <text x="154.2" y="150.925" font-family="monospace" font-size="13" fill="var(--base04)">({</text>
+            <text x="177.6" y="150.925" font-family="monospace" font-size="13" fill="var(--base05)">port</text>
+            <text x="208.8" y="150.925" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="224.4" y="150.925" font-family="monospace" font-size="13" fill="var(--base09)">3000</text>
+            <text x="255.6" y="150.925" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+            <text x="271.2" y="150.925" font-family="monospace" font-size="13" fill="var(--base05)">fetch</text>
+            <text x="310.2" y="150.925" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="325.8" y="150.925" font-family="monospace" font-size="13" fill="var(--base0D)">handle</text>
+            <text x="380.4" y="150.925" font-family="monospace" font-size="13" fill="var(--base04)">});</text>
+            <text x="115.2" y="191.225" font-family="monospace" font-size="13" fill="var(--base0E)">async</text>
+            <text x="162" y="191.225" font-family="monospace" font-size="13" fill="var(--base0E)">function</text>
+            <text x="232.2" y="191.225" font-family="monospace" font-size="13" fill="var(--base0D)">handle</text>
+            <text x="279" y="191.225" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="286.8" y="191.225" font-family="monospace" font-size="13" fill="var(--base05)">req</text>
+            <text x="310.2" y="191.225" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="325.8" y="191.225" font-family="monospace" font-size="13" fill="var(--base0A)">Request</text>
+            <text x="380.4" y="191.225" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+            <text x="396" y="191.225" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            <text x="130.8" y="211.375" font-family="monospace" font-size="13" fill="var(--base0E)">const</text>
+            <text x="177.6" y="211.375" font-family="monospace" font-size="13" fill="var(--base05)">body</text>
+            <text x="216.6" y="211.375" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+            <text x="232.2" y="211.375" font-family="monospace" font-size="13" fill="var(--base0E)">await</text>
+            <text x="279" y="211.375" font-family="monospace" font-size="13" fill="var(--base0D)">parse</text>
+            <text x="318" y="211.375" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="325.8" y="211.375" font-family="monospace" font-size="13" fill="var(--base05)">req</text>
+            <text x="349.2" y="211.375" font-family="monospace" font-size="13" fill="var(--base04)">);</text>
+            <text x="130.8" y="231.525" font-family="monospace" font-size="13" fill="var(--base0E)">const</text>
+            <text x="177.6" y="231.525" font-family="monospace" font-size="13" fill="var(--base05)">user</text>
+            <text x="216.6" y="231.525" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+            <text x="232.2" y="231.525" font-family="monospace" font-size="13" fill="var(--base0E)">await</text>
+            <text x="279" y="231.525" font-family="monospace" font-size="13" fill="var(--base0D)">auth</text>
+            <text x="310.2" y="231.525" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="318" y="231.525" font-family="monospace" font-size="13" fill="var(--base05)">req</text>
+            <text x="341.4" y="231.525" font-family="monospace" font-size="13" fill="var(--base04)">);</text>
+            <text x="130.8" y="251.675" font-family="monospace" font-size="13" fill="var(--base0E)">return</text>
+            <text x="185.4" y="251.675" font-family="monospace" font-size="13" fill="var(--base0D)">respond</text>
+            <text x="240" y="251.675" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="247.8" y="251.675" font-family="monospace" font-size="13" fill="var(--base05)">user</text>
+            <text x="279" y="251.675" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+            <text x="294.6" y="251.675" font-family="monospace" font-size="13" fill="var(--base05)">body</text>
+            <text x="325.8" y="251.675" font-family="monospace" font-size="13" fill="var(--base04)">);</text>
+            <text x="115.2" y="271.825" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            <text x="115.2" y="312.125" font-family="monospace" font-size="13" fill="var(--base0E)">async</text>
+            <text x="162" y="312.125" font-family="monospace" font-size="13" fill="var(--base0E)">function</text>
+            <text x="232.2" y="312.125" font-family="monospace" font-size="13" fill="var(--base0D)">parse</text>
+            <text x="271.2" y="312.125" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="279" y="312.125" font-family="monospace" font-size="13" fill="var(--base05)">req</text>
+            <text x="302.4" y="312.125" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="318" y="312.125" font-family="monospace" font-size="13" fill="var(--base0A)">Request</text>
+            <text x="372.6" y="312.125" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+            <text x="388.2" y="312.125" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            <text x="130.8" y="332.275" font-family="monospace" font-size="13" fill="var(--base0E)">return</text>
+            <text x="185.4" y="332.275" font-family="monospace" font-size="13" fill="var(--base0A)">JSON</text>
+            <text x="216.6" y="332.275" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="224.4" y="332.275" font-family="monospace" font-size="13" fill="var(--base0D)">parse</text>
+            <text x="263.4" y="332.275" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="271.2" y="332.275" font-family="monospace" font-size="13" fill="var(--base0E)">await</text>
+            <text x="318" y="332.275" font-family="monospace" font-size="13" fill="var(--base05)">req</text>
+            <text x="341.4" y="332.275" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="349.2" y="332.275" font-family="monospace" font-size="13" fill="var(--base0D)">text</text>
+            <text x="380.4" y="332.275" font-family="monospace" font-size="13" fill="var(--base04)">());</text>
+            <text x="115.2" y="352.425" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            <text x="115.2" y="392.725" font-family="monospace" font-size="13" fill="var(--base0E)">async</text>
+            <text x="162" y="392.725" font-family="monospace" font-size="13" fill="var(--base0E)">function</text>
+            <text x="232.2" y="392.725" font-family="monospace" font-size="13" fill="var(--base0D)">auth</text>
+            <text x="263.4" y="392.725" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="271.2" y="392.725" font-family="monospace" font-size="13" fill="var(--base05)">req</text>
+            <text x="294.6" y="392.725" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="310.2" y="392.725" font-family="monospace" font-size="13" fill="var(--base0A)">Request</text>
+            <text x="364.8" y="392.725" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+            <text x="380.4" y="392.725" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            <text x="130.8" y="412.875" font-family="monospace" font-size="13" fill="var(--base0E)">const</text>
+            <text x="177.6" y="412.875" font-family="monospace" font-size="13" fill="var(--base05)">token</text>
+            <text x="224.4" y="412.875" font-family="monospace" font-size="13" fill="var(--base04)">=</text>
+            <text x="240" y="412.875" font-family="monospace" font-size="13" fill="var(--base05)">req</text>
+            <text x="263.4" y="412.875" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="271.2" y="412.875" font-family="monospace" font-size="13" fill="var(--base05)">headers</text>
+            <text x="325.8" y="412.875" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="333.6" y="412.875" font-family="monospace" font-size="13" fill="var(--base0D)">get</text>
+            <text x="357" y="412.875" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="364.8" y="412.875" font-family="monospace" font-size="13" fill="var(--base0B)">"authorization"</text>
+            <text x="481.8" y="412.875" font-family="monospace" font-size="13" fill="var(--base04)">);</text>
+            <text x="130.8" y="433.025" font-family="monospace" font-size="13" fill="var(--base0E)">if</text>
+            <text x="154.2" y="433.025" font-family="monospace" font-size="13" fill="var(--base04)">(!</text>
+            <text x="169.8" y="433.025" font-family="monospace" font-size="13" fill="var(--base05)">token</text>
+            <text x="208.8" y="433.025" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+            <text x="224.4" y="433.025" font-family="monospace" font-size="13" fill="var(--base0E)">throw</text>
+            <text x="271.2" y="433.025" font-family="monospace" font-size="13" fill="var(--base08)">new</text>
+            <text x="302.4" y="433.025" font-family="monospace" font-size="13" fill="var(--base08)">Response(401)</text>
+            <text x="403.8" y="433.025" font-family="monospace" font-size="13" fill="var(--base04)">;</text>
+            <text x="130.8" y="453.175" font-family="monospace" font-size="13" fill="var(--base0E)">return</text>
+            <text x="185.4" y="453.175" font-family="monospace" font-size="13" fill="var(--base05)">db</text>
+            <text x="201" y="453.175" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="208.8" y="453.175" font-family="monospace" font-size="13" fill="var(--base05)">users</text>
+            <text x="247.8" y="453.175" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="255.6" y="453.175" font-family="monospace" font-size="13" fill="var(--base0D)">find</text>
+            <text x="286.8" y="453.175" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="294.6" y="453.175" font-family="monospace" font-size="13" fill="var(--base05)">token</text>
+            <text x="333.6" y="453.175" font-family="monospace" font-size="13" fill="var(--base04)">);</text>
+            <text x="115.2" y="473.325" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+            <text x="115.2" y="513.625" font-family="monospace" font-size="13" fill="var(--base0E)">function</text>
+            <text x="185.4" y="513.625" font-family="monospace" font-size="13" fill="var(--base0D)">respond</text>
+            <text x="240" y="513.625" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+            <text x="247.8" y="513.625" font-family="monospace" font-size="13" fill="var(--base05)">user</text>
+            <text x="279" y="513.625" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="294.6" y="513.625" font-family="monospace" font-size="13" fill="var(--base0A)">User</text>
+            <text x="325.8" y="513.625" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+            <text x="341.4" y="513.625" font-family="monospace" font-size="13" fill="var(--base05)">body</text>
+            <text x="372.6" y="513.625" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="388.2" y="513.625" font-family="monospace" font-size="13" fill="var(--base0A)">Body</text>
+            <text x="419.4" y="513.625" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+            <text x="435" y="513.625" font-family="monospace" font-size="13" fill="var(--base04)">{</text>
+            <text x="130.8" y="533.775" font-family="monospace" font-size="13" fill="var(--base0E)">return</text>
+            <text x="185.4" y="533.775" font-family="monospace" font-size="13" fill="var(--base0A)">Response</text>
+            <text x="247.8" y="533.775" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="255.6" y="533.775" font-family="monospace" font-size="13" fill="var(--base0D)">json</text>
+            <text x="286.8" y="533.775" font-family="monospace" font-size="13" fill="var(--base04)">({</text>
+            <text x="310.2" y="533.775" font-family="monospace" font-size="13" fill="var(--base05)">id</text>
+            <text x="325.8" y="533.775" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+            <text x="341.4" y="533.775" font-family="monospace" font-size="13" fill="var(--base05)">user</text>
+            <text x="372.6" y="533.775" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+            <text x="380.4" y="533.775" font-family="monospace" font-size="13" fill="var(--base05)">id</text>
+            <text x="396" y="533.775" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+            <text x="411.6" y="533.775" font-family="monospace" font-size="13" fill="var(--base05)">body</text>
+            <text x="450.6" y="533.775" font-family="monospace" font-size="13" fill="var(--base04)">});</text>
+            <text x="115.2" y="553.925" font-family="monospace" font-size="13" fill="var(--base04)">}</text>
+          </g>
+        </g>
+      </g>
+      <g class="note">
+        <g class="a m9">
+          <path d="M349.2 156.45000000000002Q296.29 130.64500000000004 259.5 176.60000000000002" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m7"/>
+          <path d="M266.7184367866944 173.1512074059901L259.5 176.60000000000002L261.28552021732895 168.80180036460277" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m8 fb"/>
+        </g>
+        <g class="a m12">
+          <path d="M376.8 206.825Q437.73749999999995 243.16 408 307.575" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m10"/>
+          <path d="M414.1786538652584 302.4932447507453L408 307.575L407.86003719825675 299.5762244428207" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m11 fb"/>
+        </g>
+        <g class="a m15">
+          <path d="M369 226.975Q441.02000000000004 296.655 400.2 388.175" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m13"/>
+          <path d="M406.31226565453034 383.01358463515595L400.2 388.175L399.95636971252736 380.1787105928421" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m14 fb"/>
+        </g>
+        <g class="a m15">
+          <path d="M423.79999999999995 428.475L403.79999999999995 428.475" fill="none" stroke="var(--base08)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+          <rect x="423.8" y="413.475" width="128" height="30" rx="6" fill="var(--base08)" fill-opacity="0.08" stroke="var(--base08)" stroke-opacity="0.4"/>
+          <text x="433.8" y="431.475" font-size="10" fill="var(--base08)">no token, no entry</text>
+        </g>
+        <g class="a m18">
+          <path d="M353.4 247.125Q482.68499999999995 347.68 454.79999999999995 509.07500000000005" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m16"/>
+          <path d="M459.4553484937976 502.56902348595577L454.79999999999995 509.07500000000005L452.5975045526631 501.3841603966498" fill="none" stroke="var(--base0A)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m17 fb"/>
+        </g>
+      </g>
+    </g>
+  </g>
+  <text x="500" y="584" class="sans a m20" font-size="17" text-anchor="middle" fill="var(--base05)">One request, from the server to the response.</text>
+  <text x="500" y="584" class="sans a m21" font-size="17" text-anchor="middle" fill="var(--base05)">handle() runs three steps in order.</text>
+  <text x="500" y="584" class="sans a m22" font-size="17" text-anchor="middle" fill="var(--base05)">parse() turns the raw body into JSON.</text>
+  <text x="500" y="584" class="sans a m23" font-size="17" text-anchor="middle" fill="var(--base05)">auth() fails fast when the token is missing.</text>
+  <text x="500" y="584" class="sans a m24" font-size="17" text-anchor="middle" fill="var(--base05)">respond() shapes what the client sees.</text>
+  <g>
+    <circle cx="472" cy="604" r="2.5" fill="var(--base03)"/>
+    <circle cx="486" cy="604" r="2.5" fill="var(--base03)"/>
+    <circle cx="500" cy="604" r="2.5" fill="var(--base03)"/>
+    <circle cx="514" cy="604" r="2.5" fill="var(--base03)"/>
+    <circle cx="528" cy="604" r="2.5" fill="var(--base03)"/>
+    <circle cx="472" cy="604" r="2.5" fill="var(--base0A)" class="a m25"/>
+    <circle cx="486" cy="604" r="2.5" fill="var(--base0A)" class="a m9"/>
+    <circle cx="500" cy="604" r="2.5" fill="var(--base0A)" class="a m12"/>
+    <circle cx="514" cy="604" r="2.5" fill="var(--base0A)" class="a m15"/>
+    <circle cx="528" cy="604" r="2.5" fill="var(--base0A)" class="a m18"/>
+  </g>
+</svg>

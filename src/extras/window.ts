@@ -22,7 +22,7 @@ export function window(frame: Rect, { theme = defaultDark, title, dots = "muted"
     el.rect({ x: frame.x, y: frame.y, width: frame.w, height: frame.h, rx: radius, fill: theme.base00, stroke: theme.base02 }),
     el.path({ d: `M${frame.x} ${frame.y + bar}h${frame.w}`, stroke: theme.base01 }),
     dots && [0, 1, 2].map((i) => el.circle({ cx: frame.x + bar / 2 + i * 18, cy: frame.y + bar / 2, r: 5.5, fill: dot(i) })),
-    title && el.text({ x: frame.center.x, y: frame.y + bar / 2 + 4, fontSize: 12, textAnchor: "middle", fill: tint(theme, "muted") }, title),
+    title && el.text({ x: frame.center.x, y: frame.y + bar / 2 + 4, fontSize: 12, textAnchor: "middle", fill: theme.base04 }, title),
   ]);
   return { node, body: rect(frame.x, frame.y + bar, frame.w, frame.h - bar) };
 }

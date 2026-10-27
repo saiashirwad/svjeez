@@ -2,6 +2,7 @@
   "name": "svjeez",
   "version": "0.2.0",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./package-dist/index.d.ts",
