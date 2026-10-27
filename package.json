@@ -1,6 +1,6 @@
 {
   "name": "svjeez",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "type": "module",
   "sideEffects": false,
   "types": "./package-dist/index.d.ts",
