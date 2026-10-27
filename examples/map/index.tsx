@@ -1,4 +1,4 @@
-import { Glyphs, def, draw, ease, enter, font, motion, rect, render, type Child, type Font, type Paint, type Rect, type SvgNode } from "svjeez";
+import { Stroke, brush, def, ease, enter, font, motion, nib, pen, rect, render, type Child, type Font, type Paint, type Rect, type Ref, type SvgNode } from "svjeez";
 import { Camera, travel, type CameraStop } from "svjeez/extras";
 
 const W = 960;
@@ -71,8 +71,33 @@ const MAINLAND = smooth(shore(490, 334, 392, 226, 7), true);
 const ISLANDS = [smooth(shore(96, 548, 46, 26, 3, 1.4, 28), true), smooth(shore(70, 168, 26, 16, 11, 1.4, 24), true), smooth(shore(912, 120, 20, 30, 5, 1.6, 24), true)];
 const LAND = [MAINLAND, ...ISLANDS];
 const landClip = def.clipPath({}, <path d={LAND.join("")} />);
-/** The coastline is the heaviest path on the map, so every layer that strokes or fills it shares one copy. */
-const landShape = def.symbol({ style: "overflow:visible" }, <path d={LAND.join("")} />);
+/**
+ * The map is drawn twice: an intro copy that animates in at the overview, and a still copy the camera zooms. Chromium keeps
+ * every animated element on its own raster, and when a camera scales hundreds of them they fall behind and flash blank,
+ * so the copy that zooms has no animations at all. Geometry lives in shared symbols, so drawing it twice costs little.
+ */
+const shapes = new Map<string, Ref<"symbol">>();
+const shape = (d: string): Ref<"symbol"> => {
+  let symbol = shapes.get(d);
+  if (!symbol) shapes.set(d, (symbol = def.symbol({ style: "overflow:visible" }, <path d={d} />)));
+  return symbol;
+};
+const landShape = shape(LAND.join(""));
+
+/** Hand tools: a broad nib for coasts and lettering rules, a fine pen for peaks, a brush for rivers and lava. */
+const COAST = nib({ size: 2.6, angle: 40, thin: 0.35 });
+const PEN = pen({ size: 1.05, seed: 4 });
+const HATCH = pen({ size: 0.65, taper: 0.3, seed: 5 });
+const RIVER = brush({ size: 2.6, taper: 0.18, pressure: 0.3, seed: 6 });
+const LAVA = brush({ size: 2.8, taper: 0.4, seed: 9 });
+
+/** Drops a motion from the still copy. */
+const intro = (still: boolean) => <T,>(motion: T): T | undefined => (still ? undefined : motion);
+
+/** A line of outlined text from a shared symbol, readable by assistive tech. */
+function Words({ face, text, size, x, y, fill }: { face: Font; text: string; size: number; x: number; y: number; fill: Paint }): SvgNode {
+  return <use href={shape(face.path(text, { size, x, y }).d)} fill={fill} role="img" aria-label={text} />;
+}
 
 /** A range of peaks along a line, each a little inked tent with hatching down its shadowed side. */
 const range = (spine: readonly Pt[], seed: number, size: number, spacing: number) => {
@@ -105,16 +130,18 @@ const peak = ({ x, y, h, w }: { x: number; y: number; h: number; w: number }) =>
   return { body, hatch };
 };
 
-function Range({ spine, seed, size = 22, spacing = 16, at }: { spine: readonly Pt[]; seed: number; size?: number; spacing?: number; at: number }): SvgNode {
+function Range({ spine, seed, size = 22, spacing = 16, at, still }: { spine: readonly Pt[]; seed: number; size?: number; spacing?: number; at: number; still: boolean }): SvgNode {
   const peaks = range(spine, seed, size, spacing);
+  const play = intro(still);
   return (
-    <g stroke={C.ink} strokeWidth={1.1} strokeLinejoin="round" strokeLinecap="round">
+    <g>
       {peaks.map((p, i) => {
         const { body, hatch } = peak(p);
         return (
-          <g animation={enter({ at: at + i * 0.012, over: 0.35 }, { opacity: 0, y: 4 })}>
-            <path d={body} fill={C.land} />
-            <path d={hatch} fill="none" strokeWidth={0.7} />
+          <g animation={play(enter({ at: at + i * 0.012, over: 0.35 }, { opacity: 0, y: 4 }))}>
+            <use href={shape(`${body}Z`)} fill={C.land} />
+            <Stroke d={body} tool={PEN} color={C.ink} />
+            <Stroke d={hatch} tool={HATCH} color={C.ink} />
           </g>
         );
       })}
@@ -123,7 +150,7 @@ function Range({ spine, seed, size = 22, spacing = 16, at }: { spine: readonly P
 }
 
 /** Lollipop trees scattered inside an ellipse, all in one path. */
-function Forest({ cx, cy, rx, ry, seed, at }: { cx: number; cy: number; rx: number; ry: number; seed: number; at: number }): SvgNode {
+function Forest({ cx, cy, rx, ry, seed, at, still }: { cx: number; cy: number; rx: number; ry: number; seed: number; at: number; still: boolean }): SvgNode {
   const rand = random(seed);
   const trees: Pt[] = [];
   for (let y = cy - ry; y <= cy + ry; y += 7) {
@@ -137,9 +164,9 @@ function Forest({ cx, cy, rx, ry, seed, at }: { cx: number; cy: number; rx: numb
   return (
     <g stroke={C.ink} strokeWidth={0.8} fill={C.land}>
       {rows.map((row, band) => (
-        <path
-          d={row.map(({ x, y }) => `M${n(x)} ${n(y)}v3M${n(x - 3.2)} ${n(y)}a3.2 3.6 0 1 1 6.4 0a3.2 1.6 0 0 1 -6.4 0Z`).join("")}
-          animation={enter({ at: at + band * 0.15, over: 0.5 }, { opacity: 0 })}
+        <use
+          href={shape(row.map(({ x, y }) => `M${n(x)} ${n(y)}v3M${n(x - 3.2)} ${n(y)}a3.2 3.6 0 1 1 6.4 0a3.2 1.6 0 0 1 -6.4 0Z`).join(""))}
+          animation={intro(still)(enter({ at: at + band * 0.15, over: 0.5 }, { opacity: 0 }))}
         />
       ))}
     </g>
@@ -147,7 +174,7 @@ function Forest({ cx, cy, rx, ry, seed, at }: { cx: number; cy: number; rx: numb
 }
 
 /** A label whose letters sit on a curve, each glyph turned to the curve's direction. */
-function Curved({ text, face, size, path, tracking = 0.25, fill = C.ink, at, step = 0.04 }: { text: string; face: Font; size: number; path: readonly Pt[]; tracking?: number; fill?: Paint; at: number; step?: number }): SvgNode {
+function Curved({ text, face, size, path, tracking = 0.25, fill = C.ink, at, step = 0.04, still }: { text: string; face: Font; size: number; path: readonly Pt[]; tracking?: number; fill?: Paint; at: number; step?: number; still: boolean }): SvgNode {
   const along = sample(path, 30);
   const length = lengths(along);
   const glyphs = [...text].map((char) => ({ char, advance: face.measure(char, size) }));
@@ -166,7 +193,7 @@ function Curved({ text, face, size, path, tracking = 0.25, fill = C.ink, at, ste
         const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
         return (
           <g transform={`translate(${n(a.x + (b.x - a.x) * t)} ${n(a.y + (b.y - a.y) * t)}) rotate(${n(angle)})`}>
-            <path d={face.path(char, { size, x: -advance / 2, y: lift }).d} animation={enter({ at: at + i * step, over: 0.4 }, { opacity: 0 })} />
+            <use href={shape(face.path(char, { size, x: -advance / 2, y: lift }).d)} animation={intro(still)(enter({ at: at + i * step, over: 0.4 }, { opacity: 0 }))} />
           </g>
         );
       })}
@@ -194,7 +221,7 @@ const PLACES = {
 
 const CINDER = { x: 772, y: 336 };
 
-function Marker({ place, at }: { place: Place; at: number }): SvgNode {
+function Marker({ place, at, still }: { place: Place; at: number; still: boolean }): SvgNode {
   const { x, y } = place.at;
   const size = 10.5;
   const width = roman.measure(place.name, size);
@@ -212,9 +239,9 @@ function Marker({ place, at }: { place: Place; at: number }): SvgNode {
       </>
     );
   return (
-    <g animation={enter({ at, over: 0.5 }, { opacity: 0, scale: 0.6 }, ease.pop)}>
+    <g animation={intro(still)(enter({ at, over: 0.5 }, { opacity: 0, scale: 0.6 }, ease.pop))}>
       {icon}
-      <Glyphs font={roman} text={place.name} size={size} x={lx} y={ly} fill={C.ink} />
+      <Words face={roman} text={place.name} size={size} x={lx} y={ly} fill={C.ink} />
     </g>
   );
 }
@@ -234,14 +261,18 @@ const view = (center: Pt, width: number): Rect => rect(center.x - width / 2, cen
 const FRAME = rect(0, 0, W, H);
 const PAN = 1.1;
 
+/** The intro has finished and the camera has not moved: the moment to swap the animated copy for the still one. */
+const SWAP = 4.9;
+
 const STOPS: CameraStop[] = [
-  { at: { at: 4.6, over: PAN }, view: view(PLACES.bramblecott.at, 300) },
+  { at: { at: 5, over: PAN }, view: view(PLACES.bramblecott.at, 300) },
   ...[PLACES.ford.at, PLACES.elder.at, PLACES.pass.at, PLACES.ashfall.at].map((p) => ({ at: { at: reach(p) - PAN * 0.8, over: PAN }, view: view(p, 320) })),
   { at: { at: reach(CINDER) - PAN * 0.6, over: PAN }, view: view({ x: CINDER.x - 6, y: CINDER.y - 22 }, 210) },
   { at: { at: 18.2, over: PAN }, view: "all" },
 ];
 
-function Cinder({ at }: { at: number }): SvgNode {
+/** The volcano. `live` is the glow and smoke, which loop forever and so belong in the live layer. */
+function Cinder({ at, live = false, still = false }: { at: number; live?: boolean; still?: boolean }): SvgNode {
   const { x, y } = CINDER;
   const glow = def.radialGradient({}, (
     <>
@@ -270,19 +301,26 @@ function Cinder({ at }: { at: number }): SvgNode {
         .loop(4.4)}
     />
   );
+  if (live) {
+    return (
+      <g animation={enter({ at, over: 0.6 }, { opacity: 0 })}>
+        <ellipse cx={x} cy={rim.y} rx={70} ry={52} fill={glow} animation={motion({ opacity: 0.55 }).to({ opacity: 1 }, 1.1, ease.inOut).to({ opacity: 0.55 }, 1.1, ease.inOut).loop(2.2)} />
+        {[0, 1, 2].map(puff)}
+      </g>
+    );
+  }
   return (
-    <g animation={enter({ at, over: 0.6 }, { opacity: 0, y: 6 })}>
-      <ellipse cx={x} cy={rim.y} rx={70} ry={52} fill={glow} animation={motion({ opacity: 0.55 }).to({ opacity: 1 }, 1.1, ease.inOut).to({ opacity: 0.55 }, 1.1, ease.inOut)} />
-      {[0, 1, 2].map(puff)}
-      <path d={body} fill={C.land} stroke={C.ink} strokeWidth={1.4} strokeLinejoin="round" />
-      <path d={hatch} stroke={C.ink} strokeWidth={0.7} strokeLinecap="round" />
-      <path d={`M${rim.l} ${rim.y}Q${x} ${rim.y - 4} ${rim.r} ${rim.y}`} fill="none" stroke={C.ink} strokeWidth={1.1} />
-      <path d={lava} fill="none" stroke={C.red} strokeWidth={2} strokeLinecap="round" animation={motion({ opacity: 0.7 }).to({ opacity: 1 }, 0.55).to({ opacity: 0.7 }, 0.55)} />
+    <g animation={intro(still)(enter({ at, over: 0.6 }, { opacity: 0, y: 6 }))}>
+      <use href={shape(body)} fill={C.land} />
+      <Stroke d={body} tool={pen({ size: 1.5, seed: 8 })} color={C.ink} />
+      <Stroke d={hatch} tool={HATCH} color={C.ink} />
+      <Stroke d={`M${rim.l} ${rim.y}Q${x} ${rim.y - 4} ${rim.r} ${rim.y}`} tool={PEN} color={C.ink} />
+      <Stroke d={lava} tool={LAVA} color={C.red} />
     </g>
   );
 }
 
-function Compass({ x, y, at }: { x: number; y: number; at: number }): SvgNode {
+function Compass({ x, y, at, still }: { x: number; y: number; at: number; still: boolean }): SvgNode {
   const star = (r: number, inner: number, count: number, turn = 0) =>
     Array.from({ length: count * 2 }, (_, i) => {
       const a = ((i * Math.PI) / count) + turn - Math.PI / 2;
@@ -290,56 +328,56 @@ function Compass({ x, y, at }: { x: number; y: number; at: number }): SvgNode {
       return `${i ? "L" : "M"}${n(x + rr * Math.cos(a))} ${n(y + rr * Math.sin(a))}`;
     }).join("") + "Z";
   return (
-    <g animation={motion({ opacity: 0, rotate: -90, scale: 0.4 }).at(at).to({ opacity: 1, rotate: 0, scale: 1 }, 1.4, ease.out)}>
+    <g animation={intro(still)(motion({ opacity: 0, rotate: -90, scale: 0.4 }).at(at).to({ opacity: 1, rotate: 0, scale: 1 }, 1.4, ease.out))}>
       <circle cx={x} cy={y} r={34} fill="none" stroke={C.ink} strokeWidth={0.8} />
       <circle cx={x} cy={y} r={30} fill="none" stroke={C.ink} strokeWidth={0.5} strokeDasharray="1.5 3" />
       <path d={star(26, 4, 4, Math.PI / 4)} fill={C.faded} opacity={0.5} />
       <path d={star(40, 6, 4)} fill={C.land} stroke={C.ink} strokeWidth={0.9} strokeLinejoin="round" />
       <path d={`M${x} ${y - 40}L${x + 6} ${y - 6}L${x} ${y}Z`} fill={C.red} />
-      <Glyphs font={roman} text="N" size={13} x={x - roman.measure("N", 13) / 2} y={y - 45} fill={C.ink} />
+      <Words face={roman} text="N" size={13} x={x - roman.measure("N", 13) / 2} y={y - 45} fill={C.ink} />
     </g>
   );
 }
 
-function Cartouche({ at }: { at: number }): SvgNode {
+function Cartouche({ at, still }: { at: number; still: boolean }): SvgNode {
   const box = { x: 26, y: 24, w: 300, h: 92 };
   const title = "The Western Reaches";
   const titleSize = 27;
   const sub = "Being a map of the long road to Mount Cinder";
   const subSize = 9;
   return (
-    <g animation={enter({ at, over: 0.8 }, { opacity: 0, y: -8 })}>
+    <g animation={intro(still)(enter({ at, over: 0.8 }, { opacity: 0, y: -8 }))}>
       <rect x={box.x} y={box.y} width={box.w} height={box.h} fill={C.land} stroke={C.ink} strokeWidth={1.4} />
       <rect x={box.x + 5} y={box.y + 5} width={box.w - 10} height={box.h - 10} fill="none" stroke={C.ink} strokeWidth={0.6} />
-      <Glyphs font={uncial} text={title} size={titleSize} x={box.x + (box.w - uncial.measure(title, titleSize)) / 2} y={box.y + 50} fill={C.ink} />
-      <path d={`M${box.x + 60} ${box.y + 62}h${box.w - 120}`} stroke={C.red} strokeWidth={0.8} />
-      <Glyphs font={roman} text={sub} size={subSize} x={box.x + (box.w - roman.measure(sub, subSize)) / 2} y={box.y + 78} fill={C.faded} />
+      <Words face={uncial} text={title} size={titleSize} x={box.x + (box.w - uncial.measure(title, titleSize)) / 2} y={box.y + 50} fill={C.ink} />
+      <Stroke d={`M${box.x + 60} ${box.y + 62}h${box.w - 120}`} tool={brush({ size: 2.4, taper: 0.45, seed: 12 })} color={C.red} draw={still ? undefined : { at: at + 0.6, over: 0.8 }} />
+      <Words face={roman} text={sub} size={subSize} x={box.x + (box.w - roman.measure(sub, subSize)) / 2} y={box.y + 78} fill={C.faded} />
     </g>
   );
 }
 
-function ScaleBar({ x, y, at }: { x: number; y: number; at: number }): SvgNode {
+function ScaleBar({ x, y, at, still }: { x: number; y: number; at: number; still: boolean }): SvgNode {
   const segment = 30;
   return (
-    <g animation={enter({ at, over: 0.6 }, { opacity: 0 })}>
+    <g animation={intro(still)(enter({ at, over: 0.6 }, { opacity: 0 }))}>
       {[0, 1, 2, 3].map((i) => (
         <rect x={x + i * segment} y={y} width={segment} height={5} fill={i % 2 ? C.land : C.ink} stroke={C.ink} strokeWidth={0.8} />
       ))}
       {[0, 50, 100].map((v, i) => (
-        <Glyphs font={roman} text={String(v)} size={8} x={x + i * segment * 2 - roman.measure(String(v), 8) / 2} y={y + 16} fill={C.ink} />
+        <Words face={roman} text={String(v)} size={8} x={x + i * segment * 2 - roman.measure(String(v), 8) / 2} y={y + 16} fill={C.ink} />
       ))}
-      <Glyphs font={roman} text="Leagues" size={9} x={x + segment * 2 - roman.measure("Leagues", 9) / 2} y={y - 6} fill={C.ink} />
+      <Words face={roman} text="Leagues" size={9} x={x + segment * 2 - roman.measure("Leagues", 9) / 2} y={y - 6} fill={C.ink} />
     </g>
   );
 }
 
-const coastRipples = (at: number): Child =>
+const coastRipples = (at: number, still: boolean): Child =>
   [
     { width: 26, color: C.faded, opacity: 0.18 },
     { width: 21, color: C.sea, opacity: 1 },
     { width: 13, color: C.faded, opacity: 0.35 },
     { width: 9, color: C.sea, opacity: 1 },
-  ].map(({ width, color, opacity }, i) => <use href={landShape} fill="none" stroke={color} strokeWidth={width} strokeLinejoin="round" opacity={opacity} animation={enter({ at: at + i * 0.15, over: 0.8 }, { opacity: 0 })} />);
+  ].map(({ width, color, opacity }, i) => <use href={landShape} fill="none" stroke={color} strokeWidth={width} strokeLinejoin="round" opacity={opacity} animation={intro(still)(enter({ at: at + i * 0.15, over: 0.8 }, { opacity: 0 }))} />);
 
 const RIVERS: Pt[][] = [
   [{ x: 300, y: 196 }, { x: 330, y: 260 }, { x: 352, y: 304 }, { x: 330, y: 360 }, { x: 318, y: 440 }, { x: 290, y: 520 }, { x: 270, y: 600 }],
@@ -347,49 +385,84 @@ const RIVERS: Pt[][] = [
   [{ x: 470, y: 230 }, { x: 440, y: 270 }, { x: 395, y: 300 }, { x: 352, y: 304 }],
 ];
 
-function Map(): SvgNode {
-  const routeD = smooth(ROUTE_POINTS);
-  const reveal = def.mask({ maskUnits: "userSpaceOnUse", x: 0, y: 0, width: W, height: H }, (
-    <path d={routeD} fill="none" stroke="#fff" strokeWidth={10} strokeLinecap="round" animation={draw({ at: JOURNEY.at, over: JOURNEY.over }, ease.linear)} />
-  ));
-  const traveller = ROUTE.filter((_, i) => i % 3 === 0 || i === ROUTE.length - 1);
+/**
+ * The dashed route, revealed in short pieces as the traveller passes. A mask that draws on would be simpler, but a masked
+ * element inside the zooming camera makes Chromium re-raster the whole map each frame, and tiles flash blank mid-zoom.
+ */
+function Route(): SvgNode {
+  const fine = sample(ROUTE_POINTS, 24);
+  const along = lengths(fine);
+  const PIECE = 6;
+  const pieces = Array.from({ length: Math.ceil((fine.length - 1) / PIECE) }, (_, k) => fine.slice(k * PIECE, k * PIECE + PIECE + 1));
+  return (
+    <g fill="none" stroke={C.red} strokeWidth={2} strokeDasharray="5 4" strokeLinecap="round">
+      {pieces.map((piece, k) => (
+        <path
+          d={piece.map((p, i) => `${i ? "L" : "M"}${n(p.x)} ${n(p.y)}`).join("")}
+          strokeDashoffset={-n(along[k * PIECE]!)}
+          animation={motion({ opacity: 0 }).at(JOURNEY.at + (JOURNEY.over * along[k * PIECE]!) / along.at(-1)!).set({ opacity: 1 })}
+        />
+      ))}
+    </g>
+  );
+}
+
+/** Everything that settles before the camera first moves. `still` drops every motion, for the copy the camera zooms. */
+function Atlas({ still }: { still: boolean }): SvgNode {
+  const play = intro(still);
   return (
     <>
       <rect width={W} height={H} fill={C.sea} />
-      <g animation={enter({ at: 0.2, over: 1 }, { opacity: 0 })}>{coastRipples(0.2)}</g>
-      <use href={landShape} fill={C.land} animation={enter({ at: 0.1, over: 1 }, { opacity: 0 })} />
-      <path d={LAND.join("")} fill="none" stroke={C.ink} strokeWidth={1.6} strokeLinejoin="round" animation={draw({ at: 0.1, over: 1.6 }, ease.inOut)} />
-      <g clipPath={landClip} fill="none" stroke={C.river} strokeLinecap="round">
+      <g animation={play(enter({ at: 0.2, over: 1 }, { opacity: 0 }))}>{coastRipples(0.2, still)}</g>
+      <use href={landShape} fill={C.land} animation={play(enter({ at: 0.1, over: 1 }, { opacity: 0 }))} />
+      <Stroke d={LAND.join("")} tool={COAST} color={C.ink} draw={still ? undefined : { at: 0.1, over: 1.6 }} />
+      <g clipPath={landClip}>
         {RIVERS.map((river, i) => (
-          <path d={smooth(river)} strokeWidth={i === 2 ? 1.1 : 1.6} animation={draw({ at: 1.8 + i * 0.3, over: 1.4 }, ease.inOut)} />
+          <Stroke d={smooth(river)} tool={i === 2 ? brush({ size: 1.7, taper: 0.25, seed: 7 }) : RIVER} color={C.river} draw={still ? undefined : { at: 1.8 + i * 0.3, over: 1.4 }} />
         ))}
-        <ellipse cx={352} cy={304} rx={16} ry={8} fill={C.sea} stroke={C.river} strokeWidth={1} animation={enter({ at: 2.4, over: 0.6 }, { opacity: 0 })} />
+        <ellipse cx={352} cy={304} rx={16} ry={8} fill={C.sea} stroke={C.river} strokeWidth={1} animation={play(enter({ at: 2.4, over: 0.6 }, { opacity: 0 }))} />
       </g>
-      <Forest cx={420} cy={330} rx={68} ry={40} seed={21} at={1.6} />
-      <Forest cx={268} cy={440} rx={46} ry={26} seed={22} at={1.8} />
-      <Forest cx={545} cy={470} rx={60} ry={30} seed={23} at={2} />
-      <Forest cx={196} cy={230} rx={44} ry={24} seed={24} at={1.9} />
-      <Forest cx={740} cy={196} rx={56} ry={26} seed={25} at={2.1} />
-      <Forest cx={420} cy={520} rx={40} ry={18} seed={26} at={2.2} />
-      <Range spine={[{ x: 560, y: 160 }, { x: 590, y: 240 }, { x: 600, y: 320 }]} seed={31} spacing={12} at={1.2} />
-      <Range spine={[{ x: 600, y: 392 }, { x: 590, y: 450 }, { x: 612, y: 516 }]} seed={32} spacing={12} at={1.4} />
-      <Range spine={[{ x: 150, y: 430 }, { x: 196, y: 470 }, { x: 240, y: 500 }]} seed={35} size={14} spacing={11} at={1.6} />
-      <Range spine={[{ x: 268, y: 190 }, { x: 300, y: 176 }, { x: 340, y: 186 }]} seed={33} size={18} spacing={12} at={1.5} />
-      <Range spine={[{ x: 720, y: 300 }, { x: 772, y: 280 }, { x: 822, y: 310 }, { x: 830, y: 370 }]} seed={34} size={16} spacing={11} at={1.7} />
-      <Cinder at={2.2} />
-      <Curved text="THE IRON TEETH" face={roman} size={13} path={[{ x: 630, y: 170 }, { x: 648, y: 250 }, { x: 640, y: 318 }]} at={3} />
-      <Curved text="ELDERWOOD" face={roman} size={12} path={[{ x: 360, y: 336 }, { x: 420, y: 326 }, { x: 482, y: 336 }]} tracking={0.5} fill={C.faded} at={3.2} />
-      <Curved text="THE ASHLANDS" face={roman} size={12} path={[{ x: 700, y: 268 }, { x: 772, y: 252 }, { x: 846, y: 276 }]} tracking={0.4} fill={C.red} at={3.4} />
-      <Curved text="GREY HILLS" face={roman} size={10} path={[{ x: 254, y: 210 }, { x: 304, y: 216 }, { x: 352, y: 208 }]} tracking={0.35} fill={C.faded} at={3.5} />
-      <Curved text="SEA OF WHISPERS" face={roman} size={17} path={[{ x: 300, y: 600 }, { x: 470, y: 618 }, { x: 640, y: 596 }]} tracking={0.6} fill={C.faded} at={3.6} step={0.05} />
-      <Curved text="THE GREAT WEST" face={roman} size={15} path={[{ x: 52, y: 470 }, { x: 46, y: 330 }, { x: 64, y: 200 }]} tracking={0.5} fill={C.faded} at={3.7} />
-      <Curved text="WESTWOLD" face={roman} size={9.5} path={[{ x: 156, y: 205 }, { x: 196, y: 198 }, { x: 236, y: 205 }]} tracking={0.45} fill={C.faded} at={3.75} />
-      <Curved text="THE BARROWS" face={roman} size={9.5} path={[{ x: 140, y: 500 }, { x: 186, y: 515 }, { x: 236, y: 530 }]} tracking={0.35} fill={C.faded} at={3.75} />
-      <Curved text="River Glass" face={roman} size={8.5} path={[{ x: 334, y: 420 }, { x: 324, y: 470 }, { x: 304, y: 512 }]} tracking={0.2} fill={C.river} at={3.8} />
+      <Forest cx={420} cy={330} rx={68} ry={40} seed={21} at={1.6} still={still} />
+      <Forest cx={268} cy={440} rx={46} ry={26} seed={22} at={1.8} still={still} />
+      <Forest cx={545} cy={470} rx={60} ry={30} seed={23} at={2} still={still} />
+      <Forest cx={196} cy={230} rx={44} ry={24} seed={24} at={1.9} still={still} />
+      <Forest cx={740} cy={196} rx={56} ry={26} seed={25} at={2.1} still={still} />
+      <Forest cx={420} cy={520} rx={40} ry={18} seed={26} at={2.2} still={still} />
+      <Range spine={[{ x: 560, y: 160 }, { x: 590, y: 240 }, { x: 600, y: 320 }]} seed={31} spacing={12} at={1.2} still={still} />
+      <Range spine={[{ x: 600, y: 392 }, { x: 590, y: 450 }, { x: 612, y: 516 }]} seed={32} spacing={12} at={1.4} still={still} />
+      <Range spine={[{ x: 150, y: 430 }, { x: 196, y: 470 }, { x: 240, y: 500 }]} seed={35} size={14} spacing={11} at={1.6} still={still} />
+      <Range spine={[{ x: 268, y: 190 }, { x: 300, y: 176 }, { x: 340, y: 186 }]} seed={33} size={18} spacing={12} at={1.5} still={still} />
+      <Range spine={[{ x: 720, y: 300 }, { x: 772, y: 280 }, { x: 822, y: 310 }, { x: 830, y: 370 }]} seed={34} size={16} spacing={11} at={1.7} still={still} />
+      <Cinder at={2.2} still={still} />
+      <Curved text="THE IRON TEETH" face={roman} size={13} path={[{ x: 630, y: 170 }, { x: 648, y: 250 }, { x: 640, y: 318 }]} at={3} still={still} />
+      <Curved text="ELDERWOOD" face={roman} size={12} path={[{ x: 360, y: 336 }, { x: 420, y: 326 }, { x: 482, y: 336 }]} tracking={0.5} fill={C.faded} at={3.2} still={still} />
+      <Curved text="THE ASHLANDS" face={roman} size={12} path={[{ x: 700, y: 268 }, { x: 772, y: 252 }, { x: 846, y: 276 }]} tracking={0.4} fill={C.red} at={3.4} still={still} />
+      <Curved text="GREY HILLS" face={roman} size={10} path={[{ x: 254, y: 210 }, { x: 304, y: 216 }, { x: 352, y: 208 }]} tracking={0.35} fill={C.faded} at={3.5} still={still} />
+      <Curved text="SEA OF WHISPERS" face={roman} size={17} path={[{ x: 300, y: 600 }, { x: 470, y: 618 }, { x: 640, y: 596 }]} tracking={0.6} fill={C.faded} at={3.6} step={0.05} still={still} />
+      <Curved text="THE GREAT WEST" face={roman} size={15} path={[{ x: 52, y: 470 }, { x: 46, y: 330 }, { x: 64, y: 200 }]} tracking={0.5} fill={C.faded} at={3.7} still={still} />
+      <Curved text="WESTWOLD" face={roman} size={9.5} path={[{ x: 156, y: 205 }, { x: 196, y: 198 }, { x: 236, y: 205 }]} tracking={0.45} fill={C.faded} at={3.75} still={still} />
+      <Curved text="THE BARROWS" face={roman} size={9.5} path={[{ x: 140, y: 500 }, { x: 186, y: 515 }, { x: 236, y: 530 }]} tracking={0.35} fill={C.faded} at={3.75} still={still} />
+      <Curved text="River Glass" face={roman} size={8.5} path={[{ x: 334, y: 420 }, { x: 324, y: 470 }, { x: 304, y: 512 }]} tracking={0.2} fill={C.river} at={3.8} still={still} />
       {Object.values(PLACES).map((place, i) => (
-        <Marker place={place} at={3 + i * 0.12} />
+        <Marker place={place} at={3 + i * 0.12} still={still} />
       ))}
-      <path d={routeD} fill="none" stroke={C.red} strokeWidth={2} strokeDasharray="5 4" strokeLinecap="round" mask={reveal} />
+      <Compass x={884} y={560} at={0.6} still={still} />
+      <Cartouche at={0.4} still={still} />
+      <ScaleBar x={44} y={604} at={0.8} still={still} />
+    </>
+  );
+}
+
+/**
+ * What keeps moving while the camera does: the route, the traveller, the smoke. Chromium re-rasters a zooming layer whenever
+ * anything inside it changes, and a whole map re-rastered every frame shows blank tiles, so these ride a second camera.
+ */
+function Live(): SvgNode {
+  const traveller = ROUTE.filter((_, i) => i % 3 === 0 || i === ROUTE.length - 1);
+  return (
+    <>
+      <Cinder at={2.2} live />
+      <Route />
       <g animation={travel(traveller, JOURNEY)}>
         <circle r={5.5} fill={C.red} opacity={0.25} />
         <circle r={3} fill={C.red} stroke={C.land} strokeWidth={1} />
@@ -397,9 +470,6 @@ function Map(): SvgNode {
       <g animation={motion({ opacity: 0, scale: 0.3 }).at(reach(CINDER)).to({ opacity: 1, scale: 1 }, 0.5, ease.pop)}>
         <path d={`M${CINDER.x - 6} ${CINDER.y + 8}l12 12M${CINDER.x + 6} ${CINDER.y + 8}l-12 12`} stroke={C.red} strokeWidth={2.6} strokeLinecap="round" />
       </g>
-      <Compass x={884} y={560} at={0.6} />
-      <Cartouche at={0.4} />
-      <ScaleBar x={44} y={604} at={0.8} />
     </>
   );
 }
@@ -428,8 +498,16 @@ export default function build(): string {
     },
     <>
       <rect width={W} height={H} fill={C.paper} />
+      <g animation={motion({ opacity: 1 }).at(SWAP).set({ opacity: 0 })}>
+        <Atlas still={false} />
+      </g>
+      <g animation={motion({ opacity: 0 }).at(SWAP).set({ opacity: 1 })}>
+        <Camera frame={FRAME} stops={STOPS} over={PAN}>
+          <Atlas still />
+        </Camera>
+      </g>
       <Camera frame={FRAME} stops={STOPS} over={PAN}>
-        <Map />
+        <Live />
       </Camera>
       <rect width={W} height={H} filter={grain} opacity={0.5} />
       <rect width={W} height={H} fill={vignette} />

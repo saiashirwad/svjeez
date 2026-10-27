@@ -170,6 +170,22 @@ Before you embed:
 - A character the font lacks draws from the fallback in `<text>` and as the `.notdef` box in `<Glyphs>`. `font.has(char)` tells you.
 - You are redistributing the font. Check its license; OFL fonts allow embedding.
 
+## Ink
+
+`<Stroke>` draws a path with a hand tool instead of an even SVG stroke. The tool sets the width at every point, and the stroke becomes a filled outline.
+
+```tsx
+import { Stroke, brush, nib, pen, pencil } from "svjeez";
+
+<Stroke d="M20 80C80 20 160 140 220 80" tool={brush({ size: 8, seed: 2 })} color="#2B2118" draw={{ at: 0.5, over: 1.2 }} />;
+<Stroke d={coast} tool={nib({ size: 3, angle: 40 })} color={ink} />;
+const outline = ink(d, pen({ size: 1.2 }));  // the outline as path data, to fill yourself
+```
+
+Tools: `pen({ size, taper })` is an even line with slightly thinned ends. `brush({ size, taper, pressure, wobble, seed })` swells mid-stroke and lifts to a point. `nib({ size, angle, thin })` is a broad calligraphy nib, thick across its edge and thin along it. `pencil({ size, seed })` is a fine line that wavers with the grain. A `seed` rerolls the wobble, and the same seed draws the same line. A tool is a plain `{ width(t, s, angle), drift?, size }` object, so you can write your own.
+
+`draw={{ at, over }}` inks the stroke in along its path, through a mask, then swaps to an unmasked copy so it costs nothing once drawn. `animation` moves or fades the whole mark. The outline is filled, so `fill` and gradients work and `stroke` does not. Each path and tool pair embeds its outline once. `d` takes any SVG path data, arcs included.
+
 ## Extras
 
 Import from `svjeez/extras`. Every extra takes `theme`, `x`, `y`, `fontSize`, `font` and `class`, and returns `{ node, ... }`. Put `node` in the tree.
@@ -190,6 +206,8 @@ reveal(src, { at: 1, step: 0.6 });                  // a paragraph at a time: { 
 ```
 
 Annotations are components: `<Focus stops={[{ during: tl.intro, on: src.lines(2) }]}>`, `<Marker stops={[{ at: span, rect }]} />`, `<Callout target={rect} side="right" during={span}>text</Callout>`, `Arrow`, `Brace`, `Underline`, `Camera`. `during(span)` fades anything in and out over a span.
+
+`Camera` zooms everything inside it. Do not zoom it over hundreds of animated elements: Chromium keeps each animated element on its own raster, and when a parent scales they fall behind and flash blank mid-zoom (measured in Chromium). Play the intro as one copy outside the `Camera`, swap at a cut to a still copy inside it, and share geometry through `def.symbol` so the second copy costs little. Put what must keep moving during the zoom in a second, small `Camera` with the same stops. `examples/map` shows the pattern.
 
 **Terminals.**
 

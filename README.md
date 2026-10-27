@@ -306,6 +306,16 @@ const w = display.measure("Wave!", 96); // px, matches the browser, kerning incl
 
 A font is embedded once, and only if the tree uses it. `<Glyphs>` draws one path per glyph and embeds no font, which suits short animated titles. Extras take `font` and size their boxes by measuring. Full notes are in the skill's Fonts section. See `examples/fonts`, `examples/newspaper` for a front page with a drawn masthead and columns justified by measuring, and `examples/map` for a fantasy map with labels set along curves and a camera that follows a journey.
 
+## Ink
+
+Draw a path with a pen, brush, calligraphy nib or pencil instead of an even stroke. The tool sets the width at every point.
+
+```tsx
+<Stroke d="M20 80C80 20 160 140 220 80" tool={brush({ size: 8, seed: 2 })} color="#2B2118" draw={{ at: 0.5, over: 1.2 }} />
+```
+
+`draw` inks the stroke in along its path. `ink(d, tool)` returns the outline as path data. See the skill's Ink section, and `examples/map`, whose coasts, rivers, peaks and lava are all inked.
+
 ## Extras
 
 `svjeez/extras` adds code explainers, terminals and diagrams.
