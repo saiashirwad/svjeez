@@ -1,15 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 550" width="1200" height="550" role="img" aria-labelledby="t d">
-  <title id="t">From state to reducer</title>
-  <desc id="d">A React counter moves its update rule out of a click handler and into a reducer.</desc>
-  <defs>
-    <mask id="m1">
-      <rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" class="a m2"/>
-      <g class="a m3">
-        <rect x="40" y="220" width="700" height="28" fill="#fff"/>
-      </g>
-    </mask>
-  </defs>
-  <style><![CDATA[
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 550" width="1200" height="550" role="img" aria-labelledby="t d"><title id="t">From state to reducer</title><desc id="d">A React counter moves its update rule out of a click handler and into a reducer.</desc><defs><mask id="m1"><rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" class="a m2"/><g class="a m3"><rect x="40" y="220" width="700" height="28" fill="#fff"/></g></mask></defs><style><![CDATA[
 .mono,.code text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
 .sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
 
@@ -31,224 +20,71 @@
 @keyframes k8{0%,44.033%,47.737%,94.239%,97.942%,100%{translate:0px 0px}}
 .m8{animation-name:k8}
 @keyframes k9{0%,44.033%,47.737%,100%{translate:0px 0px}}
-@keyframes k10{0%,44.033%{opacity:1}47.737%,100%{opacity:0}}
-.m9{animation-name:k9,k10;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k01{0%,44.033%{opacity:1}47.737%,100%{opacity:0}}
+.m9{animation-name:k9,k01;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
 @keyframes k11{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:19.2px 0px}}
-.m10{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k12{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:105.6px 0px}}
-.m11{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k13{0%,44.033%{opacity:1}45.885%,100%{opacity:0}}
-.m12{animation-name:k13}
-@keyframes k14{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:38.4px 196px}}
-.m13{animation-name:k14;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k15{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:-76.8px 196px}}
-.m14{animation-name:k15;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k16{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:-38.4px 0px}}
-.m15{animation-name:k16;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k17{0%,44.033%,97.942%,100%{opacity:0}47.737%,94.239%{opacity:1}}
-.m16{animation-name:k8,k17;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k18{0%,94.239%,97.942%,100%{translate:0px 0px}}
-@keyframes k19{0%,94.239%{opacity:0}97.942%,100%{opacity:1}}
-.m17{animation-name:k18,k19;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k20{0%,96.091%{opacity:0}97.942%,100%{opacity:1}}
-.m18{animation-name:k20}
-@keyframes k21{0%,3.292%{stroke-dashoffset:1;visibility:hidden}5.35%,100%{stroke-dashoffset:0;visibility:visible}}
+.m01{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k21{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:105.6px 0px}}
+.m11{animation-name:k21;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k31{0%,44.033%{opacity:1}45.885%,100%{opacity:0}}
+.m21{animation-name:k31}
+@keyframes k41{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:38.4px 196px}}
+.m31{animation-name:k41;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k51{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:-76.8px 196px}}
+.m41{animation-name:k51;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k61{0%,44.033%,97.942%,100%{translate:0px 0px}47.737%,94.239%{translate:-38.4px 0px}}
+.m51{animation-name:k61;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k71{0%,44.033%,97.942%,100%{opacity:0}47.737%,94.239%{opacity:1}}
+.m61{animation-name:k8,k71;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k81{0%,94.239%,97.942%,100%{translate:0px 0px}}
+@keyframes k91{0%,94.239%{opacity:0}97.942%,100%{opacity:1}}
+.m71{animation-name:k81,k91;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k02{0%,96.091%{opacity:0}97.942%,100%{opacity:1}}
+.m81{animation-name:k02}
+@keyframes k12{0%,3.292%{stroke-dashoffset:1;visibility:hidden}5.35%,100%{stroke-dashoffset:0;visibility:visible}}
 @keyframes k22{0%,3.292%,18.519%,100%{opacity:0}4.115%,17.695%{opacity:1}}
-.m19{animation-name:k21,k22}
-@keyframes k23{0%,5.761%{stroke-dashoffset:1;visibility:hidden}7.819%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k24{0%,5.761%,18.519%,100%{opacity:0}6.584%,17.695%{opacity:1}}
-.m20{animation-name:k23,k24}
-@keyframes k25{0%,20.988%{stroke-dashoffset:1;visibility:hidden}23.457%,100%{stroke-dashoffset:0;visibility:visible}}
-.m21{animation-name:k25}
-@keyframes k26{0%,23.457%{opacity:0}24.074%,100%{opacity:1}}
-@keyframes k27{0%,23.457%{scale:0.5}24.074%,100%{scale:1}}
-.m22{animation-name:k26,k27}
-@keyframes k28{0%,20.988%,41.564%,100%{opacity:0}21.811%,40.741%{opacity:1}}
-.m23{animation-name:k28}
-@keyframes k29{0%,44.033%{stroke-dashoffset:1;visibility:hidden}46.091%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k30{0%,44.033%,64.609%,100%{opacity:0}44.856%,63.786%{opacity:1}}
-.m24{animation-name:k29,k30}
-@keyframes k31{0%,67.078%,91.77%,100%{opacity:0}67.901%,90.947%{opacity:1}}
-.m25{animation-name:k31}
-@keyframes k32{0%,67.078%{stroke-dashoffset:1;visibility:hidden}69.547%,100%{stroke-dashoffset:0;visibility:visible}}
-.m26{animation-name:k32}
+.m91{animation-name:k12,k22}
+@keyframes k32{0%,5.761%{stroke-dashoffset:1;visibility:hidden}7.819%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k42{0%,5.761%,18.519%,100%{opacity:0}6.584%,17.695%{opacity:1}}
+.m02{animation-name:k32,k42}
+@keyframes k52{0%,20.988%{stroke-dashoffset:1;visibility:hidden}23.457%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k52}
+@keyframes k62{0%,23.457%{opacity:0}24.074%,100%{opacity:1}}
+@keyframes k72{0%,23.457%{scale:0.5}24.074%,100%{scale:1}}
+.m22{animation-name:k62,k72}
+@keyframes k82{0%,20.988%,41.564%,100%{opacity:0}21.811%,40.741%{opacity:1}}
+.m32{animation-name:k82}
+@keyframes k92{0%,44.033%{stroke-dashoffset:1;visibility:hidden}46.091%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k03{0%,44.033%,64.609%,100%{opacity:0}44.856%,63.786%{opacity:1}}
+.m42{animation-name:k92,k03}
+@keyframes k13{0%,67.078%,91.77%,100%{opacity:0}67.901%,90.947%{opacity:1}}
+.m52{animation-name:k13}
+@keyframes k23{0%,67.078%{stroke-dashoffset:1;visibility:hidden}69.547%,100%{stroke-dashoffset:0;visibility:visible}}
+.m62{animation-name:k23}
 @keyframes k33{0%,69.547%{opacity:0}70.165%,100%{opacity:1}}
-@keyframes k34{0%,69.547%{scale:0.5}70.165%,100%{scale:1}}
-.m27{animation-name:k33,k34}
-@keyframes k35{0%,18.519%,100%{opacity:0}1.852%{opacity:1}17.284%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-@keyframes k36{0%{translate:0px 10px}1.852%{translate:0px 0px}17.284%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}18.519%,100%{translate:0px -6px}}
-.m28{animation-name:k35,k36}
-@keyframes k37{0%,20.988%,41.564%,100%{opacity:0}22.84%{opacity:1}40.329%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-@keyframes k38{0%,20.988%{translate:0px 10px}22.84%{translate:0px 0px}40.329%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}41.564%,100%{translate:0px -6px}}
-.m29{animation-name:k37,k38}
-@keyframes k39{0%,44.033%,64.609%,100%{opacity:0}45.885%{opacity:1}63.374%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-@keyframes k40{0%,44.033%{translate:0px 10px}45.885%{translate:0px 0px}63.374%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}64.609%,100%{translate:0px -6px}}
-.m30{animation-name:k39,k40}
-@keyframes k41{0%,67.078%,91.77%,100%{opacity:0}68.93%{opacity:1}90.535%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-@keyframes k42{0%,67.078%{translate:0px 10px}68.93%{translate:0px 0px}90.535%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.77%,100%{translate:0px -6px}}
-.m31{animation-name:k41,k42}
-@keyframes k43{0%{stroke-dashoffset:1;visibility:hidden}20.988%,100%{stroke-dashoffset:0;visibility:visible}}
-.m32{animation-name:k43;animation-timing-function:linear}
+@keyframes k43{0%,69.547%{scale:0.5}70.165%,100%{scale:1}}
+.m72{animation-name:k33,k43}
+@keyframes k53{0%,18.519%,100%{opacity:0}1.852%{opacity:1}17.284%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+@keyframes k63{0%{translate:0px 10px}1.852%{translate:0px 0px}17.284%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}18.519%,100%{translate:0px -6px}}
+.m82{animation-name:k53,k63}
+@keyframes k73{0%,20.988%,41.564%,100%{opacity:0}22.84%{opacity:1}40.329%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+@keyframes k83{0%,20.988%{translate:0px 10px}22.84%{translate:0px 0px}40.329%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}41.564%,100%{translate:0px -6px}}
+.m92{animation-name:k73,k83}
+@keyframes k93{0%,44.033%,64.609%,100%{opacity:0}45.885%{opacity:1}63.374%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+@keyframes k04{0%,44.033%{translate:0px 10px}45.885%{translate:0px 0px}63.374%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}64.609%,100%{translate:0px -6px}}
+.m03{animation-name:k93,k04}
+@keyframes k14{0%,67.078%,91.77%,100%{opacity:0}68.93%{opacity:1}90.535%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+@keyframes k24{0%,67.078%{translate:0px 10px}68.93%{translate:0px 0px}90.535%{translate:0px 0px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}91.77%,100%{translate:0px -6px}}
+.m13{animation-name:k14,k24}
+@keyframes k34{0%{stroke-dashoffset:1;visibility:hidden}20.988%,100%{stroke-dashoffset:0;visibility:visible}}
+.m23{animation-name:k34;animation-timing-function:linear}
 @keyframes k44{0%,20.988%{stroke-dashoffset:1;visibility:hidden}44.033%,100%{stroke-dashoffset:0;visibility:visible}}
 .m33{animation-name:k44;animation-timing-function:linear}
-@keyframes k45{0%,44.033%{stroke-dashoffset:1;visibility:hidden}67.078%,100%{stroke-dashoffset:0;visibility:visible}}
-.m34{animation-name:k45;animation-timing-function:linear}
-@keyframes k46{0%,67.078%{stroke-dashoffset:1;visibility:hidden}91.77%,100%{stroke-dashoffset:0;visibility:visible}}
-.m35{animation-name:k46;animation-timing-function:linear}
-@keyframes k47{0%,94.239%{opacity:1}96.296%,100%{opacity:0}}
-.m36{animation-name:k47}
+@keyframes k54{0%,44.033%{stroke-dashoffset:1;visibility:hidden}67.078%,100%{stroke-dashoffset:0;visibility:visible}}
+.m43{animation-name:k54;animation-timing-function:linear}
+@keyframes k64{0%,67.078%{stroke-dashoffset:1;visibility:hidden}91.77%,100%{stroke-dashoffset:0;visibility:visible}}
+.m53{animation-name:k64;animation-timing-function:linear}
+@keyframes k74{0%,94.239%{opacity:1}96.296%,100%{opacity:0}}
+.m63{animation-name:k74}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-18.3s!important;animation-play-state:paused!important}}
-]]></style>
-  <rect width="1200" height="550" fill="#0a0b0e"/>
-  <g class="mono">
-    <rect x="40" y="40" width="700" height="470" rx="12" fill="#111318" stroke="#23262e"/>
-    <path d="M40 80h700" stroke="#1a1d24"/>
-    <circle cx="60" cy="60" r="5.5" fill="#23262e"/>
-    <circle cx="78" cy="60" r="5.5" fill="#23262e"/>
-    <circle cx="96" cy="60" r="5.5" fill="#23262e"/>
-    <text x="390" y="64" font-size="12" text-anchor="middle" fill="#626a7c">Counter.tsx</text>
-  </g>
-  <g mask="url(#m1)">
-    <g class="a m5">
-      <rect x="99" y="131" width="394" height="38" rx="6" fill="#ffc799" fill-opacity="0.1" stroke="#ffc799" stroke-opacity="0.4" stroke-width="1" class="a m4"/>
-    </g>
-    <g class="code">
-      <g>
-        <text x="84.8" y="127.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">1</text>
-        <text x="84.8" y="155.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">2</text>
-        <text x="84.8" y="183.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">3</text>
-        <text x="84.8" y="211.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">4</text>
-        <text x="84.8" y="239.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">5</text>
-        <text x="84.8" y="267.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">6</text>
-        <text x="84.8" y="295.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">7</text>
-        <text x="84.8" y="323.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">8</text>
-        <text x="84.8" y="351.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">9</text>
-        <text x="84.8" y="379.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">10</text>
-        <text x="84.8" y="407.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">11</text>
-        <text x="84.8" y="435.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">12</text>
-        <text x="84.8" y="463.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">13</text>
-        <text x="104" y="127.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">function</text>
-        <text x="190.4" y="127.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m8">Counter</text>
-        <text x="257.6" y="127.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">()</text>
-        <text x="286.4" y="127.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">{</text>
-        <text x="123.2" y="155.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">const</text>
-        <text x="180.8" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">[</text>
-        <text x="190.4" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">count</text>
-        <text x="238.4" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">,</text>
-        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m9">setCount</text>
-        <text x="334.4" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">]</text>
-        <text x="353.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">=</text>
-        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m9">useState</text>
-        <text x="449.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m10">(</text>
-        <text x="459.2" y="155.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m11">0</text>
-        <text x="468.8" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m11">);</text>
-        <text x="123.2" y="211.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">return</text>
-        <text x="190.4" y="211.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">(</text>
-        <text x="142.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&lt;</text>
-        <text x="152" y="239.6" font-family="monospace" font-size="16" fill="#a8b8ff" class="a m8">button</text>
-        <text x="219.2" y="239.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">onClick</text>
-        <text x="286.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">={()</text>
-        <text x="334.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">=&gt;</text>
-        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m12">setCount</text>
-        <text x="440" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">(</text>
-        <text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m13">count</text>
-        <text x="507.2" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m14">+</text>
-        <text x="526.4" y="239.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m14">1</text>
-        <text x="536" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m15">)</text>
-        <text x="545.6" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m15">}&gt;</text>
-        <text x="161.6" y="267.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">{</text>
-        <text x="171.2" y="267.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">count</text>
-        <text x="219.2" y="267.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">}</text>
-        <text x="142.4" y="295.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&lt;/</text>
-        <text x="161.6" y="295.6" font-family="monospace" font-size="16" fill="#a8b8ff" class="a m8">button</text>
-        <text x="219.2" y="295.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&gt;</text>
-        <text x="123.2" y="323.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">);</text>
-        <text x="104" y="351.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">}</text>
-        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m16">dispatch</text>
-        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m16">useReducer</text>
-        <text x="478.4" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">reducer</text>
-        <text x="545.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">,</text>
-        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m7">dispatch</text>
-        <text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m7">"inc"</text>
-        <text x="104" y="407.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m7">function</text>
-        <text x="190.4" y="407.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m7">reducer</text>
-        <text x="257.6" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">(</text>
-        <text x="267.2" y="407.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">count</text>
-        <text x="315.2" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">,</text>
-        <text x="334.4" y="407.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">action</text>
-        <text x="392" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">)</text>
-        <text x="411.2" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">{</text>
-        <text x="123.2" y="435.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m7">return</text>
-        <text x="190.4" y="435.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">action</text>
-        <text x="257.6" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">===</text>
-        <text x="296" y="435.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m7">"inc"</text>
-        <text x="353.6" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">?</text>
-        <text x="372.8" y="435.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">count</text>
-        <text x="468.8" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">:</text>
-        <text x="536" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">;</text>
-        <text x="104" y="463.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">}</text>
-        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m17">setCount</text>
-        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m17">useState</text>
-        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m18">setCount</text>
-      </g>
-    </g>
-  </g>
-  <g class="note">
-    <path d="M190.39999999999998 162h48" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m19"/>
-    <path d="M257.6 162h76.8" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m20"/>
-    <g class="a m23">
-      <path d="M454.4 252Q600.9000000000001 355.252 776 317" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m21"/>
-      <path d="M768.2197380620172 315.1378710634394L776 317L769.7050559183891 321.93697063080106" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m22 fb"/>
-    </g>
-    <path d="M372.8 162h96" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m24"/>
-    <g class="a m25">
-      <path d="M553.5999999999999 388q8 0 8 8V422q0 8 8 8q-8 0 -8 8V464q0 8 -8 8" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="573.6" y="434" text-anchor="start" font-size="12" fill="#ffc799">the rule</text>
-    </g>
-    <g class="a m25">
-      <path d="M435.2 248Q280.59999999999997 244.07999999999998 223.99999999999997 388" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m26"/>
-      <path d="M229.8747248017312 382.56975060389266L223.99999999999997 388L223.39812701964374 380.02267282133187" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m27 fb"/>
-    </g>
-  </g>
-  <text x="792" y="98" class="mono" font-size="11" letter-spacing="2.2" fill="#3a404d">REACT · REFACTOR</text>
-  <text x="792" y="124" class="sans" font-size="15" fill="#8d95a6">useState → useReducer</text>
-  <g class="a m28">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">01  THE SETUP</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">One piece of state</text>
-    <text x="792" y="286" class="sans" font-size="15.5" fill="#8d95a6">useState hands the counter a value</text>
-    <text x="792" y="310" class="sans" font-size="15.5" fill="#8d95a6">and a setter to change it.</text>
-  </g>
-  <g class="a m29">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">02  THE PROBLEM</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">The rule hides</text>
-    <text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">in a handler</text>
-    <text x="792" y="322" class="sans" font-size="15.5" fill="#8d95a6">How count changes is written inline.</text>
-    <text x="792" y="346" class="sans" font-size="15.5" fill="#8d95a6">Every new button has to repeat it.</text>
-  </g>
-  <g class="a m30">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">03  THE MOVE</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">Lift the rule</text>
-    <text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">into a reducer</text>
-    <text x="792" y="322" class="sans" font-size="15.5" fill="#8d95a6">useReducer takes a pure function</text>
-    <text x="792" y="346" class="sans" font-size="15.5" fill="#8d95a6">that owns every state change.</text>
-  </g>
-  <g class="a m31">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">04  THE RESULT</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">Handlers send intent</text>
-    <text x="792" y="286" class="sans" font-size="15.5" fill="#8d95a6">The button dispatches "inc".</text>
-    <text x="792" y="310" class="sans" font-size="15.5" fill="#8d95a6">The reducer decides what it means,</text>
-    <text x="792" y="334" class="sans" font-size="15.5" fill="#8d95a6">in one place.</text>
-  </g>
-  <g>
-    <path d="M792 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
-    <path d="M884.5 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
-    <path d="M977 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
-    <path d="M1069.5 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
-    <g class="a m36">
-      <path d="M792 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m32"/>
-      <path d="M884.5 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m33"/>
-      <path d="M977 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m34"/>
-      <path d="M1069.5 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m35"/>
-    </g>
-  </g>
-</svg>
+]]></style><rect width="1200" height="550" fill="#0a0b0e"/><g class="mono"><rect x="40" y="40" width="700" height="470" rx="12" fill="#111318" stroke="#23262e"/><path d="M40 80H740" stroke="#1a1d24"/><circle cx="60" cy="60" r="5.5" fill="#23262e"/><circle cx="78" cy="60" r="5.5" fill="#23262e"/><circle cx="96" cy="60" r="5.5" fill="#23262e"/><text x="390" y="64" font-size="12" text-anchor="middle" fill="#626a7c">Counter.tsx</text></g><g mask="url(#m1)"><g class="a m5"><rect x="99" y="131" width="394" height="38" rx="6" fill="#ffc799" fill-opacity="0.1" stroke="#ffc799" stroke-opacity="0.4" stroke-width="1" class="a m4"/></g><g class="code"><g><text x="84.8" y="127.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">1</text><text x="84.8" y="155.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">2</text><text x="84.8" y="183.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">3</text><text x="84.8" y="211.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">4</text><text x="84.8" y="239.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">5</text><text x="84.8" y="267.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">6</text><text x="84.8" y="295.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">7</text><text x="84.8" y="323.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">8</text><text x="84.8" y="351.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">9</text><text x="84.8" y="379.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">10</text><text x="84.8" y="407.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">11</text><text x="84.8" y="435.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">12</text><text x="84.8" y="463.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">13</text><text x="104" y="127.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">function</text><text x="190.4" y="127.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m8">Counter</text><text x="257.6" y="127.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">()</text><text x="286.4" y="127.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">{</text><text x="123.2" y="155.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">const</text><text x="180.8" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">[</text><text x="190.4" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">count</text><text x="238.4" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">,</text><text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m9">setCount</text><text x="334.4" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">]</text><text x="353.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">=</text><text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m9">useState</text><text x="449.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m01">(</text><text x="459.2" y="155.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m11">0</text><text x="468.8" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m11">);</text><text x="123.2" y="211.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">return</text><text x="190.4" y="211.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">(</text><text x="142.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&lt;</text><text x="152" y="239.6" font-family="monospace" font-size="16" fill="#a8b8ff" class="a m8">button</text><text x="219.2" y="239.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">onClick</text><text x="286.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">={()</text><text x="334.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">=&gt;</text><text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m21">setCount</text><text x="440" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">(</text><text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m31">count</text><text x="507.2" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m41">+</text><text x="526.4" y="239.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m41">1</text><text x="536" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m51">)</text><text x="545.6" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m51">}&gt;</text><text x="161.6" y="267.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">{</text><text x="171.2" y="267.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">count</text><text x="219.2" y="267.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">}</text><text x="142.4" y="295.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&lt;/</text><text x="161.6" y="295.6" font-family="monospace" font-size="16" fill="#a8b8ff" class="a m8">button</text><text x="219.2" y="295.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&gt;</text><text x="123.2" y="323.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">);</text><text x="104" y="351.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">}</text><text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m61">dispatch</text><text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m61">useReducer</text><text x="478.4" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">reducer</text><text x="545.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">,</text><text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m7">dispatch</text><text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m7">"inc"</text><text x="104" y="407.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m7">function</text><text x="190.4" y="407.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m7">reducer</text><text x="257.6" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">(</text><text x="267.2" y="407.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">count</text><text x="315.2" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">,</text><text x="334.4" y="407.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">action</text><text x="392" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">)</text><text x="411.2" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">{</text><text x="123.2" y="435.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m7">return</text><text x="190.4" y="435.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">action</text><text x="257.6" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">===</text><text x="296" y="435.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m7">"inc"</text><text x="353.6" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">?</text><text x="372.8" y="435.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">count</text><text x="468.8" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">:</text><text x="536" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">;</text><text x="104" y="463.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">}</text><text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m71">setCount</text><text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m71">useState</text><text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m81">setCount</text></g></g></g><g class="note"><path d="M190.4 162h48" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m91"/><path d="M257.6 162h76.8" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m02"/><g class="a m32"><path d="M454.4 252Q600.9 355.252 776 317" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m12"/><path d="M768.22 315.138 776 317l-6.295 4.937" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m22 fb"/></g><path d="M372.8 162h96" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m42"/><g class="a m52"><path d="M553.6 388q8 0 8 8v26q0 8 8 8-8 0-8 8v26q0 8-8 8" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><text x="573.6" y="434" text-anchor="start" font-size="12" fill="#ffc799">the rule</text></g><g class="a m52"><path d="M435.2 248Q280.6 244.08 224 388" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m62"/><path d="M229.875 382.57 224 388l-.602-7.977" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m72 fb"/></g></g><text x="792" y="98" class="mono" font-size="11" letter-spacing="2.2" fill="#3a404d">REACT · REFACTOR</text><text x="792" y="124" class="sans" font-size="15" fill="#8d95a6">useState → useReducer</text><g class="a m82"><text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">01  THE SETUP</text><text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">One piece of state</text><text x="792" y="286" class="sans" font-size="15.5" fill="#8d95a6">useState hands the counter a value</text><text x="792" y="310" class="sans" font-size="15.5" fill="#8d95a6">and a setter to change it.</text></g><g class="a m92"><text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">02  THE PROBLEM</text><text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">The rule hides</text><text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">in a handler</text><text x="792" y="322" class="sans" font-size="15.5" fill="#8d95a6">How count changes is written inline.</text><text x="792" y="346" class="sans" font-size="15.5" fill="#8d95a6">Every new button has to repeat it.</text></g><g class="a m03"><text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">03  THE MOVE</text><text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">Lift the rule</text><text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">into a reducer</text><text x="792" y="322" class="sans" font-size="15.5" fill="#8d95a6">useReducer takes a pure function</text><text x="792" y="346" class="sans" font-size="15.5" fill="#8d95a6">that owns every state change.</text></g><g class="a m13"><text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">04  THE RESULT</text><text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">Handlers send intent</text><text x="792" y="286" class="sans" font-size="15.5" fill="#8d95a6">The button dispatches "inc".</text><text x="792" y="310" class="sans" font-size="15.5" fill="#8d95a6">The reducer decides what it means,</text><text x="792" y="334" class="sans" font-size="15.5" fill="#8d95a6">in one place.</text></g><g><path d="M792 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/><path d="M884.5 510H967" stroke="#23262e" stroke-width="2" stroke-linecap="round"/><path d="M977 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/><path d="M1069.5 510H1152" stroke="#23262e" stroke-width="2" stroke-linecap="round"/><g class="a m63"><path d="M792 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m23"/><path d="M884.5 510H967" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m33"/><path d="M977 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m43"/><path d="M1069.5 510H1152" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m53"/></g></g></svg>

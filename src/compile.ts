@@ -70,7 +70,7 @@ const seconds = (canvas: Canvas, scene: number): string => `${num(scene / canvas
 const nextName = (state: State, prefix: string): string => {
   const count = (state.counters.get(prefix) ?? 0) + 1;
   state.counters.set(prefix, count);
-  return `${prefix}${count}`;
+  return `${prefix}${count % 10}${count >= 10 ? Math.floor(count / 10).toString(36) : ""}`;
 };
 
 const hasSmil = (node: SvgNode): boolean =>

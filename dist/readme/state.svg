@@ -1,7 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 178.4 708" width="178.4" height="708" role="img" aria-labelledby="t d">
-  <title id="t">State machine</title>
-  <desc id="d">An agent's states light up in turn as a token runs from idle through plan and act to done.</desc>
-  <style><![CDATA[
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 178.4 708" width="178.4" height="708" role="img" aria-labelledby="t d"><title id="t">State machine</title><desc id="d">An agent's states light up in turn as a token runs from idle through plan and act to done.</desc><style><![CDATA[
 svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
 @media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
 .mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
@@ -24,97 +21,11 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 @keyframes k8{0%,38.318%,100%{visibility:hidden}34.818%{visibility:visible}}
 @keyframes k9{0%,34.818%{translate:71.2px 292px}38.318%,100%{translate:71.2px 340px}}
 .m7{animation-name:k8,k9;animation-timing-function:steps(1),linear}
-@keyframes k10{0%,51.818%,100%{visibility:hidden}48.318%{visibility:visible}}
+@keyframes k01{0%,51.818%,100%{visibility:hidden}48.318%{visibility:visible}}
 @keyframes k11{0%,48.318%{translate:71.2px 376px}51.818%,100%{translate:71.2px 424px}}
-.m8{animation-name:k10,k11;animation-timing-function:steps(1),linear}
-@keyframes k12{0%,66.636%,100%{visibility:hidden}61.818%{visibility:visible}}
-@keyframes k13{0%,61.818%{translate:89.2px 476px}66.636%,100%{translate:89.2px 582px}}
-.m9{animation-name:k12,k13;animation-timing-function:steps(1),linear}
+.m8{animation-name:k01,k11;animation-timing-function:steps(1),linear}
+@keyframes k21{0%,66.636%,100%{visibility:hidden}61.818%{visibility:visible}}
+@keyframes k31{0%,61.818%{translate:89.2px 476px}66.636%,100%{translate:89.2px 582px}}
+.m9{animation-name:k21,k31;animation-timing-function:steps(1),linear}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-1s!important;animation-play-state:paused!important}}
-]]></style>
-  <rect width="100%" height="100%" fill="var(--base00)"/>
-  <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
-    <g>
-      <rect x="58" y="86" width="62.4" height="36" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
-      <text x="89.2" y="108.55" font-size="13" text-anchor="middle" fill="var(--base05)">Idle</text>
-    </g>
-    <g>
-      <rect x="24" y="228" width="130.4" height="248" rx="10" fill="var(--base01)" stroke="var(--base03)"/>
-      <path d="M24 262h130.39999999999998" stroke="var(--base03)"/>
-      <text x="89.2" y="249.55" font-size="13" text-anchor="middle" fill="var(--base05)">Working</text>
-    </g>
-    <g>
-      <rect x="58" y="582" width="62.4" height="36" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
-      <text x="89.2" y="604.55" font-size="13" text-anchor="middle" fill="var(--base05)">Done</text>
-    </g>
-    <g>
-      <rect x="40" y="340" width="62.4" height="36" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
-      <text x="71.2" y="362.55" font-size="13" text-anchor="middle" fill="var(--base05)">Plan</text>
-    </g>
-    <g>
-      <rect x="43.9" y="424" width="54.6" height="36" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
-      <text x="71.2" y="446.55" font-size="13" text-anchor="middle" fill="var(--base05)">Act</text>
-    </g>
-    <g>
-      <path d="M89.2 38L89.2 79" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M89.20000005637544 86L85.20000005637544 78L93.20000005637544 78Z" fill="var(--base04)"/>
-    </g>
-    <g>
-      <path d="M89.2 122L89.2 221" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M89.20000005637544 228L85.20000005637544 220L93.20000005637544 220Z" fill="var(--base04)"/>
-    </g>
-    <g>
-      <path d="M89.2 476L89.2 575" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M89.19999999999999 582L85.19999999999999 574L93.19999999999999 574Z" fill="var(--base04)"/>
-    </g>
-    <g>
-      <path d="M89.2 618L89.2 659" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M89.1999999396406 666L85.1999999396406 658L93.1999999396406 658Z" fill="var(--base04)"/>
-    </g>
-    <g>
-      <path d="M71.2 292L71.2 333" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M71.19999999999999 340L67.19999999999999 332L75.19999999999999 332Z" fill="var(--base04)"/>
-    </g>
-    <g>
-      <path d="M71.2 376L71.2 417" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M71.19999999999999 424L67.19999999999999 416L75.19999999999999 416Z" fill="var(--base04)"/>
-    </g>
-    <g>
-      <path d="M98.5 442L128.4 442C133.9 442 138.4 437.5 138.4 432L138.4 368C138.4 362.5 133.9 358 128.4 358L109.4 358" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M102.39999999999999 358L110.39999999999999 354L110.39999999999999 362Z" fill="var(--base04)"/>
-    </g>
-    <circle cx="89.2" cy="31" r="7" fill="var(--base05)"/>
-    <circle cx="71.2" cy="285" r="7" fill="var(--base05)"/>
-    <g>
-      <circle cx="89.2" cy="675" r="9" fill="none" stroke="var(--base05)" stroke-width="1.5"/>
-      <circle cx="89.2" cy="675" r="5" fill="var(--base05)"/>
-    </g>
-    <g>
-      <rect x="70.94" y="166.5" width="36.52" height="17" rx="3" fill="var(--base00)"/>
-      <text x="89.2" y="178.868" font-size="11.05" text-anchor="middle" fill="var(--base05)">task</text>
-    </g>
-    <g>
-      <rect x="64.31" y="520.5" width="49.78" height="17" rx="3" fill="var(--base00)"/>
-      <text x="89.2" y="532.868" font-size="11.05" text-anchor="middle" fill="var(--base05)">finish</text>
-    </g>
-  </g>
-  <g>
-    <rect x="54" y="82" width="70.4" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m1"/>
-    <rect x="20" y="224" width="138.4" height="256" rx="13" fill="none" stroke="var(--base09)" stroke-width="2" class="a m2"/>
-    <rect x="36" y="336" width="70.4" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m3"/>
-    <rect x="39.9" y="420" width="62.6" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m4"/>
-    <rect x="54" y="578" width="70.4" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m5"/>
-    <g>
-      <circle r="5" fill="var(--base09)" class="a m6"/>
-    </g>
-    <g>
-      <circle r="5" fill="var(--base09)" class="a m7"/>
-    </g>
-    <g>
-      <circle r="5" fill="var(--base09)" class="a m8"/>
-    </g>
-    <g>
-      <circle r="5" fill="var(--base09)" class="a m9"/>
-    </g>
-  </g>
-</svg>
+]]></style><rect width="100%" height="100%" fill="var(--base00)"/><g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace"><g><rect x="58" y="86" width="62.4" height="36" rx="8" fill="var(--base01)" stroke="var(--base03)"/><text x="89.2" y="108.55" font-size="13" text-anchor="middle" fill="var(--base05)">Idle</text></g><g><rect x="24" y="228" width="130.4" height="248" rx="10" fill="var(--base01)" stroke="var(--base03)"/><path d="M24 262H154.4" stroke="var(--base03)"/><text x="89.2" y="249.55" font-size="13" text-anchor="middle" fill="var(--base05)">Working</text></g><g><rect x="58" y="582" width="62.4" height="36" rx="8" fill="var(--base01)" stroke="var(--base03)"/><text x="89.2" y="604.55" font-size="13" text-anchor="middle" fill="var(--base05)">Done</text></g><g><rect x="40" y="340" width="62.4" height="36" rx="8" fill="var(--base00)" stroke="var(--base03)"/><text x="71.2" y="362.55" font-size="13" text-anchor="middle" fill="var(--base05)">Plan</text></g><g><rect x="43.9" y="424" width="54.6" height="36" rx="8" fill="var(--base00)" stroke="var(--base03)"/><text x="71.2" y="446.55" font-size="13" text-anchor="middle" fill="var(--base05)">Act</text></g><g><path d="M89.2 38V79" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/><path d="M89.2 86l-4-8h8Z" fill="var(--base04)"/></g><g><path d="M89.2 122v99" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/><path d="M89.2 228l-4-8h8Z" fill="var(--base04)"/></g><g><path d="M89.2 476v99" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/><path d="M89.2 582l-4-8h8Z" fill="var(--base04)"/></g><g><path d="M89.2 618v41" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/><path d="M89.2 666l-4-8h8Z" fill="var(--base04)"/></g><g><path d="M71.2 292v41" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/><path d="M71.2 340l-4-8h8Z" fill="var(--base04)"/></g><g><path d="M71.2 376v41" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/><path d="M71.2 424l-4-8h8Z" fill="var(--base04)"/></g><g><path d="M98.5 442h29.9c5.5 0 10-4.5 10-10V368c0-5.5-4.5-10-10-10h-19" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round"/><path d="M102.4 358l8-4v8Z" fill="var(--base04)"/></g><circle cx="89.2" cy="31" r="7" fill="var(--base05)"/><circle cx="71.2" cy="285" r="7" fill="var(--base05)"/><g><circle cx="89.2" cy="675" r="9" fill="none" stroke="var(--base05)" stroke-width="1.5"/><circle cx="89.2" cy="675" r="5" fill="var(--base05)"/></g><g><rect x="70.94" y="166.5" width="36.52" height="17" rx="3" fill="var(--base00)"/><text x="89.2" y="178.868" font-size="11.05" text-anchor="middle" fill="var(--base05)">task</text></g><g><rect x="64.31" y="520.5" width="49.78" height="17" rx="3" fill="var(--base00)"/><text x="89.2" y="532.868" font-size="11.05" text-anchor="middle" fill="var(--base05)">finish</text></g></g><g><rect x="54" y="82" width="70.4" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m1"/><rect x="20" y="224" width="138.4" height="256" rx="13" fill="none" stroke="var(--base09)" stroke-width="2" class="a m2"/><rect x="36" y="336" width="70.4" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m3"/><rect x="39.9" y="420" width="62.6" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m4"/><rect x="54" y="578" width="70.4" height="44" rx="11" fill="none" stroke="var(--base09)" stroke-width="2" class="a m5"/><g><circle r="5" fill="var(--base09)" class="a m6"/></g><g><circle r="5" fill="var(--base09)" class="a m7"/></g><g><circle r="5" fill="var(--base09)" class="a m8"/></g><g><circle r="5" fill="var(--base09)" class="a m9"/></g></g></svg>

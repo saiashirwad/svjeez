@@ -1,7 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498.02 659" width="498.02" height="659" role="img" aria-labelledby="t d">
-  <title id="t">Review pipeline</title>
-  <desc id="d">A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.</desc>
-  <style><![CDATA[
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498.02 659" width="498.02" height="659" role="img" aria-labelledby="t d"><title id="t">Review pipeline</title><desc id="d">A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.</desc><style><![CDATA[
 svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
 @media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
 
@@ -26,152 +23,50 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 .m8{animation-name:k8}
 @keyframes k9{0%,13.975%{opacity:0}14.5%,100%{opacity:1}}
 .m9{animation-name:k9}
-@keyframes k10{0%,18%{stroke-dashoffset:1;visibility:hidden}21.5%,100%{stroke-dashoffset:0;visibility:visible}}
-.m10{animation-name:k10}
+@keyframes k01{0%,18%{stroke-dashoffset:1;visibility:hidden}21.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m01{animation-name:k01}
 @keyframes k11{0%,20.975%{opacity:0}21.5%,100%{opacity:1}}
 .m11{animation-name:k11}
-@keyframes k12{0%,21.5%{stroke-dashoffset:1;visibility:hidden}25%,100%{stroke-dashoffset:0;visibility:visible}}
-.m12{animation-name:k12}
-@keyframes k13{0%,24.475%{opacity:0}25%,100%{opacity:1}}
-.m13{animation-name:k13}
-@keyframes k14{0%,14.5%{stroke-dashoffset:1;visibility:hidden}18%,100%{stroke-dashoffset:0;visibility:visible}}
-.m14{animation-name:k14}
-@keyframes k15{0%,17.475%{opacity:0}18%,100%{opacity:1}}
-.m15{animation-name:k15}
-@keyframes k16{0%,40%{stroke-dashoffset:1;visibility:hidden}79.225%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k17{0%,80.725%{opacity:1}86.725%,100%{opacity:0}}
-.m16{animation-name:k16,k17;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
-@keyframes k18{0%,79.225%,100%{visibility:hidden}40%{visibility:visible}}
-@keyframes k19{0%,40%{translate:305.2px 84px}43.313%{translate:305.2px 137px}45.75%{translate:305.2px 176px}48.75%{translate:305.2px 224px}51.188%{translate:305.2px 263px}54.188%{translate:305.2px 311px}56.625%{translate:305.2px 350px}59.625%{translate:305.2px 398px}63.715%{translate:252.57px 436.9px}67.534%{translate:252.57px 498px}68.042%{translate:246.418px 503.313px}69.089%{translate:230.2px 507.5px}70.538%{translate:207.27px 510.938px}72.192%{translate:180.985px 514px}73.846%{translate:154.7px 517.063px}75.295%{translate:131.77px 520.5px}76.342%{translate:115.552px 524.688px}76.85%{translate:109.4px 530px}79.225%,100%{translate:109.4px 568px}}
-.m17{animation-name:k18,k19;animation-timing-function:steps(1),linear}
-@keyframes k20{0%{opacity:0;animation-timing-function:steps(1)}79.225%{opacity:0.9}86.225%,100%{opacity:0}}
-@keyframes k21{0%,79.225%{scale:0.5}86.225%,100%{scale:3}}
-.m18{animation-name:k20,k21}
+@keyframes k21{0%,21.5%{stroke-dashoffset:1;visibility:hidden}25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m21{animation-name:k21}
+@keyframes k31{0%,24.475%{opacity:0}25%,100%{opacity:1}}
+.m31{animation-name:k31}
+@keyframes k41{0%,14.5%{stroke-dashoffset:1;visibility:hidden}18%,100%{stroke-dashoffset:0;visibility:visible}}
+.m41{animation-name:k41}
+@keyframes k51{0%,17.475%{opacity:0}18%,100%{opacity:1}}
+.m51{animation-name:k51}
+@keyframes k61{0%,40%{stroke-dashoffset:1;visibility:hidden}79.225%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k71{0%,80.725%{opacity:1}86.725%,100%{opacity:0}}
+.m61{animation-name:k61,k71;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
+@keyframes k81{0%,79.225%,100%{visibility:hidden}40%{visibility:visible}}
+@keyframes k91{0%,40%{translate:305.2px 84px}43.313%{translate:305.2px 137px}45.75%{translate:305.2px 176px}48.75%{translate:305.2px 224px}51.188%{translate:305.2px 263px}54.188%{translate:305.2px 311px}56.625%{translate:305.2px 350px}59.625%{translate:305.2px 398px}63.715%{translate:252.57px 436.9px}67.534%{translate:252.57px 498px}68.042%{translate:246.418px 503.313px}69.089%{translate:230.2px 507.5px}70.538%{translate:207.27px 510.938px}72.192%{translate:180.985px 514px}73.846%{translate:154.7px 517.063px}75.295%{translate:131.77px 520.5px}76.342%{translate:115.552px 524.688px}76.85%{translate:109.4px 530px}79.225%,100%{translate:109.4px 568px}}
+.m71{animation-name:k81,k91;animation-timing-function:steps(1),linear}
+@keyframes k02{0%{opacity:0;animation-timing-function:steps(1)}79.225%{opacity:0.9}86.225%,100%{opacity:0}}
+@keyframes k12{0%,79.225%{scale:0.5}86.225%,100%{scale:3}}
+.m81{animation-name:k02,k12}
 @keyframes k22{0%,4%{opacity:0}7.5%,100%{opacity:1}}
-@keyframes k23{0%,4%{scale:0.9}7.5%,100%{scale:1}}
-.m19{animation-name:k22,k23}
-@keyframes k24{0%,7.5%{opacity:0}11%,100%{opacity:1}}
-@keyframes k25{0%,7.5%{scale:0.9}11%,100%{scale:1}}
-.m20{animation-name:k24,k25}
-@keyframes k26{0%,11%{opacity:0}14.5%,100%{opacity:1}}
-@keyframes k27{0%,11%{scale:0.9}14.5%,100%{scale:1}}
-.m21{animation-name:k26,k27}
-@keyframes k28{0%,14.5%{opacity:0}18%,100%{opacity:1}}
-@keyframes k29{0%,14.5%{scale:0.9}18%,100%{scale:1}}
-.m22{animation-name:k28,k29}
-@keyframes k30{0%,21.5%{opacity:0}25%,100%{opacity:1}}
-@keyframes k31{0%,21.5%{scale:0.9}25%,100%{scale:1}}
-.m23{animation-name:k30,k31}
-@keyframes k32{0%,18%{opacity:0}21.5%,100%{opacity:1}}
+@keyframes k32{0%,4%{scale:0.9}7.5%,100%{scale:1}}
+.m91{animation-name:k22,k32}
+@keyframes k42{0%,7.5%{opacity:0}11%,100%{opacity:1}}
+@keyframes k52{0%,7.5%{scale:0.9}11%,100%{scale:1}}
+.m02{animation-name:k42,k52}
+@keyframes k62{0%,11%{opacity:0}14.5%,100%{opacity:1}}
+@keyframes k72{0%,11%{scale:0.9}14.5%,100%{scale:1}}
+.m12{animation-name:k62,k72}
+@keyframes k82{0%,14.5%{opacity:0}18%,100%{opacity:1}}
+@keyframes k92{0%,14.5%{scale:0.9}18%,100%{scale:1}}
+.m22{animation-name:k82,k92}
+@keyframes k03{0%,21.5%{opacity:0}25%,100%{opacity:1}}
+@keyframes k13{0%,21.5%{scale:0.9}25%,100%{scale:1}}
+.m32{animation-name:k03,k13}
+@keyframes k23{0%,18%{opacity:0}21.5%,100%{opacity:1}}
 @keyframes k33{0%,18%{scale:0.9}21.5%,100%{scale:1}}
-.m24{animation-name:k32,k33}
-@keyframes k34{0%,21.5%{opacity:0}24%,100%{opacity:1}}
-.m25{animation-name:k34}
-@keyframes k35{0%,25%{opacity:0}27.5%,100%{opacity:1}}
-.m26{animation-name:k35}
-@keyframes k36{0%,18%{opacity:0}20.5%,100%{opacity:1}}
-.m27{animation-name:k36}
+.m42{animation-name:k23,k33}
+@keyframes k43{0%,21.5%{opacity:0}24%,100%{opacity:1}}
+.m52{animation-name:k43}
+@keyframes k53{0%,25%{opacity:0}27.5%,100%{opacity:1}}
+.m62{animation-name:k53}
+@keyframes k63{0%,18%{opacity:0}20.5%,100%{opacity:1}}
+.m72{animation-name:k63}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
-]]></style>
-  <rect width="100%" height="100%" fill="var(--base00)"/>
-  <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
-    <g class="a m1">
-      <rect x="214.8" y="106.72" width="180.8" height="512.28" rx="10" fill="none" stroke="var(--base0E)" stroke-opacity="0.45" stroke-dasharray="4 3"/>
-      <text x="226.8" y="126.62" font-size="11.9" fill="var(--base04)">Review agent</text>
-    </g>
-    <g>
-      <path d="M305.2 84L305.2 130" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m2"/>
-      <path d="M305.20000000000005 137L301.20000000000005 129L309.20000000000005 129Z" fill="var(--base04)" class="a m3"/>
-    </g>
-    <g>
-      <path d="M305.2 176L305.2 217" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
-      <path d="M305.20000000000005 224L301.20000000000005 216L309.20000000000005 216Z" fill="var(--base04)" class="a m5"/>
-    </g>
-    <g>
-      <path d="M132.35 89L132.35 97C132.35 113 166.92 113 166.92 129L166.92 192C166.92 208 305.2 208 305.2 215L305.2 217" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
-      <path d="M305.20000000000005 224L301.20000000000005 216L309.20000000000005 216Z" fill="var(--base04)" class="a m5"/>
-    </g>
-    <g>
-      <path d="M305.2 263L305.2 304" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m6"/>
-      <path d="M305.20000000000005 311L301.20000000000005 303L309.20000000000005 303Z" fill="var(--base04)" class="a m7"/>
-    </g>
-    <g>
-      <path d="M305.2 350L305.2 391" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m8"/>
-      <path d="M305.20000000000005 398L301.20000000000005 390L309.20000000000005 390Z" fill="var(--base04)" class="a m9"/>
-    </g>
-    <g>
-      <path d="M305.2 460L305.2 561" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m10"/>
-      <path d="M305.20000000000005 568L301.20000000000005 560L309.20000000000005 560Z" fill="var(--base04)" class="a m11"/>
-    </g>
-    <g>
-      <path d="M366.8 587.5L421.6 587.5C427.1 587.5 431.6 583 431.6 577.5L431.6 340.5C431.6 335 427.1 330.5 421.6 330.5L381.8 330.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m12"/>
-      <path d="M374.80000000000007 330.5L382.80000000000007 326.5L382.80000000000007 334.5Z" fill="var(--base04)" class="a m13"/>
-    </g>
-    <g>
-      <path d="M252.57 436.9L252.57 498C252.57 514 109.4 514 109.4 530L109.4 561" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
-      <path d="M109.4 568L105.4 560L113.4 560Z" fill="var(--base04)" class="a m15"/>
-    </g>
-  </g>
-  <g>
-    <path d="M305.20000000000005 84L305.20000000000005 137L305.20000000000005 176L305.20000000000005 224L305.20000000000005 263L305.20000000000005 311L305.20000000000005 350L305.20000000000005 398L252.57000000000005 436.90032564066263L252.57000000000005 498L246.41816406250004 503.3125L230.19968750000004 507.5L207.27011718750006 510.9375L180.98500000000004 514L154.6998828125 517.0625L131.77031250000002 520.5L115.55183593750002 524.6875L109.4 530L109.4 568" fill="none" stroke="var(--base09)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m16"/>
-    <circle r="4.5" fill="var(--base09)" class="a m17"/>
-    <circle cx="109.4" cy="568" r="9" fill="none" stroke="var(--base09)" stroke-width="1.5" class="a m18 fb"/>
-  </g>
-  <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
-    <g>
-      <path d="M252.00000000000006 45H372.05000000000007L358.4000000000001 84H238.35000000000005Z" fill="var(--base00)"/>
-      <path d="M252.00000000000006 45H372.05000000000007L358.4000000000001 84H238.35000000000005Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">PR opened</text>
-    </g>
-    <g class="a m19 fb">
-      <path d="M238.60000000000002 137H371.80000000000007Q374.80000000000007 137 374.80000000000007 140V173Q374.80000000000007 176 371.80000000000007 176H238.60000000000002Q235.60000000000002 176 235.60000000000002 173V140Q235.60000000000002 137 238.60000000000002 137Z" fill="var(--base00)"/>
-      <path d="M238.60000000000002 137H371.80000000000007Q374.80000000000007 137 374.80000000000007 140V173Q374.80000000000007 176 371.80000000000007 176H238.60000000000002Q235.60000000000002 176 235.60000000000002 173V140Q235.60000000000002 137 238.60000000000002 137Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M243.60000000000002 137V176M366.80000000000007 137V176" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="305.2" y="161.4" font-size="14" text-anchor="middle" fill="var(--base05)">Gather diff</text>
-    </g>
-    <g>
-      <path d="M62.34999999999998 45A70.00000000000001 5 0 0 1 202.35000000000002 45V84A70.00000000000001 5 0 0 1 62.34999999999998 84Z" fill="var(--base00)"/>
-      <path d="M62.34999999999998 45A70.00000000000001 5 0 0 1 202.35000000000002 45V84A70.00000000000001 5 0 0 1 62.34999999999998 84Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M62.34999999999998 45A70.00000000000001 5 0 0 0 202.35000000000002 45" stroke="var(--base0E)" fill="none"/>
-      <text x="132.35" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Review memory</text>
-    </g>
-    <g class="a m20 fb">
-      <path d="M234.8 224H375.6Q383.6 224 383.6 232V255Q383.6 263 375.6 263H234.8Q226.8 263 226.8 255V232Q226.8 224 234.8 224Z" fill="var(--base00)"/>
-      <path d="M234.8 224H375.6Q383.6 224 383.6 232V255Q383.6 263 375.6 263H234.8Q226.8 263 226.8 255V232Q226.8 224 234.8 224Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="248.4" font-size="14" text-anchor="middle" fill="var(--base05)">Analyze changes</text>
-    </g>
-    <g class="a m21 fb">
-      <path d="M238.60000000000002 311H371.80000000000007Q374.80000000000007 311 374.80000000000007 314V347Q374.80000000000007 350 371.80000000000007 350H238.60000000000002Q235.60000000000002 350 235.60000000000002 347V314Q235.60000000000002 311 238.60000000000002 311Z" fill="var(--base00)"/>
-      <path d="M238.60000000000002 311H371.80000000000007Q374.80000000000007 311 374.80000000000007 314V347Q374.80000000000007 350 371.80000000000007 350H238.60000000000002Q235.60000000000002 350 235.60000000000002 347V314Q235.60000000000002 311 238.60000000000002 311Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M243.60000000000002 311V350M366.80000000000007 311V350" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="305.2" y="335.4" font-size="14" text-anchor="middle" fill="var(--base05)">Run linters</text>
-    </g>
-    <g class="a m22 fb">
-      <path d="M305.20000000000005 398L375.83000000000004 429L305.20000000000005 460L234.57000000000005 429Z" fill="var(--base00)"/>
-      <path d="M305.20000000000005 398L375.83000000000004 429L305.20000000000005 460L234.57000000000005 429Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="433.9" font-size="14" text-anchor="middle" fill="var(--base05)">Issues?</text>
-    </g>
-    <g class="a m23 fb">
-      <path d="M251.60000000000002 568H358.80000000000007Q366.80000000000007 568 366.80000000000007 576V599Q366.80000000000007 607 358.80000000000007 607H251.60000000000002Q243.60000000000002 607 243.60000000000002 599V576Q243.60000000000002 568 251.60000000000002 568Z" fill="var(--base00)"/>
-      <path d="M251.60000000000002 568H358.80000000000007Q366.80000000000007 568 366.80000000000007 576V599Q366.80000000000007 607 358.80000000000007 607H251.60000000000002Q243.60000000000002 607 243.60000000000002 599V576Q243.60000000000002 568 251.60000000000002 568Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Draft fixes</text>
-    </g>
-    <g class="a m24 fb">
-      <path d="M59.5 568H159.3A19.5 19.5 0 0 1 159.3 607H59.5A19.5 19.5 0 0 1 59.5 568Z" fill="var(--base00)"/>
-      <path d="M59.5 568H159.3A19.5 19.5 0 0 1 159.3 607H59.5A19.5 19.5 0 0 1 59.5 568Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="109.4" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Post review</text>
-    </g>
-    <g class="a m25">
-      <rect x="289.49" y="505" width="31.42" height="18" rx="3" fill="var(--base00)"/>
-      <text x="305.2" y="518.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text>
-    </g>
-    <g class="a m26">
-      <rect x="405.18" y="450" width="52.84" height="18" rx="3" fill="var(--base00)"/>
-      <text x="431.6" y="463.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">re-run</text>
-    </g>
-    <g class="a m27">
-      <rect x="240.43" y="478" width="24.28" height="18" rx="3" fill="var(--base00)"/>
-      <text x="252.57" y="491.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text>
-    </g>
-  </g>
-</svg>
+]]></style><rect width="100%" height="100%" fill="var(--base00)"/><g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace"><g class="a m1"><rect x="214.8" y="106.72" width="180.8" height="512.28" rx="10" fill="none" stroke="var(--base0E)" stroke-opacity="0.45" stroke-dasharray="4 3"/><text x="226.8" y="126.62" font-size="11.9" fill="var(--base04)">Review agent</text></g><g><path d="M305.2 84v46" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m2"/><path d="M305.2 137l-4-8h8Z" fill="var(--base04)" class="a m3"/></g><g><path d="M305.2 176v41" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/><path d="M305.2 224l-4-8h8Z" fill="var(--base04)" class="a m5"/></g><g><path d="M132.35 89v8c0 16 34.57 16 34.57 32v63c0 16 138.28 16 138.28 23v2" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/><path d="M305.2 224l-4-8h8Z" fill="var(--base04)" class="a m5"/></g><g><path d="M305.2 263v41" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m6"/><path d="M305.2 311l-4-8h8Z" fill="var(--base04)" class="a m7"/></g><g><path d="M305.2 350v41" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m8"/><path d="M305.2 398l-4-8h8Z" fill="var(--base04)" class="a m9"/></g><g><path d="M305.2 460V561" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m01"/><path d="M305.2 568l-4-8h8Z" fill="var(--base04)" class="a m11"/></g><g><path d="M366.8 587.5h54.8c5.5 0 10-4.5 10-10v-237c0-5.5-4.5-10-10-10H381.8" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m21"/><path d="M374.8 330.5l8-4v8Z" fill="var(--base04)" class="a m31"/></g><g><path d="M252.57 436.9V498c0 16-143.17 16-143.17 32v31" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m41"/><path d="M109.4 568l-4-8h8Z" fill="var(--base04)" class="a m51"/></g></g><g><path d="M305.2 84v53 39 48 39 48 39 48l-52.63 38.9V498l-6.152 5.313L230.2 507.5l-22.93 3.438L180.985 514 154.7 517.063 131.77 520.5l-16.218 4.188L109.4 530v38" fill="none" stroke="var(--base09)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m61"/><circle r="4.5" fill="var(--base09)" class="a m71"/><circle cx="109.4" cy="568" r="9" fill="none" stroke="var(--base09)" stroke-width="1.5" class="a m81 fb"/></g><g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace"><g><path d="M252 45H372.05L358.4 84H238.35Z" fill="var(--base00)"/><path d="M252 45H372.05L358.4 84H238.35Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/><text x="305.2" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">PR opened</text></g><g class="a m91 fb"><path d="M238.6 137H371.8q3 0 3 3v33q0 3-3 3H238.6q-3 0-3-3V140q0-3 3-3Z" fill="var(--base00)"/><path d="M238.6 137H371.8q3 0 3 3v33q0 3-3 3H238.6q-3 0-3-3V140q0-3 3-3Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/><path d="M243.6 137v39m123.2-39v39" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/><text x="305.2" y="161.4" font-size="14" text-anchor="middle" fill="var(--base05)">Gather diff</text></g><g><path d="M62.35 45a70 5 0 0 1 140 0V84a70 5 0 0 1-140 0Z" fill="var(--base00)"/><path d="M62.35 45a70 5 0 0 1 140 0V84a70 5 0 0 1-140 0Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/><path d="M62.35 45a70 5 0 0 0 140 0" stroke="var(--base0E)" fill="none"/><text x="132.35" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Review memory</text></g><g class="a m02 fb"><path d="M234.8 224H375.6q8 0 8 8v23q0 8-8 8H234.8q-8 0-8-8V232q0-8 8-8Z" fill="var(--base00)"/><path d="M234.8 224H375.6q8 0 8 8v23q0 8-8 8H234.8q-8 0-8-8V232q0-8 8-8Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/><text x="305.2" y="248.4" font-size="14" text-anchor="middle" fill="var(--base05)">Analyze changes</text></g><g class="a m12 fb"><path d="M238.6 311H371.8q3 0 3 3v33q0 3-3 3H238.6q-3 0-3-3V314q0-3 3-3Z" fill="var(--base00)"/><path d="M238.6 311H371.8q3 0 3 3v33q0 3-3 3H238.6q-3 0-3-3V314q0-3 3-3Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/><path d="M243.6 311v39m123.2-39v39" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/><text x="305.2" y="335.4" font-size="14" text-anchor="middle" fill="var(--base05)">Run linters</text></g><g class="a m22 fb"><path d="M305.2 398l70.63 31-70.63 31-70.63-31Z" fill="var(--base00)"/><path d="M305.2 398l70.63 31-70.63 31-70.63-31Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/><text x="305.2" y="433.9" font-size="14" text-anchor="middle" fill="var(--base05)">Issues?</text></g><g class="a m32 fb"><path d="M251.6 568H358.8q8 0 8 8v23q0 8-8 8H251.6q-8 0-8-8V576q0-8 8-8Z" fill="var(--base00)"/><path d="M251.6 568H358.8q8 0 8 8v23q0 8-8 8H251.6q-8 0-8-8V576q0-8 8-8Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/><text x="305.2" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Draft fixes</text></g><g class="a m42 fb"><path d="M59.5 568h99.8a19.5 19.5 0 0 1 0 39H59.5a19.5 19.5 0 0 1 0-39Z" fill="var(--base00)"/><path d="M59.5 568h99.8a19.5 19.5 0 0 1 0 39H59.5a19.5 19.5 0 0 1 0-39Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/><text x="109.4" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Post review</text></g><g class="a m52"><rect x="289.49" y="505" width="31.42" height="18" rx="3" fill="var(--base00)"/><text x="305.2" y="518.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text></g><g class="a m62"><rect x="405.18" y="450" width="52.84" height="18" rx="3" fill="var(--base00)"/><text x="431.6" y="463.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">re-run</text></g><g class="a m72"><rect x="240.43" y="478" width="24.28" height="18" rx="3" fill="var(--base00)"/><text x="252.57" y="491.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text></g></g></svg>

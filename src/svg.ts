@@ -1,8 +1,9 @@
 import { attributeName } from "./attributes";
 import { isRef, type AnyRef } from "./defs";
 import { isFontValue, type FontValue } from "./font/font";
-import { escapeAttr, escapeText, kebab, num } from "./format";
+import { escapeAttr, escapeText, kebab, num, significant } from "./format";
 import { isMotion, type Motion } from "./motion";
+import { compactPath } from "./pathdata";
 import { Css, formatProperty, isProperty, type CssPart } from "./properties";
 
 export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
@@ -56,13 +57,17 @@ export const children = (input: unknown, preserveWhitespace = false): SvgNode[] 
   return out;
 };
 
+const NOISY = /-?(?:\d*\.\d{4,}|\d+(?:\.\d*)?e[-+]?\d+)/gi;
+const LONG_DECIMAL = /-?\d*\.\d{4,}/g;
+const tidy = (text: string, pattern: RegExp, format = num): string => text.replace(pattern, (n) => format(Number(n)));
+
 const style = (value: unknown): string | Css => {
   if (typeof value === "string") return value;
   const parts = Object.entries(value as Record<string, string | number | undefined>)
     .filter(([, entry]) => entry !== undefined)
     .flatMap(([name, entry], index): CssPart[] => [
       index > 0 ? ";" : "",
-      ...(isProperty(name) ? [{ property: name }, `:${formatProperty(name, entry!)}`] : [`${kebab(name)}:${entry}`]),
+      ...(isProperty(name) ? [{ property: name }, `:${formatProperty(name, entry!)}`] : [`${kebab(name)}:${typeof entry === "number" ? num(entry) : tidy(entry!, LONG_DECIMAL)}`]),
     ]);
   return parts.every((part) => typeof part === "string") ? parts.join("") : new Css(parts);
 };
@@ -71,7 +76,7 @@ const attrValue = (prop: string, value: unknown): AttrValue | undefined => {
   if (value === undefined || value === null || value === false) return undefined;
   if (prop === "class") return (Array.isArray(value) ? value : [value]).filter(Boolean).join(" ") || undefined;
   if (prop === "style") return style(value) || undefined;
-  if (typeof value === "string") return value;
+  if (typeof value === "string") return prop === "d" ? compactPath(value) : prop === "points" ? tidy(value, NOISY) : prop === "transform" ? tidy(value, NOISY, significant) : value;
   if (typeof value === "number") return num(value);
   if (isRef(value) || isFontValue(value)) return value;
   throw new Error(`Unsupported value for ${prop}: ${String(value)}`);
@@ -122,24 +127,4 @@ const inline = (node: SvgNode, rawText = false): string => {
   }
 };
 
-const serializeNode = (node: SvgNode, depth: number): string => {
-  const pad = "  ".repeat(depth);
-  switch (node.kind) {
-    case "text":
-      return pad + escapeText(node.value);
-    case "raw":
-      return pad + node.value;
-    case "fragment":
-      return node.children
-        .map((child) => serializeNode(child, depth))
-        .filter(Boolean)
-        .join("\n");
-    case "element": {
-      if (node.children.length === 0 || TEXT_TAGS.has(node.tag) || RAW_TEXT_TAGS.has(node.tag)) return pad + inline(node);
-      const inner = node.children.map((child) => serializeNode(child, depth + 1)).join("\n");
-      return `${pad}<${node.tag}${serializeAttrs(node.attrs)}>\n${inner}\n${pad}</${node.tag}>`;
-    }
-  }
-};
-
-export const serialize = (node: SvgNode): string => serializeNode(node, 0);
+export const serialize = (node: SvgNode): string => inline(node);

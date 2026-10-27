@@ -1,7 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 110" width="360" height="110" role="img" aria-labelledby="t d">
-  <title id="t">Code morph</title>
-  <desc id="d">A call to sum morphs into a reduce and back, with a marker following the call.</desc>
-  <style><![CDATA[
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 110" width="360" height="110" role="img" aria-labelledby="t d"><title id="t">Code morph</title><desc id="d">A call to sum morphs into a reduce and back, with a marker following the call.</desc><style><![CDATA[
 svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
 @media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
 .mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
@@ -23,42 +20,15 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 .m6{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k9{0%,25%,78.75%,100%{translate:0px 0px}35%,68.75%{translate:-36px 0px}}
 .m7{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k10{0%,25%,78.75%,100%{translate:0px 0px}35%,68.75%{translate:90px 0px}}
-.m8{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k01{0%,25%,78.75%,100%{translate:0px 0px}35%,68.75%{translate:90px 0px}}
+.m8{animation-name:k01;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k11{0%,30%,73.75%,100%{opacity:0}35%,68.75%{opacity:1}}
 .m9{animation-name:k11}
-@keyframes k12{0%,25%,78.75%,100%{translate:-27px 0px}35%,68.75%{translate:0px 0px}}
-@keyframes k13{0%,25%,78.75%,100%{opacity:0}35%,68.75%{opacity:1}}
-.m10{animation-name:k12,k13;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k14{0%,68.75%{translate:27px 0px}78.75%,100%{translate:0px 0px}}
-@keyframes k15{0%,68.75%{opacity:0}78.75%,100%{opacity:1}}
-.m11{animation-name:k14,k15;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k21{0%,25%,78.75%,100%{translate:-27px 0px}35%,68.75%{translate:0px 0px}}
+@keyframes k31{0%,25%,78.75%,100%{opacity:0}35%,68.75%{opacity:1}}
+.m01{animation-name:k21,k31;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k41{0%,68.75%{translate:27px 0px}78.75%,100%{translate:0px 0px}}
+@keyframes k51{0%,68.75%{opacity:0}78.75%,100%{opacity:1}}
+.m11{animation-name:k41,k51;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-1s!important;animation-play-state:paused!important}}
-]]></style>
-  <rect width="100%" height="100%" fill="var(--base00)"/>
-  <g class="a m2">
-    <rect x="175" y="37" width="33" height="30" rx="6" fill="#f6c96b" fill-opacity="0.1" stroke="#f6c96b" stroke-opacity="0.4" stroke-width="1" class="a m1"/>
-  </g>
-  <g class="mono">
-    <g>
-      <text x="34" y="57.25" text-anchor="end" font-family="monospace" font-size="15" fill="var(--base03)" class="a m3">1</text>
-      <text x="34" y="81.25" text-anchor="end" font-family="monospace" font-size="15" fill="var(--base03)" class="a m3">2</text>
-      <text x="52" y="57.25" font-family="monospace" font-size="15" fill="var(--base0E)" class="a m4">const</text>
-      <text x="106" y="57.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m4">total</text>
-      <text x="160" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m4">=</text>
-      <text x="178" y="57.25" font-family="monospace" font-size="15" fill="var(--base0D)" class="a m5">sum</text>
-      <text x="205" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m6">(</text>
-      <text x="214" y="57.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m7">xs</text>
-      <text x="232" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m8">);</text>
-      <text x="52" y="81.25" font-family="monospace" font-size="15" fill="var(--base0E)" class="a m4">return</text>
-      <text x="115" y="81.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m4">total</text>
-      <text x="160" y="81.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m4">;</text>
-      <text x="196" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m9">.</text>
-      <text x="205" y="57.25" font-family="monospace" font-size="15" fill="var(--base0D)" class="a m10">reduce</text>
-      <text x="268" y="57.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m9">add</text>
-      <text x="295" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m9">,</text>
-      <text x="313" y="57.25" font-family="monospace" font-size="15" fill="var(--base09)" class="a m9">0</text>
-      <text x="178" y="57.25" font-family="monospace" font-size="15" fill="var(--base0D)" class="a m11">sum</text>
-    </g>
-  </g>
-</svg>
+]]></style><rect width="100%" height="100%" fill="var(--base00)"/><g class="a m2"><rect x="175" y="37" width="33" height="30" rx="6" fill="#f6c96b" fill-opacity="0.1" stroke="#f6c96b" stroke-opacity="0.4" stroke-width="1" class="a m1"/></g><g class="mono"><g><text x="34" y="57.25" text-anchor="end" font-family="monospace" font-size="15" fill="var(--base03)" class="a m3">1</text><text x="34" y="81.25" text-anchor="end" font-family="monospace" font-size="15" fill="var(--base03)" class="a m3">2</text><text x="52" y="57.25" font-family="monospace" font-size="15" fill="var(--base0E)" class="a m4">const</text><text x="106" y="57.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m4">total</text><text x="160" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m4">=</text><text x="178" y="57.25" font-family="monospace" font-size="15" fill="var(--base0D)" class="a m5">sum</text><text x="205" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m6">(</text><text x="214" y="57.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m7">xs</text><text x="232" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m8">);</text><text x="52" y="81.25" font-family="monospace" font-size="15" fill="var(--base0E)" class="a m4">return</text><text x="115" y="81.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m4">total</text><text x="160" y="81.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m4">;</text><text x="196" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m9">.</text><text x="205" y="57.25" font-family="monospace" font-size="15" fill="var(--base0D)" class="a m01">reduce</text><text x="268" y="57.25" font-family="monospace" font-size="15" fill="var(--base05)" class="a m9">add</text><text x="295" y="57.25" font-family="monospace" font-size="15" fill="var(--base04)" class="a m9">,</text><text x="313" y="57.25" font-family="monospace" font-size="15" fill="var(--base09)" class="a m9">0</text><text x="178" y="57.25" font-family="monospace" font-size="15" fill="var(--base0D)" class="a m11">sum</text></g></g></svg>

@@ -1,35 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" width="200" height="120" role="img" aria-labelledby="t d">
-  <title id="t">Voxels</title>
-  <desc id="d">A grass block, a dirt block that pops in at three seconds and leaves at nine, and a dirt block that drops onto the grass.</desc>
-  <defs>
-    <symbol id="s2" style="overflow:visible">
-      <rect width="4" height="4" fill="#49331f"/>
-      <path d="M2 0h1v1h-1zM0 1h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1z" fill="#402c1a"/>
-    </symbol>
-    <symbol id="s3" style="overflow:visible">
-      <rect width="4" height="4" fill="#62442a"/>
-      <path d="M2 0h1v1h-1zM0 1h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1z" fill="#553b23"/>
-    </symbol>
-    <symbol id="s4" style="overflow:visible">
-      <rect width="4" height="4" fill="#7a5534"/>
-      <path d="M0 0h4v1h-4zM0 1h1v1h-1zM2 1h2v1h-2z" fill="#5da03a"/>
-    </symbol>
-    <symbol id="s1" style="overflow:visible">
-      <use href="#s2" transform="matrix(4.3841 -2.192 0 5.3694 -0.2828 -4.019)"/>
-      <use href="#s3" transform="matrix(4.3841 2.192 0 5.3694 -17.2534 -12.7872)"/>
-      <use href="#s4" transform="matrix(4.3841 2.192 -4.3841 2.192 0 -21.0675)"/>
-    </symbol>
-    <symbol id="s6" style="overflow:visible">
-      <rect width="4" height="4" fill="#7a5534"/>
-      <path d="M2 0h1v1h-1zM0 1h1v1h-1zM3 2h1v1h-1zM1 3h1v1h-1z" fill="#6a4a2c"/>
-    </symbol>
-    <symbol id="s5" style="overflow:visible">
-      <use href="#s2" transform="matrix(4.3841 -2.192 0 5.3694 -0.2828 -4.019)"/>
-      <use href="#s3" transform="matrix(4.3841 2.192 0 5.3694 -17.2534 -12.7872)"/>
-      <use href="#s6" transform="matrix(4.3841 2.192 -4.3841 2.192 0 -21.0675)"/>
-    </symbol>
-  </defs>
-  <style><![CDATA[
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" width="200" height="120" role="img" aria-labelledby="t d"><title id="t">Voxels</title><desc id="d">A grass block, a dirt block that pops in at three seconds and leaves at nine, and a dirt block that drops onto the grass.</desc><defs><symbol id="s2" style="overflow:visible"><rect width="4" height="4" fill="#49331f"/><path d="M2 0H3V1H2ZM0 1H1V2H0ZM3 2H4V3H3ZM1 3H2V4H1Z" fill="#402c1a"/></symbol><symbol id="s3" style="overflow:visible"><rect width="4" height="4" fill="#62442a"/><path d="M2 0H3V1H2ZM0 1H1V2H0ZM3 2H4V3H3ZM1 3H2V4H1Z" fill="#553b23"/></symbol><symbol id="s4" style="overflow:visible"><rect width="4" height="4" fill="#7a5534"/><path d="M0 0H4V1H0ZM0 1H1V2H0ZM2 1H4V2H2Z" fill="#5da03a"/></symbol><symbol id="s1" style="overflow:visible"><use href="#s2" transform="matrix(4.3841 -2.192 0 5.3694 -0.2828 -4.019)"/><use href="#s3" transform="matrix(4.3841 2.192 0 5.3694 -17.2534 -12.7872)"/><use href="#s4" transform="matrix(4.3841 2.192 -4.3841 2.192 0 -21.0675)"/></symbol><symbol id="s6" style="overflow:visible"><rect width="4" height="4" fill="#7a5534"/><path d="M2 0H3V1H2ZM0 1H1V2H0ZM3 2H4V3H3ZM1 3H2V4H1Z" fill="#6a4a2c"/></symbol><symbol id="s5" style="overflow:visible"><use href="#s2" transform="matrix(4.3841 -2.192 0 5.3694 -0.2828 -4.019)"/><use href="#s3" transform="matrix(4.3841 2.192 0 5.3694 -17.2534 -12.7872)"/><use href="#s6" transform="matrix(4.3841 2.192 -4.3841 2.192 0 -21.0675)"/></symbol></defs><style><![CDATA[
 svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
 @media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
 .mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
@@ -41,13 +10,4 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 @keyframes k3{0%{visibility:hidden}10%,100%{visibility:visible}}
 .m2{animation-name:k2,k3;animation-timing-function:cubic-bezier(.34,1.56,.64,1),steps(1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-5s!important;animation-play-state:paused!important}}
-]]></style>
-  <rect width="100%" height="100%" fill="var(--base00)"/>
-  <g transform="translate(100 64)">
-    <g>
-      <use href="#s1" x="0" y="0"/>
-      <use href="#s5" x="16.971" y="8.485" class="a m1"/>
-      <use href="#s1" x="-16.971" y="8.485" class="a m2"/>
-    </g>
-  </g>
-</svg>
+]]></style><rect width="100%" height="100%" fill="var(--base00)"/><g transform="translate(100 64)"><g><use href="#s1" x="0" y="0"/><use href="#s5" x="16.971" y="8.485" class="a m1"/><use href="#s1" x="-16.971" y="8.485" class="a m2"/></g></g></svg>

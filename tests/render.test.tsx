@@ -268,6 +268,28 @@ describe("output", () => {
     const css = `@property --x{syntax:'<angle>';inherits:true;initial-value:0deg}\n.q::after{content:"]]>"}`;
     expect(wellFormed(render({ width: 10, height: 10, duration: 1, title: "T", css }, <rect width={1} height={1} />))).toBe(true);
   });
+
+  test("float noise in path data and points rounds like numeric attributes", () => {
+    const x = 0.1 + 0.2;
+    const svg = scene(<g><path d={`M${x} ${98.28 + 1e-14}H${-1e-9}A25 25 0 0 1 1.5.25Z`} /><polygon points={`${x},1 2,${1 / 3}`} /></g>);
+    expect(svg).toContain('d="M.3 98.28H0A25 25 0 0 1 1.5.25Z"');
+    expect(svg).toContain('points="0.3,1 2,0.333"');
+  });
+
+  test("path data takes the shorter of absolute and relative per segment, ending on the same points", () => {
+    const svg = scene(<path d="M812.6 425.7 L 804.8 428.6 L 796.3 428.6 C 790 430 785 432 780.3 440 Z m 10 10 l 0 5 z" />);
+    expect(svg).toContain('d="M812.6 425.7l-7.8 2.9h-8.5C790 430 785 432 780.3 440Zm10 10v5Z"');
+  });
+
+  test("path data that does not parse is kept as written", () => {
+    expect(scene(<path d="M10 10 L oops" />)).toContain('d="M10 10 L oops"');
+  });
+
+  test("float noise in transforms and style values rounds without losing scale precision", () => {
+    const svg = scene(<g transform={`translate(480 ${266.3398868208392}) scale(0.518519)`} style={{ transformOrigin: `${478.48462583809055}px 1px`, fill: "#1e3" }} />);
+    expect(svg).toContain('transform="translate(480 266.34) scale(0.518519)"');
+    expect(svg).toContain("transform-origin:478.485px 1px;fill:#1e3");
+  });
 });
 
 describe("timeline", () => {

@@ -1,7 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 598.29 455.66" width="598.29" height="455.66" role="img" aria-labelledby="t d">
-  <title id="t">Login handshake</title>
-  <desc id="d">A sequence diagram of a login: the browser posts credentials, the API checks them against Postgres, has a token signed and returns it.</desc>
-  <style><![CDATA[
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 598.29 455.66" width="598.29" height="455.66" role="img" aria-labelledby="t d"><title id="t">Login handshake</title><desc id="d">A sequence diagram of a login: the browser posts credentials, the API checks them against Postgres, has a token signed and returns it.</desc><style><![CDATA[
 svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
 @media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
 
@@ -25,140 +22,34 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 .m8{animation-name:k8}
 @keyframes k9{0%,24%{opacity:0}26.5%,100%{opacity:1}}
 .m9{animation-name:k9}
-@keyframes k10{0%,33%{stroke-dashoffset:1;visibility:hidden}38%,100%{stroke-dashoffset:0;visibility:visible}}
-.m10{animation-name:k10}
+@keyframes k01{0%,33%{stroke-dashoffset:1;visibility:hidden}38%,100%{stroke-dashoffset:0;visibility:visible}}
+.m01{animation-name:k01}
 @keyframes k11{0%,37.25%{opacity:0}38%,100%{opacity:1}}
 .m11{animation-name:k11}
-@keyframes k12{0%,33%{opacity:0}35.5%,100%{opacity:1}}
-.m12{animation-name:k12}
-@keyframes k13{0%,42%{opacity:0}44.5%,100%{opacity:1}}
-.m13{animation-name:k13}
-@keyframes k14{0%,51%{stroke-dashoffset:1;visibility:hidden}56%,100%{stroke-dashoffset:0;visibility:visible}}
-.m14{animation-name:k14}
-@keyframes k15{0%,55.25%{opacity:0}56%,100%{opacity:1}}
-.m15{animation-name:k15}
-@keyframes k16{0%,51%{opacity:0}53.5%,100%{opacity:1}}
-.m16{animation-name:k16}
-@keyframes k17{0%,60%{opacity:0}65%,100%{opacity:1}}
-.m17{animation-name:k17}
-@keyframes k18{0%,64.25%{opacity:0}65%,100%{opacity:1}}
-.m18{animation-name:k18}
-@keyframes k19{0%,60%{opacity:0}62.5%,100%{opacity:1}}
-.m19{animation-name:k19}
-@keyframes k20{0%,69%{opacity:0}74%,100%{opacity:1}}
-.m20{animation-name:k20}
-@keyframes k21{0%,73.25%{opacity:0}74%,100%{opacity:1}}
+@keyframes k21{0%,33%{opacity:0}35.5%,100%{opacity:1}}
 .m21{animation-name:k21}
+@keyframes k31{0%,42%{opacity:0}44.5%,100%{opacity:1}}
+.m31{animation-name:k31}
+@keyframes k41{0%,51%{stroke-dashoffset:1;visibility:hidden}56%,100%{stroke-dashoffset:0;visibility:visible}}
+.m41{animation-name:k41}
+@keyframes k51{0%,55.25%{opacity:0}56%,100%{opacity:1}}
+.m51{animation-name:k51}
+@keyframes k61{0%,51%{opacity:0}53.5%,100%{opacity:1}}
+.m61{animation-name:k61}
+@keyframes k71{0%,60%{opacity:0}65%,100%{opacity:1}}
+.m71{animation-name:k71}
+@keyframes k81{0%,64.25%{opacity:0}65%,100%{opacity:1}}
+.m81{animation-name:k81}
+@keyframes k91{0%,60%{opacity:0}62.5%,100%{opacity:1}}
+.m91{animation-name:k91}
+@keyframes k02{0%,69%{opacity:0}74%,100%{opacity:1}}
+.m02{animation-name:k02}
+@keyframes k12{0%,73.25%{opacity:0}74%,100%{opacity:1}}
+.m12{animation-name:k12}
 @keyframes k22{0%,69%{opacity:0}71.5%,100%{opacity:1}}
 .m22{animation-name:k22}
-@keyframes k23{0%,74%,100%{visibility:hidden}69%{visibility:visible}}
-@keyframes k24{0%,69%{translate:254.69px 393.66px}74%,100%{translate:98.45px 393.66px}}
-.m23{animation-name:k23,k24;animation-timing-function:steps(1),linear}
+@keyframes k32{0%,74%,100%{visibility:hidden}69%{visibility:visible}}
+@keyframes k42{0%,69%{translate:254.69px 393.66px}74%,100%{translate:98.45px 393.66px}}
+.m32{animation-name:k32,k42;animation-timing-function:steps(1),linear}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
-]]></style>
-  <rect width="100%" height="100%" fill="var(--base00)"/>
-  <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
-    <path d="M98.44999999999999 84V415.65999999999997" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
-    <path d="M254.69 84V415.65999999999997" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
-    <path d="M388.09 84V415.65999999999997" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
-    <path d="M509.28999999999996 89V415.65999999999997" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
-    <g>
-      <path d="M53.65 45H156.89999999999998L143.24999999999997 84H40Z" fill="var(--base00)"/>
-      <path d="M53.65 45H156.89999999999998L143.24999999999997 84H40Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="98.45" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">Browser</text>
-    </g>
-    <g>
-      <path d="M234.69 45H274.69Q282.69 45 282.69 53V76Q282.69 84 274.69 84H234.69Q226.69 84 226.69 76V53Q226.69 45 234.69 45Z" fill="var(--base00)"/>
-      <path d="M234.69 45H274.69Q282.69 45 282.69 53V76Q282.69 84 274.69 84H234.69Q226.69 84 226.69 76V53Q226.69 45 234.69 45Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="254.69" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">API</text>
-    </g>
-    <g>
-      <path d="M350.89 45H425.28999999999996Q428.28999999999996 45 428.28999999999996 48V81Q428.28999999999996 84 425.28999999999996 84H350.89Q347.89 84 347.89 81V48Q347.89 45 350.89 45Z" fill="var(--base00)"/>
-      <path d="M350.89 45H425.28999999999996Q428.28999999999996 45 428.28999999999996 48V81Q428.28999999999996 84 425.28999999999996 84H350.89Q347.89 84 347.89 81V48Q347.89 45 350.89 45Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M355.89 45V84M420.28999999999996 45V84" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="388.09" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">Auth</text>
-    </g>
-    <g>
-      <path d="M460.28999999999996 45A49 5 0 0 1 558.29 45V84A49 5 0 0 1 460.28999999999996 84Z" fill="var(--base00)"/>
-      <path d="M460.28999999999996 45A49 5 0 0 1 558.29 45V84A49 5 0 0 1 460.28999999999996 84Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M460.28999999999996 45A49 5 0 0 0 558.29 45" stroke="var(--base0E)" fill="none"/>
-      <text x="509.29" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Postgres</text>
-    </g>
-    <g>
-      <g>
-        <path d="M98.45 135L247.69 135" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
-        <path d="M254.69 135L246.69 139L246.69 131Z" fill="var(--base04)" class="a m2"/>
-      </g>
-      <g class="a m3">
-        <rect x="132.3" y="113" width="88.54" height="18" rx="3" fill="var(--base00)"/>
-        <text x="176.57" y="126.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">POST /login</text>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M254.69 171L502.29 171" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
-        <path d="M509.28999999999996 171L501.28999999999996 175L501.28999999999996 167Z" fill="var(--base04)" class="a m5"/>
-      </g>
-      <g class="a m6">
-        <rect x="337.72" y="149" width="88.54" height="18" rx="3" fill="var(--base00)"/>
-        <text x="381.99" y="162.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">select user</text>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M509.29 207L261.69 207" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m7"/>
-        <path d="M254.69 207L262.69 203L262.69 211Z" fill="var(--base04)" class="a m8"/>
-      </g>
-      <g class="a m9">
-        <rect x="366.28" y="185" width="31.42" height="18" rx="3" fill="var(--base00)"/>
-        <text x="381.99" y="198.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">row</text>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M254.69 225L273.69 225C278.64 225 282.69 229.05 282.69 234L282.69 234C282.69 238.95 278.64 243 273.69 243L261.69 243" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m10"/>
-        <path d="M254.69 243L262.69 239L262.69 247Z" fill="var(--base04)" class="a m11"/>
-      </g>
-      <g class="a m12">
-        <rect x="290.69" y="225" width="81.4" height="18" rx="3" fill="var(--base00)"/>
-        <text x="331.39" y="238.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">hash check</text>
-      </g>
-    </g>
-    <g class="a m13">
-      <rect x="187.57" y="257" width="134.24" height="28.66" rx="4" fill="var(--base00)"/>
-      <rect x="187.57" y="257" width="134.24" height="28.66" rx="4" fill="var(--base0A)" fill-opacity="0.12" stroke="var(--base0A)" stroke-opacity="0.7"/>
-      <text x="254.69" y="275.495" font-size="11.9" text-anchor="middle" fill="var(--base05)">password matches</text>
-    </g>
-    <g>
-      <g>
-        <path d="M254.69 321.66L381.09 321.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
-        <path d="M388.09 321.65999999999997L380.09 325.65999999999997L380.09 317.65999999999997Z" fill="var(--base04)" class="a m15"/>
-      </g>
-      <g class="a m16">
-        <rect x="280.69" y="299.66" width="81.4" height="18" rx="3" fill="var(--base00)"/>
-        <text x="321.39" y="312.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">sign token</text>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M388.09 357.66L261.69 357.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m17"/>
-        <path d="M254.69 357.65999999999997L262.69 353.65999999999997L262.69 361.65999999999997Z" fill="var(--base04)" class="a m18"/>
-      </g>
-      <g class="a m19">
-        <rect x="305.68" y="335.66" width="31.42" height="18" rx="3" fill="var(--base00)"/>
-        <text x="321.39" y="348.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">jwt</text>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M254.69 393.66L105.45 393.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m20"/>
-        <path d="M98.44999999999999 393.65999999999997L106.44999999999999 389.65999999999997L106.44999999999999 397.65999999999997Z" fill="var(--base04)" class="a m21"/>
-      </g>
-      <g class="a m22">
-        <rect x="114.45" y="371.66" width="124.24" height="18" rx="3" fill="var(--base00)"/>
-        <text x="176.57" y="384.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">200 + Set-Cookie</text>
-      </g>
-    </g>
-  </g>
-  <circle r="4" fill="var(--base09)" class="a m23"/>
-</svg>
+]]></style><rect width="100%" height="100%" fill="var(--base00)"/><g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace"><path d="M98.45 84V415.66" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/><path d="M254.69 84V415.66" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/><path d="M388.09 84V415.66" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/><path d="M509.29 89V415.66" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/><g><path d="M53.65 45H156.9L143.25 84H40Z" fill="var(--base00)"/><path d="M53.65 45H156.9L143.25 84H40Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/><text x="98.45" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">Browser</text></g><g><path d="M234.69 45h40q8 0 8 8V76q0 8-8 8h-40q-8 0-8-8V53q0-8 8-8Z" fill="var(--base00)"/><path d="M234.69 45h40q8 0 8 8V76q0 8-8 8h-40q-8 0-8-8V53q0-8 8-8Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/><text x="254.69" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">API</text></g><g><path d="M350.89 45h74.4q3 0 3 3V81q0 3-3 3h-74.4q-3 0-3-3V48q0-3 3-3Z" fill="var(--base00)"/><path d="M350.89 45h74.4q3 0 3 3V81q0 3-3 3h-74.4q-3 0-3-3V48q0-3 3-3Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/><path d="M355.89 45V84m64.4-39V84" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/><text x="388.09" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">Auth</text></g><g><path d="M460.29 45a49 5 0 0 1 98 0V84a49 5 0 0 1-98 0Z" fill="var(--base00)"/><path d="M460.29 45a49 5 0 0 1 98 0V84a49 5 0 0 1-98 0Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/><path d="M460.29 45a49 5 0 0 0 98 0" stroke="var(--base0E)" fill="none"/><text x="509.29" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Postgres</text></g><g><g><path d="M98.45 135H247.69" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/><path d="M254.69 135l-8 4v-8Z" fill="var(--base04)" class="a m2"/></g><g class="a m3"><rect x="132.3" y="113" width="88.54" height="18" rx="3" fill="var(--base00)"/><text x="176.57" y="126.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">POST /login</text></g></g><g><g><path d="M254.69 171h247.6" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/><path d="M509.29 171l-8 4v-8Z" fill="var(--base04)" class="a m5"/></g><g class="a m6"><rect x="337.72" y="149" width="88.54" height="18" rx="3" fill="var(--base00)"/><text x="381.99" y="162.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">select user</text></g></g><g><g><path d="M509.29 207H261.69" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m7"/><path d="M254.69 207l8-4v8Z" fill="var(--base04)" class="a m8"/></g><g class="a m9"><rect x="366.28" y="185" width="31.42" height="18" rx="3" fill="var(--base00)"/><text x="381.99" y="198.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">row</text></g></g><g><g><path d="M254.69 225h19c4.95 0 9 4.05 9 9h0c0 4.95-4.05 9-9 9h-12" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m01"/><path d="M254.69 243l8-4v8Z" fill="var(--base04)" class="a m11"/></g><g class="a m21"><rect x="290.69" y="225" width="81.4" height="18" rx="3" fill="var(--base00)"/><text x="331.39" y="238.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">hash check</text></g></g><g class="a m31"><rect x="187.57" y="257" width="134.24" height="28.66" rx="4" fill="var(--base00)"/><rect x="187.57" y="257" width="134.24" height="28.66" rx="4" fill="var(--base0A)" fill-opacity="0.12" stroke="var(--base0A)" stroke-opacity="0.7"/><text x="254.69" y="275.495" font-size="11.9" text-anchor="middle" fill="var(--base05)">password matches</text></g><g><g><path d="M254.69 321.66h126.4" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m41"/><path d="M388.09 321.66l-8 4v-8Z" fill="var(--base04)" class="a m51"/></g><g class="a m61"><rect x="280.69" y="299.66" width="81.4" height="18" rx="3" fill="var(--base00)"/><text x="321.39" y="312.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">sign token</text></g></g><g><g><path d="M388.09 357.66H261.69" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m71"/><path d="M254.69 357.66l8-4v8Z" fill="var(--base04)" class="a m81"/></g><g class="a m91"><rect x="305.68" y="335.66" width="31.42" height="18" rx="3" fill="var(--base00)"/><text x="321.39" y="348.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">jwt</text></g></g><g><g><path d="M254.69 393.66H105.45" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m02"/><path d="M98.45 393.66l8-4v8Z" fill="var(--base04)" class="a m12"/></g><g class="a m22"><rect x="114.45" y="371.66" width="124.24" height="18" rx="3" fill="var(--base00)"/><text x="176.57" y="384.825" font-size="11.9" text-anchor="middle" fill="var(--base05)">200 + Set-Cookie</text></g></g></g><circle r="4" fill="var(--base09)" class="a m32"/></svg>

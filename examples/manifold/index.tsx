@@ -63,7 +63,7 @@ const flight = (s: Seat) =>
       const { x, y, size, depth } = project(CAMERA, (-TAU * t) / D, shapeAt({ along: (s.along + t / D) % 1, around: s.around }, t));
       return { opacity: round(fog(depth), 3), scale: round(size, 3), x: round(x, 1), y: round(y, 1) };
     },
-    { duration: D, tolerance: { translate: 1, scale: 0.015, opacity: 0.02 } },
+    { duration: D, tolerance: { translate: 2, scale: 0.03, opacity: 0.04 } },
   );
 
 const rgb = (color: string) => [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16));

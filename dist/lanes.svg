@@ -1,7 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1001.8 272" width="1001.8" height="272" role="img" aria-labelledby="t d">
-  <title id="t">Agent threads</title>
-  <desc id="d">Three agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.</desc>
-  <style><![CDATA[
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1001.8 272" width="1001.8" height="272" role="img" aria-labelledby="t d"><title id="t">Agent threads</title><desc id="d">Three agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.</desc><style><![CDATA[
 svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04:#b4b7b4;--base05:#c5c8c6;--base06:#e0e0e0;--base07:#ffffff;--base08:#cc6666;--base09:#de935f;--base0A:#f0c674;--base0B:#b5bd68;--base0C:#8abeb7;--base0D:#81a2be;--base0E:#b294bb;--base0F:#a3685a}
 @media (prefers-color-scheme:light){svg{--base00:#ffffff;--base01:#e0e0e0;--base02:#d6d6d6;--base03:#8e908c;--base04:#969896;--base05:#4d4d4c;--base06:#282a2e;--base07:#1d1f21;--base08:#c82829;--base09:#f5871f;--base0A:#eab700;--base0B:#718c00;--base0C:#3e999f;--base0D:#4271ae;--base0E:#8959a8;--base0F:#a3685a}}
 
@@ -26,203 +23,62 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 .m8{animation-name:k8}
 @keyframes k9{0%,23.636%{width:0px}65.455%,100%{width:414px}}
 .m9{animation-name:k9;animation-timing-function:linear}
-@keyframes k10{0%,23.636%{opacity:0}25.455%,100%{opacity:1}}
-.m10{animation-name:k10}
+@keyframes k01{0%,23.636%{opacity:0}25.455%,100%{opacity:1}}
+.m01{animation-name:k01}
 @keyframes k11{0%,9.091%{stroke-dashoffset:1;visibility:hidden}11.818%,100%{stroke-dashoffset:0;visibility:visible}}
 .m11{animation-name:k11}
-@keyframes k12{0%,11.409%{opacity:0}11.818%,100%{opacity:1}}
-.m12{animation-name:k12}
-@keyframes k13{0%,11.818%,100%{visibility:hidden}9.091%{visibility:visible}}
-@keyframes k14{0%,9.091%{translate:270.8px 77px}11.818%,100%{translate:270.8px 115px}}
-.m13{animation-name:k13,k14;animation-timing-function:steps(1),linear}
-@keyframes k15{0%,23.636%{stroke-dashoffset:1;visibility:hidden}26.364%,100%{stroke-dashoffset:0;visibility:visible}}
-.m14{animation-name:k15}
-@keyframes k16{0%,25.955%{opacity:0}26.364%,100%{opacity:1}}
-.m15{animation-name:k16}
-@keyframes k17{0%,26.364%,100%{visibility:hidden}23.636%{visibility:visible}}
-@keyframes k18{0%,23.636%{translate:414.8px 77px}26.364%,100%{translate:414.8px 171px}}
-.m16{animation-name:k17,k18;animation-timing-function:steps(1),linear}
-@keyframes k19{0%,41.818%{stroke-dashoffset:1;visibility:hidden}44.545%,100%{stroke-dashoffset:0;visibility:visible}}
-.m17{animation-name:k19}
-@keyframes k20{0%,44.136%{opacity:0}44.545%,100%{opacity:1}}
-.m18{animation-name:k20}
-@keyframes k21{0%,44.545%,100%{visibility:hidden}41.818%{visibility:visible}}
+@keyframes k21{0%,11.409%{opacity:0}11.818%,100%{opacity:1}}
+.m21{animation-name:k21}
+@keyframes k31{0%,11.818%,100%{visibility:hidden}9.091%{visibility:visible}}
+@keyframes k41{0%,9.091%{translate:270.8px 77px}11.818%,100%{translate:270.8px 115px}}
+.m31{animation-name:k31,k41;animation-timing-function:steps(1),linear}
+@keyframes k51{0%,23.636%{stroke-dashoffset:1;visibility:hidden}26.364%,100%{stroke-dashoffset:0;visibility:visible}}
+.m41{animation-name:k51}
+@keyframes k61{0%,25.955%{opacity:0}26.364%,100%{opacity:1}}
+.m51{animation-name:k61}
+@keyframes k71{0%,26.364%,100%{visibility:hidden}23.636%{visibility:visible}}
+@keyframes k81{0%,23.636%{translate:414.8px 77px}26.364%,100%{translate:414.8px 171px}}
+.m61{animation-name:k71,k81;animation-timing-function:steps(1),linear}
+@keyframes k91{0%,41.818%{stroke-dashoffset:1;visibility:hidden}44.545%,100%{stroke-dashoffset:0;visibility:visible}}
+.m71{animation-name:k91}
+@keyframes k02{0%,44.136%{opacity:0}44.545%,100%{opacity:1}}
+.m81{animation-name:k02}
+@keyframes k12{0%,44.545%,100%{visibility:hidden}41.818%{visibility:visible}}
 @keyframes k22{0%,41.818%{translate:594.8px 115px}44.545%,100%{translate:594.8px 77px}}
-.m19{animation-name:k21,k22;animation-timing-function:steps(1),linear}
-@keyframes k23{0%,65.455%{stroke-dashoffset:1;visibility:hidden}68.182%,100%{stroke-dashoffset:0;visibility:visible}}
-.m20{animation-name:k23}
-@keyframes k24{0%,67.773%{opacity:0}68.182%,100%{opacity:1}}
-.m21{animation-name:k24}
-@keyframes k25{0%,68.182%,100%{visibility:hidden}65.455%{visibility:visible}}
-@keyframes k26{0%,65.455%{translate:828.8px 171px}68.182%,100%{translate:828.8px 77px}}
-.m22{animation-name:k25,k26;animation-timing-function:steps(1),linear}
-@keyframes k27{0%,16.364%{opacity:0}19.091%,100%{opacity:1}}
-@keyframes k28{0%,16.364%{scale:0.3}19.091%,100%{scale:1}}
-.m23{animation-name:k27,k28;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k29{0%,16.364%{opacity:0}18.636%,100%{opacity:1}}
-.m24{animation-name:k29}
-@keyframes k30{0%,30.909%{opacity:0}33.636%,100%{opacity:1}}
-@keyframes k31{0%,30.909%{scale:0.3}33.636%,100%{scale:1}}
-.m25{animation-name:k30,k31;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k32{0%,30.909%{opacity:0}33.182%,100%{opacity:1}}
-.m26{animation-name:k32}
+.m91{animation-name:k12,k22;animation-timing-function:steps(1),linear}
+@keyframes k32{0%,65.455%{stroke-dashoffset:1;visibility:hidden}68.182%,100%{stroke-dashoffset:0;visibility:visible}}
+.m02{animation-name:k32}
+@keyframes k42{0%,67.773%{opacity:0}68.182%,100%{opacity:1}}
+.m12{animation-name:k42}
+@keyframes k52{0%,68.182%,100%{visibility:hidden}65.455%{visibility:visible}}
+@keyframes k62{0%,65.455%{translate:828.8px 171px}68.182%,100%{translate:828.8px 77px}}
+.m22{animation-name:k52,k62;animation-timing-function:steps(1),linear}
+@keyframes k72{0%,16.364%{opacity:0}19.091%,100%{opacity:1}}
+@keyframes k82{0%,16.364%{scale:0.3}19.091%,100%{scale:1}}
+.m32{animation-name:k72,k82;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k92{0%,16.364%{opacity:0}18.636%,100%{opacity:1}}
+.m42{animation-name:k92}
+@keyframes k03{0%,30.909%{opacity:0}33.636%,100%{opacity:1}}
+@keyframes k13{0%,30.909%{scale:0.3}33.636%,100%{scale:1}}
+.m52{animation-name:k03,k13;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k23{0%,30.909%{opacity:0}33.182%,100%{opacity:1}}
+.m62{animation-name:k23}
 @keyframes k33{0%,32.727%{opacity:0}35.455%,100%{opacity:1}}
-@keyframes k34{0%,32.727%{scale:0.3}35.455%,100%{scale:1}}
-.m27{animation-name:k33,k34;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k35{0%,32.727%{opacity:0}35%,100%{opacity:1}}
-.m28{animation-name:k35}
-@keyframes k36{0%,47.273%{opacity:0}50%,100%{opacity:1}}
-@keyframes k37{0%,47.273%{scale:0.3}50%,100%{scale:1}}
-.m29{animation-name:k36,k37;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k38{0%,47.273%{opacity:0}49.545%,100%{opacity:1}}
-.m30{animation-name:k38}
-@keyframes k39{0%,60%{opacity:0}62.727%,100%{opacity:1}}
-@keyframes k40{0%,60%{scale:0.3}62.727%,100%{scale:1}}
-.m31{animation-name:k39,k40;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k41{0%,60%{opacity:0}62.273%,100%{opacity:1}}
-.m32{animation-name:k41}
-@keyframes k42{0%{translate:0px 0px}77.273%,100%{translate:765px 0px}}
-.m33{animation-name:k42;animation-timing-function:linear}
+@keyframes k43{0%,32.727%{scale:0.3}35.455%,100%{scale:1}}
+.m72{animation-name:k33,k43;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k53{0%,32.727%{opacity:0}35%,100%{opacity:1}}
+.m82{animation-name:k53}
+@keyframes k63{0%,47.273%{opacity:0}50%,100%{opacity:1}}
+@keyframes k73{0%,47.273%{scale:0.3}50%,100%{scale:1}}
+.m92{animation-name:k63,k73;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k83{0%,47.273%{opacity:0}49.545%,100%{opacity:1}}
+.m03{animation-name:k83}
+@keyframes k93{0%,60%{opacity:0}62.727%,100%{opacity:1}}
+@keyframes k04{0%,60%{scale:0.3}62.727%,100%{scale:1}}
+.m13{animation-name:k93,k04;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k14{0%,60%{opacity:0}62.273%,100%{opacity:1}}
+.m23{animation-name:k14}
+@keyframes k24{0%{translate:0px 0px}77.273%,100%{translate:765px 0px}}
+.m33{animation-name:k24;animation-timing-function:linear}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
-]]></style>
-  <rect width="100%" height="100%" fill="var(--base00)"/>
-  <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
-    <g>
-      <rect x="40" y="40" width="921.8" height="56" fill="var(--base01)" fill-opacity="0.5"/>
-      <circle cx="45" cy="68" r="4" fill="var(--base0B)"/>
-      <text x="56" y="72.9" font-size="14" fill="var(--base05)">TH-01 lead</text>
-      <path d="M180.8 68H945.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
-    </g>
-    <g>
-      <circle cx="45" cy="124" r="4" fill="var(--base0D)"/>
-      <text x="56" y="128.9" font-size="14" fill="var(--base05)">TH-02 search</text>
-      <path d="M180.8 124H945.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
-    </g>
-    <g>
-      <rect x="40" y="152" width="921.8" height="56" fill="var(--base01)" fill-opacity="0.5"/>
-      <circle cx="45" cy="180" r="4" fill="var(--base08)"/>
-      <text x="56" y="184.9" font-size="14" fill="var(--base05)">TH-03 build</text>
-      <path d="M180.8 180H945.8" stroke="var(--base02)" stroke-dasharray="2 4"/>
-    </g>
-    <g>
-      <path d="M180.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="180.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">0s</text>
-    </g>
-    <g>
-      <path d="M270.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="270.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">1s</text>
-    </g>
-    <g>
-      <path d="M360.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="360.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">2s</text>
-    </g>
-    <g>
-      <path d="M450.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="450.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">3s</text>
-    </g>
-    <g>
-      <path d="M540.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="540.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">4s</text>
-    </g>
-    <g>
-      <path d="M630.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="630.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">5s</text>
-    </g>
-    <g>
-      <path d="M720.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="720.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">6s</text>
-    </g>
-    <g>
-      <path d="M810.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="810.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">7s</text>
-    </g>
-    <g>
-      <path d="M900.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/>
-      <text x="900.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">8s</text>
-    </g>
-    <g>
-      <rect x="180.8" y="59" width="234" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m1"/>
-      <text x="188.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m2">planning</text>
-    </g>
-    <g>
-      <rect x="594.8" y="59" width="90" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m3"/>
-      <text x="602.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m4">review</text>
-    </g>
-    <g>
-      <rect x="828.8" y="59" width="117" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m5"/>
-      <text x="836.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m6">merge</text>
-    </g>
-    <g>
-      <rect x="270.8" y="115" width="324" height="18" rx="4" fill="var(--base0D)" fill-opacity="0.25" stroke="var(--base0D)" class="a m7"/>
-      <text x="278.8" y="147.9" font-size="11.9" fill="var(--base04)" class="a m8">researching</text>
-    </g>
-    <g>
-      <rect x="414.8" y="171" width="414" height="18" rx="4" fill="var(--base08)" fill-opacity="0.25" stroke="var(--base08)" class="a m9"/>
-      <text x="422.8" y="203.9" font-size="11.9" fill="var(--base04)" class="a m10">editing</text>
-    </g>
-    <g>
-      <g>
-        <path d="M270.8 77L270.8 108" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m11"/>
-        <path d="M270.8 115L266.8 107L274.8 107Z" fill="var(--base04)" class="a m12"/>
-      </g>
-      <circle r="4" fill="var(--base09)" class="a m13"/>
-    </g>
-    <g>
-      <g>
-        <path d="M414.8 77L414.8 164" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
-        <path d="M414.8 171L410.8 163L418.8 163Z" fill="var(--base04)" class="a m15"/>
-      </g>
-      <circle r="4" fill="var(--base09)" class="a m16"/>
-    </g>
-    <g>
-      <g>
-        <path d="M594.8 115L594.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m17"/>
-        <path d="M594.8 77L598.8 85L590.8 85Z" fill="var(--base04)" class="a m18"/>
-      </g>
-      <circle r="4" fill="var(--base09)" class="a m19"/>
-    </g>
-    <g>
-      <g>
-        <path d="M828.8 171L828.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m20"/>
-        <path d="M828.8 77L832.8 85L824.8 85Z" fill="var(--base04)" class="a m21"/>
-      </g>
-      <circle r="4" fill="var(--base09)" class="a m22"/>
-    </g>
-    <g>
-      <path d="M342.8 114L352.8 124L342.8 134L332.8 124Z" fill="var(--base0D)" stroke="var(--base00)" class="a m23 fb"/>
-      <g class="a m24">
-        <rect x="323.52" y="91" width="38.56" height="18" rx="3" fill="none"/>
-        <text x="342.8" y="104.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">READ</text>
-      </g>
-    </g>
-    <g>
-      <path d="M486.8 114L496.8 124L486.8 134L476.8 124Z" fill="var(--base0C)" stroke="var(--base00)" class="a m25 fb"/>
-      <g class="a m26">
-        <rect x="471.09" y="91" width="31.42" height="18" rx="3" fill="none"/>
-        <text x="486.8" y="104.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">WEB</text>
-      </g>
-    </g>
-    <g>
-      <path d="M504.8 170L514.8 180L504.8 190L494.8 180Z" fill="var(--base0E)" stroke="var(--base00)" class="a m27 fb"/>
-      <g class="a m28">
-        <rect x="485.52" y="147" width="38.56" height="18" rx="3" fill="none"/>
-        <text x="504.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">EDIT</text>
-      </g>
-    </g>
-    <g>
-      <path d="M648.8 170L658.8 180L648.8 190L638.8 180Z" fill="var(--base0A)" stroke="var(--base00)" class="a m29 fb"/>
-      <g class="a m30">
-        <rect x="629.52" y="147" width="38.56" height="18" rx="3" fill="none"/>
-        <text x="648.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">TEST</text>
-      </g>
-    </g>
-    <g>
-      <path d="M774.8 170L784.8 180L774.8 190L764.8 180Z" fill="var(--base0E)" stroke="var(--base00)" class="a m31 fb"/>
-      <g class="a m32">
-        <rect x="755.52" y="147" width="38.56" height="18" rx="3" fill="none"/>
-        <text x="774.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">EDIT</text>
-      </g>
-    </g>
-    <path d="M180.8 40V208" stroke="var(--base09)" stroke-width="1.5" class="a m33"/>
-  </g>
-</svg>
+]]></style><rect width="100%" height="100%" fill="var(--base00)"/><g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace"><g><rect x="40" y="40" width="921.8" height="56" fill="var(--base01)" fill-opacity="0.5"/><circle cx="45" cy="68" r="4" fill="var(--base0B)"/><text x="56" y="72.9" font-size="14" fill="var(--base05)">TH-01 lead</text><path d="M180.8 68h765" stroke="var(--base02)" stroke-dasharray="2 4"/></g><g><circle cx="45" cy="124" r="4" fill="var(--base0D)"/><text x="56" y="128.9" font-size="14" fill="var(--base05)">TH-02 search</text><path d="M180.8 124h765" stroke="var(--base02)" stroke-dasharray="2 4"/></g><g><rect x="40" y="152" width="921.8" height="56" fill="var(--base01)" fill-opacity="0.5"/><circle cx="45" cy="180" r="4" fill="var(--base08)"/><text x="56" y="184.9" font-size="14" fill="var(--base05)">TH-03 build</text><path d="M180.8 180h765" stroke="var(--base02)" stroke-dasharray="2 4"/></g><g><path d="M180.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="180.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">0s</text></g><g><path d="M270.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="270.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">1s</text></g><g><path d="M360.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="360.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">2s</text></g><g><path d="M450.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="450.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">3s</text></g><g><path d="M540.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="540.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">4s</text></g><g><path d="M630.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="630.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">5s</text></g><g><path d="M720.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="720.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">6s</text></g><g><path d="M810.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="810.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">7s</text></g><g><path d="M900.8 40V212" stroke="var(--base02)" stroke-opacity="0.6"/><text x="900.8" y="224" font-size="11.9" text-anchor="middle" fill="var(--base04)">8s</text></g><g><rect x="180.8" y="59" width="234" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m1"/><text x="188.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m2">planning</text></g><g><rect x="594.8" y="59" width="90" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m3"/><text x="602.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m4">review</text></g><g><rect x="828.8" y="59" width="117" height="18" rx="4" fill="var(--base0B)" fill-opacity="0.25" stroke="var(--base0B)" class="a m5"/><text x="836.8" y="91.9" font-size="11.9" fill="var(--base04)" class="a m6">merge</text></g><g><rect x="270.8" y="115" width="324" height="18" rx="4" fill="var(--base0D)" fill-opacity="0.25" stroke="var(--base0D)" class="a m7"/><text x="278.8" y="147.9" font-size="11.9" fill="var(--base04)" class="a m8">researching</text></g><g><rect x="414.8" y="171" width="414" height="18" rx="4" fill="var(--base08)" fill-opacity="0.25" stroke="var(--base08)" class="a m9"/><text x="422.8" y="203.9" font-size="11.9" fill="var(--base04)" class="a m01">editing</text></g><g><g><path d="M270.8 77v31" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m11"/><path d="M270.8 115l-4-8h8Z" fill="var(--base04)" class="a m21"/></g><circle r="4" fill="var(--base09)" class="a m31"/></g><g><g><path d="M414.8 77v87" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m41"/><path d="M414.8 171l-4-8h8Z" fill="var(--base04)" class="a m51"/></g><circle r="4" fill="var(--base09)" class="a m61"/></g><g><g><path d="M594.8 115V84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m71"/><path d="M594.8 77l4 8h-8Z" fill="var(--base04)" class="a m81"/></g><circle r="4" fill="var(--base09)" class="a m91"/></g><g><g><path d="M828.8 171V84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m02"/><path d="M828.8 77l4 8h-8Z" fill="var(--base04)" class="a m12"/></g><circle r="4" fill="var(--base09)" class="a m22"/></g><g><path d="M342.8 114l10 10-10 10-10-10Z" fill="var(--base0D)" stroke="var(--base00)" class="a m32 fb"/><g class="a m42"><rect x="323.52" y="91" width="38.56" height="18" rx="3" fill="none"/><text x="342.8" y="104.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">READ</text></g></g><g><path d="M486.8 114l10 10-10 10-10-10Z" fill="var(--base0C)" stroke="var(--base00)" class="a m52 fb"/><g class="a m62"><rect x="471.09" y="91" width="31.42" height="18" rx="3" fill="none"/><text x="486.8" y="104.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">WEB</text></g></g><g><path d="M504.8 170l10 10-10 10-10-10Z" fill="var(--base0E)" stroke="var(--base00)" class="a m72 fb"/><g class="a m82"><rect x="485.52" y="147" width="38.56" height="18" rx="3" fill="none"/><text x="504.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">EDIT</text></g></g><g><path d="M648.8 170l10 10-10 10-10-10Z" fill="var(--base0A)" stroke="var(--base00)" class="a m92 fb"/><g class="a m03"><rect x="629.52" y="147" width="38.56" height="18" rx="3" fill="none"/><text x="648.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">TEST</text></g></g><g><path d="M774.8 170l10 10-10 10-10-10Z" fill="var(--base0E)" stroke="var(--base00)" class="a m13 fb"/><g class="a m23"><rect x="755.52" y="147" width="38.56" height="18" rx="3" fill="none"/><text x="774.8" y="160.165" font-size="11.9" text-anchor="middle" fill="var(--base05)">EDIT</text></g></g><path d="M180.8 40V208" stroke="var(--base09)" stroke-width="1.5" class="a m33"/></g></svg>
