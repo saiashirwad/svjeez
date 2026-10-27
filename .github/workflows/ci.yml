@@ -24,7 +24,7 @@ jobs:
       - name: dist/ matches the examples
         run: |
           git add --intent-to-add dist
-          git diff --exit-code --stat dist || { echo "::error::dist/ is stale. Run 'bun run build' and commit the result."; exit 1; }
+          git diff --exit-code --stat dist || { git diff --word-diff=plain --unified=0 dist | head -60; echo "::error::dist/ is stale. Run 'bun run build' and commit the result."; exit 1; }
       - run: npm pack --dry-run
 
   node:
