@@ -2,9 +2,28 @@
 
 <p align="center">Animated SVGs in TSX. One file out, no JavaScript.</p>
 
-svjeez is a TypeScript library for making animated SVGs. Describe a scene with TSX, compose motions on a timeline, and render it to a single SVG file. The animation is built into the SVG with CSS and SVG animation, so it plays without a JavaScript runtime.
+svjeez turns TSX into one animated SVG. Write a code walkthrough, a flowchart, a sequence diagram or a terminal session, and drop the file into a README. No JavaScript, no video, no player. A wrong node id fails at compile time. Zero dependencies.
 
-<p align="center"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/horizon.svg" width="720" alt="An animated black hole" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/hero.svg" width="720" alt="A flowchart spec in TSX on the left; on the right each node appears as its line is highlighted, then a comet runs from PR opened to Post review" /></p>
+
+The animation is CSS and SVG animation inside the file, so it plays anywhere an `<img>` does, GitHub READMEs included.
+
+### Typed ids
+
+Node ids come from the spec, so a typo is a type error, not a broken diagram:
+
+```ts
+const chart = flowchart({
+  nodes: { pr: "PR opened", lint: "Run linters", post: "Post review" },
+  edges: [["pr", "lint"], ["lint", "posts"]],
+});
+chart.route("pr", "review");
+```
+
+```text
+error TS2820: Type '"posts"' is not assignable to type '"lint" | "post" | "pr"'. Did you mean '"post"'?
+error TS2345: Argument of type '"review"' is not assignable to parameter of type '"lint" | "post" | "pr"'.
+```
 
 ## Installation
 
