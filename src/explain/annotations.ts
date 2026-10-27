@@ -1,46 +1,62 @@
-import { el } from "../el";
-import { draw } from "../recipes";
-import { motion, type Motion, type Span } from "../motion";
-import type { Point, Rect } from "../geometry";
 import type { Color } from "../attributes";
+import { el } from "../el";
+import type { Edge, Point, Rect } from "../geometry";
+import { motion, type Span } from "../motion";
+import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
+import { during } from "./timeline";
 
-const visible = (span: Span): Motion<"opacity"> => {
-  const fade = Math.min(0.2, span.over / 2);
-  if (!Number.isFinite(span.at) || span.at < 0 || !(fade > 0)) throw new Error("Annotation needs a valid span.");
-  return motion({ opacity: 0 }).at(span.at).to({ opacity: 1 }, fade).at(span.at + span.over - fade).to({ opacity: 0 }, fade);
-};
-interface Timed { readonly during: Span; readonly color?: Color }
-export function Arrow({ from, to, bend = 0, during, color = "#f6c96b" }: Timed & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
-  const dx = to.x - from.x, dy = to.y - from.y;
-  const cx = (from.x + to.x) / 2 - dy * bend, cy = (from.y + to.y) / 2 + dx * bend;
-  const angle = Math.atan2(to.y - cy, to.x - cx), size = 8;
-  const p = (a: number) => `${to.x - size * Math.cos(angle + a)} ${to.y - size * Math.sin(angle + a)}`;
-  const duration = Math.min(0.6, during.over / 2);
-  return el.g({ animation: visible(during) }, [
-    el.path({ d: `M${from.x} ${from.y} Q${cx} ${cy} ${to.x} ${to.y}`, fill: "none", stroke: color, strokeWidth: 1.5, strokeLinecap: "round", animation: draw({ at: during.at, over: duration }) }),
-    el.path({ d: `M${p(0.45)} L${to.x} ${to.y} L${p(-0.45)}`, fill: "none", stroke: color, strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round", animation: motion({ opacity: 0, scale: 0.5 }).at(during.at + duration).to({ opacity: 1, scale: 1 }, Math.min(0.15, during.over - duration)) }),
+interface Common {
+  readonly during: Span;
+  readonly color?: Color;
+  /** On the root element, so fonts come from your CSS. */
+  readonly class?: string;
+}
+
+const ink = (color: Color) => ({ fill: "none", stroke: color, strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" }) as const;
+
+const ACCENT: Color = "#f6c96b";
+
+export function Arrow({ from, to, bend = 0, during: span, color = ACCENT, class: cls }: Common & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
+  const [cx, cy] = [(from.x + to.x) / 2 - (to.y - from.y) * bend, (from.y + to.y) / 2 + (to.x - from.x) * bend];
+  const angle = Math.atan2(to.y - cy, to.x - cx);
+  const barb = (a: number) => `${to.x - 8 * Math.cos(angle + a)} ${to.y - 8 * Math.sin(angle + a)}`;
+  const stroke = Math.min(0.6, span.over / 2);
+  return el.g({ class: cls, animation: during(span, 0.2) }, [
+    el.path({ d: `M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`, ...ink(color), animation: draw({ at: span.at, over: stroke }) }),
+    el.path({ d: `M${barb(0.45)}L${to.x} ${to.y}L${barb(-0.45)}`, ...ink(color), animation: motion({ opacity: 0, scale: 0.5 }).at(span.at + stroke).to({ opacity: 1, scale: 1 }, Math.min(0.15, span.over - stroke)) }),
   ]);
 }
-export function Callout({ target, side = "right", during, children, color = "#f6c96b", fontSize = 14, width = 24 }: Timed & { readonly target: Rect; readonly side?: "left" | "right" | "top" | "bottom"; readonly children: string; readonly fontSize?: number; readonly width?: number }): SvgNode {
-  if (!Number.isInteger(width) || width < 1) throw new Error("Callout width must be a positive character count.");
-  const lines: string[] = [];
-  for (const word of children.split(/\s+/)) {
-    const last = lines.length - 1;
-    if (last >= 0 && lines[last]!.length + 1 + word.length <= width) lines[last] += ` ${word}`; else lines.push(word);
-  }
-  const w = Math.max(...lines.map(s => s.length), 0) * fontSize * 0.6 + 20, h = lines.length * fontSize * 1.4 + 16;
-  const x = side === "left" ? target.x - w - 20 : side === "right" ? target.x + target.w + 20 : target.center.x - w / 2;
-  const y = side === "top" ? target.y - h - 20 : side === "bottom" ? target.y + target.h + 20 : target.center.y - h / 2;
-  return el.g({ animation: visible(during) }, [el.rect({ x, y, width: w, height: h, rx: 6, fill: color, fillOpacity: 0.08, stroke: color, strokeOpacity: 0.4 }), ...lines.map((line, i) => el.text({ x: x + 10, y: y + 10 + fontSize + i * fontSize * 1.4, fontFamily: "monospace", fontSize, fill: color }, line))]);
+
+/** A note box beside `target`, joined to it by a short leader. `width` is in characters. */
+export function Callout({ target, side = "right", during: span, children, color = ACCENT, fontSize = 14, width = 24, class: cls }: Common & { readonly target: Rect; readonly side?: Edge; readonly children: string; readonly fontSize?: number; readonly width?: number }): SvgNode {
+  const lines = children.split(/\s+/).filter(Boolean).reduce<string[]>((out, word) => {
+    if (out.length > 0 && out.at(-1)!.length + 1 + word.length <= width) out[out.length - 1] += ` ${word}`;
+    else out.push(word);
+    return out;
+  }, []);
+  const [w, h, gap] = [Math.max(0, ...lines.map((line) => line.length)) * fontSize * 0.6 + 20, lines.length * fontSize * 1.4 + 16, 20];
+  const x = side === "left" ? target.x - w - gap : side === "right" ? target.x + target.w + gap : target.center.x - w / 2;
+  const y = side === "top" ? target.y - h - gap : side === "bottom" ? target.y + target.h + gap : target.center.y - h / 2;
+  const [start, end] = [target.side(side, 0.5), { x: x + (side === "left" ? w : side === "right" ? 0 : w / 2), y: y + (side === "top" ? h : side === "bottom" ? 0 : h / 2) }];
+  return el.g({ class: cls, animation: during(span, 0.2) }, [
+    el.path({ d: `M${end.x} ${end.y}L${start.x} ${start.y}`, ...ink(color), strokeOpacity: 0.6 }),
+    el.rect({ x, y, width: w, height: h, rx: 6, fill: color, fillOpacity: 0.08, stroke: color, strokeOpacity: 0.4 }),
+    lines.map((line, i) => el.text({ x: x + 10, y: y + 8 + fontSize + i * fontSize * 1.4, fontSize, fill: color }, line)),
+  ]);
 }
-export function Brace({ lines, side = "left", label, during, color = "#f6c96b" }: Timed & { readonly lines: Rect; readonly side?: "left" | "right"; readonly label?: string }): SvgNode {
-  const x = side === "left" ? lines.x - 8 : lines.x + lines.w + 8, dir = side === "left" ? -1 : 1, mid = lines.center.y;
-  return el.g({ animation: visible(during) }, [el.path({ d: `M${x} ${lines.y} q${dir * 8} 0 ${dir * 8} 8 V${mid - 8} q0 8 ${dir * 8} 8 q${-dir * 8} 0 ${-dir * 8} 8 V${lines.y + lines.h - 8} q0 8 ${-dir * 8} 8`, fill: "none", stroke: color, strokeWidth: 1.5, strokeLinecap: "round" }), label && el.text({ x: x + dir * 20, y: mid, textAnchor: side === "left" ? "end" : "start", fontFamily: "monospace", fontSize: 12, fill: color }, label)]);
+
+export function Brace({ lines, side = "left", label, during: span, color = ACCENT, class: cls }: Common & { readonly lines: Rect; readonly side?: "left" | "right"; readonly label?: string }): SvgNode {
+  const [x, dir, mid] = [side === "left" ? lines.x - 8 : lines.x + lines.w + 8, side === "left" ? -1 : 1, lines.center.y];
+  const d = `M${x} ${lines.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${lines.y + lines.h - 8}q0 8 ${-dir * 8} 8`;
+  return el.g({ class: cls, animation: during(span, 0.2) }, [
+    el.path({ d, ...ink(color) }),
+    label && el.text({ x: x + dir * 20, y: mid + 4, textAnchor: side === "left" ? "end" : "start", fontSize: 12, fill: color }, label),
+  ]);
 }
-export function Underline({ rect: r, style = "straight", during, color = "#f6c96b" }: Timed & { readonly rect: Rect; readonly style?: "straight" | "squiggle" }): SvgNode {
-  const y = r.y + r.h - 2;
-  const count = Math.max(1, Math.ceil(r.w / 8));
-  const d = style === "straight" ? `M${r.x} ${y} h${r.w}` : `M${r.x} ${y} ` + Array.from({ length: count }, () => `l${r.w / count / 2} -2 l${r.w / count / 2} 2`).join(" ");
-  return el.path({ d, fill: "none", stroke: color, strokeWidth: 1.5, strokeLinecap: "round", animation: [visible(during), draw({ at: during.at, over: Math.min(0.5, during.over / 2) })] });
+
+export function Underline({ rect: r, style = "straight", during: span, color = ACCENT, class: cls }: Common & { readonly rect: Rect; readonly style?: "straight" | "squiggle" }): SvgNode {
+  const [y, count] = [r.y + r.h - 2, Math.max(1, Math.ceil(r.w / 8))];
+  const d = style === "straight" ? `M${r.x} ${y}h${r.w}` : `M${r.x} ${y}${`l${r.w / count / 2} -2l${r.w / count / 2} 2`.repeat(count)}`;
+  return el.path({ d, ...ink(color), class: cls, animation: [during(span, 0.2), draw({ at: span.at, over: Math.min(0.5, span.over / 2) })] });
 }
