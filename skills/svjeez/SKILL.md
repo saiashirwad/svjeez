@@ -163,7 +163,7 @@ Extras take a `font` too: `code(src, { font })` (monospaced only; it sets the co
 
 Before you embed:
 
-- An embedded TrueType font is cut down to the glyphs the scene's text uses, often to a tenth of the file or less. Kerning moves to a `kern` table and variable fonts become their default instance. Text that forms ligatures, or could meet any other layout the browser applies, such as contextual alternates, combining marks or Arabic and Indic forms, embeds the whole font so the browser can still apply it. So do OTF with CFF outlines, WOFF and WOFF2. Pass `{ subset: false }` to embed the whole file. `validateSvg` warns past 256 KB. For a short title, `<Glyphs>` embeds no font at all.
+- An embedded TrueType font is cut down to the glyphs the scene's text uses, often to a tenth of the file or less. Kerning moves to a `kern` table and variable fonts become their default instance. Text that forms ligatures, or could meet any other layout the browser applies, such as contextual alternates, combining marks or Arabic and Indic forms, embeds the whole font so the browser can still apply it. So do OTF with CFF outlines, WOFF and WOFF2. Pass `{ subset: false }` to embed the whole file. A coding font such as JetBrains Mono turns `=>` or `--` into ligatures; load it with `{ ligatures: false }` to draw one glyph per character and keep the cut. `validateSvg` warns past 256 KB. For a short title, `<Glyphs>` embeds no font at all.
 - Glyphs are outlines, not text. They are not selectable or searchable, the group's `aria-label` is all assistive tech reads, and they lose hinting, so keep small body text as `<text>`.
 - Measuring and outlines need the TTF or OTF file; WOFF and WOFF2 embed but throw on `measure` and `path`. `path` reads TrueType (`glyf`) outlines only, so an OTF with CFF outlines throws.
 - Shaping is for Latin text: no bidi, no contextual alternates, no mark positioning. Arabic or Indic text will not match the browser.
@@ -201,11 +201,11 @@ src.get("call"); src.find("total"); src.lines(1, 2); src.at(2, 8); // Rects and 
 
 const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, { gap: 0.5 }); // named spans
 morph([before, after], { at: [tl.change.at], gutter: true }).node; // moves surviving words, fades the rest
-typewriter(src, { at: 1, cps: 28, cursor: true });  // { node, end }
+typewriter(src, { at: 1, cps: 28, cursor: true });  // { node, end, lines }: lines[i] is when line i+1 types
 reveal(src, { at: 1, step: 0.6 });                  // a paragraph at a time: { node, spans, end }
 ```
 
-Annotations are components: `<Focus stops={[{ during: tl.intro, on: src.lines(2) }]}>`, `<Marker stops={[{ at: span, rect }]} />`, `<Callout target={rect} side="right" during={span}>text</Callout>`, `Arrow`, `Brace`, `Underline`, `Camera`. `during(span)` fades anything in and out over a span.
+Annotations are components: `<Focus stops={[{ during: tl.intro, on: src.lines(2) }]}>`, `<Marker stops={[{ at: span, rect }]} />`, `<Callout target={rect} side="right" during={span}>text</Callout>`, `Arrow`, `Brace`, `Underline`, `Camera`. `during(span)` fades anything in and out over a span; `cut(span)` shows it for the span with hard cuts, for shots in an edit.
 
 `Camera` zooms everything inside it. Do not zoom it over hundreds of animated elements: Chromium keeps each animated element on its own raster, and when a parent scales they fall behind and flash blank mid-zoom (measured in Chromium). Play the intro as one copy outside the `Camera`, swap at a cut to a still copy inside it, and share geometry through `def.symbol` so the second copy costs little. Put what must keep moving during the zoom in a second, small `Camera` with the same stops. `examples/map` shows the pattern.
 

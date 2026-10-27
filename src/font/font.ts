@@ -20,6 +20,12 @@ export interface FontOptions {
    * CFF outlines, WOFF and WOFF2 embed whole. Turn it off if text is changed after rendering.
    */
   readonly subset?: boolean;
+  /**
+   * Default true. False draws one glyph per character, with no ligatures or contextual alternates: `measure` and `path`
+   * skip them, and a subset embed carries no layout tables for the browser to apply them with. A coding font such as
+   * JetBrains Mono, whose `=>` and `--` would otherwise form ligatures, then still cuts down to the glyphs the scene uses.
+   */
+  readonly ligatures?: boolean;
 }
 
 export interface PathOptions {
@@ -88,6 +94,8 @@ export class Font {
   readonly fallback: readonly string[];
   /** Whether embedding cuts the font down to the glyphs a scene uses. See `FontOptions.subset`. */
   readonly subset: boolean;
+  /** Whether text forms ligatures. See `FontOptions.ligatures`. */
+  readonly ligatures: boolean;
   readonly format: FontFormat;
   readonly href: `data:${string}`;
   /** Length of `href`, which is what the output pays each time the font is embedded. */
@@ -98,6 +106,7 @@ export class Font {
     this.#sfnt = readable;
     this.#bytes = bytes;
     this.subset = options.subset ?? true;
+    this.ligatures = options.ligatures ?? true;
     this.format = format;
     this.family = options.family ?? (readable && name(readable, 16, 1)) ?? `font-${hash(bytes)}`;
     this.weight = options.weight ?? (readable ? weightOf(readable) : 400);
@@ -114,7 +123,7 @@ export class Font {
   }
 
   #shape(text: string, what: string) {
-    this.#shaper ??= shaper(this.#readable(what));
+    this.#shaper ??= shaper(this.#readable(what), this.ligatures);
     return this.#shaper.shape(text);
   }
 
@@ -128,9 +137,9 @@ export class Font {
     const key = [...new Set(texts.flatMap((text) => [...text]))].sort().join("") + "\u0000" + texts.join("\u0000");
     let href = this.#embeds.get(key);
     if (!href) {
-      this.#shaper ??= shaper(font);
+      this.#shaper ??= shaper(font, this.ligatures);
       const shaped = this.#shaper;
-      const cut = subset(this.#bytes, font, shaped, shaped.kern, texts);
+      const cut = subset(this.#bytes, font, shaped, shaped.kern, texts, this.ligatures);
       href = cut ? `data:font/ttf;base64,${base64(cut)}` : this.href;
       this.#embeds.set(key, href);
     }
@@ -144,7 +153,7 @@ export class Font {
 
   /** Whether the font has a glyph for this character. The browser draws a missing one from the fallback font. */
   has(char: string): boolean {
-    this.#shaper ??= shaper(this.#readable("has()"));
+    this.#shaper ??= shaper(this.#readable("has()"), this.ligatures);
     return this.#shaper.glyph(char) !== 0;
   }
 

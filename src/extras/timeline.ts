@@ -26,6 +26,10 @@ export const during = ({ at, over }: Span, fade: Seconds = 0.3): Motion<"opacity
   return motion({ opacity: 0 }).at(at).to({ opacity: 1 }, f).at(at + over - f).to({ opacity: 0 }, f);
 };
 
+/** On for the span and off outside it, with hard cuts: a shot in an edit. */
+export const cut = ({ at, over }: Span): Motion<"opacity"> =>
+  (at > 0 ? motion({ opacity: 0 }).at(at).set({ opacity: 1 }) : motion({ opacity: 1 })).at(at + over).set({ opacity: 0 });
+
 /** When each of several things happens: a start, from which they follow `step` apart, or one time each. */
 export type Beats = Seconds | readonly Seconds[];
 

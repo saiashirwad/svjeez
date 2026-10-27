@@ -262,10 +262,11 @@ export interface Shaper {
 /**
  * Glyphs for a line of text with the features a browser turns on by default for Latin: standard ligatures and pair kerning.
  * No bidi, no contextual alternates, no mark positioning, so complex scripts will not match the browser.
+ * Without `withLigatures`, one glyph per character and pair kerning only.
  */
-export const shaper = (f: Sfnt): Shaper => {
+export const shaper = (f: Sfnt, withLigatures = true): Shaper => {
   const map = charMap(f);
-  const ligatures = lookups(f, "GSUB", ["liga", "clig", "rlig"], 7).filter((l) => l.type === 4);
+  const ligatures = withLigatures ? lookups(f, "GSUB", ["liga", "clig", "rlig"], 7).filter((l) => l.type === 4) : [];
   const kerning = lookups(f, "GPOS", ["kern"], 9).filter((l) => l.type === 2);
   const legacyKern = kerning.length === 0 ? table(f, "kern") : undefined;
   const pair = (left: number, right: number): number => {

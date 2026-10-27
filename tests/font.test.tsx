@@ -188,6 +188,18 @@ describe("fontFamily", () => {
     expect(scene(<text fontFamily={jetbrains}>POST /login</text>)).not.toContain(jetbrains.href);
   });
 
+  test("with ligatures off, text draws one glyph per character and the font still cuts down", async () => {
+    const plain = font(await readFile(fixture("ArchivoBlack-Regular")), { ligatures: false });
+    expect(plain.path("fi", { size: 10 }).glyphs.map((glyph) => glyph.char)).toEqual(["f", "i"]);
+    expect(plain.measure("fi", 100)).toBeCloseTo(plain.measure("f", 100) + plain.measure("i", 100), 6);
+    expect(scene(<text fontFamily={plain}>fi</text>)).not.toContain(plain.href);
+    const code = font(await readFile(fixture("JetBrainsMono")), { ligatures: false });
+    const svg = scene(<text fontFamily={code}>{"a // b => c"}</text>);
+    expect(svg).not.toContain(code.href);
+    const cut = font(Buffer.from(/base64,([^)]+)\)/.exec(svg)![1]!, "base64"));
+    expect(cut.has("=") && cut.has(">") && cut.has("/")).toBe(true);
+  });
+
   test("the cut maps characters beyond the BMP", async () => {
     const bytes = new Uint8Array(await readFile(fixture("ABeeZee-Regular")));
     const parsed = sfnt(bytes);

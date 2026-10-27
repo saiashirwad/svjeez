@@ -304,7 +304,7 @@ const w = display.measure("Wave!", 96); // px, matches the browser, kerning incl
 <Glyphs font={display} text="Wave!" size={96} x={(W - w) / 2} y={140} animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />
 ```
 
-A font is embedded once, only if the tree uses it, and cut down to the glyphs the scene's text needs. `<Glyphs>` draws one path per glyph and embeds no font, which suits short animated titles. Extras take `font` and size their boxes by measuring. Full notes are in the skill's Fonts section. See `examples/fonts`, `examples/newspaper` for a front page with a drawn masthead and columns justified by measuring, and `examples/map` for a fantasy map with labels set along curves and a camera that follows a journey.
+A font is embedded once, only if the tree uses it, and cut down to the glyphs the scene's text needs. Load a coding font with `{ ligatures: false }` so its `=>` ligatures don't force the whole file in. `<Glyphs>` draws one path per glyph and embeds no font, which suits short animated titles. Extras take `font` and size their boxes by measuring. Full notes are in the skill's Fonts section. See `examples/fonts`, `examples/newspaper` for a front page with a drawn masthead and columns justified by measuring, and `examples/map` for a fantasy map with labels set along curves and a camera that follows a journey.
 
 ## Ink
 
@@ -392,7 +392,7 @@ const session = terminal(
 
 <>{shell.node}{session.node}</>; // session.end is when the last command finishes
 
-typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end }
+typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end, lines }, a span per line
 reveal(src, { at: 1, step: 0.6 }); // a paragraph at a time: { node, spans, end }
 reveal(src, { at: 1, blocks: [[2, 3], [5, 9]] }); // these lines in turn, the rest there from the start
 reveal(src, { at: [1, 4] }); // one time per block

@@ -1,7 +1,7 @@
 import type { Color } from "../attributes";
 import { def } from "../defs";
 import { el } from "../el";
-import { ease, motion, type Motion, type Seconds } from "../motion";
+import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import type { SvgNode } from "../svg";
 import { number, text, type Code, type Metrics } from "./code";
 import { tint } from "./theme";
@@ -16,8 +16,11 @@ export interface TypewriterOptions {
   readonly blink?: boolean;
 }
 
-/** Type `code` out line by line, one character per step. A line costs its characters plus one for the newline. */
-export function typewriter(code: Code, { at, cps = 28, cursor = false, blink = true }: TypewriterOptions): { readonly node: SvgNode; readonly end: Seconds } {
+/**
+ * Type `code` out line by line, one character per step. A line costs its characters plus one for the newline.
+ * `lines` holds when each line types, so other things can happen as their line lands.
+ */
+export function typewriter(code: Code, { at, cps = 28, cursor = false, blink = true }: TypewriterOptions): { readonly node: SvgNode; readonly end: Seconds; readonly lines: readonly Span[] } {
   if (!(at >= 0 && cps > 0)) throw new Error("typewriter() needs a non-negative start and a positive cps.");
   const m = code.metrics;
   let t = at - 1 / cps;
@@ -37,7 +40,7 @@ export function typewriter(code: Code, { at, cps = 28, cursor = false, blink = t
     const clip = def.clipPath({}, el.rect({ x: from, y: top, width: 0, height: m.height, animation: reveal }));
     return [numbered, el.g({ clipPath: clip }, words.map((w) => text(w, m)))];
   });
-  return { node: el.g({}, [rows, cursor && caret(lines, m, cursor === true ? tint(m.theme, "plain") : cursor, at, t, cps, blink)]), end: t };
+  return { node: el.g({}, [rows, cursor && caret(lines, m, cursor === true ? tint(m.theme, "plain") : cursor, at, t, cps, blink)]), end: t, lines: lines.map(({ start, chars }) => ({ at: start, over: chars / cps })) };
 }
 
 type Line = { readonly start: Seconds; readonly chars: number; readonly from: number; readonly top: number };

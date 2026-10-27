@@ -129,14 +129,15 @@ const assemble = (tables: Map<string, Uint8Array>): Uint8Array => {
  * The font cut down to the glyphs that `texts` use. Glyph ids stay as they are, so only the outlines of every other glyph
  * are dropped, the character map is rebuilt for these characters, and pair kerning among them moves to a `kern` table.
  * Returns undefined when the text forms ligatures or could meet any other layout lookup, such as contextual alternates
- * or mark positioning, which a subset without GSUB and GPOS would no longer apply.
+ * or mark positioning, which a subset without GSUB and GPOS would no longer apply. With `layout` false the caller has
+ * opted out of those lookups, so dropping them is the point and the text always cuts.
  */
-export const subset = (bytes: Uint8Array, f: Sfnt, shaper: Shaper, kerning: (left: number, right: number) => number, texts: readonly string[]): Uint8Array | undefined => {
+export const subset = (bytes: Uint8Array, f: Sfnt, shaper: Shaper, kerning: (left: number, right: number) => number, texts: readonly string[], layout = true): Uint8Array | undefined => {
   const chars = new Set(texts.flatMap((text) => [...text]));
   const mapped = [...chars].map((char) => [char.codePointAt(0)!, shaper.glyph(char)] as const).filter(([, glyph]) => glyph !== 0);
-  for (const text of texts) if (shaper.shape(text).some((placed) => [...placed.chars].length > 1)) return undefined;
+  if (layout && texts.some((text) => shaper.shape(text).some((placed) => [...placed.chars].length > 1))) return undefined;
   const drawn = [...new Set(mapped.map(([, glyph]) => glyph))];
-  if (shaper.beyond(texts.map((text) => [...text].map(shaper.glyph)))) return undefined;
+  if (layout && shaper.beyond(texts.map((text) => [...text].map(shaper.glyph)))) return undefined;
   const keep = withComponents(f, new Set([0, ...drawn]));
 
   const glyfData: number[] = [];
