@@ -2,12 +2,17 @@ import type { Point } from "../geometry";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 
 export type Timeline<K extends string> = { readonly [P in K]: Span } & {
+  /** From the first scene's start to the last one's end. */
   readonly duration: Seconds;
+  /** When the last scene ends. */
+  readonly end: Seconds;
   show(name: K): Motion<"opacity">;
   from(name: K): Motion<"opacity">;
 };
 
 export interface TimelineOptions {
+  /** When the first scene starts, so a timeline can lay out the beats inside another's scene. */
+  readonly at?: Seconds;
   /** Seconds between scenes. Not scaled by `pace`. */
   readonly gap?: Seconds;
   readonly fade?: Seconds;
@@ -21,9 +26,24 @@ export const during = ({ at, over }: Span, fade: Seconds = 0.3): Motion<"opacity
   return motion({ opacity: 0 }).at(at).to({ opacity: 1 }, f).at(at + over - f).to({ opacity: 0 }, f);
 };
 
-/** On during each `[from, to]`, off between. Spans closer than two fades merge, so fades never overlap. */
-export const visible = (spans: readonly (readonly [Seconds, Seconds])[], fade: Seconds = 0.15): Motion<"opacity"> =>
-  [...spans]
+/** When each of several things happens: a start, from which they follow `step` apart, or one time each. */
+export type Beats = Seconds | readonly Seconds[];
+
+/** `count` times from `at`. A list must have one time per thing, in order. */
+export const beats = (at: Beats, count: number, step: Seconds, what: string): Seconds[] => {
+  if (typeof at === "number") {
+    if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
+    return Array.from({ length: count }, (_, i) => at + i * step);
+  }
+  if (at.length !== count) throw new Error(`${what} needs ${count} times, got ${at.length}.`);
+  if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!))) throw new Error(`${what} times must be non-negative and in order.`);
+  return [...at];
+};
+
+/** On during each span, off between. Spans closer than two fades merge, so fades never overlap. */
+export const visible = (spans: readonly Span[], fade: Seconds = 0.15): Motion<"opacity"> =>
+  spans
+    .map(({ at, over }): [Seconds, Seconds] => [at, at + over])
     .sort((a, b) => a[0] - b[0])
     .reduce<[Seconds, Seconds][]>((out, [a, b]) => {
       const last = out.at(-1);
@@ -55,14 +75,14 @@ export const read = (text: string | readonly string[], { wps = 3.5, min = 2, set
 
 /** Consecutive named scenes, `gap` apart. */
 export function timeline<const T extends Record<string, Seconds>>(durations: T, options: TimelineOptions = {}): Timeline<keyof T & string> {
-  const { gap = 0, fade = 0.3, pace = 1 } = options;
-  if (!(gap >= 0 && fade > 0 && pace > 0)) throw new Error("timeline() needs a non-negative gap, a positive fade and a positive pace.");
+  const { at: start = 0, gap = 0, fade = 0.3, pace = 1 } = options;
+  if (!(start >= 0 && gap >= 0 && fade > 0 && pace > 0)) throw new Error("timeline() needs a non-negative start and gap, a positive fade and a positive pace.");
   const spans: Record<string, Span> = {};
-  let end = 0;
-  for (const [name, length] of Object.entries(durations)) {
-    if (name === "duration" || name === "show" || name === "from") throw new Error(`"${name}" is reserved in a timeline.`);
+  let end = start;
+  for (const [i, [name, length]] of Object.entries(durations).entries()) {
+    if (name === "duration" || name === "end" || name === "show" || name === "from") throw new Error(`"${name}" is reserved in a timeline.`);
     if (!(length > 0)) throw new Error(`Scene ${name} needs a positive length, got ${length}.`);
-    const at = end === 0 ? 0 : end + gap;
+    const at = i === 0 ? start : end + gap;
     spans[name] = { at, over: length * pace };
     end = at + length * pace;
   }
@@ -73,7 +93,8 @@ export function timeline<const T extends Record<string, Seconds>>(durations: T, 
   };
   return {
     ...spans,
-    duration: end,
+    duration: end - start,
+    end,
     show: (name: string) => during(span(name), fade),
     from: (name: string) => motion({ opacity: 0 }).at(span(name).at).to({ opacity: 1 }, Math.min(fade, span(name).over)),
   } as Timeline<keyof T & string>;

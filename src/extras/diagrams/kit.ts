@@ -1,6 +1,6 @@
 import type { Color } from "../../attributes";
 import { el } from "../../el";
-import { rect, type Point, type Rect } from "../../geometry";
+import { rect, type Edge, type Point, type Rect } from "../../geometry";
 import type { Box, Size } from "../../layout/box";
 import { motion, type Seconds, type Stack } from "../../motion";
 import { draw } from "../../recipes";
@@ -19,12 +19,17 @@ export interface Diagram<Id extends string> {
   readonly bounds: Rect;
 }
 
+/** Which point of `bounds` lands on `x`, `y`: a corner, the center, or the middle of an edge. */
+export type Anchor = "top-left" | "center" | Edge;
+
 export interface DiagramOptions {
   /** Default `defaultDark`. */
   readonly theme?: Base16;
-  /** Where the top-left of `bounds` lands. */
+  /** Where `anchor` of `bounds` lands. */
   readonly x?: number;
   readonly y?: number;
+  /** Default `"top-left"`. */
+  readonly anchor?: Anchor;
   /** Default 14. */
   readonly fontSize?: number;
   /** On the root element, so fonts come from your CSS. */
@@ -177,8 +182,15 @@ export const chip = (b: Box, text: string, look: Look & { readonly fill?: Color;
 /** The knockout box an inline edge label needs. */
 export const labelSize = (text: string, fontSize: number): Size => ({ w: textWidth(text, fontSize) + 10, h: Math.round(fontSize * 1.5) });
 
-/** Shifts layout geometry so `bounds` starts at `(x, y)`. */
-export const placer = (bounds: Box, x = 0, y = 0) => {
+/** The top-left corner that puts `anchor` of a `w` by `h` box on `(x, y)`. */
+export const corner = (w: number, h: number, { x = 0, y = 0, anchor = "top-left" }: { readonly x?: number; readonly y?: number; readonly anchor?: Anchor }): Point => {
+  const point = anchor === "top-left" ? { x: 0, y: 0 } : anchor === "center" ? rect(0, 0, w, h).center : rect(0, 0, w, h)[anchor];
+  return { x: x - point.x, y: y - point.y };
+};
+
+/** Shifts layout geometry so `bounds` lands where `options` place it. */
+export const placer = (bounds: Box, options: { readonly x?: number; readonly y?: number; readonly anchor?: Anchor }) => {
+  const { x, y } = corner(bounds.w, bounds.h, options);
   const [dx, dy] = [x - bounds.x, y - bounds.y];
   return {
     box: (b: Box): Rect => rect(b.x + dx, b.y + dy, b.w, b.h),

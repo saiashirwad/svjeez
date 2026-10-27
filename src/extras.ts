@@ -1,4 +1,4 @@
-export { timeline, during, read, visible, travel, type Timeline, type TimelineOptions } from "./extras/timeline";
+export { timeline, during, read, visible, travel, type Beats, type Timeline, type TimelineOptions } from "./extras/timeline";
 export { code, type Code, type CodeOptions, type Token, type Tokens, type Run, type Piece, type Word, type Metrics } from "./extras/code";
 export { morph, type MorphOptions } from "./extras/morph";
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";
@@ -11,7 +11,7 @@ export { rect, type Rect, type Point, type Edge } from "./geometry";
 export { base16, tint, adaptive, defaultDark, defaultLight, tomorrowNight, tomorrow, type Base16, type Slot, type Role } from "./extras/theme";
 export { window, type WindowOptions } from "./extras/window";
 export { terminal, type Command, type TerminalOptions } from "./extras/terminal";
-export { type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./extras/diagrams/kit";
+export { type Anchor, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./extras/diagrams/kit";
 export { flow, type FlowOptions, type FlowStyle } from "./extras/flow";
 export { flowchart, type Flowchart, type FlowchartOptions, type FlowEdge, type FlowGroup } from "./extras/diagrams/flowchart";
 export { sequence, type Sequence, type SequenceMessage, type SequenceOptions } from "./extras/diagrams/sequence";

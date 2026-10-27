@@ -33,7 +33,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
     typeof s === "string" ? { id, label: s, role: "task" as NodeRole, parent: undefined } : { id, label: s.label, role: s.role ?? "task", parent: s.parent },
   );
   const out = layout({ direction, nodes: nodes.map((n) => ({ id: n.id, parent: n.parent, ...sizeOf(n.role, n.label, fontSize) })) });
-  const at = placer(out.bounds, options.x, options.y);
+  const at = placer(out.bounds, options);
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
   const edges = new Map(out.edges.map((e) => [e.to, e.points.map(at.point)]));
   const step = reveal?.step ?? 0.3;

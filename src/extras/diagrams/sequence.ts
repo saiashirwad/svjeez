@@ -3,6 +3,7 @@ import type { Point } from "../../geometry";
 import { sequence as layout } from "../../layout/sequence";
 import { motion, type Seconds, type Span } from "../../motion";
 import { defaultDark } from "../theme";
+import { beats, type Beats } from "../timeline";
 import { arrow, chip, labelOf, labelSize, lookup, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled } from "./kit";
 
 /** `[from, to, label]`, dashed with `{ reply: true }`; a message to its own sender loops on the right. */
@@ -12,8 +13,11 @@ export type SequenceMessage<A extends string> =
   | { readonly note: A; readonly text: string };
 
 export interface SequenceOptions extends DiagramOptions {
-  /** Each message draws on in order, `step` apart, its label fading in; lifelines are there from the start. */
-  readonly play?: { readonly at: Seconds; readonly step?: Seconds };
+  /**
+   * Each message or note draws on in order, its label fading in; lifelines are there from the start. From a start
+   * `at` they follow `step` apart (default 0.8), or each comes at its own time.
+   */
+  readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
 export interface Sequence<A extends string> extends Diagram<A> {
@@ -35,11 +39,13 @@ export function sequence<const A extends Record<string, Labelled>>(
       : { kind: "message" as const, from: m[0], to: m[1], text: m[2], reply: m[3]?.reply ?? false, label: labelSize(m[2], small) },
   );
   const out = layout({ actors: actors.map((a) => ({ id: a.id, ...sizeOf(a.role, a.label, fontSize) })), rows });
-  const at = placer(out.bounds, options.x, options.y);
+  const at = placer(out.bounds, options);
   const heads = new Map([...out.heads].map(([id, b]) => [id, at.box(b)]));
   const placed = out.rows.map((r) => ({ points: r.points.map(at.point), box: at.box(r.box) }));
   const step = play?.step ?? 0.8;
-  const span = (i: number): Span => ({ at: (play?.at ?? 0) + i * step, over: step });
+  const times = beats(play?.at ?? 0, rows.length, step, "sequence() play");
+  /** Until the next row starts. */
+  const span = (i: number): Span => ({ at: times[i]!, over: i + 1 < times.length ? times[i + 1]! - times[i]! : step });
   const fade = (i: number) => play && motion({ opacity: 0 }).at(span(i).at).to({ opacity: 1 }, 0.25);
 
   const node = el.g({ class: cls }, [
@@ -58,7 +64,7 @@ export function sequence<const A extends Record<string, Labelled>>(
         ]);
       }
       return el.g({}, [
-        arrow(points, { ...look, dashed: row.reply, at: play && span(i).at, over: Math.min(0.5, step * 0.7) }),
+        arrow(points, { ...look, dashed: row.reply, at: play && span(i).at, over: Math.min(0.5, span(i).over * 0.7) || 0.3 }),
         chip(box, row.text, { theme, fontSize: small, fill: theme.base05 }, fade(i)),
       ]);
     }),

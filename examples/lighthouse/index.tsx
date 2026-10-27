@@ -278,7 +278,7 @@ function Beacon({ thread }: { thread: Thread }): SvgNode {
     return el.line({ x1: Math.cos(angle) * inner, y1: Math.sin(angle) * inner, x2: Math.cos(angle) * outer, y2: Math.sin(angle) * outer });
   });
   return (
-    <g animation={visible(thread.runs, 0.15)}>
+    <g animation={visible(thread.runs.map(([at, to]) => ({ at, over: to - at })), 0.15)}>
       <g stroke={C.ink} strokeWidth={1.5} strokeLinecap="square" animation={motion({ rotate: 0 }).to({ rotate: 360 }, 6, ease.linear).loop(6)}>
         {rays}
       </g>
@@ -289,7 +289,7 @@ function Beacon({ thread }: { thread: Thread }): SvgNode {
 function Node({ thread }: { thread: Thread }): SvgNode {
   const { x, y } = position[thread.index]!;
   const fades = thread.last < end - 10;
-  const flashes = (arrivals.get(thread.index) ?? []).map((t) => [t, t + 0.6] as const);
+  const flashes = (arrivals.get(thread.index) ?? []).map((t) => ({ at: t, over: 0.6 }));
   const tint = thread.family === "gpt" ? C.gpt : C.claude;
   /** A finished thread hollows out to a ring in its family's color, so it reads in either mode. */
   const retire = motion().at(thread.last + 1).to({ fill: C.paper, stroke: tint }, 1);

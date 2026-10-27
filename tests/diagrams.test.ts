@@ -63,6 +63,12 @@ describe("sequence", () => {
   });
 
   test("renders valid SVG", () => expect(() => valid(seq.node)).not.toThrow());
+
+  test("with one time per row, each message runs until the next starts", () => {
+    const timed = sequence({ actors: { a: "A", b: "B" }, messages: [["a", "b", "x"], ["b", "a", "y"], { note: "a", text: "z" }] }, { play: { at: [1, 1.5, 4], step: 0.6 } });
+    expect([0, 1, 2].map((i) => timed.message(i).span)).toEqual([{ at: 1, over: 0.5 }, { at: 1.5, over: 2.5 }, { at: 4, over: 0.6 }]);
+    expect(() => sequence({ actors: { a: "A" }, messages: [["a", "a", "x"]] }, { play: { at: [1, 2] } })).toThrow();
+  });
 });
 
 describe("state", () => {
@@ -78,6 +84,22 @@ describe("state", () => {
     expect(walk.spans.done[0]!.at).toBeCloseTo(1 + 4 * 1.35, 9);
     expect(walk.end).toBeCloseTo(1 + 5 + 4 * 0.35, 9);
     expect(() => valid(el.g({}, [machine.node, walk.node]))).not.toThrow();
+  });
+
+  test("with one time per state, each lights then, the token arriving as it does", () => {
+    const walk = machine.walk(["idle", "run", "done"], { at: [1, 5, 6], dwell: 2, speed: 1e9 });
+    expect([walk.spans.idle[0]!.at, walk.spans.run[0]!.at, walk.spans.done[0]!.at]).toEqual([1, 5, 6]);
+    expect(walk.spans.idle[0]!.over).toBeCloseTo(4 - 0.35, 9);
+    expect(walk.spans.run[0]!.over).toBeCloseTo(1 - 0.35, 9);
+    expect(walk.end).toBe(8);
+    expect(() => machine.walk(["idle", "run"], { at: [2, 1] })).toThrow();
+  });
+
+  test("anchor puts that point of the bounds on x, y", () => {
+    const centered = state({ states: { a: "A", b: "B" }, initial: "a", transitions: [["a", "b"]] }, { x: 400, y: 300, anchor: "center" });
+    expect(centered.bounds.center).toEqual({ x: 400, y: 300 });
+    const below = sequence({ actors: { a: "A" }, messages: [] }, { x: 50, y: 20, anchor: "top" });
+    expect(below.bounds.top).toEqual({ x: 50, y: 20 });
   });
 
   test("walk throws when consecutive states have no transition", () => {
@@ -148,7 +170,7 @@ describe("lanes", () => {
       events: [{ lane: "b", at: 1, label: "READ" }],
       links: [{ from: "a", to: "b", at: 1.5 }],
     },
-    { scale: 50, x: 10, y: 20, play: true },
+    { scale: 50, x: 10, y: 20, play: { at: 0 } },
   );
 
   test("x maps seconds onto the lane axis at the given scale", () => {

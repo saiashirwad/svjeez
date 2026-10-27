@@ -1,11 +1,11 @@
 import { el } from "../el";
-import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
+import { ease, motion, type Motion, type Seconds } from "../motion";
 import type { SvgNode } from "../svg";
 import { number, text, type Code, type Word } from "./code";
 
 export interface MorphOptions {
-  /** One per transition: the move into `versions[i + 1]` starts at `at[i].at`. */
-  readonly at: readonly Span[];
+  /** One per transition: the move into `versions[i + 1]` starts at `at[i]`. */
+  readonly at: readonly Seconds[];
   readonly over?: Seconds;
   /** Line numbers for the longest version, fading as lines come and go. */
   readonly gutter?: boolean;
@@ -57,9 +57,9 @@ interface Chain {
 
 /** Animate code from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move. */
 export function morph(versions: readonly Code[], { at, over = 0.8, gutter = false }: MorphOptions): { readonly node: SvgNode } {
-  if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error("morph() needs versions, one span per transition and a positive duration.");
-  at.forEach((span, i) => {
-    if (i > 0 && span.at < at[i - 1]!.at + over) throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
+  if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error("morph() needs versions, one start per transition and a positive duration.");
+  at.forEach((start, i) => {
+    if (i > 0 && start < at[i - 1]! + over) throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
   });
   const half = over / 2;
   const born = (word: Word, code: Code, start?: Seconds): Chain => ({
@@ -69,7 +69,7 @@ export function morph(versions: readonly Code[], { at, over = 0.8, gutter = fals
   });
   const chains = versions[0]!.words.map((word) => born(word, versions[0]!));
   let live = chains.slice();
-  at.forEach(({ at: start }, i) => {
+  at.forEach((start, i) => {
     const [before, after] = [versions[i]!, versions[i + 1]!];
     const pairs = match(before.words, after.words);
     const kept = new Map(pairs.map(([a, b]) => [b, a]));
@@ -94,11 +94,11 @@ export function morph(versions: readonly Code[], { at, over = 0.8, gutter = fals
   return { node: el.g({}, [numbers, chains.map((chain) => text(chain.word, chain.code.metrics, chain.track))]) };
 }
 
-const lineNumbers = (versions: readonly Code[], at: readonly Span[], over: Seconds): SvgNode[] =>
+const lineNumbers = (versions: readonly Code[], at: readonly Seconds[], over: Seconds): SvgNode[] =>
   Array.from({ length: Math.max(...versions.map((v) => v.lineCount)) }, (_, i) => {
     const shown = (v: Code) => i < v.lineCount;
     let track = motion({ opacity: shown(versions[0]!) ? 1 : 0 });
-    at.forEach(({ at: start }, k) => {
+    at.forEach((start, k) => {
       const [was, is] = [shown(versions[k]!), shown(versions[k + 1]!)];
       if (was !== is) track = track.at(is ? start + over / 2 : start).to({ opacity: is ? 1 : 0 }, over / 2);
     });

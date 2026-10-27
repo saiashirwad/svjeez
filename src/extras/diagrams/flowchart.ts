@@ -95,10 +95,10 @@ const cross = (b: Rect, direction: Direction = "TB") => (direction === "TB" ? b.
 const lay = <N extends string>(
   input: Parameters<typeof layered>[0],
   roles: ReadonlyMap<string, NodeRole>,
-  { x, y }: { readonly x?: number; readonly y?: number },
+  options: DiagramOptions,
 ): Laid<N> => {
   const out = layered(input);
-  const at = placer(out.bounds, x, y);
+  const at = placer(out.bounds, options);
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
   const lines = out.edges.map((e) => {
     const points = e.points.map(at.point);

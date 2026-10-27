@@ -4,9 +4,11 @@ import { ease, type Seconds, type Span } from "../motion";
 import { enter } from "../recipes";
 import type { SvgNode } from "../svg";
 import { number, text, type Code } from "./code";
+import { beats, type Beats } from "./timeline";
 
 export interface RevealOptions {
-  readonly at: Seconds;
+  /** A start, from which blocks follow `step` apart, or one time per block. */
+  readonly at: Beats;
   /**
    * Line ranges, shown in order. Lines in no block are there from the start, so a skeleton can stay put while its
    * bodies arrive. `"line"` shows one line at a time. Default: paragraphs, split at blank lines.
@@ -22,7 +24,7 @@ export interface RevealOptions {
 
 /** Show `code` a block of lines at a time. `spans[i]` is when block `i` enters; `end` is when the last one settles. */
 export function reveal(code: Code, { at, blocks = paragraphs(code), step = 0.6, over = 0.4, from = { opacity: 0, y: 6 } }: RevealOptions): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
-  if (!(at >= 0 && step >= 0 && over > 0)) throw new Error("reveal() needs a non-negative start and step, and a positive duration.");
+  if (!(step >= 0 && over > 0)) throw new Error("reveal() needs a non-negative step and a positive duration.");
   const ranges = blocks === "line" ? Array.from({ length: code.lineCount }, (_, i) => [i + 1, i + 1] as const) : blocks.map(([first, last = first]) => [first, last] as const);
   const owner = new Map<number, number>();
   ranges.forEach(([first, last], k) => {
@@ -32,14 +34,14 @@ export function reveal(code: Code, { at, blocks = paragraphs(code), step = 0.6, 
       owner.set(line, k);
     }
   });
-  const spans = ranges.map((_, k): Span => ({ at: at + k * step, over }));
+  const spans = beats(at, ranges.length, step, "reveal()").map((t): Span => ({ at: t, over }));
   const lines = (k: number | undefined) => Array.from({ length: code.lineCount }, (_, i) => i + 1).filter((line) => owner.get(line) === k);
   const draw = (k: number | undefined) =>
     lines(k).map((line) => [code.gutter && number(line, code.metrics), code.words.filter((w) => w.line === line).map((w) => text(w, code.metrics))]);
   return {
     node: el.g({}, [draw(undefined), spans.map((span, k) => el.g({ animation: enter(span, from, ease.out) }, draw(k)))]),
     spans,
-    end: at + (ranges.length - 1) * step + over,
+    end: Math.max(...spans.map((span) => span.at + span.over)),
   };
 }
 

@@ -305,14 +305,14 @@ const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, 
 
 <>
   <Focus stops={[{ during: tl.intro, on: before.lines(2) }]} dim={0.3}>
-    {morph([before, after], { at: [tl.change], gutter: true }).node}
+    {morph([before, after], { at: [tl.change.at], gutter: true }).node}
   </Focus>
   <Marker stops={[{ at: tl.intro, rect: before.get("hook").pad(4) }, { at: tl.change, rect: after.get("hook").pad(4) }]} />
   <Callout target={after.get("send")} side="right" during={tl.outro} class="note">Handlers send intent</Callout>
 </>;
 ```
 
-`morph` moves the words that survive each change and fades the rest. Runs that share an id pair first, and when their text differs they cross-fade as they move. `timeline` lays out named scenes, `read` gives the seconds a caption needs, and `pace` scales every scene. `during(span)` fades anything in and out with a span. `Camera` pans and zooms each stop's view to fit inside a `frame` rect; clip it yourself. Annotations take a `class`, so their font comes from your CSS.
+`morph` moves the words that survive each change and fades the rest. Runs that share an id pair first, and when their text differs they cross-fade as they move. `timeline` lays out named scenes, `read` gives the seconds a caption needs, and `pace` scales every scene. `timeline(beats, { at: tl.change.at })` lays out beats inside a scene. `during(span)` fades anything in and out with a span. `Camera` pans and zooms each stop's view to fit inside a `frame` rect; clip it yourself. Annotations take a `class`, so their font comes from your CSS.
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/code.svg" width="360" alt="A call to sum morphs into a reduce and back, with a marker following it" />
 
@@ -333,13 +333,18 @@ const session = terminal(
 <>{shell.node}{session.node}</>; // session.end is when the last command finishes
 
 typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end }
+reveal(src, { at: 1, step: 0.6 }); // a paragraph at a time: { node, spans, end }
+reveal(src, { at: 1, blocks: [[2, 3], [5, 9]] }); // these lines in turn, the rest there from the start
+reveal(src, { at: [1, 4] }); // one time per block
 ```
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/terminal.svg" width="440" alt="Two commands typed into a terminal window" />
 
 ### Diagrams
 
-Each diagram takes a typed object, so a misspelled id is a compile error. It returns `{ node, get(id), bounds }` plus its own helpers, and takes `theme`, `x`, `y`, `fontSize` and `class` like the other extras. A node's `role` (`task`, `input`, `output`, `tool`, `decision`, `store`) picks its shape and theme color.
+Each diagram takes a typed object, so a misspelled id is a compile error. It returns `{ node, get(id), bounds }` plus its own helpers, and takes `theme`, `x`, `y`, `fontSize` and `class` like the other extras. `anchor` (`"center"`, `"top"`, `"right"`, `"bottom"`, `"left"`, default `"top-left"`) picks the point of `bounds` that lands on `x`, `y`, so a diagram centers without measuring it first.
+
+Anything that happens in steps takes `at` as a start, with things following `step` apart, or as one time per thing: `play: { at: [0.5, 1, 3] }`, `walk(path, { at: [1, 4, 5] })`, `reveal(src, { at: [1, 4] })`. That is how two diagrams stay in sync. A node's `role` (`task`, `input`, `output`, `tool`, `decision`, `store`) picks its shape and theme color.
 
 ```tsx
 const chart = flowchart(
@@ -383,7 +388,7 @@ const agent = state(
 const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1 }); // { node, spans, end }
 ```
 
-`state` marks the initial state with a dot and sends final states to a bullseye; a state with `states` is a composite laid out inside its own box, and `walk` lights each state in turn while a token runs the transitions.
+`state` marks the initial state with a dot and sends final states to a bullseye; a state with `states` is a composite laid out inside its own box, and `walk` lights each state in turn while a token runs the transitions. Given one time per state, each lights at its time with the token arriving just then.
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/state.svg" width="178" alt="A state machine lighting each state in turn" />
 
@@ -399,11 +404,11 @@ team.route("a", "b"); // up through the common ancestor and down
 ```tsx
 const run = lanes(
   { lanes: { lead: "Lead", build: { label: "Build", role: "tool" } }, spans: [{ lane: "lead", from: 0, to: 1, label: "plan" }, { lane: "build", from: 1, to: 4, label: "editing" }], events: [{ lane: "build", at: 2, label: "TEST" }], links: [{ from: "lead", to: "build", at: 1 }] },
-  { theme, scale: 80, play: true },
+  { theme, scale: 80, play: { at: 0 } },
 );
 ```
 
-`lanes` puts one row per lane on a time axis in seconds; `x(t)` maps a time to x, and `play` runs it in real time with a playhead. `visible(spans)` and `travel(points, { at })` are the time helpers the diagrams use: on during each span, and a token that runs a path at constant speed.
+`lanes` puts one row per lane on a time axis in seconds; `x(t)` maps a time to x, and `play: { at }` runs it in real time from `at` with a playhead. `visible(spans)` and `travel(points, { at })` are the time helpers the diagrams use: on during each span, and a token that runs a path at constant speed.
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/lanes.svg" width="463" alt="Two lanes on a time axis played in real time" />
 

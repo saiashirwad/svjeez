@@ -30,8 +30,8 @@ export interface LaneLink<L extends string> {
 export interface LanesOptions extends DiagramOptions {
   /** Pixels per second. */
   readonly scale: number;
-  /** Play in real time: a playhead sweeps, spans grow as it passes, events pop, links fire. */
-  readonly play?: boolean;
+  /** Play in real time from `at`, lane time 0 then: a playhead sweeps, spans grow as it passes, events pop, links fire. */
+  readonly play?: { readonly at: Seconds };
 }
 
 export interface Lanes<L extends string> extends Diagram<L> {
@@ -50,7 +50,9 @@ export function lanes<const L extends Record<string, Labelled>>(
   },
   options: LanesOptions,
 ): Lanes<keyof L & string> {
-  const { theme = defaultDark, fontSize = 14, class: cls, scale, play = false } = options;
+  const { theme = defaultDark, fontSize = 14, class: cls, scale, play } = options;
+  /** Scene time of lane time `t`. */
+  const when = (t: Seconds) => (play?.at ?? 0) + t;
   const small = fontSize * 0.85;
   const rows = Object.entries(spec.lanes as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
   const [spans, events, links] = [spec.spans ?? [], spec.events ?? [], spec.links ?? []];
@@ -62,7 +64,7 @@ export function lanes<const L extends Record<string, Labelled>>(
     scale,
     bar: BAR,
   });
-  const at = placer(out.bounds, options.x, options.y);
+  const at = placer(out.bounds, options);
   const boxes = new Map([...out.rows].map(([id, b]) => [id, at.box(b)]));
   const track = at.box(out.track);
   const x = (t: Seconds) => at.point({ x: out.x(t), y: 0 }).x;
@@ -90,15 +92,15 @@ export function lanes<const L extends Record<string, Labelled>>(
       const b = at.box(out.spans[i]!);
       const tint = tintOf(theme, s.role ?? role(s.lane));
       return el.g({}, [
-        el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 4, fill: tint, fillOpacity: 0.25, stroke: tint, animation: play ? motion({ width: 0 }).at(s.from).to({ width: b.w }, s.to - s.from, ease.linear) : undefined }),
-        s.label !== undefined && el.text({ x: b.x + 8, y: b.y + b.h + small + 3, fontSize: small, fill: theme.base04, animation: play ? enter({ at: s.from, over: 0.2 }) : undefined }, s.label),
+        el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 4, fill: tint, fillOpacity: 0.25, stroke: tint, animation: play ? motion({ width: 0 }).at(when(s.from)).to({ width: b.w }, s.to - s.from, ease.linear) : undefined }),
+        s.label !== undefined && el.text({ x: b.x + 8, y: b.y + b.h + small + 3, fontSize: small, fill: theme.base04, animation: play ? enter({ at: when(s.from), over: 0.2 }) : undefined }, s.label),
       ]);
     }),
     links.map((l, i) => {
       const [p, q] = out.links[i]!.map(at.point) as [typeof track.center, typeof track.center];
       return el.g({}, [
-        arrow([p, q], { theme, fontSize, at: play ? l.at : undefined, over: 0.3 }),
-        play && el.circle({ r: 4, fill: theme.base09, animation: travel([p, q], { at: l.at, over: 0.3 }) }),
+        arrow([p, q], { theme, fontSize, at: play ? when(l.at) : undefined, over: 0.3 }),
+        play && el.circle({ r: 4, fill: theme.base09, animation: travel([p, q], { at: when(l.at), over: 0.3 }) }),
       ]);
     }),
     events.map((e, i) => {
@@ -111,12 +113,12 @@ export function lanes<const L extends Record<string, Labelled>>(
           d: `M${p.x} ${p.y - size}L${p.x + size} ${p.y}L${p.x} ${p.y + size}L${p.x - size} ${p.y}Z`,
           fill: tint,
           stroke: theme.base00,
-          animation: play ? enter({ at: e.at, over: 0.3 }, { opacity: 0, scale: 0.3 }, ease.pop) : undefined,
+          animation: play ? enter({ at: when(e.at), over: 0.3 }, { opacity: 0, scale: 0.3 }, ease.pop) : undefined,
         }),
-        label && chip(at.box(label), e.label!, { theme, fontSize: small, fill: theme.base05, ground: "none" }, play ? enter({ at: e.at, over: 0.25 }) : undefined),
+        label && chip(at.box(label), e.label!, { theme, fontSize: small, fill: theme.base05, ground: "none" }, play ? enter({ at: when(e.at), over: 0.25 }) : undefined),
       ]);
     }),
-    play && el.path({ d: `M${track.x} ${track.y}V${track.y + track.h}`, stroke: theme.base09, strokeWidth: 1.5, animation: motion({ x: 0 }).to({ x: track.w }, out.end, ease.linear) }),
+    play && el.path({ d: `M${track.x} ${track.y}V${track.y + track.h}`, stroke: theme.base09, strokeWidth: 1.5, animation: motion({ x: 0 }).at(when(0)).to({ x: track.w }, out.end, ease.linear) }),
   ]);
   return { node, bounds: at.bounds, get: lookup("lanes()", boxes), x };
 }

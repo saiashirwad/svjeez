@@ -73,6 +73,12 @@ describe("pacing", () => {
     expect([tl.intro, tl.body, tl.duration]).toEqual([{ at: 0, over: 4 }, { at: 4.5, over: 6 }, 10.5]);
   });
 
+  test("a timeline starting inside another's scene lays out its beats from there", () => {
+    const outer = timeline({ intro: 2, body: 6 }, { gap: 1 });
+    const beats = timeline({ setup: 1, punchline: 2 }, { at: outer.body.at, gap: 0.5 });
+    expect([beats.setup, beats.punchline, beats.duration, beats.end]).toEqual([{ at: 3, over: 1 }, { at: 4.5, over: 2 }, 3.5, 6.5]);
+  });
+
   test("read holds for words / wps + settle, at least min", () => {
     expect(read("one two three four five six seven")).toBe(3);
     expect(read(["one two three", "four five six seven"], { wps: 7, settle: 0, min: 0 })).toBe(1);
@@ -156,7 +162,7 @@ describe("terminal", () => {
 test("a run renamed under the same id cross-fades: both texts render, each animated", () => {
   const a = code([[["fn", "useState", "hook"]]]);
   const b = code([[["fn", "useReducer", "hook"]]]);
-  const svg = render({ width: 100, height: 100, duration: 4, title: "morph" }, morph([a, b], { at: [{ at: 1, over: 1 }] }).node);
+  const svg = render({ width: 100, height: 100, duration: 4, title: "morph" }, morph([a, b], { at: [1] }).node);
   for (const word of ["useState", "useReducer"]) expect(svg).toMatch(new RegExp(`<text[^>]*class="a [^"]*"[^>]*>${word}</text>`));
 });
 
@@ -164,7 +170,7 @@ describe("time helpers", () => {
   const at = (track: Motion, t: number) => valueAt(keysOf(dataOf(track).initial, dataOf(track).steps, 100), t);
 
   test("visible is on during each span and stays on across gaps shorter than two fades", () => {
-    const track = visible([[5, 6], [1, 2], [2.2, 3]], 0.15);
+    const track = visible([{ at: 5, over: 1 }, { at: 1, over: 1 }, { at: 2.2, over: 0.8 }], 0.15);
     expect([0.5, 1.5, 2.1, 2.5, 4, 5.5, 7].map((t) => at(track, t).opacity)).toEqual([0, 1, 1, 1, 0, 1, 0]);
   });
 
@@ -184,12 +190,13 @@ describe("reveal", () => {
     const shown = reveal(source, { at: 1, step: 0.5, over: 0.4 });
     expect(shown.spans).toEqual([{ at: 1, over: 0.4 }, { at: 1.5, over: 0.4 }]);
     expect(shown.end).toBeCloseTo(1.9, 9);
+    expect(reveal(source, { at: [0.5, 3] }).spans.map((s) => s.at)).toEqual([0.5, 3]);
   });
 
   test("lines outside every block render unanimated, so a skeleton stays put", () => {
     const svg = render({ width: 100, height: 100, duration: 4, title: "reveal" }, reveal(source, { at: 1, blocks: [[2], [4]] }).node);
     expect(svg).toMatch(/<text(?![^>]*class=)[^>]*>class<\/text>/);
-    expect(svg).toMatch(/<g class="[^"]+"><text[^>]*>a<\/text>/);
+    expect(svg).toMatch(/<g class="[^"]+">\s*<text[^>]*>a<\/text>/);
   });
 
   test("one block per line with \"line\", and overlapping or out-of-range blocks throw", () => {

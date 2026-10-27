@@ -17,7 +17,7 @@ const after: Tokens = [
 const settings = { x: 52, y: 40, fontSize: 15, theme };
 const one = code(before, settings);
 const two = code(after, settings);
-const m = morph([one, two, one], { at: [{ at: 2, over: 3 }, { at: 5.5, over: 2 }], over: 0.8, gutter: true });
+const m = morph([one, two, one], { at: [2, 5.5], over: 0.8, gutter: true });
 
 export default function build(): string {
   return render(

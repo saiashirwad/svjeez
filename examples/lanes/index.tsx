@@ -32,7 +32,7 @@ const run = lanes(
       { from: "build", to: "lead", at: 7.2 },
     ],
   },
-  { theme, x: M, y: M, class: "mono", scale: 90, play: true },
+  { theme, x: M, y: M, class: "mono", scale: 90, play: { at: 0 } },
 );
 
 const D = 11;

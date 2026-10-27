@@ -5,7 +5,7 @@ import { CSS, theme } from "./kit";
 const M = 24;
 const run = lanes(
   { lanes: { lead: "Lead", build: { label: "Build", role: "tool" } }, spans: [{ lane: "lead", from: 0, to: 1, label: "plan" }, { lane: "build", from: 1, to: 4, label: "editing" }], events: [{ lane: "build", at: 2, label: "TEST" }], links: [{ from: "lead", to: "build", at: 1 }] },
-  { theme, x: M, y: M, class: "mono", fontSize: 13, scale: 80, play: true },
+  { theme, x: M, y: M, class: "mono", fontSize: 13, scale: 80, play: { at: 0 } },
 );
 
 export default function build(): string {

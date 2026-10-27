@@ -7,9 +7,9 @@ import type { Seconds, Span } from "../../motion";
 import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
 import { flow, type FlowOptions } from "../flow";
-import { visible } from "../timeline";
+import { beats, visible, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, labelSize, lookup, textWidth, type Diagram, type DiagramOptions } from "./kit";
+import { arrow, chip, corner, labelSize, lookup, textWidth, type Diagram, type DiagramOptions } from "./kit";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =
@@ -48,10 +48,13 @@ export interface StateMachine<S extends string> extends Diagram<S> {
   /** The drawn line of the first transition `from` → `to`, sampled along its curve. */
   edge(from: S, to: S): Point[];
   /**
-   * An overlay that lights each state of `path` for `dwell` seconds, then runs a token to the next along a transition
-   * from it or from a composite holding it, or into a composite's initial state. Throws if there is no such way.
+   * An overlay that lights each state of `path` in turn, running a token to the next along a transition from it or
+   * from a composite holding it, or into a composite's initial state. Throws if there is no such way.
+   *
+   * From a start `at`, each state stays lit for `dwell` and the token moves at `speed`. With one time per state, each
+   * state lights at its time, the token arriving just then; the last stays lit for `dwell`.
    */
-  walk(path: readonly S[], options: { readonly at: Seconds; readonly dwell?: Seconds; readonly speed?: number; readonly token?: WalkToken }): Walk<S>;
+  walk(path: readonly S[], options: { readonly at: Beats; readonly dwell?: Seconds; readonly speed?: number; readonly token?: WalkToken }): Walk<S>;
 }
 
 interface Node {
@@ -174,7 +177,7 @@ export function state<const S extends Record<string, StateSpec>>(
     return { w: out.bounds.w, h: out.bounds.h, boxes, lines, dots, ends };
   };
   const local = lay(root);
-  const [ox, oy] = [options.x ?? 0, options.y ?? 0];
+  const { x: ox, y: oy } = corner(local.w, local.h, options);
   const boxes = new Map([...nodes.keys()].map((id) => [id, toRect(shift(local.boxes.get(id)!, ox, oy))]));
   const lines = local.lines.map((l) => ({ ...l, points: l.points.map((p) => ({ x: p.x + ox, y: p.y + oy })), label: l.label && toRect(shift(l.label, ox, oy)) }));
   const ground = (depth: number): Color => (depth % 2 === 0 ? theme.base00 : theme.base01);
@@ -226,20 +229,25 @@ export function state<const S extends Record<string, StateSpec>>(
     edge,
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
       if (path.length === 0) throw new Error("walk() needs at least one state.");
-      const lit = new Map<string, [Seconds, Seconds][]>();
-      const tokens: SvgNode[] = [];
-      let t = at;
-      path.forEach((s, k) => {
-        lit.set(s, [...(lit.get(s) ?? []), [t, t + dwell]]);
-        t += dwell;
-        const next = path[k + 1];
-        if (next === undefined) return;
-        const points = step(s, next);
+      const legs = path.slice(1).map((next, k) => {
+        const points = step(path[k]!, next);
         const length = points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
-        const over = Math.max(0.35, length / speed);
-        tokens.push(flow(points, { color: theme.base09, size: 5, ...token, at: t, over }).node);
-        t += over;
+        return { points, over: Math.max(0.35, length / speed) };
       });
+      const arrive =
+        typeof at === "number"
+          ? path.map((_, k) => at + k * dwell + legs.slice(0, k).reduce((sum, leg) => sum + leg.over, 0))
+          : beats(at, path.length, 0, "walk()");
+      const runs = legs.map((leg, k) => {
+        const over = typeof at === "number" ? leg.over : Math.min(leg.over, (arrive[k + 1]! - arrive[k]!) / 2);
+        return { points: leg.points, at: arrive[k + 1]! - over, over };
+      });
+      const lit = new Map<string, Span[]>();
+      path.forEach((s, k) => {
+        const until = runs[k]?.at ?? arrive[k]! + dwell;
+        lit.set(s, [...(lit.get(s) ?? []), { at: arrive[k]!, over: until - arrive[k]! }]);
+      });
+      const tokens = runs.map((run) => run.over > 0 && flow(run.points, { color: theme.base09, size: 5, ...token, at: run.at, over: run.over }).node);
       const overlay = el.g({}, [
         [...lit].map(([s, spans]) => {
           const b = boxes.get(s)!.pad(4);
@@ -247,8 +255,8 @@ export function state<const S extends Record<string, StateSpec>>(
         }),
         tokens,
       ]);
-      const spans = Object.fromEntries([...nodes.keys()].map((s) => [s, (lit.get(s) ?? []).map(([a, b]): Span => ({ at: a, over: b - a }))])) as Record<Id, Span[]>;
-      return { node: overlay, spans, end: t };
+      const spans = Object.fromEntries([...nodes.keys()].map((s) => [s, lit.get(s) ?? []])) as Record<Id, Span[]>;
+      return { node: overlay, spans, end: arrive.at(-1)! + dwell };
     },
   };
 }

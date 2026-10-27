@@ -53,7 +53,7 @@ const editor = window(frame, { theme, title: "Counter.tsx", class: "mono" });
 const settings = { x: 104, y: editor.body.y + 28, fontSize: 16, lineHeight: 1.75, theme };
 const one = code(before, settings);
 const two = code(after, settings);
-const m = morph([one, two, one], { at: [tl.refactor, tl.rewind], over: 0.9, gutter: true });
+const m = morph([one, two, one], { at: [tl.refactor.at, tl.rewind.at], over: 0.9, gutter: true });
 
 const panel = { x: 792, w: 360 };
 const copy: Record<(typeof slides)[number], { kicker: string; head: string[]; body: string[] }> = {
