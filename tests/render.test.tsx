@@ -32,6 +32,18 @@ describe("motion timing", () => {
     expect(svg).not.toContain("opacity:0");
   });
 
+  test("a cut inside a cut cannot show through its hidden parent", () => {
+    const cut = (at: number) => motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+    const nested = scene(
+      <g animation={cut(5)}>
+        <rect width={10} height={10} animation={cut(1)} />
+        <path d="M0 0h10" stroke="#000" animation={draw({ at: 1, over: 1 })} />
+      </g>,
+    );
+    const stacked = scene(<rect width={10} height={10} animation={[cut(5), cut(1)]} />);
+    for (const svg of [nested, stacked]) expect(keyframes(svg).filter((frames) => frames.includes("visibility:visible"))).toHaveLength(1);
+  });
+
   test("a fade, a stepped fade, or a static opacity keeps animating opacity", () => {
     const fade = scene(<rect width={10} height={10} animation={motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1)} />);
     const stepped = scene(<rect width={10} height={10} animation={motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1, ease.steps(4))} />);

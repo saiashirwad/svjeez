@@ -24,6 +24,8 @@ interface Lane {
   readonly snapped: number;
   readonly nest: boolean;
   readonly discrete: boolean;
+  /** An outer element or shell toggles visibility, so this lane must not set it back to visible. */
+  readonly veiled?: boolean;
   readonly label?: string;
 }
 
@@ -214,7 +216,7 @@ const className = (state: State, lanes: readonly Lane[]): string => {
   const { duration } = state.canvas;
   const frames = lanes.map((lane) => ({
     lane,
-    ...cssKeyframes(lane.discrete ? "visibility" : isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.keys, lane.period),
+    ...cssKeyframes(lane.discrete ? "visibility" : lane.veiled && lane.key === "draw" ? "dash" : isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.keys, lane.period),
   }));
   const names = frames.map(({ lane, body }) => keyframesName(state, body, lane.label));
   const durations = lanes.map((lane) => seconds(state.canvas, lane.snapped));
@@ -285,21 +287,29 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
   return element(target.tag, attrs, children);
 };
 
-const place = (state: State, el: Element, motions: readonly Motion[]): Element => {
-  const shells = placeLanes(el, motions.map((value) => lanesOf(state, el, value)));
-  return shells.reduce<Element>((inner, lanes, index) => emitShell(state, index === 0 ? inner : element("g", {}, [inner]), lanes), el);
-};
+/**
+ * A hard 0/1 opacity cut compiles to `visibility`, which a descendant's `visibility:visible` overrides.
+ * Inside an element or shell that toggles visibility, cuts fall back to opacity and draw keeps only its dash.
+ */
+const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
+  shells.map((lanes, index) => {
+    const outer = veiled || shells.slice(index + 1).some((shell) => shell.some((lane) => lane.discrete));
+    return outer ? lanes.map((lane) => ({ ...lane, discrete: false, veiled: true })) : lanes;
+  });
 
-const walk = (state: State, node: SvgNode): SvgNode => {
+const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
   switch (node.kind) {
     case "text":
     case "raw":
       return node;
     case "fragment":
-      return { ...node, children: node.children.map((child) => walk(state, child)) };
+      return { ...node, children: node.children.map((child) => walk(state, child, veiled)) };
     case "element": {
-      const el = element(node.tag, resolveAttrs(state, node.attrs), node.children.map((child) => walk(state, child)));
-      return node.motions.length > 0 ? place(state, el, node.motions) : el;
+      const bare = element(node.tag, resolveAttrs(state, node.attrs), []);
+      const shells = veil(node.motions.length > 0 ? placeLanes(bare, node.motions.map((value) => lanesOf(state, bare, value))) : [], veiled);
+      const hides = veiled || shells.some((shell) => shell.some((lane) => lane.discrete));
+      const el = { ...bare, children: node.children.map((child) => walk(state, child, hides)) };
+      return shells.reduce<Element>((inner, lanes, index) => emitShell(state, index === 0 ? inner : element("g", {}, [inner]), lanes), el);
     }
   }
 };
