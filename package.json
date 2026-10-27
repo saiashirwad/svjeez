@@ -44,6 +44,7 @@
     "dev": "bun run scripts/preview.ts",
     "test": "bun test",
     "test:node": "tsx scripts/node-check.ts",
+    "test:package": "tsx scripts/package-check.ts",
     "typecheck": "tsc --noEmit",
     "build:package": "bun run scripts/package.ts",
     "prepack": "bun run build:package",
@@ -51,8 +52,10 @@
     "render-png": "bun run src/cli.ts render"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",
+    "publint": "^0.3.25",
     "tsx": "^4.23.15",
     "typescript": "latest"
   },

@@ -11,6 +11,7 @@ bun install
 bun run typecheck                 # tsc --noEmit, must stay clean
 bun test                          # every test, including frame tests in headless Chromium
 bun run test:node                 # renders every example on the current Node through tsx
+bun run test:package              # packs the tarball, lints it, and type-checks and loads it as a consumer
 bun run build [name ...]          # examples into dist/, e.g. bun run build readme/hero
 bun run build:package             # the npm build into package-dist/
 bun run dev <file.tsx>            # live preview with reload and a scrubber
@@ -38,7 +39,7 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 
 ## Releasing
 
-CI (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It typechecks, runs the tests, fails if `dist/` is stale, packs the package, and renders every example on Node 20 and 22.
+CI (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed package.
 
 To release, bump the version and push the tag:
 
