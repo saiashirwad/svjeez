@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" role="img" aria-labelledby="t d">
+  <title id="t">Terminal</title>
+  <desc id="d">Installing svjeez and building the examples, typed out in a terminal.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="131.2" y="118" width="0" height="28" class="a m2"/>
+    </clipPath>
+    <clipPath id="c2">
+      <rect x="131.2" y="174" width="0" height="28" class="a m5"/>
+    </clipPath>
+    <clipPath id="c3">
+      <rect x="131.2" y="258" width="0" height="28" class="a m9"/>
+    </clipPath>
+  </defs>
+  <style><![CDATA[
+.code text,.mono{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
+
+.a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,3.182%{opacity:0}4.545%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,5.455%{width:0px}12.525%,100%{width:134.4px}}
+.m2{animation-name:k2;animation-timing-function:steps(14)}
+@keyframes k3{0%,15.707%{opacity:0}17.525%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,20.889%{opacity:0}22.253%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,23.162%{width:0px}29.727%,100%{width:124.8px}}
+.m5{animation-name:k5;animation-timing-function:steps(13)}
+@keyframes k6{0%,32.909%{opacity:0}34.727%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,34%{opacity:0}35.818%,100%{opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,39.182%{opacity:0}40.545%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,41.455%{width:0px}53.071%,100%{width:220.8px}}
+.m9{animation-name:k9;animation-timing-function:steps(23)}
+@keyframes k10{0%{opacity:1}50%,100%{opacity:0}}
+.m10{animation-name:k10;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k11{0%,53.071%,100%{opacity:0}41.455%{opacity:1}}
+.m11{animation-name:k11;animation-timing-function:steps(1)}
+@keyframes k12{0%,41.455%{translate:0px 0px}53.071%,100%{translate:220.8px 0px}}
+.m12{animation-name:k12;animation-timing-function:steps(23)}
+@keyframes k13{0%{visibility:hidden}39.182%,100%{visibility:visible}}
+.m13{animation-name:k13;animation-timing-function:steps(1)}
+@keyframes k14{0%,86.364%,100%{opacity:0}3.636%,82.727%{opacity:1}}
+.m14{animation-name:k14}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="960" height="440" fill="#0a0b0e"/>
+  <rect x="80" y="50" width="800" height="340" rx="14" fill="#111318" stroke="#ffffff12"/>
+  <path d="M80 94h800" stroke="#ffffff12"/>
+  <circle cx="102" cy="72" r="5.5" fill="#ffffff1c"/>
+  <circle cx="120" cy="72" r="5.5" fill="#ffffff1c"/>
+  <circle cx="138" cy="72" r="5.5" fill="#ffffff1c"/>
+  <text x="480" y="76.5" class="mono" font-size="12" text-anchor="middle" fill="#626a7c">~/hello</text>
+  <g class="code a m14">
+    <g>
+      <g class="a m1">
+        <g>
+          <text x="112" y="137.6" font-family="monospace" font-size="16" fill="#ffc799">❯</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <g clip-path="url(#c1)">
+            <text x="131.2" y="137.6" font-family="monospace" font-size="16" fill="#d7dae0">bun</text>
+            <text x="169.6" y="137.6" font-family="monospace" font-size="16" fill="#d7dae0">add</text>
+            <text x="208" y="137.6" font-family="monospace" font-size="16" fill="#d7dae0">svjeez</text>
+          </g>
+        </g>
+      </g>
+      <g class="a m3">
+        <g>
+          <text x="112" y="165.6" font-family="monospace" font-size="16" fill="#626a7c">installed</text>
+          <text x="208" y="165.6" font-family="monospace" font-size="16" fill="#626a7c">svjeez@0.2.0</text>
+        </g>
+      </g>
+    </g>
+    <g>
+      <g class="a m4">
+        <g>
+          <text x="112" y="193.6" font-family="monospace" font-size="16" fill="#ffc799">❯</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <g clip-path="url(#c2)">
+            <text x="131.2" y="193.6" font-family="monospace" font-size="16" fill="#d7dae0">bun</text>
+            <text x="169.6" y="193.6" font-family="monospace" font-size="16" fill="#d7dae0">run</text>
+            <text x="208" y="193.6" font-family="monospace" font-size="16" fill="#d7dae0">build</text>
+          </g>
+        </g>
+      </g>
+      <g class="a m6">
+        <g>
+          <text x="112" y="221.6" font-family="monospace" font-size="16" fill="#99ffe4">✓</text>
+          <text x="131.2" y="221.6" font-family="monospace" font-size="16" fill="#99ffe4">dist/explainer.svg</text>
+          <text x="323.2" y="221.6" font-family="monospace" font-size="16" fill="#99ffe4">29.4</text>
+          <text x="371.2" y="221.6" font-family="monospace" font-size="16" fill="#99ffe4">KB</text>
+        </g>
+      </g>
+      <g class="a m7">
+        <g>
+          <text x="112" y="249.6" font-family="monospace" font-size="16" fill="#99ffe4">✓</text>
+          <text x="131.2" y="249.6" font-family="monospace" font-size="16" fill="#99ffe4">dist/terminal.svg</text>
+          <text x="323.2" y="249.6" font-family="monospace" font-size="16" fill="#99ffe4">11.2</text>
+          <text x="371.2" y="249.6" font-family="monospace" font-size="16" fill="#99ffe4">KB</text>
+        </g>
+      </g>
+    </g>
+    <g>
+      <g class="a m8">
+        <g>
+          <text x="112" y="277.6" font-family="monospace" font-size="16" fill="#ffc799">❯</text>
+        </g>
+      </g>
+      <g class="a m13">
+        <g>
+          <g clip-path="url(#c3)">
+            <text x="131.2" y="277.6" font-family="monospace" font-size="16" fill="#d7dae0">open</text>
+            <text x="179.2" y="277.6" font-family="monospace" font-size="16" fill="#d7dae0">dist/explainer.svg</text>
+          </g>
+          <g class="a m12">
+            <rect x="131.2" y="262" width="9.6" height="20" fill="#ffc799" fill-opacity="0.8" class="a m10"/>
+            <rect x="131.2" y="262" width="9.6" height="20" fill="#ffc799" fill-opacity="0.8" class="a m11"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
