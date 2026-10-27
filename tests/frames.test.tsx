@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
-import { Picture, def, ease, motion, picture, render } from "svjeez";
+import { Picture, def, ease, motion, picture, render, type SvgNode } from "svjeez";
 import { renderFrames, systemColorScheme } from "svjeez/frames";
 
 const browser = await renderFrames(render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />), { times: [0] }).then(
@@ -136,10 +136,10 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("an embedded raster and an embedded SVG paint their own colors", async () => {
-    const scene = (child: JSX.Element) => render({ width: 20, height: 20, duration: 1, title: "Embed" }, child);
+    const scene = (child: SvgNode) => render({ width: 20, height: 20, duration: 1, title: "Embed" }, child);
     const raster = picture(solidPng(8, 8, [0, 200, 0]));
     const vector = picture('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="4" height="4" fill="#c80000"/></svg>');
-    const paint = async (child: JSX.Element) => (await renderFrames(scene(child), { times: [0], colorScheme: "light" })).frames[0]!.png;
+    const paint = async (child: SvgNode) => (await renderFrames(scene(child), { times: [0], colorScheme: "light" })).frames[0]!.png;
     const png = await paint(<Picture src={raster} x={0} y={0} width={20} height={20} />);
     const svg = await paint(<Picture src={vector} x={0} y={0} width={20} height={20} />);
     const green = await paint(<rect width={20} height={20} fill="#00c800" />);
