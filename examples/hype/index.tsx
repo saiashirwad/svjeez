@@ -451,7 +451,7 @@ const montage = (
 // ─── Shot 5: handwriting. A single-line script, inked with a nib, stroke by stroke. ──
 
 const HAND_AT = MONTAGE.at + MONTAGE.over;
-const WRITTEN = "Made by hand.";
+const WRITTEN = "Write anything.";
 const HAND_SIZE = 150;
 const handX = (W - hand.measure(WRITTEN, HAND_SIZE)) / 2;
 const SPEED = 1500;
