@@ -1,0 +1,64 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: ci
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      # npm 11.5.1+ for trusted publishing, which Node 24 ships.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: bun install --frozen-lockfile
+      - name: Tag matches package.json
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Pick the dist-tag
+        run: |
+          case "$VERSION" in
+            *-*) echo "DIST_TAG=next" >> "$GITHUB_ENV" ;;
+            *) echo "DIST_TAG=latest" >> "$GITHUB_ENV" ;;
+          esac
+      - name: Pack
+        run: npm pack
+      - name: Publish to npm
+        run: |
+          if npm view "svjeez@$VERSION" version >/dev/null 2>&1; then
+            echo "svjeez@$VERSION is already on npm, skipping publish"
+          else
+            npm publish "svjeez-$VERSION.tgz" --provenance --access public --tag "$DIST_TAG"
+          fi
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "svjeez-$VERSION.tgz" --clobber
+          else
+            prerelease=""
+            [ "$DIST_TAG" = next ] && prerelease="--prerelease"
+            gh release create "$GITHUB_REF_NAME" "svjeez-$VERSION.tgz" --title "svjeez $VERSION" --generate-notes --verify-tag $prerelease
+          fi

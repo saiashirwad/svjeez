@@ -35,3 +35,16 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `dist/` files and commit them with the change.
 - Check visual changes by looking at frames: run `bun run render-png <file> --sheet`, then open `sheet.png`. Passing tests don't show timing or layout bugs.
+
+## Releasing
+
+CI (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It typechecks, runs the tests, fails if `dist/` is stale, packs the package, and renders every example on Node 20 and 22.
+
+To release, bump the version and push the tag:
+
+```sh
+npm version minor -m "svjeez %s"   # or patch, major, prerelease --preid beta
+git push --follow-tags
+```
+
+The `v*` tag starts `.github/workflows/release.yml`. It reruns CI, checks the tag against `package.json`, publishes to npm with provenance through trusted publishing, and creates a GitHub release with the tarball and generated notes. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
