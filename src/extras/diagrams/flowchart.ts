@@ -4,7 +4,6 @@ import type { Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
 import { ease, motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
-import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
 import { curve } from "./curve";
 import { arrow, chip, labelOf, labelSize, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
@@ -28,8 +27,8 @@ export interface Flowchart<N extends string, G extends string> extends Diagram<N
   route(from: N, to: N): Point[];
 }
 
-/** Each layout box with the role and label drawn in it. Shared by `state`, which adds its own marks. */
-export interface Laid<N extends string> {
+/** Laid-out boxes and lines, shifted into place. */
+interface Laid<N extends string> {
   readonly boxes: ReadonlyMap<string, Rect>;
   readonly lines: readonly { readonly from: N; readonly to: N; readonly points: Point[]; readonly label?: Rect }[];
   readonly groups: ReadonlyMap<string, Rect>;
@@ -88,7 +87,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
 const cross = (b: Rect, direction: Direction = "TB") => (direction === "TB" ? b.x : b.y);
 
 /** Layered layout, shifted to `x`/`y`, with each edge's ends moved onto its nodes' outlines. */
-export const lay = <N extends string>(
+const lay = <N extends string>(
   input: Parameters<typeof layered>[0],
   roles: ReadonlyMap<string, NodeRole>,
   { x, y }: { readonly x?: number; readonly y?: number },
@@ -107,7 +106,7 @@ export const lay = <N extends string>(
 };
 
 /** `edge` and `route` over laid-out lines. */
-export const paths = <N extends string>(lines: Laid<N>["lines"], boxes: ReadonlyMap<string, Rect>) => {
+const paths = <N extends string>(lines: Laid<N>["lines"], boxes: ReadonlyMap<string, Rect>) => {
   const edge = (from: N, to: N): Point[] => {
     const line = lines.find((l) => l.from === from && l.to === to);
     if (!line) throw new Error(`No edge from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);

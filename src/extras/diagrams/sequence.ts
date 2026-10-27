@@ -2,7 +2,6 @@ import { el } from "../../el";
 import type { Point } from "../../geometry";
 import { sequence as layout } from "../../layout/sequence";
 import { motion, type Seconds, type Span } from "../../motion";
-import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
 import { arrow, chip, labelOf, labelSize, lookup, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled } from "./kit";
 

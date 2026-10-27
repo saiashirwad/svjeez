@@ -48,7 +48,7 @@ export function sequence(input: SequenceInput): SequenceLayout {
     return [{ from: Math.min(a, b), to: Math.max(a, b), length: row.label.w + 2 * PAD }];
   });
   for (const { from, to, length } of demands.sort((p, q) => p.to - p.from - (q.to - q.from))) if (from >= 0 && to <= gaps.length) need(from, to, length);
-  const centers = actors.map((a, i) => actors[0]!.w / 2 + gaps.slice(0, i).reduce((s, g) => s + g, 0));
+  const centers = actors.map((_, i) => actors[0]!.w / 2 + gaps.slice(0, i).reduce((s, g) => s + g, 0));
   const tall = Math.max(...actors.map((a) => a.h));
   const heads = new Map(actors.map((a, i) => [a.id, { x: centers[i]! - a.w / 2, y: (tall - a.h) / 2, w: a.w, h: a.h }]));
 

@@ -55,7 +55,7 @@ export const tracks = (crossings: readonly Crossing[], merging: ReadonlySet<numb
 const hits = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 /** Whether the segment `p`–`q` runs through the inside of `b`. */
-export const crosses = (p: Point, q: Point, b: Box): boolean =>
+const crosses = (p: Point, q: Point, b: Box): boolean =>
   Math.max(p.x, q.x) > b.x && Math.min(p.x, q.x) < b.x + b.w && Math.max(p.y, q.y) > b.y && Math.min(p.y, q.y) < b.y + b.h;
 
 /**
