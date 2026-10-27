@@ -46,7 +46,7 @@ const captions = {
   respond: "respond() shapes what the client sees.",
 };
 const tl = timeline(
-  Object.fromEntries(Object.entries(captions).map(([name, text]) => [name, read(text, { settle: 2 })])) as Record<keyof typeof captions, number>,
+  Object.fromEntries(Object.entries(captions).map(([name, text]) => [name, read(text, { settle: name === "overview" ? 0.5 : 2 })])) as Record<keyof typeof captions, number>,
   { gap: 0.15, pace: 0.7 },
 );
 
