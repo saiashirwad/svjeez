@@ -1,7 +1,7 @@
 import type { Color } from "../../attributes";
 import { el } from "../../el";
 import { textWidth } from "../../font/font";
-import type { Point } from "../../geometry";
+import { pathLength, type Point } from "../../geometry";
 import type { Box, Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
 import type { Seconds, Span } from "../../motion";
@@ -239,8 +239,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
       if (path.length === 0) throw new Error("walk() needs at least one state, got none.");
       const legs = path.slice(1).map((next, k) => {
         const points = step(path[k]!, next);
-        const length = points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
-        return { points, over: Math.max(0.35, length / speed) };
+        return { points, over: Math.max(0.35, pathLength(points) / speed) };
       });
       const arrive =
         typeof at === "number"

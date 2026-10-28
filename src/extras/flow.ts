@@ -1,6 +1,6 @@
 import type { Color } from "../attributes";
 import { el } from "../el";
-import type { Point } from "../geometry";
+import { pathLength, type Point } from "../geometry";
 import { ease, motion, type Seconds } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
@@ -43,14 +43,12 @@ const TAIL = 8;
 /** Px of path the comet's tail covers. */
 const REACH = 36;
 
-const lengthOf = (points: readonly Point[]) => points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
-
 /** Something running `points` from `at`. `end` is when it arrives. */
 export function flow(points: readonly Point[], options: FlowOptions): { readonly node: SvgNode; readonly end: Seconds } {
   const { at, speed = 220, style = "dot", theme = defaultDark, color = theme.base09, size = 4.5, arrive = false, class: cls } = options;
-  const over = options.over ?? lengthOf(points) / speed;
+  const over = options.over ?? pathLength(points) / speed;
   const end = at + over;
-  const lag = REACH / TAIL / (lengthOf(points) / over);
+  const lag = REACH / TAIL / (pathLength(points) / over);
   const run = (delay = 0) => travel(points, { at: at + delay, over });
   const head = el.circle({ r: size, fill: color, animation: run() });
 

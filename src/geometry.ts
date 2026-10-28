@@ -2,6 +2,9 @@ import type { Point } from "./layout/box";
 
 export type { Point };
 
+/** The total length of the straight runs between consecutive points. */
+export const pathLength = (points: readonly Point[]): number => points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
+
 export type Edge = "top" | "right" | "bottom" | "left";
 
 export interface Rect {

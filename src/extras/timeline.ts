@@ -1,4 +1,4 @@
-import type { Point } from "../geometry";
+import { pathLength, type Point } from "../geometry";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 
 export type Timeline<K extends string> = { readonly [P in K]: Span } & {
@@ -68,7 +68,7 @@ export const travel = (points: readonly Point[], { at, speed = 300, over }: { re
     const length = Math.hypot(point.x - points[i]!.x, point.y - points[i]!.y);
     return length > 0 ? [{ point, length }] : [];
   });
-  const total = legs.reduce((sum, leg) => sum + leg.length, 0);
+  const total = pathLength(points);
   const duration = over ?? total / speed;
   if (!(total > 0 && duration > 0)) throw new Error(`travel() needs a path of positive length and a positive speed or duration, got length ${total} over ${duration}s.`);
   const start: Motion<"x" | "y" | "opacity"> = motion({ opacity: 0, x: points[0]!.x, y: points[0]!.y }).at(at).set({ opacity: 1 });

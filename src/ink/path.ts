@@ -1,3 +1,4 @@
+import { pathLength } from "../geometry";
 import type { Point } from "../layout/box";
 
 /** One continuous run of a path, flattened to points. `closed` when it ended in Z. */
@@ -12,11 +13,7 @@ const tokens = (d: string): (string | number)[] =>
   [...d.matchAll(/([MLHVCSQTAZmlhvcsqtaz])|(-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)/g)].map((m) => (m[1] !== undefined ? m[1] : Number(m[2])));
 
 /** Points per curve: enough that no chord strays far from the curve, judged from the control polygon's length. */
-const steps = (...pts: Point[]): number => {
-  let length = 0;
-  for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i]!.x - pts[i - 1]!.x, pts[i]!.y - pts[i - 1]!.y);
-  return Math.max(2, Math.min(64, Math.ceil(length / 3)));
-};
+const steps = (...pts: Point[]): number => Math.max(2, Math.min(64, Math.ceil(pathLength(pts) / 3)));
 
 const cubic = (p0: Point, p1: Point, p2: Point, p3: Point, out: Point[]): void => {
   const count = steps(p0, p1, p2, p3);
