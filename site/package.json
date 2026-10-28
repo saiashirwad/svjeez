@@ -1,0 +1,21 @@
+{
+  "name": "svjeez-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "cd .. && bun run build landing && mkdir -p site/public && cp dist/landing.svg site/index.html site/public/",
+    "deploy": "alchemy deploy",
+    "destroy": "alchemy destroy"
+  },
+  "dependencies": {
+    "@alchemy.run/cloudflare": "^2.0.0-beta.84",
+    "@effect/platform-bun": "^4.0.6",
+    "@effect/platform-node": "^4.0.6",
+    "alchemy": "^2.0.0-beta.84",
+    "effect": "^4.0.6"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "typescript": "^7.0.2"
+  }
+}
