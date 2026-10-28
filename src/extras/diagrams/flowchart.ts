@@ -1,4 +1,5 @@
 import { el } from "../../el";
+import { textWidth } from "../../font/font";
 import type { Point, Rect } from "../../geometry";
 import type { Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
@@ -7,7 +8,7 @@ import { enter } from "../../recipes";
 import type { SvgNode } from "../../svg";
 import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, labelOf, labelSize, look, lookup, onShape, placer, popIn, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
+import { arrow, chip, labelOf, labelSize, look, lookup, onShape, placer, popIn, shape, sizeOf, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
 export type FlowchartEdge<N extends string> = readonly [from: N, to: N] | readonly [from: N, to: N, options: { readonly label?: string }];
 

@@ -1,9 +1,10 @@
 import { el } from "../../el";
+import { textWidth } from "../../font/font";
 import { lanes as layout } from "../../layout/lanes";
 import { ease, motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
 import { travel } from "../timeline";
-import { arrow, chip, labelOf, labelSize, look, lookup, placer, textWidth, tintOf, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
+import { arrow, chip, labelOf, labelSize, look, lookup, placer, tintOf, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
 export interface LaneSpan<L extends string> {
   readonly lane: L;

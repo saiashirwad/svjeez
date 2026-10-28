@@ -1,5 +1,6 @@
 import type { Color } from "../../attributes";
 import { el } from "../../el";
+import { textWidth } from "../../font/font";
 import type { Point } from "../../geometry";
 import type { Box, Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
@@ -8,7 +9,7 @@ import type { SvgNode } from "../../svg";
 import { flow, type FlowOptions } from "../flow";
 import { beats, visible, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, labelSize, look, lookup, placer, textWidth, type Diagram, type DiagramOptions } from "./kit";
+import { arrow, chip, labelSize, look, lookup, placer, type Diagram, type DiagramOptions } from "./kit";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =

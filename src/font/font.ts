@@ -216,6 +216,9 @@ export const isFontValue = (value: unknown): value is FontValue => value instanc
 /** The face a measuring helper should use for regular text. */
 export const regularFace = (value: FontValue): Font => (value instanceof Font ? value : value.face());
 
+/** `text` measured with the font when there is one, else assumed monospace at 0.6em per character. */
+export const textWidth = (text: string, fontSize: number, font?: FontValue): number => (font ? regularFace(font).measure(text, fontSize) : text.length * fontSize * 0.6);
+
 /** A CSS string. Control characters are hex-escaped, since a raw newline would end the string and start a rule. */
 const cssString = (text: string): string =>
   `'${text.replace(/['\\]/g, "\\$&").replace(/[\u0000-\u001f\u007f]/g, (char) => `\\${char.charCodeAt(0).toString(16)} `)}'`;

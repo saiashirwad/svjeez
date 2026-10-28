@@ -1,6 +1,6 @@
 import type { Color } from "../../attributes";
 import { el } from "../../el";
-import { regularFace, type FontValue } from "../../font/font";
+import { textWidth, type FontValue } from "../../font/font";
 import { rect, type Edge, type Point, type Rect } from "../../geometry";
 import type { Box, Size } from "../../layout/box";
 import { ease, motion, type Seconds, type Stack } from "../../motion";
@@ -47,9 +47,6 @@ export const labelOf = (spec: Labelled): { readonly label: string; readonly role
 const SLOT: Record<NodeRole, Slot> = { task: "base0D", input: "base0B", output: "base0C", tool: "base08", decision: "base0A", store: "base0E" };
 
 export const tintOf = (theme: Base16, role: NodeRole): Color => theme[SLOT[role]];
-
-/** Measured with the font when there is one, else assumed monospace at 0.6em per character. */
-export const textWidth = (text: string, fontSize: number, font?: FontValue): number => (font ? regularFace(font).measure(text, fontSize) : text.length * fontSize * 0.6);
 
 /** The box a role needs around `label`. */
 export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: FontValue): Size => {
