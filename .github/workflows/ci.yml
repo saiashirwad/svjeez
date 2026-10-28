@@ -1,8 +1,7 @@
 name: ci
 
+# release.yml runs this on every push to main, before it releases.
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_call:
 

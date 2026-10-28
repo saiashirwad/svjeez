@@ -73,16 +73,17 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 ## Releasing
 
-CI (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
+`.github/workflows/release.yml` runs on every push to `main`, and `ci.yml` runs on every pull request. CI typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
 
-To release, bump the version in `packages/svjeez/`, then commit, tag and push from the root. Neither `npm version` nor `bun pm version` commits or tags inside a workspace, so do those steps yourself:
+After CI passes, `release.yml` runs `scripts/release.ts`. It releases every package under `packages/` whose version isn't on npm or has no GitHub release yet. It publishes to npm with provenance through trusted publishing, and it creates a GitHub release with the tarball and generated notes. A package with a private workspace manifest publishes the `package-dist/` that its `build:package` writes. svjeez's tags stay `v1.2.3`, and the other packages tag `@svjeez/vite@1.2.3`. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
+
+To release, bump a package's version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-(cd packages/svjeez && bun pm version minor --no-git-tag-version)   # or patch, major, prerelease --preid beta
-v=$(node -p 'require("./packages/svjeez/package.json").version')
-git commit -am "svjeez $v" && git tag "v$v" && git push --follow-tags
+(cd packages/vite && bun pm version minor --no-git-tag-version)   # or patch, major, prerelease --preid beta
+git commit -am "@svjeez/vite $(node -p 'require("./packages/vite/package.json").version')" && git push
 ```
 
-The `v*` tag starts `.github/workflows/release.yml`. It reruns CI, checks the tag against `packages/svjeez/package.json`, publishes to npm with provenance through trusted publishing, and creates a GitHub release with the tarball and generated notes. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
+Bump `@svjeez/vite` and `@svjeez/astro` together and the workflow publishes vite first. A new `@svjeez/vite` version reaches `@svjeez/astro` users through its `^` range, so it needs no Astro release.
 
-The plugins release the same way, each on its own version and tag. Bump `packages/vite/` and push `vite-v$v`, or bump `packages/astro/` and push `astro-v$v`. The workflow builds that package's `package-dist/` and publishes it. A new `@svjeez/vite` version reaches `@svjeez/astro` users through its `^` range, so it needs no Astro release.
+npm trusts a workflow one package at a time, and only for a package that it already has. A new package therefore needs one publish from a maintainer's machine. Run `npm login`, then `bun scripts/release.ts claim packages/<name>` from the root. It publishes the package's current version and trusts `release.yml` and the `npm` environment for every later version. Until then, the workflow skips the package with a warning. `bun scripts/release.ts plan` lists what the next push would release.

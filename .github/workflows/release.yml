@@ -1,22 +1,36 @@
 name: release
 
+# Every push to main runs CI, then releases each package under packages/ whose version isn't on npm and GitHub yet.
+# scripts/release.ts decides which ones. npm's trusted publisher for every package names this file and the npm environment.
 on:
   push:
-    # v1.2.3 releases svjeez, vite-v1.2.3 releases @svjeez/vite, and astro-v1.2.3 releases @svjeez/astro.
-    tags: ["v*", "vite-v*", "astro-v*"]
-
-concurrency:
-  group: release
-  cancel-in-progress: false
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
 
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.plan.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bun scripts/release.ts plan
+
   publish:
-    needs: ci
+    needs: [ci, plan]
+    if: needs.plan.outputs.packages != ''
     runs-on: ubuntu-latest
     environment: npm
+    concurrency:
+      group: release
+      cancel-in-progress: false
     permissions:
       contents: write
       id-token: write
@@ -29,52 +43,6 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
       - run: bun install --frozen-lockfile
-      # svjeez packs its own folder. The plugins pack package-dist/, which build:package writes.
-      - name: Pick the package
-        run: |
-          case "$GITHUB_REF_NAME" in
-            vite-v*) dir=packages/vite; out=package-dist; prefix=vite-v ;;
-            astro-v*) dir=packages/astro; out=package-dist; prefix=astro-v ;;
-            *) dir=packages/svjeez; out=.; prefix=v ;;
-          esac
-          if [ "$out" = package-dist ]; then (cd "$dir" && bun run build:package); fi
-          echo "PACKAGE_DIR=$dir/$out" >> "$GITHUB_ENV"
-          echo "PREFIX=$prefix" >> "$GITHUB_ENV"
-      - name: Tag matches package.json
-        working-directory: ${{ env.PACKAGE_DIR }}
-        run: |
-          name=$(node -p "require('./package.json').name")
-          version=$(node -p "require('./package.json').version")
-          if [ "$PREFIX$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match $name's package.json version $version"
-            exit 1
-          fi
-          echo "NAME=$name" >> "$GITHUB_ENV"
-          echo "VERSION=$version" >> "$GITHUB_ENV"
-      - name: Pick the dist-tag
-        run: |
-          case "$VERSION" in
-            *-*) echo "DIST_TAG=next" >> "$GITHUB_ENV" ;;
-            *) echo "DIST_TAG=latest" >> "$GITHUB_ENV" ;;
-          esac
-      - name: Pack
-        working-directory: ${{ env.PACKAGE_DIR }}
-        run: echo "TARBALL=$PWD/$(npm pack --silent | tail -1)" >> "$GITHUB_ENV"
-      - name: Publish to npm
-        run: |
-          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
-            echo "$NAME@$VERSION is already on npm, skipping publish"
-          else
-            npm publish "$TARBALL" --provenance --access public --tag "$DIST_TAG"
-          fi
-      - name: GitHub release
-        env:
+      - env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "$TARBALL" --clobber
-          else
-            prerelease=""
-            [ "$DIST_TAG" = next ] && prerelease="--prerelease"
-            gh release create "$GITHUB_REF_NAME" "$TARBALL" --title "$NAME $VERSION" --generate-notes --verify-tag $prerelease
-          fi
+        run: bun scripts/release.ts publish
