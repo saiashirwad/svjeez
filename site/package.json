@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "cd .. && bun run build landing && mkdir -p site/public && cp dist/landing.svg site/index.html site/favicon.svg site/public/ && bun site/assets.ts",
+    "build": "cd .. && bun run build landing && mkdir -p site/public && cp dist/landing.svg dist/hype.svg site/index.html site/intro.html site/favicon.svg site/public/ && bun site/assets.ts",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy"
   },

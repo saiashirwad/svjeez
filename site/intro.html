@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>svjeez · the intro</title>
+<meta name="description" content="A 45-second tour of svjeez, made with svjeez: prompt, animate, ship.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="svjeez · the intro">
+<meta property="og:description" content="animated SVG, compiled from TSX">
+<meta property="og:image" content="https://svjeez.texoport.in/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&display=swap">
+<style>
+  /* The reel follows the viewer's light or dark mode, so the page around it does too. */
+  :root { --page: #FAFAF9; --ink: #23203A; --cloud: #FFFDF8; --pink: #FF5E8E; color-scheme: light dark }
+  @media (prefers-color-scheme: dark) { :root { --page: #0B0B0C } }
+  html, body { margin: 0; height: 100%; background: var(--page); overflow: hidden }
+  img { display: block; width: 100vw; height: 100dvh; object-fit: contain }
+  a {
+    position: fixed; top: 16px; left: 16px; display: inline-flex; align-items: center; height: 40px; padding: 0 18px;
+    font: 600 15px / 1 "JetBrains Mono", ui-monospace, Menlo, monospace; color: var(--ink); text-decoration: none;
+    background: var(--cloud); border: 2.5px solid var(--ink); border-radius: 20px; box-shadow: 4px 4px 0 var(--pink);
+    rotate: -2deg; transition: translate .18s cubic-bezier(.3, 1.6, .5, 1), rotate .18s cubic-bezier(.3, 1.6, .5, 1), box-shadow .18s;
+  }
+  a:hover { rotate: 3deg; translate: 0 -3px; box-shadow: 6px 7px 0 var(--pink) }
+  a:active { translate: 4px 4px; box-shadow: 0 0 0 var(--pink); transition-duration: .05s }
+  a:focus-visible { outline: 2.5px dashed var(--pink); outline-offset: 5px }
+</style>
+</head>
+<body>
+<img src="hype.svg" alt="The svjeez intro: Claude Code writes a scene, the code streams into an editor beside a live preview, a montage of springs, flowcharts, outlined type and charts, then the install command.">
+<a href="/">← back</a>
+</body>
+</html>
