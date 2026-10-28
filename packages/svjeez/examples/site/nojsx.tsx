@@ -51,8 +51,8 @@ export const make = (tall = false): string => {
         <g animation={enter({ at: T0, over: 0.5 }, { opacity: 0, y: 8 })}>
           <rect x={panel.x} y={panel.y} width={panel.w} height={panel.h} rx={12} fill={theme.base01} />
           <g transform={`translate(${panel.x + (panel.w - 120 * scale) / 2} ${panel.y + (panel.h - 80 * scale) / 2}) scale(${scale})`}>
-            <path d="M20 66Q60 -6 100 66" fill="none" stroke="#34C759" strokeWidth={4} strokeLinecap="round" animation={draw({ at: T0 + 0.2, over: 1 })} />
-            <circle cx={60} cy={30} r={6} fill="#0A6CFF" animation={enter({ at: T0 + 1, over: 0.4 }, { scale: 0 }, ease.pop)} />
+            <path d="M20 66Q60 -6 100 66" fill="none" stroke={theme.base0B} strokeWidth={4} strokeLinecap="round" animation={draw({ at: T0 + 0.2, over: 1 })} />
+            <circle cx={60} cy={30} r={6} fill={theme.base0D} animation={enter({ at: T0 + 1, over: 0.4 }, { scale: 0 }, ease.pop)} />
           </g>
         </g>
         <g class="sans" animation={enter({ at: T0 + 0.8, over: 0.5 }, { opacity: 0, y: 6 })}>

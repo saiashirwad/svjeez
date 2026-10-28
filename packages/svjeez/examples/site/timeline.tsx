@@ -11,7 +11,7 @@ const shown = `motion({ opacity: 0, y: 40 })
   .at(0.5)
   .to({ opacity: 1, y: 0 }, 0.6, ease.pop)
   .wait(1.5)
-  .to({ scale: 1.5, fill: "#FF9F0A" }, 0.5)
+  .to({ scale: 1.5, fill: theme.base09 }, 0.5)
   .to({ scale: 1 }, 0.4, ease.inOut)`;
 
 const chain = (t0: number) =>
@@ -19,7 +19,7 @@ const chain = (t0: number) =>
     .at(t0 + 0.5)
     .to({ opacity: 1, y: 0 }, 0.6, ease.pop)
     .wait(1.5)
-    .to({ scale: 1.5, fill: "#FF9F0A" }, 0.5)
+    .to({ scale: 1.5, fill: theme.base09 }, 0.5)
     .to({ scale: 1 }, 0.4, ease.inOut);
 
 export const make = (tall = false): string => {
