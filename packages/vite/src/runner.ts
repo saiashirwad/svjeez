@@ -29,7 +29,8 @@ const files = (node: EnvironmentModuleNode, found = new Set([node.file!])): Set<
 export const createRunner = (app: ResolvedConfig): Runner => {
   let environment: RunnableDevEnvironment | undefined;
   const ready = (async () => {
-    const { conditions, externalConditions, noExternal, external } = app.environments.ssr!.resolve;
+    // A client-only build has no server environment, and then the scene environment keeps Vite's defaults.
+    const { conditions, externalConditions, noExternal, external } = app.environments.ssr?.resolve ?? {};
     const config = await resolveConfig(
       {
         configFile: false,
@@ -43,7 +44,7 @@ export const createRunner = (app: ResolvedConfig): Runner => {
       },
       "serve",
     );
-    environment = createRunnableDevEnvironment("svjeez", config, { hot: false });
+    environment = createRunnableDevEnvironment("svjeez", config, { hot: false, runnerOptions: { hmr: { logger: false } } });
     await environment.init();
     return environment;
   })();
