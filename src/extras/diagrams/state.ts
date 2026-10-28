@@ -228,7 +228,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     get: lookup("stateMachine()", boxes),
     edge,
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
-      if (path.length === 0) throw new Error("walk() needs at least one state.");
+      if (path.length === 0) throw new Error("walk() needs at least one state, got none.");
       const legs = path.slice(1).map((next, k) => {
         const points = step(path[k]!, next);
         const length = points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);

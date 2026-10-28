@@ -21,7 +21,7 @@ export interface TypewriterOptions {
  * `spans` holds when each line types, so other things can happen as their line lands.
  */
 export function typewriter(code: Code, { at, cps = 28, cursor = false, blink = true }: TypewriterOptions): { readonly node: SvgNode; readonly end: Seconds; readonly spans: readonly Span[] } {
-  if (!(at >= 0 && cps > 0)) throw new Error("typewriter() needs a non-negative start and a positive cps.");
+  if (!(at >= 0 && cps > 0)) throw new Error(`typewriter() needs a non-negative start and a positive cps, got at ${at} and cps ${cps}.`);
   const m = code.metrics;
   let t = at - 1 / cps;
   const lines = Array.from({ length: code.lineCount }, (_, i) => {

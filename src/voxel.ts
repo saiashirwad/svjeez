@@ -59,8 +59,8 @@ const lifetime = (from: Seconds, to: Seconds): Motion<"opacity"> | undefined => 
 };
 
 const check = ({ at, from = 0, to = Infinity }: VoxelBlock): void => {
-  if (!at.every(Number.isInteger)) throw new Error(`A block sits on a whole cell, got [${at.join(", ")}].`);
-  if (!(from >= 0 && from < to)) throw new Error(`A block at [${at.join(", ")}] lives from ${from} to ${to}; it needs 0 <= from < to.`);
+  if (!at.every(Number.isInteger)) throw new Error(`voxel.scene() needs blocks on whole cells, got [${at.join(", ")}].`);
+  if (!(from >= 0 && from < to)) throw new Error(`voxel.scene() needs 0 <= from < to, got from ${from} to ${to} on the block at [${at.join(", ")}].`);
 };
 
 const FACES = Object.keys(SIDES) as VoxelFace[];

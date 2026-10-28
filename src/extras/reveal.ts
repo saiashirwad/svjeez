@@ -24,7 +24,7 @@ export interface RevealOptions {
 
 /** Show `code` a block of lines at a time. `spans[i]` is when block `i` enters; `end` is when the last one settles. */
 export function reveal(code: Code, { at, blocks = paragraphs(code), step = 0.6, over = 0.4, from = { opacity: 0, y: 6 } }: RevealOptions): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
-  if (!(step >= 0 && over > 0)) throw new Error("reveal() needs a non-negative step and a positive duration.");
+  if (!(step >= 0 && over > 0)) throw new Error(`reveal() needs a non-negative step and a positive duration, got step ${step} and over ${over}.`);
   const ranges = blocks === "line" ? Array.from({ length: code.lineCount }, (_, i) => [i + 1, i + 1] as const) : blocks.map(([first, last = first]) => [first, last] as const);
   const owner = new Map<number, number>();
   ranges.forEach(([first, last], k) => {

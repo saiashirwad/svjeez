@@ -27,8 +27,8 @@ export interface RenderOptions {
 /** Compile motions and refs, serialize, and validate. Throws on invalid output. */
 export const render = (options: RenderOptions, content: Child): string => {
   const { width, height, duration } = options;
-  if (!(width > 0) || !(height > 0)) throw new Error("render() needs a positive width and height.");
-  if (!(duration > 0)) throw new Error("render() needs a positive duration.");
+  if (!(width > 0) || !(height > 0)) throw new Error(`render() needs a positive width and height, got ${width} by ${height}.`);
+  if (!(duration > 0)) throw new Error(`render() needs a positive duration, got ${duration}.`);
   const playbackRate = options.playbackRate ?? 1;
   if (!(playbackRate > 0 && Number.isFinite(playbackRate))) throw new Error(`render() needs a positive, finite playbackRate, got ${playbackRate}.`);
   const stillAt =

@@ -112,7 +112,7 @@ export function code(input: string | CodeTokens, options: CodeOptions = {}): Cod
   const { x = 0, y = 0, fontSize = 14, lineHeight = 1.6, font, theme = defaultDark, gutter = false } = options;
   const fontFamily = font ?? options.fontFamily ?? "monospace";
   const advance = options.advance ?? (font ? monospaceAdvance(regularFace(font), fontSize) : fontSize * 0.6);
-  if (![fontSize, lineHeight, advance].every((v) => v > 0) || !Number.isFinite(x + y)) throw new Error("code() needs finite coordinates and positive metrics.");
+  if (![fontSize, lineHeight, advance].every((v) => v > 0) || !Number.isFinite(x + y)) throw new Error(`code() needs finite coordinates and positive metrics, got x ${x}, y ${y}, fontSize ${fontSize}, lineHeight ${lineHeight} and advance ${advance}.`);
   const piece = (p: CodePiece): CodeToken & { readonly id?: string } => {
     if (typeof p === "string") return { content: p };
     if (!Array.isArray(p)) return p as CodeToken;

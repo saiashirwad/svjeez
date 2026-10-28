@@ -256,7 +256,7 @@ Runtime errors (thrown by `motion()`, `render()`, `picture()` or `font()`):
 | `A motion on <rect> runs until 4s, past the 2s scene` | Raise `duration`, or end the motion earlier |
 | `loop(2) is shorter than the motion` | The loop period must cover every step in it |
 | `<rect> has no attribute "stroke-width"` | Use camelCase: `strokeWidth` |
-| `to() needs a positive duration. Use set() for a cut.` | `over` is a length; use `.set()` for an instant change |
+| `to() needs a positive duration, got 0. Use set() for a cut.` | `over` is a length; use `.set()` for an instant change |
 | `Two keys are too close to tell apart` | Space transitions further apart, or shorten `duration` |
 | `Unknown image format. picture() reads png, jpeg, gif, webp, svg.` | The bytes are something else, such as a path string, an HTML error page or AVIF. Convert the image, and pass a file or URL to `picture.load()` |
 | `Unknown font format. font() reads ttf, otf, woff, woff2.` | Pass the font file's bytes or `font.load(path)`. A `.ttc` collection throws its own error; extract one face |

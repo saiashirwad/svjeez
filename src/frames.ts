@@ -36,7 +36,7 @@ export interface Frames {
 
 const launch = async (executablePath?: string) => {
   const { chromium } = await import("playwright-core").catch(() => {
-    throw new Error("renderFrames needs playwright-core. Install it with `npm i -D playwright-core`, then `npx playwright-core install chromium-headless-shell`.");
+    throw new Error("renderFrames() needs playwright-core. Install it with `npm i -D playwright-core`, then `npx playwright-core install chromium-headless-shell`.");
   });
   try {
     return await chromium.launch({ executablePath });
@@ -52,7 +52,7 @@ const size = (svg: string): { width: number; height: number } => {
   const root = /<svg\b[^>]*>/.exec(svg)?.[0] ?? "";
   const width = parseFloat(/\swidth="([\d.]+)"/.exec(root)?.[1] ?? "");
   const height = parseFloat(/\sheight="([\d.]+)"/.exec(root)?.[1] ?? "");
-  if (!(width > 0 && height > 0)) throw new Error("renderFrames needs an <svg> root with numeric width and height.");
+  if (!(width > 0 && height > 0)) throw new Error(`renderFrames() needs an <svg> root with numeric width and height, got ${width} by ${height}.`);
   return { width, height };
 };
 
@@ -76,14 +76,14 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
   const { width, height } = size(svg);
   const scale = options.scale ?? 1;
   const colorScheme = !options.colorScheme || options.colorScheme === "system" ? systemColorScheme() : options.colorScheme;
-  if (!(scale > 0 && Number.isFinite(scale))) throw new Error(`scale must be a positive number, got ${scale}.`);
+  if (!(scale > 0 && Number.isFinite(scale))) throw new Error(`renderFrames() needs a positive, finite scale, got ${scale}.`);
   if (options.times !== undefined) {
     for (const time of options.times) if (!(Number.isFinite(time) && time >= 0)) throw new Error(`renderFrames() needs finite, non-negative times, got ${time}.`);
   } else if (!(Number.isInteger(options.count) && options.count > 0)) {
     throw new Error(`renderFrames() needs a positive whole count, got ${options.count}.`);
   }
   const columns = typeof options.sheet === "object" ? options.sheet.columns : undefined;
-  if (columns !== undefined && !(Number.isInteger(columns) && columns > 0)) throw new Error(`sheet columns must be a positive whole number, got ${columns}.`);
+  if (columns !== undefined && !(Number.isInteger(columns) && columns > 0)) throw new Error(`renderFrames() needs a positive whole number of sheet columns, got ${columns}.`);
   const browser = await launch(options.executablePath);
   try {
     const page = await browser.newPage({ viewport: { width: Math.ceil(width), height: Math.ceil(height) }, deviceScaleFactor: scale, colorScheme, reducedMotion: "no-preference" });

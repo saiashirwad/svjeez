@@ -28,7 +28,7 @@ export interface TerminalOptions extends Omit<CodeOptions, "gutter"> {
 /** A shell session typed out: each prompt appears, its command types, its output prints. The last command keeps a blinking cursor. */
 export function terminal(session: readonly TerminalCommand[], options: TerminalOptions = {}): { readonly node: SvgNode; readonly end: Seconds; readonly bounds: Rect } {
   const { at = 0.5, prompt = "❯", promptRole = "blue", cps = 18, think = 0.35, gap = 0.6, x = 0, y = 0, ...metrics } = options;
-  if (session.length === 0) throw new Error("terminal() needs at least one command.");
+  if (session.length === 0) throw new Error("terminal() needs at least one command, got none.");
   const theme = metrics.theme ?? defaultDark;
   const { height } = code("", { ...metrics, theme }).metrics;
   const laid: Code[] = [];

@@ -8,7 +8,7 @@ const SLOTS = ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A",
 
 /** Build a scheme from 16 hex colors, base00 first. */
 export const base16 = (...colors: readonly Color[]): Base16 => {
-  if (colors.length !== 16) throw new Error(`base16() takes 16 colors, got ${colors.length}.`);
+  if (colors.length !== 16) throw new Error(`base16() needs 16 colors, got ${colors.length}.`);
   return Object.fromEntries(SLOTS.map((slot, i) => [slot, colors[i]])) as Base16;
 };
 

@@ -90,7 +90,7 @@ export const strokeFont = Object.assign(
       has: (char) => glyphs.has(char),
       measure: (line, size) => [...line].reduce((sum, char) => sum + glyphOf(char).advance, 0) * (size / unitsPerEm),
       path: (line, { size, x = 0, y = 0 }): TextPath => {
-        if (!(size > 0) || !Number.isFinite(x + y)) throw new Error("path() needs a positive size and finite coordinates.");
+        if (!(size > 0) || !Number.isFinite(x + y)) throw new Error(`path() needs a positive size and finite coordinates, got size ${size} at ${x}, ${y}.`);
         const scale = size / unitsPerEm;
         let pen = x;
         const placed = [...line].map((char): GlyphPath => {

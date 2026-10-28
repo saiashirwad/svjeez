@@ -172,6 +172,19 @@ test("morph reports when each transition runs and when the last settles", () => 
   expect(morph([a], { at: [] })).toMatchObject({ spans: [], end: 0 });
 });
 
+describe("errors name the call, the constraint and the value", () => {
+  const span = { at: 0, over: 1 };
+  test.each([
+    ["Marker", () => Marker({ stops: [] }), "Marker() needs at least one stop, got none."],
+    ["Marker over", () => Marker({ stops: [{ during: span, target: rect(0, 0, 1, 1) }], over: 0 }), "Marker() needs a positive over, got 0."],
+    ["Focus", () => Focus({ stops: [], dim: 2, children: null }), "Focus() needs dim between 0 and 1, got 2."],
+    ["typewriter", () => typewriter(code("a"), { at: -1 }), "typewriter() needs a non-negative start and a positive cps, got at -1 and cps 28."],
+    ["terminal", () => terminal([]), "terminal() needs at least one command, got none."],
+  ])("%s", (_, make, message) => {
+    expect(make).toThrow(message);
+  });
+});
+
 describe("accent color", () => {
   const scene = (node: ReturnType<typeof Marker>) => render({ width: 100, height: 100, duration: 4, title: "accent" }, node);
   const [span, box] = [{ at: 0, over: 2 }, rect(10, 10, 30, 20)];

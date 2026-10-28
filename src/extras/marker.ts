@@ -6,7 +6,8 @@ import { defaultDark, type Base16 } from "./theme";
 import type { SvgNode } from "../svg";
 
 export function Marker({ stops, theme = defaultDark, color = theme.base09, over = 0.4 }: { readonly stops: readonly { readonly during: Span; readonly target: Rect }[]; readonly theme?: Base16; readonly color?: Color; readonly over?: number }): SvgNode {
-  if (!stops.length || !(over > 0)) throw new Error("Marker needs stops and a positive transition duration.");
+  if (stops.length === 0) throw new Error("Marker() needs at least one stop, got none.");
+  if (!(over > 0)) throw new Error(`Marker() needs a positive over, got ${over}.`);
   const first = stops[0]!.target;
   let position: Motion<"x" | "y"> = motion({ x: 0, y: 0 });
   let size: Motion<"width" | "height"> = motion({ width: first.w, height: first.h });

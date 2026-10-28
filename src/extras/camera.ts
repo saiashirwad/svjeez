@@ -12,7 +12,7 @@ export interface CameraStop {
 /** The x, y and scale that fit `target` inside `frame`, centered. */
 export const fit = (frame: Rect, target: Rect | "all") => {
   if (target === "all") return { x: 0, y: 0, scale: 1 };
-  if (!(target.w > 0 && target.h > 0)) throw new Error("A camera target needs a positive width and height.");
+  if (!(target.w > 0 && target.h > 0)) throw new Error(`Camera() needs a target with a positive width and height, got ${target.w} by ${target.h}.`);
   const scale = Math.min(frame.w / target.w, frame.h / target.h);
   return { x: frame.x + (frame.w - target.w * scale) / 2 - target.x * scale, y: frame.y + (frame.h - target.h * scale) / 2 - target.y * scale, scale };
 };

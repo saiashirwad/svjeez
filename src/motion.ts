@@ -84,7 +84,7 @@ export interface Motion<K extends Target = Target> {
 export type Stack<K extends Target = Target> = Motion<K> | readonly (Motion<K> | false | null | undefined)[];
 
 const time = (value: Seconds, what: string): Seconds => {
-  if (!Number.isFinite(value) || value < 0) throw new Error(`${what} must be a finite, non-negative number of seconds, got ${value}.`);
+  if (!Number.isFinite(value) || value < 0) throw new Error(`${what} needs a finite, non-negative number of seconds, got ${value}.`);
   return value;
 };
 
@@ -95,7 +95,7 @@ const checkValues = (values: TargetValues): TargetValues => {
     if (isProperty(key)) declarationOf(key);
     else if (!isChannel(key)) throw new Error(`"${key}" is not an animatable channel.`);
     const value = valueOf(values, key as Target);
-    if (typeof value === "number" && !Number.isFinite(value)) throw new Error(`${key} must be finite, got ${value}.`);
+    if (typeof value === "number" && !Number.isFinite(value)) throw new Error(`A transition needs a finite ${key}, got ${value}.`);
   }
   return values;
 };
@@ -126,7 +126,7 @@ class Track implements Motion {
   }
 
   to(values: TargetValues, over: Seconds, curve: Ease = ease.out): Track {
-    if (!(time(over, "to() duration") > 0)) throw new Error("to() needs a positive duration. Use set() for a cut.");
+    if (!(time(over, "to()") > 0)) throw new Error(`to() needs a positive duration, got ${over}. Use set() for a cut.`);
     return this.push({ start: this.data.cursor, over, ease: curve, values: checkValues(values) });
   }
 
@@ -135,7 +135,7 @@ class Track implements Motion {
   }
 
   loop(period: Seconds): Track {
-    if (!(time(period, "loop()") > 0)) throw new Error("loop() needs a positive period.");
+    if (!(time(period, "loop()") > 0)) throw new Error(`loop() needs a positive period, got ${period}.`);
     const last = Math.max(0, ...this.data.steps.map(end));
     if (last > period + EPSILON) throw new Error(`loop(${period}) is shorter than the motion, which runs until ${last}s.`);
     return this.with({ period });

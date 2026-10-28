@@ -83,7 +83,7 @@ export const texture = (palette: VoxelPalette, art: string): VoxelTexture => {
   const indent = Math.min(...lines.map((line) => line.length - line.trimStart().length));
   const rows = lines.map((line) => [...line.slice(indent).trimEnd()]);
   const width = rows[0]?.length ?? 0;
-  if (width === 0) throw new Error("texture() needs at least one row of pixels.");
+  if (width === 0) throw new Error("texture() needs at least one row of pixels, got none.");
   const colors = new Map(Object.entries(palette).map(([key, color]) => [key, color === null ? null : hexOf(color, "texture()", true)]));
   const pixels = rows.map((row, y) => {
     if (row.length !== width) throw new Error(`texture() row ${y} has ${row.length} pixels; row 0 has ${width}.`);

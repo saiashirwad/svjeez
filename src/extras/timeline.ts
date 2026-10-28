@@ -42,7 +42,7 @@ export const beats = (at: Beats, count: number, step: Seconds, what: string): Se
     return Array.from({ length: count }, (_, i) => at + i * step);
   }
   if (at.length !== count) throw new Error(`${what} needs ${count} times, got ${at.length}.`);
-  if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!))) throw new Error(`${what} times must be non-negative and in order.`);
+  if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!))) throw new Error(`${what} needs non-negative times in order, got ${at.join(", ")}.`);
   return [...at];
 };
 
@@ -70,7 +70,7 @@ export const travel = (points: readonly Point[], { at, speed = 300, over }: { re
   });
   const total = legs.reduce((sum, leg) => sum + leg.length, 0);
   const duration = over ?? total / speed;
-  if (!(total > 0 && duration > 0)) throw new Error("travel() needs a path of positive length and a positive speed or duration.");
+  if (!(total > 0 && duration > 0)) throw new Error(`travel() needs a path of positive length and a positive speed or duration, got length ${total} over ${duration}s.`);
   const start: Motion<"x" | "y" | "opacity"> = motion({ opacity: 0, x: points[0]!.x, y: points[0]!.y }).at(at).set({ opacity: 1 });
   return legs.reduce((track, leg) => track.to({ x: leg.point.x, y: leg.point.y }, (duration * leg.length) / total, ease.linear), start).set({ opacity: 0 });
 };
@@ -82,7 +82,7 @@ export const readingTime = (text: string | readonly string[], { wps = 3.5, min =
 /** Consecutive named scenes, `gap` apart. */
 export function timeline<const T extends Record<string, Seconds>>(durations: T, options: TimelineOptions = {}): Timeline<keyof T & string> {
   const { at: start = 0, gap = 0, fade = 0.3, pace = 1 } = options;
-  if (!(start >= 0 && gap >= 0 && fade > 0 && pace > 0)) throw new Error("timeline() needs a non-negative start and gap, a positive fade and a positive pace.");
+  if (!(start >= 0 && gap >= 0 && fade > 0 && pace > 0)) throw new Error(`timeline() needs a non-negative start and gap, a positive fade and a positive pace, got at ${start}, gap ${gap}, fade ${fade} and pace ${pace}.`);
   const spans: Record<string, Span> = {};
   let end = start;
   for (const [i, [name, length]] of Object.entries(durations).entries()) {

@@ -60,7 +60,7 @@ interface Chain {
  * `spans[i]` is when the move into `versions[i + 1]` runs; `end` is when the last one settles, or 0 for a single version.
  */
 export function morph(versions: readonly Code[], { at, over = 0.8, gutter = false }: MorphOptions): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
-  if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error("morph() needs versions, one start per transition and a positive duration.");
+  if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error(`morph() needs one start per transition and a positive duration, got ${versions.length} versions, ${at.length} starts and over ${over}.`);
   at.forEach((start, i) => {
     if (i > 0 && start < at[i - 1]! + over) throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
   });

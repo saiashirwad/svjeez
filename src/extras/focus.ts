@@ -23,7 +23,7 @@ const merged = (spans: readonly Span[]): Span[] =>
 
 /** Dim `children` to `dim` except the stop's rects, during each stop. A mask, so it works over any background. */
 export function Focus({ stops, dim = 0.3, fade = 0.3, children }: { readonly stops: readonly FocusStop[]; readonly dim?: number; readonly fade?: Seconds; readonly children: Child }): SvgNode {
-  if (!(dim >= 0 && dim <= 1)) throw new Error(`Focus dim must be between 0 and 1, got ${dim}.`);
+  if (!(dim >= 0 && dim <= 1)) throw new Error(`Focus() needs dim between 0 and 1, got ${dim}.`);
   const shade = merged(stops.map((stop) => stop.during)).reduce((track, { at, over }) => {
     const f = Math.min(fade, over / 2);
     return track.at(at).to({ opacity: dim }, f).at(at + over - f).to({ opacity: 1 }, f);

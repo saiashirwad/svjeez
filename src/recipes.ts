@@ -6,8 +6,8 @@ import { NUDGE, ease, motion, type Ease, type Exact, type Motion, type Seconds, 
 type Shake = "x" | "y" | "rotate";
 
 const span = ({ at, over }: Span, what: string): Span => {
-  if (!Number.isFinite(at) || at < 0) throw new Error(`${what} starts at ${at}; spans start at 0 or later.`);
-  if (!Number.isFinite(over) || over <= 0) throw new Error(`${what} lasts ${over}; spans need a positive duration.`);
+  if (!Number.isFinite(at) || at < 0) throw new Error(`${what} needs a start of 0 or later, got ${at}.`);
+  if (!Number.isFinite(over) || over <= 0) throw new Error(`${what} needs a positive duration, got ${over}.`);
   return { at, over };
 };
 
@@ -137,8 +137,8 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   options: SampledOptions<T>,
 ): Motion<keyof V & Sampled> {
   const { duration, step = 0.05 } = options;
-  if (!Number.isFinite(duration) || duration <= 0) throw new Error(`sampled() lasts ${duration}; it needs a positive duration.`);
-  if (!Number.isFinite(step) || step <= 0) throw new Error(`sampled() steps by ${step}; it needs a positive step.`);
+  if (!Number.isFinite(duration) || duration <= 0) throw new Error(`sampled() needs a positive duration, got ${duration}.`);
+  if (!Number.isFinite(step) || step <= 0) throw new Error(`sampled() needs a positive step, got ${step}.`);
   const edge = duration * NUDGE;
   const times = Array.from({ length: Math.ceil((duration - edge) / step) }, (_, i) => i * step).concat(duration);
   const frames = times.map(sample) as Partial<Record<Sampled, number>>[];

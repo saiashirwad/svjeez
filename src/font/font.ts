@@ -114,7 +114,7 @@ export class Font {
     this.fallback = options.fallback ?? [readable && isFixedPitch(readable) ? "monospace" : "sans-serif"];
     this.href = `data:${FORMATS[format].mime};base64,${base64(bytes)}`;
     this.bytes = this.href.length;
-    if (!(this.weight >= 1 && this.weight <= 1000)) throw new Error(`Font weight must be between 1 and 1000, got ${this.weight}.`);
+    if (!(this.weight >= 1 && this.weight <= 1000)) throw new Error(`font() needs a weight between 1 and 1000, got ${this.weight}.`);
   }
 
   #readable(what: string): Sfnt {
@@ -167,7 +167,7 @@ export class Font {
   path(text: string, { size, x = 0, y = 0 }: PathOptions): TextPath {
     const font = this.#readable("path()");
     if (this.format === "otf") throw new Error("path() reads TrueType outlines. This OTF stores CFF outlines, which path() does not read yet.");
-    if (!(size > 0) || !Number.isFinite(x + y)) throw new Error("path() needs a positive size and finite coordinates.");
+    if (!(size > 0) || !Number.isFinite(x + y)) throw new Error(`path() needs a positive size and finite coordinates, got size ${size} at ${x}, ${y}.`);
     const scale = size / this.metrics.unitsPerEm;
     let pen = x;
     const glyphs = this.#shape(text, "path()").map((glyph): GlyphPath => {
@@ -263,7 +263,7 @@ export const font = Object.assign(
     },
     /** Group weights and styles under the first face's family name. Using the family embeds every face in it. */
     family: (...faces: readonly [Font, ...Font[]]): FontFamily => {
-      if (faces.length === 0) throw new Error("font.family() needs at least one font.");
+      if (faces.length === 0) throw new Error("font.family() needs at least one font, got none.");
       const seen = new Map<string, Font>();
       for (const face of faces) {
         const key = `${face.weight} ${face.style}`;
