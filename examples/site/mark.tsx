@@ -1,4 +1,4 @@
-import { def, motion, render } from "svjeez";
+import { def, motion, render, type Color } from "svjeez";
 import { CSS } from "./kit";
 
 // The app-icon mark: a small dot-matrix meter on a dark tile. It is the same trick as the signature, in seven columns.
@@ -14,7 +14,7 @@ const level = (c: number, t: number) => {
   const u = (2 * Math.PI * t) / D;
   return Math.max(1, Math.min(ROWS, Math.round(3.6 + 2.4 * Math.sin(c * 1.1 - u) * Math.cos(c * 0.5 + u * 0.5) + 0.8 * Math.sin(2 * u + c * 2))));
 };
-const dots = (fill: string) => def.pattern({ width: CELL, height: CELL, patternUnits: "userSpaceOnUse" }, <circle cx={CELL / 2} cy={CELL / 2} r={6.2} fill={fill} />);
+const dots = (fill: Color) => def.pattern({ width: CELL, height: CELL, patternUnits: "userSpaceOnUse" }, <circle cx={CELL / 2} cy={CELL / 2} r={6.2} fill={fill} />);
 const off = dots("#3A3A3D");
 const on = dots("#32D74B");
 const tile = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (

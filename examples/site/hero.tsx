@@ -63,7 +63,7 @@ export default function build(): string {
       <path d={`M${SIDE} ${BAR}V${H}`} stroke={theme.base02} />
       <path d={`M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
       <g class="sans" fontSize={12}>
-        <text x={20} y={BAR + 26} fontSize={11} fontWeight="600" fill={theme.base03} letterSpacing={0.6}>FILES</text>
+        <text x={20} y={BAR + 26} fontSize={11} fontWeight={600} fill={theme.base03} letterSpacing={0.6}>FILES</text>
         {files.map((file, i) => {
           const y = BAR + 40 + i * 30;
           return (
@@ -81,7 +81,7 @@ export default function build(): string {
         </g>
       </g>
       <g class="sans">
-        <text x={SPLIT + 24} y={BAR + 28} fontSize={11} fontWeight="600" fill={theme.base03} letterSpacing={0.6}>PREVIEW</text>
+        <text x={SPLIT + 24} y={BAR + 28} fontSize={11} fontWeight={600} fill={theme.base03} letterSpacing={0.6}>PREVIEW</text>
         <rect x={SPLIT + 24} y={BAR + 42} width={CARD} height={CARD * 0.625} rx={10} fill={theme.base01} />
       </g>
       <g animation={[enter({ at: PLAY, over: 0.3 }), motion({ opacity: 1 }).at(D - 0.5).to({ opacity: 0 }, 0.5)]}>
@@ -98,7 +98,7 @@ export default function build(): string {
         {stats.map(([label, value, unit], i) => (
           <g>
             <text x={SPLIT + 24 + (i * CARD) / 3} y={H - 60} fontSize={11} fill={theme.base04}>{label}</text>
-            <text x={SPLIT + 24 + (i * CARD) / 3} y={H - 30} fontSize={26} fontWeight="700" fill={theme.base06}>{value}<tspan fontSize={13} fontWeight="600" fill={theme.base03} dx={3}>{unit}</tspan></text>
+            <text x={SPLIT + 24 + (i * CARD) / 3} y={H - 30} fontSize={26} fontWeight={700} fill={theme.base06}>{value}<tspan fontSize={13} fontWeight={600} fill={theme.base03} dx={3}>{unit}</tspan></text>
           </g>
         ))}
       </g>

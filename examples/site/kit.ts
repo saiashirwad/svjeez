@@ -1,4 +1,4 @@
-import { motion, rect } from "svjeez";
+import { el, motion, rect, type Color, type SvgNode } from "svjeez";
 import { adaptive, appWindow, base16, type Base16, type CodePiece, type CodeTokens } from "svjeez/extras";
 
 // One calm palette for every scene on the site: white and system gray by day, near-black by night.
@@ -55,3 +55,7 @@ export const chrome = (w: number, h: number, title: string, options: { theme?: B
 
 /** Fade everything out just before the loop restarts, so the jump back to the first frame is not seen. */
 export const outro = (duration: number) => motion({ opacity: 1 }).at(duration - 0.5).to({ opacity: 0 }, 0.5);
+
+/** Gray bars standing in for lines of text. */
+export const skeleton = (x: number, y: number, widths: readonly number[], { gap = 16, height = 7, fill = theme.base02 }: { gap?: number; height?: number; fill?: Color } = {}): SvgNode[] =>
+  widths.map((w, i) => el.rect({ x, y: y + i * gap, width: w, height, rx: height / 2, fill }));

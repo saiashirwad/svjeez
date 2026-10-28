@@ -15,12 +15,12 @@ const shown = `motion({ opacity: 0, y: 40 })
   .to({ scale: 1.5, fill: "#FF9F0A" }, 0.5)
   .to({ scale: 1 }, 0.4, ease.inOut)`;
 
-const chain = (t0: number, fill: string) =>
+const chain = (t0: number) =>
   motion({ opacity: 0, y: 40 })
     .at(t0 + 0.5)
     .to({ opacity: 1, y: 0 }, 0.6, ease.pop)
     .wait(1.5)
-    .to({ scale: 1.5, fill }, 0.5)
+    .to({ scale: 1.5, fill: "#FF9F0A" }, 0.5)
     .to({ scale: 1 }, 0.4, ease.inOut);
 
 const win = chrome(W, H, "motion.ts");
@@ -56,7 +56,7 @@ export default function build(): string {
       <g class="mono" animation={outro(D)}>{typed.node}</g>
       <g animation={outro(D)}>
         <rect x={SPLIT + 24} y={BAR + 22} width={W - SPLIT - 48} height={132} rx={10} fill={theme.base01} />
-        <rect x={(SPLIT + W) / 2 - 28} y={BAR + 60} width={56} height={56} rx={14} fill={theme.base0D} animation={chain(T0, theme.base09)} />
+        <rect x={(SPLIT + W) / 2 - 28} y={BAR + 60} width={56} height={56} rx={14} fill={theme.base0D} animation={chain(T0)} />
         <g class="round" fontSize={11} fill={theme.base03}>
           {[0, 1, 2, 3, 4].map((s) => (
             <g>

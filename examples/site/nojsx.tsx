@@ -41,7 +41,7 @@ export default function build(): string {
         </g>
         <g class="sans" animation={enter({ at: T0 + 0.8, over: 0.5 }, { y: 6 })}>
           <text x={(SPLIT + W) / 2} y={BAR + 292} fontSize={13} textAnchor="middle" fill={theme.base04}>
-            <tspan fill={theme.base0D} fontWeight="600">prefix</tspan> namespaces every id and class,
+            <tspan fill={theme.base0D} fontWeight={600}>prefix</tspan> namespaces every id and class,
           </text>
           <text x={(SPLIT + W) / 2} y={BAR + 312} fontSize={13} textAnchor="middle" fill={theme.base04}>so scenes inlined in one page never collide.</text>
         </g>
