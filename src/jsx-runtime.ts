@@ -1,6 +1,5 @@
-import type { Attrs, Tag } from "./attributes";
-import type { AnimatedTag, TagChannels } from "./channels";
-import type { Stack } from "./motion";
+import type { ElementProps } from "./el";
+import type { Tag } from "./attributes";
 import { children, node, type Child, type SvgNode } from "./svg";
 
 export const Fragment = Symbol.for("svjeez.fragment");
@@ -17,9 +16,7 @@ export const jsx = (type: string | typeof Fragment | Component, props: Record<st
 
 export const jsxs = jsx;
 
-export const jsxDEV = (type: string | typeof Fragment | Component, props: Record<string, unknown> | null): SvgNode => jsx(type, props);
-
-export type ElementProps<T extends Tag> = Attrs<T> & (T extends AnimatedTag ? { readonly animation?: Stack<TagChannels<T>> } : {});
+export const jsxDEV = jsx;
 
 type Intrinsic<T extends Tag> = ElementProps<T> & { readonly children?: Child; readonly key?: string | number };
 

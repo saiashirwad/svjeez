@@ -1,11 +1,8 @@
-export interface Pt {
-  readonly x: number;
-  readonly y: number;
-}
+import type { Point } from "../layout/box";
 
 /** One continuous run of a path, flattened to points. `closed` when it ended in Z. */
 export interface Polyline {
-  readonly points: readonly Pt[];
+  readonly points: readonly Point[];
   readonly closed: boolean;
 }
 
@@ -15,13 +12,13 @@ const tokens = (d: string): (string | number)[] =>
   [...d.matchAll(/([MLHVCSQTAZmlhvcsqtaz])|(-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)/g)].map((m) => (m[1] !== undefined ? m[1] : Number(m[2])));
 
 /** Points per curve: enough that no chord strays far from the curve, judged from the control polygon's length. */
-const steps = (...pts: Pt[]): number => {
+const steps = (...pts: Point[]): number => {
   let length = 0;
   for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i]!.x - pts[i - 1]!.x, pts[i]!.y - pts[i - 1]!.y);
   return Math.max(2, Math.min(64, Math.ceil(length / 3)));
 };
 
-const cubic = (p0: Pt, p1: Pt, p2: Pt, p3: Pt, out: Pt[]): void => {
+const cubic = (p0: Point, p1: Point, p2: Point, p3: Point, out: Point[]): void => {
   const count = steps(p0, p1, p2, p3);
   for (let i = 1; i <= count; i++) {
     const t = i / count;
@@ -31,7 +28,7 @@ const cubic = (p0: Pt, p1: Pt, p2: Pt, p3: Pt, out: Pt[]): void => {
   }
 };
 
-const quadratic = (p0: Pt, p1: Pt, p2: Pt, out: Pt[]): void => {
+const quadratic = (p0: Point, p1: Point, p2: Point, out: Point[]): void => {
   const count = steps(p0, p1, p2);
   for (let i = 1; i <= count; i++) {
     const t = i / count;
@@ -41,7 +38,7 @@ const quadratic = (p0: Pt, p1: Pt, p2: Pt, out: Pt[]): void => {
 };
 
 /** SVG arc, endpoint form, flattened through its center form (SVG 1.1 appendix F.6). */
-const arc = (p0: Pt, rx: number, ry: number, rotation: number, large: number, sweep: number, p1: Pt, out: Pt[]): void => {
+const arc = (p0: Point, rx: number, ry: number, rotation: number, large: number, sweep: number, p1: Point, out: Point[]): void => {
   if (p0.x === p1.x && p0.y === p1.y) return;
   if (rx === 0 || ry === 0) {
     out.push(p1);
@@ -79,10 +76,10 @@ const arc = (p0: Pt, rx: number, ry: number, rotation: number, large: number, sw
 export const flatten = (d: string): Polyline[] => {
   const list = tokens(d);
   const lines: Polyline[] = [];
-  let points: Pt[] = [];
-  let pen: Pt = { x: 0, y: 0 };
-  let start: Pt = pen;
-  let control: Pt | undefined;
+  let points: Point[] = [];
+  let pen: Point = { x: 0, y: 0 };
+  let start: Point = pen;
+  let control: Point | undefined;
   let previous = "";
   const end = (closed: boolean) => {
     if (points.length > 1) lines.push({ points, closed });
@@ -99,8 +96,8 @@ export const flatten = (d: string): Polyline[] => {
     const args = list.slice(i, i + count) as number[];
     if (args.length < count || args.some((a) => typeof a !== "number")) throw new Error(`Path command ${command} needs ${count} numbers.`);
     i += count;
-    const at = (x: number, y: number): Pt => (relative ? { x: pen.x + x, y: pen.y + y } : { x, y });
-    const mirror = (after: RegExp): Pt => (control && after.test(previous) ? { x: 2 * pen.x - control.x, y: 2 * pen.y - control.y } : pen);
+    const at = (x: number, y: number): Point => (relative ? { x: pen.x + x, y: pen.y + y } : { x, y });
+    const mirror = (after: RegExp): Point => (control && after.test(previous) ? { x: 2 * pen.x - control.x, y: 2 * pen.y - control.y } : pen);
     switch (lower) {
       case "m":
         end(false);

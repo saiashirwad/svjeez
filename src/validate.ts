@@ -1,6 +1,6 @@
 export interface ValidationResult {
-  errors: string[];
-  warnings: string[];
+  readonly errors: readonly string[];
+  readonly warnings: readonly string[];
 }
 
 const collect = (source: string, pattern: RegExp, group = 1): string[] => {
@@ -113,11 +113,4 @@ export const validateSvg = (source: string): ValidationResult => {
   warnings.push(...imageHrefs(source), ...embeddedFonts(source), ...filteredAnimation(source));
 
   return { errors, warnings };
-};
-
-export const assertValidSvg = (source: string): void => {
-  const result = validateSvg(source);
-  if (result.errors.length > 0) {
-    throw new Error(result.errors.map((error) => `- ${error}`).join("\n"));
-  }
 };

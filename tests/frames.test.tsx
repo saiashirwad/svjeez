@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
 import { Picture, def, ease, font, motion, picture, render, type Child, type SvgNode } from "svjeez";
-import { renderFrames, systemColorScheme } from "svjeez/frames";
+import { renderFrames } from "svjeez/frames";
+import { systemColorScheme } from "../src/scheme";
 
 const browser = await renderFrames(render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />), { times: [0] }).then(
   () => true,
@@ -202,5 +203,15 @@ describe.if(browser)("embedded fonts", async () => {
     );
     expect(same(whole, split)).toBe(true);
     expect(same(whole, unkerned)).toBe(false);
+  });
+});
+
+describe("renderFrames input", () => {
+  const svg = render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />);
+
+  test("rejects a bad count or time before launching a browser", async () => {
+    await expect(renderFrames(svg, { count: -1 })).rejects.toThrow("renderFrames() needs a positive whole count, got -1.");
+    await expect(renderFrames(svg, { count: 1.5 })).rejects.toThrow("got 1.5.");
+    await expect(renderFrames(svg, { times: [0, -2] })).rejects.toThrow("renderFrames() needs finite, non-negative times, got -2.");
   });
 });

@@ -1,7 +1,6 @@
-export interface Point {
-  readonly x: number;
-  readonly y: number;
-}
+import type { Point } from "./layout/box";
+
+export type { Point };
 
 export type Edge = "top" | "right" | "bottom" | "left";
 

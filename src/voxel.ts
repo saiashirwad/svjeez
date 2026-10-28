@@ -66,7 +66,7 @@ const check = ({ at, from = 0, until = Infinity }: Block): void => {
 const FACES = Object.keys(SIDES) as Face[];
 
 export type { Camera, Vec3 } from "./space";
-export type { Face, Skin, Texture } from "./texture";
+export type { Face, Palette, Skin, Texture } from "./texture";
 
 const scene = ({ camera: view, blocks }: Scene): SvgNode => {
   blocks.forEach(check);

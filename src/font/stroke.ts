@@ -1,4 +1,5 @@
 import { flatten } from "../ink/path";
+import type { Point } from "../layout/box";
 import type { GlyphPath, PathOptions, TextPath } from "./font";
 
 /**
@@ -38,20 +39,19 @@ const number = (value: string | undefined, fallback: number): number => {
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
-type Pt = { readonly x: number; readonly y: number };
 
 /**
  * A curve through every point: Catmull-Rom, as cubic Béziers. Single-line fonts store their strokes as short polylines,
  * which a wide nib would show as facets; a corner sharper than a right angle stays a corner.
  */
-const smooth = (points: readonly Pt[]): string => {
-  const at = (p: Pt) => `${round(p.x)} ${round(p.y)}`;
+const smooth = (points: readonly Point[]): string => {
+  const at = (p: Point) => `${round(p.x)} ${round(p.y)}`;
   if (points.length < 3) return `M${points.map(at).join("L")}`;
   const sharp = (i: number) => {
     const [a, b, c] = [points[i - 1]!, points[i]!, points[i + 1]!];
     return (b.x - a.x) * (c.x - b.x) + (b.y - a.y) * (c.y - b.y) < 0;
   };
-  const tangent = (i: number): Pt => {
+  const tangent = (i: number): Point => {
     if (i === 0 || i === points.length - 1 || sharp(i)) return { x: 0, y: 0 };
     return { x: (points[i + 1]!.x - points[i - 1]!.x) / 6, y: (points[i + 1]!.y - points[i - 1]!.y) / 6 };
   };

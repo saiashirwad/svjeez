@@ -1,7 +1,7 @@
 import { watch } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { basename, dirname, extname, join, resolve } from "node:path";
-import { loopLength, seek } from "../src/frames";
+import { loopLength, seek } from "../src/page";
 
 const ROOT = join(import.meta.dir, "..");
 const [file, flag, out] = process.argv.slice(2);

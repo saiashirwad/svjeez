@@ -10,10 +10,10 @@ export { font, type Font, type FontFamily, type FontFormat, type FontMetrics, ty
 export { strokeFont, type StrokeFont } from "./font/stroke";
 export { Glyphs, type GlyphsProps } from "./glyphs";
 export { Stroke, ink, pen, brush, nib, pencil, type Tool, type StrokeProps, type PenOptions, type BrushOptions, type NibOptions, type PencilOptions } from "./ink/ink";
-export { el } from "./el";
+export { el, type ElementProps } from "./el";
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 export type { Channel, Values } from "./channels";
 export type { SvgNode, Child } from "./svg";
-export { validateSvg } from "./validate";
-export { voxel, type Block, type Scene, type Camera, type Vec3, type Skin, type Face, type Texture } from "./voxel";
+export { validateSvg, type ValidationResult } from "./validate";
+export { voxel, type Block, type Scene, type Camera, type Vec3, type Skin, type Face, type Texture, type Palette } from "./voxel";
 export { rect, type Rect, type Point, type Edge } from "./geometry";

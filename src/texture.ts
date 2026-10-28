@@ -1,7 +1,7 @@
 import { def, type Ref } from "./defs";
 import { el } from "./el";
 import { num } from "./format";
-import type { Point } from "./space";
+import type { Point } from "./layout/box";
 import type { SvgNode } from "./svg";
 
 export type Hex = `#${string}`;

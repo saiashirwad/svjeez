@@ -1,5 +1,6 @@
-import { execFileSync } from "node:child_process";
 import type { Seconds } from "./motion";
+import { loopLength, seek } from "./page";
+import { systemColorScheme } from "./scheme";
 
 export type ColorScheme = "light" | "dark";
 
@@ -32,49 +33,6 @@ export interface Frames {
   readonly frames: readonly Frame[];
   readonly sheet?: Uint8Array;
 }
-
-/** Runs in the page: pause every CSS and SMIL animation at `time` playback seconds. */
-export const seek = (time: Seconds): void => {
-  for (const animation of document.getAnimations()) {
-    animation.pause();
-    animation.currentTime = time * 1000;
-  }
-  for (const svg of document.querySelectorAll("svg")) {
-    svg.pauseAnimations();
-    svg.setCurrentTime(time);
-  }
-};
-
-/** Runs in the page: one loop of the scene, the least common multiple of every CSS and SMIL period, in seconds. */
-export const loopLength = (): Seconds => {
-  const css = document.getAnimations().map((animation) => Number(animation.effect?.getTiming().duration) || 0);
-  const smil = [...document.querySelectorAll("animate, animateTransform, animateMotion, set")].map((element) => parseFloat(element.getAttribute("dur") ?? "") * 1000 || 0);
-  const periods = [...css, ...smil].filter((ms) => ms > 0);
-  const longest = Math.max(0, ...periods);
-  for (let k = 1; k <= 1000; k++) {
-    const loop = longest * k;
-    if (periods.every((ms) => Math.abs(loop / ms - Math.round(loop / ms)) * ms < 1)) return loop / 1000;
-  }
-  return longest / 1000;
-};
-
-const read = (command: string, args: readonly string[]): string => execFileSync(command, args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 2000 });
-
-/** This machine's light or dark appearance: macOS, Windows, or GNOME. Light when there is none to read, as in CI. */
-export const systemColorScheme = (): ColorScheme => {
-  try {
-    switch (process.platform) {
-      case "darwin":
-        return read("defaults", ["read", "-g", "AppleInterfaceStyle"]).trim() === "Dark" ? "dark" : "light";
-      case "win32":
-        return /AppsUseLightTheme\s+REG_DWORD\s+0x0\b/.test(read("reg", ["query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme"])) ? "dark" : "light";
-      default:
-        return read("gsettings", ["get", "org.gnome.desktop.interface", "color-scheme"]).includes("dark") ? "dark" : "light";
-    }
-  } catch {
-    return "light";
-  }
-};
 
 const launch = async (executablePath?: string) => {
   const { chromium } = await import("playwright-core").catch(() => {
@@ -119,6 +77,11 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
   const scale = options.scale ?? 1;
   const colorScheme = !options.colorScheme || options.colorScheme === "system" ? systemColorScheme() : options.colorScheme;
   if (!(scale > 0 && Number.isFinite(scale))) throw new Error(`scale must be a positive number, got ${scale}.`);
+  if (options.times !== undefined) {
+    for (const time of options.times) if (!(Number.isFinite(time) && time >= 0)) throw new Error(`renderFrames() needs finite, non-negative times, got ${time}.`);
+  } else if (!(Number.isInteger(options.count) && options.count > 0)) {
+    throw new Error(`renderFrames() needs a positive whole count, got ${options.count}.`);
+  }
   const columns = typeof options.sheet === "object" ? options.sheet.columns : undefined;
   if (columns !== undefined && !(Number.isInteger(columns) && columns > 0)) throw new Error(`sheet columns must be a positive whole number, got ${columns}.`);
   const browser = await launch(options.executablePath);
@@ -133,7 +96,6 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
     const stage = page.locator("#stage");
     const frames: Frame[] = [];
     for (const time of times) {
-      if (!(Number.isFinite(time) && time >= 0)) throw new Error(`Frame times must be finite and non-negative, got ${time}.`);
       await page.evaluate(seek, time);
       frames.push({ time, png: new Uint8Array(await stage.screenshot({ animations: "allow", omitBackground: true })) });
     }

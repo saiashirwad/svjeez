@@ -17,6 +17,9 @@ Times are playback seconds. Without --times, render takes --count frames (defaul
 On Node, .tsx files load through tsx when it is installed.
 skill prints the agent skill for writing svjeez scenes; --install copies it, with its examples, into <dir>/svjeez.`;
 
+const SCHEMES = ["system", "light", "dark"] as const;
+const isScheme = (value: string): value is (typeof SCHEMES)[number] => (SCHEMES as readonly string[]).includes(value);
+
 const fail = (message: string): never => {
   console.error(message);
   process.exit(1);
@@ -85,13 +88,13 @@ const renderCommand = async (args: string[]): Promise<void> => {
       background: { type: "string" },
     },
   });
-  if (values.scheme !== undefined && !["system", "light", "dark"].includes(values.scheme)) fail(`--scheme is system, light or dark, got "${values.scheme}".`);
+  const scheme = values.scheme === undefined ? undefined : isScheme(values.scheme) ? values.scheme : fail(`--scheme is system, light or dark, got "${values.scheme}".`);
   const svg = await loadSvg(positionals[0] ?? fail(USAGE));
   report(svg);
   const { duration, colorScheme, frames, sheet } = await renderFrames(svg, {
     ...when(values.times, values.count),
     scale: number("scale", values.scale),
-    colorScheme: values.scheme as ColorScheme | "system" | undefined,
+    colorScheme: scheme,
     background: values.background,
     sheet: values.sheet || values.columns !== undefined ? { columns: number("columns", values.columns) } : false,
   });

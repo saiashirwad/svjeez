@@ -3,7 +3,8 @@ import { def, type Ref } from "../defs";
 import { ease as easing, motion, type Ease, type Span, type Stack } from "../motion";
 import { draw as drawOn } from "../recipes";
 import type { SvgNode } from "../svg";
-import { flatten, type Pt } from "./path";
+import type { Point } from "../layout/box";
+import { flatten } from "./path";
 
 /**
  * A drawing tool: how wide the mark is at each point. `t` runs 0 to 1 along one stroke, `s` is px along it,
@@ -106,8 +107,8 @@ export const pencil = ({ size = 1.2, seed = 1 }: PencilOptions = {}): Tool => {
 const SPACING = 1.5;
 
 /** Evenly spaced points along a polyline, so width changes stay smooth however the path was drawn. */
-const resample = (points: readonly Pt[]): Pt[] => {
-  const out: Pt[] = [points[0]!];
+const resample = (points: readonly Point[]): Point[] => {
+  const out: Point[] = [points[0]!];
   let carry = 0;
   for (let i = 1; i < points.length; i++) {
     const [a, b] = [points[i - 1]!, points[i]!];
@@ -125,11 +126,11 @@ const resample = (points: readonly Pt[]): Pt[] => {
 };
 
 /** Path data in tenths of a px, written as relative moves from rounded points, so it is short and never drifts. */
-const writer = (first: Pt) => {
+const writer = (first: Point) => {
   const tenth = (v: number) => Math.round(v * 10);
   let at = { x: tenth(first.x), y: tenth(first.y) };
   const pair = (x: number, y: number) => `${x / 10}${y < 0 ? "" : " "}${y / 10}`;
-  const step = (p: Pt) => {
+  const step = (p: Point) => {
     const next = { x: tenth(p.x), y: tenth(p.y) };
     const out = pair(next.x - at.x, next.y - at.y);
     at = next;
@@ -137,8 +138,8 @@ const writer = (first: Pt) => {
   };
   return {
     start: `M${pair(at.x, at.y)}`,
-    line: (points: readonly Pt[]) => (points.length ? `l${points.map(step).join(" ")}` : ""),
-    curve: (control: Pt, end: Pt) => {
+    line: (points: readonly Point[]) => (points.length ? `l${points.map(step).join(" ")}` : ""),
+    curve: (control: Point, end: Point) => {
       const origin = at;
       const c = { x: tenth(control.x) - origin.x, y: tenth(control.y) - origin.y };
       return `q${pair(c.x, c.y)} ${step(end)}`;
@@ -147,13 +148,13 @@ const writer = (first: Pt) => {
 };
 
 /** The filled outline of one stroke: the left edge out, a round cap, the right edge back, a round cap. */
-const outline = (points: readonly Pt[], tool: Tool): string => {
+const outline = (points: readonly Point[], tool: Tool): string => {
   const line = resample(points);
   if (line.length < 2) return "";
   const total = (line.length - 1) * SPACING;
-  const left: Pt[] = [];
-  const right: Pt[] = [];
-  const caps: { half: number; normal: Pt }[] = [];
+  const left: Point[] = [];
+  const right: Point[] = [];
+  const caps: { half: number; normal: Point }[] = [];
   line.forEach((p, i) => {
     const [a, b] = [line[Math.max(0, i - 1)]!, line[Math.min(line.length - 1, i + 1)]!];
     const angle = Math.atan2(b.y - a.y, b.x - a.x);
@@ -168,7 +169,7 @@ const outline = (points: readonly Pt[], tool: Tool): string => {
   });
   const end = line.length - 1;
   /** A rounded end: one quadratic from one edge, out past the tip, to the other edge. */
-  const cap = (i: number, sign: 1 | -1, from: Pt, to: Pt) => {
+  const cap = (i: number, sign: 1 | -1, from: Point, to: Point) => {
     const { half, normal } = caps[i]!;
     const out = { x: sign * normal.y * half * 2, y: -sign * normal.x * half * 2 };
     return half < 0.4 ? pen.line([to]) : pen.curve({ x: (from.x + to.x) / 2 + out.x, y: (from.y + to.y) / 2 + out.y }, to);
