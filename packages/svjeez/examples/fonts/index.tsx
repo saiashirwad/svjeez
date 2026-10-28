@@ -1,5 +1,5 @@
 import { Glyphs, draw, ease, enter, font, motion, render } from "svjeez";
-import { css, theme } from "../style";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
 
 const W = 680;
 const H = 360;
@@ -9,6 +9,7 @@ const load = (file: string) => font.load(new URL(`./${file}`, import.meta.url));
 const display = await load("ArchivoBlack-Regular.ttf");
 const body = font.family(await load("ABeeZee-Regular.ttf"), await load("ABeeZee-Italic.ttf"));
 
+const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const C = { bg: theme.base00, ink: theme.base06, accent: theme.base08, soft: theme.base04, rule: theme.base0C } as const;
 
 const TITLE = "Wave!";

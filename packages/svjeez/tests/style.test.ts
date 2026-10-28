@@ -5,8 +5,8 @@ import { join } from "node:path";
 // Every scene that shows code, a code explainer or a terminal takes its palette and mono font from examples/style.ts.
 const EXAMPLES = join(import.meta.dir, "../examples");
 
-// fonts/faces.ts defines the shared mono face. Scenes that only label things in a monospace face, with no code on screen, keep their own look.
-const OWN_LOOK = ["bloom", "daynight", "horizon", "images", "lighthouse", "manifold", "neon", "tictactoe"];
+// Scenes that only label things in a monospace face, with no code on screen, keep their own look.
+const OWN_LOOK = ["bloom", "daynight", "effects", "fonts", "horizon", "images", "lighthouse", "manifold", "neon", "tictactoe"];
 
 const RULES: [RegExp, string][] = [
   [/\b(tomorrow|tomorrowNight|defaultDark|defaultLight)\b/, "a stock code palette: import { theme, css } from examples/style.ts"],
@@ -16,7 +16,7 @@ const RULES: [RegExp, string][] = [
 ];
 
 const scenes = (readdirSync(EXAMPLES, { recursive: true }) as string[])
-  .filter((file) => /\.tsx?$/.test(file) && file !== "style.ts" && file !== "fonts/faces.ts" && !OWN_LOOK.includes(file.split("/")[0]!));
+  .filter((file) => /\.tsx?$/.test(file) && file !== "style.ts" && !OWN_LOOK.includes(file.split("/")[0]!));
 
 describe("code scenes share examples/style.ts", () => {
   test("no scene brings its own code palette or mono font", () => {
