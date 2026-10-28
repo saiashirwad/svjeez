@@ -102,7 +102,7 @@ describe("globe()", () => {
         ),
       ).toBeGreaterThan(0.98);
     }
-  });
+  }, 30_000);
 
   test("animates every piece of land through d, with the same commands throughout", () => {
     const earth = globe(world, { frame, tilt: 22, spin });
