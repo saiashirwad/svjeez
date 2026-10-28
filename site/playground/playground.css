@@ -71,7 +71,7 @@
 .pg-out { grid-area: out; display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; min-inline-size: 0 }
 
 @container pg (min-width: 52rem) {
-  .pg-body { grid-template: "code out" 30rem / minmax(0, 1.15fr) minmax(0, 1fr) }
+  .pg-body { grid-template: "code out" 36rem / minmax(0, 1.6fr) minmax(0, 1fr) }
   .pg-code { border-block-start: 0; border-inline-end: 1px solid var(--pg-line) }
   .pg-editor { flex: 1; block-size: auto; min-block-size: 0 }
   .pg-out { padding: 1rem }

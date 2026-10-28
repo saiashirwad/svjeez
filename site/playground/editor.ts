@@ -45,6 +45,7 @@ export const editorExtensions = (onChange: () => void): Extension[] => [
   javascript({ jsx: true, typescript: true }),
   syntaxHighlighting(highlight),
   chrome,
+  EditorView.lineWrapping,
   EditorView.contentAttributes.of({ "aria-label": "Scene source, TSX", spellcheck: "false", autocapitalize: "off" }),
   EditorView.updateListener.of((update) => update.docChanged && onChange()),
 ];
