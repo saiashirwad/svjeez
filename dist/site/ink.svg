@@ -35,10 +35,11 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m9{animation-name:k8;animation-timing-function:steps(1)}
 @keyframes k9{0%{visibility:hidden}56.206%,100%{visibility:visible}}
 .m10{animation-name:k9;animation-timing-function:steps(1)}
-@keyframes k10{0%,55.095%{translate:0px 6px}61.762%,100%{translate:0px 0px}}
-.m11{animation-name:k10}
-@keyframes k11{0%,94.444%{opacity:1}100%{opacity:0}}
-.m12{animation-name:k11}
+@keyframes k10{0%,55.095%{opacity:0}61.762%,100%{opacity:1}}
+@keyframes k11{0%,55.095%{translate:0px 6px}61.762%,100%{translate:0px 0px}}
+.m11{animation-name:k10,k11}
+@keyframes k12{0%,94.444%{opacity:1}100%{opacity:0}}
+.m12{animation-name:k12}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">

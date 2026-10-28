@@ -1,9 +1,8 @@
 // The examples gallery: one page of cards, and one page per example, built from the committed dist/ SVGs.
 // A card shows a poster until you hover it, so the gallery stays small however many scenes it lists.
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { renderFrames } from "../src/frames.ts";
+import { close, encode } from "./image.ts";
 
 const here = (path: string) => new URL(path, import.meta.url);
 const REPO = "https://github.com/saiashirwad/svjeez";
@@ -35,13 +34,14 @@ const read = (name: string): Example => {
   return { name, title, desc, width: width!, height: height! };
 };
 
-const poster = (ex: Example) => `/examples/poster/${ex.name}.jpg`;
+/** The base of a poster path: `-light.webp` and `-dark.webp` follow it. */
+const poster = (ex: Example) => `/examples/poster/${ex.name}`;
 const posterHeight = (ex: Example) => Math.round((POSTER_WIDTH * ex.height) / ex.width);
 
 const GITHUB = `<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>`;
 
 const HEADER = `<header class="wrap top">
-  <a class="brand" href="/">svjeez<i>.</i></a>
+  <a class="brand" href="/">svjeez</a>
   <nav aria-label="Main">
     <a href="/examples/">Examples</a>
     <a href="/intro">Intro</a>
@@ -77,7 +77,7 @@ const speculate = `<script type="speculationrules">${JSON.stringify({ prefetch: 
 
 const card = (ex: Example) => `
     <a class="card" href="/examples/${ex.name}">
-      <span class="shot" data-live="/examples/svg/${ex.name}.svg" data-still="${poster(ex)}"><img data-src="${poster(ex)}" width="${POSTER_WIDTH}" height="${posterHeight(ex)}" alt="" decoding="async"></span>
+      <span class="shot" data-live="/examples/svg/${ex.name}.svg" data-still="${poster(ex)}"><img data-src="1" width="${POSTER_WIDTH}" height="${posterHeight(ex)}" alt="" decoding="async"></span>
       <span><b>${escape(ex.title)}</b><span class="d">${escape(ex.desc)}</span></span>
     </a>`;
 
@@ -116,8 +116,8 @@ const viewer = (ex: Example, i: number, all: readonly Example[]) => {
 ${HEADER}
 <main class="wrap">
   <p class="count"><a href="/examples/">← Examples</a> · ${i + 1} of ${all.length}</p>
-  <figure class="plate" style="--ratio: ${(ex.width / ex.height).toFixed(4)}; --poster: url(${poster(ex)}); margin-block-start: 0.75rem">
-    <picture><source media="(prefers-reduced-motion: reduce)" srcset="${poster(ex)}"><img src="/examples/svg/${ex.name}.svg" width="${ex.width}" height="${ex.height}" alt="${escape(ex.desc || ex.title)}"></picture>
+  <figure class="plate" style="--ratio: ${(ex.width / ex.height).toFixed(4)}; --poster: url(${poster(ex)}-light.webp); margin-block-start: 0.75rem">
+    <picture><source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="${poster(ex)}-dark.webp"><source media="(prefers-reduced-motion: reduce)" srcset="${poster(ex)}-light.webp"><img src="/examples/svg/${ex.name}.svg" width="${ex.width}" height="${ex.height}" alt="${escape(ex.desc || ex.title)}"></picture>
   </figure>
   <div class="meta">
     <div>
@@ -137,17 +137,15 @@ ${HEADER}
 `;
 };
 
-/** A settled frame of each scene, at the width a card draws it, as a JPEG. */
+/** A settled frame of each scene in each color scheme, at the width a card draws it, as WebP. */
 const writePoster = async (ex: Example, out: URL) => {
   const svg = readFileSync(here(`../dist/${ex.name}.svg`), "utf8");
   const scale = POSTER_WIDTH / ex.width;
   const { duration } = await renderFrames(svg, { times: [0], colorScheme: "light" });
-  const { frames } = await renderFrames(svg, { times: [duration * 0.72], colorScheme: "light", scale });
-  const png = join(tmpdir(), `svjeez-poster-${ex.name}.png`);
-  writeFileSync(png, frames[0]!.png);
-  const jpg = new URL(`${ex.name}.jpg`, out);
-  const converted = Bun.spawnSync(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "60", png, "--out", jpg.pathname]);
-  if (converted.exitCode !== 0) writeFileSync(jpg, frames[0]!.png);
+  for (const scheme of ["light", "dark"] as const) {
+    const { frames } = await renderFrames(svg, { times: [duration * 0.72], colorScheme: scheme, scale });
+    writeFileSync(new URL(`${ex.name}-${scheme}.webp`, out), await encode(frames[0]!.png, "webp", 0.7));
+  }
 };
 
 const out = here("public/examples/");
@@ -164,5 +162,6 @@ writeFileSync(new URL("index.html", out), gallery(sections));
 // SVGs and posters only change on a deploy, so browsers may keep them for a day instead of revalidating.
 writeFileSync(
   here("public/_headers"),
-  ["/examples/svg/*", "/examples/poster/*", "/*.svg", "/*.css", "/*.js"].map((path) => `${path}\n  Cache-Control: public, max-age=86400`).join("\n") + "\n",
+  ["/examples/svg/*", "/examples/poster/*", "/s/*", "/*.svg", "/*.css", "/*.js"].map((path) => `${path}\n  Cache-Control: public, max-age=86400`).join("\n") + "\n",
 );
+await close();

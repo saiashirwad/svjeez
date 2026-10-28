@@ -40,7 +40,7 @@ export default function build(): string {
           <path d={s.d} fill="none" stroke={theme.base06} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" animation={draw({ at: s.at, over: s.over }, ease.linear)} />
         ))}
         <Ink d={`M44 ${BAR + 218}C130 ${BAR + 240} 250 ${BAR + 196} 450 ${BAR + 226}`} tool={tool.brush({ size: 10, seed: 3 })} fill={theme.base09} draw={{ at: swashAt, over: 1.1 }} />
-        <g class="sans" animation={enter({ at: swashAt + 1, over: 0.6 }, { y: 6 })}>
+        <g class="sans" animation={enter({ at: swashAt + 1, over: 0.6 }, { opacity: 0, y: 6 })}>
           <text x={44} y={H - 28} fontSize={12} fill={theme.base03}>{'<Ink tool={tool.brush({ size: 10 })} draw={{ at: 4, over: 1 }} />'}</text>
         </g>
       </g>

@@ -94,7 +94,7 @@ export default function build(): string {
       <g class="mono">
         <g animation={motion({ opacity: 1 }).at(D - 0.5).to({ opacity: 0 }, 0.5)}>{term.node}</g>
       </g>
-      <g class="round" animation={[enter({ at: PLAY, over: 0.5 }, { y: 8 }), motion({ opacity: 1 }).at(D - 0.5).to({ opacity: 0 }, 0.5)]}>
+      <g class="round" animation={[enter({ at: PLAY, over: 0.5 }, { opacity: 0, y: 8 }), motion({ opacity: 1 }).at(D - 0.5).to({ opacity: 0 }, 0.5)]}>
         {stats.map(([label, value, unit], i) => (
           <g>
             <text x={SPLIT + 24 + (i * CARD) / 3} y={H - 60} fontSize={11} fill={theme.base04}>{label}</text>

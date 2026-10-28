@@ -40,14 +40,16 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @keyframes k17{0%,19.778%{opacity:0}25.333%,100%{opacity:1}}
 @keyframes k18{0%,19.778%{translate:0px 10px}25.333%,100%{translate:0px 0px}}
 .m12{animation-name:k17,k18}
-@keyframes k19{0%,26.667%{translate:0px 8px}33.333%,100%{translate:0px 0px}}
-.m13{animation-name:k19}
-@keyframes k20{0%,35.556%{translate:0px 8px}42.222%,100%{translate:0px 0px}}
-.m14{animation-name:k20}
-@keyframes k21{0%,44.444%{opacity:0}51.111%,100%{opacity:1}}
-.m15{animation-name:k21}
-@keyframes k22{0%,94.444%{opacity:1}100%{opacity:0}}
-.m16{animation-name:k22}
+@keyframes k19{0%,26.667%{opacity:0}33.333%,100%{opacity:1}}
+@keyframes k20{0%,26.667%{translate:0px 8px}33.333%,100%{translate:0px 0px}}
+.m13{animation-name:k19,k20}
+@keyframes k21{0%,35.556%{opacity:0}42.222%,100%{opacity:1}}
+@keyframes k22{0%,35.556%{translate:0px 8px}42.222%,100%{translate:0px 0px}}
+.m14{animation-name:k21,k22}
+@keyframes k23{0%,44.444%{opacity:0}51.111%,100%{opacity:1}}
+.m15{animation-name:k23}
+@keyframes k24{0%,94.444%{opacity:1}100%{opacity:0}}
+.m16{animation-name:k24}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">

@@ -14,7 +14,7 @@ const level = (c: number, t: number) => {
   const u = (2 * Math.PI * t) / D;
   const wave = Math.sin(c * 0.33 - 2 * u) * 0.5 + Math.sin(c * 0.12 + u) * 0.9 + Math.sin(c * 0.71 - 3 * u) * 0.25;
   const swell = 0.5 + 0.5 * Math.sin(c * 0.09 - u);
-  return Math.max(1, Math.min(ROWS, Math.round(2.6 + wave * 1.7 * swell + 1.2 * Math.sin(u * 2 + c * 0.05))));
+  return Math.max(1, Math.min(ROWS, Math.round(2.4 + wave * 2.3 * swell + 1.4 * Math.sin(u * 2 + c * 0.05))));
 };
 
 const dots = (fill: Color) => def.pattern({ width: CELL, height: CELL, patternUnits: "userSpaceOnUse" }, <circle cx={CELL / 2} cy={CELL / 2} r={4.2} fill={fill} />);

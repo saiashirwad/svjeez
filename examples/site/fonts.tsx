@@ -31,16 +31,16 @@ export default function build(): string {
       <g animation={outro(D)}>
         <Glyphs font={display} text={TITLE} size={size} x={left} y={BAR + 112} fill="none" stroke={theme.base0D} strokeWidth={1.5} animation={(_, i) => draw({ at: 0.3 + i * 0.12, over: 0.9 }, ease.inOut)} />
         <Glyphs font={display} text={TITLE} size={size} x={left} y={BAR + 112} fill={theme.base06} alt="" animation={(_, i) => enter({ at: 1.3 + i * 0.08, over: 0.5 }, { opacity: 0, y: 10 })} />
-        <g animation={enter({ at: 2.4, over: 0.6 }, { y: 8 })}>
+        <g animation={enter({ at: 2.4, over: 0.6 }, { opacity: 0, y: 8 })}>
           <text x={left} y={BAR + 168} fontFamily={italic} fontSize={26} fill={theme.base05}>Real text, measured to the pixel.</text>
         </g>
-        <g animation={enter({ at: 3.2, over: 0.6 }, { y: 8 })}>
-          <rect x={left} y={BAR + 196} width={W - 2 * left} height={64} rx={10} fill={theme.base01} />
-          <text class="mono" x={left + 18} y={BAR + 224} fontSize={13} fill={theme.base04}>await font.load(new URL("./Archivo.ttf"))</text>
-          <text class="mono" x={left + 18} y={BAR + 246} fontSize={13} fill={theme.base0B}>{"<text fontFamily={display}>"}</text>
+        <g animation={enter({ at: 3.2, over: 0.6 }, { opacity: 0, y: 8 })}>
+          <rect x={left} y={BAR + 186} width={W - 2 * left} height={62} rx={10} fill={theme.base01} />
+          <text class="mono" x={left + 18} y={BAR + 213} fontSize={13} fill={theme.base04}>await font.load(new URL("./Archivo.ttf"))</text>
+          <text class="mono" x={left + 18} y={BAR + 235} fontSize={13} fill={theme.base0B}>{"<text fontFamily={display}>"}</text>
         </g>
         <g animation={enter({ at: 4, over: 0.6 })} class="sans">
-          <text x={left} y={H - 24} fontSize={12} fill={theme.base03}>Subset to the glyphs it draws. One file, no font requests.</text>
+          <text x={left} y={H - 22} fontSize={12} fill={theme.base03}>Subset to the glyphs it draws. One file, no font requests.</text>
         </g>
       </g>
     </>,

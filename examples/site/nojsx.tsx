@@ -6,13 +6,13 @@ import { CSS, chrome, highlight, outro, theme } from "./kit";
 
 // Without JSX: the same scene built from el() calls, shown from the real file so it type-checks.
 const W = 1032;
-const H = 376;
-const SPLIT = 560;
+const H = 392;
+const SPLIT = 604;
 const BAR = 40;
 const D = 11;
 const source = readFileSync(fileURLToPath(new URL("./plain.ts", import.meta.url)), "utf8").trimEnd();
 const win = chrome(W, H, "plain.ts");
-const src = code(highlight(source), { theme, fontSize: 12.5, lineHeight: 1.7, x: 28, y: BAR + 22 });
+const src = code(highlight(source), { theme, fontSize: 12, lineHeight: 1.75, x: 28, y: BAR + 22 });
 const typed = typewriter(src, { at: 0.5, cps: 75, cursor: theme.base0D, blink: false });
 const T0 = typed.end + 0.6;
 
@@ -32,14 +32,14 @@ export default function build(): string {
       <path d={`M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
       <g animation={outro(D)}>
         <g class="mono">{typed.node}</g>
-        <g animation={enter({ at: T0, over: 0.5 }, { y: 8 })}>
+        <g animation={enter({ at: T0, over: 0.5 }, { opacity: 0, y: 8 })}>
           <rect x={SPLIT + 36} y={BAR + 30} width={W - SPLIT - 72} height={230} rx={12} fill={theme.base01} />
           <g transform={`translate(${SPLIT + 36 + (W - SPLIT - 72 - 120 * 2.6) / 2} ${BAR + 30 + (230 - 80 * 2.6) / 2}) scale(2.6)`}>
             <path d="M20 66Q60 -6 100 66" fill="none" stroke="#34C759" strokeWidth={4} strokeLinecap="round" animation={draw({ at: T0 + 0.2, over: 1 })} />
             <circle cx={60} cy={30} r={6} fill="#0A6CFF" animation={enter({ at: T0 + 1, over: 0.4 }, { scale: 0 }, ease.pop)} />
           </g>
         </g>
-        <g class="sans" animation={enter({ at: T0 + 0.8, over: 0.5 }, { y: 6 })}>
+        <g class="sans" animation={enter({ at: T0 + 0.8, over: 0.5 }, { opacity: 0, y: 6 })}>
           <text x={(SPLIT + W) / 2} y={BAR + 292} fontSize={13} textAnchor="middle" fill={theme.base04}>
             <tspan fill={theme.base0D} fontWeight={600}>prefix</tspan> namespaces every id and class,
           </text>

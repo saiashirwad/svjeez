@@ -24,7 +24,7 @@ const chain = (t0: number) =>
     .to({ scale: 1 }, 0.4, ease.inOut);
 
 const win = chrome(W, H, "motion.ts");
-const src = code(highlight(shown), { theme, fontSize: 13, lineHeight: 1.9, x: 28, y: BAR + 28 });
+const src = code(highlight(shown), { theme, fontSize: 14, lineHeight: 1.9, x: 28, y: BAR + 28 });
 const typed = typewriter(src, { at: 0.5, cps: 55, cursor: theme.base0D, blink: false });
 const T0 = typed.end + 0.7;
 const D = Math.ceil(T0 + 3.5 + 2.2);
