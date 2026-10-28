@@ -5,6 +5,7 @@ import { rect, type Point, type Rect } from "../geometry";
 import { defaultDark, tint, type Base16, type CodeRole } from "./theme";
 import type { Stack } from "../motion";
 import type { SvgNode } from "../svg";
+import type { Morphable } from "./morph";
 
 /** `fontStyle` is a bit set, as Shiki emits it: 1 italic, 2 bold. */
 export interface CodeToken {
@@ -63,7 +64,7 @@ export interface CodeMetrics {
 }
 
 /** Laid-out code. Lines and columns are 1-based. */
-export interface Code {
+export interface Code extends Morphable<CodeWord> {
   readonly node: SvgNode;
   readonly words: readonly CodeWord[];
   readonly metrics: CodeMetrics;
@@ -75,6 +76,8 @@ export interface Code {
   /** Bounds of every run named `id`. */
   get(id: string): Rect;
   at(line: number, column: number): Point;
+  /** One word as a <text>, optionally animated. morph() draws with it. */
+  draw(word: CodeWord, animation?: Stack<"x" | "y" | "opacity">): SvgNode;
 }
 
 const baseline = (m: CodeMetrics, top: number): number => top + m.height / 2 + m.fontSize * 0.35;
@@ -281,5 +284,6 @@ export function code(input: string | CodeTokens, options: CodeOptions = {}): Cod
     find,
     get,
     at,
+    draw: (word, animation) => text(word, m, animation),
   };
 }
