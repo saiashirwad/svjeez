@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@svjeez/geo": "workspace:*",
+    "@svjeez/math": "workspace:*",
     "@types/bun": "latest",
     "svjeez": "workspace:*",
     "tsx": "^4.23.15",

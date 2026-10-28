@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "customConditions": ["@svjeez/source"],
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["bun"],
+    "lib": ["ESNext"],
+    "paths": {
+      "svjeez": ["../svjeez/src/index.ts"],
+      "svjeez/extras": ["../svjeez/src/extras.ts"]
+    }
+  },
+  "include": ["src", "test"],
+  "exclude": ["test/consumer"]
+}

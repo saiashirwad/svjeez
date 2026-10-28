@@ -239,6 +239,25 @@ const tl = timeline(
   <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/explainer.svg" width="680" alt="A React counter refactored from useState to useReducer across four timed slides with Focus, Marker, Brace, Arrow and morph" />
 </p>
 
+`morph()` animates anything that lists placed pieces and draws one with a motion. `@svjeez/math` is the second such source: `tex()` typesets TeX into glyph paths while the scene compiles, so an equation transforms the way it does in Manim and the SVG still carries no font and no script.
+
+```tsx
+import { tex } from "@svjeez/math";
+import { Brace, morph } from "svjeez/extras";
+
+const square = tex(String.raw`(a+b)^2`, { x: 40, y: 80, fontSize: 40, theme });
+const expanded = tex(String.raw`a^2 + \cssId{mid}{2ab} + b^2`, { x: 40, y: 80, fontSize: 40, theme });
+
+<>
+  {morph([square, expanded], { at: [1.5], over: 1 }).node}
+  <Brace target={expanded.get("mid")} side="below" label="cross term" during={{ at: 3, over: 2 }} />
+</>;
+```
+
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/math.svg" width="680" alt="(a+b)^2 morphs into a^2+2ab+b^2 with a brace under the cross term, then divides by a+b and grows into the binomial theorem" />
+</p>
+
 Build terminal recordings with `appWindow`, `terminal`, `typewriter`, and `reveal`:
 
 ```tsx

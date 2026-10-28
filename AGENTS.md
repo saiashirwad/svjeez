@@ -2,7 +2,7 @@
 
 svjeez is a TypeScript library that compiles TSX scenes into one self-contained animated SVG. Motions become CSS keyframes, or SMIL on filter primitives. Nothing runs in the viewer's browser.
 
-To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. `SKILL.md` covers the `motion()` timeline, channels, easing, recipes, `sampled()`, and the compile and runtime errors with their fixes. `skills/svjeez/references/` covers defs and CSS properties, images and fonts, ink, explainers, diagrams, voxels, maps through `@svjeez/geo` and non-JSX use. Five worked examples sit in `skills/svjeez/examples/`. `svjeez skill` prints `SKILL.md` alone; `--install` also copies the references and examples. This file covers working on the repository.
+To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. `SKILL.md` covers the `motion()` timeline, channels, easing, recipes, `sampled()`, and the compile and runtime errors with their fixes. `skills/svjeez/references/` covers defs and CSS properties, images and fonts, ink, explainers, diagrams, voxels, maps through `@svjeez/geo`, equations through `@svjeez/math` and non-JSX use. Five worked examples sit in `skills/svjeez/examples/`. `svjeez skill` prints `SKILL.md` alone; `--install` also copies the references and examples. This file covers working on the repository.
 
 ## Workspace
 
@@ -12,6 +12,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
+- `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax.
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
 - `site/` is the Astro site at svjeez.texoport.in.
 
@@ -63,6 +64,10 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 `@svjeez/geo` depends on `d3-geo` and `topojson-client`, which is why it is not a `svjeez` subpath. `project()` fits a projection to a frame and returns regions, merged `land` and `lines`, places, great-circle routes and camera bounds. `src/writer.ts` writes the path data: it rounds to 0.1px, drops points closer than the tolerance, and straightens with Douglas–Peucker. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/world` is its example scene, and `skills/svjeez/references/geo.md` teaches it to scene writers.
 
+## Math
+
+`@svjeez/math` depends on `mathjax-full`, which is why it is not a `svjeez` subpath. `tex()` runs MathJax's TeX input and SVG output once per formula, reads the SVG back with `src/mathjax.ts`, and composes every nested `translate()` and `scale()` into one matrix per glyph, so a formula is a flat list of placed `<path>`s. `src/mathjax.ts` drops the `noundefined` and `noerrors` packages, because they turn a typo into a picture, and it throws on a MathJax error node or on a `<text>` fallback. `Tex` is a `Morphable`, so `morph()` from `svjeez/extras` animates it: a glyph's `text` key is its character and size, because a morph translates and cannot scale. `draw()` puts the motion on a wrapping `<g>`, since a CSS animation overrides a `transform` attribute. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/math` is its example scene, and `skills/svjeez/references/math.md` teaches it to scene writers.
+
 ## Site
 
 `site/` imports scenes straight from `examples/` through the `@examples/*` path. Run `bun run dev`, `bun run build`, `bun run typecheck` and `bun run test` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
@@ -86,10 +91,10 @@ After CI passes, `release.yml` runs `scripts/release.ts`. It releases every pack
 To release, bump the version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro geo; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro geo math; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
-All four packages share one version, so bump them together. The workflow publishes `@svjeez/vite` before `@svjeez/astro`.
+All five packages share one version, so bump them together. The workflow publishes `@svjeez/vite` before `@svjeez/astro`.
 
 npm trusts a workflow one package at a time, and only for a package that it already has. A new package therefore needs one publish from a maintainer's machine. Run `npm login`, then `bun scripts/release.ts claim packages/<name>` from the root. It publishes the package's current version and trusts `release.yml` and the `npm` environment for every later version. npm stages that first version, so approve it under Staged Packages on npmjs.com. Until then, the workflow skips the package with a warning. `bun scripts/release.ts plan` lists what the next push would release.
