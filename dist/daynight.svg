@@ -1,0 +1,271 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-labelledby="t d">
+  <title id="t">svjeez: one lighthouse, day and night</title>
+  <desc id="d">A lighthouse on a headland draws itself in. In a light color scheme the sun crosses a pale sky past a drifting cloud. In a dark one a moon crosses a starry sky and the lantern sweeps its beam over the water. Both halves live in one SVG file and a media query picks which shows.</desc>
+  <style><![CDATA[
+svg{--base00:#14162A;--base01:#1D2038;--base02:#2D3150;--base03:#6C7196;--base04:#999EC0;--base05:#C9CCE6;--base06:#EEEFFA;--base07:#FFFFFF;--base08:#FF7A6E;--base09:#FFA05C;--base0A:#FFD166;--base0B:#8FD19E;--base0C:#6FD0C8;--base0D:#7FA2FF;--base0E:#B79CFF;--base0F:#C98F6A}
+@media (prefers-color-scheme:light){svg{--base00:#FBF1DE;--base01:#FFFBF2;--base02:#E6D9BF;--base03:#A39780;--base04:#6E6450;--base05:#3F382B;--base06:#221D14;--base07:#14100A;--base08:#D9483B;--base09:#E8772E;--base0A:#E0A21B;--base0B:#4F8A5B;--base0C:#2F8C88;--base0D:#3A5FC8;--base0E:#7E52C2;--base0F:#A66B43}}
+svg{--sky:#14162A;--sea:#1F3A5C;--wave:#4F7FA8;--land:#2B2547;--house:#3A3060;--roof:#FF7A6E;--tower:#C9CCE6;--band:#FF7A6E;--glass:#FFD166;--ink:#EEEFFA;--sun:#FFD166;--cloud:#2D3150}
+@media (prefers-color-scheme:light){svg{--sky:#FBF1DE;--sea:#9DCFCF;--wave:#F4FBF8;--land:#E9B97E;--house:#FFFBF2;--roof:#D9483B;--tower:#FFFBF2;--band:#D9483B;--glass:#F6DFA4;--ink:#3F382B;--sun:#F5A623;--cloud:#FFFFFF}}
+@media (prefers-color-scheme:light){.night{display:none}}
+@media (prefers-color-scheme:dark){.day{display:none}}
+
+.a{animation-duration:16s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,16.667%,25%,41.667%,66.667%,91.667%,100%{opacity:1}8.333%{opacity:0.648}33.333%{opacity:0.742}50%{opacity:0.667}58.333%{opacity:0.859}75%{opacity:0.712}83.333%{opacity:0.869}}
+@keyframes k2{0%,2.5%{scale:0}5.625%,100%{scale:1}}
+.m1{animation-name:k1,k2;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k3{0%,100%{opacity:0.792}8.333%{opacity:0.724}16.667%,33.333%,41.667%,50%,83.333%,91.667%{opacity:1}25%{opacity:0.654}58.333%{opacity:0.662}66.667%{opacity:0.875}75%{opacity:0.847}}
+@keyframes k4{0%,3.125%{scale:0}6.25%,100%{scale:1}}
+.m2{animation-name:k3,k4;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k5{0%,100%{opacity:0.617}8.333%{opacity:0.818}16.667%,25%,41.667%,50%,58.333%,66.667%{opacity:1}33.333%{opacity:0.6}75%{opacity:0.864}83.333%{opacity:0.903}91.667%{opacity:0.788}}
+@keyframes k6{0%,3.75%{scale:0}6.875%,100%{scale:1}}
+.m3{animation-name:k5,k6;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k7{0%,33.333%,41.667%,58.333%,66.667%,83.333%,100%{opacity:1}8.333%{opacity:0.926}16.667%{opacity:0.963}25%{opacity:0.667}50%{opacity:0.982}75%{opacity:0.699}91.667%{opacity:0.659}}
+@keyframes k8{0%,4.375%{scale:0}7.5%,100%{scale:1}}
+.m4{animation-name:k7,k8;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k9{0%,16.667%,33.333%,41.667%,50%,91.667%,100%{opacity:1}8.333%{opacity:0.799}25%,58.333%{opacity:0.984}66.667%{opacity:0.781}75%{opacity:0.644}83.333%{opacity:0.833}}
+@keyframes k10{0%,5%{scale:0}8.125%,100%{scale:1}}
+.m5{animation-name:k9,k10;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k11{0%,8.333%,16.667%,25%,33.333%,41.667%,66.667%,75%,91.667%,100%{opacity:1}50%{opacity:0.975}58.333%{opacity:0.869}83.333%{opacity:0.911}}
+@keyframes k12{0%,5.625%{scale:0}8.75%,100%{scale:1}}
+.m6{animation-name:k11,k12;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k13{0%,25%,41.667%,66.667%,75%,83.333%,100%{opacity:1}8.333%{opacity:0.99}16.667%{opacity:0.663}33.333%{opacity:0.782}50%{opacity:0.679}58.333%{opacity:0.912}91.667%{opacity:0.989}}
+@keyframes k14{0%,6.25%{scale:0}9.375%,100%{scale:1}}
+.m7{animation-name:k13,k14;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k15{0%,8.333%,16.667%,25%,41.667%,58.333%,66.667%,91.667%,100%{opacity:1}33.333%{opacity:0.985}50%{opacity:0.659}75%{opacity:0.726}83.333%{opacity:0.887}}
+@keyframes k16{0%,6.875%{scale:0}10%,100%{scale:1}}
+.m8{animation-name:k15,k16;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k17{0%,8.333%,25%,33.333%,66.667%,83.333%,91.667%,100%{opacity:1}16.667%{opacity:0.644}41.667%{opacity:0.724}50%{opacity:0.823}58.333%{opacity:0.718}75%{opacity:0.763}}
+@keyframes k18{0%,7.5%{scale:0}10.625%,100%{scale:1}}
+.m9{animation-name:k17,k18;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k19{0%,100%{opacity:0.775}8.333%{opacity:0.873}16.667%{opacity:0.898}25%,41.667%,50%,66.667%,83.333%,91.667%{opacity:1}33.333%{opacity:0.699}58.333%{opacity:0.864}75%{opacity:0.959}}
+@keyframes k20{0%,8.125%{scale:0}11.25%,100%{scale:1}}
+.m10{animation-name:k19,k20;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k21{0%,100%{opacity:0.678}8.333%{opacity:0.809}16.667%,25%,41.667%,66.667%,83.333%{opacity:1}33.333%{opacity:0.913}50%{opacity:0.634}58.333%{opacity:0.787}75%{opacity:0.651}91.667%{opacity:0.776}}
+@keyframes k22{0%,8.75%{scale:0}11.875%,100%{scale:1}}
+.m11{animation-name:k21,k22;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k23{0%,100%{opacity:0.681}8.333%{opacity:0.72}16.667%,33.333%,41.667%,50%,66.667%,75%{opacity:1}25%{opacity:0.667}58.333%{opacity:0.649}83.333%{opacity:0.921}91.667%{opacity:0.893}}
+@keyframes k24{0%,9.375%{scale:0}12.5%,100%{scale:1}}
+.m12{animation-name:k23,k24;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k25{0%,50%,75%,83.333%,100%{opacity:1}8.333%{opacity:0.914}16.667%{opacity:0.649}25%{opacity:0.877}33.333%{opacity:0.947}41.667%{opacity:0.804}58.333%{opacity:0.616}66.667%{opacity:0.97}91.667%{opacity:0.807}}
+@keyframes k26{0%,10%{scale:0}13.125%,100%{scale:1}}
+.m13{animation-name:k25,k26;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k27{0%,16.667%,25%,33.333%,41.667%,50%,75%,83.333%,100%{opacity:1}8.333%{opacity:0.947}58.333%{opacity:0.651}66.667%{opacity:0.75}91.667%{opacity:0.645}}
+@keyframes k28{0%,10.625%{scale:0}13.75%,100%{scale:1}}
+.m14{animation-name:k27,k28;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k29{0%,100%{opacity:0.733}8.333%,16.667%,58.333%,75%,83.333%{opacity:1}25%{opacity:0.928}33.333%{opacity:0.955}41.667%{opacity:0.954}50%{opacity:0.863}66.667%{opacity:0.866}91.667%{opacity:0.832}}
+@keyframes k30{0%,11.25%{scale:0}14.375%,100%{scale:1}}
+.m15{animation-name:k29,k30;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k31{0%,100%{opacity:0.923}8.333%{opacity:0.784}16.667%,25%,33.333%,41.667%,50%,58.333%,75%,83.333%{opacity:1}66.667%{opacity:0.933}91.667%{opacity:0.969}}
+@keyframes k32{0%,11.875%{scale:0}15%,100%{scale:1}}
+.m16{animation-name:k31,k32;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k33{0%,9.375%{translate:110px 250px}16.875%{translate:148.769px 201.389px}22.5%{translate:177.846px 167.383px}27.5%{translate:203.692px 140.377px}32.188%{translate:227.923px 118.751px}36.875%{translate:252.154px 101.425px}41.25%{translate:274.769px 89.637px}45.625%{translate:297.385px 82.427px}50%{translate:320px 80px}54.375%{translate:342.615px 82.427px}58.75%{translate:365.231px 89.637px}63.125%{translate:387.846px 101.425px}67.813%{translate:412.077px 118.751px}72.5%{translate:436.308px 140.377px}77.5%{translate:462.154px 167.383px}83.125%{translate:491.231px 201.389px}90.625%,100%{translate:530px 250px}}
+@keyframes k34{0%,3.75%{opacity:0}8.75%,100%{opacity:1}}
+.m17{animation-name:k33,k34;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
+@keyframes k35{0%{rotate:0deg}100%{rotate:360deg}}
+.m18{animation-name:k35;animation-timing-function:linear}
+@keyframes k36{0%,100%{translate:3.578px 0px}12.5%{translate:5.215px 0px}25%{translate:6.239px 0px}37.5%{translate:-0.335px 0px}50%{translate:6.164px 0px}62.5%{translate:16.347px 0px}75%{translate:-5.492px 0px}87.5%{translate:-15.17px 0px}}
+@keyframes k37{0%,8.75%{opacity:0}15%,100%{opacity:1}}
+.m19{animation-name:k36,k37;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k38{0%,100%{translate:-5.767px 0px}12.5%{translate:-10.774px 0px}25%{translate:-5.81px 0px}37.5%{translate:-1.298px 0px}50%{translate:7.829px 0px}62.5%{translate:-4.179px 0px}75%{translate:-6.315px 0px}87.5%{translate:-3.312px 0px}}
+@keyframes k39{0%,11.25%{opacity:0}17.5%,100%{opacity:1}}
+.m20{animation-name:k38,k39;animation-duration:8s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k40{0%,1.25%{opacity:0}5%,100%{opacity:1}}
+.m21{animation-name:k40}
+@keyframes k41{0%,1.25%{stroke-dashoffset:1;visibility:hidden}7.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m22{animation-name:k41}
+@keyframes k42{0%,100%{translate:2.458px 0px}20%{translate:-1.693px 0px}40%{translate:3.436px 0px}60%{translate:2.377px 0px}80%{translate:-4.535px 0px}}
+@keyframes k43{0%,20%{opacity:0}23.75%,100%{opacity:1}}
+.m23{animation-name:k42,k43;animation-duration:4s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k44{0%,100%{translate:1.441px 0px}20%{translate:-5.605px 0px}40%{translate:-4.229px 0px}60%{translate:1.127px 0px}80%{translate:3.704px 0px}}
+@keyframes k45{0%,21.25%{opacity:0}25%,100%{opacity:1}}
+.m24{animation-name:k44,k45;animation-duration:4s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k46{0%,100%{translate:0.082px 0px}20%{translate:-3.004px 0px}40%{translate:3.726px 0px}60%{translate:6.721px 0px}80%{translate:2.397px 0px}}
+@keyframes k47{0%,22.5%{opacity:0}26.25%,100%{opacity:1}}
+.m25{animation-name:k46,k47;animation-duration:4s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k48{0%,100%{translate:5.932px 0px}20%{translate:-5.577px 0px}40%{translate:0.724px 0px}60%{translate:2.009px 0px}80%{translate:-0.347px 0px}}
+@keyframes k49{0%,23.75%{opacity:0}27.5%,100%{opacity:1}}
+.m26{animation-name:k48,k49;animation-duration:4s,16s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k50{0%,10%{opacity:0}13.125%,100%{opacity:1}}
+.m27{animation-name:k50}
+@keyframes k51{0%,7.5%{stroke-dashoffset:1;visibility:hidden}12.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m28{animation-name:k51}
+@keyframes k52{0%,12.5%{opacity:0}15.625%,100%{opacity:1}}
+.m29{animation-name:k52}
+@keyframes k53{0%,8.75%{stroke-dashoffset:1;visibility:hidden}16.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m30{animation-name:k53}
+@keyframes k54{0%,15.625%{opacity:0}18.75%,100%{opacity:1}}
+.m31{animation-name:k54}
+@keyframes k55{0%,13.75%{stroke-dashoffset:1;visibility:hidden}17.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m32{animation-name:k55}
+@keyframes k56{0%,17.813%{opacity:0}20.938%,100%{opacity:1}}
+.m33{animation-name:k56}
+@keyframes k57{0%,16.25%{stroke-dashoffset:1;visibility:hidden}19.375%,100%{stroke-dashoffset:0;visibility:visible}}
+.m34{animation-name:k57}
+@keyframes k58{0%,19.375%{opacity:0}21.875%,100%{opacity:1}}
+.m35{animation-name:k58}
+@keyframes k59{0%,20%{opacity:0}22.5%,100%{opacity:1}}
+.m36{animation-name:k59}
+@keyframes k60{0%,22.5%{opacity:0}25.625%,100%{opacity:1}}
+.m37{animation-name:k60}
+@keyframes k61{0%,18.75%{stroke-dashoffset:1;visibility:hidden}26.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m38{animation-name:k61}
+@keyframes k62{0%,26.25%{opacity:0}28.75%,100%{opacity:1}}
+.m39{animation-name:k62}
+@keyframes k63{0%,26.875%{opacity:0}29.375%,100%{opacity:1}}
+.m40{animation-name:k63}
+@keyframes k64{0%,27.813%{opacity:0}30.938%,100%{opacity:1}}
+.m41{animation-name:k64}
+@keyframes k65{0%,26.25%{stroke-dashoffset:1;visibility:hidden}29.375%,100%{stroke-dashoffset:0;visibility:visible}}
+.m42{animation-name:k65}
+@keyframes k66{0%,28.75%{opacity:0}31.25%,100%{opacity:1}}
+.m43{animation-name:k66}
+@keyframes k67{0%,30.938%{opacity:0}34.063%,100%{opacity:1}}
+.m44{animation-name:k67}
+@keyframes k68{0%,29.375%{stroke-dashoffset:1;visibility:hidden}32.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m45{animation-name:k68}
+@keyframes k69{0%,31.875%{stroke-dashoffset:1;visibility:hidden}33.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m46{animation-name:k69}
+@keyframes k70{0%,100%{opacity:1}50%{opacity:0.1}}
+.m47{animation-name:k70;animation-duration:4s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k71{0%,32.5%{opacity:0}36.25%,100%{opacity:1}}
+.m48{animation-name:k71}
+@keyframes k72{0%,100%{opacity:0.1}50%{opacity:1}}
+.m49{animation-name:k72;animation-duration:4s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k73{0%,100%{translate:-150px 0px}1.25%{translate:-149.491px 0.773px}2.5%{translate:-147.969px 1.469px}3.75%{translate:-145.441px 2.023px}5.313%{translate:-140.893px 2.431px}6.563%{translate:-136.171px 2.492px}8.125%{translate:-128.962px 2.228px}9.375%{translate:-122.192px 1.768px}10.938%{translate:-112.547px 0.957px}12.5%{translate:-101.673px 0px}14.063%{translate:-89.675px -0.957px}15.625%{translate:-76.669px -1.768px}17.5%{translate:-59.908px -2.378px}19.375%{translate:-42.109px -2.469px}21.25%{translate:-23.518px -2.023px}27.813%{translate:44.006px 1.624px}30.938%{translate:75.138px 2.492px}32.5%{translate:89.908px 2.378px}34.063%{translate:103.958px 1.901px}35.625%{translate:117.151px 1.135px}37.188%{translate:129.359px 0.196px}39.063%{translate:142.547px -0.957px}40.625%{translate:152.192px -1.768px}42.188%{translate:160.517px -2.31px}43.75%{translate:167.44px -2.5px}45.313%{translate:172.895px -2.31px}46.875%{translate:176.83px -1.768px}48.438%{translate:179.205px -0.957px}50%{translate:180px 0px}51.25%{translate:179.491px 0.773px}52.5%{translate:177.969px 1.469px}53.75%{translate:175.441px 2.023px}55.313%{translate:170.893px 2.431px}56.563%{translate:166.171px 2.492px}58.125%{translate:158.962px 2.228px}59.375%{translate:152.192px 1.768px}60.938%{translate:142.547px 0.957px}62.5%{translate:131.673px 0px}64.063%{translate:119.675px -0.957px}65.625%{translate:106.669px -1.768px}67.5%{translate:89.908px -2.378px}69.375%{translate:72.109px -2.469px}71.25%{translate:53.518px -2.023px}77.813%{translate:-14.006px 1.624px}80.938%{translate:-45.138px 2.492px}82.5%{translate:-59.908px 2.378px}84.063%{translate:-73.958px 1.901px}85.625%{translate:-87.151px 1.135px}87.188%{translate:-99.359px 0.196px}89.063%{translate:-112.547px -0.957px}90.625%{translate:-122.192px -1.768px}92.188%{translate:-130.517px -2.31px}93.75%{translate:-137.44px -2.5px}95.313%{translate:-142.895px -2.31px}96.875%{translate:-146.83px -1.768px}98.438%{translate:-149.205px -0.957px}}
+@keyframes k74{0%,100%{rotate:2.104deg}2.188%{rotate:2.499deg}4.375%{rotate:2.159deg}11.563%,36.563%,61.563%,86.563%{rotate:-1.73deg}14.688%,39.688%,64.688%,89.688%{rotate:-2.499deg}17.5%,42.5%{rotate:-1.935deg}23.75%,48.75%,73.75%{rotate:1.583deg}26.875%,51.875%{rotate:2.488deg}30%,55%{rotate:1.935deg}67.813%,92.813%{rotate:-1.805deg}76.563%{rotate:2.46deg}79.688%{rotate:2.053deg}}
+.m50{animation-name:k73,k74,k47;animation-timing-function:linear,linear,cubic-bezier(.23,1,.32,1)}
+@keyframes k75{0%,95.625%{opacity:1}99.375%,100%{opacity:0}}
+.m51{animation-name:k75}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="800" height="500" fill="var(--sky)"/>
+  <g class="a m51">
+    <g class="night">
+      <g transform="translate(39 38) scale(1.18)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m1 fb"/>
+      </g>
+      <g transform="translate(547 144) scale(0.78)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m2 fb"/>
+      </g>
+      <g transform="translate(375 79) scale(0.89)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m3 fb"/>
+      </g>
+      <g transform="translate(570 83) scale(0.61)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m4 fb"/>
+      </g>
+      <g transform="translate(595 143) scale(0.64)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m5 fb"/>
+      </g>
+      <g transform="translate(302 91) scale(0.87)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m6 fb"/>
+      </g>
+      <g transform="translate(249 249) scale(0.67)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m7 fb"/>
+      </g>
+      <g transform="translate(680 68) scale(0.60)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m8 fb"/>
+      </g>
+      <g transform="translate(144 91) scale(0.88)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m9 fb"/>
+      </g>
+      <g transform="translate(594 41) scale(1.14)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m10 fb"/>
+      </g>
+      <g transform="translate(440 167) scale(0.98)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m11 fb"/>
+      </g>
+      <g transform="translate(745 168) scale(1.14)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m12 fb"/>
+      </g>
+      <g transform="translate(642 33) scale(0.62)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m13 fb"/>
+      </g>
+      <g transform="translate(294 122) scale(0.51)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m14 fb"/>
+      </g>
+      <g transform="translate(95 201) scale(0.76)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m15 fb"/>
+      </g>
+      <g transform="translate(346 132) scale(1.16)">
+        <path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" fill="var(--base0A)" class="a m16 fb"/>
+      </g>
+    </g>
+    <g class="night">
+      <g class="a m17">
+        <circle r="30" fill="var(--base0A)"/>
+        <circle cx="13" cy="-8" r="26" fill="var(--sky)"/>
+      </g>
+    </g>
+    <g class="day">
+      <g class="a m17">
+        <circle r="30" fill="var(--sun)"/>
+        <g class="a m18 fb">
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(0)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(30)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(60)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(90)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(120)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(150)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(180)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(210)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(240)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(270)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(300)"/>
+          <path d="M0-42V-54" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" transform="rotate(330)"/>
+        </g>
+      </g>
+      <g class="a m19">
+        <path d="M520 128a14 14 0 0 1 4-27a20 20 0 0 1 38-8a16 16 0 0 1 28 12a12 12 0 0 1-2 23Z" fill="var(--cloud)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+      </g>
+      <g class="a m20">
+        <path d="M120 196a11 11 0 0 1 3-21a15 15 0 0 1 29-6a12 12 0 0 1 21 9a9 9 0 0 1-2 18Z" fill="var(--cloud)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+      </g>
+    </g>
+    <rect y="330" width="800" height="170" fill="var(--sea)" class="a m21"/>
+    <path d="M0 330H800" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m22"/>
+    <path d="M70 395q14-9 28 0t28 0t28 0t28 0" stroke="var(--wave)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="a m23"/>
+    <path d="M300 372q14-9 28 0t28 0t28 0t28 0" stroke="var(--wave)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="a m24"/>
+    <path d="M520 430q14-9 28 0t28 0t28 0t28 0" stroke="var(--wave)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="a m25"/>
+    <path d="M180 455q14-9 28 0t28 0t28 0t28 0" stroke="var(--wave)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="a m26"/>
+    <path d="M18 342C60 318 175 316 232 342Z" fill="var(--land)" class="a m27"/>
+    <path d="M18 342C60 318 175 316 232 342Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m28"/>
+    <path d="M440 500C440 410 510 342 600 330C680 320 740 332 800 322V500Z" fill="var(--land)" class="a m29"/>
+    <path d="M440 500C440 410 510 342 600 330C680 320 740 332 800 322V500Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m30"/>
+    <path d="M82 322V292H134V322Z" fill="var(--house)" class="a m31"/>
+    <path d="M82 322V292H134V322Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m32"/>
+    <path d="M74 292L108 262L142 292Z" fill="var(--roof)" class="a m33"/>
+    <path d="M74 292L108 262L142 292Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m34"/>
+    <path d="M100 322V304H116V322Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--glass)" class="a m35"/>
+    <path d="M122 306H132V316H122Z" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="var(--glass)" class="a m36"/>
+    <path d="M612 328L626 214H654L668 328Z" fill="var(--tower)" class="a m37"/>
+    <path d="M612 328L626 214H654L668 328Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m38"/>
+    <path d="M619.6 276H660.4L663.4 258H616.6Z" fill="var(--band)" class="a m39"/>
+    <path d="M630 238H650L651.6 224H628.4Z" fill="var(--band)" class="a m40"/>
+    <path d="M618 214H662V204H618Z" fill="var(--tower)" class="a m41"/>
+    <path d="M618 214H662V204H618Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m42"/>
+    <path d="M628 204V176H652V204Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="var(--glass)" class="a m43"/>
+    <path d="M622 176L640 154L658 176Z" fill="var(--roof)" class="a m44"/>
+    <path d="M622 176L640 154L658 176Z" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m45"/>
+    <path d="M640 154V142" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" stroke-dasharray="1" class="a m46"/>
+    <g class="night">
+      <g class="a m48">
+        <g class="a m47">
+          <path d="M628 190L360 150V230Z" fill="var(--base0A)" opacity="0.22"/>
+        </g>
+      </g>
+      <g class="a m48">
+        <g class="a m49">
+          <path d="M652 190L800 150V230Z" fill="var(--base0A)" opacity="0.22"/>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(250 405)">
+      <g class="a m50 fb">
+        <path d="M-26 0H26L18 12H-18Z" fill="var(--roof)" stroke="var(--ink)" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M0 0V-34" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M3-32L22-6H3Z" fill="var(--tower)" stroke="var(--ink)" stroke-width="2.2" stroke-linejoin="round"/>
+      </g>
+    </g>
+  </g>
+</svg>
