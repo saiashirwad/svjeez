@@ -1,0 +1,2 @@
+[test]
+preload = ["./scripts/root-test-guard.ts"]
