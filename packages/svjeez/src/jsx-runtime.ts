@@ -10,10 +10,7 @@ const isComponent = (type: string | typeof Fragment | Component): type is Compon
   typeof type === "function";
 
 /** The automatic JSX runtime. Elements compile to the svjeez AST; components are pure functions of props. */
-export const jsx = (
-  type: string | typeof Fragment | Component,
-  props: Props | null,
-): SvgNode => {
+export const jsx = (type: string | typeof Fragment | Component, props: Props | null): SvgNode => {
   const values = props ?? {};
 
   if (type === Fragment) return { kind: "fragment", children: children(values.children) };

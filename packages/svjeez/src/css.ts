@@ -39,12 +39,7 @@ const percents = (keys: readonly Key[], period: Seconds): string[] => {
   );
 };
 
-export const cssKeyframes = (
-  lane: string,
-  emit: Emit,
-  keys: readonly Key[],
-  period: Seconds,
-) => {
+export const cssKeyframes = (lane: string, emit: Emit, keys: readonly Key[], period: Seconds) => {
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
     if (moving(keys, index)) counts.set(timing(key.ease), (counts.get(timing(key.ease)) ?? 0) + 1);

@@ -15,8 +15,7 @@ type GlyphStack = Stack<TagChannels<"path">>;
 
 const isPerGlyph = (
   animation: GlyphsProps["animation"],
-): animation is (glyph: GlyphPath, index: number) => GlyphStack =>
-  typeof animation === "function";
+): animation is (glyph: GlyphPath, index: number) => GlyphStack => typeof animation === "function";
 
 export interface GlyphsProps {
   readonly font: Font | FontFamily;

@@ -1,4 +1,11 @@
-import { isChannel, spec, valueOf, type Target, type TargetValue, type TargetValues } from "./channels";
+import {
+  isChannel,
+  spec,
+  valueOf,
+  type Target,
+  type TargetValue,
+  type TargetValues,
+} from "./channels";
 import { declarationOf, isProperty } from "./properties";
 
 export type Seconds = number;

@@ -210,12 +210,11 @@ const isText = (source: Uint8Array | ArrayBuffer | string): source is string =>
  */
 export const picture = Object.assign(
   (source: Uint8Array | ArrayBuffer | string): PictureData => {
-    const bytes =
-      isText(source)
-        ? new TextEncoder().encode(source)
-        : source instanceof Uint8Array
-          ? source
-          : new Uint8Array(source);
+    const bytes = isText(source)
+      ? new TextEncoder().encode(source)
+      : source instanceof Uint8Array
+        ? source
+        : new Uint8Array(source);
 
     // SAFETY: FORMATS is typed Record<ImageFormat, Codec>, so its keys are exactly the image formats.
     const format = (Object.keys(FORMATS) as ImageFormat[]).find((key) =>

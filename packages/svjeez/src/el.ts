@@ -14,7 +14,6 @@ type Helpers = { readonly [T in Tag]: (props?: ElementProps<T>, content?: Child)
 export const el = Object.fromEntries(
   TAGS.map((tag) => [
     tag,
-    (props: ElementProps<Tag> = {}, content?: Child) =>
-      node(tag, { ...props, children: content }),
+    (props: ElementProps<Tag> = {}, content?: Child) => node(tag, { ...props, children: content }),
   ]),
 ) as Helpers;

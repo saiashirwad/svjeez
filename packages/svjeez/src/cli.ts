@@ -40,30 +40,32 @@ const loadSvg = async (file: string): Promise<string> => {
   if (path.endsWith(".svg")) return readFile(path, "utf8");
   const url = pathToFileURL(path).href;
 
-  const module: { default?: SceneExport } = await import(url).catch(async (error: Error & { code?: string }) => {
-    if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
+  const module: { default?: SceneExport } = await import(url).catch(
+    async (error: Error & { code?: string }) => {
+      if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
 
-    // Node has no TSX loader of its own; use tsx when the project has it.
-    const tsx = (() => {
-      try {
-        return pathToFileURL(
-          createRequire(join(process.cwd(), "package.json")).resolve("tsx/esm/api"),
-        ).href;
-      } catch {
-        return "tsx/esm/api";
-      }
-    })();
+      // Node has no TSX loader of its own; use tsx when the project has it.
+      const tsx = (() => {
+        try {
+          return pathToFileURL(
+            createRequire(join(process.cwd(), "package.json")).resolve("tsx/esm/api"),
+          ).href;
+        } catch {
+          return "tsx/esm/api";
+        }
+      })();
 
-    const { register }: { register: () => void } = await import(tsx).catch(() =>
-      fail(
-        `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
-      ),
-    );
+      const { register }: { register: () => void } = await import(tsx).catch(() =>
+        fail(
+          `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
+        ),
+      );
 
-    register();
+      register();
 
-    return import(url);
-  });
+      return import(url);
+    },
+  );
 
   const value = isSceneFunction(module.default) ? await module.default() : module.default;
 

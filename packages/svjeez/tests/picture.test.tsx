@@ -5,9 +5,7 @@ const isText = (part: number | string): part is string => typeof part === "strin
 
 const bytes = (...parts: (number | string)[]): Uint8Array =>
   Uint8Array.from(
-    parts.flatMap((part) =>
-      isText(part) ? [...part].map((char) => char.charCodeAt(0)) : [part],
-    ),
+    parts.flatMap((part) => (isText(part) ? [...part].map((char) => char.charCodeAt(0)) : [part])),
   );
 
 const be32 = (n: number) => [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
