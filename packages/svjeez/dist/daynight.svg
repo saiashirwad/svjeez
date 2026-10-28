@@ -9,7 +9,7 @@ svg{--sky:#14162A;--sea:#1F3A5C;--wave:#4F7FA8;--land:#2B2547;--house:#3A3060;--
 @media (prefers-color-scheme:light){.night{display:none}}
 @media (prefers-color-scheme:dark){.day{display:none}}
 
-.a{animation-duration:16s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:16s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,16.667%,25%,41.667%,66.667%,91.667%,100%{opacity:1}8.333%{opacity:0.56}33.333%{opacity:0.677}50%{opacity:0.584}58.333%{opacity:0.823}75%{opacity:0.64}83.333%{opacity:0.837}}
 @keyframes k2{0%,2.5%{scale:0}5.625%,100%{scale:1}}

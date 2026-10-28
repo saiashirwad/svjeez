@@ -4,7 +4,7 @@ Import from `svjeez/extras`. `code` and `terminal` take `theme` (default `defaul
 
 ## Themes
 
-Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made: `tomorrowNight`, `tomorrow`, `systemDark`, `systemLight`, `defaultDark`, `defaultLight`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
+Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made: `tomorrowNight`, `tomorrow`, `systemDark`, `systemLight`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`, `defaultDark`, `defaultLight`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
 
 ```tsx
 import { adaptive, tomorrow, tomorrowNight } from "svjeez/extras";
@@ -16,6 +16,46 @@ const fonts = `${css}\n.sans text{font-family:system-ui,sans-serif}`; // pass as
 `adaptive` gives colors as CSS variables that follow the viewer's color scheme. Diagram and callout text inherits the page font, so add a font rule or pass `font`.
 
 Code roles are `plain muted comment punct keyword fn string number constant type variable tag red green yellow blue magenta cyan`.
+
+## Restyling with CSS variables
+
+A scene painted with `adaptive` colors reads sixteen variables, `--base00` to `--base0F`, from CSS. A page can set them again, after the scene is rendered. `base00` to `base07` run from background to foreground: `00` background, `01` raised surface, `02` selection and borders, `03` comments and muted text, `04` secondary text, `05` text, `06` and `07` brighter text. `base08` to `base0F` are accents: `08` red, `09` orange, `0A` yellow, `0B` green, `0C` cyan, `0D` blue, `0E` purple, `0F` brown.
+
+Code and terminal runs use them by role:
+
+| Role | Slot |
+| --- | --- |
+| `plain` | `base05` |
+| `muted`, `comment` | `base03` |
+| `punct` | `base04` |
+| `keyword`, `magenta` | `base0E` |
+| `fn`, `blue` | `base0D` |
+| `string`, `green` | `base0B` |
+| `number`, `constant` | `base09` |
+| `type`, `yellow` | `base0A` |
+| `variable`, `tag`, `red` | `base08` |
+| `cyan` | `base0C` |
+
+`variables(dark, light?)` does the same for colors a scene paints itself. It returns `vars`, where `vars.sky` is `var(--sky)`, and `css` for `render`. With `light`, those values win under `prefers-color-scheme: light`. Names must be CSS identifiers.
+
+```tsx
+import { variables } from "svjeez/extras";
+
+const { vars, css } = variables({ sky: "#14162A", sea: "#1F3A5C" }, { sky: "#FBF1DE", sea: "#9DCFCF" });
+// <rect fill={vars.sky} />, and render({ ..., css }, ...)
+```
+
+`restyle(svg, { css, at, still })` returns a copy of a rendered SVG with more CSS after the scene's own. A page uses it to recolor an `<img>` without restarting the animation. `at` is how many playback seconds the copy starts in, written to `--t0` on the root, which delays every CSS animation, and to `begin` on every SMIL `<animate>`. Any value works, so a page never needs the scene's loop length. `still: true` holds the reduced-motion frame whatever the viewer's setting, and pauses every animation, your own CSS included. A scene rendered with `reducedMotion: false` has no frame to hold.
+
+```ts
+import { restyle } from "svjeez";
+import { adaptive, solarizedDark, solarizedLight } from "svjeez/extras";
+
+const text = await (await fetch(img.src)).text();
+const at = (performance.now() - shownAt) / 1000; // shownAt: when the img started playing
+const css = adaptive({ dark: solarizedDark, light: solarizedLight }).css;
+img.src = URL.createObjectURL(new Blob([restyle(text, { css, at })], { type: "image/svg+xml" }));
+```
 
 ## Code
 

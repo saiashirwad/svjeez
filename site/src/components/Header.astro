@@ -1,4 +1,6 @@
 ---
+import { PALETTES, type Palette } from "../palettes";
+
 interface Props {
   current?: "examples" | "intro" | "play";
   wide?: boolean;
@@ -13,10 +15,12 @@ const links = [
 ];
 // On the playground page the extra link would crowd a phone, so the last two give way.
 const optional = current === "play" ? ["Intro", "GitHub"] : [];
+const SWATCH = ["base00", "base08", "base0B", "base0D", "base0E"] as const;
+const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}: light-dark(${light[slot]}, ${dark[slot]})`).join("; ");
 ---
 
 <header class:list={["wrap top", { wide }]}>
-  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="" />svjeez</a>
+  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="" /><span>svjeez</span></a>
   <nav aria-label="Main">
     {
       links.map((link) => (
@@ -25,6 +29,19 @@ const optional = current === "play" ? ["Intro", "GitHub"] : [];
         </a>
       ))
     }
+    <button class="pick" type="button" popovertarget="palettes" aria-haspopup="menu" aria-label="Choose a color palette">
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+    <div class="palettes" id="palettes" popover role="menu" aria-label="Color palette">
+      {
+        PALETTES.map((p) => (
+          <button type="button" role="menuitemradio" aria-checked="false" tabindex="-1" data-palette={p.id} style={swatches(p)}>
+            <span class="sw" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            {p.label}
+          </button>
+        ))
+      }
+    </div>
     <button class="theme" type="button" aria-label="Switch between light and dark">
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"></path></svg>
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"></path></svg>
@@ -33,6 +50,7 @@ const optional = current === "play" ? ["Intro", "GitHub"] : [];
 </header>
 
 <script>
+  import { choose, palette, type PaletteId } from "../scripts/palette";
   import { scheme, THEMECHANGE } from "../scripts/scheme";
 
   // The toggle sets `color-scheme` on the page, and Chromium hands that to every <img> SVG on it.
@@ -43,5 +61,29 @@ const optional = current === "play" ? ["Intro", "GitHub"] : [];
       localStorage.setItem("theme", next);
     } catch {}
     dispatchEvent(new Event(THEMECHANGE));
+  });
+
+  // A menu of radio items: arrows move between them, Enter or a click picks one, Escape and Tab close it.
+  const menu = document.querySelector<HTMLElement>("#palettes")!;
+  const items = [...menu.querySelectorAll<HTMLButtonElement>("[role=menuitemradio]")];
+  const mark = () => items.forEach((item) => item.setAttribute("aria-checked", String(item.dataset.palette === palette())));
+  mark();
+  menu.addEventListener("toggle", (event) => {
+    if ((event as ToggleEvent).newState === "open") items.find((item) => item.ariaChecked === "true")?.focus();
+  });
+  menu.addEventListener("click", (event) => {
+    const item = (event.target as Element).closest<HTMLButtonElement>("[role=menuitemradio]");
+    if (!item) return;
+    choose(item.dataset.palette as PaletteId);
+    mark();
+    menu.hidePopover();
+  });
+  menu.addEventListener("keydown", (event) => {
+    const at = items.indexOf(document.activeElement as HTMLButtonElement);
+    const to: number | undefined = ({ ArrowDown: at + 1, ArrowUp: at - 1, Home: 0, End: -1 } as Record<string, number>)[event.key];
+    if (event.key === "Tab") return menu.hidePopover();
+    if (to === undefined) return;
+    event.preventDefault();
+    items.at(to % items.length)!.focus();
   });
 </script>

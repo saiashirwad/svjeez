@@ -46,7 +46,7 @@ const { scene, alt } = Astro.props;
       stage.classList.add("playing");
     };
     const rest = () => {
-      pair.forEach(still);
+      pair.forEach((img) => still(img));
       stage.classList.remove("playing");
     };
     stage.addEventListener("pointerenter", start);

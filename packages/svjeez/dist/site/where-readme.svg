@@ -15,7 +15,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
 .round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
 
-.a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,50%,95.833%,100%{height:36px}4.167%,37.5%,54.167%,87.5%{height:24px}16.667%,66.667%{height:12px}}
 .m1{animation-name:k1;animation-timing-function:steps(1)}
 @keyframes k2{0%,50%,95.833%,100%{height:36px}12.5%,37.5%,62.5%,87.5%{height:24px}20.833%,70.833%{height:12px}}

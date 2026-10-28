@@ -422,7 +422,7 @@
     </radialGradient>
   </defs>
   <style><![CDATA[
-.a{animation-duration:60s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:60s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,50%,86.667%,100%{stop-color:#5aa9ee}56.667%{stop-color:#4c4fa8}63.333%{stop-color:#1a2250}66.667%,73.333%{stop-color:#050a20}80%{stop-color:#36559c}}
 .m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k2{0%,50%,86.667%,100%{stop-color:#bfe4ff}56.667%{stop-color:#ffb070}63.333%{stop-color:#8a4a7a}66.667%,73.333%{stop-color:#0b1236}80%{stop-color:#ff9a6a}}

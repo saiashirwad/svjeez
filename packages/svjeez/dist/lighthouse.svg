@@ -117,7 +117,7 @@
 svg{--paper:#faf7ea;--ink:#181f2e;--muted:#181f2e8c;--faint:#181f2e29;--orange:#fa6e1d;--claude:#fdccac;--gpt:#b6e8d1;--read:#1467c2;--edit:#763ebd;--test:#cf9c00;--delegate:#db428c;--research:#008e82}@media (prefers-color-scheme:dark){svg{--paper:#12151d;--ink:#e6e1cf;--muted:#e6e1cf8c;--faint:#e6e1cf29;--orange:#ff8a3d;--claude:#e8a57f;--gpt:#7fc9a8;--read:#5b9cf0;--edit:#a77ff0;--test:#e8b923;--delegate:#f06aa8;--research:#2cc2b2}}
 .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}.hud{font-size:11px}.label{font-size:13px;font-weight:600}
 
-.a{animation-duration:108s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:108s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,1.424%{stroke-dashoffset:1;visibility:hidden}1.887%,100%{stroke-dashoffset:0;visibility:visible}}
 .m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}

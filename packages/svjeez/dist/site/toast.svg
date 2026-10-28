@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" role="img" aria-labelledby="t">
   <title id="t">Saved</title>
   <style><![CDATA[
-.a{animation-duration:5s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:5s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,32%,40%,100%{rotate:0deg}33.6%{rotate:-9.6deg}35.2%{rotate:7.2deg}36.8%{rotate:-4.8deg}38.4%{rotate:2.4deg}}
 .m1{animation-name:k1;animation-timing-function:linear}
