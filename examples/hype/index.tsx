@@ -1,5 +1,5 @@
 import { Glyphs, Ink, def, draw, ease, enter, font, motion, rect, render, sampled, strokeFont, tool, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
-import { Marker, adaptive, base16, code, cut, flow, flowchart, typewriter, window, type Piece } from "svjeez/extras";
+import { Marker, adaptive, base16, code, cut, flow, flowchart, typewriter, appWindow, type CodePiece } from "svjeez/extras";
 
 const W = 1280;
 const H = 720;
@@ -67,15 +67,15 @@ const TERM_AT = COLD.at + COLD.over;
 const FS = 15;
 const ROW = FS * 1.6;
 const CELL = FS * 0.6;
-const shell = window(rect(140, 96, 1000, 568), { theme, title: "~/launch — claude", dots: "traffic" });
+const shell = appWindow(rect(140, 96, 1000, 568), { theme, title: "~/launch — claude", dots: "traffic" });
 const body = def.clipPath({}, <rect x={shell.body.x} y={shell.body.y} width={shell.body.w} height={shell.body.h - 6} />);
 const VISIBLE = Math.floor((shell.body.h - 18) / ROW);
 const left = shell.body.x + 24;
 const top = (row: number) => shell.body.y + 12 + row * ROW;
 const mid = (row: number) => top(row) + ROW / 2;
-const sayAt = (pieces: readonly Piece[], row: number, x: number) => code([pieces], { theme, font: mono, fontSize: FS, lineHeight: 1.6, x, y: top(row) }).node;
-const say = (pieces: readonly Piece[], row: number, indent = 0) => sayAt(pieces, row, left + indent);
-const bold = (content: string, color: Color = C.ink): Piece => ({ content, color, fontStyle: 2 });
+const sayAt = (pieces: readonly CodePiece[], row: number, x: number) => code([pieces], { theme, font: mono, fontSize: FS, lineHeight: 1.6, x, y: top(row) }).node;
+const say = (pieces: readonly CodePiece[], row: number, indent = 0) => sayAt(pieces, row, left + indent);
+const bold = (content: string, color: Color = C.ink): CodePiece => ({ content, color, fontStyle: 2 });
 const width = (text: string) => [...text].length * CELL;
 
 /** Claude's spinner glyph, drawn: a six-spoke asterisk that breathes as it turns. */
@@ -103,7 +103,7 @@ const mascot = (x: number, row: number) =>
 
 const BOX = { x: left - 8, w: shell.body.w - 32, top: 1.2, rows: 8 };
 const split = BOX.x + BOX.w * 0.56;
-const centerAt = (text: string, row: number, color: Piece) => sayAt([color], row, BOX.x + (split - BOX.x) / 2 - width(text) / 2);
+const centerAt = (text: string, row: number, color: CodePiece) => sayAt([color], row, BOX.x + (split - BOX.x) / 2 - width(text) / 2);
 const welcome = (
   <>
     <rect x={BOX.x} y={top(BOX.top)} width={BOX.w} height={BOX.rows * ROW} rx={6} fill="none" stroke={C.accent} />
@@ -145,11 +145,11 @@ const dot = (row: number, color: Color, pending?: { until: number }) =>
   );
 const elbow = (row: number) => <path d={`M${left + 13} ${top(row) + 3}V${mid(row)}h8`} fill="none" stroke={C.muted} strokeWidth={1.2} />;
 
-const toolCall = (row: number, at: number, done: number, name: string, args: string, results: readonly (readonly Piece[])[]) => {
+const toolCall = (row: number, at: number, done: number, name: string, args: string, results: readonly (readonly CodePiece[])[]) => {
   line(row, at, <>{dot(row, C.green, { until: done })}{say([bold(name), ["plain", `(${args})`]], row, 18)}</>);
   results.forEach((pieces, i) => line(row + 1 + i, done, <>{i === 0 && elbow(row + 1)}{say(pieces, row + 1 + i, 36)}</>));
 };
-const reply = (row: number, at: number, pieces: readonly Piece[]) => line(row, at, <>{dot(row, C.ink)}{say(pieces, row, 18)}</>);
+const reply = (row: number, at: number, pieces: readonly CodePiece[]) => line(row, at, <>{dot(row, C.ink)}{say(pieces, row, 18)}</>);
 
 line(0, TERM_AT + 0.35, launch.node);
 line(BOX.top + BOX.rows - 1, welcomeAt, welcome);
@@ -227,8 +227,8 @@ const KEYWORDS = new Set(["import", "from", "export", "default"]);
 const TOKEN = /("[^"]*")|(\d+(?:\.\d+)?)|(<\/?)([a-z]+)|([A-Za-z_]\w*)(?=\()|([A-Za-z_]\w*)(?==)|([A-Za-z_]\w*)|([^\sA-Za-z_\d"]+)|(\s+)/g;
 
 /** Just enough TSX highlighting for one screen of code. */
-const highlight = (source: string): Piece[] =>
-  [...source.matchAll(TOKEN)].flatMap(([all, str, num, open, tag, fn, attr, word, punct]): Piece[] => {
+const highlight = (source: string): CodePiece[] =>
+  [...source.matchAll(TOKEN)].flatMap(([all, str, num, open, tag, fn, attr, word, punct]): CodePiece[] => {
     if (str) return [["string", str]];
     if (num) return [["number", num]];
     if (open && tag) return [["punct", open], ["tag", tag]];
@@ -256,8 +256,8 @@ const SOURCE = [
 ];
 
 const CODE_AT = TERM.at + TERM.over;
-const editor = window(rect(40, 96, 810, 568), { theme, title: "launch.tsx" });
-const preview = window(rect(870, 96, 370, 568), { theme, title: "dist/launch.svg" });
+const editor = appWindow(rect(40, 96, 810, 568), { theme, title: "launch.tsx" });
+const preview = appWindow(rect(870, 96, 370, 568), { theme, title: "dist/launch.svg" });
 const src = code(SOURCE.map(highlight), { theme, font: mono, fontSize: 16.5, lineHeight: 1.95, x: editor.body.x + 24, y: editor.body.y + 40 });
 const typed = typewriter(src, { at: CODE_AT + 0.45, cps: 150, cursor: C.accent, blink: false });
 const landed = (n: number) => typed.spans[n - 1]!.at + typed.spans[n - 1]!.over;

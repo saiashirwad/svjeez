@@ -10,9 +10,9 @@ import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
 import { arrow, chip, labelOf, labelSize, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
-export type FlowEdge<N extends string> = readonly [from: N, to: N] | readonly [from: N, to: N, options: { readonly label?: string }];
+export type FlowchartEdge<N extends string> = readonly [from: N, to: N] | readonly [from: N, to: N, options: { readonly label?: string }];
 
-export interface FlowGroup<N extends string> {
+export interface FlowchartGroup<N extends string> {
   readonly label: string;
   readonly nodes: readonly N[];
 }
@@ -45,8 +45,8 @@ interface Laid<N extends string> {
   readonly bounds: Rect;
 }
 
-export function flowchart<const N extends Record<string, Labelled>, const G extends Record<string, FlowGroup<NoInfer<keyof N & string>>> = {}>(
-  spec: { readonly nodes: N; readonly groups?: G; readonly edges: readonly FlowEdge<NoInfer<keyof N & string>>[] },
+export function flowchart<const N extends Record<string, Labelled>, const G extends Record<string, FlowchartGroup<NoInfer<keyof N & string>>> = {}>(
+  spec: { readonly nodes: N; readonly groups?: G; readonly edges: readonly FlowchartEdge<NoInfer<keyof N & string>>[] },
   options: FlowchartOptions = {},
 ): Flowchart<keyof N & string, keyof G & string> {
   type Id = keyof N & string;
@@ -56,7 +56,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   const nodes = Object.entries(spec.nodes as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
   const roles = new Map(nodes.map((n) => [n.id, n.role]));
   const edges = spec.edges.map(([from, to, o]) => ({ from, to, label: o?.label }));
-  const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowGroup<Id>>);
+  const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<Id>>);
   const laid = lay<Id>(
     {
       direction,

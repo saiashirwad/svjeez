@@ -13,7 +13,7 @@ export const base16 = (...colors: readonly Color[]): Base16 => {
 };
 
 /** What a run of code or terminal output is, so the scheme can color it. */
-export type Role = keyof typeof ROLES;
+export type CodeRole = keyof typeof ROLES;
 
 /** Slots follow the base16 styling guidelines; the ANSI names are for terminal output. */
 const ROLES = {
@@ -37,7 +37,7 @@ const ROLES = {
   cyan: "base0C",
 } as const satisfies Record<string, Slot>;
 
-export const tint = (theme: Base16, role: Role): Color => theme[ROLES[role]];
+export const tint = (theme: Base16, role: CodeRole): Color => theme[ROLES[role]];
 
 /**
  * One scheme that follows the viewer's color scheme. Its colors are CSS variables; pass `css` to `render`.

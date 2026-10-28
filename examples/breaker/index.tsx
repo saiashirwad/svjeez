@@ -10,16 +10,16 @@ import {
   lanes,
   morph,
   sequence,
-  state,
+  stateMachine,
   timeline,
   tomorrow,
   tomorrowNight,
   reveal,
   visible,
-  window,
-  type Piece,
-  type Role,
-  type Tokens,
+  appWindow,
+  type CodePiece,
+  type CodeRole,
+  type CodeTokens,
 } from "svjeez/extras";
 
 const W = 1280;
@@ -27,11 +27,11 @@ const H = 720;
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 
 /** Just enough TypeScript highlighting for the slides. `«id:text»` names a run. */
-const highlight = (source: string): Tokens =>
+const highlight = (source: string): CodeTokens =>
   source.split("\n").map((line) =>
-    [...line.matchAll(/«(\w[\w-]*):([^»]+)»|(\/\/.*)|("[^"]*")|\b(class|async|await|if|try|catch|throw|return|new|const|this)\b|\b(\d[\d_]*)\b|\b([A-Z]\w*)\b|(\w+)(?=\()|([{}()[\];:.,=<>+!&|]+)|([^«/"\w{}()[\];:.,=<>+!&|]+|\w+)/g)].map((m): Piece => {
+    [...line.matchAll(/«(\w[\w-]*):([^»]+)»|(\/\/.*)|("[^"]*")|\b(class|async|await|if|try|catch|throw|return|new|const|this)\b|\b(\d[\d_]*)\b|\b([A-Z]\w*)\b|(\w+)(?=\()|([{}()[\];:.,=<>+!&|]+)|([^«/"\w{}()[\];:.,=<>+!&|]+|\w+)/g)].map((m): CodePiece => {
       const [, id, named, comment, str, kw, num, type, fn, punct, rest] = m;
-      const role: Role | undefined = comment ? "comment" : str ? "string" : kw ? "keyword" : num ? "number" : type ? "type" : fn ? "fn" : punct ? "punct" : undefined;
+      const role: CodeRole | undefined = comment ? "comment" : str ? "string" : kw ? "keyword" : num ? "number" : type ? "type" : fn ? "fn" : punct ? "punct" : undefined;
       if (id) return ["fn", named!, id];
       return role ? [role, m[0]] : (rest ?? m[0]);
     }),
@@ -93,7 +93,7 @@ const Heading = ({ scene, children }: { readonly scene: keyof typeof scenes; rea
 const TOP = 110;
 const BAR_H = 40;
 const listing = (source: string) => code(highlight(source), { x: 88, y: TOP + BAR_H + 14, fontSize: 13, lineHeight: 1.4, theme, gutter: true });
-const editorFor = (c: ReturnType<typeof code>) => window(rect(64, TOP, 760, c.bounds.y + c.bounds.h + 16 - TOP), { theme, title: "breaker.ts", bar: BAR_H, class: "mono" });
+const editorFor = (c: ReturnType<typeof code>) => appWindow(rect(64, TOP, 760, c.bounds.y + c.bounds.h + 16 - TOP), { theme, title: "breaker.ts", bar: BAR_H, class: "mono" });
 const source = listing(v1);
 const editor = editorFor(source);
 const beat = timeline({ build: 3.8, guard: 3, trip: 3 }, { at: tl.code.at + 0.6, gap: 0.2 });
@@ -114,7 +114,7 @@ const machineSpec = {
     ["half", "open", "failure"],
   ],
 } as const;
-const machine = state(machineSpec, { theme, fontSize: 15, class: "mono", x: 820, y: 130, anchor: "top" });
+const machine = stateMachine(machineSpec, { theme, fontSize: 15, class: "mono", x: 820, y: 130, anchor: "top" });
 const walk = machine.walk(["closed", "open", "half", "open", "half", "closed"], { at: tl.machine.at + 0.8, dwell: 0.9, token: { style: "comet" } });
 
 // --- together: a sequence on the left, the machine beside it lighting as messages land
@@ -145,7 +145,7 @@ const story = sequence(
     play: { at: [0, 1, 2, 3, 4.4, 5.4, 6.6, 8.6, 9.6, 10.6, 11.6].map((t) => tl.together.at + 0.6 + t) },
   },
 );
-const mini = state(machineSpec, { theme, fontSize: 14, class: "mono", x: 760, y: 150 });
+const mini = stateMachine(machineSpec, { theme, fontSize: 14, class: "mono", x: 760, y: 150 });
 const msg = (i: number) => story.message(i).span.at;
 const synced = mini.walk(["closed", "open", "half", "closed"], { at: [tl.together.at, msg(3), msg(7), msg(10)], dwell: tl.together.at + tl.together.over - msg(10) });
 

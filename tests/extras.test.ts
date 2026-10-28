@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, rect, render, type Motion } from "svjeez";
-import { Focus, Marker, adaptive, code, cut, defaultDark, defaultLight, morph, read, reveal, terminal, timeline, travel, typewriter, visible, window } from "svjeez/extras";
+import { Focus, Marker, adaptive, code, cut, defaultDark, defaultLight, morph, read, reveal, terminal, timeline, travel, typewriter, visible, appWindow } from "svjeez/extras";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -153,7 +153,7 @@ describe("terminal", () => {
   });
 
   test("a window's body starts under its title bar", () => {
-    expect(window(rect(0, 0, 100, 80), { bar: 30 }).body).toMatchObject({ x: 0, y: 30, w: 100, h: 50 });
+    expect(appWindow(rect(0, 0, 100, 80), { bar: 30 }).body).toMatchObject({ x: 0, y: 30, w: 100, h: 50 });
   });
 });
 

@@ -16,7 +16,7 @@ export interface WindowOptions {
 }
 
 /** An app window filling `frame`. `body` is the area under the title bar. */
-export function window(frame: Rect, { theme = defaultDark, title, dots = "muted", bar = 40, radius = 12, class: cls }: WindowOptions = {}): { readonly node: SvgNode; readonly body: Rect } {
+export function appWindow(frame: Rect, { theme = defaultDark, title, dots = "muted", bar = 40, radius = 12, class: cls }: WindowOptions = {}): { readonly node: SvgNode; readonly body: Rect } {
   const dot = (i: number) => (dots === "traffic" ? tint(theme, (["red", "yellow", "green"] as const)[i]!) : theme.base02);
   const node = el.g({ class: cls }, [
     el.rect({ x: frame.x, y: frame.y, width: frame.w, height: frame.h, rx: radius, fill: theme.base00, stroke: theme.base02 }),

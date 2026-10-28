@@ -214,7 +214,7 @@ Annotations are components: `<Focus stops={[{ during: tl.intro, target: src.line
 **Terminals.**
 
 ```tsx
-const shell = window(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic" });
+const shell = appWindow(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic" });
 const session = terminal(
   [{ cmd: "bun add svjeez", output: [[["muted", "installed svjeez"]]] }, { cmd: "bun run build", output: [[["green", "✓"], " dist/hello.svg"]] }],
   { theme, x: shell.body.x + 20, y: shell.body.y + 16, fontSize: 14 },
@@ -230,7 +230,7 @@ const trip = flow(chart.route("a", "b"), { at: 3, style: "comet", arrive: true }
 <>{chart.layers.under}{trip.node}{chart.layers.over}</>; // the flow runs between edges and nodes
 ```
 
-`sequence(...).message(i)`, `state(...).walk(ids, { at })`, `tree(...).route(a, b)`, `lanes(...).x(t)` and `travel(points, { at })` cover the rest. Read `README.md` in the svjeez repo for each spec.
+`sequence(...).message(i)`, `stateMachine(...).walk(ids, { at })`, `tree(...).route(a, b)`, `lanes(...).x(t)` and `travel(points, { at })` cover the rest. Read `README.md` in the svjeez repo for each spec.
 
 ## Errors and fixes
 

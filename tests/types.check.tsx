@@ -1,5 +1,5 @@
 import { calc, css, def, draw, ease, el, enter, fx, motion, sampled, wiggle, type Calc, type SyntaxOf } from "svjeez";
-import { flowchart, lanes, sequence, state, tree } from "svjeez/extras";
+import { flowchart, lanes, sequence, stateMachine, tree } from "svjeez/extras";
 import { voxel } from "svjeez/voxel";
 
 const bg = def.linearGradient({}, <stop offset={0} stopColor="#000" />);
@@ -118,7 +118,7 @@ export const invalid = [
   length(radius),
 ];
 
-const machine = state({
+const machine = stateMachine({
   states: { idle: "Idle", busy: { label: "Busy", states: { plan: "Plan", act: "Act" }, initial: "plan" } },
   initial: "idle",
   transitions: [["idle", "busy"], ["plan", "act"]],
@@ -144,11 +144,11 @@ export const badDiagrams = [
   // @ts-expect-error a note on an actor that does not exist
   sequence({ actors: { user: "User" }, messages: [{ note: "db", text: "hi" }] }),
   // @ts-expect-error a transition to a state that does not exist
-  state({ states: { a: "A", b: "B" }, initial: "a", transitions: [["a", "c"]] }),
+  stateMachine({ states: { a: "A", b: "B" }, initial: "a", transitions: [["a", "c"]] }),
   // @ts-expect-error an initial state that does not exist
-  state({ states: { a: "A" }, initial: "b", transitions: [] }),
+  stateMachine({ states: { a: "A" }, initial: "b", transitions: [] }),
   // @ts-expect-error a composite whose initial is not one of its own states
-  state({ states: { a: { label: "A", states: { x: "X" }, initial: "y" } }, initial: "a", transitions: [] }),
+  stateMachine({ states: { a: { label: "A", states: { x: "X" }, initial: "y" } }, initial: "a", transitions: [] }),
   // @ts-expect-error a walk through a state that does not exist
   machine.walk(["idle", "bsy"], { at: 0 }),
   // @ts-expect-error a parent that does not exist

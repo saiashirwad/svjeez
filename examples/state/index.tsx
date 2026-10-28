@@ -1,11 +1,11 @@
 import { render } from "svjeez";
-import { adaptive, state, tomorrow, tomorrowNight } from "svjeez/extras";
+import { adaptive, stateMachine, tomorrow, tomorrowNight } from "svjeez/extras";
 import { mono } from "../fonts/faces";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const M = 40;
 
-export const agent = state(
+export const agent = stateMachine(
   {
     states: {
       idle: "Idle",

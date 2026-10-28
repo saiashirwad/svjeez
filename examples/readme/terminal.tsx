@@ -1,8 +1,8 @@
 import { rect, render } from "svjeez";
-import { terminal, window } from "svjeez/extras";
+import { terminal, appWindow } from "svjeez/extras";
 import { CSS, theme } from "./kit";
 
-const shell = window(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic", class: "mono" });
+const shell = appWindow(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic", class: "mono" });
 const session = terminal(
   [
     { cmd: "bun add svjeez", output: [[["muted", "installed svjeez@0.2.0"]]] },

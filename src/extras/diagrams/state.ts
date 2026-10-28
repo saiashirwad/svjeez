@@ -105,7 +105,7 @@ const shift = (b: Box, dx: number, dy: number): Box => ({ x: b.x + dx, y: b.y + 
  * laid out inside first, then sized to fit and laid out with its siblings as one node; transitions attach to the
  * nearest ancestors that share a scope.
  */
-export function state<const S extends Record<string, StateSpec>>(
+export function stateMachine<const S extends Record<string, StateSpec>>(
   spec: { readonly states: Checked<S>; readonly initial: NoInfer<keyof S & string>; readonly transitions: readonly Transition<NoInfer<StateIds<S>>>[] },
   options: StateOptions = {},
 ): StateMachine<StateIds<S>> {
@@ -116,7 +116,7 @@ export function state<const S extends Record<string, StateSpec>>(
   const nodes = new Map<string, Node>();
   const scope = (states: Record<string, StateSpec>, initial: string, depth: number, owner?: string): Scope => {
     const list = Object.entries(states).map(([id, s]): Node => {
-      if (nodes.has(id)) throw new Error(`state() has two states named ${JSON.stringify(id)}.`);
+      if (nodes.has(id)) throw new Error(`stateMachine() has two states named ${JSON.stringify(id)}.`);
       const node: Node =
         typeof s === "string"
           ? { id, label: s, final: false, parent: owner, depth }
@@ -124,13 +124,13 @@ export function state<const S extends Record<string, StateSpec>>(
       nodes.set(id, node);
       return node;
     });
-    if (!list.some((n) => n.id === initial)) throw new Error(`state() initial ${JSON.stringify(initial)} is not one of its scope's states.`);
+    if (!list.some((n) => n.id === initial)) throw new Error(`stateMachine() initial ${JSON.stringify(initial)} is not one of its scope's states.`);
     return { owner, depth, nodes: list, initial };
   };
   const root = scope(spec.states as Record<string, StateSpec>, spec.initial, 0);
   const chain = (id: string): string[] => {
     const node = nodes.get(id);
-    if (!node) throw new Error(`state() has no state ${JSON.stringify(id)}.`);
+    if (!node) throw new Error(`stateMachine() has no state ${JSON.stringify(id)}.`);
     return node.parent === undefined ? [id] : [...chain(node.parent), id];
   };
   /** The scope owner a transition lives in, and its two ends as that scope's direct members. */
@@ -205,7 +205,7 @@ export function state<const S extends Record<string, StateSpec>>(
   const line = (pred: (l: (typeof lines)[number]) => boolean) => lines.find(pred);
   const edge = (from: Id, to: Id): Point[] => {
     const found = line((l) => typeof l.of === "number" && transitions[l.of]!.source === from && transitions[l.of]!.target === to);
-    if (!found) throw new Error(`state() has no transition from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);
+    if (!found) throw new Error(`stateMachine() has no transition from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);
     return curve(found.points).samples;
   };
   /** How a walk gets from `a` to `b`: a transition from `a` or a composite holding it, or into a composite's initial state. */
@@ -225,7 +225,7 @@ export function state<const S extends Record<string, StateSpec>>(
   return {
     node,
     bounds: rect(ox, oy, local.w, local.h),
-    get: lookup("state()", boxes),
+    get: lookup("stateMachine()", boxes),
     edge,
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
       if (path.length === 0) throw new Error("walk() needs at least one state.");

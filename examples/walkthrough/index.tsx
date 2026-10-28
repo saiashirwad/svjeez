@@ -1,18 +1,18 @@
 import { def, rect, render } from "svjeez";
-import { Arrow, Callout, Camera, Focus, adaptive, code, during, read, timeline, tomorrow, tomorrowNight, window, type Run, type Tokens } from "svjeez/extras";
+import { Arrow, Callout, Camera, Focus, adaptive, code, during, read, timeline, tomorrow, tomorrowNight, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
 
 const W = 1000;
 const H = 620;
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 
-const kw = (text: string): Run => ["keyword", text];
-const fn = (text: string, id?: string): Run => ["fn", text, id];
-const ty = (text: string): Run => ["type", text];
-const str = (text: string): Run => ["string", text];
-const p = (text: string): Run => ["punct", text];
+const kw = (text: string): CodeRun => ["keyword", text];
+const fn = (text: string, id?: string): CodeRun => ["fn", text, id];
+const ty = (text: string): CodeRun => ["type", text];
+const str = (text: string): CodeRun => ["string", text];
+const p = (text: string): CodeRun => ["punct", text];
 
-const source: Tokens = [
+const source: CodeTokens = [
   [kw("import"), " ", p("{"), " serve ", p("}"), " ", kw("from"), " ", str('"bun"'), p(";")],
   [],
   [fn("serve"), p("({"), " port", p(":"), " ", ["number", "3000"], p(","), " fetch", p(":"), " ", fn("handle", "entry"), " ", p("});")],
@@ -51,7 +51,7 @@ const tl = timeline(
 );
 
 const frame = rect(60, 40, 880, 500);
-const editor = window(frame, { theme, title: "server.ts", class: "mono" });
+const editor = appWindow(frame, { theme, title: "server.ts", class: "mono" });
 const view = rect(editor.body.x, editor.body.y, editor.body.w, editor.body.h);
 const src = code(source, { x: view.x + 24, y: view.y + 16, fontSize: 13, lineHeight: 1.55, theme, gutter: true });
 /** A view as wide as the code plus margins, so every stop zooms the same and only the pan changes. */

@@ -2,23 +2,23 @@ import type { Color } from "../attributes";
 import { el } from "../el";
 import { regularFace, type Font, type FontValue } from "../font/font";
 import { rect, type Point, type Rect } from "../geometry";
-import { defaultDark, tint, type Base16, type Role } from "./theme";
+import { defaultDark, tint, type Base16, type CodeRole } from "./theme";
 import type { Stack } from "../motion";
 import type { SvgNode } from "../svg";
 
 /** `fontStyle` is a bit set, as Shiki emits it: 1 italic, 2 bold. */
-export interface Token {
+export interface CodeToken {
   readonly content: string;
   readonly color?: Color;
   readonly fontStyle?: number;
 }
 
 /** `[role, text]` colored by the theme, or `[role, text, id]` to name it for `get()` and exact morphs. */
-export type Run = readonly [role: Role, text: string, id?: string];
+export type CodeRun = readonly [role: CodeRole, text: string, id?: string];
 
 /** Plain text, a role-tagged run, or a Shiki-style token. */
-export type Piece = string | Run | Token;
-export type Tokens = readonly (readonly Piece[])[];
+export type CodePiece = string | CodeRun | CodeToken;
+export type CodeTokens = readonly (readonly CodePiece[])[];
 
 export interface CodeOptions {
   readonly x?: number;
@@ -38,7 +38,7 @@ export interface CodeOptions {
 }
 
 /** One run of non-space characters, placed. `y` is the top of its line. */
-export interface Word {
+export interface CodeWord {
   readonly text: string;
   readonly line: number;
   readonly column: number;
@@ -49,7 +49,7 @@ export interface Word {
   readonly id?: string;
 }
 
-export interface Metrics {
+export interface CodeMetrics {
   /** x of column 1. */
   readonly origin: number;
   readonly y: number;
@@ -64,8 +64,8 @@ export interface Metrics {
 /** Laid-out code. Lines and columns are 1-based. */
 export interface Code {
   readonly node: SvgNode;
-  readonly words: readonly Word[];
-  readonly metrics: Metrics;
+  readonly words: readonly CodeWord[];
+  readonly metrics: CodeMetrics;
   readonly lineCount: number;
   readonly gutter: boolean;
   readonly bounds: Rect;
@@ -76,10 +76,10 @@ export interface Code {
   at(line: number, column: number): Point;
 }
 
-const baseline = (m: Metrics, top: number): number => top + m.height / 2 + m.fontSize * 0.35;
+const baseline = (m: CodeMetrics, top: number): number => top + m.height / 2 + m.fontSize * 0.35;
 
 /** One word as a <text>. Shared by `code`, `morph` and `typewriter` so they render identically. */
-export const text = ({ text, x, y, color, fontStyle = 0 }: Word, m: Metrics, animation?: Stack<"x" | "y" | "opacity">): SvgNode =>
+export const text = ({ text, x, y, color, fontStyle = 0 }: CodeWord, m: CodeMetrics, animation?: Stack<"x" | "y" | "opacity">): SvgNode =>
   el.text(
     {
       x,
@@ -95,7 +95,7 @@ export const text = ({ text, x, y, color, fontStyle = 0 }: Word, m: Metrics, ani
   );
 
 /** Line number `n`, right-aligned in the gutter. */
-export const number = (n: number, m: Metrics, animation?: Stack<"x" | "y" | "opacity">): SvgNode =>
+export const number = (n: number, m: CodeMetrics, animation?: Stack<"x" | "y" | "opacity">): SvgNode =>
   el.text(
     { x: m.origin - 2 * m.advance, y: baseline(m, m.y + (n - 1) * m.height), textAnchor: "end", fontFamily: m.fontFamily, fontSize: m.fontSize, fill: tint(m.theme, "comment"), animation },
     String(n),
@@ -108,26 +108,26 @@ const monospaceAdvance = (face: Font, fontSize: number): number => {
   return wide;
 };
 
-export function code(input: string | Tokens, options: CodeOptions = {}): Code {
+export function code(input: string | CodeTokens, options: CodeOptions = {}): Code {
   const { x = 0, y = 0, fontSize = 14, lineHeight = 1.6, font, theme = defaultDark, gutter = false } = options;
   const fontFamily = font ?? options.fontFamily ?? "monospace";
   const advance = options.advance ?? (font ? monospaceAdvance(regularFace(font), fontSize) : fontSize * 0.6);
   if (![fontSize, lineHeight, advance].every((v) => v > 0) || !Number.isFinite(x + y)) throw new Error("code() needs finite coordinates and positive metrics.");
-  const piece = (p: Piece): Token & { readonly id?: string } => {
+  const piece = (p: CodePiece): CodeToken & { readonly id?: string } => {
     if (typeof p === "string") return { content: p };
-    if (!Array.isArray(p)) return p as Token;
-    const [role, content, id] = p as Run;
+    if (!Array.isArray(p)) return p as CodeToken;
+    const [role, content, id] = p as CodeRun;
     return { content, color: tint(theme, role), id };
   };
   const rows = (typeof input === "string" ? input.split("\n").map((line) => [line]) : input).map((row) => row.map(piece));
   if (rows.some((row) => row.some((token) => /[\n\r\t]/.test(token.content)))) throw new Error("code() tokens must not contain line breaks or tabs.");
   const texts = rows.map((row) => row.map((token) => token.content).join(""));
-  const m: Metrics = { origin: x + (gutter ? (String(rows.length).length + 2) * advance : 0), y, fontSize, height: fontSize * lineHeight, advance, fontFamily, theme };
+  const m: CodeMetrics = { origin: x + (gutter ? (String(rows.length).length + 2) * advance : 0), y, fontSize, height: fontSize * lineHeight, advance, fontFamily, theme };
   const top = (line: number) => y + (line - 1) * m.height;
   const words = rows.flatMap((row, i) => {
     let column = 0;
     return row.flatMap(({ content, color, fontStyle, id }) => {
-      const placed = [...content.matchAll(/\S+/g)].map((run): Word => {
+      const placed = [...content.matchAll(/\S+/g)].map((run): CodeWord => {
         const col = column + run.index;
         return { text: run[0], line: i + 1, column: col + 1, x: m.origin + col * advance, y: top(i + 1), color, fontStyle, id };
       });

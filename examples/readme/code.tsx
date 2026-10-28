@@ -1,15 +1,15 @@
 import { render } from "svjeez";
-import { Marker, code, morph, type Run, type Tokens } from "svjeez/extras";
+import { Marker, code, morph, type CodeRun, type CodeTokens } from "svjeez/extras";
 import { CSS, theme } from "./kit";
 
-const kw = (text: string): Run => ["keyword", text];
-const p = (text: string): Run => ["punct", text];
+const kw = (text: string): CodeRun => ["keyword", text];
+const p = (text: string): CodeRun => ["punct", text];
 
-const before: Tokens = [
+const before: CodeTokens = [
   [kw("const"), " total ", p("="), " ", ["fn", "sum", "call"], p("("), "xs", p(");")],
   [kw("return"), " total", p(";")],
 ];
-const after: Tokens = [
+const after: CodeTokens = [
   [kw("const"), " total ", p("="), " xs", p("."), ["fn", "reduce", "call"], p("("), "add", p(","), " ", ["number", "0"], p(");")],
   [kw("return"), " total", p(";")],
 ];

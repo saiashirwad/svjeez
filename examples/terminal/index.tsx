@@ -1,12 +1,12 @@
 import { rect, render } from "svjeez";
-import { adaptive, terminal, tomorrow, tomorrowNight, window } from "svjeez/extras";
+import { adaptive, terminal, tomorrow, tomorrowNight, appWindow } from "svjeez/extras";
 
 const W = 960;
 const H = 440;
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const frame = rect(80, 50, 800, 340);
-const shell = window(frame, { theme, title: "~/hello", dots: "traffic", class: "mono" });
+const shell = appWindow(frame, { theme, title: "~/hello", dots: "traffic", class: "mono" });
 
 const session = terminal(
   [

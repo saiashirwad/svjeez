@@ -1,17 +1,17 @@
 import { motion, rect, render } from "svjeez";
-import { Marker, code, flow, flowchart, window, type Run, type Tokens } from "svjeez/extras";
+import { Marker, code, flow, flowchart, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
 import { CSS, theme } from "./kit";
 
 const STEP = 0.9;
 const START = 1;
 
-const k = (text: string): Run => ["keyword", text];
-const p = (text: string): Run => ["punct", text];
-const s = (text: string): Run => ["string", `"${text}"`];
+const k = (text: string): CodeRun => ["keyword", text];
+const p = (text: string): CodeRun => ["punct", text];
+const s = (text: string): CodeRun => ["string", `"${text}"`];
 
-const edge = (from: string, to: string, label?: string): Tokens[number] => ["    [", s(from), p(", "), s(to), ...(label ? [p(", { "), "label", p(": "), s(label), p(" }")] : []), p("],")];
+const edge = (from: string, to: string, label?: string): CodeTokens[number] => ["    [", s(from), p(", "), s(to), ...(label ? [p(", { "), "label", p(": "), s(label), p(" }")] : []), p("],")];
 
-const source: Tokens = [
+const source: CodeTokens = [
   [k("const"), " chart ", p("="), " ", ["fn", "flowchart"], p("({")],
   ["  nodes", p(": {")],
   ["    pr", p(": "), s("PR opened"), p(",")],
@@ -41,7 +41,7 @@ const LINE = 1.75;
 const size = flowchart(spec, look).bounds;
 const W = CODE_W + size.w + 4 * M;
 const H = Math.max(size.h + 2 * M, source.length * FONT * LINE + 76 + 2 * M);
-const shell = window(rect(M, M, CODE_W, H - 2 * M), { theme, title: "readme.tsx", class: "mono" });
+const shell = appWindow(rect(M, M, CODE_W, H - 2 * M), { theme, title: "readme.tsx", class: "mono" });
 const src = code(source, { theme, x: shell.body.x + 18, y: shell.body.y + 18, fontSize: FONT, lineHeight: LINE });
 const chart = flowchart(spec, { ...look, x: (CODE_W + 2 * M + W) / 2, y: H / 2, anchor: "center" });
 

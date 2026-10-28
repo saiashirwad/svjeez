@@ -383,9 +383,9 @@ const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, 
 ### Terminals
 
 ```tsx
-import { terminal, typewriter, window } from "svjeez/extras";
+import { terminal, typewriter, appWindow } from "svjeez/extras";
 
-const shell = window(rect(80, 50, 800, 340), { theme, title: "~/hello", dots: "traffic" });
+const shell = appWindow(rect(80, 50, 800, 340), { theme, title: "~/hello", dots: "traffic" });
 const session = terminal(
   [
     { cmd: "bun add svjeez", output: [[["muted", "installed svjeez@0.2.0"]]] },
@@ -441,7 +441,7 @@ const login = sequence(
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/sequence.svg" width="342" alt="A login sequence diagram playing message by message" />
 
 ```tsx
-const agent = state(
+const agent = stateMachine(
   {
     states: { idle: "Idle", working: { label: "Working", states: { plan: "Plan", act: "Act" }, initial: "plan" }, done: { label: "Done", final: true } },
     initial: "idle",

@@ -19,7 +19,7 @@ export interface TreeOptions extends DiagramOptions {
   readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
-export interface TreeDiagram<N extends string> extends Diagram<N> {
+export interface Tree<N extends string> extends Diagram<N> {
   /** Up from `from` to the nearest common ancestor, then down to `to`, along the drawn edges. */
   route(from: N, to: N): Point[];
 }
@@ -27,7 +27,7 @@ export interface TreeDiagram<N extends string> extends Diagram<N> {
 export function tree<const N extends Record<string, TreeSpec<string>>>(
   spec: { readonly nodes: N & { readonly [K in keyof N]: TreeSpec<Exclude<keyof N & string, K>> } },
   options: TreeOptions = {},
-): TreeDiagram<keyof N & string> {
+): Tree<keyof N & string> {
   type Id = keyof N & string;
   const { theme = defaultDark, fontSize = 14, font, class: cls, play, direction } = options;
   const look = { theme, fontSize };

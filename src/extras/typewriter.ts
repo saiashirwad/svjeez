@@ -3,7 +3,7 @@ import { def } from "../defs";
 import { el } from "../el";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import type { SvgNode } from "../svg";
-import { number, text, type Code, type Metrics } from "./code";
+import { number, text, type Code, type CodeMetrics } from "./code";
 import { tint } from "./theme";
 
 export interface TypewriterOptions {
@@ -45,7 +45,7 @@ export function typewriter(code: Code, { at, cps = 28, cursor = false, blink = t
 
 type Line = { readonly start: Seconds; readonly chars: number; readonly from: number; readonly top: number };
 
-const caret = (lines: readonly Line[], m: Metrics, color: Color, at: Seconds, end: Seconds, cps: number, blink: boolean): SvgNode => {
+const caret = (lines: readonly Line[], m: CodeMetrics, color: Color, at: Seconds, end: Seconds, cps: number, blink: boolean): SvgNode => {
   const { from: x, top: y } = lines[0]!;
   const path = lines.reduce<Motion<"x" | "y">>((track, { start, chars, from, top }) => {
     const placed = track.at(start).set({ x: from - x, y: top - y });

@@ -1,9 +1,9 @@
 import { render } from "svjeez";
-import { state } from "svjeez/extras";
+import { stateMachine } from "svjeez/extras";
 import { CSS, theme, mono } from "./kit";
 
 const M = 24;
-const agent = state(
+const agent = stateMachine(
   {
     states: { idle: "Idle", working: { label: "Working", states: { plan: "Plan", act: "Act" }, initial: "plan" }, done: { label: "Done", final: true } },
     initial: "idle",

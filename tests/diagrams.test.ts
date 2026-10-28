@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, render, type Rect, type SvgNode } from "svjeez";
-import { flowchart, lanes, sequence, state, tree } from "svjeez/extras";
+import { flowchart, lanes, sequence, stateMachine, tree } from "svjeez/extras";
 
 const valid = (node: SvgNode) => render({ width: 800, height: 600, duration: 10, title: "diagram" }, node);
 
@@ -72,7 +72,7 @@ describe("sequence", () => {
 });
 
 describe("state", () => {
-  const machine = state({
+  const machine = stateMachine({
     states: { idle: "Idle", run: { label: "Running" }, done: { label: "Done", final: true } },
     initial: "idle",
     transitions: [["idle", "run", "start"], ["run", "idle", "pause"], ["run", "done"]],
@@ -96,7 +96,7 @@ describe("state", () => {
   });
 
   test("anchor puts that point of the bounds on x, y", () => {
-    const centered = state({ states: { a: "A", b: "B" }, initial: "a", transitions: [["a", "b"]] }, { x: 400, y: 300, anchor: "center" });
+    const centered = stateMachine({ states: { a: "A", b: "B" }, initial: "a", transitions: [["a", "b"]] }, { x: 400, y: 300, anchor: "center" });
     expect(centered.bounds.center).toEqual({ x: 400, y: 300 });
     const below = sequence({ actors: { a: "A" }, messages: [] }, { x: 50, y: 20, anchor: "top" });
     expect(below.bounds.top).toEqual({ x: 50, y: 20 });
@@ -112,7 +112,7 @@ describe("state", () => {
   });
 
   describe("composite", () => {
-    const review = state({
+    const review = stateMachine({
       states: {
         draft: "Draft",
         review: { label: "Review", states: { screening: "Screening", decision: "Decision" }, initial: "screening" },

@@ -1,7 +1,7 @@
 import { el } from "../el";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import type { SvgNode } from "../svg";
-import { number, text, type Code, type Word } from "./code";
+import { number, text, type Code, type CodeWord } from "./code";
 
 export interface MorphOptions {
   /** One per transition: the move into `versions[i + 1]` starts at `at[i]`. */
@@ -16,7 +16,7 @@ export interface MorphOptions {
  * anchors the order; leftovers pair by equal content, nearest first, so swapped words cross.
  * Runs named with the same id pair first, in order, whatever their content.
  */
-export function match(a: readonly Word[], b: readonly Word[]): [number, number][] {
+export function match(a: readonly CodeWord[], b: readonly CodeWord[]): [number, number][] {
   const named = a.flatMap((w, i): [number, number][] => {
     if (w.id === undefined) return [];
     const k = a.slice(0, i).filter((v) => v.id === w.id).length;
@@ -27,7 +27,7 @@ export function match(a: readonly Word[], b: readonly Word[]): [number, number][
   return [...named, ...unnamed(ia.map((i) => a[i]!), ib.map((j) => b[j]!)).map(([i, j]): [number, number] => [ia[i]!, ib[j]!])];
 }
 
-const unnamed = (a: readonly Word[], b: readonly Word[]): [number, number][] => {
+const unnamed = (a: readonly CodeWord[], b: readonly CodeWord[]): [number, number][] => {
   const lcs = Array.from({ length: a.length + 1 }, () => new Uint32Array(b.length + 1));
   for (let i = a.length - 1; i >= 0; i--)
     for (let j = b.length - 1; j >= 0; j--) lcs[i]![j] = a[i]!.text === b[j]!.text ? 1 + lcs[i + 1]![j + 1]! : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
@@ -50,7 +50,7 @@ const unnamed = (a: readonly Word[], b: readonly Word[]): [number, number][] => 
 };
 
 interface Chain {
-  readonly word: Word;
+  readonly word: CodeWord;
   readonly code: Code;
   track?: Motion<"x" | "y" | "opacity">;
 }
@@ -65,7 +65,7 @@ export function morph(versions: readonly Code[], { at, over = 0.8, gutter = fals
     if (i > 0 && start < at[i - 1]! + over) throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
   });
   const half = over / 2;
-  const born = (word: Word, code: Code, start?: Seconds): Chain => ({
+  const born = (word: CodeWord, code: Code, start?: Seconds): Chain => ({
     word,
     code,
     track: start === undefined ? undefined : motion({ opacity: 0 }).at(start + half).to({ opacity: 1 }, half),

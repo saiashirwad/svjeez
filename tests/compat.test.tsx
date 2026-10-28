@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { render, sampled } from "svjeez";
 import { voxel } from "svjeez/voxel";
-import { flowchart, state } from "svjeez/extras";
+import { flowchart, stateMachine } from "svjeez/extras";
 
 // Node 20 has no Map.groupBy; remove it so these run as they would there.
 const native = Map.groupBy;
@@ -20,7 +20,7 @@ describe("without Map.groupBy, as on Node 20", () => {
   });
 
   test("state lays out a machine", () => {
-    const machine = state({ states: { idle: "Idle", busy: "Busy" }, initial: "idle", transitions: [["idle", "busy"], ["busy", "idle"]] }, {});
+    const machine = stateMachine({ states: { idle: "Idle", busy: "Busy" }, initial: "idle", transitions: [["idle", "busy"], ["busy", "idle"]] }, {});
     expect(machine.bounds.w).toBeGreaterThan(0);
   });
 

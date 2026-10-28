@@ -1,5 +1,5 @@
 import { draw, ease, motion, rect, render } from "svjeez";
-import { Arrow, Brace, Focus, Marker, Underline, base16, code, morph, timeline, tint, window, type Run, type Tokens } from "svjeez/extras";
+import { Arrow, Brace, Focus, Marker, Underline, base16, code, morph, timeline, tint, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
 
 const W = 1200;
 const H = 550;
@@ -13,14 +13,14 @@ const C = { bg: "#0a0b0e", head: theme.base06, body: "#8d95a6", accent: tint(the
 const tl = timeline({ setup: 4.5, problem: 5, refactor: 5, result: 6, rewind: 1.4 }, { gap: 0.6 });
 const slides = ["setup", "problem", "refactor", "result"] as const;
 
-const kw = (text: string): Run => ["keyword", text];
-const fn = (text: string, id?: string): Run => ["fn", text, id];
-const p = (text: string, id?: string): Run => ["punct", text, id];
-const str = (text: string): Run => ["string", text];
-const num = (text: string, id?: string): Run => ["number", text, id];
-const tag = (text: string): Run => ["tag", text];
+const kw = (text: string): CodeRun => ["keyword", text];
+const fn = (text: string, id?: string): CodeRun => ["fn", text, id];
+const p = (text: string, id?: string): CodeRun => ["punct", text, id];
+const str = (text: string): CodeRun => ["string", text];
+const num = (text: string, id?: string): CodeRun => ["number", text, id];
+const tag = (text: string): CodeRun => ["tag", text];
 
-const before: Tokens = [
+const before: CodeTokens = [
   [kw("function"), " ", fn("Counter"), p("() {")],
   ["  ", kw("const"), " ", p("["), "count", p(","), " ", ["plain", "setCount", "setter"], p("]"), " ", p("="), " ", fn("useState", "hook"), p("("), num("0"), p(");")],
   [],
@@ -32,7 +32,7 @@ const before: Tokens = [
   [p("}")],
 ];
 
-const after: Tokens = [
+const after: CodeTokens = [
   [kw("function"), " ", fn("Counter"), p("() {")],
   ["  ", kw("const"), " ", p("["), "count", p(","), " ", ["plain", "dispatch", "setter"], p("]"), " ", p("="), " ", fn("useReducer", "hook"), p("("), "reducer", p(","), " ", num("0"), p(");")],
   [],
@@ -49,7 +49,7 @@ const after: Tokens = [
 ];
 
 const frame = rect(40, 40, 700, 470);
-const editor = window(frame, { theme, title: "Counter.tsx", class: "mono" });
+const editor = appWindow(frame, { theme, title: "Counter.tsx", class: "mono" });
 const settings = { x: 104, y: editor.body.y + 28, fontSize: 16, lineHeight: 1.75, theme };
 const one = code(before, settings);
 const two = code(after, settings);
