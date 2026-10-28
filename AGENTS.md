@@ -86,4 +86,4 @@ git commit -am "@svjeez/vite $(node -p 'require("./packages/vite/package.json").
 
 Bump `@svjeez/vite` and `@svjeez/astro` together and the workflow publishes vite first. A new `@svjeez/vite` version reaches `@svjeez/astro` users through its `^` range, so it needs no Astro release.
 
-npm trusts a workflow one package at a time, and only for a package that it already has. A new package therefore needs one publish from a maintainer's machine. Run `npm login`, then `bun scripts/release.ts claim packages/<name>` from the root. It publishes the package's current version and trusts `release.yml` and the `npm` environment for every later version. Until then, the workflow skips the package with a warning. `bun scripts/release.ts plan` lists what the next push would release.
+npm takes a package from `release.yml` only once the package's trusted publisher names it. Before a new package's first release, add one on npmjs.com under the package's settings, with this repository, `release.yml` and the `npm` environment. npm allows this before the package exists. `bun scripts/release.ts plan` lists what the next push would release.
