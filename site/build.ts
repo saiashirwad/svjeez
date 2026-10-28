@@ -1,4 +1,5 @@
 // Builds site/public: the pages, the scenes they use, and a still poster of each scene in both color schemes.
+// A scene shows its poster whenever the play budget in site.js holds it back, so posters render at 2x to stay sharp on retina screens.
 // The scenes are discovered from `data-scene="..."` in index.html, so the page is the single list.
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { renderFrames } from "../src/frames.ts";
@@ -44,8 +45,8 @@ for (const name of names) {
   const width = Number(svg.match(/viewBox="[\d.-]+ [\d.-]+ ([\d.]+)/)![1]);
   const { duration } = await renderFrames(svg, { times: [0] });
   for (const scheme of ["light", "dark"] as const) {
-    const { frames } = await renderFrames(svg, { times: [stillAt(svg, duration)], colorScheme: scheme, scale: 1.5, background: "transparent" });
-    writeFileSync(`${PUBLIC}s/poster/${name}-${scheme}.webp`, await encode(frames[0]!.png, "webp", 0.8));
+    const { frames } = await renderFrames(svg, { times: [stillAt(svg, duration)], colorScheme: scheme, scale: 2, background: "transparent" });
+    writeFileSync(`${PUBLIC}s/poster/${name}-${scheme}.webp`, await encode(frames[0]!.png, "webp", 0.9));
   }
 }
 console.log(`${names.length} scenes, ${(gzipped / 1024).toFixed(1)} KB gzipped in all`);
