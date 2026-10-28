@@ -1,6 +1,7 @@
 ---
 import { Font } from "astro:assets";
 import Header from "../components/Header.astro";
+import { DEFAULT_PALETTE, PALETTES } from "../palettes";
 import { codeVars } from "../styles/code";
 import "../styles/site.css";
 
@@ -17,6 +18,7 @@ interface Props {
 const { title, description, share = { title, description }, class: className, current, wide } = Astro.props;
 const url = new URL(Astro.url.pathname, Astro.site);
 const image = new URL("/og.jpg", Astro.site);
+const picked = PALETTES.map(({ id }) => id).filter((id) => id !== DEFAULT_PALETTE);
 ---
 
 <!doctype html>
@@ -46,10 +48,12 @@ const image = new URL("/og.jpg", Astro.site);
     <meta name="twitter:title" content={share.title} />
     <meta name="twitter:description" content={share.description} />
     <meta name="twitter:image" content={image} />
-    <script is:inline>
+    <script is:inline define:vars={{ picked }}>
       try {
         var t = localStorage.getItem("theme");
         if (t) document.documentElement.dataset.theme = t;
+        var p = localStorage.getItem("palette");
+        if (picked.indexOf(p) >= 0) document.documentElement.dataset.palette = p;
       } catch (e) {}
     </script>
     <Font cssVariable="--font-mono" preload />
