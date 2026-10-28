@@ -8,21 +8,21 @@ import type { SvgNode } from "./svg";
 export type Hex = `#${string}`;
 
 /** One character per color. `null` is a transparent pixel. */
-export type Palette = Readonly<Record<string, Hex | null>>;
+export type VoxelPalette = Readonly<Record<string, Hex | null>>;
 
 declare const textureBrand: unique symbol;
 
 /** A parsed pixel grid. It maps onto a face with row 0 at the top. */
-export interface Texture {
+export interface VoxelTexture {
   readonly [textureBrand]: true;
   readonly width: number;
   readonly height: number;
 }
 
-export type Face = "top" | "north" | "south" | "east" | "west";
+export type VoxelFace = "top" | "north" | "south" | "east" | "west";
 
 /** Every face resolves: a bare texture covers all five, and any face not named falls back to `side`. */
-export type Skin = Texture | ({ readonly side: Texture } & { readonly [F in Face]?: Texture });
+export type VoxelSkin = VoxelTexture | ({ readonly side: VoxelTexture } & { readonly [F in VoxelFace]?: VoxelTexture });
 
 const HEX = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
 
@@ -70,9 +70,9 @@ class Grid {
   }
 }
 
-const gridOf = (texture: Texture): Grid => texture as unknown as Grid;
+const gridOf = (texture: VoxelTexture): Grid => texture as unknown as Grid;
 
-export const isOpaque = (texture: Texture): boolean => gridOf(texture).opaque;
+export const isOpaque = (texture: VoxelTexture): boolean => gridOf(texture).opaque;
 
 const shaded = (color: Hex, shade: number): Hex => {
   const [r, g, b, a] = hexBytes(color);
@@ -81,7 +81,7 @@ const shaded = (color: Hex, shade: number): Hex => {
 };
 
 /** Parse pixel art. Each line is a row and each character a palette key. */
-export const texture = (palette: Palette, art: string): Texture => {
+export const texture = (palette: VoxelPalette, art: string): VoxelTexture => {
   const lines = art.split("\n").filter((line) => line.trim() !== "");
   const indent = Math.min(...lines.map((line) => line.length - line.trimStart().length));
   const rows = lines.map((line) => [...line.slice(indent).trimEnd()]);
@@ -96,10 +96,10 @@ export const texture = (palette: Palette, art: string): Texture => {
       return color;
     });
   });
-  return new Grid(width, rows.length, pixels) as unknown as Texture;
+  return new Grid(width, rows.length, pixels) as unknown as VoxelTexture;
 };
 
-export const resolve = (skin: Skin, face: Face): Texture => ("side" in skin ? (skin[face] ?? skin.side) : skin);
+export const resolve = (skin: VoxelSkin, face: VoxelFace): VoxelTexture => ("side" in skin ? (skin[face] ?? skin.side) : skin);
 
 const faded = new WeakMap<Grid, Map<number, Ref<"symbol">>>();
 
@@ -117,7 +117,7 @@ const symbolOf = (grid: Grid, shade: number): Ref<"symbol"> => {
   return symbol;
 };
 
-export const face = (texture: Texture, shade: number, origin: Point, u: Point, v: Point, bleed: number): SvgNode => {
+export const face = (texture: VoxelTexture, shade: number, origin: Point, u: Point, v: Point, bleed: number): SvgNode => {
   const grid = gridOf(texture);
   const grow = 1 + 2 * bleed;
   const [a, b, c, d] = [(u.x * grow) / grid.width, (u.y * grow) / grid.width, (v.x * grow) / grid.height, (v.y * grow) / grid.height];

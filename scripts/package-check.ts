@@ -7,7 +7,7 @@ import { join } from "node:path";
 // CI runs it on Node 20 and 22 through tsx.
 const ROOT = join(import.meta.dirname, "..");
 const BIN = join(ROOT, "node_modules/.bin");
-const ENTRIES = ["svjeez", "svjeez/extras", "svjeez/jsx-runtime", "svjeez/jsx-dev-runtime", "svjeez/frames"];
+const ENTRIES = ["svjeez", "svjeez/extras", "svjeez/voxel", "svjeez/jsx-runtime", "svjeez/jsx-dev-runtime", "svjeez/frames"];
 
 // The @ts-expect-error fails the check if typed ids stop being checked, as they do when NoInfer is missing.
 const CONSUMER = `import { ease, enter, render } from "svjeez";

@@ -1,15 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { motion, render, voxel, type Block, type Vec3 } from "svjeez";
+import { motion, render } from "svjeez";
+import { voxel, type Vec3, type VoxelBlock } from "svjeez/voxel";
 
 const DURATION = 10;
 const camera = voxel.camera({ yaw: 45, pitch: 30, unit: 10 });
 const solid = (color: `#${string}`) => voxel.texture({ x: color }, "x");
 const [red, green, blue] = [solid("#ff0000"), solid("#00ff00"), solid("#0000ff")];
 
-const build = (blocks: readonly Block[]) =>
+const build = (blocks: readonly VoxelBlock[]) =>
   render({ width: 200, height: 200, duration: DURATION, title: "Test" }, voxel.scene({ camera, blocks }));
 
-const place = (at: Vec3, extra: Partial<Block> = {}): Block => ({ at, skin: red, ...extra });
+const place = (at: Vec3, extra: Partial<VoxelBlock> = {}): VoxelBlock => ({ at, skin: red, ...extra });
 
 const uses = (svg: string) =>
   [...svg.slice(svg.indexOf("<g>")).matchAll(/<use href="#(\w+)" x="([^"]+)" y="([^"]+)"(?: class="([^"]+)")?/g)].map(([, href, x, y, cls]) => ({
@@ -46,7 +47,7 @@ describe("voxel.scene", () => {
   });
 
   test("blocks sharing a cell keep the order given", () => {
-    const colors = (blocks: readonly Block[]) => {
+    const colors = (blocks: readonly VoxelBlock[]) => {
       const svg = build(blocks);
       return uses(svg).map((use) => topColor(svg, use.href));
     };
@@ -54,8 +55,8 @@ describe("voxel.scene", () => {
     expect(colors([place([0, 0, 0], { skin: green }), place([0, 0, 0], { skin: red })])).toEqual(["#00ff00", "#ff0000"]);
   });
 
-  test("from and until toggle visibility at those times", () => {
-    const svg = build([place([0, 0, 0], { from: 2, until: 6 })]);
+  test("from and to toggle visibility at those times", () => {
+    const svg = build([place([0, 0, 0], { from: 2, to: 6 })]);
     const cls = uses(svg)[0]!.cls!;
     expect([0, 1.9, 2.1, 5.9, 6.1, 9.9].map((t) => presenceAt(svg, cls, t))).toEqual([0, 0, 1, 1, 0, 0]);
   });
@@ -72,8 +73,8 @@ describe("voxel.scene", () => {
 
   describe("a block behind its three nearer neighbors", () => {
     const hidden = place([0, 0, 0]);
-    const cover = (extra: Partial<Block> = {}) => ([[1, 0, 0], [0, 1, 0], [0, 0, 1]] as const).map((at) => place(at, { skin: green, ...extra }));
-    const count = (covers: readonly Block[]) => uses(build([hidden, ...covers])).length;
+    const cover = (extra: Partial<VoxelBlock> = {}) => ([[1, 0, 0], [0, 1, 0], [0, 0, 1]] as const).map((at) => place(at, { skin: green, ...extra }));
+    const count = (covers: readonly VoxelBlock[]) => uses(build([hidden, ...covers])).length;
 
     test("is absent", () => expect(count(cover())).toBe(3));
 
@@ -86,11 +87,11 @@ describe("voxel.scene", () => {
     });
 
     test("is present when a neighbor lives a shorter time", () => {
-      expect(uses(build([place([0, 0, 0], { until: 8 }), ...cover({ until: 5 })])).length).toBe(4);
+      expect(uses(build([place([0, 0, 0], { to: 8 }), ...cover({ to: 5 })])).length).toBe(4);
     });
 
     test("is absent when a neighbor outlives it", () => {
-      expect(uses(build([place([0, 0, 0], { from: 2, until: 5 }), ...cover({ from: 1, until: 7 })])).length).toBe(3);
+      expect(uses(build([place([0, 0, 0], { from: 2, to: 5 }), ...cover({ from: 1, to: 7 })])).length).toBe(3);
     });
   });
 
@@ -114,7 +115,7 @@ describe("voxel.scene", () => {
   });
 
   test("output is byte-identical across runs", () => {
-    const blocks = [place([0, 0, 0]), place([1, 0, 0], { skin: green, from: 1, until: 4 }), place([0, 1, 0], { skin: blue })];
+    const blocks = [place([0, 0, 0]), place([1, 0, 0], { skin: green, from: 1, to: 4 }), place([0, 1, 0], { skin: blue })];
     expect(build(blocks)).toBe(build(blocks));
   });
 
@@ -125,7 +126,7 @@ describe("voxel.scene", () => {
 
   test("a cell must be whole and a lifetime must run forward", () => {
     expect(() => build([place([0.5, 0, 0])])).toThrow(/whole cell/);
-    expect(() => build([place([0, 0, 0], { from: 4, until: 4 })])).toThrow(/from < until/);
+    expect(() => build([place([0, 0, 0], { from: 4, to: 4 })])).toThrow(/from < to/);
   });
 });
 

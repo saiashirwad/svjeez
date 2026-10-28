@@ -28,6 +28,10 @@
       "types": "./package-dist/extras.d.ts",
       "default": "./package-dist/extras.js"
     },
+    "./voxel": {
+      "types": "./package-dist/voxel.d.ts",
+      "default": "./package-dist/voxel.js"
+    },
     "./frames": {
       "types": "./package-dist/frames.d.ts",
       "default": "./package-dist/frames.js"

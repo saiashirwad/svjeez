@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { render, sampled, voxel } from "svjeez";
+import { render, sampled } from "svjeez";
+import { voxel } from "svjeez/voxel";
 import { flowchart, state } from "svjeez/extras";
 
 // Node 20 has no Map.groupBy; remove it so these run as they would there.

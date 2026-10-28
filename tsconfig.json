@@ -32,6 +32,9 @@
       ],
       "svjeez/frames": [
         "./src/frames.ts"
+      ],
+      "svjeez/voxel": [
+        "./src/voxel.ts"
       ]
     }
   },

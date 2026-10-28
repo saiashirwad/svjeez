@@ -5,7 +5,7 @@ export type Degrees = number;
 /** World coordinates in blocks, y up. */
 export type Vec3 = readonly [x: number, y: number, z: number];
 
-export interface CameraOptions {
+export interface VoxelCameraOptions {
   /** Turn about y. 45 looks from +x +z. */
   readonly yaw: Degrees;
   /** Tilt down toward the ground, above 0 and below 90. 30 is the 2:1 pixel-art look, 35.264 is true isometric. */
@@ -15,7 +15,7 @@ export interface CameraOptions {
 }
 
 /** A fixed orthographic camera. Linear, so it maps paths, faces and offsets exactly. */
-export interface Camera extends CameraOptions {
+export interface VoxelCamera extends VoxelCameraOptions {
   /** Screen position of a world point, keyed like the `x`/`y` channels so it feeds `sampled()` directly. */
   project(p: Vec3): Point;
 }
@@ -26,12 +26,12 @@ const EDGE_ON = 1e-9;
 
 const sign = (value: number): -1 | 0 | 1 => (Math.abs(value) < EDGE_ON ? 0 : value > 0 ? 1 : -1);
 
-export const facingOf = ({ yaw }: CameraOptions): Facing => {
+export const facingOf = ({ yaw }: VoxelCameraOptions): Facing => {
   const turn = (yaw * Math.PI) / 180;
   return [sign(Math.sin(turn)), 1, sign(Math.cos(turn))];
 };
 
-export const camera = (options: CameraOptions): Camera => {
+export const camera = (options: VoxelCameraOptions): VoxelCamera => {
   const { yaw, pitch, unit } = options;
   if (!Number.isFinite(yaw)) throw new Error(`camera() needs a finite yaw, got ${yaw}.`);
   if (!(pitch > 0 && pitch < 90)) throw new Error(`camera() needs a pitch between 0 and 90 degrees, got ${pitch}.`);

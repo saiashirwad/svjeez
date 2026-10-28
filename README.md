@@ -237,7 +237,11 @@ The same props and children as JSX, in plain calls.
 
 ## Voxels
 
+Voxels live in their own entry, `svjeez/voxel`.
+
 ```tsx
+import { voxel } from "svjeez/voxel";
+
 const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 }); // unit: px per block edge
 const grass = voxel.texture(
   { g: "#5DA03A", d: "#7A5534" },
@@ -254,7 +258,7 @@ const grass = voxel.texture(
     camera: view,
     blocks: [
       { at: [0, 0, 0], skin: { side: dirt, top: grass } },
-      { at: [1, 0, 0], skin: dirt, from: 3, until: 9 }, // pops in at 3s, gone at 9s
+      { at: [1, 0, 0], skin: dirt, from: 3, to: 9 }, // pops in at 3s, gone at 9s
       { at: [0, 0, 1], skin: { side: dirt, top: grass }, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
     ],
   })}

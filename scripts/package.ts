@@ -3,7 +3,7 @@ import { readdir, readFile, rm, writeFile } from "node:fs/promises";
 await rm("package-dist", { recursive: true, force: true });
 
 const result = await Bun.build({
-  entrypoints: ["./src/index.ts", "./src/extras.ts", "./src/jsx-runtime.ts", "./src/jsx-dev-runtime.ts", "./src/frames.ts", "./src/cli.ts"],
+  entrypoints: ["./src/index.ts", "./src/extras.ts", "./src/voxel.ts", "./src/jsx-runtime.ts", "./src/jsx-dev-runtime.ts", "./src/frames.ts", "./src/cli.ts"],
   external: ["playwright-core"],
   outdir: "./package-dist",
   target: "node",

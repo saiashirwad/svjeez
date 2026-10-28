@@ -1,4 +1,4 @@
-import { voxel } from "svjeez";
+import { voxel } from "svjeez/voxel";
 
 export const W = 960;
 export const H = 600;

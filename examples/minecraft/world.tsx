@@ -1,4 +1,5 @@
-import { ease, motion, type Block, type Motion, type Seconds, type Vec3 } from "svjeez";
+import { ease, motion, type Motion, type Seconds } from "svjeez";
+import type { Vec3, VoxelBlock } from "svjeez/voxel";
 import { BEAT, GRID, random, tenth } from "./kit";
 import { COLUMNS, LAKE, PLOT, columnOf, type Column } from "./terrain";
 import { SKIN } from "./textures";
@@ -27,45 +28,45 @@ const skinAt = (column: Column, depth: number) => {
   return depth <= 2 ? SKIN.dirt : SKIN.stone;
 };
 
-const terrain = (column: Column): Block[] => {
+const terrain = (column: Column): VoxelBlock[] => {
   const { x, z, top, depth } = column;
   const [from, until] = [risesAt(column), leavesAt(column)];
-  return Array.from({ length: top + depth }, (_, i): Block => {
+  return Array.from({ length: top + depth }, (_, i): VoxelBlock => {
     const y = top - 1 - i;
     const shallow = i <= 1;
     const landed = tenth(from + 0.3);
     return i === 0
-      ? { at: [x, y, z], skin: skinAt(column, i), from: landed, until: snowy(column) ? snowsAt(column) : until, animation: life(landed, until) }
-      : { at: [x, y, z], skin: skinAt(column, i), from, until, animation: shallow ? sinks(until) : undefined };
+      ? { at: [x, y, z], skin: skinAt(column, i), from: landed, to: snowy(column) ? snowsAt(column) : until, animation: life(landed, until) }
+      : { at: [x, y, z], skin: skinAt(column, i), from, to: until, animation: shallow ? sinks(until) : undefined };
   });
 };
 
 const snowy = ({ kind }: Column): boolean => kind === "grass" || kind === "stone";
 
-const water = ({ x, z, top }: Column): Block[] => {
+const water = ({ x, z, top }: Column): VoxelBlock[] => {
   const shore = Math.hypot(x - LAKE.x, z - LAKE.z);
   const [filled, frozen] = [tenth(BEAT.lake + shore * 0.35), tenth(BEAT.freeze + shore * 0.2)];
   const until = leavesAt(columnOf(x, z)!);
   return [
-    { at: [x, top, z], skin: SKIN.water, from: filled, until: frozen, animation: motion({ y: -6 }).at(filled).to({ y: 0 }, 0.6) },
-    { at: [x, top, z], skin: SKIN.ice, from: frozen, until, animation: sinks(until) },
+    { at: [x, top, z], skin: SKIN.water, from: filled, to: frozen, animation: motion({ y: -6 }).at(filled).to({ y: 0 }, 0.6) },
+    { at: [x, top, z], skin: SKIN.ice, from: frozen, to: until, animation: sinks(until) },
   ];
 };
 
-const snow = (column: Column): Block[] =>
+const snow = (column: Column): VoxelBlock[] =>
   snowy(column)
-    ? [{ at: [column.x, column.top - 1, column.z], skin: SKIN.snow, from: snowsAt(column), until: leavesAt(column), animation: sinks(leavesAt(column)) }]
+    ? [{ at: [column.x, column.top - 1, column.z], skin: SKIN.snow, from: snowsAt(column), to: leavesAt(column), animation: sinks(leavesAt(column)) }]
     : [];
 
 interface Part {
   readonly at: Vec3;
-  readonly skin: Block["skin"];
+  readonly skin: VoxelBlock["skin"];
 }
 
-const built = (parts: readonly Part[], start: Seconds, step: Seconds, gone: (at: Vec3) => Seconds): Block[] =>
-  parts.map(({ at, skin }, i): Block => {
+const built = (parts: readonly Part[], start: Seconds, step: Seconds, gone: (at: Vec3) => Seconds): VoxelBlock[] =>
+  parts.map(({ at, skin }, i): VoxelBlock => {
     const [from, until] = [tenth(start + i * step), gone(at)];
-    return { at, skin, from, until, animation: life(from, until) };
+    return { at, skin, from, to: until, animation: life(from, until) };
   });
 
 const nearPlot = ({ x, z }: Column, margin: number): boolean =>
@@ -107,7 +108,7 @@ const CROWN_TOPS = LEAF_CELLS.filter(([dx, y, dz]) => !LEAF_CELLS.some(([ox, oy,
 
 const fallsAt = (top: number, y: number): Seconds => tenth(BEAT.fall + (top + 7 - y) * 0.08);
 
-const tree = ({ x, z, top }: Column, start: Seconds): Block[] => {
+const tree = ({ x, z, top }: Column, start: Seconds): VoxelBlock[] => {
   const goes = (y: number): Seconds => fallsAt(top, y);
   const trunk = built(range(0, 3).map((i): Part => ({ at: [x, top + i, z], skin: SKIN.log })), start + 0.8, 0.45, ([, y]) => goes(y));
   const canopyStart = start + 3;
@@ -120,22 +121,22 @@ const tree = ({ x, z, top }: Column, start: Seconds): Block[] => {
   return [...trunk, ...crown];
 };
 
-const crownTops = ({ x, z, top }: Column): Block[] =>
-  CROWN_TOPS.map(([dx, y, dz]): Block => {
+const crownTops = ({ x, z, top }: Column): VoxelBlock[] =>
+  CROWN_TOPS.map(([dx, y, dz]): VoxelBlock => {
     const at: Vec3 = [x + dx, top + 3 + y, z + dz];
     const until = fallsAt(top, at[1]);
-    return { at, skin: SKIN.snowCap, from: tenth(BEAT.snow + 1.5 + (1 - nearness({ x: at[0], z: at[2] })) * 3), until, animation: sinks(until) };
+    return { at, skin: SKIN.snowCap, from: tenth(BEAT.snow + 1.5 + (1 - nearness({ x: at[0], z: at[2] })) * 3), to: until, animation: sinks(until) };
   });
 
-const flowers = (): Block[] => {
+const flowers = (): VoxelBlock[] => {
   const free = COLUMNS.filter(
     (column) => column.kind === "grass" && column.top === 3 && !nearPlot(column, 1) && !TREES.some((t) => Math.hypot(t.x - column.x, t.z - column.z) < 2.5),
   );
   const chosen = shuffled(free, 23).slice(0, 9);
   const step = (BEAT.flowersEnd - BEAT.flowers) / chosen.length;
-  return chosen.map(({ x, z, top }, i): Block => {
+  return chosen.map(({ x, z, top }, i): VoxelBlock => {
     const [from, until] = [tenth(BEAT.flowers + i * step), tenth(BEAT.void + 0.2 * i)];
-    return { at: [x, top, z], skin: i % 2 ? SKIN.flowerYellow : SKIN.flowerRed, from, until, animation: life(from, until) };
+    return { at: [x, top, z], skin: i % 2 ? SKIN.flowerYellow : SKIN.flowerRed, from, to: until, animation: life(from, until) };
   });
 };
 
@@ -150,7 +151,7 @@ const window = ([i, j]: readonly [number, number]) => windows.some(([a, b]) => a
 
 const spiral = (cells: readonly (readonly [number, number])[]) => cells.toSorted(([a, b], [c, d]) => -(a + b) + (c + d) || a - c);
 
-const hut = (): Block[] => {
+const hut = (): VoxelBlock[] => {
   const goes = (y: number): Seconds => tenth(BEAT.fall + (7 - y) * 0.1);
   const level = (y: number): Part[] =>
     spiral(ring)
@@ -164,19 +165,19 @@ const hut = (): Block[] => {
 
 const POST = columnOf(PLOT.x + 5, PLOT.z + 4)!;
 
-const lantern = (): Block[] => {
+const lantern = (): VoxelBlock[] => {
   const [from, until] = [tenth(BEAT.hutEnd - 0.4), goes()];
   return [
-    { at: [POST.x, POST.top, POST.z], skin: SKIN.log, from, until, animation: life(from, until) },
-    { at: [POST.x, POST.top + 1, POST.z], skin: SKIN.lampOff, from: tenth(from + 0.3), until, animation: life(tenth(from + 0.3), until) },
+    { at: [POST.x, POST.top, POST.z], skin: SKIN.log, from, to: until, animation: life(from, until) },
+    { at: [POST.x, POST.top + 1, POST.z], skin: SKIN.lampOff, from: tenth(from + 0.3), to: until, animation: life(tenth(from + 0.3), until) },
   ];
 };
 
 const goes = (): Seconds => tenth(BEAT.fall + 0.4);
 
-const lit = (): Block[] => {
+const lit = (): VoxelBlock[] => {
   const lamps: readonly Vec3[] = [...windows.map(([i, j]) => hutAt(i, j, PLOT.top + 1)), [POST.x, POST.top + 1, POST.z]];
-  return lamps.map((at): Block => ({ at, skin: SKIN.lampOn, from: BEAT.lights, until: BEAT.lightsOut }));
+  return lamps.map((at): VoxelBlock => ({ at, skin: SKIN.lampOn, from: BEAT.lights, to: BEAT.lightsOut }));
 };
 
 export const LIGHTS: readonly Vec3[] = [
@@ -184,7 +185,7 @@ export const LIGHTS: readonly Vec3[] = [
   [POST.x + 1, POST.top + 1.5, POST.z + 0.5],
 ];
 
-export const island = (): Block[] => [
+export const island = (): VoxelBlock[] => [
   ...COLUMNS.flatMap(terrain),
   ...COLUMNS.filter((column) => column.kind === "lake").flatMap(water),
   ...TREES.flatMap((column, i) => tree(column, BEAT.trees[i]!)),

@@ -1,4 +1,4 @@
-import { voxel, type Skin } from "svjeez";
+import { voxel, type VoxelSkin } from "svjeez/voxel";
 
 const art = voxel.texture;
 
@@ -252,4 +252,4 @@ export const SKIN = {
   lampOff,
   lampOn,
   cloud,
-} as const satisfies Record<string, Skin>;
+} as const satisfies Record<string, VoxelSkin>;

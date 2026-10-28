@@ -1,4 +1,5 @@
-import { ease, motion, render, voxel } from "svjeez";
+import { ease, motion, render } from "svjeez";
+import { voxel } from "svjeez/voxel";
 import { CAMERA, D, H, ORIGIN, W } from "./kit";
 import { Backdrop, Clouds, Glow, Moon, Night, Shadow, Snow, Stars, Sun } from "./sky";
 import { island } from "./world";
