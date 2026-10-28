@@ -7,7 +7,7 @@
 //
 // npm trusts a workflow one package at a time, and only for a package it already has. So a new package's first version
 // goes out through `claim`, which publishes it with the maintainer's npm login and then trusts release.yml with the rest.
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { appendFileSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
@@ -234,6 +234,27 @@ const publish = async () => {
   }
 };
 
+/**
+ * Runs `npm publish` with its output and login prompts shown live. A version staged by an earlier claim is not on the
+ * registry yet, so `published()` misses it and npm refuses the second publish. That refusal resolves to true.
+ */
+const stage = (args: readonly string[], cwd: string) =>
+  new Promise<boolean>((done, fail) => {
+    const child = spawn("npm", args, { cwd, stdio: ["inherit", "inherit", "pipe"] });
+    let errors = "";
+
+    child.stderr.on("data", (chunk: Buffer) => {
+      process.stderr.write(chunk);
+      errors += chunk;
+    });
+    child.on("error", fail);
+    child.on("close", (code) => {
+      if (code === 0) done(false);
+      else if (errors.includes("previously staged version")) done(true);
+      else fail(new Error(`npm ${args.join(" ")} exited with ${code}.`));
+    });
+  });
+
 const claim = async (dir: string | undefined) => {
   if (!dir)
     throw new Error(
@@ -255,12 +276,16 @@ const claim = async (dir: string | undefined) => {
     console.log(`${name} is already on npm, so this only adds the trusted publisher.`);
   else {
     if (pkg.out !== pkg.dir) run("bun", ["run", "build:package"], pkg.dir);
-    execFileSync("npm", ["publish", "--access", "public", "--tag", distTag(version)], {
-      cwd: pkg.out,
-      stdio: "inherit",
-    });
+    const staged = await stage(
+      ["publish", "--access", "public", "--tag", distTag(version)],
+      pkg.out,
+    );
+
     console.log(
-      `npm stages a new package's first version. Approve ${name} ${version} under Staged Packages on npmjs.com, or with \`npm stage approve\`.`,
+      staged
+        ? `${name} ${version} is already staged from an earlier claim, so this only adds the trusted publisher.`
+        : `npm stages a new package's first version.`,
+      `Approve ${name} ${version} under Staged Packages on npmjs.com, or with \`npm stage approve\`.`,
     );
   }
 
