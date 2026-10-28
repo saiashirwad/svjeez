@@ -494,6 +494,10 @@ render(
 
 `render` throws if the output is invalid.
 
+Scenes loop by default. With `loop: false` the scene plays once and holds its last frame. Shorter loops inside it, such as a `wiggle`, repeat until the scene ends and then stop. The [delegation tree](examples/tree/index.tsx) plays once and keeps the finished tree on screen.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/tree.svg" width="480" alt="A delegation tree revealed level by level, then a message runs from docs to tests, and the finished tree stays on screen" />
+
 ## Validation
 
 ```tsx
