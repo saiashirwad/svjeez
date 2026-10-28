@@ -1,5 +1,5 @@
 ---
-import { POSTER_WIDTH, REPO, sections } from "../../examples";
+import { POSTER_WIDTH, sections, SOURCES } from "../../examples";
 import Base from "../../layouts/Base.astro";
 
 /** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
@@ -40,7 +40,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   </main>
   <footer class="wrap foot">
     <span>Find the source for every scene on GitHub.</span>
-    <nav aria-label="Footer"><a href={`${REPO}/tree/main/examples`}>All sources</a><a href="/">Home</a></nav>
+    <nav aria-label="Footer"><a href={SOURCES}>All sources</a><a href="/">Home</a></nav>
   </footer>
 </Base>
 

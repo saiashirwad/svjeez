@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
-import { compileScene } from "../site/src/playground/core";
-import { validateSvg } from "../src/index";
+import { validateSvg } from "svjeez";
+import { compileScene } from "./core";
 
-const dir = new URL("../site/src/playground/examples/", import.meta.url);
+const dir = new URL("examples/", import.meta.url);
 const examples = readdirSync(dir).map((file) => ({ id: file.replace(".tsx.txt", ""), source: readFileSync(new URL(file, dir), "utf8") }));
 
 describe("playground", () => {

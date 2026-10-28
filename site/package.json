@@ -6,9 +6,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check",
     "deploy": "alchemy deploy",
-    "destroy": "alchemy destroy"
+    "destroy": "alchemy destroy",
+    "typecheck": "astro check",
+    "test": "bun test --conditions @svjeez/source"
   },
   "dependencies": {
     "@alchemy.run/cloudflare": "^2.0.0-beta.84",
@@ -20,15 +21,19 @@
     "@effect/platform-bun": "^4.0.6",
     "@effect/platform-node": "^4.0.6",
     "@lezer/highlight": "^1.2.5",
+    "@svjeez/astro": "workspace:*",
     "alchemy": "^2.0.0-beta.84",
     "astro": "^7.4.3",
     "effect": "^4.0.6",
-    "sucrase": "^3.35.1"
+    "sucrase": "^3.35.1",
+    "svjeez": "workspace:*"
   },
   "devDependencies": {
     "@alchemy.run/frontend-frameworks": "2.0.0-beta.84",
     "@astrojs/check": "^0.9.12",
+    "@types/bun": "^1.4.4",
     "playwright-core": "^1.64.1",
-    "typescript": "6"
+    "typescript": "6",
+    "vite": "8.3.5"
   }
 }

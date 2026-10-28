@@ -4,13 +4,10 @@
     "jsx": "react-jsx",
     "jsxImportSource": "svjeez",
     "noUncheckedIndexedAccess": true,
+    "types": ["bun"],
+    "customConditions": ["@svjeez/source"],
     "paths": {
-      "svjeez": ["../src/index.ts"],
-      "svjeez/jsx-runtime": ["../src/jsx-runtime.ts"],
-      "svjeez/jsx-dev-runtime": ["../src/jsx-dev-runtime.ts"],
-      "svjeez/extras": ["../src/extras.ts"],
-      "svjeez/frames": ["../src/frames.ts"],
-      "@examples/*": ["../examples/*"]
+      "@examples/*": ["../packages/svjeez/examples/*"]
     }
   },
   "include": [".astro/types.d.ts", "**/*"],

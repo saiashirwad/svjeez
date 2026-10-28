@@ -1,0 +1,8 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
+    "customConditions": ["@svjeez/source"]
+  },
+  "include": ["src", "client.d.ts"]
+}

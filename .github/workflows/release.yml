@@ -19,6 +19,9 @@ jobs:
     permissions:
       contents: write
       id-token: write
+    defaults:
+      run:
+        working-directory: packages/svjeez
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

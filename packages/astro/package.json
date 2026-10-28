@@ -1,0 +1,30 @@
+{
+  "name": "@svjeez/astro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Astro integration for svjeez: import a scene into a page and get an animated SVG, with poster stills.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./encode": "./src/encode.ts",
+    "./client": {
+      "types": "./client.d.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "svjeez": "workspace:*"
+  },
+  "peerDependencies": {
+    "astro": ">=7",
+    "playwright-core": ">=1.49"
+  },
+  "devDependencies": {
+    "astro": "^7.4.3",
+    "playwright-core": "^1.64.1",
+    "typescript": "6"
+  }
+}

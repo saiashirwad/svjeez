@@ -1,6 +1,6 @@
 // An Astro integration for svjeez scenes. Import a scene's .tsx into a page and hand it to <Scene> or getScene() from
 // "svjeez:astro": the dev server compiles it on request and reloads when it changes, and the build writes each SVG and
-// its poster stills under /_svjeez/, named by content.
+// its poster stills under /_svjeez/, named by content. Posters need playwright-core and a Chromium build.
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -42,8 +42,9 @@ export default function svjeez(): AstroIntegration {
           },
         });
       },
-      "astro:config:done": ({ config }) => {
+      "astro:config:done": ({ config, injectTypes }) => {
         assets.cache = new URL("svjeez/", config.cacheDir);
+        injectTypes({ filename: "types.d.ts", content: '/// <reference types="@svjeez/astro/client" />' });
       },
       "astro:server:setup": ({ server }) => {
         server.middlewares.use(ROUTE, async (request, response, next) => {

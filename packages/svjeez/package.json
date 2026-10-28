@@ -1,0 +1,96 @@
+{
+  "name": "svjeez",
+  "version": "0.6.0",
+  "type": "module",
+  "sideEffects": false,
+  "types": "./package-dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "package-dist/*.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "@svjeez/source": "./src/index.ts",
+      "types": "./package-dist/index.d.ts",
+      "default": "./package-dist/index.js"
+    },
+    "./jsx-runtime": {
+      "@svjeez/source": "./src/jsx-runtime.ts",
+      "types": "./package-dist/jsx-runtime.d.ts",
+      "default": "./package-dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "@svjeez/source": "./src/jsx-dev-runtime.ts",
+      "types": "./package-dist/jsx-dev-runtime.d.ts",
+      "default": "./package-dist/jsx-dev-runtime.js"
+    },
+    "./extras": {
+      "@svjeez/source": "./src/extras.ts",
+      "types": "./package-dist/extras.d.ts",
+      "default": "./package-dist/extras.js"
+    },
+    "./voxel": {
+      "@svjeez/source": "./src/voxel.ts",
+      "types": "./package-dist/voxel.d.ts",
+      "default": "./package-dist/voxel.js"
+    },
+    "./frames": {
+      "@svjeez/source": "./src/frames.ts",
+      "types": "./package-dist/frames.d.ts",
+      "default": "./package-dist/frames.js"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "svjeez": "./package-dist/cli.js"
+  },
+  "scripts": {
+    "build": "bun run scripts/build.ts",
+    "dev": "bun run scripts/preview.ts",
+    "test": "bun test",
+    "test:node": "tsx scripts/node-check.ts",
+    "test:package": "tsx scripts/package-check.ts",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun run scripts/package.ts",
+    "prepack": "bun run build:package",
+    "svjeez": "bun run src/cli.ts",
+    "render-png": "bun run src/cli.ts frames"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@types/bun": "latest",
+    "playwright-core": "^1.64.1",
+    "publint": "^0.3.25",
+    "sucrase": "^3.35.1",
+    "tsx": "^4.23.15",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "playwright-core": ">=1.49",
+    "typescript": ">=5.4"
+  },
+  "peerDependenciesMeta": {
+    "playwright-core": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
+  },
+  "description": "Animated SVGs in TSX. One file out, no JavaScript.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/svjeez"
+  },
+  "files": [
+    "package-dist",
+    "skills"
+  ]
+}
