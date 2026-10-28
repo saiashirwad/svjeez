@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 672 98" width="672" height="98" role="img" aria-labelledby="t d">
+  <title id="t">A dot-matrix meter</title>
+  <desc id="d">A row of dots rises and falls like a level meter. It is one SVG file made of rectangles filled with a dot pattern.</desc>
+  <defs>
+    <pattern id="p1" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="7" cy="7" r="4.2" fill="var(--base02)"/>
+    </pattern>
+    <pattern id="p2" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="7" cy="7" r="4.2" fill="var(--base0B)"/>
+    </pattern>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,18.75%,50%,97.917%,100%{height:42px}8.333%{height:56px}27.083%,62.5%,89.583%{height:28px}68.75%{height:14px}}
+.m1{animation-name:k1;animation-timing-function:steps(1)}
+@keyframes k2{0%,18.75%,50%,95.833%,100%{height:42px}6.25%{height:56px}27.083%,62.5%,89.583%{height:28px}68.75%{height:14px}}
+.m2{animation-name:k2;animation-timing-function:steps(1)}
+@keyframes k3{0%,18.75%,50%,95.833%,100%{height:42px}2.083%{height:56px}25%,64.583%,89.583%{height:28px}70.833%{height:14px}}
+.m3{animation-name:k3;animation-timing-function:steps(1)}
+@keyframes k4{0%,97.917%,100%{height:56px}18.75%,47.917%,95.833%{height:42px}25%,37.5%,62.5%,91.667%{height:28px}35.417%,70.833%{height:14px}}
+.m4{animation-name:k4;animation-timing-function:steps(1)}
+@keyframes k5{0%,10.417%,97.917%,100%{height:56px}4.167%{height:70px}18.75%,47.917%,95.833%{height:42px}25%,39.583%,62.5%,91.667%{height:28px}33.333%,70.833%{height:14px}}
+.m5{animation-name:k5;animation-timing-function:steps(1)}
+@keyframes k6{0%,12.5%,97.917%,100%{height:56px}4.167%{height:70px}18.75%,47.917%,95.833%{height:42px}25%,39.583%,64.583%,91.667%{height:28px}33.333%,70.833%{height:14px}}
+.m6{animation-name:k6;animation-timing-function:steps(1)}
+@keyframes k7{0%,14.583%,97.917%,100%{height:56px}4.167%{height:70px}18.75%,47.917%,95.833%{height:42px}25%,39.583%,64.583%,89.583%{height:28px}33.333%,70.833%{height:14px}}
+.m7{animation-name:k7;animation-timing-function:steps(1)}
+@keyframes k8{0%,14.583%,56.25%,97.917%,100%{height:56px}4.167%{height:70px}20.833%,47.917%,60.417%,93.75%{height:42px}25%,39.583%,66.667%,89.583%{height:28px}33.333%,70.833%{height:14px}}
+.m8{animation-name:k8;animation-timing-function:steps(1)}
+@keyframes k9{0%,14.583%,56.25%,97.917%,100%{height:56px}2.083%{height:70px}20.833%,47.917%,62.5%,93.75%{height:42px}25%,39.583%,68.75%,89.583%{height:28px}31.25%,72.917%{height:14px}}
+.m9{animation-name:k9;animation-timing-function:steps(1)}
+@keyframes k10{0%,14.583%,56.25%,95.833%,100%{height:56px}2.083%{height:70px}20.833%,47.917%,64.583%,93.75%{height:42px}25%,37.5%,68.75%,89.583%{height:28px}31.25%,72.917%{height:14px}}
+.m10{animation-name:k10;animation-timing-function:steps(1)}
+@keyframes k11{0%,97.917%,100%{height:70px}14.583%,56.25%,95.833%{height:56px}20.833%,47.917%,64.583%,93.75%{height:42px}25%,37.5%,70.833%,89.583%{height:28px}31.25%,75%{height:14px}}
+.m11{animation-name:k11;animation-timing-function:steps(1)}
+@keyframes k12{0%,97.917%,100%{height:70px}14.583%,58.333%,95.833%{height:56px}18.75%,45.833%,64.583%,93.75%{height:42px}25%,37.5%,72.917%,89.583%{height:28px}31.25%,79.167%{height:14px}}
+.m12{animation-name:k12;animation-timing-function:steps(1)}
+@keyframes k13{0%,14.583%,97.917%,100%{height:56px}2.083%{height:70px}18.75%,45.833%,93.75%{height:42px}22.917%,37.5%,75%,87.5%{height:28px}31.25%,83.333%{height:14px}}
+.m13{animation-name:k13;animation-timing-function:steps(1)}
+@keyframes k14{0%,14.583%,97.917%,100%{height:56px}2.083%{height:70px}18.75%,45.833%,93.75%{height:42px}22.917%,37.5%,79.167%{height:28px}29.167%{height:14px}}
+.m14{animation-name:k14;animation-timing-function:steps(1)}
+@keyframes k15{0%,14.583%,54.167%,97.917%,100%{height:56px}4.167%{height:70px}18.75%,45.833%,58.333%{height:42px}22.917%,37.5%{height:28px}29.167%{height:14px}}
+.m15{animation-name:k15;animation-timing-function:steps(1)}
+@keyframes k16{0%,52.083%,97.917%,100%{height:56px}18.75%,43.75%,60.417%{height:42px}22.917%,37.5%{height:28px}29.167%{height:14px}}
+.m16{animation-name:k16;animation-timing-function:steps(1)}
+@keyframes k17{0%,52.083%,85.417%,100%{height:56px}16.667%,43.75%,60.417%,77.083%{height:42px}22.917%,37.5%,68.75%{height:28px}29.167%{height:14px}}
+.m17{animation-name:k17;animation-timing-function:steps(1)}
+@keyframes k18{0%,50%,85.417%,95.833%,100%{height:56px}8.333%,43.75%,60.417%,79.167%{height:42px}20.833%,37.5%,68.75%{height:28px}29.167%{height:14px}93.75%{height:70px}}
+.m18{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%,91.667%,100%{height:70px}2.083%,50%,87.5%{height:56px}8.333%,43.75%,60.417%,81.25%{height:42px}14.583%,37.5%,68.75%{height:28px}27.083%{height:14px}}
+.m19{animation-name:k19;animation-timing-function:steps(1)}
+@keyframes k20{0%,91.667%,100%{height:70px}4.167%,50%,87.5%{height:56px}8.333%,43.75%,60.417%,83.333%{height:42px}12.5%,35.417%,68.75%{height:28px}18.75%{height:14px}}
+.m20{animation-name:k20;animation-timing-function:steps(1)}
+@keyframes k21{0%,91.667%,100%{height:70px}6.25%,50%,89.583%{height:56px}8.333%,43.75%,60.417%,83.333%{height:42px}12.5%,35.417%,68.75%{height:28px}16.667%{height:14px}}
+.m21{animation-name:k21;animation-timing-function:steps(1)}
+@keyframes k22{0%,93.75%,100%{height:70px}6.25%,50%,89.583%{height:56px}10.417%,41.667%,60.417%,85.417%{height:42px}12.5%,35.417%,68.75%{height:28px}16.667%{height:14px}}
+.m22{animation-name:k22;animation-timing-function:steps(1)}
+@keyframes k23{0%,95.833%,100%{height:70px}6.25%,50%,89.583%{height:56px}10.417%,41.667%,60.417%,85.417%{height:42px}14.583%,37.5%,68.75%{height:28px}16.667%{height:14px}}
+.m23{animation-name:k23;animation-timing-function:steps(1)}
+@keyframes k24{0%,97.917%,100%{height:70px}6.25%,47.917%,91.667%{height:56px}10.417%,41.667%,60.417%,85.417%{height:42px}14.583%,37.5%,66.667%{height:28px}16.667%{height:14px}}
+.m24{animation-name:k24;animation-timing-function:steps(1)}
+@keyframes k25{0%,47.917%,91.667%,100%{height:56px}10.417%,41.667%,60.417%,85.417%{height:42px}14.583%,37.5%,66.667%{height:28px}16.667%{height:14px}}
+.m25{animation-name:k25;animation-timing-function:steps(1)}
+@keyframes k26{0%,47.917%,91.667%,100%{height:56px}8.333%,41.667%,60.417%,85.417%{height:42px}14.583%,39.583%,66.667%{height:28px}16.667%{height:14px}}
+.m26{animation-name:k26;animation-timing-function:steps(1)}
+@keyframes k27{0%,47.917%,91.667%,100%{height:56px}8.333%,43.75%,58.333%,87.5%{height:42px}12.5%,39.583%,66.667%,79.167%{height:28px}16.667%,77.083%{height:14px}}
+.m27{animation-name:k27;animation-timing-function:steps(1)}
+@keyframes k28{0%,47.917%,93.75%,100%{height:56px}6.25%,43.75%,58.333%,87.5%{height:42px}12.5%,39.583%,66.667%,79.167%{height:28px}16.667%,77.083%{height:14px}}
+.m28{animation-name:k28;animation-timing-function:steps(1)}
+@keyframes k29{0%,47.917%,95.833%,100%{height:56px}6.25%,43.75%,58.333%,89.583%{height:42px}10.417%,39.583%,64.583%{height:28px}14.583%{height:14px}}
+.m29{animation-name:k29;animation-timing-function:steps(1)}
+@keyframes k30{0%,47.917%,97.917%,100%{height:56px}6.25%,41.667%,58.333%,89.583%{height:42px}10.417%,37.5%,64.583%{height:28px}14.583%{height:14px}}
+.m30{animation-name:k30;animation-timing-function:steps(1)}
+@keyframes k31{0%,41.667%,58.333%,91.667%,100%{height:42px}10.417%,35.417%,64.583%{height:28px}16.667%{height:14px}47.917%{height:56px}}
+.m31{animation-name:k31;animation-timing-function:steps(1)}
+@keyframes k32{0%,39.583%,58.333%,89.583%,100%{height:42px}10.417%,35.417%,64.583%,77.083%{height:28px}16.667%,72.917%{height:14px}45.833%{height:56px}}
+.m32{animation-name:k32;animation-timing-function:steps(1)}
+@keyframes k33{0%,39.583%,58.333%,87.5%,100%{height:42px}2.083%,35.417%,64.583%,77.083%{height:28px}16.667%,72.917%{height:14px}43.75%{height:56px}}
+.m33{animation-name:k33;animation-timing-function:steps(1)}
+@keyframes k34{0%,33.333%,64.583%,77.083%,97.917%,100%{height:28px}14.583%,72.917%{height:14px}39.583%,58.333%,87.5%{height:42px}43.75%{height:56px}}
+.m34{animation-name:k34;animation-timing-function:steps(1)}
+@keyframes k35{0%,25%,64.583%,77.083%,97.917%,100%{height:28px}6.25%,72.917%{height:14px}37.5%,58.333%,85.417%{height:42px}43.75%{height:56px}}
+.m35{animation-name:k35;animation-timing-function:steps(1)}
+@keyframes k36{0%,31.25%,58.333%,85.417%,100%{height:42px}2.083%,25%,64.583%,77.083%{height:28px}6.25%,70.833%{height:14px}41.667%{height:56px}}
+.m36{animation-name:k36;animation-timing-function:steps(1)}
+@keyframes k37{0%,29.167%,58.333%,85.417%,100%{height:42px}4.167%,25%,64.583%,77.083%{height:28px}8.333%,70.833%{height:14px}35.417%{height:56px}}
+.m37{animation-name:k37;animation-timing-function:steps(1)}
+@keyframes k38{0%,29.167%,56.25%,85.417%,97.917%,100%{height:42px}4.167%,25%,62.5%,77.083%{height:28px}8.333%,70.833%{height:14px}33.333%,47.917%,93.75%{height:56px}39.583%{height:70px}}
+.m38{animation-name:k38;animation-timing-function:steps(1)}
+@keyframes k39{0%,29.167%,56.25%,85.417%,97.917%,100%{height:42px}6.25%,27.083%,62.5%,77.083%{height:28px}10.417%,70.833%{height:14px}33.333%,50%,93.75%{height:56px}35.417%{height:70px}}
+.m39{animation-name:k39;animation-timing-function:steps(1)}
+@keyframes k40{0%,31.25%,56.25%,85.417%,97.917%,100%{height:42px}6.25%,27.083%,62.5%,77.083%{height:28px}10.417%,70.833%{height:14px}33.333%,52.083%,93.75%{height:56px}35.417%,47.917%{height:70px}39.583%{height:84px}}
+.m40{animation-name:k40;animation-timing-function:steps(1)}
+@keyframes k41{0%,31.25%,56.25%,85.417%,97.917%,100%{height:42px}6.25%,29.167%,60.417%,77.083%{height:28px}12.5%,68.75%{height:14px}33.333%,54.167%,93.75%{height:56px}37.5%,50%{height:70px}39.583%{height:84px}}
+.m41{animation-name:k41;animation-timing-function:steps(1)}
+@keyframes k42{0%,31.25%,58.333%,83.333%,97.917%,100%{height:42px}8.333%,29.167%,60.417%,77.083%{height:28px}12.5%,66.667%{height:14px}35.417%,54.167%,91.667%{height:56px}37.5%,52.083%{height:70px}39.583%{height:84px}}
+.m42{animation-name:k42;animation-timing-function:steps(1)}
+@keyframes k43{0%,33.333%,58.333%,83.333%,97.917%,100%{height:42px}8.333%,27.083%,62.5%,77.083%{height:28px}14.583%,66.667%{height:14px}35.417%,56.25%,91.667%{height:56px}37.5%,52.083%{height:70px}41.667%{height:84px}}
+.m43{animation-name:k43;animation-timing-function:steps(1)}
+@keyframes k44{0%,31.25%,58.333%,83.333%,97.917%,100%{height:42px}8.333%,25%,62.5%,77.083%{height:28px}16.667%,66.667%{height:14px}35.417%,56.25%,91.667%{height:56px}39.583%,52.083%{height:70px}43.75%{height:84px}}
+.m44{animation-name:k44;animation-timing-function:steps(1)}
+@keyframes k45{0%,29.167%,60.417%,83.333%,97.917%,100%{height:42px}8.333%,62.5%,77.083%{height:28px}35.417%,56.25%,89.583%{height:56px}39.583%,50%{height:70px}47.917%{height:84px}66.667%{height:14px}}
+.m45{animation-name:k45;animation-timing-function:steps(1)}
+@keyframes k46{0%,27.083%,60.417%,83.333%,97.917%,100%{height:42px}8.333%,62.5%,77.083%{height:28px}33.333%,54.167%,89.583%{height:56px}41.667%{height:70px}68.75%{height:14px}}
+.m46{animation-name:k46;animation-timing-function:steps(1)}
+@keyframes k47{0%,27.083%,58.333%,83.333%,97.917%,100%{height:42px}8.333%,62.5%,77.083%{height:28px}33.333%,50%,89.583%{height:56px}39.583%{height:70px}68.75%{height:14px}}
+.m47{animation-name:k47;animation-timing-function:steps(1)}
+@keyframes k48{0%,27.083%,56.25%,83.333%,97.917%,100%{height:42px}8.333%,62.5%,77.083%{height:28px}31.25%,47.917%,89.583%{height:56px}39.583%{height:70px}68.75%{height:14px}}
+.m48{animation-name:k48;animation-timing-function:steps(1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-3s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="672" height="98" fill="url(#p1)"/>
+  <g transform="translate(0 98) scale(1 -1)">
+    <rect x="0" width="14" height="42" fill="url(#p2)" class="a m1"/>
+    <rect x="14" width="14" height="42" fill="url(#p2)" class="a m2"/>
+    <rect x="28" width="14" height="42" fill="url(#p2)" class="a m3"/>
+    <rect x="42" width="14" height="56" fill="url(#p2)" class="a m4"/>
+    <rect x="56" width="14" height="56" fill="url(#p2)" class="a m5"/>
+    <rect x="70" width="14" height="56" fill="url(#p2)" class="a m6"/>
+    <rect x="84" width="14" height="56" fill="url(#p2)" class="a m7"/>
+    <rect x="98" width="14" height="56" fill="url(#p2)" class="a m8"/>
+    <rect x="112" width="14" height="56" fill="url(#p2)" class="a m9"/>
+    <rect x="126" width="14" height="56" fill="url(#p2)" class="a m10"/>
+    <rect x="140" width="14" height="70" fill="url(#p2)" class="a m11"/>
+    <rect x="154" width="14" height="70" fill="url(#p2)" class="a m12"/>
+    <rect x="168" width="14" height="56" fill="url(#p2)" class="a m13"/>
+    <rect x="182" width="14" height="56" fill="url(#p2)" class="a m14"/>
+    <rect x="196" width="14" height="56" fill="url(#p2)" class="a m15"/>
+    <rect x="210" width="14" height="56" fill="url(#p2)" class="a m16"/>
+    <rect x="224" width="14" height="56" fill="url(#p2)" class="a m17"/>
+    <rect x="238" width="14" height="56" fill="url(#p2)" class="a m18"/>
+    <rect x="252" width="14" height="70" fill="url(#p2)" class="a m19"/>
+    <rect x="266" width="14" height="70" fill="url(#p2)" class="a m20"/>
+    <rect x="280" width="14" height="70" fill="url(#p2)" class="a m21"/>
+    <rect x="294" width="14" height="70" fill="url(#p2)" class="a m22"/>
+    <rect x="308" width="14" height="70" fill="url(#p2)" class="a m23"/>
+    <rect x="322" width="14" height="70" fill="url(#p2)" class="a m24"/>
+    <rect x="336" width="14" height="56" fill="url(#p2)" class="a m25"/>
+    <rect x="350" width="14" height="56" fill="url(#p2)" class="a m26"/>
+    <rect x="364" width="14" height="56" fill="url(#p2)" class="a m27"/>
+    <rect x="378" width="14" height="56" fill="url(#p2)" class="a m28"/>
+    <rect x="392" width="14" height="56" fill="url(#p2)" class="a m29"/>
+    <rect x="406" width="14" height="56" fill="url(#p2)" class="a m30"/>
+    <rect x="420" width="14" height="42" fill="url(#p2)" class="a m31"/>
+    <rect x="434" width="14" height="42" fill="url(#p2)" class="a m32"/>
+    <rect x="448" width="14" height="42" fill="url(#p2)" class="a m33"/>
+    <rect x="462" width="14" height="28" fill="url(#p2)" class="a m34"/>
+    <rect x="476" width="14" height="28" fill="url(#p2)" class="a m35"/>
+    <rect x="490" width="14" height="42" fill="url(#p2)" class="a m36"/>
+    <rect x="504" width="14" height="42" fill="url(#p2)" class="a m37"/>
+    <rect x="518" width="14" height="42" fill="url(#p2)" class="a m38"/>
+    <rect x="532" width="14" height="42" fill="url(#p2)" class="a m39"/>
+    <rect x="546" width="14" height="42" fill="url(#p2)" class="a m40"/>
+    <rect x="560" width="14" height="42" fill="url(#p2)" class="a m41"/>
+    <rect x="574" width="14" height="42" fill="url(#p2)" class="a m42"/>
+    <rect x="588" width="14" height="42" fill="url(#p2)" class="a m43"/>
+    <rect x="602" width="14" height="42" fill="url(#p2)" class="a m44"/>
+    <rect x="616" width="14" height="42" fill="url(#p2)" class="a m45"/>
+    <rect x="630" width="14" height="42" fill="url(#p2)" class="a m46"/>
+    <rect x="644" width="14" height="42" fill="url(#p2)" class="a m47"/>
+    <rect x="658" width="14" height="42" fill="url(#p2)" class="a m48"/>
+  </g>
+</svg>

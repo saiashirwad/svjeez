@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 340" width="504" height="340" role="img" aria-labelledby="t d">
+  <title id="t">Code explainers</title>
+  <desc id="d">Five lines of TSX type out. A spotlight moves across them and a note explains each: draw strokes the path on over two seconds, enter fades the dot in at three.</desc>
+  <defs>
+    <mask id="m1">
+      <rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" class="a m2"/>
+      <g class="a m3">
+        <rect x="26" y="58" width="344.1" height="82.875" fill="#fff"/>
+      </g>
+      <g class="a m4">
+        <rect x="26" y="199.75" width="279.3" height="59.25" fill="#fff"/>
+      </g>
+    </mask>
+    <clipPath id="c1">
+      <rect x="32" y="64" width="0" height="23.625" class="a m5"/>
+    </clipPath>
+    <clipPath id="c2">
+      <rect x="48.2" y="87.625" width="0" height="23.625" class="a m6"/>
+    </clipPath>
+    <clipPath id="c3">
+      <rect x="48.2" y="111.25" width="0" height="23.625" class="a m7"/>
+    </clipPath>
+    <clipPath id="c4">
+      <rect x="32" y="205.75" width="0" height="23.625" class="a m8"/>
+    </clipPath>
+    <clipPath id="c5">
+      <rect x="48.2" y="229.375" width="0" height="23.625" class="a m9"/>
+    </clipPath>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:14s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,36.218%,59.076%,61.933%,84.79%,100%{opacity:1}38.361%,56.933%,64.076%,82.647%{opacity:0.28}}
+.m2{animation-name:k1}
+@keyframes k2{0%,36.218%,59.076%,100%{opacity:0}38.361%,56.933%{opacity:1}}
+.m3{animation-name:k2}
+@keyframes k3{0%,61.933%,84.79%,100%{opacity:0}64.076%,82.647%{opacity:1}}
+.m4{animation-name:k3}
+@keyframes k4{0%,3.571%{width:0px}6.513%,100%{width:113.4px}}
+.m5{animation-name:k4;animation-timing-function:steps(14)}
+@keyframes k5{0%,6.723%{width:0px}10.084%,100%{width:129.6px}}
+.m6{animation-name:k5;animation-timing-function:steps(16)}
+@keyframes k6{0%,10.294%{width:0px}18.487%,100%{width:315.9px}}
+.m7{animation-name:k6;animation-timing-function:steps(39)}
+@keyframes k7{0%,19.328%{width:0px}25.21%,100%{width:226.8px}}
+.m8{animation-name:k7;animation-timing-function:steps(28)}
+@keyframes k8{0%,25.42%{width:0px}31.933%,100%{width:251.1px}}
+.m9{animation-name:k8;animation-timing-function:steps(31)}
+@keyframes k9{0%{opacity:1}50%,100%{opacity:0}}
+.m10{animation-name:k9;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k10{0%,31.933%,100%{opacity:0}3.571%{opacity:1}}
+.m11{animation-name:k10;animation-timing-function:steps(1)}
+@keyframes k11{0%,31.933%,100%{visibility:hidden}3.571%{visibility:visible}}
+@keyframes k12{0%{translate:0px 0px}3.571%{translate:0px 0px;animation-timing-function:steps(14)}6.513%{translate:113.4px 0px}6.723%{translate:16.2px 23.625px;animation-timing-function:steps(16)}10.084%{translate:145.8px 23.625px}10.294%{translate:16.2px 47.25px;animation-timing-function:steps(39)}18.487%{translate:332.1px 47.25px}18.697%{translate:0px 70.875px}18.908%{translate:0px 94.5px}19.118%{translate:0px 118.125px}19.328%{translate:0px 141.75px;animation-timing-function:steps(28)}25.21%{translate:226.8px 141.75px}25.42%{translate:16.2px 165.375px;animation-timing-function:steps(31)}31.933%,100%{translate:267.3px 165.375px}}
+.m12{animation-name:k11,k12;animation-timing-function:steps(1),steps(1)}
+@keyframes k13{0%,36.218%,59.076%,100%{opacity:0}37.647%,57.647%{opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,61.933%,84.79%,100%{opacity:0}63.361%,83.361%{opacity:1}}
+.m14{animation-name:k14}
+@keyframes k15{0%,96.429%{opacity:1}100%{opacity:0}}
+.m15{animation-name:k15}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-12s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h503" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">wave.tsx</text>
+  </g>
+  <g class="a m15">
+    <g mask="url(#m1)">
+      <g class="mono">
+        <g>
+          <g clip-path="url(#c1)">
+            <text x="32" y="80.538" font-family="monospace" font-size="13.5" fill="var(--base08)">&lt;path</text>
+            <text x="80.6" y="80.538" font-family="monospace" font-size="13.5" fill="var(--base05)">d</text>
+            <text x="88.7" y="80.538" font-family="monospace" font-size="13.5" fill="var(--base04)">={</text>
+            <text x="104.9" y="80.538" font-family="monospace" font-size="13.5" fill="var(--base05)">wave</text>
+            <text x="137.3" y="80.538" font-family="monospace" font-size="13.5" fill="var(--base04)">}</text>
+          </g>
+          <g clip-path="url(#c2)">
+            <text x="48.2" y="104.163" font-family="monospace" font-size="13.5" fill="var(--base05)">stroke</text>
+            <text x="96.8" y="104.163" font-family="monospace" font-size="13.5" fill="var(--base04)">=</text>
+            <text x="104.9" y="104.163" font-family="monospace" font-size="13.5" fill="var(--base0B)">"#0A6CFF"</text>
+          </g>
+          <g clip-path="url(#c3)">
+            <text x="48.2" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base05)">animation</text>
+            <text x="121.1" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base04)">={</text>
+            <text x="137.3" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base0D)">draw</text>
+            <text x="169.7" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base04)">({</text>
+            <text x="194" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base05)">at</text>
+            <text x="210.2" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base04)">:</text>
+            <text x="226.4" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base09)">1</text>
+            <text x="234.5" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base04)">,</text>
+            <text x="250.7" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base05)">over</text>
+            <text x="283.1" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base04)">:</text>
+            <text x="299.3" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base09)">2</text>
+            <text x="315.5" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base04)">})}</text>
+            <text x="347.9" y="127.788" font-family="monospace" font-size="13.5" fill="var(--base08)">/&gt;</text>
+          </g>
+          <g clip-path="url(#c4)">
+            <text x="32" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base08)">&lt;circle</text>
+            <text x="96.8" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base05)">r</text>
+            <text x="104.9" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base04)">={</text>
+            <text x="121.1" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base09)">8</text>
+            <text x="129.2" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base04)">}</text>
+            <text x="145.4" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base05)">fill</text>
+            <text x="177.8" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base04)">=</text>
+            <text x="185.9" y="222.288" font-family="monospace" font-size="13.5" fill="var(--base0B)">"#FF9F0A"</text>
+          </g>
+          <g clip-path="url(#c5)">
+            <text x="48.2" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base05)">animation</text>
+            <text x="121.1" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base04)">={</text>
+            <text x="137.3" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base0D)">enter</text>
+            <text x="177.8" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base04)">({</text>
+            <text x="202.1" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base05)">at</text>
+            <text x="218.3" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base04)">:</text>
+            <text x="234.5" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base09)">3</text>
+            <text x="250.7" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base04)">})}</text>
+            <text x="283.1" y="245.913" font-family="monospace" font-size="13.5" fill="var(--base08)">/&gt;</text>
+          </g>
+          <g class="a m12">
+            <rect x="32" y="67.375" width="8.1" height="16.875" fill="var(--base0D)" fill-opacity="0.8" class="a m10"/>
+            <rect x="32" y="67.375" width="8.1" height="16.875" fill="var(--base0D)" fill-opacity="0.8" class="a m11"/>
+          </g>
+        </g>
+      </g>
+    </g>
+    <g class="sans">
+      <g class="a m13">
+        <path d="M153.5 154.875L153.5 134.875" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+        <rect x="38.2" y="154.875" width="230.6" height="52.4" rx="6" fill="var(--base0D)" fill-opacity="0.08" stroke="var(--base0D)" stroke-opacity="0.4"/>
+        <text x="48.2" y="175.875" font-size="13" fill="var(--base0D)">draw() strokes the path on,</text>
+        <text x="48.2" y="194.075" font-size="13" fill="var(--base0D)">from 1s to 3s.</text>
+      </g>
+      <g class="a m14">
+        <path d="M157.55 273L157.55 253" fill="none" stroke="var(--base09)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+        <rect x="42.25" y="273" width="230.6" height="52.4" rx="6" fill="var(--base09)" fill-opacity="0.08" stroke="var(--base09)" stroke-opacity="0.4"/>
+        <text x="52.25" y="294" font-size="13" fill="var(--base09)">enter() fades the dot in at</text>
+        <text x="52.25" y="312.2" font-size="13" fill="var(--base09)">3s.</text>
+      </g>
+    </g>
+  </g>
+</svg>

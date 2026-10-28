@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 340" width="504" height="340" role="img" aria-labelledby="t d">
+  <title id="t">A tree that grows</title>
+  <desc id="d">An agent team revealed level by level: a lead, three workers and two children, then a dot runs between branches.</desc>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:7s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,2.143%{stroke-dashoffset:1;visibility:hidden}7.143%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,6.393%{opacity:0}7.143%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,9.286%{stroke-dashoffset:1;visibility:hidden}14.286%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,13.536%{opacity:0}14.286%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,16.429%{stroke-dashoffset:1;visibility:hidden}21.429%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,20.679%{opacity:0}21.429%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,23.571%{stroke-dashoffset:1;visibility:hidden}28.571%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,27.821%{opacity:0}28.571%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,30.714%{stroke-dashoffset:1;visibility:hidden}35.714%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,34.964%{opacity:0}35.714%,100%{opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,7.143%{opacity:0}12.143%,100%{opacity:1}}
+@keyframes k12{0%,7.143%{scale:0.9}12.143%,100%{scale:1}}
+.m11{animation-name:k11,k12}
+@keyframes k13{0%,14.286%{opacity:0}19.286%,100%{opacity:1}}
+@keyframes k14{0%,14.286%{scale:0.9}19.286%,100%{scale:1}}
+.m12{animation-name:k13,k14}
+@keyframes k15{0%,21.429%{opacity:0}26.429%,100%{opacity:1}}
+@keyframes k16{0%,21.429%{scale:0.9}26.429%,100%{scale:1}}
+.m13{animation-name:k15,k16}
+@keyframes k17{0%,28.571%{opacity:0}33.571%,100%{opacity:1}}
+@keyframes k18{0%,28.571%{scale:0.9}33.571%,100%{scale:1}}
+.m14{animation-name:k17,k18}
+@keyframes k19{0%,35.714%{opacity:0}40.714%,100%{opacity:1}}
+@keyframes k20{0%,35.714%{scale:0.9}40.714%,100%{scale:1}}
+.m15{animation-name:k19,k20}
+@keyframes k21{0%,68.863%,100%{visibility:hidden}42.857%{visibility:visible}}
+@keyframes k22{0%,42.857%{translate:146px 247px}46.218%{translate:146px 207px}49.076%{translate:146px 173px}49.412%{translate:146px 169px}50%{translate:150.555px 163.688px}51.068%{translate:162.563px 159.5px}52.524%{translate:179.539px 156.063px}54.18%{translate:199px 153px}55.835%{translate:218.461px 149.938px}57.291%{translate:235.438px 146.5px}58.359%{translate:247.445px 142.313px}58.947%{translate:252px 137px}59.283%{translate:252px 133px}62.645%{translate:252px 173px}65.502%{translate:252px 207px}68.863%,100%{translate:252px 247px}}
+.m16{animation-name:k21,k22;animation-timing-function:steps(1),linear}
+@keyframes k23{0%,92.857%{opacity:1}100%{opacity:0}}
+.m17{animation-name:k23}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-5s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h503" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">team.tsx</text>
+  </g>
+  <g class="a m17">
+    <g class="sans">
+      <g>
+        <path d="M252 133L252 137C252 153 146 153 146 164L146 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+        <path d="M146 173L142 165L150 165Z" fill="var(--base04)" class="a m2"/>
+      </g>
+      <g>
+        <path d="M252 133L252 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+        <path d="M252 173L248 165L256 165Z" fill="var(--base04)" class="a m4"/>
+      </g>
+      <g>
+        <path d="M252 133L252 137C252 153 358 153 358 164L358 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+        <path d="M358 173L354 165L362 165Z" fill="var(--base04)" class="a m6"/>
+      </g>
+      <g>
+        <path d="M146 207L146 240" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m7"/>
+        <path d="M146 247L142 239L150 239Z" fill="var(--base04)" class="a m8"/>
+      </g>
+      <g>
+        <path d="M252 207L252 240" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m9"/>
+        <path d="M252 247L248 239L256 239Z" fill="var(--base04)" class="a m10"/>
+      </g>
+      <g>
+        <path d="M232.39999999999998 99H271.59999999999997Q279.59999999999997 99 279.59999999999997 107V125Q279.59999999999997 133 271.59999999999997 133H232.39999999999998Q224.39999999999998 133 224.39999999999998 125V107Q224.39999999999998 99 232.39999999999998 99Z" fill="var(--base00)"/>
+        <path d="M232.39999999999998 99H271.59999999999997Q279.59999999999997 99 279.59999999999997 107V125Q279.59999999999997 133 271.59999999999997 133H232.39999999999998Q224.39999999999998 133 224.39999999999998 125V107Q224.39999999999998 99 232.39999999999998 99Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="252" y="120.2" font-size="12" text-anchor="middle" fill="var(--base05)">Lead</text>
+      </g>
+      <g class="a m11 fb">
+        <path d="M106.19999999999999 173H185.79999999999998Q188.79999999999998 173 188.79999999999998 176V204Q188.79999999999998 207 185.79999999999998 207H106.19999999999999Q103.19999999999999 207 103.19999999999999 204V176Q103.19999999999999 173 106.19999999999999 173Z" fill="var(--base00)"/>
+        <path d="M106.19999999999999 173H185.79999999999998Q188.79999999999998 173 188.79999999999998 176V204Q188.79999999999998 207 185.79999999999998 207H106.19999999999999Q103.19999999999999 207 103.19999999999999 204V176Q103.19999999999999 173 106.19999999999999 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M111.19999999999999 173V207M180.79999999999998 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+        <text x="146" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Search</text>
+      </g>
+      <g class="a m12 fb">
+        <path d="M215.79999999999998 173H288.2Q291.2 173 291.2 176V204Q291.2 207 288.2 207H215.79999999999998Q212.79999999999998 207 212.79999999999998 204V176Q212.79999999999998 173 215.79999999999998 173Z" fill="var(--base00)"/>
+        <path d="M215.79999999999998 173H288.2Q291.2 173 291.2 176V204Q291.2 207 288.2 207H215.79999999999998Q212.79999999999998 207 212.79999999999998 204V176Q212.79999999999998 173 215.79999999999998 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M220.79999999999998 173V207M283.2 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+        <text x="252" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Build</text>
+      </g>
+      <g class="a m13 fb">
+        <path d="M318.2 173H397.79999999999995Q400.79999999999995 173 400.79999999999995 176V204Q400.79999999999995 207 397.79999999999995 207H318.2Q315.2 207 315.2 204V176Q315.2 173 318.2 173Z" fill="var(--base00)"/>
+        <path d="M318.2 173H397.79999999999995Q400.79999999999995 173 400.79999999999995 176V204Q400.79999999999995 207 397.79999999999995 207H318.2Q315.2 207 315.2 204V176Q315.2 173 318.2 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M323.2 173V207M392.79999999999995 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+        <text x="358" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Review</text>
+      </g>
+      <g class="a m14 fb">
+        <path d="M126.39999999999998 247H165.59999999999997Q173.59999999999997 247 173.59999999999997 255V273Q173.59999999999997 281 165.59999999999997 281H126.39999999999998Q118.39999999999998 281 118.39999999999998 273V255Q118.39999999999998 247 126.39999999999998 247Z" fill="var(--base00)"/>
+        <path d="M126.39999999999998 247H165.59999999999997Q173.59999999999997 247 173.59999999999997 255V273Q173.59999999999997 281 165.59999999999997 281H126.39999999999998Q118.39999999999998 281 118.39999999999998 273V255Q118.39999999999998 247 126.39999999999998 247Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="146" y="268.2" font-size="12" text-anchor="middle" fill="var(--base05)">Docs</text>
+      </g>
+      <g class="a m15 fb">
+        <path d="M228.79999999999998 247H275.2Q283.2 247 283.2 255V273Q283.2 281 275.2 281H228.79999999999998Q220.79999999999998 281 220.79999999999998 273V255Q220.79999999999998 247 228.79999999999998 247Z" fill="var(--base00)"/>
+        <path d="M228.79999999999998 247H275.2Q283.2 247 283.2 255V273Q283.2 281 275.2 281H228.79999999999998Q220.79999999999998 281 220.79999999999998 273V255Q220.79999999999998 247 228.79999999999998 247Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="252" y="268.2" font-size="12" text-anchor="middle" fill="var(--base05)">Tests</text>
+      </g>
+    </g>
+    <circle r="4.5" fill="var(--base09)" class="a m16"/>
+  </g>
+</svg>

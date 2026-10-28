@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 340" width="504" height="340" role="img" aria-labelledby="t d">
+  <title id="t">Terminal recordings</title>
+  <desc id="d">Three svjeez commands typed into a terminal: frames, svg and skill, each with its output.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="24" y="62" width="0" height="21.875" class="a m1"/>
+    </clipPath>
+    <clipPath id="c2">
+      <rect x="24" y="171.375" width="0" height="21.875" class="a m10"/>
+    </clipPath>
+    <clipPath id="c3">
+      <rect x="24" y="193.25" width="0" height="21.875" class="a m14"/>
+    </clipPath>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,5%{width:0px}20%,100%{width:337.5px}}
+.m1{animation-name:k1;animation-timing-function:steps(45)}
+@keyframes k2{0%{opacity:1}50%,100%{opacity:0}}
+.m2{animation-name:k2;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k3{0%,20%,100%{opacity:0}5%{opacity:1}}
+.m3{animation-name:k3;animation-timing-function:steps(1)}
+@keyframes k4{0%,5%{translate:0px 0px}20%,100%{translate:337.5px 0px}}
+.m4{animation-name:k3,k4;animation-timing-function:steps(1),steps(45)}
+@keyframes k5{0%{opacity:0}23.5%,100%{opacity:1}}
+.m5{animation-name:k5;animation-timing-function:steps(1)}
+@keyframes k6{0%{opacity:0}24.1%,100%{opacity:1}}
+.m6{animation-name:k6;animation-timing-function:steps(1)}
+@keyframes k7{0%{opacity:0}24.7%,100%{opacity:1}}
+.m7{animation-name:k7;animation-timing-function:steps(1)}
+@keyframes k8{0%{opacity:0}25.3%,100%{opacity:1}}
+.m8{animation-name:k8;animation-timing-function:steps(1)}
+@keyframes k9{0%{visibility:hidden}5%,100%{visibility:visible}}
+.m9{animation-name:k9;animation-timing-function:steps(1)}
+@keyframes k10{0%,30.9%{width:0px}44.9%,100%{width:315px}}
+.m10{animation-name:k10;animation-timing-function:steps(42)}
+@keyframes k11{0%,44.9%,100%{opacity:0}30.9%{opacity:1}}
+.m11{animation-name:k11;animation-timing-function:steps(1)}
+@keyframes k12{0%,30.9%{translate:0px 0px}44.9%,100%{translate:315px 0px}}
+.m12{animation-name:k11,k12;animation-timing-function:steps(1),steps(42)}
+@keyframes k13{0%{visibility:hidden}30.9%,100%{visibility:visible}}
+.m13{animation-name:k13;animation-timing-function:steps(1)}
+@keyframes k14{0%,53.4%{width:0px}62.733%,100%{width:210px}}
+.m14{animation-name:k14;animation-timing-function:steps(28)}
+@keyframes k15{0%,62.733%,100%{opacity:0}53.4%{opacity:1}}
+.m15{animation-name:k15;animation-timing-function:steps(1)}
+@keyframes k16{0%{opacity:0}53.4%,100%{opacity:1}}
+@keyframes k17{0%,53.4%{translate:0px 0px}62.733%,100%{translate:210px 0px}}
+.m16{animation-name:k16,k17;animation-timing-function:steps(1),steps(28)}
+@keyframes k18{0%{opacity:0}66.233%,100%{opacity:1}}
+.m17{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%{visibility:hidden}53.4%,100%{visibility:visible}}
+.m18{animation-name:k19;animation-timing-function:steps(1)}
+@keyframes k20{0%,95%{opacity:1}100%{opacity:0}}
+.m19{animation-name:k20}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="#1C1C1E" stroke="#3A3A3C"/>
+    <path d="M0.5 40.5h503" stroke="#2C2C2E"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="#FF6961"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="#FFD60A"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="#32D74B"/>
+    <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="#A1A1A6">~/hello, zsh</text>
+  </g>
+  <g class="mono a m19">
+    <g>
+      <g class="a m9">
+        <g>
+          <g clip-path="url(#c1)">
+            <text x="24" y="77.313" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+            <text x="39" y="77.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">npx</text>
+            <text x="69" y="77.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">svjeez</text>
+            <text x="121.5" y="77.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">frames</text>
+            <text x="174" y="77.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.tsx</text>
+            <text x="249" y="77.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">--times</text>
+            <text x="309" y="77.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">0,1.5,3</text>
+          </g>
+          <g class="a m4">
+            <rect x="24" y="65.125" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m2"/>
+            <rect x="24" y="65.125" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m3"/>
+          </g>
+        </g>
+        <g class="a m5">
+          <g>
+            <text x="24" y="99.188" font-family="monospace" font-size="12.5" fill="#7C7C82">loop</text>
+            <text x="61.5" y="99.188" font-family="monospace" font-size="12.5" fill="#7C7C82">4s,</text>
+            <text x="91.5" y="99.188" font-family="monospace" font-size="12.5" fill="#7C7C82">light</text>
+          </g>
+        </g>
+        <g class="a m6">
+          <g>
+            <text x="24" y="121.063" font-family="monospace" font-size="12.5" fill="#32D74B">frames/frame-00-0_000s.png</text>
+          </g>
+        </g>
+        <g class="a m7">
+          <g>
+            <text x="24" y="142.938" font-family="monospace" font-size="12.5" fill="#32D74B">frames/frame-01-1_500s.png</text>
+          </g>
+        </g>
+        <g class="a m8">
+          <g>
+            <text x="24" y="164.813" font-family="monospace" font-size="12.5" fill="#32D74B">frames/frame-02-3_000s.png</text>
+          </g>
+        </g>
+      </g>
+      <g class="a m13">
+        <g>
+          <g clip-path="url(#c2)">
+            <text x="24" y="186.688" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+            <text x="39" y="186.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">npx</text>
+            <text x="69" y="186.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">svjeez</text>
+            <text x="121.5" y="186.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">svg</text>
+            <text x="151.5" y="186.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.tsx</text>
+            <text x="226.5" y="186.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">--out</text>
+            <text x="271.5" y="186.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.svg</text>
+          </g>
+          <g class="a m12">
+            <rect x="24" y="174.5" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m2"/>
+            <rect x="24" y="174.5" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m11"/>
+          </g>
+        </g>
+      </g>
+      <g class="a m18">
+        <g>
+          <g clip-path="url(#c3)">
+            <text x="24" y="208.563" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+            <text x="39" y="208.563" font-family="monospace" font-size="12.5" fill="#E5E5EA">npx</text>
+            <text x="69" y="208.563" font-family="monospace" font-size="12.5" fill="#E5E5EA">svjeez</text>
+            <text x="121.5" y="208.563" font-family="monospace" font-size="12.5" fill="#E5E5EA">skill</text>
+            <text x="166.5" y="208.563" font-family="monospace" font-size="12.5" fill="#E5E5EA">--install</text>
+          </g>
+          <g class="a m16">
+            <rect x="24" y="196.375" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m2"/>
+            <rect x="24" y="196.375" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m15"/>
+          </g>
+        </g>
+        <g class="a m17">
+          <g>
+            <text x="24" y="230.438" font-family="monospace" font-size="12.5" fill="#7C7C82">installed</text>
+            <text x="99" y="230.438" font-family="monospace" font-size="12.5" fill="#7C7C82">the</text>
+            <text x="129" y="230.438" font-family="monospace" font-size="12.5" fill="#7C7C82">svjeez</text>
+            <text x="181.5" y="230.438" font-family="monospace" font-size="12.5" fill="#7C7C82">skill</text>
+            <text x="226.5" y="230.438" font-family="monospace" font-size="12.5" fill="#7C7C82">in</text>
+            <text x="249" y="230.438" font-family="monospace" font-size="12.5" fill="#7C7C82">.claude/skills/svjeez</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

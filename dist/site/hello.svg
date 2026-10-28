@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200" role="img" aria-labelledby="t">
+  <title id="t">Arc</title>
+  <style><![CDATA[
+.a{animation-duration:4s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,7.5%{stroke-dashoffset:1;visibility:hidden}45%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,40%{scale:0}52.5%,100%{scale:1}}
+.m2{animation-name:k2;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-3.4s!important;animation-play-state:paused!important}}
+]]></style>
+  <path d="M40 150C100 30 220 30 280 150" fill="none" stroke="#34C759" stroke-width="6" pathLength="1" stroke-dasharray="1" class="a m1"/>
+  <circle cx="160" cy="62" r="9" fill="#0A6CFF" class="a m2 fb"/>
+</svg>

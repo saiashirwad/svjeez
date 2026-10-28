@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 420" width="1032" height="420" role="img" aria-labelledby="t d">
+  <title id="t">Motions on a timeline</title>
+  <desc id="d">A motion chain types out. Beside it the same chain is drawn as one track per channel, a playhead sweeps across them, and a square fades in, drops into place, grows and turns orange exactly as the chain says.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="28" y="68" width="0" height="24.7" class="a m1"/>
+    </clipPath>
+    <clipPath id="c2">
+      <rect x="43.6" y="92.7" width="0" height="24.7" class="a m2"/>
+    </clipPath>
+    <clipPath id="c3">
+      <rect x="43.6" y="117.4" width="0" height="24.7" class="a m3"/>
+    </clipPath>
+    <clipPath id="c4">
+      <rect x="43.6" y="142.1" width="0" height="24.7" class="a m4"/>
+    </clipPath>
+    <clipPath id="c5">
+      <rect x="43.6" y="166.8" width="0" height="24.7" class="a m5"/>
+    </clipPath>
+    <clipPath id="c6">
+      <rect x="43.6" y="191.5" width="0" height="24.7" class="a m6"/>
+    </clipPath>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,5%{width:0px}10.273%,100%{width:226.2px}}
+.m1{animation-name:k1;animation-timing-function:steps(29)}
+@keyframes k2{0%,10.455%{width:0px}11.909%,100%{width:62.4px}}
+.m2{animation-name:k2;animation-timing-function:steps(8)}
+@keyframes k3{0%,12.091%{width:0px}19.364%,100%{width:312px}}
+.m3{animation-name:k3;animation-timing-function:steps(40)}
+@keyframes k4{0%,19.545%{width:0px}21.364%,100%{width:78px}}
+.m4{animation-name:k4;animation-timing-function:steps(10)}
+@keyframes k5{0%,21.545%{width:0px}29%,100%{width:319.8px}}
+.m5{animation-name:k5;animation-timing-function:steps(41)}
+@keyframes k6{0%,29.182%{width:0px}35.364%,100%{width:265.2px}}
+.m6{animation-name:k6;animation-timing-function:steps(34)}
+@keyframes k7{0%{opacity:1}50%,100%{opacity:0}}
+.m7{animation-name:k7;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k8{0%,35.364%,100%{opacity:0}5%{opacity:1}}
+.m8{animation-name:k8;animation-timing-function:steps(1)}
+@keyframes k9{0%,35.364%,100%{visibility:hidden}5%{visibility:visible}}
+@keyframes k10{0%{translate:0px 0px}5%{translate:0px 0px;animation-timing-function:steps(29)}10.273%{translate:226.2px 0px}10.455%{translate:15.6px 24.7px;animation-timing-function:steps(8)}11.909%{translate:78px 24.7px}12.091%{translate:15.6px 49.4px;animation-timing-function:steps(40)}19.364%{translate:327.6px 49.4px}19.545%{translate:15.6px 74.1px;animation-timing-function:steps(10)}21.364%{translate:93.6px 74.1px}21.545%{translate:15.6px 98.8px;animation-timing-function:steps(41)}29%{translate:335.4px 98.8px}29.182%{translate:15.6px 123.5px;animation-timing-function:steps(34)}35.364%,100%{translate:280.8px 123.5px}}
+.m9{animation-name:k9,k10;animation-timing-function:steps(1),steps(1)}
+@keyframes k11{0%,95%{opacity:1}100%{opacity:0}}
+.m10{animation-name:k11}
+@keyframes k12{0%,68.364%{fill:var(--base0D)}73.364%,100%{fill:var(--base09)}}
+@keyframes k13{0%,47.364%{opacity:0}53.364%,100%{opacity:1}}
+@keyframes k14{0%,47.364%{translate:0px 40px}53.364%,100%{translate:0px 0px}}
+@keyframes k15{0%,68.364%,77.364%,100%{scale:1}73.364%{scale:1.5;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.m11{animation-name:k12,k13,k14,k15;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k16{0%,47.364%{width:0px}53.364%,100%{width:67.2px}}
+.m12{animation-name:k16;animation-timing-function:linear}
+@keyframes k17{0%,68.364%{width:0px}73.364%,100%{width:56px}}
+.m13{animation-name:k17;animation-timing-function:linear}
+@keyframes k18{0%,73.364%{width:0px}77.364%,100%{width:44.8px}}
+.m14{animation-name:k18;animation-timing-function:linear}
+@keyframes k19{0%,42.364%{translate:0px 0px}77.364%,100%{translate:392px 0px}}
+.m15{animation-name:k19;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="1031" height="419" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h1031" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="516" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">motion.ts</text>
+  </g>
+  <path d="M452 40V420" stroke="var(--base02)"/>
+  <g class="mono a m10">
+    <g>
+      <g clip-path="url(#c1)">
+        <text x="28" y="84.9" font-family="monospace" font-size="13" fill="var(--base0D)">motion</text>
+        <text x="74.8" y="84.9" font-family="monospace" font-size="13" fill="var(--base04)">({</text>
+        <text x="98.2" y="84.9" font-family="monospace" font-size="13" fill="var(--base05)">opacity</text>
+        <text x="152.8" y="84.9" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+        <text x="168.4" y="84.9" font-family="monospace" font-size="13" fill="var(--base09)">0</text>
+        <text x="176.2" y="84.9" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+        <text x="191.8" y="84.9" font-family="monospace" font-size="13" fill="var(--base05)">y</text>
+        <text x="199.6" y="84.9" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+        <text x="215.2" y="84.9" font-family="monospace" font-size="13" fill="var(--base09)">40</text>
+        <text x="238.6" y="84.9" font-family="monospace" font-size="13" fill="var(--base04)">})</text>
+      </g>
+      <g clip-path="url(#c2)">
+        <text x="43.6" y="109.6" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+        <text x="51.4" y="109.6" font-family="monospace" font-size="13" fill="var(--base0D)">at</text>
+        <text x="67" y="109.6" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+        <text x="74.8" y="109.6" font-family="monospace" font-size="13" fill="var(--base09)">0.5</text>
+        <text x="98.2" y="109.6" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+      </g>
+      <g clip-path="url(#c3)">
+        <text x="43.6" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+        <text x="51.4" y="134.3" font-family="monospace" font-size="13" fill="var(--base0D)">to</text>
+        <text x="67" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">({</text>
+        <text x="90.4" y="134.3" font-family="monospace" font-size="13" fill="var(--base05)">opacity</text>
+        <text x="145" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+        <text x="160.6" y="134.3" font-family="monospace" font-size="13" fill="var(--base09)">1</text>
+        <text x="168.4" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+        <text x="184" y="134.3" font-family="monospace" font-size="13" fill="var(--base05)">y</text>
+        <text x="191.8" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+        <text x="207.4" y="134.3" font-family="monospace" font-size="13" fill="var(--base09)">0</text>
+        <text x="223" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">},</text>
+        <text x="246.4" y="134.3" font-family="monospace" font-size="13" fill="var(--base09)">0.6</text>
+        <text x="269.8" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+        <text x="285.4" y="134.3" font-family="monospace" font-size="13" fill="var(--base05)">ease</text>
+        <text x="316.6" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+        <text x="324.4" y="134.3" font-family="monospace" font-size="13" fill="var(--base05)">pop</text>
+        <text x="347.8" y="134.3" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+      </g>
+      <g clip-path="url(#c4)">
+        <text x="43.6" y="159" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+        <text x="51.4" y="159" font-family="monospace" font-size="13" fill="var(--base0D)">wait</text>
+        <text x="82.6" y="159" font-family="monospace" font-size="13" fill="var(--base04)">(</text>
+        <text x="90.4" y="159" font-family="monospace" font-size="13" fill="var(--base09)">1.5</text>
+        <text x="113.8" y="159" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+      </g>
+      <g clip-path="url(#c5)">
+        <text x="43.6" y="183.7" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+        <text x="51.4" y="183.7" font-family="monospace" font-size="13" fill="var(--base0D)">to</text>
+        <text x="67" y="183.7" font-family="monospace" font-size="13" fill="var(--base04)">({</text>
+        <text x="90.4" y="183.7" font-family="monospace" font-size="13" fill="var(--base05)">scale</text>
+        <text x="129.4" y="183.7" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+        <text x="145" y="183.7" font-family="monospace" font-size="13" fill="var(--base09)">1.5</text>
+        <text x="168.4" y="183.7" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+        <text x="184" y="183.7" font-family="monospace" font-size="13" fill="var(--base05)">fill</text>
+        <text x="215.2" y="183.7" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+        <text x="230.8" y="183.7" font-family="monospace" font-size="13" fill="var(--base0B)">"#FF9F0A"</text>
+        <text x="308.8" y="183.7" font-family="monospace" font-size="13" fill="var(--base04)">},</text>
+        <text x="332.2" y="183.7" font-family="monospace" font-size="13" fill="var(--base09)">0.5</text>
+        <text x="355.6" y="183.7" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+      </g>
+      <g clip-path="url(#c6)">
+        <text x="43.6" y="208.4" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+        <text x="51.4" y="208.4" font-family="monospace" font-size="13" fill="var(--base0D)">to</text>
+        <text x="67" y="208.4" font-family="monospace" font-size="13" fill="var(--base04)">({</text>
+        <text x="90.4" y="208.4" font-family="monospace" font-size="13" fill="var(--base05)">scale</text>
+        <text x="129.4" y="208.4" font-family="monospace" font-size="13" fill="var(--base04)">:</text>
+        <text x="145" y="208.4" font-family="monospace" font-size="13" fill="var(--base09)">1</text>
+        <text x="160.6" y="208.4" font-family="monospace" font-size="13" fill="var(--base04)">},</text>
+        <text x="184" y="208.4" font-family="monospace" font-size="13" fill="var(--base09)">0.4</text>
+        <text x="207.4" y="208.4" font-family="monospace" font-size="13" fill="var(--base04)">,</text>
+        <text x="223" y="208.4" font-family="monospace" font-size="13" fill="var(--base05)">ease</text>
+        <text x="254.2" y="208.4" font-family="monospace" font-size="13" fill="var(--base04)">.</text>
+        <text x="262" y="208.4" font-family="monospace" font-size="13" fill="var(--base05)">inOut</text>
+        <text x="301" y="208.4" font-family="monospace" font-size="13" fill="var(--base04)">)</text>
+      </g>
+      <g class="a m9">
+        <rect x="28" y="72.225" width="7.8" height="16.25" fill="var(--base0D)" fill-opacity="0.8" class="a m7"/>
+        <rect x="28" y="72.225" width="7.8" height="16.25" fill="var(--base0D)" fill-opacity="0.8" class="a m8"/>
+      </g>
+    </g>
+  </g>
+  <g class="a m10">
+    <rect x="476" y="62" width="532" height="132" rx="10" fill="var(--base01)"/>
+    <rect x="714" y="100" width="56" height="56" rx="14" fill="var(--base0D)" class="a m11 fb"/>
+    <g class="round" font-size="11" fill="var(--base03)">
+      <g>
+        <text x="548" y="226" text-anchor="middle">0s</text>
+        <path d="M548 232V380" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+      <g>
+        <text x="660" y="226" text-anchor="middle">1s</text>
+        <path d="M660 232V380" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+      <g>
+        <text x="772" y="226" text-anchor="middle">2s</text>
+        <path d="M772 232V380" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+      <g>
+        <text x="884" y="226" text-anchor="middle">3s</text>
+        <path d="M884 232V380" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+      <g>
+        <text x="996" y="226" text-anchor="middle">4s</text>
+        <path d="M996 232V380" stroke="var(--base02)" stroke-dasharray="2 4"/>
+      </g>
+    </g>
+    <g>
+      <text x="480" y="250" class="sans" font-size="12" fill="var(--base04)">opacity</text>
+      <rect x="604" y="238" width="67.2" height="16" rx="8" fill="var(--base02)"/>
+      <rect x="604" y="238" width="0" height="16" rx="8" fill="var(--base0D)" class="a m12"/>
+    </g>
+    <g>
+      <text x="480" y="290" class="sans" font-size="12" fill="var(--base04)">y</text>
+      <rect x="604" y="278" width="67.2" height="16" rx="8" fill="var(--base02)"/>
+      <rect x="604" y="278" width="0" height="16" rx="8" fill="var(--base0D)" class="a m12"/>
+    </g>
+    <g>
+      <text x="480" y="330" class="sans" font-size="12" fill="var(--base04)">scale</text>
+      <rect x="839.2" y="318" width="56" height="16" rx="8" fill="var(--base02)"/>
+      <rect x="839.2" y="318" width="0" height="16" rx="8" fill="var(--base0E)" class="a m13"/>
+      <rect x="895.2" y="318" width="44.8" height="16" rx="8" fill="var(--base02)"/>
+      <rect x="895.2" y="318" width="0" height="16" rx="8" fill="var(--base0E)" class="a m14"/>
+    </g>
+    <g>
+      <text x="480" y="370" class="sans" font-size="12" fill="var(--base04)">fill</text>
+      <rect x="839.2" y="358" width="56" height="16" rx="8" fill="var(--base02)"/>
+      <rect x="839.2" y="358" width="0" height="16" rx="8" fill="var(--base09)" class="a m13"/>
+    </g>
+    <g class="a m15">
+      <path d="M548 232V380" stroke="var(--base06)" stroke-width="1.5"/>
+      <circle cx="548" cy="232" r="4" fill="var(--base06)"/>
+    </g>
+  </g>
+</svg>
