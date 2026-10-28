@@ -53,7 +53,7 @@
     "build:package": "bun run scripts/package.ts",
     "prepack": "bun run build:package",
     "svjeez": "bun run src/cli.ts",
-    "render-png": "bun run src/cli.ts render"
+    "render-png": "bun run src/cli.ts frames"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

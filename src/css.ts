@@ -9,7 +9,7 @@ import { formatProperty, isProperty } from "./properties";
 export type Emit = "value" | "visibility" | "dash";
 
 /** A scene-time length as the seconds CSS plays it in, after the canvas's playback rate. */
-export const seconds = (canvas: Canvas, scene: Seconds): string => `${num(scene / canvas.speed)}s`;
+export const seconds = (canvas: Canvas, scene: Seconds): string => `${num(scene / canvas.playbackRate)}s`;
 
 const short = (value: number): string => num(value).replace(/^(-?)0\./, "$1.");
 

@@ -15,7 +15,7 @@ export interface RenderOptions {
   /** Fonts and page classes. Build it with `css` to read declared properties. */
   readonly css?: string | Css;
   /** Playback rate: 2 plays twice as fast. `duration` and `reducedMotion.at` stay in scene seconds. Default 1. */
-  readonly speed?: number;
+  readonly playbackRate?: number;
   /** Freeze frame for prefers-reduced-motion. Default: 85% through. */
   readonly reducedMotion?: { readonly at: Seconds } | false;
   /** False plays the scene once and holds its last frame. Default true. */
@@ -29,11 +29,11 @@ export const render = (options: RenderOptions, content: Child): string => {
   const { width, height, duration } = options;
   if (!(width > 0) || !(height > 0)) throw new Error("render() needs a positive width and height.");
   if (!(duration > 0)) throw new Error("render() needs a positive duration.");
-  const speed = options.speed ?? 1;
-  if (!(speed > 0 && Number.isFinite(speed))) throw new Error(`render() needs a positive, finite speed, got ${speed}.`);
+  const playbackRate = options.playbackRate ?? 1;
+  if (!(playbackRate > 0 && Number.isFinite(playbackRate))) throw new Error(`render() needs a positive, finite playbackRate, got ${playbackRate}.`);
   const stillAt =
     options.reducedMotion === false ? undefined : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
-  const { css, ...compiled } = compile(children(content), { width, height, duration, speed, stillAt, loop: options.loop ?? true }, options.css);
+  const { css, ...compiled } = compile(children(content), { width, height, duration, playbackRate, stillAt, loop: options.loop ?? true }, options.css);
   const root = element(
     "svg",
     {

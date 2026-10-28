@@ -7,7 +7,7 @@ import type { SvgNode } from "./svg";
 export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
 /** An image ready to embed: a data URI plus the intrinsic size read from its header. */
-export interface Picture {
+export interface PictureData {
   readonly href: `data:${string}`;
   /** Intrinsic width in px, after EXIF rotation. For SVG, the root width, else derived from the viewBox. */
   readonly width: number;
@@ -153,7 +153,7 @@ const SUPPORTED = Object.keys(FORMATS).join(", ");
  * Pure and synchronous. See `picture.load` for files and URLs.
  */
 export const picture = Object.assign(
-  (source: Uint8Array | ArrayBuffer | string): Picture => {
+  (source: Uint8Array | ArrayBuffer | string): PictureData => {
     const bytes = typeof source === "string" ? new TextEncoder().encode(source) : source instanceof Uint8Array ? source : new Uint8Array(source);
     const format = (Object.keys(FORMATS) as ImageFormat[]).find((key) => FORMATS[key].matches(bytes));
     if (!format) throw new Error(`Unknown image format. picture() reads ${SUPPORTED}.`);
@@ -169,7 +169,7 @@ export const picture = Object.assign(
   },
   {
     /** Read an http(s) URL with fetch, or a path or file: URL from disk. The format comes from the content. */
-    load: async (source: string | URL): Promise<Picture> => {
+    load: async (source: string | URL): Promise<PictureData> => {
       const url = source instanceof URL ? source : /^[a-z][a-z0-9+.-]*:\/\//i.test(source) ? new URL(source) : undefined;
       if (url?.protocol === "http:" || url?.protocol === "https:") {
         const response = await fetch(url);
@@ -188,7 +188,7 @@ export const picture = Object.assign(
 const FITS = ["contain", "cover", "fill"] as const;
 
 export interface PictureProps {
-  readonly src: Picture;
+  readonly src: PictureData;
   readonly x: number;
   readonly y: number;
   /** With only one of width and height, the other follows the aspect ratio. With neither, the intrinsic size. */
@@ -208,9 +208,9 @@ export interface PictureProps {
 }
 
 /** One symbol per picture, so drawing an image many times embeds its bytes once. Overflow stays visible, or the symbol would crop an image larger than the canvas. */
-const symbols = new WeakMap<Picture, Ref<"symbol">>();
+const symbols = new WeakMap<PictureData, Ref<"symbol">>();
 
-const symbolOf = (src: Picture): Ref<"symbol"> => {
+const symbolOf = (src: PictureData): Ref<"symbol"> => {
   let symbol = symbols.get(src);
   if (!symbol) symbols.set(src, (symbol = def.symbol({ style: "overflow:visible" }, <image href={src.href} width={src.width} height={src.height} />)));
   return symbol;

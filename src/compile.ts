@@ -14,7 +14,7 @@ export interface Canvas {
   readonly height: number;
   readonly duration: number;
   /** Playback rate. Every emitted duration is divided by it; the timeline stays in scene seconds. */
-  readonly speed: number;
+  readonly playbackRate: number;
   readonly stillAt?: number;
   /** False plays once and holds the last frame. */
   readonly loop: boolean;

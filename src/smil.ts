@@ -42,4 +42,4 @@ export const smilAttributes = (attribute: string, channel: Channel, keys: readon
 
 /** The `<animate>` for a lane on `attribute`, playing at the canvas's rate. */
 export const animate = (canvas: Canvas, attribute: string, lane: { readonly channels: readonly Target[]; readonly keys: readonly Key[]; readonly period: Seconds; readonly snapped: Seconds }): SvgNode =>
-  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped / canvas.speed, canvas.loop ? undefined : Math.round(canvas.duration / lane.snapped)));
+  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped / canvas.playbackRate, canvas.loop ? undefined : Math.round(canvas.duration / lane.snapped)));

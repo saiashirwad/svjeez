@@ -10,10 +10,10 @@ import { validateSvg } from "./validate";
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg]
   svjeez skill [--install [--dir .claude/skills]]
-  svjeez render <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--scheme system|light|dark] [--background css]
+  svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css]
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
-Times are playback seconds. Without --times, render takes --count frames (default 6) across one loop.
+Times are playback seconds. Without --times, frames takes --count frames (default 6) across one loop.
 On Node, .tsx files load through tsx when it is installed.
 skill prints the agent skill for writing svjeez scenes; --install copies it, with its examples, into <dir>/svjeez.`;
 
@@ -73,7 +73,7 @@ const svgCommand = async (args: string[]): Promise<void> => {
   else process.stdout.write(svg);
 };
 
-const renderCommand = async (args: string[]): Promise<void> => {
+const framesCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
@@ -84,11 +84,11 @@ const renderCommand = async (args: string[]): Promise<void> => {
       sheet: { type: "boolean" },
       columns: { type: "string" },
       scale: { type: "string" },
-      scheme: { type: "string" },
+      "color-scheme": { type: "string" },
       background: { type: "string" },
     },
   });
-  const scheme = values.scheme === undefined ? undefined : isScheme(values.scheme) ? values.scheme : fail(`--scheme is system, light or dark, got "${values.scheme}".`);
+  const scheme = values["color-scheme"] === undefined ? undefined : isScheme(values["color-scheme"]) ? values["color-scheme"] : fail(`--color-scheme is system, light or dark, got "${values["color-scheme"]}".`);
   const svg = await loadSvg(positionals[0] ?? fail(USAGE));
   report(svg);
   const { duration, colorScheme, frames, sheet } = await renderFrames(svg, {
@@ -127,7 +127,7 @@ const skillCommand = async (args: string[]): Promise<void> => {
   console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
 };
 
-const COMMANDS: Record<string, (args: string[]) => Promise<void>> = { svg: svgCommand, render: renderCommand, skill: skillCommand, skills: skillCommand };
+const COMMANDS: Record<string, (args: string[]) => Promise<void>> = { svg: svgCommand, frames: framesCommand, skill: skillCommand };
 
 const [command = "", ...args] = process.argv.slice(2);
 const run = COMMANDS[command] ?? (() => fail(USAGE));

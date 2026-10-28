@@ -31,7 +31,7 @@ export default function build(): string {
 }
 ```
 
-`render` options: `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `speed` (playback rate), `reducedMotion: { at }` (the still frame under `prefers-reduced-motion`, default 85% through) or `false`, `loop` (default `true`; `false` plays the scene once and holds its last frame), `comment`.
+`render` options: `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `playbackRate`, `reducedMotion: { at }` (the still frame under `prefers-reduced-motion`, default 85% through) or `false`, `loop` (default `true`; `false` plays the scene once and holds its last frame), `comment`.
 
 ## The timeline
 
@@ -270,10 +270,10 @@ Runtime errors (thrown by `motion()`, `render()`, `picture()` or `font()`):
 Render frames at the moments that matter and look at them before you report anything.
 
 ```sh
-npx svjeez render scene.tsx --times 0,0.5,1.2,3 --sheet --out frames/  # Bun: bunx --bun svjeez render ...
+npx svjeez frames scene.tsx --times 0,0.5,1.2,3 --sheet --out frames/  # Bun: bunx --bun svjeez frames ...
 ```
 
-This writes one PNG per time plus `sheet.png`, all frames on one labelled grid. Open `sheet.png` first. Without `--times` you get `--count` frames (default 6) over one loop. Frames follow the machine's light or dark appearance; render both `--scheme light` and `--scheme dark` when the scene uses an adaptive theme. Add `--scale 2` to read small text. `svjeez svg scene.tsx --out scene.svg` writes the SVG itself. From code, `renderFrames(svg, { times, sheet: true })` from `svjeez/frames` returns the same PNGs as bytes. Frames need `playwright-core` and Chromium: `npm i -D playwright-core && npx playwright-core install chromium-headless-shell`.
+This writes one PNG per time plus `sheet.png`, all frames on one labelled grid. Open `sheet.png` first. Without `--times` you get `--count` frames (default 6) over one loop. Frames follow the machine's light or dark appearance; render both `--color-scheme light` and `--color-scheme dark` when the scene uses an adaptive theme. Add `--scale 2` to read small text. `svjeez svg scene.tsx --out scene.svg` writes the SVG itself. From code, `renderFrames(svg, { times, sheet: true })` from `svjeez/frames` returns the same PNGs as bytes. Frames need `playwright-core` and Chromium: `npm i -D playwright-core && npx playwright-core install chromium-headless-shell`.
 
 The loop:
 
@@ -298,4 +298,4 @@ Each file in `examples/` next to this skill compiles and renders. Read them as p
 - `examples/orbit.tsx` shows `sampled()` for an elliptical orbit, a `.loop()` spin with `ease.linear`, and a `wiggle` breathing effect.
 - `examples/review-flow.tsx` shows a typed `flowchart` with `reveal`, a `flow` comet along `route()`, an `adaptive` theme with a font rule, and a canvas sized from `bounds`.
 
-Render one to see the loop in action: `npx svjeez render examples/orbit.tsx --count 6 --sheet`.
+Render one to see the loop in action: `npx svjeez frames examples/orbit.tsx --count 6 --sheet`.
