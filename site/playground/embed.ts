@@ -14,7 +14,7 @@
  */
 import css from "./playground.css" with { type: "text" };
 
-const appUrl = new URL("app.js", import.meta.url).href;
+const appUrl = new URL(APP_FILE, import.meta.url).href;
 
 if (!document.getElementById("pg-css")) {
   const style = document.createElement("style");
