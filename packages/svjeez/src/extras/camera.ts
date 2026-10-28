@@ -1,5 +1,5 @@
 import { el } from "../el";
-import type { Rect } from "../geometry";
+import type { Point, Rect } from "../geometry";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import type { Child, SvgNode } from "../svg";
 
@@ -50,4 +50,35 @@ export function Camera({
     { style: { transformOrigin: "0 0", transformBox: "view-box" }, animation: track },
     children,
   );
+}
+
+/**
+ * Holds `children` at their size on screen while a `Camera` with the same `frame`, `stops` and `over` zooms: it scales
+ * them by the inverse of the camera's zoom around `at`, the point they sit on, so a marker or label stays put on the
+ * map and stays the same size. Put it inside the `Camera`'s children.
+ */
+export function Steady({
+  frame,
+  stops,
+  over = 0.5,
+  at,
+  children,
+}: {
+  readonly frame: Rect;
+  readonly stops: readonly CameraStop[];
+  readonly over?: Seconds;
+  /** The point `children` is drawn around, in the camera's content space. */
+  readonly at: Point;
+  readonly children: Child;
+}): SvgNode {
+  const track = stops.reduce<Motion<"scale">>(
+    (t, { during: span, target }) => {
+      const scale = 1 / fit(frame, target).scale;
+
+      return span.at === 0 ? t.set({ scale }) : t.at(span.at).to({ scale }, over, ease.inOut);
+    },
+    motion({ scale: 1 }),
+  );
+
+  return el.g({ style: { transformOrigin: `${at.x}px ${at.y}px` }, animation: track }, children);
 }

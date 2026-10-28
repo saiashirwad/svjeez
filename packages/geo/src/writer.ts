@@ -76,7 +76,7 @@ const join = (n: string) => (n.startsWith("-") ? n : ` ${n}`);
 type Tenths = readonly [number, number];
 
 /** Douglas–Peucker: drops the points that sit within `epsilon` of the straight line their neighbours already draw. */
-const straighten = (line: readonly Tenths[], epsilon: number): Tenths[] => {
+export const straighten = (line: readonly Tenths[], epsilon: number): Tenths[] => {
   if (line.length < 3) return [...line];
   const keep = new Uint8Array(line.length);
   const stack: [number, number][] = [[0, line.length - 1]];

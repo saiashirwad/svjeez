@@ -1,6 +1,6 @@
 import { distance, project, type LonLat, type Topology } from "@svjeez/geo";
 import { draw, ease, motion, rect, render, type Child, type Rect, type SvgNode } from "svjeez";
-import { Camera, flow, variables, type CameraStop } from "svjeez/extras";
+import { Camera, Steady, flow, variables, type CameraStop } from "svjeez/extras";
 import { createRequire } from "node:module";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-50m.json");
@@ -149,25 +149,13 @@ function Visited(): SvgNode {
   );
 }
 
-/** Scales by the inverse of the camera's zoom at every stop, so what it holds keeps its size on screen. */
-const steady = stops.reduce(
-  (track, { during, target }) => {
-    const scale = target === "all" ? 1 : 1 / scaleOf(target);
-
-    return during.at === 0
-      ? track.set({ scale })
-      : track.at(during.at).to({ scale }, PAN, ease.inOut);
-  },
-  motion({ scale: 1 }),
-);
-
 /** A dot and name that keep their size on screen while the camera zooms, gone by the time it pulls back. */
 function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
   const { x, y } = map.point(stop.at);
   const origin = { transformOrigin: `${x}px ${y}px` };
 
   return (
-    <g animation={steady} style={origin}>
+    <Steady frame={rect(0, 0, W, H)} stops={stops} over={PAN} at={{ x, y }}>
       <g
         animation={motion({ opacity: 0, scale: 0.4 })
           .at(at)
@@ -190,7 +178,7 @@ function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
           {stop.city}
         </text>
       </g>
-    </g>
+    </Steady>
   );
 }
 
