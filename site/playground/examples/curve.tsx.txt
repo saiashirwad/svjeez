@@ -1,9 +1,17 @@
 import { draw, ease, enter, render } from "svjeez";
 
-// A curve draws itself on, then its end point pops in. draw() needs no path length.
+// A curve draws itself on, then its end point pops in. draw() needs no
+// path length.
 export default function build(): string {
   return render(
-    { width: 320, height: 140, duration: 4, title: "Draw-on curve", desc: "A line draws across the frame and ends in a dot.", reducedMotion: { at: 3 } },
+    {
+      width: 320,
+      height: 140,
+      duration: 4,
+      title: "Draw-on curve",
+      desc: "A line draws across the frame and ends in a dot.",
+      reducedMotion: { at: 3 },
+    },
     <>
       <rect width={320} height={140} fill="#14161C" />
       <path d="M0 104H320M0 70H320M0 36H320" stroke="#262A35" />
@@ -15,7 +23,17 @@ export default function build(): string {
         strokeLinecap="round"
         animation={draw({ at: 0.4, over: 1.8 }, ease.inOut)}
       />
-      <circle cx={292} cy={40} r={7} fill="#FFB84D" animation={enter({ at: 2.1, over: 0.4 }, { scale: 0 }, ease.pop)} />
+      <circle
+        cx={292}
+        cy={40}
+        r={7}
+        fill="#FFB84D"
+        animation={enter(
+          { at: 2.1, over: 0.4 },
+          { scale: 0 },
+          ease.pop,
+        )}
+      />
     </>,
   );
 }

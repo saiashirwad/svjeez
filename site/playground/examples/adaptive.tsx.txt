@@ -1,6 +1,7 @@
 import { enter, ease, render } from "svjeez";
 
-// The scene carries both palettes. A media query inside the SVG picks one, so the same file suits light and dark pages.
+// The scene carries both palettes. A media query inside the SVG picks
+// one, so the same file suits light and dark pages.
 const css = `
 .bg { fill: #FBF1DE }
 .dot { fill: #E8772E }
@@ -13,13 +14,39 @@ const css = `
 
 export default function build(): string {
   return render(
-    { width: 320, height: 140, duration: 4, title: "Adaptive", desc: "Three dots rise in turn. The colors follow the viewer's light or dark mode.", css, reducedMotion: { at: 2 } },
+    {
+      width: 320,
+      height: 140,
+      duration: 4,
+      title: "Adaptive",
+      desc: "Three dots rise in turn. The colors follow the viewer's light or dark mode.",
+      css,
+      reducedMotion: { at: 2 },
+    },
     <>
       <rect class="bg" width={320} height={140} />
       {[0, 1, 2].map((i) => (
-        <circle class="dot" cx={110 + i * 50} cy={64} r={14} animation={enter({ at: 0.3 + i * 0.25, over: 0.5 }, { y: 22, scale: 0.4 }, ease.pop)} />
+        <circle
+          class="dot"
+          cx={110 + i * 50}
+          cy={64}
+          r={14}
+          animation={enter(
+            { at: 0.3 + i * 0.25, over: 0.5 },
+            { y: 22, scale: 0.4 },
+            ease.pop,
+          )}
+        />
       ))}
-      <text class="ink" x={160} y={112} textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize={13} animation={enter({ at: 1.2, over: 0.5 })}>
+      <text
+        class="ink"
+        x={160}
+        y={112}
+        textAnchor="middle"
+        fontFamily="system-ui, sans-serif"
+        fontSize={13}
+        animation={enter({ at: 1.2, over: 0.5 })}
+      >
         Switch the preview between light and dark
       </text>
     </>,
