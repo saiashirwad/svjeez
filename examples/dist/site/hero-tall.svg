@@ -56,14 +56,14 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="86" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">=</text>
     <text x="99.2" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">motion</text>
     <text x="138.8" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="158.6" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">fill</text>
+    <text x="158.6" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">fill</text>
     <text x="185" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="198.2" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">dawn</text>
     <text x="231.2" y="336.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">})</text>
     <text x="33.2" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="39.8" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">to</text>
     <text x="53" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="72.8" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">fill</text>
+    <text x="72.8" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">fill</text>
     <text x="99.2" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="112.4" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">noon</text>
     <text x="145.4" y="354.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">},</text>
@@ -77,7 +77,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="33.2" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="39.8" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">to</text>
     <text x="53" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="72.8" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">fill</text>
+    <text x="72.8" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">fill</text>
     <text x="99.2" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="112.4" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">dusk</text>
     <text x="145.4" y="389.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">},</text>
@@ -86,7 +86,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="33.2" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="39.8" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">to</text>
     <text x="53" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="72.8" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">fill</text>
+    <text x="72.8" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">fill</text>
     <text x="99.2" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="112.4" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">night</text>
     <text x="152" y="407.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">},</text>
@@ -100,7 +100,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="33.2" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="39.8" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">to</text>
     <text x="53" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="72.8" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">fill</text>
+    <text x="72.8" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">fill</text>
     <text x="99.2" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="112.4" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">dawn</text>
     <text x="145.4" y="442.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">},</text>
@@ -111,7 +111,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="92.6" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">=</text>
     <text x="105.8" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">motion</text>
     <text x="145.4" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="165.2" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">x</text>
+    <text x="165.2" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">x</text>
     <text x="171.8" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="185" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">-</text>
     <text x="191.6" y="477.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base09)">200</text>
@@ -119,7 +119,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="33.2" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="39.8" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">to</text>
     <text x="53" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="72.8" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">x</text>
+    <text x="72.8" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">x</text>
     <text x="79.4" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="92.6" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base09)">200</text>
     <text x="119" y="495.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">},</text>
@@ -134,14 +134,14 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="92.6" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">=</text>
     <text x="105.8" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">motion</text>
     <text x="145.4" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="165.2" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">y</text>
+    <text x="165.2" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">y</text>
     <text x="171.8" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="185" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base09)">60</text>
     <text x="204.8" y="512.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">})</text>
     <text x="33.2" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="39.8" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">to</text>
     <text x="53" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="72.8" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">y</text>
+    <text x="72.8" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">y</text>
     <text x="79.4" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="92.6" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">-</text>
     <text x="99.2" y="530.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base09)">170</text>
@@ -151,7 +151,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="33.2" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="39.8" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0D)">to</text>
     <text x="53" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">({</text>
-    <text x="72.8" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">y</text>
+    <text x="72.8" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">y</text>
     <text x="79.4" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">:</text>
     <text x="92.6" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base09)">60</text>
     <text x="112.4" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">},</text>
@@ -161,46 +161,49 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="178.4" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">.</text>
     <text x="185" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">in</text>
     <text x="198.2" y="547.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">);</text>
-    <text x="20" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">&lt;rect</text>
-    <text x="59.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">width</text>
+    <text x="20" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">&lt;</text>
+    <text x="26.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">rect</text>
+    <text x="59.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">width</text>
     <text x="92.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={</text>
     <text x="105.8" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">w</text>
     <text x="112.4" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">}</text>
-    <text x="125.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">height</text>
+    <text x="125.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">height</text>
     <text x="165.2" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={</text>
     <text x="178.4" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">h</text>
     <text x="185" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">}</text>
-    <text x="198.2" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">animation</text>
+    <text x="198.2" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">animation</text>
     <text x="257.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={</text>
     <text x="270.8" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">sky</text>
     <text x="290.6" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">}</text>
-    <text x="303.8" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">/&gt;</text>
-    <text x="20" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">&lt;circle</text>
-    <text x="72.8" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">r</text>
+    <text x="303.8" y="583.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">/&gt;</text>
+    <text x="20" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">&lt;</text>
+    <text x="26.6" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">circle</text>
+    <text x="72.8" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">r</text>
     <text x="79.4" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={</text>
     <text x="92.6" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base09)">24</text>
     <text x="105.8" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">}</text>
-    <text x="119" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">fill</text>
+    <text x="119" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">fill</text>
     <text x="145.4" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={</text>
     <text x="158.6" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">sun</text>
     <text x="178.4" y="600.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">}</text>
-    <text x="33.2" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">animation</text>
+    <text x="33.2" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">animation</text>
     <text x="92.6" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={[</text>
     <text x="112.4" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">sunX</text>
     <text x="138.8" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">,</text>
     <text x="152" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">sunY</text>
     <text x="178.4" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">]}</text>
-    <text x="198.2" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">/&gt;</text>
-    <text x="20" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">&lt;path</text>
-    <text x="59.6" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">d</text>
+    <text x="198.2" y="618.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">/&gt;</text>
+    <text x="20" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">&lt;</text>
+    <text x="26.6" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">path</text>
+    <text x="59.6" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">d</text>
     <text x="66.2" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={</text>
     <text x="79.4" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">hills</text>
     <text x="112.4" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">}</text>
-    <text x="125.6" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">fill</text>
+    <text x="125.6" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base0A)">fill</text>
     <text x="152" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">={</text>
     <text x="165.2" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">land</text>
     <text x="191.6" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">}</text>
-    <text x="204.8" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base08)">/&gt;</text>
+    <text x="204.8" y="635.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base04)">/&gt;</text>
   </g>
   <g clip-path="url(#c1)">
     <rect x="0" y="40" width="358" height="260" class="a m7"/>

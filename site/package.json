@@ -22,6 +22,7 @@
     "@effect/platform-node": "^4.0.6",
     "@lezer/highlight": "^1.2.5",
     "@svjeez/astro": "workspace:*",
+    "@svjeez/code": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/math": "workspace:*",
     "@svjeez/vite": "workspace:*",

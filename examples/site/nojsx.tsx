@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { draw, ease, enter, render } from "svjeez";
 import { Marker, code } from "svjeez/extras";
-import { CSS, chrome, highlight, outro } from "./kit";
+import { highlight } from "@svjeez/code";
+import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 
 // Without JSX: the same scene built from el() calls, shown from the real file so it type-checks.
@@ -27,7 +28,7 @@ export const make = (tall = false): string => {
     : full;
 
   const src = code(
-    highlight(lines.join("\n")),
+    highlight(lines.join("\n"), "tsx"),
     tall
       ? { theme, font: mono, fontSize: 12, lineHeight: 1.7, x: 22, y: BAR + 16 }
       : { theme, font: mono, fontSize: 12, lineHeight: 1.75, x: 28, y: BAR + 22 },

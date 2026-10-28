@@ -1,6 +1,7 @@
 import { def, ease, motion, render, type SvgNode } from "svjeez";
 import { code } from "svjeez/extras";
-import { CSS, chrome, highlight } from "../kit";
+import { highlight } from "@svjeez/code";
+import { CSS, chrome } from "../kit";
 import { mono, theme } from "../../style";
 
 // The home page hero: a day in ten seconds, written as one motion() chain beside the sky it paints. As each step of the
@@ -100,7 +101,7 @@ export function day(layout: Layout): string {
   const { lineHeight } = layout;
   const y = layout.code.y ?? BAR + (height - BAR - lines.length * fontSize * lineHeight) / 2;
 
-  const listing = code(highlight(source(name)), {
+  const listing = code(highlight(source(name), "tsx"), {
     theme,
     font: mono,
     fontSize,
