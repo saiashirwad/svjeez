@@ -106,6 +106,7 @@ Configure TypeScript to use svjeez's JSX runtime in `tsconfig.json` (or add `/**
 ```
 
 > **Using a coding agent?** Install the built-in scene-writing skill and worked examples into `.claude/skills/svjeez` (pass `--dir` for another agent harness):
+>
 > ```sh
 > npx svjeez skill --install
 > ```
@@ -182,10 +183,10 @@ const pulse = motion({ opacity: 0 })
 
 // Ready-made recipes
 enter({ at: 0.5, over: 0.8 }, { y: 20, blur: 6 }); // rise out of a blur to rest
-exit({ at: 4, over: 0.4 });                        // fade out
-draw({ at: 0, over: 1.2 });                        // stroke a path or shape on
-shake({ at: 2, over: 0.5 }, { x: 6 });             // damped shake
-wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });  // seeded looping noise
+exit({ at: 4, over: 0.4 }); // fade out
+draw({ at: 0, over: 1.2 }); // stroke a path or shape on
+shake({ at: 2, over: 0.5 }, { x: 6 }); // damped shake
+wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 }); // seeded looping noise
 
 // Stack multiple animations on one element (outermost first) + loop
 <circle animation={[enter({ at: 0, over: 0.6 }), wiggle({ x: 4, y: 4 }, { seed: "dot" })]} />;
@@ -212,15 +213,28 @@ const orbit = sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), {
 
 ```tsx
 import {
-  Callout, Focus, Marker, adaptive, appWindow, code,
-  morph, readingTime, terminal, timeline, tomorrow, tomorrowNight,
+  Callout,
+  Focus,
+  Marker,
+  adaptive,
+  appWindow,
+  code,
+  morph,
+  readingTime,
+  terminal,
+  timeline,
+  tomorrow,
+  tomorrowNight,
 } from "svjeez/extras";
 
 // Adaptive base16 themes emit CSS variables that follow prefers-color-scheme
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 
 // Named beats with automatic reading-time estimation
-const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5 });
+const tl = timeline(
+  { intro: readingTime("One piece of state"), change: 5, outro: 3 },
+  { gap: 0.5 },
+);
 
 // Morph matching tokens smoothly between code versions while markers and callouts track them
 <>
@@ -268,7 +282,10 @@ All five diagram builders — `flowchart`, `sequence`, `stateMachine`, `tree`, a
 ```ts
 const chart = flowchart({
   nodes: { pr: "PR opened", lint: "Run linters", post: "Post review" },
-  edges: [["pr", "lint"], ["lint", "posts"]],
+  edges: [
+    ["pr", "lint"],
+    ["lint", "posts"],
+  ],
   //                                ^^^^^^^
   // error TS2820: Type '"posts"' is not assignable to type '"lint" | "post" | "pr"'. Did you mean '"post"'?
 });
@@ -286,13 +303,22 @@ const chart = flowchart(
       post: "Post review",
     },
     groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
-    edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
+    edges: [
+      ["pr", "lint"],
+      ["lint", "ok"],
+      ["ok", "post", { label: "yes" }],
+      ["ok", "lint", { label: "no" }],
+    ],
   },
   { theme, play: { at: 0.5 } },
 );
 const trip = flow(chart.route("pr", "post"), { theme, at: 4, style: "trace", arrive: true });
 
-<>{chart.layers.under}{trip.node}{chart.layers.over}</>;
+<>
+  {chart.layers.under}
+  {trip.node}
+  {chart.layers.over}
+</>;
 ```
 
 <table>
@@ -334,13 +360,34 @@ const photo = await picture.load(new URL("./nebula.jpg", import.meta.url));
 
 // Outlined display type drawn letter by letter + exact browser-matching text measurement
 const w = display.measure("Wave!", 96);
-<Glyphs font={display} text="Wave!" size={96} x={(680 - w) / 2} y={140} animation={(_, i) => draw({ at: i * 0.15, over: 1 })} />;
+<Glyphs
+  font={display}
+  text="Wave!"
+  size={96}
+  x={(680 - w) / 2}
+  y={140}
+  animation={(_, i) => draw({ at: i * 0.15, over: 1 })}
+/>;
 
 // Variable-width brush, nib, pen, or pencil strokes (plus single-line handwriting via strokeFont)
-<Ink d="M20 80C80 20 160 140 220 80" tool={tool.brush({ size: 8, seed: 2 })} fill="#2B2118" draw={{ at: 0.5, over: 1.2 }} />;
+<Ink
+  d="M20 80C80 20 160 140 220 80"
+  tool={tool.brush({ size: 8, seed: 2 })}
+  fill="#2B2118"
+  draw={{ at: 0.5, over: 1.2 }}
+/>;
 
 // Embedded images (SVG/PNG/JPEG/WebP/GIF/AVIF) & animated SMIL/CSS filters
-<Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" filter={fx.duotone({ dark: "#14162A", light: "#FFB86C" })} alt="Nebula" />;
+<Picture
+  src={photo}
+  x={20}
+  y={20}
+  width={240}
+  radius={16}
+  fit="cover"
+  filter={fx.duotone({ dark: "#14162A", light: "#FFB86C" })}
+  alt="Nebula"
+/>;
 <g filter={fx.boil({ strength: 2 })}>{/* hand-drawn line boil */}</g>;
 ```
 
@@ -414,11 +461,11 @@ At runtime, `render()` validates its own output (`validateSvg(svg)`) and throws 
 
 ### CLI commands
 
-| Command | Description |
-| --- | --- |
-| `npx svjeez svg <file.tsx> [-o out.svg]` | Compile a scene module (or validate an `.svg`) to `--out` or stdout. |
+| Command                                                              | Description                                                                                                                                                  |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npx svjeez svg <file.tsx> [-o out.svg]`                             | Compile a scene module (or validate an `.svg`) to `--out` or stdout.                                                                                         |
 | `npx svjeez frames <file> [-t 0,1,2 \| -n 6] [--sheet] [-o frames/]` | Rasterize PNG frames and an optional contact sheet (`sheet.png`). Supports `--scale`, `--columns`, `--color-scheme light\|dark\|system`, and `--background`. |
-| `npx svjeez skill [--install [--dir .claude/skills]]` | Print `SKILL.md` or copy the full skill, references, and examples into your project. |
+| `npx svjeez skill [--install [--dir .claude/skills]]`                | Print `SKILL.md` or copy the full skill, references, and examples into your project.                                                                         |
 
 ### `render(options, content)` & `renderFrames(svg, options)`
 
@@ -430,14 +477,14 @@ const svg = render(
   {
     width: 600,
     height: 400,
-    duration: 8,               // loop length in seconds
-    title: "My Scene",         // required; wired to role="img" and aria-labelledby
+    duration: 8, // loop length in seconds
+    title: "My Scene", // required; wired to role="img" and aria-labelledby
     desc: "Accessible summary.",
     css: ".mono { font-family: ui-monospace, monospace }",
-    reducedMotion: { at: 4 },  // freeze frame for prefers-reduced-motion (defaults to 85% of duration)
-    playbackRate: 1.5,         // speed multiplier
-    loop: false,               // play once and hold the final frame (default: true)
-    prefix: "hero-",           // namespace generated IDs/classes/keyframes when inlining multiple SVGs on one page
+    reducedMotion: { at: 4 }, // freeze frame for prefers-reduced-motion (defaults to 85% of duration)
+    playbackRate: 1.5, // speed multiplier
+    loop: false, // play once and hold the final frame (default: true)
+    prefix: "hero-", // namespace generated IDs/classes/keyframes when inlining multiple SVGs on one page
   },
   content,
 );
@@ -455,28 +502,18 @@ import { draw, el, render } from "svjeez";
 
 const { path, circle } = el;
 const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
-  path({ d: "M20 100C60 20 140 20 180 100", fill: "none", stroke: "#FF5FA8", strokeWidth: 4, animation: draw({ at: 0.2, over: 1.2 }) }),
+  path({
+    d: "M20 100C60 20 140 20 180 100",
+    fill: "none",
+    stroke: "#FF5FA8",
+    strokeWidth: 4,
+    animation: draw({ at: 0.2, over: 1.2 }),
+  }),
   circle({ cx: 100, cy: 40, r: 8, fill: "#3EE6D6" }),
 ]);
 ```
 
 ---
-
-## Documentation & Reference Guides
-
-Detailed guides, channel tables, error catalogs, and copy-pasteable starter scenes ship in [`skills/svjeez/`](https://github.com/saiashirwad/svjeez/tree/main/skills/svjeez) (and are installed locally via `npx svjeez skill --install`):
-
-| Topic | Guide |
-| --- | --- |
-| **Core Playbook**: timeline rules, channel table, recipes, `tsc` &amp; runtime error fixes | [`skills/svjeez/SKILL.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/SKILL.md) |
-| **Defs, CSS &amp; Filters**: gradients, masks, symbols, `@property`, `calc()`, `fx.*` | [`references/defs-css.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/defs-css.md) |
-| **Code Explainers &amp; Terminals**: themes, `code()`, `morph()`, `timeline()`, annotations, `Camera`, `terminal()` | [`references/explainers.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/explainers.md) |
-| **Diagrams &amp; Flows**: `flowchart`, `sequence`, `stateMachine`, `tree`, `lanes`, `flow`, `travel` | [`references/diagrams.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/diagrams.md) |
-| **Images &amp; Fonts**: `picture`, `<Picture>`, `font.load`, subsetting, `<Glyphs>` | [`references/images-fonts.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/images-fonts.md) |
-| **Ink &amp; Handwriting**: `<Ink>`, `tool.pen/brush/nib/pencil`, `strokeFont` | [`references/ink.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/ink.md) |
-| **Voxels**: `voxel.camera`, `voxel.texture`, `voxel.scene`, `camera.project` | [`references/voxels.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/voxels.md) |
-| **Without JSX &amp; Frameworks**: `el.*`, inlining with `prefix`, data URIs | [`references/without-jsx.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/without-jsx.md) |
-| **Starter Examples**: `toast`, `orbit`, `review-flow`, `explainer`, `terminal` | [`skills/svjeez/examples/`](https://github.com/saiashirwad/svjeez/tree/main/skills/svjeez/examples) |
 
 ## Contributing & Local Development
 
