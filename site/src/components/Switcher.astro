@@ -59,19 +59,32 @@ const { name, label, items } = Astro.props;
 }
 
 <script>
+  import { play } from "../scripts/scenes";
+
   for (const switcher of document.querySelectorAll<HTMLElement>("[data-switcher]")) {
     const tabs = [...switcher.querySelectorAll<HTMLButtonElement>("[role=tab]")];
+    const pane = (tab: HTMLButtonElement) => document.getElementById(tab.getAttribute("aria-controls")!)!;
+    let latest: HTMLButtonElement | undefined;
 
-    const select = (tab: HTMLButtonElement, focus = false) => {
+    // The tab answers at once. Its scene starts playing while still hidden, and swaps in once its first frame is
+    // decoded, so the switch is one cut with no empty or poster frame in between.
+    const select = async (tab: HTMLButtonElement, focus = false) => {
+      latest = tab;
+
       for (const other of tabs) {
-        const on = other === tab;
-        other.setAttribute("aria-selected", String(on));
-        other.tabIndex = on ? 0 : -1;
-        document.getElementById(other.getAttribute("aria-controls")!)!.hidden = !on;
+        other.setAttribute("aria-selected", String(other === tab));
+        other.tabIndex = other === tab ? 0 : -1;
       }
 
       if (focus) tab.focus();
       tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+      const img = pane(tab).querySelector<HTMLImageElement>(".scene");
+
+      if (img) await play(img);
+
+      if (latest !== tab) return;
+
+      for (const other of tabs) pane(other).hidden = other !== tab;
     };
 
     for (const tab of tabs) tab.addEventListener("click", () => select(tab));

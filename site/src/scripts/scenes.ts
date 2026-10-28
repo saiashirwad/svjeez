@@ -25,7 +25,10 @@ export const play = (img: HTMLImageElement) => {
 
   if (img.dataset.want === "live") return;
   img.dataset.want = "live";
-  show(img, playing(img, img.dataset.live!)).then((shown) => shown && (img.dataset.state = "live"));
+
+  return show(img, playing(img, img.dataset.live!)).then((shown) => {
+    if (shown) img.dataset.state = "live";
+  });
 };
 
 const scenes = document.querySelectorAll<HTMLImageElement>(".scene[data-live]");
@@ -94,6 +97,22 @@ scenes.forEach((img) => {
 
   if (!("manual" in img.dataset)) view.observe(img);
 });
+
+// Once the page has loaded, every scene and its still in the page's scheme download together in the background, so a
+// scene is in the cache before it is scrolled to or switched to. A fetch fills the HTTP cache without loading the SVG
+// as an image, which would start its clock. Readers who ask to save data are skipped.
+const warm = () => {
+  if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
+
+  new Set([...scenes].flatMap((img) => [img.dataset.live!, posterOf(img)])).forEach((url) =>
+    fetch(url, { priority: "low" })
+      .then((response) => response.arrayBuffer())
+      .catch(() => {}),
+  );
+};
+
+if (document.readyState === "complete") warm();
+else addEventListener("load", warm, { once: true });
 
 calm.addEventListener("change", () =>
   scenes.forEach((img) => (img.dataset.state === "live" && calm.matches ? still(img) : undefined)),

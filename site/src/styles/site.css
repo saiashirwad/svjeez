@@ -817,18 +817,6 @@ pre.code {
       color 0.15s,
       translate 0.12s var(--out);
   }
-  .pane:not([hidden]) > * {
-    animation: pane-in 0.4s var(--out) both;
-  }
-  .pane:not([hidden]) > :nth-child(2) {
-    animation-delay: 0.05s;
-  }
-}
-@keyframes pane-in {
-  from {
-    opacity: 0;
-    translate: 0 0.5rem;
-  }
 }
 .pane {
   display: contents;
