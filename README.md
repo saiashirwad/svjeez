@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/hero.svg" width="840" alt="The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a floating voxel island orbited by a golden light." />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/hero.svg" width="840" alt="The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a damped spring physics simulation plotted in real time." />
 </p>
 
 <p align="center">
