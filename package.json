@@ -7,9 +7,19 @@
     "site"
   ],
   "scripts": {
+    "check": "bun run lint && bun run format:check && bun run typecheck",
+    "lint": "oxlint . --deny-warnings --report-unused-disable-directives",
+    "lint:fix": "oxlint . --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "typecheck": "bun run --filter '*' typecheck",
     "test": "bun run --filter '*' test",
     "dev": "bun run --filter svjeez-site dev",
     "deploy": "bun run --filter svjeez-site deploy"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.90.0",
+    "oxfmt": "0.75.0",
+    "oxlint": "1.90.0"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "proseWrap": "preserve",
+  "ignorePatterns": [
+    ".claude/**",
+    ".opencode/**",
+    ".preview/**",
+    "**/*.astro",
+    "**/dist/**",
+    "**/package-dist/**",
+    "site/.alchemy/**",
+    "site/.astro/**",
+    "tools/oxlint/anti-slop/**"
+  ]
+}
