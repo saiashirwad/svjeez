@@ -103,21 +103,22 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
   .big .win { inline-size: min(100%, 26rem) }
 }
 
-/* Hero: a left-aligned headline, then a short paragraph on the left and the install line on the right. */
-.hero { padding-block: clamp(1.5rem, 4vw, 2.25rem) clamp(1.25rem, 2.5vw, 1.75rem); row-gap: clamp(1.25rem, 2.5vw, 1.5rem) }
-.hero h1 { font-size: clamp(3.25rem, 1rem + 9.5vw, 6.5rem); line-height: 0.92; letter-spacing: -0.055em }
+/* Hero: one left-aligned column on the page grid, the headline, a short paragraph, then the install line and links in one row.
+   Spacing steps on 8px: 32px under the underline, 32px to the row, 96px to the demo. */
+.hero { padding-block: clamp(1.5rem, 4vw, 2.25rem) 0; row-gap: 2rem }
+.hero h1 { font-size: clamp(3.25rem, 1rem + 9.5vw, 6.5rem); line-height: 0.92; letter-spacing: -0.055em; padding-block-end: 0.07em }
 .ul { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 0.07em; text-underline-offset: 0.09em; text-decoration-skip-ink: none }
-.lede { max-inline-size: 44ch; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem); line-height: 1.5; color: var(--muted) }
-.cta { display: grid; gap: 1.25rem; align-content: start; justify-items: start }
+.lede { max-inline-size: 42ch; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem); line-height: 1.5; color: var(--muted) }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem }
 .install { display: inline-flex; align-items: center; gap: 0.5rem; min-block-size: 3rem; padding-inline: 1.1rem 0.4rem; background: var(--sunken); border-radius: 0.625rem; box-shadow: 0 0 0 1px var(--line); font: 500 1rem / 1 var(--mono) }
 .install code { font-size: inherit }
 .install b { color: var(--accent); font-weight: 600 }
 .install button { display: grid; place-items: center; inline-size: 2.25rem; block-size: 2.25rem; padding: 0; color: var(--muted); background: none; border: 0; border-radius: 0.5rem; cursor: pointer }
 .install button svg { inline-size: 1.1rem; block-size: 1.1rem }
 @media (hover: hover) and (pointer: fine) { .install button:hover { color: var(--ink); background: var(--bg) } }
-.links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9375rem }
+.links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; font-size: 0.9375rem }
 .links a { color: var(--ink) }
-.hero-demo { margin-block: clamp(1rem, 3vw, 2.5rem) clamp(3rem, 7vw, 5rem) }
+.hero-demo { margin-block: clamp(3rem, 8vw, 6rem) clamp(3rem, 7vw, 5rem) }
 @media (max-width: 63.99rem) { .hero-demo .wide { display: none } .hero-demo .tall { display: block } .hero-demo .win { inline-size: min(100%, 22.5rem) } }
 @media (min-width: 56rem) and (max-width: 63.99rem) { .hero-demo .win { inline-size: min(100%, 26rem) } }
 

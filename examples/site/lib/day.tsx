@@ -10,6 +10,7 @@ const SKY = { dawn: "#FFB38A", noon: "#8CCBFF", dusk: "#FF7E5F", night: "#2B2F66
 const SUN = "#FFD60A";
 const LAND = "#141826";
 const D = 10;
+const BAR = 40;
 
 const sky = motion({ fill: SKY.dawn })
   .to({ fill: SKY.noon }, 2)
@@ -60,8 +61,9 @@ export interface Layout {
   readonly width: number;
   readonly height: number;
   readonly fontSize: number;
-  /** Top-left of the code. */
-  readonly code: { readonly x: number; readonly y: number };
+  readonly lineHeight: number;
+  /** Top-left of the code. Without a y the code sits centered in the window's body below the bar. */
+  readonly code: { readonly x: number; readonly y?: number };
   /** The sky's pane inside the window, and how far down it the horizon sits. Its corners are square except where it meets the window's own rounded corner. */
   readonly panel: { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
   readonly horizon: number;
@@ -71,7 +73,9 @@ export interface Layout {
 export function day(layout: Layout): string {
   const { name, width, height, fontSize, panel } = layout;
   const lines = SOURCE[name];
-  const listing = code(highlight(source(name)) as CodeTokens, { theme, fontSize, lineHeight: 1.7, x: layout.code.x, y: layout.code.y });
+  const { lineHeight } = layout;
+  const y = layout.code.y ?? BAR + (height - BAR - lines.length * fontSize * lineHeight) / 2;
+  const listing = code(highlight(source(name)) as CodeTokens, { theme, fontSize, lineHeight, x: layout.code.x, y });
   const lineH = listing.metrics.height;
 
   // One bar per step behind its line, tinted toward the color that step is heading for; a wait gets a quiet gray.
@@ -103,7 +107,7 @@ export function day(layout: Layout): string {
       reducedMotion: { at: 3 },
     },
     <>
-      {chrome(width, height, "day.tsx", { mono: true }).node}
+      {chrome(width, height, "day.tsx", { mono: true, bar: BAR }).node}
       <g class="mono">
         {bars}
         {listing.node}
