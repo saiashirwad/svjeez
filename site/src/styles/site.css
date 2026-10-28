@@ -93,6 +93,40 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
   :root:not([data-theme]) .theme .moon { display: block }
 }
 
+/* The palette picker: three dots in the page's own colors, and a menu of palettes, each on its own background. */
+.pick { position: relative; display: grid; place-items: center; inline-size: 2.25rem; block-size: 2.25rem; padding: 0; background: none; border: 0; border-radius: 50%; cursor: pointer }
+.pick::after { content: ""; position: absolute; inset: min(0px, (100% - 44px) / 2) }
+.pick:active { translate: 0 1px }
+.pick .dots { display: flex }
+.pick i { inline-size: 0.625rem; block-size: 0.625rem; margin-inline-start: -0.1875rem; border-radius: 50%; box-shadow: 0 0 0 2px var(--bg) }
+.pick i:nth-child(1) { margin-inline-start: 0; background: var(--code-tag) }
+.pick i:nth-child(2) { background: var(--code-string) }
+.pick i:nth-child(3) { background: var(--code-fn) }
+@media (hover: hover) and (pointer: fine) { .pick:hover { background: color-mix(in oklch, var(--ink) 7%, transparent) } }
+.palettes { margin: 0; padding: 0.375rem; min-inline-size: 11.5rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 0.75rem; box-shadow: 0 1rem 2rem -0.75rem var(--shadow); font: 500 0.875rem / 1 var(--sans); opacity: 0; transition: opacity 0.15s var(--out), translate 0.15s var(--out), display 0.15s allow-discrete, overlay 0.15s allow-discrete }
+.palettes:popover-open { display: grid; gap: 0.125rem; opacity: 1 }
+@starting-style { .palettes:popover-open { opacity: 0 } }
+@media (prefers-reduced-motion: no-preference) {
+  .palettes { translate: 0 -0.25rem }
+  .palettes:popover-open { translate: 0 0 }
+  @starting-style { .palettes:popover-open { translate: 0 -0.25rem } }
+}
+@supports (position-area: block-end) {
+  .palettes { margin-block-start: 0.375rem; position-area: block-end span-inline-start; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline }
+}
+.palettes button { display: flex; align-items: center; gap: 0.75rem; min-block-size: 2.5rem; padding: 0.375rem 0.625rem 0.375rem 0.375rem; font: inherit; color: inherit; text-align: start; background: none; border: 0; border-radius: 0.5rem; cursor: pointer }
+.palettes button:focus-visible { outline-offset: -2px }
+.palettes button:active { background: var(--sunken) }
+.palettes button[aria-checked="true"] { font-weight: 600 }
+.palettes button[aria-checked="true"]::after { content: ""; inline-size: 1rem; block-size: 1rem; margin-inline-start: auto; background: var(--accent); mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat }
+@media (hover: hover) and (pointer: fine) { .palettes button:hover { background: var(--sunken) } }
+.sw { display: flex; gap: 0.1875rem; padding: 0.375rem 0.4375rem; background: var(--s0); border-radius: 0.375rem; box-shadow: 0 0 0 1px var(--line) }
+.sw i { inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50% }
+.sw i:nth-child(1) { background: var(--s1) }
+.sw i:nth-child(2) { background: var(--s2) }
+.sw i:nth-child(3) { background: var(--s3) }
+.sw i:nth-child(4) { background: var(--s4) }
+
 /* Windows: every scene is a window with its own chrome, so the page only adds a shadow. */
 .win { border-radius: var(--radius); background: var(--win-bg); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
 .win img, .win > .stage { border-radius: inherit }
