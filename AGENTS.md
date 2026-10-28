@@ -15,7 +15,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
 - `site/` is the Astro site at svjeez.texoport.in.
 
-Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
+Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, `bun run build:examples` rebuilds `examples/dist/`, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 
 The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
