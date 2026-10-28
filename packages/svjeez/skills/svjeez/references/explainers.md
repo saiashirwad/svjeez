@@ -108,7 +108,7 @@ const typed = typewriter(src, { at: 1, cps: 28, cursor: true });      // { node,
 const shown2 = reveal(src, { at: 1, step: 0.6 });                      // { node, spans, end }
 ```
 
-- `morph(versions, { at, over })` moves words that survive, fades the rest, and pairs runs by id first. One `at` per transition. Give a run an id when the text changes but the meaning does not.
+- `morph(versions, { at, over })` moves words that survive, fades the rest, and pairs runs by id first. One `at` per transition. Give a run an id when the text changes but the meaning does not. `morph()` also takes anything with `words` and `draw()`, such as a `tex()` formula from `@svjeez/math`; `gutter` needs `code()` versions.
 - `typewriter` types line by line. `spans[i]` is when line `i + 1` types.
 - `reveal` shows a paragraph at a time. `blocks: [[2, 3], [5, 9]]` picks line ranges and leaves the rest visible. `blocks: "line"` goes line by line.
 
@@ -134,6 +134,7 @@ const notes = (
 - `Focus` dims its children except the stop's rects. A stop's `target` may be a list of rects.
 - `Marker` is a box that glides between stops.
 - `Callout` takes text as children, wrapped at `columns` characters, on any `side`. With `font` it sizes by measuring.
+- `Brace` takes `side` `"left"`, `"right"`, `"above"` or `"below"`. The last two run along the top or bottom of the target, which suits a term of an equation.
 - `Underline` has `variant` `"straight"` or `"squiggle"`.
 - `color` defaults to the theme's `base09` on all of them.
 

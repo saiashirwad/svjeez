@@ -150,28 +150,40 @@ export function Brace({
   class: cls,
 }: Common & {
   readonly target: Rect;
-  readonly side?: "left" | "right";
+  /** `above` and `below` run the brace along the top or bottom of `target`, for an equation term. */
+  readonly side?: "left" | "right" | "above" | "below";
   readonly label?: string;
 }): SvgNode {
-  const [x, dir, mid] = [
-    side === "left" ? target.x - 8 : target.x + target.w + 8,
-    side === "left" ? -1 : 1,
-    target.center.y,
-  ];
+  const along = side === "above" || side === "below";
+  const dir = side === "left" || side === "above" ? -1 : 1;
 
-  const d = `M${x} ${target.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${target.y + target.h - 8}q0 8 ${-dir * 8} 8`;
+  const [edge, mid] = along
+    ? [dir < 0 ? target.y - 8 : target.y + target.h + 8, target.center.x]
+    : [dir < 0 ? target.x - 8 : target.x + target.w + 8, target.center.y];
+
+  const d = along
+    ? `M${target.x} ${edge}q0 ${dir * 8} 8 ${dir * 8}H${mid - 8}q8 0 8 ${dir * 8}q0 ${-dir * 8} 8 ${-dir * 8}H${target.x + target.w - 8}q8 0 8 ${-dir * 8}`
+    : `M${edge} ${target.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${target.y + target.h - 8}q0 8 ${-dir * 8} 8`;
 
   return el.g({ class: cls, animation: during(span, 0.2) }, [
     el.path({ d, ...ink(color) }),
     label &&
       el.text(
-        {
-          x: x + dir * 20,
-          y: mid + 4,
-          textAnchor: side === "left" ? "end" : "start",
-          fontSize: 12,
-          fill: color,
-        },
+        along
+          ? {
+              x: mid,
+              y: edge + (dir < 0 ? -16 : 22),
+              textAnchor: "middle",
+              fontSize: 12,
+              fill: color,
+            }
+          : {
+              x: edge + dir * 20,
+              y: mid + 4,
+              textAnchor: side === "left" ? "end" : "start",
+              fontSize: 12,
+              fill: color,
+            },
         label,
       ),
   ]);

@@ -22,12 +22,7 @@ export {
   type CodeMetrics,
 } from "./extras/code";
 
-export {
-  morph,
-  type MorphOptions,
-  type Morphable,
-  type MorphPiece,
-} from "./extras/morph";
+export { morph, type MorphOptions, type Morphable, type MorphPiece } from "./extras/morph";
 
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";
 

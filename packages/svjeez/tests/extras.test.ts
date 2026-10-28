@@ -305,6 +305,22 @@ test("morph reports when each transition runs and when the last settles", () => 
   expect(morph([a], { at: [] })).toMatchObject({ spans: [], end: 0 });
 });
 
+test("a brace runs along the bottom or top of a target, and centers its label there", () => {
+  const target = rect(100, 50, 80, 30);
+
+  const draw = (side: "above" | "below") =>
+    render(
+      { width: 300, height: 200, duration: 4, title: "brace" },
+      Brace({ target, side, label: "term", during: { at: 1, over: 2 } }),
+    );
+
+  const [below, above] = [draw("below"), draw("above")];
+  expect(below).toContain('d="M100 88q0 8 8 8H132');
+  expect(above).toContain('d="M100 42q0 -8 8 -8H132');
+  expect(below).toMatch(/<text[^>]*x="140"[^>]*y="110"[^>]*>term/);
+  expect(above).toMatch(/<text[^>]*x="140"[^>]*y="26"[^>]*>term/);
+});
+
 describe("morph over any Morphable", () => {
   const dots = (...pieces: MorphPiece[]): Morphable => ({
     words: pieces,
@@ -328,6 +344,7 @@ describe("morph over any Morphable", () => {
 
   test("a gutter needs code, because only code has lines to number", () => {
     const a = dots({ text: "k", x: 10, y: 10 });
+    // SAFETY: the overloads reject this call at compile time, and a plain-JS caller would still reach the runtime check.
     expect(() => morph([a, a], { at: [1], gutter: true } as never)).toThrow(/gutter only for code/);
   });
 });

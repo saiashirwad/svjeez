@@ -127,7 +127,10 @@ export function morph(
     if (i > 0 && start < at[i - 1]! + over)
       throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
   });
-  if (gutter && !versions.every(isCode))
+
+  const codes = versions.filter(isCode);
+
+  if (gutter && codes.length !== versions.length)
     throw new Error("morph() draws a gutter only for code() versions.");
   const half = over / 2;
 
@@ -181,13 +184,10 @@ export function morph(
       return chains[chains.push(next) - 1]!;
     });
   });
-  const numbers = gutter ? lineNumbers(versions as readonly Code[], at, over) : [];
+  const numbers = gutter ? lineNumbers(codes, at, over) : [];
 
   return {
-    node: el.g({}, [
-      numbers,
-      chains.map((chain) => chain.source.draw(chain.word, chain.track)),
-    ]),
+    node: el.g({}, [numbers, chains.map((chain) => chain.source.draw(chain.word, chain.track))]),
     spans: at.map((start): Span => ({ at: start, over })),
     end: at.length > 0 ? at.at(-1)! + over : 0,
   };
