@@ -39,35 +39,42 @@ const point = sampled(
   sample((x, y) => ({ x, y })),
   { duration: D, tolerance: { translate: 0.3 } },
 );
+
 const radius = sampled((t) => ({ rotate: (-theta(t) * 180) / Math.PI }), {
   duration: D,
   tolerance: { rotate: 0.4 },
 });
+
 const cosine = sampled(
   sample((x) => ({ x: Math.min(0, x), width: Math.abs(x) })),
   { duration: D, tolerance: { translate: 0.3, width: 0.3 } },
 );
+
 const sine = sampled(
   sample((x, y) => ({ x, y: Math.min(0, y), height: Math.abs(y) })),
   { duration: D, tolerance: { translate: 0.3, height: 0.3 } },
 );
 
 const at = { x: 238, y: CY - 22, fontSize: 25, theme } as const;
+
 const angle = (a: string) =>
   tex(
     String.raw`e^{i\cssId{e}{${a}}} = \color{${COS}}{\cos\cssId{c}{${a}}} + \color{${SIN}}{i\sin\cssId{s}{${a}}}`,
     at,
   );
+
 const versions = [
   angle(String.raw`\theta`),
   angle(String.raw`\color{${PI}}{\pi}`),
   tex(String.raw`e^{i\cssId{e}{\color{${PI}}{\pi}}} = -1`, at),
   tex(String.raw`e^{i\cssId{e}{\color{${PI}}{\pi}}} + 1 = 0`, at),
 ];
+
 const m = morph(versions, { at: [5.9, 7.9, 9.0], over: 0.8 });
 
 const label = (source: string, x: number, y: number, color: Color) =>
   tex(source, { x, y, fontSize: 15, color, display: false });
+
 const one = label("1", CX + R + 6, CY + 4, theme.base03);
 const minusOne = label("-1", CX - R - 28, CY + 6, PI);
 

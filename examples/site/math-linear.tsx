@@ -22,12 +22,15 @@ const AREA = theme.base0A;
 
 /** One number drives the whole transformation: the grid is drawn through M(u) = I + u(A − I), with A = [[2, −1], [1, 1]]. */
 const u = def.property("u", { syntax: "number", inherits: true, initial: 0 });
+
 /** A shaft grows from the origin: `draw()` would leave a dash pattern that non-scaling-stroke reads in screen pixels. */
 const g = def.property("g", { syntax: "number", inherits: false, initial: 0 });
+
 const grow = (at: number) =>
   motion({ [g]: 0 })
     .at(at)
     .to({ [g]: 1 }, 0.5, ease.inOut);
+
 const morphing = motion({ [u]: 0 })
   .at(3.6)
   .to({ [u]: 1 }, 2.6, ease.inOut);
@@ -46,6 +49,7 @@ const scene = css`
   .grow{scale:${g}}
   .mid{translate:0 calc(${u} * ${-U / 2}px)}
 `;
+
 const base = css(Object.assign([CSS], { raw: [CSS] }));
 
 /** Arrowhead pointing along +x, its tip 4px past the end of the shaft so the shaft's square end hides inside it. */
@@ -53,18 +57,22 @@ const head = (fill: Color) => <polygon points="4,0 -8,-5.5 -8,5.5" fill={fill} /
 
 const label = (source: string, color: Color, x: number, y: number) =>
   tex(source, { x, y, fontSize: 17, color, anchor: [0.5, 0.5] });
+
 const iHat = label(String.raw`\hat\imath`, I, 0, 0);
 const jHat = label(String.raw`\hat\jmath`, J, 0, 0);
 
 const at = { x: 404, y: 128, fontSize: 21, theme, anchor: [0.5, 0.5] } as const;
+
 const matrix = tex(
   String.raw`A = \begin{bmatrix} \color{${I}}{2} & \color{${J}}{-1} \\ \color{${I}}{1} & \color{${J}}{1} \end{bmatrix}`,
   at,
 );
+
 const det = tex(String.raw`\det A = \color{${AREA}}{3}`, { ...at, y: 214 });
 
 const area = (n: string) =>
   tex(n, { x: U / 2, y: -U / 2, fontSize: 15, color: AREA, anchor: [0.5, 0.5], display: false });
+
 const areas = morph([area("1"), area("3")], { at: [7], over: 0.5 });
 
 /** The tips of î and ĵ under M(u), in pixels from the origin: the labels ride along with CSS. */
@@ -80,6 +88,7 @@ const fade = def.linearGradient(
     <stop offset={1} stopColor="#fff" stopOpacity={0} />
   </>,
 );
+
 const body = def.mask(
   {},
   <path

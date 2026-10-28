@@ -41,6 +41,7 @@ const center = (corners: readonly Point[]): Point => {
 // The tilted square's corners sit a along each side, turning clockwise. The second arrangement puts a² top left and b² bottom right, and every triangle only slides.
 const TOP_RIGHT: Point = [A + B / 2, A / 2];
 const BOTTOM_LEFT: Point = [A / 2, A + B / 2];
+
 const triangles: readonly Triangle[] = [
   {
     corners: [
@@ -96,10 +97,12 @@ const b2 = label("b^2", A + B / 2, A + B / 2, BB, SIZE);
 const EX = (X0 + S + W) / 2 + 4;
 const EY = Y0 + S / 2 - 6;
 const at = { x: EX, y: EY, fontSize: SIZE, theme, anchor: [0.5, 0.5] } as const;
+
 const equation = tex(
   String.raw`\cssId{a}{\color{${AA}}{a^2}} + \cssId{b}{\color{${BB}}{b^2}} = \cssId{c}{\color{${CC}}{c^2}}`,
   at,
 );
+
 const plusEquals = tex(String.raw`\phantom{a^2} + \phantom{b^2} = \phantom{c^2}`, {
   ...at,
   color: theme.base05,
