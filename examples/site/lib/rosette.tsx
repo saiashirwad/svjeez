@@ -1,5 +1,5 @@
 import { draw, ease, enter, motion, rect, render, type Ease, type SvgNode } from "svjeez";
-import { code, morph, type CodeTokens } from "svjeez/extras";
+import { code, type CodeRole, type CodeTokens } from "svjeez/extras";
 import { CSS, highlight, outro, theme } from "../kit";
 
 // The home page hero: a few lines of TSX beside the scene they make. Four values in the code change one after another,
@@ -56,8 +56,8 @@ export const source = (layout: "wide" | "tall", d: Dials): string => {
 
 const DIAL_LINE: Record<Dial, RegExp> = { n: /^const n = /, over: /^const over = /, color: /^const color = /, ease: /ease\./ };
 
-/** Highlights the source and names each dial's value token, so `morph` swaps it in place. */
-const tokens = (layout: "wide" | "tall", d: Dials): CodeTokens => {
+/** Highlights the source and names each dial's value token. With `blank` the dial values are left as spaces, so they can be laid over the static text. */
+const tokens = (layout: "wide" | "tall", d: Dials, blank = false): CodeTokens => {
   const lines = source(layout, d).split("\n");
   const t = text(d);
   return highlight(lines.join("\n")).map((row, i) => {
@@ -65,7 +65,7 @@ const tokens = (layout: "wide" | "tall", d: Dials): CodeTokens => {
     return row.map((piece) => {
       if (!dial) return piece;
       const content = typeof piece === "string" ? piece : Array.isArray(piece) ? piece[1] : (piece as { content: string }).content;
-      return content === t[dial] ? (["number", content, dial] as const) : piece;
+      return content === t[dial] ? (blank ? " ".repeat(content.length) : (["number", content, dial] as const)) : piece;
     });
   });
 };
@@ -116,7 +116,21 @@ export function rosette(layout: Layout): string {
   const D = Math.ceil(last + PHASES.at(-1)!.over + (PHASES.at(-1)!.n - 1) * STEP + 1.8 + 0.5);
   const hold = last + PHASES.at(-1)!.over + (PHASES.at(-1)!.n - 1) * STEP + 0.6;
 
-  const moved = morph(versions, { at: swaps, over: 0.2 });
+  // The code is static except for the dial values, so only those are animated: each distinct value is its own piece of text, laid over a blank, and switched on and off in turn.
+  const still = code(tokens(name, PHASES[0]!, true), opts);
+  const roles = Object.fromEntries(ids.map((dial) => [dial, (tokens(name, PHASES[0]!).flat().find((piece) => Array.isArray(piece) && piece[2] === dial) as readonly [CodeRole, string, string])[0]])) as Record<Dial, CodeRole>;
+  const values = ids.flatMap((dial) =>
+    PHASES.flatMap((d, k) => {
+      const value = text(d)[dial];
+      if (k > 0 && value === text(PHASES[k - 1]!)[dial]) return [];
+      const next = PHASES.findIndex((e, j) => j > k && text(e)[dial] !== value);
+      const word = versions[k]!.words.find((w) => w.id === dial)!;
+      let shown = motion({ opacity: k === 0 ? 1 : 0 });
+      if (k > 0) shown = shown.at(swaps[k - 1]!).to({ opacity: 1 }, 0.2);
+      if (next > 0) shown = shown.at(swaps[next - 1]!).to({ opacity: 0 }, 0.2);
+      return [<g animation={shown}>{code([[[roles[dial], value]]], { ...opts, x: word.x, y: word.y }).node}</g>];
+    }),
+  );
   const flashes = swaps.map((at, k) => {
     const dial = ids.find((id) => text(PHASES[k]!)[id] !== text(PHASES[k + 1]!)[id])!;
     const box = versions[k + 1]!.get(dial).pad(3);
@@ -144,7 +158,8 @@ export function rosette(layout: Layout): string {
       <rect x={panel.x} y={panel.y} width={panel.w} height={panel.h} rx={20} fill={theme.base01} />
       <g animation={outro(D)}>
         <g class="mono" animation={enter({ at: 0.1, over: 0.45 }, { opacity: 0, y: 6 })}>
-          {moved.node}
+          {still.node}
+          {values}
           {flashes}
         </g>
         <g transform={`translate(${panel.x + panel.w / 2} ${panel.y + panel.h / 2}) scale(${layout.scale})`}>{layers}</g>
