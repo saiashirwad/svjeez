@@ -16,12 +16,45 @@ import yaml from "shiki/langs/yaml.mjs";
 
 /** Names and aliases that `highlight()` accepts without `grammars`. */
 export type DefaultLang =
-  | "ts" | "typescript" | "tsx" | "js" | "javascript" | "jsx"
-  | "json" | "css" | "html"
-  | "bash" | "sh" | "shell" | "zsh"
-  | "python" | "py" | "rust" | "rs" | "go" | "sql" | "yaml" | "yml"
-  | "md" | "markdown" | "diff";
+  | "ts"
+  | "typescript"
+  | "tsx"
+  | "js"
+  | "javascript"
+  | "jsx"
+  | "json"
+  | "css"
+  | "html"
+  | "bash"
+  | "sh"
+  | "shell"
+  | "zsh"
+  | "python"
+  | "py"
+  | "rust"
+  | "rs"
+  | "go"
+  | "sql"
+  | "yaml"
+  | "yml"
+  | "md"
+  | "markdown"
+  | "diff";
 
 export const LANGS = [
-  bash, css, diff, go, html, javascript, json, jsx, markdown, python, rust, sql, tsx, typescript, yaml,
+  bash,
+  css,
+  diff,
+  go,
+  html,
+  javascript,
+  json,
+  jsx,
+  markdown,
+  python,
+  rust,
+  sql,
+  tsx,
+  typescript,
+  yaml,
 ];

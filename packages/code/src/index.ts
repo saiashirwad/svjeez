@@ -1,11 +1,19 @@
-import type { CodePiece, CodeRole, CodeTokens } from "svjeez/extras";
-import { createHighlighterCoreSync, type LanguageRegistration, type ThemeRegistration } from "shiki/core";
+import type { CodeRole, CodeRun } from "svjeez/extras";
+import {
+  createHighlighterCoreSync,
+  type LanguageRegistration,
+  type ThemeRegistration,
+} from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { LANGS, type DefaultLang } from "./langs.ts";
 import { SCOPES } from "./scopes.ts";
 
 export type { CodePiece, CodeRole, CodeTokens } from "svjeez/extras";
+
 export type { DefaultLang } from "./langs.ts";
+
+/** What `highlight()` returns: a `CodeTokens` whose pieces are all plain strings or `[role, text]` runs. */
+export type Highlighted = readonly (readonly (string | CodeRun)[])[];
 
 /** A language this package bundles, an alias of one, or the name of a grammar passed in `grammars`. */
 export type Lang = DefaultLang | (string & {});
@@ -18,7 +26,7 @@ export interface HighlightOptions {
 }
 
 /** Each role gets a color no theme would use, so a token's color names its role. */
-const ROLES = ["plain", ...new Set(Object.values(SCOPES))] as readonly CodeRole[];
+const ROLES: readonly CodeRole[] = ["plain", ...new Set<CodeRole>(Object.values(SCOPES))];
 const sentinel = (role: CodeRole) => `#${(ROLES.indexOf(role) + 1).toString(16).padStart(6, "0")}`;
 const roleOf = new Map(ROLES.map((role) => [sentinel(role), role]));
 
@@ -58,11 +66,13 @@ const expandTabs = (line: string, tabSize: number): string => {
  * Splits `source` into lines of role-tagged runs, ready for `code()`. Runs of the same role are merged, and
  * plain text is a bare string. Colors come from the scene's theme, so `adaptive()` and `variables()` keep working.
  */
-export function highlight(source: string, lang: Lang, options: HighlightOptions = {}): CodeTokens {
+export function highlight(source: string, lang: Lang, options: HighlightOptions = {}): Highlighted {
   const { tabSize = 2, grammars = [] } = options;
 
   if (!Number.isInteger(tabSize) || tabSize < 1) {
-    throw new Error(`highlight() needs tabSize to be a whole number of at least 1, got ${tabSize}.`);
+    throw new Error(
+      `highlight() needs tabSize to be a whole number of at least 1, got ${tabSize}.`,
+    );
   }
 
   for (const grammar of grammars) {
@@ -84,6 +94,7 @@ export function highlight(source: string, lang: Lang, options: HighlightOptions 
     .split("\n")
     .map((line) => expandTabs(line, tabSize))
     .join("\n");
+
   const lines = highlighter.codeToTokensBase(text, { lang, theme: THEME.name });
 
   return lines.map((tokens) => {
@@ -98,6 +109,8 @@ export function highlight(source: string, lang: Lang, options: HighlightOptions 
       else runs.push([role, content]);
     }
 
-    return runs.map(([role, content]): CodePiece => (role === "plain" ? content : [role, content]));
+    return runs.map(([role, content]): string | CodeRun =>
+      role === "plain" ? content : [role, content],
+    );
   });
 }

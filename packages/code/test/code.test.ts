@@ -5,7 +5,7 @@ import toml from "shiki/langs/toml.mjs";
 import { highlight } from "../src/index.ts";
 
 const flat = (lines: ReturnType<typeof highlight>) =>
-  lines.map((line) => line.map((p) => (typeof p === "string" ? p : p[1])).join(""));
+  lines.map((line) => line.map((p) => (Array.isArray(p) ? p[1] : p)).join(""));
 
 describe("highlight", () => {
   test("tags runs with roles and keeps plain text bare", () => {
@@ -45,7 +45,11 @@ describe("highlight", () => {
 
   test("takes aliases and the other default languages", () => {
     const roles = (lang: string, source: string) =>
-      new Set(highlight(source, lang).flatMap((line) => line.flatMap((p) => (typeof p === "string" ? [] : [p[0]]))));
+      new Set(
+        highlight(source, lang).flatMap((line) =>
+          line.flatMap((p) => (Array.isArray(p) ? [p[0]] : [])),
+        ),
+      );
 
     expect(roles("bash", 'echo "$HOME" # hi').has("comment")).toBe(true);
     expect(roles("sh", "ls -la").has("fn")).toBe(true);
@@ -92,6 +96,7 @@ describe("with code()", () => {
 
   test("an adaptive theme switches with the color scheme instead of baking in hex", () => {
     const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
+
     const svg = render(
       { width: 400, height: 80, duration: 1, title: "Code", css },
       code(highlight(source, "ts"), { x: 10, y: 10, theme }).node,

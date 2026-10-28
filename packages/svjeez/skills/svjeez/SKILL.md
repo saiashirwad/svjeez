@@ -150,6 +150,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |
 | Equations: TeX, equation transforms, `morph()` over formulas (`@svjeez/math`) | [`references/math.md`](references/math.md) |
+| Syntax highlighting for `code()` and `terminal()`, themed by role (`@svjeez/code`) | [`references/code.md`](references/code.md) |
 | `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
 
 ## Examples

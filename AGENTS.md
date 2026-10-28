@@ -11,6 +11,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/svjeez/` is the library published to npm as `svjeez`.
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
+- `packages/code/` is `@svjeez/code`, which highlights source into role-tagged runs for `code()` and `terminal()` through Shiki.
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
@@ -74,6 +75,10 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 `@svjeez/icons` is data with no dependencies, and it does not import svjeez. `<Icon>` in `packages/svjeez/src/icon.tsx` takes its `{ grid, kind, paths }` shape structurally through its own `IconData`. `src/tabler.ts` and `src/lucide.ts` are generated and committed: `bun run generate` in `packages/icons/` reads `@tabler/icons` and `lucide-static` from `node_modules`, pinned to exact versions, and rerunning it changes nothing. Never edit them by hand, and both oxfmt and oxlint ignore them. Each starts with the upstream licence. The naming rule is in the package README. `bun run test:package` checks the packed tarball on plain Node.
 
+## Code
+
+`@svjeez/code` depends on `shiki`, pinned, which is why it is not a `svjeez` subpath. `highlight()` is synchronous: it builds one `createHighlighterCoreSync` with statically imported grammars (`src/langs.ts`) and Shiki's JavaScript regex engine, so nothing loads WebAssembly and it runs on Node 20. It does not use a real theme. `src/index.ts` builds a synthetic one from `src/scopes.ts`, the single table from TextMate scope prefix to `CodeRole`, where each role has a sentinel color, and maps the color Shiki returns back to its role. Shiki's own scope matching then decides which prefix wins, and uppercases the colors it returns, so the lookup lowercases them. The output is `[role, text]` runs, never hex, so `adaptive()` and `variables()` keep working. Tabs expand to spaces before tokenizing, because `code()` has one column per character. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/code` is its example scene, `examples/site/` highlights its snippets with it, and `skills/svjeez/references/code.md` teaches it to scene writers.
+
 ## Math
 
 `@svjeez/math` depends on `mathjax-full`, which is why it is not a `svjeez` subpath. `tex()` runs MathJax's TeX input and SVG output once per formula, reads the SVG back with `src/mathjax.ts`, and composes every nested `translate()` and `scale()` into one matrix per glyph, so a formula is a flat list of placed `<path>`s. `src/mathjax.ts` drops the `noundefined` and `noerrors` packages, because they turn a typo into a picture, and it throws on a MathJax error node or on a `<text>` fallback. `Tex` is a `Morphable`, so `morph()` from `svjeez/extras` animates it: a glyph's `text` key is its character and size, because a morph translates and cannot scale. `draw()` puts the motion on a wrapping `<g>`, since a CSS animation overrides a `transform` attribute. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/math` is its example scene, and `skills/svjeez/references/math.md` teaches it to scene writers.
@@ -101,7 +106,7 @@ After CI passes, `release.yml` runs `scripts/release.ts`. It releases every pack
 To release, bump the version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro fonts geo icons math; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro code fonts geo icons math; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
