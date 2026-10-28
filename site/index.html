@@ -27,8 +27,8 @@
 <meta name="twitter:image" content="https://svjeez.texoport.in/og.jpg">
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/site.css">
-<link rel="preload" as="image" href="/landing.svg" media="(min-width: 44em)">
-<link rel="preload" as="image" href="/landing-tall.svg" media="(max-width: 43.99em)">
+<link rel="preload" as="image" href="/landing.svg" media="(min-width: 44em) and (prefers-reduced-motion: no-preference)">
+<link rel="preload" as="image" href="/landing-tall.svg" media="(max-width: 43.99em) and (prefers-reduced-motion: no-preference)">
 <script src="/site.js" defer></script>
 </head>
 <body>
@@ -59,7 +59,11 @@
   <div class="wrap reel">
     <div class="frame">
       <picture>
-        <source media="(max-width: 43.99em)" srcset="/landing-tall.svg" width="520" height="671">
+        <source media="(prefers-reduced-motion: reduce) and (max-width: 43.99em) and (prefers-color-scheme: dark)" srcset="/still-tall-dark.jpg" width="520" height="707">
+        <source media="(prefers-reduced-motion: reduce) and (max-width: 43.99em)" srcset="/still-tall-light.jpg" width="520" height="707">
+        <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="/still-wide-dark.jpg" width="1200" height="420">
+        <source media="(prefers-reduced-motion: reduce)" srcset="/still-wide-light.jpg" width="1200" height="420">
+        <source media="(max-width: 43.99em)" srcset="/landing-tall.svg" width="520" height="707">
         <img src="/landing.svg" width="1200" height="420" alt="A few lines of TSX type out in an editor. As each line lands, a hill is inked, a sun rises, the word hello is handwritten and a bird flies across the canvas beside it.">
       </picture>
     </div>
@@ -111,8 +115,8 @@ npx svjeez render arc.tsx --sheet</pre>
       <p class="sub">The two halves below are the same <code>daynight.svg</code>, fetched once. One <code>&lt;img&gt;</code> is told the page is light, the other that it is dark. The scene decides what to show.</p>
       <div class="split">
         <div class="stage intro">
-          <div class="layer light"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam."></div>
-          <div class="layer dark" aria-hidden="true"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt=""></div>
+          <div class="layer light"><picture><source media="(prefers-reduced-motion: reduce)" srcset="/still-daynight-light.jpg"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam."></picture></div>
+          <div class="layer dark" aria-hidden="true"><picture><source media="(prefers-reduced-motion: reduce)" srcset="/still-daynight-dark.jpg"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt=""></picture></div>
           <span class="tag l">light</span><span class="tag d">dark</span>
           <div class="handle"></div>
           <input type="range" min="0" max="100" value="50" aria-label="Compare the light and dark versions of the scene">

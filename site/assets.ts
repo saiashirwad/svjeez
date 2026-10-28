@@ -30,3 +30,17 @@ writeJpeg(og.frames[0]!.png, here("public/og.jpg"));
 
 const icon = await renderFrames(readFileSync(here("favicon.svg"), "utf8"), { times: [0], colorScheme: "light" });
 writeFileSync(here("public/apple-touch-icon.png"), icon.frames[0]!.png);
+
+// For people who ask for reduced motion, the page swaps each animated image for a settled frame of it.
+// Chromium did not apply emulated reduced motion inside an <img> SVG when measured, so the page picks the file.
+const writeStill = async (svg: string, name: string, scheme: "light" | "dark", scale = 1) => {
+  const source = readFileSync(here(`../dist/${svg}.svg`), "utf8");
+  const { duration } = await renderFrames(source, { times: [0], colorScheme: scheme });
+  const { frames } = await renderFrames(source, { times: [duration - 1.5], colorScheme: scheme, scale });
+  writeJpeg(frames[0]!.png, here(`public/${name}-${scheme}.jpg`), 80);
+};
+for (const scheme of ["light", "dark"] as const) {
+  await writeStill("landing", "still-wide", scheme);
+  await writeStill("landing-tall", "still-tall", scheme);
+  await writeStill("daynight", "still-daynight", scheme);
+}

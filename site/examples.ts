@@ -117,7 +117,7 @@ ${HEADER}
 <main class="wrap">
   <p class="count"><a href="/examples/">← Examples</a> · ${i + 1} of ${all.length}</p>
   <figure class="plate" style="--ratio: ${(ex.width / ex.height).toFixed(4)}; --poster: url(${poster(ex)}); margin-block-start: 0.75rem">
-    <img src="/examples/svg/${ex.name}.svg" width="${ex.width}" height="${ex.height}" alt="${escape(ex.desc || ex.title)}">
+    <picture><source media="(prefers-reduced-motion: reduce)" srcset="${poster(ex)}"><img src="/examples/svg/${ex.name}.svg" width="${ex.width}" height="${ex.height}" alt="${escape(ex.desc || ex.title)}"></picture>
   </figure>
   <div class="meta">
     <div>
