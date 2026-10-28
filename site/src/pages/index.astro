@@ -11,6 +11,7 @@ import hero from "@examples/site/hero.tsx";
 import heroTall from "@examples/site/hero-tall.tsx";
 import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
+import math from "@examples/site/math.tsx";
 import nojsx from "@examples/site/nojsx.tsx";
 import nojsxTall from "@examples/site/nojsx-tall.tsx";
 import pipeline from "@examples/site/pipeline.tsx";
@@ -48,6 +49,7 @@ const s = {
   recording: live(recording),
   ink: live(ink),
   icons: live(icons),
+  math: live(math),
   fonts: live(fonts),
   breaker: live(breaker),
   agents: live(agents),
@@ -65,6 +67,13 @@ const iconUse = `import { bell } from "@svjeez/icons/tabler";
 
 <Icon icon={bell} size={40} animation={(d, i) =>
   draw({ at: i * 0.2, over: 0.5 })} />`;
+
+const mathUse = `import { tex } from "@svjeez/math";
+
+const before = tex(String.raw\`e^{i\\pi} = -1\`, at);
+const after = tex(String.raw\`e^{i\\pi} + 1 = 0\`, at);
+
+morph([before, after], { at: 2, over: 0.8 });`;
 
 const adaptive = `const { theme, css } = adaptive({
   dark: systemDark,
@@ -160,6 +169,12 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <h2 class="c1-6">Make any of 8,000 icons move.</h2>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.icons} cost={24} alt="Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings." /></div></figure>
       <Code class="code side c7-12" code={iconUse} lang="tsx" theme={shikiTheme} />
+    </section>
+
+    <section class="wrap sec g" id="math">
+      <h2 class="c1-6">Typeset equations, then morph them.</h2>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.math} cost={20} alt="A point turns once round the unit circle while its cosine and sine trace the axes. Euler's formula, e to the i theta equals cos theta plus i sin theta, follows it to pi, collapses to e to the i pi equals minus one, and settles as e to the i pi plus one equals zero." /></div></figure>
+      <Code class="code side c7-12" code={mathUse} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="light-dark">
