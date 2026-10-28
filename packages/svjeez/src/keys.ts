@@ -34,6 +34,10 @@ export const keysOf = (
       keys.push({ t: segment.start + segment.over, values: next, ease: ease.out });
     } else if (keys.length === 1 && segment.start === 0) {
       keys[0] = { ...last, values: next };
+    } else if (contiguous && last.t + nudge > period + EPSILON) {
+      // A cut at the very end: hold one nudge early so the new value still lands on the period.
+      keys[keys.length - 1] = { ...last, t: last.t - nudge, ease: ease.hold };
+      keys.push({ t: period, values: next, ease: ease.out });
     } else {
       keys[keys.length - 1] = { ...last, ease: ease.hold };
       keys.push({ t: contiguous ? last.t + nudge : segment.start, values: next, ease: ease.out });
