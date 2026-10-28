@@ -4,7 +4,7 @@ import type { GlyphPath, PathOptions, TextPath } from "./font";
 
 /**
  * A single-line font: each glyph is a centerline, as a plotter or an engraver draws it, instead of a filled outline.
- * Read from an SVG font, the format Hershey and EMS fonts ship in. Its paths suit `<Stroke>`, which inks a centerline
+ * Read from an SVG font, the format Hershey and EMS fonts ship in. Its paths suit `<Ink>`, which inks a centerline
  * with a pen, brush or nib, and `draw`, which writes it on in order, so text can appear as handwriting.
  */
 export interface StrokeFont {

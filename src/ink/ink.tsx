@@ -47,7 +47,7 @@ export interface PenOptions {
 }
 
 /** A technical or ballpoint pen: an even line with slightly thinned ends. */
-export const pen = ({ size = 1.5, taper = 0.08, seed = 1 }: PenOptions = {}): Tool => {
+const pen = ({ size = 1.5, taper = 0.08, seed = 1 }: PenOptions = {}): Tool => {
   const wobble = noise(seed);
   return { size: size * 1.1, width: (t, s) => size * envelope(t, taper, 0.45) * (1 + 0.06 * wobble(s / 18)) };
 };
@@ -65,7 +65,7 @@ export interface BrushOptions {
 }
 
 /** A round brush: pressed down in the middle, lifting to a point at both ends, uneven along the way. */
-export const brush = ({ size = 6, taper = 0.3, pressure = 0.35, wobble, seed = 1 }: BrushOptions = {}): Tool => {
+const brush = ({ size = 6, taper = 0.3, pressure = 0.35, wobble, seed = 1 }: BrushOptions = {}): Tool => {
   const press = noise(seed);
   const wander = noise(seed + 101);
   const drift = wobble ?? size * 0.12;
@@ -86,7 +86,7 @@ export interface NibOptions {
 }
 
 /** A broad calligraphy nib: thick across the nib's edge, thin along it. Downstrokes swell and crossbars stay fine. */
-export const nib = ({ size = 5, angle = 35, thin = 0.12 }: NibOptions = {}): Tool => {
+const nib = ({ size = 5, angle = 35, thin = 0.12 }: NibOptions = {}): Tool => {
   const edge = (angle * Math.PI) / 180;
   return { size, width: (_, __, direction) => size * (thin + (1 - thin) * Math.abs(Math.sin(direction - edge))) };
 };
@@ -98,11 +98,14 @@ export interface PencilOptions {
 }
 
 /** A pencil: a fine line whose width flickers with the grain of the paper. */
-export const pencil = ({ size = 1.2, seed = 1 }: PencilOptions = {}): Tool => {
+const pencil = ({ size = 1.2, seed = 1 }: PencilOptions = {}): Tool => {
   const grain = noise(seed);
   const shake = noise(seed + 7);
   return { size: size * 1.4, width: (t, s) => size * envelope(t, 0.05, 0.5) * (0.8 + 0.3 * grain(s / 3.5)), drift: (s) => size * 0.25 * shake(s / 14) };
 };
+
+/** The four drawing tools: `tool.pen()`, `tool.brush()`, `tool.nib()` and `tool.pencil()`. */
+export const tool = { pen, brush, nib, pencil } as const;
 
 const SPACING = 1.5;
 
@@ -179,17 +182,17 @@ const outline = (points: readonly Point[], tool: Tool): string => {
 };
 
 /** Path data drawn with a tool, as one filled outline per stroke. Fill it; do not stroke it. */
-export const ink = (d: string, tool: Tool): string =>
+export const inkPath = (d: string, tool: Tool): string =>
   flatten(d)
     .map((line) => outline(line.points, tool))
     .join("");
 
-export interface StrokeProps {
+export interface InkProps {
   /** The path the hand follows: the centerline of the mark. */
   readonly d: string;
   readonly tool: Tool;
   /** Ink color. */
-  readonly color?: Paint;
+  readonly fill?: Paint;
   readonly opacity?: number;
   readonly class?: string;
   /** Ink the mark in along its path over this span, as a hand would. */
@@ -207,7 +210,7 @@ const outlineOf = (d: string, tool: Tool): Ref<"symbol"> => {
   const byPath = outlines.get(tool) ?? new Map<string, Ref<"symbol">>();
   outlines.set(tool, byPath);
   let symbol = byPath.get(d);
-  if (!symbol) byPath.set(d, (symbol = def.symbol({ style: "overflow:visible" }, <path d={ink(d, tool)} />)));
+  if (!symbol) byPath.set(d, (symbol = def.symbol({ style: "overflow:visible" }, <path d={inkPath(d, tool)} />)));
   return symbol;
 };
 
@@ -215,15 +218,15 @@ const outlineOf = (d: string, tool: Tool): Ref<"symbol"> => {
  * A path inked with a pen, brush, nib or pencil. With `draw`, a mask with the path drawing on reveals the ink. A masked
  * shape costs a mask raster on every repaint, so once the reveal ends a plain copy takes over and the masked one hides.
  */
-export function Stroke({ d, tool, color = "currentColor", opacity, class: className, draw, ease = easing.inOut, animation }: StrokeProps): SvgNode {
+export function Ink({ d, tool, fill = "currentColor", opacity, class: className, draw, ease = easing.inOut, animation }: InkProps): SvgNode {
   const shape = outlineOf(d, tool);
-  if (!draw) return <use href={shape} fill={color} opacity={opacity} class={className} animation={animation} />;
+  if (!draw) return <use href={shape} fill={fill} opacity={opacity} class={className} animation={animation} />;
   const end = draw.at + draw.over;
   const reveal = def.mask({ maskUnits: "userSpaceOnUse", x: -1e4, y: -1e4, width: 2e4, height: 2e4 }, (
     <path d={d} fill="none" stroke="#fff" strokeWidth={tool.size * 2 + 2} strokeLinecap="round" strokeLinejoin="round" animation={drawOn(draw, ease)} />
   ));
   return (
-    <g fill={color} opacity={opacity} class={className} animation={animation}>
+    <g fill={fill} opacity={opacity} class={className} animation={animation}>
       <use href={shape} mask={reveal} animation={motion({ opacity: 1 }).at(end).set({ opacity: 0 })} />
       <use href={shape} animation={motion({ opacity: 0 }).at(end).set({ opacity: 1 })} />
     </g>

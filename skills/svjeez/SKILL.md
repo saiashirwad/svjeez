@@ -172,19 +172,19 @@ Before you embed:
 
 ## Ink
 
-`<Stroke>` draws a path with a hand tool instead of an even SVG stroke. The tool sets the width at every point, and the stroke becomes a filled outline.
+`<Ink>` draws a path with a hand tool instead of an even SVG stroke. The tool sets the width at every point, and the stroke becomes a filled outline.
 
 ```tsx
-import { Stroke, brush, nib, pen, pencil } from "svjeez";
+import { Ink, inkPath, tool } from "svjeez";
 
-<Stroke d="M20 80C80 20 160 140 220 80" tool={brush({ size: 8, seed: 2 })} color="#2B2118" draw={{ at: 0.5, over: 1.2 }} />;
-<Stroke d={coast} tool={nib({ size: 3, angle: 40 })} color={ink} />;
-const outline = ink(d, pen({ size: 1.2 }));  // the outline as path data, to fill yourself
+<Ink d="M20 80C80 20 160 140 220 80" tool={tool.brush({ size: 8, seed: 2 })} fill="#2B2118" draw={{ at: 0.5, over: 1.2 }} />;
+<Ink d={coast} tool={tool.nib({ size: 3, angle: 40 })} fill={C.ink} />;
+const outline = inkPath(d, tool.pen({ size: 1.2 }));  // the outline as path data, to fill yourself
 ```
 
-Tools: `pen({ size, taper })` is an even line with slightly thinned ends. `brush({ size, taper, pressure, wobble, seed })` swells mid-stroke and lifts to a point. `nib({ size, angle, thin })` is a broad calligraphy nib, thick across its edge and thin along it. `pencil({ size, seed })` is a fine line that wavers with the grain. A `seed` rerolls the wobble, and the same seed draws the same line. A tool is a plain `{ width(t, s, angle), drift?, size }` object, so you can write your own.
+Tools: `tool.pen({ size, taper })` is an even line with slightly thinned ends. `tool.brush({ size, taper, pressure, wobble, seed })` swells mid-stroke and lifts to a point. `tool.nib({ size, angle, thin })` is a broad calligraphy nib, thick across its edge and thin along it. `tool.pencil({ size, seed })` is a fine line that wavers with the grain. A `seed` rerolls the wobble, and the same seed draws the same line. A tool is a plain `{ width(t, s, angle), drift?, size }` object, so you can write your own.
 
-Handwriting: `strokeFont.load(url)` reads a single-line SVG font (Hershey and EMS fonts, such as EMS Allure), and `hand.path(text, { size, x, y }).d` gives centerlines to ink with `<Stroke>`. A `d` with several subpaths reveals them all at once, so split it at each `M` and give each piece its own `draw` span, paced by its length, to write it stroke by stroke. `examples/hype` shows this.
+Handwriting: `strokeFont.load(url)` reads a single-line SVG font (Hershey and EMS fonts, such as EMS Allure), and `hand.path(text, { size, x, y }).d` gives centerlines to ink with `<Ink>`. A `d` with several subpaths reveals them all at once, so split it at each `M` and give each piece its own `draw` span, paced by its length, to write it stroke by stroke. `examples/hype` shows this.
 
 `draw={{ at, over }}` inks the stroke in along its path, through a mask, then swaps to an unmasked copy so it costs nothing once drawn. `animation` moves or fades the whole mark. The outline is filled, so `fill` and gradients work and `stroke` does not. Each path and tool pair embeds its outline once. `d` takes any SVG path data, arcs included.
 

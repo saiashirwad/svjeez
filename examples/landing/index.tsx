@@ -1,4 +1,4 @@
-import { type Color, type SvgNode, Glyphs, Stroke, brush, def, draw, ease, enter, font, fx, motion, nib, render, sampled, strokeFont, wiggle } from "svjeez";
+import { type Color, type SvgNode, Glyphs, Ink, def, draw, ease, enter, font, fx, motion, render, sampled, strokeFont, tool, wiggle } from "svjeez";
 
 // A sketchbook page printed in two riso inks. The canvas is a square shown edge to edge with
 // `object-fit: cover`: wide screens crop the top and bottom, tall ones the sides. The words live in the
@@ -43,7 +43,7 @@ const Written = ({ text, size, x, y, at, color, width, speed = 900 }: { text: st
   return (
     <>
       {strokes.map((s) => (
-        <Stroke d={s.d} tool={nib({ size: width, angle: 30, thin: 0.35 })} color={color} draw={{ at: s.at, over: s.over }} ease={ease.linear} />
+        <Ink d={s.d} tool={tool.nib({ size: width, angle: 30, thin: 0.35 })} fill={color} draw={{ at: s.at, over: s.over }} ease={ease.linear} />
       ))}
     </>
   );
@@ -157,7 +157,7 @@ const install = (
         {ch}
       </text>
     ))}
-    <Stroke d={loop} tool={brush({ size: 5, seed: 4, pressure: 0.5 })} color={P.pink} draw={{ at: CIRCLE_AT, over: 0.7 }} />
+    <Ink d={loop} tool={tool.brush({ size: 5, seed: 4, pressure: 0.5 })} fill={P.pink} draw={{ at: CIRCLE_AT, over: 0.7 }} />
   </>
 );
 

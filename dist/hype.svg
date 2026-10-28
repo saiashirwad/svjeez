@@ -1070,7 +1070,7 @@ svg{--base00:#0B0B0C;--base01:#141416;--base02:#26262A;--base03:#5C5C64;--base04
               <g>
                 <text x="182" y="630.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base06)" font-weight="bold">Bash</text>
                 <text x="218" y="630.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base05)">(svjeez</text>
-                <text x="290" y="630.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base05)">render</text>
+                <text x="290" y="630.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base05)">frames</text>
                 <text x="353" y="630.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base05)">launch.tsx</text>
                 <text x="452" y="630.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base05)">--times</text>
                 <text x="524" y="630.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base05)">0,0.6,1.2,1.8</text>
@@ -1670,7 +1670,7 @@ svg{--base00:#0B0B0C;--base01:#141416;--base02:#26262A;--base03:#5C5C64;--base04
         <use href="#s20" class="a m213"/>
       </g>
       <g filter="url(#f12)" class="a m214">
-        <text x="64" y="632" font-size="30" fill="var(--base06)">&lt;Stroke tool={nib()} /&gt;</text>
+        <text x="64" y="632" font-size="30" fill="var(--base06)">&lt;Ink tool={tool.nib()} /&gt;</text>
         <text x="64" y="664" font-size="14" fill="var(--base04)">single-line fonts, inked stroke by stroke</text>
       </g>
     </g>

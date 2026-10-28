@@ -1,4 +1,4 @@
-import { Glyphs, Stroke, brush, def, draw, ease, enter, font, motion, nib, rect, render, sampled, strokeFont, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
+import { Glyphs, Ink, def, draw, ease, enter, font, motion, rect, render, sampled, strokeFont, tool, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
 import { Marker, adaptive, base16, code, cut, flow, flowchart, typewriter, window, type Piece } from "svjeez/extras";
 
 const W = 1280;
@@ -145,7 +145,7 @@ const dot = (row: number, color: Color, pending?: { until: number }) =>
   );
 const elbow = (row: number) => <path d={`M${left + 13} ${top(row) + 3}V${mid(row)}h8`} fill="none" stroke={C.muted} strokeWidth={1.2} />;
 
-const tool = (row: number, at: number, done: number, name: string, args: string, results: readonly (readonly Piece[])[]) => {
+const toolCall = (row: number, at: number, done: number, name: string, args: string, results: readonly (readonly Piece[])[]) => {
   line(row, at, <>{dot(row, C.green, { until: done })}{say([bold(name), ["plain", `(${args})`]], row, 18)}</>);
   results.forEach((pieces, i) => line(row + 1 + i, done, <>{i === 0 && elbow(row + 1)}{say(pieces, row + 1 + i, 36)}</>));
 };
@@ -160,16 +160,16 @@ line(BOX.top + BOX.rows + 0.4, SENT, (
   </>
 ));
 const R = BOX.top + BOX.rows + 1.8;
-tool(R, SENT + 0.35, SENT + 0.75, "Read", "skills/svjeez/SKILL.md", [[["muted", "Read "], bold("299", C.muted), ["muted", " lines (ctrl+o to expand)"]]]);
-tool(R + 2.2, SENT + 0.95, SENT + 1.35, "Write", "launch.tsx", [
+toolCall(R, SENT + 0.35, SENT + 0.75, "Read", "skills/svjeez/SKILL.md", [[["muted", "Read "], bold("299", C.muted), ["muted", " lines (ctrl+o to expand)"]]]);
+toolCall(R + 2.2, SENT + 0.95, SENT + 1.35, "Write", "launch.tsx", [
   [["muted", "Wrote "], bold("13", C.muted), ["muted", " lines to "], bold("launch.tsx", C.muted)],
   [["muted", "  1 "], ["keyword", "import"], " { draw, ease, enter, motion, render } ", ["keyword", "from"], " ", ["string", '"svjeez"'], ";"],
   [["muted", "  2"]],
   [["muted", "  3 "], ["keyword", "export default"], " () => ", ["fn", "render"], "("],
   [["muted", "… +10 lines (ctrl+o to expand)"]],
 ]);
-tool(R + 8.4, SENT + 1.6, SENT + 2.05, "Bash", "svjeez render launch.tsx --times 0,0.6,1.2,1.8 --sheet", [[["muted", "Wrote 4 frames and sheet.png"]]]);
-tool(R + 10.6, SENT + 2.25, SENT + 2.6, "Read", "sheet.png", [[["muted", "Read image (48KB)"]]]);
+toolCall(R + 8.4, SENT + 1.6, SENT + 2.05, "Bash", "svjeez frames launch.tsx --times 0,0.6,1.2,1.8 --sheet", [[["muted", "Wrote 4 frames and sheet.png"]]]);
+toolCall(R + 10.6, SENT + 2.25, SENT + 2.6, "Read", "sheet.png", [[["muted", "Read image (48KB)"]]]);
 reply(R + 12.8, SENT + 2.95, ["The dot lands late at 1.2s, so I tightened its ease."]);
 const DONE_AT = SENT + 3.5;
 reply(R + 14.2, DONE_AT, ["Done. ", bold("dist/launch.svg"), " is 18.4 KB, with 0 bytes of JavaScript."]);
@@ -473,16 +473,16 @@ const strokes = hand
   }, []);
 const inked = strokes.at(-1)!.at + strokes.at(-1)!.over;
 const HAND = { at: HAND_AT, over: inked - HAND_AT + 1.8 };
-const nibTool = nib({ size: 6, angle: 35, thin: 0.25 });
+const nibTool = tool.nib({ size: 6, angle: 35, thin: 0.25 });
 
 const handwriting = (
   <g animation={cut(HAND)}>
     {strokes.map(({ d, at, over }) => (
-      <Stroke d={d} tool={nibTool} color={C.ink} draw={{ at, over }} ease={ease.linear} />
+      <Ink d={d} tool={nibTool} fill={C.ink} draw={{ at, over }} ease={ease.linear} />
     ))}
-    <Stroke d={`M${handX + 40} 452C${W / 2 - 100} 436 ${W / 2 + 200} 436 ${W - handX - 30} 446`} tool={brush({ size: 7, seed: 5 })} color={C.accent} draw={{ at: inked + 0.1, over: 0.5 }} />
+    <Ink d={`M${handX + 40} 452C${W / 2 - 100} 436 ${W / 2 + 200} 436 ${W - handX - 30} 446`} tool={tool.brush({ size: 7, seed: 5 })} fill={C.accent} draw={{ at: inked + 0.1, over: 0.5 }} />
     <g animation={rise(HAND.at + 0.2, 0.4, 10)}>
-      <text x={64} y={H - 88} fontSize={30} fill={C.ink}>{"<Stroke tool={nib()} />"}</text>
+      <text x={64} y={H - 88} fontSize={30} fill={C.ink}>{"<Ink tool={tool.nib()} />"}</text>
       <text x={64} y={H - 56} fontSize={14} fill={C.soft}>single-line fonts, inked stroke by stroke</text>
     </g>
   </g>

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Stroke, brush, ink, nib, pen, pencil, render, type Child } from "svjeez";
+import { Ink, inkPath, render, tool, type Child } from "svjeez";
 import { flatten } from "../src/ink/path";
 
 const scene = (child: Child) => render({ width: 200, height: 100, duration: 2, title: "Ink" }, child);
@@ -69,42 +69,42 @@ describe("tools", () => {
   const line = "M0 50H200";
 
   test("a pen draws an even line at its size", () => {
-    const d = ink(line, pen({ size: 2, taper: 0 }));
+    const d = inkPath(line, tool.pen({ size: 2, taper: 0 }));
     expect(thickness(d, 100)).toBeCloseTo(2, 0);
   });
 
   test("a brush is widest mid-stroke and comes to a point at the ends", () => {
-    const d = ink(line, brush({ size: 8, pressure: 0, wobble: 0 }));
+    const d = inkPath(line, tool.brush({ size: 8, pressure: 0, wobble: 0 }));
     expect(thickness(d, 100)).toBeCloseTo(8, 0);
     expect(thickness(d, 3)).toBeLessThan(2);
   });
 
   test("a nib is thick across its edge and thin along it", () => {
-    const tool = nib({ size: 6, angle: 0, thin: 0.1 });
-    expect(thickness(ink(line, tool), 100)).toBeCloseTo(0.6, 0);
-    expect(tool.width(0.5, 50, Math.PI / 2)).toBeCloseTo(6, 6);
+    const chisel = tool.nib({ size: 6, angle: 0, thin: 0.1 });
+    expect(thickness(inkPath(line, chisel), 100)).toBeCloseTo(0.6, 0);
+    expect(chisel.width(0.5, 50, Math.PI / 2)).toBeCloseTo(6, 6);
   });
 
   test("a pencil wavers with a seed, and the same seed draws the same line", () => {
-    expect(ink(line, pencil({ seed: 3 }))).toBe(ink(line, pencil({ seed: 3 })));
-    expect(ink(line, pencil({ seed: 3 }))).not.toBe(ink(line, pencil({ seed: 4 })));
+    expect(inkPath(line, tool.pencil({ seed: 3 }))).toBe(inkPath(line, tool.pencil({ seed: 3 })));
+    expect(inkPath(line, tool.pencil({ seed: 3 }))).not.toBe(inkPath(line, tool.pencil({ seed: 4 })));
   });
 
   test("each subpath becomes its own closed outline", () => {
-    expect(ink("M0 0H50M0 20H50", pen()).match(/Z/g)).toHaveLength(2);
+    expect(inkPath("M0 0H50M0 20H50", tool.pen()).match(/Z/g)).toHaveLength(2);
   });
 });
 
-describe("Stroke", () => {
+describe("Ink", () => {
   test("a still stroke is one filled outline from a symbol", () => {
-    const svg = scene(<Stroke d="M10 50H190" tool={brush()} color="#123456" />);
+    const svg = scene(<Ink d="M10 50H190" tool={tool.brush()} fill="#123456" />);
     expect(svg).toContain('fill="#123456"');
     expect(svg.match(/<use /g)).toHaveLength(1);
     expect(svg).not.toContain("<mask");
   });
 
   test("draw reveals it through a mask, then hands over to an unmasked copy", () => {
-    const svg = scene(<Stroke d="M10 50H190" tool={brush()} draw={{ at: 0.2, over: 1 }} />);
+    const svg = scene(<Ink d="M10 50H190" tool={tool.brush()} draw={{ at: 0.2, over: 1 }} />);
     expect(svg.match(/<mask /g)).toHaveLength(1);
     expect(svg.match(/<use /g)).toHaveLength(2);
     expect(svg.match(/<symbol /g)).toHaveLength(1);
@@ -112,11 +112,11 @@ describe("Stroke", () => {
   });
 
   test("the same path and tool embed their outline once", () => {
-    const tool = pen();
+    const hand = tool.pen();
     const svg = scene(
       <>
-        <Stroke d="M10 50H190" tool={tool} />
-        <Stroke d="M10 50H190" tool={tool} color="red" />
+        <Ink d="M10 50H190" tool={hand} />
+        <Ink d="M10 50H190" tool={hand} fill="red" />
       </>,
     );
     expect(svg.match(/<symbol /g)).toHaveLength(1);

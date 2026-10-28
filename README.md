@@ -315,10 +315,10 @@ A font is embedded once, only if the tree uses it, and cut down to the glyphs th
 Draw a path with a pen, brush, calligraphy nib or pencil instead of an even stroke. The tool sets the width at every point.
 
 ```tsx
-<Stroke d="M20 80C80 20 160 140 220 80" tool={brush({ size: 8, seed: 2 })} color="#2B2118" draw={{ at: 0.5, over: 1.2 }} />
+<Ink d="M20 80C80 20 160 140 220 80" tool={tool.brush({ size: 8, seed: 2 })} fill="#2B2118" draw={{ at: 0.5, over: 1.2 }} />
 ```
 
-`draw` inks the stroke in along its path. `ink(d, tool)` returns the outline as path data. `strokeFont(svgFont)` reads a single-line SVG font, so `<Stroke>` can write text by hand. See the skill's Ink section, and `examples/map`, whose coasts, rivers, peaks and lava are all inked.
+`draw` inks the stroke in along its path. `inkPath(d, tool)` returns the outline as path data. `strokeFont(svgFont)` reads a single-line SVG font, so `<Ink>` can write text by hand. See the skill's Ink section, and `examples/map`, whose coasts, rivers, peaks and lava are all inked.
 
 ## Extras
 

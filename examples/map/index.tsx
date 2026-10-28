@@ -1,4 +1,4 @@
-import { Stroke, brush, def, ease, enter, font, motion, nib, pen, rect, render, type Child, type Font, type Paint, type Rect, type Ref, type SvgNode } from "svjeez";
+import { Ink, def, ease, enter, font, motion, rect, render, tool, type Child, type Font, type Paint, type Rect, type Ref, type SvgNode } from "svjeez";
 import { Camera, travel, type CameraStop } from "svjeez/extras";
 
 const W = 960;
@@ -85,11 +85,11 @@ const shape = (d: string): Ref<"symbol"> => {
 const landShape = shape(LAND.join(""));
 
 /** Hand tools: a broad nib for coasts and lettering rules, a fine pen for peaks, a brush for rivers and lava. */
-const COAST = nib({ size: 2.6, angle: 40, thin: 0.35 });
-const PEN = pen({ size: 1.05, seed: 4 });
-const HATCH = pen({ size: 0.65, taper: 0.3, seed: 5 });
-const RIVER = brush({ size: 2.6, taper: 0.18, pressure: 0.3, seed: 6 });
-const LAVA = brush({ size: 2.8, taper: 0.4, seed: 9 });
+const COAST = tool.nib({ size: 2.6, angle: 40, thin: 0.35 });
+const PEN = tool.pen({ size: 1.05, seed: 4 });
+const HATCH = tool.pen({ size: 0.65, taper: 0.3, seed: 5 });
+const RIVER = tool.brush({ size: 2.6, taper: 0.18, pressure: 0.3, seed: 6 });
+const LAVA = tool.brush({ size: 2.8, taper: 0.4, seed: 9 });
 
 /** Drops a motion from the still copy. */
 const intro = (still: boolean) => <T,>(motion: T): T | undefined => (still ? undefined : motion);
@@ -140,8 +140,8 @@ function Range({ spine, seed, size = 22, spacing = 16, at, still }: { spine: rea
         return (
           <g animation={play(enter({ at: at + i * 0.012, over: 0.35 }, { opacity: 0, y: 4 }))}>
             <use href={shape(`${body}Z`)} fill={C.land} />
-            <Stroke d={body} tool={PEN} color={C.ink} />
-            <Stroke d={hatch} tool={HATCH} color={C.ink} />
+            <Ink d={body} tool={PEN} fill={C.ink} />
+            <Ink d={hatch} tool={HATCH} fill={C.ink} />
           </g>
         );
       })}
@@ -312,10 +312,10 @@ function Cinder({ at, live = false, still = false }: { at: number; live?: boolea
   return (
     <g animation={intro(still)(enter({ at, over: 0.6 }, { opacity: 0, y: 6 }))}>
       <use href={shape(body)} fill={C.land} />
-      <Stroke d={body} tool={pen({ size: 1.5, seed: 8 })} color={C.ink} />
-      <Stroke d={hatch} tool={HATCH} color={C.ink} />
-      <Stroke d={`M${rim.l} ${rim.y}Q${x} ${rim.y - 4} ${rim.r} ${rim.y}`} tool={PEN} color={C.ink} />
-      <Stroke d={lava} tool={LAVA} color={C.red} />
+      <Ink d={body} tool={tool.pen({ size: 1.5, seed: 8 })} fill={C.ink} />
+      <Ink d={hatch} tool={HATCH} fill={C.ink} />
+      <Ink d={`M${rim.l} ${rim.y}Q${x} ${rim.y - 4} ${rim.r} ${rim.y}`} tool={PEN} fill={C.ink} />
+      <Ink d={lava} tool={LAVA} fill={C.red} />
     </g>
   );
 }
@@ -350,7 +350,7 @@ function Cartouche({ at, still }: { at: number; still: boolean }): SvgNode {
       <rect x={box.x} y={box.y} width={box.w} height={box.h} fill={C.land} stroke={C.ink} strokeWidth={1.4} />
       <rect x={box.x + 5} y={box.y + 5} width={box.w - 10} height={box.h - 10} fill="none" stroke={C.ink} strokeWidth={0.6} />
       <Words face={uncial} text={title} size={titleSize} x={box.x + (box.w - uncial.measure(title, titleSize)) / 2} y={box.y + 50} fill={C.ink} />
-      <Stroke d={`M${box.x + 60} ${box.y + 62}h${box.w - 120}`} tool={brush({ size: 2.4, taper: 0.45, seed: 12 })} color={C.red} draw={still ? undefined : { at: at + 0.6, over: 0.8 }} />
+      <Ink d={`M${box.x + 60} ${box.y + 62}h${box.w - 120}`} tool={tool.brush({ size: 2.4, taper: 0.45, seed: 12 })} fill={C.red} draw={still ? undefined : { at: at + 0.6, over: 0.8 }} />
       <Words face={roman} text={sub} size={subSize} x={box.x + (box.w - roman.measure(sub, subSize)) / 2} y={box.y + 78} fill={C.faded} />
     </g>
   );
@@ -415,10 +415,10 @@ function Atlas({ still }: { still: boolean }): SvgNode {
       <rect width={W} height={H} fill={C.sea} />
       <g animation={play(enter({ at: 0.2, over: 1 }, { opacity: 0 }))}>{coastRipples(0.2, still)}</g>
       <use href={landShape} fill={C.land} animation={play(enter({ at: 0.1, over: 1 }, { opacity: 0 }))} />
-      <Stroke d={LAND.join("")} tool={COAST} color={C.ink} draw={still ? undefined : { at: 0.1, over: 1.6 }} />
+      <Ink d={LAND.join("")} tool={COAST} fill={C.ink} draw={still ? undefined : { at: 0.1, over: 1.6 }} />
       <g clipPath={landClip}>
         {RIVERS.map((river, i) => (
-          <Stroke d={smooth(river)} tool={i === 2 ? brush({ size: 1.7, taper: 0.25, seed: 7 }) : RIVER} color={C.river} draw={still ? undefined : { at: 1.8 + i * 0.3, over: 1.4 }} />
+          <Ink d={smooth(river)} tool={i === 2 ? tool.brush({ size: 1.7, taper: 0.25, seed: 7 }) : RIVER} fill={C.river} draw={still ? undefined : { at: 1.8 + i * 0.3, over: 1.4 }} />
         ))}
         <ellipse cx={352} cy={304} rx={16} ry={8} fill={C.sea} stroke={C.river} strokeWidth={1} animation={play(enter({ at: 2.4, over: 0.6 }, { opacity: 0 }))} />
       </g>
