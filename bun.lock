@@ -16,6 +16,7 @@
       "name": "svjeez-examples",
       "devDependencies": {
         "@svjeez/geo": "workspace:*",
+        "@svjeez/icons": "workspace:*",
         "@types/bun": "latest",
         "svjeez": "workspace:*",
         "tsx": "^4.23.15",

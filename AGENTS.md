@@ -12,6 +12,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
+- `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
 - `site/` is the Astro site at svjeez.texoport.in.
 
@@ -63,6 +64,10 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 `@svjeez/geo` depends on `d3-geo` and `topojson-client`, which is why it is not a `svjeez` subpath. `project()` fits a projection to a frame and returns regions, merged `land` and `lines`, places, great-circle routes and camera bounds. `src/writer.ts` writes the path data: it rounds to 0.1px, drops points closer than the tolerance, and straightens with Douglas–Peucker. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/world` is its example scene, and `skills/svjeez/references/geo.md` teaches it to scene writers.
 
+## Icons
+
+`@svjeez/icons` is data with no dependencies, and it does not import svjeez. `<Icon>` in `packages/svjeez/src/icon.tsx` takes its `{ grid, kind, paths }` shape structurally through its own `IconData`. `src/tabler.ts` and `src/lucide.ts` are generated and committed: `bun run generate` in `packages/icons/` reads `@tabler/icons` and `lucide-static` from `node_modules`, pinned to exact versions, and rerunning it changes nothing. Never edit them by hand, and both oxfmt and oxlint ignore them. Each starts with the upstream licence. The naming rule is in the package README. `bun run test:package` checks the packed tarball on plain Node.
+
 ## Site
 
 `site/` imports scenes straight from `examples/` through the `@examples/*` path. Run `bun run dev`, `bun run build`, `bun run typecheck` and `bun run test` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
@@ -86,10 +91,10 @@ After CI passes, `release.yml` runs `scripts/release.ts`. It releases every pack
 To release, bump the version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro geo; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro geo icons; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
-All four packages share one version, so bump them together. The workflow publishes `@svjeez/vite` before `@svjeez/astro`.
+All five packages share one version, so bump them together. The workflow publishes `@svjeez/vite` before `@svjeez/astro`.
 
 npm trusts a workflow one package at a time, and only for a package that it already has. A new package therefore needs one publish from a maintainer's machine. Run `npm login`, then `bun scripts/release.ts claim packages/<name>` from the root. It publishes the package's current version and trusts `release.yml` and the `npm` environment for every later version. npm stages that first version, so approve it under Staged Packages on npmjs.com. Until then, the workflow skips the package with a warning. `bun scripts/release.ts plan` lists what the next push would release.

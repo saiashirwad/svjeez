@@ -147,6 +147,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Code walkthroughs, terminals, annotations, camera, themes, recoloring a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
 | Flowchart, sequence, state, tree, lanes, `flow` | [`references/diagrams.md`](references/diagrams.md) |
 | Pixel-art voxel scenes | [`references/voxels.md`](references/voxels.md) |
+| Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |
 | `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
 
