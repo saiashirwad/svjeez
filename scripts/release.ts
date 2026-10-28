@@ -1,15 +1,16 @@
 // Releases every package under packages/ whose version isn't out yet. A version is out once npm has it and GitHub has a
 // release for it, so a rerun after a failure finishes the job without repeating the steps that worked.
 //
-//   bun scripts/release.ts plan       names the packages that have something to release
-//   bun scripts/release.ts publish    releases them; release.yml runs this with npm's trusted publishing
+//   bun scripts/release.ts plan           names the packages that have something to release
+//   bun scripts/release.ts publish        releases them; release.yml runs this with npm's trusted publishing
+//   bun scripts/release.ts claim <dir>    a new package's first publish, from a maintainer's machine
 //
-// npm only takes a package from release.yml once the package's trusted publisher names it, so a new package needs one
-// added on npmjs.com before its first release. npm allows that before the package exists.
+// npm trusts a workflow one package at a time, and only for a package it already has. So a new package's first version
+// goes out through `claim`, which publishes it with the maintainer's npm login and then trusts release.yml with the rest.
 import { execFileSync } from "node:child_process";
 import { appendFileSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 interface Manifest {
   readonly name: string;
@@ -17,6 +18,7 @@ interface Manifest {
   readonly private?: boolean;
   readonly scripts?: Record<string, string>;
   readonly dependencies?: Record<string, string>;
+  readonly repository?: { readonly url: string };
 }
 
 interface Package {
@@ -34,8 +36,11 @@ interface Pending {
 }
 
 const ROOT = join(import.meta.dirname, "..");
+const WORKFLOW = "release.yml";
+const ENVIRONMENT = "npm";
 
 const run = (command: string, args: readonly string[], cwd = ROOT) => execFileSync(command, args, { cwd, encoding: "utf8", stdio: ["inherit", "pipe", "inherit"] }).trim();
+const warn = (message: string) => console.log(process.env.GITHUB_ACTIONS ? `::warning::${message}` : message);
 
 const load = (dir: string): Package | undefined => {
   const manifest: Manifest = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
@@ -62,10 +67,13 @@ const packages = (): Package[] => {
 /** svjeez keeps the v1.2.3 tags it has always had. Every other package tags name@version, as in @svjeez/vite@0.1.0. */
 const tagFor = (name: string, version: string) => (name === "svjeez" ? `v${version}` : `${name}@${version}`);
 
-/** The versions npm has. The full document, because npm's cache can keep answering 404 for the abbreviated one after a package appears. */
-const published = async (name: string): Promise<ReadonlySet<string>> => {
+/**
+ * The versions npm has, or undefined when npm has never had the package. This reads the full document, because npm's
+ * cache kept answering 404 for the abbreviated one after @svjeez/vite appeared.
+ */
+const published = async (name: string): Promise<ReadonlySet<string> | undefined> => {
   const response = await fetch(`https://registry.npmjs.org/${name.replace("/", "%2f")}`);
-  if (response.status === 404) return new Set();
+  if (response.status === 404) return undefined;
   if (!response.ok) throw new Error(`npm answered ${response.status} for ${name}`);
   return new Set(Object.keys(((await response.json()) as { versions: Record<string, unknown> }).versions));
 };
@@ -78,6 +86,10 @@ const pending = async (): Promise<Pending[]> => {
   for (const pkg of packages()) {
     const { name, version } = pkg.manifest;
     const versions = await published(name);
+    if (!versions) {
+      warn(`${name} isn't on npm yet. Run \`bun scripts/release.ts claim ${relative(ROOT, pkg.dir)}\` once, and this workflow releases it after that.`);
+      continue;
+    }
     const tag = tagFor(name, version);
     const step = { pkg, tag, npm: !versions.has(version), github: !tags.includes(tag) };
     if (step.npm || step.github) out.push(step);
@@ -131,7 +143,25 @@ const publish = async () => {
   }
 };
 
-const [command] = process.argv.slice(2);
+const claim = async (dir: string | undefined) => {
+  if (!dir) throw new Error("Name the package's folder, as in `bun scripts/release.ts claim packages/vite`.");
+  const pkg = load(resolve(dir));
+  if (!pkg) throw new Error(`${dir} is private and has no build:package script, so it isn't released.`);
+  const { name, version, repository } = pkg.manifest;
+  const repo = repository && /github\.com[/:](.+?)(\.git)?$/.exec(repository.url)?.[1];
+  if (!repo) throw new Error(`${name}'s package.json needs a GitHub repository.url, which npm checks the workflow against.`);
+  if (await published(name)) console.log(`${name} is already on npm, so this only adds the trusted publisher.`);
+  else {
+    if (pkg.out !== pkg.dir) run("bun", ["run", "build:package"], pkg.dir);
+    execFileSync("npm", ["publish", "--access", "public", "--tag", distTag(version)], { cwd: pkg.out, stdio: "inherit" });
+    console.log(`npm stages a new package's first version. Approve ${name} ${version} under Staged Packages on npmjs.com, or with \`npm stage approve\`.`);
+  }
+  execFileSync("npm", ["trust", "github", name, "--repo", repo, "--file", WORKFLOW, "--env", ENVIRONMENT, "--allow-publish", "--yes"], { stdio: "inherit" });
+  console.log(`${WORKFLOW} can now publish ${name}. Its next run on main adds the GitHub release for ${version}.`);
+};
+
+const [command, arg] = process.argv.slice(2);
 if (command === "plan") await plan();
 else if (command === "publish") await publish();
-else throw new Error("Usage: bun scripts/release.ts plan | publish");
+else if (command === "claim") await claim(arg);
+else throw new Error("Usage: bun scripts/release.ts plan | publish | claim <dir>");
