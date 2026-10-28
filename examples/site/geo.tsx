@@ -1,9 +1,9 @@
 import { project, type LonLat, type Topology } from "@svjeez/geo";
-import { draw, ease, enter, rect, render, type Point } from "svjeez";
+import { draw, ease, enter, font, rect, render, type Point } from "svjeez";
 import { flow } from "svjeez/extras";
 import { createRequire } from "node:module";
 import { CSS, chrome, outro } from "./kit";
-import { theme } from "../style";
+import { mono, theme } from "../style";
 
 // The world's countries fill in from west to east, then great-circle flights leave London for six cities.
 const W = 504;
@@ -11,6 +11,11 @@ const H = 340;
 const BAR = 40;
 const D = 10;
 const win = chrome(W, H, "map.tsx");
+
+/** Geist SemiBold alone, since every label is bold: the family would embed the regular face too. */
+const geist = await font.load(new URL("../fonts/Geist-SemiBold.ttf", import.meta.url), {
+  ligatures: false,
+});
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 
@@ -77,8 +82,10 @@ function Label(props: { x: number; y: number; anchor: City["anchor"]; children: 
     <text
       x={props.x}
       y={props.y}
-      fontSize={10.5}
+      fontFamily={geist}
+      fontSize={10}
       fontWeight={600}
+      letterSpacing={0.1}
       textAnchor={props.anchor}
       fill={theme.base05}
       stroke={theme.base00}
@@ -139,7 +146,7 @@ export default function build(): string {
                 style={{ transformOrigin: `${x}px ${y}px` }}
                 animation={enter({ at: land, over: 0.4 }, { opacity: 0, scale: 0 }, ease.pop)}
               />
-              <g class="sans" animation={enter({ at: land + 0.1, over: 0.4 })}>
+              <g animation={enter({ at: land + 0.1, over: 0.4 })}>
                 <Label x={x + dx} y={y + dy} anchor={anchor}>
                   {name}
                 </Label>
@@ -160,13 +167,20 @@ export default function build(): string {
             strokeWidth={2}
           />
         </g>
-        <g class="sans" animation={enter({ at: 1.9, over: 0.4 })}>
+        <g animation={enter({ at: 1.9, over: 0.4 })}>
           <Label x={home.x} y={home.y - 10} anchor="middle">
             London
           </Label>
         </g>
-        <g class="sans" animation={enter({ at: 2, over: 0.6 }, { opacity: 0, y: 6 })}>
-          <text x={W / 2} y={H - 26} fontSize={12} textAnchor="middle" fill={theme.base03}>
+        <g animation={enter({ at: 2, over: 0.6 }, { opacity: 0, y: 6 })}>
+          <text
+            x={W / 2}
+            y={H - 26}
+            fontFamily={mono}
+            fontSize={11}
+            textAnchor="middle"
+            fill={theme.base03}
+          >
             {"map.route(london, tokyo)"}
           </text>
         </g>
