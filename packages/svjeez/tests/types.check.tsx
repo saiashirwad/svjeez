@@ -125,6 +125,7 @@ const machine = stateMachine({
   initial: "idle",
   transitions: [["idle", "busy"], ["plan", "act"]],
 });
+
 const chart = flowchart({ nodes: { a: "A", b: "B" }, edges: [["a", "b"]] });
 
 export const diagrams = [
