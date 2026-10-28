@@ -58,10 +58,14 @@ const s = {
 const totalKB = Math.round(Object.values(s).reduce((sum, scene) => sum + scene.gzip, 0) / 1024);
 
 const adaptive = `const { theme, css } = adaptive({
-  dark: systemDark, light: systemLight,
+  dark: systemDark,
+  light: systemLight,
 });
+
 // theme colors are CSS variables
-render({ css }, <rect fill={theme.base00} />);`;
+render({ css },
+  <rect fill={theme.base00} />,
+);`;
 const start = `npm i svjeez
 npx svjeez frames scene.tsx --sheet
 npx svjeez svg scene.tsx --out scene.svg`;
@@ -147,13 +151,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <div class="stagewrap c1-8">
         <DayNight scene={s.daynight} alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam." />
       </div>
-      <div class="side c9-12">
-        <ul class="points">
-          <li><b>The theme is built into the SVG</b><span>A <code>prefers-color-scheme</code> media query selects the theme.</span></li>
-          <li><b>Change the scene, too</b><span>Swap the sun for a moon, light the windows, and sweep a beam across the water.</span></li>
-        </ul>
-      </div>
-      <Code class="code c1-6" code={adaptive} lang="tsx" theme={shikiTheme} />
+      <Code class="code side c9-12" code={adaptive} lang="tsx" theme={shikiTheme} />
     </section>
 
     <div class="tint">

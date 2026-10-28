@@ -128,7 +128,7 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 .sec h2 { font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.25rem); line-height: 1.04; letter-spacing: -0.04em }
 .sec h2.xl { font-size: clamp(2.125rem, 1.2rem + 4vw, 4.5rem); line-height: 0.98; letter-spacing: -0.05em }
 .sub { max-inline-size: 38ch; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem); line-height: 1.55; color: var(--muted); align-self: end }
-.sub code, .get code, .foot code, .points code, figure code { font-size: 0.85em }
+.sub code, .get code, .foot code, figure code { font-size: 0.85em }
 .sub code { color: var(--ink) }
 figure { min-inline-size: 0 }
 figcaption { margin-block-start: 0.9rem; font-size: 0.9375rem; color: var(--muted) }
@@ -161,6 +161,7 @@ pre.code { --pre-bg: var(--sunken); font-variant-ligatures: none }
 
 /* Light and dark, side by side. */
 .stagewrap { min-inline-size: 0 }
+pre.side { align-self: start }
 .stage { --split: 50%; position: relative; aspect-ratio: 800 / 500; overflow: clip; border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow); touch-action: pan-y; cursor: ew-resize; user-select: none; -webkit-user-select: none }
 .layer { position: absolute; inset: 0 }
 .layer img { inline-size: 100%; block-size: 100%; pointer-events: none }
@@ -178,12 +179,6 @@ pre.code { --pre-bg: var(--sunken); font-variant-ligatures: none }
 .stage.intro { animation: sweep 2.4s 0.2s var(--out) both }
 @media (prefers-reduced-motion: reduce) { .stage.intro { animation: none } }
 @keyframes sweep { 0% { --split: 50% } 35% { --split: 82% } 70% { --split: 22% } 100% { --split: 50% } }
-.side { display: grid; gap: 1.5rem; align-content: start }
-.side .sub { align-self: start }
-.points { display: grid; gap: 1.25rem; margin: 0; padding: 0; list-style: none }
-.points li { padding-inline-start: 1rem; border-inline-start: 2px solid var(--accent) }
-.points b { display: block; font-size: 1.0625rem }
-.points span { color: var(--muted); font-size: 0.9375rem }
 
 /* Start and footer. */
 .get { display: grid; gap: 0.75rem; align-content: start }
