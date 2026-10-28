@@ -4,7 +4,7 @@ import { getScene } from "svjeez:astro";
 import { renderFrames } from "svjeez/frames";
 import hero from "@examples/site/hero.tsx";
 import mark from "../../public/favicon.svg?raw";
-import { close, encode } from "@svjeez/astro/encode";
+import { close, encode } from "@svjeez/vite/encode";
 
 const base64 = (bytes: Uint8Array) => Buffer.from(bytes).toString("base64");
 

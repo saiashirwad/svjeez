@@ -6,3 +6,4 @@ site/.astro
 site/.alchemy
 packages/svjeez/README.md
 packages/svjeez/LICENSE
+packages/vite/test/.scratch-*

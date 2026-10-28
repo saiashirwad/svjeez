@@ -7,7 +7,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./encode": "./src/encode.ts",
+    "./scene": "./src/scene.ts",
+    "./Scene.astro": "./src/Scene.astro",
     "./client": {
       "types": "./client.d.ts"
     }
@@ -16,7 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "svjeez": "workspace:*"
+    "@svjeez/vite": "workspace:*"
   },
   "peerDependencies": {
     "astro": ">=7",

@@ -9,12 +9,13 @@ To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjee
 The repository is a Bun workspace. The root `package.json` is private and lists the workspaces:
 
 - `packages/svjeez/` is the library published to npm as `svjeez`.
-- `packages/astro/` is `@svjeez/astro`, the Astro integration. It is private and ships TypeScript source.
+- `packages/vite/` is `@svjeez/vite`, the Vite plugin.
+- `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `site/` is the Astro site at svjeez.texoport.in.
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script. Every other command runs inside its workspace.
 
-The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the integration turn that condition on, so they run the library's source and never need `package-dist/`.
+The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
 ## Library commands
 
@@ -44,9 +45,15 @@ Paths in this section are relative to `packages/svjeez/`.
 - `examples/` holds scenes. `dist/` is their committed output, which the README links to.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. They carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
+## Vite plugin
+
+`@svjeez/vite` compiles scenes while an app builds. An import such as `./hero.tsx?svjeez` gives `{ src, width, height, title, desc }`, and `?svjeez&posters` adds a still per color scheme. The dev server serves the files under `/_svjeez/`, and the build emits them as assets. Scenes run in a Vite environment of their own that compiles JSX as svjeez, so a React app's JSX settings never reach them. `getScene()` and the poster renderer run in that environment too, so the plugin itself never imports svjeez. Posters render in headless Chromium and are cached in Vite's cache directory.
+
+Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`. Run `bun run dev` there to open it.
+
 ## Astro integration
 
-`@svjeez/astro` provides the `svjeez:astro` module. `<Scene scene={build} />` and `getScene(build, { posters })` compile a scene and give it a URL under `/_svjeez/`. The dev server serves those files, and the build writes them with their poster stills. Posters render in headless Chromium and are cached in Astro's cache directory.
+`@svjeez/astro` adds `@svjeez/vite` to Astro and provides the `svjeez:astro` module. `<Scene scene={build} />` and `getScene(build, { posters })` compile a scene and give it a URL under `/_svjeez/`. Pages call `getScene()` while they render, after Vite has bundled, so the integration writes those files in `astro:build:done`. Posters are cached in Astro's cache directory.
 
 ## Site
 
