@@ -20,14 +20,14 @@
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The svjeez window: an editor, a terminal running npx svjeez svg, and the animation it made.">
+<meta property="og:image:alt" content="A line-drawn flower and the TSX that makes it.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="svjeez: TSX in, one animated SVG out">
 <meta name="twitter:description" content="Motion becomes CSS keyframes. No JavaScript, one file, plays in an img tag.">
 <meta name="twitter:image" content="https://svjeez.texoport.in/og.jpg">
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/site.css">
-<link rel="preload" as="image" href="/s/hero.svg" media="(prefers-reduced-motion: no-preference) and (min-width: 44.01rem)">
+<link rel="preload" as="image" href="/s/hero.svg" media="(prefers-reduced-motion: no-preference) and (min-width: 64rem)">
 </head>
 <body class="home">
 <header class="wrap top">
@@ -53,8 +53,9 @@
     </div>
   </section>
 
-  <div class="wrap hero-window">
-    <div class="bleed"><div class="win big"><img class="scene" data-scene="hero" width="1032" height="560" alt="One window: an editor shows a short TSX scene, a terminal runs npx svjeez svg on it and prints the size of the file, and the preview plays an arc that draws itself with a dot popping onto it."></div></div>
+  <div class="wrap hero-demo">
+    <img class="scene wide" data-scene="hero" width="1056" height="392" alt="Eleven lines of TSX beside a line-drawn flower. Four values in the code change in turn: the number of petals goes from 6 to 9, the color from blue to orange, the center dot's easing from out to pop, and the draw time from 1.5 to 0.4 seconds. Each time the flower draws itself again with the new value.">
+    <img class="scene tall" data-scene="hero-tall" width="358" height="592" alt="A line-drawn flower above eleven lines of TSX. Four values in the code change in turn, the number of petals, the color, the easing of the center dot and the draw time, and the flower draws itself again each time.">
   </div>
 
   <section class="wrap spec" aria-label="What it does">

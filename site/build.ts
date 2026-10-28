@@ -44,7 +44,7 @@ for (const name of names) {
   const width = Number(svg.match(/viewBox="[\d.-]+ [\d.-]+ ([\d.]+)/)![1]);
   const { duration } = await renderFrames(svg, { times: [0] });
   for (const scheme of ["light", "dark"] as const) {
-    const { frames } = await renderFrames(svg, { times: [stillAt(svg, duration)], colorScheme: scheme, scale: width > 700 ? 1 : 1.5, background: "transparent" });
+    const { frames } = await renderFrames(svg, { times: [stillAt(svg, duration)], colorScheme: scheme, scale: 1.5, background: "transparent" });
     writeFileSync(`${PUBLIC}s/poster/${name}-${scheme}.webp`, await encode(frames[0]!.png, "webp", 0.8));
   }
 }

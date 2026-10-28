@@ -1,0 +1,331 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 358 592" width="358" height="592" role="img" aria-labelledby="t d">
+  <title id="t">svjeez live tweaking</title>
+  <desc id="d">A short TSX scene beside the animation it makes. Four values change in turn, the number of petals, the draw time, the color and the easing of the center dot, and each time the animation replays with the new value.</desc>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:18s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,19.444%,20.556%,39.167%,40.278%,58.889%,60%,78.611%,79.722%,100%{translate:0px 0px}}
+.m1{animation-name:k1}
+@keyframes k2{0%,19.444%,20.556%,100%{translate:0px 0px}}
+@keyframes k3{0%,19.444%{opacity:1}20.556%,100%{opacity:0}}
+.m2{animation-name:k2,k3;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k4{0%,78.611%{opacity:1}79.722%,100%{opacity:0}}
+.m3{animation-name:k1,k4;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k5{0%,19.444%,20.556%,39.167%,40.278%,100%{translate:0px 0px}}
+@keyframes k6{0%,39.167%{opacity:1}40.278%,100%{opacity:0}}
+.m4{animation-name:k5,k6;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k7{0%,19.444%,20.556%,39.167%,40.278%,58.889%,60%,100%{translate:0px 0px}}
+@keyframes k8{0%,58.889%{opacity:1}60%,100%{opacity:0}}
+.m5{animation-name:k7,k8;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k9{0%,19.444%{opacity:0}20.556%,100%{opacity:1}}
+.m6{animation-name:k1,k9;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k10{0%,39.167%,40.278%,58.889%,60%,78.611%,79.722%,100%{translate:0px 0px}}
+@keyframes k11{0%,39.167%{opacity:0}40.278%,100%{opacity:1}}
+.m7{animation-name:k10,k11;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k12{0%,58.889%,60%,78.611%,79.722%,100%{translate:0px 0px}}
+@keyframes k13{0%,58.889%{opacity:0}60%,100%{opacity:1}}
+.m8{animation-name:k12,k13;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k14{0%,78.611%,79.722%,100%{translate:0px 0px}}
+@keyframes k15{0%,78.611%{opacity:0}79.722%,100%{opacity:1}}
+.m9{animation-name:k14,k15;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k16{0%,19.444%,26.278%,100%{opacity:0}19.889%,21.278%{opacity:1}}
+.m10{animation-name:k16}
+@keyframes k17{0%,39.167%,46%,100%{opacity:0}39.611%,41%{opacity:1}}
+.m11{animation-name:k17}
+@keyframes k18{0%,58.889%,65.722%,100%{opacity:0}59.333%,60.722%{opacity:1}}
+.m12{animation-name:k18}
+@keyframes k19{0%,78.611%,85.444%,100%{opacity:0}79.056%,80.444%{opacity:1}}
+.m13{animation-name:k19}
+@keyframes k20{0%,0.556%{opacity:0}3.056%,100%{opacity:1}}
+@keyframes k21{0%,0.556%{translate:0px 6px}3.056%,100%{translate:0px 0px}}
+.m14{animation-name:k20,k21}
+@keyframes k22{0%,3.333%{stroke-dashoffset:1;visibility:hidden}11.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m15{animation-name:k22}
+@keyframes k23{0%,3.889%{stroke-dashoffset:1;visibility:hidden}12.222%,100%{stroke-dashoffset:0;visibility:visible}}
+.m16{animation-name:k23}
+@keyframes k24{0%,4.444%{stroke-dashoffset:1;visibility:hidden}12.778%,100%{stroke-dashoffset:0;visibility:visible}}
+.m17{animation-name:k24}
+@keyframes k25{0%,5%{stroke-dashoffset:1;visibility:hidden}13.333%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k25}
+@keyframes k26{0%,5.556%{stroke-dashoffset:1;visibility:hidden}13.889%,100%{stroke-dashoffset:0;visibility:visible}}
+.m19{animation-name:k26}
+@keyframes k27{0%,6.111%{stroke-dashoffset:1;visibility:hidden}14.444%,100%{stroke-dashoffset:0;visibility:visible}}
+.m20{animation-name:k27}
+@keyframes k28{0%,3.333%{scale:0}11.667%,100%{scale:1}}
+.m21{animation-name:k28}
+@keyframes k29{0%,2.778%,20.556%,100%{opacity:0}3.056%,19.444%{opacity:1}}
+.m22{animation-name:k29}
+@keyframes k30{0%,21.389%{stroke-dashoffset:1;visibility:hidden}29.722%,100%{stroke-dashoffset:0;visibility:visible}}
+.m23{animation-name:k30}
+@keyframes k31{0%,21.944%{stroke-dashoffset:1;visibility:hidden}30.278%,100%{stroke-dashoffset:0;visibility:visible}}
+.m24{animation-name:k31}
+@keyframes k32{0%,22.5%{stroke-dashoffset:1;visibility:hidden}30.833%,100%{stroke-dashoffset:0;visibility:visible}}
+.m25{animation-name:k32}
+@keyframes k33{0%,23.056%{stroke-dashoffset:1;visibility:hidden}31.389%,100%{stroke-dashoffset:0;visibility:visible}}
+.m26{animation-name:k33}
+@keyframes k34{0%,23.611%{stroke-dashoffset:1;visibility:hidden}31.944%,100%{stroke-dashoffset:0;visibility:visible}}
+.m27{animation-name:k34}
+@keyframes k35{0%,24.167%{stroke-dashoffset:1;visibility:hidden}32.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m28{animation-name:k35}
+@keyframes k36{0%,24.722%{stroke-dashoffset:1;visibility:hidden}33.056%,100%{stroke-dashoffset:0;visibility:visible}}
+.m29{animation-name:k36}
+@keyframes k37{0%,25.278%{stroke-dashoffset:1;visibility:hidden}33.611%,100%{stroke-dashoffset:0;visibility:visible}}
+.m30{animation-name:k37}
+@keyframes k38{0%,25.833%{stroke-dashoffset:1;visibility:hidden}34.167%,100%{stroke-dashoffset:0;visibility:visible}}
+.m31{animation-name:k38}
+@keyframes k39{0%,21.389%{scale:0}29.722%,100%{scale:1}}
+.m32{animation-name:k39}
+@keyframes k40{0%,20.833%,40.278%,100%{opacity:0}21.111%,39.167%{opacity:1}}
+.m33{animation-name:k40}
+@keyframes k41{0%,41.111%{stroke-dashoffset:1;visibility:hidden}49.444%,100%{stroke-dashoffset:0;visibility:visible}}
+.m34{animation-name:k41}
+@keyframes k42{0%,41.667%{stroke-dashoffset:1;visibility:hidden}50%,100%{stroke-dashoffset:0;visibility:visible}}
+.m35{animation-name:k42}
+@keyframes k43{0%,42.222%{stroke-dashoffset:1;visibility:hidden}50.556%,100%{stroke-dashoffset:0;visibility:visible}}
+.m36{animation-name:k43}
+@keyframes k44{0%,42.778%{stroke-dashoffset:1;visibility:hidden}51.111%,100%{stroke-dashoffset:0;visibility:visible}}
+.m37{animation-name:k44}
+@keyframes k45{0%,43.333%{stroke-dashoffset:1;visibility:hidden}51.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m38{animation-name:k45}
+@keyframes k46{0%,43.889%{stroke-dashoffset:1;visibility:hidden}52.222%,100%{stroke-dashoffset:0;visibility:visible}}
+.m39{animation-name:k46}
+@keyframes k47{0%,44.444%{stroke-dashoffset:1;visibility:hidden}52.778%,100%{stroke-dashoffset:0;visibility:visible}}
+.m40{animation-name:k47}
+@keyframes k48{0%,45%{stroke-dashoffset:1;visibility:hidden}53.333%,100%{stroke-dashoffset:0;visibility:visible}}
+.m41{animation-name:k48}
+@keyframes k49{0%,45.556%{stroke-dashoffset:1;visibility:hidden}53.889%,100%{stroke-dashoffset:0;visibility:visible}}
+.m42{animation-name:k49}
+@keyframes k50{0%,41.111%{scale:0}49.444%,100%{scale:1}}
+.m43{animation-name:k50}
+@keyframes k51{0%,40.556%,60%,100%{opacity:0}40.833%,58.889%{opacity:1}}
+.m44{animation-name:k51}
+@keyframes k52{0%,60.833%{stroke-dashoffset:1;visibility:hidden}69.167%,100%{stroke-dashoffset:0;visibility:visible}}
+.m45{animation-name:k52}
+@keyframes k53{0%,61.389%{stroke-dashoffset:1;visibility:hidden}69.722%,100%{stroke-dashoffset:0;visibility:visible}}
+.m46{animation-name:k53}
+@keyframes k54{0%,61.944%{stroke-dashoffset:1;visibility:hidden}70.278%,100%{stroke-dashoffset:0;visibility:visible}}
+.m47{animation-name:k54}
+@keyframes k55{0%,62.5%{stroke-dashoffset:1;visibility:hidden}70.833%,100%{stroke-dashoffset:0;visibility:visible}}
+.m48{animation-name:k55}
+@keyframes k56{0%,63.056%{stroke-dashoffset:1;visibility:hidden}71.389%,100%{stroke-dashoffset:0;visibility:visible}}
+.m49{animation-name:k56}
+@keyframes k57{0%,63.611%{stroke-dashoffset:1;visibility:hidden}71.944%,100%{stroke-dashoffset:0;visibility:visible}}
+.m50{animation-name:k57}
+@keyframes k58{0%,64.167%{stroke-dashoffset:1;visibility:hidden}72.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m51{animation-name:k58}
+@keyframes k59{0%,64.722%{stroke-dashoffset:1;visibility:hidden}73.056%,100%{stroke-dashoffset:0;visibility:visible}}
+.m52{animation-name:k59}
+@keyframes k60{0%,65.278%{stroke-dashoffset:1;visibility:hidden}73.611%,100%{stroke-dashoffset:0;visibility:visible}}
+.m53{animation-name:k60}
+@keyframes k61{0%,60.833%{scale:0}69.167%,100%{scale:1}}
+.m54{animation-name:k61;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k62{0%,60.278%,79.722%,100%{opacity:0}60.556%,78.611%{opacity:1}}
+.m55{animation-name:k62}
+@keyframes k63{0%,80.556%{stroke-dashoffset:1;visibility:hidden}82.778%,100%{stroke-dashoffset:0;visibility:visible}}
+.m56{animation-name:k63}
+@keyframes k64{0%,81.111%{stroke-dashoffset:1;visibility:hidden}83.333%,100%{stroke-dashoffset:0;visibility:visible}}
+.m57{animation-name:k64}
+@keyframes k65{0%,81.667%{stroke-dashoffset:1;visibility:hidden}83.889%,100%{stroke-dashoffset:0;visibility:visible}}
+.m58{animation-name:k65}
+@keyframes k66{0%,82.222%{stroke-dashoffset:1;visibility:hidden}84.444%,100%{stroke-dashoffset:0;visibility:visible}}
+.m59{animation-name:k66}
+@keyframes k67{0%,82.778%{stroke-dashoffset:1;visibility:hidden}85%,100%{stroke-dashoffset:0;visibility:visible}}
+.m60{animation-name:k67}
+@keyframes k68{0%,83.333%{stroke-dashoffset:1;visibility:hidden}85.556%,100%{stroke-dashoffset:0;visibility:visible}}
+.m61{animation-name:k68}
+@keyframes k69{0%,83.889%{stroke-dashoffset:1;visibility:hidden}86.111%,100%{stroke-dashoffset:0;visibility:visible}}
+.m62{animation-name:k69}
+@keyframes k70{0%,84.444%{stroke-dashoffset:1;visibility:hidden}86.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m63{animation-name:k70}
+@keyframes k71{0%,85%{stroke-dashoffset:1;visibility:hidden}87.222%,100%{stroke-dashoffset:0;visibility:visible}}
+.m64{animation-name:k71}
+@keyframes k72{0%,80.556%{scale:0}82.778%,100%{scale:1}}
+.m65{animation-name:k72;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k73{0%,80%{opacity:0}80.278%,100%{opacity:1}}
+.m66{animation-name:k73}
+@keyframes k74{0%,97.222%{opacity:1}100%{opacity:0}}
+.m67{animation-name:k74}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-16.3s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect x="0" y="0" width="358" height="296" rx="20" fill="var(--base01)"/>
+  <g class="a m67">
+    <g class="mono a m14">
+      <g>
+        <text x="4" y="334.7" font-family="monospace" font-size="12" fill="var(--base0E)" class="a m1">const</text>
+        <text x="47.2" y="334.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">n</text>
+        <text x="61.6" y="334.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">=</text>
+        <text x="76" y="334.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m2">6</text>
+        <text x="83.2" y="334.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">;</text>
+        <text x="4" y="355.7" font-family="monospace" font-size="12" fill="var(--base0E)" class="a m1">const</text>
+        <text x="47.2" y="355.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">over</text>
+        <text x="83.2" y="355.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">=</text>
+        <text x="97.6" y="355.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m3">1.5</text>
+        <text x="119.2" y="355.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">;</text>
+        <text x="4" y="376.7" font-family="monospace" font-size="12" fill="var(--base0E)" class="a m1">const</text>
+        <text x="47.2" y="376.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">color</text>
+        <text x="90.4" y="376.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">=</text>
+        <text x="104.8" y="376.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m4">"#0A6CFF"</text>
+        <text x="169.6" y="376.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">;</text>
+        <text x="4" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">{</text>
+        <text x="11.2" y="418.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">Array</text>
+        <text x="47.2" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">.</text>
+        <text x="54.4" y="418.7" font-family="monospace" font-size="12" fill="var(--base0D)" class="a m1">from</text>
+        <text x="83.2" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">({</text>
+        <text x="104.8" y="418.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">length</text>
+        <text x="148" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">:</text>
+        <text x="162.4" y="418.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">n</text>
+        <text x="176.8" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">},</text>
+        <text x="198.4" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">(</text>
+        <text x="205.6" y="418.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">_</text>
+        <text x="212.8" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">,</text>
+        <text x="227.2" y="418.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">i</text>
+        <text x="234.4" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">)</text>
+        <text x="248.8" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">=&gt;</text>
+        <text x="270.4" y="418.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">(</text>
+        <text x="18.4" y="439.7" font-family="monospace" font-size="12" fill="var(--base08)" class="a m1">&lt;path</text>
+        <text x="61.6" y="439.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">d</text>
+        <text x="68.8" y="439.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">={</text>
+        <text x="83.2" y="439.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">petal</text>
+        <text x="119.2" y="439.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">}</text>
+        <text x="133.6" y="439.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">stroke</text>
+        <text x="176.8" y="439.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">={</text>
+        <text x="191.2" y="439.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">color</text>
+        <text x="227.2" y="439.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">}</text>
+        <text x="32.8" y="460.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">transform</text>
+        <text x="97.6" y="460.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">={</text>
+        <text x="112" y="460.7" font-family="monospace" font-size="12" fill="var(--base0B)" class="a m1">`rotate(${(360</text>
+        <text x="220" y="460.7" font-family="monospace" font-size="12" fill="var(--base0B)" class="a m1">/</text>
+        <text x="234.4" y="460.7" font-family="monospace" font-size="12" fill="var(--base0B)" class="a m1">n)</text>
+        <text x="256" y="460.7" font-family="monospace" font-size="12" fill="var(--base0B)" class="a m1">*</text>
+        <text x="270.4" y="460.7" font-family="monospace" font-size="12" fill="var(--base0B)" class="a m1">i})`</text>
+        <text x="299.2" y="460.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">}</text>
+        <text x="32.8" y="481.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">animation</text>
+        <text x="97.6" y="481.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">={</text>
+        <text x="112" y="481.7" font-family="monospace" font-size="12" fill="var(--base0D)" class="a m1">draw</text>
+        <text x="140.8" y="481.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">({</text>
+        <text x="162.4" y="481.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">at</text>
+        <text x="176.8" y="481.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">:</text>
+        <text x="191.2" y="481.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">i</text>
+        <text x="205.6" y="481.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">/</text>
+        <text x="220" y="481.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m1">10</text>
+        <text x="234.4" y="481.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">,</text>
+        <text x="248.8" y="481.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">over</text>
+        <text x="284.8" y="481.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">})}</text>
+        <text x="313.6" y="481.7" font-family="monospace" font-size="12" fill="var(--base08)" class="a m1">/&gt;</text>
+        <text x="4" y="502.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">))}</text>
+        <text x="4" y="523.7" font-family="monospace" font-size="12" fill="var(--base08)" class="a m1">&lt;circle</text>
+        <text x="61.6" y="523.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">r</text>
+        <text x="68.8" y="523.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">={</text>
+        <text x="83.2" y="523.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m1">16</text>
+        <text x="97.6" y="523.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">}</text>
+        <text x="112" y="523.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">fill</text>
+        <text x="140.8" y="523.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">={</text>
+        <text x="155.2" y="523.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">color</text>
+        <text x="191.2" y="523.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">}</text>
+        <text x="18.4" y="544.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">animation</text>
+        <text x="83.2" y="544.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">={</text>
+        <text x="97.6" y="544.7" font-family="monospace" font-size="12" fill="var(--base0D)" class="a m1">enter</text>
+        <text x="133.6" y="544.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">({</text>
+        <text x="155.2" y="544.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">at</text>
+        <text x="169.6" y="544.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">:</text>
+        <text x="184" y="544.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m1">0</text>
+        <text x="191.2" y="544.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">,</text>
+        <text x="205.6" y="544.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">over</text>
+        <text x="241.6" y="544.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">},</text>
+        <text x="32.8" y="565.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">{</text>
+        <text x="47.2" y="565.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">scale</text>
+        <text x="83.2" y="565.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">:</text>
+        <text x="97.6" y="565.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m1">0</text>
+        <text x="112" y="565.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">},</text>
+        <text x="133.6" y="565.7" font-family="monospace" font-size="12" fill="var(--base05)" class="a m1">ease</text>
+        <text x="162.4" y="565.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">.</text>
+        <text x="169.6" y="565.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m5">out</text>
+        <text x="191.2" y="565.7" font-family="monospace" font-size="12" fill="var(--base04)" class="a m1">)}</text>
+        <text x="212.8" y="565.7" font-family="monospace" font-size="12" fill="var(--base08)" class="a m1">/&gt;</text>
+        <text x="76" y="334.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m6">9</text>
+        <text x="104.8" y="376.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m7">"#FF9F0A"</text>
+        <text x="169.6" y="565.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m8">pop</text>
+        <text x="97.6" y="355.7" font-family="monospace" font-size="12" fill="var(--base09)" class="a m9">0.4</text>
+      </g>
+      <rect x="73" y="317" width="13.2" height="27" rx="5" fill="#34C759" fill-opacity="0.3" class="a m10"/>
+      <rect x="101.8" y="359" width="70.8" height="27" rx="5" fill="#34C759" fill-opacity="0.3" class="a m11"/>
+      <rect x="166.6" y="548" width="27.6" height="27" rx="5" fill="#34C759" fill-opacity="0.3" class="a m12"/>
+      <rect x="94.6" y="338" width="27.6" height="27" rx="5" fill="#34C759" fill-opacity="0.3" class="a m13"/>
+    </g>
+    <g transform="translate(179 148) scale(0.85)">
+      <g class="a m22">
+        <g>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m15"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(60)" pathLength="1" stroke-dasharray="1" class="a m16"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m17"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180)" pathLength="1" stroke-dasharray="1" class="a m18"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m19"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(300)" pathLength="1" stroke-dasharray="1" class="a m20"/>
+          <circle r="16" fill="#0A6CFF" class="a m21 fb"/>
+        </g>
+      </g>
+      <g class="a m33">
+        <g>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m23"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(40)" pathLength="1" stroke-dasharray="1" class="a m24"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(80)" pathLength="1" stroke-dasharray="1" class="a m25"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m26"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(160)" pathLength="1" stroke-dasharray="1" class="a m27"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(200)" pathLength="1" stroke-dasharray="1" class="a m28"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m29"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(280)" pathLength="1" stroke-dasharray="1" class="a m30"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#0A6CFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(320)" pathLength="1" stroke-dasharray="1" class="a m31"/>
+          <circle r="16" fill="#0A6CFF" class="a m32 fb"/>
+        </g>
+      </g>
+      <g class="a m44">
+        <g>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m34"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(40)" pathLength="1" stroke-dasharray="1" class="a m35"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(80)" pathLength="1" stroke-dasharray="1" class="a m36"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m37"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(160)" pathLength="1" stroke-dasharray="1" class="a m38"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(200)" pathLength="1" stroke-dasharray="1" class="a m39"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m40"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(280)" pathLength="1" stroke-dasharray="1" class="a m41"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(320)" pathLength="1" stroke-dasharray="1" class="a m42"/>
+          <circle r="16" fill="#FF9F0A" class="a m43 fb"/>
+        </g>
+      </g>
+      <g class="a m55">
+        <g>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m45"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(40)" pathLength="1" stroke-dasharray="1" class="a m46"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(80)" pathLength="1" stroke-dasharray="1" class="a m47"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m48"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(160)" pathLength="1" stroke-dasharray="1" class="a m49"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(200)" pathLength="1" stroke-dasharray="1" class="a m50"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m51"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(280)" pathLength="1" stroke-dasharray="1" class="a m52"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(320)" pathLength="1" stroke-dasharray="1" class="a m53"/>
+          <circle r="16" fill="#FF9F0A" class="a m54 fb"/>
+        </g>
+      </g>
+      <g class="a m66">
+        <g>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m56"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(40)" pathLength="1" stroke-dasharray="1" class="a m57"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(80)" pathLength="1" stroke-dasharray="1" class="a m58"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m59"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(160)" pathLength="1" stroke-dasharray="1" class="a m60"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(200)" pathLength="1" stroke-dasharray="1" class="a m61"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m62"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(280)" pathLength="1" stroke-dasharray="1" class="a m63"/>
+          <path d="M0 0C52 -40 52 -118 0 -160C-52 -118 -52 -40 0 0Z" fill="none" stroke="#FF9F0A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(320)" pathLength="1" stroke-dasharray="1" class="a m64"/>
+          <circle r="16" fill="#FF9F0A" class="a m65 fb"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

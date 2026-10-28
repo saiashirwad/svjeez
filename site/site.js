@@ -16,7 +16,7 @@ const SHOWN = 0.3;
 // Main-thread milliseconds per second each scene costs while it plays, measured in headless Chromium at 1440 wide.
 // Scenes play while their total stays inside BUDGET, so a screen of busy windows never costs more than that.
 const BUDGET = 80;
-const COST = { mark: 3, matrix: 24, hero: 55, timeline: 41, pipeline: 44, agents: 52, nojsx: 45, explainer: 23, recording: 28, ink: 17, fonts: 20, handshake: 11, team: 32, daynight: 30, "where-readme": 8, "where-docs": 4, "where-mail": 4, toast: 6 };
+const COST = { mark: 3, matrix: 24, hero: 55, "hero-tall": 55, timeline: 41, pipeline: 44, agents: 52, nojsx: 45, explainer: 23, recording: 28, ink: 17, fonts: 20, handshake: 11, team: 32, daynight: 30, "where-readme": 8, "where-docs": 4, "where-mail": 4, toast: 6 };
 const scenes = document.querySelectorAll(".scene[data-scene]");
 const posterOf = (img) => `/s/poster/${img.dataset.scene}-${img.dataset.scheme || scheme()}.webp`;
 const liveOf = (img) => `/s/${img.dataset.scene}.svg`;

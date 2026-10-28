@@ -101,10 +101,10 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 }
 
 /* Hero: a left-aligned headline, then a short paragraph on the left and the install line on the right. */
-.hero { padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2rem, 4vw, 3rem); row-gap: clamp(1.5rem, 3vw, 2.25rem) }
-.hero h1 { font-size: clamp(3.25rem, 1rem + 9.5vw, 8.25rem); line-height: 0.92; letter-spacing: -0.055em }
+.hero { padding-block: clamp(1.5rem, 4vw, 2.25rem) clamp(1.25rem, 2.5vw, 1.75rem); row-gap: clamp(1.25rem, 2.5vw, 1.5rem) }
+.hero h1 { font-size: clamp(3.25rem, 1rem + 9.5vw, 6.5rem); line-height: 0.92; letter-spacing: -0.055em }
 .ul { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 0.07em; text-underline-offset: 0.09em; text-decoration-skip-ink: none }
-.lede { max-inline-size: 36ch; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem); line-height: 1.5; color: var(--muted) }
+.lede { max-inline-size: 44ch; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem); line-height: 1.5; color: var(--muted) }
 .cta { display: grid; gap: 1.25rem; align-content: start; justify-items: start }
 .install { display: inline-flex; align-items: center; gap: 0.5rem; min-block-size: 3rem; padding-inline: 1.1rem 0.4rem; background: var(--sunken); border-radius: 0.625rem; box-shadow: 0 0 0 1px var(--line); font: 500 1rem / 1 var(--mono) }
 .install code { font-size: inherit }
@@ -114,7 +114,9 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 @media (hover: hover) and (pointer: fine) { .install button:hover { color: var(--ink); background: var(--bg) } }
 .links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9375rem }
 .links a { color: var(--ink) }
-.hero-window { margin-block-end: clamp(3rem, 7vw, 5rem) }
+.hero-demo { margin-block-end: clamp(3rem, 7vw, 5rem) }
+.hero-demo .tall { display: none; inline-size: min(100%, 22.5rem); margin-inline: auto }
+@media (max-width: 63.99rem) { .hero-demo .wide { display: none } .hero-demo .tall { display: block } }
 
 /* What it does: a ruled list. */
 .spec { margin-block-end: clamp(1rem, 3vw, 2rem) }
