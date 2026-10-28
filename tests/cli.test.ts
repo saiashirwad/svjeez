@@ -10,11 +10,15 @@ test("svjeez skill prints the skill", () => {
   expect(cli("skill").stdout.toString()).toBe(skill);
 });
 
-test("svjeez skill --install copies the skill and its examples, and can run again", () => {
+test("svjeez skill --install copies the skill, its references and its examples, and can run again", () => {
   const dir = mkdtempSync(join(tmpdir(), "svjeez-skill-"));
   for (let run = 0; run < 2; run++) expect(cli("skill", "--install", "--dir", dir).exitCode).toBe(0);
   expect(readFileSync(join(dir, "svjeez/SKILL.md"), "utf8")).toBe(skill);
-  expect(readdirSync(join(dir, "svjeez/examples")).sort()).toEqual(["orbit.tsx", "review-flow.tsx", "toast.tsx"]);
+  for (const sub of ["examples", "references"]) {
+    const shipped = readdirSync(join(import.meta.dir, "../skills/svjeez", sub)).sort();
+    expect(shipped.length).toBeGreaterThan(0);
+    expect(readdirSync(join(dir, "svjeez", sub)).sort()).toEqual(shipped);
+  }
 });
 
 test("svjeez frames rejects an unknown --color-scheme before launching a browser", () => {

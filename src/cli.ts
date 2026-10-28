@@ -15,7 +15,7 @@ const USAGE = `usage:
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
 Times are playback seconds. Without --times, frames takes --count frames (default 6) across one loop.
 On Node, .tsx files load through tsx when it is installed.
-skill prints the agent skill for writing svjeez scenes; --install copies it, with its examples, into <dir>/svjeez.`;
+skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.`;
 
 const SCHEMES = ["system", "light", "dark"] as const;
 const isScheme = (value: string): value is (typeof SCHEMES)[number] => (SCHEMES as readonly string[]).includes(value);

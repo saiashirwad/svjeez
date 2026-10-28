@@ -1,21 +1,19 @@
 ---
 name: svjeez
-description: Write animated SVGs with svjeez, a TSX library that compiles motions to CSS and SMIL with no runtime JavaScript. Use when asked to make, edit or debug an animated SVG, a svjeez scene, a code explainer, a terminal recording, or an animated flowchart, sequence, state or lanes diagram in TSX.
+description: Write animated SVGs with svjeez, a TSX library that compiles motions to CSS and SMIL with no runtime JavaScript. Use when asked to make, edit or debug an animated SVG, a svjeez scene, a code explainer, a terminal recording, or an animated flowchart, sequence, state or lanes diagram in TSX, or when a project imports svjeez.
 ---
 
 # svjeez
 
 svjeez turns a TSX scene into one self-contained animated SVG. Motions are values on a timeline. `render()` compiles them to CSS keyframes (SMIL for filter primitives), validates the output and returns a string. Nothing runs in the viewer's browser.
 
-Work in a loop: write the scene, render frames, look at them, fix, repeat. Never call a scene done from the source alone. Timing bugs only show up in frames.
-
 ## Setup
 
-```json
-{ "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "svjeez", "strict": true } }
+```sh
+npm i svjeez
 ```
 
-A scene module exports a default function that returns the SVG string. The CLI and the preview load modules of this shape.
+Add `"jsx": "react-jsx", "jsxImportSource": "svjeez", "strict": true` to `compilerOptions`, or put `/** @jsxImportSource svjeez */` and `/** @jsxRuntime automatic */` at the top of one file. A scene module exports a default function that returns the SVG string. The CLI and the preview load modules of this shape.
 
 ```tsx
 import { draw, ease, enter, render } from "svjeez";
@@ -31,271 +29,132 @@ export default function build(): string {
 }
 ```
 
-`render` options: `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `playbackRate`, `reducedMotion: { at }` (the still frame under `prefers-reduced-motion`, default 85% through) or `false`, `loop` (default `true`; `false` plays the scene once and holds its last frame), `comment`.
+`render` takes `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `playbackRate`, `reducedMotion: { at }` or `false`, `loop` (`false` plays once and holds) and `prefix`. Attributes are camelCase (`strokeWidth`) and the class attribute is `class`.
+
+## Render, look, fix
+
+Never call a scene done from its source. Timing bugs only show in frames.
+
+```sh
+npx svjeez frames scene.tsx --times 0,0.5,1.2,3 --sheet --out frames/
+```
+
+Times are playback seconds. The command writes one PNG per time plus `sheet.png`, a labelled grid. Open `sheet.png` first. Without `--times` you get `--count` frames (default 6) over one loop. Add `--scale 2` for small text and `--color-scheme light` or `dark` for adaptive themes. `svjeez svg scene.tsx --out scene.svg` writes the SVG. Frames need `npm i -D playwright-core` and `npx playwright-core install chromium-headless-shell`. On Node, `.tsx` needs `npm i -D tsx`. Under Bun use `bunx --bun svjeez`.
+
+1. Pick `duration` first and plan beats in absolute seconds.
+2. Run `tsc --noEmit`. Fix type errors with the table below.
+3. Render a sheet at each beat's start, middle and end, plus `0` and just before `duration`.
+4. Check: nothing visible at `t = 0` that should be hidden; each element arrives and leaves on cue; nothing clipped or off center; text legible in both color schemes; the last frame close to the first.
+5. Fix, render again, and report only after a sheet shows the intended motion. Name the times you checked. Two times that should differ but render identically mean the motion is not attached or starts later than you think.
 
 ## The timeline
 
-Every motion lives on the scene timeline, `0` to `duration`, and the whole scene loops unless `loop: false`. Attach motions with the `animation` prop.
+Every motion lives on the scene timeline, `0` to `duration`. Attach motions with the `animation` prop.
 
 ```tsx
 motion({ opacity: 0 })          // initial values, held until the first transition
-  .at(1)                        // move the cursor to 1s (absolute)
-  .to({ opacity: 1 }, 0.5)      // transition over 0.5s from the cursor; cursor is now 1.5
-  .wait(2)                      // advance the cursor 2s; values hold
+  .at(1)                        // move the cursor to 1s
+  .to({ opacity: 1 }, 0.5)      // transition over 0.5s; cursor is now 1.5
+  .wait(2)                      // values hold; cursor is now 3.5
   .to({ opacity: 0, scale: 0.8 }, 0.4, ease.in)
   .set({ scale: 1 })            // hard cut at the cursor
-  .label("fade");               // readable keyframe names, optional
+  .loop(6);                     // repeat every 6s; snapped to divide duration
 ```
 
-- `.to(values, over, ease?)`: `over` is a duration, never an end time. The default ease is `ease.out`.
-- Between transitions every value holds. You never write hold keys.
-- `.loop(period)` repeats the motion every `period` seconds. Render snaps the period so it divides `duration`.
-- Motions are immutable. Each call returns a new motion, so build them as one chain or reassign.
-- Stack layers with an array: `animation={[enter(...), wiggle(...)]}`. Index 0 is outermost, like a wrapper `<g>`. Falsy entries are dropped, so `cond && motion` works.
-- Two transitions in one motion may not move the same lane at overlapping times. `x` and `y` share the `translate` lane. Move them in one `.to()`, or stack two motions.
-
-### Channels
+- `.to(values, over, ease?)`: `over` is a length, never an end time. Default ease is `ease.out`. Between transitions every value holds.
+- Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign.
+- Stack with an array: `animation={[enter(...), wiggle(...)]}`. Index 0 is outermost, like a wrapper `<g>`. Falsy entries drop out.
+- Only `opacity x y scale rotate blur` stack. Every other channel takes one motion per element, or render throws `Two motions both animate`. Within one motion, `x` and `y` share a lane, so move them in one `.to()`.
+- `scale` and `rotate` pivot on the element's own center. To pivot elsewhere, draw around 0,0 inside `<g transform="translate(cx cy)">`.
+- Units: px, degrees for `rotate`, standard deviation in px for `blur`, CSS strings for colors.
 
 | Tag | Channels |
 | --- | --- |
-| shapes, `g`, `text`, `use` | `opacity` `x` `y` `scale` `rotate` `blur` `fill` `stroke` `color` |
-| shapes (`path` `line` `polyline` `polygon` `circle` `ellipse` `rect`) | `draw` (0 to 1) |
-| `rect`, `image` | `width` `height` |
-| `stop` | `stopColor` `stopOpacity` |
-| filter primitives | `stdDeviation` `baseFrequency` `seed` `displace` `dx` `dy` `floodColor` `floodOpacity` |
+| `g` `use` `text`, shapes (`path line polyline polygon circle ellipse rect`) | `opacity x y scale rotate blur fill stroke color` |
+| `image` | `opacity x y scale rotate blur width height` |
+| `tspan` | `fill stroke` |
+| shapes | `draw` (0 to 1; the shape needs a stroke, or nothing renders) |
+| `rect` | `width height` |
+| `stop` | `stopColor stopOpacity` |
+| filter primitives | `stdDeviation baseFrequency seed displace dx dy floodColor floodOpacity` |
 
-Units: `x`, `y`, `width`, `height` are px; `rotate` is degrees; `blur` is the Gaussian blur's standard deviation in px; colors are CSS color strings. `scale` and `rotate` pivot on the element's own center (fill-box), not the canvas origin. To rotate around another point, put the shape in a `<g transform="translate(cx cy)">` and draw it around 0,0.
-
-### Easing
-
-`ease.linear`, `ease.in`, `ease.out` (default), `ease.inOut`, `ease.pop` (overshoots, then settles), `ease.hold` (jumps at the end), `ease.steps(n)`, `ease.bezier(x1, y1, x2, y2)`. An ease shapes only the transition it is passed to. Use `ease.linear` for spins and anything looping at constant speed.
+Custom properties from `def.property` animate on every tag above except filter primitives.
 
 ## Recipes
 
 ```tsx
 enter({ at: 0.5, over: 0.8 });                       // fade in
 enter({ at: 0.5, over: 0.8 }, { y: 20, blur: 6 });   // arrive from these values to rest
-enter({ at: 1, over: 0.4 }, { scale: 0 }, ease.pop); // pop in
-exit({ at: 4, over: 0.4 });                          // fade out
 exit({ at: 4, over: 0.4 }, { y: -10, opacity: 0 });  // leave to these values
-draw({ at: 0, over: 1.2 });                          // stroke a shape on; needs a stroke
+draw({ at: 0, over: 1.2 });                          // stroke a shape on
 shake({ at: 2, over: 0.5 }, { x: 6 });               // damped shake on x, y or rotate
-wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise around rest
+wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; change the seed to reroll
 ```
 
-Recipes take a span `{ at, over }`. `enter` and `exit` only take rest channels (`opacity x y scale rotate blur`), because rest is where they start or end. Use `motion()` for colors. `wiggle` needs a `seed`; change the seed to reroll. `rate` is samples per second, `period` the loop length (default 2s), `ease: ease.hold` gives a jittery look.
-
-### sampled()
-
-Bake any function of time into keyframes. The tolerance per lane decides how many keys survive.
+Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys.
 
 ```tsx
-sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), {
-  duration: 12,
-  tolerance: { translate: 1 }, // px; rotate is degrees, scale and opacity are unitless
-});
+sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translate: 1 } });
 ```
-
-Every key the function returns needs a tolerance for its lane (`translate` covers `x` and `y`). Every sample must return the same keys, each a finite number. Make `t = duration` match `t = 0` if the scene loops.
-
-## Defs, CSS and effects
-
-```tsx
-const fade = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, <><stop offset={0} stopColor="#fff" /><stop offset={1} stopColor="#fff" stopOpacity={0} /></>);
-<rect width={100} height={100} fill={fade} />;  // pass the ref itself, never a string or url(#id)
-
-<text filter={fx.glow({ blur: 4 })}>OPEN</text>;   // neon bloom
-<g filter={fx.boil({ strength: 2 })}>{/* ... */}</g>; // hand-drawn boil
-```
-
-`render` emits a def only if something uses it, with a generated id. `def.property(name, { syntax, inherits, initial })` declares a typed CSS custom property you can animate as a motion key and use inside `` css`...` `` with `calc`. `el.circle({...}, children)` builds elements without JSX.
-
-Attributes are camelCase (`strokeWidth`, `textAnchor`, `strokeLinecap`) and the class attribute is `class`, not `className`.
-
-## Images
-
-Embed images as data URIs so the output stays one file. GitHub and Markdown show SVGs through `<img>`, which blocks external hrefs but allows `data:`.
-
-```tsx
-import { Picture, fx, motion, ease, picture } from "svjeez";
-
-const photo = await picture.load(new URL("./harbor.jpg", import.meta.url)); // path, file: or http(s) URL
-const logo = picture('<svg viewBox="0 0 40 40">...</svg>');                   // bytes or SVG markup, sync
-
-<Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" alt="A harbor at dusk" filter={fx.duotone({ dark: "#1b1464", light: "#ffb36b" })} />;
-<Picture src={photo} x={20} y={20} width={240} height={160} animation={motion({ scale: 1 }).to({ scale: 1.3 }, 6, ease.inOut)} />; // Ken Burns
-```
-
-`picture()` sniffs the format from the bytes (svg, png, jpeg, gif, webp), never the extension, and reads the intrinsic size from the header, after any EXIF rotation. It throws on anything else. `<Picture>` takes `x`, `y` and `width` and/or `height` (one given derives the other from the aspect ratio; none uses the intrinsic size), `fit` (`cover` default, `contain`, `fill`), `radius`, `filter`, `opacity`, `class` and `alt` (omit it and the picture is `aria-hidden`). `animation` moves the inner image while the frame stays put, so `scale` zooms about the frame's center, clipped to the frame. To animate the whole picture, wrap it in an animated `<g>`. Draw a picture as often as you like: its bytes go into the file once.
-
-Filters that suit photos: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })` (hex colors, maps luminance onto the ramp), `fx.blur(deviation)`, `fx.shadow({ dx, dy, blur, color, opacity })`.
-
-Before you embed:
-
-- Only SVG scales infinitely. Raster pixelates when scaled up, so prefer SVG, and export raster at 2x the drawn size.
-- base64 adds about 33%, and the whole file downloads before the first frame. Keep each image small, under 100 KB; `validateSvg` warns past 256 KB.
-- An external href (`<image href="photo.png">`) loads inline in a page but not through `<img>`, so `validateSvg` warns on it. Load the file with `picture.load()` instead.
-- An embedded SVG is sealed. Web fonts, scripts and external refs do not load inside it, so outline its text. You cannot animate its parts. Its own CSS animations run when the outer SVG is inline in a page but freeze on the first frame through `<img>` (measured in Chromium), which is how GitHub shows it. Animate with `<Picture animation>` or a wrapping `<g>` instead.
-- Animated content under a filter on a large image re-renders every frame and is expensive.
-- You are redistributing the image's bytes. Check the license.
-
-## Fonts
-
-Load a TTF or OTF the way you load an image, then use it three ways: as real text, to measure text, or as outlines.
-
-```tsx
-import { Glyphs, draw, font } from "svjeez";
-
-const display = await font.load(new URL("./ArchivoBlack-Regular.ttf", import.meta.url)); // or font(bytes), sync
-const body = font.family(await font.load(new URL("./Body-Regular.ttf", import.meta.url)), await font.load(new URL("./Body-Bold.ttf", import.meta.url)));
-
-<text x={20} y={60} fontFamily={body} fontWeight="bold">Real, selectable text</text>;   // also on <g>
-const w = display.measure("Title", 48);                                                  // px, kerning and ligatures included
-<Glyphs font={display} text="Wave!" size={96} x={(W - display.measure("Wave!", 96)) / 2} y={140} stroke="#FF5FA8" fill="none"
-  animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />;                         // one path per glyph
-```
-
-`font()` reads the format from the bytes (ttf, otf, woff, woff2) and the family, weight and style from the file; pass `{ family, weight, style, fallback }` to override. `font.family(...faces)` groups weights and styles under the first face's name, and `family.face(weight, style)` picks one the way the browser would. `fontFamily={font}` embeds each face as a data URI the first time the tree uses it, once, and writes the fallback after it (`monospace` for a fixed-pitch font, else `sans-serif`).
-
-`font.measure(text, size)` and `font.path(text, { size, x, y })` match Chromium's layout, standard ligatures and pair kerning included. `path` returns `{ d, width, glyphs }`, each glyph `{ char, d, x, advance }`. `font.metrics` gives ascent, descent, cap height and x-height in em. `<Glyphs>` draws one `<path>` per visible glyph inside a group labelled with the text. Its `animation` is a stack applied to every glyph, or a function of `(glyph, index)` for a stagger. To move the word as one, wrap it in an animated `<g>`.
-
-Extras take a `font` too: `code(src, { font })` (monospaced only; it sets the column width), every diagram, `<Callout>` and `flow` packet labels. Their boxes are then sized by measuring, instead of the 0.6em-per-character estimate.
-
-Before you embed:
-
-- An embedded TrueType font is cut down to the glyphs the scene's text uses, often to a tenth of the file or less. Kerning moves to a `kern` table and variable fonts become their default instance. Text that forms ligatures, or could meet any other layout the browser applies, such as contextual alternates, combining marks or Arabic and Indic forms, embeds the whole font so the browser can still apply it. So do OTF with CFF outlines, WOFF and WOFF2. Pass `{ subset: false }` to embed the whole file. A coding font such as JetBrains Mono turns `=>` or `--` into ligatures; load it with `{ ligatures: false }` to draw one glyph per character and keep the cut. `validateSvg` warns past 256 KB. For a short title, `<Glyphs>` embeds no font at all.
-- Glyphs are outlines, not text. They are not selectable or searchable, the group's `aria-label` is all assistive tech reads, and they lose hinting, so keep small body text as `<text>`.
-- Measuring and outlines need the TTF or OTF file; WOFF and WOFF2 embed but throw on `measure` and `path`. `path` reads TrueType (`glyf`) outlines only, so an OTF with CFF outlines throws.
-- Shaping is for Latin text: no bidi, no contextual alternates, no mark positioning. Arabic or Indic text will not match the browser.
-- A character the font lacks draws from the fallback in `<text>` and as the `.notdef` box in `<Glyphs>`. `font.has(char)` tells you.
-- You are redistributing the font. Check its license; OFL fonts allow embedding.
-
-## Ink
-
-`<Ink>` draws a path with a hand tool instead of an even SVG stroke. The tool sets the width at every point, and the stroke becomes a filled outline.
-
-```tsx
-import { Ink, inkPath, tool } from "svjeez";
-
-<Ink d="M20 80C80 20 160 140 220 80" tool={tool.brush({ size: 8, seed: 2 })} fill="#2B2118" draw={{ at: 0.5, over: 1.2 }} />;
-<Ink d={coast} tool={tool.nib({ size: 3, angle: 40 })} fill={C.ink} />;
-const outline = inkPath(d, tool.pen({ size: 1.2 }));  // the outline as path data, to fill yourself
-```
-
-Tools: `tool.pen({ size, taper })` is an even line with slightly thinned ends. `tool.brush({ size, taper, pressure, wobble, seed })` swells mid-stroke and lifts to a point. `tool.nib({ size, angle, thin })` is a broad calligraphy nib, thick across its edge and thin along it. `tool.pencil({ size, seed })` is a fine line that wavers with the grain. A `seed` rerolls the wobble, and the same seed draws the same line. A tool is a plain `{ width(t, s, angle), drift?, size }` object, so you can write your own.
-
-Handwriting: `strokeFont.load(url)` reads a single-line SVG font (Hershey and EMS fonts, such as EMS Allure), and `hand.path(text, { size, x, y }).d` gives centerlines to ink with `<Ink>`. A `d` with several subpaths reveals them all at once, so split it at each `M` and give each piece its own `draw` span, paced by its length, to write it stroke by stroke. `examples/hype` shows this.
-
-`draw={{ at, over }}` inks the stroke in along its path, through a mask, then swaps to an unmasked copy so it costs nothing once drawn. `animation` moves or fades the whole mark. The outline is filled, so `fill` and gradients work and `stroke` does not. Each path and tool pair embeds its outline once. `d` takes any SVG path data, arcs included.
-
-## Extras
-
-Import from `svjeez/extras`. Every extra takes `theme`, `x`, `y`, `fontSize`, `font` and `class`, and returns `{ node, ... }`. Put `node` in the tree.
-
-**Themes.** `const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow })` gives colors as CSS variables (`theme.base00` background through `theme.base0F`) that follow the viewer's color scheme. Pass `css` to `render`. Diagram text inherits the page font, so pass `font` or add a font rule: `` css: `${css}\n.sans text{font-family:system-ui,sans-serif}` `` with `class: "sans"`.
-
-**Code explainers.**
-
-```tsx
-const kw = (text: string): Run => ["keyword", text];
-const src = code([[kw("const"), " total ", ["punct", "="], " ", ["fn", "sum", "call"], ["punct", "();"]]], { x: 40, y: 60, fontSize: 16, theme });
-src.get("call"); src.find("total"); src.lines(1, 2); src.at(2, 8); // Rects and Points to aim at
-
-const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5 }); // named spans
-morph([before, after], { at: [tl.change.at], gutter: true }); // { node, spans, end }: moves surviving words, fades the rest
-typewriter(src, { at: 1, cps: 28, cursor: true });  // { node, end, spans }: spans[i] is when line i+1 types
-reveal(src, { at: 1, step: 0.6 });                  // a paragraph at a time: { node, spans, end }
-```
-
-Annotations are components: `<Focus stops={[{ during: tl.intro, target: src.lines(2) }]}>`, `<Marker stops={[{ during: span, target: rect }]} />`, `<Callout target={rect} side="right" during={span}>text</Callout>`, `Arrow`, `Brace`, `Underline`, `Camera`. `during(span)` fades anything in and out over a span; `cut(span)` shows it for the span with hard cuts, for shots in an edit.
-
-`Camera` zooms everything inside it. Do not zoom it over hundreds of animated elements: Chromium keeps each animated element on its own raster, and when a parent scales they fall behind and flash blank mid-zoom (measured in Chromium). Play the intro as one copy outside the `Camera`, swap at a cut to a still copy inside it, and share geometry through `def.symbol` so the second copy costs little. Put what must keep moving during the zoom in a second, small `Camera` with the same stops. `examples/map` shows the pattern.
-
-**Terminals.**
-
-```tsx
-const shell = appWindow(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic" });
-const session = terminal(
-  [{ cmd: "bun add svjeez", output: [[["muted", "installed svjeez"]]] }, { cmd: "bun run build", output: [[["green", "✓"], " dist/hello.svg"]] }],
-  { theme, x: shell.body.x + 20, y: shell.body.y + 16, fontSize: 14 },
-);
-// duration: session.end + 2, so the last line stays up before the loop restarts
-```
-
-**Diagrams.** `flowchart`, `sequence`, `state`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error. Each returns `{ node, get(id), bounds }` plus helpers. Size the canvas from `bounds` instead of guessing. `anchor: "center"` places a diagram by its center. Stepped things take `at` plus `step`. `sequence`'s `play`, `state`'s `walk` and the code `reveal` also take one time per item, as in `play: { at: [0.5, 1, 3] }`, which keeps two diagrams in sync. A flowchart or tree `reveal` takes a single `at`. A node `role` (`task input output tool decision store`) picks its shape and color.
-
-```tsx
-const chart = flowchart({ nodes: { a: "Start", b: { label: "Done", role: "output" } }, edges: [["a", "b"]] }, { theme, play: { at: 0.5 } });
-const trip = flow(chart.route("a", "b"), { theme, at: 3, style: "comet", arrive: true }); // dot, comet, trace, packet
-<>{chart.layers.under}{trip.node}{chart.layers.over}</>; // the flow runs between edges and nodes
-```
-
-`sequence(...).message(i)`, `stateMachine(...).walk(ids, { at })`, `tree(...).route(a, b)`, `lanes(...).x(t)` and `travel(points, { at })` cover the rest. Read `README.md` in the svjeez repo for each spec.
 
 ## Errors and fixes
 
-Type errors (from `tsc`):
+Type errors from `tsc`:
 
-| Error | Cause | Fix |
-| --- | --- | --- |
-| `Type 'number' is not assignable to type 'never'` inside `.to({...})`, `motion({...})` or `sampled` | Misspelled channel (`opcity`), or a `sampled` key with no tolerance for its lane | Fix the name from the channel table; add the lane to `tolerance` |
-| `Motion<"draw"> is not assignable to type 'Stack<TagChannels<"g">>'` | The tag cannot animate that channel (`draw` on `<g>`, `width` on `<circle>`) | Move the motion to a tag from the table, or wrap the element in `<g>` for transforms |
-| `Ref<"linearGradient"> is not assignable to type 'Ref<"clipPath">'` | A def used in the wrong slot | Make the right def kind (`def.clipPath`, `def.mask`, `def.filter`) |
-| `'duration' does not exist in type 'Span'` | Recipes take `{ at, over }` | Use `over`, the length in seconds |
-| `No overload matches this call` on `enter` or `exit` | A non-rest channel such as `fill` | Use `motion().to({ fill }, over)` |
-| `Expected 2 arguments` on `wiggle` | Missing options | `wiggle(amp, { seed: "name" })` |
-| `Property 'title' is missing` | `render` needs `title` | Add a title (and a `desc`) |
-| `Type '{ className: string; }' is not assignable to type 'Intrinsic<"rect">'` | JSX here is SVG | Use `class` |
-| `Type '"c"' is not assignable to type '"a" \| "b"'` | Unknown id in a diagram spec or route | Use an id from `nodes` |
+| Error | Fix |
+| --- | --- |
+| `Type 'number' is not assignable to type 'never'` in `.to()`, `motion()` or `sampled` | Misspelled channel, or a `sampled` key with no tolerance |
+| `Motion<"draw"> is not assignable to type 'Stack<TagChannels<"g">>` | The tag cannot animate that channel. See the table |
+| `Ref<"linearGradient"> is not assignable to type 'Ref<"clipPath">'` | A def in the wrong slot. Use `def.clipPath` or `def.mask` |
+| `'duration' does not exist in type 'Span'` | Recipes take `{ at, over }` |
+| `No overload matches this call` on `enter` or `exit` | A non-rest channel such as `fill`. Use `motion().to()` |
+| `Expected 2 arguments` on `wiggle` | `wiggle(amplitude, { seed: "name" })` |
+| `Property 'title' is missing` | `render` needs `title` |
+| `'className' does not exist on type 'Intrinsic<"rect">'` | Use `class` |
+| `Type '"c"' is not assignable to type '"a" \| "b"'` | Unknown id in a diagram spec or route |
 
-Runtime errors (thrown by `motion()`, `render()`, `picture()` or `font()`):
+Runtime errors. `…` stands for a value the message fills in.
 
 | Message | Fix |
 | --- | --- |
-| `Two transitions move \`translate\` between 1s and 2s` | Merge them into one `.to({ x, y })`, or stack two motions |
-| `A motion on <rect> runs until 4s, past the 2s scene` | Raise `duration`, or end the motion earlier |
-| `loop(2) is shorter than the motion` | The loop period must cover every step in it |
-| `<rect> has no attribute "stroke-width"` | Use camelCase: `strokeWidth` |
-| `to() needs a positive duration, got 0. Use set() for a cut.` | `over` is a length; use `.set()` for an instant change |
-| `Two keys are too close to tell apart` | Space transitions further apart, or shorten `duration` |
-| `Unknown image format. picture() reads png, jpeg, gif, webp, svg.` | The bytes are something else, such as a path string, an HTML error page or AVIF. Convert the image, and pass a file or URL to `picture.load()` |
-| `Unknown font format. font() reads ttf, otf, woff, woff2.` | Pass the font file's bytes or `font.load(path)`. A `.ttc` collection throws its own error; extract one face |
-| `measure() needs the TTF or OTF file` | The font is WOFF or WOFF2. Load the TTF or OTF instead |
-| `Two different fonts claim 'Inter' 400 normal` | Two files share a family, weight and style. Rename one with `font(bytes, { family })` |
-| `code() needs a monospaced font` | Use a monospaced font for `code()`, and `<text fontFamily={font}>` for prose |
-| `Generated SVG is invalid` | Usually a hand-written `id` clashing with another; let `def` make ids |
+| `… on <…> has no starting value.` | Pass it in `motion({ width: 10 })` or set the attribute |
+| ``Two motions both animate `…` on <…>: put them in one motion().`` | Only the stacking channels may repeat |
+| ``Two transitions move `…` between …s and …s.`` | Merge into one `.to({ x, y })`, or stack two motions |
+| `A motion on <…> runs until …s, past the …s scene.` | Raise `duration`, or end the motion earlier |
+| `loop(…) is shorter than the motion, which runs until …s.` | The period must cover every step |
+| `A step ending at …s overruns loop(…).` | Same, for a later step |
+| `… on <…> has … keys; the cap is ….` | Raise `tolerance`, or shorten it |
+| `to() needs a positive duration, got …. Use set() for a cut.` | Use `.set()` for an instant change |
+| `<…> has no attribute "…".` | camelCase: `strokeWidth`, not `stroke-width` |
+| `A def ref is not a string. Pass it as the attribute value itself.` | `fill={grad}`, never `url(#id)` |
+| `… was never declared with def.property().` | Declare the property before animating it |
+| `animation takes motions built with motion() or a recipe.` | Pass motions, an array of them, or a falsy value |
+| `Unknown image format. picture() reads …` | The bytes are not an image. Try `picture.load(path)` |
+| `Unknown font format. font() reads …` | Pass font bytes or `font.load(path)` |
+| `code() needs a monospaced font, and … is proportional.` | Use a monospaced font for `code()` |
+| `Generated SVG is invalid:` | Often a duplicate hand-written `id`. Let `def` make ids |
+| `Node cannot load …. Install tsx` | `npm i -D tsx`, or run under Bun |
 
-## Render, look, fix
+## References
 
-Render frames at the moments that matter and look at them before you report anything.
+Read the one that matches the task. `svjeez skill --install` copies them.
 
-```sh
-npx svjeez frames scene.tsx --times 0,0.5,1.2,3 --sheet --out frames/  # Bun: bunx --bun svjeez frames ...
-```
+| Task | Read |
+| --- | --- |
+| Gradients, clip paths, filters, custom properties, `calc` | [`references/defs-css.md`](references/defs-css.md) |
+| Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
+| Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
+| Code walkthroughs, terminals, annotations, camera | [`references/explainers.md`](references/explainers.md) |
+| Flowchart, sequence, state, tree, lanes, `flow` | [`references/diagrams.md`](references/diagrams.md) |
+| Pixel-art voxel scenes | [`references/voxels.md`](references/voxels.md) |
+| `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
 
-This writes one PNG per time plus `sheet.png`, all frames on one labelled grid. Open `sheet.png` first. Without `--times` you get `--count` frames (default 6) over one loop. Frames follow the machine's light or dark appearance; render both `--color-scheme light` and `--color-scheme dark` when the scene uses an adaptive theme. Add `--scale 2` to read small text. `svjeez svg scene.tsx --out scene.svg` writes the SVG itself. From code, `renderFrames(svg, { times, sheet: true })` from `svjeez/frames` returns the same PNGs as bytes. Frames need `playwright-core` and Chromium: `npm i -D playwright-core && npx playwright-core install chromium-headless-shell`.
+## Examples
 
-The loop:
+Each file in `examples/` renders. Copy one and change it.
 
-1. Write the scene. Pick `duration` first and plan beats in absolute seconds.
-2. Run `tsc --noEmit`. Fix type errors with the table above.
-3. Render a sheet. Choose times at each beat's start, middle and end, plus `0` and just before `duration`.
-4. Look at each frame and check, in order:
-   - Is anything visible at `t = 0` that should still be hidden, or missing at the end?
-   - Does each element arrive and leave when planned? A frame mid-transition should be partway.
-   - Is anything clipped by the canvas, overlapping, or off center? Size the canvas from `bounds`.
-   - Is text legible: font, size, contrast in both schemes?
-   - Does the last frame match the first well enough that the loop does not jump?
-5. Fix and render again. Report only after a sheet shows the intended motion, and name the times you checked.
-
-Frames are deterministic: the same time renders the same pixels. Two times that should differ but render identically mean the motion is not attached or starts later than you think.
-
-## Worked examples
-
-Each file in `examples/` next to this skill compiles and renders. Read them as patterns.
-
-- `examples/toast.tsx` shows a `motion()` chain with `.at` and `.to`, a stacked `enter` and `shake`, `draw` on a check mark, and `exit` through `ease.in`.
-- `examples/orbit.tsx` shows `sampled()` for an elliptical orbit, a `.loop()` spin with `ease.linear`, and a `wiggle` breathing effect.
-- `examples/review-flow.tsx` shows a typed `flowchart` with `play`, a `flow` comet along `route()`, an `adaptive` theme with a font rule, and a canvas sized from `bounds`.
-
-Render one to see the loop in action: `npx svjeez frames examples/orbit.tsx --count 6 --sheet`.
+- `examples/toast.tsx`: a `motion()` chain, stacked `enter` and `shake`, `draw` on a check.
+- `examples/orbit.tsx`: `sampled()` orbit, a `.loop()` spin, a `wiggle` breath.
+- `examples/review-flow.tsx`: a typed `flowchart`, a `flow` comet, an adaptive theme.
+- `examples/explainer.tsx`: `code`, `morph`, `timeline`, `Focus`, `Marker`, `Callout`.
+- `examples/terminal.tsx`: `appWindow` with a typed `terminal` session.
