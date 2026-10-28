@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { geoContains, geoOrthographic } from "d3-geo";
 import { rect } from "svjeez";
 import { createRequire } from "node:module";
-import { night, project, sun, type LonLat, type Topology } from "../src/index.ts";
+import { distance, night, project, sun, type LonLat, type Topology } from "../src/index.ts";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 const frame = rect(20, 10, 960, 500);
@@ -205,5 +205,34 @@ describe("sun()", () => {
 
     expect(geoContains(dark, [180, 0])).toBe(true);
     expect(geoContains(dark, [0, 20])).toBe(false);
+  });
+});
+
+describe("line()", () => {
+  test("runs through every waypoint in one piece when it stays on the map", () => {
+    const [piece, ...rest] = map.line([NEW_YORK, LONDON, TOKYO]);
+
+    expect(rest).toHaveLength(0);
+    expect(piece![0]).toEqual(map.point(NEW_YORK));
+    expect(piece!.at(-1)).toEqual(map.point(TOKYO));
+    expect(piece!.some((p) => p.x === map.point(LONDON).x && p.y === map.point(LONDON).y)).toBe(
+      true,
+    );
+  });
+
+  test("cuts where it crosses the edge of the map, where route() throws", () => {
+    const pieces = map.line([TOKYO, SAN_FRANCISCO]);
+
+    expect(() => map.route(TOKYO, SAN_FRANCISCO)).toThrow(/use line\(\)/);
+    expect(pieces).toHaveLength(2);
+    expect(pieces[0]![0]).toEqual(map.point(TOKYO));
+    expect(pieces[1]!.at(-1)).toEqual(map.point(SAN_FRANCISCO));
+  });
+});
+
+describe("distance()", () => {
+  test("measures great circles in kilometres", () => {
+    expect(distance([NEW_YORK, LONDON])).toBeCloseTo(5570, -1);
+    expect(distance([NEW_YORK, LONDON, NEW_YORK])).toBeCloseTo(2 * distance([NEW_YORK, LONDON]));
   });
 });

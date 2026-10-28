@@ -61,9 +61,10 @@ The map it returns has:
 - `point([lon, lat])`, a place in scene pixels. It throws for a place the projection clips, such as the far side of an orthographic globe.
 - `dots(step)`, evenly spaced places on land for a dot map, each with its `at`, the `id` and `properties` of the feature it sits in, and its `point`. Rows sit `step` degrees of latitude apart (default 2), and dots about `step` degrees of arc apart along a row. On a globe, dots on the far side are kept with an undefined `point`, so a scene can turn them into view.
 - `route(from, to)`, the great-circle arc as a list of points, in the form `travel()` and `flow()` take. It throws when the arc crosses the edge of the map; rotate the projection so both ends sit on one side.
+- `line(points)`, the path through a list of `[lon, lat]` waypoints along great circles, for a cable or a shipping lane. Where it crosses the edge of the map it is cut, so it returns one list of points per piece.
 - `bounds(target, pad)`, a `Rect` for a `Camera` stop around a region, a list that mixes regions and `[lon, lat]` places, or any GeoJSON.
 
-`sun(date)` gives the `[lon, lat]` where the sun stands overhead, to within about a degree. `night(date)` gives the dark hemisphere as a GeoJSON polygon, ready for `map.path(night(date))`.
+`distance(points)` gives the kilometres along the great circles through a list of places. `sun(date)` gives the `[lon, lat]` where the sun stands overhead, to within about a degree. `night(date)` gives the dark hemisphere as a GeoJSON polygon, ready for `map.path(night(date))`.
 
 ## Size
 

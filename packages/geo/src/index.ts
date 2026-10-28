@@ -89,6 +89,11 @@ export interface GeoMap {
   dots(step?: number): Dot[];
   /** The great-circle arc from `from` to `to`, for `travel()` and `flow()`. `steps` defaults to one per degree. */
   route(from: LonLat, to: LonLat, options?: { readonly steps?: number }): Point[];
+  /**
+   * The path through `points` along great circles, as a cable, a shipping lane or a flight with stops would run. Where it
+   * crosses the edge of the map it is cut, so it comes back as one list of points per piece.
+   */
+  line(points: readonly LonLat[]): Point[][];
   /** A camera target around a region, a list of regions and places, or any GeoJSON, grown by `pad` px on every side. */
   bounds(target: Region | readonly (Region | LonLat)[] | GeoPermissibleObjects, pad?: number): Rect;
 }
@@ -142,6 +147,21 @@ const largest = (f: Feature, area: (o: GeoPermissibleObjects) => number): Featur
 /** Whether a place sits in a `geoBounds` box, which runs from x0 east to x1 and wraps when it crosses the antimeridian. */
 const within = ([[x0, y0], [x1, y1]]: [[number, number], [number, number]], [lon, lat]: LonLat) =>
   lat >= y0 && lat <= y1 && (x0 <= x1 ? lon >= x0 && lon <= x1 : lon >= x0 || lon <= x1);
+
+/** The great circle from `from` to `to` as `steps` segments, one per degree by default. */
+const arc = (from: LonLat, to: LonLat, steps?: number): [number, number][] => {
+  const count = steps ?? Math.max(2, Math.ceil((geoDistance([...from], [...to]) * 180) / Math.PI));
+  const along = geoInterpolate([...from], [...to]);
+
+  return Array.from({ length: count + 1 }, (_, i) => along(i / count));
+};
+
+/** Kilometres along the great circles through `points`, on a sphere of the Earth's mean radius. */
+export function distance(points: readonly LonLat[]): number {
+  return points
+    .slice(1)
+    .reduce((km, to, i) => km + geoDistance([...points[i]!], [...to]) * 6371, 0);
+}
 
 const toRect = ([[x0, y0], [x1, y1]]: [[number, number], [number, number]]) =>
   rect(x0, y0, x1 - x0, y1 - y0);
@@ -313,22 +333,22 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
       );
     },
     route(from, to, { steps } = {}) {
-      const count =
-        steps ?? Math.max(2, Math.ceil((geoDistance([...from], [...to]) * 180) / Math.PI));
-
-      const along = geoInterpolate([...from], [...to]);
-
-      const cut = lines({
-        type: "LineString",
-        coordinates: Array.from({ length: count + 1 }, (_, i) => along(i / count)),
-      });
+      const cut = lines({ type: "LineString", coordinates: arc(from, to, steps) });
 
       if (cut.length !== 1)
         throw new Error(
-          `route() from [${from.join(", ")}] to [${to.join(", ")}] crosses the edge of the map. Rotate the projection so both ends sit on one side, as in geoNaturalEarth1().rotate([-150, 0]).`,
+          `route() from [${from.join(", ")}] to [${to.join(", ")}] crosses the edge of the map. Rotate the projection so both ends sit on one side, as in geoNaturalEarth1().rotate([-150, 0]), or use line(), which cuts it into pieces.`,
         );
 
       return cut[0]!;
+    },
+    line(points) {
+      if (points.length < 2) throw new Error("line() needs at least two places.");
+
+      return lines({
+        type: "LineString",
+        coordinates: points.slice(1).flatMap((to, i) => arc(points[i]!, to).slice(i ? 1 : 0)),
+      }).filter((piece) => piece.length > 1);
     },
     bounds(target, pad = 0) {
       const box = (() => {

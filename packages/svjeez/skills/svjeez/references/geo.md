@@ -20,6 +20,7 @@ const map = project(world, {
 - `map.dots(step)` returns evenly spaced places on land, `{ at, id, properties, point }`, for a dot map. On a globe, far-side dots keep their `at` and have no `point`.
 - `sun(date)` is the `[lon, lat]` under the overhead sun, and `night(date)` the dark hemisphere as GeoJSON for `map.path()`.
 - `map.route(from, to)` returns the great-circle arc as points for `travel()` and `flow()`. Draw it with `<path d={...}>` and `draw()`; `draw` needs no `strokeDasharray` of its own.
+- `map.line([a, b, c])` runs great circles through waypoints and returns one point list per piece, cut where it crosses the map's edge. `distance([a, b, c])` gives its length in km. `examples/cables` lays submarine cables this way.
 - `map.bounds(region)`, `map.bounds([region, [lon, lat], ...], pad)` and `map.bounds(geojson)` return a `Rect` for a `Camera` stop.
 - `tolerance` (default 0.5px) sets how hard paths are simplified. Raise it for a small scene.
 

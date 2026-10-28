@@ -2,23 +2,28 @@ import { night, project, sun, type LonLat, type Topology } from "@svjeez/geo";
 import { geoOrthographic } from "d3-geo";
 import { css, def, ease, enter, fx, motion, rect, render, type SvgNode } from "svjeez";
 import { createRequire } from "node:module";
-import { mono } from "../style";
+import { geist, geistMono } from "../fonts/faces";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 
 const W = 960;
 const H = 540;
+
 /** One turn of the globe: a day in 24 seconds. */
 const D = 24;
+
 /** How far the north pole leans toward the viewer, in degrees. */
 const TILT = 22;
+
 /** Where the sun sits from the middle of the globe, in degrees of longitude. Negative is west, so night falls on the right. */
 const SUN_OFFSET = -72;
+
 /** The June solstice, at midnight UTC. */
 const DAY = Date.UTC(2026, 5, 21);
 const R = 226;
 
 const [sunLon, sunLat] = sun(new Date(DAY));
+
 /** The longitude at the middle of the globe at t = 0. Each second of the scene turns it 15 degrees west. */
 const middle = sunLon - SUN_OFFSET;
 
@@ -244,21 +249,25 @@ function Globe(): SvgNode {
             <circle r={1.8} fill="#fff6e0" />
           </g>
         ))}
-        {CITIES.filter((city) => city.label).map((city) => (
-          <text
-            class="g n"
-            style={place(city.at)}
-            x={7}
-            y={-6}
-            fontFamily="system-ui, sans-serif"
-            fontSize={11}
-            fontWeight={600}
-            letterSpacing={0.3}
-            fill={C.text}
-          >
-            {city.name}
-          </text>
-        ))}
+        {CITIES.flatMap((city) =>
+          city.label
+            ? [
+                <text
+                  class="g n"
+                  style={place(city.at)}
+                  x={7}
+                  y={-6}
+                  fontFamily={geist}
+                  fontSize={11}
+                  fontWeight={600}
+                  letterSpacing={0.3}
+                  fill={C.text}
+                >
+                  {city.name}
+                </text>,
+              ]
+            : [],
+        )}
       </g>
       <path d={map.sphere} fill="none" stroke={C.land} strokeOpacity={0.25} strokeWidth={0.8} />
     </>
@@ -310,7 +319,7 @@ const hours = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")
 /** The UTC time, one hour per second, cut over as the globe turns. */
 function Clock(): SvgNode {
   return (
-    <g fontFamily={mono} fill={C.text}>
+    <g fontFamily={geistMono} fill={C.text}>
       {hours.map((label, h) => (
         <text
           x={64}
@@ -340,11 +349,11 @@ function Clock(): SvgNode {
 
 function Caption(): SvgNode {
   return (
-    <g fontFamily="system-ui, sans-serif" animation={enter({ at: 0.2, over: 1 }, { y: 10 })}>
-      <text x={64} y={180} fontSize={12} fontWeight={600} letterSpacing={2.4} fill={C.dawn}>
+    <g fontFamily={geist} animation={enter({ at: 0.2, over: 1 }, { y: 10 })}>
+      <text x={64} y={180} fontFamily={geistMono} fontSize={11} letterSpacing={2.4} fill={C.dawn}>
         21 JUNE 2026
       </text>
-      <text x={64} y={226} fontSize={38} fontWeight={750} letterSpacing={-1} fill={C.text}>
+      <text x={64} y={226} fontSize={40} fontWeight={600} letterSpacing={-1.6} fill={C.text}>
         The longest day
       </text>
       <text x={64} y={256} fontSize={14} fill={C.dim}>

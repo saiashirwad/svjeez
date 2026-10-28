@@ -63,7 +63,7 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 ## Geo
 
-`@svjeez/geo` depends on `d3-geo` and `topojson-client`, which is why it is not a `svjeez` subpath. `project()` fits a projection to a frame and returns regions, merged `land` and `lines`, places, great-circle routes and camera bounds. `src/writer.ts` writes the path data: it rounds to 0.1px, drops points closer than the tolerance, and straightens with Douglas–Peucker. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/world` and `examples/earth` are its example scenes, and `skills/svjeez/references/geo.md` teaches it to scene writers.
+`@svjeez/geo` depends on `d3-geo` and `topojson-client`, which is why it is not a `svjeez` subpath. `project()` fits a projection to a frame and returns regions, merged `land` and `lines`, places, great-circle routes and camera bounds. `src/writer.ts` writes the path data: it rounds to 0.1px, drops points closer than the tolerance, and straightens with Douglas–Peucker. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/world`, `examples/earth` and `examples/cables` are its example scenes, and `skills/svjeez/references/geo.md` teaches it to scene writers.
 
 ## Icons
 

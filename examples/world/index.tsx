@@ -1,4 +1,4 @@
-import { project, type LonLat, type Topology } from "@svjeez/geo";
+import { distance, project, type LonLat, type Topology } from "@svjeez/geo";
 import { draw, ease, motion, rect, render, type Child, type Rect, type SvgNode } from "svjeez";
 import { Camera, flow, variables, type CameraStop } from "svjeez/extras";
 import { createRequire } from "node:module";
@@ -259,7 +259,7 @@ function Summary(): SvgNode {
 }
 
 function Caption(): SvgNode {
-  const total = legs.reduce((km, leg) => km + distance(leg.from.at, leg.to.at), 0);
+  const total = distance(STOPS.map((stop) => stop.at));
 
   return (
     <g
@@ -276,17 +276,6 @@ function Caption(): SvgNode {
       </text>
     </g>
   );
-}
-
-/** Kilometres along the great circle. */
-function distance([lon1, lat1]: LonLat, [lon2, lat2]: LonLat): number {
-  const r = Math.PI / 180;
-
-  const a =
-    Math.sin(((lat2 - lat1) * r) / 2) ** 2 +
-    Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin(((lon2 - lon1) * r) / 2) ** 2;
-
-  return 2 * 6371 * Math.asin(Math.sqrt(a));
 }
 
 export default function build(): string {
