@@ -146,6 +146,7 @@
         "@effect/platform-node": "^4.0.6",
         "@lezer/highlight": "^1.2.5",
         "@svjeez/astro": "workspace:*",
+        "@svjeez/icons": "workspace:*",
         "@svjeez/vite": "workspace:*",
         "alchemy": "^2.0.0-beta.84",
         "astro": "^7.4.3",

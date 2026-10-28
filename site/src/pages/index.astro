@@ -9,6 +9,7 @@ import fonts from "@examples/site/fonts.tsx";
 import handshake from "@examples/site/handshake.tsx";
 import hero from "@examples/site/hero.tsx";
 import heroTall from "@examples/site/hero-tall.tsx";
+import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
 import nojsx from "@examples/site/nojsx.tsx";
 import nojsxTall from "@examples/site/nojsx-tall.tsx";
@@ -46,6 +47,7 @@ const s = {
   explainer: live(explainer),
   recording: live(recording),
   ink: live(ink),
+  icons: live(icons),
   fonts: live(fonts),
   breaker: live(breaker),
   agents: live(agents),
@@ -58,6 +60,11 @@ const s = {
 };
 
 const totalKB = Math.round(Object.values(s).reduce((sum, scene) => sum + scene.gzip, 0) / 1024);
+
+const iconUse = `import { bell } from "@svjeez/icons/tabler";
+
+<Icon icon={bell} size={40} animation={(d, i) =>
+  draw({ at: i * 0.2, over: 0.5 })} />`;
 
 const adaptive = `const { theme, css } = adaptive({
   dark: systemDark,
@@ -147,6 +154,12 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <h2 class="c1-6">Animate handwriting. Embed your fonts.</h2>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.ink} cost={17} alt="The word hello is handwritten stroke by stroke, then a brush swash is inked underneath." /></div></figure>
       <figure class="c7-12"><div class="win"><LiveScene scene={s.fonts} cost={20} alt="The words Aa Type draw on as outlines in an embedded display font, with real italic text below." /></div></figure>
+    </section>
+
+    <section class="wrap sec g" id="icons">
+      <h2 class="c1-6">Make any of 8,000 icons move.</h2>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.icons} cost={24} alt="Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings." /></div></figure>
+      <Code class="code side c7-12" code={iconUse} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="light-dark">
