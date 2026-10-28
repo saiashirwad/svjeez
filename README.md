@@ -47,19 +47,13 @@ Every preview below is a single `.svg` file loaded in an `<img>` tag. Click any 
       <sub><b>Event Horizon</b> · Accretion disk, lensed photon ring, camera shake &amp; HUD (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/horizon">TSX</a>)</sub>
     </td>
     <td align="center" width="50%">
-      <a href="https://svjeez.texoport.in/examples/strata">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/strata.svg" width="400" alt="An outliner app with coding agents working in the margin, typing a query, citing sources, and inserting structured notes." />
-      </a><br />
-      <sub><b>Strata</b> · Product UI showcase with live margin agents (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/strata">TSX</a>)</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/daynight">
         <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/daynight.svg" width="400" alt="A lighthouse scene that shows sun and clouds in light mode, or moon, stars, and a sweeping lantern beam in dark mode." />
       </a><br />
       <sub><b>Day &amp; Night Lighthouse</b> · One SVG that swaps scenes with your OS theme (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/daynight">TSX</a>)</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/newspaper">
         <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/newspaper.svg" width="240" alt="A broadsheet front page spins in: a blackletter masthead inks on letter by letter, three measured columns justify, and an EXTRA stamp lands." />

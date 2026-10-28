@@ -15,7 +15,7 @@ const { light, dark } = scene.posters!;
 <Base title={`${scene.title} · svjeez`} description={scene.desc || `${scene.title}, made with svjeez`} class="viewer" current="examples">
   <main class="wrap">
     <p class="count"><a href="/examples/">← Examples</a> · {i + 1} of {examples.length}</p>
-    <figure class="plate" style={`--ratio: ${(scene.width / scene.height).toFixed(4)}; --poster: url(${light}); margin-block-start: 0.75rem`}>
+    <figure class="plate" style={`--ratio: ${(scene.width / scene.height).toFixed(4)}; --poster: url(${light})`}>
       <picture>
         <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset={dark} />
         <source media="(prefers-reduced-motion: reduce)" srcset={light} />
@@ -23,10 +23,7 @@ const { light, dark } = scene.posters!;
       </picture>
     </figure>
     <div class="meta">
-      <div>
-        <h1>{scene.title}</h1>
-        <p>{scene.desc}</p>
-      </div>
+      <h1>{scene.title}</h1>
       <div class="actions">
         <a class="btn" href={`/examples/${prev.name}`} title={prev.scene.title}>← Prev</a>
         <a class="btn" href={`/examples/${next.name}`} title={next.scene.title}>Next →</a>
