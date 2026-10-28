@@ -30,7 +30,7 @@ const read = (name: string): Example => {
   return { name, title, desc, width: width!, height: height! };
 };
 
-const HEAD = (title: string, description: string) => `<!doctype html>
+const HEAD = (title: string, description: string, extra = "") => `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -47,7 +47,10 @@ const HEAD = (title: string, description: string) => `<!doctype html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..800,100,1;1,9..144,400..800,100,1&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="/examples/style.css">
-</head>`;
+${extra}</head>`;
+
+/** Prerender pages before they are clicked: Chromium keeps them ready, so the click swaps in a page that has already loaded. */
+const speculate = (rule: object) => `<script type="speculationrules">${JSON.stringify(rule)}</script>\n`;
 
 const SHADOWS = ["var(--pink)", "var(--blue)", "var(--sun)"];
 
@@ -58,7 +61,11 @@ const card = (ex: Example, i: number) => `
       <span class="desc">${escape(ex.desc)}</span>
     </a>`;
 
-const gallery = (sections: readonly { title: string; blurb: string; examples: Example[] }[]) => `${HEAD("svjeez · examples", "Scenes and building blocks made with svjeez. Every one is a single animated SVG with no JavaScript.")}
+const gallery = (sections: readonly { title: string; blurb: string; examples: Example[] }[]) => `${HEAD(
+  "svjeez · examples",
+  "Scenes and building blocks made with svjeez. Every one is a single animated SVG with no JavaScript.",
+  speculate({ prerender: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] }),
+)}
 <body class="gallery">
 <header>
   <a class="pill" href="/">← home</a>
@@ -82,10 +89,14 @@ ${sections
 const viewer = (ex: Example, i: number, all: readonly Example[]) => {
   const prev = all[(i - 1 + all.length) % all.length]!;
   const next = all[(i + 1) % all.length]!;
-  return `${HEAD(`${ex.title} · svjeez`, ex.desc || `${ex.title}, made with svjeez`)}
+  const neighbours = [prev, next];
+  const ready =
+    speculate({ prerender: [{ source: "list", urls: neighbours.map((n) => `/examples/${n.name}`), eagerness: "immediate" }, { source: "list", urls: ["/examples/"], eagerness: "moderate" }] }) +
+    neighbours.map((n) => `<link rel="prefetch" href="/examples/${n.name}">\n<link rel="prefetch" href="/examples/svg/${n.name}.svg" as="image">\n`).join("");
+  return `${HEAD(`${ex.title} · svjeez`, ex.desc || `${ex.title}, made with svjeez`, ready)}
 <body class="viewer">
 <header>
-  <a class="pill" href="/examples">← examples</a>
+  <a class="pill" href="/examples/">← examples</a>
   <span class="count">no. ${i + 1} <i>of</i> ${all.length}</span>
 </header>
 <main>
@@ -119,3 +130,5 @@ all.forEach((ex, i) => {
 });
 writeFileSync(new URL("index.html", out), gallery(sections));
 copyFileSync(here("examples.css"), new URL("style.css", out));
+// The SVGs only change on a deploy, so let browsers keep them for a day instead of revalidating on every page.
+writeFileSync(here("public/_headers"), "/examples/svg/*\n  Cache-Control: public, max-age=86400\n/examples/style.css\n  Cache-Control: public, max-age=86400\n");
