@@ -3,9 +3,22 @@ import { def, font, fx, motion, render, validateSvg } from "svjeez";
 
 const scene = (prefix?: string) =>
   render(
-    { width: 100, height: 100, duration: 4, title: "P", desc: "D", prefix, reducedMotion: { at: 1 } },
+    {
+      width: 100,
+      height: 100,
+      duration: 4,
+      title: "P",
+      desc: "D",
+      prefix,
+      reducedMotion: { at: 1 },
+    },
     <>
-      <rect width={10} height={10} fill={def.linearGradient({}, [<stop offset={0} stopColor="#fff" />])} animation={motion({ opacity: 0, rotate: 0 }).at(1).to({ opacity: 1, rotate: 90 }, 1)} />
+      <rect
+        width={10}
+        height={10}
+        fill={def.linearGradient({}, [<stop offset={0} stopColor="#fff" />])}
+        animation={motion({ opacity: 0, rotate: 0 }).at(1).to({ opacity: 1, rotate: 90 }, 1)}
+      />
       <circle r={4} animation={motion({ blur: 0 }).at(2).to({ blur: 4 }, 1)} />
       <circle r={4} animation={motion({ scale: 1 }).at(2).to({ scale: 2 }, 1)} />
     </>,
@@ -14,8 +27,15 @@ const scene = (prefix?: string) =>
 const names = (svg: string) => {
   const source = svg.replace(/xmlns="[^"]*"/, "");
   const classes = [...source.matchAll(/class="([^"]*)"/g)].flatMap((match) => match[1]!.split(" "));
-  const others = [...source.matchAll(/(?:id="|url\(#|href="#|@keyframes |\.)([A-Za-z][\w-]*)/g)].map((match) => match[1]!);
-  const animationNames = [...source.matchAll(/animation-name:([^;}]*)/g)].flatMap((match) => match[1]!.split(","));
+
+  const others = [
+    ...source.matchAll(/(?:id="|url\(#|href="#|@keyframes |\.)([A-Za-z][\w-]*)/g),
+  ].map((match) => match[1]!);
+
+  const animationNames = [...source.matchAll(/animation-name:([^;}]*)/g)].flatMap((match) =>
+    match[1]!.split(","),
+  );
+
   return new Set([...classes, ...others, ...animationNames]);
 };
 
@@ -44,13 +64,19 @@ describe("prefix", () => {
 
   test("a prefix renames embedded font families in the rule and its uses", async () => {
     const sans = await font.load(new URL("../examples/fonts/ABeeZee-Regular.ttf", import.meta.url));
-    const svg = render({ width: 100, height: 100, duration: 1, title: "F", prefix: "one-" }, <text fontFamily={sans}>Hi</text>);
+
+    const svg = render(
+      { width: 100, height: 100, duration: 1, title: "F", prefix: "one-" },
+      <text fontFamily={sans}>Hi</text>,
+    );
+
     expect(svg).toContain("@font-face{font-family:'one-ABeeZee'");
     expect(svg).toContain(`font-family="'one-ABeeZee', sans-serif"`);
   });
 
   test("a prefix must be a CSS identifier start", () => {
-    for (const bad of ["1a", "-a", "a b", "a.b", 'a"b']) expect(() => scene(bad)).toThrow(/needs a prefix/);
+    for (const bad of ["1a", "-a", "a b", "a.b", 'a"b'])
+      expect(() => scene(bad)).toThrow(/needs a prefix/);
   });
 });
 
@@ -60,11 +86,21 @@ test("a prefixed scene still warns about a filter over many animated elements", 
       { width: 100, height: 100, duration: 2, title: "Glow", prefix },
       <g filter={fx.blur(2)}>
         {Array.from({ length: 45 }, (_, i) => (
-          <circle cx={i} cy={50} r={1} animation={motion({ opacity: 0 }).at(i / 45).to({ opacity: 1 }, 0.5)} />
+          <circle
+            cx={i}
+            cy={50}
+            r={1}
+            animation={motion({ opacity: 0 })
+              .at(i / 45)
+              .to({ opacity: 1 }, 0.5)}
+          />
         ))}
       </g>,
     );
-  const warnings = (source: string) => validateSvg(source).warnings.filter((w) => w.includes("animated elements"));
+
+  const warnings = (source: string) =>
+    validateSvg(source).warnings.filter((w) => w.includes("animated elements"));
+
   expect(warnings(svg())).toHaveLength(1);
   expect(warnings(svg("p-"))).toHaveLength(1);
 });

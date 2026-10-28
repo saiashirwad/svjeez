@@ -4,6 +4,11 @@
   "private": true,
   "description": "Astro integration for svjeez: import a scene into a page and get an animated SVG, with poster stills.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/astro"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -21,16 +26,11 @@
   "dependencies": {
     "@svjeez/vite": "workspace:*"
   },
-  "peerDependencies": {
-    "astro": ">=7"
-  },
   "devDependencies": {
     "astro": "^7.4.3",
     "typescript": "6"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/saiashirwad/svjeez.git",
-    "directory": "packages/astro"
+  "peerDependencies": {
+    "astro": ">=7"
   }
 }

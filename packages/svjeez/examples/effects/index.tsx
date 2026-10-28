@@ -1,4 +1,15 @@
-import { draw, ease, el, enter, fx, motion, render, wiggle, type Child, type SvgNode } from "svjeez";
+import {
+  draw,
+  ease,
+  el,
+  enter,
+  fx,
+  motion,
+  render,
+  wiggle,
+  type Child,
+  type SvgNode,
+} from "svjeez";
 import { adaptive, systemDark, systemLight } from "svjeez/extras";
 
 const W = 660;
@@ -6,17 +17,40 @@ const H = 420;
 const D = 6;
 
 const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
-const C = { bg: theme.base00, tile: theme.base01, edge: theme.base02, label: theme.base04, pink: theme.base08, cyan: theme.base0C, gold: theme.base0A, violet: theme.base0E } as const;
+
+const C = {
+  bg: theme.base00,
+  tile: theme.base01,
+  edge: theme.base02,
+  label: theme.base04,
+  pink: theme.base08,
+  cyan: theme.base0C,
+  gold: theme.base0A,
+  violet: theme.base0E,
+} as const;
 
 const CSS = `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}`;
 
 const glow = fx.glow({ blur: 4 });
 const boil = fx.boil({ strength: 2.5, rate: 8 });
 
-function Tile({ col, row, label, children }: { col: number; row: number; label: string; children: Child }): SvgNode {
+function Tile({
+  col,
+  row,
+  label,
+  children,
+}: {
+  col: number;
+  row: number;
+  label: string;
+  children: Child;
+}): SvgNode {
   return el.g({ transform: `translate(${20 + col * 210} ${20 + row * 200})` }, [
     el.rect({ width: 200, height: 180, rx: 14, fill: C.tile, stroke: C.edge }),
-    el.text({ x: 16, y: 162, class: "mono", fontSize: 11, letterSpacing: 1.5, fill: C.label }, label),
+    el.text(
+      { x: 16, y: 162, class: "mono", fontSize: 11, letterSpacing: 1.5, fill: C.label },
+      label,
+    ),
     children,
   ]);
 }
@@ -25,6 +59,7 @@ const star = (cx: number, cy: number, r: number) =>
   Array.from({ length: 10 }, (_, i) => {
     const angle = (Math.PI / 5) * i - Math.PI / 2;
     const radius = i % 2 ? r * 0.45 : r;
+
     return `${(cx + Math.cos(angle) * radius).toFixed(1)},${(cy + Math.sin(angle) * radius).toFixed(1)}`;
   }).join(" ");
 
@@ -51,7 +86,9 @@ export function buildEffects(): string {
           fontWeight={700}
           fill={C.cyan}
           textAnchor="middle"
-          animation={enter({ at: 0.4, over: 0.9 }, { opacity: 0, blur: 10 }).at(4.4).to({ opacity: 0, blur: 10 }, 0.9)}
+          animation={enter({ at: 0.4, over: 0.9 }, { opacity: 0, blur: 10 })
+            .at(4.4)
+            .to({ opacity: 0, blur: 10 }, 0.9)}
         >
           BLUR
         </text>
@@ -60,14 +97,30 @@ export function buildEffects(): string {
         <polygon
           points={star(100, 78, 42)}
           fill={C.gold}
-          animation={wiggle({ x: 3, y: 3, rotate: 8 }, { seed: "jitter", rate: 12, ease: ease.hold })}
+          animation={wiggle(
+            { x: 3, y: 3, rotate: 8 },
+            { seed: "jitter", rate: 12, ease: ease.hold },
+          )}
         />
       </Tile>
       <Tile col={2} row={0} label="WIGGLE · SMOOTH">
-        <circle cx={100} cy={78} r={30} fill={C.violet} animation={wiggle({ x: 14, y: 10, scale: 0.12 }, { seed: "drift", rate: 1.5, period: 3 })} />
+        <circle
+          cx={100}
+          cy={78}
+          r={30}
+          fill={C.violet}
+          animation={wiggle({ x: 14, y: 10, scale: 0.12 }, { seed: "drift", rate: 1.5, period: 3 })}
+        />
       </Tile>
       <Tile col={0} row={1} label="FX.BOIL + DRAW">
-        <g filter={boil} fill="none" stroke={C.pink} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+        <g
+          filter={boil}
+          fill="none"
+          stroke={C.pink}
+          strokeWidth={3}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M40 120V70L100 30L160 70V120Z" animation={draw({ at: 0.3, over: 1.2 })} />
           <path d="M85 120V90H115V120" animation={draw({ at: 1.2, over: 0.6 })} />
         </g>
@@ -99,7 +152,16 @@ export function buildEffects(): string {
           strokeDasharray="70 150"
           animation={motion().to({ rotate: 360 }, 1.5, ease.linear).loop(1.5)}
         />
-        <circle cx={100} cy={78} r={7} fill={C.gold} animation={motion({ scale: 1 }).to({ scale: 1.6 }, 0.375, ease.inOut).to({ scale: 1 }, 0.375, ease.inOut).loop(0.75)} />
+        <circle
+          cx={100}
+          cy={78}
+          r={7}
+          fill={C.gold}
+          animation={motion({ scale: 1 })
+            .to({ scale: 1.6 }, 0.375, ease.inOut)
+            .to({ scale: 1 }, 0.375, ease.inOut)
+            .loop(0.75)}
+        />
       </Tile>
     </>,
   );

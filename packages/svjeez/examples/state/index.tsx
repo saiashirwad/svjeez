@@ -8,7 +8,11 @@ export const agent = stateMachine(
   {
     states: {
       idle: "Idle",
-      working: { label: "Working", states: { planning: "Planning", acting: "Calling tools" }, initial: "planning" },
+      working: {
+        label: "Working",
+        states: { planning: "Planning", acting: "Calling tools" },
+        initial: "planning",
+      },
       waiting: "Waiting on user",
       done: { label: "Done", final: true },
       failed: { label: "Failed", final: true },
@@ -27,7 +31,23 @@ export const agent = stateMachine(
   { theme, x: M, y: M, font: mono },
 );
 
-const walk = agent.walk(["idle", "working", "planning", "acting", "planning", "acting", "waiting", "working", "planning", "acting", "done"], { at: 0.6, dwell: 0.8, token: { style: "comet", arrive: true } });
+const walk = agent.walk(
+  [
+    "idle",
+    "working",
+    "planning",
+    "acting",
+    "planning",
+    "acting",
+    "waiting",
+    "working",
+    "planning",
+    "acting",
+    "done",
+  ],
+  { at: 0.6, dwell: 0.8, token: { style: "comet", arrive: true } },
+);
+
 const D = Math.ceil(walk.end + 1.5);
 
 export default function build(): string {

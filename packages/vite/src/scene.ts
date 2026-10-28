@@ -21,34 +21,58 @@ export interface SceneImage {
 }
 
 const hash = (text: string) => createHash("sha256").update(text).digest("base64url").slice(0, 12);
-const unescape = (text: string) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+
+const unescape = (text: string) =>
+  text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
 
 const compiled = new WeakMap<() => string, string>();
+
 const compile = (scene: SceneSource) => {
   if (typeof scene === "string") return scene;
   let svg = compiled.get(scene);
+
   if (svg === undefined) compiled.set(scene, (svg = scene()));
+
   return svg;
 };
 
 /** Compiles a scene and gives it a URL, plus poster stills when asked. The files are served in dev and written by the build. */
-export const getScene = (scene: SceneSource, options: { posters?: boolean | PosterOptions } = {}): SceneImage => {
+export const getScene = (
+  scene: SceneSource,
+  options: { posters?: boolean | PosterOptions } = {},
+): SceneImage => {
   const svg = compile(scene);
   const name = hash(svg);
   const text = new TextEncoder().encode(svg);
   assets.files.set(`${name}.svg`, { type: "image/svg+xml", bytes: async () => text });
-  const [, , width, height] = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/.exec(svg)!.slice(1).map(Number);
+
+  const [, , width, height] = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/
+    .exec(svg)!
+    .slice(1)
+    .map(Number);
+
   let posters: Record<Scheme, string> | undefined;
+
   if (options.posters) {
     const settings = options.posters === true ? {} : options.posters;
     const variant = hash(JSON.stringify([settings.scale, settings.quality, settings.background]));
     posters = { light: "", dark: "" };
+
     for (const scheme of ["light", "dark"] as const) {
       const file = `${name}-${variant}-${scheme}.webp`;
-      assets.files.set(file, { type: "image/webp", bytes: () => poster(file, svg, scheme, settings) });
+      assets.files.set(file, {
+        type: "image/webp",
+        bytes: () => poster(file, svg, scheme, settings),
+      });
       posters[scheme] = ROUTE + file;
     }
   }
+
   return {
     src: `${ROUTE}${name}.svg`,
     width: width!,

@@ -9,7 +9,8 @@ import { formatProperty, isProperty } from "./properties";
 export type Emit = "value" | "visibility" | "dash";
 
 /** A scene-time length as the seconds CSS plays it in, after the canvas's playback rate. */
-export const seconds = (canvas: Canvas, scene: Seconds): string => `${num(scene / canvas.playbackRate)}s`;
+export const seconds = (canvas: Canvas, scene: Seconds): string =>
+  `${num(scene / canvas.playbackRate)}s`;
 
 const short = (value: number): string => num(value).replace(/^(-?)0\./, "$1.");
 
@@ -29,30 +30,54 @@ export const BASE_TIMING = timing(ease.out);
 const percents = (keys: readonly Key[], period: Seconds): string[] => {
   for (const places of [3, 4]) {
     const out = keys.map((key) => `${num((key.t / period) * 100, places)}%`);
+
     if (new Set(out).size === out.length) return out;
   }
-  throw new Error(`Two keys are too close to tell apart on a ${num(period)}s timeline: ${keys.map((key) => key.t).join(", ")}.`);
+
+  throw new Error(
+    `Two keys are too close to tell apart on a ${num(period)}s timeline: ${keys.map((key) => key.t).join(", ")}.`,
+  );
 };
 
-export const cssKeyframes = (lane: string, emit: Emit, keys: readonly Key[], period: Seconds): { body: string; timing: string } => {
+export const cssKeyframes = (
+  lane: string,
+  emit: Emit,
+  keys: readonly Key[],
+  period: Seconds,
+): { body: string; timing: string } => {
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
     if (moving(keys, index)) counts.set(timing(key.ease), (counts.get(timing(key.ease)) ?? 0) + 1);
   });
-  const [laneTiming] = [...counts].reduce<[string, number]>((best, entry) => (entry[1] > best[1] ? entry : best), [BASE_TIMING, counts.get(BASE_TIMING) ?? 0]);
+
+  const [laneTiming] = [...counts].reduce<[string, number]>(
+    (best, entry) => (entry[1] > best[1] ? entry : best),
+    [BASE_TIMING, counts.get(BASE_TIMING) ?? 0],
+  );
+
   const blocks = new Map<string, string[]>();
   const at = percents(keys, period);
   keys.forEach((key, index) => {
     const own = timing(key.ease);
-    const block = cssDeclarations(lane, emit, key.values) + (moving(keys, index) && own !== laneTiming ? `;animation-timing-function:${own}` : "");
+
+    const block =
+      cssDeclarations(lane, emit, key.values) +
+      (moving(keys, index) && own !== laneTiming ? `;animation-timing-function:${own}` : "");
+
     blocks.set(block, [...(blocks.get(block) ?? []), at[index]!]);
   });
-  return { body: [...blocks].map(([block, list]) => `${list.join(",")}{${block}}`).join(""), timing: laneTiming };
+
+  return {
+    body: [...blocks].map(([block, list]) => `${list.join(",")}{${block}}`).join(""),
+    timing: laneTiming,
+  };
 };
 
 export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues): string => {
   if (emit === "visibility") return `visibility:${values.opacity === 0 ? "hidden" : "visible"}`;
+
   if (emit === "dash") return `stroke-dashoffset:${num(1 - (values.draw ?? 0))}`;
+
   switch (lane) {
     case "translate":
       return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
@@ -63,25 +88,38 @@ export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues):
       return `rotate:${formatValue(values.rotate)}deg`;
     case "draw": {
       const drawn = values.draw ?? 0;
+
       return `stroke-dashoffset:${num(1 - drawn)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
     }
+
     default: {
       const [target] = Object.keys(values) as Target[];
+
       if (!target) throw new Error(`Lane ${lane} has no value.`);
       const value = valueOf(values, target)!;
+
       return `${lane}:${isProperty(target) ? formatProperty(target, value) : formatValue(value)}`;
     }
   }
 };
 
 /** The body of a motion class: its keyframes by name, plus the durations, repeat counts and timings that differ from the `.a` base. */
-export const classBody = (canvas: Canvas, lanes: readonly { readonly snapped: Seconds }[], names: readonly string[], timings: readonly string[]): string => {
+export const classBody = (
+  canvas: Canvas,
+  lanes: readonly { readonly snapped: Seconds }[],
+  names: readonly string[],
+  timings: readonly string[],
+): string => {
   const off = lanes.some((lane) => lane.snapped !== canvas.duration);
+
   return [
     `animation-name:${names.join(",")}`,
     off && `animation-duration:${lanes.map((lane) => seconds(canvas, lane.snapped)).join(",")}`,
-    !canvas.loop && off && `animation-iteration-count:${lanes.map((lane) => Math.round(canvas.duration / lane.snapped)).join(",")}`,
-    timings.some((entry) => entry !== BASE_TIMING) && `animation-timing-function:${timings.join(",")}`,
+    !canvas.loop &&
+      off &&
+      `animation-iteration-count:${lanes.map((lane) => Math.round(canvas.duration / lane.snapped)).join(",")}`,
+    timings.some((entry) => entry !== BASE_TIMING) &&
+      `animation-timing-function:${timings.join(",")}`,
   ]
     .filter(Boolean)
     .join(";");

@@ -1,9 +1,33 @@
 import { ease, motion, render } from "svjeez";
 import { D, H, W, random } from "./kit";
 import { island, inside, ground } from "./island";
-import { birch, blossom, fallenPetals, fern, flowers, oak, seed as seedGlow, stones, tuft, type Stand } from "./flora";
+import {
+  birch,
+  blossom,
+  fallenPetals,
+  fern,
+  flowers,
+  oak,
+  seed as seedGlow,
+  stones,
+  tuft,
+  type Stand,
+} from "./flora";
 import { layer } from "./paint";
-import { Backdrop, Birds, Clouds, Fireflies, Foreground, Mist, Moon, Motes, Petals, Shadow, Stars, Sun } from "./sky";
+import {
+  Backdrop,
+  Birds,
+  Clouds,
+  Fireflies,
+  Foreground,
+  Mist,
+  Moon,
+  Motes,
+  Petals,
+  Shadow,
+  Stars,
+  Sun,
+} from "./sky";
 
 interface Spot {
   readonly x: number;
@@ -14,7 +38,8 @@ const OAK = { x: -1.2, z: 0.6 } as const;
 const BIRCH = { x: 3.4, z: -1.8 } as const;
 const BLOSSOM = { x: -4.3, z: -1.4 } as const;
 
-const inReach = (spot: Spot, x: number, z: number, radius: number): boolean => Math.hypot(spot.x - x, spot.z - z) < radius;
+const inReach = (spot: Spot, x: number, z: number, radius: number): boolean =>
+  Math.hypot(spot.x - x, spot.z - z) < radius;
 
 const occupied: readonly (readonly [Spot, number])[] = [
   [OAK, 1.25],
@@ -37,7 +62,11 @@ const FERNS: readonly Spot[] = [
   { x: 1.9, z: -2.6 },
 ];
 
-const FLOWERS: readonly { readonly spot: Spot; readonly kind: "cream" | "blush" | "blue"; readonly seed: number }[] = [
+const FLOWERS: readonly {
+  readonly spot: Spot;
+  readonly kind: "cream" | "blush" | "blue";
+  readonly seed: number;
+}[] = [
   { spot: { x: 0.9, z: 3.25 }, kind: "cream", seed: 11 },
   { spot: { x: 2.2, z: 2.45 }, kind: "blue", seed: 23 },
   { spot: { x: -2.75, z: 1.05 }, kind: "blush", seed: 37 },
@@ -51,14 +80,18 @@ const scatter = (): readonly Stand[] => {
   const pick = random(1009);
   const stands: Stand[] = [];
   const placed: Spot[] = [];
+
   for (let attempt = 0; attempt < 900 && stands.length < 88; attempt++) {
     const x = (pick() * 2 - 1) * 5.4;
     const z = (pick() * 2 - 1) * 5.4;
+
     if (!clear(x, z, 0.1)) continue;
+
     if (placed.some((spot) => Math.hypot(spot.x - x, spot.z - z) < 0.3)) continue;
     placed.push({ x, z });
     stands.push(tuft(ground(x, z), 2000 + stands.length));
   }
+
   return stands;
 };
 
@@ -77,7 +110,9 @@ const stands = (): readonly Stand[] => [
   oak(ground(OAK.x, OAK.z)),
 ];
 
-const bob = motion({ y: 0 }).to({ y: -5 }, D / 2, ease.inOut).to({ y: 0 }, D / 2, ease.inOut);
+const bob = motion({ y: 0 })
+  .to({ y: -5 }, D / 2, ease.inOut)
+  .to({ y: 0 }, D / 2, ease.inOut);
 
 export function buildGrove(): string {
   return render(

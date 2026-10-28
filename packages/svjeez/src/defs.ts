@@ -2,7 +2,16 @@ import type { Attrs } from "./attributes";
 import { property } from "./properties";
 import { children, node, type Child, type Element } from "./svg";
 
-export type DefTag = "linearGradient" | "radialGradient" | "pattern" | "clipPath" | "mask" | "filter" | "marker" | "symbol";
+export type DefTag =
+  | "linearGradient"
+  | "radialGradient"
+  | "pattern"
+  | "clipPath"
+  | "mask"
+  | "filter"
+  | "marker"
+  | "symbol";
+
 export type PaintServer = "linearGradient" | "radialGradient" | "pattern";
 
 declare const refKind: unique symbol;

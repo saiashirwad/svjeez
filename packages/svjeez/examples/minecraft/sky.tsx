@@ -1,4 +1,15 @@
-import { def, ease, el, motion, sampled, wiggle, type Color, type Motion, type Seconds, type SvgNode } from "svjeez";
+import {
+  def,
+  ease,
+  el,
+  motion,
+  sampled,
+  wiggle,
+  type Color,
+  type Motion,
+  type Seconds,
+  type SvgNode,
+} from "svjeez";
 import { voxel } from "svjeez/voxel";
 import { BEAT, C, CAMERA, D, GRID, H, ORIGIN, W, clamp, lerp, random } from "./kit";
 import { SKIN } from "./textures";
@@ -9,22 +20,49 @@ type Keys = readonly (readonly [Seconds, Color])[];
 function grade(first: Color, keys: Keys): Motion<"stopColor"> {
   let track = motion({ stopColor: first });
   let from = 0;
+
   for (const [at, color] of keys) {
     track = track.at(from).to({ stopColor: color }, at - from, ease.inOut);
     from = at;
   }
+
   return track;
 }
 
 const DAY_TOP = "#5aa9ee";
 const DAY_HORIZON = "#bfe4ff";
 
-const sky = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
+const sky = def.linearGradient(
+  { x1: 0, y1: 0, x2: 0, y2: 1 },
   <>
-    <stop offset={0} stopColor={DAY_TOP} animation={grade(DAY_TOP, [[BEAT.dusk, DAY_TOP], [BEAT.dim, "#4c4fa8"], [BEAT.sunset, "#1a2250"], [BEAT.night, "#050a20"], [BEAT.snow, "#050a20"], [BEAT.dawn, "#36559c"], [BEAT.day, DAY_TOP]])} />
-    <stop offset={1} stopColor={DAY_HORIZON} animation={grade(DAY_HORIZON, [[BEAT.dusk, DAY_HORIZON], [BEAT.dim, "#ffb070"], [BEAT.sunset, "#8a4a7a"], [BEAT.night, "#0b1236"], [BEAT.snow, "#0b1236"], [BEAT.dawn, "#ff9a6a"], [BEAT.day, DAY_HORIZON]])} />
-  </>
-));
+    <stop
+      offset={0}
+      stopColor={DAY_TOP}
+      animation={grade(DAY_TOP, [
+        [BEAT.dusk, DAY_TOP],
+        [BEAT.dim, "#4c4fa8"],
+        [BEAT.sunset, "#1a2250"],
+        [BEAT.night, "#050a20"],
+        [BEAT.snow, "#050a20"],
+        [BEAT.dawn, "#36559c"],
+        [BEAT.day, DAY_TOP],
+      ])}
+    />
+    <stop
+      offset={1}
+      stopColor={DAY_HORIZON}
+      animation={grade(DAY_HORIZON, [
+        [BEAT.dusk, DAY_HORIZON],
+        [BEAT.dim, "#ffb070"],
+        [BEAT.sunset, "#8a4a7a"],
+        [BEAT.night, "#0b1236"],
+        [BEAT.snow, "#0b1236"],
+        [BEAT.dawn, "#ff9a6a"],
+        [BEAT.day, DAY_HORIZON],
+      ])}
+    />
+  </>,
+);
 
 export function Backdrop(): SvgNode {
   return <rect width={W} height={H} fill={sky} />;
@@ -40,34 +78,57 @@ const STARS = Array.from({ length: 70 }, (_, i) => ({
 }));
 
 export function Stars(): SvgNode {
-  const dark = motion({ opacity: 0 }).at(BEAT.dim).to({ opacity: 1 }, BEAT.night - BEAT.dim).at(BEAT.dawn).to({ opacity: 0 }, BEAT.day - BEAT.dawn);
+  const dark = motion({ opacity: 0 })
+    .at(BEAT.dim)
+    .to({ opacity: 1 }, BEAT.night - BEAT.dim)
+    .at(BEAT.dawn)
+    .to({ opacity: 0 }, BEAT.day - BEAT.dawn);
+
   return (
     <g fill={C.star} animation={dark}>
       {STARS.map(({ x, y, size, twinkle }, i) =>
-        el.rect({ x, y, width: size, height: size, animation: twinkle ? wiggle({ opacity: 0.6 }, { seed: i, rate: 2, period: 5 }) : undefined }),
+        el.rect({
+          x,
+          y,
+          width: size,
+          height: size,
+          animation: twinkle
+            ? wiggle({ opacity: 0.6 }, { seed: i, rate: 2, period: 5 })
+            : undefined,
+        }),
       )}
     </g>
   );
 }
 
 const halo = (color: Color) =>
-  def.radialGradient({}, (
+  def.radialGradient(
+    {},
     <>
       <stop offset={0} stopColor={color} stopOpacity={0.45} />
       <stop offset={1} stopColor={color} stopOpacity={0} />
-    </>
-  ));
+    </>,
+  );
 
 const SUN_UP = D - BEAT.sunRise + BEAT.night;
 
 const sunPath = (t: Seconds) => {
   const away = t > BEAT.night && t < BEAT.sunRise;
-  const along = clamp(away ? 1 : t <= BEAT.night ? (t + D - BEAT.sunRise) / SUN_UP : (t - BEAT.sunRise) / SUN_UP);
-  return { x: lerp(-70, W + 70, along), y: 440 - 380 * Math.sin(Math.PI * along), opacity: away || (t >= BEAT.sunRise && t < BEAT.sunRise + 0.1) ? 0 : 1 };
+
+  const along = clamp(
+    away ? 1 : t <= BEAT.night ? (t + D - BEAT.sunRise) / SUN_UP : (t - BEAT.sunRise) / SUN_UP,
+  );
+
+  return {
+    x: lerp(-70, W + 70, along),
+    y: 440 - 380 * Math.sin(Math.PI * along),
+    opacity: away || (t >= BEAT.sunRise && t < BEAT.sunRise + 0.1) ? 0 : 1,
+  };
 };
 
 const moonPath = (t: Seconds) => {
   const along = clamp((t - BEAT.moonRise) / (BEAT.day - BEAT.moonRise));
+
   return { x: lerp(-60, W + 60, along), y: 460 - 400 * Math.sin(Math.PI * along) };
 };
 
@@ -108,18 +169,26 @@ const MARGIN = 280;
 const wind = (cells: number) => CAMERA.project([cells, 0, -cells]);
 const TRAVEL = (W + 2 * MARGIN) / wind(1).x;
 
-const CELLS = Array.from({ length: 6400 }, (_, i): readonly [number, number] => [(i % 80) - 40, Math.floor(i / 80) - 40]);
+const CELLS = Array.from({ length: 6400 }, (_, i): readonly [number, number] => [
+  (i % 80) - 40,
+  Math.floor(i / 80) - 40,
+]);
 
 const cellNear = ([sx, sy]: readonly [number, number]): readonly [number, number] => {
   const miss = ([x, z]: readonly [number, number]) => {
     const p = CAMERA.project([x, SKY_HEIGHT, z]);
+
     return Math.hypot(p.x + ORIGIN.x - sx, p.y + ORIGIN.y - sy);
   };
+
   let [best, bestMiss] = [CELLS[0]!, miss(CELLS[0]!)];
+
   for (const cell of CELLS) {
     const distance = miss(cell);
+
     if (distance < bestMiss) [best, bestMiss] = [cell, distance];
   }
+
   return best;
 };
 
@@ -129,40 +198,64 @@ export function Clouds(): SvgNode {
       {CLOUDS.map(({ at, phase, size }, k) => {
         const pick = random(40 + k);
         const [x0, z0] = cellNear([-MARGIN, at[1]]);
-        const cells = Array.from({ length: size * 4 }, (_, i): readonly [number, number] => [i % size, Math.floor(i / size)]).filter(
-          ([a, b]) => a > 0 && a < size - 1 && (b === 1 || b === 2 || pick() > 0.45),
-        );
+
+        const cells = Array.from({ length: size * 4 }, (_, i): readonly [number, number] => [
+          i % size,
+          Math.floor(i / size),
+        ]).filter(([a, b]) => a > 0 && a < size - 1 && (b === 1 || b === 2 || pick() > 0.45));
+
         const drift = motion(wind(phase * TRAVEL))
           .to(wind(TRAVEL), (1 - phase) * D, ease.linear)
           .set(wind(0))
           .to(wind(phase * TRAVEL), phase * D, ease.linear);
-        return el.g({ animation: drift }, voxel.scene({ camera: CAMERA, blocks: cells.map(([a, b]) => ({ at: [x0 + a, SKY_HEIGHT, z0 + b] as const, skin: SKIN.cloud })) }));
+
+        return el.g(
+          { animation: drift },
+          voxel.scene({
+            camera: CAMERA,
+            blocks: cells.map(([a, b]) => ({
+              at: [x0 + a, SKY_HEIGHT, z0 + b] as const,
+              skin: SKIN.cloud,
+            })),
+          }),
+        );
       })}
     </>
   );
 }
 
-const dusk = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
+const dusk = def.linearGradient(
+  { x1: 0, y1: 0, x2: 0, y2: 1 },
   <>
     <stop offset={0} stopColor="#ff8a3d" stopOpacity={0} />
     <stop offset={1} stopColor="#ff8a3d" stopOpacity={0.9} />
-  </>
-));
+  </>,
+);
 
-const dark = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, (
+const dark = def.linearGradient(
+  { x1: 0, y1: 0, x2: 0, y2: 1 },
   <>
     <stop offset={0} stopColor="#0a1440" stopOpacity={0.2} />
     <stop offset={1} stopColor="#0a1440" stopOpacity={1} />
-  </>
-));
+  </>,
+);
 
 export function Night(): SvgNode {
   const evening = motion({ opacity: 0 })
-    .at(BEAT.dusk).to({ opacity: 0.45 }, BEAT.dim - BEAT.dusk, ease.inOut)
-    .at(BEAT.sunset).to({ opacity: 0 }, BEAT.night - BEAT.sunset, ease.inOut)
-    .at(BEAT.dawn).to({ opacity: 0.4 }, (BEAT.day - BEAT.dawn) / 2, ease.inOut)
+    .at(BEAT.dusk)
+    .to({ opacity: 0.45 }, BEAT.dim - BEAT.dusk, ease.inOut)
+    .at(BEAT.sunset)
+    .to({ opacity: 0 }, BEAT.night - BEAT.sunset, ease.inOut)
+    .at(BEAT.dawn)
+    .to({ opacity: 0.4 }, (BEAT.day - BEAT.dawn) / 2, ease.inOut)
     .to({ opacity: 0 }, (BEAT.day - BEAT.dawn) / 2, ease.inOut);
-  const night = motion({ opacity: 0 }).at(BEAT.dim).to({ opacity: 0.6 }, BEAT.night - BEAT.dim, ease.inOut).at(BEAT.dawn).to({ opacity: 0 }, BEAT.day - BEAT.dawn, ease.inOut);
+
+  const night = motion({ opacity: 0 })
+    .at(BEAT.dim)
+    .to({ opacity: 0.6 }, BEAT.night - BEAT.dim, ease.inOut)
+    .at(BEAT.dawn)
+    .to({ opacity: 0 }, BEAT.day - BEAT.dawn, ease.inOut);
+
   return (
     <>
       <rect width={W} height={H} fill={dusk} animation={evening} />
@@ -171,20 +264,27 @@ export function Night(): SvgNode {
   );
 }
 
-const lamplight = def.radialGradient({}, (
+const lamplight = def.radialGradient(
+  {},
   <>
     <stop offset={0} stopColor={C.lamp} stopOpacity={0.7} />
     <stop offset={0.4} stopColor={C.lamp} stopOpacity={0.25} />
     <stop offset={1} stopColor={C.lamp} stopOpacity={0} />
-  </>
-));
+  </>,
+);
 
 export function Glow(): SvgNode {
-  const lit = motion({ opacity: 0 }).at(BEAT.lights).to({ opacity: 1 }, BEAT.sunset - BEAT.lights).at(BEAT.lightsOut).to({ opacity: 0 }, 1.5, ease.inOut);
+  const lit = motion({ opacity: 0 })
+    .at(BEAT.lights)
+    .to({ opacity: 1 }, BEAT.sunset - BEAT.lights)
+    .at(BEAT.lightsOut)
+    .to({ opacity: 0 }, 1.5, ease.inOut);
+
   return (
     <g animation={lit}>
       {LIGHTS.map((light) => {
         const { x, y } = CAMERA.project(light);
+
         return el.circle({ cx: x + ORIGIN.x, cy: y + ORIGIN.y, r: 52, fill: lamplight });
       })}
     </g>
@@ -195,41 +295,85 @@ const FLAKES = 120;
 const FLAKE_TOP = 24;
 const GROUND = 3;
 
-const flake = (x: number, z: number, wait: Seconds, fall: Seconds, period: Seconds, phase: number) =>
+const flake = (
+  x: number,
+  z: number,
+  wait: Seconds,
+  fall: Seconds,
+  period: Seconds,
+  phase: number,
+) =>
   sampled(
     (t) => {
       const down = clamp((t - wait) / fall);
-      const { x: sx, y: sy } = CAMERA.project([x + 0.4 * Math.sin(2 * Math.PI * (down * 1.5 + phase)), lerp(FLAKE_TOP, GROUND, down), z]);
+
+      const { x: sx, y: sy } = CAMERA.project([
+        x + 0.4 * Math.sin(2 * Math.PI * (down * 1.5 + phase)),
+        lerp(FLAKE_TOP, GROUND, down),
+        z,
+      ]);
+
       return { x: sx + ORIGIN.x, y: sy + ORIGIN.y, opacity: clamp((1 - down) * 10) };
     },
     { duration: period, tolerance: { translate: 0.5, opacity: 0.05 } },
   ).loop(period);
 
-const FALLS = [[5, 3], [6, 3.6], [10, 4.2]] as const;
+const FALLS = [
+  [5, 3],
+  [6, 3.6],
+  [10, 4.2],
+] as const;
 
 export function Snow(): SvgNode {
   const pick = random(77);
-  const falling = motion({ opacity: 0 }).at(BEAT.snow).to({ opacity: 1 }, 1.5).at(BEAT.day - 1.5).to({ opacity: 0 }, 1.5);
+
+  const falling = motion({ opacity: 0 })
+    .at(BEAT.snow)
+    .to({ opacity: 1 }, 1.5)
+    .at(BEAT.day - 1.5)
+    .to({ opacity: 0 }, 1.5);
+
   return (
     <g fill="#ffffff" animation={falling}>
       {Array.from({ length: FLAKES }, (_, i) => {
         const [period, fall] = FALLS[i % FALLS.length]!;
         const size = i % 3 ? 4 : 5;
-        return el.rect({ width: size, height: size, animation: flake(pick() * 14, pick() * 14, pick() * (period - fall), fall, period, pick()) });
+
+        return el.rect({
+          width: size,
+          height: size,
+          animation: flake(
+            pick() * 14,
+            pick() * 14,
+            pick() * (period - fall),
+            fall,
+            period,
+            pick(),
+          ),
+        });
       })}
     </g>
   );
 }
 
-const shade = def.radialGradient({}, (
+const shade = def.radialGradient(
+  {},
   <>
     <stop offset={0} stopColor="#000000" stopOpacity={0.3} />
     <stop offset={1} stopColor="#000000" stopOpacity={0} />
-  </>
-));
+  </>,
+);
 
 export function Shadow(): SvgNode {
   const { x, y } = CAMERA.project([GRID / 2, -6, GRID / 2]);
-  const life = motion({ opacity: 0 }).at(BEAT.rise).to({ opacity: 1 }, 4).at(BEAT.void).to({ opacity: 0 }, 4);
-  return <ellipse cx={x + ORIGIN.x} cy={y + ORIGIN.y} rx={230} ry={52} fill={shade} animation={life} />;
+
+  const life = motion({ opacity: 0 })
+    .at(BEAT.rise)
+    .to({ opacity: 1 }, 4)
+    .at(BEAT.void)
+    .to({ opacity: 0 }, 4);
+
+  return (
+    <ellipse cx={x + ORIGIN.x} cy={y + ORIGIN.y} rx={230} ry={52} fill={shade} animation={life} />
+  );
 }

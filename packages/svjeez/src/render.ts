@@ -32,15 +32,33 @@ export interface RenderOptions {
 /** Compile motions and refs, serialize, and validate. Throws on invalid output. */
 export const render = (options: RenderOptions, content: Child): string => {
   const { width, height, duration } = options;
-  if (!(width > 0) || !(height > 0)) throw new Error(`render() needs a positive width and height, got ${width} by ${height}.`);
+
+  if (!(width > 0) || !(height > 0))
+    throw new Error(`render() needs a positive width and height, got ${width} by ${height}.`);
+
   if (!(duration > 0)) throw new Error(`render() needs a positive duration, got ${duration}.`);
   const playbackRate = options.playbackRate ?? 1;
-  if (!(playbackRate > 0 && Number.isFinite(playbackRate))) throw new Error(`render() needs a positive, finite playbackRate, got ${playbackRate}.`);
+
+  if (!(playbackRate > 0 && Number.isFinite(playbackRate)))
+    throw new Error(`render() needs a positive, finite playbackRate, got ${playbackRate}.`);
   const prefix = options.prefix ?? "";
-  if (prefix !== "" && !/^[A-Za-z][\w-]*$/.test(prefix)) throw new Error(`render() needs a prefix of letters, digits, _ and -, starting with a letter, got ${JSON.stringify(prefix)}.`);
+
+  if (prefix !== "" && !/^[A-Za-z][\w-]*$/.test(prefix))
+    throw new Error(
+      `render() needs a prefix of letters, digits, _ and -, starting with a letter, got ${JSON.stringify(prefix)}.`,
+    );
+
   const stillAt =
-    options.reducedMotion === false ? undefined : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
-  const { css, ...compiled } = compile(children(content), { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true }, options.css);
+    options.reducedMotion === false
+      ? undefined
+      : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
+
+  const { css, ...compiled } = compile(
+    children(content),
+    { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
+    options.css,
+  );
+
   const root = element(
     "svg",
     {
@@ -53,14 +71,22 @@ export const render = (options: RenderOptions, content: Child): string => {
     },
     [
       element("title", { id: `${prefix}t` }, children(options.title, true)),
-      ...(options.desc ? [element("desc", { id: `${prefix}d` }, children(options.desc, true))] : []),
+      ...(options.desc
+        ? [element("desc", { id: `${prefix}d` }, children(options.desc, true))]
+        : []),
       ...(compiled.defs.length > 0 ? [element("defs", {}, compiled.defs)] : []),
       ...(css ? [element("style", {}, [raw(`\n${css}\n`)])] : []),
       ...compiled.body,
     ],
   );
+
   const source = serialize(root);
   const { errors } = validateSvg(source);
-  if (errors.length > 0) throw new Error(`Generated SVG is invalid:\n${errors.map((error) => `  - ${error}`).join("\n")}`);
+
+  if (errors.length > 0)
+    throw new Error(
+      `Generated SVG is invalid:\n${errors.map((error) => `  - ${error}`).join("\n")}`,
+    );
+
   return `${options.comment ? `<!-- ${options.comment} -->\n` : ""}${source}\n`;
 };

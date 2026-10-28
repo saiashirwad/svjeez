@@ -4,6 +4,11 @@
   "private": true,
   "description": "Vite plugin for svjeez: import a scene with ?svjeez and get an animated SVG's URL, with poster stills.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/vite"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -20,19 +25,6 @@
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
-  "peerDependencies": {
-    "playwright-core": ">=1.49",
-    "svjeez": ">=0.6.0 <1",
-    "vite": ">=8"
-  },
-  "peerDependenciesMeta": {
-    "playwright-core": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "^19.0.0",
@@ -45,9 +37,17 @@
     "typescript": "latest",
     "vite": "8.3.5"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/saiashirwad/svjeez.git",
-    "directory": "packages/vite"
+  "peerDependencies": {
+    "playwright-core": ">=1.49",
+    "svjeez": ">=0.6.0 <1",
+    "vite": ">=8"
+  },
+  "peerDependenciesMeta": {
+    "playwright-core": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

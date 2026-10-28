@@ -1,6 +1,20 @@
 {
   "name": "svjeez",
   "version": "0.6.0",
+  "description": "Animated SVGs in TSX. One file out, no JavaScript.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/svjeez"
+  },
+  "bin": {
+    "svjeez": "./package-dist/cli.js"
+  },
+  "files": [
+    "package-dist",
+    "skills"
+  ],
   "type": "module",
   "sideEffects": false,
   "types": "./package-dist/index.d.ts",
@@ -43,12 +57,6 @@
       "default": "./package-dist/frames.js"
     }
   },
-  "engines": {
-    "node": ">=20"
-  },
-  "bin": {
-    "svjeez": "./package-dist/cli.js"
-  },
   "scripts": {
     "build": "bun run scripts/build.ts",
     "dev": "bun run scripts/preview.ts",
@@ -82,15 +90,7 @@
       "optional": true
     }
   },
-  "description": "Animated SVGs in TSX. One file out, no JavaScript.",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/saiashirwad/svjeez.git",
-    "directory": "packages/svjeez"
-  },
-  "files": [
-    "package-dist",
-    "skills"
-  ]
+  "engines": {
+    "node": ">=20"
+  }
 }

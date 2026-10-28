@@ -6,7 +6,11 @@ const W = 800;
 const ROW = 90;
 const D = 4;
 
-const wave = (y: number) => Array.from({ length: 61 }, (_, i) => ({ x: 150 + i * 9.5, y: y + 22 * Math.sin((i / 60) * Math.PI * 2) }));
+const wave = (y: number) =>
+  Array.from({ length: 61 }, (_, i) => ({
+    x: 150 + i * 9.5,
+    y: y + 22 * Math.sin((i / 60) * Math.PI * 2),
+  }));
 
 const rows: [string, Omit<FlowOptions, "at">][] = [
   ["dot", { style: "dot" }],
@@ -30,12 +34,18 @@ export default function build(): string {
       <rect width="100%" height="100%" fill={theme.base00} />
       {rows.map(([name, options], i) => {
         const points = wave(60 + i * ROW);
+
         return (
           <g fontFamily={mono}>
             <text x={40} y={64 + i * ROW} fontSize={13} fill={theme.base04}>
               {name}
             </text>
-            <path d={points.map((p, k) => `${k ? "L" : "M"}${p.x} ${p.y}`).join("")} fill="none" stroke={theme.base02} strokeWidth={1.5} />
+            <path
+              d={points.map((p, k) => `${k ? "L" : "M"}${p.x} ${p.y}`).join("")}
+              fill="none"
+              stroke={theme.base02}
+              strokeWidth={1.5}
+            />
             {flow(points, { ...options, at: 0.4, over: 2.6, color: theme.base09 }).node}
           </g>
         );

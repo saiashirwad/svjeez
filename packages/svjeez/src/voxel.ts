@@ -5,7 +5,15 @@ import { el } from "./el";
 import { motion, type Motion, type Seconds, type Stack } from "./motion";
 import { camera, facingOf, type VoxelCamera, type Facing, type Vec3 } from "./space";
 import type { SvgNode } from "./svg";
-import { face, isOpaque, resolve, texture, type VoxelFace, type VoxelSkin, type VoxelTexture } from "./texture";
+import {
+  face,
+  isOpaque,
+  resolve,
+  texture,
+  type VoxelFace,
+  type VoxelSkin,
+  type VoxelTexture,
+} from "./texture";
 
 export interface VoxelBlock {
   /** Integer cell; the cube spans `at` to `at + 1`. */
@@ -45,8 +53,11 @@ const BLEED = 0.4;
 
 const visibleFaces = ([x, , z]: Facing): readonly VoxelFace[] => {
   const sides: VoxelFace[] = [];
+
   if (x !== 0) sides.push(x > 0 ? "east" : "west");
+
   if (z !== 0) sides.push(z > 0 ? "south" : "north");
+
   return [...sides, "top"];
 };
 
@@ -55,17 +66,24 @@ const cellKey = ([x, y, z]: Vec3): string => `${x},${y},${z}`;
 const lifetime = (from: Seconds, to: Seconds): Motion<"opacity"> | undefined => {
   if (from === 0 && to === Infinity) return;
   const arrive = from > 0 ? motion({ opacity: 0 }).at(from).set({ opacity: 1 }) : motion();
+
   return to === Infinity ? arrive : arrive.at(to).set({ opacity: 0 });
 };
 
 const check = ({ at, from = 0, to = Infinity }: VoxelBlock): void => {
-  if (!at.every(Number.isInteger)) throw new Error(`voxel.scene() needs blocks on whole cells, got [${at.join(", ")}].`);
-  if (!(from >= 0 && from < to)) throw new Error(`voxel.scene() needs 0 <= from < to, got from ${from} to ${to} on the block at [${at.join(", ")}].`);
+  if (!at.every(Number.isInteger))
+    throw new Error(`voxel.scene() needs blocks on whole cells, got [${at.join(", ")}].`);
+
+  if (!(from >= 0 && from < to))
+    throw new Error(
+      `voxel.scene() needs 0 <= from < to, got from ${from} to ${to} on the block at [${at.join(", ")}].`,
+    );
 };
 
 const FACES = Object.keys(SIDES) as VoxelFace[];
 
 export type { VoxelCamera, VoxelCameraOptions, Vec3 } from "./space";
+
 export type { VoxelFace, VoxelPalette, VoxelSkin, VoxelTexture } from "./texture";
 
 const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
@@ -76,11 +94,14 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
   const cells = groupBy(blocks, (block) => cellKey(block.at));
 
   const opaque = new Map<VoxelSkin, boolean>();
+
   const solid = (skin: VoxelSkin): boolean => {
     const known = opaque.get(skin);
+
     if (known !== undefined) return known;
     const all = FACES.every((side) => isOpaque(resolve(skin, side)));
     opaque.set(skin, all);
+
     return all;
   };
 
@@ -92,30 +113,56 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
 
   const buried = (block: VoxelBlock): boolean => {
     const [x, y, z] = block.at;
-    const near: Vec3[] = [[x, y + 1, z], ...(fx === 0 ? [] : [[x + fx, y, z] as const]), ...(fz === 0 ? [] : [[x, y, z + fz] as const])];
-    return block.animation === undefined && near.every((cell) => cells.get(cellKey(cell))?.some((cover) => covers(cover, block)));
+
+    const near: Vec3[] = [
+      [x, y + 1, z],
+      ...(fx === 0 ? [] : [[x + fx, y, z] as const]),
+      ...(fz === 0 ? [] : [[x, y, z + fz] as const]),
+    ];
+
+    return (
+      block.animation === undefined &&
+      near.every((cell) => cells.get(cellKey(cell))?.some((cover) => covers(cover, block)))
+    );
   };
 
   const textureIds = new Map<VoxelTexture, number>();
-  const idOf = (tex: VoxelTexture): number => textureIds.get(tex) ?? (textureIds.set(tex, textureIds.size), textureIds.size - 1);
+
+  const idOf = (tex: VoxelTexture): number =>
+    textureIds.get(tex) ?? (textureIds.set(tex, textureIds.size), textureIds.size - 1);
+
   const symbols = new Map<string, Ref<"symbol">>();
+
   const symbolOf = (skin: VoxelSkin): Ref<"symbol"> => {
     const sides = faces.map((side) => [side, resolve(skin, side)] as const);
     const key = sides.map(([, tex]) => idOf(tex)).join();
     const known = symbols.get(key);
+
     if (known) return known;
+
     const symbol = def.symbol(
       { style: "overflow:visible" },
       sides.map(([side, tex]) => {
         const { shade, origin, u, v } = SIDES[side];
-        return face(tex, shade, view.project(origin), view.project(u), view.project(v), BLEED / view.unit);
+
+        return face(
+          tex,
+          shade,
+          view.project(origin),
+          view.project(u),
+          view.project(v),
+          BLEED / view.unit,
+        );
       }),
     );
+
     symbols.set(key, symbol);
+
     return symbol;
   };
 
   const depth = ({ at }: VoxelBlock): number => fx * at[0] + facing[1] * at[1] + fz * at[2];
+
   const visible = blocks
     .filter((block) => !buried(block))
     .map((block) => ({ block, depth: depth(block) }))
@@ -126,7 +173,13 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
     {},
     visible.map((block) => {
       const { x, y } = view.project(block.at);
-      return el.use({ href: symbolOf(block.skin), x, y, animation: [lifetime(block.from ?? 0, block.to ?? Infinity), block.animation].flat() });
+
+      return el.use({
+        href: symbolOf(block.skin),
+        x,
+        y,
+        animation: [lifetime(block.from ?? 0, block.to ?? Infinity), block.animation].flat(),
+      });
     }),
   );
 };

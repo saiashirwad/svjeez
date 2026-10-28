@@ -10,7 +10,12 @@ const CSS = [
   `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:10px}`,
 ].join("");
 
-const push = motion({ scale: 1 }).at(T.hud).to({ scale: 1.1 }, T.collapse - T.hud, ease.inOut).at(T.black).set({ scale: 1 });
+const push = motion({ scale: 1 })
+  .at(T.hud)
+  .to({ scale: 1.1 }, T.collapse - T.hud, ease.inOut)
+  .at(T.black)
+  .set({ scale: 1 });
+
 const kick = shake({ at: T.ignite, over: 0.9 }, { x: 9, y: 6, rotate: 0.8 }, { rate: 22 });
 
 export function buildHorizon(): string {
@@ -27,7 +32,10 @@ export function buildHorizon(): string {
     },
     <>
       <Backdrop />
-      <g style={{ transformBox: "view-box", transformOrigin: `${W / 2}px ${H / 2}px` }} animation={[push, kick]}>
+      <g
+        style={{ transformBox: "view-box", transformOrigin: `${W / 2}px ${H / 2}px` }}
+        animation={[push, kick]}
+      >
         <Nebula />
         <Stars />
         <g transform={`translate(${W / 2} ${H / 2})`}>

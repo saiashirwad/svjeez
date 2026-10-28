@@ -7,10 +7,16 @@ export const Fragment = Symbol.for("svjeez.fragment");
 type Component = (props: Record<string, unknown>) => SvgNode | null;
 
 /** The automatic JSX runtime. Elements compile to the svjeez AST; components are pure functions of props. */
-export const jsx = (type: string | typeof Fragment | Component, props: Record<string, unknown> | null): SvgNode => {
+export const jsx = (
+  type: string | typeof Fragment | Component,
+  props: Record<string, unknown> | null,
+): SvgNode => {
   const values = props ?? {};
+
   if (type === Fragment) return { kind: "fragment", children: children(values.children) };
+
   if (typeof type === "function") return type(values) ?? { kind: "fragment", children: [] };
+
   return node(type, values);
 };
 
@@ -18,7 +24,10 @@ export const jsxs = jsx;
 
 export const jsxDEV = jsx;
 
-type Intrinsic<T extends Tag> = ElementProps<T> & { readonly children?: Child; readonly key?: string | number };
+type Intrinsic<T extends Tag> = ElementProps<T> & {
+  readonly children?: Child;
+  readonly key?: string | number;
+};
 
 export namespace JSX {
   export type Element = SvgNode;

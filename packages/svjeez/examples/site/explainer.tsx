@@ -17,7 +17,15 @@ const shown = `<path d={wave}
 <circle r={8} fill="#FF9F0A"
   animation={enter({ at: 3 })} />`;
 
-const src = code(highlight(shown), { theme, font: mono, fontSize: 15, lineHeight: 1.6, x: 32, y: BAR + 20 });
+const src = code(highlight(shown), {
+  theme,
+  font: mono,
+  fontSize: 15,
+  lineHeight: 1.6,
+  x: 32,
+  y: BAR + 20,
+});
+
 const [drawAt, enterAt] = [0.8, 4.4];
 const one = { at: drawAt, over: 3.2 };
 const two = { at: enterAt, over: 3.2 };
@@ -37,11 +45,39 @@ export default function build(): string {
     <>
       {win.node}
       <g animation={outro(D)}>
-        <Focus stops={[{ during: one, target: src.lines(1, 3).pad(6) }, { during: two, target: src.lines(7, 8).pad(6) }]} dim={0.28}>
+        <Focus
+          stops={[
+            { during: one, target: src.lines(1, 3).pad(6) },
+            { during: two, target: src.lines(7, 8).pad(6) },
+          ]}
+          dim={0.28}
+        >
           <g animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
         </Focus>
-        <Callout theme={theme} color={theme.base0D} target={src.find("draw")} side="bottom" during={one} font={mono} fontSize={14} columns={30}>draw() strokes the path on.</Callout>
-        <Callout theme={theme} color={theme.base09} target={src.find("enter")} side="bottom" during={two} font={mono} fontSize={14} columns={30}>enter() fades the dot in.</Callout>
+        <Callout
+          theme={theme}
+          color={theme.base0D}
+          target={src.find("draw")}
+          side="bottom"
+          during={one}
+          font={mono}
+          fontSize={14}
+          columns={30}
+        >
+          draw() strokes the path on.
+        </Callout>
+        <Callout
+          theme={theme}
+          color={theme.base09}
+          target={src.find("enter")}
+          side="bottom"
+          during={two}
+          font={mono}
+          fontSize={14}
+          columns={30}
+        >
+          enter() fades the dot in.
+        </Callout>
       </g>
     </>,
   );

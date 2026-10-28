@@ -9,13 +9,27 @@ import type { SvgNode } from "../../svg";
 import { flow, type FlowOptions } from "../flow";
 import { beats, visible, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, labelSize, look, lookup, placer, type Diagram, type DiagramOptions } from "./kit";
+import {
+  arrow,
+  chip,
+  labelSize,
+  look,
+  lookup,
+  placer,
+  type Diagram,
+  type DiagramOptions,
+} from "./kit";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =
   | string
   | { readonly label: string; readonly final?: boolean }
-  | { readonly label: string; readonly final?: boolean; readonly states: Record<string, StateSpec>; readonly initial: string };
+  | {
+      readonly label: string;
+      readonly final?: boolean;
+      readonly states: Record<string, StateSpec>;
+      readonly initial: string;
+    };
 
 /** Every state id in `S`, nested ones included. */
 export type StateIds<S> = {
@@ -24,10 +38,14 @@ export type StateIds<S> = {
 
 /** Holds each composite's `initial` to its own states. */
 export type Checked<S> = {
-  readonly [K in keyof S]: S[K] extends { readonly states: infer I } ? S[K] & { readonly initial: keyof I & string; readonly states: Checked<I> } : S[K];
+  readonly [K in keyof S]: S[K] extends { readonly states: infer I }
+    ? S[K] & { readonly initial: keyof I & string; readonly states: Checked<I> }
+    : S[K];
 };
 
-export type Transition<S extends string> = readonly [from: S, to: S] | readonly [from: S, to: S, label: string];
+export type Transition<S extends string> =
+  | readonly [from: S, to: S]
+  | readonly [from: S, to: S, label: string];
 
 export interface StateOptions extends DiagramOptions {
   readonly direction?: Direction;
@@ -54,7 +72,15 @@ export interface StateMachine<S extends string> extends Diagram<S> {
    * From a start `at`, each state stays lit for `dwell` and the token moves at `speed`. With one time per state, each
    * state lights at its time, the token arriving just then; the last stays lit for `dwell`.
    */
-  walk(path: readonly S[], options: { readonly at: Beats; readonly dwell?: Seconds; readonly speed?: number; readonly token?: WalkToken }): Walk<S>;
+  walk(
+    path: readonly S[],
+    options: {
+      readonly at: Beats;
+      readonly dwell?: Seconds;
+      readonly speed?: number;
+      readonly token?: WalkToken;
+    },
+  ): Walk<S>;
 }
 
 interface Node {
@@ -81,11 +107,16 @@ interface Run {
 }
 
 /** A transition, by index, which may carry a label; or the scope's start or end marker, which never does. */
-type Line = (Run & { readonly of: number; readonly label?: Box }) | (Run & { readonly of: "start" | "end" });
+type Line =
+  | (Run & { readonly of: number; readonly label?: Box })
+  | (Run & { readonly of: "start" | "end" });
 
 const relocate = (l: Line, point: (p: Point) => Point, box: (b: Box) => Box): Line => {
   const points = l.points.map(point);
-  return typeof l.of === "number" ? { ...l, points, label: l.label && box(l.label) } : { ...l, points };
+
+  return typeof l.of === "number"
+    ? { ...l, points, label: l.label && box(l.label) }
+    : { ...l, points };
 };
 
 interface Local {
@@ -103,7 +134,12 @@ const DOT = 14;
 const RING = 18;
 const PAD = 16;
 
-const shift = (b: Box, dx: number, dy: number): Box => ({ x: b.x + dx, y: b.y + dy, w: b.w, h: b.h });
+const shift = (b: Box, dx: number, dy: number): Box => ({
+  x: b.x + dx,
+  y: b.y + dy,
+  w: b.w,
+  h: b.h,
+});
 
 /**
  * A layered state machine. A dot marks each scope's initial state; final states lead to a bullseye. A composite is
@@ -111,80 +147,165 @@ const shift = (b: Box, dx: number, dy: number): Box => ({ x: b.x + dx, y: b.y + 
  * nearest ancestors that share a scope.
  */
 export function stateMachine<const S extends Record<string, StateSpec>>(
-  spec: { readonly states: Checked<S>; readonly initial: NoInfer<keyof S & string>; readonly transitions: readonly Transition<NoInfer<StateIds<S>>>[] },
+  spec: {
+    readonly states: Checked<S>;
+    readonly initial: NoInfer<keyof S & string>;
+    readonly transitions: readonly Transition<NoInfer<StateIds<S>>>[];
+  },
   options: StateOptions = {},
 ): StateMachine<StateIds<S>> {
   type Id = StateIds<S>;
+
   const { direction } = options;
   const base = look(options);
   const { theme, fontSize, font, small } = base;
   const header = Math.round(fontSize * 2.6);
   const nodes = new Map<string, Node>();
-  const scope = (states: Record<string, StateSpec>, initial: string, depth: number, owner?: string): Scope => {
+
+  const scope = (
+    states: Record<string, StateSpec>,
+    initial: string,
+    depth: number,
+    owner?: string,
+  ): Scope => {
     const list = Object.entries(states).map(([id, s]): Node => {
-      if (nodes.has(id)) throw new Error(`stateMachine() has two states named ${JSON.stringify(id)}.`);
+      if (nodes.has(id))
+        throw new Error(`stateMachine() has two states named ${JSON.stringify(id)}.`);
+
       const node: Node =
         typeof s === "string"
           ? { id, label: s, final: false, parent: owner, depth }
-          : { id, label: s.label, final: s.final ?? false, parent: owner, depth, inner: "states" in s ? scope(s.states, s.initial, depth + 1, id) : undefined };
+          : {
+              id,
+              label: s.label,
+              final: s.final ?? false,
+              parent: owner,
+              depth,
+              inner: "states" in s ? scope(s.states, s.initial, depth + 1, id) : undefined,
+            };
+
       nodes.set(id, node);
+
       return node;
     });
-    if (!list.some((n) => n.id === initial)) throw new Error(`stateMachine() initial ${JSON.stringify(initial)} is not one of its scope's states.`);
+
+    if (!list.some((n) => n.id === initial))
+      throw new Error(
+        `stateMachine() initial ${JSON.stringify(initial)} is not one of its scope's states.`,
+      );
+
     return { owner, depth, nodes: list, initial };
   };
+
   const root = scope(spec.states as Record<string, StateSpec>, spec.initial, 0);
+
   const chain = (id: string): string[] => {
     const node = nodes.get(id);
+
     if (!node) throw new Error(`stateMachine() has no state ${JSON.stringify(id)}.`);
+
     return node.parent === undefined ? [id] : [...chain(node.parent), id];
   };
+
   /** The scope owner a transition lives in, and its two ends as that scope's direct members. */
   const home = (from: string, to: string) => {
     const [a, b] = [chain(from), chain(to)];
     let k = 0;
+
     while (k < a.length - 1 && k < b.length - 1 && a[k] === b[k]) k++;
+
     return { owner: k === 0 ? undefined : a[k - 1], from: a[k]!, to: b[k]! };
   };
-  const transitions = spec.transitions.map(([from, to, label], i) => ({ i, label, ...home(from, to), source: from as string, target: to as string }));
+
+  const transitions = spec.transitions.map(([from, to, label], i) => ({
+    i,
+    label,
+    ...home(from, to),
+    source: from as string,
+    target: to as string,
+  }));
 
   const lay = (s: Scope): Local => {
     const inner = new Map(s.nodes.flatMap((n) => (n.inner ? [[n.id, lay(n.inner)] as const] : [])));
+
     const size = (n: Node) => {
-      const own = { w: textWidth(n.label, fontSize, font) + fontSize * 2.4, h: Math.round(fontSize * 2.8) };
+      const own = {
+        w: textWidth(n.label, fontSize, font) + fontSize * 2.4,
+        h: Math.round(fontSize * 2.8),
+      };
+
       const box = inner.get(n.id);
+
       return box ? { w: Math.max(own.w, box.w + 2 * PAD), h: header + box.h + 2 * PAD } : own;
     };
+
     const mine = transitions.filter((t) => t.owner === s.owner);
     const finals = s.nodes.filter((n) => n.final);
+
     const out = layered({
       direction,
-      nodes: [{ id: START, w: DOT, h: DOT }, ...s.nodes.map((n) => ({ id: n.id, ...size(n) })), ...(finals.length > 0 ? [{ id: END, w: RING, h: RING }] : [])],
+      nodes: [
+        { id: START, w: DOT, h: DOT },
+        ...s.nodes.map((n) => ({ id: n.id, ...size(n) })),
+        ...(finals.length > 0 ? [{ id: END, w: RING, h: RING }] : []),
+      ],
       edges: [
         { from: START, to: s.initial },
-        ...mine.map((t) => ({ from: t.from, to: t.to, label: t.label === undefined ? undefined : labelSize(t.label, small, font) })),
+        ...mine.map((t) => ({
+          from: t.from,
+          to: t.to,
+          label: t.label === undefined ? undefined : labelSize(t.label, small, font),
+        })),
         ...finals.map((n) => ({ from: n.id, to: END })),
       ],
     });
+
     const [dx, dy] = [-out.bounds.x, -out.bounds.y];
     const boxes = new Map([...out.nodes].map(([id, b]) => [id, shift(b, dx, dy)]));
-    const of = (k: number): Line["of"] => (k === 0 ? "start" : k <= mine.length ? mine[k - 1]!.i : "end");
+
+    const of = (k: number): Line["of"] =>
+      k === 0 ? "start" : k <= mine.length ? mine[k - 1]!.i : "end";
+
     const lines: Line[] = out.edges.map((e, k) => {
-      const [run, o] = [{ from: e.from, to: e.to, points: e.points.map((p) => ({ x: p.x + dx, y: p.y + dy })), depth: s.depth }, of(k)];
-      return typeof o === "number" ? { ...run, of: o, label: e.label && shift(e.label, dx, dy) } : { ...run, of: o };
+      const [run, o] = [
+        {
+          from: e.from,
+          to: e.to,
+          points: e.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+          depth: s.depth,
+        },
+        of(k),
+      ];
+
+      return typeof o === "number"
+        ? { ...run, of: o, label: e.label && shift(e.label, dx, dy) }
+        : { ...run, of: o };
     });
+
     const dots = [boxes.get(START)!];
     const ends = finals.length > 0 ? [boxes.get(END)!] : [];
+
     for (const [id, local] of inner) {
       const b = boxes.get(id)!;
       const [ix, iy] = [b.x + (b.w - local.w) / 2, b.y + header + PAD];
+
       for (const [k, v] of local.boxes) boxes.set(k, shift(v, ix, iy));
-      lines.push(...local.lines.map((l) => relocate(l, (p) => ({ x: p.x + ix, y: p.y + iy }), (b) => shift(b, ix, iy))));
+      lines.push(
+        ...local.lines.map((l) =>
+          relocate(
+            l,
+            (p) => ({ x: p.x + ix, y: p.y + iy }),
+            (b) => shift(b, ix, iy),
+          ),
+        ),
+      );
       dots.push(...local.dots.map((d) => shift(d, ix, iy)));
       ends.push(...local.ends.map((d) => shift(d, ix, iy)));
     }
+
     return { w: out.bounds.w, h: out.bounds.h, boxes, lines, dots, ends };
   };
+
   const local = lay(root);
   const at = placer({ x: 0, y: 0, w: local.w, h: local.h }, options);
   const boxes = new Map([...nodes.keys()].map((id) => [id, at.box(local.boxes.get(id)!)]));
@@ -195,38 +316,99 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   const drawn = (n: Node): SvgNode => {
     const b = boxes.get(n.id)!;
     const fill = ground(n.depth + 1);
-    const frame = el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: n.inner ? 10 : 8, fill, stroke: theme.base03 });
-    const title = (y: number) => el.text({ x: b.center.x, y: y + fontSize * 0.35, fontSize, textAnchor: "middle", fill: theme.base05 }, n.label);
+
+    const frame = el.rect({
+      x: b.x,
+      y: b.y,
+      width: b.w,
+      height: b.h,
+      rx: n.inner ? 10 : 8,
+      fill,
+      stroke: theme.base03,
+    });
+
+    const title = (y: number) =>
+      el.text(
+        {
+          x: b.center.x,
+          y: y + fontSize * 0.35,
+          fontSize,
+          textAnchor: "middle",
+          fill: theme.base05,
+        },
+        n.label,
+      );
+
     if (!n.inner) return el.g({}, [frame, title(b.center.y)]);
-    return el.g({}, [frame, el.path({ d: `M${b.x} ${b.y + header}h${b.w}`, stroke: theme.base03 }), title(b.y + header / 2)]);
+
+    return el.g({}, [
+      frame,
+      el.path({ d: `M${b.x} ${b.y + header}h${b.w}`, stroke: theme.base03 }),
+      title(b.y + header / 2),
+    ]);
   };
+
   const node = base.root([
     [...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawn),
     lines.map((l) => arrow(l.points, base)),
     dots.map(({ center: { x, y } }) => el.circle({ cx: x, cy: y, r: DOT / 2, fill: theme.base05 })),
     ends.map(({ center: { x: cx, y: cy } }) =>
-      el.g({}, [el.circle({ cx, cy, r: RING / 2, fill: "none", stroke: theme.base05, strokeWidth: 1.5 }), el.circle({ cx, cy, r: RING / 2 - 4, fill: theme.base05 })]),
+      el.g({}, [
+        el.circle({ cx, cy, r: RING / 2, fill: "none", stroke: theme.base05, strokeWidth: 1.5 }),
+        el.circle({ cx, cy, r: RING / 2 - 4, fill: theme.base05 }),
+      ]),
     ),
-    lines.map((l) => typeof l.of === "number" && l.label && chip(l.label, transitions[l.of]!.label!, { ...base.smallLook, fill: theme.base05, ground: ground(l.depth) })),
+    lines.map(
+      (l) =>
+        typeof l.of === "number" &&
+        l.label &&
+        chip(l.label, transitions[l.of]!.label!, {
+          ...base.smallLook,
+          fill: theme.base05,
+          ground: ground(l.depth),
+        }),
+    ),
   ]);
 
   const line = (pred: (l: (typeof lines)[number]) => boolean) => lines.find(pred);
+
   const edge = (from: Id, to: Id): Point[] => {
-    const found = line((l) => typeof l.of === "number" && transitions[l.of]!.source === from && transitions[l.of]!.target === to);
-    if (!found) throw new Error(`stateMachine() has no transition from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);
+    const found = line(
+      (l) =>
+        typeof l.of === "number" &&
+        transitions[l.of]!.source === from &&
+        transitions[l.of]!.target === to,
+    );
+
+    if (!found)
+      throw new Error(
+        `stateMachine() has no transition from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`,
+      );
+
     return curve(found.points).samples;
   };
+
   /** How a walk gets from `a` to `b`: a transition from `a` or a composite holding it, or into a composite's initial state. */
   const step = (a: string, b: string): Point[] => {
     for (const from of chain(a).reverse()) {
-      const found = line((l) => typeof l.of === "number" && transitions[l.of]!.source === from && transitions[l.of]!.target === b);
+      const found = line(
+        (l) =>
+          typeof l.of === "number" &&
+          transitions[l.of]!.source === from &&
+          transitions[l.of]!.target === b,
+      );
+
       if (found) return curve(found.points).samples;
     }
+
     const target = nodes.get(b)!;
+
     if (target.parent === a && nodes.get(a)!.inner!.initial === b) {
       const entry = line((l) => l.of === "start" && l.to === b)!;
+
       return curve(entry.points).samples;
     }
+
     throw new Error(`walk() has no way from ${JSON.stringify(a)} to ${JSON.stringify(b)}.`);
   };
 
@@ -237,34 +419,64 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     edge,
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
       if (path.length === 0) throw new Error("walk() needs at least one state, got none.");
+
       const legs = path.slice(1).map((next, k) => {
         const points = step(path[k]!, next);
+
         return { points, over: Math.max(0.35, pathLength(points) / speed) };
       });
+
       const arrive =
         typeof at === "number"
-          ? path.map((_, k) => at + k * dwell + legs.slice(0, k).reduce((sum, leg) => sum + leg.over, 0))
+          ? path.map(
+              (_, k) => at + k * dwell + legs.slice(0, k).reduce((sum, leg) => sum + leg.over, 0),
+            )
           : beats(at, path.length, 0, "walk()");
+
       const runs = legs.map((leg, k) => {
-        const over = typeof at === "number" ? leg.over : Math.min(leg.over, (arrive[k + 1]! - arrive[k]!) / 2);
+        const over =
+          typeof at === "number" ? leg.over : Math.min(leg.over, (arrive[k + 1]! - arrive[k]!) / 2);
+
         return { points: leg.points, at: arrive[k + 1]! - over, over };
       });
+
       const lit = new Map<string, Span[]>();
       path.forEach((s, k) => {
         const until = runs[k]?.at ?? arrive[k]! + dwell;
         lit.set(s, [...(lit.get(s) ?? []), { at: arrive[k]!, over: until - arrive[k]! }]);
       });
-      const tokens = runs.map((run) => run.over > 0 && flow(run.points, { color: theme.base09, size: 5, ...token, at: run.at, over: run.over }).node);
+
+      const tokens = runs.map(
+        (run) =>
+          run.over > 0 &&
+          flow(run.points, { color: theme.base09, size: 5, ...token, at: run.at, over: run.over })
+            .node,
+      );
+
       const overlay = el.g({}, [
         [...lit].map(([s, spans]) => {
           const b = boxes.get(s)!.pad(4);
-          return el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: nodes.get(s)!.inner ? 13 : 11, fill: "none", stroke: theme.base09, strokeWidth: 2, animation: visible(spans) });
+
+          return el.rect({
+            x: b.x,
+            y: b.y,
+            width: b.w,
+            height: b.h,
+            rx: nodes.get(s)!.inner ? 13 : 11,
+            fill: "none",
+            stroke: theme.base09,
+            strokeWidth: 2,
+            animation: visible(spans),
+          });
         }),
         tokens,
       ]);
-      const spans = Object.fromEntries([...nodes.keys()].map((s) => [s, lit.get(s) ?? []])) as Record<Id, Span[]>;
+
+      const spans = Object.fromEntries(
+        [...nodes.keys()].map((s) => [s, lit.get(s) ?? []]),
+      ) as Record<Id, Span[]>;
+
       return { node: overlay, spans, end: arrive.at(-1)! + dwell };
     },
   };
 }
-

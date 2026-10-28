@@ -22,12 +22,18 @@ export const CSS = [
   `.u{text-decoration:underline;text-underline-offset:3px}`,
 ].join("");
 
-export const ui = (size: number, fill: Color, extra: Attrs<"text"> = {}): Attrs<"text"> => ({ class: "ui", fontSize: size, fill, ...extra });
+export const ui = (size: number, fill: Color, extra: Attrs<"text"> = {}): Attrs<"text"> => ({
+  class: "ui",
+  fontSize: size,
+  fill,
+  ...extra,
+});
 
 export const random = (seed: number) => () => {
   seed = (seed + 0x6d2b79f5) | 0;
   let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
   t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 

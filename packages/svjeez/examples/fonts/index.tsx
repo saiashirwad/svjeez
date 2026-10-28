@@ -10,7 +10,14 @@ const display = await load("ArchivoBlack-Regular.ttf");
 const body = font.family(await load("ABeeZee-Regular.ttf"), await load("ABeeZee-Italic.ttf"));
 
 const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
-const C = { bg: theme.base00, ink: theme.base06, accent: theme.base08, soft: theme.base04, rule: theme.base0C } as const;
+
+const C = {
+  bg: theme.base00,
+  ink: theme.base06,
+  accent: theme.base08,
+  soft: theme.base04,
+  rule: theme.base0C,
+} as const;
 
 const TITLE = "Wave!";
 const TITLE_SIZE = 120;
@@ -35,17 +42,53 @@ export default function build(): string {
     },
     <>
       <rect width={W} height={H} fill={C.bg} />
-      <Glyphs font={display} text={TITLE} size={TITLE_SIZE} x={titleX} y={160} fill="none" stroke={C.accent} strokeWidth={2} animation={(_, i) => draw({ at: 0.2 + i * 0.18, over: 1.1 }, ease.inOut)} />
-      <Glyphs font={display} text={TITLE} size={TITLE_SIZE} x={titleX} y={160} fill={C.ink} alt="" animation={(_, i) => enter({ at: 1.4 + i * 0.12, over: 0.5 }, { opacity: 0, y: 12 }, ease.out)} />
+      <Glyphs
+        font={display}
+        text={TITLE}
+        size={TITLE_SIZE}
+        x={titleX}
+        y={160}
+        fill="none"
+        stroke={C.accent}
+        strokeWidth={2}
+        animation={(_, i) => draw({ at: 0.2 + i * 0.18, over: 1.1 }, ease.inOut)}
+      />
+      <Glyphs
+        font={display}
+        text={TITLE}
+        size={TITLE_SIZE}
+        x={titleX}
+        y={160}
+        fill={C.ink}
+        alt=""
+        animation={(_, i) =>
+          enter({ at: 1.4 + i * 0.12, over: 0.5 }, { opacity: 0, y: 12 }, ease.out)
+        }
+      />
       <g animation={enter({ at: 2.4, over: 0.6 }, { opacity: 0, y: 8 })}>
         <text x={(W - lineWidth) / 2} y={240} fontFamily={body} fontSize={LINE_SIZE} fill={C.ink}>
           {LINE}
         </text>
-        <text x={(W - italicWidth) / 2} y={282} fontFamily={body} fontStyle="italic" fontSize={LINE_SIZE} fill={C.soft}>
+        <text
+          x={(W - italicWidth) / 2}
+          y={282}
+          fontFamily={body}
+          fontStyle="italic"
+          fontSize={LINE_SIZE}
+          fill={C.soft}
+        >
           {ITALIC}
         </text>
       </g>
-      <rect x={(W - lineWidth) / 2} y={300} width={lineWidth} height={3} rx={1.5} fill={C.rule} animation={motion({ scale: 0 }).at(3).to({ scale: 1 }, 0.8, ease.out)} />
+      <rect
+        x={(W - lineWidth) / 2}
+        y={300}
+        width={lineWidth}
+        height={3}
+        rx={1.5}
+        fill={C.rule}
+        animation={motion({ scale: 0 }).at(3).to({ scale: 1 }, 0.8, ease.out)}
+      />
     </>,
   );
 }

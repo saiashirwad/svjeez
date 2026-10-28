@@ -5,12 +5,15 @@ import { loopLength, seek } from "../src/page";
 
 const ROOT = join(import.meta.dir, "..");
 const [file, flag, out] = process.argv.slice(2);
+
 if (!file || (flag !== undefined && flag !== "--out")) {
   console.error("usage: bun run dev <file.tsx> [--out file.svg]");
   process.exit(1);
 }
+
 const source = resolve(file);
 const target = resolve(out ?? join(ROOT, ".preview", `${basename(source, extname(source))}.svg`));
+
 await mkdir(dirname(target), { recursive: true });
 
 let state: { version: number; error?: string } = { version: 0 };
@@ -20,14 +23,18 @@ const clients = new Set<ReadableStreamDefaultController>();
 // One build at a time; a change during a build queues exactly one more.
 let building: Promise<void> | undefined;
 let again = false;
+
 const build = async (): Promise<void> => {
   if (building) {
     again = true;
+
     return building;
   }
+
   building = once();
   await building;
   building = undefined;
+
   if (again) {
     again = false;
     await build();
@@ -35,20 +42,31 @@ const build = async (): Promise<void> => {
 };
 
 const once = async (): Promise<void> => {
-  const child = Bun.spawn([process.execPath, join(ROOT, "src/cli.ts"), "svg", source, "--out", target], { cwd: ROOT, stderr: "pipe" });
+  const child = Bun.spawn(
+    [process.execPath, join(ROOT, "src/cli.ts"), "svg", source, "--out", target],
+    { cwd: ROOT, stderr: "pipe" },
+  );
+
   const [code, stderr] = await Promise.all([child.exited, new Response(child.stderr).text()]);
   state = { version: state.version + 1, error: code === 0 ? undefined : stderr.trim() };
-  console.log(code === 0 ? `✓ ${target}${stderr ? `\n${stderr.trim()}` : ""}` : `✗ ${stderr.trim()}`);
+  console.log(
+    code === 0 ? `✓ ${target}${stderr ? `\n${stderr.trim()}` : ""}` : `✗ ${stderr.trim()}`,
+  );
+
   for (const client of clients) client.enqueue(`data: ${state.version}\n\n`);
 };
 
 let pending: Timer | undefined;
+
 const rebuild = (_event: string, name: string | null): void => {
   if (name && /\.svg$|(^|\/)\./.test(name)) return;
   clearTimeout(pending);
   pending = setTimeout(build, 60);
 };
-for (const dir of new Set([dirname(source), join(ROOT, "src")])) watch(dir, { recursive: true }, rebuild);
+
+for (const dir of new Set([dirname(source), join(ROOT, "src")]))
+  watch(dir, { recursive: true }, rebuild);
+
 await build();
 
 const PAGE = `<!doctype html>
@@ -107,7 +125,10 @@ const server = Bun.serve({
   routes: {
     "/": new Response(PAGE, { headers: { "content-type": "text/html" } }),
     "/state": () => Response.json(state),
-    "/svg": () => new Response(Bun.file(target), { headers: { "content-type": "image/svg+xml", "cache-control": "no-store" } }),
+    "/svg": () =>
+      new Response(Bun.file(target), {
+        headers: { "content-type": "image/svg+xml", "cache-control": "no-store" },
+      }),
     "/events": (request) =>
       new Response(
         new ReadableStream({
@@ -120,4 +141,5 @@ const server = Bun.serve({
       ),
   },
 });
+
 console.log(`previewing ${source} at ${server.url}`);

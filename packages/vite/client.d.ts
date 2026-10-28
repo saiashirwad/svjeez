@@ -6,6 +6,8 @@ declare module "*?svjeez" {
 }
 
 declare module "*?svjeez&posters" {
-  const scene: import("@svjeez/vite").SceneModule & Required<Pick<import("@svjeez/vite").SceneModule, "posters">>;
+  const scene: import("@svjeez/vite").SceneModule &
+    Required<Pick<import("@svjeez/vite").SceneModule, "posters">>;
+
   export default scene;
 }

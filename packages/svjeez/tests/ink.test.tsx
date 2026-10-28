@@ -2,22 +2,28 @@ import { describe, expect, test } from "bun:test";
 import { Ink, inkPath, render, tool, type Child } from "svjeez";
 import { flatten } from "../src/ink/path";
 
-const scene = (child: Child) => render({ width: 200, height: 100, duration: 2, title: "Ink" }, child);
+const scene = (child: Child) =>
+  render({ width: 200, height: 100, duration: 2, title: "Ink" }, child);
 
 /** Width of an outline across its middle, measured perpendicular to a horizontal stroke. */
 const thickness = (d: string, x: number): number => {
   const ys: number[] = [];
   let [px, py] = [0, 0];
+
   for (const [, cmd, args] of d.matchAll(/([MlLqZ])([^MlLqZ]*)/g)) {
     const n = (args!.match(/-?\d*\.?\d+/g) ?? []).map(Number);
+
     const visit = (nx: number, ny: number) => {
       [px, py] = [nx, ny];
+
       if (Math.abs(px - x) < 1) ys.push(py);
     };
+
     if (cmd === "M" || cmd === "L") visit(n[0]!, n[1]!);
     else if (cmd === "l") for (let i = 0; i < n.length; i += 2) visit(px + n[i]!, py + n[i + 1]!);
     else if (cmd === "q") visit(px + n[2]!, py + n[3]!);
   }
+
   return Math.max(...ys) - Math.min(...ys);
 };
 
@@ -87,7 +93,9 @@ describe("tools", () => {
 
   test("a pencil wavers with a seed, and the same seed draws the same line", () => {
     expect(inkPath(line, tool.pencil({ seed: 3 }))).toBe(inkPath(line, tool.pencil({ seed: 3 })));
-    expect(inkPath(line, tool.pencil({ seed: 3 }))).not.toBe(inkPath(line, tool.pencil({ seed: 4 })));
+    expect(inkPath(line, tool.pencil({ seed: 3 }))).not.toBe(
+      inkPath(line, tool.pencil({ seed: 4 })),
+    );
   });
 
   test("each subpath becomes its own closed outline", () => {
@@ -113,12 +121,14 @@ describe("Ink", () => {
 
   test("the same path and tool embed their outline once", () => {
     const hand = tool.pen();
+
     const svg = scene(
       <>
         <Ink d="M10 50H190" tool={hand} />
         <Ink d="M10 50H190" tool={hand} fill="red" />
       </>,
     );
+
     expect(svg.match(/<symbol /g)).toHaveLength(1);
   });
 });

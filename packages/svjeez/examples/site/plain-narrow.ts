@@ -14,10 +14,11 @@ export default () =>
         animation: draw({ at: 0.2, over: 1 }),
       }),
       circle({
-        cx: 60, cy: 30, r: 6,
+        cx: 60,
+        cy: 30,
+        r: 6,
         fill: "#0A6CFF",
-        animation: enter({ at: 1, over: 0.4 },
-          { scale: 0 }, ease.pop),
+        animation: enter({ at: 1, over: 0.4 }, { scale: 0 }, ease.pop),
       }),
     ]),
   );

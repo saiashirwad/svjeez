@@ -40,12 +40,26 @@ export interface FlowOptions {
 }
 
 const TAIL = 8;
+
 /** Px of path the comet's tail covers. */
 const REACH = 36;
 
 /** Something running `points` from `at`. `end` is when it arrives. */
-export function flow(points: readonly Point[], options: FlowOptions): { readonly node: SvgNode; readonly end: Seconds } {
-  const { at, speed = 220, style = "dot", theme = defaultDark, color = theme.base09, size = 4.5, arrive = false, class: cls } = options;
+export function flow(
+  points: readonly Point[],
+  options: FlowOptions,
+): { readonly node: SvgNode; readonly end: Seconds } {
+  const {
+    at,
+    speed = 220,
+    style = "dot",
+    theme = defaultDark,
+    color = theme.base09,
+    size = 4.5,
+    arrive = false,
+    class: cls,
+  } = options;
+
   const over = options.over ?? pathLength(points) / speed;
   const end = at + over;
   const lag = REACH / TAIL / (pathLength(points) / over);
@@ -61,7 +75,11 @@ export function flow(points: readonly Point[], options: FlowOptions): { readonly
           el.g({ opacity: 0.22 }, el.circle({ r: size * 2.4, fill: color, animation: run() })),
           Array.from({ length: TAIL }, (_, i) => {
             const k = (i + 1) / (TAIL + 1);
-            return el.g({ opacity: 0.6 * (1 - k) }, el.circle({ r: size * (1 - 0.7 * k), fill: color, animation: run(lag * (i + 1)) }));
+
+            return el.g(
+              { opacity: 0.6 * (1 - k) },
+              el.circle({ r: size * (1 - 0.7 * k), fill: color, animation: run(lag * (i + 1)) }),
+            );
           }),
           head,
         ];
@@ -74,7 +92,12 @@ export function flow(points: readonly Point[], options: FlowOptions): { readonly
             strokeWidth: size * 0.6,
             strokeLinecap: "round",
             strokeLinejoin: "round",
-            animation: [motion().at(end + 0.15).to({ opacity: 0 }, 0.6), draw({ at, over }, ease.linear)],
+            animation: [
+              motion()
+                .at(end + 0.15)
+                .to({ opacity: 0 }, 0.6),
+              draw({ at, over }, ease.linear),
+            ],
           }),
           head,
         ];
@@ -82,15 +105,36 @@ export function flow(points: readonly Point[], options: FlowOptions): { readonly
         const text = options.label ?? "";
         const fontSize = options.fontSize ?? 11;
         const [w, h] = [textWidth(text, fontSize, options.font) + 14, fontSize + 9];
+
         return el.g({ animation: run() }, [
-          el.rect({ x: -w / 2, y: -h / 2, width: w, height: h, rx: h / 2, fill: options.fill ?? color, fillOpacity: options.fill ? 1 : 0.18, stroke: color, strokeWidth: 1.25 }),
-          el.text({ y: fontSize * 0.35, textAnchor: "middle", fontSize, fontFamily: options.font, fill: options.ink ?? color }, text),
+          el.rect({
+            x: -w / 2,
+            y: -h / 2,
+            width: w,
+            height: h,
+            rx: h / 2,
+            fill: options.fill ?? color,
+            fillOpacity: options.fill ? 1 : 0.18,
+            stroke: color,
+            strokeWidth: 1.25,
+          }),
+          el.text(
+            {
+              y: fontSize * 0.35,
+              textAnchor: "middle",
+              fontSize,
+              fontFamily: options.font,
+              fill: options.ink ?? color,
+            },
+            text,
+          ),
         ]);
       }
     }
   })();
 
   const last = points.at(-1)!;
+
   const ring =
     arrive &&
     el.circle({
@@ -100,7 +144,10 @@ export function flow(points: readonly Point[], options: FlowOptions): { readonly
       fill: "none",
       stroke: color,
       strokeWidth: 1.5,
-      animation: motion({ opacity: 0, scale: 0.5 }).at(end).set({ opacity: 0.9 }).to({ opacity: 0, scale: 3 }, 0.7),
+      animation: motion({ opacity: 0, scale: 0.5 })
+        .at(end)
+        .set({ opacity: 0.9 })
+        .to({ opacity: 0, scale: 3 }, 0.7),
     });
 
   return { node: el.g({ class: cls }, [body, ring]), end: end + (arrive ? 0.7 : 0) };

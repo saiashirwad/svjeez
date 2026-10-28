@@ -15,12 +15,19 @@ const load = async (host: HTMLElement) => {
   if (host.dataset.state !== "idle") return;
   host.dataset.state = "loading";
   const label = host.querySelector(".pg-load");
+
   if (label) label.textContent = "Loading the editor";
+
   try {
     const { mount } = await import("./app");
-    mount(host, host.dataset.playground ?? "", host.dataset.examples?.split(",").map((id) => id.trim()));
+    mount(
+      host,
+      host.dataset.playground ?? "",
+      host.dataset.examples?.split(",").map((id) => id.trim()),
+    );
   } catch {
     host.dataset.state = "idle";
+
     if (label) label.textContent = "Could not load the editor. Try again";
   }
 };
@@ -45,6 +52,7 @@ for (const host of document.querySelectorAll<HTMLElement>("[data-playground]")) 
   button.textContent = "Edit this scene";
   button.addEventListener("click", () => load(host));
   host.replaceChildren(button);
+
   if ("eager" in host.dataset) load(host);
   else observer.observe(host);
 }

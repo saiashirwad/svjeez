@@ -20,32 +20,63 @@ export function match(a: readonly CodeWord[], b: readonly CodeWord[]): [number, 
   const named = a.flatMap((w, i): [number, number][] => {
     if (w.id === undefined) return [];
     const k = a.slice(0, i).filter((v) => v.id === w.id).length;
-    const j = b.findIndex((v, j) => v.id === w.id && b.slice(0, j).filter((u) => u.id === w.id).length === k);
+
+    const j = b.findIndex(
+      (v, j) => v.id === w.id && b.slice(0, j).filter((u) => u.id === w.id).length === k,
+    );
+
     return j < 0 ? [] : [[i, j]];
   });
-  const [ia, ib] = [a.flatMap((_, i) => (named.some(([x]) => x === i) ? [] : [i])), b.flatMap((_, j) => (named.some(([, y]) => y === j) ? [] : [j]))];
-  return [...named, ...unnamed(ia.map((i) => a[i]!), ib.map((j) => b[j]!)).map(([i, j]): [number, number] => [ia[i]!, ib[j]!])];
+
+  const [ia, ib] = [
+    a.flatMap((_, i) => (named.some(([x]) => x === i) ? [] : [i])),
+    b.flatMap((_, j) => (named.some(([, y]) => y === j) ? [] : [j])),
+  ];
+
+  return [
+    ...named,
+    ...unnamed(
+      ia.map((i) => a[i]!),
+      ib.map((j) => b[j]!),
+    ).map(([i, j]): [number, number] => [ia[i]!, ib[j]!]),
+  ];
 }
 
 const unnamed = (a: readonly CodeWord[], b: readonly CodeWord[]): [number, number][] => {
   const lcs = Array.from({ length: a.length + 1 }, () => new Uint32Array(b.length + 1));
+
   for (let i = a.length - 1; i >= 0; i--)
-    for (let j = b.length - 1; j >= 0; j--) lcs[i]![j] = a[i]!.text === b[j]!.text ? 1 + lcs[i + 1]![j + 1]! : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
+    for (let j = b.length - 1; j >= 0; j--)
+      lcs[i]![j] =
+        a[i]!.text === b[j]!.text
+          ? 1 + lcs[i + 1]![j + 1]!
+          : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
   const pairs: [number, number][] = [];
-  for (let i = 0, j = 0; i < a.length && j < b.length; ) {
+
+  for (let i = 0, j = 0; i < a.length && j < b.length;) {
     if (a[i]!.text === b[j]!.text) pairs.push([i++, j++]);
     else if (lcs[i + 1]![j]! >= lcs[i]![j + 1]!) i++;
     else j++;
   }
+
   const [usedA, usedB] = [new Set(pairs.map(([i]) => i)), new Set(pairs.map(([, j]) => j))];
   const distance = ([i, j]: [number, number]) => Math.hypot(a[i]!.x - b[j]!.x, a[i]!.y - b[j]!.y);
-  const candidates = a.flatMap((w, i) => (usedA.has(i) ? [] : b.flatMap((v, j): [number, number][] => (usedB.has(j) || v.text !== w.text ? [] : [[i, j]]))));
+
+  const candidates = a.flatMap((w, i) =>
+    usedA.has(i)
+      ? []
+      : b.flatMap((v, j): [number, number][] =>
+          usedB.has(j) || v.text !== w.text ? [] : [[i, j]],
+        ),
+  );
+
   for (const pair of candidates.sort((p, q) => distance(p) - distance(q))) {
     if (usedA.has(pair[0]) || usedB.has(pair[1])) continue;
     usedA.add(pair[0]);
     usedB.add(pair[1]);
     pairs.push(pair);
   }
+
   return pairs;
 };
 
@@ -59,17 +90,31 @@ interface Chain {
  * Animate code from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
  * `spans[i]` is when the move into `versions[i + 1]` runs; `end` is when the last one settles, or 0 for a single version.
  */
-export function morph(versions: readonly Code[], { at, over = 0.8, gutter = false }: MorphOptions): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
-  if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error(`morph() needs one start per transition and a positive duration, got ${versions.length} versions, ${at.length} starts and over ${over}.`);
+export function morph(
+  versions: readonly Code[],
+  { at, over = 0.8, gutter = false }: MorphOptions,
+): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
+  if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0))
+    throw new Error(
+      `morph() needs one start per transition and a positive duration, got ${versions.length} versions, ${at.length} starts and over ${over}.`,
+    );
   at.forEach((start, i) => {
-    if (i > 0 && start < at[i - 1]! + over) throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
+    if (i > 0 && start < at[i - 1]! + over)
+      throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
   });
   const half = over / 2;
+
   const born = (word: CodeWord, code: Code, start?: Seconds): Chain => ({
     word,
     code,
-    track: start === undefined ? undefined : motion({ opacity: 0 }).at(start + half).to({ opacity: 1 }, half),
+    track:
+      start === undefined
+        ? undefined
+        : motion({ opacity: 0 })
+            .at(start + half)
+            .to({ opacity: 1 }, half),
   });
+
   const chains = versions[0]!.words.map((word) => born(word, versions[0]!));
   let live = chains.slice();
   at.forEach((start, i) => {
@@ -78,24 +123,44 @@ export function morph(versions: readonly Code[], { at, over = 0.8, gutter = fals
     const kept = new Map(pairs.map(([a, b]) => [b, a]));
     const stays = new Set(pairs.map(([a]) => a));
     const gone = live.filter((_, a) => !stays.has(a));
-    for (const chain of gone) chain.track = (chain.track ?? motion<{}>()).at(start).to({ opacity: 0 }, half);
+
+    for (const chain of gone)
+      chain.track = (chain.track ?? motion<{}>()).at(start).to({ opacity: 0 }, half);
     live = after.words.map((word, j) => {
       const a = kept.get(j);
+
       if (a === undefined) return chains[chains.push(born(word, after, start)) - 1]!;
       const [chain, from] = [live[a]!, before.words[a]!];
       const to = { x: word.x - chain.word.x, y: word.y - chain.word.y };
+
       if (from.text === word.text) {
         chain.track = (chain.track ?? motion<{}>()).at(start).to(to, over, ease.inOut);
+
         return chain;
       }
-      chain.track = (chain.track ?? motion<{}>()).at(start).to({ ...to, opacity: 0 }, over, ease.inOut);
-      const next: Chain = { word, code: after, track: motion({ x: from.x - word.x, y: from.y - word.y, opacity: 0 }).at(start).to({ x: 0, y: 0, opacity: 1 }, over, ease.inOut) };
+
+      chain.track = (chain.track ?? motion<{}>())
+        .at(start)
+        .to({ ...to, opacity: 0 }, over, ease.inOut);
+
+      const next: Chain = {
+        word,
+        code: after,
+        track: motion({ x: from.x - word.x, y: from.y - word.y, opacity: 0 })
+          .at(start)
+          .to({ x: 0, y: 0, opacity: 1 }, over, ease.inOut),
+      };
+
       return chains[chains.push(next) - 1]!;
     });
   });
   const numbers = gutter ? lineNumbers(versions, at, over) : [];
+
   return {
-    node: el.g({}, [numbers, chains.map((chain) => text(chain.word, chain.code.metrics, chain.track))]),
+    node: el.g({}, [
+      numbers,
+      chains.map((chain) => text(chain.word, chain.code.metrics, chain.track)),
+    ]),
     spans: at.map((start): Span => ({ at: start, over })),
     end: at.length > 0 ? at.at(-1)! + over : 0,
   };
@@ -107,7 +172,10 @@ const lineNumbers = (versions: readonly Code[], at: readonly Seconds[], over: Se
     let track = motion({ opacity: shown(versions[0]!) ? 1 : 0 });
     at.forEach((start, k) => {
       const [was, is] = [shown(versions[k]!), shown(versions[k + 1]!)];
-      if (was !== is) track = track.at(is ? start + over / 2 : start).to({ opacity: is ? 1 : 0 }, over / 2);
+
+      if (was !== is)
+        track = track.at(is ? start + over / 2 : start).to({ opacity: is ? 1 : 0 }, over / 2);
     });
+
     return number(i + 1, versions[0]!.metrics, track);
   });

@@ -20,7 +20,15 @@ const team = tree(
       b: { label: "Tests", parent: "build" },
     },
   },
-  { theme, x: W / 2, y: BAR + (H - BAR) / 2, anchor: "center", fontSize: 12, class: "sans", play: { at: 0.5, step: 0.5 } },
+  {
+    theme,
+    x: W / 2,
+    y: BAR + (H - BAR) / 2,
+    anchor: "center",
+    fontSize: 12,
+    class: "sans",
+    play: { at: 0.5, step: 0.5 },
+  },
 );
 
 export default function build(): string {
@@ -38,7 +46,11 @@ export default function build(): string {
       {win.node}
       <g animation={outro(D)}>
         {team.node}
-        <circle r={4.5} fill={theme.base09} animation={travel(team.route("a", "b"), { at: 3, speed: 170 })} />
+        <circle
+          r={4.5}
+          fill={theme.base09}
+          animation={travel(team.route("a", "b"), { at: 3, speed: 170 })}
+        />
       </g>
     </>,
   );

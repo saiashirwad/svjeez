@@ -3,6 +3,7 @@ import { terminal, appWindow } from "svjeez/extras";
 import { css, mono, theme } from "../style";
 
 const shell = appWindow(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic" });
+
 const session = terminal(
   [
     { cmd: "bun add svjeez", output: [[["muted", "installed svjeez@0.2.0"]]] },
@@ -13,7 +14,15 @@ const session = terminal(
 
 export default function build(): string {
   return render(
-    { width: 440, height: 210, duration: session.end + 2, title: "Terminal", desc: "Two commands typed into a terminal window, each followed by its output.", css, reducedMotion: { at: session.end + 1 } },
+    {
+      width: 440,
+      height: 210,
+      duration: session.end + 2,
+      title: "Terminal",
+      desc: "Two commands typed into a terminal window, each followed by its output.",
+      css,
+      reducedMotion: { at: session.end + 1 },
+    },
     <>
       <rect width="100%" height="100%" fill={theme.base01} />
       <g fontFamily={mono}>{shell.node}</g>

@@ -12,13 +12,22 @@ const session = terminal(
   [
     {
       cmd: "npx svjeez frames hello.tsx --times 0,1.5,3",
-      output: [[["muted", "loop 4s, light"]], [["green", "frames/frame-00-0_000s.png"]], [["green", "frames/frame-01-1_500s.png"]], [["green", "frames/frame-02-3_000s.png"]]],
+      output: [
+        [["muted", "loop 4s, light"]],
+        [["green", "frames/frame-00-0_000s.png"]],
+        [["green", "frames/frame-01-1_500s.png"]],
+        [["green", "frames/frame-02-3_000s.png"]],
+      ],
     },
     { cmd: "npx svjeez svg hello.tsx --out hello.svg" },
-    { cmd: "npx svjeez skill --install", output: [[["muted", "installed the svjeez skill in .claude/skills/svjeez"]]] },
+    {
+      cmd: "npx svjeez skill --install",
+      output: [[["muted", "installed the svjeez skill in .claude/skills/svjeez"]]],
+    },
   ],
   { theme, font: mono, x: 24, y: BAR + 22, fontSize: 12.5, lineHeight: 1.75, cps: 90, gap: 0.35 },
 );
+
 const D = Math.ceil(session.end) + 3;
 
 export default function build(): string {

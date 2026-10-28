@@ -1,7 +1,13 @@
 import type { Paint } from "./attributes";
 import type { TagChannels } from "./channels";
 import type { Ref } from "./defs";
-import { regularFace, type Font, type FontFamily, type FontStyle, type GlyphPath } from "./font/font";
+import {
+  regularFace,
+  type Font,
+  type FontFamily,
+  type FontStyle,
+  type GlyphPath,
+} from "./font/font";
 import type { Stack } from "./motion";
 import type { SvgNode } from "./svg";
 
@@ -34,12 +40,52 @@ export interface GlyphsProps {
 }
 
 /** A line of text drawn as one path per glyph. No font is embedded; the outlines are the drawing. */
-export function Glyphs({ font, weight, style, text, size, x = 0, y = 0, fill, stroke, strokeWidth, opacity, filter, class: className, alt, animation }: GlyphsProps): SvgNode {
-  const face = "faces" in font ? (weight === undefined && style === undefined ? regularFace(font) : font.face(weight, style)) : font;
+export function Glyphs({
+  font,
+  weight,
+  style,
+  text,
+  size,
+  x = 0,
+  y = 0,
+  fill,
+  stroke,
+  strokeWidth,
+  opacity,
+  filter,
+  class: className,
+  alt,
+  animation,
+}: GlyphsProps): SvgNode {
+  const face =
+    "faces" in font
+      ? weight === undefined && style === undefined
+        ? regularFace(font)
+        : font.face(weight, style)
+      : font;
+
   const glyphs = face.path(text, { size, x, y }).glyphs;
+
   return (
-    <g role="img" aria-label={alt ?? text} fill={fill} stroke={stroke} strokeWidth={strokeWidth} opacity={opacity} filter={filter} class={className}>
-      {glyphs.map((glyph, index) => glyph.d && <path d={glyph.d} animation={typeof animation === "function" ? animation(glyph, index) : animation} />)}
+    <g
+      role="img"
+      aria-label={alt ?? text}
+      fill={fill}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      opacity={opacity}
+      filter={filter}
+      class={className}
+    >
+      {glyphs.map(
+        (glyph, index) =>
+          glyph.d && (
+            <path
+              d={glyph.d}
+              animation={typeof animation === "function" ? animation(glyph, index) : animation}
+            />
+          ),
+      )}
     </g>
   );
 }

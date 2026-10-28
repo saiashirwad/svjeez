@@ -6,4 +6,7 @@ export interface Part {
 }
 
 export const layer = (parts: readonly Part[]): SvgNode =>
-  el.g({}, [...parts].sort((a, b) => a.depth - b.depth).map((part) => part.node));
+  el.g(
+    {},
+    [...parts].sort((a, b) => a.depth - b.depth).map((part) => part.node),
+  );

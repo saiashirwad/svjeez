@@ -32,6 +32,7 @@ import { shikiTheme } from "../styles/code";
 
 // A scene shows its poster whenever the play budget holds it back, so posters render at 2x to stay sharp on retina screens.
 const live = (scene: () => string) => getScene(scene, { posters: { scale: 2, quality: 0.9, background: "transparent" } });
+
 const s = {
   hero: live(hero),
   heroTall: live(heroTall),
@@ -55,6 +56,7 @@ const s = {
   whereDocs: live(whereDocs),
   whereMail: live(whereMail),
 };
+
 const totalKB = Math.round(Object.values(s).reduce((sum, scene) => sum + scene.gzip, 0) / 1024);
 
 const adaptive = `const { theme, css } = adaptive({
@@ -66,6 +68,7 @@ const adaptive = `const { theme, css } = adaptive({
 render({ css },
   <rect fill={theme.base00} />,
 );`;
+
 const start = `npm i svjeez
 npx svjeez frames scene.tsx --sheet
 npx svjeez svg scene.tsx --out scene.svg`;

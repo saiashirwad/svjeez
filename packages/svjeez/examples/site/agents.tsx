@@ -5,55 +5,102 @@ import { mono, theme } from "../style";
 
 // A desktop: a soft wallpaper, a menu bar, a terminal installing the skill, and an agent writing a scene with it.
 const MENU = 30;
-const wallpaper = def.linearGradient({ x1: 0, y1: 0, x2: 1, y2: 1 }, (
+
+const wallpaper = def.linearGradient(
+  { x1: 0, y1: 0, x2: 1, y2: 1 },
   <>
     <stop offset={0} stopColor="var(--wall-a)" />
     <stop offset={1} stopColor="var(--wall-b)" />
-  </>
-));
-const WALL_CSS = "svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}\n@media (prefers-color-scheme:light){svg{--wall-a:#D9E7FB;--wall-b:#DDF3E6;--bar:#FFFFFF}}";
+  </>,
+);
+
+const WALL_CSS =
+  "svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}\n@media (prefers-color-scheme:light){svg{--wall-a:#D9E7FB;--wall-b:#DDF3E6;--bar:#FFFFFF}}";
 
 const shadowed = (x: number, y: number, w: number, h: number) =>
-  [18, 10, 4].map((grow, i) => <rect x={x - grow} y={y - grow + 8} width={w + 2 * grow} height={h + 2 * grow} rx={14 + grow} fill="#000" opacity={0.012 + i * 0.01} />);
+  [18, 10, 4].map((grow, i) => (
+    <rect
+      x={x - grow}
+      y={y - grow + 8}
+      width={w + 2 * grow}
+      height={h + 2 * grow}
+      rx={14 + grow}
+      fill="#000"
+      opacity={0.012 + i * 0.01}
+    />
+  ));
 
 /** `tall` stacks the terminal over the agent for a phone. */
 export const make = (tall = false): string => {
-const W = tall ? 358 : 1032;
-const H = tall ? 578 : 560;
-const term = tall ? rect(12, 44, 334, 160) : rect(44, 64, 440, 290);
-const agent = tall ? rect(12, 216, 334, 346) : rect(516, 112, 472, 396);
-const shell = appWindow(term, { theme, title: "~/project, zsh", dots: "traffic", class: "sans" });
-const session = terminal(
-  [
-    { cmd: "npx svjeez skill --install", output: [[["muted", "installed the svjeez skill in"]], [["muted", ".claude/skills/svjeez"]]] },
-    { cmd: "ls .claude/skills/svjeez", output: [["SKILL.md  examples"]] },
-  ],
-  { theme, font: mono, at: 0.6, x: shell.body.x + 22, y: shell.body.y + 18, fontSize: tall ? 11 : 12.5, lineHeight: 1.75, cps: 90, gap: 0.3 },
-);
+  const W = tall ? 358 : 1032;
+  const H = tall ? 578 : 560;
+  const term = tall ? rect(12, 44, 334, 160) : rect(44, 64, 440, 290);
+  const agent = tall ? rect(12, 216, 334, 346) : rect(516, 112, 472, 396);
+  const shell = appWindow(term, { theme, title: "~/project, zsh", dots: "traffic", class: "sans" });
 
-const agentWin = appWindow(agent, { theme, title: "agent", dots: "traffic", class: "sans" });
-const you = (text: string) => [["fn", "you"], "   ", text] as const;
-const step = (verb: string, what: string) => [["muted", "▸"], " ", ["keyword", verb.padEnd(6)], what] as const;
-const closing: CodeTokens = tall
-  ? [[["green", "✓"], " The arc closes at 2s and"], ["  the loop is seamless."]]
-  : [[["green", "✓"], " The arc closes at 2s and the loop is seamless."]];
-const transcript = code(
-  [
-    you("make a loading spinner svg, 2s loop"),
-    [],
-    step("read", ".claude/skills/svjeez/SKILL.md"),
-    step("write", "spinner.tsx"),
-    step("run", "svjeez frames spinner.tsx --sheet"),
-    step("look", "frames/sheet.png"),
-    [],
-    ...closing,
-  ],
-  { theme, font: mono, x: agentWin.body.x + 20, y: agentWin.body.y + 20, fontSize: tall ? 11 : 12.5, lineHeight: 1.85 },
-);
-const SHOW = session.end + 0.6;
-const shown = reveal(transcript, { at: SHOW, blocks: "line", step: 0.6, over: 0.3 });
-const D = Math.ceil((shown.end + 4) / 2) * 2;
-const spin = { x: agentWin.body.x + 20, y: tall ? transcript.bounds.y + transcript.bounds.h + 14 : agentWin.body.y + 250 };
+  const session = terminal(
+    [
+      {
+        cmd: "npx svjeez skill --install",
+        output: [
+          [["muted", "installed the svjeez skill in"]],
+          [["muted", ".claude/skills/svjeez"]],
+        ],
+      },
+      { cmd: "ls .claude/skills/svjeez", output: [["SKILL.md  examples"]] },
+    ],
+    {
+      theme,
+      font: mono,
+      at: 0.6,
+      x: shell.body.x + 22,
+      y: shell.body.y + 18,
+      fontSize: tall ? 11 : 12.5,
+      lineHeight: 1.75,
+      cps: 90,
+      gap: 0.3,
+    },
+  );
+
+  const agentWin = appWindow(agent, { theme, title: "agent", dots: "traffic", class: "sans" });
+  const you = (text: string) => [["fn", "you"], "   ", text] as const;
+
+  const step = (verb: string, what: string) =>
+    [["muted", "▸"], " ", ["keyword", verb.padEnd(6)], what] as const;
+
+  const closing: CodeTokens = tall
+    ? [[["green", "✓"], " The arc closes at 2s and"], ["  the loop is seamless."]]
+    : [[["green", "✓"], " The arc closes at 2s and the loop is seamless."]];
+
+  const transcript = code(
+    [
+      you("make a loading spinner svg, 2s loop"),
+      [],
+      step("read", ".claude/skills/svjeez/SKILL.md"),
+      step("write", "spinner.tsx"),
+      step("run", "svjeez frames spinner.tsx --sheet"),
+      step("look", "frames/sheet.png"),
+      [],
+      ...closing,
+    ],
+    {
+      theme,
+      font: mono,
+      x: agentWin.body.x + 20,
+      y: agentWin.body.y + 20,
+      fontSize: tall ? 11 : 12.5,
+      lineHeight: 1.85,
+    },
+  );
+
+  const SHOW = session.end + 0.6;
+  const shown = reveal(transcript, { at: SHOW, blocks: "line", step: 0.6, over: 0.3 });
+  const D = Math.ceil((shown.end + 4) / 2) * 2;
+
+  const spin = {
+    x: agentWin.body.x + 20,
+    y: tall ? transcript.bounds.y + transcript.bounds.h + 14 : agentWin.body.y + 250,
+  };
 
   return render(
     {
@@ -67,28 +114,56 @@ const spin = { x: agentWin.body.x + 20, y: tall ? transcript.bounds.y + transcri
     },
     <>
       <rect width={W} height={H} rx={12} fill={wallpaper} />
-      <path d={`M0 ${MENU}H${W}V12a12 12 0 0 0 -12 -12H12A12 12 0 0 0 0 12Z`} fill="var(--bar)" opacity={0.72} />
+      <path
+        d={`M0 ${MENU}H${W}V12a12 12 0 0 0 -12 -12H12A12 12 0 0 0 0 12Z`}
+        fill="var(--bar)"
+        opacity={0.72}
+      />
       <g class="sans" fontSize={13} fill={theme.base05}>
         <rect x={18} y={8} width={14} height={14} rx={4} fill={theme.base0B} />
-        <text x={46} y={20} fontWeight={700}>Terminal</text>
+        <text x={46} y={20} fontWeight={700}>
+          Terminal
+        </text>
         {(tall ? ["Shell", "Edit"] : ["Shell", "Edit", "View", "Window", "Help"]).map((name, i) => (
-          <text x={116 + i * 58} y={20}>{name}</text>
+          <text x={116 + i * 58} y={20}>
+            {name}
+          </text>
         ))}
-        <text x={W - 20} y={20} textAnchor="end">Wed 9:41</text>
+        <text x={W - 20} y={20} textAnchor="end">
+          Wed 9:41
+        </text>
       </g>
       {shadowed(term.x, term.y, term.w, term.h)}
       {shell.node}
       {shadowed(agent.x, agent.y, agent.w, agent.h)}
       {agentWin.node}
-      <g animation={motion({ opacity: 1 }).at(D - 0.5).to({ opacity: 0 }, 0.5)}>
+      <g
+        animation={motion({ opacity: 1 })
+          .at(D - 0.5)
+          .to({ opacity: 0 }, 0.5)}
+      >
         {session.node}
         {shown.node}
-        <g animation={enter({ at: shown.spans[4]!.at + 0.3, over: 0.5 }, { opacity: 0, scale: 0.9 }, ease.out)}>
+        <g
+          animation={enter(
+            { at: shown.spans[4]!.at + 0.3, over: 0.5 },
+            { opacity: 0, scale: 0.9 },
+            ease.out,
+          )}
+        >
           <rect x={spin.x} y={spin.y} width={120} height={84} rx={10} fill={theme.base01} />
           <g transform={`translate(${spin.x + 60} ${spin.y + 42})`}>
             <circle r={18} fill="none" stroke={theme.base02} strokeWidth={5} />
             <g animation={motion({ rotate: 0 }).at(0).to({ rotate: 360 }, 1, ease.linear).loop(1)}>
-              <circle r={18} fill="none" stroke={theme.base0D} strokeWidth={5} strokeLinecap="round" pathLength={1} strokeDasharray="0.28 1" />
+              <circle
+                r={18}
+                fill="none"
+                stroke={theme.base0D}
+                strokeWidth={5}
+                strokeLinecap="round"
+                pathLength={1}
+                strokeDasharray="0.28 1"
+              />
             </g>
           </g>
         </g>

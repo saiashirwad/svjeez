@@ -7,22 +7,33 @@ import { layered, type LayeredInput } from "../src/layout/layered";
 import { sequence } from "../src/layout/sequence";
 import { tree } from "../src/layout/tree";
 
-const overlap = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+const overlap = (a: Box, b: Box) =>
+  a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 const onBorder = (p: Point, b: Box) => {
   const near = (u: number, v: number) => Math.abs(u - v) < 1e-6;
   const inX = p.x >= b.x - 1e-6 && p.x <= b.x + b.w + 1e-6;
   const inY = p.y >= b.y - 1e-6 && p.y <= b.y + b.h + 1e-6;
-  return ((near(p.x, b.x) || near(p.x, b.x + b.w)) && inY) || ((near(p.y, b.y) || near(p.y, b.y + b.h)) && inX);
+
+  return (
+    ((near(p.x, b.x) || near(p.x, b.x + b.w)) && inY) ||
+    ((near(p.y, b.y) || near(p.y, b.y + b.h)) && inX)
+  );
 };
 
-const nodes = (ids: string, w = 80, h = 36) => ids.split(" ").map((id, i) => ({ id, w: w + (i % 3) * 20, h: h + (i % 2) * 14 }));
-const edges = (list: string) => list.split(" ").map((pair) => ({ from: pair.split(">")[0]!, to: pair.split(">")[1]! }));
+const nodes = (ids: string, w = 80, h = 36) =>
+  ids.split(" ").map((id, i) => ({ id, w: w + (i % 3) * 20, h: h + (i % 2) * 14 }));
+
+const edges = (list: string) =>
+  list.split(" ").map((pair) => ({ from: pair.split(">")[0]!, to: pair.split(">")[1]! }));
 
 const graphs: Record<string, LayeredInput> = {
   chain: { nodes: nodes("a b c d"), edges: edges("a>b b>c c>d") },
   diamond: { nodes: nodes("a b c d"), edges: edges("a>b a>c b>d c>d") },
-  cycle: { nodes: nodes("idle run wait done"), edges: edges("idle>run run>wait wait>run run>idle run>done") },
+  cycle: {
+    nodes: nodes("idle run wait done"),
+    edges: edges("idle>run run>wait wait>run run>idle run>done"),
+  },
   long: { nodes: nodes("a b c d e"), edges: edges("a>b b>c c>d a>d a>e b>e") },
   wide: { nodes: nodes("r a b c d e f g"), edges: edges("r>a r>b r>c r>d a>e b>e c>f d>g a>g") },
   grouped: {
@@ -47,13 +58,19 @@ describe("layered", () => {
       const boxes = [...out.nodes.entries()];
 
       test(`${name} ${direction}: no two nodes overlap`, () => {
-        for (const [i, [a, ba]] of boxes.entries()) for (const [b, bb] of boxes.slice(i + 1)) expect(`${a}/${b} ${overlap(ba, bb)}`).toBe(`${a}/${b} false`);
+        for (const [i, [a, ba]] of boxes.entries())
+          for (const [b, bb] of boxes.slice(i + 1))
+            expect(`${a}/${b} ${overlap(ba, bb)}`).toBe(`${a}/${b} false`);
       });
 
       test(`${name} ${direction}: no node sits inside a group it is not in`, () => {
         for (const g of graph.groups ?? []) {
           const box = out.groups.get(g.id)!;
-          for (const [id, b] of boxes) expect(`${id} in ${g.id}: ${overlap(b, box)}`).toBe(`${id} in ${g.id}: ${g.members.includes(id)}`);
+
+          for (const [id, b] of boxes)
+            expect(`${id} in ${g.id}: ${overlap(b, box)}`).toBe(
+              `${id} in ${g.id}: ${g.members.includes(id)}`,
+            );
         }
       });
 
@@ -61,12 +78,15 @@ describe("layered", () => {
         for (const e of out.edges) {
           expect(onBorder(e.points[0]!, out.nodes.get(e.from)!)).toBe(true);
           expect(onBorder(e.points.at(-1)!, out.nodes.get(e.to)!)).toBe(true);
-          for (const [k, p] of e.points.slice(1).entries()) expect(p.x === e.points[k]!.x || p.y === e.points[k]!.y).toBe(true);
+
+          for (const [k, p] of e.points.slice(1).entries())
+            expect(p.x === e.points[k]!.x || p.y === e.points[k]!.y).toBe(true);
         }
       });
 
       test(`${name} ${direction}: ranks advance along the direction`, () => {
         const along = (b: Box) => (direction === "TB" ? [b.y, b.y + b.h] : [b.x, b.x + b.w]);
+
         for (const e of graph.edges) {
           const [from, to] = [out.nodes.get(e.from)!, out.nodes.get(e.to)!];
           const [ra, rb] = [out.rank.get(e.from)!, out.rank.get(e.to)!];
@@ -86,14 +106,26 @@ describe("layered", () => {
   });
 
   test("a chain with backward edges round both sides stays straight", () => {
-    const out = layered({ nodes: nodes("start closed open half"), edges: edges("start>closed closed>open open>half half>closed half>open") });
-    const centers = ["start", "closed", "open", "half"].map((id) => out.nodes.get(id)!.x + out.nodes.get(id)!.w / 2);
+    const out = layered({
+      nodes: nodes("start closed open half"),
+      edges: edges("start>closed closed>open open>half half>closed half>open"),
+    });
+
+    const centers = ["start", "closed", "open", "half"].map(
+      (id) => out.nodes.get(id)!.x + out.nodes.get(id)!.w / 2,
+    );
+
     for (const x of centers) expect(x).toBeCloseTo(centers[0]!, 3);
+
     for (const e of out.edges.slice(0, 3)) expect(e.points).toHaveLength(2);
   });
 
   test("a wide node sends each of its edges out from above its target", () => {
-    const out = layered({ nodes: [{ id: "hub", w: 400, h: 40 }, ...nodes("a b c")], edges: edges("hub>a hub>b hub>c") });
+    const out = layered({
+      nodes: [{ id: "hub", w: 400, h: 40 }, ...nodes("a b c")],
+      edges: edges("hub>a hub>b hub>c"),
+    });
+
     for (const e of out.edges) expect(e.points.length).toBeLessThanOrEqual(2);
   });
 
@@ -106,21 +138,43 @@ describe("layered", () => {
   });
 
   test("an edge label sits beside its edge, clear of every node", () => {
-    const out = layered({ nodes: nodes("a b c"), edges: [{ from: "a", to: "b", label: { w: 40, h: 16 } }, { from: "a", to: "c", label: { w: 30, h: 16 } }] });
-    for (const e of out.edges) for (const b of out.nodes.values()) expect(overlap(e.label!, b)).toBe(false);
+    const out = layered({
+      nodes: nodes("a b c"),
+      edges: [
+        { from: "a", to: "b", label: { w: 40, h: 16 } },
+        { from: "a", to: "c", label: { w: 30, h: 16 } },
+      ],
+    });
+
+    for (const e of out.edges)
+      for (const b of out.nodes.values()) expect(overlap(e.label!, b)).toBe(false);
   });
 
   test("edges both ways between two nodes take separate lines and labels", () => {
     const label = { w: 40, h: 16 };
-    const out = layered({ nodes: nodes("a b c"), edges: [{ from: "a", to: "b", label }, { from: "b", to: "a", label }, { from: "a", to: "b", label }, { from: "b", to: "c" }] });
+
+    const out = layered({
+      nodes: nodes("a b c"),
+      edges: [
+        { from: "a", to: "b", label },
+        { from: "b", to: "a", label },
+        { from: "a", to: "b", label },
+        { from: "b", to: "c" },
+      ],
+    });
+
     const [ab, ba, ab2] = out.edges;
     expect(ab!.points).not.toEqual([...ba!.points].reverse());
     expect(ab!.points).not.toEqual(ab2!.points);
-    expect([overlap(ab!.label!, ba!.label!), overlap(ab!.label!, ab2!.label!)]).toEqual([false, false]);
+    expect([overlap(ab!.label!, ba!.label!), overlap(ab!.label!, ab2!.label!)]).toEqual([
+      false,
+      false,
+    ]);
   });
 
   describe("edges keep clear of each other", () => {
     const label = (text: string) => ({ w: text.length * 7.2, h: 17 });
+
     const routed: Record<string, LayeredInput> = {
       "state example": {
         nodes: [
@@ -134,11 +188,27 @@ describe("layered", () => {
         ],
         edges: [
           { from: "start", to: "idle" },
-          ...[["idle", "planning", "task"], ["planning", "acting", "plan"], ["acting", "planning", "result"], ["acting", "waiting", "ask"], ["waiting", "planning", "reply"], ["acting", "done", "finish"], ["acting", "failed", "error"]].map(([from, to, text]) => ({ from: from!, to: to!, label: label(text!) })),
+          ...[
+            ["idle", "planning", "task"],
+            ["planning", "acting", "plan"],
+            ["acting", "planning", "result"],
+            ["acting", "waiting", "ask"],
+            ["waiting", "planning", "reply"],
+            ["acting", "done", "finish"],
+            ["acting", "failed", "error"],
+          ].map(([from, to, text]) => ({ from: from!, to: to!, label: label(text!) })),
         ],
       },
       "decision fanning out": {
-        nodes: [{ id: "in", w: 90, h: 39 }, { id: "check", w: 120, h: 62 }, { id: "a", w: 80, h: 39 }, { id: "b", w: 110, h: 39 }, { id: "c", w: 80, h: 39 }, { id: "d", w: 90, h: 39 }, { id: "out", w: 90, h: 39 }],
+        nodes: [
+          { id: "in", w: 90, h: 39 },
+          { id: "check", w: 120, h: 62 },
+          { id: "a", w: 80, h: 39 },
+          { id: "b", w: 110, h: 39 },
+          { id: "c", w: 80, h: 39 },
+          { id: "d", w: 90, h: 39 },
+          { id: "out", w: 90, h: 39 },
+        ],
         edges: [
           { from: "in", to: "check" },
           ...["a", "b", "c", "d"].map((to) => ({ from: "check", to, label: label(`go ${to}`) })),
@@ -146,18 +216,42 @@ describe("layered", () => {
           { from: "d", to: "check", label: label("again") },
         ],
       },
-      "two-cycle": { nodes: nodes("a b"), edges: [{ from: "a", to: "b", label: label("go") }, { from: "b", to: "a", label: label("back") }] },
+      "two-cycle": {
+        nodes: nodes("a b"),
+        edges: [
+          { from: "a", to: "b", label: label("go") },
+          { from: "b", to: "a", label: label("back") },
+        ],
+      },
       ...graphs,
     };
 
-    const segments = (points: readonly Point[]) => points.slice(1).map((q, k) => [points[k]!, q] as const);
+    const segments = (points: readonly Point[]) =>
+      points.slice(1).map((q, k) => [points[k]!, q] as const);
+
     const collinear = ([a, b]: readonly [Point, Point], [c, d]: readonly [Point, Point]) => {
-      if (a.x === b.x && c.x === d.x && Math.abs(a.x - c.x) < 0.5) return Math.min(Math.max(a.y, b.y), Math.max(c.y, d.y)) - Math.max(Math.min(a.y, b.y), Math.min(c.y, d.y)) > 0.5;
-      if (a.y === b.y && c.y === d.y && Math.abs(a.y - c.y) < 0.5) return Math.min(Math.max(a.x, b.x), Math.max(c.x, d.x)) - Math.max(Math.min(a.x, b.x), Math.min(c.x, d.x)) > 0.5;
+      if (a.x === b.x && c.x === d.x && Math.abs(a.x - c.x) < 0.5)
+        return (
+          Math.min(Math.max(a.y, b.y), Math.max(c.y, d.y)) -
+            Math.max(Math.min(a.y, b.y), Math.min(c.y, d.y)) >
+          0.5
+        );
+
+      if (a.y === b.y && c.y === d.y && Math.abs(a.y - c.y) < 0.5)
+        return (
+          Math.min(Math.max(a.x, b.x), Math.max(c.x, d.x)) -
+            Math.max(Math.min(a.x, b.x), Math.min(c.x, d.x)) >
+          0.5
+        );
+
       return false;
     };
+
     const through = ([p, q]: readonly [Point, Point], b: Box) =>
-      Math.max(p.x, q.x) > b.x + 0.5 && Math.min(p.x, q.x) < b.x + b.w - 0.5 && Math.max(p.y, q.y) > b.y + 0.5 && Math.min(p.y, q.y) < b.y + b.h - 0.5;
+      Math.max(p.x, q.x) > b.x + 0.5 &&
+      Math.min(p.x, q.x) < b.x + b.w - 0.5 &&
+      Math.max(p.y, q.y) > b.y + 0.5 &&
+      Math.min(p.y, q.y) < b.y + b.h - 0.5;
 
     for (const [name, graph] of Object.entries(routed)) {
       for (const direction of ["TB", "LR"] as const) {
@@ -165,25 +259,54 @@ describe("layered", () => {
         const lines = out.edges.map((e) => ({ ...e, segments: segments(e.points) }));
 
         test(`${name} ${direction}: no two edges share a stretch of line, except a final approach into one port`, () => {
-          const merging = (e: (typeof lines)[number], s: (typeof e.segments)[number], f: (typeof lines)[number], t: (typeof f.segments)[number]) => {
+          const merging = (
+            e: (typeof lines)[number],
+            s: (typeof e.segments)[number],
+            f: (typeof lines)[number],
+            t: (typeof f.segments)[number],
+          ) => {
             const [p, q] = [e.points.at(-1)!, f.points.at(-1)!];
+
             return s === e.segments.at(-1) && t === f.segments.at(-1) && p.x === q.x && p.y === q.y;
           };
+
           for (const [i, e] of lines.entries())
             for (const f of lines.slice(i + 1))
-              for (const s of e.segments) for (const t of f.segments) expect(`${e.from}>${e.to} / ${f.from}>${f.to}: ${collinear(s, t) && !merging(e, s, f, t)}`).toEndWith("false");
+              for (const s of e.segments)
+                for (const t of f.segments)
+                  expect(
+                    `${e.from}>${e.to} / ${f.from}>${f.to}: ${collinear(s, t) && !merging(e, s, f, t)}`,
+                  ).toEndWith("false");
         });
 
         test(`${name} ${direction}: no edge runs through a node`, () => {
-          for (const e of lines) for (const [id, b] of out.nodes) for (const s of e.segments) expect(`${e.from}>${e.to} through ${id}: ${through(s, b)}`).toEndWith("false");
+          for (const e of lines)
+            for (const [id, b] of out.nodes)
+              for (const s of e.segments)
+                expect(`${e.from}>${e.to} through ${id}: ${through(s, b)}`).toEndWith("false");
         });
 
         test(`${name} ${direction}: labels clear nodes, other labels and other edges`, () => {
           const labelled = lines.filter((e) => e.label);
+
           for (const e of labelled) {
-            for (const [id, b] of out.nodes) expect(`${e.from}>${e.to} label on ${id}: ${overlap(e.label!, b)}`).toEndWith("false");
-            for (const f of labelled) if (f !== e) expect(`${e.from}>${e.to} label on ${f.from}>${f.to} label: ${overlap(e.label!, f.label!)}`).toEndWith("false");
-            for (const f of lines) if (f !== e) for (const s of f.segments) expect(`${e.from}>${e.to} label on ${f.from}>${f.to}: ${through(s, e.label!)}`).toEndWith("false");
+            for (const [id, b] of out.nodes)
+              expect(`${e.from}>${e.to} label on ${id}: ${overlap(e.label!, b)}`).toEndWith(
+                "false",
+              );
+
+            for (const f of labelled)
+              if (f !== e)
+                expect(
+                  `${e.from}>${e.to} label on ${f.from}>${f.to} label: ${overlap(e.label!, f.label!)}`,
+                ).toEndWith("false");
+
+            for (const f of lines)
+              if (f !== e)
+                for (const s of f.segments)
+                  expect(
+                    `${e.from}>${e.to} label on ${f.from}>${f.to}: ${through(s, e.label!)}`,
+                  ).toEndWith("false");
           }
         });
       }
@@ -192,7 +315,16 @@ describe("layered", () => {
 
   test("unknown ids and a node in two groups throw", () => {
     expect(() => layered({ nodes: nodes("a"), edges: edges("a>b") })).toThrow();
-    expect(() => layered({ nodes: nodes("a b"), edges: [], groups: [{ id: "x", members: ["a"], label: { w: 1, h: 1 } }, { id: "y", members: ["a"], label: { w: 1, h: 1 } }] })).toThrow();
+    expect(() =>
+      layered({
+        nodes: nodes("a b"),
+        edges: [],
+        groups: [
+          { id: "x", members: ["a"], label: { w: 1, h: 1 } },
+          { id: "y", members: ["a"], label: { w: 1, h: 1 } },
+        ],
+      }),
+    ).toThrow();
   });
 });
 
@@ -218,19 +350,30 @@ describe("tree", () => {
 
     test(`${direction}: each parent is centered over its first and last child`, () => {
       for (const id of ["root", "a", "b", "c", "c1"]) {
-        const kids = input.nodes.filter((n) => n.parent === id).map((n) => cross(out.nodes.get(n.id)!));
+        const kids = input.nodes
+          .filter((n) => n.parent === id)
+          .map((n) => cross(out.nodes.get(n.id)!));
+
         expect(cross(out.nodes.get(id)!)).toBeCloseTo((kids[0]! + kids.at(-1)!) / 2, 6);
       }
     });
 
     test(`${direction}: subtrees never overlap and siblings keep their order`, () => {
       const boxes = [...out.nodes.values()];
-      for (const [i, a] of boxes.entries()) for (const b of boxes.slice(i + 1)) expect(overlap(a, b)).toBe(false);
-      expect(["a", "b", "c"].map((id) => cross(out.nodes.get(id)!))).toEqual(["a", "b", "c"].map((id) => cross(out.nodes.get(id)!)).sort((p, q) => p - q));
+
+      for (const [i, a] of boxes.entries())
+        for (const b of boxes.slice(i + 1)) expect(overlap(a, b)).toBe(false);
+      expect(["a", "b", "c"].map((id) => cross(out.nodes.get(id)!))).toEqual(
+        ["a", "b", "c"].map((id) => cross(out.nodes.get(id)!)).sort((p, q) => p - q),
+      );
     });
 
     test(`${direction}: edges run from the parent's border to the child's`, () => {
-      for (const e of out.edges) expect([onBorder(e.points[0]!, out.nodes.get(e.from)!), onBorder(e.points.at(-1)!, out.nodes.get(e.to)!)]).toEqual([true, true]);
+      for (const e of out.edges)
+        expect([
+          onBorder(e.points[0]!, out.nodes.get(e.from)!),
+          onBorder(e.points.at(-1)!, out.nodes.get(e.to)!),
+        ]).toEqual([true, true]);
     });
   }
 
@@ -239,9 +382,31 @@ describe("tree", () => {
   });
 
   test("two roots, an unknown parent and a cycle throw", () => {
-    expect(() => tree({ nodes: [{ id: "a", w: 1, h: 1 }, { id: "b", w: 1, h: 1 }] })).toThrow("one root");
-    expect(() => tree({ nodes: [{ id: "a", w: 1, h: 1 }, { id: "b", parent: "z", w: 1, h: 1 }] })).toThrow("unknown parent");
-    expect(() => tree({ nodes: [{ id: "r", w: 1, h: 1 }, { id: "a", parent: "b", w: 1, h: 1 }, { id: "b", parent: "a", w: 1, h: 1 }] })).toThrow("cycle");
+    expect(() =>
+      tree({
+        nodes: [
+          { id: "a", w: 1, h: 1 },
+          { id: "b", w: 1, h: 1 },
+        ],
+      }),
+    ).toThrow("one root");
+    expect(() =>
+      tree({
+        nodes: [
+          { id: "a", w: 1, h: 1 },
+          { id: "b", parent: "z", w: 1, h: 1 },
+        ],
+      }),
+    ).toThrow("unknown parent");
+    expect(() =>
+      tree({
+        nodes: [
+          { id: "r", w: 1, h: 1 },
+          { id: "a", parent: "b", w: 1, h: 1 },
+          { id: "b", parent: "a", w: 1, h: 1 },
+        ],
+      }),
+    ).toThrow("cycle");
   });
 });
 
@@ -260,10 +425,16 @@ describe("sequence", () => {
       { kind: "note", actor: "db", size: { w: 120, h: 30 } },
     ],
   });
+
   const x = (id: string) => out.lifelines.get(id)![0].x;
 
   test("every message label fits between the lifelines it spans", () => {
-    const pairs = [["user", "api"], ["api", "db"], ["user", "db"]] as const;
+    const pairs = [
+      ["user", "api"],
+      ["api", "db"],
+      ["user", "db"],
+    ] as const;
+
     pairs.forEach(([a, b], i) => {
       const label = out.rows[i]!.box;
       expect(label.x).toBeGreaterThan(x(a));
@@ -272,10 +443,15 @@ describe("sequence", () => {
   });
 
   test("arrows run lifeline to lifeline, one row below the last", () => {
-    expect(out.rows[0]!.points).toEqual([{ x: x("user"), y: out.rows[0]!.points[0]!.y }, { x: x("api"), y: out.rows[0]!.points[0]!.y }]);
+    expect(out.rows[0]!.points).toEqual([
+      { x: x("user"), y: out.rows[0]!.points[0]!.y },
+      { x: x("api"), y: out.rows[0]!.points[0]!.y },
+    ]);
     const tops = out.rows.map((r) => Math.min(r.box.y, ...r.points.map((p) => p.y)));
     expect(tops).toEqual([...tops].sort((a, b) => a - b));
-    expect(out.lifelines.get("api")![1].y).toBeGreaterThan(Math.max(...out.rows.map((r) => r.box.y + r.box.h)));
+    expect(out.lifelines.get("api")![1].y).toBeGreaterThan(
+      Math.max(...out.rows.map((r) => r.box.y + r.box.h)),
+    );
   });
 
   test("a self message's label clears the next lifeline", () => {
@@ -315,8 +491,12 @@ describe("lanes", () => {
 
 test("src/layout imports nothing outside src/layout", () => {
   const dir = join(import.meta.dir, "../src/layout");
+
   for (const file of readdirSync(dir)) {
-    const imports = [...readFileSync(join(dir, file), "utf8").matchAll(/from\s+"([^"]+)"/g)].map((m) => m[1]!);
+    const imports = [...readFileSync(join(dir, file), "utf8").matchAll(/from\s+"([^"]+)"/g)].map(
+      (m) => m[1]!,
+    );
+
     for (const path of imports) expect(`${file}: ${path}`).toMatch(/: \.\/[\w-]+$/);
   }
 });

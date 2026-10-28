@@ -26,6 +26,7 @@ export type Color =
   | NamedColor;
 
 export type Paint = Color | "none" | Ref<PaintServer>;
+
 export type Length = number | `${number}%` | `${number}px` | `${number}em`;
 
 declare const attrValue: unique symbol;
@@ -107,13 +108,30 @@ const ELEMENTS = {
     ry: attr<Length>("ry"),
   },
   circle: { ...SHAPE, cx: attr<Length>("cx"), cy: attr<Length>("cy"), r: attr<Length>("r") },
-  ellipse: { ...SHAPE, cx: attr<Length>("cx"), cy: attr<Length>("cy"), rx: attr<Length>("rx"), ry: attr<Length>("ry") },
-  line: { ...SHAPE, x1: attr<Length>("x1"), y1: attr<Length>("y1"), x2: attr<Length>("x2"), y2: attr<Length>("y2") },
+  ellipse: {
+    ...SHAPE,
+    cx: attr<Length>("cx"),
+    cy: attr<Length>("cy"),
+    rx: attr<Length>("rx"),
+    ry: attr<Length>("ry"),
+  },
+  line: {
+    ...SHAPE,
+    x1: attr<Length>("x1"),
+    y1: attr<Length>("y1"),
+    x2: attr<Length>("x2"),
+    y2: attr<Length>("y2"),
+  },
   polyline: { ...SHAPE, points: attr<string>("points") },
   polygon: { ...SHAPE, points: attr<string>("points") },
   text: TEXT,
   tspan: TEXT,
-  use: { ...PRESENTATION, href: attr<Ref<"symbol">>("href"), x: attr<Length>("x"), y: attr<Length>("y") },
+  use: {
+    ...PRESENTATION,
+    href: attr<Ref<"symbol">>("href"),
+    x: attr<Length>("x"),
+    y: attr<Length>("y"),
+  },
   image: {
     href: attr<string>("href"),
     x: attr<Length>("x"),
@@ -128,8 +146,21 @@ const ELEMENTS = {
     stopColor: attr<Color>("stop-color"),
     stopOpacity: attr<number>("stop-opacity"),
   },
-  linearGradient: { ...GRADIENT, x1: attr<number>("x1"), y1: attr<number>("y1"), x2: attr<number>("x2"), y2: attr<number>("y2") },
-  radialGradient: { ...GRADIENT, cx: attr<number>("cx"), cy: attr<number>("cy"), r: attr<number>("r"), fx: attr<number>("fx"), fy: attr<number>("fy") },
+  linearGradient: {
+    ...GRADIENT,
+    x1: attr<number>("x1"),
+    y1: attr<number>("y1"),
+    x2: attr<number>("x2"),
+    y2: attr<number>("y2"),
+  },
+  radialGradient: {
+    ...GRADIENT,
+    cx: attr<number>("cx"),
+    cy: attr<number>("cy"),
+    r: attr<number>("r"),
+    fx: attr<number>("fx"),
+    fy: attr<number>("fy"),
+  },
   pattern: {
     x: attr<Length>("x"),
     y: attr<Length>("y"),
@@ -185,7 +216,11 @@ const ELEMENTS = {
     values: attr<string>("values"),
   },
   feOffset: { ...PRIMITIVE, dx: attr<number>("dx"), dy: attr<number>("dy") },
-  feFlood: { ...PRIMITIVE, floodColor: attr<Color>("flood-color"), floodOpacity: attr<number>("flood-opacity") },
+  feFlood: {
+    ...PRIMITIVE,
+    floodColor: attr<Color>("flood-color"),
+    floodOpacity: attr<number>("flood-opacity"),
+  },
   feDropShadow: {
     ...PRIMITIVE,
     dx: attr<number>("dx"),
@@ -194,7 +229,11 @@ const ELEMENTS = {
     floodColor: attr<Color>("flood-color"),
     floodOpacity: attr<number>("flood-opacity"),
   },
-  feBlend: { ...PRIMITIVE, in2: attr<string>("in2"), mode: attr<"normal" | "screen" | "multiply" | "lighten">("mode") },
+  feBlend: {
+    ...PRIMITIVE,
+    in2: attr<string>("in2"),
+    mode: attr<"normal" | "screen" | "multiply" | "lighten">("mode"),
+  },
   feComposite: {
     ...PRIMITIVE,
     in2: attr<string>("in2"),
@@ -211,7 +250,10 @@ export const TAGS = Object.keys(ELEMENTS) as Tag[];
 type ValueOf<A> = A extends Attr<infer V> ? V : never;
 
 type ClassValue = string | readonly (string | false | null | undefined)[];
-type StyleValue = string | ({ readonly [property: string]: string | number | undefined } & PropertyValues);
+
+type StyleValue =
+  | string
+  | ({ readonly [property: string]: string | number | undefined } & PropertyValues);
 
 interface Common {
   readonly class?: ClassValue;
@@ -223,13 +265,17 @@ interface Common {
 }
 
 /** Typed attributes for one tag, for helpers like `ui(size, fill)` that return spreadable props. */
-export type Attrs<T extends Tag> = { readonly [K in keyof (typeof ELEMENTS)[T]]?: ValueOf<(typeof ELEMENTS)[T][K]> } & Common;
+export type Attrs<T extends Tag> = {
+  readonly [K in keyof (typeof ELEMENTS)[T]]?: ValueOf<(typeof ELEMENTS)[T][K]>;
+} & Common;
 
 const PASSTHROUGH = /^(?:aria-|data-)|^(?:class|style|id|role)$/;
 
 export const attributeName = (tag: string, prop: string): string => {
   if (PASSTHROUGH.test(prop)) return prop;
   const spec = (ELEMENTS as Record<string, Record<string, Attr<unknown>>>)[tag]?.[prop];
+
   if (!spec) throw new Error(`<${tag}> has no attribute "${prop}".`);
+
   return spec.name;
 };

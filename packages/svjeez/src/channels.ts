@@ -31,39 +31,173 @@ interface Spec {
 }
 
 export const CHANNELS = {
-  width: { value: number, tags: ["rect", "image"], lane: "width", composition: "replace", attr: "width", range: [0, Infinity] },
-  height: { value: number, tags: ["rect", "image"], lane: "height", composition: "replace", attr: "height", range: [0, Infinity] },
-  opacity: { value: number, tags: GRAPHICS, lane: "opacity", composition: "nest", identity: 1, range: [0, 1], collidesWith: ["opacity"], toggles: ["opacity", "visibility", "style"] },
+  width: {
+    value: number,
+    tags: ["rect", "image"],
+    lane: "width",
+    composition: "replace",
+    attr: "width",
+    range: [0, Infinity],
+  },
+  height: {
+    value: number,
+    tags: ["rect", "image"],
+    lane: "height",
+    composition: "replace",
+    attr: "height",
+    range: [0, Infinity],
+  },
+  opacity: {
+    value: number,
+    tags: GRAPHICS,
+    lane: "opacity",
+    composition: "nest",
+    identity: 1,
+    range: [0, 1],
+    collidesWith: ["opacity"],
+    toggles: ["opacity", "visibility", "style"],
+  },
   x: { value: number, tags: GRAPHICS, lane: "translate", composition: "nest", identity: 0 },
   y: { value: number, tags: GRAPHICS, lane: "translate", composition: "nest", identity: 0 },
-  scale: { value: number, tags: GRAPHICS, lane: "scale", composition: "nest", identity: 1, pivot: true, collidesWith: ["transform"], wrapsOn: ["text"] },
-  rotate: { value: number, tags: GRAPHICS, lane: "rotate", composition: "nest", identity: 0, pivot: true, collidesWith: ["transform"], wrapsOn: ["text"] },
-  blur: { value: number, tags: GRAPHICS, lane: "blur", composition: "nest", identity: 0, range: [0, Infinity], collidesWith: ["filter"], backend: "blur" },
-  draw: { value: number, tags: SHAPES, lane: "draw", composition: "replace", range: [0, 1], pins: { pathLength: "1", "stroke-dasharray": "1" } },
+  scale: {
+    value: number,
+    tags: GRAPHICS,
+    lane: "scale",
+    composition: "nest",
+    identity: 1,
+    pivot: true,
+    collidesWith: ["transform"],
+    wrapsOn: ["text"],
+  },
+  rotate: {
+    value: number,
+    tags: GRAPHICS,
+    lane: "rotate",
+    composition: "nest",
+    identity: 0,
+    pivot: true,
+    collidesWith: ["transform"],
+    wrapsOn: ["text"],
+  },
+  blur: {
+    value: number,
+    tags: GRAPHICS,
+    lane: "blur",
+    composition: "nest",
+    identity: 0,
+    range: [0, Infinity],
+    collidesWith: ["filter"],
+    backend: "blur",
+  },
+  draw: {
+    value: number,
+    tags: SHAPES,
+    lane: "draw",
+    composition: "replace",
+    range: [0, 1],
+    pins: { pathLength: "1", "stroke-dasharray": "1" },
+  },
   fill: { value: color, tags: PAINTED, lane: "fill", composition: "replace", attr: "fill" },
   stroke: { value: color, tags: PAINTED, lane: "stroke", composition: "replace", attr: "stroke" },
-  color: { value: color, tags: ["g", "use", "text", ...SHAPES], lane: "color", composition: "replace", attr: "color" },
-  stopColor: { value: color, tags: ["stop"], lane: "stop-color", composition: "replace", attr: "stop-color" },
-  stopOpacity: { value: number, tags: ["stop"], lane: "stop-opacity", composition: "replace", attr: "stop-opacity" },
-  floodColor: { value: color, tags: ["feFlood", "feDropShadow"], lane: "flood-color", composition: "replace", attr: "flood-color" },
-  floodOpacity: { value: number, tags: ["feFlood", "feDropShadow"], lane: "flood-opacity", composition: "replace", attr: "flood-opacity" },
-  stdDeviation: { value: number, tags: ["feGaussianBlur", "feDropShadow"], lane: "stdDeviation", composition: "replace", attr: "stdDeviation" },
-  baseFrequency: { value: number, tags: ["feTurbulence"], lane: "baseFrequency", composition: "replace", attr: "baseFrequency" },
-  seed: { value: number, tags: ["feTurbulence"], lane: "seed", composition: "replace", attr: "seed" },
-  displace: { value: number, tags: ["feDisplacementMap"], lane: "displace", composition: "replace", attr: "scale" },
-  dx: { value: number, tags: ["feOffset", "feDropShadow"], lane: "dx", composition: "replace", attr: "dx" },
-  dy: { value: number, tags: ["feOffset", "feDropShadow"], lane: "dy", composition: "replace", attr: "dy" },
+  color: {
+    value: color,
+    tags: ["g", "use", "text", ...SHAPES],
+    lane: "color",
+    composition: "replace",
+    attr: "color",
+  },
+  stopColor: {
+    value: color,
+    tags: ["stop"],
+    lane: "stop-color",
+    composition: "replace",
+    attr: "stop-color",
+  },
+  stopOpacity: {
+    value: number,
+    tags: ["stop"],
+    lane: "stop-opacity",
+    composition: "replace",
+    attr: "stop-opacity",
+  },
+  floodColor: {
+    value: color,
+    tags: ["feFlood", "feDropShadow"],
+    lane: "flood-color",
+    composition: "replace",
+    attr: "flood-color",
+  },
+  floodOpacity: {
+    value: number,
+    tags: ["feFlood", "feDropShadow"],
+    lane: "flood-opacity",
+    composition: "replace",
+    attr: "flood-opacity",
+  },
+  stdDeviation: {
+    value: number,
+    tags: ["feGaussianBlur", "feDropShadow"],
+    lane: "stdDeviation",
+    composition: "replace",
+    attr: "stdDeviation",
+  },
+  baseFrequency: {
+    value: number,
+    tags: ["feTurbulence"],
+    lane: "baseFrequency",
+    composition: "replace",
+    attr: "baseFrequency",
+  },
+  seed: {
+    value: number,
+    tags: ["feTurbulence"],
+    lane: "seed",
+    composition: "replace",
+    attr: "seed",
+  },
+  displace: {
+    value: number,
+    tags: ["feDisplacementMap"],
+    lane: "displace",
+    composition: "replace",
+    attr: "scale",
+  },
+  dx: {
+    value: number,
+    tags: ["feOffset", "feDropShadow"],
+    lane: "dx",
+    composition: "replace",
+    attr: "dx",
+  },
+  dy: {
+    value: number,
+    tags: ["feOffset", "feDropShadow"],
+    lane: "dy",
+    composition: "replace",
+    attr: "dy",
+  },
 } as const satisfies Record<string, Spec>;
 
 type Table = typeof CHANNELS;
 
 export type Channel = keyof Table;
+
 export type Values<K extends Channel = Channel> = { readonly [P in K]?: Table[P]["value"] };
-export type NumericChannel = { [C in Channel]: Table[C]["value"] extends number ? C : never }[Channel];
-export type RestChannel = { [C in Channel]: Table[C] extends { readonly identity: number } ? C : never }[Channel];
+
+export type NumericChannel = {
+  [C in Channel]: Table[C]["value"] extends number ? C : never;
+}[Channel];
+
+export type RestChannel = {
+  [C in Channel]: Table[C] extends { readonly identity: number } ? C : never;
+}[Channel];
+
 export type AnimatedTag = Table[Channel]["tags"][number];
+
 export type Target = Channel | Property;
+
 export type TargetValues = Values & PropertyValues;
+
 export type TargetValue = number | Color;
 
 export const valueOf = (values: TargetValues, target: Target): TargetValue | undefined =>
@@ -71,13 +205,19 @@ export const valueOf = (values: TargetValues, target: Target): TargetValue | und
 
 /** Filter primitives animate through SMIL, which cannot reach a custom property. */
 type StyledTag = Exclude<AnimatedTag, `fe${string}`>;
-export type TagChannels<T extends Tag> = { [C in Channel]: T extends Table[C]["tags"][number] ? C : never }[Channel] | (T extends StyledTag ? Property : never);
 
-const STYLED = [...new Set(Object.values(CHANNELS).flatMap((row): readonly Tag[] => row.tags))].filter((tag) => !tag.startsWith("fe"));
+export type TagChannels<T extends Tag> =
+  | { [C in Channel]: T extends Table[C]["tags"][number] ? C : never }[Channel]
+  | (T extends StyledTag ? Property : never);
+
+const STYLED = [
+  ...new Set(Object.values(CHANNELS).flatMap((row): readonly Tag[] => row.tags)),
+].filter((tag) => !tag.startsWith("fe"));
 
 export const spec = (target: Target): Spec => {
   if (!isProperty(target)) return CHANNELS[target];
   const { initial } = declarationOf(target);
+
   return { value: initial, tags: STYLED, lane: target, composition: "replace", identity: initial };
 };
 
@@ -87,16 +227,19 @@ export const isChannel = (name: string): name is Channel => Object.hasOwn(CHANNE
 export type Backend = "css" | "smil" | "blur";
 
 export const backendOf = (tag: string, channel: Target): Backend =>
-  tag.startsWith("fe") ? "smil" : spec(channel).backend ?? "css";
+  tag.startsWith("fe") ? "smil" : (spec(channel).backend ?? "css");
 
 export const laneOf = (tag: string, channel: Target): string => {
   const row = spec(channel);
-  return backendOf(tag, channel) === "smil" ? row.attr ?? channel : row.lane;
+
+  return backendOf(tag, channel) === "smil" ? (row.attr ?? channel) : row.lane;
 };
 
-export const formatValue = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
+export const formatValue = (value: Values[Channel]): string =>
+  typeof value === "number" ? num(value) : String(value);
 
 export const clamp = (channel: Channel, value: number): number => {
   const range = spec(channel).range;
+
   return range ? Math.min(range[1], Math.max(range[0], value)) : value;
 };

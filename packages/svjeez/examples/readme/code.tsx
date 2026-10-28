@@ -9,8 +9,22 @@ const before: CodeTokens = [
   [kw("const"), " total ", p("="), " ", ["fn", "sum", "call"], p("("), "xs", p(");")],
   [kw("return"), " total", p(";")],
 ];
+
 const after: CodeTokens = [
-  [kw("const"), " total ", p("="), " xs", p("."), ["fn", "reduce", "call"], p("("), "add", p(","), " ", ["number", "0"], p(");")],
+  [
+    kw("const"),
+    " total ",
+    p("="),
+    " xs",
+    p("."),
+    ["fn", "reduce", "call"],
+    p("("),
+    "add",
+    p(","),
+    " ",
+    ["number", "0"],
+    p(");"),
+  ],
   [kw("return"), " total", p(";")],
 ];
 
@@ -21,10 +35,25 @@ const m = morph([one, two, one], { at: [2, 5.5], over: 0.8, gutter: true });
 
 export default function build(): string {
   return render(
-    { width: 360, height: 110, duration: 8, title: "Code morph", desc: "A call to sum morphs into a reduce and back, with a marker following the call.", css, reducedMotion: { at: 1 } },
+    {
+      width: 360,
+      height: 110,
+      duration: 8,
+      title: "Code morph",
+      desc: "A call to sum morphs into a reduce and back, with a marker following the call.",
+      css,
+      reducedMotion: { at: 1 },
+    },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      <Marker theme={theme} stops={[{ during: { at: 0.5, over: 1 }, target: one.get("call").pad(3) }, { during: { at: 2, over: 3 }, target: two.get("call").pad(3) }, { during: { at: 5.5, over: 2 }, target: one.get("call").pad(3) }]} />
+      <Marker
+        theme={theme}
+        stops={[
+          { during: { at: 0.5, over: 1 }, target: one.get("call").pad(3) },
+          { during: { at: 2, over: 3 }, target: two.get("call").pad(3) },
+          { during: { at: 5.5, over: 2 }, target: one.get("call").pad(3) },
+        ]}
+      />
       {m.node}
     </>,
   );

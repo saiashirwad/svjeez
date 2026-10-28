@@ -15,6 +15,7 @@ const { command } = Astro.props;
     button.addEventListener("click", async () => {
       const label = button.parentElement!.querySelector("code")!;
       const before = label.innerHTML;
+
       try {
         await navigator.clipboard.writeText(button.dataset.copy!);
         label.textContent = "Copied";

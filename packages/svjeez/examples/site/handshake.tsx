@@ -19,8 +19,17 @@ const login = sequence(
       ["img", "you", "animation", { reply: true }],
     ],
   },
-  { theme, x: W / 2, y: BAR + (H - BAR) / 2, anchor: "center", fontSize: 12, class: "sans", play: { at: 0.6, step: 0.8 } },
+  {
+    theme,
+    x: W / 2,
+    y: BAR + (H - BAR) / 2,
+    anchor: "center",
+    fontSize: 12,
+    class: "sans",
+    play: { at: 0.6, step: 0.8 },
+  },
 );
+
 const D = 8;
 
 export default function build(): string {

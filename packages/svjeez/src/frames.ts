@@ -5,7 +5,9 @@ import { systemColorScheme } from "./scheme";
 export type ColorScheme = "light" | "dark";
 
 /** When to capture: exact playback times, or `count` frames spread evenly over one loop. */
-export type FrameTimes = { readonly times: readonly Seconds[]; readonly count?: never } | { readonly count: number; readonly times?: never };
+export type FrameTimes =
+  | { readonly times: readonly Seconds[]; readonly count?: never }
+  | { readonly count: number; readonly times?: never };
 
 export type FrameOptions = FrameTimes & {
   /** Device pixel ratio. Default 1. */
@@ -36,14 +38,20 @@ export interface Frames {
 
 const launch = async (executablePath?: string) => {
   const { chromium } = await import("playwright-core").catch(() => {
-    throw new Error("renderFrames() needs playwright-core. Install it with `npm i -D playwright-core`, then `npx playwright-core install chromium-headless-shell`.");
+    throw new Error(
+      "renderFrames() needs playwright-core. Install it with `npm i -D playwright-core`, then `npx playwright-core install chromium-headless-shell`.",
+    );
   });
+
   try {
     return await chromium.launch({ executablePath });
   } catch (error) {
     if (executablePath) throw error;
+
     return chromium.launch({ channel: "chrome" }).catch(() => {
-      throw new Error(`No Chromium to render with. Run \`npx playwright-core install chromium-headless-shell\`, or pass executablePath.\n${error instanceof Error ? error.message : error}`);
+      throw new Error(
+        `No Chromium to render with. Run \`npx playwright-core install chromium-headless-shell\`, or pass executablePath.\n${error instanceof Error ? error.message : error}`,
+      );
     });
   }
 };
@@ -52,7 +60,12 @@ const size = (svg: string): { width: number; height: number } => {
   const root = /<svg\b[^>]*>/.exec(svg)?.[0] ?? "";
   const width = parseFloat(/\swidth="([\d.]+)"/.exec(root)?.[1] ?? "");
   const height = parseFloat(/\sheight="([\d.]+)"/.exec(root)?.[1] ?? "");
-  if (!(width > 0 && height > 0)) throw new Error(`renderFrames() needs an <svg> root with numeric width and height, got ${width} by ${height}.`);
+
+  if (!(width > 0 && height > 0))
+    throw new Error(
+      `renderFrames() needs an <svg> root with numeric width and height, got ${width} by ${height}.`,
+    );
+
   return { width, height };
 };
 
@@ -63,7 +76,11 @@ const CAPTION = 20;
 
 const label = (time: Seconds): string => `${Number(time.toFixed(3))}s`;
 
-const sheetHtml = (frames: readonly Frame[], width: number, columns: number): string => `<!doctype html>
+const sheetHtml = (
+  frames: readonly Frame[],
+  width: number,
+  columns: number,
+): string => `<!doctype html>
 <style>
   :root { color-scheme: light dark; background: Canvas; font: 12px ui-monospace, Menlo, monospace }
   body { margin: 0; padding: ${GAP}px; display: grid; grid-template-columns: repeat(${columns}, ${width}px); gap: ${GAP}px; width: max-content }
@@ -75,36 +92,77 @@ ${frames.map((frame) => `<figure><img src="data:image/png;base64,${Buffer.from(f
 export const renderFrames = async (svg: string, options: FrameOptions): Promise<Frames> => {
   const { width, height } = size(svg);
   const scale = options.scale ?? 1;
-  const colorScheme = !options.colorScheme || options.colorScheme === "system" ? systemColorScheme() : options.colorScheme;
-  if (!(scale > 0 && Number.isFinite(scale))) throw new Error(`renderFrames() needs a positive, finite scale, got ${scale}.`);
+
+  const colorScheme =
+    !options.colorScheme || options.colorScheme === "system"
+      ? systemColorScheme()
+      : options.colorScheme;
+
+  if (!(scale > 0 && Number.isFinite(scale)))
+    throw new Error(`renderFrames() needs a positive, finite scale, got ${scale}.`);
+
   if (options.times !== undefined) {
-    for (const time of options.times) if (!(Number.isFinite(time) && time >= 0)) throw new Error(`renderFrames() needs finite, non-negative times, got ${time}.`);
+    for (const time of options.times)
+      if (!(Number.isFinite(time) && time >= 0))
+        throw new Error(`renderFrames() needs finite, non-negative times, got ${time}.`);
   } else if (!(Number.isInteger(options.count) && options.count > 0)) {
     throw new Error(`renderFrames() needs a positive whole count, got ${options.count}.`);
   }
+
   const columns = typeof options.sheet === "object" ? options.sheet.columns : undefined;
-  if (columns !== undefined && !(Number.isInteger(columns) && columns > 0)) throw new Error(`renderFrames() needs a positive whole number of sheet columns, got ${columns}.`);
+
+  if (columns !== undefined && !(Number.isInteger(columns) && columns > 0))
+    throw new Error(
+      `renderFrames() needs a positive whole number of sheet columns, got ${columns}.`,
+    );
   const browser = await launch(options.executablePath);
+
   try {
-    const page = await browser.newPage({ viewport: { width: Math.ceil(width), height: Math.ceil(height) }, deviceScaleFactor: scale, colorScheme, reducedMotion: "no-preference" });
+    const page = await browser.newPage({
+      viewport: { width: Math.ceil(width), height: Math.ceil(height) },
+      deviceScaleFactor: scale,
+      colorScheme,
+      reducedMotion: "no-preference",
+    });
+
     await page.setContent(
       `<!doctype html><style>:root{color-scheme:${colorScheme}}body{margin:0}#stage{display:inline-block;line-height:0;background:${options.background ?? "Canvas"}}</style><div id="stage">${svg}</div>`,
     );
     await page.evaluate(() => document.fonts.ready);
     const duration = await page.evaluate(loopLength);
-    const times = options.times ?? Array.from({ length: options.count }, (_, i) => (i * duration) / options.count);
+
+    const times =
+      options.times ??
+      Array.from({ length: options.count }, (_, i) => (i * duration) / options.count);
+
     const stage = page.locator("#stage");
     const frames: Frame[] = [];
+
     for (const time of times) {
       await page.evaluate(seek, time);
-      frames.push({ time, png: new Uint8Array(await stage.screenshot({ animations: "allow", omitBackground: true })) });
+      frames.push({
+        time,
+        png: new Uint8Array(await stage.screenshot({ animations: "allow", omitBackground: true })),
+      });
     }
+
     if (!options.sheet) return { duration, colorScheme, frames };
     const across = Math.min(columns ?? 4, frames.length);
-    const sheetSize = Math.max(across * (width + GAP) + GAP, Math.ceil(frames.length / across) * (height + GAP + CAPTION) + GAP);
-    const sheetPage = await browser.newPage({ viewport: { width: 1, height: 1 }, deviceScaleFactor: Math.min(scale, MAX_CAPTURE / sheetSize), colorScheme });
+
+    const sheetSize = Math.max(
+      across * (width + GAP) + GAP,
+      Math.ceil(frames.length / across) * (height + GAP + CAPTION) + GAP,
+    );
+
+    const sheetPage = await browser.newPage({
+      viewport: { width: 1, height: 1 },
+      deviceScaleFactor: Math.min(scale, MAX_CAPTURE / sheetSize),
+      colorScheme,
+    });
+
     await sheetPage.setContent(sheetHtml(frames, width, across));
     const sheet = new Uint8Array(await sheetPage.locator("body").screenshot());
+
     return { duration, colorScheme, frames, sheet };
   } finally {
     await browser.close();

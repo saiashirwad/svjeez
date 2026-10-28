@@ -3,7 +3,10 @@ import type { Point } from "./layout/box";
 export type { Point };
 
 /** The total length of the straight runs between consecutive points. */
-export const pathLength = (points: readonly Point[]): number => points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
+export const pathLength = (points: readonly Point[]): number =>
+  points
+    .slice(1)
+    .reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
 
 export type Edge = "top" | "right" | "bottom" | "left";
 
@@ -36,8 +39,11 @@ export const rect = (x: number, y: number, w: number, h: number): Rect => ({
   pad: (n) => rect(x - n, y - n, w + n * 2, h + n * 2),
   union: (o) => {
     const [left, top] = [Math.min(x, o.x), Math.min(y, o.y)];
+
     return rect(left, top, Math.max(x + w, o.x + o.w) - left, Math.max(y + h, o.y + o.h) - top);
   },
   side: (edge, t) =>
-    edge === "top" || edge === "bottom" ? { x: x + w * t, y: edge === "top" ? y : y + h } : { x: edge === "left" ? x : x + w, y: y + h * t },
+    edge === "top" || edge === "bottom"
+      ? { x: x + w * t, y: edge === "top" ? y : y + h }
+      : { x: edge === "left" ? x : x + w, y: y + h * t },
 });

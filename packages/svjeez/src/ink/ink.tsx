@@ -23,12 +23,15 @@ const noise = (seed: number) => {
   const knot = (i: number) => {
     let h = Math.imul(i ^ (seed * 0x9e3779b1), 0x85ebca6b);
     h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+
     return (((h ^ (h >>> 16)) >>> 0) / 4294967295) * 2 - 1;
   };
+
   return (x: number) => {
     const i = Math.floor(x);
     const f = x - i;
     const u = f * f * (3 - 2 * f);
+
     return knot(i) * (1 - u) + knot(i + 1) * u;
   };
 };
@@ -36,7 +39,8 @@ const noise = (seed: number) => {
 const smoothstep = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
 /** 1 in the middle of a stroke, easing toward `tip` at both ends over `taper` of its length. */
-const envelope = (t: number, taper: number, tip: number) => (taper <= 0 ? 1 : tip + (1 - tip) * Math.min(smoothstep(t / taper), smoothstep((1 - t) / taper)));
+const envelope = (t: number, taper: number, tip: number) =>
+  taper <= 0 ? 1 : tip + (1 - tip) * Math.min(smoothstep(t / taper), smoothstep((1 - t) / taper));
 
 export interface PenOptions {
   /** Line width in px. Default 1.5. */
@@ -49,7 +53,11 @@ export interface PenOptions {
 /** A technical or ballpoint pen: an even line with slightly thinned ends. */
 const pen = ({ size = 1.5, taper = 0.08, seed = 1 }: PenOptions = {}): Tool => {
   const wobble = noise(seed);
-  return { size: size * 1.1, width: (t, s) => size * envelope(t, taper, 0.45) * (1 + 0.06 * wobble(s / 18)) };
+
+  return {
+    size: size * 1.1,
+    width: (t, s) => size * envelope(t, taper, 0.45) * (1 + 0.06 * wobble(s / 18)),
+  };
 };
 
 export interface BrushOptions {
@@ -65,10 +73,17 @@ export interface BrushOptions {
 }
 
 /** A round brush: pressed down in the middle, lifting to a point at both ends, uneven along the way. */
-const brush = ({ size = 6, taper = 0.3, pressure = 0.35, wobble, seed = 1 }: BrushOptions = {}): Tool => {
+const brush = ({
+  size = 6,
+  taper = 0.3,
+  pressure = 0.35,
+  wobble,
+  seed = 1,
+}: BrushOptions = {}): Tool => {
   const press = noise(seed);
   const wander = noise(seed + 101);
   const drift = wobble ?? size * 0.12;
+
   return {
     size,
     width: (t, s) => size * envelope(t, taper, 0.04) * (1 - pressure * (0.5 + 0.5 * press(s / 40))),
@@ -88,7 +103,11 @@ export interface NibOptions {
 /** A broad calligraphy nib: thick across the nib's edge, thin along it. Downstrokes swell and crossbars stay fine. */
 const nib = ({ size = 5, angle = 35, thin = 0.12 }: NibOptions = {}): Tool => {
   const edge = (angle * Math.PI) / 180;
-  return { size, width: (_, __, direction) => size * (thin + (1 - thin) * Math.abs(Math.sin(direction - edge))) };
+
+  return {
+    size,
+    width: (_, __, direction) => size * (thin + (1 - thin) * Math.abs(Math.sin(direction - edge))),
+  };
 };
 
 export interface PencilOptions {
@@ -101,7 +120,12 @@ export interface PencilOptions {
 const pencil = ({ size = 1.2, seed = 1 }: PencilOptions = {}): Tool => {
   const grain = noise(seed);
   const shake = noise(seed + 7);
-  return { size: size * 1.4, width: (t, s) => size * envelope(t, 0.05, 0.5) * (0.8 + 0.3 * grain(s / 3.5)), drift: (s) => size * 0.25 * shake(s / 14) };
+
+  return {
+    size: size * 1.4,
+    width: (t, s) => size * envelope(t, 0.05, 0.5) * (0.8 + 0.3 * grain(s / 3.5)),
+    drift: (s) => size * 0.25 * shake(s / 14),
+  };
 };
 
 /** The four drawing tools: `tool.pen()`, `tool.brush()`, `tool.nib()` and `tool.pencil()`. */
@@ -113,18 +137,24 @@ const SPACING = 1.5;
 const resample = (points: readonly Point[]): Point[] => {
   const out: Point[] = [points[0]!];
   let carry = 0;
+
   for (let i = 1; i < points.length; i++) {
     const [a, b] = [points[i - 1]!, points[i]!];
     const length = Math.hypot(b.x - a.x, b.y - a.y);
     let at = SPACING - carry;
+
     while (at <= length) {
       out.push({ x: a.x + ((b.x - a.x) * at) / length, y: a.y + ((b.y - a.y) * at) / length });
       at += SPACING;
     }
+
     carry = length - (at - SPACING);
   }
+
   const last = points.at(-1)!;
+
   if (Math.hypot(last.x - out.at(-1)!.x, last.y - out.at(-1)!.y) > 0.2) out.push(last);
+
   return out;
 };
 
@@ -133,18 +163,22 @@ const writer = (first: Point) => {
   const tenth = (v: number) => Math.round(v * 10);
   let at = { x: tenth(first.x), y: tenth(first.y) };
   const pair = (x: number, y: number) => `${x / 10}${y < 0 ? "" : " "}${y / 10}`;
+
   const step = (p: Point) => {
     const next = { x: tenth(p.x), y: tenth(p.y) };
     const out = pair(next.x - at.x, next.y - at.y);
     at = next;
+
     return out;
   };
+
   return {
     start: `M${pair(at.x, at.y)}`,
     line: (points: readonly Point[]) => (points.length ? `l${points.map(step).join(" ")}` : ""),
     curve: (control: Point, end: Point) => {
       const origin = at;
       const c = { x: tenth(control.x) - origin.x, y: tenth(control.y) - origin.y };
+
       return `q${pair(c.x, c.y)} ${step(end)}`;
     },
   };
@@ -153,6 +187,7 @@ const writer = (first: Point) => {
 /** The filled outline of one stroke: the left edge out, a round cap, the right edge back, a round cap. */
 const outline = (points: readonly Point[], tool: Tool): string => {
   const line = resample(points);
+
   if (line.length < 2) return "";
   const total = (line.length - 1) * SPACING;
   const left: Point[] = [];
@@ -171,14 +206,27 @@ const outline = (points: readonly Point[], tool: Tool): string => {
     caps.push({ half, normal });
   });
   const end = line.length - 1;
+
   /** A rounded end: one quadratic from one edge, out past the tip, to the other edge. */
   const cap = (i: number, sign: 1 | -1, from: Point, to: Point) => {
     const { half, normal } = caps[i]!;
     const out = { x: sign * normal.y * half * 2, y: -sign * normal.x * half * 2 };
-    return half < 0.4 ? pen.line([to]) : pen.curve({ x: (from.x + to.x) / 2 + out.x, y: (from.y + to.y) / 2 + out.y }, to);
+
+    return half < 0.4
+      ? pen.line([to])
+      : pen.curve({ x: (from.x + to.x) / 2 + out.x, y: (from.y + to.y) / 2 + out.y }, to);
   };
+
   const pen = writer(left[0]!);
-  return pen.start + pen.line(left.slice(1)) + cap(end, 1, left[end]!, right[end]!) + pen.line(right.slice(0, end).reverse()) + cap(0, -1, right[0]!, left[0]!) + "Z";
+
+  return (
+    pen.start +
+    pen.line(left.slice(1)) +
+    cap(end, 1, left[end]!, right[end]!) +
+    pen.line(right.slice(0, end).reverse()) +
+    cap(0, -1, right[0]!, left[0]!) +
+    "Z"
+  );
 };
 
 /** Path data drawn with a tool, as one filled outline per stroke. Fill it; do not stroke it. */
@@ -210,7 +258,13 @@ const outlineOf = (d: string, tool: Tool): Ref<"symbol"> => {
   const byPath = outlines.get(tool) ?? new Map<string, Ref<"symbol">>();
   outlines.set(tool, byPath);
   let symbol = byPath.get(d);
-  if (!symbol) byPath.set(d, (symbol = def.symbol({ style: "overflow:visible" }, <path d={inkPath(d, tool)} />)));
+
+  if (!symbol)
+    byPath.set(
+      d,
+      (symbol = def.symbol({ style: "overflow:visible" }, <path d={inkPath(d, tool)} />)),
+    );
+
   return symbol;
 };
 
@@ -218,16 +272,44 @@ const outlineOf = (d: string, tool: Tool): Ref<"symbol"> => {
  * A path inked with a pen, brush, nib or pencil. With `draw`, a mask with the path drawing on reveals the ink. A masked
  * shape costs a mask raster on every repaint, so once the reveal ends a plain copy takes over and the masked one hides.
  */
-export function Ink({ d, tool, fill = "currentColor", opacity, class: className, draw, ease = easing.inOut, animation }: InkProps): SvgNode {
+export function Ink({
+  d,
+  tool,
+  fill = "currentColor",
+  opacity,
+  class: className,
+  draw,
+  ease = easing.inOut,
+  animation,
+}: InkProps): SvgNode {
   const shape = outlineOf(d, tool);
-  if (!draw) return <use href={shape} fill={fill} opacity={opacity} class={className} animation={animation} />;
+
+  if (!draw)
+    return (
+      <use href={shape} fill={fill} opacity={opacity} class={className} animation={animation} />
+    );
   const end = draw.at + draw.over;
-  const reveal = def.mask({ maskUnits: "userSpaceOnUse", x: -1e4, y: -1e4, width: 2e4, height: 2e4 }, (
-    <path d={d} fill="none" stroke="#fff" strokeWidth={tool.size * 2 + 2} strokeLinecap="round" strokeLinejoin="round" animation={drawOn(draw, ease)} />
-  ));
+
+  const reveal = def.mask(
+    { maskUnits: "userSpaceOnUse", x: -1e4, y: -1e4, width: 2e4, height: 2e4 },
+    <path
+      d={d}
+      fill="none"
+      stroke="#fff"
+      strokeWidth={tool.size * 2 + 2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      animation={drawOn(draw, ease)}
+    />,
+  );
+
   return (
     <g fill={fill} opacity={opacity} class={className} animation={animation}>
-      <use href={shape} mask={reveal} animation={motion({ opacity: 1 }).at(end).set({ opacity: 0 })} />
+      <use
+        href={shape}
+        mask={reveal}
+        animation={motion({ opacity: 1 }).at(end).set({ opacity: 0 })}
+      />
       <use href={shape} animation={motion({ opacity: 0 }).at(end).set({ opacity: 1 })} />
     </g>
   );

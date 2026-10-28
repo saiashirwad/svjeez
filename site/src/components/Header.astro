@@ -7,12 +7,14 @@ interface Props {
 }
 
 const { current, wide } = Astro.props;
+
 const links = [
   { href: "/examples/", label: "Examples", page: "examples" },
   ...(current === "play" ? [{ href: "/play", label: "Playground", page: "play" }] : []),
   { href: "/intro", label: "Intro", page: "intro" },
   { href: "https://github.com/saiashirwad/svjeez", label: "GitHub" },
 ];
+
 // On the playground page the extra link would crowd a phone, so the last two give way.
 const optional = current === "play" ? ["Intro", "GitHub"] : [];
 const SWATCH = ["base00", "base08", "base0B", "base0D", "base0E"] as const;
@@ -57,9 +59,11 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   document.querySelector(".theme")?.addEventListener("click", () => {
     const next = scheme() === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
+
     try {
       localStorage.setItem("theme", next);
     } catch {}
+
     dispatchEvent(new Event(THEMECHANGE));
   });
 
@@ -67,21 +71,28 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   const menu = document.querySelector<HTMLElement>("#palettes")!;
   const items = [...menu.querySelectorAll<HTMLButtonElement>("[role=menuitemradio]")];
   const mark = () => items.forEach((item) => item.setAttribute("aria-checked", String(item.dataset.palette === palette())));
+
   mark();
+
   menu.addEventListener("toggle", (event) => {
     if ((event as ToggleEvent).newState === "open") items.find((item) => item.ariaChecked === "true")?.focus();
   });
+
   menu.addEventListener("click", (event) => {
     const item = (event.target as Element).closest<HTMLButtonElement>("[role=menuitemradio]");
+
     if (!item) return;
     choose(item.dataset.palette as PaletteId);
     mark();
     menu.hidePopover();
   });
+
   menu.addEventListener("keydown", (event) => {
     const at = items.indexOf(document.activeElement as HTMLButtonElement);
     const to: number | undefined = ({ ArrowDown: at + 1, ArrowUp: at - 1, Home: 0, End: -1 } as Record<string, number>)[event.key];
+
     if (event.key === "Tab") return menu.hidePopover();
+
     if (to === undefined) return;
     event.preventDefault();
     items.at(to % items.length)!.focus();

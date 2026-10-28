@@ -1,11 +1,11 @@
 {
   "name": "svjeez-monorepo",
   "private": true,
-  "type": "module",
   "workspaces": [
     "packages/*",
     "site"
   ],
+  "type": "module",
   "scripts": {
     "check": "bun run lint && bun run format:check && bun run typecheck",
     "lint": "oxlint . --deny-warnings --report-unused-disable-directives",

@@ -22,14 +22,24 @@ export default function integration(): AstroIntegration {
               {
                 name: "svjeez:astro",
                 resolveId: (id) => (id === MODULE ? resolved : undefined),
-                load: (id) => (id === resolved ? `export { getScene } from "@svjeez/astro/scene";\nexport { default as Scene } from "@svjeez/astro/Scene.astro";` : undefined),
+                load: (id) =>
+                  id === resolved
+                    ? `export { getScene } from "@svjeez/astro/scene";\nexport { default as Scene } from "@svjeez/astro/Scene.astro";`
+                    : undefined,
               },
               {
                 // Scenes load fonts and images beside their own module, so the server build keeps each module's own location.
                 name: "svjeez:import-meta",
                 apply: "build",
                 transform(code, id) {
-                  if (this.environment.config.consumer !== "server" || id.includes("/node_modules/") || !/\.[mc]?[jt]sx?$/.test(id) || !code.includes("import.meta.")) return;
+                  if (
+                    this.environment.config.consumer !== "server" ||
+                    id.includes("/node_modules/") ||
+                    !/\.[mc]?[jt]sx?$/.test(id) ||
+                    !code.includes("import.meta.")
+                  )
+                    return;
+
                   return code
                     .replaceAll("import.meta.url", JSON.stringify(pathToFileURL(id).href))
                     .replaceAll("import.meta.dirname", JSON.stringify(dirname(id)))
@@ -41,7 +51,10 @@ export default function integration(): AstroIntegration {
         });
       },
       "astro:config:done": ({ injectTypes }) => {
-        injectTypes({ filename: "types.d.ts", content: '/// <reference types="@svjeez/astro/client" />' });
+        injectTypes({
+          filename: "types.d.ts",
+          content: '/// <reference types="@svjeez/astro/client" />',
+        });
       },
       // Pages call getScene() while they render, after Vite has bundled, so the integration writes what they asked for.
       "astro:build:done": async ({ dir, logger }) => {

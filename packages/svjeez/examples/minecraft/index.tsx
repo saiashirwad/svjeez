@@ -4,7 +4,9 @@ import { CAMERA, D, H, ORIGIN, W } from "./kit";
 import { Backdrop, Clouds, Glow, Moon, Night, Shadow, Snow, Stars, Sun } from "./sky";
 import { island } from "./world";
 
-const breathe = motion({ scale: 1, y: 0 }).to({ scale: 1.025, y: -5 }, D / 2, ease.inOut).to({ scale: 1, y: 0 }, D / 2, ease.inOut);
+const breathe = motion({ scale: 1, y: 0 })
+  .to({ scale: 1.025, y: -5 }, D / 2, ease.inOut)
+  .to({ scale: 1, y: 0 }, D / 2, ease.inOut);
 
 export function buildMinecraft(): string {
   return render(
@@ -26,8 +28,13 @@ export function buildMinecraft(): string {
         <Clouds />
       </g>
       <Shadow />
-      <g style={{ transformBox: "view-box", transformOrigin: `${W / 2}px 350px` }} animation={breathe}>
-        <g transform={`translate(${ORIGIN.x} ${ORIGIN.y})`}>{voxel.scene({ camera: CAMERA, blocks: island() })}</g>
+      <g
+        style={{ transformBox: "view-box", transformOrigin: `${W / 2}px 350px` }}
+        animation={breathe}
+      >
+        <g transform={`translate(${ORIGIN.x} ${ORIGIN.y})`}>
+          {voxel.scene({ camera: CAMERA, blocks: island() })}
+        </g>
       </g>
       <Night />
       <Glow />

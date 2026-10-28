@@ -51,8 +51,10 @@ const picked = PALETTES.map(({ id }) => id).filter((id) => id !== DEFAULT_PALETT
     <script is:inline define:vars={{ picked }}>
       try {
         var t = localStorage.getItem("theme");
+
         if (t) document.documentElement.dataset.theme = t;
         var p = localStorage.getItem("palette");
+
         if (picked.indexOf(p) >= 0) document.documentElement.dataset.palette = p;
       } catch (e) {}
     </script>

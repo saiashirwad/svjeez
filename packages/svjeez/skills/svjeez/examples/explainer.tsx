@@ -1,7 +1,18 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
 import { rect, render } from "svjeez";
-import { Callout, Focus, Marker, code, morph, readingTime, timeline, systemDark as theme, type CodeRun, type CodeTokens } from "svjeez/extras";
+import {
+  Callout,
+  Focus,
+  Marker,
+  code,
+  morph,
+  readingTime,
+  timeline,
+  systemDark as theme,
+  type CodeRun,
+  type CodeTokens,
+} from "svjeez/extras";
 
 // A code explainer: two versions of a function, a timeline that names the beats, and annotations aimed at runs by id.
 const kw = (text: string): CodeRun => ["keyword", text];
@@ -12,6 +23,7 @@ const before: CodeTokens = [
   [kw("const"), " total ", p("="), " ", fn("sum", "call"), p("(prices);")],
   [kw("return"), " total", p(";")],
 ];
+
 const after: CodeTokens = [
   [kw("const"), " total ", p("="), " ", fn("prices.reduce", "call"), p("((a, b) => a + b, 0);")],
   [kw("return"), " total", p(";")],
@@ -22,7 +34,11 @@ const one = code(before, mono);
 const two = code(after, mono);
 
 // readingTime sizes a beat to its caption. `change` is the beat where one version morphs into the other.
-const tl = timeline({ intro: readingTime("A call to sum"), change: 3, outro: readingTime("Inline the loop") }, { gap: 0.4 });
+const tl = timeline(
+  { intro: readingTime("A call to sum"), change: 3, outro: readingTime("Inline the loop") },
+  { gap: 0.4 },
+);
+
 const move = morph([one, two], { at: [tl.change.at], gutter: true });
 
 export default function build(): string {
@@ -41,8 +57,21 @@ export default function build(): string {
       <Focus stops={[{ during: tl.intro, target: one.lines(1) }]} dim={0.35}>
         {move.node}
       </Focus>
-      <Marker theme={theme} stops={[{ during: tl.intro, target: one.get("call").pad(4) }, { during: tl.change, target: two.get("call").pad(4) }]} />
-      <Callout theme={theme} target={two.lines(1)} side="bottom" during={tl.outro} columns={28} class="sans">
+      <Marker
+        theme={theme}
+        stops={[
+          { during: tl.intro, target: one.get("call").pad(4) },
+          { during: tl.change, target: two.get("call").pad(4) },
+        ]}
+      />
+      <Callout
+        theme={theme}
+        target={two.lines(1)}
+        side="bottom"
+        during={tl.outro}
+        columns={28}
+        class="sans"
+      >
         The loop now lives in the call site
       </Callout>
     </>,

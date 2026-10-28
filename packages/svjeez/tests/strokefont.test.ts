@@ -2,7 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { strokeFont } from "svjeez";
 
 const allure = await strokeFont.load(new URL("../examples/fonts/EMSAllure.svg", import.meta.url));
-const tiny = strokeFont(`<svg><defs><font id="T" horiz-adv-x="500"><font-face font-family="Tiny" units-per-em="1000" />
+
+const tiny =
+  strokeFont(`<svg><defs><font id="T" horiz-adv-x="500"><font-face font-family="Tiny" units-per-em="1000" />
   <glyph unicode="a" horiz-adv-x="600" d="M 0 0 L 100 500 L 200 0" />
   <glyph unicode="&amp;" d="M 0 0 L 0 700" />
   <glyph unicode=" " horiz-adv-x="300" />
@@ -19,7 +21,10 @@ describe("strokeFont", () => {
   test("places glyphs left to right from the baseline, y down", () => {
     const { glyphs, width } = tiny.path("a&", { size: 100, x: 10, y: 50 });
     expect(width).toBeCloseTo(110, 9);
-    expect(glyphs.map((g) => [g.char, g.x])).toEqual([["a", 10], ["&", 70]]);
+    expect(glyphs.map((g) => [g.char, g.x])).toEqual([
+      ["a", 10],
+      ["&", 70],
+    ]);
     expect(glyphs[0]!.d.startsWith("M10 50")).toBe(true);
     expect(glyphs[0]!.d).toContain("20 0");
     expect(glyphs[1]!.d).toBe("M70 50L70 -20");
@@ -40,7 +45,13 @@ describe("strokeFont", () => {
   test("reads the same font from a string, bytes or an ArrayBuffer", () => {
     const markup = `<svg><defs><font horiz-adv-x="500"><font-face font-family="Tiny" units-per-em="1000" /><glyph unicode="a" d="M 0 0 L 0 500" /></font></defs></svg>`;
     const bytes = new TextEncoder().encode(markup);
-    const [fromString, fromBytes, fromBuffer] = [strokeFont(markup), strokeFont(bytes), strokeFont(bytes.buffer as ArrayBuffer)];
+
+    const [fromString, fromBytes, fromBuffer] = [
+      strokeFont(markup),
+      strokeFont(bytes),
+      strokeFont(bytes.buffer as ArrayBuffer),
+    ];
+
     expect(fromBytes.path("a", { size: 10 }).d).toBe(fromString.path("a", { size: 10 }).d);
     expect(fromBuffer.path("a", { size: 10 }).d).toBe(fromString.path("a", { size: 10 }).d);
   });

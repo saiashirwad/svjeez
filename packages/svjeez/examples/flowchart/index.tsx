@@ -33,7 +33,14 @@ export const chart = flowchart(
   { theme, x: M, y: M, font: mono, play: { at: 0.4, step: 0.35 } },
 );
 
-const trip = flow(chart.route("pr", "post"), { at: 4, speed: 160, style: "trace", color: theme.base09, arrive: true });
+const trip = flow(chart.route("pr", "post"), {
+  at: 4,
+  speed: 160,
+  style: "trace",
+  color: theme.base09,
+  arrive: true,
+});
+
 const D = 10;
 
 export default function build(): string {

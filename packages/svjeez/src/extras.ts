@@ -1,20 +1,111 @@
-export { timeline, during, cut, readingTime, visible, travel, type Beats, type Timeline, type TimelineOptions } from "./extras/timeline";
-export { code, type Code, type CodeOptions, type CodeToken, type CodeTokens, type CodeRun, type CodePiece, type CodeWord, type CodeMetrics } from "./extras/code";
+export {
+  timeline,
+  during,
+  cut,
+  readingTime,
+  visible,
+  travel,
+  type Beats,
+  type Timeline,
+  type TimelineOptions,
+} from "./extras/timeline";
+
+export {
+  code,
+  type Code,
+  type CodeOptions,
+  type CodeToken,
+  type CodeTokens,
+  type CodeRun,
+  type CodePiece,
+  type CodeWord,
+  type CodeMetrics,
+} from "./extras/code";
+
 export { morph, type MorphOptions } from "./extras/morph";
+
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";
+
 export { reveal, type RevealOptions } from "./extras/reveal";
+
 export { Focus, type FocusStop } from "./extras/focus";
+
 export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
+
 export { Marker } from "./extras/marker";
+
 export { Camera, type CameraStop } from "./extras/camera";
+
 export type { Direction } from "./layout/box";
-export { base16, tint, adaptive, variables, defaultDark, defaultLight, tomorrowNight, tomorrow, systemLight, systemDark, solarizedDark, solarizedLight, gruvboxDark, gruvboxLight, type Base16, type Slot, type CodeRole } from "./extras/theme";
+
+export {
+  base16,
+  tint,
+  adaptive,
+  variables,
+  defaultDark,
+  defaultLight,
+  tomorrowNight,
+  tomorrow,
+  systemLight,
+  systemDark,
+  solarizedDark,
+  solarizedLight,
+  gruvboxDark,
+  gruvboxLight,
+  type Base16,
+  type Slot,
+  type CodeRole,
+} from "./extras/theme";
+
 export { appWindow, type WindowOptions } from "./extras/window";
+
 export { terminal, type TerminalCommand, type TerminalOptions } from "./extras/terminal";
-export { type Anchor, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./extras/diagrams/kit";
+
+export {
+  type Anchor,
+  type Diagram,
+  type DiagramOptions,
+  type Labelled,
+  type NodeRole,
+} from "./extras/diagrams/kit";
+
 export { flow, type FlowOptions, type FlowStyle } from "./extras/flow";
-export { flowchart, type Flowchart, type FlowchartOptions, type FlowchartEdge, type FlowchartGroup } from "./extras/diagrams/flowchart";
-export { sequence, type Sequence, type SequenceMessage, type SequenceOptions } from "./extras/diagrams/sequence";
-export { lanes, type Lanes, type LanesOptions, type LaneEvent, type LaneLink, type LaneSpan } from "./extras/diagrams/lanes";
+
+export {
+  flowchart,
+  type Flowchart,
+  type FlowchartOptions,
+  type FlowchartEdge,
+  type FlowchartGroup,
+} from "./extras/diagrams/flowchart";
+
+export {
+  sequence,
+  type Sequence,
+  type SequenceMessage,
+  type SequenceOptions,
+} from "./extras/diagrams/sequence";
+
+export {
+  lanes,
+  type Lanes,
+  type LanesOptions,
+  type LaneEvent,
+  type LaneLink,
+  type LaneSpan,
+} from "./extras/diagrams/lanes";
+
 export { tree, type Tree, type TreeOptions, type TreeSpec } from "./extras/diagrams/tree";
-export { stateMachine, type Checked, type StateIds, type StateMachine, type StateOptions, type StateSpec, type WalkToken, type Transition, type Walk } from "./extras/diagrams/state";
+
+export {
+  stateMachine,
+  type Checked,
+  type StateIds,
+  type StateMachine,
+  type StateOptions,
+  type StateSpec,
+  type WalkToken,
+  type Transition,
+  type Walk,
+} from "./extras/diagrams/state";

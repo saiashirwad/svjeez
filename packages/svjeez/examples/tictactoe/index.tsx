@@ -37,34 +37,64 @@ const ink = (color: Color, width: number): Attrs<"path"> => ({
 function Grid(): SvgNode {
   const { x, y, cell } = BOARD;
   const end = 3 * cell;
+
   const lines = [
     `M${x + cell} ${y}V${y + end}`,
     `M${x + 2 * cell} ${y}V${y + end}`,
     `M${x} ${y + cell}H${x + end}`,
     `M${x} ${y + 2 * cell}H${x + end}`,
   ];
-  return <>{lines.map((d, index) => el.path({ d, ...ink(C.grid, 4), animation: draw({ at: 0.2 + index * 0.15, over: 0.6 }) }))}</>;
+
+  return (
+    <>
+      {lines.map((d, index) =>
+        el.path({ d, ...ink(C.grid, 4), animation: draw({ at: 0.2 + index * 0.15, over: 0.6 }) }),
+      )}
+    </>
+  );
 }
 
 const cross = (cell: Cell, at: number): SvgNode[] => {
   const { x, y } = center(cell);
   const r = 30;
+
   return [
-    el.path({ d: `M${x - r} ${y - r}L${x + r} ${y + r}`, ...ink(C.x, 10), animation: draw({ at, over: 0.22 }) }),
-    el.path({ d: `M${x + r} ${y - r}L${x - r} ${y + r}`, ...ink(C.x, 10), animation: draw({ at: at + 0.18, over: 0.22 }) }),
+    el.path({
+      d: `M${x - r} ${y - r}L${x + r} ${y + r}`,
+      ...ink(C.x, 10),
+      animation: draw({ at, over: 0.22 }),
+    }),
+    el.path({
+      d: `M${x + r} ${y - r}L${x - r} ${y + r}`,
+      ...ink(C.x, 10),
+      animation: draw({ at: at + 0.18, over: 0.22 }),
+    }),
   ];
 };
 
 const nought = (cell: Cell, at: number): SvgNode => {
   const { x, y } = center(cell);
-  return el.circle({ cx: x, cy: y, r: 32, transform: `rotate(-90 ${x} ${y})`, ...ink(C.o, 10), animation: draw({ at, over: 0.4 }) });
+
+  return el.circle({
+    cx: x,
+    cy: y,
+    r: 32,
+    transform: `rotate(-90 ${x} ${y})`,
+    ...ink(C.o, 10),
+    animation: draw({ at, over: 0.4 }),
+  });
 };
 
 function WinLine(): SvgNode {
   const from = center(WIN[0]);
   const to = center(WIN[1]);
   const reach = 46;
-  return el.path({ d: `M${from.x} ${from.y - reach}L${to.x} ${to.y + reach}`, ...ink(C.win, 8), animation: draw({ at: winAt, over: 0.5 }) });
+
+  return el.path({
+    d: `M${from.x} ${from.y - reach}L${to.x} ${to.y + reach}`,
+    ...ink(C.win, 8),
+    animation: draw({ at: winAt, over: 0.5 }),
+  });
 }
 
 export function buildTicTacToe(): string {
@@ -83,7 +113,9 @@ export function buildTicTacToe(): string {
       <rect width={SIZE} height={SIZE + 40} rx={20} fill={C.bg} />
       <g animation={enter({ at: 0, over: 0.2 }).at(OUT.at).to({ opacity: 0 }, OUT.over)}>
         <Grid />
-        {MOVES.map((cell, turn) => (turn % 2 === 0 ? cross(cell, moveAt(turn)) : nought(cell, moveAt(turn))))}
+        {MOVES.map((cell, turn) =>
+          turn % 2 === 0 ? cross(cell, moveAt(turn)) : nought(cell, moveAt(turn)),
+        )}
         <WinLine />
         <text
           x={SIZE / 2}

@@ -9,40 +9,16 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": [
-      "bun"
-    ],
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "types": ["bun"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "paths": {
-      "svjeez": [
-        "./src/index.ts"
-      ],
-      "svjeez/jsx-runtime": [
-        "./src/jsx-runtime.ts"
-      ],
-      "svjeez/jsx-dev-runtime": [
-        "./src/jsx-dev-runtime.ts"
-      ],
-      "svjeez/extras": [
-        "./src/extras.ts"
-      ],
-      "svjeez/frames": [
-        "./src/frames.ts"
-      ],
-      "svjeez/voxel": [
-        "./src/voxel.ts"
-      ]
+      "svjeez": ["./src/index.ts"],
+      "svjeez/jsx-runtime": ["./src/jsx-runtime.ts"],
+      "svjeez/jsx-dev-runtime": ["./src/jsx-dev-runtime.ts"],
+      "svjeez/extras": ["./src/extras.ts"],
+      "svjeez/frames": ["./src/frames.ts"],
+      "svjeez/voxel": ["./src/voxel.ts"]
     }
   },
-  "include": [
-    "src",
-    "examples",
-    "scripts",
-    "skills",
-    "tests"
-  ]
+  "include": ["src", "examples", "scripts", "skills", "tests"]
 }

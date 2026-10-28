@@ -1,11 +1,14 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "embeddedLanguageFormatting": "off",
   "proseWrap": "preserve",
   "ignorePatterns": [
     ".claude/**",
     ".opencode/**",
     ".preview/**",
     "**/*.astro",
+    "**/*.md",
+    "packages/svjeez/tests/types.check.tsx",
     "**/dist/**",
     "**/package-dist/**",
     "site/.alchemy/**",

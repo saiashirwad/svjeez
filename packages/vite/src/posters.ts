@@ -20,12 +20,24 @@ assets.close = close;
 /** The frame the scene itself holds under prefers-reduced-motion, else most of the way through. */
 const stillAt = (svg: string, duration: number) => {
   const held = /animation-delay:-([\d.]+)s!important/.exec(svg);
+
   return held ? Number(held[1]) : duration * 0.72;
 };
 
-const render = async (svg: string, scheme: Scheme, { scale = 1, quality = 0.8, background = "Canvas" }: PosterOptions) => {
+const render = async (
+  svg: string,
+  scheme: Scheme,
+  { scale = 1, quality = 0.8, background = "Canvas" }: PosterOptions,
+) => {
   const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
-  const { frames } = await renderFrames(svg, { times: [stillAt(svg, duration)], colorScheme: scheme, scale, background });
+
+  const { frames } = await renderFrames(svg, {
+    times: [stillAt(svg, duration)],
+    colorScheme: scheme,
+    scale,
+    background,
+  });
+
   return encode(frames[0]!.png, "webp", quality);
 };
 
@@ -33,9 +45,11 @@ const render = async (svg: string, scheme: Scheme, { scale = 1, quality = 0.8, b
 const LANES = 4;
 let running = 0;
 const queue: (() => void)[] = [];
+
 const limit = async <T>(task: () => Promise<T>): Promise<T> => {
   if (running >= LANES) await new Promise<void>((resolve) => queue.push(resolve));
   running++;
+
   try {
     return await task();
   } finally {
@@ -47,22 +61,31 @@ const limit = async <T>(task: () => Promise<T>): Promise<T> => {
 const pending = new Map<string, Promise<Uint8Array>>();
 
 /** The poster `file` of `svg`, from the disk cache or freshly rendered. */
-export const poster = (file: string, svg: string, scheme: Scheme, options: PosterOptions): Promise<Uint8Array> => {
+export const poster = (
+  file: string,
+  svg: string,
+  scheme: Scheme,
+  options: PosterOptions,
+): Promise<Uint8Array> => {
   let job = pending.get(file);
+
   if (!job) {
     const cached = assets.cache && new URL(file, assets.cache);
     job = (cached ? readFile(cached) : Promise.reject()).catch(() =>
       limit(async () => {
         const bytes = await render(svg, scheme, options);
+
         if (assets.cache && cached) {
           await mkdir(assets.cache, { recursive: true });
           await writeFile(cached, bytes);
         }
+
         return bytes;
       }),
     );
     pending.set(file, job);
     job.catch(() => pending.delete(file));
   }
+
   return job;
 };

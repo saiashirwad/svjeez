@@ -54,19 +54,23 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   const shots = document.querySelectorAll<HTMLElement>(".shot[data-live]");
   const image = (shot: HTMLElement) => shot.querySelector("img")!;
   const stillOf = (shot: HTMLElement) => frozen(image(shot), shot.dataset.live!, shot.dataset[scheme()]!);
+
   const run = (shot: HTMLElement) => {
     if (shot.dataset.want === "1" || calm.matches) return;
     shot.dataset.want = "1";
     show(image(shot), playing(image(shot), shot.dataset.live!)).then((shown) => shown && (shot.dataset.playing = "1"));
   };
+
   const rest = (shot: HTMLElement) => {
     if (shot.dataset.want !== "1") return;
     shot.dataset.want = "0";
     delete shot.dataset.playing;
     show(image(shot), stillOf(shot));
   };
+
   if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
     let timer: ReturnType<typeof setTimeout>;
+
     for (const shot of shots) {
       const card = shot.closest("a")!;
       card.addEventListener("pointerenter", () => (timer = setTimeout(() => run(shot), 150)));
@@ -78,19 +82,24 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
     const seen = new IntersectionObserver((entries) => entries.forEach((entry) => (entry.isIntersecting ? run : rest)(entry.target as HTMLElement)), { threshold: 0.75 });
     shots.forEach((shot) => seen.observe(shot));
   }
+
   const near = new IntersectionObserver(
     (entries) =>
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         const shot = entry.target as HTMLElement;
+
         if (!shot.dataset.want) show(image(shot), stillOf(shot));
         near.unobserve(shot);
       }),
     { rootMargin: "250px 0px" },
   );
+
   shots.forEach((shot) => near.observe(shot));
+
   // A recolored still follows light and dark by itself; a poster has to be swapped.
   addEventListener(THEMECHANGE, () => shots.forEach((shot) => !shot.dataset.playing && image(shot).src && !image(shot).src.startsWith("blob:") && show(image(shot), stillOf(shot))));
+
   addEventListener(PALETTECHANGE, () =>
     shots.forEach((shot) => {
       if (shot.dataset.playing) replay(image(shot));

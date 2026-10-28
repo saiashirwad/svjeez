@@ -3,19 +3,11 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
-    "types": [
-      "node"
-    ],
+    "lib": ["ESNext", "DOM"],
+    "types": ["node"],
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true
   },
-  "files": [
-    "main.ts",
-    "vite.config.ts"
-  ]
+  "files": ["main.ts", "vite.config.ts"]
 }

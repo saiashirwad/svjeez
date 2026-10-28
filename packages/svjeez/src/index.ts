@@ -1,20 +1,77 @@
 export { render, type RenderOptions } from "./render";
+
 export { restyle, type RestyleOptions } from "./restyle";
-export { motion, ease, type Motion, type Stack, type Span, type Seconds, type Ease } from "./motion";
-export { enter, exit, draw, shake, wiggle, sampled, type WiggleOptions, type SampledOptions } from "./recipes";
+
+export {
+  motion,
+  ease,
+  type Motion,
+  type Stack,
+  type Span,
+  type Seconds,
+  type Ease,
+} from "./motion";
+
+export {
+  enter,
+  exit,
+  draw,
+  shake,
+  wiggle,
+  sampled,
+  type WiggleOptions,
+  type SampledOptions,
+} from "./recipes";
+
 export { def, type Ref, type DefTag } from "./defs";
+
 export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./properties";
+
 export { calc, type Calc } from "./calc";
+
 export { fx } from "./fx";
+
 export { picture, Picture, type ImageFormat, type PictureData, type PictureProps } from "./picture";
-export { font, type Font, type FontFamily, type FontFormat, type FontMetrics, type FontOptions, type FontStyle, type GlyphPath, type PathOptions, type TextPath } from "./font/font";
+
+export {
+  font,
+  type Font,
+  type FontFamily,
+  type FontFormat,
+  type FontMetrics,
+  type FontOptions,
+  type FontStyle,
+  type GlyphPath,
+  type PathOptions,
+  type TextPath,
+} from "./font/font";
+
 export { strokeFont, type StrokeFont } from "./font/stroke";
+
 export { Glyphs, type GlyphsProps } from "./glyphs";
-export { Ink, inkPath, tool, type Tool, type InkProps, type PenOptions, type BrushOptions, type NibOptions, type PencilOptions } from "./ink/ink";
+
+export {
+  Ink,
+  inkPath,
+  tool,
+  type Tool,
+  type InkProps,
+  type PenOptions,
+  type BrushOptions,
+  type NibOptions,
+  type PencilOptions,
+} from "./ink/ink";
+
 export { el, type ElementProps } from "./el";
+
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
+
 export type { Hex } from "./color";
+
 export type { Channel, Values } from "./channels";
+
 export type { SvgNode, Child } from "./svg";
+
 export { validateSvg, type ValidationResult } from "./validate";
+
 export { rect, type Rect, type Point, type Edge } from "./geometry";

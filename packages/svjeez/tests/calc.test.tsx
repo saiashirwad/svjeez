@@ -10,6 +10,7 @@ const pz = def.property("pz", { syntax: "number", inherits: false, initial: 0 })
 
 const style = (rule: Css) => {
   const svg = render({ width: 10, height: 10, duration: 1, title: "T", css: rule }, <g />);
+
   return svg.slice(svg.indexOf("<![CDATA[") + 9, svg.indexOf("]]>"));
 };
 
@@ -20,12 +21,16 @@ describe("calc", () => {
     const built = css`.dot{translate:${add(length(100), mul(length(60), px, cos(yaw)))} 100px}`;
     const written = css`.dot{translate:calc(100px + 60px * ${px} * cos(${yaw})) 100px}`;
     expect(style(built)).toBe(style(written));
-    expect(style(built)).toContain(".dot{translate:calc(100px + 60px * var(--p1) * cos(var(--p2))) 100px}");
+    expect(style(built)).toContain(
+      ".dot{translate:calc(100px + 60px * var(--p1) * cos(var(--p2))) 100px}",
+    );
   });
 
   test("properties read through the builder are registered once, under their render names", () => {
     const rule = style(css`.d{a:${mul(px, cos(yaw))};b:${mul(px, sin(yaw))}}`);
-    expect(rule).toContain(".d{a:calc(var(--p1) * cos(var(--p2)));b:calc(var(--p1) * sin(var(--p2)))}");
+    expect(rule).toContain(
+      ".d{a:calc(var(--p1) * cos(var(--p2)));b:calc(var(--p1) * sin(var(--p2)))}",
+    );
     expect(rule.match(/@property/g)).toHaveLength(2);
   });
 
@@ -55,7 +60,9 @@ describe("calc", () => {
   });
 
   test("min and max take any number of operands", () => {
-    expect(value(min(length(4), mul(length(2), px), length(8)))).toBe("min(4px, 2px * var(--p1), 8px)");
+    expect(value(min(length(4), mul(length(2), px), length(8)))).toBe(
+      "min(4px, 2px * var(--p1), 8px)",
+    );
     expect(value(max(px, 0))).toBe("max(var(--p1), 0)");
   });
 
@@ -67,7 +74,10 @@ describe("calc", () => {
     const depth = sub(mul(z, cos(pitch)), mul(py, sin(pitch)));
     const size = div(720, add(720, depth));
     const fog = clamp(0.15, sub(0.95, mul(div(add(depth, 150), 300), 0.75)), 1);
-    const rule = style(css`.dot{translate:${length(mul(x, 1.3, size))} ${length(mul(up, -1.3, size))};scale:${size};opacity:${fog}}`);
+
+    const rule = style(
+      css`.dot{translate:${length(mul(x, 1.3, size))} ${length(mul(up, -1.3, size))};scale:${size};opacity:${fog}}`,
+    );
 
     const Z = "(var(--p1) * sin(var(--p2)) + var(--p3) * cos(var(--p2)))";
     const depthText = `${Z} * cos(22deg) - var(--p4) * sin(22deg)`;

@@ -8,12 +8,23 @@ const solid = (color: `#${string}`) => voxel.texture({ x: color }, "x");
 const [red, green, blue] = [solid("#ff0000"), solid("#00ff00"), solid("#0000ff")];
 
 const build = (blocks: readonly VoxelBlock[]) =>
-  render({ width: 200, height: 200, duration: DURATION, title: "Test" }, voxel.scene({ camera, blocks }));
+  render(
+    { width: 200, height: 200, duration: DURATION, title: "Test" },
+    voxel.scene({ camera, blocks }),
+  );
 
-const place = (at: Vec3, extra: Partial<VoxelBlock> = {}): VoxelBlock => ({ at, skin: red, ...extra });
+const place = (at: Vec3, extra: Partial<VoxelBlock> = {}): VoxelBlock => ({
+  at,
+  skin: red,
+  ...extra,
+});
 
 const uses = (svg: string) =>
-  [...svg.slice(svg.indexOf("<g>")).matchAll(/<use href="#(\w+)" x="([^"]+)" y="([^"]+)"(?: class="([^"]+)")?/g)].map(([, href, x, y, cls]) => ({
+  [
+    ...svg
+      .slice(svg.indexOf("<g>"))
+      .matchAll(/<use href="#(\w+)" x="([^"]+)" y="([^"]+)"(?: class="([^"]+)")?/g),
+  ].map(([, href, x, y, cls]) => ({
     href: href!,
     x: Number(x),
     y: Number(y),
@@ -23,24 +34,46 @@ const uses = (svg: string) =>
 const topColor = (svg: string, href: string): string => {
   const symbol = svg.match(new RegExp(`<symbol id="${href}"[^>]*>([\\s\\S]*?)</symbol>`))![1]!;
   const top = [...symbol.matchAll(/href="#(\w+)"/g)].at(-1)![1]!;
+
   return svg.match(new RegExp(`<symbol id="${top}"[^>]*>\\s*<rect[^>]*fill="(#\\w+)"`))![1]!;
 };
 
 const cellAt = (cells: readonly Vec3[]) => (use: { x: number; y: number }) =>
-  cells.find((cell) => Math.abs(camera.project(cell).x - use.x) < 0.01 && Math.abs(camera.project(cell).y - use.y) < 0.01);
+  cells.find(
+    (cell) =>
+      Math.abs(camera.project(cell).x - use.x) < 0.01 &&
+      Math.abs(camera.project(cell).y - use.y) < 0.01,
+  );
 
 const presenceAt = (svg: string, cls: string, t: number): number => {
   const name = svg.match(new RegExp(`\\.${cls.split(" ").at(-1)}\\{animation-name:([\\w-]+)`))![1]!;
   const body = svg.match(new RegExp(`@keyframes ${name}\\{(.*)\\}$`, "m"))![1]!;
-  const keys = [...body.matchAll(/([\d.%,]+)\{visibility:(hidden|visible)\}/g)].flatMap(([, percents, value]) =>
-    percents!.split(",").map((percent) => ({ at: (parseFloat(percent) / 100) * DURATION, value: value === "visible" ? 1 : 0 })),
+
+  const keys = [...body.matchAll(/([\d.%,]+)\{visibility:(hidden|visible)\}/g)].flatMap(
+    ([, percents, value]) =>
+      percents!.split(",").map((percent) => ({
+        at: (parseFloat(percent) / 100) * DURATION,
+        value: value === "visible" ? 1 : 0,
+      })),
   );
-  return keys.filter((key) => key.at <= t).sort((a, b) => a.at - b.at).at(-1)!.value;
+
+  return keys
+    .filter((key) => key.at <= t)
+    .sort((a, b) => a.at - b.at)
+    .at(-1)!.value;
 };
 
 describe("voxel.scene", () => {
   test("blocks come out back to front however they are given", () => {
-    const cells: Vec3[] = [[1, 1, 0], [0, 0, 0], [2, 0, 2], [0, 0, 1], [0, 1, 0], [1, 0, 3]];
+    const cells: Vec3[] = [
+      [1, 1, 0],
+      [0, 0, 0],
+      [2, 0, 2],
+      [0, 0, 1],
+      [0, 1, 0],
+      [1, 0, 3],
+    ];
+
     const depth = (cell: Vec3) => cell[0] + cell[1] + cell[2];
     const order = uses(build(cells.map((at) => place(at)))).map(cellAt(cells));
     expect(order.map((cell) => depth(cell!))).toEqual(cells.map(depth).sort((a, b) => a - b));
@@ -49,16 +82,26 @@ describe("voxel.scene", () => {
   test("blocks sharing a cell keep the order given", () => {
     const colors = (blocks: readonly VoxelBlock[]) => {
       const svg = build(blocks);
+
       return uses(svg).map((use) => topColor(svg, use.href));
     };
-    expect(colors([place([0, 0, 0], { skin: red }), place([0, 0, 0], { skin: green })])).toEqual(["#ff0000", "#00ff00"]);
-    expect(colors([place([0, 0, 0], { skin: green }), place([0, 0, 0], { skin: red })])).toEqual(["#00ff00", "#ff0000"]);
+
+    expect(colors([place([0, 0, 0], { skin: red }), place([0, 0, 0], { skin: green })])).toEqual([
+      "#ff0000",
+      "#00ff00",
+    ]);
+    expect(colors([place([0, 0, 0], { skin: green }), place([0, 0, 0], { skin: red })])).toEqual([
+      "#00ff00",
+      "#ff0000",
+    ]);
   });
 
   test("from and to toggle visibility at those times", () => {
     const svg = build([place([0, 0, 0], { from: 2, to: 6 })]);
     const cls = uses(svg)[0]!.cls!;
-    expect([0, 1.9, 2.1, 5.9, 6.1, 9.9].map((t) => presenceAt(svg, cls, t))).toEqual([0, 0, 1, 1, 0, 0]);
+    expect([0, 1.9, 2.1, 5.9, 6.1, 9.9].map((t) => presenceAt(svg, cls, t))).toEqual([
+      0, 0, 1, 1, 0, 0,
+    ]);
   });
 
   test("a block with no lifetime has no animation", () => {
@@ -73,7 +116,16 @@ describe("voxel.scene", () => {
 
   describe("a block behind its three nearer neighbors", () => {
     const hidden = place([0, 0, 0]);
-    const cover = (extra: Partial<VoxelBlock> = {}) => ([[1, 0, 0], [0, 1, 0], [0, 0, 1]] as const).map((at) => place(at, { skin: green, ...extra }));
+
+    const cover = (extra: Partial<VoxelBlock> = {}) =>
+      (
+        [
+          [1, 0, 0],
+          [0, 1, 0],
+          [0, 0, 1],
+        ] as const
+      ).map((at) => place(at, { skin: green, ...extra }));
+
     const count = (covers: readonly VoxelBlock[]) => uses(build([hidden, ...covers])).length;
 
     test("is absent", () => expect(count(cover())).toBe(3));
@@ -91,19 +143,35 @@ describe("voxel.scene", () => {
     });
 
     test("is absent when a neighbor outlives it", () => {
-      expect(uses(build([place([0, 0, 0], { from: 2, to: 5 }), ...cover({ from: 1, to: 7 })])).length).toBe(3);
+      expect(
+        uses(build([place([0, 0, 0], { from: 2, to: 5 }), ...cover({ from: 1, to: 7 })])).length,
+      ).toBe(3);
     });
   });
 
   test("a solid 3x3x3 cube keeps only the blocks on its three nearer faces", () => {
-    const cells = Array.from({ length: 27 }, (_, i): Vec3 => [i % 3, Math.floor(i / 3) % 3, Math.floor(i / 9)]);
+    const cells = Array.from({ length: 27 }, (_, i): Vec3 => [
+      i % 3,
+      Math.floor(i / 3) % 3,
+      Math.floor(i / 9),
+    ]);
+
     const shown = uses(build(cells.map((at) => place(at)))).map(cellAt(cells));
     expect(shown.length).toBe(19);
     expect(shown.every((cell) => cell!.some((axis) => axis === 2))).toBe(true);
   });
 
   test("blocks with the same skin share one symbol", () => {
-    const hrefs = uses(build([place([0, 0, 0]), place([1, 0, 0], { skin: green }), place([2, 0, 0]), place([3, 0, 0], { skin: green }), place([4, 0, 0], { skin: blue })]));
+    const hrefs = uses(
+      build([
+        place([0, 0, 0]),
+        place([1, 0, 0], { skin: green }),
+        place([2, 0, 0]),
+        place([3, 0, 0], { skin: green }),
+        place([4, 0, 0], { skin: blue }),
+      ]),
+    );
+
     expect(hrefs[0]!.href).toBe(hrefs[2]!.href);
     expect(hrefs[1]!.href).toBe(hrefs[3]!.href);
     expect(new Set(hrefs.map((use) => use.href)).size).toBe(3);
@@ -115,7 +183,12 @@ describe("voxel.scene", () => {
   });
 
   test("output is byte-identical across runs", () => {
-    const blocks = [place([0, 0, 0]), place([1, 0, 0], { skin: green, from: 1, to: 4 }), place([0, 1, 0], { skin: blue })];
+    const blocks = [
+      place([0, 0, 0]),
+      place([1, 0, 0], { skin: green, from: 1, to: 4 }),
+      place([0, 1, 0], { skin: blue }),
+    ];
+
     expect(build(blocks)).toBe(build(blocks));
   });
 
@@ -135,7 +208,9 @@ describe("voxel.texture", () => {
     expect(() => voxel.texture({ a: "#fff" }, "aa\na")).toThrow(/row 1/);
     expect(() => voxel.texture({ a: "#fff" }, "ab")).toThrow(/"b"/);
     // @ts-expect-error a named color is a type error; untyped callers still get the runtime check
-    expect(() => voxel.texture({ a: "red" }, "a")).toThrow("texture() needs #rgb, #rrggbb or #rrggbbaa colors, got red.");
+    expect(() => voxel.texture({ a: "red" }, "a")).toThrow(
+      "texture() needs #rgb, #rrggbb or #rrggbbaa colors, got red.",
+    );
   });
 });
 

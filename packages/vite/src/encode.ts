@@ -7,14 +7,22 @@ let browser: Promise<Browser> | undefined;
 let page: Promise<Page> | undefined;
 
 const open = (): Promise<Page> => {
-  browser ??= import("playwright-core").then(({ chromium }) => chromium.launch().catch(() => chromium.launch({ channel: "chrome" })));
+  browser ??= import("playwright-core").then(({ chromium }) =>
+    chromium.launch().catch(() => chromium.launch({ channel: "chrome" })),
+  );
   page ??= browser.then((b) => b.newPage());
+
   return page;
 };
 
 /** Encode a PNG. WebP keeps transparency; JPEG paints it white. */
-export const encode = async (png: Uint8Array, format: Format, quality = 0.82): Promise<Uint8Array> => {
+export const encode = async (
+  png: Uint8Array,
+  format: Format,
+  quality = 0.82,
+): Promise<Uint8Array> => {
   const p = await open();
+
   const base64 = await p.evaluate(
     async ({ data, format, quality }) => {
       const image = new Image();
@@ -24,20 +32,25 @@ export const encode = async (png: Uint8Array, format: Format, quality = 0.82): P
       canvas.width = image.naturalWidth;
       canvas.height = image.naturalHeight;
       const context = canvas.getContext("2d")!;
+
       if (format === "jpeg") {
         context.fillStyle = "#fff";
         context.fillRect(0, 0, canvas.width, canvas.height);
       }
+
       context.drawImage(image, 0, 0);
+
       return canvas.toDataURL(`image/${format}`, quality).split(",")[1]!;
     },
     { data: Buffer.from(png).toString("base64"), format, quality },
   );
+
   return Buffer.from(base64, "base64");
 };
 
 export const close = async (): Promise<void> => {
   const open = browser;
   browser = page = undefined;
+
   if (open) await (await open).close();
 };

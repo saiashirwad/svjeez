@@ -1,24 +1,51 @@
-import { Glyphs, def, draw, ease, enter, font, motion, render, type Child, type Font, type SvgNode } from "svjeez";
+import {
+  Glyphs,
+  def,
+  draw,
+  ease,
+  enter,
+  font,
+  motion,
+  render,
+  type Child,
+  type Font,
+  type SvgNode,
+} from "svjeez";
 
 const W = 720;
 const H = 960;
 const D = 11;
 
-const load = (file: string, fallback: readonly string[]) => font.load(new URL(`./${file}`, import.meta.url), { fallback });
+const load = (file: string, fallback: readonly string[]) =>
+  font.load(new URL(`./${file}`, import.meta.url), { fallback });
+
 const blackletter = await load("UnifrakturMaguntia-Book.ttf", ["serif"]);
 const fat = await load("AbrilFatface-Regular.ttf", ["Georgia", "serif"]);
 const body = await load("Lusitana-Regular.ttf", ["Georgia", "serif"]);
 
-const C = { paper: "#F2ECDD", shade: "#E4DCC8", ink: "#1C1A16", soft: "#5B5548", red: "#B3261E", desk: "#2A2622" } as const;
+const C = {
+  paper: "#F2ECDD",
+  shade: "#E4DCC8",
+  ink: "#1C1A16",
+  soft: "#5B5548",
+  red: "#B3261E",
+  desk: "#2A2622",
+} as const;
 
 const PAGE = { x: 36, y: 36, w: W - 72, h: H - 72 };
 const INNER = { x: PAGE.x + 28, w: PAGE.w - 56 };
 
-const centered = (face: Font, text: string, size: number) => INNER.x + (INNER.w - face.measure(text, size)) / 2;
+const centered = (face: Font, text: string, size: number) =>
+  INNER.x + (INNER.w - face.measure(text, size)) / 2;
 
 /** A ruled line that draws on from the left. */
 const rule = (y: number, at: number, weight = 1, x1 = INNER.x, x2 = INNER.x + INNER.w): Child => (
-  <path d={`M${x1} ${y}H${x2}`} stroke={C.ink} strokeWidth={weight} animation={draw({ at, over: 0.6 }, ease.inOut)} />
+  <path
+    d={`M${x1} ${y}H${x2}`}
+    stroke={C.ink}
+    strokeWidth={weight}
+    animation={draw({ at, over: 0.6 }, ease.inOut)}
+  />
 );
 
 interface Line {
@@ -27,31 +54,56 @@ interface Line {
 }
 
 /** Greedy line breaking with full justification, every width measured in the real font. The last line of a paragraph stays ragged. */
-const justify = (text: string, { x, y, width, size, leading }: { x: number; y: number; width: number; size: number; leading: number }): Line[] => {
+const justify = (
+  text: string,
+  {
+    x,
+    y,
+    width,
+    size,
+    leading,
+  }: { x: number; y: number; width: number; size: number; leading: number },
+): Line[] => {
   const space = body.measure(" ", size);
   const indent = size * 1.2;
   const lines: Line[] = [];
+
   for (const paragraph of text.trim().split(/\n\s*\n/)) {
-    const words = paragraph.split(/\s+/).map((word) => ({ text: word, w: body.measure(word, size) }));
+    const words = paragraph
+      .split(/\s+/)
+      .map((word) => ({ text: word, w: body.measure(word, size) }));
+
     let start = 0;
+
     while (start < words.length) {
       const room = width - (start === 0 ? indent : 0);
       let end = start + 1;
       let used = words[start]!.w;
-      while (end < words.length && used + space + words[end]!.w <= room) used += space + words[end++]!.w;
+
+      while (end < words.length && used + space + words[end]!.w <= room)
+        used += space + words[end++]!.w;
       const run = words.slice(start, end);
       const last = end === words.length;
-      const gap = last || run.length === 1 ? space : (room - run.reduce((sum, word) => sum + word.w, 0)) / (run.length - 1);
+
+      const gap =
+        last || run.length === 1
+          ? space
+          : (room - run.reduce((sum, word) => sum + word.w, 0)) / (run.length - 1);
+
       let pen = x + width - room;
+
       const placed = run.map((word) => {
         const at = pen;
         pen += word.w + gap;
+
         return { text: word.text, x: at };
       });
+
       lines.push({ y: y + lines.length * leading, words: placed });
       start = end;
     }
   }
+
   return lines;
 };
 
@@ -84,17 +136,37 @@ const columnWidth = (INNER.w - 2 * COLUMN.gap) / 3;
 const columnX = (i: number) => INNER.x + i * (columnWidth + COLUMN.gap);
 
 const PHOTO = { x: columnX(1), y: COLUMN.y, w: columnWidth, h: 196 };
-const halftone = def.pattern({ width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, <circle cx={2.5} cy={2.5} r={1.55} fill={C.ink} />);
 
-const all = justify(ARTICLE, { x: 0, y: 0, width: columnWidth, size: COLUMN.size, leading: COLUMN.leading });
+const halftone = def.pattern(
+  { width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" },
+  <circle cx={2.5} cy={2.5} r={1.55} fill={C.ink} />,
+);
+
+const all = justify(ARTICLE, {
+  x: 0,
+  y: 0,
+  width: columnWidth,
+  size: COLUMN.size,
+  leading: COLUMN.leading,
+});
+
 const rows = Math.floor((PAGE.y + PAGE.h - 40 - COLUMN.y) / COLUMN.leading);
 const photoRows = Math.ceil((PHOTO.h + 52) / COLUMN.leading);
 const capacity = [rows, rows - photoRows, rows];
-if (all.length > capacity.reduce((a, b) => a + b)) throw new Error(`The article runs ${all.length} lines into ${capacity.reduce((a, b) => a + b)}. Cut it.`);
+
+if (all.length > capacity.reduce((a, b) => a + b))
+  throw new Error(
+    `The article runs ${all.length} lines into ${capacity.reduce((a, b) => a + b)}. Cut it.`,
+  );
+
 const columns = capacity.map((count, i) => {
   const from = capacity.slice(0, i).reduce((a, b) => a + b, 0);
   const top = COLUMN.y + 10 + (i === 1 ? photoRows * COLUMN.leading : 0);
-  return all.slice(from, from + count).map((line, row) => ({ y: top + row * COLUMN.leading, words: line.words.map((word) => ({ ...word, x: word.x + columnX(i) })) }));
+
+  return all.slice(from, from + count).map((line, row) => ({
+    y: top + row * COLUMN.leading,
+    words: line.words.map((word) => ({ ...word, x: word.x + columnX(i) })),
+  }));
 });
 
 const SPIN = 1.8;
@@ -107,10 +179,34 @@ const DECK = "Letters draw themselves, columns justify by measure, and nothing l
 function Masthead(): SvgNode {
   const x = centered(blackletter, MAST, MAST_SIZE);
   const y = 152;
+
   return (
     <>
-      <Glyphs font={blackletter} text={MAST} size={MAST_SIZE} x={x} y={y} fill="none" stroke={C.ink} strokeWidth={1.1} alt="" animation={(_, i) => draw({ at: SPIN + 0.1 + i * 0.07, over: 0.9 }, ease.inOut)} />
-      <Glyphs font={blackletter} text={MAST} size={MAST_SIZE} x={x} y={y} fill={C.ink} animation={(_, i) => motion({ opacity: 0 }).at(SPIN + 0.7 + i * 0.07).to({ opacity: 1 }, 0.5)} />
+      <Glyphs
+        font={blackletter}
+        text={MAST}
+        size={MAST_SIZE}
+        x={x}
+        y={y}
+        fill="none"
+        stroke={C.ink}
+        strokeWidth={1.1}
+        alt=""
+        animation={(_, i) => draw({ at: SPIN + 0.1 + i * 0.07, over: 0.9 }, ease.inOut)}
+      />
+      <Glyphs
+        font={blackletter}
+        text={MAST}
+        size={MAST_SIZE}
+        x={x}
+        y={y}
+        fill={C.ink}
+        animation={(_, i) =>
+          motion({ opacity: 0 })
+            .at(SPIN + 0.7 + i * 0.07)
+            .to({ opacity: 1 }, 0.5)
+        }
+      />
     </>
   );
 }
@@ -118,13 +214,20 @@ function Masthead(): SvgNode {
 function Dateline(): SvgNode {
   const y = 194;
   const small = 11;
+
   const items: [string, number][] = [
     ["VOL. I  No. 1", INNER.x],
     ["TUESDAY, OCTOBER 27, 2026", centered(body, "TUESDAY, OCTOBER 27, 2026", small)],
     ["ONE CENT", INNER.x + INNER.w - body.measure("ONE CENT", small)],
   ];
+
   return (
-    <g fontFamily={body} fontSize={small} fill={C.soft} animation={enter({ at: SPIN + 0.9, over: 0.5 }, { opacity: 0 })}>
+    <g
+      fontFamily={body}
+      fontSize={small}
+      fill={C.soft}
+      animation={enter({ at: SPIN + 0.9, over: 0.5 }, { opacity: 0 })}
+    >
       {items.map(([text, x]) => (
         <text x={x} y={y}>
           {text}
@@ -135,26 +238,45 @@ function Dateline(): SvgNode {
 }
 
 function Headline(): SvgNode {
-  return <>{HEAD.map((line, row) => {
-    const offset = HEAD.slice(0, row).join("").length;
-    return (
-      <Glyphs
-        font={fat}
-        text={line}
-        size={HEAD_SIZE}
-        x={centered(fat, line, HEAD_SIZE)}
-        y={270 + row * 62}
-        fill={C.ink}
-        animation={(_, i) => enter({ at: 3.4 + (offset + i) * 0.045, over: 0.45 }, { opacity: 0, y: -28, scale: 1.4 }, ease.pop)}
-      />
-    );
-  })}</>;
+  return (
+    <>
+      {HEAD.map((line, row) => {
+        const offset = HEAD.slice(0, row).join("").length;
+
+        return (
+          <Glyphs
+            font={fat}
+            text={line}
+            size={HEAD_SIZE}
+            x={centered(fat, line, HEAD_SIZE)}
+            y={270 + row * 62}
+            fill={C.ink}
+            animation={(_, i) =>
+              enter(
+                { at: 3.4 + (offset + i) * 0.045, over: 0.45 },
+                { opacity: 0, y: -28, scale: 1.4 },
+                ease.pop,
+              )
+            }
+          />
+        );
+      })}
+    </>
+  );
 }
 
 function Deck(): SvgNode {
   const size = 15;
+
   return (
-    <text x={centered(body, DECK, size)} y={372} fontFamily={body} fontSize={size} fill={C.soft} animation={enter({ at: 4.7, over: 0.6 }, { opacity: 0, y: 6 })}>
+    <text
+      x={centered(body, DECK, size)}
+      y={372}
+      fontFamily={body}
+      fontSize={size}
+      fill={C.soft}
+      animation={enter({ at: 4.7, over: 0.6 }, { opacity: 0, y: 6 })}
+    >
       {DECK}
     </text>
   );
@@ -162,15 +284,26 @@ function Deck(): SvgNode {
 
 function Columns(): SvgNode {
   let index = 0;
-  return <>{columns.map((lines) =>
-    lines.map((line) => (
-      <text y={line.y} fontFamily={body} fontSize={COLUMN.size} fill={C.ink} animation={enter({ at: 5 + index++ * 0.028, over: 0.25 }, { opacity: 0 })}>
-        {line.words.map((word) => (
-          <tspan x={word.x}>{word.text} </tspan>
-        ))}
-      </text>
-    )),
-  )}</>;
+
+  return (
+    <>
+      {columns.map((lines) =>
+        lines.map((line) => (
+          <text
+            y={line.y}
+            fontFamily={body}
+            fontSize={COLUMN.size}
+            fill={C.ink}
+            animation={enter({ at: 5 + index++ * 0.028, over: 0.25 }, { opacity: 0 })}
+          >
+            {line.words.map((word) => (
+              <tspan x={word.x}>{word.text} </tspan>
+            ))}
+          </text>
+        )),
+      )}
+    </>
+  );
 }
 
 function Photo(): SvgNode {
@@ -178,12 +311,40 @@ function Photo(): SvgNode {
   const size = 210;
   const x = PHOTO.x + (PHOTO.w - fat.measure(letter, size)) / 2;
   const caption = "The letter A, set as outlines and filled with a halftone screen.";
-  const lines = justify(caption, { x: PHOTO.x, y: PHOTO.y + PHOTO.h + 18, width: PHOTO.w, size: 10.5, leading: 13 });
+
+  const lines = justify(caption, {
+    x: PHOTO.x,
+    y: PHOTO.y + PHOTO.h + 18,
+    width: PHOTO.w,
+    size: 10.5,
+    leading: 13,
+  });
+
   return (
     <g animation={enter({ at: 6.2, over: 0.6 }, { opacity: 0 })}>
-      <rect x={PHOTO.x} y={PHOTO.y} width={PHOTO.w} height={PHOTO.h} fill={C.shade} stroke={C.ink} strokeWidth={0.75} />
-      <g animation={motion({ scale: 0.6, opacity: 0 }).at(6.3).to({ scale: 1, opacity: 1 }, 0.9, ease.out)}>
-        <Glyphs font={fat} text={letter} size={size} x={x} y={PHOTO.y + PHOTO.h - 26} fill={halftone} alt="A halftone letter A" />
+      <rect
+        x={PHOTO.x}
+        y={PHOTO.y}
+        width={PHOTO.w}
+        height={PHOTO.h}
+        fill={C.shade}
+        stroke={C.ink}
+        strokeWidth={0.75}
+      />
+      <g
+        animation={motion({ scale: 0.6, opacity: 0 })
+          .at(6.3)
+          .to({ scale: 1, opacity: 1 }, 0.9, ease.out)}
+      >
+        <Glyphs
+          font={fat}
+          text={letter}
+          size={size}
+          x={x}
+          y={PHOTO.y + PHOTO.h - 26}
+          fill={halftone}
+          alt="A halftone letter A"
+        />
       </g>
       {lines.map((line) => (
         <text y={line.y} fontFamily={body} fontSize={10.5} fill={C.soft}>
@@ -201,11 +362,33 @@ function Stamp(): SvgNode {
   const size = 54;
   const width = fat.measure(text, size);
   const [cx, cy] = [columnX(2) + columnWidth / 2, 520];
+
   return (
     <g transform={`translate(${cx} ${cy}) rotate(-14)`}>
-      <g animation={motion({ opacity: 0, scale: 3 }).at(8.2).to({ opacity: 1, scale: 1 }, 0.35, ease.in)}>
-        <rect x={-width / 2 - 12} y={-size * 0.62} width={width + 24} height={size * 1.04} rx={4} fill="none" stroke={C.red} strokeWidth={3} />
-        <Glyphs font={fat} text={text} size={size} x={-width / 2} y={size * 0.28} fill={C.red} opacity={0.92} />
+      <g
+        animation={motion({ opacity: 0, scale: 3 })
+          .at(8.2)
+          .to({ opacity: 1, scale: 1 }, 0.35, ease.in)}
+      >
+        <rect
+          x={-width / 2 - 12}
+          y={-size * 0.62}
+          width={width + 24}
+          height={size * 1.04}
+          rx={4}
+          fill="none"
+          stroke={C.red}
+          strokeWidth={3}
+        />
+        <Glyphs
+          font={fat}
+          text={text}
+          size={size}
+          x={-width / 2}
+          y={size * 0.28}
+          fill={C.red}
+          opacity={0.92}
+        />
       </g>
     </g>
   );
@@ -214,7 +397,14 @@ function Stamp(): SvgNode {
 export default function build(): string {
   const page = (
     <>
-      <rect x={PAGE.x + 6} y={PAGE.y + 8} width={PAGE.w} height={PAGE.h} fill="#000" opacity={0.35} />
+      <rect
+        x={PAGE.x + 6}
+        y={PAGE.y + 8}
+        width={PAGE.w}
+        height={PAGE.h}
+        fill="#000"
+        opacity={0.35}
+      />
       <rect x={PAGE.x} y={PAGE.y} width={PAGE.w} height={PAGE.h} fill={C.paper} />
       {rule(78, SPIN, 0.75)}
       <Masthead />
@@ -226,13 +416,19 @@ export default function build(): string {
       {rule(388, 4.6, 0.75)}
       <Deck />
       {[1, 2].map((i) => (
-        <path d={`M${columnX(i) - COLUMN.gap / 2} ${COLUMN.y + 2}V${PAGE.y + PAGE.h - 34}`} stroke={C.ink} strokeWidth={0.5} animation={draw({ at: 4.9 + i * 0.1, over: 0.8 })} />
+        <path
+          d={`M${columnX(i) - COLUMN.gap / 2} ${COLUMN.y + 2}V${PAGE.y + PAGE.h - 34}`}
+          stroke={C.ink}
+          strokeWidth={0.5}
+          animation={draw({ at: 4.9 + i * 0.1, over: 0.8 })}
+        />
       ))}
       <Columns />
       <Photo />
       <Stamp />
     </>
   );
+
   return render(
     {
       width: W,
@@ -244,7 +440,18 @@ export default function build(): string {
     },
     <>
       <rect width={W} height={H} fill={C.desk} />
-      <g animation={[motion({ scale: 0.04, rotate: -1080, opacity: 0 }).to({ scale: 1, rotate: 0, opacity: 1 }, SPIN, ease.out), motion().at(8.5).to({ scale: 1.012 }, 0.08).to({ scale: 1 }, 0.25, ease.out)]}>{page}</g>
+      <g
+        animation={[
+          motion({ scale: 0.04, rotate: -1080, opacity: 0 }).to(
+            { scale: 1, rotate: 0, opacity: 1 },
+            SPIN,
+            ease.out,
+          ),
+          motion().at(8.5).to({ scale: 1.012 }, 0.08).to({ scale: 1 }, 0.25, ease.out),
+        ]}
+      >
+        {page}
+      </g>
     </>,
   );
 }

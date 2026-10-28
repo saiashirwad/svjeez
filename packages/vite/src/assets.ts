@@ -26,7 +26,12 @@ export const assets: Assets = ((globalThis as { [key]?: Assets })[key] ??= { fil
 export const writeScenes = async (dir: URL): Promise<number> => {
   const out = new URL(ROUTE.slice(1), dir);
   await mkdir(out, { recursive: true });
-  await Promise.all([...assets.files].map(async ([file, asset]) => writeFile(new URL(file, out), await asset.bytes())));
+  await Promise.all(
+    [...assets.files].map(async ([file, asset]) =>
+      writeFile(new URL(file, out), await asset.bytes()),
+    ),
+  );
   await assets.close?.();
+
   return assets.files.size;
 };

@@ -8,6 +8,7 @@ export const follow = (img: HTMLImageElement) => {
   const live = img.getAttribute("src")!;
   const posters = [...img.parentElement!.querySelectorAll("source")];
   const recolored = () => "themed" in img.dataset && palette() !== DEFAULT_PALETTE;
+
   const sync = async (fade: boolean) => {
     if (calm.matches && recolored()) {
       if (await show(img, frozen(img, live, live))) posters.forEach((source) => source.remove());
@@ -17,6 +18,7 @@ export const follow = (img: HTMLImageElement) => {
     } else await (isPlaying(img) ? replay(img) : show(img, playing(img, live), { fade }));
     img.dataset.shown = "";
   };
+
   if (calm.matches || recolored()) sync(false);
   else adopt(img);
   addEventListener(PALETTECHANGE, () => sync(true));

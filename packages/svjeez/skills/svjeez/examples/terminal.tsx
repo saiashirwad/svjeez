@@ -7,7 +7,13 @@ import { adaptive, appWindow, terminal, systemDark, systemLight } from "svjeez/e
 const { theme, css: colors } = adaptive({ dark: systemDark, light: systemLight });
 const css = `${colors}\n.mono,.mono text{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}`;
 
-const shell = appWindow(rect(24, 24, 560, 190), { theme, title: "~/hello", dots: "traffic", class: "mono" });
+const shell = appWindow(rect(24, 24, 560, 190), {
+  theme,
+  title: "~/hello",
+  dots: "traffic",
+  class: "mono",
+});
+
 const session = terminal(
   [
     { cmd: "npm i svjeez", output: [[["muted", "added 1 package"]]] },

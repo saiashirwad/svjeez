@@ -1,4 +1,14 @@
-import { def, ease, el, motion, type Channel, type Color, type Motion, type Ref, type Values } from "svjeez";
+import {
+  def,
+  ease,
+  el,
+  motion,
+  type Channel,
+  type Color,
+  type Motion,
+  type Ref,
+  type Values,
+} from "svjeez";
 
 export const W = 960;
 export const H = 540;
@@ -37,6 +47,7 @@ export const random = (seed: number) => () => {
   seed = (seed + 0x6d2b79f5) | 0;
   let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
   t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
 
@@ -44,7 +55,11 @@ const rgb = (color: string) => [1, 3, 5].map((i) => parseInt(color.slice(i, i + 
 
 const mix = (a: string, b: string, t: number): Color =>
   `#${rgb(a)
-    .map((channel, i) => Math.round(channel + (rgb(b)[i]! - channel) * t).toString(16).padStart(2, "0"))
+    .map((channel, i) =>
+      Math.round(channel + (rgb(b)[i]! - channel) * t)
+        .toString(16)
+        .padStart(2, "0"),
+    )
     .join("")}`;
 
 const HEAT: readonly (readonly [number, string])[] = [
@@ -58,9 +73,11 @@ const HEAT: readonly (readonly [number, string])[] = [
 
 export const heat = (t: number): Color => {
   const upper = HEAT.findIndex(([at]) => at >= t);
+
   if (upper <= 0) return HEAT[0]![1] as Color;
   const [a, from] = HEAT[upper - 1]!;
   const [b, to] = HEAT[upper]!;
+
   return mix(from, to, (t - a) / (b - a));
 };
 
@@ -68,35 +85,59 @@ export const heat = (t: number): Color => {
  * Bloom for world-space layers, whose origin is the canvas center. The region is `reach` around that
  * origin: blur cost scales with its area, so keep it to what the layer can actually cover.
  */
-export const glow = (blur: number, strength: number, reach: { readonly x: number; readonly y: number }): Ref<"filter"> =>
-  def.filter({ filterUnits: "userSpaceOnUse", x: -reach.x, y: -reach.y, width: 2 * reach.x, height: 2 * reach.y }, (
+export const glow = (
+  blur: number,
+  strength: number,
+  reach: { readonly x: number; readonly y: number },
+): Ref<"filter"> =>
+  def.filter(
+    {
+      filterUnits: "userSpaceOnUse",
+      x: -reach.x,
+      y: -reach.y,
+      width: 2 * reach.x,
+      height: 2 * reach.y,
+    },
     <>
       <feGaussianBlur stdDeviation={blur} result="blur" />
       <feMerge>
         {Array.from({ length: strength }, () => el.feMergeNode({ in: "blur" }))}
         <feMergeNode in="SourceGraphic" />
       </feMerge>
-    </>
-  ));
+    </>,
+  );
 
-export const on = (at: number): Motion<"opacity"> => motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+export const on = (at: number): Motion<"opacity"> =>
+  motion({ opacity: 0 }).at(at).set({ opacity: 1 });
 
 export const envelope = (at: number, off: number, over = 0.4): Motion<"opacity"> =>
   motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over).at(off).to({ opacity: 0 }, over, ease.in);
 
-export const phased = <K extends Channel>(period: number, offset: number, at: (u: number) => Values<K>, pieces = 8): Motion<K> => {
+export const phased = <K extends Channel>(
+  period: number,
+  offset: number,
+  at: (u: number) => Values<K>,
+  pieces = 8,
+): Motion<K> => {
   const shift = ((offset % period) + period) % period;
   const progress = (t: number) => ((t + shift) % period) / period;
   const wrap = period - shift;
   const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
-  const grid = Array.from({ length: pieces + 1 }, (_, j) => (j * period) / pieces).filter((t) => !near(t, wrap));
+
+  const grid = Array.from({ length: pieces + 1 }, (_, j) => (j * period) / pieces).filter(
+    (t) => !near(t, wrap),
+  );
+
   const times = [...grid, wrap].sort((a, b) => a - b);
   let track: Motion = motion(at(progress(0)) as Values);
+
   for (let j = 1; j < times.length; j++) {
     const [from, to] = [times[j - 1]!, times[j]!];
     const cut = to === wrap;
     track = track.at(from).to(at(cut ? 1 : progress(to)) as Values, to - from, ease.linear);
+
     if (cut && wrap < period) track = track.set(at(0) as Values);
   }
+
   return track.loop(period) as Motion<K>;
 };
