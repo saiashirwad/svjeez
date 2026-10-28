@@ -1,0 +1,27 @@
+---
+import Playground from "../components/Playground.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Playground · svjeez" description="Edit a svjeez scene and watch the SVG recompile in your browser." current="play" wide>
+  <main class="wrap wide">
+    <h1>Playground</h1>
+    <p class="lede">Edit a scene and see the SVG update as you type. The playground compiles it in your browser using the svjeez library.</p>
+    <Playground initial="toast" eager />
+  </main>
+</Base>
+
+<style>
+  h1 {
+    margin: 1rem 0 0.5rem;
+    font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2rem);
+  }
+  .lede {
+    margin: 0 0 1rem;
+    max-inline-size: 60ch;
+    color: var(--muted);
+  }
+  main {
+    padding-block-end: 3rem;
+  }
+</style>

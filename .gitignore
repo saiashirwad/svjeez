@@ -1,5 +1,6 @@
 node_modules
 package-dist
 .preview
-site/public
+site/dist
+site/.astro
 site/.alchemy

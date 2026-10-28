@@ -1,23 +1,11 @@
-// Drives the built playground in headless Chromium: edit, error, recovery, timings, screenshots.
-// Run `bun site/playground/build.ts` first, then `bun site/playground/verify.ts [screenshotDir]`.
+// Drives the playground in headless Chromium: edit, error, recovery, timings, screenshots.
+// Start the site first (`bun run dev` or `bun run preview`), then `bun src/playground/verify.ts [origin] [screenshotDir]`.
 import { mkdirSync } from "node:fs";
 import { chromium } from "playwright-core";
 
-const root = new URL("../public/", import.meta.url).pathname;
-const shots = process.argv[2];
+const origin = process.argv[2] ?? "http://localhost:4321";
+const shots = process.argv[3];
 if (shots) mkdirSync(shots, { recursive: true });
-
-const server = Bun.serve({
-  port: 0,
-  fetch: async (request) => {
-    let path = new URL(request.url).pathname;
-    if (path === "/__embed") return new Response(`<!doctype html><body style="margin:0"><div style="height:3000px"></div><div data-playground="toast"></div><script type="module" src="/playground/embed.js"></script>`, { headers: { "content-type": "text/html" } });
-    if (path === "/play") path = "/play.html";
-    const file = Bun.file(root + path.slice(1));
-    return (await file.exists()) ? new Response(file) : new Response("not found", { status: 404 });
-  },
-});
-const origin = `http://localhost:${server.port}`;
 
 const assert = (ok: boolean, what: string) => {
   console.log(`${ok ? "ok  " : "FAIL"} ${what}`);
@@ -28,13 +16,8 @@ const browser = await chromium.launch();
 const visit = async (scheme: "light" | "dark", width: number, height: number) => {
   const context = await browser.newContext({ colorScheme: scheme, viewport: { width, height } });
   const page = await context.newPage();
-  const bytes: Record<string, number> = {};
-  page.on("response", async (response) => {
-    const url = new URL(response.url());
-    if (url.pathname.endsWith(".js")) bytes[url.pathname] = (await response.body()).length;
-  });
   page.on("pageerror", (error) => assert(false, `page error: ${error.message}`));
-  return { page, bytes, context };
+  return { page, context };
 };
 
 {
@@ -151,18 +134,16 @@ for (const [scheme, width, height] of [["light", 1440, 900], ["dark", 1440, 900]
 }
 
 {
-  const { page, bytes, context } = await visit("light", 1440, 900);
-  await page.goto(`${origin}/__embed`);
+  // A short window keeps the home page's playground more than 600px below the fold.
+  const { page, context } = await visit("light", 1440, 400);
+  await page.goto(origin);
   await page.waitForTimeout(500);
-  const seen = Object.keys(bytes).map((p) => p.split("/").pop());
-  console.log(`before scroll, scripts fetched: ${seen.join(", ")}`);
-  assert(!seen.includes("app.js") && !seen.includes("worker.js"), "embed does not load the editor while far below the viewport");
+  assert((await page.locator(".pg[data-state=idle]").count()) === 1, "the home page does not load the editor while it is far below the viewport");
   const t0 = Date.now();
-  await page.evaluate(() => scrollTo(0, 2600));
+  await page.locator("#play").scrollIntoViewIfNeeded();
   await page.waitForSelector(".pg[data-state=ready] .pg-img[src^=blob]");
   console.log(`scroll near to first render: ${Date.now() - t0} ms`);
   await context.close();
 }
 
 await browser.close();
-server.stop();

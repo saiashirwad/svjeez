@@ -1,4 +1,4 @@
-/* svjeez.texoport.in: one stylesheet for the home page, the intro and the examples. System fonts, no framework.
+/* svjeez.texoport.in: one stylesheet for every page. System fonts, no framework.
    One grid: a 66rem content box, twelve columns, and every block starts on column 1, 5, 7 or 9. */
 
 @property --split { syntax: "<percentage>"; inherits: true; initial-value: 50% }
@@ -139,11 +139,20 @@ figure h3 + p { margin-block-start: 0.35rem; color: var(--muted); font-size: 0.9
 
 pre.code { margin: 0; padding: 1rem 1.2rem; overflow-x: auto; background: var(--sunken); border-radius: 0.75rem; font-size: 0.8125rem; line-height: 1.7; tab-size: 2; box-shadow: 0 0 0 1px var(--line) }
 @media (max-width: 30em) { pre.code { font-size: 0.71875rem } }
-pre.code .k { color: light-dark(oklch(52% 0.2 305), oklch(76% 0.14 305)) }
-pre.code .f { color: light-dark(oklch(50% 0.17 258), oklch(78% 0.11 252)) }
-pre.code .s { color: light-dark(oklch(50% 0.14 150), oklch(80% 0.14 150)) }
-pre.code .n { color: light-dark(oklch(60% 0.17 50), oklch(80% 0.13 60)) }
-pre.code .c { color: var(--muted) }
+/* Code blocks are Astro's <Code> with Shiki's css-variables theme, colored here. */
+pre.code {
+  --astro-code-foreground: var(--ink);
+  --astro-code-background: var(--sunken);
+  --astro-code-token-keyword: light-dark(oklch(52% 0.2 305), oklch(76% 0.14 305));
+  --astro-code-token-function: light-dark(oklch(50% 0.17 258), oklch(78% 0.11 252));
+  --astro-code-token-string: light-dark(oklch(50% 0.14 150), oklch(80% 0.14 150));
+  --astro-code-token-string-expression: var(--astro-code-token-string);
+  --astro-code-token-constant: light-dark(oklch(60% 0.17 50), oklch(80% 0.13 60));
+  --astro-code-token-comment: var(--muted);
+  --astro-code-token-parameter: var(--ink);
+  --astro-code-token-punctuation: var(--ink);
+  --astro-code-token-link: var(--ink);
+}
 
 /* The playground block: a window on the grid like every other. The embed fills it once it loads; until then a static editor and preview stand in. */
 .playground { display: grid; min-block-size: 34.5rem }
@@ -157,7 +166,7 @@ pre.code .c { color: var(--muted) }
 .pg-bar i { inline-size: 0.6875rem; block-size: 0.6875rem; border-radius: 50%; background: var(--line) }
 .pg-body { display: grid; grid-template-columns: minmax(0, 1fr); min-block-size: 0 }
 @media (min-width: 56rem) { .pg-body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) } .pg-view { border-inline-start: 1px solid var(--line) } }
-.pg-body pre.code { border-radius: 0; box-shadow: none; background: transparent; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
+.pg-body pre.code { --astro-code-background: transparent; border-radius: 0; box-shadow: none; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
 .pg-view { display: grid; place-items: center; padding: 1.5rem }
 .pg-view .scene { inline-size: min(100%, 28rem) }
 
@@ -231,3 +240,8 @@ pre.code .c { color: var(--muted) }
 .reel .frame { overflow: clip; background: var(--surface); border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
 .reel img { inline-size: 100%; block-size: auto }
 .caption { margin-block-start: 0.9rem; font-size: 0.875rem; color: var(--muted); text-align: center }
+
+/* The playground page: a wider box, and a header that sheds links on a phone. */
+.wrap.wide { inline-size: min(100% - 2 * var(--gutter), 90rem) }
+.top nav a[aria-current="page"] { color: var(--ink) }
+@media (max-width: 30rem) { .top nav .opt { display: none } }

@@ -1,8 +1,8 @@
 // Source text in, SVG and stats out. The worker runs it in the browser, tests/playground.test.ts runs it under bun.
 import { transform } from "sucrase";
-import * as svjeez from "../../src/index";
-import * as extras from "../../src/extras";
-import * as jsxRuntime from "../../src/jsx-runtime";
+import * as svjeez from "svjeez";
+import * as extras from "svjeez/extras";
+import * as jsxRuntime from "svjeez/jsx-runtime";
 
 const modules: Record<string, object> = {
   svjeez,

@@ -1,0 +1,29 @@
+---
+import { getScene, Scene } from "svjeez:astro";
+import hype from "@examples/hype/index.tsx";
+import Base from "../layouts/Base.astro";
+
+const kb = Math.round(getScene(hype).svg.length / 1024);
+---
+
+<Base
+  title="The intro · svjeez"
+  description="A 45-second introduction to svjeez, made with svjeez."
+  share={{ title: "svjeez · the intro", description: "A 45-second tour of svjeez, made with svjeez." }}
+  current="intro"
+>
+  <main class="wrap">
+    <div class="page-head">
+      <p class="kicker">The intro</p>
+      <h1>See svjeez in motion.</h1>
+      <p class="sub">A 45-second tour of what you can make with svjeez, made as a single animated SVG. It adapts to your light or dark mode.</p>
+    </div>
+    <div class="reel wide">
+      <div class="frame">
+        <Scene scene={hype} alt="The svjeez intro: Claude Code writes a scene, the code streams into an editor beside a live preview, a montage of springs, flowcharts, outlined type and charts, then the install command." />
+      </div>
+    </div>
+    <p class="more"><a class="btn primary" href="/examples/">Explore the examples</a></p>
+  </main>
+  <footer class="wrap foot"><span>One animated SVG, {kb} KB, no runtime JavaScript.</span><nav aria-label="Footer"><a href="https://github.com/saiashirwad/svjeez">GitHub</a><a href="/">Home</a></nav></footer>
+</Base>

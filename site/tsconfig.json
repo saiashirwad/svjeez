@@ -1,12 +1,18 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "Preserve",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "types": ["bun"]
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "svjeez": ["../src/index.ts"],
+      "svjeez/jsx-runtime": ["../src/jsx-runtime.ts"],
+      "svjeez/jsx-dev-runtime": ["../src/jsx-dev-runtime.ts"],
+      "svjeez/extras": ["../src/extras.ts"],
+      "svjeez/frames": ["../src/frames.ts"],
+      "@examples/*": ["../examples/*"]
+    }
   },
-  "include": ["alchemy.run.ts"]
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
 }

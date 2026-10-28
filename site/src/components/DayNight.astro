@@ -1,0 +1,60 @@
+---
+// Light and dark, side by side: one SVG file in two <img>s, one of them told to be dark.
+import type { SceneImage } from "svjeez:astro";
+import LiveScene from "./LiveScene.astro";
+
+interface Props {
+  scene: SceneImage;
+  alt: string;
+}
+
+const { scene, alt } = Astro.props;
+---
+
+<div class="stage intro">
+  <div class="layer light"><LiveScene scene={scene} scheme="light" manual alt={alt} /></div>
+  <div class="layer dark" aria-hidden="true"><LiveScene scene={scene} scheme="dark" manual alt="" /></div>
+  <span class="tag l">light</span><span class="tag d">dark</span>
+  <div class="handle"></div>
+  <input type="range" min="0" max="100" value="50" aria-label="Compare the light and dark versions of the scene" />
+  <span class="hint">Point or tap to play</span>
+</div>
+
+<script>
+  import { play, still } from "../scripts/scenes";
+
+  for (const stage of document.querySelectorAll<HTMLElement>(".stage")) {
+    const range = stage.querySelector("input")!;
+    const set = (percent: number) => {
+      const value = Math.min(100, Math.max(0, percent));
+      stage.style.setProperty("--split", `${value}%`);
+      range.value = String(Math.round(value));
+    };
+    const at = (event: PointerEvent) => set(((event.clientX - stage.getBoundingClientRect().left) / stage.offsetWidth) * 100);
+    const stop = () => stage.classList.remove("intro");
+    stage.addEventListener("pointerdown", (event) => {
+      stop();
+      stage.setPointerCapture(event.pointerId);
+      at(event);
+      stage.onpointermove = at;
+    });
+    stage.addEventListener("pointerup", () => (stage.onpointermove = null));
+    // This one scene costs two images' worth, so it plays only while you point at it (or touch it), and rests as a still otherwise.
+    const pair = [...stage.querySelectorAll<HTMLImageElement>(".scene")];
+    const start = () => {
+      pair.forEach(play);
+      stage.classList.add("playing");
+    };
+    const rest = () => {
+      pair.forEach(still);
+      stage.classList.remove("playing");
+    };
+    stage.addEventListener("pointerenter", start);
+    stage.addEventListener("pointerleave", (event) => event.pointerType === "mouse" && rest());
+    new IntersectionObserver((entries) => entries.forEach((entry) => !entry.isIntersecting && rest())).observe(stage);
+    range.addEventListener("input", () => {
+      stop();
+      stage.style.setProperty("--split", `${range.value}%`);
+    });
+  }
+</script>

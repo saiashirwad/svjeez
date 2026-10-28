@@ -29,6 +29,10 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 - `examples/` holds scenes. `dist/` is their committed output, which the README links to.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. They carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
+## Site
+
+`site/` is the Astro site at svjeez.texoport.in. Pages import scenes straight from `examples/`. The local integration in `site/integrations/svjeez/` provides `svjeez:astro`: `<Scene scene={build} />` and `getScene(build, { posters })` compile a scene, serve it from `/_svjeez/` in dev, and write it with its poster stills at build. Run `bun run dev`, `bun run build` and `bun run check` inside `site/`. `bun run deploy` builds and deploys through Alchemy (`site/alchemy.run.ts`).
+
 ## Rules
 
 - Import `svjeez`, `svjeez/extras`, `svjeez/voxel` and `svjeez/frames`. The tsconfig maps them to `src/`.

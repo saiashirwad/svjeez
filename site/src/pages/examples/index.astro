@@ -1,0 +1,97 @@
+---
+import { POSTER_WIDTH, REPO, sections } from "../../examples";
+import Base from "../../layouts/Base.astro";
+
+/** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
+const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] });
+---
+
+<Base title="Examples · svjeez" description="Explore animated scenes and building blocks made with svjeez. Each is a self-contained SVG." class="gallery" current="examples">
+  <script slot="head" type="speculationrules" is:inline set:html={speculation} />
+  <main class="wrap">
+    <div class="page-head">
+      <p class="kicker">Examples</p>
+      <h1>Explore what you can make.</h1>
+      <p class="sub">Each example is a single animated SVG made with svjeez. Hover over a card to play it; on touch screens, scenes play as you scroll. Open one to see it full size and find its source.</p>
+    </div>
+    {
+      sections.map((section) => (
+        <section>
+          <h2>
+            {section.title}
+            <small>{section.blurb}</small>
+          </h2>
+          <div class="grid">
+            {section.examples.map(({ name, scene }) => (
+              <a class="card" href={`/examples/${name}`}>
+                <span class="shot" data-live={scene.src} data-light={scene.posters!.light} data-dark={scene.posters!.dark}>
+                  <img width={POSTER_WIDTH} height={Math.round((POSTER_WIDTH * scene.height) / scene.width)} alt="" decoding="async" />
+                </span>
+                <span>
+                  <b>{scene.title}</b>
+                  <span class="d">{scene.desc}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </main>
+  <footer class="wrap foot">
+    <span>Find the source for every scene on GitHub.</span>
+    <nav aria-label="Footer"><a href={`${REPO}/tree/main/examples`}>All sources</a><a href="/">Home</a></nav>
+  </footer>
+</Base>
+
+<script>
+  import { calm, scheme, THEMECHANGE } from "../../scripts/scheme";
+
+  // A card shows a still until you hover it (or, on a touch screen, until it is mostly in view).
+  // Only then does its SVG download, and it goes back to the still when you leave.
+  const shots = document.querySelectorAll<HTMLElement>(".shot[data-live]");
+  const image = (shot: HTMLElement) => shot.querySelector("img")!;
+  const stillOf = (shot: HTMLElement) => shot.dataset[scheme()]!;
+  const run = (shot: HTMLElement) => {
+    if (shot.dataset.playing || calm.matches) return;
+    const live = new Image();
+    live.onload = () => {
+      if (shot.dataset.want !== "1") return;
+      image(shot).src = shot.dataset.live!;
+      shot.dataset.playing = "1";
+    };
+    shot.dataset.want = "1";
+    live.src = shot.dataset.live!;
+  };
+  const rest = (shot: HTMLElement) => {
+    shot.dataset.want = "0";
+    if (!shot.dataset.playing) return;
+    image(shot).src = stillOf(shot);
+    delete shot.dataset.playing;
+  };
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    let timer: ReturnType<typeof setTimeout>;
+    for (const shot of shots) {
+      const card = shot.closest("a")!;
+      card.addEventListener("pointerenter", () => (timer = setTimeout(() => run(shot), 150)));
+      card.addEventListener("pointerleave", () => (clearTimeout(timer), rest(shot)));
+      card.addEventListener("focus", () => run(shot));
+      card.addEventListener("blur", () => rest(shot));
+    }
+  } else {
+    const seen = new IntersectionObserver((entries) => entries.forEach((entry) => (entry.isIntersecting ? run : rest)(entry.target as HTMLElement)), { threshold: 0.75 });
+    shots.forEach((shot) => seen.observe(shot));
+  }
+  const near = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const shot = entry.target as HTMLElement;
+        image(shot).src = stillOf(shot);
+        near.unobserve(shot);
+      }),
+    { rootMargin: "250px 0px" },
+  );
+  shots.forEach((shot) => near.observe(shot));
+  addEventListener(THEMECHANGE, () => shots.forEach((shot) => !shot.dataset.playing && image(shot).src && (image(shot).src = stillOf(shot))));
+</script>

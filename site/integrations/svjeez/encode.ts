@@ -1,4 +1,4 @@
-// Re-encode frames as WebP or JPEG in headless Chromium, so the site builds the same on macOS and Linux with no extra tools.
+// Re-encodes PNG frames as WebP or JPEG in headless Chromium, so the site builds the same on macOS and Linux with no extra tools.
 import { chromium, type Browser, type Page } from "playwright-core";
 
 export type Format = "webp" | "jpeg";
@@ -37,5 +37,7 @@ export const encode = async (png: Uint8Array, format: Format, quality = 0.82): P
 };
 
 export const close = async (): Promise<void> => {
-  if (browser) await (await browser).close();
+  const open = browser;
+  browser = page = undefined;
+  if (open) await (await open).close();
 };

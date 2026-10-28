@@ -1,0 +1,207 @@
+---
+import { Code } from "astro:components";
+import { getScene } from "svjeez:astro";
+import agents from "@examples/site/agents.tsx";
+import agentsTall from "@examples/site/agents-tall.tsx";
+import explainer from "@examples/site/explainer.tsx";
+import fonts from "@examples/site/fonts.tsx";
+import handshake from "@examples/site/handshake.tsx";
+import hero from "@examples/site/hero.tsx";
+import heroTall from "@examples/site/hero-tall.tsx";
+import ink from "@examples/site/ink.tsx";
+import nojsx from "@examples/site/nojsx.tsx";
+import nojsxTall from "@examples/site/nojsx-tall.tsx";
+import pipeline from "@examples/site/pipeline.tsx";
+import pipelineTall from "@examples/site/pipeline-tall.tsx";
+import recording from "@examples/site/recording.tsx";
+import team from "@examples/site/team.tsx";
+import timeline from "@examples/site/timeline.tsx";
+import timelineTall from "@examples/site/timeline-tall.tsx";
+import toast from "@examples/site/toast.tsx";
+import toastSource from "@examples/site/toast.tsx?raw";
+import whereDocs from "@examples/site/where-docs.tsx";
+import whereMail from "@examples/site/where-mail.tsx";
+import whereReadme from "@examples/site/where-readme.tsx";
+import daynight from "@examples/daynight/index.tsx";
+import DayNight from "../components/DayNight.astro";
+import Install from "../components/Install.astro";
+import LiveScene from "../components/LiveScene.astro";
+import Playground from "../components/Playground.astro";
+import Base from "../layouts/Base.astro";
+
+// A scene shows its poster whenever the play budget holds it back, so posters render at 2x to stay sharp on retina screens.
+const live = (scene: () => string) => getScene(scene, { posters: { scale: 2, quality: 0.9, background: "transparent" } });
+const s = {
+  hero: live(hero),
+  heroTall: live(heroTall),
+  toast: live(toast),
+  timeline: live(timeline),
+  timelineTall: live(timelineTall),
+  pipeline: live(pipeline),
+  pipelineTall: live(pipelineTall),
+  handshake: live(handshake),
+  team: live(team),
+  explainer: live(explainer),
+  recording: live(recording),
+  ink: live(ink),
+  fonts: live(fonts),
+  daynight: live(daynight),
+  agents: live(agents),
+  agentsTall: live(agentsTall),
+  nojsx: live(nojsx),
+  nojsxTall: live(nojsxTall),
+  whereReadme: live(whereReadme),
+  whereDocs: live(whereDocs),
+  whereMail: live(whereMail),
+};
+const totalKB = Math.round(Object.values(s).reduce((sum, scene) => sum + scene.gzip, 0) / 1024);
+
+const adaptive = `const { theme, css } = adaptive({
+  dark: tomorrowNight, light: tomorrow,
+});
+// theme colors are CSS variables
+render({ css }, <rect fill={theme.base00} />);`;
+const start = `npm i svjeez
+npx svjeez frames scene.tsx --sheet
+npx svjeez svg scene.tsx --out scene.svg`;
+---
+
+<Base
+  title="svjeez · animated SVG from TSX"
+  description="Create animated SVGs with TypeScript. svjeez compiles scenes into self-contained files you can use in image tags, with no runtime JavaScript."
+  share={{
+    title: "svjeez: animated SVGs from TypeScript",
+    description: "Write a scene in TSX and compile it to a self-contained animated SVG.",
+    alt: "A line-drawn flower and the TSX that makes it.",
+  }}
+  class="home"
+>
+  <link slot="head" rel="preload" as="image" href={s.hero.src} media="(prefers-reduced-motion: no-preference) and (min-width: 64rem)" />
+  <main>
+    <section class="wrap hero g">
+      <h1 class="c1-12">Make animated <span class="ul">SVGs</span> with TypeScript.</h1>
+      <p class="lede c1-12">Write a scene in TSX and compile it to one self-contained SVG. The animation plays without runtime JavaScript.</p>
+      <div class="cta c1-12"><Install command="npm i svjeez" /></div>
+    </section>
+
+    <div class="wrap hero-demo">
+      <div class="win">
+        <LiveScene class="wide" scene={s.hero} cost={55} alt="A motion() chain beside the sky it paints. The sky goes from dawn to noon, holds, turns to dusk and night, then back to dawn, while a sun arcs over two hills. Each step of the chain lights up in the code while it plays." />
+        <LiveScene class="tall" scene={s.heroTall} cost={55} alt="A sky above the motion() chain that paints it: dawn, noon, dusk, night and back, with a sun arcing over two hills. Each step of the chain lights up while it plays." />
+      </div>
+    </div>
+
+    <section class="wrap sec g" id="play">
+      <h2 class="c1-6">Try it: edit the scene and see the result.</h2>
+      <div class="playground c1-12">
+        <div class="pg-fallback win" aria-hidden="false">
+          <div class="pg-bar"><span class="dots"><i></i><i></i><i></i></span><b>toast.tsx</b></div>
+          <div class="pg-body">
+            <Code class="code" code={toastSource.trimEnd()} lang="tsx" theme="css-variables" />
+            <div class="pg-view"><LiveScene scene={s.toast} cost={6} alt="A toast slides up, a check mark draws itself inside a green dot, and the words Changes saved appear." /></div>
+          </div>
+        </div>
+        <Playground initial="toast" />
+      </div>
+    </section>
+
+    <section class="wrap sec g" id="timeline">
+      <h2 class="c1-12">Compose motion on a timeline.</h2>
+      <div class="big c1-12">
+        <div class="win">
+          <LiveScene class="wide" scene={s.timeline} cost={41} alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says." />
+          <LiveScene class="tall" scene={s.timelineTall} cost={30} alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says." />
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap sec g" id="diagrams">
+      <h2 class="c1-8 xl">Bring diagrams to life.</h2>
+      <div class="big c1-12">
+        <div class="win">
+          <LiveScene class="wide" scene={s.pipeline} cost={44} alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
+          <LiveScene class="tall" scene={s.pipelineTall} cost={30} alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
+        </div>
+      </div>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.handshake} cost={11} alt="A sequence diagram: a browser image asks a CDN for one SVG file, gets it back and starts the animation." /></div></figure>
+      <figure class="c7-12"><div class="win"><LiveScene scene={s.team} cost={32} alt="An agent team grows level by level as a tree, then a dot walks between two branches." /></div></figure>
+    </section>
+
+    <div class="tint">
+      <section class="wrap sec g" id="code">
+        <h2 class="c1-6">Explain code and show terminal sessions.</h2>
+        <figure class="c1-6"><div class="win"><LiveScene scene={s.explainer} cost={23} alt="Five lines of TSX with a spotlight moving across them and a note explaining draw and enter." /></div></figure>
+        <figure class="c7-12"><div class="win"><LiveScene scene={s.recording} cost={28} alt="Three svjeez commands in a terminal: frames, svg and skill, each followed by its output." /></div></figure>
+      </section>
+    </div>
+
+    <section class="wrap sec g" id="type">
+      <h2 class="c1-6">Animate handwriting. Embed your fonts.</h2>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.ink} cost={17} alt="The word hello is handwritten stroke by stroke, then a brush swash is inked underneath." /></div></figure>
+      <figure class="c7-12"><div class="win"><LiveScene scene={s.fonts} cost={20} alt="The words Aa Type draw on as outlines in an embedded display font, with real italic text below." /></div></figure>
+    </section>
+
+    <section class="wrap sec g" id="light-dark">
+      <h2 class="c1-8">One SVG, made for light and dark.</h2>
+      <div class="stagewrap c1-8">
+        <DayNight scene={s.daynight} alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam." />
+      </div>
+      <div class="side c9-12">
+        <ul class="points">
+          <li><b>The theme is built into the SVG</b><span>A <code>prefers-color-scheme</code> media query selects the theme.</span></li>
+          <li><b>Change the scene, too</b><span>Swap the sun for a moon, light the windows, and sweep a beam across the water.</span></li>
+        </ul>
+      </div>
+      <Code class="code c1-6" code={adaptive} lang="tsx" theme="css-variables" />
+    </section>
+
+    <div class="tint">
+      <section class="wrap sec g" id="agents">
+        <h2 class="c1-6">Give your coding agent the scene-writing guide.</h2>
+        <div class="big c1-12">
+          <div class="win desk">
+            <LiveScene class="wide" scene={s.agents} cost={52} alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns." />
+            <LiveScene class="tall" scene={s.agentsTall} cost={40} alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns." />
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="wrap sec g" id="no-jsx">
+      <h2 class="c1-8 xl">Write scenes with or without JSX.</h2>
+      <div class="big c1-12">
+        <div class="win">
+          <LiveScene class="wide" scene={s.nojsx} cost={45} alt="A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it." />
+          <LiveScene class="tall" scene={s.nojsxTall} cost={30} alt="A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it." />
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap sec g" id="where">
+      <h2 class="c1-8">Use your SVG where images are supported.</h2>
+      <figure class="c1-4"><div class="win"><LiveScene scene={s.whereReadme} cost={8} alt="A README page with an animated dot-matrix image in the middle." /></div><h3>READMEs</h3><p>Add an animated SVG to a GitHub README with an <code>&lt;img&gt;</code> tag.</p></figure>
+      <figure class="c5-8"><div class="win"><LiveScene scene={s.whereDocs} cost={4} alt="A docs page with a diagram in which a packet travels between two boxes." /></div><h3>Docs and blogs</h3><p>Add a scene to a page as an image, without a separate player or script.</p></figure>
+      <figure class="c9-12"><div class="win"><LiveScene scene={s.whereMail} cost={4} alt="An email with a bar chart that grows inside the message." /></div><h3>Email</h3><p>SVG support varies across email clients. Provide a still image as a fallback.</p></figure>
+    </section>
+
+    <section class="wrap sec g" id="start">
+      <div class="c1-6">
+        <h2>Start making animated SVGs.</h2>
+        <p class="more"><a class="btn primary" href="/examples/">Explore the examples</a><a class="btn" href="/intro">Watch the 45-second intro</a></p>
+      </div>
+      <div class="get c7-12">
+        <h3>In a project</h3>
+        <pre class="code">{start}</pre>
+        <p>The library has no runtime dependencies and supports Node 20 and newer. Frame rendering also requires Playwright and Chromium; running TSX on Node requires tsx.</p>
+        <h3>With a coding agent</h3>
+        <pre class="code">npx svjeez skill --install</pre>
+        <p>Install the guide, references, and worked examples into <code>.claude/skills</code> for your coding agent.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot g">
+    <p class="c1-6">The animated scenes on this page are svjeez SVGs, displayed as images. Together they total {totalKB} KB gzipped. Off-screen scenes pause until you scroll to them. MIT licensed.</p>
+    <nav class="c7-12" aria-label="Footer"><a href="/examples/">Examples</a><a href="/intro">Intro</a><a href="https://github.com/saiashirwad/svjeez">GitHub</a><a href="https://www.npmjs.com/package/svjeez">npm</a></nav>
+  </footer>
+</Base>

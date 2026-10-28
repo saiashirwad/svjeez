@@ -1,0 +1,11 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { getScene, type SceneSource } from "./scene";
+
+type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & { scene: SceneSource };
+
+const { scene, alt, ...attributes } = Astro.props;
+const image = getScene(scene);
+---
+
+<img src={image.src} width={image.width} height={image.height} alt={alt ?? (image.desc || image.title)} {...attributes} />

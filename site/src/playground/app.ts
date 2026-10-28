@@ -14,7 +14,7 @@ const createCompiler = () => {
   let next = 0;
 
   const start = () => {
-    worker = new Worker(new URL(WORKER_FILE, import.meta.url), { type: "module" });
+    worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
     worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
       waiting.get(data.id)?.(data);
       waiting.delete(data.id);

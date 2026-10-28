@@ -1,0 +1,17 @@
+---
+// The live editor. Only a small loader ships with the page; the editor and the compiler load near the viewport or on a click.
+interface Props {
+  /** The first example: curve, toast, orbit, flowchart, explainer or adaptive. */
+  initial: string;
+  /** Load now instead of near the viewport. */
+  eager?: boolean;
+}
+
+const { initial, eager } = Astro.props;
+---
+
+<div data-playground={initial} data-eager={eager ? "" : undefined}></div>
+
+<script>
+  import "../playground/embed";
+</script>

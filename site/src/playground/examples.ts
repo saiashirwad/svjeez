@@ -1,9 +1,9 @@
-import curve from "./examples/curve.tsx.txt" with { type: "text" };
-import toast from "./examples/toast.tsx.txt" with { type: "text" };
-import orbit from "./examples/orbit.tsx.txt" with { type: "text" };
-import flowchart from "./examples/flowchart.tsx.txt" with { type: "text" };
-import explainer from "./examples/explainer.tsx.txt" with { type: "text" };
-import adaptive from "./examples/adaptive.tsx.txt" with { type: "text" };
+import curve from "./examples/curve.tsx.txt?raw";
+import toast from "./examples/toast.tsx.txt?raw";
+import orbit from "./examples/orbit.tsx.txt?raw";
+import flowchart from "./examples/flowchart.tsx.txt?raw";
+import explainer from "./examples/explainer.tsx.txt?raw";
+import adaptive from "./examples/adaptive.tsx.txt?raw";
 
 export interface PlaygroundExample {
   readonly id: string;

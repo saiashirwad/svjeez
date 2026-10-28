@@ -1,0 +1,47 @@
+---
+interface Props {
+  current?: "examples" | "intro" | "play";
+  wide?: boolean;
+}
+
+const { current, wide } = Astro.props;
+const links = [
+  { href: "/examples/", label: "Examples", page: "examples" },
+  ...(current === "play" ? [{ href: "/play", label: "Playground", page: "play" }] : []),
+  { href: "/intro", label: "Intro", page: "intro" },
+  { href: "https://github.com/saiashirwad/svjeez", label: "GitHub" },
+];
+// On the playground page the extra link would crowd a phone, so the last two give way.
+const optional = current === "play" ? ["Intro", "GitHub"] : [];
+---
+
+<header class:list={["wrap top", { wide }]}>
+  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="" />svjeez</a>
+  <nav aria-label="Main">
+    {
+      links.map((link) => (
+        <a href={link.href} class:list={{ opt: optional.includes(link.label) }} aria-current={link.page === current ? "page" : undefined}>
+          {link.label}
+        </a>
+      ))
+    }
+    <button class="theme" type="button" aria-label="Switch between light and dark">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"></path></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"></path></svg>
+    </button>
+  </nav>
+</header>
+
+<script>
+  import { scheme, THEMECHANGE } from "../scripts/scheme";
+
+  // The toggle sets `color-scheme` on the page, and Chromium hands that to every <img> SVG on it.
+  document.querySelector(".theme")?.addEventListener("click", () => {
+    const next = scheme() === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem("theme", next);
+    } catch {}
+    dispatchEvent(new Event(THEMECHANGE));
+  });
+</script>
