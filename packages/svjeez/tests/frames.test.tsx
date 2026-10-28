@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
-import { Picture, def, ease, font, motion, picture, render, type Child, type SvgNode } from "svjeez";
+import { Picture, def, ease, font, motion, picture, render, restyle, type Child, type SvgNode } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
 import { renderFrames } from "svjeez/frames";
 import { systemColorScheme } from "../src/scheme";
 
@@ -250,5 +251,64 @@ describe.if(browser)("prefix in one page", () => {
   test("unprefixed scenes clobber each other's keyframes", async () => {
     const { translate } = await halfway(`<!doctype html><body>${slide()}${fade()}`);
     expect(translate).toBe("none");
+  });
+});
+
+describe("restyle", () => {
+  const scene = (reducedMotion?: { at: number }) =>
+    render(
+      { width: 40, height: 20, duration: 4, title: "Restyle", reducedMotion },
+      <>
+        <rect width={40} height={20} fill="#3EE6D6" animation={motion({ opacity: 0 }).to({ opacity: 1 }, 4, ease.linear)} />
+        <rect x={10} width={10} height={10} fill="#E64" animation={motion({ blur: 0 }).to({ blur: 4 }, 2, ease.linear)} />
+      </>,
+    );
+
+  test("an untouched copy is the input, and the reduced-motion freeze stays where posters read it", () => {
+    const svg = scene({ at: 2.5 });
+    expect(restyle(svg, {})).toBe(svg);
+    expect(svg).toMatch(/animation-delay:-2\.5s!important/);
+  });
+
+  describe.if(browser)("in the browser", () => {
+    const paint = async (svg: string, time: number) => (await renderFrames(svg, { times: [time], colorScheme: "light" })).frames[0]!.png;
+
+    test("a copy started at 1.5 s begins where the original is at 1.5 s, CSS and SMIL motions alike", async () => {
+      const svg = scene();
+      expect(svg).toContain("<animate");
+      expect(same(await paint(restyle(svg, { at: 1.5 }), 0), await paint(svg, 1.5))).toBe(true);
+      expect(same(await paint(restyle(svg, { at: 1.5 }), 0), await paint(svg, 0))).toBe(false);
+    });
+
+    test("css after the scene's own recolors a scene painted with theme variables", async () => {
+      const { theme, css } = adaptive({ dark: systemDark, light: systemLight });
+      const svg = render({ width: 20, height: 20, duration: 1, title: "Themed", css }, <rect width={20} height={20} fill={theme.base0D} />);
+      const red = await paint(render({ width: 20, height: 20, duration: 1, title: "Red" }, <rect width={20} height={20} fill="#ff0000" />), 0);
+      expect(same(await paint(restyle(svg, { css: "svg{--base0D:#ff0000}" }), 0), red)).toBe(true);
+      expect(same(await paint(svg, 0), red)).toBe(false);
+    });
+
+    test("still holds the reduced-motion frame, SMIL included", async () => {
+      const svg = scene({ at: 2.5 });
+      expect(same(await paint(restyle(svg, { still: true }), 0), await paint(svg, 2.5))).toBe(true);
+    });
+
+    test("still stops every animation, a scene's own CSS among them", async () => {
+      const own = render({ width: 20, height: 20, duration: 1, title: "Own", css: "@keyframes spin{from{opacity:0}to{opacity:1}}rect{animation:spin 100s linear infinite}" }, <rect width={20} height={20} />);
+      const opacityAfter = async (svg: string) => {
+        const { chromium } = await import("playwright-core");
+        const chrome = await chromium.launch();
+        try {
+          const page = await chrome.newPage();
+          await page.setContent(`<!doctype html><body>${svg}`);
+          await page.waitForTimeout(500);
+          return await page.evaluate(() => Number(getComputedStyle(document.querySelector("rect")!).opacity));
+        } finally {
+          await chrome.close();
+        }
+      };
+      expect(await opacityAfter(own)).toBeGreaterThan(0);
+      expect(await opacityAfter(restyle(own, { still: true }))).toBe(0);
+    });
   });
 });
