@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 560" width="1032" height="560" role="img" aria-labelledby="t d">
+  <title id="t">Agents write scenes too</title>
+  <desc id="d">On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, looks at them and reports the result, and a small spinner it made turns.</desc>
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="var(--wall-a)"/>
+      <stop offset="1" stop-color="var(--wall-b)"/>
+    </linearGradient>
+    <clipPath id="c1">
+      <rect x="66" y="122" width="0" height="21.875" class="a m1"/>
+    </clipPath>
+    <clipPath id="c2">
+      <rect x="66" y="187.625" width="0" height="21.875" class="a m8"/>
+    </clipPath>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}
+@media (prefers-color-scheme:light){svg{--wall-a:#D9E7FB;--wall-b:#DDF3E6;--bar:#FFFFFF}}
+
+.a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,5%{width:0px}7.593%,100%{width:210px}}
+.m1{animation-name:k1;animation-timing-function:steps(28)}
+@keyframes k2{0%{opacity:1}50%,100%{opacity:0}}
+.m2{animation-name:k2;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k3{0%,7.593%,100%{opacity:0}5%{opacity:1}}
+.m3{animation-name:k3;animation-timing-function:steps(1)}
+@keyframes k4{0%,5%{translate:0px 0px}7.593%,100%{translate:210px 0px}}
+.m4{animation-name:k3,k4;animation-timing-function:steps(1),steps(28)}
+@keyframes k5{0%{opacity:0}10.509%,100%{opacity:1}}
+.m5{animation-name:k5;animation-timing-function:steps(1)}
+@keyframes k6{0%{opacity:0}11.009%,100%{opacity:1}}
+.m6{animation-name:k6;animation-timing-function:steps(1)}
+@keyframes k7{0%{visibility:hidden}5%,100%{visibility:visible}}
+.m7{animation-name:k7;animation-timing-function:steps(1)}
+@keyframes k8{0%,14.009%{width:0px}16.417%,100%{width:195px}}
+.m8{animation-name:k8;animation-timing-function:steps(26)}
+@keyframes k9{0%,16.417%,100%{opacity:0}14.009%{opacity:1}}
+.m9{animation-name:k9;animation-timing-function:steps(1)}
+@keyframes k10{0%{opacity:0}14.009%,100%{opacity:1}}
+@keyframes k11{0%,14.009%{translate:0px 0px}16.417%,100%{translate:195px 0px}}
+.m10{animation-name:k10,k11;animation-timing-function:steps(1),steps(26)}
+@keyframes k12{0%{opacity:0}19.333%,100%{opacity:1}}
+.m11{animation-name:k12;animation-timing-function:steps(1)}
+@keyframes k13{0%{visibility:hidden}14.009%,100%{visibility:visible}}
+.m12{animation-name:k13;animation-timing-function:steps(1)}
+@keyframes k14{0%,24.833%{opacity:0}27.333%,100%{opacity:1}}
+@keyframes k15{0%,24.833%{translate:0px 6px}27.333%,100%{translate:0px 0px}}
+.m13{animation-name:k14,k15}
+@keyframes k16{0%,29.833%{opacity:0}32.333%,100%{opacity:1}}
+@keyframes k17{0%,29.833%{translate:0px 6px}32.333%,100%{translate:0px 0px}}
+.m14{animation-name:k16,k17}
+@keyframes k18{0%,34.833%{opacity:0}37.333%,100%{opacity:1}}
+@keyframes k19{0%,34.833%{translate:0px 6px}37.333%,100%{translate:0px 0px}}
+.m15{animation-name:k18,k19}
+@keyframes k20{0%,39.833%{opacity:0}42.333%,100%{opacity:1}}
+@keyframes k21{0%,39.833%{translate:0px 6px}42.333%,100%{translate:0px 0px}}
+.m16{animation-name:k20,k21}
+@keyframes k22{0%,44.833%{opacity:0}47.333%,100%{opacity:1}}
+@keyframes k23{0%,44.833%{translate:0px 6px}47.333%,100%{translate:0px 0px}}
+.m17{animation-name:k22,k23}
+@keyframes k24{0%,49.833%{opacity:0}52.333%,100%{opacity:1}}
+@keyframes k25{0%,49.833%{translate:0px 6px}52.333%,100%{translate:0px 0px}}
+.m18{animation-name:k24,k25}
+@keyframes k26{0%,54.833%{opacity:0}57.333%,100%{opacity:1}}
+@keyframes k27{0%,54.833%{translate:0px 6px}57.333%,100%{translate:0px 0px}}
+.m19{animation-name:k26,k27}
+@keyframes k28{0%,59.833%{opacity:0}62.333%,100%{opacity:1}}
+@keyframes k29{0%,59.833%{translate:0px 6px}62.333%,100%{translate:0px 0px}}
+.m20{animation-name:k28,k29}
+@keyframes k30{0%{rotate:0deg}100%{rotate:360deg}}
+.m21{animation-name:k30;animation-duration:1s;animation-timing-function:linear}
+@keyframes k31{0%,47.333%{opacity:0}51.5%,100%{opacity:1}}
+@keyframes k32{0%,47.333%{scale:0.9}51.5%,100%{scale:1}}
+.m22{animation-name:k31,k32}
+@keyframes k33{0%,95.833%{opacity:1}100%{opacity:0}}
+.m23{animation-name:k33}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-11s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="1032" height="560" rx="12" fill="url(#g1)"/>
+  <path d="M0 30H1032V12a12 12 0 0 0 -12 -12H12A12 12 0 0 0 0 12Z" fill="var(--bar)" opacity="0.72"/>
+  <g class="sans" font-size="13" fill="var(--base05)">
+    <rect x="18" y="8" width="14" height="14" rx="4" fill="var(--base0B)"/>
+    <text x="46" y="20" font-weight="700">Terminal</text>
+    <text x="116" y="20">Shell</text>
+    <text x="174" y="20">Edit</text>
+    <text x="232" y="20">View</text>
+    <text x="290" y="20">Window</text>
+    <text x="348" y="20">Help</text>
+    <text x="1012" y="20" text-anchor="end">Wed 9:41</text>
+  </g>
+  <rect x="26" y="54" width="476" height="326" rx="32" fill="#000" opacity="0.012"/>
+  <rect x="34" y="62" width="460" height="310" rx="24" fill="#000" opacity="0.022"/>
+  <rect x="40" y="68" width="448" height="298" rx="18" fill="#000" opacity="0.032"/>
+  <g class="sans">
+    <rect x="44" y="64" width="440" height="290" rx="12" fill="#1C1C1E" stroke="#3A3A3C"/>
+    <path d="M44 104h440" stroke="#2C2C2E"/>
+    <circle cx="64" cy="84" r="5.5" fill="#FF6961"/>
+    <circle cx="82" cy="84" r="5.5" fill="#FFD60A"/>
+    <circle cx="100" cy="84" r="5.5" fill="#32D74B"/>
+    <text x="264" y="88" font-size="12" text-anchor="middle" fill="#A1A1A6">~/project, zsh</text>
+  </g>
+  <rect x="498" y="102" width="508" height="432" rx="32" fill="#000" opacity="0.012"/>
+  <rect x="506" y="110" width="492" height="416" rx="24" fill="#000" opacity="0.022"/>
+  <rect x="512" y="116" width="480" height="404" rx="18" fill="#000" opacity="0.032"/>
+  <g class="sans">
+    <rect x="516" y="112" width="472" height="396" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M516 152h472" stroke="var(--base01)"/>
+    <circle cx="536" cy="132" r="5.5" fill="var(--base08)"/>
+    <circle cx="554" cy="132" r="5.5" fill="var(--base0A)"/>
+    <circle cx="572" cy="132" r="5.5" fill="var(--base0B)"/>
+    <text x="752" y="136" font-size="12" text-anchor="middle" fill="var(--base04)">agent</text>
+  </g>
+  <g class="a m23">
+    <g class="mono">
+      <g>
+        <g class="a m7">
+          <g>
+            <g clip-path="url(#c1)">
+              <text x="66" y="137.313" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+              <text x="81" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">npx</text>
+              <text x="111" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">svjeez</text>
+              <text x="163.5" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">skill</text>
+              <text x="208.5" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">--install</text>
+            </g>
+            <g class="a m4">
+              <rect x="66" y="125.125" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m2"/>
+              <rect x="66" y="125.125" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m3"/>
+            </g>
+          </g>
+          <g class="a m5">
+            <g>
+              <text x="66" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">installed</text>
+              <text x="141" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">the</text>
+              <text x="171" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">svjeez</text>
+              <text x="223.5" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">skill</text>
+              <text x="268.5" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">in</text>
+            </g>
+          </g>
+          <g class="a m6">
+            <g>
+              <text x="66" y="181.063" font-family="monospace" font-size="12.5" fill="#7C7C82">.claude/skills/svjeez</text>
+            </g>
+          </g>
+        </g>
+        <g class="a m12">
+          <g>
+            <g clip-path="url(#c2)">
+              <text x="66" y="202.938" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+              <text x="81" y="202.938" font-family="monospace" font-size="12.5" fill="#E5E5EA">ls</text>
+              <text x="103.5" y="202.938" font-family="monospace" font-size="12.5" fill="#E5E5EA">.claude/skills/svjeez</text>
+            </g>
+            <g class="a m10">
+              <rect x="66" y="190.75" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m2"/>
+              <rect x="66" y="190.75" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m9"/>
+            </g>
+          </g>
+          <g class="a m11">
+            <g>
+              <text x="66" y="224.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">SKILL.md</text>
+              <text x="141" y="224.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">examples</text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <g class="mono">
+      <g>
+        <g class="a m13">
+          <text x="540" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base0D)">you</text>
+          <text x="585" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">make</text>
+          <text x="622.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">a</text>
+          <text x="637.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loading</text>
+          <text x="697.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner</text>
+          <text x="757.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">svg,</text>
+          <text x="795" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
+          <text x="817.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
+        </g>
+        <g class="a m14"/>
+        <g class="a m15">
+          <text x="540" y="236.188" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="555" y="236.188" font-family="monospace" font-size="12.5" fill="var(--base0E)">read</text>
+          <text x="600" y="236.188" font-family="monospace" font-size="12.5" fill="var(--base05)">.claude/skills/svjeez/SKILL.md</text>
+        </g>
+        <g class="a m16">
+          <text x="540" y="259.313" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="555" y="259.313" font-family="monospace" font-size="12.5" fill="var(--base0E)">write</text>
+          <text x="600" y="259.313" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
+        </g>
+        <g class="a m17">
+          <text x="540" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="555" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base0E)">run</text>
+          <text x="600" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">svjeez</text>
+          <text x="652.5" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">frames</text>
+          <text x="705" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
+          <text x="795" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">--sheet</text>
+        </g>
+        <g class="a m18">
+          <text x="540" y="305.563" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="555" y="305.563" font-family="monospace" font-size="12.5" fill="var(--base0E)">look</text>
+          <text x="600" y="305.563" font-family="monospace" font-size="12.5" fill="var(--base05)">frames/sheet.png</text>
+        </g>
+        <g class="a m19"/>
+        <g class="a m20">
+          <text x="540" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base0B)">✓</text>
+          <text x="555" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">The</text>
+          <text x="585" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">arc</text>
+          <text x="615" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">closes</text>
+          <text x="667.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">at</text>
+          <text x="690" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
+          <text x="712.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">and</text>
+          <text x="742.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">the</text>
+          <text x="772.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
+          <text x="810" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">is</text>
+          <text x="832.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">seamless.</text>
+        </g>
+      </g>
+    </g>
+    <g class="a m22 fb">
+      <rect x="540" y="402" width="120" height="84" rx="10" fill="var(--base01)"/>
+      <g transform="translate(600 444)">
+        <circle r="18" fill="none" stroke="var(--base02)" stroke-width="5"/>
+        <g class="a m21 fb">
+          <circle r="18" fill="none" stroke="var(--base0D)" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="0.28 1"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

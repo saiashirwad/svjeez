@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 328 264" width="328" height="264" role="img" aria-labelledby="t d">
+  <title id="t">In a README</title>
+  <desc id="d">A README page with a heading, text and an animated dot-matrix image in the middle of it.</desc>
+  <defs>
+    <pattern id="p1" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="6" r="3.4" fill="var(--base02)"/>
+    </pattern>
+    <pattern id="p2" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="6" r="3.4" fill="var(--base0B)"/>
+    </pattern>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,50%,95.833%,100%{height:36px}4.167%,37.5%,54.167%,87.5%{height:24px}16.667%,66.667%{height:12px}}
+.m1{animation-name:k1;animation-timing-function:steps(1)}
+@keyframes k2{0%,50%,95.833%,100%{height:36px}12.5%,37.5%,62.5%,87.5%{height:24px}20.833%,70.833%{height:12px}}
+.m2{animation-name:k2;animation-timing-function:steps(1)}
+@keyframes k3{0%,45.833%,95.833%,100%{height:36px}20.833%,33.333%,70.833%,83.333%{height:24px}29.167%,79.167%{height:12px}}
+.m3{animation-name:k3;animation-timing-function:steps(1)}
+@keyframes k4{0%,50%,95.833%,100%{height:48px}16.667%,41.667%,66.667%,91.667%{height:36px}25%,75%{height:24px}}
+.m4{animation-name:k4;animation-timing-function:steps(1)}
+@keyframes k5{0%,50%,95.833%,100%{height:48px}25%,75%{height:36px}}
+.m5{animation-name:k5;animation-timing-function:steps(1)}
+@keyframes k6{0%,29.167%,79.167%,100%{height:36px}4.167%,54.167%{height:48px}}
+.m6{animation-name:k6;animation-timing-function:steps(1)}
+@keyframes k7{0%,29.167%,50%,79.167%,95.833%,100%{height:36px}8.333%,58.333%{height:48px}37.5%,87.5%{height:24px}}
+.m7{animation-name:k7;animation-timing-function:steps(1)}
+@keyframes k8{0%,33.333%,83.333%,100%{height:24px}8.333%,25%,58.333%,75%{height:36px}16.667%,66.667%{height:48px}}
+.m8{animation-name:k8;animation-timing-function:steps(1)}
+@keyframes k9{0%,41.667%,91.667%,100%{height:12px}4.167%,33.333%,54.167%,83.333%{height:24px}16.667%,66.667%{height:36px}}
+.m9{animation-name:k9;animation-timing-function:steps(1)}
+@keyframes k10{0%,41.667%,91.667%,100%{height:12px}12.5%,29.167%,62.5%,79.167%{height:24px}20.833%,70.833%{height:36px}}
+.m10{animation-name:k10;animation-timing-function:steps(1)}
+@keyframes k11{0%,41.667%,91.667%,100%{height:12px}12.5%,33.333%,62.5%,83.333%{height:24px}25%,75%{height:36px}}
+.m11{animation-name:k11;animation-timing-function:steps(1)}
+@keyframes k12{0%,50%,95.833%,100%{height:12px}12.5%,41.667%,62.5%,91.667%{height:24px}20.833%,70.833%{height:36px}}
+.m12{animation-name:k12;animation-timing-function:steps(1)}
+@keyframes k13{0%,50%,95.833%,100%{height:24px}20.833%,37.5%,70.833%,87.5%{height:36px}29.167%,79.167%{height:48px}}
+.m13{animation-name:k13;animation-timing-function:steps(1)}
+@keyframes k14{0%,16.667%,45.833%,66.667%,95.833%,100%{height:36px}8.333%,58.333%{height:24px}25%,75%{height:48px}}
+.m14{animation-name:k14;animation-timing-function:steps(1)}
+@keyframes k15{0%,50%,95.833%,100%{height:36px}25%,75%{height:48px}}
+.m15{animation-name:k15;animation-timing-function:steps(1)}
+@keyframes k16{0%,29.167%,79.167%,100%{height:48px}4.167%,20.833%,54.167%,70.833%{height:36px}12.5%,62.5%{height:24px}}
+.m16{animation-name:k16;animation-timing-function:steps(1)}
+@keyframes k17{0%,29.167%,50%,79.167%,95.833%,100%{height:36px}8.333%,58.333%{height:24px}37.5%,87.5%{height:48px}}
+.m17{animation-name:k17;animation-timing-function:steps(1)}
+@keyframes k18{0%,37.5%,87.5%,100%{height:36px}8.333%,29.167%,58.333%,79.167%{height:24px}16.667%,66.667%{height:12px}}
+.m18{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%,45.833%,95.833%,100%{height:36px}4.167%,33.333%,54.167%,83.333%{height:24px}12.5%,62.5%{height:12px}}
+.m19{animation-name:k19;animation-timing-function:steps(1)}
+@keyframes k20{0%,45.833%,95.833%,100%{height:36px}12.5%,37.5%,62.5%,87.5%{height:24px}20.833%,70.833%{height:12px}}
+.m20{animation-name:k20;animation-timing-function:steps(1)}
+@keyframes k21{0%,45.833%,95.833%,100%{height:36px}20.833%,70.833%{height:24px}}
+.m21{animation-name:k21;animation-timing-function:steps(1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-2s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="327" height="263" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 36.5h327" stroke="var(--base01)"/>
+    <circle cx="18.5" cy="18.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="36.5" cy="18.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="54.5" cy="18.5" r="5.5" fill="var(--base0B)"/>
+    <text x="164" y="22.5" font-size="12" text-anchor="middle" fill="var(--base04)">README.md</text>
+  </g>
+  <rect x="24" y="58" width="96" height="13" rx="6.5" fill="var(--base06)"/>
+  <rect x="24" y="90" width="276" height="7" rx="3.5" fill="var(--base02)"/>
+  <rect x="24" y="106" width="250" height="7" rx="3.5" fill="var(--base02)"/>
+  <rect x="24" y="122" width="190" height="7" rx="3.5" fill="var(--base02)"/>
+  <rect x="24" y="146" width="280" height="86" rx="9" fill="var(--base01)" stroke="var(--base02)"/>
+  <g transform="translate(32 160)">
+    <rect width="264" height="60" fill="url(#p1)"/>
+    <g transform="translate(0 60) scale(1 -1)">
+      <rect x="0" width="12" height="36" fill="url(#p2)" class="a m1"/>
+      <rect x="12" width="12" height="36" fill="url(#p2)" class="a m2"/>
+      <rect x="24" width="12" height="36" fill="url(#p2)" class="a m3"/>
+      <rect x="36" width="12" height="48" fill="url(#p2)" class="a m4"/>
+      <rect x="48" width="12" height="48" fill="url(#p2)" class="a m5"/>
+      <rect x="60" width="12" height="36" fill="url(#p2)" class="a m6"/>
+      <rect x="72" width="12" height="36" fill="url(#p2)" class="a m7"/>
+      <rect x="84" width="12" height="24" fill="url(#p2)" class="a m8"/>
+      <rect x="96" width="12" height="12" fill="url(#p2)" class="a m9"/>
+      <rect x="108" width="12" height="12" fill="url(#p2)" class="a m10"/>
+      <rect x="120" width="12" height="12" fill="url(#p2)" class="a m11"/>
+      <rect x="132" width="12" height="12" fill="url(#p2)" class="a m12"/>
+      <rect x="144" width="12" height="24" fill="url(#p2)" class="a m13"/>
+      <rect x="156" width="12" height="36" fill="url(#p2)" class="a m14"/>
+      <rect x="168" width="12" height="36" fill="url(#p2)" class="a m15"/>
+      <rect x="180" width="12" height="48" fill="url(#p2)" class="a m16"/>
+      <rect x="192" width="12" height="36" fill="url(#p2)" class="a m17"/>
+      <rect x="204" width="12" height="36" fill="url(#p2)" class="a m18"/>
+      <rect x="216" width="12" height="36" fill="url(#p2)" class="a m19"/>
+      <rect x="228" width="12" height="36" fill="url(#p2)" class="a m1"/>
+      <rect x="240" width="12" height="36" fill="url(#p2)" class="a m20"/>
+      <rect x="252" width="12" height="36" fill="url(#p2)" class="a m21"/>
+    </g>
+  </g>
+  <rect x="24" y="248" width="220" height="7" rx="3.5" fill="var(--base02)"/>
+</svg>

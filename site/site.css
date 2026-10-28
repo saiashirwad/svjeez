@@ -1,27 +1,30 @@
-/* svjeez.texoport.in: one stylesheet for the home page, the intro and the examples. No web fonts, no framework. */
+/* svjeez.texoport.in: one stylesheet for the home page, the intro and the examples. System fonts, no framework.
+   One grid: a 66rem content box, twelve columns, and every block starts on column 1, 5, 7 or 9. */
 
 @property --split { syntax: "<percentage>"; inherits: true; initial-value: 50% }
 
 :root {
   color-scheme: light dark;
-  --bg: light-dark(oklch(97% 0.018 85), oklch(19% 0.035 275));
-  --surface: light-dark(oklch(99% 0.008 85), oklch(23% 0.04 275));
-  --sunken: light-dark(oklch(94.5% 0.025 85), oklch(16.5% 0.035 275));
-  --ink: light-dark(oklch(24% 0.025 70), oklch(94% 0.012 275));
-  --muted: light-dark(oklch(48% 0.025 70), oklch(72% 0.035 275));
-  --line: light-dark(oklch(86% 0.03 80), oklch(33% 0.045 275));
-  --accent: light-dark(oklch(60% 0.19 40), oklch(76% 0.16 40));
-  --accent-ink: light-dark(oklch(99% 0.01 85), oklch(20% 0.04 275));
-  --sun: light-dark(oklch(78% 0.16 80), oklch(86% 0.14 90));
-  --shadow: light-dark(oklch(40% 0.05 70 / 0.14), oklch(5% 0.03 275 / 0.5));
+  --bg: light-dark(oklch(100% 0 0), oklch(14.5% 0.004 270));
+  --surface: light-dark(oklch(98.2% 0.002 270), oklch(20% 0.005 270));
+  --sunken: light-dark(oklch(97.2% 0.003 270), oklch(17.5% 0.005 270));
+  --ink: light-dark(oklch(21% 0.005 270), oklch(96% 0.002 270));
+  --muted: light-dark(oklch(50% 0.008 270), oklch(72% 0.008 270));
+  --line: light-dark(oklch(90% 0.004 270), oklch(29% 0.006 270));
+  --accent: light-dark(oklch(60% 0.19 150), oklch(76% 0.19 150));
+  --accent-ink: oklch(100% 0 0);
+  --shadow: light-dark(oklch(30% 0.02 270 / 0.16), oklch(0% 0 0 / 0.6));
+  --ring: light-dark(oklch(0% 0 0 / 0.07), oklch(100% 0 0 / 0.11));
+  --win-bg: light-dark(oklch(100% 0 0), oklch(24% 0.005 270));
 
-  --serif: ui-serif, "Iowan Old Style", "Apple Garamond", Baskerville, Georgia, serif;
-  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
   --gutter: clamp(1rem, 4vw, 2rem);
-  --measure: 66ch;
-  --radius: 0.875rem;
+  --content: 66rem;
+  --gap: 1.5rem;
+  --radius: 0.75rem;
   --out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root[data-theme="light"] { color-scheme: light }
@@ -29,161 +32,207 @@
 
 * { box-sizing: border-box }
 html { background: var(--bg); -webkit-text-size-adjust: none; text-size-adjust: none }
-body { margin: 0; min-block-size: 100dvh; color: var(--ink); background: var(--bg); font: 400 1rem / 1.6 var(--sans); text-wrap: pretty; overflow-wrap: break-word }
+body { margin: 0; min-block-size: 100dvh; color: var(--ink); background: var(--bg); font: 400 1rem / 1.6 var(--sans); text-wrap: pretty; overflow-wrap: break-word; -webkit-font-smoothing: antialiased }
 img, svg { display: block; max-inline-size: 100% }
-h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 600; line-height: 1.08; letter-spacing: -0.02em; text-wrap: balance }
-p { margin: 0 }
+h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; text-wrap: balance }
+p, dl, dd, figure { margin: 0 }
 a { color: inherit; text-decoration-color: color-mix(in oklch, currentColor 35%, transparent); text-underline-offset: 0.2em }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px }
-::selection { background: color-mix(in oklch, var(--accent) 30%, transparent) }
+::selection { background: color-mix(in oklch, var(--accent) 28%, transparent) }
 code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
-.wrap { inline-size: min(100% - 2 * var(--gutter), 72rem); margin-inline: auto }
-.visually-hidden { position: absolute; inline-size: 1px; block-size: 1px; overflow: clip; clip-path: inset(50%); white-space: nowrap }
+.wrap { inline-size: min(100% - 2 * var(--gutter), var(--content)); margin-inline: auto }
 
-/* Buttons and chips. */
+/* The grid. On a phone everything is one column; from 56rem each block names its columns. */
+.g { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--gap); row-gap: 1.25rem }
+@media (min-width: 56rem) {
+  .g { grid-template-columns: repeat(12, minmax(0, 1fr)) }
+  .c1-12 { grid-column: 1 / -1 }
+  .c1-8 { grid-column: 1 / 9 }
+  .c1-6 { grid-column: 1 / 7 }
+  .c1-5 { grid-column: 1 / 6 }
+  .c1-4 { grid-column: 1 / 5 }
+  .c5-8 { grid-column: 5 / 9 }
+  .c5-12 { grid-column: 5 / -1 }
+  .c7-12 { grid-column: 7 / -1 }
+  .c9-12 { grid-column: 9 / -1 }
+}
+
+/* Buttons. */
 .btn {
-  display: inline-flex; align-items: center; gap: 0.5rem; min-block-size: 2.75rem; padding-inline: 1.1rem;
-  font: 600 0.9375rem / 1 var(--sans); color: var(--ink); text-decoration: none; white-space: nowrap; cursor: pointer;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
-  box-shadow: 0 1px 0 var(--shadow);
+  display: inline-flex; align-items: center; gap: 0.5rem; min-block-size: 2.75rem; padding-inline: 1.25rem;
+  font: 500 0.9375rem / 1 var(--sans); color: var(--ink); text-decoration: none; white-space: nowrap; cursor: pointer;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
 }
-.btn.primary { color: var(--accent-ink); background: var(--accent); border-color: transparent }
+.btn.primary { color: var(--bg); background: var(--ink); border-color: transparent }
 .btn svg { inline-size: 1.1em; block-size: 1.1em; flex: none }
-.btn:active { translate: 0 1px; box-shadow: none }
+.btn:active, .install button:active { translate: 0 1px }
 @media (hover: hover) and (pointer: fine) {
-  .btn:hover { border-color: color-mix(in oklch, var(--ink) 40%, var(--line)) }
-  .btn.primary:hover { background: color-mix(in oklch, var(--accent) 88%, var(--ink)) }
+  .btn:hover { border-color: color-mix(in oklch, var(--ink) 35%, var(--line)) }
+  .btn.primary:hover { background: color-mix(in oklch, var(--ink) 82%, var(--bg)) }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .btn { transition: translate 0.12s var(--out), border-color 0.15s, background-color 0.15s }
-}
+@media (prefers-reduced-motion: no-preference) { .btn { transition: translate 0.12s var(--out), border-color 0.15s, background-color 0.15s } }
 
 /* Header. */
-.top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem }
-.brand { font: 700 1.5rem / 1 var(--serif); letter-spacing: -0.03em; text-decoration: none }
-.brand i { color: var(--accent); font-style: normal }
-.top nav { display: flex; align-items: center; gap: clamp(0.75rem, 3vw, 1.75rem); font-size: 0.9375rem }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.25rem }
+.brand { display: inline-flex; align-items: center; gap: 0.6rem; font: 700 1.0625rem / 1 var(--display); letter-spacing: -0.02em; text-decoration: none }
+.brand img { inline-size: 1.625rem; block-size: 1.625rem; border-radius: 22.5% }
+.top nav { display: flex; align-items: center; gap: clamp(0.75rem, 3vw, 1.5rem); font-size: 0.875rem; color: var(--muted) }
 .top nav a { text-decoration: none; padding-block: 0.5rem }
-@media (hover: hover) and (pointer: fine) { .top nav a:hover { text-decoration: underline } }
-.theme { inline-size: 2.5rem; block-size: 2.5rem; display: grid; place-items: center; padding: 0; color: var(--ink); background: none; border: 1px solid var(--line); border-radius: 50%; cursor: pointer }
+@media (hover: hover) and (pointer: fine) { .top nav a:hover { color: var(--ink) } }
+.theme { inline-size: 2.25rem; block-size: 2.25rem; display: grid; place-items: center; padding: 0; color: var(--muted); background: none; border: 0; border-radius: 50%; cursor: pointer }
 .theme:active { translate: 0 1px }
-.theme svg { inline-size: 1.25rem; block-size: 1.25rem }
+.theme svg { inline-size: 1.2rem; block-size: 1.2rem }
 .theme .moon { display: none }
 :root[data-theme="dark"] .theme .sun { display: none }
 :root[data-theme="dark"] .theme .moon { display: block }
+@media (hover: hover) and (pointer: fine) { .theme:hover { color: var(--ink) } }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .theme .sun { display: none }
   :root:not([data-theme]) .theme .moon { display: block }
 }
 
-/* Hero. */
-.hero { display: grid; justify-items: center; gap: 1rem; padding-block: clamp(1rem, 3.5vw, 2.5rem) 0.5rem; text-align: center }
-.hero h1 { margin-block-end: 0.6rem; font-size: clamp(2.75rem, 1.2rem + 6vw, 5rem); line-height: 0.98; letter-spacing: -0.035em }
-.hero h1 em { position: relative; font-style: italic; color: var(--accent); white-space: nowrap }
-.hero h1 em svg { position: absolute; inset-inline: -2%; inset-block-end: -0.14em; inline-size: 104%; block-size: 0.2em; overflow: visible }
-.hero h1 em path { fill: none; stroke: var(--sun); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0 }
-@media (prefers-reduced-motion: no-preference) {
-  .hero h1 em path { stroke-dashoffset: 1; animation: scribble 0.9s 0.5s var(--out) forwards }
-  @keyframes scribble { to { stroke-dashoffset: 0 } }
+/* Windows: every scene is a window with its own chrome, so the page only adds a shadow. */
+.win { border-radius: var(--radius); background: var(--win-bg); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
+.win img, .win > .stage { border-radius: inherit }
+.scene { inline-size: 100%; block-size: auto }
+@media (max-width: 55.99rem) {
+  .bleed { overflow-x: auto; overscroll-behavior-x: contain; margin-inline: calc(var(--gutter) * -1); padding: 1rem var(--gutter) 2rem; margin-block: -1rem -1rem; scrollbar-width: thin }
+  .win.big { inline-size: 40rem }
 }
-.lede { max-inline-size: 50ch; font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem); color: var(--muted) }
-.lede code { color: var(--ink) }
-.cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.75rem; margin-block-start: 0.5rem }
-.install { display: inline-flex; align-items: center; gap: 0.75rem; min-block-size: 2.75rem; padding-inline: 1.1rem 0.4rem; background: var(--sunken); border: 1px solid var(--line); border-radius: 999px; font: 500 0.9375rem / 1 var(--mono) }
+
+/* Hero: a left-aligned headline, then a short paragraph on the left and the install line on the right. */
+.hero { padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2rem, 4vw, 3rem); row-gap: clamp(1.5rem, 3vw, 2.25rem) }
+.hero h1 { font-size: clamp(3.25rem, 1rem + 9.5vw, 8.25rem); line-height: 0.92; letter-spacing: -0.055em }
+.ul { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 0.07em; text-underline-offset: 0.09em; text-decoration-skip-ink: none }
+.lede { max-inline-size: 36ch; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem); line-height: 1.5; color: var(--muted) }
+.cta { display: grid; gap: 1.25rem; align-content: start; justify-items: start }
+.install { display: inline-flex; align-items: center; gap: 0.5rem; min-block-size: 3rem; padding-inline: 1.1rem 0.4rem; background: var(--sunken); border-radius: 0.625rem; box-shadow: 0 0 0 1px var(--line); font: 500 1rem / 1 var(--mono) }
+.install code { font-size: inherit }
 .install b { color: var(--accent); font-weight: 600 }
-.install button { display: grid; place-items: center; inline-size: 2.25rem; block-size: 2.25rem; padding: 0; color: var(--muted); background: none; border: 0; border-radius: 50%; cursor: pointer }
-.install button:active { translate: 0 1px }
+.install button { display: grid; place-items: center; inline-size: 2.25rem; block-size: 2.25rem; padding: 0; color: var(--muted); background: none; border: 0; border-radius: 0.5rem; cursor: pointer }
 .install button svg { inline-size: 1.1rem; block-size: 1.1rem }
-@media (hover: hover) and (pointer: fine) { .install button:hover { color: var(--ink); background: var(--surface) } }
+@media (hover: hover) and (pointer: fine) { .install button:hover { color: var(--ink); background: var(--bg) } }
+.links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9375rem }
+.links a { color: var(--ink) }
+.hero-window { margin-block-end: clamp(3rem, 7vw, 5rem) }
 
-.reel { margin-block: 1.25rem 0.75rem }
-.reel .frame { overflow: clip; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 1.5rem 3rem -1.5rem var(--shadow) }
-.reel img { inline-size: 100%; block-size: auto }
-.caption { margin-block-start: 0.9rem; font-size: 0.875rem; color: var(--muted); text-align: center }
+/* What it does: a ruled list. */
+.spec { margin-block-end: clamp(1rem, 3vw, 2rem) }
+.spec .row { padding-block: 1.25rem; border-block-start: 1px solid var(--line); row-gap: 0.4rem }
+.spec dt { font: 600 1.0625rem / 1.35 var(--sans); letter-spacing: -0.01em }
+.spec dt span { display: inline-block; min-inline-size: 2.25rem; font: 500 0.8125rem / 1 var(--mono); color: var(--accent) }
+.spec dd { color: var(--muted) }
+.spec code { color: var(--ink); font-size: 0.85em }
 
-/* Sections. */
-section.block { padding-block: clamp(3rem, 8vw, 6rem) 0 }
-.kicker { margin-block-end: 0.75rem; font: 600 0.8125rem / 1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent) }
-.block h2 { font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3rem) }
-.block > .wrap > p.sub, .sub { max-inline-size: var(--measure); margin-block-start: 1rem; font-size: 1.125rem; color: var(--muted) }
+/* Sections: a hairline, a numbered label, a heading, and blocks on the grid. */
+.sec { padding-block: clamp(2.5rem, 6vw, 4.5rem) 0; margin-block-start: clamp(2.5rem, 7vw, 5.5rem); border-block-start: 1px solid var(--line); row-gap: clamp(1.25rem, 2.5vw, 1.75rem) }
+.spec + .sec { margin-block-start: clamp(2.5rem, 7vw, 5rem) }
+.kicker { font: 500 0.75rem / 1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
+.kicker span { color: var(--accent); margin-inline-end: 0.6rem }
+.sec h2 { font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.25rem); line-height: 1.04; letter-spacing: -0.04em }
+.sec h2.xl { font-size: clamp(2.125rem, 1.2rem + 4vw, 4.5rem); line-height: 0.98; letter-spacing: -0.05em }
+.sub { max-inline-size: 38ch; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem); line-height: 1.55; color: var(--muted); align-self: end }
+.sub code, .get code, .foot code, .points code, .rail code, figure code { font-size: 0.85em }
+.sub code { color: var(--ink) }
+.rail { display: grid; gap: 1.25rem; align-content: start }
+figure { min-inline-size: 0 }
+figcaption { margin-block-start: 0.9rem; font-size: 0.9375rem; color: var(--muted) }
+figure h3 { margin-block-start: 1.25rem; font: 600 1.125rem / 1.3 var(--sans); letter-spacing: -0.01em }
+figure h3 + p { margin-block-start: 0.35rem; color: var(--muted); font-size: 0.9375rem }
+.tint { margin-block-start: clamp(2.5rem, 7vw, 5.5rem); padding-block-end: clamp(3rem, 7vw, 5.5rem); background: var(--sunken) }
+.tint .sec { margin-block-start: 0; padding-block-start: clamp(3rem, 7vw, 5.5rem); border-block-start: 0 }
+@media (min-width: 56rem) { .stagger .right { grid-row: 2 / span 3; align-self: start } }
 
-/* How it works. */
-.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.5rem), 1fr)); gap: 1.25rem; margin-block-start: 2.25rem; padding: 0; list-style: none; counter-reset: step }
-.steps li { display: flex; flex-direction: column; gap: 0.75rem; min-inline-size: 0; counter-increment: step }
-.steps h3 { font: 600 1.25rem / 1.2 var(--sans); letter-spacing: -0.01em }
-.steps h3::before { content: counter(step); display: inline-grid; place-items: center; inline-size: 1.75rem; block-size: 1.75rem; margin-inline-end: 0.6rem; font: 600 0.875rem / 1 var(--mono); color: var(--accent-ink); background: var(--accent); border-radius: 50% }
-.steps p { color: var(--muted); font-size: 0.9375rem }
-pre.code { margin: 0; padding: 1rem 1.1rem; overflow-x: auto; background: var(--sunken); border: 1px solid var(--line); border-radius: 0.75rem; font-size: 0.75rem; line-height: 1.7; tab-size: 2; flex: 1 }
-@media (max-width: 30em) { pre.code { font-size: 0.6875rem } }
-pre.code .k { color: light-dark(oklch(50% 0.17 305), oklch(76% 0.13 305)) }
-pre.code .f { color: light-dark(oklch(48% 0.14 250), oklch(78% 0.11 250)) }
-pre.code .s { color: light-dark(oklch(48% 0.12 150), oklch(80% 0.12 150)) }
-pre.code .n { color: light-dark(oklch(55% 0.16 50), oklch(80% 0.13 60)) }
+pre.code { margin: 0; padding: 1rem 1.2rem; overflow-x: auto; background: var(--sunken); border-radius: 0.75rem; font-size: 0.8125rem; line-height: 1.7; tab-size: 2; box-shadow: 0 0 0 1px var(--line) }
+@media (max-width: 30em) { pre.code { font-size: 0.71875rem } }
+pre.code .k { color: light-dark(oklch(52% 0.2 305), oklch(76% 0.14 305)) }
+pre.code .f { color: light-dark(oklch(50% 0.17 258), oklch(78% 0.11 252)) }
+pre.code .s { color: light-dark(oklch(50% 0.14 150), oklch(80% 0.14 150)) }
+pre.code .n { color: light-dark(oklch(60% 0.17 50), oklch(80% 0.13 60)) }
 pre.code .c { color: var(--muted) }
 
-/* Light and dark showcase. */
-.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); margin-block-start: 2.25rem; align-items: center }
-@media (min-width: 62rem) { .split { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) } }
-.stage { --split: 50%; position: relative; aspect-ratio: 800 / 500; overflow: clip; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 1.5rem 3rem -1.5rem var(--shadow); touch-action: pan-y; cursor: ew-resize; user-select: none; -webkit-user-select: none }
+/* The playground block: the embed fills it once it loads; until then a static editor and preview stand in. */
+.playground { display: grid; min-block-size: 35rem }
+.playground > * { grid-area: 1 / 1; min-inline-size: 0 }
+.playground [data-playground]:empty { display: none }
+.playground:has([data-playground]:not(:empty)) .pg-fallback { display: none }
+.pg-fallback { display: grid; grid-template-rows: auto 1fr; overflow: clip; background: var(--win-bg) }
+.pg-bar { display: flex; align-items: center; gap: 1rem; padding: 0.7rem 1rem; border-block-end: 1px solid var(--line); font: 500 0.8125rem / 1 var(--sans); color: var(--muted) }
+.pg-bar .dots { display: flex; gap: 0.4rem }
+.pg-bar i { inline-size: 0.7rem; block-size: 0.7rem; border-radius: 50%; background: var(--line) }
+.pg-body { display: grid; grid-template-columns: minmax(0, 1fr); min-block-size: 0 }
+@media (min-width: 56rem) { .pg-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } .pg-view { border-inline-start: 1px solid var(--line) } }
+.pg-body pre.code { border-radius: 0; box-shadow: none; background: transparent; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
+.pg-view { display: grid; place-items: center; padding: 1.5rem; background: var(--sunken) }
+.pg-view .scene { inline-size: min(100%, 28rem) }
+
+/* Light and dark, side by side. */
+.stagewrap { min-inline-size: 0 }
+.stage { --split: 50%; position: relative; aspect-ratio: 800 / 500; overflow: clip; border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow); touch-action: pan-y; cursor: ew-resize; user-select: none; -webkit-user-select: none }
 .layer { position: absolute; inset: 0 }
 .layer img { inline-size: 100%; block-size: 100%; pointer-events: none }
 .layer.light { color-scheme: light }
 .layer.dark { color-scheme: dark; clip-path: inset(0 0 0 var(--split)) }
-.handle { position: absolute; inset-block: 0; inset-inline-start: var(--split); inline-size: 2px; translate: -1px 0; background: var(--accent-ink); mix-blend-mode: normal; box-shadow: 0 0 0 1px color-mix(in oklch, var(--ink) 30%, transparent); pointer-events: none }
-.handle::after { content: ""; position: absolute; inset-block-start: 50%; inset-inline-start: 50%; inline-size: 2.5rem; block-size: 2.5rem; translate: -50% -50%; border-radius: 50%; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 7l-5 5 5 5M15 7l5 5-5 5'/%3E%3C/svg%3E") center / 1.5rem no-repeat; box-shadow: 0 2px 8px var(--shadow) }
-.stage:has(input:focus-visible) .handle::after { outline: 2px solid var(--ink); outline-offset: 3px }
+.handle { position: absolute; inset-block: 0; inset-inline-start: var(--split); inline-size: 2px; translate: -1px 0; background: oklch(100% 0 0); box-shadow: 0 0 0 1px oklch(0% 0 0 / 0.25); pointer-events: none }
+.handle::after { content: ""; position: absolute; inset-block-start: 50%; inset-inline-start: 50%; inline-size: 2.5rem; block-size: 2.5rem; translate: -50% -50%; border-radius: 50%; background: oklch(20% 0.005 270) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 7l-5 5 5 5M15 7l5 5-5 5'/%3E%3C/svg%3E") center / 1.5rem no-repeat; box-shadow: 0 2px 8px oklch(0% 0 0 / 0.35) }
+.stage:has(input:focus-visible) .handle::after { outline: 2px solid var(--accent); outline-offset: 3px }
 .tag { position: absolute; inset-block-start: 0.75rem; padding: 0.3rem 0.65rem; font: 600 0.75rem / 1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; border-radius: 999px; pointer-events: none }
-.tag.l { inset-inline-start: 0.75rem; color: oklch(30% 0.03 70); background: oklch(98% 0.01 85 / 0.85) }
-.tag.d { inset-inline-end: 0.75rem; color: oklch(92% 0.02 275); background: oklch(20% 0.04 275 / 0.85) }
+.tag.l { inset-inline-start: 0.75rem; color: oklch(30% 0.01 270); background: oklch(98% 0 0 / 0.85) }
+.tag.d { inset-inline-end: 0.75rem; color: oklch(92% 0.005 270); background: oklch(20% 0.005 270 / 0.85) }
+.hint { position: absolute; inset-block-end: 0.75rem; inset-inline-start: 50%; translate: -50% 0; padding: 0.3rem 0.65rem; font: 500 0.6875rem / 1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; color: oklch(95% 0 0); background: oklch(20% 0.005 270 / 0.7); border-radius: 999px; pointer-events: none; transition: opacity 0.2s }
+.stage.playing .hint { opacity: 0 }
 .stage input { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; margin: 0; opacity: 0; pointer-events: none }
 .stage.intro { animation: sweep 2.4s 0.2s var(--out) both }
 @media (prefers-reduced-motion: reduce) { .stage.intro { animation: none } }
 @keyframes sweep { 0% { --split: 50% } 35% { --split: 82% } 70% { --split: 22% } 100% { --split: 50% } }
+.side { display: grid; gap: 1.5rem; align-content: start }
+.side .sub { align-self: start }
 .points { display: grid; gap: 1.25rem; margin: 0; padding: 0; list-style: none }
 .points li { padding-inline-start: 1rem; border-inline-start: 2px solid var(--accent) }
 .points b { display: block; font-size: 1.0625rem }
 .points span { color: var(--muted); font-size: 0.9375rem }
-.points code { font-size: 0.85em }
 
-/* Picks. */
-.picks, .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1.25rem; margin-block-start: 2rem }
+/* Start and footer. */
+.get { display: grid; gap: 0.75rem; align-content: start }
+.get h3 { margin-block-start: 0.75rem; font: 600 1.0625rem / 1.3 var(--sans); letter-spacing: -0.01em }
+.get h3:first-child { margin-block-start: 0 }
+.get p { font-size: 0.9375rem; color: var(--muted) }
+.get pre.code { font-size: 0.875rem }
+.more { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-block-start: 0.5rem }
+.foot { margin-block-start: clamp(4rem, 9vw, 7rem); padding-block: 1.5rem 2.5rem; border-block-start: 1px solid var(--line); font-size: 0.875rem; color: var(--muted) }
+.foot p { max-inline-size: 52ch }
+.foot nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem }
+.foot a { text-decoration: none }
+@media (hover: hover) and (pointer: fine) { .foot a:hover { color: var(--ink) } }
+
+/* Examples gallery and one example. */
+.page-head { padding-block: 2rem 0.5rem }
+.page-head h1 { font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.5rem); letter-spacing: -0.04em }
+.page-head .kicker { margin-block-end: 0.75rem; color: var(--accent) }
+.page-head .sub { margin-block-start: 1rem; max-inline-size: 48ch }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1.5rem 1.25rem; margin-block-start: 1.5rem }
 .card { display: flex; flex-direction: column; gap: 0.75rem; min-inline-size: 0; color: inherit; text-decoration: none }
-.card .shot { position: relative; display: block; aspect-ratio: 16 / 10; overflow: clip; background: var(--surface); border: 1px solid var(--line); border-radius: 0.75rem; box-shadow: 0 1px 0 var(--shadow) }
+.card .shot { position: relative; display: block; aspect-ratio: 16 / 10; overflow: clip; background: var(--surface); border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring) }
 .card .shot img { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 25% }
 .card b { display: block; font: 600 1.0625rem / 1.2 var(--sans) }
 .card span.d { display: -webkit-box; margin-block-start: 0.2rem; font-size: 0.875rem; line-height: 1.45; color: var(--muted); -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: clip }
 .card:active .shot { translate: 0 1px }
-@media (hover: hover) and (pointer: fine) { .card:hover b { text-decoration: underline; text-underline-offset: 0.2em } .card:hover .shot { border-color: color-mix(in oklch, var(--ink) 35%, var(--line)) } }
-@media (prefers-reduced-motion: no-preference) { .card .shot { transition: translate 0.15s var(--out), border-color 0.15s } }
-.more { margin-block-start: 1.75rem }
-
-/* Get started and footer. */
-.get { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; margin-block-start: 1.75rem }
-@media (min-width: 48rem) { .get { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
-.get h3 { margin-block-end: 0.5rem; font: 600 1rem / 1.3 var(--sans); letter-spacing: 0 }
-.get pre.code { font-size: 0.875rem }
-.get p { margin-block-start: 0.5rem; font-size: 0.9375rem; color: var(--muted) }
-.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem; margin-block-start: clamp(3rem, 8vw, 6rem); padding-block: 1.5rem 2.5rem; border-block-start: 1px solid var(--line); font-size: 0.875rem; color: var(--muted) }
-.foot nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem }
-
-/* Examples gallery. */
-.page-head { padding-block: 1.5rem 0.5rem }
-.page-head h1 { font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.75rem) }
-.gallery h2 { margin-block-start: clamp(2.5rem, 6vw, 4rem); font-size: 1.625rem }
+@media (hover: hover) and (pointer: fine) { .card:hover b { text-decoration: underline; text-underline-offset: 0.2em } .card:hover .shot { box-shadow: 0 0 0 1px var(--ring), 0 1rem 2rem -1rem var(--shadow) } }
+@media (prefers-reduced-motion: no-preference) { .card .shot { transition: translate 0.15s var(--out), box-shadow 0.2s } }
+.gallery h2 { margin-block-start: clamp(2.5rem, 6vw, 4rem); font-size: 1.625rem; text-align: left }
 .gallery h2 small { display: block; margin-block-start: 0.35rem; font: 400 0.9375rem / 1.4 var(--sans); letter-spacing: 0; color: var(--muted) }
 .gallery .grid { margin-block-start: 1.25rem }
-.gallery .shot[data-live]::after { content: ""; position: absolute; inset-block-end: 0.5rem; inset-inline-end: 0.5rem; inline-size: 1.75rem; block-size: 1.75rem; border-radius: 50%; background: oklch(20% 0.03 275 / 0.7) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6.5v11l9-5.5z' fill='white'/%3E%3C/svg%3E") center / 1rem no-repeat; opacity: 0.85; pointer-events: none }
+.gallery .shot[data-live]::after { content: ""; position: absolute; inset-block-end: 0.5rem; inset-inline-end: 0.5rem; inline-size: 1.75rem; block-size: 1.75rem; border-radius: 50%; background: oklch(20% 0.005 270 / 0.7) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6.5v11l9-5.5z' fill='white'/%3E%3C/svg%3E") center / 1rem no-repeat; opacity: 0.85; pointer-events: none }
 .gallery .shot[data-playing]::after { display: none }
-
-/* One example. */
 .viewer main { padding-block: 0.5rem 0 }
-.plate { margin: 0; inline-size: min(100%, calc((100dvh - 15rem) * var(--ratio))); margin-inline: auto; aspect-ratio: var(--ratio); overflow: clip; background: var(--surface) var(--poster) center / cover; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 1.5rem 3rem -1.5rem var(--shadow) }
+.plate { margin: 0; inline-size: min(100%, calc((100dvh - 15rem) * var(--ratio))); margin-inline: auto; aspect-ratio: var(--ratio); overflow: clip; background: var(--surface) var(--poster) center / cover; border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
 .plate img { inline-size: 100%; block-size: 100% }
-.viewer .meta { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-block-start: 1.25rem }
+.viewer .meta { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-block-start: 1.5rem }
 .viewer .meta h1 { font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.25rem) }
 .viewer .meta p { max-inline-size: 64ch; margin-block-start: 0.4rem; font-size: 0.9375rem; color: var(--muted) }
 .viewer .actions { display: flex; flex-wrap: wrap; gap: 0.625rem }
 .count { font: 500 0.875rem / 1 var(--mono); color: var(--muted) }
-
-/* The intro. */
-.reel.wide .frame { background: var(--surface) }
+.reel { margin-block: 1.25rem 0.75rem }
+.reel .frame { overflow: clip; background: var(--surface); border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
+.reel img { inline-size: 100%; block-size: auto }
+.caption { margin-block-start: 0.9rem; font-size: 0.875rem; color: var(--muted); text-align: center }

@@ -9,8 +9,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#FBF1DE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14162A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="svjeez">
 <meta property="og:url" content="https://svjeez.texoport.in/">
@@ -20,20 +20,18 @@
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Code typing out in an editor beside a hand-lettered hello, a sun and a bird drawing themselves into a canvas.">
+<meta property="og:image:alt" content="The svjeez window: an editor, a terminal running npx svjeez svg, and the animation it made.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="svjeez: TSX in, one animated SVG out">
 <meta name="twitter:description" content="Motion becomes CSS keyframes. No JavaScript, one file, plays in an img tag.">
 <meta name="twitter:image" content="https://svjeez.texoport.in/og.jpg">
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/site.css">
-<link rel="preload" as="image" href="/landing.svg" media="(min-width: 44em) and (prefers-reduced-motion: no-preference)">
-<link rel="preload" as="image" href="/landing-tall.svg" media="(max-width: 43.99em) and (prefers-reduced-motion: no-preference)">
-<script src="/site.js" defer></script>
+<link rel="preload" as="image" href="/s/hero.svg" media="(prefers-reduced-motion: no-preference) and (min-width: 44.01rem)">
 </head>
-<body>
+<body class="home">
 <header class="wrap top">
-  <a class="brand" href="/">svjeez<i>.</i></a>
+  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="">svjeez</a>
   <nav aria-label="Main">
     <a href="/examples/">Examples</a>
     <a href="/intro">Intro</a>
@@ -46,133 +44,153 @@
 </header>
 
 <main>
-  <div class="wrap hero">
-    <h1>TSX in.<br><em>One SVG<svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path d="M1 6C20 1 35 9 52 5S85 2 99 6" pathLength="1"/></svg></em> out.</h1>
-    <p class="lede">svjeez compiles a scene written in TSX into a single animated SVG. Motion becomes CSS keyframes, so there is no <code>JavaScript</code> to ship and the file plays in a plain <code>&lt;img&gt;</code>.</p>
-    <div class="cta">
-      <span class="install"><span><b>$</b> npm i svjeez</span><button type="button" data-copy="npm i svjeez" aria-label="Copy the install command" title="Copy the install command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></span>
-      <a class="btn primary" href="/examples/">See examples</a>
-      <a class="btn" href="https://github.com/saiashirwad/svjeez"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a>
-    </div>
-  </div>
-
-  <div class="wrap reel">
-    <div class="frame">
-      <picture>
-        <source media="(prefers-reduced-motion: reduce) and (max-width: 43.99em) and (prefers-color-scheme: dark)" srcset="/still-tall-dark.jpg" width="520" height="707">
-        <source media="(prefers-reduced-motion: reduce) and (max-width: 43.99em)" srcset="/still-tall-light.jpg" width="520" height="707">
-        <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="/still-wide-dark.jpg" width="1200" height="420">
-        <source media="(prefers-reduced-motion: reduce)" srcset="/still-wide-light.jpg" width="1200" height="420">
-        <source media="(max-width: 43.99em)" srcset="/landing-tall.svg" width="520" height="707">
-        <img src="/landing.svg" width="1200" height="420" alt="A few lines of TSX type out in an editor. As each line lands, a hill is inked, a sun rises, the word hello is handwritten and a bird flies across the canvas beside it.">
-      </picture>
-    </div>
-    <p class="caption">All of that is one SVG file, 12 KB over the wire. <a href="/landing.svg">Open it</a> and view source.</p>
-  </div>
-
-  <section class="block" id="how">
-    <div class="wrap">
-      <p class="kicker">How it works</p>
-      <h2>Write a scene, render it, ship an image.</h2>
-      <ol class="steps">
-        <li>
-          <h3>Write the scene</h3>
-          <pre class="code"><span class="k">import</span> { render, draw } <span class="k">from</span> <span class="s">"svjeez"</span>;
-
-<span class="k">export default</span> () =&gt; <span class="f">render</span>(
-  { width: <span class="n">320</span>, height: <span class="n">200</span>,
-    duration: <span class="n">4</span>, title: <span class="s">"Arc"</span> },
-  &lt;path d=<span class="s">"M40 150C100 30 220 30 280 150"</span>
-    fill=<span class="s">"none"</span> stroke=<span class="s">"#E8772E"</span>
-    strokeWidth={<span class="n">6</span>}
-    animation={<span class="f">draw</span>({ at: <span class="n">0.3</span>, over: <span class="n">1.5</span> })}
-  /&gt;,
-);</pre>
-          <p>Motions are values on a timeline. They are typed, so a misspelled channel is a compile error.</p>
-        </li>
-        <li>
-          <h3>Render it</h3>
-          <pre class="code"><span class="c"># one file out</span>
-npx svjeez svg arc.tsx --out arc.svg
-
-<span class="c"># or look at frames first</span>
-npx svjeez frames arc.tsx --sheet</pre>
-          <p>The compiler emits CSS keyframes, and SMIL for filter primitives. It validates the result, so the file is the whole scene.</p>
-        </li>
-        <li>
-          <h3>Ship an image</h3>
-          <pre class="code">&lt;<span class="f">img</span> src=<span class="s">"arc.svg"</span> alt=<span class="s">"An arc draws"</span>&gt;</pre>
-          <p>Nothing runs in the viewer's browser. It works anywhere an image does: READMEs, docs, blog posts. Coding agents can write scenes too: <code>npx svjeez skill --install</code>.</p>
-        </li>
-      </ol>
+  <section class="wrap hero g">
+    <h1 class="c1-12">TSX in.<br>One <span class="ul">SVG</span> out.</h1>
+    <p class="lede c1-6">svjeez compiles a scene written in TSX into one animated SVG. Motion becomes CSS keyframes, so nothing runs in the viewer's browser and the file plays in a plain image tag.</p>
+    <div class="cta c7-12">
+      <div class="install"><code><b>$</b> npm i svjeez</code><button type="button" data-copy="npm i svjeez" aria-label="Copy the install command" title="Copy the install command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></div>
+      <p class="links"><a href="/examples/">See the examples</a><a href="https://github.com/saiashirwad/svjeez">Source on GitHub</a></p>
     </div>
   </section>
 
-  <section class="block" id="light-dark">
-    <div class="wrap">
-      <p class="kicker">Light and dark</p>
-      <h2>One file. It changes its own mind.</h2>
-      <p class="sub">The two halves below are the same <code>daynight.svg</code>, fetched once. One <code>&lt;img&gt;</code> is told the page is light, the other that it is dark. The scene decides what to show.</p>
-      <div class="split">
-        <div class="stage intro">
-          <div class="layer light"><picture><source media="(prefers-reduced-motion: reduce)" srcset="/still-daynight-light.jpg"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam."></picture></div>
-          <div class="layer dark" aria-hidden="true"><picture><source media="(prefers-reduced-motion: reduce)" srcset="/still-daynight-dark.jpg"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt=""></picture></div>
-          <span class="tag l">light</span><span class="tag d">dark</span>
-          <div class="handle"></div>
-          <input type="range" min="0" max="100" value="50" aria-label="Compare the light and dark versions of the scene">
+  <div class="wrap hero-window">
+    <div class="bleed"><div class="win big"><img class="scene" data-scene="hero" width="1032" height="560" alt="One window: an editor shows a short TSX scene, a terminal runs npx svjeez svg on it and prints the size of the file, and the preview plays an arc that draws itself with a dot popping onto it."></div></div>
+  </div>
+
+  <section class="wrap spec" aria-label="What it does">
+    <dl>
+      <div class="row g"><dt class="c1-4"><span>01</span>Motions on a timeline</dt><dd class="c5-12">Chain <code>.at()</code>, <code>.to()</code> and <code>.wait()</code> on one timeline. Opacity, position, scale, color and stroke drawing all compile to CSS keyframes.</dd></div>
+      <div class="row g"><dt class="c1-4"><span>02</span>Diagrams that build themselves</dt><dd class="c5-12">Flowcharts, sequences, trees and state machines from a typed spec. A misspelled id is a compile error, not a blank box.</dd></div>
+      <div class="row g"><dt class="c1-4"><span>03</span>Code and terminals</dt><dd class="c5-12">Explainers with a spotlight and notes pinned to tokens, and shell sessions that print what the real one prints.</dd></div>
+      <div class="row g"><dt class="c1-4"><span>04</span>Ink, type and light</dt><dd class="c5-12">Brush, nib and pencil strokes, fonts embedded and cut down to the glyphs you use, and one file that follows light and dark.</dd></div>
+    </dl>
+  </section>
+
+  <section class="wrap sec g" id="play">
+    <p class="kicker c1-12"><span>00</span> Try it</p>
+    <h2 class="c1-6">Edit a scene. Watch it recompile.</h2>
+    <p class="sub c7-12">The compiler runs in your browser. Change a number or a color in the code and the SVG beside it plays the new version. <a href="/play">Open the full playground</a>.</p>
+    <div class="playground c1-12">
+      <div class="pg-fallback win" aria-hidden="false">
+        <div class="pg-bar"><span class="dots"><i></i><i></i><i></i></span><b>toast.tsx</b></div>
+        <div class="pg-body">
+          <pre class="code">{{TOAST_CODE}}</pre>
+          <div class="pg-view"><img class="scene" data-scene="toast" width="320" height="120" alt="A toast slides up, a check mark draws itself inside a green dot, and the words Changes saved appear."></div>
         </div>
-        <ul class="points">
-          <li><b>A media query inside the file</b><span>The scene carries <code>@media (prefers-color-scheme)</code> rules. The page only says which scheme applies.</span></li>
-          <li><b>Not a recolor</b><span>The sun is a moon, windows light up, a beam sweeps the water. The scene swaps whole parts.</span></li>
-          <li><b>Use the toggle at the top</b><span>It flips the whole page, and every SVG on it follows.</span></li>
-        </ul>
       </div>
-      <pre class="code" style="margin-block-start: 1.5rem"><span class="k">const</span> { theme, css } = <span class="f">adaptive</span>({
+      <div data-playground="toast"></div>
+    </div>
+  </section>
+
+  <section class="wrap sec g" id="timeline">
+    <p class="kicker c1-12"><span>01</span> Motion</p>
+    <h2 class="c1-6">Motions are values on a timeline.</h2>
+    <p class="sub c7-12">Write the chain once. The compiler turns it into CSS keyframes, so the browser does the animating and the file carries no script.</p>
+    <div class="bleed c1-12"><div class="win big"><img class="scene" data-scene="timeline" width="1032" height="420" alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says."></div></div>
+  </section>
+
+  <section class="wrap sec g" id="diagrams">
+    <p class="kicker c1-12"><span>02</span> Diagrams</p>
+    <h2 class="c1-8 xl">Diagrams that build themselves.</h2>
+    <p class="sub c1-5">Give it nodes and edges. It lays them out, reveals them in order and sends a packet along any route.</p>
+    <div class="bleed c1-12"><div class="win big"><img class="scene" data-scene="pipeline" width="1032" height="300" alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route."></div></div>
+    <figure class="c1-6"><div class="win"><img class="scene" data-scene="handshake" width="504" height="340" alt="A sequence diagram: a browser image asks a CDN for one SVG file, gets it back and starts the animation."></div><figcaption>Sequences play their messages in order.</figcaption></figure>
+    <figure class="c7-12"><div class="win"><img class="scene" data-scene="team" width="504" height="340" alt="An agent team grows level by level as a tree, then a dot walks between two branches."></div><figcaption>Trees grow level by level, and a dot can walk any route.</figcaption></figure>
+  </section>
+
+  <div class="tint">
+    <section class="wrap sec g stagger" id="code">
+      <p class="kicker c1-6"><span>03</span> Code and terminals</p>
+      <h2 class="c1-6">Show the code. Run the commands.</h2>
+      <p class="sub c1-5">A spotlight follows the explanation and a note pins to the token it is about. Terminals print what the real shell prints.</p>
+      <figure class="c1-6 left"><div class="win"><img class="scene" data-scene="explainer" width="504" height="340" alt="Five lines of TSX with a spotlight moving across them and a note explaining draw and enter."></div><figcaption>A spotlight and a note for each idea.</figcaption></figure>
+      <figure class="c7-12 right"><div class="win"><img class="scene" data-scene="recording" width="504" height="340" alt="Three svjeez commands in a terminal: frames, svg and skill, each followed by its output."></div><figcaption>The real commands, with their output.</figcaption></figure>
+    </section>
+  </div>
+
+  <section class="wrap sec g" id="type">
+    <p class="kicker c1-12"><span>04</span> Ink and type</p>
+    <div class="rail c1-4">
+      <h2>Your fonts. Your ink.</h2>
+      <p class="sub">Embed a font and it is cut down to the glyphs you use. Write by hand with a brush, a nib or a pencil.</p>
+    </div>
+    <figure class="c5-8"><div class="win"><img class="scene" data-scene="ink" width="504" height="340" alt="The word hello is handwritten stroke by stroke, then a brush swash is inked underneath."></div><figcaption>Handwriting from a single-line font, then a brush swash.</figcaption></figure>
+    <figure class="c9-12"><div class="win"><img class="scene" data-scene="fonts" width="504" height="340" alt="The words Aa Type draw on as outlines in an embedded display font, with real italic text below."></div><figcaption>Real fonts, cut down to what the scene draws.</figcaption></figure>
+  </section>
+
+  <section class="wrap sec g" id="light-dark">
+    <p class="kicker c1-12"><span>05</span> Light and dark</p>
+    <h2 class="c1-8">One file. It changes its own mind.</h2>
+    <div class="stagewrap c1-8">
+      <div class="stage intro">
+        <div class="layer light"><img class="scene" data-scene="daynight" data-scheme="light" data-manual width="800" height="500" alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam."></div>
+        <div class="layer dark" aria-hidden="true"><img class="scene" data-scene="daynight" data-scheme="dark" data-manual width="800" height="500" alt=""></div>
+        <span class="tag l">light</span><span class="tag d">dark</span>
+        <div class="handle"></div>
+        <input type="range" min="0" max="100" value="50" aria-label="Compare the light and dark versions of the scene">
+        <span class="hint">Point or tap to play</span>
+      </div>
+    </div>
+    <div class="side c9-12">
+      <p class="sub">The two halves are the same <code>daynight.svg</code>, fetched once. One <code>&lt;img&gt;</code> is told the page is light, the other that it is dark. The scene decides what to show.</p>
+      <ul class="points">
+        <li><b>A media query inside the file</b><span>The scene carries <code>@media (prefers-color-scheme)</code> rules.</span></li>
+        <li><b>Not a recolor</b><span>The sun is a moon, windows light up, a beam sweeps the water.</span></li>
+      </ul>
+    </div>
+    <pre class="code c1-6"><span class="k">const</span> { theme, css } = <span class="f">adaptive</span>({
   dark: tomorrowNight, light: tomorrow,
 });
 <span class="c">// theme colors are CSS variables</span>
 <span class="f">render</span>({ css }, &lt;rect fill={theme.base00} /&gt;);</pre>
-    </div>
   </section>
 
-  <section class="block" id="made">
-    <div class="wrap">
-      <p class="kicker">Made with it</p>
-      <h2>Scenes, diagrams and recordings.</h2>
-      <div class="picks">
-        <a class="card" href="/examples/map"><span class="shot"><img data-src="/examples/poster/map.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Map</b><span class="d">A hand-inked fantasy map draws itself, then the camera follows a dashed route across it.</span></span></a>
-        <a class="card" href="/examples/flowchart"><span class="shot"><img data-src="/examples/poster/flowchart.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Flowchart</b><span class="d">A typed spec becomes a diagram that builds itself, node by node.</span></span></a>
-        <a class="card" href="/examples/newspaper"><span class="shot"><img data-src="/examples/poster/newspaper.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Newspaper</b><span class="d">A blackletter masthead inks on letter by letter and a red stamp slams down.</span></span></a>
-        <a class="card" href="/examples/horizon"><span class="shot"><img data-src="/examples/poster/horizon.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Event Horizon</b><span class="d">A black hole forms, then the camera falls through it.</span></span></a>
-      </div>
-      <p class="more"><a class="btn" href="/examples/">All examples</a> <a class="btn" href="/intro">Watch the 45 second intro</a></p>
-    </div>
+  <div class="tint">
+    <section class="wrap sec g" id="agents">
+      <p class="kicker c1-12"><span>06</span> Agents</p>
+      <h2 class="c1-6">Agents write scenes too.</h2>
+      <p class="sub c7-12">Install the skill once. A coding agent then reads it, writes a scene, renders frames, looks at them and fixes what it sees.</p>
+      <div class="bleed c1-12"><div class="win desk big"><img class="scene" data-scene="agents" width="1032" height="560" alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns."></div></div>
+    </section>
+  </div>
+
+  <section class="wrap sec g" id="no-jsx">
+    <p class="kicker c1-12"><span>07</span> Without JSX</p>
+    <h2 class="c1-8 xl">Not a JSX fan? Use functions.</h2>
+    <p class="sub c1-5">Every element is also a function. Set <code>prefix</code> and the file can be inlined next to others, in a view library such as FoldKit, without id clashes.</p>
+    <div class="bleed c1-12"><div class="win big"><img class="scene" data-scene="nojsx" width="1032" height="392" alt="A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it."></div></div>
   </section>
 
-  <section class="block" id="start">
-    <div class="wrap">
-      <p class="kicker">Get started</p>
+  <section class="wrap sec g" id="where">
+    <p class="kicker c1-12"><span>08</span> Anywhere an image works</p>
+    <figure class="c1-4"><div class="win"><img class="scene" data-scene="where-readme" width="328" height="264" alt="A README page with an animated dot-matrix image in the middle."></div><h3>READMEs</h3><p>GitHub shows SVG through an <code>&lt;img&gt;</code>, and the animation plays.</p></figure>
+    <figure class="c5-8"><div class="win"><img class="scene" data-scene="where-docs" width="328" height="264" alt="A docs page with a diagram in which a packet travels between two boxes."></div><h3>Docs and blogs</h3><p>One file, no player and no script. Put it where you would put a screenshot.</p></figure>
+    <figure class="c9-12"><div class="win"><img class="scene" data-scene="where-mail" width="328" height="264" alt="An email with a bar chart that grows inside the message."></div><h3>Email</h3><p>Some mail clients show SVG images and some do not. Send a still as the fallback.</p></figure>
+  </section>
+
+  <section class="wrap sec g" id="start">
+    <p class="kicker c1-12"><span>09</span> Start</p>
+    <div class="c1-6">
       <h2>Install it, then ask for a scene.</h2>
-      <div class="get">
-        <div>
-          <h3>In a project</h3>
-          <pre class="code">npm i svjeez
-npx svjeez frames scene.tsx --sheet</pre>
-          <p>TypeScript, no dependencies, Node 20 or newer.</p>
-        </div>
-        <div>
-          <h3>With a coding agent</h3>
-          <pre class="code">npx svjeez skill --install</pre>
-          <p>Copies a skill and worked examples into <code>.claude/skills</code>, so the agent knows how to write, render and check a scene.</p>
-        </div>
-      </div>
+      <p class="more"><a class="btn primary" href="/examples/">See every example</a><a class="btn" href="/intro">Watch the 45 second intro</a></p>
+    </div>
+    <div class="get c7-12">
+      <h3>In a project</h3>
+      <pre class="code">npm i svjeez
+npx svjeez frames scene.tsx --sheet
+npx svjeez svg scene.tsx --out scene.svg</pre>
+      <p>TypeScript, no dependencies, Node 20 or newer.</p>
+      <h3>With a coding agent</h3>
+      <pre class="code">npx svjeez skill --install</pre>
+      <p>Copies a skill and worked examples into <code>.claude/skills</code>, so the agent knows how to write, render and check a scene.</p>
     </div>
   </section>
 </main>
 
-<footer class="wrap foot">
-  <span>svjeez, MIT licensed. This page is built with it.</span>
-  <nav aria-label="Footer"><a href="https://github.com/saiashirwad/svjeez">GitHub</a><a href="https://www.npmjs.com/package/svjeez">npm</a><a href="/examples/">Examples</a><a href="/intro">Intro</a></nav>
+<footer class="wrap foot g">
+  <p class="c1-6">Every picture on this page is a svjeez scene: {{TOTAL_KB}} KB gzipped in all, each one an <code>&lt;img&gt;</code>. The ones off screen stand still until you scroll to them. MIT licensed.</p>
+  <nav class="c7-12" aria-label="Footer"><a href="/examples/">Examples</a><a href="/intro">Intro</a><a href="https://github.com/saiashirwad/svjeez">GitHub</a><a href="https://www.npmjs.com/package/svjeez">npm</a></nav>
 </footer>
+<script src="/site.js"></script>
 </body>
 </html>

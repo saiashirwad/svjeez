@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 340" width="504" height="340" role="img" aria-labelledby="t d">
+  <title id="t">A sequence diagram that plays</title>
+  <desc id="d">A browser image asks a CDN for one SVG file, gets it back and starts the animation. The messages appear one at a time.</desc>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,7.5%{stroke-dashoffset:1;visibility:hidden}13.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,12.812%{opacity:0}13.75%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,7.5%{opacity:0}10.625%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,17.5%{stroke-dashoffset:1;visibility:hidden}23.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,22.813%{opacity:0}23.75%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,17.5%{opacity:0}20.625%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,27.5%{opacity:0}33.75%,100%{opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,32.813%{opacity:0}33.75%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,27.5%{opacity:0}30.625%,100%{opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,37.5%{opacity:0}40.625%,100%{opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,47.5%{opacity:0}53.75%,100%{opacity:1}}
+.m11{animation-name:k11}
+@keyframes k12{0%,52.813%{opacity:0}53.75%,100%{opacity:1}}
+.m12{animation-name:k12}
+@keyframes k13{0%,47.5%{opacity:0}50.625%,100%{opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,93.75%{opacity:1}100%{opacity:0}}
+.m14{animation-name:k14}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h503" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">sequence.tsx</text>
+  </g>
+  <g class="a m14">
+    <g class="sans">
+      <path d="M136.56 104.86V314.14" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+      <path d="M245.88 104.86V314.14" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+      <path d="M367.44 109.86V314.14" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
+      <g>
+        <path d="M120.56 70.86H152.56Q160.56 70.86 160.56 78.86V96.86Q160.56 104.86 152.56 104.86H120.56Q112.56 104.86 112.56 96.86V78.86Q112.56 70.86 120.56 70.86Z" fill="var(--base00)"/>
+        <path d="M120.56 70.86H152.56Q160.56 70.86 160.56 78.86V96.86Q160.56 104.86 152.56 104.86H120.56Q112.56 104.86 112.56 96.86V78.86Q112.56 70.86 120.56 70.86Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="136.56" y="92.06" font-size="12" text-anchor="middle" fill="var(--base05)">You</text>
+      </g>
+      <g>
+        <path d="M222.68 70.86H269.08000000000004Q277.08000000000004 70.86 277.08000000000004 78.86V96.86Q277.08000000000004 104.86 269.08000000000004 104.86H222.68Q214.68 104.86 214.68 96.86V78.86Q214.68 70.86 222.68 70.86Z" fill="var(--base00)"/>
+        <path d="M222.68 70.86H269.08000000000004Q277.08000000000004 70.86 277.08000000000004 78.86V96.86Q277.08000000000004 104.86 269.08000000000004 104.86H222.68Q214.68 104.86 214.68 96.86V78.86Q214.68 70.86 222.68 70.86Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="245.88" y="92.06" font-size="12" text-anchor="middle" fill="var(--base05)">&lt;img&gt;</text>
+      </g>
+      <g>
+        <path d="M343.44 70.86A24 5 0 0 1 391.44 70.86V104.86A24 5 0 0 1 343.44 104.86Z" fill="var(--base00)"/>
+        <path d="M343.44 70.86A24 5 0 0 1 391.44 70.86V104.86A24 5 0 0 1 343.44 104.86Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M343.44 70.86A24 5 0 0 0 391.44 70.86" stroke="var(--base0E)" fill="none"/>
+        <text x="367.44" y="94.56" font-size="12" text-anchor="middle" fill="var(--base05)">CDN</text>
+      </g>
+      <g>
+        <g>
+          <path d="M136.56 152.86L238.88 152.86" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+          <path d="M245.88 152.86L237.88 156.86L237.88 148.86Z" fill="var(--base04)" class="a m2"/>
+        </g>
+        <g class="a m3">
+          <rect x="152.56" y="133.86" width="77.32" height="15" rx="3" fill="var(--base00)"/>
+          <text x="191.22" y="144.93" font-size="10.2" text-anchor="middle" fill="var(--base05)">open README</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M245.88 185.86L360.44 185.86" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+          <path d="M367.44 185.86L359.44 189.86L359.44 181.86Z" fill="var(--base04)" class="a m5"/>
+        </g>
+        <g class="a m6">
+          <rect x="261.88" y="166.86" width="89.56" height="15" rx="3" fill="var(--base00)"/>
+          <text x="306.66" y="177.93" font-size="10.2" text-anchor="middle" fill="var(--base05)">GET hello.svg</text>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path d="M367.44 218.86L252.88 218.86" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m7"/>
+          <path d="M245.88 218.86L253.88 214.86L253.88 222.86Z" fill="var(--base04)" class="a m8"/>
+        </g>
+        <g class="a m9">
+          <rect x="261.88" y="199.86" width="89.56" height="15" rx="3" fill="var(--base00)"/>
+          <text x="306.66" y="210.93" font-size="10.2" text-anchor="middle" fill="var(--base05)">1 file, 955 B</text>
+        </g>
+      </g>
+      <g class="a m10">
+        <rect x="177.74" y="232.86" width="136.28" height="26.28" rx="4" fill="var(--base00)"/>
+        <rect x="177.74" y="232.86" width="136.28" height="26.28" rx="4" fill="var(--base0A)" fill-opacity="0.12" stroke="var(--base0A)" stroke-opacity="0.7"/>
+        <text x="245.88" y="249.57" font-size="10.2" text-anchor="middle" fill="var(--base05)">plays CSS keyframes</text>
+      </g>
+      <g>
+        <g>
+          <path d="M245.88 292.14L143.56 292.14" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 4" class="a m11"/>
+          <path d="M136.56 292.14L144.56 288.14L144.56 296.14Z" fill="var(--base04)" class="a m12"/>
+        </g>
+        <g class="a m13">
+          <rect x="158.68" y="273.14" width="65.08" height="15" rx="3" fill="var(--base00)"/>
+          <text x="191.22" y="284.21" font-size="10.2" text-anchor="middle" fill="var(--base05)">animation</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

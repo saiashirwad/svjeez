@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 300" width="1032" height="300" role="img" aria-labelledby="t d">
+  <title id="t">A diagram that builds itself</title>
+  <desc id="d">A flowchart from prompt to finished SVG appears node by node, then a comet runs the route from the prompt to the result.</desc>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,0.909%{stroke-dashoffset:1;visibility:hidden}4.545%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,4%{opacity:0}4.545%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,5%{stroke-dashoffset:1;visibility:hidden}8.636%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,8.091%{opacity:0}8.636%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,9.091%{stroke-dashoffset:1;visibility:hidden}12.727%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,12.182%{opacity:0}12.727%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,13.182%{stroke-dashoffset:1;visibility:hidden}16.818%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,16.273%{opacity:0}16.818%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,12.727%{stroke-dashoffset:1;visibility:hidden}16.364%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,15.818%{opacity:0}16.364%,100%{opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,65.602%,100%{visibility:hidden}36.364%{visibility:visible}}
+@keyframes k12{0%,36.364%{translate:160.56px 147.75px}38.607%{translate:214.86px 147.75px}43.335%{translate:329.26px 147.75px}45.318%{translate:377.26px 147.75px}51.351%{translate:523.26px 147.75px}53.335%{translate:571.26px 147.75px}60.157%{translate:736.36px 147.75px}65.602%,100%{translate:868.14px 147.75px}}
+.m11{animation-name:k11,k12;animation-timing-function:steps(1),linear}
+@keyframes k13{0%,65.788%,100%{visibility:hidden}36.55%{visibility:visible}}
+@keyframes k14{0%,36.55%{translate:160.56px 147.75px}38.793%{translate:214.86px 147.75px}43.521%{translate:329.26px 147.75px}45.504%{translate:377.26px 147.75px}51.537%{translate:523.26px 147.75px}53.521%{translate:571.26px 147.75px}60.343%{translate:736.36px 147.75px}65.788%,100%{translate:868.14px 147.75px}}
+.m12{animation-name:k13,k14;animation-timing-function:steps(1),linear}
+@keyframes k15{0%,65.974%,100%{visibility:hidden}36.736%{visibility:visible}}
+@keyframes k16{0%,36.736%{translate:160.56px 147.75px}38.979%{translate:214.86px 147.75px}43.707%{translate:329.26px 147.75px}45.69%{translate:377.26px 147.75px}51.723%{translate:523.26px 147.75px}53.707%{translate:571.26px 147.75px}60.529%{translate:736.36px 147.75px}65.974%,100%{translate:868.14px 147.75px}}
+.m13{animation-name:k15,k16;animation-timing-function:steps(1),linear}
+@keyframes k17{0%,66.16%,100%{visibility:hidden}36.921%{visibility:visible}}
+@keyframes k18{0%,36.921%{translate:160.56px 147.75px}39.165%{translate:214.86px 147.75px}43.893%{translate:329.26px 147.75px}45.876%{translate:377.26px 147.75px}51.909%{translate:523.26px 147.75px}53.893%{translate:571.26px 147.75px}60.715%{translate:736.36px 147.75px}66.16%,100%{translate:868.14px 147.75px}}
+.m14{animation-name:k17,k18;animation-timing-function:steps(1),linear}
+@keyframes k19{0%,66.346%,100%{visibility:hidden}37.107%{visibility:visible}}
+@keyframes k20{0%,37.107%{translate:160.56px 147.75px}39.351%{translate:214.86px 147.75px}44.079%{translate:329.26px 147.75px}46.062%{translate:377.26px 147.75px}52.095%{translate:523.26px 147.75px}54.079%{translate:571.26px 147.75px}60.901%{translate:736.36px 147.75px}66.346%,100%{translate:868.14px 147.75px}}
+.m15{animation-name:k19,k20;animation-timing-function:steps(1),linear}
+@keyframes k21{0%,66.532%,100%{visibility:hidden}37.293%{visibility:visible}}
+@keyframes k22{0%,37.293%{translate:160.56px 147.75px}39.537%{translate:214.86px 147.75px}44.264%{translate:329.26px 147.75px}46.248%{translate:377.26px 147.75px}52.281%{translate:523.26px 147.75px}54.264%{translate:571.26px 147.75px}61.087%{translate:736.36px 147.75px}66.532%,100%{translate:868.14px 147.75px}}
+.m16{animation-name:k21,k22;animation-timing-function:steps(1),linear}
+@keyframes k23{0%,66.718%,100%{visibility:hidden}37.479%{visibility:visible}}
+@keyframes k24{0%,37.479%{translate:160.56px 147.75px}39.723%{translate:214.86px 147.75px}44.45%{translate:329.26px 147.75px}46.434%{translate:377.26px 147.75px}52.467%{translate:523.26px 147.75px}54.45%{translate:571.26px 147.75px}61.273%{translate:736.36px 147.75px}66.718%,100%{translate:868.14px 147.75px}}
+.m17{animation-name:k23,k24;animation-timing-function:steps(1),linear}
+@keyframes k25{0%,66.904%,100%{visibility:hidden}37.665%{visibility:visible}}
+@keyframes k26{0%,37.665%{translate:160.56px 147.75px}39.909%{translate:214.86px 147.75px}44.636%{translate:329.26px 147.75px}46.62%{translate:377.26px 147.75px}52.653%{translate:523.26px 147.75px}54.636%{translate:571.26px 147.75px}61.459%{translate:736.36px 147.75px}66.904%,100%{translate:868.14px 147.75px}}
+.m18{animation-name:k25,k26;animation-timing-function:steps(1),linear}
+@keyframes k27{0%,67.09%,100%{visibility:hidden}37.851%{visibility:visible}}
+@keyframes k28{0%,37.851%{translate:160.56px 147.75px}40.095%{translate:214.86px 147.75px}44.822%{translate:329.26px 147.75px}46.806%{translate:377.26px 147.75px}52.839%{translate:523.26px 147.75px}54.822%{translate:571.26px 147.75px}61.645%{translate:736.36px 147.75px}67.09%,100%{translate:868.14px 147.75px}}
+.m19{animation-name:k27,k28;animation-timing-function:steps(1),linear}
+@keyframes k29{0%{opacity:0;animation-timing-function:steps(1)}65.602%{opacity:0.9}71.966%,100%{opacity:0}}
+@keyframes k30{0%,65.602%{scale:0.5}71.966%,100%{scale:3}}
+.m20{animation-name:k29,k30}
+@keyframes k31{0%,4.545%{opacity:0}7.727%,100%{opacity:1}}
+@keyframes k32{0%,4.545%{scale:0.9}7.727%,100%{scale:1}}
+.m21{animation-name:k31,k32}
+@keyframes k33{0%,8.636%{opacity:0}11.818%,100%{opacity:1}}
+@keyframes k34{0%,8.636%{scale:0.9}11.818%,100%{scale:1}}
+.m22{animation-name:k33,k34}
+@keyframes k35{0%,12.727%{opacity:0}15.909%,100%{opacity:1}}
+@keyframes k36{0%,12.727%{scale:0.9}15.909%,100%{scale:1}}
+.m23{animation-name:k35,k36}
+@keyframes k37{0%,16.818%{opacity:0}20%,100%{opacity:1}}
+@keyframes k38{0%,16.818%{scale:0.9}20%,100%{scale:1}}
+.m24{animation-name:k37,k38}
+@keyframes k39{0%,16.818%{opacity:0}19.091%,100%{opacity:1}}
+.m25{animation-name:k39}
+@keyframes k40{0%,16.364%{opacity:0}18.636%,100%{opacity:1}}
+.m26{animation-name:k40}
+@keyframes k41{0%,95.455%{opacity:1}100%{opacity:0}}
+.m27{animation-name:k41}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-10s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="1031" height="299" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h1031" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="516" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">pipeline.tsx</text>
+  </g>
+  <g class="a m27">
+    <g class="sans">
+      <g>
+        <path d="M160.56 147.75L207.86 147.75" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+        <path d="M214.86 147.7499999728092L206.86 151.7499999728092L206.86 143.7499999728092Z" fill="var(--base04)" class="a m2"/>
+      </g>
+      <g>
+        <path d="M329.26 147.75L370.26 147.75" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+        <path d="M377.26 147.7499999728092L369.26 151.7499999728092L369.26 143.7499999728092Z" fill="var(--base04)" class="a m4"/>
+      </g>
+      <g>
+        <path d="M523.26 147.75L564.26 147.75" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+        <path d="M571.2600000407228 147.74999998594063L563.2600000407228 151.74999998594063L563.2600000407228 143.74999998594063Z" fill="var(--base04)" class="a m6"/>
+      </g>
+      <g>
+        <path d="M736.36 147.75L861.14 147.75" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m7"/>
+        <path d="M868.14 147.75L860.14 151.75L860.14 143.75Z" fill="var(--base04)" class="a m8"/>
+      </g>
+      <g>
+        <path d="M653.81 176.25L653.81 202.25C653.81 207.75 649.31 212.25 643.81 212.25L282.06 212.25C276.56 212.25 272.06 207.75 272.06 202.25L272.06 172.75" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m9"/>
+        <path d="M272.06 165.7499999728092L276.06 173.7499999728092L268.06 173.7499999728092Z" fill="var(--base04)" class="a m10"/>
+      </g>
+    </g>
+    <g>
+      <g opacity="0.22">
+        <circle r="10.8" fill="var(--base0D)" class="a m11"/>
+      </g>
+      <g opacity="0.533">
+        <circle r="4.15" fill="var(--base0D)" class="a m12"/>
+      </g>
+      <g opacity="0.467">
+        <circle r="3.8" fill="var(--base0D)" class="a m13"/>
+      </g>
+      <g opacity="0.4">
+        <circle r="3.45" fill="var(--base0D)" class="a m14"/>
+      </g>
+      <g opacity="0.333">
+        <circle r="3.1" fill="var(--base0D)" class="a m15"/>
+      </g>
+      <g opacity="0.267">
+        <circle r="2.75" fill="var(--base0D)" class="a m16"/>
+      </g>
+      <g opacity="0.2">
+        <circle r="2.4" fill="var(--base0D)" class="a m17"/>
+      </g>
+      <g opacity="0.133">
+        <circle r="2.05" fill="var(--base0D)" class="a m18"/>
+      </g>
+      <g opacity="0.067">
+        <circle r="1.7" fill="var(--base0D)" class="a m19"/>
+      </g>
+      <circle r="4.5" fill="var(--base0D)" class="a m11"/>
+      <circle cx="868.14" cy="147.75" r="9" fill="none" stroke="var(--base0D)" stroke-width="1.5" class="a m20 fb"/>
+    </g>
+    <g class="sans">
+      <g>
+        <path d="M78.85999999999999 129.7499999728092H166.86L154.26000000000002 165.7499999728092H66.25999999999999Z" fill="var(--base00)"/>
+        <path d="M78.85999999999999 129.7499999728092H166.86L154.26000000000002 165.7499999728092H66.25999999999999Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="116.56" y="152.3" font-size="13" text-anchor="middle" fill="var(--base05)">Prompt</text>
+      </g>
+      <g class="a m21 fb">
+        <path d="M222.86 129.7499999728092H321.26Q329.26 129.7499999728092 329.26 137.7499999728092V157.7499999728092Q329.26 165.7499999728092 321.26 165.7499999728092H222.86Q214.86 165.7499999728092 214.86 157.7499999728092V137.7499999728092Q214.86 129.7499999728092 222.86 129.7499999728092Z" fill="var(--base00)"/>
+        <path d="M222.86 129.7499999728092H321.26Q329.26 129.7499999728092 329.26 137.7499999728092V157.7499999728092Q329.26 165.7499999728092 321.26 165.7499999728092H222.86Q214.86 165.7499999728092 214.86 157.7499999728092V137.7499999728092Q214.86 129.7499999728092 222.86 129.7499999728092Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="272.06" y="152.3" font-size="13" text-anchor="middle" fill="var(--base05)">Write scene</text>
+      </g>
+      <g class="a m22 fb">
+        <path d="M380.26 129.74999998594063H520.26Q523.26 129.74999998594063 523.26 132.74999998594063V162.74999998594063Q523.26 165.74999998594063 520.26 165.74999998594063H380.26Q377.26 165.74999998594063 377.26 162.74999998594063V132.74999998594063Q377.26 129.74999998594063 380.26 129.74999998594063Z" fill="var(--base00)"/>
+        <path d="M380.26 129.74999998594063H520.26Q523.26 129.74999998594063 523.26 132.74999998594063V162.74999998594063Q523.26 165.74999998594063 520.26 165.74999998594063H380.26Q377.26 165.74999998594063 377.26 162.74999998594063V132.74999998594063Q377.26 129.74999998594063 380.26 129.74999998594063Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M385.26 129.74999998594063V165.74999998594063M515.26 129.74999998594063V165.74999998594063" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
+        <text x="450.26" y="152.3" font-size="13" text-anchor="middle" fill="var(--base05)">Render frames</text>
+      </g>
+      <g class="a m23 fb">
+        <path d="M653.81 119.25L736.36 147.75L653.81 176.25L571.26 147.75Z" fill="var(--base00)"/>
+        <path d="M653.81 119.25L736.36 147.75L653.81 176.25L571.26 147.75Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="653.81" y="152.3" font-size="13" text-anchor="middle" fill="var(--base05)">Frames ok?</text>
+      </g>
+      <g class="a m24 fb">
+        <path d="M886.14 129.75000000895122H947.74A18 18 0 0 1 947.74 165.75000000895122H886.14A18 18 0 0 1 886.14 129.75000000895122Z" fill="var(--base00)"/>
+        <path d="M886.14 129.75000000895122H947.74A18 18 0 0 1 947.74 165.75000000895122H886.14A18 18 0 0 1 886.14 129.75000000895122Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="916.94" y="152.3" font-size="13" text-anchor="middle" fill="var(--base05)">One SVG</text>
+      </g>
+      <g class="a m25">
+        <rect x="787.305" y="139.25" width="29.89" height="17" rx="3" fill="var(--base00)"/>
+        <text x="802.25" y="151.618" font-size="11.05" text-anchor="middle" fill="var(--base04)">yes</text>
+      </g>
+      <g class="a m26">
+        <rect x="451.305" y="203.75" width="23.26" height="17" rx="3" fill="var(--base00)"/>
+        <text x="462.935" y="216.118" font-size="11.05" text-anchor="middle" fill="var(--base04)">no</text>
+      </g>
+    </g>
+  </g>
+</svg>

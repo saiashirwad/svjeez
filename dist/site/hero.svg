@@ -1,0 +1,329 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 560" width="1032" height="560" role="img" aria-labelledby="t d">
+  <title id="t">svjeez in one window</title>
+  <desc id="d">An editor types a short TSX scene. A terminal runs npx svjeez svg on it and prints the size of the file it wrote. Then the preview plays that file: an arc draws and a dot pops onto it.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="652" y="354.5" width="0" height="21.875" class="a m9"/>
+    </clipPath>
+    <clipPath id="c2">
+      <rect x="652" y="376.375" width="0" height="21.875" class="a m14"/>
+    </clipPath>
+    <clipPath id="c3">
+      <rect x="652" y="420.125" width="0" height="21.875" class="a m19"/>
+    </clipPath>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,17.273%{opacity:0}20.909%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,1.364%{opacity:0}5.909%,100%{opacity:1}}
+@keyframes k3{0%,1.364%{translate:0px 6px}5.909%,100%{translate:0px 0px}}
+.m2{animation-name:k2,k3}
+@keyframes k4{0%,46.758%{width:380.4px}50.394%,100%{width:373.2px}}
+@keyframes k5{0%,46.758%,50.394%,100%{height:72.6px}}
+.m3{animation-name:k4,k5}
+@keyframes k6{0%,46.758%{translate:0px 0px}50.394%,100%{translate:0px 66.6px}}
+.m4{animation-name:k6}
+@keyframes k7{0%,95.455%{opacity:1}100%{opacity:0}}
+.m5{animation-name:k7}
+@keyframes k8{0%,35.848%{stroke-dashoffset:1;visibility:hidden}49.485%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k8}
+@keyframes k9{0%,47.667%{scale:0}52.212%,100%{scale:1}}
+.m7{animation-name:k9;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k10{0%,33.121%{opacity:0}35.848%,100%{opacity:1}}
+.m8{animation-name:k10}
+@keyframes k11{0%,6.364%{width:0px}10.606%,100%{width:315px}}
+.m9{animation-name:k11;animation-timing-function:steps(42)}
+@keyframes k12{0%{opacity:1}50%,100%{opacity:0}}
+.m10{animation-name:k12;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k13{0%,10.606%,100%{opacity:0}6.364%{opacity:1}}
+.m11{animation-name:k13;animation-timing-function:steps(1)}
+@keyframes k14{0%,6.364%{translate:0px 0px}10.606%,100%{translate:315px 0px}}
+.m12{animation-name:k13,k14;animation-timing-function:steps(1),steps(42)}
+@keyframes k15{0%{visibility:hidden}6.364%,100%{visibility:visible}}
+.m13{animation-name:k15;animation-timing-function:steps(1)}
+@keyframes k16{0%,16.515%{width:0px}18.232%,100%{width:127.5px}}
+.m14{animation-name:k16;animation-timing-function:steps(17)}
+@keyframes k17{0%,18.232%,100%{opacity:0}16.515%{opacity:1}}
+.m15{animation-name:k17;animation-timing-function:steps(1)}
+@keyframes k18{0%,16.515%{translate:0px 0px}18.232%,100%{translate:127.5px 0px}}
+.m16{animation-name:k17,k18;animation-timing-function:steps(1),steps(17)}
+@keyframes k19{0%{opacity:0}21.414%,100%{opacity:1}}
+.m17{animation-name:k19;animation-timing-function:steps(1)}
+@keyframes k20{0%{visibility:hidden}16.515%,100%{visibility:visible}}
+.m18{animation-name:k20;animation-timing-function:steps(1)}
+@keyframes k21{0%,24.687%{width:0px}26.303%,100%{width:120px}}
+.m19{animation-name:k21;animation-timing-function:steps(16)}
+@keyframes k22{0%,26.303%,100%{opacity:0}24.687%{opacity:1}}
+.m20{animation-name:k22;animation-timing-function:steps(1)}
+@keyframes k23{0%{opacity:0}24.687%,100%{opacity:1}}
+@keyframes k24{0%,24.687%{translate:0px 0px}26.303%,100%{translate:120px 0px}}
+.m21{animation-name:k23,k24;animation-timing-function:steps(1),steps(16)}
+@keyframes k25{0%{visibility:hidden}24.687%,100%{visibility:visible}}
+.m22{animation-name:k25;animation-timing-function:steps(1)}
+@keyframes k26{0%,33.121%{opacity:0}37.667%,100%{opacity:1}}
+@keyframes k27{0%,33.121%{translate:0px 8px}37.667%,100%{translate:0px 0px}}
+.m23{animation-name:k26,k27}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-10s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="1031" height="559" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 44.5h1031" stroke="var(--base01)"/>
+    <circle cx="22.5" cy="22.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="40.5" cy="22.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="58.5" cy="22.5" r="5.5" fill="var(--base0B)"/>
+    <text x="516" y="26.5" font-size="12" text-anchor="middle" fill="var(--base04)">hello.tsx</text>
+  </g>
+  <path d="M0.5 44H150V547.5a12 12 0 0 1 -12 12H12.5a12 12 0 0 1 -12 -12Z" fill="var(--base01)"/>
+  <path d="M150 44V560" stroke="var(--base02)"/>
+  <path d="M612 44V560" stroke="var(--base02)"/>
+  <g class="sans" font-size="12">
+    <text x="20" y="70" font-size="11" font-weight="600" fill="var(--base03)" letter-spacing="0.6">FILES</text>
+    <g>
+      <rect x="10" y="84" width="130" height="26" rx="7" fill="var(--base0D)"/>
+      <rect x="22" y="91" width="12" height="12" rx="3.5" fill="#fff"/>
+      <text x="44" y="101" font-size="13" fill="#fff">hello.tsx</text>
+    </g>
+    <g>
+      <rect x="22" y="121" width="12" height="12" rx="3.5" fill="var(--base0E)"/>
+      <text x="44" y="131" font-size="13" fill="var(--base05)">kit.ts</text>
+    </g>
+    <g class="a m1">
+      <rect x="22" y="151" width="12" height="12" rx="3.5" fill="var(--base09)"/>
+      <text x="44" y="161" font-size="13" fill="var(--base05)">hello.svg</text>
+    </g>
+    <g>
+      <rect x="22" y="181" width="12" height="12" rx="3.5" fill="var(--base03)"/>
+      <text x="44" y="191" font-size="13" fill="var(--base05)">README.md</text>
+    </g>
+  </g>
+  <g class="mono">
+    <g class="a m5">
+      <g class="a m2">
+        <g>
+          <text x="212.4" y="81.3" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">1</text>
+          <text x="212.4" y="103.5" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">2</text>
+          <text x="212.4" y="125.7" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">3</text>
+          <text x="212.4" y="147.9" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">4</text>
+          <text x="212.4" y="170.1" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">5</text>
+          <text x="212.4" y="192.3" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">6</text>
+          <text x="212.4" y="214.5" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">7</text>
+          <text x="212.4" y="236.7" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">8</text>
+          <text x="212.4" y="258.9" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">9</text>
+          <text x="212.4" y="281.1" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">10</text>
+          <text x="212.4" y="303.3" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">11</text>
+          <text x="212.4" y="325.5" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">12</text>
+          <text x="212.4" y="347.7" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">13</text>
+          <text x="212.4" y="369.9" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">14</text>
+          <text x="212.4" y="392.1" text-anchor="end" font-family="monospace" font-size="12" fill="var(--base03)">15</text>
+          <text x="226.8" y="81.3" font-family="monospace" font-size="12" fill="var(--base0E)">import</text>
+          <text x="277.2" y="81.3" font-family="monospace" font-size="12" fill="var(--base04)">{</text>
+          <text x="291.6" y="81.3" font-family="monospace" font-size="12" fill="var(--base05)">render</text>
+          <text x="334.8" y="81.3" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="349.2" y="81.3" font-family="monospace" font-size="12" fill="var(--base05)">draw</text>
+          <text x="378" y="81.3" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="392.4" y="81.3" font-family="monospace" font-size="12" fill="var(--base05)">enter</text>
+          <text x="428.4" y="81.3" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="442.8" y="81.3" font-family="monospace" font-size="12" fill="var(--base05)">ease</text>
+          <text x="478.8" y="81.3" font-family="monospace" font-size="12" fill="var(--base04)">}</text>
+          <text x="493.2" y="81.3" font-family="monospace" font-size="12" fill="var(--base0E)">from</text>
+          <text x="529.2" y="81.3" font-family="monospace" font-size="12" fill="var(--base0B)">"svjeez"</text>
+          <text x="586.8" y="81.3" font-family="monospace" font-size="12" fill="var(--base04)">;</text>
+          <text x="226.8" y="125.7" font-family="monospace" font-size="12" fill="var(--base0E)">export</text>
+          <text x="277.2" y="125.7" font-family="monospace" font-size="12" fill="var(--base0E)">default</text>
+          <text x="334.8" y="125.7" font-family="monospace" font-size="12" fill="var(--base04)">()</text>
+          <text x="356.4" y="125.7" font-family="monospace" font-size="12" fill="var(--base04)">=&gt;</text>
+          <text x="241.2" y="147.9" font-family="monospace" font-size="12" fill="var(--base0D)">render</text>
+          <text x="284.4" y="147.9" font-family="monospace" font-size="12" fill="var(--base04)">(</text>
+          <text x="255.6" y="170.1" font-family="monospace" font-size="12" fill="var(--base04)">{</text>
+          <text x="270" y="170.1" font-family="monospace" font-size="12" fill="var(--base05)">width</text>
+          <text x="306" y="170.1" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="320.4" y="170.1" font-family="monospace" font-size="12" fill="var(--base09)">320</text>
+          <text x="342" y="170.1" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="356.4" y="170.1" font-family="monospace" font-size="12" fill="var(--base05)">height</text>
+          <text x="399.6" y="170.1" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="414" y="170.1" font-family="monospace" font-size="12" fill="var(--base09)">200</text>
+          <text x="435.6" y="170.1" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="270" y="192.3" font-family="monospace" font-size="12" fill="var(--base05)">duration</text>
+          <text x="327.6" y="192.3" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="342" y="192.3" font-family="monospace" font-size="12" fill="var(--base09)">4</text>
+          <text x="349.2" y="192.3" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="363.6" y="192.3" font-family="monospace" font-size="12" fill="var(--base05)">title</text>
+          <text x="399.6" y="192.3" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="414" y="192.3" font-family="monospace" font-size="12" fill="var(--base0B)">"Arc"</text>
+          <text x="457.2" y="192.3" font-family="monospace" font-size="12" fill="var(--base04)">},</text>
+          <text x="255.6" y="214.5" font-family="monospace" font-size="12" fill="var(--base08)">&lt;&gt;</text>
+          <text x="270" y="236.7" font-family="monospace" font-size="12" fill="var(--base08)">&lt;path</text>
+          <text x="313.2" y="236.7" font-family="monospace" font-size="12" fill="var(--base05)">d</text>
+          <text x="320.4" y="236.7" font-family="monospace" font-size="12" fill="var(--base04)">=</text>
+          <text x="327.6" y="236.7" font-family="monospace" font-size="12" fill="var(--base0B)">"M40</text>
+          <text x="363.6" y="236.7" font-family="monospace" font-size="12" fill="var(--base0B)">150C100</text>
+          <text x="421.2" y="236.7" font-family="monospace" font-size="12" fill="var(--base0B)">30</text>
+          <text x="442.8" y="236.7" font-family="monospace" font-size="12" fill="var(--base0B)">220</text>
+          <text x="471.6" y="236.7" font-family="monospace" font-size="12" fill="var(--base0B)">30</text>
+          <text x="493.2" y="236.7" font-family="monospace" font-size="12" fill="var(--base0B)">280</text>
+          <text x="522" y="236.7" font-family="monospace" font-size="12" fill="var(--base0B)">150"</text>
+          <text x="284.4" y="258.9" font-family="monospace" font-size="12" fill="var(--base05)">fill</text>
+          <text x="313.2" y="258.9" font-family="monospace" font-size="12" fill="var(--base04)">=</text>
+          <text x="320.4" y="258.9" font-family="monospace" font-size="12" fill="var(--base0B)">"none"</text>
+          <text x="370.8" y="258.9" font-family="monospace" font-size="12" fill="var(--base05)">stroke</text>
+          <text x="414" y="258.9" font-family="monospace" font-size="12" fill="var(--base04)">=</text>
+          <text x="421.2" y="258.9" font-family="monospace" font-size="12" fill="var(--base0B)">"#34C759"</text>
+          <text x="493.2" y="258.9" font-family="monospace" font-size="12" fill="var(--base05)">strokeWidth</text>
+          <text x="572.4" y="258.9" font-family="monospace" font-size="12" fill="var(--base04)">={</text>
+          <text x="586.8" y="258.9" font-family="monospace" font-size="12" fill="var(--base09)">6</text>
+          <text x="594" y="258.9" font-family="monospace" font-size="12" fill="var(--base04)">}</text>
+          <text x="284.4" y="281.1" font-family="monospace" font-size="12" fill="var(--base05)">animation</text>
+          <text x="349.2" y="281.1" font-family="monospace" font-size="12" fill="var(--base04)">={</text>
+          <text x="363.6" y="281.1" font-family="monospace" font-size="12" fill="var(--base0D)">draw</text>
+          <text x="392.4" y="281.1" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
+          <text x="414" y="281.1" font-family="monospace" font-size="12" fill="var(--base05)">at</text>
+          <text x="428.4" y="281.1" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="442.8" y="281.1" font-family="monospace" font-size="12" fill="var(--base09)">0.3</text>
+          <text x="464.4" y="281.1" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="478.8" y="281.1" font-family="monospace" font-size="12" fill="var(--base05)">over</text>
+          <text x="507.6" y="281.1" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="522" y="281.1" font-family="monospace" font-size="12" fill="var(--base09)">1.5</text>
+          <text x="550.8" y="281.1" font-family="monospace" font-size="12" fill="var(--base04)">})}</text>
+          <text x="579.6" y="281.1" font-family="monospace" font-size="12" fill="var(--base08)">/&gt;</text>
+          <text x="270" y="303.3" font-family="monospace" font-size="12" fill="var(--base08)">&lt;circle</text>
+          <text x="327.6" y="303.3" font-family="monospace" font-size="12" fill="var(--base05)">cx</text>
+          <text x="342" y="303.3" font-family="monospace" font-size="12" fill="var(--base04)">={</text>
+          <text x="356.4" y="303.3" font-family="monospace" font-size="12" fill="var(--base09)">160</text>
+          <text x="378" y="303.3" font-family="monospace" font-size="12" fill="var(--base04)">}</text>
+          <text x="392.4" y="303.3" font-family="monospace" font-size="12" fill="var(--base05)">cy</text>
+          <text x="406.8" y="303.3" font-family="monospace" font-size="12" fill="var(--base04)">={</text>
+          <text x="421.2" y="303.3" font-family="monospace" font-size="12" fill="var(--base09)">62</text>
+          <text x="435.6" y="303.3" font-family="monospace" font-size="12" fill="var(--base04)">}</text>
+          <text x="450" y="303.3" font-family="monospace" font-size="12" fill="var(--base05)">r</text>
+          <text x="457.2" y="303.3" font-family="monospace" font-size="12" fill="var(--base04)">={</text>
+          <text x="471.6" y="303.3" font-family="monospace" font-size="12" fill="var(--base09)">9</text>
+          <text x="478.8" y="303.3" font-family="monospace" font-size="12" fill="var(--base04)">}</text>
+          <text x="493.2" y="303.3" font-family="monospace" font-size="12" fill="var(--base05)">fill</text>
+          <text x="522" y="303.3" font-family="monospace" font-size="12" fill="var(--base04)">=</text>
+          <text x="529.2" y="303.3" font-family="monospace" font-size="12" fill="var(--base0B)">"#0A6CFF"</text>
+          <text x="284.4" y="325.5" font-family="monospace" font-size="12" fill="var(--base05)">animation</text>
+          <text x="349.2" y="325.5" font-family="monospace" font-size="12" fill="var(--base04)">={</text>
+          <text x="363.6" y="325.5" font-family="monospace" font-size="12" fill="var(--base0D)">enter</text>
+          <text x="399.6" y="325.5" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
+          <text x="421.2" y="325.5" font-family="monospace" font-size="12" fill="var(--base05)">at</text>
+          <text x="435.6" y="325.5" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="450" y="325.5" font-family="monospace" font-size="12" fill="var(--base09)">1.6</text>
+          <text x="471.6" y="325.5" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="486" y="325.5" font-family="monospace" font-size="12" fill="var(--base05)">over</text>
+          <text x="514.8" y="325.5" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="529.2" y="325.5" font-family="monospace" font-size="12" fill="var(--base09)">0.5</text>
+          <text x="558" y="325.5" font-family="monospace" font-size="12" fill="var(--base04)">},</text>
+          <text x="298.8" y="347.7" font-family="monospace" font-size="12" fill="var(--base04)">{</text>
+          <text x="313.2" y="347.7" font-family="monospace" font-size="12" fill="var(--base05)">scale</text>
+          <text x="349.2" y="347.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="363.6" y="347.7" font-family="monospace" font-size="12" fill="var(--base09)">0</text>
+          <text x="378" y="347.7" font-family="monospace" font-size="12" fill="var(--base04)">},</text>
+          <text x="399.6" y="347.7" font-family="monospace" font-size="12" fill="var(--base05)">ease</text>
+          <text x="428.4" y="347.7" font-family="monospace" font-size="12" fill="var(--base04)">.</text>
+          <text x="435.6" y="347.7" font-family="monospace" font-size="12" fill="var(--base05)">pop</text>
+          <text x="457.2" y="347.7" font-family="monospace" font-size="12" fill="var(--base04)">)}</text>
+          <text x="478.8" y="347.7" font-family="monospace" font-size="12" fill="var(--base08)">/&gt;</text>
+          <text x="255.6" y="369.9" font-family="monospace" font-size="12" fill="var(--base08)">&lt;/&gt;</text>
+          <text x="277.2" y="369.9" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="241.2" y="392.1" font-family="monospace" font-size="12" fill="var(--base04)">);</text>
+        </g>
+      </g>
+      <g class="a m4">
+        <rect x="223.8" y="218.4" width="380.4" height="72.6" rx="6" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4" stroke-width="1" class="a m3"/>
+      </g>
+    </g>
+  </g>
+  <g class="sans">
+    <text x="636" y="72" font-size="11" font-weight="600" fill="var(--base03)" letter-spacing="0.6">PREVIEW</text>
+    <rect x="636" y="86" width="372" height="232.5" rx="10" fill="var(--base01)"/>
+  </g>
+  <g class="a m8">
+    <g class="a m5">
+      <g transform="translate(636 86) scale(1.1625)">
+        <path d="M40 150C100 30 220 30 280 150" fill="none" stroke="#34C759" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m6"/>
+        <circle cx="160" cy="62" r="9" fill="#0A6CFF" class="a m7 fb"/>
+      </g>
+    </g>
+  </g>
+  <rect x="636" y="338.5" width="372" height="150" rx="10" fill="#1C1C1E"/>
+  <g class="mono">
+    <g class="a m5">
+      <g>
+        <g class="a m13">
+          <g>
+            <g clip-path="url(#c1)">
+              <text x="652" y="369.813" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+              <text x="667" y="369.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">npx</text>
+              <text x="697" y="369.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">svjeez</text>
+              <text x="749.5" y="369.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">svg</text>
+              <text x="779.5" y="369.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.tsx</text>
+              <text x="854.5" y="369.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">--out</text>
+              <text x="899.5" y="369.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.svg</text>
+            </g>
+            <g class="a m12">
+              <rect x="652" y="357.625" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m10"/>
+              <rect x="652" y="357.625" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m11"/>
+            </g>
+          </g>
+        </g>
+        <g class="a m18">
+          <g>
+            <g clip-path="url(#c2)">
+              <text x="652" y="391.688" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+              <text x="667" y="391.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">wc</text>
+              <text x="689.5" y="391.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">-c</text>
+              <text x="712" y="391.688" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.svg</text>
+            </g>
+            <g class="a m16">
+              <rect x="652" y="379.5" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m10"/>
+              <rect x="652" y="379.5" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m15"/>
+            </g>
+          </g>
+          <g class="a m17">
+            <g>
+              <text x="652" y="413.563" font-family="monospace" font-size="12.5" fill="#FF9F0A">955</text>
+              <text x="682" y="413.563" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.svg</text>
+            </g>
+          </g>
+        </g>
+        <g class="a m22">
+          <g>
+            <g clip-path="url(#c3)">
+              <text x="652" y="435.438" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
+              <text x="667" y="435.438" font-family="monospace" font-size="12.5" fill="#E5E5EA">open</text>
+              <text x="704.5" y="435.438" font-family="monospace" font-size="12.5" fill="#E5E5EA">hello.svg</text>
+            </g>
+            <g class="a m21">
+              <rect x="652" y="423.25" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m10"/>
+              <rect x="652" y="423.25" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m20"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="a m23">
+    <g class="round a m5">
+      <g>
+        <text x="636" y="500" font-size="11" fill="var(--base04)">File size</text>
+        <text x="636" y="530" font-size="26" font-weight="700" fill="var(--base06)">955<tspan font-size="13" font-weight="600" fill="var(--base03)" dx="3">B</tspan></text>
+      </g>
+      <g>
+        <text x="760" y="500" font-size="11" fill="var(--base04)">Keyframes</text>
+        <text x="760" y="530" font-size="26" font-weight="700" fill="var(--base06)">2<tspan font-size="13" font-weight="600" fill="var(--base03)" dx="3"></tspan></text>
+      </g>
+      <g>
+        <text x="884" y="500" font-size="11" fill="var(--base04)">JavaScript</text>
+        <text x="884" y="530" font-size="26" font-weight="700" fill="var(--base06)">0<tspan font-size="13" font-weight="600" fill="var(--base03)" dx="3">B</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>
