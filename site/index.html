@@ -58,9 +58,7 @@
   </div>
 
   <section class="wrap sec g" id="play">
-    <p class="kicker c1-12"><span>00</span> Try it</p>
     <h2 class="c1-6">Edit a scene. Watch it recompile.</h2>
-    <p class="sub c7-12">The compiler runs in your browser. Change a number or a color in the code and the SVG beside it plays the new version. <a href="/play">Open the full playground</a>.</p>
     <div class="playground c1-12">
       <div class="pg-fallback win" aria-hidden="false">
         <div class="pg-bar"><span class="dots"><i></i><i></i><i></i></span><b>toast.tsx</b></div>
@@ -74,16 +72,12 @@
   </section>
 
   <section class="wrap sec g" id="timeline">
-    <p class="kicker c1-12"><span>01</span> Motion</p>
     <h2 class="c1-6">Motions are values on a timeline.</h2>
-    <p class="sub c7-12">Write the chain once. The compiler turns it into CSS keyframes, so the browser does the animating and the file carries no script.</p>
     <div class="big c1-12"><div class="win"><img class="scene wide" data-scene="timeline" width="1032" height="420" alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says."><img class="scene tall" data-scene="timeline-tall" width="358" height="504" alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says."></div></div>
   </section>
 
   <section class="wrap sec g" id="diagrams">
-    <p class="kicker c1-12"><span>02</span> Diagrams</p>
     <h2 class="c1-8 xl">Diagrams that build themselves.</h2>
-    <p class="sub c1-5">Give it nodes and edges. It lays them out, reveals them in order and sends a packet along any route.</p>
     <div class="big c1-12"><div class="win"><img class="scene wide" data-scene="pipeline" width="1032" height="300" alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route."><img class="scene tall" data-scene="pipeline-tall" width="358" height="560" alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route."></div></div>
     <figure class="c1-6"><div class="win"><img class="scene" data-scene="handshake" width="504" height="340" alt="A sequence diagram: a browser image asks a CDN for one SVG file, gets it back and starts the animation."></div><figcaption>Sequences play their messages in order.</figcaption></figure>
     <figure class="c7-12"><div class="win"><img class="scene" data-scene="team" width="504" height="340" alt="An agent team grows level by level as a tree, then a dot walks between two branches."></div><figcaption>Trees grow level by level, and a dot can walk any route.</figcaption></figure>
@@ -91,24 +85,19 @@
 
   <div class="tint">
     <section class="wrap sec g" id="code">
-      <p class="kicker c1-12"><span>03</span> Code and terminals</p>
       <h2 class="c1-6">Show the code. Run the commands.</h2>
-      <p class="sub c7-12">A spotlight follows the explanation and a note pins to the token it is about. Terminals print what the real shell prints.</p>
       <figure class="c1-6"><div class="win"><img class="scene" data-scene="explainer" width="504" height="340" alt="Five lines of TSX with a spotlight moving across them and a note explaining draw and enter."></div><figcaption>A spotlight and a note for each idea.</figcaption></figure>
       <figure class="c7-12"><div class="win"><img class="scene" data-scene="recording" width="504" height="340" alt="Three svjeez commands in a terminal: frames, svg and skill, each followed by its output."></div><figcaption>The real commands, with their output.</figcaption></figure>
     </section>
   </div>
 
   <section class="wrap sec g" id="type">
-    <p class="kicker c1-12"><span>04</span> Ink and type</p>
     <h2 class="c1-6">Your fonts. Your ink.</h2>
-    <p class="sub c7-12">Embed a font and it is cut down to the glyphs you use. Write by hand with a brush, a nib or a pencil.</p>
     <figure class="c1-6"><div class="win"><img class="scene" data-scene="ink" width="504" height="340" alt="The word hello is handwritten stroke by stroke, then a brush swash is inked underneath."></div><figcaption>Handwriting from a single-line font, then a brush swash.</figcaption></figure>
     <figure class="c7-12"><div class="win"><img class="scene" data-scene="fonts" width="504" height="340" alt="The words Aa Type draw on as outlines in an embedded display font, with real italic text below."></div><figcaption>Real fonts, cut down to what the scene draws.</figcaption></figure>
   </section>
 
   <section class="wrap sec g" id="light-dark">
-    <p class="kicker c1-12"><span>05</span> Light and dark</p>
     <h2 class="c1-8">One file. It changes its own mind.</h2>
     <div class="stagewrap c1-8">
       <div class="stage intro">
@@ -121,7 +110,6 @@
       </div>
     </div>
     <div class="side c9-12">
-      <p class="sub">The two halves are the same <code>daynight.svg</code>, fetched once. One <code>&lt;img&gt;</code> is told the page is light, the other that it is dark. The scene decides what to show.</p>
       <ul class="points">
         <li><b>A media query inside the file</b><span>The scene carries <code>@media (prefers-color-scheme)</code> rules.</span></li>
         <li><b>Not a recolor</b><span>The sun is a moon, windows light up, a beam sweeps the water.</span></li>
@@ -136,29 +124,24 @@
 
   <div class="tint">
     <section class="wrap sec g" id="agents">
-      <p class="kicker c1-12"><span>06</span> Agents</p>
       <h2 class="c1-6">Agents write scenes too.</h2>
-      <p class="sub c7-12">Install the skill once. A coding agent then reads it, writes a scene, renders frames, looks at them and fixes what it sees.</p>
       <div class="big c1-12"><div class="win desk"><img class="scene wide" data-scene="agents" width="1032" height="560" alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns."><img class="scene tall" data-scene="agents-tall" width="358" height="578" alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns."></div></div>
     </section>
   </div>
 
   <section class="wrap sec g" id="no-jsx">
-    <p class="kicker c1-12"><span>07</span> Without JSX</p>
     <h2 class="c1-8 xl">Not a JSX fan? Use functions.</h2>
-    <p class="sub c1-5">Every element is also a function. Set <code>prefix</code> and the file can be inlined next to others, in a view library such as FoldKit, without id clashes.</p>
     <div class="big c1-12"><div class="win"><img class="scene wide" data-scene="nojsx" width="1032" height="392" alt="A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it."><img class="scene tall" data-scene="nojsx-tall" width="358" height="596" alt="A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it."></div></div>
   </section>
 
   <section class="wrap sec g" id="where">
-    <p class="kicker c1-12"><span>08</span> Anywhere an image works</p>
+    <h2 class="c1-8">Anywhere an image works.</h2>
     <figure class="c1-4"><div class="win"><img class="scene" data-scene="where-readme" width="328" height="264" alt="A README page with an animated dot-matrix image in the middle."></div><h3>READMEs</h3><p>GitHub shows SVG through an <code>&lt;img&gt;</code>, and the animation plays.</p></figure>
     <figure class="c5-8"><div class="win"><img class="scene" data-scene="where-docs" width="328" height="264" alt="A docs page with a diagram in which a packet travels between two boxes."></div><h3>Docs and blogs</h3><p>One file, no player and no script. Put it where you would put a screenshot.</p></figure>
     <figure class="c9-12"><div class="win"><img class="scene" data-scene="where-mail" width="328" height="264" alt="An email with a bar chart that grows inside the message."></div><h3>Email</h3><p>Some mail clients show SVG images and some do not. Send a still as the fallback.</p></figure>
   </section>
 
   <section class="wrap sec g" id="start">
-    <p class="kicker c1-12"><span>09</span> Start</p>
     <div class="c1-6">
       <h2>Install it, then ask for a scene.</h2>
       <p class="more"><a class="btn primary" href="/examples/">See every example</a><a class="btn" href="/intro">Watch the 45 second intro</a></p>

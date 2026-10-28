@@ -1,7 +1,7 @@
-// Builds the playground into site/public: /play, and /playground/{embed,app,worker}-<hash>.js for embedding.
-// Each file is named by its content and names the next one in the chain, worker <- app <- embed, and the pages point at
-// the hashed embed, so a browser never pairs a new page with a cached old worker.
-import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+// Builds the playground into site/public: /play, /playground/embed.js, and the app-<hash>.js and worker-<hash>.js it loads.
+// The pages load embed.js by a fixed name and the server makes browsers revalidate it; app and worker are named by their
+// content and each names the next, worker <- app <- embed, so a browser never pairs a new embed with a cached old worker.
+import { copyFileSync, mkdirSync, rmSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
 const here = (path: string) => new URL(path, import.meta.url).pathname;
@@ -11,14 +11,14 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 
 /** Builds one entry with the given constants and returns its file name. */
-const bundle = async (entry: string, define: Record<string, string> = {}) => {
+const bundle = async (entry: string, define: Record<string, string> = {}, naming = "[name]-[hash].[ext]") => {
   const result = await Bun.build({
     entrypoints: [here(entry)],
     outdir: out,
     target: "browser",
     format: "esm",
     minify: true,
-    naming: "[name]-[hash].[ext]",
+    naming,
     define: Object.fromEntries(Object.entries(define).map(([key, value]) => [key, JSON.stringify(value)])),
   });
   if (!result.success) {
@@ -34,11 +34,6 @@ const bundle = async (entry: string, define: Record<string, string> = {}) => {
 
 const worker = await bundle("worker.ts");
 const app = await bundle("app.ts", { WORKER_FILE: worker });
-const embed = await bundle("embed.ts", { APP_FILE: app });
+await bundle("embed.ts", { APP_FILE: app }, "[name].[ext]");
 
 copyFileSync(here("play.html"), here("../public/play.html"));
-for (const page of ["../public/play.html", "../public/index.html"]) {
-  const html = readFileSync(here(page), "utf8");
-  if (!html.includes("/playground/embed.js")) throw new Error(`${page} does not load /playground/embed.js`);
-  writeFileSync(here(page), html.replaceAll("/playground/embed.js", `/playground/${embed}`));
-}

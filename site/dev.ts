@@ -1,5 +1,5 @@
 // Local preview without Alchemy: serves site/public, with the stylesheet and script read straight from site/ so CSS and JS
-// edits show on reload. Nothing is cached. Run `bun build.ts` first, and again after changing index.html or a scene.
+// edits show on reload. Nothing is cached. Run `bun run build` first, and again after changing index.html or a scene.
 const here = (path: string) => new URL(path, import.meta.url).pathname;
 const live = new Set(["/site.css", "/site.js", "/favicon.svg", "/intro.html"]);
 const port = Number(process.env.PORT ?? 4321);
