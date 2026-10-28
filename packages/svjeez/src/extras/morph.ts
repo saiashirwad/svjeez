@@ -1,13 +1,27 @@
 import { el } from "../el";
-import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
+import { ease, motion, type Motion, type Seconds, type Span, type Stack } from "../motion";
 import type { SvgNode } from "../svg";
-import { number, text, type Code, type CodeWord } from "./code";
+import { number, type Code } from "./code";
+
+/** A placed piece morph() can carry between versions. `text` is the match key. */
+export interface MorphPiece {
+  readonly text: string;
+  readonly x: number;
+  readonly y: number;
+  readonly id?: string;
+}
+
+/** Anything morph() animates: its pieces, and how to draw one with a motion. */
+export interface Morphable<P extends MorphPiece = MorphPiece> {
+  readonly words: readonly P[];
+  draw(piece: P, animation?: Stack<"x" | "y" | "opacity">): SvgNode;
+}
 
 export interface MorphOptions {
   /** One per transition: the move into `versions[i + 1]` starts at `at[i]`. */
   readonly at: readonly Seconds[];
   readonly over?: Seconds;
-  /** Line numbers for the longest version, fading as lines come and go. */
+  /** Line numbers for the longest version, fading as lines come and go. Needs `code()` versions. */
   readonly gutter?: boolean;
 }
 
@@ -16,7 +30,7 @@ export interface MorphOptions {
  * anchors the order; leftovers pair by equal content, nearest first, so swapped words cross.
  * Runs named with the same id pair first, in order, whatever their content.
  */
-export function match(a: readonly CodeWord[], b: readonly CodeWord[]): [number, number][] {
+export function match(a: readonly MorphPiece[], b: readonly MorphPiece[]): [number, number][] {
   const named = a.flatMap((w, i): [number, number][] => {
     if (w.id === undefined) return [];
     const k = a.slice(0, i).filter((v) => v.id === w.id).length;
@@ -42,7 +56,7 @@ export function match(a: readonly CodeWord[], b: readonly CodeWord[]): [number, 
   ];
 }
 
-const unnamed = (a: readonly CodeWord[], b: readonly CodeWord[]): [number, number][] => {
+const unnamed = (a: readonly MorphPiece[], b: readonly MorphPiece[]): [number, number][] => {
   const lcs = Array.from({ length: a.length + 1 }, () => new Uint32Array(b.length + 1));
 
   for (let i = a.length - 1; i >= 0; i--)
@@ -81,8 +95,8 @@ const unnamed = (a: readonly CodeWord[], b: readonly CodeWord[]): [number, numbe
 };
 
 interface Chain {
-  readonly word: CodeWord;
-  readonly code: Code;
+  readonly word: MorphPiece;
+  readonly source: Morphable;
   track?: Motion<"x" | "y" | "opacity">;
 }
 
@@ -93,11 +107,16 @@ export interface MorphResult {
 }
 
 /**
- * Animate code from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
+ * Animate code, or any `Morphable` such as a `tex()` formula, from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
  * `spans[i]` is when the move into `versions[i + 1]` runs; `end` is when the last one settles, or 0 for a single version.
  */
+export function morph(versions: readonly Code[], options: MorphOptions): MorphResult;
 export function morph(
-  versions: readonly Code[],
+  versions: readonly Morphable[],
+  options: Omit<MorphOptions, "gutter">,
+): MorphResult;
+export function morph(
+  versions: readonly Morphable[],
   { at, over = 0.8, gutter = false }: MorphOptions,
 ): MorphResult {
   if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0))
@@ -108,11 +127,16 @@ export function morph(
     if (i > 0 && start < at[i - 1]! + over)
       throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
   });
+
+  const codes = versions.filter(isCode);
+
+  if (gutter && codes.length !== versions.length)
+    throw new Error("morph() draws a gutter only for code() versions.");
   const half = over / 2;
 
-  const born = (word: CodeWord, code: Code, start?: Seconds): Chain => ({
+  const born = (word: MorphPiece, source: Morphable, start?: Seconds): Chain => ({
     word,
-    code,
+    source,
     track:
       start === undefined
         ? undefined
@@ -151,7 +175,7 @@ export function morph(
 
       const next: Chain = {
         word,
-        code: after,
+        source: after,
         track: motion({ x: from.x - word.x, y: from.y - word.y, opacity: 0 })
           .at(start)
           .to({ x: 0, y: 0, opacity: 1 }, over, ease.inOut),
@@ -160,17 +184,16 @@ export function morph(
       return chains[chains.push(next) - 1]!;
     });
   });
-  const numbers = gutter ? lineNumbers(versions, at, over) : [];
+  const numbers = gutter ? lineNumbers(codes, at, over) : [];
 
   return {
-    node: el.g({}, [
-      numbers,
-      chains.map((chain) => text(chain.word, chain.code.metrics, chain.track)),
-    ]),
+    node: el.g({}, [numbers, chains.map((chain) => chain.source.draw(chain.word, chain.track))]),
     spans: at.map((start): Span => ({ at: start, over })),
     end: at.length > 0 ? at.at(-1)! + over : 0,
   };
 }
+
+const isCode = (v: Morphable): v is Code => "lineCount" in v;
 
 const lineNumbers = (versions: readonly Code[], at: readonly Seconds[], over: Seconds): SvgNode[] =>
   Array.from({ length: Math.max(...versions.map((v) => v.lineCount)) }, (_, i) => {

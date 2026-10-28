@@ -15,6 +15,8 @@ import {
   defaultDark,
   defaultLight,
   morph,
+  type Morphable,
+  type MorphPiece,
   readingTime,
   reveal,
   terminal,
@@ -301,6 +303,50 @@ test("morph reports when each transition runs and when the last settles", () => 
   ]);
   expect(two.end).toBe(3.5);
   expect(morph([a], { at: [] })).toMatchObject({ spans: [], end: 0 });
+});
+
+test("a brace runs along the bottom or top of a target, and centers its label there", () => {
+  const target = rect(100, 50, 80, 30);
+
+  const draw = (side: "above" | "below") =>
+    render(
+      { width: 300, height: 200, duration: 4, title: "brace" },
+      Brace({ target, side, label: "term", during: { at: 1, over: 2 } }),
+    );
+
+  const [below, above] = [draw("below"), draw("above")];
+  expect(below).toContain('d="M100 88q0 8 8 8H132');
+  expect(above).toContain('d="M100 42q0 -8 8 -8H132');
+  expect(below).toMatch(/<text[^>]*x="140"[^>]*y="110"[^>]*>term/);
+  expect(above).toMatch(/<text[^>]*x="140"[^>]*y="26"[^>]*>term/);
+});
+
+describe("morph over any Morphable", () => {
+  const dots = (...pieces: MorphPiece[]): Morphable => ({
+    words: pieces,
+    draw: (p, animation) =>
+      el.circle({ cx: p.x, cy: p.y, r: 2, class: `dot-${p.text}`, animation }),
+  });
+
+  test("a piece present in both versions travels, one only in the second fades in, and each is drawn by its own source", () => {
+    const a = dots({ text: "k", x: 10, y: 10 });
+    const b = dots({ text: "k", x: 50, y: 10 }, { text: "n", x: 80, y: 10 });
+
+    const svg = render(
+      { width: 100, height: 20, duration: 4, title: "dots" },
+      morph([a, b], { at: [1], over: 1 }).node,
+    );
+
+    expect(svg.match(/class="[^"]*dot-k/g)).toHaveLength(1);
+    expect(svg.match(/class="[^"]*dot-n/g)).toHaveLength(1);
+    expect(svg).toMatch(/translate:40px 0px/);
+  });
+
+  test("a gutter needs code, because only code has lines to number", () => {
+    const a = dots({ text: "k", x: 10, y: 10 });
+    // SAFETY: the overloads reject this call at compile time, and a plain-JS caller would still reach the runtime check.
+    expect(() => morph([a, a], { at: [1], gutter: true } as never)).toThrow(/gutter only for code/);
+  });
 });
 
 describe("errors name the call, the constraint and the value", () => {

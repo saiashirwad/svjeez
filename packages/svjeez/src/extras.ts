@@ -24,7 +24,7 @@ export {
 
 export { axes, type Axes, type AxesOptions, type Plot, type PlotOptions } from "./extras/axes";
 
-export { morph, type MorphOptions } from "./extras/morph";
+export { morph, type MorphOptions, type Morphable, type MorphPiece } from "./extras/morph";
 
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";
 
