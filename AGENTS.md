@@ -2,7 +2,7 @@
 
 svjeez is a TypeScript library that compiles TSX scenes into one self-contained animated SVG. Motions become CSS keyframes, or SMIL on filter primitives. Nothing runs in the viewer's browser.
 
-To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. `SKILL.md` covers the `motion()` timeline, channels, easing, recipes, `sampled()`, and the compile and runtime errors with their fixes. `skills/svjeez/references/` covers defs and CSS properties, images and fonts, ink, explainers, diagrams, voxels, maps through `@svjeez/geo`, equations through `@svjeez/math`, charts through `@svjeez/charts` and non-JSX use. Five worked examples sit in `skills/svjeez/examples/`. `svjeez skill` prints `SKILL.md` alone; `--install` also copies the references and examples. This file covers working on the repository.
+To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. `SKILL.md` covers the `motion()` timeline, channels, easing, recipes, `sampled()`, and the compile and runtime errors with their fixes. `skills/svjeez/references/` covers defs and CSS properties, images and fonts, ink, explainers, diagrams, voxels, maps through `@svjeez/geo`, syntax highlighting through `@svjeez/code`, equations through `@svjeez/math`, charts through `@svjeez/charts`, Mermaid text through `@svjeez/mermaid` and non-JSX use. Five worked examples sit in `skills/svjeez/examples/`. `svjeez skill` prints `SKILL.md` alone; `--install` also copies the references and examples. This file covers working on the repository.
 
 ## Workspace
 
@@ -11,12 +11,13 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/svjeez/` is the library published to npm as `svjeez`.
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
+- `packages/charts/` is `@svjeez/charts`, which draws animated bar, line and area charts with `d3-scale` and `d3-shape`.
 - `packages/code/` is `@svjeez/code`, which highlights source into role-tagged runs for `code()` and `terminal()` through Shiki.
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax.
-- `packages/charts/` is `@svjeez/charts`, which draws animated bar, line and area charts with `d3-scale` and `d3-shape`.
+- `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid flowcharts, sequence diagrams and state diagrams into svjeez diagrams.
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
 - `site/` is the Astro site at svjeez.texoport.in.
 
@@ -88,6 +89,9 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 `@svjeez/charts` depends on `d3-scale` and `d3-shape`, which is why it is not a `svjeez` subpath. Only numbers and path strings leave d3, and the SVG is built with `el`. It does not call `axes()`, because that takes numeric ranges with a fixed tick step and a band x axis needs its own drawing, so `src/chart.ts` draws the frame itself with the same stroke slots, label slot, 4px ticks and label offsets as `axes()`. `chart()` decides every scale once, from explicit domains or from `data`, and a series whose points fall outside them throws instead of clipping. `src/series.ts` builds `bars()`, `line()` and `area()`. A bar is drawn its radius longer than it shows and a clip at the baseline squares the foot, and an area is revealed by a clip rect whose width animates. Lines draw with a linear ease so their dots can appear in proportion to the length the stroke has covered. There is no time scale. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/charts` is its example scene, and `skills/svjeez/references/charts.md` teaches it to scene writers.
 
+## Mermaid
+
+`@svjeez/mermaid` has no dependencies and does not import the `mermaid` npm package, which needs a DOM. It works in two layers. `parse()` is a hand-written, line-based parser in `src/flowchart.ts`, `src/sequence.ts` and `src/state.ts` that returns a plain `MermaidDoc` (`src/types.ts`) and never imports svjeez. `mermaid()` in `src/index.ts` maps that model onto `flowchart()`, `sequence()` or `stateMachine()` and returns the svjeez diagram with `kind` and `doc`. `FORM_ROLES` is the one table from Mermaid node forms to svjeez `NodeRole`s. Anything the parser or svjeez cannot draw throws a `MermaidSyntaxError` with the line number, so a line is never dropped: when svjeez gains a feature (activations, edge styles, `BT`), move it from the rejected list to the parser and the mapper together, and update the README and `references/mermaid.md`. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/mermaid` is its example scene, and `skills/svjeez/references/mermaid.md` teaches it to scene writers.
 ## Site
 
 `site/` imports scenes straight from `examples/` through the `@examples/*` path. Run `bun run dev`, `bun run build`, `bun run typecheck` and `bun run test` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
@@ -111,7 +115,7 @@ After CI passes, `release.yml` runs `scripts/release.ts`. It releases every pack
 To release, bump the version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro code fonts geo icons math charts; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro charts code fonts geo icons math mermaid; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 

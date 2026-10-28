@@ -21,6 +21,7 @@
         "@svjeez/geo": "workspace:*",
         "@svjeez/icons": "workspace:*",
         "@svjeez/math": "workspace:*",
+        "@svjeez/mermaid": "workspace:*",
         "@types/bun": "latest",
         "@types/d3-geo": "^3.1.0",
         "d3-geo": "^3.1.1",
@@ -126,6 +127,18 @@
       "dependencies": {
         "mathjax-full": "3.2.2",
       },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "svjeez": "workspace:*",
+        "typescript": "latest",
+      },
+      "peerDependencies": {
+        "svjeez": ">=0.6.0 <1",
+      },
+    },
+    "packages/mermaid": {
+      "name": "@svjeez/mermaid",
+      "version": "0.6.1",
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -672,6 +685,8 @@
     "@svjeez/icons": ["@svjeez/icons@workspace:packages/icons"],
 
     "@svjeez/math": ["@svjeez/math@workspace:packages/math"],
+
+    "@svjeez/mermaid": ["@svjeez/mermaid@workspace:packages/mermaid"],
 
     "@svjeez/vite": ["@svjeez/vite@workspace:packages/vite"],
 

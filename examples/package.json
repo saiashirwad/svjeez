@@ -17,6 +17,7 @@
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/math": "workspace:*",
+    "@svjeez/mermaid": "workspace:*",
     "@types/bun": "latest",
     "@types/d3-geo": "^3.1.0",
     "d3-geo": "^3.1.1",
