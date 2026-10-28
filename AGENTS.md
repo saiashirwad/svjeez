@@ -31,7 +31,7 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 
 ## Rules
 
-- Import `svjeez`, `svjeez/extras` and `svjeez/frames`. The tsconfig maps them to `src/`.
+- Import `svjeez`, `svjeez/extras`, `svjeez/voxel` and `svjeez/frames`. The tsconfig maps them to `src/`.
 - Keep the library dependency-free and runnable on Node 20. Don't use APIs newer than Node 20, such as `Map.groupBy` or `Set.prototype.union`. `bun run test:node` under Node 20 catches these.
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `dist/` files and commit them with the change.
