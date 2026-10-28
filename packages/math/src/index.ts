@@ -224,3 +224,20 @@ export function tex(source: string, options: TexOptions = {}): Tex {
     draw,
   };
 }
+
+export {
+  epicycles,
+  type Epicycles,
+  type EpicyclesOptions,
+  type EpicyclesSource,
+  type Outline,
+} from "./epicycles.ts";
+
+export {
+  derive,
+  type Derivation,
+  type DeriveOptions,
+  type DeriveStep,
+} from "./derive.ts";
+
+export { readout, type Readout, type ReadoutOptions, type ReadoutValue } from "./readout.ts";

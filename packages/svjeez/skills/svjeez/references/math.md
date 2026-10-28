@@ -36,6 +36,63 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 
 `\color{red}{x}` paints the part it wraps. Everything else takes the theme.
 
+## Epicycles
+
+`epicycles(outline, { at, over })` draws any closed outline as circles spinning on the tips of circles, with a pen at the last tip and the trace drawn in step with it. It samples the outline by arc length and Fourier-transforms it while the scene compiles.
+
+```tsx
+import { epicycles, tex } from "@svjeez/math";
+
+const pi = tex(String.raw`\pi`, { fontSize: 400, theme });
+const e = epicycles(pi.words, { at: 0.8, over: 10, size: 360, center: [480, 270], fill: tint(theme, "blue") });
+
+<>{e.node}</>;
+```
+
+- The outline is path data, a `tex()` glyph, a list of glyphs or path strings, or a list of `[x, y]` points. Pass the glyph itself, not its `d`: the glyph's `matrix` turns the font's upright path to the screen's. Several outlines, such as a word, join into one loop with straight bridges, and the bridges show in the trace.
+- Path data takes `M L H V C S Q T Z`, absolute or relative. Arcs are not read.
+- `terms` is the number of circles in the chain, default 80, and the trace uses all of them. `circles` is how many of the largest draw their ring and arm, default 24. The rest are too small to see but still move the pen.
+- `center` is where the middle of the outline's box goes, and `size` scales its longer side to that many pixels. `fill` fades in once the pen has closed the outline.
+- `fade` is how long the rings take to fade after the pen is done, 0.6 by default. `0` leaves them. The result has `node`, `end` (when the rings have gone) and `d` (the trace as closed path data).
+- Each circle is one two-keyframe rotation on a group nested in the last, and the trace is a `draw` track sampled from its own arc length. A 10 second scene with 80 terms is about 90 KB.
+
+## Derivations
+
+`derive(steps, { at })` shows a step-by-step derivation. Every line sits with its `=` on one x, so the equals sign stays put while the sides change.
+
+```tsx
+const d = derive(
+  [
+    String.raw`2x + 4 = 10`,
+    { tex: String.raw`x + 2 = 5`, note: String.raw`\div 2 \text{ both sides}` },
+    { tex: String.raw`x = 3`, note: String.raw`- 2 \text{ both sides}` },
+  ],
+  { at: 0.5, every: 2.5, x: 320, y: 120, fontSize: 36, stack: true, theme },
+);
+```
+
+- By default one line transforms into the next with `morph()`, so glyphs the lines share slide into place and the rest fade. Wrap a part in `\cssId{name}{…}` in both lines to pair it by name. With `stack: true` every line stays and each new one fades in below, `lineHeight` pixels lower.
+- `align` is what the lines line up on: `"="`, the first equals sign, or the id of a `\cssId` in each line. `x` is where that point sits.
+- A step's `note` is TeX set small beside the line after an arrow, such as `\div 2 \text{ both sides}`. In place it fades with the next change, and in a stack it stays.
+- `every` is the time from one change to the next, default 2.5, and `over` is how long a change takes, default 0.9. The result has `node`, `end`, `lines` (every line as a `tex()`, aligned) and `bounds`.
+
+## Readouts
+
+`readout(values, { x, y })` is a number that changes over time, typeset with the same glyphs as `tex()`.
+
+```tsx
+const r = readout(
+  [{ at: 0, value: 1 }, { at: 3, value: 3.14 }],
+  { x: 100, y: 80, fontSize: 48, digits: 2, theme },
+);
+const counting = readout((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 0.05, x: 100, y: 200 });
+```
+
+- A list of `{ at, value }` holds each value until the next. A function is read every `step` seconds, 0.1 by default, up to `duration`.
+- `digits` is the decimal places. Places stay put at the widest value, right-aligned on the decimal point, with a sign place only if a value is negative.
+- Digits cut by default. `roll` seconds makes the old digit lift out as the new one rolls in from below. The changes must be at least `roll` apart.
+- Each place holds one glyph per distinct digit it ever shows, toggled by stepped keyframes, so a number that changes every tenth of a second for ten seconds is still a few dozen paths. `width` and `height` give the box.
+
 ## Errors
 
 | Error | Fix |
@@ -49,5 +106,15 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 | `tex() needs finite coordinates and anchor and a positive fontSize, got …` | Pass numbers. |
 | `tex.write() needs a non-negative span and a positive stroke time, got …` | Pass `over` of 0 or more and `stroke` above 0. |
 | `morph() draws a gutter only for code() versions.` | Drop `gutter`. |
+| `epicycles() needs a finite start and a positive duration, got …` | Pass numbers: `over` above 0. |
+| `epicycles() needs 1 to … terms, a non-negative number of circles and fade, got …` | Lower `terms`, and pass `circles` and `fade` of 0 or more. |
+| `epicycles() cannot read a "…" path command. …` | Arcs are not read. Write the outline with lines and curves, or pass points. |
+| `epicycles() needs an outline with at least three points.` / `…with some length.` | The path is empty or a single point. |
+| `derive() found no "=" in step …` | Put an equals sign in every step, or pass `align` as the `\cssId` id in each. |
+| `derive() needs a step, a positive over that fits in every, …` | Pass at least one step, `over` above 0 and `every` at least `over`. |
+| `readout() needs at least one value, each with a finite time and number.` | Pass values with finite `at` and `value`. |
+| `readout() of a function needs a positive duration and step, …` | Pass `duration`, and a positive `step`. |
+| `readout() needs a whole number of digits, a positive fontSize and a non-negative roll, …` | Pass whole `digits` and `roll` of 0 or more. |
+| `readout() changes faster than its roll of … seconds.` | Lower `roll` or space the changes out. |
 
 In Bun, a non-ASCII character in `String.raw` arrives as a `\u{…}` escape. Write such characters in a plain string, or as TeX.
