@@ -30,8 +30,10 @@ const theta = (t: number): number => {
   return t < 5.8 ? 2 * Math.PI * span(1.6, 4) : Math.PI * span(6.2, 1.4);
 };
 
-const sample = <T extends Record<string, number>>(fn: (c: number, s: number) => T) =>
-  (t: number) => fn(R * Math.cos(theta(t)), -R * Math.sin(theta(t)));
+const sample =
+  <T extends Record<string, number>>(fn: (c: number, s: number) => T) =>
+  (t: number) =>
+    fn(R * Math.cos(theta(t)), -R * Math.sin(theta(t)));
 
 const point = sampled(
   sample((x, y) => ({ x, y })),
