@@ -51,6 +51,8 @@ Paths in this section are relative to `packages/svjeez/`.
 
 Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`. Run `bun run dev` there to open it.
 
+Both plugin packages point their exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. `bun run build:package` in either package writes `package-dist/`, with compiled JavaScript, declarations, and the package.json that npm publishes. `bun run test:package` builds it, lints it, installs the packed tarballs into a copy of `test/consumer/`, and builds that project. Both commands use the scripts in the root `scripts/` folder.
+
 ## Astro integration
 
 `@svjeez/astro` adds `@svjeez/vite` to Astro and provides the `svjeez:astro` module. `<Scene scene={build} />` and `getScene(build, { posters })` compile a scene and give it a URL under `/_svjeez/`. Pages call `getScene()` while they render, after Vite has bundled, so the integration writes those files in `astro:build:done`. Posters are cached in Astro's cache directory.
@@ -71,7 +73,7 @@ Run `bun run test` in `packages/vite/` to build and serve the React app in `test
 
 ## Releasing
 
-CI (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed package.
+CI (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
 
 To release, bump the version in `packages/svjeez/`, then commit, tag and push from the root. Neither `npm version` nor `bun pm version` commits or tags inside a workspace, so do those steps yourself:
 
@@ -82,3 +84,5 @@ git commit -am "svjeez $v" && git tag "v$v" && git push --follow-tags
 ```
 
 The `v*` tag starts `.github/workflows/release.yml`. It reruns CI, checks the tag against `packages/svjeez/package.json`, publishes to npm with provenance through trusted publishing, and creates a GitHub release with the tarball and generated notes. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
+
+The plugins release the same way, each on its own version and tag. Bump `packages/vite/` and push `vite-v$v`, or bump `packages/astro/` and push `astro-v$v`. The workflow builds that package's `package-dist/` and publishes it. A new `@svjeez/vite` version reaches `@svjeez/astro` users through its `^` range, so it needs no Astro release.

@@ -3,15 +3,30 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "customConditions": ["@svjeez/source"],
+    "customConditions": [
+      "@svjeez/source"
+    ],
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["bun"],
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    "types": [
+      "bun"
+    ],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ]
   },
-  "include": ["src", "test", "client.d.ts"]
+  "include": [
+    "src",
+    "test",
+    "client.d.ts"
+  ],
+  "exclude": [
+    "test/consumer"
+  ]
 }
