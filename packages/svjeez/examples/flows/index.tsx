@@ -1,8 +1,7 @@
 import { render } from "svjeez";
-import { adaptive, flow, systemLight, systemDark, type FlowOptions } from "svjeez/extras";
-import { mono } from "../fonts/faces";
+import { flow, type FlowOptions } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
-const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const W = 800;
 const ROW = 90;
 const D = 4;

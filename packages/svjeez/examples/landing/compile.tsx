@@ -1,10 +1,10 @@
-import { def, draw, ease, enter, font, motion, rect, render, sampled, strokeFont, type Motion } from "svjeez";
+import { def, draw, ease, enter, motion, rect, render, sampled, strokeFont, type Motion } from "svjeez";
 import { Marker, code, typewriter, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
-import { SCHEME_CSS, theme, themeCss } from "./kit";
+import { css, mono, theme } from "../style";
+import { SCHEME_CSS } from "./kit";
 
 // The landing hero: a few lines of TSX type out on the left, and the picture they describe draws itself on the right.
 // `layout` picks the same scene's wide cut for laptops or a stacked cut for phones.
-const mono = await font.load(new URL("../fonts/JetBrainsMono.ttf", import.meta.url), { fallback: ["ui-monospace", "Menlo", "monospace"], ligatures: false });
 const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
 
 const tag = (text: string): CodeRun => ["tag", text];
@@ -36,8 +36,8 @@ const LAYOUTS = {
 
 export function make(layout: keyof typeof LAYOUTS): string {
   const L = LAYOUTS[layout];
-  const editor = appWindow(L.editor, { theme, title: "hello.tsx", class: "mono" });
-  const canvas = appWindow(L.canvas, { theme, title: "hello.svg", class: "mono" });
+  const editor = appWindow(L.editor, { theme, title: "hello.tsx" });
+  const canvas = appWindow(L.canvas, { theme, title: "hello.svg" });
   const src = code(source, { theme, font: mono, fontSize: L.font, lineHeight: 1.85, x: editor.body.x + 22, y: editor.body.y + 20 });
   const typed = typewriter(src, { at: START, cps: CPS, cursor: theme.base09, blink: false });
   const done = typed.spans.map((span) => span.at + span.over + 0.1);
@@ -84,13 +84,15 @@ export function make(layout: keyof typeof LAYOUTS): string {
       duration: D,
       title: "svjeez: TSX in, one SVG out",
       desc: "A few lines of TSX type out in an editor. As each line lands, the picture it describes draws itself in a canvas beside it: a hill is inked, a sun rises, the word hello is handwritten and a bird flies across. The colors follow the viewer's light or dark scheme.",
-      css: [themeCss, SCHEME_CSS, ".mono,.mono text{font-variant-ligatures:none}"].join("\n"),
+      css: [css, SCHEME_CSS].join("\n"),
       reducedMotion: { at: D - 1.5 },
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      {editor.node}
-      {canvas.node}
+      <g fontFamily={mono}>
+        {editor.node}
+        {canvas.node}
+      </g>
       <path d={L.arrow} stroke={theme.base03} strokeWidth={2} strokeLinecap="round" strokeDasharray="2 7" fill="none" animation={enter({ at: START, over: 0.5 })} />
       <g animation={motion({ opacity: 1 }).at(D - 0.7).to({ opacity: 0 }, 0.6)}>
         <g animation={enter({ at: hillAt - 0.2, over: 0.3 })}>

@@ -1,9 +1,9 @@
 import { ease, enter, motion, render, wiggle } from "svjeez";
-import { CSS, theme } from "./kit";
+import { css, theme } from "../style";
 
 export default function build(): string {
   return render(
-    { width: 200, height: 120, duration: 4, title: "Loops and stacking", desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.", css: CSS, reducedMotion: { at: 1 } },
+    { width: 200, height: 120, duration: 4, title: "Loops and stacking", desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.", css, reducedMotion: { at: 1 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       <g transform="translate(60 60)">

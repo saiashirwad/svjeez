@@ -1,5 +1,7 @@
 ---
+import { Font } from "astro:assets";
 import Header from "../components/Header.astro";
+import { codeVars } from "../styles/code";
 import "../styles/site.css";
 
 interface Props {
@@ -50,6 +52,8 @@ const image = new URL("/og.jpg", Astro.site);
         if (t) document.documentElement.dataset.theme = t;
       } catch (e) {}
     </script>
+    <Font cssVariable="--font-mono" preload />
+    <style is:inline set:html={codeVars}></style>
     <slot name="head" />
   </head>
   <body class={className}>

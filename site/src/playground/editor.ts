@@ -9,7 +9,7 @@ import { tags as t } from "@lezer/highlight";
 const chrome = EditorView.theme({
   "&": { color: "var(--pg-ink)", backgroundColor: "transparent", fontSize: "0.75rem", blockSize: "100%" },
   "&.cm-focused": { outline: "none" },
-  ".cm-scroller": { fontFamily: "var(--pg-mono)", lineHeight: "1.65", overflow: "auto" },
+  ".cm-scroller": { fontFamily: "var(--pg-mono)", fontVariantLigatures: "none", lineHeight: "1.65", overflow: "auto" },
   ".cm-content": { caretColor: "var(--pg-accent)", paddingBlock: "1rem" },
   ".cm-line": { paddingInline: "0.75rem 1rem" },
   ".cm-cursor": { borderLeftColor: "var(--pg-accent)", borderLeftWidth: "2px" },

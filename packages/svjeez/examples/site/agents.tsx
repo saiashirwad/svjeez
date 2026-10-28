@@ -1,6 +1,7 @@
 import { def, ease, enter, motion, rect, render } from "svjeez";
 import { appWindow, code, reveal, terminal, type CodeTokens } from "svjeez/extras";
-import { CSS, termTheme, theme } from "./kit";
+import { CSS } from "./kit";
+import { mono, theme } from "../style";
 
 // A desktop: a soft wallpaper, a menu bar, a terminal installing the skill, and an agent writing a scene with it.
 const MENU = 30;
@@ -21,13 +22,13 @@ const W = tall ? 358 : 1032;
 const H = tall ? 578 : 560;
 const term = tall ? rect(12, 44, 334, 160) : rect(44, 64, 440, 290);
 const agent = tall ? rect(12, 216, 334, 346) : rect(516, 112, 472, 396);
-const shell = appWindow(term, { theme: termTheme, title: "~/project, zsh", dots: "traffic", class: "sans" });
+const shell = appWindow(term, { theme, title: "~/project, zsh", dots: "traffic", class: "sans" });
 const session = terminal(
   [
     { cmd: "npx svjeez skill --install", output: [[["muted", "installed the svjeez skill in"]], [["muted", ".claude/skills/svjeez"]]] },
     { cmd: "ls .claude/skills/svjeez", output: [["SKILL.md  examples"]] },
   ],
-  { theme: termTheme, at: 0.6, x: shell.body.x + 22, y: shell.body.y + 18, fontSize: tall ? 11 : 12.5, lineHeight: 1.75, cps: 90, gap: 0.3 },
+  { theme, font: mono, at: 0.6, x: shell.body.x + 22, y: shell.body.y + 18, fontSize: tall ? 11 : 12.5, lineHeight: 1.75, cps: 90, gap: 0.3 },
 );
 
 const agentWin = appWindow(agent, { theme, title: "agent", dots: "traffic", class: "sans" });
@@ -47,12 +48,12 @@ const transcript = code(
     [],
     ...closing,
   ],
-  { theme, x: agentWin.body.x + 20, y: agentWin.body.y + 20, fontSize: tall ? 11 : 12.5, lineHeight: 1.85 },
+  { theme, font: mono, x: agentWin.body.x + 20, y: agentWin.body.y + 20, fontSize: tall ? 11 : 12.5, lineHeight: 1.85 },
 );
 const SHOW = session.end + 0.6;
 const shown = reveal(transcript, { at: SHOW, blocks: "line", step: 0.6, over: 0.3 });
 const D = Math.ceil((shown.end + 4) / 2) * 2;
-const spin = { x: agentWin.body.x + 20, y: agentWin.body.y + (tall ? 198 : 250) };
+const spin = { x: agentWin.body.x + 20, y: tall ? transcript.bounds.y + transcript.bounds.h + 14 : agentWin.body.y + 250 };
 
   return render(
     {
@@ -80,8 +81,8 @@ const spin = { x: agentWin.body.x + 20, y: agentWin.body.y + (tall ? 198 : 250) 
       {shadowed(agent.x, agent.y, agent.w, agent.h)}
       {agentWin.node}
       <g animation={motion({ opacity: 1 }).at(D - 0.5).to({ opacity: 0 }, 0.5)}>
-        <g class="mono">{session.node}</g>
-        <g class="mono">{shown.node}</g>
+        {session.node}
+        {shown.node}
         <g animation={enter({ at: shown.spans[4]!.at + 0.3, over: 0.5 }, { opacity: 0, scale: 0.9 }, ease.out)}>
           <rect x={spin.x} y={spin.y} width={120} height={84} rx={10} fill={theme.base01} />
           <g transform={`translate(${spin.x + 60} ${spin.y + 42})`}>

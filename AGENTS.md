@@ -59,6 +59,7 @@ Paths in this section are relative to `packages/svjeez/`.
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `dist/` files and commit them with the change.
 - Keep the library free of Astro. Astro code belongs in `packages/astro/`.
+- Scenes that show code, an explainer or a terminal take `theme`, `css` and `mono` from `packages/svjeez/examples/style.ts`, and the site's code blocks and playground read the same palette through `site/src/styles/code.ts`. `tests/style.test.ts` fails on a scene that brings its own code palette or mono font.
 - Check visual changes by looking at frames: run `bun run render-png <file> --sheet`, then open `sheet.png`. Passing tests don't show timing or layout bugs.
 
 ## Releasing

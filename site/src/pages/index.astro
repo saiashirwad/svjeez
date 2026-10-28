@@ -28,6 +28,7 @@ import Install from "../components/Install.astro";
 import LiveScene from "../components/LiveScene.astro";
 import Playground from "../components/Playground.astro";
 import Base from "../layouts/Base.astro";
+import { shikiTheme } from "../styles/code";
 
 // A scene shows its poster whenever the play budget holds it back, so posters render at 2x to stay sharp on retina screens.
 const live = (scene: () => string) => getScene(scene, { posters: { scale: 2, quality: 0.9, background: "transparent" } });
@@ -57,7 +58,7 @@ const s = {
 const totalKB = Math.round(Object.values(s).reduce((sum, scene) => sum + scene.gzip, 0) / 1024);
 
 const adaptive = `const { theme, css } = adaptive({
-  dark: tomorrowNight, light: tomorrow,
+  dark: systemDark, light: systemLight,
 });
 // theme colors are CSS variables
 render({ css }, <rect fill={theme.base00} />);`;
@@ -97,7 +98,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
         <div class="pg-fallback win" aria-hidden="false">
           <div class="pg-bar"><span class="dots"><i></i><i></i><i></i></span><b>toast.tsx</b></div>
           <div class="pg-body">
-            <Code class="code" code={toastSource.trimEnd()} lang="tsx" theme="css-variables" />
+            <Code class="code" code={toastSource.trimEnd()} lang="tsx" theme={shikiTheme} />
             <div class="pg-view"><LiveScene scene={s.toast} cost={6} alt="A toast slides up, a check mark draws itself inside a green dot, and the words Changes saved appear." /></div>
           </div>
         </div>
@@ -152,7 +153,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
           <li><b>Change the scene, too</b><span>Swap the sun for a moon, light the windows, and sweep a beam across the water.</span></li>
         </ul>
       </div>
-      <Code class="code c1-6" code={adaptive} lang="tsx" theme="css-variables" />
+      <Code class="code c1-6" code={adaptive} lang="tsx" theme={shikiTheme} />
     </section>
 
     <div class="tint">

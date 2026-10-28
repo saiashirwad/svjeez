@@ -1,5 +1,6 @@
 import { Glyphs, draw, ease, enter, font, motion, render } from "svjeez";
-import { CSS, chrome, outro, theme } from "./kit";
+import { CSS, chrome, outro } from "./kit";
+import { mono, theme } from "../style";
 
 // Two real fonts embedded in one file. Each is cut down to the glyphs this card uses.
 const W = 504;
@@ -36,8 +37,8 @@ export default function build(): string {
         </g>
         <g animation={enter({ at: 3.2, over: 0.6 }, { opacity: 0, y: 8 })}>
           <rect x={left} y={BAR + 186} width={W - 2 * left} height={62} rx={10} fill={theme.base01} />
-          <text class="mono" x={left + 18} y={BAR + 213} fontSize={13} fill={theme.base04}>await font.load(new URL("./Archivo.ttf"))</text>
-          <text class="mono" x={left + 18} y={BAR + 235} fontSize={13} fill={theme.base0B}>{"<text fontFamily={display}>"}</text>
+          <text fontFamily={mono} x={left + 18} y={BAR + 213} fontSize={13} fill={theme.base04}>await font.load(new URL("./Archivo.ttf"))</text>
+          <text fontFamily={mono} x={left + 18} y={BAR + 235} fontSize={13} fill={theme.base0B}>{"<text fontFamily={display}>"}</text>
         </g>
         <g animation={enter({ at: 4, over: 0.6 })} class="sans">
           <text x={left} y={H - 22} fontSize={12} fill={theme.base03}>Subset to the glyphs it draws. One file, no font requests.</text>

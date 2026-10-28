@@ -1,9 +1,9 @@
 import { ease, motion, render } from "svjeez";
-import { CSS, theme } from "./kit";
+import { css, theme } from "../style";
 
 export default function build(): string {
   return render(
-    { width: 200, height: 120, duration: 5, title: "Motion", desc: "A square fades in, holds, then shrinks away and cuts back to full size.", css: CSS, reducedMotion: { at: 2 } },
+    { width: 200, height: 120, duration: 5, title: "Motion", desc: "A square fades in, holds, then shrinks away and cuts back to full size.", css, reducedMotion: { at: 2 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       <rect

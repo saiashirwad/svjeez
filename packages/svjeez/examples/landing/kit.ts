@@ -1,11 +1,4 @@
 import type { Color } from "svjeez";
-import { adaptive, base16 } from "svjeez/extras";
-
-// One palette, two schemes: warm paper by day, blue ink-black by night. Slots follow base16.
-export const { theme, css: themeCss } = adaptive({
-  dark: base16("#14162A", "#1D2038", "#2D3150", "#6C7196", "#999EC0", "#C9CCE6", "#EEEFFA", "#FFFFFF", "#FF7A6E", "#FFA05C", "#FFD166", "#8FD19E", "#6FD0C8", "#7FA2FF", "#B79CFF", "#C98F6A"),
-  light: base16("#FBF1DE", "#FFFBF2", "#E6D9BF", "#A39780", "#6E6450", "#3F382B", "#221D14", "#14100A", "#D9483B", "#E8772E", "#E0A21B", "#4F8A5B", "#2F8C88", "#3A5FC8", "#7E52C2", "#A66B43"),
-});
 
 type Pair = readonly [dark: string, light: string];
 

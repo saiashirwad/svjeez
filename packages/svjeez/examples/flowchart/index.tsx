@@ -1,8 +1,7 @@
 import { render } from "svjeez";
-import { adaptive, flow, flowchart, systemLight, systemDark } from "svjeez/extras";
-import { mono } from "../fonts/faces";
+import { flow, flowchart } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
-const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const M = 40;
 
 export const chart = flowchart(

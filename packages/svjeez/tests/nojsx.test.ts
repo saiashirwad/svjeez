@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { draw, ease, el, enter, motion, render, shake } from "svjeez";
-import { adaptive, flow, flowchart, tomorrow, tomorrowNight } from "svjeez/extras";
+import { adaptive, flow, flowchart, systemDark, systemLight } from "svjeez/extras";
 import jsxReview from "../skills/svjeez/examples/review-flow";
 import jsxToast from "../skills/svjeez/examples/toast";
 
@@ -21,7 +21,7 @@ const toast = (): string => {
 };
 
 const review = (): string => {
-  const { theme, css: colors } = adaptive({ dark: tomorrowNight, light: tomorrow });
+  const { theme, css: colors } = adaptive({ dark: systemDark, light: systemLight });
   const css = `${colors}\n.sans text{font-family:system-ui,sans-serif}`;
   const M = 24;
   const chart = flowchart(

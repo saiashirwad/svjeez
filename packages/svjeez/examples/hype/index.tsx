@@ -1,18 +1,13 @@
 import { Glyphs, Ink, def, draw, ease, enter, font, motion, rect, render, sampled, strokeFont, tool, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
-import { Marker, adaptive, base16, code, cut, flow, flowchart, typewriter, appWindow, type CodePiece } from "svjeez/extras";
+import { Marker, code, cut, flow, flowchart, typewriter, appWindow, type CodePiece } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
 const W = 1280;
 const H = 720;
 
 const display = await font.load(new URL("../fonts/ArchivoBlack-Regular.ttf", import.meta.url));
 const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
-const mono = await font.load(new URL("../fonts/JetBrainsMono.ttf", import.meta.url), { fallback: ["ui-monospace", "Menlo", "monospace"], ligatures: false });
 
-// One accent on quiet neutrals, in both schemes. Slots follow base16: 00 page, 01 surface, 02 hairline, 03–07 text.
-const { theme, css } = adaptive({
-  dark: base16("#0B0B0C", "#141416", "#26262A", "#5C5C64", "#8E8E97", "#D9D9DE", "#F2F2F4", "#FFFFFF", "#F07178", "#E8875F", "#E6C07B", "#7BC896", "#6CC4C4", "#82AAFF", "#C792EA", "#A16946"),
-  light: base16("#FAFAF9", "#FFFFFF", "#E4E4E7", "#A1A1AA", "#71717A", "#3F3F46", "#18181B", "#09090B", "#D14D41", "#C8643B", "#A67C00", "#2F8F5B", "#1F8A8A", "#3B6FD8", "#8E5BC9", "#A16946"),
-});
 const C = {
   page: theme.base00,
   surface: theme.base01,

@@ -16,12 +16,12 @@
   <style><![CDATA[
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
-.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
 .round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
 svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}
 @media (prefers-color-scheme:light){svg{--wall-a:#D9E7FB;--wall-b:#DDF3E6;--bar:#FFFFFF}}
 
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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AlgAWgJYAFoCWABaAlgAWgJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWAAjAlgAIwJYAFgCWAAoAlgAXAJYAFoCWABQAlgAXAJYAFwCWABcAlgAXAJYAEgCWABIAlgASAJYAEgCWABIAlgASAJYAFwCWABaAlgANwJYADcCWAA3AlgANwJYADcCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAMgJYABkCWAAZAlgAGQJYABkCWAAZAlgAKAJYACMCWAAjAlgAIwJYACMCWAAjAlgAIwJYACMCWAAjAlgAIwJYAFUCWABVAlgAVQJYAFUCWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYACMCWAAjAlgAXAJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABGAlgAPwJYAFoCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAWAJYAFUCWABaAlgAPAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABcAlgAAAJY/+ECWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAXwJYAF8CWABhAlgAHgJYAB4CWAAeAlgAHgJYAAoCWAAeAlgAQgJYAFwCWABcAlgAAAJYAFwCWABcAlgAXgJYAFwCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABYAlgAIwJYACMCWABVAlgAIwJYAFwCWABXAlgAWAJYAG8CWABvAlgAbwJYABkCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABcAlgApQJYADcCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYADcCWAAjAlgAIwJYACMCWAAjAlgAIwJYADICWAA3AlgANwJYADcCWAA3AlgANwJYADcCWAA3AlgANwJYADcCWABaAlgAWgJYAFoCWABaAlgArwJYALkCWAAyAlgAXgJYAF0CWABuAlgAbgJYAG4CWAAZAlgAZAJYAGQCWAAMAlgANQJYAFoCWABaAlgAXAJYAFwCWAAUAlgATAJYAF0CWABYAlgAXgJYAFwCWABYAlgANwJYADICWAAyAlgANgJYACgCWABLAlgAXgJYAEACWABAAlgAXgJYAF4CWP/7AlgAQQJY//sCWAA1AlgASAJYAFoCWABUAlgAaQJYAGkCWAAtAlgAAAJYADwCWAA4AlgAAAJYACMCWABaAlgAQQJYAFoCWABeAlgAggJYAIICWACCAlgAHgJYAFUCWABVAlgAEgJYAEECWABeAlgAXgJYAGECWABhAlgAGQJYAEwCWABeAlgAVQJYAF4CWABcAlgAUwJYADcCWAA3AlgANwJYADYCWAAyAlgATgJYAF4CWABAAlgAQAJYAF4CWABiAlgAAAJYAEECWAAFAlgAQAJYAFoCWABaAlgAVAJYAFUCWABVAlgAVQJYAAACWAA+AlgAPAJYAAACWAA8AlgAWgJYADICWABdAlgAbgJYADICWABkAlgAVQJYAF0CWABYAlgAaQJYAFwCWAAyAlgATAJYAFoCWABQAlgAWAJYAF4CWABcAlgANwJYADcCWAAjAlgANgJYACgCWAA2AlgAMgJYAAoCWP+NAlj/jQJY/40CWP+wAlj/gwJY/7ACWABpAlgAIwJYAFwCWABaAlgAXAJYADwCWABGAlgAUAJYAEQCWABcAlgAWAJYADcCWABhAlgAMgJYAF0CWAA3AlgAQgJYAFUCWAAZAlgAXgJYAFgCWABYAlgANwJYAFoCWAA3AlgAKAJYADYCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAVQJYADcCWABaAlgAUAJYAFwCWABeAlgAWgJYAFACWABaAlgASAJYAEYCWABQAlgAVQJYAEQCWABQAlgAUAJYAEQCWABaAlgAkQJYAJsCWACXAlgAiAJYAJICWACJAlgAkQJYAJsCWACWAlgAkgJYAJECWACbAlgAlwJYAIgCWACSAlgAiQJYAJECWACbAlgAlgJYAJICWABaAlgAHgJYAB4CWAAaAlgA2QJYAKUCWADZAlgAqgJYADwCWADhAlgA4QJYAIcCWABuAlgA2QJYALQCWAAjAlgAIwJYANkCWABLAlgASwAA/xkAAP94AlgAuQJYAHMCWABVAlgAVQJYAM0CWACWAlgAbgJYAJYCWABpAlgAkwJYAIwCWACMAlgAUAJYAAACWACMAlgAPAJYAKUCWABVAlgASwJYAFUCWADmAlgAoAJYAB4CWAAeAlgAkwJYAJMCWACWAlgA9gJY/jQCWPvcAlj7pgJY/lwCWP39Alj7pQJY/f0CWPulAlj+EQJY/kMCWP67Alj5/AJY/o4CWP4+Alj+0wJY/I8CWPxwAlj+gQJY/lwCWP7RAlj8yQJY/EQCWP6zAlj8LAJY/lICWP6BAlj+gQJY/qICWP7FAlj9+AJY+6ACWP6VAlj+lQJY/mECWP5XAlj7mwJY/cUCWP39Alj9ywJY/csCWP3LAlj9ywJY/csCWP3LAlj96QJY+5ECWPk5Alj9ywJY/csCWPtzAlj98wJY/hECWPugAlj+FgJY/j4CWPv6Alj8EwJY/CICWP3kAlgAfQJYAHMCWADZAlgAqgJYAAACWAAAAlgAAAAAAAACWABdAlgAVQJYACsCWABIAlgAWgJYABMCWAAAAlgAHgJYAEsCWAAtAlgAIwJYANkCWAAoAlgA/wJYAFoCWAAjAlgAUAJYAFACWABBAlgAIwJYACMCWAAjAlgAHgJYAEECWACMAlgAaQJYAGQCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABBAlgAQQJYAEECWABGAlgAUAJYACMCWAA8AlgAPAJYAAACWAAoAlgANwJYAB4CWABaAlgAWgJYAJsCWAAOAlj/+AJYAKACWAA3AlgAIwJYAB4CWAC0AlgAQQJYACMCWAAjAlgAHgJYADICWAAKAlgACgJYACgCWAAKAlgACgJYAC0CWAAoAlgALQJY/7ACWAAKAlgADwJYAAoEsAAoBLAAHgSwACgCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJYASwCWAINAlj/9gJYASwCWP/2Alj/9gJY//YCWP/2Alj/9gJYASwCWP/2Alj/9gJYADwCWAAAAlgAAAJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2AlgAPAJYAAACWAAAAlgAlgJYAJYCWAAAAlgAAAJYAAACWAAAAlgAAAJY//YCWAAAAlj/9gJY//YCWP/2AlgAAAJY//YCWP/2AlgAAAJY//YCWAAAAlj/9gJYAJYCWACWAlgAlgJYAIwCWACWAlgAlgJYAJYCWACMAlj/7AJY/+wCWACWAlj/7AJY/+wCWP/sAlgAlgJYAJYCWP/sAlj/7AJYAJYCWP/sAlj/7AJYAJYCWP/sAlj/7AJY/+wCWADIAlgAyAJY/+wCWP/sAlj/7AJY/+wCWAD6AlgAyAJY/+wCWP/sAlj/7AJYAPoCWABLAlgAyAJYAMgCWP/sAlj/7AJYAMgCWP/sAlj/7AJY/+wCWAAZAlgAyAJYAPoCWAAlAlgAyAJYAMgCWP/sAlj/7AJYAMgCWADIAlgAyAJY/+wCWP/sAlgAyAJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJYAPoCWP/sAlgA+gJY/+wCWP/sAlj/7AJYAEYCWAD6AlgA+gJY/+wCWP/sAlgA+gJY/+wCWP/sAlj/7AJYABkCWAD6AlgA+gJYACUCWAD6AlgA+gJYAMgCWP/sAlj/7AJYAPoCWAD6Alj/7AJY/+wCWAD6Alj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJYAJYCWP/sAlj/7AJY/+wCWP/sAlgAyAJYAMgCWP/sAlj/7AJY/+wCWP/sAlgAyAJYAPoCWP/sAlj/7AJYAPoCWP/sAlj/7AJYAJYCWP/sAlj/7AJYAMgCWP/sAlj/7AJYAPoCWP/sAlj/7AJYAPoCWP/2Alj/9gJYAF4CWP/2AlgAFAJYAEICWAAtAlgANwJYAEECWABNAlgALQJYAC0CWAAPAlgAlgJYAKUCWABVAlgA/wJYAP8CWABQAlgARgJYAFACWAAeAlgAPAJYADwCWABRAlgACgJYAA8CWP/sAlj/7AJY/+wCWAD1AlgABgJYADwCWAC0AlgAjAJY/dUCWP39Alj7wwJY/hECWP6nAlj70gJY/rsCWP67Alj+4wJY/KQCWPzHAlj6yQJY/KQCWPzWAlj+pwJY+9ICWP67Alj+EwJY/iACWPv/Alj92gJY+6ACWPugAlj9+AJY+6ACWPulAlj9/QJY+6UCWPulAlj7jAJY/gwCWPuzAlj+YQJY/okCWP7PAlj7swJY/ioCWPuzAlj7swJY/G0CWP3zAlj7mwJY+5sCWPubAlj7mwJY/okCWPlDAlj97gJY+7QCWP6YAlj8dwJY+n4CWPvmAlj+BwJY+74CWPlDAlj97gJY+7QCWP7PAlj7mwJY+5sCWPlDAlj7mwJY+5sCWP40Alj+RwJY+5sCWPubAlj79QJY/fMCWPu0Alj7mwJY/ioCWPv1Alj+EQJY/ekCWP3uAlj+VwJY+5YCWP45AlgApQJYAKUCWAClAlgApQJYADcCWACMAlgApQAAAH0AAADlAAAAtgAAANQAAACTAAABvQAAAHcAAAB3AAAAjAAAALQAAACMAAAAjAAAANIAAABIAAAA0gAA/6AAAADlAAAAtAAAAL4AAADNAAAAuQAA/YoAAAB4AlgAfQJYAOUCWAC2AlgA1AJYAJMCWAB3AlgAdwJYAIwCWAC0AlgAjAJYAIwCWADNAlgAuQAAAL4AAAB9AAAA5QAAALYAAADUAAAAkwAAAHcAAAB3AAAAjAAAALQAAACMAAAAjAAAANIAAABIAAAAjAAAANIAAAFzAAAA5QAAAH0AAAC+AAAAzQAAALkAAACMAAAAjAJYAH0CWADlAlgAtgJYANQCWACTAlgAdwJYAHcCWACMAlgAtAJYAIwCWACMAlgA1AJYAOECWAB9AAAAjAAAAIIAAACCAAAAggAAAIwAAAB4AAAAeAAAAHgAAAB4AAAAhwAAAIcAAACHAAAAhwAAAHgAAAB4AAAAeAAAAHgCWABaAlgAaQJYADICWAAAAlgAAAJYAAACWAAAAAAAAAJYAAAAAAAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaADIAMgAyADIAMgAyADIAMgAyADIAMgAyADIAMgAyADIAMgAyADIAMgAyADIAMgAyADIAMgBIAEgASABeAF4AXgBeAF4AXgBeAF4AXgBeAF4AXgBeAF4AeAB4AIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAiACIAIgAyADIAMgAyADIAMgAyADIANoA2gDaANoA2gDaANoA2gDaANoA2gDaANoA2gDaANoA2gDaANoA2gDaANoA2gDaAPYBNAE0ATQBNAE0ATQBNAE0ATQBNAE0ATQBNAE0ATQBNAE0ATQBNAFsAWwBbAFsAWwBbAFsAWwBbAFsAWwBbAFsAWwBbAFsAWwBbAFsAWwBbAFsAWwBbAFsAWwBmgGaAZoBmgGaAZoB0AHQAdAB0AIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAiQCYgJiAmICYgJiAmICYgKGAoYChgKSAqYCpgKmAqYCpgKmAqYCpgKmAqYCpgKmArICygLKAuIC4gLiAvwC/AL8AvwC/AL8AzQDVgNWA1YDVgNWA1YDVgOGA4YDhgOGA4YDhgOGA4YDhgOGA4YDhgOGA4YDhgOGA4YDhgOGA4YDhgOGA4YDhgOGA4YDvAO8A7wD3gPeA94D3gQgBCAEIAQgBCAEIAQgBCAEPAQ8BDwEPAQ8BFoEWgRaBFoEWgRaBFoEWgRaBFoEWgRaBFoEWgRaBFoEWgRaBFoEdgSuBK4ErgSuBK4E2gT4BPgE+AT4BPgE+AT4BPgE+AUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUOBQ4FDgUiBUwFTAVkBWQFZAVkBWQFmgWaBZoFmgWaBZoFmgWaBZoFmgWaBZoFmgWaBZoFmgWaBZoFmgWaBZoFmgWaBZoFmgWaBbAFvgXmBeYF5gXmBeYF5gXmBeYF5gXmBeYF5gX2BfYF9gX2BfYF9gX2BfYF9gX2BfYGCAYIBhQGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGIgYiBiIGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGTAZMBkwGWgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZmBmYGZgZm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AHIALgBvAC4ASgBlAHQAQgByAGEAaQBuAHMAUABoAGkAbABpAHAAcAAgAE4AdQByAHUAbABsAGkAbgAsACAASwBvAG4AcwB0AGEAbgB0AGkAbgAgAEIAdQBsAGUAbgBrAG8AdgBoAHQAdABwAHMAOgAvAC8AdwB3AHcALgBqAGUAdABiAHIAYQBpAG4AcwAuAGMAbwBtAFQAaABpAHMAIABGAG8AbgB0ACAAUwBvAGYAdAB3AGEAcgBlACAAaQBzACAAbABpAGMAZQBuAHMAZQBkACAAdQBuAGQAZQByACAAdABoAGUAIABTAEkATAAgAE8AcABlAG4AIABGAG8AbgB0ACAATABpAGMAZQBuAHMAZQAsACAAVgBlAHIAcwBpAG8AbgAgADEALgAxAC4AIABUAGgAaQBzACAAbABpAGMAZQBuAHMAZQAgAGkAcwAgAGEAdgBhAGkAbABhAGIAbABlACAAdwBpAHQAaAAgAGEAIABGAEEAUQAgAGEAdAA6ACAAaAB0AHQAcABzADoALwAvAHMAYwByAGkAcAB0AHMALgBzAGkAbAAuAG8AcgBnAC8ATwBGAEwAaAB0AHQAcABzADoALwAvAHMAYwByAGkAcAB0AHMALgBzAGkAbAAuAG8AcgBnAC8ATwBGAEwASgBlAHQAQgByAGEAaQBuAHMATQBvAG4AbwBSAG8AbQBhAG4AVwBlAGkAZwBoAHQAVABoAGkAbgBFAHgAdAByAGEATABpAGcAaAB0AEwAaQBnAGgAdABNAGUAZABpAHUAbQBCAG8AbABkAEUAeAB0AHIAYQBCAG8AbABkAEoAZQB0AEIAcgBhAGkAbgBzAE0AbwBuAG8AUgBvAG0AYQBuAC0AVABoAGkAbgBKAGUAdABCAHIAYQBpAG4AcwBNAG8AbgBvAFIAbwBtAGEAbgAtAEUAeAB0AHIAYQBMAGkAZwBoAHQASgBlAHQAQgByAGEAaQBuAHMATQBvAG4AbwBSAG8AbQBhAG4ALQBMAGkAZwBoAHQASgBlAHQAQgByAGEAaQBuAHMATQBvAG4AbwBSAG8AbQBhAG4ALQBSAGUAZwB1AGwAYQByAEoAZQB0AEIAcgBhAGkAbgBzAE0AbwBuAG8AUgBvAG0AYQBuAC0ATQBlAGQAaQB1AG0ASgBlAHQAQgByAGEAaQBuAHMATQBvAG4AbwBSAG8AbQBhAG4ALQBCAG8AbABkAEoAZQB0AEIAcgBhAGkAbgBzAE0AbwBuAG8AUgBvAG0AYQBuAC0ARQB4AHQAcgBhAEIAbwBsAGQASQB0AGEAbABpAGMAUgBvAG0AYQBuAAMAAAAAAAD/ZQAyAAAAAQAAAAAAAAAAAAAAAAAAAAC4Af+FsASNAA==) format('truetype');font-weight:400;font-style:normal}
 .a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,5%{width:0px}7.593%,100%{width:210px}}
@@ -98,12 +98,12 @@ svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}
   <rect x="34" y="62" width="460" height="310" rx="24" fill="#000" opacity="0.022"/>
   <rect x="40" y="68" width="448" height="298" rx="18" fill="#000" opacity="0.032"/>
   <g class="sans">
-    <rect x="44" y="64" width="440" height="290" rx="12" fill="#1C1C1E" stroke="#3A3A3C"/>
-    <path d="M44 104h440" stroke="#2C2C2E"/>
-    <circle cx="64" cy="84" r="5.5" fill="#FF6961"/>
-    <circle cx="82" cy="84" r="5.5" fill="#FFD60A"/>
-    <circle cx="100" cy="84" r="5.5" fill="#32D74B"/>
-    <text x="264" y="88" font-size="12" text-anchor="middle" fill="#A1A1A6">~/project, zsh</text>
+    <rect x="44" y="64" width="440" height="290" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M44 104h440" stroke="var(--base01)"/>
+    <circle cx="64" cy="84" r="5.5" fill="var(--base08)"/>
+    <circle cx="82" cy="84" r="5.5" fill="var(--base0A)"/>
+    <circle cx="100" cy="84" r="5.5" fill="var(--base0B)"/>
+    <text x="264" y="88" font-size="12" text-anchor="middle" fill="var(--base04)">~/project, zsh</text>
   </g>
   <rect x="498" y="102" width="508" height="432" rx="32" fill="#000" opacity="0.012"/>
   <rect x="506" y="110" width="492" height="416" rx="24" fill="#000" opacity="0.022"/>
@@ -117,108 +117,104 @@ svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}
     <text x="752" y="136" font-size="12" text-anchor="middle" fill="var(--base04)">agent</text>
   </g>
   <g class="a m23">
-    <g class="mono">
-      <g>
-        <g class="a m7">
-          <g>
-            <g clip-path="url(#c1)">
-              <text x="66" y="137.313" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
-              <text x="81" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">npx</text>
-              <text x="111" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">svjeez</text>
-              <text x="163.5" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">skill</text>
-              <text x="208.5" y="137.313" font-family="monospace" font-size="12.5" fill="#E5E5EA">--install</text>
-            </g>
-            <g class="a m4">
-              <rect x="66" y="125.125" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m2"/>
-              <rect x="66" y="125.125" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m3"/>
-            </g>
+    <g>
+      <g class="a m7">
+        <g>
+          <g clip-path="url(#c1)">
+            <text x="66" y="137.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0D)">❯</text>
+            <text x="81" y="137.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">npx</text>
+            <text x="111" y="137.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">svjeez</text>
+            <text x="163.5" y="137.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">skill</text>
+            <text x="208.5" y="137.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">--install</text>
           </g>
-          <g class="a m5">
-            <g>
-              <text x="66" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">installed</text>
-              <text x="141" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">the</text>
-              <text x="171" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">svjeez</text>
-              <text x="223.5" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">skill</text>
-              <text x="268.5" y="159.188" font-family="monospace" font-size="12.5" fill="#7C7C82">in</text>
-            </g>
-          </g>
-          <g class="a m6">
-            <g>
-              <text x="66" y="181.063" font-family="monospace" font-size="12.5" fill="#7C7C82">.claude/skills/svjeez</text>
-            </g>
+          <g class="a m4">
+            <rect x="66" y="125.125" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m2"/>
+            <rect x="66" y="125.125" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m3"/>
           </g>
         </g>
-        <g class="a m12">
+        <g class="a m5">
           <g>
-            <g clip-path="url(#c2)">
-              <text x="66" y="202.938" font-family="monospace" font-size="12.5" fill="#5EA0FF">❯</text>
-              <text x="81" y="202.938" font-family="monospace" font-size="12.5" fill="#E5E5EA">ls</text>
-              <text x="103.5" y="202.938" font-family="monospace" font-size="12.5" fill="#E5E5EA">.claude/skills/svjeez</text>
-            </g>
-            <g class="a m10">
-              <rect x="66" y="190.75" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m2"/>
-              <rect x="66" y="190.75" width="7.5" height="15.625" fill="#E5E5EA" fill-opacity="0.8" class="a m9"/>
-            </g>
+            <text x="66" y="159.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">installed</text>
+            <text x="141" y="159.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">the</text>
+            <text x="171" y="159.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">svjeez</text>
+            <text x="223.5" y="159.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">skill</text>
+            <text x="268.5" y="159.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">in</text>
           </g>
-          <g class="a m11">
-            <g>
-              <text x="66" y="224.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">SKILL.md</text>
-              <text x="141" y="224.813" font-family="monospace" font-size="12.5" fill="#E5E5EA">examples</text>
-            </g>
+        </g>
+        <g class="a m6">
+          <g>
+            <text x="66" y="181.063" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">.claude/skills/svjeez</text>
+          </g>
+        </g>
+      </g>
+      <g class="a m12">
+        <g>
+          <g clip-path="url(#c2)">
+            <text x="66" y="202.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0D)">❯</text>
+            <text x="81" y="202.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">ls</text>
+            <text x="103.5" y="202.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">.claude/skills/svjeez</text>
+          </g>
+          <g class="a m10">
+            <rect x="66" y="190.75" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m2"/>
+            <rect x="66" y="190.75" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m9"/>
+          </g>
+        </g>
+        <g class="a m11">
+          <g>
+            <text x="66" y="224.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">SKILL.md</text>
+            <text x="141" y="224.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">examples</text>
           </g>
         </g>
       </g>
     </g>
-    <g class="mono">
-      <g>
-        <g class="a m13">
-          <text x="536" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base0D)">you</text>
-          <text x="581" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">make</text>
-          <text x="618.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">a</text>
-          <text x="633.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loading</text>
-          <text x="693.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner</text>
-          <text x="753.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">svg,</text>
-          <text x="791" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
-          <text x="813.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
-        </g>
-        <g class="a m14"/>
-        <g class="a m15">
-          <text x="536" y="234.188" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="551" y="234.188" font-family="monospace" font-size="12.5" fill="var(--base0E)">read</text>
-          <text x="596" y="234.188" font-family="monospace" font-size="12.5" fill="var(--base05)">.claude/skills/svjeez/SKILL.md</text>
-        </g>
-        <g class="a m16">
-          <text x="536" y="257.313" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="551" y="257.313" font-family="monospace" font-size="12.5" fill="var(--base0E)">write</text>
-          <text x="596" y="257.313" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
-        </g>
-        <g class="a m17">
-          <text x="536" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="551" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base0E)">run</text>
-          <text x="596" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">svjeez</text>
-          <text x="648.5" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">frames</text>
-          <text x="701" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
-          <text x="791" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">--sheet</text>
-        </g>
-        <g class="a m18">
-          <text x="536" y="303.563" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="551" y="303.563" font-family="monospace" font-size="12.5" fill="var(--base0E)">look</text>
-          <text x="596" y="303.563" font-family="monospace" font-size="12.5" fill="var(--base05)">frames/sheet.png</text>
-        </g>
-        <g class="a m19"/>
-        <g class="a m20">
-          <text x="536" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base0B)">✓</text>
-          <text x="551" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">The</text>
-          <text x="581" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">arc</text>
-          <text x="611" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">closes</text>
-          <text x="663.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">at</text>
-          <text x="686" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
-          <text x="708.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">and</text>
-          <text x="738.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">the</text>
-          <text x="768.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
-          <text x="806" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">is</text>
-          <text x="828.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">seamless.</text>
-        </g>
+    <g>
+      <g class="a m13">
+        <text x="536" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0D)">you</text>
+        <text x="581" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">make</text>
+        <text x="618.5" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">a</text>
+        <text x="633.5" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">loading</text>
+        <text x="693.5" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">spinner</text>
+        <text x="753.5" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">svg,</text>
+        <text x="791" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">2s</text>
+        <text x="813.5" y="187.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">loop</text>
+      </g>
+      <g class="a m14"/>
+      <g class="a m15">
+        <text x="536" y="234.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">▸</text>
+        <text x="551" y="234.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0E)">read</text>
+        <text x="596" y="234.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">.claude/skills/svjeez/SKILL.md</text>
+      </g>
+      <g class="a m16">
+        <text x="536" y="257.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">▸</text>
+        <text x="551" y="257.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0E)">write</text>
+        <text x="596" y="257.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
+      </g>
+      <g class="a m17">
+        <text x="536" y="280.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">▸</text>
+        <text x="551" y="280.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0E)">run</text>
+        <text x="596" y="280.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">svjeez</text>
+        <text x="648.5" y="280.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">frames</text>
+        <text x="701" y="280.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
+        <text x="791" y="280.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">--sheet</text>
+      </g>
+      <g class="a m18">
+        <text x="536" y="303.563" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">▸</text>
+        <text x="551" y="303.563" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0E)">look</text>
+        <text x="596" y="303.563" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">frames/sheet.png</text>
+      </g>
+      <g class="a m19"/>
+      <g class="a m20">
+        <text x="536" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0B)">✓</text>
+        <text x="551" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">The</text>
+        <text x="581" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">arc</text>
+        <text x="611" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">closes</text>
+        <text x="663.5" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">at</text>
+        <text x="686" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">2s</text>
+        <text x="708.5" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">and</text>
+        <text x="738.5" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">the</text>
+        <text x="768.5" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">loop</text>
+        <text x="806" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">is</text>
+        <text x="828.5" y="349.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">seamless.</text>
       </g>
     </g>
     <g class="a m22 fb">

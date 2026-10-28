@@ -1,16 +1,12 @@
 import { Glyphs, Ink, def, draw, ease, enter, font, motion, render, sampled, strokeFont, tool, type Child } from "svjeez";
 import { Marker, code, flow, flowchart, morph, typewriter, type CodeRun, type CodeTokens } from "svjeez/extras";
-import { CSS, theme } from "./kit";
+import { css, mono, theme } from "../style";
 
 const W = 960;
 const H = 540;
 const D = 12;
 
 const display = await font.load(new URL("../fonts/ArchivoBlack-Regular.ttf", import.meta.url));
-const mono = await font.load(new URL("../fonts/JetBrainsMono.ttf", import.meta.url), {
-  fallback: ["ui-monospace", "Menlo", "monospace"],
-  ligatures: false,
-});
 const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
 
 const kw = (text: string): CodeRun => ["keyword", text];
@@ -107,7 +103,7 @@ const header = (
     <g animation={rise(0.4, 0.4, 8)}>
       <rect x={PILL_X} y={PILL_Y} width={PILL_W} height={PILL_H} rx={PILL_H / 2} fill={theme.base01} stroke={theme.base02} />
     </g>
-    <g class="mono">{typedCmd.node}</g>
+    {typedCmd.node}
 
     {BADGES.map((b, i) => {
       const bw = badgeWidths[i]!;
@@ -154,10 +150,10 @@ const Card = ({
     <g animation={rise(at, 0.45, 14)}>
       <rect x={x} y={y} width={w} height={h} rx={12} fill={theme.base01} stroke={theme.base02} />
       <path d={`M${x} ${y + 32}H${x + w}`} stroke={theme.base02} />
-      <text x={x + 16} y={y + 21} class="mono" fontSize={11} fontWeight={600} fill={theme.base04}>
+      <text x={x + 16} y={y + 21} fontFamily={mono} fontSize={11} fontWeight={600} fill={theme.base04}>
         {tag}
       </text>
-      <text x={x + w - 16} y={y + 21} class="mono" fontSize={11} textAnchor="end" fill={theme.base09}>
+      <text x={x + w - 16} y={y + 21} fontFamily={mono} fontSize={11} textAnchor="end" fill={theme.base09}>
         {api}
       </text>
       <g clipPath={inner}>{children}</g>
@@ -200,7 +196,7 @@ const q1 = (
         { during: { at: 8.9, over: 2.3 }, target: beforeCode.get("ret").pad(4) },
       ]}
     />
-    <g class="mono">{morphed.node}</g>
+    {morphed.node}
   </Card>
 );
 
@@ -291,7 +287,7 @@ const q3 = (
       draw={{ at: inkDone + 0.15, over: 0.55 }}
     />
     <g animation={rise(inkDone + 0.4, 0.4, 6)}>
-      <text x={Q3.x + Q3.w / 2} y={Q3.y + 168} class="mono" fontSize={11.5} textAnchor="middle" fill={theme.base04}>
+      <text x={Q3.x + Q3.w / 2} y={Q3.y + 168} fontFamily={mono} fontSize={11.5} textAnchor="middle" fill={theme.base04}>
         pressure-varied nib, brush &amp; pen strokes · subsetted TTF/OTF
       </text>
     </g>
@@ -360,7 +356,7 @@ const q4 = (
       <circle r={8} fill={theme.base09} opacity={0.22} />
       <circle r={4} fill={theme.base09} />
     </g>
-    <text x={SPRING.plotX + SPRING.plotW} y={Q4.y + 172} class="mono" fontSize={10.5} textAnchor="end" fill={theme.base04}>
+    <text x={SPRING.plotX + SPRING.plotW} y={Q4.y + 172} fontFamily={mono} fontSize={10.5} textAnchor="end" fill={theme.base04}>
       RDP keyframe simplification
     </text>
   </Card>
@@ -374,7 +370,7 @@ export default function build(): string {
       duration: D,
       title: "svjeez: animated SVGs in TSX",
       desc: "The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a damped spring physics simulation plotted in real time.",
-      css: CSS,
+      css,
       reducedMotion: { at: 9.5 },
     },
     <>

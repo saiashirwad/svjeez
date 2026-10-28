@@ -1,12 +1,12 @@
 import { rect, render } from "svjeez";
-import { adaptive, terminal, systemLight, systemDark, appWindow } from "svjeez/extras";
+import { terminal, appWindow } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
 const W = 960;
 const H = 440;
 
-const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const frame = rect(80, 50, 800, 340);
-const shell = appWindow(frame, { theme, title: "~/hello", dots: "traffic", class: "mono" });
+const shell = appWindow(frame, { theme, title: "~/hello", dots: "traffic" });
 
 const session = terminal(
   [
@@ -20,7 +20,7 @@ const session = terminal(
     },
     { cmd: "open dist/explainer.svg" },
   ],
-  { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 16, lineHeight: 1.75 },
+  { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 16, lineHeight: 1.75, font: mono },
 );
 
 export default function build(): string {
@@ -32,12 +32,12 @@ export default function build(): string {
       desc: "Installing svjeez and building the examples, typed out in a terminal that follows the viewer's light or dark mode.",
       duration: session.end + 2,
       reducedMotion: { at: session.end + 1 },
-      css: [css, ".mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}"].join("\n"),
+      css,
     },
     <>
       <rect width={W} height={H} fill={theme.base00} />
-      {shell.node}
-      <g class="mono">{session.node}</g>
+      <g fontFamily={mono}>{shell.node}</g>
+      {session.node}
     </>,
   );
 }

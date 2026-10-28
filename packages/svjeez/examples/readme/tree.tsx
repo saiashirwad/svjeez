@@ -1,6 +1,6 @@
 import { render } from "svjeez";
 import { travel, tree } from "svjeez/extras";
-import { CSS, theme, mono } from "./kit";
+import { css, mono, theme } from "../style";
 
 const M = 24;
 const team = tree(
@@ -10,7 +10,7 @@ const team = tree(
 
 export default function build(): string {
   return render(
-    { width: team.bounds.w + 2 * M, height: team.bounds.h + 2 * M, duration: 5, title: "Tree", desc: "A lead with two children revealed level by level, then a dot runs from Search up to Lead and down to Build.", css: CSS, reducedMotion: { at: 4 } },
+    { width: team.bounds.w + 2 * M, height: team.bounds.h + 2 * M, duration: 5, title: "Tree", desc: "A lead with two children revealed level by level, then a dot runs from Search up to Lead and down to Build.", css, reducedMotion: { at: 4 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       {team.node}

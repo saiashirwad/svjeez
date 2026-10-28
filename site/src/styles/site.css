@@ -20,7 +20,7 @@
 
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --mono: var(--font-mono), ui-monospace, monospace;
 
   --gutter: clamp(1rem, 4vw, 2rem);
   --content: 66rem;
@@ -137,22 +137,11 @@ figure h3 + p { margin-block-start: 0.35rem; color: var(--muted); font-size: 0.9
 .tint { margin-block-start: clamp(2.5rem, 7vw, 5.5rem); padding-block-end: clamp(3rem, 7vw, 5.5rem); background: var(--band) }
 .tint .sec { margin-block-start: 0; padding-block-start: clamp(3rem, 7vw, 5.5rem); border-block-start: 0 }
 
-pre.code { margin: 0; padding: 1rem 1.2rem; overflow-x: auto; background: var(--sunken); border-radius: 0.75rem; font-size: 0.8125rem; line-height: 1.7; tab-size: 2; box-shadow: 0 0 0 1px var(--line) }
+pre.code { margin: 0; padding: 1rem 1.2rem; overflow-x: auto; background: var(--pre-bg); border-radius: 0.75rem; font-size: 0.8125rem; line-height: 1.7; tab-size: 2; box-shadow: 0 0 0 1px var(--line) }
 @media (max-width: 30em) { pre.code { font-size: 0.71875rem } }
-/* Code blocks are Astro's <Code> with Shiki's css-variables theme, colored here. */
-pre.code {
-  --astro-code-foreground: var(--ink);
-  --astro-code-background: var(--sunken);
-  --astro-code-token-keyword: light-dark(oklch(52% 0.2 305), oklch(76% 0.14 305));
-  --astro-code-token-function: light-dark(oklch(50% 0.17 258), oklch(78% 0.11 252));
-  --astro-code-token-string: light-dark(oklch(50% 0.14 150), oklch(80% 0.14 150));
-  --astro-code-token-string-expression: var(--astro-code-token-string);
-  --astro-code-token-constant: light-dark(oklch(60% 0.17 50), oklch(80% 0.13 60));
-  --astro-code-token-comment: var(--muted);
-  --astro-code-token-parameter: var(--ink);
-  --astro-code-token-punctuation: var(--ink);
-  --astro-code-token-link: var(--ink);
-}
+/* Code blocks are Astro's <Code> with the theme in styles/code.ts, colored by the --code-* palette the scenes share. */
+pre.code { --pre-bg: var(--sunken); font-variant-ligatures: none }
+.pg-body pre.code { --pre-bg: transparent }
 
 /* The playground block: a window on the grid like every other. The embed fills it once it loads; until then a static editor and preview stand in. */
 .playground { display: grid; min-block-size: 34.5rem }
@@ -166,7 +155,7 @@ pre.code {
 .pg-bar i { inline-size: 0.6875rem; block-size: 0.6875rem; border-radius: 50%; background: var(--line) }
 .pg-body { display: grid; grid-template-columns: minmax(0, 1fr); min-block-size: 0 }
 @media (min-width: 56rem) { .pg-body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) } .pg-view { border-inline-start: 1px solid var(--line) } }
-.pg-body pre.code { --astro-code-background: transparent; border-radius: 0; box-shadow: none; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
+.pg-body pre.code { border-radius: 0; box-shadow: none; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
 .pg-view { display: grid; place-items: center; padding: 1.5rem }
 .pg-view .scene { inline-size: min(100%, 28rem) }
 

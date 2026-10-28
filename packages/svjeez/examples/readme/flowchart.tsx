@@ -1,6 +1,6 @@
 import { render } from "svjeez";
 import { flow, flowchart } from "svjeez/extras";
-import { CSS, theme, mono } from "./kit";
+import { css, mono, theme } from "../style";
 
 const M = 24;
 const chart = flowchart(
@@ -15,7 +15,7 @@ const trip = flow(chart.route("pr", "post"), { at: 4, style: "trace", arrive: tr
 
 export default function build(): string {
   return render(
-    { width: chart.bounds.w + 2 * M, height: chart.bounds.h + 2 * M, duration: Math.ceil(trip.end) + 2, title: "Flowchart", desc: "A review flowchart revealed rank by rank, then a trace runs from the opened PR to the posted review.", css: CSS, reducedMotion: { at: 3.5 } },
+    { width: chart.bounds.w + 2 * M, height: chart.bounds.h + 2 * M, duration: Math.ceil(trip.end) + 2, title: "Flowchart", desc: "A review flowchart revealed rank by rank, then a trace runs from the opened PR to the posted review.", css, reducedMotion: { at: 3.5 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       {chart.layers.under}

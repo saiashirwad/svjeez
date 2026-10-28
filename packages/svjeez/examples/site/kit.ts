@@ -1,23 +1,12 @@
 import { el, motion, rect, type Color, type SvgNode } from "svjeez";
-import { adaptive, appWindow, base16, systemDark, systemLight, type Base16, type CodePiece, type CodeTokens } from "svjeez/extras";
+import { appWindow, type CodePiece, type CodeTokens } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
-// One calm palette for every scene on the site: white and system gray by day, near-black by night.
-// Accents follow the system colors, so the traffic lights double as the code colors.
-export const { theme, css: themeCss } = adaptive({
-  light: systemLight,
-  dark: systemDark,
-});
-
-/** A terminal stays dark in both schemes, like the real one. */
-export const termTheme = base16("#1C1C1E", "#2C2C2E", "#3A3A3C", "#7C7C82", "#A1A1A6", "#E5E5EA", "#F5F5F7", "#FFFFFF", "#FF6961", "#FF9F0A", "#FFD60A", "#32D74B", "#64D2FF", "#5EA0FF", "#C58AFF", "#AC8E68");
-
-const MONO = "ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace";
 const SANS = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif";
 const ROUND = "ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif";
 
 export const CSS = [
-  themeCss,
-  `.mono,.mono text{font-family:${MONO};font-variant-ligatures:none}`,
+  css,
   `.sans text,.sans{font-family:${SANS}}`,
   `.round text,.round{font-family:${ROUND};font-variant-numeric:tabular-nums}`,
 ].join("\n");
@@ -49,9 +38,11 @@ export const highlight = (source: string): CodeTokens =>
     }),
   );
 
-/** The window every card shares: traffic lights and a title bar. The page adds the shadow, so the canvas stays transparent around it. */
-export const chrome = (w: number, h: number, title: string, options: { theme?: Base16; bar?: number; mono?: boolean } = {}) =>
-  appWindow(rect(0.5, 0.5, w - 1, h - 1), { theme: options.theme ?? theme, title, dots: "traffic", bar: options.bar ?? 40, radius: 12, class: options.mono ? "mono" : "sans" });
+/** The window every card shares: traffic lights and a title bar. The page adds the shadow, so the canvas stays transparent around it. A `mono` title names a file or a shell. */
+export const chrome = (w: number, h: number, title: string, options: { bar?: number; mono?: boolean } = {}) => {
+  const win = appWindow(rect(0.5, 0.5, w - 1, h - 1), { theme, title, dots: "traffic", bar: options.bar ?? 40, radius: 12, class: options.mono ? undefined : "sans" });
+  return options.mono ? { ...win, node: el.g({ fontFamily: mono }, [win.node]) } : win;
+};
 
 /** Fade everything out just before the loop restarts, so the jump back to the first frame is not seen. */
 export const outro = (duration: number) => motion({ opacity: 1 }).at(duration - 0.5).to({ opacity: 0 }, 0.5);

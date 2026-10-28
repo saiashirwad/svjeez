@@ -1,6 +1,6 @@
 import { render } from "svjeez";
 import { lanes } from "svjeez/extras";
-import { CSS, theme, mono } from "./kit";
+import { css, mono, theme } from "../style";
 
 const M = 24;
 const run = lanes(
@@ -10,7 +10,7 @@ const run = lanes(
 
 export default function build(): string {
   return render(
-    { width: run.bounds.w + 2 * M, height: run.bounds.h + 2 * M, duration: 6, title: "Lanes", desc: "Two lanes on a time axis: the lead hands off to build, which edits for three seconds and runs a test.", css: CSS, reducedMotion: { at: 4.5 } },
+    { width: run.bounds.w + 2 * M, height: run.bounds.h + 2 * M, duration: 6, title: "Lanes", desc: "Two lanes on a time axis: the lead hands off to build, which edits for three seconds and runs a test.", css, reducedMotion: { at: 4.5 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       {run.node}

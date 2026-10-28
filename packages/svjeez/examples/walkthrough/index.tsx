@@ -1,10 +1,10 @@
 import { def, rect, render } from "svjeez";
-import { Arrow, Callout, Camera, Focus, adaptive, code, during, readingTime, timeline, systemLight, systemDark, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { Arrow, Callout, Camera, Focus, code, during, readingTime, timeline, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
 const W = 1000;
 const H = 620;
 
-const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 
 const kw = (text: string): CodeRun => ["keyword", text];
 const fn = (text: string, id?: string): CodeRun => ["fn", text, id];
@@ -51,9 +51,9 @@ const tl = timeline(
 );
 
 const frame = rect(60, 40, 880, 500);
-const editor = appWindow(frame, { theme, title: "server.ts", class: "mono" });
+const editor = appWindow(frame, { theme, title: "server.ts" });
 const view = rect(editor.body.x, editor.body.y, editor.body.w, editor.body.h);
-const src = code(source, { x: view.x + 24, y: view.y + 16, fontSize: 13, lineHeight: 1.55, theme, gutter: true });
+const src = code(source, { x: view.x + 24, y: view.y + 16, fontSize: 13, lineHeight: 1.55, theme, font: mono, gutter: true });
 /** A view as wide as the code plus margins, so every stop zooms the same and only the pan changes. */
 const lines = (a: number, b: number) => rect(src.bounds.x - 110, src.lines(a, b).y, src.bounds.w + 220, src.lines(a, b).h);
 /** Out past the end of a line, so call-to-definition arrows bow through the margin. */
@@ -71,13 +71,12 @@ export default function build(): string {
       reducedMotion: { at: tl.auth.at + 2 },
       css: [
         css,
-        ".mono,.mono text,.code text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}",
         ".sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}",
       ].join("\n"),
     },
     <>
       <rect width={W} height={H} fill={theme.base00} />
-      {editor.node}
+      <g fontFamily={mono}>{editor.node}</g>
       <g clipPath={clip}>
         <Camera
           frame={view}
@@ -98,7 +97,7 @@ export default function build(): string {
               { during: tl.respond, target: [src.lines(8).pad(2), src.lines(21, 23).pad(2)] },
             ]}
           >
-            <g class="code">{src.node}</g>
+            {src.node}
           </Focus>
           <g class="note">
             <Arrow from={src.get("entry").bottom} to={src.lines(5).top} bend={0.4} during={tl.handle} color={theme.base0A} />

@@ -1,6 +1,7 @@
 import { ease, enter, motion, render } from "svjeez";
 import { Marker, code } from "svjeez/extras";
-import { CSS, chrome, highlight, outro, theme } from "./kit";
+import { CSS, chrome, highlight, outro } from "./kit";
+import { mono, theme } from "../style";
 
 // A motion() chain on the left, the same chain drawn as tracks on the right, and a square that obeys it.
 // `tall` stacks the three for a phone: the chain, the square, then the tracks.
@@ -26,7 +27,7 @@ const W = tall ? 358 : 1032;
 const H = tall ? 504 : 420;
 const SPLIT = 452;
 const win = chrome(W, H, "motion.ts");
-const src = code(highlight(shown), tall ? { theme, fontSize: 12.5, lineHeight: 1.9, x: 22, y: BAR + 18 } : { theme, fontSize: 14, lineHeight: 1.9, x: 28, y: BAR + 28 });
+const src = code(highlight(shown), tall ? { theme, font: mono, fontSize: 12.5, lineHeight: 1.9, x: 22, y: BAR + 18 } : { theme, font: mono, fontSize: 14, lineHeight: 1.9, x: 28, y: BAR + 28 });
 const panel = tall ? { x: 20, y: 214, w: 318, h: 96 } : { x: SPLIT + 24, y: BAR + 22, w: W - SPLIT - 48, h: 132 };
 const labelY = tall ? 342 : BAR + 186;
 const lineTop = labelY + 6;
@@ -64,7 +65,7 @@ const rowY = (i: number) => rowY0 + i * gap;
     <>
       {win.node}
       <path d={tall ? `M0 ${BAR + 172}H${W}` : `M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
-      <g class="mono" animation={outro(D)}>
+      <g animation={outro(D)}>
         <g animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
         <Marker theme={theme} stops={lit} color={theme.base0D} />
       </g>

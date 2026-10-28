@@ -2,7 +2,6 @@ import { def, ease, motion, rect, render } from "svjeez";
 import {
   Callout,
   Focus,
-  adaptive,
   code,
   during,
   flow,
@@ -12,8 +11,6 @@ import {
   sequence,
   stateMachine,
   timeline,
-  tomorrow,
-  tomorrowNight,
   reveal,
   visible,
   appWindow,
@@ -21,10 +18,10 @@ import {
   type CodeRole,
   type CodeTokens,
 } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
 const W = 1280;
 const H = 720;
-const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 
 /** Just enough TypeScript highlighting for the slides. `«id:text»` names a run. */
 const highlight = (source: string): CodeTokens =>
@@ -92,8 +89,8 @@ const Heading = ({ scene, children }: { readonly scene: keyof typeof scenes; rea
 // --- code: the skeleton, then each member a block at a time, then its two halves called out
 const TOP = 110;
 const BAR_H = 40;
-const listing = (source: string) => code(highlight(source), { x: 88, y: TOP + BAR_H + 14, fontSize: 13, lineHeight: 1.4, theme, gutter: true });
-const editorFor = (c: ReturnType<typeof code>) => appWindow(rect(64, TOP, 760, c.bounds.y + c.bounds.h + 16 - TOP), { theme, title: "breaker.ts", bar: BAR_H, class: "mono" });
+const listing = (source: string) => code(highlight(source), { x: 88, y: TOP + BAR_H + 14, fontSize: 13, lineHeight: 1.4, theme, font: mono, gutter: true });
+const editorFor = (c: ReturnType<typeof code>) => appWindow(rect(64, TOP, 760, c.bounds.y + c.bounds.h + 16 - TOP), { theme, title: "breaker.ts", bar: BAR_H });
 const source = listing(v1);
 const editor = editorFor(source);
 const beat = timeline({ build: 3.8, guard: 3, trip: 3 }, { at: tl.code.at + 0.6, gap: 0.2 });
@@ -114,7 +111,7 @@ const machineSpec = {
     ["half", "open", "failure"],
   ],
 } as const;
-const machine = stateMachine(machineSpec, { theme, fontSize: 15, class: "mono", x: 820, y: 130, anchor: "top" });
+const machine = stateMachine(machineSpec, { theme, fontSize: 15, font: mono, x: 820, y: 130, anchor: "top" });
 const walk = machine.walk(["closed", "open", "half", "open", "half", "closed"], { at: tl.machine.at + 0.8, dwell: 0.9, token: { style: "comet" } });
 
 // --- together: a sequence on the left, the machine beside it lighting as messages land
@@ -138,14 +135,14 @@ const story = sequence(
   {
     theme,
     fontSize: 14,
-    class: "mono",
+    font: mono,
     x: 64,
     y: 120,
     /** The wait before the probe gets its own pause. */
     play: { at: [0, 1, 2, 3, 4.4, 5.4, 6.6, 8.6, 9.6, 10.6, 11.6].map((t) => tl.together.at + 0.6 + t) },
   },
 );
-const mini = stateMachine(machineSpec, { theme, fontSize: 14, class: "mono", x: 760, y: 150 });
+const mini = stateMachine(machineSpec, { theme, fontSize: 14, font: mono, x: 760, y: 150 });
 const msg = (i: number) => story.message(i).span.at;
 const synced = mini.walk(["closed", "open", "half", "closed"], { at: [tl.together.at, msg(3), msg(7), msg(10)], dwell: tl.together.at + tl.together.over - msg(10) });
 
@@ -180,7 +177,7 @@ const clock = lanes(
       { from: "breaker", to: "client", at: 6.9 },
     ],
   },
-  { theme, fontSize: 14, class: "mono", scale: 120, x: 64, y: 170, play: { at: zero } },
+  { theme, fontSize: 14, font: mono, scale: 120, x: 64, y: 170, play: { at: zero } },
 );
 const captions = [
   [0, 3, "Closed: every call waits out the timeout."],
@@ -215,7 +212,7 @@ const recapSpec = {
       ["run", "count", { label: "threw" }],
     ],
 } as const;
-const decide = flowchart(recapSpec, { theme, fontSize: 14, class: "mono", x: W / 2, y: (STAGE.h + 40) / 2, anchor: "center", direction: "LR", play: { at: tl.recap.at + 0.3, step: 0.25 } });
+const decide = flowchart(recapSpec, { theme, fontSize: 14, font: mono, x: W / 2, y: (STAGE.h + 40) / 2, anchor: "center", direction: "LR", play: { at: tl.recap.at + 0.3, step: 0.25 } });
 const trips = [
   flow(decide.route("call", "fail"), { at: tl.recap.at + 2.6, over: 1.8, style: "packet", label: "call()", color: theme.base08, arrive: true }),
   flow(decide.route("call", "ok"), { at: tl.recap.at + 4.8, over: 1.8, style: "trace", color: theme.base0B, arrive: true }),
@@ -241,7 +238,6 @@ export default function build(): string {
       reducedMotion: { at: tl.together.at + tl.together.over - 1 },
       css: [
         css,
-        ".mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace;font-variant-ligatures:none}",
         ".sans,.sans text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}",
       ].join("\n"),
     },
@@ -260,7 +256,7 @@ export default function build(): string {
 
       <Heading scene="code">The whole thing is one class</Heading>
       <g animation={tl.show("code")}>
-        {editor.node}
+        <g fontFamily={mono}>{editor.node}</g>
         <g clipPath={clip}>
           <Focus
             dim={0.3}
@@ -269,7 +265,7 @@ export default function build(): string {
               { during: beat.trip, target: [source.lines(15, 18).pad(2), source.lines(21, 24).pad(2)] },
             ]}
           >
-            <g class="mono">{shown.node}</g>
+            {shown.node}
           </Focus>
         </g>
         <g class="sans">
@@ -314,8 +310,8 @@ export default function build(): string {
 
       <Heading scene="backoff">Backoff is a two-line change</Heading>
       <g animation={tl.show("backoff")}>
-        {editorFor(after).node}
-        <g class="mono">{morphed.node}</g>
+        <g fontFamily={mono}>{editorFor(after).node}</g>
+        {morphed.node}
         <g class="sans">
           <Callout target={after.get("wait")} side="right" during={{ at: change + 1.3, over: 4 }} color={theme.base0B} fontSize={14} columns={22}>
             Each trip waits longer than the last.

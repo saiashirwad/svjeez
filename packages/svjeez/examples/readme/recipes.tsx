@@ -1,5 +1,5 @@
 import { draw, enter, exit, render, shake, wiggle, type Child } from "svjeez";
-import { CSS, theme } from "./kit";
+import { css, mono, theme } from "../style";
 
 const W = 600;
 const D = 5;
@@ -14,7 +14,7 @@ const tiles: [string, (cx: number) => Child][] = [
 
 export default function build(): string {
   return render(
-    { width: W, height: 110, duration: D, title: "Recipes", desc: "Six shapes showing enter, enter from a blur, exit, draw, shake and wiggle.", css: CSS, reducedMotion: { at: 2.5 } },
+    { width: W, height: 110, duration: D, title: "Recipes", desc: "Six shapes showing enter, enter from a blur, exit, draw, shake and wiggle.", css, reducedMotion: { at: 2.5 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       {tiles.map(([label, shape], i) => {
@@ -22,7 +22,7 @@ export default function build(): string {
         return (
           <>
             {shape(cx)}
-            <text x={cx} y={98} class="mono" fontSize={11} fill={theme.base04} textAnchor="middle">
+            <text x={cx} y={98} fontFamily={mono} fontSize={11} fill={theme.base04} textAnchor="middle">
               {label}
             </text>
           </>

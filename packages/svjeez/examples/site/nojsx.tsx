@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { draw, ease, enter, render } from "svjeez";
 import { Marker, code } from "svjeez/extras";
-import { CSS, chrome, highlight, outro, theme } from "./kit";
+import { CSS, chrome, highlight, outro } from "./kit";
+import { mono, theme } from "../style";
 
 // Without JSX: the same scene built from el() calls, shown from the real file so it type-checks.
 const BAR = 40;
@@ -18,7 +19,7 @@ export const make = (tall = false): string => {
   const win = chrome(W, H, "plain.ts");
   const full = read(tall ? "./plain-narrow.ts" : "./plain.ts").split("\n");
   const lines = tall ? full.slice(full.findIndex((l) => l.startsWith("    g({}")) ).map((l) => l.slice(4)) : full;
-  const src = code(highlight(lines.join("\n")), tall ? { theme, fontSize: 12, lineHeight: 1.7, x: 22, y: BAR + 16 } : { theme, fontSize: 12, lineHeight: 1.75, x: 28, y: BAR + 22 });
+  const src = code(highlight(lines.join("\n")), tall ? { theme, font: mono, fontSize: 12, lineHeight: 1.7, x: 22, y: BAR + 16 } : { theme, font: mono, fontSize: 12, lineHeight: 1.75, x: 28, y: BAR + 22 });
   const lit = tall
     ? [
         { during: { at: T0 + 0.2, over: 1.4 }, target: src.lines(2, 8).pad(3) },
@@ -45,10 +46,8 @@ export const make = (tall = false): string => {
       {win.node}
       <path d={tall ? `M0 ${panel.y - 10}H${W}` : `M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
       <g animation={outro(D)}>
-        <g class="mono">
-          <g animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
-          <Marker theme={theme} stops={lit} color={theme.base0D} />
-        </g>
+        <g animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
+        <Marker theme={theme} stops={lit} color={theme.base0D} />
         <g animation={enter({ at: T0, over: 0.5 }, { opacity: 0, y: 8 })}>
           <rect x={panel.x} y={panel.y} width={panel.w} height={panel.h} rx={12} fill={theme.base01} />
           <g transform={`translate(${panel.x + (panel.w - 120 * scale) / 2} ${panel.y + (panel.h - 80 * scale) / 2}) scale(${scale})`}>

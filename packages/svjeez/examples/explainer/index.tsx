@@ -1,10 +1,10 @@
 import { draw, ease, motion, rect, render } from "svjeez";
-import { Arrow, Brace, Focus, Marker, Underline, adaptive, code, morph, systemDark, systemLight, timeline, tint, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { Arrow, Brace, Focus, Marker, Underline, code, morph, timeline, tint, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
 const W = 1200;
 const H = 550;
 
-const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const C = { bg: theme.base00, head: theme.base06, body: theme.base04, accent: tint(theme, "fn"), dim: theme.base03 } as const;
 
 const tl = timeline({ setup: 4.5, problem: 5, refactor: 5, result: 6, rewind: 1.4 }, { gap: 0.6 });
@@ -46,8 +46,8 @@ const after: CodeTokens = [
 ];
 
 const frame = rect(40, 40, 700, 470);
-const editor = appWindow(frame, { theme, title: "Counter.tsx", class: "mono" });
-const settings = { x: 104, y: editor.body.y + 28, fontSize: 16, lineHeight: 1.75, theme };
+const editor = appWindow(frame, { theme, title: "Counter.tsx" });
+const settings = { x: 104, y: editor.body.y + 28, fontSize: 16, lineHeight: 1.75, theme, font: mono };
 const one = code(before, settings);
 const two = code(after, settings);
 const m = morph([one, two, one], { at: [tl.refactor.at, tl.rewind.at], over: 0.9, gutter: true });
@@ -84,7 +84,7 @@ const slide = (name: (typeof slides)[number]) => {
   const bodyTop = headTop + head.length * 36 + 22;
   return (
     <g animation={motion({ opacity: 0, y: 10 }).at(at).to({ opacity: 1, y: 0 }, fade).at(at + over - 0.3).to({ opacity: 0, y: -6 }, 0.3, ease.in)}>
-      <text x={panel.x} y={190} class="mono" fontSize={11} letterSpacing={2.2} fill={C.accent}>
+      <text x={panel.x} y={190} fontFamily={mono} fontSize={11} letterSpacing={2.2} fill={C.accent}>
         {kicker}
       </text>
       {head.map((line, i) => (
@@ -138,14 +138,13 @@ export default function build(): string {
       reducedMotion: { at: tl.result.at + 2 },
       css: [
         css,
-        ".mono,.code text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}",
         ".sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}",
       ].join("\n"),
     },
     <>
       <rect width={W} height={H} fill={C.bg} />
 
-      {editor.node}
+      <g fontFamily={mono}>{editor.node}</g>
 
       <Focus stops={[{ during: tl.problem, target: rect(frame.x, one.lines(5).y, frame.w, one.lines(5).h) }]} dim={0.28}>
         <Marker
@@ -158,7 +157,7 @@ export default function build(): string {
             { during: tl.rewind, target: one.lines(2).pad(5) },
           ]}
         />
-        <g class="code">{m.node}</g>
+        {m.node}
       </Focus>
 
       <g class="note">
@@ -170,7 +169,7 @@ export default function build(): string {
         <Arrow from={two.get("send").bottom} to={two.get("def").top} bend={0.35} during={tl.result} color={C.accent} />
       </g>
 
-      <text x={panel.x} y={98} class="mono" fontSize={11} letterSpacing={2.2} fill={C.dim}>
+      <text x={panel.x} y={98} fontFamily={mono} fontSize={11} letterSpacing={2.2} fill={C.dim}>
         REACT · REFACTOR
       </text>
       <text x={panel.x} y={124} class="sans" fontSize={15} fill={C.body}>

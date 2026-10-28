@@ -1,11 +1,12 @@
 import { render } from "svjeez";
 import { terminal } from "svjeez/extras";
-import { CSS, chrome, outro, termTheme } from "./kit";
+import { CSS, chrome, outro } from "./kit";
+import { mono, theme } from "../style";
 
 const W = 504;
 const H = 340;
 const BAR = 40;
-const win = chrome(W, H, "~/hello, zsh", { theme: termTheme, mono: true });
+const win = chrome(W, H, "~/hello, zsh", { mono: true });
 
 const session = terminal(
   [
@@ -16,7 +17,7 @@ const session = terminal(
     { cmd: "npx svjeez svg hello.tsx --out hello.svg" },
     { cmd: "npx svjeez skill --install", output: [[["muted", "installed the svjeez skill in .claude/skills/svjeez"]]] },
   ],
-  { theme: termTheme, x: 24, y: BAR + 22, fontSize: 12.5, lineHeight: 1.75, cps: 90, gap: 0.35 },
+  { theme, font: mono, x: 24, y: BAR + 22, fontSize: 12.5, lineHeight: 1.75, cps: 90, gap: 0.35 },
 );
 const D = Math.ceil(session.end) + 3;
 
@@ -33,7 +34,7 @@ export default function build(): string {
     },
     <>
       {win.node}
-      <g class="mono" animation={outro(D)}>{session.node}</g>
+      <g animation={outro(D)}>{session.node}</g>
     </>,
   );
 }

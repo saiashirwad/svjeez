@@ -1,8 +1,7 @@
 import { render } from "svjeez";
-import { adaptive, sequence, systemLight, systemDark, travel } from "svjeez/extras";
-import { mono } from "../fonts/faces";
+import { sequence, travel } from "svjeez/extras";
+import { css, mono, theme } from "../style";
 
-const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const M = 40;
 
 const login = sequence(

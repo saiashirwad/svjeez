@@ -1,5 +1,5 @@
 import { ease, motion, render, type Ease } from "svjeez";
-import { CSS, theme } from "./kit";
+import { css, mono, theme } from "../style";
 
 const curves: [string, Ease][] = [
   ["linear", ease.linear],
@@ -17,14 +17,14 @@ const X1 = 380;
 
 export default function build(): string {
   return render(
-    { width: 420, height: curves.length * ROW + 24, duration: 3, title: "Easing", desc: "Eight dots cross the same track, each with a different easing curve.", css: CSS, reducedMotion: { at: 2 } },
+    { width: 420, height: curves.length * ROW + 24, duration: 3, title: "Easing", desc: "Eight dots cross the same track, each with a different easing curve.", css, reducedMotion: { at: 2 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       {curves.map(([label, curve], i) => {
         const y = 24 + i * ROW;
         return (
           <>
-            <text x={20} y={y + 4} class="mono" fontSize={11} fill={theme.base04}>
+            <text x={20} y={y + 4} fontFamily={mono} fontSize={11} fill={theme.base04}>
               {label}
             </text>
             <line x1={X0} x2={X1} y1={y} y2={y} stroke={theme.base02} strokeWidth={2} strokeLinecap="round" />

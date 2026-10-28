@@ -1,6 +1,7 @@
 import { render } from "svjeez";
 import { flow, flowchart } from "svjeez/extras";
-import { CSS, chrome, outro, theme } from "./kit";
+import { CSS, chrome, outro } from "./kit";
+import { theme } from "../style";
 
 const BAR = 40;
 

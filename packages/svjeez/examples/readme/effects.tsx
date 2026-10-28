@@ -1,12 +1,12 @@
 import { draw, fx, render } from "svjeez";
-import { CSS, theme } from "./kit";
+import { css, mono, theme } from "../style";
 
 export default function build(): string {
   return render(
-    { width: 320, height: 120, duration: 4, title: "Effects", desc: "A glowing word beside a hand-drawn house that boils.", css: CSS, reducedMotion: { at: 2 } },
+    { width: 320, height: 120, duration: 4, title: "Effects", desc: "A glowing word beside a hand-drawn house that boils.", css, reducedMotion: { at: 2 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      <text x={90} y={74} class="mono" fontSize={36} fontWeight={700} fill="#FF4FA3" textAnchor="middle" filter={fx.glow({ blur: 4 })}>
+      <text x={90} y={74} fontFamily={mono} fontSize={36} fontWeight={700} fill="#FF4FA3" textAnchor="middle" filter={fx.glow({ blur: 4 })}>
         OPEN
       </text>
       <g filter={fx.boil({ strength: 2 })} fill="none" stroke={theme.base0C} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">

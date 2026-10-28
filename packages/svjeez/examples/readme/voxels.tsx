@@ -1,6 +1,6 @@
 import { ease, enter, render } from "svjeez";
 import { voxel } from "svjeez/voxel";
-import { CSS, theme } from "./kit";
+import { css, theme } from "../style";
 
 const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 });
 const grass = voxel.texture(
@@ -24,7 +24,7 @@ const dirt = voxel.texture(
 
 export default function build(): string {
   return render(
-    { width: 200, height: 120, duration: 10, title: "Voxels", desc: "A grass block, a dirt block that pops in at three seconds and leaves at nine, and a dirt block that drops onto the grass.", css: CSS, reducedMotion: { at: 5 } },
+    { width: 200, height: 120, duration: 10, title: "Voxels", desc: "A grass block, a dirt block that pops in at three seconds and leaves at nine, and a dirt block that drops onto the grass.", css, reducedMotion: { at: 5 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       <g transform="translate(100 64)">

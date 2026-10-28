@@ -1,6 +1,7 @@
 import { def, ease, motion, render, type SvgNode } from "svjeez";
 import { code, type CodeTokens } from "svjeez/extras";
-import { CSS, chrome, highlight, theme } from "../kit";
+import { CSS, chrome, highlight } from "../kit";
+import { mono, theme } from "../../style";
 
 // The home page hero: a day in ten seconds, written as one motion() chain beside the sky it paints. As each step of the
 // chain plays, its line in the code lights up in the color the sky is heading for, so the timeline in the code and the
@@ -81,7 +82,7 @@ export function day(layout: Layout): string {
   const lines = SOURCE[name];
   const { lineHeight } = layout;
   const y = layout.code.y ?? BAR + (height - BAR - lines.length * fontSize * lineHeight) / 2;
-  const listing = code(highlight(source(name)) as CodeTokens, { theme, fontSize, lineHeight, x: layout.code.x, y });
+  const listing = code(highlight(source(name)) as CodeTokens, { theme, font: mono, fontSize, lineHeight, x: layout.code.x, y });
   const lineH = listing.metrics.height;
 
   // One bar per step behind its line, tinted toward the color that step is heading for; a wait gets a quiet gray.
@@ -114,10 +115,8 @@ export function day(layout: Layout): string {
     },
     <>
       {chrome(width, height, "day.tsx", { mono: true, bar: BAR }).node}
-      <g class="mono">
-        {bars}
-        {listing.node}
-      </g>
+      {bars}
+      {listing.node}
       <g clipPath={clip}>
         <rect x={panel.x} y={panel.y} width={panel.w} height={panel.h} animation={sky} />
         <g transform={origin}>

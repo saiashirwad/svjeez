@@ -1,5 +1,6 @@
 import { ease, motion, render } from "svjeez";
-import { CSS, chrome, outro, skeleton, theme } from "./kit";
+import { CSS, chrome, outro, skeleton } from "./kit";
+import { theme } from "../style";
 
 // An email: no scripts run in a mail client, and an animated SVG still plays where images do.
 const W = 328;

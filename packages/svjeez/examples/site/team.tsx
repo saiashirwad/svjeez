@@ -1,6 +1,7 @@
 import { render } from "svjeez";
 import { travel, tree } from "svjeez/extras";
-import { CSS, chrome, outro, theme } from "./kit";
+import { CSS, chrome, outro } from "./kit";
+import { theme } from "../style";
 
 const W = 504;
 const H = 340;
