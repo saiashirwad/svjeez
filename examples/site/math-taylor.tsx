@@ -21,6 +21,7 @@ const graph = axes({
   labels: false,
   theme,
 });
+
 const { x: bx, y: by, w: bw, h: bh } = graph.bounds;
 const clip = def.clipPath({}, <rect x={bx} y={by} width={bw} height={bh} />);
 
@@ -34,6 +35,7 @@ const stages: { n: number; color: Color; op?: string; term: string; at: number }
 ];
 
 const factorial = (k: number): number => (k <= 1 ? 1 : k * factorial(k - 1));
+
 const taylor =
   (n: number) =>
   (x: number): number => {
@@ -63,6 +65,7 @@ const half = (f: (x: number) => number, to: number): string => {
 };
 
 const at = { x: W / 2, y: 92, fontSize: 21, anchor: [0.5, 0.5], theme } as const;
+
 const versions = stages.map((_, i) =>
   tex(
     String.raw`\color{${COS}}{\cos x} \approx ` +
@@ -73,6 +76,7 @@ const versions = stages.map((_, i) =>
     at,
   ),
 );
+
 const WRITE = { at: 1.2, over: 1 };
 const m = morph(versions, { at: stages.slice(1).map((s) => s.at - 0.3), over: 0.7 });
 const handoff = WRITE.at + WRITE.over + 0.2;
@@ -82,6 +86,7 @@ const cosine = graph.plot(Math.cos, {
   strokeWidth: 2.5,
   animation: draw({ at: 0.5, over: 1.4 }),
 });
+
 const origin = graph.point(0, 1);
 
 const ticks = [-2, -1, 1, 2].map((k) => {
@@ -121,6 +126,7 @@ export default function build(): string {
           {stages.map((s, i) => {
             const f = taylor(s.n);
             const next = stages[i + 1];
+
             const fade = next
               ? motion({ opacity: 1 }).at(next.at).to({ opacity: 0 }, 0.6)
               : undefined;

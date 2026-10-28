@@ -139,6 +139,9 @@ npx svjeez svg scene.tsx --out hello.svg
 # Optional: render PNG frames & a contact sheet to check timing in headless Chromium
 npm i -D playwright-core && npx playwright-core install chromium-headless-shell
 npx svjeez frames scene.tsx --times 0,0.8,1.6,3 --sheet --out frames/
+
+# Optional: encode the scene as an MP4 or WebM with @svjeez/video, for places that don't take SVG
+npm i -D @svjeez/video && npx svjeez video scene.tsx --out scene.mp4
 ```
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/basic.svg" width="200" alt="A curve draws on, then a dot pops in" />
@@ -465,6 +468,7 @@ At runtime, `render()` validates its own output (`validateSvg(svg)`) and throws 
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `npx svjeez svg <file.tsx> [-o out.svg]`                             | Compile a scene module (or validate an `.svg`) to `--out` or stdout.                                                                                         |
 | `npx svjeez frames <file> [-t 0,1,2 \| -n 6] [--sheet] [-o frames/]` | Rasterize PNG frames and an optional contact sheet (`sheet.png`). Supports `--scale`, `--columns`, `--color-scheme light\|dark\|system`, and `--background`. |
+| `npx svjeez video <file> [-o scene.mp4] [--loops 2] [--fps 30]`      | Encode the scene as MP4 or WebM through `@svjeez/video`. Supports `--format`, `--quality`, `--scale`, `--color-scheme`, and `--background transparent` (WebM). |
 | `npx svjeez skill [--install [--dir .claude/skills]]`                | Print `SKILL.md` or copy the full skill, references, and examples into your project.                                                                         |
 
 ### `render(options, content)` & `renderFrames(svg, options)`

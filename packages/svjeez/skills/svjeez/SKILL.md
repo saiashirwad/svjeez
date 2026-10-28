@@ -92,7 +92,7 @@ shake({ at: 2, over: 0.5 }, { x: 6 });               // damped shake on x, y or 
 wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; change the seed to reroll
 ```
 
-Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys.
+Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead.
 
 ```tsx
 sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translate: 1 } });
@@ -168,6 +168,10 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |
 | Equations: TeX, equation transforms, `morph()` over formulas (`@svjeez/math`) | [`references/math.md`](references/math.md) |
 | Vector fields, streamlines, slope fields, contour lines, implicit curves | [`references/fields.md`](references/fields.md) |
+| Syntax highlighting for `code()` and `terminal()`, themed by role (`@svjeez/code`) | [`references/code.md`](references/code.md) |
+| Bar, line and area charts that animate in (`@svjeez/charts`) | [`references/charts.md`](references/charts.md) |
+| Mermaid text drawn as a flowchart, sequence or state diagram (`@svjeez/mermaid`) | [`references/mermaid.md`](references/mermaid.md) |
+| MP4 or WebM video of a finished scene (`@svjeez/video`) | [`references/video.md`](references/video.md) |
 | `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
 
 ## Examples

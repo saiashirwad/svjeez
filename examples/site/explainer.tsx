@@ -1,6 +1,7 @@
 import { enter, render } from "svjeez";
 import { Callout, Focus, code } from "svjeez/extras";
-import { CSS, chrome, highlight, outro } from "./kit";
+import { highlight } from "@svjeez/code";
+import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 
 const W = 504;
@@ -17,7 +18,7 @@ const shown = `<path d={wave}
 <circle r={8} fill="#FF9F0A"
   animation={enter({ at: 3 })} />`;
 
-const src = code(highlight(shown), {
+const src = code(highlight(shown, "tsx"), {
   theme,
   font: mono,
   fontSize: 15,

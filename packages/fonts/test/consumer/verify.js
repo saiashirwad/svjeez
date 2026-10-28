@@ -6,6 +6,7 @@ import { google } from "@svjeez/fonts";
 import { el, render } from "svjeez";
 
 const cache = mkdtempSync(join(tmpdir(), "svjeez-fonts-consumer-"));
+
 process.env.SVJEEZ_FONTS_CACHE = cache;
 
 try {

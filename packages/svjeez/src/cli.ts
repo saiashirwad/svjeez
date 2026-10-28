@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { join, relative, resolve } from "node:path";
+import { basename, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { renderFrames, type FrameTimes } from "./frames";
@@ -11,9 +11,12 @@ const USAGE = `usage:
   svjeez svg <file> [--out file.svg]
   svjeez skill [--install [--dir .claude/skills]]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css]
+  svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css]
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
 Times are playback seconds. Without --times, frames takes --count frames (default 6) across one loop.
+video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
+--background transparent keeps alpha, in webm only.
 On Node, .tsx files load through tsx when it is installed.
 skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.`;
 
@@ -119,6 +122,100 @@ const svgCommand = async (args: string[]): Promise<void> => {
   else process.stdout.write(svg);
 };
 
+const parseScheme = (value: string | undefined) =>
+  value === undefined
+    ? undefined
+    : isScheme(value)
+      ? value
+      : fail(`--color-scheme is system, light or dark, got "${value}".`);
+
+/** The part of @svjeez/video the CLI uses. svjeez doesn't depend on it, so it is typed here. */
+interface VideoModule {
+  renderVideo: (
+    svg: string,
+    options: {
+      format: string;
+      fps?: number;
+      loops?: number;
+      quality?: string;
+      scale?: number;
+      colorScheme?: string;
+      background?: string;
+    },
+  ) => Promise<{
+    bytes: Uint8Array;
+    codec: string;
+    frames: number;
+    duration: number;
+    colorScheme: string;
+  }>;
+}
+
+const VIDEO = "@svjeez/video";
+
+// From the project first, so a package manager that doesn't hoist still finds it.
+const loadVideo = async (): Promise<VideoModule> => {
+  const from = (base: string) => {
+    try {
+      return pathToFileURL(createRequire(base).resolve(VIDEO)).href;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const url =
+    from(join(process.cwd(), "package.json")) ??
+    from(fileURLToPath(import.meta.url)) ??
+    fail(`svjeez video needs ${VIDEO}. Install it with \`npm i -D ${VIDEO}\`.`);
+
+  return import(url);
+};
+
+const videoCommand = async (args: string[]): Promise<void> => {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: {
+      out: { type: "string", short: "o" },
+      format: { type: "string" },
+      fps: { type: "string" },
+      loops: { type: "string" },
+      quality: { type: "string" },
+      scale: { type: "string" },
+      "color-scheme": { type: "string" },
+      background: { type: "string" },
+    },
+  });
+
+  const file = positionals[0] ?? fail(USAGE);
+  const extension = values.out ? extname(values.out).slice(1) : "";
+  const named = extension === "mp4" || extension === "webm" ? extension : undefined;
+  const format = values.format ?? named ?? "mp4";
+
+  if (named && named !== format)
+    fail(`--format ${format} doesn't match --out ${values.out}. Pass one, or make them agree.`);
+  const out = values.out ?? `${basename(file, extname(file))}.${format}`;
+  const colorScheme = parseScheme(values["color-scheme"]);
+  const { renderVideo } = await loadVideo();
+  const svg = await loadSvg(file);
+  report(svg);
+
+  const video = await renderVideo(svg, {
+    format,
+    fps: number("fps", values.fps),
+    loops: number("loops", values.loops),
+    quality: values.quality,
+    scale: number("scale", values.scale),
+    colorScheme,
+    background: values.background,
+  });
+
+  await writeFile(out, video.bytes);
+  console.log(
+    `${out}: ${video.codec}, ${video.frames} frames, ${Number(video.duration.toFixed(3))}s, ${video.colorScheme}`,
+  );
+};
+
 const framesCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
     args,
@@ -135,13 +232,7 @@ const framesCommand = async (args: string[]): Promise<void> => {
     },
   });
 
-  const scheme =
-    values["color-scheme"] === undefined
-      ? undefined
-      : isScheme(values["color-scheme"])
-        ? values["color-scheme"]
-        : fail(`--color-scheme is system, light or dark, got "${values["color-scheme"]}".`);
-
+  const scheme = parseScheme(values["color-scheme"]);
   const svg = await loadSvg(positionals[0] ?? fail(USAGE));
   report(svg);
 
@@ -205,6 +296,7 @@ const skillCommand = async (args: string[]): Promise<void> => {
 const COMMANDS = new Map([
   ["svg", svgCommand],
   ["frames", framesCommand],
+  ["video", videoCommand],
   ["skill", skillCommand],
 ]);
 

@@ -13,7 +13,7 @@ import {
   type SvgNode,
 } from "svjeez";
 import { adaptive, systemDark, systemLight } from "svjeez/extras";
-import { renderFrames } from "svjeez/frames";
+import { openScene, renderFrames } from "svjeez/frames";
 import { systemColorScheme } from "../src/scheme";
 
 const browser = await renderFrames(
@@ -254,6 +254,27 @@ describe.if(browser)("renderFrames", () => {
   test("a non-positive scale or column count is rejected", async () => {
     expect(renderFrames(fade, { times: [0], scale: 0 })).rejects.toThrow("scale");
     expect(renderFrames(fade, { times: [0], sheet: { columns: 1.5 } })).rejects.toThrow("columns");
+  });
+
+  test("an open scene captures what renderFrames renders, in a secure context, until closed", async () => {
+    const scene = await openScene(fade, { scale: 2, colorScheme: "light" });
+
+    try {
+      expect(scene.duration).toBe(4);
+      expect(
+        await scene.evaluate((name) => name in window && isSecureContext, "VideoEncoder"),
+      ).toBe(true);
+      const { frames } = await renderFrames(fade, { times: [1.5], scale: 2, colorScheme: "light" });
+      expect(same(await scene.capture(1.5), frames[0]!.png)).toBe(true);
+    } finally {
+      await scene.close();
+    }
+  });
+
+  test("openScene() rejects a bad scale under the caller's name, before launching", async () => {
+    expect(openScene(fade, { scale: -1 }, "renderVideo()")).rejects.toThrow(
+      "renderVideo() needs a positive, finite scale, got -1.",
+    );
   });
 
   test("frames follow the system color scheme unless told otherwise", async () => {

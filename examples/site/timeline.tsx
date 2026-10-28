@@ -1,6 +1,7 @@
 import { ease, enter, motion, render } from "svjeez";
 import { Marker, code } from "svjeez/extras";
-import { CSS, chrome, highlight, outro } from "./kit";
+import { highlight } from "@svjeez/code";
+import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 
 // A motion() chain on the left, the same chain drawn as tracks on the right, and a square that obeys it.
@@ -29,7 +30,7 @@ export const make = (tall = false): string => {
   const win = chrome(W, H, "motion.ts");
 
   const src = code(
-    highlight(shown),
+    highlight(shown, "tsx"),
     tall
       ? { theme, font: mono, fontSize: 12.5, lineHeight: 1.9, x: 22, y: BAR + 18 }
       : { theme, font: mono, fontSize: 14, lineHeight: 1.9, x: 28, y: BAR + 28 },

@@ -19,7 +19,7 @@ const COS = theme.base0D;
 const SIN = theme.base0B;
 const PI = theme.base09;
 
-/** The angle at time t: one full turn, a reset at 2π ≡ 0, then half a turn to π. */
+/** The angle at time t: one full turn, then half a turn more to 3π, which is π. */
 const theta = (t: number): number => {
   const span = (from: number, over: number) => {
     const u = Math.min(1, Math.max(0, (t - from) / over));
@@ -27,7 +27,7 @@ const theta = (t: number): number => {
     return u * u * (3 - 2 * u);
   };
 
-  return t < 5.8 ? 2 * Math.PI * span(1.6, 4) : Math.PI * span(6.2, 1.4);
+  return 2 * Math.PI * span(1.6, 4) + Math.PI * span(6.2, 1.4);
 };
 
 const sample =
@@ -39,35 +39,42 @@ const point = sampled(
   sample((x, y) => ({ x, y })),
   { duration: D, tolerance: { translate: 0.3 } },
 );
+
 const radius = sampled((t) => ({ rotate: (-theta(t) * 180) / Math.PI }), {
   duration: D,
   tolerance: { rotate: 0.4 },
 });
+
 const cosine = sampled(
   sample((x) => ({ x: Math.min(0, x), width: Math.abs(x) })),
   { duration: D, tolerance: { translate: 0.3, width: 0.3 } },
 );
+
 const sine = sampled(
   sample((x, y) => ({ x, y: Math.min(0, y), height: Math.abs(y) })),
   { duration: D, tolerance: { translate: 0.3, height: 0.3 } },
 );
 
 const at = { x: 238, y: CY - 22, fontSize: 25, theme } as const;
+
 const angle = (a: string) =>
   tex(
     String.raw`e^{i\cssId{e}{${a}}} = \color{${COS}}{\cos\cssId{c}{${a}}} + \color{${SIN}}{i\sin\cssId{s}{${a}}}`,
     at,
   );
+
 const versions = [
   angle(String.raw`\theta`),
   angle(String.raw`\color{${PI}}{\pi}`),
   tex(String.raw`e^{i\cssId{e}{\color{${PI}}{\pi}}} = -1`, at),
   tex(String.raw`e^{i\cssId{e}{\color{${PI}}{\pi}}} + 1 = 0`, at),
 ];
+
 const m = morph(versions, { at: [5.9, 7.9, 9.0], over: 0.8 });
 
 const label = (source: string, x: number, y: number, color: Color) =>
   tex(source, { x, y, fontSize: 15, color, display: false });
+
 const one = label("1", CX + R + 6, CY + 4, theme.base03);
 const minusOne = label("-1", CX - R - 28, CY + 6, PI);
 

@@ -1,5 +1,5 @@
 import { el, motion, rect, type Color, type SvgNode } from "svjeez";
-import { appWindow, type CodePiece, type CodeTokens } from "svjeez/extras";
+import { appWindow } from "svjeez/extras";
 import { css, mono, theme } from "../style";
 
 const SANS = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif";
@@ -19,46 +19,6 @@ export const random = (seed: number) => () => {
 
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
-
-const KEYWORDS = new Set([
-  "import",
-  "from",
-  "export",
-  "default",
-  "const",
-  "return",
-  "await",
-  "async",
-  "type",
-  "new",
-]);
-
-const TOKEN =
-  /(\/\/.*)|("[^"]*"|'[^']*'|`[^`]*`)|(\b\d+(?:\.\d+)?\b)|(<\/?[A-Za-z][\w.]*|<\/?>|\/>)|([A-Za-z_$][\w$]*)(?=\()|([A-Za-z_$][\w$]*)|([{}()[\];,=:.<>+*!?&|-]+)|(\s+)|(.)/g;
-
-/** A small TSX highlighter: enough colors for the snippets on the site, nothing more. */
-export const highlight = (source: string): CodeTokens =>
-  source.split("\n").map((line) =>
-    [...line.matchAll(TOKEN)].map((m): CodePiece => {
-      const text = m[0];
-
-      if (m[1]) return ["comment", text];
-
-      if (m[2]) return ["string", text];
-
-      if (m[3]) return ["number", text];
-
-      if (m[4]) return ["tag", text];
-
-      if (m[5]) return ["fn", text];
-
-      if (m[6]) return KEYWORDS.has(text) ? ["keyword", text] : text;
-
-      if (m[7]) return ["punct", text];
-
-      return text;
-    }),
-  );
 
 /** The window every card shares: traffic lights and a title bar. The page adds the shadow, so the canvas stays transparent around it. A `mono` title names a file or a shell. */
 export const chrome = (
