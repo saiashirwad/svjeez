@@ -122,17 +122,8 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 @media (max-width: 63.99rem) { .hero-demo .wide { display: none } .hero-demo .tall { display: block } }
 @media (min-width: 56rem) and (max-width: 63.99rem) { .hero-demo .tall { inline-size: min(100%, 26rem) } }
 
-/* What it does: a ruled list. */
-.spec { margin-block-end: clamp(1rem, 3vw, 2rem) }
-.spec .row { padding-block: 1.25rem; border-block-start: 1px solid var(--line); row-gap: 0.4rem }
-.spec dt { font: 600 1.0625rem / 1.35 var(--sans); letter-spacing: -0.01em }
-.spec dt span { display: inline-block; min-inline-size: 2.25rem; font: 500 0.8125rem / 1 var(--mono); color: var(--accent) }
-.spec dd { color: var(--muted) }
-.spec code { color: var(--ink); font-size: 0.85em }
-
 /* Sections: a hairline, a numbered label, a heading, and blocks on the grid. */
 .sec { padding-block: clamp(2.5rem, 6vw, 4.5rem) 0; margin-block-start: clamp(2.5rem, 7vw, 5.5rem); border-block-start: 1px solid var(--line); row-gap: clamp(1.25rem, 2.5vw, 1.75rem) }
-.spec + .sec { margin-block-start: clamp(2.5rem, 7vw, 5rem) }
 .kicker { font: 500 0.75rem / 1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
 .kicker span { color: var(--accent); margin-inline-end: 0.6rem }
 .sec h2 { font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.25rem); line-height: 1.04; letter-spacing: -0.04em }
