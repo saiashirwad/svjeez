@@ -34,6 +34,7 @@ export default function build(): string {
       title: "Delegation tree",
       desc: "A lead agent's delegation tree revealed level by level, then a message runs from the docs thread to the tests thread through their common ancestor.",
       reducedMotion: { at: D - 1 },
+      loop: false,
       css,
     },
     <>
