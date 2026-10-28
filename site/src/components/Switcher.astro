@@ -1,0 +1,92 @@
+---
+// Several scenes in one spot: a row of tabs picks which one shows, with its note and code beside it.
+// Hidden scenes are display: none, so the play budget in scripts/scenes.ts never counts them.
+import { Code } from "astro:components";
+import type { SceneImage } from "@svjeez/astro/scene";
+import { shikiTheme } from "../styles/code";
+import LiveScene from "./LiveScene.astro";
+
+interface Props {
+  /** Prefixes the tab and panel ids, so two switchers on a page never share one. */
+  name: string;
+  label: string;
+  items: readonly {
+    id: string;
+    tab: string;
+    scene: SceneImage;
+    cost: number;
+    alt: string;
+    note: string;
+    code: string;
+  }[];
+}
+
+const { name, label, items } = Astro.props;
+---
+
+<div class="switcher c1-12" data-switcher>
+  <div class="tabs" role="tablist" aria-label={label}>
+    {
+      items.map((item, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${name}-${item.id}-tab`}
+          aria-controls={`${name}-${item.id}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+        >
+          {item.tab}
+        </button>
+      ))
+    }
+  </div>
+</div>
+{
+  items.map((item, i) => (
+    <div class="pane" role="tabpanel" id={`${name}-${item.id}`} aria-labelledby={`${name}-${item.id}-tab`} hidden={i !== 0}>
+      <figure class="c1-6">
+        <div class="win">
+          <LiveScene scene={item.scene} cost={item.cost} alt={item.alt} />
+        </div>
+      </figure>
+      <div class="pane-side c7-12">
+        <p class="note">{item.note}</p>
+        <Code class="code" code={item.code} lang="tsx" theme={shikiTheme} />
+      </div>
+    </div>
+  ))
+}
+
+<script>
+  for (const switcher of document.querySelectorAll<HTMLElement>("[data-switcher]")) {
+    const tabs = [...switcher.querySelectorAll<HTMLButtonElement>("[role=tab]")];
+
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      for (const other of tabs) {
+        const on = other === tab;
+        other.setAttribute("aria-selected", String(on));
+        other.tabIndex = on ? 0 : -1;
+        document.getElementById(other.getAttribute("aria-controls")!)!.hidden = !on;
+      }
+
+      if (focus) tab.focus();
+      tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+    };
+
+    for (const tab of tabs) tab.addEventListener("click", () => select(tab));
+
+    switcher.addEventListener("keydown", (event) => {
+      const at = tabs.findIndex((tab) => tab === document.activeElement);
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+
+      if (at < 0) return;
+
+      if (step) select(tabs[(at + step + tabs.length) % tabs.length]!, true);
+      else if (event.key === "Home") select(tabs[0]!, true);
+      else if (event.key === "End") select(tabs.at(-1)!, true);
+      else return;
+      event.preventDefault();
+    });
+  }
+</script>

@@ -738,6 +738,115 @@ pre.code {
   inline-size: min(100%, 28rem);
 }
 
+/* A switcher: a row of tabs over several scenes. The active tab's pill slides to it through anchor positioning. */
+.tabs {
+  anchor-scope: --tab;
+  position: relative;
+  display: flex;
+  gap: 0.25rem;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  padding: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+  background: var(--sunken);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.tabs [role="tab"] {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  min-block-size: 2.25rem;
+  padding-inline: 1rem;
+  font: 500 0.875rem / 1 var(--sans);
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 999px;
+}
+.tabs [role="tab"]:focus-visible {
+  outline-offset: -2px;
+}
+.tabs [role="tab"]:active {
+  translate: 0 1px;
+}
+.tabs [aria-selected="true"] {
+  anchor-name: --tab;
+  color: var(--ink);
+}
+.tabs::before {
+  content: "";
+  position: absolute;
+  position-anchor: --tab;
+  inset-block: anchor(top) anchor(bottom);
+  inset-inline-start: anchor(start);
+  inline-size: anchor-size(inline);
+  background: var(--bg);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1px 3px var(--shadow);
+}
+/* Without anchor positioning the pill has nowhere to go, so the tab paints its own. */
+@supports not (anchor-name: --tab) {
+  .tabs::before {
+    display: none;
+  }
+  .tabs [aria-selected="true"] {
+    background: var(--bg);
+    box-shadow: 0 0 0 1px var(--ring);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .tabs [role="tab"]:hover {
+    color: var(--ink);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tabs::before {
+    transition:
+      inset-inline-start 0.3s var(--out),
+      inline-size 0.3s var(--out);
+  }
+  .tabs [role="tab"] {
+    transition:
+      color 0.15s,
+      translate 0.12s var(--out);
+  }
+  .pane:not([hidden]) > * {
+    animation: pane-in 0.4s var(--out) both;
+  }
+  .pane:not([hidden]) > :nth-child(2) {
+    animation-delay: 0.05s;
+  }
+}
+@keyframes pane-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+}
+.pane {
+  display: contents;
+}
+.pane[hidden] {
+  display: none;
+}
+.pane-side {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-inline-size: 0;
+}
+.pane-side .note {
+  max-inline-size: 44ch;
+  color: var(--muted);
+}
+
 /* Light and dark, side by side. */
 .stagewrap {
   min-inline-size: 0;

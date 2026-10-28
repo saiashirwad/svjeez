@@ -13,6 +13,10 @@ import heroTall from "@examples/site/hero-tall.tsx";
 import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
 import math from "@examples/site/math.tsx";
+import mathFourier from "@examples/site/math-fourier.tsx";
+import mathLinear from "@examples/site/math-linear.tsx";
+import mathPythagoras from "@examples/site/math-pythagoras.tsx";
+import mathTaylor from "@examples/site/math-taylor.tsx";
 import nojsx from "@examples/site/nojsx.tsx";
 import nojsxTall from "@examples/site/nojsx-tall.tsx";
 import pipeline from "@examples/site/pipeline.tsx";
@@ -30,6 +34,7 @@ import DayNight from "../components/DayNight.astro";
 import Install from "../components/Install.astro";
 import LiveScene from "../components/LiveScene.astro";
 import Playground from "../components/Playground.astro";
+import Switcher from "../components/Switcher.astro";
 import Base from "../layouts/Base.astro";
 import { shikiTheme } from "../styles/code";
 
@@ -51,6 +56,10 @@ const s = {
   ink: live(ink),
   icons: live(icons),
   math: live(math),
+  mathFourier: live(mathFourier),
+  mathLinear: live(mathLinear),
+  mathTaylor: live(mathTaylor),
+  mathPythagoras: live(mathPythagoras),
   geo: live(geo),
   fonts: live(fonts),
   breaker: live(breaker),
@@ -70,12 +79,82 @@ const iconUse = `import { bell } from "@svjeez/icons/tabler";
 <Icon icon={bell} size={40} animation={(d, i) =>
   draw({ at: i * 0.2, over: 0.5 })} />`;
 
-const mathUse = `import { tex } from "@svjeez/math";
+const maths = [
+  {
+    id: "euler",
+    tab: "Euler's identity",
+    scene: s.math,
+    cost: 20,
+    alt: "A point turns once round the unit circle while its cosine and sine trace the axes. Euler's formula, e to the i theta equals cos theta plus i sin theta, follows it to pi, collapses to e to the i pi equals minus one, and settles as e to the i pi plus one equals zero.",
+    note: "A point turns round the unit circle, and the formula follows it. At π the cosine is −1 and the sine is gone, so the formula collapses into the identity.",
+    code: `import { tex } from "@svjeez/math";
 
 const before = tex(String.raw\`e^{i\\pi} = -1\`, at);
 const after = tex(String.raw\`e^{i\\pi} + 1 = 0\`, at);
 
-morph([before, after], { at: 2, over: 0.8 });`;
+morph([before, after], { at: 2, over: 0.8 });`,
+  },
+  {
+    id: "fourier",
+    tab: "Fourier series",
+    scene: s.mathFourier,
+    cost: 20,
+    alt: "A chain of circles builds a square wave. A large blue circle spins, and a faint line carries its tip's height to a plot on the right, where a yellow pen traces a sine wave over a dashed square wave. Smaller green, orange and purple circles join one at a time, each spinning faster on the tip of the last, and each new trace comes closer to the square while older traces fade behind it. Above, the formula gains one term per circle, each term the color of its circle.",
+    note: "Circles spinning on circles, at one, three, five and seven times the speed. Each one adds a term, and the sum creeps toward a square wave.",
+    code: `const sums = [1, 3, 5, 7].map((_, k) => tex(
+  String.raw\`\\frac{4}{\\pi}(\${terms.slice(0, k + 1).join("+")})\`, at));
+
+sums[0].write({ at: 0.25, over: 1.2 });
+morph(sums, { at: [3, 5.25, 7.5], over: 0.5 });
+
+<path d={partialSum(k)} animation={sampled(
+  (t) => ({ draw: arc(t) }), { duration, tolerance: { draw: 0.002 } })} />`,
+  },
+  {
+    id: "linear",
+    tab: "Linear maps",
+    scene: s.mathLinear,
+    cost: 20,
+    alt: "A coordinate grid with a green arrow i-hat, a red arrow j-hat and a yellow unit square between them. The matrix A, with columns 2, 1 in green and minus 1, 1 in red, is written out beside it. The whole grid then tilts into a slanted lattice as i-hat swings to 2, 1 and j-hat leans to minus 1, 1. The square stretches into a parallelogram, its area label changes from 1 to 3, and det A equals 3 is written under the matrix.",
+    note: "The columns of a matrix say where î and ĵ land. Move the whole grid with them, and the unit square's new area is the determinant.",
+    code: `const matrix = tex(String.raw\`A = \\begin{bmatrix}
+  \\color{\${I}}{2} & \\color{\${J}}{-1} \\\\
+  \\color{\${I}}{1} & \\color{\${J}}{1}
+\\end{bmatrix}\`, { x, y, anchor: [0.5, 0.5] });
+
+matrix.write({ at: 2.2, over: 1.4 });
+morph([area("1"), area("3")], { at: [7], over: 0.5 });`,
+  },
+  {
+    id: "taylor",
+    tab: "Taylor series",
+    scene: s.mathTaylor,
+    cost: 20,
+    alt: "A blue cosine curve draws across the axes from minus two pi to two pi, and cos x is approximately 1 is written above it. Then the formula gains one term at a time, minus x squared over 2 factorial, plus x to the fourth over 4 factorial, and on to x to the eighth over 8 factorial. Each new term matches a curve that grows outward from zero in the same color and hugs the cosine further before it shoots off the plot.",
+    note: "Each new term of the polynomial matches one more derivative of cos x at zero, so the curve hugs the cosine a little further out.",
+    code: `const versions = stages.map((_, i) =>
+  tex(terms.slice(0, i + 1).join(" "), at));
+
+versions[0].write({ at: 1.2, over: 1 });
+morph(versions, { at: [3.7, 5.3, 6.9, 8.5], over: 0.7 });`,
+  },
+  {
+    id: "pythagoras",
+    tab: "Pythagoras",
+    scene: s.mathPythagoras,
+    cost: 20,
+    alt: "A square with sides a + b holds four blue right triangles whose hypotenuses enclose a tilted yellow square, labelled c squared. Three of the triangles slide, one after another, into a new arrangement in the same big square. The space left over is now two squares, a green a squared and a red b squared, and their labels fly over to join c squared, so the equation reads a squared plus b squared equals c squared.",
+    note: "Four triangles leave a square of area c². Slide them around the same frame and the space they leave is a² and b².",
+    code: `const c2 = tex("c^2", { x, y, anchor: [0.5, 0.5] });
+const sum = tex(String.raw\`a^2 + b^2 = c^2\`, at);
+
+c2.write({ at: 3.5, over: 0.7 });
+<g animation={motion({ x: 0, y: 0 })
+  .at(5.2).to({ x: dx, y: dy }, 1.3, ease.inOut)}>
+  {triangle}
+</g>`,
+  },
+];
 
 const geoUse = `import { project } from "@svjeez/geo";
 
@@ -182,9 +261,8 @@ npx svjeez svg scene.tsx --out scene.svg`;
     </section>
 
     <section class="wrap sec g" id="math">
-      <h2 class="c1-6"><a class="anchor" href="#math">Typeset equations, then morph them.</a></h2>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.math} cost={20} alt="A point turns once round the unit circle while its cosine and sine trace the axes. Euler's formula, e to the i theta equals cos theta plus i sin theta, follows it to pi, collapses to e to the i pi equals minus one, and settles as e to the i pi plus one equals zero." /></div></figure>
-      <Code class="code side c7-12" code={mathUse} lang="tsx" theme={shikiTheme} />
+      <h2 class="c1-8"><a class="anchor" href="#math">Typeset equations, then morph them.</a></h2>
+      <Switcher name="math" label="Math scenes" items={maths} />
     </section>
 
     <section class="wrap sec g" id="maps">
