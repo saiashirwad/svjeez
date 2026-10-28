@@ -62,6 +62,8 @@ jobs:
         working-directory: packages/geo
       - run: npm run test:package
         working-directory: packages/math
+      - run: npm run test:package
+        working-directory: packages/charts
       - run: bunx playwright-core install --with-deps chromium-headless-shell
       - run: npm run test:package
         working-directory: packages/vite

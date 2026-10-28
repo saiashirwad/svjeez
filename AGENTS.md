@@ -2,7 +2,7 @@
 
 svjeez is a TypeScript library that compiles TSX scenes into one self-contained animated SVG. Motions become CSS keyframes, or SMIL on filter primitives. Nothing runs in the viewer's browser.
 
-To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. `SKILL.md` covers the `motion()` timeline, channels, easing, recipes, `sampled()`, and the compile and runtime errors with their fixes. `skills/svjeez/references/` covers defs and CSS properties, images and fonts, ink, explainers, diagrams, voxels, maps through `@svjeez/geo`, equations through `@svjeez/math` and non-JSX use. Five worked examples sit in `skills/svjeez/examples/`. `svjeez skill` prints `SKILL.md` alone; `--install` also copies the references and examples. This file covers working on the repository.
+To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. `SKILL.md` covers the `motion()` timeline, channels, easing, recipes, `sampled()`, and the compile and runtime errors with their fixes. `skills/svjeez/references/` covers defs and CSS properties, images and fonts, ink, explainers, diagrams, voxels, maps through `@svjeez/geo`, equations through `@svjeez/math`, charts through `@svjeez/charts` and non-JSX use. Five worked examples sit in `skills/svjeez/examples/`. `svjeez skill` prints `SKILL.md` alone; `--install` also copies the references and examples. This file covers working on the repository.
 
 ## Workspace
 
@@ -15,6 +15,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax.
+- `packages/charts/` is `@svjeez/charts`, which draws animated bar, line and area charts with `d3-scale` and `d3-shape`.
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
 - `site/` is the Astro site at svjeez.texoport.in.
 
@@ -78,6 +79,10 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 `@svjeez/math` depends on `mathjax-full`, which is why it is not a `svjeez` subpath. `tex()` runs MathJax's TeX input and SVG output once per formula, reads the SVG back with `src/mathjax.ts`, and composes every nested `translate()` and `scale()` into one matrix per glyph, so a formula is a flat list of placed `<path>`s. `src/mathjax.ts` drops the `noundefined` and `noerrors` packages, because they turn a typo into a picture, and it throws on a MathJax error node or on a `<text>` fallback. `Tex` is a `Morphable`, so `morph()` from `svjeez/extras` animates it: a glyph's `text` key is its character and size, because a morph translates and cannot scale. `draw()` puts the motion on a wrapping `<g>`, since a CSS animation overrides a `transform` attribute. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/math` is its example scene, and `skills/svjeez/references/math.md` teaches it to scene writers.
 
+## Charts
+
+`@svjeez/charts` depends on `d3-scale` and `d3-shape`, which is why it is not a `svjeez` subpath. Only numbers and path strings leave d3, and the SVG is built with `el`. It does not call `axes()`, because that takes numeric ranges with a fixed tick step and a band x axis needs its own drawing, so `src/chart.ts` draws the frame itself with the same stroke slots, label slot, 4px ticks and label offsets as `axes()`. `chart()` decides every scale once, from explicit domains or from `data`, and a series whose points fall outside them throws instead of clipping. `src/series.ts` builds `bars()`, `line()` and `area()`. A bar is drawn its radius longer than it shows and a clip at the baseline squares the foot, and an area is revealed by a clip rect whose width animates. Lines draw with a linear ease so their dots can appear in proportion to the length the stroke has covered. There is no time scale. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/charts` is its example scene, and `skills/svjeez/references/charts.md` teaches it to scene writers.
+
 ## Site
 
 `site/` imports scenes straight from `examples/` through the `@examples/*` path. Run `bun run dev`, `bun run build`, `bun run typecheck` and `bun run test` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
@@ -101,7 +106,7 @@ After CI passes, `release.yml` runs `scripts/release.ts`. It releases every pack
 To release, bump the version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro fonts geo icons math; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro fonts geo icons math charts; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
