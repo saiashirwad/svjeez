@@ -42,6 +42,7 @@ export default () =>
 - `theme`, a `Base16` palette whose `plain` color paints the formula. It defaults to `defaultDark`.
 - `color`, which replaces the theme's plain color.
 - `display`, which sets display style. It defaults to `true`.
+- `anchor`, the point of the box that `x` and `y` place, as fractions of its width and height. `[0.5, 0.5]` centers the formula on `x`, `y`. It defaults to `[0, 0]`, the top-left.
 
 The formula it returns has:
 
@@ -51,6 +52,7 @@ The formula it returns has:
 - `get(id)`, the box of everything under `\cssId{id}{…}`.
 - `find(text, nth)`, the box of the `nth` run of consecutive glyphs that spell `text`, such as `find("2ab")`.
 - `draw(glyph, animation)`, one glyph in a group that carries the animation.
+- `write({ at, over }, { stroke })`, the formula written on in reading order like Manim's `Write`: each glyph's outline draws, then fills. Glyphs start one after another across `over`, and each takes `stroke` seconds, 0.6 by default.
 
 ## How glyphs pair
 

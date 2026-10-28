@@ -19,8 +19,8 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 </>;
 ```
 
-- `x` and `y` are the top-left of the formula's box. `fontSize` is the pixels in one em, default 32. `theme` paints the formula with its `plain` color, and `color` overrides that. `display: false` sets inline style.
-- `.node` draws the formula. `.bounds`, `.width` and `.height` give its box.
+- `x` and `y` are the top-left of the formula's box. `anchor: [0.5, 0.5]` puts its center there instead, which suits a label on a side or inside an area. `fontSize` is the pixels in one em, default 32. `theme` paints the formula with its `plain` color, and `color` overrides that. `display: false` sets inline style.
+- `.node` draws the formula. `.write({ at, over })` writes it on glyph by glyph, each outline drawing and then filling, and it stays once written. `.bounds`, `.width` and `.height` give its box.
 - `.get("mid")` is the box of everything wrapped in `\cssId{mid}{…}`. `.find("2ab")` is the box of consecutive glyphs that spell it, and `.find("2", 2)` takes the second match. Both return a `Rect` for `Brace` (give its label a `fontSize` to match the formula), `Underline`, `Callout`, `Marker`, `Focus` and `Camera`.
 - `.words` lists the glyphs and bars in reading order. A glyph has `char`, `size`, `d`, `matrix`, `fill`, `bounds` and the `text`, `x`, `y` and `id` that `morph()` uses.
 
@@ -29,6 +29,7 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 `morph()` takes any `tex()` formulas. A glyph carries over when the next version has the same character at the same size, and moves to its new place. Everything else fades: glyphs only in the old version fade out and glyphs only in the new version fade in. `morph` translates and cannot scale, so a superscript `2` never pairs with a full-size `2`, and a fraction bar pairs only with a bar of the same length.
 
 - Place every version at the same `x` and `y`, so a glyph's move is the move in the algebra.
+- To write a formula and then morph it, cut from `write()` to `morph().node` at one instant after the writing ends. Both draw the same glyphs in the same places, so the cut does not show.
 - Wrap a part in `\cssId{name}{…}` in both versions to pair it by name, even when its glyphs change. Pieces under an id also give you `get(name)`.
 - `gutter` is for `code()`. It is a type error with formulas.
 - Bold, italic and upright forms of one letter share a key, so `\mathbf{a}` can pair with `a` and jump in shape. Name both with the same `\cssId` instead.
@@ -45,7 +46,8 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 | `tex() could not read the box MathJax drew for …` | `\tag` draws a full-width table. Leave the number out and draw it as text. |
 | `tex.get() found no part named "…".` | Wrap the part in `\cssId{name}{…}`. |
 | `tex.find() found … of "…", not ….` | The text spells nothing, or fewer matches, among consecutive glyphs. Fractions list the numerator, the denominator, then the bar. |
-| `tex() needs finite coordinates and a positive fontSize, got …` | Pass numbers. |
+| `tex() needs finite coordinates and anchor and a positive fontSize, got …` | Pass numbers. |
+| `tex.write() needs a non-negative span and a positive stroke time, got …` | Pass `over` of 0 or more and `stroke` above 0. |
 | `morph() draws a gutter only for code() versions.` | Drop `gutter`. |
 
 In Bun, a non-ASCII character in `String.raw` arrives as a `\u{…}` escape. Write such characters in a plain string, or as TeX.

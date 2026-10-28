@@ -70,6 +70,23 @@ describe("tex", () => {
 
   test("bad options name the call and the value", () => {
     expect(() => tex("x", { fontSize: 0 })).toThrow(/tex\(\) needs finite coordinates/);
+    expect(() => tex("x", { anchor: [Number.NaN, 0] })).toThrow(/tex\(\) needs finite coordinates/);
+    expect(() => f.write({ at: 0, over: -1 })).toThrow(/tex.write\(\) needs a non-negative span/);
+  });
+
+  test("anchor places that point of the box at x, y", () => {
+    const centered = tex(String.raw`(a+b)^2`, { x: 200, y: 100, fontSize: 40, anchor: [0.5, 0.5] });
+    expect(centered.bounds.x + centered.width / 2).toBeCloseTo(200, 0);
+    expect(centered.bounds.y + centered.height / 2).toBeCloseTo(100, 0);
+    expect(centered.width).toBe(f.width);
+  });
+
+  test("write() draws each glyph's outline, then its fill, one glyph after another", () => {
+    const out = svg(f.write({ at: 0.5, over: 2 }));
+    expect(out.match(/<path /g)).toHaveLength(f.words.length * 2);
+    expect(out.match(/stroke-dasharray="1"/g)).toHaveLength(f.words.length);
+    // Outline, its fade and the fill, at times of each glyph's own, so no two glyphs share keyframes.
+    expect(out.match(/@keyframes/g)).toHaveLength(f.words.length * 3);
   });
 
   test("fractions, roots and sums come out as glyphs and bars", () => {

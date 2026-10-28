@@ -1,4 +1,14 @@
-import { el, rect, type Color, type Rect, type Stack, type SvgNode } from "svjeez";
+import {
+  ease,
+  el,
+  motion,
+  rect,
+  type Color,
+  type Rect,
+  type Span,
+  type Stack,
+  type SvgNode,
+} from "svjeez";
 import { defaultDark, tint, type Base16, type Morphable, type MorphPiece } from "svjeez/extras";
 import { compile } from "./mathjax.ts";
 import { apply, multiply, round, roundMatrix, scale, translate, type Matrix } from "./matrix.ts";
@@ -17,6 +27,13 @@ export interface TexOptions {
   readonly color?: Color;
   /** Display style: big operators stack their limits and fractions are full size. Default true. */
   readonly display?: boolean;
+  /** The point of the box that `x` and `y` place, as fractions of its width and height. `[0.5, 0.5]` centers the formula on `x`, `y`. Default `[0, 0]`, the top-left. */
+  readonly anchor?: readonly [number, number];
+}
+
+export interface WriteOptions {
+  /** Each glyph's outline draws, then fills, this long. Default 0.6. */
+  readonly stroke?: number;
 }
 
 /** One glyph or bar of a formula, placed in the scene. morph() pairs glyphs by `text`. */
@@ -45,6 +62,8 @@ export interface Tex extends Morphable<Glyph> {
   get(id: string): Rect;
   /** Bounds of the `nth` run of consecutive glyphs spelling `text`, such as `2ab`. */
   find(text: string, nth?: number): Rect;
+  /** The formula written on in reading order during `span`: each glyph's outline draws, then fills. It stays once written. */
+  write(span: Span, options?: WriteOptions): SvgNode;
 }
 
 export type { Matrix };
@@ -62,15 +81,20 @@ const glyphBounds = (d: string, matrix: Matrix): Rect => {
  * `x` and `y` place the top-left of the formula's box; one em is `fontSize` pixels.
  */
 export function tex(source: string, options: TexOptions = {}): Tex {
-  const { x = 0, y = 0, fontSize = 32, theme = defaultDark, display = true } = options;
+  const { fontSize = 32, theme = defaultDark, display = true, anchor = [0, 0] } = options;
 
-  if (!(fontSize > 0) || !Number.isFinite(x + y))
+  if (
+    !(fontSize > 0) ||
+    !Number.isFinite((options.x ?? 0) + (options.y ?? 0) + anchor[0] + anchor[1])
+  )
     throw new Error(
-      `tex() needs finite coordinates and a positive fontSize, got x ${x}, y ${y} and fontSize ${fontSize}.`,
+      `tex() needs finite coordinates and anchor and a positive fontSize, got x ${options.x}, y ${options.y}, anchor [${anchor.join(", ")}] and fontSize ${fontSize}.`,
     );
   const compiled = compile(source, display);
   const [minX, minY, boxW, boxH] = compiled.box;
   const k = fontSize / 1000;
+  const x = (options.x ?? 0) - anchor[0] * boxW * k;
+  const y = (options.y ?? 0) - anchor[1] * boxH * k;
   const place = multiply(translate(x, y), multiply(scale(k), translate(-minX, -minY)));
 
   const glyphs = compiled.marks.map((mark): Glyph => {
@@ -144,11 +168,53 @@ export function tex(source: string, options: TexOptions = {}): Tex {
     throw new Error(`tex.find() found ${seen} of ${JSON.stringify(needle)}, not ${nth}.`);
   };
 
+  const write = ({ at, over }: Span, { stroke = 0.6 }: WriteOptions = {}): SvgNode => {
+    if (!(over >= 0 && stroke > 0))
+      throw new Error(
+        `tex.write() needs a non-negative span and a positive stroke time, got over ${over} and stroke ${stroke}.`,
+      );
+    const step = glyphs.length > 1 ? Math.max(0, over - stroke) / (glyphs.length - 1) : 0;
+
+    return el.g(
+      {},
+      glyphs.map((g, i) => {
+        const start = at + i * step;
+        const paint = (g.fill as Color | undefined) ?? ink;
+        const transform = `matrix(${g.matrix.join(" ")})`;
+
+        // The outline is in glyph units, so its width undoes the matrix's scale to stay near 1px on screen.
+        return el.g({}, [
+          el.path({
+            d: g.d,
+            transform,
+            fill: "none",
+            stroke: paint,
+            strokeWidth: round(1.2 / Math.hypot(g.matrix[0], g.matrix[1])),
+            strokeLinejoin: "round",
+            animation: motion({ draw: 0, opacity: 1 })
+              .at(start)
+              .to({ draw: 1 }, stroke * 0.7, ease.inOut)
+              .to({ opacity: 0 }, stroke * 0.3),
+          }),
+          el.path({
+            d: g.d,
+            transform,
+            fill: paint,
+            animation: motion({ opacity: 0 })
+              .at(start + stroke * 0.5)
+              .to({ opacity: 1 }, stroke * 0.5),
+          }),
+        ]);
+      }),
+    );
+  };
+
   return {
     node: el.g(
       {},
       glyphs.map((g) => draw(g)),
     ),
+    write,
     words: glyphs,
     bounds,
     width: bounds.w,
