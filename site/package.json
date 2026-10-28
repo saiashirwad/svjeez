@@ -3,14 +3,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "cd .. && bun run build landing landing-tall daynight hype && rm -rf site/public && mkdir -p site/public && cp dist/landing.svg dist/landing-tall.svg dist/daynight.svg dist/hype.svg site/index.html site/intro.html site/site.css site/site.js site/favicon.svg site/public/ && bun site/assets.ts && bun site/examples.ts",
+    "build": "cd .. && bun run build landing landing-tall daynight hype && rm -rf site/public && mkdir -p site/public && cp dist/landing.svg dist/landing-tall.svg dist/daynight.svg dist/hype.svg site/index.html site/intro.html site/site.css site/site.js site/favicon.svg site/public/ && bun site/assets.ts && bun site/examples.ts && bun site/playground/build.ts",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy"
   },
   "dependencies": {
     "@alchemy.run/cloudflare": "^2.0.0-beta.84",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
     "@effect/platform-bun": "^4.0.6",
     "@effect/platform-node": "^4.0.6",
+    "@lezer/highlight": "^1.2.5",
     "alchemy": "^2.0.0-beta.84",
     "effect": "^4.0.6"
   },
