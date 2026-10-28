@@ -1,19 +1,24 @@
-// The examples gallery: one page of cards, and one full-screen page per example, built from the committed dist/ SVGs.
+// The examples gallery: one page of cards, and one page per example, built from the committed dist/ SVGs.
+// A card shows a poster until you hover it, so the gallery stays small however many scenes it lists.
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { renderFrames } from "../src/frames.ts";
 
 const here = (path: string) => new URL(path, import.meta.url);
 const REPO = "https://github.com/saiashirwad/svjeez";
+const POSTER_WIDTH = 480;
 
 const SECTIONS = [
   {
-    title: "scenes",
-    blurb: "whole little films, each one a single SVG file",
+    title: "Scenes",
+    blurb: "Whole little films, each one a single SVG file.",
     names: ["map", "newspaper", "horizon", "lighthouse", "grove", "manifold", "minecraft", "breaker", "reflect", "bloom", "explainer", "walkthrough"],
   },
   {
-    title: "building blocks",
-    blurb: "typed diagrams, terminals, fonts and effects to make them from",
-    names: ["flowchart", "sequence", "state", "tree", "lanes", "flows", "terminal", "effects", "fonts", "images"],
+    title: "Building blocks",
+    blurb: "Typed diagrams, terminals, fonts and effects to make them from.",
+    names: ["flowchart", "sequence", "state", "tree", "lanes", "flows", "terminal", "effects", "fonts", "images", "daynight"],
   },
 ] as const;
 
@@ -30,6 +35,24 @@ const read = (name: string): Example => {
   return { name, title, desc, width: width!, height: height! };
 };
 
+const poster = (ex: Example) => `/examples/poster/${ex.name}.jpg`;
+const posterHeight = (ex: Example) => Math.round((POSTER_WIDTH * ex.height) / ex.width);
+
+const GITHUB = `<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>`;
+
+const HEADER = `<header class="wrap top">
+  <a class="brand" href="/">svjeez<i>.</i></a>
+  <nav aria-label="Main">
+    <a href="/examples/">Examples</a>
+    <a href="/intro">Intro</a>
+    <a href="${REPO}">GitHub</a>
+    <button class="theme" type="button" aria-label="Switch between light and dark">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+    </button>
+  </nav>
+</header>`;
+
 const HEAD = (title: string, description: string, extra = "") => `<!doctype html>
 <html lang="en">
 <head>
@@ -39,49 +62,48 @@ const HEAD = (title: string, description: string, extra = "") => `<!doctype html
 <meta name="description" content="${escape(description)}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="color-scheme" content="light dark">
 <meta property="og:title" content="${escape(title)}">
 <meta property="og:description" content="${escape(description)}">
-<meta property="og:image" content="https://svjeez.texoport.in/og.png">
+<meta property="og:image" content="https://svjeez.texoport.in/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..800,100,1;1,9..144,400..800,100,1&family=JetBrains+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="/examples/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
 ${extra}</head>`;
 
-/** Prerender pages before they are clicked: Chromium keeps them ready, so the click swaps in a page that has already loaded. */
-const speculate = (rule: object) => `<script type="speculationrules">${JSON.stringify(rule)}</script>\n`;
+/** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
+const speculate = `<script type="speculationrules">${JSON.stringify({ prefetch: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] })}</script>\n`;
 
-const SHADOWS = ["var(--pink)", "var(--blue)", "var(--sun)"];
-
-const card = (ex: Example, i: number) => `
-    <a class="card" href="/examples/${ex.name}" style="--shadow: ${SHADOWS[i % 3]}; --tilt: ${[-1.2, 0.8, -0.4, 1.4][i % 4]}deg">
-      <span class="frame" style="aspect-ratio: ${ex.width} / ${ex.height}"><img src="/examples/svg/${ex.name}.svg" alt="" loading="lazy" decoding="async"></span>
-      <span class="name">${escape(ex.title)}</span>
-      <span class="desc">${escape(ex.desc)}</span>
+const card = (ex: Example) => `
+    <a class="card" href="/examples/${ex.name}">
+      <span class="shot" data-live="/examples/svg/${ex.name}.svg" data-still="${poster(ex)}"><img data-src="${poster(ex)}" width="${POSTER_WIDTH}" height="${posterHeight(ex)}" alt="" decoding="async"></span>
+      <span><b>${escape(ex.title)}</b><span class="d">${escape(ex.desc)}</span></span>
     </a>`;
 
-const gallery = (sections: readonly { title: string; blurb: string; examples: Example[] }[]) => `${HEAD(
-  "svjeez · examples",
-  "Scenes and building blocks made with svjeez. Every one is a single animated SVG with no JavaScript.",
-  speculate({ prerender: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] }),
-)}
+const gallery = (sections: readonly { title: string; blurb: string; examples: Example[] }[]) => `${HEAD("Examples · svjeez", "Scenes and building blocks made with svjeez. Every one is a single animated SVG with no JavaScript.", speculate)}
 <body class="gallery">
-<header>
-  <a class="pill" href="/">← home</a>
-  <h1><span>examples</span></h1>
-  <p>every one of these is a single SVG file, written in TSX.<br>no JavaScript, no video, no runtime. <span class="hand">just svjeez.</span></p>
-</header>
+${HEADER}
+<main class="wrap">
+  <div class="page-head">
+    <p class="kicker">Examples</p>
+    <h1>Every one is a single SVG file.</h1>
+    <p class="sub">Written in TSX, compiled to CSS keyframes. No JavaScript, no video. Point at a card to play it, or open one to see it full size.</p>
+  </div>
 ${sections
   .map(
-    (section, s) => `<section>
-  <h2>${section.title} <small>${section.blurb}</small></h2>
-  <div class="grid">${section.examples.map((ex, i) => card(ex, i + s)).join("")}
-  </div>
-</section>`,
+    (section) => `  <section>
+    <h2>${section.title}<small>${section.blurb}</small></h2>
+    <div class="grid">${section.examples.map(card).join("")}
+    </div>
+  </section>`,
   )
   .join("\n")}
-<footer><a class="pill" href="${REPO}">see them all on GitHub</a></footer>
+</main>
+<footer class="wrap foot">
+  <span>Each scene's TSX is in the repository.</span>
+  <nav aria-label="Footer"><a href="${REPO}/tree/main/examples">All sources</a><a href="/">Home</a></nav>
+</footer>
 </body>
 </html>
 `;
@@ -89,46 +111,58 @@ ${sections
 const viewer = (ex: Example, i: number, all: readonly Example[]) => {
   const prev = all[(i - 1 + all.length) % all.length]!;
   const next = all[(i + 1) % all.length]!;
-  const neighbours = [prev, next];
-  const ready =
-    speculate({ prerender: [{ source: "list", urls: neighbours.map((n) => `/examples/${n.name}`), eagerness: "immediate" }, { source: "list", urls: ["/examples/"], eagerness: "moderate" }] }) +
-    neighbours.map((n) => `<link rel="prefetch" href="/examples/${n.name}">\n<link rel="prefetch" href="/examples/svg/${n.name}.svg" as="image">\n`).join("");
-  return `${HEAD(`${ex.title} · svjeez`, ex.desc || `${ex.title}, made with svjeez`, ready)}
+  return `${HEAD(`${ex.title} · svjeez`, ex.desc || `${ex.title}, made with svjeez`)}
 <body class="viewer">
-<header>
-  <a class="pill" href="/examples/">← examples</a>
-  <span class="count">no. ${i + 1} <i>of</i> ${all.length}</span>
-</header>
-<main>
-  <figure class="plate" style="--ratio: ${(ex.width / ex.height).toFixed(4)}; --shadow: ${SHADOWS[i % 3]}">
-    <img src="/examples/svg/${ex.name}.svg" alt="${escape(ex.desc || ex.title)}">
+${HEADER}
+<main class="wrap">
+  <p class="count"><a href="/examples/">← Examples</a> · ${i + 1} of ${all.length}</p>
+  <figure class="plate" style="--ratio: ${(ex.width / ex.height).toFixed(4)}; --poster: url(${poster(ex)}); margin-block-start: 0.75rem">
+    <picture><source media="(prefers-reduced-motion: reduce)" srcset="${poster(ex)}"><img src="/examples/svg/${ex.name}.svg" width="${ex.width}" height="${ex.height}" alt="${escape(ex.desc || ex.title)}"></picture>
   </figure>
+  <div class="meta">
+    <div>
+      <h1>${escape(ex.title)}</h1>
+      <p>${escape(ex.desc)}</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/examples/${prev.name}" title="${escape(prev.title)}">← Prev</a>
+      <a class="btn" href="/examples/${next.name}" title="${escape(next.title)}">Next →</a>
+      <a class="btn primary" href="${REPO}/tree/main/examples/${ex.name}">${GITHUB}View the TSX</a>
+    </div>
+  </div>
 </main>
-<footer>
-  <div class="caption">
-    <h1>${escape(ex.title)}</h1>
-    <p>${escape(ex.desc)}</p>
-  </div>
-  <div class="actions">
-    <a class="pill" href="/examples/${prev.name}" title="${escape(prev.title)}">← prev</a>
-    <a class="pill alt" href="/examples/${next.name}" title="${escape(next.title)}">next →</a>
-    <a class="pill sun icon" href="${REPO}/tree/main/examples/${ex.name}" aria-label="View the TSX on GitHub" title="View the TSX on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
-  </div>
-</footer>
+<footer class="wrap foot"><span>One SVG file, no JavaScript.</span><nav aria-label="Footer"><a href="${REPO}">GitHub</a><a href="/">Home</a></nav></footer>
 </body>
 </html>
 `;
 };
 
+/** A settled frame of each scene, at the width a card draws it, as a JPEG. */
+const writePoster = async (ex: Example, out: URL) => {
+  const svg = readFileSync(here(`../dist/${ex.name}.svg`), "utf8");
+  const scale = POSTER_WIDTH / ex.width;
+  const { duration } = await renderFrames(svg, { times: [0], colorScheme: "light" });
+  const { frames } = await renderFrames(svg, { times: [duration * 0.72], colorScheme: "light", scale });
+  const png = join(tmpdir(), `svjeez-poster-${ex.name}.png`);
+  writeFileSync(png, frames[0]!.png);
+  const jpg = new URL(`${ex.name}.jpg`, out);
+  const converted = Bun.spawnSync(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "60", png, "--out", jpg.pathname]);
+  if (converted.exitCode !== 0) writeFileSync(jpg, frames[0]!.png);
+};
+
 const out = here("public/examples/");
 mkdirSync(new URL("svg/", out), { recursive: true });
+mkdirSync(new URL("poster/", out), { recursive: true });
 const sections = SECTIONS.map((section) => ({ ...section, examples: section.names.map(read) }));
 const all = sections.flatMap((section) => section.examples);
-all.forEach((ex, i) => {
+for (const [i, ex] of all.entries()) {
   copyFileSync(here(`../dist/${ex.name}.svg`), new URL(`svg/${ex.name}.svg`, out));
   writeFileSync(new URL(`${ex.name}.html`, out), viewer(ex, i, all));
-});
+  await writePoster(ex, new URL("poster/", out));
+}
 writeFileSync(new URL("index.html", out), gallery(sections));
-copyFileSync(here("examples.css"), new URL("style.css", out));
-// The SVGs only change on a deploy, so let browsers keep them for a day instead of revalidating on every page.
-writeFileSync(here("public/_headers"), "/examples/svg/*\n  Cache-Control: public, max-age=86400\n/examples/style.css\n  Cache-Control: public, max-age=86400\n");
+// SVGs and posters only change on a deploy, so browsers may keep them for a day instead of revalidating.
+writeFileSync(
+  here("public/_headers"),
+  ["/examples/svg/*", "/examples/poster/*", "/*.svg", "/*.css", "/*.js"].map((path) => `${path}\n  Cache-Control: public, max-age=86400`).join("\n") + "\n",
+);

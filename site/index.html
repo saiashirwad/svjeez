@@ -3,74 +3,176 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>svjeez · animated SVG, compiled from TSX</title>
-<meta name="description" content="animated SVG, compiled from TSX">
+<title>svjeez · animated SVG from TSX</title>
+<meta name="description" content="svjeez compiles a TSX scene into one animated SVG. Motion becomes CSS keyframes, there is no JavaScript, and the file plays in a plain img tag.">
 <link rel="canonical" href="https://svjeez.texoport.in/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&display=swap">
-<meta name="theme-color" content="#F3ECDF">
-
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBF1DE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14162A" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="svjeez">
 <meta property="og:url" content="https://svjeez.texoport.in/">
-<meta property="og:title" content="svjeez">
-<meta property="og:description" content="animated SVG, compiled from TSX">
-<meta property="og:image" content="https://svjeez.texoport.in/og.png">
-<meta property="og:image:type" content="image/png">
+<meta property="og:title" content="svjeez: TSX in, one animated SVG out">
+<meta property="og:description" content="Motion becomes CSS keyframes. No JavaScript, one file, plays in an img tag.">
+<meta property="og:image" content="https://svjeez.texoport.in/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The svjeez wordmark in pink and blue riso ink on paper, with a small yellow creature on the z, a sleepy sun, clouds and a paper plane.">
-
+<meta property="og:image:alt" content="Code typing out in an editor beside a hand-lettered hello, a sun and a bird drawing themselves into a canvas.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="svjeez">
-<meta name="twitter:description" content="animated SVG, compiled from TSX">
-<meta name="twitter:image" content="https://svjeez.texoport.in/og.png">
-<meta name="twitter:image:alt" content="The svjeez wordmark in pink and blue riso ink on paper, with a small yellow creature on the z.">
-<style>
-  :root { --paper: #F3ECDF; --cloud: #FFFDF8; --ink: #23203A; --pink: #FF5E8E; --blue: #3358E0; --sun: #FFC63D;
-    /* One unit of the 1200×1200 scene, as the cover-scaled image draws it. */
-    --u: calc(max(100vw, 100dvh) / 1200) }
-  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden }
-  img { display: block; width: 100vw; height: 100dvh; object-fit: cover }
-  /* The buttons sit in the scene's own coordinates, under the circled install command. */
-  nav { position: fixed; left: 50%; top: calc(50dvh + 222 * var(--u)); translate: -50% 0; display: flex; gap: calc(20 * var(--u)) }
-  nav a {
-    display: inline-flex; align-items: center; gap: calc(9 * var(--u)); height: calc(52 * var(--u)); padding: 0 calc(18 * var(--u));
-    font: 600 calc(16 * var(--u)) / 1 "JetBrains Mono", ui-monospace, Menlo, monospace; color: var(--ink); text-decoration: none; white-space: nowrap;
-    background: var(--cloud); border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(26 * var(--u));
-    box-shadow: calc(5 * var(--u)) calc(5 * var(--u)) 0 var(--shadow);
-    rotate: var(--tilt); transition: translate .18s cubic-bezier(.3, 1.6, .5, 1), rotate .18s cubic-bezier(.3, 1.6, .5, 1), box-shadow .18s;
-    animation: pop .6s cubic-bezier(.3, 1.6, .5, 1) backwards;
-  }
-  nav a:nth-child(1) { --shadow: var(--pink); --tilt: -2deg; animation-delay: 5s }
-  nav a:nth-child(2) { --shadow: var(--blue); --tilt: 2deg; animation-delay: 5.15s }
-  nav a:nth-child(3) { --shadow: var(--sun); --tilt: -1deg; animation-delay: 5.3s }
-  nav a:hover { rotate: calc(var(--tilt) * -1.5); translate: 0 calc(-4 * var(--u)); box-shadow: calc(9 * var(--u)) calc(10 * var(--u)) 0 var(--shadow) }
-  nav a:active { translate: calc(6 * var(--u)) calc(6 * var(--u)); box-shadow: 0 0 0 var(--shadow); transition-duration: .05s }
-  nav a:focus-visible { outline: calc(3 * var(--u)) dashed var(--ink); outline-offset: calc(6 * var(--u)) }
-  nav svg { width: calc(18 * var(--u)); height: calc(18 * var(--u)); flex: none }
-  @keyframes pop { from { opacity: 0; transform: translateY(calc(24 * var(--u))) scale(.5) rotate(-8deg) } }
-  @media (prefers-reduced-motion: reduce) { nav a { animation: none; transition: none } }
-</style>
+<meta name="twitter:title" content="svjeez: TSX in, one animated SVG out">
+<meta name="twitter:description" content="Motion becomes CSS keyframes. No JavaScript, one file, plays in an img tag.">
+<meta name="twitter:image" content="https://svjeez.texoport.in/og.jpg">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/site.css">
+<link rel="preload" as="image" href="/landing.svg" media="(min-width: 44em) and (prefers-reduced-motion: no-preference)">
+<link rel="preload" as="image" href="/landing-tall.svg" media="(max-width: 43.99em) and (prefers-reduced-motion: no-preference)">
+<script src="/site.js" defer></script>
 </head>
 <body>
-<img src="landing.svg" alt="svjeez: animated SVG, compiled from TSX. npm i svjeez">
-<nav>
-  <a href="https://github.com/saiashirwad/svjeez">
-    <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-    GitHub
-  </a>
-  <a href="/intro">
-    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5 13 8l-9 5.5Z" fill="var(--pink)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-    the intro
-  </a>
-  <a href="/examples/">
-    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1Q8 8 15 8Q8 8 8 15Q8 8 1 8Q8 8 8 1Z" fill="var(--sun)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-    examples
-  </a>
-</nav>
+<header class="wrap top">
+  <a class="brand" href="/">svjeez<i>.</i></a>
+  <nav aria-label="Main">
+    <a href="/examples/">Examples</a>
+    <a href="/intro">Intro</a>
+    <a href="https://github.com/saiashirwad/svjeez">GitHub</a>
+    <button class="theme" type="button" aria-label="Switch between light and dark">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <h1>TSX in.<br><em>One SVG<svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path d="M1 6C20 1 35 9 52 5S85 2 99 6" pathLength="1"/></svg></em> out.</h1>
+    <p class="lede">svjeez compiles a scene written in TSX into a single animated SVG. Motion becomes CSS keyframes, so there is no <code>JavaScript</code> to ship and the file plays in a plain <code>&lt;img&gt;</code>.</p>
+    <div class="cta">
+      <span class="install"><span><b>$</b> npm i svjeez</span><button type="button" data-copy="npm i svjeez" aria-label="Copy the install command" title="Copy the install command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button></span>
+      <a class="btn primary" href="/examples/">See examples</a>
+      <a class="btn" href="https://github.com/saiashirwad/svjeez"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a>
+    </div>
+  </div>
+
+  <div class="wrap reel">
+    <div class="frame">
+      <picture>
+        <source media="(prefers-reduced-motion: reduce) and (max-width: 43.99em) and (prefers-color-scheme: dark)" srcset="/still-tall-dark.jpg" width="520" height="707">
+        <source media="(prefers-reduced-motion: reduce) and (max-width: 43.99em)" srcset="/still-tall-light.jpg" width="520" height="707">
+        <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="/still-wide-dark.jpg" width="1200" height="420">
+        <source media="(prefers-reduced-motion: reduce)" srcset="/still-wide-light.jpg" width="1200" height="420">
+        <source media="(max-width: 43.99em)" srcset="/landing-tall.svg" width="520" height="707">
+        <img src="/landing.svg" width="1200" height="420" alt="A few lines of TSX type out in an editor. As each line lands, a hill is inked, a sun rises, the word hello is handwritten and a bird flies across the canvas beside it.">
+      </picture>
+    </div>
+    <p class="caption">All of that is one SVG file, 12 KB over the wire. <a href="/landing.svg">Open it</a> and view source.</p>
+  </div>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <p class="kicker">How it works</p>
+      <h2>Write a scene, render it, ship an image.</h2>
+      <ol class="steps">
+        <li>
+          <h3>Write the scene</h3>
+          <pre class="code"><span class="k">import</span> { render, draw } <span class="k">from</span> <span class="s">"svjeez"</span>;
+
+<span class="k">export default</span> () =&gt; <span class="f">render</span>(
+  { width: <span class="n">320</span>, height: <span class="n">200</span>,
+    duration: <span class="n">4</span>, title: <span class="s">"Arc"</span> },
+  &lt;path d=<span class="s">"M40 150C100 30 220 30 280 150"</span>
+    fill=<span class="s">"none"</span> stroke=<span class="s">"#E8772E"</span>
+    strokeWidth={<span class="n">6</span>}
+    animation={<span class="f">draw</span>({ at: <span class="n">0.3</span>, over: <span class="n">1.5</span> })}
+  /&gt;,
+);</pre>
+          <p>Motions are values on a timeline. They are typed, so a misspelled channel is a compile error.</p>
+        </li>
+        <li>
+          <h3>Render it</h3>
+          <pre class="code"><span class="c"># one file out</span>
+npx svjeez svg arc.tsx --out arc.svg
+
+<span class="c"># or look at frames first</span>
+npx svjeez frames arc.tsx --sheet</pre>
+          <p>The compiler emits CSS keyframes, and SMIL for filter primitives. It validates the result, so the file is the whole scene.</p>
+        </li>
+        <li>
+          <h3>Ship an image</h3>
+          <pre class="code">&lt;<span class="f">img</span> src=<span class="s">"arc.svg"</span> alt=<span class="s">"An arc draws"</span>&gt;</pre>
+          <p>Nothing runs in the viewer's browser. It works anywhere an image does: READMEs, docs, blog posts. Coding agents can write scenes too: <code>npx svjeez skill --install</code>.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="light-dark">
+    <div class="wrap">
+      <p class="kicker">Light and dark</p>
+      <h2>One file. It changes its own mind.</h2>
+      <p class="sub">The two halves below are the same <code>daynight.svg</code>, fetched once. One <code>&lt;img&gt;</code> is told the page is light, the other that it is dark. The scene decides what to show.</p>
+      <div class="split">
+        <div class="stage intro">
+          <div class="layer light"><picture><source media="(prefers-reduced-motion: reduce)" srcset="/still-daynight-light.jpg"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam."></picture></div>
+          <div class="layer dark" aria-hidden="true"><picture><source media="(prefers-reduced-motion: reduce)" srcset="/still-daynight-dark.jpg"><img src="/daynight.svg" width="800" height="500" loading="lazy" decoding="async" alt=""></picture></div>
+          <span class="tag l">light</span><span class="tag d">dark</span>
+          <div class="handle"></div>
+          <input type="range" min="0" max="100" value="50" aria-label="Compare the light and dark versions of the scene">
+        </div>
+        <ul class="points">
+          <li><b>A media query inside the file</b><span>The scene carries <code>@media (prefers-color-scheme)</code> rules. The page only says which scheme applies.</span></li>
+          <li><b>Not a recolor</b><span>The sun is a moon, windows light up, a beam sweeps the water. The scene swaps whole parts.</span></li>
+          <li><b>Use the toggle at the top</b><span>It flips the whole page, and every SVG on it follows.</span></li>
+        </ul>
+      </div>
+      <pre class="code" style="margin-block-start: 1.5rem"><span class="k">const</span> { theme, css } = <span class="f">adaptive</span>({
+  dark: tomorrowNight, light: tomorrow,
+});
+<span class="c">// theme colors are CSS variables</span>
+<span class="f">render</span>({ css }, &lt;rect fill={theme.base00} /&gt;);</pre>
+    </div>
+  </section>
+
+  <section class="block" id="made">
+    <div class="wrap">
+      <p class="kicker">Made with it</p>
+      <h2>Scenes, diagrams and recordings.</h2>
+      <div class="picks">
+        <a class="card" href="/examples/map"><span class="shot"><img data-src="/examples/poster/map.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Map</b><span class="d">A hand-inked fantasy map draws itself, then the camera follows a dashed route across it.</span></span></a>
+        <a class="card" href="/examples/flowchart"><span class="shot"><img data-src="/examples/poster/flowchart.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Flowchart</b><span class="d">A typed spec becomes a diagram that builds itself, node by node.</span></span></a>
+        <a class="card" href="/examples/newspaper"><span class="shot"><img data-src="/examples/poster/newspaper.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Newspaper</b><span class="d">A blackletter masthead inks on letter by letter and a red stamp slams down.</span></span></a>
+        <a class="card" href="/examples/horizon"><span class="shot"><img data-src="/examples/poster/horizon.jpg" width="480" height="300" decoding="async" alt=""></span><span><b>Event Horizon</b><span class="d">A black hole forms, then the camera falls through it.</span></span></a>
+      </div>
+      <p class="more"><a class="btn" href="/examples/">All examples</a> <a class="btn" href="/intro">Watch the 45 second intro</a></p>
+    </div>
+  </section>
+
+  <section class="block" id="start">
+    <div class="wrap">
+      <p class="kicker">Get started</p>
+      <h2>Install it, then ask for a scene.</h2>
+      <div class="get">
+        <div>
+          <h3>In a project</h3>
+          <pre class="code">npm i svjeez
+npx svjeez frames scene.tsx --sheet</pre>
+          <p>TypeScript, no dependencies, Node 20 or newer.</p>
+        </div>
+        <div>
+          <h3>With a coding agent</h3>
+          <pre class="code">npx svjeez skill --install</pre>
+          <p>Copies a skill and worked examples into <code>.claude/skills</code>, so the agent knows how to write, render and check a scene.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <span>svjeez, MIT licensed. This page is built with it.</span>
+  <nav aria-label="Footer"><a href="https://github.com/saiashirwad/svjeez">GitHub</a><a href="https://www.npmjs.com/package/svjeez">npm</a><a href="/examples/">Examples</a><a href="/intro">Intro</a></nav>
+</footer>
 </body>
 </html>
