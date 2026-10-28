@@ -14,6 +14,7 @@ const SECTIONS = [
     title: "Scenes",
     blurb: "Complete animated scenes, each in a single SVG.",
     names: [
+      "earth",
       "map",
       "world",
       "newspaper",

@@ -19,6 +19,8 @@
         "@svjeez/icons": "workspace:*",
         "@svjeez/math": "workspace:*",
         "@types/bun": "latest",
+        "@types/d3-geo": "^3.1.0",
+        "d3-geo": "^3.1.1",
         "svjeez": "workspace:*",
         "tsx": "^4.23.15",
         "typescript": "latest",

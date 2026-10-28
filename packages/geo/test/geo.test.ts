@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { geoOrthographic } from "d3-geo";
+import { geoContains, geoOrthographic } from "d3-geo";
 import { rect } from "svjeez";
 import { createRequire } from "node:module";
-import { project, type LonLat, type Topology } from "../src/index.ts";
+import { night, project, sun, type LonLat, type Topology } from "../src/index.ts";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 const frame = rect(20, 10, 960, 500);
@@ -154,5 +154,56 @@ describe("bounds()", () => {
 
   test("of one region is its main piece", () => {
     expect(map.bounds(map.region("Italy"))).toEqual(map.region("Italy").bounds);
+  });
+});
+
+describe("dots()", () => {
+  const dots = map.dots(3);
+
+  test("puts every dot inside the region it names", () => {
+    expect(dots.length).toBeGreaterThan(1000);
+
+    for (const dot of dots.slice(0, 200))
+      expect(geoContains(map.region(dot.id).feature, [...dot.at])).toBe(true);
+  });
+
+  test("spaces dots by arc, so rows near the poles hold fewer", () => {
+    const row = (lat: number) => dots.filter((d) => Math.abs(d.at[1] - lat) < 1.5).length;
+
+    expect(row(64.5)).toBeLessThan(row(4.5) + row(1.5));
+    expect(new Set(dots.map((d) => d.at[1])).size).toBeLessThanOrEqual(60);
+  });
+
+  test("keeps the far side of a globe, with no point", () => {
+    const globe = project(world, { frame, projection: geoOrthographic(), fit: "sphere" });
+    const all = globe.dots(3);
+
+    expect(all).toHaveLength(dots.length);
+    expect(all.some((d) => d.point === undefined)).toBe(true);
+    expect(all.find((d) => d.at[0] > 120 && d.at[0] < 150)?.point).toBeUndefined();
+  });
+});
+
+describe("sun()", () => {
+  test("stands over the Tropic of Cancer near Greenwich at noon on the June solstice", () => {
+    const [lon, lat] = sun(new Date(Date.UTC(2026, 5, 21, 12)));
+
+    expect(lat).toBeCloseTo(23.44, 1);
+    expect(Math.abs(lon)).toBeLessThan(1);
+  });
+
+  test("moves 15 degrees west an hour", () => {
+    const [noon] = sun(new Date(Date.UTC(2026, 2, 20, 12)));
+    const [later] = sun(new Date(Date.UTC(2026, 2, 20, 13)));
+
+    expect(noon - later).toBeCloseTo(15, 0);
+  });
+
+  test("night() is the hemisphere facing away from the sun", () => {
+    const date = new Date(Date.UTC(2026, 5, 21, 12));
+    const dark = { type: "Feature", properties: {}, geometry: night(date) } as const;
+
+    expect(geoContains(dark, [180, 0])).toBe(true);
+    expect(geoContains(dark, [0, 20])).toBe(false);
   });
 });

@@ -17,6 +17,8 @@ const map = project(world, {
 - `map.regions` holds `{ id, properties, feature, d, centroid, bounds }` per feature. `map.region("France")` finds one by `id` or `properties.name`. `centroid` and `bounds` describe the largest piece, so labels and zooms land on the mainland.
 - `map.land` fills every region in one path. `map.lines` strokes every border once. `map.sphere` and `map.graticule(15)` draw the globe and its grid.
 - `map.point([lon, lat])` places a marker or label. Longitude comes first.
+- `map.dots(step)` returns evenly spaced places on land, `{ at, id, properties, point }`, for a dot map. On a globe, far-side dots keep their `at` and have no `point`.
+- `sun(date)` is the `[lon, lat]` under the overhead sun, and `night(date)` the dark hemisphere as GeoJSON for `map.path()`.
 - `map.route(from, to)` returns the great-circle arc as points for `travel()` and `flow()`. Draw it with `<path d={...}>` and `draw()`; `draw` needs no `strokeDasharray` of its own.
 - `map.bounds(region)`, `map.bounds([region, [lon, lat], ...], pad)` and `map.bounds(geojson)` return a `Rect` for a `Camera` stop.
 - `tolerance` (default 0.5px) sets how hard paths are simplified. Raise it for a small scene.
@@ -26,6 +28,10 @@ const map = project(world, {
 Don't zoom a camera over one animated path per country: Chromium flashes blank tiles. Animate the per-region paths for the intro, then at a fixed time hide them and show a still copy of `map.land` and `map.lines` inside the `Camera`. Put markers and routes in a second `Camera` with the same stops. `examples/world` in the svjeez repository does this.
 
 Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, 0.6)`; `fillOpacity` is not a channel.
+
+## Turning a globe
+
+A globe's paths can't turn, but its dots can. Register `lat` and `lon` with `def.property`, put them on each dot's `style`, animate one `yaw` angle on the group around them, and let a `css` rule place every dot with `sin` and `cos`. `examples/earth` in the svjeez repository turns 1,879 dots through a day and lights cities by the sun's angle this way.
 
 ## Errors
 

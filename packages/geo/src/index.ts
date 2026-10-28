@@ -1,4 +1,6 @@
 import {
+  geoBounds,
+  geoContains,
   geoDistance,
   geoGraticule,
   geoInterpolate,
@@ -52,6 +54,15 @@ export interface Region {
   readonly bounds: Rect;
 }
 
+export interface Dot {
+  readonly at: LonLat;
+  /** The id of the feature the dot sits in, as `map.region()` takes it. */
+  readonly id: string;
+  readonly properties: GeoJsonProperties;
+  /** Where the dot lands in the scene, or undefined when the projection clips it, as on the far side of a globe. */
+  readonly point: Point | undefined;
+}
+
 export interface GeoMap {
   readonly frame: Rect;
   readonly projection: GeoProjection;
@@ -70,6 +81,12 @@ export interface GeoMap {
   graticule(step?: number): string;
   /** Where a place lands in the scene. */
   point(at: LonLat): Point;
+  /**
+   * Evenly spaced places on land, for a dot map: rows `step` degrees of latitude apart, and dots about `step` degrees
+   * of arc apart along each row, so they stay even toward the poles. Dots on the far side of a globe are kept, so a
+   * scene can turn it. Default step 2.
+   */
+  dots(step?: number): Dot[];
   /** The great-circle arc from `from` to `to`, for `travel()` and `flow()`. `steps` defaults to one per degree. */
   route(from: LonLat, to: LonLat, options?: { readonly steps?: number }): Point[];
   /** A camera target around a region, a list of regions and places, or any GeoJSON, grown by `pad` px on every side. */
@@ -121,6 +138,10 @@ const largest = (f: Feature, area: (o: GeoPermissibleObjects) => number): Featur
 
   return pieces.reduce((a, b) => (area(b) > area(a) ? b : a));
 };
+
+/** Whether a place sits in a `geoBounds` box, which runs from x0 east to x1 and wraps when it crosses the antimeridian. */
+const within = ([[x0, y0], [x1, y1]]: [[number, number], [number, number]], [lon, lat]: LonLat) =>
+  lat >= y0 && lat <= y1 && (x0 <= x1 ? lon >= x0 && lon <= x1 : lon >= x0 || lon <= x1);
 
 const toRect = ([[x0, y0], [x1, y1]]: [[number, number], [number, number]]) =>
   rect(x0, y0, x1 - x0, y1 - y0);
@@ -214,8 +235,11 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
         }
       : undefined;
 
+  const locate = (at: LonLat): Point | undefined =>
+    lines({ type: "Point", coordinates: [...at] }).flat()[0];
+
   const point = (at: LonLat): Point => {
-    const [found] = lines({ type: "Point", coordinates: [...at] }).flat();
+    const found = locate(at);
 
     if (!found)
       throw new Error(
@@ -268,6 +292,26 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
           ])(),
       ),
     point,
+    dots(step = 2) {
+      const boxes = kept.map(({ f, id }) => ({ f, id, box: geoBounds(f) }));
+      const rows = Math.round(180 / step);
+
+      return Array.from({ length: rows }, (_, row) => -90 + ((row + 0.5) * 180) / rows).flatMap(
+        (lat) => {
+          const count = Math.max(1, Math.round((360 * Math.cos((lat * Math.PI) / 180)) / step));
+
+          return Array.from({ length: count }, (_, i): Dot[] => {
+            const at: LonLat = [-180 + ((i + 0.5) * 360) / count, lat];
+
+            const found = boxes.find(({ f, box }) => within(box, at) && geoContains(f, [...at]));
+
+            return found
+              ? [{ at, id: found.id, properties: found.f.properties, point: locate(at) }]
+              : [];
+          }).flat();
+        },
+      );
+    },
     route(from, to, { steps } = {}) {
       const count =
         steps ?? Math.max(2, Math.ceil((geoDistance([...from], [...to]) * 180) / Math.PI));
@@ -308,5 +352,7 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
     },
   };
 }
+
+export { night, sun } from "./sun.ts";
 
 export type { Feature, FeatureCollection, Geometry, GeoJsonProperties, GeoProjection, Topology };
