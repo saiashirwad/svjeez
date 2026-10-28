@@ -224,3 +224,52 @@ export function tex(source: string, options: TexOptions = {}): Tex {
     draw,
   };
 }
+
+export {
+  epicycles,
+  type Epicycles,
+  type EpicyclesOptions,
+  type EpicyclesSource,
+  type Outline,
+} from "./epicycles.ts";
+
+export { derive, type Derivation, type DeriveOptions, type DeriveStep } from "./derive.ts";
+
+export { counter, type Counter, type CounterOptions, type CounterValue } from "./counter.ts";
+
+export {
+  construct,
+  type AngleOptions,
+  type BisectOptions,
+  type CircleOptions,
+  type ConstructOptions,
+  type Construction,
+  type GeoCircle,
+  type GeoCurve,
+  type GeoLine,
+  type GeoPoint,
+  type IntersectOptions,
+  type LineOptions,
+  type Look,
+  type Pace,
+  type PointOptions,
+  type PolygonOptions,
+  type SegmentOptions,
+  type SettleOptions,
+  type TickOptions,
+  type Timing,
+} from "./construct.ts";
+
+export {
+  plane,
+  type LabelOptions as PlaneLabelOptions,
+  type LineOptions as SpanOptions,
+  type Plane,
+  type PlaneFunction,
+  type PlaneMatrix,
+  type PlaneOptions,
+  type PolygonOptions as PlanePolygonOptions,
+  type StepOptions,
+  type Vec2,
+  type VectorOptions,
+} from "./plane.ts";

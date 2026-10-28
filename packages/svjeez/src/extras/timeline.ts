@@ -86,22 +86,40 @@ export const visible = (spans: readonly Span[], fade: Seconds = 0.15): Motion<"o
     motion({ opacity: 0 }),
   );
 
+export interface TravelOptions {
+  readonly at: Seconds;
+  readonly speed?: number;
+  readonly over?: Seconds;
+}
+
+export interface HeadingOptions extends TravelOptions {
+  /**
+   * Turn the token to face the way it moves. `true` points its +x axis along the path. A number adds that many degrees,
+   * so an icon drawn pointing up takes 90.
+   */
+  readonly heading: true | number;
+}
+
 /**
  * A token that appears at `at`, runs `points` at constant speed and vanishes at the end. Draw it at the origin.
- * `over` fixes the trip's duration; otherwise `speed` in px/s sets it.
+ * `over` fixes the trip's duration; otherwise `speed` in px/s sets it. With `heading` it also turns to follow the
+ * path, easing between the directions of consecutive legs, and the motion gains a `rotate` channel.
  */
-export const travel = (
+export function travel(points: readonly Point[], options: HeadingOptions): Motion<Heading>;
+export function travel(points: readonly Point[], options: TravelOptions): Motion<Travel>;
+export function travel(
   points: readonly Point[],
-  {
-    at,
-    speed = 300,
-    over,
-  }: { readonly at: Seconds; readonly speed?: number; readonly over?: Seconds },
-): Motion<"x" | "y" | "opacity"> => {
-  const legs = points.slice(1).flatMap((point, i) => {
-    const length = Math.hypot(point.x - points[i]!.x, point.y - points[i]!.y);
+  options: TravelOptions & { readonly heading?: true | number },
+): Motion<Heading> {
+  const { at, speed = 300, over, heading } = options;
 
-    return length > 0 ? [{ point, length }] : [];
+  const legs = points.slice(1).flatMap((point, i) => {
+    const from = points[i]!;
+    const length = Math.hypot(point.x - from.x, point.y - from.y);
+
+    return length > 0
+      ? [{ point, length, angle: (Math.atan2(point.y - from.y, point.x - from.x) * 180) / Math.PI }]
+      : [];
   });
 
   const total = pathLength(points);
@@ -112,22 +130,70 @@ export const travel = (
       `travel() needs a path of positive length and a positive speed or duration, got length ${total} over ${duration}s.`,
     );
 
-  const start: Motion<"x" | "y" | "opacity"> = motion({
+  const turns =
+    heading === undefined
+      ? []
+      : facings(
+          legs.map((leg) => leg.angle),
+          heading,
+        );
+
+  const start: Motion<Heading> = motion({
     opacity: 0,
     x: points[0]!.x,
     y: points[0]!.y,
+    ...(heading === undefined ? {} : { rotate: turns[0]! }),
   })
     .at(at)
     .set({ opacity: 1 });
 
   return legs
     .reduce(
-      (track, leg) =>
-        track.to({ x: leg.point.x, y: leg.point.y }, (duration * leg.length) / total, ease.linear),
+      (track, leg, i) =>
+        track.to(
+          {
+            x: leg.point.x,
+            y: leg.point.y,
+            ...(heading === undefined ? {} : { rotate: turns[i + 1]! }),
+          },
+          (duration * leg.length) / total,
+          ease.linear,
+        ),
       start,
     )
     .set({ opacity: 0 });
+}
+
+type Travel = "x" | "y" | "opacity";
+type Heading = Travel | "rotate";
+
+/**
+ * The heading at each vertex of a path whose legs point `angles` degrees: the mean of the two legs that meet there,
+ * the first and last leg's own at the ends. Each is shifted by multiples of 360 to sit within 180 of the one before,
+ * so the token turns the short way and never spins.
+ */
+const facings = (angles: readonly number[], offset: true | number): number[] => {
+  const shift = offset === true ? 0 : offset;
+  const turned: number[] = [];
+
+  const vertex = angles.map((angle, i) => {
+    if (i === 0) return angle;
+    const before = angles[i - 1]!;
+
+    return before + wrap(angle - before) / 2;
+  });
+  vertex.push(angles.at(-1)!);
+
+  for (const angle of vertex) {
+    const last = turned.at(-1);
+    turned.push(last === undefined ? angle : last + wrap(angle - last));
+  }
+
+  return turned.map((angle) => angle + shift);
 };
+
+/** `angle` brought into -180 to 180. */
+const wrap = (angle: number) => angle - 360 * Math.round(angle / 360);
 
 /** Seconds a viewer needs to read `text`: words / wps + settle, at least `min`. */
 export const readingTime = (

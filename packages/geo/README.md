@@ -88,6 +88,73 @@ Chromium keeps each animated element on its own raster, and when a camera scales
 
 [`examples/world`](https://github.com/saiashirwad/svjeez/tree/main/examples/world) does this end to end.
 
-## Not yet
+## Data maps
 
-Spinning globes and changing projections change a path's outline over time, which svjeez can't animate yet.
+Color regions from numbers, play them through time, and morph the map into a cartogram or a bar chart. Import from `@svjeez/geo`. `examples/choropleth` in the svjeez repository plays life expectancy through 1960 to 2020, then morphs it into a population cartogram and a bar chart. The data is World Bank (SP.DYN.LE00.IN, SP.POP.TOTL) and is named in the scene's `desc`.
+
+A scale turns a number into one of `steps` colors (default 9). Colors are hex, blended in OKLab. `palettes` has `viridis`, `magma`, `blues`, `redBlue` and `brownTeal`.
+
+```tsx
+const scale = sequential(palettes.viridis, { domain: [35, 85], steps: 10, empty: "#2a343f" });
+const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
+const key = legend(scale, { x: 40, y: 480, width: 360, title: "Life expectancy (years)", empty: "No data" });
+```
+
+`choropleth(map, values, { scale, at, over, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per time in `at`, and the map fades from `scale.empty` into the first frame unless that time is 0. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
+
+```tsx
+const years = choropleth(map, { "250": [78, 82], "276": [77, 81] }, { scale, at: [0.5, 3], lines: "#0b1118" });
+```
+
+`cartogram(map, values, { at, over, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel. `toBars(map, values, { frame, at, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
+
+The shapes start as the outline and hide until `at`. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
+
+## Traffic
+
+`traffic(lines, { during, rate, seed, speed, style, color, size, back })` sends `rate` particles a second over the span `during`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, end }`.
+
+`arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
+
+```tsx
+const routes = flights.map(([a, b]) => ({ points: arc(map, a, b), weight: 3 }));
+const { node } = traffic(routes, { during: { at: 1, over: 8 }, rate: 6, seed: 4, style: "comet", size: 2.5 });
+```
+
+Particles still in flight at the end of the scene fail the scene's length check, so end `during` a trip's length before the scene ends.
+
+## Turning globes
+
+`globe(data, { frame, tilt, spin })` turns an orthographic globe whose land, borders, grid, routes and night side are real paths. Each is a `sampledPath()` from svjeez with a fixed point count. A point behind the globe is folded out past the rim rather than clipped, so a ring keeps its points as it crosses the horizon, and the fold runs around the hidden pole, or a clear parallel, so no ring wraps the wrong way. Clip every layer to `globe.sphere`.
+
+```tsx
+const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 24 } });
+
+<g clipPath={def.clipPath({}, <path d={earth.sphere} />)}>
+  {earth.land().map((piece) => <path {...piece} fill="#9fcbea" />)}
+  <path {...earth.night(date)} fill="#000" opacity={0.6} />
+</g>
+<g {...earth.place([-0.13, 51.5])}><circle r={3} /></g>
+```
+
+`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
+
+## Changing projection
+
+`reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
+
+`trueSize(map, region, to, { at, over })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. `nightfall(map, (t) => date, { duration })` moves the night side of a flat map through a day or a year as one shape, a column of darkness per longitude, so it holds together across an equinox. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
+
+## Errors
+
+| Error | Fix |
+| --- | --- |
+| `choropleth() has … values per region but … times in at. Pass one time per value.` | Give `at` one time per entry of each list. |
+| `choropleth() needs every region to have the same number of values, got lists of …` | Pad or trim the lists to one length. |
+| `cartogram() takes one number per region, but … has a list.` | Pass one time's values. |
+| `toBars() needs positive values, got … for …` | Drop zero and negative values first. |
+| `cartogram() found no region to draw. Check the keys of values against the map's region ids and names.` | Keys are ids or `properties.name`. world-atlas ids are numeric strings such as `"250"`. |
+| `A color scale needs hex colors such as "#1f77b4", got …` | Scales blend hex colors. Names and CSS variables can't be blended. |
+| `sequential() needs a domain that rises, got […]` | Put the low value first. |
+| `traffic() needs a positive rate, got …` | Pass departures per second above 0. |
+| `arc() needs two different places.` | The two ends must not coincide. |

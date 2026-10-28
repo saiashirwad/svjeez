@@ -14,125 +14,129 @@
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
-.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
-  .plane path,.plane line,.plane polygon{vector-effect:non-scaling-stroke}
-  .lin{transform:matrix(calc(1 + var(--p2)),var(--p2),calc(0 - var(--p2)),1,0,0)}
-  .hi{translate:calc((1 + var(--p2)) * 34px) calc(var(--p2) * -34px);rotate:atan2(calc(0 - var(--p2)),calc(1 + var(--p2)))}
-  .hj{translate:calc(var(--p2) * -34px) -34px;rotate:atan2(-1,calc(0 - var(--p2)))}
-  .grow{scale:var(--p1)}
-  .mid{translate:0 calc(var(--p2) * -17px)}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}.plane-map{transform:matrix(var(--p1),var(--p2),var(--p3),var(--p11),var(--p12),var(--p13))}.plane-map *{vector-effect:non-scaling-stroke}.plane-head{translate:calc((var(--p1) * var(--p5) + var(--p3) * var(--p6) + var(--p12)) * var(--p4) * 1px) calc((var(--p2) * var(--p5) + var(--p11) * var(--p6) + var(--p13)) * var(--p4) * -1px);rotate:atan2(calc(0 - var(--p2) * var(--p8) - var(--p11) * var(--p10)), calc(var(--p1) * var(--p8) + var(--p3) * var(--p10)))}.plane-at{translate:calc((var(--p1) * var(--p5) + var(--p3) * var(--p6) + var(--p12)) * var(--p4) * 1px + var(--p9) * cos(atan2(calc(0 - var(--p2) * var(--p8) - var(--p11) * var(--p10)), calc(var(--p1) * var(--p8) + var(--p3) * var(--p10))) - 35deg) * 1px) calc((var(--p2) * var(--p5) + var(--p11) * var(--p6) + var(--p13)) * var(--p4) * -1px + var(--p9) * sin(atan2(calc(0 - var(--p2) * var(--p8) - var(--p11) * var(--p10)), calc(var(--p1) * var(--p8) + var(--p3) * var(--p10))) - 35deg) * 1px)}.plane-grow{scale:var(--p7);transform-origin:calc(var(--p5) * 1px) calc(var(--p6) * 1px)}
 
-  .li{translate:calc((1 + var(--p2)) * 34px + 12px) calc(var(--p2) * -34px + 12px)}
-  .lj{translate:calc(var(--p2) * -34px - 13px) -32px}
-
-@property --p1{syntax:'<number>';inherits:false;initial-value:0}
+@property --p1{syntax:'<number>';inherits:true;initial-value:1}
 @property --p2{syntax:'<number>';inherits:true;initial-value:0}
+@property --p3{syntax:'<number>';inherits:true;initial-value:0}
+@property --p4{syntax:'<number>';inherits:true;initial-value:1}
+@property --p5{syntax:'<number>';inherits:false;initial-value:0}
+@property --p6{syntax:'<number>';inherits:false;initial-value:0}
+@property --p7{syntax:'<number>';inherits:false;initial-value:1}
+@property --p8{syntax:'<number>';inherits:false;initial-value:0}
+@property --p9{syntax:'<number>';inherits:false;initial-value:0}
+@property --p10{syntax:'<number>';inherits:false;initial-value:0}
+@property --p11{syntax:'<number>';inherits:true;initial-value:1}
+@property --p12{syntax:'<number>';inherits:true;initial-value:0}
+@property --p13{syntax:'<number>';inherits:true;initial-value:0}
 .a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,1.818%{opacity:0}7.273%,100%{opacity:1}}
 .m2{animation-name:k1}
-@keyframes k2{0%,4.545%{opacity:0}11.818%,100%{opacity:1}}
-.m3{animation-name:k2}
-@keyframes k3{0%,20%{opacity:0}25.455%,100%{opacity:1}}
-.m4{animation-name:k3}
-@keyframes k4{0%,11.818%{--p1:0}16.364%,100%{--p1:1}}
-.m5{animation-name:k4;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k5{0%,13.636%{--p1:0}18.182%,100%{--p1:1}}
-.m6{animation-name:k5;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k6{0%,63.636%{opacity:1}65.909%,100%{opacity:0}}
-.m7{animation-name:k6}
-@keyframes k7{0%,65.909%{opacity:0}68.182%,100%{opacity:1}}
-.m8{animation-name:k7}
-@keyframes k8{0%,22.727%{opacity:0}27.273%,100%{opacity:1}}
-.m9{animation-name:k8}
-@keyframes k9{0%,15.455%{opacity:0}17.273%,100%{opacity:1}}
-.m10{animation-name:k9}
-@keyframes k10{0%,17.273%{opacity:0}19.091%,100%{opacity:1}}
-.m11{animation-name:k10}
-@keyframes k11{0%,16.364%{opacity:0}20%,100%{opacity:1}}
-.m12{animation-name:k11}
-@keyframes k12{0%,18.182%{opacity:0}21.818%,100%{opacity:1}}
-.m13{animation-name:k12}
-@keyframes k13{0%,32.727%{--p2:0}56.364%,100%{--p2:1}}
-.m14{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k14{0%,20%{stroke-dashoffset:1;visibility:hidden}23.818%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k15{0%,23.818%{opacity:1}25.455%,100%{opacity:0}}
-.m15{animation-name:k14,k15;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k16{0%,22.727%{opacity:0}25.455%,100%{opacity:1}}
-.m16{animation-name:k16}
-@keyframes k17{0%,20.909%{stroke-dashoffset:1;visibility:hidden}24.727%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k18{0%,24.727%{opacity:1}26.364%,100%{opacity:0}}
-.m17{animation-name:k17,k18;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k19{0%,23.636%{opacity:0}26.364%,100%{opacity:1}}
-.m18{animation-name:k19}
-@keyframes k20{0%,21.818%{stroke-dashoffset:1;visibility:hidden}25.636%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k21{0%,25.636%{opacity:1}27.273%,100%{opacity:0}}
-.m19{animation-name:k20,k21;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k22{0%,24.545%{opacity:0}27.273%,100%{opacity:1}}
-.m20{animation-name:k22}
-@keyframes k23{0%,22.727%{stroke-dashoffset:1;visibility:hidden}26.545%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k24{0%,26.545%{opacity:1}28.182%,100%{opacity:0}}
-.m21{animation-name:k23,k24;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k25{0%,25.455%{opacity:0}28.182%,100%{opacity:1}}
-.m22{animation-name:k25}
-@keyframes k26{0%,23.636%{stroke-dashoffset:1;visibility:hidden}27.455%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k27{0%,27.455%{opacity:1}29.091%,100%{opacity:0}}
-.m23{animation-name:k26,k27;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k28{0%,26.364%{opacity:0}29.091%,100%{opacity:1}}
-.m24{animation-name:k28}
-@keyframes k29{0%,24.545%{stroke-dashoffset:1;visibility:hidden}28.364%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k30{0%,28.364%{opacity:1}30%,100%{opacity:0}}
-.m25{animation-name:k29,k30;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k31{0%,27.273%{opacity:0}30%,100%{opacity:1}}
-.m26{animation-name:k31}
-@keyframes k32{0%,25.455%{stroke-dashoffset:1;visibility:hidden}29.273%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k33{0%,29.273%{opacity:1}30.909%,100%{opacity:0}}
-.m27{animation-name:k32,k33;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k34{0%,28.182%{opacity:0}30.909%,100%{opacity:1}}
-.m28{animation-name:k34}
-@keyframes k35{0%,26.364%{stroke-dashoffset:1;visibility:hidden}30.182%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k36{0%,30.182%{opacity:1}31.818%,100%{opacity:0}}
-.m29{animation-name:k35,k36;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k37{0%,29.091%{opacity:0}31.818%,100%{opacity:1}}
-.m30{animation-name:k37}
-@keyframes k38{0%,27.273%{stroke-dashoffset:1;visibility:hidden}31.091%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k39{0%,31.091%{opacity:1}32.727%,100%{opacity:0}}
-.m31{animation-name:k38,k39;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k40{0%,30%{opacity:0}32.727%,100%{opacity:1}}
-.m32{animation-name:k40}
-@keyframes k41{0%,63.636%{stroke-dashoffset:1;visibility:hidden}67.455%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k42{0%,67.455%{opacity:1}69.091%,100%{opacity:0}}
-.m33{animation-name:k41,k42;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k43{0%,66.364%{opacity:0}69.091%,100%{opacity:1}}
-.m34{animation-name:k43}
-@keyframes k44{0%,64.364%{stroke-dashoffset:1;visibility:hidden}68.182%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k45{0%,68.182%{opacity:1}69.818%,100%{opacity:0}}
-.m35{animation-name:k44,k45;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k46{0%,67.091%{opacity:0}69.818%,100%{opacity:1}}
-.m36{animation-name:k46}
-@keyframes k47{0%,65.091%{stroke-dashoffset:1;visibility:hidden}68.909%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k48{0%,68.909%{opacity:1}70.545%,100%{opacity:0}}
-.m37{animation-name:k47,k48;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k49{0%,67.818%{opacity:0}70.545%,100%{opacity:1}}
-.m38{animation-name:k49}
-@keyframes k50{0%,65.818%{stroke-dashoffset:1;visibility:hidden}69.636%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k51{0%,69.636%{opacity:1}71.273%,100%{opacity:0}}
-.m39{animation-name:k50,k51;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k52{0%,68.545%{opacity:0}71.273%,100%{opacity:1}}
-.m40{animation-name:k52}
-@keyframes k53{0%,66.545%{stroke-dashoffset:1;visibility:hidden}70.364%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k54{0%,70.364%{opacity:1}72%,100%{opacity:0}}
-.m41{animation-name:k53,k54;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k55{0%,69.273%{opacity:0}72%,100%{opacity:1}}
-.m42{animation-name:k55}
-@keyframes k56{0%,67.273%{stroke-dashoffset:1;visibility:hidden}71.091%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k57{0%,71.091%{opacity:1}72.727%,100%{opacity:0}}
-.m43{animation-name:k56,k57;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k58{0%,70%{opacity:0}72.727%,100%{opacity:1}}
-.m44{animation-name:k58}
-@keyframes k59{0%,23.636%{opacity:0}29.091%,100%{opacity:1}}
-.m45{animation-name:k59}
-@keyframes k60{0%,95.455%{opacity:1}100%{opacity:0}}
-.m46{animation-name:k60}
+@keyframes k2{0%,32.727%{--p1:1}56.364%,100%{--p1:2}}
+@keyframes k3{0%,32.727%{--p2:0}56.364%,100%{--p2:1}}
+@keyframes k4{0%,32.727%{--p3:0}56.364%,100%{--p3:-1}}
+.m3{animation-name:k2,k3,k4;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k5{0%,4.545%{opacity:0}11.818%,100%{opacity:1}}
+.m4{animation-name:k5}
+@keyframes k6{0%,20%{opacity:0}25.455%,100%{opacity:1}}
+.m5{animation-name:k6}
+@keyframes k7{0%,63.636%{opacity:1}65.909%,100%{opacity:0}}
+.m6{animation-name:k7}
+@keyframes k8{0%,65.909%{opacity:0}68.182%,100%{opacity:1}}
+.m7{animation-name:k8}
+@keyframes k9{0%,22.727%{opacity:0}27.273%,100%{opacity:1}}
+.m8{animation-name:k9}
+@keyframes k10{0%,11.818%{--p7:0}16.364%,100%{--p7:1}}
+.m9{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k11{0%,15.455%{opacity:0}17.273%,100%{opacity:1}}
+.m10{animation-name:k11}
+@keyframes k12{0%,16.364%{opacity:0}20%,100%{opacity:1}}
+.m11{animation-name:k12}
+@keyframes k13{0%,13.636%{--p7:0}18.182%,100%{--p7:1}}
+.m12{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k14{0%,17.273%{opacity:0}19.091%,100%{opacity:1}}
+.m13{animation-name:k14}
+@keyframes k15{0%,18.182%{opacity:0}21.818%,100%{opacity:1}}
+.m14{animation-name:k15}
+@keyframes k16{0%,20%{stroke-dashoffset:1;visibility:hidden}23.818%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k17{0%,23.818%{opacity:1}25.455%,100%{opacity:0}}
+.m15{animation-name:k16,k17;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k18{0%,22.727%{opacity:0}25.455%,100%{opacity:1}}
+.m16{animation-name:k18}
+@keyframes k19{0%,20.909%{stroke-dashoffset:1;visibility:hidden}24.727%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k20{0%,24.727%{opacity:1}26.364%,100%{opacity:0}}
+.m17{animation-name:k19,k20;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k21{0%,23.636%{opacity:0}26.364%,100%{opacity:1}}
+.m18{animation-name:k21}
+@keyframes k22{0%,21.818%{stroke-dashoffset:1;visibility:hidden}25.636%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k23{0%,25.636%{opacity:1}27.273%,100%{opacity:0}}
+.m19{animation-name:k22,k23;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k24{0%,24.545%{opacity:0}27.273%,100%{opacity:1}}
+.m20{animation-name:k24}
+@keyframes k25{0%,22.727%{stroke-dashoffset:1;visibility:hidden}26.545%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k26{0%,26.545%{opacity:1}28.182%,100%{opacity:0}}
+.m21{animation-name:k25,k26;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k27{0%,25.455%{opacity:0}28.182%,100%{opacity:1}}
+.m22{animation-name:k27}
+@keyframes k28{0%,23.636%{stroke-dashoffset:1;visibility:hidden}27.455%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k29{0%,27.455%{opacity:1}29.091%,100%{opacity:0}}
+.m23{animation-name:k28,k29;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k30{0%,26.364%{opacity:0}29.091%,100%{opacity:1}}
+.m24{animation-name:k30}
+@keyframes k31{0%,24.545%{stroke-dashoffset:1;visibility:hidden}28.364%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k32{0%,28.364%{opacity:1}30%,100%{opacity:0}}
+.m25{animation-name:k31,k32;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k33{0%,27.273%{opacity:0}30%,100%{opacity:1}}
+.m26{animation-name:k33}
+@keyframes k34{0%,25.455%{stroke-dashoffset:1;visibility:hidden}29.273%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k35{0%,29.273%{opacity:1}30.909%,100%{opacity:0}}
+.m27{animation-name:k34,k35;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k36{0%,28.182%{opacity:0}30.909%,100%{opacity:1}}
+.m28{animation-name:k36}
+@keyframes k37{0%,26.364%{stroke-dashoffset:1;visibility:hidden}30.182%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k38{0%,30.182%{opacity:1}31.818%,100%{opacity:0}}
+.m29{animation-name:k37,k38;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k39{0%,29.091%{opacity:0}31.818%,100%{opacity:1}}
+.m30{animation-name:k39}
+@keyframes k40{0%,27.273%{stroke-dashoffset:1;visibility:hidden}31.091%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k41{0%,31.091%{opacity:1}32.727%,100%{opacity:0}}
+.m31{animation-name:k40,k41;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k42{0%,30%{opacity:0}32.727%,100%{opacity:1}}
+.m32{animation-name:k42}
+@keyframes k43{0%,63.636%{stroke-dashoffset:1;visibility:hidden}67.455%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k44{0%,67.455%{opacity:1}69.091%,100%{opacity:0}}
+.m33{animation-name:k43,k44;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k45{0%,66.364%{opacity:0}69.091%,100%{opacity:1}}
+.m34{animation-name:k45}
+@keyframes k46{0%,64.364%{stroke-dashoffset:1;visibility:hidden}68.182%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k47{0%,68.182%{opacity:1}69.818%,100%{opacity:0}}
+.m35{animation-name:k46,k47;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k48{0%,67.091%{opacity:0}69.818%,100%{opacity:1}}
+.m36{animation-name:k48}
+@keyframes k49{0%,65.091%{stroke-dashoffset:1;visibility:hidden}68.909%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k50{0%,68.909%{opacity:1}70.545%,100%{opacity:0}}
+.m37{animation-name:k49,k50;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k51{0%,67.818%{opacity:0}70.545%,100%{opacity:1}}
+.m38{animation-name:k51}
+@keyframes k52{0%,65.818%{stroke-dashoffset:1;visibility:hidden}69.636%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k53{0%,69.636%{opacity:1}71.273%,100%{opacity:0}}
+.m39{animation-name:k52,k53;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k54{0%,68.545%{opacity:0}71.273%,100%{opacity:1}}
+.m40{animation-name:k54}
+@keyframes k55{0%,66.545%{stroke-dashoffset:1;visibility:hidden}70.364%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k56{0%,70.364%{opacity:1}72%,100%{opacity:0}}
+.m41{animation-name:k55,k56;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k57{0%,69.273%{opacity:0}72%,100%{opacity:1}}
+.m42{animation-name:k57}
+@keyframes k58{0%,67.273%{stroke-dashoffset:1;visibility:hidden}71.091%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k59{0%,71.091%{opacity:1}72.727%,100%{opacity:0}}
+.m43{animation-name:k58,k59;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k60{0%,70%{opacity:0}72.727%,100%{opacity:1}}
+.m44{animation-name:k60}
+@keyframes k61{0%,23.636%{opacity:0}29.091%,100%{opacity:1}}
+.m45{animation-name:k61}
+@keyframes k62{0%,95.455%{opacity:1}100%{opacity:0}}
+.m46{animation-name:k62}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">
@@ -144,58 +148,123 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">linear.tsx</text>
   </g>
   <g class="a m46">
-    <g mask="url(#m1)" class="a m14">
-      <g class="plane" transform="translate(126 238) scale(34 -34)">
-        <g class="a m2">
-          <path d="M-12 -12V12M-12 -12H12M-11 -12V12M-12 -11H12M-10 -12V12M-12 -10H12M-9 -12V12M-12 -9H12M-8 -12V12M-12 -8H12M-7 -12V12M-12 -7H12M-6 -12V12M-12 -6H12M-5 -12V12M-12 -5H12M-4 -12V12M-12 -4H12M-3 -12V12M-12 -3H12M-2 -12V12M-12 -2H12M-1 -12V12M-12 -1H12M1 -12V12M-12 1H12M2 -12V12M-12 2H12M3 -12V12M-12 3H12M4 -12V12M-12 4H12M5 -12V12M-12 5H12M6 -12V12M-12 6H12M7 -12V12M-12 7H12M8 -12V12M-12 8H12M9 -12V12M-12 9H12M10 -12V12M-12 10H12M11 -12V12M-12 11H12M12 -12V12M-12 12H12" fill="none" stroke="var(--base02)"/>
-        </g>
-        <g class="lin a m3">
-          <path d="M-12 -12V12M-12 -12H12M-11 -12V12M-12 -11H12M-10 -12V12M-12 -10H12M-9 -12V12M-12 -9H12M-8 -12V12M-12 -8H12M-7 -12V12M-12 -7H12M-6 -12V12M-12 -6H12M-5 -12V12M-12 -5H12M-4 -12V12M-12 -4H12M-3 -12V12M-12 -3H12M-2 -12V12M-12 -2H12M-1 -12V12M-12 -1H12M1 -12V12M-12 1H12M2 -12V12M-12 2H12M3 -12V12M-12 3H12M4 -12V12M-12 4H12M5 -12V12M-12 5H12M6 -12V12M-12 6H12M7 -12V12M-12 7H12M8 -12V12M-12 8H12M9 -12V12M-12 9H12M10 -12V12M-12 10H12M11 -12V12M-12 11H12M12 -12V12M-12 12H12" fill="none" stroke="var(--base0D)" stroke-opacity="0.55"/>
-          <path d="M-12 0H12M0 -12V12" fill="none" stroke="var(--base05)" stroke-width="1.5"/>
-        </g>
-        <g class="lin">
-          <g class="a m4">
-            <polygon points="0,0 1,0 1,1 0,1" fill="var(--base0A)" fill-opacity="0.22"/>
-            <path d="M1 0V1H0" fill="none" stroke="var(--base0A)" stroke-width="1.5"/>
-          </g>
-          <line class="grow a m5" x2="1" stroke="var(--base0B)" stroke-width="3"/>
-          <line class="grow a m6" y2="1" stroke="var(--base08)" stroke-width="3"/>
+    <g mask="url(#m1)">
+      <g class="a m2">
+        <g transform="translate(126 238) scale(34 -34)">
+          <path d="M-12 -12V12M-11 -12V12M-10 -12V12M-9 -12V12M-8 -12V12M-7 -12V12M-6 -12V12M-5 -12V12M-4 -12V12M-3 -12V12M-2 -12V12M-1 -12V12M0 -12V12M1 -12V12M2 -12V12M3 -12V12M4 -12V12M5 -12V12M6 -12V12M7 -12V12M8 -12V12M9 -12V12M10 -12V12M11 -12V12M12 -12V12M-12 -12H12M-12 -11H12M-12 -10H12M-12 -9H12M-12 -8H12M-12 -7H12M-12 -6H12M-12 -5H12M-12 -4H12M-12 -3H12M-12 -2H12M-12 -1H12M-12 0H12M-12 1H12M-12 2H12M-12 3H12M-12 4H12M-12 5H12M-12 6H12M-12 7H12M-12 8H12M-12 9H12M-12 10H12M-12 11H12M-12 12H12" fill="none" stroke="var(--base02)" style="vector-effect:non-scaling-stroke"/>
         </g>
       </g>
-      <g transform="translate(126 238)">
-        <g class="mid a m9">
-          <g>
-            <g class="a m7">
-              <path d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z" transform="matrix(0.015 0 0 -0.015 13.25 -12.005)" fill="var(--base0A)"/>
-            </g>
-            <g class="a m8">
-              <path d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z" transform="matrix(0.015 0 0 -0.015 13.25 -12.177)" fill="var(--base0A)"/>
+      <g class="a m4">
+        <g transform="translate(126 238) scale(34 -34)">
+          <g class="a m3">
+            <g class="plane-map">
+              <path fill="none" stroke="var(--base0D)" stroke-opacity="0.55" d="M-12 -12V12M-11 -12V12M-10 -12V12M-9 -12V12M-8 -12V12M-7 -12V12M-6 -12V12M-5 -12V12M-4 -12V12M-3 -12V12M-2 -12V12M-1 -12V12M1 -12V12M2 -12V12M3 -12V12M4 -12V12M5 -12V12M6 -12V12M7 -12V12M8 -12V12M9 -12V12M10 -12V12M11 -12V12M12 -12V12M-12 -12H12M-12 -11H12M-12 -10H12M-12 -9H12M-12 -8H12M-12 -7H12M-12 -6H12M-12 -5H12M-12 -4H12M-12 -3H12M-12 -2H12M-12 -1H12M-12 1H12M-12 2H12M-12 3H12M-12 4H12M-12 5H12M-12 6H12M-12 7H12M-12 8H12M-12 9H12M-12 10H12M-12 11H12M-12 12H12"/>
             </g>
           </g>
         </g>
-        <g class="hi a m10">
-          <polygon points="4,0 -8,-5.5 -8,5.5" fill="var(--base0B)"/>
-        </g>
-        <g class="hj a m11">
-          <polygon points="4,0 -8,-5.5 -8,5.5" fill="var(--base08)"/>
-        </g>
-        <g class="li a m12">
-          <g>
-            <g>
-              <path d="M75 287Q75 292 82 313T103 362T142 413T196 441H214Q248 441 270 419T293 357Q292 338 289 330T245 208Q193 72 193 46Q193 26 209 26Q228 26 247 43Q273 71 292 136Q295 148 297 150T311 153H317Q327 153 330 153T337 150T340 143Q340 133 330 105T292 41T228 -8Q220 -10 204 -10Q160 -10 141 15T122 71Q122 98 171 227T221 384Q221 396 218 400T203 405Q175 403 156 374T128 312T116 279Q115 278 97 278H81Q75 284 75 287Z" transform="matrix(0.017 0 0 -0.017 -2.89 6.8)" fill="var(--base0B)"/>
-            </g>
-            <g>
-              <path d="M112 560L249 694L257 686Q387 562 387 560L361 531Q359 532 303 581L250 627L195 580Q182 569 169 557T148 538L140 532Q138 530 125 546L112 560Z" transform="matrix(0.017 0 0 -0.017 -4.111 6.528)" fill="var(--base0B)"/>
+        <g transform="translate(126 238) scale(34 -34)">
+          <g class="a m3">
+            <g class="plane-map">
+              <path fill="none" stroke="var(--base05)" stroke-width="1.5" d="M0 -12V12M-12 0H12"/>
             </g>
           </g>
         </g>
-        <g class="lj a m13">
-          <g>
-            <g>
-              <path d="M75 284T75 287T81 305T101 343T133 389T180 426T240 442Q273 440 300 420T327 350V332L278 134Q267 92 253 37T233 -45T225 -73Q208 -123 162 -163T54 -204Q8 -204 -15 -181Q-32 -164 -32 -140Q-32 -112 -14 -96T27 -79Q48 -79 57 -91T67 -114Q67 -146 39 -166L44 -167H59H60Q112 -167 145 -74Q148 -65 198 134T251 347Q252 353 252 370Q252 382 251 388T245 399T230 405Q204 405 175 378Q157 360 145 337T126 298T117 280T98 278H81Q75 284 75 287Z" transform="matrix(0.017 0 0 -0.017 -2.822 5.151)" fill="var(--base08)"/>
+      </g>
+      <g class="a m5">
+        <g transform="translate(126 238) scale(34 -34)">
+          <g class="a m3">
+            <g class="plane-map">
+              <path fill="var(--base0A)" fill-opacity="0.22" stroke="var(--base0A)" stroke-width="1.5" d="M0 0H1V1H0Z"/>
             </g>
-            <g>
-              <path d="M112 560L249 694L257 686Q387 562 387 560L361 531Q359 532 303 581L250 627L195 580Q182 569 169 557T148 538L140 532Q138 530 125 546L112 560Z" transform="matrix(0.017 0 0 -0.017 -4.25 4.879)" fill="var(--base08)"/>
+          </g>
+        </g>
+      </g>
+      <g class="a m8">
+        <g transform="translate(126 238)">
+          <g style="--p4:34" class="a m3">
+            <g class="plane-at" style="--p5:0.5;--p6:0.5">
+              <g>
+                <g class="a m6">
+                  <path d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z" transform="matrix(0.015 0 0 -0.015 -3.75 4.995)" fill="var(--base0A)"/>
+                </g>
+                <g class="a m7">
+                  <path d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z" transform="matrix(0.015 0 0 -0.015 -3.75 4.823)" fill="var(--base0A)"/>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g>
+        <g>
+          <g transform="translate(126 238) scale(34 -34)">
+            <g class="a m3">
+              <g class="plane-map">
+                <path fill="none" stroke="var(--base0B)" stroke-width="3" d="M0 0H1" class="plane-grow a m9"/>
+              </g>
+            </g>
+          </g>
+          <g class="a m10">
+            <g transform="translate(126 238)">
+              <g style="--p4:34" class="a m3">
+                <g class="plane-head" style="--p5:1;--p8:1">
+                  <polygon points="4,0 -8,-5.5 -8,5.5" fill="var(--base0B)"/>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g class="a m11">
+            <g transform="translate(126 238)">
+              <g style="--p4:34" class="a m3">
+                <g class="plane-at" style="--p5:1;--p8:1;--p9:17.545">
+                  <g transform="translate(0 0)">
+                    <g>
+                      <g>
+                        <path d="M75 287Q75 292 82 313T103 362T142 413T196 441H214Q248 441 270 419T293 357Q292 338 289 330T245 208Q193 72 193 46Q193 26 209 26Q228 26 247 43Q273 71 292 136Q295 148 297 150T311 153H317Q327 153 330 153T337 150T340 143Q340 133 330 105T292 41T228 -8Q220 -10 204 -10Q160 -10 141 15T122 71Q122 98 171 227T221 384Q221 396 218 400T203 405Q175 403 156 374T128 312T116 279Q115 278 97 278H81Q75 284 75 287Z" transform="matrix(0.017 0 0 -0.017 -2.89 6.8)" fill="var(--base0B)"/>
+                      </g>
+                      <g>
+                        <path d="M112 560L249 694L257 686Q387 562 387 560L361 531Q359 532 303 581L250 627L195 580Q182 569 169 557T148 538L140 532Q138 530 125 546L112 560Z" transform="matrix(0.017 0 0 -0.017 -4.111 6.528)" fill="var(--base0B)"/>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g>
+          <g transform="translate(126 238) scale(34 -34)">
+            <g class="a m3">
+              <g class="plane-map">
+                <path fill="none" stroke="var(--base08)" stroke-width="3" d="M0 0V1" class="plane-grow a m12"/>
+              </g>
+            </g>
+          </g>
+          <g class="a m13">
+            <g transform="translate(126 238)">
+              <g style="--p4:34" class="a m3">
+                <g class="plane-head" style="--p6:1;--p10:1">
+                  <polygon points="4,0 -8,-5.5 -8,5.5" fill="var(--base08)"/>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g class="a m14">
+            <g transform="translate(126 238)">
+              <g style="--p4:34" class="a m3">
+                <g class="plane-at" style="--p6:1;--p10:1;--p9:19.069">
+                  <g transform="translate(0 0)">
+                    <g>
+                      <g>
+                        <path d="M75 284T75 287T81 305T101 343T133 389T180 426T240 442Q273 440 300 420T327 350V332L278 134Q267 92 253 37T233 -45T225 -73Q208 -123 162 -163T54 -204Q8 -204 -15 -181Q-32 -164 -32 -140Q-32 -112 -14 -96T27 -79Q48 -79 57 -91T67 -114Q67 -146 39 -166L44 -167H59H60Q112 -167 145 -74Q148 -65 198 134T251 347Q252 353 252 370Q252 382 251 388T245 399T230 405Q204 405 175 378Q157 360 145 337T126 298T117 280T98 278H81Q75 284 75 287Z" transform="matrix(0.017 0 0 -0.017 -2.822 5.151)" fill="var(--base08)"/>
+                      </g>
+                      <g>
+                        <path d="M112 560L249 694L257 686Q387 562 387 560L361 531Q359 532 303 581L250 627L195 580Q182 569 169 557T148 538L140 532Q138 530 125 546L112 560Z" transform="matrix(0.017 0 0 -0.017 -4.25 4.879)" fill="var(--base08)"/>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
             </g>
           </g>
         </g>

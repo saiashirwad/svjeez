@@ -35,7 +35,7 @@ const picture = <>{chart.layers.under}{trip.node}{chart.layers.over}</>; // the 
 
 `edge(from, to)` is the drawn line, `route(from, to)` the shortest path through nodes, both as points. `layers` splits the diagram so a flow runs between edges and nodes.
 
-`flow(points, { at })` runs a token along any path. `style` is `dot`, `comet`, `trace` or `packet` (a labelled chip: pass `label`). `speed` is px per second, or set `over`. `arrive` adds a ripple at the end. It returns `{ node, end }`. `travel(points, { at, speed, over })` is the bare motion: draw your own token at the origin and give it `animation={travel(...)}`.
+`flow(points, { at })` runs a token along any path. `style` is `dot`, `comet`, `trace` or `packet` (a labelled chip: pass `label`). `speed` is px per second, or set `over`. `arrive` adds a ripple at the end. It returns `{ node, end }`. `loop` runs a dot, comet or packet again every that many seconds, and `tail` sets how many dots trail a comet. `travel(points, { at, speed, over })` is the bare motion: draw your own token at the origin and give it `animation={travel(...)}`.
 
 ## Sequence
 

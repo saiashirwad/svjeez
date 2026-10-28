@@ -376,3 +376,62 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
 export { night, sun } from "./sun.ts";
 
 export type { Feature, FeatureCollection, Geometry, GeoJsonProperties, GeoProjection, Topology };
+
+export {
+  choropleth,
+  type Choropleth,
+  type ChoroplethOptions,
+  type RegionValues,
+} from "./choropleth.ts";
+export {
+  cartogram,
+  toBars,
+  type Bar,
+  type Bars,
+  type BarsOptions,
+  type Bubble,
+  type Cartogram,
+  type CartogramOptions,
+  type MorphOptions,
+  type Morphed,
+} from "./morph.ts";
+export {
+  diverging,
+  legend,
+  palettes,
+  sequential,
+  type ColorScale,
+  type Hex,
+  type DivergingOptions,
+  type LegendOptions,
+  type ScaleOptions,
+  type SequentialOptions,
+} from "./scale.ts";
+export {
+  arc,
+  traffic,
+  type ArcOptions,
+  type Traffic,
+  type TrafficLine,
+  type TrafficOptions,
+} from "./traffic.ts";
+
+export {
+  globe,
+  type Globe,
+  type GlobeOptions,
+  type Riding,
+  type Spin,
+  type Turning,
+} from "./globe.ts";
+
+export {
+  reproject,
+  trueSize,
+  type Reprojected,
+  type Reprojection,
+  type ReprojectOptions,
+  type TrueSizeOptions,
+} from "./reproject.ts";
+
+export { nightfall, type NightfallOptions } from "./nightfall.ts";
