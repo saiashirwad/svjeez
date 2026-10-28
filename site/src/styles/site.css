@@ -76,7 +76,7 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 
 /* Header. */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.25rem }
-.brand { display: inline-flex; align-items: center; gap: 0.6rem; font: 700 1.0625rem / 1 var(--display); letter-spacing: -0.02em; text-decoration: none }
+.brand { flex: none; display: inline-flex; align-items: center; gap: 0.6rem; font: 700 1.0625rem / 1 var(--display); letter-spacing: -0.02em; text-decoration: none }
 .brand img { inline-size: 1.625rem; block-size: 1.625rem; border-radius: 22.5% }
 .top nav { display: flex; align-items: center; gap: clamp(0.75rem, 3vw, 1.5rem); font-size: 0.875rem; color: var(--muted) }
 .top nav a { text-decoration: none; padding-block: 0.5rem }
@@ -271,4 +271,6 @@ pre.side { align-self: start }
 /* The playground page: a wider box, and a header that sheds links on a phone. */
 .wrap.wide { inline-size: min(100% - 2 * var(--gutter), 90rem) }
 .top nav a[aria-current="page"] { color: var(--ink) }
-@media (max-width: 30rem) { .top nav .opt { display: none } }
+@media (max-width: 30rem) { .top nav { gap: 0.5rem } .top nav .opt { display: none } }
+/* On the narrowest phones the logo stands for the name, so the menu and both buttons still fit. */
+@media (max-width: 23rem) { .brand span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
