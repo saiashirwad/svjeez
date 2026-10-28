@@ -120,11 +120,14 @@ export function make(layout: keyof typeof LAYOUTS): string {
     return sum;
   };
 
-  const strokes = words.reduce<{ d: string; at: number; over: number }[]>((out, d) => {
-    const at = out.length ? out.at(-1)!.at + out.at(-1)!.over + 0.04 : handAt;
+  const strokes: { d: string; at: number; over: number }[] = [];
 
-    return [...out, { d, at, over: Math.max(0.08, lengthOf(d) / 520) }];
-  }, []);
+  for (const d of words) {
+    const last = strokes.at(-1);
+    const at = last ? last.at + last.over + 0.04 : handAt;
+
+    strokes.push({ d, at, over: Math.max(0.08, lengthOf(d) / 520) });
+  }
 
   const fly = sampled(
     (t) => {

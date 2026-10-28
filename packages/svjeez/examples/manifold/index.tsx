@@ -79,7 +79,7 @@ const round = (value: number, places: number) => Math.round(value * 10 ** places
 const clamp = (value: number, low = 0, high = 1) => Math.min(high, Math.max(low, value));
 const smooth = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
 
-const shapeAt = (s: Seat, t: number): Point => {
+const positionAt = (s: Seat, t: number): Point => {
   const i = STARTS.findLastIndex((start) => start <= t);
   const act = ACTS[i]!;
   const next = ACTS[(i + 1) % ACTS.length]!;
@@ -97,7 +97,7 @@ const flight = (s: Seat) =>
       const { x, y, size, depth } = project(
         CAMERA,
         (-TAU * t) / D,
-        shapeAt({ along: (s.along + t / D) % 1, around: s.around }, t),
+        positionAt({ along: (s.along + t / D) % 1, around: s.around }, t),
       );
 
       return {

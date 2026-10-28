@@ -154,7 +154,7 @@ const asterisk = (x: number, y: number, r: number, animation?: Stack<"rotate" | 
 /** The welcome mascot, built from the same block-character quadrants the terminal draws it with. */
 const MASCOT = [" ▐▛███▜▌ ", "▝▜█████▛▘", "  ▘▘ ▝▝  "];
 
-const QUADRANTS: Record<string, readonly number[]> = {
+const QUADRANTS = {
   "█": [0, 1, 2, 3],
   "▐": [1, 3],
   "▌": [0, 2],
@@ -162,12 +162,14 @@ const QUADRANTS: Record<string, readonly number[]> = {
   "▜": [0, 1, 3],
   "▝": [1],
   "▘": [0],
-};
+} satisfies Record<string, readonly number[]>;
+
+const isQuadrant = (ch: string): ch is keyof typeof QUADRANTS => ch in QUADRANTS;
 
 const mascot = (x: number, row: number) =>
   MASCOT.flatMap((line, r) =>
     [...line].flatMap((ch, c) =>
-      (QUADRANTS[ch] ?? []).map((q) => (
+      (isQuadrant(ch) ? QUADRANTS[ch] : []).map((q) => (
         <rect
           x={x + c * CELL + (q % 2) * (CELL / 2)}
           y={top(row + r) + Math.floor(q / 2) * (ROW / 2)}
@@ -404,7 +406,7 @@ const TERM = { at: TERM_AT, over: DONE_AT + 1.6 - TERM_AT };
 const spinning = (t: number) => t >= SENT && t < DONE_AT;
 
 const bottom = (t: number) =>
-  Math.max(...lines.filter((l) => l.at <= t + 1e-6).map((l) => l.row + 1));
+  Math.max(...lines.flatMap((l) => (l.at <= t + 1e-6 ? [l.row + 1] : [])));
 
 const spinnerRow = (t: number) => bottom(t) + 0.4;
 const inputRow = (t: number) => bottom(t) + (spinning(t) ? 1.8 : 0.5);
@@ -1014,14 +1016,15 @@ const lengthOf = (d: string) => {
 };
 
 /** Each stroke of the pen in turn, at one speed, with a breath between lifts. */
-const strokes = hand
-  .path(WRITTEN, { size: HAND_SIZE, x: handX, y: 360 })
-  .d.split(/(?=M)/)
-  .reduce<{ d: string; at: number; over: number }[]>((out, d) => {
-    const at = out.length ? out.at(-1)!.at + out.at(-1)!.over + 0.04 : HAND_AT + 0.35;
+const strokePaths = hand.path(WRITTEN, { size: HAND_SIZE, x: handX, y: 360 }).d.split(/(?=M)/);
+const strokes: { d: string; at: number; over: number }[] = [];
 
-    return [...out, { d, at, over: lengthOf(d) / SPEED }];
-  }, []);
+for (const d of strokePaths) {
+  const last = strokes.at(-1);
+  const at = last ? last.at + last.over + 0.04 : HAND_AT + 0.35;
+
+  strokes.push({ d, at, over: lengthOf(d) / SPEED });
+}
 
 const inked = strokes.at(-1)!.at + strokes.at(-1)!.over;
 const HAND = { at: HAND_AT, over: inked - HAND_AT + 1.8 };

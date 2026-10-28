@@ -97,6 +97,8 @@ const scenes = {
 };
 
 const tl = timeline(scenes, { gap: 0.6 });
+
+// SAFETY: scenes is a literal object, so each of its keys is a key of scenes
 const names = Object.keys(scenes) as (keyof typeof scenes)[];
 const D = Math.ceil(tl.duration + 1);
 

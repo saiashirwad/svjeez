@@ -91,12 +91,12 @@ export default function build(): string {
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      {tiles.map(([label, shape], i) => {
+      {tiles.map(([label, demo], i) => {
         const cx = 50 + i * 100;
 
         return (
           <>
-            {shape(cx)}
+            {demo(cx)}
             <text
               x={cx}
               y={98}

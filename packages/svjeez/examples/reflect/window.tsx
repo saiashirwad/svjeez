@@ -168,15 +168,14 @@ const NOTE: readonly Line[] = [
   { depth: 2, runs: ["We recommend you splitting your personal and work notes into two graphs."] },
 ];
 
-const TOPS = NOTE.reduce<number[]>(
-  (tops, line) => [...tops, (tops.at(-1) ?? 790) + (line.wrap ? 24 : 32)],
-  [],
-);
+const TOPS: number[] = [];
+
+for (const line of NOTE) TOPS.push((TOPS.at(-1) ?? 790) + (line.wrap ? 24 : 32));
+
+const isText = (run: Run): run is string => typeof run === "string";
 
 const runs = (line: Line): Child =>
-  line.runs.map((run) =>
-    typeof run === "string" ? run : el.tspan({ class: "u", fill: C.link }, run.link),
-  );
+  line.runs.map((run) => (isText(run) ? run : el.tspan({ class: "u", fill: C.link }, run.link)));
 
 function Note(): SvgNode {
   return (

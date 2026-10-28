@@ -278,9 +278,9 @@ const limbNode = (rng: Rng, spec: Species, limb: Limb): SvgNode => {
   const widths = limb.radii.map((radius) => Math.max(1.15, radius * CAM.unit * 2));
   const depth = points[Math.floor(points.length / 2)]!.depth;
   const color = hazed(limbTone(rng, spec, limb.points), depth);
-  const shape = el.path({ d: tapered(points, widths), fill: color });
+  const body = el.path({ d: tapered(points, widths), fill: color });
 
-  if (Math.max(...widths) < 5.5) return shape;
+  if (Math.max(...widths) < 5.5) return body;
   const before = points[Math.max(0, Math.floor(points.length / 2) - 1)]!;
   const after = points[Math.min(points.length - 1, Math.floor(points.length / 2) + 1)]!;
   const tangent = { x: after.x - before.x, y: after.y - before.y };
@@ -293,7 +293,7 @@ const limbNode = (rng: Rng, spec: Species, limb: Limb): SvgNode => {
     opacity: 0.5,
   });
 
-  return el.g({}, [shape, shine]);
+  return el.g({}, [body, shine]);
 };
 
 const leafColor = (

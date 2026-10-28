@@ -45,6 +45,7 @@ export interface Message {
   readonly to: number;
 }
 
+// SAFETY: publication.json is a checked-in export with this shape, and this read is its only parse
 const raw = JSON.parse(readFileSync(join(import.meta.dirname, "publication.json"), "utf8")) as {
   readonly publications: readonly { readonly threads: readonly RawThread[] }[];
 };

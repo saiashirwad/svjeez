@@ -212,6 +212,7 @@ const captions = {
   respond: "respond() shapes what the client sees.",
 };
 
+// SAFETY: Object.fromEntries over captions' own entries has a key for each caption name
 const tl = timeline(
   Object.fromEntries(
     Object.entries(captions).map(([name, text]) => [
@@ -221,6 +222,9 @@ const tl = timeline(
   ) as Record<keyof typeof captions, number>,
   { gap: 0.15, pace: 0.7 },
 );
+
+// SAFETY: captions is a literal object, so each of its keys is a keyof captions
+const names = Object.keys(captions) as (keyof typeof captions)[];
 
 const frame = rect(60, 40, 880, 500);
 const editor = appWindow(frame, { theme, title: "server.ts" });
@@ -329,7 +333,7 @@ export default function build(): string {
           </g>
         </Camera>
       </g>
-      {Object.entries(captions).map(([name, text]) => (
+      {names.map((name) => (
         <text
           x={W / 2}
           y={584}
@@ -337,22 +341,22 @@ export default function build(): string {
           fontSize={17}
           textAnchor="middle"
           fill={theme.base05}
-          animation={during(tl[name as keyof typeof captions], 0.35)}
+          animation={during(tl[name], 0.35)}
         >
-          {text}
+          {captions[name]}
         </text>
       ))}
       <g>
-        {Object.keys(captions).map((_, i) => (
+        {names.map((_, i) => (
           <circle cx={W / 2 + (i - 2) * 14} cy={604} r={2.5} fill={theme.base03} />
         ))}
-        {Object.keys(captions).map((name, i) => (
+        {names.map((name, i) => (
           <circle
             cx={W / 2 + (i - 2) * 14}
             cy={604}
             r={2.5}
             fill={theme.base0A}
-            animation={during(tl[name as keyof typeof captions], 0.2)}
+            animation={during(tl[name], 0.2)}
           />
         ))}
       </g>

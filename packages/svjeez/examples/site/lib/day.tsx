@@ -1,5 +1,5 @@
 import { def, ease, motion, render, type SvgNode } from "svjeez";
-import { code, type CodeTokens } from "svjeez/extras";
+import { code } from "svjeez/extras";
 import { CSS, chrome, highlight } from "../kit";
 import { mono, theme } from "../../style";
 
@@ -100,7 +100,7 @@ export function day(layout: Layout): string {
   const { lineHeight } = layout;
   const y = layout.code.y ?? BAR + (height - BAR - lines.length * fontSize * lineHeight) / 2;
 
-  const listing = code(highlight(source(name)) as CodeTokens, {
+  const listing = code(highlight(source(name)), {
     theme,
     font: mono,
     fontSize,

@@ -411,14 +411,18 @@ const lengthOf = (d: string) => {
   return sum;
 };
 
-const strokes = hand
+const phrasePaths = hand
   .path(PHRASE, { size: PHRASE_SIZE, x: phraseX, y: phraseY })
-  .d.split(/(?=M)/)
-  .reduce<{ d: string; at: number; over: number }[]>((out, d) => {
-    const at = out.length ? out.at(-1)!.at + out.at(-1)!.over + 0.03 : 1.2;
+  .d.split(/(?=M)/);
 
-    return [...out, { d, at, over: Math.max(0.06, lengthOf(d) / 680) }];
-  }, []);
+const strokes: { d: string; at: number; over: number }[] = [];
+
+for (const d of phrasePaths) {
+  const last = strokes.at(-1);
+  const at = last ? last.at + last.over + 0.03 : 1.2;
+
+  strokes.push({ d, at, over: Math.max(0.06, lengthOf(d) / 680) });
+}
 
 const inkDone = strokes.at(-1)!.at + strokes.at(-1)!.over;
 const nib = tool.nib({ size: 3.8, angle: 35, thin: 0.25 });

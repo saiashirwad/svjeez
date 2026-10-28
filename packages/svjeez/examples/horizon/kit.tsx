@@ -62,7 +62,7 @@ const mix = (a: string, b: string, t: number): Color =>
     )
     .join("")}`;
 
-const HEAT: readonly (readonly [number, string])[] = [
+const HEAT: readonly (readonly [number, Color])[] = [
   [0, "#FFFBEA"],
   [0.15, "#FFE3A3"],
   [0.35, "#FFB25C"],
@@ -74,7 +74,7 @@ const HEAT: readonly (readonly [number, string])[] = [
 export const heat = (t: number): Color => {
   const upper = HEAT.findIndex(([at]) => at >= t);
 
-  if (upper <= 0) return HEAT[0]![1] as Color;
+  if (upper <= 0) return HEAT[0]![1];
   const [a, from] = HEAT[upper - 1]!;
   const [b, to] = HEAT[upper]!;
 
@@ -129,15 +129,21 @@ export const phased = <K extends Channel>(
   );
 
   const times = [...grid, wrap].sort((a, b) => a - b);
+  // SAFETY: K extends Target, so the keys of the Values<K> that at() returns are Target keys
   let track: Motion = motion(at(progress(0)) as Values);
 
   for (let j = 1; j < times.length; j++) {
     const [from, to] = [times[j - 1]!, times[j]!];
     const cut = to === wrap;
+    // SAFETY: same Values<K> to Target widening as the first frame, since at() returns K values
     track = track.at(from).to(at(cut ? 1 : progress(to)) as Values, to - from, ease.linear);
 
-    if (cut && wrap < period) track = track.set(at(0) as Values);
+    if (cut && wrap < period) {
+      // SAFETY: same Values<K> to Target widening as the first frame
+      track = track.set(at(0) as Values);
+    }
   }
 
+  // SAFETY: track was built only from at() values, so its target keys are K
   return track.loop(period) as Motion<K>;
 };

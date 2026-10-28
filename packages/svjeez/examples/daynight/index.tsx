@@ -75,7 +75,7 @@ const stroke = {
 } as const;
 
 /** A filled shape that fades in, with its outline drawn over it. */
-const Shape = ({
+const Silhouette = ({
   d,
   fill,
   at,
@@ -232,16 +232,16 @@ export default function build(): string {
         {wave(520, 430, 2)}
         {wave(180, 455, 3)}
 
-        <Shape d="M18 342C60 318 175 316 232 342Z" fill={v.land} at={1.2} />
-        <Shape
+        <Silhouette d="M18 342C60 318 175 316 232 342Z" fill={v.land} at={1.2} />
+        <Silhouette
           d="M440 500C440 410 510 342 600 330C680 320 740 332 800 322V500Z"
           fill={v.land}
           at={1.4}
           over={1.2}
         />
 
-        <Shape d="M82 322V292H134V322Z" fill={v.house} at={2.2} over={0.6} />
-        <Shape d="M74 292L108 262L142 292Z" fill={v.roof} at={2.6} over={0.5} />
+        <Silhouette d="M82 322V292H134V322Z" fill={v.house} at={2.2} over={0.6} />
+        <Silhouette d="M74 292L108 262L142 292Z" fill={v.roof} at={2.6} over={0.5} />
         <path
           d="M100 322V304H116V322Z"
           {...stroke}
@@ -256,7 +256,7 @@ export default function build(): string {
           animation={enter({ at: 3.2, over: 0.4 })}
         />
 
-        <Shape d="M612 328L626 214H654L668 328Z" fill={v.tower} at={3.0} over={1.2} />
+        <Silhouette d="M612 328L626 214H654L668 328Z" fill={v.tower} at={3.0} over={1.2} />
         <path
           d="M619.6 276H660.4L663.4 258H616.6Z"
           fill={v.band}
@@ -267,14 +267,14 @@ export default function build(): string {
           fill={v.band}
           animation={enter({ at: 4.3, over: 0.4 })}
         />
-        <Shape d="M618 214H662V204H618Z" fill={v.tower} at={4.2} over={0.5} />
+        <Silhouette d="M618 214H662V204H618Z" fill={v.tower} at={4.2} over={0.5} />
         <path
           d="M628 204V176H652V204Z"
           {...stroke}
           fill={v.glass}
           animation={enter({ at: 4.6, over: 0.4 })}
         />
-        <Shape d="M622 176L640 154L658 176Z" fill={v.roof} at={4.7} over={0.5} />
+        <Silhouette d="M622 176L640 154L658 176Z" fill={v.roof} at={4.7} over={0.5} />
         <path d="M640 154V142" {...stroke} animation={draw({ at: 5.1, over: 0.3 })} />
 
         <g class="night">

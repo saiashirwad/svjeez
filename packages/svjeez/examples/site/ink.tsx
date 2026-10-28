@@ -22,11 +22,14 @@ const lengthOf = (d: string) => {
   return sum;
 };
 
-const strokes = word.reduce<{ d: string; at: number; over: number }[]>((out, d) => {
-  const at = out.length ? out.at(-1)!.at + out.at(-1)!.over + 0.04 : 0.6;
+const strokes: { d: string; at: number; over: number }[] = [];
 
-  return [...out, { d, at, over: Math.max(0.1, lengthOf(d) / 480) }];
-}, []);
+for (const d of word) {
+  const last = strokes.at(-1);
+  const at = last ? last.at + last.over + 0.04 : 0.6;
+
+  strokes.push({ d, at, over: Math.max(0.1, lengthOf(d) / 480) });
+}
 
 const swashAt = strokes.at(-1)!.at + strokes.at(-1)!.over + 0.3;
 

@@ -144,17 +144,18 @@ const landClip = def.clipPath({}, <path d={LAND.join("")} />);
  * every animated element on its own raster, and when a camera scales hundreds of them they fall behind and flash blank,
  * so the copy that zooms has no animations at all. Geometry lives in shared symbols, so drawing it twice costs little.
  */
-const shapes = new Map<string, Ref<"symbol">>();
+const pathSymbols = new Map<string, Ref<"symbol">>();
 
-const shape = (d: string): Ref<"symbol"> => {
-  let symbol = shapes.get(d);
+const pathSymbol = (d: string): Ref<"symbol"> => {
+  let symbol = pathSymbols.get(d);
 
-  if (!symbol) shapes.set(d, (symbol = def.symbol({ style: "overflow:visible" }, <path d={d} />)));
+  if (!symbol)
+    pathSymbols.set(d, (symbol = def.symbol({ style: "overflow:visible" }, <path d={d} />)));
 
   return symbol;
 };
 
-const landShape = shape(LAND.join(""));
+const landSymbol = pathSymbol(LAND.join(""));
 
 /** Hand tools: a broad nib for coasts and lettering rules, a fine pen for peaks, a brush for rivers and lava. */
 const COAST = tool.nib({ size: 2.6, angle: 40, thin: 0.35 });
@@ -186,7 +187,12 @@ function Words({
   fill: Paint;
 }): SvgNode {
   return (
-    <use href={shape(face.path(text, { size, x, y }).d)} fill={fill} role="img" aria-label={text} />
+    <use
+      href={pathSymbol(face.path(text, { size, x, y }).d)}
+      fill={fill}
+      role="img"
+      aria-label={text}
+    />
   );
 }
 
@@ -258,7 +264,7 @@ function Range({
 
         return (
           <g animation={play(enter({ at: at + i * 0.012, over: 0.35 }, { opacity: 0, y: 4 }))}>
-            <use href={shape(`${body}Z`)} fill={C.land} />
+            <use href={pathSymbol(`${body}Z`)} fill={C.land} />
             <Ink d={body} tool={PEN} fill={C.ink} />
             <Ink d={hatch} tool={HATCH} fill={C.ink} />
           </g>
@@ -307,7 +313,7 @@ function Forest({
     <g stroke={C.ink} strokeWidth={0.8} fill={C.land}>
       {rows.map((row, band) => (
         <use
-          href={shape(
+          href={pathSymbol(
             row
               .map(
                 ({ x, y }) =>
@@ -376,7 +382,7 @@ function Curved({
             transform={`translate(${n(a.x + (b.x - a.x) * t)} ${n(a.y + (b.y - a.y) * t)}) rotate(${n(angle)})`}
           >
             <use
-              href={shape(face.path(char, { size, x: -advance / 2, y: lift }).d)}
+              href={pathSymbol(face.path(char, { size, x: -advance / 2, y: lift }).d)}
               animation={intro(still)(enter({ at: at + i * step, over: 0.4 }, { opacity: 0 }))}
             />
           </g>
@@ -564,7 +570,7 @@ function Cinder({
 
   return (
     <g animation={intro(still)(enter({ at, over: 0.6 }, { opacity: 0, y: 6 }))}>
-      <use href={shape(body)} fill={C.land} />
+      <use href={pathSymbol(body)} fill={C.land} />
       <Ink d={body} tool={tool.pen({ size: 1.5, seed: 8 })} fill={C.ink} />
       <Ink d={hatch} tool={HATCH} fill={C.ink} />
       <Ink d={`M${rim.l} ${rim.y}Q${x} ${rim.y - 4} ${rim.r} ${rim.y}`} tool={PEN} fill={C.ink} />
@@ -740,7 +746,7 @@ const coastRipples = (at: number, still: boolean): Child =>
     { width: 9, color: C.sea, opacity: 1 },
   ].map(({ width, color, opacity }, i) => (
     <use
-      href={landShape}
+      href={landSymbol}
       fill="none"
       stroke={color}
       strokeWidth={width}
@@ -814,7 +820,7 @@ function Atlas({ still }: { still: boolean }): SvgNode {
         {coastRipples(0.2, still)}
       </g>
       <use
-        href={landShape}
+        href={landSymbol}
         fill={C.land}
         animation={play(enter({ at: 0.1, over: 1 }, { opacity: 0 }))}
       />

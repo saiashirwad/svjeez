@@ -70,7 +70,9 @@ const judge = ({ first, cells }: Script): Outcome => {
   return { kind: "draw" };
 };
 
-export const schedule = (scripts: Script[], start: number): { games: Game[]; end: number } => {
+type Schedule = { games: Game[]; end: number };
+
+export const schedule = (scripts: Script[], start: number): Schedule => {
   const games: Game[] = [];
   let cursor = start;
 

@@ -1,4 +1,4 @@
-import { Glyphs, draw, ease, enter, font, motion, render } from "svjeez";
+import { Glyphs, draw, ease, enter, font, render } from "svjeez";
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 

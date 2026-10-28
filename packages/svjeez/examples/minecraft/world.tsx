@@ -203,8 +203,10 @@ const tree = ({ x, z, top }: Column, start: Seconds): VoxelBlock[] => {
   const canopyStart = start + 3;
 
   const crown = built(
-    LEAF_CELLS.filter(([dx, y, dz]) => !(dx === 0 && dz === 0 && y === 0)).map(
-      ([dx, y, dz]): Part => ({ at: [x + dx, top + 3 + y, z + dz], skin: SKIN.leaves }),
+    LEAF_CELLS.flatMap(([dx, y, dz]): Part[] =>
+      dx === 0 && dz === 0 && y === 0
+        ? []
+        : [{ at: [x + dx, top + 3 + y, z + dz], skin: SKIN.leaves }],
     ),
     canopyStart,
     0.04,

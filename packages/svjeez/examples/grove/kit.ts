@@ -149,9 +149,10 @@ export const mix = (a: string, b: string, t: number): Color => {
 export const alpha = (color: string, a: number): Color => {
   const [r, g, b] = rgb(color);
 
-  return `rgba(${r},${g},${b},${a})` as Color;
+  return `rgba(${r},${g},${b},${a})`;
 };
 
+// SAFETY: every ramp is a list of hex color literals, so any entry is a Color
 export const tone = (ramp: readonly string[], t: number): Color =>
   ramp[Math.round(clamp(t) * (ramp.length - 1))] as Color;
 

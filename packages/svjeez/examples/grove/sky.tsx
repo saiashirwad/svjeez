@@ -409,7 +409,7 @@ export function Motes(): SvgNode {
               ),
             });
           }),
-          ...Array.from({ length: count }, (_, i) => {
+          ...Array.from({ length: count }, () => {
             const angle = pick() * TAU;
             const radius = Math.sqrt(pick());
             const x = cx + Math.cos(angle) * rx * radius;

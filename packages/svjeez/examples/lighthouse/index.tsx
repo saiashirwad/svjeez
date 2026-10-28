@@ -38,10 +38,12 @@ const PALETTE = {
 
 type Swatch = keyof typeof PALETTE;
 
+// SAFETY: the keys come from PALETTE, so every Swatch is present and maps to a var(--name) color
 const C = Object.fromEntries(
   Object.keys(PALETTE).map((name) => [name, `var(--${name})`]),
 ) as Record<Swatch, Color>;
 
+// SAFETY: entries(PALETTE) keeps each Swatch key with its [light, dark] pair
 const scheme = (mode: 0 | 1) =>
   (Object.entries(PALETTE) as [Swatch, readonly [Color, Color]][])
     .map(([name, pair]) => `--${name}:${pair[mode]}`)
@@ -148,11 +150,14 @@ const fit = (born: number) => {
 
 const PAN = 0.9;
 
-const shots = graph.reduce<{ at: number; view: ReturnType<typeof fit> }[]>((list, thread) => {
-  const at = list.length === 0 ? 0 : Math.max(thread.born, list.at(-1)!.at + PAN);
+const shots: { at: number; view: ReturnType<typeof fit> }[] = [];
 
-  return [...list, { at, view: fit(thread.born) }];
-}, []);
+for (const thread of graph) {
+  const last = shots.at(-1);
+  const at = last ? Math.max(thread.born, last.at + PAN) : 0;
+
+  shots.push({ at, view: fit(thread.born) });
+}
 
 const camera = shots
   .slice(1)
@@ -389,11 +394,13 @@ function Label({
 function Labels({ thread }: { thread: Thread }): SvgNode {
   const slots = slotsOf(thread);
   const at = position[thread.index]!;
+  // SAFETY: KINDS is a literal Record<Kind, ...>, so each of its keys is a Kind
+  const kinds = Object.keys(KINDS) as Kind[];
 
   return (
     <>
       {schedules[thread.index]!.flatMap((shown, s) =>
-        (Object.keys(KINDS) as Kind[]).map((kind) => {
+        kinds.map((kind) => {
           const mine = shown.filter((label) => label.kind === kind);
 
           return (
@@ -637,8 +644,13 @@ const counted = (pick: (thread: Thread) => boolean) => [
 
 const active = (() => {
   const edges = graph.flatMap((thread) =>
-    merge(thread.runs, 0.3).flatMap(
-      ([a, b]) => [[a, 1], ...(b < end ? [[b, -1]] : [])] as [number, number][],
+    merge(thread.runs, 0.3).flatMap(([a, b]): [number, number][] =>
+      b < end
+        ? [
+            [a, 1],
+            [b, -1],
+          ]
+        : [[a, 1]],
     ),
   );
 
@@ -682,6 +694,8 @@ function Wheel({
 
 const digits = (count: number) => Array.from({ length: count }, (_, k) => String(k));
 
+const isFixed = (labels: string[] | string): labels is string => typeof labels === "string";
+
 /** Scene seconds times SPEED, as T+HH:MM:SS. */
 function Clock({ x, y }: { x: number; y: number }): SvgNode {
   const hour = 3600 / SPEED;
@@ -697,21 +711,21 @@ function Clock({ x, y }: { x: number; y: number }): SvgNode {
     ["s1", 9, digits(10)],
   ];
 
-  const periods: Record<string, number> = {
-    h: D,
-    m10: hour,
-    m1: hour / 6,
-    s10: hour / 60,
-    s1: hour / 360,
-  };
+  const periods = new Map<string, number>([
+    ["h", D],
+    ["m10", hour],
+    ["m1", hour / 6],
+    ["s10", hour / 60],
+    ["s1", hour / 360],
+  ]);
 
   return (
     <g class="mono hud" fill={C.muted}>
       {cells.map(([key, column, labels]) =>
-        typeof labels === "string" ? (
+        isFixed(labels) ? (
           el.text({ x: x + column * ADV, y }, labels)
         ) : (
-          <Wheel x={x + column * ADV} y={y} labels={labels} period={periods[key]!} />
+          <Wheel x={x + column * ADV} y={y} labels={labels} period={periods.get(key)!} />
         ),
       )}
     </g>

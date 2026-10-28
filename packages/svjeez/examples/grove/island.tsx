@@ -176,7 +176,7 @@ const skirt = (): Part[] => {
   return parts;
 };
 
-const surface = (): { readonly fill: SvgNode; readonly detail: SvgNode } => {
+const surface = () => {
   const patch = random(77);
   const patches: SvgNode[] = [];
 
@@ -241,7 +241,7 @@ const surface = (): { readonly fill: SvgNode; readonly detail: SvgNode } => {
   };
 };
 
-const fringe = (): { readonly back: Part[]; readonly front: Part[] } => {
+const fringe = () => {
   const edge = topEdge();
   const center = at([0, 0, 0]);
   const back: Part[] = [];

@@ -9,6 +9,7 @@ export const palette = <const T extends Record<string, Pair>>(pairs: T) => {
       .map(([name, pair]) => `--${name}:${pair[index]}`)
       .join(";");
 
+  // SAFETY: the keys come from pairs, so each key of T is present in the result
   return {
     v: Object.fromEntries(Object.keys(pairs).map((name) => [name, `var(--${name})`])) as {
       [K in keyof T]: Color;
