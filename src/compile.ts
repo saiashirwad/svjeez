@@ -15,6 +15,8 @@ export interface Canvas {
   readonly duration: number;
   /** Playback rate. Every emitted duration is divided by it; the timeline stays in scene seconds. */
   readonly playbackRate: number;
+  /** Put in front of every generated id, class, keyframe name, custom property and font family. */
+  readonly prefix: string;
   readonly stillAt?: number;
   /** False plays once and holds the last frame. */
   readonly loop: boolean;
@@ -68,10 +70,10 @@ const PREFIX: Record<DefTag, string> = {
 
 const REGION = ["filterUnits", "x", "y", "width", "height"];
 
-const nextName = (state: State, prefix: string): string => {
-  const count = (state.counters.get(prefix) ?? 0) + 1;
-  state.counters.set(prefix, count);
-  return `${prefix}${count}`;
+const nextName = (state: State, base: string, lead = ""): string => {
+  const count = (state.counters.get(lead + base) ?? 0) + 1;
+  state.counters.set(lead + base, count);
+  return `${lead}${state.canvas.prefix}${base}${count}`;
 };
 
 const hasSmil = (node: SvgNode): boolean =>
@@ -113,7 +115,7 @@ const refId = (state: State, ref: AnyRef): string => {
 const propertyName = (state: State, key: Property): string => {
   const known = state.properties.get(key);
   if (known) return known;
-  const name = nextName(state, "--p");
+  const name = nextName(state, "p", "--");
   state.properties.set(key, name);
   state.registrations.push(propertyRule(name, key));
   return name;
@@ -121,7 +123,10 @@ const propertyName = (state: State, key: Property): string => {
 
 /** Embed each face the first time a family uses it, whole if any font with its bytes asks to, and return the `font-family` value. */
 const fontFamily = (state: State, value: FontValue): string => {
-  const { family, faces } = fontFaces(value);
+  const { family: plain, faces: named } = fontFaces(value);
+  const { prefix } = state.canvas;
+  const faces = named.map((face) => ({ ...face, name: prefix + face.name }));
+  const family = `'${prefix}${plain.slice(1)}`;
   for (const { name, font } of faces) {
     const slot = `'${name}' ${font.weight} ${font.style}`;
     const taken = state.fonts.get(slot);
@@ -292,7 +297,7 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
       children.push(animate(state.canvas, lane.key, lane));
     }
   }
-  const classes = [attrs.class, css.length > 0 && "a", css.length > 0 && className(state, css), pivot && "fb"].filter(Boolean);
+  const classes = [attrs.class, css.length > 0 && `${state.canvas.prefix}a`, css.length > 0 && className(state, css), pivot && `${state.canvas.prefix}fb`].filter(Boolean);
   if (classes.length > 0) attrs.class = classes.join(" ");
   return element(target.tag, attrs, children);
 };
@@ -353,6 +358,6 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
   const body = content.map((node) => walk(state, node));
   const authored = (isCss(author) ? resolveCss(state, author) : author).trim();
   const fontRules = state.faces.map(({ name, font }) => fontFaceRule(name, font, state.texts));
-  const generated = [...fontRules, ...state.registrations, state.rules.length > 0 && baseRule(canvas), state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freezeRule(canvas, state.rules.length > 0, state.stills)].filter(Boolean).join("\n");
+  const generated = [...fontRules, ...state.registrations, state.rules.length > 0 && baseRule(canvas), state.pivot && `.${canvas.prefix}fb{transform-box:fill-box;transform-origin:center}`, ...state.rules, freezeRule(canvas, state.rules.length > 0, state.stills)].filter(Boolean).join("\n");
   return { body, defs: state.defs, css: [authored, generated].filter(Boolean).join("\n\n") };
 };
