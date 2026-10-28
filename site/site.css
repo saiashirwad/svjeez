@@ -25,7 +25,7 @@
   --gutter: clamp(1rem, 4vw, 2rem);
   --content: 66rem;
   --gap: 1.5rem;
-  --hero-step: clamp(3rem, 8vw, 6rem);
+  --hero-step: clamp(2rem, 4vw, 3rem);
   --radius: 0.75rem;
   --out: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -105,7 +105,7 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 }
 
 /* Hero: one left-aligned column on the page grid, the headline, a short paragraph, then the install line.
-   Spacing steps on 8px: 32px under the underline, then the same step above and below the install line. */
+   Spacing steps on 8px: 32px under the underline, then the same 48px step above and below the install line. */
 .hero { padding-block: clamp(1.5rem, 4vw, 2.25rem) 0; row-gap: 2rem }
 .hero h1 { font-size: clamp(3.25rem, 1rem + 9.5vw, 6.5rem); line-height: 0.92; letter-spacing: -0.055em; padding-block-end: 0.07em }
 .ul { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 0.07em; text-underline-offset: 0.09em; text-decoration-skip-ink: none }
