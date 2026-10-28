@@ -29,3 +29,16 @@ export const simplify = (points: readonly Point[]): Point[] =>
     else out.push(p);
     return out;
   }, []);
+
+/** Each id's position in `ids`, and a lookup that throws `missing(id)` for an id not among them. `unique` is false when an id repeats. */
+export const indexing = (ids: readonly string[], missing: (id: string) => string) => {
+  const index = new Map(ids.map((id, i) => [id, i]));
+  return {
+    unique: index.size === ids.length,
+    at: (id: string): number => {
+      const i = index.get(id);
+      if (i === undefined) throw new Error(missing(id));
+      return i;
+    },
+  };
+};
