@@ -52,7 +52,7 @@ const write = ({ text, size, x, y, at, color, tool, speed = 1100, align = "left"
     node: (
       <g aria-label={text}>
         {strokes.map((s) => (
-          <Stroke d={s.d} tool={tool} color={color} draw={at < 0 ? undefined : { at: s.at, over: s.over }} ease={ease.linear} />
+          <Ink d={s.d} tool={tool} color={color} draw={at < 0 ? undefined : { at: s.at, over: s.over }} />
         ))}
       </g>
     ),
@@ -61,9 +61,27 @@ const write = ({ text, size, x, y, at, color, tool, speed = 1100, align = "left"
 };
 const Written = (props: Hand) => write(props).node;
 
+/**
+ * A mark inked on along its path. While the pen moves it is a plain dashed stroke; when the pen lifts,
+ * the tool's outline takes its place. `<Stroke draw>` reveals through a mask instead, and hundreds of
+ * masks are too slow to repaint on every scroll frame.
+ */
+const Ink = ({ d, tool, color, draw: span, opacity }: { d: string; tool: Tool; color: Color; draw?: { at: number; over: number }; opacity?: number }) => {
+  if (!span) return <Stroke d={d} tool={tool} color={color} opacity={opacity} />;
+  const lift = span.at + span.over;
+  return (
+    <>
+      <g animation={motion({ opacity: 1 }).at(lift).set({ opacity: 0 })}>
+        <path d={d} fill="none" stroke={color} strokeWidth={tool.size * 0.7} strokeLinecap="round" strokeLinejoin="round" opacity={opacity} animation={draw(span, ease.linear)} />
+      </g>
+      <Stroke d={d} tool={tool} color={color} opacity={opacity} animation={motion({ opacity: 0 }).at(lift).set({ opacity: 1 })} />
+    </>
+  );
+};
+
 /** A pencil line drawn on over a span. */
 const Line = ({ d, at, over, color = P.lead, size = 2.2, seed = 1 }: { d: string; at: number; over: number; color?: Color; size?: number; seed?: number }) => (
-  <Stroke d={d} tool={lead(size, seed)} color={color} draw={{ at, over }} ease={ease.inOut} />
+  <Ink d={d} tool={lead(size, seed)} color={color} draw={{ at, over }} />
 );
 
 /** Leaves the page: a lift and a fade, the way an eraser takes a line. */
@@ -272,7 +290,7 @@ const titleNode = (
     <g class="once">
       {title.node}
       {tagline.node}
-      <Stroke d={`M${S / 2 - 210} 425C${S / 2 - 60} 412 ${S / 2 + 90} 418 ${S / 2 + 230} 410`} tool={lead(3.2, 8)} color={P.red} draw={{ at: title.done - 0.2, over: 0.4 }} />
+      <Ink d={`M${S / 2 - 210} 425C${S / 2 - 60} 412 ${S / 2 + 90} 418 ${S / 2 + 230} 410`} tool={lead(3.2, 8)} color={P.red} draw={{ at: title.done - 0.2, over: 0.4 }} />
     </g>
   </g>
 );
@@ -333,7 +351,7 @@ const chapterKeys = (
       <g animation={motion({ opacity: 0 }).at(k.t + 0.08).set({ opacity: 1 })}>
         {ghostShape(k, P.lead, 1.4, "5 4")}
         <g transform={`translate(${k.x + (k.shape === "squash" ? 0 : 54)} ${k.y + (k.shape === "squash" ? 72 : -40)})`}>
-          <Stroke d={circlePath(0, -8, 17)} tool={lead(1.6, 30 + k.n)} color={P.red} draw={{ at: k.t + 0.1, over: 0.25 }} />
+          <Ink d={circlePath(0, -8, 17)} tool={lead(1.6, 30 + k.n)} color={P.red} draw={{ at: k.t + 0.1, over: 0.25 }} />
           <Written text={String(k.n)} size={22} x={0} y={0} at={k.t + 0.12} color={P.red} tool={lead(1.8, 40 + k.n)} align="center" speed={600} />
         </g>
       </g>
@@ -387,7 +405,7 @@ const marker = (line: number, from: number, until: number, seed: number) => {
   const w = mono.measure(CODE[line]!.map(([s]) => s).join(""), CODE_SIZE);
   return (
     <g animation={motion({ opacity: 0 }).at(from).set({ opacity: 1 }).at(until).set({ opacity: 0 })}>
-      <Stroke d={`M${CODE_X + 40} ${y}L${CODE_X + w + 6} ${y - 2}`} tool={{ ...pencil({ size: 26, seed }), size: 26 }} color={P.marker} opacity={0.85} draw={{ at: from, over: 0.25 }} />
+      <Ink d={`M${CODE_X + 40} ${y}L${CODE_X + w + 6} ${y - 2}`} tool={{ ...pencil({ size: 26, seed }), size: 26 }} color={P.marker} opacity={0.85} draw={{ at: from, over: 0.25 }} />
     </g>
   );
 };
@@ -407,7 +425,7 @@ const chapterCode = (
         {marker(2, 18.4, 19.4, 63)}
         {marker(3, 19.4, 20.4, 64)}
         {codeLines}
-        <Stroke d={circlePath(CODE_X + 118, codeY(4) - 8, 70, 22, -2.6, 1.1)} tool={lead(2, 53)} color={P.red} draw={{ at: 18.6, over: 0.35 }} />
+        <Ink d={circlePath(CODE_X + 118, codeY(4) - 8, 70, 22, -2.6, 1.1)} tool={lead(2, 53)} color={P.red} draw={{ at: 18.6, over: 0.35 }} />
         {loopNote.node}
         {tape(CARD.x + 30, CARD.y + 2, -24)}
         {tape(CARD.x + CARD.w - 30, CARD.y + 2, 22)}
@@ -438,7 +456,7 @@ const machine = (
       <Line d="M545 420C540 480 538 560 542 650L702 652C706 560 704 480 698 420" at={MACHINE_AT + 0.3} over={0.5} seed={71} size={2.6} />
       <Line d="M702 560L782 572L780 618L702 616" at={MACHINE_AT + 0.7} over={0.3} seed={72} />
       <Line d="M560 652L556 690M686 652L690 690" at={MACHINE_AT + 0.9} over={0.2} seed={73} />
-      <Stroke d={circlePath(620, 490, 30)} tool={lead(2, 74)} color={P.lead} draw={{ at: MACHINE_AT + 0.8, over: 0.3 }} />
+      <Ink d={circlePath(620, 490, 30)} tool={lead(2, 74)} color={P.lead} draw={{ at: MACHINE_AT + 0.8, over: 0.3 }} />
       <g animation={enter({ at: MACHINE_AT + 1.0, over: 0.2 })}>
         <g transform="translate(620 490)">
         <g animation={motion({ rotate: -50 }).at(CRANK.at).to({ rotate: 60 }, 0.5, ease.inOut).to({ rotate: -20 }, 0.5, ease.inOut).to({ rotate: 80 }, 0.5, ease.inOut).to({ rotate: 30 }, 0.5, ease.pop)}>
@@ -508,7 +526,7 @@ const list = strikes.map((word, i) => {
   return (
     <>
       {w.node}
-      <Stroke d={`M92 ${y - 11}C${130 + width * 0.3} ${y - 15} ${100 + width * 0.7} ${y - 8} ${112 + width} ${y - 13}`} tool={lead(3, 90 + i)} color={P.red} draw={{ at: w.done + 0.1, over: 0.25 }} />
+      <Ink d={`M92 ${y - 11}C${130 + width * 0.3} ${y - 15} ${100 + width * 0.7} ${y - 8} ${112 + width} ${y - 13}`} tool={lead(3, 90 + i)} color={P.red} draw={{ at: w.done + 0.1, over: 0.25 }} />
     </>
   );
 });
@@ -522,7 +540,7 @@ const chapterCompile = (
       {insideHeader.node}
       {list}
       {justCss.node}
-      <Stroke d={circlePath(260, 418, 190, 34, -2.9, 1.06)} tool={lead(2, 96)} color={P.red} draw={{ at: justCss.done + 0.1, over: 0.4 }} />
+      <Ink d={circlePath(260, 418, 190, 34, -2.9, 1.06)} tool={lead(2, 96)} color={P.red} draw={{ at: justCss.done + 0.1, over: 0.4 }} />
     </g>
   </>
 );
@@ -595,7 +613,7 @@ const chapterYou = (
     {sparkle(630, 640, 46.6, 12)}
     {sparkle(372, 640, 46.75, 10)}
     {yourTurn.node}
-    <Stroke d="M330 352C420 344 560 350 680 340" tool={lead(3, 121)} color={P.red} draw={{ at: yourTurn.done, over: 0.4 }} />
+    <Ink d="M330 352C420 344 560 350 680 340" tool={lead(3, 121)} color={P.red} draw={{ at: yourTurn.done, over: 0.4 }} />
     <g class="scrollonly">{rewind.node}</g>
   </>
 );
