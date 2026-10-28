@@ -22,7 +22,7 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 
 ## Layout
 
-- `src/` holds the core: `motion.ts` (timeline), `recipes.ts`, `channels.ts` (the channel table), `compile.ts` and `render.ts` (motions to CSS and SMIL), `validate.ts`.
+- `src/` holds the core: `motion.ts` (timeline), `recipes.ts`, `channels.ts` (the channel table), `keys.ts` (keyframe math), `css.ts` and `smil.ts` (emit CSS and SMIL), `compile.ts` and `render.ts` (orchestrate them), `validate.ts`.
 - `src/extras/` holds code, terminal, annotations, themes, and the diagrams in `extras/diagrams/`.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
 - `src/frames.ts` and `src/cli.ts` rasterize frames. They are the only code that touches a browser.

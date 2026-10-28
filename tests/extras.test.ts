@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { el, rect, render } from "svjeez";
 import { Focus, Marker, adaptive, code, cut, defaultDark, defaultLight, morph, read, reveal, terminal, timeline, travel, typewriter, visible, window } from "svjeez/extras";
 import { dataOf, type Motion } from "../src/motion";
-import { keysOf, valueAt } from "../src/timeline";
+import { keysOf, valueAt } from "../src/keys";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 

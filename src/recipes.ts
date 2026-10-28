@@ -1,7 +1,7 @@
 import { groupBy } from "./layout/group";
 import { CHANNELS, clamp, spec, type NumericChannel, type RestChannel, type TargetValues, type Values } from "./channels";
 import type { NumericProperty } from "./properties";
-import { ease, motion, type Ease, type Exact, type Motion, type Seconds, type Span } from "./motion";
+import { NUDGE, ease, motion, type Ease, type Exact, type Motion, type Seconds, type Span } from "./motion";
 
 type Shake = "x" | "y" | "rotate";
 
@@ -139,7 +139,7 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   const { duration, step = 0.05 } = options;
   if (!Number.isFinite(duration) || duration <= 0) throw new Error(`sampled() lasts ${duration}; it needs a positive duration.`);
   if (!Number.isFinite(step) || step <= 0) throw new Error(`sampled() steps by ${step}; it needs a positive step.`);
-  const edge = duration * 1e-5;
+  const edge = duration * NUDGE;
   const times = Array.from({ length: Math.ceil((duration - edge) / step) }, (_, i) => i * step).concat(duration);
   const frames = times.map(sample) as Partial<Record<Sampled, number>>[];
   const present = (frame: Partial<Record<Sampled, number>>) => (Object.keys(frame) as Sampled[]).filter((channel) => Number.isFinite(frame[channel])).sort();

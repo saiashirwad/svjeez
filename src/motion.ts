@@ -102,7 +102,10 @@ const checkValues = (values: TargetValues): TargetValues => {
 
 const end = (step: Step): Seconds => step.start + step.over;
 
-const EPSILON = 1e-9;
+/** Absolute slack, in seconds, when comparing times. */
+export const EPSILON = 1e-9;
+/** Relative to a timeline, the gap that separates two keys meant to be one instant apart. */
+export const NUDGE = 1e-5;
 
 const sharedLane = (a: TargetValues, b: TargetValues): Target | undefined =>
   (Object.keys(a) as Target[]).find((c) => (Object.keys(b) as Target[]).some((d) => spec(c).lane === spec(d).lane));

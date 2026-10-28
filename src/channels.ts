@@ -1,6 +1,6 @@
 import type { Color, Tag } from "./attributes";
 import { num } from "./format";
-import { declarationOf, formatProperty, isProperty, type Property, type PropertyValues } from "./properties";
+import { declarationOf, isProperty, type Property, type PropertyValues } from "./properties";
 
 const SHAPES = ["path", "line", "polyline", "polygon", "circle", "ellipse", "rect"] as const;
 const GRAPHICS = ["g", "use", "text", "image", ...SHAPES] as const;
@@ -24,17 +24,21 @@ interface Spec {
   readonly collidesWith?: readonly string[];
   /** Tags where this lane always lands on a wrapper (WebKit ignores fill-box on bare <text>). */
   readonly wrapsOn?: readonly Tag[];
+  /** How the lane is animated when CSS would not do, as `blur` is through a filter. */
+  readonly backend?: "blur";
+  /** A hard 0/1 cut compiles to `visibility` when the element sets none of these attributes. */
+  readonly toggles?: readonly string[];
 }
 
 export const CHANNELS = {
   width: { value: number, tags: ["rect", "image"], lane: "width", composition: "replace", attr: "width", range: [0, Infinity] },
   height: { value: number, tags: ["rect", "image"], lane: "height", composition: "replace", attr: "height", range: [0, Infinity] },
-  opacity: { value: number, tags: GRAPHICS, lane: "opacity", composition: "nest", identity: 1, range: [0, 1], collidesWith: ["opacity"] },
+  opacity: { value: number, tags: GRAPHICS, lane: "opacity", composition: "nest", identity: 1, range: [0, 1], collidesWith: ["opacity"], toggles: ["opacity", "visibility", "style"] },
   x: { value: number, tags: GRAPHICS, lane: "translate", composition: "nest", identity: 0 },
   y: { value: number, tags: GRAPHICS, lane: "translate", composition: "nest", identity: 0 },
   scale: { value: number, tags: GRAPHICS, lane: "scale", composition: "nest", identity: 1, pivot: true, collidesWith: ["transform"], wrapsOn: ["text"] },
   rotate: { value: number, tags: GRAPHICS, lane: "rotate", composition: "nest", identity: 0, pivot: true, collidesWith: ["transform"], wrapsOn: ["text"] },
-  blur: { value: number, tags: GRAPHICS, lane: "blur", composition: "nest", identity: 0, range: [0, Infinity], collidesWith: ["filter"] },
+  blur: { value: number, tags: GRAPHICS, lane: "blur", composition: "nest", identity: 0, range: [0, Infinity], collidesWith: ["filter"], backend: "blur" },
   draw: { value: number, tags: SHAPES, lane: "draw", composition: "replace", range: [0, 1], pins: { pathLength: "1", "stroke-dasharray": "1" } },
   fill: { value: color, tags: PAINTED, lane: "fill", composition: "replace", attr: "fill" },
   stroke: { value: color, tags: PAINTED, lane: "stroke", composition: "replace", attr: "stroke" },
@@ -83,7 +87,7 @@ export const isChannel = (name: string): name is Channel => Object.hasOwn(CHANNE
 export type Backend = "css" | "smil" | "blur";
 
 export const backendOf = (tag: string, channel: Target): Backend =>
-  tag.startsWith("fe") ? "smil" : channel === "blur" ? "blur" : "css";
+  tag.startsWith("fe") ? "smil" : spec(channel).backend ?? "css";
 
 export const laneOf = (tag: string, channel: Target): string => {
   const row = spec(channel);
@@ -91,32 +95,6 @@ export const laneOf = (tag: string, channel: Target): string => {
 };
 
 export const formatValue = (value: Values[Channel]): string => (typeof value === "number" ? num(value) : String(value));
-
-export const cssDeclarations = (lane: string, values: TargetValues): string => {
-  switch (lane) {
-    case "translate":
-      return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
-    case "width":
-    case "height":
-      return `${lane}:${formatValue(valueOf(values, lane))}px`;
-    case "rotate":
-      return `rotate:${formatValue(values.rotate)}deg`;
-    case "visibility":
-      return `visibility:${values.opacity === 0 ? "hidden" : "visible"}`;
-    case "dash":
-      return `stroke-dashoffset:${num(1 - (values.draw ?? 0))}`;
-    case "draw": {
-      const drawn = values.draw ?? 0;
-      return `stroke-dashoffset:${num(1 - drawn)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
-    }
-    default: {
-      const [target] = Object.keys(values) as Target[];
-      if (!target) throw new Error(`Lane ${lane} has no value.`);
-      const value = valueOf(values, target)!;
-      return `${lane}:${isProperty(target) ? formatProperty(target, value) : formatValue(value)}`;
-    }
-  }
-};
 
 export const clamp = (channel: Channel, value: number): number => {
   const range = spec(channel).range;

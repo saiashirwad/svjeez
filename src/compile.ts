@@ -1,11 +1,13 @@
 import { backendOf, formatValue, laneOf, spec, valueOf, type Backend, type Channel, type Target, type TargetValue, type TargetValues } from "./channels";
+import { BASE_TIMING, baseRule, classBody, cssKeyframes, freezeRule, seconds, type Emit } from "./css";
 import { isRef, refNode, type AnyRef, type DefTag } from "./defs";
 import { fontFaceRule, fontFaces, isFontValue, type Font, type FontValue } from "./font/font";
 import { num } from "./format";
 import { isCss, isProperty, propertyRule, type Css, type Property } from "./properties";
-import { dataOf, type Motion } from "./motion";
+import { keysOf, snapPeriod, valueAt, type Key } from "./keys";
+import { EPSILON, dataOf, type Motion } from "./motion";
+import { animate } from "./smil";
 import { element, type AttrValue, type Element, type SvgNode } from "./svg";
-import { BASE_TIMING, cssKeyframes, keysOf, smilAttributes, snapPeriod, valueAt, type Key } from "./timeline";
 
 export interface Canvas {
   readonly width: number;
@@ -26,9 +28,8 @@ interface Lane {
   readonly period: number;
   readonly snapped: number;
   readonly nest: boolean;
-  readonly discrete: boolean;
-  /** An outer element or shell toggles visibility, so this lane must not set it back to visible. */
-  readonly veiled?: boolean;
+  /** `visibility` for a hard 0/1 cut; `dash` or `value` once an outer element or shell toggles visibility, which a descendant's `visible` would override. */
+  readonly emit: Emit;
   readonly label?: string;
 }
 
@@ -66,8 +67,6 @@ const PREFIX: Record<DefTag, string> = {
 };
 
 const REGION = ["filterUnits", "x", "y", "width", "height"];
-
-const seconds = (canvas: Canvas, scene: number): string => `${num(scene / canvas.speed)}s`;
 
 const nextName = (state: State, prefix: string): string => {
   const count = (state.counters.get(prefix) ?? 0) + 1;
@@ -161,12 +160,12 @@ const startValue = (el: Element, channel: Target, backend: Backend, given: Targe
   throw new Error(`${channel} on <${el.tag}> has no starting value. Pass it to motion({ ${channel}: … }) or set the attribute.`);
 };
 
-const isDiscrete = (keys: readonly Key[]): boolean =>
+const isDiscrete = (keys: readonly Key[], channel: Target): boolean =>
   keys.every((key, index) => {
-    const value = key.values.opacity;
+    const value = valueOf(key.values, channel);
     if (value !== 0 && value !== 1) return false;
     const next = keys[index + 1];
-    return next === undefined || next.values.opacity === value || (key.ease.kind === "steps" && key.ease.count === 1);
+    return next === undefined || valueOf(next.values, channel) === value || (key.ease.kind === "steps" && key.ease.count === 1);
   });
 
 const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
@@ -187,7 +186,7 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
     const initial = Object.fromEntries(channels.map((c) => [c, startValue(el, c, backend, valueOf(data.initial, c))])) as TargetValues;
     const segments = data.steps.filter((step) => channels.some((c) => c in step.values)).map((step) => ({ ...step, values: pick(step.values) }));
     const last = Math.max(0, ...segments.map((step) => step.start + step.over));
-    if (last > period + 1e-9) throw new Error(`A motion on <${el.tag}> runs until ${num(last)}s, past the ${num(duration)}s scene.`);
+    if (last > period + EPSILON) throw new Error(`A motion on <${el.tag}> runs until ${num(last)}s, past the ${num(duration)}s scene.`);
     const keys = keysOf(initial, segments.sort((a, b) => a.start - b.start), period);
     if (keys.length > MAX_KEYS) throw new Error(`${key} on <${el.tag}> has ${keys.length} keys; the cap is ${MAX_KEYS}.`);
     return {
@@ -198,12 +197,7 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
       period,
       snapped,
       nest: backend !== "smil" && spec(channels[0]!).composition === "nest",
-      discrete:
-        key === "opacity" &&
-        el.attrs.opacity === undefined &&
-        el.attrs.visibility === undefined &&
-        el.attrs.style === undefined &&
-        isDiscrete(keys),
+      emit: spec(channels[0]!).toggles?.every((name) => el.attrs[name] === undefined) && isDiscrete(keys, channels[0]!) ? "visibility" : "value",
       label: data.label,
     };
   });
@@ -242,22 +236,9 @@ const keyframesName = (state: State, body: string, label?: string): string => {
 };
 
 const className = (state: State, lanes: readonly Lane[]): string => {
-  const { duration } = state.canvas;
-  const frames = lanes.map((lane) => ({
-    lane,
-    ...cssKeyframes(lane.discrete ? "visibility" : lane.veiled && lane.key === "draw" ? "dash" : isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.keys, lane.period),
-  }));
-  const names = frames.map(({ lane, body }) => keyframesName(state, body, lane.label));
-  const durations = lanes.map((lane) => seconds(state.canvas, lane.snapped));
-  const timings = frames.map((frame) => frame.timing);
-  const body = [
-    `animation-name:${names.join(",")}`,
-    lanes.some((lane) => lane.snapped !== duration) && `animation-duration:${durations.join(",")}`,
-    !state.canvas.loop && lanes.some((lane) => lane.snapped !== duration) && `animation-iteration-count:${lanes.map((lane) => Math.round(duration / lane.snapped)).join(",")}`,
-    timings.some((entry) => entry !== BASE_TIMING) && `animation-timing-function:${timings.join(",")}`,
-  ]
-    .filter(Boolean)
-    .join(";");
+  const frames = lanes.map((lane) => cssKeyframes(isProperty(lane.key) ? propertyName(state, lane.key) : lane.key, lane.emit, lane.keys, lane.period));
+  const names = frames.map(({ body }, index) => keyframesName(state, body, lanes[index]!.label));
+  const body = classBody(state.canvas, lanes, names, frames.map((frame) => frame.timing));
   const known = state.classes.get(body);
   if (known) return known;
   const label = lanes.find((lane) => lane.label)?.label;
@@ -272,9 +253,6 @@ const local = (state: State, lane: Lane): number => {
   return ((at % lane.snapped) / lane.snapped) * lane.period;
 };
 
-const animate = (state: State, attribute: string, lane: Lane): SvgNode =>
-  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped / state.canvas.speed, state.canvas.loop ? undefined : Math.round(state.canvas.duration / lane.snapped)));
-
 const blurFilter = (state: State, lane: Lane): string => {
   const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}`;
   const known = state.blurs.get(signature);
@@ -282,7 +260,7 @@ const blurFilter = (state: State, lane: Lane): string => {
   const id = nextName(state, "f");
   state.blurs.set(signature, id);
   const still = formatValue(valueAt(lane.keys, local(state, lane)).blur);
-  const blur = element("feGaussianBlur", { stdDeviation: still }, [animate(state, "stdDeviation", lane)]);
+  const blur = element("feGaussianBlur", { stdDeviation: still }, [animate(state.canvas, "stdDeviation", lane)]);
   addDef(state, element("filter", { id, ...canvasRegion(state.canvas) }, [blur]));
   return id;
 };
@@ -309,7 +287,7 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
     if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane)})`;
     if (lane.backend === "smil") {
       attrs[lane.key] = formatValue(valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel]);
-      children.push(animate(state, lane.key, lane));
+      children.push(animate(state.canvas, lane.key, lane));
     }
   }
   const classes = [attrs.class, css.length > 0 && "a", css.length > 0 && className(state, css), pivot && "fb"].filter(Boolean);
@@ -323,8 +301,8 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
  */
 const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
   shells.map((lanes, index) => {
-    const outer = veiled || shells.slice(index + 1).some((shell) => shell.some((lane) => lane.discrete));
-    return outer ? lanes.map((lane) => ({ ...lane, discrete: false, veiled: true })) : lanes;
+    const outer = veiled || shells.slice(index + 1).some((shell) => shell.some((lane) => lane.emit === "visibility"));
+    return outer ? lanes.map((lane): Lane => ({ ...lane, emit: lane.key === "draw" ? "dash" : "value" })) : lanes;
   });
 
 const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
@@ -339,7 +317,7 @@ const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
     case "element": {
       const bare = element(node.tag, resolveAttrs(state, node.attrs), []);
       const shells = veil(node.motions.length > 0 ? placeLanes(bare, node.motions.map((value) => lanesOf(state, bare, value))) : [], veiled);
-      const hides = veiled || shells.some((shell) => shell.some((lane) => lane.discrete));
+      const hides = veiled || shells.some((shell) => shell.some((lane) => lane.emit === "visibility"));
       const el = { ...bare, children: node.children.map((child) => walk(state, child, hides)) };
       return shells.reduce<Element>((inner, lanes, index) => emitShell(state, index === 0 ? inner : element("g", {}, [inner]), lanes), el);
     }
@@ -372,12 +350,7 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
   };
   const body = content.map((node) => walk(state, node));
   const authored = (isCss(author) ? resolveCss(state, author) : author).trim();
-  const base = `.a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:${canvas.loop ? "infinite" : 1};animation-fill-mode:both;animation-timing-function:${BASE_TIMING}}`;
-  const freeze =
-    canvas.stillAt === undefined || (state.rules.length === 0 && state.stills.length === 0)
-      ? ""
-      : `@media (prefers-reduced-motion:reduce){${state.rules.length > 0 ? `.a{animation-delay:-${seconds(canvas, canvas.stillAt)}!important;animation-play-state:paused!important}` : ""}${state.stills.join("")}}`;
   const fontRules = state.faces.map(({ name, font }) => fontFaceRule(name, font, state.texts));
-  const generated = [...fontRules, ...state.registrations, state.rules.length > 0 && base, state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freeze].filter(Boolean).join("\n");
+  const generated = [...fontRules, ...state.registrations, state.rules.length > 0 && baseRule(canvas), state.pivot && ".fb{transform-box:fill-box;transform-origin:center}", ...state.rules, freezeRule(canvas, state.rules.length > 0, state.stills)].filter(Boolean).join("\n");
   return { body, defs: state.defs, css: [authored, generated].filter(Boolean).join("\n\n") };
 };
