@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, rect, render, type Motion } from "svjeez";
-import { Focus, Marker, adaptive, code, cut, defaultDark, defaultLight, morph, readingTime, reveal, terminal, timeline, travel, typewriter, visible, appWindow } from "svjeez/extras";
+import { Arrow, Brace, Callout, Focus, Marker, Underline, adaptive, code, cut, defaultDark, defaultLight, morph, readingTime, reveal, terminal, timeline, travel, typewriter, visible, appWindow, flow, tomorrow } from "svjeez/extras";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -170,6 +170,27 @@ test("morph reports when each transition runs and when the last settles", () => 
   expect(two.spans).toEqual([{ at: 1, over: 0.5 }, { at: 3, over: 0.5 }]);
   expect(two.end).toBe(3.5);
   expect(morph([a], { at: [] })).toMatchObject({ spans: [], end: 0 });
+});
+
+describe("accent color", () => {
+  const scene = (node: ReturnType<typeof Marker>) => render({ width: 100, height: 100, duration: 4, title: "accent" }, node);
+  const [span, box] = [{ at: 0, over: 2 }, rect(10, 10, 30, 20)];
+  const items: Record<string, (theme?: typeof tomorrow) => ReturnType<typeof Marker>> = {
+    Marker: (theme) => Marker({ theme, stops: [{ during: span, target: box }] }),
+    Arrow: (theme) => Arrow({ theme, from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, during: span }),
+    Callout: (theme) => Callout({ theme, target: box, during: span, children: "hi" }),
+    Brace: (theme) => Brace({ theme, target: box, during: span }),
+    Underline: (theme) => Underline({ theme, target: box, during: span }),
+    flow: (theme) => flow([{ x: 0, y: 0 }, { x: 50, y: 0 }], { theme, at: 0 }).node,
+  };
+
+  for (const [name, make] of Object.entries(items)) {
+    test(`${name} takes its default color from the theme's base09`, () => {
+      expect(scene(make())).toContain(defaultDark.base09);
+      expect(scene(make(tomorrow))).toContain(tomorrow.base09);
+      expect(scene(make(tomorrow))).not.toContain("#f6c96b");
+    });
+  }
 });
 
 describe("time helpers", () => {

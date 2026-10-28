@@ -5,10 +5,13 @@ import { motion, type Span } from "../motion";
 import { regularFace, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
+import { defaultDark, type Base16 } from "./theme";
 import { during } from "./timeline";
 
 interface Common {
   readonly during: Span;
+  /** Default `defaultDark`; `color` defaults to its `base09`. */
+  readonly theme?: Base16;
   readonly color?: Color;
   /** On the root element, so fonts come from your CSS. */
   readonly class?: string;
@@ -16,9 +19,7 @@ interface Common {
 
 const ink = (color: Color) => ({ fill: "none", stroke: color, strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" }) as const;
 
-const ACCENT: Color = "#f6c96b";
-
-export function Arrow({ from, to, bend = 0, during: span, color = ACCENT, class: cls }: Common & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
+export function Arrow({ from, to, bend = 0, during: span, theme = defaultDark, color = theme.base09, class: cls }: Common & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
   const [cx, cy] = [(from.x + to.x) / 2 - (to.y - from.y) * bend, (from.y + to.y) / 2 + (to.x - from.x) * bend];
   const angle = Math.atan2(to.y - cy, to.x - cx);
   const barb = (a: number) => `${to.x - 8 * Math.cos(angle + a)} ${to.y - 8 * Math.sin(angle + a)}`;
@@ -30,7 +31,7 @@ export function Arrow({ from, to, bend = 0, during: span, color = ACCENT, class:
 }
 
 /** A note box beside `target`, joined to it by a short leader. `columns` is the line length in characters. With `font`, the box fits the measured lines. */
-export function Callout({ target, side = "right", during: span, children, color = ACCENT, fontSize = 14, font, columns = 24, class: cls }: Common & { readonly target: Rect; readonly side?: Edge; readonly children: string; readonly fontSize?: number; readonly font?: FontValue; readonly columns?: number }): SvgNode {
+export function Callout({ target, side = "right", during: span, children, theme = defaultDark, color = theme.base09, fontSize = 14, font, columns = 24, class: cls }: Common & { readonly target: Rect; readonly side?: Edge; readonly children: string; readonly fontSize?: number; readonly font?: FontValue; readonly columns?: number }): SvgNode {
   const lines = children.split(/\s+/).filter(Boolean).reduce<string[]>((out, word) => {
     if (out.length > 0 && out.at(-1)!.length + 1 + word.length <= columns) out[out.length - 1] += ` ${word}`;
     else out.push(word);
@@ -48,7 +49,7 @@ export function Callout({ target, side = "right", during: span, children, color 
   ]);
 }
 
-export function Brace({ target, side = "left", label, during: span, color = ACCENT, class: cls }: Common & { readonly target: Rect; readonly side?: "left" | "right"; readonly label?: string }): SvgNode {
+export function Brace({ target, side = "left", label, during: span, theme = defaultDark, color = theme.base09, class: cls }: Common & { readonly target: Rect; readonly side?: "left" | "right"; readonly label?: string }): SvgNode {
   const [x, dir, mid] = [side === "left" ? target.x - 8 : target.x + target.w + 8, side === "left" ? -1 : 1, target.center.y];
   const d = `M${x} ${target.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${target.y + target.h - 8}q0 8 ${-dir * 8} 8`;
   return el.g({ class: cls, animation: during(span, 0.2) }, [
@@ -57,7 +58,7 @@ export function Brace({ target, side = "left", label, during: span, color = ACCE
   ]);
 }
 
-export function Underline({ target: r, variant = "straight", during: span, color = ACCENT, class: cls }: Common & { readonly target: Rect; readonly variant?: "straight" | "squiggle" }): SvgNode {
+export function Underline({ target: r, variant = "straight", during: span, theme = defaultDark, color = theme.base09, class: cls }: Common & { readonly target: Rect; readonly variant?: "straight" | "squiggle" }): SvgNode {
   const [y, count] = [r.y + r.h - 2, Math.max(1, Math.ceil(r.w / 8))];
   const d = variant === "straight" ? `M${r.x} ${y}h${r.w}` : `M${r.x} ${y}${`l${r.w / count / 2} -2l${r.w / count / 2} 2`.repeat(count)}`;
   return el.path({ d, ...ink(color), class: cls, animation: [during(span, 0.2), draw({ at: span.at, over: Math.min(0.5, span.over / 2) })] });

@@ -226,7 +226,7 @@ const session = terminal(
 
 ```tsx
 const chart = flowchart({ nodes: { a: "Start", b: { label: "Done", role: "output" } }, edges: [["a", "b"]] }, { theme, play: { at: 0.5 } });
-const trip = flow(chart.route("a", "b"), { at: 3, style: "comet", arrive: true }); // dot, comet, trace, packet
+const trip = flow(chart.route("a", "b"), { theme, at: 3, style: "comet", arrive: true }); // dot, comet, trace, packet
 <>{chart.layers.under}{trip.node}{chart.layers.over}</>; // the flow runs between edges and nodes
 ```
 

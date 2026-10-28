@@ -5,6 +5,7 @@ import { ease, motion, type Seconds } from "../motion";
 import { regularFace, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
+import { defaultDark, type Base16 } from "./theme";
 import { travel } from "./timeline";
 
 /**
@@ -19,6 +20,8 @@ export interface FlowOptions {
   readonly speed?: number;
   readonly over?: Seconds;
   readonly style?: FlowStyle;
+  /** Default `defaultDark`; `color` defaults to its `base09`. */
+  readonly theme?: Base16;
   readonly color?: Color;
   /** Head radius. Default 4.5. */
   readonly size?: number;
@@ -44,7 +47,7 @@ const lengthOf = (points: readonly Point[]) => points.slice(1).reduce((sum, p, i
 
 /** Something running `points` from `at`. `end` is when it arrives. */
 export function flow(points: readonly Point[], options: FlowOptions): { readonly node: SvgNode; readonly end: Seconds } {
-  const { at, speed = 220, style = "dot", color = "#f6c96b", size = 4.5, arrive = false, class: cls } = options;
+  const { at, speed = 220, style = "dot", theme = defaultDark, color = theme.base09, size = 4.5, arrive = false, class: cls } = options;
   const over = options.over ?? lengthOf(points) / speed;
   const end = at + over;
   const lag = REACH / TAIL / (lengthOf(points) / over);

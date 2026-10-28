@@ -67,7 +67,7 @@ export default function build(): string {
       <rect width="100%" height="100%" fill={theme.base01} />
       <g animation={motion({ opacity: 1 }).at(D - 0.6).to({ opacity: 0 }, 0.5)}>
         {shell.node}
-        <Marker stops={[...stops, { during: { at: nodesDone, over: trip.end - nodesDone }, target: src.lines(8, 13).pad(3) }]} />
+        <Marker theme={theme} stops={[...stops, { during: { at: nodesDone, over: trip.end - nodesDone }, target: src.lines(8, 13).pad(3) }]} />
         <g class="mono">{src.node}</g>
         {chart.layers.under}
         {trip.node}

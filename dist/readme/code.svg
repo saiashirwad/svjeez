@@ -37,7 +37,7 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 ]]></style>
   <rect width="100%" height="100%" fill="var(--base00)"/>
   <g class="a m2">
-    <rect x="175" y="37" width="33" height="30" rx="6" fill="#f6c96b" fill-opacity="0.1" stroke="#f6c96b" stroke-opacity="0.4" stroke-width="1" class="a m1"/>
+    <rect x="175" y="37" width="33" height="30" rx="6" fill="var(--base09)" fill-opacity="0.1" stroke="var(--base09)" stroke-opacity="0.4" stroke-width="1" class="a m1"/>
   </g>
   <g class="mono">
     <g>

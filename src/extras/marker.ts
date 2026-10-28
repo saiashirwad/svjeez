@@ -2,9 +2,10 @@ import { el } from "../el";
 import { motion, type Motion, type Span } from "../motion";
 import type { Rect } from "../geometry";
 import type { Color } from "../attributes";
+import { defaultDark, type Base16 } from "./theme";
 import type { SvgNode } from "../svg";
 
-export function Marker({ stops, color = "#f6c96b", over = 0.4 }: { readonly stops: readonly { readonly during: Span; readonly target: Rect }[]; readonly color?: Color; readonly over?: number }): SvgNode {
+export function Marker({ stops, theme = defaultDark, color = theme.base09, over = 0.4 }: { readonly stops: readonly { readonly during: Span; readonly target: Rect }[]; readonly theme?: Base16; readonly color?: Color; readonly over?: number }): SvgNode {
   if (!stops.length || !(over > 0)) throw new Error("Marker needs stops and a positive transition duration.");
   const first = stops[0]!.target;
   let position: Motion<"x" | "y"> = motion({ x: 0, y: 0 });

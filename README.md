@@ -371,8 +371,8 @@ const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro
   <Focus stops={[{ during: tl.intro, target: before.lines(2) }]} dim={0.3}>
     {morph([before, after], { at: [tl.change.at], gutter: true }).node}
   </Focus>
-  <Marker stops={[{ during: tl.intro, target: before.get("hook").pad(4) }, { during: tl.change, target: after.get("hook").pad(4) }]} />
-  <Callout target={after.get("send")} side="right" during={tl.outro} class="note">Handlers send intent</Callout>
+  <Marker theme={theme} stops={[{ during: tl.intro, target: before.get("hook").pad(4) }, { during: tl.change, target: after.get("hook").pad(4) }]} />
+  <Callout theme={theme} target={after.get("send")} side="right" during={tl.outro} class="note">Handlers send intent</Callout>
 </>;
 ```
 
@@ -419,7 +419,7 @@ const chart = flowchart(
   },
   { theme, play: { at: 0.5 } },
 );
-const trip = flow(chart.route("pr", "post"), { at: 4, style: "trace", arrive: true });
+const trip = flow(chart.route("pr", "post"), { theme, at: 4, style: "trace", arrive: true });
 <>{chart.layers.under}{trip.node}{chart.layers.over}</>;
 ```
 

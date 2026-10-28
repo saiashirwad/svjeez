@@ -87,7 +87,7 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
       <text x="234" y="48" font-size="12" text-anchor="middle" fill="var(--base04)">readme.tsx</text>
     </g>
     <g class="a m2">
-      <rect x="39" y="122.75" width="156" height="27.875" rx="6" fill="#f6c96b" fill-opacity="0.1" stroke="#f6c96b" stroke-opacity="0.4" stroke-width="1" class="a m1"/>
+      <rect x="39" y="122.75" width="156" height="27.875" rx="6" fill="var(--base09)" fill-opacity="0.1" stroke="var(--base09)" stroke-opacity="0.4" stroke-width="1" class="a m1"/>
     </g>
     <g class="mono">
       <g>
