@@ -1,6 +1,6 @@
 import type { Attrs } from "./attributes";
 import { property } from "./properties";
-import { children, node, type Child, type SvgNode } from "./svg";
+import { children, node, type Child, type Element } from "./svg";
 
 export type DefTag = "linearGradient" | "radialGradient" | "pattern" | "clipPath" | "mask" | "filter" | "marker" | "symbol";
 export type PaintServer = "linearGradient" | "radialGradient" | "pattern";
@@ -15,7 +15,10 @@ export interface Ref<T extends DefTag> {
 export type AnyRef = Ref<DefTag>;
 
 class Reference {
-  constructor(readonly node: SvgNode) {}
+  constructor(
+    readonly tag: DefTag,
+    readonly node: Element,
+  ) {}
 
   toString(): never {
     throw new Error("A def ref is not a string. Pass it as the attribute value itself.");
@@ -24,12 +27,14 @@ class Reference {
 
 export const isRef = (value: unknown): value is AnyRef => value instanceof Reference;
 
-export const refNode = (ref: AnyRef): SvgNode => (ref as unknown as Reference).node;
+export const refNode = (ref: AnyRef): Element => (ref as unknown as Reference).node;
+
+export const refTag = (ref: AnyRef): DefTag => (ref as unknown as Reference).tag;
 
 const make =
   <T extends DefTag>(tag: T) =>
   (attrs: Attrs<T> = {}, content?: Child): Ref<T> =>
-    new Reference({ ...node(tag, attrs), children: children(content) }) as unknown as Ref<T>;
+    new Reference(tag, { ...node(tag, attrs), children: children(content) }) as unknown as Ref<T>;
 
 /**
  * `def.<tag>(attrs, children)`: emitted into <defs> only if the rendered tree references it, with a

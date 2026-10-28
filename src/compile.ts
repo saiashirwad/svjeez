@@ -1,6 +1,6 @@
 import { backendOf, formatValue, laneOf, spec, valueOf, type Backend, type Channel, type Target, type TargetValue, type TargetValues } from "./channels";
 import { BASE_TIMING, baseRule, classBody, cssKeyframes, freezeRule, seconds, type Emit } from "./css";
-import { isRef, refNode, type AnyRef, type DefTag } from "./defs";
+import { isRef, refNode, refTag, type AnyRef, type DefTag } from "./defs";
 import { fontFaceRule, fontFaces, isFontValue, type Font, type FontValue } from "./font/font";
 import { num } from "./format";
 import { isCss, isProperty, propertyRule, type Css, type Property } from "./properties";
@@ -77,15 +77,17 @@ const nextName = (state: State, prefix: string): string => {
 const hasSmil = (node: SvgNode): boolean =>
   node.kind === "element" ? node.tag === "animate" || node.children.some(hasSmil) : node.kind === "fragment" && node.children.some(hasSmil);
 
-const withoutSmil = (node: SvgNode): SvgNode =>
-  node.kind === "element" ? { ...node, children: node.children.filter((child) => !(child.kind === "element" && child.tag === "animate")).map(withoutSmil) } : node;
+const withoutSmil = (node: Element): Element => ({
+  ...node,
+  children: node.children.filter((child) => !(child.kind === "element" && child.tag === "animate")).map((child) => (child.kind === "element" ? withoutSmil(child) : child)),
+});
 
 /** Emit a def. A filter animated by SMIL gets a still twin that reduced motion swaps in, since CSS cannot pause SMIL. */
 const addDef = (state: State, def: Element): void => {
   state.defs.push(def);
   if (state.canvas.stillAt === undefined || def.tag !== "filter" || !hasSmil(def)) return;
   const id = String(def.attrs.id);
-  state.defs.push({ ...(withoutSmil(def) as Element), attrs: { ...def.attrs, id: `${id}s` } });
+  state.defs.push({ ...(withoutSmil(def)), attrs: { ...def.attrs, id: `${id}s` } });
   state.stills.push(`[filter="url(#${id})"]{filter:url(#${id}s)}`);
 };
 
@@ -100,8 +102,8 @@ const canvasRegion = ({ width, height }: Canvas): Record<string, string> => ({
 const refId = (state: State, ref: AnyRef): string => {
   const known = state.ids.get(ref);
   if (known) return known;
-  const def = refNode(ref) as Element;
-  const id = nextName(state, PREFIX[def.tag as DefTag]);
+  const def = refNode(ref);
+  const id = nextName(state, PREFIX[refTag(ref)]);
   state.ids.set(ref, id);
   const region = def.tag === "filter" && !REGION.some((name) => name in def.attrs) ? canvasRegion(state.canvas) : {};
   addDef(state, walk(state, { ...def, attrs: { id, ...region, ...def.attrs } }) as Element);

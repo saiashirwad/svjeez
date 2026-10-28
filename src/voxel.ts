@@ -5,7 +5,7 @@ import { el } from "./el";
 import { motion, type Motion, type Seconds, type Stack } from "./motion";
 import { camera, facingOf, type Camera, type Facing, type Vec3 } from "./space";
 import type { SvgNode } from "./svg";
-import { face, idOf, isOpaque, resolve, texture, type Face, type Skin } from "./texture";
+import { face, isOpaque, resolve, texture, type Face, type Skin, type Texture } from "./texture";
 
 export interface Block {
   /** Integer cell; the cube spans `at` to `at + 1`. */
@@ -96,6 +96,8 @@ const scene = ({ camera: view, blocks }: Scene): SvgNode => {
     return block.animation === undefined && near.every((cell) => cells.get(cellKey(cell))?.some((cover) => covers(cover, block)));
   };
 
+  const textureIds = new Map<Texture, number>();
+  const idOf = (tex: Texture): number => textureIds.get(tex) ?? (textureIds.set(tex, textureIds.size), textureIds.size - 1);
   const symbols = new Map<string, Ref<"symbol">>();
   const symbolOf = (skin: Skin): Ref<"symbol"> => {
     const sides = faces.map((side) => [side, resolve(skin, side)] as const);

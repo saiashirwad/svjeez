@@ -1,3 +1,4 @@
+import { hexBytes } from "./color";
 import { def, type Ref } from "./defs";
 import { el } from "./el";
 import { num } from "./format";
@@ -43,8 +44,6 @@ const runs = (rows: readonly (readonly (Hex | null)[])[], color: Hex): string =>
     .join("");
 
 class Grid {
-  private static count = 0;
-  readonly id = Grid.count++;
   readonly opaque: boolean;
   readonly colors: readonly Hex[];
   readonly base: Hex | undefined;
@@ -73,19 +72,10 @@ class Grid {
 
 const gridOf = (texture: Texture): Grid => texture as unknown as Grid;
 
-export const idOf = (texture: Texture): number => gridOf(texture).id;
-
 export const isOpaque = (texture: Texture): boolean => gridOf(texture).opaque;
 
-const channels = (color: Hex): readonly [number, number, number, number] => {
-  const digits = color.slice(1);
-  const full = digits.length === 3 ? [...digits].map((digit) => digit + digit).join("") : digits;
-  const [r, g, b, a = 255] = (full.match(/../g) ?? []).map((pair) => parseInt(pair, 16));
-  return [r!, g!, b!, a];
-};
-
 const shaded = (color: Hex, shade: number): Hex => {
-  const [r, g, b, a] = channels(color);
+  const [r, g, b, a] = hexBytes(color);
   const hex = (value: number) => Math.round(value).toString(16).padStart(2, "0");
   return `#${hex(r * shade)}${hex(g * shade)}${hex(b * shade)}${a === 255 ? "" : hex(a)}`;
 };

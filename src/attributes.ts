@@ -60,16 +60,20 @@ const PRESENTATION = {
 
 const SHAPE = { ...PRESENTATION, pathLength: attr<number>("pathLength") } as const;
 
+const FONT = {
+  fontFamily: attr<string | FontValue>("font-family"),
+  fontSize: attr<Length>("font-size"),
+  fontStyle: attr<"normal" | "italic">("font-style"),
+  fontWeight: attr<number | "normal" | "bold">("font-weight"),
+} as const;
+
 const TEXT = {
   ...PRESENTATION,
   x: attr<Length>("x"),
   y: attr<Length>("y"),
   dx: attr<Length>("dx"),
   dy: attr<Length>("dy"),
-  fontFamily: attr<string | FontValue>("font-family"),
-  fontSize: attr<Length>("font-size"),
-  fontStyle: attr<"normal" | "italic">("font-style"),
-  fontWeight: attr<number | "normal" | "bold">("font-weight"),
+  ...FONT,
   letterSpacing: attr<Length>("letter-spacing"),
   textAnchor: attr<"start" | "middle" | "end">("text-anchor"),
   dominantBaseline: attr<"auto" | "middle" | "central" | "hanging">("dominant-baseline"),
@@ -90,10 +94,7 @@ const GRADIENT = {
 const ELEMENTS = {
   g: {
     ...PRESENTATION,
-    fontFamily: attr<string | FontValue>("font-family"),
-    fontSize: attr<Length>("font-size"),
-    fontStyle: attr<"normal" | "italic">("font-style"),
-    fontWeight: attr<number | "normal" | "bold">("font-weight"),
+    ...FONT,
   },
   path: { ...SHAPE, d: attr<string>("d") },
   rect: {

@@ -1,4 +1,5 @@
 import type { Color } from "./attributes";
+import { hexBytes } from "./color";
 import { def, type Ref } from "./defs";
 import { num } from "./format";
 import { ease, motion } from "./motion";
@@ -53,10 +54,9 @@ const grayscale = ({ amount = 1 }: { readonly amount?: number } = {}): Ref<"filt
   def.filter({ colorInterpolationFilters: "sRGB" }, <feColorMatrix type="saturate" values={num(1 - Math.min(1, Math.max(0, amount)))} />);
 
 const channels = (hex: `#${string}`): [number, number, number] => {
-  const digits = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex)?.[1];
-  if (!digits) throw new Error(`duotone takes hex colors like "#1b1f3a", got "${hex}".`);
-  const full = digits.length === 3 ? [...digits].map((digit) => digit + digit).join("") : digits;
-  return [0, 2, 4].map((at) => parseInt(full.slice(at, at + 2), 16) / 255) as [number, number, number];
+  if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) throw new Error(`duotone takes hex colors like "#1b1f3a", got "${hex}".`);
+  const [r, g, b] = hexBytes(hex);
+  return [r / 255, g / 255, b / 255];
 };
 
 /** Map luminance (Rec. 709) onto a ramp from `dark` to `light`. Hex colors only. */

@@ -9,16 +9,14 @@ export const num = (value: number, places = 3): string => {
   return String(round(value, places));
 };
 
-const escape = (value: string): string =>
+export const escapeText = (value: string): string =>
   value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 
-export const escapeText = (value: string): string => escape(value);
-
 export const escapeAttr = (value: string): string =>
-  escape(value).replaceAll('"', "&quot;");
+  escapeText(value).replaceAll('"', "&quot;");
 
 export const kebab = (property: string): string => {
   if (property.startsWith("--") || property.includes("-")) return property;
