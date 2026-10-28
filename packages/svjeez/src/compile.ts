@@ -10,19 +10,18 @@ import {
   type TargetValue,
   type TargetValues,
 } from "./channels";
-import {
-  BASE_TIMING,
-  baseRule,
-  classBody,
-  cssKeyframes,
-  freezeRule,
-  seconds,
-  type Emit,
-} from "./css";
+import { baseRule, classBody, cssKeyframes, freezeRule, type Emit } from "./css";
 import { isRef, refNode, refTag, type AnyRef, type DefTag } from "./defs";
 import { fontFaceRule, fontFaces, isFontValue, type Font, type FontValue } from "./font/font";
 import { num } from "./format";
-import { isCss, isProperty, propertyRule, type Css, type Property } from "./properties";
+import {
+  isCss,
+  isProperty,
+  propertyRule,
+  type Css,
+  type CssPart,
+  type Property,
+} from "./properties";
 import { keysOf, snapPeriod, valueAt, type Key } from "./keys";
 import { EPSILON, dataOf, type Motion } from "./motion";
 import { animate } from "./smil";
@@ -118,7 +117,7 @@ const addDef = (state: State, def: Element): void => {
   state.stills.push(`[filter="url(#${id})"]{filter:url(#${id}s)}`);
 };
 
-const canvasRegion = ({ width, height }: Canvas): Record<string, string> => ({
+const canvasRegion = ({ width, height }: Canvas) => ({
   filterUnits: "userSpaceOnUse",
   x: "0",
   y: "0",
@@ -139,6 +138,7 @@ const refId = (state: State, ref: AnyRef): string => {
       ? canvasRegion(state.canvas)
       : {};
 
+  // SAFETY: walk returns an element for an element node, since emitShell and element() build an Element.
   addDef(state, walk(state, { ...def, attrs: { id, ...region, ...def.attrs } }) as Element);
 
   return id;
@@ -190,10 +190,10 @@ const fontFamily = (state: State, value: FontValue): string => {
   return family;
 };
 
+const isHole = (part: CssPart): part is Exclude<CssPart, string> => typeof part !== "string";
+
 const resolveCss = (state: State, text: Css): string =>
-  text.parts
-    .map((part) => (typeof part === "string" ? part : propertyName(state, part.property)))
-    .join("");
+  text.parts.map((part) => (isHole(part) ? propertyName(state, part.property) : part)).join("");
 
 const resolveAttrs = (state: State, attrs: Element["attrs"]): Record<string, AttrValue> =>
   Object.fromEntries(
@@ -209,6 +209,10 @@ const resolveAttrs = (state: State, attrs: Element["attrs"]): Record<string, Att
     }),
   );
 
+const isNumeric = (value: TargetValue): value is number => typeof value === "number";
+
+const isAttrText = (value: AttrValue | undefined): value is string => typeof value === "string";
+
 const startValue = (
   el: Element,
   channel: Target,
@@ -222,8 +226,11 @@ const startValue = (
   if (backend !== "smil" && row.identity !== undefined) return row.identity;
   const attr = row.attr && el.attrs[row.attr];
 
-  if (typeof attr === "string")
-    return typeof row.value === "number" ? Number(attr) : (attr as TargetValue);
+  if (isAttrText(attr)) {
+    // SAFETY: a channel whose value is not a number takes a color, and a color is written as text, so the attribute is a TargetValue.
+    return isNumeric(row.value) ? Number(attr) : (attr as TargetValue);
+  }
+
   throw new Error(
     `${channel} on <${el.tag}> has no starting value. Pass it to motion({ ${channel}: … }) or set the attribute.`,
   );
@@ -249,6 +256,7 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   const period = data.period ?? duration;
   const snapped = data.period === undefined ? duration : snapPeriod(data.period, duration);
 
+  // SAFETY: each key is a channel or property that motion() validated, so it is a Target name.
   const touched = [
     ...new Set([
       ...Object.keys(data.initial),
@@ -259,6 +267,7 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   const groups = new Map<string, Target[]>();
 
   for (const channel of touched) {
+    // SAFETY: tags lists tag names and includes only compares them with el.tag, a string, so the widened readonly string[] is correct.
     if (!(spec(channel).tags as readonly string[]).includes(el.tag))
       throw new Error(`<${el.tag}> cannot animate ${channel}.`);
     const key = laneOf(el.tag, channel);
@@ -268,11 +277,13 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   return [...groups].map(([key, channels]) => {
     const backend = backendOf(el.tag, channels[0]!);
 
+    // SAFETY: the entries are the lane's own channels, each read from a TargetValues, so the result is a TargetValues.
     const pick = (values: TargetValues) =>
       Object.fromEntries(
         channels.filter((c) => c in values).map((c) => [c, valueOf(values, c)]),
       ) as TargetValues;
 
+    // SAFETY: the entries are the lane's own channels, each paired with a TargetValue from startValue, so the result is a TargetValues.
     const initial = Object.fromEntries(
       channels.map((c) => [c, startValue(el, c, backend, valueOf(data.initial, c))]),
     ) as TargetValues;
@@ -319,6 +330,7 @@ const collides = (el: Element, lane: Lane): boolean =>
   lane.channels.some((channel) => {
     const row = spec(channel);
 
+    // SAFETY: wrapsOn lists tag names and includes compares them with el.tag, a string, so the widened readonly string[] is correct.
     return (
       row.collidesWith?.some((name) => name in el.attrs) ||
       (row.wrapsOn as readonly string[] | undefined)?.includes(el.tag)
@@ -433,7 +445,7 @@ const pin = (attrs: Record<string, AttrValue>, el: Element, lane: Lane): void =>
 };
 
 const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Element => {
-  const attrs: Record<string, AttrValue> = { ...target.attrs };
+  const attrs = { ...target.attrs };
   const children = [...target.children];
   const css = lanes.filter((lane) => lane.backend === "css");
 
@@ -449,6 +461,7 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
     if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane)})`;
 
     if (lane.backend === "smil") {
+      // SAFETY: a smil lane animates an SVG attribute, never a custom property, so its first target is a Channel.
       attrs[lane.key] = formatValue(
         valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel],
       );

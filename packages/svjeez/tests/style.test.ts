@@ -32,6 +32,7 @@ const RULES: [RegExp, string][] = [
   [/font\.load\([^)]*JetBrainsMono/, "its own JetBrains Mono: import mono from examples/style.ts"],
 ];
 
+// SAFETY: without withFileTypes, readdirSync returns each entry's relative path as a string.
 const scenes = (readdirSync(EXAMPLES, { recursive: true }) as string[]).filter(
   (file) => /\.tsx?$/.test(file) && file !== "style.ts" && !OWN_LOOK.includes(file.split("/")[0]!),
 );
@@ -41,8 +42,8 @@ describe("code scenes share examples/style.ts", () => {
     const found = scenes.flatMap((file) => {
       const source = readFileSync(join(EXAMPLES, file), "utf8");
 
-      return RULES.filter(([pattern]) => pattern.test(source)).map(
-        ([, problem]) => `${file}: ${problem}`,
+      return RULES.flatMap(([pattern, problem]) =>
+        pattern.test(source) ? [`${file}: ${problem}`] : [],
       );
     });
 

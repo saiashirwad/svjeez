@@ -44,7 +44,7 @@ export const cssKeyframes = (
   emit: Emit,
   keys: readonly Key[],
   period: Seconds,
-): { body: string; timing: string } => {
+) => {
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
     if (moving(keys, index)) counts.set(timing(key.ease), (counts.get(timing(key.ease)) ?? 0) + 1);
@@ -93,6 +93,7 @@ export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues):
     }
 
     default: {
+      // SAFETY: values is a TargetValues, keyed by Target names, so its first key is a Target.
       const [target] = Object.keys(values) as Target[];
 
       if (!target) throw new Error(`Lane ${lane} has no value.`);

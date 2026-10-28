@@ -282,11 +282,11 @@ export function Ink({
   ease = easing.inOut,
   animation,
 }: InkProps): SvgNode {
-  const shape = outlineOf(d, tool);
+  const symbol = outlineOf(d, tool);
 
   if (!draw)
     return (
-      <use href={shape} fill={fill} opacity={opacity} class={className} animation={animation} />
+      <use href={symbol} fill={fill} opacity={opacity} class={className} animation={animation} />
     );
   const end = draw.at + draw.over;
 
@@ -306,11 +306,11 @@ export function Ink({
   return (
     <g fill={fill} opacity={opacity} class={className} animation={animation}>
       <use
-        href={shape}
+        href={symbol}
         mask={reveal}
         animation={motion({ opacity: 1 }).at(end).set({ opacity: 0 })}
       />
-      <use href={shape} animation={motion({ opacity: 0 }).at(end).set({ opacity: 1 })} />
+      <use href={symbol} animation={motion({ opacity: 0 }).at(end).set({ opacity: 1 })} />
     </g>
   );
 }

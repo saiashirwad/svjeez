@@ -5,12 +5,10 @@ import { moving, type Key } from "./keys";
 import type { Seconds } from "./motion";
 import { element, type SvgNode } from "./svg";
 
+const isNumeric = (value: Values[Channel]): value is number => typeof value === "number";
+
 const lerp = (from: Values[Channel], to: Values[Channel], amount: number): Values[Channel] =>
-  typeof from === "number" && typeof to === "number"
-    ? from + (to - from) * amount
-    : amount < 1
-      ? from
-      : to;
+  isNumeric(from) && isNumeric(to) ? from + (to - from) * amount : amount < 1 ? from : to;
 
 export const smilAttributes = (
   attribute: string,
@@ -19,7 +17,7 @@ export const smilAttributes = (
   period: Seconds,
   duration: Seconds,
   repeats?: number,
-): Record<string, string> => {
+) => {
   const movingKeys = keys.filter((_, index) => moving(keys, index));
   const discrete = movingKeys.length > 0 && movingKeys.every((key) => key.ease.kind === "steps");
   const points: { t: Seconds; value: Values[Channel]; spline: string }[] = [];
@@ -94,15 +92,19 @@ export const animate = (
     readonly period: Seconds;
     readonly snapped: Seconds;
   },
-): SvgNode =>
-  element(
+): SvgNode => {
+  // SAFETY: SMIL lanes animate SVG attributes, never custom properties, so the first target of a smil lane is a Channel.
+  const channel = lane.channels[0] as Channel;
+
+  return element(
     "animate",
     smilAttributes(
       attribute,
-      lane.channels[0] as Channel,
+      channel,
       lane.keys,
       lane.period,
       lane.snapped / canvas.playbackRate,
       canvas.loop ? undefined : Math.round(canvas.duration / lane.snapped),
     ),
   );
+};

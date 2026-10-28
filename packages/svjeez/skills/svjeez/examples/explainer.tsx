@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { rect, render } from "svjeez";
+import { render } from "svjeez";
 import {
   Callout,
   Focus,

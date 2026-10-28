@@ -1,11 +1,16 @@
 import type { Color } from "./attributes";
 import { num } from "./format";
 
+const NUMBER: number = 0;
+
+// SAFETY: a placeholder that only fixes the value type; nothing reads its text at runtime.
+const COLOR = "" as Color;
+
 const SYNTAX = {
-  number: { value: 0 as number, css: "<number>", unit: "" },
-  length: { value: 0 as number, css: "<length>", unit: "px" },
-  angle: { value: 0 as number, css: "<angle>", unit: "deg" },
-  color: { value: "" as Color, css: "<color>", unit: "" },
+  number: { value: NUMBER, css: "<number>", unit: "" },
+  length: { value: NUMBER, css: "<length>", unit: "px" },
+  angle: { value: NUMBER, css: "<angle>", unit: "deg" },
+  color: { value: COLOR, css: "<color>", unit: "" },
 } as const;
 
 export type Syntax = keyof typeof SYNTAX;
@@ -72,10 +77,12 @@ export const property = <const N extends string, const S extends Syntax>(
   return key;
 };
 
+const isNumeric = (value: number | string | Css): value is number => typeof value === "number";
+
 export const formatProperty = (key: Property, value: number | string): string => {
   const { unit } = SYNTAX[declarationOf(key).syntax];
 
-  return typeof value === "number" ? `${num(value)}${unit}` : value;
+  return isNumeric(value) ? `${num(value)}${unit}` : value;
 };
 
 export const propertyRule = (name: string, key: Property): string => {
@@ -103,7 +110,7 @@ export const css = (
       if (index === holes.length) return [text];
       const hole = holes[index]!;
 
-      if (typeof hole === "number") return [text, num(hole)];
+      if (isNumeric(hole)) return [text, num(hole)];
 
       if (isCss(hole)) return [text, ...hole.parts];
 

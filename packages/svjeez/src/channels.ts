@@ -2,11 +2,13 @@ import type { Color, Tag } from "./attributes";
 import { num } from "./format";
 import { declarationOf, isProperty, type Property, type PropertyValues } from "./properties";
 
-const SHAPES = ["path", "line", "polyline", "polygon", "circle", "ellipse", "rect"] as const;
-const GRAPHICS = ["g", "use", "text", "image", ...SHAPES] as const;
-const PAINTED = ["g", "use", "text", "tspan", ...SHAPES] as const;
+const GEOMETRY = ["path", "line", "polyline", "polygon", "circle", "ellipse", "rect"] as const;
+const GRAPHICS = ["g", "use", "text", "image", ...GEOMETRY] as const;
+const PAINTED = ["g", "use", "text", "tspan", ...GEOMETRY] as const;
 
-const number = 0 as number;
+const number: number = 0;
+
+// SAFETY: a placeholder that only fixes the value type; compile.ts reads just the typeof of a row value.
 const color = "" as Color;
 
 type Composition = "nest" | "replace";
@@ -91,7 +93,7 @@ export const CHANNELS = {
   },
   draw: {
     value: number,
-    tags: SHAPES,
+    tags: GEOMETRY,
     lane: "draw",
     composition: "replace",
     range: [0, 1],
@@ -101,7 +103,7 @@ export const CHANNELS = {
   stroke: { value: color, tags: PAINTED, lane: "stroke", composition: "replace", attr: "stroke" },
   color: {
     value: color,
-    tags: ["g", "use", "text", ...SHAPES],
+    tags: ["g", "use", "text", ...GEOMETRY],
     lane: "color",
     composition: "replace",
     attr: "color",
@@ -201,7 +203,7 @@ export type TargetValues = Values & PropertyValues;
 export type TargetValue = number | Color;
 
 export const valueOf = (values: TargetValues, target: Target): TargetValue | undefined =>
-  (values as Partial<Record<Target, TargetValue>>)[target];
+  values[target];
 
 /** Filter primitives animate through SMIL, which cannot reach a custom property. */
 type StyledTag = Exclude<AnimatedTag, `fe${string}`>;
@@ -235,8 +237,10 @@ export const laneOf = (tag: string, channel: Target): string => {
   return backendOf(tag, channel) === "smil" ? (row.attr ?? channel) : row.lane;
 };
 
+const isNumeric = (value: Values[Channel]): value is number => typeof value === "number";
+
 export const formatValue = (value: Values[Channel]): string =>
-  typeof value === "number" ? num(value) : String(value);
+  isNumeric(value) ? num(value) : String(value);
 
 export const clamp = (channel: Channel, value: number): number => {
   const range = spec(channel).range;

@@ -1,6 +1,6 @@
 import type { Attrs } from "./attributes";
 import { property } from "./properties";
-import { children, node, type Child, type Element } from "./svg";
+import { children, node, type Child, type Element, type Props } from "./svg";
 
 export type DefTag =
   | "linearGradient"
@@ -23,9 +23,11 @@ export interface Ref<T extends DefTag> {
 
 export type AnyRef = Ref<DefTag>;
 
-class Reference {
+class Reference<T extends DefTag> implements Ref<T> {
+  declare readonly [refKind]: T;
+
   constructor(
-    readonly tag: DefTag,
+    readonly tag: T,
     readonly node: Element,
   ) {}
 
@@ -36,14 +38,17 @@ class Reference {
 
 export const isRef = (value: unknown): value is AnyRef => value instanceof Reference;
 
-export const refNode = (ref: AnyRef): Element => (ref as unknown as Reference).node;
+// SAFETY: every AnyRef comes from make(), which only builds Reference instances.
+export const refNode = (ref: AnyRef): Element => (ref as Reference<DefTag>).node;
 
-export const refTag = (ref: AnyRef): DefTag => (ref as unknown as Reference).tag;
+// SAFETY: every AnyRef comes from make(), which only builds Reference instances.
+export const refTag = (ref: AnyRef): DefTag => (ref as Reference<DefTag>).tag;
 
 const make =
   <T extends DefTag>(tag: T) =>
   (attrs: Attrs<T> = {}, content?: Child): Ref<T> =>
-    new Reference(tag, { ...node(tag, attrs), children: children(content) }) as unknown as Ref<T>;
+    // SAFETY: Attrs<T> holds attribute values only, which is the part of Props that node() reads.
+    new Reference(tag, { ...node(tag, attrs as Props), children: children(content) });
 
 /**
  * `def.<tag>(attrs, children)`: emitted into <defs> only if the rendered tree references it, with a

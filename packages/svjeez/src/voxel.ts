@@ -80,6 +80,7 @@ const check = ({ at, from = 0, to = Infinity }: VoxelBlock): void => {
     );
 };
 
+// SAFETY: SIDES is typed Record<VoxelFace, Side>, so its keys are exactly the faces.
 const FACES = Object.keys(SIDES) as VoxelFace[];
 
 export type { VoxelCamera, VoxelCameraOptions, Vec3 } from "./space";

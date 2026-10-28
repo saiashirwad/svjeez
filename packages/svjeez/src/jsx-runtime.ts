@@ -1,21 +1,24 @@
 import type { ElementProps } from "./el";
 import type { Tag } from "./attributes";
-import { children, node, type Child, type SvgNode } from "./svg";
+import { children, node, type Child, type Props, type SvgNode } from "./svg";
 
 export const Fragment = Symbol.for("svjeez.fragment");
 
-type Component = (props: Record<string, unknown>) => SvgNode | null;
+type Component = (props: Props) => SvgNode | null;
+
+const isComponent = (type: string | typeof Fragment | Component): type is Component =>
+  typeof type === "function";
 
 /** The automatic JSX runtime. Elements compile to the svjeez AST; components are pure functions of props. */
 export const jsx = (
   type: string | typeof Fragment | Component,
-  props: Record<string, unknown> | null,
+  props: Props | null,
 ): SvgNode => {
   const values = props ?? {};
 
   if (type === Fragment) return { kind: "fragment", children: children(values.children) };
 
-  if (typeof type === "function") return type(values) ?? { kind: "fragment", children: [] };
+  if (isComponent(type)) return type(values) ?? { kind: "fragment", children: [] };
 
   return node(type, values);
 };

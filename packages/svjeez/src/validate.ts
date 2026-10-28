@@ -80,12 +80,13 @@ const imageHrefs = (source: string): string[] => {
 };
 
 const embeddedFonts = (source: string): string[] =>
-  [...source.matchAll(/@font-face\{[^}]*?url\((data:[^)]*)\)/g)]
-    .filter(([, uri = ""]) => uri.length > EMBED_WARN_BYTES)
-    .map(
-      ([, uri = ""]) =>
-        `An embedded font is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame. Use a smaller font, or draw short titles with <Glyphs>, which embeds no font.`,
-    );
+  [...source.matchAll(/@font-face\{[^}]*?url\((data:[^)]*)\)/g)].flatMap(([, uri = ""]) =>
+    uri.length > EMBED_WARN_BYTES
+      ? [
+          `An embedded font is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame. Use a smaller font, or draw short titles with <Glyphs>, which embeds no font.`,
+        ]
+      : [],
+  );
 
 export const validateSvg = (source: string): ValidationResult => {
   const errors: string[] = [];

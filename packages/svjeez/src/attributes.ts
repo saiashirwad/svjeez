@@ -59,7 +59,7 @@ const PRESENTATION = {
   mask: attr<Ref<"mask">>("mask"),
 } as const;
 
-const SHAPE = { ...PRESENTATION, pathLength: attr<number>("pathLength") } as const;
+const GEOMETRY = { ...PRESENTATION, pathLength: attr<number>("pathLength") } as const;
 
 const FONT = {
   fontFamily: attr<string | FontValue>("font-family"),
@@ -97,9 +97,9 @@ const ELEMENTS = {
     ...PRESENTATION,
     ...FONT,
   },
-  path: { ...SHAPE, d: attr<string>("d") },
+  path: { ...GEOMETRY, d: attr<string>("d") },
   rect: {
-    ...SHAPE,
+    ...GEOMETRY,
     x: attr<Length>("x"),
     y: attr<Length>("y"),
     width: attr<Length>("width"),
@@ -107,23 +107,23 @@ const ELEMENTS = {
     rx: attr<Length>("rx"),
     ry: attr<Length>("ry"),
   },
-  circle: { ...SHAPE, cx: attr<Length>("cx"), cy: attr<Length>("cy"), r: attr<Length>("r") },
+  circle: { ...GEOMETRY, cx: attr<Length>("cx"), cy: attr<Length>("cy"), r: attr<Length>("r") },
   ellipse: {
-    ...SHAPE,
+    ...GEOMETRY,
     cx: attr<Length>("cx"),
     cy: attr<Length>("cy"),
     rx: attr<Length>("rx"),
     ry: attr<Length>("ry"),
   },
   line: {
-    ...SHAPE,
+    ...GEOMETRY,
     x1: attr<Length>("x1"),
     y1: attr<Length>("y1"),
     x2: attr<Length>("x2"),
     y2: attr<Length>("y2"),
   },
-  polyline: { ...SHAPE, points: attr<string>("points") },
-  polygon: { ...SHAPE, points: attr<string>("points") },
+  polyline: { ...GEOMETRY, points: attr<string>("points") },
+  polygon: { ...GEOMETRY, points: attr<string>("points") },
   text: TEXT,
   tspan: TEXT,
   use: {
@@ -245,6 +245,7 @@ const ELEMENTS = {
 
 export type Tag = keyof typeof ELEMENTS;
 
+// SAFETY: ELEMENTS has a key for every Tag, and no other.
 export const TAGS = Object.keys(ELEMENTS) as Tag[];
 
 type ValueOf<A> = A extends Attr<infer V> ? V : never;
@@ -271,9 +272,19 @@ export type Attrs<T extends Tag> = {
 
 const PASSTHROUGH = /^(?:aria-|data-)|^(?:class|style|id|role)$/;
 
+interface AttrSpecs {
+  readonly [prop: string]: Attr<unknown> | undefined;
+}
+
+interface ElementTable {
+  readonly [tag: string]: AttrSpecs | undefined;
+}
+
+const ATTRIBUTES: ElementTable = ELEMENTS;
+
 export const attributeName = (tag: string, prop: string): string => {
   if (PASSTHROUGH.test(prop)) return prop;
-  const spec = (ELEMENTS as Record<string, Record<string, Attr<unknown>>>)[tag]?.[prop];
+  const spec = ATTRIBUTES[tag]?.[prop];
 
   if (!spec) throw new Error(`<${tag}> has no attribute "${prop}".`);
 

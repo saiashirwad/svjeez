@@ -7,7 +7,7 @@ interface Polyline {
   readonly closed: boolean;
 }
 
-const ARGS: Readonly<Record<string, number>> = {
+const ARGS = {
   m: 2,
   l: 2,
   h: 1,
@@ -19,6 +19,12 @@ const ARGS: Readonly<Record<string, number>> = {
   a: 7,
   z: 0,
 };
+
+const isCommand = (token: string | number | undefined): token is string =>
+  typeof token === "string";
+
+const isArgument = (token: string | number | undefined): token is number =>
+  typeof token === "number";
 
 const tokens = (d: string): (string | number)[] =>
   [...d.matchAll(/([MLHVCSQTAZmlhvcsqtaz])|(-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)/g)].map((m) =>
@@ -129,15 +135,19 @@ export const flatten = (d: string): Polyline[] => {
   let command = "";
 
   while (i < list.length) {
-    if (typeof list[i] === "string") command = list[i++] as string;
-    else if (!command) throw new Error(`Path data must start with a command, got "${list[i]}".`);
+    const token = list[i];
+
+    if (isCommand(token)) {
+      command = token;
+      i++;
+    } else if (!command) throw new Error(`Path data must start with a command, got "${token}".`);
     const lower = command.toLowerCase();
     const relative = command === lower;
-    const count = ARGS[lower]!;
-    const args = list.slice(i, i + count) as number[];
+    // SAFETY: tokens() only yields the command letters that ARGS names, so lower is one of its keys.
+    const count = ARGS[lower as keyof typeof ARGS];
+    const args = list.slice(i, i + count).filter(isArgument);
 
-    if (args.length < count || args.some((a) => typeof a !== "number"))
-      throw new Error(`Path command ${command} needs ${count} numbers.`);
+    if (args.length < count) throw new Error(`Path command ${command} needs ${count} numbers.`);
     i += count;
 
     const at = (x: number, y: number): Point =>

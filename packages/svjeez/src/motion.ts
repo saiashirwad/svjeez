@@ -1,4 +1,4 @@
-import { isChannel, spec, valueOf, type Target, type TargetValues } from "./channels";
+import { isChannel, spec, valueOf, type Target, type TargetValue, type TargetValues } from "./channels";
 import { declarationOf, isProperty } from "./properties";
 
 export type Seconds = number;
@@ -12,25 +12,29 @@ export interface Span {
 declare const easeBrand: unique symbol;
 
 /** Structured, so CSS and SMIL each compile it. An ease always shapes the transition it is passed to. */
-export type Ease = { readonly [easeBrand]: true } & (
+export type Ease = { readonly [easeBrand]: true } & EaseBody;
+
+type EaseBody =
   | { readonly kind: "linear" }
   | { readonly kind: "bezier"; readonly points: readonly [number, number, number, number] }
   /** `count` equal jumps, each at the end of its slice. */
-  | { readonly kind: "steps"; readonly count: number }
-);
+  | { readonly kind: "steps"; readonly count: number };
+
+// SAFETY: easeBrand is declare-only, so no runtime value carries it. Every caller passes a finished EaseBody, and this only adds the compile-time brand.
+const brand = (body: EaseBody): Ease => body as Ease;
 
 const bezier = (x1: number, y1: number, x2: number, y2: number): Ease =>
-  ({ kind: "bezier", points: [x1, y1, x2, y2] }) as unknown as Ease;
+  brand({ kind: "bezier", points: [x1, y1, x2, y2] });
 
 const steps = (count: number): Ease => {
   if (!Number.isInteger(count) || count < 1)
     throw new Error(`ease.steps needs a positive whole count, got ${count}.`);
 
-  return { kind: "steps", count } as unknown as Ease;
+  return brand({ kind: "steps", count });
 };
 
 export const ease = {
-  linear: { kind: "linear" } as unknown as Ease,
+  linear: brand({ kind: "linear" }),
   in: bezier(0.55, 0.06, 0.68, 0.19),
   out: bezier(0.23, 1, 0.32, 1),
   inOut: bezier(0.77, 0, 0.175, 1),
@@ -101,6 +105,8 @@ const time = (value: Seconds, what: string): Seconds => {
   return value;
 };
 
+const isNumeric = (value: TargetValue | undefined): value is number => typeof value === "number";
+
 const checkValues = (values: TargetValues): TargetValues => {
   const keys = Object.keys(values);
 
@@ -109,9 +115,10 @@ const checkValues = (values: TargetValues): TargetValues => {
   for (const key of keys) {
     if (isProperty(key)) declarationOf(key);
     else if (!isChannel(key)) throw new Error(`"${key}" is not an animatable channel.`);
+    // SAFETY: the check above accepted key as a property or a channel, and both are Target names.
     const value = valueOf(values, key as Target);
 
-    if (typeof value === "number" && !Number.isFinite(value))
+    if (isNumeric(value) && !Number.isFinite(value))
       throw new Error(`A transition needs a finite ${key}, got ${value}.`);
   }
 
@@ -126,6 +133,7 @@ export const EPSILON = 1e-9;
 /** Relative to a timeline, the gap that separates two keys meant to be one instant apart. */
 export const NUDGE = 1e-5;
 
+// SAFETY: checkValues rejects every key that is not a Target before a step can store its values, so the keys of a step are Target names.
 const sharedLane = (a: TargetValues, b: TargetValues): Target | undefined =>
   (Object.keys(a) as Target[]).find((c) =>
     (Object.keys(b) as Target[]).some((d) => spec(c).lane === spec(d).lane),
@@ -207,6 +215,7 @@ export function motion<const V extends TargetValues = {}>(
   return new Track({ initial: initial ?? {}, steps: [], cursor: 0 });
 }
 
-export const dataOf = (value: Motion): MotionData => (value as unknown as Track).data;
+// SAFETY: Track is the only class that implements Motion, and motion() is its only constructor, so a Motion is always a Track.
+export const dataOf = (value: Motion): MotionData => (value as Track).data;
 
 export const isMotion = (value: unknown): value is Motion => value instanceof Track;

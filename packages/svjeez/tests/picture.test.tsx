@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { Picture, fx, picture, render, validateSvg } from "svjeez";
 
+const isText = (part: number | string): part is string => typeof part === "string";
+
 const bytes = (...parts: (number | string)[]): Uint8Array =>
   Uint8Array.from(
     parts.flatMap((part) =>
-      typeof part === "string" ? [...part].map((char) => char.charCodeAt(0)) : [part],
+      isText(part) ? [...part].map((char) => char.charCodeAt(0)) : [part],
     ),
   );
 
@@ -372,6 +374,7 @@ describe("image filters", () => {
 
     const apply = (gray: number) =>
       [0, 1, 2].map((row) => {
+        // SAFETY: duotone writes a four-row, five-value color matrix, so each row slice holds five numbers.
         const [r, g, b, , offset] = values.slice(row * 5, row * 5 + 5) as [
           number,
           number,

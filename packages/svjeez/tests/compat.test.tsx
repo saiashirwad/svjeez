@@ -8,6 +8,7 @@ const native = Map.groupBy;
 
 describe("without Map.groupBy, as on Node 20", () => {
   beforeAll(() => {
+    // SAFETY: TypeScript types Map.groupBy as required, but this test deletes it, so the cast lets delete compile.
     delete (Map as { groupBy?: unknown }).groupBy;
   });
   afterAll(() => {

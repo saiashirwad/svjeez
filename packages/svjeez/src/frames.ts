@@ -56,7 +56,7 @@ const launch = async (executablePath?: string) => {
   }
 };
 
-const size = (svg: string): { width: number; height: number } => {
+const size = (svg: string) => {
   const root = /<svg\b[^>]*>/.exec(svg)?.[0] ?? "";
   const width = parseFloat(/\swidth="([\d.]+)"/.exec(root)?.[1] ?? "");
   const height = parseFloat(/\sheight="([\d.]+)"/.exec(root)?.[1] ?? "");
@@ -88,6 +88,9 @@ const sheetHtml = (
 </style>
 ${frames.map((frame) => `<figure><img src="data:image/png;base64,${Buffer.from(frame.png).toString("base64")}"><figcaption>t = ${label(frame.time)}</figcaption></figure>`).join("\n")}`;
 
+const isSheetOptions = (sheet: FrameOptions["sheet"]): sheet is { readonly columns?: number } =>
+  typeof sheet === "object";
+
 /** Rasterize an SVG at chosen playback times in headless Chromium. Needs `playwright-core` and a Chromium build. */
 export const renderFrames = async (svg: string, options: FrameOptions): Promise<Frames> => {
   const { width, height } = size(svg);
@@ -109,7 +112,7 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
     throw new Error(`renderFrames() needs a positive whole count, got ${options.count}.`);
   }
 
-  const columns = typeof options.sheet === "object" ? options.sheet.columns : undefined;
+  const columns = isSheetOptions(options.sheet) ? options.sheet.columns : undefined;
 
   if (columns !== undefined && !(Number.isInteger(columns) && columns > 0))
     throw new Error(

@@ -2,12 +2,24 @@ import { attributeName } from "./attributes";
 import { isRef, type AnyRef } from "./defs";
 import { isFontValue, type FontValue } from "./font/font";
 import { escapeAttr, escapeText, kebab, num } from "./format";
-import { isMotion, type Motion } from "./motion";
+import { isMotion, type Motion, type Stack } from "./motion";
 import { Css, formatProperty, isProperty, type CssPart } from "./properties";
 
 export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
 
 export type AttrValue = string | AnyRef | Css | FontValue;
+
+/** CSS declarations as a JSX `style` object: property name to value. */
+export type Style = Readonly<Record<string, string | number | undefined>>;
+
+/** A prop as JSX or `el` passes it. `children` and `animation` are typed in `Props`. */
+export type Prop = Child | Stack | AttrValue | Style;
+
+/** The props `node` reads. Every key but `children` and `animation` is an attribute. */
+export type Props = Readonly<Record<string, Prop>> & {
+  readonly children?: Child;
+  readonly animation?: Stack;
+};
 
 export type SvgNode =
   | {
@@ -36,29 +48,31 @@ export const element = (
 
 export const raw = (value: string): SvgNode => ({ kind: "raw", value });
 
-export const children = (input: unknown, preserveWhitespace = false): SvgNode[] => {
+const isNode = (value: Child): value is SvgNode =>
+  value !== null && typeof value === "object" && "kind" in value;
+
+/** Text is a string, or a number that `num` writes out. */
+const isText = (value: Prop): value is string | number =>
+  typeof value === "string" || typeof value === "number";
+
+const isNumber = (value: Prop): value is number => typeof value === "number";
+
+export const children = (input: Child, preserveWhitespace = false): SvgNode[] => {
   const out: SvgNode[] = [];
 
-  const visit = (value: unknown): void => {
+  const visit = (value: Child): void => {
     if (value === null || value === undefined || value === false || value === true) return;
 
     if (Array.isArray(value)) return value.forEach(visit);
 
-    if (typeof value === "string") {
-      if (preserveWhitespace || value.trim() !== "") out.push({ kind: "text", value });
+    if (isNode(value))
+      return value.kind === "fragment" ? value.children.forEach(visit) : void out.push(value);
 
-      return;
-    }
+    if (!isText(value)) throw new Error(`Unsupported SVG child: ${String(value)}`);
 
-    if (typeof value === "number") return void out.push({ kind: "text", value: num(value) });
+    const text = isNumber(value) ? num(value) : value;
 
-    if (typeof value === "object" && "kind" in value) {
-      const child = value as SvgNode;
-
-      return child.kind === "fragment" ? child.children.forEach(visit) : void out.push(child);
-    }
-
-    throw new Error(`Unsupported SVG child: ${String(value)}`);
+    if (preserveWhitespace || text.trim() !== "") out.push({ kind: "text", value: text });
   };
 
   visit(input);
@@ -66,38 +80,42 @@ export const children = (input: unknown, preserveWhitespace = false): SvgNode[] 
   return out;
 };
 
-const style = (value: unknown): string | Css => {
-  if (typeof value === "string") return value;
+const isStyleText = (value: string | Style): value is string => typeof value === "string";
 
-  const parts = Object.entries(value as Record<string, string | number | undefined>)
-    .filter(([, entry]) => entry !== undefined)
-    .flatMap(([name, entry], index): CssPart[] => [
-      index > 0 ? ";" : "",
-      ...(isProperty(name)
-        ? [{ property: name }, `:${formatProperty(name, entry!)}`]
-        : [`${kebab(name)}:${entry}`]),
-    ]);
+const style = (value: string | Style): string | Css => {
+  if (isStyleText(value)) return value;
 
-  return parts.every((part) => typeof part === "string") ? parts.join("") : new Css(parts);
+  const entries = Object.entries(value).filter(([, entry]) => entry !== undefined);
+
+  const parts = entries.flatMap(([name, entry], index): CssPart[] => [
+    index > 0 ? ";" : "",
+    ...(isProperty(name)
+      ? [{ property: name }, `:${formatProperty(name, entry!)}`]
+      : [`${kebab(name)}:${entry}`]),
+  ]);
+
+  return entries.some(([name]) => isProperty(name)) ? new Css(parts) : parts.join("");
 };
 
-const attrValue = (prop: string, value: unknown): AttrValue | undefined => {
+const attrValue = (prop: string, value: Prop): AttrValue | undefined => {
   if (value === undefined || value === null || value === false) return undefined;
 
   if (prop === "class")
     return (Array.isArray(value) ? value : [value]).filter(Boolean).join(" ") || undefined;
 
-  if (prop === "style") return style(value) || undefined;
+  if (prop === "style") {
+    // SAFETY: the JSX types give a style prop as text or a Style object, the two forms style() takes.
+    return style(value as string | Style) || undefined;
+  }
 
-  if (typeof value === "string") return value;
-
-  if (typeof value === "number") return num(value);
+  if (isText(value)) return isNumber(value) ? num(value) : value;
 
   if (isRef(value) || isFontValue(value)) return value;
+
   throw new Error(`Unsupported value for ${prop}: ${String(value)}`);
 };
 
-const stack = (value: unknown): Motion[] =>
+const stack = (value: Stack | undefined): Motion[] =>
   (Array.isArray(value) ? value : [value]).filter((entry): entry is Motion => {
     if (!entry) return false;
 
@@ -107,7 +125,7 @@ const stack = (value: unknown): Motion[] =>
     return true;
   });
 
-export const node = (tag: string, props: Record<string, unknown>): Element => {
+export const node = (tag: string, props: Props): Element => {
   const attrs: Record<string, AttrValue> = {};
 
   for (const [prop, value] of Object.entries(props)) {
@@ -120,10 +138,12 @@ export const node = (tag: string, props: Record<string, unknown>): Element => {
   return element(tag, attrs, children(props.children, TEXT_TAGS.has(tag)), stack(props.animation));
 };
 
+const isResolved = (value: AttrValue): value is string => typeof value === "string";
+
 const serializeAttrs = (attrs: Readonly<Record<string, AttrValue>>): string =>
   Object.entries(attrs)
     .map(([name, value]) => {
-      if (typeof value !== "string") throw new Error(`Unresolved ref in ${name}.`);
+      if (!isResolved(value)) throw new Error(`Unresolved ref in ${name}.`);
 
       return ` ${name}="${escapeAttr(value)}"`;
     })

@@ -1,13 +1,14 @@
 /** The bytes at an http(s) URL, fetched, or at a path or file: URL, read from disk. */
 export const readSource = async (source: string | URL): Promise<Uint8Array> => {
-  const url =
-    source instanceof URL
-      ? source
-      : /^[a-z][a-z0-9+.-]*:\/\//i.test(source)
-        ? new URL(source)
-        : undefined;
+  if (!(source instanceof URL) && !/^[a-z][a-z0-9+.-]*:\/\//i.test(source)) {
+    const { readFile } = await import("node:fs/promises");
 
-  if (url?.protocol === "http:" || url?.protocol === "https:") {
+    return readFile(source);
+  }
+
+  const url = source instanceof URL ? source : new URL(source);
+
+  if (url.protocol === "http:" || url.protocol === "https:") {
     const response = await fetch(url);
 
     if (!response.ok)
@@ -16,12 +17,9 @@ export const readSource = async (source: string | URL): Promise<Uint8Array> => {
     return new Uint8Array(await response.arrayBuffer());
   }
 
-  const { readFile } = await import("node:fs/promises");
-
-  if (!url) return readFile(source as string);
-
   if (url.protocol !== "file:")
     throw new Error(`Cannot load ${url}. Use an http(s) or file: URL, or a path.`);
+  const { readFile } = await import("node:fs/promises");
   const { fileURLToPath } = await import("node:url");
 
   return readFile(fileURLToPath(url));

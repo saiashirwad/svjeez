@@ -16,9 +16,9 @@ const scene = (animation: Motion<"x" | "y" | "opacity">, duration: number) =>
   );
 
 const lane = (svg: string, property: string): string[] =>
-  [...svg.matchAll(/@keyframes [\w-]+\{(.*)\}$/gm)]
-    .map((match) => match[1]!)
-    .filter((body) => body.includes(`${property}:`));
+  [...svg.matchAll(/@keyframes [\w-]+\{(.*)\}$/gm)].flatMap((match) =>
+    match[1]!.includes(`${property}:`) ? [match[1]!] : [],
+  );
 
 const translateKeys = (svg: string, duration: number): Key[] => {
   const [body] = lane(svg, "translate");

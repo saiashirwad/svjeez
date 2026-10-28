@@ -10,6 +10,7 @@ export interface Key {
 export const snapPeriod = (period: Seconds, duration: Seconds): Seconds =>
   duration / Math.max(1, Math.round(duration / period));
 
+// SAFETY: a and b are TargetValues, so their keys are Target names.
 const same = (a: TargetValues, b: TargetValues): boolean =>
   (Object.keys(a) as Target[]).every((target) => valueOf(a, target) === valueOf(b, target));
 

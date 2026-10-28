@@ -44,7 +44,8 @@ const runs = (rows: readonly (readonly (Hex | null)[])[], color: Hex): string =>
     })
     .join("");
 
-class Grid {
+class Grid implements VoxelTexture {
+  declare readonly [textureBrand]: true;
   readonly opaque: boolean;
   readonly colors: readonly Hex[];
   readonly base: Hex | undefined;
@@ -76,7 +77,8 @@ class Grid {
   }
 }
 
-const gridOf = (texture: VoxelTexture): Grid => texture as unknown as Grid;
+// SAFETY: texture() is the only place a VoxelTexture is made, and it makes a Grid.
+const gridOf = (texture: VoxelTexture): Grid => texture as Grid;
 
 export const isOpaque = (texture: VoxelTexture): boolean => gridOf(texture).opaque;
 
@@ -117,7 +119,7 @@ export const texture = (palette: VoxelPalette, art: string): VoxelTexture => {
     });
   });
 
-  return new Grid(width, rows.length, pixels) as unknown as VoxelTexture;
+  return new Grid(width, rows.length, pixels);
 };
 
 export const resolve = (skin: VoxelSkin, face: VoxelFace): VoxelTexture =>

@@ -13,6 +13,11 @@ import type { SvgNode } from "./svg";
 
 type GlyphStack = Stack<TagChannels<"path">>;
 
+const isPerGlyph = (
+  animation: GlyphsProps["animation"],
+): animation is (glyph: GlyphPath, index: number) => GlyphStack =>
+  typeof animation === "function";
+
 export interface GlyphsProps {
   readonly font: Font | FontFamily;
   /** From a family, the face nearest this weight and style. Default 400, normal. */
@@ -82,7 +87,7 @@ export function Glyphs({
           glyph.d && (
             <path
               d={glyph.d}
-              animation={typeof animation === "function" ? animation(glyph, index) : animation}
+              animation={isPerGlyph(animation) ? animation(glyph, index) : animation}
             />
           ),
       )}

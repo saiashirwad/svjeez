@@ -32,9 +32,10 @@ const span = ({ at, over }: Span, what: string): Span => {
   return { at, over };
 };
 
+// SAFETY: values is typed Values<RestChannel>, so its keys are rest channel names.
 const rest = (values: Values<RestChannel>): Values<RestChannel> =>
   Object.fromEntries(
-    Object.keys(values).map((channel) => [channel, CHANNELS[channel as RestChannel].identity]),
+    (Object.keys(values) as RestChannel[]).map((channel) => [channel, CHANNELS[channel].identity]),
   );
 
 /** Arrive from `from` to rest. Without `from` it is a fade-in. */
@@ -86,10 +87,11 @@ export function shake<V extends Values<Shake>>(
 ): Motion<keyof V & Shake> {
   const { at: start, over } = span(at, "shake()");
   const count = Math.max(2, Math.round(over * (options.rate ?? 12)));
+  const amounts: Values<Shake> = amplitude;
 
   const swing = (k: number): Values<Shake> =>
     Object.fromEntries(
-      Object.entries(amplitude as Values<Shake>).map(([channel, amp]) => [
+      Object.entries(amounts).map(([channel, amp]) => [
         channel,
         k === count ? 0 : (k % 2 ? -1 : 1) * amp * (1 - k / count),
       ]),
@@ -100,6 +102,7 @@ export function shake<V extends Values<Shake>>(
   for (let k = 1; k <= count; k++)
     track = track.at(start + ((k - 1) * over) / count).to(swing(k), over / count, ease.linear);
 
+  // SAFETY: every step was built from amplitude's keys, so track only moves channels in keyof V & Shake.
   return track as Motion<keyof V & Shake>;
 }
 
@@ -138,10 +141,12 @@ export function wiggle<V extends Values<RestChannel>>(
   const period = options.period ?? 2;
   const count = Math.max(2, Math.round((options.rate ?? 8) * period));
   const random = mulberry32(fnv1a(String(options.seed)));
-  const channels = (Object.keys(amplitude) as RestChannel[]).sort();
+  const amounts: Values<RestChannel> = amplitude;
+  // SAFETY: amounts is typed Values<RestChannel>, so its keys are rest channel names.
+  const channels = (Object.keys(amounts) as RestChannel[]).sort();
 
   const samples = channels.map((channel) => {
-    const amp = (amplitude as Values<RestChannel>)[channel] ?? 0;
+    const amp = amounts[channel] ?? 0;
     const base = CHANNELS[channel].identity;
 
     return Array.from({ length: count }, () => clamp(channel, base + amp * (random() * 2 - 1)));
@@ -157,6 +162,7 @@ export function wiggle<V extends Values<RestChannel>>(
       .at(((i - 1) * period) / count)
       .to(at(i), period / count, options.ease ?? ease.inOut);
 
+  // SAFETY: every step was built from amplitude's keys, so the loop only moves keyof V & RestChannel.
   return track.loop(period) as Motion<keyof V & RestChannel>;
 }
 
@@ -238,8 +244,10 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
     (_, i) => i * step,
   ).concat(duration);
 
+  // SAFETY: sample returns V, keyed by numeric channel or property names; the check below requires every frame to have the same finite keys.
   const frames = times.map(sample) as Partial<Record<Sampled, number>>[];
 
+  // SAFETY: a frame's keys are Sampled names, since frames come from sample() as checked just above.
   const present = (frame: Partial<Record<Sampled, number>>) =>
     (Object.keys(frame) as Sampled[]).filter((channel) => Number.isFinite(frame[channel])).sort();
 
@@ -251,9 +259,11 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
       );
   });
   const lanes = groupBy(channels, (channel) => spec(channel).lane);
+  // SAFETY: every frame passed the same-keys check above, so frame 0 is an object of Sampled names to numbers.
   let track: Motion = motion(frames[0]! as TargetValues);
 
   for (const [lane, members] of lanes) {
+    // SAFETY: tolerance is keyed by lane names, and lane comes from spec(), so the lookup is a tolerance or undefined, which the check below rejects.
     const tolerance = (options.tolerance as Record<string, number | undefined>)[lane];
 
     if (tolerance === undefined || !(tolerance >= 0))
@@ -269,11 +279,13 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
     for (let j = 1; j < kept.length; j++) {
       const [from, to] = [kept[j - 1]!, kept[j]!];
       const values = Object.fromEntries(members.map((channel) => [channel, frames[to]![channel]]));
+      // SAFETY: members are channels of this lane, and every frame holds each of them as a number, so values is a TargetValues.
       track = track
         .at(times[from]!)
         .to(values as TargetValues, times[to]! - times[from]!, ease.linear);
     }
   }
 
+  // SAFETY: every step was built from frame keys that are Sampled names, so track only moves keyof V & Sampled.
   return track as Motion<keyof V & Sampled>;
 }

@@ -39,10 +39,15 @@ type Like<O extends Operand> = NoInfer<Operand<DimOf<O>>>;
 
 const PRECEDENCE: Record<Op, number> = { "+": 1, "-": 1, "*": 2, "/": 2 };
 
-const nodeOf = (operand: Operand): Node => {
-  if (typeof operand === "number") return { kind: "literal", value: operand, dim: "number" };
+const isLiteral = (operand: Operand): operand is number => typeof operand === "number";
 
-  if (typeof operand === "string") return { kind: "var", property: operand };
+const isVariable = (operand: Operand): operand is Property<string, Dim> =>
+  typeof operand === "string";
+
+const nodeOf = (operand: Operand): Node => {
+  if (isLiteral(operand)) return { kind: "literal", value: operand, dim: "number" };
+
+  if (isVariable(operand)) return { kind: "var", property: operand };
 
   return operand.node;
 };
@@ -89,7 +94,7 @@ const unit =
   <D extends "length" | "angle">(dim: D) =>
   (amount: Operand<"number">): Calc<D> =>
     new Calc(
-      typeof amount === "number"
+      isLiteral(amount)
         ? { kind: "literal", value: amount, dim }
         : { kind: "op", op: "*", left: nodeOf(amount), right: { kind: "literal", value: 1, dim } },
     );

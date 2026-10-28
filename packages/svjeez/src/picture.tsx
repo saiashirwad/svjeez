@@ -201,6 +201,9 @@ const svgHref = (markup: string): `data:${string}` =>
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 
+const isText = (source: Uint8Array | ArrayBuffer | string): source is string =>
+  typeof source === "string";
+
 /**
  * Embed an image as a data URI. The format comes from the bytes, never the file extension; a string is SVG markup.
  * Pure and synchronous. See `picture.load` for files and URLs.
@@ -208,12 +211,13 @@ const SUPPORTED = Object.keys(FORMATS).join(", ");
 export const picture = Object.assign(
   (source: Uint8Array | ArrayBuffer | string): PictureData => {
     const bytes =
-      typeof source === "string"
+      isText(source)
         ? new TextEncoder().encode(source)
         : source instanceof Uint8Array
           ? source
           : new Uint8Array(source);
 
+    // SAFETY: FORMATS is typed Record<ImageFormat, Codec>, so its keys are exactly the image formats.
     const format = (Object.keys(FORMATS) as ImageFormat[]).find((key) =>
       FORMATS[key].matches(bytes),
     );

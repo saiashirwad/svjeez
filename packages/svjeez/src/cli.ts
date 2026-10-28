@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { renderFrames, type ColorScheme, type FrameTimes } from "./frames";
+import { renderFrames, type FrameTimes } from "./frames";
 import { validateSvg } from "./validate";
 
 const USAGE = `usage:
@@ -20,12 +20,19 @@ skill prints the agent skill for writing svjeez scenes; --install copies it, wit
 const SCHEMES = ["system", "light", "dark"] as const;
 
 const isScheme = (value: string): value is (typeof SCHEMES)[number] =>
-  (SCHEMES as readonly string[]).includes(value);
+  SCHEMES.some((scheme) => scheme === value);
 
 const fail = (message: string): never => {
   console.error(message);
   process.exit(1);
 };
+
+type SceneExport = string | (() => string | Promise<string>);
+
+const isSceneFunction = (value: SceneExport | undefined): value is () => string | Promise<string> =>
+  typeof value === "function";
+
+const isText = (value: string | undefined): value is string => typeof value === "string";
 
 const loadSvg = async (file: string): Promise<string> => {
   const path = resolve(file);
@@ -33,7 +40,7 @@ const loadSvg = async (file: string): Promise<string> => {
   if (path.endsWith(".svg")) return readFile(path, "utf8");
   const url = pathToFileURL(path).href;
 
-  const module = (await import(url).catch(async (error: Error & { code?: string }) => {
+  const module: { default?: SceneExport } = await import(url).catch(async (error: Error & { code?: string }) => {
     if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
 
     // Node has no TSX loader of its own; use tsx when the project has it.
@@ -47,23 +54,22 @@ const loadSvg = async (file: string): Promise<string> => {
       }
     })();
 
-    const { register } = (await import(tsx).catch(() =>
+    const { register }: { register: () => void } = await import(tsx).catch(() =>
       fail(
         `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
       ),
-    )) as { register: () => void };
+    );
 
     register();
 
     return import(url);
-  })) as { default?: unknown };
+  });
 
-  const value = typeof module.default === "function" ? await module.default() : module.default;
+  const value = isSceneFunction(module.default) ? await module.default() : module.default;
 
-  if (typeof value !== "string")
-    fail(`${file} must export default an SVG string, or a function that returns one.`);
+  if (isText(value)) return value;
 
-  return value as string;
+  return fail(`${file} must export default an SVG string, or a function that returns one.`);
 };
 
 const number = (flag: string, value: string | undefined): number | undefined => {
@@ -194,13 +200,13 @@ const skillCommand = async (args: string[]): Promise<void> => {
   console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
 };
 
-const COMMANDS: Record<string, (args: string[]) => Promise<void>> = {
-  svg: svgCommand,
-  frames: framesCommand,
-  skill: skillCommand,
-};
+const COMMANDS = new Map([
+  ["svg", svgCommand],
+  ["frames", framesCommand],
+  ["skill", skillCommand],
+]);
 
 const [command = "", ...args] = process.argv.slice(2);
-const run = COMMANDS[command] ?? (() => fail(USAGE));
+const run = COMMANDS.get(command) ?? (() => fail(USAGE));
 
 await run(args).catch((error: Error) => fail(error.stack ?? error.message));

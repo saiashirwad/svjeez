@@ -394,6 +394,7 @@ describe("properties", () => {
   });
 
   test("an undeclared property key is refused when the motion is built", () => {
+    // SAFETY: the key is deliberately undeclared, so the cast lets it reach motion(), which must refuse it at runtime.
     expect(() => motion().to({ ["--nope:angle" as typeof yaw]: 1 }, 1)).toThrow(/never declared/);
   });
 
@@ -410,6 +411,7 @@ describe("properties", () => {
         />,
       ),
     ).toThrow(/--yaw:angle/);
+    // SAFETY: a filter primitive cannot take a motion, which is the error under test, so the cast gets past its prop type.
     const flood = def.filter({}, <feFlood animation={motion().to({ [yaw]: 1 }, 1) as never} />);
     expect(() => scene(<rect width={1} height={1} filter={flood} />)).toThrow(
       /cannot animate --yaw:angle/,

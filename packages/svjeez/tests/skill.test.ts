@@ -25,7 +25,7 @@ const sources = (dir: string): string[] =>
 describe("skill examples", () => {
   for (const file of readdirSync(examples).filter((name) => name.endsWith(".tsx"))) {
     test(`${file} renders a valid, animated SVG`, async () => {
-      const { default: build } = (await import(join(examples, file))) as { default: () => string };
+      const { default: build }: { default: () => string } = await import(join(examples, file));
       const svg = build();
       expect(validateSvg(svg).errors).toEqual([]);
       expect(svg).toContain("@keyframes");
@@ -54,9 +54,9 @@ describe("skill docs", () => {
     const section = /\nRuntime errors[^\n]*\n([\s\S]*?)\n## /.exec(read("SKILL.md"))?.[1] ?? "";
 
     // `…` stands for a value the message fills in. A message with backticks is wrapped in double backticks.
-    const quoted = [...section.matchAll(/^\| (`+) ?(.+?) ?\1 \|/gm)]
-      .map((match) => match[2]!)
-      .filter((message) => message !== "Message");
+    const quoted = [...section.matchAll(/^\| (`+) ?(.+?) ?\1 \|/gm)].flatMap((match) =>
+      match[2] === "Message" ? [] : [match[2]!],
+    );
 
     expect(quoted.length).toBeGreaterThan(10);
 

@@ -98,6 +98,7 @@ describe.if(browser)("renderFrames", () => {
   test("frames at different times differ, and holds between transitions render the same", async () => {
     const { frames } = await renderFrames(fade, { times: [0, 1.5, 2.5, 3.5] });
 
+    // SAFETY: renderFrames returns one frame for each of the four times passed above.
     const [before, middle, after, later] = frames.map((frame) => frame.png) as [
       Uint8Array,
       Uint8Array,
