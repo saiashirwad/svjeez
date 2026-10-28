@@ -1,4 +1,4 @@
-import { type Color, Glyphs, Stroke, brush, def, ease, enter, font, fx, motion, nib, pencil, render, sampled, strokeFont, wiggle } from "svjeez";
+import { type Color, type SvgNode, Glyphs, Stroke, brush, def, draw, ease, enter, font, fx, motion, nib, pencil, render, sampled, strokeFont, wiggle } from "svjeez";
 
 // A sketchbook page printed in two riso inks. The canvas is a square shown edge to edge with
 // `object-fit: cover`: wide screens crop the top and bottom, tall ones the sides. The words live in the
@@ -71,10 +71,34 @@ const xTop = BASE - (display.metrics.xHeight ?? 0.52) * WORD_SIZE;
 const glyphs = display.path(WORD, { size: WORD_SIZE, x: wordX, y: BASE }).glyphs;
 
 const DROP = 1.25;
+
+// Pip's walkabout: hop letter to letter out to the s, look around, and come home. The j is too tall, so Pip leaps it.
+const center = (i: number) => glyphs[i]!.x + glyphs[i]!.advance / 2;
+const ROUTE = [[5, 4], [4, 3], [3, 1], [1, 0], null, [0, 1], [1, 3], [3, 4], [4, 5]] as const;
+const HOPS = ROUTE.reduce<{ at: number; from: number; to: number; over: number; high: number }[]>((out, leg) => {
+  const last = out.at(-1);
+  if (!leg) return [...out, { at: last!.at + last!.over + 3.2, from: last!.to, to: last!.to, over: 0, high: 0 }];
+  const big = Math.abs(leg[0] - leg[1]) > 1;
+  const at = last ? last.at + last.over + 0.3 : 7;
+  return [...out, { at, from: leg[0], to: leg[1], over: big ? 0.8 : 0.45, high: big ? 140 : 46 }];
+}, []).filter((hop) => hop.over > 0);
+/** Where Pip is, relative to home on the z. */
+const hopAt = (t: number) => {
+  const hop = HOPS.find((h) => t >= h.at && t < h.at + h.over);
+  if (hop) {
+    const u = (t - hop.at) / hop.over;
+    return { x: center(hop.from) + (center(hop.to) - center(hop.from)) * u - center(5), y: -hop.high * 4 * u * (1 - u) };
+  }
+  const landed = HOPS.filter((h) => h.at + h.over <= t).at(-1);
+  return { x: (landed ? center(landed.to) : center(5)) - center(5), y: 0 };
+};
+const squish = (i: number) =>
+  HOPS.filter((h) => h.to === i).reduce((m, h) => m.at(h.at + h.over).to({ y: 9 }, 0.07, ease.out).to({ y: 0 }, 0.35, ease.pop), motion({ y: 0 }));
+
 const letterDrop = (i: number, lag: number) => enter({ at: DROP + lag + i * 0.07, over: 0.55 }, { y: -70, opacity: 0, rotate: (i % 2 ? 1 : -1) * 9 }, ease.pop);
 const plate = (color: Color, lag: number, from: { x: number; y: number }, to: { x: number; y: number }) => (
   <g style={multiply} animation={motion(from).at(DROP + 0.5).to(to, 0.9, ease.pop)}>
-    <Glyphs font={display} text={WORD} size={WORD_SIZE} x={wordX} y={BASE} fill={color} alt={lag ? "" : undefined} animation={(_, i) => letterDrop(i, lag)} />
+    <Glyphs font={display} text={WORD} size={WORD_SIZE} x={wordX} y={BASE} fill={color} alt={lag ? "" : undefined} animation={(_, i) => [letterDrop(i, lag), HOPS.some((h) => h.to === i) && squish(i)]} />
   </g>
 );
 const wordmark = (
@@ -91,30 +115,14 @@ const pip = { x: z.x + z.advance * 0.5, y: xTop - 2 };
 const PIP_AT = DROP + 1.15;
 const BLINKS = [5.2, 9.8, 10.15, 14.6, 19.3];
 const blink = BLINKS.reduce((m, at) => m.at(at).to({ height: 1.5, y: 4 }, 0.07, ease.in).to({ height: 9, y: 0 }, 0.1), motion({ height: 9, y: 0 }));
+const BIG_HOP = HOPS.find((h) => h.high > 100)!;
 const eye = (dx: number) => <rect x={dx - 3} y={-17} width={6} height={9} rx={3} fill={P.ink} animation={blink} />;
-const pipNode = (
-  <g transform={`translate(${pip.x} ${pip.y})`}>
-    <g animation={[enter({ at: PIP_AT, over: 0.5 }, { y: 30, scale: 0, opacity: 0 }, ease.pop), wiggle({ rotate: 5 }, { seed: "pip", rate: 1.5, period: 6 })]}>
-      <g animation={motion({ y: 0 }).to({ y: -5 }, 0.5, ease.inOut).to({ y: 0 }, 0.5, ease.inOut).loop(1)}>
-        <path d="M-12 -2l-3 6M12 -2l3 6" stroke={P.ink} strokeWidth={3} strokeLinecap="round" />
-        <path d="M-28 -2C-30 -28 -14 -40 0 -40S30 -28 28 -2C18 2 -18 2 -28 -2Z" fill={P.sun} stroke={P.ink} strokeWidth={3} strokeLinejoin="round" />
-        <path d="M2 -40C4 -50 12 -54 16 -50" fill="none" stroke={P.ink} strokeWidth={2.5} strokeLinecap="round" />
-        <circle cx={-17} cy={-11} r={4} fill={P.pink} opacity={0.6} />
-        <circle cx={17} cy={-11} r={4} fill={P.pink} opacity={0.6} />
-        {eye(-8)}
-        {eye(8)}
-        <path d="M-4 -8Q0 -4 4 -8" fill="none" stroke={P.ink} strokeWidth={2} strokeLinecap="round" />
-      </g>
-    </g>
-  </g>
-);
-
 // ─── Words around the wordmark. ──────────────────────────────────────────────
 
 const HELLO_AT = 0.35;
 const hello = (
-  <g transform={`rotate(-7 ${wordX} ${xTop - 70})`}>
-    <Written text="hello," size={74} x={wordX - 6} y={xTop - 78} at={HELLO_AT} color={P.blue} width={4.5} />
+  <g transform={`rotate(-7 ${wordX} ${xTop - 110})`}>
+    <Written text="hello," size={74} x={wordX - 6} y={xTop - 118} at={HELLO_AT} color={P.blue} width={4.5} />
   </g>
 );
 
@@ -181,10 +189,11 @@ const sun = (x: number, y: number) => (
 );
 
 const CLOUD = "M-70 20C-92 20 -96 -8 -74 -12C-76 -38 -40 -46 -28 -26C-20 -52 24 -54 30 -24C46 -40 80 -28 72 -4C94 0 90 20 70 20Z";
-const cloud = (x: number, y: number, scale: number, drift: number, phase: number) => (
+const cloud = (x: number, y: number, scale: number, drift: number, phase: number, weather?: SvgNode) => (
   <g filter={boil}>
     <g transform={`translate(${x} ${y}) scale(${scale})`}>
       <g animation={sampled((t) => ({ x: drift * Math.sin((TAU * t) / D + phase) }), { duration: D, tolerance: { translate: 0.5 } })}>
+        {weather}
         <path d={CLOUD} fill={P.cloud} stroke={P.ink} strokeWidth={3 / scale} strokeLinejoin="round" />
       </g>
     </g>
@@ -229,6 +238,39 @@ const squiggles = SQUIGGLES.map((s, i) => (
   </g>
 ));
 
+// One cloud has a little shower, and leaves a rainbow behind.
+const RAIN = { at: 10.8, until: 13.4 };
+const drops = [-52, -30, -8, 14, 36, 58].map((x, i) => {
+  const starts = Array.from({ length: 6 }, (_, k) => RAIN.at + (i % 3) * 0.16 + k * 0.42).filter((t) => t < RAIN.until);
+  const fall = starts.reduce((m, t) => m.at(t).set({ y: 0, opacity: 1 }).to({ y: 70 }, 0.38, ease.in).set({ opacity: 0 }), motion({ y: 0, opacity: 0 }));
+  return <path d={`M${x} 26v12`} stroke={P.blue} strokeWidth={3} strokeLinecap="round" animation={fall} />;
+});
+const RAINBOW_AT = RAIN.until + 0.2;
+const rainbow = (
+  <g animation={motion({ opacity: 1 }).at(RAINBOW_AT + 4.5).to({ opacity: 0 }, 0.8)}>
+    {[P.pink, P.sun, P.blue].map((color, i) => {
+      const r = 62 - i * 10;
+      return <path d={`M${-r} 112A${r} ${r} 0 0 1 ${r} 112`} fill="none" stroke={color} strokeWidth={8} strokeLinecap="round" style={multiply} animation={draw({ at: RAINBOW_AT + i * 0.12, over: 0.7 }, ease.inOut)} />;
+    })}
+  </g>
+);
+
+// A snail crosses the bottom of the page once a loop, taking its time.
+const snail = (
+  <g transform="translate(230 1158)">
+    <g animation={motion({ x: 0 }).to({ x: 740 }, D, ease.linear)}>
+      <g animation={motion({ y: 0 }).to({ y: -2 }, 0.75, ease.inOut).to({ y: 0 }, 0.75, ease.inOut).loop(1.5)}>
+        <path d="M-34 10C-20 12 18 12 34 8C40 6 40 -6 34 -8C30 -2 26 2 20 2" fill={P.cloud} stroke={P.ink} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+        <path d="M30 -6L28 -22M36 -6L40 -20" stroke={P.ink} strokeWidth={2} strokeLinecap="round" />
+        <circle cx={28} cy={-23} r={2.5} fill={P.ink} />
+        <circle cx={40} cy={-21} r={2.5} fill={P.ink} />
+        <circle cx={-6} cy={-8} r={20} fill={P.pink} stroke={P.ink} strokeWidth={2.5} />
+        <path d="M-6 -8m0 0a4 4 0 1 1 6 -2a9 9 0 1 1 -14 -6a14 14 0 1 1 18 18" fill="none" stroke={P.ink} strokeWidth={2} strokeLinecap="round" />
+      </g>
+    </g>
+  </g>
+);
+
 // A paper plane laps the page twice a loop, with a loop-the-loop on the far side each lap.
 const ORBIT = { rx: 480, ry: 350, laps: 2 };
 const planeAt = (t: number) => {
@@ -253,14 +295,75 @@ const flightPath = Array.from({ length: 241 }, (_, i) => {
   const { x, y } = planeAt((i / 240) * (D / ORBIT.laps));
   return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
 }).join("");
+// Each loop-the-loop leaves a curl of smoke puffs that hang a moment, then go.
+const puffs = [0, 1].flatMap((lap) =>
+  Array.from({ length: 12 }, (_, j) => {
+    const t = (lap + 0.565 + j * 0.009) * (D / ORBIT.laps);
+    const { x, y } = planeAt(t);
+    return (
+      <g transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}>
+        <circle r={5 + (j % 3) * 2} fill={P.cloud} stroke={P.ink} strokeWidth={1.6} animation={motion({ scale: 0, opacity: 1 }).at(t + 0.1).to({ scale: 1 }, 0.3, ease.pop).wait(0.9).to({ scale: 0.2, opacity: 0 }, 0.7, ease.in)} />
+      </g>
+    );
+  }),
+);
 const planeNode = (
   <>
     <path d={flightPath} fill="none" stroke={P.ink} strokeOpacity={0.28} strokeWidth={1.6} strokeDasharray="2 9" strokeLinecap="round" />
+    {puffs}
     <g animation={plane}>
       <path d="M22 0L-16 -14L-8 0L-16 14Z" fill={P.cloud} stroke={P.ink} strokeWidth={2.4} strokeLinejoin="round" />
       <path d="M22 0L-8 0L-12 8" fill="none" stroke={P.ink} strokeWidth={2} strokeLinejoin="round" />
     </g>
   </>
+);
+
+// ─── Pip again: the hop, the eyes that follow the plane, and what Pip says. ──
+
+const Bubble = ({ text, at, until }: { text: string; at: number; until: number }) => {
+  const width = hand.measure(text, 26);
+  return (
+  <g transform="translate(-6 -78)">
+    <g animation={[enter({ at, over: 0.35 }, { scale: 0, opacity: 0 }, ease.pop), motion({ scale: 1, opacity: 1 }).at(until).to({ scale: 0, opacity: 0 }, 0.25, ease.in)]}>
+      <path d={`M${-width / 2} -24H${width / 2}a14 14 0 0 1 14 14v12a14 14 0 0 1 -14 14H8l-10 14 2 -14H${-width / 2}a14 14 0 0 1 -14 -14v-12a14 14 0 0 1 14 -14Z`} fill={P.cloud} stroke={P.ink} strokeWidth={2.5} strokeLinejoin="round" />
+      <Written text={text} size={26} x={-width / 2} y={8} at={at + 0.2} color={P.pink} width={2.4} />
+    </g>
+  </g>
+  );
+};
+// The eyes drift toward wherever the plane is, from wherever Pip is.
+const look = sampled(
+  (t) => {
+    const me = hopAt(t);
+    const plane = planeAt(t);
+    const dx = plane.x - (pip.x + me.x);
+    const dy = plane.y - (pip.y + me.y - 14);
+    const d = Math.hypot(dx, dy) || 1;
+    return { x: (3 * dx) / d, y: (2.2 * dy) / d };
+  },
+  { duration: D, step: 1 / 20, tolerance: { translate: 0.3 } },
+);
+const Pip = () => (
+  <g transform={`translate(${pip.x} ${pip.y})`}>
+    <g animation={sampled(hopAt, { duration: D, step: 1 / 60, tolerance: { translate: 0.5 } })}>
+      <g animation={[enter({ at: PIP_AT, over: 0.5 }, { y: 30, scale: 0, opacity: 0 }, ease.pop), wiggle({ rotate: 5 }, { seed: "pip", rate: 1.5, period: 6 })]}>
+        <g animation={motion({ y: 0 }).to({ y: -5 }, 0.5, ease.inOut).to({ y: 0 }, 0.5, ease.inOut).loop(1)}>
+          <path d="M-12 -2l-3 6M12 -2l3 6" stroke={P.ink} strokeWidth={3} strokeLinecap="round" />
+          <path d="M-28 -2C-30 -28 -14 -40 0 -40S30 -28 28 -2C18 2 -18 2 -28 -2Z" fill={P.sun} stroke={P.ink} strokeWidth={3} strokeLinejoin="round" />
+          <path d="M2 -40C4 -50 12 -54 16 -50" fill="none" stroke={P.ink} strokeWidth={2.5} strokeLinecap="round" />
+          <circle cx={-17} cy={-11} r={4} fill={P.pink} opacity={0.6} />
+          <circle cx={17} cy={-11} r={4} fill={P.pink} opacity={0.6} />
+          <g animation={look}>
+            {eye(-8)}
+            {eye(8)}
+          </g>
+          <path d="M-4 -8Q0 -4 4 -8" fill="none" stroke={P.ink} strokeWidth={2} strokeLinecap="round" />
+        </g>
+      </g>
+      <Bubble text="hi!" at={PIP_AT + 0.6} until={PIP_AT + 2.6} />
+      <Bubble text="wheee!" at={BIG_HOP.at - 0.1} until={BIG_HOP.at + BIG_HOP.over + 0.2} />
+    </g>
+  </g>
 );
 
 // The front layer bows out just before the loop, so the redraw reads as a fresh page, not a jump.
@@ -282,18 +385,19 @@ export default function build(): string {
       <rect width={S} height={S} fill={P.paper} />
       <rect width={S} height={S} fill={warmth} />
       {planeNode}
-      {cloud(190, 470, 1.1, 30, 0)}
+      {cloud(190, 470, 1.1, 30, 0, <>{drops}{rainbow}</>)}
       {cloud(1010, 700, 0.85, 24, 2)}
       {cloud(460, 230, 0.75, 20, 4)}
       {cloud(780, 1010, 0.9, 26, 1)}
       {sun(1000, 400)}
-      {sun(450, 1060)}
+      {sun(440, 1020)}
+      {snail}
       {sparkles}
       {squiggles}
       <g animation={front}>
         {hello}
         {wordmark}
-        {pipNode}
+        <Pip />
         {tagline}
         {install}
       </g>
