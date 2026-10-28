@@ -1,37 +1,99 @@
-<h1 align="center">svjeez</h1>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/hero.svg" width="840" alt="The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a floating voxel island orbited by a golden light." />
+</p>
 
-<p align="center">Animated SVGs in TSX. One file out, no JavaScript.</p>
+<p align="center">
+  <strong>Write scenes in TSX. Compile them into a single animated SVG. Zero runtime JavaScript.</strong>
+</p>
 
-Make code walkthroughs, diagrams and terminal animations in TSX. svjeez compiles them into a single SVG with no JavaScript or dependencies.
+<p align="center">
+  <a href="https://svjeez.texoport.in">Website</a> ·
+  <a href="https://svjeez.texoport.in/examples/">Examples Gallery</a> ·
+  <a href="https://svjeez.texoport.in/intro">45s Intro Reel</a> ·
+  <a href="https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/SKILL.md">Agent Skill &amp; Docs</a> ·
+  <a href="https://www.npmjs.com/package/svjeez">npm</a>
+</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/hero.svg" width="720" alt="A flowchart spec in TSX on the left; on the right each node appears as its line is highlighted, then a comet runs from PR opened to Post review" /></p>
+---
 
-The animation lives in the SVG, so it plays in an `<img>`, including in GitHub READMEs.
+**svjeez** compiles TSX scenes into one self-contained animated SVG. Motions compile to CSS `@keyframes` (or SMIL `<animate>` on filter primitives), fonts are subsetted and embedded, and themes adapt to `prefers-color-scheme` and `prefers-reduced-motion` inside the file itself.
 
-### Typed ids
+Because the animation lives in the SVG with **no JavaScript**, it plays anywhere an `<img>` tag works — including GitHub READMEs, docs sites, and blog posts.
 
-Diagram ids are checked at compile time:
+## Made with svjeez
 
-```ts
-const chart = flowchart({
-  nodes: { pr: "PR opened", lint: "Run linters", post: "Post review" },
-  edges: [["pr", "lint"], ["lint", "posts"]],
-});
-chart.route("pr", "review");
-```
+Every preview below is a single `.svg` file loaded in an `<img>` tag. Click any card to inspect it full-size on [svjeez.texoport.in](https://svjeez.texoport.in/examples/) or read its TSX source.
 
-```text
-error TS2820: Type '"posts"' is not assignable to type '"lint" | "post" | "pr"'. Did you mean '"post"'?
-error TS2345: Argument of type '"review"' is not assignable to parameter of type '"lint" | "post" | "pr"'.
-```
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <a href="https://svjeez.texoport.in/examples/map">
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/map.svg" width="400" alt="A hand-inked fantasy map draws itself, then the camera zooms in and follows a dashed route east to Mount Cinder." />
+      </a><br />
+      <sub><b>The Western Reaches</b> · Hand-inked cartography, curved labels &amp; camera pan (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/map">TSX</a>)</sub>
+    </td>
+    <td align="center" width="50%">
+      <a href="https://svjeez.texoport.in/examples/breaker">
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/breaker.svg" width="400" alt="A seven-slide explainer on circuit breakers combining code morphs, state machines, sequence diagrams, lanes, and flowcharts." />
+      </a><br />
+      <sub><b>Circuit Breakers</b> · 7-slide explainer with code, state machine, sequence &amp; lanes (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/breaker">TSX</a>)</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <a href="https://svjeez.texoport.in/examples/minecraft">
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/minecraft.svg" width="400" alt="A voxel floating island builds itself block by block, grows trees and a lantern-lit cabin, shifts to snowy night, and crumbles." />
+      </a><br />
+      <sub><b>Voxel Island</b> · Isometric pixel-art blocks, day-to-night sky &amp; falling snow (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/minecraft">TSX</a>)</sub>
+    </td>
+    <td align="center" width="50%">
+      <a href="https://svjeez.texoport.in/examples/strata">
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/strata.svg" width="400" alt="An outliner app with coding agents working in the margin, typing a query, citing sources, and inserting structured notes." />
+      </a><br />
+      <sub><b>Strata</b> · Product UI showcase with live margin agents (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/strata">TSX</a>)</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <a href="https://svjeez.texoport.in/examples/daynight">
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/daynight.svg" width="400" alt="A lighthouse scene that shows sun and clouds in light mode, or moon, stars, and a sweeping lantern beam in dark mode." />
+      </a><br />
+      <sub><b>Day &amp; Night Lighthouse</b> · One SVG that swaps scenes with your OS theme (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/daynight">TSX</a>)</sub>
+    </td>
+    <td align="center" width="50%">
+      <a href="https://svjeez.texoport.in/examples/newspaper">
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/newspaper.svg" width="240" alt="A broadsheet front page spins in: a blackletter masthead inks on letter by letter, three measured columns justify, and an EXTRA stamp lands." />
+      </a><br />
+      <sub><b>The Svjeez Gazette</b> · Outlined masthead &amp; measured column justification (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/newspaper">TSX</a>)</sub>
+    </td>
+  </tr>
+</table>
 
-## Installation
+<p align="center">
+  More in <a href="https://github.com/saiashirwad/svjeez/tree/main/examples"><code>examples/</code></a>:
+  <a href="https://svjeez.texoport.in/examples/lighthouse">Agent Timelapse (108s)</a> ·
+  <a href="https://svjeez.texoport.in/examples/horizon">Event Horizon</a> ·
+  <a href="https://svjeez.texoport.in/examples/grove">Floating Grove</a> ·
+  <a href="https://svjeez.texoport.in/examples/manifold">3D Manifold</a> ·
+  <a href="https://svjeez.texoport.in/examples/bloom">Bloom</a> ·
+  <a href="https://svjeez.texoport.in/examples/explainer">React Explainer</a> ·
+  <a href="https://svjeez.texoport.in/examples/walkthrough">Server Walkthrough</a> ·
+  <a href="https://svjeez.texoport.in/intro">45s Hype Reel</a>
+</p>
 
-Install svjeez and configure its JSX runtime. svjeez needs Node 20 or later, and its type checks need TypeScript 5.4 or later:
+---
+
+## Quickstart
+
+### 1. Install
+
+svjeez runs on Node 20+ or Bun and has zero runtime dependencies. For full type checking, use TypeScript 5.4+.
 
 ```sh
 npm install svjeez
 ```
+
+Configure TypeScript to use svjeez's JSX runtime in `tsconfig.json` (or add `/** @jsxImportSource svjeez */` at the top of a file):
 
 ```json
 {
@@ -43,548 +105,376 @@ npm install svjeez
 }
 ```
 
-## Basic usage
+> **Using a coding agent?** Install the built-in scene-writing skill and worked examples into `.claude/skills/svjeez` (pass `--dir` for another agent harness):
+> ```sh
+> npx svjeez skill --install
+> ```
+
+### 2. Write a scene (`scene.tsx`)
+
+Export a default function returning `render(...)`. Both the CLI and the live preview load this module shape:
 
 ```tsx
-import { writeFileSync } from "node:fs";
-import { draw, ease, enter, motion, render } from "svjeez";
+import { draw, ease, enter, render } from "svjeez";
 
-const svg = render(
-  { width: 200, height: 120, duration: 4, title: "Hello" },
-  <>
-    <path
-      d="M20 100C60 20 140 20 180 100"
-      fill="none"
-      stroke="#FF5FA8"
-      strokeWidth={4}
-      animation={draw({ at: 0.2, over: 1.2 })}
-    />
-    <circle
-      cx={100}
-      cy={40}
-      r={8}
-      fill="#3EE6D6"
-      animation={enter({ at: 1.2, over: 0.5 }, { scale: 0 }, ease.pop)}
-    />
-  </>,
-);
-
-writeFileSync("hello.svg", svg);
+export default function build(): string {
+  return render(
+    {
+      width: 200,
+      height: 120,
+      duration: 4,
+      title: "Hello",
+      desc: "A curve draws on, then a dot pops in.",
+    },
+    <>
+      <path
+        d="M20 100C60 20 140 20 180 100"
+        fill="none"
+        stroke="#FF5FA8"
+        strokeWidth={4}
+        animation={draw({ at: 0.2, over: 1.2 })}
+      />
+      <circle
+        cx={100}
+        cy={40}
+        r={8}
+        fill="#3EE6D6"
+        animation={enter({ at: 1.2, over: 0.5 }, { scale: 0 }, ease.pop)}
+      />
+    </>,
+  );
+}
 ```
 
-Run with Bun (`bun hello.tsx`) or Node and [tsx](https://tsx.is) (`npx tsx hello.tsx`). For `node:fs` types, install `@types/node` and add `"types": ["node"]`.
+### 3. Render & inspect frames
+
+Compile to a standalone `.svg` file, or rasterize a labelled contact sheet of timestamps to verify your timing visually:
+
+```sh
+# Compile to SVG (on Node, install tsx so Node can import .tsx; on Bun, use bunx --bun svjeez)
+npx svjeez svg scene.tsx --out hello.svg
+
+# Optional: render PNG frames & a contact sheet to check timing in headless Chromium
+npm i -D playwright-core && npx playwright-core install chromium-headless-shell
+npx svjeez frames scene.tsx --times 0,0.8,1.6,3 --sheet --out frames/
+```
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/basic.svg" width="200" alt="A curve draws on, then a dot pops in" />
 
-## Motions
+---
+
+## Tour of Features
+
+### 1. Timeline, Recipes & Easing
+
+Every motion lives on the scene timeline (`0` to `duration`). `motion()` uses a cursor: `.at(t)` moves the cursor, `.to(values, over, ease?)` transitions over a duration and advances the cursor, `.wait(d)` holds values, and `.set(values)` cuts instantly.
 
 ```tsx
-motion({ opacity: 0 }) // initial values
-  .at(1) // move the cursor to 1s
-  .to({ opacity: 1 }, 0.5) // fade in, cursor now at 1.5s
-  .wait(2) // hold for 2s
+import { draw, ease, enter, exit, motion, sampled, shake, wiggle } from "svjeez";
+
+// Chainable timeline
+const pulse = motion({ opacity: 0 })
+  .at(1)
+  .to({ opacity: 1 }, 0.5)
+  .wait(2)
   .to({ opacity: 0, scale: 0.8 }, 0.4, ease.in)
-  .set({ scale: 1 }); // hard cut
-```
+  .set({ scale: 1 });
 
-Values hold between transitions.
+// Ready-made recipes
+enter({ at: 0.5, over: 0.8 }, { y: 20, blur: 6 }); // rise out of a blur to rest
+exit({ at: 4, over: 0.4 });                        // fade out
+draw({ at: 0, over: 1.2 });                        // stroke a path or shape on
+shake({ at: 2, over: 0.5 }, { x: 6 });             // damped shake
+wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });  // seeded looping noise
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/motion.svg" width="200" alt="A square fades in, holds, then shrinks away" />
+// Stack multiple animations on one element (outermost first) + loop
+<circle animation={[enter({ at: 0, over: 0.6 }), wiggle({ x: 4, y: 4 }, { seed: "dot" })]} />;
 
-### Channels
-
-| Tag                        | Channels                                                                               |
-| -------------------------- | -------------------------------------------------------------------------------------- |
-| shapes, `g`, `text`, `use` | `opacity` `x` `y` `scale` `rotate` `blur` `fill` `stroke` `color`                      |
-| shapes                     | `draw`                                                                                 |
-| `rect`, `image`            | `width` `height`                                                                       |
-| `stop`                     | `stopColor` `stopOpacity`                                                              |
-| filter primitives          | `stdDeviation` `baseFrequency` `seed` `displace` `dx` `dy` `floodColor` `floodOpacity` |
-
-### Loops
-
-```tsx
-motion({ rotate: 0 }).to({ rotate: 360 }, 2, ease.linear).loop(2);
-```
-
-`render` snaps each period so it divides `duration`.
-
-### Stacking
-
-```tsx
-<circle animation={[enter({ at: 0, over: 0.6 }), wiggle({ x: 4, y: 4 }, { seed: "dot" })]} />
-```
-
-The first animation is outermost, like a wrapper `<g>`.
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/loops.svg" width="200" alt="A looping spinner and a wandering dot" />
-
-## Recipes
-
-```tsx
-enter({ at: 0.5, over: 0.8 }); // fade in
-enter({ at: 0.5, over: 0.8 }, { y: 20, blur: 6 }); // rise out of a blur
-exit({ at: 4, over: 0.4 }); // fade out
-draw({ at: 0, over: 1.2 }); // stroke a shape on
-shake({ at: 2, over: 0.5 }, { x: 6 }); // damped shake
-wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 }); // seeded noise that loops
-```
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/recipes.svg" width="600" alt="enter, enter from a blur, exit, draw, shake and wiggle" />
-
-```tsx
-sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), {
+// Bake any math or physics function of time into keyframes within a pixel/degree tolerance
+const orbit = sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), {
   duration: 12,
   tolerance: { translate: 1 },
 });
 ```
 
-`sampled` turns a function of time into keyframes within the given tolerance.
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/recipes.svg" width="560" alt="enter, enter from a blur, exit, draw, shake and wiggle" />
+</p>
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/motion.svg" width="180" alt="A square fades in, holds, then shrinks away" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/loops.svg" width="180" alt="A looping spinner and a wandering dot" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/easing.svg" width="340" alt="Eight dots crossing a track, one per easing" />
+</p>
 
-## Easing
+### 2. Code Walkthroughs, Morphing & Terminals (`svjeez/extras`)
 
-```tsx
-ease.linear;
-ease.in;
-ease.out; // default
-ease.inOut;
-ease.pop; // overshoots, then settles
-ease.hold; // jumps at the end
-ease.steps(4);
-ease.bezier(0.2, 0.8, 0.2, 1);
-```
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/easing.svg" width="420" alt="Eight dots crossing a track, one per easing" />
-
-## Defs
+`svjeez/extras` turns code blocks into measurable geometry (`src.get(id)`, `src.find(text)`, `src.lines(a, b)`) that drives `<Focus>`, `<Marker>`, `<Callout>`, `<Arrow>`, `<Brace>`, `<Underline>`, `<Camera>`, and token-level `morph()`.
 
 ```tsx
-const fade = def.linearGradient(
-  { x1: 0, y1: 0, x2: 0, y2: 1 },
-  <>
-    <stop offset={0} stopColor="#fff" />
-    <stop offset={1} stopColor="#fff" stopOpacity={0} />
-  </>,
-);
+import {
+  Callout, Focus, Marker, adaptive, appWindow, code,
+  morph, readingTime, terminal, timeline, tomorrow, tomorrowNight,
+} from "svjeez/extras";
 
-<rect width={100} height={100} fill={fade} />;
-```
-
-`render` gives used defs generated ids.
-
-### Properties
-
-```tsx
-const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
-const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
-
-render(
-  {
-    width: 200,
-    height: 200,
-    duration: 4,
-    title: "Orbit",
-    css: css`
-      .dot {
-        translate: calc(100px + 60px * ${px} * cos(${yaw})) 100px;
-      }
-    `,
-  },
-  <g animation={motion().to({ [yaw]: 360 }, 4, ease.linear)}>
-    <circle class="dot" r={6} style={{ [px]: 1 }} />
-  </g>,
-);
-```
-
-Use properties in motions, `style` and `css`. Values are checked against their declared syntax.
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/property.svg" width="200" alt="A dot orbiting, driven by an animated angle property" />
-
-### Calc
-
-```tsx
-const { add, sub, mul, div, sin, cos, clamp, length, angle } = calc;
-
-css`
-  .dot {
-    translate: ${add(length(100), mul(length(60), px, cos(yaw)))} 100px;
-  }
-`;
-// .dot{translate:calc(100px + 60px * var(--p1) * cos(var(--p2))) 100px}
-
-const z = add(mul(px, sin(yaw)), mul(pz, cos(yaw)));
-css`
-  .dot {
-    scale: ${div(720, add(720, z))};
-  }
-`;
-```
-
-`calc` checks units in CSS expressions. It also includes `min` and `max`.
-
-## Without JSX
-
-`el` builds the same elements as JSX, with the same props and the same type checking. Each tag is a function of `(props, children)`. A scene built with `el` renders the same bytes as its JSX twin.
-
-```ts
-import { draw, ease, el, enter, render } from "svjeez";
-
-const { circle, g, path } = el;
-
-const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
-  path({ d: "M20 100C60 20 140 20 180 100", fill: "none", stroke: "#FF5FA8", strokeWidth: 4, animation: draw({ at: 0.2, over: 1.2 }) }),
-  g({ opacity: 0.9 }, [circle({ cx: 100, cy: 40, r: 8, fill: "#3EE6D6", animation: enter({ at: 1.2, over: 0.5 }, { scale: 0 }, ease.pop) })]),
-  el.text({ x: 4, y: 10 }, "hi"),
-]);
-```
-
-- Children are one node, a string, or an array of them. An array is a fragment, so `render` takes an array as its content and a `map` result nests anywhere.
-- Components are plain functions. Call them with their props and `children` as a prop: `Callout({ target, children: "Click here" })`.
-- `key` is accepted and ignored. Nothing diffs these trees.
-- `null`, `undefined` and booleans are skipped, as children and as props.
-- `.ts` files work. No pragma or `jsxImportSource` is needed.
-
-### Inside a framework that is not JSX
-
-`render` returns a string, so any view layer can show it. Two ways in:
-
-- Inline the SVG as trusted HTML. Pass `prefix` to `render`. Inlined scenes share one document, and every scene numbers its keyframes, classes and ids from 1, so two scenes without a prefix overwrite each other's animations.
-- Load it as an image. An `<img src="data:image/svg+xml,...">` is its own document, so it needs no prefix. The scene plays, but its text cannot be selected and the page cannot style it.
-
-```ts
-const hello = render({ width: 200, height: 120, duration: 4, title: "Hello", prefix: "hello-" }, scene);
-const saved = render({ width: 320, height: 120, duration: 5, title: "Saved", prefix: "saved-" }, toast);
-
-// FoldKit, which builds snabbdom vnodes: h.div([attributes], [children]).
-h.div([h.Class("banner"), h.InnerHTML(hello)], []);
-
-// Or as an image.
-h.img([h.Src(`data:image/svg+xml,${encodeURIComponent(saved)}`), h.Alt("Changes saved")]);
-```
-
-Render once at module scope or memoize it. A view function that runs on every update would compile the scene again each time.
-
-`prefix` goes in front of every id, class, keyframe name, custom property and embedded font family the compiler generates, and in front of the title and description ids. It starts with a letter and contains only letters, digits, `_` and `-`, such as `"hello-"`. The default is no prefix, and the output is unchanged. Classes and ids you write yourself in `css` or in props are not renamed.
-
-## Voxels
-
-Voxels live in their own entry, `svjeez/voxel`.
-
-```tsx
-import { voxel } from "svjeez/voxel";
-
-const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 }); // unit: px per block edge
-const grass = voxel.texture(
-  { g: "#5DA03A", d: "#7A5534" },
-  `
-  gggg
-  gdgg
-  dddd
-  dddd
-`,
-);
-
-<g transform="translate(300 160)">
-  {voxel.scene({
-    camera: view,
-    blocks: [
-      { at: [0, 0, 0], skin: { side: dirt, top: grass } },
-      { at: [1, 0, 0], skin: dirt, from: 3, to: 9 }, // pops in at 3s, gone at 9s
-      { at: [0, 0, 1], skin: { side: dirt, top: grass }, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
-    ],
-  })}
-</g>;
-
-sampled((t) => view.project([2, 3 - t, 1]), { duration: 3, tolerance: { translate: 0.5 } }); // a free point
-```
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/voxels.svg" width="200" alt="Three voxel blocks, one dropping in and one popping in" />
-
-A scene is a list of blocks with optional lifetimes and motion. Blocks draw back to front; blocks in the same cell keep their array order.
-
-Textures are pixel art. A skin can use one texture for every face or different textures per face.
-
-## Effects
-
-```tsx
-<text filter={fx.glow({ blur: 4 })}>OPEN</text>
-<g filter={fx.boil({ strength: 2 })}>{/* ... */}</g>
-```
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/effects.svg" width="320" alt="A glowing word and a boiling hand-drawn house" />
-
-Photo filters: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })`, `fx.blur(deviation)`, `fx.shadow({ dx, dy, blur, color, opacity })`.
-
-## Images
-
-Embed SVG or raster images as data URIs, so the output stays one file that GitHub shows through `<img>`.
-
-```tsx
-const photo = await picture.load(new URL("./harbor.jpg", import.meta.url)); // or picture(bytesOrSvgMarkup)
-<Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" alt="A harbor" />
-```
-
-`<Picture>` takes `fit` (`cover`, `contain`, `fill`), `radius`, `filter`, `opacity`, `alt`, and an `animation` that moves the image inside a fixed frame (a Ken Burns zoom). `validateSvg` warns on external image hrefs, which GitHub won't load, and on a data URI over 256 KB. Prefer SVG, which scales infinitely; embedded SVGs are sealed, so outline their text. Full notes are in the skill's Images section. See `examples/images`.
-
-## Fonts
-
-Embed a font as real text, measure text with it, or draw text as animated outlines.
-
-```tsx
-const display = await font.load(new URL("./ArchivoBlack-Regular.ttf", import.meta.url)); // or font(bytes)
-const body = font.family(await font.load("Body-Regular.ttf"), await font.load("Body-Italic.ttf"));
-
-<text x={20} y={60} fontFamily={body}>Selectable text in an embedded font</text>
-const w = display.measure("Wave!", 96); // px, matches the browser, kerning included
-<Glyphs font={display} text="Wave!" size={96} x={(W - w) / 2} y={140} animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />
-```
-
-A font is embedded once, only if the tree uses it, and cut down to the glyphs the scene's text needs. Load a coding font with `{ ligatures: false }` so its `=>` ligatures don't force the whole file in. `<Glyphs>` draws one path per glyph and embeds no font, which suits short animated titles. Extras take `font` and size their boxes by measuring. Full notes are in the skill's Fonts section. See `examples/fonts`, `examples/newspaper` for a front page with a drawn masthead and columns justified by measuring, and `examples/map` for a fantasy map with labels set along curves and a camera that follows a journey.
-
-## Ink
-
-Draw a path with a pen, brush, calligraphy nib or pencil instead of an even stroke. The tool sets the width at every point.
-
-```tsx
-<Ink d="M20 80C80 20 160 140 220 80" tool={tool.brush({ size: 8, seed: 2 })} fill="#2B2118" draw={{ at: 0.5, over: 1.2 }} />
-```
-
-`draw` inks the stroke in along its path. `inkPath(d, tool)` returns the outline as path data. `strokeFont(svgFont)` reads a single-line SVG font, so `<Ink>` can write text by hand. See the skill's Ink section, and `examples/map`, whose coasts, rivers, peaks and lava are all inked.
-
-## Extras
-
-`svjeez/extras` adds code explainers, terminals and diagrams.
-
-### Code
-
-```tsx
-import { code, tomorrowNight, type CodeRun } from "svjeez/extras";
-
-const kw = (text: string): CodeRun => ["keyword", text];
-
-const src = code(
-  [
-    [kw("const"), " total ", ["punct", "="], " ", ["fn", "sum", "call"], ["punct", "("], "xs", ["punct", ");"]],
-    [kw("return"), " total", ["punct", ";"]],
-  ],
-  { x: 40, y: 60, fontSize: 16, gutter: true, theme: tomorrowNight },
-);
-
-src.node;           // the rendered code
-src.get("call");    // Rect around every run with id "call"
-src.find("total");  // Rect around the first "total"
-src.lines(1, 2);    // Rect around lines 1-2
-src.at(2, 8);       // Point at line 2, column 8
-```
-
-Lines contain text, themed runs or Shiki tokens. Give a run an id to find it with `get()` or match it with `morph`.
-
-### Themes
-
-```tsx
-import { adaptive, base16, tomorrow, tomorrowNight } from "svjeez/extras";
-
-const custom = base16("#111318", "#1a1d24", /* 14 more, base00 to base0F */);
+// Adaptive base16 themes emit CSS variables that follow prefers-color-scheme
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
-render({ /* ... */ css }, content); // follows the viewer's light or dark mode
-```
 
-Themes use base16 colors. `adaptive` switches between a dark and light theme.
+// Named beats with automatic reading-time estimation
+const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5 });
 
-### Explainers
-
-```tsx
-import { Arrow, Callout, Focus, Marker, morph, readingTime, timeline } from "svjeez/extras";
-
-const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
-
+// Morph matching tokens smoothly between code versions while markers and callouts track them
 <>
   <Focus stops={[{ during: tl.intro, target: before.lines(2) }]} dim={0.3}>
     {morph([before, after], { at: [tl.change.at], gutter: true }).node}
   </Focus>
-  <Marker theme={theme} stops={[{ during: tl.intro, target: before.get("hook").pad(4) }, { during: tl.change, target: after.get("hook").pad(4) }]} />
-  <Callout theme={theme} target={after.get("send")} side="right" during={tl.outro} class="note">Handlers send intent</Callout>
+  <Marker
+    theme={theme}
+    stops={[
+      { during: tl.intro, target: before.get("hook").pad(4) },
+      { during: tl.change, target: after.get("hook").pad(4) },
+    ]}
+  />
+  <Callout theme={theme} target={after.get("send")} side="right" during={tl.outro}>
+    Handlers send intent
+  </Callout>
 </>;
 ```
 
-`morph` moves matching text between versions. `timeline` arranges named scenes, and `readingTime` estimates a caption’s duration.
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/explainer.svg" width="680" alt="A React counter refactored from useState to useReducer across four timed slides with Focus, Marker, Brace, Arrow and morph" />
+</p>
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/code.svg" width="360" alt="A call to sum morphs into a reduce and back, with a marker following it" />
-
-### Terminals
+Build terminal recordings with `appWindow`, `terminal`, `typewriter`, and `reveal`:
 
 ```tsx
-import { terminal, typewriter, appWindow } from "svjeez/extras";
-
 const shell = appWindow(rect(80, 50, 800, 340), { theme, title: "~/hello", dots: "traffic" });
 const session = terminal(
   [
-    { cmd: "bun add svjeez", output: [[["muted", "installed svjeez@0.2.0"]]] },
+    { cmd: "bun add svjeez", output: [[["muted", "installed svjeez"]]] },
     { cmd: "bun run build", output: [[["green", "✓"], " dist/hello.svg"]] },
   ],
   { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 16 },
 );
-
-<>{shell.node}{session.node}</>; // session.end is when the last command finishes
-
-typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end, spans }, a span per line
-reveal(src, { at: 1, step: 0.6 }); // a paragraph at a time: { node, spans, end }
-reveal(src, { at: 1, blocks: [[2, 3], [5, 9]] }); // these lines in turn, the rest there from the start
-reveal(src, { at: [1, 4] }); // one time per block
 ```
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/terminal.svg" width="440" alt="Two commands typed into a terminal window" />
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/terminal.svg" width="560" alt="Two commands typed into an adaptive terminal window" />
+</p>
 
-### Diagrams
+### 3. Typed Diagrams & Flows (`svjeez/extras`)
 
-Diagrams have typed ids and return `{ node, get(id), bounds }` alongside their own helpers. Use `anchor` to position a diagram by its center or edge.
+All five diagram builders — `flowchart`, `sequence`, `stateMachine`, `tree`, and `lanes` — infer literal node IDs from your spec. Referencing a nonexistent node in an edge, transition, or `.route()` fails at compile time with a suggestion:
 
-Stepped animations take `play: { at, step }`, with a start time and spacing or an array of times to sync them with other animations. `flowchart`, `tree` and `state` take `direction: "LR"` in their options to lay out left to right.
+```ts
+const chart = flowchart({
+  nodes: { pr: "PR opened", lint: "Run linters", post: "Post review" },
+  edges: [["pr", "lint"], ["lint", "posts"]],
+  //                                ^^^^^^^
+  // error TS2820: Type '"posts"' is not assignable to type '"lint" | "post" | "pr"'. Did you mean '"post"'?
+});
+```
+
+Diagrams lay themselves out and expose `.get(id)`, `.bounds`, `.route(from, to)`, and `.layers` so `flow()` tokens (`"dot"`, `"comet"`, `"trace"`, or `"packet"`) can travel right between edges and nodes:
 
 ```tsx
 const chart = flowchart(
   {
-    nodes: { pr: { label: "PR opened", role: "input" }, lint: { label: "Run linters", role: "tool" }, ok: { label: "Clean?", role: "decision" }, post: "Post review" },
+    nodes: {
+      pr: { label: "PR opened", role: "input" },
+      lint: { label: "Run linters", role: "tool" },
+      ok: { label: "Clean?", role: "decision" },
+      post: "Post review",
+    },
     groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
     edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
   },
   { theme, play: { at: 0.5 } },
 );
 const trip = flow(chart.route("pr", "post"), { theme, at: 4, style: "trace", arrive: true });
+
 <>{chart.layers.under}{trip.node}{chart.layers.over}</>;
 ```
 
-`edge` and `route` follow the drawn curves. Use `layers` to place a flow between the edges and nodes.
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/flowchart.svg" width="220" alt="Flowchart revealed rank by rank, then traced" /><br />
+      <sub><code>flowchart()</code> + <code>flow()</code></sub>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/sequence.svg" width="300" alt="Sequence diagram playing message by message" /><br />
+      <sub><code>sequence()</code></sub>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/state.svg" width="160" alt="State machine walking nested states" /><br />
+      <sub><code>stateMachine()</code> + <code>.walk()</code></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/tree.svg" width="215" alt="Tree revealed level by level" /><br />
+      <sub><code>tree()</code></sub>
+    </td>
+    <td align="center" colspan="2">
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/lanes.svg" width="440" alt="Two lanes on a time axis with a sweeping playhead" /><br />
+      <sub><code>lanes()</code></sub>
+    </td>
+  </tr>
+</table>
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/flowchart.svg" width="250" alt="A review flowchart revealed rank by rank, then traced" />
+### 4. Ink, Fonts, Images & Effects
 
-`flow` follows a path as a `dot`, `comet`, `trace` or `packet`.
+Draw variable-width strokes with a pen, brush, calligraphy nib, or pencil (`<Ink>`); subset and embed TTF/OTF fonts (`font.load`) or draw outlined glyphs (`<Glyphs>`); embed framed photos with Ken Burns pan/zoom (`<Picture>`); and apply animated SVG filters (`fx.*`).
 
 ```tsx
-const login = sequence(
-  { actors: { user: "User", api: "API", db: { label: "Postgres", role: "store" } }, messages: [["user", "api", "POST /login"], ["api", "db", "select"], ["db", "api", "row", { reply: true }], { note: "api", text: "hash check" }] },
-  { theme, play: { at: 0.5, step: 0.8 } },
-);
+import { Glyphs, Ink, Picture, draw, font, fx, picture, strokeFont, tool } from "svjeez";
+
+const display = await font.load(new URL("./ArchivoBlack-Regular.ttf", import.meta.url));
+const photo = await picture.load(new URL("./nebula.jpg", import.meta.url));
+
+// Outlined display type drawn letter by letter + exact browser-matching text measurement
+const w = display.measure("Wave!", 96);
+<Glyphs font={display} text="Wave!" size={96} x={(680 - w) / 2} y={140} animation={(_, i) => draw({ at: i * 0.15, over: 1 })} />;
+
+// Variable-width brush, nib, pen, or pencil strokes (plus single-line handwriting via strokeFont)
+<Ink d="M20 80C80 20 160 140 220 80" tool={tool.brush({ size: 8, seed: 2 })} fill="#2B2118" draw={{ at: 0.5, over: 1.2 }} />;
+
+// Embedded images (SVG/PNG/JPEG/WebP/GIF/AVIF) & animated SMIL/CSS filters
+<Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" filter={fx.duotone({ dark: "#14162A", light: "#FFB86C" })} alt="Nebula" />;
+<g filter={fx.boil({ strength: 2 })}>{/* hand-drawn line boil */}</g>;
 ```
 
-`message(i)` gives a message’s arrow and its slot on the `play` timeline.
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/fonts.svg" width="340" alt="Wave! drawn as glyph outlines then filled, with measured text below" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/images.svg" width="340" alt="Picture fit modes, duotone, grayscale, and Ken Burns pan/zoom" />
+</p>
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/effects.svg" width="460" alt="Six effect tiles: blur, jitter, smooth drift, boiling house, neon flicker, spinner" />
+</p>
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/sequence.svg" width="342" alt="A login sequence diagram playing message by message" />
+### 5. Voxels (`svjeez/voxel`) & Typed CSS `@property` Math
+
+Project 3D pixel-art block scenes into pure SVG with automatic hidden-block culling, per-face shading, lifetimes (`from`/`to`), and `camera.project([x, y, z])` (`y` is vertical height), or drive CSS `calc()` expressions with animated `@property` values checked for unit dimensionality.
 
 ```tsx
-const agent = stateMachine(
-  {
-    states: { idle: "Idle", working: { label: "Working", states: { plan: "Plan", act: "Act" }, initial: "plan" }, done: { label: "Done", final: true } },
-    initial: "idle",
-    transitions: [["idle", "working", "task"], ["plan", "act"], ["act", "plan"], ["working", "done", "finish"]],
-  },
-  { theme },
-);
-const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1 }); // { node, spans, end }
+import { calc, css, def, ease, enter, motion } from "svjeez";
+import { voxel } from "svjeez/voxel";
+
+// 1. Isometric voxel scenes
+const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 });
+voxel.scene({
+  camera: view,
+  blocks: [
+    { at: [0, 0, 0], skin: { side: dirt, top: grass } },
+    { at: [0, 1, 0], skin: { side: dirt, top: grass }, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
+  ],
+});
+
+// 2. Typed CSS @property + dimension-checked calc()
+const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
+const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
+const style = css`.dot { translate: ${calc.add(calc.length(100), calc.mul(calc.length(60), px, calc.cos(yaw)))} 100px; }`;
 ```
 
-`walk` follows the transitions, lighting each state in turn.
+<p>
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/voxels.svg" width="200" alt="Three voxel blocks, one dropping in and one popping in" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/property.svg" width="160" alt="A dot orbiting, driven by an animated angle property" />
+</p>
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/state.svg" width="178" alt="A state machine lighting each state in turn" />
+---
+
+## End-to-End Type Safety
+
+Beyond diagram IDs, svjeez uses TypeScript's type system to catch broken animations and invalid SVG combinations before you render:
 
 ```tsx
-const team = tree({ nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } }, { theme, play: { at: 0.5 } });
-team.route("a", "b"); // up through the common ancestor and down
+<g animation={draw({ at: 0, over: 1 })} /> // ✗ error: <g> has no stroke to draw
+<g clipPath={fadeGradient} />              // ✗ error: Ref<"linearGradient"> is not assignable to Ref<"clipPath">
+motion().to({ opcity: 1 }, 1);             // ✗ error: misspelled channel
+calc.mul(calc.length(1), calc.length(2));  // ✗ error: cannot multiply a length by a length
+calc.cos(px);                              // ✗ error: calc.cos() requires an angle
 ```
 
-`tree` lays out parents above their children and reveals them level by level.
+At runtime, `render()` validates its own output (`validateSvg(svg)`) and throws actionable errors if a motion exceeds `duration`, two transitions collide on the same lane, or a non-stackable channel is stacked.
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/tree.svg" width="215" alt="A small tree revealed level by level" />
+---
+
+## CLI, `render()` & Plain TypeScript (`el`)
+
+### CLI commands
+
+| Command | Description |
+| --- | --- |
+| `npx svjeez svg <file.tsx> [-o out.svg]` | Compile a scene module (or validate an `.svg`) to `--out` or stdout. |
+| `npx svjeez frames <file> [-t 0,1,2 \| -n 6] [--sheet] [-o frames/]` | Rasterize PNG frames and an optional contact sheet (`sheet.png`). Supports `--scale`, `--columns`, `--color-scheme light\|dark\|system`, and `--background`. |
+| `npx svjeez skill [--install [--dir .claude/skills]]` | Print `SKILL.md` or copy the full skill, references, and examples into your project. |
+
+### `render(options, content)` & `renderFrames(svg, options)`
 
 ```tsx
-const run = lanes(
-  { lanes: { lead: "Lead", build: { label: "Build", role: "tool" } }, spans: [{ lane: "lead", from: 0, to: 1, label: "plan" }, { lane: "build", from: 1, to: 4, label: "editing" }], events: [{ lane: "build", at: 2, label: "TEST" }], links: [{ from: "lead", to: "build", at: 1 }] },
-  { theme, scale: 80, play: { at: 0 } },
-);
-```
+import { render, validateSvg } from "svjeez";
+import { renderFrames } from "svjeez/frames";
 
-`lanes` plots spans and events on a time axis. `play` adds a playhead.
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/lanes.svg" width="463" alt="Two lanes on a time axis played in real time" />
-
-## Render
-
-```tsx
-render(
+const svg = render(
   {
     width: 600,
     height: 400,
-    duration: 8, // one loop, in seconds
-    title: "Hello",
-    desc: "A dot fades in and pulses.",
-    css: ".mono{font-family:ui-monospace,monospace}",
-    reducedMotion: { at: 4 }, // frame shown under prefers-reduced-motion, or false
-    playbackRate: 1.5, // 1.5x speed; duration and reducedMotion stay in scene seconds
-    loop: false, // play once and hold the last frame; default true
-    comment: "Generated by svjeez.",
-    prefix: "hello-", // put in front of every generated id and class; for scenes inlined into one page
+    duration: 8,               // loop length in seconds
+    title: "My Scene",         // required; wired to role="img" and aria-labelledby
+    desc: "Accessible summary.",
+    css: ".mono { font-family: ui-monospace, monospace }",
+    reducedMotion: { at: 4 },  // freeze frame for prefers-reduced-motion (defaults to 85% of duration)
+    playbackRate: 1.5,         // speed multiplier
+    loop: false,               // play once and hold the final frame (default: true)
+    prefix: "hero-",           // namespace generated IDs/classes/keyframes when inlining multiple SVGs on one page
   },
   content,
 );
-```
 
-`render` throws if the output is invalid.
-
-Scenes loop by default. With `loop: false` the scene plays once and holds its last frame. Shorter loops inside it, such as a `wiggle`, repeat until the scene ends and then stop. The [delegation tree](examples/tree/index.tsx) plays once and keeps the finished tree on screen.
-
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/tree.svg" width="480" alt="A delegation tree revealed level by level, then a message runs from docs to tests, and the finished tree stays on screen" />
-
-## Validation
-
-```tsx
 const { errors, warnings } = validateSvg(svg);
+const { frames, sheet } = await renderFrames(svg, { times: [0, 2, 4], scale: 2, sheet: true });
 ```
 
-## Frames
+### Without JSX (`el`)
 
-`svjeez frames` captures frames from an SVG or a module that exports one.
-
-```sh
-npm i -D playwright-core && npx playwright-core install chromium-headless-shell
-
-npx svjeez frames scene.tsx --times 0,0.5,1,2 --out frames/ --sheet
-npx svjeez frames scene.svg --count 8 --scale 2 --color-scheme dark
-npx svjeez svg scene.tsx --out scene.svg
-```
-
-Times are playback seconds. Without `--times`, frames are spread over one loop. `--sheet` writes a labelled grid; `--color-scheme` sets light or dark mode. On Node, loading `.tsx` requires `tsx`. Under Bun, use `bunx --bun svjeez`.
-
-For scripts and tools:
+Prefer plain `.ts` files or embedding inside a non-JSX framework? `el` builds the exact same SVG nodes with identical props and type checking:
 
 ```ts
-import { renderFrames } from "svjeez/frames";
+import { draw, el, render } from "svjeez";
 
-const { duration, frames, sheet } = await renderFrames(svg, { times: [0, 1.5], scale: 2, sheet: true });
-frames[0].png; // Uint8Array
+const { path, circle } = el;
+const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
+  path({ d: "M20 100C60 20 140 20 180 100", fill: "none", stroke: "#FF5FA8", strokeWidth: 4, animation: draw({ at: 0.2, over: 1.2 }) }),
+  circle({ cx: 100, cy: 40, r: 8, fill: "#3EE6D6" }),
+]);
 ```
 
-Frames use headless Chromium through the optional `playwright-core` peer dependency.
+---
 
-## Development
+## Documentation & Reference Guides
+
+Detailed guides, channel tables, error catalogs, and copy-pasteable starter scenes ship in [`skills/svjeez/`](https://github.com/saiashirwad/svjeez/tree/main/skills/svjeez) (and are installed locally via `npx svjeez skill --install`):
+
+| Topic | Guide |
+| --- | --- |
+| **Core Playbook**: timeline rules, channel table, recipes, `tsc` &amp; runtime error fixes | [`skills/svjeez/SKILL.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/SKILL.md) |
+| **Defs, CSS &amp; Filters**: gradients, masks, symbols, `@property`, `calc()`, `fx.*` | [`references/defs-css.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/defs-css.md) |
+| **Code Explainers &amp; Terminals**: themes, `code()`, `morph()`, `timeline()`, annotations, `Camera`, `terminal()` | [`references/explainers.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/explainers.md) |
+| **Diagrams &amp; Flows**: `flowchart`, `sequence`, `stateMachine`, `tree`, `lanes`, `flow`, `travel` | [`references/diagrams.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/diagrams.md) |
+| **Images &amp; Fonts**: `picture`, `<Picture>`, `font.load`, subsetting, `<Glyphs>` | [`references/images-fonts.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/images-fonts.md) |
+| **Ink &amp; Handwriting**: `<Ink>`, `tool.pen/brush/nib/pencil`, `strokeFont` | [`references/ink.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/ink.md) |
+| **Voxels**: `voxel.camera`, `voxel.texture`, `voxel.scene`, `camera.project` | [`references/voxels.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/voxels.md) |
+| **Without JSX &amp; Frameworks**: `el.*`, inlining with `prefix`, data URIs | [`references/without-jsx.md`](https://github.com/saiashirwad/svjeez/blob/main/skills/svjeez/references/without-jsx.md) |
+| **Starter Examples**: `toast`, `orbit`, `review-flow`, `explainer`, `terminal` | [`skills/svjeez/examples/`](https://github.com/saiashirwad/svjeez/tree/main/skills/svjeez/examples) |
+
+## Contributing & Local Development
 
 ```sh
 bun install
-bun run dev examples/readme/basic.tsx   # writes .preview/basic.svg, serves it, reloads on change
-bun run render-png examples/readme/basic.tsx --times 0,1,2   # PNG frames into frames/
-bun run build                           # every example into dist/
-bun test && bun run typecheck
+bun run dev examples/readme/hero.tsx                         # live preview with hot reload & timeline scrubber
+bun run render-png examples/readme/hero.tsx --sheet          # render PNG frames & contact sheet into frames/
+bun run build                                                # compile all examples into dist/
+bun test && bun run typecheck                                # run test suite & typecheck
 ```
 
-The preview watches the module’s folder and `src/`, with a scrubber and build errors.
-
-For coding agents, see [`AGENTS.md`](AGENTS.md) and the [scene-writing skill](skills/svjeez/SKILL.md). Run `npx svjeez skill` to print the skill or `npx svjeez skill --install` to install it (use `--dir` to choose a folder).
-
-## Type safety
-
-```tsx
-<g animation={draw({ at: 0, over: 1 })} /> // error: a <g> has no stroke to draw
-<g clipPath={fade} />                       // error: a gradient is not a clip path
-motion().to({ opcity: 1 }, 1);              // error: misspelled channel
-calc.mul(calc.length(1), calc.length(2));   // error: a length times a length
-calc.cos(px);                               // error: cos takes an angle
-```
+See [`AGENTS.md`](https://github.com/saiashirwad/svjeez/blob/main/AGENTS.md) for architecture notes and release instructions. MIT Licensed.
