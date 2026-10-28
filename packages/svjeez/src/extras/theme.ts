@@ -59,3 +59,11 @@ export const tomorrow = /* @__PURE__ */ base16("#ffffff", "#e0e0e0", "#d6d6d6", 
 export const systemLight = /* @__PURE__ */ base16("#FFFFFF", "#F5F5F7", "#E5E5EA", "#8E8E93", "#6E6E73", "#1D1D1F", "#1D1D1F", "#000000", "#E5453B", "#E8751A", "#E5A50A", "#2FA84F", "#1B9AAA", "#0A6CFF", "#9B51E0", "#A66B43");
 /** Near-black by night, with the system accent colors. Pairs with `systemLight` in `adaptive`. */
 export const systemDark = /* @__PURE__ */ base16("#1E1E20", "#2A2A2D", "#3A3A3D", "#7C7C82", "#A1A1A6", "#E5E5EA", "#F5F5F7", "#FFFFFF", "#FF6961", "#FF9F0A", "#FFD60A", "#32D74B", "#64D2FF", "#5EA0FF", "#C58AFF", "#AC8E68");
+/** Solarized by night. Pairs with `solarizedLight` in `adaptive`. */
+export const solarizedDark = /* @__PURE__ */ base16("#002b36", "#073642", "#586e75", "#657b83", "#839496", "#93a1a1", "#eee8d5", "#fdf6e3", "#dc322f", "#cb4b16", "#b58900", "#859900", "#2aa198", "#268bd2", "#6c71c4", "#d33682");
+/** Solarized by day: the dark ramp reversed, the same accents. Pairs with `solarizedDark` in `adaptive`. */
+export const solarizedLight = /* @__PURE__ */ base16("#fdf6e3", "#eee8d5", "#93a1a1", "#839496", "#657b83", "#586e75", "#073642", "#002b36", "#dc322f", "#cb4b16", "#b58900", "#859900", "#2aa198", "#268bd2", "#6c71c4", "#d33682");
+/** Gruvbox medium by night. Pairs with `gruvboxLight` in `adaptive`. */
+export const gruvboxDark = /* @__PURE__ */ base16("#282828", "#3c3836", "#504945", "#665c54", "#bdae93", "#d5c4a1", "#ebdbb2", "#fbf1c7", "#fb4934", "#fe8019", "#fabd2f", "#b8bb26", "#8ec07c", "#83a598", "#d3869b", "#d65d0e");
+/** Gruvbox medium by day. Pairs with `gruvboxDark` in `adaptive`. */
+export const gruvboxLight = /* @__PURE__ */ base16("#fbf1c7", "#ebdbb2", "#d5c4a1", "#bdae93", "#665c54", "#504945", "#3c3836", "#282828", "#9d0006", "#af3a03", "#b57614", "#79740e", "#427b58", "#076678", "#8f3f71", "#d65d0e");
