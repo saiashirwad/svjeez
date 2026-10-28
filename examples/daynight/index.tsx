@@ -1,4 +1,4 @@
-import { draw, ease, enter, motion, render, sampled, wiggle } from "svjeez";
+import { type Color, draw, ease, enter, motion, render, sampled, wiggle } from "svjeez";
 import { SCHEME_CSS, palette, random, theme, themeCss } from "../landing/kit";
 
 // One lighthouse, one file. By day it is paper, sun and drifting cloud; by night it is ink, moon, stars and a turning beam.
@@ -27,7 +27,7 @@ const rand = random(7);
 const stroke = { stroke: v.ink, strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round", fill: "none" } as const;
 
 /** A filled shape that fades in, with its outline drawn over it. */
-const Shape = ({ d, fill, at, over = 0.8 }: { d: string; fill: string; at: number; over?: number }) => (
+const Shape = ({ d, fill, at, over = 0.8 }: { d: string; fill: Color; at: number; over?: number }) => (
   <>
     <path d={d} fill={fill} animation={enter({ at: at + over * 0.5, over: 0.5 })} />
     <path d={d} {...stroke} animation={draw({ at, over })} />
@@ -80,7 +80,7 @@ export default function build(): string {
         <g class="night">
           {stars.map((star, i) => (
             <g transform={`translate(${star.x.toFixed(0)} ${star.y.toFixed(0)}) scale(${star.s.toFixed(2)})`}>
-              <path d={sparkle} fill={theme.base0A} animation={[enter({ at: 0.4 + i * 0.1, over: 0.5 }, { scale: 0 }, ease.pop), wiggle({ opacity: 0.4 }, { seed: `star${i}`, rate: 1.5, period: D / 2 })]} />
+              <path d={sparkle} fill={theme.base0A} animation={[enter({ at: 0.4 + i * 0.1, over: 0.5 }, { scale: 0 }, ease.pop), i % 4 === 0 && wiggle({ opacity: 0.5 }, { seed: `star${i}`, rate: 1.5, period: D / 2 })]} />
             </g>
           ))}
         </g>
@@ -93,11 +93,9 @@ export default function build(): string {
         <g class="day">
           <g animation={[enter({ at: 0.6, over: 0.8 }), orbit]}>
             <circle r={30} fill={v.sun} />
-            <g animation={motion({ rotate: 0 }).to({ rotate: 360 }, D, ease.linear)}>
-              {Array.from({ length: 12 }, (_, i) => (
-                <path d="M0-42V-54" stroke={v.sun} strokeWidth={4} strokeLinecap="round" transform={`rotate(${i * 30})`} />
-              ))}
-            </g>
+            {Array.from({ length: 12 }, (_, i) => (
+              <path d="M0-42V-54" stroke={v.sun} strokeWidth={4} strokeLinecap="round" transform={`rotate(${i * 30})`} />
+            ))}
           </g>
           <g animation={[enter({ at: 1.4, over: 1 }), wiggle({ x: 18 }, { seed: "cloud", rate: 1, period: D / 2 })]}>
             <path d="M520 128a14 14 0 0 1 4-27a20 20 0 0 1 38-8a16 16 0 0 1 28 12a12 12 0 0 1-2 23Z" fill={v.cloud} stroke={v.ink} strokeWidth={2.5} strokeLinejoin="round" />

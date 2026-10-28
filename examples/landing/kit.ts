@@ -1,3 +1,4 @@
+import type { Color } from "svjeez";
 import { adaptive, base16 } from "svjeez/extras";
 
 // One palette, two schemes: warm paper by day, blue ink-black by night. Slots follow base16.
@@ -15,7 +16,7 @@ export const palette = <const T extends Record<string, Pair>>(pairs: T) => {
       .map(([name, pair]) => `--${name}:${pair[index]}`)
       .join(";");
   return {
-    v: Object.fromEntries(Object.keys(pairs).map((name) => [name, `var(--${name})`])) as { [K in keyof T]: string },
+    v: Object.fromEntries(Object.keys(pairs).map((name) => [name, `var(--${name})`])) as { [K in keyof T]: Color },
     css: `svg{${decl(0)}}\n@media (prefers-color-scheme:light){svg{${decl(1)}}}`,
   };
 };
