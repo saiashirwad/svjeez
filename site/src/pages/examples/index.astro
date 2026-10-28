@@ -3,6 +3,9 @@ import { POSTER_WIDTH, sections, SOURCES } from "../../examples";
 import { themed } from "../../palettes";
 import Base from "../../layouts/Base.astro";
 
+/** A section's anchor: "Building blocks" is #building-blocks. */
+const slug = (title: string) => title.toLowerCase().replaceAll(" ", "-");
+
 /** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
 const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] });
 ---
@@ -17,9 +20,9 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
     </div>
     {
       sections.map((section) => (
-        <section>
+        <section id={slug(section.title)}>
           <h2>
-            {section.title}
+            <a class="anchor" href={`#${slug(section.title)}`}>{section.title}</a>
             <small>{section.blurb}</small>
           </h2>
           <div class="grid">

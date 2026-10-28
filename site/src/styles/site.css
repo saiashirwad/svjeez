@@ -84,6 +84,25 @@ a {
   text-decoration-color: color-mix(in oklch, currentColor 35%, transparent);
   text-underline-offset: 0.2em;
 }
+/* A heading that links to its own section, so a section can be shared by URL. */
+a.anchor {
+  text-decoration: none;
+}
+a.anchor::after {
+  content: "#";
+  margin-inline-start: 0.25em;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+a.anchor:hover::after,
+a.anchor:focus-visible::after,
+:target h2 a.anchor::after {
+  opacity: 1;
+}
+section[id] {
+  scroll-margin-block-start: 1.5rem;
+}
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
