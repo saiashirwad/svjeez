@@ -29,10 +29,10 @@ export function Arrow({ from, to, bend = 0, during: span, color = ACCENT, class:
   ]);
 }
 
-/** A note box beside `target`, joined to it by a short leader. `width` is in characters. With `font`, the box fits the measured lines. */
-export function Callout({ target, side = "right", during: span, children, color = ACCENT, fontSize = 14, font, width = 24, class: cls }: Common & { readonly target: Rect; readonly side?: Edge; readonly children: string; readonly fontSize?: number; readonly font?: FontValue; readonly width?: number }): SvgNode {
+/** A note box beside `target`, joined to it by a short leader. `columns` is the line length in characters. With `font`, the box fits the measured lines. */
+export function Callout({ target, side = "right", during: span, children, color = ACCENT, fontSize = 14, font, columns = 24, class: cls }: Common & { readonly target: Rect; readonly side?: Edge; readonly children: string; readonly fontSize?: number; readonly font?: FontValue; readonly columns?: number }): SvgNode {
   const lines = children.split(/\s+/).filter(Boolean).reduce<string[]>((out, word) => {
-    if (out.length > 0 && out.at(-1)!.length + 1 + word.length <= width) out[out.length - 1] += ` ${word}`;
+    if (out.length > 0 && out.at(-1)!.length + 1 + word.length <= columns) out[out.length - 1] += ` ${word}`;
     else out.push(word);
     return out;
   }, []);
@@ -48,17 +48,17 @@ export function Callout({ target, side = "right", during: span, children, color 
   ]);
 }
 
-export function Brace({ lines, side = "left", label, during: span, color = ACCENT, class: cls }: Common & { readonly lines: Rect; readonly side?: "left" | "right"; readonly label?: string }): SvgNode {
-  const [x, dir, mid] = [side === "left" ? lines.x - 8 : lines.x + lines.w + 8, side === "left" ? -1 : 1, lines.center.y];
-  const d = `M${x} ${lines.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${lines.y + lines.h - 8}q0 8 ${-dir * 8} 8`;
+export function Brace({ target, side = "left", label, during: span, color = ACCENT, class: cls }: Common & { readonly target: Rect; readonly side?: "left" | "right"; readonly label?: string }): SvgNode {
+  const [x, dir, mid] = [side === "left" ? target.x - 8 : target.x + target.w + 8, side === "left" ? -1 : 1, target.center.y];
+  const d = `M${x} ${target.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${target.y + target.h - 8}q0 8 ${-dir * 8} 8`;
   return el.g({ class: cls, animation: during(span, 0.2) }, [
     el.path({ d, ...ink(color) }),
     label && el.text({ x: x + dir * 20, y: mid + 4, textAnchor: side === "left" ? "end" : "start", fontSize: 12, fill: color }, label),
   ]);
 }
 
-export function Underline({ rect: r, style = "straight", during: span, color = ACCENT, class: cls }: Common & { readonly rect: Rect; readonly style?: "straight" | "squiggle" }): SvgNode {
+export function Underline({ target: r, variant = "straight", during: span, color = ACCENT, class: cls }: Common & { readonly target: Rect; readonly variant?: "straight" | "squiggle" }): SvgNode {
   const [y, count] = [r.y + r.h - 2, Math.max(1, Math.ceil(r.w / 8))];
-  const d = style === "straight" ? `M${r.x} ${y}h${r.w}` : `M${r.x} ${y}${`l${r.w / count / 2} -2l${r.w / count / 2} 2`.repeat(count)}`;
+  const d = variant === "straight" ? `M${r.x} ${y}h${r.w}` : `M${r.x} ${y}${`l${r.w / count / 2} -2l${r.w / count / 2} 2`.repeat(count)}`;
   return el.path({ d, ...ink(color), class: cls, animation: [during(span, 0.2), draw({ at: span.at, over: Math.min(0.5, span.over / 2) })] });
 }

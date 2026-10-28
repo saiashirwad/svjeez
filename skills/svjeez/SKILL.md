@@ -202,12 +202,12 @@ const src = code([[kw("const"), " total ", ["punct", "="], " ", ["fn", "sum", "c
 src.get("call"); src.find("total"); src.lines(1, 2); src.at(2, 8); // Rects and Points to aim at
 
 const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, { gap: 0.5 }); // named spans
-morph([before, after], { at: [tl.change.at], gutter: true }).node; // moves surviving words, fades the rest
-typewriter(src, { at: 1, cps: 28, cursor: true });  // { node, end, lines }: lines[i] is when line i+1 types
+morph([before, after], { at: [tl.change.at], gutter: true }); // { node, spans, end }: moves surviving words, fades the rest
+typewriter(src, { at: 1, cps: 28, cursor: true });  // { node, end, spans }: spans[i] is when line i+1 types
 reveal(src, { at: 1, step: 0.6 });                  // a paragraph at a time: { node, spans, end }
 ```
 
-Annotations are components: `<Focus stops={[{ during: tl.intro, on: src.lines(2) }]}>`, `<Marker stops={[{ at: span, rect }]} />`, `<Callout target={rect} side="right" during={span}>text</Callout>`, `Arrow`, `Brace`, `Underline`, `Camera`. `during(span)` fades anything in and out over a span; `cut(span)` shows it for the span with hard cuts, for shots in an edit.
+Annotations are components: `<Focus stops={[{ during: tl.intro, target: src.lines(2) }]}>`, `<Marker stops={[{ during: span, target: rect }]} />`, `<Callout target={rect} side="right" during={span}>text</Callout>`, `Arrow`, `Brace`, `Underline`, `Camera`. `during(span)` fades anything in and out over a span; `cut(span)` shows it for the span with hard cuts, for shots in an edit.
 
 `Camera` zooms everything inside it. Do not zoom it over hundreds of animated elements: Chromium keeps each animated element on its own raster, and when a parent scales they fall behind and flash blank mid-zoom (measured in Chromium). Play the intro as one copy outside the `Camera`, swap at a cut to a still copy inside it, and share geometry through `def.symbol` so the second copy costs little. Put what must keep moving during the zoom in a second, small `Camera` with the same stops. `examples/map` shows the pattern.
 

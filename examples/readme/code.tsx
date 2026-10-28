@@ -24,7 +24,7 @@ export default function build(): string {
     { width: 360, height: 110, duration: 8, title: "Code morph", desc: "A call to sum morphs into a reduce and back, with a marker following the call.", css: CSS, reducedMotion: { at: 1 } },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      <Marker stops={[{ at: { at: 0.5, over: 1 }, rect: one.get("call").pad(3) }, { at: { at: 2, over: 3 }, rect: two.get("call").pad(3) }, { at: { at: 5.5, over: 2 }, rect: one.get("call").pad(3) }]} />
+      <Marker stops={[{ during: { at: 0.5, over: 1 }, target: one.get("call").pad(3) }, { during: { at: 2, over: 3 }, target: two.get("call").pad(3) }, { during: { at: 5.5, over: 2 }, target: one.get("call").pad(3) }]} />
       <g class="mono">{m.node}</g>
     </>,
   );

@@ -265,10 +265,10 @@ const PAN = 1.1;
 const SWAP = 4.9;
 
 const STOPS: CameraStop[] = [
-  { at: { at: 5, over: PAN }, view: view(PLACES.bramblecott.at, 300) },
-  ...[PLACES.ford.at, PLACES.elder.at, PLACES.pass.at, PLACES.ashfall.at].map((p) => ({ at: { at: reach(p) - PAN * 0.8, over: PAN }, view: view(p, 320) })),
-  { at: { at: reach(CINDER) - PAN * 0.6, over: PAN }, view: view({ x: CINDER.x - 6, y: CINDER.y - 22 }, 210) },
-  { at: { at: 18.2, over: PAN }, view: "all" },
+  { during: { at: 5, over: PAN }, target: view(PLACES.bramblecott.at, 300) },
+  ...[PLACES.ford.at, PLACES.elder.at, PLACES.pass.at, PLACES.ashfall.at].map((p) => ({ during: { at: reach(p) - PAN * 0.8, over: PAN }, target: view(p, 320) })),
+  { during: { at: reach(CINDER) - PAN * 0.6, over: PAN }, target: view({ x: CINDER.x - 6, y: CINDER.y - 22 }, 210) },
+  { during: { at: 18.2, over: PAN }, target: "all" },
 ];
 
 /** The volcano. `live` is the glow and smoke, which loop forever and so belong in the live layer. */

@@ -7,7 +7,7 @@ import { during } from "./timeline";
 
 export interface FocusStop {
   readonly during: Span;
-  readonly on: Rect | readonly Rect[];
+  readonly target: Rect | readonly Rect[];
 }
 
 /** Merge spans that touch, so back-to-back stops keep the dim instead of flashing bright between them. */
@@ -30,7 +30,7 @@ export function Focus({ stops, dim = 0.3, fade = 0.3, children }: { readonly sto
   }, motion({ opacity: 1 }));
   const mask = def.mask({}, [
     el.rect({ x: "-10%", y: "-10%", width: "120%", height: "120%", fill: "#fff", animation: shade }),
-    stops.map((stop) => el.g({ animation: during(stop.during, fade) }, [stop.on].flat().map((r) => el.rect({ x: r.x, y: r.y, width: r.w, height: r.h, fill: "#fff" })))),
+    stops.map((stop) => el.g({ animation: during(stop.during, fade) }, [stop.target].flat().map((r) => el.rect({ x: r.x, y: r.y, width: r.w, height: r.h, fill: "#fff" })))),
   ]);
   return el.g({ mask }, children);
 }

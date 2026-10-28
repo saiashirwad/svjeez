@@ -1,5 +1,5 @@
 import { el } from "../el";
-import { ease, motion, type Motion, type Seconds } from "../motion";
+import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import type { SvgNode } from "../svg";
 import { number, text, type Code, type Word } from "./code";
 
@@ -55,8 +55,11 @@ interface Chain {
   track?: Motion<"x" | "y" | "opacity">;
 }
 
-/** Animate code from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move. */
-export function morph(versions: readonly Code[], { at, over = 0.8, gutter = false }: MorphOptions): { readonly node: SvgNode } {
+/**
+ * Animate code from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
+ * `spans[i]` is when the move into `versions[i + 1]` runs; `end` is when the last one settles, or 0 for a single version.
+ */
+export function morph(versions: readonly Code[], { at, over = 0.8, gutter = false }: MorphOptions): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
   if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0)) throw new Error("morph() needs versions, one start per transition and a positive duration.");
   at.forEach((start, i) => {
     if (i > 0 && start < at[i - 1]! + over) throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
@@ -91,7 +94,11 @@ export function morph(versions: readonly Code[], { at, over = 0.8, gutter = fals
     });
   });
   const numbers = gutter ? lineNumbers(versions, at, over) : [];
-  return { node: el.g({}, [numbers, chains.map((chain) => text(chain.word, chain.code.metrics, chain.track))]) };
+  return {
+    node: el.g({}, [numbers, chains.map((chain) => text(chain.word, chain.code.metrics, chain.track))]),
+    spans: at.map((start): Span => ({ at: start, over })),
+    end: at.length > 0 ? at.at(-1)! + over : 0,
+  };
 }
 
 const lineNumbers = (versions: readonly Code[], at: readonly Seconds[], over: Seconds): SvgNode[] =>

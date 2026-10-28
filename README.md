@@ -368,10 +368,10 @@ import { Arrow, Callout, Focus, Marker, morph, read, timeline } from "svjeez/ext
 const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
 
 <>
-  <Focus stops={[{ during: tl.intro, on: before.lines(2) }]} dim={0.3}>
+  <Focus stops={[{ during: tl.intro, target: before.lines(2) }]} dim={0.3}>
     {morph([before, after], { at: [tl.change.at], gutter: true }).node}
   </Focus>
-  <Marker stops={[{ at: tl.intro, rect: before.get("hook").pad(4) }, { at: tl.change, rect: after.get("hook").pad(4) }]} />
+  <Marker stops={[{ during: tl.intro, target: before.get("hook").pad(4) }, { during: tl.change, target: after.get("hook").pad(4) }]} />
   <Callout target={after.get("send")} side="right" during={tl.outro} class="note">Handlers send intent</Callout>
 </>;
 ```
@@ -396,7 +396,7 @@ const session = terminal(
 
 <>{shell.node}{session.node}</>; // session.end is when the last command finishes
 
-typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end, lines }, a span per line
+typewriter(src, { at: 1, cps: 28, cursor: true }); // any code, typed: { node, end, spans }, a span per line
 reveal(src, { at: 1, step: 0.6 }); // a paragraph at a time: { node, spans, end }
 reveal(src, { at: 1, blocks: [[2, 3], [5, 9]] }); // these lines in turn, the rest there from the start
 reveal(src, { at: [1, 4] }); // one time per block

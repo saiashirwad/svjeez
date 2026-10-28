@@ -50,7 +50,7 @@ const trip = flow(chart.route("pr", "post"), { at: nodesDone + 1.2, style: "come
 const D = Math.ceil(trip.end) + 2;
 
 const pad = (line: number) => src.lines(line, line).pad(3);
-const stops = [3, 4, 5, 6].map((line, i) => ({ at: { at: START + i * STEP, over: STEP }, rect: pad(line) }));
+const stops = [3, 4, 5, 6].map((line, i) => ({ during: { at: START + i * STEP, over: STEP }, target: pad(line) }));
 
 export default function build(): string {
   return render(
@@ -67,7 +67,7 @@ export default function build(): string {
       <rect width="100%" height="100%" fill={theme.base01} />
       <g animation={motion({ opacity: 1 }).at(D - 0.6).to({ opacity: 0 }, 0.5)}>
         {shell.node}
-        <Marker stops={[...stops, { at: { at: nodesDone, over: trip.end - nodesDone }, rect: src.lines(8, 13).pad(3) }]} />
+        <Marker stops={[...stops, { during: { at: nodesDone, over: trip.end - nodesDone }, target: src.lines(8, 13).pad(3) }]} />
         <g class="mono">{src.node}</g>
         {chart.layers.under}
         {trip.node}

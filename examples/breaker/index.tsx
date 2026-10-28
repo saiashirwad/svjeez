@@ -265,18 +265,18 @@ export default function build(): string {
           <Focus
             dim={0.3}
             stops={[
-              { during: beat.guard, on: source.lines(6, 9).pad(2) },
-              { during: beat.trip, on: [source.lines(15, 18).pad(2), source.lines(21, 24).pad(2)] },
+              { during: beat.guard, target: source.lines(6, 9).pad(2) },
+              { during: beat.trip, target: [source.lines(15, 18).pad(2), source.lines(21, 24).pad(2)] },
             ]}
           >
             <g class="mono">{shown.node}</g>
           </Focus>
         </g>
         <g class="sans">
-          <Callout target={source.lines(6, 9)} side="right" during={beat.guard} color={theme.base0A} fontSize={14} width={22}>
+          <Callout target={source.lines(6, 9)} side="right" during={beat.guard} color={theme.base0A} fontSize={14} columns={22}>
             While open, refuse until retryAt, then let one call through.
           </Callout>
-          <Callout target={source.get("trip")} side="right" during={beat.trip} color={theme.base08} fontSize={14} width={22}>
+          <Callout target={source.get("trip")} side="right" during={beat.trip} color={theme.base08} fontSize={14} columns={22}>
             Three strikes, or any failure while half-open, trips it.
           </Callout>
         </g>
@@ -317,7 +317,7 @@ export default function build(): string {
         {editorFor(after).node}
         <g class="mono">{morphed.node}</g>
         <g class="sans">
-          <Callout target={after.get("wait")} side="right" during={{ at: change + 1.3, over: 4 }} color={theme.base0B} fontSize={14} width={22}>
+          <Callout target={after.get("wait")} side="right" during={{ at: change + 1.3, over: 4 }} color={theme.base0B} fontSize={14} columns={22}>
             Each trip waits longer than the last.
           </Callout>
         </g>

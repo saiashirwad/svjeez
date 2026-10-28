@@ -260,7 +260,7 @@ const editor = window(rect(40, 96, 810, 568), { theme, title: "launch.tsx" });
 const preview = window(rect(870, 96, 370, 568), { theme, title: "dist/launch.svg" });
 const src = code(SOURCE.map(highlight), { theme, font: mono, fontSize: 16.5, lineHeight: 1.95, x: editor.body.x + 24, y: editor.body.y + 40 });
 const typed = typewriter(src, { at: CODE_AT + 0.45, cps: 150, cursor: C.accent, blink: false });
-const landed = (n: number) => typed.lines[n - 1]!.at + typed.lines[n - 1]!.over;
+const landed = (n: number) => typed.spans[n - 1]!.at + typed.spans[n - 1]!.over;
 const runAt = typed.end + 0.25;
 
 /** Live edits after the first run: each swaps one value in the source, and the preview follows a beat later. */
@@ -328,7 +328,7 @@ const codeShot = (
     <g animation={rise(CODE.at, 0.45, 20)}>
       {editor.node}
       <g animation={motion({ opacity: 0 }).at(landed(6) - 0.05).set({ opacity: 1 }).at(runAt).to({ opacity: 0 }, 0.3)}>
-        <Marker color={C.accent} over={0.2} stops={[lineRect(6), lineRect(7, 8), lineRect(9, 11)].map((r, i) => ({ at: { at: landed([6, 8, 9][i]!) - 0.05, over: 0.2 }, rect: r }))} />
+        <Marker color={C.accent} over={0.2} stops={[lineRect(6), lineRect(7, 8), lineRect(9, 11)].map((r, i) => ({ during: { at: landed([6, 8, 9][i]!) - 0.05, over: 0.2 }, target: r }))} />
       </g>
       {typed.node}
       {EDITS.map(edit)}

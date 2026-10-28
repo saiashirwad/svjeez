@@ -83,19 +83,19 @@ export default function build(): string {
           frame={view}
           over={0.7}
           stops={[
-            { at: tl.handle, view: lines(1, 9) },
-            { at: tl.parse, view: lines(5, 12) },
-            { at: tl.auth, view: lines(6, 18) },
-            { at: tl.respond, view: lines(8, 22) },
+            { during: tl.handle, target: lines(1, 9) },
+            { during: tl.parse, target: lines(5, 12) },
+            { during: tl.auth, target: lines(6, 18) },
+            { during: tl.respond, target: lines(8, 22) },
           ]}
         >
           <Focus
             dim={0.25}
             stops={[
-              { during: tl.handle, on: src.lines(5, 9).pad(2) },
-              { during: tl.parse, on: [src.lines(6).pad(2), src.lines(11, 13).pad(2)] },
-              { during: tl.auth, on: [src.lines(7).pad(2), src.lines(15, 19).pad(2)] },
-              { during: tl.respond, on: [src.lines(8).pad(2), src.lines(21, 23).pad(2)] },
+              { during: tl.handle, target: src.lines(5, 9).pad(2) },
+              { during: tl.parse, target: [src.lines(6).pad(2), src.lines(11, 13).pad(2)] },
+              { during: tl.auth, target: [src.lines(7).pad(2), src.lines(15, 19).pad(2)] },
+              { during: tl.respond, target: [src.lines(8).pad(2), src.lines(21, 23).pad(2)] },
             ]}
           >
             <g class="code">{src.node}</g>
@@ -104,7 +104,7 @@ export default function build(): string {
             <Arrow from={src.get("entry").bottom} to={src.lines(5).top} bend={0.4} during={tl.handle} color={theme.base0A} />
             <Arrow from={margin(6)} to={margin(11)} bend={-0.45} during={tl.parse} color={theme.base0A} />
             <Arrow from={margin(7)} to={margin(15)} bend={-0.35} during={tl.auth} color={theme.base0A} />
-            <Callout target={src.get("reject")} side="right" during={tl.auth} color={theme.base08} fontSize={10} width={20}>
+            <Callout target={src.get("reject")} side="right" during={tl.auth} color={theme.base08} fontSize={10} columns={20}>
               no token, no entry
             </Callout>
             <Arrow from={margin(8)} to={margin(21)} bend={-0.3} during={tl.respond} color={theme.base0A} />

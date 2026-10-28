@@ -113,7 +113,7 @@ describe("reduced motion", () => {
   test("an animated Marker freezes at its stop's size, with no SMIL", () => {
     const svg = render(
       { width: 100, height: 100, duration: 6, title: "Marker", reducedMotion: { at: 4 } },
-      Marker({ stops: [{ at: { at: 0, over: 1 }, rect: rect(0, 0, 10, 20) }, { at: { at: 2, over: 1 }, rect: rect(10, 10, 30, 40) }] }),
+      Marker({ stops: [{ during: { at: 0, over: 1 }, target: rect(0, 0, 10, 20) }, { during: { at: 2, over: 1 }, target: rect(10, 10, 30, 40) }] }),
     );
     expect(svg).not.toContain("<animate");
     expect(svg).toContain(".a{animation-delay:-4s!important;animation-play-state:paused!important}");
@@ -124,7 +124,7 @@ describe("reduced motion", () => {
   test("Focus freezes dimmed during its span with the focused rect lit", () => {
     const svg = render(
       { width: 100, height: 100, duration: 6, title: "Focus", reducedMotion: { at: 3 } },
-      Focus({ stops: [{ during: { at: 2, over: 2 }, on: rect(0, 0, 10, 10) }], dim: 0.3, children: el.rect({ width: 10, height: 10 }) }),
+      Focus({ stops: [{ during: { at: 2, over: 2 }, target: rect(0, 0, 10, 10) }], dim: 0.3, children: el.rect({ width: 10, height: 10 }) }),
     );
     expect(svg).not.toContain("<animate");
     expect(frozen(svg, /<rect [^>]*width="120%"[^>]*class="a (m\d+)"/, "opacity", 50)).toBe("0.3");
@@ -164,6 +164,14 @@ test("a run renamed under the same id cross-fades: both texts render, each anima
   for (const word of ["useState", "useReducer"]) expect(svg).toMatch(new RegExp(`<text[^>]*class="a [^"]*"[^>]*>${word}</text>`));
 });
 
+test("morph reports when each transition runs and when the last settles", () => {
+  const [a, b, c] = [code([[["fn", "a"]]]), code([[["fn", "b"]]]), code([[["fn", "c"]]])];
+  const two = morph([a, b, c], { at: [1, 3], over: 0.5 });
+  expect(two.spans).toEqual([{ at: 1, over: 0.5 }, { at: 3, over: 0.5 }]);
+  expect(two.end).toBe(3.5);
+  expect(morph([a], { at: [] })).toMatchObject({ spans: [], end: 0 });
+});
+
 describe("time helpers", () => {
   /** What the rendered keyframes hold at playback second `t` of a 100s scene: opacity, and x and y from the translate lane. */
   const at = (track: Motion<"opacity" | "x" | "y">, t: number): { opacity?: number; x?: number; y?: number } => {
@@ -198,9 +206,9 @@ describe("time helpers", () => {
   });
 
   test("typewriter reports when each line types, a blank line taking only its newline", () => {
-    const { lines, end } = typewriter(code("ab\n\ncde"), { at: 1, cps: 10 });
-    expect(lines.map(({ at, over }) => [at, over].map((n) => Number(n.toFixed(9))))).toEqual([[1, 0.2], [1.3, 0], [1.4, 0.3]]);
-    expect(end).toBeCloseTo(lines.at(-1)!.at + lines.at(-1)!.over, 9);
+    const { spans, end } = typewriter(code("ab\n\ncde"), { at: 1, cps: 10 });
+    expect(spans.map(({ at, over }) => [at, over].map((n) => Number(n.toFixed(9))))).toEqual([[1, 0.2], [1.3, 0], [1.4, 0.3]]);
+    expect(end).toBeCloseTo(spans.at(-1)!.at + spans.at(-1)!.over, 9);
   });
 
   test("travel crosses each leg at one speed, then hides", () => {
