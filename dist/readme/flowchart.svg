@@ -33,13 +33,13 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 @keyframes k13{0%,59.343%{scale:0.5}67.121%,100%{scale:3}}
 .m10{animation-name:k12,k13}
 @keyframes k14{0%,5.556%{opacity:0}9.444%,100%{opacity:1}}
-@keyframes k15{0%,5.556%{scale:0.9}9.444%,100%{scale:1}}
+@keyframes k15{0%,5.556%{translate:0px 6px}9.444%,100%{translate:0px 0px}}
 .m11{animation-name:k14,k15}
 @keyframes k16{0%,10%{opacity:0}13.889%,100%{opacity:1}}
-@keyframes k17{0%,10%{scale:0.9}13.889%,100%{scale:1}}
+@keyframes k17{0%,10%{translate:0px 6px}13.889%,100%{translate:0px 0px}}
 .m12{animation-name:k16,k17}
 @keyframes k18{0%,14.444%{opacity:0}18.333%,100%{opacity:1}}
-@keyframes k19{0%,14.444%{scale:0.9}18.333%,100%{scale:1}}
+@keyframes k19{0%,14.444%{translate:0px 6px}18.333%,100%{translate:0px 0px}}
 .m13{animation-name:k18,k19}
 @keyframes k20{0%,14.444%{opacity:0}17.222%,100%{opacity:1}}
 .m14{animation-name:k20}
@@ -79,18 +79,18 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
       <path d="M51.8 24H163.2L150.6 60H39.199999999999996Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="101.2" y="46.55" font-size="13" text-anchor="middle" fill="var(--base05)">PR opened</text>
     </g>
-    <g class="a m11 fb">
+    <g class="a m11">
       <path d="M39 108H163.39999999999998Q166.39999999999998 108 166.39999999999998 111V141Q166.39999999999998 144 163.39999999999998 144H39Q36 144 36 141V111Q36 108 39 108Z" fill="var(--base00)"/>
       <path d="M39 108H163.39999999999998Q166.39999999999998 108 166.39999999999998 111V141Q166.39999999999998 144 163.39999999999998 144H39Q36 144 36 141V111Q36 108 39 108Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
       <path d="M44 108V144M158.39999999999998 108V144" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
       <text x="101.2" y="130.55" font-size="13" text-anchor="middle" fill="var(--base05)">Run linters</text>
     </g>
-    <g class="a m12 fb">
+    <g class="a m12">
       <path d="M101.19999999999999 192L161.13 220.5L101.19999999999999 249L41.26999999999999 220.5Z" fill="var(--base00)"/>
       <path d="M101.19999999999999 192L161.13 220.5L101.19999999999999 249L41.26999999999999 220.5Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="101.2" y="225.05" font-size="13" text-anchor="middle" fill="var(--base05)">Clean?</text>
     </g>
-    <g class="a m13 fb">
+    <g class="a m13">
       <path d="M52 355H150.39999999999998Q158.39999999999998 355 158.39999999999998 363V383Q158.39999999999998 391 150.39999999999998 391H52Q44 391 44 383V363Q44 355 52 355Z" fill="var(--base00)"/>
       <path d="M52 355H150.39999999999998Q158.39999999999998 355 158.39999999999998 363V383Q158.39999999999998 391 150.39999999999998 391H52Q44 391 44 383V363Q44 355 52 355Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
       <text x="101.2" y="377.55" font-size="13" text-anchor="middle" fill="var(--base05)">Post review</text>

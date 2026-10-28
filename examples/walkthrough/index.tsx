@@ -1,10 +1,10 @@
 import { def, rect, render } from "svjeez";
-import { Arrow, Callout, Camera, Focus, adaptive, code, during, readingTime, timeline, tomorrow, tomorrowNight, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { Arrow, Callout, Camera, Focus, adaptive, code, during, readingTime, timeline, systemLight, systemDark, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
 
 const W = 1000;
 const H = 620;
 
-const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
+const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 
 const kw = (text: string): CodeRun => ["keyword", text];
 const fn = (text: string, id?: string): CodeRun => ["fn", text, id];
@@ -76,7 +76,7 @@ export default function build(): string {
       ].join("\n"),
     },
     <>
-      <rect width={W} height={H} fill={theme.base01} />
+      <rect width={W} height={H} fill={theme.base00} />
       {editor.node}
       <g clipPath={clip}>
         <Camera

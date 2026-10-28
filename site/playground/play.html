@@ -8,49 +8,35 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/site.css">
 <style>
-:root {
-  --bg: light-dark(oklch(97% 0.018 85), oklch(19% 0.035 275));
-  --ink: light-dark(oklch(24% 0.025 70), oklch(94% 0.012 275));
-  --muted: light-dark(oklch(48% 0.025 70), oklch(74% 0.02 275));
-  --line: light-dark(oklch(88% 0.02 80), oklch(31% 0.035 275));
-  --accent: light-dark(oklch(60% 0.19 40), oklch(76% 0.16 40));
-  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  color-scheme: light dark;
-}
-:root[data-theme="light"] { color-scheme: light }
-:root[data-theme="dark"] { color-scheme: dark }
-* { box-sizing: border-box }
-html { background: var(--bg); text-size-adjust: none; -webkit-text-size-adjust: none }
-body { margin: 0; min-block-size: 100dvh; color: var(--ink); background: var(--bg); font: 400 1rem / 1.6 var(--sans); text-wrap: pretty }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px }
-.wrap { inline-size: min(100% - 2rem, 76rem); margin-inline: auto }
-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.25rem }
-.brand { color: var(--ink); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; text-decoration: none }
-.brand i { color: var(--accent); font-style: normal }
-nav { display: flex; align-items: center; gap: 0.25rem }
-nav a { padding: 0.5rem 0.75rem; color: var(--muted); text-decoration: none; border-radius: 0.5rem; transition: color 120ms ease-out }
-nav a[aria-current] { color: var(--ink) }
-@media (hover: hover) and (pointer: fine) { nav a:hover { color: var(--ink) } }
-h1 { margin: 1.5rem 0 0.25rem; font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem); line-height: 1.15; letter-spacing: -0.02em }
-.lede { margin: 0 0 1.5rem; max-inline-size: 60ch; color: var(--muted) }
-main { padding-block-end: 4rem }
+h1 { margin: 1rem 0 0.5rem; font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2rem) }
+.lede { margin: 0 0 1rem; max-inline-size: 60ch; color: var(--muted) }
+main { padding-block-end: 3rem }
+.wrap.wide { inline-size: min(100% - 2 * var(--gutter), 90rem) }
+@media (max-width: 30rem) { .top nav .opt { display: none } }
 </style>
 </head>
 <body>
-<header class="wrap">
-  <a class="brand" href="/">svjeez<i>.</i></a>
+<header class="wrap wide top">
+  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="">svjeez</a>
   <nav aria-label="Main">
     <a href="/examples/">Examples</a>
-    <a href="/play" aria-current="page">Playground</a>
-    <a href="https://github.com/saiashirwad/svjeez">GitHub</a>
+    <a href="/play" aria-current="page" style="color:var(--ink)">Playground</a>
+    <a class="opt" href="/intro">Intro</a>
+    <a class="opt" href="https://github.com/saiashirwad/svjeez">GitHub</a>
+    <button class="theme" type="button" aria-label="Switch between light and dark">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+    </button>
   </nav>
 </header>
-<main class="wrap">
+<main class="wrap wide">
   <h1>Playground</h1>
   <p class="lede">Edit the TSX. The SVG compiles in your browser, in a worker, with the same library you install from npm.</p>
   <div data-playground="toast" data-eager></div>
 </main>
 <script type="module" src="/playground/embed.js"></script>
+<script src="/site.js" defer></script>
 </body>
 </html>

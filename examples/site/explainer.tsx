@@ -12,10 +12,11 @@ const shown = `<path d={wave}
   animation={draw({ at: 1, over: 2 })} />
 
 
+
 <circle r={8} fill="#FF9F0A"
   animation={enter({ at: 3 })} />`;
 
-const src = code(highlight(shown), { theme, fontSize: 15, lineHeight: 1.75, x: 32, y: BAR + 26 });
+const src = code(highlight(shown), { theme, fontSize: 15, lineHeight: 1.6, x: 32, y: BAR + 20 });
 const [drawAt, enterAt] = [0.8, 4.4];
 const one = { at: drawAt, over: 3.2 };
 const two = { at: enterAt, over: 3.2 };
@@ -35,7 +36,7 @@ export default function build(): string {
     <>
       {win.node}
       <g animation={outro(D)}>
-        <Focus stops={[{ during: one, target: src.lines(1, 3).pad(6) }, { during: two, target: src.lines(6, 7).pad(6) }]} dim={0.28}>
+        <Focus stops={[{ during: one, target: src.lines(1, 3).pad(6) }, { during: two, target: src.lines(7, 8).pad(6) }]} dim={0.28}>
           <g class="mono" animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
         </Focus>
         <g class="mono">

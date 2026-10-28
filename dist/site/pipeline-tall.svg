@@ -61,16 +61,16 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @keyframes k30{0%,57.227%{scale:0.5}64.227%,100%{scale:3}}
 .m20{animation-name:k29,k30}
 @keyframes k31{0%,5%{opacity:0}8.5%,100%{opacity:1}}
-@keyframes k32{0%,5%{scale:0.9}8.5%,100%{scale:1}}
+@keyframes k32{0%,5%{translate:0px 6px}8.5%,100%{translate:0px 0px}}
 .m21{animation-name:k31,k32}
 @keyframes k33{0%,9.5%{opacity:0}13%,100%{opacity:1}}
-@keyframes k34{0%,9.5%{scale:0.9}13%,100%{scale:1}}
+@keyframes k34{0%,9.5%{translate:0px 6px}13%,100%{translate:0px 0px}}
 .m22{animation-name:k33,k34}
 @keyframes k35{0%,14%{opacity:0}17.5%,100%{opacity:1}}
-@keyframes k36{0%,14%{scale:0.9}17.5%,100%{scale:1}}
+@keyframes k36{0%,14%{translate:0px 6px}17.5%,100%{translate:0px 0px}}
 .m23{animation-name:k35,k36}
 @keyframes k37{0%,18.5%{opacity:0}22%,100%{opacity:1}}
-@keyframes k38{0%,18.5%{scale:0.9}22%,100%{scale:1}}
+@keyframes k38{0%,18.5%{translate:0px 6px}22%,100%{translate:0px 0px}}
 .m24{animation-name:k37,k38}
 @keyframes k39{0%,18.5%{opacity:0}21%,100%{opacity:1}}
 .m25{animation-name:k39}
@@ -148,23 +148,23 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <path d="M117.48499997990442 74.5H205.48499997990444L192.88499997990445 110.5H104.88499997990442Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
         <text x="155.185" y="97.05" font-size="13" text-anchor="middle" fill="var(--base05)">Prompt</text>
       </g>
-      <g class="a m21 fb">
+      <g class="a m21">
         <path d="M105.98499997990442 158.5H204.38499997990442Q212.38499997990442 158.5 212.38499997990442 166.5V186.5Q212.38499997990442 194.5 204.38499997990442 194.5H105.98499997990442Q97.98499997990442 194.5 97.98499997990442 186.5V166.5Q97.98499997990442 158.5 105.98499997990442 158.5Z" fill="var(--base00)"/>
         <path d="M105.98499997990442 158.5H204.38499997990442Q212.38499997990442 158.5 212.38499997990442 166.5V186.5Q212.38499997990442 194.5 204.38499997990442 194.5H105.98499997990442Q97.98499997990442 194.5 97.98499997990442 186.5V166.5Q97.98499997990442 158.5 105.98499997990442 158.5Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
         <text x="155.185" y="181.05" font-size="13" text-anchor="middle" fill="var(--base05)">Write scene</text>
       </g>
-      <g class="a m22 fb">
+      <g class="a m22">
         <path d="M85.1849999896093 242.5H225.1849999896093Q228.1849999896093 242.5 228.1849999896093 245.5V275.5Q228.1849999896093 278.5 225.1849999896093 278.5H85.1849999896093Q82.1849999896093 278.5 82.1849999896093 275.5V245.5Q82.1849999896093 242.5 85.1849999896093 242.5Z" fill="var(--base00)"/>
         <path d="M85.1849999896093 242.5H225.1849999896093Q228.1849999896093 242.5 228.1849999896093 245.5V275.5Q228.1849999896093 278.5 225.1849999896093 278.5H85.1849999896093Q82.1849999896093 278.5 82.1849999896093 275.5V245.5Q82.1849999896093 242.5 85.1849999896093 242.5Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
         <path d="M90.1849999896093 242.5V278.5M220.1849999896093 242.5V278.5" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
         <text x="155.185" y="265.05" font-size="13" text-anchor="middle" fill="var(--base05)">Render frames</text>
       </g>
-      <g class="a m23 fb">
+      <g class="a m23">
         <path d="M155.185 326.5L237.735 355L155.185 383.5L72.635 355Z" fill="var(--base00)"/>
         <path d="M155.185 326.5L237.735 355L155.185 383.5L72.635 355Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
         <text x="155.185" y="359.55" font-size="13" text-anchor="middle" fill="var(--base05)">Frames ok?</text>
       </g>
-      <g class="a m24 fb">
+      <g class="a m24">
         <path d="M124.38500000661546 489.5H185.98500000661545A18 18 0 0 1 185.98500000661545 525.5H124.38500000661546A18 18 0 0 1 124.38500000661546 489.5Z" fill="var(--base00)"/>
         <path d="M124.38500000661546 489.5H185.98500000661545A18 18 0 0 1 185.98500000661545 525.5H124.38500000661546A18 18 0 0 1 124.38500000661546 489.5Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
         <text x="155.185" y="512.05" font-size="13" text-anchor="middle" fill="var(--base05)">One SVG</text>

@@ -1,14 +1,11 @@
 import { draw, ease, motion, rect, render } from "svjeez";
-import { Arrow, Brace, Focus, Marker, Underline, base16, code, morph, timeline, tint, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { Arrow, Brace, Focus, Marker, Underline, adaptive, code, morph, systemDark, systemLight, timeline, tint, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
 
 const W = 1200;
 const H = 550;
 
-const theme = base16(
-  "#111318", "#1a1d24", "#23262e", "#3a404d", "#626a7c", "#d7dae0", "#f1f2f5", "#ffffff",
-  "#a8b8ff", "#99ffe4", "#ffc799", "#99ffe4", "#99ffe4", "#ffc799", "#8c95a8", "#ffc799",
-);
-const C = { bg: "#0a0b0e", head: theme.base06, body: "#8d95a6", accent: tint(theme, "fn"), dim: theme.base03 } as const;
+const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
+const C = { bg: theme.base00, head: theme.base06, body: theme.base04, accent: tint(theme, "fn"), dim: theme.base03 } as const;
 
 const tl = timeline({ setup: 4.5, problem: 5, refactor: 5, result: 6, rewind: 1.4 }, { gap: 0.6 });
 const slides = ["setup", "problem", "refactor", "result"] as const;
@@ -140,6 +137,7 @@ export default function build(): string {
       duration: tl.duration,
       reducedMotion: { at: tl.result.at + 2 },
       css: [
+        css,
         ".mono,.code text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}",
         ".sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}",
       ].join("\n"),

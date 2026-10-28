@@ -1,11 +1,11 @@
 import { el, motion, rect, type Color, type SvgNode } from "svjeez";
-import { adaptive, appWindow, base16, type Base16, type CodePiece, type CodeTokens } from "svjeez/extras";
+import { adaptive, appWindow, base16, systemDark, systemLight, type Base16, type CodePiece, type CodeTokens } from "svjeez/extras";
 
 // One calm palette for every scene on the site: white and system gray by day, near-black by night.
 // Accents follow the system colors, so the traffic lights double as the code colors.
 export const { theme, css: themeCss } = adaptive({
-  light: base16("#FFFFFF", "#F5F5F7", "#E5E5EA", "#8E8E93", "#6E6E73", "#1D1D1F", "#1D1D1F", "#000000", "#E5453B", "#E8751A", "#E5A50A", "#2FA84F", "#1B9AAA", "#0A6CFF", "#9B51E0", "#A66B43"),
-  dark: base16("#1E1E20", "#2A2A2D", "#3A3A3D", "#7C7C82", "#A1A1A6", "#E5E5EA", "#F5F5F7", "#FFFFFF", "#FF6961", "#FF9F0A", "#FFD60A", "#32D74B", "#64D2FF", "#5EA0FF", "#C58AFF", "#AC8E68"),
+  light: systemLight,
+  dark: systemDark,
 });
 
 /** A terminal stays dark in both schemes, like the real one. */

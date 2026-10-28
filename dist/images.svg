@@ -34,6 +34,8 @@
     </clipPath>
   </defs>
   <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
 .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
 
 .a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -57,9 +59,9 @@
 .m8{animation-name:k9}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-6.8s!important;animation-play-state:paused!important}}
 ]]></style>
-  <rect width="680" height="400" fill="#0E0B16"/>
+  <rect width="680" height="400" fill="var(--base00)"/>
   <g class="a m1">
-    <rect x="30" y="30" width="140" height="140" fill="#161224" stroke="#2A2340"/>
+    <rect x="30" y="30" width="140" height="140" fill="var(--base01)" stroke="var(--base02)"/>
     <g role="img" aria-label="A nebula, cropped to fill the frame">
       <g clip-path="url(#c1)">
         <g transform="translate(-24.4444 30) scale(0.518519 0.518519)">
@@ -67,28 +69,28 @@
         </g>
       </g>
     </g>
-    <text x="30" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">COVER</text>
+    <text x="30" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">COVER</text>
   </g>
   <g class="a m2">
-    <rect x="190" y="30" width="140" height="140" fill="#161224" stroke="#2A2340"/>
+    <rect x="190" y="30" width="140" height="140" fill="var(--base01)" stroke="var(--base02)"/>
     <g role="img" aria-label="A nebula, letterboxed">
       <g transform="translate(190 60.625) scale(0.291667 0.291667)">
         <use href="#s1"/>
       </g>
     </g>
-    <text x="190" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">CONTAIN</text>
+    <text x="190" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">CONTAIN</text>
   </g>
   <g class="a m3">
-    <rect x="350" y="30" width="140" height="140" fill="#161224" stroke="#2A2340"/>
+    <rect x="350" y="30" width="140" height="140" fill="var(--base01)" stroke="var(--base02)"/>
     <g role="img" aria-label="A nebula, stretched">
       <g transform="translate(350 30) scale(0.291667 0.518519)">
         <use href="#s1"/>
       </g>
     </g>
-    <text x="350" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">FILL</text>
+    <text x="350" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">FILL</text>
   </g>
   <g class="a m4">
-    <rect x="510" y="30" width="140" height="140" fill="#161224" stroke="#2A2340"/>
+    <rect x="510" y="30" width="140" height="140" fill="var(--base01)" stroke="var(--base02)"/>
     <g filter="url(#f1)" role="img" aria-label="A sun over mountains">
       <g clip-path="url(#c2)">
         <g transform="translate(510 30) scale(0.875 0.875)">
@@ -96,10 +98,10 @@
         </g>
       </g>
     </g>
-    <text x="510" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">SVG + SHADOW</text>
+    <text x="510" y="188" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">SVG + SHADOW</text>
   </g>
   <g class="a m5">
-    <rect x="30" y="220" width="140" height="140" fill="#161224" stroke="#2A2340"/>
+    <rect x="30" y="220" width="140" height="140" fill="var(--base01)" stroke="var(--base02)"/>
     <g filter="url(#f2)" role="img" aria-label="The nebula in indigo and amber">
       <g clip-path="url(#c3)">
         <g transform="translate(-24.4444 220) scale(0.518519 0.518519)">
@@ -107,10 +109,10 @@
         </g>
       </g>
     </g>
-    <text x="30" y="378" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">DUOTONE</text>
+    <text x="30" y="378" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">DUOTONE</text>
   </g>
   <g class="a m6">
-    <rect x="190" y="220" width="140" height="140" fill="#161224" stroke="#2A2340"/>
+    <rect x="190" y="220" width="140" height="140" fill="var(--base01)" stroke="var(--base02)"/>
     <g filter="url(#f3)" role="img" aria-label="The nebula in gray">
       <g clip-path="url(#c4)">
         <g transform="translate(135.5556 220) scale(0.518519 0.518519)">
@@ -118,10 +120,10 @@
         </g>
       </g>
     </g>
-    <text x="190" y="378" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">GRAYSCALE</text>
+    <text x="190" y="378" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">GRAYSCALE</text>
   </g>
   <g class="a m8">
-    <rect x="350" y="220" width="300" height="140" fill="#161224" stroke="#2A2340"/>
+    <rect x="350" y="220" width="300" height="140" fill="var(--base01)" stroke="var(--base02)"/>
     <g role="img" aria-label="A slow pan and zoom across the nebula">
       <g clip-path="url(#c5)">
         <g class="a m7 fb">
@@ -131,6 +133,6 @@
         </g>
       </g>
     </g>
-    <text x="350" y="378" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">KEN BURNS</text>
+    <text x="350" y="378" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">KEN BURNS</text>
   </g>
 </svg>

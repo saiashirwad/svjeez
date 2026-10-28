@@ -67,8 +67,9 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
   }
 };
 
-/** The pop-in of a node that appears at `at`. */
-export const popIn = (at: Seconds): Motion<"opacity" | "scale"> => enter({ at, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out);
+/** The pop-in of a node that appears at `at`. It rises a few pixels rather than scaling, because browsers can keep a layer
+ * that once animated `scale` rasterized at the smaller size, which leaves the label blurry long after it settles. */
+export const popIn = (at: Seconds): Motion<"opacity" | "y"> => enter({ at, over: 0.35 }, { opacity: 0, y: 6 }, ease.out);
 
 const SKEW = 0.35;
 const LID = 5;

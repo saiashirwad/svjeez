@@ -50,9 +50,9 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
   await editor.click();
   await page.keyboard.press("ControlOrMeta+a");
   const source = await page.evaluate(() => document.querySelector(".cm-content")!.textContent!);
-  assert(source.includes("#3EE6D6"), "toast source is in the editor");
+  assert(source.includes('title: "Saved"'), "toast source is in the editor");
 
-  // Replace a color and a duration through real typing into the document.
+  // Replace the title and the duration through real typing into the document.
   await page.evaluate(() => (document.querySelector(".cm-content") as HTMLElement).focus());
   const edit = async (find: string, replace: string) => {
     await page.evaluate((text) => {
@@ -88,17 +88,15 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
 
   await edit("duration: 5", "duration: 7");
   await timeEdit();
-  await edit("#3EE6D6", "#FF00AA");
-  await timeEdit();
-  await edit("#3EE6D6", "#FF00AA");
+  await edit('title: "Saved"', 'title: "Edited"');
   const settled = await timeEdit();
   console.log(`keystroke to new img.src (includes 250 ms debounce): ${settled} ms`);
   const svg = await page.evaluate(async () => (await (await fetch(document.querySelector<HTMLImageElement>(".pg-img")!.src)).text()));
-  assert(svg.includes("#FF00AA") && !svg.includes("#3EE6D6"), "new SVG carries the edited color");
+  assert(svg.includes(">Edited</title>"), "new SVG carries the edited title");
   assert(/animation-duration:\s*7s|7s/.test(svg), "new SVG carries the edited duration");
 
   const good = await page.getAttribute(".pg-img", "src");
-  await edit("#FF00AA", "#FF00AA\"");
+  await edit('"Edited"', '"Edited""');
   await page.waitForSelector(".pg-error:not([hidden])");
   const message = await page.textContent(".pg-error");
   console.log(`error strip: ${message}`);
@@ -106,7 +104,7 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
   assert((await page.getAttribute(".pg-img", "src")) === good, "last good preview stays during the error");
   if (shots) await page.screenshot({ path: `${shots}/error-1440-light.png` });
 
-  await edit('#FF00AA"', "#FF00AA");
+  await edit('"Edited""', '"Edited"');
   await page.waitForSelector(".pg-error[hidden]", { state: "attached" });
   assert((await page.getAttribute(".pg-img", "src")) === good || (await page.getAttribute(".pg-img", "src")) !== null, "error clears after the fix");
 
@@ -144,7 +142,7 @@ for (const [scheme, width, height] of [["light", 1440, 900], ["dark", 1440, 900]
   await page.waitForSelector(".pg[data-state=ready] .pg-img[src^=blob]");
   await page.waitForTimeout(1500);
   if (shots) await page.screenshot({ path: `${shots}/play-${width}-${scheme}.png`, fullPage: true });
-  await page.getByRole("button", { name: "Light and dark" }).click();
+  await page.getByRole("button", { name: "Light and dark", exact: true }).click();
   await page.waitForTimeout(1500);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
   assert(!overflow, `${scheme} ${width}: no horizontal page scroll`);

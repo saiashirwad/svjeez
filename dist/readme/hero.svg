@@ -322,13 +322,13 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
 @keyframes k93{0%,65%{scale:0.5}70.833%,100%{scale:3}}
 .m71{animation-name:k92,k93}
 @keyframes k94{0%,6.667%{opacity:0}9.583%,100%{opacity:1}}
-@keyframes k95{0%,6.667%{scale:0.9}9.583%,100%{scale:1}}
+@keyframes k95{0%,6.667%{translate:0px 6px}9.583%,100%{translate:0px 0px}}
 .m72{animation-name:k94,k95}
 @keyframes k96{0%,9%{opacity:0}11.917%,100%{opacity:1}}
-@keyframes k97{0%,9%{scale:0.9}11.917%,100%{scale:1}}
+@keyframes k97{0%,9%{translate:0px 6px}11.917%,100%{translate:0px 0px}}
 .m73{animation-name:k96,k97}
 @keyframes k98{0%,11.333%{opacity:0}14.25%,100%{opacity:1}}
-@keyframes k99{0%,11.333%{scale:0.9}14.25%,100%{scale:1}}
+@keyframes k99{0%,11.333%{translate:0px 6px}14.25%,100%{translate:0px 0px}}
 .m74{animation-name:k98,k99}
 @keyframes k100{0%,11.333%{opacity:0}13.417%,100%{opacity:1}}
 .m75{animation-name:k100}
@@ -698,18 +698,18 @@ svg{--base00:#1d1f21;--base01:#282a2e;--base02:#373b41;--base03:#969896;--base04
               <path d="M-314.375 -39.50000000000332H-207.125L-219.375 -4.500000000003318H-326.625Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
               <text x="-266.875" y="-17.625" font-size="12.5" text-anchor="middle" fill="var(--base05)">scene.tsx</text>
             </g>
-            <g class="a m72 fb">
+            <g class="a m72">
               <path d="M-156.125 -39.50000000000332H-66.125Q-63.125 -39.50000000000332 -63.125 -36.50000000000332V-7.500000000003318Q-63.125 -4.500000000003318 -66.125 -4.500000000003318H-156.125Q-159.125 -4.500000000003318 -159.125 -7.500000000003318V-36.50000000000332Q-159.125 -39.50000000000332 -156.125 -39.50000000000332Z" fill="var(--base00)"/>
               <path d="M-156.125 -39.50000000000332H-66.125Q-63.125 -39.50000000000332 -63.125 -36.50000000000332V-7.500000000003318Q-63.125 -4.500000000003318 -66.125 -4.500000000003318H-156.125Q-159.125 -4.500000000003318 -159.125 -7.500000000003318V-36.50000000000332Q-159.125 -39.50000000000332 -156.125 -39.50000000000332Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
               <path d="M-151.125 -39.50000000000332V-4.500000000003318M-71.125 -39.50000000000332V-4.500000000003318" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
               <text x="-111.125" y="-17.625" font-size="12.5" text-anchor="middle" fill="var(--base05)">compile</text>
             </g>
-            <g class="a m73 fb">
+            <g class="a m73">
               <path d="M42.5 -49.5L100.125 -22L42.5 5.5L-15.125 -22Z" fill="var(--base00)"/>
               <path d="M42.5 -49.5L100.125 -22L42.5 5.5L-15.125 -22Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
               <text x="42.5" y="-17.625" font-size="12.5" text-anchor="middle" fill="var(--base05)">valid?</text>
             </g>
-            <g class="a m74 fb">
+            <g class="a m74">
               <path d="M235.125 -39.499999999997414H309.125A17.5 17.5 0 0 1 309.125 -4.499999999997414H235.125A17.5 17.5 0 0 1 235.125 -39.499999999997414Z" fill="var(--base00)"/>
               <path d="M235.125 -39.499999999997414H309.125A17.5 17.5 0 0 1 309.125 -4.499999999997414H235.125A17.5 17.5 0 0 1 235.125 -39.499999999997414Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
               <text x="272.125" y="-17.625" font-size="12.5" text-anchor="middle" fill="var(--base05)">scene.svg</text>

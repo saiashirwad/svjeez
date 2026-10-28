@@ -9,7 +9,6 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
 
 .a{animation-duration:7s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
-.fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,2.143%{stroke-dashoffset:1;visibility:hidden}7.143%,100%{stroke-dashoffset:0;visibility:visible}}
 .m1{animation-name:k1}
 @keyframes k2{0%,6.393%{opacity:0}7.143%,100%{opacity:1}}
@@ -31,19 +30,19 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @keyframes k10{0%,34.964%{opacity:0}35.714%,100%{opacity:1}}
 .m10{animation-name:k10}
 @keyframes k11{0%,7.143%{opacity:0}12.143%,100%{opacity:1}}
-@keyframes k12{0%,7.143%{scale:0.9}12.143%,100%{scale:1}}
+@keyframes k12{0%,7.143%{translate:0px 6px}12.143%,100%{translate:0px 0px}}
 .m11{animation-name:k11,k12}
 @keyframes k13{0%,14.286%{opacity:0}19.286%,100%{opacity:1}}
-@keyframes k14{0%,14.286%{scale:0.9}19.286%,100%{scale:1}}
+@keyframes k14{0%,14.286%{translate:0px 6px}19.286%,100%{translate:0px 0px}}
 .m12{animation-name:k13,k14}
 @keyframes k15{0%,21.429%{opacity:0}26.429%,100%{opacity:1}}
-@keyframes k16{0%,21.429%{scale:0.9}26.429%,100%{scale:1}}
+@keyframes k16{0%,21.429%{translate:0px 6px}26.429%,100%{translate:0px 0px}}
 .m13{animation-name:k15,k16}
 @keyframes k17{0%,28.571%{opacity:0}33.571%,100%{opacity:1}}
-@keyframes k18{0%,28.571%{scale:0.9}33.571%,100%{scale:1}}
+@keyframes k18{0%,28.571%{translate:0px 6px}33.571%,100%{translate:0px 0px}}
 .m14{animation-name:k17,k18}
 @keyframes k19{0%,35.714%{opacity:0}40.714%,100%{opacity:1}}
-@keyframes k20{0%,35.714%{scale:0.9}40.714%,100%{scale:1}}
+@keyframes k20{0%,35.714%{translate:0px 6px}40.714%,100%{translate:0px 0px}}
 .m15{animation-name:k19,k20}
 @keyframes k21{0%,68.863%,100%{visibility:hidden}42.857%{visibility:visible}}
 @keyframes k22{0%,42.857%{translate:146px 247px}46.218%{translate:146px 207px}49.076%{translate:146px 173px}49.412%{translate:146px 169px}50%{translate:150.555px 163.688px}51.068%{translate:162.563px 159.5px}52.524%{translate:179.539px 156.063px}54.18%{translate:199px 153px}55.835%{translate:218.461px 149.938px}57.291%{translate:235.438px 146.5px}58.359%{translate:247.445px 142.313px}58.947%{translate:252px 137px}59.283%{translate:252px 133px}62.645%{translate:252px 173px}65.502%{translate:252px 207px}68.863%,100%{translate:252px 247px}}
@@ -87,30 +86,30 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <path d="M232.39999999999998 99H271.59999999999997Q279.59999999999997 99 279.59999999999997 107V125Q279.59999999999997 133 271.59999999999997 133H232.39999999999998Q224.39999999999998 133 224.39999999999998 125V107Q224.39999999999998 99 232.39999999999998 99Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
         <text x="252" y="120.2" font-size="12" text-anchor="middle" fill="var(--base05)">Lead</text>
       </g>
-      <g class="a m11 fb">
+      <g class="a m11">
         <path d="M106.19999999999999 173H185.79999999999998Q188.79999999999998 173 188.79999999999998 176V204Q188.79999999999998 207 185.79999999999998 207H106.19999999999999Q103.19999999999999 207 103.19999999999999 204V176Q103.19999999999999 173 106.19999999999999 173Z" fill="var(--base00)"/>
         <path d="M106.19999999999999 173H185.79999999999998Q188.79999999999998 173 188.79999999999998 176V204Q188.79999999999998 207 185.79999999999998 207H106.19999999999999Q103.19999999999999 207 103.19999999999999 204V176Q103.19999999999999 173 106.19999999999999 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
         <path d="M111.19999999999999 173V207M180.79999999999998 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
         <text x="146" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Search</text>
       </g>
-      <g class="a m12 fb">
+      <g class="a m12">
         <path d="M215.79999999999998 173H288.2Q291.2 173 291.2 176V204Q291.2 207 288.2 207H215.79999999999998Q212.79999999999998 207 212.79999999999998 204V176Q212.79999999999998 173 215.79999999999998 173Z" fill="var(--base00)"/>
         <path d="M215.79999999999998 173H288.2Q291.2 173 291.2 176V204Q291.2 207 288.2 207H215.79999999999998Q212.79999999999998 207 212.79999999999998 204V176Q212.79999999999998 173 215.79999999999998 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
         <path d="M220.79999999999998 173V207M283.2 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
         <text x="252" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Build</text>
       </g>
-      <g class="a m13 fb">
+      <g class="a m13">
         <path d="M318.2 173H397.79999999999995Q400.79999999999995 173 400.79999999999995 176V204Q400.79999999999995 207 397.79999999999995 207H318.2Q315.2 207 315.2 204V176Q315.2 173 318.2 173Z" fill="var(--base00)"/>
         <path d="M318.2 173H397.79999999999995Q400.79999999999995 173 400.79999999999995 176V204Q400.79999999999995 207 397.79999999999995 207H318.2Q315.2 207 315.2 204V176Q315.2 173 318.2 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
         <path d="M323.2 173V207M392.79999999999995 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
         <text x="358" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Review</text>
       </g>
-      <g class="a m14 fb">
+      <g class="a m14">
         <path d="M126.39999999999998 247H165.59999999999997Q173.59999999999997 247 173.59999999999997 255V273Q173.59999999999997 281 165.59999999999997 281H126.39999999999998Q118.39999999999998 281 118.39999999999998 273V255Q118.39999999999998 247 126.39999999999998 247Z" fill="var(--base00)"/>
         <path d="M126.39999999999998 247H165.59999999999997Q173.59999999999997 247 173.59999999999997 255V273Q173.59999999999997 281 165.59999999999997 281H126.39999999999998Q118.39999999999998 281 118.39999999999998 273V255Q118.39999999999998 247 126.39999999999998 247Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
         <text x="146" y="268.2" font-size="12" text-anchor="middle" fill="var(--base05)">Docs</text>
       </g>
-      <g class="a m15 fb">
+      <g class="a m15">
         <path d="M228.79999999999998 247H275.2Q283.2 247 283.2 255V273Q283.2 281 275.2 281H228.79999999999998Q220.79999999999998 281 220.79999999999998 273V255Q220.79999999999998 247 228.79999999999998 247Z" fill="var(--base00)"/>
         <path d="M228.79999999999998 247H275.2Q283.2 247 283.2 255V273Q283.2 281 275.2 281H228.79999999999998Q220.79999999999998 281 220.79999999999998 273V255Q220.79999999999998 247 228.79999999999998 247Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
         <text x="252" y="268.2" font-size="12" text-anchor="middle" fill="var(--base05)">Tests</text>

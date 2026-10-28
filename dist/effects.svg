@@ -30,6 +30,8 @@
     </filter>
   </defs>
   <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
 .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
 
 .a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
@@ -54,39 +56,39 @@
 .m8{animation-name:k10;animation-duration:0.75s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3s!important;animation-play-state:paused!important}[filter="url(#f1)"]{filter:url(#f1s)}[filter="url(#f2)"]{filter:url(#f2s)}}
 ]]></style>
-  <rect width="660" height="420" fill="#0E0B16"/>
+  <rect width="660" height="420" fill="var(--base00)"/>
   <g transform="translate(20 20)">
-    <rect width="200" height="180" rx="14" fill="#161224" stroke="#2A2340"/>
-    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">BLUR IN / OUT</text>
-    <text x="100" y="92" class="mono a m1" font-size="40" font-weight="700" fill="#36E2D3" text-anchor="middle" filter="url(#f1)">BLUR</text>
+    <rect width="200" height="180" rx="14" fill="var(--base01)" stroke="var(--base02)"/>
+    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">BLUR IN / OUT</text>
+    <text x="100" y="92" class="mono a m1" font-size="40" font-weight="700" fill="var(--base0C)" text-anchor="middle" filter="url(#f1)">BLUR</text>
   </g>
   <g transform="translate(230 20)">
-    <rect width="200" height="180" rx="14" fill="#161224" stroke="#2A2340"/>
-    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">WIGGLE · HOLD</text>
-    <polygon points="100.0,36.0 111.1,62.7 139.9,65.0 118.0,83.8 124.7,112.0 100.0,96.9 75.3,112.0 82.0,83.8 60.1,65.0 88.9,62.7" fill="#FFD166" class="a m2 fb"/>
+    <rect width="200" height="180" rx="14" fill="var(--base01)" stroke="var(--base02)"/>
+    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">WIGGLE · HOLD</text>
+    <polygon points="100.0,36.0 111.1,62.7 139.9,65.0 118.0,83.8 124.7,112.0 100.0,96.9 75.3,112.0 82.0,83.8 60.1,65.0 88.9,62.7" fill="var(--base0A)" class="a m2 fb"/>
   </g>
   <g transform="translate(440 20)">
-    <rect width="200" height="180" rx="14" fill="#161224" stroke="#2A2340"/>
-    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">WIGGLE · SMOOTH</text>
-    <circle cx="100" cy="78" r="30" fill="#A99CFF" class="a m3 fb"/>
+    <rect width="200" height="180" rx="14" fill="var(--base01)" stroke="var(--base02)"/>
+    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">WIGGLE · SMOOTH</text>
+    <circle cx="100" cy="78" r="30" fill="var(--base0E)" class="a m3 fb"/>
   </g>
   <g transform="translate(20 220)">
-    <rect width="200" height="180" rx="14" fill="#161224" stroke="#2A2340"/>
-    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">FX.BOIL + DRAW</text>
-    <g filter="url(#f2)" fill="none" stroke="#FF4FA3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="200" height="180" rx="14" fill="var(--base01)" stroke="var(--base02)"/>
+    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">FX.BOIL + DRAW</text>
+    <g filter="url(#f2)" fill="none" stroke="var(--base08)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
       <path d="M40 120V70L100 30L160 70V120Z" pathLength="1" stroke-dasharray="1" class="a m4"/>
       <path d="M85 120V90H115V120" pathLength="1" stroke-dasharray="1" class="a m5"/>
     </g>
   </g>
   <g transform="translate(230 220)">
-    <rect width="200" height="180" rx="14" fill="#161224" stroke="#2A2340"/>
-    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">FLICKER + GLOW</text>
-    <text x="100" y="94" class="mono a m6" font-size="44" font-weight="700" fill="#FF4FA3" text-anchor="middle" filter="url(#f3)">OPEN</text>
+    <rect width="200" height="180" rx="14" fill="var(--base01)" stroke="var(--base02)"/>
+    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">FLICKER + GLOW</text>
+    <text x="100" y="94" class="mono a m6" font-size="44" font-weight="700" fill="var(--base08)" text-anchor="middle" filter="url(#f3)">OPEN</text>
   </g>
   <g transform="translate(440 220)">
-    <rect width="200" height="180" rx="14" fill="#161224" stroke="#2A2340"/>
-    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="#8A7FB0">LOOP</text>
-    <circle cx="100" cy="78" r="34" fill="none" stroke="#36E2D3" stroke-width="6" stroke-linecap="round" stroke-dasharray="70 150" class="a m7 fb"/>
-    <circle cx="100" cy="78" r="7" fill="#FFD166" class="a m8 fb"/>
+    <rect width="200" height="180" rx="14" fill="var(--base01)" stroke="var(--base02)"/>
+    <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">LOOP</text>
+    <circle cx="100" cy="78" r="34" fill="none" stroke="var(--base0C)" stroke-width="6" stroke-linecap="round" stroke-dasharray="70 150" class="a m7 fb"/>
+    <circle cx="100" cy="78" r="7" fill="var(--base0A)" class="a m8 fb"/>
   </g>
 </svg>

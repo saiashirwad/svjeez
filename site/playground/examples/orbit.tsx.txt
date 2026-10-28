@@ -1,4 +1,10 @@
 import { ease, motion, render, sampled, wiggle } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
 
 const D = 6;
 const R = 70;
@@ -24,20 +30,21 @@ export default function build(): string {
       duration: D,
       title: "Orbit",
       desc: "A moon circles a wobbling planet while a ring spins.",
+      css,
     },
     <>
-      <rect width={240} height={160} fill="#0B0D12" />
+      <rect width={240} height={160} fill={theme.base00} />
       <g transform="translate(120 80)">
         <ellipse
           rx={R}
           ry={0.4 * R}
           fill="none"
-          stroke="#2A2F3D"
+          stroke={theme.base03}
           strokeDasharray="3 5"
         />
         <circle
           r={26}
-          fill="#FF5FA8"
+          fill={theme.base0E}
           animation={wiggle(
             { scale: 0.04 },
             { seed: "planet", rate: 3 },
@@ -49,12 +56,12 @@ export default function build(): string {
           width={68}
           height={4}
           rx={2}
-          fill="#FFD166"
+          fill={theme.base0A}
           animation={motion({ rotate: 0 })
             .to({ rotate: 360 }, 3, ease.linear)
             .loop(3)}
         />
-        <circle r={7} fill="#3EE6D6" animation={moon} />
+        <circle r={7} fill={theme.base0C} animation={moon} />
       </g>
     </>,
   );

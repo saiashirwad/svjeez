@@ -1,8 +1,8 @@
 import { render } from "svjeez";
-import { adaptive, tomorrow, tomorrowNight, travel, tree } from "svjeez/extras";
+import { adaptive, systemLight, systemDark, travel, tree } from "svjeez/extras";
 import { mono } from "../fonts/faces";
 
-const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
+const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const M = 40;
 
 const team = tree(

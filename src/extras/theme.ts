@@ -55,3 +55,7 @@ export const defaultDark = /* @__PURE__ */ base16("#181818", "#282828", "#383838
 export const defaultLight = /* @__PURE__ */ base16("#f8f8f8", "#e8e8e8", "#d8d8d8", "#b8b8b8", "#585858", "#383838", "#282828", "#181818", "#ab4642", "#dc9656", "#f7ca88", "#a1b56c", "#86c1b9", "#7cafc2", "#ba8baf", "#a16946");
 export const tomorrowNight = /* @__PURE__ */ base16("#1d1f21", "#282a2e", "#373b41", "#969896", "#b4b7b4", "#c5c8c6", "#e0e0e0", "#ffffff", "#cc6666", "#de935f", "#f0c674", "#b5bd68", "#8abeb7", "#81a2be", "#b294bb", "#a3685a");
 export const tomorrow = /* @__PURE__ */ base16("#ffffff", "#e0e0e0", "#d6d6d6", "#8e908c", "#969896", "#4d4d4c", "#282a2e", "#1d1f21", "#c82829", "#f5871f", "#eab700", "#718c00", "#3e999f", "#4271ae", "#8959a8", "#a3685a");
+/** White and system gray by day, with the system accent colors. Pairs with `systemDark` in `adaptive`. */
+export const systemLight = /* @__PURE__ */ base16("#FFFFFF", "#F5F5F7", "#E5E5EA", "#8E8E93", "#6E6E73", "#1D1D1F", "#1D1D1F", "#000000", "#E5453B", "#E8751A", "#E5A50A", "#2FA84F", "#1B9AAA", "#0A6CFF", "#9B51E0", "#A66B43");
+/** Near-black by night, with the system accent colors. Pairs with `systemLight` in `adaptive`. */
+export const systemDark = /* @__PURE__ */ base16("#1E1E20", "#2A2A2D", "#3A3A3D", "#7C7C82", "#A1A1A6", "#E5E5EA", "#F5F5F7", "#FFFFFF", "#FF6961", "#FF9F0A", "#FFD60A", "#32D74B", "#64D2FF", "#5EA0FF", "#C58AFF", "#AC8E68");

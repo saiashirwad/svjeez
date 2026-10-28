@@ -4,7 +4,7 @@ Import from `svjeez/extras`. `code` and `terminal` take `theme` (default `defaul
 
 ## Themes
 
-Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made: `tomorrowNight`, `tomorrow`, `defaultDark`, `defaultLight`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
+Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made: `tomorrowNight`, `tomorrow`, `systemDark`, `systemLight`, `defaultDark`, `defaultLight`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
 
 ```tsx
 import { adaptive, tomorrow, tomorrowNight } from "svjeez/extras";

@@ -3,13 +3,13 @@ import {
   adaptive,
   flow,
   flowchart,
-  tomorrow,
-  tomorrowNight,
+  systemDark,
+  systemLight,
 } from "svjeez/extras";
 
 const { theme, css: colors } = adaptive({
-  dark: tomorrowNight,
-  light: tomorrow,
+  light: systemLight,
+  dark: systemDark,
 });
 const css = `${colors}\n.sans text{font-family:system-ui,sans-serif}`;
 const M = 24;

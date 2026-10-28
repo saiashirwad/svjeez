@@ -1,16 +1,23 @@
 import { rect, render } from "svjeez";
 import {
   Callout,
+  adaptive,
   Focus,
   Marker,
   code,
   morph,
   readingTime,
   timeline,
-  tomorrowNight as theme,
+  systemDark,
+  systemLight,
   type CodeRun,
   type CodeTokens,
 } from "svjeez/extras";
+
+const { theme, css: colors } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
 
 // A code explainer: two versions of a function, a timeline that names
 // the beats, and annotations aimed at runs by id.
@@ -73,7 +80,7 @@ export default function build(): string {
       title: "Inline a helper",
       desc: "A call to sum is replaced by a reduce, with a marker on the call and a note after the change.",
       reducedMotion: { at: tl.end },
-      css: ".sans text{font-family:system-ui,sans-serif}",
+      css: `${colors}\n.sans text{font-family:system-ui,sans-serif}`,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />

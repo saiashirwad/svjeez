@@ -1,16 +1,13 @@
 import { enter, ease, render } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
 
-// The scene carries both palettes. A media query inside the SVG picks
-// one, so the same file suits light and dark pages.
-const css = `
-.bg { fill: #FBF1DE }
-.dot { fill: #E8772E }
-.ink { fill: #3A3224 }
-@media (prefers-color-scheme: dark) {
-  .bg { fill: #14162A }
-  .dot { fill: #FFD166 }
-  .ink { fill: #E8E9F6 }
-}`;
+// adaptive() takes a light and a dark palette. `theme` holds CSS
+// variables, and `css` defines them with a prefers-color-scheme
+// media query, so the same file suits light and dark pages.
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
 
 export default function build(): string {
   return render(
@@ -24,10 +21,10 @@ export default function build(): string {
       reducedMotion: { at: 2 },
     },
     <>
-      <rect class="bg" width={320} height={140} />
-      {[0, 1, 2].map((i) => (
+      <rect width={320} height={140} fill={theme.base00} />
+      {[theme.base08, theme.base09, theme.base0B].map((fill, i) => (
         <circle
-          class="dot"
+          fill={fill}
           cx={110 + i * 50}
           cy={64}
           r={14}
@@ -39,7 +36,7 @@ export default function build(): string {
         />
       ))}
       <text
-        class="ink"
+        fill={theme.base05}
         x={160}
         y={112}
         textAnchor="middle"

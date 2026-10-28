@@ -10,6 +10,8 @@
     </mask>
   </defs>
   <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
 .mono,.code text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}
 .sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
 
@@ -99,156 +101,156 @@
 .m36{animation-name:k47}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-18.3s!important;animation-play-state:paused!important}}
 ]]></style>
-  <rect width="1200" height="550" fill="#0a0b0e"/>
+  <rect width="1200" height="550" fill="var(--base00)"/>
   <g class="mono">
-    <rect x="40" y="40" width="700" height="470" rx="12" fill="#111318" stroke="#23262e"/>
-    <path d="M40 80h700" stroke="#1a1d24"/>
-    <circle cx="60" cy="60" r="5.5" fill="#23262e"/>
-    <circle cx="78" cy="60" r="5.5" fill="#23262e"/>
-    <circle cx="96" cy="60" r="5.5" fill="#23262e"/>
-    <text x="390" y="64" font-size="12" text-anchor="middle" fill="#626a7c">Counter.tsx</text>
+    <rect x="40" y="40" width="700" height="470" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M40 80h700" stroke="var(--base01)"/>
+    <circle cx="60" cy="60" r="5.5" fill="var(--base02)"/>
+    <circle cx="78" cy="60" r="5.5" fill="var(--base02)"/>
+    <circle cx="96" cy="60" r="5.5" fill="var(--base02)"/>
+    <text x="390" y="64" font-size="12" text-anchor="middle" fill="var(--base04)">Counter.tsx</text>
   </g>
   <g mask="url(#m1)">
     <g class="a m5">
-      <rect x="99" y="131" width="394" height="38" rx="6" fill="#ffc799" fill-opacity="0.1" stroke="#ffc799" stroke-opacity="0.4" stroke-width="1" class="a m4"/>
+      <rect x="99" y="131" width="394" height="38" rx="6" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4" stroke-width="1" class="a m4"/>
     </g>
     <g class="code">
       <g>
-        <text x="84.8" y="127.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">1</text>
-        <text x="84.8" y="155.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">2</text>
-        <text x="84.8" y="183.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">3</text>
-        <text x="84.8" y="211.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">4</text>
-        <text x="84.8" y="239.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">5</text>
-        <text x="84.8" y="267.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">6</text>
-        <text x="84.8" y="295.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">7</text>
-        <text x="84.8" y="323.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">8</text>
-        <text x="84.8" y="351.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m6">9</text>
-        <text x="84.8" y="379.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">10</text>
-        <text x="84.8" y="407.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">11</text>
-        <text x="84.8" y="435.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">12</text>
-        <text x="84.8" y="463.6" text-anchor="end" font-family="monospace" font-size="16" fill="#3a404d" class="a m7">13</text>
-        <text x="104" y="127.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">function</text>
-        <text x="190.4" y="127.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m8">Counter</text>
-        <text x="257.6" y="127.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">()</text>
-        <text x="286.4" y="127.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">{</text>
-        <text x="123.2" y="155.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">const</text>
-        <text x="180.8" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">[</text>
-        <text x="190.4" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">count</text>
-        <text x="238.4" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">,</text>
-        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m9">setCount</text>
-        <text x="334.4" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">]</text>
-        <text x="353.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">=</text>
-        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m9">useState</text>
-        <text x="449.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m10">(</text>
-        <text x="459.2" y="155.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m11">0</text>
-        <text x="468.8" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m11">);</text>
-        <text x="123.2" y="211.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m8">return</text>
-        <text x="190.4" y="211.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">(</text>
-        <text x="142.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&lt;</text>
-        <text x="152" y="239.6" font-family="monospace" font-size="16" fill="#a8b8ff" class="a m8">button</text>
-        <text x="219.2" y="239.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">onClick</text>
-        <text x="286.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">={()</text>
-        <text x="334.4" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">=&gt;</text>
-        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m12">setCount</text>
-        <text x="440" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">(</text>
-        <text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m13">count</text>
-        <text x="507.2" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m14">+</text>
-        <text x="526.4" y="239.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m14">1</text>
-        <text x="536" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m15">)</text>
-        <text x="545.6" y="239.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m15">}&gt;</text>
-        <text x="161.6" y="267.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">{</text>
-        <text x="171.2" y="267.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m8">count</text>
-        <text x="219.2" y="267.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">}</text>
-        <text x="142.4" y="295.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&lt;/</text>
-        <text x="161.6" y="295.6" font-family="monospace" font-size="16" fill="#a8b8ff" class="a m8">button</text>
-        <text x="219.2" y="295.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">&gt;</text>
-        <text x="123.2" y="323.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">);</text>
-        <text x="104" y="351.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m8">}</text>
-        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m16">dispatch</text>
-        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m16">useReducer</text>
-        <text x="478.4" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">reducer</text>
-        <text x="545.6" y="155.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">,</text>
-        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m7">dispatch</text>
-        <text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m7">"inc"</text>
-        <text x="104" y="407.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m7">function</text>
-        <text x="190.4" y="407.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m7">reducer</text>
-        <text x="257.6" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">(</text>
-        <text x="267.2" y="407.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">count</text>
-        <text x="315.2" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">,</text>
-        <text x="334.4" y="407.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">action</text>
-        <text x="392" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">)</text>
-        <text x="411.2" y="407.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">{</text>
-        <text x="123.2" y="435.6" font-family="monospace" font-size="16" fill="#8c95a8" class="a m7">return</text>
-        <text x="190.4" y="435.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">action</text>
-        <text x="257.6" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">===</text>
-        <text x="296" y="435.6" font-family="monospace" font-size="16" fill="#99ffe4" class="a m7">"inc"</text>
-        <text x="353.6" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">?</text>
-        <text x="372.8" y="435.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m7">count</text>
-        <text x="468.8" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">:</text>
-        <text x="536" y="435.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">;</text>
-        <text x="104" y="463.6" font-family="monospace" font-size="16" fill="#626a7c" class="a m7">}</text>
-        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="#d7dae0" class="a m17">setCount</text>
-        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m17">useState</text>
-        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="#ffc799" class="a m18">setCount</text>
+        <text x="84.8" y="127.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">1</text>
+        <text x="84.8" y="155.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">2</text>
+        <text x="84.8" y="183.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">3</text>
+        <text x="84.8" y="211.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">4</text>
+        <text x="84.8" y="239.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">5</text>
+        <text x="84.8" y="267.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">6</text>
+        <text x="84.8" y="295.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">7</text>
+        <text x="84.8" y="323.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">8</text>
+        <text x="84.8" y="351.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m6">9</text>
+        <text x="84.8" y="379.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m7">10</text>
+        <text x="84.8" y="407.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m7">11</text>
+        <text x="84.8" y="435.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m7">12</text>
+        <text x="84.8" y="463.6" text-anchor="end" font-family="monospace" font-size="16" fill="var(--base03)" class="a m7">13</text>
+        <text x="104" y="127.6" font-family="monospace" font-size="16" fill="var(--base0E)" class="a m8">function</text>
+        <text x="190.4" y="127.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m8">Counter</text>
+        <text x="257.6" y="127.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">()</text>
+        <text x="286.4" y="127.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">{</text>
+        <text x="123.2" y="155.6" font-family="monospace" font-size="16" fill="var(--base0E)" class="a m8">const</text>
+        <text x="180.8" y="155.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">[</text>
+        <text x="190.4" y="155.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m8">count</text>
+        <text x="238.4" y="155.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">,</text>
+        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m9">setCount</text>
+        <text x="334.4" y="155.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">]</text>
+        <text x="353.6" y="155.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">=</text>
+        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m9">useState</text>
+        <text x="449.6" y="155.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m10">(</text>
+        <text x="459.2" y="155.6" font-family="monospace" font-size="16" fill="var(--base09)" class="a m11">0</text>
+        <text x="468.8" y="155.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m11">);</text>
+        <text x="123.2" y="211.6" font-family="monospace" font-size="16" fill="var(--base0E)" class="a m8">return</text>
+        <text x="190.4" y="211.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">(</text>
+        <text x="142.4" y="239.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">&lt;</text>
+        <text x="152" y="239.6" font-family="monospace" font-size="16" fill="var(--base08)" class="a m8">button</text>
+        <text x="219.2" y="239.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m8">onClick</text>
+        <text x="286.4" y="239.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">={()</text>
+        <text x="334.4" y="239.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">=&gt;</text>
+        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m12">setCount</text>
+        <text x="440" y="239.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">(</text>
+        <text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m13">count</text>
+        <text x="507.2" y="239.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m14">+</text>
+        <text x="526.4" y="239.6" font-family="monospace" font-size="16" fill="var(--base09)" class="a m14">1</text>
+        <text x="536" y="239.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m15">)</text>
+        <text x="545.6" y="239.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m15">}&gt;</text>
+        <text x="161.6" y="267.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">{</text>
+        <text x="171.2" y="267.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m8">count</text>
+        <text x="219.2" y="267.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">}</text>
+        <text x="142.4" y="295.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">&lt;/</text>
+        <text x="161.6" y="295.6" font-family="monospace" font-size="16" fill="var(--base08)" class="a m8">button</text>
+        <text x="219.2" y="295.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">&gt;</text>
+        <text x="123.2" y="323.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">);</text>
+        <text x="104" y="351.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m8">}</text>
+        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m16">dispatch</text>
+        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m16">useReducer</text>
+        <text x="478.4" y="155.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m7">reducer</text>
+        <text x="545.6" y="155.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">,</text>
+        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m7">dispatch</text>
+        <text x="449.6" y="239.6" font-family="monospace" font-size="16" fill="var(--base0B)" class="a m7">"inc"</text>
+        <text x="104" y="407.6" font-family="monospace" font-size="16" fill="var(--base0E)" class="a m7">function</text>
+        <text x="190.4" y="407.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m7">reducer</text>
+        <text x="257.6" y="407.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">(</text>
+        <text x="267.2" y="407.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m7">count</text>
+        <text x="315.2" y="407.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">,</text>
+        <text x="334.4" y="407.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m7">action</text>
+        <text x="392" y="407.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">)</text>
+        <text x="411.2" y="407.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">{</text>
+        <text x="123.2" y="435.6" font-family="monospace" font-size="16" fill="var(--base0E)" class="a m7">return</text>
+        <text x="190.4" y="435.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m7">action</text>
+        <text x="257.6" y="435.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">===</text>
+        <text x="296" y="435.6" font-family="monospace" font-size="16" fill="var(--base0B)" class="a m7">"inc"</text>
+        <text x="353.6" y="435.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">?</text>
+        <text x="372.8" y="435.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m7">count</text>
+        <text x="468.8" y="435.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">:</text>
+        <text x="536" y="435.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">;</text>
+        <text x="104" y="463.6" font-family="monospace" font-size="16" fill="var(--base04)" class="a m7">}</text>
+        <text x="257.6" y="155.6" font-family="monospace" font-size="16" fill="var(--base05)" class="a m17">setCount</text>
+        <text x="372.8" y="155.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m17">useState</text>
+        <text x="363.2" y="239.6" font-family="monospace" font-size="16" fill="var(--base0D)" class="a m18">setCount</text>
       </g>
     </g>
   </g>
   <g class="note">
-    <path d="M190.39999999999998 162h48" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m19"/>
-    <path d="M257.6 162h76.8" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m20"/>
+    <path d="M190.39999999999998 162h48" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m19"/>
+    <path d="M257.6 162h76.8" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m20"/>
     <g class="a m23">
-      <path d="M454.4 252Q600.9000000000001 355.252 776 317" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m21"/>
-      <path d="M768.2197380620172 315.1378710634394L776 317L769.7050559183891 321.93697063080106" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m22 fb"/>
+      <path d="M454.4 252Q600.9000000000001 355.252 776 317" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m21"/>
+      <path d="M768.2197380620172 315.1378710634394L776 317L769.7050559183891 321.93697063080106" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m22 fb"/>
     </g>
-    <path d="M372.8 162h96" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m24"/>
+    <path d="M372.8 162h96" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m24"/>
     <g class="a m25">
-      <path d="M553.5999999999999 388q8 0 8 8V422q0 8 8 8q-8 0 -8 8V464q0 8 -8 8" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="573.6" y="434" text-anchor="start" font-size="12" fill="#ffc799">the rule</text>
+      <path d="M553.5999999999999 388q8 0 8 8V422q0 8 8 8q-8 0 -8 8V464q0 8 -8 8" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="573.6" y="434" text-anchor="start" font-size="12" fill="var(--base0D)">the rule</text>
     </g>
     <g class="a m25">
-      <path d="M435.2 248Q280.59999999999997 244.07999999999998 223.99999999999997 388" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m26"/>
-      <path d="M229.8747248017312 382.56975060389266L223.99999999999997 388L223.39812701964374 380.02267282133187" fill="none" stroke="#ffc799" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m27 fb"/>
+      <path d="M435.2 248Q280.59999999999997 244.07999999999998 223.99999999999997 388" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m26"/>
+      <path d="M229.8747248017312 382.56975060389266L223.99999999999997 388L223.39812701964374 380.02267282133187" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m27 fb"/>
     </g>
   </g>
-  <text x="792" y="98" class="mono" font-size="11" letter-spacing="2.2" fill="#3a404d">REACT · REFACTOR</text>
-  <text x="792" y="124" class="sans" font-size="15" fill="#8d95a6">useState → useReducer</text>
+  <text x="792" y="98" class="mono" font-size="11" letter-spacing="2.2" fill="var(--base03)">REACT · REFACTOR</text>
+  <text x="792" y="124" class="sans" font-size="15" fill="var(--base04)">useState → useReducer</text>
   <g class="a m28">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">01  THE SETUP</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">One piece of state</text>
-    <text x="792" y="286" class="sans" font-size="15.5" fill="#8d95a6">useState hands the counter a value</text>
-    <text x="792" y="310" class="sans" font-size="15.5" fill="#8d95a6">and a setter to change it.</text>
+    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="var(--base0D)">01  THE SETUP</text>
+    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="var(--base06)">One piece of state</text>
+    <text x="792" y="286" class="sans" font-size="15.5" fill="var(--base04)">useState hands the counter a value</text>
+    <text x="792" y="310" class="sans" font-size="15.5" fill="var(--base04)">and a setter to change it.</text>
   </g>
   <g class="a m29">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">02  THE PROBLEM</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">The rule hides</text>
-    <text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">in a handler</text>
-    <text x="792" y="322" class="sans" font-size="15.5" fill="#8d95a6">How count changes is written inline.</text>
-    <text x="792" y="346" class="sans" font-size="15.5" fill="#8d95a6">Every new button has to repeat it.</text>
+    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="var(--base0D)">02  THE PROBLEM</text>
+    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="var(--base06)">The rule hides</text>
+    <text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="var(--base06)">in a handler</text>
+    <text x="792" y="322" class="sans" font-size="15.5" fill="var(--base04)">How count changes is written inline.</text>
+    <text x="792" y="346" class="sans" font-size="15.5" fill="var(--base04)">Every new button has to repeat it.</text>
   </g>
   <g class="a m30">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">03  THE MOVE</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">Lift the rule</text>
-    <text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">into a reducer</text>
-    <text x="792" y="322" class="sans" font-size="15.5" fill="#8d95a6">useReducer takes a pure function</text>
-    <text x="792" y="346" class="sans" font-size="15.5" fill="#8d95a6">that owns every state change.</text>
+    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="var(--base0D)">03  THE MOVE</text>
+    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="var(--base06)">Lift the rule</text>
+    <text x="792" y="264" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="var(--base06)">into a reducer</text>
+    <text x="792" y="322" class="sans" font-size="15.5" fill="var(--base04)">useReducer takes a pure function</text>
+    <text x="792" y="346" class="sans" font-size="15.5" fill="var(--base04)">that owns every state change.</text>
   </g>
   <g class="a m31">
-    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="#ffc799">04  THE RESULT</text>
-    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="#f1f2f5">Handlers send intent</text>
-    <text x="792" y="286" class="sans" font-size="15.5" fill="#8d95a6">The button dispatches "inc".</text>
-    <text x="792" y="310" class="sans" font-size="15.5" fill="#8d95a6">The reducer decides what it means,</text>
-    <text x="792" y="334" class="sans" font-size="15.5" fill="#8d95a6">in one place.</text>
+    <text x="792" y="190" class="mono" font-size="11" letter-spacing="2.2" fill="var(--base0D)">04  THE RESULT</text>
+    <text x="792" y="228" class="sans" font-size="29" font-weight="600" letter-spacing="-0.6" fill="var(--base06)">Handlers send intent</text>
+    <text x="792" y="286" class="sans" font-size="15.5" fill="var(--base04)">The button dispatches "inc".</text>
+    <text x="792" y="310" class="sans" font-size="15.5" fill="var(--base04)">The reducer decides what it means,</text>
+    <text x="792" y="334" class="sans" font-size="15.5" fill="var(--base04)">in one place.</text>
   </g>
   <g>
-    <path d="M792 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
-    <path d="M884.5 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
-    <path d="M977 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
-    <path d="M1069.5 510h82.5" stroke="#23262e" stroke-width="2" stroke-linecap="round"/>
+    <path d="M792 510h82.5" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M884.5 510h82.5" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M977 510h82.5" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M1069.5 510h82.5" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
     <g class="a m36">
-      <path d="M792 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m32"/>
-      <path d="M884.5 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m33"/>
-      <path d="M977 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m34"/>
-      <path d="M1069.5 510h82.5" fill="none" stroke="#ffc799" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m35"/>
+      <path d="M792 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m32"/>
+      <path d="M884.5 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m33"/>
+      <path d="M977 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m34"/>
+      <path d="M1069.5 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m35"/>
     </g>
   </g>
 </svg>

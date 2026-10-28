@@ -1,10 +1,10 @@
 import { rect, render } from "svjeez";
-import { adaptive, terminal, tomorrow, tomorrowNight, appWindow } from "svjeez/extras";
+import { adaptive, terminal, systemLight, systemDark, appWindow } from "svjeez/extras";
 
 const W = 960;
 const H = 440;
 
-const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
+const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 const frame = rect(80, 50, 800, 340);
 const shell = appWindow(frame, { theme, title: "~/hello", dots: "traffic", class: "mono" });
 
@@ -35,7 +35,7 @@ export default function build(): string {
       css: [css, ".mono,.mono text{font-family:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}"].join("\n"),
     },
     <>
-      <rect width={W} height={H} fill={theme.base01} />
+      <rect width={W} height={H} fill={theme.base00} />
       {shell.node}
       <g class="mono">{session.node}</g>
     </>,

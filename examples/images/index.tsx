@@ -1,4 +1,5 @@
 import { Picture, ease, enter, fx, motion, picture, render, type Child } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
 
 const W = 680;
 const H = 400;
@@ -7,7 +8,8 @@ const D = 8;
 const photo = await picture.load(new URL("./nebula.jpg", import.meta.url));
 const emblem = await picture.load(new URL("./emblem.svg", import.meta.url));
 
-const C = { bg: "#0E0B16", tile: "#161224", edge: "#2A2340", label: "#8A7FB0" } as const;
+const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
+const C = { bg: theme.base00, tile: theme.base01, edge: theme.base02, label: theme.base04 } as const;
 const CSS = `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}`;
 
 const SIZE = 140;
@@ -28,7 +30,7 @@ const pan = motion({ scale: 1, x: 0 }).to({ scale: 1.35, x: -24 }, D / 2, ease.i
 
 export default function build(): string {
   return render(
-    { width: W, height: H, duration: D, title: "Embedded images", desc: "A nebula photo in three fit modes, an SVG emblem with rounded corners and a shadow, duotone and grayscale treatments, and a slow pan-zoom inside a fixed frame.", css: CSS },
+    { width: W, height: H, duration: D, title: "Embedded images", desc: "A nebula photo in three fit modes, an SVG emblem with rounded corners and a shadow, duotone and grayscale treatments, and a slow pan-zoom inside a fixed frame.", css: [css, CSS].join("\n") },
     <>
       <rect width={W} height={H} fill={C.bg} />
       <Slot x={30} y={30} label="COVER" at={0}>

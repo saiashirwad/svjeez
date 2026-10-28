@@ -13,7 +13,7 @@ const chrome = EditorView.theme({
   ".cm-content": { caretColor: "var(--pg-accent)", paddingBlock: "0.75rem" },
   ".cm-line": { paddingInline: "0.75rem 1rem" },
   ".cm-cursor": { borderLeftColor: "var(--pg-accent)", borderLeftWidth: "2px" },
-  ".cm-gutters": { backgroundColor: "var(--pg-bg)", color: "var(--pg-faint)", border: "none" },
+  ".cm-gutters": { backgroundColor: "transparent", color: "var(--pg-faint)", border: "none" },
   ".cm-lineNumbers .cm-gutterElement": { paddingInline: "0.75rem 0.25rem", minInlineSize: "2.5ch" },
   ".cm-activeLine": { backgroundColor: "var(--pg-hover)" },
   ".cm-activeLineGutter": { backgroundColor: "var(--pg-hover)", color: "var(--pg-muted)" },

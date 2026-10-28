@@ -1,4 +1,10 @@
 import { draw, ease, enter, motion, render, shake } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
 
 // A toast slides up, a check draws on, the badge shakes, then it all
 // leaves and the loop restarts.
@@ -10,10 +16,11 @@ export default function build(): string {
       duration: 5,
       title: "Saved",
       desc: "A toast slides in, a check mark draws, then the toast leaves.",
+      css,
       reducedMotion: { at: 2 },
     },
     <>
-      <rect width={320} height={120} fill="#111318" />
+      <rect width={320} height={120} fill={theme.base00} />
       <g
         animation={motion({ opacity: 0, y: 24 })
           .at(0.3)
@@ -27,15 +34,14 @@ export default function build(): string {
           width={240}
           height={52}
           rx={12}
-          fill="#1E2230"
-          stroke="#3EE6D6"
-          strokeOpacity={0.4}
+          fill={theme.base01}
+          stroke={theme.base02}
         />
         <circle
           cx={68}
           cy={60}
           r={14}
-          fill="#3EE6D6"
+          fill={theme.base0B}
           animation={[
             enter({ at: 0.6, over: 0.3 }, { scale: 0 }, ease.pop),
             shake({ at: 1.6, over: 0.4 }, { rotate: 12 }),
@@ -44,7 +50,7 @@ export default function build(): string {
         <path
           d="M61 60l5 5 9-10"
           fill="none"
-          stroke="#111318"
+          stroke={theme.base00}
           strokeWidth={3}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -55,7 +61,7 @@ export default function build(): string {
           y={66}
           fontFamily="system-ui, sans-serif"
           fontSize={16}
-          fill="#E6E8EE"
+          fill={theme.base05}
           animation={enter({ at: 0.9, over: 0.5 }, { x: -8 })}
         >
           Changes saved

@@ -549,16 +549,16 @@ svg{--base00:#0B0B0C;--base01:#141416;--base02:#26262A;--base03:#5C5C64;--base04
 @keyframes k119{0%,57.209%{scale:0.5}58.722%,100%{scale:3}}
 .m97{animation-name:k118,k119}
 @keyframes k120{0%,53.751%{opacity:0}54.508%,100%{opacity:1}}
-@keyframes k121{0%,53.751%{scale:0.9}54.508%,100%{scale:1}}
+@keyframes k121{0%,53.751%{translate:0px 6px}54.508%,100%{translate:0px 0px}}
 .m98{animation-name:k120,k121}
 @keyframes k122{0%,54.054%{opacity:0}54.81%,100%{opacity:1}}
-@keyframes k123{0%,54.054%{scale:0.9}54.81%,100%{scale:1}}
+@keyframes k123{0%,54.054%{translate:0px 6px}54.81%,100%{translate:0px 0px}}
 .m99{animation-name:k122,k123}
 @keyframes k124{0%,54.356%{opacity:0}55.113%,100%{opacity:1}}
-@keyframes k125{0%,54.356%{scale:0.9}55.113%,100%{scale:1}}
+@keyframes k125{0%,54.356%{translate:0px 6px}55.113%,100%{translate:0px 0px}}
 .m100{animation-name:k124,k125}
 @keyframes k126{0%,54.659%{opacity:0}55.415%,100%{opacity:1}}
-@keyframes k127{0%,54.659%{scale:0.9}55.415%,100%{scale:1}}
+@keyframes k127{0%,54.659%{translate:0px 6px}55.415%,100%{translate:0px 0px}}
 .m101{animation-name:k126,k127}
 @keyframes k128{0%,54.659%{opacity:0}55.199%,100%{opacity:1}}
 .m102{animation-name:k128}
@@ -1490,23 +1490,23 @@ svg{--base00:#0B0B0C;--base01:#141416;--base02:#26262A;--base03:#5C5C64;--base04
             <path d="M98.28000000000009 271.25H274.18000000000006L256.68000000000006 321.25H80.78000000000009Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
             <text x="177.48" y="302.55" font-size="18" text-anchor="middle" fill="var(--base05)">your prompt</text>
           </g>
-          <g class="a m98 fb">
+          <g class="a m98">
             <path d="M325.18000000000006 271.25H439.58000000000004Q442.58000000000004 271.25 442.58000000000004 274.25V318.25Q442.58000000000004 321.25 439.58000000000004 321.25H325.18000000000006Q322.18000000000006 321.25 322.18000000000006 318.25V274.25Q322.18000000000006 271.25 325.18000000000006 271.25Z" fill="var(--base00)"/>
             <path d="M325.18000000000006 271.25H439.58000000000004Q442.58000000000004 271.25 442.58000000000004 274.25V318.25Q442.58000000000004 321.25 439.58000000000004 321.25H325.18000000000006Q322.18000000000006 321.25 322.18000000000006 318.25V274.25Q322.18000000000006 271.25 325.18000000000006 271.25Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
             <path d="M330.18000000000006 271.25V321.25M434.58000000000004 271.25V321.25" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
             <text x="382.38" y="302.55" font-size="18" text-anchor="middle" fill="var(--base05)">Claude</text>
           </g>
-          <g class="a m99 fb">
+          <g class="a m99">
             <path d="M498.58000000000004 271.25H619.38Q627.38 271.25 627.38 279.25V313.25Q627.38 321.25 619.38 321.25H498.58000000000004Q490.58000000000004 321.25 490.58000000000004 313.25V279.25Q490.58000000000004 271.25 498.58000000000004 271.25Z" fill="var(--base00)"/>
             <path d="M498.58000000000004 271.25H619.38Q627.38 271.25 627.38 279.25V313.25Q627.38 321.25 619.38 321.25H498.58000000000004Q490.58000000000004 321.25 490.58000000000004 313.25V279.25Q490.58000000000004 271.25 498.58000000000004 271.25Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
             <text x="558.98" y="302.55" font-size="18" text-anchor="middle" fill="var(--base05)">scene.tsx</text>
           </g>
-          <g class="a m100 fb">
+          <g class="a m100">
             <path d="M683.38 271.25H858.1800000000001Q866.1800000000001 271.25 866.1800000000001 279.25V313.25Q866.1800000000001 321.25 858.1800000000001 321.25H683.38Q675.38 321.25 675.38 313.25V279.25Q675.38 271.25 683.38 271.25Z" fill="var(--base00)"/>
             <path d="M683.38 271.25H858.1800000000001Q866.1800000000001 271.25 866.1800000000001 279.25V313.25Q866.1800000000001 321.25 858.1800000000001 321.25H683.38Q675.38 321.25 675.38 313.25V279.25Q675.38 271.25 683.38 271.25Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
             <text x="770.78" y="302.55" font-size="18" text-anchor="middle" fill="var(--base05)">look at frames</text>
           </g>
-          <g class="a m101 fb">
+          <g class="a m101">
             <path d="M1056.62 271.25H1174.2199999999998A25 25 0 0 1 1174.2199999999998 321.25H1056.62A25 25 0 0 1 1056.62 271.25Z" fill="var(--base00)"/>
             <path d="M1056.62 271.25H1174.2199999999998A25 25 0 0 1 1174.2199999999998 321.25H1056.62A25 25 0 0 1 1056.62 271.25Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
             <text x="1115.42" y="302.55" font-size="18" text-anchor="middle" fill="var(--base05)">launch.svg</text>

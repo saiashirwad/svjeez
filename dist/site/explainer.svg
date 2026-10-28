@@ -5,10 +5,10 @@
     <mask id="m1">
       <rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" class="a m2"/>
       <g class="a m3">
-        <rect x="26" y="60" width="381" height="90.75" fill="#fff"/>
+        <rect x="26" y="54" width="381" height="84" fill="#fff"/>
       </g>
       <g class="a m4">
-        <rect x="26" y="191.25" width="309" height="64.5" fill="#fff"/>
+        <rect x="26" y="198" width="309" height="60" fill="#fff"/>
       </g>
     </mask>
   </defs>
@@ -49,57 +49,57 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <g mask="url(#m1)">
       <g class="mono a m5">
         <g>
-          <text x="32" y="84.375" font-family="monospace" font-size="15" fill="var(--base08)">&lt;path</text>
-          <text x="86" y="84.375" font-family="monospace" font-size="15" fill="var(--base05)">d</text>
-          <text x="95" y="84.375" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
-          <text x="113" y="84.375" font-family="monospace" font-size="15" fill="var(--base05)">wave</text>
-          <text x="149" y="84.375" font-family="monospace" font-size="15" fill="var(--base04)">}</text>
-          <text x="50" y="110.625" font-family="monospace" font-size="15" fill="var(--base05)">stroke</text>
-          <text x="104" y="110.625" font-family="monospace" font-size="15" fill="var(--base04)">=</text>
-          <text x="113" y="110.625" font-family="monospace" font-size="15" fill="var(--base0B)">"#0A6CFF"</text>
-          <text x="50" y="136.875" font-family="monospace" font-size="15" fill="var(--base05)">animation</text>
-          <text x="131" y="136.875" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
-          <text x="149" y="136.875" font-family="monospace" font-size="15" fill="var(--base0D)">draw</text>
-          <text x="185" y="136.875" font-family="monospace" font-size="15" fill="var(--base04)">({</text>
-          <text x="212" y="136.875" font-family="monospace" font-size="15" fill="var(--base05)">at</text>
-          <text x="230" y="136.875" font-family="monospace" font-size="15" fill="var(--base04)">:</text>
-          <text x="248" y="136.875" font-family="monospace" font-size="15" fill="var(--base09)">1</text>
-          <text x="257" y="136.875" font-family="monospace" font-size="15" fill="var(--base04)">,</text>
-          <text x="275" y="136.875" font-family="monospace" font-size="15" fill="var(--base05)">over</text>
-          <text x="311" y="136.875" font-family="monospace" font-size="15" fill="var(--base04)">:</text>
-          <text x="329" y="136.875" font-family="monospace" font-size="15" fill="var(--base09)">2</text>
-          <text x="347" y="136.875" font-family="monospace" font-size="15" fill="var(--base04)">})}</text>
-          <text x="383" y="136.875" font-family="monospace" font-size="15" fill="var(--base08)">/&gt;</text>
-          <text x="32" y="215.625" font-family="monospace" font-size="15" fill="var(--base08)">&lt;circle</text>
-          <text x="104" y="215.625" font-family="monospace" font-size="15" fill="var(--base05)">r</text>
-          <text x="113" y="215.625" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
-          <text x="131" y="215.625" font-family="monospace" font-size="15" fill="var(--base09)">8</text>
-          <text x="140" y="215.625" font-family="monospace" font-size="15" fill="var(--base04)">}</text>
-          <text x="158" y="215.625" font-family="monospace" font-size="15" fill="var(--base05)">fill</text>
-          <text x="194" y="215.625" font-family="monospace" font-size="15" fill="var(--base04)">=</text>
-          <text x="203" y="215.625" font-family="monospace" font-size="15" fill="var(--base0B)">"#FF9F0A"</text>
-          <text x="50" y="241.875" font-family="monospace" font-size="15" fill="var(--base05)">animation</text>
-          <text x="131" y="241.875" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
-          <text x="149" y="241.875" font-family="monospace" font-size="15" fill="var(--base0D)">enter</text>
-          <text x="194" y="241.875" font-family="monospace" font-size="15" fill="var(--base04)">({</text>
-          <text x="221" y="241.875" font-family="monospace" font-size="15" fill="var(--base05)">at</text>
-          <text x="239" y="241.875" font-family="monospace" font-size="15" fill="var(--base04)">:</text>
-          <text x="257" y="241.875" font-family="monospace" font-size="15" fill="var(--base09)">3</text>
-          <text x="275" y="241.875" font-family="monospace" font-size="15" fill="var(--base04)">})}</text>
-          <text x="311" y="241.875" font-family="monospace" font-size="15" fill="var(--base08)">/&gt;</text>
+          <text x="32" y="77.25" font-family="monospace" font-size="15" fill="var(--base08)">&lt;path</text>
+          <text x="86" y="77.25" font-family="monospace" font-size="15" fill="var(--base05)">d</text>
+          <text x="95" y="77.25" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
+          <text x="113" y="77.25" font-family="monospace" font-size="15" fill="var(--base05)">wave</text>
+          <text x="149" y="77.25" font-family="monospace" font-size="15" fill="var(--base04)">}</text>
+          <text x="50" y="101.25" font-family="monospace" font-size="15" fill="var(--base05)">stroke</text>
+          <text x="104" y="101.25" font-family="monospace" font-size="15" fill="var(--base04)">=</text>
+          <text x="113" y="101.25" font-family="monospace" font-size="15" fill="var(--base0B)">"#0A6CFF"</text>
+          <text x="50" y="125.25" font-family="monospace" font-size="15" fill="var(--base05)">animation</text>
+          <text x="131" y="125.25" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
+          <text x="149" y="125.25" font-family="monospace" font-size="15" fill="var(--base0D)">draw</text>
+          <text x="185" y="125.25" font-family="monospace" font-size="15" fill="var(--base04)">({</text>
+          <text x="212" y="125.25" font-family="monospace" font-size="15" fill="var(--base05)">at</text>
+          <text x="230" y="125.25" font-family="monospace" font-size="15" fill="var(--base04)">:</text>
+          <text x="248" y="125.25" font-family="monospace" font-size="15" fill="var(--base09)">1</text>
+          <text x="257" y="125.25" font-family="monospace" font-size="15" fill="var(--base04)">,</text>
+          <text x="275" y="125.25" font-family="monospace" font-size="15" fill="var(--base05)">over</text>
+          <text x="311" y="125.25" font-family="monospace" font-size="15" fill="var(--base04)">:</text>
+          <text x="329" y="125.25" font-family="monospace" font-size="15" fill="var(--base09)">2</text>
+          <text x="347" y="125.25" font-family="monospace" font-size="15" fill="var(--base04)">})}</text>
+          <text x="383" y="125.25" font-family="monospace" font-size="15" fill="var(--base08)">/&gt;</text>
+          <text x="32" y="221.25" font-family="monospace" font-size="15" fill="var(--base08)">&lt;circle</text>
+          <text x="104" y="221.25" font-family="monospace" font-size="15" fill="var(--base05)">r</text>
+          <text x="113" y="221.25" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
+          <text x="131" y="221.25" font-family="monospace" font-size="15" fill="var(--base09)">8</text>
+          <text x="140" y="221.25" font-family="monospace" font-size="15" fill="var(--base04)">}</text>
+          <text x="158" y="221.25" font-family="monospace" font-size="15" fill="var(--base05)">fill</text>
+          <text x="194" y="221.25" font-family="monospace" font-size="15" fill="var(--base04)">=</text>
+          <text x="203" y="221.25" font-family="monospace" font-size="15" fill="var(--base0B)">"#FF9F0A"</text>
+          <text x="50" y="245.25" font-family="monospace" font-size="15" fill="var(--base05)">animation</text>
+          <text x="131" y="245.25" font-family="monospace" font-size="15" fill="var(--base04)">={</text>
+          <text x="149" y="245.25" font-family="monospace" font-size="15" fill="var(--base0D)">enter</text>
+          <text x="194" y="245.25" font-family="monospace" font-size="15" fill="var(--base04)">({</text>
+          <text x="221" y="245.25" font-family="monospace" font-size="15" fill="var(--base05)">at</text>
+          <text x="239" y="245.25" font-family="monospace" font-size="15" fill="var(--base04)">:</text>
+          <text x="257" y="245.25" font-family="monospace" font-size="15" fill="var(--base09)">3</text>
+          <text x="275" y="245.25" font-family="monospace" font-size="15" fill="var(--base04)">})}</text>
+          <text x="311" y="245.25" font-family="monospace" font-size="15" fill="var(--base08)">/&gt;</text>
         </g>
       </g>
     </g>
     <g class="mono">
       <g class="a m6">
-        <path d="M167 164.75L167 144.75" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
-        <rect x="43.6" y="164.75" width="246.8" height="35.6" rx="6" fill="var(--base0D)" fill-opacity="0.08" stroke="var(--base0D)" stroke-opacity="0.4"/>
-        <text x="53.6" y="186.75" font-size="14" fill="var(--base0D)">draw() strokes the path on.</text>
+        <path d="M167 152L167 132" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+        <rect x="43.6" y="152" width="246.8" height="35.6" rx="6" fill="var(--base0D)" fill-opacity="0.08" stroke="var(--base0D)" stroke-opacity="0.4"/>
+        <text x="53.6" y="174" font-size="14" fill="var(--base0D)">draw() strokes the path on.</text>
       </g>
       <g class="a m7">
-        <path d="M171.5 269.75L171.5 249.75" fill="none" stroke="var(--base09)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
-        <rect x="56.5" y="269.75" width="230" height="35.6" rx="6" fill="var(--base09)" fill-opacity="0.08" stroke="var(--base09)" stroke-opacity="0.4"/>
-        <text x="66.5" y="291.75" font-size="14" fill="var(--base09)">enter() fades the dot in.</text>
+        <path d="M171.5 272L171.5 252" fill="none" stroke="var(--base09)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
+        <rect x="56.5" y="272" width="230" height="35.6" rx="6" fill="var(--base09)" fill-opacity="0.08" stroke="var(--base09)" stroke-opacity="0.4"/>
+        <text x="66.5" y="294" font-size="14" fill="var(--base09)">enter() fades the dot in.</text>
       </g>
     </g>
   </g>

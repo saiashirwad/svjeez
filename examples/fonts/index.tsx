@@ -1,4 +1,5 @@
 import { Glyphs, draw, ease, enter, font, motion, render } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
 
 const W = 680;
 const H = 360;
@@ -8,7 +9,8 @@ const load = (file: string) => font.load(new URL(`./${file}`, import.meta.url));
 const display = await load("ArchivoBlack-Regular.ttf");
 const body = font.family(await load("ABeeZee-Regular.ttf"), await load("ABeeZee-Italic.ttf"));
 
-const C = { bg: "#12101C", ink: "#F4EFFF", accent: "#FF5FA8", soft: "#A99CD6", rule: "#3EE6D6" } as const;
+const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
+const C = { bg: theme.base00, ink: theme.base06, accent: theme.base08, soft: theme.base04, rule: theme.base0C } as const;
 
 const TITLE = "Wave!";
 const TITLE_SIZE = 120;
@@ -28,6 +30,7 @@ export default function build(): string {
       height: H,
       duration: D,
       title: "Custom fonts",
+      css,
       desc: "The word Wave! draws on letter by letter as outlines, then fills. Below it, two lines of real text in an embedded font, centered by measuring them, with a rule that grows to the measured width.",
     },
     <>

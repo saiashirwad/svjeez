@@ -71,7 +71,8 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
   let url = "";
 
   const img = h("img", { class: "pg-img", alt: "Preview of the scene", decoding: "async" });
-  const stage = h("div", { class: "pg-stage" }, img);
+  const tools = h("div", { class: "pg-tools" });
+  const stage = h("div", { class: "pg-stage" }, img, tools);
   const stats = h("p", { class: "pg-stats", "aria-live": "off" });
   const error = h("p", { class: "pg-error", role: "status", hidden: "" });
   const editorHost = h("div", { class: "pg-editor" });
@@ -151,14 +152,15 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
     for (const [value, button] of schemeButtons) button.setAttribute("aria-pressed", String(value === scheme));
   };
   paintScheme();
+  tools.append(restart, h("div", { class: "pg-segs", role: "group", "aria-label": "Preview colors" }, ...schemeButtons.map(([, b]) => b)));
 
   host.replaceChildren(
     h("div", { class: "pg-tabs" }, h("div", { class: "pg-tablist", role: "group", "aria-label": "Examples" }, ...tabs), reset),
     h(
       "div",
-      { class: "pg-body" },
+      { class: "pg-split" },
       h("div", { class: "pg-code" }, editorHost, error),
-      h("div", { class: "pg-out" }, h("div", { class: "pg-bar" }, restart, h("div", { class: "pg-segs", role: "group", "aria-label": "Preview colors" }, ...schemeButtons.map(([, b]) => b))), stage, stats),
+      h("div", { class: "pg-out" }, stage, stats),
     ),
   );
   host.dataset.state = "building";
