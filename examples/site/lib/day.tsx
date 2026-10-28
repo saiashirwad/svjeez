@@ -33,7 +33,8 @@ const STEPS = [
   { line: /fill: dawn \}, 1\.5/, at: 8.5, over: 1.5, tint: SKY.dawn },
 ] as const;
 
-const HEAD = [
+// The sun gets named motions like the sky, so every chain reads top to bottom and the JSX stays one line per element.
+const MOTIONS = [
   "const sky = motion({ fill: dawn })",
   "  .to({ fill: noon }, 2)",
   "  .wait(2)",
@@ -42,12 +43,17 @@ const HEAD = [
   "  .wait(1)",
   "  .to({ fill: dawn }, 1.5);",
   "",
+  "const sunX = motion({ x: -200 })",
+  "  .to({ x: 200 }, 6, ease.linear);",
+  "const sunY = motion({ y: 60 })",
+  "  .to({ y: -170 }, 3)",
+  "  .to({ y: 60 }, 3, ease.in);",
+  "",
   "<rect width={w} height={h} animation={sky} />",
-  "<circle r={24} fill={sun} animation={[",
 ];
 const SOURCE = {
-  wide: [...HEAD, "  motion({ x: -200 }).to({ x: 200 }, 6, ease.linear),", "  motion({ y: 60 }).to({ y: -170 }, 3)", "    .to({ y: 60 }, 3, ease.in),", "]} />", "<path d={hills} fill={land} />"],
-  tall: [...HEAD, "  motion({ x: -200 })", "    .to({ x: 200 }, 6, ease.linear),", "  motion({ y: 60 })", "    .to({ y: -170 }, 3)", "    .to({ y: 60 }, 3, ease.in),", "]} />", "<path d={hills} fill={land} />"],
+  wide: [...MOTIONS, "<circle r={24} fill={sun} animation={[sunX, sunY]} />", "<path d={hills} fill={land} />"],
+  tall: [...MOTIONS, "<circle r={24} fill={sun}", "  animation={[sunX, sunY]} />", "<path d={hills} fill={land} />"],
 };
 
 /** The source text for one layout. */
