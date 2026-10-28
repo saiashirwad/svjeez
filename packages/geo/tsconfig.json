@@ -12,7 +12,10 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["bun"],
-    "lib": ["ESNext"]
+    "lib": ["ESNext"],
+    "paths": {
+      "svjeez": ["../svjeez/src/index.ts"]
+    }
   },
   "include": ["src", "test"],
   "exclude": ["test/consumer"]
