@@ -32,7 +32,7 @@ Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, 0.6
 
 ## Turning a globe
 
-A globe's paths can't turn, but its dots can. Register `lat` and `lon` with `def.property`, put them on each dot's `style`, animate one `yaw` angle on the group around them, and let a `css` rule place every dot with `sin` and `cos`. `examples/earth` in the svjeez repository turns 1,879 dots through a day and lights cities by the sun's angle this way.
+A globe's paths can't turn, but its dots can. Register `lat` and `lon` with `def.property`, put them on each dot's `style`, animate one `yaw` angle on the group around them, and let a `css` rule place every dot with `sin` and `cos`. `examples/earth` in the svjeez repository turns 1,393 dots through a day and lights cities by the sun's angle this way.
 
 ## Errors
 

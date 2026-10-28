@@ -109,7 +109,7 @@ const C = {
   star: "var(--star)",
 } as const;
 
-const dots = map.dots(2.4);
+const dots = map.dots(2.8);
 const rows = new Map<number, number[]>();
 
 for (const { at } of dots) rows.set(at[1], [...(rows.get(at[1]) ?? []), at[0]]);
@@ -239,7 +239,7 @@ function Globe(): SvgNode {
         {[...rows].map(([la, row]) => (
           <g style={{ [lat]: la }} fill={C.land}>
             {row.map((lo) => (
-              <circle class="g d" r={1.9} style={{ [lon]: lo }} />
+              <circle class="g d" r={2.1} style={{ [lon]: lo }} />
             ))}
           </g>
         ))}
