@@ -88,10 +88,13 @@ export const classBody = (canvas: Canvas, lanes: readonly { readonly snapped: Se
 };
 
 export const baseRule = (canvas: Canvas): string =>
-  `.${canvas.prefix}a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:${canvas.loop ? "infinite" : 1};animation-fill-mode:both;animation-timing-function:${BASE_TIMING}}`;
+  `.${canvas.prefix}a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:${canvas.loop ? "infinite" : 1};animation-fill-mode:both;animation-timing-function:${BASE_TIMING};animation-delay:var(--t0,0s)}`;
+
+/** Opens the block that holds the still frame under reduced motion, where `restyle` finds it. */
+export const REDUCED_MOTION = "@media (prefers-reduced-motion:reduce){";
 
 /** Under reduced motion, hold every CSS animation at `stillAt` and swap SMIL filters for their still twins. */
 export const freezeRule = (canvas: Canvas, hasRules: boolean, stills: readonly string[]): string =>
   canvas.stillAt === undefined || (!hasRules && stills.length === 0)
     ? ""
-    : `@media (prefers-reduced-motion:reduce){${hasRules ? `.${canvas.prefix}a{animation-delay:-${seconds(canvas, canvas.stillAt)}!important;animation-play-state:paused!important}` : ""}${stills.join("")}}`;
+    : `${REDUCED_MOTION}${hasRules ? `.${canvas.prefix}a{animation-delay:-${seconds(canvas, canvas.stillAt)}!important;animation-play-state:paused!important}` : ""}${stills.join("")}}`;
