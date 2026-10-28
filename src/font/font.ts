@@ -2,6 +2,7 @@ import { contours, pathData } from "./glyf";
 import { shaper, type Shaper } from "./shape";
 import { subset } from "./subset";
 import { isFixedPitch, isItalic, metrics, name, sfnt, SFNT_CFF, SFNT_TRUETYPE, weightOf, type Metrics, type Sfnt } from "./sfnt";
+import { readSource } from "../source";
 
 export type FontFormat = "ttf" | "otf" | "woff" | "woff2";
 export type FontStyle = "normal" | "italic";
@@ -251,19 +252,7 @@ export const font = Object.assign(
   },
   {
     /** Read an http(s) URL with fetch, or a path or file: URL from disk. */
-    load: async (source: string | URL, options: FontOptions = {}): Promise<Font> => {
-      const url = source instanceof URL ? source : /^[a-z][a-z0-9+.-]*:\/\//i.test(source) ? new URL(source) : undefined;
-      if (url?.protocol === "http:" || url?.protocol === "https:") {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Could not load ${url}: ${response.status} ${response.statusText}`.trim());
-        return font(await response.arrayBuffer(), options);
-      }
-      const { readFile } = await import("node:fs/promises");
-      if (!url) return font(await readFile(source as string), options);
-      if (url.protocol !== "file:") throw new Error(`Cannot load ${url}. Use an http(s) or file: URL, or a path.`);
-      const { fileURLToPath } = await import("node:url");
-      return font(await readFile(fileURLToPath(url)), options);
-    },
+    load: async (source: string | URL, options: FontOptions = {}): Promise<Font> => font(await readSource(source), options),
     /** Group weights and styles under the first face's family name. Using the family embeds every face in it. */
     family: (...faces: readonly [Font, ...Font[]]): FontFamily => {
       if (faces.length === 0) throw new Error("font.family() needs at least one font, got none.");

@@ -1,6 +1,7 @@
 import { flatten } from "../ink/path";
 import type { Point } from "../layout/box";
 import type { GlyphPath, PathOptions, TextPath } from "./font";
+import { readSource } from "../source";
 
 /**
  * A single-line font: each glyph is a centerline, as a plotter or an engraver draws it, instead of a filled outline.
@@ -106,18 +107,6 @@ export const strokeFont = Object.assign(
   },
   {
     /** Read an SVG font from an http(s) URL with fetch, or from a path or file: URL on disk. */
-    load: async (source: string | URL): Promise<StrokeFont> => {
-      const url = source instanceof URL ? source : /^[a-z][a-z0-9+.-]*:\/\//i.test(source) ? new URL(source) : undefined;
-      if (url?.protocol === "http:" || url?.protocol === "https:") {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Could not load ${url}: ${response.status} ${response.statusText}`.trim());
-        return strokeFont(await response.text());
-      }
-      const { readFile } = await import("node:fs/promises");
-      if (!url) return strokeFont(await readFile(source as string, "utf8"));
-      if (url.protocol !== "file:") throw new Error(`Cannot load ${url}. Use an http(s) or file: URL, or a path.`);
-      const { fileURLToPath } = await import("node:url");
-      return strokeFont(await readFile(fileURLToPath(url), "utf8"));
-    },
+    load: async (source: string | URL): Promise<StrokeFont> => strokeFont(await readSource(source)),
   },
 );
