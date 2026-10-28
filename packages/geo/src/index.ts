@@ -376,3 +376,23 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
 export { night, sun } from "./sun.ts";
 
 export type { Feature, FeatureCollection, Geometry, GeoJsonProperties, GeoProjection, Topology };
+
+export {
+  globe,
+  type Globe,
+  type GlobeOptions,
+  type Riding,
+  type Spin,
+  type Turning,
+} from "./globe.ts";
+
+export {
+  reproject,
+  trueSize,
+  type Reprojected,
+  type Reprojection,
+  type ReprojectOptions,
+  type TrueSizeOptions,
+} from "./reproject.ts";
+
+export { nightfall, type NightfallOptions } from "./nightfall.ts";

@@ -374,6 +374,11 @@ export interface SampledPathOptions {
   readonly tolerance: number;
   /** Decimal places in the output. Default 1. */
   readonly precision?: number;
+  /**
+   * Px beyond `tolerance` that a point may stray, given where it sits in a sample, for points nobody sees, such as
+   * the hidden side of a globe folded out past its clip. Numbers are read in pairs as points. Default none.
+   */
+  readonly slack?: (x: number, y: number) => number;
 }
 
 /**
@@ -411,8 +416,15 @@ export function sampledPath(
       );
   });
   const values = frames.map(numbers);
+  const { slack } = options;
 
-  /** The worst point distance between frame i and the straight blend of frames a and b. */
+  const room = slack
+    ? values.map((v) =>
+        Float64Array.from({ length: v.length >> 1 }, (_, k) => slack(v[2 * k]!, v[2 * k + 1]!)),
+      )
+    : undefined;
+
+  /** The worst point distance between frame i and the straight blend of frames a and b, less the slack it has. */
   const miss = (a: number, b: number, i: number) => {
     const u = (times[i]! - times[a]!) / (times[b]! - times[a]!);
     let worst = 0;
@@ -423,10 +435,12 @@ export function sampledPath(
       const y =
         values[a]![k + 1]! + (values[b]![k + 1]! - values[a]![k + 1]!) * u - values[i]![k + 1]!;
 
-      worst = Math.max(worst, x * x + y * y);
+      worst = room
+        ? Math.max(worst, Math.hypot(x, y) - room[i]![k >> 1]!)
+        : Math.max(worst, x * x + y * y);
     }
 
-    return Math.sqrt(worst);
+    return room ? worst : Math.sqrt(worst);
   };
 
   const kept = [0, frames.length - 1];

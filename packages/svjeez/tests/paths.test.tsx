@@ -73,4 +73,16 @@ describe("sampledPath", () => {
       sampledPath((t) => (t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), { duration: 2, tolerance: 1 }),
     ).toThrow("sampledPath() returned a path with different commands at t=1 than at t=0.");
   });
+
+  test("lets points stray by their slack", () => {
+    const wave = (t: number) => `M0 0L${50 + 40 * Math.sin(t)} 0`;
+
+    const keys = (slack?: (x: number, y: number) => number) =>
+      scene(sampledPath(wave, { duration: 4, tolerance: 0.5, slack }))
+        .match(/values="([^"]*)"/)![1]!
+        .split(";").length;
+
+    expect(keys((x) => (x > 5 ? 100 : 0))).toBe(2);
+    expect(keys()).toBeGreaterThan(5);
+  });
 });

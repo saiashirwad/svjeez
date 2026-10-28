@@ -88,6 +88,24 @@ Chromium keeps each animated element on its own raster, and when a camera scales
 
 [`examples/world`](https://github.com/saiashirwad/svjeez/tree/main/examples/world) does this end to end.
 
-## Not yet
+## Turning globes
 
-Spinning globes and changing projections change a path's outline over time, which svjeez can't animate yet.
+`globe(data, { frame, tilt, spin })` turns an orthographic globe whose land, borders, grid, routes and night side are real paths. Each is a `sampledPath()` from svjeez with a fixed point count. A point behind the globe is folded out past the rim rather than clipped, so a ring keeps its points as it crosses the horizon, and the fold runs around the hidden pole, or a clear parallel, so no ring wraps the wrong way. Clip every layer to `globe.sphere`.
+
+```tsx
+const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 24 } });
+
+<g clipPath={def.clipPath({}, <path d={earth.sphere} />)}>
+  {earth.land().map((piece) => <path {...piece} fill="#9fcbea" />)}
+  <path {...earth.night(date)} fill="#000" opacity={0.6} />
+</g>
+<g {...earth.place([-0.13, 51.5])}><circle r={3} /></g>
+```
+
+`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
+
+## Changing projection
+
+`reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
+
+`trueSize(map, region, to, { at, over })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. `nightfall(map, (t) => date, { duration })` moves the night side of a flat map through a day or a year as one shape, a column of darkness per longitude, so it holds together across an equinox. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
