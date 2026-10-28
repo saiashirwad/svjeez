@@ -31,11 +31,11 @@ export default function build(): string {
 }
 ```
 
-`render` options: `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `speed` (playback rate), `reducedMotion: { at }` (the still frame under `prefers-reduced-motion`, default 85% through) or `false`, `comment`.
+`render` options: `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `speed` (playback rate), `reducedMotion: { at }` (the still frame under `prefers-reduced-motion`, default 85% through) or `false`, `loop` (default `true`; `false` plays the scene once and holds its last frame), `comment`.
 
 ## The timeline
 
-Every motion lives on the scene timeline, `0` to `duration`, and the whole scene loops. Attach motions with the `animation` prop.
+Every motion lives on the scene timeline, `0` to `duration`, and the whole scene loops unless `loop: false`. Attach motions with the `animation` prop.
 
 ```tsx
 motion({ opacity: 0 })          // initial values, held until the first transition

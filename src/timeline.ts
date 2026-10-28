@@ -85,7 +85,7 @@ export const cssKeyframes = (lane: string, keys: readonly Key[], period: Seconds
 const lerp = (from: Values[Channel], to: Values[Channel], amount: number): Values[Channel] =>
   typeof from === "number" && typeof to === "number" ? from + (to - from) * amount : amount < 1 ? from : to;
 
-export const smilAttributes = (attribute: string, channel: Channel, keys: readonly Key[], period: Seconds, duration: Seconds): Record<string, string> => {
+export const smilAttributes = (attribute: string, channel: Channel, keys: readonly Key[], period: Seconds, duration: Seconds, repeats?: number): Record<string, string> => {
   const movingKeys = keys.filter((_, index) => moving(keys, index));
   const discrete = movingKeys.length > 0 && movingKeys.every((key) => key.ease.kind === "steps");
   const points: { t: Seconds; value: Values[Channel]; spline: string }[] = [];
@@ -113,6 +113,6 @@ export const smilAttributes = (attribute: string, channel: Channel, keys: readon
     keyTimes: points.map((point) => num(point.t / period, 5)).join(";"),
     ...(discrete ? { calcMode: "discrete" } : spline ? { calcMode: "spline", keySplines: points.slice(0, -1).map((point) => point.spline).join(";") } : {}),
     dur: `${num(duration)}s`,
-    repeatCount: "indefinite",
+    ...(repeats === undefined ? { repeatCount: "indefinite" } : { repeatCount: String(repeats), fill: "freeze" }),
   };
 };

@@ -14,6 +14,8 @@ export interface Canvas {
   /** Playback rate. Every emitted duration is divided by it; the timeline stays in scene seconds. */
   readonly speed: number;
   readonly stillAt?: number;
+  /** False plays once and holds the last frame. */
+  readonly loop: boolean;
 }
 
 interface Lane {
@@ -251,6 +253,7 @@ const className = (state: State, lanes: readonly Lane[]): string => {
   const body = [
     `animation-name:${names.join(",")}`,
     lanes.some((lane) => lane.snapped !== duration) && `animation-duration:${durations.join(",")}`,
+    !state.canvas.loop && lanes.some((lane) => lane.snapped !== duration) && `animation-iteration-count:${lanes.map((lane) => Math.round(duration / lane.snapped)).join(",")}`,
     timings.some((entry) => entry !== BASE_TIMING) && `animation-timing-function:${timings.join(",")}`,
   ]
     .filter(Boolean)
@@ -270,7 +273,7 @@ const local = (state: State, lane: Lane): number => {
 };
 
 const animate = (state: State, attribute: string, lane: Lane): SvgNode =>
-  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped / state.canvas.speed));
+  element("animate", smilAttributes(attribute, lane.channels[0] as Channel, lane.keys, lane.period, lane.snapped / state.canvas.speed, state.canvas.loop ? undefined : Math.round(state.canvas.duration / lane.snapped)));
 
 const blurFilter = (state: State, lane: Lane): string => {
   const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}`;
@@ -369,7 +372,7 @@ export const compile = (content: readonly SvgNode[], canvas: Canvas, author: str
   };
   const body = content.map((node) => walk(state, node));
   const authored = (isCss(author) ? resolveCss(state, author) : author).trim();
-  const base = `.a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:${BASE_TIMING}}`;
+  const base = `.a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:${canvas.loop ? "infinite" : 1};animation-fill-mode:both;animation-timing-function:${BASE_TIMING}}`;
   const freeze =
     canvas.stillAt === undefined || (state.rules.length === 0 && state.stills.length === 0)
       ? ""

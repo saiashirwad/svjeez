@@ -18,6 +18,8 @@ export interface RenderOptions {
   readonly speed?: number;
   /** Freeze frame for prefers-reduced-motion. Default: 85% through. */
   readonly reducedMotion?: { readonly at: Seconds } | false;
+  /** False plays the scene once and holds its last frame. Default true. */
+  readonly loop?: boolean;
   /** Comment above the root element. */
   readonly comment?: string;
 }
@@ -31,7 +33,7 @@ export const render = (options: RenderOptions, content: Child): string => {
   if (!(speed > 0 && Number.isFinite(speed))) throw new Error(`render() needs a positive, finite speed, got ${speed}.`);
   const stillAt =
     options.reducedMotion === false ? undefined : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
-  const { css, ...compiled } = compile(children(content), { width, height, duration, speed, stillAt }, options.css);
+  const { css, ...compiled } = compile(children(content), { width, height, duration, speed, stillAt, loop: options.loop ?? true }, options.css);
   const root = element(
     "svg",
     {
