@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from "astro";
 import { examples, REPO, SOURCES } from "../../examples";
 import Base from "../../layouts/Base.astro";
+import { themed } from "../../palettes";
 
 export const getStaticPaths = (() => examples.map((example, i) => ({ params: { name: example.name }, props: { i } }))) satisfies GetStaticPaths;
 
@@ -19,7 +20,7 @@ const { light, dark } = scene.posters!;
       <picture>
         <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset={dark} />
         <source media="(prefers-reduced-motion: reduce)" srcset={light} />
-        <img src={scene.src} width={scene.width} height={scene.height} alt={scene.desc || scene.title} />
+        <img src={scene.src} width={scene.width} height={scene.height} alt={scene.desc || scene.title} data-themed={themed(scene.svg) ? "" : undefined} />
       </picture>
     </figure>
     <div class="meta">
@@ -36,3 +37,9 @@ const { light, dark } = scene.posters!;
   </main>
   <footer class="wrap foot"><span>One animated SVG, no runtime JavaScript.</span><nav aria-label="Footer"><a href={REPO}>GitHub</a><a href="/">Home</a></nav></footer>
 </Base>
+
+<script>
+  import { follow } from "../../scripts/follow";
+
+  follow(document.querySelector(".plate img")!);
+</script>

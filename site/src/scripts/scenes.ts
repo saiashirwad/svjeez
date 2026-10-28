@@ -1,5 +1,6 @@
 // Scenes: every one is an <img>. Off screen it is a still; it plays only while it is on screen, and goes back to its still when it leaves.
 // A scene near the viewport gets its still first, so scrolling never meets an empty box.
+import { frozen, PALETTECHANGE, playing, replay, show } from "./palette";
 import { calm, scheme, THEMECHANGE, type Scheme } from "./scheme";
 
 // A scene plays once this much of it is on screen, so a screen full of half-cut cards does not animate them all.
@@ -11,27 +12,18 @@ const COST = 30;
 
 const posterOf = (img: HTMLImageElement) => img.dataset[(img.dataset.scheme as Scheme | undefined) ?? scheme()]!;
 
-export const still = (img: HTMLImageElement) => {
+// Under another palette a still is the recolored scene held at its still frame, which follows light and dark by itself.
+export const still = (img: HTMLImageElement, { fade = false } = {}) => {
   img.dataset.want = "still";
   img.dataset.state = "still";
-  img.src = posterOf(img);
+  show(img, frozen(img, img.dataset.live!, posterOf(img)), { fade });
 };
 
 export const play = (img: HTMLImageElement) => {
   if (calm.matches) return img.dataset.state === "still" ? undefined : still(img);
-  if (img.dataset.state === "live") return;
+  if (img.dataset.want === "live") return;
   img.dataset.want = "live";
-  const live = img.dataset.live!;
-  const probe = new Image();
-  probe.src = live;
-  probe
-    .decode()
-    .catch(() => {})
-    .then(() => {
-      if (img.dataset.want !== "live") return;
-      img.src = live;
-      img.dataset.state = "live";
-    });
+  show(img, playing(img, img.dataset.live!)).then((shown) => shown && (img.dataset.state = "live"));
 };
 
 const scenes = document.querySelectorAll<HTMLImageElement>(".scene[data-live]");
@@ -82,4 +74,11 @@ scenes.forEach((img) => {
   if (!("manual" in img.dataset)) view.observe(img);
 });
 calm.addEventListener("change", () => scenes.forEach((img) => (img.dataset.state === "live" && calm.matches ? still(img) : undefined)));
-addEventListener(THEMECHANGE, () => scenes.forEach((img) => img.dataset.state === "still" && still(img)));
+addEventListener(THEMECHANGE, () => scenes.forEach((img) => img.dataset.state === "still" && !img.src.startsWith("blob:") && still(img)));
+addEventListener(PALETTECHANGE, () =>
+  scenes.forEach((img) => {
+    if (img.dataset.state === "live") replay(img);
+    else if (img.dataset.want === "live") (delete img.dataset.want, play(img));
+    else if (img.dataset.want) still(img, { fade: true });
+  }),
+);

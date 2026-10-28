@@ -251,6 +251,9 @@ pre.side { align-self: start }
 .viewer .count { margin-block-end: 1.25rem }
 .plate { margin: 0; inline-size: min(100%, calc((100dvh - 15rem) * var(--ratio))); margin-inline: auto; aspect-ratio: var(--ratio); overflow: clip; background: var(--surface) var(--poster) center / cover; border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
 .plate img { inline-size: 100%; block-size: 100% }
+/* Under another palette a page scene waits, unseen, for its recolored copy instead of flashing the built-in colors. */
+:root[data-palette] .plate:has(img[data-themed]) { background-image: none }
+:root[data-palette] :is(.plate, .reel) img[data-themed]:not([data-shown]) { visibility: hidden }
 .viewer .meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem 2rem; margin-block-start: 2rem }
 .viewer .meta h1 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem) }
 .viewer .actions { display: flex; flex-wrap: wrap; gap: 0.625rem }
