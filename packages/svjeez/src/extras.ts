@@ -8,7 +8,7 @@ export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
 export { Marker } from "./extras/marker";
 export { Camera, type CameraStop } from "./extras/camera";
 export type { Direction } from "./layout/box";
-export { base16, tint, adaptive, defaultDark, defaultLight, tomorrowNight, tomorrow, systemLight, systemDark, solarizedDark, solarizedLight, gruvboxDark, gruvboxLight, type Base16, type Slot, type CodeRole } from "./extras/theme";
+export { base16, tint, adaptive, variables, defaultDark, defaultLight, tomorrowNight, tomorrow, systemLight, systemDark, solarizedDark, solarizedLight, gruvboxDark, gruvboxLight, type Base16, type Slot, type CodeRole } from "./extras/theme";
 export { appWindow, type WindowOptions } from "./extras/window";
 export { terminal, type TerminalCommand, type TerminalOptions } from "./extras/terminal";
 export { type Anchor, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./extras/diagrams/kit";

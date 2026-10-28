@@ -39,16 +39,27 @@ const ROLES = {
 
 export const tint = (theme: Base16, role: CodeRole): Color => theme[ROLES[role]];
 
+/** CSS variables with defaults. `vars.sky` is `var(--sky)`; pass `css` to `render`. With `light`, those values win under prefers-color-scheme: light. */
+export const variables = <const K extends string>(
+  dark: Readonly<Record<K, string>>,
+  light?: Readonly<Record<K, string>>,
+): { readonly vars: { readonly [N in K]: `var(--${N})` }; readonly css: string } => {
+  const names = Object.keys(dark) as K[];
+  for (const name of names) if (!/^[A-Za-z_][\w-]*$/.test(name)) throw new Error(`variables() needs CSS identifiers for names, got "${name}".`);
+  const declarations = (values: Readonly<Record<K, string>>) => names.map((name) => `--${name}:${values[name]}`).join(";");
+  return {
+    vars: Object.fromEntries(names.map((name) => [name, `var(--${name})`])) as { [N in K]: `var(--${N})` },
+    css: `svg{${declarations(dark)}}${light ? `\n@media (prefers-color-scheme:light){svg{${declarations(light)}}}` : ""}`,
+  };
+};
+
 /**
  * One scheme that follows the viewer's color scheme. Its colors are CSS variables; pass `css` to `render`.
  * Light wins under `prefers-color-scheme: light`, dark otherwise.
  */
 export const adaptive = ({ dark, light }: { readonly dark: Base16; readonly light: Base16 }): { readonly theme: Base16; readonly css: string } => {
-  const vars = (scheme: Base16) => SLOTS.map((slot) => `--${slot}:${scheme[slot]}`).join(";");
-  return {
-    theme: base16(...SLOTS.map((slot): Color => `var(--${slot})`)),
-    css: `svg{${vars(dark)}}\n@media (prefers-color-scheme:light){svg{${vars(light)}}}`,
-  };
+  const { vars, css } = variables(dark, light);
+  return { theme: vars, css };
 };
 
 export const defaultDark = /* @__PURE__ */ base16("#181818", "#282828", "#383838", "#585858", "#b8b8b8", "#d8d8d8", "#e8e8e8", "#f8f8f8", "#ab4642", "#dc9656", "#f7ca88", "#a1b56c", "#86c1b9", "#7cafc2", "#ba8baf", "#a16946");
