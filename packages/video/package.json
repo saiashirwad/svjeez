@@ -1,0 +1,38 @@
+{
+  "name": "@svjeez/video",
+  "version": "0.6.1",
+  "private": true,
+  "description": "MP4 and WebM video from an svjeez SVG, encoded in headless Chromium with Mediabunny.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/video"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "dependencies": {
+    "mediabunny": "1.63.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "playwright-core": "^1.64.1",
+    "svjeez": "workspace:*",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "playwright-core": ">=1.49",
+    "svjeez": ">=0.6.0 <1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

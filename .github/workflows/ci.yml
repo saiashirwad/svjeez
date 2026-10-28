@@ -71,6 +71,8 @@ jobs:
       - run: bunx playwright-core install --with-deps chromium-headless-shell
       - run: npm run test:package
         working-directory: packages/vite
+      - run: npm run test:package
+        working-directory: packages/video
       # Astro 7 needs Node 22.
       - run: npm run test:package
         if: matrix.node != 20

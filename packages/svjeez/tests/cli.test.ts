@@ -37,6 +37,28 @@ test("svjeez frames rejects an unknown --color-scheme before launching a browser
   );
 });
 
+test("svjeez video names the package to install when @svjeez/video is missing", () => {
+  const dir = mkdtempSync(join(tmpdir(), "svjeez-video-"));
+  const file = join(dir, "scene.svg");
+  writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
+
+  const result = Bun.spawnSync(
+    [process.execPath, join(import.meta.dir, "../src/cli.ts"), "video", file],
+    { cwd: dir },
+  );
+
+  expect(result.exitCode).toBe(1);
+  expect(result.stderr.toString()).toContain(
+    "svjeez video needs @svjeez/video. Install it with `npm i -D @svjeez/video`.",
+  );
+});
+
+test("svjeez video rejects a --format that contradicts --out", () => {
+  const result = cli("video", "scene.svg", "--out", "scene.mp4", "--format", "webm");
+  expect(result.exitCode).toBe(1);
+  expect(result.stderr.toString()).toContain("--format webm doesn't match --out scene.mp4.");
+});
+
 test("svjeez render is no longer a command", () => {
   const result = cli("render", "scene.svg");
   expect(result.exitCode).toBe(1);
