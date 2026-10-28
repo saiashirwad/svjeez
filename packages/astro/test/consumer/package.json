@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "astro build && node verify.js"
+  },
+  "devDependencies": {
+    "astro": "^7.4.3"
+  }
+}

@@ -1,8 +1,8 @@
 // Poster stills, rendered in headless Chromium and kept on disk by name, so a scene renders once per change.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { renderFrames } from "svjeez/frames";
-import { assets } from "./assets";
-import { close, encode } from "./encode";
+import { assets } from "./assets.ts";
+import { close, encode } from "./encode.ts";
 
 export type Scheme = "light" | "dark";
 

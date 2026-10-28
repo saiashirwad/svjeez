@@ -1,5 +1,5 @@
 // Re-encodes PNG frames as WebP or JPEG in headless Chromium, so the site builds the same on macOS and Linux with no extra tools.
-import { chromium, type Browser, type Page } from "playwright-core";
+import type { Browser, Page } from "playwright-core";
 
 export type Format = "webp" | "jpeg";
 
@@ -7,7 +7,7 @@ let browser: Promise<Browser> | undefined;
 let page: Promise<Page> | undefined;
 
 const open = (): Promise<Page> => {
-  browser ??= chromium.launch().catch(() => chromium.launch({ channel: "chrome" }));
+  browser ??= import("playwright-core").then(({ chromium }) => chromium.launch().catch(() => chromium.launch({ channel: "chrome" })));
   page ??= browser.then((b) => b.newPage());
   return page;
 };

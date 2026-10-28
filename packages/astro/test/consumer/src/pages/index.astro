@@ -1,0 +1,11 @@
+---
+import { Scene, getScene } from "svjeez:astro";
+import scene from "../scene.tsx";
+import imported from "../scene.tsx?svjeez";
+
+const { posters } = getScene(scene, { posters: { scale: 0.5 } });
+---
+
+<Scene scene={scene} id="scene" />
+<img id="poster" src={posters!.light} />
+<img id="imported" src={imported.src} />

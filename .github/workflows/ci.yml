@@ -1,8 +1,7 @@
 name: ci
 
+# release.yml runs this on every push to main, before it releases.
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_call:
 
@@ -55,3 +54,10 @@ jobs:
         working-directory: packages/svjeez
       - run: npm run test:package
         working-directory: packages/svjeez
+      - run: bunx playwright-core install --with-deps chromium-headless-shell
+      - run: npm run test:package
+        working-directory: packages/vite
+      # Astro 7 needs Node 22.
+      - run: npm run test:package
+        if: matrix.node != 20
+        working-directory: packages/astro

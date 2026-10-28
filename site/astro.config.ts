@@ -5,7 +5,7 @@ import { defaultClientConditions, defaultServerConditions, type Plugin } from "v
 // The workspace's own packages resolve to their TypeScript sources in every Vite environment, and Vite compiles them
 // instead of handing them to Node, so a library edit shows on reload.
 const source = "@svjeez/source";
-const workspace = ["svjeez", "@svjeez/astro"];
+const workspace = ["svjeez", "@svjeez/vite", "@svjeez/astro"];
 const workspaceSources: Plugin = {
   name: "workspace-sources",
   configEnvironment: (_, config) =>

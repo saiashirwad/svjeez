@@ -9,12 +9,13 @@ To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjee
 The repository is a Bun workspace. The root `package.json` is private and lists the workspaces:
 
 - `packages/svjeez/` is the library published to npm as `svjeez`.
-- `packages/astro/` is `@svjeez/astro`, the Astro integration. It is private and ships TypeScript source.
+- `packages/vite/` is `@svjeez/vite`, the Vite plugin.
+- `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `site/` is the Astro site at svjeez.texoport.in.
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script. Every other command runs inside its workspace.
 
-The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the integration turn that condition on, so they run the library's source and never need `package-dist/`.
+The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
 ## Library commands
 
@@ -44,9 +45,17 @@ Paths in this section are relative to `packages/svjeez/`.
 - `examples/` holds scenes. `dist/` is their committed output, which the README links to.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. They carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
+## Vite plugin
+
+`@svjeez/vite` compiles scenes while an app builds. An import such as `./hero.tsx?svjeez` gives `{ src, width, height, title, desc }`, and `?svjeez&posters` adds a still per color scheme. The dev server serves the files under `/_svjeez/`, and the build emits them as assets. Scenes run in a Vite environment of their own that compiles JSX as svjeez, so a React app's JSX settings never reach them. `getScene()` and the poster renderer run in that environment too, so the plugin itself never imports svjeez. Posters render in headless Chromium and are cached in Vite's cache directory.
+
+Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`. Run `bun run dev` there to open it.
+
+Both plugin packages point their exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. `bun run build:package` in either package writes `package-dist/`, with compiled JavaScript, declarations, and the package.json that npm publishes. `bun run test:package` builds it, lints it, installs the packed tarballs into a copy of `test/consumer/`, and builds that project. Both commands use the scripts in the root `scripts/` folder.
+
 ## Astro integration
 
-`@svjeez/astro` provides the `svjeez:astro` module. `<Scene scene={build} />` and `getScene(build, { posters })` compile a scene and give it a URL under `/_svjeez/`. The dev server serves those files, and the build writes them with their poster stills. Posters render in headless Chromium and are cached in Astro's cache directory.
+`@svjeez/astro` adds `@svjeez/vite` to Astro and provides the `svjeez:astro` module. `<Scene scene={build} />` and `getScene(build, { posters })` compile a scene and give it a URL under `/_svjeez/`. Pages call `getScene()` while they render, after Vite has bundled, so the integration writes those files in `astro:build:done`. Posters are cached in Astro's cache directory.
 
 ## Site
 
@@ -64,14 +73,17 @@ Paths in this section are relative to `packages/svjeez/`.
 
 ## Releasing
 
-CI (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request. It typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed package.
+`.github/workflows/release.yml` runs on every push to `main`, and `ci.yml` runs on every pull request. CI typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
 
-To release, bump the version in `packages/svjeez/`, then commit, tag and push from the root. Neither `npm version` nor `bun pm version` commits or tags inside a workspace, so do those steps yourself:
+After CI passes, `release.yml` runs `scripts/release.ts`. It releases every package under `packages/` whose version isn't on npm or has no GitHub release yet. It publishes to npm with provenance through trusted publishing, and it creates a GitHub release with the tarball and generated notes. A package with a private workspace manifest publishes the `package-dist/` that its `build:package` writes. svjeez's tags stay `v1.2.3`, and the other packages tag `@svjeez/vite@1.2.3`. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
+
+To release, bump a package's version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-(cd packages/svjeez && bun pm version minor --no-git-tag-version)   # or patch, major, prerelease --preid beta
-v=$(node -p 'require("./packages/svjeez/package.json").version')
-git commit -am "svjeez $v" && git tag "v$v" && git push --follow-tags
+(cd packages/vite && bun pm version minor --no-git-tag-version)   # or patch, major, prerelease --preid beta
+git commit -am "@svjeez/vite $(node -p 'require("./packages/vite/package.json").version')" && git push
 ```
 
-The `v*` tag starts `.github/workflows/release.yml`. It reruns CI, checks the tag against `packages/svjeez/package.json`, publishes to npm with provenance through trusted publishing, and creates a GitHub release with the tarball and generated notes. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
+Bump `@svjeez/vite` and `@svjeez/astro` together and the workflow publishes vite first. A new `@svjeez/vite` version reaches `@svjeez/astro` users through its `^` range, so it needs no Astro release.
+
+npm trusts a workflow one package at a time, and only for a package that it already has. A new package therefore needs one publish from a maintainer's machine. Run `npm login`, then `bun scripts/release.ts claim packages/<name>` from the root. It publishes the package's current version and trusts `release.yml` and the `npm` environment for every later version. Until then, the workflow skips the package with a warning. `bun scripts/release.ts plan` lists what the next push would release.

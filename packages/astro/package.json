@@ -7,24 +7,30 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./encode": "./src/encode.ts",
+    "./scene": "./src/scene.ts",
+    "./Scene.astro": "./src/Scene.astro",
     "./client": {
       "types": "./client.d.ts"
     }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
   "dependencies": {
-    "svjeez": "workspace:*"
+    "@svjeez/vite": "workspace:*"
   },
   "peerDependencies": {
-    "astro": ">=7",
-    "playwright-core": ">=1.49"
+    "astro": ">=7"
   },
   "devDependencies": {
     "astro": "^7.4.3",
-    "playwright-core": "^1.64.1",
     "typescript": "6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/astro"
   }
 }

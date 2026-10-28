@@ -1,6 +1,6 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import { getScene, type SceneSource } from "./scene";
+import { getScene, type SceneSource } from "@svjeez/vite/scene";
 
 type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & { scene: SceneSource };
 

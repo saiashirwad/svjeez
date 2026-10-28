@@ -1,8 +1,7 @@
 /// <reference types="astro/client" />
+/// <reference types="@svjeez/vite/client" />
 
 declare module "svjeez:astro" {
-  export const getScene: typeof import("./src/scene").getScene;
-  export type SceneImage = import("./src/scene").SceneImage;
-  export type SceneSource = import("./src/scene").SceneSource;
-  export const Scene: typeof import("./src/Scene.astro").default;
+  export { getScene, type SceneImage, type SceneSource } from "@svjeez/astro/scene";
+  export const Scene: typeof import("@svjeez/astro/Scene.astro").default;
 }
