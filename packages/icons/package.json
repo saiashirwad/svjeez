@@ -2,7 +2,7 @@
   "name": "@svjeez/icons",
   "version": "0.6.1",
   "private": true,
-  "description": "Tabler and Lucide icons as plain path data for svjeez scenes. No dependencies, and each icon imports on its own.",
+  "description": "Tabler and Lucide icons as plain path data for svjeez scenes. No dependencies.",
   "license": "MIT",
   "repository": {
     "type": "git",
