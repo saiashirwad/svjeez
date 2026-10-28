@@ -6,6 +6,7 @@ import agentsTall from "@examples/site/agents-tall.tsx";
 import breaker from "@examples/breaker/index.tsx";
 import explainer from "@examples/site/explainer.tsx";
 import fonts from "@examples/site/fonts.tsx";
+import geo from "@examples/site/geo.tsx";
 import handshake from "@examples/site/handshake.tsx";
 import hero from "@examples/site/hero.tsx";
 import heroTall from "@examples/site/hero-tall.tsx";
@@ -50,6 +51,7 @@ const s = {
   ink: live(ink),
   icons: live(icons),
   math: live(math),
+  geo: live(geo),
   fonts: live(fonts),
   breaker: live(breaker),
   agents: live(agents),
@@ -74,6 +76,14 @@ const before = tex(String.raw\`e^{i\\pi} = -1\`, at);
 const after = tex(String.raw\`e^{i\\pi} + 1 = 0\`, at);
 
 morph([before, after], { at: 2, over: 0.8 });`;
+
+const geoUse = `import { project } from "@svjeez/geo";
+
+const map = project(world, { frame });
+const route = map.route(london, tokyo);
+
+<path d={map.land} />
+<path d={line(route)} animation={draw({ at: 2, over: 1.6 })} />`;
 
 const adaptive = `const { theme, css } = adaptive({
   dark: systemDark,
@@ -175,6 +185,12 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <h2 class="c1-6"><a class="anchor" href="#math">Typeset equations, then morph them.</a></h2>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.math} cost={20} alt="A point turns once round the unit circle while its cosine and sine trace the axes. Euler's formula, e to the i theta equals cos theta plus i sin theta, follows it to pi, collapses to e to the i pi equals minus one, and settles as e to the i pi plus one equals zero." /></div></figure>
       <Code class="code side c7-12" code={mathUse} lang="tsx" theme={shikiTheme} />
+    </section>
+
+    <section class="wrap sec g" id="maps">
+      <h2 class="c1-6"><a class="anchor" href="#maps">Draw real maps, then fly across them.</a></h2>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.geo} cost={20} alt="A dot map of the world fills in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city pulses as its flight lands." /></div></figure>
+      <Code class="code side c7-12" code={geoUse} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="light-dark">
