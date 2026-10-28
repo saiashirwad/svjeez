@@ -157,7 +157,7 @@ pre.code .c { color: var(--muted) }
 .pg-body { display: grid; grid-template-columns: minmax(0, 1fr); min-block-size: 0 }
 @media (min-width: 56rem) { .pg-body { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) } .pg-view { border-inline-start: 1px solid var(--line) } }
 .pg-body pre.code { border-radius: 0; box-shadow: none; background: transparent; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
-.pg-view { display: grid; place-items: center; padding: 1.5rem; background: var(--sunken) }
+.pg-view { display: grid; place-items: center; padding: 1.5rem }
 .pg-view .scene { inline-size: min(100%, 28rem) }
 
 /* Light and dark, side by side. */
