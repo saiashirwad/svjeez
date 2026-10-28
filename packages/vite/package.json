@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/vite",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "private": true,
   "description": "Vite plugin for svjeez: import a scene with ?svjeez and get an animated SVG's URL, with poster stills.",
   "license": "MIT",
