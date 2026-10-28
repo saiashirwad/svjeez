@@ -95,7 +95,13 @@ export function highlight(source: string, lang: Lang, options: HighlightOptions 
     .map((line) => expandTabs(line, tabSize))
     .join("\n");
 
-  const lines = highlighter.codeToTokensBase(text, { lang, theme: THEME.name });
+  // Past Shiki's default 500ms per line, the rest of the line comes back as one token in the current color. The
+  // first call compiles the grammar's regexes, which can take that long on a slow machine.
+  const lines = highlighter.codeToTokensBase(text, {
+    lang,
+    theme: THEME.name,
+    tokenizeTimeLimit: 0,
+  });
 
   return lines.map((tokens) => {
     const runs: [CodeRole, string][] = [];
