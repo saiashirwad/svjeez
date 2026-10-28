@@ -35,7 +35,8 @@ try {
   const playwright = manifest(join(ROOT, "packages/svjeez/node_modules/playwright-core")).version;
   const consumer = join(tmp, "consumer");
   cpSync(join(dir, "test/consumer"), consumer, { recursive: true });
-  run("npm", ["install", "--no-audit", "--no-fund", "--loglevel=error", ...tarballs, `playwright-core@${playwright}`], consumer);
+  // npm 10, which Node 20 ships, can't install Vite 8 even on its own: arborist fails on Vite's optional peers. npm 11 can.
+  run("npx", ["--yes", "npm@11", "install", "--no-audit", "--no-fund", "--loglevel=error", ...tarballs, `playwright-core@${playwright}`], consumer);
   console.log(`✓ installed ${tarballs.length} tarballs`);
   process.stdout.write(run("npm", ["run", "--silent", "check"], consumer));
   console.log(`${manifest(dir).name} package checks passed on Node ${run("node", ["--version"]).trim()}`);
