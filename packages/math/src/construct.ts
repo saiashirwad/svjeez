@@ -447,6 +447,13 @@ export function construct(options: ConstructOptions = {}): Construction {
 
   const colorOf = (look: Look, main: Color): Color => look.color ?? (look.aid ? palette.aid : main);
 
+  /** A stroke drawn on from nothing. It stays invisible until its turn, because a round cap shows a dot at zero length. */
+  const drawOn = (span: { at: number; over: number }, curve?: typeof ease.out) =>
+    motion({ draw: 0, opacity: 0 })
+      .at(span.at)
+      .set({ opacity: 1 })
+      .to({ draw: 1 }, span.over, curve);
+
   const label = (
     source: string | undefined,
     span: { at: number; over: number },
@@ -590,7 +597,7 @@ export function construct(options: ConstructOptions = {}): Construction {
           stroke: color,
           strokeWidth: o.aid ? 1.2 : 1.8,
           strokeLinecap: "round",
-          animation: motion({ draw: 0 }).at(span.at).to({ draw: 1 }, span.over),
+          animation: drawOn(span),
         });
       };
 
@@ -651,7 +658,7 @@ export function construct(options: ConstructOptions = {}): Construction {
         stroke: color,
         strokeWidth: o.aid ? 1.2 : 1.8,
         strokeLinecap: "round",
-        animation: motion({ draw: 0 }).at(span.at).to({ draw: 1 }, span.over, ease.inOut),
+        animation: drawOn(span, ease.inOut),
       });
     });
 
@@ -818,7 +825,7 @@ export function construct(options: ConstructOptions = {}): Construction {
             stroke: color,
             strokeWidth: 1.8,
             strokeLinejoin: "round",
-            animation: motion({ draw: 0 }).at(span.at).to({ draw: 1 }, span.over),
+            animation: drawOn(span),
           }),
       ]);
     });
@@ -874,7 +881,7 @@ export function construct(options: ConstructOptions = {}): Construction {
         strokeWidth: 1.6,
         strokeLinecap: "round",
         strokeLinejoin: "round",
-        animation: motion({ draw: 0 }).at(span.at).to({ draw: 1 }, span.over),
+        animation: drawOn(span),
       });
     });
     label(

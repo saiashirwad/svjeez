@@ -5,10 +5,10 @@ import { css, theme } from "../style";
 
 const W = 960;
 const H = 540;
-const SIDE = 170;
+const SIDE = 200;
 
 // Euclid I.1, then the bisector of the angle at C: the construction below is the whole figure.
-const g = construct({ theme, at: { x: 200, y: 300 }, fontSize: 24 });
+const g = construct({ theme, at: { x: 235, y: 300 }, fontSize: 24 });
 
 const A = g.point(0, 0, "A", { at: 0.4 });
 const B = g.point(SIDE, 0, "B", { at: 0.4 });
@@ -44,7 +44,6 @@ g.together(() => {
 
 g.step();
 
-const tBisect = g.time;
 const bisector = g.angleBisector(A, C, B, { extend: 24 });
 const M = g.intersect(bisector, AB, { label: "M" });
 
@@ -55,7 +54,7 @@ g.angle(A, M, C);
 const tDone = g.time;
 
 const note = (source: string, y: number) =>
-  tex(source, { x: 640, y, fontSize: 25, theme, anchor: [0, 0.5], display: false });
+  tex(source, { x: 690, y, fontSize: 25, theme, anchor: [0, 0.5], display: false });
 
 const duration = Math.ceil(g.end + 3);
 
@@ -78,8 +77,8 @@ export default function build(): string {
       >
         {
           tex(String.raw`\text{Euclid I.1}`, {
-            x: 640,
-            y: 70,
+            x: 690,
+            y: 100,
             fontSize: 28,
             theme,
             color: tint(theme, "blue"),
@@ -88,20 +87,20 @@ export default function build(): string {
         }
       </g>
       {g.node}
-      {note(String.raw`AC = AB \quad (\text{circle } A)`, 150).write({
+      {note(String.raw`AC = AB \quad (\text{circle } A)`, 190).write({
         at: tCircles + 1.4,
         over: 1,
       })}
-      {note(String.raw`BC = AB \quad (\text{circle } B)`, 200).write({
+      {note(String.raw`BC = AB \quad (\text{circle } B)`, 240).write({
         at: tCircles + 2.6,
         over: 1,
       })}
-      {note(String.raw`AB = AC = BC`, 262).write({ at: tSides + 2.4, over: 1 })}
-      {note(String.raw`\angle A = \angle B = \angle C = 60^\circ`, 312).write({
+      {note(String.raw`AB = AC = BC`, 302).write({ at: tSides + 2.4, over: 1 })}
+      {note(String.raw`\angle A = \angle B = \angle C = 60^\circ`, 352).write({
         at: tAngles + 0.6,
         over: 1.2,
       })}
-      {note(String.raw`CM \perp AB, \; AM = MB`, 400).write({ at: tDone, over: 1 })}
+      {note(String.raw`CM \perp AB, \; AM = MB`, 440).write({ at: tDone, over: 1 })}
     </>,
   );
 }
