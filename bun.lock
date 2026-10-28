@@ -14,7 +14,7 @@
     },
     "packages/astro": {
       "name": "@svjeez/astro",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "dependencies": {
         "@svjeez/vite": "workspace:*",
       },
@@ -28,7 +28,7 @@
     },
     "packages/svjeez": {
       "name": "svjeez",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "bin": {
         "svjeez": "./package-dist/cli.js",
       },
@@ -52,7 +52,7 @@
     },
     "packages/vite": {
       "name": "@svjeez/vite",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "devDependencies": {
         "@types/bun": "latest",
         "@types/react": "^19.0.0",

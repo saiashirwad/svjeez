@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/astro",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "description": "Astro integration for svjeez: import a scene into a page and get an animated SVG, with poster stills.",
   "license": "MIT",

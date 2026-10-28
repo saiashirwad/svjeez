@@ -1,6 +1,6 @@
 // The link-preview card: the product window under the headline, cropped by the bottom edge like a screenshot.
 import type { APIRoute } from "astro";
-import { getScene } from "svjeez:astro";
+import { getScene } from "@svjeez/astro/scene";
 import { renderFrames } from "svjeez/frames";
 import hero from "@examples/site/hero.tsx";
 import mark from "../../public/favicon.svg?raw";

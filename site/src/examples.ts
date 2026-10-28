@@ -1,5 +1,5 @@
 // The examples gallery: which scenes it shows, in what order, and the posters its cards and pages use.
-import { getScene, type SceneImage } from "svjeez:astro";
+import { getScene, type SceneImage } from "@svjeez/astro/scene";
 
 export const REPO = "https://github.com/saiashirwad/svjeez";
 

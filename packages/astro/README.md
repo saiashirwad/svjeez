@@ -35,7 +35,7 @@ Show a scene with `<Scene>`:
 
 ```astro
 ---
-import { Scene } from "svjeez:astro";
+import Scene from "@svjeez/astro/Scene.astro";
 import hero from "../scenes/hero.tsx";
 ---
 
@@ -46,7 +46,7 @@ import hero from "../scenes/hero.tsx";
 
 ```astro
 ---
-import { getScene } from "svjeez:astro";
+import { getScene } from "@svjeez/astro/scene";
 import hero from "../scenes/hero.tsx";
 
 const image = getScene(hero, { posters: { scale: 2 } });
