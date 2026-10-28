@@ -255,6 +255,24 @@ const stage = (args: readonly string[], cwd: string) =>
     });
   });
 
+/** Whether release.yml in `repo` already publishes `name`. npm lists one publisher as an object, several as an array. */
+const trusted = (name: string, repo: string): boolean => {
+  // SAFETY: `npm trust list --json` prints a trusted publisher, or an array of them.
+  const listed = JSON.parse(run("npm", ["trust", "list", name, "--json"]) || "[]") as
+    | Publisher
+    | Publisher[];
+
+  return [listed]
+    .flat()
+    .some((p) => p.type === "github" && p.repository === repo && p.file === WORKFLOW);
+};
+
+interface Publisher {
+  readonly type: string;
+  readonly repository?: string;
+  readonly file?: string;
+}
+
 const claim = async (dir: string | undefined) => {
   if (!dir)
     throw new Error(
@@ -288,6 +306,12 @@ const claim = async (dir: string | undefined) => {
         : `npm stages a new package's first version.`,
       `Approve ${name} ${version} under Staged Packages on npmjs.com, or with \`npm stage approve\`.`,
     );
+  }
+
+  if (trusted(name, repo)) {
+    console.log(`${WORKFLOW} can already publish ${name}.`);
+
+    return;
   }
 
   execFileSync(
