@@ -6,7 +6,7 @@ import type { Box, Size } from "../../layout/box";
 import { motion, type Seconds, type Stack } from "../../motion";
 import { draw } from "../../recipes";
 import type { SvgNode } from "../../svg";
-import type { Base16, Slot } from "../theme";
+import { defaultDark, type Base16, type Slot } from "../theme";
 import { curve } from "./curve";
 
 /** What a node is, so the theme can draw it. */
@@ -130,6 +130,20 @@ export interface Look {
   readonly theme: Base16;
   readonly fontSize: number;
 }
+
+/** What every diagram reads from its options: the theme and sizes with defaults applied, a `Look` at both sizes, and the root group that carries the class and font. */
+export const look = (options: DiagramOptions) => {
+  const { theme = defaultDark, fontSize = 14, font, class: cls } = options;
+  const small = fontSize * 0.85;
+  return {
+    theme,
+    fontSize,
+    font,
+    small,
+    smallLook: { theme, fontSize: small } satisfies Look,
+    root: (children: Parameters<typeof el.g>[1]): SvgNode => el.g({ class: cls, fontFamily: font }, children),
+  };
+};
 
 /** A role's shape with its label centered inside. `extra` draws over the fill, under the label. */
 export const shape = (role: NodeRole, b: Box, label: string, look: Look, animation?: Stack<"opacity" | "scale" | "x" | "y">, extra?: SvgNode): SvgNode => {

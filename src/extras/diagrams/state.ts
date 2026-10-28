@@ -5,11 +5,10 @@ import type { Box, Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
 import type { Seconds, Span } from "../../motion";
 import type { SvgNode } from "../../svg";
-import { defaultDark } from "../theme";
 import { flow, type FlowOptions } from "../flow";
 import { beats, visible, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, corner, labelSize, lookup, textWidth, type Diagram, type DiagramOptions } from "./kit";
+import { arrow, chip, corner, labelSize, look, lookup, textWidth, type Diagram, type DiagramOptions } from "./kit";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =
@@ -110,8 +109,9 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   options: StateOptions = {},
 ): StateMachine<StateIds<S>> {
   type Id = StateIds<S>;
-  const { theme = defaultDark, fontSize = 14, font, class: cls, direction } = options;
-  const small = fontSize * 0.85;
+  const { direction } = options;
+  const l0 = look(options);
+  const { theme, fontSize, font, small } = l0;
   const header = Math.round(fontSize * 2.6);
   const nodes = new Map<string, Node>();
   const scope = (states: Record<string, StateSpec>, initial: string, depth: number, owner?: string): Scope => {
@@ -181,7 +181,6 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   const boxes = new Map([...nodes.keys()].map((id) => [id, toRect(shift(local.boxes.get(id)!, ox, oy))]));
   const lines = local.lines.map((l) => ({ ...l, points: l.points.map((p) => ({ x: p.x + ox, y: p.y + oy })), label: l.label && toRect(shift(l.label, ox, oy)) }));
   const ground = (depth: number): Color => (depth % 2 === 0 ? theme.base00 : theme.base01);
-  const look = { theme, fontSize };
 
   const drawn = (n: Node): SvgNode => {
     const b = boxes.get(n.id)!;
@@ -191,15 +190,15 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     if (!n.inner) return el.g({}, [frame, title(b.center.y)]);
     return el.g({}, [frame, el.path({ d: `M${b.x} ${b.y + header}h${b.w}`, stroke: theme.base03 }), title(b.y + header / 2)]);
   };
-  const node = el.g({ class: cls, fontFamily: font }, [
+  const node = l0.root([
     [...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawn),
-    lines.map((l) => arrow(l.points, look)),
+    lines.map((l) => arrow(l.points, l0)),
     local.dots.map((d) => el.circle({ cx: d.x + ox + d.w / 2, cy: d.y + oy + d.h / 2, r: DOT / 2, fill: theme.base05 })),
     local.ends.map((d) => {
       const [cx, cy] = [d.x + ox + d.w / 2, d.y + oy + d.h / 2];
       return el.g({}, [el.circle({ cx, cy, r: RING / 2, fill: "none", stroke: theme.base05, strokeWidth: 1.5 }), el.circle({ cx, cy, r: RING / 2 - 4, fill: theme.base05 })]);
     }),
-    lines.map((l) => l.label && chip(l.label, transitions[l.of as number]!.label!, { theme, fontSize: small, fill: theme.base05, ground: ground(l.depth) })),
+    lines.map((l) => l.label && chip(l.label, transitions[l.of as number]!.label!, { ...l0.smallLook, fill: theme.base05, ground: ground(l.depth) })),
   ]);
 
   const line = (pred: (l: (typeof lines)[number]) => boolean) => lines.find(pred);
