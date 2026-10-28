@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" role="img" aria-labelledby="t">
+  <title id="t">Saved</title>
+  <style><![CDATA[
+.a{animation-duration:5s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,32%,40%,100%{rotate:0deg}33.6%{rotate:-9.6deg}35.2%{rotate:7.2deg}36.8%{rotate:-4.8deg}38.4%{rotate:2.4deg}}
+.m1{animation-name:k1;animation-timing-function:linear}
+@keyframes k2{0%,18%{stroke-dashoffset:1;visibility:hidden}26%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,6%{opacity:0}16%,100%{opacity:1}}
+@keyframes k4{0%,6%{translate:0px 24px}16%,100%{translate:0px 0px}}
+.m3{animation-name:k3,k4;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-4.25s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="a m3">
+    <rect x="40" y="34" width="240" height="52" rx="12" fill="#1E2230"/>
+    <circle cx="68" cy="60" r="14" fill="#32D74B" class="a m1 fb"/>
+    <path d="M61 60l5 5 9-10" fill="none" stroke="#111318" stroke-width="3" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m2"/>
+    <text x="96" y="66" fill="#E6E8EE" font-size="16" font-family="system-ui, sans-serif">Changes saved</text>
+  </g>
+</svg>

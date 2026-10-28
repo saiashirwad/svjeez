@@ -16,7 +16,7 @@ const session = terminal(
     { cmd: "npx svjeez svg hello.tsx --out hello.svg" },
     { cmd: "npx svjeez skill --install", output: [[["muted", "installed the svjeez skill in .claude/skills/svjeez"]]] },
   ],
-  { theme: termTheme, x: 24, y: BAR + 22, fontSize: 12.5, lineHeight: 1.75, cps: 30, gap: 0.5 },
+  { theme: termTheme, x: 24, y: BAR + 22, fontSize: 12.5, lineHeight: 1.75, cps: 90, gap: 0.35 },
 );
 const D = Math.ceil(session.end) + 3;
 

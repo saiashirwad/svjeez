@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { draw, ease, enter, render } from "svjeez";
-import { code, typewriter } from "svjeez/extras";
+import { Marker, code } from "svjeez/extras";
 import { CSS, chrome, highlight, outro, theme } from "./kit";
 
 // Without JSX: the same scene built from el() calls, shown from the real file so it type-checks.
@@ -13,8 +13,11 @@ const D = 11;
 const source = readFileSync(fileURLToPath(new URL("./plain.ts", import.meta.url)), "utf8").trimEnd();
 const win = chrome(W, H, "plain.ts");
 const src = code(highlight(source), { theme, fontSize: 12, lineHeight: 1.75, x: 28, y: BAR + 22 });
-const typed = typewriter(src, { at: 0.5, cps: 75, cursor: theme.base0D, blink: false });
-const T0 = typed.end + 0.6;
+const T0 = 0.9;
+const lit = [
+  { during: { at: T0 + 0.2, over: 1.4 }, target: src.lines(9, 11).pad(3) },
+  { during: { at: T0 + 1.2, over: 1.2 }, target: src.lines(12, 13).pad(3) },
+];
 
 export default function build(): string {
   return render(
@@ -31,7 +34,10 @@ export default function build(): string {
       {win.node}
       <path d={`M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
       <g animation={outro(D)}>
-        <g class="mono">{typed.node}</g>
+        <g class="mono">
+          <g animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
+          <Marker theme={theme} stops={lit} color={theme.base0D} />
+        </g>
         <g animation={enter({ at: T0, over: 0.5 }, { opacity: 0, y: 8 })}>
           <rect x={SPLIT + 36} y={BAR + 30} width={W - SPLIT - 72} height={230} rx={12} fill={theme.base01} />
           <g transform={`translate(${SPLIT + 36 + (W - SPLIT - 72 - 120 * 2.6) / 2} ${BAR + 30 + (230 - 80 * 2.6) / 2}) scale(2.6)`}>

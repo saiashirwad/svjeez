@@ -8,7 +8,17 @@ const here = (path: string) => new URL(path, import.meta.url);
 const ROOT = here("../").pathname;
 const PUBLIC = here("public/").pathname;
 
-const html = readFileSync(here("index.html"), "utf8");
+const highlight = (source: string) => {
+  const keywords = new Set(["import", "from", "export", "default", "const", "return"]);
+  const escape = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const token = /(\/\/.*)|("[^"]*")|(\b\d+(?:\.\d+)?\b)|(<\/?[A-Za-z][\w.]*|<\/?>|\/>)|([A-Za-z_$][\w$]*)(?=\()|([A-Za-z_$][\w$]*)|(.)/gs;
+  return source.replace(token, (m, comment, string, number, tag, fn, word) => {
+    const cls = comment ? "c" : string ? "s" : number ? "n" : tag ? "f" : fn ? "f" : word && keywords.has(word) ? "k" : "";
+    return cls ? `<span class="${cls}">${escape(m)}</span>` : escape(m);
+  });
+};
+const toast = highlight(readFileSync(`${ROOT}examples/site/toast.tsx`, "utf8").trimEnd());
+const html = readFileSync(here("index.html"), "utf8").replace("{{TOAST_CODE}}", toast);
 const names = [...new Set([...html.matchAll(/data-scene="([\w-]+)"/g)].map((m) => m[1]!))];
 const dist = (name: string) => (name === "daynight" ? "daynight" : `site/${name}`);
 

@@ -1,14 +1,14 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { draw, ease, enter, motion, rect, render } from "svjeez";
-import { appWindow, code, terminal, typewriter } from "svjeez/extras";
+import { Marker, appWindow, code, terminal } from "svjeez/extras";
 import hello from "./hello";
 import { CSS, highlight, termTheme, theme } from "./kit";
 
 // The product window: the editor types hello.tsx, the terminal builds it, and the preview plays the file it wrote.
 // The code on screen is the file itself, so it cannot drift from what the build compiles.
 const W = 1032;
-const H = 640;
+const H = 560;
 const BAR = 44;
 const SIDE = 150;
 const SPLIT = 612;
@@ -20,16 +20,19 @@ const keyframes = built.match(/@keyframes /g)?.length ?? 0;
 
 const win = appWindow(rect(0.5, 0.5, W - 1, H - 1), { theme, title: "hello.tsx", dots: "traffic", bar: BAR, radius: 12, class: "sans" });
 const src = code(highlight(source), { theme, fontSize: 12, lineHeight: 1.85, gutter: true, x: SIDE + 48, y: BAR + 22 });
-const typed = typewriter(src, { at: 0.6, cps: 80, cursor: theme.base0D, blink: false });
 
-const TERM_AT = typed.end + 0.8;
+const TERM_AT = 0.7;
 const term = terminal(
   [{ cmd: "npx svjeez svg hello.tsx --out hello.svg" }, { cmd: "wc -c hello.svg", output: [[["number", String(bytes)], " hello.svg"]] }, { cmd: "open hello.svg" }],
-  { theme: termTheme, at: TERM_AT, x: SPLIT + 40, y: BAR + 42 + CARD * 0.625 + 36, fontSize: 12.5, lineHeight: 1.75, cps: 30, gap: 0.45 },
+  { theme: termTheme, at: TERM_AT, x: SPLIT + 40, y: BAR + 42 + CARD * 0.625 + 36, fontSize: 12.5, lineHeight: 1.75, cps: 90, gap: 0.3 },
 );
-const PLAY = term.end + 0.5;
+const PLAY = term.end + 0.4;
 const D = Math.ceil(PLAY + 4 + 2.5);
-const BUILT = TERM_AT + 2.4;
+const BUILT = TERM_AT + 1.2;
+const editing = [
+  { during: { at: PLAY + 0.2, over: 1.9 }, target: src.lines(8, 10).pad(3) },
+  { during: { at: PLAY + 1.5, over: 1.3 }, target: src.lines(11, 13).pad(3) },
+];
 
 const stats = [
   ["File size", String(bytes), "B"],
@@ -77,7 +80,8 @@ export default function build(): string {
       </g>
       <g class="mono">
         <g animation={motion({ opacity: 1 }).at(D - 0.5).to({ opacity: 0 }, 0.5)}>
-          {typed.node}
+          <g animation={enter({ at: 0.15, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
+          <Marker theme={theme} stops={editing} color={theme.base0D} />
         </g>
       </g>
       <g class="sans">

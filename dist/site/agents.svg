@@ -22,65 +22,65 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}
 @media (prefers-color-scheme:light){svg{--wall-a:#D9E7FB;--wall-b:#DDF3E6;--bar:#FFFFFF}}
 
-.a{animation-duration:18s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
 .fb{transform-box:fill-box;transform-origin:center}
-@keyframes k1{0%,3.333%{width:0px}8.889%,100%{width:210px}}
+@keyframes k1{0%,5%{width:0px}7.593%,100%{width:210px}}
 .m1{animation-name:k1;animation-timing-function:steps(28)}
 @keyframes k2{0%{opacity:1}50%,100%{opacity:0}}
 .m2{animation-name:k2;animation-duration:1s;animation-timing-function:steps(1)}
-@keyframes k3{0%,8.889%,100%{opacity:0}3.333%{opacity:1}}
+@keyframes k3{0%,7.593%,100%{opacity:0}5%{opacity:1}}
 .m3{animation-name:k3;animation-timing-function:steps(1)}
-@keyframes k4{0%,3.333%{translate:0px 0px}8.889%,100%{translate:210px 0px}}
+@keyframes k4{0%,5%{translate:0px 0px}7.593%,100%{translate:210px 0px}}
 .m4{animation-name:k3,k4;animation-timing-function:steps(1),steps(28)}
-@keyframes k5{0%{opacity:0}10.833%,100%{opacity:1}}
+@keyframes k5{0%{opacity:0}10.509%,100%{opacity:1}}
 .m5{animation-name:k5;animation-timing-function:steps(1)}
-@keyframes k6{0%{opacity:0}11.167%,100%{opacity:1}}
+@keyframes k6{0%{opacity:0}11.009%,100%{opacity:1}}
 .m6{animation-name:k6;animation-timing-function:steps(1)}
-@keyframes k7{0%{visibility:hidden}3.333%,100%{visibility:visible}}
+@keyframes k7{0%{visibility:hidden}5%,100%{visibility:visible}}
 .m7{animation-name:k7;animation-timing-function:steps(1)}
-@keyframes k8{0%,14.833%{width:0px}19.992%,100%{width:195px}}
+@keyframes k8{0%,14.009%{width:0px}16.417%,100%{width:195px}}
 .m8{animation-name:k8;animation-timing-function:steps(26)}
-@keyframes k9{0%,19.992%,100%{opacity:0}14.833%{opacity:1}}
+@keyframes k9{0%,16.417%,100%{opacity:0}14.009%{opacity:1}}
 .m9{animation-name:k9;animation-timing-function:steps(1)}
-@keyframes k10{0%{opacity:0}14.833%,100%{opacity:1}}
-@keyframes k11{0%,14.833%{translate:0px 0px}19.992%,100%{translate:195px 0px}}
+@keyframes k10{0%{opacity:0}14.009%,100%{opacity:1}}
+@keyframes k11{0%,14.009%{translate:0px 0px}16.417%,100%{translate:195px 0px}}
 .m10{animation-name:k10,k11;animation-timing-function:steps(1),steps(26)}
-@keyframes k12{0%{opacity:0}21.937%,100%{opacity:1}}
+@keyframes k12{0%{opacity:0}19.333%,100%{opacity:1}}
 .m11{animation-name:k12;animation-timing-function:steps(1)}
-@keyframes k13{0%{visibility:hidden}14.833%,100%{visibility:visible}}
+@keyframes k13{0%{visibility:hidden}14.009%,100%{visibility:visible}}
 .m12{animation-name:k13;animation-timing-function:steps(1)}
-@keyframes k14{0%,27.825%{opacity:0}29.77%,100%{opacity:1}}
-@keyframes k15{0%,27.825%{translate:0px 6px}29.77%,100%{translate:0px 0px}}
+@keyframes k14{0%,24.833%{opacity:0}27.333%,100%{opacity:1}}
+@keyframes k15{0%,24.833%{translate:0px 6px}27.333%,100%{translate:0px 0px}}
 .m13{animation-name:k14,k15}
-@keyframes k16{0%,33.103%{opacity:0}35.048%,100%{opacity:1}}
-@keyframes k17{0%,33.103%{translate:0px 6px}35.048%,100%{translate:0px 0px}}
+@keyframes k16{0%,29.833%{opacity:0}32.333%,100%{opacity:1}}
+@keyframes k17{0%,29.833%{translate:0px 6px}32.333%,100%{translate:0px 0px}}
 .m14{animation-name:k16,k17}
-@keyframes k18{0%,38.381%{opacity:0}40.325%,100%{opacity:1}}
-@keyframes k19{0%,38.381%{translate:0px 6px}40.325%,100%{translate:0px 0px}}
+@keyframes k18{0%,34.833%{opacity:0}37.333%,100%{opacity:1}}
+@keyframes k19{0%,34.833%{translate:0px 6px}37.333%,100%{translate:0px 0px}}
 .m15{animation-name:k18,k19}
-@keyframes k20{0%,43.659%{opacity:0}45.603%,100%{opacity:1}}
-@keyframes k21{0%,43.659%{translate:0px 6px}45.603%,100%{translate:0px 0px}}
+@keyframes k20{0%,39.833%{opacity:0}42.333%,100%{opacity:1}}
+@keyframes k21{0%,39.833%{translate:0px 6px}42.333%,100%{translate:0px 0px}}
 .m16{animation-name:k20,k21}
-@keyframes k22{0%,48.937%{opacity:0}50.881%,100%{opacity:1}}
-@keyframes k23{0%,48.937%{translate:0px 6px}50.881%,100%{translate:0px 0px}}
+@keyframes k22{0%,44.833%{opacity:0}47.333%,100%{opacity:1}}
+@keyframes k23{0%,44.833%{translate:0px 6px}47.333%,100%{translate:0px 0px}}
 .m17{animation-name:k22,k23}
-@keyframes k24{0%,54.214%{opacity:0}56.159%,100%{opacity:1}}
-@keyframes k25{0%,54.214%{translate:0px 6px}56.159%,100%{translate:0px 0px}}
+@keyframes k24{0%,49.833%{opacity:0}52.333%,100%{opacity:1}}
+@keyframes k25{0%,49.833%{translate:0px 6px}52.333%,100%{translate:0px 0px}}
 .m18{animation-name:k24,k25}
-@keyframes k26{0%,59.492%{opacity:0}61.437%,100%{opacity:1}}
-@keyframes k27{0%,59.492%{translate:0px 6px}61.437%,100%{translate:0px 0px}}
+@keyframes k26{0%,54.833%{opacity:0}57.333%,100%{opacity:1}}
+@keyframes k27{0%,54.833%{translate:0px 6px}57.333%,100%{translate:0px 0px}}
 .m19{animation-name:k26,k27}
-@keyframes k28{0%,64.77%{opacity:0}66.714%,100%{opacity:1}}
-@keyframes k29{0%,64.77%{translate:0px 6px}66.714%,100%{translate:0px 0px}}
+@keyframes k28{0%,59.833%{opacity:0}62.333%,100%{opacity:1}}
+@keyframes k29{0%,59.833%{translate:0px 6px}62.333%,100%{translate:0px 0px}}
 .m20{animation-name:k28,k29}
 @keyframes k30{0%{rotate:0deg}100%{rotate:360deg}}
 .m21{animation-name:k30;animation-duration:1s;animation-timing-function:linear}
-@keyframes k31{0%,50.603%{opacity:0}53.381%,100%{opacity:1}}
-@keyframes k32{0%,50.603%{scale:0.9}53.381%,100%{scale:1}}
+@keyframes k31{0%,47.333%{opacity:0}51.5%,100%{opacity:1}}
+@keyframes k32{0%,47.333%{scale:0.9}51.5%,100%{scale:1}}
 .m22{animation-name:k31,k32}
-@keyframes k33{0%,97.222%{opacity:1}100%{opacity:0}}
+@keyframes k33{0%,95.833%{opacity:1}100%{opacity:0}}
 .m23{animation-name:k33}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-17s!important;animation-play-state:paused!important}}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-11s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="1032" height="560" rx="12" fill="url(#g1)"/>
   <path d="M0 30H1032V12a12 12 0 0 0 -12 -12H12A12 12 0 0 0 0 12Z" fill="var(--bar)" opacity="0.72"/>

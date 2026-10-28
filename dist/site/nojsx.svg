@@ -1,47 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 392" width="1032" height="392" role="img" aria-labelledby="t d">
   <title id="t">Without JSX</title>
   <desc id="d">A scene written with el() calls instead of JSX types out. Its prefix option namespaces ids and classes, so the result can be inlined in a page next to other scenes. The preview below plays it.</desc>
-  <defs>
-    <clipPath id="c1">
-      <rect x="28" y="62" width="0" height="21" class="a m1"/>
-    </clipPath>
-    <clipPath id="c2">
-      <rect x="28" y="104" width="0" height="21" class="a m2"/>
-    </clipPath>
-    <clipPath id="c3">
-      <rect x="28" y="146" width="0" height="21" class="a m3"/>
-    </clipPath>
-    <clipPath id="c4">
-      <rect x="42.4" y="167" width="0" height="21" class="a m4"/>
-    </clipPath>
-    <clipPath id="c5">
-      <rect x="56.8" y="188" width="0" height="21" class="a m5"/>
-    </clipPath>
-    <clipPath id="c6">
-      <rect x="56.8" y="209" width="0" height="21" class="a m6"/>
-    </clipPath>
-    <clipPath id="c7">
-      <rect x="71.2" y="230" width="0" height="21" class="a m7"/>
-    </clipPath>
-    <clipPath id="c8">
-      <rect x="85.6" y="251" width="0" height="21" class="a m8"/>
-    </clipPath>
-    <clipPath id="c9">
-      <rect x="85.6" y="272" width="0" height="21" class="a m9"/>
-    </clipPath>
-    <clipPath id="c10">
-      <rect x="71.2" y="293" width="0" height="21" class="a m10"/>
-    </clipPath>
-    <clipPath id="c11">
-      <rect x="85.6" y="314" width="0" height="21" class="a m11"/>
-    </clipPath>
-    <clipPath id="c12">
-      <rect x="56.8" y="335" width="0" height="21" class="a m12"/>
-    </clipPath>
-    <clipPath id="c13">
-      <rect x="42.4" y="356" width="0" height="21" class="a m13"/>
-    </clipPath>
-  </defs>
   <style><![CDATA[
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
@@ -51,51 +10,26 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 
 .a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
 .fb{transform-box:fill-box;transform-origin:center}
-@keyframes k1{0%,4.545%{width:0px}11.212%,100%{width:396px}}
-.m1{animation-name:k1;animation-timing-function:steps(55)}
-@keyframes k2{0%,11.455%{width:0px}15.212%,100%{width:223.2px}}
-.m2{animation-name:k2;animation-timing-function:steps(31)}
-@keyframes k3{0%,15.455%{width:0px}17.879%,100%{width:144px}}
-.m3{animation-name:k3;animation-timing-function:steps(20)}
-@keyframes k4{0%,18%{width:0px}18.848%,100%{width:50.4px}}
-.m4{animation-name:k4;animation-timing-function:steps(7)}
-@keyframes k5{0%,18.97%{width:0px}27.333%,100%{width:496.8px}}
-.m5{animation-name:k5;animation-timing-function:steps(69)}
-@keyframes k6{0%,27.455%{width:0px}28.303%,100%{width:50.4px}}
-.m6{animation-name:k6;animation-timing-function:steps(7)}
-@keyframes k7{0%,28.424%{width:0px}34%,100%{width:331.2px}}
-.m7{animation-name:k7;animation-timing-function:steps(46)}
-@keyframes k8{0%,34.121%{width:0px}38.242%,100%{width:244.8px}}
-.m8{animation-name:k8;animation-timing-function:steps(34)}
-@keyframes k9{0%,38.364%{width:0px}43.333%,100%{width:295.2px}}
-.m9{animation-name:k9;animation-timing-function:steps(41)}
-@keyframes k10{0%,43.455%{width:0px}49.152%,100%{width:338.4px}}
-.m10{animation-name:k10;animation-timing-function:steps(47)}
-@keyframes k11{0%,49.273%{width:0px}57.273%,100%{width:475.2px}}
-.m11{animation-name:k11;animation-timing-function:steps(66)}
-@keyframes k12{0%,57.394%{width:0px}57.758%,100%{width:21.6px}}
-.m12{animation-name:k12;animation-timing-function:steps(3)}
-@keyframes k13{0%,57.879%{width:0px}58.121%,100%{width:14.4px}}
-.m13{animation-name:k13;animation-timing-function:steps(2)}
-@keyframes k14{0%{opacity:1}50%,100%{opacity:0}}
-.m14{animation-name:k14;animation-duration:1s;animation-timing-function:steps(1)}
-@keyframes k15{0%,58.121%,100%{opacity:0}4.545%{opacity:1}}
-.m15{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%,58.121%,100%{visibility:hidden}4.545%{visibility:visible}}
-@keyframes k17{0%{translate:0px 0px}4.545%{translate:0px 0px;animation-timing-function:steps(55)}11.212%{translate:396px 0px}11.333%{translate:0px 21px}11.455%{translate:0px 42px;animation-timing-function:steps(31)}15.212%{translate:223.2px 42px}15.333%{translate:0px 63px}15.455%{translate:0px 84px;animation-timing-function:steps(20)}17.879%{translate:144px 84px}18%{translate:14.4px 105px;animation-timing-function:steps(7)}18.848%{translate:64.8px 105px}18.97%{translate:28.8px 126px;animation-timing-function:steps(69)}27.333%{translate:525.6px 126px}27.455%{translate:28.8px 147px;animation-timing-function:steps(7)}28.303%{translate:79.2px 147px}28.424%{translate:43.2px 168px;animation-timing-function:steps(46)}34%{translate:374.4px 168px}34.121%{translate:57.6px 189px;animation-timing-function:steps(34)}38.242%{translate:302.4px 189px}38.364%{translate:57.6px 210px;animation-timing-function:steps(41)}43.333%{translate:352.8px 210px}43.455%{translate:43.2px 231px;animation-timing-function:steps(47)}49.152%{translate:381.6px 231px}49.273%{translate:57.6px 252px;animation-timing-function:steps(66)}57.273%{translate:532.8px 252px}57.394%{translate:28.8px 273px;animation-timing-function:steps(3)}57.758%{translate:50.4px 273px}57.879%{translate:14.4px 294px;animation-timing-function:steps(2)}58.121%,100%{translate:28.8px 294px}}
-.m16{animation-name:k16,k17;animation-timing-function:steps(1),steps(1)}
-@keyframes k18{0%,65.394%{stroke-dashoffset:1;visibility:hidden}74.485%,100%{stroke-dashoffset:0;visibility:visible}}
-.m17{animation-name:k18}
-@keyframes k19{0%,72.667%{scale:0}76.303%,100%{scale:1}}
-.m18{animation-name:k19;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k20{0%,63.576%{opacity:0}68.121%,100%{opacity:1}}
-@keyframes k21{0%,63.576%{translate:0px 8px}68.121%,100%{translate:0px 0px}}
-.m19{animation-name:k20,k21}
-@keyframes k22{0%,70.848%{opacity:0}75.394%,100%{opacity:1}}
-@keyframes k23{0%,70.848%{translate:0px 6px}75.394%,100%{translate:0px 0px}}
-.m20{animation-name:k22,k23}
-@keyframes k24{0%,95.455%{opacity:1}100%{opacity:0}}
-.m21{animation-name:k24}
+@keyframes k1{0%,0.909%{opacity:0}5.455%,100%{opacity:1}}
+@keyframes k2{0%,0.909%{translate:0px 6px}5.455%,100%{translate:0px 0px}}
+.m1{animation-name:k1,k2}
+@keyframes k3{0%,19.091%{width:380.4px}22.727%,100%{width:538.8px}}
+@keyframes k4{0%,19.091%{height:69px}22.727%,100%{height:48px}}
+.m2{animation-name:k3,k4}
+@keyframes k5{0%,19.091%{translate:0px 0px}22.727%,100%{translate:0px 63px}}
+.m3{animation-name:k5}
+@keyframes k6{0%,10%{stroke-dashoffset:1;visibility:hidden}19.091%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k6}
+@keyframes k7{0%,17.273%{scale:0}20.909%,100%{scale:1}}
+.m5{animation-name:k7;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k8{0%,8.182%{opacity:0}12.727%,100%{opacity:1}}
+@keyframes k9{0%,8.182%{translate:0px 8px}12.727%,100%{translate:0px 0px}}
+.m6{animation-name:k8,k9}
+@keyframes k10{0%,15.455%{opacity:0}20%,100%{opacity:1}}
+@keyframes k11{0%,15.455%{translate:0px 6px}20%,100%{translate:0px 0px}}
+.m7{animation-name:k10,k11}
+@keyframes k12{0%,95.455%{opacity:1}100%{opacity:0}}
+.m8{animation-name:k12}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">
@@ -107,10 +41,10 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="516" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">plain.ts</text>
   </g>
   <path d="M604 40V392" stroke="var(--base02)"/>
-  <g class="a m21">
+  <g class="a m8">
     <g class="mono">
-      <g>
-        <g clip-path="url(#c1)">
+      <g class="a m1">
+        <g>
           <text x="28" y="76.7" font-family="monospace" font-size="12" fill="var(--base0E)">import</text>
           <text x="78.4" y="76.7" font-family="monospace" font-size="12" fill="var(--base04)">{</text>
           <text x="92.8" y="76.7" font-family="monospace" font-size="12" fill="var(--base05)">draw</text>
@@ -126,8 +60,6 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="323.2" y="76.7" font-family="monospace" font-size="12" fill="var(--base0E)">from</text>
           <text x="359.2" y="76.7" font-family="monospace" font-size="12" fill="var(--base0B)">"svjeez"</text>
           <text x="416.8" y="76.7" font-family="monospace" font-size="12" fill="var(--base04)">;</text>
-        </g>
-        <g clip-path="url(#c2)">
           <text x="28" y="118.7" font-family="monospace" font-size="12" fill="var(--base0E)">const</text>
           <text x="71.2" y="118.7" font-family="monospace" font-size="12" fill="var(--base04)">{</text>
           <text x="85.6" y="118.7" font-family="monospace" font-size="12" fill="var(--base05)">circle</text>
@@ -139,18 +71,12 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="215.2" y="118.7" font-family="monospace" font-size="12" fill="var(--base04)">=</text>
           <text x="229.6" y="118.7" font-family="monospace" font-size="12" fill="var(--base05)">el</text>
           <text x="244" y="118.7" font-family="monospace" font-size="12" fill="var(--base04)">;</text>
-        </g>
-        <g clip-path="url(#c3)">
           <text x="28" y="160.7" font-family="monospace" font-size="12" fill="var(--base0E)">export</text>
           <text x="78.4" y="160.7" font-family="monospace" font-size="12" fill="var(--base0E)">default</text>
           <text x="136" y="160.7" font-family="monospace" font-size="12" fill="var(--base04)">()</text>
           <text x="157.6" y="160.7" font-family="monospace" font-size="12" fill="var(--base04)">=&gt;</text>
-        </g>
-        <g clip-path="url(#c4)">
           <text x="42.4" y="181.7" font-family="monospace" font-size="12" fill="var(--base0D)">render</text>
           <text x="85.6" y="181.7" font-family="monospace" font-size="12" fill="var(--base04)">(</text>
-        </g>
-        <g clip-path="url(#c5)">
           <text x="56.8" y="202.7" font-family="monospace" font-size="12" fill="var(--base04)">{</text>
           <text x="71.2" y="202.7" font-family="monospace" font-size="12" fill="var(--base05)">width</text>
           <text x="107.2" y="202.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
@@ -172,13 +98,9 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="481.6" y="202.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
           <text x="496" y="202.7" font-family="monospace" font-size="12" fill="var(--base0B)">"kit"</text>
           <text x="539.2" y="202.7" font-family="monospace" font-size="12" fill="var(--base04)">},</text>
-        </g>
-        <g clip-path="url(#c6)">
           <text x="56.8" y="223.7" font-family="monospace" font-size="12" fill="var(--base0D)">g</text>
           <text x="64" y="223.7" font-family="monospace" font-size="12" fill="var(--base04)">({},</text>
           <text x="100" y="223.7" font-family="monospace" font-size="12" fill="var(--base04)">[</text>
-        </g>
-        <g clip-path="url(#c7)">
           <text x="71.2" y="244.7" font-family="monospace" font-size="12" fill="var(--base0D)">path</text>
           <text x="100" y="244.7" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
           <text x="121.6" y="244.7" font-family="monospace" font-size="12" fill="var(--base05)">d</text>
@@ -193,8 +115,6 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="337.6" y="244.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
           <text x="352" y="244.7" font-family="monospace" font-size="12" fill="var(--base0B)">"none"</text>
           <text x="395.2" y="244.7" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
-        </g>
-        <g clip-path="url(#c8)">
           <text x="85.6" y="265.7" font-family="monospace" font-size="12" fill="var(--base05)">stroke</text>
           <text x="128.8" y="265.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
           <text x="143.2" y="265.7" font-family="monospace" font-size="12" fill="var(--base0B)">"#34C759"</text>
@@ -203,8 +123,6 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="301.6" y="265.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
           <text x="316" y="265.7" font-family="monospace" font-size="12" fill="var(--base09)">4</text>
           <text x="323.2" y="265.7" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
-        </g>
-        <g clip-path="url(#c9)">
           <text x="85.6" y="286.7" font-family="monospace" font-size="12" fill="var(--base05)">animation</text>
           <text x="150.4" y="286.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
           <text x="164.8" y="286.7" font-family="monospace" font-size="12" fill="var(--base0D)">draw</text>
@@ -218,8 +136,6 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="323.2" y="286.7" font-family="monospace" font-size="12" fill="var(--base09)">1</text>
           <text x="337.6" y="286.7" font-family="monospace" font-size="12" fill="var(--base04)">})</text>
           <text x="359.2" y="286.7" font-family="monospace" font-size="12" fill="var(--base04)">}),</text>
-        </g>
-        <g clip-path="url(#c10)">
           <text x="71.2" y="307.7" font-family="monospace" font-size="12" fill="var(--base0D)">circle</text>
           <text x="114.4" y="307.7" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
           <text x="136" y="307.7" font-family="monospace" font-size="12" fill="var(--base05)">cx</text>
@@ -238,8 +154,6 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="323.2" y="307.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
           <text x="337.6" y="307.7" font-family="monospace" font-size="12" fill="var(--base0B)">"#0A6CFF"</text>
           <text x="402.4" y="307.7" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
-        </g>
-        <g clip-path="url(#c11)">
           <text x="85.6" y="328.7" font-family="monospace" font-size="12" fill="var(--base05)">animation</text>
           <text x="150.4" y="328.7" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
           <text x="164.8" y="328.7" font-family="monospace" font-size="12" fill="var(--base0D)">enter</text>
@@ -262,27 +176,22 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           <text x="503.2" y="328.7" font-family="monospace" font-size="12" fill="var(--base05)">pop</text>
           <text x="524.8" y="328.7" font-family="monospace" font-size="12" fill="var(--base04)">)</text>
           <text x="539.2" y="328.7" font-family="monospace" font-size="12" fill="var(--base04)">}),</text>
-        </g>
-        <g clip-path="url(#c12)">
           <text x="56.8" y="349.7" font-family="monospace" font-size="12" fill="var(--base04)">]),</text>
-        </g>
-        <g clip-path="url(#c13)">
           <text x="42.4" y="370.7" font-family="monospace" font-size="12" fill="var(--base04)">);</text>
         </g>
-        <g class="a m16">
-          <rect x="28" y="65" width="7.2" height="15" fill="var(--base0D)" fill-opacity="0.8" class="a m14"/>
-          <rect x="28" y="65" width="7.2" height="15" fill="var(--base0D)" fill-opacity="0.8" class="a m15"/>
-        </g>
+      </g>
+      <g class="a m3">
+        <rect x="25" y="227" width="380.4" height="69" rx="6" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4" stroke-width="1" class="a m2"/>
       </g>
     </g>
-    <g class="a m19">
+    <g class="a m6">
       <rect x="640" y="70" width="356" height="230" rx="12" fill="var(--base01)"/>
       <g transform="translate(662 81) scale(2.6)">
-        <path d="M20 66Q60 -6 100 66" fill="none" stroke="#34C759" stroke-width="4" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m17"/>
-        <circle cx="60" cy="30" r="6" fill="#0A6CFF" class="a m18 fb"/>
+        <path d="M20 66Q60 -6 100 66" fill="none" stroke="#34C759" stroke-width="4" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+        <circle cx="60" cy="30" r="6" fill="#0A6CFF" class="a m5 fb"/>
       </g>
     </g>
-    <g class="sans a m20">
+    <g class="sans a m7">
       <text x="818" y="332" font-size="13" text-anchor="middle" fill="var(--base04)"><tspan fill="var(--base0D)" font-weight="600">prefix</tspan> namespaces every id and class,</text>
       <text x="818" y="352" font-size="13" text-anchor="middle" fill="var(--base04)">so scenes inlined in one page never collide.</text>
     </g>

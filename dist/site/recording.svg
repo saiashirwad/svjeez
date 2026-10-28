@@ -19,47 +19,47 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
 .round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
 
-.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
-@keyframes k1{0%,5%{width:0px}20%,100%{width:337.5px}}
+.a{animation-duration:7s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,7.143%{width:0px}14.286%,100%{width:337.5px}}
 .m1{animation-name:k1;animation-timing-function:steps(45)}
 @keyframes k2{0%{opacity:1}50%,100%{opacity:0}}
 .m2{animation-name:k2;animation-duration:1s;animation-timing-function:steps(1)}
-@keyframes k3{0%,20%,100%{opacity:0}5%{opacity:1}}
+@keyframes k3{0%,14.286%,100%{opacity:0}7.143%{opacity:1}}
 .m3{animation-name:k3;animation-timing-function:steps(1)}
-@keyframes k4{0%,5%{translate:0px 0px}20%,100%{translate:337.5px 0px}}
+@keyframes k4{0%,7.143%{translate:0px 0px}14.286%,100%{translate:337.5px 0px}}
 .m4{animation-name:k3,k4;animation-timing-function:steps(1),steps(45)}
-@keyframes k5{0%{opacity:0}23.5%,100%{opacity:1}}
+@keyframes k5{0%{opacity:0}19.286%,100%{opacity:1}}
 .m5{animation-name:k5;animation-timing-function:steps(1)}
-@keyframes k6{0%{opacity:0}24.1%,100%{opacity:1}}
+@keyframes k6{0%{opacity:0}20.143%,100%{opacity:1}}
 .m6{animation-name:k6;animation-timing-function:steps(1)}
-@keyframes k7{0%{opacity:0}24.7%,100%{opacity:1}}
+@keyframes k7{0%{opacity:0}21%,100%{opacity:1}}
 .m7{animation-name:k7;animation-timing-function:steps(1)}
-@keyframes k8{0%{opacity:0}25.3%,100%{opacity:1}}
+@keyframes k8{0%{opacity:0}21.857%,100%{opacity:1}}
 .m8{animation-name:k8;animation-timing-function:steps(1)}
-@keyframes k9{0%{visibility:hidden}5%,100%{visibility:visible}}
+@keyframes k9{0%{visibility:hidden}7.143%,100%{visibility:visible}}
 .m9{animation-name:k9;animation-timing-function:steps(1)}
-@keyframes k10{0%,30.9%{width:0px}44.9%,100%{width:315px}}
+@keyframes k10{0%,27.714%{width:0px}34.381%,100%{width:315px}}
 .m10{animation-name:k10;animation-timing-function:steps(42)}
-@keyframes k11{0%,44.9%,100%{opacity:0}30.9%{opacity:1}}
+@keyframes k11{0%,34.381%,100%{opacity:0}27.714%{opacity:1}}
 .m11{animation-name:k11;animation-timing-function:steps(1)}
-@keyframes k12{0%,30.9%{translate:0px 0px}44.9%,100%{translate:315px 0px}}
+@keyframes k12{0%,27.714%{translate:0px 0px}34.381%,100%{translate:315px 0px}}
 .m12{animation-name:k11,k12;animation-timing-function:steps(1),steps(42)}
-@keyframes k13{0%{visibility:hidden}30.9%,100%{visibility:visible}}
+@keyframes k13{0%{visibility:hidden}27.714%,100%{visibility:visible}}
 .m13{animation-name:k13;animation-timing-function:steps(1)}
-@keyframes k14{0%,53.4%{width:0px}62.733%,100%{width:210px}}
+@keyframes k14{0%,44.381%{width:0px}48.825%,100%{width:210px}}
 .m14{animation-name:k14;animation-timing-function:steps(28)}
-@keyframes k15{0%,62.733%,100%{opacity:0}53.4%{opacity:1}}
+@keyframes k15{0%,48.825%,100%{opacity:0}44.381%{opacity:1}}
 .m15{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%{opacity:0}53.4%,100%{opacity:1}}
-@keyframes k17{0%,53.4%{translate:0px 0px}62.733%,100%{translate:210px 0px}}
+@keyframes k16{0%{opacity:0}44.381%,100%{opacity:1}}
+@keyframes k17{0%,44.381%{translate:0px 0px}48.825%,100%{translate:210px 0px}}
 .m16{animation-name:k16,k17;animation-timing-function:steps(1),steps(28)}
-@keyframes k18{0%{opacity:0}66.233%,100%{opacity:1}}
+@keyframes k18{0%{opacity:0}53.825%,100%{opacity:1}}
 .m17{animation-name:k18;animation-timing-function:steps(1)}
-@keyframes k19{0%{visibility:hidden}53.4%,100%{visibility:visible}}
+@keyframes k19{0%{visibility:hidden}44.381%,100%{visibility:visible}}
 .m18{animation-name:k19;animation-timing-function:steps(1)}
-@keyframes k20{0%,95%{opacity:1}100%{opacity:0}}
+@keyframes k20{0%,92.857%{opacity:1}100%{opacity:0}}
 .m19{animation-name:k20}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">
     <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="#1C1C1E" stroke="#3A3A3C"/>

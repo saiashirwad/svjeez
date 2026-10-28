@@ -15,8 +15,8 @@ const scheme = () => root.dataset.theme || (dark.matches ? "dark" : "light");
 const SHOWN = 0.3;
 // Main-thread milliseconds per second each scene costs while it plays, measured in headless Chromium at 1440 wide.
 // Scenes play while their total stays inside BUDGET, so a screen of busy windows never costs more than that.
-const BUDGET = 90;
-const COST = { mark: 3, matrix: 24, hero: 70, timeline: 41, pipeline: 44, agents: 52, nojsx: 45, explainer: 23, recording: 28, ink: 17, fonts: 20, handshake: 11, team: 32, daynight: 30, "where-readme": 8, "where-docs": 4, "where-mail": 4 };
+const BUDGET = 80;
+const COST = { mark: 3, matrix: 24, hero: 55, timeline: 41, pipeline: 44, agents: 52, nojsx: 45, explainer: 23, recording: 28, ink: 17, fonts: 20, handshake: 11, team: 32, daynight: 30, "where-readme": 8, "where-docs": 4, "where-mail": 4, toast: 6 };
 const scenes = document.querySelectorAll(".scene[data-scene]");
 const posterOf = (img) => `/s/poster/${img.dataset.scene}-${img.dataset.scheme || scheme()}.webp`;
 const liveOf = (img) => `/s/${img.dataset.scene}.svg`;
@@ -42,7 +42,7 @@ if (scenes.length) {
     (entries) =>
       entries.forEach((entry) => {
         const img = entry.target;
-        if (entry.isIntersecting && !img.dataset.state) still(img);
+        if (entry.isIntersecting && !img.dataset.want) still(img);
       }),
     { rootMargin: "500px 0px" },
   );
@@ -63,6 +63,7 @@ if (scenes.length) {
         .filter((img) => (spent + (COST[img.dataset.scene] ?? 30) <= BUDGET ? ((spent += COST[img.dataset.scene] ?? 30), true) : false)),
     );
     scenes.forEach((img) => {
+      if ("manual" in img.dataset) return;
       if (wanted.has(img)) play(img);
       else if (img.dataset.state === "live") still(img);
     });
@@ -76,7 +77,7 @@ if (scenes.length) {
   );
   scenes.forEach((img) => {
     near.observe(img);
-    view.observe(img);
+    if (!("manual" in img.dataset)) view.observe(img);
   });
   const refresh = () => scenes.forEach((img) => img.dataset.state === "still" && still(img));
   calm.addEventListener("change", () => scenes.forEach((img) => (img.dataset.state === "live" && calm.matches ? still(img) : undefined)));
@@ -94,7 +95,7 @@ document.querySelector(".theme")?.addEventListener("click", () => {
 // Install command.
 document.querySelector("[data-copy]")?.addEventListener("click", async (event) => {
   const button = event.currentTarget;
-  const label = button.querySelector("span");
+  const label = button.parentElement.querySelector("code");
   const before = label.innerHTML;
   try {
     await navigator.clipboard.writeText(button.dataset.copy);
@@ -121,6 +122,19 @@ if (stage) {
     stage.onpointermove = at;
   });
   stage.addEventListener("pointerup", () => (stage.onpointermove = null));
+  // This one scene costs two images' worth, so it plays only while you point at it (or touch it), and rests as a still otherwise.
+  const pair = [...stage.querySelectorAll(".scene")];
+  const start = () => {
+    pair.forEach(play);
+    stage.classList.add("playing");
+  };
+  const rest = () => {
+    pair.forEach(still);
+    stage.classList.remove("playing");
+  };
+  stage.addEventListener("pointerenter", start);
+  stage.addEventListener("pointerleave", (event) => event.pointerType === "mouse" && rest());
+  new IntersectionObserver((entries) => entries.forEach((entry) => !entry.isIntersecting && rest())).observe(stage);
   range.addEventListener("input", () => {
     stop();
     stage.style.setProperty("--split", `${range.value}%`);

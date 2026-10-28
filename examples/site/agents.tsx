@@ -23,7 +23,7 @@ const session = terminal(
     { cmd: "npx svjeez skill --install", output: [[["muted", "installed the svjeez skill in"]], [["muted", ".claude/skills/svjeez"]]] },
     { cmd: "ls .claude/skills/svjeez", output: [["SKILL.md  examples"]] },
   ],
-  { theme: termTheme, at: 0.6, x: shell.body.x + 22, y: shell.body.y + 18, fontSize: 12.5, lineHeight: 1.75, cps: 28 },
+  { theme: termTheme, at: 0.6, x: shell.body.x + 22, y: shell.body.y + 18, fontSize: 12.5, lineHeight: 1.75, cps: 90, gap: 0.3 },
 );
 
 const agentWin = appWindow(rect(516, 112, 472, 396), { theme, title: "agent", dots: "traffic", class: "sans" });
@@ -42,8 +42,8 @@ const transcript = code(
   ],
   { theme, x: agentWin.body.x + 24, y: agentWin.body.y + 22, fontSize: 12.5, lineHeight: 1.85 },
 );
-const SHOW = session.end + 1;
-const shown = reveal(transcript, { at: SHOW, blocks: "line", step: 0.95, over: 0.35 });
+const SHOW = session.end + 0.6;
+const shown = reveal(transcript, { at: SHOW, blocks: "line", step: 0.6, over: 0.3 });
 const D = Math.ceil((shown.end + 4) / 2) * 2;
 const spin = { x: agentWin.body.x + 24, y: agentWin.body.y + 250 };
 

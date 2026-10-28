@@ -1,5 +1,5 @@
-import { render } from "svjeez";
-import { Callout, Focus, code, typewriter } from "svjeez/extras";
+import { enter, render } from "svjeez";
+import { Callout, Focus, code } from "svjeez/extras";
 import { CSS, chrome, highlight, outro, theme } from "./kit";
 
 const W = 504;
@@ -17,8 +17,7 @@ const shown = `<path d={wave}
   animation={enter({ at: 3 })} />`;
 
 const src = code(highlight(shown), { theme, fontSize: 13.5, lineHeight: 1.75, x: 32, y: BAR + 24 });
-const typed = typewriter(src, { at: 0.5, cps: 34, cursor: theme.base0D, blink: false });
-const [drawAt, enterAt] = [typed.end + 0.6, typed.end + 4.2];
+const [drawAt, enterAt] = [0.8, 4.4];
 const one = { at: drawAt, over: 3.2 };
 const two = { at: enterAt, over: 3.2 };
 const D = Math.ceil(enterAt + 5);
@@ -38,7 +37,7 @@ export default function build(): string {
       {win.node}
       <g animation={outro(D)}>
         <Focus stops={[{ during: one, target: src.lines(1, 3).pad(6) }, { during: two, target: src.lines(7, 8).pad(6) }]} dim={0.28}>
-          <g class="mono">{typed.node}</g>
+          <g class="mono" animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
         </Focus>
         <g class="sans">
           <Callout theme={theme} color={theme.base0D} target={src.find("draw")} side="bottom" during={one} fontSize={13} columns={30}>draw() strokes the path on, from 1s to 3s.</Callout>

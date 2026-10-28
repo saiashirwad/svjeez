@@ -1,4 +1,5 @@
-/* svjeez.texoport.in: one stylesheet for the home page, the intro and the examples. System fonts, no framework. */
+/* svjeez.texoport.in: one stylesheet for the home page, the intro and the examples. System fonts, no framework.
+   One grid: a 66rem content box, twelve columns, and every block starts on column 1, 5, 7 or 9. */
 
 @property --split { syntax: "<percentage>"; inherits: true; initial-value: 50% }
 
@@ -6,30 +7,23 @@
   color-scheme: light dark;
   --bg: light-dark(oklch(100% 0 0), oklch(14.5% 0.004 270));
   --surface: light-dark(oklch(98.2% 0.002 270), oklch(20% 0.005 270));
-  --sunken: light-dark(oklch(96.8% 0.003 270), oklch(18% 0.005 270));
-  --ink: light-dark(oklch(23% 0.005 270), oklch(96% 0.002 270));
-  --muted: light-dark(oklch(52% 0.008 270), oklch(72% 0.008 270));
-  --line: light-dark(oklch(92% 0.004 270), oklch(28% 0.006 270));
-  --accent: light-dark(oklch(55% 0.21 258), oklch(70% 0.16 252));
+  --sunken: light-dark(oklch(97.2% 0.003 270), oklch(17.5% 0.005 270));
+  --ink: light-dark(oklch(21% 0.005 270), oklch(96% 0.002 270));
+  --muted: light-dark(oklch(50% 0.008 270), oklch(72% 0.008 270));
+  --line: light-dark(oklch(90% 0.004 270), oklch(29% 0.006 270));
+  --accent: light-dark(oklch(60% 0.19 150), oklch(76% 0.19 150));
   --accent-ink: oklch(100% 0 0);
   --shadow: light-dark(oklch(30% 0.02 270 / 0.16), oklch(0% 0 0 / 0.6));
   --ring: light-dark(oklch(0% 0 0 / 0.07), oklch(100% 0 0 / 0.11));
   --win-bg: light-dark(oklch(100% 0 0), oklch(24% 0.005 270));
 
-  --blue: oklch(58% 0.22 258);
-  --green: oklch(68% 0.19 150);
-  --orange: oklch(72% 0.17 60);
-  --red: oklch(63% 0.22 25);
-  --purple: oklch(60% 0.22 305);
-  --teal: oklch(70% 0.12 195);
-
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
-  --round: ui-rounded, "SF Pro Rounded", var(--sans);
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
   --gutter: clamp(1rem, 4vw, 2rem);
-  --content: 64.5rem;
+  --content: 66rem;
+  --gap: 1.5rem;
   --radius: 0.75rem;
   --out: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -40,13 +34,28 @@
 html { background: var(--bg); -webkit-text-size-adjust: none; text-size-adjust: none }
 body { margin: 0; min-block-size: 100dvh; color: var(--ink); background: var(--bg); font: 400 1rem / 1.6 var(--sans); text-wrap: pretty; overflow-wrap: break-word; -webkit-font-smoothing: antialiased }
 img, svg { display: block; max-inline-size: 100% }
-h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; text-wrap: balance }
-p { margin: 0 }
+h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; text-wrap: balance }
+p, dl, dd, figure { margin: 0 }
 a { color: inherit; text-decoration-color: color-mix(in oklch, currentColor 35%, transparent); text-underline-offset: 0.2em }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px }
 ::selection { background: color-mix(in oklch, var(--accent) 28%, transparent) }
 code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 .wrap { inline-size: min(100% - 2 * var(--gutter), var(--content)); margin-inline: auto }
+
+/* The grid. On a phone everything is one column; from 56rem each block names its columns. */
+.g { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--gap); row-gap: 1.25rem }
+@media (min-width: 56rem) {
+  .g { grid-template-columns: repeat(12, minmax(0, 1fr)) }
+  .c1-12 { grid-column: 1 / -1 }
+  .c1-8 { grid-column: 1 / 9 }
+  .c1-6 { grid-column: 1 / 7 }
+  .c1-5 { grid-column: 1 / 6 }
+  .c1-4 { grid-column: 1 / 5 }
+  .c5-8 { grid-column: 5 / 9 }
+  .c5-12 { grid-column: 5 / -1 }
+  .c7-12 { grid-column: 7 / -1 }
+  .c9-12 { grid-column: 9 / -1 }
+}
 
 /* Buttons. */
 .btn {
@@ -56,18 +65,17 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 }
 .btn.primary { color: var(--bg); background: var(--ink); border-color: transparent }
 .btn svg { inline-size: 1.1em; block-size: 1.1em; flex: none }
-.btn:active, .pill:active { translate: 0 1px }
+.btn:active, .install button:active { translate: 0 1px }
 @media (hover: hover) and (pointer: fine) {
   .btn:hover { border-color: color-mix(in oklch, var(--ink) 35%, var(--line)) }
   .btn.primary:hover { background: color-mix(in oklch, var(--ink) 82%, var(--bg)) }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .btn, .pill { transition: translate 0.12s var(--out), border-color 0.15s, background-color 0.15s }
-}
+@media (prefers-reduced-motion: no-preference) { .btn { transition: translate 0.12s var(--out), border-color 0.15s, background-color 0.15s } }
 
 /* Header. */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.25rem }
-.brand { font: 700 1.0625rem / 1 var(--display); letter-spacing: -0.02em; text-decoration: none }
+.brand { display: inline-flex; align-items: center; gap: 0.6rem; font: 700 1.0625rem / 1 var(--display); letter-spacing: -0.02em; text-decoration: none }
+.brand img { inline-size: 1.625rem; block-size: 1.625rem; border-radius: 22.5% }
 .top nav { display: flex; align-items: center; gap: clamp(0.75rem, 3vw, 1.5rem); font-size: 0.875rem; color: var(--muted) }
 .top nav a { text-decoration: none; padding-block: 0.5rem }
 @media (hover: hover) and (pointer: fine) { .top nav a:hover { color: var(--ink) } }
@@ -83,54 +91,59 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
   :root:not([data-theme]) .theme .moon { display: block }
 }
 
-/* Windows: every scene on the home page is a window with its own chrome, so the page only adds a shadow. */
+/* Windows: every scene is a window with its own chrome, so the page only adds a shadow. */
 .win { border-radius: var(--radius); background: var(--win-bg); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
 .win img, .win > .stage { border-radius: inherit }
 .scene { inline-size: 100%; block-size: auto }
-.bleed { margin-block: 2.5rem 0 }
-@media (max-width: 44rem) {
-  .bleed { overflow-x: auto; overscroll-behavior-x: contain; margin-inline: calc(var(--gutter) * -1); padding: 1.5rem var(--gutter) 2.5rem; margin-block: 0.5rem -1rem; scrollbar-width: thin }
+@media (max-width: 55.99rem) {
+  .bleed { overflow-x: auto; overscroll-behavior-x: contain; margin-inline: calc(var(--gutter) * -1); padding: 1rem var(--gutter) 2rem; margin-block: -1rem -1rem; scrollbar-width: thin }
   .win.big { inline-size: 40rem }
 }
 
-/* Hero. */
-.hero { display: grid; justify-items: center; gap: 0; padding-block: clamp(1.5rem, 5vw, 3.5rem) 0; text-align: center }
-.mark { inline-size: 6.5rem; block-size: 6.5rem; border-radius: 22.5%; box-shadow: 0 0.75rem 1.75rem -0.75rem oklch(0% 0 0 / 0.45), 0 0 0 1px var(--ring) }
-.hero h1 { margin-block: 1.5rem 0; font-size: clamp(3.25rem, 2.2rem + 5vw, 4.75rem); line-height: 1; letter-spacing: -0.045em }
-.lede { max-inline-size: 30ch; margin-block-start: 1.25rem; font-size: clamp(1.1875rem, 1.05rem + 0.7vw, 1.5rem); line-height: 1.4; color: var(--muted); text-wrap: balance }
-.pill { display: inline-flex; align-items: center; gap: 0.9rem; margin-block-start: 2.25rem; min-block-size: 3.25rem; padding-inline: 1.75rem 1.5rem; color: var(--bg); background: var(--ink); border: 0; border-radius: 999px; font: 600 1rem / 1 var(--mono); cursor: pointer }
-.pill b { opacity: 0.55; font-weight: 600 }
-.pill svg { inline-size: 1.1rem; block-size: 1.1rem; opacity: 0.7 }
-@media (hover: hover) and (pointer: fine) { .pill:hover { background: color-mix(in oklch, var(--ink) 82%, var(--bg)) } }
-.fine { margin-block-start: 1rem; font-size: 0.8125rem; color: var(--muted) }
-.matrix { margin-block: clamp(2.5rem, 6vw, 4rem) clamp(2.5rem, 6vw, 4rem) }
-.matrix .scene { inline-size: min(100%, 42rem); margin-inline: auto }
+/* Hero: a left-aligned headline, then a short paragraph on the left and the install line on the right. */
+.hero { padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2rem, 4vw, 3rem); row-gap: clamp(1.5rem, 3vw, 2.25rem) }
+.hero h1 { font-size: clamp(3.25rem, 1rem + 9.5vw, 8.25rem); line-height: 0.92; letter-spacing: -0.055em }
+.ul { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 0.07em; text-underline-offset: 0.09em; text-decoration-skip-ink: none }
+.lede { max-inline-size: 36ch; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem); line-height: 1.5; color: var(--muted) }
+.cta { display: grid; gap: 1.25rem; align-content: start; justify-items: start }
+.install { display: inline-flex; align-items: center; gap: 0.5rem; min-block-size: 3rem; padding-inline: 1.1rem 0.4rem; background: var(--sunken); border-radius: 0.625rem; box-shadow: 0 0 0 1px var(--line); font: 500 1rem / 1 var(--mono) }
+.install code { font-size: inherit }
+.install b { color: var(--accent); font-weight: 600 }
+.install button { display: grid; place-items: center; inline-size: 2.25rem; block-size: 2.25rem; padding: 0; color: var(--muted); background: none; border: 0; border-radius: 0.5rem; cursor: pointer }
+.install button svg { inline-size: 1.1rem; block-size: 1.1rem }
+@media (hover: hover) and (pointer: fine) { .install button:hover { color: var(--ink); background: var(--bg) } }
+.links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9375rem }
+.links a { color: var(--ink) }
+.hero-window { margin-block-end: clamp(3rem, 7vw, 5rem) }
 
-/* Features: a heading with a colored dot, and a grey paragraph. */
-.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: clamp(2rem, 5vw, 3.25rem) clamp(1.5rem, 4vw, 2.75rem); margin-block-start: clamp(4rem, 9vw, 7rem) }
-.features h3 { display: flex; align-items: center; gap: 0.6rem; font: 600 1.125rem / 1.3 var(--sans); letter-spacing: -0.01em }
-.features h3::before { content: ""; flex: none; inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--dot) }
-.features p { margin-block-start: 0.5rem; color: var(--muted); font-size: 1rem }
-.features code { font-size: 0.85em; color: var(--ink) }
+/* What it does: a ruled list. */
+.spec { margin-block-end: clamp(1rem, 3vw, 2rem) }
+.spec .row { padding-block: 1.25rem; border-block-start: 1px solid var(--line); row-gap: 0.4rem }
+.spec dt { font: 600 1.0625rem / 1.35 var(--sans); letter-spacing: -0.01em }
+.spec dt span { display: inline-block; min-inline-size: 2.25rem; font: 500 0.8125rem / 1 var(--mono); color: var(--accent) }
+.spec dd { color: var(--muted) }
+.spec code { color: var(--ink); font-size: 0.85em }
 
-/* Sections. */
-.band { padding-block-start: clamp(5rem, 11vw, 9rem) }
-.band h2 { font-size: clamp(1.875rem, 1.3rem + 2.2vw, 2.75rem); text-align: center }
-.sub { max-inline-size: 40rem; margin: 1rem auto 0; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem); line-height: 1.55; color: var(--muted); text-align: center }
-.sub code { font-size: 0.85em; color: var(--ink) }
-.duo, .trio { display: grid; gap: clamp(1.5rem, 3vw, 2rem) 1.5rem; margin-block-start: 3rem }
-.duo { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)) }
-.trio { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)) }
-.bleed + .duo { margin-block-start: 2rem }
-figure { margin: 0; min-inline-size: 0 }
-figcaption { margin-block-start: 1.1rem; font-size: 0.9375rem; color: var(--muted); text-align: center }
-.trio h3 { margin-block-start: 1.5rem; font: 600 1.25rem / 1.3 var(--sans); letter-spacing: -0.01em }
-.trio p { margin-block-start: 0.4rem; color: var(--muted) }
-.trio code, .points code, .get code, .made code { font-size: 0.85em }
-.desk { border-radius: 0.875rem }
+/* Sections: a hairline, a numbered label, a heading, and blocks on the grid. */
+.sec { padding-block: clamp(2.5rem, 6vw, 4.5rem) 0; margin-block-start: clamp(2.5rem, 7vw, 5.5rem); border-block-start: 1px solid var(--line); row-gap: clamp(1.25rem, 2.5vw, 1.75rem) }
+.spec + .sec { margin-block-start: clamp(2.5rem, 7vw, 5rem) }
+.kicker { font: 500 0.75rem / 1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
+.kicker span { color: var(--accent); margin-inline-end: 0.6rem }
+.sec h2 { font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.25rem); line-height: 1.04; letter-spacing: -0.04em }
+.sec h2.xl { font-size: clamp(2.125rem, 1.2rem + 4vw, 4.5rem); line-height: 0.98; letter-spacing: -0.05em }
+.sub { max-inline-size: 38ch; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem); line-height: 1.55; color: var(--muted); align-self: end }
+.sub code, .get code, .foot code, .points code, .rail code, figure code { font-size: 0.85em }
+.sub code { color: var(--ink) }
+.rail { display: grid; gap: 1.25rem; align-content: start }
+figure { min-inline-size: 0 }
+figcaption { margin-block-start: 0.9rem; font-size: 0.9375rem; color: var(--muted) }
+figure h3 { margin-block-start: 1.25rem; font: 600 1.125rem / 1.3 var(--sans); letter-spacing: -0.01em }
+figure h3 + p { margin-block-start: 0.35rem; color: var(--muted); font-size: 0.9375rem }
+.tint { margin-block-start: clamp(2.5rem, 7vw, 5.5rem); padding-block-end: clamp(3rem, 7vw, 5.5rem); background: var(--sunken) }
+.tint .sec { margin-block-start: 0; padding-block-start: clamp(3rem, 7vw, 5.5rem); border-block-start: 0 }
+@media (min-width: 56rem) { .stagger .right { grid-row: 2 / span 3; align-self: start } }
 
 pre.code { margin: 0; padding: 1rem 1.2rem; overflow-x: auto; background: var(--sunken); border-radius: 0.75rem; font-size: 0.8125rem; line-height: 1.7; tab-size: 2; box-shadow: 0 0 0 1px var(--line) }
-.band > .wrap > pre.code { max-inline-size: 28rem; margin: 1.75rem auto 0 }
 @media (max-width: 30em) { pre.code { font-size: 0.71875rem } }
 pre.code .k { color: light-dark(oklch(52% 0.2 305), oklch(76% 0.14 305)) }
 pre.code .f { color: light-dark(oklch(50% 0.17 258), oklch(78% 0.11 252)) }
@@ -138,9 +151,23 @@ pre.code .s { color: light-dark(oklch(50% 0.14 150), oklch(80% 0.14 150)) }
 pre.code .n { color: light-dark(oklch(60% 0.17 50), oklch(80% 0.13 60)) }
 pre.code .c { color: var(--muted) }
 
+/* The playground block: the embed fills it once it loads; until then a static editor and preview stand in. */
+.playground { display: grid; min-block-size: 35rem }
+.playground > * { grid-area: 1 / 1; min-inline-size: 0 }
+.playground [data-playground]:empty { display: none }
+.playground:has([data-playground]:not(:empty)) .pg-fallback { display: none }
+.pg-fallback { display: grid; grid-template-rows: auto 1fr; overflow: clip; background: var(--win-bg) }
+.pg-bar { display: flex; align-items: center; gap: 1rem; padding: 0.7rem 1rem; border-block-end: 1px solid var(--line); font: 500 0.8125rem / 1 var(--sans); color: var(--muted) }
+.pg-bar .dots { display: flex; gap: 0.4rem }
+.pg-bar i { inline-size: 0.7rem; block-size: 0.7rem; border-radius: 50%; background: var(--line) }
+.pg-body { display: grid; grid-template-columns: minmax(0, 1fr); min-block-size: 0 }
+@media (min-width: 56rem) { .pg-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } .pg-view { border-inline-start: 1px solid var(--line) } }
+.pg-body pre.code { border-radius: 0; box-shadow: none; background: transparent; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
+.pg-view { display: grid; place-items: center; padding: 1.5rem; background: var(--sunken) }
+.pg-view .scene { inline-size: min(100%, 28rem) }
+
 /* Light and dark, side by side. */
-.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(1.75rem, 4vw, 3rem); margin-block-start: 3rem; align-items: center }
-@media (min-width: 62rem) { .split { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) } }
+.stagewrap { min-inline-size: 0 }
 .stage { --split: 50%; position: relative; aspect-ratio: 800 / 500; overflow: clip; border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow); touch-action: pan-y; cursor: ew-resize; user-select: none; -webkit-user-select: none }
 .layer { position: absolute; inset: 0 }
 .layer img { inline-size: 100%; block-size: 100%; pointer-events: none }
@@ -152,38 +179,37 @@ pre.code .c { color: var(--muted) }
 .tag { position: absolute; inset-block-start: 0.75rem; padding: 0.3rem 0.65rem; font: 600 0.75rem / 1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; border-radius: 999px; pointer-events: none }
 .tag.l { inset-inline-start: 0.75rem; color: oklch(30% 0.01 270); background: oklch(98% 0 0 / 0.85) }
 .tag.d { inset-inline-end: 0.75rem; color: oklch(92% 0.005 270); background: oklch(20% 0.005 270 / 0.85) }
+.hint { position: absolute; inset-block-end: 0.75rem; inset-inline-start: 50%; translate: -50% 0; padding: 0.3rem 0.65rem; font: 500 0.6875rem / 1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; color: oklch(95% 0 0); background: oklch(20% 0.005 270 / 0.7); border-radius: 999px; pointer-events: none; transition: opacity 0.2s }
+.stage.playing .hint { opacity: 0 }
 .stage input { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; margin: 0; opacity: 0; pointer-events: none }
 .stage.intro { animation: sweep 2.4s 0.2s var(--out) both }
 @media (prefers-reduced-motion: reduce) { .stage.intro { animation: none } }
 @keyframes sweep { 0% { --split: 50% } 35% { --split: 82% } 70% { --split: 22% } 100% { --split: 50% } }
+.side { display: grid; gap: 1.5rem; align-content: start }
+.side .sub { align-self: start }
 .points { display: grid; gap: 1.25rem; margin: 0; padding: 0; list-style: none }
 .points li { padding-inline-start: 1rem; border-inline-start: 2px solid var(--accent) }
 .points b { display: block; font-size: 1.0625rem }
 .points span { color: var(--muted); font-size: 0.9375rem }
 
-/* Get started, the made-with note and the footer. */
-.get { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 2rem; margin-block-start: 2.5rem }
-.get h3 { margin-block-end: 0.75rem; font: 600 1.0625rem / 1.3 var(--sans); letter-spacing: -0.01em }
-.get p { margin-block-start: 0.75rem; font-size: 0.9375rem; color: var(--muted) }
+/* Start and footer. */
+.get { display: grid; gap: 0.75rem; align-content: start }
+.get h3 { margin-block-start: 0.75rem; font: 600 1.0625rem / 1.3 var(--sans); letter-spacing: -0.01em }
+.get h3:first-child { margin-block-start: 0 }
+.get p { font-size: 0.9375rem; color: var(--muted) }
 .get pre.code { font-size: 0.875rem }
-.more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-block-start: 2.5rem }
-.made { display: grid; justify-items: center; gap: 0.6rem; margin-block-start: clamp(5rem, 11vw, 8rem); padding-block-start: 4rem; border-block-start: 1px solid var(--line); text-align: center }
-.made .mark.small { inline-size: 3.5rem; block-size: 3.5rem; margin-block-end: 0.5rem; box-shadow: 0 0 0 1px var(--ring) }
-.made h3 { font: 600 1.25rem / 1.3 var(--sans) }
-.made p { max-inline-size: 36rem; color: var(--muted); font-size: 1rem }
-.made .links { display: flex; gap: 1.25rem; margin-block-start: 0.5rem }
-.made .links a { color: var(--accent); text-decoration: none }
-@media (hover: hover) and (pointer: fine) { .made .links a:hover { text-decoration: underline } }
-.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem; margin-block-start: clamp(3.5rem, 8vw, 5.5rem); padding-block: 0 2.25rem; font-size: 0.875rem; color: var(--muted) }
+.more { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-block-start: 0.5rem }
+.foot { margin-block-start: clamp(4rem, 9vw, 7rem); padding-block: 1.5rem 2.5rem; border-block-start: 1px solid var(--line); font-size: 0.875rem; color: var(--muted) }
+.foot p { max-inline-size: 52ch }
 .foot nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem }
 .foot a { text-decoration: none }
 @media (hover: hover) and (pointer: fine) { .foot a:hover { color: var(--ink) } }
 
 /* Examples gallery and one example. */
-.page-head { padding-block: 2rem 0.5rem; text-align: center }
+.page-head { padding-block: 2rem 0.5rem }
 .page-head h1 { font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.5rem); letter-spacing: -0.04em }
-.kicker { margin-block-end: 0.75rem; font: 600 0.8125rem / 1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent) }
-.page-head .sub { margin-block-start: 1rem }
+.page-head .kicker { margin-block-end: 0.75rem; color: var(--accent) }
+.page-head .sub { margin-block-start: 1rem; max-inline-size: 48ch }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1.5rem 1.25rem; margin-block-start: 1.5rem }
 .card { display: flex; flex-direction: column; gap: 0.75rem; min-inline-size: 0; color: inherit; text-decoration: none }
 .card .shot { position: relative; display: block; aspect-ratio: 16 / 10; overflow: clip; background: var(--surface); border-radius: var(--radius); box-shadow: 0 0 0 1px var(--ring) }

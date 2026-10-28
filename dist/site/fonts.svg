@@ -81,12 +81,12 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="36" y="208" font-family="'ABeeZee', sans-serif" font-size="26" fill="var(--base05)">Real text, measured to the pixel.</text>
     </g>
     <g class="a m14">
-      <rect x="36" y="236" width="432" height="64" rx="10" fill="var(--base01)"/>
-      <text class="mono" x="54" y="264" font-size="13" fill="var(--base04)">await font.load(new URL("./Archivo.ttf"))</text>
-      <text class="mono" x="54" y="286" font-size="13" fill="var(--base0B)">&lt;text fontFamily={display}&gt;</text>
+      <rect x="36" y="226" width="432" height="62" rx="10" fill="var(--base01)"/>
+      <text class="mono" x="54" y="253" font-size="13" fill="var(--base04)">await font.load(new URL("./Archivo.ttf"))</text>
+      <text class="mono" x="54" y="275" font-size="13" fill="var(--base0B)">&lt;text fontFamily={display}&gt;</text>
     </g>
     <g class="sans a m15">
-      <text x="36" y="316" font-size="12" fill="var(--base03)">Subset to the glyphs it draws. One file, no font requests.</text>
+      <text x="36" y="318" font-size="12" fill="var(--base03)">Subset to the glyphs it draws. One file, no font requests.</text>
     </g>
   </g>
 </svg>

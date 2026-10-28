@@ -1,5 +1,5 @@
-import { ease, motion, render } from "svjeez";
-import { code, typewriter } from "svjeez/extras";
+import { ease, enter, motion, render } from "svjeez";
+import { Marker, code } from "svjeez/extras";
 import { CSS, chrome, highlight, outro, theme } from "./kit";
 
 // A motion() chain on the left, the same chain drawn as tracks on the right, and a square that obeys it.
@@ -25,8 +25,13 @@ const chain = (t0: number) =>
 
 const win = chrome(W, H, "motion.ts");
 const src = code(highlight(shown), { theme, fontSize: 14, lineHeight: 1.9, x: 28, y: BAR + 28 });
-const typed = typewriter(src, { at: 0.5, cps: 55, cursor: theme.base0D, blink: false });
-const T0 = typed.end + 0.7;
+const T0 = 0.9;
+const lit = [
+  { during: { at: T0 + 0.5, over: 0.6 }, target: src.lines(2, 3).pad(3) },
+  { during: { at: T0 + 1.1, over: 1.5 }, target: src.lines(4, 4).pad(3) },
+  { during: { at: T0 + 2.6, over: 0.5 }, target: src.lines(5, 5).pad(3) },
+  { during: { at: T0 + 3.1, over: 0.4 }, target: src.lines(6, 6).pad(3) },
+];
 const D = Math.ceil(T0 + 3.5 + 2.2);
 
 const AXIS = { x: SPLIT + 96, w: W - SPLIT - 96 - 36, span: 4 };
@@ -53,7 +58,10 @@ export default function build(): string {
     <>
       {win.node}
       <path d={`M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
-      <g class="mono" animation={outro(D)}>{typed.node}</g>
+      <g class="mono" animation={outro(D)}>
+        <g animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
+        <Marker theme={theme} stops={lit} color={theme.base0D} />
+      </g>
       <g animation={outro(D)}>
         <rect x={SPLIT + 24} y={BAR + 22} width={W - SPLIT - 48} height={132} rx={10} fill={theme.base01} />
         <rect x={(SPLIT + W) / 2 - 28} y={BAR + 60} width={56} height={56} rx={14} fill={theme.base0D} animation={chain(T0)} />
