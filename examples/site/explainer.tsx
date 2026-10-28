@@ -5,7 +5,7 @@ import { CSS, chrome, highlight, outro, theme } from "./kit";
 const W = 504;
 const H = 340;
 const BAR = 40;
-const win = chrome(W, H, "wave.tsx");
+const win = chrome(W, H, "wave.tsx", { mono: true });
 
 const shown = `<path d={wave}
   stroke="#0A6CFF"
@@ -38,7 +38,7 @@ export default function build(): string {
         <Focus stops={[{ during: one, target: src.lines(1, 3).pad(6) }, { during: two, target: src.lines(6, 7).pad(6) }]} dim={0.28}>
           <g class="mono" animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
         </Focus>
-        <g class="sans">
+        <g class="mono">
           <Callout theme={theme} color={theme.base0D} target={src.find("draw")} side="bottom" during={one} fontSize={14} columns={30}>draw() strokes the path on.</Callout>
           <Callout theme={theme} color={theme.base09} target={src.find("enter")} side="bottom" during={two} fontSize={14} columns={30}>enter() fades the dot in.</Callout>
         </g>

@@ -61,7 +61,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m19{animation-name:k20}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}}
 ]]></style>
-  <g class="sans">
+  <g class="mono">
     <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="#1C1C1E" stroke="#3A3A3C"/>
     <path d="M0.5 40.5h503" stroke="#2C2C2E"/>
     <circle cx="20.5" cy="20.5" r="5.5" fill="#FF6961"/>

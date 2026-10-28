@@ -37,7 +37,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m8{animation-name:k8}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2.3s!important;animation-play-state:paused!important}}
 ]]></style>
-  <g class="sans">
+  <g class="mono">
     <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
     <path d="M0.5 40.5h503" stroke="var(--base01)"/>
     <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
@@ -90,7 +90,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         </g>
       </g>
     </g>
-    <g class="sans">
+    <g class="mono">
       <g class="a m6">
         <path d="M167 164.75L167 144.75" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
         <rect x="43.6" y="164.75" width="246.8" height="35.6" rx="6" fill="var(--base0D)" fill-opacity="0.08" stroke="var(--base0D)" stroke-opacity="0.4"/>

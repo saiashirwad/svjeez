@@ -50,8 +50,8 @@ export const highlight = (source: string): CodeTokens =>
   );
 
 /** The window every card shares: traffic lights and a title bar. The page adds the shadow, so the canvas stays transparent around it. */
-export const chrome = (w: number, h: number, title: string, options: { theme?: Base16; bar?: number } = {}) =>
-  appWindow(rect(0.5, 0.5, w - 1, h - 1), { theme: options.theme ?? theme, title, dots: "traffic", bar: options.bar ?? 40, radius: 12, class: "sans" });
+export const chrome = (w: number, h: number, title: string, options: { theme?: Base16; bar?: number; mono?: boolean } = {}) =>
+  appWindow(rect(0.5, 0.5, w - 1, h - 1), { theme: options.theme ?? theme, title, dots: "traffic", bar: options.bar ?? 40, radius: 12, class: options.mono ? "mono" : "sans" });
 
 /** Fade everything out just before the loop restarts, so the jump back to the first frame is not seen. */
 export const outro = (duration: number) => motion({ opacity: 1 }).at(duration - 0.5).to({ opacity: 0 }, 0.5);

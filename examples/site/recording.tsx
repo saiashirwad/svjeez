@@ -5,7 +5,7 @@ import { CSS, chrome, outro, termTheme } from "./kit";
 const W = 504;
 const H = 340;
 const BAR = 40;
-const win = chrome(W, H, "~/hello, zsh", { theme: termTheme });
+const win = chrome(W, H, "~/hello, zsh", { theme: termTheme, mono: true });
 
 const session = terminal(
   [
