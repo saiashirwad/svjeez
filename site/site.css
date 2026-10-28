@@ -15,6 +15,7 @@
   --accent-ink: oklch(100% 0 0);
   --shadow: light-dark(oklch(30% 0.02 270 / 0.16), oklch(0% 0 0 / 0.6));
   --ring: light-dark(oklch(0% 0 0 / 0.07), oklch(100% 0 0 / 0.11));
+  --band: light-dark(oklch(97.2% 0.003 270), oklch(21.5% 0.006 270));
   --win-bg: light-dark(oklch(100% 0 0), oklch(24% 0.005 270));
 
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
@@ -95,9 +96,11 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 .win { border-radius: var(--radius); background: var(--win-bg); box-shadow: 0 0 0 1px var(--ring), 0 1.25rem 2.5rem -1rem var(--shadow) }
 .win img, .win > .stage { border-radius: inherit }
 .scene { inline-size: 100%; block-size: auto }
+.scene.tall { display: none }
 @media (max-width: 55.99rem) {
-  .bleed { overflow-x: auto; overscroll-behavior-x: contain; margin-inline: calc(var(--gutter) * -1); padding: 1rem var(--gutter) 2rem; margin-block: -1rem -1rem; scrollbar-width: thin }
-  .win.big { inline-size: 40rem }
+  .scene.wide { display: none }
+  .scene.tall { display: block }
+  .big .win { inline-size: min(100%, 26rem) }
 }
 
 /* Hero: a left-aligned headline, then a short paragraph on the left and the install line on the right. */
@@ -115,8 +118,9 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 .links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9375rem }
 .links a { color: var(--ink) }
 .hero-demo { margin-block-end: clamp(3rem, 7vw, 5rem) }
-.hero-demo .tall { display: none; inline-size: min(100%, 22.5rem); margin-inline: auto }
+.hero-demo .tall { inline-size: min(100%, 22.5rem) }
 @media (max-width: 63.99rem) { .hero-demo .wide { display: none } .hero-demo .tall { display: block } }
+@media (min-width: 56rem) and (max-width: 63.99rem) { .hero-demo .tall { inline-size: min(100%, 26rem) } }
 
 /* What it does: a ruled list. */
 .spec { margin-block-end: clamp(1rem, 3vw, 2rem) }
@@ -134,16 +138,14 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 .sec h2 { font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.25rem); line-height: 1.04; letter-spacing: -0.04em }
 .sec h2.xl { font-size: clamp(2.125rem, 1.2rem + 4vw, 4.5rem); line-height: 0.98; letter-spacing: -0.05em }
 .sub { max-inline-size: 38ch; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem); line-height: 1.55; color: var(--muted); align-self: end }
-.sub code, .get code, .foot code, .points code, .rail code, figure code { font-size: 0.85em }
+.sub code, .get code, .foot code, .points code, figure code { font-size: 0.85em }
 .sub code { color: var(--ink) }
-.rail { display: grid; gap: 1.25rem; align-content: start }
 figure { min-inline-size: 0 }
 figcaption { margin-block-start: 0.9rem; font-size: 0.9375rem; color: var(--muted) }
 figure h3 { margin-block-start: 1.25rem; font: 600 1.125rem / 1.3 var(--sans); letter-spacing: -0.01em }
 figure h3 + p { margin-block-start: 0.35rem; color: var(--muted); font-size: 0.9375rem }
-.tint { margin-block-start: clamp(2.5rem, 7vw, 5.5rem); padding-block-end: clamp(3rem, 7vw, 5.5rem); background: var(--sunken) }
+.tint { margin-block-start: clamp(2.5rem, 7vw, 5.5rem); padding-block-end: clamp(3rem, 7vw, 5.5rem); background: var(--band) }
 .tint .sec { margin-block-start: 0; padding-block-start: clamp(3rem, 7vw, 5.5rem); border-block-start: 0 }
-@media (min-width: 56rem) { .stagger .right { grid-row: 2 / span 3; align-self: start } }
 
 pre.code { margin: 0; padding: 1rem 1.2rem; overflow-x: auto; background: var(--sunken); border-radius: 0.75rem; font-size: 0.8125rem; line-height: 1.7; tab-size: 2; box-shadow: 0 0 0 1px var(--line) }
 @media (max-width: 30em) { pre.code { font-size: 0.71875rem } }

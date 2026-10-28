@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 358 596" width="358" height="596" role="img" aria-labelledby="t d">
+  <title id="t">Without JSX</title>
+  <desc id="d">A scene written with el() calls instead of JSX types out. Its prefix option namespaces ids and classes, so the result can be inlined in a page next to other scenes. The preview below plays it.</desc>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.mono,.mono text{font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:none}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,0.909%{opacity:0}5.455%,100%{opacity:1}}
+@keyframes k2{0%,0.909%{translate:0px 6px}5.455%,100%{translate:0px 0px}}
+.m1{animation-name:k1,k2}
+@keyframes k3{0%,19.091%,22.727%,100%{width:308.4px}}
+@keyframes k4{0%,19.091%{height:148.8px}22.727%,100%{height:128.4px}}
+.m2{animation-name:k3,k4}
+@keyframes k5{0%,19.091%{translate:0px 0px}22.727%,100%{translate:0px 142.8px}}
+.m3{animation-name:k5}
+@keyframes k6{0%,10%{stroke-dashoffset:1;visibility:hidden}19.091%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k6}
+@keyframes k7{0%,17.273%{scale:0}20.909%,100%{scale:1}}
+.m5{animation-name:k7;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k8{0%,8.182%{opacity:0}12.727%,100%{opacity:1}}
+@keyframes k9{0%,8.182%{translate:0px 8px}12.727%,100%{translate:0px 0px}}
+.m6{animation-name:k8,k9}
+@keyframes k10{0%,15.455%{opacity:0}20%,100%{opacity:1}}
+@keyframes k11{0%,15.455%{translate:0px 6px}20%,100%{translate:0px 0px}}
+.m7{animation-name:k10,k11}
+@keyframes k12{0%,95.455%{opacity:1}100%{opacity:0}}
+.m8{animation-name:k12}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="357" height="595" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h357" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="179" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">plain.ts</text>
+  </g>
+  <path d="M0 366H358" stroke="var(--base02)"/>
+  <g class="a m8">
+    <g class="mono">
+      <g class="a m1">
+        <g>
+          <text x="22" y="70.4" font-family="monospace" font-size="12" fill="var(--base0D)">g</text>
+          <text x="29.2" y="70.4" font-family="monospace" font-size="12" fill="var(--base04)">({},</text>
+          <text x="65.2" y="70.4" font-family="monospace" font-size="12" fill="var(--base04)">[</text>
+          <text x="36.4" y="90.8" font-family="monospace" font-size="12" fill="var(--base0D)">path</text>
+          <text x="65.2" y="90.8" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
+          <text x="50.8" y="111.2" font-family="monospace" font-size="12" fill="var(--base05)">d</text>
+          <text x="58" y="111.2" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="72.4" y="111.2" font-family="monospace" font-size="12" fill="var(--base0B)">"M20</text>
+          <text x="108.4" y="111.2" font-family="monospace" font-size="12" fill="var(--base0B)">66Q60</text>
+          <text x="151.6" y="111.2" font-family="monospace" font-size="12" fill="var(--base0B)">-6</text>
+          <text x="173.2" y="111.2" font-family="monospace" font-size="12" fill="var(--base0B)">100</text>
+          <text x="202" y="111.2" font-family="monospace" font-size="12" fill="var(--base0B)">66"</text>
+          <text x="223.6" y="111.2" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="50.8" y="131.6" font-family="monospace" font-size="12" fill="var(--base05)">fill</text>
+          <text x="79.6" y="131.6" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="94" y="131.6" font-family="monospace" font-size="12" fill="var(--base0B)">"none"</text>
+          <text x="137.2" y="131.6" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="50.8" y="152" font-family="monospace" font-size="12" fill="var(--base05)">stroke</text>
+          <text x="94" y="152" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="108.4" y="152" font-family="monospace" font-size="12" fill="var(--base0B)">"#34C759"</text>
+          <text x="173.2" y="152" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="50.8" y="172.4" font-family="monospace" font-size="12" fill="var(--base05)">strokeWidth</text>
+          <text x="130" y="172.4" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="144.4" y="172.4" font-family="monospace" font-size="12" fill="var(--base09)">4</text>
+          <text x="151.6" y="172.4" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="50.8" y="192.8" font-family="monospace" font-size="12" fill="var(--base05)">animation</text>
+          <text x="115.6" y="192.8" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="130" y="192.8" font-family="monospace" font-size="12" fill="var(--base0D)">draw</text>
+          <text x="158.8" y="192.8" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
+          <text x="180.4" y="192.8" font-family="monospace" font-size="12" fill="var(--base05)">at</text>
+          <text x="194.8" y="192.8" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="209.2" y="192.8" font-family="monospace" font-size="12" fill="var(--base09)">0.2</text>
+          <text x="230.8" y="192.8" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="245.2" y="192.8" font-family="monospace" font-size="12" fill="var(--base05)">over</text>
+          <text x="274" y="192.8" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="288.4" y="192.8" font-family="monospace" font-size="12" fill="var(--base09)">1</text>
+          <text x="302.8" y="192.8" font-family="monospace" font-size="12" fill="var(--base04)">}),</text>
+          <text x="36.4" y="213.2" font-family="monospace" font-size="12" fill="var(--base04)">}),</text>
+          <text x="36.4" y="233.6" font-family="monospace" font-size="12" fill="var(--base0D)">circle</text>
+          <text x="79.6" y="233.6" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
+          <text x="50.8" y="254" font-family="monospace" font-size="12" fill="var(--base05)">cx</text>
+          <text x="65.2" y="254" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="79.6" y="254" font-family="monospace" font-size="12" fill="var(--base09)">60</text>
+          <text x="94" y="254" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="108.4" y="254" font-family="monospace" font-size="12" fill="var(--base05)">cy</text>
+          <text x="122.8" y="254" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="137.2" y="254" font-family="monospace" font-size="12" fill="var(--base09)">30</text>
+          <text x="151.6" y="254" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="166" y="254" font-family="monospace" font-size="12" fill="var(--base05)">r</text>
+          <text x="173.2" y="254" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="187.6" y="254" font-family="monospace" font-size="12" fill="var(--base09)">6</text>
+          <text x="194.8" y="254" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="50.8" y="274.4" font-family="monospace" font-size="12" fill="var(--base05)">fill</text>
+          <text x="79.6" y="274.4" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="94" y="274.4" font-family="monospace" font-size="12" fill="var(--base0B)">"#0A6CFF"</text>
+          <text x="158.8" y="274.4" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="50.8" y="294.8" font-family="monospace" font-size="12" fill="var(--base05)">animation</text>
+          <text x="115.6" y="294.8" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="130" y="294.8" font-family="monospace" font-size="12" fill="var(--base0D)">enter</text>
+          <text x="166" y="294.8" font-family="monospace" font-size="12" fill="var(--base04)">({</text>
+          <text x="187.6" y="294.8" font-family="monospace" font-size="12" fill="var(--base05)">at</text>
+          <text x="202" y="294.8" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="216.4" y="294.8" font-family="monospace" font-size="12" fill="var(--base09)">1</text>
+          <text x="223.6" y="294.8" font-family="monospace" font-size="12" fill="var(--base04)">,</text>
+          <text x="238" y="294.8" font-family="monospace" font-size="12" fill="var(--base05)">over</text>
+          <text x="266.8" y="294.8" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="281.2" y="294.8" font-family="monospace" font-size="12" fill="var(--base09)">0.4</text>
+          <text x="310" y="294.8" font-family="monospace" font-size="12" fill="var(--base04)">},</text>
+          <text x="65.2" y="315.2" font-family="monospace" font-size="12" fill="var(--base04)">{</text>
+          <text x="79.6" y="315.2" font-family="monospace" font-size="12" fill="var(--base05)">scale</text>
+          <text x="115.6" y="315.2" font-family="monospace" font-size="12" fill="var(--base04)">:</text>
+          <text x="130" y="315.2" font-family="monospace" font-size="12" fill="var(--base09)">0</text>
+          <text x="144.4" y="315.2" font-family="monospace" font-size="12" fill="var(--base04)">},</text>
+          <text x="166" y="315.2" font-family="monospace" font-size="12" fill="var(--base05)">ease</text>
+          <text x="194.8" y="315.2" font-family="monospace" font-size="12" fill="var(--base04)">.</text>
+          <text x="202" y="315.2" font-family="monospace" font-size="12" fill="var(--base05)">pop</text>
+          <text x="223.6" y="315.2" font-family="monospace" font-size="12" fill="var(--base04)">),</text>
+          <text x="36.4" y="335.6" font-family="monospace" font-size="12" fill="var(--base04)">}),</text>
+          <text x="22" y="356" font-family="monospace" font-size="12" fill="var(--base04)">]),</text>
+        </g>
+      </g>
+      <g class="a m3">
+        <rect x="19" y="73.4" width="308.4" height="148.8" rx="6" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4" stroke-width="1" class="a m2"/>
+      </g>
+    </g>
+    <g class="a m6">
+      <rect x="20" y="376" width="318" height="130" rx="12" fill="var(--base01)"/>
+      <g transform="translate(71 369) scale(1.8)">
+        <path d="M20 66Q60 -6 100 66" fill="none" stroke="#34C759" stroke-width="4" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+        <circle cx="60" cy="30" r="6" fill="#0A6CFF" class="a m5 fb"/>
+      </g>
+    </g>
+    <g class="sans a m7">
+      <text x="179" y="540" font-size="13" text-anchor="middle" fill="var(--base04)"><tspan fill="var(--base0D)" font-weight="600">prefix</tspan> namespaces every id and class,</text>
+      <text x="179" y="560" font-size="13" text-anchor="middle" fill="var(--base04)">so scenes inlined in one page never collide.</text>
+    </g>
+  </g>
+</svg>

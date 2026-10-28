@@ -172,58 +172,58 @@ svg{--wall-a:#1B2748;--wall-b:#173A36;--bar:#0D0F14}
     <g class="mono">
       <g>
         <g class="a m13">
-          <text x="540" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base0D)">you</text>
-          <text x="585" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">make</text>
-          <text x="622.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">a</text>
-          <text x="637.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loading</text>
-          <text x="697.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner</text>
-          <text x="757.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">svg,</text>
-          <text x="795" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
-          <text x="817.5" y="189.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
+          <text x="536" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base0D)">you</text>
+          <text x="581" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">make</text>
+          <text x="618.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">a</text>
+          <text x="633.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loading</text>
+          <text x="693.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner</text>
+          <text x="753.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">svg,</text>
+          <text x="791" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
+          <text x="813.5" y="187.938" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
         </g>
         <g class="a m14"/>
         <g class="a m15">
-          <text x="540" y="236.188" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="555" y="236.188" font-family="monospace" font-size="12.5" fill="var(--base0E)">read</text>
-          <text x="600" y="236.188" font-family="monospace" font-size="12.5" fill="var(--base05)">.claude/skills/svjeez/SKILL.md</text>
+          <text x="536" y="234.188" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="551" y="234.188" font-family="monospace" font-size="12.5" fill="var(--base0E)">read</text>
+          <text x="596" y="234.188" font-family="monospace" font-size="12.5" fill="var(--base05)">.claude/skills/svjeez/SKILL.md</text>
         </g>
         <g class="a m16">
-          <text x="540" y="259.313" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="555" y="259.313" font-family="monospace" font-size="12.5" fill="var(--base0E)">write</text>
-          <text x="600" y="259.313" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
+          <text x="536" y="257.313" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="551" y="257.313" font-family="monospace" font-size="12.5" fill="var(--base0E)">write</text>
+          <text x="596" y="257.313" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
         </g>
         <g class="a m17">
-          <text x="540" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="555" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base0E)">run</text>
-          <text x="600" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">svjeez</text>
-          <text x="652.5" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">frames</text>
-          <text x="705" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
-          <text x="795" y="282.438" font-family="monospace" font-size="12.5" fill="var(--base05)">--sheet</text>
+          <text x="536" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="551" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base0E)">run</text>
+          <text x="596" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">svjeez</text>
+          <text x="648.5" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">frames</text>
+          <text x="701" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">spinner.tsx</text>
+          <text x="791" y="280.438" font-family="monospace" font-size="12.5" fill="var(--base05)">--sheet</text>
         </g>
         <g class="a m18">
-          <text x="540" y="305.563" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
-          <text x="555" y="305.563" font-family="monospace" font-size="12.5" fill="var(--base0E)">look</text>
-          <text x="600" y="305.563" font-family="monospace" font-size="12.5" fill="var(--base05)">frames/sheet.png</text>
+          <text x="536" y="303.563" font-family="monospace" font-size="12.5" fill="var(--base03)">▸</text>
+          <text x="551" y="303.563" font-family="monospace" font-size="12.5" fill="var(--base0E)">look</text>
+          <text x="596" y="303.563" font-family="monospace" font-size="12.5" fill="var(--base05)">frames/sheet.png</text>
         </g>
         <g class="a m19"/>
         <g class="a m20">
-          <text x="540" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base0B)">✓</text>
-          <text x="555" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">The</text>
-          <text x="585" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">arc</text>
-          <text x="615" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">closes</text>
-          <text x="667.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">at</text>
-          <text x="690" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
-          <text x="712.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">and</text>
-          <text x="742.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">the</text>
-          <text x="772.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
-          <text x="810" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">is</text>
-          <text x="832.5" y="351.813" font-family="monospace" font-size="12.5" fill="var(--base05)">seamless.</text>
+          <text x="536" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base0B)">✓</text>
+          <text x="551" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">The</text>
+          <text x="581" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">arc</text>
+          <text x="611" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">closes</text>
+          <text x="663.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">at</text>
+          <text x="686" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">2s</text>
+          <text x="708.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">and</text>
+          <text x="738.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">the</text>
+          <text x="768.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">loop</text>
+          <text x="806" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">is</text>
+          <text x="828.5" y="349.813" font-family="monospace" font-size="12.5" fill="var(--base05)">seamless.</text>
         </g>
       </g>
     </g>
     <g class="a m22 fb">
-      <rect x="540" y="402" width="120" height="84" rx="10" fill="var(--base01)"/>
-      <g transform="translate(600 444)">
+      <rect x="536" y="402" width="120" height="84" rx="10" fill="var(--base01)"/>
+      <g transform="translate(596 444)">
         <circle r="18" fill="none" stroke="var(--base02)" stroke-width="5"/>
         <g class="a m21 fb">
           <circle r="18" fill="none" stroke="var(--base0D)" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="0.28 1"/>
