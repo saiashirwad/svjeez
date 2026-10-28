@@ -5,6 +5,7 @@ import { tree as layout } from "../../layout/tree";
 import { ease, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
 import { defaultDark } from "../theme";
+import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
 import { arrow, lookup, placer, shape, sizeOf, type Diagram, type DiagramOptions, type NodeRole } from "./kit";
 
@@ -12,9 +13,10 @@ import { arrow, lookup, placer, shape, sizeOf, type Diagram, type DiagramOptions
 export type TreeSpec<N extends string> = string | { readonly label: string; readonly parent?: N; readonly role?: NodeRole };
 
 export interface TreeOptions extends DiagramOptions {
+  /** Default `"TB"`. */
   readonly direction?: Direction;
-  /** Nodes appear breadth-first, `step` apart, each edge drawing on as its child appears. */
-  readonly reveal?: { readonly at: Seconds; readonly step?: Seconds };
+  /** Nodes appear breadth-first after the root, each edge drawing on as its child appears. From a start `at` they follow `step` apart (default 0.3), or each comes at its own time. */
+  readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
 export interface TreeDiagram<N extends string> extends Diagram<N> {
@@ -27,7 +29,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   options: TreeOptions = {},
 ): TreeDiagram<keyof N & string> {
   type Id = keyof N & string;
-  const { theme = defaultDark, fontSize = 14, font, class: cls, reveal, direction } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, play, direction } = options;
   const look = { theme, fontSize };
   const nodes = Object.entries(spec.nodes as Record<string, TreeSpec<string>>).map(([id, s]) =>
     typeof s === "string" ? { id, label: s, role: "task" as NodeRole, parent: undefined } : { id, label: s.label, role: s.role ?? "task", parent: s.parent },
@@ -36,14 +38,15 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   const at = placer(out.bounds, options);
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
   const edges = new Map(out.edges.map((e) => [e.to, e.points.map(at.point)]));
-  const step = reveal?.step ?? 0.3;
+  const step = play?.step ?? 0.3;
+  const times = beats(play?.at ?? 0, out.order.length - 1, step, "tree() play");
   /** The root is there from the start, so no frame is empty. */
-  const shown = new Map(out.order.map((id, i) => [id, i === 0 ? -Infinity : (reveal?.at ?? 0) + (i - 1) * step]));
+  const shown = new Map(out.order.map((id, i) => [id, i === 0 ? -Infinity : times[i - 1]!]));
   const over = Math.min(0.35, step);
 
   const node = el.g({ class: cls, fontFamily: font }, [
-    out.edges.map((e) => arrow(edges.get(e.to)!, { ...look, at: reveal && Math.max(0, shown.get(e.from)!, shown.get(e.to)! - over), over })),
-    nodes.map((n) => shape(n.role, boxes.get(n.id)!, n.label, look, reveal && shown.get(n.id)! >= 0 ? enter({ at: shown.get(n.id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined)),
+    out.edges.map((e) => arrow(edges.get(e.to)!, { ...look, at: play && Math.max(0, shown.get(e.from)!, shown.get(e.to)! - over), over })),
+    nodes.map((n) => shape(n.role, boxes.get(n.id)!, n.label, look, play && shown.get(n.id)! >= 0 ? enter({ at: shown.get(n.id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined)),
   ]);
   const up = (id: string): string[] => {
     const parent = out.parent.get(id);

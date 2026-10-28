@@ -6,6 +6,7 @@ import { ease, motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
 import type { SvgNode } from "../../svg";
 import { defaultDark } from "../theme";
+import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
 import { arrow, chip, labelOf, labelSize, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
@@ -17,8 +18,13 @@ export interface FlowGroup<N extends string> {
 }
 
 export interface FlowchartOptions extends DiagramOptions {
-  /** Nodes appear in rank order, `step` apart; each edge draws on as its target appears; a group fades in with its first member. */
-  readonly reveal?: { readonly at: Seconds; readonly step?: Seconds };
+  /** Default `"TB"`. */
+  readonly direction?: Direction;
+  /**
+   * Nodes appear in rank order after the first rank; each edge draws on as its target appears; a group fades in with its
+   * first member. From a start `at` they follow `step` apart (default 0.4), or each comes at its own time.
+   */
+  readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
 export interface Flowchart<N extends string, G extends string> extends Diagram<N | G> {
@@ -40,11 +46,11 @@ interface Laid<N extends string> {
 }
 
 export function flowchart<const N extends Record<string, Labelled>, const G extends Record<string, FlowGroup<NoInfer<keyof N & string>>> = {}>(
-  spec: { readonly direction?: Direction; readonly nodes: N; readonly groups?: G; readonly edges: readonly FlowEdge<NoInfer<keyof N & string>>[] },
+  spec: { readonly nodes: N; readonly groups?: G; readonly edges: readonly FlowEdge<NoInfer<keyof N & string>>[] },
   options: FlowchartOptions = {},
 ): Flowchart<keyof N & string, keyof G & string> {
   type Id = keyof N & string;
-  const { theme = defaultDark, fontSize = 14, font, class: cls, reveal } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, direction, play } = options;
   const look = { theme, fontSize };
   const small = { theme, fontSize: fontSize * 0.85 };
   const nodes = Object.entries(spec.nodes as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
@@ -53,7 +59,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowGroup<Id>>);
   const laid = lay<Id>(
     {
-      direction: spec.direction,
+      direction,
       nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(n.role, n.label, fontSize, font) })),
       edges: edges.map((e) => ({ ...e, label: e.label === undefined ? undefined : labelSize(e.label, small.fontSize, font) })),
       groups: groups.map(([id, g]) => ({ id, members: g.nodes, label: { w: textWidth(g.label, small.fontSize, font), h: small.fontSize * 1.2 } })),
@@ -62,12 +68,13 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
     options,
   );
 
-  const order = nodes.map((n) => n.id).sort((a, b) => laid.rank.get(a)! - laid.rank.get(b)! || cross(laid.boxes.get(a)!, spec.direction) - cross(laid.boxes.get(b)!, spec.direction));
-  const step = reveal?.step ?? 0.4;
+  const order = nodes.map((n) => n.id).sort((a, b) => laid.rank.get(a)! - laid.rank.get(b)! || cross(laid.boxes.get(a)!, direction) - cross(laid.boxes.get(b)!, direction));
+  const step = play?.step ?? 0.4;
   /** The first rank is there from the start, so no frame is empty; the rest follow in order. */
   const later = order.filter((id) => laid.rank.get(id)! > 0);
-  const shown = new Map(order.map((id) => [id, later.includes(id) ? (reveal?.at ?? 0) + later.indexOf(id) * step : -Infinity]));
-  const appear = (id: string) => (reveal && shown.get(id)! >= 0 ? enter({ at: shown.get(id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined);
+  const times = beats(play?.at ?? 0, later.length, step, "flowchart() play");
+  const shown = new Map(order.map((id) => [id, later.includes(id) ? times[later.indexOf(id)]! : -Infinity]));
+  const appear = (id: string) => (play && shown.get(id)! >= 0 ? enter({ at: shown.get(id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined);
   const drawOver = Math.min(0.4, step);
   const drawAt = (from: string, to: string) => Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
 
@@ -75,16 +82,16 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
     groups.map(([id, g]) => {
       const b = laid.groups.get(id)!;
       const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
-      return el.g({ animation: reveal && at >= 0 ? enter({ at, over: 0.4 }) : undefined }, [
+      return el.g({ animation: play && at >= 0 ? enter({ at, over: 0.4 }) : undefined }, [
         el.rect({ x: b.x, y: b.y, width: b.w, height: b.h, rx: 10, fill: "none", stroke: theme.base0E, strokeOpacity: 0.45, strokeDasharray: "4 3" }),
         el.text({ x: b.x + 12, y: b.y + 8 + small.fontSize, fontSize: small.fontSize, fill: theme.base04 }, g.label),
       ]);
     }),
-    laid.lines.map((line) => arrow(line.points, { ...look, at: reveal && drawAt(line.from, line.to), over: drawOver })),
+    laid.lines.map((line) => arrow(line.points, { ...look, at: play && drawAt(line.from, line.to), over: drawOver })),
   ]);
   const over = el.g({ class: cls, fontFamily: font }, [
     nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, look, appear(n.id))),
-    laid.lines.map((line, i) => line.label && chip(line.label, edges[i]!.label!, small, reveal && motion({ opacity: 0 }).at(drawAt(line.from, line.to) + drawOver).to({ opacity: 1 }, 0.25))),
+    laid.lines.map((line, i) => line.label && chip(line.label, edges[i]!.label!, small, play && motion({ opacity: 0 }).at(drawAt(line.from, line.to) + drawOver).to({ opacity: 1 }, 0.25))),
   ]);
   return { node: el.g({}, [under, over]), layers: { under, over }, bounds: laid.bounds, get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])), ...paths(laid.lines, laid.boxes) };
 }

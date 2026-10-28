@@ -15,7 +15,7 @@ describe("flowchart", () => {
       groups: { core: { label: "Core", nodes: ["check", "work"] } },
       edges: [["start", "check"], ["check", "work", { label: "yes" }], ["work", "check"], ["check", "db", { label: "no" }], ["db", "end"]],
     },
-    { x: 100, y: 50, reveal: { at: 1 } },
+    { x: 100, y: 50, play: { at: 1 } },
   );
 
   test("bounds start at x, y and hold every node and group", () => {
@@ -146,8 +146,29 @@ describe("state", () => {
   });
 });
 
+describe("diagram options", () => {
+  const spec = { nodes: { a: "A", b: "B", c: "C" }, edges: [["a", "b"], ["b", "c"]] } as const;
+
+  test("direction is an option and turns the ranks sideways", () => {
+    const [down, across] = [flowchart(spec), flowchart(spec, { direction: "LR" })];
+    expect(down.get("c").y).toBeGreaterThan(down.get("a").y);
+    expect(across.get("c").x).toBeGreaterThan(across.get("a").x);
+    expect(across.get("c").y).toBeCloseTo(across.get("a").y, 6);
+  });
+
+  test("play takes a start and a step, or one time per node after the first", () => {
+    const times = (svg: string) => [...svg.matchAll(/animation-delay:(-?[\d.]+)s/g)].map((m) => Number(m[1]));
+    const stepped = times(valid(flowchart(spec, { play: { at: 1, step: 2 } }).node));
+    const listed = times(valid(flowchart(spec, { play: { at: [1, 3] } }).node));
+    expect(stepped.length).toBeGreaterThan(0);
+    expect(Math.max(...stepped)).toBeCloseTo(Math.max(...listed), 6);
+    expect(() => flowchart(spec, { play: { at: [1] } })).toThrow(/needs 2 times, got 1/);
+    expect(() => tree({ nodes: { r: "R", k: { label: "K", parent: "r" } } }, { play: { at: [1, 2] } })).toThrow(/needs 1 times, got 2/);
+  });
+});
+
 describe("tree", () => {
-  const team = tree({ nodes: { root: "Root", a: { label: "A", parent: "root" }, b: { label: "B", parent: "root", role: "tool" }, a1: { label: "A1", parent: "a" } } }, { reveal: { at: 1 } });
+  const team = tree({ nodes: { root: "Root", a: { label: "A", parent: "root" }, b: { label: "B", parent: "root", role: "tool" }, a1: { label: "A1", parent: "a" } } }, { play: { at: 1 } });
 
   test("route runs from one node up through the common ancestor and down to the other", () => {
     const trip = team.route("a1", "b");

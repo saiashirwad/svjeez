@@ -19,7 +19,7 @@ const team = tree(
       tests: { label: "TH-09 tests", parent: "ui", role: "tool" },
     },
   },
-  { theme, x: M, y: M, font: mono, reveal: { at: 0.4, step: 0.3 } },
+  { theme, x: M, y: M, font: mono, play: { at: 0.4, step: 0.3 } },
 );
 
 const D = 9;

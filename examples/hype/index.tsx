@@ -380,11 +380,10 @@ const anchored = def.clipPath({}, <rect x={SPRING.x - 60} y={110} width={120} he
 // b. flowchart(): the loop this whole video is about.
 const chart = flowchart(
   {
-    direction: "LR",
     nodes: { you: { label: "your prompt", role: "input" }, agent: { label: "Claude", role: "tool" }, scene: "scene.tsx", frames: "look at frames", svg: { label: "launch.svg", role: "output" } },
     edges: [["you", "agent"], ["agent", "scene"], ["scene", "frames"], ["frames", "scene", { label: "fix" }], ["frames", "svg", { label: "ship" }]],
   },
-  { theme, font: mono, fontSize: 18, x: W / 2, y: H / 2 - 40, anchor: "center", reveal: { at: card(1).at + 0.1, step: 0.14 } },
+  { theme, font: mono, fontSize: 18, x: W / 2, y: H / 2 - 40, anchor: "center", direction: "LR", play: { at: card(1).at + 0.1, step: 0.14 } },
 );
 const comet = flow(chart.route("you", "svg"), { at: card(1).at + 0.75, over: 0.95, style: "comet", arrive: true, color: C.accent, size: 5 });
 

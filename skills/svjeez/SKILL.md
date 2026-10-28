@@ -225,7 +225,7 @@ const session = terminal(
 **Diagrams.** `flowchart`, `sequence`, `state`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error. Each returns `{ node, get(id), bounds }` plus helpers. Size the canvas from `bounds` instead of guessing. `anchor: "center"` places a diagram by its center. Stepped things take `at` plus `step`. `sequence`'s `play`, `state`'s `walk` and the code `reveal` also take one time per item, as in `play: { at: [0.5, 1, 3] }`, which keeps two diagrams in sync. A flowchart or tree `reveal` takes a single `at`. A node `role` (`task input output tool decision store`) picks its shape and color.
 
 ```tsx
-const chart = flowchart({ nodes: { a: "Start", b: { label: "Done", role: "output" } }, edges: [["a", "b"]] }, { theme, reveal: { at: 0.5 } });
+const chart = flowchart({ nodes: { a: "Start", b: { label: "Done", role: "output" } }, edges: [["a", "b"]] }, { theme, play: { at: 0.5 } });
 const trip = flow(chart.route("a", "b"), { at: 3, style: "comet", arrive: true }); // dot, comet, trace, packet
 <>{chart.layers.under}{trip.node}{chart.layers.over}</>; // the flow runs between edges and nodes
 ```
@@ -296,6 +296,6 @@ Each file in `examples/` next to this skill compiles and renders. Read them as p
 
 - `examples/toast.tsx` shows a `motion()` chain with `.at` and `.to`, a stacked `enter` and `shake`, `draw` on a check mark, and `exit` through `ease.in`.
 - `examples/orbit.tsx` shows `sampled()` for an elliptical orbit, a `.loop()` spin with `ease.linear`, and a `wiggle` breathing effect.
-- `examples/review-flow.tsx` shows a typed `flowchart` with `reveal`, a `flow` comet along `route()`, an `adaptive` theme with a font rule, and a canvas sized from `bounds`.
+- `examples/review-flow.tsx` shows a typed `flowchart` with `play`, a `flow` comet along `route()`, an `adaptive` theme with a font rule, and a canvas sized from `bounds`.
 
 Render one to see the loop in action: `npx svjeez frames examples/orbit.tsx --count 6 --sheet`.

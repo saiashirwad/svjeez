@@ -32,7 +32,7 @@ const spec = {
   nodes: { pr: "PR opened", lint: "Run linters", ok: { label: "Clean?", role: "decision" }, post: "Post review" },
   edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
 } as const;
-const look = { theme, fontSize: 12, class: "mono", reveal: { at: START, step: STEP } };
+const look = { theme, fontSize: 12, class: "mono", play: { at: START, step: STEP } };
 
 const M = 24;
 const CODE_W = 420;

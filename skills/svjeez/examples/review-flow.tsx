@@ -13,7 +13,7 @@ const chart = flowchart(
     nodes: { push: { label: "git push", role: "input" }, ci: { label: "Run CI", role: "tool" }, green: { label: "Green?", role: "decision" }, ship: { label: "Deploy", role: "output" } },
     edges: [["push", "ci"], ["ci", "green"], ["green", "ship", { label: "yes" }], ["green", "ci", { label: "retry" }]],
   },
-  { theme, x: M, y: M, fontSize: 13, class: "sans", reveal: { at: 0.4, step: 0.4 } },
+  { theme, x: M, y: M, fontSize: 13, class: "sans", play: { at: 0.4, step: 0.4 } },
 );
 const trip = flow(chart.route("push", "ship"), { at: 2.6, style: "comet", arrive: true, color: theme.base09 });
 

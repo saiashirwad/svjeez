@@ -408,7 +408,7 @@ reveal(src, { at: [1, 4] }); // one time per block
 
 Diagrams have typed ids and return `{ node, get(id), bounds }` alongside their own helpers. Use `anchor` to position a diagram by its center or edge.
 
-Stepped animations accept a start time and spacing, or an array of times to sync them with other animations.
+Stepped animations take `play: { at, step }`, with a start time and spacing or an array of times to sync them with other animations. `flowchart`, `tree` and `state` take `direction: "LR"` in their options to lay out left to right.
 
 ```tsx
 const chart = flowchart(
@@ -417,7 +417,7 @@ const chart = flowchart(
     groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
     edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
   },
-  { theme, reveal: { at: 0.5 } },
+  { theme, play: { at: 0.5 } },
 );
 const trip = flow(chart.route("pr", "post"), { at: 4, style: "trace", arrive: true });
 <>{chart.layers.under}{trip.node}{chart.layers.over}</>;
@@ -457,7 +457,7 @@ const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1 }); 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/state.svg" width="178" alt="A state machine lighting each state in turn" />
 
 ```tsx
-const team = tree({ nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } }, { theme, reveal: { at: 0.5 } });
+const team = tree({ nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } }, { theme, play: { at: 0.5 } });
 team.route("a", "b"); // up through the common ancestor and down
 ```
 

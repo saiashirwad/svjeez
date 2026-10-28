@@ -1,4 +1,4 @@
-import { def, ease, motion, render } from "svjeez";
+import { def, ease, motion, rect, render } from "svjeez";
 import {
   Callout,
   Focus,
@@ -9,7 +9,6 @@ import {
   flowchart,
   lanes,
   morph,
-  rect,
   sequence,
   state,
   timeline,
@@ -197,7 +196,6 @@ const morphed = morph([before, after], { at: [change], over: 1, gutter: true });
 
 // --- recap: what call() does, as a flowchart with a request traced through it
 const recapSpec = {
-    direction: "LR",
     nodes: {
       call: { label: "call(fn)", role: "input" },
       open: { label: "open?", role: "decision" },
@@ -217,7 +215,7 @@ const recapSpec = {
       ["run", "count", { label: "threw" }],
     ],
 } as const;
-const decide = flowchart(recapSpec, { theme, fontSize: 14, class: "mono", x: W / 2, y: (STAGE.h + 40) / 2, anchor: "center", reveal: { at: tl.recap.at + 0.3, step: 0.25 } });
+const decide = flowchart(recapSpec, { theme, fontSize: 14, class: "mono", x: W / 2, y: (STAGE.h + 40) / 2, anchor: "center", direction: "LR", play: { at: tl.recap.at + 0.3, step: 0.25 } });
 const trips = [
   flow(decide.route("call", "fail"), { at: tl.recap.at + 2.6, over: 1.8, style: "packet", label: "call()", color: theme.base08, arrive: true }),
   flow(decide.route("call", "ok"), { at: tl.recap.at + 4.8, over: 1.8, style: "trace", color: theme.base0B, arrive: true }),

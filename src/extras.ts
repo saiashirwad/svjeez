@@ -7,7 +7,7 @@ export { Focus, type FocusStop } from "./extras/focus";
 export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
 export { Marker } from "./extras/marker";
 export { Camera, type CameraStop } from "./extras/camera";
-export { rect, type Rect, type Point, type Edge } from "./geometry";
+export type { Direction } from "./layout/box";
 export { base16, tint, adaptive, defaultDark, defaultLight, tomorrowNight, tomorrow, type Base16, type Slot, type Role } from "./extras/theme";
 export { window, type WindowOptions } from "./extras/window";
 export { terminal, type Command, type TerminalOptions } from "./extras/terminal";

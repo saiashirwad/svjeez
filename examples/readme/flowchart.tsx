@@ -9,7 +9,7 @@ const chart = flowchart(
     groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
     edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
   },
-  { theme, x: M, y: M, font: mono, fontSize: 13, reveal: { at: 0.5 } },
+  { theme, x: M, y: M, font: mono, fontSize: 13, play: { at: 0.5 } },
 );
 const trip = flow(chart.route("pr", "post"), { at: 4, style: "trace", arrive: true, color: theme.base09 });
 
