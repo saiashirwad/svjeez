@@ -15,13 +15,13 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 
 <>
   {m.node}
-  <Brace target={expanded.get("mid")} side="below" label="cross term" during={{ at: 2.5, over: 1.5 }} />
+  <Brace target={expanded.get("mid")} side="below" label="cross term" fontSize={18} during={{ at: 2.5, over: 1.5 }} />
 </>;
 ```
 
 - `x` and `y` are the top-left of the formula's box. `fontSize` is the pixels in one em, default 32. `theme` paints the formula with its `plain` color, and `color` overrides that. `display: false` sets inline style.
 - `.node` draws the formula. `.bounds`, `.width` and `.height` give its box.
-- `.get("mid")` is the box of everything wrapped in `\cssId{mid}{…}`. `.find("2ab")` is the box of consecutive glyphs that spell it, and `.find("2", 2)` takes the second match. Both return a `Rect` for `Brace`, `Underline`, `Callout`, `Marker`, `Focus` and `Camera`.
+- `.get("mid")` is the box of everything wrapped in `\cssId{mid}{…}`. `.find("2ab")` is the box of consecutive glyphs that spell it, and `.find("2", 2)` takes the second match. Both return a `Rect` for `Brace` (give its label a `fontSize` to match the formula), `Underline`, `Callout`, `Marker`, `Focus` and `Camera`.
 - `.words` lists the glyphs and bars in reading order. A glyph has `char`, `size`, `d`, `matrix`, `fill`, `bounds` and the `text`, `x`, `y` and `id` that `morph()` uses.
 
 ## Equation transforms

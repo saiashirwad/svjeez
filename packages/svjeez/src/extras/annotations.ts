@@ -144,6 +144,7 @@ export function Brace({
   target,
   side = "left",
   label,
+  fontSize = 12,
   during: span,
   theme = defaultDark,
   color = theme.base09,
@@ -153,6 +154,7 @@ export function Brace({
   /** `above` and `below` run the brace along the top or bottom of `target`, for an equation term. */
   readonly side?: "left" | "right" | "above" | "below";
   readonly label?: string;
+  readonly fontSize?: number;
 }): SvgNode {
   const along = side === "above" || side === "below";
   const dir = side === "left" || side === "above" ? -1 : 1;
@@ -172,16 +174,16 @@ export function Brace({
         along
           ? {
               x: mid,
-              y: edge + (dir < 0 ? -16 : 22),
+              y: edge + (dir < 0 ? -4 - fontSize : 10 + fontSize),
               textAnchor: "middle",
-              fontSize: 12,
+              fontSize,
               fill: color,
             }
           : {
               x: edge + dir * 20,
-              y: mid + 4,
+              y: mid + fontSize / 3,
               textAnchor: side === "left" ? "end" : "start",
-              fontSize: 12,
+              fontSize,
               fill: color,
             },
         label,
