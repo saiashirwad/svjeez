@@ -9,6 +9,8 @@ npx astro add @svjeez/astro
 npm i -D svjeez
 ```
 
+On Node 20, use npm 11, pnpm or bun. npm 10, the npm that ships with Node 20, crashes while it installs Vite 8 (`Cannot read properties of null (reading 'edgesOut')`). Run `npm i -g npm@11` to update it.
+
 Posters need `playwright-core` and a Chromium build:
 
 ```sh

@@ -13,7 +13,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `site/` is the Astro site at svjeez.texoport.in.
 
-Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script. Every other command runs inside its workspace.
+Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 
 The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
@@ -75,7 +75,7 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 `.github/workflows/release.yml` runs on every push to `main`, and `ci.yml` runs on every pull request. CI typechecks, runs the tests, fails if `dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
 
-After CI passes, `release.yml` runs `scripts/release.ts`. It releases every package under `packages/` whose version isn't on npm or has no GitHub release yet. It publishes to npm with provenance through trusted publishing, and it creates a GitHub release with the tarball and generated notes. A package with a private workspace manifest publishes the `package-dist/` that its `build:package` writes. svjeez's tags stay `v1.2.3`, and the other packages tag `@svjeez/vite@1.2.3`. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
+After CI passes, `release.yml` runs `scripts/release.ts`. It releases every package under `packages/` whose version isn't on npm or has no GitHub release yet. It publishes to npm with provenance through trusted publishing, and it creates a GitHub release with the tarball and notes listing the commits that touched the package since its previous release. A package with a private workspace manifest publishes the `package-dist/` that its `build:package` writes. svjeez's tags stay `v1.2.3`, and the other packages tag `@svjeez/vite@1.2.3`. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
 
 To release, bump a package's version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 

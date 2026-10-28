@@ -97,7 +97,8 @@ const published = async (name: string): Promise<ReadonlySet<string> | undefined>
 
   if (!response.ok) throw new Error(`npm answered ${response.status} for ${name}`);
 
-  const { versions }: { versions: object } = await response.json();
+  // SAFETY: a packument from the registry always has a versions object, keyed by version.
+  const { versions } = (await response.json()) as { versions: object };
 
   return new Set(Object.keys(versions));
 };
@@ -148,6 +149,25 @@ const previous = (name: string, version: string, tags: readonly string[]) => {
   return earlier.length ? tagFor(name, earlier.at(-1)!) : undefined;
 };
 
+/**
+ * The commits since `start` that touched this package. GitHub's generated notes list every pull request merged in that
+ * range, so an @svjeez/astro release would also list svjeez and site changes.
+ */
+const notes = (pkg: Package, start: string | undefined, target: string) => {
+  const range = start ? `${start}..${target}` : target;
+
+  const log = run("git", [
+    "log",
+    "--no-merges",
+    "--format=- %s (%h)",
+    range,
+    "--",
+    relative(ROOT, pkg.dir),
+  ]);
+
+  return log || "No changes to this package.";
+};
+
 const distTag = (version: string) => (version.includes("-") ? "next" : "latest");
 
 const plan = async () => {
@@ -188,6 +208,7 @@ const publish = async () => {
 
       if (github) {
         const start = previous(name, version, tags);
+        const target = process.env.GITHUB_SHA ?? run("git", ["rev-parse", "HEAD"]);
         const prerelease = version.includes("-");
         run("gh", [
           "release",
@@ -195,11 +216,11 @@ const publish = async () => {
           tag,
           tarball,
           "--target",
-          process.env.GITHUB_SHA ?? run("git", ["rev-parse", "HEAD"]),
+          target,
           "--title",
           `${name} ${version}`,
-          "--generate-notes",
-          ...(start ? ["--notes-start-tag", start] : []),
+          "--notes",
+          notes(pkg, start, target),
           // The repository's latest release stays svjeez's.
           `--latest=${name === "svjeez" && !prerelease}`,
           ...(prerelease ? ["--prerelease"] : []),
