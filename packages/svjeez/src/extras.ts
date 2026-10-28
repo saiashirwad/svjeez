@@ -22,6 +22,8 @@ export {
   type CodeMetrics,
 } from "./extras/code";
 
+export { axes, type Axes, type AxesOptions, type Plot, type PlotOptions } from "./extras/axes";
+
 export { morph, type MorphOptions } from "./extras/morph";
 
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";

@@ -185,6 +185,24 @@ const scene = (
 );
 ```
 
+## Axes and function plots
+
+`axes(options)` draws coordinate axes over a graph range and returns `{ node, bounds, point, plot }`. `x` and `y` are `[min, max]` ranges, `width` and `height` the plot area in px, and `at` its top-left. `ticks: { x, y }` are steps in graph units, and an axis without a step has no ticks. `labels` (default true) numbers the ticks, `grid` adds faint lines, and `theme`, `fontSize` and `font` style it. Each axis crosses at 0 when 0 is in its range, else sits on the bottom or left edge.
+
+```tsx
+import { draw } from "svjeez";
+import { axes, tint, tomorrowNight } from "svjeez/extras";
+
+const theme = tomorrowNight;
+const ax = axes({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 }, theme, ticks: { x: 1, y: 2 } });
+const parabola = ax.plot((x) => x * x, { samples: 120, color: tint(theme, "blue"), animation: draw({ at: 1, over: 1.5 }) });
+const dot = ax.point(2, 4); // graph coordinates to a scene Point
+
+const scene = <g>{ax.node}{parabola.node}<circle cx={dot.x} cy={dot.y} r={4} fill={tint(theme, "yellow")} /></g>;
+```
+
+`plot(f, options)` samples `f` evenly (`samples`, default 200, over `from`..`to`, default the x range) and returns `{ node, d, points }`. The curve breaks where `f` is not finite, leaves the y range by more than one range height, or jumps by more than the range, so `1 / x` and `Math.tan` draw no vertical spikes. Clipping to the plot area is built in. `color`, `strokeWidth` and `animation` (such as `draw()`) style the path. `axes()` and `plot()` throw on empty ranges, non-positive sizes, steps or sample counts.
+
 ## Terminals
 
 ```tsx
