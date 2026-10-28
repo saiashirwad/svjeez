@@ -2,12 +2,12 @@ import { el } from "../../el";
 import type { Point, Rect } from "../../geometry";
 import type { Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
-import { ease, motion, type Seconds } from "../../motion";
+import { motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
 import type { SvgNode } from "../../svg";
 import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, labelOf, labelSize, look, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
+import { arrow, chip, labelOf, labelSize, look, lookup, onShape, placer, popIn, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
 export type FlowchartEdge<N extends string> = readonly [from: N, to: N] | readonly [from: N, to: N, options: { readonly label?: string }];
 
@@ -73,7 +73,7 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   const later = order.filter((id) => laid.rank.get(id)! > 0);
   const times = beats(play?.at ?? 0, later.length, step, "flowchart() play");
   const shown = new Map(order.map((id) => [id, later.includes(id) ? times[later.indexOf(id)]! : -Infinity]));
-  const appear = (id: string) => (play && shown.get(id)! >= 0 ? enter({ at: shown.get(id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined);
+  const appear = (id: string) => (play && shown.get(id)! >= 0 ? popIn(shown.get(id)!) : undefined);
   const drawOver = Math.min(0.4, step);
   const drawAt = (from: string, to: string) => Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
 

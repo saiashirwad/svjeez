@@ -3,8 +3,8 @@ import { el } from "../../el";
 import { regularFace, type FontValue } from "../../font/font";
 import { rect, type Edge, type Point, type Rect } from "../../geometry";
 import type { Box, Size } from "../../layout/box";
-import { motion, type Seconds, type Stack } from "../../motion";
-import { draw } from "../../recipes";
+import { ease, motion, type Seconds, type Stack } from "../../motion";
+import { draw, enter } from "../../recipes";
 import type { SvgNode } from "../../svg";
 import { defaultDark, type Base16, type Slot } from "../theme";
 import { curve } from "./curve";
@@ -69,6 +69,9 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
       return { w, h };
   }
 };
+
+/** The pop-in of a node that appears at `at`. */
+export const popIn = (at: Seconds) => enter({ at, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out);
 
 const SKEW = 0.35;
 const LID = 5;
