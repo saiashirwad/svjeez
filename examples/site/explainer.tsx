@@ -12,11 +12,10 @@ const shown = `<path d={wave}
   animation={draw({ at: 1, over: 2 })} />
 
 
-
 <circle r={8} fill="#FF9F0A"
   animation={enter({ at: 3 })} />`;
 
-const src = code(highlight(shown), { theme, fontSize: 13.5, lineHeight: 1.75, x: 32, y: BAR + 24 });
+const src = code(highlight(shown), { theme, fontSize: 15, lineHeight: 1.75, x: 32, y: BAR + 26 });
 const [drawAt, enterAt] = [0.8, 4.4];
 const one = { at: drawAt, over: 3.2 };
 const two = { at: enterAt, over: 3.2 };
@@ -31,17 +30,17 @@ export default function build(): string {
       title: "Code explainers",
       desc: "Five lines of TSX type out. A spotlight moves across them and a note explains each: draw strokes the path on over two seconds, enter fades the dot in at three.",
       css: CSS,
-      reducedMotion: { at: D - 2 },
+      reducedMotion: { at: drawAt + 1.5 },
     },
     <>
       {win.node}
       <g animation={outro(D)}>
-        <Focus stops={[{ during: one, target: src.lines(1, 3).pad(6) }, { during: two, target: src.lines(7, 8).pad(6) }]} dim={0.28}>
+        <Focus stops={[{ during: one, target: src.lines(1, 3).pad(6) }, { during: two, target: src.lines(6, 7).pad(6) }]} dim={0.28}>
           <g class="mono" animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
         </Focus>
         <g class="sans">
-          <Callout theme={theme} color={theme.base0D} target={src.find("draw")} side="bottom" during={one} fontSize={13} columns={30}>draw() strokes the path on, from 1s to 3s.</Callout>
-          <Callout theme={theme} color={theme.base09} target={src.find("enter")} side="bottom" during={two} fontSize={13} columns={30}>enter() fades the dot in at 3s.</Callout>
+          <Callout theme={theme} color={theme.base0D} target={src.find("draw")} side="bottom" during={one} fontSize={14} columns={30}>draw() strokes the path on.</Callout>
+          <Callout theme={theme} color={theme.base09} target={src.find("enter")} side="bottom" during={two} fontSize={14} columns={30}>enter() fades the dot in.</Callout>
         </g>
       </g>
     </>,
