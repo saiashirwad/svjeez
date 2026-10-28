@@ -182,11 +182,12 @@ const spinnerRow = (t: number) => bottom(t) + 0.4;
 const inputRow = (t: number) => bottom(t) + (spinning(t) ? 1.8 : 0.5);
 const scroll = (t: number) => Math.max(0, inputRow(t) + 2.6 - VISIBLE);
 const beats = [...new Set([welcomeAt, SENT, ...lines.map((l) => l.at), DONE_AT])].filter((t) => t >= welcomeAt).sort((a, b) => a - b);
-const follow = (y: (t: number) => number, over: number): Motion<"y"> =>
+// Every follower eases over the same span, so the input box holds still on screen while the session scrolls under it.
+const follow = (y: (t: number) => number, over = 0.25): Motion<"y"> =>
   beats.reduce((track, t, i) => (i > 0 && y(t) !== y(beats[i - 1]!) ? track.at(t).to({ y: y(t) }, Math.min(over, (beats[i + 1] ?? Infinity) - t - 0.02), ease.out) : track), motion({ y: y(welcomeAt) }));
 
 const inputBox = (
-  <g animation={follow((t) => top(inputRow(t)), 0.15)}>
+  <g animation={follow((t) => top(inputRow(t)))}>
     <path d={`M${left - 8} 0H${left - 8 + BOX.w}M${left - 8} ${ROW * 1.5}H${left - 8 + BOX.w}`} stroke={C.muted} strokeOpacity={0.7} />
     <g transform={`translate(0 ${ROW * 0.25})`}>
       <g animation={motion({ opacity: 1 }).at(SENT).set({ opacity: 0 })}>{ask.node}</g>
@@ -197,7 +198,7 @@ const inputBox = (
 );
 
 const spinner = (
-  <g animation={[motion({ opacity: 0 }).at(SENT).set({ opacity: 1 }).at(DONE_AT).set({ opacity: 0 }), follow((t) => top(spinnerRow(t)) - top(0), 0.15)]}>
+  <g animation={[motion({ opacity: 0 }).at(SENT).set({ opacity: 1 }).at(DONE_AT).set({ opacity: 0 }), follow((t) => top(spinnerRow(t)) - top(0))]}>
     {asterisk(left + 4, mid(0), 6, [motion({ rotate: 0 }).to({ rotate: 180 }, 1.5, ease.linear).loop(1.5), motion({ scale: 1 }).to({ scale: 0.6 }, 0.375, ease.inOut).to({ scale: 1 }, 0.375, ease.inOut).loop(0.75)])}
     {say([["number", "Animating…"], ["muted", " (esc to interrupt · "], ["muted", "↓ 1.2k tokens)"]], 0, 18)}
   </g>
@@ -208,7 +209,7 @@ const terminalShot = (
     <g animation={rise(TERM.at, 0.5, 20)}>
       {shell.node}
       <g clipPath={body}>
-        <g animation={follow((t) => -scroll(t) * ROW, 0.25)}>
+        <g animation={follow((t) => -scroll(t) * ROW)}>
           {lines.map(({ at, node }) => (
             <g animation={motion({ opacity: 0 }).at(at).set({ opacity: 1 })}>{node}</g>
           ))}
@@ -347,9 +348,10 @@ const codeShot = (
 
 // ─── Shot 4: montage. Four capabilities, one beat each. ──────────────────────
 
-const CARD = 2.1;
-const MONTAGE = { at: CODE.at + CODE.over, over: 4 * CARD };
-const card = (i: number) => ({ at: MONTAGE.at + i * CARD, over: CARD });
+// The spring and the flowchart hold a beat longer than the other two.
+const CARDS = [2.7, 2.7, 2.1, 2.1];
+const MONTAGE = { at: CODE.at + CODE.over, over: CARDS.reduce((sum, over) => sum + over, 0) };
+const card = (i: number) => ({ at: MONTAGE.at + CARDS.slice(0, i).reduce((sum, over) => sum + over, 0), over: CARDS[i]! });
 
 const Caption = ({ i, call, line }: { i: number; call: string; line: string }) => (
   <g animation={rise(card(i).at + 0.1, 0.4, 10)}>
