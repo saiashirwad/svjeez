@@ -1,6 +1,6 @@
 import { indexing, union, type Box, type Point, type Size } from "./box";
 
-export interface LanesInput {
+interface LanesInput {
   readonly lanes: readonly { readonly id: string; readonly label: Size }[];
   readonly spans: readonly { readonly lane: string; readonly from: number; readonly to: number }[];
   readonly events: readonly { readonly lane: string; readonly at: number; readonly label?: Size }[];

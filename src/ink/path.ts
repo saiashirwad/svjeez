@@ -2,7 +2,7 @@ import { pathLength } from "../geometry";
 import type { Point } from "../layout/box";
 
 /** One continuous run of a path, flattened to points. `closed` when it ended in Z. */
-export interface Polyline {
+interface Polyline {
   readonly points: readonly Point[];
   readonly closed: boolean;
 }

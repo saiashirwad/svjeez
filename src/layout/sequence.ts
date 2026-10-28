@@ -1,10 +1,10 @@
 import { indexing, union, type Box, type Point, type Size } from "./box";
 
-export type SequenceRow =
+type SequenceRow =
   | { readonly kind: "message"; readonly from: string; readonly to: string; readonly label: Size }
   | { readonly kind: "note"; readonly actor: string; readonly size: Size };
 
-export interface SequenceInput {
+interface SequenceInput {
   readonly actors: readonly ({ readonly id: string } & Size)[];
   readonly rows: readonly SequenceRow[];
   /** Least space between neighbouring heads. */
