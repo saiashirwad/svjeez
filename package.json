@@ -60,6 +60,7 @@
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",
     "publint": "^0.3.25",
+    "sucrase": "^3.35.1",
     "tsx": "^4.23.15",
     "typescript": "latest"
   },

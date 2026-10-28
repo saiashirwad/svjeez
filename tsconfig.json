@@ -43,6 +43,7 @@
     "examples",
     "scripts",
     "skills",
-    "tests"
+    "tests",
+    "site/playground"
   ]
 }
