@@ -1,3 +1,4 @@
+import { google } from "@svjeez/fonts";
 import {
   Glyphs,
   Ink,
@@ -5,7 +6,6 @@ import {
   draw,
   ease,
   enter,
-  font,
   motion,
   render,
   sampled,
@@ -29,7 +29,7 @@ const W = 960;
 const H = 540;
 const D = 12;
 
-const display = await font.load(new URL("../fonts/ArchivoBlack-Regular.ttf", import.meta.url));
+const display = await google("Archivo Black");
 const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
 
 const kw = (text: string): CodeRun => ["keyword", text];

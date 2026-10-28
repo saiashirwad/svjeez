@@ -1,5 +1,6 @@
 import { project, type LonLat, type Topology } from "@svjeez/geo";
-import { draw, ease, enter, font, rect, render, type Point } from "svjeez";
+import { google } from "@svjeez/fonts";
+import { draw, ease, enter, rect, render, type Point } from "svjeez";
 import { flow } from "svjeez/extras";
 import { createRequire } from "node:module";
 import { CSS, chrome, outro } from "./kit";
@@ -13,9 +14,7 @@ const D = 10;
 const win = chrome(W, H, "map.tsx");
 
 /** Geist SemiBold alone, since every label is bold: the family would embed the regular face too. */
-const geist = await font.load(new URL("../fonts/Geist-SemiBold.ttf", import.meta.url), {
-  ligatures: false,
-});
+const geist = await google("Geist", { weight: 600, ligatures: false });
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 

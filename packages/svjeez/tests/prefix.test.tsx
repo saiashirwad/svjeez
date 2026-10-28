@@ -63,9 +63,7 @@ describe("prefix", () => {
   });
 
   test("a prefix renames embedded font families in the rule and its uses", async () => {
-    const sans = await font.load(
-      new URL("../../../examples/fonts/ABeeZee-Regular.ttf", import.meta.url),
-    );
+    const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
 
     const svg = render(
       { width: 100, height: 100, duration: 1, title: "F", prefix: "one-" },

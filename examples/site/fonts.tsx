@@ -1,4 +1,5 @@
-import { Glyphs, draw, ease, enter, font, render } from "svjeez";
+import { google } from "@svjeez/fonts";
+import { Glyphs, draw, ease, enter, render } from "svjeez";
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 
@@ -7,9 +8,8 @@ const W = 504;
 const H = 340;
 const BAR = 40;
 const D = 9;
-const load = (file: string) => font.load(new URL(`../fonts/${file}`, import.meta.url));
-const display = await load("ArchivoBlack-Regular.ttf");
-const italic = await load("ABeeZee-Italic.ttf");
+const display = await google("Archivo Black");
+const italic = await google("ABeeZee", { style: "italic" });
 
 const win = chrome(W, H, "fonts.tsx");
 const TITLE = "Aa Type";

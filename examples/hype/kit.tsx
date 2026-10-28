@@ -1,12 +1,11 @@
-import { ease, enter, font, motion, strokeFont } from "svjeez";
+import { google } from "@svjeez/fonts";
+import { ease, enter, motion, strokeFont } from "svjeez";
 import { theme } from "../style";
 
 export const W = 1280;
 export const H = 720;
 
-export const display = await font.load(
-  new URL("../fonts/ArchivoBlack-Regular.ttf", import.meta.url),
-);
+export const display = await google("Archivo Black");
 
 export const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
 

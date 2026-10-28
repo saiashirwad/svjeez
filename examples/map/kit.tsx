@@ -1,4 +1,5 @@
-import { def, font, type Font, type Paint, type Ref, type SvgNode } from "svjeez";
+import { google } from "@svjeez/fonts";
+import { def, type Font, type Paint, type Ref, type SvgNode } from "svjeez";
 
 export const W = 960;
 export const H = 640;
@@ -15,10 +16,8 @@ export const C = {
   ember: "#E0662A",
 } as const;
 
-const load = (file: string) => font.load(new URL(`./${file}`, import.meta.url));
-
-export const roman = await load("Cinzel.ttf");
-export const uncial = await load("UncialAntiqua-Regular.ttf");
+export const roman = await google("Cinzel");
+export const uncial = await google("Uncial Antiqua");
 
 /** Mulberry32, so every tree and peak lands in the same place on every build. */
 export const random = (seed: number) => () => {

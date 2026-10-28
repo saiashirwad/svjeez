@@ -57,6 +57,8 @@ jobs:
       - run: npm run test:package
         working-directory: packages/svjeez
       - run: npm run test:package
+        working-directory: packages/fonts
+      - run: npm run test:package
         working-directory: packages/geo
       - run: npm run test:package
         working-directory: packages/math

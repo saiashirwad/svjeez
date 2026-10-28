@@ -11,6 +11,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/svjeez/` is the library published to npm as `svjeez`.
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
+- `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax.
@@ -65,6 +66,10 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 `@svjeez/geo` depends on `d3-geo` and `topojson-client`, which is why it is not a `svjeez` subpath. `project()` fits a projection to a frame and returns regions, merged `land` and `lines`, places, great-circle routes and camera bounds. `src/writer.ts` writes the path data: it rounds to 0.1px, drops points closer than the tolerance, and straightens with Douglas–Peucker. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/world`, `examples/earth` and `examples/cables` are its example scenes, and `skills/svjeez/references/geo.md` teaches it to scene writers.
 
+## Fonts
+
+`@svjeez/fonts` has no runtime dependencies. `google(family, { weight, style, ...fontOptions })` asks `fonts.googleapis.com/css2` for one static TTF and passes the bytes to `font()`. Google sends TTF only to a user agent it doesn't recognize, so `src/index.ts` sets its own. Files are cached in `$SVJEEZ_FONTS_CACHE`, else `$XDG_CACHE_HOME/svjeez/fonts`, else `~/.cache/svjeez/fonts`, written through a temp file and a rename. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node, with one real download. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/tests/fixtures/`, because the core never touches the network.
+
 ## Icons
 
 `@svjeez/icons` is data with no dependencies, and it does not import svjeez. `<Icon>` in `packages/svjeez/src/icon.tsx` takes its `{ grid, kind, paths }` shape structurally through its own `IconData`. `src/tabler.ts` and `src/lucide.ts` are generated and committed: `bun run generate` in `packages/icons/` reads `@tabler/icons` and `lucide-static` from `node_modules`, pinned to exact versions, and rerunning it changes nothing. Never edit them by hand, and both oxfmt and oxlint ignore them. Each starts with the upstream licence. The naming rule is in the package README. `bun run test:package` checks the packed tarball on plain Node.
@@ -96,10 +101,10 @@ After CI passes, `release.yml` runs `scripts/release.ts`. It releases every pack
 To release, bump the version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro geo icons math; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro fonts geo icons math; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
-All five packages share one version, so bump them together. The workflow publishes `@svjeez/vite` before `@svjeez/astro`.
+Every package shares one version, so bump them together. The workflow publishes `@svjeez/vite` before `@svjeez/astro`.
 
 npm trusts a workflow one package at a time, and only for a package that it already has. A new package therefore needs one publish from a maintainer's machine. Run `npm login`, then `bun scripts/release.ts claim packages/<name>` from the root. It publishes the package's current version and trusts `release.yml` and the `npm` environment for every later version. npm stages that first version, so approve it under Staged Packages on npmjs.com. Until then, the workflow skips the package with a warning. `bun scripts/release.ts plan` lists what the next push would release.

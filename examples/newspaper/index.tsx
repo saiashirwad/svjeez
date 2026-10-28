@@ -1,10 +1,10 @@
+import { google } from "@svjeez/fonts";
 import {
   Glyphs,
   def,
   draw,
   ease,
   enter,
-  font,
   motion,
   render,
   type Child,
@@ -17,12 +17,9 @@ const W = 720;
 const H = 960;
 const D = 11;
 
-const load = (file: string, fallback: readonly string[]) =>
-  font.load(new URL(`./${file}`, import.meta.url), { fallback });
-
-const blackletter = await load("UnifrakturMaguntia-Book.ttf", ["serif"]);
-const fat = await load("AbrilFatface-Regular.ttf", ["Georgia", "serif"]);
-const body = await load("Lusitana-Regular.ttf", ["Georgia", "serif"]);
+const blackletter = await google("UnifrakturMaguntia", { fallback: ["serif"] });
+const fat = await google("Abril Fatface", { fallback: ["Georgia", "serif"] });
+const body = await google("Lusitana", { fallback: ["Georgia", "serif"] });
 
 const C = {
   paper: "#F2ECDD",

@@ -1,13 +1,13 @@
-import { Glyphs, draw, ease, enter, font, motion, render } from "svjeez";
+import { google } from "@svjeez/fonts";
+import { Glyphs, draw, ease, enter, motion, render } from "svjeez";
 import { adaptive, systemDark, systemLight } from "svjeez/extras";
 
 const W = 680;
 const H = 360;
 const D = 6;
 
-const load = (file: string) => font.load(new URL(`./${file}`, import.meta.url));
-const display = await load("ArchivoBlack-Regular.ttf");
-const body = font.family(await load("ABeeZee-Regular.ttf"), await load("ABeeZee-Italic.ttf"));
+const display = await google("Archivo Black");
+const body = await google.family("ABeeZee", [400, { weight: 400, style: "italic" }]);
 
 const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
 

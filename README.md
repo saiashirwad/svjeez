@@ -350,7 +350,7 @@ const trip = flow(chart.route("pr", "post"), { theme, at: 4, style: "trace", arr
 
 ### 4. Ink, Fonts, Images & Effects
 
-Draw variable-width strokes with a pen, brush, calligraphy nib, or pencil (`<Ink>`); subset and embed TTF/OTF fonts (`font.load`) or draw outlined glyphs (`<Glyphs>`); embed framed photos with Ken Burns pan/zoom (`<Picture>`); and apply animated SVG filters (`fx.*`).
+Draw variable-width strokes with a pen, brush, calligraphy nib, or pencil (`<Ink>`); subset and embed TTF/OTF fonts (`font.load`, or `google()` from `@svjeez/fonts`) or draw outlined glyphs (`<Glyphs>`); embed framed photos with Ken Burns pan/zoom (`<Picture>`); and apply animated SVG filters (`fx.*`).
 
 ```tsx
 import { Glyphs, Ink, Picture, draw, font, fx, picture, strokeFont, tool } from "svjeez";

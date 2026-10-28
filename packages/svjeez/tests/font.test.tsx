@@ -7,7 +7,7 @@ import { sfnt } from "../src/font/sfnt";
 import { typesetter } from "../src/font/shape";
 import { subset } from "../src/font/subset";
 
-const fixture = (name: string) => new URL(`../../../examples/fonts/${name}.ttf`, import.meta.url);
+const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
 const sans = await font.load(fixture("ABeeZee-Regular"));
 const italic = await font.load(fixture("ABeeZee-Italic"));
 const mono = await font.load(fixture("SpaceMono-Regular"));
