@@ -144,7 +144,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Gradients, clip paths, filters, custom properties, `calc` | [`references/defs-css.md`](references/defs-css.md) |
 | Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
-| Code walkthroughs, terminals, annotations, camera | [`references/explainers.md`](references/explainers.md) |
+| Code walkthroughs, terminals, annotations, camera, themes, recoloring a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
 | Flowchart, sequence, state, tree, lanes, `flow` | [`references/diagrams.md`](references/diagrams.md) |
 | Pixel-art voxel scenes | [`references/voxels.md`](references/voxels.md) |
 | `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
