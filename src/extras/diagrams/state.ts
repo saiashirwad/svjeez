@@ -1,6 +1,6 @@
 import type { Color } from "../../attributes";
 import { el } from "../../el";
-import { rect, type Point, type Rect } from "../../geometry";
+import type { Point } from "../../geometry";
 import type { Box, Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
 import type { Seconds, Span } from "../../motion";
@@ -8,7 +8,7 @@ import type { SvgNode } from "../../svg";
 import { flow, type FlowOptions } from "../flow";
 import { beats, visible, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, corner, labelSize, look, lookup, textWidth, type Diagram, type DiagramOptions } from "./kit";
+import { arrow, chip, labelSize, look, lookup, placer, textWidth, type Diagram, type DiagramOptions } from "./kit";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =
@@ -72,15 +72,20 @@ interface Scope {
   readonly initial: string;
 }
 
-interface Line {
-  /** Index into the transitions, or the scope's start or end marker. */
-  readonly of: number | "start" | "end";
+interface Run {
   readonly from: string;
   readonly to: string;
   readonly points: Point[];
-  readonly label?: Box;
   readonly depth: number;
 }
+
+/** A transition, by index, which may carry a label; or the scope's start or end marker, which never does. */
+type Line = (Run & { readonly of: number; readonly label?: Box }) | (Run & { readonly of: "start" | "end" });
+
+const relocate = (l: Line, point: (p: Point) => Point, box: (b: Box) => Box): Line => {
+  const points = l.points.map(point);
+  return typeof l.of === "number" ? { ...l, points, label: l.label && box(l.label) } : { ...l, points };
+};
 
 interface Local {
   readonly w: number;
@@ -110,8 +115,8 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
 ): StateMachine<StateIds<S>> {
   type Id = StateIds<S>;
   const { direction } = options;
-  const l0 = look(options);
-  const { theme, fontSize, font, small } = l0;
+  const base = look(options);
+  const { theme, fontSize, font, small } = base;
   const header = Math.round(fontSize * 2.6);
   const nodes = new Map<string, Node>();
   const scope = (states: Record<string, StateSpec>, initial: string, depth: number, owner?: string): Scope => {
@@ -163,23 +168,27 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     const [dx, dy] = [-out.bounds.x, -out.bounds.y];
     const boxes = new Map([...out.nodes].map(([id, b]) => [id, shift(b, dx, dy)]));
     const of = (k: number): Line["of"] => (k === 0 ? "start" : k <= mine.length ? mine[k - 1]!.i : "end");
-    const lines: Line[] = out.edges.map((e, k) => ({ of: of(k), from: e.from, to: e.to, points: e.points.map((p) => ({ x: p.x + dx, y: p.y + dy })), label: e.label && shift(e.label, dx, dy), depth: s.depth }));
+    const lines: Line[] = out.edges.map((e, k) => {
+      const [run, o] = [{ from: e.from, to: e.to, points: e.points.map((p) => ({ x: p.x + dx, y: p.y + dy })), depth: s.depth }, of(k)];
+      return typeof o === "number" ? { ...run, of: o, label: e.label && shift(e.label, dx, dy) } : { ...run, of: o };
+    });
     const dots = [boxes.get(START)!];
     const ends = finals.length > 0 ? [boxes.get(END)!] : [];
     for (const [id, local] of inner) {
       const b = boxes.get(id)!;
       const [ix, iy] = [b.x + (b.w - local.w) / 2, b.y + header + PAD];
       for (const [k, v] of local.boxes) boxes.set(k, shift(v, ix, iy));
-      lines.push(...local.lines.map((l) => ({ ...l, points: l.points.map((p) => ({ x: p.x + ix, y: p.y + iy })), label: l.label && shift(l.label, ix, iy) })));
+      lines.push(...local.lines.map((l) => relocate(l, (p) => ({ x: p.x + ix, y: p.y + iy }), (b) => shift(b, ix, iy))));
       dots.push(...local.dots.map((d) => shift(d, ix, iy)));
       ends.push(...local.ends.map((d) => shift(d, ix, iy)));
     }
     return { w: out.bounds.w, h: out.bounds.h, boxes, lines, dots, ends };
   };
   const local = lay(root);
-  const { x: ox, y: oy } = corner(local.w, local.h, options);
-  const boxes = new Map([...nodes.keys()].map((id) => [id, toRect(shift(local.boxes.get(id)!, ox, oy))]));
-  const lines = local.lines.map((l) => ({ ...l, points: l.points.map((p) => ({ x: p.x + ox, y: p.y + oy })), label: l.label && toRect(shift(l.label, ox, oy)) }));
+  const at = placer({ x: 0, y: 0, w: local.w, h: local.h }, options);
+  const boxes = new Map([...nodes.keys()].map((id) => [id, at.box(local.boxes.get(id)!)]));
+  const lines = local.lines.map((l) => relocate(l, at.point, at.box));
+  const [dots, ends] = [local.dots.map(at.box), local.ends.map(at.box)];
   const ground = (depth: number): Color => (depth % 2 === 0 ? theme.base00 : theme.base01);
 
   const drawn = (n: Node): SvgNode => {
@@ -190,15 +199,14 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     if (!n.inner) return el.g({}, [frame, title(b.center.y)]);
     return el.g({}, [frame, el.path({ d: `M${b.x} ${b.y + header}h${b.w}`, stroke: theme.base03 }), title(b.y + header / 2)]);
   };
-  const node = l0.root([
+  const node = base.root([
     [...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawn),
-    lines.map((l) => arrow(l.points, l0)),
-    local.dots.map((d) => el.circle({ cx: d.x + ox + d.w / 2, cy: d.y + oy + d.h / 2, r: DOT / 2, fill: theme.base05 })),
-    local.ends.map((d) => {
-      const [cx, cy] = [d.x + ox + d.w / 2, d.y + oy + d.h / 2];
-      return el.g({}, [el.circle({ cx, cy, r: RING / 2, fill: "none", stroke: theme.base05, strokeWidth: 1.5 }), el.circle({ cx, cy, r: RING / 2 - 4, fill: theme.base05 })]);
-    }),
-    lines.map((l) => l.label && chip(l.label, transitions[l.of as number]!.label!, { ...l0.smallLook, fill: theme.base05, ground: ground(l.depth) })),
+    lines.map((l) => arrow(l.points, base)),
+    dots.map(({ center: { x, y } }) => el.circle({ cx: x, cy: y, r: DOT / 2, fill: theme.base05 })),
+    ends.map(({ center: { x: cx, y: cy } }) =>
+      el.g({}, [el.circle({ cx, cy, r: RING / 2, fill: "none", stroke: theme.base05, strokeWidth: 1.5 }), el.circle({ cx, cy, r: RING / 2 - 4, fill: theme.base05 })]),
+    ),
+    lines.map((l) => typeof l.of === "number" && l.label && chip(l.label, transitions[l.of]!.label!, { ...base.smallLook, fill: theme.base05, ground: ground(l.depth) })),
   ]);
 
   const line = (pred: (l: (typeof lines)[number]) => boolean) => lines.find(pred);
@@ -223,7 +231,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
 
   return {
     node,
-    bounds: rect(ox, oy, local.w, local.h),
+    bounds: at.bounds,
     get: lookup("stateMachine()", boxes),
     edge,
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
@@ -260,4 +268,3 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   };
 }
 
-const toRect = (b: Box): Rect => rect(b.x, b.y, b.w, b.h);
