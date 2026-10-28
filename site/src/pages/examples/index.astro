@@ -1,5 +1,6 @@
 ---
 import { POSTER_WIDTH, sections, SOURCES } from "../../examples";
+import { themed } from "../../palettes";
 import Base from "../../layouts/Base.astro";
 
 /** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
@@ -25,7 +26,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
             {section.examples.map(({ name, scene }) => (
               <a class="card" href={`/examples/${name}`}>
                 <span class="shot" data-live={scene.src} data-light={scene.posters!.light} data-dark={scene.posters!.dark}>
-                  <img width={POSTER_WIDTH} height={Math.round((POSTER_WIDTH * scene.height) / scene.width)} alt="" decoding="async" />
+                  <img width={POSTER_WIDTH} height={Math.round((POSTER_WIDTH * scene.height) / scene.width)} alt="" decoding="async" data-themed={themed(scene.svg) ? "" : undefined} />
                 </span>
                 <span>
                   <b>{scene.title}</b>
@@ -45,29 +46,24 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
 </Base>
 
 <script>
+  import { frozen, PALETTECHANGE, playing, replay, show } from "../../scripts/palette";
   import { calm, scheme, THEMECHANGE } from "../../scripts/scheme";
 
   // A card shows a still until you hover it (or, on a touch screen, until it is mostly in view).
   // Only then does its SVG download, and it goes back to the still when you leave.
   const shots = document.querySelectorAll<HTMLElement>(".shot[data-live]");
   const image = (shot: HTMLElement) => shot.querySelector("img")!;
-  const stillOf = (shot: HTMLElement) => shot.dataset[scheme()]!;
+  const stillOf = (shot: HTMLElement) => frozen(image(shot), shot.dataset.live!, shot.dataset[scheme()]!);
   const run = (shot: HTMLElement) => {
-    if (shot.dataset.playing || calm.matches) return;
-    const live = new Image();
-    live.onload = () => {
-      if (shot.dataset.want !== "1") return;
-      image(shot).src = shot.dataset.live!;
-      shot.dataset.playing = "1";
-    };
+    if (shot.dataset.want === "1" || calm.matches) return;
     shot.dataset.want = "1";
-    live.src = shot.dataset.live!;
+    show(image(shot), playing(image(shot), shot.dataset.live!)).then((shown) => shown && (shot.dataset.playing = "1"));
   };
   const rest = (shot: HTMLElement) => {
+    if (shot.dataset.want !== "1") return;
     shot.dataset.want = "0";
-    if (!shot.dataset.playing) return;
-    image(shot).src = stillOf(shot);
     delete shot.dataset.playing;
+    show(image(shot), stillOf(shot));
   };
   if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
     let timer: ReturnType<typeof setTimeout>;
@@ -87,11 +83,19 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         const shot = entry.target as HTMLElement;
-        image(shot).src = stillOf(shot);
+        if (!shot.dataset.want) show(image(shot), stillOf(shot));
         near.unobserve(shot);
       }),
     { rootMargin: "250px 0px" },
   );
   shots.forEach((shot) => near.observe(shot));
-  addEventListener(THEMECHANGE, () => shots.forEach((shot) => !shot.dataset.playing && image(shot).src && (image(shot).src = stillOf(shot))));
+  // A recolored still follows light and dark by itself; a poster has to be swapped.
+  addEventListener(THEMECHANGE, () => shots.forEach((shot) => !shot.dataset.playing && image(shot).src && !image(shot).src.startsWith("blob:") && show(image(shot), stillOf(shot))));
+  addEventListener(PALETTECHANGE, () =>
+    shots.forEach((shot) => {
+      if (shot.dataset.playing) replay(image(shot));
+      else if (shot.dataset.want === "1") (delete shot.dataset.want, run(shot));
+      else if (image(shot).src) show(image(shot), stillOf(shot), { fade: true });
+    }),
+  );
 </script>
