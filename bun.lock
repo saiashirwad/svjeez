@@ -58,6 +58,16 @@
         "svjeez": ">=0.6.0 <1",
       },
     },
+    "packages/icons": {
+      "name": "@svjeez/icons",
+      "version": "0.6.1",
+      "devDependencies": {
+        "@tabler/icons": "3.50.0",
+        "@types/bun": "latest",
+        "lucide-static": "1.63.0",
+        "typescript": "latest",
+      },
+    },
     "packages/svjeez": {
       "name": "svjeez",
       "version": "0.6.1",
@@ -583,7 +593,11 @@
 
     "@svjeez/geo": ["@svjeez/geo@workspace:packages/geo"],
 
+    "@svjeez/icons": ["@svjeez/icons@workspace:packages/icons"],
+
     "@svjeez/vite": ["@svjeez/vite@workspace:packages/vite"],
+
+    "@tabler/icons": ["@tabler/icons@3.50.0", "", {}, "sha512-HflLxyrH1cqC7s7jzQGSjpsTAVIoaf7+/yHjbdM59rJQBMjliibp+LYhDPFxOMcwa1M8DNpOk6ENzQiWn9a1Dg=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.4", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A=="],
 
@@ -906,6 +920,8 @@
     "lines-and-columns": ["lines-and-columns@1.2.4", "", {}, "sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg=="],
 
     "lru-cache": ["lru-cache@11.5.3", "", {}, "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg=="],
+
+    "lucide-static": ["lucide-static@1.63.0", "", {}, "sha512-rTBVdPw3vlBsjxfdqm5Tvaa0jI8TMlVAeGefHRIvzUBnEyUE866zSZN34FwpJkXiGN8ER+sy1JCB0XOBEe/QgA=="],
 
     "magic-string": ["magic-string@1.4.5", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.6.0" } }, "sha512-oLLC2+YvQUfAa+vxoufE/yc1icb87M9iXIRqAoR/2EhE/8cb3SF/+Gi0c2By1B+5Vz2e2vQtUvHiu1+63Znh+w=="],
 

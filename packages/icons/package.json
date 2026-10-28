@@ -1,0 +1,35 @@
+{
+  "name": "@svjeez/icons",
+  "version": "0.6.1",
+  "private": true,
+  "description": "Tabler and Lucide icons as plain path data for svjeez scenes. No dependencies, and each icon imports on its own.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/icons"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/icon.ts",
+    "./tabler": "./src/tabler.ts",
+    "./lucide": "./src/lucide.ts"
+  },
+  "scripts": {
+    "generate": "bun scripts/generate.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "devDependencies": {
+    "@tabler/icons": "3.50.0",
+    "@types/bun": "latest",
+    "lucide-static": "1.63.0",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
