@@ -54,7 +54,7 @@ export default function build(): string {
       height: chart.bounds.h + 2 * M,
       duration: Math.ceil(trip.end) + 2,
       title: "Deploy flow",
-      desc: "A CI flowchart revealed rank by rank, then a comet runs from push to deploy.",
+      desc: "A CI flowchart revealed rank by rank, then a comet runs.",
       css,
       reducedMotion: { at: trip.end },
     },

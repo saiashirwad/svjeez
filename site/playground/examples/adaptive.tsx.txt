@@ -16,7 +16,7 @@ export default function build(): string {
       height: 140,
       duration: 4,
       title: "Adaptive",
-      desc: "Three dots rise in turn. The colors follow the viewer's light or dark mode.",
+      desc: "Three dots rise in turn, colored for light or dark mode.",
       css,
       reducedMotion: { at: 2 },
     },

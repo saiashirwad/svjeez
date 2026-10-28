@@ -7,16 +7,18 @@ import { tags as t } from "@lezer/highlight";
 
 // Colors come from custom properties in playground.css, so one theme serves light and dark.
 const chrome = EditorView.theme({
-  "&": { color: "var(--pg-ink)", backgroundColor: "transparent", fontSize: "0.8125rem", blockSize: "100%" },
+  "&": { color: "var(--pg-ink)", backgroundColor: "transparent", fontSize: "0.75rem", blockSize: "100%" },
   "&.cm-focused": { outline: "none" },
   ".cm-scroller": { fontFamily: "var(--pg-mono)", lineHeight: "1.65", overflow: "auto" },
-  ".cm-content": { caretColor: "var(--pg-accent)", paddingBlock: "0.75rem" },
+  ".cm-content": { caretColor: "var(--pg-accent)", paddingBlock: "1rem" },
   ".cm-line": { paddingInline: "0.75rem 1rem" },
   ".cm-cursor": { borderLeftColor: "var(--pg-accent)", borderLeftWidth: "2px" },
   ".cm-gutters": { backgroundColor: "transparent", color: "var(--pg-faint)", border: "none" },
   ".cm-lineNumbers .cm-gutterElement": { paddingInline: "0.75rem 0.25rem", minInlineSize: "2.5ch" },
-  ".cm-activeLine": { backgroundColor: "var(--pg-hover)" },
-  ".cm-activeLineGutter": { backgroundColor: "var(--pg-hover)", color: "var(--pg-muted)" },
+  // The current line shows only while the editor has focus, so a page that just loaded shows plain code.
+  "&.cm-focused .cm-activeLine": { backgroundColor: "var(--pg-hover)" },
+  "&.cm-focused .cm-activeLineGutter": { backgroundColor: "var(--pg-hover)", color: "var(--pg-muted)" },
+  ".cm-activeLine, .cm-activeLineGutter": { backgroundColor: "transparent" },
   "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": { backgroundColor: "var(--pg-select)" },
   "&.cm-focused .cm-matchingBracket": { backgroundColor: "var(--pg-select)", outline: "none" },
 });

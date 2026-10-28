@@ -145,18 +145,18 @@ pre.code .s { color: light-dark(oklch(50% 0.14 150), oklch(80% 0.14 150)) }
 pre.code .n { color: light-dark(oklch(60% 0.17 50), oklch(80% 0.13 60)) }
 pre.code .c { color: var(--muted) }
 
-/* The playground block: the embed fills it once it loads; until then a static editor and preview stand in. */
-.playground { --pg-wide: min(100vw - 2 * var(--gutter) - 1rem, 90rem); display: grid; min-block-size: 34rem; inline-size: var(--pg-wide); margin-inline: calc((100% - var(--pg-wide)) / 2) }
+/* The playground block: a window on the grid like every other. The embed fills it once it loads; until then a static editor and preview stand in. */
+.playground { display: grid; min-block-size: 34.5rem }
 .playground > * { grid-area: 1 / 1; min-inline-size: 0 }
 .playground [data-playground] { align-self: start }
 .playground [data-playground]:empty { display: none }
 .playground:has([data-playground]:not(:empty)) .pg-fallback { display: none }
 .pg-fallback { display: grid; grid-template-rows: auto 1fr; overflow: clip; background: var(--win-bg) }
-.pg-bar { display: flex; align-items: center; gap: 1rem; padding: 0.7rem 1rem; border-block-end: 1px solid var(--line); font: 500 0.8125rem / 1 var(--sans); color: var(--muted) }
-.pg-bar .dots { display: flex; gap: 0.4rem }
-.pg-bar i { inline-size: 0.7rem; block-size: 0.7rem; border-radius: 50%; background: var(--line) }
+.pg-bar { display: flex; align-items: center; gap: 0.75rem; min-block-size: 2.5rem; padding-inline: 1rem; border-block-end: 1px solid var(--line); font: 500 0.8125rem / 1 var(--sans); color: var(--muted) }
+.pg-bar .dots { display: flex; gap: 0.5rem }
+.pg-bar i { inline-size: 0.6875rem; block-size: 0.6875rem; border-radius: 50%; background: var(--line) }
 .pg-body { display: grid; grid-template-columns: minmax(0, 1fr); min-block-size: 0 }
-@media (min-width: 56rem) { .pg-body { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) } .pg-view { border-inline-start: 1px solid var(--line) } }
+@media (min-width: 56rem) { .pg-body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) } .pg-view { border-inline-start: 1px solid var(--line) } }
 .pg-body pre.code { border-radius: 0; box-shadow: none; background: transparent; font-size: 0.78rem; padding: 1.25rem; overflow-x: auto }
 .pg-view { display: grid; place-items: center; padding: 1.5rem }
 .pg-view .scene { inline-size: min(100%, 28rem) }

@@ -72,7 +72,7 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
 
   const img = h("img", { class: "pg-img", alt: "Preview of the scene", decoding: "async" });
   const tools = h("div", { class: "pg-tools" });
-  const stage = h("div", { class: "pg-stage" }, img, tools);
+  const stage = h("div", { class: "pg-stage" }, img);
   const stats = h("p", { class: "pg-stats", "aria-live": "off" });
   const error = h("p", { class: "pg-error", role: "status", hidden: "" });
   const editorHost = h("div", { class: "pg-editor" });
@@ -155,7 +155,7 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
   tools.append(restart, h("div", { class: "pg-segs", role: "group", "aria-label": "Preview colors" }, ...schemeButtons.map(([, b]) => b)));
 
   host.replaceChildren(
-    h("div", { class: "pg-tabs" }, h("div", { class: "pg-tablist", role: "group", "aria-label": "Examples" }, ...tabs), reset),
+    h("div", { class: "pg-tabs" }, h("span", { class: "pg-dots", "aria-hidden": "true" }, h("i"), h("i"), h("i")), h("div", { class: "pg-tablist", role: "group", "aria-label": "Examples" }, ...tabs), tools, reset),
     h(
       "div",
       { class: "pg-split" },

@@ -15,7 +15,7 @@ export default function build(): string {
       height: 120,
       duration: 5,
       title: "Saved",
-      desc: "A toast slides in, a check mark draws, then the toast leaves.",
+      desc: "A toast slides in, a check draws, then the toast leaves.",
       css,
       reducedMotion: { at: 2 },
     },

@@ -78,7 +78,7 @@ export default function build(): string {
       height: 200,
       duration: tl.end + 2,
       title: "Inline a helper",
-      desc: "A call to sum is replaced by a reduce, with a marker on the call and a note after the change.",
+      desc: "A call to sum becomes a reduce, with a marker and a note.",
       reducedMotion: { at: tl.end },
       css: `${colors}\n.sans text{font-family:system-ui,sans-serif}`,
     },
