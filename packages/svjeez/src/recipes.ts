@@ -222,9 +222,41 @@ const ramerDouglasPeucker = (
   return kept.sort((a, b) => a - b);
 };
 
+interface Point {
+  readonly t: Seconds;
+  readonly values: readonly number[];
+}
+
+const distance = (a: Point, b: Point): number =>
+  Math.hypot(...a.values.map((value, c) => value - b.values[c]!));
+
+/**
+ * The two points either side of a jump between `a` and `b`, or undefined if the lane moves smoothly between them.
+ * Halving the span shrinks a smooth change with it, so a change that survives every halving is a jump.
+ */
+const jump = (
+  a: Point,
+  b: Point,
+  at: (t: Seconds) => Point,
+  tolerance: number,
+): readonly [Point, Point] | undefined => {
+  const floor = Math.max(tolerance, distance(a, b) / 1000);
+  let [lo, hi] = [a, b];
+
+  for (let i = 0; i < 20; i++) {
+    const mid = at((lo.t + hi.t) / 2);
+    [lo, hi] = distance(lo, mid) > distance(mid, hi) ? [lo, mid] : [mid, hi];
+
+    if (distance(lo, hi) <= floor) return undefined;
+  }
+
+  return [lo, hi];
+};
+
 /**
  * Sample `(t) => values` densely, then keep only the keys each lane needs. Morphs come out dense and
- * holds sparse. Every channel or property returned needs a tolerance for its lane.
+ * holds sparse, and a jump in the function comes out as a cut. Every channel or property returned needs a
+ * tolerance for its lane.
  */
 export function sampled<T extends Tolerance, V extends Covered<T>>(
   sample: (t: Seconds) => V & { readonly [P in Exclude<keyof V, keyof Covered<T>>]: never },
@@ -244,23 +276,30 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
     (_, i) => i * step,
   ).concat(duration);
 
-  // SAFETY: sample returns V, keyed by numeric channel or property names; the check below requires every frame to have the same finite keys.
-  const frames = times.map(sample) as Partial<Record<Sampled, number>>[];
-
-  // SAFETY: a frame's keys are Sampled names, since frames come from sample() as checked just above.
+  // SAFETY: a frame's keys are Sampled names, since frames come from sample(), which returns V.
   const present = (frame: Partial<Record<Sampled, number>>) =>
     (Object.keys(frame) as Sampled[]).filter((channel) => Number.isFinite(frame[channel])).sort();
 
-  const channels = present(frames[0]!);
-  frames.forEach((frame, i) => {
+  // SAFETY: sample returns V, keyed by numeric channel or property names; frameAt requires every frame to have the same finite keys as frame 0.
+  const first = sample(0) as Partial<Record<Sampled, number>>;
+  const channels = present(first);
+
+  const frameAt = (t: Seconds): Partial<Record<Sampled, number>> => {
+    // SAFETY: as for frame 0 above.
+    const frame = t === 0 ? first : (sample(t) as Partial<Record<Sampled, number>>);
+
     if (present(frame).join() !== channels.join())
       throw new Error(
-        `sampled() returned different channels at t=${times[i]} than at t=0; every sample needs the same keys, each a finite number.`,
+        `sampled() returned different channels at t=${t} than at t=0; every sample needs the same keys, each a finite number.`,
       );
-  });
+
+    return frame;
+  };
+
+  const frames = times.map(frameAt);
   const lanes = groupBy(channels, (channel) => spec(channel).lane);
-  // SAFETY: every frame passed the same-keys check above, so frame 0 is an object of Sampled names to numbers.
-  let track: Motion = motion(frames[0]! as TargetValues);
+  // SAFETY: every frame passed the same-keys check in frameAt, so frame 0 is an object of Sampled names to numbers.
+  let track: Motion = motion(first as TargetValues);
 
   for (const [lane, members] of lanes) {
     // SAFETY: tolerance is keyed by lane names, and lane comes from spec(), so the lookup is a tolerance or undefined, which the check below rejects.
@@ -271,19 +310,45 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
         `sampled() needs a non-negative tolerance for \`${lane}\`, got ${tolerance}.`,
       );
 
-    const kept = ramerDouglasPeucker(
-      frames.map((frame) => members.map((channel) => frame[channel]!)),
-      tolerance,
-    );
+    const point = (t: Seconds, frame = frameAt(t)): Point => ({
+      t,
+      values: members.map((channel) => frame[channel]!),
+    });
 
-    for (let j = 1; j < kept.length; j++) {
-      const [from, to] = [kept[j - 1]!, kept[j]!];
-      const values = Object.fromEntries(members.map((channel) => [channel, frames[to]![channel]]));
-      // SAFETY: members are channels of this lane, and every frame holds each of them as a number, so values is a TargetValues.
-      track = track
-        .at(times[from]!)
-        .to(values as TargetValues, times[to]! - times[from]!, ease.linear);
+    // SAFETY: members are channels of this lane, so each point's values become a TargetValues of them.
+    const valuesOf = (at: Point) =>
+      Object.fromEntries(members.map((channel, c) => [channel, at.values[c]])) as TargetValues;
+
+    const runs: Point[][] = [[point(0, frames[0])]];
+
+    for (let i = 1; i < times.length; i++) {
+      const next = point(times[i]!, frames[i]);
+      const run = runs.at(-1)!;
+      const last = run.at(-1)!;
+      const cut = distance(last, next) > tolerance ? jump(last, next, point, tolerance) : undefined;
+
+      if (cut) {
+        if (cut[0].t > last.t) run.push(cut[0]);
+        runs.push(cut[1].t < next.t ? [cut[1], next] : [next]);
+      } else run.push(next);
     }
+
+    runs.forEach((run, r) => {
+      if (r > 0) track = track.at(run[0]!.t).set(valuesOf(run[0]!));
+
+      const kept =
+        run.length > 1
+          ? ramerDouglasPeucker(
+              run.map((at) => at.values),
+              tolerance,
+            )
+          : [];
+
+      for (let j = 1; j < kept.length; j++) {
+        const [from, to] = [run[kept[j - 1]!]!, run[kept[j]!]!];
+        track = track.at(from.t).to(valuesOf(to), to.t - from.t, ease.linear);
+      }
+    });
   }
 
   // SAFETY: every step was built from frame keys that are Sampled names, so track only moves keyof V & Sampled.

@@ -91,7 +91,7 @@ shake({ at: 2, over: 0.5 }, { x: 6 });               // damped shake on x, y or 
 wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; change the seed to reroll
 ```
 
-Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys.
+Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead.
 
 ```tsx
 sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translate: 1 } });

@@ -35,6 +35,16 @@ describe("motion timing", () => {
     expect(keyframes(svg)).toEqual(["0%,20%{opacity:0}30%,100%{opacity:1}"]);
   });
 
+  test("a cut right after a transition that ends the scene lands on 100%", () => {
+    const svg = scene(
+      <rect width={10} height={10} animation={motion({ x: 0 }).to({ x: 50 }, 10).set({ x: 0 })} />,
+    );
+
+    expect(keyframes(svg)).toEqual([
+      "0%,100%{translate:0px 0px}99.999%{translate:50px 0px;animation-timing-function:steps(1)}",
+    ]);
+  });
+
   test("a loop period snaps to divide the scene", () => {
     const svg = scene(
       <rect
