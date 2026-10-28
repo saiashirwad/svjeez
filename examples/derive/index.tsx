@@ -1,4 +1,4 @@
-import { derive, readout, tex } from "@svjeez/math";
+import { derive, counter, tex } from "@svjeez/math";
 import { motion, render } from "svjeez";
 import { tint } from "svjeez/extras";
 import { css, theme } from "../style";
@@ -43,7 +43,7 @@ const count = (t: number) => {
   return 144 * (1 - (1 - u) ** 3);
 };
 
-const value = readout(count, {
+const value = counter(count, {
   x: label.bounds.x + label.width + 14,
   y: 468,
   fontSize: 30,

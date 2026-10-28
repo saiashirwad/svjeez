@@ -235,7 +235,7 @@ export {
 
 export { derive, type Derivation, type DeriveOptions, type DeriveStep } from "./derive.ts";
 
-export { readout, type Readout, type ReadoutOptions, type ReadoutValue } from "./readout.ts";
+export { counter, type Counter, type CounterOptions, type CounterValue } from "./counter.ts";
 
 export {
   construct,

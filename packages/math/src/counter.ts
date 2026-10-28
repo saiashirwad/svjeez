@@ -3,12 +3,12 @@ import { defaultDark, tint, type Base16 } from "svjeez/extras";
 import { tex } from "./index.ts";
 
 /** A value from `at` on, until the next one. */
-export interface ReadoutValue {
+export interface CounterValue {
   readonly at: Seconds;
   readonly value: number;
 }
 
-export interface ReadoutOptions {
+export interface CounterOptions {
   /** Left of the number's box, or the point `anchor` names. Default 0. */
   readonly x?: number;
   /** Top of the number's box. Default 0. */
@@ -29,7 +29,7 @@ export interface ReadoutOptions {
   readonly step?: Seconds;
 }
 
-export interface Readout {
+export interface Counter {
   readonly node: SvgNode;
   readonly width: number;
   readonly height: number;
@@ -41,7 +41,7 @@ interface Change {
 }
 
 const isFunction = (
-  v: readonly ReadoutValue[] | ((t: Seconds) => number),
+  v: readonly CounterValue[] | ((t: Seconds) => number),
 ): v is (t: Seconds) => number => typeof v === "function";
 
 const MINUS = "-";
@@ -53,16 +53,16 @@ const format = (value: number, digits: number): string => {
 };
 
 const changes = (
-  values: readonly ReadoutValue[] | ((t: Seconds) => number),
+  values: readonly CounterValue[] | ((t: Seconds) => number),
   digits: number,
-  { duration, step = 0.1 }: ReadoutOptions,
+  { duration, step = 0.1 }: CounterOptions,
 ): Change[] => {
-  let timeline: ReadoutValue[];
+  let timeline: CounterValue[];
 
   if (isFunction(values)) {
     if (!(duration !== undefined && duration > 0) || !(step > 0))
       throw new Error(
-        `readout() of a function needs a positive duration and step, got duration ${duration} and step ${step}.`,
+        `counter() of a function needs a positive duration and step, got duration ${duration} and step ${step}.`,
       );
     timeline = Array.from({ length: Math.floor(duration / step) + 1 }, (_, i) => ({
       at: i * step,
@@ -71,7 +71,7 @@ const changes = (
   } else timeline = [...values].sort((a, b) => a.at - b.at);
 
   if (timeline.length === 0 || timeline.some((v) => !Number.isFinite(v.value + v.at)))
-    throw new Error("readout() needs at least one value, each with a finite time and number.");
+    throw new Error("counter() needs at least one value, each with a finite time and number.");
   const list: Change[] = [];
 
   for (const { at, value } of timeline) {
@@ -88,20 +88,20 @@ const changes = (
  * or a function of time to read at every `step`. Each place holds one glyph per distinct digit it ever shows, toggled by stepped
  * keyframes, so the output stays small however often the number changes.
  */
-export function readout(
-  values: readonly ReadoutValue[] | ((t: Seconds) => number),
-  options: ReadoutOptions = {},
-): Readout {
+export function counter(
+  values: readonly CounterValue[] | ((t: Seconds) => number),
+  options: CounterOptions = {},
+): Counter {
   const { fontSize = 32, digits = 0, theme = defaultDark, roll = 0, anchor = [0, 0] } = options;
 
   if (!Number.isInteger(digits) || digits < 0 || !(fontSize > 0) || !(roll >= 0))
     throw new Error(
-      `readout() needs a whole number of digits, a positive fontSize and a non-negative roll, got digits ${digits}, fontSize ${fontSize} and roll ${roll}.`,
+      `counter() needs a whole number of digits, a positive fontSize and a non-negative roll, got digits ${digits}, fontSize ${fontSize} and roll ${roll}.`,
     );
   const list = changes(values, digits, options);
 
   if (roll > 0 && list.some((c, i) => i > 0 && c.at - list[i - 1]!.at < roll))
-    throw new Error(`readout() changes faster than its roll of ${roll} seconds.`);
+    throw new Error(`counter() changes faster than its roll of ${roll} seconds.`);
 
   const point = digits > 0 ? digits + 1 : 0;
   const whole = Math.max(...list.map((c) => c.text.replace(MINUS, "").split(".")[0]!.length));

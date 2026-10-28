@@ -100,16 +100,16 @@ const d = derive(
 - A step's `note` is TeX set small beside the line after an arrow, such as `\div 2 \text{ both sides}`. In place it fades with the next change, and in a stack it stays.
 - `every` is the time from one change to the next, default 2.5, and `over` is how long a change takes, default 0.9. The result has `node`, `end`, `lines` (every line as a `tex()`, aligned) and `bounds`.
 
-## Readouts
+## Counters
 
-`readout(values, { x, y })` is a number that changes over time, typeset with the same glyphs as `tex()`.
+`counter(values, { x, y })` is a number that changes over time, typeset with the same glyphs as `tex()`.
 
 ```tsx
-const r = readout(
+const r = counter(
   [{ at: 0, value: 1 }, { at: 3, value: 3.14 }],
   { x: 100, y: 80, fontSize: 48, digits: 2, theme },
 );
-const counting = readout((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 0.05, x: 100, y: 200 });
+const counting = counter((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 0.05, x: 100, y: 200 });
 ```
 
 - A list of `{ at, value }` holds each value until the next. A function is read every `step` seconds, 0.1 by default, up to `duration`.

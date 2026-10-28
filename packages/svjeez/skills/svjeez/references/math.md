@@ -76,16 +76,16 @@ const d = derive(
 - A step's `note` is TeX set small beside the line after an arrow, such as `\div 2 \text{ both sides}`. In place it fades with the next change, and in a stack it stays.
 - `every` is the time from one change to the next, default 2.5, and `over` is how long a change takes, default 0.9. The result has `node`, `end`, `lines` (every line as a `tex()`, aligned) and `bounds`.
 
-## Readouts
+## Counters
 
-`readout(values, { x, y })` is a number that changes over time, typeset with the same glyphs as `tex()`.
+`counter(values, { x, y })` is a number that changes over time, typeset with the same glyphs as `tex()`.
 
 ```tsx
-const r = readout(
+const r = counter(
   [{ at: 0, value: 1 }, { at: 3, value: 3.14 }],
   { x: 100, y: 80, fontSize: 48, digits: 2, theme },
 );
-const counting = readout((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 0.05, x: 100, y: 200 });
+const counting = counter((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 0.05, x: 100, y: 200 });
 ```
 
 - A list of `{ at, value }` holds each value until the next. A function is read every `step` seconds, 0.1 by default, up to `duration`.
@@ -177,10 +177,10 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `epicycles() needs an outline with at least three points.` / `…with some length.` | The path is empty or a single point. |
 | `derive() found no "=" in step …` | Put an equals sign in every step, or pass `align` as the `\cssId` id in each. |
 | `derive() needs a step, a positive over that fits in every, …` | Pass at least one step, `over` above 0 and `every` at least `over`. |
-| `readout() needs at least one value, each with a finite time and number.` | Pass values with finite `at` and `value`. |
-| `readout() of a function needs a positive duration and step, …` | Pass `duration`, and a positive `step`. |
-| `readout() needs a whole number of digits, a positive fontSize and a non-negative roll, …` | Pass whole `digits` and `roll` of 0 or more. |
-| `readout() changes faster than its roll of … seconds.` | Lower `roll` or space the changes out. |
+| `counter() needs at least one value, each with a finite time and number.` | Pass values with finite `at` and `value`. |
+| `counter() of a function needs a positive duration and step, …` | Pass `duration`, and a positive `step`. |
+| `counter() needs a whole number of digits, a positive fontSize and a non-negative roll, …` | Pass whole `digits` and `roll` of 0 or more. |
+| `counter() changes faster than its roll of … seconds.` | Lower `roll` or space the changes out. |
 | `intersect() found no crossing of … and …. …` | The circles do not meet or the lines are parallel. Raise a radius, move a center, or change a line. |
 | `intersect() crossing (…, …) lies past the end of segment ….` | The crossing is off the segment. Draw it with `g.line()` so it runs on. |
 | `intersect() pick is 0 or 1, got ….` | Pass 0 or 1. |
