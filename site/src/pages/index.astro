@@ -190,6 +190,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
   class="home"
 >
   <link slot="head" rel="preload" as="image" href={s.hero.src} media="(prefers-reduced-motion: no-preference) and (min-width: 64rem)" />
+  <link slot="head" rel="preload" as="image" href={s.heroTall.src} media="(prefers-reduced-motion: no-preference) and (max-width: 63.99rem)" />
   <main>
     <section class="wrap hero g">
       <h1 class="c1-12">Make animated <span class="ul">SVGs</span> with TypeScript.</h1>
