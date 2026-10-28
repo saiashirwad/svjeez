@@ -1,14 +1,13 @@
-import { hexBytes } from "./color";
+import type { Color } from "./attributes";
+import { hexBytes, hexOf, type Hex } from "./color";
 import { def, type Ref } from "./defs";
 import { el } from "./el";
 import { num } from "./format";
 import type { Point } from "./layout/box";
 import type { SvgNode } from "./svg";
 
-export type Hex = `#${string}`;
-
 /** One character per color. `null` is a transparent pixel. */
-export type VoxelPalette = Readonly<Record<string, Hex | null>>;
+export type VoxelPalette = Readonly<Record<string, Color | null>>;
 
 declare const textureBrand: unique symbol;
 
@@ -23,8 +22,6 @@ export type VoxelFace = "top" | "north" | "south" | "east" | "west";
 
 /** Every face resolves: a bare texture covers all five, and any face not named falls back to `side`. */
 export type VoxelSkin = VoxelTexture | ({ readonly side: VoxelTexture } & { readonly [F in VoxelFace]?: VoxelTexture });
-
-const HEX = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
 
 /** The 8-digit forms carry alpha; `#rgb` and `#rrggbb` are always solid. */
 const alphaOf = (color: Hex): number => (color.length === 9 ? parseInt(color.slice(7), 16) : 255);
@@ -87,11 +84,11 @@ export const texture = (palette: VoxelPalette, art: string): VoxelTexture => {
   const rows = lines.map((line) => [...line.slice(indent).trimEnd()]);
   const width = rows[0]?.length ?? 0;
   if (width === 0) throw new Error("texture() needs at least one row of pixels.");
-  for (const color of Object.values(palette)) if (color !== null && !HEX.test(color)) throw new Error(`texture() takes #rgb, #rrggbb or #rrggbbaa colors, got ${color}.`);
+  const colors = new Map(Object.entries(palette).map(([key, color]) => [key, color === null ? null : hexOf(color, "texture()", true)]));
   const pixels = rows.map((row, y) => {
     if (row.length !== width) throw new Error(`texture() row ${y} has ${row.length} pixels; row 0 has ${width}.`);
     return row.map((key) => {
-      const color = palette[key];
+      const color = colors.get(key);
       if (color === undefined) throw new Error(`texture() row ${y} uses "${key}", which the palette lacks.`);
       return color;
     });

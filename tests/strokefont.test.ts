@@ -37,6 +37,14 @@ describe("strokeFont", () => {
     expect(glyphs[1]!.advance).toBeCloseTo(5, 9);
   });
 
+  test("reads the same font from a string, bytes or an ArrayBuffer", () => {
+    const markup = `<svg><defs><font horiz-adv-x="500"><font-face font-family="Tiny" units-per-em="1000" /><glyph unicode="a" d="M 0 0 L 0 500" /></font></defs></svg>`;
+    const bytes = new TextEncoder().encode(markup);
+    const [fromString, fromBytes, fromBuffer] = [strokeFont(markup), strokeFont(bytes), strokeFont(bytes.buffer as ArrayBuffer)];
+    expect(fromBytes.path("a", { size: 10 }).d).toBe(fromString.path("a", { size: 10 }).d);
+    expect(fromBuffer.path("a", { size: 10 }).d).toBe(fromString.path("a", { size: 10 }).d);
+  });
+
   test("throws on markup that is not an SVG font", () => {
     expect(() => strokeFont("<svg/>")).toThrow(/no <font>/);
   });

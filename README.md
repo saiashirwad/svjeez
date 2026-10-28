@@ -282,7 +282,7 @@ Textures are pixel art. A skin can use one texture for every face or different t
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/effects.svg" width="320" alt="A glowing word and a boiling hand-drawn house" />
 
-Photo filters: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })`, `fx.blur({ blur })`, `fx.shadow({ dx, dy, blur, color, opacity })`.
+Photo filters: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })`, `fx.blur(deviation)`, `fx.shadow({ dx, dy, blur, color, opacity })`.
 
 ## Images
 
@@ -363,9 +363,9 @@ Themes use base16 colors. `adaptive` switches between a dark and light theme.
 ### Explainers
 
 ```tsx
-import { Arrow, Callout, Focus, Marker, morph, read, timeline } from "svjeez/extras";
+import { Arrow, Callout, Focus, Marker, morph, readingTime, timeline } from "svjeez/extras";
 
-const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
+const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
 
 <>
   <Focus stops={[{ during: tl.intro, target: before.lines(2) }]} dim={0.3}>

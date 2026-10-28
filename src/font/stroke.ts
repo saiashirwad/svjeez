@@ -66,7 +66,7 @@ const smooth = (points: readonly Point[]): string => {
 
 /** Read an SVG font's markup. Glyph coordinates are y-up from the baseline, as SVG fonts store them. */
 export const strokeFont = Object.assign(
-  (markup: string | Uint8Array): StrokeFont => {
+  (markup: string | Uint8Array | ArrayBuffer): StrokeFont => {
     const text = typeof markup === "string" ? markup : new TextDecoder().decode(markup);
     const fontTag = /<font\b[^>]*>/.exec(text)?.[0];
     if (!fontTag) throw new Error("strokeFont() reads SVG fonts, and this has no <font> element.");

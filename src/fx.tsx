@@ -1,5 +1,5 @@
 import type { Color } from "./attributes";
-import { hexBytes } from "./color";
+import { hexBytes, hexOf } from "./color";
 import { def, type Ref } from "./defs";
 import { num } from "./format";
 import { ease, motion } from "./motion";
@@ -17,7 +17,7 @@ const glow = ({ blur = 5 }: { readonly blur?: number } = {}): Ref<"filter"> =>
     </>,
   );
 
-interface Boil {
+export interface BoilOptions {
   /** Displacement in px. */
   readonly strength?: number;
   /** Seed changes per second. */
@@ -31,7 +31,7 @@ interface Boil {
 const BOIL_FRAMES = 4;
 
 /** Hand-drawn boil: turbulence whose seed steps `rate` times a second, displacing the source by `strength` px. */
-const boil = ({ strength = 3, rate = 10, seed = 1, detail = 0.04 }: Boil = {}): Ref<"filter"> => {
+const boil = ({ strength = 3, rate = 10, seed = 1, detail = 0.04 }: BoilOptions = {}): Ref<"filter"> => {
   const start = Math.max(1, Math.round(seed));
   const period = BOIL_FRAMES / rate;
   return def.filter(
@@ -53,23 +53,23 @@ const boil = ({ strength = 3, rate = 10, seed = 1, detail = 0.04 }: Boil = {}): 
 const grayscale = ({ amount = 1 }: { readonly amount?: number } = {}): Ref<"filter"> =>
   def.filter({ colorInterpolationFilters: "sRGB" }, <feColorMatrix type="saturate" values={num(1 - Math.min(1, Math.max(0, amount)))} />);
 
-const channels = (hex: `#${string}`): [number, number, number] => {
-  if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) throw new Error(`duotone takes hex colors like "#1b1f3a", got "${hex}".`);
-  const [r, g, b] = hexBytes(hex);
+const channels = (color: Color): [number, number, number] => {
+  const [r, g, b] = hexBytes(hexOf(color, "fx.duotone()"));
   return [r / 255, g / 255, b / 255];
 };
 
-/** Map luminance (Rec. 709) onto a ramp from `dark` to `light`. Hex colors only. */
-const duotone = ({ dark, light }: { readonly dark: `#${string}`; readonly light: `#${string}` }): Ref<"filter"> => {
+/** Map luminance (Rec. 709) onto a ramp from `dark` to `light`. Hex colors only; others throw. */
+const duotone = ({ dark, light }: { readonly dark: Color; readonly light: Color }): Ref<"filter"> => {
   const [from, to] = [channels(dark), channels(light)];
   const row = (c: 0 | 1 | 2) => [0.2126, 0.7152, 0.0722].map((weight) => num((to[c] - from[c]) * weight, 4)).concat("0", num(from[c], 4));
   const values = [row(0), row(1), row(2), ["0", "0", "0", "1", "0"]].map((cells) => cells.join(" ")).join(" ");
   return def.filter({ colorInterpolationFilters: "sRGB" }, <feColorMatrix type="matrix" values={values} />);
 };
 
-const blur = ({ blur: deviation }: { readonly blur: number }): Ref<"filter"> => def.filter({}, <feGaussianBlur stdDeviation={deviation} />);
+/** Gaussian blur with the given standard deviation in px. */
+const blur = (deviation: number): Ref<"filter"> => def.filter({}, <feGaussianBlur stdDeviation={deviation} />);
 
-interface Shadow {
+export interface ShadowOptions {
   readonly dx?: number;
   readonly dy?: number;
   readonly blur?: number;
@@ -77,7 +77,7 @@ interface Shadow {
   readonly opacity?: number;
 }
 
-const shadow = ({ dx = 0, dy = 4, blur: deviation = 6, color = "black", opacity = 0.4 }: Shadow = {}): Ref<"filter"> =>
+const shadow = ({ dx = 0, dy = 4, blur: deviation = 6, color = "black", opacity = 0.4 }: ShadowOptions = {}): Ref<"filter"> =>
   def.filter({}, <feDropShadow dx={dx} dy={dy} stdDeviation={deviation} floodColor={color} floodOpacity={opacity} />);
 
 export const fx = { glow, boil, grayscale, duotone, blur, shadow } as const;

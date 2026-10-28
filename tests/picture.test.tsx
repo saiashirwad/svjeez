@@ -133,6 +133,7 @@ describe("<Picture>", () => {
     expect(frame(scene(<Picture src={photo} x={0} y={0} width={150} />))).toEqual([150, 100]);
     expect(frame(scene(<Picture src={photo} x={0} y={0} height={50} />))).toEqual([75, 50]);
     expect(frame(scene(<Picture src={photo} x={0} y={0} />))).toEqual([300, 200]);
+    expect(scene(<Picture src={photo} width={150} />)).toBe(scene(<Picture src={photo} x={0} y={0} width={150} />));
   });
 
   test("fit scales and centers the image in its frame, defaulting to cover", () => {
@@ -173,7 +174,7 @@ describe("image filters", () => {
 
   test("each filter renders into the scene", () => {
     expect(filtered(fx.grayscale({ amount: 0.25 }))).toContain('values="0.75"');
-    expect(filtered(fx.blur({ blur: 3 }))).toContain('stdDeviation="3"');
+    expect(filtered(fx.blur(3))).toContain('stdDeviation="3"');
     expect(filtered(fx.shadow({ dx: 2, dy: 3, blur: 4, color: "#000000", opacity: 0.5 }))).toContain("<feDropShadow");
   });
 
@@ -188,7 +189,7 @@ describe("image filters", () => {
     expect(apply(1)[0]).toBeCloseTo(1, 3);
     expect(apply(1)[1]).toBeCloseTo(128 / 255, 3);
     expect(svg).toContain('color-interpolation-filters="sRGB"');
-    expect(() => fx.duotone({ dark: "red" as `#${string}`, light: "#fff" })).toThrow("hex");
+    expect(() => fx.duotone({ dark: "red", light: "#fff" })).toThrow("fx.duotone() needs #rgb or #rrggbb colors, got red.");
   });
 });
 

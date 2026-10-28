@@ -6,8 +6,10 @@ export type Timeline<K extends string> = { readonly [P in K]: Span } & {
   readonly duration: Seconds;
   /** When the last scene ends. */
   readonly end: Seconds;
+  /** Fade in at the scene's start and out by its end. */
   show(name: K): Motion<"opacity">;
-  from(name: K): Motion<"opacity">;
+  /** Fade in at the scene's start and stay. */
+  enter(name: K): Motion<"opacity">;
 };
 
 export interface TimelineOptions {
@@ -74,7 +76,7 @@ export const travel = (points: readonly Point[], { at, speed = 300, over }: { re
 };
 
 /** Seconds a viewer needs to read `text`: words / wps + settle, at least `min`. */
-export const read = (text: string | readonly string[], { wps = 3.5, min = 2, settle = 1 } = {}): Seconds =>
+export const readingTime = (text: string | readonly string[], { wps = 3.5, min = 2, settle = 1 } = {}): Seconds =>
   Math.max(min, [text].flat().join(" ").split(/\s+/).filter(Boolean).length / wps + settle);
 
 /** Consecutive named scenes, `gap` apart. */
@@ -84,7 +86,7 @@ export function timeline<const T extends Record<string, Seconds>>(durations: T, 
   const spans: Record<string, Span> = {};
   let end = start;
   for (const [i, [name, length]] of Object.entries(durations).entries()) {
-    if (name === "duration" || name === "end" || name === "show" || name === "from") throw new Error(`"${name}" is reserved in a timeline.`);
+    if (name === "duration" || name === "end" || name === "show" || name === "enter") throw new Error(`"${name}" is reserved in a timeline.`);
     if (!(length > 0)) throw new Error(`Scene ${name} needs a positive length, got ${length}.`);
     const at = i === 0 ? start : end + gap;
     spans[name] = { at, over: length * pace };
@@ -100,6 +102,6 @@ export function timeline<const T extends Record<string, Seconds>>(durations: T, 
     duration: end - start,
     end,
     show: (name: string) => during(span(name), fade),
-    from: (name: string) => motion({ opacity: 0 }).at(span(name).at).to({ opacity: 1 }, Math.min(fade, span(name).over)),
+    enter: (name: string) => motion({ opacity: 0 }).at(span(name).at).to({ opacity: 1 }, Math.min(fade, span(name).over)),
   } as Timeline<keyof T & string>;
 }

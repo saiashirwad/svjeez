@@ -1,5 +1,5 @@
 import { def, rect, render } from "svjeez";
-import { Arrow, Callout, Camera, Focus, adaptive, code, during, read, timeline, tomorrow, tomorrowNight, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { Arrow, Callout, Camera, Focus, adaptive, code, during, readingTime, timeline, tomorrow, tomorrowNight, appWindow, type CodeRun, type CodeTokens } from "svjeez/extras";
 
 const W = 1000;
 const H = 620;
@@ -46,7 +46,7 @@ const captions = {
   respond: "respond() shapes what the client sees.",
 };
 const tl = timeline(
-  Object.fromEntries(Object.entries(captions).map(([name, text]) => [name, read(text, { settle: name === "overview" ? 0.5 : 2 })])) as Record<keyof typeof captions, number>,
+  Object.fromEntries(Object.entries(captions).map(([name, text]) => [name, readingTime(text, { settle: name === "overview" ? 0.5 : 2 })])) as Record<keyof typeof captions, number>,
   { gap: 0.15, pace: 0.7 },
 );
 

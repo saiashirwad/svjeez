@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, rect, render, type Motion } from "svjeez";
-import { Focus, Marker, adaptive, code, cut, defaultDark, defaultLight, morph, read, reveal, terminal, timeline, travel, typewriter, visible, appWindow } from "svjeez/extras";
+import { Focus, Marker, adaptive, code, cut, defaultDark, defaultLight, morph, readingTime, reveal, terminal, timeline, travel, typewriter, visible, appWindow } from "svjeez/extras";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -77,10 +77,10 @@ describe("pacing", () => {
     expect([beats.setup, beats.punchline, beats.duration, beats.end]).toEqual([{ at: 3, over: 1 }, { at: 4.5, over: 2 }, 3.5, 6.5]);
   });
 
-  test("read holds for words / wps + settle, at least min", () => {
-    expect(read("one two three four five six seven")).toBe(3);
-    expect(read(["one two three", "four five six seven"], { wps: 7, settle: 0, min: 0 })).toBe(1);
-    expect(read("hi")).toBe(2);
+  test("readingTime holds for words / wps + settle, at least min", () => {
+    expect(readingTime("one two three four five six seven")).toBe(3);
+    expect(readingTime(["one two three", "four five six seven"], { wps: 7, settle: 0, min: 0 })).toBe(1);
+    expect(readingTime("hi")).toBe(2);
   });
 });
 
@@ -203,6 +203,13 @@ describe("time helpers", () => {
   test("cut is on only during its span, with no fade either side", () => {
     expect([0.9, 1.01, 2.99, 3.01].map((t) => at(cut({ at: 1, over: 2 }), t).opacity)).toEqual([0, 1, 1, 0]);
     expect([0, 0.5, 1.01].map((t) => at(cut({ at: 0, over: 1 }), t).opacity)).toEqual([1, 1, 0]);
+  });
+
+  test("a timeline's show fades a scene in and out, and its enter fades in and stays", () => {
+    const tl = timeline({ intro: 4, body: 4 }, { fade: 0.5 });
+    expect([3, 6, 50].map((t) => at(tl.show("body"), t).opacity)).toEqual([0, 1, 0]);
+    expect([3, 6, 50].map((t) => at(tl.enter("body"), t).opacity)).toEqual([0, 1, 1]);
+    expect(() => timeline({ enter: 1 })).toThrow('"enter" is reserved');
   });
 
   test("typewriter reports when each line types, a blank line taking only its newline", () => {

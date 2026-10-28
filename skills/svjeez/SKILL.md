@@ -128,7 +128,7 @@ const logo = picture('<svg viewBox="0 0 40 40">...</svg>');                   //
 
 `picture()` sniffs the format from the bytes (svg, png, jpeg, gif, webp), never the extension, and reads the intrinsic size from the header, after any EXIF rotation. It throws on anything else. `<Picture>` takes `x`, `y` and `width` and/or `height` (one given derives the other from the aspect ratio; none uses the intrinsic size), `fit` (`cover` default, `contain`, `fill`), `radius`, `filter`, `opacity`, `class` and `alt` (omit it and the picture is `aria-hidden`). `animation` moves the inner image while the frame stays put, so `scale` zooms about the frame's center, clipped to the frame. To animate the whole picture, wrap it in an animated `<g>`. Draw a picture as often as you like: its bytes go into the file once.
 
-Filters that suit photos: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })` (hex colors, maps luminance onto the ramp), `fx.blur({ blur })`, `fx.shadow({ dx, dy, blur, color, opacity })`.
+Filters that suit photos: `fx.grayscale({ amount })`, `fx.duotone({ dark, light })` (hex colors, maps luminance onto the ramp), `fx.blur(deviation)`, `fx.shadow({ dx, dy, blur, color, opacity })`.
 
 Before you embed:
 
@@ -201,7 +201,7 @@ const kw = (text: string): Run => ["keyword", text];
 const src = code([[kw("const"), " total ", ["punct", "="], " ", ["fn", "sum", "call"], ["punct", "();"]]], { x: 40, y: 60, fontSize: 16, theme });
 src.get("call"); src.find("total"); src.lines(1, 2); src.at(2, 8); // Rects and Points to aim at
 
-const tl = timeline({ intro: read("One piece of state"), change: 5, outro: 3 }, { gap: 0.5 }); // named spans
+const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5 }); // named spans
 morph([before, after], { at: [tl.change.at], gutter: true }); // { node, spans, end }: moves surviving words, fades the rest
 typewriter(src, { at: 1, cps: 28, cursor: true });  // { node, end, spans }: spans[i] is when line i+1 types
 reveal(src, { at: 1, step: 0.6 });                  // a paragraph at a time: { node, spans, end }

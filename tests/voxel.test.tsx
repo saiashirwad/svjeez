@@ -134,7 +134,7 @@ describe("voxel.texture", () => {
   test("rejects a ragged row, an unknown key and a color it cannot shade", () => {
     expect(() => voxel.texture({ a: "#fff" }, "aa\na")).toThrow(/row 1/);
     expect(() => voxel.texture({ a: "#fff" }, "ab")).toThrow(/"b"/);
-    expect(() => voxel.texture({ a: "red" as "#fff" }, "a")).toThrow(/red/);
+    expect(() => voxel.texture({ a: "red" }, "a")).toThrow("texture() needs #rgb, #rrggbb or #rrggbbaa colors, got red.");
   });
 });
 

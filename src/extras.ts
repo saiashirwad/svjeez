@@ -1,4 +1,4 @@
-export { timeline, during, cut, read, visible, travel, type Beats, type Timeline, type TimelineOptions } from "./extras/timeline";
+export { timeline, during, cut, readingTime, visible, travel, type Beats, type Timeline, type TimelineOptions } from "./extras/timeline";
 export { code, type Code, type CodeOptions, type CodeToken, type CodeTokens, type CodeRun, type CodePiece, type CodeWord, type CodeMetrics } from "./extras/code";
 export { morph, type MorphOptions } from "./extras/morph";
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";

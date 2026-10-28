@@ -189,8 +189,9 @@ const FITS = ["contain", "cover", "fill"] as const;
 
 export interface PictureProps {
   readonly src: PictureData;
-  readonly x: number;
-  readonly y: number;
+  /** Frame position. Default 0. */
+  readonly x?: number;
+  readonly y?: number;
   /** With only one of width and height, the other follows the aspect ratio. With neither, the intrinsic size. */
   readonly width?: number;
   readonly height?: number;
@@ -217,7 +218,7 @@ const symbolOf = (src: PictureData): Ref<"symbol"> => {
 };
 
 /** An embedded image in a fixed frame. `scale` on `animation` zooms about the frame's center, clipped to the frame. */
-export function Picture({ src, x, y, width, height, fit = "cover", radius, filter, opacity, class: className, alt, animation }: PictureProps): SvgNode {
+export function Picture({ src, x = 0, y = 0, width, height, fit = "cover", radius, filter, opacity, class: className, alt, animation }: PictureProps): SvgNode {
   const w = width ?? (height === undefined ? src.width : (height * src.width) / src.height);
   const h = height ?? (width === undefined ? src.height : (width * src.height) / src.width);
   const [sx, sy] = fit === "fill" ? [w / src.width, h / src.height] : Array(2).fill((fit === "cover" ? Math.max : Math.min)(w / src.width, h / src.height));

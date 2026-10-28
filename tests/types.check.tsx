@@ -90,8 +90,6 @@ export const invalid = [
   voxel.scene({ camera: eye, blocks: [{ at: [0, 0, 0], skin: { top: stone } }] }),
   // @ts-expect-error a block's <use> cannot draw
   voxel.scene({ camera: eye, blocks: [{ at: [0, 0, 0], skin: stone, animation: draw({ at: 0, over: 1 }) }] }),
-  // @ts-expect-error a texture palette takes hex colors, which it can shade
-  voxel.texture({ s: "gray" }, "s"),
   // @ts-expect-error length × length
   mul(length(1), length(2)),
   // @ts-expect-error a length property times a length
