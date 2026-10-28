@@ -1,5 +1,5 @@
 import type { Color } from "./attributes";
-import { hexBytes, hexOf } from "./color";
+import { hexBytes, hexOf, type Hex } from "./color";
 import { def, type Ref } from "./defs";
 import { num } from "./format";
 import { ease, motion } from "./motion";
@@ -53,13 +53,13 @@ const boil = ({ strength = 3, rate = 10, seed = 1, detail = 0.04 }: BoilOptions 
 const grayscale = ({ amount = 1 }: { readonly amount?: number } = {}): Ref<"filter"> =>
   def.filter({ colorInterpolationFilters: "sRGB" }, <feColorMatrix type="saturate" values={num(1 - Math.min(1, Math.max(0, amount)))} />);
 
-const channels = (color: Color): [number, number, number] => {
+const channels = (color: Hex): [number, number, number] => {
   const [r, g, b] = hexBytes(hexOf(color, "fx.duotone()"));
   return [r / 255, g / 255, b / 255];
 };
 
 /** Map luminance (Rec. 709) onto a ramp from `dark` to `light`. Hex colors only; others throw. */
-const duotone = ({ dark, light }: { readonly dark: Color; readonly light: Color }): Ref<"filter"> => {
+const duotone = ({ dark, light }: { readonly dark: Hex; readonly light: Hex }): Ref<"filter"> => {
   const [from, to] = [channels(dark), channels(light)];
   const row = (c: 0 | 1 | 2) => [0.2126, 0.7152, 0.0722].map((weight) => num((to[c] - from[c]) * weight, 4)).concat("0", num(from[c], 4));
   const values = [row(0), row(1), row(2), ["0", "0", "0", "1", "0"]].map((cells) => cells.join(" ")).join(" ");

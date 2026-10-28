@@ -1,4 +1,3 @@
-import type { Color } from "./attributes";
 import { hexBytes, hexOf, type Hex } from "./color";
 import { def, type Ref } from "./defs";
 import { el } from "./el";
@@ -7,7 +6,7 @@ import type { Point } from "./layout/box";
 import type { SvgNode } from "./svg";
 
 /** One character per color. `null` is a transparent pixel. */
-export type VoxelPalette = Readonly<Record<string, Color | null>>;
+export type VoxelPalette = Readonly<Record<string, Hex | null>>;
 
 declare const textureBrand: unique symbol;
 
