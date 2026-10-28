@@ -1,6 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 358 560" width="358" height="560" role="img" aria-labelledby="t d">
-  <title id="t">svjeez live tweaking</title>
-  <desc id="d">A short TSX scene beside the flower it draws. Three values change in turn, the number of petals, the color and the draw time, and each time the flower draws itself again with the new value.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 358 640" width="358" height="640" role="img" aria-labelledby="t d">
+  <title id="t">svjeez: a day on one timeline</title>
+  <desc id="d">A motion() chain beside the sky it paints. The sky turns from dawn to noon, holds, goes to dusk and night, then back to dawn, while a sun arcs over two hills. Each line of the chain lights up while its step plays.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="0" y="0" width="358" height="272" rx="20"/>
+    </clipPath>
+  </defs>
   <style><![CDATA[
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
@@ -8,252 +13,185 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
 .round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
 
-.a{animation-duration:16s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
-@keyframes k1{0%,23.125%,32.812%,100%{opacity:0}24.062%,27.812%{opacity:1}}
+.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@keyframes k1{0%,20%,100%{opacity:0}1.5%,18.5%{opacity:1}}
 .m1{animation-name:k1}
-@keyframes k2{0%,46.563%,56.25%,100%{opacity:0}47.5%,51.25%{opacity:1}}
+@keyframes k2{0%,20%,40%,100%{opacity:0}21.5%,38.5%{opacity:1}}
 .m2{animation-name:k2}
-@keyframes k3{0%,70%,79.688%,100%{opacity:0}70.938%,74.688%{opacity:1}}
+@keyframes k3{0%,40%,60%,100%{opacity:0}41.5%,58.5%{opacity:1}}
 .m3{animation-name:k3}
-@keyframes k4{0%,23.125%{opacity:1}24.375%,100%{opacity:0}}
+@keyframes k4{0%,60%,75%,100%{opacity:0}61.5%,73.5%{opacity:1}}
 .m4{animation-name:k4}
-@keyframes k5{0%,23.125%{opacity:0}24.375%,100%{opacity:1}}
+@keyframes k5{0%,75%,85%,100%{opacity:0}76.5%,83.5%{opacity:1}}
 .m5{animation-name:k5}
-@keyframes k6{0%,46.563%{opacity:1}47.813%,100%{opacity:0}}
+@keyframes k6{0%,85%,100%{opacity:0}86.5%,98.5%{opacity:1}}
 .m6{animation-name:k6}
-@keyframes k7{0%,46.563%{opacity:0}47.813%,100%{opacity:1}}
+@keyframes k7{0%,100%{fill:#FFB38A}20%,40%{fill:#8CCBFF}60%{fill:#FF7E5F}75%,85%{fill:#2B2F66}}
 .m7{animation-name:k7}
-@keyframes k8{0%,70%{opacity:1}71.25%,100%{opacity:0}}
+@keyframes k8{0%,60%,100%{translate:0px 60px}30%{translate:0px -170px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
 .m8{animation-name:k8}
-@keyframes k9{0%,70%{opacity:0}71.25%,100%{opacity:1}}
-.m9{animation-name:k9}
-@keyframes k10{0%,3.75%{stroke-dashoffset:1;visibility:hidden}13.125%,100%{stroke-dashoffset:0;visibility:visible}}
-.m10{animation-name:k10}
-@keyframes k11{0%,4.375%{stroke-dashoffset:1;visibility:hidden}13.75%,100%{stroke-dashoffset:0;visibility:visible}}
-.m11{animation-name:k11}
-@keyframes k12{0%,5%{stroke-dashoffset:1;visibility:hidden}14.375%,100%{stroke-dashoffset:0;visibility:visible}}
-.m12{animation-name:k12}
-@keyframes k13{0%,5.625%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
-.m13{animation-name:k13}
-@keyframes k14{0%,6.25%{stroke-dashoffset:1;visibility:hidden}15.625%,100%{stroke-dashoffset:0;visibility:visible}}
-.m14{animation-name:k14}
-@keyframes k15{0%,6.875%{stroke-dashoffset:1;visibility:hidden}16.25%,100%{stroke-dashoffset:0;visibility:visible}}
-.m15{animation-name:k15}
-@keyframes k16{0%,3.125%,25%,100%{opacity:0}3.438%,23.125%{opacity:1}}
-.m16{animation-name:k16}
-@keyframes k17{0%,25.313%{stroke-dashoffset:1;visibility:hidden}34.688%,100%{stroke-dashoffset:0;visibility:visible}}
-.m17{animation-name:k17}
-@keyframes k18{0%,25.937%{stroke-dashoffset:1;visibility:hidden}35.313%,100%{stroke-dashoffset:0;visibility:visible}}
-.m18{animation-name:k18}
-@keyframes k19{0%,26.563%{stroke-dashoffset:1;visibility:hidden}35.938%,100%{stroke-dashoffset:0;visibility:visible}}
-.m19{animation-name:k19}
-@keyframes k20{0%,27.187%{stroke-dashoffset:1;visibility:hidden}36.563%,100%{stroke-dashoffset:0;visibility:visible}}
-.m20{animation-name:k20}
-@keyframes k21{0%,27.813%{stroke-dashoffset:1;visibility:hidden}37.188%,100%{stroke-dashoffset:0;visibility:visible}}
-.m21{animation-name:k21}
-@keyframes k22{0%,28.438%{stroke-dashoffset:1;visibility:hidden}37.813%,100%{stroke-dashoffset:0;visibility:visible}}
-.m22{animation-name:k22}
-@keyframes k23{0%,29.063%{stroke-dashoffset:1;visibility:hidden}38.438%,100%{stroke-dashoffset:0;visibility:visible}}
-.m23{animation-name:k23}
-@keyframes k24{0%,29.688%{stroke-dashoffset:1;visibility:hidden}39.063%,100%{stroke-dashoffset:0;visibility:visible}}
-.m24{animation-name:k24}
-@keyframes k25{0%,30.312%{stroke-dashoffset:1;visibility:hidden}39.688%,100%{stroke-dashoffset:0;visibility:visible}}
-.m25{animation-name:k25}
-@keyframes k26{0%,24.688%,48.438%,100%{opacity:0}25%,46.563%{opacity:1}}
-.m26{animation-name:k26}
-@keyframes k27{0%,48.75%{stroke-dashoffset:1;visibility:hidden}58.125%,100%{stroke-dashoffset:0;visibility:visible}}
-.m27{animation-name:k27}
-@keyframes k28{0%,49.375%{stroke-dashoffset:1;visibility:hidden}58.75%,100%{stroke-dashoffset:0;visibility:visible}}
-.m28{animation-name:k28}
-@keyframes k29{0%,50%{stroke-dashoffset:1;visibility:hidden}59.375%,100%{stroke-dashoffset:0;visibility:visible}}
-.m29{animation-name:k29}
-@keyframes k30{0%,50.625%{stroke-dashoffset:1;visibility:hidden}60%,100%{stroke-dashoffset:0;visibility:visible}}
-.m30{animation-name:k30}
-@keyframes k31{0%,51.25%{stroke-dashoffset:1;visibility:hidden}60.625%,100%{stroke-dashoffset:0;visibility:visible}}
-.m31{animation-name:k31}
-@keyframes k32{0%,51.875%{stroke-dashoffset:1;visibility:hidden}61.25%,100%{stroke-dashoffset:0;visibility:visible}}
-.m32{animation-name:k32}
-@keyframes k33{0%,52.5%{stroke-dashoffset:1;visibility:hidden}61.875%,100%{stroke-dashoffset:0;visibility:visible}}
-.m33{animation-name:k33}
-@keyframes k34{0%,53.125%{stroke-dashoffset:1;visibility:hidden}62.5%,100%{stroke-dashoffset:0;visibility:visible}}
-.m34{animation-name:k34}
-@keyframes k35{0%,53.75%{stroke-dashoffset:1;visibility:hidden}63.125%,100%{stroke-dashoffset:0;visibility:visible}}
-.m35{animation-name:k35}
-@keyframes k36{0%,48.125%,71.875%,100%{opacity:0}48.438%,70%{opacity:1}}
-.m36{animation-name:k36}
-@keyframes k37{0%,72.188%{stroke-dashoffset:1;visibility:hidden}75.313%,100%{stroke-dashoffset:0;visibility:visible}}
-.m37{animation-name:k37}
-@keyframes k38{0%,72.813%{stroke-dashoffset:1;visibility:hidden}75.938%,100%{stroke-dashoffset:0;visibility:visible}}
-.m38{animation-name:k38}
-@keyframes k39{0%,73.438%{stroke-dashoffset:1;visibility:hidden}76.563%,100%{stroke-dashoffset:0;visibility:visible}}
-.m39{animation-name:k39}
-@keyframes k40{0%,74.063%{stroke-dashoffset:1;visibility:hidden}77.188%,100%{stroke-dashoffset:0;visibility:visible}}
-.m40{animation-name:k40}
-@keyframes k41{0%,74.688%{stroke-dashoffset:1;visibility:hidden}77.813%,100%{stroke-dashoffset:0;visibility:visible}}
-.m41{animation-name:k41}
-@keyframes k42{0%,75.313%{stroke-dashoffset:1;visibility:hidden}78.438%,100%{stroke-dashoffset:0;visibility:visible}}
-.m42{animation-name:k42}
-@keyframes k43{0%,75.938%{stroke-dashoffset:1;visibility:hidden}79.063%,100%{stroke-dashoffset:0;visibility:visible}}
-.m43{animation-name:k43}
-@keyframes k44{0%,76.563%{stroke-dashoffset:1;visibility:hidden}79.688%,100%{stroke-dashoffset:0;visibility:visible}}
-.m44{animation-name:k44}
-@keyframes k45{0%,77.188%{stroke-dashoffset:1;visibility:hidden}80.313%,100%{stroke-dashoffset:0;visibility:visible}}
-.m45{animation-name:k45}
-@keyframes k46{0%,71.563%{opacity:0}71.875%,100%{opacity:1}}
-.m46{animation-name:k46}
-@keyframes k47{0%,96.875%{opacity:1}100%{opacity:0}}
-.m47{animation-name:k47}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-13.15s!important;animation-play-state:paused!important}}
+@keyframes k9{0%{translate:-200px 0px}60%,100%{translate:200px 0px}}
+.m9{animation-name:k9;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-3s!important;animation-play-state:paused!important}}
 ]]></style>
-  <rect x="0.5" y="0.5" width="357" height="559" rx="20" fill="var(--base01)"/>
-  <line x1="20" y1="316" x2="338" y2="316" stroke="var(--base02)" stroke-width="1"/>
-  <g class="a m47">
-    <g class="mono">
-      <rect x="116" y="341" width="12.6" height="25.8" rx="4" fill="#0A6CFF" fill-opacity="0.14" class="a m1"/>
-      <rect x="109.4" y="360.8" width="65.4" height="25.8" rx="4" fill="#FF9F0A" fill-opacity="0.14" class="a m2"/>
-      <rect x="102.8" y="380.6" width="25.8" height="25.8" rx="4" fill="#FF9F0A" fill-opacity="0.14" class="a m3"/>
-      <g>
-        <text x="20" y="357.75" font-family="monospace" font-size="11" fill="var(--base0E)">const</text>
-        <text x="59.6" y="357.75" font-family="monospace" font-size="11" fill="var(--base05)">petals</text>
-        <text x="105.8" y="357.75" font-family="monospace" font-size="11" fill="var(--base04)">=</text>
-        <text x="125.6" y="357.75" font-family="monospace" font-size="11" fill="var(--base04)">;</text>
-        <text x="20" y="377.55" font-family="monospace" font-size="11" fill="var(--base0E)">const</text>
-        <text x="59.6" y="377.55" font-family="monospace" font-size="11" fill="var(--base05)">color</text>
-        <text x="99.2" y="377.55" font-family="monospace" font-size="11" fill="var(--base04)">=</text>
-        <text x="171.8" y="377.55" font-family="monospace" font-size="11" fill="var(--base04)">;</text>
-        <text x="20" y="397.35" font-family="monospace" font-size="11" fill="var(--base0E)">const</text>
-        <text x="59.6" y="397.35" font-family="monospace" font-size="11" fill="var(--base05)">over</text>
-        <text x="92.6" y="397.35" font-family="monospace" font-size="11" fill="var(--base04)">=</text>
-        <text x="125.6" y="397.35" font-family="monospace" font-size="11" fill="var(--base04)">;</text>
-        <text x="20" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">{</text>
-        <text x="26.6" y="436.95" font-family="monospace" font-size="11" fill="var(--base05)">Array</text>
-        <text x="59.6" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
-        <text x="66.2" y="436.95" font-family="monospace" font-size="11" fill="var(--base0D)">from</text>
-        <text x="92.6" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
-        <text x="112.4" y="436.95" font-family="monospace" font-size="11" fill="var(--base05)">length</text>
-        <text x="152" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
-        <text x="165.2" y="436.95" font-family="monospace" font-size="11" fill="var(--base05)">petals</text>
-        <text x="211.4" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
-        <text x="231.2" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">(</text>
-        <text x="237.8" y="436.95" font-family="monospace" font-size="11" fill="var(--base05)">_</text>
-        <text x="244.4" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">,</text>
-        <text x="257.6" y="436.95" font-family="monospace" font-size="11" fill="var(--base05)">i</text>
-        <text x="264.2" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">)</text>
-        <text x="277.4" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">=&gt;</text>
-        <text x="297.2" y="436.95" font-family="monospace" font-size="11" fill="var(--base04)">(</text>
-        <text x="33.2" y="456.75" font-family="monospace" font-size="11" fill="var(--base08)">&lt;path</text>
-        <text x="72.8" y="456.75" font-family="monospace" font-size="11" fill="var(--base05)">d</text>
-        <text x="79.4" y="456.75" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
-        <text x="92.6" y="456.75" font-family="monospace" font-size="11" fill="var(--base05)">petal</text>
-        <text x="125.6" y="456.75" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
-        <text x="138.8" y="456.75" font-family="monospace" font-size="11" fill="var(--base05)">stroke</text>
-        <text x="178.4" y="456.75" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
-        <text x="191.6" y="456.75" font-family="monospace" font-size="11" fill="var(--base05)">color</text>
-        <text x="224.6" y="456.75" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
-        <text x="46.4" y="476.55" font-family="monospace" font-size="11" fill="var(--base05)">transform</text>
-        <text x="105.8" y="476.55" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
-        <text x="119" y="476.55" font-family="monospace" font-size="11" fill="var(--base0B)">`rotate(${(i</text>
-        <text x="204.8" y="476.55" font-family="monospace" font-size="11" fill="var(--base0B)">*</text>
-        <text x="218" y="476.55" font-family="monospace" font-size="11" fill="var(--base0B)">360)</text>
-        <text x="251" y="476.55" font-family="monospace" font-size="11" fill="var(--base0B)">/</text>
-        <text x="264.2" y="476.55" font-family="monospace" font-size="11" fill="var(--base0B)">petals})`</text>
-        <text x="323.6" y="476.55" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
-        <text x="46.4" y="496.35" font-family="monospace" font-size="11" fill="var(--base05)">animation</text>
-        <text x="105.8" y="496.35" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
-        <text x="119" y="496.35" font-family="monospace" font-size="11" fill="var(--base0D)">draw</text>
-        <text x="145.4" y="496.35" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
-        <text x="165.2" y="496.35" font-family="monospace" font-size="11" fill="var(--base05)">at</text>
-        <text x="178.4" y="496.35" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
-        <text x="191.6" y="496.35" font-family="monospace" font-size="11" fill="var(--base05)">i</text>
-        <text x="204.8" y="496.35" font-family="monospace" font-size="11" fill="var(--base05)">/</text>
-        <text x="218" y="496.35" font-family="monospace" font-size="11" fill="var(--base09)">10</text>
-        <text x="231.2" y="496.35" font-family="monospace" font-size="11" fill="var(--base04)">,</text>
-        <text x="244.4" y="496.35" font-family="monospace" font-size="11" fill="var(--base05)">over</text>
-        <text x="277.4" y="496.35" font-family="monospace" font-size="11" fill="var(--base04)">})}</text>
-        <text x="303.8" y="496.35" font-family="monospace" font-size="11" fill="var(--base08)">/&gt;</text>
-        <text x="20" y="516.15" font-family="monospace" font-size="11" fill="var(--base04)">))}</text>
-      </g>
-      <g class="a m4">
-        <g>
-          <text x="119" y="357.75" font-family="monospace" font-size="11" fill="var(--base09)">6</text>
-        </g>
-      </g>
-      <g class="a m5">
-        <g>
-          <text x="119" y="357.75" font-family="monospace" font-size="11" fill="var(--base09)">9</text>
-        </g>
-      </g>
-      <g class="a m6">
-        <g>
-          <text x="112.4" y="377.55" font-family="monospace" font-size="11" fill="var(--base09)">"#0A6CFF"</text>
-        </g>
-      </g>
-      <g class="a m7">
-        <g>
-          <text x="112.4" y="377.55" font-family="monospace" font-size="11" fill="var(--base09)">"#FF9F0A"</text>
-        </g>
-      </g>
-      <g class="a m8">
-        <g>
-          <text x="105.8" y="397.35" font-family="monospace" font-size="11" fill="var(--base09)">1.5</text>
-        </g>
-      </g>
-      <g class="a m9">
-        <g>
-          <text x="105.8" y="397.35" font-family="monospace" font-size="11" fill="var(--base09)">0.5</text>
-        </g>
-      </g>
+  <g class="mono">
+    <rect x="19.8" y="315.55" width="163.8" height="19.55" rx="5" fill="#8CCBFF" fill-opacity="0.28" class="a m1"/>
+    <rect x="19.8" y="335.1" width="67.2" height="19.55" rx="5" fill="var(--base03)" fill-opacity="0.16" class="a m2"/>
+    <rect x="19.8" y="354.65" width="163.8" height="19.55" rx="5" fill="#FF7E5F" fill-opacity="0.28" class="a m3"/>
+    <rect x="19.8" y="374.2" width="184.5" height="19.55" rx="5" fill="#5E5CE6" fill-opacity="0.28" class="a m4"/>
+    <rect x="19.8" y="393.75" width="67.2" height="19.55" rx="5" fill="var(--base03)" fill-opacity="0.16" class="a m5"/>
+    <rect x="19.8" y="413.3" width="184.5" height="19.55" rx="5" fill="#FFB38A" fill-opacity="0.28" class="a m6"/>
+    <g>
+      <text x="12" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base0E)">const</text>
+      <text x="53.4" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base05)">sky</text>
+      <text x="81" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">=</text>
+      <text x="94.8" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base0D)">motion</text>
+      <text x="136.2" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="156.9" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
+      <text x="184.5" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="198.3" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base05)">dawn</text>
+      <text x="232.8" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">})</text>
+      <text x="25.8" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="32.7" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
+      <text x="46.5" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="67.2" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
+      <text x="94.8" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="108.6" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base05)">noon</text>
+      <text x="143.1" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
+      <text x="163.8" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base09)">2</text>
+      <text x="170.7" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
+      <text x="25.8" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="32.7" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base0D)">wait</text>
+      <text x="60.3" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base04)">(</text>
+      <text x="67.2" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base09)">2</text>
+      <text x="74.1" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
+      <text x="25.8" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="32.7" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
+      <text x="46.5" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="67.2" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
+      <text x="94.8" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="108.6" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base05)">dusk</text>
+      <text x="143.1" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
+      <text x="163.8" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base09)">2</text>
+      <text x="170.7" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
+      <text x="25.8" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="32.7" y="388" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
+      <text x="46.5" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="67.2" y="388" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
+      <text x="94.8" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="108.6" y="388" font-family="monospace" font-size="11.5" fill="var(--base05)">night</text>
+      <text x="150" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
+      <text x="170.7" y="388" font-family="monospace" font-size="11.5" fill="var(--base09)">1.5</text>
+      <text x="191.4" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
+      <text x="25.8" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="32.7" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base0D)">wait</text>
+      <text x="60.3" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base04)">(</text>
+      <text x="67.2" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base09)">1</text>
+      <text x="74.1" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
+      <text x="25.8" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="32.7" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
+      <text x="46.5" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="67.2" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
+      <text x="94.8" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="108.6" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base05)">dawn</text>
+      <text x="143.1" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
+      <text x="163.8" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base09)">1.5</text>
+      <text x="184.5" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">);</text>
+      <text x="12" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base08)">&lt;rect</text>
+      <text x="53.4" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">width</text>
+      <text x="87.9" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
+      <text x="101.7" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">w</text>
+      <text x="108.6" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
+      <text x="122.4" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">height</text>
+      <text x="163.8" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
+      <text x="177.6" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">h</text>
+      <text x="184.5" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
+      <text x="198.3" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">animation</text>
+      <text x="260.4" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
+      <text x="274.2" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">sky</text>
+      <text x="294.9" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
+      <text x="308.7" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base08)">/&gt;</text>
+      <text x="12" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base08)">&lt;circle</text>
+      <text x="67.2" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">r</text>
+      <text x="74.1" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
+      <text x="87.9" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base09)">24</text>
+      <text x="101.7" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
+      <text x="115.5" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
+      <text x="143.1" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
+      <text x="156.9" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">sun</text>
+      <text x="177.6" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
+      <text x="191.4" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">animation</text>
+      <text x="253.5" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">={[</text>
+      <text x="25.8" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base0D)">motion</text>
+      <text x="67.2" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="87.9" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base05)">x</text>
+      <text x="94.8" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="108.6" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">-</text>
+      <text x="115.5" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base09)">200</text>
+      <text x="143.1" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">})</text>
+      <text x="39.6" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="46.5" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
+      <text x="60.3" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="81" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base05)">x</text>
+      <text x="87.9" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="101.7" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base09)">200</text>
+      <text x="129.3" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
+      <text x="150" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base09)">6</text>
+      <text x="156.9" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">,</text>
+      <text x="170.7" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base05)">ease</text>
+      <text x="198.3" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="205.2" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base05)">linear</text>
+      <text x="246.6" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">),</text>
+      <text x="25.8" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base0D)">motion</text>
+      <text x="67.2" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="87.9" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base05)">y</text>
+      <text x="94.8" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="108.6" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base09)">60</text>
+      <text x="129.3" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base04)">})</text>
+      <text x="39.6" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="46.5" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
+      <text x="60.3" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="81" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base05)">y</text>
+      <text x="87.9" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="101.7" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">-</text>
+      <text x="108.6" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base09)">170</text>
+      <text x="136.2" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
+      <text x="156.9" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base09)">3</text>
+      <text x="163.8" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
+      <text x="39.6" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="46.5" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
+      <text x="60.3" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
+      <text x="81" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base05)">y</text>
+      <text x="87.9" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
+      <text x="101.7" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base09)">60</text>
+      <text x="122.4" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
+      <text x="143.1" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base09)">3</text>
+      <text x="150" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">,</text>
+      <text x="163.8" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base05)">ease</text>
+      <text x="191.4" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
+      <text x="198.3" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base05)">in</text>
+      <text x="212.1" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">),</text>
+      <text x="12" y="603.05" font-family="monospace" font-size="11.5" fill="var(--base04)">]}</text>
+      <text x="32.7" y="603.05" font-family="monospace" font-size="11.5" fill="var(--base08)">/&gt;</text>
+      <text x="12" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base08)">&lt;path</text>
+      <text x="53.4" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">d</text>
+      <text x="60.3" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
+      <text x="74.1" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">hills</text>
+      <text x="108.6" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
+      <text x="122.4" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
+      <text x="150" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
+      <text x="163.8" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">land</text>
+      <text x="191.4" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
+      <text x="205.2" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base08)">/&gt;</text>
     </g>
-    <g transform="translate(179 160) scale(0.85)">
-      <g class="a m16">
-        <g>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m10"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(60)" pathLength="1" stroke-dasharray="1" class="a m11"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m12"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180)" pathLength="1" stroke-dasharray="1" class="a m13"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m14"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(300)" pathLength="1" stroke-dasharray="1" class="a m15"/>
-        </g>
+  </g>
+  <g clip-path="url(#c1)">
+    <rect x="0" y="0" width="358" height="272" class="a m7"/>
+    <g transform="translate(179 217.60000000000002) scale(0.7)">
+      <g class="a m9">
+        <circle r="24" fill="#FFD60A" class="a m8"/>
       </g>
-      <g class="a m26">
-        <g>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m17"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(40)" pathLength="1" stroke-dasharray="1" class="a m18"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(80)" pathLength="1" stroke-dasharray="1" class="a m19"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m20"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(160)" pathLength="1" stroke-dasharray="1" class="a m21"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(200)" pathLength="1" stroke-dasharray="1" class="a m22"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m23"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(280)" pathLength="1" stroke-dasharray="1" class="a m24"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(320)" pathLength="1" stroke-dasharray="1" class="a m25"/>
-        </g>
-      </g>
-      <g class="a m36">
-        <g>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m27"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(40)" pathLength="1" stroke-dasharray="1" class="a m28"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(80)" pathLength="1" stroke-dasharray="1" class="a m29"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m30"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(160)" pathLength="1" stroke-dasharray="1" class="a m31"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(200)" pathLength="1" stroke-dasharray="1" class="a m32"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m33"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(280)" pathLength="1" stroke-dasharray="1" class="a m34"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(320)" pathLength="1" stroke-dasharray="1" class="a m35"/>
-        </g>
-      </g>
-      <g class="a m46">
-        <g>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(0)" pathLength="1" stroke-dasharray="1" class="a m37"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(40)" pathLength="1" stroke-dasharray="1" class="a m38"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(80)" pathLength="1" stroke-dasharray="1" class="a m39"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(120)" pathLength="1" stroke-dasharray="1" class="a m40"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(160)" pathLength="1" stroke-dasharray="1" class="a m41"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(200)" pathLength="1" stroke-dasharray="1" class="a m42"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(240)" pathLength="1" stroke-dasharray="1" class="a m43"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(280)" pathLength="1" stroke-dasharray="1" class="a m44"/>
-          <path d="M0 -18C46 -50 46 -118 0 -150C-46 -118 -46 -50 0 -18Z" fill="none" stroke="#FF9F0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(320)" pathLength="1" stroke-dasharray="1" class="a m45"/>
-        </g>
-      </g>
+      <path d="M-300 4C-220 -40 -150 -36 -80 -6C-20 18 40 -48 120 -34C190 -22 240 -8 300 6V200H-300Z" fill="#141826"/>
     </g>
   </g>
 </svg>

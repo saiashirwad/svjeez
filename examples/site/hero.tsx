@@ -1,4 +1,4 @@
-import { rosette } from "./lib/rosette";
+import { day } from "./lib/day";
 
-// Wide cut: one card, the code on the left half and the flower on the right, split by a hairline.
-export default () => rosette({ width: 1056, height: 392, fontSize: 14, code: { x: 56, y: 106 }, flower: { x: 816, y: 196, scale: 1 }, rule: { x1: 576, y1: 40, x2: 576, y2: 352 } });
+// Wide cut: the code on columns 1 to 6, the sky on 7 to 12 of the site's grid.
+export default () => day({ name: "wide", width: 1056, height: 392, fontSize: 13, code: { x: 8, y: 41 }, panel: { x: 540, y: 0, w: 516, h: 392 }, horizon: 0.8, scale: 1 });
