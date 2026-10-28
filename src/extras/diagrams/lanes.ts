@@ -97,7 +97,8 @@ export function lanes<const L extends Record<string, Labelled>>(
       ]);
     }),
     links.map((link, i) => {
-      const [p, q] = out.links[i]!.map(at.point) as [typeof track.center, typeof track.center];
+      const [a, b] = out.links[i]!;
+      const [p, q] = [at.point(a), at.point(b)];
       return el.g({}, [
         arrow([p, q], { ...l, at: play ? when(link.at) : undefined, over: 0.3 }),
         play && el.circle({ r: 4, fill: theme.base09, animation: travel([p, q], { at: when(link.at), over: 0.3 }) }),
