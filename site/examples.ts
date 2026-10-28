@@ -11,12 +11,12 @@ const POSTER_WIDTH = 480;
 const SECTIONS = [
   {
     title: "Scenes",
-    blurb: "Whole little films, each one a single SVG file.",
+    blurb: "Complete animated scenes, each in a single SVG.",
     names: ["map", "newspaper", "horizon", "lighthouse", "grove", "manifold", "minecraft", "breaker", "reflect", "bloom", "explainer", "walkthrough"],
   },
   {
     title: "Building blocks",
-    blurb: "Typed diagrams, terminals, fonts and effects to make them from.",
+    blurb: "Explore diagrams, terminals, fonts, images, and effects.",
     names: ["flowchart", "sequence", "state", "tree", "lanes", "flows", "terminal", "effects", "fonts", "images", "daynight"],
   },
 ] as const;
@@ -81,14 +81,14 @@ const card = (ex: Example) => `
       <span><b>${escape(ex.title)}</b><span class="d">${escape(ex.desc)}</span></span>
     </a>`;
 
-const gallery = (sections: readonly { title: string; blurb: string; examples: Example[] }[]) => `${HEAD("Examples · svjeez", "Scenes and building blocks made with svjeez. Every one is a single animated SVG with no JavaScript.", speculate)}
+const gallery = (sections: readonly { title: string; blurb: string; examples: Example[] }[]) => `${HEAD("Examples · svjeez", "Explore animated scenes and building blocks made with svjeez. Each is a self-contained SVG.", speculate)}
 <body class="gallery">
 ${HEADER}
 <main class="wrap">
   <div class="page-head">
     <p class="kicker">Examples</p>
-    <h1>Every one is a single SVG file.</h1>
-    <p class="sub">Written in TSX, compiled to CSS keyframes. No JavaScript, no video. Point at a card to play it, or open one to see it full size.</p>
+    <h1>Explore what you can make.</h1>
+    <p class="sub">Each example is a single animated SVG made with svjeez. Hover over a card to play it; on touch screens, scenes play as you scroll. Open one to see it full size and find its source.</p>
   </div>
 ${sections
   .map(
@@ -101,7 +101,7 @@ ${sections
   .join("\n")}
 </main>
 <footer class="wrap foot">
-  <span>Each scene's TSX is in the repository.</span>
+  <span>Find the source for every scene on GitHub.</span>
   <nav aria-label="Footer"><a href="${REPO}/tree/main/examples">All sources</a><a href="/">Home</a></nav>
 </footer>
 </body>
@@ -131,7 +131,7 @@ ${HEADER}
     </div>
   </div>
 </main>
-<footer class="wrap foot"><span>One SVG file, no JavaScript.</span><nav aria-label="Footer"><a href="${REPO}">GitHub</a><a href="/">Home</a></nav></footer>
+<footer class="wrap foot"><span>One animated SVG, no runtime JavaScript.</span><nav aria-label="Footer"><a href="${REPO}">GitHub</a><a href="/">Home</a></nav></footer>
 </body>
 </html>
 `;
