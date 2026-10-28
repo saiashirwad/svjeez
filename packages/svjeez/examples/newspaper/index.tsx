@@ -8,6 +8,7 @@ import {
   motion,
   render,
   type Child,
+  type ElementProps,
   type Font,
   type SvgNode,
 } from "svjeez";
@@ -48,64 +49,48 @@ const rule = (y: number, at: number, weight = 1, x1 = INNER.x, x2 = INNER.x + IN
   />
 );
 
-interface Line {
-  readonly words: readonly { readonly text: string; readonly x: number }[];
-  readonly y: number;
-}
+type Line = { text: string; x: number }[];
 
-/** Greedy line breaking with full justification, every width measured in the real font. The last line of a paragraph stays ragged. */
-const justify = (
-  text: string,
-  {
-    x,
-    y,
-    width,
-    size,
-    leading,
-  }: { x: number; y: number; width: number; size: number; leading: number },
-): Line[] => {
+/** Greedy line breaking measured in the real font, justified by spreading words across the column. A paragraph's last line stays ragged. */
+const justify = (text: string, width: number, size: number): Line[] => {
   const space = body.measure(" ", size);
   const indent = size * 1.2;
-  const lines: Line[] = [];
 
-  for (const paragraph of text.trim().split(/\n\s*\n/)) {
-    const words = paragraph
-      .split(/\s+/)
-      .map((word) => ({ text: word, w: body.measure(word, size) }));
+  return text
+    .trim()
+    .split(/\n\s*\n/)
+    .flatMap((paragraph) => {
+      const rows: string[][] = [[]];
 
-    let start = 0;
+      for (const word of paragraph.split(/\s+/)) {
+        const row = rows.at(-1)!;
+        const room = rows.length === 1 ? width - indent : width;
 
-    while (start < words.length) {
-      const room = width - (start === 0 ? indent : 0);
-      let end = start + 1;
-      let used = words[start]!.w;
+        if (row.length && body.measure([...row, word].join(" "), size) > room) rows.push([word]);
+        else row.push(word);
+      }
 
-      while (end < words.length && used + space + words[end]!.w <= room)
-        used += space + words[end++]!.w;
-      const run = words.slice(start, end);
-      const last = end === words.length;
+      return rows.map((row, i) => {
+        let x = i === 0 ? indent : 0;
+        const ragged = i === rows.length - 1 || row.length === 1;
+        const widths = row.map((word) => body.measure(word, size));
 
-      const gap =
-        last || run.length === 1
+        const gap = ragged
           ? space
-          : (room - run.reduce((sum, word) => sum + word.w, 0)) / (run.length - 1);
+          : (width - x - widths.reduce((a, b) => a + b)) / (row.length - 1);
 
-      let pen = x + width - room;
-
-      const placed = run.map((word) => {
-        const at = pen;
-        pen += word.w + gap;
-
-        return { text: word.text, x: at };
+        return row.map((word, j) => ({ text: word, x: (x += j && widths[j - 1]! + gap) }));
       });
-
-      lines.push({ y: y + lines.length * leading, words: placed });
-      start = end;
-    }
-  }
-
-  return lines;
+    });
 };
+
+const Row = ({ line, x, ...props }: ElementProps<"text"> & { line: Line; x: number }): SvgNode => (
+  <text fontFamily={body} {...props}>
+    {line.map((word) => (
+      <tspan x={x + word.x}>{word.text} </tspan>
+    ))}
+  </text>
+);
 
 const ARTICLE = `
 Type has arrived in the animated SVG. A scene can now load a real font file, embed it once, and set whole columns of text in it, measured to the pixel before the browser ever sees a glyph.
@@ -142,32 +127,13 @@ const halftone = def.pattern(
   <circle cx={2.5} cy={2.5} r={1.55} fill={C.ink} />,
 );
 
-const all = justify(ARTICLE, {
-  x: 0,
-  y: 0,
-  width: columnWidth,
-  size: COLUMN.size,
-  leading: COLUMN.leading,
-});
-
 const rows = Math.floor((PAGE.y + PAGE.h - 40 - COLUMN.y) / COLUMN.leading);
 const photoRows = Math.ceil((PHOTO.h + 52) / COLUMN.leading);
-const capacity = [rows, rows - photoRows, rows];
+const rest = justify(ARTICLE, columnWidth, COLUMN.size);
+const columns = [rows, rows - photoRows, rows].map((count) => rest.splice(0, count));
 
-if (all.length > capacity.reduce((a, b) => a + b))
-  throw new Error(
-    `The article runs ${all.length} lines into ${capacity.reduce((a, b) => a + b)}. Cut it.`,
-  );
-
-const columns = capacity.map((count, i) => {
-  const from = capacity.slice(0, i).reduce((a, b) => a + b, 0);
-  const top = COLUMN.y + 10 + (i === 1 ? photoRows * COLUMN.leading : 0);
-
-  return all.slice(from, from + count).map((line, row) => ({
-    y: top + row * COLUMN.leading,
-    words: line.words.map((word) => ({ ...word, x: word.x + columnX(i) })),
-  }));
-});
+if (rest.length)
+  throw new Error(`The article overruns its columns by ${rest.length} lines. Cut it.`);
 
 const SPIN = 1.8;
 const MAST = "The Svjeez Gazette";
@@ -287,19 +253,16 @@ function Columns(): SvgNode {
 
   return (
     <>
-      {columns.map((lines) =>
-        lines.map((line) => (
-          <text
-            y={line.y}
-            fontFamily={body}
+      {columns.map((lines, i) =>
+        lines.map((line, row) => (
+          <Row
+            line={line}
+            x={columnX(i)}
+            y={COLUMN.y + 10 + (i === 1 ? photoRows : 0) * COLUMN.leading + row * COLUMN.leading}
             fontSize={COLUMN.size}
             fill={C.ink}
             animation={enter({ at: 5 + index++ * 0.028, over: 0.25 }, { opacity: 0 })}
-          >
-            {line.words.map((word) => (
-              <tspan x={word.x}>{word.text} </tspan>
-            ))}
-          </text>
+          />
         )),
       )}
     </>
@@ -312,13 +275,7 @@ function Photo(): SvgNode {
   const x = PHOTO.x + (PHOTO.w - fat.measure(letter, size)) / 2;
   const caption = "The letter A, set as outlines and filled with a halftone screen.";
 
-  const lines = justify(caption, {
-    x: PHOTO.x,
-    y: PHOTO.y + PHOTO.h + 18,
-    width: PHOTO.w,
-    size: 10.5,
-    leading: 13,
-  });
+  const lines = justify(caption, PHOTO.w, 10.5);
 
   return (
     <g animation={enter({ at: 6.2, over: 0.6 }, { opacity: 0 })}>
@@ -346,12 +303,14 @@ function Photo(): SvgNode {
           alt="A halftone letter A"
         />
       </g>
-      {lines.map((line) => (
-        <text y={line.y} fontFamily={body} fontSize={10.5} fill={C.soft}>
-          {line.words.map((word) => (
-            <tspan x={word.x}>{word.text} </tspan>
-          ))}
-        </text>
+      {lines.map((line, row) => (
+        <Row
+          line={line}
+          x={PHOTO.x}
+          y={PHOTO.y + PHOTO.h + 18 + row * 13}
+          fontSize={10.5}
+          fill={C.soft}
+        />
       ))}
     </g>
   );

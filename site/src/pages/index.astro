@@ -3,6 +3,7 @@ import { Code } from "astro:components";
 import { getScene } from "svjeez:astro";
 import agents from "@examples/site/agents.tsx";
 import agentsTall from "@examples/site/agents-tall.tsx";
+import breaker from "@examples/breaker/index.tsx";
 import explainer from "@examples/site/explainer.tsx";
 import fonts from "@examples/site/fonts.tsx";
 import handshake from "@examples/site/handshake.tsx";
@@ -22,7 +23,6 @@ import toastSource from "@examples/site/toast.tsx?raw";
 import whereDocs from "@examples/site/where-docs.tsx";
 import whereMail from "@examples/site/where-mail.tsx";
 import whereReadme from "@examples/site/where-readme.tsx";
-import daynight from "@examples/daynight/index.tsx";
 import DayNight from "../components/DayNight.astro";
 import Install from "../components/Install.astro";
 import LiveScene from "../components/LiveScene.astro";
@@ -47,7 +47,7 @@ const s = {
   recording: live(recording),
   ink: live(ink),
   fonts: live(fonts),
-  daynight: live(daynight),
+  breaker: live(breaker),
   agents: live(agents),
   agentsTall: live(agentsTall),
   nojsx: live(nojsx),
@@ -152,7 +152,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
     <section class="wrap sec g" id="light-dark">
       <h2 class="c1-8">One SVG, made for light and dark.</h2>
       <div class="stagewrap c1-8">
-        <DayNight scene={s.daynight} alt="A lighthouse on a headland. In a light scheme the sun crosses a pale sky past drifting clouds. In a dark scheme a moon crosses a starry sky and the lantern sweeps its beam." />
+        <DayNight scene={s.breaker} alt="A slide deck on circuit breakers: a title, then breaker code with a callout, then a state machine and a sequence diagram. The light version is black text on white, the dark version light text on charcoal." />
       </div>
       <Code class="code side c9-12" code={adaptive} lang="tsx" theme={shikiTheme} />
     </section>

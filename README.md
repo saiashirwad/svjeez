@@ -34,9 +34,9 @@ Every preview below is a single `.svg` file loaded in an `<img>` tag. Click any 
     </td>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/breaker">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/breaker.svg" width="400" alt="A seven-slide explainer on circuit breakers combining code morphs, state machines, sequence diagrams, lanes, and flowcharts." />
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/breaker.svg" width="400" alt="A six-slide explainer on circuit breakers combining code morphs, a state machine, a sequence diagram, and a flowchart." />
       </a><br />
-      <sub><b>Circuit Breakers</b> · 7-slide explainer with code, state machine, sequence &amp; lanes (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/breaker">TSX</a>)</sub>
+      <sub><b>Circuit Breakers</b> · 6-slide explainer with code, state machine, sequence &amp; flowchart (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/breaker">TSX</a>)</sub>
     </td>
   </tr>
   <tr>
@@ -46,14 +46,6 @@ Every preview below is a single `.svg` file loaded in an `<img>` tag. Click any 
       </a><br />
       <sub><b>Event Horizon</b> · Accretion disk, lensed photon ring, camera shake &amp; HUD (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/horizon">TSX</a>)</sub>
     </td>
-    <td align="center" width="50%">
-      <a href="https://svjeez.texoport.in/examples/daynight">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/daynight.svg" width="400" alt="A lighthouse scene that shows sun and clouds in light mode, or moon, stars, and a sweeping lantern beam in dark mode." />
-      </a><br />
-      <sub><b>Day &amp; Night Lighthouse</b> · One SVG that swaps scenes with your OS theme (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/daynight">TSX</a>)</sub>
-    </td>
-  </tr>
-  <tr>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/newspaper">
         <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/newspaper.svg" width="240" alt="A broadsheet front page spins in: a blackletter masthead inks on letter by letter, three measured columns justify, and an EXTRA stamp lands." />
@@ -65,13 +57,8 @@ Every preview below is a single `.svg` file loaded in an `<img>` tag. Click any 
 
 <p align="center">
   More in <a href="https://github.com/saiashirwad/svjeez/tree/main/examples"><code>examples/</code></a>:
-  <a href="https://svjeez.texoport.in/examples/lighthouse">Agent Timelapse (108s)</a> ·
-  <a href="https://svjeez.texoport.in/examples/horizon">Event Horizon</a> ·
-  <a href="https://svjeez.texoport.in/examples/grove">Floating Grove</a> ·
-  <a href="https://svjeez.texoport.in/examples/manifold">3D Manifold</a> ·
-  <a href="https://svjeez.texoport.in/examples/bloom">Bloom</a> ·
+  <a href="https://svjeez.texoport.in/examples/lighthouse">Agent Timelapse (96s)</a> ·
   <a href="https://svjeez.texoport.in/examples/explainer">React Explainer</a> ·
-  <a href="https://svjeez.texoport.in/examples/walkthrough">Server Walkthrough</a> ·
   <a href="https://svjeez.texoport.in/intro">45s Hype Reel</a>
 </p>
 

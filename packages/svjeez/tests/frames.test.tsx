@@ -202,6 +202,29 @@ describe.if(browser)("renderFrames", () => {
     expect((await renderFrames(svg, { times: [0] })).duration).toBe(6);
   });
 
+  test("periods that are rounded fractions of the scene duration still loop in the scene duration", async () => {
+    const ring = (laps: number) => (
+      <circle
+        r={4}
+        animation={motion({ rotate: 0 })
+          .to({ rotate: 360 }, 12 / laps, ease.linear)
+          .loop(12 / laps)}
+      />
+    );
+
+    const svg = render(
+      { width: 20, height: 20, duration: 12, title: "Rings" },
+      <>
+        <rect width={10} height={10} animation={motion({ x: 0 }).to({ x: 10 }, 12, ease.linear)} />
+        {[2, 3, 5, 7, 8].map(ring)}
+      </>,
+    );
+
+    const { duration, frames } = await renderFrames(svg, { count: 4 });
+    expect(duration).toBe(12);
+    expect(frames.map((frame) => frame.time)).toEqual([0, 3, 6, 9]);
+  });
+
   test("a sheet too big for one capture comes back whole, at a lower scale", async () => {
     const wide = render(
       { width: 2000, height: 100, duration: 4, title: "Wide" },

@@ -729,7 +729,7 @@ pre.side {
 .stage {
   --split: 50%;
   position: relative;
-  aspect-ratio: 800 / 500;
+  aspect-ratio: 1280 / 720;
   overflow: clip;
   border-radius: var(--radius);
   box-shadow:

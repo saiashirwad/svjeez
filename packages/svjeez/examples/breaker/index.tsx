@@ -3,10 +3,8 @@ import {
   Callout,
   Focus,
   code,
-  during,
   flow,
   flowchart,
-  lanes,
   morph,
   sequence,
   stateMachine,
@@ -15,7 +13,6 @@ import {
   visible,
   appWindow,
   type CodePiece,
-  type CodeRole,
   type CodeTokens,
 } from "svjeez/extras";
 import { css, mono, theme } from "../style";
@@ -23,35 +20,19 @@ import { css, mono, theme } from "../style";
 const W = 1280;
 const H = 720;
 
+const TOKEN =
+  /«(?<id>[\w-]+):(?<named>[^»]+)»|(?<comment>\/\/.*)|(?<string>"[^"]*")|(?<keyword>\b(?:class|async|await|if|try|catch|throw|return|new|const|this)\b)|(?<number>\b\d[\d_]*\b)|(?<type>\b[A-Z]\w*)|(?<fn>\w+(?=\())|(?<punct>[{}()[\];:.,=<>+!&|]+)|\w+|\s+|./g;
+
+const ROLES = ["comment", "string", "keyword", "number", "type", "fn", "punct"] as const;
+
 /** Just enough TypeScript highlighting for the slides. `«id:text»` names a run. */
 const highlight = (source: string): CodeTokens =>
   source.split("\n").map((line) =>
-    [
-      ...line.matchAll(
-        /«(\w[\w-]*):([^»]+)»|(\/\/.*)|("[^"]*")|\b(class|async|await|if|try|catch|throw|return|new|const|this)\b|\b(\d[\d_]*)\b|\b([A-Z]\w*)\b|(\w+)(?=\()|([{}()[\];:.,=<>+!&|]+)|([^«/"\w{}()[\];:.,=<>+!&|]+|\w+)/g,
-      ),
-    ].map((m): CodePiece => {
-      const [, id, named, comment, str, kw, num, type, fn, punct, rest] = m;
+    [...line.matchAll(TOKEN)].map(({ 0: text, groups: g = {} }): CodePiece => {
+      if (g.id) return ["fn", g.named!, g.id];
+      const role = ROLES.find((r) => g[r]);
 
-      const role: CodeRole | undefined = comment
-        ? "comment"
-        : str
-          ? "string"
-          : kw
-            ? "keyword"
-            : num
-              ? "number"
-              : type
-                ? "type"
-                : fn
-                  ? "fn"
-                  : punct
-                    ? "punct"
-                    : undefined;
-
-      if (id) return ["fn", named!, id];
-
-      return role ? [role, m[0]] : (rest ?? m[0]);
+      return role ? [role, text] : text;
     }),
   );
 
@@ -91,7 +72,6 @@ const scenes = {
   code: 11,
   machine: 9,
   together: 15,
-  timeline: 9,
   backoff: 8,
   recap: 8,
 };
@@ -221,10 +201,7 @@ const story = sequence(
     font: mono,
     x: 64,
     y: 120,
-    /** The wait before the probe gets its own pause. */
-    play: {
-      at: [0, 1, 2, 3, 4.4, 5.4, 6.6, 8.6, 9.6, 10.6, 11.6].map((t) => tl.together.at + 0.6 + t),
-    },
+    play: { at: tl.together.at + 0.6, step: 1.1 },
   },
 );
 
@@ -235,51 +212,6 @@ const synced = mini.walk(["closed", "open", "half", "closed"], {
   at: [tl.together.at, msg(3), msg(7), msg(10)],
   dwell: tl.together.at + tl.together.over - msg(10),
 });
-
-// --- timeline: the same story on a clock
-const zero = tl.timeline.at + 0.5;
-
-const clock = lanes(
-  {
-    lanes: {
-      client: { label: "client", role: "input" },
-      breaker: { label: "breaker", role: "tool" },
-      service: { label: "service", role: "store" },
-    },
-    spans: [
-      { lane: "breaker", from: 0, to: 3, label: "closed", role: "input" },
-      { lane: "breaker", from: 3, to: 6, label: "open", role: "tool" },
-      { lane: "breaker", from: 6, to: 6.8, label: "half", role: "decision" },
-      { lane: "breaker", from: 6.8, to: 8, label: "closed", role: "input" },
-      { lane: "service", from: 0.2, to: 3, label: "down", role: "tool" },
-    ],
-    events: [
-      { lane: "service", at: 1, label: "timeout" },
-      { lane: "service", at: 2, label: "timeout" },
-      { lane: "service", at: 3, label: "timeout" },
-      { lane: "client", at: 4, label: "OpenError" },
-      { lane: "client", at: 5, label: "OpenError" },
-      { lane: "service", at: 6.4 },
-      { lane: "client", at: 6.9, label: "quote" },
-    ],
-    links: [
-      { from: "client", to: "breaker", at: 0.5 },
-      { from: "client", to: "breaker", at: 1.5 },
-      { from: "client", to: "breaker", at: 2.5 },
-      { from: "breaker", to: "client", at: 4 },
-      { from: "breaker", to: "client", at: 5 },
-      { from: "breaker", to: "service", at: 6.4 },
-      { from: "breaker", to: "client", at: 6.9 },
-    ],
-  },
-  { theme, fontSize: 14, font: mono, scale: 120, x: 64, y: 170, play: { at: zero } },
-);
-
-const captions = [
-  [0, 3, "Closed: every call waits out the timeout."],
-  [3, 6, "Open: calls fail at once, the service gets a rest."],
-  [6, 8, "Half-open: one probe succeeds, and traffic flows again."],
-] as const;
 
 // --- backoff: v1 morphs into v2
 const before = listing(v1);
@@ -338,14 +270,40 @@ const trips = [
   }),
 ];
 
-// --- chrome: progress bar and slide counter
+// --- chrome: one progress segment per slide
 const BAR = rect(64, H - 40, W - 128, 4);
 
-const segment = (name: keyof typeof scenes) => {
+const segments = names.map((name) => {
   const { at, over } = tl[name];
+  const x = BAR.x + (at / tl.duration) * BAR.w;
+  const w = (over / tl.duration) * BAR.w;
 
-  return rect(BAR.x + (at / tl.duration) * BAR.w, BAR.y, (over / tl.duration) * BAR.w, BAR.h);
-};
+  const lit = motion({ fill: theme.base03 })
+    .at(at)
+    .set({ fill: theme.base05 })
+    .at(at + over)
+    .set({ fill: theme.base03 });
+
+  return (
+    <>
+      <rect x={x} y={BAR.y} width={w - 2} height={BAR.h} rx={2} fill={theme.base02} />
+      <rect
+        x={x}
+        y={BAR.y}
+        width={w - 2}
+        height={BAR.h}
+        rx={2}
+        fill={theme.base0A}
+        animation={motion({ width: 0 })
+          .at(at)
+          .to({ width: w - 2 }, over, ease.linear)}
+      />
+      <text x={x + 2} y={BAR.y + 22} fontSize={12} fill={theme.base03} animation={lit}>
+        {name}
+      </text>
+    </>
+  );
+});
 
 const clip = def.clipPath(
   {},
@@ -359,7 +317,7 @@ export default function build(): string {
       height: H,
       duration: D,
       title: "Circuit breakers",
-      desc: "A seven-slide explainer: a circuit breaker's code shown block by block, its state machine walked, a sequence diagram synced to the machine, the story on a time axis, a refactor to backoff, and a flowchart traced.",
+      desc: "A six-slide explainer: a circuit breaker's code shown block by block, its state machine walked, a sequence diagram synced to the machine, a refactor to backoff, and a flowchart traced.",
       reducedMotion: { at: tl.together.at + tl.together.over - 1 },
       css: [
         css,
@@ -369,7 +327,12 @@ export default function build(): string {
     <>
       <rect width={W} height={H} fill={theme.base00} />
 
-      <g animation={tl.show("title")} class="sans">
+      <g
+        animation={motion({ opacity: 1 })
+          .at(tl.title.over - 0.3)
+          .to({ opacity: 0 }, 0.3)}
+        class="sans"
+      >
         <text
           x={W / 2}
           y={300}
@@ -464,30 +427,13 @@ export default function build(): string {
         {synced.node}
       </g>
 
-      <Heading scene="timeline">Eight seconds, on a clock</Heading>
-      <g animation={tl.show("timeline")}>
-        {clock.node}
-        {captions.map(([from, to, text]) => (
-          <text
-            x={clock.x(from)}
-            y={clock.bounds.y + clock.bounds.h + 40}
-            class="sans"
-            fontSize={18}
-            fill={theme.base05}
-            animation={visible([{ at: zero + from, over: to - from }])}
-          >
-            {text}
-          </text>
-        ))}
-      </g>
-
       <Heading scene="backoff">Backoff is a two-line change</Heading>
       <g animation={tl.show("backoff")}>
         <g fontFamily={mono}>{editorFor(after).node}</g>
         {morphed.node}
         <g class="sans">
           <Callout
-            target={after.get("wait")}
+            target={after.lines(25)}
             side="right"
             during={{ at: change + 1.3, over: 4 }}
             color={theme.base0B}
@@ -506,51 +452,7 @@ export default function build(): string {
         {decide.layers.over}
       </g>
 
-      <g class="sans">
-        <rect x={BAR.x} y={BAR.y} width={BAR.w} height={BAR.h} rx={2} fill={theme.base02} />
-        <rect
-          x={BAR.x}
-          y={BAR.y}
-          width={BAR.w}
-          height={BAR.h}
-          rx={2}
-          fill={theme.base0A}
-          animation={motion({ width: 0 }).to({ width: BAR.w }, tl.duration, ease.linear)}
-        />
-        {names.map((name, i) => {
-          const s = segment(name);
-
-          return (
-            <>
-              {i > 0 && (
-                <rect x={s.x - 1} y={BAR.y - 3} width={2} height={BAR.h + 6} fill={theme.base00} />
-              )}
-              <text x={s.x + 2} y={BAR.y + 22} fontSize={12} fill={theme.base03}>
-                {name}
-              </text>
-              <text
-                x={s.x + 2}
-                y={BAR.y + 22}
-                fontSize={12}
-                fill={theme.base05}
-                animation={during(tl[name], 0.2)}
-              >
-                {name}
-              </text>
-              <text
-                x={W - 64}
-                y={BAR.y - 14}
-                fontSize={12}
-                textAnchor="end"
-                fill={theme.base04}
-                animation={during(tl[name], 0.2)}
-              >
-                {`${i + 1} / ${names.length}`}
-              </text>
-            </>
-          );
-        })}
-      </g>
+      <g class="sans">{segments}</g>
     </>,
   );
 }

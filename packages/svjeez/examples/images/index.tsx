@@ -1,4 +1,4 @@
-import { Picture, ease, enter, fx, motion, picture, render, type Child } from "svjeez";
+import { Picture, ease, enter, fx, motion, picture, render, type PictureProps } from "svjeez";
 import { adaptive, systemDark, systemLight } from "svjeez/extras";
 
 const W = 680;
@@ -21,25 +21,13 @@ const CSS = `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Conso
 
 const SIZE = 140;
 
-function Slot({
-  x,
-  y,
-  width = SIZE,
-  label,
-  at,
-  children,
-}: {
-  x: number;
-  y: number;
-  width?: number;
-  label: string;
-  at: number;
-  children: Child;
-}) {
+function Slot({ label, at, ...picture }: PictureProps & { label: string; at: number }) {
+  const { x = 0, y = 0, width = SIZE } = picture;
+
   return (
     <g animation={enter({ at, over: 0.6 }, { y: 10 })}>
       <rect x={x} y={y} width={width} height={SIZE} fill={C.tile} stroke={C.edge} />
-      {children}
+      <Picture {...picture} width={width} height={SIZE} />
       <text x={x} y={y + SIZE + 18} class="mono" fontSize={11} letterSpacing={1.5} fill={C.label}>
         {label}
       </text>
@@ -63,84 +51,64 @@ export default function build(): string {
     },
     <>
       <rect width={W} height={H} fill={C.bg} />
-      <Slot x={30} y={30} label="COVER" at={0}>
-        <Picture
-          src={photo}
-          x={30}
-          y={30}
-          width={SIZE}
-          height={SIZE}
-          fit="cover"
-          alt="A nebula, cropped to fill the frame"
-        />
-      </Slot>
-      <Slot x={190} y={30} label="CONTAIN" at={0.15}>
-        <Picture
-          src={photo}
-          x={190}
-          y={30}
-          width={SIZE}
-          height={SIZE}
-          fit="contain"
-          alt="A nebula, letterboxed"
-        />
-      </Slot>
-      <Slot x={350} y={30} label="FILL" at={0.3}>
-        <Picture
-          src={photo}
-          x={350}
-          y={30}
-          width={SIZE}
-          height={SIZE}
-          fit="fill"
-          alt="A nebula, stretched"
-        />
-      </Slot>
-      <Slot x={510} y={30} label="SVG + SHADOW" at={0.45}>
-        <Picture
-          src={emblem}
-          x={510}
-          y={30}
-          width={SIZE}
-          radius={24}
-          filter={fx.shadow({ dy: 6, blur: 7, opacity: 0.6 })}
-          alt="A sun over mountains"
-        />
-      </Slot>
-      <Slot x={30} y={220} label="DUOTONE" at={0.6}>
-        <Picture
-          src={photo}
-          x={30}
-          y={220}
-          width={SIZE}
-          height={SIZE}
-          filter={fx.duotone({ dark: "#1B1464", light: "#FFB36B" })}
-          alt="The nebula in indigo and amber"
-        />
-      </Slot>
-      <Slot x={190} y={220} label="GRAYSCALE" at={0.75}>
-        <Picture
-          src={photo}
-          x={190}
-          y={220}
-          width={SIZE}
-          height={SIZE}
-          filter={fx.grayscale()}
-          alt="The nebula in gray"
-        />
-      </Slot>
-      <Slot x={350} y={220} width={300} label="KEN BURNS" at={0.9}>
-        <Picture
-          src={photo}
-          x={350}
-          y={220}
-          width={300}
-          height={SIZE}
-          radius={14}
-          animation={pan}
-          alt="A slow pan and zoom across the nebula"
-        />
-      </Slot>
+      <Slot
+        x={30}
+        y={30}
+        label="COVER"
+        at={0}
+        src={photo}
+        fit="cover"
+        alt="A nebula, cropped to fill the frame"
+      />
+      <Slot
+        x={190}
+        y={30}
+        label="CONTAIN"
+        at={0.15}
+        src={photo}
+        fit="contain"
+        alt="A nebula, letterboxed"
+      />
+      <Slot x={350} y={30} label="FILL" at={0.3} src={photo} fit="fill" alt="A nebula, stretched" />
+      <Slot
+        x={510}
+        y={30}
+        label="SVG + SHADOW"
+        at={0.45}
+        src={emblem}
+        radius={24}
+        filter={fx.shadow({ dy: 6, blur: 7, opacity: 0.6 })}
+        alt="A sun over mountains"
+      />
+      <Slot
+        x={30}
+        y={220}
+        label="DUOTONE"
+        at={0.6}
+        src={photo}
+        filter={fx.duotone({ dark: "#1B1464", light: "#FFB36B" })}
+        alt="The nebula in indigo and amber"
+      />
+      <Slot
+        x={190}
+        y={220}
+        label="GRAYSCALE"
+        at={0.75}
+        src={photo}
+        filter={fx.grayscale()}
+        alt="The nebula in gray"
+      />
+      <Slot
+        x={350}
+        y={220}
+        width={300}
+        label="KEN BURNS"
+        at={0.9}
+        src={photo}
+        radius={14}
+        animation={pan}
+        alt="A slow pan and zoom across the nebula"
+      />
     </>,
   );
 }

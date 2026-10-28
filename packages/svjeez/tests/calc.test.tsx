@@ -6,7 +6,6 @@ const { add, sub, mul, div, sin, cos, clamp, min, max, length, angle } = calc;
 const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
 const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
 const py = def.property("py", { syntax: "number", inherits: false, initial: 0 });
-const pz = def.property("pz", { syntax: "number", inherits: false, initial: 0 });
 
 const style = (rule: Css) => {
   const svg = render({ width: 10, height: 10, duration: 1, title: "T", css: rule }, <g />);
@@ -64,27 +63,6 @@ describe("calc", () => {
       "min(4px, 2px * var(--p1), 8px)",
     );
     expect(value(max(px, 0))).toBe("max(var(--p1), 0)");
-  });
-
-  test("the manifold projection renders one calc() per value", () => {
-    const pitch = angle(22);
-    const x = sub(mul(px, cos(yaw)), mul(pz, sin(yaw)));
-    const z = add(mul(px, sin(yaw)), mul(pz, cos(yaw)));
-    const up = add(mul(py, cos(pitch)), mul(z, sin(pitch)));
-    const depth = sub(mul(z, cos(pitch)), mul(py, sin(pitch)));
-    const size = div(720, add(720, depth));
-    const fog = clamp(0.15, sub(0.95, mul(div(add(depth, 150), 300), 0.75)), 1);
-
-    const rule = style(
-      css`.dot{translate:${length(mul(x, 1.3, size))} ${length(mul(up, -1.3, size))};scale:${size};opacity:${fog}}`,
-    );
-
-    const Z = "(var(--p1) * sin(var(--p2)) + var(--p3) * cos(var(--p2)))";
-    const depthText = `${Z} * cos(22deg) - var(--p4) * sin(22deg)`;
-    expect(rule).toContain(`scale:calc(720 / (720 + ${depthText}))`);
-    expect(rule).toContain(`opacity:clamp(0.15, 0.95 - (${depthText} + 150) / 300 * 0.75, 1)`);
-    const values = rule.match(/\.dot\{translate:(.*)\}/)![1]!.split(/;\w+:| (?=calc\()/);
-    expect(values.map((text) => text.match(/calc\(/g)?.length ?? 0)).toEqual([1, 1, 1, 0]);
   });
 
   test("literals keep their meaning, tiny or large", () => {

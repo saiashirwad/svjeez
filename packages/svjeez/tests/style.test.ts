@@ -6,18 +6,7 @@ import { join } from "node:path";
 const EXAMPLES = join(import.meta.dir, "../examples");
 
 // Scenes that only label things in a monospace face, with no code on screen, keep their own look.
-const OWN_LOOK = [
-  "bloom",
-  "daynight",
-  "effects",
-  "fonts",
-  "horizon",
-  "images",
-  "lighthouse",
-  "manifold",
-  "neon",
-  "tictactoe",
-];
+const OWN_LOOK = ["effects", "fonts", "horizon", "images", "lighthouse", "neon"];
 
 const RULES: [RegExp, string][] = [
   [

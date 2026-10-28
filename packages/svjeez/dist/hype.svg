@@ -875,60 +875,16 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
                 <text x="368.54" y="218.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base06)" font-weight="bold">Welcome</text>
                 <text x="440.54" y="218.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base06)" font-weight="bold">back!</text>
               </g>
-              <rect x="400.04" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="400.04" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="404.54" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="409.04" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="404.54" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="413.54" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="418.04" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="413.54" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="418.04" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="422.54" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="427.04" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="422.54" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="427.04" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="431.54" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="436.04" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="431.54" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="436.04" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="440.54" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="445.04" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="445.04" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="449.54" y="234.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="449.54" y="246.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="391.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="395.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="400.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="400.04" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="404.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="409.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="404.54" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="409.04" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="413.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="418.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="413.54" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="418.04" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="422.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="427.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="422.54" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="427.04" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="431.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="436.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="431.54" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="436.04" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="440.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="445.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="440.54" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="445.04" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="449.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="454.04" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="449.54" y="270.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="458.54" y="258.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="404.54" y="282.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="413.54" y="282.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="436.04" y="282.4" width="4.8" height="12.3" fill="var(--base09)"/>
-              <rect x="445.04" y="282.4" width="4.8" height="12.3" fill="var(--base09)"/>
+              <rect x="400.04" y="234.4" width="54" height="12.3" fill="var(--base09)"/>
+              <rect x="400.04" y="246.4" width="9" height="12.3" fill="var(--base09)"/>
+              <rect x="413.54" y="246.4" width="27" height="12.3" fill="var(--base09)"/>
+              <rect x="445.04" y="246.4" width="9" height="12.3" fill="var(--base09)"/>
+              <rect x="391.04" y="258.4" width="72" height="12.3" fill="var(--base09)"/>
+              <rect x="400.04" y="270.4" width="54" height="12.3" fill="var(--base09)"/>
+              <rect x="404.54" y="282.4" width="4.5" height="12.3" fill="var(--base09)"/>
+              <rect x="413.54" y="282.4" width="4.5" height="12.3" fill="var(--base09)"/>
+              <rect x="436.04" y="282.4" width="4.5" height="12.3" fill="var(--base09)"/>
+              <rect x="445.04" y="282.4" width="4.5" height="12.3" fill="var(--base09)"/>
               <g>
                 <text x="332.54" y="328.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base03)">Opus</text>
                 <text x="377.54" y="328.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base03)">5.5</text>
@@ -1136,7 +1092,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
             </g>
             <g class="a m27">
               <g transform="translate(168 160)">
-                <path d="M6.00 0.00L-6.00 0.00M3.00 5.20L-3.00 -5.20M-3.00 5.20L3.00 -5.20" stroke="var(--base09)" stroke-width="2.4" stroke-linecap="round" class="a m26 fb"/>
+                <path d="M-6 0H6M-3 -5.2L3 5.2M3 -5.2L-3 5.2" stroke="var(--base09)" stroke-width="2.4" stroke-linecap="round" class="a m26 fb"/>
               </g>
               <g>
                 <text x="182" y="165.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base09)">Animating…</text>
@@ -1815,7 +1771,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         </g>
       </g>
       <g filter="url(#f18)" class="a m238">
-        <text x="640" y="620" font-size="14" text-anchor="middle" fill="var(--base04)">this entire video is <tspan fill="var(--base06)">one 254 KB SVG</tspan>. no video file, no JavaScript.</text>
+        <text x="640" y="620" font-size="14" text-anchor="middle" fill="var(--base04)">this entire video is <tspan fill="var(--base06)">one 251 KB SVG</tspan>. no video file, no JavaScript.</text>
       </g>
     </g>
     <g class="a m241">

@@ -18,14 +18,10 @@ const SECTIONS = [
       "newspaper",
       "horizon",
       "lighthouse",
-      "grove",
-      "manifold",
       "minecraft",
       "breaker",
-      "reflect",
-      "bloom",
+      "neon",
       "explainer",
-      "walkthrough",
     ],
   },
   {
@@ -42,7 +38,6 @@ const SECTIONS = [
       "effects",
       "fonts",
       "images",
-      "daynight",
     ],
   },
 ] as const;
