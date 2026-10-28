@@ -50,6 +50,8 @@ export { strokeFont, type StrokeFont } from "./font/stroke";
 
 export { Glyphs, type GlyphsProps } from "./glyphs";
 
+export { Icon, type IconData, type IconProps } from "./icon";
+
 export {
   Ink,
   inkPath,
