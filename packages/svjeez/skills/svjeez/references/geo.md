@@ -32,15 +32,43 @@ Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, 0.6
 
 ## Turning a globe
 
-A globe's paths can't turn, but its dots can. Register `lat` and `lon` with `def.property`, put them on each dot's `style`, animate one `yaw` angle on the group around them, and let a `css` rule place every dot with `sin` and `cos`. `examples/earth` in the svjeez repository turns 1,393 dots through a day and lights cities by the sun's angle this way.
+Dots turn more cheaply than paths, through CSS alone. Register `lat` and `lon` with `def.property`, put them on each dot's `style`, animate one `yaw` angle on the group around them, and let a `css` rule place every dot with `sin` and `cos`. `examples/earth` in the svjeez repository turns 1,393 dots through a day and lights cities by the sun's angle this way.
 
-## Errors
+## Turning globes
 
-| Error | Fix |
-| --- | --- |
-| `route() from … to … crosses the edge of the map` | Rotate the projection so both ends sit on one side: `geoNaturalEarth1().rotate([-150, 0])`. |
-| `point(…) falls outside the projection` | The place is on the far side of a globe or outside the clip. Rotate the projection toward it. |
-| `project() has no region …` | Use the feature's `id` or its `properties.name`. world-atlas ids are ISO 3166 numeric codes as strings. |
+`globe(data, { frame, tilt, spin: { from, to, over } })` turns a globe whose outlines are real paths. `from` and `to` are the longitude at the middle; a day turns from `lon` to `lon - 360`. Every layer is a `sampledPath()` with a fixed point count: the hidden side folds out past the rim instead of being clipped, so clip every layer to `globe.sphere`.
+
+```tsx
+const earth = globe(world, { frame: rect(430, 44, 452, 452), tilt: 22, spin: { from: 0, to: -360, over: 24 } });
+const clip = def.clipPath({}, <path d={earth.sphere} />);
+
+<path d={earth.sphere} fill="#0b1a2c" />
+<g clipPath={clip}>
+  {earth.land().map((piece) => <path {...piece} fill="#9fcbea" />)}
+  <path {...earth.night((t) => new Date(day + t * 3_600_000))} fill="#000" opacity={0.6} />
+</g>
+{cities.map((c) => <g {...earth.place(c.at)}><circle r={3} /></g>)}
+```
+
+- `land()`, `borders()`, `graticule(15)` and `path(geojson)` return pieces a band of longitude wide, so a piece behind the globe costs no keys. Spread each onto a `<path>`.
+- `route(from, to)`, `circle(center, degrees)`, `night(date)` and `terminator(date)` return one path each. `date` is a `Date` or a function of time.
+- `place(at)` gives a `<g>` a moving `x`, `y` and `opacity`, so a marker rides the globe and fades out at the horizon. Draw its content at the origin.
+- `simplify` (default 0.6 degrees) and `tolerance` (default 1px) set the file size. One turn of 110m land in 24s with a 226px radius is about 500 KB at `simplify: 0.8`. Tilt the globe 20 degrees or more so its hidden pole holds the fold; an upright globe needs more keys.
+- `spin` also takes `(t) => [lon, lat]` with a `duration`.
+
+`examples/globe` in the svjeez repository turns a day this way. The dot globe above stays smaller for a long loop.
+
+## Changing projection
+
+`reproject(data, [geoMercator(), geoEqualEarth()], { frame, filter })` writes every region under each projection from the same points, so `motion({ d })` morphs between them. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` fills everything. Outlines are cut at the antimeridian and simplified once, in degrees. Filter out Antarctica for Mercator.
+
+```tsx
+const maps = reproject(world, [geoMercator(), geoEqualEarth()], { frame, filter });
+const [a, b] = maps.land;
+<path d={a} animation={motion({ d: a }).at(1).to({ d: b }, 1.8, ease.inOut)} />;
+```
+
+`trueSize(map, region, [lon, lat], { at, over })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `nightfall(map, (t) => date, { duration })` moves the night side of a flat map through a day or a year with one fixed shape, even across an equinox. `examples/projections` does the Mercator morph and the slide.
 
 ## Data maps
 
@@ -77,10 +105,13 @@ const { node } = traffic(routes, { during: { at: 1, over: 8 }, rate: 6, seed: 4,
 
 Particles still in flight at the end of the scene fail the scene's length check, so end `during` a trip's length before the scene ends.
 
-### Data map errors
+## Errors
 
 | Error | Fix |
 | --- | --- |
+| `route() from … to … crosses the edge of the map` | Rotate the projection so both ends sit on one side: `geoNaturalEarth1().rotate([-150, 0])`. |
+| `point(…) falls outside the projection` | The place is on the far side of a globe or outside the clip. Rotate the projection toward it. |
+| `project() has no region …` | Use the feature's `id` or its `properties.name`. world-atlas ids are ISO 3166 numeric codes as strings. |
 | `choropleth() has … values per region but … times in at. Pass one time per value.` | Give `at` one time per entry of each list. |
 | `choropleth() needs every region to have the same number of values, got lists of …` | Pad or trim the lists to one length. |
 | `cartogram() takes one number per region, but … has a list.` | Pass one time's values. |
@@ -90,3 +121,9 @@ Particles still in flight at the end of the scene fail the scene's length check,
 | `sequential() needs a domain that rises, got […]` | Put the low value first. |
 | `traffic() needs a positive rate, got …` | Pass departures per second above 0. |
 | `arc() needs two different places.` | The two ends must not coincide. |
+| `globe() with a spin function needs a duration, as in { duration: 24 }.` | Pass `duration` beside a function `spin`. |
+| `globe() found no parallel behind the globe clear of every outline …` | Tilt the globe further, simplify less, or filter out shapes that cross every parallel. |
+| `globe().borders() needs TopoJSON, which knows which edges two regions share.` | Load TopoJSON, or draw outlines with `path()`. |
+| `reproject() puts … far outside the frame under projection ….` | Filter that region out: Mercator stretches the poles without end. |
+| `reproject() needs at least two projections.` | Pass two or more projections. |
+| `trueSize() needs a region with polygons.` | Pass a region or polygon feature. |

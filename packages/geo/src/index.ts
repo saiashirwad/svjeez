@@ -415,3 +415,23 @@ export {
   type TrafficLine,
   type TrafficOptions,
 } from "./traffic.ts";
+
+export {
+  globe,
+  type Globe,
+  type GlobeOptions,
+  type Riding,
+  type Spin,
+  type Turning,
+} from "./globe.ts";
+
+export {
+  reproject,
+  trueSize,
+  type Reprojected,
+  type Reprojection,
+  type ReprojectOptions,
+  type TrueSizeOptions,
+} from "./reproject.ts";
+
+export { nightfall, type NightfallOptions } from "./nightfall.ts";

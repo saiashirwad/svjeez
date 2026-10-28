@@ -110,6 +110,8 @@ sampledPath((t) => wavePath(t), { duration: 6, tolerance: 0.5 });
 
 Reduced motion shows a still copy of the path at `reducedMotion.at`.
 
+`sampledPath`'s `slack: (x, y) => px` lets points that nobody sees stray further, which saves keys; `@svjeez/geo`'s turning globes use it for the side folded out past the clip.
+
 ## Errors and fixes
 
 Type errors from `tsc`:
