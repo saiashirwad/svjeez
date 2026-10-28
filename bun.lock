@@ -42,6 +42,21 @@
         "astro": ">=7",
       },
     },
+    "packages/code": {
+      "name": "@svjeez/code",
+      "version": "0.6.1",
+      "dependencies": {
+        "shiki": "4.5.0",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "svjeez": "workspace:*",
+        "typescript": "latest",
+      },
+      "peerDependencies": {
+        "svjeez": ">=0.6.0 <1",
+      },
+    },
     "packages/fonts": {
       "name": "@svjeez/fonts",
       "version": "0.6.1",
@@ -624,6 +639,8 @@
     "@sindresorhus/is": ["@sindresorhus/is@4.6.0", "", {}, "sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw=="],
 
     "@svjeez/astro": ["@svjeez/astro@workspace:packages/astro"],
+
+    "@svjeez/code": ["@svjeez/code@workspace:packages/code"],
 
     "@svjeez/fonts": ["@svjeez/fonts@workspace:packages/fonts"],
 
