@@ -14,7 +14,8 @@
     "types": ["bun"],
     "lib": ["ESNext"],
     "paths": {
-      "svjeez": ["../svjeez/src/index.ts"]
+      "svjeez": ["../svjeez/src/index.ts"],
+      "svjeez/extras": ["../svjeez/src/extras.ts"]
     }
   },
   "include": ["src", "test"],

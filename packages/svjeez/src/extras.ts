@@ -6,6 +6,8 @@ export {
   visible,
   travel,
   type Beats,
+  type HeadingOptions,
+  type TravelOptions,
   type Timeline,
   type TimelineOptions,
 } from "./extras/timeline";
@@ -36,7 +38,7 @@ export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
 
 export { Marker } from "./extras/marker";
 
-export { Camera, type CameraStop } from "./extras/camera";
+export { Camera, Steady, type CameraStop } from "./extras/camera";
 
 export type { Direction } from "./layout/box";
 

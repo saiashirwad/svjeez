@@ -186,6 +186,26 @@ const scene = (
 );
 ```
 
+## Heading and steady
+
+`travel(points, { at, over, heading: true })` also turns the token to face the way it moves, through a `rotate` channel. Legs ease into each other, so a route of many short legs turns smoothly. A number is added in degrees: an icon drawn pointing up takes `heading: 90`.
+
+```tsx
+<g animation={travel(route, { at: 2, over: 3, heading: 90 })}>
+  <Icon icon={plane} x={-8} y={-8} size={16} />
+</g>
+```
+
+`Steady` keeps what it holds at its size on screen while a `Camera` zooms. Give it the camera's `frame`, `stops` and `over`, and `at`, the point it is drawn around. Put it inside the `Camera`'s children.
+
+```tsx
+<Camera frame={FRAME} stops={stops} over={0.8}>
+  <Steady frame={FRAME} stops={stops} over={0.8} at={{ x: city.x, y: city.y }}>
+    <circle cx={city.x} cy={city.y} r={4} />
+  </Steady>
+</Camera>
+```
+
 ## Axes and function plots
 
 `axes(options)` draws coordinate axes over a graph range and returns `{ node, bounds, point, plot }`. `x` and `y` are `[min, max]` ranges, `width` and `height` the plot area in px, and `at` its top-left. `ticks: { x, y }` are steps in graph units, and an axis without a step has no ticks. `labels` (default true) numbers the ticks, `grid` adds faint lines, and `theme`, `fontSize` and `font` style it. Each axis crosses at 0 when 0 is in its range, else sits on the bottom or left edge.
