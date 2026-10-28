@@ -3,156 +3,74 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>svjeez · draw in TSX, get one animated SVG</title>
-<meta name="description" content="draw in TSX, get one animated SVG">
+<title>svjeez · animated SVG, compiled from TSX</title>
+<meta name="description" content="animated SVG, compiled from TSX">
 <link rel="canonical" href="https://svjeez.texoport.in/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap">
-<meta name="theme-color" content="#211D29">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&display=swap">
+<meta name="theme-color" content="#F3ECDF">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="svjeez">
 <meta property="og:url" content="https://svjeez.texoport.in/">
 <meta property="og:title" content="svjeez">
-<meta property="og:description" content="draw in TSX, get one animated SVG">
+<meta property="og:description" content="animated SVG, compiled from TSX">
 <meta property="og:image" content="https://svjeez.texoport.in/og.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="A sheet of animation paper with svjeez written in ink, the line 'draw in TSX, get one animated SVG' in blue pencil, and a small orange ball waking up.">
+<meta property="og:image:alt" content="The svjeez wordmark in pink and blue riso ink on paper, with a small yellow creature on the z, a sleepy sun, clouds and a paper plane.">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="svjeez">
-<meta name="twitter:description" content="draw in TSX, get one animated SVG">
+<meta name="twitter:description" content="animated SVG, compiled from TSX">
 <meta name="twitter:image" content="https://svjeez.texoport.in/og.png">
-<meta name="twitter:image:alt" content="A sheet of animation paper with svjeez written in ink and a small orange ball waking up.">
+<meta name="twitter:image:alt" content="The svjeez wordmark in pink and blue riso ink on paper, with a small yellow creature on the z.">
 <style>
-  /* A pencil test on a light table. The sheet is one svjeez SVG, inlined so the page can drive it:
-     where the browser has scroll-driven animations, every story keyframe follows the scrollbar
-     instead of the clock. There is no JavaScript on this page. */
-  @property --fr { syntax: "<integer>"; inherits: false; initial-value: 0 }
-  :root {
-    --desk: #211D29; --glow: #4A3F55; --paper: #FBF7EE; --lead: #2E2B36; --red: #E5383B; --blue: #3F6FE8; --tape: #EADFBF;
-    --side: min(100vw - 28px, 100dvh - 44px);
-    color-scheme: dark; scrollbar-color: var(--red) var(--desk);
+  :root { --paper: #F3ECDF; --cloud: #FFFDF8; --ink: #23203A; --pink: #FF5E8E; --blue: #3358E0; --sun: #FFC63D;
+    /* One unit of the 1200×1200 scene, as the cover-scaled image draws it. */
+    --u: calc(max(100vw, 100dvh) / 1200) }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden }
+  img { display: block; width: 100vw; height: 100dvh; object-fit: cover }
+  /* The buttons sit in the scene's own coordinates, under the circled install command. */
+  nav { position: fixed; left: 50%; top: calc(50dvh + 222 * var(--u)); translate: -50% 0; display: flex; gap: calc(20 * var(--u)) }
+  nav a {
+    display: inline-flex; align-items: center; gap: calc(9 * var(--u)); height: calc(52 * var(--u)); padding: 0 calc(18 * var(--u));
+    font: 600 calc(16 * var(--u)) / 1 "JetBrains Mono", ui-monospace, Menlo, monospace; color: var(--ink); text-decoration: none; white-space: nowrap;
+    background: var(--cloud); border: calc(3 * var(--u)) solid var(--ink); border-radius: calc(26 * var(--u));
+    box-shadow: calc(5 * var(--u)) calc(5 * var(--u)) 0 var(--shadow);
+    rotate: var(--tilt); transition: translate .18s cubic-bezier(.3, 1.6, .5, 1), rotate .18s cubic-bezier(.3, 1.6, .5, 1), box-shadow .18s;
+    animation: pop .6s cubic-bezier(.3, 1.6, .5, 1) backwards;
   }
-  html { background: var(--desk) }
-  body {
-    margin: 0; min-height: 100dvh; color: var(--paper);
-    background: radial-gradient(ellipse 70% 60% at 50% 48%, var(--glow), transparent 75%) fixed, var(--desk);
-  }
-  .table { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden }
-
-  /* The sheet: square, as large as the window allows, with two more sheets under it on the pegs. */
-  .sheet {
-    position: relative; width: var(--side); aspect-ratio: 1; margin-top: 16px; container-type: size;
-    rotate: -0.6deg; filter: drop-shadow(0 18px 30px #0008) drop-shadow(0 2px 3px #0006);
-  }
-  .sheet::before, .sheet::after {
-    content: ""; position: absolute; inset: 0; background: #EFE9DC; border-radius: 1px; z-index: -1;
-    translate: 0.5cqw 0.7cqw; rotate: 1.1deg;
-  }
-  .sheet::after { background: #E6DFD0; translate: -0.4cqw 1.3cqw; rotate: -0.8deg; z-index: -2 }
-  .sheet > svg:not(.pegbar) { display: block; width: 100%; height: 100%; border-radius: 1px }
-  /* Grain over the drawing, so the pencil sits in the paper's tooth. */
-  .grain { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .22;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .17 0 0 0 0 .14 0 0 0 -1.5 .95'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E") }
-
-  /* The peg bar the sheet hangs on, in the sheet's own 1000-unit coordinates. */
-  .pegbar { position: absolute; left: -8%; width: 116%; top: -4%; height: 9%; pointer-events: none; overflow: visible }
-
-  /* The frame counter, written into the FR box printed on the sheet. */
-  .counter {
-    position: absolute; left: 82.4%; top: 1.85%; font: 700 2.3cqw/1 "JetBrains Mono", ui-monospace, monospace; color: var(--red);
-    counter-reset: fr var(--fr); animation: frames 60s linear both;
-  }
-  .counter::after { content: counter(fr) }
-  @keyframes frames { to { --fr: 720 } }
-
-  /* The way out: strips of masking tape stuck to the last page. */
-  .tape { position: absolute; left: 0; right: 0; top: 71.5%; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.6cqw 1.8cqw; padding: 0 4cqw }
-  .tape a, .tape code {
-    display: inline-flex; align-items: center; gap: .8cqw; padding: 1.2cqw 2.2cqw;
-    font: 500 2.2cqw/1 "JetBrains Mono", ui-monospace, monospace; color: var(--lead); text-decoration: none;
-    background: color-mix(in srgb, var(--tape) 88%, transparent);
-    clip-path: polygon(0 8%, 3% 0, 6% 10%, 10% 2%, 14% 9%, 18% 0, 100% 3%, 98% 14%, 100% 30%, 97% 46%, 100% 62%, 98% 80%, 100% 100%, 0 96%, 2% 78%, 0 60%, 3% 42%, 0 24%);
-    rotate: var(--tilt, -2deg); transition: rotate .25s cubic-bezier(.3, 1.7, .5, 1), translate .25s cubic-bezier(.3, 1.7, .5, 1);
-  }
-  .tape code { font-weight: 700; user-select: all; cursor: text; background: color-mix(in srgb, #FFE45C 85%, transparent); --tilt: 1.5deg }
-  .tape code::before { content: "$"; color: var(--red) }
-  .tape a:nth-of-type(2) { --tilt: 2.5deg }
-  .tape a:nth-of-type(3) { --tilt: -1deg }
-  .tape a:hover { rotate: calc(var(--tilt) * -1.6); translate: 0 -.5cqw }
-  .tape a:focus-visible { outline: .3cqw dashed var(--red); outline-offset: .6cqw }
-  .tape svg { width: 2.4cqw; height: 2.4cqw }
-
-  /* Desk things, where the window has room for them. */
-  .prop { position: absolute; pointer-events: none }
-  .pencil { width: 34vmin; left: calc(50% - var(--side) / 2 - 30vmin); bottom: 14%; rotate: -64deg }
-  .eraser { width: 10vmin; right: calc(50% - var(--side) / 2 - 15vmin); top: 22%; rotate: 18deg }
-  /* On a tall screen the desk shows above and below the sheet instead. */
-  @media (max-aspect-ratio: 5/4) {
-    .pencil { width: 58vw; left: 8vw; bottom: calc(50% - var(--side) / 2 - 26vw); rotate: -7deg; animation: none !important }
-    .eraser { width: 18vw; right: 10vw; top: calc(50% - var(--side) / 2 - 24vw); rotate: 12deg }
-  }
-
-  .scrollonly { display: none }
-
-  @supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) {
-      /* Sixty story seconds, a fifth of a screen each. */
-      body { height: 1300vh }
-      .scrollonly { display: inline }
-      .sheet svg .a:not(.idle, .idle *, .once, .once *) {
-        animation-timeline: scroll(root); animation-duration: auto; animation-iteration-count: 1; animation-delay: 0s;
-      }
-      .counter { animation-timeline: scroll(root); animation-duration: auto }
-      .tape { animation: arrive linear both; animation-timeline: scroll(root); animation-range: 84% 90% }
-      .tape > * { animation: stick linear both; animation-timeline: scroll(root); animation-range: 84% 91% }
-      .pencil { animation: roll linear both; animation-timeline: scroll(root) }
-    }
-  }
-  @keyframes arrive { from { opacity: 0; visibility: hidden } }
-  @keyframes stick { from { translate: 0 6cqw; rotate: -14deg; scale: .6 } }
-  @keyframes roll { to { translate: 0 -30vh; rotate: -50deg } }
-  @media (prefers-reduced-motion: reduce) { .counter { animation: none; --fr: 720 } }
+  nav a:nth-child(1) { --shadow: var(--pink); --tilt: -2deg; animation-delay: 5s }
+  nav a:nth-child(2) { --shadow: var(--blue); --tilt: 2deg; animation-delay: 5.15s }
+  nav a:nth-child(3) { --shadow: var(--sun); --tilt: -1deg; animation-delay: 5.3s }
+  nav a:hover { rotate: calc(var(--tilt) * -1.5); translate: 0 calc(-4 * var(--u)); box-shadow: calc(9 * var(--u)) calc(10 * var(--u)) 0 var(--shadow) }
+  nav a:active { translate: calc(6 * var(--u)) calc(6 * var(--u)); box-shadow: 0 0 0 var(--shadow); transition-duration: .05s }
+  nav a:focus-visible { outline: calc(3 * var(--u)) dashed var(--ink); outline-offset: calc(6 * var(--u)) }
+  nav svg { width: calc(18 * var(--u)); height: calc(18 * var(--u)); flex: none }
+  @keyframes pop { from { opacity: 0; transform: translateY(calc(24 * var(--u))) scale(.5) rotate(-8deg) } }
+  @media (prefers-reduced-motion: reduce) { nav a { animation: none; transition: none } }
 </style>
 </head>
 <body>
-<div class="table">
-  <svg class="prop pencil" viewBox="0 0 400 40" aria-hidden="true">
-    <path d="M40 6H330L392 20L330 34H40Z" fill="#F5B731"/>
-    <path d="M40 6H330V14H40Z" fill="#FFD25C"/><path d="M40 26H330V34H40Z" fill="#D9951F"/>
-    <path d="M330 6L392 20L330 34Z" fill="#E9C99A"/><path d="M372 15.5L392 20L372 24.5Z" fill="#2E2B36"/>
-    <rect x="0" y="6" width="22" height="28" rx="4" fill="#F28AA0"/><rect x="18" y="5" width="24" height="30" fill="#B9B4AA"/>
-    <path d="M24 5V35M30 5V35M36 5V35" stroke="#8F8A80" stroke-width="1.4"/>
-  </svg>
-  <svg class="prop eraser" viewBox="0 0 100 60" aria-hidden="true">
-    <rect x="4" y="8" width="92" height="44" rx="8" fill="#F28AA0"/><rect x="4" y="8" width="44" height="44" rx="8" fill="#F7F1E6"/>
-    <rect x="34" y="8" width="20" height="44" fill="#3F6FE8"/>
-  </svg>
-  <main class="sheet">
-    <svg class="pegbar" viewBox="-80 -40 1160 90" aria-hidden="true">
-      <defs><linearGradient id="steel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D8D6DD"/><stop offset=".5" stop-color="#9C99A6"/><stop offset="1" stop-color="#6E6B78"/></linearGradient></defs>
-      <rect x="-80" y="-34" width="1160" height="34" rx="6" fill="url(#steel)"/>
-      <rect x="334" y="24" width="82" height="16" rx="8" fill="url(#steel)"/>
-      <circle cx="500" cy="33" r="9" fill="url(#steel)"/>
-      <rect x="584" y="24" width="82" height="16" rx="8" fill="url(#steel)"/>
-      <circle cx="-50" cy="-17" r="5" fill="#5D5A66"/><circle cx="1050" cy="-17" r="5" fill="#5D5A66"/>
-    </svg>
-<!-- landing.svg -->
-    <div class="grain"></div>
-    <div class="counter" aria-hidden="true"></div>
-    <nav class="tape">
-      <code>npm i svjeez</code>
-      <a href="https://github.com/saiashirwad/svjeez">github ↗</a>
-      <a href="/examples/">examples</a>
-      <a href="/intro">the intro reel</a>
-    </nav>
-  </main>
-</div>
+<img src="landing.svg" alt="svjeez: animated SVG, compiled from TSX. npm i svjeez">
+<nav>
+  <a href="https://github.com/saiashirwad/svjeez">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+  <a href="/intro">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5 13 8l-9 5.5Z" fill="var(--pink)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    the intro
+  </a>
+  <a href="/examples/">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1Q8 8 15 8Q8 8 8 15Q8 8 1 8Q8 8 8 1Z" fill="var(--sun)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    examples
+  </a>
+</nav>
 </body>
 </html>
