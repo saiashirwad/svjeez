@@ -29,7 +29,7 @@
   <style><![CDATA[
 .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
 
-.a{animation-duration:25.95s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:25.95s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,24.547%{opacity:1}25.511%,100%{opacity:0}}
 @keyframes k2{0%,24.547%{translate:0px 0px}25.511%,100%{translate:0px -12px}}

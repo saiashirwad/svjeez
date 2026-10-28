@@ -152,7 +152,7 @@
   <style><![CDATA[
 .ui{font-family:"Inter V",Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}.display{font-family:AeonikPro,"Aeonik Pro",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-weight:500}.u{text-decoration:underline;text-underline-offset:3px}
 
-.a{animation-duration:70s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:70s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%{rotate:0deg}100%{rotate:270deg}}
 .m3{animation-name:k1;animation-timing-function:linear}

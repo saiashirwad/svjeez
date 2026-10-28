@@ -8,7 +8,7 @@
 
 @property --p1{syntax:'<number>';inherits:false;initial-value:0}
 @property --p2{syntax:'<angle>';inherits:true;initial-value:0deg}
-.a{animation-duration:4s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:4s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%{--p2:0deg}100%{--p2:360deg}}
 .m1{animation-name:k1;animation-timing-function:linear}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-1s!important;animation-play-state:paused!important}}

@@ -101,7 +101,7 @@
   <style><![CDATA[
 .serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
 
-.a{animation-duration:24s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:24s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,100%{opacity:0.82}41.667%{opacity:1}}
 .m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}

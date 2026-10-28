@@ -103,7 +103,7 @@
   <style><![CDATA[
 .sans{font-family:"Inter","SF Pro Display",system-ui,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace}
 
-.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,100%{stop-color:#9F8CFF}33.333%{stop-color:#FF5FA8}66.667%{stop-color:#3EE6D6}}
 .m2{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
