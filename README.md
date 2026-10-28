@@ -41,10 +41,10 @@ Every preview below is a single `.svg` file loaded in an `<img>` tag. Click any 
   </tr>
   <tr>
     <td align="center" width="50%">
-      <a href="https://svjeez.texoport.in/examples/minecraft">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/minecraft.svg" width="400" alt="A voxel floating island builds itself block by block, grows trees and a lantern-lit cabin, shifts to snowy night, and crumbles." />
+      <a href="https://svjeez.texoport.in/examples/horizon">
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/horizon.svg" width="400" alt="A cinematic black hole with a glowing accretion disk, lensed photon ring, relativistic jets, and HUD telemetry." />
       </a><br />
-      <sub><b>Voxel Island</b> · Isometric pixel-art blocks, day-to-night sky &amp; falling snow (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/minecraft">TSX</a>)</sub>
+      <sub><b>Event Horizon</b> · Accretion disk, lensed photon ring, camera shake &amp; HUD (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/horizon">TSX</a>)</sub>
     </td>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/strata">
@@ -352,33 +352,44 @@ const w = display.measure("Wave!", 96);
   <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/effects.svg" width="460" alt="Six effect tiles: blur, jitter, smooth drift, boiling house, neon flicker, spinner" />
 </p>
 
-### 5. Voxels (`svjeez/voxel`) & Typed CSS `@property` Math
+### 5. Defs, Typed CSS `@property` & Unit-Checked `calc()`
 
-Project 3D pixel-art block scenes into pure SVG with automatic hidden-block culling, per-face shading, lifetimes (`from`/`to`), and `camera.project([x, y, z])` (`y` is vertical height), or drive CSS `calc()` expressions with animated `@property` values checked for unit dimensionality.
+Create gradients, masks, clip paths, patterns, filters, and reusable `<symbol>` defs with `def.*` (`render` assigns conflict-free IDs only to referenced defs), or animate typed CSS `@property` variables inside dimension-checked `calc()` expressions:
 
 ```tsx
-import { calc, css, def, ease, enter, motion } from "svjeez";
-import { voxel } from "svjeez/voxel";
+import { calc, css, def, ease, motion, render } from "svjeez";
 
-// 1. Isometric voxel scenes
-const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 });
-voxel.scene({
-  camera: view,
-  blocks: [
-    { at: [0, 0, 0], skin: { side: dirt, top: grass } },
-    { at: [0, 1, 0], skin: { side: dirt, top: grass }, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
-  ],
-});
+const fade = def.linearGradient(
+  { x1: 0, y1: 0, x2: 0, y2: 1 },
+  <>
+    <stop offset={0} stopColor="#fff" />
+    <stop offset={1} stopColor="#fff" stopOpacity={0} />
+  </>,
+);
 
-// 2. Typed CSS @property + dimension-checked calc()
 const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
 const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
-const style = css`.dot { translate: ${calc.add(calc.length(100), calc.mul(calc.length(60), px, calc.cos(yaw)))} 100px; }`;
+
+render(
+  {
+    width: 200,
+    height: 200,
+    duration: 4,
+    title: "Orbit",
+    css: css`
+      .dot {
+        translate: ${calc.add(calc.length(100), calc.mul(calc.length(60), px, calc.cos(yaw)))} 100px;
+      }
+    `,
+  },
+  <g animation={motion().to({ [yaw]: 360 }, 4, ease.linear)}>
+    <circle class="dot" r={6} fill={fade} style={{ [px]: 1 }} />
+  </g>,
+);
 ```
 
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/voxels.svg" width="200" alt="Three voxel blocks, one dropping in and one popping in" />
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/property.svg" width="160" alt="A dot orbiting, driven by an animated angle property" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/property.svg" width="180" alt="A dot orbiting, driven by an animated angle property" />
 </p>
 
 ---
