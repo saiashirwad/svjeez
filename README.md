@@ -358,9 +358,9 @@ Draw a path with a pen, brush, calligraphy nib or pencil instead of an even stro
 ### Code
 
 ```tsx
-import { code, tomorrowNight, type Run } from "svjeez/extras";
+import { code, tomorrowNight, type CodeRun } from "svjeez/extras";
 
-const kw = (text: string): Run => ["keyword", text];
+const kw = (text: string): CodeRun => ["keyword", text];
 
 const src = code(
   [
@@ -407,7 +407,7 @@ const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro
 </>;
 ```
 
-`morph` moves matching text between versions. `timeline` arranges named scenes, and `read` estimates a caption’s duration.
+`morph` moves matching text between versions. `timeline` arranges named scenes, and `readingTime` estimates a caption’s duration.
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/dist/readme/code.svg" width="360" alt="A call to sum morphs into a reduce and back, with a marker following it" />
 

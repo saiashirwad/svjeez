@@ -65,7 +65,7 @@ const check = ({ at, from = 0, to = Infinity }: VoxelBlock): void => {
 
 const FACES = Object.keys(SIDES) as VoxelFace[];
 
-export type { VoxelCamera, Vec3 } from "./space";
+export type { VoxelCamera, VoxelCameraOptions, Vec3 } from "./space";
 export type { VoxelFace, VoxelPalette, VoxelSkin, VoxelTexture } from "./texture";
 
 const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
