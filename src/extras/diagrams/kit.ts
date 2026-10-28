@@ -3,9 +3,9 @@ import { el } from "../../el";
 import { textWidth, type FontValue } from "../../font/font";
 import { rect, type Edge, type Point, type Rect } from "../../geometry";
 import type { Box, Size } from "../../layout/box";
-import { ease, motion, type Seconds, type Stack } from "../../motion";
+import { ease, motion, type Motion, type Seconds, type Stack } from "../../motion";
 import { draw, enter } from "../../recipes";
-import type { SvgNode } from "../../svg";
+import type { Child, SvgNode } from "../../svg";
 import { defaultDark, type Base16, type Slot } from "../theme";
 import { curve } from "./curve";
 
@@ -68,7 +68,7 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
 };
 
 /** The pop-in of a node that appears at `at`. */
-export const popIn = (at: Seconds) => enter({ at, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out);
+export const popIn = (at: Seconds): Motion<"opacity" | "scale"> => enter({ at, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out);
 
 const SKEW = 0.35;
 const LID = 5;
@@ -141,7 +141,7 @@ export const look = (options: DiagramOptions) => {
     font,
     small,
     smallLook: { theme, fontSize: small } satisfies Look,
-    root: (children: Parameters<typeof el.g>[1]): SvgNode => el.g({ class: cls, fontFamily: font }, children),
+    root: (children: Child): SvgNode => el.g({ class: cls, fontFamily: font }, children),
   };
 };
 
