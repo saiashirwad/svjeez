@@ -1,6 +1,6 @@
 import { def, ease, motion, render, type SvgNode } from "svjeez";
 import { code, type CodeTokens } from "svjeez/extras";
-import { CSS, highlight, theme } from "../kit";
+import { CSS, chrome, highlight, theme } from "../kit";
 
 // The home page hero: a day in ten seconds, written as one motion() chain beside the sky it paints. As each step of the
 // chain plays, its line in the code lights up in the color the sky is heading for, so the timeline in the code and the
@@ -62,7 +62,7 @@ export interface Layout {
   readonly fontSize: number;
   /** Top-left of the code. */
   readonly code: { readonly x: number; readonly y: number };
-  /** The sky's window, and how far down it the horizon sits. */
+  /** The sky's pane inside the window, and how far down it the horizon sits. Its corners are square except where it meets the window's own rounded corner. */
   readonly panel: { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
   readonly horizon: number;
   readonly scale: number;
@@ -86,7 +86,10 @@ export function day(layout: Layout): string {
     );
   });
 
-  const clip = def.clipPath({}, <rect x={panel.x} y={panel.y} width={panel.w} height={panel.h} rx={20} />);
+  // The pane meets the window's bottom-right corner in the wide cut and only its bottom edge in the tall one, which sits between the bar and the code.
+  const r = panel.x + panel.w >= width - 1 && panel.y + panel.h >= height - 1 ? 12 : 0;
+  const [x0, y0, x1, y1] = [panel.x, panel.y, panel.x + panel.w, panel.y + panel.h];
+  const clip = def.clipPath({}, <path d={`M${x0} ${y0}H${x1}V${y1 - r}A${r} ${r} 0 0 1 ${x1 - r} ${y1}H${x0}Z`} />);
   const origin = `translate(${panel.x + panel.w / 2} ${panel.y + panel.h * layout.horizon}) scale(${layout.scale})`;
 
   return render(
@@ -100,6 +103,7 @@ export function day(layout: Layout): string {
       reducedMotion: { at: 3 },
     },
     <>
+      {chrome(width, height, "day.tsx", { mono: true }).node}
       <g class="mono">
         {bars}
         {listing.node}

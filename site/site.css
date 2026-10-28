@@ -117,10 +117,9 @@ code, pre, kbd { font-family: var(--mono); font-size: 0.9em }
 @media (hover: hover) and (pointer: fine) { .install button:hover { color: var(--ink); background: var(--bg) } }
 .links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9375rem }
 .links a { color: var(--ink) }
-.hero-demo { margin-block-end: clamp(3rem, 7vw, 5rem) }
-.hero-demo .tall { inline-size: min(100%, 22.5rem) }
-@media (max-width: 63.99rem) { .hero-demo .wide { display: none } .hero-demo .tall { display: block } }
-@media (min-width: 56rem) and (max-width: 63.99rem) { .hero-demo .tall { inline-size: min(100%, 26rem) } }
+.hero-demo { margin-block: clamp(1rem, 3vw, 2.5rem) clamp(3rem, 7vw, 5rem) }
+@media (max-width: 63.99rem) { .hero-demo .wide { display: none } .hero-demo .tall { display: block } .hero-demo .win { inline-size: min(100%, 22.5rem) } }
+@media (min-width: 56rem) and (max-width: 63.99rem) { .hero-demo .win { inline-size: min(100%, 26rem) } }
 
 /* Sections: a hairline, a numbered label, a heading, and blocks on the grid. */
 .sec { padding-block: clamp(2.5rem, 6vw, 4.5rem) 0; margin-block-start: clamp(2.5rem, 7vw, 5.5rem); border-block-start: 1px solid var(--line); row-gap: clamp(1.25rem, 2.5vw, 1.75rem) }

@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 358 640" width="358" height="640" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 358 668" width="358" height="668" role="img" aria-labelledby="t d">
   <title id="t">svjeez: a day on one timeline</title>
   <desc id="d">A motion() chain beside the sky it paints. The sky turns from dawn to noon, holds, goes to dusk and night, then back to dawn, while a sun arcs over two hills. Each line of the chain lights up while its step plays.</desc>
   <defs>
     <clipPath id="c1">
-      <rect x="0" y="0" width="358" height="272" rx="20"/>
+      <path d="M0 40H358V300A0 0 0 0 1 358 300H0Z"/>
     </clipPath>
   </defs>
   <style><![CDATA[
@@ -35,159 +35,167 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="mono">
-    <rect x="19.8" y="315.55" width="163.8" height="19.55" rx="5" fill="#8CCBFF" fill-opacity="0.28" class="a m1"/>
-    <rect x="19.8" y="335.1" width="67.2" height="19.55" rx="5" fill="var(--base03)" fill-opacity="0.16" class="a m2"/>
-    <rect x="19.8" y="354.65" width="163.8" height="19.55" rx="5" fill="#FF7E5F" fill-opacity="0.28" class="a m3"/>
-    <rect x="19.8" y="374.2" width="184.5" height="19.55" rx="5" fill="#5E5CE6" fill-opacity="0.28" class="a m4"/>
-    <rect x="19.8" y="393.75" width="67.2" height="19.55" rx="5" fill="var(--base03)" fill-opacity="0.16" class="a m5"/>
-    <rect x="19.8" y="413.3" width="184.5" height="19.55" rx="5" fill="#FFB38A" fill-opacity="0.28" class="a m6"/>
+    <rect x="0.5" y="0.5" width="357" height="667" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h357" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="179" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">day.tsx</text>
+  </g>
+  <g class="mono">
+    <rect x="27.2" y="342.7" width="157.2" height="18.7" rx="5" fill="#8CCBFF" fill-opacity="0.28" class="a m1"/>
+    <rect x="27.2" y="361.4" width="64.8" height="18.7" rx="5" fill="var(--base03)" fill-opacity="0.16" class="a m2"/>
+    <rect x="27.2" y="380.1" width="157.2" height="18.7" rx="5" fill="#FF7E5F" fill-opacity="0.28" class="a m3"/>
+    <rect x="27.2" y="398.8" width="177" height="18.7" rx="5" fill="#5E5CE6" fill-opacity="0.28" class="a m4"/>
+    <rect x="27.2" y="417.5" width="64.8" height="18.7" rx="5" fill="var(--base03)" fill-opacity="0.16" class="a m5"/>
+    <rect x="27.2" y="436.2" width="177" height="18.7" rx="5" fill="#FFB38A" fill-opacity="0.28" class="a m6"/>
     <g>
-      <text x="12" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base0E)">const</text>
-      <text x="53.4" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base05)">sky</text>
-      <text x="81" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">=</text>
-      <text x="94.8" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base0D)">motion</text>
-      <text x="136.2" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="156.9" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
-      <text x="184.5" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="198.3" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base05)">dawn</text>
-      <text x="232.8" y="309.8" font-family="monospace" font-size="11.5" fill="var(--base04)">})</text>
-      <text x="25.8" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="32.7" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
-      <text x="46.5" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="67.2" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
-      <text x="94.8" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="108.6" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base05)">noon</text>
-      <text x="143.1" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
-      <text x="163.8" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base09)">2</text>
-      <text x="170.7" y="329.35" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
-      <text x="25.8" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="32.7" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base0D)">wait</text>
-      <text x="60.3" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base04)">(</text>
-      <text x="67.2" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base09)">2</text>
-      <text x="74.1" y="348.9" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
-      <text x="25.8" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="32.7" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
-      <text x="46.5" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="67.2" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
-      <text x="94.8" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="108.6" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base05)">dusk</text>
-      <text x="143.1" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
-      <text x="163.8" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base09)">2</text>
-      <text x="170.7" y="368.45" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
-      <text x="25.8" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="32.7" y="388" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
-      <text x="46.5" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="67.2" y="388" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
-      <text x="94.8" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="108.6" y="388" font-family="monospace" font-size="11.5" fill="var(--base05)">night</text>
-      <text x="150" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
-      <text x="170.7" y="388" font-family="monospace" font-size="11.5" fill="var(--base09)">1.5</text>
-      <text x="191.4" y="388" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
-      <text x="25.8" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="32.7" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base0D)">wait</text>
-      <text x="60.3" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base04)">(</text>
-      <text x="67.2" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base09)">1</text>
-      <text x="74.1" y="407.55" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
-      <text x="25.8" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="32.7" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
-      <text x="46.5" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="67.2" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
-      <text x="94.8" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="108.6" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base05)">dawn</text>
-      <text x="143.1" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
-      <text x="163.8" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base09)">1.5</text>
-      <text x="184.5" y="427.1" font-family="monospace" font-size="11.5" fill="var(--base04)">);</text>
-      <text x="12" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base08)">&lt;rect</text>
-      <text x="53.4" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">width</text>
-      <text x="87.9" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
-      <text x="101.7" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">w</text>
-      <text x="108.6" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
-      <text x="122.4" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">height</text>
-      <text x="163.8" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
-      <text x="177.6" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">h</text>
-      <text x="184.5" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
-      <text x="198.3" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">animation</text>
-      <text x="260.4" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
-      <text x="274.2" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base05)">sky</text>
-      <text x="294.9" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
-      <text x="308.7" y="466.2" font-family="monospace" font-size="11.5" fill="var(--base08)">/&gt;</text>
-      <text x="12" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base08)">&lt;circle</text>
-      <text x="67.2" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">r</text>
-      <text x="74.1" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
-      <text x="87.9" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base09)">24</text>
-      <text x="101.7" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
-      <text x="115.5" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
-      <text x="143.1" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
-      <text x="156.9" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">sun</text>
-      <text x="177.6" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
-      <text x="191.4" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base05)">animation</text>
-      <text x="253.5" y="485.75" font-family="monospace" font-size="11.5" fill="var(--base04)">={[</text>
-      <text x="25.8" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base0D)">motion</text>
-      <text x="67.2" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="87.9" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base05)">x</text>
-      <text x="94.8" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="108.6" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">-</text>
-      <text x="115.5" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base09)">200</text>
-      <text x="143.1" y="505.3" font-family="monospace" font-size="11.5" fill="var(--base04)">})</text>
-      <text x="39.6" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="46.5" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
-      <text x="60.3" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="81" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base05)">x</text>
-      <text x="87.9" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="101.7" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base09)">200</text>
-      <text x="129.3" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
-      <text x="150" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base09)">6</text>
-      <text x="156.9" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">,</text>
-      <text x="170.7" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base05)">ease</text>
-      <text x="198.3" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="205.2" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base05)">linear</text>
-      <text x="246.6" y="524.85" font-family="monospace" font-size="11.5" fill="var(--base04)">),</text>
-      <text x="25.8" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base0D)">motion</text>
-      <text x="67.2" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="87.9" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base05)">y</text>
-      <text x="94.8" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="108.6" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base09)">60</text>
-      <text x="129.3" y="544.4" font-family="monospace" font-size="11.5" fill="var(--base04)">})</text>
-      <text x="39.6" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="46.5" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
-      <text x="60.3" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="81" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base05)">y</text>
-      <text x="87.9" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="101.7" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">-</text>
-      <text x="108.6" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base09)">170</text>
-      <text x="136.2" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
-      <text x="156.9" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base09)">3</text>
-      <text x="163.8" y="563.95" font-family="monospace" font-size="11.5" fill="var(--base04)">)</text>
-      <text x="39.6" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="46.5" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base0D)">to</text>
-      <text x="60.3" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">({</text>
-      <text x="81" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base05)">y</text>
-      <text x="87.9" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">:</text>
-      <text x="101.7" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base09)">60</text>
-      <text x="122.4" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">},</text>
-      <text x="143.1" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base09)">3</text>
-      <text x="150" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">,</text>
-      <text x="163.8" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base05)">ease</text>
-      <text x="191.4" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">.</text>
-      <text x="198.3" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base05)">in</text>
-      <text x="212.1" y="583.5" font-family="monospace" font-size="11.5" fill="var(--base04)">),</text>
-      <text x="12" y="603.05" font-family="monospace" font-size="11.5" fill="var(--base04)">]}</text>
-      <text x="32.7" y="603.05" font-family="monospace" font-size="11.5" fill="var(--base08)">/&gt;</text>
-      <text x="12" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base08)">&lt;path</text>
-      <text x="53.4" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">d</text>
-      <text x="60.3" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
-      <text x="74.1" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">hills</text>
-      <text x="108.6" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
-      <text x="122.4" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">fill</text>
-      <text x="150" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">={</text>
-      <text x="163.8" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base05)">land</text>
-      <text x="191.4" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base04)">}</text>
-      <text x="205.2" y="622.6" font-family="monospace" font-size="11.5" fill="var(--base08)">/&gt;</text>
+      <text x="20" y="337.2" font-family="monospace" font-size="11" fill="var(--base0E)">const</text>
+      <text x="59.6" y="337.2" font-family="monospace" font-size="11" fill="var(--base05)">sky</text>
+      <text x="86" y="337.2" font-family="monospace" font-size="11" fill="var(--base04)">=</text>
+      <text x="99.2" y="337.2" font-family="monospace" font-size="11" fill="var(--base0D)">motion</text>
+      <text x="138.8" y="337.2" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="158.6" y="337.2" font-family="monospace" font-size="11" fill="var(--base05)">fill</text>
+      <text x="185" y="337.2" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="198.2" y="337.2" font-family="monospace" font-size="11" fill="var(--base05)">dawn</text>
+      <text x="231.2" y="337.2" font-family="monospace" font-size="11" fill="var(--base04)">})</text>
+      <text x="33.2" y="355.9" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="39.8" y="355.9" font-family="monospace" font-size="11" fill="var(--base0D)">to</text>
+      <text x="53" y="355.9" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="72.8" y="355.9" font-family="monospace" font-size="11" fill="var(--base05)">fill</text>
+      <text x="99.2" y="355.9" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="112.4" y="355.9" font-family="monospace" font-size="11" fill="var(--base05)">noon</text>
+      <text x="145.4" y="355.9" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
+      <text x="165.2" y="355.9" font-family="monospace" font-size="11" fill="var(--base09)">2</text>
+      <text x="171.8" y="355.9" font-family="monospace" font-size="11" fill="var(--base04)">)</text>
+      <text x="33.2" y="374.6" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="39.8" y="374.6" font-family="monospace" font-size="11" fill="var(--base0D)">wait</text>
+      <text x="66.2" y="374.6" font-family="monospace" font-size="11" fill="var(--base04)">(</text>
+      <text x="72.8" y="374.6" font-family="monospace" font-size="11" fill="var(--base09)">2</text>
+      <text x="79.4" y="374.6" font-family="monospace" font-size="11" fill="var(--base04)">)</text>
+      <text x="33.2" y="393.3" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="39.8" y="393.3" font-family="monospace" font-size="11" fill="var(--base0D)">to</text>
+      <text x="53" y="393.3" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="72.8" y="393.3" font-family="monospace" font-size="11" fill="var(--base05)">fill</text>
+      <text x="99.2" y="393.3" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="112.4" y="393.3" font-family="monospace" font-size="11" fill="var(--base05)">dusk</text>
+      <text x="145.4" y="393.3" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
+      <text x="165.2" y="393.3" font-family="monospace" font-size="11" fill="var(--base09)">2</text>
+      <text x="171.8" y="393.3" font-family="monospace" font-size="11" fill="var(--base04)">)</text>
+      <text x="33.2" y="412" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="39.8" y="412" font-family="monospace" font-size="11" fill="var(--base0D)">to</text>
+      <text x="53" y="412" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="72.8" y="412" font-family="monospace" font-size="11" fill="var(--base05)">fill</text>
+      <text x="99.2" y="412" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="112.4" y="412" font-family="monospace" font-size="11" fill="var(--base05)">night</text>
+      <text x="152" y="412" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
+      <text x="171.8" y="412" font-family="monospace" font-size="11" fill="var(--base09)">1.5</text>
+      <text x="191.6" y="412" font-family="monospace" font-size="11" fill="var(--base04)">)</text>
+      <text x="33.2" y="430.7" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="39.8" y="430.7" font-family="monospace" font-size="11" fill="var(--base0D)">wait</text>
+      <text x="66.2" y="430.7" font-family="monospace" font-size="11" fill="var(--base04)">(</text>
+      <text x="72.8" y="430.7" font-family="monospace" font-size="11" fill="var(--base09)">1</text>
+      <text x="79.4" y="430.7" font-family="monospace" font-size="11" fill="var(--base04)">)</text>
+      <text x="33.2" y="449.4" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="39.8" y="449.4" font-family="monospace" font-size="11" fill="var(--base0D)">to</text>
+      <text x="53" y="449.4" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="72.8" y="449.4" font-family="monospace" font-size="11" fill="var(--base05)">fill</text>
+      <text x="99.2" y="449.4" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="112.4" y="449.4" font-family="monospace" font-size="11" fill="var(--base05)">dawn</text>
+      <text x="145.4" y="449.4" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
+      <text x="165.2" y="449.4" font-family="monospace" font-size="11" fill="var(--base09)">1.5</text>
+      <text x="185" y="449.4" font-family="monospace" font-size="11" fill="var(--base04)">);</text>
+      <text x="20" y="486.8" font-family="monospace" font-size="11" fill="var(--base08)">&lt;rect</text>
+      <text x="59.6" y="486.8" font-family="monospace" font-size="11" fill="var(--base05)">width</text>
+      <text x="92.6" y="486.8" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
+      <text x="105.8" y="486.8" font-family="monospace" font-size="11" fill="var(--base05)">w</text>
+      <text x="112.4" y="486.8" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
+      <text x="125.6" y="486.8" font-family="monospace" font-size="11" fill="var(--base05)">height</text>
+      <text x="165.2" y="486.8" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
+      <text x="178.4" y="486.8" font-family="monospace" font-size="11" fill="var(--base05)">h</text>
+      <text x="185" y="486.8" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
+      <text x="198.2" y="486.8" font-family="monospace" font-size="11" fill="var(--base05)">animation</text>
+      <text x="257.6" y="486.8" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
+      <text x="270.8" y="486.8" font-family="monospace" font-size="11" fill="var(--base05)">sky</text>
+      <text x="290.6" y="486.8" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
+      <text x="303.8" y="486.8" font-family="monospace" font-size="11" fill="var(--base08)">/&gt;</text>
+      <text x="20" y="505.5" font-family="monospace" font-size="11" fill="var(--base08)">&lt;circle</text>
+      <text x="72.8" y="505.5" font-family="monospace" font-size="11" fill="var(--base05)">r</text>
+      <text x="79.4" y="505.5" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
+      <text x="92.6" y="505.5" font-family="monospace" font-size="11" fill="var(--base09)">24</text>
+      <text x="105.8" y="505.5" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
+      <text x="119" y="505.5" font-family="monospace" font-size="11" fill="var(--base05)">fill</text>
+      <text x="145.4" y="505.5" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
+      <text x="158.6" y="505.5" font-family="monospace" font-size="11" fill="var(--base05)">sun</text>
+      <text x="178.4" y="505.5" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
+      <text x="191.6" y="505.5" font-family="monospace" font-size="11" fill="var(--base05)">animation</text>
+      <text x="251" y="505.5" font-family="monospace" font-size="11" fill="var(--base04)">={[</text>
+      <text x="33.2" y="524.2" font-family="monospace" font-size="11" fill="var(--base0D)">motion</text>
+      <text x="72.8" y="524.2" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="92.6" y="524.2" font-family="monospace" font-size="11" fill="var(--base05)">x</text>
+      <text x="99.2" y="524.2" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="112.4" y="524.2" font-family="monospace" font-size="11" fill="var(--base04)">-</text>
+      <text x="119" y="524.2" font-family="monospace" font-size="11" fill="var(--base09)">200</text>
+      <text x="145.4" y="524.2" font-family="monospace" font-size="11" fill="var(--base04)">})</text>
+      <text x="46.4" y="542.9" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="53" y="542.9" font-family="monospace" font-size="11" fill="var(--base0D)">to</text>
+      <text x="66.2" y="542.9" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="86" y="542.9" font-family="monospace" font-size="11" fill="var(--base05)">x</text>
+      <text x="92.6" y="542.9" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="105.8" y="542.9" font-family="monospace" font-size="11" fill="var(--base09)">200</text>
+      <text x="132.2" y="542.9" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
+      <text x="152" y="542.9" font-family="monospace" font-size="11" fill="var(--base09)">6</text>
+      <text x="158.6" y="542.9" font-family="monospace" font-size="11" fill="var(--base04)">,</text>
+      <text x="171.8" y="542.9" font-family="monospace" font-size="11" fill="var(--base05)">ease</text>
+      <text x="198.2" y="542.9" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="204.8" y="542.9" font-family="monospace" font-size="11" fill="var(--base05)">linear</text>
+      <text x="244.4" y="542.9" font-family="monospace" font-size="11" fill="var(--base04)">),</text>
+      <text x="33.2" y="561.6" font-family="monospace" font-size="11" fill="var(--base0D)">motion</text>
+      <text x="72.8" y="561.6" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="92.6" y="561.6" font-family="monospace" font-size="11" fill="var(--base05)">y</text>
+      <text x="99.2" y="561.6" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="112.4" y="561.6" font-family="monospace" font-size="11" fill="var(--base09)">60</text>
+      <text x="132.2" y="561.6" font-family="monospace" font-size="11" fill="var(--base04)">})</text>
+      <text x="46.4" y="580.3" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="53" y="580.3" font-family="monospace" font-size="11" fill="var(--base0D)">to</text>
+      <text x="66.2" y="580.3" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="86" y="580.3" font-family="monospace" font-size="11" fill="var(--base05)">y</text>
+      <text x="92.6" y="580.3" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="105.8" y="580.3" font-family="monospace" font-size="11" fill="var(--base04)">-</text>
+      <text x="112.4" y="580.3" font-family="monospace" font-size="11" fill="var(--base09)">170</text>
+      <text x="138.8" y="580.3" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
+      <text x="158.6" y="580.3" font-family="monospace" font-size="11" fill="var(--base09)">3</text>
+      <text x="165.2" y="580.3" font-family="monospace" font-size="11" fill="var(--base04)">)</text>
+      <text x="46.4" y="599" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="53" y="599" font-family="monospace" font-size="11" fill="var(--base0D)">to</text>
+      <text x="66.2" y="599" font-family="monospace" font-size="11" fill="var(--base04)">({</text>
+      <text x="86" y="599" font-family="monospace" font-size="11" fill="var(--base05)">y</text>
+      <text x="92.6" y="599" font-family="monospace" font-size="11" fill="var(--base04)">:</text>
+      <text x="105.8" y="599" font-family="monospace" font-size="11" fill="var(--base09)">60</text>
+      <text x="125.6" y="599" font-family="monospace" font-size="11" fill="var(--base04)">},</text>
+      <text x="145.4" y="599" font-family="monospace" font-size="11" fill="var(--base09)">3</text>
+      <text x="152" y="599" font-family="monospace" font-size="11" fill="var(--base04)">,</text>
+      <text x="165.2" y="599" font-family="monospace" font-size="11" fill="var(--base05)">ease</text>
+      <text x="191.6" y="599" font-family="monospace" font-size="11" fill="var(--base04)">.</text>
+      <text x="198.2" y="599" font-family="monospace" font-size="11" fill="var(--base05)">in</text>
+      <text x="211.4" y="599" font-family="monospace" font-size="11" fill="var(--base04)">),</text>
+      <text x="20" y="617.7" font-family="monospace" font-size="11" fill="var(--base04)">]}</text>
+      <text x="39.8" y="617.7" font-family="monospace" font-size="11" fill="var(--base08)">/&gt;</text>
+      <text x="20" y="636.4" font-family="monospace" font-size="11" fill="var(--base08)">&lt;path</text>
+      <text x="59.6" y="636.4" font-family="monospace" font-size="11" fill="var(--base05)">d</text>
+      <text x="66.2" y="636.4" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
+      <text x="79.4" y="636.4" font-family="monospace" font-size="11" fill="var(--base05)">hills</text>
+      <text x="112.4" y="636.4" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
+      <text x="125.6" y="636.4" font-family="monospace" font-size="11" fill="var(--base05)">fill</text>
+      <text x="152" y="636.4" font-family="monospace" font-size="11" fill="var(--base04)">={</text>
+      <text x="165.2" y="636.4" font-family="monospace" font-size="11" fill="var(--base05)">land</text>
+      <text x="191.6" y="636.4" font-family="monospace" font-size="11" fill="var(--base04)">}</text>
+      <text x="204.8" y="636.4" font-family="monospace" font-size="11" fill="var(--base08)">/&gt;</text>
     </g>
   </g>
   <g clip-path="url(#c1)">
-    <rect x="0" y="0" width="358" height="272" class="a m7"/>
-    <g transform="translate(179 217.60000000000002) scale(0.7)">
+    <rect x="0" y="40" width="358" height="260" class="a m7"/>
+    <g transform="translate(179 248) scale(0.7)">
       <g class="a m9">
         <circle r="24" fill="#FFD60A" class="a m8"/>
       </g>
