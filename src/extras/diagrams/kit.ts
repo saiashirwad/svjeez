@@ -1,12 +1,12 @@
 import type { Color } from "../../attributes";
 import { el } from "../../el";
-import { regularFace, type FontValue } from "../../font/font";
+import { textWidth, type FontValue } from "../../font/font";
 import { rect, type Edge, type Point, type Rect } from "../../geometry";
 import type { Box, Size } from "../../layout/box";
-import { motion, type Seconds, type Stack } from "../../motion";
-import { draw } from "../../recipes";
-import type { SvgNode } from "../../svg";
-import type { Base16, Slot } from "../theme";
+import { ease, motion, type Motion, type Seconds, type Stack } from "../../motion";
+import { draw, enter } from "../../recipes";
+import type { Child, SvgNode } from "../../svg";
+import { defaultDark, type Base16, type Slot } from "../theme";
 import { curve } from "./curve";
 
 /** What a node is, so the theme can draw it. */
@@ -48,9 +48,6 @@ const SLOT: Record<NodeRole, Slot> = { task: "base0D", input: "base0B", output: 
 
 export const tintOf = (theme: Base16, role: NodeRole): Color => theme[SLOT[role]];
 
-/** Measured with the font when there is one, else assumed monospace at 0.6em per character. */
-export const textWidth = (text: string, fontSize: number, font?: FontValue): number => (font ? regularFace(font).measure(text, fontSize) : text.length * fontSize * 0.6);
-
 /** The box a role needs around `label`. */
 export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: FontValue): Size => {
   const [w, h] = [textWidth(label, fontSize, font) + fontSize * 2.2, Math.round(fontSize * 2.8)];
@@ -69,6 +66,9 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
       return { w, h };
   }
 };
+
+/** The pop-in of a node that appears at `at`. */
+export const popIn = (at: Seconds): Motion<"opacity" | "scale"> => enter({ at, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out);
 
 const SKEW = 0.35;
 const LID = 5;
@@ -130,6 +130,20 @@ export interface Look {
   readonly theme: Base16;
   readonly fontSize: number;
 }
+
+/** What every diagram reads from its options: the theme and sizes with defaults applied, a `Look` at both sizes, and the root group that carries the class and font. */
+export const look = (options: DiagramOptions) => {
+  const { theme = defaultDark, fontSize = 14, font, class: cls } = options;
+  const small = fontSize * 0.85;
+  return {
+    theme,
+    fontSize,
+    font,
+    small,
+    smallLook: { theme, fontSize: small } satisfies Look,
+    root: (children: Child): SvgNode => el.g({ class: cls, fontFamily: font }, children),
+  };
+};
 
 /** A role's shape with its label centered inside. `extra` draws over the fill, under the label. */
 export const shape = (role: NodeRole, b: Box, label: string, look: Look, animation?: Stack<"opacity" | "scale" | "x" | "y">, extra?: SvgNode): SvgNode => {

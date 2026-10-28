@@ -1,10 +1,10 @@
 import { el } from "../../el";
+import { textWidth } from "../../font/font";
 import { lanes as layout } from "../../layout/lanes";
 import { ease, motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
-import { defaultDark } from "../theme";
 import { travel } from "../timeline";
-import { arrow, chip, labelOf, labelSize, lookup, placer, textWidth, tintOf, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
+import { arrow, chip, labelOf, labelSize, look, lookup, placer, tintOf, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
 export interface LaneSpan<L extends string> {
   readonly lane: L;
@@ -50,10 +50,11 @@ export function lanes<const L extends Record<string, Labelled>>(
   },
   options: LanesOptions,
 ): Lanes<keyof L & string> {
-  const { theme = defaultDark, fontSize = 14, font, class: cls, scale, play } = options;
+  const { scale, play } = options;
+  const l = look(options);
+  const { theme, fontSize, font, small } = l;
   /** Scene time of lane time `t`. */
   const when = (t: Seconds) => (play?.at ?? 0) + t;
-  const small = fontSize * 0.85;
   const rows = Object.entries(spec.lanes as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
   const [spans, events, links] = [spec.spans ?? [], spec.events ?? [], spec.links ?? []];
   const out = layout({
@@ -70,7 +71,7 @@ export function lanes<const L extends Record<string, Labelled>>(
   const x = (t: Seconds) => at.point({ x: out.x(t), y: 0 }).x;
   const role = (lane: string) => rows.find((r) => r.id === lane)!.role;
 
-  const node = el.g({ class: cls, fontFamily: font }, [
+  const node = l.root([
     rows.map((r, i) => {
       const b = boxes.get(r.id)!;
       const label = at.point(out.labels.get(r.id)!);
@@ -96,11 +97,12 @@ export function lanes<const L extends Record<string, Labelled>>(
         s.label !== undefined && el.text({ x: b.x + 8, y: b.y + b.h + small + 3, fontSize: small, fill: theme.base04, animation: play ? enter({ at: when(s.from), over: 0.2 }) : undefined }, s.label),
       ]);
     }),
-    links.map((l, i) => {
-      const [p, q] = out.links[i]!.map(at.point) as [typeof track.center, typeof track.center];
+    links.map((link, i) => {
+      const [a, b] = out.links[i]!;
+      const [p, q] = [at.point(a), at.point(b)];
       return el.g({}, [
-        arrow([p, q], { theme, fontSize, at: play ? when(l.at) : undefined, over: 0.3 }),
-        play && el.circle({ r: 4, fill: theme.base09, animation: travel([p, q], { at: when(l.at), over: 0.3 }) }),
+        arrow([p, q], { ...l, at: play ? when(link.at) : undefined, over: 0.3 }),
+        play && el.circle({ r: 4, fill: theme.base09, animation: travel([p, q], { at: when(link.at), over: 0.3 }) }),
       ]);
     }),
     events.map((e, i) => {
@@ -115,7 +117,7 @@ export function lanes<const L extends Record<string, Labelled>>(
           stroke: theme.base00,
           animation: play ? enter({ at: when(e.at), over: 0.3 }, { opacity: 0, scale: 0.3 }, ease.pop) : undefined,
         }),
-        label && chip(at.box(label), e.label!, { theme, fontSize: small, fill: theme.base05, ground: "none" }, play ? enter({ at: when(e.at), over: 0.25 }) : undefined),
+        label && chip(at.box(label), e.label!, { ...l.smallLook, fill: theme.base05, ground: "none" }, play ? enter({ at: when(e.at), over: 0.25 }) : undefined),
       ]);
     }),
     play && el.path({ d: `M${track.x} ${track.y}V${track.y + track.h}`, stroke: theme.base09, strokeWidth: 1.5, animation: motion({ x: 0 }).at(when(0)).to({ x: track.w }, out.end, ease.linear) }),

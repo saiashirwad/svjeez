@@ -1,4 +1,4 @@
-import type { Point } from "../geometry";
+import { pathLength, type Point } from "../geometry";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 
 export type Timeline<K extends string> = { readonly [P in K]: Span } & {
@@ -46,18 +46,21 @@ export const beats = (at: Beats, count: number, step: Seconds, what: string): Se
   return [...at];
 };
 
-/** On during each span, off between. Spans closer than two fades merge, so fades never overlap. */
-export const visible = (spans: readonly Span[], fade: Seconds = 0.15): Motion<"opacity"> =>
+/** Spans as `[start, end]` pairs in order, with those that overlap, touch or sit closer than `gap` joined into one. */
+export const mergeSpans = (spans: readonly Span[], gap: Seconds = 0): [Seconds, Seconds][] =>
   spans
     .map(({ at, over }): [Seconds, Seconds] => [at, at + over])
     .sort((a, b) => a[0] - b[0])
     .reduce<[Seconds, Seconds][]>((out, [a, b]) => {
       const last = out.at(-1);
-      if (last && a - last[1] < fade * 2) last[1] = Math.max(last[1], b);
+      if (last && (a <= last[1] || a - last[1] < gap)) last[1] = Math.max(last[1], b);
       else out.push([a, b]);
       return out;
-    }, [])
-    .reduce((track, [a, b]) => track.at(a).to({ opacity: 1 }, Math.min(fade, (b - a) / 2)).at(b).to({ opacity: 0 }, fade), motion({ opacity: 0 }));
+    }, []);
+
+/** On during each span, off between. Spans closer than two fades merge, so fades never overlap. */
+export const visible = (spans: readonly Span[], fade: Seconds = 0.15): Motion<"opacity"> =>
+  mergeSpans(spans, fade * 2).reduce((track, [a, b]) => track.at(a).to({ opacity: 1 }, Math.min(fade, (b - a) / 2)).at(b).to({ opacity: 0 }, fade), motion({ opacity: 0 }));
 
 /**
  * A token that appears at `at`, runs `points` at constant speed and vanishes at the end. Draw it at the origin.
@@ -68,7 +71,7 @@ export const travel = (points: readonly Point[], { at, speed = 300, over }: { re
     const length = Math.hypot(point.x - points[i]!.x, point.y - points[i]!.y);
     return length > 0 ? [{ point, length }] : [];
   });
-  const total = legs.reduce((sum, leg) => sum + leg.length, 0);
+  const total = pathLength(points);
   const duration = over ?? total / speed;
   if (!(total > 0 && duration > 0)) throw new Error(`travel() needs a path of positive length and a positive speed or duration, got length ${total} over ${duration}s.`);
   const start: Motion<"x" | "y" | "opacity"> = motion({ opacity: 0, x: points[0]!.x, y: points[0]!.y }).at(at).set({ opacity: 1 });

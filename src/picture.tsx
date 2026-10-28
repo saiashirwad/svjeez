@@ -3,6 +3,7 @@ import { def, type Ref } from "./defs";
 import type { Stack } from "./motion";
 import { num } from "./format";
 import type { SvgNode } from "./svg";
+import { readSource } from "./source";
 
 export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
@@ -169,19 +170,7 @@ export const picture = Object.assign(
   },
   {
     /** Read an http(s) URL with fetch, or a path or file: URL from disk. The format comes from the content. */
-    load: async (source: string | URL): Promise<PictureData> => {
-      const url = source instanceof URL ? source : /^[a-z][a-z0-9+.-]*:\/\//i.test(source) ? new URL(source) : undefined;
-      if (url?.protocol === "http:" || url?.protocol === "https:") {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Could not load ${url}: ${response.status} ${response.statusText}`.trim());
-        return picture(await response.arrayBuffer());
-      }
-      const { readFile } = await import("node:fs/promises");
-      if (!url) return picture(await readFile(source as string));
-      if (url.protocol !== "file:") throw new Error(`Cannot load ${url}. Use an http(s) or file: URL, or a path.`);
-      const { fileURLToPath } = await import("node:url");
-      return picture(await readFile(fileURLToPath(url)));
-    },
+    load: async (source: string | URL): Promise<PictureData> => picture(await readSource(source)),
   },
 );
 

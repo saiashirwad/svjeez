@@ -2,12 +2,10 @@ import { el } from "../../el";
 import type { Point } from "../../geometry";
 import type { Direction } from "../../layout/box";
 import { tree as layout } from "../../layout/tree";
-import { ease, type Seconds } from "../../motion";
-import { enter } from "../../recipes";
-import { defaultDark } from "../theme";
+import type { Seconds } from "../../motion";
 import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, lookup, placer, shape, sizeOf, type Diagram, type DiagramOptions, type NodeRole } from "./kit";
+import { arrow, labelOf, look, lookup, placer, popIn, shape, sizeOf, type Diagram, type DiagramOptions, type NodeRole } from "./kit";
 
 /** A label, or a node naming its `parent`. Exactly one node has no parent. */
 export type TreeSpec<N extends string> = string | { readonly label: string; readonly parent?: N; readonly role?: NodeRole };
@@ -29,11 +27,10 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   options: TreeOptions = {},
 ): Tree<keyof N & string> {
   type Id = keyof N & string;
-  const { theme = defaultDark, fontSize = 14, font, class: cls, play, direction } = options;
-  const look = { theme, fontSize };
-  const nodes = Object.entries(spec.nodes as Record<string, TreeSpec<string>>).map(([id, s]) =>
-    typeof s === "string" ? { id, label: s, role: "task" as NodeRole, parent: undefined } : { id, label: s.label, role: s.role ?? "task", parent: s.parent },
-  );
+  const { play, direction } = options;
+  const l = look(options);
+  const { fontSize, font } = l;
+  const nodes = Object.entries(spec.nodes as Record<string, TreeSpec<string>>).map(([id, s]) => ({ id, ...labelOf(s), parent: typeof s === "string" ? undefined : s.parent }));
   const out = layout({ direction, nodes: nodes.map((n) => ({ id: n.id, parent: n.parent, ...sizeOf(n.role, n.label, fontSize, font) })) });
   const at = placer(out.bounds, options);
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
@@ -44,9 +41,9 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   const shown = new Map(out.order.map((id, i) => [id, i === 0 ? -Infinity : times[i - 1]!]));
   const over = Math.min(0.35, step);
 
-  const node = el.g({ class: cls, fontFamily: font }, [
-    out.edges.map((e) => arrow(edges.get(e.to)!, { ...look, at: play && Math.max(0, shown.get(e.from)!, shown.get(e.to)! - over), over })),
-    nodes.map((n) => shape(n.role, boxes.get(n.id)!, n.label, look, play && shown.get(n.id)! >= 0 ? enter({ at: shown.get(n.id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined)),
+  const node = l.root([
+    out.edges.map((e) => arrow(edges.get(e.to)!, { ...l, at: play && Math.max(0, shown.get(e.from)!, shown.get(e.to)! - over), over })),
+    nodes.map((n) => shape(n.role, boxes.get(n.id)!, n.label, l, play && shown.get(n.id)! >= 0 ? popIn(shown.get(n.id)!) : undefined)),
   ]);
   const up = (id: string): string[] => {
     const parent = out.parent.get(id);

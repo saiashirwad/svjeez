@@ -1,14 +1,15 @@
 import type { Color } from "./attributes";
 
+/** A hex color: `#rgb`, `#rrggbb` or `#rrggbbaa`. The type fixes only the leading `#`. */
 export type Hex = Extract<Color, `#${string}`>;
 
 const SOLID = /^#(?:[\da-f]{3}|[\da-f]{6})$/i;
 const WITH_ALPHA = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
 
-/** `color` as a hex color, or an error naming `caller`. With `alpha`, `#rrggbbaa` passes too. */
-export const hexOf = (color: Color, caller: string, alpha = false): Hex => {
+/** `color` as a hex color, or an error naming `caller`. The type only fixes the leading `#`, and untyped callers may pass anything, so the shape is checked here. With `alpha`, `#rrggbbaa` passes too. */
+export const hexOf = (color: Hex, caller: string, alpha = false): Hex => {
   if (!(alpha ? WITH_ALPHA : SOLID).test(color)) throw new Error(`${caller} needs ${alpha ? "#rgb, #rrggbb or #rrggbbaa" : "#rgb or #rrggbb"} colors, got ${color}.`);
-  return color as Hex;
+  return color;
 };
 
 /** Red, green, blue and alpha bytes of `#rgb`, `#rrggbb` or `#rrggbbaa`. The caller has checked the shape. */

@@ -1,7 +1,7 @@
 import { advance, i16, required, table, u16, u32, type Sfnt } from "./sfnt";
 
 /** One glyph placed on the line. `chars` is the text it draws, more than one character for a ligature. */
-export interface Placed {
+interface Placed {
   readonly glyph: number;
   readonly chars: string;
   /** In font units, kerning included. */
@@ -268,7 +268,7 @@ export const shaper = (f: Sfnt, withLigatures = true): Shaper => {
   const map = charMap(f);
   const ligatures = withLigatures ? lookups(f, "GSUB", ["liga", "clig", "rlig"], 7).filter((l) => l.type === 4) : [];
   const kerning = lookups(f, "GPOS", ["kern"], 9).filter((l) => l.type === 2);
-  const legacyKern = kerning.length === 0 ? table(f, "kern") : undefined;
+  const legacyTable = kerning.length === 0 ? table(f, "kern") : undefined;
   const pair = (left: number, right: number): number => {
     let total = 0;
     for (const { subtables } of kerning) {
@@ -279,11 +279,7 @@ export const shaper = (f: Sfnt, withLigatures = true): Shaper => {
         break;
       }
     }
-    if (legacyKern !== undefined) {
-      const placed: Placed[] = [{ glyph: left, chars: "", advance: 0 }, { glyph: right, chars: "", advance: 0 }];
-      applyKernTable(f, legacyKern, placed);
-      total += placed[0]!.advance;
-    }
+    if (legacyTable !== undefined) total += legacyKern(f, legacyTable, left, right);
     return total;
   };
   const applied = new Set([...ligatures, ...kerning].map((l) => `${l.type === 4 ? "GSUB" : "GPOS"} ${l.index}`));
@@ -306,27 +302,26 @@ export const shaper = (f: Sfnt, withLigatures = true): Shaper => {
   };
 };
 
-/** The old `kern` table, format 0, for fonts without GPOS kerning. */
-const applyKernTable = (f: Sfnt, at: number, placed: Placed[]): void => {
-  if (u16(f, at) !== 0) return;
+/** The kerning between two glyphs from the old `kern` table, format 0, for fonts without GPOS kerning. */
+const legacyKern = (f: Sfnt, at: number, left: number, right: number): number => {
+  if (u16(f, at) !== 0) return 0;
+  const key = left * 65536 + right;
+  let total = 0;
   let sub = at + 4;
   for (let t = 0, count = u16(f, at + 2); t < count; t++, sub += u16(f, sub + 2)) {
     if (u16(f, sub + 4) >> 8 !== 0 || (u16(f, sub + 4) & 1) === 0) continue;
-    const pairs = u16(f, sub + 6);
-    for (let i = 0; i + 1 < placed.length; i++) {
-      const key = placed[i]!.glyph * 65536 + placed[i + 1]!.glyph;
-      let [lo, hi] = [0, pairs - 1];
-      while (lo <= hi) {
-        const mid = (lo + hi) >> 1;
-        const r = sub + 14 + 6 * mid;
-        const k = u16(f, r) * 65536 + u16(f, r + 2);
-        if (k < key) lo = mid + 1;
-        else if (k > key) hi = mid - 1;
-        else {
-          placed[i] = { ...placed[i]!, advance: placed[i]!.advance + i16(f, r + 4) };
-          break;
-        }
+    let [lo, hi] = [0, u16(f, sub + 6) - 1];
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      const r = sub + 14 + 6 * mid;
+      const k = u16(f, r) * 65536 + u16(f, r + 2);
+      if (k < key) lo = mid + 1;
+      else if (k > key) hi = mid - 1;
+      else {
+        total += i16(f, r + 4);
+        break;
       }
     }
   }
+  return total;
 };

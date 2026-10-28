@@ -1,14 +1,14 @@
 import { el } from "../../el";
+import { textWidth } from "../../font/font";
 import type { Point, Rect } from "../../geometry";
 import type { Direction } from "../../layout/box";
 import { layered } from "../../layout/layered";
-import { ease, motion, type Seconds } from "../../motion";
+import { motion, type Seconds } from "../../motion";
 import { enter } from "../../recipes";
 import type { SvgNode } from "../../svg";
-import { defaultDark } from "../theme";
 import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
-import { arrow, chip, labelOf, labelSize, lookup, onShape, placer, shape, sizeOf, textWidth, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
+import { arrow, chip, labelOf, labelSize, look, lookup, onShape, placer, popIn, shape, sizeOf, type Diagram, type DiagramOptions, type Labelled, type NodeRole } from "./kit";
 
 export type FlowchartEdge<N extends string> = readonly [from: N, to: N] | readonly [from: N, to: N, options: { readonly label?: string }];
 
@@ -50,9 +50,9 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   options: FlowchartOptions = {},
 ): Flowchart<keyof N & string, keyof G & string> {
   type Id = keyof N & string;
-  const { theme = defaultDark, fontSize = 14, font, class: cls, direction, play } = options;
-  const look = { theme, fontSize };
-  const small = { theme, fontSize: fontSize * 0.85 };
+  const { direction, play } = options;
+  const l = look(options);
+  const { theme, fontSize, font, smallLook: small } = l;
   const nodes = Object.entries(spec.nodes as Record<string, Labelled>).map(([id, s]) => ({ id, ...labelOf(s) }));
   const roles = new Map(nodes.map((n) => [n.id, n.role]));
   const edges = spec.edges.map(([from, to, o]) => ({ from, to, label: o?.label }));
@@ -74,11 +74,11 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
   const later = order.filter((id) => laid.rank.get(id)! > 0);
   const times = beats(play?.at ?? 0, later.length, step, "flowchart() play");
   const shown = new Map(order.map((id) => [id, later.includes(id) ? times[later.indexOf(id)]! : -Infinity]));
-  const appear = (id: string) => (play && shown.get(id)! >= 0 ? enter({ at: shown.get(id)!, over: 0.35 }, { opacity: 0, scale: 0.9 }, ease.out) : undefined);
+  const appear = (id: string) => (play && shown.get(id)! >= 0 ? popIn(shown.get(id)!) : undefined);
   const drawOver = Math.min(0.4, step);
   const drawAt = (from: string, to: string) => Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
 
-  const under = el.g({ class: cls, fontFamily: font }, [
+  const under = l.root([
     groups.map(([id, g]) => {
       const b = laid.groups.get(id)!;
       const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
@@ -87,10 +87,10 @@ export function flowchart<const N extends Record<string, Labelled>, const G exte
         el.text({ x: b.x + 12, y: b.y + 8 + small.fontSize, fontSize: small.fontSize, fill: theme.base04 }, g.label),
       ]);
     }),
-    laid.lines.map((line) => arrow(line.points, { ...look, at: play && drawAt(line.from, line.to), over: drawOver })),
+    laid.lines.map((line) => arrow(line.points, { ...l, at: play && drawAt(line.from, line.to), over: drawOver })),
   ]);
-  const over = el.g({ class: cls, fontFamily: font }, [
-    nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, look, appear(n.id))),
+  const over = l.root([
+    nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, l, appear(n.id))),
     laid.lines.map((line, i) => line.label && chip(line.label, edges[i]!.label!, small, play && motion({ opacity: 0 }).at(drawAt(line.from, line.to) + drawOver).to({ opacity: 1 }, 0.25))),
   ]);
   return { node: el.g({}, [under, over]), layers: { under, over }, bounds: laid.bounds, get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])), ...paths(laid.lines, laid.boxes) };

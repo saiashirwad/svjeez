@@ -1,6 +1,6 @@
 import { around, flip, simplify, union, type Box, type Direction, type Point, type Size } from "./box";
 
-export interface TreeInput {
+interface TreeInput {
   /** In order; siblings keep this order. Exactly one node has no parent. */
   readonly nodes: readonly ({ readonly id: string; readonly parent?: string } & Size)[];
   readonly direction?: Direction;
@@ -8,10 +8,9 @@ export interface TreeInput {
   readonly siblingGap?: number;
 }
 
-export interface Tree {
+export interface TreeLayout {
   readonly nodes: ReadonlyMap<string, Box>;
   readonly parent: ReadonlyMap<string, string>;
-  readonly depth: ReadonlyMap<string, number>;
   /** Breadth-first, siblings in input order. */
   readonly order: readonly string[];
   /** One per child, parent to child, in breadth-first order of the child. */
@@ -22,7 +21,7 @@ export interface Tree {
 type Contour = [number, number][];
 
 /** A tidy tree: each subtree packed beside its siblings as close as their contours allow, each parent centered over its children. */
-export function tree(input: TreeInput): Tree {
+export function tree(input: TreeInput): TreeLayout {
   const { direction = "TB", levelGap = 40, siblingGap = 24 } = input;
   const lr = direction === "LR";
   const index = new Map(input.nodes.map((n, i) => [n.id, i]));
@@ -90,7 +89,6 @@ export function tree(input: TreeInput): Tree {
   return {
     nodes,
     parent: new Map(input.nodes.flatMap((n) => (n.parent === undefined ? [] : [[n.id, n.parent] as const]))),
-    depth: new Map(input.nodes.map((n, i) => [n.id, depth[i]!])),
     order: order.map((v) => input.nodes[v]!.id),
     edges,
     bounds: union([...nodes.values(), ...edges.map((e) => around(e.points))]),

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { el, rect, render, type Motion } from "svjeez";
-import { Arrow, Brace, Callout, Focus, Marker, Underline, adaptive, code, cut, defaultDark, defaultLight, morph, readingTime, reveal, terminal, timeline, travel, typewriter, visible, appWindow, flow, tomorrow } from "svjeez/extras";
+import { el, rect, render, validateSvg, type Motion, type SvgNode } from "svjeez";
+import { Arrow, Brace, Callout, Camera, Focus, Marker, Underline, adaptive, code, cut, defaultDark, defaultLight, morph, readingTime, reveal, terminal, timeline, travel, typewriter, visible, appWindow, flow, tomorrow } from "svjeez/extras";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -202,6 +202,36 @@ describe("accent color", () => {
       expect(scene(make())).toContain(defaultDark.base09);
       expect(scene(make(tomorrow))).toContain(tomorrow.base09);
       expect(scene(make(tomorrow))).not.toContain("#f6c96b");
+    });
+  }
+});
+
+describe("timed components render valid SVG that moves only inside their span", () => {
+  const [span, box, duration] = [{ at: 2, over: 3 }, rect(10, 10, 30, 20), 10];
+  const scene = (node: SvgNode) => render({ width: 100, height: 100, duration, title: "timing" }, node);
+  /** When the first and last keyframe stop fall inside the loop, in seconds. The 0% and 100% stops are the loop's own. */
+  const window = (svg: string): [number, number] => {
+    const stops = [...svg.matchAll(/@keyframes [\w-]+\{((?:[^{}]*\{[^}]*\})*)\}/g)]
+      .flatMap(([, body]) => [...body!.matchAll(/([\d.%,]+)\{[^}]*\}/g)].flatMap(([, percents]) => percents!.split(",").map(parseFloat)))
+      .filter((percent) => percent > 0 && percent < 100)
+      .map((percent) => (percent * duration) / 100);
+    return [Math.min(...stops), Math.max(...stops)];
+  };
+  const items: Record<string, [SvgNode, [number, number]]> = {
+    flow: [flow([{ x: 0, y: 0 }, { x: 50, y: 0 }], { at: span.at, over: span.over }).node, [2, 5]],
+    Arrow: [Arrow({ from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, during: span }), [2, 5]],
+    Brace: [Brace({ target: box, during: span }), [2, 5]],
+    Underline: [Underline({ target: box, during: span }), [2, 5]],
+    Camera: [Camera({ frame: rect(0, 0, 100, 100), stops: [{ during: span, target: box }], over: 0.5, children: el.rect({ width: 5, height: 5 }) }), [2, 2.5]],
+  };
+
+  for (const [name, [node, [start, end]]] of Object.entries(items)) {
+    test(name, () => {
+      const svg = scene(node);
+      expect(validateSvg(svg).errors).toEqual([]);
+      const [first, last] = window(svg);
+      expect(first).toBeCloseTo(start, 6);
+      expect(last).toBeCloseTo(end, 6);
     });
   }
 });

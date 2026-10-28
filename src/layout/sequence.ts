@@ -1,10 +1,10 @@
-import { union, type Box, type Point, type Size } from "./box";
+import { indexing, union, type Box, type Point, type Size } from "./box";
 
-export type SequenceRow =
+type SequenceRow =
   | { readonly kind: "message"; readonly from: string; readonly to: string; readonly label: Size }
   | { readonly kind: "note"; readonly actor: string; readonly size: Size };
 
-export interface SequenceInput {
+interface SequenceInput {
   readonly actors: readonly ({ readonly id: string } & Size)[];
   readonly rows: readonly SequenceRow[];
   /** Least space between neighbouring heads. */
@@ -26,13 +26,8 @@ const PAD = 16;
 /** Heads in a row, spaced so every label fits between the lifelines it spans; one row per message or note, top to bottom. */
 export function sequence(input: SequenceInput): SequenceLayout {
   const { actorGap = 32, rowGap = 14, actors } = input;
-  const index = new Map(actors.map((a, i) => [a.id, i]));
-  if (index.size !== actors.length || actors.length === 0) throw new Error("sequence() needs actors with unique ids.");
-  const at = (id: string): number => {
-    const i = index.get(id);
-    if (i === undefined) throw new Error(`sequence() has no actor ${JSON.stringify(id)}.`);
-    return i;
-  };
+  const { unique, at } = indexing(actors.map((a) => a.id), (id) => `sequence() has no actor ${JSON.stringify(id)}.`);
+  if (!unique || actors.length === 0) throw new Error("sequence() needs actors with unique ids.");
   const gaps = actors.slice(1).map((a, i) => actors[i]!.w / 2 + a.w / 2 + actorGap);
   const need = (from: number, to: number, length: number) => {
     const have = gaps.slice(from, to).reduce((a, b) => a + b, 0);

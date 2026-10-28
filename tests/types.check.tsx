@@ -54,6 +54,10 @@ export const invalid = [
   <feTurbulence animation={enter({ at: 0, over: 1 })} />,
   // @ts-expect-error feDisplacementMap animates displace, not the CSS scale channel
   <feDisplacementMap animation={motion().to({ scale: 2 }, 1)} />,
+  // @ts-expect-error duotone takes hex colors, not named ones
+  fx.duotone({ dark: "red", light: "#fff" }),
+  // @ts-expect-error a voxel palette takes hex colors, not named ones
+  voxel.texture({ s: "red" }, "s"),
   // @ts-expect-error misspelled channel
   motion().to({ opcity: 1 }, 1),
   // @ts-expect-error misspelled attribute through el

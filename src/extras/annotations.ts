@@ -2,7 +2,7 @@ import type { Color } from "../attributes";
 import { el } from "../el";
 import type { Edge, Point, Rect } from "../geometry";
 import { motion, type Span } from "../motion";
-import { regularFace, type FontValue } from "../font/font";
+import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
 import { defaultDark, type Base16 } from "./theme";
@@ -37,7 +37,7 @@ export function Callout({ target, side = "right", during: span, children, theme 
     else out.push(word);
     return out;
   }, []);
-  const lineWidth = (line: string) => (font ? regularFace(font).measure(line, fontSize) : line.length * fontSize * 0.6);
+  const lineWidth = (line: string) => textWidth(line, fontSize, font);
   const [w, h, gap] = [Math.max(0, ...lines.map(lineWidth)) + 20, lines.length * fontSize * 1.4 + 16, 20];
   const x = side === "left" ? target.x - w - gap : side === "right" ? target.x + target.w + gap : target.center.x - w / 2;
   const y = side === "top" ? target.y - h - gap : side === "bottom" ? target.y + target.h + gap : target.center.y - h / 2;

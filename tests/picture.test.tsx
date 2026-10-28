@@ -189,6 +189,7 @@ describe("image filters", () => {
     expect(apply(1)[0]).toBeCloseTo(1, 3);
     expect(apply(1)[1]).toBeCloseTo(128 / 255, 3);
     expect(svg).toContain('color-interpolation-filters="sRGB"');
+    // @ts-expect-error a named color is a type error; untyped callers still get the runtime check
     expect(() => fx.duotone({ dark: "red", light: "#fff" })).toThrow("fx.duotone() needs #rgb or #rrggbb colors, got red.");
   });
 });

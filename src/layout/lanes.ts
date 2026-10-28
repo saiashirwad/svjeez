@@ -1,6 +1,6 @@
-import { union, type Box, type Point, type Size } from "./box";
+import { indexing, union, type Box, type Point, type Size } from "./box";
 
-export interface LanesInput {
+interface LanesInput {
   readonly lanes: readonly { readonly id: string; readonly label: Size }[];
   readonly spans: readonly { readonly lane: string; readonly from: number; readonly to: number }[];
   readonly events: readonly { readonly lane: string; readonly at: number; readonly label?: Size }[];
@@ -32,13 +32,8 @@ const NICE = [0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600];
 export function lanes(input: LanesInput): LanesLayout {
   const { scale, rowHeight = 56, bar = 18 } = input;
   if (!(scale > 0)) throw new Error(`lanes() needs a positive scale, got ${scale}.`);
-  const index = new Map(input.lanes.map((l, i) => [l.id, i]));
-  if (index.size !== input.lanes.length || index.size === 0) throw new Error("lanes() needs lanes with unique ids.");
-  const row = (id: string): number => {
-    const i = index.get(id);
-    if (i === undefined) throw new Error(`lanes() has no lane ${JSON.stringify(id)}.`);
-    return i;
-  };
+  const { unique, at: row } = indexing(input.lanes.map((l) => l.id), (id) => `lanes() has no lane ${JSON.stringify(id)}.`);
+  if (!unique || input.lanes.length === 0) throw new Error("lanes() needs lanes with unique ids.");
   const times = [...input.spans.flatMap((s) => [s.from, s.to]), ...input.events.map((e) => e.at), ...input.links.map((l) => l.at)];
   if (times.some((t) => !(t >= 0 && Number.isFinite(t))) || input.spans.some((s) => !(s.to > s.from))) throw new Error("lanes() times must be finite and non-negative, and each span must end after it starts.");
   const end = Math.max(1, ...times);

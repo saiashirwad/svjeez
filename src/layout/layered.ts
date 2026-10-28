@@ -1,5 +1,5 @@
 import { groupBy } from "./group";
-import { around, flip, simplify, union, type Box, type Direction, type Point, type Size } from "./box";
+import { around, flip, indexing, simplify, union, type Box, type Direction, type Point, type Size } from "./box";
 import { placeLabels, tracks, type Crossing } from "./route";
 
 export interface LayeredInput {
@@ -14,7 +14,7 @@ export interface LayeredInput {
   readonly groupPad?: number;
 }
 
-export interface LayeredEdge {
+interface LayeredEdge {
   readonly from: string;
   readonly to: string;
   /** Orthogonal, from the border of `from` to the border of `to`. */
@@ -22,7 +22,7 @@ export interface LayeredEdge {
   readonly label?: Box;
 }
 
-export interface Layered {
+export interface LayeredLayout {
   readonly nodes: ReadonlyMap<string, Box>;
   readonly rank: ReadonlyMap<string, number>;
   /** Same order as the input edges. */
@@ -69,16 +69,11 @@ export const BEND = 16;
  * own ports and its own horizontal track in each gap; a backward edge leaves and enters its nodes on the right and
  * climbs in its own channel.
  */
-export function layered(input: LayeredInput): Layered {
+export function layered(input: LayeredInput): LayeredLayout {
   const { direction = "TB", rankGap = 48, nodeGap = 36, groupPad = 12 } = input;
   const lr = direction === "LR";
-  const index = new Map(input.nodes.map((n, i) => [n.id, i]));
-  if (index.size !== input.nodes.length) throw new Error("layered() node ids must be unique.");
-  const at = (id: string): number => {
-    const i = index.get(id);
-    if (i === undefined) throw new Error(`layered() has no node ${JSON.stringify(id)}.`);
-    return i;
-  };
+  const { unique, at } = indexing(input.nodes.map((n) => n.id), (id) => `layered() has no node ${JSON.stringify(id)}.`);
+  if (!unique) throw new Error("layered() node ids must be unique.");
   const size = (s: Size): Size => (lr ? { w: s.h, h: s.w } : s);
   const groups = (input.groups ?? []).map((g) => ({ id: g.id, members: g.members.map(at), label: size(g.label) }));
   const groupOf = input.nodes.map(() => -1);
