@@ -224,3 +224,17 @@ export function tex(source: string, options: TexOptions = {}): Tex {
     draw,
   };
 }
+
+export {
+  plane,
+  type LabelOptions,
+  type LineOptions,
+  type Plane,
+  type PlaneFunction,
+  type PlaneMatrix,
+  type PlaneOptions,
+  type PolygonOptions,
+  type StepOptions,
+  type Vec2,
+  type VectorOptions,
+} from "./plane.ts";

@@ -60,6 +60,36 @@ The formula it returns has:
 
 `\color{red}{x}` paints a part, and the theme paints the rest.
 
+## Planes and transformations
+
+`plane({ origin, unit, extent, step, theme })` draws a coordinate grid that moves. Chain `apply(matrix, { at, over, ease })`, `applyFunction(f, { at, over, ease })` and `reset({ at, over })`, then draw from the plane those calls return. Pass `p.css` to `render`'s `css`.
+
+```tsx
+const p = plane({ origin: { x: 160, y: 240 }, unit: 34, extent: 10 }).apply(
+  [
+    [2, -1],
+    [1, 1],
+  ],
+  { at: 2, over: 2.5 },
+);
+
+<>
+  {p.background}
+  {p.grid}
+  {p.axes}
+  {p.polygon([[0, 0], [1, 0], [1, 1], [0, 1]])}
+  {p.basis({ enter: { at: 1, over: 0.5 } })}
+</>;
+```
+
+- A matrix is written by rows: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy). A third number in a row translates. Each step applies on top of the ones before it.
+- `background` stays put. `grid` and `axes` move.
+- `vector(to, { color, width, label, from, enter })` is an arrow whose head stays upright under any shear and whose TeX label rides past its tip. `basis()` draws î and ĵ.
+- `polygon(points)`, `span(direction)` and `label(at, content)` move with the plane. An eigenvector's span stays on itself.
+- `point(x, y)` and `map(x, y)` give scene pixels before and after every step.
+
+When every step is a matrix, the plane is one CSS transform driven by registered properties, so the file stays small. A function step, such as z ↦ z² written as `(x, y) => [x * x - y * y, 2 * x * y]`, samples every outline and morphs it through `d`.
+
 ## Errors
 
 A formula MathJax cannot read throws `tex() could not parse "…": <MathJax's message>`, so a typo fails the build instead of drawing red text. A character the MathJax font lacks, such as `é` or an emoji, throws `tex() cannot draw "…"`. Write accents with TeX, as in `\'e`.
