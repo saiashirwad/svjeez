@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { renderFrames } from "../src/frames.ts";
 
 const here = (path: string) => new URL(path, import.meta.url);
-const OG = { width: 1200, height: 630, at: 16.8 };
+const OG = { width: 1200, height: 630, at: 2.75 };
 
 // The landing scene is a square shown with `cover`; a 1200×630 slice of it is what a laptop sees.
 const landing = readFileSync(here("../dist/landing.svg"), "utf8").replace(
