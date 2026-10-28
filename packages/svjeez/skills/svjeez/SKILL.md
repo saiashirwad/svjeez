@@ -74,6 +74,7 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
 | `image` | `opacity x y scale rotate blur width height` |
 | `tspan` | `fill stroke` |
 | shapes | `draw` (0 to 1; the shape needs a stroke, or nothing renders) |
+| `path` | `d` (path data; see Shape morphs) |
 | `rect` | `width height` |
 | `stop` | `stopColor stopOpacity` |
 | filter primitives | `stdDeviation baseFrequency seed displace dx dy floodColor floodOpacity` |
@@ -96,6 +97,18 @@ Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channe
 ```tsx
 sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translate: 1 } });
 ```
+
+## Shape morphs
+
+`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampledPath(fn, { duration, tolerance })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is in px.
+
+```tsx
+const [square, star] = matchPaths([squareD, starD]);
+<path d={square} animation={motion({ d: square }).at(1).to({ d: star }, 0.8, ease.inOut)} />;
+sampledPath((t) => wavePath(t), { duration: 6, tolerance: 0.5 });
+```
+
+Reduced motion shows a still copy of the path at `reducedMotion.at`.
 
 ## Errors and fixes
 
@@ -123,6 +136,8 @@ Runtime errors. `…` stands for a value the message fills in.
 | `A motion on <…> runs until …s, past the …s scene.` | Raise `duration`, or end the motion earlier |
 | `loop(…) is shorter than the motion, which runs until …s.` | The period must cover every step |
 | `A step ending at …s overruns loop(…).` | Same, for a later step |
+| `d on <path> moves between paths with different commands, so it would jump. Write them through matchPaths() first.` | `matchPaths([a, b])` and animate between its results |
+| `sampledPath() returned a path with different commands at t=… than at t=0.` | Write every sample with the same points, or through `matchPaths()` |
 | `… on <…> has … keys; the cap is ….` | Raise `tolerance`, or shorten it |
 | `to() needs a positive duration, got …. Use set() for a cut.` | Use `.set()` for an instant change |
 | `<…> has no attribute "…".` | camelCase: `strokeWidth`, not `stroke-width` |

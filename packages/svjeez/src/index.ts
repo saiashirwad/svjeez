@@ -77,3 +77,11 @@ export type { SvgNode, Child } from "./svg";
 export { validateSvg, type ValidationResult } from "./validate";
 
 export { rect, type Rect, type Point, type Edge } from "./geometry";
+
+export {
+  matchPaths,
+  sampledPath,
+  type MatchOptions,
+  type PathData,
+  type SampledPathOptions,
+} from "./paths";

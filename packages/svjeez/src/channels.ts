@@ -1,6 +1,7 @@
 import type { Color, Tag } from "./attributes";
 import { num } from "./format";
 import { declarationOf, isProperty, type Property, type PropertyValues } from "./properties";
+import type { PathData } from "./paths";
 
 const GEOMETRY = ["path", "line", "polyline", "polygon", "circle", "ellipse", "rect"] as const;
 const GRAPHICS = ["g", "use", "text", "image", ...GEOMETRY] as const;
@@ -11,14 +12,17 @@ const number: number = 0;
 // SAFETY: a placeholder that only fixes the value type; compile.ts reads just the typeof of a row value.
 const color = "" as Color;
 
+// SAFETY: the same kind of placeholder, fixing the value type to path data.
+const pathData = "" as PathData;
+
 type Composition = "nest" | "replace";
 
 interface Spec {
-  readonly value: number | Color;
+  readonly value: number | Color | PathData;
   readonly tags: readonly Tag[];
   readonly lane: string;
   readonly composition: Composition;
-  readonly identity?: number | Color;
+  readonly identity?: number | Color | PathData;
   readonly range?: readonly [number, number];
   readonly attr?: string;
   readonly pins?: Readonly<Record<string, string>>;
@@ -26,8 +30,8 @@ interface Spec {
   readonly collidesWith?: readonly string[];
   /** Tags where this lane always lands on a wrapper (WebKit ignores fill-box on bare <text>). */
   readonly wrapsOn?: readonly Tag[];
-  /** How the lane is animated when CSS would not do, as `blur` is through a filter. */
-  readonly backend?: "blur";
+  /** How the lane is animated when CSS would not do: `blur` through a filter, `d` through SMIL, which Safari animates and CSS `d` does not. */
+  readonly backend?: "blur" | "smil";
   /** A hard 0/1 cut compiles to `visibility` when the element sets none of these attributes. */
   readonly toggles?: readonly string[];
 }
@@ -98,6 +102,14 @@ export const CHANNELS = {
     composition: "replace",
     range: [0, 1],
     pins: { pathLength: "1", "stroke-dasharray": "1" },
+  },
+  d: {
+    value: pathData,
+    tags: ["path"],
+    lane: "d",
+    composition: "replace",
+    attr: "d",
+    backend: "smil",
   },
   fill: { value: color, tags: PAINTED, lane: "fill", composition: "replace", attr: "fill" },
   stroke: { value: color, tags: PAINTED, lane: "stroke", composition: "replace", attr: "stroke" },
@@ -200,7 +212,7 @@ export type Target = Channel | Property;
 
 export type TargetValues = Values & PropertyValues;
 
-export type TargetValue = number | Color;
+export type TargetValue = number | Color | PathData;
 
 export const valueOf = (values: TargetValues, target: Target): TargetValue | undefined =>
   values[target];

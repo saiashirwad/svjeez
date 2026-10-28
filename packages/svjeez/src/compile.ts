@@ -24,6 +24,7 @@ import {
 } from "./properties";
 import { keysOf, snapPeriod, valueAt, type Key } from "./keys";
 import { EPSILON, dataOf, type Motion } from "./motion";
+import { commandsOf } from "./paths";
 import { animate } from "./smil";
 import { element, type AttrValue, type Element, type SvgNode } from "./svg";
 
@@ -308,6 +309,15 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
     if (keys.length > MAX_KEYS)
       throw new Error(`${key} on <${el.tag}> has ${keys.length} keys; the cap is ${MAX_KEYS}.`);
 
+    if (key === "d") {
+      const commands = new Set(keys.map((k) => commandsOf(String(k.values.d))));
+
+      if (commands.size > 1)
+        throw new Error(
+          "d on <path> moves between paths with different commands, so it would jump. Write them through matchPaths() first.",
+        );
+    }
+
     return {
       key,
       backend,
@@ -444,7 +454,7 @@ const pin = (attrs: Record<string, AttrValue>, el: Element, lane: Lane): void =>
   }
 };
 
-const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Element => {
+const emitShell = (state: State, target: Element, lanes: readonly Lane[]): SvgNode => {
   const attrs = { ...target.attrs };
   const children = [...target.children];
   const css = lanes.filter((lane) => lane.backend === "css");
@@ -477,8 +487,34 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): Eleme
   ].filter(Boolean);
 
   if (classes.length > 0) attrs.class = classes.join(" ");
+  const emitted = element(target.tag, attrs, children);
 
-  return element(target.tag, attrs, children);
+  if (state.canvas.stillAt === undefined || !lanes.some((lane) => lane.key === "d")) return emitted;
+
+  return stillTwin(state, emitted);
+};
+
+/** A path whose `d` moves through SMIL, beside a still twin that reduced motion shows instead, since CSS cannot pause SMIL. */
+const stillTwin = (state: State, moving: Element): SvgNode => {
+  const { prefix } = state.canvas;
+  const rule = `.${prefix}dm{display:none}.${prefix}ds{display:inline}`;
+
+  if (!state.stills.includes(rule)) state.stills.push(rule);
+  const { id: _, ...attrs } = moving.attrs;
+
+  const classes = (name: string, own: AttrValue | undefined) =>
+    [own, `${prefix}${name}`].filter(Boolean).join(" ");
+
+  return {
+    kind: "fragment",
+    children: [
+      { ...moving, attrs: { ...moving.attrs, class: classes("dm", moving.attrs.class) } },
+      {
+        ...withoutSmil(moving),
+        attrs: { ...attrs, class: classes("ds", attrs.class), display: "none" },
+      },
+    ],
+  };
 };
 
 /**
@@ -524,9 +560,10 @@ const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
 
       const el = { ...bare, children: node.children.map((child) => walk(state, child, hides)) };
 
-      return shells.reduce<Element>(
+      return shells.reduce<SvgNode>(
         (inner, lanes, index) =>
-          emitShell(state, index === 0 ? inner : element("g", {}, [inner]), lanes),
+          // SAFETY: only the first shell can carry `d` and come back as a fragment, and every later shell wraps it in a <g>.
+          emitShell(state, index === 0 ? (inner as Element) : element("g", {}, [inner]), lanes),
         el,
       );
     }
