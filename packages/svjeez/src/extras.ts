@@ -24,6 +24,25 @@ export {
 
 export { axes, type Axes, type AxesOptions, type Plot, type PlotOptions } from "./extras/axes";
 
+export {
+  readout,
+  type Area,
+  type AreaOptions,
+  type Calculus,
+  type Curve,
+  type CurveOptions,
+  type Dot,
+  type DotOptions,
+  type Line,
+  type LineOptions,
+  type MorphCurveOptions,
+  type Moving,
+  type ReadoutOptions,
+  type Riemann,
+  type RiemannOptions,
+  type Sweep,
+} from "./extras/calculus";
+
 export { morph, type MorphOptions, type Morphable, type MorphPiece } from "./extras/morph";
 
 export { typewriter, type TypewriterOptions } from "./extras/typewriter";

@@ -6,6 +6,7 @@ import { rect, type Point, type Rect } from "../geometry";
 import type { Motion } from "../motion";
 import type { SvgNode } from "../svg";
 import { defaultDark, tint, type Base16 } from "./theme";
+import { calculus, type Calculus } from "./calculus";
 
 export interface AxesOptions {
   /** Graph range of the x axis, `[min, max]`. */
@@ -49,7 +50,7 @@ export interface Plot {
   readonly points: readonly Point[];
 }
 
-export interface Axes {
+export interface Axes extends Calculus {
   readonly node: SvgNode;
   /** The plot area. */
   readonly bounds: Rect;
@@ -206,5 +207,5 @@ export function axes(options: AxesOptions): Axes {
     };
   }
 
-  return { node, bounds, point, plot };
+  return { node, bounds, point, plot, ...calculus({ x: xr, y: yr, bounds, theme, clip, point }) };
 }

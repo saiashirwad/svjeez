@@ -204,6 +204,34 @@ const scene = <g>{ax.node}{parabola.node}<circle cx={dot.x} cy={dot.y} r={4} fil
 
 `plot(f, options)` samples `f` evenly (`samples`, default 200, over `from`..`to`, default the x range) and returns `{ node, d, points }`. The curve breaks where `f` is not finite, leaves the y range by more than one range height, or jumps by more than the range, so `1 / x` and `Math.tan` draw no vertical spikes. Clipping to the plot area is built in. `color`, `strokeWidth` and `animation` (such as `draw()`) style the path. `axes()` and `plot()` throw on empty ranges, non-positive sizes, steps or sample counts.
 
+## Calculus on axes
+
+The axes also carry calculus. A value that moves is a `Moving`: a number holds still, `{ from, to, at, over, ease }` sweeps it (default `ease.inOut`), and an array of sweeps chains them, holding in between. Lines and areas whose shape changes bake into a `d` motion through `sampledPath()`, so they morph in Safari too.
+
+```tsx
+import { draw, enter } from "svjeez";
+import { axes, readout } from "svjeez/extras";
+
+const graph = axes({ x: [-3, 3], y: [0, 4], width: 300, height: 240, at: { x: 40, y: 60 }, theme });
+const f = (x: number) => 2 + Math.sin(x);
+
+const rider = graph.dot(f, { from: -2, to: 2, at: 1, over: 3 });         // { node, motion, point(t) }
+const secant = graph.secant(f, 0.5, { from: 2, to: 0, at: 1, over: 3 }); // h shrinks to 0: it lands on the tangent
+const slope = readout((t) => `slope ≈ ${secant.slope(t).toFixed(2)}`, { at: 1, over: 3, x: 190, y: 330, fill: "white" });
+
+const sums = graph.riemann(f, { from: -2, to: 2, n: [4, 8, 16, 32], at: [5, 6, 7], over: 0.7 }); // { node, sums }
+const filled = graph.area(f, -2, { from: -2, to: 2, at: 8, over: 2 });  // { node, value(t) }
+const taylor = graph.morph([p0, p2, p4], { at: [3, 4.5], over: 0.8, animation: draw({ at: 1, over: 1 }) });
+```
+
+- `dot(f, x, { r, color })` puts a dot on `f` that rides the curve as `x` moves. Put `motion` on a `<g>` to carry a label with it.
+- `tangent(f, x, options)` is a segment `length` px long (default half the plot width) that slides along the curve. `secant(f, x, h, options)` passes through `f` at `x` and `x + h` and draws a dot at each, unless `points: false`. When `h` reaches 0 it becomes the tangent. Both return `{ node, slope(t) }`, with the slope in graph units.
+- `area(f, from, to, { color, opacity, base })` shades the region between `f` and `base` (default 0), and either bound can move. `value(t)` is its signed area.
+- `riemann(f, { from, to, n, at, over, rule })` draws rectangles as one path. Each stage in `n` splits into the next, and `at` gives one start time per later stage. `rule` is `"left"`, `"mid"` (the default) or `"right"`, and `sums` holds each stage's sum.
+- `morph([f, g, …], { at, over, color })` is one curve that bends from each function into the next, so it never draws twice. Values are clamped just past the plot. Give `color` an array, one per function, and the stroke changes color with each bend.
+- `parametric((t) => [x, y], [t0, t1])` and `polar((θ) => r, [θ0, θ1])` draw like `plot()`, with 400 samples by default. They return `{ node, d, points }`.
+- `readout(text, { at, over, step, ...textAttributes })` is text that changes over time. It samples `text(t)` every `step` (default 1/12 s) and shows each distinct string while it holds.
+
 ## Terminals
 
 ```tsx
