@@ -241,3 +241,26 @@ export {
 } from "./derive.ts";
 
 export { readout, type Readout, type ReadoutOptions, type ReadoutValue } from "./readout.ts";
+
+export {
+  construct,
+  type AngleOptions,
+  type BisectOptions,
+  type CircleOptions,
+  type ConstructOptions,
+  type Construction,
+  type GeoCircle,
+  type GeoCurve,
+  type GeoLine,
+  type GeoPoint,
+  type IntersectOptions,
+  type LineOptions,
+  type Look,
+  type Pace,
+  type PointOptions,
+  type PolygonOptions,
+  type SegmentOptions,
+  type SettleOptions,
+  type TickOptions,
+  type Timing,
+} from "./construct.ts";

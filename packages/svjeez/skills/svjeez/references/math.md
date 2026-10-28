@@ -92,6 +92,40 @@ const counting = readout((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 
 - `digits` is the decimal places. Places stay put at the widest value, right-aligned on the decimal point, with a sign place only if a value is negative.
 - Digits cut by default. `roll` seconds makes the old digit lift out as the new one rolls in from below. The changes must be at least `roll` apart.
 - Each place holds one glyph per distinct digit it ever shows, toggled by stepped keyframes, so a number that changes every tenth of a second for ten seconds is still a few dozen paths. `width` and `height` give the box.
+## Constructions
+
+`construct()` draws compass-and-straightedge geometry in the order you write it. Build the figure on the builder, then render `g.node`. Every element draws on in turn: compass circles sweep from the point they pass through, lines grow from their first point, points pop and labels fade in.
+
+```tsx
+import { construct } from "@svjeez/math";
+
+const g = construct({ theme, at: { x: 200, y: 300 } }); // origin in px, y grows up
+const A = g.point(0, 0, "A");
+const B = g.point(170, 0, "B");
+g.segment(A, B);
+
+const C = g.intersect(g.circle(A, B, { aid: true }), g.circle(B, A, { aid: true }), {
+  pick: 0,
+  label: "C",
+});
+
+g.settle(); // the compass circles fade back to faint
+g.polygon([A, B, C]);
+g.angle(B, A, C, { label: "60^\\circ" });
+
+<>{g.node}</>;
+```
+
+- `construct({ theme, unit, at, fontSize, start, pace, faint })`. `unit` is pixels per unit and `at` is where the origin sits in the scene. Coordinates have y up. `pace` overrides the seconds each kind of element takes.
+- `point(x, y, label?)`, `segment(a, b)`, `line(a, b)` (runs past both points, grows outward from `a`), `circle(center, through)` or `circle(center, { radius })`. A circle takes `arc: { from, to }` in degrees to draw only an arc.
+- `intersect(a, b)` of two lines gives one point. Of a line and a circle, or two circles, it gives `[p, q]`, and `{ pick: 0 | 1 }` keeps one. A line and a circle give crossings in the order along the line. Two circles give the crossing left of the line from center 1 to center 2 first. Intersections count a segment only between its ends and a `line()` as endless.
+- `midpoint`, `parallel(line, p)`, `perpendicular(line, p)`, `perpendicularBisector(a, b)` and `angleBisector(a, b, c)`, the angle at `b`. The two bisectors draw the compass arcs that find them, as aids. `{ compass: false }` draws only the result.
+- `polygon(points, { fill, opacity, outline, label })`, `angle(a, b, c, { label, count, mark })` (a square at a right angle, an arc otherwise) and `tick(segment, { count })` for congruence marks.
+- Labels are `tex()` formulas. Each sits off its point, away from the lines and circles that meet there, and away from the figure's center when nothing does. Segment and line labels sit beside the middle on the outer side.
+- Every element takes `at` and `over`, `color`, and `aid`. Without `at` it starts when the one before it ends. `together(() => { … })` starts what it holds at once. `step(pause?)` waits and returns when the next beat starts, as does reading `g.time`. `g.end` is when the last element finishes, so `duration` can follow it.
+- `settle()` fades every aid made so far, to `faint` opacity. Mark compass arcs and helper points with `aid: true`.
+
+Time the text beside the figure from `g.time`, read before the elements it explains. `examples/construct/index.tsx` does so with `tex().write()`.
 
 ## Errors
 
@@ -116,5 +150,14 @@ const counting = readout((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 
 | `readout() of a function needs a positive duration and step, …` | Pass `duration`, and a positive `step`. |
 | `readout() needs a whole number of digits, a positive fontSize and a non-negative roll, …` | Pass whole `digits` and `roll` of 0 or more. |
 | `readout() changes faster than its roll of … seconds.` | Lower `roll` or space the changes out. |
+| `intersect() found no crossing of … and …. …` | The circles do not meet or the lines are parallel. Raise a radius, move a center, or change a line. |
+| `intersect() crossing (…, …) lies past the end of segment ….` | The crossing is off the segment. Draw it with `g.line()` so it runs on. |
+| `intersect() pick is 0 or 1, got ….` | Pass 0 or 1. |
+| `circle() needs a positive radius, got ….` | Pass a point other than the center, or `{ radius }` above 0. |
+| `A line needs two different points, got … twice.` | Pass two points that are not at the same place. |
+| `construct() needs a positive unit and fontSize and a finite origin, got …` | Pass numbers above 0 and a finite `at`. |
+| `angle() needs the vertex in the middle and two other points, got …` | Pass `(a, vertex, c)` with distinct points. The same goes for `angleBisector()`. |
+| `polygon() needs at least three points, got ….` | Pass three or more corners. |
+| `together() cannot nest. Put the elements in one together() block.` | Flatten the blocks. |
 
 In Bun, a non-ASCII character in `String.raw` arrives as a `\u{…}` escape. Write such characters in a plain string, or as TeX.
