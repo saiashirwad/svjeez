@@ -1,11 +1,13 @@
 :root {
   --paper: #F3ECDF; --cloud: #FFFDF8; --ink: #23203A; --pink: #FF5E8E; --blue: #3358E0; --sun: #FFC63D;
   --spring: cubic-bezier(.3, 1.6, .5, 1);
+  /* Fraunces with its soft, wonky axes on: a serif with a sense of humor. */
+  --serif: "Fraunces", Georgia, serif;
   color-scheme: light;
 }
 * { box-sizing: border-box }
 html { background: var(--paper) }
-body { margin: 0; color: var(--ink); font: 400 15px / 1.55 "JetBrains Mono", ui-monospace, Menlo, monospace }
+body { margin: 0; font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--ink); font: 400 15px / 1.55 "JetBrains Mono", ui-monospace, Menlo, monospace }
 
 .pill {
   display: inline-flex; align-items: center; height: 40px; padding: 0 18px; flex: none;
@@ -15,6 +17,8 @@ body { margin: 0; color: var(--ink); font: 400 15px / 1.55 "JetBrains Mono", ui-
 }
 .pill.icon { width: 40px; padding: 0; justify-content: center }
 .pill.icon svg { width: 20px; height: 20px }
+.pill.sun { box-shadow: 4px 4px 0 var(--sun); rotate: -1deg }
+.pill.sun:hover { box-shadow: 6px 7px 0 var(--sun) }
 .pill.alt { box-shadow: 4px 4px 0 var(--blue); rotate: 1.5deg }
 .pill:hover { rotate: 2deg; translate: 0 -3px; box-shadow: 6px 7px 0 var(--pink) }
 .pill.alt:hover { rotate: -2deg; box-shadow: 6px 7px 0 var(--blue) }
@@ -33,7 +37,7 @@ header p { margin: 0 auto; max-width: 560px; opacity: .8 }
 .hand { color: var(--pink); font-weight: 600 }
 
 section { margin-top: 56px }
-h2 { margin: 0 0 24px; font: 400 28px / 1.2 "Archivo Black", sans-serif; text-align: center }
+h2 { margin: 0 0 24px; font: italic 600 34px / 1.1 var(--serif); text-align: center }
 h2 small { display: block; margin-top: 6px; font: 400 14px / 1.4 "JetBrains Mono", monospace; opacity: .65 }
 
 .grid { columns: 3 300px; column-gap: 28px }
@@ -46,17 +50,38 @@ h2 small { display: block; margin-top: 6px; font: 400 14px / 1.4 "JetBrains Mono
 .card:active { translate: 6px 6px; box-shadow: 0 0 0 transparent; transition-duration: .05s }
 .frame { display: block; overflow: hidden; border: 2px solid var(--ink); border-radius: 8px; background: #fff }
 .frame img { display: block; width: 100%; height: 100% }
-.name { display: block; margin: 14px 4px 4px; font: 400 19px / 1.25 "Archivo Black", sans-serif }
+.name { display: block; margin: 14px 4px 4px; font: 650 22px / 1.15 var(--serif); letter-spacing: -0.01em }
 .desc { display: -webkit-box; margin: 0 4px; font-size: 12.5px; opacity: .72; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden }
 
 footer { margin-top: 40px; text-align: center }
 
-/* ─── One example, full screen. ────────────────────────────────────────────── */
+/* ─── One example, as a plate in a sketchbook. ───────────────────────────── */
 
-.viewer { height: 100dvh; overflow: hidden; background: var(--paper) }
-.viewer img { display: block; width: 100vw; height: 100dvh; padding: 72px 16px 16px; object-fit: contain }
-.viewer nav { position: fixed; inset: 16px 16px auto; display: flex; align-items: center; gap: 16px }
-.viewer .title { flex: 1; min-width: 0; text-align: center; font: 400 20px / 1.2 "Archivo Black", sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-@media (max-width: 560px) { .viewer .title { display: none } .viewer nav { justify-content: space-between } }
+.viewer { display: grid; grid-template-rows: auto 1fr auto; height: 100dvh; overflow: hidden; padding: 16px 24px 20px; gap: 16px }
+.viewer header { display: flex; align-items: center; justify-content: space-between }
+.count { font: italic 500 17px / 1 var(--serif); opacity: .7 }
+.count i { font-style: normal; opacity: .7 }
+/* The plate fills whatever room is left, at the example's own aspect ratio. */
+.viewer main { container-type: size; display: grid; place-items: center; min-height: 0; padding: 0 8px 8px 0 }
+.plate {
+  margin: 0; width: min(100cqw, 100cqh * var(--ratio)); aspect-ratio: var(--ratio); overflow: hidden;
+  background: #fff; border: 3px solid var(--ink); border-radius: 14px; box-shadow: 8px 8px 0 var(--shadow);
+}
+.plate img { display: block; width: 100%; height: 100% }
+.viewer footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; max-width: 1240px; width: 100%; margin: 0 auto }
+.caption { text-align: left }
+.caption h1 { margin: 0 0 6px; font: 650 clamp(26px, 3.2vw, 38px) / 1.05 var(--serif); letter-spacing: -0.015em }
+.caption p { margin: 0; max-width: 72ch; text-align: left; font-size: 13px; line-height: 1.5; opacity: .72; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+.actions { display: flex; gap: 14px; flex: none; padding: 0 6px 6px 0 }
+/* On a phone the page scrolls like a page: the plate, then the caption, then the buttons. */
+@media (max-width: 720px) {
+  .viewer { display: block; height: auto; overflow: visible; padding: 12px 16px 24px }
+  .viewer header { margin-bottom: 20px }
+  .viewer main { container-type: normal; display: block; padding: 0 8px 0 0 }
+  .plate { width: 100% }
+  .viewer footer { flex-direction: column; align-items: stretch; gap: 16px; margin-top: 24px }
+  .caption p { -webkit-line-clamp: unset; display: block }
+  .actions { justify-content: space-between }
+}
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important } }

@@ -45,7 +45,7 @@ const HEAD = (title: string, description: string) => `<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..800,100,1;1,9..144,400..800,100,1&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="/examples/style.css">
 </head>`;
 
@@ -79,24 +79,43 @@ ${sections
 </html>
 `;
 
-const viewer = (ex: Example) => `${HEAD(`${ex.title} · svjeez`, ex.desc || `${ex.title}, made with svjeez`)}
+const viewer = (ex: Example, i: number, all: readonly Example[]) => {
+  const prev = all[(i - 1 + all.length) % all.length]!;
+  const next = all[(i + 1) % all.length]!;
+  return `${HEAD(`${ex.title} · svjeez`, ex.desc || `${ex.title}, made with svjeez`)}
 <body class="viewer">
-<img src="/examples/svg/${ex.name}.svg" alt="${escape(ex.desc || ex.title)}">
-<nav>
+<header>
   <a class="pill" href="/examples">← examples</a>
-  <span class="title">${escape(ex.title)}</span>
-  <a class="pill alt icon" href="${REPO}/tree/main/examples/${ex.name}" aria-label="View the TSX on GitHub" title="View the TSX on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
-</nav>
+  <span class="count">no. ${i + 1} <i>of</i> ${all.length}</span>
+</header>
+<main>
+  <figure class="plate" style="--ratio: ${(ex.width / ex.height).toFixed(4)}; --shadow: ${SHADOWS[i % 3]}">
+    <img src="/examples/svg/${ex.name}.svg" alt="${escape(ex.desc || ex.title)}">
+  </figure>
+</main>
+<footer>
+  <div class="caption">
+    <h1>${escape(ex.title)}</h1>
+    <p>${escape(ex.desc)}</p>
+  </div>
+  <div class="actions">
+    <a class="pill" href="/examples/${prev.name}" title="${escape(prev.title)}">← prev</a>
+    <a class="pill alt" href="/examples/${next.name}" title="${escape(next.title)}">next →</a>
+    <a class="pill sun icon" href="${REPO}/tree/main/examples/${ex.name}" aria-label="View the TSX on GitHub" title="View the TSX on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
+  </div>
+</footer>
 </body>
 </html>
 `;
+};
 
 const out = here("public/examples/");
 mkdirSync(new URL("svg/", out), { recursive: true });
 const sections = SECTIONS.map((section) => ({ ...section, examples: section.names.map(read) }));
-for (const ex of sections.flatMap((section) => section.examples)) {
+const all = sections.flatMap((section) => section.examples);
+all.forEach((ex, i) => {
   copyFileSync(here(`../dist/${ex.name}.svg`), new URL(`svg/${ex.name}.svg`, out));
-  writeFileSync(new URL(`${ex.name}.html`, out), viewer(ex));
-}
+  writeFileSync(new URL(`${ex.name}.html`, out), viewer(ex, i, all));
+});
 writeFileSync(new URL("index.html", out), gallery(sections));
 copyFileSync(here("examples.css"), new URL("style.css", out));
