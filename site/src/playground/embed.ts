@@ -35,9 +35,9 @@ const load = async (host: HTMLElement) => {
 const observer = new IntersectionObserver(
   (entries) => {
     for (const entry of entries) {
-      if (!entry.isIntersecting) continue;
+      if (!entry.isIntersecting || !(entry.target instanceof HTMLElement)) continue;
       observer.unobserve(entry.target);
-      load(entry.target as HTMLElement);
+      load(entry.target);
     }
   },
   { rootMargin: "600px 0px" },

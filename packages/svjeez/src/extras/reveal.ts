@@ -22,6 +22,12 @@ export interface RevealOptions {
   readonly from?: Values<RestChannel>;
 }
 
+export interface RevealResult {
+  readonly node: SvgNode;
+  readonly spans: readonly Span[];
+  readonly end: Seconds;
+}
+
 /** Show `code` a block of lines at a time. `spans[i]` is when block `i` enters; `end` is when the last one settles. */
 export function reveal(
   code: Code,
@@ -32,7 +38,7 @@ export function reveal(
     over = 0.4,
     from = { opacity: 0, y: 6 },
   }: RevealOptions,
-): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
+): RevealResult {
   if (!(step >= 0 && over > 0))
     throw new Error(
       `reveal() needs a non-negative step and a positive duration, got step ${step} and over ${over}.`,

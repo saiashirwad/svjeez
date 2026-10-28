@@ -15,6 +15,11 @@ export interface WindowOptions {
   readonly class?: string;
 }
 
+export interface AppWindowResult {
+  readonly node: SvgNode;
+  readonly body: Rect;
+}
+
 /** An app window filling `frame`. `body` is the area under the title bar. */
 export function appWindow(
   frame: Rect,
@@ -26,7 +31,7 @@ export function appWindow(
     radius = 12,
     class: cls,
   }: WindowOptions = {},
-): { readonly node: SvgNode; readonly body: Rect } {
+): AppWindowResult {
   const dot = (i: number) =>
     dots === "traffic" ? tint(theme, (["red", "yellow", "green"] as const)[i]!) : theme.base02;
 

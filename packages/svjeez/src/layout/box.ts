@@ -10,6 +10,7 @@ export interface Box extends Point, Size {}
 /** Rank axis down the page (`TB`) or across it (`LR`). */
 export type Direction = "TB" | "LR";
 
+// SAFETY: a Box flips to a Box and a Point to a Point, so the result has the same keys as T
 export const flip = <T extends Box | Point>(value: T): T =>
   ("w" in value
     ? { x: value.y, y: value.x, w: value.h, h: value.w }

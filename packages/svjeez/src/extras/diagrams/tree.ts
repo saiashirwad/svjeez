@@ -1,4 +1,3 @@
-import { el } from "../../el";
 import type { Point } from "../../geometry";
 import type { Direction } from "../../layout/box";
 import { tree as layout } from "../../layout/tree";
@@ -7,12 +6,13 @@ import { beats, type Beats } from "../timeline";
 import { curve } from "./curve";
 import {
   arrow,
+  drawNode,
+  isBareLabel,
   labelOf,
   look,
   lookup,
   placer,
   popIn,
-  shape,
   sizeOf,
   type Diagram,
   type DiagramOptions,
@@ -46,10 +46,10 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   const l = look(options);
   const { fontSize, font } = l;
 
-  const nodes = Object.entries(spec.nodes as Record<string, TreeSpec<string>>).map(([id, s]) => ({
+  const nodes = Object.entries(spec.nodes).map(([id, s]) => ({
     id,
     ...labelOf(s),
-    parent: typeof s === "string" ? undefined : s.parent,
+    parent: isBareLabel(s) ? undefined : s.parent,
   }));
 
   const out = layout({
@@ -79,7 +79,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
       }),
     ),
     nodes.map((n) =>
-      shape(
+      drawNode(
         n.role,
         boxes.get(n.id)!,
         n.label,

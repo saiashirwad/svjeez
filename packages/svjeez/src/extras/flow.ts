@@ -44,11 +44,13 @@ const TAIL = 8;
 /** Px of path the comet's tail covers. */
 const REACH = 36;
 
+export interface FlowResult {
+  readonly node: SvgNode;
+  readonly end: Seconds;
+}
+
 /** Something running `points` from `at`. `end` is when it arrives. */
-export function flow(
-  points: readonly Point[],
-  options: FlowOptions,
-): { readonly node: SvgNode; readonly end: Seconds } {
+export function flow(points: readonly Point[], options: FlowOptions): FlowResult {
   const {
     at,
     speed = 220,

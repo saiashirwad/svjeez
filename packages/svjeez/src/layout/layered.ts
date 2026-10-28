@@ -201,7 +201,10 @@ export function layered(input: LayeredInput): LayeredLayout {
   );
 
   /** Per node, the backward edges leaving or entering each side. */
-  const sides = input.nodes.map(() => ({ left: [] as number[], right: [] as number[] }));
+  const sides: Record<"left" | "right", number[]>[] = input.nodes.map(() => ({
+    left: [],
+    right: [],
+  }));
 
   for (const i of reversed) {
     const { chain } = chains.get(i)!;
@@ -265,13 +268,12 @@ export function layered(input: LayeredInput): LayeredLayout {
   const into = (c: Crossing) => crossing[c.id]!.b;
 
   const merging = new Set(
-    ends
-      .filter(
-        (c) =>
-          vertices[into(c)]!.node !== undefined &&
-          ends.some((d) => d !== c && into(d) === into(c) && Math.abs(d.xb - c.xb) < 0.5),
-      )
-      .map((c) => c.id),
+    ends.flatMap((c) =>
+      vertices[into(c)]!.node !== undefined &&
+      ends.some((d) => d !== c && into(d) === into(c) && Math.abs(d.xb - c.xb) < 0.5)
+        ? [c.id]
+        : [],
+    ),
   );
 
   const thick = layers.map((layer) => Math.max(0, ...layer.map((v) => vertices[v]!.h)));
@@ -489,8 +491,8 @@ const backEdges = (
 };
 
 const longestPath = (count: number, edges: readonly { u: number; v: number }[]): number[] => {
-  const rank = new Array<number>(count).fill(0);
-  const indegree = new Array<number>(count).fill(0);
+  const rank = Array.from({ length: count }, () => 0);
+  const indegree = Array.from({ length: count }, () => 0);
 
   for (const e of edges) indegree[e.v]!++;
   const queue = rank.flatMap((_, i) => (indegree[i] === 0 ? [i] : []));
@@ -602,7 +604,7 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
  */
 const outside = (
   vertices: Vertex[],
-  layers: readonly number[][],
+  layers: number[][],
   base: (v: number) => number,
   backs: readonly { chain: readonly number[] }[],
 ) => {
@@ -625,7 +627,7 @@ const outside = (
     for (const v of chain.slice(1, -1)) {
       vertices[v]!.outer = end;
       vertices[v]!.group = -1;
-      const layer = layers[vertices[v]!.rank]! as number[];
+      const layer = layers[vertices[v]!.rank]!;
       layer.splice(layer.indexOf(v), 1);
 
       if (end === "left") layer.unshift(v);
@@ -730,8 +732,8 @@ const place = (
     return items.sort((a, b) => a.key - b.key || (a.kind === b.kind ? 0 : a.kind === "v" ? -1 : 1));
   });
 
-  const vx = new Array<number>(vertices.length).fill(0);
-  const gx = new Array<number>(groups).fill(0);
+  const vx = Array.from({ length: vertices.length }, () => 0);
+  const gx = Array.from({ length: groups }, () => 0);
   const get = (it: Item) => (it.kind === "v" ? vx[it.id]! : gx[it.id]!);
 
   const set = (it: Item, value: number) =>
@@ -754,7 +756,7 @@ const place = (
     }
   }
 
-  const offset = new Array<number>(vertices.length).fill(0);
+  const offset = Array.from({ length: vertices.length }, () => 0);
 
   for (const layer of layers) {
     for (let g = 0; g < groups; g++) {

@@ -4,12 +4,17 @@ import * as svjeez from "svjeez";
 import * as extras from "svjeez/extras";
 import * as jsxRuntime from "svjeez/jsx-runtime";
 
-const modules: Record<string, object> = {
-  svjeez,
-  "svjeez/extras": extras,
-  "svjeez/jsx-runtime": jsxRuntime,
-  "svjeez/jsx-dev-runtime": jsxRuntime,
-};
+const modules = new Map<string, object>([
+  ["svjeez", svjeez],
+  ["svjeez/extras", extras],
+  ["svjeez/jsx-runtime", jsxRuntime],
+  ["svjeez/jsx-dev-runtime", jsxRuntime],
+]);
+
+// What a scene's module object holds once its code has run.
+interface SceneModule {
+  default?: unknown;
+}
 
 export interface SceneStats {
   readonly bytes: number;
@@ -29,13 +34,16 @@ export type Compiled =
   | { readonly ok: false; readonly error: SourceError; readonly ms: number };
 
 const requireModule = (name: string): object => {
-  const found = modules[name];
+  const found = modules.get(name);
 
   if (!found)
     throw new Error(`Cannot import "${name}". The playground has "svjeez" and "svjeez/extras".`);
 
   return found;
 };
+
+const isBuild = (value: unknown): value is () => string => typeof value === "function";
+const isText = (value: unknown): value is string => typeof value === "string";
 
 /** Sucrase reports syntax errors as `message (line:column)`. */
 const parseSyntax = (error: Error): SourceError => {
@@ -71,16 +79,16 @@ const run = (source: string): string => {
     production: true,
   });
 
-  const exports: { default?: unknown } = {};
+  const exports: SceneModule = {};
   new Function("require", "exports", code)(requireModule, exports);
 
-  if (typeof exports.default !== "function")
+  if (!isBuild(exports.default))
     throw new Error(
       "The scene needs a default export: export default function build(): string { return render(...) }",
     );
-  const svg = exports.default();
+  const svg: unknown = exports.default();
 
-  if (typeof svg !== "string") throw new Error("build() should return the string from render().");
+  if (!isText(svg)) throw new Error("build() should return the string from render().");
 
   return svg;
 };

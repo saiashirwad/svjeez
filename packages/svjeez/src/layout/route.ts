@@ -28,15 +28,17 @@ const over = (c: Crossing, d: Crossing): boolean => {
   return cr === dr && (cr ? d.xa > c.xa : d.xa < c.xa);
 };
 
+interface Tracks {
+  readonly track: ReadonlyMap<number, number>;
+  readonly count: number;
+}
+
 /**
  * Gives each bent crossing a horizontal track in the gap, numbered top to bottom: interval colouring in an order that
  * keeps fans from crossing. Crossings in `merging` share an entry with another edge; they take the lowest tracks so
  * they join it just above the arrowhead, and two meeting from opposite sides share a track.
  */
-export const tracks = (
-  crossings: readonly Crossing[],
-  merging: ReadonlySet<number>,
-): { readonly track: ReadonlyMap<number, number>; readonly count: number } => {
+export const tracks = (crossings: readonly Crossing[], merging: ReadonlySet<number>): Tracks => {
   const track = new Map<number, number>();
   const used: Crossing[][] = [];
 

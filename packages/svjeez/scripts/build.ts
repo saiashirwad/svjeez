@@ -34,9 +34,9 @@ const lint = (svg: string): string | undefined => {
 
 const build = async (name: string): Promise<boolean> => {
   try {
-    const { default: make } = (await import(
+    const { default: make }: { default: () => string } = await import(
       join(ROOT, "examples", name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"))
-    )) as { default: () => string };
+    );
 
     const svg = make();
     const { warnings } = validateSvg(svg);

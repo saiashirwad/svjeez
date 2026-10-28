@@ -32,8 +32,10 @@ const unescape = (text: string) =>
 
 const compiled = new WeakMap<() => string, string>();
 
+const isSvgText = (scene: SceneSource): scene is string => typeof scene === "string";
+
 const compile = (scene: SceneSource) => {
-  if (typeof scene === "string") return scene;
+  if (isSvgText(scene)) return scene;
   let svg = compiled.get(scene);
 
   if (svg === undefined) compiled.set(scene, (svg = scene()));

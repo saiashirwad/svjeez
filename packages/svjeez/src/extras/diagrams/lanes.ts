@@ -69,7 +69,7 @@ export function lanes<const L extends Record<string, Labelled>>(
   /** Scene time of lane time `t`. */
   const when = (t: Seconds) => (play?.at ?? 0) + t;
 
-  const rows = Object.entries(spec.lanes as Record<string, Labelled>).map(([id, s]) => ({
+  const rows = Object.entries(spec.lanes).map(([id, s]) => ({
     id,
     ...labelOf(s),
   }));

@@ -21,9 +21,12 @@ const same = (a: Point, b: Point) => Math.abs(a.x - b.x) < 1e-9 && Math.abs(a.y 
  * Smooths an orthogonal polyline. A jog (down, across, down) becomes one S-curve whose ends leave and arrive
  * straight; any other corner is rounded. Straight runs keep their direction, so the ends stay square to the borders.
  */
-export const curve = (
-  points: readonly Point[],
-): { readonly d: string; readonly samples: Point[] } => {
+export interface Curve {
+  readonly d: string;
+  readonly samples: Point[];
+}
+
+export const curve = (points: readonly Point[]): Curve => {
   const n = points.length;
 
   const length = (i: number) =>

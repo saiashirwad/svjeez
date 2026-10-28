@@ -20,6 +20,8 @@ export interface Assets {
 export const ROUTE = "/_svjeez/";
 
 const key = Symbol.for("svjeez.vite.assets");
+
+// SAFETY: only this module writes the symbol, always with an Assets, so whatever is stored under it is one.
 export const assets: Assets = ((globalThis as { [key]?: Assets })[key] ??= { files: new Map() });
 
 /** Writes every file getScene() handed out a URL for under `dir`, at the path of its URL, and returns how many it wrote. */

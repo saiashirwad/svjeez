@@ -11,14 +11,14 @@ import { curve } from "./curve";
 import {
   arrow,
   chip,
+  drawNode,
   labelOf,
   labelSize,
   look,
   lookup,
-  onShape,
+  onOutline,
   placer,
   popIn,
-  shape,
   sizeOf,
   type Diagram,
   type DiagramOptions,
@@ -85,13 +85,14 @@ export function flowchart<
   const l = look(options);
   const { theme, fontSize, font, smallLook: small } = l;
 
-  const nodes = Object.entries(spec.nodes as Record<string, Labelled>).map(([id, s]) => ({
+  const nodes = Object.entries(spec.nodes).map(([id, s]) => ({
     id,
     ...labelOf(s),
   }));
 
   const roles = new Map(nodes.map((n) => [n.id, n.role]));
   const edges = spec.edges.map(([from, to, o]) => ({ from, to, label: o?.label }));
+  // SAFETY: G's values are FlowchartGroup<keyof N & string>, and the {} default has no values to mismatch
   const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<Id>>);
 
   const laid = lay<Id>(
@@ -169,7 +170,7 @@ export function flowchart<
   ]);
 
   const over = l.root([
-    nodes.map((n) => shape(n.role, laid.boxes.get(n.id)!, n.label, l, appear(n.id))),
+    nodes.map((n) => drawNode(n.role, laid.boxes.get(n.id)!, n.label, l, appear(n.id))),
     laid.lines.map(
       (line, i) =>
         line.label &&
@@ -209,14 +210,15 @@ const lay = <N extends string>(
   const lines = out.edges.map((e) => {
     const points = e.points.map(at.point);
     const [from, to] = [boxes.get(e.from)!, boxes.get(e.to)!];
-    points[0] = onShape(roles.get(e.from) ?? "task", from, points[0]!, points[1]!);
-    points[points.length - 1] = onShape(
+    points[0] = onOutline(roles.get(e.from) ?? "task", from, points[0]!, points[1]!);
+    points[points.length - 1] = onOutline(
       roles.get(e.to) ?? "task",
       to,
       points.at(-1)!,
       points.at(-2)!,
     );
 
+    // SAFETY: e.from and e.to are ids from spec.edges, which flowchart() types as keyof N & string
     return { from: e.from as N, to: e.to as N, points, label: e.label && at.box(e.label) };
   });
 

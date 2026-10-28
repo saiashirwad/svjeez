@@ -6,29 +6,30 @@ export type Base16 = { readonly [K in Slot]: Color };
 export type Slot =
   `base0${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | "A" | "B" | "C" | "D" | "E" | "F"}`;
 
-const SLOTS = [
-  "00",
-  "01",
-  "02",
-  "03",
-  "04",
-  "05",
-  "06",
-  "07",
-  "08",
-  "09",
-  "0A",
-  "0B",
-  "0C",
-  "0D",
-  "0E",
-  "0F",
-].map((n) => `base${n}` as Slot);
+const SLOTS: readonly Slot[] = [
+  "base00",
+  "base01",
+  "base02",
+  "base03",
+  "base04",
+  "base05",
+  "base06",
+  "base07",
+  "base08",
+  "base09",
+  "base0A",
+  "base0B",
+  "base0C",
+  "base0D",
+  "base0E",
+  "base0F",
+];
 
 /** Build a scheme from 16 hex colors, base00 first. */
 export const base16 = (...colors: readonly Color[]): Base16 => {
   if (colors.length !== 16) throw new Error(`base16() needs 16 colors, got ${colors.length}.`);
 
+  // SAFETY: the length check above gives one color per slot in SLOTS, so every Slot key is present.
   return Object.fromEntries(SLOTS.map((slot, i) => [slot, colors[i]])) as Base16;
 };
 
@@ -59,11 +60,17 @@ const ROLES = {
 
 export const tint = (theme: Base16, role: CodeRole): Color => theme[ROLES[role]];
 
+export interface VariablesResult<K extends string> {
+  readonly vars: { readonly [N in K]: `var(--${N})` };
+  readonly css: string;
+}
+
 /** CSS variables with defaults. `vars.sky` is `var(--sky)`; pass `css` to `render`. With `light`, those values win under prefers-color-scheme: light. */
 export const variables = <const K extends string>(
   dark: Readonly<Record<K, string>>,
   light?: Readonly<Record<K, string>>,
-): { readonly vars: { readonly [N in K]: `var(--${N})` }; readonly css: string } => {
+): VariablesResult<K> => {
+  // SAFETY: Object.keys of a Record<K, string> lists exactly its K keys, and those are strings.
   const names = Object.keys(dark) as K[];
 
   for (const name of names)
@@ -73,6 +80,7 @@ export const variables = <const K extends string>(
   const declarations = (values: Readonly<Record<K, string>>) =>
     names.map((name) => `--${name}:${values[name]}`).join(";");
 
+  // SAFETY: names are the keys of `dark`, so each one gets exactly one `var(--name)` entry.
   return {
     vars: Object.fromEntries(names.map((name) => [name, `var(--${name})`])) as {
       [N in K]: `var(--${N})`;
@@ -85,13 +93,18 @@ export const variables = <const K extends string>(
  * One scheme that follows the viewer's color scheme. Its colors are CSS variables; pass `css` to `render`.
  * Light wins under `prefers-color-scheme: light`, dark otherwise.
  */
+export interface AdaptiveResult {
+  readonly theme: Base16;
+  readonly css: string;
+}
+
 export const adaptive = ({
   dark,
   light,
 }: {
   readonly dark: Base16;
   readonly light: Base16;
-}): { readonly theme: Base16; readonly css: string } => {
+}): AdaptiveResult => {
   const { vars, css } = variables(dark, light);
 
   return { theme: vars, css };

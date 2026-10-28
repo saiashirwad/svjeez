@@ -130,6 +130,12 @@ const monospaceAdvance = (face: Font, fontSize: number): number => {
   return wide;
 };
 
+const isSourceText = (input: string | CodeTokens): input is string => typeof input === "string";
+
+const isPlainPiece = (p: CodePiece): p is string => typeof p === "string";
+
+const isRun = (p: CodePiece): p is CodeRun => Array.isArray(p);
+
 export function code(input: string | CodeTokens, options: CodeOptions = {}): Code {
   const {
     x = 0,
@@ -152,16 +158,16 @@ export function code(input: string | CodeTokens, options: CodeOptions = {}): Cod
     );
 
   const piece = (p: CodePiece): CodeToken & { readonly id?: string } => {
-    if (typeof p === "string") return { content: p };
+    if (isPlainPiece(p)) return { content: p };
 
-    if (!Array.isArray(p)) return p as CodeToken;
-    const [role, content, id] = p as CodeRun;
+    if (!isRun(p)) return p;
+    const [role, content, id] = p;
 
     return { content, color: tint(theme, role), id };
   };
 
-  const rows = (typeof input === "string" ? input.split("\n").map((line) => [line]) : input).map(
-    (row) => row.map(piece),
+  const rows = (isSourceText(input) ? input.split("\n").map((line) => [line]) : input).map((row) =>
+    row.map(piece),
   );
 
   if (rows.some((row) => row.some((token) => /[\n\r\t]/.test(token.content))))

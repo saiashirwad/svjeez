@@ -50,6 +50,7 @@ const run = (command: string, args: readonly string[], cwd = ROOT): string => {
       stdio: ["ignore", "pipe", "pipe"],
     });
   } catch (error) {
+    // SAFETY: execFileSync runs with encoding utf8, so the stdout and stderr on its error are strings when the command ran; the defaults cover a command that never started.
     const { stdout = "", stderr = "" } = error as { stdout?: string; stderr?: string };
     throw new Error(`${command} ${args.join(" ")}\n${stdout}${stderr}`);
   }

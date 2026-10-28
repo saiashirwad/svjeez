@@ -25,11 +25,20 @@ export interface TerminalOptions extends Omit<CodeOptions, "gutter"> {
   readonly gap?: Seconds;
 }
 
+const isPlainOutput = (out: string | readonly CodePiece[]): out is string =>
+  typeof out === "string";
+
+export interface TerminalResult {
+  readonly node: SvgNode;
+  readonly end: Seconds;
+  readonly bounds: Rect;
+}
+
 /** A shell session typed out: each prompt appears, its command types, its output prints. The last command keeps a blinking cursor. */
 export function terminal(
   session: readonly TerminalCommand[],
   options: TerminalOptions = {},
-): { readonly node: SvgNode; readonly end: Seconds; readonly bounds: Rect } {
+): TerminalResult {
   const {
     at = 0.5,
     prompt = "❯",
@@ -74,7 +83,7 @@ export function terminal(
             .at(printed + i * 0.06)
             .set({ opacity: 1 }),
         },
-        line(typeof out === "string" ? [out] : out).node,
+        line(isPlainOutput(out) ? [out] : out).node,
       ),
     );
 

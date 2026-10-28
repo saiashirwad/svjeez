@@ -7,12 +7,12 @@ import { beats, type Beats } from "../timeline";
 import {
   arrow,
   chip,
+  drawNode,
   labelOf,
   labelSize,
   look,
   lookup,
   placer,
-  shape,
   sizeOf,
   type Diagram,
   type DiagramOptions,
@@ -49,7 +49,7 @@ export function sequence<const A extends Record<string, Labelled>>(
   const l = look(options);
   const { theme, fontSize, font, small } = l;
 
-  const actors = Object.entries(spec.actors as Record<string, Labelled>).map(([id, s]) => ({
+  const actors = Object.entries(spec.actors).map(([id, s]) => ({
     id,
     ...labelOf(s),
   }));
@@ -103,7 +103,7 @@ export function sequence<const A extends Record<string, Labelled>>(
         fill: "none",
       });
     }),
-    actors.map((a) => shape(a.role, heads.get(a.id)!, a.label, l)),
+    actors.map((a) => drawNode(a.role, heads.get(a.id)!, a.label, l)),
     rows.map((row, i) => {
       const { points, box } = placed[i]!;
 

@@ -24,13 +24,13 @@ interface Glyph {
   readonly lines: readonly (readonly { readonly x: number; readonly y: number }[])[];
 }
 
-const ENTITIES: Readonly<Record<string, string>> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-};
+const ENTITIES = new Map([
+  ["amp", "&"],
+  ["lt", "<"],
+  ["gt", ">"],
+  ["quot", '"'],
+  ["apos", "'"],
+]);
 
 const decode = (value: string): string =>
   value.replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (whole, name: string) =>
@@ -38,7 +38,7 @@ const decode = (value: string): string =>
       ? String.fromCodePoint(
           name[1]?.toLowerCase() === "x" ? parseInt(name.slice(2), 16) : Number(name.slice(1)),
         )
-      : (ENTITIES[name] ?? whole),
+      : (ENTITIES.get(name) ?? whole),
   );
 
 const attributes = (tag: string): Map<string, string> =>
@@ -92,10 +92,13 @@ const smooth = (points: readonly Point[]): string => {
   return d;
 };
 
+const isMarkup = (markup: string | Uint8Array | ArrayBuffer): markup is string =>
+  typeof markup === "string";
+
 /** Read an SVG font's markup. Glyph coordinates are y-up from the baseline, as SVG fonts store them. */
 export const strokeFont = Object.assign(
   (markup: string | Uint8Array | ArrayBuffer): StrokeFont => {
-    const text = typeof markup === "string" ? markup : new TextDecoder().decode(markup);
+    const text = isMarkup(markup) ? markup : new TextDecoder().decode(markup);
     const fontTag = /<font\b[^>]*>/.exec(text)?.[0];
 
     if (!fontTag) throw new Error("strokeFont() reads SVG fonts, and this has no <font> element.");

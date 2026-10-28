@@ -115,19 +115,19 @@ export const adopt = (img: HTMLImageElement) => {
 
   if (!img.complete)
     return img.addEventListener("load", () => start(performance.now()), { once: true });
-  const entry = performance.getEntriesByName(img.src)[0] as PerformanceResourceTiming | undefined;
-  start(entry?.responseEnd ?? performance.now());
+  const [entry] = performance.getEntriesByName(img.src);
+  start(entry instanceof PerformanceResourceTiming ? entry.responseEnd : performance.now());
 };
 
 // An SVG's clock is shared by every <img> and probe that loads its URL, and a new one restarts it. A background image
 // shares it without restarting it, so the copy fading out over the img is a background.
-const FIT: Record<string, string> = {
-  fill: "100% 100%",
-  cover: "cover",
-  contain: "contain",
-  "scale-down": "contain",
-  none: "auto",
-};
+const FIT = new Map([
+  ["fill", "100% 100%"],
+  ["cover", "cover"],
+  ["contain", "contain"],
+  ["scale-down", "contain"],
+  ["none", "auto"],
+]);
 
 const crossfade = (img: HTMLImageElement, old: string) => {
   if (!img.offsetParent) return revoke(old);
@@ -141,7 +141,7 @@ const crossfade = (img: HTMLImageElement, old: string) => {
     width: `${img.offsetWidth}px`,
     height: `${img.offsetHeight}px`,
     borderRadius: style.borderRadius,
-    background: `url("${old}") ${style.objectPosition} / ${FIT[style.objectFit] ?? "100% 100%"} no-repeat`,
+    background: `url("${old}") ${style.objectPosition} / ${FIT.get(style.objectFit) ?? "100% 100%"} no-repeat`,
     pointerEvents: "none",
   });
   img.after(veil);

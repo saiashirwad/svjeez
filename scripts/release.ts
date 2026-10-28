@@ -84,11 +84,12 @@ const published = async (name: string): Promise<ReadonlySet<string>> => {
   const response = await fetch(`https://registry.npmjs.org/${name.replace("/", "%2f")}`);
 
   if (response.status === 404) return new Set();
+
   if (!response.ok) throw new Error(`npm answered ${response.status} for ${name}`);
 
-  return new Set(
-    Object.keys(((await response.json()) as { versions: Record<string, unknown> }).versions),
-  );
+  const { versions }: { versions: object } = await response.json();
+
+  return new Set(Object.keys(versions));
 };
 
 const releases = (): readonly string[] =>
@@ -195,6 +196,7 @@ const publish = async () => {
 };
 
 const [command] = process.argv.slice(2);
+
 if (command === "plan") await plan();
 else if (command === "publish") await publish();
 else throw new Error("Usage: bun scripts/release.ts plan | publish");

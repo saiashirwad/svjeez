@@ -46,6 +46,7 @@ describe("strokeFont", () => {
     const markup = `<svg><defs><font horiz-adv-x="500"><font-face font-family="Tiny" units-per-em="1000" /><glyph unicode="a" d="M 0 0 L 0 500" /></font></defs></svg>`;
     const bytes = new TextEncoder().encode(markup);
 
+    // SAFETY: TextEncoder.encode allocates a fresh ArrayBuffer, never a SharedArrayBuffer, so the cast to ArrayBuffer holds.
     const [fromString, fromBytes, fromBuffer] = [
       strokeFont(markup),
       strokeFont(bytes),

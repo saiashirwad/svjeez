@@ -27,7 +27,7 @@ const nodes = (ids: string, w = 80, h = 36) =>
 const edges = (list: string) =>
   list.split(" ").map((pair) => ({ from: pair.split(">")[0]!, to: pair.split(">")[1]! }));
 
-const graphs: Record<string, LayeredInput> = {
+const graphs = {
   chain: { nodes: nodes("a b c d"), edges: edges("a>b b>c c>d") },
   diamond: { nodes: nodes("a b c d"), edges: edges("a>b a>c b>d c>d") },
   cycle: {
@@ -49,10 +49,10 @@ const graphs: Record<string, LayeredInput> = {
       { id: "right", members: ["c", "e"], label: { w: 120, h: 14 } },
     ],
   },
-};
+} satisfies Record<string, LayeredInput>;
 
 describe("layered", () => {
-  for (const [name, graph] of Object.entries(graphs)) {
+  for (const [name, graph] of Object.entries<LayeredInput>(graphs)) {
     for (const direction of ["TB", "LR"] as const) {
       const out = layered({ ...graph, direction });
       const boxes = [...out.nodes.entries()];
@@ -175,7 +175,7 @@ describe("layered", () => {
   describe("edges keep clear of each other", () => {
     const label = (text: string) => ({ w: text.length * 7.2, h: 17 });
 
-    const routed: Record<string, LayeredInput> = {
+    const routed = {
       "state example": {
         nodes: [
           { id: "start", w: 14, h: 14 },
@@ -224,7 +224,7 @@ describe("layered", () => {
         ],
       },
       ...graphs,
-    };
+    } satisfies Record<string, LayeredInput>;
 
     const segments = (points: readonly Point[]) =>
       points.slice(1).map((q, k) => [points[k]!, q] as const);
@@ -253,7 +253,7 @@ describe("layered", () => {
       Math.max(p.y, q.y) > b.y + 0.5 &&
       Math.min(p.y, q.y) < b.y + b.h - 0.5;
 
-    for (const [name, graph] of Object.entries(routed)) {
+    for (const [name, graph] of Object.entries<LayeredInput>(routed)) {
       for (const direction of ["TB", "LR"] as const) {
         const out = layered({ ...graph, direction });
         const lines = out.edges.map((e) => ({ ...e, segments: segments(e.points) }));

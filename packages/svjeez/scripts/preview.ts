@@ -16,7 +16,12 @@ const target = resolve(out ?? join(ROOT, ".preview", `${basename(source, extname
 
 await mkdir(dirname(target), { recursive: true });
 
-let state: { version: number; error?: string } = { version: 0 };
+interface BuildState {
+  version: number;
+  error?: string;
+}
+
+let state: BuildState = { version: 0 };
 const clients = new Set<ReadableStreamDefaultController>();
 
 // A fresh process per build, so edits to anything the module imports are picked up.

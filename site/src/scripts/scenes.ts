@@ -1,7 +1,7 @@
 // Scenes: every one is an <img>. Off screen it is a still; it plays only while it is on screen, and goes back to its still when it leaves.
 // A scene near the viewport gets its still first, so scrolling never meets an empty box.
 import { frozen, PALETTECHANGE, playing, replay, show } from "./palette";
-import { calm, scheme, THEMECHANGE, type Scheme } from "./scheme";
+import { calm, scheme, THEMECHANGE } from "./scheme";
 
 // A scene plays once this much of it is on screen, so a screen full of half-cut cards does not animate them all.
 const SHOWN = 0.3;
@@ -11,8 +11,7 @@ const SHOWN = 0.3;
 const BUDGET = 80;
 const COST = 30;
 
-const posterOf = (img: HTMLImageElement) =>
-  img.dataset[(img.dataset.scheme as Scheme | undefined) ?? scheme()]!;
+const posterOf = (img: HTMLImageElement) => img.dataset[img.dataset.scheme ?? scheme()]!;
 
 // Under another palette a still is the recolored scene held at its still frame, which follows light and dark by itself.
 export const still = (img: HTMLImageElement, { fade = false } = {}) => {
@@ -34,9 +33,11 @@ const scenes = document.querySelectorAll<HTMLImageElement>(".scene[data-live]");
 const near = new IntersectionObserver(
   (entries) =>
     entries.forEach((entry) => {
-      const img = entry.target as HTMLImageElement;
+      const { target } = entry;
 
-      if (entry.isIntersecting && !img.dataset.want) still(img);
+      if (!(target instanceof HTMLImageElement)) return;
+
+      if (entry.isIntersecting && !target.dataset.want) still(target);
     }),
   { rootMargin: "500px 0px" },
 );
@@ -57,8 +58,7 @@ const balance = () => {
 
   const wanted = new Set(
     [...ratio]
-      .filter(([, r]) => r >= SHOWN)
-      .map(([img]) => img)
+      .flatMap(([img, r]) => (r >= SHOWN ? [img] : []))
       .sort((a, b) => ratio.get(b)! - ratio.get(a)! || reach(a) - reach(b))
       .filter((img) => {
         const cost = Number(img.dataset.cost ?? COST);
@@ -80,12 +80,10 @@ const balance = () => {
 
 const view = new IntersectionObserver(
   (entries) => {
-    entries.forEach((entry) =>
-      ratio.set(
-        entry.target as HTMLImageElement,
-        entry.isIntersecting ? entry.intersectionRatio : 0,
-      ),
-    );
+    entries.forEach((entry) => {
+      if (entry.target instanceof HTMLImageElement)
+        ratio.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
+    });
     balance();
   },
   { threshold: [0, 0.15, SHOWN, 0.5, 0.75, 1] },
@@ -110,7 +108,9 @@ addEventListener(THEMECHANGE, () =>
 addEventListener(PALETTECHANGE, () =>
   scenes.forEach((img) => {
     if (img.dataset.state === "live") replay(img);
-    else if (img.dataset.want === "live") (delete img.dataset.want, play(img));
-    else if (img.dataset.want) still(img, { fade: true });
+    else if (img.dataset.want === "live") {
+      delete img.dataset.want;
+      play(img);
+    } else if (img.dataset.want) still(img, { fade: true });
   }),
 );

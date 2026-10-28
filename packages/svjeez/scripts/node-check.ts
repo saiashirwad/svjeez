@@ -24,7 +24,7 @@ let failed = 0;
 
 for (const scene of scenes) {
   try {
-    const { default: build } = (await import(join(ROOT, scene))) as { default: () => string };
+    const { default: build }: { default: () => string } = await import(join(ROOT, scene));
     const { errors } = validateSvg(build());
 
     if (errors.length > 0) throw new Error(errors.join("\n"));

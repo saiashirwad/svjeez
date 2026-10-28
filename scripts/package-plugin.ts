@@ -5,12 +5,19 @@ import { execFileSync } from "node:child_process";
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-type Manifest = Record<string, unknown> & {
+type Target = string | { types: string };
+
+type Manifest = {
   name: string;
   version: string;
-  exports: Record<string, string | { types: string }>;
+  private?: boolean;
+  scripts?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  exports: Record<string, Target>;
   dependencies?: Record<string, string>;
 };
+
+const isPath = (target: Target): target is string => typeof target === "string";
 
 const ROOT = join(import.meta.dirname, "..");
 const read = (dir: string): Manifest => JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
@@ -40,7 +47,7 @@ const copy = (from: string, to: string) => {
 // "./src/scene.ts" is compiled to "./scene.js" and "./scene.d.ts"; any other file is copied as it is.
 const exports = Object.fromEntries(
   Object.entries(read(dir).exports).map(([key, target]) => {
-    if (typeof target !== "string") return (copy(target.types, target.types), [key, target]);
+    if (!isPath(target)) return (copy(target.types, target.types), [key, target]);
     const path = target.replace(/^\.\/src\//, "./");
 
     if (!path.endsWith(".ts")) return (copy(target, path), [key, path]);

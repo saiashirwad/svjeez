@@ -52,7 +52,8 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
 </header>
 
 <script>
-  import { choose, palette, type PaletteId } from "../scripts/palette";
+  import { PALETTES } from "../palettes";
+  import { choose, palette } from "../scripts/palette";
   import { scheme, THEMECHANGE } from "../scripts/scheme";
 
   // The toggle sets `color-scheme` on the page, and Chromium hands that to every <img> SVG on it.
@@ -75,21 +76,33 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   mark();
 
   menu.addEventListener("toggle", (event) => {
+    // SAFETY: the popover fires toggle as a ToggleEvent, which carries newState.
     if ((event as ToggleEvent).newState === "open") items.find((item) => item.ariaChecked === "true")?.focus();
   });
 
   menu.addEventListener("click", (event) => {
-    const item = (event.target as Element).closest<HTMLButtonElement>("[role=menuitemradio]");
+    const item =
+      event.target instanceof Element
+        ? event.target.closest<HTMLButtonElement>("[role=menuitemradio]")
+        : null;
 
-    if (!item) return;
-    choose(item.dataset.palette as PaletteId);
+    const picked = PALETTES.find((p) => p.id === item?.dataset.palette);
+
+    if (!picked) return;
+    choose(picked.id);
     mark();
     menu.hidePopover();
   });
 
   menu.addEventListener("keydown", (event) => {
-    const at = items.indexOf(document.activeElement as HTMLButtonElement);
-    const to: number | undefined = ({ ArrowDown: at + 1, ArrowUp: at - 1, Home: 0, End: -1 } as Record<string, number>)[event.key];
+    const at = items.findIndex((item) => item === document.activeElement);
+
+    const to = new Map([
+      ["ArrowDown", at + 1],
+      ["ArrowUp", at - 1],
+      ["Home", 0],
+      ["End", -1],
+    ]).get(event.key);
 
     if (event.key === "Tab") return menu.hidePopover();
 

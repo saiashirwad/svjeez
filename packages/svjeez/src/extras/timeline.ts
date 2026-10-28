@@ -42,9 +42,11 @@ export const cut = ({ at, over }: Span): Motion<"opacity"> =>
 /** When each of several things happens: a start, from which they follow `step` apart, or one time each. */
 export type Beats = Seconds | readonly Seconds[];
 
+const isStart = (at: Beats): at is Seconds => typeof at === "number";
+
 /** `count` times from `at`. A list must have one time per thing, in order. */
 export const beats = (at: Beats, count: number, step: Seconds, what: string): Seconds[] => {
-  if (typeof at === "number") {
+  if (isStart(at)) {
     if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
 
     return Array.from({ length: count }, (_, i) => at + i * step);
@@ -166,6 +168,7 @@ export function timeline<const T extends Record<string, Seconds>>(
     return found;
   };
 
+  // SAFETY: the loop above sets a span for every name in `durations`, so the keys of `spans` are exactly K.
   return {
     ...spans,
     duration: end - start,

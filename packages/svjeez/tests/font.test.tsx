@@ -4,7 +4,7 @@ import { Glyphs, draw, font, render, validateSvg, type Child } from "svjeez";
 import { Callout, code, flowchart } from "svjeez/extras";
 import { contours, pathData } from "../src/font/glyf";
 import { sfnt } from "../src/font/sfnt";
-import { shaper } from "../src/font/shape";
+import { typesetter } from "../src/font/shape";
 import { subset } from "../src/font/subset";
 
 const fixture = (name: string) => new URL(`../examples/fonts/${name}.ttf`, import.meta.url);
@@ -66,7 +66,7 @@ describe("font", () => {
   });
 
   test("a WOFF2 font embeds but cannot be measured or drawn", () => {
-    const woff2 = font(Uint8Array.from([...Buffer.from("wOF2"), ...new Array(40).fill(0)]), {
+    const woff2 = font(Uint8Array.from([...Buffer.from("wOF2"), ...new Uint8Array(40)]), {
       family: "Packed",
     });
 
@@ -262,7 +262,7 @@ describe("fontFamily", () => {
   test("the cut maps characters beyond the BMP", async () => {
     const bytes = new Uint8Array(await readFile(fixture("ABeeZee-Regular")));
     const parsed = sfnt(bytes);
-    const real = shaper(parsed);
+    const real = typesetter(parsed);
     const clef = "\u{1d11e}";
     const remapped = { ...real, glyph: (char: string) => real.glyph(char === clef ? "H" : char) };
     const cut = font(subset(bytes, parsed, remapped, real.kern, [`${clef}i`])!);
@@ -290,9 +290,12 @@ describe("fontFamily", () => {
   });
 
   test("a large embedded font warns", () => {
-    const big = font(Uint8Array.from([...Buffer.from("wOF2"), ...new Array(200_000).fill(7)]), {
-      family: "Big",
-    });
+    const big = font(
+      Uint8Array.from([...Buffer.from("wOF2"), ...new Uint8Array(200_000).fill(7)]),
+      {
+        family: "Big",
+      },
+    );
 
     expect(validateSvg(scene(<text fontFamily={big}>Hi</text>)).warnings.join("\n")).toContain(
       "An embedded font is",

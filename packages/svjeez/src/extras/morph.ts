@@ -86,6 +86,12 @@ interface Chain {
   track?: Motion<"x" | "y" | "opacity">;
 }
 
+export interface MorphResult {
+  readonly node: SvgNode;
+  readonly spans: readonly Span[];
+  readonly end: Seconds;
+}
+
 /**
  * Animate code from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
  * `spans[i]` is when the move into `versions[i + 1]` runs; `end` is when the last one settles, or 0 for a single version.
@@ -93,7 +99,7 @@ interface Chain {
 export function morph(
   versions: readonly Code[],
   { at, over = 0.8, gutter = false }: MorphOptions,
-): { readonly node: SvgNode; readonly spans: readonly Span[]; readonly end: Seconds } {
+): MorphResult {
   if (versions.length === 0 || at.length !== versions.length - 1 || !(over > 0))
     throw new Error(
       `morph() needs one start per transition and a positive duration, got ${versions.length} versions, ${at.length} starts and over ${over}.`,

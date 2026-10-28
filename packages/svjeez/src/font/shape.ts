@@ -368,13 +368,13 @@ const kern = (f: Sfnt, subtable: number, first: number, second: number): number 
   return xAdvance(f, subtable + 16 + (class1 * count2 + class2) * (size1 + size2), format1);
 };
 
-export interface Shaper {
-  readonly shape: (text: string) => readonly Placed[];
+export interface Typesetter {
+  readonly layoutGlyphs: (text: string) => readonly Placed[];
   readonly glyph: (char: string) => number;
   /** Pair kerning between two glyphs in font units. */
   readonly kern: (left: number, right: number) => number;
   /**
-   * Whether a browser could substitute or position these runs of glyphs, one per text, through a lookup this shaper
+   * Whether a browser could substitute or position these runs of glyphs, one per text, through a lookup this typesetter
    * does not apply: contextual alternates, mark positioning, the forms of another script. Errs toward yes.
    */
   readonly beyond: (runs: readonly (readonly number[])[]) => boolean;
@@ -385,7 +385,7 @@ export interface Shaper {
  * No bidi, no contextual alternates, no mark positioning, so complex scripts will not match the browser.
  * Without `withLigatures`, one glyph per character and pair kerning only.
  */
-export const shaper = (f: Sfnt, withLigatures = true): Shaper => {
+export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
   const map = charMap(f);
 
   const ligatures = withLigatures
@@ -430,7 +430,7 @@ export const shaper = (f: Sfnt, withLigatures = true): Shaper => {
       others.some(({ tag, lookup }) =>
         lookup.subtables.some((s) => mayApply(f, tag, lookup, s, runs)),
       ),
-    shape: (text) => {
+    layoutGlyphs: (text) => {
       const run: Placed[] = [...text].map((chars) => ({
         glyph: map(chars.codePointAt(0)!),
         chars,

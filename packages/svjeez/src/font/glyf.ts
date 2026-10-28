@@ -127,7 +127,7 @@ const fixed = (n: number): string => String(Math.round(n * 100) / 100);
  * TrueType curves are quadratic, with an implied on-curve point between two off-curve points.
  */
 export const pathData = (
-  shapes: readonly Contour[],
+  outlines: readonly Contour[],
   scale: number,
   x: number,
   y: number,
@@ -135,9 +135,9 @@ export const pathData = (
   const px = (p: { x: number; y: number }) => `${fixed(x + p.x * scale)} ${fixed(y - p.y * scale)}`;
   const mid = (a: Point, b: Point): Point => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, on: true });
 
-  return shapes
-    .filter((contour) => contour.length > 1)
-    .map((contour) => {
+  return outlines
+    .flatMap((contour) => {
+      if (contour.length <= 1) return [];
       const first = contour.findIndex((p) => p.on);
 
       const ring =
@@ -161,7 +161,7 @@ export const pathData = (
 
       if (control) d += `Q${px(control)} ${px(start)}`;
 
-      return `${d}Z`;
+      return [`${d}Z`];
     })
     .join("");
 };

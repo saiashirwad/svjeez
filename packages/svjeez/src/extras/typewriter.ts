@@ -16,6 +16,12 @@ export interface TypewriterOptions {
   readonly blink?: boolean;
 }
 
+export interface TypewriterResult {
+  readonly node: SvgNode;
+  readonly end: Seconds;
+  readonly spans: readonly Span[];
+}
+
 /**
  * Type `code` out line by line, one character per step. A line costs its characters plus one for the newline.
  * `spans` holds when each line types, so other things can happen as their line lands.
@@ -23,7 +29,7 @@ export interface TypewriterOptions {
 export function typewriter(
   code: Code,
   { at, cps = 28, cursor = false, blink = true }: TypewriterOptions,
-): { readonly node: SvgNode; readonly end: Seconds; readonly spans: readonly Span[] } {
+): TypewriterResult {
   if (!(at >= 0 && cps > 0))
     throw new Error(
       `typewriter() needs a non-negative start and a positive cps, got at ${at} and cps ${cps}.`,

@@ -334,7 +334,7 @@ describe("accent color", () => {
 
   const [span, box] = [{ at: 0, over: 2 }, rect(10, 10, 30, 20)];
 
-  const items: Record<string, (theme?: typeof tomorrow) => ReturnType<typeof Marker>> = {
+  const items = {
     Marker: (theme) => Marker({ theme, stops: [{ during: span, target: box }] }),
     Arrow: (theme) => Arrow({ theme, from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, during: span }),
     Callout: (theme) => Callout({ theme, target: box, during: span, children: "hi" }),
@@ -348,11 +348,11 @@ describe("accent color", () => {
         ],
         { theme, at: 0 },
       ).node,
-  };
+  } satisfies Record<string, (theme?: typeof tomorrow) => ReturnType<typeof Marker>>;
 
   for (const [name, make] of Object.entries(items)) {
     test(`${name} takes its default color from the theme's base09`, () => {
-      expect(scene(make())).toContain(defaultDark.base09);
+      expect(scene(make(undefined))).toContain(defaultDark.base09);
       expect(scene(make(tomorrow))).toContain(tomorrow.base09);
       expect(scene(make(tomorrow))).not.toContain("#f6c96b");
     });
@@ -373,13 +373,12 @@ describe("timed components render valid SVG that moves only inside their span", 
           percents!.split(",").map(parseFloat),
         ),
       )
-      .filter((percent) => percent > 0 && percent < 100)
-      .map((percent) => (percent * duration) / 100);
+      .flatMap((percent) => (percent > 0 && percent < 100 ? [(percent * duration) / 100] : []));
 
     return [Math.min(...stops), Math.max(...stops)];
   };
 
-  const items: Record<string, [SvgNode, [number, number]]> = {
+  const items = {
     flow: [
       flow(
         [
@@ -402,7 +401,7 @@ describe("timed components render valid SVG that moves only inside their span", 
       }),
       [2, 2.5],
     ],
-  };
+  } satisfies Record<string, [SvgNode, [number, number]]>;
 
   for (const [name, [node, [start, end]]] of Object.entries(items)) {
     test(name, () => {
@@ -416,17 +415,16 @@ describe("timed components render valid SVG that moves only inside their span", 
 });
 
 describe("time helpers", () => {
+  type Held = { opacity?: number; x?: number; y?: number };
+
   /** What the rendered keyframes hold at playback second `t` of a 100s scene: opacity, and x and y from the translate lane. */
-  const at = (
-    track: Motion<"opacity" | "x" | "y">,
-    t: number,
-  ): { opacity?: number; x?: number; y?: number } => {
+  const at = (track: Motion<"opacity" | "x" | "y">, t: number): Held => {
     const svg = render(
       { width: 10, height: 10, duration: 100, title: "probe" },
       el.rect({ width: 1, height: 1, animation: track }),
     );
 
-    const held: { opacity?: number; x?: number; y?: number } = {};
+    const held: Held = {};
 
     for (const [, body] of svg.matchAll(/@keyframes [\w-]+\{((?:[^{}]*\{[^}]*\})*)\}/g)) {
       let stop: string | undefined;

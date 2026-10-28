@@ -40,7 +40,7 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
   assert(source.includes('title: "Saved"'), "toast source is in the editor");
 
   // Replace the title and the duration through real typing into the document.
-  await page.evaluate(() => (document.querySelector(".cm-content") as HTMLElement).focus());
+  await page.evaluate(() => document.querySelector<HTMLElement>(".cm-content")!.focus());
 
   const edit = async (find: string, replace: string) => {
     await page.evaluate((text) => {
@@ -51,7 +51,8 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
 
       const nodes: Text[] = [];
 
-      for (let node = walker.nextNode(); node; node = walker.nextNode()) nodes.push(node as Text);
+      for (let node = walker.nextNode(); node; node = walker.nextNode())
+        if (node instanceof Text) nodes.push(node);
       const whole = nodes.map((n) => n.data).join("");
       const from = whole.indexOf(text);
 

@@ -79,15 +79,25 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
       card.addEventListener("blur", () => rest(shot));
     }
   } else {
-    const seen = new IntersectionObserver((entries) => entries.forEach((entry) => (entry.isIntersecting ? run : rest)(entry.target as HTMLElement)), { threshold: 0.75 });
+    const seen = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!(entry.target instanceof HTMLElement)) return;
+
+          if (entry.isIntersecting) run(entry.target);
+          else rest(entry.target);
+        }),
+      { threshold: 0.75 },
+    );
+
     shots.forEach((shot) => seen.observe(shot));
   }
 
   const near = new IntersectionObserver(
     (entries) =>
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const shot = entry.target as HTMLElement;
+        if (!entry.isIntersecting || !(entry.target instanceof HTMLElement)) return;
+        const shot = entry.target;
 
         if (!shot.dataset.want) show(image(shot), stillOf(shot));
         near.unobserve(shot);
@@ -103,7 +113,10 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   addEventListener(PALETTECHANGE, () =>
     shots.forEach((shot) => {
       if (shot.dataset.playing) replay(image(shot));
-      else if (shot.dataset.want === "1") (delete shot.dataset.want, run(shot));
+      else if (shot.dataset.want === "1") {
+        delete shot.dataset.want;
+        run(shot);
+      }
       else if (image(shot).src) show(image(shot), stillOf(shot), { fade: true });
     }),
   );

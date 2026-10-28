@@ -8,7 +8,20 @@ import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
 const dir = process.cwd();
-const manifest = (path: string) => JSON.parse(readFileSync(join(path, "package.json"), "utf8"));
+
+type Target = string | { types: string };
+
+interface Manifest {
+  name: string;
+  version: string;
+  exports: Record<string, Target>;
+  dependencies?: Record<string, string>;
+}
+
+const isPath = (target: Target): target is string => typeof target === "string";
+
+const manifest = (path: string): Manifest =>
+  JSON.parse(readFileSync(join(path, "package.json"), "utf8"));
 
 const run = (command: string, args: readonly string[], cwd = dir) =>
   execFileSync(command, args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
@@ -30,8 +43,8 @@ try {
   const tarball = pack(join(dir, "package-dist"));
 
   // Only compiled entry points: .astro files and type-only entries reach into other packages, which the consumer covers.
-  const compiled = Object.entries(manifest(dir).exports as Record<string, unknown>).filter(
-    ([, target]) => typeof target === "string" && target.endsWith(".ts"),
+  const compiled = Object.entries(manifest(dir).exports).filter(
+    ([, target]) => isPath(target) && target.endsWith(".ts"),
   );
 
   run(join(ROOT, "packages/svjeez/node_modules/.bin/attw"), [

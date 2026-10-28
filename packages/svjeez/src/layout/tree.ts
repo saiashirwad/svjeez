@@ -57,7 +57,7 @@ export function tree(input: TreeInput): TreeLayout {
   if (roots.length !== 1) throw new Error(`tree() needs exactly one root, got ${roots.length}.`);
 
   const order = [roots[0]!];
-  const depth = new Array<number>(input.nodes.length).fill(0);
+  const depth = Array.from({ length: input.nodes.length }, () => 0);
 
   for (let k = 0; k < order.length; k++) {
     for (const c of children[order[k]!]!) {
@@ -68,7 +68,7 @@ export function tree(input: TreeInput): TreeLayout {
 
   if (order.length !== input.nodes.length) throw new Error("tree() parents form a cycle.");
 
-  const offset = new Array<number>(input.nodes.length).fill(0);
+  const offset = Array.from({ length: input.nodes.length }, () => 0);
 
   const lay = (v: number): Contour => {
     const own: [number, number] = [-size[v]!.w / 2, size[v]!.w / 2];
@@ -107,14 +107,14 @@ export function tree(input: TreeInput): TreeLayout {
 
   lay(roots[0]!);
 
-  const x = new Array<number>(input.nodes.length).fill(0);
+  const x = Array.from({ length: input.nodes.length }, () => 0);
 
   for (const v of order.slice(1)) x[v] = x[index.get(input.nodes[v]!.parent!)!]! + offset[v]!;
   const left = Math.min(...order.map((v) => x[v]! - size[v]!.w / 2));
   const levels = Math.max(...depth) + 1;
 
   const thick = Array.from({ length: levels }, (_, d) =>
-    Math.max(...order.filter((v) => depth[v] === d).map((v) => size[v]!.h)),
+    Math.max(...order.flatMap((v) => (depth[v] === d ? [size[v]!.h] : []))),
   );
 
   const top: number[] = [];

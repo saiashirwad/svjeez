@@ -41,8 +41,12 @@ export interface DiagramOptions {
 
 export type Labelled = string | { readonly label: string; readonly role?: NodeRole };
 
+/** Whether a spec is a bare label, with no options to read. */
+export const isBareLabel = (spec: string | { readonly label: string }): spec is string =>
+  typeof spec === "string";
+
 export const labelOf = (spec: Labelled): { readonly label: string; readonly role: NodeRole } =>
-  typeof spec === "string"
+  isBareLabel(spec)
     ? { label: spec, role: "task" }
     : { label: spec.label, role: spec.role ?? "task" };
 
@@ -89,7 +93,7 @@ const SKEW = 0.35;
 const LID = 5;
 
 /** Moves an edge's end from the box border onto the shape's own outline, along the edge's last segment. */
-export const onShape = (role: NodeRole, b: Box, end: Point, toward: Point): Point => {
+export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Point => {
   const [cx, cy] = [b.x + b.w / 2, b.y + b.h / 2];
   const vertical = end.x === toward.x;
 
@@ -195,7 +199,7 @@ export const look = (options: DiagramOptions) => {
 };
 
 /** A role's shape with its label centered inside. `extra` draws over the fill, under the label. */
-export const shape = (
+export const drawNode = (
   role: NodeRole,
   b: Box,
   label: string,

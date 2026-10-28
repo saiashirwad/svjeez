@@ -1,5 +1,5 @@
 import { contours, pathData } from "./glyf";
-import { shaper, type Shaper } from "./shape";
+import { typesetter, type Typesetter } from "./shape";
 import { subset } from "./subset";
 import {
   isFixedPitch,
@@ -110,7 +110,7 @@ const hash = (bytes: Uint8Array): string => {
 export class Font {
   readonly #sfnt: Sfnt | undefined;
   readonly #bytes: Uint8Array;
-  #shaper: Shaper | undefined;
+  #typesetter: Typesetter | undefined;
   readonly #embeds = new Map<string, `data:${string}`>();
   readonly family: string;
   readonly weight: number;
@@ -154,10 +154,10 @@ export class Font {
     return this.#sfnt;
   }
 
-  #shape(text: string, what: string) {
-    this.#shaper ??= shaper(this.#readable(what), this.ligatures);
+  #typeset(text: string, what: string) {
+    this.#typesetter ??= typesetter(this.#readable(what), this.ligatures);
 
-    return this.#shaper.shape(text);
+    return this.#typesetter.layoutGlyphs(text);
   }
 
   /**
@@ -177,9 +177,9 @@ export class Font {
     let href = this.#embeds.get(key);
 
     if (!href) {
-      this.#shaper ??= shaper(font, this.ligatures);
-      const shaped = this.#shaper;
-      const cut = subset(this.#bytes, font, shaped, shaped.kern, texts, this.ligatures);
+      this.#typesetter ??= typesetter(font, this.ligatures);
+      const active = this.#typesetter;
+      const cut = subset(this.#bytes, font, active, active.kern, texts, this.ligatures);
       href = cut ? `data:font/ttf;base64,${base64(cut)}` : this.href;
       this.#embeds.set(key, href);
     }
@@ -194,16 +194,16 @@ export class Font {
 
   /** Whether the font has a glyph for this character. The browser draws a missing one from the fallback font. */
   has(char: string): boolean {
-    this.#shaper ??= shaper(this.#readable("has()"), this.ligatures);
+    this.#typesetter ??= typesetter(this.#readable("has()"), this.ligatures);
 
-    return this.#shaper.glyph(char) !== 0;
+    return this.#typesetter.glyph(char) !== 0;
   }
 
   /** Advance width of one line of text in px, with ligatures and kerning as the browser applies them. */
   measure(text: string, size: number): number {
     const scale = size / this.metrics.unitsPerEm;
 
-    return this.#shape(text, "measure()").reduce(
+    return this.#typeset(text, "measure()").reduce(
       (width, glyph) => width + glyph.advance * scale,
       0,
     );
@@ -225,7 +225,7 @@ export class Font {
     const scale = size / this.metrics.unitsPerEm;
     let pen = x;
 
-    const glyphs = this.#shape(text, "path()").map((glyph): GlyphPath => {
+    const glyphs = this.#typeset(text, "path()").map((glyph): GlyphPath => {
       const placed = {
         char: glyph.chars,
         d: pathData(contours(font, glyph.glyph), scale, pen, y),
@@ -289,17 +289,23 @@ export const regularFace = (value: FontValue): Font =>
 export const textWidth = (text: string, fontSize: number, font?: FontValue): number =>
   font ? regularFace(font).measure(text, fontSize) : text.length * fontSize * 0.6;
 
+const escapeControl = (char: string): string => {
+  const code = char.charCodeAt(0);
+
+  return code < 0x20 || code === 0x7f ? `\\${code.toString(16)} ` : char;
+};
+
 /** A CSS string. Control characters are hex-escaped, since a raw newline would end the string and start a rule. */
 const cssString = (text: string): string =>
-  `'${text.replace(/['\\]/g, "\\$&").replace(/[\u0000-\u001f\u007f]/g, (char) => `\\${char.charCodeAt(0).toString(16)} `)}'`;
+  `'${[...text.replace(/['\\]/g, "\\$&")].map(escapeControl).join("")}'`;
 
-/** The faces a `fontFamily` value embeds, each under the family name it is used with, and the attribute value. */
-export const fontFaces = (
-  value: FontValue,
-): {
+interface FontFaces {
   readonly family: string;
   readonly faces: readonly { readonly name: string; readonly font: Font }[];
-} => {
+}
+
+/** The faces a `fontFamily` value embeds, each under the family name it is used with, and the attribute value. */
+export const fontFaces = (value: FontValue): FontFaces => {
   const [name, faces, fallback] =
     value instanceof Font
       ? [value.family, [value], value.fallback]
@@ -333,6 +339,7 @@ export const font = Object.assign(
         "This is a font collection (.ttc). Extract one face to a .ttf or .otf and load that.",
       );
 
+    // SAFETY: FORMATS has exactly the FontFormat keys, so every key Object.keys returns is a FontFormat.
     const format = (Object.keys(FORMATS) as FontFormat[]).find((key) =>
       FORMATS[key].matches(signature),
     );

@@ -1,5 +1,5 @@
 import { i16, required, table, u16, u32, type Sfnt } from "./sfnt";
-import type { Shaper } from "./shape";
+import type { Typesetter } from "./shape";
 
 /**
  * Tables that go: variation data (the subset is the default instance), layout tables (kerning is rebuilt as a `kern`
@@ -233,25 +233,30 @@ const assemble = (tables: Map<string, Uint8Array>): Uint8Array => {
 export const subset = (
   bytes: Uint8Array,
   f: Sfnt,
-  shaper: Shaper,
+  typesetter: Typesetter,
   kerning: (left: number, right: number) => number,
   texts: readonly string[],
   layout = true,
 ): Uint8Array | undefined => {
   const chars = new Set(texts.flatMap((text) => [...text]));
 
-  const mapped = [...chars]
-    .map((char) => [char.codePointAt(0)!, shaper.glyph(char)] as const)
-    .filter(([, glyph]) => glyph !== 0);
+  const mapped = [...chars].flatMap((char) => {
+    const glyph = typesetter.glyph(char);
+
+    return glyph === 0 ? [] : [[char.codePointAt(0)!, glyph] as const];
+  });
 
   if (
     layout &&
-    texts.some((text) => shaper.shape(text).some((placed) => [...placed.chars].length > 1))
+    texts.some((text) =>
+      typesetter.layoutGlyphs(text).some((placed) => [...placed.chars].length > 1),
+    )
   )
     return undefined;
   const drawn = [...new Set(mapped.map(([, glyph]) => glyph))];
 
-  if (layout && shaper.beyond(texts.map((text) => [...text].map(shaper.glyph)))) return undefined;
+  if (layout && typesetter.beyond(texts.map((text) => [...text].map(typesetter.glyph))))
+    return undefined;
   const keep = withComponents(f, new Set([0, ...drawn]));
 
   const glyfData: number[] = [];
@@ -274,7 +279,10 @@ export const subset = (
   const short = glyfData.length < 0x20000;
   const loca = new Writer();
 
-  for (const offset of offsets) short ? loca.u16(offset / 2) : loca.u32(offset);
+  for (const offset of offsets) {
+    if (short) loca.u16(offset / 2);
+    else loca.u32(offset);
+  }
 
   const copy = (tag: string): Uint8Array => {
     const at = required(f, tag);

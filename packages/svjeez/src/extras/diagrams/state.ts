@@ -12,6 +12,7 @@ import { curve } from "./curve";
 import {
   arrow,
   chip,
+  isBareLabel,
   labelSize,
   look,
   lookup,
@@ -111,12 +112,17 @@ type Line =
   | (Run & { readonly of: number; readonly label?: Box })
   | (Run & { readonly of: "start" | "end" });
 
+/** Whether a line is a transition, by index, rather than the scope's start or end marker. */
+const isTransitionLine = (l: Line): l is Run & { readonly of: number; readonly label?: Box } =>
+  typeof l.of === "number";
+
+/** Whether `at` is one start time, with the walk's states following it, rather than one time per state. */
+const isSingleStart = (at: Beats): at is Seconds => typeof at === "number";
+
 const relocate = (l: Line, point: (p: Point) => Point, box: (b: Box) => Box): Line => {
   const points = l.points.map(point);
 
-  return typeof l.of === "number"
-    ? { ...l, points, label: l.label && box(l.label) }
-    : { ...l, points };
+  return isTransitionLine(l) ? { ...l, points, label: l.label && box(l.label) } : { ...l, points };
 };
 
 interface Local {
@@ -172,17 +178,16 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
       if (nodes.has(id))
         throw new Error(`stateMachine() has two states named ${JSON.stringify(id)}.`);
 
-      const node: Node =
-        typeof s === "string"
-          ? { id, label: s, final: false, parent: owner, depth }
-          : {
-              id,
-              label: s.label,
-              final: s.final ?? false,
-              parent: owner,
-              depth,
-              inner: "states" in s ? scope(s.states, s.initial, depth + 1, id) : undefined,
-            };
+      const node: Node = isBareLabel(s)
+        ? { id, label: s, final: false, parent: owner, depth }
+        : {
+            id,
+            label: s.label,
+            final: s.final ?? false,
+            parent: owner,
+            depth,
+            inner: "states" in s ? scope(s.states, s.initial, depth + 1, id) : undefined,
+          };
 
       nodes.set(id, node);
 
@@ -197,6 +202,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     return { owner, depth, nodes: list, initial };
   };
 
+  // SAFETY: Checked<S> only adds initial and states to S's composites, which StateSpec already admits
   const root = scope(spec.states as Record<string, StateSpec>, spec.initial, 0);
 
   const chain = (id: string): string[] => {
@@ -217,12 +223,12 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     return { owner: k === 0 ? undefined : a[k - 1], from: a[k]!, to: b[k]! };
   };
 
-  const transitions = spec.transitions.map(([from, to, label], i) => ({
+  const transitions = spec.transitions.map(([from, to, label]: Transition<string>, i) => ({
     i,
     label,
     ...home(from, to),
-    source: from as string,
-    target: to as string,
+    source: from,
+    target: to,
   }));
 
   const lay = (s: Scope): Local => {
@@ -263,23 +269,19 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     const [dx, dy] = [-out.bounds.x, -out.bounds.y];
     const boxes = new Map([...out.nodes].map(([id, b]) => [id, shift(b, dx, dy)]));
 
-    const of = (k: number): Line["of"] =>
-      k === 0 ? "start" : k <= mine.length ? mine[k - 1]!.i : "end";
+    const lines: Line[] = out.edges.map((e, k): Line => {
+      const run = {
+        from: e.from,
+        to: e.to,
+        points: e.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+        depth: s.depth,
+      };
 
-    const lines: Line[] = out.edges.map((e, k) => {
-      const [run, o] = [
-        {
-          from: e.from,
-          to: e.to,
-          points: e.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-          depth: s.depth,
-        },
-        of(k),
-      ];
+      if (k === 0) return { ...run, of: "start" };
 
-      return typeof o === "number"
-        ? { ...run, of: o, label: e.label && shift(e.label, dx, dy) }
-        : { ...run, of: o };
+      if (k > mine.length) return { ...run, of: "end" };
+
+      return { ...run, of: mine[k - 1]!.i, label: e.label && shift(e.label, dx, dy) };
     });
 
     const dots = [boxes.get(START)!];
@@ -360,7 +362,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     ),
     lines.map(
       (l) =>
-        typeof l.of === "number" &&
+        isTransitionLine(l) &&
         l.label &&
         chip(l.label, transitions[l.of]!.label!, {
           ...base.smallLook,
@@ -375,7 +377,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   const edge = (from: Id, to: Id): Point[] => {
     const found = line(
       (l) =>
-        typeof l.of === "number" &&
+        isTransitionLine(l) &&
         transitions[l.of]!.source === from &&
         transitions[l.of]!.target === to,
     );
@@ -393,7 +395,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     for (const from of chain(a).reverse()) {
       const found = line(
         (l) =>
-          typeof l.of === "number" &&
+          isTransitionLine(l) &&
           transitions[l.of]!.source === from &&
           transitions[l.of]!.target === b,
       );
@@ -426,16 +428,16 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
         return { points, over: Math.max(0.35, pathLength(points) / speed) };
       });
 
-      const arrive =
-        typeof at === "number"
-          ? path.map(
-              (_, k) => at + k * dwell + legs.slice(0, k).reduce((sum, leg) => sum + leg.over, 0),
-            )
-          : beats(at, path.length, 0, "walk()");
+      const arrive = isSingleStart(at)
+        ? path.map(
+            (_, k) => at + k * dwell + legs.slice(0, k).reduce((sum, leg) => sum + leg.over, 0),
+          )
+        : beats(at, path.length, 0, "walk()");
 
       const runs = legs.map((leg, k) => {
-        const over =
-          typeof at === "number" ? leg.over : Math.min(leg.over, (arrive[k + 1]! - arrive[k]!) / 2);
+        const over = isSingleStart(at)
+          ? leg.over
+          : Math.min(leg.over, (arrive[k + 1]! - arrive[k]!) / 2);
 
         return { points: leg.points, at: arrive[k + 1]! - over, over };
       });
@@ -472,6 +474,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
         tokens,
       ]);
 
+      // SAFETY: nodes.keys() are exactly the ids of S, and each one gets an entry (empty when never lit)
       const spans = Object.fromEntries(
         [...nodes.keys()].map((s) => [s, lit.get(s) ?? []]),
       ) as Record<Id, Span[]>;
