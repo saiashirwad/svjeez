@@ -159,9 +159,9 @@ for (const [i, ex] of all.entries()) {
   await writePoster(ex, new URL("poster/", out));
 }
 writeFileSync(new URL("index.html", out), gallery(sections));
-// SVGs and posters only change on a deploy, so browsers may keep them for a day instead of revalidating.
+// The file names carry no hash, so browsers must revalidate every asset or they keep the last deploy's CSS and scenes.
 writeFileSync(
   here("public/_headers"),
-  ["/examples/svg/*", "/examples/poster/*", "/s/*", "/*.svg", "/*.css", "/*.js"].map((path) => `${path}\n  Cache-Control: public, max-age=86400`).join("\n") + "\n",
+  ["/examples/svg/*", "/examples/poster/*", "/s/*", "/*.svg", "/*.css", "/*.js"].map((path) => `${path}\n  Cache-Control: public, no-cache`).join("\n") + "\n",
 );
 await close();

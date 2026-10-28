@@ -146,8 +146,9 @@ pre.code .n { color: light-dark(oklch(60% 0.17 50), oklch(80% 0.13 60)) }
 pre.code .c { color: var(--muted) }
 
 /* The playground block: the embed fills it once it loads; until then a static editor and preview stand in. */
-.playground { --pg-wide: min(100vw - 2 * var(--gutter) - 1rem, 90rem); display: grid; min-block-size: 35rem; inline-size: var(--pg-wide); margin-inline: calc((100% - var(--pg-wide)) / 2) }
+.playground { --pg-wide: min(100vw - 2 * var(--gutter) - 1rem, 90rem); display: grid; min-block-size: 34rem; inline-size: var(--pg-wide); margin-inline: calc((100% - var(--pg-wide)) / 2) }
 .playground > * { grid-area: 1 / 1; min-inline-size: 0 }
+.playground [data-playground] { align-self: start }
 .playground [data-playground]:empty { display: none }
 .playground:has([data-playground]:not(:empty)) .pg-fallback { display: none }
 .pg-fallback { display: grid; grid-template-rows: auto 1fr; overflow: clip; background: var(--win-bg) }

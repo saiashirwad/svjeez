@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "bun dev.ts",
     "build": "bun build.ts && bun assets.ts && bun examples.ts && bun playground/build.ts",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy"
