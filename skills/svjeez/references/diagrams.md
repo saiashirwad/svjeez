@@ -14,7 +14,7 @@ Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or 
 | `lanes` | `play: { at }`. Real time: a playhead sweeps, spans grow, events pop |
 | `stateMachine` | No `play`. Call `walk(ids, { at })` |
 
-`at` is a `Beats`: a start time, or an array with one time per item, to keep two diagrams in sync. Without `play`, everything is there from the start.
+`at` is a `Beats`: a start time, or an array with one time per item, to keep two diagrams in sync. `lanes` takes a plain start time, because its spans already play in real time. Without `play`, everything is there from the start.
 
 ## Flowchart
 

@@ -1,6 +1,6 @@
 # Explainers, terminals and annotations
 
-Import from `svjeez/extras`. Every extra takes `theme` (default `defaultDark`), `x`, `y`, `fontSize`, `font` and `class`, and returns an object with a `node` to put in the tree. `examples/explainer.tsx` and `examples/terminal.tsx` show whole scenes.
+Import from `svjeez/extras`. `code` and `terminal` take `theme` (default `defaultDark`), `x`, `y`, `fontSize`, `font` and `class`, and return an object with a `node` to put in the tree. The annotations (`Arrow`, `Callout`, `Brace`, `Underline`, `Marker`), `Focus` and `Camera` are components that return a node. `examples/explainer.tsx` and `examples/terminal.tsx` show whole scenes.
 
 ## Themes
 

@@ -17,6 +17,8 @@ const FILTERED_ANIMATION_LIMIT = 40;
 const filteredAnimation = (source: string): string[] => {
   const warnings: string[] = [];
   const open: { tag: string; filter?: string; animated: number }[] = [];
+  const base = /\.([A-Za-z][\w-]*)\{animation-duration/.exec(source)?.[1] ?? "a";
+  const animatedClass = new RegExp(`\\bclass="(?:[^"]*\\s)?${base}(?:\\s[^"]*)?"`);
   for (const [, closing, tag, attrs = "", selfClosing] of source.matchAll(/<(\/?)([A-Za-z][\w-]*)([^>]*?)(\/?)>/g)) {
     if (closing) {
       const element = open.pop();
@@ -27,7 +29,7 @@ const filteredAnimation = (source: string): string[] => {
       }
       continue;
     }
-    if (tag === "animate" || /\bclass="(?:[^"]*\s)?a(?:\s[^"]*)?"/.test(attrs)) {
+    if (tag === "animate" || animatedClass.test(attrs)) {
       for (const ancestor of open) if (ancestor.filter) ancestor.animated++;
     }
     if (!selfClosing) open.push({ tag: tag!, filter: /\bfilter="([^"]+)"/.exec(attrs)?.[1], animated: 0 });
