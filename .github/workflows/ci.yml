@@ -30,9 +30,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run build
-        working-directory: packages/svjeez
+        working-directory: examples
       - name: dist/ matches the examples
-        working-directory: packages/svjeez
+        working-directory: examples
         run: |
           git add --intent-to-add dist
           git diff --exit-code --stat dist || { git diff --word-diff=plain --unified=0 dist | head -60; echo "::error::dist/ is stale. Run 'bun run build' and commit the result."; exit 1; }
@@ -52,8 +52,12 @@ jobs:
       - run: node --version
       - run: npm run test:node
         working-directory: packages/svjeez
+      - run: npm run test:node
+        working-directory: examples
       - run: npm run test:package
         working-directory: packages/svjeez
+      - run: npm run test:package
+        working-directory: packages/geo
       - run: bunx playwright-core install --with-deps chromium-headless-shell
       - run: npm run test:package
         working-directory: packages/vite

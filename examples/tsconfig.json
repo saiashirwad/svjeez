@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["bun"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "paths": {
+      "svjeez": ["../packages/svjeez/src/index.ts"],
+      "svjeez/jsx-runtime": ["../packages/svjeez/src/jsx-runtime.ts"],
+      "svjeez/jsx-dev-runtime": ["../packages/svjeez/src/jsx-dev-runtime.ts"],
+      "svjeez/extras": ["../packages/svjeez/src/extras.ts"],
+      "svjeez/frames": ["../packages/svjeez/src/frames.ts"],
+      "svjeez/voxel": ["../packages/svjeez/src/voxel.ts"]
+    }
+  },
+  "include": [".", "../packages/svjeez/src"],
+  "exclude": ["dist", "node_modules"]
+}

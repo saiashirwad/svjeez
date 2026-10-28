@@ -2,23 +2,12 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSvg } from "svjeez";
 
-// Renders every example on the running runtime; CI runs it on Node 20 and 22 through tsx.
+// Renders the skill's examples on the running runtime; CI runs it on Node 20 and 22 through tsx.
 const ROOT = join(import.meta.dirname, "..");
 
-const scenes = [
-  ...(await readdir(join(ROOT, "examples"), { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory() && entry.name !== "readme" && entry.name !== "site")
-    .map((entry) => join("examples", entry.name, "index.tsx")),
-  ...(await readdir(join(ROOT, "examples/readme")))
-    .filter((name) => name.endsWith(".tsx"))
-    .map((name) => join("examples/readme", name)),
-  ...(await readdir(join(ROOT, "examples/site")))
-    .filter((name) => name.endsWith(".tsx"))
-    .map((name) => join("examples/site", name)),
-  ...(await readdir(join(ROOT, "skills/svjeez/examples")))
-    .filter((name) => name.endsWith(".tsx"))
-    .map((name) => join("skills/svjeez/examples", name)),
-];
+const scenes = (await readdir(join(ROOT, "skills/svjeez/examples")))
+  .filter((name) => name.endsWith(".tsx"))
+  .map((name) => join("skills/svjeez/examples", name));
 
 let failed = 0;
 

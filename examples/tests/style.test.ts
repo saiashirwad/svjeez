@@ -1,12 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // Every scene that shows code, a code explainer or a terminal takes its palette and mono font from examples/style.ts.
-const EXAMPLES = join(import.meta.dir, "../examples");
+const EXAMPLES = join(import.meta.dir, "..");
 
 // Scenes that only label things in a monospace face, with no code on screen, keep their own look.
 const OWN_LOOK = ["effects", "fonts", "horizon", "images", "lighthouse", "neon"];
+
+// Not scenes.
+const SKIP = ["dist", "node_modules", "scripts", "tests"];
 
 const RULES: [RegExp, string][] = [
   [
@@ -21,9 +24,11 @@ const RULES: [RegExp, string][] = [
   [/font\.load\([^)]*JetBrainsMono/, "its own JetBrains Mono: import mono from examples/style.ts"],
 ];
 
-// SAFETY: without withFileTypes, readdirSync returns each entry's relative path as a string.
-const scenes = (readdirSync(EXAMPLES, { recursive: true }) as string[]).filter(
-  (file) => /\.tsx?$/.test(file) && file !== "style.ts" && !OWN_LOOK.includes(file.split("/")[0]!),
+const scenes = [...new Bun.Glob("**/*.{ts,tsx}").scanSync(EXAMPLES)].filter(
+  (file) =>
+    file !== "style.ts" &&
+    !SKIP.includes(file.split("/")[0]!) &&
+    !OWN_LOOK.includes(file.split("/")[0]!),
 );
 
 describe("code scenes share examples/style.ts", () => {

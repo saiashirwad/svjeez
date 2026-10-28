@@ -7,7 +7,7 @@
     "types": ["bun"],
     "customConditions": ["@svjeez/source"],
     "paths": {
-      "@examples/*": ["../packages/svjeez/examples/*"]
+      "@examples/*": ["../examples/*"]
     }
   },
   "include": [".astro/types.d.ts", "**/*"],

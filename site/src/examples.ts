@@ -4,7 +4,7 @@ import { getScene, type SceneImage } from "@svjeez/astro/scene";
 export const REPO = "https://github.com/saiashirwad/svjeez";
 
 /** Where the examples' sources live on GitHub. */
-export const SOURCES = `${REPO}/tree/main/packages/svjeez/examples`;
+export const SOURCES = `${REPO}/tree/main/examples`;
 
 /** The width a card draws its poster at. */
 export const POSTER_WIDTH = 480;
@@ -15,6 +15,7 @@ const SECTIONS = [
     blurb: "Complete animated scenes, each in a single SVG.",
     names: [
       "map",
+      "world",
       "newspaper",
       "horizon",
       "lighthouse",
@@ -47,13 +48,13 @@ export interface Example {
   readonly scene: SceneImage;
 }
 
-const modules = import.meta.glob<() => string>("../../packages/svjeez/examples/*/index.tsx", {
+const modules = import.meta.glob<() => string>("../../examples/*/index.tsx", {
   eager: true,
   import: "default",
 });
 
 const example = (name: string): Example => {
-  const build = modules[`../../packages/svjeez/examples/${name}/index.tsx`];
+  const build = modules[`../../examples/${name}/index.tsx`];
 
   if (!build) throw new Error(`No example named ${name} in examples/.`);
   const { width } = getScene(build);

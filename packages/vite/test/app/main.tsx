@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 /// <reference types="../../client.d.ts" />
 import { createRoot } from "react-dom/client";
-import hero from "../../../svjeez/examples/readme/hero.tsx?svjeez&posters";
+import hero from "../../../../examples/readme/hero.tsx?svjeez&posters";
 
 const App = () => (
   <main style={{ display: "grid", gap: 16, maxWidth: hero.width, margin: "24px auto" }}>

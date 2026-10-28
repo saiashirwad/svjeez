@@ -313,7 +313,9 @@ describe.if(browser)("renderFrames", () => {
 });
 
 describe.if(browser)("embedded fonts", async () => {
-  const sans = await font.load(new URL("../examples/fonts/ABeeZee-Regular.ttf", import.meta.url));
+  const sans = await font.load(
+    new URL("../../../examples/fonts/ABeeZee-Regular.ttf", import.meta.url),
+  );
 
   const paint = async (child: Child) =>
     (
@@ -341,7 +343,9 @@ describe.if(browser)("embedded fonts", async () => {
 
   test("a font cut down to the scene's glyphs paints the same as the whole file", async () => {
     const whole = font(
-      await Bun.file(new URL("../examples/fonts/ABeeZee-Regular.ttf", import.meta.url)).bytes(),
+      await Bun.file(
+        new URL("../../../examples/fonts/ABeeZee-Regular.ttf", import.meta.url),
+      ).bytes(),
       { subset: false },
     );
 

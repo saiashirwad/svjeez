@@ -58,7 +58,6 @@
     }
   },
   "scripts": {
-    "build": "bun run scripts/build.ts",
     "dev": "bun run scripts/preview.ts",
     "test": "bun test",
     "test:node": "tsx scripts/node-check.ts",

@@ -6,11 +6,11 @@ const ROOT = join(import.meta.dir, "..");
 const OUT = join(ROOT, "dist");
 
 const flat = (dir: string) =>
-  [...new Bun.Glob(`examples/${dir}/*.tsx`).scanSync(ROOT)].map(
+  [...new Bun.Glob(`${dir}/*.tsx`).scanSync(ROOT)].map(
     (entry) => `${dir}/${basename(entry, ".tsx")}`,
   );
 
-const examples = [...new Bun.Glob("examples/*/index.tsx").scanSync(ROOT)]
+const examples = [...new Bun.Glob("*/index.tsx").scanSync(ROOT)]
   .map((entry) => basename(dirname(entry)))
   .concat(flat("readme"), flat("site"))
   .sort();
@@ -35,7 +35,7 @@ const lint = (svg: string): string | undefined => {
 const build = async (name: string): Promise<boolean> => {
   try {
     const { default: make }: { default: () => string } = await import(
-      join(ROOT, "examples", name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"))
+      join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"))
     );
 
     const svg = make();

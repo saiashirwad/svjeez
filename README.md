@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/hero.svg" width="840" alt="The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a damped spring physics simulation plotted in real time." />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/hero.svg" width="840" alt="The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a damped spring physics simulation plotted in real time." />
 </p>
 
 <p align="center">
@@ -28,29 +28,29 @@ Every preview below is a single `.svg` file loaded in an `<img>` tag. Click any 
   <tr>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/map">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/map.svg" width="400" alt="A hand-inked fantasy map draws itself, then the camera zooms in and follows a dashed route east to Mount Cinder." />
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/map.svg" width="400" alt="A hand-inked fantasy map draws itself, then the camera zooms in and follows a dashed route east to Mount Cinder." />
       </a><br />
-      <sub><b>The Western Reaches</b> · Hand-inked cartography, curved labels &amp; camera pan (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/map">TSX</a>)</sub>
+      <sub><b>The Western Reaches</b> · Hand-inked cartography, curved labels &amp; camera pan (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/map">TSX</a>)</sub>
     </td>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/breaker">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/breaker.svg" width="400" alt="A six-slide explainer on circuit breakers combining code morphs, a state machine, a sequence diagram, and a flowchart." />
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/breaker.svg" width="400" alt="A six-slide explainer on circuit breakers combining code morphs, a state machine, a sequence diagram, and a flowchart." />
       </a><br />
-      <sub><b>Circuit Breakers</b> · 6-slide explainer with code, state machine, sequence &amp; flowchart (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/breaker">TSX</a>)</sub>
+      <sub><b>Circuit Breakers</b> · 6-slide explainer with code, state machine, sequence &amp; flowchart (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/breaker">TSX</a>)</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/horizon">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/horizon.svg" width="400" alt="A cinematic black hole with a glowing accretion disk, lensed photon ring, relativistic jets, and HUD telemetry." />
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/horizon.svg" width="400" alt="A cinematic black hole with a glowing accretion disk, lensed photon ring, relativistic jets, and HUD telemetry." />
       </a><br />
-      <sub><b>Event Horizon</b> · Accretion disk, lensed photon ring, camera shake &amp; HUD (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/horizon">TSX</a>)</sub>
+      <sub><b>Event Horizon</b> · Accretion disk, lensed photon ring, camera shake &amp; HUD (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/horizon">TSX</a>)</sub>
     </td>
     <td align="center" width="50%">
       <a href="https://svjeez.texoport.in/examples/newspaper">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/newspaper.svg" width="240" alt="A broadsheet front page spins in: a blackletter masthead inks on letter by letter, three measured columns justify, and an EXTRA stamp lands." />
+        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/newspaper.svg" width="240" alt="A broadsheet front page spins in: a blackletter masthead inks on letter by letter, three measured columns justify, and an EXTRA stamp lands." />
       </a><br />
-      <sub><b>The Svjeez Gazette</b> · Outlined masthead &amp; measured column justification (<a href="https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez/examples/newspaper">TSX</a>)</sub>
+      <sub><b>The Svjeez Gazette</b> · Outlined masthead &amp; measured column justification (<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/newspaper">TSX</a>)</sub>
     </td>
   </tr>
 </table>
@@ -141,7 +141,7 @@ npm i -D playwright-core && npx playwright-core install chromium-headless-shell
 npx svjeez frames scene.tsx --times 0,0.8,1.6,3 --sheet --out frames/
 ```
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/basic.svg" width="200" alt="A curve draws on, then a dot pops in" />
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/basic.svg" width="200" alt="A curve draws on, then a dot pops in" />
 
 ---
 
@@ -180,12 +180,12 @@ const orbit = sampled((t) => ({ x: 100 * Math.cos(t), y: 100 * Math.sin(t) }), {
 ```
 
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/recipes.svg" width="560" alt="enter, enter from a blur, exit, draw, shake and wiggle" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/recipes.svg" width="560" alt="enter, enter from a blur, exit, draw, shake and wiggle" />
 </p>
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/motion.svg" width="180" alt="A square fades in, holds, then shrinks away" />
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/loops.svg" width="180" alt="A looping spinner and a wandering dot" />
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/easing.svg" width="340" alt="Eight dots crossing a track, one per easing" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/motion.svg" width="180" alt="A square fades in, holds, then shrinks away" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/loops.svg" width="180" alt="A looping spinner and a wandering dot" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/easing.svg" width="340" alt="Eight dots crossing a track, one per easing" />
 </p>
 
 ### 2. Code Walkthroughs, Morphing & Terminals (`svjeez/extras`)
@@ -236,7 +236,7 @@ const tl = timeline(
 ```
 
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/explainer.svg" width="680" alt="A React counter refactored from useState to useReducer across four timed slides with Focus, Marker, Brace, Arrow and morph" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/explainer.svg" width="680" alt="A React counter refactored from useState to useReducer across four timed slides with Focus, Marker, Brace, Arrow and morph" />
 </p>
 
 Build terminal recordings with `appWindow`, `terminal`, `typewriter`, and `reveal`:
@@ -253,7 +253,7 @@ const session = terminal(
 ```
 
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/terminal.svg" width="560" alt="Two commands typed into an adaptive terminal window" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/terminal.svg" width="560" alt="Two commands typed into an adaptive terminal window" />
 </p>
 
 ### 3. Typed Diagrams & Flows (`svjeez/extras`)
@@ -305,25 +305,25 @@ const trip = flow(chart.route("pr", "post"), { theme, at: 4, style: "trace", arr
 <table>
   <tr>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/flowchart.svg" width="220" alt="Flowchart revealed rank by rank, then traced" /><br />
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/flowchart.svg" width="220" alt="Flowchart revealed rank by rank, then traced" /><br />
       <sub><code>flowchart()</code> + <code>flow()</code></sub>
     </td>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/sequence.svg" width="300" alt="Sequence diagram playing message by message" /><br />
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/sequence.svg" width="300" alt="Sequence diagram playing message by message" /><br />
       <sub><code>sequence()</code></sub>
     </td>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/state.svg" width="160" alt="State machine walking nested states" /><br />
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/state.svg" width="160" alt="State machine walking nested states" /><br />
       <sub><code>stateMachine()</code> + <code>.walk()</code></sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/tree.svg" width="215" alt="Tree revealed level by level" /><br />
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/tree.svg" width="215" alt="Tree revealed level by level" /><br />
       <sub><code>tree()</code></sub>
     </td>
     <td align="center" colspan="2">
-      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/lanes.svg" width="440" alt="Two lanes on a time axis with a sweeping playhead" /><br />
+      <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/lanes.svg" width="440" alt="Two lanes on a time axis with a sweeping playhead" /><br />
       <sub><code>lanes()</code></sub>
     </td>
   </tr>
@@ -373,11 +373,11 @@ const w = display.measure("Wave!", 96);
 ```
 
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/fonts.svg" width="340" alt="Wave! drawn as glyph outlines then filled, with measured text below" />
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/images.svg" width="340" alt="Picture fit modes, duotone, grayscale, and Ken Burns pan/zoom" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/fonts.svg" width="340" alt="Wave! drawn as glyph outlines then filled, with measured text below" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/images.svg" width="340" alt="Picture fit modes, duotone, grayscale, and Ken Burns pan/zoom" />
 </p>
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/effects.svg" width="460" alt="Six effect tiles: blur, jitter, smooth drift, boiling house, neon flicker, spinner" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/effects.svg" width="460" alt="Six effect tiles: blur, jitter, smooth drift, boiling house, neon flicker, spinner" />
 </p>
 
 ### 5. Defs, Typed CSS `@property` & Unit-Checked `calc()`
@@ -417,7 +417,7 @@ render(
 ```
 
 <p>
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/svjeez/dist/readme/property.svg" width="180" alt="A dot orbiting, driven by an animated angle property" />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/property.svg" width="180" alt="A dot orbiting, driven by an animated angle property" />
 </p>
 
 ---
@@ -499,11 +499,11 @@ const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
 ## Contributing & Local Development
 
 ```sh
-bun install
-bun run dev examples/readme/hero.tsx                         # live preview with hot reload & timeline scrubber
-bun run render-png examples/readme/hero.tsx --sheet          # render PNG frames & contact sheet into frames/
+bun install && cd examples
+bun run dev readme/hero.tsx                                  # live preview with hot reload & timeline scrubber
+bun run render-png readme/hero.tsx --sheet                   # render PNG frames & contact sheet into frames/
 bun run build                                                # compile all examples into dist/
-bun test && bun run typecheck                                # run test suite & typecheck
+cd .. && bun run test && bun run typecheck                   # run every test suite & typecheck
 ```
 
 See [`AGENTS.md`](https://github.com/saiashirwad/svjeez/blob/main/AGENTS.md) for architecture notes and release instructions. MIT Licensed.

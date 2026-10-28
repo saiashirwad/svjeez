@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { strokeFont } from "svjeez";
 
-const allure = await strokeFont.load(new URL("../examples/fonts/EMSAllure.svg", import.meta.url));
+const allure = await strokeFont.load(
+  new URL("../../../examples/fonts/EMSAllure.svg", import.meta.url),
+);
 
 const tiny =
   strokeFont(`<svg><defs><font id="T" horiz-adv-x="500"><font-face font-family="Tiny" units-per-em="1000" />
