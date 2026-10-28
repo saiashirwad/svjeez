@@ -37,6 +37,10 @@ export interface FlowOptions {
   /** Packet fill. Default transparent over a solid outline. */
   readonly fill?: Color;
   readonly class?: string;
+  /** Run again every this many seconds, for a `dot`, `comet` or `packet`. The period must cover the trip and the comet's tail. */
+  readonly loop?: Seconds;
+  /** Dots trailing a `comet`. Default 8. Each one is its own animated element, so a crowd of comets wants fewer. */
+  readonly tail?: number;
 }
 
 const TAIL = 8;
@@ -60,12 +64,30 @@ export function flow(points: readonly Point[], options: FlowOptions): FlowResult
     size = 4.5,
     arrive = false,
     class: cls,
+    loop,
+    tail = TAIL,
   } = options;
+
+  if (loop !== undefined && (style === "trace" || arrive))
+    throw new Error(
+      `flow() loops a dot, comet or packet. Drop loop, or leave out the ${style === "trace" ? "trace style" : "arrive ring"}.`,
+    );
 
   const over = options.over ?? pathLength(points) / speed;
   const end = at + over;
-  const lag = REACH / TAIL / (pathLength(points) / over);
-  const run = (delay = 0) => travel(points, { at: at + delay, over });
+  const lag = REACH / tail / (pathLength(points) / over);
+
+  if (loop !== undefined && style === "comet" && at + over + lag * tail > loop)
+    throw new Error(
+      `flow() needs a loop period past ${Math.ceil((at + over + lag * tail) * 100) / 100}s to hold the trip and the comet's tail, got ${loop}s.`,
+    );
+
+  const run = (delay = 0) => {
+    const trip = travel(points, { at: at + delay, over });
+
+    return loop === undefined ? trip : trip.loop(loop);
+  };
+
   const head = el.circle({ r: size, fill: color, animation: run() });
 
   const body = (() => {
@@ -75,8 +97,8 @@ export function flow(points: readonly Point[], options: FlowOptions): FlowResult
       case "comet":
         return [
           el.g({ opacity: 0.22 }, el.circle({ r: size * 2.4, fill: color, animation: run() })),
-          Array.from({ length: TAIL }, (_, i) => {
-            const k = (i + 1) / (TAIL + 1);
+          Array.from({ length: tail }, (_, i) => {
+            const k = (i + 1) / (tail + 1);
 
             return el.g(
               { opacity: 0.6 * (1 - k) },
