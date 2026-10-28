@@ -276,6 +276,7 @@ const claim = async (dir: string | undefined) => {
     console.log(`${name} is already on npm, so this only adds the trusted publisher.`);
   else {
     if (pkg.out !== pkg.dir) run("bun", ["run", "build:package"], pkg.dir);
+
     const staged = await stage(
       ["publish", "--access", "public", "--tag", distTag(version)],
       pkg.out,
