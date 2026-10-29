@@ -249,16 +249,13 @@ kbd {
   inline-size: 1rem;
   block-size: 1rem;
 }
-/* The palette menu and the light and dark toggle share one outlined pill, so they read as the page's settings. */
+/* The palette menu and the light and dark toggle sit after a hairline, set like the links so the row stays even. */
 .controls {
   display: flex;
   align-items: center;
-  padding: 0.1875rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-.controls .pick {
-  border-radius: 999px;
+  gap: 0.25rem;
+  padding-inline-start: clamp(0.75rem, 3vw, 1.5rem);
+  border-inline-start: 1px solid var(--line);
 }
 .controls .theme {
   inline-size: 2rem;
@@ -316,11 +313,12 @@ kbd {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   block-size: 2rem;
-  padding: 0 0.5rem 0 0.625rem;
+  padding: 0 0.5rem;
+  margin-inline-start: -0.5rem;
   color: var(--muted);
-  font: 500 0.8125rem / 1 var(--sans);
+  font: inherit;
   background: none;
   border: 0;
   border-radius: 50%;
@@ -364,9 +362,8 @@ kbd {
   background: var(--code-fn);
 }
 @media (hover: hover) and (pointer: fine) {
-  .pick:hover,
-  .controls .theme:hover {
-    background: color-mix(in oklch, var(--ink) 7%, transparent);
+  .pick:hover {
+    color: var(--ink);
   }
 }
 .palettes {
