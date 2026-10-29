@@ -2,6 +2,8 @@ export { render, type RenderOptions } from "./render";
 
 export { restyle, type RestyleOptions } from "./restyle";
 
+export { nest, prefixed, type NestOptions } from "./nest";
+
 export {
   motion,
   ease,

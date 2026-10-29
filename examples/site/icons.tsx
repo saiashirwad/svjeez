@@ -35,7 +35,7 @@ const win = chrome(W, H, "icons.tsx");
 const SIZE = 40;
 const CELL = W / 4;
 const ROWS = [BAR + 44, BAR + 156];
-const at = (index: number) => 0.5 + index * 0.24;
+const at = (index: number) => 0.3 + index * 0.12;
 
 type Rest = Stack<"opacity" | "x" | "y" | "scale" | "rotate" | "blur">;
 

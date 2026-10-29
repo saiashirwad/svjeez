@@ -1,5 +1,6 @@
 import { compile } from "./compile";
 import { num } from "./format";
+import { ambientPrefix } from "./nest";
 import type { Seconds } from "./motion";
 import type { Css } from "./properties";
 import { children, element, raw, serialize, type Child } from "./svg";
@@ -41,7 +42,7 @@ export const render = (options: RenderOptions, content: Child): string => {
 
   if (!(playbackRate > 0 && Number.isFinite(playbackRate)))
     throw new Error(`render() needs a positive, finite playbackRate, got ${playbackRate}.`);
-  const prefix = options.prefix ?? "";
+  const prefix = options.prefix ?? ambientPrefix() ?? "";
 
   if (prefix !== "" && !/^[A-Za-z][\w-]*$/.test(prefix))
     throw new Error(

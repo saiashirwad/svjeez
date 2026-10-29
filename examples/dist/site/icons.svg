@@ -4,7 +4,7 @@
   <defs>
     <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="504" height="340">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="8;8;0;0" keyTimes="0;0.1825;0.295;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="stdDeviation" values="8;8;0;0" keyTimes="0;0.0975;0.21;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="8s" repeatCount="indefinite"/>
       </feGaussianBlur>
     </filter>
     <filter id="f1s" filterUnits="userSpaceOnUse" x="0" y="0" width="504" height="340">
@@ -19,70 +19,70 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 
 .a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
-@keyframes k1{0%,6.25%{stroke-dashoffset:1;visibility:hidden}13.125%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k1{0%,3.75%{stroke-dashoffset:1;visibility:hidden}10.625%,100%{stroke-dashoffset:0;visibility:visible}}
 .m1{animation-name:k1}
-@keyframes k2{0%,8%{stroke-dashoffset:1;visibility:hidden}14.875%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k2{0%,5.5%{stroke-dashoffset:1;visibility:hidden}12.375%,100%{stroke-dashoffset:0;visibility:visible}}
 .m2{animation-name:k2}
-@keyframes k3{0%,9.75%{stroke-dashoffset:1;visibility:hidden}16.625%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k3{0%,7.25%{stroke-dashoffset:1;visibility:hidden}14.125%,100%{stroke-dashoffset:0;visibility:visible}}
 .m3{animation-name:k3}
-@keyframes k4{0%,6.25%{opacity:0}12.5%,100%{opacity:1}}
+@keyframes k4{0%,3.75%{opacity:0}10%,100%{opacity:1}}
 .m4{animation-name:k4}
 @keyframes k5{0%,37.5%,41%,46.25%,67.5%,71%,76.25%,100%{scale:1}39%,69%{scale:1.2}42.5%,72.5%{scale:1.14}}
 .m5{animation-name:k5}
-@keyframes k6{0%,9.25%{opacity:0}16.75%,100%{opacity:1}}
-@keyframes k7{0%,9.25%{scale:0}16.75%,100%{scale:1}}
+@keyframes k6{0%,5.25%{opacity:0}12.75%,100%{opacity:1}}
+@keyframes k7{0%,5.25%{scale:0}12.75%,100%{scale:1}}
 .m6{animation-name:k6,k7;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k8{0%,9.25%{opacity:0}15.5%,100%{opacity:1}}
+@keyframes k8{0%,5.25%{opacity:0}11.5%,100%{opacity:1}}
 .m7{animation-name:k8}
-@keyframes k9{0%,12.25%{opacity:0}21%,100%{opacity:1}}
-@keyframes k10{0%,12.25%{translate:0px -56px}21%,100%{translate:0px 0px}}
+@keyframes k9{0%,6.75%{opacity:0}15.5%,100%{opacity:1}}
+@keyframes k10{0%,6.75%{translate:0px -56px}15.5%,100%{translate:0px 0px}}
 .m8{animation-name:k9,k10;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k11{0%,12.25%{opacity:0}18.5%,100%{opacity:1}}
+@keyframes k11{0%,6.75%{opacity:0}13%,100%{opacity:1}}
 .m9{animation-name:k11}
-@keyframes k12{0%,27.75%{rotate:0deg}100%{rotate:120deg}}
+@keyframes k12{0%,20.75%{rotate:0deg}100%{rotate:120deg}}
 .m10{animation-name:k12;animation-timing-function:linear}
-@keyframes k13{0%,15.25%{opacity:0}27.75%,100%{opacity:1}}
-@keyframes k14{0%,15.25%{scale:0.2}27.75%,100%{scale:1}}
-@keyframes k15{0%,15.25%{rotate:-270deg}27.75%,100%{rotate:0deg}}
+@keyframes k13{0%,8.25%{opacity:0}20.75%,100%{opacity:1}}
+@keyframes k14{0%,8.25%{scale:0.2}20.75%,100%{scale:1}}
+@keyframes k15{0%,8.25%{rotate:-270deg}20.75%,100%{rotate:0deg}}
 .m11{animation-name:k13,k14,k15}
-@keyframes k16{0%,15.25%{opacity:0}21.5%,100%{opacity:1}}
+@keyframes k16{0%,8.25%{opacity:0}14.5%,100%{opacity:1}}
 .m12{animation-name:k16}
-@keyframes k17{0%,18.25%{opacity:0}29.5%,100%{opacity:1}}
-@keyframes k18{0%,18.25%{scale:1.5}29.5%,100%{scale:1}}
+@keyframes k17{0%,9.75%{opacity:0}21%,100%{opacity:1}}
+@keyframes k18{0%,9.75%{scale:1.5}21%,100%{scale:1}}
 .m13{animation-name:k17,k18}
-@keyframes k19{0%,18.25%{opacity:0}24.5%,100%{opacity:1}}
+@keyframes k19{0%,9.75%{opacity:0}16%,100%{opacity:1}}
 .m14{animation-name:k19}
-@keyframes k20{0%,21.25%{opacity:0}23.75%,57.5%,60.625%,62.5%,65%,100%{opacity:1}}
+@keyframes k20{0%,11.25%{opacity:0}13.75%,57.5%,60.625%,62.5%,65%,100%{opacity:1}}
 .m15{animation-name:k20}
-@keyframes k21{0%,23.5%{opacity:0}26%,57.5%,67.25%,100%{opacity:1}60.625%,64.75%{opacity:0.15}}
+@keyframes k21{0%,13.5%{opacity:0}16%,57.5%,67.25%,100%{opacity:1}60.625%,64.75%{opacity:0.15}}
 .m16{animation-name:k21}
-@keyframes k22{0%,25.75%{opacity:0}28.25%,57.5%,69.5%,100%{opacity:1}60.625%,67%{opacity:0.15}}
+@keyframes k22{0%,15.75%{opacity:0}18.25%,57.5%,69.5%,100%{opacity:1}60.625%,67%{opacity:0.15}}
 .m17{animation-name:k22}
-@keyframes k23{0%,28%{opacity:0}30.5%,57.5%,71.75%,100%{opacity:1}60.625%,69.25%{opacity:0.15}}
+@keyframes k23{0%,18%{opacity:0}20.5%,57.5%,71.75%,100%{opacity:1}60.625%,69.25%{opacity:0.15}}
 .m18{animation-name:k23}
-@keyframes k24{0%,21.25%{opacity:0}27.5%,100%{opacity:1}}
+@keyframes k24{0%,11.25%{opacity:0}17.5%,100%{opacity:1}}
 .m19{animation-name:k24}
 @keyframes k25{0%,50%{opacity:1}55%,100%{opacity:0}}
 @keyframes k26{0%,50%{scale:1}55%,100%{scale:0}}
 @keyframes k27{0%,50%{rotate:0deg}55%,100%{rotate:90deg}}
 .m20{animation-name:k25,k26,k27;animation-timing-function:cubic-bezier(.55,.06,.68,.19),cubic-bezier(.55,.06,.68,.19),cubic-bezier(.55,.06,.68,.19)}
-@keyframes k28{0%,24.25%{opacity:0}31.75%,100%{opacity:1}}
-@keyframes k29{0%,24.25%{scale:0}31.75%,100%{scale:1}}
-@keyframes k30{0%,24.25%{rotate:-90deg}31.75%,100%{rotate:0deg}}
+@keyframes k28{0%,12.75%{opacity:0}20.25%,100%{opacity:1}}
+@keyframes k29{0%,12.75%{scale:0}20.25%,100%{scale:1}}
+@keyframes k30{0%,12.75%{rotate:-90deg}20.25%,100%{rotate:0deg}}
 .m21{animation-name:k28,k29,k30;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
 @keyframes k31{0%,53.75%{opacity:0}61.25%,100%{opacity:1}}
 @keyframes k32{0%,53.75%{scale:0}61.25%,100%{scale:1}}
 @keyframes k33{0%,53.75%{rotate:-90deg}61.25%,100%{rotate:0deg}}
 .m22{animation-name:k31,k32,k33;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k34{0%,24.25%{opacity:0}30.5%,100%{opacity:1}}
+@keyframes k34{0%,12.75%{opacity:0}19%,100%{opacity:1}}
 .m23{animation-name:k34}
-@keyframes k35{0%,27.25%{stroke-dashoffset:1;visibility:hidden}33.5%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k35{0%,14.25%{stroke-dashoffset:1;visibility:hidden}20.5%,100%{stroke-dashoffset:0;visibility:visible}}
 .m24{animation-name:k35}
-@keyframes k36{0%,29.75%{stroke-dashoffset:1;visibility:hidden}36%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k36{0%,16.75%{stroke-dashoffset:1;visibility:hidden}23%,100%{stroke-dashoffset:0;visibility:visible}}
 .m25{animation-name:k36}
 @keyframes k37{0%,45%,57.5%,100%{rotate:0deg}46.042%{rotate:-14.667deg}47.083%{rotate:13.333deg}48.125%{rotate:-12deg}49.167%{rotate:10.667deg}50.208%{rotate:-9.333deg}51.25%{rotate:8deg}52.292%{rotate:-6.667deg}53.333%{rotate:5.333deg}54.375%{rotate:-4deg}55.417%{rotate:2.667deg}56.458%{rotate:-1.333deg}}
 .m26{animation-name:k37;animation-timing-function:linear}
-@keyframes k38{0%,27.25%{opacity:0}33.5%,100%{opacity:1}}
+@keyframes k38{0%,14.25%{opacity:0}20.5%,100%{opacity:1}}
 .m27{animation-name:k38}
 @keyframes k39{0%,35%{opacity:0}42.5%,100%{opacity:1}}
 @keyframes k40{0%,35%{translate:0px 6px}42.5%,100%{translate:0px 0px}}
