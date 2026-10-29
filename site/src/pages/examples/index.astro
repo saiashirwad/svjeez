@@ -49,6 +49,13 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   import { frozen, PALETTECHANGE, playing, replay, show } from "../../scripts/palette";
   import { calm, scheme, THEMECHANGE } from "../../scripts/scheme";
 
+  // The Network Information API ships in Chromium only, so lib.dom has no type for it.
+  declare global {
+    interface Navigator {
+      readonly connection?: { readonly saveData?: boolean };
+    }
+  }
+
   // A card shows a still until you hover it (or, on a touch screen, until it is mostly in view).
   // Only then does its SVG download, and it goes back to the still when you leave.
   const shots = document.querySelectorAll<HTMLElement>(".shot[data-live]");
@@ -110,7 +117,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   // Once the page has loaded, fetch every card's still and scene in the background, a few at a time and in page order,
   // so a card shows and plays at once wherever you scroll or point. The files are immutable, so the HTTP cache keeps them.
   const prefetch = async () => {
-    if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
+    if (navigator.connection?.saveData) return;
     const other = scheme() === "light" ? "dark" : "light";
 
     const urls = [

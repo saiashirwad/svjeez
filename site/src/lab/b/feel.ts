@@ -171,7 +171,9 @@ export default function build(): string {
   ];
 };
 
+const isPlainPart = (p: Part): p is string => typeof p === "string";
+
 export const source = (f: Feel) =>
   parts(f)
-    .map((p) => (typeof p === "string" ? p : p.text))
+    .map((p) => (isPlainPart(p) ? p : p.text))
     .join("");

@@ -315,8 +315,12 @@ const fitFrame = (p: Parts) => {
   if (f.liquid) {
     const sink = sub(melt(center), center);
 
-    for (const m of [...marks])
-      marks.push({ ...melt(m), r: m.r }, ...(orbit ? [{ ...add(m, sink), r: m.r }] : []));
+    marks.push(
+      ...marks.flatMap((m) => [
+        { ...melt(m), r: m.r },
+        ...(orbit ? [{ ...add(m, sink), r: m.r }] : []),
+      ]),
+    );
   }
 
   let x0 = Math.min(...marks.map((m) => m.x - m.r));

@@ -2,6 +2,7 @@ import { $, $$ } from "../util";
 import { restamp } from "./card";
 import { drag } from "./drags";
 import {
+  geneValue,
   mutate,
   numberSpec,
   numericKey,
@@ -29,7 +30,7 @@ export const paintControls = () => {
   const { genome } = state;
 
   for (const b of $$<HTMLButtonElement>("[data-gene]")) {
-    const on = String(Reflect.get(genome, b.dataset.gene ?? "")) === b.dataset.value;
+    const on = String(geneValue(genome, b.dataset.gene)) === b.dataset.value;
     b.setAttribute("aria-checked", String(on));
   }
 

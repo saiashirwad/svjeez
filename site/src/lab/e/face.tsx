@@ -3,14 +3,14 @@ import { blinkAt, Eye, Pivot } from "./bits";
 import { r1, type Cx } from "./look";
 import { INK, PINK } from "./palette";
 
-const EYE_SPOTS = [
+const EYE_SPOTS: [number, number][] = [
   [0, -0.55],
   [-0.74, 0.3],
   [0.74, 0.3],
   [0, 0.62],
   [-0.34, -0.8],
   [0.34, -0.8],
-] as const;
+];
 
 export const Face = ({
   cx,
@@ -41,14 +41,14 @@ export const Face = ({
 
   const twitch = Math.floor(rand() * Math.max(1, ears));
 
-  const earShape = (a: number, i: number) => {
+  const drawEar = (a: number, i: number) => {
     const rad = (a * Math.PI) / 180;
     const x = r * 0.82 * Math.sin(rad);
     const y = -r * 0.82 * Math.cos(rad);
     const h = r * (0.78 + horse * 0.5 - loaf * 0.45);
     const w = r * (0.7 - horse * 0.25);
 
-    const shape = f.floppy
+    const outline = f.floppy
       ? `M${r1(-w * 0.4)} 0C${r1(-w * 0.7)} ${r1(h * 0.6)} ${r1(w * 0.2)} ${r1(h * 1.1)} ${r1(w * 0.45)} ${r1(h * 0.2)}Z`
       : f.boxy
         ? `M${r1(-w / 2)} 0Q0 ${r1(-h * 1.6)} ${r1(w / 2)} 0Z`
@@ -65,7 +65,7 @@ export const Face = ({
           }
         >
           <path
-            d={shape}
+            d={outline}
             fill={f.floppy ? pal.dark : pal.base}
             stroke={ink}
             strokeWidth={2.2}
@@ -91,17 +91,13 @@ export const Face = ({
       ? [[0, -0.08]]
       : eyes === 0
         ? []
-        : [
-            [-0.38, -0.1],
-            [0.38, -0.1],
-            ...EYE_SPOTS.slice(0, eyes - 2).map(([x, y]) => [x, y] as [number, number]),
-          ];
+        : [[-0.38, -0.1], [0.38, -0.1], ...EYE_SPOTS.slice(0, eyes - 2)];
 
   const mouthAt = f.snouted ? { x: sx + face * r * 0.1, y: sy + r * 0.3 } : { x: 0, y: r * 0.42 };
 
   return (
     <>
-      {earList.map(earShape)}
+      {earList.map(drawEar)}
       {f.boxy ? (
         <rect
           x={r1(-r * 1.15)}
@@ -233,7 +229,7 @@ export const Face = ({
       )}
       {f.maned && (
         <path
-          d={`M${r1(-face * r * 0.2)} ${r1(-r * 0.95)}l${r1(-face * r * 0.3)} ${r1(-r * 0.25)}l${r1(-face * r * 0.05)} ${r1(r * 0.35)}l${r1(-face * r * 0.35)} ${r1(-r * 0.15)}l${r1(-face * r * 0.0)} ${r1(r * 0.4)}`}
+          d={`M${r1(-face * r * 0.2)} ${r1(-r * 0.95)}l${r1(-face * r * 0.3)} ${r1(-r * 0.25)}l${r1(-face * r * 0.05)} ${r1(r * 0.35)}l${r1(-face * r * 0.35)} ${r1(-r * 0.15)}l0 ${r1(r * 0.4)}`}
           fill={pal.dark}
           stroke={ink}
           strokeWidth={1.6}

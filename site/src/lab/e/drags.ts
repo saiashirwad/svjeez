@@ -7,7 +7,7 @@ export const drag = (
   h: { move?: (m: PointerEvent) => void; end?: (u: PointerEvent, cancelled: boolean) => void },
 ) => {
   try {
-    (down.currentTarget as Element).setPointerCapture(down.pointerId);
+    if (down.currentTarget instanceof Element) down.currentTarget.setPointerCapture(down.pointerId);
   } catch {
     // The pointer may be gone already; the window listeners carry the drag either way.
   }

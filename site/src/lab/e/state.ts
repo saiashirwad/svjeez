@@ -8,14 +8,20 @@ export interface SetOptions {
   readonly shelve?: boolean;
 }
 
-const current: { genome: Genome; lay: Layout; lineage: string } = {
+interface Stage {
+  genome: Genome;
+  lay: Layout;
+  lineage: string;
+}
+
+const current: Stage = {
   genome: FIRST,
   lay: layout(FIRST),
   lineage: "",
 };
 
 /** The specimen on the stage. `set` is the only writer. */
-export const state: Readonly<typeof current> = current;
+export const state: Readonly<Stage> = current;
 
 const listeners: ((opts: SetOptions) => void)[] = [];
 

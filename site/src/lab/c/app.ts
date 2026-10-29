@@ -83,6 +83,12 @@ interface Telemetry {
   now: number;
 }
 
+declare global {
+  interface Window {
+    __labC?: Telemetry;
+  }
+}
+
 export const start = (root: HTMLElement) => {
   const img = root.querySelector<HTMLImageElement>(".lc-img")!;
   const stills = [...root.querySelectorAll<HTMLIFrameElement>(".lc-still")];
@@ -97,7 +103,7 @@ export const start = (root: HTMLElement) => {
   const compile = createCompiler();
 
   const telemetry: Telemetry = { compiles: [], svg: "", frozen: false, now: 0 };
-  (window as unknown as { __labC: Telemetry }).__labC = telemetry;
+  window.__labC = telemetry;
 
   let flight: Flight = INITIAL;
   let drag: Drag | undefined;
@@ -196,9 +202,9 @@ export const start = (root: HTMLElement) => {
       animation.currentTime = t * 1000;
     }
 
-    const rootSvg = doc.documentElement as unknown as SVGSVGElement;
-    rootSvg.pauseAnimations?.();
-    rootSvg.setCurrentTime?.(t);
+    const rootSvg = doc.querySelector<SVGSVGElement>("svg");
+    rootSvg?.pauseAnimations?.();
+    rootSvg?.setCurrentTime?.(t);
   };
 
   let stillSvg = "";
@@ -516,7 +522,7 @@ export const start = (root: HTMLElement) => {
     block.style.setProperty("--leg", LEG_COLORS[i % LEG_COLORS.length]!);
     block.innerHTML = `<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path/></svg><span class="lc-block-label"></span><span class="lc-edge" aria-hidden="true"></span>`;
     block.addEventListener("pointerdown", (event) => {
-      const onEdge = (event.target as HTMLElement).classList.contains("lc-edge");
+      const onEdge = event.target instanceof Element && event.target.classList.contains("lc-edge");
       const legStart = starts(flight)[i]!;
       begin(event, { kind: onEdge ? "edge" : "body", leg: i, x0: event.clientX, flight });
       setHot(i);
@@ -636,7 +642,9 @@ export const start = (root: HTMLElement) => {
     event.preventDefault();
     drag = next;
     root.dataset.dragging = next.kind;
-    (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
+
+    if (event.currentTarget instanceof Element)
+      event.currentTarget.setPointerCapture?.(event.pointerId);
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", finish, { once: true });
     window.addEventListener("pointercancel", finish, { once: true });

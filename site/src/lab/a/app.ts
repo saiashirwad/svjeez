@@ -1,6 +1,6 @@
 // Direction A: the scene's source is the control panel. Every edit recompiles a real svjeez SVG in the playground worker.
 import { createCompiler } from "../compiler";
-import { svgUrl } from "../util";
+import { $, svgUrl } from "../util";
 import initial from "./meadow.tsx.txt?raw";
 
 type Kind =
@@ -35,13 +35,15 @@ const KEYWORDS = new Set([
   "length",
 ]);
 
-const NAMED: Record<string, [number, number, number, number]> = {
-  in: [0.55, 0.06, 0.68, 0.19],
-  out: [0.23, 1, 0.32, 1],
-  inOut: [0.77, 0, 0.175, 1],
-  pop: [0.34, 1.56, 0.64, 1],
-  linear: [0, 0, 1, 1],
-};
+const NAMED = new Map(
+  Object.entries({
+    in: [0.55, 0.06, 0.68, 0.19],
+    out: [0.23, 1, 0.32, 1],
+    inOut: [0.77, 0, 0.175, 1],
+    pop: [0.34, 1.56, 0.64, 1],
+    linear: [0, 0, 1, 1],
+  }),
+);
 
 const tokenize = (src: string): Token[] => {
   const out: Token[] = [];
@@ -202,7 +204,7 @@ const strip = (svg: string) => svg.replace(/ data-l="[\d-]+"/g, "");
 // ----- easing math
 
 const bez = (p: readonly number[]) => {
-  const [x1, y1, x2, y2] = p as [number, number, number, number];
+  const [x1, y1, x2, y2] = [p[0]!, p[1]!, p[2]!, p[3]!];
   const cx = (t: number) => 3 * (1 - t) * (1 - t) * t * x1 + 3 * (1 - t) * t * t * x2 + t * t * t;
   const cy = (t: number) => 3 * (1 - t) * (1 - t) * t * y1 + 3 * (1 - t) * t * t * y2 + t * t * t;
 
@@ -236,7 +238,7 @@ const curvePath = (p: readonly number[], X: (u: number) => number, Y: (v: number
 const pointsOf = (text: string): number[] => {
   const named = /^ease\.(\w+)$/.exec(text);
 
-  if (named) return [...(NAMED[named[1]!] ?? NAMED.out!)];
+  if (named) return [...(NAMED.get(named[1]!) ?? NAMED.get("out")!)];
 
   return [...text.slice(text.indexOf("(")).matchAll(/-?[\d.]+/g)].map((m) => Number(m[0]));
 };
@@ -297,23 +299,27 @@ const specFor = (src: string, tok: Token): Spec => {
   const constName = /const (\w+) = $/.exec(before)?.[1];
   const attr = /(\w+)=\{$/.exec(before)?.[1];
 
-  const table: Record<string, Partial<Spec>> = {
-    flowers: { min: 1, max: 12, step: 1, label: "how many" },
-    gap: { min: 16, max: 160, step: 1, label: "px apart" },
-    stagger: { min: 0, max: 0.4, step: 0.01, label: "s between flowers" },
-    beat: { values: [0.6, 0.75, 1, 1.2, 1.5, 2, 3], label: "s per pulse" },
-    r: { min: 2, max: 90, step: 1, label: "radius" },
-    strokeWidth: { min: 0.5, max: 24, step: 0.5, label: "stroke" },
-    cx: { min: 0, max: 480, step: 1, label: "x" },
-    cy: { min: -200, max: 300, step: 1, label: "y" },
-    width: { min: 120, max: 960, step: 10, label: "px" },
-    height: { min: 120, max: 600, step: 10, label: "px" },
-    duration: { min: 1, max: 20, step: 0.5, label: "s loop" },
-  };
+  const table = new Map<string, Partial<Spec>>(
+    Object.entries({
+      flowers: { min: 1, max: 12, step: 1, label: "how many" },
+      gap: { min: 16, max: 160, step: 1, label: "px apart" },
+      stagger: { min: 0, max: 0.4, step: 0.01, label: "s between flowers" },
+      beat: { values: [0.6, 0.75, 1, 1.2, 1.5, 2, 3], label: "s per pulse" },
+      r: { min: 2, max: 90, step: 1, label: "radius" },
+      strokeWidth: { min: 0.5, max: 24, step: 0.5, label: "stroke" },
+      cx: { min: 0, max: 480, step: 1, label: "x" },
+      cy: { min: -200, max: 300, step: 1, label: "y" },
+      width: { min: 120, max: 960, step: 10, label: "px" },
+      height: { min: 120, max: 600, step: 10, label: "px" },
+      duration: { min: 1, max: 20, step: 0.5, label: "s loop" },
+    }),
+  );
 
   const name = constName ?? attr ?? /(\w+): $/.exec(before)?.[1];
 
-  if (name && table[name]) return { ...generic, ...table[name] } as Spec;
+  const known = name ? table.get(name) : undefined;
+
+  if (known) return { ...generic, ...known };
 
   if (before.endsWith("}, ")) return { min: 0.05, max: 4, step: 0.05, label: "s long" };
 
@@ -334,8 +340,9 @@ const compileRaw = createCompiler();
 
 // ----- DOM
 
-const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) =>
-  root.querySelector(sel) as T;
+/** The closest ancestor of an event's target that matches, or null when the target is not an element. */
+const closestTo = <E extends Element>(e: Event, sel: string): E | null =>
+  e.target instanceof Element ? e.target.closest<E>(sel) : null;
 
 const root = $("[data-lab-a]");
 const codeEl = $(".la-code", root);
@@ -363,7 +370,6 @@ let paused = false;
 let pausedAt = 0;
 let files = 0;
 let lastSvg = "";
-let lastAnnotated = "";
 let url = "";
 let dragging: HTMLElement | null = null;
 
@@ -656,7 +662,7 @@ const openEase = (anchor: Element, get: () => number[], set: (p: number[]) => vo
   editor = { svg, X, Y, get };
 
   const down = (e: PointerEvent) => {
-    const h = (e.target as Element).closest<SVGElement>(".e-handle");
+    const h = closestTo<SVGElement>(e, ".e-handle");
 
     if (!h) return;
     e.preventDefault();
@@ -687,7 +693,10 @@ const openEase = (anchor: Element, get: () => number[], set: (p: number[]) => vo
   svg.addEventListener("pointerdown", down);
 
   const outside = (e: PointerEvent) => {
-    if (!pop.contains(e.target as Node) && !anchor.contains(e.target as Node)) easeClose?.();
+    const inside =
+      e.target instanceof Node && (pop.contains(e.target) || anchor.contains(e.target));
+
+    if (!inside) easeClose?.();
   };
 
   const esc = (e: KeyboardEvent) => e.key === "Escape" && easeClose?.();
@@ -773,7 +782,13 @@ let dirty = false;
 let editedAt = 0;
 const latencies: { compile: number; total: number }[] = [];
 
-(window as unknown as { __labA: unknown }).__labA = { latencies, files: () => files };
+declare global {
+  interface Window {
+    __labA?: { latencies: { compile: number; total: number }[]; files: () => number };
+  }
+}
+
+window.__labA = { latencies, files: () => files };
 
 const schedule = () => {
   editedAt = editedAt || performance.now();
@@ -847,7 +862,6 @@ const paintImg = (t: number) =>
   });
 
 const show = async (annotatedSvg: string) => {
-  lastAnnotated = annotatedSvg;
   lastSvg = strip(annotatedSvg);
   files++;
   duration = Number(/\.a\{animation-duration:([\d.]+)s/.exec(lastSvg)?.[1] ?? 6) || 6;
@@ -928,7 +942,14 @@ const buildTimeline = () => {
   const next: Row[] = [];
 
   for (const m of css.matchAll(/\.(m\d+)\{([^}]*)\}/g)) {
-    const props = Object.fromEntries(m[2]!.split(";").map((d) => d.split(":") as [string, string]));
+    const props = Object.fromEntries(
+      m[2]!.split(";").map((d): [string, string | undefined] => {
+        const [name = "", value] = d.split(":");
+
+        return [name, value];
+      }),
+    );
+
     const stops = frames.get(props["animation-name"] ?? "");
 
     if (!stops) continue;
@@ -1041,7 +1062,9 @@ const linesFor = (keys: Iterable<string>) => {
   const out = new Set<number>();
 
   for (const k of keys) {
-    const [a, b] = k.split("-").map(Number) as [number, number];
+    const [a, b] = k.split("-").map(Number);
+
+    if (a === undefined || b === undefined) continue;
 
     for (let n = a; n <= b; n++) out.add(n);
   }
@@ -1103,7 +1126,7 @@ const setHot = (keys: Set<string>, lines: Set<number>, step = 0) => {
 
 codeEl.addEventListener("pointerover", (e) => {
   if (dragging) return;
-  const line = (e.target as Element).closest<HTMLElement>(".la-line");
+  const line = closestTo<HTMLElement>(e, ".la-line");
 
   if (!line) return;
   const n = Number(line.dataset.line);
@@ -1126,8 +1149,8 @@ stage.addEventListener("pointerleave", () => setHot(new Set(), new Set()));
 
 timeline.addEventListener("pointerover", (e) => {
   if (dragging || scrubbing) return;
-  const bar = (e.target as Element).closest<SVGGElement>(".la-bar");
-  const row = (e.target as Element).closest<HTMLElement>(".la-row");
+  const bar = closestTo<SVGGElement>(e, ".la-bar");
+  const row = closestTo<HTMLElement>(e, ".la-row");
 
   if (!row) return;
   const keys = new Set(row.dataset.keys!.split(" "));
@@ -1227,7 +1250,9 @@ const tick = (ms: number) => {
   while (boxes.children.length < want.length) boxes.append(document.createElement("i"));
   [...boxes.children].forEach((b, i) => {
     const r = want[i];
-    const box = b as HTMLElement;
+
+    if (!(b instanceof HTMLElement)) return;
+    const box = b;
     box.hidden = !r;
 
     if (!r) return;

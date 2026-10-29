@@ -1,7 +1,7 @@
 import { restyle } from "svjeez";
 import { createCompiler } from "../compiler";
 import { svgUrl } from "../util";
-import { spectrum, type Point, type Spectrum, type Term } from "./fourier";
+import { spectrum, type Point, type Spectrum } from "./fourier";
 import { sceneSource, type Frame } from "./scene";
 import { PRESETS } from "./shapes";
 
@@ -23,8 +23,7 @@ const sweep = (to: number) => {
 
 const thumbPath = (outline: readonly Point[]) =>
   outline
-    .filter((_, i) => i % 4 === 0)
-    .map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(3)} ${(-y).toFixed(3)}`)
+    .flatMap(([x, y], i) => (i % 4 ? [] : [`${i ? "L" : "M"}${x.toFixed(3)} ${(-y).toFixed(3)}`]))
     .join("") + "Z";
 
 const kb = (n: number) => `${(n / 1024).toFixed(1)} KB gzip`;
@@ -37,6 +36,12 @@ interface Shown {
 interface Telemetry {
   compiles: { n: number; ms: number; wall: number; gzip: number; bytes: number }[];
   shown: number;
+}
+
+declare global {
+  interface Window {
+    __labD?: Telemetry;
+  }
 }
 
 export const start = (root: HTMLElement) => {
@@ -55,7 +60,7 @@ export const start = (root: HTMLElement) => {
   const compile = createCompiler();
 
   const telemetry: Telemetry = { compiles: [], shown: 0 };
-  (window as unknown as { __labD: Telemetry }).__labD = telemetry;
+  window.__labD = telemetry;
 
   const spectra = new Map(PRESETS.map((p) => [p.name, spectrum(p.points())]));
 
@@ -83,7 +88,7 @@ export const start = (root: HTMLElement) => {
     return {
       spectrum: next.spectrum,
       n: next.n,
-      before: { terms: before.spectrum.terms as Term[], n: before.n },
+      before: { terms: before.spectrum.terms, n: before.n },
       freshFrom: same ? Math.min(before.n, next.n) : 0,
       loop: LOOP,
     };
@@ -161,7 +166,7 @@ export const start = (root: HTMLElement) => {
     void pump();
   };
 
-  const useShape = (s: Spectrum) => {
+  const showSpectrum = (s: Spectrum) => {
     current = s;
     plan = sweep(n);
     setCount(plan[0]!);
@@ -179,7 +184,7 @@ export const start = (root: HTMLElement) => {
     tile.addEventListener("click", () => {
       pick(tile);
       root.removeAttribute("data-drawing");
-      useShape(spectra.get(tile.dataset.preset!)!);
+      showSpectrum(spectra.get(tile.dataset.preset!)!);
     });
 
   pen.addEventListener("click", () => {
@@ -243,7 +248,7 @@ export const start = (root: HTMLElement) => {
     pen.dataset.drawn = "";
     pick(pen);
     root.removeAttribute("data-drawing");
-    useShape(doodle);
+    showSpectrum(doodle);
   };
 
   ink.addEventListener("pointerup", finish);
@@ -254,5 +259,5 @@ export const start = (root: HTMLElement) => {
   });
 
   pick(root.querySelector<HTMLButtonElement>('[data-preset="heart"]')!);
-  useShape(current);
+  showSpectrum(current);
 };

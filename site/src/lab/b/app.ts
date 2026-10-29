@@ -114,7 +114,7 @@ const localPoint = (svg: SVGSVGElement, e: PointerEvent) => {
 /** Pointer drag on `target`, reported in the instrument's own coordinates. */
 const drag = (
   svg: SVGSVGElement,
-  target: Element,
+  target: SVGElement,
   handlers: {
     start?: (p: { x: number; y: number }) => void;
     move: (p: { x: number; y: number }, from: { x: number; y: number }) => void;
@@ -122,14 +122,13 @@ const drag = (
   },
 ) => {
   target.addEventListener("pointerdown", (event) => {
-    const e = event as PointerEvent;
-    e.preventDefault();
-    e.stopPropagation();
-    const from = localPoint(svg, e);
-    (target as Element).setPointerCapture(e.pointerId);
+    event.preventDefault();
+    event.stopPropagation();
+    const from = localPoint(svg, event);
+    target.setPointerCapture(event.pointerId);
     svg.classList.add("held");
     handlers.start?.(from);
-    const move = (m: Event) => handlers.move(localPoint(svg, m as PointerEvent), from);
+    const move = (m: PointerEvent) => handlers.move(localPoint(svg, m), from);
 
     const up = () => {
       target.removeEventListener("pointermove", move);
@@ -311,10 +310,10 @@ const frames: ((now: number, dt: number) => void)[] = [];
     add(laneStrobe, "line", { class: "strobe-line" }),
   );
 
-  const handle = (el: Element, i: 0 | 1) =>
+  const handle = (el: SVGElement, i: 0 | 1) =>
     drag(svg, el, {
       move: (p) => {
-        const next = [...feel.fall] as [number, number, number, number];
+        const next: [number, number, number, number] = [...feel.fall];
         next[i * 2] = Number(clamp((p.x - X0) / S, 0, 1).toFixed(2));
         next[i * 2 + 1] = Number(clamp((p.y - Y0) / S, -0.35, 1.35).toFixed(2));
         update({ fall: next });
@@ -325,7 +324,7 @@ const frames: ((now: number, dt: number) => void)[] = [];
   handle(h2, 1);
 
   const nudge = (i: number, d: number) => {
-    const next = [...feel.fall] as [number, number, number, number];
+    const next: [number, number, number, number] = [...feel.fall];
     next[i] = Number(clamp(next[i]! + d, i % 2 ? -0.35 : 0, i % 2 ? 1.35 : 1).toFixed(2));
     update({ fall: next });
   };
@@ -510,7 +509,7 @@ const frames: ((now: number, dt: number) => void)[] = [];
         [
           { opacity: 1, r: 9 },
           { opacity: 0, r: 4 },
-        ] as Keyframe[],
+        ],
         { duration: 260 },
       );
     const target = holding ? 0 : 24 * Math.sin(Math.PI * phase);

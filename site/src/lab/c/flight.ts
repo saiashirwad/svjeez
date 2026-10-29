@@ -49,12 +49,14 @@ export const along = (pts: readonly Pt[], i: number, u: number, d = 0) => {
     (k) => pts[Math.max(0, Math.min(pts.length - 1, k))]!,
   );
 
-  return [0, 1].map((k) => {
-    const [p0, p1, p2, p3] = [a![k]!, b![k]!, c![k]!, e![k]!];
+  const axis = (k: 0 | 1) => {
+    const [p0, p1, p2, p3] = [a![k], b![k], c![k], e![k]];
     const [A, B, C] = [3 * p1 - p0 - 3 * p2 + p3, 2 * p0 - 5 * p1 + 4 * p2 - p3, p2 - p0];
 
     return d ? (C + 2 * B * u + 3 * A * u * u) / 2 : (2 * p1 + C * u + B * u * u + A * u ** 3) / 2;
-  }) as [number, number];
+  };
+
+  return [axis(0), axis(1)] satisfies Pt;
 };
 
 export const starts = (flight: Flight) => {

@@ -162,43 +162,63 @@ export const clampGene = (key: NumericKey, v: number): number => {
   return roundTo(Math.min(max, Math.max(min, v)), step);
 };
 
+const isNumber = (v: unknown): v is number => typeof v === "number";
+
+const isString = (v: unknown): v is string => typeof v === "string";
+
 export const withGene = <K extends keyof Genome>(g: Genome, key: K, value: Genome[K]): Genome => ({
   ...g,
-  [key]: isNumeric(key) && typeof value === "number" ? clampGene(key, value) : value,
+  [key]: isNumeric(key) ? clampGene(key, Number(value)) : value,
 });
 
-const oneOf = <T extends string>(options: readonly T[], v: unknown): v is T =>
+const oneOf = <T extends string>(options: readonly T[], v: string | undefined): v is T =>
   options.some((o) => o === v);
+
+/** A value read back from storage as JSON, before anything about it is checked. */
+export type Stored = string | number | boolean | null | readonly Stored[] | StoredGenome;
+
+/** A stored object: any gene may be missing or hold anything. */
+export type StoredGenome = { readonly [K in keyof Genome]?: Stored };
+
+const isStoredGenome = (raw: Stored): raw is StoredGenome =>
+  typeof raw === "object" && raw !== null;
 
 /**
  * A genome read back from storage. Numbers are clamped, choices must be real, and a gene the saved genome lacks takes
  * the first specimen's. Undefined when anything is the wrong type, so the caller drops it.
  */
-export const parseGenome = (raw: unknown): Genome | undefined => {
-  if (typeof raw !== "object" || raw === null) return undefined;
-  const seed = Reflect.get(raw, "seed") ?? FIRST.seed;
+export const parseGenome = (raw: Stored): Genome | undefined => {
+  if (!isStoredGenome(raw)) return undefined;
+  const seed = raw.seed ?? FIRST.seed;
 
-  if (typeof seed !== "number" || !Number.isInteger(seed) || seed < 0 || seed > 9999)
-    return undefined;
+  if (!isNumber(seed) || !Number.isInteger(seed) || seed < 0 || seed > 9999) return undefined;
   let g: Genome = { ...FIRST, seed };
 
   for (const key of KEYS) {
-    const v: unknown = Reflect.get(raw, key);
+    const v = raw[key];
 
     if (v === undefined) continue;
 
     if (isNumeric(key)) {
-      if (typeof v !== "number" || !Number.isFinite(v)) return undefined;
+      if (!isNumber(v) || !Number.isFinite(v)) return undefined;
       g = withGene(g, key, v);
     } else {
       const options = choiceSpec(key).options;
 
-      if (!oneOf(options, v)) return undefined;
+      if (!isString(v) || !oneOf(options, v)) return undefined;
       g = withGene(g, key, v);
     }
   }
 
   return g;
+};
+
+/** What a gene holds, by the name a control gives it. Undefined for a name that is no gene. */
+export const geneValue = (
+  g: Genome,
+  name: string | undefined,
+): Genome[keyof Genome] | undefined => {
+  for (const [key, value] of Object.entries(g)) if (key === name) return value;
 };
 
 /** The number gene a control names. Throws on a name the page markup should never hold. */
@@ -238,8 +258,13 @@ const randomValue = (key: GeneKey): number | string => {
 
 const reseed = () => Math.floor(Math.random() * 9999);
 
-export const random = (): Genome =>
-  KEYS.reduce<Genome>((g, key) => ({ ...g, [key]: randomValue(key) }), { ...CAT, seed: reseed() });
+export const random = (): Genome => {
+  const out = { ...CAT, seed: reseed() };
+
+  for (const key of KEYS) Object.assign(out, { [key]: randomValue(key) });
+
+  return out;
+};
 
 export interface Mutation {
   readonly genome: Genome;
@@ -251,19 +276,24 @@ export interface Mutation {
 /** Nudges one to three genes. One time in seven it pushes every gene to an end of its range. */
 export const mutate = (g: Genome): Mutation => {
   if (Math.random() < 1 / 7) {
-    const extreme = KEYS.reduce<Genome>((out, key) => {
-      if (!isNumeric(key)) return { ...out, [key]: randomValue(key) };
+    const extreme = { ...g };
+
+    for (const key of KEYS) {
+      if (!isNumeric(key)) {
+        Object.assign(extreme, { [key]: randomValue(key) });
+        continue;
+      }
+
       const { min, max, extremeCap = Infinity } = numberSpec(key);
       const end = Math.random() < 0.75 ? max : min;
 
-      return {
-        ...out,
+      Object.assign(extreme, {
         [key]: Math.min(
           clampGene(key, end + (Math.random() - 0.5) * (max - min) * 0.2),
           extremeCap,
         ),
-      };
-    }, g);
+      });
+    }
 
     return { genome: { ...extreme, seed: reseed() }, tooFar: true, changed: KEYS };
   }
@@ -271,13 +301,19 @@ export const mutate = (g: Genome): Mutation => {
   const count = 1 + Math.floor(Math.random() * 3);
   const changed = Array.from({ length: count }, () => pick(KEYS));
 
-  const genome = changed.reduce<Genome>((out, key) => {
-    if (!isNumeric(key)) return { ...out, [key]: randomValue(key) };
+  const genome = { ...g };
+
+  for (const key of changed) {
+    if (!isNumeric(key)) {
+      Object.assign(genome, { [key]: randomValue(key) });
+      continue;
+    }
+
     const { min, max, step } = numberSpec(key);
     const span = Math.max((max - min) * 0.35, step * 1.5);
 
-    return { ...out, [key]: clampGene(key, out[key] + (Math.random() - 0.4) * span) };
-  }, g);
+    Object.assign(genome, { [key]: clampGene(key, genome[key] + (Math.random() - 0.4) * span) });
+  }
 
   return {
     genome: { ...genome, seed: Math.random() < 0.3 ? reseed() : genome.seed },
@@ -287,18 +323,19 @@ export const mutate = (g: Genome): Mutation => {
 };
 
 /** Each gene from one parent or the other; numbers sometimes land between them. */
-export const breed = (a: Genome, b: Genome): Genome =>
-  KEYS.reduce<Genome>(
-    (out, key) => {
-      const from = Math.random() < 0.5 ? a : b;
+export const breed = (a: Genome, b: Genome): Genome => {
+  const child = { ...a, seed: reseed() };
 
-      if (isNumeric(key) && Math.random() < 0.4)
-        return { ...out, [key]: clampGene(key, (a[key] + b[key]) / 2) };
+  for (const key of KEYS) {
+    const from = Math.random() < 0.5 ? a : b;
 
-      return { ...out, [key]: from[key] };
-    },
-    { ...a, seed: reseed() },
-  );
+    if (isNumeric(key) && Math.random() < 0.4)
+      Object.assign(child, { [key]: clampGene(key, (a[key] + b[key]) / 2) });
+    else Object.assign(child, { [key]: from[key] });
+  }
+
+  return child;
+};
 
 /** How far a genome strays from a cat, one point per oddity. */
 export const oddities = (g: Genome): string[] => {
@@ -408,9 +445,12 @@ export const specimenNo = (g: Genome): string => {
   return String((h >>> 0) % 10000).padStart(4, "0");
 };
 
-export const certificate = (
-  g: Genome,
-): { readonly verdict: string; readonly grade: 0 | 1 | 2 | 3 } => {
+export interface Certificate {
+  readonly verdict: string;
+  readonly grade: 0 | 1 | 2 | 3;
+}
+
+export const certificate = (g: Genome): Certificate => {
   const n = oddities(g).length + (g.length > 2 ? 1 : 0) + (g.plan === "line" ? 0 : 1);
 
   if (n === 0) return { verdict: "Conforms", grade: 0 };

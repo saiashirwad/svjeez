@@ -11,9 +11,11 @@ export { DEFAULT };
 
 type Options<T> = readonly { readonly value: T; readonly label: string; readonly hint?: string }[];
 
-export const KNOBS: {
+export type KnobTable = {
   readonly [K in keyof Knobs]: { readonly label: string; readonly options: Options<Knobs[K]> };
-} = {
+};
+
+export const KNOBS: KnobTable = {
   sky: {
     label: "Sky",
     options: [

@@ -48,7 +48,7 @@ const ember = voxel.texture(
 const TALLEST = 7;
 const heights = STARS.map((v) => Math.max(1, Math.round((v / STARS.at(-1)!) * TALLEST)));
 
-export const dataShot = ({ at, over }: Span) => {
+export const dataShot = ({ at }: Span) => {
   const grow = at + 0.5;
   const bars = plot.bars(Object.fromEntries(pairs), { at: grow, stagger: STEP, color: C.hairline });
 

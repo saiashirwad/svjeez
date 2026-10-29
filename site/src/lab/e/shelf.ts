@@ -1,7 +1,7 @@
 import { $, svgUrl } from "../util";
 import { restamp } from "./card";
 import { carryDrag } from "./drags";
-import { breed, parseGenome, specimenNo, taxon, type Genome } from "./genome";
+import { breed, parseGenome, specimenNo, taxon, type Genome, type Stored } from "./genome";
 import { frame, viewPoint } from "./overlay";
 import { compile, onShelve, still } from "./preview";
 import { set, state } from "./state";
@@ -113,7 +113,7 @@ export const markCurrent = () => {
 
 /** Restores shelved genomes from an earlier visit, compiling their thumbnails one by one. */
 export const restoreShelf = async () => {
-  let saved: unknown = [];
+  let saved: Stored = [];
 
   try {
     saved = JSON.parse(localStorage.getItem(STORE) ?? "[]");
@@ -130,7 +130,7 @@ export const restoreShelf = async () => {
 
   paintShelf();
 
-  for (const s of [...shelf]) {
+  for (const s of shelf.slice()) {
     if (s.thumb) continue;
     const r = await compile(s.genome);
 
