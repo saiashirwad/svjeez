@@ -16,7 +16,11 @@
 
 ---
 
-You write a scene in TypeScript and svjeez compiles it into one self-contained SVG. Motions become CSS `@keyframes`, or SMIL on filter primitives. Fonts are subset and embedded, and the file follows `prefers-color-scheme` and `prefers-reduced-motion` by itself. Nothing runs in the viewer's browser, so a scene plays anywhere an `<img>` works, this README included.
+- Write a scene in TypeScript, get one self-contained SVG.
+- Motions become CSS `@keyframes`, or SMIL on filter primitives.
+- Fonts are subset and embedded.
+- Follows `prefers-color-scheme` and `prefers-reduced-motion` by itself.
+- Nothing runs in the viewer's browser, so it plays anywhere an `<img>` works, this README included.
 
 ## Quickstart
 
