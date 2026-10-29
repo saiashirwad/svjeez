@@ -18,9 +18,11 @@ export const stroke = <K extends keyof Settable>(editor: Editor, key: string) =>
   let going = false;
 
   return (value: Settable[K]) => {
+    const was = editor.getState().text;
     // SAFETY: `K` is the kind of the value at `key`, so `value` is what a set of that key carries.
     editor.send({ type: "set", key, value, continues: going } as never);
-    going = true;
+    // A write that changed nothing is in no undo step, so the next one must start the step.
+    going ||= editor.getState().text !== was;
   };
 };
 

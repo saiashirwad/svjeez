@@ -88,6 +88,13 @@ describe("update", () => {
     expect(state.text).toContain("const k = 0.9;");
   });
 
+  test("a number written with an exponent is set without decimals it never had", () => {
+    const [state] = init({ text: `const a = 1.5e3;\nexport default () => a;\n`, now: 0 });
+    const [next] = update(state, { type: "set", key: "a", value: 1600 });
+
+    expect(next.text).toContain("const a = 1600;");
+  });
+
   test("a drag is one undo step, and redo puts it back", () => {
     const drag = play([
       { type: "set", key: "default#0", value: 41 },

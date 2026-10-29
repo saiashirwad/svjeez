@@ -91,6 +91,18 @@ describe("gestures", () => {
     expect(easeAt(editor, "curve").literal.value).toEqual(ease.bezier(0.05, 0, 0.4, 2.2));
   });
 
+  test("a drag whose first move changes nothing is still an undo step of its own", () => {
+    const editor = editing();
+    stroke<"color">(editor, "fill")("#445566");
+    const drag = stroke<"number">(editor, "x");
+    drag(10);
+    drag(15);
+    editor.send({ type: "undo" });
+
+    expect(number(editor, "x").literal.value).toBe(10);
+    expect(editor.getState().text).toContain('"#445566"');
+  });
+
   test("a stroke's first write is an undo step and the rest continue it", () => {
     const editor = editing();
     const pick = stroke<"color">(editor, "fill");

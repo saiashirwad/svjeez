@@ -606,8 +606,12 @@ const numberText = (v: number, decimals: number, exact = false) => {
   return Number(text) === 0 ? text.replace("-", "") : text;
 };
 
-/** How many decimals a number is written with, as in `2` for `0.50`. */
-export const decimalsOf = (text: string) => (text.split(".")[1] ?? "").length;
+/** How many decimals a number is written with, as in `2` for `0.50`, and none for `1.5e3` or `0xff`. */
+export const decimalsOf = (text: string) => {
+  const plain = text.replaceAll("_", "");
+
+  return /^-?\d*\.?\d+$/.test(plain) ? (plain.split(".")[1] ?? "").length : 0;
+};
 
 /** An ease as code: `ease.name` when it is that very ease, else `ease.bezier(…)` to two decimals. */
 export const easeText = (value: Ease): string => {

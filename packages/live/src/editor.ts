@@ -423,7 +423,7 @@ export type Input =
 export interface Effects {
   /**
    * Compiles the file. A `stop` on it is called whenever the editor goes idle, when its last listener leaves or it is
-   * destroyed, and a compile after a stop starts the compiler again.
+   * destroyed, and a compile after a stop must start the compiler again, which `createCompiler` alone does not.
    */
   readonly compile: ((text: string) => Promise<Compiled>) & { readonly stop?: () => void };
   /** An image URL for `svg` started `at` seconds in, playing on or held, once it is ready to draw. */
