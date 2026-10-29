@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 392" width="1032" height="392" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 580" width="1032" height="580" role="img" aria-labelledby="t d">
   <title id="t">Without JSX</title>
   <desc id="d">A scene written with el() calls instead of JSX types out. Its prefix option namespaces ids and classes, so the result can be inlined in a page next to other scenes. The preview below plays it.</desc>
   <style><![CDATA[
@@ -33,14 +33,14 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">
-    <rect x="0.5" y="0.5" width="1031" height="391" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <rect x="0.5" y="0.5" width="1031" height="579" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
     <path d="M0.5 40.5h1031" stroke="var(--base01)"/>
     <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
     <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
     <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
     <text x="516" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">plain.ts</text>
   </g>
-  <path d="M604 40V392" stroke="var(--base02)"/>
+  <path d="M604 40V580" stroke="var(--base02)"/>
   <g class="a m8">
     <g class="a m1">
       <g>
@@ -183,15 +183,15 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <rect x="25" y="227" width="243.6" height="69" rx="6" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4" stroke-width="1" class="a m2"/>
     </g>
     <g class="a m6">
-      <rect x="640" y="70" width="356" height="230" rx="12" fill="var(--base01)"/>
-      <g transform="translate(662 81) scale(2.6)">
+      <rect x="640" y="154" width="356" height="230" rx="12" fill="var(--base01)"/>
+      <g transform="translate(662 165) scale(2.6)">
         <path d="M20 66Q60 -6 100 66" fill="none" stroke="var(--base0B)" stroke-width="4" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
         <circle cx="60" cy="30" r="6" fill="var(--base0D)" class="a m5 fb"/>
       </g>
     </g>
     <g class="sans a m7">
-      <text x="818" y="332" font-size="13" text-anchor="middle" fill="var(--base04)"><tspan fill="var(--base0D)" font-weight="600">prefix</tspan> namespaces every id and class,</text>
-      <text x="818" y="352" font-size="13" text-anchor="middle" fill="var(--base04)">so scenes inlined in one page never collide.</text>
+      <text x="818" y="416" font-size="13" text-anchor="middle" fill="var(--base04)"><tspan fill="var(--base0D)" font-weight="600">prefix</tspan> namespaces every id and class,</text>
+      <text x="818" y="436" font-size="13" text-anchor="middle" fill="var(--base04)">so scenes inlined in one page never collide.</text>
     </g>
   </g>
 </svg>

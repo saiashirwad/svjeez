@@ -18,7 +18,7 @@ const T0 = 0.9;
 /** `tall` stacks the code above the preview for a phone, and shows the part of the file that builds the scene, set in a narrower measure. */
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
-  const H = tall ? 596 : 392;
+  const H = tall ? 596 : 580;
   const SPLIT = 604;
   const win = chrome(W, H, "plain.ts");
   const full = read(tall ? "./plain-narrow.ts" : "./plain.ts").split("\n");
@@ -36,8 +36,8 @@ export const make = (tall = false): string => {
 
   const lit = tall
     ? [
-        { during: { at: T0 + 0.2, over: 1.4 }, target: src.lines(2, 8).pad(3) },
-        { during: { at: T0 + 1.2, over: 1.2 }, target: src.lines(9, 14).pad(3) },
+        { during: { at: T0 + 0.2, over: 1.4 }, target: src.lines(2, 7).pad(3) },
+        { during: { at: T0 + 1.2, over: 1.2 }, target: src.lines(8, 13).pad(3) },
       ]
     : [
         { during: { at: T0 + 0.2, over: 1.4 }, target: src.lines(9, 11).pad(3) },
@@ -46,10 +46,10 @@ export const make = (tall = false): string => {
 
   const panel = tall
     ? { x: 20, y: 376, w: W - 40, h: 130 }
-    : { x: SPLIT + 36, y: BAR + 30, w: W - SPLIT - 72, h: 230 };
+    : { x: SPLIT + 36, y: (BAR + H - 312) / 2, w: W - SPLIT - 72, h: 230 };
 
   const scale = tall ? 1.8 : 2.6;
-  const note = tall ? { x: W / 2, y: 540 } : { x: (SPLIT + W) / 2, y: BAR + 292 };
+  const note = tall ? { x: W / 2, y: 540 } : { x: (SPLIT + W) / 2, y: panel.y + 262 };
 
   return render(
     {
