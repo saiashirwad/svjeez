@@ -7,6 +7,7 @@ import * as jsxDevRuntime from "svjeez/jsx-dev-runtime";
 import * as jsxRuntime from "svjeez/jsx-runtime";
 import * as params from "svjeez/params";
 import { fixFor } from "./fixes";
+import { gzipSize } from "./gzip";
 
 const modules = new Map<string, object>([
   ["svjeez", svjeez],
@@ -111,12 +112,6 @@ const placeOf = (error: Error): { line?: number; column?: number } => {
   const line = at ? Number(at[1]) - HEADER_LINES : 0;
 
   return line > 0 ? { line, column: Number(at![2]) } : {};
-};
-
-const gzipSize = async (text: string): Promise<number> => {
-  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"));
-
-  return (await new Response(stream).arrayBuffer()).byteLength;
 };
 
 const measure = async (svg: string): Promise<SceneStats> => ({

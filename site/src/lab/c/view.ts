@@ -5,11 +5,11 @@ import type { Spline } from "svjeez";
 import { clamp } from "../util";
 import { curve, DURATION, end, INITIAL, isFlight, route, type Flight } from "./flight";
 
-export const LEG_COLORS = ["#FF6B5B", "#F5A524", "#17B890", "#7C6CF2", "#E255A1", "#2E9BF0"];
+const LEG_COLORS = ["#FF6B5B", "#F5A524", "#17B890", "#7C6CF2", "#E255A1", "#2E9BF0"];
 export const legColor = (i: number) => LEG_COLORS[i % LEG_COLORS.length]!;
 
-export const GHOST_STEP = 1 / 12;
-export const SPEED_STEPS = 24;
+const GHOST_STEP = 1 / 12;
+const SPEED_STEPS = 24;
 
 export const round = (n: number, step: number) => Math.round(n / step) * step;
 export const fmt = (t: number) => `${t.toFixed(2)}s`;

@@ -64,17 +64,17 @@ const swatch = (fur: Fur) => {
 };
 
 /** How an option button shows its value: the word, an icon path in a 24×24 box, or a fur swatch's background. */
-export type Face =
+type Face =
   | { readonly kind: "word" }
   | { readonly kind: "icon"; readonly d: string }
   | { readonly kind: "swatch"; readonly background: string };
 
-export interface Option {
+interface Option {
   readonly value: string;
   readonly face: Face;
 }
 
-export interface Row {
+interface Row {
   readonly gene: ChoiceKey;
   readonly label: string;
   readonly options: readonly Option[];

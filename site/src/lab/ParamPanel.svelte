@@ -9,6 +9,7 @@
     type Values,
   } from "svjeez/params";
   import { easeText } from "@svjeez/live/source";
+  import { easePoints } from "./util";
   import { ease, type Ease } from "svjeez";
 
   // One control per param a scene declares, drawn from the schema alone. Sliders run on the param's own scale.
@@ -33,10 +34,8 @@
 
   const at = (p: NumberParam, v: number) => Math.round(positionOf(p, v) * STOPS);
 
-  const points = (e: Ease) => (e.kind === "bezier" ? e.points : ([0, 0, 1, 1] as const));
-
   const bend = (e: Ease, i: number, v: number) => {
-    const next: [number, number, number, number] = [...points(e)];
+    const next: [number, number, number, number] = [...easePoints(e)];
     next[i] = v;
 
     return ease.bezier(...next);
@@ -86,7 +85,7 @@
       <fieldset class="row">
         <legend class="muted">{name}</legend>
         <code>{easeText(value)}</code>
-        {#each points(value) as v, i (i)}
+        {#each easePoints(value) as v, i (i)}
           <input
             type="number"
             step="0.01"

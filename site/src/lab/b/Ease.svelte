@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ease, easeAt } from "svjeez";
-  import { clamp } from "../util";
+  import { clamp, easePoints } from "../util";
   import { drag } from "./attach";
   import { COLORS } from "./feel";
   import Instrument from "./Instrument.svelte";
@@ -20,8 +20,7 @@
   const feel = $derived(lab.feel);
   const fall = $derived(feel.fall);
 
-  /** The fall's control points. A param of its own kind holds any ease, so a non-bezier one reads as linear. */
-  const points = $derived(fall.kind === "bezier" ? fall.points : ([0, 0, 1, 1] as const));
+  const points = $derived(easePoints(fall));
   const [x1, y1, x2, y2] = $derived(points);
 
   let now = $state(0);

@@ -1,7 +1,7 @@
 import { createContext, untrack } from "svelte";
-import { restyle } from "svjeez";
+import { polylinePath, restyle } from "svjeez";
 import { compilerFor } from "@svjeez/live/client";
-import { svgUrl } from "../util";
+import { lazy, svgUrl } from "../util";
 import { outlineOf, type Outline, type Point } from "./outline";
 import first from "./first.tsx?svjeez";
 import type { Frame } from "./scene";
@@ -20,16 +20,17 @@ const sweep = (to: number) => {
 const thumbPath = (outline: Outline) => {
   const step = Math.max(1, Math.floor(outline.length / 128));
 
-  return `${outline
-    .flatMap(([x, y], i) =>
-      i % step ? [] : [`${i ? "L" : "M"}${x.toFixed(3)} ${(-y).toFixed(3)}`],
-    )
-    .join("")}Z`;
+  return polylinePath(
+    outline.flatMap(([x, y], i) => (i % step ? [] : [{ x, y: -y }])),
+    { closed: true, precision: 3 },
+  );
 };
 
 const strokePath = (points: readonly Point[], closed: boolean) =>
-  points.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("") +
-  (closed ? "Z" : "");
+  polylinePath(
+    points.map(([x, y]) => ({ x, y })),
+    { closed, precision: 1 },
+  );
 
 const kb = (n: number) => `${(n / 1024).toFixed(1)} KB gzip`;
 
@@ -71,7 +72,12 @@ export class Lab {
   thumbs = $derived(new Map([...this.outlines].map(([name, o]) => [name, thumbPath(o)])));
   doodleThumb = $derived(this.doodle && thumbPath(this.doodle));
 
-  #compile = createCompilerLazily();
+  #compile = lazy(() =>
+    compilerFor<Frame>(
+      new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }),
+      (frame) => ({ frame }),
+    ),
+  );
   #target: number = FIRST.n;
   #current: Outline | undefined;
   #shown: Shown | undefined;
@@ -238,17 +244,6 @@ export class Lab {
     this.#busy = false;
     void this.#pump();
   }
-}
-
-/** The compiler's worker starts on first use, which only happens in the browser. */
-function createCompilerLazily() {
-  let compile: ReturnType<typeof compilerFor<Frame>> | undefined;
-
-  return () =>
-    (compile ??= compilerFor<Frame>(
-      new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }),
-      (frame) => ({ frame }),
-    ));
 }
 
 export const [getLab, setLab] = createContext<Lab>();

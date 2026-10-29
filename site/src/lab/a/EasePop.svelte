@@ -1,6 +1,7 @@
 <script lang="ts">
   import { easeText } from "@svjeez/live/source";
   import { ease } from "svjeez";
+  import { clamp } from "../util";
   import { bez, curvePath } from "./curves";
   import { getLab, type EaseEditor } from "./lab.svelte";
 
@@ -36,8 +37,8 @@
     const x = ((e.clientX - b.left) / b.width) * W;
     const y = ((e.clientY - b.top) / b.height) * H;
     const next = [...p];
-    next[held * 2] = Math.round(Math.max(0, Math.min(1, UX(x))) * 100) / 100;
-    next[held * 2 + 1] = Math.round(Math.max(-0.8, Math.min(2.2, UY(y))) * 100) / 100;
+    next[held * 2] = Math.round(clamp(UX(x), 0, 1) * 100) / 100;
+    next[held * 2 + 1] = Math.round(clamp(UY(y), -0.8, 2.2) * 100) / 100;
     editor.set(next);
   };
 

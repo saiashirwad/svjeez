@@ -1,6 +1,6 @@
 import { createContext } from "svelte";
 import { compilerFor, latestWins } from "@svjeez/live/client";
-import { svgUrl } from "../util";
+import { lazy, svgUrl } from "../util";
 import { defaults, fitValues } from "svjeez/params";
 import { params, type Feel } from "./scene";
 import first from "./scene.tsx?svjeez";
@@ -35,14 +35,16 @@ export class Stage {
     this.#push(feel);
   }
 
-  #compile?: ReturnType<typeof compilerFor<Feel>>;
-
-  #draw = async (feel: Feel) => {
-    this.#compile ??= compilerFor<Feel>(
+  /** The worker starts on first use, so nothing reaches for one while the page renders on the server. */
+  #compile = lazy(() =>
+    compilerFor<Feel>(
       new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }),
       (job) => ({ feel: job }),
-    );
-    const result = await this.#compile(feel);
+    ),
+  );
+
+  #draw = async (feel: Feel) => {
+    const result = await this.#compile()(feel);
 
     if (!result.ok) {
       this.error = result.error.message;

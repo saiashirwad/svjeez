@@ -1,24 +1,10 @@
 // Easing and color math for the panel's handles.
-import type { Hex } from "svjeez";
+import { ease, easeAt, type Hex } from "svjeez";
 
 export const bez = (p: readonly number[]) => {
-  const [x1, y1, x2, y2] = [p[0]!, p[1]!, p[2]!, p[3]!];
-  const cx = (t: number) => 3 * (1 - t) * (1 - t) * t * x1 + 3 * (1 - t) * t * t * x2 + t * t * t;
-  const cy = (t: number) => 3 * (1 - t) * (1 - t) * t * y1 + 3 * (1 - t) * t * t * y2 + t * t * t;
+  const curve = ease.bezier(p[0]!, p[1]!, p[2]!, p[3]!);
 
-  return (u: number) => {
-    let lo = 0;
-    let hi = 1;
-
-    for (let k = 0; k < 24; k++) {
-      const mid = (lo + hi) / 2;
-
-      if (cx(mid) < u) lo = mid;
-      else hi = mid;
-    }
-
-    return cy((lo + hi) / 2);
-  };
+  return (u: number) => easeAt(curve, u);
 };
 
 export const curvePath = (

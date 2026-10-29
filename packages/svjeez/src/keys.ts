@@ -1,8 +1,7 @@
 import { valueOf, type Target, type TargetValue, type TargetValues } from "./channels";
 import { easeAt } from "./ease-at";
-import { num } from "./format";
 import { EPSILON, NUDGE, ease, type Ease, type Seconds, type Step } from "./motion";
-import { NUMBER } from "./paths";
+import { blendPaths } from "./paths";
 
 export interface Key {
   readonly t: Seconds;
@@ -73,14 +72,8 @@ const blend = (
   if (isNumber(a) && isNumber(b)) return a + (b - a) * amount;
 
   if (target !== "d" || b === undefined) return a;
-  // A d motion moves between paths with the same commands, so their numbers pair up one to one.
-  const to = (String(b).match(NUMBER) ?? []).map(Number);
-  let k = 0;
 
-  // SAFETY: the replacement keeps every command letter of a, so the result is path data like a.
-  return String(a).replace(NUMBER, (n) =>
-    num(Number(n) + (to[k++]! - Number(n)) * amount),
-  ) as TargetValue;
+  return blendPaths(String(a), String(b), amount);
 };
 
 /** What the keys draw at `t`, as the browser plays them: the last key's values eased toward the next key's. */

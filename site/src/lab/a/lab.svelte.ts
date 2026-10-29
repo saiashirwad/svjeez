@@ -3,8 +3,9 @@ import { createContext, untrack } from "svelte";
 import { restyle } from "svjeez";
 import { seek } from "svjeez/page";
 import type { Compiled } from "@svjeez/live/compile";
-import { compilerFor, latestWins } from "@svjeez/live/client";
-import { svgUrl } from "../util";
+import { createCompiler, latestWins } from "@svjeez/live/client";
+import { gzipSize } from "@svjeez/live/gzip";
+import { clamp, svgUrl } from "../util";
 import initial from "./meadow.tsx?raw";
 import meadow from "./meadow.tsx?svjeez";
 import { positionOf, type NumberParam } from "svjeez/params";
@@ -85,22 +86,8 @@ const NO_TIMELINE: Timeline = { duration: 6, rows: [] };
 
 type Compile = (source: string) => Promise<Compiled>;
 
-const createCompiler = (): Compile =>
-  compilerFor<string>(
-    new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }),
-    (source) => ({
-      source,
-    }),
-  );
-
 /** The download is the file render() writes without `sources`: the same bytes minus the one attribute it adds. */
 const strip = (svg: string) => svg.replaceAll(/ data-source="[^"]*"/g, "");
-
-const gzip = async (text: string) => {
-  const s = new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"));
-
-  return (await new Response(s).arrayBuffer()).byteLength;
-};
 
 export class Lab {
   /** What the worker compiles. Every step of a drag edits it. */
@@ -129,7 +116,7 @@ export class Lab {
   #ms = $state(0);
   paused = $state(false);
   /** Where the dots on every ease ride, 0 to 1, resting at the end for a beat before the next lap. */
-  ride = $derived(Math.min(1, (((this.#ms / 1400) % 1.25) / 1.25) * 1.25));
+  ride = $derived(clamp((((this.#ms / 1400) % 1.25) / 1.25) * 1.25, 0, 1));
   /** The source lines of the steps under the playhead. */
   live = $derived.by(() => {
     const out = new Set<number>();
@@ -165,7 +152,7 @@ export class Lab {
     untrack(() => {
       this.#root = root;
       this.#origin = performance.now();
-      const compile = createCompiler();
+      const compile = createCompiler({ sources: true });
       this.#queue = latestWins((source) => this.#run(compile, source));
       window.__labA = { latencies: this.#latencies, files: () => this.#files };
       this.#schedule();
@@ -252,7 +239,7 @@ export class Lab {
 
     this.ease = {
       anchor,
-      left: Math.max(8, Math.min(host.width - W - 8, r.left - host.left - W / 2)),
+      left: clamp(r.left - host.left - W / 2, 8, Math.max(8, host.width - W - 8)),
       top: r.bottom - host.top + 8,
       get,
       set,
@@ -322,7 +309,7 @@ export class Lab {
   }
 
   seek(at: number) {
-    this.#pausedAt = Math.max(0, Math.min(this.duration - 0.001, at * this.duration));
+    this.#pausedAt = clamp(at * this.duration, 0, this.duration - 0.001);
     void this.#paintImg(this.#pausedAt);
   }
 
@@ -393,7 +380,7 @@ export class Lab {
     const recent = this.#latencies.slice(-20);
 
     this.stats = {
-      gzip: await gzip(svg),
+      gzip: await gzipSize(svg),
       raw: new TextEncoder().encode(svg).length,
       ms,
       avg: recent.reduce((s, l) => s + l.total, 0) / recent.length,

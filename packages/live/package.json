@@ -9,6 +9,7 @@
     "./doc": "./src/doc.ts",
     "./compile": "./src/compile.ts",
     "./client": "./src/client.ts",
+    "./gzip": "./src/gzip.ts",
     "./svelte": "./src/svelte/index.ts"
   },
   "scripts": {

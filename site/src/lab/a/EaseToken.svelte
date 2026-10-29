@@ -3,14 +3,13 @@
   import { ease } from "svjeez";
   import { bez, curvePath, fmt } from "./curves";
   import { getLab } from "./lab.svelte";
+  import { easePoints } from "../util";
 
   let { literal }: { literal: LiteralOf<"ease"> } = $props();
   const lab = getLab();
 
-  const pointsOf = (e: LiteralOf<"ease">["value"]) => (e.kind === "bezier" ? e.points : [0, 0, 1, 1]);
-
   let text = $derived(literal.text);
-  let points: readonly number[] = $derived(pointsOf(literal.value));
+  let points: readonly number[] = $derived(easePoints(literal.value));
 
   /** A named ease turns into `ease.bezier(…)` at its first edit. */
   let name = $derived(literal.name);

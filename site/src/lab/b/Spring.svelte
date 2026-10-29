@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fit } from "svjeez/params";
+  import { polylinePath } from "svjeez";
   import { clamp } from "../util";
   import { drag } from "./attach";
   import { COLORS } from "./feel";
@@ -26,7 +27,9 @@
   let held = $state<number>();
 
   const tx = (s: number) => T0 + (s / SPAN) * (T1 - T0);
-  const line = (points: string[]) => points.map((p, i) => `${i ? "L" : "M"}${p}`).join("");
+
+  const line = (points: readonly { x: number; y: number }[]) =>
+    polylinePath(points, { precision: 1 });
 
   const tau = $derived((now - plucked) / 1000);
   const s = $derived(held ?? (tau < SPAN + 0.6 ? spring(Math.min(tau, SPAN), feel) : 0));
@@ -48,7 +51,7 @@
   });
 
   const trace = $derived(
-    line(SAMPLES.map((t) => `${tx(t).toFixed(1)} ${(MID + spring(t, feel) * AMP).toFixed(1)}`)),
+    line(SAMPLES.map((t) => ({ x: tx(t), y: MID + spring(t, feel) * AMP }))),
   );
 
   const envelope = $derived.by(() => {
@@ -56,8 +59,8 @@
       feel.squash * Math.exp(-feel.damping * 2 * Math.PI * feel.hz * t) * AMP;
 
     return (
-      line(SAMPLES.map((t) => `${tx(t).toFixed(1)} ${(MID - e(t)).toFixed(1)}`)) +
-      line(SAMPLES.map((t) => `${tx(t).toFixed(1)} ${(MID + e(t)).toFixed(1)}`))
+      line(SAMPLES.map((t) => ({ x: tx(t), y: MID - e(t) }))) +
+      line(SAMPLES.map((t) => ({ x: tx(t), y: MID + e(t) })))
     );
   });
 

@@ -1,8 +1,7 @@
 import { createContext } from "svelte";
 import { restyle } from "svjeez";
-import type { Compiled } from "@svjeez/live/compile";
 import { compilerFor, latestWins } from "@svjeez/live/client";
-import { svgUrl } from "../util";
+import { lazy, svgUrl } from "../util";
 import type { At } from "./drags";
 import { carryDrag, type Carrying } from "./drags";
 import type { Part } from "./edit";
@@ -90,7 +89,12 @@ export class Lab {
   shakes = $state(0);
 
   #worker?: Worker;
-  #compile?: (g: Genome) => Promise<Compiled>;
+  /** Starts the worker on first use, so nothing reaches for one while the page renders on the server. */
+  #compile = lazy(() => {
+    this.#worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+
+    return compilerFor<Genome>(this.#worker, (genome) => ({ genome }));
+  });
 
   set(genome: Genome, opts: SetOptions = {}) {
     this.staged = { genome, lineage: opts.lineage ?? "", shelve: !!opts.shelve };
@@ -162,20 +166,10 @@ export class Lab {
     carryDrag(down, { ...o, float: (at) => (this.carried = at && { ghost, at }) });
   }
 
-  /** The compiler, started on first use so nothing reaches for a worker while the page renders on the server. */
-  #compiler() {
-    if (!this.#compile) {
-      this.#worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
-      this.#compile = compilerFor<Genome>(this.#worker, (genome) => ({ genome }));
-    }
-
-    return this.#compile;
-  }
-
   #lastKey = "";
 
   #push = latestWins(async ({ genome, shelve }: { genome: Genome; shelve: boolean }) => {
-    const result = await this.#compiler()(genome);
+    const result = await this.#compile()(genome);
 
     if (!result.ok) {
       this.error = result.error.message;
@@ -270,7 +264,7 @@ export class Lab {
 
     for (const s of restored) {
       if (s.thumb) continue;
-      const r = await this.#compiler()(s.genome);
+      const r = await this.#compile()(s.genome);
       const now = this.shelf.find((x) => x.no === s.no);
 
       if (!r.ok || !now || now.thumb) continue;

@@ -38,6 +38,8 @@ export class Live<S extends Schema> {
   active = $state<string | null>(null);
 
   #doc: Doc<S>;
+  /** Where every handle sits for the current values, so a render reads `handles()` once, not once per grip. */
+  #points: { readonly [key: string]: Point | undefined };
   #src: string;
   #error = $state<string | null>(null);
   #compile: ReturnType<typeof createCompiler> | undefined;
@@ -45,9 +47,12 @@ export class Live<S extends Schema> {
   constructor(text: string, { params, handles }: SceneModule<S>, first: First) {
     this.first = first;
     this.#doc = $state.raw(open(text, params));
+    this.#points = $derived(handles(this.values));
     this.#src = $state(first.src);
 
     type Key = keyof S & string;
+
+    const placed = (key: Key): Point | undefined => this.#points[key];
 
     const pointAt = (key: Key, v: number): Point | undefined => {
       const points: { readonly [key: string]: Point | undefined } = handles({
@@ -72,7 +77,7 @@ export class Live<S extends Schema> {
             return value();
           },
           get at() {
-            return pointAt(key, value());
+            return placed(key);
           },
           along: (v) => pointAt(key, v),
           // SAFETY: `key` names a number param, so a number is its value.

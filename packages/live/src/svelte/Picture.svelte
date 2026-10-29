@@ -16,6 +16,7 @@
     (grip: Grip): Attachment<HTMLElement> =>
     (handle) => {
       let raw = 0;
+      let scale = 1;
       let last = { x: 0, y: 0 };
 
       const offs = [
@@ -25,11 +26,12 @@
           handle.focus();
           handle.setPointerCapture(e.pointerId);
           raw = grip.value;
+          // The picture keeps its size for the drag, so measure it once rather than on every move.
+          scale = scene.first.width / handle.parentElement!.clientWidth;
           last = { x: e.clientX, y: e.clientY };
         }),
         on(handle, "pointermove", (e) => {
           if (!handle.hasPointerCapture(e.pointerId)) return;
-          const scale = scene.first.width / handle.parentElement!.clientWidth;
           const by = { x: (e.clientX - last.x) * scale, y: (e.clientY - last.y) * scale };
           last = { x: e.clientX, y: e.clientY };
           raw = follow(grip.param, (v) => grip.along(v)!, raw, by);

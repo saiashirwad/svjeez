@@ -41,8 +41,11 @@ export const compilerFor = <Job>(worker: Worker, message: (job: Job) => object) 
 export const sceneWorker = () =>
   new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
 
-/** Scene source in, compiled file out, on a worker of its own. */
-export const createCompiler = () => compilerFor<string>(sceneWorker(), (source) => ({ source }));
+/**
+ * Scene source in, compiled file out, on a worker of its own. `sources` marks every element with the line that made it.
+ */
+export const createCompiler = ({ sources = false }: { sources?: boolean } = {}) =>
+  compilerFor<string>(sceneWorker(), (source) => ({ source, sources }));
 
 /**
  * Runs jobs one at a time, and while one runs keeps only the newest of the jobs that arrive, so a drag never builds a

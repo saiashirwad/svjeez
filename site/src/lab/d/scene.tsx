@@ -1,5 +1,16 @@
 import { fourier, tex, type FourierTerm } from "@svjeez/math";
-import { ease, enter, fx, motion, Once, render, sampled, type Hex, type SvgNode } from "svjeez";
+import {
+  ease,
+  enter,
+  fx,
+  motion,
+  Once,
+  polylinePath,
+  render,
+  sampled,
+  type Hex,
+  type SvgNode,
+} from "svjeez";
 import { morph } from "svjeez/extras";
 import type { Outline } from "./outline";
 
@@ -64,7 +75,10 @@ const drawnPath = ({ mean: [mx, my], points }: ReturnType<typeof fourier>) => {
   const step = Math.max(1, Math.floor(points.length / 256));
   const kept = points.filter((_, i) => i % step === 0);
 
-  return `${kept.map(([x, y], i) => `${i ? "L" : "M"}${fix(x - mx, 3)} ${fix(my - y, 3)}`).join("")}Z`;
+  return polylinePath(
+    kept.map(([x, y]) => ({ x: x - mx, y: my - y })),
+    { closed: true, precision: 3 },
+  );
 };
 
 const term = ({ k, r, phase }: FourierTerm) => {
@@ -122,7 +136,11 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
     );
 
   const length = along[STEPS]! || 1;
-  const d = `${trace.map(([x, y], j) => `${j ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("")}Z`;
+
+  const d = polylinePath(
+    trace.map(([x, y]) => ({ x, y })),
+    { closed: true, precision: 1 },
+  );
 
   const inked = sampled(
     (t) => {

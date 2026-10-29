@@ -1,5 +1,6 @@
 import type { Attrs, Color, Paint } from "../attributes";
 import type { Ref } from "../defs";
+import { easeAt } from "../ease-at";
 import { el } from "../el";
 import type { Point, Rect } from "../geometry";
 import {
@@ -185,28 +186,6 @@ const joined = ([first, ...rest]: readonly PathData[]): PathData =>
 const sweepsOf = (m: Moving): readonly Sweep[] =>
   m instanceof Object ? ("from" in m ? [m] : m) : [];
 
-/** The progress `ease` gives at fraction `u` of its transition. */
-const progress = (curve: Ease, u: number): number => {
-  if (curve.kind === "linear") return u;
-
-  if (curve.kind === "steps") return u >= 1 ? 1 : Math.floor(u * curve.count) / curve.count;
-  const [x1, y1, x2, y2] = curve.points;
-
-  const bez = (a: number, b: number, s: number) =>
-    3 * a * s * (1 - s) ** 2 + 3 * b * s * s * (1 - s) + s ** 3;
-
-  let [lo, hi] = [0, 1];
-
-  for (let i = 0; i < 40; i++) {
-    const mid = (lo + hi) / 2;
-
-    if (bez(x1, x2, mid) < u) lo = mid;
-    else hi = mid;
-  }
-
-  return bez(y1, y2, (lo + hi) / 2);
-};
-
 /** `m` as a function of scene time. */
 const valueOf = (m: Moving, what: string): ((t: Seconds) => number) => {
   const sweeps = sweepsOf(m);
@@ -234,7 +213,7 @@ const valueOf = (m: Moving, what: string): ((t: Seconds) => number) => {
     const s = sweeps.findLast((sweep) => sweep.at <= t) ?? sweeps[0]!;
     const u = Math.min(1, Math.max(0, (t - s.at) / s.over));
 
-    return s.from + (s.to - s.from) * progress(s.ease ?? ease.inOut, u);
+    return s.from + (s.to - s.from) * easeAt(s.ease ?? ease.inOut, u);
   };
 };
 
