@@ -1,4 +1,4 @@
-import { def, ease, motion, render, type SvgNode } from "svjeez";
+import { def, ease, motion, render, type Color, type SvgNode } from "svjeez";
 import { code } from "svjeez/extras";
 import { highlight } from "@svjeez/code";
 import { CSS, chrome } from "../kit";
@@ -6,71 +6,181 @@ import { mono, theme } from "../../style";
 
 // The home page hero: a day in ten seconds, written as one motion() chain beside the sky it paints. As each step of the
 // chain plays, its line in the code lights up in the color the sky is heading for, so the timeline in the code and the
-// timeline on screen read as the same thing. The scene below is built from the same numbers the code shows.
+// timeline on screen read as the same thing. The scene and the code are both printed from the tables below, so a knob
+// that changes a color, an ease or a duration changes the picture and the text together.
 
-const SKY = { dawn: "#FFB38A", noon: "#8CCBFF", dusk: "#FF7E5F", night: "#2B2F66" } as const;
-const SUN = "#FFD60A";
-const LAND = "#141826";
-const D = 10;
-const BAR = 40;
+type Phase = "dawn" | "noon" | "dusk" | "night";
+type EaseName = "linear" | "in" | "pop";
 
-const sky = motion({ fill: SKY.dawn })
-  .to({ fill: SKY.noon }, 2)
-  .wait(2)
-  .to({ fill: SKY.dusk }, 2)
-  .to({ fill: SKY.night }, 1.5)
-  .wait(1)
-  .to({ fill: SKY.dawn }, 1.5);
+/** Which world the day happens on. */
+export type Sky = "earth" | "mars" | "sorbet";
+/** How every step moves: today's eases, all linear, or all bouncy. */
+export type Feel = "smooth" | "robot" | "bouncy";
+/** How long the day takes: twice as long, as written, or half. */
+export type Speed = "snail" | "normal" | "rabbit";
 
-const sunX = motion({ x: -200 }).to({ x: 200 }, 6, ease.linear);
-const sunY = motion({ y: 60 }).to({ y: -170 }, 3).to({ y: 60 }, 3, ease.in);
+export interface Knobs {
+  readonly sky: Sky;
+  readonly feel: Feel;
+  readonly speed: Speed;
+}
 
-// Each step of the sky chain: the line that writes it, when it plays, and the color its line lights up in: the sky it
-// heads for, but indigo for night, which would read as gray on a white page. A wait has no tint.
-const STEPS = [
-  { line: /fill: noon/, at: 0, over: 2, tint: SKY.noon },
-  { line: /wait\(2\)/, at: 2, over: 2 },
-  { line: /fill: dusk/, at: 4, over: 2, tint: SKY.dusk },
-  { line: /fill: night/, at: 6, over: 1.5, tint: "#5E5CE6" },
-  { line: /wait\(1\)/, at: 7.5, over: 1 },
-  { line: /fill: dawn \}, 1\.5/, at: 8.5, over: 1.5, tint: SKY.dawn },
-] as const;
+export const DEFAULT: Knobs = { sky: "earth", feel: "smooth", speed: "normal" };
 
-// The sun gets named motions like the sky, so every chain reads top to bottom and the JSX stays one line per element.
-const MOTIONS = [
-  "const sky = motion({ fill: dawn })",
-  "  .to({ fill: noon }, 2)",
-  "  .wait(2)",
-  "  .to({ fill: dusk }, 2)",
-  "  .to({ fill: night }, 1.5)",
-  "  .wait(1)",
-  "  .to({ fill: dawn }, 1.5);",
-  "",
-  "const sunX = motion({ x: -200 })",
-  "  .to({ x: 200 }, 6, ease.linear);",
-  "const sunY = motion({ y: 60 })",
-  "  .to({ y: -170 }, 3)",
-  "  .to({ y: 60 }, 3, ease.in);",
-  "",
-  "<rect width={w} height={h} animation={sky} />",
-];
+interface World {
+  /** The window's title. */
+  readonly file: string;
+  readonly sky: Readonly<Record<Phase, Color>>;
+  /** The color a step's line lights up in, where the sky's own would read as gray on a white page. */
+  readonly tint: Partial<Readonly<Record<Phase, Color>>>;
+  readonly sun: Color;
+  readonly sunR: number;
+  readonly land: Color;
+  /** What the sun does, for the description. */
+  readonly scene: string;
+}
 
-const SOURCE = {
-  wide: [
-    ...MOTIONS,
-    "<circle r={24} fill={sun} animation={[sunX, sunY]} />",
-    "<path d={hills} fill={land} />",
-  ],
-  tall: [
-    ...MOTIONS,
-    "<circle r={24} fill={sun}",
-    "  animation={[sunX, sunY]} />",
-    "<path d={hills} fill={land} />",
-  ],
+// Mars runs the other way round: a butterscotch noon and blue sunsets, under a sun two thirds the size.
+const WORLDS: Readonly<Record<Sky, World>> = {
+  earth: {
+    file: "day.tsx",
+    sky: { dawn: "#FFB38A", noon: "#8CCBFF", dusk: "#FF7E5F", night: "#2B2F66" },
+    tint: { night: "#5E5CE6" },
+    sun: "#FFD60A",
+    sunR: 24,
+    land: "#141826",
+    scene: "a sun arcs over two hills",
+  },
+  mars: {
+    file: "mars.tsx",
+    sky: { dawn: "#A9BCD0", noon: "#E2A66B", dusk: "#4F86C6", night: "#1C1424" },
+    tint: { night: "#8E5CD9" },
+    sun: "#F4F1E6",
+    sunR: 16,
+    land: "#5A1F14",
+    scene: "a small pale sun arcs over two rust-red hills",
+  },
+  sorbet: {
+    file: "sorbet.tsx",
+    sky: { dawn: "#FFB5CC", noon: "#9EEBD5", dusk: "#FFB070", night: "#6A4BA8" },
+    tint: { night: "#9B6BFF" },
+    sun: "#FF4F7B",
+    sunR: 24,
+    land: "#5B3426",
+    scene: "a cherry sun arcs over two chocolate hills",
+  },
 };
 
-/** The source text for one layout. */
-export const source = (name: "wide" | "tall"): string => SOURCE[name].join("\n");
+/** The ease each step names in the code. Undefined is the default ease, which the code leaves out. */
+interface Eases {
+  readonly sky?: EaseName;
+  readonly sunX: EaseName;
+  readonly rise?: EaseName;
+  readonly set: EaseName;
+}
+
+const FEELS: Readonly<Record<Feel, Eases>> = {
+  smooth: { sunX: "linear", set: "in" },
+  robot: { sky: "linear", sunX: "linear", rise: "linear", set: "linear" },
+  bouncy: { sky: "pop", sunX: "linear", rise: "pop", set: "in" },
+};
+
+const SPEEDS: Readonly<Record<Speed, number>> = { snail: 2, normal: 1, rabbit: 0.5 };
+
+/** The sky's chain after its first value, in seconds as written for a normal day. */
+const CHAIN: readonly (
+  | { readonly to: Phase; readonly over: number }
+  | { readonly wait: number }
+)[] = [
+  { to: "noon", over: 2 },
+  { wait: 2 },
+  { to: "dusk", over: 2 },
+  { to: "night", over: 1.5 },
+  { wait: 1 },
+  { to: "dawn", over: 1.5 },
+];
+
+/** The sun takes the first six seconds of a normal day: three up, three down. */
+const ARC = 3;
+const BAR = 40;
+
+const to = (target: string, over: number, name: EaseName | undefined) =>
+  `.to({ ${target} }, ${over}${name ? `, ease.${name}` : ""})`;
+
+const curve = (name: EaseName | undefined) => (name ? ease[name] : undefined);
+
+/** Everything one set of knobs decides: the motions, the code that writes them, and when each line of the chain plays. */
+const plan = ({ sky, feel, speed }: Knobs) => {
+  const world = WORLDS[sky];
+  const eases = FEELS[feel];
+  const k = SPEEDS[speed];
+  const arc = ARC * k;
+
+  const steps = CHAIN.map((step) =>
+    "to" in step ? { ...step, over: step.over * k } : { wait: step.wait * k },
+  );
+
+  let skyMotion = motion({ fill: world.sky.dawn });
+  let at = 0;
+
+  const timing = steps.map((step) => {
+    const start = at;
+
+    if ("to" in step) {
+      skyMotion = skyMotion.to({ fill: world.sky[step.to] }, step.over, curve(eases.sky));
+      at += step.over;
+
+      return { at: start, over: step.over, tint: world.tint[step.to] ?? world.sky[step.to] };
+    }
+
+    skyMotion = skyMotion.wait(step.wait);
+    at += step.wait;
+
+    return { at: start, over: step.wait };
+  });
+
+  const sunX = motion({ x: -200 }).to({ x: 200 }, 2 * arc, curve(eases.sunX));
+  const sunY = motion({ y: 60 })
+    .to({ y: -170 }, arc, curve(eases.rise))
+    .to({ y: 60 }, arc, curve(eases.set));
+
+  const chain = steps.map((step, i) => {
+    const end = i === steps.length - 1 ? ";" : "";
+
+    return "to" in step
+      ? `  ${to(`fill: ${step.to}`, step.over, eases.sky)}${end}`
+      : `  .wait(${step.wait})${end}`;
+  });
+
+  const motions = [
+    "const sky = motion({ fill: dawn })",
+    ...chain,
+    "",
+    "const sunX = motion({ x: -200 })",
+    `  ${to("x: 200", 2 * arc, eases.sunX)};`,
+    "const sunY = motion({ y: 60 })",
+    `  ${to("y: -170", arc, eases.rise)}`,
+    `  ${to("y: 60", arc, eases.set)};`,
+    "",
+    "<rect width={w} height={h} animation={sky} />",
+  ];
+
+  const circle = `<circle r={${world.sunR}} fill={sun}`;
+
+  return {
+    world,
+    duration: at,
+    reducedAt: arc,
+    sky: skyMotion,
+    sun: [sunX, sunY],
+    // The chain's steps sit on the lines after its first.
+    timing: timing.map((t, i) => ({ ...t, row: i + 1 })),
+    source: {
+      wide: [...motions, `${circle} animation={[sunX, sunY]} />`, "<path d={hills} fill={land} />"],
+      tall: [...motions, circle, "  animation={[sunX, sunY]} />", "<path d={hills} fill={land} />"],
+    },
+  };
+};
 
 // Two ridges drawn around the horizon at 0,0, wide enough to hide the sun below it at both ends.
 const HILLS =
@@ -95,13 +205,15 @@ export interface Layout {
   readonly scale: number;
 }
 
-export function day(layout: Layout): string {
+export function day(layout: Layout, knobs: Knobs = DEFAULT): string {
   const { name, width, height, fontSize, panel } = layout;
-  const lines = SOURCE[name];
+  const scene = plan(knobs);
+  const { world } = scene;
+  const lines = scene.source[name];
   const { lineHeight } = layout;
   const y = layout.code.y ?? BAR + (height - BAR - lines.length * fontSize * lineHeight) / 2;
 
-  const listing = code(highlight(source(name), "tsx"), {
+  const listing = code(highlight(lines.join("\n"), "tsx"), {
     theme,
     font: mono,
     fontSize,
@@ -113,11 +225,11 @@ export function day(layout: Layout): string {
   const lineH = listing.metrics.height;
 
   // One bar per step behind its line, tinted toward the color that step is heading for; a wait gets a quiet gray.
-  const bars: SvgNode[] = STEPS.map((step) => {
-    const row = lines.findIndex((line) => step.line.test(line));
-    const indent = lines[row]!.length - lines[row]!.trimStart().length;
+  const bars: SvgNode[] = scene.timing.map((step) => {
+    const line = lines[step.row]!;
+    const indent = line.length - line.trimStart().length;
     const x = listing.metrics.origin + indent * listing.metrics.advance;
-    const width = lines[row]!.trim().length * listing.metrics.advance;
+    const width = line.trim().length * listing.metrics.advance;
 
     const shown = motion({ opacity: 0 })
       .at(step.at)
@@ -128,12 +240,12 @@ export function day(layout: Layout): string {
     return (
       <rect
         x={x - 6}
-        y={listing.metrics.y + row * lineH}
+        y={listing.metrics.y + step.row * lineH}
         width={width + 12}
         height={lineH}
         rx={5}
-        fill={"tint" in step ? step.tint : theme.base03}
-        fillOpacity={"tint" in step ? 0.28 : 0.16}
+        fill={step.tint ?? theme.base03}
+        fillOpacity={step.tint ? 0.28 : 0.16}
         animation={shown}
       />
     );
@@ -154,21 +266,21 @@ export function day(layout: Layout): string {
     {
       width,
       height,
-      duration: D,
+      duration: scene.duration,
       title: "svjeez: a day on one timeline",
-      desc: "A motion() chain beside the sky it paints. The sky turns from dawn to noon, holds, goes to dusk and night, then back to dawn, while a sun arcs over two hills. Each line of the chain lights up while its step plays.",
+      desc: `A motion() chain beside the sky it paints. The sky turns from dawn to noon, holds, goes to dusk and night, then back to dawn, while ${world.scene}. Each line of the chain lights up while its step plays.`,
       css: CSS,
-      reducedMotion: { at: 3 },
+      reducedMotion: { at: scene.reducedAt },
     },
     <>
-      {chrome(width, height, "day.tsx", { mono: true, bar: BAR }).node}
+      {chrome(width, height, world.file, { mono: true, bar: BAR }).node}
       {bars}
       {listing.node}
       <g clipPath={clip}>
-        <rect x={panel.x} y={panel.y} width={panel.w} height={panel.h} animation={sky} />
+        <rect x={panel.x} y={panel.y} width={panel.w} height={panel.h} animation={scene.sky} />
         <g transform={origin}>
-          <circle r={24} fill={SUN} animation={[sunX, sunY]} />
-          <path d={HILLS} fill={LAND} />
+          <circle r={world.sunR} fill={world.sun} animation={scene.sun} />
+          <path d={HILLS} fill={world.land} />
         </g>
       </g>
     </>,
