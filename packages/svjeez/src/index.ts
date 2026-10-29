@@ -2,6 +2,8 @@ export { render, type RenderOptions } from "./render";
 
 export { restyle, type RestyleOptions } from "./restyle";
 
+export { nest, prefixed, type NestOptions } from "./nest";
+
 export {
   motion,
   ease,
@@ -32,6 +34,8 @@ export { calc, type Calc } from "./calc";
 export { fx } from "./fx";
 
 export { picture, Picture, type ImageFormat, type PictureData, type PictureProps } from "./picture";
+
+export { Flipbook, type FlipbookFrame, type FlipbookProps } from "./flipbook";
 
 export {
   font,

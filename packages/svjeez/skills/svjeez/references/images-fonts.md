@@ -27,6 +27,35 @@ Before you embed:
 - A filter over a large animated image re-renders every frame.
 - You are redistributing the bytes. Check the license.
 
+## Flipbooks
+
+`<Flipbook>` plays raster frames, such as a screen recording, on the scene's timeline. Each frame shows from its `at` until the next frame's, and the last holds until `duration`.
+
+```tsx
+import { Flipbook, picture } from "svjeez";
+
+const frames = shots.map((jpeg, i) => ({ at: i / 10, src: picture(jpeg) }));
+<Flipbook frames={frames} duration={D} x={20} y={20} width={400} alt="The page scrolling" />;
+```
+
+- Pass the scene's `duration`, and keep every `at` in time order and below it, or it throws.
+- The file pays for every frame. Crop each frame to the part that moves, and drop a frame that repeats the one before it.
+
+## Nesting scenes
+
+An SVG drawn through `<Picture>` or `<img>` freezes. `nest(svg, { x, y, width, height })` copies a rendered scene inline as a child `<svg>` instead, so it keeps animating on its own clock.
+
+```tsx
+import { nest, prefixed } from "svjeez";
+
+const left = prefixed("l", buildOld);  // every render() inside uses this prefix
+const right = prefixed("r", buildNew);
+<>{nest(left, { width: 400 })}{nest(right, { x: 420, width: 400 })}</>;
+```
+
+- Each nested scene needs its own prefix, from `render({ prefix })` or `prefixed()`, or its ids, classes and keyframes would collide with its neighbours'. `nest()` throws on a scene rendered without one.
+- Through `prefixed()` you can nest a scene whose code you can't change.
+
 ## Fonts
 
 Load a TTF or OTF the way you load an image. Use it as real text, to measure text, or as outlines.
