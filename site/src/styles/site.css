@@ -1301,19 +1301,23 @@ pre.side {
   font: 500 0.875rem / 1 var(--mono);
   color: var(--muted);
 }
-.reel {
-  margin-block: 2rem 1.75rem;
+/* The intro page: the reel fills the window under the header, as large as it fits. */
+.cinema {
+  display: flex;
+  flex-direction: column;
+  block-size: 100dvh;
 }
-.reel .frame {
-  overflow: clip;
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow:
-    0 0 0 1px var(--ring),
-    0 1.25rem 2.5rem -1rem var(--shadow);
+.reel {
+  flex: 1;
+  min-block-size: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 var(--gutter) var(--gutter);
 }
 .reel img {
-  inline-size: 100%;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  inline-size: auto;
   block-size: auto;
 }
 .caption {

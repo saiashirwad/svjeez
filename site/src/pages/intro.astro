@@ -4,8 +4,6 @@ import { getScene } from "@svjeez/astro/scene";
 import hype from "@examples/hype/index.tsx";
 import Base from "../layouts/Base.astro";
 import { themed } from "../palettes";
-
-const kb = Math.round(getScene(hype).svg.length / 1024);
 ---
 
 <Base
@@ -13,21 +11,11 @@ const kb = Math.round(getScene(hype).svg.length / 1024);
   description="A one-minute introduction to svjeez, made with svjeez."
   share={{ title: "svjeez · the intro", description: "A one-minute tour of svjeez, made with svjeez." }}
   current="intro"
+  class="cinema"
 >
-  <main class="wrap">
-    <div class="page-head">
-      <p class="kicker">The intro</p>
-      <h1>See svjeez in motion.</h1>
-      <p class="sub">One SVG. No video, no JavaScript.</p>
-    </div>
-    <div class="reel wide">
-      <div class="frame">
-        <Scene scene={hype} data-themed={themed(getScene(hype).svg) ? "" : undefined} alt="The svjeez intro: Claude Code writes a scene, the code streams into an editor beside a live preview, then shots that compose a world map, Mermaid, equations, charts and voxels, then the install command and the packages." />
-      </div>
-    </div>
-    <p class="more"><a class="btn primary" href="/examples/">Explore the examples</a></p>
+  <main class="reel">
+    <Scene scene={hype} data-themed={themed(getScene(hype).svg) ? "" : undefined} alt="The svjeez intro: Claude Code writes a scene, the code streams into an editor beside a live preview, then shots that compose a world map, Mermaid, equations, charts and voxels, then the install command and the packages." />
   </main>
-  <footer class="wrap foot"><span>One animated SVG, {kb} KB, no runtime JavaScript.</span><nav aria-label="Footer"><a href="https://github.com/saiashirwad/svjeez">GitHub</a><a href="/">Home</a></nav></footer>
 </Base>
 
 <script>
