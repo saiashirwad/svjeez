@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1056 432" width="1056" height="432" role="img" aria-labelledby="t d">
+  <title id="t">404: not on the timeline</title>
+  <desc id="d">The svjeez chick hops along a timeline behind its playhead. The track ends at 6s and the chick skids to a stop, but the playhead sails on into the dark. The chick looks around, lights its antenna bulb like a flashlight and finds the playhead parked far away at 404s.</desc>
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFE066" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#FFE066" stop-opacity="0.12"/>
+    </linearGradient>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,66%{opacity:0.18}69%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,62%{rotate:-22deg}66%,100%{rotate:0deg}}
+@keyframes k3{0%,60%,90%,100%{opacity:0}62%,86%{opacity:1}}
+.m2{animation-name:k2,k3;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k4{0%,40%,69%,100%{opacity:1}50%,66%{opacity:0.18}}
+@keyframes k5{0%{translate:0px 0px}4%{translate:0px 0px;animation-timing-function:linear}40%{translate:480px 0px}56%,100%{translate:780px 0px}}
+.m3{animation-name:k4,k5}
+@keyframes k6{0%,60%,90%,100%{fill:#FFC21A}62%,86%{fill:#FFF6C2}}
+@keyframes k7{0%,67.5%,75.5%,100%{translate:0px 0px}68.7%{translate:0px 3px;animation-timing-function:cubic-bezier(.77,0,.175,1)}70.5%{translate:0px -2px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}71.5%{translate:0px 3px;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
+.m4{animation-name:k6,k7}
+@keyframes k8{0%,55.5%,57.9%,76%,78.4%,100%{opacity:1}55.9%,57.1%,76.4%,77.6%{opacity:0}}
+.m5{animation-name:k8}
+@keyframes k9{0%,47%,92%,100%{translate:0px 0px}49%,53%,62.5%,89%{translate:5px 0px}56%,60%{translate:-5px 0px}}
+.m6{animation-name:k9}
+@keyframes k10{0%,40%,47.2%,100%{rotate:0deg}41.2%{rotate:12deg;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
+.m7{animation-name:k10}
+@keyframes k11{0%,4%,8.5%,13%,17.5%,22%,26.5%,31%,35.5%,40%,67.5%,70.9%,100%{translate:0px 0px}6.25%,10.75%,15.25%,19.75%,24.25%,28.75%,33.25%,37.75%{translate:0px -10px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}69.1%{translate:0px -14px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m8{animation-name:k11}
+@keyframes k12{0%,4%{translate:0px 0px}40%,100%{translate:498.8px 0px}}
+.m9{animation-name:k12;animation-timing-function:linear}
+@keyframes k13{0%,59%,100%{opacity:0}49%{opacity:0;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}52.5%,57%{opacity:1}}
+@keyframes k14{0%,49%{scale:0}52.5%,100%{scale:1}}
+.m10{animation-name:k13,k14;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k15{0%,83%,100%{opacity:0}67%{opacity:0;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}70.5%,81%{opacity:1}}
+@keyframes k16{0%,67%{scale:0}70.5%,100%{scale:1}}
+.m11{animation-name:k15,k16;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k17{0%,100%{opacity:0}3%,95%{opacity:1}}
+.m12{animation-name:k17}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="1055" height="431" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h1055" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="528" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">404.tsx</text>
+  </g>
+  <g class="a m12">
+    <circle cx="789.292" cy="222.799" r="1.405" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="715.594" cy="151.116" r="2.069" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="925.145" cy="125.625" r="1.564" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="764.468" cy="234.118" r="1.226" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="958.918" cy="114.593" r="1.821" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="942.062" cy="194.086" r="1.941" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="896.578" cy="195.235" r="1.726" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="827.686" cy="166.542" r="1.632" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="762.803" cy="147.852" r="2.458" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="935.166" cy="83.575" r="2.329" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="752.163" cy="134.617" r="2.102" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="710.37" cy="189.211" r="2.377" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="781.937" cy="237.163" r="2.182" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="813.96" cy="134.457" r="2.256" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="1016.324" cy="193.481" r="2.099" fill="var(--base03)" opacity="0.5"/>
+    <circle cx="723.493" cy="145.856" r="2.444" fill="var(--base03)" opacity="0.5"/>
+    <path d="M644 287H1032" stroke="var(--base02)" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round"/>
+    <path d="M138 287H630" stroke="var(--base03)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M630 278V296" stroke="var(--base03)" stroke-width="3" stroke-linecap="round"/>
+    <g class="round" font-size="13" fill="var(--base03)">
+      <path d="M150 293V299" stroke="var(--base03)" stroke-width="1.5"/>
+      <text x="150" y="315" text-anchor="middle">0s</text>
+      <path d="M230 293V299" stroke="var(--base03)" stroke-width="1.5"/>
+      <text x="230" y="315" text-anchor="middle">1s</text>
+      <path d="M310 293V299" stroke="var(--base03)" stroke-width="1.5"/>
+      <text x="310" y="315" text-anchor="middle">2s</text>
+      <path d="M390 293V299" stroke="var(--base03)" stroke-width="1.5"/>
+      <text x="390" y="315" text-anchor="middle">3s</text>
+      <path d="M470 293V299" stroke="var(--base03)" stroke-width="1.5"/>
+      <text x="470" y="315" text-anchor="middle">4s</text>
+      <path d="M550 293V299" stroke="var(--base03)" stroke-width="1.5"/>
+      <text x="550" y="315" text-anchor="middle">5s</text>
+      <path d="M630 293V299" stroke="var(--base03)" stroke-width="1.5"/>
+      <text x="630" y="315" text-anchor="middle">6s</text>
+      <g class="a m1">
+        <path d="M930 293V299" stroke="var(--base09)" stroke-width="1.5"/>
+        <text x="930" y="315" text-anchor="middle" fill="var(--base09)" font-weight="700">404s</text>
+      </g>
+    </g>
+    <g transform="translate(590 187.8) rotate(11.5)">
+      <g class="a m2 fb">
+        <path d="M0 0L391.3 -67.2A397 397 0 0 1 391.3 67.2Z" fill="url(#g1)"/>
+        <path d="M0 0L-391.3 -67.2A397 397 0 0 0 -391.3 67.2Z" fill="none"/>
+      </g>
+    </g>
+    <g class="a m3">
+      <path d="M150 257V299" stroke="var(--base06)" stroke-width="2"/>
+      <circle cx="150" cy="257" r="5" fill="var(--base06)"/>
+    </g>
+    <g class="a m9">
+      <g class="a m8">
+        <g transform="translate(91.19999999999999 285.5) scale(0.8) translate(-104 -162)">
+          <g class="a m7 fb">
+            <path d="M104 60V42" stroke="#E3A100" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="104" cy="38" r="9" fill="#FFC21A" class="a m4"/>
+            <path d="M38 150C38 94 68 60 104 60S170 94 170 150C170 158 165 162 157 162H51C43 162 38 158 38 150Z" fill="#FFC21A"/>
+            <path d="M38 150C38 158 43 162 51 162H157C165 162 170 158 170 150C170 146 170 143 169 140C160 148 150 150 104 150S48 148 39 140C38 143 38 146 38 150Z" fill="#F2A900"/>
+            <ellipse cx="66" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+            <ellipse cx="142" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+            <g class="a m6">
+              <path d="M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z" fill="#26262A" class="dm">
+                <animate attributeName="d" values="M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z;M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z;M76.5 112C76.5 111.23 79.86 110.6 84 110.6C88.14 110.6 91.5 111.23 91.5 112C91.5 112.77 88.14 113.4 84 113.4C79.86 113.4 76.5 112.77 76.5 112Z;M76.5 112C76.5 111.23 79.86 110.6 84 110.6C88.14 110.6 91.5 111.23 91.5 112C91.5 112.77 88.14 113.4 84 113.4C79.86 113.4 76.5 112.77 76.5 112Z;M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z;M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z;M76.5 112C76.5 111.23 79.86 110.6 84 110.6C88.14 110.6 91.5 111.23 91.5 112C91.5 112.77 88.14 113.4 84 113.4C79.86 113.4 76.5 112.77 76.5 112Z;M76.5 112C76.5 111.23 79.86 110.6 84 110.6C88.14 110.6 91.5 111.23 91.5 112C91.5 112.77 88.14 113.4 84 113.4C79.86 113.4 76.5 112.77 76.5 112Z;M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z;M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z" keyTimes="0;0.555;0.562;0.567;0.579;0.76;0.767;0.772;0.784;1" calcMode="spline" keySplines="0 0 1 1;0.55 0.06 0.68 0.19;0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19;0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="10s" repeatCount="indefinite"/>
+              </path>
+              <path d="M77 110C77 105.03 80.13 101 84 101C87.87 101 91 105.03 91 110C91 114.97 87.87 119 84 119C80.13 119 77 114.97 77 110Z" fill="#26262A" class="ds" display="none"/>
+              <circle cx="86" cy="106" r="2.4" fill="#FFF" class="a m5"/>
+              <path d="M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z" fill="#26262A" class="dm">
+                <animate attributeName="d" values="M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z;M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z;M116.5 112C116.5 111.23 119.86 110.6 124 110.6C128.14 110.6 131.5 111.23 131.5 112C131.5 112.77 128.14 113.4 124 113.4C119.86 113.4 116.5 112.77 116.5 112Z;M116.5 112C116.5 111.23 119.86 110.6 124 110.6C128.14 110.6 131.5 111.23 131.5 112C131.5 112.77 128.14 113.4 124 113.4C119.86 113.4 116.5 112.77 116.5 112Z;M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z;M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z;M116.5 112C116.5 111.23 119.86 110.6 124 110.6C128.14 110.6 131.5 111.23 131.5 112C131.5 112.77 128.14 113.4 124 113.4C119.86 113.4 116.5 112.77 116.5 112Z;M116.5 112C116.5 111.23 119.86 110.6 124 110.6C128.14 110.6 131.5 111.23 131.5 112C131.5 112.77 128.14 113.4 124 113.4C119.86 113.4 116.5 112.77 116.5 112Z;M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z;M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z" keyTimes="0;0.555;0.562;0.567;0.579;0.76;0.767;0.772;0.784;1" calcMode="spline" keySplines="0 0 1 1;0.55 0.06 0.68 0.19;0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19;0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="10s" repeatCount="indefinite"/>
+              </path>
+              <path d="M117 110C117 105.03 120.13 101 124 101C127.87 101 131 105.03 131 110C131 114.97 127.87 119 124 119C120.13 119 117 114.97 117 110Z" fill="#26262A" class="ds" display="none"/>
+              <circle cx="126" cy="106" r="2.4" fill="#FFF" class="a m5"/>
+            </g>
+            <path d="M97 124Q104 131 111 124" fill="none" stroke="#26262A" stroke-width="4.5" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+    </g>
+    <g class="a m10 fb">
+      <text x="553.2" y="183.8" class="round" font-size="23.4" font-weight="700" text-anchor="middle" fill="var(--base0D)">?</text>
+    </g>
+    <g class="a m11 fb">
+      <text x="553.2" y="183.8" class="round" font-size="23.4" font-weight="700" text-anchor="middle" fill="var(--base0D)">!</text>
+    </g>
+  </g>
+</svg>
