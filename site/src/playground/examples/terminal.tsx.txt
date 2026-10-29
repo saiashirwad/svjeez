@@ -1,0 +1,40 @@
+import { rect, render } from "svjeez";
+import { adaptive, appWindow, systemDark, systemLight, terminal } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+const shell = appWindow(rect(10, 10, 380, 160), { theme, title: "zsh", dots: "traffic" });
+
+// Commands type out at a steady pace, and each output appears
+// once its command is done.
+const session = terminal(
+  [
+    { cmd: "npm i svjeez", output: [[["muted", "added 1 package in 2s"]]] },
+    {
+      cmd: "npx svjeez svg hero.tsx --out hero.svg",
+      output: [[["green", "✓"], " hero.svg  14.2 KB · 0 B JS"]],
+    },
+  ],
+  { theme, x: shell.body.x + 16, y: shell.body.y + 14, fontSize: 12 },
+);
+
+export default function build(): string {
+  return render(
+    {
+      width: 400,
+      height: 180,
+      duration: session.end + 2,
+      title: "Install and build",
+      desc: "A terminal installs svjeez, then compiles a scene to one SVG with no JavaScript.",
+      css: `${css}\n.mono text{font-family:ui-monospace,Menlo,monospace}`,
+      reducedMotion: { at: session.end },
+    },
+    <>
+      <g fontFamily="system-ui, sans-serif">{shell.node}</g>
+      <g class="mono">{session.node}</g>
+    </>,
+  );
+}

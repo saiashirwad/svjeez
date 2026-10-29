@@ -146,26 +146,28 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
 
   const view = new EditorView({ state: editorState(current.source, schedule), parent: editorHost });
 
-  const tabs = choices.map((example) => {
-    const tab = h(
-      "button",
-      { type: "button", class: "pg-tab", "aria-pressed": String(example === current) },
-      example.label,
+  // One menu of examples, the core first and then one per package, so the title bar stays as quiet as a window's.
+  const picker = h("select", { class: "pg-pick", "aria-label": "Example" });
+
+  for (const from of new Set(choices.map((e) => e.from)))
+    picker.append(
+      h(
+        "optgroup",
+        { label: from },
+        ...choices.filter((e) => e.from === from).map((e) => h("option", { value: e.id }, e.label)),
+      ),
     );
 
-    tab.addEventListener("click", () => {
-      if (example === current) return;
-      states.set(current.id, view.state);
-      current = example;
-      view.setState(states.get(example.id) ?? editorState(example.source, schedule));
+  picker.value = current.id;
+  picker.addEventListener("change", () => {
+    const example = choices.find((e) => e.id === picker.value);
 
-      for (const [i, other] of tabs.entries())
-        other.setAttribute("aria-pressed", String(choices[i] === example));
-      clearTimeout(timer);
-      run();
-    });
-
-    return tab;
+    if (!example || example === current) return;
+    states.set(current.id, view.state);
+    current = example;
+    view.setState(states.get(example.id) ?? editorState(example.source, schedule));
+    clearTimeout(timer);
+    run();
   });
 
   const reset = h("button", { type: "button", class: "pg-quiet" }, "Reset");
@@ -218,7 +220,7 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
       "div",
       { class: "pg-tabs" },
       h("span", { class: "pg-dots", "aria-hidden": "true" }, h("i"), h("i"), h("i")),
-      h("div", { class: "pg-tablist", role: "group", "aria-label": "Examples" }, ...tabs),
+      h("label", { class: "pg-picker" }, picker),
       tools,
       reset,
     ),

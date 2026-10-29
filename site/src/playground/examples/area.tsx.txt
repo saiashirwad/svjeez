@@ -1,0 +1,60 @@
+import { chart } from "@svjeez/charts";
+import { enter, render } from "svjeez";
+import { adaptive, systemDark, systemLight, tint } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+const hours = [26, 28, 25, 27, 29, 26, 24, 15, 11, 9, 8, 7];
+const points = hours.map((h, i) => [i + 1, h] as const);
+
+const c = chart({
+  width: 270,
+  height: 120,
+  at: { x: 40, y: 20 },
+  x: { kind: "linear", domain: [1, 12], ticks: 6 },
+  y: { domain: [0, 30], ticks: 3, format: (h) => `${h}h` },
+  theme,
+  font: "ui-monospace, monospace",
+  fontSize: 10,
+  grid: true,
+});
+
+// The fill wipes in with its line, and c.x() and c.y() place
+// anything else in the chart's own units.
+const wait = c.area(points, { at: 0.5, over: 2.2, curve: "monotone", dots: 2.5 });
+const week = c.x(8);
+
+export default function build(): string {
+  return render(
+    {
+      width: 340,
+      height: 170,
+      duration: 6,
+      title: "Time to first review",
+      desc: "An area of review hours wipes on, then a dashed line marks week 8 where the hours drop.",
+      css,
+      reducedMotion: { at: 5 },
+    },
+    <>
+      <rect width={340} height={170} fill={theme.base00} />
+      {c.node}
+      {wait.node}
+      <g animation={enter({ at: wait.end, over: 0.5 })}>
+        <line
+          x1={week}
+          y1={c.y(30)}
+          x2={week}
+          y2={c.y(0)}
+          stroke={tint(theme, "comment")}
+          strokeDasharray="4 4"
+        />
+        <text x={week + 6} y={c.y(30) + 10} fontSize={10} fill={tint(theme, "plain")} fontFamily="system-ui, sans-serif">
+          bot ships
+        </text>
+      </g>
+    </>,
+  );
+}

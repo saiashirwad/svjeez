@@ -1,0 +1,40 @@
+import { epicycles, tex } from "@svjeez/math";
+import { render } from "svjeez";
+import { adaptive, systemDark, systemLight, tint } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+// Any closed outline, here the π glyph, drawn by circles spinning
+// on the tips of circles. Try another letter.
+const pi = tex(String.raw`\pi`, { fontSize: 300, theme });
+
+const e = epicycles(pi.words, {
+  at: 0.5,
+  over: 7,
+  terms: 40,
+  circles: 16,
+  size: 150,
+  center: [160, 110],
+  fill: tint(theme, "blue"),
+});
+
+export default function build(): string {
+  return render(
+    {
+      width: 320,
+      height: 220,
+      duration: 9,
+      title: "π by epicycles",
+      desc: "A chain of spinning circles traces the outline of π, which then fills in.",
+      css,
+      reducedMotion: { at: 8.5 },
+    },
+    <>
+      <rect width={320} height={220} fill={theme.base00} />
+      {e.node}
+    </>,
+  );
+}

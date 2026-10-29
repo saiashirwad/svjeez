@@ -1,8 +1,8 @@
 /**
  * Upgrades every [data-playground] container on the page.
  *
- * data-playground    first example: curve, toast, orbit, flowchart, explainer or adaptive.
- * data-examples      optional comma list that limits the tabs, e.g. "toast,orbit".
+ * data-playground    first example, by id from examples.ts.
+ * data-examples      optional comma list that limits the menu, e.g. "toast,chart".
  * data-eager         optional. Load now instead of near the viewport or on click (the /play page uses it).
  *
  * This module holds only the loader. The editor and the worker (transpiler and library) load when the container

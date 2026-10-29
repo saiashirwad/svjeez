@@ -1,0 +1,41 @@
+import { mermaid } from "@svjeez/mermaid";
+import { render } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+// A Mermaid sequence diagram plays its messages in order.
+const diagram = mermaid(
+  `sequenceDiagram
+  participant B as Browser
+  participant C as CDN
+  B->>C: GET hero.svg
+  C-->>B: 200, one file
+  B->>B: plays, no JavaScript`,
+  { theme, fontSize: 13, play: { at: 0.3, step: 0.6 } },
+);
+
+const { x, y, w, h } = diagram.bounds;
+
+export default function build(): string {
+  return render(
+    {
+      width: w + 40,
+      height: h + 40,
+      duration: 6,
+      title: "Request",
+      desc: "A browser asks a CDN for one SVG file, gets it back and plays it.",
+      css,
+      reducedMotion: { at: 5 },
+    },
+    <>
+      <rect width={w + 40} height={h + 40} fill={theme.base00} />
+      <g transform={`translate(${20 - x} ${20 - y})`} fontFamily="system-ui, sans-serif">
+        {diagram.node}
+      </g>
+    </>,
+  );
+}

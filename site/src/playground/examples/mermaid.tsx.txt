@@ -1,0 +1,55 @@
+import { mermaid } from "@svjeez/mermaid";
+import { render } from "svjeez";
+import { adaptive, flow, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+// Plain Mermaid text, laid out and animated while it compiles.
+const chart = mermaid(
+  `flowchart LR
+  push([Push]) --> build[Build]
+  build --> test{Pass?}
+  test -->|yes| ship((Ship))
+  test -->|no| build`,
+  { theme, fontSize: 13, play: { at: 0.3, step: 0.35 } },
+);
+
+if (chart.kind !== "flowchart") throw new Error("expected a flowchart");
+
+const trip = flow(chart.route("push", "ship"), {
+  at: 3.4,
+  speed: 160,
+  style: "trace",
+  color: theme.base09,
+  arrive: true,
+});
+
+const { w, h } = chart.bounds;
+
+export default function build(): string {
+  return render(
+    {
+      width: w + 40,
+      height: h + 40,
+      duration: 8,
+      title: "Deploy",
+      desc: "A Mermaid flowchart builds node by node, then a token traces the path from push to ship.",
+      css,
+      reducedMotion: { at: 7 },
+    },
+    <>
+      <rect width={w + 40} height={h + 40} fill={theme.base00} />
+      <g
+        transform={`translate(${20 - chart.bounds.x} ${20 - chart.bounds.y})`}
+        fontFamily="system-ui, sans-serif"
+      >
+        {chart.layers.under}
+        {trip.node}
+        {chart.layers.over}
+      </g>
+    </>,
+  );
+}

@@ -1,0 +1,47 @@
+import { project } from "@svjeez/geo";
+import { draw, enter, rect, render } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import world from "world-atlas/countries-110m.json";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+const map = project(world, {
+  frame: rect(10, 10, 300, 160),
+  filter: (f) => f.properties?.name !== "Antarctica",
+});
+
+// A great circle from London to Tokyo, in scene pixels.
+const route = map.route([-0.13, 51.5], [139.7, 35.7], { steps: 32 });
+const d = route.map((p, i) => `${i ? "L" : "M"}${p.x} ${p.y}`).join("");
+const [from, to] = [route[0]!, route.at(-1)!];
+
+export default function build(): string {
+  return render(
+    {
+      width: 320,
+      height: 180,
+      duration: 6,
+      title: "London to Tokyo",
+      desc: "The world fades in, then a great-circle route draws from London to Tokyo.",
+      css,
+      reducedMotion: { at: 5 },
+    },
+    <>
+      <rect width={320} height={180} fill={theme.base00} />
+      <path d={map.land} fill={theme.base02} animation={enter({ at: 0.2, over: 0.8 })} />
+      <path
+        d={d}
+        fill="none"
+        stroke={theme.base09}
+        strokeWidth={2}
+        strokeLinecap="round"
+        animation={draw({ at: 1.2, over: 1.6 })}
+      />
+      <circle cx={from.x} cy={from.y} r={3} fill={theme.base09} />
+      <circle cx={to.x} cy={to.y} r={3} fill={theme.base09} animation={enter({ at: 2.8, over: 0.3 })} />
+    </>,
+  );
+}

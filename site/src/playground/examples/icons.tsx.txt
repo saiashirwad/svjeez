@@ -1,0 +1,50 @@
+import { bell, heartFilled, rocket, settings } from "@svjeez/icons/tabler";
+import { Icon, draw, ease, enter, render, shake } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+// Every Tabler and Lucide icon is path data, so each stroke
+// can draw on by itself.
+const row = [
+  { icon: rocket, color: theme.base0D },
+  { icon: settings, color: theme.base0E },
+  { icon: bell, color: theme.base09, ring: true },
+  { icon: heartFilled, color: theme.base08 },
+];
+
+export default function build(): string {
+  return render(
+    {
+      width: 300,
+      height: 110,
+      duration: 5,
+      title: "Icons",
+      desc: "A rocket, a gear, a bell and a heart draw on stroke by stroke, then the bell rings.",
+      css,
+      reducedMotion: { at: 4 },
+    },
+    <>
+      <rect width={300} height={110} fill={theme.base00} />
+      {row.map(({ icon, color, ring }, i) => (
+        <g animation={enter({ at: i * 0.4, over: 0.4 }, { opacity: 0, scale: 0.6 }, ease.pop)}>
+          <g animation={ring ? shake({ at: 2.6, over: 0.6 }, { rotate: 14 }) : undefined}>
+            <Icon
+              icon={icon}
+              x={34 + i * 66}
+              y={31}
+              size={48}
+              stroke={color}
+              fill={color}
+              strokeWidth={1.75}
+              animation={(d, j) => draw({ at: i * 0.4 + j * 0.12, over: 0.5 })}
+            />
+          </g>
+        </g>
+      ))}
+    </>,
+  );
+}

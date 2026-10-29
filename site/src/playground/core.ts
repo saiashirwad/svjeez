@@ -33,11 +33,49 @@ export type Compiled =
   | { readonly ok: true; readonly svg: string; readonly stats: SceneStats; readonly ms: number }
   | { readonly ok: false; readonly error: SourceError; readonly ms: number };
 
+/** A JSON file as a default export that sucrase's import interop keeps as is. */
+const json = async (file: Promise<{ default: unknown }>) => ({
+  __esModule: true,
+  default: (await file).default,
+});
+
+// The @svjeez packages and the map data load only when a scene imports them, so the worker starts small.
+const packages = new Map<string, () => Promise<object>>([
+  ["@svjeez/charts", () => import("@svjeez/charts")],
+  ["@svjeez/code", () => import("@svjeez/code")],
+  ["@svjeez/geo", () => import("@svjeez/geo")],
+  ["@svjeez/icons/lucide", () => import("@svjeez/icons/lucide")],
+  ["@svjeez/icons/tabler", () => import("@svjeez/icons/tabler")],
+  ["@svjeez/math", () => import("@svjeez/math")],
+  ["@svjeez/mermaid", () => import("@svjeez/mermaid")],
+  ["world-atlas/countries-110m.json", () => json(import("world-atlas/countries-110m.json"))],
+  ["world-atlas/land-110m.json", () => json(import("world-atlas/land-110m.json"))],
+]);
+
+const known = () => [...modules.keys(), ...packages.keys()].filter((name) => !name.includes("jsx"));
+
+/** Loads every package the compiled code requires that isn't loaded yet. */
+const load = async (code: string) => {
+  const names = [...code.matchAll(/require\((["'])(.+?)\1\)/g)].map((match) => match[2]!);
+
+  await Promise.all(
+    names.map(async (name) => {
+      const loader = packages.get(name);
+
+      if (!modules.has(name) && loader) modules.set(name, await loader());
+    }),
+  );
+};
+
 const requireModule = (name: string): object => {
   const found = modules.get(name);
 
   if (!found)
-    throw new Error(`Cannot import "${name}". The playground has "svjeez" and "svjeez/extras".`);
+    throw new Error(
+      `Cannot import "${name}". The playground has ${known()
+        .map((n) => `"${n}"`)
+        .join(", ")}.`,
+    );
 
   return found;
 };
@@ -71,7 +109,7 @@ const measure = async (svg: string): Promise<SceneStats> => ({
 });
 
 /** The scene's default export, called. Throws what the author's code throws. */
-const run = (source: string): string => {
+const run = async (source: string): Promise<string> => {
   const { code } = transform(source, {
     transforms: ["typescript", "jsx", "imports"],
     jsxRuntime: "automatic",
@@ -79,6 +117,7 @@ const run = (source: string): string => {
     production: true,
   });
 
+  await load(code);
   const exports: SceneModule = {};
   new Function("require", "exports", code)(requireModule, exports);
 
@@ -97,7 +136,7 @@ export const compileScene = async (source: string): Promise<Compiled> => {
   const start = performance.now();
 
   try {
-    const svg = run(source);
+    const svg = await run(source);
     const stats = await measure(svg);
 
     return { ok: true, svg, stats, ms: performance.now() - start };

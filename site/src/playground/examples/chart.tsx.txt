@@ -1,0 +1,52 @@
+import { chart } from "@svjeez/charts";
+import { render } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+const stars = { Jan: 12, Feb: 19, Mar: 31, Apr: 44, May: 62, Jun: 87 };
+
+// chart() fits the scales once; each series hands back the
+// second it ends, so the next one can start there.
+const c = chart({
+  width: 260,
+  height: 130,
+  at: { x: 44, y: 20 },
+  x: { kind: "band", domain: months },
+  data: Object.entries(stars),
+  theme,
+  font: "ui-monospace, monospace",
+  fontSize: 10,
+  grid: true,
+});
+
+const bars = c.bars(stars, { at: 0.4, stagger: 0.12 });
+const trend = c.line(Object.entries(stars), {
+  at: bars.end,
+  curve: "monotone",
+  dots: 3,
+});
+
+export default function build(): string {
+  return render(
+    {
+      width: 330,
+      height: 190,
+      duration: 6,
+      title: "Stars",
+      desc: "Six bars grow month by month, then a line draws across their tops.",
+      css,
+      reducedMotion: { at: 5 },
+    },
+    <>
+      <rect width={330} height={190} fill={theme.base00} />
+      {c.node}
+      {bars.node}
+      {trend.node}
+    </>,
+  );
+}

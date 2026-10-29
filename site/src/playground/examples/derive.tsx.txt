@@ -1,0 +1,37 @@
+import { derive } from "@svjeez/math";
+import { render } from "svjeez";
+import { adaptive, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+// Every line keeps its = on one x, so the equals sign stays put
+// while the sides change.
+const d = derive(
+  [
+    String.raw`2x + 4 = 10`,
+    { tex: String.raw`2x = 6`, note: String.raw`- 4` },
+    { tex: String.raw`x = 3`, note: String.raw`\div 2` },
+  ],
+  { at: 0.5, every: 2, x: 150, y: 40, fontSize: 30, theme },
+);
+
+export default function build(): string {
+  return render(
+    {
+      width: 320,
+      height: 110,
+      duration: d.end + 2,
+      title: "Solve for x",
+      desc: "2x + 4 = 10 becomes 2x = 6, then x = 3, with the equals sign held still.",
+      css,
+      reducedMotion: { at: d.end },
+    },
+    <>
+      <rect width={320} height={110} fill={theme.base00} />
+      {d.node}
+    </>,
+  );
+}

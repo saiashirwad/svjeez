@@ -141,24 +141,23 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
     "restart reloads the image",
   );
 
-  // Every tab compiles.
-  const tabs = await page.locator(".pg-tab").all();
+  // Every example in the menu compiles.
+  const ids = await page
+    .locator(".pg-pick option")
+    .evaluateAll((options) => options.map((option) => option.getAttribute("value") ?? ""));
 
-  for (const tab of tabs) {
+  for (const id of ids.filter((id) => id !== "toast")) {
     const before = await page.getAttribute(".pg-img", "src");
-    await tab.click();
+    await page.selectOption(".pg-pick", id);
     await page.waitForFunction(
       (b) => document.querySelector(".pg-img")!.getAttribute("src") !== b,
       before,
     );
-    assert(
-      (await page.locator(".pg-error[hidden]").count()) === 1,
-      `tab "${await tab.textContent()}" builds`,
-    );
+    assert((await page.locator(".pg-error[hidden]").count()) === 1, `example "${id}" builds`);
   }
 
   // Recompile timing for the toast example, as reported by the worker.
-  await tabs[1]!.click();
+  await page.selectOption(".pg-pick", "toast");
   await page.waitForTimeout(400);
 
   const ms = await page.evaluate(
@@ -182,7 +181,7 @@ for (const [scheme, width, height] of [
 
   if (shots)
     await page.screenshot({ path: `${shots}/play-${width}-${scheme}.png`, fullPage: true });
-  await page.getByRole("button", { name: "Light and dark", exact: true }).click();
+  await page.selectOption(".pg-pick", "adaptive");
   await page.waitForTimeout(1500);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
   assert(!overflow, `${scheme} ${width}: no horizontal page scroll`);

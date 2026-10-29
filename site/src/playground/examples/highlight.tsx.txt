@@ -1,0 +1,52 @@
+import { highlight } from "@svjeez/code";
+import { render } from "svjeez";
+import { adaptive, code, morph, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+// highlight() tokenizes with Shiki while the scene compiles and
+// hands back roles, so the colors come from your theme.
+const at = { x: 24, y: 28, fontSize: 15, lineHeight: 1.7, theme };
+
+const named = code(
+  highlight(
+    `function total(prices: number[]) {
+  return prices.reduce((a, b) => a + b, 0);
+}`,
+    "ts",
+  ),
+  at,
+);
+
+const arrow = code(
+  highlight(
+    `const total = (prices: number[]) =>
+  prices.reduce((a, b) => a + b, 0);`,
+    "ts",
+  ),
+  at,
+);
+
+// Runs with the same text carry over and slide; the rest fade.
+const m = morph([named, arrow, named], { at: [2, 5], over: 0.9 });
+
+export default function build(): string {
+  return render(
+    {
+      width: 440,
+      height: 130,
+      duration: 7,
+      title: "Function to arrow",
+      desc: "A named function that sums prices morphs into an arrow function and back.",
+      css: `${css}\n.mono text{font-family:ui-monospace,Menlo,monospace}`,
+      reducedMotion: { at: 3.5 },
+    },
+    <>
+      <rect width={440} height={130} fill={theme.base00} />
+      <g class="mono">{m.node}</g>
+    </>,
+  );
+}

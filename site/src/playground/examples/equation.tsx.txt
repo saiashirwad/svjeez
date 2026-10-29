@@ -1,0 +1,38 @@
+import { tex } from "@svjeez/math";
+import { render } from "svjeez";
+import { adaptive, morph, systemDark, systemLight } from "svjeez/extras";
+
+const { theme, css } = adaptive({
+  light: systemLight,
+  dark: systemDark,
+});
+
+// Every version sits at the same spot, so glyphs that carry
+// over slide to their new place and the rest fade.
+const at = { x: 160, y: 60, fontSize: 34, anchor: [0.5, 0.5], theme } as const;
+
+const steps = [
+  tex(String.raw`(a+b)^2`, at),
+  tex(String.raw`(a+b)(a+b)`, at),
+  tex(String.raw`a^2 + 2ab + b^2`, at),
+];
+
+const m = morph(steps, { at: [1.5, 3.5], over: 0.9 });
+
+export default function build(): string {
+  return render(
+    {
+      width: 320,
+      height: 120,
+      duration: 6,
+      title: "Square of a sum",
+      desc: "(a+b) squared becomes (a+b)(a+b), then a squared plus 2ab plus b squared.",
+      css,
+      reducedMotion: { at: 5 },
+    },
+    <>
+      <rect width={320} height={120} fill={theme.base00} />
+      {m.node}
+    </>,
+  );
+}
