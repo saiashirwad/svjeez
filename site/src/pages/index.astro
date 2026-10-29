@@ -271,17 +271,19 @@ npx svjeez svg scene.tsx --out scene.svg`;
   <link slot="head" rel="preload" as="image" href={s.hero.src} media="(prefers-reduced-motion: no-preference) and (min-width: 64rem)" />
   <link slot="head" rel="preload" as="image" href={s.heroTall.src} media="(prefers-reduced-motion: no-preference) and (max-width: 63.99rem)" />
   <main>
-    <section class="wrap hero g">
-      <h1 class="c1-12">Animated <span class="ul">SVGs</span>, written in TypeScript.</h1>
-      <p class="lede c1-12">Build diagrams, code walkthroughs, charts and more. <span>Ship one SVG file, <strong>zero runtime JavaScript</strong>.</span></p>
-      <div class="cta c1-12"><Install command="npm i svjeez" /></div>
-      <img class="like" src={like.src} width={like.width} height={like.height} alt="" />
-    </section>
+    <div class="lead">
+      <section class="wrap hero g">
+        <h1 class="c1-12">Animated <span class="ul">SVGs</span>, written in TypeScript.</h1>
+        <p class="lede c1-12">Build diagrams, code walkthroughs, charts and more. <span>Ship one SVG file, <strong>zero runtime JavaScript</strong>.</span></p>
+        <div class="cta c1-12"><Install command="npm i svjeez" /></div>
+        <img class="like" src={like.src} width={like.width} height={like.height} alt="" />
+      </section>
 
-    <div class="wrap hero-demo">
-      <div class="win">
-        <LiveScene class="wide" scene={s.hero} cost={55} alt="A motion() chain beside the sky it paints. The sky goes from dawn to noon, holds, turns to dusk and night, then back to dawn, while a sun arcs over two hills. Each step of the chain lights up in the code while it plays." />
-        <LiveScene class="tall" scene={s.heroTall} cost={55} alt="A sky above the motion() chain that paints it: dawn, noon, dusk, night and back, with a sun arcing over two hills. Each step of the chain lights up while it plays." />
+      <div class="wrap hero-demo">
+        <div class="win">
+          <LiveScene class="wide" scene={s.hero} cost={55} alt="A motion() chain beside the sky it paints. The sky goes from dawn to noon, holds, turns to dusk and night, then back to dawn, while a sun arcs over two hills. Each step of the chain lights up in the code while it plays." />
+          <LiveScene class="tall" scene={s.heroTall} cost={55} alt="A sky above the motion() chain that paints it: dawn, noon, dusk, night and back, with a sun arcing over two hills. Each step of the chain lights up while it plays." />
+        </div>
       </div>
     </div>
 

@@ -505,6 +505,18 @@ kbd {
     inline-size: min(100%, 26rem);
   }
 }
+@media (min-width: 48rem) and (max-width: 55.99rem) {
+  .big .win {
+    inline-size: 28rem;
+    margin-inline: auto;
+  }
+}
+/* The live editor needs a keyboard and room, so phones skip it. */
+@media (max-width: 47.99rem) {
+  #play {
+    display: none;
+  }
+}
 
 /* Hero: one left-aligned column on the page grid, the headline, a short paragraph, then the install line.
    Spacing steps on 8px: 32px under the underline, then the same 48px step above and below the install line. */
@@ -618,9 +630,32 @@ kbd {
     inline-size: min(100%, 22.5rem);
   }
 }
-@media (min-width: 56rem) and (max-width: 63.99rem) {
-  .hero-demo .win {
-    inline-size: min(100%, 26rem);
+/* On a tablet the tall demo stands beside the headline instead of under it, so the right half of the page isn't empty. */
+@media (min-width: 48rem) and (max-width: 63.99rem) {
+  .lead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    column-gap: 2.5rem;
+    align-items: center;
+    inline-size: min(100% - 2 * var(--gutter), var(--content));
+    margin-inline: auto;
+    margin-block-end: clamp(3rem, 7vw, 5rem);
+  }
+  .lead > .wrap {
+    inline-size: auto;
+    margin-inline: 0;
+  }
+  .lead .hero h1 {
+    font-size: clamp(2.75rem, 0.25rem + 6vw, 4.25rem);
+  }
+  .lead .lede span {
+    display: inline;
+  }
+  .lead .hero-demo {
+    margin-block: var(--hero-step) 0;
+  }
+  .lead .hero-demo .win {
+    inline-size: 100%;
   }
 }
 
@@ -1344,9 +1379,23 @@ pre.side {
   .pick-label {
     display: none;
   }
+  .controls {
+    padding-inline-start: 0.5rem;
+  }
 }
-/* On the narrowest phones the logo stands for the name, so the menu and both buttons still fit. */
-@media (max-width: 23rem) {
+/* On a phone GitHub is its mark alone, and on the narrowest the logo stands for the name, so the menu and both
+   buttons still fit. The words stay for screen readers. */
+@media (max-width: 30rem) {
+  .top nav .gh + span {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+@media (max-width: 22.49rem) {
   .brand span {
     position: absolute;
     inline-size: 1px;
