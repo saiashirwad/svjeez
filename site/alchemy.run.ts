@@ -14,6 +14,8 @@ export default Alchemy.Stack(
       astro: { output: "static" },
       // Posters render in headless Chromium, which only Node can drive.
       prerenderEnvironment: "node",
+      // An assets-only deploy answers an unknown path with Cloudflare's bare 404 unless it is told to use ours.
+      assets: { notFoundHandling: "404-page" },
       domain: "svjeez.texoport.in",
     });
 

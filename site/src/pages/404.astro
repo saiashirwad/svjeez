@@ -1,0 +1,24 @@
+---
+import lost from "@examples/site/lost.tsx";
+import lostTall from "@examples/site/lost-tall.tsx";
+import LiveScene from "../components/LiveScene.astro";
+import Base from "../layouts/Base.astro";
+import { live } from "../live";
+
+const wide = live(lost);
+const tall = live(lostTall);
+---
+
+<Base title="Not on the timeline · svjeez" description="This page isn't here. The examples and the home page are." class="lost">
+  <main class="wrap lost-page">
+    <h1>This page ran off the end of the timeline.</h1>
+    <p class="lede">Nothing lives at this address. The chick went looking with its flashlight, and found only the playhead, parked at 404 seconds.</p>
+    <div class="big">
+      <div class="win">
+        <LiveScene class="wide" scene={wide} cost={40} name="404" alt={wide.desc} />
+        <LiveScene class="tall" scene={tall} cost={30} name="404" alt={tall.desc} />
+      </div>
+    </div>
+    <p class="more"><a class="btn primary" href="/">Back to the start</a><a class="btn" href="/examples/">Explore the examples</a></p>
+  </main>
+</Base>

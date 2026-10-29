@@ -1,4 +1,6 @@
 ---
+import { getScene } from "@svjeez/astro/scene";
+import mascot from "@examples/site/mascot.tsx";
 import { PALETTES, type Palette } from "../palettes";
 
 interface Props {
@@ -7,6 +9,8 @@ interface Props {
 }
 
 const { current, wide } = Astro.props;
+// The chick from the favicon, alive: it blinks and hops on a long loop, and holds still for a reader who asks for less motion.
+const chick = getScene(mascot);
 
 const links = [
   { href: "/examples/", label: "Examples", page: "examples" },
@@ -22,7 +26,7 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
 ---
 
 <header class:list={["wrap top", { wide }]}>
-  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="" /><span>svjeez</span></a>
+  <a class="brand" href="/"><img src={chick.src} width="26" height="26" alt="" /><span>svjeez</span></a>
   <nav aria-label="Main">
     {
       links.map((link) => (

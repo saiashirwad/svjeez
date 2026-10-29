@@ -1851,3 +1851,19 @@ pre.side {
     white-space: nowrap;
   }
 }
+
+/* Not found: a short heading, the lost chick, and two ways home. */
+.lost-page {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  padding-block: clamp(1.5rem, 5vw, 3.5rem) clamp(3rem, 8vw, 6rem);
+}
+.lost-page h1 {
+  max-inline-size: 18ch;
+  font-size: clamp(2.25rem, 1rem + 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.lost-page .lede {
+  max-inline-size: 46ch;
+}
