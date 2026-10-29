@@ -1,58 +1,253 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 190" width="340" height="190" role="img" aria-labelledby="t d">
   <title id="t">Like this!</title>
   <desc id="d">The words like this! are handwritten, then an arrow swoops down to the animated scene below.</desc>
+  <defs>
+    <symbol id="s1" style="overflow:visible">
+      <path d="M134.1 69l0.4-1.5 0.5-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 -0.5-1.5 -0.5-1.4q-0.8-1.6 -1.5 0l-0.4 1.4 -0.5 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0.1 1.5 0 1.5 0 1.5 0 1.5 0.1 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0.1 1.5 0.6 1.5 0.4 1.5q0.9 1.7 1.7 0Z"/>
+    </symbol>
+    <mask id="m1" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M133.25 69.02L132.75 28.56" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m2"/>
+    </mask>
+    <symbol id="s2" style="overflow:visible">
+      <path d="M143.6 69l0.6-1.6 0.2-1.5 -0.2-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.4 -0.2-1.5 -0.4-1.5 -0.7-0.6q-1-1.5 -1.6 0.2l-0.7 0.6 -0.2 1.6 0.1 1.5 0.1 1.5 0.1 1.5 0.2 1.4 0.1 1.5 0.1 1.5 0.1 1.5 0.2 1.5 0.1 1.5 0.1 1.5 0.2 1.5 0.1 1.5 0.1 1.5 0.2 1.5 0.1 1.5 0.4 1.5 0.8 1.4q1 1.6 1.7-0.1Z"/>
+    </symbol>
+    <mask id="m5" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M142.77 69.02L140.46 41.5" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m6"/>
+    </mask>
+    <symbol id="s3" style="overflow:visible">
+      <path d="M137.9 23.5l0.4 2 2.8 0.9 2.1-3.3 -2.7-1.8 -1.6-0.1 -0.3 1q-1.8 0.6 -0.2 1.6l0.1 1.1 1.4 0.1 -0.4-1.2 0.4-0.8 0.8-0.3 -1.6-0.3q-1.7-0.6 -1.2 1.1Z"/>
+    </symbol>
+    <mask id="m9" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M138.5 22.99C138.5 22.99 140.3 24.97 140.3 24.97C140.3 24.97 141.47 23.3 141.47 23.3C141.47 23.3 138.5 22.99 138.5 22.99" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m10"/>
+    </mask>
+    <symbol id="s4" style="overflow:visible">
+      <path d="M151.2 73.3l0.4-1.5 0.6-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 0-1.5 0-1.5 -0.1-1.5 0-1.5 0-1.5 -0.6-1.5 -0.3-0.9q-0.8-1.6 -1.6 0l-0.3 0.9 -0.5 1.5 -0.1 1.5 0 1.5 0 1.5 0.1 1.5 0 1.5 0 1.5 0 1.5 -0.1 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0.1 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0.1 1.5 0.6 1.5 0.4 1.5q0.8 1.6 1.6 0Z"/>
+    </symbol>
+    <mask id="m13" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M150.41 73.28L150.1 28.87" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
+    </mask>
+    <symbol id="s5" style="overflow:visible">
+      <path d="M168.1 57.5l-1.5-0.6 -1.3-0.8 -1.5-0.3 -1.5-0.2 -1.5-0.2 -1.5-0.3 -1.4-0.2 -1.5-0.3 -1.5-0.2 -1.5-0.2 -1.5-0.3 -0.8 0 0.6 1.7 0.7-0.6 0.9-1.2 1-1.1 1-1.2 1-1.1 0.9-1.1 1-1.2 1-1.1 1-1.2 1-1.1 0.9-1.1 1-1.1 1-1.2 1-1.1 0.6-1.5 0.1-0.6q0.4-1.7 -1.2-1.1l-0.6 0.2 -1.4 0.8 -1 1.1 -1 1.1 -1 1.1 -1 1.2 -1 1.1 -1 1.1 -1 1.1 -1 1.1 -1 1.1 -1 1.1 -1 1.2 -1 1.1 -1 1.1 -1.4 1.6 1 3.1 2.1 0.4 1.5 0.3 1.5 0.2 1.5 0.2 1.5 0.3 1.5 0.2 1.4 0.2 1.5 0.2 1.5 0.3 1.5 0.2 1.6-0.4 1.5-0.1q1.8-0.6 0.3-1.7Z"/>
+    </symbol>
+    <mask id="m17" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M167.94 58.35C167.94 58.35 149.45 55.44 149.45 55.44C149.45 55.44 165.18 37.55 165.18 37.55" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m18"/>
+    </mask>
+    <symbol id="s6" style="overflow:visible">
+      <path d="M172 58.7l1.5-0.4 1.6-0.3 1.5-0.3 1.5-0.5 1.5-0.8 1.3-0.9 1.3-0.9 1.2-1 1.3-1.1 1.1-1.3 1.1-1.9 0.1-2.4 -1-2 -1.5-1.4 -1.9-1 -2.2-0.1 -2.1 0.9 -1.4 1.5 -1 1.5 -0.7 1.5 -0.6 1.5 -0.4 1.6 -0.4 1.5 -0.3 1.5 -0.3 1.5 -0.2 1.5 -0.3 1.5 -0.2 1.5 -0.3 1.5 -0.1 1.6 -0.1 1.7 0.1 1.7 0.5 1.8 1 1.8 2.2 1.5 2.5-0.7 1.5-1 1.2-1.1 1.1-1.1 1.1-1 1.1-1 1.1-1.1 1.1-1 1.1-1 1-1.1 1.1-1 1.1-1.1 1.1-1 0.9-1.2 0.8-1.3 0.8-1.3 0.5-0.8q0.6-1.7 -1.1-1.1l-0.8 0.4 -1.3 0.9 -1.3 0.8 -1.2 0.9 -1 1 -1.1 1.1 -1.1 1.1 -1 1 -1.1 1.1 -1 1 -1.1 1.1 -1.1 1 -1.1 1 -1 1 -1.1 1 -0.9 0.7 -0.2 0.3 -0.1-0.4 -0.4-0.7 -0.3-1.1 -0.1-1.2 0.1-1.4 0.1-1.4 0.2-1.4 0.2-1.5 0.2-1.4 0.3-1.5 0.3-1.4 0.3-1.5 0.3-1.3 0.4-1.4 0.5-1.2 0.6-1.2 0.7-1 0.6-0.7 0.7-0.3 0.6 0.1 0.7 0.4 0.7 0.7 0.3 0.6 0 0.5 -0.5 0.6 -0.8 1 -1 0.9 -1.1 0.8 -1.1 0.8 -1.2 0.8 -1.2 0.7 -1.2 0.8 -1.2 0.9 -1.2 0.9 -1.3 0.6q-1.3 1.3 0.5 1.6Z"/>
+    </symbol>
+    <mask id="m21" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M171.75 57.88C171.75 57.88 175.26 56.68 176.98 55.75C178.71 54.82 180.75 53.41 182.08 52.32C183.41 51.23 184.51 50.13 184.99 49.2C185.48 48.27 185.37 47.54 184.99 46.76C184.61 45.97 183.63 44.82 182.7 44.47C181.78 44.11 180.52 43.67 179.43 44.62C178.34 45.58 177.08 47.24 176.15 50.19C175.22 53.13 174.22 59.52 173.86 62.3C173.51 65.09 173.77 65.74 174.02 66.89C174.27 68.03 174.6 68.93 175.37 69.18C176.14 69.42 175.48 71.03 178.65 68.36C181.81 65.69 194.35 53.15 194.35 53.15" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m22"/>
+    </mask>
+    <symbol id="s7" style="overflow:visible">
+      <path d="M227.9 68.8l0-1.5 0.1-1.6 0.2-1.5 0.1-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.4 -0.2-1.7 -1.7-2.6 -2.6 0.8 -1.4 0.6 -1.3 0.7 -1.4 0.6 0.5 3.7 1.6-0.6 1.4-0.6 1.4-0.5 1.4-0.6 1.4-0.6 1.4-0.5 1.4-0.6 1.3-0.5 1.4-0.5 1.4-0.6 1.4-0.5 1.4-0.6 1.4-0.5 1.4-0.5 2.3-1.3 -3.5-2.1 -1.4 0.6 -1.4 0.5 -1.4 0.5 -1.4 0.6 -1.4 0.5 -1.4 0.5 -1.5 0.5 -1.4 0.6 -0.6 0.4 1.1 0.6 0-1.1 -0.1-1.5 -0.1-1.5 0-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 0-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.4-1.4 -0.4-1.5 -0.3-1.5 -0.2-0.7q-0.9-1.6 -1.7 0.1l0 0.7 -0.2 1.5 -0.3 1.5 -0.2 1.5 0 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 2 2.3 2 2.2-0.7 1.4-0.6 1.3-0.5 1.4-0.5 1.4-0.6 1.4-0.5 1.4-0.6 1.4-0.5 1.4-0.6 -0.7-3.1 -0.6-0.1 -1.3 0.5 -1.4 0.6 -1.4 0.5 -1.4 0.6 -1.4 0.6 -1.4 0.5 -1.4 0.6 -1.4 0.5 -1.4 0.6 -1.4 0.5 -1.4 0.6 -1.4 0.5 -1.4 0.5 -1.2 0.5 1.9 3 1.4-0.6 1.4-0.6 1.3-0.7 0.1-0.5 -1-0.3 0.1 1.3 0.2 1.5 0.1 1.5 0.2 1.5 0.1 1.5 0.2 1.5 0.1 1.5 0.1 1.5 0.3 1.4 0.4 1.5 0.4 1.5 0.4 1.4 0.3 1.5q1 1.6 1.6-0.1Z"/>
+    </symbol>
+    <mask id="m25" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M227.11 68.85C227.11 68.85 225.14 48.21 225.14 48.21C225.14 48.21 218.42 51.33 218.42 51.33C218.42 51.33 239.7 42.96 239.7 42.96C239.7 42.96 225.14 48.52 225.14 48.52C225.14 48.52 223.99 25.96 223.99 25.96" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m26"/>
+    </mask>
+    <symbol id="s8" style="overflow:visible">
+      <path d="M244.3 25.5l0 1.5 -0.2 1.5 -0.2 1.5 -0.2 1.5 0 1.5 0 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0 1.5 0.1 1.7 3.5-1.1 0.1-1.5 0.1-1.5 0.1-1.5 0.1-1.4 0.3-1.4 0.2-1.3 0.4-1.2 0.6-1.2 0.7-1.2 0.8-1.1 0.8-1.2 0.9-1.2 1-1.1 0.8-1 0.9-0.8 0.8-0.5 0.8-0.2 0.6 0.1 0.3 0.3 0.2 1 0.3 1.3 0.3 1.3 0.1 1.4 0 1.4 0 1.5 0 1.5 0 1.5 -0.1 1.5 0.1 1.4 0.2 1.5 0.3 1.6 0.2 1.5 0.1 1.2q0.7 1.7 1.6 0.1l0.2-1.3 0.3-1.5 0.4-1.5 0.3-1.4 0.1-1.5 0.1-1.6 0-1.5 0-1.5 0-1.5 -0.1-1.6 -0.1-1.6 -0.3-1.6 -0.3-1.6 -0.7-1.9 -1.8-1.7 -2.3-0.5 -2.1 0.4 -1.7 1 -1.4 1.2 -1 1.3 -1 1.2 -0.9 1.2 -0.9 1.3 -0.8 1.3 -0.9 1.4 -0.7 1.6 -0.5 1.6 -0.3 1.6 -0.3 1.6 -0.1 1.5 -0.1 1.6 -0.1 1.5 -0.1 1.5 3.4 0.6 0-1.2 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 0-1.5 -0.1-1.5 -0.1-1.5 0-1.5 -0.1-1.5 -0.1-1.5 0-1.5 -0.1-1.5 0-1.5 -0.1-1.5 -0.1-1.5 0-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 0-1.5 -0.1-1.5 -0.2-1.5 -0.4-1.4 -0.3-1.5 -0.4-1.5 -0.1-1.5q-1-1.6 -1.7 0.1Z"/>
+    </symbol>
+    <mask id="m29" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M245.13 25.44C245.13 25.44 247.44 69.18 247.44 69.18C247.44 69.18 247.57 61.64 248.43 58.72C249.3 55.79 251.28 53.53 252.64 51.64C254 49.75 255.37 48.12 256.6 47.38C257.83 46.64 259.24 46.97 260.03 47.22C260.82 47.48 260.95 47.61 261.33 48.89C261.71 50.17 262.2 51.59 262.32 54.92C262.43 58.25 262 68.85 262 68.85" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m30"/>
+    </mask>
+    <symbol id="s9" style="overflow:visible">
+      <path d="M271 69l0.7-1.6 0.1-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.5 -0.1-1.5 -0.1-1.5 -0.2-1.5 -0.1-1.5 -0.2-1.4 -0.1-1.5 -0.4-1.5 -0.8-0.6q-0.9-1.5 -1.6 0.2l-0.7 0.6 -0.1 1.6 0.1 1.5 0.1 1.5 0.1 1.5 0.1 1.4 0.1 1.5 0.2 1.5 0.1 1.5 0.1 1.5 0.2 1.5 0.1 1.5 0.1 1.5 0.1 1.5 0.2 1.5 0.1 1.5 0.1 1.5 0.4 1.5 0.9 1.4q1 1.6 1.6-0.1Z"/>
+    </symbol>
+    <mask id="m33" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M270.22 69.02L267.91 41.5" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m34"/>
+    </mask>
+    <symbol id="s10" style="overflow:visible">
+      <path d="M265.3 23.5l0.5 2 2.7 0.9 2.1-3.3 -2.6-1.8 -1.7-0.1 -0.3 1q-1.7 0.6 -0.1 1.6l0.1 1.1 1.3 0.1 -0.3-1.2 0.3-0.8 0.9-0.3 -1.6-0.3q-1.8-0.6 -1.3 1.1Z"/>
+    </symbol>
+    <mask id="m37" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M265.95 22.99C265.95 22.99 267.75 24.97 267.75 24.97C267.75 24.97 268.92 23.3 268.92 23.3C268.92 23.3 265.95 22.99 265.95 22.99" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m38"/>
+    </mask>
+    <symbol id="s11" style="overflow:visible">
+      <path d="M286.9 70l1.1-1 1.3-0.9 1.2-1 0.9-1.2 0.9-1.2 0.9-1.2 1-1.2 0.9-1.2 1-1.4 0.8-2.4 -1.5-2.6 -2.4-0.6 -1.9 0.2 -1.6 0.4 -1.5 0.5 -1.4 0.4 -1.4 0.4 -1.2 0.3 -1.3 0 -1.3 0 -1.5-0.2 -1.1-0.1 -0.2 0.2 0.2-0.2 0.5-0.9 0.7-1 1-1 1.1-0.9 1.1-1 1.1-0.9 1.1-0.8 1.2-0.8 1.2-0.7 1.2-0.6 1.2-0.5 1.2-0.4 1.3-0.7 0.6-0.2q1.6-0.9 0-1.6l-0.7-0.2 -1.7-0.3 -1.7 0 -1.6 0.6 -1.5 0.8 -1.4 0.8 -1.3 0.9 -1.3 1 -1.2 1 -1.1 1 -1.2 1 -1.1 1.2 -1.1 1.4 -0.9 1.8 0 2.7 2.2 1.6 1.8 0.3 1.6 0.1 1.6 0.2 1.7-0.1 1.7-0.3 1.5-0.4 1.5-0.4 1.4-0.4 1.3-0.3 1.1-0.2 0.4 0 -0.2-0.3 -0.3 0.4 -0.7 1 -0.9 1.2 -0.9 1.2 -0.9 1.2 -0.9 1.1 -1 1.2 -0.7 1.4 -0.5 1.5 -0.7 1.3q-0.4 1.8 1.3 1Z"/>
+    </symbol>
+    <mask id="m41" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M286.24 69.51C286.24 69.51 291.65 62.58 293.1 60.64C294.55 58.7 294.64 58.56 294.92 57.88C295.2 57.21 295.17 56.91 294.76 56.58C294.36 56.25 294.2 55.67 292.48 55.91C290.75 56.15 286.44 57.71 284.42 58.04C282.4 58.37 281.45 57.96 280.36 57.88C279.27 57.81 278.44 57.81 277.86 57.57C277.29 57.33 276.79 57.16 276.9 56.43C277.01 55.69 277.23 54.6 278.54 53.15C279.85 51.7 282.95 49.06 284.78 47.74C286.61 46.43 288.09 45.74 289.51 45.25C290.93 44.75 293.31 44.78 293.31 44.78" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m42"/>
+    </mask>
+    <symbol id="s12" style="overflow:visible">
+      <path d="M300.6 24.4l-0.8 1.5 -0.2 1.5 0 1.5 0 1.5 0 1.5 0 1.5 -0.1 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0 1.5 0.2 1.5 0.8 1q0.8 1.6 1.6 0l0.9-0.9 0.2-1.5 0-1.5 0-1.5 0.1-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 0-1.5 -0.2-1.5 -0.8-1.5q-0.8-1.7 -1.7-0.1Z"/>
+    </symbol>
+    <mask id="m45" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M301.47 24.45L301.33 49.36" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m46"/>
+    </mask>
+    <symbol id="s13" style="overflow:visible">
+      <path d="M299.5 68.3l-0.9 2.3 2.7 1.8 2.8-1.9 -0.7-3.4 -2.6-0.6 -0.5 1q-1.6 0.9 0.1 1.7l0.1 1 0.5-0.3 -0.3-0.8 0.6-0.4 0.7 0.4 -0.8-0.7q-0.8-1.7 -1.7-0.1Z"/>
+    </symbol>
+    <mask id="m49" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M300.35 68.36C300.35 68.36 300.02 70 300.35 70.33C300.67 70.66 301.98 70.63 302.3 70.33C302.63 70.03 302.63 68.85 302.3 68.52C301.98 68.2 300.35 68.36 300.35 68.36" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m50"/>
+    </mask>
+    <symbol id="s14" style="overflow:visible">
+      <path d="M149.8 89.2l-1.5 0.3 -1.5 0.3 -1.5 0.2 -1.5 0.2 -1.5 0.2 -1.5 0.3 -1.4 0.3 -1.5 0.3 -1.4 0.4 -1.5 0.5 -1.4 0.4 -1.5 0.4 -1.4 0.4 -1.5 0.5 -1.4 0.4 -1.4 0.5 -1.5 0.5 -1.4 0.4 -1.4 0.5 -1.5 0.5 -1.4 0.5 -1.4 0.5 -1.4 0.6 -1.4 0.5 -1.5 0.5 -1.4 0.5 -1.4 0.6 -1.4 0.5 -1.4 0.6 -1.4 0.5 -1.4 0.6 -1.4 0.6 -1.4 0.6 -1.4 0.7 -1.3 0.6 -1.4 0.7 -1.4 0.7 -1.3 0.6 -1.4 0.8 -1.3 0.7 -1.4 0.7 -1.3 0.8 -1.3 0.8 -1.3 0.8 -1.3 0.8 -1.3 0.8 -1.2 0.9 -1.3 0.9 -1.2 0.9 -1.2 1 -1.2 0.9 -1.2 1 -1.1 1 -1.2 1.1 -1.1 1.1 -1.1 1 -1 1.2 -1.1 1.1 -1 1.2 -0.9 1.2 -1 1.2 -0.9 1.3 -0.9 1.3 -0.8 1.3 -0.8 1.3 -0.8 1.3 -0.7 1.4 -0.7 1.4 -0.6 1.4 -0.6 1.4 -0.6 1.5 -0.6 1.4 -0.5 1.3 -0.6 1.5 -0.5 1.4 -0.5 1.5 -0.5 1.4 -0.4 1.5 -0.4 1.5 -0.4 1.5 -0.3 1.5 -0.3 1.6 -0.2 1.5 -0.2 1.5 -0.1 1.6 -0.1 1.5 0 1.6 0 1.5 0.2 1.6 0.2 1.5 0.3 1.5 0.4 1.5 0.4 1.5 0.4 1.5 0.2 1.1q1.1 1.4 1.6-0.2l-0.2-1.2 -0.2-1.5 0-1.5 0-1.5 0.1-1.4 0-1.5 0-1.4 0.1-1.5 0-1.4 0.1-1.5 0.1-1.4 0.2-1.4 0.2-1.5 0.3-1.4 0.3-1.4 0.3-1.4 0.4-1.4 0.4-1.4 0.4-1.4 0.5-1.4 0.5-1.4 0.5-1.4 0.6-1.4 0.5-1.3 0.6-1.4 0.6-1.3 0.6-1.3 0.7-1.3 0.7-1.3 0.8-1.2 0.7-1.2 0.8-1.3 0.9-1.1 0.8-1.2 0.9-1.1 0.9-1.2 1-1.1 1-1.1 0.9-1 1.1-1 1-1.1 1.1-1 1.1-0.9 1.1-1 1.1-0.9 1.2-0.9 1.2-0.9 1.1-0.8 1.2-0.9 1.3-0.8 1.2-0.8 1.2-0.8 1.3-0.8 1.3-0.7 1.2-0.8 1.3-0.7 1.3-0.7 1.3-0.7 1.4-0.6 1.3-0.7 1.3-0.6 1.4-0.6 1.3-0.7 1.4-0.6 1.3-0.5 1.4-0.6 1.4-0.6 1.4-0.5 1.3-0.6 1.4-0.5 1.4-0.5 1.4-0.5 1.4-0.5 1.4-0.5 1.5-0.4 1.4-0.5 1.4-0.4 1.4-0.5 1.5-0.4 1.4-0.4 1.4-0.5 1.5-0.4 1.4-0.4 1.4-0.4 1.5-0.4 1.4-0.4 1.4-0.5 1.5-0.4 1.4-0.5 1.4-0.5 1.4-0.6 1.4-0.6 1.4-0.6 1.4-0.5 1.4-0.4q1.4-1.2 -0.4-1.6Z"/>
+    </symbol>
+    <mask id="m53" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M150 90C112 100 74 112 62 144C56 158 56 168 58 178" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m54"/>
+    </mask>
+    <symbol id="s15" style="overflow:visible">
+      <path d="M43.4 164.6l0.7 1.4 0.6 1.4 1 1.1 1 1.1 1.1 1.1 1 1.1 1 1.2 1 1.1 1 1 1.1 1.1 1 1.1 1 1.1 1.3 1.4 2.9 0.5 1.6-1.8 0.8-1.3 0.9-1.2 0.8-1.3 0.9-1.2 0.8-1.2 0.9-1.3 0.8-1.2 0.9-1.2 0.8-1.3 0.9-1.2 0.8-1.2 0.5-1.5 0.1-1q0.3-1.7 -1.2-0.8l-0.8 0.4 -1.3 0.9 -0.9 1.2 -0.9 1.3 -0.8 1.2 -0.9 1.2 -0.9 1.2 -0.9 1.2 -0.8 1.3 -0.9 1.2 -0.9 1.2 -0.9 1.2 -0.9 1.2 -0.1 0.6 0.9-0.2 -0.7-0.8 -1.1-1.1 -1-1.1 -1-1.1 -1-1.1 -1.1-1.1 -1-1.1 -1-1.1 -1.1-1.1 -1-1.1 -1-1 -1.5-0.8 -1.3-0.8q-1.7-0.6 -1.2 1.2Z"/>
+    </symbol>
+    <mask id="m57" maskUnits="userSpaceOnUse" x="-10000" y="-10000" width="20000" height="20000">
+      <path d="M44 164L58 179L70 162" fill="none" stroke="#fff" stroke-width="9.92" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m58"/>
+    </mask>
+  </defs>
   <style><![CDATA[
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
 
 .a{animation-duration:3.457s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,11.57%{stroke-dashoffset:1;visibility:hidden}13.884%,100%{stroke-dashoffset:0;visibility:visible}}
-.m1{animation-name:k1;animation-timing-function:linear}
-@keyframes k2{0%,14.751%{stroke-dashoffset:1;visibility:hidden}17.065%,100%{stroke-dashoffset:0;visibility:visible}}
-.m2{animation-name:k2;animation-timing-function:linear}
-@keyframes k3{0%,17.933%{stroke-dashoffset:1;visibility:hidden}20.247%,100%{stroke-dashoffset:0;visibility:visible}}
-.m3{animation-name:k3;animation-timing-function:linear}
-@keyframes k4{0%,21.115%{stroke-dashoffset:1;visibility:hidden}23.585%,100%{stroke-dashoffset:0;visibility:visible}}
-.m4{animation-name:k4;animation-timing-function:linear}
-@keyframes k5{0%,24.453%{stroke-dashoffset:1;visibility:hidden}26.819%,100%{stroke-dashoffset:0;visibility:visible}}
-.m5{animation-name:k5;animation-timing-function:linear}
-@keyframes k6{0%,27.687%{stroke-dashoffset:1;visibility:hidden}32.199%,100%{stroke-dashoffset:0;visibility:visible}}
-.m6{animation-name:k6;animation-timing-function:linear}
-@keyframes k7{0%,33.067%{stroke-dashoffset:1;visibility:hidden}38.028%,100%{stroke-dashoffset:0;visibility:visible}}
-.m7{animation-name:k7;animation-timing-function:linear}
-@keyframes k8{0%,38.895%{stroke-dashoffset:1;visibility:hidden}44.171%,100%{stroke-dashoffset:0;visibility:visible}}
-.m8{animation-name:k8;animation-timing-function:linear}
-@keyframes k9{0%,45.038%{stroke-dashoffset:1;visibility:hidden}47.352%,100%{stroke-dashoffset:0;visibility:visible}}
-.m9{animation-name:k9;animation-timing-function:linear}
-@keyframes k10{0%,48.22%{stroke-dashoffset:1;visibility:hidden}50.534%,100%{stroke-dashoffset:0;visibility:visible}}
-.m10{animation-name:k10;animation-timing-function:linear}
-@keyframes k11{0%,51.402%{stroke-dashoffset:1;visibility:hidden}54.589%,100%{stroke-dashoffset:0;visibility:visible}}
-.m11{animation-name:k11;animation-timing-function:linear}
-@keyframes k12{0%,55.457%{stroke-dashoffset:1;visibility:hidden}57.771%,100%{stroke-dashoffset:0;visibility:visible}}
-.m12{animation-name:k12;animation-timing-function:linear}
-@keyframes k13{0%,58.638%{stroke-dashoffset:1;visibility:hidden}60.952%,100%{stroke-dashoffset:0;visibility:visible}}
-.m13{animation-name:k13;animation-timing-function:linear}
-@keyframes k14{0%,65.291%{stroke-dashoffset:1;visibility:hidden}79.753%,100%{stroke-dashoffset:0;visibility:visible}}
-.m14{animation-name:k14}
-@keyframes k15{0%,78.307%{stroke-dashoffset:1;visibility:hidden}85.538%,100%{stroke-dashoffset:0;visibility:visible}}
-.m15{animation-name:k15}
+.m2{animation-name:k1;animation-timing-function:linear}
+@keyframes k2{0%{visibility:visible}13.884%,100%{visibility:hidden}}
+.m3{animation-name:k2;animation-timing-function:steps(1)}
+@keyframes k3{0%{visibility:hidden}13.884%,100%{visibility:visible}}
+.m4{animation-name:k3;animation-timing-function:steps(1)}
+@keyframes k4{0%,14.751%{stroke-dashoffset:1;visibility:hidden}17.065%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k4;animation-timing-function:linear}
+@keyframes k5{0%{visibility:visible}17.065%,100%{visibility:hidden}}
+.m7{animation-name:k5;animation-timing-function:steps(1)}
+@keyframes k6{0%{visibility:hidden}17.065%,100%{visibility:visible}}
+.m8{animation-name:k6;animation-timing-function:steps(1)}
+@keyframes k7{0%,17.933%{stroke-dashoffset:1;visibility:hidden}20.247%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k7;animation-timing-function:linear}
+@keyframes k8{0%{visibility:visible}20.247%,100%{visibility:hidden}}
+.m11{animation-name:k8;animation-timing-function:steps(1)}
+@keyframes k9{0%{visibility:hidden}20.247%,100%{visibility:visible}}
+.m12{animation-name:k9;animation-timing-function:steps(1)}
+@keyframes k10{0%,21.115%{stroke-dashoffset:1;visibility:hidden}23.585%,100%{stroke-dashoffset:0;visibility:visible}}
+.m14{animation-name:k10;animation-timing-function:linear}
+@keyframes k11{0%{visibility:visible}23.585%,100%{visibility:hidden}}
+.m15{animation-name:k11;animation-timing-function:steps(1)}
+@keyframes k12{0%{visibility:hidden}23.585%,100%{visibility:visible}}
+.m16{animation-name:k12;animation-timing-function:steps(1)}
+@keyframes k13{0%,24.453%{stroke-dashoffset:1;visibility:hidden}26.819%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k13;animation-timing-function:linear}
+@keyframes k14{0%{visibility:visible}26.819%,100%{visibility:hidden}}
+.m19{animation-name:k14;animation-timing-function:steps(1)}
+@keyframes k15{0%{visibility:hidden}26.819%,100%{visibility:visible}}
+.m20{animation-name:k15;animation-timing-function:steps(1)}
+@keyframes k16{0%,27.687%{stroke-dashoffset:1;visibility:hidden}32.199%,100%{stroke-dashoffset:0;visibility:visible}}
+.m22{animation-name:k16;animation-timing-function:linear}
+@keyframes k17{0%{visibility:visible}32.199%,100%{visibility:hidden}}
+.m23{animation-name:k17;animation-timing-function:steps(1)}
+@keyframes k18{0%{visibility:hidden}32.199%,100%{visibility:visible}}
+.m24{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%,33.067%{stroke-dashoffset:1;visibility:hidden}38.028%,100%{stroke-dashoffset:0;visibility:visible}}
+.m26{animation-name:k19;animation-timing-function:linear}
+@keyframes k20{0%{visibility:visible}38.028%,100%{visibility:hidden}}
+.m27{animation-name:k20;animation-timing-function:steps(1)}
+@keyframes k21{0%{visibility:hidden}38.028%,100%{visibility:visible}}
+.m28{animation-name:k21;animation-timing-function:steps(1)}
+@keyframes k22{0%,38.895%{stroke-dashoffset:1;visibility:hidden}44.171%,100%{stroke-dashoffset:0;visibility:visible}}
+.m30{animation-name:k22;animation-timing-function:linear}
+@keyframes k23{0%{visibility:visible}44.171%,100%{visibility:hidden}}
+.m31{animation-name:k23;animation-timing-function:steps(1)}
+@keyframes k24{0%{visibility:hidden}44.171%,100%{visibility:visible}}
+.m32{animation-name:k24;animation-timing-function:steps(1)}
+@keyframes k25{0%,45.038%{stroke-dashoffset:1;visibility:hidden}47.352%,100%{stroke-dashoffset:0;visibility:visible}}
+.m34{animation-name:k25;animation-timing-function:linear}
+@keyframes k26{0%{visibility:visible}47.352%,100%{visibility:hidden}}
+.m35{animation-name:k26;animation-timing-function:steps(1)}
+@keyframes k27{0%{visibility:hidden}47.352%,100%{visibility:visible}}
+.m36{animation-name:k27;animation-timing-function:steps(1)}
+@keyframes k28{0%,48.22%{stroke-dashoffset:1;visibility:hidden}50.534%,100%{stroke-dashoffset:0;visibility:visible}}
+.m38{animation-name:k28;animation-timing-function:linear}
+@keyframes k29{0%{visibility:visible}50.534%,100%{visibility:hidden}}
+.m39{animation-name:k29;animation-timing-function:steps(1)}
+@keyframes k30{0%{visibility:hidden}50.534%,100%{visibility:visible}}
+.m40{animation-name:k30;animation-timing-function:steps(1)}
+@keyframes k31{0%,51.402%{stroke-dashoffset:1;visibility:hidden}54.589%,100%{stroke-dashoffset:0;visibility:visible}}
+.m42{animation-name:k31;animation-timing-function:linear}
+@keyframes k32{0%{visibility:visible}54.589%,100%{visibility:hidden}}
+.m43{animation-name:k32;animation-timing-function:steps(1)}
+@keyframes k33{0%{visibility:hidden}54.589%,100%{visibility:visible}}
+.m44{animation-name:k33;animation-timing-function:steps(1)}
+@keyframes k34{0%,55.457%{stroke-dashoffset:1;visibility:hidden}57.771%,100%{stroke-dashoffset:0;visibility:visible}}
+.m46{animation-name:k34;animation-timing-function:linear}
+@keyframes k35{0%{visibility:visible}57.771%,100%{visibility:hidden}}
+.m47{animation-name:k35;animation-timing-function:steps(1)}
+@keyframes k36{0%{visibility:hidden}57.771%,100%{visibility:visible}}
+.m48{animation-name:k36;animation-timing-function:steps(1)}
+@keyframes k37{0%,58.638%{stroke-dashoffset:1;visibility:hidden}60.952%,100%{stroke-dashoffset:0;visibility:visible}}
+.m50{animation-name:k37;animation-timing-function:linear}
+@keyframes k38{0%{visibility:visible}60.952%,100%{visibility:hidden}}
+.m51{animation-name:k38;animation-timing-function:steps(1)}
+@keyframes k39{0%{visibility:hidden}60.952%,100%{visibility:visible}}
+.m52{animation-name:k39;animation-timing-function:steps(1)}
+@keyframes k40{0%,65.291%{stroke-dashoffset:1;visibility:hidden}79.753%,100%{stroke-dashoffset:0;visibility:visible}}
+.m54{animation-name:k40}
+@keyframes k41{0%{visibility:visible}79.753%,100%{visibility:hidden}}
+.m55{animation-name:k41;animation-timing-function:steps(1)}
+@keyframes k42{0%{visibility:hidden}79.753%,100%{visibility:visible}}
+.m56{animation-name:k42;animation-timing-function:steps(1)}
+@keyframes k43{0%,78.307%{stroke-dashoffset:1;visibility:hidden}85.538%,100%{stroke-dashoffset:0;visibility:visible}}
+.m58{animation-name:k43}
+@keyframes k44{0%{visibility:visible}85.538%,100%{visibility:hidden}}
+.m59{animation-name:k44;animation-timing-function:steps(1)}
+@keyframes k45{0%{visibility:hidden}85.538%,100%{visibility:visible}}
+.m60{animation-name:k45;animation-timing-function:steps(1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3.457s!important;animation-play-state:paused!important}}
 ]]></style>
-  <g fill="none" stroke="var(--base0B)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M133.25 69.02L132.75 28.56" pathLength="1" stroke-dasharray="1" class="a m1"/>
-    <path d="M142.77 69.02L140.46 41.5" pathLength="1" stroke-dasharray="1" class="a m2"/>
-    <path d="M138.5 22.99C138.5 22.99 140.3 24.97 140.3 24.97C140.3 24.97 141.47 23.3 141.47 23.3C141.47 23.3 138.5 22.99 138.5 22.99" pathLength="1" stroke-dasharray="1" class="a m3"/>
-    <path d="M150.41 73.28L150.1 28.87" pathLength="1" stroke-dasharray="1" class="a m4"/>
-    <path d="M167.94 58.35C167.94 58.35 149.45 55.44 149.45 55.44C149.45 55.44 165.18 37.55 165.18 37.55" pathLength="1" stroke-dasharray="1" class="a m5"/>
-    <path d="M171.75 57.88C171.75 57.88 175.26 56.68 176.98 55.75C178.71 54.82 180.75 53.41 182.08 52.32C183.41 51.23 184.51 50.13 184.99 49.2C185.48 48.27 185.37 47.54 184.99 46.76C184.61 45.97 183.63 44.82 182.7 44.47C181.78 44.11 180.52 43.67 179.43 44.62C178.34 45.58 177.08 47.24 176.15 50.19C175.22 53.13 174.22 59.52 173.86 62.3C173.51 65.09 173.77 65.74 174.02 66.89C174.27 68.03 174.6 68.93 175.37 69.18C176.14 69.42 175.48 71.03 178.65 68.36C181.81 65.69 194.35 53.15 194.35 53.15" pathLength="1" stroke-dasharray="1" class="a m6"/>
-    <path d="M227.11 68.85C227.11 68.85 225.14 48.21 225.14 48.21C225.14 48.21 218.42 51.33 218.42 51.33C218.42 51.33 239.7 42.96 239.7 42.96C239.7 42.96 225.14 48.52 225.14 48.52C225.14 48.52 223.99 25.96 223.99 25.96" pathLength="1" stroke-dasharray="1" class="a m7"/>
-    <path d="M245.13 25.44C245.13 25.44 247.44 69.18 247.44 69.18C247.44 69.18 247.57 61.64 248.43 58.72C249.3 55.79 251.28 53.53 252.64 51.64C254 49.75 255.37 48.12 256.6 47.38C257.83 46.64 259.24 46.97 260.03 47.22C260.82 47.48 260.95 47.61 261.33 48.89C261.71 50.17 262.2 51.59 262.32 54.92C262.43 58.25 262 68.85 262 68.85" pathLength="1" stroke-dasharray="1" class="a m8"/>
-    <path d="M270.22 69.02L267.91 41.5" pathLength="1" stroke-dasharray="1" class="a m9"/>
-    <path d="M265.95 22.99C265.95 22.99 267.75 24.97 267.75 24.97C267.75 24.97 268.92 23.3 268.92 23.3C268.92 23.3 265.95 22.99 265.95 22.99" pathLength="1" stroke-dasharray="1" class="a m10"/>
-    <path d="M286.24 69.51C286.24 69.51 291.65 62.58 293.1 60.64C294.55 58.7 294.64 58.56 294.92 57.88C295.2 57.21 295.17 56.91 294.76 56.58C294.36 56.25 294.2 55.67 292.48 55.91C290.75 56.15 286.44 57.71 284.42 58.04C282.4 58.37 281.45 57.96 280.36 57.88C279.27 57.81 278.44 57.81 277.86 57.57C277.29 57.33 276.79 57.16 276.9 56.43C277.01 55.69 277.23 54.6 278.54 53.15C279.85 51.7 282.95 49.06 284.78 47.74C286.61 46.43 288.09 45.74 289.51 45.25C290.93 44.75 293.31 44.78 293.31 44.78" pathLength="1" stroke-dasharray="1" class="a m11"/>
-    <path d="M301.47 24.45L301.33 49.36" pathLength="1" stroke-dasharray="1" class="a m12"/>
-    <path d="M300.35 68.36C300.35 68.36 300.02 70 300.35 70.33C300.67 70.66 301.98 70.63 302.3 70.33C302.63 70.03 302.63 68.85 302.3 68.52C301.98 68.2 300.35 68.36 300.35 68.36" pathLength="1" stroke-dasharray="1" class="a m13"/>
-    <path d="M150 90C112 100 74 112 62 144C56 158 56 168 58 178" pathLength="1" stroke-dasharray="1" class="a m14"/>
-    <path d="M44 164L58 179L70 162" pathLength="1" stroke-dasharray="1" class="a m15"/>
+  <g fill="var(--base0B)">
+    <use href="#s1" mask="url(#m1)" class="a m3"/>
+    <use href="#s1" class="a m4"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s2" mask="url(#m5)" class="a m7"/>
+    <use href="#s2" class="a m8"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s3" mask="url(#m9)" class="a m11"/>
+    <use href="#s3" class="a m12"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s4" mask="url(#m13)" class="a m15"/>
+    <use href="#s4" class="a m16"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s5" mask="url(#m17)" class="a m19"/>
+    <use href="#s5" class="a m20"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s6" mask="url(#m21)" class="a m23"/>
+    <use href="#s6" class="a m24"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s7" mask="url(#m25)" class="a m27"/>
+    <use href="#s7" class="a m28"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s8" mask="url(#m29)" class="a m31"/>
+    <use href="#s8" class="a m32"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s9" mask="url(#m33)" class="a m35"/>
+    <use href="#s9" class="a m36"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s10" mask="url(#m37)" class="a m39"/>
+    <use href="#s10" class="a m40"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s11" mask="url(#m41)" class="a m43"/>
+    <use href="#s11" class="a m44"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s12" mask="url(#m45)" class="a m47"/>
+    <use href="#s12" class="a m48"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s13" mask="url(#m49)" class="a m51"/>
+    <use href="#s13" class="a m52"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s14" mask="url(#m53)" class="a m55"/>
+    <use href="#s14" class="a m56"/>
+  </g>
+  <g fill="var(--base0B)">
+    <use href="#s15" mask="url(#m57)" class="a m59"/>
+    <use href="#s15" class="a m60"/>
   </g>
 </svg>

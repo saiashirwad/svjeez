@@ -1,4 +1,4 @@
-import { draw, ease, render, strokeFont } from "svjeez";
+import { Ink, ease, render, strokeFont, tool } from "svjeez";
 import { css, theme } from "../style";
 
 // A note beside the hero: "like this!" is hand-lettered, then an arrow swoops down to the demo below it.
@@ -6,6 +6,9 @@ const W = 340;
 const H = 190;
 const hand = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
 const INK = theme.base0B;
+
+/** A felt-tip pen: an even line that thins a little where it lands and lifts. */
+const marker = tool.pen({ size: 3.6, seed: 7 });
 
 const words = hand.path("like this!", { size: 52, x: 128, y: 70 }).d.split(/(?=M)/);
 
@@ -46,12 +49,24 @@ export default function build(): string {
       css,
       reducedMotion: { at: arrowAt + 1.2 },
     },
-    <g fill="none" stroke={INK} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
+    <>
       {strokes.map((s) => (
-        <path d={s.d} animation={draw({ at: s.at, over: s.over }, ease.linear)} />
+        <Ink
+          d={s.d}
+          tool={marker}
+          fill={INK}
+          draw={{ at: s.at, over: s.over }}
+          ease={ease.linear}
+        />
       ))}
-      <path d={SHAFT} animation={draw({ at: arrowAt, over: 0.5 }, ease.out)} />
-      <path d={HEAD} animation={draw({ at: arrowAt + 0.45, over: 0.25 }, ease.out)} />
-    </g>,
+      <Ink d={SHAFT} tool={marker} fill={INK} draw={{ at: arrowAt, over: 0.5 }} ease={ease.out} />
+      <Ink
+        d={HEAD}
+        tool={marker}
+        fill={INK}
+        draw={{ at: arrowAt + 0.45, over: 0.25 }}
+        ease={ease.out}
+      />
+    </>,
   );
 }
