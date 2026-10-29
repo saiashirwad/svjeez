@@ -5,16 +5,6 @@ import "../../lab/a/lab.css";
 
 <Base title="Lab A · svjeez" description="The code is the control panel: drag a number, bend an ease, and a new SVG compiles in your browser." wide>
   <main class="la" data-lab-a>
-    <header class="la-head">
-      <p class="la-kicker">Lab A</p>
-      <h1>The code is the control panel.</h1>
-      <p class="la-lede">
-        Drag any <span class="la-chip la-chip-num">number</span> sideways. Drag a
-        <span class="la-chip la-chip-color"><i></i>color</span> to turn its hue. Click a
-        <span class="la-chip la-chip-ease"><svg viewBox="-2 -8 28 28" aria-hidden="true"><path d="M0 18C6 -6 10 0 24 0"></path></svg>curve</span>
-        to bend it. Every change compiles a new SVG file, right here in your browser.
-      </p>
-    </header>
 
     <div class="la-grid">
       <section class="la-win la-codewin" aria-label="Scene source">
@@ -37,7 +27,6 @@ import "../../lab/a/lab.css";
           <div class="la-tl-head">
             <button type="button" class="la-btn la-play">Pause</button>
             <span class="la-time">0.00s</span>
-            <span class="la-tl-hint">Drag across the lanes to scrub the file’s own clock.</span>
           </div>
           <div class="la-lanes">
             <div class="la-ticks"></div>
@@ -56,7 +45,6 @@ import "../../lab/a/lab.css";
     <div class="la-ease-pop" hidden>
       <svg viewBox="0 0 200 240"></svg>
       <code class="la-ease-text"></code>
-      <p>Drag the two handles. Above the box is overshoot.</p>
     </div>
     <input class="la-color-input" type="color" tabindex="-1" aria-hidden="true" />
   </main>
