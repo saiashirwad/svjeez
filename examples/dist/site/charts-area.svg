@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 340" width="504" height="340" role="img" aria-labelledby="t d">
+  <title id="t">Area chart</title>
+  <desc id="d">An orange area of median review hours wipes on from week 1 to week 12, its dots popping in as the line reaches them. A dashed line then marks week 8, where a review bot ships and the hours fall from about 26 to 7.</desc>
+  <defs>
+    <clipPath id="c1">
+      <rect x="64" y="68" width="372" height="188" class="a m2"/>
+    </clipPath>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="var(--base09)" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="var(--base09)" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+.sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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AlgAIwJYACMCWAAjAlgAIwJYACMCWAAjAlgAIwJYAFUCWABVAlgAVQJYAFUCWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYACMCWAAjAlgAXAJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABGAlgAPwJYAFoCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAWAJYAFUCWABaAlgAPAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABcAlgAAAJY/+ECWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAXwJYAF8CWABhAlgAHgJYAB4CWAAeAlgAHgJYAAoCWAAeAlgAQgJYAFwCWABcAlgAAAJYAFwCWABcAlgAXgJYAFwCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABYAlgAIwJYACMCWABVAlgAIwJYAFwCWABXAlgAWAJYAG8CWABvAlgAbwJYABkCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABcAlgApQJYADcCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYADcCWAAjAlgAIwJYACMCWAAjAlgAIwJYADICWAA3AlgANwJYADcCWAA3AlgANwJYADcCWAA3AlgANwJYADcCWABaAlgAWgJYAFoCWABaAlgArwJYALkCWAAyAlgAXgJYAF0CWABuAlgAbgJYAG4CWAAZAlgAZAJYAGQCWAAMAlgANQJYAFoCWABaAlgAXAJYAFwCWAAUAlgATAJYAF0CWABYAlgAXgJYAFwCWABYAlgANwJYADICWAAyAlgANgJYACgCWABLAlgAXgJYAEACWABAAlgAXgJYAF4CWP/7AlgAQQJY//sCWAA1AlgASAJYAFoCWABUAlgAaQJYAGkCWAAtAlgAAAJYADwCWAA4AlgAAAJYACMCWABaAlgAQQJYAFoCWABeAlgAggJYAIICWACCAlgAHgJYAFUCWABVAlgAEgJYAEECWABeAlgAXgJYAGECWABhAlgAGQJYAEwCWABeAlgAVQJYAF4CWABcAlgAUwJYADcCWAA3AlgANwJYADYCWAAyAlgATgJYAF4CWABAAlgAQAJYAF4CWABiAlgAAAJYAEECWAAFAlgAQAJYAFoCWABaAlgAVAJYAFUCWABVAlgAVQJYAAACWAA+AlgAPAJYAAACWAA8AlgAWgJYADICWABdAlgAbgJYADICWABkAlgAVQJYAF0CWABYAlgAaQJYAFwCWAAyAlgATAJYAFoCWABQAlgAWAJYAF4CWABcAlgANwJYADcCWAAjAlgANgJYACgCWAA2AlgAMgJYAAoCWP+NAlj/jQJY/40CWP+wAlj/gwJY/7ACWABpAlgAIwJYAFwCWABaAlgAXAJYADwCWABGAlgAUAJYAEQCWABcAlgAWAJYADcCWABhAlgAMgJYAF0CWAA3AlgAQgJYAFUCWAAZAlgAXgJYAFgCWABYAlgANwJYAFoCWAA3AlgAKAJYADYCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAVQJYADcCWABaAlgAUAJYAFwCWABeAlgAWgJYAFACWABaAlgASAJYAEYCWABQAlgAVQJYAEQCWABQAlgAUAJYAEQCWACRAlgAmwJYAJcCWACIAlgAkgJYAIkCWACRAlgAmwJYAJYCWACSAlgAkQJYAJsCWACXAlgAiAJYAJICWACJAlgAkQJYAJsCWACWAlgAkgJYAFoCWAAeAlgAHgJYABoCWADZAlgApQJYANkCWACqAlgAPAJYAOECWADhAlgAhwJYAG4CWADZAlgAtAJYACMCWAAjAlgA2QJYAEsCWABLAAD/GQAA/3gCWAC5AlgAcwJYAFUCWABVAlgAzQJYAJYCWABuAlgAlgJYAGkCWACTAlgAjAJYAIwCWABQAlgAAAJYAIwCWAA8AlgApQJYAFUCWABLAlgAVQJYAOYCWACgAlgAHgJYAB4CWACTAlgAkwJYAJYCWAD2Alj+NAJY+9wCWPum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AWYBZgFmAWYBZgFmAWYBZgFmAWYBZgFmAZ4BwAHAAcABwAHAAcABwAHwAfAB8AHwAfAB8AHwAfAB8AHwAfAB8AHwAfAB8AHwAfAB8AHwAfAB8AHwAfAB8AHwAfACJgImAiYCSAJIAkgCSAKKAooCigKKAooCigKKAooCpgKmAqYCpgKmAsQCxALEAsQCxALEAsQCxALEAsQCxALEAsQCxALEAsQCxALEAsQC4ALgAuAC4ALgAuADDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDDAMMAwwDTgNiA4wDugPSBAYEPARQBKAE1gTWBNYE1gTWBNYE1gTWBNYE1gTWBNYE1gTWBNYE1gTWBNYE1gTWBNYE1gTWBNYE1gTsBPoFIgUiBSIFIgUiBSIFIgUiBSIFIgUiBSIFIgUiBSIFIgVCBWIFngXaBdoF2gXaBdoF2gXaBdoF2gXaBdoF2gXaBdoF2gXaBdoF2gXaBdoF2gXaBdoF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBfIF8gXyBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgYKBgoGCgABAAAEjwG4AG4AtAAGAAEAAAAAAAAAAAAAAAAAAwACAAAADACWAAMAAQQJAAAAvAEuAAMAAQQJAAEAHAESAAMAAQQJAAIADgEEAAMAAQQJAAMAPADIAAMAAQQJAAQALACcAAMAAQQJAAUAGgCCAAMAAQQJAAYAKgBYAAMAAQQJAA4ANgAiAAMAAQQJAQAADAAWAAMAAQQJAQQADgEEAAMAAQQJAQ8ADAAKAAMAAQQJARAACgAAAFIAbwBtAGEAbgBJAHQAYQBsAGkAYwBXAGUAaQBnAGgAdABoAHQAdABwAHMAOgAvAC8AcwBjAHIAaQBwAHQAcwAuAHMAaQBsAC4AbwByAGcALwBPAEYATABKAGUAdABCAHIAYQBpAG4AcwBNAG8AbgBvAC0AUgBlAGcAdQBsAGEAcgBWAGUAcgBzAGkAbwBuACAAMgAuADIAMQAxAEoAZQB0AEIAcgBhAGkAbgBzACAATQBvAG4AbwAgAFIAZQBnAHUAbABhAHIAMgAuADIAMQAxADsASgBCADsASgBlAHQAQgByAGEAaQBuAHMATQBvAG4AbwAtAFIAZQBnAHUAbABhAHIAUgBlAGcAdQBsAGEAcgBKAGUAdABCAHIAYQBpAG4AcwAgAE0AbwBuAG8AQwBvAHAAeQByAGkAZwBoAHQAIAAyADAAMgAwACAAVABoAGUAIABKAGUAdABCAHIAYQBpAG4AcwAgAE0AbwBuAG8AIABQAHIAbwBqAGUAYwB0ACAAQQB1AHQAaABvAHIAcwAgACgAaAB0AHQAcABzADoALwAvAGcAaQB0AGgAdQBiAC4AYwBvAG0ALwBKAGUAdABCAHIAYQBpAG4AcwAvAEoAZQB0AEIAcgBhAGkAbgBzAE0AbwBuAG8AKQADAAAAAAAA/2UAMgAAAAEAAAAAAAAAAAAAAAAAAAAAuAH/hbAEjQA=) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,2.5%{opacity:0}8.75%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,10%{width:0px}40%,100%{width:372px}}
+.m2{animation-name:k2;animation-timing-function:linear}
+@keyframes k3{0%,10%{stroke-dashoffset:1;visibility:hidden}40%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3;animation-timing-function:linear}
+@keyframes k4{0%,10%{scale:0}13.75%,100%{scale:1}}
+.m4{animation-name:k4;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k5{0%,12.491%{scale:0}16.241%,100%{scale:1}}
+.m5{animation-name:k5;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k6{0%,15.163%{scale:0}18.913%,100%{scale:1}}
+.m6{animation-name:k6;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k7{0%,17.658%{scale:0}21.408%,100%{scale:1}}
+.m7{animation-name:k7;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k8{0%,20.147%{scale:0}23.897%,100%{scale:1}}
+.m8{animation-name:k8;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k9{0%,22.818%{scale:0}26.568%,100%{scale:1}}
+.m9{animation-name:k9;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k10{0%,25.307%{scale:0}29.057%,100%{scale:1}}
+.m10{animation-name:k10;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k11{0%,29.849%{scale:0}33.599%,100%{scale:1}}
+.m11{animation-name:k11;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k12{0%,32.756%{scale:0}36.506%,100%{scale:1}}
+.m12{animation-name:k12;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k13{0%,35.252%{scale:0}39.002%,100%{scale:1}}
+.m13{animation-name:k13;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k14{0%,37.627%{scale:0}41.377%,100%{scale:1}}
+.m14{animation-name:k14;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k15{0%,40%{scale:0}43.75%,100%{scale:1}}
+.m15{animation-name:k15;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k16{0%,40%{opacity:0}45%,100%{opacity:1}}
+@keyframes k17{0%,40%{translate:-8px 0px}45%,100%{translate:0px 0px}}
+.m16{animation-name:k16,k17}
+@keyframes k18{0%,45%{opacity:0}52.5%,100%{opacity:1}}
+@keyframes k19{0%,45%{translate:0px -6px}52.5%,100%{translate:0px 0px}}
+.m17{animation-name:k18,k19}
+@keyframes k20{0%,50%{opacity:0}57.5%,100%{opacity:1}}
+@keyframes k21{0%,50%{translate:0px 6px}57.5%,100%{translate:0px 0px}}
+.m18{animation-name:k20,k21}
+@keyframes k22{0%,93.75%{opacity:1}100%{opacity:0}}
+.m19{animation-name:k22}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7s!important;animation-play-state:paused!important}}
+]]></style>
+  <g class="sans">
+    <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
+    <path d="M0.5 40.5h503" stroke="var(--base01)"/>
+    <circle cx="20.5" cy="20.5" r="5.5" fill="var(--base08)"/>
+    <circle cx="38.5" cy="20.5" r="5.5" fill="var(--base0A)"/>
+    <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
+    <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">area.tsx</text>
+  </g>
+  <g class="a m19">
+    <g class="a m1">
+      <g>
+        <g stroke-opacity="0.25">
+          <line x1="64" y1="256" x2="436" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="64" y1="193.3" x2="436" y2="193.3" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="64" y1="130.7" x2="436" y2="130.7" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="64" y1="68" x2="436" y2="68" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="64" y1="68" x2="64" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="97.8" y1="68" x2="97.8" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="131.6" y1="68" x2="131.6" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="165.5" y1="68" x2="165.5" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="199.3" y1="68" x2="199.3" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="233.1" y1="68" x2="233.1" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="266.9" y1="68" x2="266.9" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="300.7" y1="68" x2="300.7" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="334.5" y1="68" x2="334.5" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="368.4" y1="68" x2="368.4" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="402.2" y1="68" x2="402.2" y2="256" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="436" y1="68" x2="436" y2="256" stroke="var(--base03)" stroke-width="1"/>
+        </g>
+        <line x1="64" y1="256" x2="436" y2="256" stroke="var(--base03)" stroke-width="1.5"/>
+        <line x1="64" y1="68" x2="64" y2="256" stroke="var(--base03)" stroke-width="1.5"/>
+        <line x1="60" y1="256" x2="68" y2="256" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="60" y1="193.3" x2="68" y2="193.3" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="60" y1="130.7" x2="68" y2="130.7" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="60" y1="68" x2="68" y2="68" stroke="var(--base03)" stroke-width="1"/>
+        <text x="57" y="259.5" font-size="10" text-anchor="end" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0h</text>
+        <text x="57" y="196.8" font-size="10" text-anchor="end" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">10h</text>
+        <text x="57" y="134.2" font-size="10" text-anchor="end" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">20h</text>
+        <text x="57" y="71.5" font-size="10" text-anchor="end" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">30h</text>
+        <line x1="64" y1="252" x2="64" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="97.8" y1="252" x2="97.8" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="131.6" y1="252" x2="131.6" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="165.5" y1="252" x2="165.5" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="199.3" y1="252" x2="199.3" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="233.1" y1="252" x2="233.1" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="266.9" y1="252" x2="266.9" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="300.7" y1="252" x2="300.7" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="334.5" y1="252" x2="334.5" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="368.4" y1="252" x2="368.4" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="402.2" y1="252" x2="402.2" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <line x1="436" y1="252" x2="436" y2="260" stroke="var(--base03)" stroke-width="1"/>
+        <text x="64" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">1</text>
+        <text x="97.8" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">2</text>
+        <text x="131.6" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">3</text>
+        <text x="165.5" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">4</text>
+        <text x="199.3" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">5</text>
+        <text x="233.1" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">6</text>
+        <text x="266.9" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">7</text>
+        <text x="300.7" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">8</text>
+        <text x="334.5" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">9</text>
+        <text x="368.4" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">10</text>
+        <text x="402.2" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">11</text>
+        <text x="436" y="270" font-size="10" text-anchor="middle" fill="var(--base03)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">12</text>
+      </g>
+    </g>
+    <g>
+      <g clip-path="url(#c1)">
+        <path d="M64,93.1C75.3,86.8,86.5,80.5,97.8,80.5C109.1,80.5,120.3,99.3,131.6,99.3C142.9,99.3,154.2,91,165.5,86.8C176.8,82.6,188,74.3,199.3,74.3C210.6,74.3,221.8,87.9,233.1,93.1C244.4,98.3,255.6,97.3,266.9,105.6C278.2,113.9,289.4,148.4,300.7,162C312,175.6,323.2,180.8,334.5,187.1C345.8,193.4,357.1,196.5,368.4,199.6C379.7,202.7,390.9,203.8,402.2,205.9C413.5,208,424.7,210,436,212.1L436,256C424.7,256,413.5,256,402.2,256C390.9,256,379.7,256,368.4,256C357.1,256,345.8,256,334.5,256C323.2,256,312,256,300.7,256C289.4,256,278.2,256,266.9,256C255.6,256,244.4,256,233.1,256C221.8,256,210.6,256,199.3,256C188,256,176.8,256,165.5,256C154.2,256,142.9,256,131.6,256C120.3,256,109.1,256,97.8,256C86.5,256,75.3,256,64,256Z" fill="url(#g1)"/>
+      </g>
+      <g>
+        <path d="M64,93.1C75.3,86.8,86.5,80.5,97.8,80.5C109.1,80.5,120.3,99.3,131.6,99.3C142.9,99.3,154.2,91,165.5,86.8C176.8,82.6,188,74.3,199.3,74.3C210.6,74.3,221.8,87.9,233.1,93.1C244.4,98.3,255.6,97.3,266.9,105.6C278.2,113.9,289.4,148.4,300.7,162C312,175.6,323.2,180.8,334.5,187.1C345.8,193.4,357.1,196.5,368.4,199.6C379.7,202.7,390.9,203.8,402.2,205.9C413.5,208,424.7,210,436,212.1" fill="none" stroke="var(--base09)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+        <circle cx="64" cy="93.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m4 fb"/>
+        <circle cx="97.8" cy="80.5" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m5 fb"/>
+        <circle cx="131.6" cy="99.3" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m6 fb"/>
+        <circle cx="165.5" cy="86.8" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m7 fb"/>
+        <circle cx="199.3" cy="74.3" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m8 fb"/>
+        <circle cx="233.1" cy="93.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m9 fb"/>
+        <circle cx="266.9" cy="105.6" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m10 fb"/>
+        <circle cx="300.7" cy="162" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m11 fb"/>
+        <circle cx="334.5" cy="187.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m12 fb"/>
+        <circle cx="368.4" cy="199.6" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m13 fb"/>
+        <circle cx="402.2" cy="205.9" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m14 fb"/>
+        <circle cx="436" cy="212.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m15 fb"/>
+        <text x="447" y="215.6" font-size="10" fill="var(--base09)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m16">median</text>
+      </g>
+    </g>
+    <g class="a m17">
+      <line x1="300.727" y1="68" x2="300.727" y2="256" stroke="var(--base03)" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <text x="308.727" y="80" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">bot ships</text>
+    </g>
+    <g class="a m18">
+      <text x="252" y="314" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" text-anchor="middle" fill="var(--base03)">c.area(points, { curve: "monotone" })</text>
+    </g>
+  </g>
+</svg>

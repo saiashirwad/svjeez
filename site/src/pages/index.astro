@@ -5,6 +5,9 @@ import agents from "@examples/site/agents.tsx";
 import agentsTall from "@examples/site/agents-tall.tsx";
 import breaker from "@examples/breaker/index.tsx";
 import charts from "@examples/site/charts.tsx";
+import chartsArea from "@examples/site/charts-area.tsx";
+import chartsGrouped from "@examples/site/charts-grouped.tsx";
+import chartsLines from "@examples/site/charts-lines.tsx";
 import explainer from "@examples/site/explainer.tsx";
 import fonts from "@examples/site/fonts.tsx";
 import geo from "@examples/site/geo.tsx";
@@ -63,6 +66,9 @@ const s = {
   mathPythagoras: live(mathPythagoras),
   geo: live(geo),
   charts: live(charts),
+  chartsGrouped: live(chartsGrouped),
+  chartsArea: live(chartsArea),
+  chartsLines: live(chartsLines),
   fonts: live(fonts),
   breaker: live(breaker),
   agents: live(agents),
@@ -166,7 +172,15 @@ const route = map.route(london, tokyo);
 <path d={map.land} />
 <path d={line(route)} animation={draw({ at: 2, over: 1.6 })} />`;
 
-const chartUse = `import { chart } from "@svjeez/charts";
+const chartScenes = [
+  {
+    id: "trend",
+    tab: "Bars and a line",
+    scene: s.charts,
+    cost: 10,
+    alt: "Six bars grow up from the baseline one month at a time, then an orange line draws across the chart and its dots pop in as the stroke reaches them.",
+    note: "Bars grow one month at a time. Each series hands back the second it ends, so the line can start drawing right after.",
+    code: `import { chart } from "@svjeez/charts";
 
 const c = chart({
   width, height,
@@ -174,9 +188,56 @@ const c = chart({
   y: { domain: [0, 80] },
 });
 const bars = c.bars(merged, { at: 0.6, stagger: 0.12 });
-const trend = c.line(Object.entries(opened), { at: bars.end });
+const trend = c.line(Object.entries(opened), { at: bars.end });`,
+  },
+  {
+    id: "grouped",
+    tab: "Grouped bars",
+    scene: s.chartsGrouped,
+    cost: 10,
+    alt: "Gray bars for pull requests opened grow month by month, then blue bars for merged grow beside them, each writing its count, and by June merged has overtaken opened.",
+    note: "Two series share each month. The second waits for the first, then writes its count on every bar.",
+    code: `const open = c.bars(opened, {
+  at: 0.6, group: { index: 0, count: 2 },
+});
+const done = c.bars(merged, {
+  at: open.end, group: { index: 1, count: 2 },
+  values: true,
+});`,
+  },
+  {
+    id: "area",
+    tab: "Area",
+    scene: s.chartsArea,
+    cost: 10,
+    alt: "An orange area of median review hours wipes on from week 1 to week 12, its dots popping in as the line reaches them. A dashed line then marks week 8, where a review bot ships and the hours fall from about 26 to 7.",
+    note: "The fill wipes in with its line. c.x() and c.y() turn data into scene pixels, so the marker lands on week 8.",
+    code: `const wait = c.area(points, {
+  at: 0.8, over: 2.4,
+  curve: "monotone", dots: 3, label: "median",
+});
 
-<g>{c.node}{bars.node}{trend.node}</g>`;
+<line x1={c.x(8)} y1={c.y(30)}
+  x2={c.x(8)} y2={c.y(0)} strokeDasharray="4 4" />`,
+  },
+  {
+    id: "lines",
+    tab: "Lines",
+    scene: s.chartsLines,
+    cost: 10,
+    alt: "Build minutes over eight releases. A green monotone line for linux draws first, then a blue straight-segment line for macos, then an orange step line for windows, and each writes its name past its last point. All three fall release by release.",
+    note: "Three lines, three curves. Each one starts before the last finishes and writes its name past its final point.",
+    code: `const linux = c.line(pairs(builds.linux), {
+  at: 0.8, curve: "monotone", label: "linux",
+});
+const macos = c.line(pairs(builds.macos), {
+  at: linux.end - 0.4, curve: "linear", label: "macos",
+});
+const windows = c.line(pairs(builds.windows), {
+  at: macos.end - 0.4, curve: "step", label: "windows",
+});`,
+  },
+];
 
 const adaptive = `const { theme, css } = adaptive({
   dark: systemDark,
@@ -258,7 +319,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
 
     <div class="tint">
       <section class="wrap sec g" id="code">
-        <h2 class="c1-6"><a class="anchor" href="#code">Explain code and show terminal sessions.</a></h2>
+        <h2 class="c1-8"><a class="anchor" href="#code">Explain code and show terminal sessions.</a></h2>
         <p class="sub c1-8">Highlight source with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/code">@svjeez/code</a>, then animate it alongside callouts, markers and terminal output.</p>
         <figure class="c1-6"><div class="win"><LiveScene scene={s.explainer} cost={23} alt="Five lines of TSX with a spotlight moving across them and a note explaining draw and enter." /></div></figure>
         <figure class="c7-12"><div class="win"><LiveScene scene={s.recording} cost={28} alt="Three svjeez commands in a terminal: frames, svg and skill, each followed by its output." /></div></figure>
@@ -266,14 +327,14 @@ npx svjeez svg scene.tsx --out scene.svg`;
     </div>
 
     <section class="wrap sec g" id="type">
-      <h2 class="c1-6"><a class="anchor" href="#type">Animate handwriting. Embed your fonts.</a></h2>
+      <h2 class="c1-8"><a class="anchor" href="#type">Animate handwriting. Embed your fonts.</a></h2>
       <p class="sub c1-8">Load Google Fonts by name with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/fonts">@svjeez/fonts</a>, or bring your own fonts.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.ink} cost={17} alt="The word hello is handwritten stroke by stroke, then a brush swash is inked underneath." /></div></figure>
       <figure class="c7-12"><div class="win"><LiveScene scene={s.fonts} cost={20} alt="The words Aa Type draw on as outlines in an embedded display font, with real italic text below." /></div></figure>
     </section>
 
     <section class="wrap sec g" id="icons">
-      <h2 class="c1-6"><a class="anchor" href="#icons">Make any of 8,000 icons move.</a></h2>
+      <h2 class="c1-8"><a class="anchor" href="#icons">Make any of 8,000 icons move.</a></h2>
       <p class="sub c1-8">Draw and animate Tabler and Lucide icons with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/icons">@svjeez/icons</a>.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.icons} cost={24} alt="Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings." /></div></figure>
       <Code class="code side c7-12" code={iconUse} lang="tsx" theme={shikiTheme} />
@@ -286,7 +347,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
     </section>
 
     <section class="wrap sec g" id="maps">
-      <h2 class="c1-6"><a class="anchor" href="#maps">Draw real maps, then fly across them.</a></h2>
+      <h2 class="c1-8"><a class="anchor" href="#maps">Draw real maps, then fly across them.</a></h2>
       <p class="sub c1-8">Project GeoJSON or TopoJSON with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/geo">@svjeez/geo</a>, then animate regions, places and routes.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.geo} cost={20} alt="The world's countries fill in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city is labelled as its flight lands." /></div></figure>
       <Code class="code side c7-12" code={geoUse} lang="tsx" theme={shikiTheme} />
@@ -294,9 +355,8 @@ npx svjeez svg scene.tsx --out scene.svg`;
 
     <section class="wrap sec g" id="charts">
       <h2 class="c1-8"><a class="anchor" href="#charts">Chart your data as it grows.</a></h2>
-      <p class="sub c1-8">Draw bar, line and area charts with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/charts">@svjeez/charts</a>, then grow the bars and draw the lines in.</p>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.charts} cost={10} alt="Six bars grow up from the baseline one month at a time, then an orange line draws across the chart and its dots pop in as the stroke reaches them." /></div></figure>
-      <Code class="code side c7-12" code={chartUse} lang="tsx" theme={shikiTheme} />
+      <p class="sub c1-8">Draw bar, line and area charts with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/charts">@svjeez/charts</a>.</p>
+      <Switcher name="charts" label="Chart scenes" items={chartScenes} />
     </section>
 
     <section class="wrap sec g" id="light-dark">

@@ -602,9 +602,14 @@ kbd {
   color: var(--muted);
   align-self: end;
 }
+.sec > h2 {
+  text-wrap: balance;
+}
 .sec > h2 + .sub {
   align-self: start;
+  max-inline-size: 60ch;
   margin-block-start: -0.5rem;
+  text-wrap: pretty;
 }
 .sub code,
 .get code,
