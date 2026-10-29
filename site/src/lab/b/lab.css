@@ -29,11 +29,45 @@
   grid-template-areas: "stage" "inst";
 }
 
+/* On a wide screen the stage takes the top left, two instruments stack beside it and three line up underneath, so
+   everything fits in one screen. The cards join the studio's grid directly. */
 @media (width >= 70rem) {
   .studio {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    grid-template-areas: "stage inst";
-    align-items: start;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      "stage stage spring"
+      "stage stage ease"
+      "comb tempo sun";
+  }
+  .studio > .instruments {
+    display: contents;
+  }
+  .lb-card [data-instrument] {
+    inline-size: 100%;
+    max-block-size: clamp(7rem, 16dvh, 11rem);
+  }
+  :is([data-card="spring"], [data-card="ease"]) [data-instrument] {
+    contain: size;
+    block-size: 100%;
+    max-block-size: none;
+  }
+  .lb-stage img {
+    inline-size: min(100%, (100dvh - 24rem) * 16 / 9);
+  }
+  [data-card="spring"] {
+    grid-area: spring;
+  }
+  [data-card="ease"] {
+    grid-area: ease;
+  }
+  [data-card="comb"] {
+    grid-area: comb;
+  }
+  [data-card="tempo"] {
+    grid-area: tempo;
+  }
+  [data-card="sun"] {
+    grid-area: sun;
   }
 }
 
@@ -310,13 +344,4 @@ svg.held * {
 
 .lb-card [data-instrument="sun"] {
   overflow: clip;
-}
-
-@media (width >= 70rem) {
-  .instruments {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  [data-card="sun"] {
-    grid-column: 1 / -1;
-  }
 }
