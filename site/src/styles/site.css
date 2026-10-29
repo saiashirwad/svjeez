@@ -517,7 +517,7 @@ kbd {
   position: absolute;
   inset-block-end: calc(-1 * var(--hero-step) - 1rem);
   inset-inline-start: 54%;
-  inline-size: min(21rem, 30vw);
+  inline-size: min(29.625rem, 42.35vw);
   block-size: auto;
   pointer-events: none;
 }
