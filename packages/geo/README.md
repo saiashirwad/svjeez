@@ -2,6 +2,12 @@
 
 Real maps for [svjeez](https://www.npmjs.com/package/svjeez) scenes. It projects GeoJSON or TopoJSON into a scene's frame while the scene compiles, and gives back path data, places, great-circle routes and camera targets in scene pixels. The SVG it ends up in is still one file with no JavaScript.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/flights"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/flights.svg" width="400" alt="A flat world map with twelve major airline hubs. Curved arcs draw on between them to show illustrative routes, not real flight counts. Comets stream along the arcs in both directions, and one plane turns to follow its arc from London to Singapore." /></a>
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/earth"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/earth.svg" width="400" alt="A globe of glowing dots turns through the 24 hours of the June solstice. The sun lights the left side, the terminator glows orange, and fifty of the largest cities switch on as night reaches them, while a clock counts the hours in UTC." /></a>
+  <br /><sub>Great-circle routes on a flat map, and a turning globe lit by the sun</sub>
+</p>
+
 ## Install
 
 ```sh

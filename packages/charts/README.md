@@ -2,6 +2,11 @@
 
 Animated bar, line and area charts for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `chart()` fits the scales to your data while the scene compiles, draws the axes, and hands back series that grow, draw and wipe on at the seconds you name. The result is plain SVG elements with CSS keyframes, so a chart is still one file with no JavaScript and no font to load.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/charts"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/charts.svg" width="640" alt="Two charts animate in. Grouped bars show pull requests opened and merged per month, merged catching up with opened. An area chart shows the median hours to a first review falling from about 26 to 7 after a review bot ships in week 8." /></a>
+  <br /><sub>Bars grow and an area wipes on, drawn by <code>chart()</code></sub>
+</p>
+
 ## Install
 
 ```sh

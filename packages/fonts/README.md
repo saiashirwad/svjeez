@@ -2,6 +2,11 @@
 
 Google Fonts for [svjeez](https://www.npmjs.com/package/svjeez) scenes. Give it a family name and get back a svjeez `Font` that you can measure with, draw as glyph paths, or embed. The scene is still one file that loads nothing at view time.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/fonts"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/fonts.svg" width="520" alt="The word Wave! draws on letter by letter as outlines, then fills. Below it, two lines of real text in an embedded font, centered by measuring them, with a rule that grows to the measured width." /></a>
+  <br /><sub>Archivo Black and ABeeZee, loaded by name from Google Fonts</sub>
+</p>
+
 ## Install
 
 ```sh

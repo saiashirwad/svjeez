@@ -2,6 +2,11 @@
 
 A Vite plugin for [svjeez](https://www.npmjs.com/package/svjeez) scenes. Import a scene with `?svjeez`, and the plugin compiles it while the app builds. The page gets the SVG's URL and size. The browser bundle never contains svjeez or the scene's code.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/site"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/where-docs.svg" width="328" alt="A documentation page with a sidebar, text and a diagram in which a packet travels from one box to the other." /></a>
+  <br /><sub>A scene compiled at build time and shown with a plain <code>&lt;img&gt;</code></sub>
+</p>
+
 The plugin works with any framework that builds with Vite, such as React, Svelte, Vue, or Solid.
 
 ## Install

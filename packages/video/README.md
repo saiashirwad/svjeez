@@ -2,6 +2,11 @@
 
 MP4 and WebM video from a [svjeez](https://www.npmjs.com/package/svjeez) scene, for places that take video and not SVG: social posts, slides, chat apps, video editors.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/hype"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/hype.svg" width="640" alt="A hype reel for svjeez that follows the viewer's light or dark mode. Three words: prompt, animate, ship. In Claude Code, Claude reads the svjeez skill, writes a scene, renders frames, looks at them and ships an SVG. The scene's TSX streams into an editor while a preview draws each line's effect. A montage shows sampled motion, a typed flowchart, a word inked on as outlines and brush strokes. Three facts: zero bytes of runtime JS, one self-contained file, CSS and SMIL. The svjeez logo draws on above the install command." /></a>
+  <br /><sub>A 45 second scene. <code>svjeez video</code> encodes scenes like it as MP4 or WebM</sub>
+</p>
+
 ## Install
 
 ```sh

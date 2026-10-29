@@ -2,6 +2,11 @@
 
 Mermaid text for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `mermaid()` reads a flowchart, sequence diagram or state diagram and hands it to svjeez's `flowchart()`, `sequence()` or `stateMachine()`, so the diagram comes out themed, laid out and animated like any other svjeez diagram. The parser is a small hand-written one with no dependencies, and it never needs a DOM, so it runs while the scene builds.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/mermaid"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/mermaid.svg" width="320" alt="A deploy pipeline written as Mermaid text appears node by node as a svjeez flowchart, then a token runs from the push to the live release." /></a>
+  <br /><sub>A Mermaid flowchart laid out and played as a svjeez diagram</sub>
+</p>
+
 ## Install
 
 ```sh

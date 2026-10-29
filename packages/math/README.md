@@ -2,6 +2,11 @@
 
 TeX equations for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `tex()` typesets a formula with MathJax while the scene compiles and gives back one `<path>` per glyph, placed in scene pixels. Because every glyph is its own piece, `morph()` can carry an equation from one form to the next the way Manim does, and the SVG it ends up in is still one file with no JavaScript and no font to load.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/math"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/math.svg" width="640" alt="(a+b)^2 morphs into a^2+2ab+b^2 with a brace on the cross term, divides by a+b, and generalizes to the binomial theorem." /></a>
+  <br /><sub>An equation morphs glyph by glyph into the binomial theorem</sub>
+</p>
+
 ## Install
 
 ```sh

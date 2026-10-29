@@ -2,6 +2,11 @@
 
 Syntax highlighting for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `highlight()` tokenizes source text with Shiki while the scene compiles and gives back runs tagged with a role, such as `keyword`, `string` or `fn`. `code()` and `terminal()` color those roles from the scene's theme, so a highlighted snippet follows `adaptive()` and `variables()` between light and dark, and the SVG it ends up in is still one file with no JavaScript.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/code"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/code.svg" width="640" alt="A Fibonacci function morphs between TypeScript, Python, Rust and Go, highlighted by role from the scene's theme." /></a>
+  <br /><sub>One function in four languages, highlighted by role</sub>
+</p>
+
 Shiki's own tokens carry fixed hex colors. Those ignore the scene's theme, which is why this package emits roles instead.
 
 ## Install

@@ -2,6 +2,11 @@
 
 An Astro integration for [svjeez](https://www.npmjs.com/package/svjeez) scenes, built on [`@svjeez/vite`](https://www.npmjs.com/package/@svjeez/vite). Put a scene into a page, and the integration compiles it to an animated SVG with poster stills.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/site"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/hero.svg" width="640" alt="A motion() chain beside the sky it paints. The sky turns from dawn to noon, holds, goes to dusk and night, then back to dawn, while a sun arcs over two hills. Each line of the chain lights up while its step plays." /></a>
+  <br /><sub>The hero of svjeez.texoport.in, compiled by <code>@svjeez/astro</code></sub>
+</p>
+
 ## Install
 
 ```sh

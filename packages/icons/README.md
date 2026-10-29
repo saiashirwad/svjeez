@@ -2,6 +2,11 @@
 
 [Tabler](https://tabler.io/icons) and [Lucide](https://lucide.dev) icons as plain path data for [svjeez](https://www.npmjs.com/package/svjeez) scenes. The package has no dependencies and does not import svjeez. Each icon is an object, so a bundler or compiler keeps only the ones you import.
 
+<p align="center">
+  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/icons"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/icons.svg" width="480" alt="Seven Tabler outline icons draw themselves in one stroke at a time, then a filled heart pops into the last place in the grid." /></a>
+  <br /><sub>Tabler icons drawn on stroke by stroke with <code>&lt;Icon&gt;</code></sub>
+</p>
+
 ## Install
 
 ```sh
