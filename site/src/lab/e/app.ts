@@ -1,0 +1,579 @@
+import type { Compiled } from "../../playground/core";
+import sceneSource from "./catoid.tsx?raw";
+import { layout, type Layout, W, H } from "./catoid";
+import {
+  breed,
+  certificate,
+  clampGene,
+  FIRST,
+  mutate,
+  random,
+  RANGES,
+  specimenNo,
+  taxon,
+  withGene,
+  type Genome,
+} from "./genome";
+
+const DURATION = 8;
+const SHELF_SIZE = 18;
+const STORE = "svjeez-lab-e-shelf";
+
+const $ = <E extends Element = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<E>(sel)!;
+const $$ = <E extends Element = HTMLElement>(sel: string, root: ParentNode = document) => [...root.querySelectorAll<E>(sel)];
+
+const sourceFor = (g: Genome) => sceneSource.replace(/\/\*genome\*\/.*?\/\*end\*\//s, `/*genome*/ ${JSON.stringify(g)} /*end*/`);
+
+// ---------- state ----------
+
+let genome: Genome = FIRST;
+let lay: Layout = layout(genome);
+let lineage = "";
+interface Specimen {
+  readonly genome: Genome;
+  readonly no: string;
+  thumb?: string;
+}
+const shelf: Specimen[] = [];
+
+const set = (next: Genome, opts: { lineage?: string; shelve?: boolean } = {}) => {
+  genome = next;
+  lay = layout(next);
+  lineage = opts.lineage ?? "";
+  paintCard();
+  paintControls();
+  paintOverlay();
+  request();
+  if (opts.shelve) wantShelf = specimenNo(next);
+  else settle();
+};
+
+// ---------- compiling ----------
+
+const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+const waiting = new Map<number, (r: Compiled) => void>();
+let nextId = 0;
+worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
+  waiting.get(data.id)?.(data);
+  waiting.delete(data.id);
+};
+const compile = (src: string) =>
+  new Promise<Compiled>((resolve) => {
+    const id = ++nextId;
+    waiting.set(id, resolve);
+    worker.postMessage({ id, source: src });
+  });
+
+const img = $<HTMLImageElement>("[data-stage]");
+const statFile = $("[data-file]");
+const statGzip = $("[data-gzip]");
+const statMs = $("[data-ms]");
+const save = $<HTMLAnchorElement>("[data-save]");
+const errorBox = $("[data-error]");
+
+const origin = performance.now();
+const loopTime = () => (((performance.now() - origin) / 1000) % DURATION + DURATION) % DURATION;
+const atTime = (svg: string, t: number) => svg.replace("<svg ", `<svg style="--t0:-${t.toFixed(3)}s" `);
+/** A still of the file: CSS paused at t, the boiling SMIL removed. */
+const still = (svg: string, t: number) =>
+  atTime(svg, t)
+    .replace("<style><![CDATA[", "<style><![CDATA[\n.a{animation-play-state:paused!important}")
+    .replace(/<animate\b[^>]*\/>/g, "");
+const blob = (svg: string) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+
+let busy = false;
+let queued: Genome | undefined;
+let lastSource = "";
+let shown = "";
+let saveUrl = "";
+let wantShelf = "";
+const timings: { compile: number; wall: number; gzip: number }[] = [];
+
+const show = (svg: string) =>
+  new Promise<void>((resolve) => {
+    const url = blob(atTime(svg, loopTime()));
+    const next = new Image();
+    next.onload = next.onerror = () => {
+      const old = shown;
+      img.src = url;
+      shown = url;
+      if (old) setTimeout(() => URL.revokeObjectURL(old), 1000);
+      resolve();
+    };
+    next.src = url;
+  });
+
+const pump = async () => {
+  if (busy || !queued) return;
+  const g = queued;
+  queued = undefined;
+  busy = true;
+  const start = performance.now();
+  const result = await compile(sourceFor(g));
+  if (result.ok) {
+    await show(result.svg);
+    timings.push({ compile: result.ms, wall: performance.now() - start, gzip: result.stats.gzip });
+    const no = specimenNo(g);
+    if (saveUrl) URL.revokeObjectURL(saveUrl);
+    saveUrl = blob(result.svg);
+    save.href = saveUrl;
+    save.download = `${taxon(g).split(" ").slice(0, 2).join("-").toLowerCase()}-${no}.svg`;
+    statFile.textContent = `catoid-${no}.svg`;
+    statGzip.textContent = `${(result.stats.gzip / 1024).toFixed(1)} KB gzip`;
+    statMs.textContent = `${Math.round(result.ms)} ms`;
+    errorBox.hidden = true;
+    if (wantShelf === no) {
+      wantShelf = "";
+      shelve(g, result.svg);
+    }
+  } else {
+    errorBox.hidden = false;
+    errorBox.textContent = result.error.message;
+  }
+  busy = false;
+  void pump();
+};
+
+const request = () => {
+  const src = sourceFor(genome);
+  if (src === lastSource) return;
+  lastSource = src;
+  queued = genome;
+  void pump();
+};
+
+// Hand edits go on the shelf once they stop changing.
+let settleTimer = 0;
+const settle = () => {
+  clearTimeout(settleTimer);
+  settleTimer = window.setTimeout(() => {
+    wantShelf = specimenNo(genome);
+    lastSource = "";
+    request();
+  }, 1400);
+};
+
+// ---------- shelf ----------
+
+const shelfList = $("[data-shelf]");
+
+const persist = () => {
+  try {
+    localStorage.setItem(STORE, JSON.stringify(shelf.map((s) => s.genome)));
+  } catch {}
+};
+
+const shelve = (g: Genome, svg?: string) => {
+  const no = specimenNo(g);
+  const found = shelf.findIndex((s) => s.no === no);
+  const entry = found >= 0 ? shelf.splice(found, 1)[0]! : { genome: g, no };
+  if (svg) {
+    if (entry.thumb) URL.revokeObjectURL(entry.thumb);
+    entry.thumb = blob(still(svg, 1.4));
+  }
+  shelf.unshift(entry);
+  for (const gone of shelf.splice(SHELF_SIZE)) if (gone.thumb) URL.revokeObjectURL(gone.thumb);
+  persist();
+  paintShelf();
+};
+
+const paintShelf = () => {
+  const current = specimenNo(genome);
+  shelfList.replaceChildren(
+    ...shelf.map((s) => {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "le-jar";
+      b.dataset.no = s.no;
+      b.setAttribute("aria-label", `${taxon(s.genome)}, specimen ${s.no}`);
+      if (s.no === current) b.setAttribute("aria-current", "true");
+      const pic = document.createElement("img");
+      pic.alt = "";
+      pic.draggable = false;
+      if (s.thumb) pic.src = s.thumb;
+      const label = document.createElement("span");
+      label.textContent = s.no;
+      b.append(pic, label);
+      jarDrag(b, s);
+      li.append(b);
+      return li;
+    }),
+  );
+};
+
+/** Restores shelved genomes from an earlier visit, compiling their thumbnails one by one. */
+const restoreShelf = async () => {
+  let saved: Genome[] = [];
+  try {
+    saved = JSON.parse(localStorage.getItem(STORE) ?? "[]") as Genome[];
+  } catch {}
+  for (const raw of saved.slice(0, SHELF_SIZE)) {
+    const g = { ...FIRST, ...raw };
+    const no = specimenNo(g);
+    if (!shelf.some((s) => s.no === no)) shelf.push({ genome: g, no });
+  }
+  paintShelf();
+  for (const s of [...shelf]) {
+    if (s.thumb) continue;
+    const r = await compile(sourceFor(s.genome));
+    if (r.ok) s.thumb = blob(still(r.svg, 1.4));
+  }
+  paintShelf();
+};
+
+// ---------- the card ----------
+
+const paintCard = () => {
+  $("[data-no]").textContent = `No. ${specimenNo(genome)}`;
+  $("[data-lineage]").textContent = lineage;
+  $("[data-name]").textContent = taxon(genome);
+  const cert = certificate(genome);
+  const stamp = $("[data-stamp]");
+  stamp.dataset.grade = String(cert.grade);
+  $("[data-verdict]").textContent = cert.verdict;
+  for (const part of ["heads", "ears", "eyes", "legs", "tails"] as const) {
+    const n = part === "eyes" ? `${genome.eyes}${genome.bodyEyes ? `+${genome.bodyEyes}` : ""}` : String(genome[part]);
+    $(`[data-count="${part}"]`).textContent = n;
+  }
+};
+
+const restamp = () => $("[data-stamp]").animate(
+  [{ transform: "rotate(-8deg) scale(1.6)", opacity: 0 }, { transform: "rotate(-4deg) scale(1)", opacity: 1 }],
+  { duration: 260, easing: "cubic-bezier(.3,1.6,.5,1)" },
+);
+
+// ---------- genes ----------
+
+const UNITS: Partial<Record<keyof typeof RANGES, (v: number) => string>> = {
+  length: (v) => `${v.toFixed(1)} cats`,
+  girth: (v) => `${v} px girth`,
+  legLength: (v) => `${v.toFixed(2)}× legs`,
+  tailLength: (v) => `${v.toFixed(2)}× tail`,
+  slice: (v) => `w ${(v * 2 - 1).toFixed(2)}`,
+  oidness: (v) => `${Math.round(v * 100)}% ${genome.oid}`,
+  ink: (v) => (v < 0.05 ? "steady line" : `${v.toFixed(1)} boil`),
+};
+
+const paintControls = () => {
+  for (const b of $$<HTMLButtonElement>("[data-gene]")) {
+    const on = String(genome[b.dataset.gene as keyof Genome]) === b.dataset.value;
+    b.setAttribute("aria-checked", String(on));
+  }
+  for (const b of $$<HTMLButtonElement>("[data-scrub]")) {
+    const key = b.dataset.scrub as keyof typeof RANGES;
+    const v = genome[key];
+    const { min, max } = RANGES[key];
+    b.textContent = UNITS[key]?.(v) ?? String(v);
+    b.style.setProperty("--p", String((v - min) / (max - min)));
+    b.disabled = (key === "slice" && genome.dimension !== "4d") || (key === "oidness" && genome.oid === "cat");
+  }
+};
+
+for (const b of $$<HTMLButtonElement>("[data-gene]"))
+  b.addEventListener("click", () => {
+    set(withGene(genome, b.dataset.gene as keyof Genome, b.dataset.value as never));
+    restamp();
+  });
+
+/** Drag a value sideways; arrow keys step it. */
+for (const b of $$<HTMLButtonElement>("[data-scrub]")) {
+  const key = b.dataset.scrub as keyof typeof RANGES;
+  const { min, max, step } = RANGES[key];
+  b.addEventListener("pointerdown", (e) => {
+    if (b.disabled) return;
+    b.setPointerCapture(e.pointerId);
+    const x0 = e.clientX;
+    const v0 = genome[key];
+    const move = (m: PointerEvent) => set(withGene(genome, key, clampGene(key, v0 + ((m.clientX - x0) / 160) * (max - min))));
+    const up = () => {
+      b.removeEventListener("pointermove", move);
+      b.removeEventListener("pointerup", up);
+    };
+    b.addEventListener("pointermove", move);
+    b.addEventListener("pointerup", up);
+  });
+  b.addEventListener("keydown", (e) => {
+    const d = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    set(withGene(genome, key, clampGene(key, genome[key] + d * Math.max(step, (max - min) / 40))));
+  });
+}
+
+$("[data-mutate]").addEventListener("click", () => {
+  const m = mutate(genome);
+  set(m.genome, { shelve: true, lineage: m.tooFar ? "mutated too far" : "" });
+  restamp();
+  if (m.tooFar) frame.animate([{ rotate: "0deg" }, { rotate: "-2deg" }, { rotate: "1.5deg" }, { rotate: "0deg" }], { duration: 380 });
+});
+$("[data-dice]").addEventListener("click", () => {
+  set(random(), { shelve: true });
+  restamp();
+});
+const breedWith = (other: Specimen) => {
+  const parent = specimenNo(genome);
+  set(breed(genome, other.genome), { shelve: true, lineage: `${parent} × ${other.no}` });
+  restamp();
+};
+$("[data-breed]").addEventListener("click", () => {
+  const current = specimenNo(genome);
+  const mates = shelf.filter((s) => s.no !== current);
+  breedWith(mates.length ? mates[Math.floor(Math.random() * Math.min(mates.length, 5))]! : { genome: random(), no: "wild" });
+});
+
+// ---------- the stage overlay: stretch the body, add and remove parts ----------
+
+const frame = $("[data-frame]");
+const overlay = $<SVGSVGElement>("[data-overlay]");
+const NS = "http://www.w3.org/2000/svg";
+const el = <K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number>, parent: Element = overlay) => {
+  const node = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
+  parent.append(node);
+  return node;
+};
+const toScreen = (p: { x: number; y: number }) => ({ x: lay.ox + p.x * lay.scale, y: lay.oy + p.y * lay.scale });
+const toCatoid = (p: { x: number; y: number }) => ({ x: (p.x - lay.ox) / lay.scale, y: (p.y - lay.oy) / lay.scale });
+const viewPoint = (e: PointerEvent) => {
+  const r = overlay.getBoundingClientRect();
+  return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H, inside: e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom };
+};
+
+type Part = "heads" | "ears" | "eyes" | "legs" | "tails";
+
+/** Where on the specimen a point lands: the nearest stretch of body, which side of it, and any head under it. */
+const hitTest = (vp: { x: number; y: number }) => {
+  const p = toCatoid(vp);
+  let best = 0;
+  let bestD = Infinity;
+  lay.frames.forEach((f, i) => {
+    const d = Math.hypot(f.p.x - p.x, f.p.y - p.y);
+    if (d < bestD) {
+      bestD = d;
+      best = i;
+    }
+  });
+  const f = lay.frames[best]!;
+  const s = best / (lay.frames.length - 1);
+  const belly = (p.x - f.p.x) * f.n.x + (p.y - f.p.y) * f.n.y > 0;
+  const head = lay.orbit ? -1 : lay.heads.findIndex((h) => Math.hypot(h.at.x - p.x, h.at.y - p.y) < h.r * 1.4);
+  return { s, belly, head, near: bestD < lay.G * 1.2 + 30 };
+};
+
+const addPart = (part: Part, vp?: { x: number; y: number }) => {
+  const hit = vp ? hitTest(vp) : undefined;
+  let g = genome;
+  if (part === "heads") g = withGene(g, "heads", g.heads + 1);
+  if (part === "ears") g = withGene(g, "ears", g.ears + 1);
+  if (part === "eyes") g = hit && hit.head < 0 && hit.near ? withGene(g, "bodyEyes", g.bodyEyes + 1) : withGene(g, "eyes", g.eyes + 1);
+  if (part === "legs") {
+    const side = hit ? (hit.belly ? "belly" : "back") : g.legSide;
+    g = withGene(g, "legs", g.legs + 1);
+    g = withGene(g, "legSide", genome.legs === 0 || genome.legSide === side ? side : "both");
+  }
+  if (part === "tails") {
+    g = withGene(g, "tails", g.tails + 1);
+    if (hit) g = withGene(g, "tailAt", hit.s < 0.06 ? 0 : hit.s > 0.94 ? 1 : hit.s);
+  }
+  set(g);
+};
+
+const removePart = (part: Part, eyeOnBody = false) => {
+  if (part === "eyes" && eyeOnBody) set(withGene(genome, "bodyEyes", genome.bodyEyes - 1));
+  else set(withGene(genome, part, genome[part] - 1));
+};
+
+/** A floating copy of a part that follows the pointer while it's carried. */
+const carry = (html: string, e: PointerEvent) => {
+  const ghost = document.createElement("div");
+  ghost.className = "le-ghost";
+  ghost.innerHTML = html;
+  document.body.append(ghost);
+  const place = (m: PointerEvent) => ghost.style.setProperty("translate", `${m.clientX}px ${m.clientY}px`);
+  place(e);
+  return { place, drop: () => ghost.remove() };
+};
+
+const drop = el("circle", { r: 0, class: "le-drop" });
+const showDrop = (vp: { x: number; y: number; inside: boolean } | undefined, part?: Part) => {
+  if (!vp?.inside || !part) return drop.setAttribute("r", "0");
+  const hit = hitTest(vp);
+  const f = lay.frames[Math.round(hit.s * (lay.frames.length - 1))]!;
+  const at = part === "heads" || part === "ears" || (part === "eyes" && hit.head >= 0) ? vp : toScreen(f.p);
+  drop.setAttribute("cx", String(at.x));
+  drop.setAttribute("cy", String(at.y));
+  drop.setAttribute("r", String(Math.max(10, lay.G * lay.scale * 0.6)));
+};
+
+for (const b of $$<HTMLButtonElement>("[data-part]")) {
+  const part = b.dataset.part as Part;
+  const icon = b.querySelector("svg")!.outerHTML;
+  b.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    b.setPointerCapture(e.pointerId);
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    let held: ReturnType<typeof carry> | undefined;
+    const move = (m: PointerEvent) => {
+      if (!held && Math.hypot(m.clientX - x0, m.clientY - y0) > 6) {
+        held = carry(icon, m);
+        document.body.classList.add("le-carrying");
+      }
+      held?.place(m);
+      showDrop(viewPoint(m), part);
+    };
+    const up = (u: PointerEvent) => {
+      b.removeEventListener("pointermove", move);
+      b.removeEventListener("pointerup", up);
+      document.body.classList.remove("le-carrying");
+      showDrop(undefined);
+      if (!held) return addPart(part);
+      held.drop();
+      const vp = viewPoint(u);
+      if (vp.inside) addPart(part, vp);
+    };
+    b.addEventListener("pointermove", move);
+    b.addEventListener("pointerup", up);
+  });
+  b.addEventListener("click", (e) => {
+    if (e.detail === 0) addPart(part);
+  });
+  b.addEventListener("keydown", (e) => {
+    if (e.key === "-" || e.key === "Backspace" || e.key === "Delete") {
+      e.preventDefault();
+      removePart(part);
+    }
+  });
+}
+
+/** Grab handles over the drawn parts: carry one off the specimen to remove it, or to a new place on the body. */
+const handles = el("g", {});
+const bodyHit = el("path", { class: "le-body-hit" });
+overlay.insertBefore(bodyHit, handles);
+
+const paintOverlay = () => {
+  const pts = lay.spine.map(toScreen);
+  bodyHit.setAttribute("d", pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(""));
+  bodyHit.setAttribute("stroke-width", String(Math.max(16, lay.G * lay.scale)));
+  handles.replaceChildren();
+  const handle = (part: Part, at: { x: number; y: number }, r: number, eyeOnBody = false) => {
+    const p = toScreen(at);
+    const c = el("circle", { cx: p.x, cy: p.y, r: Math.max(9, r * lay.scale), class: "le-handle" }, handles);
+    c.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      c.setPointerCapture(e.pointerId);
+      const held = carry($(`[data-part="${part}"] svg`).outerHTML, e);
+      document.body.classList.add("le-carrying");
+      const move = (m: PointerEvent) => {
+        held.place(m);
+        showDrop(viewPoint(m), part);
+      };
+      const up = (u: PointerEvent) => {
+        c.removeEventListener("pointermove", move);
+        c.removeEventListener("pointerup", up);
+        held.drop();
+        document.body.classList.remove("le-carrying");
+        showDrop(undefined);
+        const vp = viewPoint(u);
+        if (!vp.inside) return removePart(part, eyeOnBody);
+        const hit = hitTest(vp);
+        if (part === "tails") set(withGene(genome, "tailAt", hit.s < 0.06 ? 0 : hit.s > 0.94 ? 1 : hit.s));
+        if (part === "legs") set(withGene(genome, "legSide", hit.belly ? "belly" : "back"));
+      };
+      c.addEventListener("pointermove", move);
+      c.addEventListener("pointerup", up);
+    });
+  };
+  if (!lay.orbit) lay.heads.forEach((h) => handle("heads", h.at, h.r));
+  lay.legs.forEach((l) => {
+    const a = ((l.angle + 90) * Math.PI) / 180;
+    handle("legs", { x: l.at.x + Math.cos(a) * l.length, y: l.at.y + Math.sin(a) * l.length }, l.width);
+  });
+  lay.tails.forEach((t) => {
+    const a = ((t.angle - 90) * Math.PI) / 180;
+    handle("tails", { x: t.at.x + Math.cos(a) * t.length, y: t.at.y + Math.sin(a) * t.length }, t.width * 1.4);
+  });
+  lay.bodyEyes.forEach((e) => handle("eyes", e, e.r, true));
+};
+
+// Drag the body: sideways stretches it, up and down fattens it.
+bodyHit.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  bodyHit.setPointerCapture(e.pointerId);
+  const x0 = e.clientX;
+  const y0 = e.clientY;
+  const from = genome;
+  const px = overlay.getBoundingClientRect().width / W;
+  const s0 = lay.scale;
+  frame.classList.add("le-stretching");
+  const move = (m: PointerEvent) => {
+    const dx = (m.clientX - x0) / px / s0;
+    const dy = (m.clientY - y0) / px / s0;
+    let g = withGene(from, "length", from.length + (dx * 2) / 120);
+    g = withGene(g, "girth", from.girth - dy * 0.5);
+    if (g.length !== genome.length || g.girth !== genome.girth) set(g);
+  };
+  const up = () => {
+    bodyHit.removeEventListener("pointermove", move);
+    bodyHit.removeEventListener("pointerup", up);
+    frame.classList.remove("le-stretching");
+    restamp();
+  };
+  bodyHit.addEventListener("pointermove", move);
+  bodyHit.addEventListener("pointerup", up);
+});
+
+/** Carry a jar onto the stage to breed with it; click to bring it back. */
+const jarDrag = (b: HTMLButtonElement, s: Specimen) => {
+  b.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    b.setPointerCapture(e.pointerId);
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    let held: ReturnType<typeof carry> | undefined;
+    const move = (m: PointerEvent) => {
+      if (!held && Math.hypot(m.clientX - x0, m.clientY - y0) > 8) held = carry(`<img src="${s.thumb ?? ""}" alt="">`, m);
+      held?.place(m);
+      frame.classList.toggle("le-mating", !!held && viewPoint(m).inside);
+    };
+    const up = (u: PointerEvent) => {
+      b.removeEventListener("pointermove", move);
+      b.removeEventListener("pointerup", up);
+      frame.classList.remove("le-mating");
+      if (!held) {
+        set(s.genome, { lineage: "from the shelf" });
+        restamp();
+        return;
+      }
+      held.drop();
+      if (viewPoint(u).inside && s.no !== specimenNo(genome)) breedWith(s);
+    };
+    b.addEventListener("pointermove", move);
+    b.addEventListener("pointerup", up);
+  });
+};
+
+Object.assign(window, {
+  __labE: {
+    timings,
+    get genome() {
+      return genome;
+    },
+    get layout() {
+      return lay;
+    },
+    get shelf() {
+      return shelf.map((s) => s.no);
+    },
+    set: (g: Genome) => set(g),
+    random,
+    mutate: () => $("[data-mutate]").click(),
+    idle: () => !busy && !queued,
+  },
+});
+
+paintShelf();
+set(genome, { shelve: true });
+void restoreShelf();
