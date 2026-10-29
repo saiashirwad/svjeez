@@ -10,6 +10,7 @@ import type { Point } from "svjeez";
 import type { Schema } from "svjeez/params";
 import { fixFor } from "./fixes.ts";
 import { gzipSize } from "./gzip.ts";
+import type { Move } from "./probe.ts";
 
 const modules = new Map<string, object>([
   ["svjeez", svjeez],
@@ -51,16 +52,10 @@ export interface SceneSize {
   readonly title: string;
 }
 
-/** Where a number param's handle sits, and which way and how fast it moves per unit of the value, in scene units. */
-export interface Handle {
-  readonly at: Point;
-  readonly way: Point;
-}
-
 /** What a scene declares beyond its picture: its params and where their handles sit, when it exports them. */
 export interface Declared {
   readonly params?: Schema;
-  readonly handles?: { readonly [key: string]: Handle };
+  readonly handles?: { readonly [key: string]: Move };
 }
 
 export type Compiled =
@@ -179,7 +174,7 @@ const handlesOf = (schema: Schema, handles: params.Handles<Schema>) => {
   const here: { readonly [key: string]: Point | undefined } = handles(values);
 
   return Object.fromEntries(
-    Object.entries(schema).flatMap(([key, p]): [string, Handle][] => {
+    Object.entries(schema).flatMap(([key, p]): [string, Move][] => {
       const at = here[key];
 
       if (p.kind !== "number" || !at) return [];
