@@ -546,6 +546,20 @@ kbd {
   line-height: 1.5;
   color: var(--muted);
 }
+/* The promise in the lede: ink color and a step of weight, enough to catch the eye without shouting. */
+.lede strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+/* With room for it, each sentence of the lede gets its own line. */
+@media (min-width: 48rem) {
+  .lede {
+    max-inline-size: none;
+  }
+  .lede span {
+    display: block;
+  }
+}
 .cta {
   display: flex;
   margin-block-start: calc(var(--hero-step) - 2rem);
