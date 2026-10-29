@@ -118,7 +118,9 @@ export const make = (tall = false): string => {
     .at(FOUND)
     .to({ opacity: 1 }, 0.3);
 
-  const found = motion({ opacity: 0.18 }).at(FOUND).to({ opacity: 1 }, 0.3);
+  // The 404s label waits in the tick labels' gray, and turns orange when the beam finds it.
+  const unlit = motion({ opacity: 1 }).at(FOUND).to({ opacity: 0 }, 0.3);
+  const found = motion({ opacity: 0 }).at(FOUND).to({ opacity: 1 }, 0.3);
 
   // The beam is drawn along +x from the bulb and sweeps down onto the playhead. A mirrored copy with no paint makes the
   // group's box centered on the bulb, so it turns about the bulb. It reaches past the playhead but stops short of the
@@ -226,6 +228,12 @@ export const make = (tall = false): string => {
               </text>
             </>
           ))}
+          <g animation={unlit}>
+            <path d={`M${lost} ${y + 6}V${y + 12}`} stroke={theme.base03} strokeWidth={1.5} />
+            <text x={lost} y={y + 28} textAnchor="middle" fontWeight={700}>
+              404s
+            </text>
+          </g>
           <g animation={found}>
             <path d={`M${lost} ${y + 6}V${y + 12}`} stroke={theme.base09} strokeWidth={1.5} />
             <text x={lost} y={y + 28} textAnchor="middle" fill={theme.base09} fontWeight={700}>
