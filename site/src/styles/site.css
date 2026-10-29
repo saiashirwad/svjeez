@@ -797,6 +797,7 @@ kbd {
   inset-inline-start: 54%;
   inline-size: min(29.625rem, 42.35vw);
   block-size: auto;
+  z-index: 1;
   pointer-events: none;
 }
 @media (max-width: 63.99rem) {
