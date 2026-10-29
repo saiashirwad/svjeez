@@ -31,20 +31,53 @@
     "@lezer/common": "^1.5.4",
     "@lezer/highlight": "^1.2.5",
     "@lezer/javascript": "^1.5.6",
+    "sucrase": "^3.35.1"
+  },
+  "devDependencies": {
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
-    "sucrase": "^3.35.1",
-    "svjeez": "workspace:*",
-    "world-atlas": "^2.0.2"
-  },
-  "devDependencies": {
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",
-    "typescript": "latest"
+    "svjeez": "workspace:*",
+    "typescript": "latest",
+    "world-atlas": "^2.0.2"
+  },
+  "peerDependencies": {
+    "@svjeez/charts": ">=0.6.0 <1",
+    "@svjeez/code": ">=0.6.0 <1",
+    "@svjeez/geo": ">=0.6.0 <1",
+    "@svjeez/icons": ">=0.6.0 <1",
+    "@svjeez/math": ">=0.6.0 <1",
+    "@svjeez/mermaid": ">=0.6.0 <1",
+    "svjeez": ">=0.6.0 <1",
+    "world-atlas": "^2.0.2"
+  },
+  "peerDependenciesMeta": {
+    "@svjeez/charts": {
+      "optional": true
+    },
+    "@svjeez/code": {
+      "optional": true
+    },
+    "@svjeez/geo": {
+      "optional": true
+    },
+    "@svjeez/icons": {
+      "optional": true
+    },
+    "@svjeez/math": {
+      "optional": true
+    },
+    "@svjeez/mermaid": {
+      "optional": true
+    },
+    "world-atlas": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20"
