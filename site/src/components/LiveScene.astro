@@ -34,6 +34,7 @@ const { scene, cost, scheme, manual, name, bar, alt, class: className, ...attrib
   data-themed={themed(scene.svg) ? "" : undefined}
   width={scene.width}
   height={scene.height}
+  style={`--native: ${scene.width}`}
   alt={alt}
   {...attributes}
 />

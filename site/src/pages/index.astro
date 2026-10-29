@@ -15,7 +15,6 @@ import ink from "@examples/site/ink.tsx";
 import likeThis from "@examples/site/like-this.tsx";
 import math from "@examples/site/math.tsx";
 import mathFourier from "@examples/site/math-fourier.tsx";
-import mathPythagoras from "@examples/site/math-pythagoras.tsx";
 import nojsx from "@examples/site/nojsx.tsx";
 import nojsxTall from "@examples/site/nojsx-tall.tsx";
 import pipeline from "@examples/site/pipeline.tsx";
@@ -64,17 +63,19 @@ const like = getScene(likeThis);
 
 const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
 
-// The wall: one tile per thing svjeez draws beyond the core. A big tile spans two columns and two rows, and the strip
-// spans the whole wall, with a tall cut for phones.
+const reference = (name: string) => `${REPO}/blob/main/packages/svjeez/skills/svjeez/references/${name}.md`;
+
+// The wall: two equal columns, so every 504-wide scene draws at close to its own size and their title bars, chips and
+// code lines all match. Tiles pair up by subject, and the strip under them is a wide scene at its own width too.
 const tiles = [
   {
     name: "map",
-    size: "big",
     scene: live(geo),
     cost: 20,
     label: "Maps",
-    pkg: "geo",
-    note: "Project GeoJSON or TopoJSON, then fly great-circle routes across it.",
+    from: "@svjeez/geo",
+    href: pkg("geo"),
+    note: "Project GeoJSON, then fly great-circle routes across it.",
     alt: "The world's countries fill in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city is labelled as its flight lands.",
   },
   {
@@ -82,7 +83,9 @@ const tiles = [
     scene: live(icons),
     cost: 24,
     label: "8,000 icons",
-    pkg: "icons",
+    from: "@svjeez/icons",
+    href: pkg("icons"),
+    note: "Tabler and Lucide, drawn on and moved like any path.",
     alt: "Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings.",
   },
   {
@@ -90,22 +93,49 @@ const tiles = [
     scene: live(math),
     cost: 20,
     label: "Equations",
-    pkg: "math",
+    from: "@svjeez/math",
+    href: pkg("math"),
+    note: "TeX becomes glyph paths, so one formula can morph into the next.",
     alt: "A point turns once round the unit circle while its cosine and sine trace the axes. Euler's formula, e to the i theta equals cos theta plus i sin theta, follows it to pi, collapses to e to the i pi equals minus one, and settles as e to the i pi plus one equals zero.",
+  },
+  {
+    name: "fourier",
+    scene: live(mathFourier),
+    cost: 20,
+    label: "Series",
+    from: "@svjeez/math",
+    href: pkg("math"),
+    note: "A formula gains a term each time a circle joins the chain.",
+    alt: "A chain of circles builds a square wave. A large blue circle spins, and a faint line carries its tip's height to a plot on the right, where a yellow pen traces a sine wave over a dashed square wave. Smaller green, orange and purple circles join one at a time, each spinning faster on the tip of the last, and each new trace comes closer to the square while older traces fade behind it. Above, the formula gains one term per circle, each term the color of its circle.",
   },
   {
     name: "chart",
     scene: live(charts),
     cost: 10,
     label: "Charts",
-    pkg: "charts",
+    from: "@svjeez/charts",
+    href: pkg("charts"),
+    note: "Bars grow a month at a time, then the line draws on.",
     alt: "Six bars grow up from the baseline one month at a time, then an orange line draws across the chart and its dots pop in as the stroke reaches them.",
+  },
+  {
+    name: "lines",
+    scene: live(chartsLines),
+    cost: 10,
+    label: "Line charts",
+    from: "@svjeez/charts",
+    href: pkg("charts"),
+    note: "Monotone, straight and step lines, each named at its end.",
+    alt: "Build minutes over eight releases. A green monotone line for linux draws first, then a blue straight-segment line for macos, then an orange step line for windows, and each writes its name past its last point. All three fall release by release.",
   },
   {
     name: "ink",
     scene: live(ink),
     cost: 17,
     label: "Handwriting",
+    from: "svjeez",
+    href: reference("ink"),
+    note: "Stroke fonts and brushes, written on stroke by stroke.",
     alt: "The word hello is handwritten stroke by stroke, then a brush swash is inked underneath.",
   },
   {
@@ -113,40 +143,17 @@ const tiles = [
     scene: live(fonts),
     cost: 20,
     label: "Your fonts",
-    pkg: "fonts",
+    from: "@svjeez/fonts",
+    href: pkg("fonts"),
+    note: "Google Fonts by name, cut down to the glyphs you draw.",
     alt: "The words Aa Type draw on as outlines in an embedded display font, with real italic text below.",
-  },
-  {
-    name: "fourier",
-    size: "big end",
-    scene: live(mathFourier),
-    cost: 20,
-    label: "Formulas that morph",
-    pkg: "math",
-    note: "TeX becomes glyph paths, so one formula can morph into the next.",
-    alt: "A chain of circles builds a square wave. A large blue circle spins, and a faint line carries its tip's height to a plot on the right, where a yellow pen traces a sine wave over a dashed square wave. Smaller green, orange and purple circles join one at a time, each spinning faster on the tip of the last, and each new trace comes closer to the square while older traces fade behind it. Above, the formula gains one term per circle, each term the color of its circle.",
-  },
-  {
-    name: "lines",
-    scene: live(chartsLines),
-    cost: 10,
-    label: "Line charts",
-    pkg: "charts",
-    alt: "Build minutes over eight releases. A green monotone line for linux draws first, then a blue straight-segment line for macos, then an orange step line for windows, and each writes its name past its last point. All three fall release by release.",
-  },
-  {
-    name: "pythagoras",
-    scene: live(mathPythagoras),
-    cost: 20,
-    label: "Proofs",
-    pkg: "math",
-    alt: "A square with sides a + b holds four blue right triangles whose hypotenuses enclose a tilted yellow square, labelled c squared. Three of the triangles slide, one after another, into a new arrangement in the same big square. The space left over is now two squares, a green a squared and a red b squared, and their labels fly over to join c squared, so the equation reads a squared plus b squared equals c squared.",
   },
 ] as const;
 
 const strip = {
   wide: live(nojsx),
   tall: live(nojsxTall),
+  href: reference("without-jsx"),
   alt: "A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it.",
 };
 
@@ -257,16 +264,15 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap sec g" id="everything">
       <h2 class="c1-8 xl"><a class="anchor" href="#everything">The rest is one import away.</a></h2>
-      <p class="sub c1-8">Maps, equations, charts, icons, handwriting and fonts each come from a small package. Import any of them and the output is still one SVG.</p>
+      <p class="sub c1-8">Maps, equations, charts, icons and fonts each come from a small package, and handwriting is built in. Import any of them and the output is still one SVG.</p>
       <div class="wall c1-12">
         {
           tiles.map((tile) => (
-            <figure class:list={["tile", "size" in tile && tile.size]}>
+            <figure class="tile">
               <div class="win"><LiveScene scene={tile.scene} cost={tile.cost} name={tile.name} alt={tile.alt} /></div>
               <figcaption>
-                <b>{tile.label}</b>
-                {"pkg" in tile ? <a href={pkg(tile.pkg)}>@svjeez/{tile.pkg}</a> : <span>built in</span>}
-                {"note" in tile && <p>{tile.note}</p>}
+                <b>{tile.label}</b> <a href={tile.href}>{tile.from}</a>
+                <p>{tile.note}</p>
               </figcaption>
             </figure>
           ))
@@ -276,7 +282,10 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
             <LiveScene class="wide" scene={strip.wide} cost={45} name="no-jsx" alt={strip.alt} />
             <LiveScene class="tall" scene={strip.tall} cost={30} name="no-jsx" alt={strip.alt} />
           </div>
-          <figcaption><b>No JSX? No problem.</b><span>el() calls in a plain .ts file</span></figcaption>
+          <figcaption>
+            <b>No JSX</b> <a href={strip.href}>svjeez</a>
+            <p>The same scenes as el() calls in a plain .ts file, for any build setup.</p>
+          </figcaption>
         </figure>
       </div>
     </section>
@@ -324,8 +333,8 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
         </div>
       </div>
       <p class="more"><a class="btn primary" href="/examples/">Explore the examples</a><a class="btn" href="/intro">Watch the one-minute intro</a></p>
-      <aside class="fine" aria-labelledby="fine">
-        <h3 id="fine">The fine print</h3>
+      <aside class="fine" id="fine-print" aria-labelledby="fine-print-title">
+        <h3 id="fine-print-title">The fine print</h3>
         <ul>
           <li>The core needs Node 20 or newer, or Bun. On Node, install <code>tsx</code> to load <code>.tsx</code> scenes.</li>
           <li>Rendering frames to check your work needs <code>playwright-core</code> and Chromium, installed once per machine.</li>
