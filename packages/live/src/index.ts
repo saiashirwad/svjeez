@@ -9,6 +9,7 @@ export {
   valueOf,
   type Clock,
   type Cmd,
+  type CompiledFile,
   type Editor,
   type Effects,
   type First,

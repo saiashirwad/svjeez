@@ -27,6 +27,9 @@ export interface Picture {
   readonly text?: string;
 }
 
+/** A compiled file, before it has a URL to show it by. */
+export type CompiledFile = Required<Omit<Picture, "url">>;
+
 /**
  * A handle on the picture for a number: where it sat when the value was `from`, and how far it moves per unit of the
  * value. A scene's `handles` declare some; the editor measures one for the selected number in any scene.
@@ -55,7 +58,7 @@ export interface State {
   readonly selected: string | null;
   readonly picture: Picture | null;
   /** The newest good compile, which a play, pause or seek shows again. It runs ahead of `picture` while it decodes. */
-  readonly compiled: Required<Omit<Picture, "url">> | null;
+  readonly compiled: CompiledFile | null;
   /** The handles on the picture, by value key. */
   readonly grips: { readonly [key: string]: Grip };
   /** Why the newest compile failed, until one succeeds. The picture stays the last good one. */
@@ -204,8 +207,8 @@ const edited = (state: State, text: string, continues = false): [State, Cmd[]] =
   return [read({ ...state, text, history: { past, future: [] } }), [{ type: "compile", text }]];
 };
 
-/** The newest compiled file shown under `clock`, from where it reads at `now`. */
-const showOf = (picture: Required<Omit<Picture, "url">>, clock: Clock, now: number): Cmd => ({
+/** Shows a compiled file under `clock`, from where it reads at `now`. */
+const showOf = (picture: CompiledFile, clock: Clock, now: number): Cmd => ({
   type: "show",
   svg: picture.svg,
   at: timeAt(clock, now),
