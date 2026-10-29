@@ -106,12 +106,19 @@ const rows = [
       <div class="le-bin" role="group" aria-label="Parts">
         {
           parts.map((p) => (
-            <button type="button" class="le-part" data-part={p.part} aria-label={`Add one of ${p.part}`}>
-              <svg viewBox="0 0 32 32" aria-hidden="true">
-                <path d={p.d} />
-              </svg>
-              <output data-count={p.part} />
-            </button>
+            <div class="le-slot">
+              <button type="button" class="le-part" data-part={p.part} aria-label={`Add one of ${p.part}`}>
+                <svg viewBox="0 0 32 32" aria-hidden="true">
+                  <path d={p.d} />
+                </svg>
+                <output data-count={p.part} />
+              </button>
+              <button type="button" class="le-less" data-less={p.part} aria-label={`Remove one of ${p.part}`}>
+                <svg viewBox="0 0 12 12" aria-hidden="true">
+                  <path d="M3 6h6" />
+                </svg>
+              </button>
+            </div>
           ))
         }
       </div>

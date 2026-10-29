@@ -267,6 +267,41 @@
   gap: 0.4rem;
 }
 
+.le-slot {
+  position: relative;
+  display: grid;
+}
+
+.le-less {
+  position: absolute;
+  inset-block-start: 0.15rem;
+  inset-inline-end: 0.15rem;
+  display: grid;
+  place-items: center;
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--ring);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.le-less svg {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.le-less:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 .le-part {
   display: grid;
   justify-items: center;
@@ -418,7 +453,7 @@
   gap: 0.25rem;
 }
 
-:is(.le-actions button, .le-part, .le-options button, .le-scrub, .le-jar):focus-visible {
+:is(.le-actions button, .le-part, .le-less, .le-options button, .le-scrub, .le-jar):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -429,7 +464,8 @@
 
 @media (hover: hover) and (pointer: fine) {
   .le-options button:hover:not([aria-checked="true"]),
-  .le-part:hover {
+  .le-part:hover,
+  .le-less:hover:not(:disabled) {
     background: color-mix(in oklch, var(--ink) 8%, var(--surface));
   }
   .le-actions button:hover {

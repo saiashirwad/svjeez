@@ -235,6 +235,7 @@ const paintCard = () => {
   for (const part of ["heads", "ears", "eyes", "legs", "tails"] as const) {
     const n = part === "eyes" ? `${genome.eyes}${genome.bodyEyes ? `+${genome.bodyEyes}` : ""}` : String(genome[part]);
     $(`[data-count="${part}"]`).textContent = n;
+    $<HTMLButtonElement>(`[data-less="${part}"]`).disabled = genome[part] === 0 && !(part === "eyes" && genome.bodyEyes);
   }
 };
 
@@ -445,6 +446,11 @@ for (const b of $$<HTMLButtonElement>("[data-part]")) {
       removePart(part);
     }
   });
+}
+
+for (const b of $$<HTMLButtonElement>("[data-less]")) {
+  const part = b.dataset.less as Part;
+  b.addEventListener("click", () => removePart(part, part === "eyes" && genome.eyes === 0));
 }
 
 /** Grab handles over the drawn parts: carry one off the specimen to remove it, or to a new place on the body. */
