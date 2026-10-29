@@ -70,32 +70,60 @@
     flex: 1;
   }
 
+  /* Long lines scroll sideways rather than wrap, so each row stays one source line for the line-linked highlights. The
+     numbers stay put while the text scrolls under them, and the right edge fades while there is more to the right. */
+  @property --la-more {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+  }
+  @keyframes la-more {
+    from,
+    90% {
+      --la-more: 2.5rem;
+    }
+    to {
+      --la-more: 0px;
+    }
+  }
   .la-code {
+    display: grid;
+    grid-template-columns: minmax(100%, max-content);
     padding-block: 0.75rem;
     font: 0.82rem/1.75 var(--mono);
     overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+    --la-more: 0px;
+    animation: la-more linear;
+    animation-timeline: scroll(self inline);
+    mask-image: linear-gradient(to left, transparent, #000 var(--la-more));
     color: var(--code-plain);
     tab-size: 2;
     font-variant-ligatures: none;
   }
   .la-line {
+    --la-row: transparent;
     display: flex;
-    min-inline-size: max-content;
     padding-inline-end: 1rem;
     white-space: pre;
-    position: relative;
+    background: var(--la-row);
   }
   .la-no {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
     flex: none;
     inline-size: 3rem;
     padding-inline-end: 1rem;
     text-align: end;
-    color: var(--code-comment);
-    opacity: 0.6;
+    background: linear-gradient(var(--la-row), var(--la-row)) var(--win-bg);
+    color: color-mix(in oklch, var(--code-comment) 60%, transparent);
     user-select: none;
     -webkit-user-select: none;
   }
-  .la-line::before {
+  .la-no::before {
     content: "";
     position: absolute;
     inset-block: 0.3em;
@@ -105,18 +133,17 @@
     background: var(--la-live);
     opacity: 0;
   }
-  .la-line.is-live::before {
+  .la-line.is-live .la-no::before {
     opacity: 1;
   }
   .la-line.is-live .la-no {
     color: var(--la-live);
-    opacity: 1;
   }
   .la-line.is-hot {
-    background: var(--la-hot);
+    --la-row: var(--la-hot);
   }
   @media (prefers-reduced-motion: no-preference) {
-    .la-line::before {
+    .la-no::before {
       transition: opacity 120ms var(--out);
     }
   }
