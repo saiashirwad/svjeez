@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Write scenes in TSX. Compile them into a single animated SVG. Zero runtime JavaScript.</strong>
+  <strong>Write scenes in TypeScript. Compile them into a single animated SVG. Zero runtime JavaScript.</strong>
 </p>
 
 <p align="center">

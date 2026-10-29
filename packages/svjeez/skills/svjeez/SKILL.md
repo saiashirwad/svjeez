@@ -1,6 +1,6 @@
 ---
 name: svjeez
-description: Write animated SVGs with svjeez, a TSX library that compiles motions to CSS and SMIL with no runtime JavaScript. Use when asked to make, edit or debug an animated SVG, a svjeez scene, a code explainer, a terminal recording, or an animated flowchart, sequence, state or lanes diagram in TSX, or when a project imports svjeez.
+description: Write animated SVGs with svjeez, a TSX library that compiles motions to CSS and SMIL with no runtime JavaScript. Use when asked to make, edit or debug an animated SVG, a svjeez scene, a code explainer, a terminal recording, or an animated flowchart, sequence, state or lanes diagram in TypeScript, or when a project imports svjeez.
 ---
 
 # svjeez

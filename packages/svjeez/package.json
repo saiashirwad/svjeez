@@ -1,7 +1,7 @@
 {
   "name": "svjeez",
   "version": "0.6.1",
-  "description": "Animated SVGs in TSX. One file out, no JavaScript.",
+  "description": "Animated SVGs in TypeScript. One file out, no JavaScript.",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -128,7 +128,7 @@ const header = (
     <g animation={rise(0.35, 0.4, 8)}>
       <Glyphs
         font={sansBold}
-        text="Animated SVGs in TSX."
+        text="Animated SVGs in TypeScript."
         size={16}
         x={28 + logoW + 22}
         y={54}
@@ -620,7 +620,7 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "svjeez: animated SVGs in TSX",
+      title: "svjeez: animated SVGs in TypeScript",
       desc: "The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a damped spring physics simulation plotted in real time.",
       css,
       reducedMotion: { at: 9.5 },
