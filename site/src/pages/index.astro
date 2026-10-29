@@ -16,6 +16,7 @@ import hero from "@examples/site/hero.tsx";
 import heroTall from "@examples/site/hero-tall.tsx";
 import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
+import likeThis from "@examples/site/like-this.tsx";
 import math from "@examples/site/math.tsx";
 import mathFourier from "@examples/site/math-fourier.tsx";
 import mathLinear from "@examples/site/math-linear.tsx";
@@ -79,6 +80,9 @@ const s = {
   whereDocs: live(whereDocs),
   whereMail: live(whereMail),
 };
+
+// The note beside the hero plays once and holds, so it needs no poster or play budget.
+const like = getScene(likeThis);
 
 const totalKB = Math.round(Object.values(s).reduce((sum, scene) => sum + scene.gzip, 0) / 1024);
 
@@ -271,6 +275,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <h1 class="c1-12">Make animated <span class="ul">SVGs</span> with TypeScript.</h1>
       <p class="lede c1-12">Write a scene in TSX and compile it to one self-contained SVG. The animation plays without runtime JavaScript.</p>
       <div class="cta c1-12"><Install command="npm i svjeez" /></div>
+      <img class="like" src={like.src} width={like.width} height={like.height} alt="" />
     </section>
 
     <div class="wrap hero-demo">

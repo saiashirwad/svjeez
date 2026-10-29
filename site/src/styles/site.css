@@ -513,8 +513,23 @@ kbd {
 /* Hero: one left-aligned column on the page grid, the headline, a short paragraph, then the install line.
    Spacing steps on 8px: 32px under the underline, then the same 48px step above and below the install line. */
 .hero {
+  position: relative;
   padding-block: clamp(1.5rem, 4vw, 2.25rem) 0;
   row-gap: 2rem;
+}
+/* A handwritten "like this!" whose arrow lands on the demo below. It needs the room beside the install pill. */
+.like {
+  position: absolute;
+  inset-block-end: calc(-1 * var(--hero-step) - 1rem);
+  inset-inline-start: 54%;
+  inline-size: min(21rem, 30vw);
+  block-size: auto;
+  pointer-events: none;
+}
+@media (max-width: 63.99rem) {
+  .like {
+    display: none;
+  }
 }
 .hero h1 {
   font-size: clamp(3.25rem, 1rem + 9.5vw, 6.5rem);

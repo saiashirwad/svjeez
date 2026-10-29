@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 190" width="340" height="190" role="img" aria-labelledby="t d">
+  <title id="t">Like this!</title>
+  <desc id="d">The words like this! are handwritten, then an arrow swoops down to the animated scene below.</desc>
+  <style><![CDATA[
+svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
+@media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
+
+.a{animation-duration:4.073s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,9.821%{stroke-dashoffset:1;visibility:hidden}14.735%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1;animation-timing-function:linear}
+@keyframes k2{0%,15.472%{stroke-dashoffset:1;visibility:hidden}17.676%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2;animation-timing-function:linear}
+@keyframes k3{0%,18.413%{stroke-dashoffset:1;visibility:hidden}20.377%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3;animation-timing-function:linear}
+@keyframes k4{0%,21.113%{stroke-dashoffset:1;visibility:hidden}23.077%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4;animation-timing-function:linear}
+@keyframes k5{0%,23.814%{stroke-dashoffset:1;visibility:hidden}28.909%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5;animation-timing-function:linear}
+@keyframes k6{0%,29.646%{stroke-dashoffset:1;visibility:hidden}31.61%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6;animation-timing-function:linear}
+@keyframes k7{0%,32.346%{stroke-dashoffset:1;visibility:hidden}35.528%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k7;animation-timing-function:linear}
+@keyframes k8{0%,36.265%{stroke-dashoffset:1;visibility:hidden}39.941%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8;animation-timing-function:linear}
+@keyframes k9{0%,40.678%{stroke-dashoffset:1;visibility:hidden}42.642%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k9;animation-timing-function:linear}
+@keyframes k10{0%,43.379%{stroke-dashoffset:1;visibility:hidden}50.411%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k10;animation-timing-function:linear}
+@keyframes k11{0%,51.148%{stroke-dashoffset:1;visibility:hidden}53.352%,100%{stroke-dashoffset:0;visibility:visible}}
+.m11{animation-name:k11;animation-timing-function:linear}
+@keyframes k12{0%,54.089%{stroke-dashoffset:1;visibility:hidden}56.053%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k12;animation-timing-function:linear}
+@keyframes k13{0%,56.789%{stroke-dashoffset:1;visibility:hidden}58.754%,100%{stroke-dashoffset:0;visibility:visible}}
+.m13{animation-name:k13;animation-timing-function:linear}
+@keyframes k14{0%,59.49%{stroke-dashoffset:1;visibility:hidden}61.454%,100%{stroke-dashoffset:0;visibility:visible}}
+.m14{animation-name:k14;animation-timing-function:linear}
+@keyframes k15{0%,62.191%{stroke-dashoffset:1;visibility:hidden}64.155%,100%{stroke-dashoffset:0;visibility:visible}}
+.m15{animation-name:k15;animation-timing-function:linear}
+@keyframes k16{0%,64.891%{stroke-dashoffset:1;visibility:hidden}66.855%,100%{stroke-dashoffset:0;visibility:visible}}
+.m16{animation-name:k16;animation-timing-function:linear}
+@keyframes k17{0%,70.538%{stroke-dashoffset:1;visibility:hidden}82.814%,100%{stroke-dashoffset:0;visibility:visible}}
+.m17{animation-name:k17}
+@keyframes k18{0%,81.586%{stroke-dashoffset:1;visibility:hidden}87.724%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k18}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-4.073s!important;animation-play-state:paused!important}}
+]]></style>
+  <g fill="none" stroke="var(--base0B)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M116.64 52.5C116.64 52.5 120.56 49.96 122.94 47.69C125.31 45.42 128.61 41.8 130.91 38.89C133.2 35.97 135.29 32.3 136.68 30.19C138.08 28.09 138.96 27.33 139.28 26.25C139.59 25.17 139.31 24.22 138.57 23.71C137.84 23.21 136.09 22.91 134.85 23.23C133.61 23.54 132.6 23.93 131.12 25.6C129.65 27.28 127.81 30.27 125.99 33.27C124.17 36.28 121.8 40.63 120.21 43.64C118.63 46.65 117.29 49.01 116.47 51.31C115.64 53.6 115.22 55.85 115.28 57.4C115.34 58.96 115.96 60.04 116.81 60.64C117.66 61.24 119.1 61.24 120.38 60.98C121.66 60.72 123.12 60.12 124.48 59.11C125.84 58.09 127.54 56.04 128.53 54.87C129.52 53.71 130.42 52.12 130.42 52.12" pathLength="1" stroke-dasharray="1" class="a m1"/>
+    <path d="M130.39 52.12C130.39 52.12 133.31 50.56 134.14 49.26C134.96 47.95 135.33 44.29 135.33 44.29C135.33 44.29 130.76 54.65 130.05 57.4C129.34 60.16 130.25 60.1 131.07 60.81C131.9 61.52 133.62 62.09 134.98 61.66C136.34 61.23 138.06 59.36 139.22 58.26C140.39 57.15 141.21 56.06 141.98 55.03C142.74 54.01 143.81 52.12 143.81 52.12" pathLength="1" stroke-dasharray="1" class="a m2"/>
+    <path d="M138.74 36.3L137.2 38.35" pathLength="1" stroke-dasharray="1" class="a m3"/>
+    <path d="M143.84 52.12C143.84 52.12 146.08 49.78 147.24 48.39C148.4 47.01 150.81 43.8 150.81 43.8" pathLength="1" stroke-dasharray="1" class="a m4"/>
+    <path d="M149.45 42.78C149.45 42.78 152.29 43.42 154.07 42.78C155.86 42.13 158.17 40.56 160.17 38.89C162.18 37.21 164.61 34.52 166.11 32.73C167.62 30.94 168.57 29.53 169.19 28.14C169.81 26.76 170.13 25.33 169.84 24.42C169.55 23.51 168.65 22.69 167.46 22.69C166.28 22.69 164.13 23.42 162.71 24.42C161.3 25.42 160.2 26.9 158.99 28.68C157.77 30.46 156.53 33.1 155.42 35.11C154.32 37.12 153.82 37.49 152.34 40.72C150.87 43.96 147.86 51.06 146.56 54.49C145.26 57.93 144.52 61.32 144.52 61.32C144.52 61.32 145.71 60.55 146.9 59.11C148.09 57.66 149.94 54.73 151.64 52.66C153.34 50.58 155.5 48.19 157.1 46.66C158.69 45.13 160.07 44.04 161.2 43.48C162.33 42.92 163.9 43.32 163.9 43.32" pathLength="1" stroke-dasharray="1" class="a m5"/>
+    <path d="M153.05 48.55C153.05 48.55 154.51 56.61 155.58 59.62C156.66 62.62 157.89 64.86 159.47 66.59C161.06 68.32 163.56 69.43 165.09 69.99C166.62 70.56 167.8 70.24 168.65 69.99C169.51 69.74 169.93 68.9 170.22 68.48C170.51 68.06 170.38 67.94 170.38 67.45C170.38 66.97 170.22 65.57 170.22 65.57" pathLength="1" stroke-dasharray="1" class="a m6"/>
+    <path d="M168.33 52.82C168.33 52.82 171.4 51.32 172.76 50.61C174.11 49.9 175.55 49.41 176.48 48.55C177.42 47.7 178.17 46.39 178.37 45.48C178.57 44.57 178.32 43.55 177.67 43.1C177.02 42.65 176.07 42.21 174.48 42.78C172.9 43.34 169.64 45.57 168.17 46.5C166.69 47.44 166.5 47.54 165.62 48.39C164.74 49.25 163.63 50.61 162.9 51.63C162.16 52.65 161.53 53.56 161.19 54.49C160.85 55.43 160.71 56.38 160.85 57.24C161 58.09 161.11 58.91 162.04 59.62C162.98 60.33 164.48 61.49 166.46 61.49C168.45 61.49 172.3 60.27 173.94 59.62C175.59 58.97 175.36 58.4 176.32 57.58C177.28 56.76 178.81 55.62 179.72 54.71C180.63 53.8 181.77 52.12 181.77 52.12" pathLength="1" stroke-dasharray="1" class="a m7"/>
+    <path d="M202.16 52.12C202.16 52.12 204.12 50.61 204.88 49.9C205.65 49.2 205.93 48.92 206.75 47.91C207.57 46.89 208.63 45.57 209.8 43.8C210.97 42.04 212.78 38.88 213.74 37.32C214.71 35.77 215.58 34.46 215.58 34.46C215.58 34.46 215.61 30.85 213.74 34.08C211.87 37.31 206.07 49.79 204.37 53.85C202.67 57.9 203.43 57.27 203.52 58.43C203.6 59.59 203.95 60.47 204.88 60.81C205.82 61.15 207.57 61.26 209.13 60.47C210.69 59.67 212.78 57.45 214.23 56.06C215.67 54.67 217.79 52.12 217.79 52.12" pathLength="1" stroke-dasharray="1" class="a m8"/>
+    <path d="M206.75 43.32L217.79 42.78" pathLength="1" stroke-dasharray="1" class="a m9"/>
+    <path d="M217.82 52.12C217.82 52.12 222.25 47.68 225.62 44.99C228.99 42.3 235.04 38.58 238.04 35.97C241.05 33.36 242.52 31.31 243.66 29.33C244.79 27.35 244.85 24.09 244.85 24.09C244.85 24.09 242.1 22.87 240.8 23.23C239.49 23.59 238.27 25.06 237.02 26.25C235.77 27.44 234.59 28.51 233.29 30.36C231.99 32.2 230.63 34.83 229.24 37.32C227.85 39.82 226.48 41.48 224.97 45.31C223.47 49.14 220.2 60.3 220.2 60.3C220.2 60.3 223.85 55.99 225.46 54.01C227.07 52.02 228.3 49.9 229.89 48.39C231.48 46.89 233.79 45.73 235.02 44.99C236.24 44.25 236.66 43.94 237.23 43.96C237.8 43.99 238.31 44.5 238.42 45.15C238.53 45.81 238.42 46.75 237.88 47.91C237.34 49.07 235.89 50.45 235.18 52.12C234.47 53.79 233.67 56.44 233.61 57.92C233.56 59.39 234.06 60.47 234.86 60.98C235.66 61.49 237.26 61.38 238.42 60.98C239.58 60.58 240.63 59.59 241.82 58.6C243.01 57.61 244.5 56.11 245.55 55.03C246.59 53.95 248.09 52.12 248.09 52.12" pathLength="1" stroke-dasharray="1" class="a m10"/>
+    <path d="M248.11 52.12C248.11 52.12 251.03 50.56 251.86 49.26C252.68 47.95 253.05 44.29 253.05 44.29C253.05 44.29 248.48 54.65 247.77 57.4C247.06 60.16 247.97 60.1 248.79 60.81C249.62 61.52 251.34 62.09 252.7 61.66C254.06 61.23 255.78 59.36 256.94 58.26C258.11 57.15 258.93 56.06 259.7 55.03C260.46 54.01 261.53 52.12 261.53 52.12" pathLength="1" stroke-dasharray="1" class="a m11"/>
+    <path d="M256.46 36.3L254.92 38.35" pathLength="1" stroke-dasharray="1" class="a m12"/>
+    <path d="M261.56 52.12C261.56 52.12 263.18 50.98 263.77 50.28C264.37 49.58 264.62 48.91 265.13 47.91C265.64 46.91 266.09 45.49 266.83 44.29C267.57 43.09 267.93 41.8 269.58 40.72C271.22 39.65 275.12 38.4 276.71 37.86C278.29 37.32 278.24 37.46 279.08 37.48C279.93 37.51 281.27 37.66 281.78 38.02C282.29 38.39 282.16 39.13 282.16 39.7C282.16 40.27 281.98 40.99 281.78 41.43C281.58 41.86 280.97 42.29 280.97 42.29" pathLength="1" stroke-dasharray="1" class="a m13"/>
+    <path d="M266.15 47.2C266.15 47.2 266.21 48.6 267.18 49.42C268.14 50.24 270.82 51.24 271.95 52.12C273.08 53 273.65 53.86 273.95 54.71C274.26 55.56 274.21 56.33 273.79 57.24C273.37 58.14 272.46 59.28 271.41 60.13C270.37 60.98 268.59 61.77 267.52 62.34C266.44 62.91 265.9 63.31 264.96 63.53C264.03 63.76 262.49 63.79 261.9 63.7C261.3 63.62 261.48 63.45 261.39 63.02C261.31 62.59 261.22 61.63 261.39 61.15C261.56 60.67 262.41 60.13 262.41 60.13" pathLength="1" stroke-dasharray="1" class="a m14"/>
+    <path d="M303.54 26.09C303.54 26.09 302.67 27.31 301.33 30.03C299.99 32.76 297.04 39.05 295.5 42.45C293.96 45.85 292.1 50.44 292.1 50.44" pathLength="1" stroke-dasharray="1" class="a m15"/>
+    <path d="M290.58 58.6L289.4 59.79" pathLength="1" stroke-dasharray="1" class="a m16"/>
+    <path d="M150 84C112 96 74 112 62 144C56 158 56 168 58 178" pathLength="1" stroke-dasharray="1" class="a m17"/>
+    <path d="M44 164L58 179L70 162" pathLength="1" stroke-dasharray="1" class="a m18"/>
+  </g>
+</svg>
