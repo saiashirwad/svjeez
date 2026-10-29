@@ -50,16 +50,16 @@ const source = (live: string) => {
 
 /**
  * A URL that shows the scene at `live` in the current palette, `at` seconds in or held at its still frame. Undefined
- * when the scene's own file already does: the default palette from the start or as a still, or a scene that does not
- * paint with the base16 variables.
+ * when the scene's own file already does: the default palette from the start or as a still unless `always`, or a scene
+ * that does not paint with the base16 variables.
  */
 export const paint = async (
   live: string,
-  { at = 0, still = false }: { at?: number; still?: boolean } = {},
+  { at = 0, still = false, always = false }: { at?: number; still?: boolean; always?: boolean } = {},
 ) => {
   const id = palette();
 
-  if (id === DEFAULT_PALETTE && (still || !at)) return undefined;
+  if (id === DEFAULT_PALETTE && (still || !at) && !always) return undefined;
   const svg = await source(live);
 
   if (!svg) return undefined;
@@ -86,13 +86,16 @@ export const playing = async (img: HTMLImageElement, live: string, at = 0): Prom
   return url ? { url, live, at } : { url: live, live, at: 0 };
 };
 
-/** The scene at `live` held at its still frame in the current palette, or `poster` when that already shows it. */
+/**
+ * The scene at `live` held at its still frame in the current palette, or `poster` when that already shows it. A scene
+ * with no poster, like a hero variant, is held by restyling its own file.
+ */
 export const frozen = async (
   img: HTMLImageElement,
   live: string,
-  poster: string,
+  poster: string | undefined,
 ): Promise<Frame> => ({
-  url: (recolors(img) ? await paint(live, { still: true }) : undefined) ?? poster,
+  url: (recolors(img) ? await paint(live, { still: true, always: !poster }) : undefined) ?? poster ?? live,
 });
 
 const turns = new WeakMap<HTMLImageElement, number>();

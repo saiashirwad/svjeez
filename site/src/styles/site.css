@@ -21,6 +21,7 @@
   --ring: light-dark(oklch(0% 0 0 / 0.07), oklch(100% 0 0 / 0.11));
   --band: light-dark(oklch(97.2% 0.003 270), oklch(21.5% 0.006 270));
   --win-bg: light-dark(#ffffff, #1e1e20);
+  --warn: light-dark(oklch(58% 0.17 45), oklch(78% 0.15 60));
 
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
@@ -475,6 +476,256 @@ kbd {
   background: var(--s4);
 }
 
+/* Copying: the two sheets give way to a check that draws itself, and a note says what happened, failure included. */
+.copy-icon .check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+[data-copied="ok"] .copy-icon .sheets {
+  opacity: 0;
+}
+[data-copied="ok"] .copy-icon .check {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+[data-copied="ok"] .copy-icon {
+  color: var(--accent);
+}
+[data-copied="failed"] .copy-icon {
+  color: var(--warn);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-copied="ok"] .copy-icon .check {
+    transition: stroke-dashoffset 0.35s 0.05s var(--out);
+  }
+  .copy-icon .sheets {
+    transition: opacity 0.12s;
+  }
+}
+.copy-say {
+  position: absolute;
+  inset-block-end: calc(100% + 0.5rem);
+  inset-inline-end: 0;
+  inline-size: max-content;
+  max-inline-size: 17rem;
+  padding: 0.45rem 0.7rem;
+  font: 500 0.8125rem / 1.35 var(--sans);
+  color: var(--bg);
+  background: var(--ink);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem -0.5rem var(--shadow);
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.copy-say:empty {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .copy-say {
+    transition:
+      opacity 0.15s,
+      translate 0.2s var(--out);
+  }
+  .copy-say:empty {
+    translate: 0 0.25rem;
+  }
+}
+
+/* The proof chip: a scene's gzipped size, set in the right of the scene's own title bar as if the window knew it.
+   --native is the scene's width and --bar its title bar's height, both in the scene's pixels, so the chip lands in the
+   middle of the bar at any size the scene is drawn. */
+.win {
+  position: relative;
+  container-type: inline-size;
+}
+.proof {
+  position: absolute;
+  inset-block-start: calc(100cqi * var(--bar) / 2 / var(--native));
+  inset-inline-end: calc(100cqi * 12 / var(--native));
+  translate: 0 -50%;
+}
+.proof.bare {
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.5rem;
+  translate: none;
+}
+.proof-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  block-size: 2em;
+  padding: 0 0.45em 0 0.75em;
+  font: 500 clamp(0.5625rem, 100cqi * 11 / var(--native), 0.6875rem) / 1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+  background: color-mix(in oklch, var(--win-bg) 70%, transparent);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--line) 70%, transparent);
+  cursor: pointer;
+}
+.proof-chip::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, (100% - 44px) / 2);
+}
+.proof-chip svg {
+  inline-size: 0.9em;
+  block-size: 0.9em;
+}
+.proof-chip:active {
+  translate: 0 1px;
+}
+.proof-chip:has(+ .proof-menu:popover-open) {
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+@media (hover: hover) and (pointer: fine) {
+  .proof-chip:hover {
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+}
+.proof-menu {
+  margin: 0;
+  padding: 0.375rem;
+  inline-size: min(18rem, 100vw - 2rem);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  box-shadow: 0 1rem 2rem -0.75rem var(--shadow);
+  font: 500 0.875rem / 1.2 var(--sans);
+  opacity: 0;
+  transition:
+    opacity 0.15s var(--out),
+    display 0.15s allow-discrete,
+    overlay 0.15s allow-discrete;
+}
+.proof-menu:popover-open {
+  display: grid;
+  gap: 0.125rem;
+  opacity: 1;
+}
+@starting-style {
+  .proof-menu:popover-open {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .proof-menu {
+    translate: 0 -0.25rem;
+    transition:
+      opacity 0.15s var(--out),
+      translate 0.15s var(--out),
+      display 0.15s allow-discrete,
+      overlay 0.15s allow-discrete;
+  }
+  .proof-menu:popover-open {
+    translate: 0 0;
+  }
+  @starting-style {
+    .proof-menu:popover-open {
+      translate: 0 -0.25rem;
+    }
+  }
+}
+@supports (position-area: block-end) {
+  .proof-menu {
+    margin-block-start: 0.375rem;
+    position-area: block-end span-inline-start;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+  }
+}
+.proof-head {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem 0.625rem 0.625rem;
+  margin-block-end: 0.25rem;
+  border-block-end: 1px solid var(--line);
+}
+.proof-head b {
+  font: 600 0.8125rem / 1.2 var(--mono);
+}
+.proof-head > span {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.proof-menu :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-block-size: 2.5rem;
+  padding: 0 0.625rem;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.proof-menu :is(a, button) > svg {
+  flex: none;
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  color: var(--muted);
+}
+.proof-menu :is(a, button):focus-visible {
+  outline-offset: -2px;
+}
+.proof-menu :is(a, button):active {
+  background: var(--sunken);
+}
+@media (hover: hover) and (pointer: fine) {
+  .proof-menu :is(a, button):hover {
+    background: var(--sunken);
+  }
+}
+.proof-menu code {
+  font-size: 0.85em;
+}
+/* The tag itself stays hidden until a blocked clipboard needs it on screen to be copied by hand. */
+.proof-tag {
+  display: none;
+  margin: 0.25rem 0.375rem 0.375rem;
+  padding: 0.5rem 0.625rem;
+  font: 400 0.6875rem / 1.5 var(--mono);
+  overflow-wrap: anywhere;
+  background: var(--sunken);
+  border-radius: 0.375rem;
+  user-select: all;
+}
+.proof-menu:has([data-copied="failed"]) .proof-tag {
+  display: block;
+}
+/* A popover clips what overflows it, so inside the menu the note is a line of its own under the actions. */
+.proof-menu .copy-say {
+  position: static;
+  inline-size: auto;
+  max-inline-size: none;
+  padding: 0.25rem 0.625rem 0.5rem;
+  color: var(--accent);
+  background: none;
+  box-shadow: none;
+  translate: none;
+}
+.proof-menu .copy-say:empty {
+  display: none;
+}
+.proof-menu:has([data-copied="failed"]) .copy-say {
+  color: var(--warn);
+}
+
 /* Windows: every scene is a window with its own chrome, so the page only adds a shadow. */
 .win {
   border-radius: var(--radius);
@@ -491,15 +742,18 @@ kbd {
   inline-size: 100%;
   block-size: auto;
 }
-.scene.tall {
+:is(.scene, .proof).tall {
   display: none;
 }
 @media (max-width: 55.99rem) {
-  .scene.wide {
+  :is(.scene, .proof).wide {
     display: none;
   }
   .scene.tall {
     display: block;
+  }
+  .proof.tall {
+    display: revert;
   }
   .big .win {
     inline-size: min(100%, 26rem);
@@ -606,6 +860,9 @@ kbd {
   border-radius: 0.5rem;
   cursor: pointer;
 }
+.install {
+  position: relative;
+}
 .install button svg {
   inline-size: 1.1rem;
   block-size: 1.1rem;
@@ -660,22 +917,162 @@ kbd {
   }
 }
 
+/* The hero's knobs: chunky keys with a little depth that sink when pressed, one color per knob from the page's palette.
+   They are radio buttons under the paint, so arrows move along a row and the form works with a keyboard alone. */
+.knobs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: end;
+  gap: 1rem 1.5rem;
+  margin-block-start: 1.75rem;
+}
+.knob {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+}
+.knob[data-knob="sky"] {
+  --hue: var(--code-number);
+}
+.knob[data-knob="feel"] {
+  --hue: var(--code-string);
+}
+.knob[data-knob="speed"] {
+  --hue: var(--code-keyword);
+}
+.knob-label {
+  padding-inline-start: 0.25rem;
+  font: 600 0.6875rem / 1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.keys {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.3125rem;
+  background: var(--sunken);
+  border-radius: 0.875rem;
+  box-shadow: inset 0 1px 2px var(--ring);
+}
+.key {
+  --depth: 3px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-block-size: 2.5rem;
+  min-inline-size: 2.75rem;
+  padding: 0 0.875rem;
+  font: 600 0.875rem / 1 var(--sans);
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 0.625rem;
+  box-shadow: 0 var(--depth) 0 var(--line);
+  translate: 0 calc(-1 * var(--depth));
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.keys .key {
+  margin-block-start: 3px;
+}
+.key input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+.key:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.key:active {
+  --depth: 1px;
+}
+.key:has(input:checked) {
+  --depth: 0px;
+  color: var(--ink);
+  background: color-mix(in oklch, var(--hue) 22%, var(--bg));
+  border-color: color-mix(in oklch, var(--hue) 70%, var(--line));
+  box-shadow: inset 0 1px 3px color-mix(in oklch, var(--hue) 35%, transparent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .key:hover {
+    color: var(--ink);
+  }
+  .key:not(:has(input:checked)):hover {
+    --depth: 4px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .key {
+    transition:
+      translate 0.12s var(--out),
+      box-shadow 0.12s var(--out),
+      background-color 0.15s,
+      color 0.15s;
+  }
+}
+.die {
+  inline-size: 3rem;
+  min-block-size: 3rem;
+  padding: 0;
+  color: var(--ink);
+  margin-block-end: 0.3125rem;
+}
+.die svg {
+  inline-size: 1.4rem;
+  block-size: 1.4rem;
+}
+.knob-hint {
+  flex-basis: 100%;
+  min-block-size: 1.5em;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-align: center;
+}
+/* On a phone each knob is a row, its name in a column of its own and its keys sharing the rest, with the die and the
+   hint in the last row. The same holds in the tablet's side column, so it asks the demo's width, not the screen's. */
+.hero-demo {
+  container-type: inline-size;
+}
+@container (width < 42rem) {
+  .knobs {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem 0.875rem;
+  }
+  .knob {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: center;
+    justify-items: stretch;
+  }
+  .knob-label {
+    padding-inline-start: 0;
+  }
+  .keys .key {
+    flex: 1;
+    padding-inline: 0.5rem;
+  }
+  .die {
+    margin-block-end: 0;
+  }
+  .knob-hint {
+    text-align: start;
+  }
+}
+
 /* Sections: a hairline, a numbered label, a heading, and blocks on the grid. */
 .sec {
   padding-block: clamp(2.5rem, 6vw, 4.5rem) 0;
   margin-block-start: clamp(2.5rem, 7vw, 5.5rem);
   border-block-start: 1px solid var(--line);
   row-gap: clamp(1.25rem, 2.5vw, 1.75rem);
-}
-.kicker {
-  font: 500 0.75rem / 1 var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.kicker span {
-  color: var(--accent);
-  margin-inline-end: 0.6rem;
 }
 .sec h2 {
   font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.25rem);
@@ -704,7 +1101,6 @@ kbd {
   text-wrap: pretty;
 }
 .sub code,
-.get code,
 .foot code,
 figure code {
   font-size: 0.85em;
@@ -837,103 +1233,6 @@ pre.code {
 }
 .pg-view .scene {
   inline-size: min(100%, 28rem);
-}
-
-/* A switcher: a row of tabs over several scenes. The active tab's pill slides to it through anchor positioning. */
-.tabs {
-  anchor-scope: --tab;
-  position: relative;
-  display: flex;
-  gap: 0.25rem;
-  inline-size: fit-content;
-  max-inline-size: 100%;
-  padding: 0.25rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  overscroll-behavior-inline: contain;
-  background: var(--sunken);
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.tabs [role="tab"] {
-  position: relative;
-  z-index: 1;
-  flex: none;
-  min-block-size: 2.25rem;
-  padding-inline: 1rem;
-  font: 500 0.875rem / 1 var(--sans);
-  color: var(--muted);
-  white-space: nowrap;
-  cursor: pointer;
-  background: none;
-  border: 0;
-  border-radius: 999px;
-}
-.tabs [role="tab"]:focus-visible {
-  outline-offset: -2px;
-}
-.tabs [role="tab"]:active {
-  translate: 0 1px;
-}
-.tabs [aria-selected="true"] {
-  anchor-name: --tab;
-  color: var(--ink);
-}
-.tabs::before {
-  content: "";
-  position: absolute;
-  position-anchor: --tab;
-  inset-block: anchor(top) anchor(bottom);
-  inset-inline-start: anchor(start);
-  inline-size: anchor-size(inline);
-  background: var(--bg);
-  border-radius: 999px;
-  box-shadow:
-    0 0 0 1px var(--ring),
-    0 1px 3px var(--shadow);
-}
-/* Without anchor positioning the pill has nowhere to go, so the tab paints its own. */
-@supports not (anchor-name: --tab) {
-  .tabs::before {
-    display: none;
-  }
-  .tabs [aria-selected="true"] {
-    background: var(--bg);
-    box-shadow: 0 0 0 1px var(--ring);
-  }
-}
-@media (hover: hover) and (pointer: fine) {
-  .tabs [role="tab"]:hover {
-    color: var(--ink);
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .tabs::before {
-    transition:
-      inset-inline-start 0.3s var(--out),
-      inline-size 0.3s var(--out);
-  }
-  .tabs [role="tab"] {
-    transition:
-      color 0.15s,
-      translate 0.12s var(--out);
-  }
-}
-.pane {
-  display: contents;
-}
-.pane[hidden] {
-  display: none;
-}
-.pane-side {
-  display: grid;
-  align-content: start;
-  gap: 1rem;
-  min-inline-size: 0;
-}
-.pane-side .note {
-  max-inline-size: 44ch;
-  color: var(--muted);
 }
 
 /* Light and dark, side by side. */
@@ -1071,59 +1370,151 @@ pre.side {
   }
 }
 
-/* Packages: a name and one line each, between hairlines. */
-.pkgs {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  align-self: end;
-}
-.pkgs li {
+/* The wall: everything the packages draw, in one grid of tiles. A big tile takes two columns and two rows, and a strip
+   takes a whole row. One column on a phone, two on a tablet, three from 56rem. */
+.wall {
   display: grid;
-  grid-template-columns: minmax(9rem, auto) 1fr;
-  gap: 0.25rem 1.5rem;
-  padding-block: 0.85rem;
-  border-block-end: 1px solid var(--line);
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-flow: dense;
+  gap: clamp(1.25rem, 2.5vw, 1.75rem) var(--gap);
+}
+@media (min-width: 40rem) {
+  .wall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tile.big,
+  .tile.strip {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 56rem) {
+  .wall {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .tile.big {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .tile.big.end {
+    grid-column: 2 / span 2;
+  }
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.tile figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.625rem;
+  margin: 0;
+  padding-inline: 0.25rem;
   font-size: 0.9375rem;
 }
-.pkgs li:first-child {
-  border-block-start: 1px solid var(--line);
-}
-.pkgs a {
-  font-family: var(--mono);
-  font-size: 0.875rem;
+.tile figcaption b {
+  font-weight: 600;
   color: var(--ink);
 }
-.pkgs span {
+.tile figcaption :is(a, span) {
+  font: 400 0.8125rem / 1.2 var(--mono);
   color: var(--muted);
 }
-@media (max-width: 30rem) {
-  .pkgs li {
-    grid-template-columns: 1fr;
+.tile figcaption p {
+  flex: 1 0 100%;
+  color: var(--muted);
+}
+.tile.strip .win {
+  inline-size: 100%;
+}
+@media (max-width: 55.99rem) {
+  .tile.strip .win {
+    inline-size: min(100%, 26rem);
+    margin-inline: auto;
   }
 }
 
-/* Start and footer. */
-.get {
+/* The close: the line that was in the footer, said out loud, then the two ways to start and the honest limits. */
+.close {
   display: grid;
-  gap: 0.75rem;
-  align-content: start;
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
+  padding-block-start: clamp(4rem, 10vw, 7.5rem);
 }
-.get h3 {
-  margin-block-start: 0.75rem;
+.close h2 {
+  max-inline-size: 16ch;
+  font-size: clamp(2.375rem, 1.2rem + 5vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+.close h2 code {
+  font-size: 0.82em;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+}
+.tally {
+  max-inline-size: 46ch;
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
+  line-height: 1.5;
+  color: var(--muted);
+}
+.tally b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.ways {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--gap);
+  margin-block-start: 1rem;
+}
+.way {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.75rem;
+  min-inline-size: 0;
+}
+.way h3 {
   font: 600 1.0625rem / 1.3 var(--sans);
   letter-spacing: -0.01em;
 }
-.get h3:first-child {
-  margin-block-start: 0;
-}
-.get p {
+.way p {
   font-size: 0.9375rem;
   color: var(--muted);
 }
-.get pre.code {
+.way pre.code {
   font-size: 0.875rem;
 }
+.way code,
+.fine code {
+  font-size: 0.85em;
+}
+.fine {
+  margin-block-start: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  max-inline-size: 44rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  background: var(--sunken);
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.fine h3 {
+  margin-block-end: 0.5rem;
+  font: 600 0.875rem / 1.3 var(--sans);
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.fine ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-inline-start: 1.1rem;
+}
+
+/* Start and footer. */
 .more {
   display: flex;
   flex-wrap: wrap;

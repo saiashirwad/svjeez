@@ -1,4 +1,6 @@
 ---
+import CopyIcon from "./CopyIcon.astro";
+
 interface Props {
   command: string;
 }
@@ -7,20 +9,21 @@ const { command } = Astro.props;
 ---
 
 <div class="install">
-  <code><b>$</b> {command}</code><button type="button" data-copy={command} aria-label="Copy the install command" title="Copy the install command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"></rect><path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"></path></svg></button>
+  <code><b>$</b> <span>{command}</span></code><button type="button" data-copy={command} aria-label="Copy the install command" title="Copy the install command"><CopyIcon /></button>
+  <span class="copy-say" role="status"></span>
 </div>
 
 <script>
-  for (const button of document.querySelectorAll<HTMLButtonElement>(".install [data-copy]")) {
-    button.addEventListener("click", async () => {
-      const label = button.parentElement!.querySelector("code")!;
-      const before = label.innerHTML;
+  import { copy } from "../scripts/copy";
 
-      try {
-        await navigator.clipboard.writeText(button.dataset.copy!);
-        label.textContent = "Copied";
-        setTimeout(() => (label.innerHTML = before), 1400);
-      } catch {}
-    });
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".install [data-copy]")) {
+    const install = button.parentElement!;
+
+    button.addEventListener("click", () =>
+      copy(button, button.dataset.copy!, {
+        say: install.querySelector(".copy-say")!,
+        fallback: install.querySelector("code span")!,
+      }),
+    );
   }
 </script>

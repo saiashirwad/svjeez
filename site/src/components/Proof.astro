@@ -1,0 +1,61 @@
+---
+// The proof that a scene is just a file: its size sits in the scene's own title bar, and opens into the file itself.
+// The hero swaps the file under it, so every value the chip shows lives in a data-proof-* slot a script can rewrite.
+import type { SceneImage } from "@svjeez/astro/scene";
+import CopyIcon from "./CopyIcon.astro";
+import { facts, proof } from "../proof";
+
+interface Props {
+  scene: SceneImage;
+  /** Names the download, as in svjeez-<name>.svg. */
+  name: string;
+  alt: string;
+  /** The height of the scene's title bar in its own pixels, or 0 for a scene without one. */
+  bar?: number;
+  class?: string | null;
+}
+
+const { scene, name, alt, bar = 40, class: className } = Astro.props;
+const file = proof(facts(scene), name, alt);
+const id = `proof-${name}-${scene.src.slice(-16, -4)}`;
+---
+
+<div class:list={["proof", className, { bare: bar === 0 }]} style={`--native: ${scene.width}; --bar: ${bar}`}>
+  <button class="proof-chip" type="button" popovertarget={id} aria-label={`${file.size} SVG file. Open, copy or download it.`}>
+    <span data-proof-size>{file.size}</span>
+    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"></path></svg>
+  </button>
+  <div class="proof-menu" id={id} popover>
+    <p class="proof-head"><b data-proof-file>{file.download}</b><span><span data-proof-facts>{file.facts}</span>. One file, nothing else to ship.</span></p>
+    <a href={scene.src} target="_blank" rel="noopener" data-proof-open>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4.5h5.5V10M19.5 4.5 11 13M17 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 4 18.5v-10A1.5 1.5 0 0 1 5.5 7H10"></path></svg>
+      Open the SVG
+    </a>
+    <button type="button" data-proof-copy data-copy={file.tag}>
+      <CopyIcon />
+      <span>Copy as <code>&lt;img&gt;</code></span>
+    </button>
+    <a href={scene.src} download={file.download} data-proof-download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"></path></svg>
+      Download
+    </a>
+    <code class="proof-tag" data-proof-tag>{file.tag}</code>
+    <span class="copy-say" role="status"></span>
+  </div>
+</div>
+
+<script>
+  import { copy } from "../scripts/copy";
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-proof-copy]")) {
+    const menu = button.closest(".proof-menu")!;
+
+    button.addEventListener("click", () =>
+      copy(button, button.dataset.copy!, {
+        say: menu.querySelector(".copy-say")!,
+        fallback: menu.querySelector("[data-proof-tag]")!,
+        done: "Copied. Paste it anywhere an image goes.",
+      }),
+    );
+  }
+</script>

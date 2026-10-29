@@ -1,0 +1,43 @@
+---
+// The hero window and the toy deck under it. Every combination of knobs is its own SVG, compiled at build time, so a
+// press swaps the file and the code drawn inside the scene changes with it.
+import { hero, KNOBS, variants } from "../hero";
+import LiveScene from "./LiveScene.astro";
+
+const groups = Object.entries(KNOBS).map(([knob, { label, options }]) => ({ knob, label, options }));
+const [first] = variants;
+---
+
+<div class="win">
+  <LiveScene class="wide" scene={hero.wide} cost={55} name="hero" alt={hero.wide.desc} data-hero="wide" />
+  <LiveScene class="tall" scene={hero.tall} cost={55} name="hero" alt={hero.tall.desc} data-hero="tall" />
+</div>
+<form class="knobs" aria-label="Change the scene above">
+  {
+    groups.map(({ knob, label, options }) => (
+      <div class="knob" role="radiogroup" aria-labelledby={`knob-${knob}`} data-knob={knob}>
+        <span class="knob-label" id={`knob-${knob}`}>{label}</span>
+        <div class="keys">
+          {options.map((option) => (
+            <label class="key" data-hint={option.hint}>
+              <input type="radio" name={knob} value={option.value} checked={first!.knobs[knob] === option.value} />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+  <button class="key die" type="button" aria-label="Surprise me: pick a random combination" title="Surprise me">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4"></rect>
+      <g fill="currentColor" stroke="none"><circle cx="8.5" cy="8.5" r="1.5"></circle><circle cx="15.5" cy="15.5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="15.5" cy="8.5" r="1.5"></circle><circle cx="8.5" cy="15.5" r="1.5"></circle></g>
+    </svg>
+  </button>
+  <p class="knob-hint" aria-live="polite">{variants.length} combinations, each its own SVG file. A press swaps the file.</p>
+</form>
+<script type="application/json" id="hero-variants" set:html={JSON.stringify(variants).replace(/</g, "\\u003c")} />
+
+<script>
+  import "../scripts/knobs";
+</script>

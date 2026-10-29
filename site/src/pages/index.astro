@@ -5,23 +5,17 @@ import agents from "@examples/site/agents.tsx";
 import agentsTall from "@examples/site/agents-tall.tsx";
 import breaker from "@examples/breaker/index.tsx";
 import charts from "@examples/site/charts.tsx";
-import chartsArea from "@examples/site/charts-area.tsx";
-import chartsGrouped from "@examples/site/charts-grouped.tsx";
 import chartsLines from "@examples/site/charts-lines.tsx";
 import explainer from "@examples/site/explainer.tsx";
 import fonts from "@examples/site/fonts.tsx";
 import geo from "@examples/site/geo.tsx";
 import handshake from "@examples/site/handshake.tsx";
-import hero from "@examples/site/hero.tsx";
-import heroTall from "@examples/site/hero-tall.tsx";
 import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
 import likeThis from "@examples/site/like-this.tsx";
 import math from "@examples/site/math.tsx";
 import mathFourier from "@examples/site/math-fourier.tsx";
-import mathLinear from "@examples/site/math-linear.tsx";
 import mathPythagoras from "@examples/site/math-pythagoras.tsx";
-import mathTaylor from "@examples/site/math-taylor.tsx";
 import nojsx from "@examples/site/nojsx.tsx";
 import nojsxTall from "@examples/site/nojsx-tall.tsx";
 import pipeline from "@examples/site/pipeline.tsx";
@@ -36,19 +30,18 @@ import whereDocs from "@examples/site/where-docs.tsx";
 import whereMail from "@examples/site/where-mail.tsx";
 import whereReadme from "@examples/site/where-readme.tsx";
 import DayNight from "../components/DayNight.astro";
+import HeroDemo from "../components/HeroDemo.astro";
 import Install from "../components/Install.astro";
 import LiveScene from "../components/LiveScene.astro";
 import Playground from "../components/Playground.astro";
-import Switcher from "../components/Switcher.astro";
 import Base from "../layouts/Base.astro";
+import { hero, variants } from "../hero";
+import { live } from "../live";
+import { facts, type FileFacts } from "../proof";
+import { REPO } from "../examples";
 import { shikiTheme } from "../styles/code";
 
-// A scene shows its poster whenever the play budget holds it back, so posters render at 2x to stay sharp on retina screens.
-const live = (scene: () => string) => getScene(scene, { posters: { scale: 2, quality: 0.9, background: "transparent" } });
-
 const s = {
-  hero: live(hero),
-  heroTall: live(heroTall),
   toast: live(toast),
   timeline: live(timeline),
   timelineTall: live(timelineTall),
@@ -58,24 +51,9 @@ const s = {
   team: live(team),
   explainer: live(explainer),
   recording: live(recording),
-  ink: live(ink),
-  icons: live(icons),
-  math: live(math),
-  mathFourier: live(mathFourier),
-  mathLinear: live(mathLinear),
-  mathTaylor: live(mathTaylor),
-  mathPythagoras: live(mathPythagoras),
-  geo: live(geo),
-  charts: live(charts),
-  chartsGrouped: live(chartsGrouped),
-  chartsArea: live(chartsArea),
-  chartsLines: live(chartsLines),
-  fonts: live(fonts),
   breaker: live(breaker),
   agents: live(agents),
   agentsTall: live(agentsTall),
-  nojsx: live(nojsx),
-  nojsxTall: live(nojsxTall),
   whereReadme: live(whereReadme),
   whereDocs: live(whereDocs),
   whereMail: live(whereMail),
@@ -84,164 +62,93 @@ const s = {
 // The note beside the hero plays once and holds, so it needs no poster or play budget.
 const like = getScene(likeThis);
 
-const totalKB = Math.round(Object.values(s).reduce((sum, scene) => sum + scene.gzip, 0) / 1024);
+const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
 
-const iconUse = `import { bell } from "@svjeez/icons/tabler";
-
-<Icon icon={bell} size={40} animation={(d, i) =>
-  draw({ at: i * 0.2, over: 0.5 })} />`;
-
-const maths = [
+// The wall: one tile per thing svjeez draws beyond the core. A big tile spans two columns and two rows, and the strip
+// spans the whole wall, with a tall cut for phones.
+const tiles = [
   {
-    id: "euler",
-    tab: "Euler's identity",
-    scene: s.math,
+    name: "map",
+    size: "big",
+    scene: live(geo),
     cost: 20,
+    label: "Maps",
+    pkg: "geo",
+    note: "Project GeoJSON or TopoJSON, then fly great-circle routes across it.",
+    alt: "The world's countries fill in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city is labelled as its flight lands.",
+  },
+  {
+    name: "icons",
+    scene: live(icons),
+    cost: 24,
+    label: "8,000 icons",
+    pkg: "icons",
+    alt: "Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings.",
+  },
+  {
+    name: "euler",
+    scene: live(math),
+    cost: 20,
+    label: "Equations",
+    pkg: "math",
     alt: "A point turns once round the unit circle while its cosine and sine trace the axes. Euler's formula, e to the i theta equals cos theta plus i sin theta, follows it to pi, collapses to e to the i pi equals minus one, and settles as e to the i pi plus one equals zero.",
-    note: "A point turns round the unit circle, and the formula follows it. At π the cosine is −1 and the sine is gone, so the formula collapses into the identity.",
-    code: `import { tex } from "@svjeez/math";
-
-const before = tex(String.raw\`e^{i\\pi} = -1\`, at);
-const after = tex(String.raw\`e^{i\\pi} + 1 = 0\`, at);
-
-morph([before, after], { at: 2, over: 0.8 });`,
   },
   {
-    id: "fourier",
-    tab: "Fourier series",
-    scene: s.mathFourier,
-    cost: 20,
-    alt: "A chain of circles builds a square wave. A large blue circle spins, and a faint line carries its tip's height to a plot on the right, where a yellow pen traces a sine wave over a dashed square wave. Smaller green, orange and purple circles join one at a time, each spinning faster on the tip of the last, and each new trace comes closer to the square while older traces fade behind it. Above, the formula gains one term per circle, each term the color of its circle.",
-    note: "Circles spinning on circles, at one, three, five and seven times the speed. Each one adds a term, and the sum creeps toward a square wave.",
-    code: `const sums = [1, 3, 5, 7].map((_, k) => tex(
-  String.raw\`\\frac{4}{\\pi}(\${terms.slice(0, k + 1).join("+")})\`, at));
-
-sums[0].write({ at: 0.25, over: 1.2 });
-morph(sums, { at: [3, 5.25, 7.5], over: 0.5 });
-
-<path d={partialSum(k)} animation={sampled(
-  (t) => ({ draw: arc(t) }), { duration, tolerance: { draw: 0.002 } })} />`,
-  },
-  {
-    id: "linear",
-    tab: "Linear maps",
-    scene: s.mathLinear,
-    cost: 20,
-    alt: "A coordinate grid with a green arrow i-hat, a red arrow j-hat and a yellow unit square between them. The matrix A, with columns 2, 1 in green and minus 1, 1 in red, is written out beside it. The whole grid then tilts into a slanted lattice as i-hat swings to 2, 1 and j-hat leans to minus 1, 1. The square stretches into a parallelogram, its area label changes from 1 to 3, and det A equals 3 is written under the matrix.",
-    note: "The columns of a matrix say where î and ĵ land. Move the whole grid with them, and the unit square's new area is the determinant.",
-    code: `const matrix = tex(String.raw\`A = \\begin{bmatrix}
-  \\color{\${I}}{2} & \\color{\${J}}{-1} \\\\
-  \\color{\${I}}{1} & \\color{\${J}}{1}
-\\end{bmatrix}\`, { x, y, anchor: [0.5, 0.5] });
-
-matrix.write({ at: 2.2, over: 1.4 });
-morph([area("1"), area("3")], { at: [7], over: 0.5 });`,
-  },
-  {
-    id: "taylor",
-    tab: "Taylor series",
-    scene: s.mathTaylor,
-    cost: 20,
-    alt: "A blue cosine curve draws across the axes from minus two pi to two pi, and cos x is approximately 1 is written above it. Then the formula gains one term at a time, minus x squared over 2 factorial, plus x to the fourth over 4 factorial, and on to x to the eighth over 8 factorial. Each new term matches a curve that grows outward from zero in the same color and hugs the cosine further before it shoots off the plot.",
-    note: "Each new term of the polynomial matches one more derivative of cos x at zero, so the curve hugs the cosine a little further out.",
-    code: `const versions = stages.map((_, i) =>
-  tex(terms.slice(0, i + 1).join(" "), at));
-
-versions[0].write({ at: 1.2, over: 1 });
-morph(versions, { at: [3.7, 5.3, 6.9, 8.5], over: 0.7 });`,
-  },
-  {
-    id: "pythagoras",
-    tab: "Pythagoras",
-    scene: s.mathPythagoras,
-    cost: 20,
-    alt: "A square with sides a + b holds four blue right triangles whose hypotenuses enclose a tilted yellow square, labelled c squared. Three of the triangles slide, one after another, into a new arrangement in the same big square. The space left over is now two squares, a green a squared and a red b squared, and their labels fly over to join c squared, so the equation reads a squared plus b squared equals c squared.",
-    note: "Four triangles leave a square of area c². Slide them around the same frame and the space they leave is a² and b².",
-    code: `const c2 = tex("c^2", { x, y, anchor: [0.5, 0.5] });
-const sum = tex(String.raw\`a^2 + b^2 = c^2\`, at);
-
-c2.write({ at: 3.5, over: 0.7 });
-<g animation={motion({ x: 0, y: 0 })
-  .at(5.2).to({ x: dx, y: dy }, 1.3, ease.inOut)}>
-  {triangle}
-</g>`,
-  },
-];
-
-const geoUse = `import { project } from "@svjeez/geo";
-
-const map = project(world, { frame });
-const route = map.route(london, tokyo);
-
-<path d={map.land} />
-<path d={line(route)} animation={draw({ at: 2, over: 1.6 })} />`;
-
-const chartScenes = [
-  {
-    id: "trend",
-    tab: "Bars and a line",
-    scene: s.charts,
+    name: "chart",
+    scene: live(charts),
     cost: 10,
+    label: "Charts",
+    pkg: "charts",
     alt: "Six bars grow up from the baseline one month at a time, then an orange line draws across the chart and its dots pop in as the stroke reaches them.",
-    note: "Bars grow one month at a time. Each series hands back the second it ends, so the line can start drawing right after.",
-    code: `import { chart } from "@svjeez/charts";
-
-const c = chart({
-  width, height,
-  x: { kind: "band", domain: months },
-  y: { domain: [0, 80] },
-});
-const bars = c.bars(merged, { at: 0.6, stagger: 0.12 });
-const trend = c.line(Object.entries(opened), { at: bars.end });`,
   },
   {
-    id: "grouped",
-    tab: "Grouped bars",
-    scene: s.chartsGrouped,
-    cost: 10,
-    alt: "Gray bars for pull requests opened grow month by month, then blue bars for merged grow beside them, each writing its count, and by June merged has overtaken opened.",
-    note: "Two series share each month. The second waits for the first, then writes its count on every bar.",
-    code: `const open = c.bars(opened, {
-  at: 0.6, group: { index: 0, count: 2 },
-});
-const done = c.bars(merged, {
-  at: open.end, group: { index: 1, count: 2 },
-  values: true,
-});`,
+    name: "ink",
+    scene: live(ink),
+    cost: 17,
+    label: "Handwriting",
+    alt: "The word hello is handwritten stroke by stroke, then a brush swash is inked underneath.",
   },
   {
-    id: "area",
-    tab: "Area",
-    scene: s.chartsArea,
-    cost: 10,
-    alt: "An orange area of median review hours wipes on from week 1 to week 12, its dots popping in as the line reaches them. A dashed line then marks week 8, where a review bot ships and the hours fall from about 26 to 7.",
-    note: "The fill wipes in with its line. c.x() and c.y() turn data into scene pixels, so the marker lands on week 8.",
-    code: `const wait = c.area(points, {
-  at: 0.8, over: 2.4,
-  curve: "monotone", dots: 3, label: "median",
-});
-
-<line x1={c.x(8)} y1={c.y(30)}
-  x2={c.x(8)} y2={c.y(0)} strokeDasharray="4 4" />`,
+    name: "fonts",
+    scene: live(fonts),
+    cost: 20,
+    label: "Your fonts",
+    pkg: "fonts",
+    alt: "The words Aa Type draw on as outlines in an embedded display font, with real italic text below.",
   },
   {
-    id: "lines",
-    tab: "Lines",
-    scene: s.chartsLines,
+    name: "fourier",
+    size: "big end",
+    scene: live(mathFourier),
+    cost: 20,
+    label: "Formulas that morph",
+    pkg: "math",
+    note: "TeX becomes glyph paths, so one formula can morph into the next.",
+    alt: "A chain of circles builds a square wave. A large blue circle spins, and a faint line carries its tip's height to a plot on the right, where a yellow pen traces a sine wave over a dashed square wave. Smaller green, orange and purple circles join one at a time, each spinning faster on the tip of the last, and each new trace comes closer to the square while older traces fade behind it. Above, the formula gains one term per circle, each term the color of its circle.",
+  },
+  {
+    name: "lines",
+    scene: live(chartsLines),
     cost: 10,
+    label: "Line charts",
+    pkg: "charts",
     alt: "Build minutes over eight releases. A green monotone line for linux draws first, then a blue straight-segment line for macos, then an orange step line for windows, and each writes its name past its last point. All three fall release by release.",
-    note: "Three lines, three curves. Each one starts before the last finishes and writes its name past its final point.",
-    code: `const linux = c.line(pairs(builds.linux), {
-  at: 0.8, curve: "monotone", label: "linux",
-});
-const macos = c.line(pairs(builds.macos), {
-  at: linux.end - 0.4, curve: "linear", label: "macos",
-});
-const windows = c.line(pairs(builds.windows), {
-  at: macos.end - 0.4, curve: "step", label: "windows",
-});`,
   },
-];
+  {
+    name: "pythagoras",
+    scene: live(mathPythagoras),
+    cost: 20,
+    label: "Proofs",
+    pkg: "math",
+    alt: "A square with sides a + b holds four blue right triangles whose hypotenuses enclose a tilted yellow square, labelled c squared. Three of the triangles slide, one after another, into a new arrangement in the same big square. The space left over is now two squares, a green a squared and a red b squared, and their labels fly over to join c squared, so the equation reads a squared plus b squared equals c squared.",
+  },
+] as const;
+
+const strip = {
+  wide: live(nojsx),
+  tall: live(nojsxTall),
+  alt: "A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it.",
+};
 
 const adaptive = `const { theme, css } = adaptive({
   dark: systemDark,
@@ -256,6 +163,23 @@ render({ css },
 const start = `npm i svjeez
 npx svjeez frames scene.tsx --sheet
 npx svjeez svg scene.tsx --out scene.svg`;
+
+// Every file this page shows as an <img>, counted once each: the scenes, their phone cuts, the wall, the note beside
+// the hero, and all of the hero's variants, played or not.
+const files = new Map<string, FileFacts>(
+  [
+    ...Object.values(s),
+    ...tiles.map((tile) => tile.scene),
+    strip.wide,
+    strip.tall,
+    like,
+    hero.wide,
+    hero.tall,
+  ].map((scene) => [scene.src, facts(scene)]),
+);
+
+for (const variant of variants) for (const file of [variant.wide, variant.tall]) files.set(file.src, file);
+const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, file) => sum + file[field], 0);
 ---
 
 <Base
@@ -268,8 +192,8 @@ npx svjeez svg scene.tsx --out scene.svg`;
   }}
   class="home"
 >
-  <link slot="head" rel="preload" as="image" href={s.hero.src} media="(prefers-reduced-motion: no-preference) and (min-width: 64rem)" />
-  <link slot="head" rel="preload" as="image" href={s.heroTall.src} media="(prefers-reduced-motion: no-preference) and (max-width: 63.99rem)" />
+  <link slot="head" rel="preload" as="image" href={hero.wide.src} media="(prefers-reduced-motion: no-preference) and (min-width: 64rem)" />
+  <link slot="head" rel="preload" as="image" href={hero.tall.src} media="(prefers-reduced-motion: no-preference) and (max-width: 63.99rem)" />
   <main>
     <div class="lead">
       <section class="wrap hero g">
@@ -280,10 +204,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
       </section>
 
       <div class="wrap hero-demo">
-        <div class="win">
-          <LiveScene class="wide" scene={s.hero} cost={55} alt="A motion() chain beside the sky it paints. The sky goes from dawn to noon, holds, turns to dusk and night, then back to dawn, while a sun arcs over two hills. Each step of the chain lights up in the code while it plays." />
-          <LiveScene class="tall" scene={s.heroTall} cost={55} alt="A sky above the motion() chain that paints it: dawn, noon, dusk, night and back, with a sun arcing over two hills. Each step of the chain lights up while it plays." />
-        </div>
+        <HeroDemo />
       </div>
     </div>
 
@@ -306,65 +227,58 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <h2 class="c1-12"><a class="anchor" href="#timeline">Compose motion on a timeline.</a></h2>
       <div class="big c1-12">
         <div class="win">
-          <LiveScene class="wide" scene={s.timeline} cost={41} alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says." />
-          <LiveScene class="tall" scene={s.timelineTall} cost={30} alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says." />
+          <LiveScene class="wide" scene={s.timeline} cost={41} name="timeline" alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says." />
+          <LiveScene class="tall" scene={s.timelineTall} cost={30} name="timeline" alt="A motion chain in an editor, lit line by line. The same chain is drawn as one track per channel with a playhead sweeping across, while a square fades in, drops into place, grows and turns orange as the chain says." />
         </div>
       </div>
     </section>
 
     <section class="wrap sec g" id="diagrams">
       <h2 class="c1-8 xl"><a class="anchor" href="#diagrams">Bring diagrams to life.</a></h2>
-      <p class="sub c1-8">Build flowcharts, sequence diagrams and state machines in TypeScript, or turn Mermaid text into animated diagrams with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/mermaid">@svjeez/mermaid</a>.</p>
+      <p class="sub c1-8">Build flowcharts, sequence diagrams and state machines in TypeScript, or turn Mermaid text into animated diagrams with <a href={pkg("mermaid")}>@svjeez/mermaid</a>.</p>
       <div class="big c1-12">
         <div class="win">
-          <LiveScene class="wide" scene={s.pipeline} cost={44} alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
-          <LiveScene class="tall" scene={s.pipelineTall} cost={30} alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
+          <LiveScene class="wide" scene={s.pipeline} cost={44} name="pipeline" alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
+          <LiveScene class="tall" scene={s.pipelineTall} cost={30} name="pipeline" alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
         </div>
       </div>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.handshake} cost={11} alt="A sequence diagram: a browser image asks a CDN for one SVG file, gets it back and starts the animation." /></div></figure>
-      <figure class="c7-12"><div class="win"><LiveScene scene={s.team} cost={32} alt="An agent team grows level by level as a tree, then a dot walks between two branches." /></div></figure>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.handshake} cost={11} name="sequence" alt="A sequence diagram: a browser image asks a CDN for one SVG file, gets it back and starts the animation." /></div></figure>
+      <figure class="c7-12"><div class="win"><LiveScene scene={s.team} cost={32} name="team" alt="An agent team grows level by level as a tree, then a dot walks between two branches." /></div></figure>
     </section>
 
     <div class="tint">
       <section class="wrap sec g" id="code">
         <h2 class="c1-8"><a class="anchor" href="#code">Explain code and show terminal sessions.</a></h2>
-        <p class="sub c1-8">Highlight source with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/code">@svjeez/code</a>, then animate it alongside callouts, markers and terminal output.</p>
-        <figure class="c1-6"><div class="win"><LiveScene scene={s.explainer} cost={23} alt="Five lines of TSX with a spotlight moving across them and a note explaining draw and enter." /></div></figure>
-        <figure class="c7-12"><div class="win"><LiveScene scene={s.recording} cost={28} alt="Three svjeez commands in a terminal: frames, svg and skill, each followed by its output." /></div></figure>
+        <p class="sub c1-8">Highlight source with <a href={pkg("code")}>@svjeez/code</a>, then animate it alongside callouts, markers and terminal output.</p>
+        <figure class="c1-6"><div class="win"><LiveScene scene={s.explainer} cost={23} name="explainer" alt="Five lines of TSX with a spotlight moving across them and a note explaining draw and enter." /></div></figure>
+        <figure class="c7-12"><div class="win"><LiveScene scene={s.recording} cost={28} name="terminal" alt="Three svjeez commands in a terminal: frames, svg and skill, each followed by its output." /></div></figure>
       </section>
     </div>
 
-    <section class="wrap sec g" id="type">
-      <h2 class="c1-8"><a class="anchor" href="#type">Animate handwriting. Embed your fonts.</a></h2>
-      <p class="sub c1-8">Load Google Fonts by name with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/fonts">@svjeez/fonts</a>, or bring your own fonts.</p>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.ink} cost={17} alt="The word hello is handwritten stroke by stroke, then a brush swash is inked underneath." /></div></figure>
-      <figure class="c7-12"><div class="win"><LiveScene scene={s.fonts} cost={20} alt="The words Aa Type draw on as outlines in an embedded display font, with real italic text below." /></div></figure>
-    </section>
-
-    <section class="wrap sec g" id="icons">
-      <h2 class="c1-8"><a class="anchor" href="#icons">Make any of 8,000 icons move.</a></h2>
-      <p class="sub c1-8">Draw and animate Tabler and Lucide icons with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/icons">@svjeez/icons</a>.</p>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.icons} cost={24} alt="Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings." /></div></figure>
-      <Code class="code side c7-12" code={iconUse} lang="tsx" theme={shikiTheme} />
-    </section>
-
-    <section class="wrap sec g" id="math">
-      <h2 class="c1-8"><a class="anchor" href="#math">Typeset equations, then morph them.</a></h2>
-      <p class="sub c1-8">Turn TeX into glyph paths with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/math">@svjeez/math</a>.</p>
-      <Switcher name="math" label="Math scenes" items={maths} />
-    </section>
-
-    <section class="wrap sec g" id="maps">
-      <h2 class="c1-8"><a class="anchor" href="#maps">Draw real maps, then fly across them.</a></h2>
-      <p class="sub c1-8">Project GeoJSON or TopoJSON with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/geo">@svjeez/geo</a>, then animate regions, places and routes.</p>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.geo} cost={20} alt="The world's countries fill in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city is labelled as its flight lands." /></div></figure>
-      <Code class="code side c7-12" code={geoUse} lang="tsx" theme={shikiTheme} />
-    </section>
-
-    <section class="wrap sec g" id="charts">
-      <h2 class="c1-8"><a class="anchor" href="#charts">Chart your data as it grows.</a></h2>
-      <p class="sub c1-8">Draw bar, line and area charts with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/charts">@svjeez/charts</a>.</p>
-      <Switcher name="charts" label="Chart scenes" items={chartScenes} />
+    <section class="wrap sec g" id="everything">
+      <h2 class="c1-8 xl"><a class="anchor" href="#everything">The rest is one import away.</a></h2>
+      <p class="sub c1-8">Maps, equations, charts, icons, handwriting and fonts each come from a small package. Import any of them and the output is still one SVG.</p>
+      <div class="wall c1-12">
+        {
+          tiles.map((tile) => (
+            <figure class:list={["tile", "size" in tile && tile.size]}>
+              <div class="win"><LiveScene scene={tile.scene} cost={tile.cost} name={tile.name} alt={tile.alt} /></div>
+              <figcaption>
+                <b>{tile.label}</b>
+                {"pkg" in tile ? <a href={pkg(tile.pkg)}>@svjeez/{tile.pkg}</a> : <span>built in</span>}
+                {"note" in tile && <p>{tile.note}</p>}
+              </figcaption>
+            </figure>
+          ))
+        }
+        <figure class="tile strip">
+          <div class="win">
+            <LiveScene class="wide" scene={strip.wide} cost={45} name="no-jsx" alt={strip.alt} />
+            <LiveScene class="tall" scene={strip.tall} cost={30} name="no-jsx" alt={strip.alt} />
+          </div>
+          <figcaption><b>No JSX? No problem.</b><span>el() calls in a plain .ts file</span></figcaption>
+        </figure>
+      </div>
     </section>
 
     <section class="wrap sec g" id="light-dark">
@@ -375,62 +289,55 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <Code class="code side c9-12" code={adaptive} lang="tsx" theme={shikiTheme} />
     </section>
 
+    <section class="wrap sec g" id="where">
+      <h2 class="c1-8"><a class="anchor" href="#where">Use your SVG where images are supported.</a></h2>
+      <figure class="c1-4"><div class="win"><LiveScene scene={s.whereReadme} cost={8} name="readme" bar={36} alt="A README page with an animated dot-matrix image in the middle." /></div><h3>READMEs</h3><p>Add an animated SVG to a GitHub README with an <code>&lt;img&gt;</code> tag.</p></figure>
+      <figure class="c5-8"><div class="win"><LiveScene scene={s.whereDocs} cost={4} name="docs" bar={36} alt="A docs page with a diagram in which a packet travels between two boxes." /></div><h3>Docs and blogs</h3><p>Add a scene to a page as an image, without a separate player or script.</p></figure>
+      <figure class="c9-12"><div class="win"><LiveScene scene={s.whereMail} cost={4} name="email" bar={36} alt="An email with a bar chart that grows inside the message." /></div><h3>Email</h3><p>SVG support varies across email clients. Provide a still image as a fallback.</p></figure>
+    </section>
+
     <div class="tint">
       <section class="wrap sec g" id="agents">
         <h2 class="c1-6"><a class="anchor" href="#agents">Give your coding agent the scene-writing guide.</a></h2>
         <div class="big c1-12">
           <div class="win desk">
-            <LiveScene class="wide" scene={s.agents} cost={52} alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns." />
-            <LiveScene class="tall" scene={s.agentsTall} cost={40} alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns." />
+            <LiveScene class="wide" scene={s.agents} cost={52} name="agents" bar={0} alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns." />
+            <LiveScene class="tall" scene={s.agentsTall} cost={40} name="agents" bar={0} alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns." />
           </div>
         </div>
       </section>
     </div>
 
-    <section class="wrap sec g" id="no-jsx">
-      <h2 class="c1-8 xl"><a class="anchor" href="#no-jsx">Write scenes with or without JSX.</a></h2>
-      <div class="big c1-12">
-        <div class="win">
-          <LiveScene class="wide" scene={s.nojsx} cost={45} alt="A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it." />
-          <LiveScene class="tall" scene={s.nojsxTall} cost={30} alt="A scene written with el() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it." />
+    <section class="wrap close" id="start">
+      <h2><a class="anchor" href="#start">Everything you just watched was an <code>&lt;img&gt;</code>.</a></h2>
+      <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped all together, counting every phone cut and all {variants.length} versions of the sky at the top. <b>{total("script")}</b> bytes of JavaScript inside any of them.</p>
+      <div class="ways">
+        <div class="way">
+          <h3>Start yourself</h3>
+          <pre class="code">{start}</pre>
+          <p>Or build scenes into your site with <a href={pkg("vite")}>@svjeez/vite</a> or <a href={pkg("astro")}>@svjeez/astro</a>, and export them as MP4 or WebM with <a href={pkg("video")}>@svjeez/video</a>.</p>
+        </div>
+        <div class="way">
+          <h3>Or hand it to your agent</h3>
+          <pre class="code">npx svjeez skill --install</pre>
+          <p>Puts the scene-writing guide, its references and worked examples in <code>.claude/skills</code>.</p>
         </div>
       </div>
-    </section>
-
-    <section class="wrap sec g" id="where">
-      <h2 class="c1-8"><a class="anchor" href="#where">Use your SVG where images are supported.</a></h2>
-      <figure class="c1-4"><div class="win"><LiveScene scene={s.whereReadme} cost={8} alt="A README page with an animated dot-matrix image in the middle." /></div><h3>READMEs</h3><p>Add an animated SVG to a GitHub README with an <code>&lt;img&gt;</code> tag.</p></figure>
-      <figure class="c5-8"><div class="win"><LiveScene scene={s.whereDocs} cost={4} alt="A docs page with a diagram in which a packet travels between two boxes." /></div><h3>Docs and blogs</h3><p>Add a scene to a page as an image, without a separate player or script.</p></figure>
-      <figure class="c9-12"><div class="win"><LiveScene scene={s.whereMail} cost={4} alt="An email with a bar chart that grows inside the message." /></div><h3>Email</h3><p>SVG support varies across email clients. Provide a still image as a fallback.</p></figure>
-    </section>
-
-    <section class="wrap sec g" id="packages">
-      <h2 class="c1-6"><a class="anchor" href="#packages">Export video, or build scenes into your site.</a></h2>
-      <ul class="pkgs c7-12">
-        <li><a href="https://github.com/saiashirwad/svjeez/tree/main/packages/video">@svjeez/video</a><span>Export a scene as MP4 or WebM.</span></li>
-        <li><a href="https://github.com/saiashirwad/svjeez/tree/main/packages/vite">@svjeez/vite</a><span>Import scenes into a Vite app.</span></li>
-        <li><a href="https://github.com/saiashirwad/svjeez/tree/main/packages/astro">@svjeez/astro</a><span>Add scenes and poster stills to an Astro site.</span></li>
-      </ul>
-    </section>
-
-    <section class="wrap sec g" id="start">
-      <div class="c1-6">
-        <h2><a class="anchor" href="#start">Start making animated SVGs.</a></h2>
-        <p class="more"><a class="btn primary" href="/examples/">Explore the examples</a><a class="btn" href="/intro">Watch the one-minute intro</a></p>
-      </div>
-      <div class="get c7-12">
-        <h3>In a project</h3>
-        <pre class="code">{start}</pre>
-        <p>The core library has no runtime dependencies and supports Node 20 and newer. Optional packages add features and integrations. Frame rendering requires Playwright and Chromium; running TSX on Node requires tsx.</p>
-        <h3>With a coding agent</h3>
-        <pre class="code">npx svjeez skill --install</pre>
-        <p>Install the guide, references, and worked examples into <code>.claude/skills</code> for your coding agent.</p>
-      </div>
+      <p class="more"><a class="btn primary" href="/examples/">Explore the examples</a><a class="btn" href="/intro">Watch the one-minute intro</a></p>
+      <aside class="fine" aria-labelledby="fine">
+        <h3 id="fine">The fine print</h3>
+        <ul>
+          <li>The core needs Node 20 or newer, or Bun. On Node, install <code>tsx</code> to load <code>.tsx</code> scenes.</li>
+          <li>Rendering frames to check your work needs <code>playwright-core</code> and Chromium, installed once per machine.</li>
+          <li>An SVG in an <code>&lt;img&gt;</code> loads nothing from outside itself, so fonts and photos are embedded into the file.</li>
+          <li>Email clients differ in SVG support. Send a still image as a fallback.</li>
+        </ul>
+      </aside>
     </section>
   </main>
 
-  <footer class="wrap foot g">
-    <p class="c1-6">The animated scenes on this page are svjeez SVGs, displayed as images. Together they total {totalKB} KB gzipped. Off-screen scenes pause until you scroll to them. MIT licensed.</p>
-    <nav class="c7-12" aria-label="Footer"><a href="/examples/">Examples</a><a href="/intro">Intro</a><a href="https://github.com/saiashirwad/svjeez">GitHub</a><a href="https://www.npmjs.com/package/svjeez">npm</a></nav>
+  <footer class="wrap foot">
+    <p>MIT licensed.</p>
+    <nav aria-label="Footer"><a href="/examples/">Examples</a><a href="/intro">Intro</a><a href={REPO}>GitHub</a><a href="https://www.npmjs.com/package/svjeez">npm</a></nav>
   </footer>
 </Base>

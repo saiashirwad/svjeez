@@ -11,7 +11,7 @@ const SHOWN = 0.3;
 const BUDGET = 80;
 const COST = 30;
 
-const posterOf = (img: HTMLImageElement) => img.dataset[img.dataset.scheme ?? scheme()]!;
+const posterOf = (img: HTMLImageElement) => img.dataset[img.dataset.scheme ?? scheme()];
 
 // Under another palette a still is the recolored scene held at its still frame, which follows light and dark by itself.
 export const still = (img: HTMLImageElement, { fade = false } = {}) => {
@@ -106,7 +106,7 @@ const warm = () => {
   // field is optional.
   if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
 
-  new Set([...scenes].flatMap((img) => [img.dataset.live!, posterOf(img)])).forEach((url) =>
+  new Set([...scenes].flatMap((img) => [img.dataset.live!, posterOf(img)].filter((url) => url !== undefined))).forEach((url) =>
     fetch(url, { priority: "low" })
       .then((response) => response.arrayBuffer())
       .catch(() => {}),

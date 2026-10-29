@@ -3,6 +3,7 @@
 import type { HTMLAttributes } from "astro/types";
 import type { SceneImage } from "@svjeez/astro/scene";
 import { themed } from "../palettes";
+import Proof from "./Proof.astro";
 
 type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & {
   scene: SceneImage;
@@ -12,9 +13,14 @@ type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & {
   scheme?: "light" | "dark";
   /** Played by a script of its own instead of by the budget. */
   manual?: boolean;
+  /** Gives the scene a proof chip whose download is named svjeez-<name>.svg. */
+  name?: string;
+  /** The height of the scene's title bar in its own pixels, where the chip sits, or 0 for none. */
+  bar?: number;
+  alt: string;
 };
 
-const { scene, cost, scheme, manual, class: className, ...attributes } = Astro.props;
+const { scene, cost, scheme, manual, name, bar, alt, class: className, ...attributes } = Astro.props;
 ---
 
 <img
@@ -28,8 +34,10 @@ const { scene, cost, scheme, manual, class: className, ...attributes } = Astro.p
   data-themed={themed(scene.svg) ? "" : undefined}
   width={scene.width}
   height={scene.height}
+  alt={alt}
   {...attributes}
 />
+{name && <Proof scene={scene} name={name} alt={alt} bar={bar} class={className} />}
 
 <script>
   import "../scripts/scenes";
