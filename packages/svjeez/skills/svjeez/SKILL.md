@@ -29,7 +29,7 @@ export default function build(): string {
 }
 ```
 
-`render` takes `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `playbackRate`, `reducedMotion: { at }` or `false`, `loop` (`false` plays once and holds) and `prefix`. Attributes are camelCase (`strokeWidth`) and the class attribute is `class`.
+`render` takes `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `playbackRate`, `reducedMotion: { at }` or `false`, `loop` (`false` plays once and holds), `prefix` and `sources` (`true` writes `data-source="file:line:column"` on every element built by the development JSX runtime, for tools that link the picture back to its code). Attributes are camelCase (`strokeWidth`) and the class attribute is `class`.
 
 ## Render, look, fix
 
@@ -62,10 +62,11 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
 ```
 
 - `.to(values, over, ease?)`: `over` is a length, never an end time. Default ease is `ease.out`. Between transitions every value holds.
-- Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign.
+- Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign. `easeAt(curve, progress)` gives an ease's value at a progress from 0 to 1, to reuse it inside `sampled()` or draw it beside the scene.
 - Stack with an array: `animation={[enter(...), wiggle(...)]}`. Index 0 is outermost, like a wrapper `<g>`. Falsy entries drop out.
 - Only `opacity x y scale rotate blur` stack. Every other channel takes one motion per element, or render throws `Two motions both animate`. Within one motion, `x` and `y` share a lane, so move them in one `.to()`.
-- `scale` and `rotate` pivot on the element's own center. To pivot elsewhere, draw around 0,0 inside `<g transform="translate(cx cy)">`.
+- `scale` and `rotate` pivot on the center of the element's box, which for a group is the box of everything in it. To turn about a chosen point, use `<Pivot at={{ x, y }} animation={spin}>…</Pivot>`: `at` is in the coordinates the children are drawn in (default 0,0), and every layer of the stack turns about it.
+- `<Once>…</Once>` is a `<g>` whose motions, and every motion inside it, play the timeline one time and hold their last frame while the rest of a looping scene repeats: an intro, or a part that pops in when a page swaps in a new file with `restyle(svg, { at, onceAt: 0 })`.
 - Units: px, degrees for `rotate`, standard deviation in px for `blur`, CSS strings for colors.
 
 | Tag | Channels |
@@ -92,7 +93,10 @@ shake({ at: 2, over: 0.5 }, { x: 6 });               // damped shake on x, y or 
 wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; change the seed to reroll
 ```
 
-Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead.
+Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. To fly along a smooth route, `spline(points)` draws a Catmull-Rom curve through `{ x, y }` points: position `i + u` is `u` along leg `i`, `point(at)` and `angle(at)` feed `sampled()`, `tangent(at)` is the velocity, `path(from, to)` cuts exact path data (`d` is the whole route), and `nearest(p, from, to)` finds the position closest to a point.
+`precision: 1` rounds each sample to one decimal place before the keys are kept, which keeps the file small. `random(seed)` is the seeded stream `wiggle` uses: the same numbers from 0 up to 1 on every run, from a whole number or a string such as `"leg-3"`.
+
+`sample(stack, t, { duration })` reads what a motion or stack draws at scene time `t`, eased and looped as `render()` plays it, for placing something beside a moving part or drawing a readout of it. It returns the numeric channels and properties. Across layers `x`, `y` and `rotate` add and `opacity` and `scale` multiply.
 
 ```tsx
 sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translate: 1 } });
@@ -109,6 +113,8 @@ sampledPath((t) => wavePath(t), { duration: 6, tolerance: 0.5 });
 ```
 
 Reduced motion shows a still copy of the path at `reducedMotion.at`.
+
+`polylinePath(points, { closed, precision })` writes the path data for straight runs through points (one decimal place by default), and `resample(points, count)` spaces `count` points evenly along them.
 
 `sampledPath`'s `slack: (x, y) => px` lets points that nobody sees stray further, which saves keys; `@svjeez/geo`'s turning globes use it for the side folded out past the clip.
 
@@ -161,7 +167,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Gradients, clip paths, filters, custom properties, `calc` | [`references/defs-css.md`](references/defs-css.md) |
 | Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
-| Code walkthroughs, terminals, annotations, camera, themes, recoloring a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
+| Code walkthroughs, terminals, annotations, camera, themes, recoloring, pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
 | Flowchart, sequence, state, tree, lanes, `flow` | [`references/diagrams.md`](references/diagrams.md) |
 | Pixel-art voxel scenes | [`references/voxels.md`](references/voxels.md) |
 | Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
@@ -173,6 +179,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Mermaid text drawn as a flowchart, sequence or state diagram (`@svjeez/mermaid`) | [`references/mermaid.md`](references/mermaid.md) |
 | MP4 or WebM video of a finished scene (`@svjeez/video`) | [`references/video.md`](references/video.md) |
 | `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
+| Values a page or editor can change: counts, times, colors, eases, choices (`svjeez/params`) | [`references/params.md`](references/params.md) |
 
 ## Examples
 

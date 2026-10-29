@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
 import {
+  Once,
   Picture,
   def,
   ease,
@@ -14,6 +15,7 @@ import {
 } from "svjeez";
 import { adaptive, systemDark, systemLight } from "svjeez/extras";
 import { openScene, renderFrames } from "svjeez/frames";
+import { loopLength, seek } from "svjeez/page";
 import { systemColorScheme } from "../src/scheme";
 
 const browser = await renderFrames(
@@ -590,5 +592,199 @@ describe("restyle", () => {
       expect(await opacityAfter(own)).toBeGreaterThan(0);
       expect(await opacityAfter(restyle(own, { still: true }))).toBe(0);
     });
+
+    /** Screenshots of the SVG shown as an `<img>`, the way a page shows it, after each wait in milliseconds. */
+    const asImage = async (
+      svg: string,
+      waits: readonly number[],
+      reducedMotion: "reduce" | "no-preference" = "no-preference",
+    ) => {
+      const { chromium } = await import("playwright-core");
+      const chrome = await chromium.launch();
+
+      try {
+        const page = await chrome.newPage({ viewport: { width: 40, height: 20 }, reducedMotion });
+        const src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+        await page.setContent(`<style>body{margin:0}img{display:block}</style><img src="${src}">`);
+        await page.evaluate(() => document.querySelector("img")!.decode());
+        const shots: Uint8Array[] = [];
+
+        for (const wait of waits) {
+          await page.waitForTimeout(wait);
+          shots.push(new Uint8Array(await page.screenshot()));
+        }
+
+        return shots;
+      } finally {
+        await chrome.close();
+      }
+    };
+
+    test("paused holds an <img> at the moment asked for, CSS and SMIL motions alike", async () => {
+      const svg = scene();
+      const [first, later] = await asImage(restyle(svg, { at: 1.5, paused: true }), [50, 700]);
+      const [start] = await asImage(restyle(svg, { paused: true }), [50]);
+
+      const drawn = render(
+        { width: 40, height: 20, duration: 4, title: "1.5 s in" },
+        <>
+          <rect width={40} height={20} fill="#3EE6D6" opacity={0.375} />
+          <rect
+            x={10}
+            width={10}
+            height={10}
+            fill="#E64"
+            filter={def.filter({}, <feGaussianBlur stdDeviation={3} />)}
+          />
+        </>,
+      );
+
+      const [frame] = await asImage(drawn, [50]);
+
+      expect(same(first!, later!)).toBe(true);
+      expect(same(first!, frame!)).toBe(true);
+      expect(same(first!, start!)).toBe(false);
+    });
+
+    test("paused shows its moment to a viewer who prefers reduced motion, not the still frame", async () => {
+      const paused = restyle(scene({ at: 3.5 }), { at: 1.5, paused: true });
+      const [reduced] = await asImage(paused, [50], "reduce");
+      const [moving] = await asImage(paused, [50]);
+
+      expect(same(reduced!, moving!)).toBe(true);
+    });
+
+    test("<Once> parts hold their end on the loop clock, and onceAt gives them a clock of their own", async () => {
+      const fade = (over: number) => motion({ opacity: 0 }).to({ opacity: 1 }, over, ease.linear);
+      const blur = motion({ blur: 0 }).to({ blur: 4 }, 2, ease.linear);
+
+      const svg = render(
+        { width: 40, height: 20, duration: 2, title: "Once" },
+        <>
+          <rect width={20} height={20} fill="#3EE6D6" animation={fade(2)} />
+          <Once>
+            <rect x={20} width={20} height={10} fill="#E64" animation={fade(1)} />
+            <rect x={25} y={12} width={10} height={6} fill="#246" animation={blur} />
+          </Once>
+        </>,
+      );
+
+      const drawn = (loop: number, once: number, deviation: number) =>
+        render(
+          { width: 40, height: 20, duration: 2, title: "Drawn" },
+          <>
+            <rect width={20} height={20} fill="#3EE6D6" opacity={loop} />
+            <rect x={20} width={20} height={10} fill="#E64" opacity={once} />
+            <rect
+              x={25}
+              y={12}
+              width={10}
+              height={6}
+              fill="#246"
+              filter={def.filter(
+                { filterUnits: "userSpaceOnUse", x: 0, y: 0, width: 40, height: 20 },
+                <feGaussianBlur stdDeviation={deviation} />,
+              )}
+            />
+          </>,
+        );
+
+      const [late, own, ...references] = await Promise.all([
+        asImage(restyle(svg, { at: 2.5, paused: true }), [50]),
+        asImage(restyle(svg, { at: 2.5, onceAt: 0.5, paused: true }), [50]),
+        asImage(drawn(0.25, 1, 4), [50]),
+        asImage(drawn(0.25, 0.5, 1), [50]),
+      ]);
+
+      expect(same(late[0]!, references[0]![0]!)).toBe(true);
+      expect(same(own[0]!, references[1]![0]!)).toBe(true);
+    });
+
+    test("a scene that plays once stays valid, held, and on its last frame when started past its end", async () => {
+      const once = render(
+        { width: 40, height: 20, duration: 4, title: "Once", loop: false },
+        <rect
+          width={10}
+          height={10}
+          animation={motion({ blur: 0 }).to({ blur: 4 }, 4, ease.linear)}
+        />,
+      );
+
+      const paused = restyle(once, { at: 1, paused: true });
+      expect(paused.match(/fill="freeze"/g)).toHaveLength(1);
+      const [first, later] = await asImage(paused, [50, 500]);
+      expect(same(first!, later!)).toBe(true);
+
+      const ended = render(
+        { width: 40, height: 20, duration: 4, title: "Ended" },
+        <rect
+          width={10}
+          height={10}
+          filter={def.filter(
+            { filterUnits: "userSpaceOnUse", x: 0, y: 0, width: 40, height: 20 },
+            <feGaussianBlur stdDeviation={4} />,
+          )}
+        />,
+      );
+
+      const [last] = await asImage(ended, [50]);
+      const [past] = await asImage(restyle(once, { at: 6 }), [50]);
+      const [heldPast] = await asImage(restyle(once, { at: 6, paused: true }), [50]);
+      expect(same(past!, last!)).toBe(true);
+      expect(same(heldPast!, last!)).toBe(true);
+    });
+  });
+});
+
+declare global {
+  interface Window {
+    seek?: typeof seek;
+    loopLength?: typeof loopLength;
+  }
+}
+
+describe.if(browser)("seek and loopLength on an inline <svg>", () => {
+  const scene = (prefix: string, duration: number) =>
+    render(
+      { width: 20, height: 20, duration, title: prefix, prefix },
+      <rect
+        width={20}
+        height={20}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, duration, ease.linear)}
+      />,
+    );
+
+  test("scrub one picture and leave the rest of the page playing", async () => {
+    const { chromium } = await import("playwright-core");
+    const chrome = await chromium.launch();
+
+    try {
+      const page = await chrome.newPage();
+      await page.setContent(`<!doctype html><body>${scene("one", 4)}${scene("two", 3)}`);
+      await page.addScriptTag({
+        content: `window.seek = ${seek};window.loopLength = ${loopLength};`,
+      });
+
+      const state = await page.evaluate(() => {
+        const [one, two] = document.querySelectorAll("svg");
+
+        window.seek!(1, one!);
+
+        const opacity = (svg: Element) =>
+          Number(getComputedStyle(svg.querySelector("rect")!).opacity);
+
+        return {
+          one: opacity(one!),
+          two: two!.getAnimations({ subtree: true }).map((animation) => animation.playState),
+          lengths: [window.loopLength!(one!), window.loopLength!(two!), window.loopLength!()],
+        };
+      });
+
+      expect(state.one).toBeCloseTo(0.25, 2);
+      expect(state.two).toEqual(["running"]);
+      expect(state.lengths).toEqual([4, 3, 12]);
+    } finally {
+      await chrome.close();
+    }
   });
 });

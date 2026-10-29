@@ -1,55 +1,8 @@
 ---
 import Base from "../../layouts/Base.astro";
-import "../../lab/a/lab.css";
+import LabA from "../../lab/a/LabA.svelte";
 ---
 
 <Base title="Lab A · svjeez" description="The code is the control panel: drag a number, bend an ease, and a new SVG compiles in your browser." wide>
-  <main class="la" data-lab-a>
-
-    <div class="la-grid">
-      <section class="la-win la-codewin" aria-label="Scene source">
-        <div class="la-bar-top">
-          <span class="la-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span class="la-file">meadow.tsx</span>
-          <button type="button" class="la-btn la-reset">Reset</button>
-        </div>
-        <div class="la-code" spellcheck="false"></div>
-      </section>
-
-      <section class="la-out" aria-label="The compiled SVG">
-        <div class="la-stage">
-          <img class="la-img" alt="The compiled meadow scene" />
-          <div class="la-ghost" aria-hidden="true"></div>
-          <div class="la-boxes" aria-hidden="true"></div>
-        </div>
-
-        <div class="la-timeline">
-          <div class="la-tl-head">
-            <button type="button" class="la-btn la-play">Pause</button>
-            <span class="la-time">0.00s</span>
-          </div>
-          <div class="la-lanes">
-            <div class="la-ticks"></div>
-            <div class="la-rows"></div>
-            <div class="la-playhead"></div>
-          </div>
-        </div>
-
-        <p class="la-error" role="status" hidden></p>
-        <p class="la-stats" aria-live="off"></p>
-        <a class="la-download" download="meadow.svg">Download this file</a>
-      </section>
-    </div>
-
-    <div class="la-hud" hidden><span class="la-hud-track"><i></i></span><span class="la-hud-label"></span></div>
-    <div class="la-ease-pop" hidden>
-      <svg viewBox="0 0 200 240"></svg>
-      <code class="la-ease-text"></code>
-    </div>
-    <input class="la-color-input" type="color" tabindex="-1" aria-hidden="true" />
-  </main>
+  <LabA client:load />
 </Base>
-
-<script>
-  import "../../lab/a/app";
-</script>

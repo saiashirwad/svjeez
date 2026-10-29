@@ -9,6 +9,7 @@ import {
   type Values,
 } from "./channels";
 import type { NumericProperty } from "./properties";
+import { random } from "./random";
 import {
   NUDGE,
   ease,
@@ -117,22 +118,6 @@ export interface WiggleOptions {
   readonly period?: Seconds;
 }
 
-const fnv1a = (text: string): number => {
-  let hash = 0x811c9dc5;
-
-  for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 0x01000193);
-
-  return hash >>> 0;
-};
-
-const mulberry32 = (seed: number) => () => {
-  seed = (seed + 0x6d2b79f5) | 0;
-  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
-
 /** Seeded noise around rest, looping seamlessly. Values are baked at call time, so output is reproducible. */
 export function wiggle<V extends Values<RestChannel>>(
   amplitude: Exact<V, RestChannel>,
@@ -140,7 +125,7 @@ export function wiggle<V extends Values<RestChannel>>(
 ): Motion<keyof V & RestChannel> {
   const period = options.period ?? 2;
   const count = Math.max(2, Math.round((options.rate ?? 8) * period));
-  const random = mulberry32(fnv1a(String(options.seed)));
+  const next = random(String(options.seed));
   const amounts: Values<RestChannel> = amplitude;
   // SAFETY: amounts is typed Values<RestChannel>, so its keys are rest channel names.
   const channels = (Object.keys(amounts) as RestChannel[]).sort();
@@ -149,7 +134,7 @@ export function wiggle<V extends Values<RestChannel>>(
     const amp = amounts[channel] ?? 0;
     const base = CHANNELS[channel].identity;
 
-    return Array.from({ length: count }, () => clamp(channel, base + amp * (random() * 2 - 1)));
+    return Array.from({ length: count }, () => clamp(channel, base + amp * (next() * 2 - 1)));
   });
 
   const at = (i: number): Values<RestChannel> =>
@@ -187,6 +172,8 @@ export interface SampledOptions<T extends Tolerance> {
   /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
   readonly tolerance: T;
+  /** Decimal places each sampled value is rounded to before simplifying. Default none. */
+  readonly precision?: number;
 }
 
 const ramerDouglasPeucker = (
@@ -262,13 +249,32 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   sample: (t: Seconds) => V & { readonly [P in Exclude<keyof V, keyof Covered<T>>]: never },
   options: SampledOptions<T>,
 ): Motion<keyof V & Sampled> {
-  const { duration, step = 0.05 } = options;
+  const { duration, step = 0.05, precision } = options;
 
   if (!Number.isFinite(duration) || duration <= 0)
     throw new Error(`sampled() needs a positive duration, got ${duration}.`);
 
   if (!Number.isFinite(step) || step <= 0)
     throw new Error(`sampled() needs a positive step, got ${step}.`);
+
+  if (precision !== undefined && !(Number.isInteger(precision) && precision >= 0))
+    throw new Error(`sampled() needs a whole, non-negative precision, got ${precision}.`);
+  const factor = 10 ** (precision ?? 0);
+
+  const read = (t: Seconds): Partial<Record<Sampled, number>> => {
+    // SAFETY: sample returns V, keyed by numeric channel or property names; frameAt requires every frame to have the same finite keys as frame 0.
+    const frame = sample(t) as Partial<Record<Sampled, number>>;
+
+    return precision === undefined
+      ? frame
+      : Object.fromEntries(
+          Object.entries(frame).map(([key, value]) => [
+            key,
+            Number.isFinite(value) ? Math.round(value! * factor) / factor : value,
+          ]),
+        );
+  };
+
   const edge = duration * NUDGE;
 
   const times = Array.from(
@@ -280,13 +286,11 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   const present = (frame: Partial<Record<Sampled, number>>) =>
     (Object.keys(frame) as Sampled[]).filter((channel) => Number.isFinite(frame[channel])).sort();
 
-  // SAFETY: sample returns V, keyed by numeric channel or property names; frameAt requires every frame to have the same finite keys as frame 0.
-  const first = sample(0) as Partial<Record<Sampled, number>>;
+  const first = read(0);
   const channels = present(first);
 
   const frameAt = (t: Seconds): Partial<Record<Sampled, number>> => {
-    // SAFETY: as for frame 0 above.
-    const frame = t === 0 ? first : (sample(t) as Partial<Record<Sampled, number>>);
+    const frame = t === 0 ? first : read(t);
 
     if (present(frame).join() !== channels.join())
       throw new Error(

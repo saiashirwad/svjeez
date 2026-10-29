@@ -361,6 +361,18 @@ export function matchPaths(paths: readonly string[], options: MatchOptions = {})
   return even.map((rings) => write(rings, places));
 }
 
+/**
+ * The path `a` eased `amount` of the way to `b`, number for number. Both must carry the same commands, as
+ * `matchPaths()` writes them, so their numbers pair up one to one.
+ */
+export const blendPaths = (a: string, b: string, amount: number): PathData => {
+  const to = (b.match(NUMBER) ?? []).map(Number);
+  let k = 0;
+
+  // SAFETY: the replacement keeps every command letter of `a`, so the result is path data like `a`.
+  return a.replace(NUMBER, (n) => num(Number(n) + (to[k++]! - Number(n)) * amount)) as PathData;
+};
+
 /** The commands of a path with every number taken out, so two paths can be checked for a smooth morph. */
 export const commandsOf = (d: string): string => d.replace(NUMBER, "#").replace(/[\s,]+/g, "");
 

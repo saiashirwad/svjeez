@@ -55,6 +55,16 @@
       "@svjeez/source": "./src/frames.ts",
       "types": "./package-dist/frames.d.ts",
       "default": "./package-dist/frames.js"
+    },
+    "./page": {
+      "@svjeez/source": "./src/page.ts",
+      "types": "./package-dist/page.d.ts",
+      "default": "./package-dist/page.js"
+    },
+    "./params": {
+      "@svjeez/source": "./src/params.ts",
+      "types": "./package-dist/params.d.ts",
+      "default": "./package-dist/params.js"
     }
   },
   "scripts": {

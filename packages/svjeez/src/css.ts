@@ -124,6 +124,10 @@ export const classBody = (
 export const baseRule = (canvas: Canvas): string =>
   `.${canvas.prefix}a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:${canvas.loop ? "infinite" : 1};animation-fill-mode:both;animation-timing-function:${BASE_TIMING};animation-delay:var(--t0,0s)}`;
 
+/** Motions inside `<Once>` play one time, on `--t1`, the clock `restyle({ onceAt })` sets, which falls back to the scene's `--t0`. */
+export const onceRule = (canvas: Canvas): string =>
+  `.${canvas.prefix}o{animation-iteration-count:1;animation-delay:var(--t1,var(--t0,0s))}`;
+
 /** Opens the block that holds the still frame under reduced motion, where `restyle` finds it. */
 export const REDUCED_MOTION = "@media (prefers-reduced-motion:reduce){";
 

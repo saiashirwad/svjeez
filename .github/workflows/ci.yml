@@ -68,6 +68,12 @@ jobs:
         working-directory: packages/charts
       - run: npm run test:package
         working-directory: packages/mermaid
+      - run: npm run test:package
+        working-directory: packages/live
+      - run: npm run test:package
+        working-directory: packages/svelte
+      - run: npm run test:package
+        working-directory: packages/react
       - run: bunx playwright-core install --with-deps chromium-headless-shell
       - run: npm run test:package
         working-directory: packages/vite

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { matchPaths, motion, render, sampledPath, type Motion } from "svjeez";
+import { ease, matchPaths, motion, render, sampledPath, type Motion } from "svjeez";
 
 const scene = (animation: Motion<"d">, reducedMotion?: false) =>
   render(
@@ -44,6 +44,18 @@ describe("the d channel", () => {
     expect(svg).toContain('attributeName="d"');
     expect(svg).toMatch(/<path[^>]*class="[^"]*ds"[^>]*display="none"/);
     expect(svg).toMatch(/prefers-reduced-motion:reduce\)\{[^}]*dm\{display:none\}/);
+  });
+
+  test("the still twin draws the shape the morph has reached at the still moment", () => {
+    const svg = render(
+      { width: 100, height: 100, duration: 4, title: "Test", reducedMotion: { at: 2 } },
+      <path
+        d="M0 0H10"
+        animation={motion({ d: "M0 0H10" }).at(1).to({ d: "M0 10H20" }, 2, ease.linear)}
+      />,
+    );
+
+    expect(svg).toMatch(/<path[^>]*d="M0 5H15"[^>]*class="[^"]*ds"/);
   });
 
   test("needs no twin when reduced motion is off", () => {

@@ -1,11 +1,15 @@
-// Where everything on a specimen sits. Pure math, no svjeez: the page lays the overlay's handles out from the same numbers
+// Where everything on a specimen sits. Pure math: the page lays the overlay's handles out from the same numbers
 // the worker draws the file from.
+import { random, resample } from "svjeez";
 import { clamp } from "../util";
-import { CENTERLINES, resample } from "./centerline";
+import { CENTERLINES } from "./centerline";
 import { form, type Form } from "./form";
 import type { Genome } from "./genome";
-import { add, mulberry, sub, unit, W, type Pt } from "./geometry";
+import { add, sub, unit, W, type Pt } from "./geometry";
 import { QUIRK } from "./quirk";
+
+/** Where a tail of `length` ends, before its rotation: it curls up from 0,0 and leans right. */
+export const tailTip = (length: number): Pt => ({ x: length * 0.242, y: -length });
 
 /** One cat of body, in px before fitting. */
 export const CAT = 120;
@@ -189,7 +193,7 @@ const placeTails = ({ g, f, G, at }: Body): Limb[] => {
 };
 
 const placeBodyEyes = ({ g, G, at }: Body): (Pt & { r: number })[] => {
-  const rand = mulberry(g.seed * 7 + 3);
+  const rand = random(g.seed * 7 + 3);
 
   return Array.from({ length: g.bodyEyes }, (_, i) => {
     const fr = at(clamp((i + 0.5 + (rand() - 0.5) * 0.6) / g.bodyEyes, 0.08, 0.92));

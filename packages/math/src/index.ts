@@ -228,9 +228,13 @@ export function tex(source: string, options: TexOptions = {}): Tex {
 
 export {
   epicycles,
+  fourier,
   type Epicycles,
   type EpicyclesOptions,
   type EpicyclesSource,
+  type Fourier,
+  type FourierOptions,
+  type FourierTerm,
   type Outline,
 } from "./epicycles.ts";
 

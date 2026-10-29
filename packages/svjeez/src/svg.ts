@@ -29,6 +29,8 @@ export type SvgNode =
       readonly children: readonly SvgNode[];
       /** The `animation` stack, outermost first. Never serialized. */
       readonly motions: readonly Motion[];
+      /** Set by `<Once>`: every motion from here down plays the timeline one time. Never serialized. */
+      readonly once?: boolean;
     }
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }
