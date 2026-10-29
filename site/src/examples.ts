@@ -6,8 +6,8 @@ export const REPO = "https://github.com/saiashirwad/svjeez";
 /** Where the examples' sources live on GitHub. */
 export const SOURCES = `${REPO}/tree/main/examples`;
 
-/** The width a card draws its poster at. */
-export const POSTER_WIDTH = 480;
+/** A poster's width in device pixels: a card is at most about 560px wide on a phone, and screens draw it at 2x or more. */
+export const POSTER_WIDTH = 1200;
 
 const SECTIONS = [
   {
@@ -67,7 +67,7 @@ const example = (name: string): Example => {
 
   return {
     name,
-    scene: getScene(build, { posters: { scale: POSTER_WIDTH / width, quality: 0.7 } }),
+    scene: getScene(build, { posters: { scale: POSTER_WIDTH / width, quality: 0.85 } }),
   };
 };
 

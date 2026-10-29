@@ -14,9 +14,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   <script slot="head" type="speculationrules" is:inline set:html={speculation} />
   <main class="wrap">
     <div class="page-head">
-      <p class="kicker">Examples</p>
       <h1>Explore what you can make.</h1>
-      <p class="sub">Each example is a single animated SVG made with svjeez. Hover over a card to play it; on touch screens, scenes play as you scroll. Open one to see it full size and find its source.</p>
     </div>
     {
       sections.map((section) => (
@@ -31,10 +29,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
                 <span class="shot" data-live={scene.src} data-light={scene.posters!.light} data-dark={scene.posters!.dark}>
                   <img width={POSTER_WIDTH} height={Math.round((POSTER_WIDTH * scene.height) / scene.width)} alt="" decoding="async" data-themed={themed(scene.svg) ? "" : undefined} />
                 </span>
-                <span>
-                  <b>{scene.title}</b>
-                  <span class="d">{scene.desc}</span>
-                </span>
+                <b>{scene.title}</b>
               </a>
             ))}
           </div>

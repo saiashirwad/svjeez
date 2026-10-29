@@ -1169,14 +1169,6 @@ pre.side {
   font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.5rem);
   letter-spacing: -0.03em;
 }
-.page-head .kicker {
-  margin-block-end: 0.75rem;
-  color: var(--accent);
-}
-.page-head .sub {
-  margin-block-start: 1rem;
-  max-inline-size: 48ch;
-}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
@@ -1194,7 +1186,7 @@ pre.side {
 .card .shot {
   position: relative;
   display: block;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   overflow: clip;
   background: var(--surface);
   border-radius: var(--radius);
@@ -1211,16 +1203,6 @@ pre.side {
 .card b {
   display: block;
   font: 600 1.0625rem / 1.2 var(--sans);
-}
-.card span.d {
-  display: -webkit-box;
-  margin-block-start: 0.2rem;
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--muted);
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: clip;
 }
 .card:active .shot {
   translate: 0 1px;
@@ -1276,22 +1258,17 @@ pre.side {
   display: none;
 }
 .viewer main {
+  /* The scene and the row under it share one width: the window's, or less so a wide scene fits its height. */
+  inline-size: min(100% - 2 * var(--gutter), var(--content), calc((100dvh - 12rem) * var(--ratio)));
   padding-block: 1rem 0;
-}
-.viewer .count {
-  margin-block-end: 1.25rem;
 }
 .plate {
   margin: 0;
-  inline-size: min(100%, calc((100dvh - 15rem) * var(--ratio)));
-  margin-inline: auto;
   aspect-ratio: var(--ratio);
   overflow: clip;
   background: var(--surface) var(--poster) center / cover;
   border-radius: var(--radius);
-  box-shadow:
-    0 0 0 1px var(--ring),
-    0 1.25rem 2.5rem -1rem var(--shadow);
+  box-shadow: 0 0 0 1px var(--ring);
 }
 .plate img {
   inline-size: 100%;
@@ -1306,36 +1283,57 @@ pre.side {
 }
 .viewer .meta {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem 2rem;
-  margin-block-start: 2rem;
+  gap: 1rem;
+  margin-block-start: 1rem;
 }
 .viewer .meta h1 {
-  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  flex: 1;
+  min-inline-size: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
 }
-.viewer .actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.625rem;
-}
-@media (max-width: 40rem) {
-  .viewer .actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    inline-size: 100%;
-  }
-  .viewer .actions .btn {
-    justify-content: center;
-  }
-  .viewer .actions .primary {
-    grid-column: 1 / -1;
-  }
-}
-.count {
-  font: 500 0.875rem / 1 var(--mono);
+.viewer .source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: 500 0.875rem / 1 var(--sans);
   color: var(--muted);
+  text-decoration: none;
+}
+.viewer .source svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+.viewer .step {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.viewer .step a {
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  color: var(--ink);
+}
+.viewer .step a + a {
+  border-inline-start: 1px solid var(--line);
+}
+.viewer .step svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (hover: hover) and (pointer: fine) {
+  .viewer .source:hover,
+  .viewer .step a:hover {
+    color: var(--accent);
+  }
 }
 /* The intro page: the reel fills the window under the header, as large as it fits. */
 .cinema {
