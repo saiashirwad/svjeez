@@ -26,6 +26,8 @@ export const cacheDir = (): string => {
 // Google serves WOFF2 to browsers and static TTF to a user agent it doesn't recognize. Fetch's own differs by runtime.
 const HEADERS = { "user-agent": "svjeez-fonts" };
 
+const isWeight = (face: number | GoogleFace): face is number => typeof face === "number";
+
 const slug = (family: string): string => family.replace(/[^A-Za-z0-9]+/g, "-");
 
 const cssUrl = (family: string, weight: number, style: FontStyle): string => {
@@ -120,10 +122,11 @@ export const google = Object.assign(
     ): Promise<FontFamily> => {
       const fonts = await Promise.all(
         faces.map((face) =>
-          google(family, { ...options, ...(typeof face === "number" ? { weight: face } : face) }),
+          google(family, { ...options, ...(isWeight(face) ? { weight: face } : face) }),
         ),
       );
 
+      // SAFETY: `faces` is a non-empty tuple and Promise.all keeps its length.
       return font.family(...(fonts as [Font, ...Font[]]));
     },
   },

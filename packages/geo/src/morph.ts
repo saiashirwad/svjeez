@@ -15,6 +15,10 @@ import { resolveRegions, type RegionValues } from "./choropleth.ts";
 import type { GeoMap, Region } from "./index.ts";
 import { straighten } from "./writer.ts";
 
+type Painter = (region: Region, value: number) => Color;
+
+const isPainter = (fill: Color | Painter): fill is Painter => typeof fill === "function";
+
 export interface MorphOptions {
   /** When the regions start to leave the map. */
   readonly at: Seconds;
@@ -157,6 +161,7 @@ function morphs(targets: readonly Target[], map: GeoMap, options: MorphOptions):
     fill = "#6b7280",
     detail = 2.5,
   } = options;
+
   const used = new Set(targets.map((t) => t.region));
 
   const paths = targets.map(({ region, value, to, center }, i) => {
@@ -166,7 +171,7 @@ function morphs(targets: readonly Target[], map: GeoMap, options: MorphOptions):
 
     return el.path({
       d: start,
-      fill: typeof fill === "function" ? fill(region, value) : fill,
+      fill: isPainter(fill) ? fill(region, value) : fill,
       animation: motion({ d: start })
         .at(at + i * stagger)
         .to({ d: end }, over, curve),
@@ -242,6 +247,7 @@ function relax(discs: Disc[], gap: number, frame: Rect): void {
         const need = a.r + b.r + gap;
 
         if (d >= need) continue;
+
         if (d < 1e-6) [dx, dy, d] = [Math.cos(i), Math.sin(i), 1];
         const push = need - d;
         const share = b.r / (a.r + b.r);
@@ -311,6 +317,7 @@ export function toBars(map: GeoMap, values: RegionValues, options: BarsOptions):
   const biggest = singles(map, values, "toBars()")
     .sort((a, b) => b[1] - a[1])
     .slice(0, top);
+
   const max = options.max ?? biggest[0]![1];
   const shown = order === "desc" ? biggest : [...biggest].reverse();
   const slot = frame.h / shown.length;

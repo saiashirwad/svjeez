@@ -21,7 +21,13 @@ const base64 = (bytes: Uint8Array) => Buffer.from(bytes).toString("base64");
 const still = async (build: () => string) => {
   const { svg } = getScene(build);
   const held = Number(/animation-delay:-([\d.]+)s!important/.exec(svg)?.[1] ?? 0);
-  const { frames } = await renderFrames(svg, { times: [held], colorScheme: "dark", scale: 2, background: "transparent" });
+
+  const { frames } = await renderFrames(svg, {
+    times: [held],
+    colorScheme: "dark",
+    scale: 2,
+    background: "transparent",
+  });
 
   return base64(frames[0]!.png);
 };
@@ -36,13 +42,20 @@ export const GET: APIRoute = async () => {
     [fourier, charts, recording],
     [team, euler, fonts],
   ];
+
   const stills = await Promise.all(columns.map((column) => Promise.all(column.map(still))));
-  const icon = await renderFrames(mark, { times: [0], colorScheme: "light", background: "transparent" });
+
+  const icon = await renderFrames(mark, {
+    times: [0],
+    colorScheme: "light",
+    background: "transparent",
+  });
 
   // Scenes are 504 by 340, drawn at 0.62x.
   const w = 312;
   const h = 210;
   const gap = 22;
+
   const wall = stills
     .flatMap((column, c) =>
       column.map(

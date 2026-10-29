@@ -63,13 +63,26 @@ export default function build(): string {
             strokeWidth={1.5}
             strokeDasharray="4 4"
           />
-          <text x={ships + 8} y={c.y(30) + 12} fontFamily={mono} fontSize={11} fill={tint(theme, "plain")}>
+          <text
+            x={ships + 8}
+            y={c.y(30) + 12}
+            fontFamily={mono}
+            fontSize={11}
+            fill={tint(theme, "plain")}
+          >
             bot ships
           </text>
         </g>
         <g animation={enter({ at: wait.end + 0.4, over: 0.6 }, { opacity: 0, y: 6 })}>
-          <text x={W / 2} y={H - 26} fontFamily={mono} fontSize={11} textAnchor="middle" fill={theme.base03}>
-            {"c.area(points, { curve: \"monotone\" })"}
+          <text
+            x={W / 2}
+            y={H - 26}
+            fontFamily={mono}
+            fontSize={11}
+            textAnchor="middle"
+            fill={theme.base03}
+          >
+            {'c.area(points, { curve: "monotone" })'}
           </text>
         </g>
       </g>

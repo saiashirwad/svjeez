@@ -102,6 +102,8 @@ scenes.forEach((img) => {
 // scene is in the cache before it is scrolled to or switched to. A fetch fills the HTTP cache without loading the SVG
 // as an image, which would start its clock. Readers who ask to save data are skipped.
 const warm = () => {
+  // SAFETY: the Network Information API is missing from lib.dom, and Chromium is the only engine that has it, so every
+  // field is optional.
   if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
 
   new Set([...scenes].flatMap((img) => [img.dataset.live!, posterOf(img)])).forEach((url) =>

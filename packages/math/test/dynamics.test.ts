@@ -118,6 +118,7 @@ describe("counter", () => {
       ],
       { roll: 0.3 },
     );
+
     expect(svg(r.node)).toContain("translate");
   });
 

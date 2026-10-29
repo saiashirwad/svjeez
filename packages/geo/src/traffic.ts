@@ -99,6 +99,8 @@ export interface ArcOptions {
   readonly steps?: number;
 }
 
+const isLonLat = (place: LonLat | Point): place is LonLat => Array.isArray(place);
+
 /**
  * A curved route between two places on a flat map, bowed upward like a rainbow, as points for `flow()`, `travel()` and
  * `traffic()`. For a route that follows the globe, use `map.route()`.
@@ -109,8 +111,8 @@ export function arc(
   to: LonLat | Point,
   options: ArcOptions = {},
 ): Point[] {
-  const a = Array.isArray(from) ? map.point(from as LonLat) : (from as Point);
-  const b = Array.isArray(to) ? map.point(to as LonLat) : (to as Point);
+  const a = isLonLat(from) ? map.point(from) : from;
+  const b = isLonLat(to) ? map.point(to) : to;
   const chord = Math.hypot(b.x - a.x, b.y - a.y);
 
   if (!(chord > 0)) throw new Error("arc() needs two different places.");

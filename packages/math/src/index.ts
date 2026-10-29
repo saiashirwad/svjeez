@@ -179,6 +179,7 @@ export function tex(source: string, options: TexOptions = {}): Tex {
       {},
       glyphs.map((g, i) => {
         const start = at + i * step;
+        // SAFETY: a glyph's fill is the color a \color{} command wrote, which MathJax passes through as a CSS color.
         const paint = (g.fill as Color | undefined) ?? ink;
         const transform = `matrix(${g.matrix.join(" ")})`;
 

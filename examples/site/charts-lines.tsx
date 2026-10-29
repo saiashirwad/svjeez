@@ -12,6 +12,7 @@ const D = 9;
 const win = chrome(W, H, "lines.tsx");
 
 const releases = [1, 2, 3, 4, 5, 6, 7, 8];
+
 const builds = {
   linux: [6.2, 5.8, 5.9, 5.1, 4.6, 4.4, 3.9, 3.6],
   macos: [8.4, 8.1, 7.2, 7.4, 6.5, 6.1, 5.8, 5.2],
@@ -32,8 +33,22 @@ const c = chart({
 
 const pairs = (values: readonly number[]) => releases.map((r, i) => [r, values[i]!] as const);
 
-const linux = c.line(pairs(builds.linux), { at: 0.8, curve: "monotone", dots: 3, label: "linux", color: tint(theme, "green") });
-const macos = c.line(pairs(builds.macos), { at: linux.end - 0.4, curve: "linear", dots: 3, label: "macos", color: tint(theme, "blue") });
+const linux = c.line(pairs(builds.linux), {
+  at: 0.8,
+  curve: "monotone",
+  dots: 3,
+  label: "linux",
+  color: tint(theme, "green"),
+});
+
+const macos = c.line(pairs(builds.macos), {
+  at: linux.end - 0.4,
+  curve: "linear",
+  dots: 3,
+  label: "macos",
+  color: tint(theme, "blue"),
+});
+
 const windows = c.line(pairs(builds.windows), {
   at: macos.end - 0.4,
   curve: "step",
@@ -60,8 +75,15 @@ export default function build(): string {
         {macos.node}
         {windows.node}
         <g animation={enter({ at: windows.end, over: 0.6 }, { opacity: 0, y: 6 })}>
-          <text x={W / 2} y={H - 26} fontFamily={mono} fontSize={11} textAnchor="middle" fill={theme.base03}>
-            {"curve: \"monotone\" | \"linear\" | \"step\""}
+          <text
+            x={W / 2}
+            y={H - 26}
+            fontFamily={mono}
+            fontSize={11}
+            textAnchor="middle"
+            fill={theme.base03}
+          >
+            {'curve: "monotone" | "linear" | "step"'}
           </text>
         </g>
       </g>

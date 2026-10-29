@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { rect, render } from "svjeez";
+import { rect, render, type SvgNode } from "svjeez";
 import { Camera, Steady, travel, type CameraStop } from "svjeez/extras";
 
-const scene = (...children: unknown[]) =>
-  render({ width: 400, height: 300, duration: 10, title: "Test" }, <>{children as never}</>);
+const scene = (...children: SvgNode[]) =>
+  render({ width: 400, height: 300, duration: 10, title: "Test" }, <>{children}</>);
 
 /** Every `rotate:` value in the stylesheet, in degrees. */
 const rotations = (svg: string) =>
@@ -19,6 +19,7 @@ describe("travel with heading", () => {
     const svg = scene(
       <circle r={3} animation={travel(south, { at: 1, over: 2, heading: true })} />,
     );
+
     expect(rotations(svg)).toContain(90);
   });
 
@@ -34,6 +35,7 @@ describe("travel with heading", () => {
     const turns = rotations(svg);
 
     expect(turns.length).toBeGreaterThan(1);
+
     for (const [i, turn] of turns.entries())
       if (i > 0) expect(Math.abs(turn - turns[i - 1]!)).toBeLessThan(180);
   });

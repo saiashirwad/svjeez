@@ -30,18 +30,19 @@ export interface Choropleth {
   readonly groups: number;
 }
 
+const isName = (name: unknown): name is string => typeof name === "string";
+
+const isTime = (at: ChoroplethOptions["at"]): at is Seconds => typeof at === "number";
+
 /** The regions `values` names, with each key resolved. Keys that match no region are returned apart. */
-export const resolveRegions = (
-  map: GeoMap,
-  values: RegionValues,
-): { found: [Region, number | readonly number[]][]; unmatched: string[] } => {
+export const resolveRegions = (map: GeoMap, values: RegionValues) => {
   const byKey = new Map<string, Region>();
 
   for (const region of map.regions) {
     byKey.set(region.id, region);
     const name = region.properties?.name;
 
-    if (typeof name === "string" && !byKey.has(name)) byKey.set(name, region);
+    if (isName(name) && !byKey.has(name)) byKey.set(name, region);
   }
 
   const found = new Map<Region, number | readonly number[]>();
@@ -58,7 +59,7 @@ export const resolveRegions = (
 };
 
 const times = (at: ChoroplethOptions["at"], frames: number): Seconds[] => {
-  const list = typeof at === "number" ? [at] : [...(at ?? [0])];
+  const list = isTime(at) ? [at] : [...(at ?? [0])];
 
   if (list.length !== frames)
     throw new Error(

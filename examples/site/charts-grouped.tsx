@@ -30,7 +30,13 @@ const c = chart({
   grid: true,
 });
 
-const open = c.bars(opened, { at: 0.6, stagger: 0.1, group: { index: 0, count: 2 }, color: tint(theme, "comment") });
+const open = c.bars(opened, {
+  at: 0.6,
+  stagger: 0.1,
+  group: { index: 0, count: 2 },
+  color: tint(theme, "comment"),
+});
+
 const done = c.bars(merged, {
   at: open.end,
   stagger: 0.1,
@@ -68,7 +74,14 @@ export default function build(): string {
         {open.node}
         {done.node}
         <g animation={enter({ at: done.end, over: 0.6 }, { opacity: 0, y: 6 })}>
-          <text x={W / 2} y={H - 22} fontFamily={mono} fontSize={11} textAnchor="middle" fill={theme.base03}>
+          <text
+            x={W / 2}
+            y={H - 22}
+            fontFamily={mono}
+            fontSize={11}
+            textAnchor="middle"
+            fill={theme.base03}
+          >
             {"group: { index: 1, count: 2 }"}
           </text>
         </g>

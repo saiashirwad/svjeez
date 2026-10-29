@@ -383,6 +383,7 @@ export {
   type ChoroplethOptions,
   type RegionValues,
 } from "./choropleth.ts";
+
 export {
   cartogram,
   toBars,
@@ -395,6 +396,7 @@ export {
   type MorphOptions,
   type Morphed,
 } from "./morph.ts";
+
 export {
   diverging,
   legend,
@@ -407,6 +409,7 @@ export {
   type ScaleOptions,
   type SequentialOptions,
 } from "./scale.ts";
+
 export {
   arc,
   traffic,

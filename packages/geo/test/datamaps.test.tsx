@@ -17,6 +17,7 @@ import {
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 const map = project(world, { frame: rect(20, 10, 960, 500) });
+
 const scene = (node: SvgNode) =>
   render({ width: 1000, height: 520, duration: 10, title: "Test" }, node);
 
@@ -50,6 +51,7 @@ describe("scales", () => {
   });
 
   test("reject colors that can't be blended", () => {
+    // SAFETY: the type already rejects "red"; the cast lets the test reach the runtime check for JavaScript callers.
     expect(() => sequential(["red", "#fff"] as never, { domain: [0, 1] })).toThrow(
       'A color scale needs hex colors such as "#1f77b4", got "red".',
     );
@@ -63,6 +65,7 @@ describe("legend()", () => {
     const svg = scene(legend(scale, { x: 10, y: 10, width: 200, every: 1, title: "Years" }));
 
     expect(svg.match(/<rect/g)).toHaveLength(4);
+
     for (const label of ["0", "20", "40", "60", "80", "Years"]) expect(svg).toContain(`>${label}<`);
   });
 });

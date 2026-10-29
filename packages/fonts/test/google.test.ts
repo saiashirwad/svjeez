@@ -10,7 +10,7 @@ const realFetch = globalThis.fetch;
 let cache: string;
 
 const stubFetch = (stub: () => Promise<Response>) => {
-  globalThis.fetch = stub as unknown as typeof fetch;
+  globalThis.fetch = Object.assign(stub, { preconnect: realFetch.preconnect });
 };
 
 beforeEach(() => {

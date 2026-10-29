@@ -138,34 +138,40 @@ export function travel(
           heading,
         );
 
-  const start: Motion<Heading> = motion({
+  const first: TokenStart = {
     opacity: 0,
     x: points[0]!.x,
     y: points[0]!.y,
-    ...(heading === undefined ? {} : { rotate: turns[0]! }),
-  })
-    .at(at)
-    .set({ opacity: 1 });
+  };
+
+  if (heading !== undefined) first.rotate = turns[0]!;
+
+  const start: Motion<Heading> = motion<TokenStart>(first).at(at).set({ opacity: 1 });
 
   return legs
-    .reduce(
-      (track, leg, i) =>
-        track.to(
-          {
-            x: leg.point.x,
-            y: leg.point.y,
-            ...(heading === undefined ? {} : { rotate: turns[i + 1]! }),
-          },
-          (duration * leg.length) / total,
-          ease.linear,
-        ),
-      start,
-    )
+    .reduce((track, leg, i) => {
+      const to = { x: leg.point.x, y: leg.point.y };
+
+      return track.to(
+        heading === undefined ? to : { ...to, rotate: turns[i + 1]! },
+        (duration * leg.length) / total,
+        ease.linear,
+      );
+    }, start)
     .set({ opacity: 0 });
 }
 
 type Travel = "x" | "y" | "opacity";
+
 type Heading = Travel | "rotate";
+
+/** Where a travelling token starts, hidden: `rotate` only when it follows a heading. */
+type TokenStart = {
+  opacity: number;
+  x: number;
+  y: number;
+  rotate?: number;
+};
 
 /**
  * The heading at each vertex of a path whose legs point `angles` degrees: the mean of the two legs that meet there,
@@ -182,6 +188,7 @@ const facings = (angles: readonly number[], offset: true | number): number[] => 
 
     return before + wrap(angle - before) / 2;
   });
+
   vertex.push(angles.at(-1)!);
 
   for (const angle of vertex) {

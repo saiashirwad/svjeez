@@ -3,9 +3,9 @@
  * (World Development Indicators, built from UN Population Division estimates), retrieved October 2026. Keyed by ISO 3166-1
  * numeric code, the ids in world-atlas. Countries without a value for every year are left out.
  */
-export const YEARS = [1960,1970,1980,1990,2000,2010,2020];
+export const YEARS = [1960, 1970, 1980, 1990, 2000, 2010, 2020];
 
-export const LIFE_EXPECTANCY: Record<string, number[]> = {
+export const LIFE_EXPECTANCY = {
   "004": [32.8, 37.5, 39.3, 45.1, 55.0, 60.7, 61.5],
   "008": [56.4, 65.2, 69.9, 72.7, 74.8, 78.4, 77.8],
   "012": [40.8, 43.3, 54.5, 67.7, 70.6, 74.1, 73.3],
@@ -219,10 +219,10 @@ export const LIFE_EXPECTANCY: Record<string, number[]> = {
   "882": [55.2, 60.4, 65.0, 67.8, 70.8, 71.5, 70.7],
   "887": [33.5, 40.6, 50.6, 58.5, 62.8, 67.2, 66.4],
   "894": [50.6, 53.4, 55.5, 48.2, 46.6, 56.9, 63.4],
-};
+} satisfies Record<string, number[]>;
 
 /** Population, 2020. World Bank, indicator SP.POP.TOTL, retrieved October 2026. Keyed like `LIFE_EXPECTANCY`. */
-export const POPULATION: Record<string, number> = {
+export const POPULATION = {
   "004": 39068979,
   "008": 2528480,
   "012": 44042091,
@@ -438,4 +438,4 @@ export const POPULATION: Record<string, number> = {
   "882": 211944,
   "887": 36134863,
   "894": 19059395,
-};
+} satisfies Record<string, number>;

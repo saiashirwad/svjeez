@@ -62,12 +62,10 @@ const toLab = (hex: Hex): Lab => {
     throw new Error(
       `A color scale needs hex colors such as "#1f77b4", got ${JSON.stringify(hex)}. Names and CSS variables can't be blended at compile time.`,
     );
-  const h = hex.length === 4 ? [...hex.slice(1)].map((c) => c + c).join("") : hex.slice(1);
-  const [r, g, b] = [0, 2, 4].map((i) => linear(parseInt(h.slice(i, i + 2), 16) / 255)) as [
-    number,
-    number,
-    number,
-  ];
+  const h = hex.length === 4 ? hex.slice(1).replace(/./g, "$&$&") : hex.slice(1);
+
+  const channel = (i: number) => linear(parseInt(h.slice(i, i + 2), 16) / 255);
+  const [r, g, b] = [channel(0), channel(2), channel(4)];
 
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
@@ -209,9 +207,12 @@ export function legend(scale: ColorScale, options: LegendOptions): SvgNode {
     ink = "#c9d1d9",
     format = (v: number) => String(+v.toFixed(2)),
   } = options;
+
   const count = scale.colors.length;
+
   const every =
     options.every ?? Math.max(1, Math.ceil(count / Math.max(1, Math.floor(width / 48))));
+
   const step = width / count;
   const top = y + (options.title ? fontSize + 6 : 0);
   const text = { fontSize, fontFamily: options.font, fill: ink };
