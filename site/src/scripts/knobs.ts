@@ -6,7 +6,6 @@ import { play, still } from "./scenes";
 import { calm } from "./scheme";
 
 const form = document.querySelector<HTMLFormElement>(".knobs")!;
-const hint = form.querySelector<HTMLElement>(".knob-hint")!;
 const die = form.querySelector<HTMLButtonElement>(".die")!;
 const variants: HeroVariant[] = JSON.parse(document.getElementById("hero-variants")!.textContent!);
 const cuts = ["wide", "tall"] as const;
@@ -68,13 +67,7 @@ const swap = (variant: HeroVariant) => {
   }
 };
 
-const hintOf = (input: HTMLInputElement) => input.closest<HTMLElement>(".key")?.dataset.hint;
-
-form.addEventListener("change", (event) => {
-  swap(chosen());
-
-  if (event.target instanceof HTMLInputElement) hint.textContent = hintOf(event.target) ?? "";
-});
+form.addEventListener("change", () => swap(chosen()));
 
 // A key that is about to be pressed fetches its file, so the swap has it in the cache.
 const visible = () => cuts.find((cut) => imgs.get(cut)!.offsetParent) ?? "wide";
@@ -107,7 +100,4 @@ die.addEventListener("click", () => {
       { duration: 520, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
     );
   swap(next);
-  hint.textContent = Object.entries(next.knobs)
-    .map(([knob, value]) => form.querySelector(`input[name="${knob}"][value="${value}"] + span`)!.textContent)
-    .join(", ");
 });

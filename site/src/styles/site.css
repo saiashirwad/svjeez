@@ -1038,15 +1038,8 @@ kbd {
   inline-size: 1.4rem;
   block-size: 1.4rem;
 }
-.knob-hint {
-  flex-basis: 100%;
-  min-block-size: 1.5em;
-  font-size: 0.875rem;
-  color: var(--muted);
-  text-align: center;
-}
-/* On a phone each knob is a row, its name in a column of its own and its keys sharing the rest, with the die and the
-   hint in the last row. The same holds in the tablet's side column, so it asks the demo's width, not the screen's. */
+/* On a phone each knob is a row, its name in a column of its own and its keys sharing the rest, with the die in the
+   last row. The same holds in the tablet's side column, so it asks the demo's width, not the screen's. */
 .hero-demo {
   container-type: inline-size;
 }
@@ -1072,9 +1065,6 @@ kbd {
   }
   .die {
     margin-block-end: 0;
-  }
-  .knob-hint {
-    text-align: start;
   }
 }
 

@@ -19,7 +19,7 @@ const [first] = variants;
         <span class="knob-label" id={`knob-${knob}`}>{label}</span>
         <div class="keys">
           {options.map((option) => (
-            <label class="key" data-hint={option.hint}>
+            <label class="key">
               <input type="radio" name={knob} value={option.value} checked={first!.knobs[knob] === option.value} />
               <span>{option.label}</span>
             </label>
@@ -34,7 +34,6 @@ const [first] = variants;
       <g fill="currentColor" stroke="none"><circle cx="8.5" cy="8.5" r="1.5"></circle><circle cx="15.5" cy="15.5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="15.5" cy="8.5" r="1.5"></circle><circle cx="8.5" cy="15.5" r="1.5"></circle></g>
     </svg>
   </button>
-  <p class="knob-hint" aria-live="polite">{variants.length} combinations, each its own SVG file. A press swaps the file.</p>
 </form>
 <script type="application/json" id="hero-variants" set:html={JSON.stringify(variants).replace(/</g, "\\u003c")} />
 
