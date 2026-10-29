@@ -71,15 +71,18 @@ export type EaseName = "linear" | "in" | "out" | "inOut" | "pop";
 interface LiteralBase {
   /**
    * Where the literal is, as a name that survives edits to other values and mostly survives rewrites elsewhere in the
-   * file: `params.swing` for a param, the path from its const as in `legs.1.over`, else the top-level declaration it
-   * sits in and its place among the other literals there, as in `default#3`.
+   * file: `params.swing` for a param, the path from its top-level const as in `legs.1.over`, else the top-level
+   * declaration it sits in and its place among the other literals there, as in `default#3`. No two literals share one.
    */
   readonly key: string;
   readonly range: Range;
   /** The literal as written, quotes and sign included. */
   readonly text: string;
   readonly role: Role;
-  /** From the const it sits in down to it, as in `["legs", 0, "over"]`, when only objects and arrays are in between. */
+  /**
+   * From the top-level const it sits in down to it, as in `["legs", 0, "over"]`, when only objects and arrays are in
+   * between.
+   */
   readonly path?: readonly PathStep[];
   /** The `export const params` entry it declares: its value, or `option` for one of its options. */
   readonly param?: { readonly key: string; readonly option?: string };
@@ -172,6 +175,13 @@ const roleOf = (src: string, literal: SyntaxNode): Role => {
   }
 };
 
+/** Whether a statement sits at the top of the file, exported or not. */
+const isTopLevel = (node: SyntaxNode) => {
+  const up = node.parent?.name === "ExportDeclaration" ? node.parent : node;
+
+  return !up.parent?.parent;
+};
+
 const pathOf = (src: string, literal: SyntaxNode): PathStep[] | undefined => {
   const path: PathStep[] = [];
   let at = outer(literal);
@@ -184,6 +194,8 @@ const pathOf = (src: string, literal: SyntaxNode): PathStep[] | undefined => {
     if (up.name === "ArrayExpression") path.unshift(items(up).findIndex((n) => n.from === at.from));
     else if (up.name === "Property") path.unshift(nameOfProperty(src, up));
     else if (up.name === "VariableDeclaration") {
+      // A const in a function is not unique to the file, so only a top-level one is a path's start.
+      if (!isTopLevel(up)) return undefined;
       path.unshift(textOf(src, up.getChild("VariableDefinition")));
 
       return path;
@@ -240,7 +252,21 @@ const COLOR = /^(["'])#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\1$/;
 /** A number as written, `30_000` and `0xff` included. */
 const numberOf = (text: string) => Number(text.replaceAll("_", ""));
 
-/** The name of the top-level statement a node sits in: a const or function name, `default`, or its place in the file. */
+const COMMENTS = new Set(["LineComment", "BlockComment"]);
+
+/** How many statements come before this top-level one, comments aside. */
+const placeOf = (statement: SyntaxNode) => {
+  let n = 0;
+
+  for (let at = statement.prevSibling; at; at = at.prevSibling) if (!COMMENTS.has(at.name)) n++;
+
+  return n;
+};
+
+/**
+ * The name of the top-level statement a node sits in: a const or function name, `default`, or its place among the
+ * file's statements, which no edit inside another statement moves.
+ */
 const scopeOf = (src: string, node: SyntaxNode): string => {
   let at = node;
 
@@ -250,7 +276,7 @@ const scopeOf = (src: string, node: SyntaxNode): string => {
   if (at.getChild("default")) return "default";
   const name = declaration?.getChild("VariableDefinition");
 
-  return name ? textOf(src, name) : `@${at.from}`;
+  return name ? textOf(src, name) : `@${placeOf(at)}`;
 };
 
 type Unkeyed = Literal extends infer L ? (L extends Literal ? Omit<L, "key"> : never) : never;
@@ -269,9 +295,21 @@ const keyed = (literals: readonly (Unkeyed & { readonly scope: string })[]): Lit
     return `${scope}#${n}`;
   };
 
+  const taken = new Set<string>();
+
+  /** The key, or for a file that names one thing twice, the key with the first free ordinal after it. */
+  const unique = (key: string) => {
+    let free = key;
+
+    for (let n = 1; taken.has(free); n++) free = `${key}#${n}`;
+    taken.add(free);
+
+    return free;
+  };
+
   return literals.map(({ scope, ...literal }): Literal => ({
     ...literal,
-    key: keyOf({ scope, ...literal }),
+    key: unique(keyOf({ scope, ...literal })),
   }));
 };
 
