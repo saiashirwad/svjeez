@@ -4,30 +4,11 @@
 import { execFileSync } from "node:child_process";
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { read, writeManifest } from "./package-manifest.ts";
 
 type Target = string | { types: string };
 
-type Manifest = {
-  name: string;
-  version: string;
-  private?: boolean;
-  scripts?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-  exports: Record<string, Target>;
-  dependencies?: Record<string, string>;
-};
-
 const isPath = (target: Target): target is string => typeof target === "string";
-
-const ROOT = join(import.meta.dirname, "..");
-const read = (dir: string): Manifest => JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
-
-const versions = new Map(
-  readdirSync(join(ROOT, "packages")).map((name) => [
-    read(join(ROOT, "packages", name)).name,
-    read(join(ROOT, "packages", name)).version,
-  ]),
-);
 
 const dir = process.cwd();
 const out = join(dir, "package-dist");
@@ -61,7 +42,7 @@ const copy = (from: string, to: string) => {
 
 // "./src/scene.ts" is compiled to "./scene.js" and "./scene.d.ts"; any other file is copied as it is.
 const exports = Object.fromEntries(
-  Object.entries(read(dir).exports).map(([key, target]) => {
+  Object.entries(read<Target>(dir).exports ?? {}).map(([key, target]) => {
     if (!isPath(target)) return (copy(target.types, target.types), [key, target]);
     const path = target.replace(/^\.\/src\//, "./");
 
@@ -71,20 +52,4 @@ const exports = Object.fromEntries(
   }),
 );
 
-const { private: _, scripts: __, devDependencies: ___, ...manifest } = read(dir);
-
-const dependencies = Object.fromEntries(
-  Object.entries(manifest.dependencies ?? {}).map(([name, range]) => [
-    name,
-    range.startsWith("workspace:") ? `^${versions.get(name)}` : range,
-  ]),
-);
-
-writeFileSync(
-  join(out, "package.json"),
-  `${JSON.stringify({ ...manifest, exports, ...(manifest.dependencies && { dependencies }) }, null, 2)}\n`,
-);
-
-copy("README.md", "README.md");
-
-copyFileSync(join(ROOT, "LICENSE"), join(out, "LICENSE"));
+writeManifest(dir, out, exports);
