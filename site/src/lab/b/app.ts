@@ -60,22 +60,17 @@ let queued: string | undefined;
 let lastSource = "";
 let files = 0;
 let url = "";
-const timings: { ms: number; wall: number; gzip: number }[] = [];
-Object.assign(window, { __labB: { timings, get feel() { return feel; }, update } });
 
 const pump = async () => {
   if (busy || queued === undefined) return;
   const src = queued;
   queued = undefined;
   busy = true;
-  const start = performance.now();
   const result = await compile(src);
-  const wall = performance.now() - start;
   busy = false;
 
   if (result.ok) {
     files++;
-    timings.push({ ms: result.ms, wall, gzip: result.stats.gzip });
     const next = URL.createObjectURL(new Blob([result.svg], { type: "image/svg+xml" }));
     const old = url;
     url = next;

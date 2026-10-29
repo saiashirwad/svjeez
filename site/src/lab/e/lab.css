@@ -202,9 +202,12 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .le-stamp {
+  :root:not([data-theme="light"]) .le-stamp {
     mix-blend-mode: normal;
   }
+}
+:root[data-theme="dark"] .le-stamp {
+  mix-blend-mode: normal;
 }
 
 .le-stamp[data-grade="0"] {

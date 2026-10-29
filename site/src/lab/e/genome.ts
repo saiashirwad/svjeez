@@ -120,6 +120,30 @@ export const clampGene = <K extends Exclude<Numeric, "seed">>(key: K, v: number)
   return roundTo(Math.min(max, Math.max(min, v)), step);
 };
 
+/**
+ * A genome read back from storage. Numbers are clamped, choices must be real, and a gene the saved genome lacks takes
+ * the first specimen's. Undefined when anything is the wrong type, so the caller drops it.
+ */
+export const parseGenome = (raw: unknown): Genome | undefined => {
+  if (typeof raw !== "object" || raw === null) return undefined;
+  const saved = raw as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(FIRST) as (keyof Genome)[]) {
+    const v = saved[key] ?? FIRST[key];
+    if (key === "seed") {
+      if (typeof v !== "number" || !Number.isInteger(v) || v < 0 || v > 9999) return undefined;
+      out[key] = v;
+    } else if (key in RANGES) {
+      if (typeof v !== "number" || !Number.isFinite(v)) return undefined;
+      out[key] = clampGene(key as Exclude<Numeric, "seed">, v);
+    } else {
+      if (!(CHOICES[key as Choice] as readonly unknown[]).includes(v)) return undefined;
+      out[key] = v;
+    }
+  }
+  return out as unknown as Genome;
+};
+
 export const withGene = <K extends keyof Genome>(g: Genome, key: K, value: Genome[K]): Genome => ({
   ...g,
   [key]: key in RANGES ? clampGene(key as Exclude<Numeric, "seed">, value as number) : value,

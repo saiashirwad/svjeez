@@ -7,6 +7,7 @@ import {
   clampGene,
   FIRST,
   mutate,
+  parseGenome,
   random,
   RANGES,
   specimenNo,
@@ -22,7 +23,7 @@ const STORE = "svjeez-lab-e-shelf";
 const $ = <E extends Element = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<E>(sel)!;
 const $$ = <E extends Element = HTMLElement>(sel: string, root: ParentNode = document) => [...root.querySelectorAll<E>(sel)];
 
-const sourceFor = (g: Genome) => sceneSource.replace(/\/\*genome\*\/.*?\/\*end\*\//s, `/*genome*/ ${JSON.stringify(g)} /*end*/`);
+const sourceFor = (g: Genome) => sceneSource.replace(/\/\*genome\*\/.*?\/\*end\*\//s, () => `/*genome*/ ${JSON.stringify(g)} /*end*/`);
 
 // ---------- state ----------
 
@@ -43,9 +44,9 @@ const set = (next: Genome, opts: { lineage?: string; shelve?: boolean } = {}) =>
   paintCard();
   paintControls();
   paintOverlay();
-  request();
-  if (opts.shelve) wantShelf = specimenNo(next);
-  else settle();
+  clearTimeout(settleTimer);
+  request(next, !!opts.shelve);
+  if (!opts.shelve) settle();
 };
 
 // ---------- compiling ----------
@@ -53,16 +54,27 @@ const set = (next: Genome, opts: { lineage?: string; shelve?: boolean } = {}) =>
 const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
 const waiting = new Map<number, (r: Compiled) => void>();
 let nextId = 0;
+let broken: Compiled | undefined;
 worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
   waiting.get(data.id)?.(data);
   waiting.delete(data.id);
 };
+/** A worker that cannot load or reply fails every compile, waiting or later, so the page shows why instead of hanging. */
+const breakWorker = (message: string) => {
+  broken = { ok: false, error: { kind: "runtime", message }, ms: 0 };
+  for (const resolve of waiting.values()) resolve(broken);
+  waiting.clear();
+};
+worker.onerror = (e) => breakWorker(`The compiler failed to start${e.message ? `: ${e.message}` : "."}`);
+worker.onmessageerror = () => breakWorker("The compiler sent back something the page could not read.");
 const compile = (src: string) =>
-  new Promise<Compiled>((resolve) => {
-    const id = ++nextId;
-    waiting.set(id, resolve);
-    worker.postMessage({ id, source: src });
-  });
+  broken
+    ? Promise.resolve(broken)
+    : new Promise<Compiled>((resolve) => {
+        const id = ++nextId;
+        waiting.set(id, resolve);
+        worker.postMessage({ id, source: src });
+      });
 
 const img = $<HTMLImageElement>("[data-stage]");
 const statFile = $("[data-file]");
@@ -81,13 +93,16 @@ const still = (svg: string, t: number) =>
     .replace(/<animate\b[^>]*\/>/g, "");
 const blob = (svg: string) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
 
+/** A genome to compile, and whether the shelf keeps it once it's drawn. */
+interface Job {
+  readonly genome: Genome;
+  readonly shelve: boolean;
+}
 let busy = false;
-let queued: Genome | undefined;
-let lastSource = "";
+let queued: Job | undefined;
+let lastKey = "";
 let shown = "";
 let saveUrl = "";
-let wantShelf = "";
-const timings: { compile: number; wall: number; gzip: number }[] = [];
 
 const show = (svg: string) =>
   new Promise<void>((resolve) => {
@@ -105,14 +120,12 @@ const show = (svg: string) =>
 
 const pump = async () => {
   if (busy || !queued) return;
-  const g = queued;
+  const { genome: g, shelve: keep } = queued;
   queued = undefined;
   busy = true;
-  const start = performance.now();
   const result = await compile(sourceFor(g));
   if (result.ok) {
     await show(result.svg);
-    timings.push({ compile: result.ms, wall: performance.now() - start, gzip: result.stats.gzip });
     const no = specimenNo(g);
     if (saveUrl) URL.revokeObjectURL(saveUrl);
     saveUrl = blob(result.svg);
@@ -122,10 +135,7 @@ const pump = async () => {
     statGzip.textContent = `${(result.stats.gzip / 1024).toFixed(1)} KB gzip`;
     statMs.textContent = `${Math.round(result.ms)} ms`;
     errorBox.hidden = true;
-    if (wantShelf === no) {
-      wantShelf = "";
-      shelve(g, result.svg);
-    }
+    if (keep) shelve(g, result.svg);
   } else {
     errorBox.hidden = false;
     errorBox.textContent = result.error.message;
@@ -134,11 +144,11 @@ const pump = async () => {
   void pump();
 };
 
-const request = () => {
-  const src = sourceFor(genome);
-  if (src === lastSource) return;
-  lastSource = src;
-  queued = genome;
+const request = (g: Genome, shelve: boolean) => {
+  const key = JSON.stringify(g);
+  if (key === lastKey && !shelve) return;
+  lastKey = key;
+  queued = { genome: g, shelve };
   void pump();
 };
 
@@ -146,11 +156,7 @@ const request = () => {
 let settleTimer = 0;
 const settle = () => {
   clearTimeout(settleTimer);
-  settleTimer = window.setTimeout(() => {
-    wantShelf = specimenNo(genome);
-    lastSource = "";
-    request();
-  }, 1400);
+  settleTimer = window.setTimeout(() => request(genome, true), 1400);
 };
 
 // ---------- shelf ----------
@@ -204,12 +210,13 @@ const paintShelf = () => {
 
 /** Restores shelved genomes from an earlier visit, compiling their thumbnails one by one. */
 const restoreShelf = async () => {
-  let saved: Genome[] = [];
+  let saved: unknown = [];
   try {
-    saved = JSON.parse(localStorage.getItem(STORE) ?? "[]") as Genome[];
+    saved = JSON.parse(localStorage.getItem(STORE) ?? "[]");
   } catch {}
-  for (const raw of saved.slice(0, SHELF_SIZE)) {
-    const g = { ...FIRST, ...raw };
+  for (const raw of Array.isArray(saved) ? saved.slice(0, SHELF_SIZE) : []) {
+    const g = parseGenome(raw);
+    if (!g) continue;
     const no = specimenNo(g);
     if (!shelf.some((s) => s.no === no)) shelf.push({ genome: g, no });
   }
@@ -217,7 +224,7 @@ const restoreShelf = async () => {
   for (const s of [...shelf]) {
     if (s.thumb) continue;
     const r = await compile(sourceFor(s.genome));
-    if (r.ok) s.thumb = blob(still(r.svg, 1.4));
+    if (r.ok && !s.thumb && shelf.includes(s)) s.thumb = blob(still(r.svg, 1.4));
   }
   paintShelf();
 };
@@ -243,6 +250,62 @@ const restamp = () => $("[data-stamp]").animate(
   [{ transform: "rotate(-8deg) scale(1.6)", opacity: 0 }, { transform: "rotate(-4deg) scale(1)", opacity: 1 }],
   { duration: 260, easing: "cubic-bezier(.3,1.6,.5,1)" },
 );
+
+// ---------- drags ----------
+
+/**
+ * Follows the pointer that went down until it lifts or is cancelled. The listeners sit on the window, so a target that
+ * is replaced or hidden mid-drag cannot strand the drag.
+ */
+const drag = (down: PointerEvent, h: { move?: (m: PointerEvent) => void; end?: (u: PointerEvent, cancelled: boolean) => void }) => {
+  try {
+    (down.currentTarget as Element).setPointerCapture(down.pointerId);
+  } catch {
+    // The pointer may be gone already; the window listeners carry the drag either way.
+  }
+  const move = (m: PointerEvent) => {
+    if (m.pointerId === down.pointerId) h.move?.(m);
+  };
+  const finish = (cancelled: boolean) => (u: PointerEvent) => {
+    if (u.pointerId !== down.pointerId) return;
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    window.removeEventListener("pointercancel", cancel);
+    h.end?.(u, cancelled);
+  };
+  const up = finish(false);
+  const cancel = finish(true);
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  window.addEventListener("pointercancel", cancel);
+};
+
+/** A drag that carries a floating copy of `html` once the pointer moves `slop` px, at once when `slop` is 0. */
+const carryDrag = (
+  down: PointerEvent,
+  o: { html: string; slop: number; over: (m: PointerEvent, lifted: boolean) => void; end: (u: PointerEvent, lifted: boolean) => void },
+) => {
+  let held: ReturnType<typeof carry> | undefined;
+  const lift = (at: PointerEvent) => {
+    held = carry(o.html, at);
+    document.body.classList.add("le-carrying");
+  };
+  if (!o.slop) lift(down);
+  drag(down, {
+    move(m) {
+      if (!held && Math.hypot(m.clientX - down.clientX, m.clientY - down.clientY) > o.slop) lift(m);
+      held?.place(m);
+      o.over(m, !!held);
+    },
+    end(u, cancelled) {
+      held?.drop();
+      document.body.classList.remove("le-carrying");
+      showDrop(undefined);
+      frame.classList.remove("le-mating");
+      if (!cancelled) o.end(u, !!held);
+    },
+  });
+};
 
 // ---------- genes ----------
 
@@ -283,16 +346,8 @@ for (const b of $$<HTMLButtonElement>("[data-scrub]")) {
   const { min, max, step } = RANGES[key];
   b.addEventListener("pointerdown", (e) => {
     if (b.disabled) return;
-    b.setPointerCapture(e.pointerId);
-    const x0 = e.clientX;
     const v0 = genome[key];
-    const move = (m: PointerEvent) => set(withGene(genome, key, clampGene(key, v0 + ((m.clientX - x0) / 160) * (max - min))));
-    const up = () => {
-      b.removeEventListener("pointermove", move);
-      b.removeEventListener("pointerup", up);
-    };
-    b.addEventListener("pointermove", move);
-    b.addEventListener("pointerup", up);
+    drag(e, { move: (m) => set(withGene(genome, key, clampGene(key, v0 + ((m.clientX - e.clientX) / 160) * (max - min)))) });
   });
   b.addEventListener("keydown", (e) => {
     const d = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
@@ -412,30 +467,16 @@ for (const b of $$<HTMLButtonElement>("[data-part]")) {
   const icon = b.querySelector("svg")!.outerHTML;
   b.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    b.setPointerCapture(e.pointerId);
-    const x0 = e.clientX;
-    const y0 = e.clientY;
-    let held: ReturnType<typeof carry> | undefined;
-    const move = (m: PointerEvent) => {
-      if (!held && Math.hypot(m.clientX - x0, m.clientY - y0) > 6) {
-        held = carry(icon, m);
-        document.body.classList.add("le-carrying");
-      }
-      held?.place(m);
-      showDrop(viewPoint(m), part);
-    };
-    const up = (u: PointerEvent) => {
-      b.removeEventListener("pointermove", move);
-      b.removeEventListener("pointerup", up);
-      document.body.classList.remove("le-carrying");
-      showDrop(undefined);
-      if (!held) return addPart(part);
-      held.drop();
-      const vp = viewPoint(u);
-      if (vp.inside) addPart(part, vp);
-    };
-    b.addEventListener("pointermove", move);
-    b.addEventListener("pointerup", up);
+    carryDrag(e, {
+      html: icon,
+      slop: 6,
+      over: (m) => showDrop(viewPoint(m), part),
+      end: (u, lifted) => {
+        if (!lifted) return addPart(part);
+        const vp = viewPoint(u);
+        if (vp.inside) addPart(part, vp);
+      },
+    });
   });
   b.addEventListener("click", (e) => {
     if (e.detail === 0) addPart(part);
@@ -469,27 +510,18 @@ const paintOverlay = () => {
     c.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      c.setPointerCapture(e.pointerId);
-      const held = carry($(`[data-part="${part}"] svg`).outerHTML, e);
-      document.body.classList.add("le-carrying");
-      const move = (m: PointerEvent) => {
-        held.place(m);
-        showDrop(viewPoint(m), part);
-      };
-      const up = (u: PointerEvent) => {
-        c.removeEventListener("pointermove", move);
-        c.removeEventListener("pointerup", up);
-        held.drop();
-        document.body.classList.remove("le-carrying");
-        showDrop(undefined);
-        const vp = viewPoint(u);
-        if (!vp.inside) return removePart(part, eyeOnBody);
-        const hit = hitTest(vp);
-        if (part === "tails") set(withGene(genome, "tailAt", hit.s < 0.06 ? 0 : hit.s > 0.94 ? 1 : hit.s));
-        if (part === "legs") set(withGene(genome, "legSide", hit.belly ? "belly" : "back"));
-      };
-      c.addEventListener("pointermove", move);
-      c.addEventListener("pointerup", up);
+      carryDrag(e, {
+        html: $(`[data-part="${part}"] svg`).outerHTML,
+        slop: 0,
+        over: (m) => showDrop(viewPoint(m), part),
+        end: (u) => {
+          const vp = viewPoint(u);
+          if (!vp.inside) return removePart(part, eyeOnBody);
+          const hit = hitTest(vp);
+          if (part === "tails") set(withGene(genome, "tailAt", hit.s < 0.06 ? 0 : hit.s > 0.94 ? 1 : hit.s));
+          if (part === "legs") set(withGene(genome, "legSide", hit.belly ? "belly" : "back"));
+        },
+      });
     });
   };
   if (!lay.orbit) lay.heads.forEach((h) => handle("heads", h.at, h.r));
@@ -507,78 +539,47 @@ const paintOverlay = () => {
 // Drag the body: sideways stretches it, up and down fattens it.
 bodyHit.addEventListener("pointerdown", (e) => {
   e.preventDefault();
-  bodyHit.setPointerCapture(e.pointerId);
-  const x0 = e.clientX;
-  const y0 = e.clientY;
   const from = genome;
   const px = overlay.getBoundingClientRect().width / W;
   const s0 = lay.scale;
   frame.classList.add("le-stretching");
-  const move = (m: PointerEvent) => {
-    const dx = (m.clientX - x0) / px / s0;
-    const dy = (m.clientY - y0) / px / s0;
-    let g = withGene(from, "length", from.length + (dx * 2) / 120);
-    g = withGene(g, "girth", from.girth - dy * 0.5);
-    if (g.length !== genome.length || g.girth !== genome.girth) set(g);
-  };
-  const up = () => {
-    bodyHit.removeEventListener("pointermove", move);
-    bodyHit.removeEventListener("pointerup", up);
-    frame.classList.remove("le-stretching");
+  drag(e, {
+    move(m) {
+      const dx = (m.clientX - e.clientX) / px / s0;
+      const dy = (m.clientY - e.clientY) / px / s0;
+      let g = withGene(from, "length", from.length + (dx * 2) / 120);
+      g = withGene(g, "girth", from.girth - dy * 0.5);
+      if (g.length !== genome.length || g.girth !== genome.girth) set(g);
+    },
+    end(_, cancelled) {
+      frame.classList.remove("le-stretching");
+      if (!cancelled) restamp();
+    },
+  });
+});
+
+/** Carry a jar onto the stage to breed with it; click, or Enter on the focused jar, to bring it back. */
+const jarDrag = (b: HTMLButtonElement, s: Specimen) => {
+  const bringBack = () => {
+    set(s.genome, { lineage: "from the shelf" });
     restamp();
   };
-  bodyHit.addEventListener("pointermove", move);
-  bodyHit.addEventListener("pointerup", up);
-});
-
-/** Carry a jar onto the stage to breed with it; click to bring it back. */
-const jarDrag = (b: HTMLButtonElement, s: Specimen) => {
   b.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    b.setPointerCapture(e.pointerId);
-    const x0 = e.clientX;
-    const y0 = e.clientY;
-    let held: ReturnType<typeof carry> | undefined;
-    const move = (m: PointerEvent) => {
-      if (!held && Math.hypot(m.clientX - x0, m.clientY - y0) > 8) held = carry(`<img src="${s.thumb ?? ""}" alt="">`, m);
-      held?.place(m);
-      frame.classList.toggle("le-mating", !!held && viewPoint(m).inside);
-    };
-    const up = (u: PointerEvent) => {
-      b.removeEventListener("pointermove", move);
-      b.removeEventListener("pointerup", up);
-      frame.classList.remove("le-mating");
-      if (!held) {
-        set(s.genome, { lineage: "from the shelf" });
-        restamp();
-        return;
-      }
-      held.drop();
-      if (viewPoint(u).inside && s.no !== specimenNo(genome)) breedWith(s);
-    };
-    b.addEventListener("pointermove", move);
-    b.addEventListener("pointerup", up);
+    carryDrag(e, {
+      html: `<img src="${s.thumb ?? ""}" alt="">`,
+      slop: 8,
+      over: (m, lifted) => frame.classList.toggle("le-mating", lifted && viewPoint(m).inside),
+      end: (u, lifted) => {
+        if (!lifted) return bringBack();
+        if (viewPoint(u).inside && s.no !== specimenNo(genome)) breedWith(s);
+      },
+    });
+  });
+  b.addEventListener("click", (e) => {
+    if (e.detail === 0) bringBack();
   });
 };
-
-Object.assign(window, {
-  __labE: {
-    timings,
-    get genome() {
-      return genome;
-    },
-    get layout() {
-      return lay;
-    },
-    get shelf() {
-      return shelf.map((s) => s.no);
-    },
-    set: (g: Genome) => set(g),
-    random,
-    mutate: () => $("[data-mutate]").click(),
-    idle: () => !busy && !queued,
-  },
-});
 
 paintShelf();
 set(genome, { shelve: true });
