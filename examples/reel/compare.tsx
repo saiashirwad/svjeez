@@ -36,6 +36,7 @@ export const compare = (
   const w = width ?? Math.max(a.width, b.width);
   const h = Math.max((w * a.height) / a.width, (w * b.height) / b.width);
   const total = { width: PAD * 2 + w * 2 + GAP, height: PAD * 2 + LABEL + h };
+
   const columns = [
     { svg: before, x: PAD, label: labels[0] },
     { svg: after, x: PAD + w + GAP, label: labels[1] },

@@ -35,6 +35,8 @@ export { fx } from "./fx";
 
 export { picture, Picture, type ImageFormat, type PictureData, type PictureProps } from "./picture";
 
+export { Flipbook, type FlipbookFrame, type FlipbookProps } from "./flipbook";
+
 export {
   font,
   type Font,

@@ -1,6 +1,56 @@
 import { describe, expect, test } from "bun:test";
-import { motion, nest, prefixed, render } from "svjeez";
+import { Flipbook, motion, nest, picture, prefixed, render } from "svjeez";
 import { renderFrames } from "svjeez/frames";
+
+const swatch = (fill: string) =>
+  picture(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="${fill}"/></svg>`,
+  );
+
+describe("Flipbook", () => {
+  test("throws on frames out of order or past the scene", () => {
+    const src = swatch("#f00");
+
+    expect(() => (
+      <Flipbook
+        frames={[
+          { at: 1, src },
+          { at: 0.5, src },
+        ]}
+        duration={2}
+      />
+    )).toThrow("must be in time order");
+    expect(() => (
+      <Flipbook
+        frames={[
+          { at: 0, src },
+          { at: 2, src },
+        ]}
+        duration={2}
+      />
+    )).toThrow("falls outside a 2s scene");
+  });
+
+  test("shows each frame from its time until the next one's", async () => {
+    const reel = render(
+      { width: 10, height: 10, duration: 3, title: "Reel", reducedMotion: false },
+      <Flipbook
+        frames={[
+          { at: 0, src: swatch("#f00") },
+          { at: 1, src: swatch("#00f") },
+          { at: 2, src: swatch("#f00") },
+        ]}
+        duration={3}
+      />,
+    );
+
+    const { frames } = await renderFrames(reel, { times: [0.5, 1.5, 2.5] });
+    const [red, blue, again] = frames.map((frame) => frame.png);
+
+    expect(red).not.toEqual(blue);
+    expect(again).toEqual(red);
+  });
+});
 
 const fade = () =>
   render(
@@ -55,6 +105,7 @@ describe("nest", () => {
         {nest(prefixed("r", fade), { x: 20 })}
       </>,
     );
+
     const { frames } = await renderFrames(pair, { times: [0, 1.8], background: "#fff" });
 
     // A nested SVG that froze would draw the same white square at both times.

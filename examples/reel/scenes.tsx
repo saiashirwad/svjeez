@@ -1,6 +1,6 @@
 // The reels themselves: a wipe between two stills with the changed regions boxed, and a flipbook that plays two films
 // of the same scroll side by side. Screenshots embed as JPEG through <Picture>, so each reel is still one file.
-import { Picture, def, draw, ease, motion, picture, render, type Motion } from "svjeez";
+import { Flipbook, Picture, def, draw, ease, motion, picture, render, type Motion } from "svjeez";
 import type { Box, Frame } from "./capture";
 
 const PAD = 16;
@@ -11,7 +11,7 @@ const CSS = `
 .reel-chip{fill:#18181b}.reel-chip-text{font:600 12px ui-sans-serif,system-ui,sans-serif;fill:#fff}
 .reel-frame{fill:none;stroke:#d4d4d8}.reel-box{fill:none;stroke:#e11d48;stroke-width:2.5}
 .reel-bar{fill:#e4e4e7}.reel-progress{fill:#e11d48}
-@media (prefers-color-scheme:dark){.reel-bg{fill:#18181b}.reel-label{fill:#a1a1aa}.reel-frame{stroke:#3f3f46}.reel-bar{fill:#27272a}}`;
+@media (prefers-color-scheme:dark){.reel-chip{fill:#f4f4f5}.reel-chip-text{fill:#18181b}.reel-bg{fill:#18181b}.reel-label{fill:#a1a1aa}.reel-frame{stroke:#3f3f46}.reel-bar{fill:#27272a}}`;
 
 const chip = (x: number, y: number, label: string, animation?: Motion<"opacity">) => (
   <g animation={animation}>
@@ -36,6 +36,7 @@ export interface WipeOptions {
 const HOLD = 0.9;
 const WIPE = 1.2;
 const SHOW = 2.6;
+
 const T = {
   in: HOLD,
   boxes: HOLD + WIPE,
@@ -51,20 +52,24 @@ export const wipe = ({ title, before, after, boxes, width }: WipeOptions) => {
   const height = a.height * k;
   const x0 = PAD;
   const y0 = PAD + LABEL;
+
   const grow = motion({ width: 0 })
     .at(T.in)
     .to({ width }, WIPE, ease.inOut)
     .at(T.out)
     .to({ width: 0 }, WIPE, ease.inOut);
+
   const slide = motion({ x: 0 })
     .at(T.in)
     .to({ x: width }, WIPE, ease.inOut)
     .at(T.out)
     .to({ x: 0 }, WIPE, ease.inOut);
+
   const reveal = def.clipPath(
     {},
     <rect x={x0} y={y0} width={0} height={height} animation={grow} />,
   );
+
   const total = { width: width + PAD * 2, height: height + PAD * 2 + LABEL };
 
   return render(
@@ -126,8 +131,8 @@ export const wipe = ({ title, before, after, boxes, width }: WipeOptions) => {
         ]}
       />
       {chip(
-        x0 + 12,
-        y0 + 12,
+        x0 + width - 64,
+        PAD - 3,
         "Before",
         motion({ opacity: 1 })
           .at(T.in + WIPE / 2)
@@ -136,8 +141,8 @@ export const wipe = ({ title, before, after, boxes, width }: WipeOptions) => {
           .to({ opacity: 1 }, 0.2),
       )}
       {chip(
-        x0 + width - 70,
-        y0 + 12,
+        x0 + width - 64,
+        PAD - 3,
         "After",
         motion({ opacity: 0 })
           .at(T.in + WIPE / 2)
@@ -166,6 +171,7 @@ export const flipbook = ({ title, films, length, width, rest = 1 }: FlipbookOpti
   const k = width / first.width;
   const height = first.height * k;
   const duration = length + rest;
+
   const total = {
     width: PAD * 2 + films.length * width + (films.length - 1) * PAD,
     height: PAD * 2 + LABEL + height + 14,
@@ -192,20 +198,16 @@ export const flipbook = ({ title, films, length, width, rest = 1 }: FlipbookOpti
             <text class="reel-label" x={x} y={PAD + 14}>
               {label}
             </text>
-            {frames.map((frame, i) => {
-              // Each frame shows from its time to the next frame's; the last holds to the end of the loop.
-              const from =
-                i === 0
-                  ? motion({ opacity: 1 })
-                  : motion({ opacity: 0 }).at(frame.t).set({ opacity: 1 });
-              const shown = from.at(frames[i + 1]?.t ?? duration - 0.01).set({ opacity: 0 });
+            <Flipbook
+              frames={frames.map((frame) => ({ at: frame.t, src: picture(frame.jpeg) }))}
+              duration={duration}
+              x={x}
+              y={y}
+              width={width}
+              height={height}
+              alt={`${label}, filmed`}
+            />
 
-              return (
-                <g animation={shown}>
-                  <Picture src={picture(frame.jpeg)} x={x} y={y} width={width} height={height} />
-                </g>
-              );
-            })}
             <rect class="reel-frame" x={x} y={y} width={width} height={height} />
             <rect class="reel-bar" x={x} y={y + height + 8} width={width} height={3} rx={1.5} />
             <rect
