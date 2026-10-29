@@ -2,7 +2,7 @@
 
 svjeez is a TypeScript library that compiles scenes written in TypeScript into one self-contained animated SVG. Motions become CSS keyframes, or SMIL on filter primitives. Nothing runs in the viewer's browser.
 
-To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md). It ships in the npm package, and `svjeez skill` prints it or `svjeez skill --install` copies it into a project. `SKILL.md` covers the `motion()` timeline, channels, easing, recipes, `sampled()`, and the compile and runtime errors with their fixes. `skills/svjeez/references/` covers defs and CSS properties, images and fonts, ink, explainers, diagrams, voxels, maps through `@svjeez/geo`, syntax highlighting through `@svjeez/code`, equations through `@svjeez/math`, charts through `@svjeez/charts`, Mermaid text through `@svjeez/mermaid`, video through `@svjeez/video` and non-JSX use. Five worked examples sit in `skills/svjeez/examples/`. `svjeez skill` prints `SKILL.md` alone; `--install` also copies the references and examples. This file covers working on the repository.
+To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md) and the references it points to. It ships in the npm package, and `svjeez skill --install` copies it into a project. This file covers working on the repository.
 
 ## Workspace
 
@@ -26,6 +26,8 @@ Run `bun install` once at the root. From the root, `bun run typecheck` and `bun 
 
 The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
+Every other package points its exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. In each, `bun run build:package` writes `package-dist/` with the package.json that npm publishes, and `bun run test:package` installs the packed tarball into a copy of `test/consumer/` and checks it on plain Node. Both use the scripts in the root `scripts/` folder. Packages with a third-party dependency stay out of `svjeez` so the core keeps none.
+
 ## Library commands
 
 Run these in `packages/svjeez/`:
@@ -40,7 +42,7 @@ bun run dev <file.tsx>            # live preview with reload and a scrubber
 bun run render-png <file> --times 0,1,2 --sheet --out frames/
 ```
 
-`examples/` has its own `build`, `dev`, `render-png`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/hero`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
+`examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/hero`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
 
 Frame rendering needs Chromium once per machine: `bunx playwright-core install chromium-headless-shell`.
 
@@ -52,51 +54,19 @@ Paths in this section are relative to `packages/svjeez/`.
 - `src/extras/` holds code, terminal, annotations, themes, and the diagrams in `extras/diagrams/`.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
 - `src/frames.ts` and `src/cli.ts` rasterize frames. They are the only code that touches a browser.
-- `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. They carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
+- `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
-## Vite plugin
+## Packages
 
-`@svjeez/vite` compiles scenes while an app builds. An import such as `./hero.tsx?svjeez` gives `{ src, width, height, title, desc }`, and `?svjeez&posters` adds a still per color scheme. The dev server serves the files under `/_svjeez/`, and the build emits them as assets. Scenes run in a Vite environment of their own that compiles JSX as svjeez, so a React app's JSX settings never reach them. `getScene()` and the poster renderer run in that environment too, so the plugin itself never imports svjeez. Posters render in headless Chromium and are cached in Vite's cache directory.
+Each package's source explains its own internals. These are the rules that aren't visible from one file:
 
-Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`. Run `bun run dev` there to open it.
-
-Both plugin packages point their exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. `bun run build:package` in either package writes `package-dist/`, with compiled JavaScript, declarations, and the package.json that npm publishes. `bun run test:package` builds it, lints it, installs the packed tarballs into a copy of `test/consumer/`, and builds that project. Both commands use the scripts in the root `scripts/` folder.
-
-## Astro integration
-
-`@svjeez/astro` adds `@svjeez/vite` to Astro and exports `<Scene>` from `@svjeez/astro/Scene.astro` and `getScene()` from `@svjeez/astro/scene`. `<Scene scene={build} />` and `getScene(build, { posters })` compile a scene and give it a URL under `/_svjeez/`. Pages call `getScene()` while they render, after Vite has bundled, so the integration writes those files in `astro:build:done`. Posters are cached in Astro's cache directory.
-
-## Geo
-
-`@svjeez/geo` depends on `d3-geo` and `topojson-client`, which is why it is not a `svjeez` subpath. `project()` fits a projection to a frame and returns regions, merged `land` and `lines`, places, great-circle routes and camera bounds. `src/writer.ts` writes the path data: it rounds to 0.1px, drops points closer than the tolerance, and straightens with Douglas–Peucker. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/world`, `examples/earth` and `examples/cables` are its example scenes, and `skills/svjeez/references/geo.md` teaches it to scene writers.
-
-## Fonts
-
-`@svjeez/fonts` has no runtime dependencies. `google(family, { weight, style, ...fontOptions })` asks `fonts.googleapis.com/css2` for one static TTF and passes the bytes to `font()`. Google sends TTF only to a user agent it doesn't recognize, so `src/index.ts` sets its own. Files are cached in `$SVJEEZ_FONTS_CACHE`, else `$XDG_CACHE_HOME/svjeez/fonts`, else `~/.cache/svjeez/fonts`, written through a temp file and a rename. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node, with one real download. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/tests/fixtures/`, because the core never touches the network.
-
-## Icons
-
-`@svjeez/icons` is data with no dependencies, and it does not import svjeez. `<Icon>` in `packages/svjeez/src/icon.tsx` takes its `{ grid, kind, paths }` shape structurally through its own `IconData`. `src/tabler.ts` and `src/lucide.ts` are generated and committed: `bun run generate` in `packages/icons/` reads `@tabler/icons` and `lucide-static` from `node_modules`, pinned to exact versions, and rerunning it changes nothing. Never edit them by hand, and both oxfmt and oxlint ignore them. Each starts with the upstream licence. The naming rule is in the package README. `bun run test:package` checks the packed tarball on plain Node.
-
-## Code
-
-`@svjeez/code` depends on `shiki`, pinned, which is why it is not a `svjeez` subpath. `highlight()` is synchronous: it builds one `createHighlighterCoreSync` with statically imported grammars (`src/langs.ts`) and Shiki's JavaScript regex engine, so nothing loads WebAssembly and it runs on Node 20. It does not use a real theme. `src/index.ts` builds a synthetic one from `src/scopes.ts`, the single table from TextMate scope prefix to `CodeRole`, where each role has a sentinel color, and maps the color Shiki returns back to its role. Shiki's own scope matching then decides which prefix wins, and uppercases the colors it returns, so the lookup lowercases them. The output is `[role, text]` runs, never hex, so `adaptive()` and `variables()` keep working. Tabs expand to spaces before tokenizing, because `code()` has one column per character. Its exports point at TypeScript source like the plugins, and `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/code` is its example scene, `examples/site/` highlights its snippets with it, and `skills/svjeez/references/code.md` teaches it to scene writers.
-
-## Math
-
-`@svjeez/math` depends on `mathjax-full`, which is why it is not a `svjeez` subpath. `tex()` runs MathJax's TeX input and SVG output once per formula, reads the SVG back with `src/mathjax.ts`, and composes every nested `translate()` and `scale()` into one matrix per glyph, so a formula is a flat list of placed `<path>`s. `src/mathjax.ts` drops the `noundefined` and `noerrors` packages, because they turn a typo into a picture, and it throws on a MathJax error node or on a `<text>` fallback. `Tex` is a `Morphable`, so `morph()` from `svjeez/extras` animates it: a glyph's `text` key is its character and size, because a morph translates and cannot scale. `draw()` puts the motion on a wrapping `<g>`, since a CSS animation overrides a `transform` attribute. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/math` is its example scene, and `skills/svjeez/references/math.md` teaches it to scene writers.
-
-## Charts
-
-`@svjeez/charts` depends on `d3-scale` and `d3-shape`, which is why it is not a `svjeez` subpath. Only numbers and path strings leave d3, and the SVG is built with `el`. It does not call `axes()`, because that takes numeric ranges with a fixed tick step and a band x axis needs its own drawing, so `src/chart.ts` draws the frame itself with the same stroke slots, label slot, 4px ticks and label offsets as `axes()`. `chart()` decides every scale once, from explicit domains or from `data`, and a series whose points fall outside them throws instead of clipping. `src/series.ts` builds `bars()`, `line()` and `area()`. A bar is drawn its radius longer than it shows and a clip at the baseline squares the foot, and an area is revealed by a clip rect whose width animates. Lines draw with a linear ease so their dots can appear in proportion to the length the stroke has covered. There is no time scale. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/charts` is its example scene, and `skills/svjeez/references/charts.md` teaches it to scene writers.
-
-## Mermaid
-
-`@svjeez/mermaid` has no dependencies and does not import the `mermaid` npm package, which needs a DOM. It works in two layers. `parse()` is a hand-written, line-based parser in `src/flowchart.ts`, `src/sequence.ts` and `src/state.ts` that returns a plain `MermaidDoc` (`src/types.ts`) and never imports svjeez. `mermaid()` in `src/index.ts` maps that model onto `flowchart()`, `sequence()` or `stateMachine()` and returns the svjeez diagram with `kind` and `doc`. `FORM_ROLES` is the one table from Mermaid node forms to svjeez `NodeRole`s. Anything the parser or svjeez cannot draw throws a `MermaidSyntaxError` with the line number, so a line is never dropped: when svjeez gains a feature (activations, edge styles, `BT`), move it from the rejected list to the parser and the mapper together, and update the README and `references/mermaid.md`. Its exports point at TypeScript source like the plugins, and its relative imports end in `.ts` so the packed declarations resolve. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node. `examples/mermaid` is its example scene, and `skills/svjeez/references/mermaid.md` teaches it to scene writers.
-
-## Video
-
-`@svjeez/video` depends on `mediabunny`, pinned, which is why it is not a `svjeez` subpath. Node has no WebCodecs, so `renderVideo()` encodes inside the Chromium page that `openScene()` from `svjeez/frames` opens. `openScene()` serves the stage from `https://svjeez.local/` through a Playwright route, because WebCodecs exists only in a secure context and `about:blank` is not one, and `renderFrames()` shares that setup. Mediabunny's `exports` has only `.`, so `src/index.ts` finds its browser bundle, `mediabunny.min.cjs`, next to the file `.` resolves to, and loads it with `addScript()`. Each frame goes from a PNG capture to an `ImageBitmap` to a `VideoSample`. The bitmap is cropped to even sides, since H.264 rejects an odd one. `FORMATS` is the one table of containers, their codecs with the default first, and whether they carry alpha, and the `VideoOptions` type follows it, so MP4 with VP8 is a type error. `canEncodeVideo()` runs in the page before any capture, so a Chromium without a codec fails with a fix rather than midway. The `svjeez video` command imports the package from the project with a specifier that isn't a literal and types it structurally, so svjeez gets no dependency. `examples/` depends on it, so `bun run render-video <file>` works there. Its exports point at TypeScript source like the plugins. `bun run test:package` checks the packed tarball in `test/consumer/` on plain Node, where it encodes both formats in Chromium. `skills/svjeez/references/video.md` teaches it to scene writers.
+- `@svjeez/vite` and `@svjeez/astro` never import svjeez. Scenes run in a Vite environment of their own that compiles JSX as svjeez. Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`, and `bun run dev` there to open it.
+- `@svjeez/icons`: `src/tabler.ts` and `src/lucide.ts` are generated by `bun run generate`. Never edit them by hand.
+- `@svjeez/code` returns `[role, text]` runs, never hex, so `adaptive()` and `variables()` keep working.
+- `@svjeez/charts`, `@svjeez/math` and `@svjeez/mermaid` end their relative imports in `.ts` so the packed declarations resolve.
+- `@svjeez/mermaid` never drops a line. Anything it cannot draw throws a `MermaidSyntaxError`. When svjeez gains a feature, move it from the rejected list to the parser and the mapper together, and update the README and `references/mermaid.md`.
+- `@svjeez/fonts` is the only package that touches the network. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/tests/fixtures/`.
+- A package that scene writers use has an example scene in `examples/` and a reference in `skills/svjeez/references/`.
 
 ## Site
 
@@ -114,17 +84,15 @@ Both plugin packages point their exports at TypeScript source in the workspace, 
 
 ## Releasing
 
-`.github/workflows/release.yml` runs on every push to `main`, and `ci.yml` runs on every pull request. CI typechecks, runs the tests, fails if `examples/dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
+`ci.yml` runs on every pull request. It typechecks, runs the tests, fails if `examples/dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
 
-After CI passes, `release.yml` runs `scripts/release.ts`. It releases every package under `packages/` whose version isn't on npm or has no GitHub release yet. It publishes to npm with provenance through trusted publishing, and it creates a GitHub release with the tarball and notes listing the commits that touched the package since its previous release. A package with a private workspace manifest publishes the `package-dist/` that its `build:package` writes. svjeez's tags stay `v1.2.3`, and the other packages tag `@svjeez/vite@1.2.3`. A version with a prerelease suffix such as `0.5.0-beta.0` goes to the `next` dist-tag. Rerunning the workflow skips steps that already happened.
+`release.yml` runs `scripts/release.ts` on every push to `main` after CI passes. It publishes every package whose version isn't on npm or has no GitHub release yet, and rerunning it skips steps that already happened. A prerelease version such as `0.5.0-beta.0` goes to the `next` dist-tag.
 
-To release, bump the version and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
+Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
 for p in svjeez vite astro charts code fonts geo icons math mermaid video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
-Every package shares one version, so bump them together. The workflow publishes `@svjeez/vite` before `@svjeez/astro`.
-
-npm trusts a workflow one package at a time, and only for a package that it already has. A new package therefore needs one publish from a maintainer's machine. Run `npm login`, then `bun scripts/release.ts claim packages/<name>` from the root. It publishes the package's current version and trusts `release.yml` and the `npm` environment for every later version. npm stages that first version, so approve it under Staged Packages on npmjs.com. Until then, the workflow skips the package with a warning. `bun scripts/release.ts plan` lists what the next push would release.
+A new package needs one publish from a maintainer's machine before the workflow can release it. The header of `scripts/release.ts` describes `claim` and `plan`.
