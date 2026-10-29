@@ -17,6 +17,7 @@ for (const b of $$<HTMLButtonElement>("[data-part]")) {
       end: (u, lifted) => {
         if (!lifted) return addPart(part);
         const vp = viewPoint(u);
+
         if (vp.inside) addPart(part, vp);
       },
       clear: () => showDrop(undefined),

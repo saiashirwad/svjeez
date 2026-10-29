@@ -16,6 +16,7 @@ export interface Flight {
 export const DURATION = 8;
 export const WIDTH = 640;
 export const HEIGHT = 300;
+
 /** The flight must land by then, so reactions and puffs finish inside the loop. */
 export const LATEST_END = DURATION - 1.2;
 export const MIN_OVER = 0.25;
@@ -38,12 +39,15 @@ export const TREES: readonly Pt[] = [
   [560, 236],
 ];
 
-export const curve = (u: number, f: number) => (f < 0 ? u ** (1 - 3 * f) : 1 - (1 - u) ** (1 + 3 * f));
+export const curve = (u: number, f: number) =>
+  f < 0 ? u ** (1 - 3 * f) : 1 - (1 - u) ** (1 + 3 * f);
 
 export const points = (flight: Flight): Pt[] => [flight.from, ...flight.legs.map((leg) => leg.to)];
 
 export const along = (pts: readonly Pt[], i: number, u: number, d = 0) => {
-  const [a, b, c, e] = [i - 1, i, i + 1, i + 2].map((k) => pts[Math.max(0, Math.min(pts.length - 1, k))]!);
+  const [a, b, c, e] = [i - 1, i, i + 1, i + 2].map(
+    (k) => pts[Math.max(0, Math.min(pts.length - 1, k))]!,
+  );
 
   return [0, 1].map((k) => {
     const [p0, p1, p2, p3] = [a![k]!, b![k]!, c![k]!, e![k]!];
@@ -64,14 +68,16 @@ export const starts = (flight: Flight) => {
   });
 };
 
-export const end = (flight: Flight) => flight.launch + flight.legs.reduce((sum, leg) => sum + leg.over, 0);
+export const end = (flight: Flight) =>
+  flight.launch + flight.legs.reduce((sum, leg) => sum + leg.over, 0);
 
 export const fly = (flight: Flight, t: number) => {
   const pts = points(flight);
   let start = flight.launch;
   let i = 0;
 
-  while (i < flight.legs.length - 1 && t > start + flight.legs[i]!.over) start += flight.legs[i++]!.over;
+  while (i < flight.legs.length - 1 && t > start + flight.legs[i]!.over)
+    start += flight.legs[i++]!.over;
   const leg = flight.legs[i]!;
   const s = Math.min(1, Math.max(0, (t - start) / leg.over));
   const u = curve(s, leg.feel);
@@ -104,6 +110,7 @@ export const sourceTokens = (flight: Flight): Token[] => {
   const out: Token[] = [];
   const t = (text: string) => out.push({ text });
   const v = (id: string, text: string) => out.push({ id, text });
+
   const pt = (id: string, p: Pt) => {
     t("[");
     v(`${id}.x`, num(p[0], 0));

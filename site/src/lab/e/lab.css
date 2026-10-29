@@ -54,7 +54,9 @@
   border-radius: var(--radius);
   overflow: clip;
   background: #f4efe2;
-  box-shadow: 0 0 0 1px var(--ring), 0 14px 36px -18px var(--shadow);
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 14px 36px -18px var(--shadow);
   transition: box-shadow 0.2s;
 }
 
@@ -72,7 +74,9 @@
 }
 
 .le-frame.le-mating {
-  box-shadow: 0 0 0 3px var(--hot), 0 14px 36px -18px var(--shadow);
+  box-shadow:
+    0 0 0 3px var(--hot),
+    0 14px 36px -18px var(--shadow);
 }
 
 .le-body-hit {
@@ -165,7 +169,9 @@
   border-radius: 0.5rem;
   background: var(--label);
   color: var(--label-ink);
-  box-shadow: 0 0 0 1px var(--ring), 0 1px 0 var(--ring);
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1px 0 var(--ring);
   font-family: var(--mono);
 }
 
@@ -179,7 +185,11 @@
 .le-card h1 {
   margin: 0.15rem 0 0.45rem;
   min-block-size: 2.5em;
-  font: italic 600 1.05rem/1.25 Georgia, "Iowan Old Style", "Times New Roman", serif;
+  font:
+    italic 600 1.05rem/1.25 Georgia,
+    "Iowan Old Style",
+    "Times New Roman",
+    serif;
   letter-spacing: -0.01em;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -433,7 +443,11 @@
   border: 0;
   border-radius: 0.4rem;
   background:
-    linear-gradient(to right, color-mix(in oklch, var(--hot) 22%, transparent) calc(var(--p) * 100%), transparent 0),
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--hot) 22%, transparent) calc(var(--p) * 100%),
+      transparent 0
+    ),
     var(--sunken);
   box-shadow: 0 0 0 1px var(--ring);
   color: var(--ink);

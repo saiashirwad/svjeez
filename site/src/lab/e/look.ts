@@ -18,6 +18,7 @@ export interface Cx {
 
 export const newCx = (g: Genome): Cx => {
   const f = form(g);
+
   return {
     g,
     f,
@@ -29,4 +30,6 @@ export const newCx = (g: Genome): Cx => {
 };
 
 export const r1 = (v: number) => Math.round(v * 10) / 10;
-export const polyline = (pts: readonly Pt[]) => pts.map((p, i) => `${i ? "L" : "M"}${r1(p.x)} ${r1(p.y)}`).join("");
+
+export const polyline = (pts: readonly Pt[]) =>
+  pts.map((p, i) => `${i ? "L" : "M"}${r1(p.x)} ${r1(p.y)}`).join("");

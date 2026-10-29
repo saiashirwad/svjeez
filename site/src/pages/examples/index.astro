@@ -112,16 +112,20 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   const prefetch = async () => {
     if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
     const other = scheme() === "light" ? "dark" : "light";
+
     const urls = [
       ...[...shots].map((shot) => shot.dataset[scheme()]!),
       ...[...shots].map((shot) => shot.dataset.live!),
       ...[...shots].map((shot) => shot.dataset[other]!),
     ];
+
     const lane = async () => {
       for (let url = urls.shift(); url; url = urls.shift()) await fetch(url, { priority: "low" }).then((r) => r.blob()).catch(() => {});
     };
+
     await Promise.all([lane(), lane(), lane()]);
   };
+
   const idle = () => ("requestIdleCallback" in window ? requestIdleCallback(() => prefetch()) : setTimeout(prefetch, 200));
 
   if (document.readyState === "complete") idle();

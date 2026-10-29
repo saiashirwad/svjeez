@@ -70,6 +70,7 @@ export const make = (tall = false): string => {
 
   const hop = WALK.over / HOPS;
   let hops = motion({ y: 0 }).at(WALK.at);
+
   for (let i = 0; i < HOPS; i++)
     hops = hops.to({ y: -10 }, hop / 2, ease.out).to({ y: 0 }, hop / 2, ease.in);
   hops = hops
@@ -127,10 +128,13 @@ export const make = (tall = false): string => {
   // window's right edge.
   const target = { x: lost, y: y - 30 };
   const angle = (Math.atan2(target.y - bulb.y, target.x - bulb.x) * 180) / Math.PI;
+
   const L = Math.round(
     Math.min(Math.hypot(target.x - bulb.x, target.y - bulb.y) + 50, W - 16 - bulb.x),
   );
+
   const [cos, sin] = [Math.cos(0.17), Math.sin(0.17)].map((n) => +(n * L).toFixed(1));
+
   const wedge = (dir: 1 | -1) =>
     `M0 0L${dir * cos!} ${-sin!}A${L} ${L} 0 0 ${dir > 0 ? 1 : 0} ${dir * cos!} ${sin!}Z`;
 
@@ -150,6 +154,7 @@ export const make = (tall = false): string => {
     .to({ opacity: 0 }, 0.4);
 
   const rnd = random(404);
+
   const specks = Array.from({ length: tall ? 7 : 16 }, () => ({
     x: x1 + 30 + rnd() * (W - x1 - 60),
     y: BAR + 24 + rnd() * (y - BAR - 70),

@@ -2,15 +2,20 @@
  * Follows the pointer that went down until it lifts or is cancelled. The listeners sit on the window, so a target that
  * is replaced or hidden mid-drag cannot strand the drag.
  */
-export const drag = (down: PointerEvent, h: { move?: (m: PointerEvent) => void; end?: (u: PointerEvent, cancelled: boolean) => void }) => {
+export const drag = (
+  down: PointerEvent,
+  h: { move?: (m: PointerEvent) => void; end?: (u: PointerEvent, cancelled: boolean) => void },
+) => {
   try {
     (down.currentTarget as Element).setPointerCapture(down.pointerId);
   } catch {
     // The pointer may be gone already; the window listeners carry the drag either way.
   }
+
   const move = (m: PointerEvent) => {
     if (m.pointerId === down.pointerId) h.move?.(m);
   };
+
   const finish = (cancelled: boolean) => (u: PointerEvent) => {
     if (u.pointerId !== down.pointerId) return;
     window.removeEventListener("pointermove", move);
@@ -18,6 +23,7 @@ export const drag = (down: PointerEvent, h: { move?: (m: PointerEvent) => void; 
     window.removeEventListener("pointercancel", cancel);
     h.end?.(u, cancelled);
   };
+
   const up = finish(false);
   const cancel = finish(true);
   window.addEventListener("pointermove", move);
@@ -31,8 +37,12 @@ const carry = (html: string, e: PointerEvent) => {
   ghost.className = "le-ghost";
   ghost.innerHTML = html;
   document.body.append(ghost);
-  const place = (m: PointerEvent) => ghost.style.setProperty("translate", `${m.clientX}px ${m.clientY}px`);
+
+  const place = (m: PointerEvent) =>
+    ghost.style.setProperty("translate", `${m.clientX}px ${m.clientY}px`);
+
   place(e);
+
   return { place, drop: () => ghost.remove() };
 };
 
@@ -50,10 +60,12 @@ interface Carrying {
 /** A drag that carries a floating copy of `html`. */
 export const carryDrag = (down: PointerEvent, o: Carrying) => {
   let held: ReturnType<typeof carry> | undefined;
+
   const lift = (at: PointerEvent) => {
     held = carry(o.html, at);
     document.body.classList.add("le-carrying");
   };
+
   if (!o.slop) lift(down);
   drag(down, {
     move(m) {
@@ -65,6 +77,7 @@ export const carryDrag = (down: PointerEvent, o: Carrying) => {
       held?.drop();
       document.body.classList.remove("le-carrying");
       o.clear();
+
       if (!cancelled) o.end(u, !!held);
     },
   });

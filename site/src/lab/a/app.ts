@@ -34,6 +34,7 @@ const KEYWORDS = new Set([
   "function",
   "length",
 ]);
+
 const NAMED: Record<string, [number, number, number, number]> = {
   in: [0.55, 0.06, 0.68, 0.19],
   out: [0.23, 1, 0.32, 1],
@@ -46,20 +47,29 @@ const tokenize = (src: string): Token[] => {
   const out: Token[] = [];
   let i = 0;
   let line = 1;
+
   const push = (kind: Kind, text: string) => {
     out.push({ kind, start: i, text, line });
+
     for (const c of text) if (c === "\n") line++;
     i += text.length;
   };
+
   // Template literals: depth of `${` inside backticks.
   const tmpl: number[] = [];
   let braces = 0;
+
   while (i < src.length) {
     const rest = src.slice(i);
     let m: RegExpMatchArray | null;
+
     if ((m = rest.match(/^\s+/))) push("ws", m[0]);
     else if ((m = rest.match(/^\/\/[^\n]*/))) push("comment", m[0]);
-    else if ((m = rest.match(/^ease\.bezier\(\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*-?[\d.]+\s*\)/)))
+    else if (
+      (m = rest.match(
+        /^ease\.bezier\(\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*-?[\d.]+\s*\)/,
+      ))
+    )
       push("ease", m[0]);
     else if ((m = rest.match(/^ease\.(inOut|in|out|pop|linear)\b/))) push("ease", m[0]);
     else if ((m = rest.match(/^"#[0-9A-Fa-f]{6}"/))) push("color", m[0]);
@@ -69,7 +79,9 @@ const tokenize = (src: string): Token[] => {
       tmpl.push(braces);
       // read string part
       const s = src.slice(i).match(/^[^`$]*(?:\$(?!\{)[^`$]*)*/)![0];
+
       if (s) push("string", s);
+
       if (src[i] === "`") {
         push("string", "`");
         tmpl.pop();
@@ -81,7 +93,9 @@ const tokenize = (src: string): Token[] => {
       push("punct", "}");
       braces--;
       const s = src.slice(i).match(/^[^`$]*(?:\$(?!\{)[^`$]*)*/)![0];
+
       if (s) push("string", s);
+
       if (src[i] === "`") {
         push("string", "`");
         tmpl.pop();
@@ -94,23 +108,28 @@ const tokenize = (src: string): Token[] => {
       const word = m[0];
       const before = src.slice(Math.max(0, i - 2), i);
       const after = src.slice(i + word.length);
+
       const kind: Kind = KEYWORDS.has(word)
         ? "keyword"
         : /<\/?$/.test(before)
           ? "tag"
           : /^=[{"]/.test(after)
             ? "attr"
-            : /^\(/.test(after)
+            : after.startsWith("(")
               ? "fn"
               : "plain";
+
       push(kind, word);
     } else {
       const c = src[i]!;
+
       if (c === "{") braces++;
+
       if (c === "}") braces--;
       push("punct", c);
     }
   }
+
   return out;
 };
 
@@ -129,31 +148,40 @@ const findElements = (src: string): JsxElement[] => {
   const stack: JsxElement[] = [];
   const re = /<(\/?)([a-z][\w]*)|<(\/?)>/g;
   let m: RegExpExecArray | null;
+
   while ((m = re.exec(src))) {
     if (m[3] !== undefined) continue;
     const closing = m[1] === "/";
     const tag = m[2]!;
+
     if (closing) {
       const el = stack.pop();
+
       if (el) el.full[1] = lineAt(src, m.index);
       continue;
     }
+
     // walk to the end of the opening tag, skipping braces
     let j = re.lastIndex;
     let depth = 0;
+
     for (; j < src.length; j++) {
       const c = src[j];
+
       if (c === "{") depth++;
       else if (c === "}") depth--;
       else if (c === ">" && depth === 0) break;
     }
+
     const selfClose = src[j - 1] === "/";
     const a = lineAt(src, m.index);
     const b = lineAt(src, j);
     const el: JsxElement = { tag, nameEnd: re.lastIndex, open: [a, b], full: [a, b] };
     els.push(el);
+
     if (!selfClose) stack.push(el);
   }
+
   return els;
 };
 
@@ -162,10 +190,13 @@ const key = (el: JsxElement) => `${el.open[0]}-${el.open[1]}`;
 /** The source the worker compiles: the same code with `data-l` on every element, which `strip` takes off again. */
 const annotate = (src: string, els: JsxElement[]) => {
   let out = src;
+
   for (const el of [...els].sort((a, b) => b.nameEnd - a.nameEnd))
     out = out.slice(0, el.nameEnd) + ` data-l="${key(el)}"` + out.slice(el.nameEnd);
+
   return out;
 };
+
 const strip = (svg: string) => svg.replace(/ data-l="[\d-]+"/g, "");
 
 // ----- easing math
@@ -174,14 +205,18 @@ const bez = (p: readonly number[]) => {
   const [x1, y1, x2, y2] = p as [number, number, number, number];
   const cx = (t: number) => 3 * (1 - t) * (1 - t) * t * x1 + 3 * (1 - t) * t * t * x2 + t * t * t;
   const cy = (t: number) => 3 * (1 - t) * (1 - t) * t * y1 + 3 * (1 - t) * t * t * y2 + t * t * t;
+
   return (u: number) => {
     let lo = 0;
     let hi = 1;
+
     for (let k = 0; k < 24; k++) {
       const mid = (lo + hi) / 2;
+
       if (cx(mid) < u) lo = mid;
       else hi = mid;
     }
+
     return cy((lo + hi) / 2);
   };
 };
@@ -189,18 +224,23 @@ const bez = (p: readonly number[]) => {
 const curvePath = (p: readonly number[], X: (u: number) => number, Y: (v: number) => number) => {
   const f = bez(p);
   let d = "";
+
   for (let k = 0; k <= 40; k++) {
     const u = k / 40;
     d += `${k ? "L" : "M"}${X(u).toFixed(2)} ${Y(f(u)).toFixed(2)}`;
   }
+
   return d;
 };
 
 const pointsOf = (text: string): number[] => {
   const named = /^ease\.(\w+)$/.exec(text);
+
   if (named) return [...(NAMED[named[1]!] ?? NAMED.out!)];
+
   return [...text.slice(text.indexOf("(")).matchAll(/-?[\d.]+/g)].map((m) => Number(m[0]));
 };
+
 const fmt = (n: number, d: number) => String(Number(n.toFixed(d)));
 const bezText = (p: readonly number[]) => `ease.bezier(${p.map((n) => fmt(n, 2)).join(", ")})`;
 
@@ -214,22 +254,28 @@ const hexToHsl = (hex: string): [number, number, number] => {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const l = (max + min) / 2;
+
   if (max === min) return [0, 0, l];
   const d = max - min;
   const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
   const h =
     max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+
   return [h * 60, s, l];
 };
+
 const hslToHex = (h: number, s: number, l: number) => {
   const f = (n: number) => {
     const k = (n + h / 30) % 12;
     const a = s * Math.min(l, 1 - l);
     const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+
     return Math.round(c * 255)
       .toString(16)
       .padStart(2, "0");
   };
+
   return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
 };
 
@@ -250,6 +296,7 @@ const specFor = (src: string, tok: Token): Spec => {
   const generic: Spec = { min: 0, max: Math.max(10, Number(tok.text) * 3), step, label: "" };
   const constName = /const (\w+) = $/.exec(before)?.[1];
   const attr = /(\w+)=\{$/.exec(before)?.[1];
+
   const table: Record<string, Partial<Spec>> = {
     flowers: { min: 1, max: 12, step: 1, label: "how many" },
     gap: { min: 16, max: 160, step: 1, label: "px apart" },
@@ -263,13 +310,21 @@ const specFor = (src: string, tok: Token): Spec => {
     height: { min: 120, max: 600, step: 10, label: "px" },
     duration: { min: 1, max: 20, step: 0.5, label: "s loop" },
   };
+
   const name = constName ?? attr ?? /(\w+): $/.exec(before)?.[1];
+
   if (name && table[name]) return { ...generic, ...table[name] } as Spec;
-  if (/\}, $/.test(before)) return { min: 0.05, max: 4, step: 0.05, label: "s long" };
-  if (/\.at\($/.test(before)) return { min: 0, max: 6, step: 0.1, label: "s in" };
+
+  if (before.endsWith("}, ")) return { min: 0.05, max: 4, step: 0.05, label: "s long" };
+
+  if (before.endsWith(".at(")) return { min: 0, max: 6, step: 0.1, label: "s in" };
+
   if (/\.at\([\d.]+ \+ $/.test(before)) return { min: 0, max: 6, step: 0.1, label: "s in" };
-  if (/y: $/.test(before)) return { min: -100, max: 300, step: 1, label: "px down" };
-  if (/scale: $/.test(before)) return { min: 0, max: 3, step: 0.05, label: "×" };
+
+  if (before.endsWith("y: ")) return { min: -100, max: 300, step: 1, label: "px down" };
+
+  if (before.endsWith("scale: ")) return { min: 0, max: 3, step: 0.05, label: "×" };
+
   return generic;
 };
 
@@ -281,6 +336,7 @@ const compileRaw = createCompiler();
 
 const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) =>
   root.querySelector(sel) as T;
+
 const root = $("[data-lab-a]");
 const codeEl = $(".la-code", root);
 const stage = $(".la-stage", root);
@@ -320,6 +376,7 @@ const renderCode = () => {
   const toks = tokenize(source);
   elements = findElements(source);
   const lines: HTMLElement[] = [];
+
   const mk = (n: number) => {
     const row = document.createElement("div");
     row.className = "la-line";
@@ -331,21 +388,27 @@ const renderCode = () => {
     tx.className = "la-tx";
     row.append(no, tx);
     lines.push(row);
+
     return tx;
   };
+
   let tx = mk(1);
   let n = 1;
+
   for (const t of toks) {
     if (t.kind === "ws" || t.kind === "comment") {
       const parts = t.text.split("\n");
       parts.forEach((p, k) => {
         if (k) tx = mk(++n);
+
         if (p) tx.append(span(t.kind, p));
       });
       continue;
     }
+
     tx.append(widget(t));
   }
+
   codeEl.replaceChildren(...lines);
 };
 
@@ -353,13 +416,17 @@ const span = (kind: Kind, text: string) => {
   const s = document.createElement("span");
   s.className = `c-${kind}`;
   s.textContent = text;
+
   return s;
 };
 
 const widget = (t: Token): Node => {
   if (t.kind === "num") return numWidget(t);
+
   if (t.kind === "color") return colorWidget(t);
+
   if (t.kind === "ease") return easeWidget(t);
+
   return span(t.kind, t.text);
 };
 
@@ -367,6 +434,7 @@ const widget = (t: Token): Node => {
 const edit = (start: number, len: number, text: string) => {
   source = source.slice(0, start) + text + source.slice(start + len);
   schedule();
+
   return text.length;
 };
 
@@ -377,29 +445,37 @@ const numWidget = (t: Token) => {
   const spec = specFor(source, t);
   s.title = spec.label ? `${spec.label}: drag sideways` : "drag sideways";
   let len = t.text.length;
+
   const decimals = Math.max(
     (t.text.split(".")[1] ?? "").length,
     (String(spec.step).split(".")[1] ?? "").length,
   );
+
   const set = (v: number) => {
     const text = fmt(v, decimals);
+
     if (text === s.textContent) return;
     s.textContent = text;
     len = edit(t.start, len, text);
     showHud(s, spec, v);
   };
+
   drag(s, {
     start: () => Number(s.textContent),
     move: (v0, dx, _dy, e) => {
       if (spec.values) {
         const i0 = spec.values.indexOf(v0);
+
         const i = Math.max(
           0,
           Math.min(spec.values.length - 1, (i0 < 0 ? 0 : i0) + Math.round(dx / 22)),
         );
+
         set(spec.values[i]!);
+
         return;
       }
+
       const range = spec.max - spec.min;
       const fine = e.shiftKey ? 0.2 : 1;
       const raw = v0 + ((dx * range) / 260) * fine;
@@ -413,11 +489,14 @@ const numWidget = (t: Token) => {
     e.preventDefault();
     const v0 = Number(s.textContent);
     const dir = e.key === "ArrowUp" ? 1 : -1;
+
     if (spec.values) {
       const i = spec.values.indexOf(v0) + dir;
+
       if (spec.values[i] !== undefined) set(spec.values[i]!);
     } else set(Math.max(spec.min, Math.min(spec.max, v0 + dir * spec.step)));
   });
+
   return s;
 };
 
@@ -433,20 +512,24 @@ const colorWidget = (t: Token) => {
   let len = t.text.length;
   let hex = t.text.slice(1, -1);
   sw.style.setProperty("--c", hex);
+
   const set = (next: string) => {
     hex = next;
     sw.style.setProperty("--c", hex);
     text.textContent = `"${hex}"`;
     len = edit(t.start, len, `"${hex}"`);
   };
+
   let moved = false;
   drag(sw, {
     start: () => {
       moved = false;
+
       return 0;
     },
     move: (_v, dx, dy) => {
       if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+
       if (!moved) return;
       const [h, s, l] = hexToHsl(start);
       set(
@@ -468,6 +551,7 @@ const colorWidget = (t: Token) => {
   });
   let start = hex;
   sw.addEventListener("pointerdown", () => (start = hex), { capture: true });
+
   return wrap;
 };
 
@@ -487,10 +571,12 @@ const easeWidget = (t: Token) => {
   let points = pointsOf(t.text);
   let len = t.text.length;
   let current = t.text;
+
   const paintText = () => {
     text.replaceChildren();
     const m = /^(ease\.)(\w+)(\(.*\))?$/.exec(current)!;
     text.append(span("plain", m[1]!), span("fn", m[2]!));
+
     if (m[3]) {
       text.append(span("punct", "("));
       points.forEach((p, i) => {
@@ -500,15 +586,19 @@ const easeWidget = (t: Token) => {
       text.append(span("punct", ")"));
     }
   };
+
   const X = (u: number) => u * 24;
   const Y = (v: number) => 18 - v * 18;
+
   const paint = () => {
     g.innerHTML = `<rect x="0" y="0" width="24" height="18" rx="2" class="g-box"/><path class="g-curve" d="${curvePath(points, X, Y)}"/><circle class="g-dot" r="2.2"/>`;
   };
+
   paint();
   paintText();
   const entry = { el: g, p: () => points };
   glyphs.add(entry);
+
   const set = (p: number[]) => {
     points = p;
     current = bezText(p);
@@ -516,6 +606,7 @@ const easeWidget = (t: Token) => {
     paint();
     paintText();
   };
+
   const open = () => openEase(g, () => points, set);
   g.addEventListener("click", open);
   g.addEventListener("keydown", (e) => {
@@ -524,11 +615,13 @@ const easeWidget = (t: Token) => {
       open();
     }
   });
+
   return wrap;
 };
 
 // The ease editor: two handles, the curve, a dot riding it, and a ball that moves with only the eased value.
 let easeClose: (() => void) | null = null;
+
 const openEase = (anchor: Element, get: () => number[], set: (p: number[]) => void) => {
   easeClose?.();
   const W = 200;
@@ -543,6 +636,7 @@ const openEase = (anchor: Element, get: () => number[], set: (p: number[]) => vo
   pop.style.left = `${Math.max(8, Math.min(host.width - W - 8, r.left - host.left - W / 2))}px`;
   pop.style.top = `${r.bottom - host.top + 8}px`;
   const svg = pop.querySelector("svg")!;
+
   const paint = () => {
     const p = get();
     svg.innerHTML = `
@@ -557,15 +651,19 @@ const openEase = (anchor: Element, get: () => number[], set: (p: number[]) => vo
       ${p[1]! > 1 || p[3]! > 1 ? `<text x="${X(0.5)}" y="${Y(1) - 34}" class="e-note">overshoot</text>` : ""}`;
     pop.querySelector(".la-ease-text")!.textContent = bezText(p);
   };
+
   paint();
   editor = { svg, X, Y, get };
+
   const down = (e: PointerEvent) => {
     const h = (e.target as Element).closest<SVGElement>(".e-handle");
+
     if (!h) return;
     e.preventDefault();
     const which = Number(h.dataset.h);
     svg.setPointerCapture(e.pointerId);
     dragging = pop;
+
     const move = (ev: PointerEvent) => {
       const b = svg.getBoundingClientRect();
       const x = ((ev.clientX - b.left) / b.width) * W;
@@ -576,17 +674,22 @@ const openEase = (anchor: Element, get: () => number[], set: (p: number[]) => vo
       set(p);
       paint();
     };
+
     const up = () => {
       svg.removeEventListener("pointermove", move);
       dragging = null;
     };
+
     svg.addEventListener("pointermove", move);
     svg.addEventListener("pointerup", up, { once: true });
   };
+
   svg.addEventListener("pointerdown", down);
+
   const outside = (e: PointerEvent) => {
     if (!pop.contains(e.target as Node) && !anchor.contains(e.target as Node)) easeClose?.();
   };
+
   const esc = (e: KeyboardEvent) => e.key === "Escape" && easeClose?.();
   setTimeout(() => document.addEventListener("pointerdown", outside));
   document.addEventListener("keydown", esc);
@@ -600,6 +703,7 @@ const openEase = (anchor: Element, get: () => number[], set: (p: number[]) => vo
     renderCode();
   };
 };
+
 let editor: {
   svg: SVGSVGElement;
   X: (u: number) => number;
@@ -627,6 +731,7 @@ const drag = (
     el.classList.add("is-dragging");
     root.classList.add("is-scrubbing");
     const move = (ev: PointerEvent) => h.move(v0, ev.clientX - x0, ev.clientY - y0, ev);
+
     const up = () => {
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", up);
@@ -637,6 +742,7 @@ const drag = (
       h.end();
       renderCode();
     };
+
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", up);
     el.addEventListener("pointercancel", up);
@@ -649,12 +755,15 @@ const showHud = (el: HTMLElement, spec: Spec, v: number) => {
   hud.hidden = false;
   hud.style.left = `${r.left - host.left + r.width / 2}px`;
   hud.style.top = `${r.top - host.top}px`;
+
   const p = spec.values
     ? spec.values.indexOf(v) / (spec.values.length - 1)
     : (v - spec.min) / (spec.max - spec.min);
+
   hud.style.setProperty("--p", String(p));
   hud.querySelector(".la-hud-label")!.textContent = spec.label;
 };
+
 const hideHud = () => (hud.hidden = true);
 
 // ----- compile loop
@@ -663,14 +772,18 @@ let busy = false;
 let dirty = false;
 let editedAt = 0;
 const latencies: { compile: number; total: number }[] = [];
+
 (window as unknown as { __labA: unknown }).__labA = { latencies, files: () => files };
 
 const schedule = () => {
   editedAt = editedAt || performance.now();
+
   if (busy) {
     dirty = true;
+
     return;
   }
+
   void run();
 };
 
@@ -682,11 +795,13 @@ const run = async () => {
   const els = findElements(source);
   const annotated = annotate(source, els);
   const result = await compileRaw(annotated);
+
   if (result.ok) {
     errorEl.hidden = true;
     root.classList.remove("has-error");
     await show(result.svg);
     latencies.push({ compile: result.ms, total: performance.now() - t0 });
+
     if (latencies.length > 400) latencies.shift();
     void stats(result.ms);
   } else {
@@ -694,14 +809,21 @@ const run = async () => {
     errorEl.textContent = `${result.error.message} The picture shows the last file that compiled.`;
     root.classList.add("has-error");
   }
+
   busy = false;
+
   if (dirty) void run();
 };
 
 const withTime = (svg: string, t: number, pausedFrame: boolean) => {
   let out = svg.replace("<svg ", `<svg style="--t0:-${t.toFixed(3)}s" `);
+
   if (pausedFrame)
-    out = out.replace("<style><![CDATA[", "<style><![CDATA[\n.a{animation-play-state:paused!important}");
+    out = out.replace(
+      "<style><![CDATA[",
+      "<style><![CDATA[\n.a{animation-play-state:paused!important}",
+    );
+
   return out;
 };
 
@@ -713,10 +835,13 @@ const paintImg = (t: number) =>
     const next = new Image();
     next.onload = () => {
       img.src = url;
+
       if (!paused) origin = performance.now() - t * 1000;
+
       if (previous) URL.revokeObjectURL(previous);
       resolve();
     };
+
     next.onerror = () => resolve();
     next.src = url;
   });
@@ -731,15 +856,19 @@ const show = async (annotatedSvg: string) => {
   await paintImg(t);
   buildTimeline();
   const blob = new Blob([lastSvg], { type: "image/svg+xml" });
+
   if (download.href) URL.revokeObjectURL(download.href);
   download.href = URL.createObjectURL(blob);
 };
 
 const bytes = (n: number) => (n < 1024 ? `${n} B` : `${(n / 1024).toFixed(2)} KB`);
+
 const gzip = async (text: string) => {
   const s = new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"));
+
   return (await new Response(s).arrayBuffer()).byteLength;
 };
+
 const stats = async (ms: number) => {
   const gz = await gzip(lastSvg);
   const recent = latencies.slice(-20);
@@ -755,19 +884,24 @@ interface Bar {
   ease: number[] | null;
   line: number;
 }
+
 interface Row {
   cls: string;
   keys: string[];
   label: string;
   bars: Bar[];
 }
+
 let rows: Row[] = [];
 
 const parseEase = (s: string | undefined): number[] | null => {
   if (!s) return null;
   const m = /cubic-bezier\(([^)]+)\)/.exec(s);
+
   if (m) return m[1]!.split(",").map(Number);
+
   if (s.trim() === "linear") return [0, 0, 1, 1];
+
   return null;
 };
 
@@ -775,23 +909,28 @@ const buildTimeline = () => {
   const css = /<style><!\[CDATA\[([\s\S]*?)\]\]><\/style>/.exec(lastSvg)?.[1] ?? "";
   const defaultEase = parseEase(/\.a\{[^}]*animation-timing-function:([^;}]+)/.exec(css)?.[1]);
   const frames = new Map<string, { pct: number; value: string; ease?: string }[]>();
+
   for (const m of css.matchAll(/@keyframes (\w+)\{((?:[^{}]*\{[^}]*\})*)\}/g)) {
     const stops: { pct: number; value: string; ease?: string }[] = [];
+
     for (const s of m[2]!.matchAll(/([\d.%,]+)\{([^}]*)\}/g)) {
       const decl = s[2]!;
       const ease = /animation-timing-function:([^;]+)/.exec(decl)?.[1];
       const value = decl.replace(/;?animation-timing-function:[^;]+/, "");
+
       for (const p of s[1]!.split(",")) stops.push({ pct: parseFloat(p) / 100, value, ease });
     }
+
     stops.sort((a, b) => a.pct - b.pct);
     frames.set(m[1]!, stops);
   }
+
   const next: Row[] = [];
+
   for (const m of css.matchAll(/\.(m\d+)\{([^}]*)\}/g)) {
-    const props = Object.fromEntries(
-      m[2]!.split(";").map((d) => d.split(":") as [string, string]),
-    );
+    const props = Object.fromEntries(m[2]!.split(";").map((d) => d.split(":") as [string, string]));
     const stops = frames.get(props["animation-name"] ?? "");
+
     if (!stops) continue;
     const period = Number(/([\d.]+)s/.exec(props["animation-duration"] ?? "")?.[1] ?? duration);
     const base = parseEase(props["animation-timing-function"]) ?? defaultEase;
@@ -801,28 +940,43 @@ const buildTimeline = () => {
     const stepLines = el ? toLines(el) : [];
     const segs: Omit<Bar, "from" | "to">[] = [];
     const spans: [number, number][] = [];
+
     for (let i = 0; i + 1 < stops.length; i++) {
       const a = stops[i]!;
       const b = stops[i + 1]!;
+
       if (a.value === b.value || b.pct <= a.pct) continue;
       spans.push([a.pct * period, b.pct * period]);
-      segs.push({ ease: parseEase(a.ease) ?? base, line: stepLines[segs.length] ?? el?.open[0] ?? 0 });
+      segs.push({
+        ease: parseEase(a.ease) ?? base,
+        line: stepLines[segs.length] ?? el?.open[0] ?? 0,
+      });
     }
+
     const bars: Bar[] = [];
+
     for (let k = 0; k * period < duration - 1e-6; k++)
-      spans.forEach(([f, t], i) => bars.push({ from: f + k * period, to: t + k * period, ...segs[i]! }));
+      spans.forEach(([f, t], i) =>
+        bars.push({ from: f + k * period, to: t + k * period, ...segs[i]! }),
+      );
     const same = next.filter((r) => r.keys[0] === keys[0]).length;
     next.push({ cls: m[1]!, keys, label: el ? rowName(el, same) : "?", bars });
   }
+
   rows = next;
   paintTimeline();
 };
 
 /** A row's name: what the element fills with, or its tag, numbered when a map() made copies of it. */
 const rowName = (el: JsxElement, copy: number) => {
-  const text = source.split("\n").slice(el.open[0] - 1, el.open[1]).join("\n");
+  const text = source
+    .split("\n")
+    .slice(el.open[0] - 1, el.open[1])
+    .join("\n");
+
   const name = /fill=\{(\w+)\}/.exec(text)?.[1] ?? (el.tag === "g" ? "flower" : el.tag);
   const copies = elements.length && /Array\.from/.test(source) && el.tag === "g";
+
   return copies ? `${name} ${copy + 1}` : name;
 };
 
@@ -830,8 +984,10 @@ const rowName = (el: JsxElement, copy: number) => {
 const toLines = (el: JsxElement) => {
   const lines = source.split("\n");
   const out: number[] = [];
+
   for (let n = el.open[0]; n <= el.open[1]; n++)
     for (const _ of lines[n - 1]!.matchAll(/\.to\(/g)) out.push(n);
+
   return out;
 };
 
@@ -840,6 +996,7 @@ const paintTimeline = () => {
   const RH = 22;
   const body = timeline.querySelector(".la-rows")!;
   body.replaceChildren();
+
   for (const r of rows) {
     const row = document.createElement("div");
     row.className = "la-row";
@@ -852,6 +1009,7 @@ const paintTimeline = () => {
     svg.setAttribute("preserveAspectRatio", "none");
     svg.classList.add("la-row-track");
     let inner = "";
+
     for (const b of r.bars) {
       const x0 = (b.from / duration) * W;
       const x1 = (b.to / duration) * W;
@@ -859,16 +1017,19 @@ const paintTimeline = () => {
       const Y = (v: number) => RH - 4 - v * (RH - 8);
       inner += `<g class="la-bar" data-line="${b.line}"><rect x="${x0}" y="3" width="${Math.max(1.5, x1 - x0)}" height="${RH - 6}" rx="3"/>${b.ease ? `<path d="${curvePath(b.ease, X, Y)}"/>` : ""}</g>`;
     }
+
     svg.innerHTML = inner;
     row.append(lab, svg);
     body.append(row);
   }
+
   const ticks = timeline.querySelector(".la-ticks")!;
   ticks.replaceChildren(
     ...Array.from({ length: Math.floor(duration) + 1 }, (_, s) => {
       const t = document.createElement("span");
       t.textContent = `${s}s`;
       t.style.setProperty("--x", String(s / duration));
+
       return t;
     }),
   );
@@ -878,10 +1039,13 @@ const paintTimeline = () => {
 
 const linesFor = (keys: Iterable<string>) => {
   const out = new Set<number>();
+
   for (const k of keys) {
     const [a, b] = k.split("-").map(Number) as [number, number];
+
     for (let n = a; n <= b; n++) out.add(n);
   }
+
   return out;
 };
 
@@ -889,23 +1053,30 @@ const linesFor = (keys: Iterable<string>) => {
 const keysForLine = (n: number, depth = 0): Set<string> => {
   const text = source.split("\n")[n - 1] ?? "";
   const own = elements.filter((e) => n >= e.open[0] && n <= e.open[1]);
+
   if (own.length) return new Set(own.map(key));
   const decl = /const (\w+) =/.exec(text)?.[1];
+
   if (decl && depth < 2) {
     const out = new Set<string>();
     source.split("\n").forEach((l, i) => {
       if (i + 1 !== n && new RegExp(`\\b${decl}\\b`).test(l))
         for (const k of keysForLine(i + 1, depth + 1)) out.add(k);
     });
+
     return out;
   }
+
   if (/=>/.test(text)) {
     const inner = elements.find((e) => e.open[0] > n);
+
     return inner ? keysForLine(inner.open[0], depth) : new Set();
   }
+
   const around = elements
     .filter((e) => n >= e.full[0] && n <= e.full[1])
     .sort((a, b) => b.open[0] - a.open[0])[0];
+
   return around ? new Set([key(around)]) : new Set();
 };
 
@@ -915,51 +1086,67 @@ let hotStep = 0;
 const setHot = (keys: Set<string>, lines: Set<number>, step = 0) => {
   hot = keys;
   hotStep = step;
+
   for (const l of codeEl.querySelectorAll<HTMLElement>(".la-line"))
-    l.classList.toggle("is-hot", lines.has(Number(l.dataset.line)) || step === Number(l.dataset.line));
+    l.classList.toggle(
+      "is-hot",
+      lines.has(Number(l.dataset.line)) || step === Number(l.dataset.line),
+    );
+
   for (const r of timeline.querySelectorAll<HTMLElement>(".la-row"))
-    r.classList.toggle("is-hot", r.dataset.keys!.split(" ").some((k) => keys.has(k)));
+    r.classList.toggle(
+      "is-hot",
+      r.dataset.keys!.split(" ").some((k) => keys.has(k)),
+    );
   root.classList.toggle("is-linking", keys.size > 0);
 };
 
 codeEl.addEventListener("pointerover", (e) => {
   if (dragging) return;
   const line = (e.target as Element).closest<HTMLElement>(".la-line");
+
   if (!line) return;
   const n = Number(line.dataset.line);
   setHot(keysForLine(n), new Set([n]));
 });
+
 codeEl.addEventListener("pointerleave", () => !dragging && setHot(new Set(), new Set()));
 
 stage.addEventListener("pointermove", (e) => {
   if (dragging) return;
   const hit = ghost.elementFromPoint(e.clientX, e.clientY)?.closest("[data-l]");
   const k = hit?.getAttribute("data-l");
+
   if (!k) return setHot(new Set(), new Set());
   // An element inside a group: the outermost animated part is what the eye picks out, so prefer the innermost element hit.
   setHot(new Set([k]), linesFor([k]));
 });
+
 stage.addEventListener("pointerleave", () => setHot(new Set(), new Set()));
 
 timeline.addEventListener("pointerover", (e) => {
   if (dragging || scrubbing) return;
   const bar = (e.target as Element).closest<SVGGElement>(".la-bar");
   const row = (e.target as Element).closest<HTMLElement>(".la-row");
+
   if (!row) return;
   const keys = new Set(row.dataset.keys!.split(" "));
   setHot(keys, linesFor(keys), bar ? Number(bar.dataset.line) : 0);
 });
+
 timeline.addEventListener("pointerleave", () => !scrubbing && setHot(new Set(), new Set()));
 
 // ----- clock: scrubbing the timeline pauses the file at that moment
 
 let scrubbing = false;
 const lanes = $(".la-lanes", root);
+
 const seek = (e: PointerEvent) => {
   const b = timeline.querySelector(".la-ticks")!.getBoundingClientRect();
   pausedAt = Math.max(0, Math.min(duration - 0.001, ((e.clientX - b.left) / b.width) * duration));
   void paintImg(pausedAt);
 };
+
 lanes.addEventListener("pointerdown", (e) => {
   scrubbing = true;
   paused = true;
@@ -967,17 +1154,22 @@ lanes.addEventListener("pointerdown", (e) => {
   root.classList.add("is-paused");
   seek(e);
 });
+
 lanes.addEventListener("pointermove", (e) => scrubbing && seek(e));
+
 lanes.addEventListener("pointerup", () => (scrubbing = false));
 
 const setPaused = (p: boolean) => {
   if (p === paused) return;
+
   if (p) pausedAt = now();
   paused = p;
   root.classList.toggle("is-paused", p);
   void paintImg(p ? pausedAt : pausedAt);
 };
+
 playBtn.addEventListener("click", () => setPaused(!paused));
+
 resetBtn.addEventListener("click", () => {
   source = initial;
   renderCode();
@@ -993,20 +1185,25 @@ const tick = (ms: number) => {
   playBtn.textContent = paused ? "Play" : "Pause";
 
   const svg = ghost.querySelector("svg");
+
   if (svg) svg.style.setProperty("--t0", `-${t.toFixed(3)}s`);
 
   const u = ((ms / 1400) % 1.25) / 1.25;
   const ride = Math.min(1, u * 1.25);
+
   for (const entry of glyphs) {
     const { el, p } = entry;
+
     if (!el.isConnected) {
       glyphs.delete(entry);
       continue;
     }
+
     const dot = el.querySelector(".g-dot");
     dot?.setAttribute("cx", String(ride * 24));
     dot?.setAttribute("cy", String(18 - bez(p())(ride) * 18));
   }
+
   if (editor) {
     const f = bez(editor.get());
     const ridee = editor.svg.querySelector(".e-ride");
@@ -1018,17 +1215,21 @@ const tick = (ms: number) => {
   // Highlight boxes follow the ghost copy, which sits paused at the same moment as the picture.
   const sb = stage.getBoundingClientRect();
   const want: DOMRect[] = [];
+
   if (hot.size)
     for (const k of hot)
       for (const el of ghost.querySelectorAll(`[data-l="${k}"]`)) {
         const r = el.getBoundingClientRect();
+
         if (r.width * r.height > 0) want.push(r);
       }
+
   while (boxes.children.length < want.length) boxes.append(document.createElement("i"));
   [...boxes.children].forEach((b, i) => {
     const r = want[i];
     const box = b as HTMLElement;
     box.hidden = !r;
+
     if (!r) return;
     const pad = 4;
     box.style.inset = `${r.top - sb.top - pad}px auto auto ${r.left - sb.left - pad}px`;
@@ -1038,9 +1239,12 @@ const tick = (ms: number) => {
 
   // A step's line glows while its bar is under the playhead.
   const live = new Set<number>();
+
   for (const r of rows) for (const b of r.bars) if (t >= b.from && t < b.to) live.add(b.line);
+
   for (const l of codeEl.querySelectorAll<HTMLElement>(".la-line"))
     l.classList.toggle("is-live", live.has(Number(l.dataset.line)));
+
   for (const b of timeline.querySelectorAll<SVGGElement>(".la-bar"))
     b.classList.toggle("is-step", hotStep > 0 && Number(b.dataset.line) === hotStep);
 
@@ -1048,5 +1252,7 @@ const tick = (ms: number) => {
 };
 
 renderCode();
+
 schedule();
+
 requestAnimationFrame(tick);

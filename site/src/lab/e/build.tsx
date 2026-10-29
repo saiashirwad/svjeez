@@ -16,6 +16,7 @@ export const build = (g: Genome): string => {
   const { G } = lay;
 
   const { breath, motion: breathMotion } = breathing(cx);
+
   const style = css`
     .co { stroke-width: calc(${G + 5}px * ${breath} + 0px); }
     .cf { stroke-width: calc(${G}px * ${breath}); }
@@ -32,7 +33,11 @@ export const build = (g: Genome): string => {
   const ghostDrawn = ghost(cx, torso.d);
   const dripsDrawn = drips(cx);
   const shadowDrawn = shadow(cx);
-  const boil = g.ink > 0.05 ? fx.boil({ strength: r1(g.ink * 1.4), rate: 8, seed: g.seed % 50, detail: 0.035 }) : undefined;
+
+  const boil =
+    g.ink > 0.05
+      ? fx.boil({ strength: r1(g.ink * 1.4), rate: 8, seed: g.seed % 50, detail: 0.035 })
+      : undefined;
 
   const creature = () => (
     <g transform={`translate(${r1(lay.ox)} ${r1(lay.oy)}) scale(${lay.scale.toFixed(4)})`}>
@@ -65,7 +70,10 @@ export const build = (g: Genome): string => {
     <>
       <rect width={W} height={H} fill={PAPER} />
       <path
-        d={Array.from({ length: 16 }, (_, i) => `M${i * 40 + 20} 0V${H}`).join("") + Array.from({ length: 10 }, (_, i) => `M0 ${i * 40 + 20}H${W}`).join("")}
+        d={
+          Array.from({ length: 16 }, (_, i) => `M${i * 40 + 20} 0V${H}`).join("") +
+          Array.from({ length: 10 }, (_, i) => `M0 ${i * 40 + 20}H${W}`).join("")
+        }
         stroke="#D9D0BC"
         strokeWidth={0.6}
         opacity={0.55}

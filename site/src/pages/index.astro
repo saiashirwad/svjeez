@@ -178,6 +178,7 @@ const files = new Map<string, FileFacts>(
 );
 
 for (const variant of variants) for (const file of [variant.wide, variant.tall]) files.set(file.src, file);
+
 const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, file) => sum + file[field], 0);
 ---
 

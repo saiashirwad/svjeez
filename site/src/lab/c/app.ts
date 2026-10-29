@@ -31,7 +31,10 @@ type Drag =
   | { kind: "body"; leg: number; x0: number; flight: Flight }
   | { kind: "scrub" };
 
-const svg = <K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}) => {
+const svg = <K extends keyof SVGElementTagNameMap>(
+  tag: K,
+  attrs: Record<string, string | number> = {},
+) => {
   const el = document.createElementNS(NS, tag);
 
   for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
@@ -43,20 +46,35 @@ const round = (n: number, step: number) => Math.round(n / step) * step;
 const fmt = (t: number) => `${t.toFixed(2)}s`;
 const bytes = (n: number) => (n < 1024 ? `${n} B` : `${(n / 1024).toFixed(2)} KB`);
 
-const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escape = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const KEYWORDS = /^(import|from|const|export|default|return|let|while|for|if|undefined)$/;
 
 const highlight = (text: string) =>
-  text.replace(/(\/\/[^\n]*)|("[^"\n]*"|`[^`\n]*`)|([A-Za-z_]\w*)|([^/"`A-Za-z_]+|.)/gs, (_, com, str, word, rest) => {
-    if (com) return `<span class="c-com">${escape(com)}</span>`;
-    if (str) return `<span class="c-str">${escape(str)}</span>`;
-    if (word) return KEYWORDS.test(word) ? `<span class="c-kw">${word}</span>` : word;
-    return escape(rest);
-  });
+  text.replace(
+    /(\/\/[^\n]*)|("[^"\n]*"|`[^`\n]*`)|([A-Za-z_]\w*)|([^/"`A-Za-z_]+|.)/gs,
+    (_, com, str, word, rest) => {
+      if (com) return `<span class="c-com">${escape(com)}</span>`;
+
+      if (str) return `<span class="c-str">${escape(str)}</span>`;
+
+      if (word) return KEYWORDS.test(word) ? `<span class="c-kw">${word}</span>` : word;
+
+      return escape(rest);
+    },
+  );
 
 const feelWords = (f: number) =>
-  Math.abs(f) < 0.08 ? "steady" : f > 0 ? (f > 0.6 ? "darts off, floats in" : "leaves fast, lands slow") : f < -0.6 ? "creeps, then dives" : "leaves slow, lands fast";
+  Math.abs(f) < 0.08
+    ? "steady"
+    : f > 0
+      ? f > 0.6
+        ? "darts off, floats in"
+        : "leaves fast, lands slow"
+      : f < -0.6
+        ? "creeps, then dives"
+        : "leaves slow, lands fast";
 
 interface Telemetry {
   compiles: { build: number; roundtrip: number; dragging: boolean }[];
@@ -97,26 +115,35 @@ export const start = (root: HTMLElement) => {
 
   const DEFAULT_HINT =
     "Drag a white point to move the path. Drag along the dots to change the easing. Drag a block, or its right edge, to retime it. Drag the ruler to scrub.";
+
   const say = (text = DEFAULT_HINT) => {
     hint.textContent = text;
   };
+
   say();
 
   // Compiling. One build in flight at a time; edits made meanwhile coalesce into the next build.
   const rebuild = () => {
     if (inFlight) {
       queued = true;
+
       return;
     }
+
     inFlight = true;
     const sent = performance.now();
+
     const source = sourceTokens(flight)
       .map((t) => t.text)
       .join("");
 
     void compile(source).then((result) => {
       inFlight = false;
-      telemetry.compiles.push({ build: result.ms, roundtrip: performance.now() - sent, dragging: drag !== undefined });
+      telemetry.compiles.push({
+        build: result.ms,
+        roundtrip: performance.now() - sent,
+        dragging: drag !== undefined,
+      });
 
       if (result.ok) {
         latestSvg = result.svg;
@@ -151,6 +178,7 @@ export const start = (root: HTMLElement) => {
       "load",
       () => {
         playStart = performance.now();
+
         if (old) URL.revokeObjectURL(old);
       },
       { once: true },
@@ -160,31 +188,39 @@ export const start = (root: HTMLElement) => {
   // The paused frame: the same compiled SVG in a document of its own, its animations stopped at t.
   const seek = (frame: HTMLIFrameElement, t: number) => {
     const doc = frame.contentDocument;
+
     if (!doc) return;
+
     for (const animation of doc.getAnimations()) {
       animation.pause();
       animation.currentTime = t * 1000;
     }
+
     const rootSvg = doc.documentElement as unknown as SVGSVGElement;
     rootSvg.pauseAnimations?.();
     rootSvg.setCurrentTime?.(t);
   };
 
   let stillSvg = "";
+
   const showStill = (t: number) => {
     root.dataset.frozen = "";
     const visible = stills[shownStill]!;
 
     if (stillSvg === latestSvg && visible.dataset.ready) {
       seek(visible, t);
+
       return;
     }
+
     stillSvg = latestSvg;
     const hidden = stills[1 - shownStill]!;
     const old = stillUrl;
+
     const fitted = latestSvg.replace(/<svg\b[^>]*>/, (tag) =>
       tag.replace(/\swidth="[^"]*"/, ' width="100%"').replace(/\sheight="[^"]*"/, ' height="100%"'),
     );
+
     stillUrl = svgUrl(fitted);
     hidden.dataset.ready = "";
     delete hidden.dataset.ready;
@@ -194,8 +230,10 @@ export const start = (root: HTMLElement) => {
       hidden.classList.add("on");
       visible.classList.remove("on");
       shownStill = 1 - shownStill;
+
       if (old) URL.revokeObjectURL(old);
     };
+
     hidden.src = stillUrl;
   };
 
@@ -204,6 +242,7 @@ export const start = (root: HTMLElement) => {
     telemetry.frozen = true;
     play.setAttribute("aria-label", "Play");
     root.dataset.frozen = "";
+
     if (latestSvg) showStill(frozen);
   };
 
@@ -212,15 +251,22 @@ export const start = (root: HTMLElement) => {
     telemetry.frozen = false;
     play.setAttribute("aria-label", "Pause");
     delete root.dataset.frozen;
+
     for (const s of stills) s.classList.remove("on");
     showImg();
   };
 
-  const now = () => (frozen !== undefined ? frozen : (((performance.now() - playStart) / 1000) % DURATION + DURATION) % DURATION);
+  const now = () =>
+    frozen !== undefined
+      ? frozen
+      : ((((performance.now() - playStart) / 1000) % DURATION) + DURATION) % DURATION;
 
   // The overlay: the whole flight at once.
   const toScene = (event: PointerEvent): Pt => {
-    const p = new DOMPoint(event.clientX, event.clientY).matrixTransform(over.getScreenCTM()!.inverse());
+    const p = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+      over.getScreenCTM()!.inverse(),
+    );
+
     return [p.x, p.y];
   };
 
@@ -228,31 +274,39 @@ export const start = (root: HTMLElement) => {
     const pts = points(flight);
     let best = 0;
     let bestD = Infinity;
+
     for (let k = 0; k <= 200; k++) {
       const [x, y] = along(pts, leg, k / 200);
       const d = (x - p[0]) ** 2 + (y - p[1]) ** 2;
+
       if (d < bestD) {
         bestD = d;
         best = k / 200;
       }
     }
+
     return best;
   };
 
   const solveFeel = (s: number, u: number) => {
     let lo = -1;
     let hi = 1;
+
     for (let k = 0; k < 40; k++) {
       const mid = (lo + hi) / 2;
+
       if (curve(s, mid) < u) lo = mid;
       else hi = mid;
     }
+
     return round((lo + hi) / 2, 0.01);
   };
 
   const ghostTimes = () => {
     const out: number[] = [];
+
     for (let t = flight.launch; t <= end(flight) + 1e-6; t += GHOST_STEP) out.push(t);
+
     return out;
   };
 
@@ -289,24 +343,32 @@ export const start = (root: HTMLElement) => {
       // The dot nearest the pointer along the path: its moment in time is what the drag holds still.
       let best = legStarts[i]!;
       let bestD = Infinity;
+
       for (const t of ghostTimes()) {
         const f = fly(flight, t);
+
         if (f.leg !== i) continue;
+
         if (Math.abs(f.u - u) < bestD) {
           bestD = Math.abs(f.u - u);
           best = t;
         }
       }
+
       const s = clamp((best - legStarts[i]!) / leg.over, 0.02, 0.98);
       begin(event, { kind: "trail", leg: i, s, moved: false, t: best });
       setHot(i);
       freeze(best);
-      say(`Holding the moment ${fmt(best)} still. Slide it along the path: the dots bunch up where the plane is slow.`);
+      say(
+        `Holding the moment ${fmt(best)} still. Slide it along the path: the dots bunch up where the plane is slow.`,
+      );
     });
     hit.addEventListener("pointerenter", () => {
       if (drag) return;
       setHot(i);
-      say(`Leg ${i + 1} ${feelWords(flight.legs[i]!.feel)}. Drag along its dots to change how it speeds up.`);
+      say(
+        `Leg ${i + 1} ${feelWords(flight.legs[i]!.feel)}. Drag along its dots to change how it speeds up.`,
+      );
     });
     hit.addEventListener("pointerleave", () => {
       if (drag) return;
@@ -318,9 +380,19 @@ export const start = (root: HTMLElement) => {
   });
 
   const pointViews = points(flight).map((_, index) => {
-    const g = svg("g", { class: "lc-point", tabindex: 0, role: "slider", "aria-label": `Point ${index}` });
+    const g = svg("g", {
+      class: "lc-point",
+      tabindex: 0,
+      role: "slider",
+      "aria-label": `Point ${index}`,
+    });
+
     const text = svg("text", { "text-anchor": "middle" });
-    g.append(svg("circle", { class: "lc-grip", r: 16 }), svg("circle", { class: "lc-knob", r: 7 }), text);
+    g.append(
+      svg("circle", { class: "lc-grip", r: 16 }),
+      svg("circle", { class: "lc-knob", r: 7 }),
+      text,
+    );
     pointLayer.append(g);
     g.addEventListener("pointerdown", (event) => {
       begin(event, { kind: "point", index });
@@ -334,6 +406,7 @@ export const start = (root: HTMLElement) => {
     g.addEventListener("pointerleave", () => {
       if (!drag) say();
     });
+
     return { g, text };
   });
 
@@ -345,6 +418,7 @@ export const start = (root: HTMLElement) => {
     const circles: SVGElement[] = [];
     ghostTimes().forEach((t, k) => {
       const f = fly(flight, t);
+
       if (k % 6 === 3)
         onions.push(
           svg("path", {
@@ -378,10 +452,12 @@ export const start = (root: HTMLElement) => {
     const pts = points(flight);
     legViews.forEach(({ trail, hit }, i) => {
       let d = "";
+
       for (let k = 0; k <= 40; k++) {
         const [x, y] = along(pts, i, k / 40);
         d += `${k ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
       }
+
       trail.setAttribute("d", d);
       hit.setAttribute("d", d);
     });
@@ -407,16 +483,22 @@ export const start = (root: HTMLElement) => {
 
   const trackTime = (event: PointerEvent) => {
     const box = track.getBoundingClientRect();
+
     return clamp(((event.clientX - box.left) / box.width) * DURATION, 0, DURATION - 0.001);
   };
 
   const speedProfile = (i: number) => {
     const pts = points(flight);
     const leg = flight.legs[i]!;
+
     return Array.from({ length: 25 }, (_, k) => {
       const s = clamp(k / 24, 0.001, 0.999);
-      const du = (curve(Math.min(1, s + 0.001), leg.feel) - curve(Math.max(0, s - 0.001), leg.feel)) / 0.002;
+
+      const du =
+        (curve(Math.min(1, s + 0.001), leg.feel) - curve(Math.max(0, s - 0.001), leg.feel)) / 0.002;
+
       const [dx, dy] = along(pts, i, curve(s, leg.feel), 1);
+
       return (Math.hypot(dx, dy) * du) / leg.over;
     });
   };
@@ -448,7 +530,9 @@ export const start = (root: HTMLElement) => {
     block.addEventListener("pointerenter", () => {
       if (drag) return;
       setHot(i);
-      say(`Leg ${i + 1} lasts ${flight.legs[i]!.over.toFixed(2)}s. The hill inside is its speed. Drag the block to shift it, its edge to stretch it.`);
+      say(
+        `Leg ${i + 1} lasts ${flight.legs[i]!.over.toFixed(2)}s. The hill inside is its speed. Drag the block to shift it, its edge to stretch it.`,
+      );
     });
     block.addEventListener("pointerleave", () => {
       if (drag) return;
@@ -456,12 +540,14 @@ export const start = (root: HTMLElement) => {
       say();
     });
     track.append(block);
+
     return {
       block,
       path: block.querySelector("path")!,
       label: block.querySelector<HTMLElement>(".lc-block-label")!,
     };
   });
+
   track.prepend(waitBlock);
   track.append(tailBlock, playhead);
 
@@ -476,7 +562,11 @@ export const start = (root: HTMLElement) => {
       const leg = flight.legs[i]!;
       block.style.insetInlineStart = pct(legStarts[i]!);
       block.style.inlineSize = pct(leg.over);
-      const area = profiles[i]!.map((v, k) => `${((k / 24) * 100).toFixed(1)} ${(40 - (v / top) * 32).toFixed(1)}`).join(" L");
+
+      const area = profiles[i]!.map(
+        (v, k) => `${((k / 24) * 100).toFixed(1)} ${(40 - (v / top) * 32).toFixed(1)}`,
+      ).join(" L");
+
       path.setAttribute("d", `M0 40 L${area} L100 40Z`);
       text.textContent = `${leg.over.toFixed(2)}s`;
     });
@@ -487,7 +577,9 @@ export const start = (root: HTMLElement) => {
   ruler.addEventListener("pointerdown", (event) => {
     begin(event, { kind: "scrub" });
     freeze(trackTime(event));
-    say("Scrubbing. Each frame is the compiled SVG paused at that moment. Press space or play to let it run.");
+    say(
+      "Scrubbing. Each frame is the compiled SVG paused at that moment. Press space or play to let it run.",
+    );
   });
   playhead.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
@@ -499,6 +591,7 @@ export const start = (root: HTMLElement) => {
   const drawCode = () => {
     const values = new Map<string, string>();
     let html = "";
+
     for (const token of sourceTokens(flight)) {
       if (token.id) {
         values.set(token.id, token.text);
@@ -508,6 +601,7 @@ export const start = (root: HTMLElement) => {
         html += highlight(token.text);
       }
     }
+
     previousValues = values;
     let legLine = 0;
     code.innerHTML = html
@@ -515,6 +609,7 @@ export const start = (root: HTMLElement) => {
       .map((line) => {
         if (!line.startsWith("  { to: ")) return line;
         const i = legLine++;
+
         return `<span class="c-leg" data-leg="${i}" style="--leg:${LEG_COLORS[i % LEG_COLORS.length]}">${line}</span>`;
       })
       .join("\n");
@@ -524,7 +619,9 @@ export const start = (root: HTMLElement) => {
   const applyHot = () => {
     legViews.forEach(({ g }, i) => g.classList.toggle("hot", hot === i));
     blockViews.forEach(({ block }, i) => block.classList.toggle("hot", hot === i));
-    code.querySelectorAll<HTMLElement>(".c-leg").forEach((line) => line.classList.toggle("hot", String(hot) === line.dataset.leg));
+    code
+      .querySelectorAll<HTMLElement>(".c-leg")
+      .forEach((line) => line.classList.toggle("hot", String(hot) === line.dataset.leg));
     drawDots();
   };
 
@@ -567,11 +664,21 @@ export const start = (root: HTMLElement) => {
     if (d.kind === "point") {
       const [x, y] = toScene(event);
       const p: Pt = [Math.round(clamp(x, -44, WIDTH + 44)), Math.round(clamp(y, 4, HEIGHT - 4))];
+
       if (d.index === 0) setFlight({ ...flight, from: p });
-      else setFlight(withLegs(flight.legs.map((leg, i) => (i === d.index - 1 ? { ...leg, to: p } : leg))));
-      const arrive = d.index === 0 ? flight.launch : starts(flight)[d.index - 1]! + flight.legs[d.index - 1]!.over;
+      else
+        setFlight(
+          withLegs(flight.legs.map((leg, i) => (i === d.index - 1 ? { ...leg, to: p } : leg))),
+        );
+
+      const arrive =
+        d.index === 0
+          ? flight.launch
+          : starts(flight)[d.index - 1]! + flight.legs[d.index - 1]!.over;
+
       freeze(arrive);
       showLabel(p, `[${p[0]}, ${p[1]}]`);
+
       return;
     }
 
@@ -584,11 +691,13 @@ export const start = (root: HTMLElement) => {
       const f = fly(flight, d.t);
       showLabel([f.x, f.y], `feel ${feel.toFixed(2)} · ${feelWords(feel)}`);
       freeze(d.t);
+
       return;
     }
 
     if (d.kind === "scrub") {
       freeze(trackTime(event));
+
       return;
     }
 
@@ -601,6 +710,7 @@ export const start = (root: HTMLElement) => {
     if (d.kind === "edge") {
       const leg = legs[d.leg]!;
       const nextLeg = legs[d.leg + 1];
+
       if (event.altKey && nextLeg) {
         const shift = clamp(dt, MIN_OVER - leg.over, nextLeg.over - MIN_OVER);
         leg.over = round(leg.over + shift, 0.01);
@@ -608,17 +718,22 @@ export const start = (root: HTMLElement) => {
       } else {
         leg.over = round(clamp(leg.over + dt, MIN_OVER, leg.over + LATEST_END - baseEnd), 0.01);
       }
+
       setFlight({ ...base, legs });
       freeze(starts(flight)[d.leg]! + flight.legs[d.leg]!.over);
+
       return;
     }
 
     let launch = base.launch;
-    if (d.leg === 0) launch = round(clamp(base.launch + dt, 0, base.launch + LATEST_END - baseEnd), 0.01);
+
+    if (d.leg === 0)
+      launch = round(clamp(base.launch + dt, 0, base.launch + LATEST_END - baseEnd), 0.01);
     else {
       const prev = legs[d.leg - 1]!;
       prev.over = round(clamp(prev.over + dt, MIN_OVER, prev.over + LATEST_END - baseEnd), 0.01);
     }
+
     setFlight({ ...base, launch, legs });
     freeze(starts(flight)[d.leg]!);
   };
@@ -628,10 +743,12 @@ export const start = (root: HTMLElement) => {
     drag = undefined;
     delete root.dataset.dragging;
     window.removeEventListener("pointermove", move);
+
     if (label) label.textContent = "";
     hot = undefined;
     render();
     say();
+
     // A plain click on the trail, or a scrub, leaves time paused there; an edit plays the new flight from the top.
     if (d?.kind === "scrub" || (d?.kind === "trail" && !d.moved)) return;
     resume();
@@ -656,6 +773,7 @@ export const start = (root: HTMLElement) => {
       nowDot.setAttribute("cy", f.y.toFixed(1));
       nowDot.classList.toggle("off", !inFlight);
     }
+
     requestAnimationFrame(tick);
   };
 

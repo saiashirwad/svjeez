@@ -137,17 +137,30 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
   await page.waitForSelector(".pg-error:not([hidden])");
   const head = (await page.textContent(".pg-error-head"))!;
   console.log(`runtime error: ${head}`);
-  assert(/stopped the build at line 27/.test(head), "a runtime error points at the line that threw");
   assert(
-    /Try this\. Use \.set\(\) for an instant change/.test((await page.textContent(".pg-error-fix"))!),
+    /stopped the build at line 27/.test(head),
+    "a runtime error points at the line that threw",
+  );
+  assert(
+    /Try this\. Use \.set\(\) for an instant change/.test(
+      (await page.textContent(".pg-error-fix"))!,
+    ),
     "the skill's fix shows under the message",
   );
-  assert(/\.to\(\{ opacity: 1, y: 0 \}, 0, ease\.pop\)/.test((await page.textContent(".pg-error-line"))!), "the offending line is quoted");
+  assert(
+    /\.to\(\{ opacity: 1, y: 0 \}, 0, ease\.pop\)/.test(
+      (await page.textContent(".pg-error-line"))!,
+    ),
+    "the offending line is quoted",
+  );
 
-  if (shots) await page.locator(".pg").screenshot({ path: `${shots}/runtime-error-1440-light.png` });
+  if (shots)
+    await page.locator(".pg").screenshot({ path: `${shots}/runtime-error-1440-light.png` });
   await page.locator(".pg-error-go").click();
   assert(
-    await page.evaluate(() => document.querySelector(".cm-activeLine")?.textContent?.includes("ease.pop") ?? false),
+    await page.evaluate(
+      () => document.querySelector(".cm-activeLine")?.textContent?.includes("ease.pop") ?? false,
+    ),
     "the line button puts the cursor on that line",
   );
   await edit("y: 0 }, 0, ease.pop", "y: 0 }, 0.5, ease.pop");

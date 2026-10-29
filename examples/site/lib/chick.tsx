@@ -43,10 +43,12 @@ export const chick = ({ blinks = [], body, look, bulb, glow }: ChickMotions = {}
   const eye = (cx: number) => {
     const open = ellipse(cx, 110, 7, 9);
     const shut = ellipse(cx, 112, 7.5, 1.4);
+
     const d = blinks.reduce(
       (m, at) => m.at(at).to({ d: shut }, 0.07, ease.in).wait(0.05).to({ d: open }, 0.12),
       motion({ d: open }),
     );
+
     const glint = blinks.reduce(
       (m, at) => m.at(at).to({ opacity: 0 }, 0.04).wait(0.12).to({ opacity: 1 }, 0.08),
       motion({ opacity: 1 }),

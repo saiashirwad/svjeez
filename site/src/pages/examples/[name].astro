@@ -44,9 +44,12 @@ const { light, dark } = scene.posters!;
 
   // The arrow keys step through the examples, like the buttons under the scene.
   const [prev, next] = document.querySelectorAll<HTMLAnchorElement>(".step a");
+
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.metaKey || event.ctrlKey || event.altKey || event.target instanceof HTMLInputElement) return;
+
     if (event.key === "ArrowLeft") prev!.click();
+
     if (event.key === "ArrowRight") next!.click();
   });
 </script>

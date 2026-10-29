@@ -4,7 +4,10 @@ import { validateSvg } from "svjeez";
 import { compileScene } from "./core";
 import { FIXES } from "./fixes";
 
-const skill = readFileSync(new URL("../../../packages/svjeez/skills/svjeez/SKILL.md", import.meta.url), "utf8");
+const skill = readFileSync(
+  new URL("../../../packages/svjeez/skills/svjeez/SKILL.md", import.meta.url),
+  "utf8",
+);
 
 const dir = new URL("examples/", import.meta.url);
 
@@ -54,7 +57,9 @@ describe("playground", () => {
   });
 
   test("every runtime error in the skill's table has a fix", () => {
-    const rows = skill.slice(skill.indexOf("Runtime errors.")).split("\n## ")[0]!.match(/^\| `/gm) ?? [];
+    const rows =
+      skill.slice(skill.indexOf("Runtime errors.")).split("\n## ")[0]!.match(/^\| `/gm) ?? [];
+
     expect(FIXES).toBe(rows.length);
   });
 

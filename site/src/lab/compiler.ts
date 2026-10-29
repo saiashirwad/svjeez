@@ -11,6 +11,7 @@ export const compilerFor = <Job>(worker: Worker, message: (job: Job) => object) 
 
   const breakWith = (text: string) => {
     broken = { ok: false, error: { kind: "runtime", message: text }, ms: 0 };
+
     for (const resolve of waiting.values()) resolve(broken);
     waiting.clear();
   };
@@ -19,8 +20,11 @@ export const compilerFor = <Job>(worker: Worker, message: (job: Job) => object) 
     waiting.get(data.id)?.(data);
     waiting.delete(data.id);
   };
-  worker.onerror = (e) => breakWith(`The compiler failed to start${e.message ? `: ${e.message}` : "."}`);
-  worker.onmessageerror = () => breakWith("The compiler sent back something the page could not read.");
+
+  worker.onerror = (e) =>
+    breakWith(`The compiler failed to start${e.message ? `: ${e.message}` : "."}`);
+  worker.onmessageerror = () =>
+    breakWith("The compiler sent back something the page could not read.");
 
   return (job: Job) =>
     broken
@@ -34,7 +38,10 @@ export const compilerFor = <Job>(worker: Worker, message: (job: Job) => object) 
 
 /** Scene source in, compiled file out, on the playground's worker. */
 export const createCompiler = () =>
-  compilerFor<string>(new Worker(new URL("../playground/worker.ts", import.meta.url), { type: "module" }), (source) => ({ source }));
+  compilerFor<string>(
+    new Worker(new URL("../playground/worker.ts", import.meta.url), { type: "module" }),
+    (source) => ({ source }),
+  );
 
 /**
  * Runs jobs one at a time, and while one runs keeps only the newest of the jobs that arrive, so a drag never builds a
@@ -49,11 +56,13 @@ export const latestWins = <T>(run: (job: T) => Promise<void>) => {
     const { job } = queued;
     queued = undefined;
     busy = true;
+
     try {
       await run(job);
     } finally {
       busy = false;
     }
+
     void pump();
   };
 

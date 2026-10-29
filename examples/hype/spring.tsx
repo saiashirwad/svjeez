@@ -17,8 +17,10 @@ export const springShot = ({ at, over }: Span) => {
   const written = { at: at + 0.25, over: 0.9 };
   const run = { at: written.at + written.over + 0.2, over: over - 1.9 };
   const clamp = (t: number) => Math.min(Math.max(t - run.at, 0), run.over);
+
   const spring = (t: number) =>
     AMP * Math.exp(-2.4 * clamp(t)) * Math.cos(2 * Math.PI * 1.9 * clamp(t));
+
   const plotX = (t: number) => PLOT.x + (clamp(t) / run.over) * PLOT.w;
   const tolerance = { translate: 0.4 };
 

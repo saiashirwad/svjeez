@@ -118,8 +118,16 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
     if (problem.line && problem.line <= view.state.doc.lines) {
       const text = view.state.doc.line(problem.line).text;
       const indent = text.length - text.trimStart().length;
-      const caret = problem.column ? `\n${" ".repeat(Math.max(0, problem.column - 1 - indent))}^` : "";
-      const go = h("button", { type: "button", class: "pg-error-go" }, `Line ${problem.line}${problem.column ? `, column ${problem.column}` : ""}`);
+
+      const caret = problem.column
+        ? `\n${" ".repeat(Math.max(0, problem.column - 1 - indent))}^`
+        : "";
+
+      const go = h(
+        "button",
+        { type: "button", class: "pg-error-go" },
+        `Line ${problem.line}${problem.column ? `, column ${problem.column}` : ""}`,
+      );
 
       go.addEventListener("click", () => {
         const line = view.state.doc.line(problem.line!);
@@ -133,10 +141,14 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
 
     parts.push(h("p", { class: "pg-error-msg" }, problem.message));
 
-    if (problem.fix) parts.push(h("p", { class: "pg-error-fix" }, h("b", {}, "Try this. "), ...inline(problem.fix), "."));
+    if (problem.fix)
+      parts.push(
+        h("p", { class: "pg-error-fix" }, h("b", {}, "Try this. "), ...inline(problem.fix), "."),
+      );
 
     return parts;
   };
+
   const editorHost = h("div", { class: "pg-editor" });
 
   const show = (nextSvg: string) => {

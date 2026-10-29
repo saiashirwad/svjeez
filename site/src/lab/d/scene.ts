@@ -30,7 +30,13 @@ const outlinePath = (outline: readonly Point[]) => {
 export const fileName = "fourier.tsx";
 
 /** The scene as TSX source, the file the worker compiles. */
-export const sceneSource = ({ spectrum, n, before, freshFrom, loop }: Frame): string => `import { tex } from "@svjeez/math";
+export const sceneSource = ({
+  spectrum,
+  n,
+  before,
+  freshFrom,
+  loop,
+}: Frame): string => `import { tex } from "@svjeez/math";
 import { css, ease, el, enter, fx, motion, render, sampled } from "svjeez";
 import { morph } from "svjeez/extras";
 

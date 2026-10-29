@@ -523,9 +523,9 @@ describe("time helpers", () => {
     const risen = shot({ at: 10, over: 10 }, { enter: "rise", exit: "rise", over: 1 });
     expect([9.9, 15, 20.1].map((t) => at(risen, t).opacity)).toEqual([0, 1, 0]);
     expect([9.9, 15, 20.1].map((t) => at(risen, t).y)).toEqual([24, 0, -24]);
-    expect([9.99, 10.01, 19.99, 20.01].map((t) => at(shot({ at: 10, over: 10 }), t).opacity)).toEqual([
-      0, 1, 1, 0,
-    ]);
+    expect(
+      [9.99, 10.01, 19.99, 20.01].map((t) => at(shot({ at: 10, over: 10 }), t).opacity),
+    ).toEqual([0, 1, 1, 0]);
     expect(at(shot({ at: 0, over: 5 }, { exit: "slide" }), 5.1).x).toBeCloseTo(-80);
     expect(() => shot({ at: 1, over: 0 })).toThrow("positive length");
   });

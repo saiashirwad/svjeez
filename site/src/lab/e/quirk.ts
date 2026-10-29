@@ -15,7 +15,10 @@ export interface QuirkFit {
 const NONE: QuirkFit = { sweep: false, trimX: 0, trimY: 0, dropY: 0 };
 
 /** The word the specimen says, and the room the odd thing needs in the frame. */
-export const QUIRK: Record<Quirk, { readonly word: string; readonly fit: (g: Genome) => QuirkFit }> = {
+export const QUIRK: Record<
+  Quirk,
+  { readonly word: string; readonly fit: (g: Genome) => QuirkFit }
+> = {
   spin: { word: "wheee", fit: (g) => ({ ...NONE, sweep: g.heads === 0 }) },
   wrap: { word: "brb", fit: () => NONE },
   split: { word: "mitosis", fit: () => ({ ...NONE, trimX: 84 }) },

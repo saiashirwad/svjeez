@@ -6,6 +6,7 @@ import { COLORS, DEFAULT_FEEL, type Feel, isDay, skyAt, source } from "./feel";
 
 let feel: Feel = DEFAULT_FEEL;
 const listeners = new Set<() => void>();
+
 const update = (patch: Partial<Feel>) => {
   feel = { ...feel, ...patch };
   listeners.forEach((f) => f());
@@ -14,19 +15,25 @@ const update = (patch: Partial<Feel>) => {
 /** The scene's landing spring, the same formula the scene source runs. */
 const spring = (s: number, f: Feel = feel) => {
   const w = 2 * Math.PI * f.hz;
+
   return f.squash * Math.exp(-f.damping * w * s) * Math.cos(w * Math.sqrt(1 - f.damping ** 2) * s);
 };
 
 /** y of a cubic-bezier ease at progress x. */
 const bezierAt = ([x1, y1, x2, y2]: Feel["fall"], x: number) => {
-  const c = (a: number, b: number, u: number) => 3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
+  const c = (a: number, b: number, u: number) =>
+    3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
+
   let lo = 0;
   let hi = 1;
+
   for (let i = 0; i < 24; i++) {
     const mid = (lo + hi) / 2;
+
     if (c(x1, x2, mid) < x) lo = mid;
     else hi = mid;
   }
+
   return c(y1, y2, (lo + hi) / 2);
 };
 
@@ -56,10 +63,12 @@ const draw = async (src: string) => {
     url = next;
     img.src = next;
     save.href = next;
+
     if (old) setTimeout(() => URL.revokeObjectURL(old), 2000);
     statFile.textContent = `gummies-${String(files).padStart(3, "0")}.svg`;
     statGzip.textContent = `${kb(result.stats.gzip)} gzip`;
     statMs.textContent = `${Math.round(result.ms)} ms`;
+
     for (const el of [statFile, statGzip])
       el.animate([{ color: "var(--hot)" }, { color: "inherit" }], { duration: 500 });
     errorBox.hidden = true;
@@ -73,25 +82,32 @@ const push = latestWins(draw);
 
 const request = () => {
   const src = source(feel);
+
   if (src === lastSource) return;
   lastSource = src;
   push(src);
 };
+
 listeners.add(request);
 
 // ---------- svg helpers ----------
 
 const NS = "http://www.w3.org/2000/svg";
+
 type Attrs = Record<string, string | number>;
+
 const set = <E extends Element>(el: E, attrs: Attrs) => {
   for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+
   return el;
 };
+
 const add = <K extends keyof SVGElementTagNameMap>(parent: Element, tag: K, attrs: Attrs = {}) =>
   parent.appendChild(set(document.createElementNS(NS, tag), attrs));
 
 const localPoint = (svg: SVGSVGElement, e: PointerEvent) => {
   const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
+
   return { x: p.x, y: p.y };
 };
 
@@ -114,6 +130,7 @@ const drag = (
     svg.classList.add("held");
     handlers.start?.(from);
     const move = (m: Event) => handlers.move(localPoint(svg, m as PointerEvent), from);
+
     const up = () => {
       target.removeEventListener("pointermove", move);
       target.removeEventListener("pointerup", up);
@@ -121,6 +138,7 @@ const drag = (
       svg.classList.remove("held");
       handlers.end?.();
     };
+
     target.addEventListener("pointermove", move);
     target.addEventListener("pointerup", up);
     target.addEventListener("pointercancel", up);
@@ -130,6 +148,7 @@ const drag = (
 const keys = (svg: SVGSVGElement, map: Record<string, () => void>) =>
   svg.addEventListener("keydown", (e) => {
     const f = map[e.key];
+
     if (f) {
       e.preventDefault();
       f();
@@ -139,6 +158,7 @@ const keys = (svg: SVGSVGElement, map: Record<string, () => void>) =>
 const instrument = (name: string) => {
   const svg = document.querySelector<SVGSVGElement>(`[data-instrument="${name}"]`)!;
   const readout = document.querySelector<HTMLElement>(`[data-readout="${name}"]`)!;
+
   return { svg, readout };
 };
 
@@ -211,6 +231,7 @@ const frames: ((now: number, dt: number) => void)[] = [];
   frames.push((now) => {
     const f = feel;
     const tau = (now - plucked) / 1000;
+
     if (tau > 3.2 && held === undefined) pluck();
     const s = held ?? (tau < SPAN + 0.6 ? spring(Math.min(tau, SPAN), f) : 0);
     const cy = REST + s * PX;
@@ -224,6 +245,7 @@ const frames: ((now: number, dt: number) => void)[] = [];
     const top = 14;
     const bottom = cy - h / 2;
     const pts = [`${AX},${top}`];
+
     for (let i = 1; i < loops * 2; i++)
       pts.push(`${AX + (i % 2 ? 13 : -13)},${top + ((bottom - top) * i) / (loops * 2)}`);
     pts.push(`${AX},${bottom}`);
@@ -232,6 +254,7 @@ const frames: ((now: number, dt: number) => void)[] = [];
     let d = "";
     let env = "";
     let low = "";
+
     for (let i = 0; i <= 160; i++) {
       const t = (i / 160) * SPAN;
       d += `${i ? "L" : "M"}${tx(t).toFixed(1)} ${(MID + spring(t, f) * AMP).toFixed(1)}`;
@@ -239,8 +262,10 @@ const frames: ((now: number, dt: number) => void)[] = [];
       env += `${i ? "L" : "M"}${tx(t).toFixed(1)} ${(MID - e).toFixed(1)}`;
       low += `${i ? "L" : "M"}${tx(t).toFixed(1)} ${(MID + e).toFixed(1)}`;
     }
+
     set(trace, { d });
     set(envelope, { d: `${env}${low}` });
+
     if (held === undefined && tau < SPAN) set(pen, { cx: tx(tau), cy: MID + s * AMP, opacity: 1 });
     else set(pen, { opacity: 0 });
 
@@ -269,7 +294,8 @@ const frames: ((now: number, dt: number) => void)[] = [];
   add(svg, "rect", { x: X0, y: Y0, width: S, height: S, class: "pad" });
   add(svg, "text", { x: X0, y: Y0 - 8, class: "tiny" }).textContent = "apex";
   add(svg, "text", { x: X0, y: Y0 + S + 16, class: "tiny" }).textContent = "ground";
-  add(svg, "text", { x: X0 + S, y: Y0 + S + 16, class: "tiny", "text-anchor": "end" }).textContent = "time →";
+  add(svg, "text", { x: X0 + S, y: Y0 + S + 16, class: "tiny", "text-anchor": "end" }).textContent =
+    "time →";
   const arms = add(svg, "path", { class: "arm" });
   const strobe = add(svg, "g");
   const curve = add(svg, "path", { class: "trace" });
@@ -280,7 +306,10 @@ const frames: ((now: number, dt: number) => void)[] = [];
   const h1 = add(svg, "circle", { r: 9, class: "knob" });
   const h2 = add(svg, "circle", { r: 9, class: "knob" });
   const dots = Array.from({ length: 11 }, () => add(strobe, "circle", { r: 2.2, class: "strobe" }));
-  const laneDots = Array.from({ length: 11 }, () => add(laneStrobe, "line", { class: "strobe-line" }));
+
+  const laneDots = Array.from({ length: 11 }, () =>
+    add(laneStrobe, "line", { class: "strobe-line" }),
+  );
 
   const handle = (el: Element, i: 0 | 1) =>
     drag(svg, el, {
@@ -291,13 +320,16 @@ const frames: ((now: number, dt: number) => void)[] = [];
         update({ fall: next });
       },
     });
+
   handle(h1, 0);
   handle(h2, 1);
+
   const nudge = (i: number, d: number) => {
     const next = [...feel.fall] as [number, number, number, number];
     next[i] = Number(clamp(next[i]! + d, i % 2 ? -0.35 : 0, i % 2 ? 1.35 : 1).toFixed(2));
     update({ fall: next });
   };
+
   keys(svg, {
     ArrowLeft: () => nudge(0, -0.02),
     ArrowRight: () => nudge(0, 0.02),
@@ -307,8 +339,12 @@ const frames: ((now: number, dt: number) => void)[] = [];
 
   frames.push((now) => {
     const [x1, y1, x2, y2] = feel.fall;
-    set(curve, { d: `M${px(0)} ${py(0)}C${px(x1)} ${py(y1)} ${px(x2)} ${py(y2)} ${px(1)} ${py(1)}` });
-    set(arms, { d: `M${px(0)} ${py(0)}L${px(x1)} ${py(y1)}M${px(1)} ${py(1)}L${px(x2)} ${py(y2)}` });
+    set(curve, {
+      d: `M${px(0)} ${py(0)}C${px(x1)} ${py(y1)} ${px(x2)} ${py(y2)} ${px(1)} ${py(1)}`,
+    });
+    set(arms, {
+      d: `M${px(0)} ${py(0)}L${px(x1)} ${py(y1)}M${px(1)} ${py(1)}L${px(x2)} ${py(y2)}`,
+    });
     set(h1, { cx: px(x1), cy: py(y1) });
     set(h2, { cx: px(x2), cy: py(y2) });
     dots.forEach((dot, k) => set(dot, { cx: px(k / 10), cy: py(bezierAt(feel.fall, k / 10)) }));
@@ -339,25 +375,57 @@ const frames: ((now: number, dt: number) => void)[] = [];
   const TOP = 22;
   const ROW = 24;
   const bx = (b: number) => X0 + b * BEAT;
+
   for (let b = 0; b <= 8; b++) {
-    add(svg, "line", { x1: bx(b), x2: bx(b), y1: TOP - 10, y2: TOP + ROW * 5, class: b % 4 ? "beat" : "bar" });
-    if (b < 8) add(svg, "text", { x: bx(b) + 3, y: TOP + ROW * 5 + 12, class: "tiny" }).textContent = String(b + 1);
+    add(svg, "line", {
+      x1: bx(b),
+      x2: bx(b),
+      y1: TOP - 10,
+      y2: TOP + ROW * 5,
+      class: b % 4 ? "beat" : "bar",
+    });
+
+    if (b < 8)
+      add(svg, "text", { x: bx(b) + 3, y: TOP + ROW * 5 + 12, class: "tiny" }).textContent = String(
+        b + 1,
+      );
   }
+
   const spine = add(svg, "line", { class: "spine" });
+
   const rows = COLORS.map((fill, i) => {
     const g = add(svg, "g");
-    const bar = add(g, "rect", { y: TOP + i * ROW + 3, height: ROW - 6, rx: (ROW - 6) / 2, fill, opacity: 0.28 });
+
+    const bar = add(g, "rect", {
+      y: TOP + i * ROW + 3,
+      height: ROW - 6,
+      rx: (ROW - 6) / 2,
+      fill,
+      opacity: 0.28,
+    });
+
     const dot = add(g, "circle", { r: 6.5, fill });
+
     return { bar, dot, i };
   });
+
   const head = add(svg, "line", { y1: TOP - 10, y2: TOP + ROW * 5, class: "playhead" });
-  const grip = add(svg, "rect", { x: 0, y: 0, width: 260, height: 170, fill: "transparent", class: "grab-x" });
+
+  const grip = add(svg, "rect", {
+    x: 0,
+    y: 0,
+    width: 260,
+    height: 170,
+    fill: "transparent",
+    class: "grab-x",
+  });
 
   let s0 = 0;
   drag(svg, grip, {
     start: () => (s0 = feel.stagger),
     move: (p, from) => {
       let s = clamp(s0 + (p.x - from.x) / (BEAT * 4), -0.8, 0.8);
+
       if (Math.abs(s) < 0.02) s = 0;
       update({ stagger: Number(s.toFixed(2)) });
     },
@@ -371,10 +439,13 @@ const frames: ((now: number, dt: number) => void)[] = [];
   frames.push((_, dt) => {
     beats = (beats + (dt / 1000) * (feel.bpm / 60)) % 8;
     set(head, { x1: bx(beats), x2: bx(beats) });
+
     const launches = rows.map(({ i }) => {
       const order = feel.stagger < 0 ? COLORS.length - 1 - i : i;
+
       return 0.75 + order * Math.abs(feel.stagger);
     });
+
     rows.forEach(({ bar, dot, i }) => {
       const b = launches[i]!;
       set(bar, { x: bx(b), width: 2 * BEAT });
@@ -388,7 +459,8 @@ const frames: ((now: number, dt: number) => void)[] = [];
       y2: TOP + ROW * 4.5,
     });
     const s = feel.stagger;
-    readout.textContent = s === 0 ? "all at once" : `${Math.abs(s).toFixed(2)} beat ${s < 0 ? "←" : "→"}`;
+    readout.textContent =
+      s === 0 ? "all at once" : `${Math.abs(s).toFixed(2)} beat ${s < 0 ? "←" : "→"}`;
   });
 }
 
@@ -400,11 +472,13 @@ const frames: ((now: number, dt: number) => void)[] = [];
   const rOf = (bpm: number) => 150 - ((bpm - 50) / 150) * 100;
   add(svg, "path", { d: "M26 214L154 214L118 12L62 12Z", class: "case" });
   add(svg, "path", { d: "M62 214L118 214L110 172L70 172Z", class: "case-dark" });
+
   for (const bpm of [60, 80, 100, 120, 140, 160, 180, 200]) {
     const y = PY - rOf(bpm);
     add(svg, "line", { x1: PX + 9, x2: PX + 15, y1: y, y2: y, class: "scale" });
     add(svg, "text", { x: PX + 18, y: y + 3, class: "tiny scale-text" }).textContent = `${bpm}`;
   }
+
   const arm = add(svg, "g");
   add(arm, "line", { x1: PX, y1: PY, x2: PX, y2: PY - 172, class: "rod" });
   const bob = add(arm, "path", { class: "bob grab" });
@@ -430,13 +504,22 @@ const frames: ((now: number, dt: number) => void)[] = [];
   frames.push((_, dt) => {
     const before = Math.floor(phase);
     phase += (dt / 1000) * (feel.bpm / 60);
+
     if (Math.floor(phase) !== before && !holding)
-      flash.animate([{ opacity: 1, r: 9 }, { opacity: 0, r: 4 }] as Keyframe[], { duration: 260 });
+      flash.animate(
+        [
+          { opacity: 1, r: 9 },
+          { opacity: 0, r: 4 },
+        ] as Keyframe[],
+        { duration: 260 },
+      );
     const target = holding ? 0 : 24 * Math.sin(Math.PI * phase);
     angle += (target - angle) * (holding ? 0.2 : 1);
     set(arm, { transform: `rotate(${angle.toFixed(2)} ${PX} ${PY})` });
     const y = PY - rOf(feel.bpm);
-    set(bob, { d: `M${PX - 13} ${y - 8}L${PX + 13} ${y - 8}L${PX + 9} ${y + 8}L${PX - 9} ${y + 8}Z` });
+    set(bob, {
+      d: `M${PX - 13} ${y - 8}L${PX + 13} ${y - 8}L${PX + 9} ${y + 8}L${PX - 9} ${y + 8}Z`,
+    });
     readout.textContent = `${feel.bpm} bpm`;
   });
 }
@@ -449,8 +532,13 @@ const frames: ((now: number, dt: number) => void)[] = [];
   const R = 92;
   const sky = add(svg, "rect", { width: 260, height: 160, rx: 0 });
   const stars = add(svg, "g", { class: "stars" });
+
   for (let i = 0; i < 18; i++)
-    add(stars, "circle", { cx: (i * 73) % 250 + 5, cy: (i * 37) % 100 + 8, r: i % 3 ? 0.8 : 1.3 });
+    add(stars, "circle", {
+      cx: ((i * 73) % 250) + 5,
+      cy: ((i * 37) % 100) + 8,
+      r: i % 3 ? 0.8 : 1.3,
+    });
   add(svg, "circle", { cx: CX, cy: CY, r: R, class: "orbit" });
   const sun = add(svg, "circle", { r: 13, fill: "#FFD60A", class: "grab" });
   const moon = add(svg, "circle", { r: 9, fill: "#F4F1E6", class: "grab" });
@@ -459,8 +547,10 @@ const frames: ((now: number, dt: number) => void)[] = [];
   // Sun angle: π at 6:00 (left horizon), π/2 at noon, 0 at 18:00.
   const sunAngle = () => Math.PI - ((feel.hour - 6) / 12) * Math.PI;
   const hourOf = (a: number) => (((6 + ((Math.PI - a) / Math.PI) * 12) % 24) + 24) % 24;
+
   const grab = (offset: number) => (p: { x: number; y: number }) =>
     update({ hour: Number(hourOf(Math.atan2(CY - p.y, p.x - CX) - offset).toFixed(2)) });
+
   drag(svg, sun, { move: grab(0) });
   drag(svg, moon, { move: grab(Math.PI) });
   keys(svg, {
@@ -485,11 +575,15 @@ const frames: ((now: number, dt: number) => void)[] = [];
 // ---------- go ----------
 
 let last = performance.now();
+
 const tick = (now: number) => {
   const dt = Math.min(now - last, 50);
   last = now;
+
   for (const f of frames) f(now, dt);
   requestAnimationFrame(tick);
 };
+
 requestAnimationFrame(tick);
+
 request();

@@ -14,7 +14,10 @@ const positionOf = (n: number) => Math.round((1000 * Math.log(n)) / Math.log(MOS
 
 /** Counts the picture passes through when a new shape arrives, so it grows from one circle to the chosen count. */
 const sweep = (to: number) => {
-  const steps = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 19, 24, 30, 38, 48, 60, 80, 110, 150, 200, 270, 400];
+  const steps = [
+    1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 19, 24, 30, 38, 48, 60, 80, 110, 150, 200, 270, 400,
+  ];
+
   return [...steps.filter((n) => n < to), to];
 };
 
@@ -55,8 +58,11 @@ export const start = (root: HTMLElement) => {
   (window as unknown as { __labD: Telemetry }).__labD = telemetry;
 
   const spectra = new Map(PRESETS.map((p) => [p.name, spectrum(p.points())]));
+
   for (const button of root.querySelectorAll<HTMLButtonElement>("[data-preset]"))
-    button.querySelector(".ld-thumb")!.setAttribute("d", thumbPath(spectra.get(button.dataset.preset!)!.outline));
+    button
+      .querySelector(".ld-thumb")!
+      .setAttribute("d", thumbPath(spectra.get(button.dataset.preset!)!.outline));
 
   let current: Spectrum = spectra.get("heart")!;
   let n = 24;
@@ -73,6 +79,7 @@ export const start = (root: HTMLElement) => {
   const frameFor = (next: Shown): Frame => {
     const before = shown ?? { spectrum: next.spectrum, n: 0 };
     const same = before.spectrum === next.spectrum;
+
     return {
       spectrum: next.spectrum,
       n: next.n,
@@ -91,9 +98,11 @@ export const start = (root: HTMLElement) => {
       probe.onload = probe.onerror = () => {
         const old = url;
         img.src = url = next;
+
         if (old) URL.revokeObjectURL(old);
         resolve();
       };
+
       probe.src = next;
     });
 
@@ -101,8 +110,11 @@ export const start = (root: HTMLElement) => {
     if (busy) return;
     const fromPlan = plan.length > 0;
     const next = fromPlan ? { spectrum: current, n: plan.shift()! } : wanted;
+
     if (!fromPlan) wanted = undefined;
+
     if (!next) return;
+
     if (shown && shown.spectrum === next.spectrum && shown.n === next.n) return void pump();
     busy = true;
     const begin = performance.now();
@@ -111,25 +123,35 @@ export const start = (root: HTMLElement) => {
     if (result.ok) {
       await paint(result.svg);
       const wall = performance.now() - begin;
-      telemetry.compiles.push({ n: next.n, ms: result.ms, wall, gzip: result.stats.gzip, bytes: result.stats.bytes });
+      telemetry.compiles.push({
+        n: next.n,
+        ms: result.ms,
+        wall,
+        gzip: result.stats.gzip,
+        bytes: result.stats.bytes,
+      });
       telemetry.shown++;
       shown = next;
       error.hidden = true;
       gzip.textContent = kb(result.stats.gzip);
       ms.textContent = `${Math.round(result.ms)} ms`;
+
       if (save.href) URL.revokeObjectURL(save.href);
       save.href = svgUrl(result.svg);
+
       if (fromPlan) setCount(next.n);
     } else {
       error.hidden = false;
       error.textContent = result.error.message;
     }
+
     busy = false;
     void pump();
   };
 
   const setCount = (value: number, moveSlider = true) => {
     count.value = String(value);
+
     if (moveSlider) slider.value = String(positionOf(value));
     root.style.setProperty("--fill", `${(positionOf(value) / 10).toFixed(1)}%`);
   };
@@ -167,14 +189,18 @@ export const start = (root: HTMLElement) => {
 
   // Drawing: anywhere on the picture, at any time.
   let stroke: Point[] = [];
+
   const toScene = (e: PointerEvent): Point => {
     const box = ink.getBoundingClientRect();
+
     return [((e.clientX - box.left) / box.width) * 960, ((e.clientY - box.top) / box.height) * 540];
   };
+
   const showStroke = (closed: boolean) =>
     inkPath.setAttribute(
       "d",
-      stroke.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("") + (closed ? "Z" : ""),
+      stroke.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("") +
+        (closed ? "Z" : ""),
     );
 
   ink.addEventListener("pointerdown", (e) => {
@@ -186,17 +212,26 @@ export const start = (root: HTMLElement) => {
   });
   ink.addEventListener("pointermove", (e) => {
     if (!root.hasAttribute("data-inking")) return;
+
     for (const ev of e.getCoalescedEvents?.() ?? [e]) stroke.push(toScene(ev));
     showStroke(false);
   });
+
   const finish = () => {
     if (!root.hasAttribute("data-inking")) return;
     root.removeAttribute("data-inking");
-    const length = stroke.reduce((s, p, i) => (i ? s + Math.hypot(p[0] - stroke[i - 1]![0], p[1] - stroke[i - 1]![1]) : 0), 0);
+
+    const length = stroke.reduce(
+      (s, p, i) => (i ? s + Math.hypot(p[0] - stroke[i - 1]![0], p[1] - stroke[i - 1]![1]) : 0),
+      0,
+    );
+
     if (stroke.length < 8 || length < 60) {
       inkPath.removeAttribute("d");
+
       return;
     }
+
     showStroke(true);
     canvas.dataset.landing = "";
     setTimeout(() => {
@@ -210,6 +245,7 @@ export const start = (root: HTMLElement) => {
     root.removeAttribute("data-drawing");
     useShape(doodle);
   };
+
   ink.addEventListener("pointerup", finish);
   ink.addEventListener("pointercancel", finish);
 

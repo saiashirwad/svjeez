@@ -166,7 +166,12 @@ const outcome = async (make: () => Promise<string>): Promise<Compiled> => {
       error:
         error.name === "SyntaxError" || /\(\d+:\d+\)$/.test(error.message)
           ? parseSyntax(error)
-          : { kind: "runtime", message: error.message, ...placeOf(error), fix: fixFor(error.message) },
+          : {
+              kind: "runtime",
+              message: error.message,
+              ...placeOf(error),
+              fix: fixFor(error.message),
+            },
       ms: performance.now() - start,
     };
   }
@@ -175,4 +180,5 @@ const outcome = async (make: () => Promise<string>): Promise<Compiled> => {
 export const compileScene = (source: string): Promise<Compiled> => outcome(() => run(source));
 
 /** For a page that ships its scene as code instead of source text: calls `build` and measures what it returns. */
-export const compileBuild = (build: () => string): Promise<Compiled> => outcome(async () => build());
+export const compileBuild = (build: () => string): Promise<Compiled> =>
+  outcome(async () => build());

@@ -23,5 +23,10 @@ const file = (scene: ReturnType<typeof getScene>) => ({ ...facts(scene), alt: sc
 
 export const variants: readonly HeroVariant[] = [
   { key: first!.key, knobs: { ...first!.knobs }, wide: file(hero.wide), tall: file(hero.tall) },
-  ...rest.map((v) => ({ key: v.key, knobs: { ...v.knobs }, wide: file(getScene(v.wide)), tall: file(getScene(v.tall)) })),
+  ...rest.map((v) => ({
+    key: v.key,
+    knobs: { ...v.knobs },
+    wide: file(getScene(v.wide)),
+    tall: file(getScene(v.tall)),
+  })),
 ];

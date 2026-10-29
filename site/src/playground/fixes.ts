@@ -13,7 +13,12 @@ const table = skill
     const row = ROW.exec(line.trim());
 
     return row
-      ? [{ pattern: new RegExp(row[2]!.trim().split("…").map(escape).join("[\\s\\S]*?")), fix: row[3]!.trim() }]
+      ? [
+          {
+            pattern: new RegExp(row[2]!.trim().split("…").map(escape).join("[\\s\\S]*?")),
+            fix: row[3]!.trim(),
+          },
+        ]
       : [];
   });
 

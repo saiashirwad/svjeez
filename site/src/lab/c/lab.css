@@ -47,7 +47,11 @@
   aspect-ratio: 736 / 316;
   border-radius: var(--radius);
   background:
-    repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in oklch, var(--ink) 5%, transparent) 6px 7px),
+    repeating-linear-gradient(
+      135deg,
+      transparent 0 6px,
+      color-mix(in oklch, var(--ink) 5%, transparent) 6px 7px
+    ),
     var(--sunken);
   box-shadow: inset 0 0 0 1px var(--ring);
   touch-action: none;
@@ -339,7 +343,11 @@
 }
 .lc-wait {
   --leg: var(--muted);
-  background: repeating-linear-gradient(135deg, transparent 0 5px, color-mix(in oklch, var(--ink) 7%, transparent) 5px 6px);
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 5px,
+    color-mix(in oklch, var(--ink) 7%, transparent) 5px 6px
+  );
   box-shadow: none;
   cursor: default;
 }

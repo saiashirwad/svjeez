@@ -20,4 +20,10 @@ export const PALETTES: Record<Fur, Palette> = {
   void: { base: "#1F1B24", dark: "#3B3444", light: "#3B3444", eye: "#F6EB5E" },
   cosmic: { base: "#2E2368", dark: "#5B45BA", light: "#F6E27A", eye: "#FF8FD0" },
 };
-export const BREAD: Palette = { base: "#D9A15A", dark: "#A8692E", light: "#F6DDB0", eye: "#3B2A1E" };
+
+export const BREAD: Palette = {
+  base: "#D9A15A",
+  dark: "#A8692E",
+  light: "#F6DDB0",
+  eye: "#3B2A1E",
+};

@@ -1,5 +1,15 @@
 import { expect, test } from "bun:test";
-import { breed, FIRST, mutate, numberSpec, parseGenome, random, specimenNo, withChoice, withGene } from "./genome";
+import {
+  breed,
+  FIRST,
+  mutate,
+  numberSpec,
+  parseGenome,
+  random,
+  specimenNo,
+  withChoice,
+  withGene,
+} from "./genome";
 
 test("a saved genome reads back as the same specimen", () => {
   const g = random();
@@ -16,7 +26,19 @@ test("saved numbers are clamped and missing genes take the first specimen's", ()
 });
 
 test("anything else in storage is dropped", () => {
-  for (const bad of [null, 5, "s", [], { seed: "x" }, { length: "3" }, { plan: "zzz" }, { oid: 4 }, { seed: -1 }, { seed: 1.5 }, { girth: NaN }])
+  for (const bad of [
+    null,
+    5,
+    "s",
+    [],
+    { seed: "x" },
+    { length: "3" },
+    { plan: "zzz" },
+    { oid: 4 },
+    { seed: -1 },
+    { seed: 1.5 },
+    { girth: NaN },
+  ])
     expect(parseGenome(bad)).toBeUndefined();
 });
 
@@ -31,5 +53,6 @@ test("mutation, breeding and rerolls stay inside every range", () => {
     const g = i % 3 === 0 ? random() : i % 3 === 1 ? mutate(FIRST).genome : breed(FIRST, random());
     expect(parseGenome(g)).toEqual(g);
   }
+
   expect(withGene(FIRST, "length", 99).length).toBe(12);
 });

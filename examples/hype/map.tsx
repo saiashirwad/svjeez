@@ -47,6 +47,7 @@ const LINKS: readonly [number, number][] = [
 ];
 
 const routes = LINKS.map(([a, b]) => arc(map, CITIES[a]!, CITIES[b]!, { height: 36, steps: 24 }));
+
 const line = (points: readonly { x: number; y: number }[]) =>
   points.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("");
 

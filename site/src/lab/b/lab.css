@@ -92,7 +92,9 @@
   aspect-ratio: 16 / 9;
   border-radius: var(--radius);
   background: var(--sunken);
-  box-shadow: 0 0 0 1px var(--ring), 0 12px 32px -16px var(--shadow);
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 12px 32px -16px var(--shadow);
 }
 
 .lb-stage figcaption {

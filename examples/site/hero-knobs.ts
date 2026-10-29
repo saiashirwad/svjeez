@@ -6,6 +6,7 @@ import { DEFAULT, type Feel, type Knobs, type Sky, type Speed } from "./lib/day"
 // and the sky it paints follows from the same values. The site builds every combination ahead of time and swaps the image.
 
 export type { Feel, Knobs, Sky, Speed };
+
 export { DEFAULT };
 
 type Options<T> = readonly { readonly value: T; readonly label: string; readonly hint?: string }[];
@@ -18,13 +19,21 @@ export const KNOBS: {
     options: [
       { value: "earth", label: "Earth", hint: "Today's sky, from peach dawn to indigo night" },
       { value: "mars", label: "Mars", hint: "Butterscotch noon, blue sunsets, a smaller sun" },
-      { value: "sorbet", label: "Sorbet", hint: "Strawberry, mint and mango, with a cherry on top" },
+      {
+        value: "sorbet",
+        label: "Sorbet",
+        hint: "Strawberry, mint and mango, with a cherry on top",
+      },
     ],
   },
   feel: {
     label: "Feel",
     options: [
-      { value: "smooth", label: "Smooth", hint: "The default ease: quick off the mark, gentle landing" },
+      {
+        value: "smooth",
+        label: "Smooth",
+        hint: "The default ease: quick off the mark, gentle landing",
+      },
       { value: "robot", label: "Robot", hint: "ease.linear everywhere, one constant speed" },
       { value: "bouncy", label: "Bouncy", hint: "ease.pop overshoots and springs back" },
     ],

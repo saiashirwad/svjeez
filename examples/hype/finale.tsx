@@ -66,6 +66,7 @@ const installCode = code([[["blue", "❯"], " ", ["plain", INSTALL]]], {
 });
 
 const install = typewriter(installCode, { at: END_AT + 1.8, cps: 34, cursor: C.accent });
+
 const PACKAGES = [
   ["charts", chartBar],
   ["code", codeIcon],

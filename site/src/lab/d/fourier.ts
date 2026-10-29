@@ -22,7 +22,10 @@ const resample = (points: readonly Point[], count: number): Point[] => {
   const cumulative = [0];
 
   for (let i = 1; i < closed.length; i++)
-    cumulative.push(cumulative[i - 1]! + Math.hypot(closed[i]![0] - closed[i - 1]![0], closed[i]![1] - closed[i - 1]![1]));
+    cumulative.push(
+      cumulative[i - 1]! +
+        Math.hypot(closed[i]![0] - closed[i - 1]![0], closed[i]![1] - closed[i - 1]![1]),
+    );
   const total = cumulative.at(-1)!;
   let j = 1;
 
@@ -45,7 +48,9 @@ const normalize = (points: readonly Point[]): Point[] => {
   const my = points.reduce((s, [, y]) => s + y, 0) / n;
   const xs = points.map(([x]) => x);
   const ys = points.map(([, y]) => y);
-  const half = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 || 1;
+
+  const half =
+    Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 || 1;
 
   return points.map(([x, y]) => [(x - mx) / half, -(y - my) / half]);
 };

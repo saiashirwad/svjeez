@@ -18,11 +18,15 @@ const along = (d: string, count = 600, flip = false): Point[] => {
   svg.append(path);
   document.body.append(svg);
   const total = path.getTotalLength();
+
   const points = Array.from({ length: count }, (_, i): Point => {
     const p = path.getPointAtLength((total * i) / count);
+
     return [p.x, flip ? -p.y : p.y];
   });
+
   svg.remove();
+
   return points;
 };
 
@@ -50,6 +54,7 @@ export const PRESETS: readonly Preset[] = [
       Array.from({ length: 10 }, (_, i): Point => {
         const a = -Math.PI / 2 + (Math.PI * i) / 5;
         const r = i % 2 ? 0.4 : 1;
+
         return [r * Math.cos(a), r * Math.sin(a)];
       }),
   },

@@ -14,7 +14,10 @@ export const ghost = (cx: Cx, bodyD: string) =>
       strokeLinecap="round"
       opacity={0.18}
       animation={sampled(
-        (t) => ({ x: r1(14 * Math.cos((Math.PI * 2 * t) / 4)), y: r1(10 * Math.sin((Math.PI * 4 * t) / 4)) }),
+        (t) => ({
+          x: r1(14 * Math.cos((Math.PI * 2 * t) / 4)),
+          y: r1(10 * Math.sin((Math.PI * 4 * t) / 4)),
+        }),
         { duration: 4, step: 0.1, tolerance: { translate: 1 } },
       ).loop(4)}
     />
@@ -24,6 +27,7 @@ export const ghost = (cx: Cx, bodyD: string) =>
 export const drips = (cx: Cx) => {
   const { lay, pal, ink, rand } = cx;
   const { G, frames } = lay;
+
   return (
     cx.f.liquid &&
     Array.from({ length: 6 }, (_, i) => {
@@ -31,6 +35,7 @@ export const drips = (cx: Cx) => {
       const p = lay.melt(fr.p);
       const at = MELT.at + 0.8 + i * 0.55;
       const fall = Math.max(16, lay.floor - p.y + G * 0.2);
+
       return (
         <circle
           cx={r1(p.x)}
@@ -54,7 +59,16 @@ export const shadow = (cx: Cx) => {
   const { g, f, lay } = cx;
   const { G, spine } = lay;
   const width = Math.max(...spine.map((p) => p.x)) - Math.min(...spine.map((p) => p.x)) + G;
-  const stand = Math.max(0, ...lay.legs.map((l) => (Math.cos((l.angle * Math.PI) / 180) > 0.3 ? l.length * Math.cos((l.angle * Math.PI) / 180) : 0)));
+
+  const stand = Math.max(
+    0,
+    ...lay.legs.map((l) =>
+      Math.cos((l.angle * Math.PI) / 180) > 0.3
+        ? l.length * Math.cos((l.angle * Math.PI) / 180)
+        : 0,
+    ),
+  );
+
   return (
     g.plan === "line" && (
       <ellipse

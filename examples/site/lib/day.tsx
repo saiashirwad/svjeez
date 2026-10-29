@@ -10,12 +10,15 @@ import { mono, theme } from "../../style";
 // that changes a color, an ease or a duration changes the picture and the text together.
 
 type Phase = "dawn" | "noon" | "dusk" | "night";
+
 type EaseName = "linear" | "in" | "pop";
 
 /** Which world the day happens on. */
 export type Sky = "earth" | "mars" | "sorbet";
+
 /** How every step moves: today's eases, all linear, or all bouncy. */
 export type Feel = "smooth" | "robot" | "bouncy";
+
 /** How long the day takes: twice as long, as written, or half. */
 export type Speed = "snail" | "normal" | "rabbit";
 
@@ -140,6 +143,7 @@ const plan = ({ sky, feel, speed }: Knobs) => {
   });
 
   const sunX = motion({ x: -200 }).to({ x: 200 }, 2 * arc, curve(eases.sunX));
+
   const sunY = motion({ y: 60 })
     .to({ y: -170 }, arc, curve(eases.rise))
     .to({ y: 60 }, arc, curve(eases.set));

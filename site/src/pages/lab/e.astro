@@ -19,17 +19,20 @@ const plan: Record<Plan, string> = {
   spiral: "M12 12a2 2 0 1 1 2 2a4 4 0 1 1-5-5a6.5 6.5 0 1 1-6 7",
   knot: "M8 19C2 14 8 4 12 6s6 10 4 13-10 0-11-4 9-9 13-5",
 };
+
 const arrangement: Record<Arrangement, string> = {
   ends: "M3 12h18M3 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M21 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0",
   stack: "M3 18h12M17 18m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M17 11.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M17 5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0",
   orbit: "M7 12h10M12 12m-10 0a10 7 0 1 0 20 0a10 7 0 1 0-20 0M22 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M2 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0",
 };
+
 const tip: Record<Tip, string> = {
   tuft: "M8 22C12 16 4 10 12 6M12 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0",
   kitten: "M6 22C10 16 4 12 10 9M14 7m-4 0a4 3.5 0 1 0 8 0a4 3.5 0 1 0-8 0M10.5 4.5l0.5-3 2 2M17.5 4.5l-.5-3-2 2",
   fork: "M8 22C12 16 6 12 12 9M12 9l-5-6M12 9l6-5",
   eye: "M8 22C12 16 4 11 11 8M13 6m-5 0a5 3.5 0 1 0 10 0a5 3.5 0 1 0-10 0M13 6m-1 0a1 2.5 0 1 0 2 0a1 2.5 0 1 0-2 0",
 };
+
 const quirk: Record<Quirk, string> = {
   spin: "M12 4a8 8 0 1 1-7.5 5.2M4 4v5h5",
   wrap: "M2 12h20M18 8l4 4-4 4M2 6v12M22 6v12",
@@ -38,10 +41,14 @@ const quirk: Record<Quirk, string> = {
   float: "M12 20V6M8 10l4-4 4 4M7 22h10",
   none: "M6 12h12",
 };
+
 const swatch = (fur: Fur) => {
   const { base, dark, light } = PALETTES[fur];
+
   if (fur === "calico") return `conic-gradient(${base} 0 50%, ${light} 0 75%, ${dark} 0)`;
+
   if (fur === "cosmic") return `radial-gradient(circle at 30% 30%, ${light} 0 8%, ${base} 9%)`;
+
   return base;
 };
 

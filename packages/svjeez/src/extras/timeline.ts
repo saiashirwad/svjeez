@@ -100,9 +100,7 @@ export const shot = (
 
 /** The leaving side of a move: what rose in from below lifts away above, what grew in keeps growing. */
 const mirror = (values: Values<"x" | "y" | "scale">): Values<"x" | "y" | "scale"> =>
-  Object.fromEntries(
-    Object.entries(values).map(([c, v]) => [c, c === "scale" ? 2 - v : -v]),
-  );
+  Object.fromEntries(Object.entries(values).map(([c, v]) => [c, c === "scale" ? 2 - v : -v]));
 
 /** When each of several things happens: a start, from which they follow `step` apart, or one time each. */
 export type Beats = Seconds | readonly Seconds[];

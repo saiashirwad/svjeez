@@ -25,12 +25,21 @@ export const kb = (bytes: number) => `${(bytes / 1024).toFixed(bytes < 10240 ? 1
 const attr = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
-export const facts = (scene: { src: string; width: number; height: number; gzip: number; svg: string }): FileFacts => ({
+export const facts = (scene: {
+  src: string;
+  width: number;
+  height: number;
+  gzip: number;
+  svg: string;
+}): FileFacts => ({
   src: scene.src,
   width: scene.width,
   height: scene.height,
   gzip: scene.gzip,
-  script: [...scene.svg.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].reduce((sum, m) => sum + m[1]!.length, 0),
+  script: [...scene.svg.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].reduce(
+    (sum, m) => sum + m[1]!.length,
+    0,
+  ),
 });
 
 export const proof = (file: FileFacts, name: string, alt: string): SceneFile => ({

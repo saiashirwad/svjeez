@@ -106,7 +106,11 @@ const warm = () => {
   // field is optional.
   if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
 
-  new Set([...scenes].flatMap((img) => [img.dataset.live!, posterOf(img)].filter((url) => url !== undefined))).forEach((url) =>
+  new Set(
+    [...scenes].flatMap((img) =>
+      [img.dataset.live!, posterOf(img)].filter((url) => url !== undefined),
+    ),
+  ).forEach((url) =>
     fetch(url, { priority: "low" })
       .then((response) => response.arrayBuffer())
       .catch(() => {}),

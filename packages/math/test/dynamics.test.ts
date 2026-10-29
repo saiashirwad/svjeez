@@ -45,17 +45,24 @@ describe("epicycles", () => {
 
   test("the pen rides the trace it draws", async () => {
     const e = epicycles(square, { at: 0, over: 4, terms: 20 });
-    const trace = [...e.d.matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)].map((m): [number, number] => [+m[1]!, +m[2]!]);
+
+    const trace = [...e.d.matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)].map((m): [number, number] => [
+      +m[1]!,
+      +m[2]!,
+    ]);
+
     const scene = await openScene(svg(e.node), { colorScheme: "light" });
 
     try {
       for (const u of [0.2, 0.45, 0.7]) {
         await scene.capture(4 * u);
+
         const pen = await scene.evaluate(() => {
           const box = document.querySelector('circle[r="4"]')!.getBoundingClientRect();
 
           return [box.x + box.width / 2, box.y + box.height / 2];
         }, null);
+
         const [x, y] = trace[Math.round(u * (trace.length - 1))]!;
         expect(Math.hypot(pen[0]! - x, pen[1]! - y)).toBeLessThan(3);
       }

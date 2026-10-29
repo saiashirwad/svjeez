@@ -36,6 +36,7 @@ export const form = (g: Genome): Form => {
   const snout = Math.max(dog, horse);
   const rawHorse = g.oid === "horse" ? g.oidness : 0;
   const rawLoaf = g.oid === "loaf" ? g.oidness : 0;
+
   return {
     dog,
     horse,

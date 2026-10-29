@@ -50,7 +50,11 @@ export const skyAt = (hour: number): string => {
   const [x, y] = [hex(ca), hex(cb)];
 
   return `#${x
-    .map((v, k) => Math.round(v + (y[k]! - v) * p).toString(16).padStart(2, "0"))
+    .map((v, k) =>
+      Math.round(v + (y[k]! - v) * p)
+        .toString(16)
+        .padStart(2, "0"),
+    )
     .join("")
     .toUpperCase()}`;
 };
@@ -167,4 +171,7 @@ export default function build(): string {
   ];
 };
 
-export const source = (f: Feel) => parts(f).map((p) => (typeof p === "string" ? p : p.text)).join("");
+export const source = (f: Feel) =>
+  parts(f)
+    .map((p) => (typeof p === "string" ? p : p.text))
+    .join("");

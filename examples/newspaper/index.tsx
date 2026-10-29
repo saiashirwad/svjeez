@@ -212,11 +212,7 @@ function Headline(): SvgNode {
       y={252}
       fill={C.ink}
       animation={(_, i) =>
-        enter(
-          { at: 3.4 + i * 0.045, over: 0.45 },
-          { opacity: 0, y: -28, scale: 1.4 },
-          ease.pop,
-        )
+        enter({ at: 3.4 + i * 0.045, over: 0.45 }, { opacity: 0, y: -28, scale: 1.4 }, ease.pop)
       }
     />
   );

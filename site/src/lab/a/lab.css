@@ -637,8 +637,13 @@
     font-size: 0.62rem;
   }
 }
-.la-hud[hidden], .la-ease-pop[hidden] { display: none; }
-.la-ease-pop svg { overflow: visible; }
+.la-hud[hidden],
+.la-ease-pop[hidden] {
+  display: none;
+}
+.la-ease-pop svg {
+  overflow: visible;
+}
 
 @media (max-width: 61.99rem) {
   .la {

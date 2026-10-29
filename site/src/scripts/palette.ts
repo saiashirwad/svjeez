@@ -55,7 +55,11 @@ const source = (live: string) => {
  */
 export const paint = async (
   live: string,
-  { at = 0, still = false, always = false }: { at?: number; still?: boolean; always?: boolean } = {},
+  {
+    at = 0,
+    still = false,
+    always = false,
+  }: { at?: number; still?: boolean; always?: boolean } = {},
 ) => {
   const id = palette();
 
@@ -95,7 +99,10 @@ export const frozen = async (
   live: string,
   poster: string | undefined,
 ): Promise<Frame> => ({
-  url: (recolors(img) ? await paint(live, { still: true, always: !poster }) : undefined) ?? poster ?? live,
+  url:
+    (recolors(img) ? await paint(live, { still: true, always: !poster }) : undefined) ??
+    poster ??
+    live,
 });
 
 const turns = new WeakMap<HTMLImageElement, number>();

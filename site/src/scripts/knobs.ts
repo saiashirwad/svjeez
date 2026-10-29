@@ -9,7 +9,10 @@ const form = document.querySelector<HTMLFormElement>(".knobs")!;
 const die = form.querySelector<HTMLButtonElement>(".die")!;
 const variants: HeroVariant[] = JSON.parse(document.getElementById("hero-variants")!.textContent!);
 const cuts = ["wide", "tall"] as const;
-const imgs = new Map(cuts.map((cut) => [cut, document.querySelector<HTMLImageElement>(`[data-hero=${cut}]`)!]));
+
+const imgs = new Map(
+  cuts.map((cut) => [cut, document.querySelector<HTMLImageElement>(`[data-hero=${cut}]`)!]),
+);
 
 // Only the default variant has posters; the others hold their own still frame (see `frozen` in palette.ts).
 const posters = new Map(cuts.map((cut) => [cut, { ...imgs.get(cut)!.dataset }]));
@@ -23,6 +26,7 @@ const chosen = () => find(new FormData(form))!;
 const relabel = (img: HTMLImageElement, file: HeroVariant["wide"], name: string) => {
   const chip = img.nextElementSibling!;
   const facts = proof(file, name, file.alt);
+
   const set = (slot: string, apply: (el: HTMLElement) => void) =>
     chip.querySelectorAll<HTMLElement>(`[data-proof-${slot}]`).forEach(apply);
 
@@ -73,7 +77,8 @@ form.addEventListener("change", () => swap(chosen()));
 const visible = () => cuts.find((cut) => imgs.get(cut)!.offsetParent) ?? "wide";
 
 const warm = (event: Event) => {
-  const input = event.target instanceof Element ? event.target.closest(".key")?.querySelector("input") : null;
+  const input =
+    event.target instanceof Element ? event.target.closest(".key")?.querySelector("input") : null;
 
   if (!input || input.checked) return;
   const data = new FormData(form);
@@ -84,6 +89,7 @@ const warm = (event: Event) => {
 };
 
 form.addEventListener("pointerover", warm);
+
 form.addEventListener("focusin", warm);
 
 die.addEventListener("click", () => {
@@ -95,9 +101,11 @@ die.addEventListener("click", () => {
     form.querySelector<HTMLInputElement>(`input[name="${knob}"][value="${value}"]`)!.checked = true;
 
   if (!calm.matches)
-    die.querySelector("svg")!.animate(
-      { rotate: ["0turn", "1turn"], scale: [1, 1.2, 1] },
-      { duration: 520, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
-    );
+    die
+      .querySelector("svg")!
+      .animate(
+        { rotate: ["0turn", "1turn"], scale: [1, 1.2, 1] },
+        { duration: 520, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
+      );
   swap(next);
 });
