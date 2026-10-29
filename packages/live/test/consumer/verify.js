@@ -16,6 +16,13 @@ assert.ok(compiled.ok, compiled.ok ? "" : compiled.error.message);
 
 assert.deepEqual(compiled.scene, { width: 200, height: 120, duration: 4, title: "Dot" });
 
+const map = await compileScene(`import land from "world-atlas/land-110m.json";
+import { render } from "svjeez";
+export default () => render({ width: 10, height: 10, duration: 1, title: "Map" }, <text>{land.type}</text>);
+`);
+
+assert.match(map.ok ? map.svg : map.error.message, /Topology/);
+
 const shown = [];
 
 const editor = createEditor(

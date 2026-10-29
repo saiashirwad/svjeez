@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "@types/node": "^22",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "world-atlas": "^2.0.2"
   }
 }

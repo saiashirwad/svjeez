@@ -74,10 +74,17 @@ export type Compiled =
     } & Declared)
   | { readonly ok: false; readonly error: SourceError; readonly ms: number };
 
-/** A JSON file as a default export that sucrase's import interop keeps as is. */
-const json = async (file: Promise<{ default: unknown }>) => ({
+const onNode = globalThis.process?.versions?.node !== undefined;
+
+/**
+ * A JSON file as a default export that sucrase's import interop keeps as is. Node imports JSON only with
+ * `with { type: "json" }`, which Node 20 before 20.10 doesn't know and Vite's dev server rejects, so Node requires it.
+ */
+const json = async (name: string, load: () => Promise<{ default: unknown }>) => ({
   __esModule: true,
-  default: (await file).default,
+  default: onNode
+    ? (await import("node:module")).createRequire(import.meta.url)(name)
+    : (await load()).default,
 });
 
 // The @svjeez packages and the map data load only when a scene imports them, so the worker starts small.
@@ -91,11 +98,11 @@ const packages = new Map<string, () => Promise<object>>([
   ["@svjeez/mermaid", () => import("@svjeez/mermaid")],
   [
     "world-atlas/countries-110m.json",
-    () => json(import("world-atlas/countries-110m.json", { with: { type: "json" } })),
+    () => json("world-atlas/countries-110m.json", () => import("world-atlas/countries-110m.json")),
   ],
   [
     "world-atlas/land-110m.json",
-    () => json(import("world-atlas/land-110m.json", { with: { type: "json" } })),
+    () => json("world-atlas/land-110m.json", () => import("world-atlas/land-110m.json")),
   ],
 ]);
 

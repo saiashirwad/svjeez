@@ -27,6 +27,14 @@ describe("compileScene", () => {
     expect(result.ok && result.svg).toContain('data-source="3"');
   });
 
+  test("a scene can import world-atlas's maps", async () => {
+    const result = await compileScene(
+      `import land from "world-atlas/land-110m.json";\nimport { render } from "svjeez";\nexport default () => render({ width: 10, height: 10, duration: 1, title: "x" }, <text>{land.type}</text>);`,
+    );
+
+    expect(result.ok && result.svg).toContain("Topology");
+  });
+
   test("a syntax error reports line and column", async () => {
     const result = await compileScene("const a = 1;\nconst b = ;\nexport default () => a;");
 
