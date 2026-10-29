@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# Verification harness for svjeez. See ../SKILL.md for the recipes.
+#
+#   verify new                      make a run dir, print its exports
+#   verify doctor                   toolchain check: bun, deps, Chromium, CLI
+#   verify doctor --preview         also check the preview this run started
+#   verify cli <args...>            run the svjeez CLI from source in examples/, log the call
+#   verify preview start <scene>    start the dev preview in tmux, wait until usable
+#   verify preview stop             stop the preview this run started
+#   verify preview drive [--at s]   drive the preview page in Chromium, capture proof
+#   verify cleanup                  stop what this run started, drop scratch, keep evidence
+#
+# Every subcommand but `new` needs VERIFY_RUN (from `eval "$(verify new)"`).
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+LIB="$REPO/packages/svjeez"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+die() { echo "verify: $*" >&2; exit 1; }
+
+need_run() {
+  [[ -n "${VERIFY_RUN:-}" && -d "$VERIFY_RUN" ]] || die 'no run. Run: eval "$(.claude/skills/verify/bin/verify new)"'
+  EVIDENCE="$VERIFY_RUN/evidence"
+  SCRATCH="$VERIFY_RUN/scratch"
+  STATE="$SCRATCH/preview.env"
+}
+
+cmd_new() {
+  local tmp="${TMPDIR:-/tmp}"
+  local root="${VERIFY_ROOT:-${tmp%/}/svjeez-verify}"
+  local id
+  id="$(date +%Y%m%d-%H%M%S)-$$"
+  mkdir -p "$root/$id/evidence" "$root/$id/scratch"
+  echo "export VERIFY_RUN='$root/$id'"
+}
+
+cmd_doctor() {
+  local ok=1
+  check() { if eval "$2" >/dev/null 2>&1; then echo "ok   $1"; else echo "FAIL $1"; ok=0; fi; }
+
+  check "bun on PATH ($(bun --version 2>/dev/null))" "command -v bun"
+  check "workspace installed (packages/svjeez/node_modules/playwright-core)" "test -d '$LIB/node_modules/playwright-core'"
+  check "CLI loads from source and prints usage" "cd '$LIB' && { bun run src/cli.ts 2>&1 || true; } | grep -q 'svjeez frames'"
+  check "headless Chromium launches" "cd '$LIB' && bun -e \"const {chromium}=await import('playwright-core'); await (await chromium.launch()).close()\""
+
+  if [[ "${1:-}" == "--preview" ]]; then
+    need_run
+    [[ -f "$STATE" ]] || die "no preview recorded for this run ($STATE)"
+    # shellcheck disable=SC1090
+    source "$STATE"
+    check "tmux session $SESSION alive" "tmux has-session -t '$SESSION'"
+    check "port $PORT owned by this run's preview (pid $PID)" "lsof -nP -iTCP:$PORT -sTCP:LISTEN -t | grep -qx '$PID'"
+    check "preview built without error" "curl -sf '$URL/state' | grep -q '\"version\":[1-9]' && ! curl -sf '$URL/state' | grep -q '\"error\"'"
+  fi
+
+  [[ $ok == 1 ]] || die "doctor failed"
+  echo "doctor: healthy"
+}
+
+cmd_cli() {
+  need_run
+  local log="$EVIDENCE/cli.log" code=0
+  {
+    echo "\$ (cd examples) svjeez $*"
+    (cd "$REPO/examples" && bun run "$LIB/src/cli.ts" "$@") 2>&1 || code=$?
+    echo "exit $code"
+    exit "$code"
+  } | tee -a "$log"
+}
+
+free_port() { bun -e 'const s=Bun.serve({port:0,fetch:()=>new Response()});console.log(s.port);s.stop(true)'; }
+
+cmd_preview() {
+  need_run
+  case "${1:-}" in
+    start)
+      local scene="${2:?usage: verify preview start <scene.tsx>}"
+      [[ -f "$STATE" ]] && die "this run already has a preview; stop it first"
+      scene="$(cd "$(dirname "$scene")" && pwd)/$(basename "$scene")"
+      local port session out log
+      port="$(free_port)"
+      session="svjeez-verify-$(basename "$VERIFY_RUN")"
+      out="$SCRATCH/preview.svg"
+      log="$EVIDENCE/preview-server.log"
+      tmux new-session -d -s "$session" -c "$LIB" \
+        "PORT=$port bun run scripts/preview.ts '$scene' --out '$out' 2>&1 | tee '$log'"
+      local url="http://localhost:$port" pid=""
+      for _ in $(seq 1 100); do
+        pid="$(lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null | head -1 || true)"
+        [[ -n "$pid" ]] && curl -sf "$url/state" | grep -q '"version":[1-9]' && break
+        sleep 0.2
+      done
+      [[ -n "$pid" ]] || { tmux kill-session -t "$session" 2>/dev/null || true; die "preview never listened on $port; see $log"; }
+      printf 'SESSION=%q\nPORT=%q\nPID=%q\nURL=%q\nSCENE=%q\n' "$session" "$port" "$pid" "$url" "$scene" >"$STATE"
+      echo "preview ready at $url (session $session, pid $pid)"
+      curl -s "$url/state"; echo
+      ;;
+    stop)
+      [[ -f "$STATE" ]] || { echo "no preview to stop"; return 0; }
+      # shellcheck disable=SC1090
+      source "$STATE"
+      tmux kill-session -t "$SESSION" 2>/dev/null || true
+      for _ in $(seq 1 25); do lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t >/dev/null 2>&1 || break; sleep 0.2; done
+      rm -f "$STATE"
+      echo "stopped $SESSION"
+      ;;
+    drive)
+      shift
+      [[ -f "$STATE" ]] || die "no preview for this run; run: verify preview start <scene>"
+      # shellcheck disable=SC1090
+      source "$STATE"
+      (cd "$LIB" && bun run "$HERE/drive-preview.ts" "$URL" "$EVIDENCE" "$@")
+      ;;
+    *) die "usage: verify preview start <scene> | stop | drive [--at seconds] [--name label]" ;;
+  esac
+}
+
+cmd_cleanup() {
+  need_run
+  cmd_preview stop
+  rm -rf "$SCRATCH"
+  echo "cleaned $VERIFY_RUN; evidence kept:"
+  ls -1 "$EVIDENCE"
+}
+
+case "${1:-}" in
+  new) cmd_new ;;
+  doctor) shift; cmd_doctor "$@" ;;
+  cli) shift; cmd_cli "$@" ;;
+  preview) shift; cmd_preview "$@" ;;
+  cleanup) cmd_cleanup ;;
+  *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac
