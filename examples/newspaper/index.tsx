@@ -13,8 +13,8 @@ import {
   type SvgNode,
 } from "svjeez";
 
-const W = 720;
-const H = 960;
+const W = 1280;
+const H = 720;
 const D = 11;
 
 const blackletter = await google("UnifrakturMaguntia", { fallback: ["serif"] });
@@ -30,8 +30,8 @@ const C = {
   desk: "#2A2622",
 } as const;
 
-const PAGE = { x: 36, y: 36, w: W - 72, h: H - 72 };
-const INNER = { x: PAGE.x + 28, w: PAGE.w - 56 };
+const PAGE = { x: 40, y: 32, w: W - 80, h: H - 64 };
+const INNER = { x: PAGE.x + 32, w: PAGE.w - 64 };
 
 const centered = (face: Font, text: string, size: number) =>
   INNER.x + (INNER.w - face.measure(text, size)) / 2;
@@ -113,35 +113,37 @@ In other news, the masthead above is set in a blackletter cut that would have lo
 Continued on page A2.
 `;
 
-const COLUMN = { y: 404, gap: 20, size: 11.5, leading: 15.5 };
-const columnWidth = (INNER.w - 2 * COLUMN.gap) / 3;
+// Five columns: the story runs down the first four under the headline, and the photo stands in the fifth.
+const COLUMN = { y: 318, gap: 22, size: 13, leading: 19.5 };
+const columnWidth = (INNER.w - 4 * COLUMN.gap) / 5;
 const columnX = (i: number) => INNER.x + i * (columnWidth + COLUMN.gap);
+const STORY = { x: INNER.x, w: columnX(4) - COLUMN.gap - INNER.x };
 
-const PHOTO = { x: columnX(1), y: COLUMN.y, w: columnWidth, h: 196 };
+const PHOTO = { x: columnX(4), y: 198, w: columnWidth, h: 400 };
 
 const halftone = def.pattern(
   { width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" },
   <circle cx={2.5} cy={2.5} r={1.55} fill={C.ink} />,
 );
 
-const rows = Math.floor((PAGE.y + PAGE.h - 40 - COLUMN.y) / COLUMN.leading);
-const photoRows = Math.ceil((PHOTO.h + 52) / COLUMN.leading);
+const rows = Math.floor((PAGE.y + PAGE.h - 30 - COLUMN.y) / COLUMN.leading);
 const rest = justify(ARTICLE, columnWidth, COLUMN.size);
-const columns = [rows, rows - photoRows, rows].map((count) => rest.splice(0, count));
+const perColumn = Math.ceil(rest.length / 4);
+const columns = [0, 1, 2, 3].map(() => rest.splice(0, Math.min(rows, perColumn)));
 
 if (rest.length)
   throw new Error(`The article overruns its columns by ${rest.length} lines. Cut it.`);
 
 const SPIN = 1.8;
 const MAST = "The Svjeez Gazette";
-const MAST_SIZE = 66;
-const HEAD = ["TYPE ARRIVES", "IN EVERY SVG"];
-const HEAD_SIZE = 58;
+const MAST_SIZE = 64;
+const HEAD = "TYPE ARRIVES IN EVERY SVG";
+const HEAD_SIZE = Math.min(64, STORY.w / fat.measure(HEAD, 1));
 const DECK = "Letters draw themselves, columns justify by measure, and nothing loads from the web.";
 
 function Masthead(): SvgNode {
   const x = centered(blackletter, MAST, MAST_SIZE);
-  const y = 152;
+  const y = 128;
 
   return (
     <>
@@ -175,7 +177,7 @@ function Masthead(): SvgNode {
 }
 
 function Dateline(): SvgNode {
-  const y = 194;
+  const y = 170;
   const small = 11;
 
   const items: [string, number][] = [
@@ -202,29 +204,21 @@ function Dateline(): SvgNode {
 
 function Headline(): SvgNode {
   return (
-    <>
-      {HEAD.map((line, row) => {
-        const offset = HEAD.slice(0, row).join("").length;
-
-        return (
-          <Glyphs
-            font={fat}
-            text={line}
-            size={HEAD_SIZE}
-            x={centered(fat, line, HEAD_SIZE)}
-            y={270 + row * 62}
-            fill={C.ink}
-            animation={(_, i) =>
-              enter(
-                { at: 3.4 + (offset + i) * 0.045, over: 0.45 },
-                { opacity: 0, y: -28, scale: 1.4 },
-                ease.pop,
-              )
-            }
-          />
-        );
-      })}
-    </>
+    <Glyphs
+      font={fat}
+      text={HEAD}
+      size={HEAD_SIZE}
+      x={STORY.x + (STORY.w - fat.measure(HEAD, HEAD_SIZE)) / 2}
+      y={252}
+      fill={C.ink}
+      animation={(_, i) =>
+        enter(
+          { at: 3.4 + i * 0.045, over: 0.45 },
+          { opacity: 0, y: -28, scale: 1.4 },
+          ease.pop,
+        )
+      }
+    />
   );
 }
 
@@ -233,8 +227,8 @@ function Deck(): SvgNode {
 
   return (
     <text
-      x={centered(body, DECK, size)}
-      y={372}
+      x={STORY.x + (STORY.w - body.measure(DECK, size)) / 2}
+      y={286}
       fontFamily={body}
       fontSize={size}
       fill={C.soft}
@@ -255,7 +249,7 @@ function Columns(): SvgNode {
           <Row
             line={line}
             x={columnX(i)}
-            y={COLUMN.y + 10 + (i === 1 ? photoRows : 0) * COLUMN.leading + row * COLUMN.leading}
+            y={COLUMN.y + 10 + row * COLUMN.leading}
             fontSize={COLUMN.size}
             fill={C.ink}
             animation={enter({ at: 5 + index++ * 0.028, over: 0.25 }, { opacity: 0 })}
@@ -268,7 +262,7 @@ function Columns(): SvgNode {
 
 function Photo(): SvgNode {
   const letter = "A";
-  const size = 210;
+  const size = (PHOTO.w - 24) / fat.measure(letter, 1);
   const x = PHOTO.x + (PHOTO.w - fat.measure(letter, size)) / 2;
   const caption = "The letter A, set as outlines and filled with a halftone screen.";
 
@@ -295,7 +289,7 @@ function Photo(): SvgNode {
           text={letter}
           size={size}
           x={x}
-          y={PHOTO.y + PHOTO.h - 26}
+          y={PHOTO.y + PHOTO.h / 2 + size * 0.36}
           fill={halftone}
           alt="A halftone letter A"
         />
@@ -317,7 +311,7 @@ function Stamp(): SvgNode {
   const text = "EXTRA!";
   const size = 54;
   const width = fat.measure(text, size);
-  const [cx, cy] = [columnX(2) + columnWidth / 2, 520];
+  const [cx, cy] = [columnX(3) - COLUMN.gap / 2, 500];
 
   return (
     <g transform={`translate(${cx} ${cy}) rotate(-14)`}>
@@ -362,18 +356,24 @@ export default function build(): string {
         opacity={0.35}
       />
       <rect x={PAGE.x} y={PAGE.y} width={PAGE.w} height={PAGE.h} fill={C.paper} />
-      {rule(78, SPIN, 0.75)}
+      {rule(58, SPIN, 0.75)}
       <Masthead />
-      {rule(170, SPIN + 0.4, 2.5)}
-      {rule(176, SPIN + 0.5, 0.75)}
+      {rule(146, SPIN + 0.4, 2.5)}
+      {rule(152, SPIN + 0.5, 0.75)}
       <Dateline />
-      {rule(204, SPIN + 0.6, 0.75)}
+      {rule(180, SPIN + 0.6, 0.75)}
       <Headline />
-      {rule(388, 4.6, 0.75)}
+      {rule(302, 4.6, 0.75, STORY.x, STORY.x + STORY.w)}
       <Deck />
-      {[1, 2].map((i) => (
+      <path
+        d={`M${columnX(4) - COLUMN.gap / 2} ${PHOTO.y}V${PAGE.y + PAGE.h - 24}`}
+        stroke={C.ink}
+        strokeWidth={0.5}
+        animation={draw({ at: 4.8, over: 0.8 })}
+      />
+      {[1, 2, 3].map((i) => (
         <path
-          d={`M${columnX(i) - COLUMN.gap / 2} ${COLUMN.y + 2}V${PAGE.y + PAGE.h - 34}`}
+          d={`M${columnX(i) - COLUMN.gap / 2} ${COLUMN.y + 2}V${PAGE.y + PAGE.h - 24}`}
           stroke={C.ink}
           strokeWidth={0.5}
           animation={draw({ at: 4.9 + i * 0.1, over: 0.8 })}
@@ -391,7 +391,7 @@ export default function build(): string {
       height: H,
       duration: D,
       title: "The Svjeez Gazette",
-      desc: "A newspaper spins in and lands. Its blackletter masthead draws on letter by letter, the headline TYPE ARRIVES IN EVERY SVG drops in, three justified columns of text fade in line by line beside a halftone letter A, and a red EXTRA! stamp slams onto the page.",
+      desc: "A newspaper spins in and lands. Its blackletter masthead draws on letter by letter, the headline TYPE ARRIVES IN EVERY SVG drops in, four justified columns of text fade in line by line beside a halftone letter A, and a red EXTRA! stamp slams onto the page.",
       reducedMotion: { at: D - 0.5 },
     },
     <>

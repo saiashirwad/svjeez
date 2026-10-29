@@ -1169,6 +1169,67 @@ pre.side {
   font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.5rem);
   letter-spacing: -0.03em;
 }
+/* "you" is struck through by hand and "your agent" written in above it. */
+.page-head h1 {
+  padding-block-start: 0.5em;
+  line-height: 1.35;
+}
+.edit {
+  position: relative;
+  display: inline-block;
+}
+.edit s {
+  text-decoration: none;
+}
+.edit svg {
+  position: absolute;
+  inset: 22% -6% 18%;
+  inline-size: 112%;
+  block-size: 60%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.09em;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+}
+.edit ins {
+  position: absolute;
+  inset-block-end: 82%;
+  inset-inline-start: 0.1em;
+  font-size: 0.42em;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--accent);
+  rotate: -4deg;
+  transform-origin: 0 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .edit path {
+    animation: scratch 0.7s 0.5s var(--out) backwards;
+  }
+  .edit ins {
+    animation: scrawl 0.6s 1.1s var(--out) backwards;
+  }
+}
+@keyframes scratch {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes scrawl {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
