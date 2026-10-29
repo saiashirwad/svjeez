@@ -50,7 +50,8 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
         ))
       }
     </div>
-    <button class="theme" type="button" aria-label="Switch between light and dark" title="Light or dark">
+    <button class="theme" type="button" aria-label="Color scheme: system" title="Color scheme: system">
+      <svg class="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12.5" rx="2"></rect><path d="M8.5 20.5h7M12 16.5v4"></path></svg>
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"></path></svg>
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"></path></svg>
     </button>
@@ -63,16 +64,41 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   import { choose, palette } from "../scripts/palette";
   import { scheme, THEMECHANGE } from "../scripts/scheme";
 
-  // The toggle sets `color-scheme` on the page, and Chromium hands that to every <img> SVG on it.
-  document.querySelector(".theme")?.addEventListener("click", () => {
-    const next = scheme() === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
+  // The toggle cycles system, light and dark. It sets `color-scheme` on the page, and Chromium hands that to every
+  // <img> SVG on it; system removes the choice so the page follows the OS again.
+  const toggle = document.querySelector<HTMLButtonElement>(".theme")!;
+
+  const NEXT = new Map([
+    ["system", "light"],
+    ["light", "dark"],
+    ["dark", "system"],
+  ]);
+
+  const chosen = () => document.documentElement.dataset.theme ?? "system";
+
+  const label = () => {
+    const text = `Color scheme: ${chosen()}`;
+    toggle.ariaLabel = text;
+    toggle.title = text;
+  };
+
+  label();
+
+  toggle.addEventListener("click", () => {
+    const next = NEXT.get(chosen()) ?? "system";
+    const before = scheme();
+
+    if (next === "system") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = next;
 
     try {
-      localStorage.setItem("theme", next);
+      if (next === "system") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", next);
     } catch {}
 
-    dispatchEvent(new Event(THEMECHANGE));
+    label();
+
+    if (scheme() !== before) dispatchEvent(new Event(THEMECHANGE));
   });
 
   // A menu of radio items: arrows move between them, Enter or a click picks one, Escape and Tab close it.

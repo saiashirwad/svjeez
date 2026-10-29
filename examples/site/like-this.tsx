@@ -1,13 +1,13 @@
 import { draw, ease, render, strokeFont } from "svjeez";
 import { css, theme } from "../style";
 
-// A note beside the hero: "like this!" is handwritten, then an arrow swoops down to the demo below it.
+// A note beside the hero: "like this!" is hand-lettered, then an arrow swoops down to the demo below it.
 const W = 340;
 const H = 190;
-const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
+const hand = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
 const INK = theme.base0B;
 
-const words = hand.path("like this!", { size: 54, x: 118, y: 62 }).d.split(/(?=M)/);
+const words = hand.path("like this!", { size: 52, x: 128, y: 70 }).d.split(/(?=M)/);
 
 const lengthOf = (d: string) => {
   const xy = (d.match(/-?[\d.]+/g) ?? []).map(Number);
@@ -31,7 +31,7 @@ for (const d of words) {
 const arrowAt = strokes.at(-1)!.at + strokes.at(-1)!.over + 0.15;
 
 /** A loose hand-drawn swoop from under the words down and to the left, and its two barbs. */
-const SHAFT = "M150 84C112 96 74 112 62 144C56 158 56 168 58 178";
+const SHAFT = "M150 90C112 100 74 112 62 144C56 158 56 168 58 178";
 const HEAD = "M44 164L58 179L70 162";
 
 export default function build(): string {

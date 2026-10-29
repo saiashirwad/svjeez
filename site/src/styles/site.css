@@ -285,26 +285,21 @@ kbd {
   inline-size: 1.2rem;
   block-size: 1.2rem;
 }
+/* One icon at a time: a screen while the page follows the system, else the sun or the moon that was chosen. */
+.theme .sun,
 .theme .moon {
   display: none;
 }
-:root[data-theme="dark"] .theme .sun {
-  display: none;
-}
+:root[data-theme="light"] .theme .sun,
 :root[data-theme="dark"] .theme .moon {
   display: block;
+}
+:root[data-theme] .theme .system {
+  display: none;
 }
 @media (hover: hover) and (pointer: fine) {
   .theme:hover {
     color: var(--ink);
-  }
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .theme .sun {
-    display: none;
-  }
-  :root:not([data-theme]) .theme .moon {
-    display: block;
   }
 }
 
