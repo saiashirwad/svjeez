@@ -3,8 +3,9 @@
 import { frozen, PALETTECHANGE, playing, replay, show } from "./palette";
 import { calm, scheme, THEMECHANGE } from "./scheme";
 
-// A scene plays once this much of it is on screen, so a screen full of half-cut cards does not animate them all.
-const SHOWN = 0.3;
+// A scene plays once a tenth of it is on screen, so it is already building by the time a reader has scrolled it in. The
+// budget below still decides how many play at once.
+const SHOWN = 0.1;
 
 // Main-thread milliseconds per second the scenes on screen may cost together while they play, measured in headless
 // Chromium at 1440 wide. Each scene carries its own cost in data-cost.
