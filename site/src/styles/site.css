@@ -246,6 +246,7 @@ kbd {
   padding-block: 0.5rem;
 }
 .top nav .gh {
+  flex: none;
   inline-size: 1rem;
   block-size: 1rem;
 }
