@@ -13,11 +13,6 @@ const cards = [
 
 <Base title="Feel instruments · svjeez lab" description="Turn bespoke instruments and watch svjeez write a new SVG file with every turn.">
   <main class="lab-b">
-    <header class="intro">
-      <h1>Play with the feel</h1>
-      <p>Each instrument draws what it does. Every turn rewrites the scene’s source below and compiles a brand-new SVG file in your browser.</p>
-    </header>
-
     <div class="studio">
       <figure class="lb-stage">
         <img data-stage alt="Five gummies hop in a rhythm, squashing as they land" width="640" height="360" />
@@ -38,7 +33,6 @@ const cards = [
                 {c.title} <output data-readout={c.name} />
               </h2>
               <svg data-instrument={c.name} viewBox={c.box} tabindex="0" role="img" aria-label={c.hint} />
-              <p>{c.hint}</p>
             </article>
           ))
         }
