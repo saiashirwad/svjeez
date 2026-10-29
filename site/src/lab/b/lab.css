@@ -26,14 +26,13 @@
 .studio {
   display: grid;
   gap: 1rem;
-  grid-template-areas: "stage" "inst" "code";
+  grid-template-areas: "stage" "inst";
 }
 
 @media (width >= 70rem) {
   .studio {
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    grid-template-areas: "stage code" "inst code";
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-areas: "stage inst";
     align-items: start;
   }
 }
@@ -309,70 +308,15 @@ svg.held * {
   }
 }
 
-.source {
-  grid-area: code;
-  align-self: stretch;
-  min-inline-size: 0;
-  border-radius: var(--radius);
-  background: var(--sunken);
-  box-shadow: 0 0 0 1px var(--ring);
+.lb-card [data-instrument="sun"] {
   overflow: clip;
-}
-
-.source-head {
-  padding: 0.5rem 0.875rem;
-  font: 600 0.78rem var(--mono);
-  border-block-end: 1px solid var(--line);
-}
-
-.source-head .muted {
-  font-weight: 400;
-  margin-inline-start: 0.5rem;
-}
-
-.source pre {
-  margin: 0;
-  padding: 0.75rem 0.875rem 1rem;
-  overflow-x: auto;
-  font: 0.72rem/1.55 var(--mono);
-  tab-size: 2;
 }
 
 @media (width >= 70rem) {
-  .source pre {
-    max-block-size: calc(100dvh - 5rem);
-    overflow-y: auto;
+  .instruments {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-.source .c {
-  color: var(--muted);
-  font-style: italic;
-}
-
-.source .k {
-  color: light-dark(oklch(50% 0.17 290), oklch(78% 0.12 290));
-}
-
-.source .v {
-  padding: 0 0.15em;
-  border-radius: 0.25em;
-  font-weight: 700;
-  color: var(--hot);
-  background: color-mix(in oklch, var(--hot) 10%, transparent);
-}
-
-.source .v.hot {
-  animation: hot 0.9s var(--out);
-}
-
-@keyframes hot {
-  from {
-    color: var(--bg);
-    background: var(--hot);
+  [data-card="sun"] {
+    grid-column: 1 / -1;
   }
-}
-
-.lb-card [data-instrument="sun"] {
-  overflow: clip;
 }

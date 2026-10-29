@@ -1,5 +1,5 @@
 import type { Compiled } from "../../playground/core";
-import { COLORS, DEFAULT_FEEL, type Feel, isDay, parts, skyAt, source } from "./feel";
+import { COLORS, DEFAULT_FEEL, type Feel, isDay, skyAt, source } from "./feel";
 
 // ---------- state ----------
 
@@ -103,33 +103,6 @@ const request = () => {
   pump();
 };
 listeners.add(request);
-
-// ---------- code ----------
-
-const codeEl = document.querySelector<HTMLElement>("[data-code]")!;
-const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const tint = (s: string) =>
-  escape(s)
-    .replace(/(\/\*\*.*?\*\/|\/\/[^\n]*)/g, '<span class="c">$1</span>')
-    .replace(/\b(import|from|const|export|default|function|return|if)\b/g, '<span class="k">$1</span>');
-let shown = new Map<string, string>();
-const renderCode = () => {
-  const ps = parts(feel);
-  const now = new Map<string, string>();
-  codeEl.innerHTML = ps
-    .map((p) => {
-      if (typeof p === "string") return tint(p);
-      now.set(p.key, (now.get(p.key) ?? "") + p.text);
-      return `<span class="v" data-key="${p.key}">${escape(p.text)}</span>`;
-    })
-    .join("");
-  for (const span of codeEl.querySelectorAll<HTMLElement>(".v")) {
-    const key = span.dataset.key!;
-    if (shown.size && shown.get(key) !== now.get(key)) span.classList.add("hot");
-  }
-  shown = now;
-};
-listeners.add(renderCode);
 
 // ---------- svg helpers ----------
 
@@ -544,5 +517,4 @@ const tick = (now: number) => {
   requestAnimationFrame(tick);
 };
 requestAnimationFrame(tick);
-renderCode();
 request();
