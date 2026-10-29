@@ -114,7 +114,7 @@ const tokenize = (src: string): Token[] => {
 };
 
 /** JSX elements: tag name, the lines of the opening tag, the lines of the whole element. */
-interface Element {
+interface JsxElement {
   tag: string;
   nameEnd: number;
   open: [number, number];
@@ -123,9 +123,9 @@ interface Element {
 
 const lineAt = (src: string, at: number) => src.slice(0, at).split("\n").length;
 
-const findElements = (src: string): Element[] => {
-  const els: Element[] = [];
-  const stack: Element[] = [];
+const findElements = (src: string): JsxElement[] => {
+  const els: JsxElement[] = [];
+  const stack: JsxElement[] = [];
   const re = /<(\/?)([a-z][\w]*)|<(\/?)>/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(src))) {
@@ -149,17 +149,17 @@ const findElements = (src: string): Element[] => {
     const selfClose = src[j - 1] === "/";
     const a = lineAt(src, m.index);
     const b = lineAt(src, j);
-    const el: Element = { tag, nameEnd: re.lastIndex, open: [a, b], full: [a, b] };
+    const el: JsxElement = { tag, nameEnd: re.lastIndex, open: [a, b], full: [a, b] };
     els.push(el);
     if (!selfClose) stack.push(el);
   }
   return els;
 };
 
-const key = (el: Element) => `${el.open[0]}-${el.open[1]}`;
+const key = (el: JsxElement) => `${el.open[0]}-${el.open[1]}`;
 
 /** The source the worker compiles: the same code with `data-l` on every element, which `strip` takes off again. */
-const annotate = (src: string, els: Element[]) => {
+const annotate = (src: string, els: JsxElement[]) => {
   let out = src;
   for (const el of [...els].sort((a, b) => b.nameEnd - a.nameEnd))
     out = out.slice(0, el.nameEnd) + ` data-l="${key(el)}"` + out.slice(el.nameEnd);
@@ -835,7 +835,7 @@ const buildTimeline = () => {
 };
 
 /** A row's name: what the element fills with, or its tag, numbered when a map() made copies of it. */
-const rowName = (el: Element, copy: number) => {
+const rowName = (el: JsxElement, copy: number) => {
   const text = source.split("\n").slice(el.open[0] - 1, el.open[1]).join("\n");
   const name = /fill=\{(\w+)\}/.exec(text)?.[1] ?? (el.tag === "g" ? "flower" : el.tag);
   const copies = elements.length && /Array\.from/.test(source) && el.tag === "g";
@@ -843,7 +843,7 @@ const rowName = (el: Element, copy: number) => {
 };
 
 /** The source line of each `.to(` inside an element's opening tag, in order. */
-const toLines = (el: Element) => {
+const toLines = (el: JsxElement) => {
   const lines = source.split("\n");
   const out: number[] = [];
   for (let n = el.open[0]; n <= el.open[1]; n++)

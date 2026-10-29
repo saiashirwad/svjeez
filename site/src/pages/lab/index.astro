@@ -1,0 +1,35 @@
+---
+import Base from "../../layouts/Base.astro";
+
+const labs = [
+  { href: "/lab/a", name: "Code", what: "meadow.tsx" },
+  { href: "/lab/b", name: "Feel", what: "gummies.tsx" },
+  { href: "/lab/c", name: "Time", what: "flight.tsx" },
+];
+---
+
+<Base title="Lab · svjeez" description="Three prototypes for editing a scene by hand.">
+  <main class="wrap lab-index">
+    <h1>Lab</h1>
+    <ul>
+      {labs.map((lab) => <li><a href={lab.href}>{lab.name}</a> <code>{lab.what}</code></li>)}
+    </ul>
+  </main>
+</Base>
+
+<style>
+  .lab-index {
+    padding-block: 4rem;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+  }
+  code {
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+</style>
