@@ -503,12 +503,12 @@ kbd {
   }
   .big .win {
     inline-size: min(100%, 26rem);
+    margin-inline: auto;
   }
 }
-@media (min-width: 48rem) and (max-width: 55.99rem) {
+@media (min-width: 42rem) and (max-width: 55.99rem) {
   .big .win {
     inline-size: 28rem;
-    margin-inline: auto;
   }
 }
 /* The live editor needs a keyboard and room, so phones skip it. */
@@ -628,13 +628,14 @@ kbd {
   }
   .hero-demo .win {
     inline-size: min(100%, 22.5rem);
+    margin-inline: auto;
   }
 }
 /* On a tablet the tall demo stands beside the headline instead of under it, so the right half of the page isn't empty. */
-@media (min-width: 48rem) and (max-width: 63.99rem) {
+@media (min-width: 42rem) and (max-width: 63.99rem) {
   .lead {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 19rem;
+    grid-template-columns: minmax(0, 1fr) clamp(16rem, 40%, 19rem);
     column-gap: 2.5rem;
     align-items: center;
     inline-size: min(100% - 2 * var(--gutter), var(--content));
