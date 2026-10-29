@@ -83,15 +83,18 @@ const aim = [src.get("call"), src.find("total"), src.lines(1, 2), src.at(2, 8)];
 `timeline` names consecutive beats so annotations and animations share one clock.
 
 ```tsx
-import { timeline, readingTime, during, cut, visible } from "svjeez/extras";
+import { timeline, readingTime, during, cut, shot, visible } from "svjeez/extras";
 
 const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
 tl.intro; tl.change.at; tl.end; tl.duration; // spans are { at, over }
 const fade = tl.show("intro"); // fade in at the start, out by the end; tl.enter("intro") fades in and stays
 const shown = during(tl.outro); // fade a span in and out
-const shot = cut(tl.outro);     // on for the span, hard cuts, for a shot in an edit
+const hard = cut(tl.outro);     // on for the span, hard cuts, for a shot in an edit
+const moved = shot(tl.change, { enter: "rise", exit: "zoom" }); // a shot that moves in and out inside its span
 const lit = visible([tl.intro, tl.outro]); // on for each span, off between
 ```
+
+`shot(span, { enter, exit, over })` takes the moves `cut`, `fade`, `rise`, `zoom` and `slide`, each `over` seconds (default 0.45) inside the span. Put it on the `<g>` that holds the whole shot. Shots laid end to end hand over through the background.
 
 `readingTime(text)` is seconds to read: words at 3.5 per second plus a second to settle, at least 2. `pace` scales every beat but not `gap`. `duration`, `end`, `show` and `enter` are reserved scene names. A start time like `at` in `play` or `reveal` is a `Beats`: one number (items follow `step` apart) or one time per item.
 

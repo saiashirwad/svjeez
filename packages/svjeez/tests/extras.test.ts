@@ -12,6 +12,7 @@ import {
   variables,
   code,
   cut,
+  shot,
   defaultDark,
   defaultLight,
   morph,
@@ -464,7 +465,7 @@ describe("time helpers", () => {
   type Held = { opacity?: number; x?: number; y?: number };
 
   /** What the rendered keyframes hold at playback second `t` of a 100s scene: opacity, and x and y from the translate lane. */
-  const at = (track: Motion<"opacity" | "x" | "y">, t: number): Held => {
+  const at = (track: Motion<"opacity" | "x" | "y" | "scale">, t: number): Held => {
     const svg = render(
       { width: 10, height: 10, duration: 100, title: "probe" },
       el.rect({ width: 1, height: 1, animation: track }),
@@ -516,6 +517,17 @@ describe("time helpers", () => {
       0, 1, 1, 0,
     ]);
     expect([0, 0.5, 1.01].map((t) => at(cut({ at: 0, over: 1 }), t).opacity)).toEqual([1, 1, 0]);
+  });
+
+  test("a shot moves in and out inside its span, and cuts by default", () => {
+    const risen = shot({ at: 10, over: 10 }, { enter: "rise", exit: "rise", over: 1 });
+    expect([9.9, 15, 20.1].map((t) => at(risen, t).opacity)).toEqual([0, 1, 0]);
+    expect([9.9, 15, 20.1].map((t) => at(risen, t).y)).toEqual([24, 0, -24]);
+    expect([9.99, 10.01, 19.99, 20.01].map((t) => at(shot({ at: 10, over: 10 }), t).opacity)).toEqual([
+      0, 1, 1, 0,
+    ]);
+    expect(at(shot({ at: 0, over: 5 }, { exit: "slide" }), 5.1).x).toBeCloseTo(-80);
+    expect(() => shot({ at: 1, over: 0 })).toThrow("positive length");
   });
 
   test("a timeline's show fades a scene in and out, and its enter fades in and stays", () => {

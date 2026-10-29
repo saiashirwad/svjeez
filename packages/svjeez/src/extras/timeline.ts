@@ -1,4 +1,5 @@
 import { pathLength, type Point } from "../geometry";
+import type { Values } from "../channels";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 
 export type Timeline<K extends string> = { readonly [P in K]: Span } & {
@@ -38,6 +39,70 @@ export const cut = ({ at, over }: Span): Motion<"opacity"> =>
   (at > 0 ? motion({ opacity: 0 }).at(at).set({ opacity: 1 }) : motion({ opacity: 1 }))
     .at(at + over)
     .set({ opacity: 0 });
+
+/** How a shot arrives or leaves. Each move but `cut` passes through these values while transparent. No blur: a shot holds many animated elements, and a filter over them repaints every frame. */
+const MOVES = {
+  cut: {},
+  fade: {},
+  rise: { y: 24 },
+  zoom: { scale: 0.94 },
+  slide: { x: 80 },
+} as const satisfies Record<string, Values<"x" | "y" | "scale">>;
+
+export type ShotMove = keyof typeof MOVES;
+
+export interface ShotOptions {
+  /** How the shot arrives at the span's start. Default `"cut"`. */
+  readonly enter?: ShotMove;
+  /** How it leaves by the span's end: `rise` lifts away, `zoom` grows past the viewer, `slide` goes left. Default `"cut"`. */
+  readonly exit?: ShotMove;
+  /** Seconds each move takes, at most half the span. Default 0.45. */
+  readonly over?: Seconds;
+}
+
+type ShotChannel = "opacity" | "x" | "y" | "scale";
+
+/**
+ * A shot in an edit that moves in and out. Both moves happen inside the span, so shots laid end to end hand over
+ * through the background: put each one on the `<g>` that holds the shot.
+ */
+export const shot = (
+  { at, over }: Span,
+  { enter = "cut", exit = "cut", over: move = 0.45 }: ShotOptions = {},
+): Motion<ShotChannel> => {
+  if (!(at >= 0 && over > 0 && move > 0))
+    throw new Error(
+      `shot() needs a non-negative start, a positive length and a positive move, got at ${at}, over ${over} and move ${move}.`,
+    );
+  const f = Math.min(move, over / 2);
+  const from = MOVES[enter];
+  const to: Values<ShotChannel> = { opacity: 0, ...mirror(MOVES[exit]) };
+  const channels = { ...from, ...to };
+  const still = Object.fromEntries(Object.keys(channels).map((c) => [c, c === "scale" ? 1 : 0]));
+
+  const start: Values<ShotChannel> =
+    at === 0 && enter === "cut" ? { ...still, opacity: 1 } : { ...still, ...from, opacity: 0 };
+
+  // SAFETY: every key of start, still and to is a ShotChannel, from MOVES or opacity.
+  const track = motion(start as { opacity: number }) as Motion<ShotChannel>;
+
+  const shown =
+    start.opacity === 1
+      ? track
+      : enter === "cut"
+        ? track.at(at).set({ opacity: 1 })
+        : track.at(at).to({ ...still, opacity: 1 }, f, ease.out);
+
+  return exit === "cut"
+    ? shown.at(at + over).set({ opacity: 0 })
+    : shown.at(at + over - f).to(to, f, ease.in);
+};
+
+/** The leaving side of a move: what rose in from below lifts away above, what grew in keeps growing. */
+const mirror = (values: Values<"x" | "y" | "scale">): Values<"x" | "y" | "scale"> =>
+  Object.fromEntries(
+    Object.entries(values).map(([c, v]) => [c, c === "scale" ? 2 - v : -v]),
+  );
 
 /** When each of several things happens: a start, from which they follow `step` apart, or one time each. */
 export type Beats = Seconds | readonly Seconds[];
