@@ -35,6 +35,7 @@ const createCompiler = () => {
           id,
           ok: false,
           error: {
+            kind: "runtime",
             message:
               "The scene took more than 5 seconds to build, so the build was stopped. Check for a loop that never ends.",
           },
@@ -80,8 +81,17 @@ const pageScheme = (): Scheme => {
 const stat = (label: string, value: string) =>
   h("span", { class: "pg-stat" }, h("b", {}, value), ` ${label}`);
 
-const describe = ({ message, line, column }: SourceError) =>
-  line ? `Line ${line}, column ${column}. ${message}` : message;
+/** Text with `code` in backticks, as the skill writes it, turned into nodes. */
+const inline = (text: string) =>
+  text.split(/`([^`]+)`/).map((part, i) => (i % 2 ? h("code", {}, part) : part));
+
+/** One plain sentence on what went wrong, before the compiler's or the library's own words. */
+const headline = (error: SourceError) =>
+  !error.line
+    ? "The scene didn't build."
+    : error.kind === "syntax"
+      ? `TypeScript can't read line ${error.line}.`
+      : `svjeez stopped the build at line ${error.line}.`;
 
 /** Upgrades `host` into an editor beside a live preview. `initial` names the first example. */
 export const mount = (host: HTMLElement, initial: string, only?: readonly string[]) => {
@@ -98,7 +108,35 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
   const tools = h("div", { class: "pg-tools" });
   const stage = h("div", { class: "pg-stage" }, img);
   const stats = h("p", { class: "pg-stats", "aria-live": "off" });
-  const error = h("p", { class: "pg-error", role: "status", hidden: "" });
+  const error = h("div", { class: "pg-error", role: "status", hidden: "" });
+
+  // The line the error points at, a caret under its column when the error knows it, then the message and, when the
+  // scene-writing skill has one for it, the fix.
+  const explain = (problem: SourceError) => {
+    const parts: Node[] = [h("p", { class: "pg-error-head" }, h("b", {}, headline(problem)))];
+
+    if (problem.line && problem.line <= view.state.doc.lines) {
+      const text = view.state.doc.line(problem.line).text;
+      const indent = text.length - text.trimStart().length;
+      const caret = problem.column ? `\n${" ".repeat(Math.max(0, problem.column - 1 - indent))}^` : "";
+      const go = h("button", { type: "button", class: "pg-error-go" }, `Line ${problem.line}${problem.column ? `, column ${problem.column}` : ""}`);
+
+      go.addEventListener("click", () => {
+        const line = view.state.doc.line(problem.line!);
+        const at = Math.min(line.to, line.from + Math.max(0, (problem.column ?? 1) - 1));
+        view.dispatch({ selection: { anchor: at }, scrollIntoView: true });
+        view.focus();
+      });
+      parts[0]!.appendChild(go);
+      parts.push(h("pre", { class: "pg-error-line" }, text.trimStart() + caret));
+    }
+
+    parts.push(h("p", { class: "pg-error-msg" }, problem.message));
+
+    if (problem.fix) parts.push(h("p", { class: "pg-error-fix" }, h("b", {}, "Try this. "), ...inline(problem.fix), "."));
+
+    return parts;
+  };
   const editorHost = h("div", { class: "pg-editor" });
 
   const show = (nextSvg: string) => {
@@ -133,7 +171,7 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
       show(result.svg);
       showStats(result.stats, result.ms);
     } else {
-      error.textContent = describe(result.error);
+      error.replaceChildren(...explain(result.error));
       error.hidden = false;
       host.classList.add("has-error");
     }

@@ -343,17 +343,66 @@
   color: var(--pg-warn);
 }
 
+/* A failed build, said kindly: a plain sentence, the line it points at with a caret, the exact message, and the
+   scene-writing skill's fix when it has one. */
 .pg-error {
-  max-block-size: 7.5rem;
+  display: grid;
+  gap: 0.375rem;
+  max-block-size: 12rem;
   overflow: auto;
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 0.875rem 0.75rem;
   color: var(--pg-ink);
-  font: 400 0.75rem / 1.5 var(--pg-mono);
-  white-space: pre-wrap;
+  font: 400 0.75rem / 1.5 var(--sans, system-ui, sans-serif);
   overflow-wrap: anywhere;
-  background: color-mix(in oklch, var(--pg-warn) 10%, var(--pg-panel));
+  background: color-mix(in oklch, var(--pg-warn) 8%, var(--pg-panel));
   border-block-start: 1px solid color-mix(in oklch, var(--pg-warn) 35%, var(--pg-line));
   border-inline-start: 3px solid var(--pg-warn);
+}
+.pg-error p {
+  margin: 0;
+}
+.pg-error-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+}
+.pg-error-go {
+  padding: 0;
+  font: 500 0.75rem / 1.4 var(--pg-mono);
+  color: var(--pg-warn);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.pg-error-line {
+  margin: 0;
+  padding: 0.375rem 0.5rem;
+  font: 400 0.75rem / 1.45 var(--pg-mono);
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--pg-ink);
+  background: color-mix(in oklch, var(--pg-ink) 5%, transparent);
+  border-radius: 0.375rem;
+}
+.pg-error-msg {
+  font-family: var(--pg-mono);
+  color: var(--pg-muted);
+}
+.pg-error-fix {
+  padding: 0.375rem 0.5rem;
+  color: var(--pg-ink);
+  background: color-mix(in oklch, var(--pg-accent) 12%, transparent);
+  border-radius: 0.375rem;
+}
+.pg-error-fix b {
+  color: var(--pg-accent);
+}
+.pg-error code {
+  font: 500 0.95em / 1 var(--pg-mono);
 }
 .pg-error[hidden] {
   display: none;

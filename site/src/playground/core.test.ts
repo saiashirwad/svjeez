@@ -2,6 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { validateSvg } from "svjeez";
 import { compileScene } from "./core";
+import { FIXES } from "./fixes";
+
+const skill = readFileSync(new URL("../../../packages/svjeez/skills/svjeez/SKILL.md", import.meta.url), "utf8");
 
 const dir = new URL("examples/", import.meta.url);
 
@@ -39,6 +42,20 @@ describe("playground", () => {
     expect(result.ok).toBe(false);
 
     if (!result.ok) expect(result.error.message).toContain("render() needs a positive width");
+  });
+
+  test("a library error carries the scene-writing skill's fix", async () => {
+    const result = await compileScene(
+      `import { motion, render } from "svjeez";\nexport default () => render({ width: 10, height: 10, duration: 1, title: "x" }, <rect width={1} height={1} animation={motion({ x: 0 }).to({ x: 1 }, 0)} />);`,
+    );
+
+    expect(result.ok ? "" : result.error.message).toContain("to() needs a positive duration");
+    expect(result.ok ? "" : result.error.fix).toBe("Use `.set()` for an instant change");
+  });
+
+  test("every runtime error in the skill's table has a fix", () => {
+    const rows = skill.slice(skill.indexOf("Runtime errors.")).split("\n## ")[0]!.match(/^\| `/gm) ?? [];
+    expect(FIXES).toBe(rows.length);
   });
 
   test("an unknown import is named", async () => {

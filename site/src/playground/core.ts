@@ -3,6 +3,7 @@ import { transform } from "sucrase";
 import * as svjeez from "svjeez";
 import * as extras from "svjeez/extras";
 import * as jsxRuntime from "svjeez/jsx-runtime";
+import { fixFor } from "./fixes";
 
 const modules = new Map<string, object>([
   ["svjeez", svjeez],
@@ -24,9 +25,13 @@ export interface SceneStats {
 }
 
 export interface SourceError {
+  /** Whether the source failed to parse, or parsed and then threw while it built the scene. */
+  readonly kind: "syntax" | "runtime";
   readonly message: string;
   readonly line?: number;
   readonly column?: number;
+  /** The scene-writing skill's fix for this message, with `code` in backticks. */
+  readonly fix?: string;
 }
 
 export type Compiled =
@@ -88,8 +93,20 @@ const parseSyntax = (error: Error): SourceError => {
   const at = /^(.*) \((\d+):(\d+)\)$/s.exec(error.message);
 
   return at
-    ? { message: at[1]!, line: Number(at[2]), column: Number(at[3]) + 1 }
-    : { message: error.message };
+    ? { kind: "syntax", message: at[1]!, line: Number(at[2]), column: Number(at[3]) + 1 }
+    : { kind: "syntax", message: error.message };
+};
+
+// new Function puts two lines of its own above the code, and sucrase keeps the author's line numbers, so the first frame
+// of the scene's own code on the stack is two lines past the line in the editor.
+const HEADER_LINES = 2;
+
+/** Where in the author's code a runtime error was thrown, read from V8's stack, when the stack says. */
+const placeOf = (error: Error): { line?: number; column?: number } => {
+  const at = /<anonymous>:(\d+):(\d+)/.exec(error.stack ?? "");
+  const line = at ? Number(at[1]) - HEADER_LINES : 0;
+
+  return line > 0 ? { line, column: Number(at![2]) } : {};
 };
 
 const gzipSize = async (text: string): Promise<number> => {
@@ -148,7 +165,7 @@ export const compileScene = async (source: string): Promise<Compiled> => {
       error:
         error.name === "SyntaxError" || /\(\d+:\d+\)$/.test(error.message)
           ? parseSyntax(error)
-          : { message: error.message },
+          : { kind: "runtime", message: error.message, ...placeOf(error), fix: fixFor(error.message) },
       ms: performance.now() - start,
     };
   }
