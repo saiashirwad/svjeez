@@ -90,14 +90,10 @@ export const GET: APIRoute = async () => {
     <tspan x="72" y="272">Animated SVGs</tspan>
     <tspan x="72" y="346">from TypeScript.</tspan>
   </text>
-  <text font-family="${SANS}" font-size="23" fill="#8E8E96">
-    <tspan x="72" y="402">Write a scene. Compile it to one</tspan>
-    <tspan x="72" y="433">self-contained SVG.</tspan>
-    <tspan x="72" y="464">No runtime JavaScript.</tspan>
-  </text>
+  <text x="73" y="414" font-family="${SANS}" font-size="25" letter-spacing="-0.2" fill="#8E8E96">Animations for the web, with no JavaScript.</text>
 
-  <rect x="72.5" y="516.5" width="196" height="47" rx="23.5" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>
-  <text x="96" y="547" font-family="${MONO}" font-size="19" fill="#F5F5F7"><tspan fill="#6E6E78">$ </tspan>npm i svjeez</text>
+  <rect x="72.5" y="466.5" width="196" height="47" rx="23.5" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.14"/>
+  <text x="96" y="497" font-family="${MONO}" font-size="19" fill="#F5F5F7"><tspan fill="#6E6E78">$ </tspan>npm i svjeez</text>
 
 </svg>`;
 
