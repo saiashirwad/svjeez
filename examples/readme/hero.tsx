@@ -30,6 +30,8 @@ const H = 540;
 const D = 12;
 
 const display = await google("Archivo Black");
+const sansBold = await google("Inter Tight", { weight: 700 });
+const sans = await google("Inter Tight", { weight: 400 });
 const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
 
 const kw = (text: string): CodeRun => ["keyword", text];
@@ -124,12 +126,22 @@ const header = (
       draw={{ at: 0.65, over: 0.45 }}
     />
     <g animation={rise(0.35, 0.4, 8)}>
-      <text x={28 + logoW + 22} y={54} fontSize={15.5} fontWeight={700} fill={theme.base06}>
-        Animated SVGs in TSX.
-      </text>
-      <text x={28 + logoW + 22} y={76} fontSize={13.5} fill={theme.base04}>
-        One file out. Light &amp; dark ready.
-      </text>
+      <Glyphs
+        font={sansBold}
+        text="Animated SVGs in TSX."
+        size={16}
+        x={28 + logoW + 22}
+        y={54}
+        fill={theme.base06}
+      />
+      <Glyphs
+        font={sans}
+        text="One file out. Light & dark ready."
+        size={14}
+        x={28 + logoW + 22}
+        y={76}
+        fill={theme.base04}
+      />
     </g>
 
     <g animation={rise(0.4, 0.4, 8)}>
