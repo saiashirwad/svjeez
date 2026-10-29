@@ -1,6 +1,7 @@
 // Direction C: time as a material. The flight is shown all at once over the compiled picture, and every drag rewrites
 // the scene source, recompiles it in the playground's worker and shows the real SVG.
-import type { Compiled } from "../../playground/core";
+import { createCompiler } from "../compiler";
+import { clamp, svgUrl } from "../util";
 import {
   along,
   curve,
@@ -39,7 +40,6 @@ const svg = <K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string,
 };
 
 const round = (n: number, step: number) => Math.round(n / step) * step;
-const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 const fmt = (t: number) => `${t.toFixed(2)}s`;
 const bytes = (n: number) => (n < 1024 ? `${n} B` : `${(n / 1024).toFixed(2)} KB`);
 
@@ -57,24 +57,6 @@ const highlight = (text: string) =>
 
 const feelWords = (f: number) =>
   Math.abs(f) < 0.08 ? "steady" : f > 0 ? (f > 0.6 ? "darts off, floats in" : "leaves fast, lands slow") : f < -0.6 ? "creeps, then dives" : "leaves slow, lands fast";
-
-const createCompiler = () => {
-  const worker = new Worker(new URL("../../playground/worker.ts", import.meta.url), { type: "module" });
-  const waiting = new Map<number, (r: Compiled) => void>();
-  let next = 0;
-
-  worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
-    waiting.get(data.id)?.(data);
-    waiting.delete(data.id);
-  };
-
-  return (source: string) =>
-    new Promise<Compiled>((resolve) => {
-      const id = ++next;
-      waiting.set(id, resolve);
-      worker.postMessage({ id, source });
-    });
-};
 
 interface Telemetry {
   compiles: { build: number; roundtrip: number; dragging: boolean }[];
@@ -163,7 +145,7 @@ export const start = (root: HTMLElement) => {
   const showImg = () => {
     if (!latestSvg) return;
     const old = imgUrl;
-    imgUrl = URL.createObjectURL(new Blob([latestSvg], { type: "image/svg+xml" }));
+    imgUrl = svgUrl(latestSvg);
     img.src = imgUrl;
     img.addEventListener(
       "load",
@@ -203,7 +185,7 @@ export const start = (root: HTMLElement) => {
     const fitted = latestSvg.replace(/<svg\b[^>]*>/, (tag) =>
       tag.replace(/\swidth="[^"]*"/, ' width="100%"').replace(/\sheight="[^"]*"/, ' height="100%"'),
     );
-    stillUrl = URL.createObjectURL(new Blob([fitted], { type: "image/svg+xml" }));
+    stillUrl = svgUrl(fitted);
     hidden.dataset.ready = "";
     delete hidden.dataset.ready;
     hidden.onload = () => {

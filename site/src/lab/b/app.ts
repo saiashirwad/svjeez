@@ -1,4 +1,5 @@
-import type { Compiled } from "../../playground/core";
+import { createCompiler, latestWins } from "../compiler";
+import { $, clamp, svgUrl } from "../util";
 import { COLORS, DEFAULT_FEEL, type Feel, isDay, skyAt, source } from "./feel";
 
 // ---------- state ----------
@@ -9,8 +10,6 @@ const update = (patch: Partial<Feel>) => {
   feel = { ...feel, ...patch };
   listeners.forEach((f) => f());
 };
-
-const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
 /** The scene's landing spring, the same formula the scene source runs. */
 const spring = (s: number, f: Feel = feel) => {
@@ -33,45 +32,26 @@ const bezierAt = ([x1, y1, x2, y2]: Feel["fall"], x: number) => {
 
 // ---------- compiling ----------
 
-const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
-const waiting = new Map<number, (r: Compiled) => void>();
-let nextId = 0;
-worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
-  waiting.get(data.id)?.(data);
-  waiting.delete(data.id);
-};
-const compile = (src: string) =>
-  new Promise<Compiled>((resolve) => {
-    const id = ++nextId;
-    waiting.set(id, resolve);
-    worker.postMessage({ id, source: src });
-  });
+const compile = createCompiler();
 
-const img = document.querySelector<HTMLImageElement>("[data-stage]")!;
-const statFile = document.querySelector<HTMLElement>("[data-file]")!;
-const statGzip = document.querySelector<HTMLElement>("[data-gzip]")!;
-const statMs = document.querySelector<HTMLElement>("[data-ms]")!;
-const save = document.querySelector<HTMLAnchorElement>("[data-save]")!;
-const errorBox = document.querySelector<HTMLElement>("[data-error]")!;
+const img = $<HTMLImageElement>("[data-stage]");
+const statFile = $<HTMLElement>("[data-file]");
+const statGzip = $<HTMLElement>("[data-gzip]");
+const statMs = $<HTMLElement>("[data-ms]");
+const save = $<HTMLAnchorElement>("[data-save]");
+const errorBox = $<HTMLElement>("[data-error]");
 
 const kb = (n: number) => `${(n / 1024).toFixed(1)} KB`;
-let busy = false;
-let queued: string | undefined;
 let lastSource = "";
 let files = 0;
 let url = "";
 
-const pump = async () => {
-  if (busy || queued === undefined) return;
-  const src = queued;
-  queued = undefined;
-  busy = true;
+const draw = async (src: string) => {
   const result = await compile(src);
-  busy = false;
 
   if (result.ok) {
     files++;
-    const next = URL.createObjectURL(new Blob([result.svg], { type: "image/svg+xml" }));
+    const next = svgUrl(result.svg);
     const old = url;
     url = next;
     img.src = next;
@@ -87,15 +67,15 @@ const pump = async () => {
     errorBox.hidden = false;
     errorBox.textContent = result.error.message;
   }
-  pump();
 };
+
+const push = latestWins(draw);
 
 const request = () => {
   const src = source(feel);
   if (src === lastSource) return;
   lastSource = src;
-  queued = src;
-  pump();
+  push(src);
 };
 listeners.add(request);
 

@@ -1,5 +1,6 @@
 // Direction A: the scene's source is the control panel. Every edit recompiles a real svjeez SVG in the playground worker.
-import type { Compiled } from "../../playground/core";
+import { createCompiler } from "../compiler";
+import { svgUrl } from "../util";
 import initial from "./meadow.tsx.txt?raw";
 
 type Kind =
@@ -274,22 +275,7 @@ const specFor = (src: string, tok: Token): Spec => {
 
 // ----- compiler: the playground worker, latest-only
 
-type Result = Compiled & { id: number };
-const worker = new Worker(new URL("../../playground/worker.ts", import.meta.url), {
-  type: "module",
-});
-let nextId = 0;
-const waiting = new Map<number, (r: Result) => void>();
-worker.onmessage = ({ data }: MessageEvent<Result>) => {
-  waiting.get(data.id)?.(data);
-  waiting.delete(data.id);
-};
-const compileRaw = (source: string) =>
-  new Promise<Result>((resolve) => {
-    const id = ++nextId;
-    waiting.set(id, resolve);
-    worker.postMessage({ id, source });
-  });
+const compileRaw = createCompiler();
 
 // ----- DOM
 
@@ -723,9 +709,7 @@ const withTime = (svg: string, t: number, pausedFrame: boolean) => {
 const paintImg = (t: number) =>
   new Promise<void>((resolve) => {
     const previous = url;
-    url = URL.createObjectURL(
-      new Blob([withTime(lastSvg, t, paused)], { type: "image/svg+xml" }),
-    );
+    url = svgUrl(withTime(lastSvg, t, paused));
     const next = new Image();
     next.onload = () => {
       img.src = url;

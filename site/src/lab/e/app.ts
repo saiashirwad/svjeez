@@ -1,4 +1,5 @@
-import type { Compiled } from "../../playground/core";
+import { createCompiler, latestWins } from "../compiler";
+import { $, $$, svgUrl } from "../util";
 import sceneSource from "./catoid.tsx?raw";
 import { layout, type Layout, W, H } from "./catoid";
 import {
@@ -19,9 +20,6 @@ import {
 const DURATION = 8;
 const SHELF_SIZE = 18;
 const STORE = "svjeez-lab-e-shelf";
-
-const $ = <E extends Element = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<E>(sel)!;
-const $$ = <E extends Element = HTMLElement>(sel: string, root: ParentNode = document) => [...root.querySelectorAll<E>(sel)];
 
 const sourceFor = (g: Genome) => sceneSource.replace(/\/\*genome\*\/.*?\/\*end\*\//s, () => `/*genome*/ ${JSON.stringify(g)} /*end*/`);
 
@@ -51,30 +49,7 @@ const set = (next: Genome, opts: { lineage?: string; shelve?: boolean } = {}) =>
 
 // ---------- compiling ----------
 
-const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
-const waiting = new Map<number, (r: Compiled) => void>();
-let nextId = 0;
-let broken: Compiled | undefined;
-worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
-  waiting.get(data.id)?.(data);
-  waiting.delete(data.id);
-};
-/** A worker that cannot load or reply fails every compile, waiting or later, so the page shows why instead of hanging. */
-const breakWorker = (message: string) => {
-  broken = { ok: false, error: { kind: "runtime", message }, ms: 0 };
-  for (const resolve of waiting.values()) resolve(broken);
-  waiting.clear();
-};
-worker.onerror = (e) => breakWorker(`The compiler failed to start${e.message ? `: ${e.message}` : "."}`);
-worker.onmessageerror = () => breakWorker("The compiler sent back something the page could not read.");
-const compile = (src: string) =>
-  broken
-    ? Promise.resolve(broken)
-    : new Promise<Compiled>((resolve) => {
-        const id = ++nextId;
-        waiting.set(id, resolve);
-        worker.postMessage({ id, source: src });
-      });
+const compile = createCompiler();
 
 const img = $<HTMLImageElement>("[data-stage]");
 const statFile = $("[data-file]");
@@ -91,22 +66,19 @@ const still = (svg: string, t: number) =>
   atTime(svg, t)
     .replace("<style><![CDATA[", "<style><![CDATA[\n.a{animation-play-state:paused!important}")
     .replace(/<animate\b[^>]*\/>/g, "");
-const blob = (svg: string) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
 
 /** A genome to compile, and whether the shelf keeps it once it's drawn. */
 interface Job {
   readonly genome: Genome;
   readonly shelve: boolean;
 }
-let busy = false;
-let queued: Job | undefined;
 let lastKey = "";
 let shown = "";
 let saveUrl = "";
 
 const show = (svg: string) =>
   new Promise<void>((resolve) => {
-    const url = blob(atTime(svg, loopTime()));
+    const url = svgUrl(atTime(svg, loopTime()));
     const next = new Image();
     next.onload = next.onerror = () => {
       const old = shown;
@@ -118,17 +90,13 @@ const show = (svg: string) =>
     next.src = url;
   });
 
-const pump = async () => {
-  if (busy || !queued) return;
-  const { genome: g, shelve: keep } = queued;
-  queued = undefined;
-  busy = true;
+const draw = async ({ genome: g, shelve: keep }: Job) => {
   const result = await compile(sourceFor(g));
   if (result.ok) {
     await show(result.svg);
     const no = specimenNo(g);
     if (saveUrl) URL.revokeObjectURL(saveUrl);
-    saveUrl = blob(result.svg);
+    saveUrl = svgUrl(result.svg);
     save.href = saveUrl;
     save.download = `${taxon(g).split(" ").slice(0, 2).join("-").toLowerCase()}-${no}.svg`;
     statFile.textContent = `catoid-${no}.svg`;
@@ -140,16 +108,15 @@ const pump = async () => {
     errorBox.hidden = false;
     errorBox.textContent = result.error.message;
   }
-  busy = false;
-  void pump();
 };
+
+const push = latestWins(draw);
 
 const request = (g: Genome, shelve: boolean) => {
   const key = JSON.stringify(g);
   if (key === lastKey && !shelve) return;
   lastKey = key;
-  queued = { genome: g, shelve };
-  void pump();
+  push({ genome: g, shelve });
 };
 
 // Hand edits go on the shelf once they stop changing.
@@ -175,7 +142,7 @@ const shelve = (g: Genome, svg?: string) => {
   const entry = found >= 0 ? shelf.splice(found, 1)[0]! : { genome: g, no };
   if (svg) {
     if (entry.thumb) URL.revokeObjectURL(entry.thumb);
-    entry.thumb = blob(still(svg, 1.4));
+    entry.thumb = svgUrl(still(svg, 1.4));
   }
   shelf.unshift(entry);
   for (const gone of shelf.splice(SHELF_SIZE)) if (gone.thumb) URL.revokeObjectURL(gone.thumb);
@@ -224,7 +191,7 @@ const restoreShelf = async () => {
   for (const s of [...shelf]) {
     if (s.thumb) continue;
     const r = await compile(sourceFor(s.genome));
-    if (r.ok && !s.thumb && shelf.includes(s)) s.thumb = blob(still(r.svg, 1.4));
+    if (r.ok && !s.thumb && shelf.includes(s)) s.thumb = svgUrl(still(r.svg, 1.4));
   }
   paintShelf();
 };

@@ -1,5 +1,6 @@
 import { restyle } from "svjeez";
-import type { Compiled } from "../../playground/core";
+import { createCompiler } from "../compiler";
+import { svgUrl } from "../util";
 import { spectrum, type Point, type Spectrum, type Term } from "./fourier";
 import { sceneSource, type Frame } from "./scene";
 import { PRESETS } from "./shapes";
@@ -15,24 +16,6 @@ const positionOf = (n: number) => Math.round((1000 * Math.log(n)) / Math.log(MOS
 const sweep = (to: number) => {
   const steps = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 19, 24, 30, 38, 48, 60, 80, 110, 150, 200, 270, 400];
   return [...steps.filter((n) => n < to), to];
-};
-
-const createCompiler = () => {
-  const worker = new Worker(new URL("../../playground/worker.ts", import.meta.url), { type: "module" });
-  const waiting = new Map<number, (r: Compiled) => void>();
-  let next = 0;
-
-  worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
-    waiting.get(data.id)?.(data);
-    waiting.delete(data.id);
-  };
-
-  return (source: string) =>
-    new Promise<Compiled>((resolve) => {
-      const id = ++next;
-      waiting.set(id, resolve);
-      worker.postMessage({ id, source });
-    });
 };
 
 const thumbPath = (outline: readonly Point[]) =>
@@ -103,7 +86,7 @@ export const start = (root: HTMLElement) => {
   const paint = (svg: string) =>
     new Promise<void>((resolve) => {
       const at = ((performance.now() - epoch) / 1000) % LOOP;
-      const next = URL.createObjectURL(new Blob([restyle(svg, { at })], { type: "image/svg+xml" }));
+      const next = svgUrl(restyle(svg, { at }));
       const probe = new Image();
       probe.onload = probe.onerror = () => {
         const old = url;
@@ -135,7 +118,7 @@ export const start = (root: HTMLElement) => {
       gzip.textContent = kb(result.stats.gzip);
       ms.textContent = `${Math.round(result.ms)} ms`;
       if (save.href) URL.revokeObjectURL(save.href);
-      save.href = URL.createObjectURL(new Blob([result.svg], { type: "image/svg+xml" }));
+      save.href = svgUrl(result.svg);
       if (fromPlan) setCount(next.n);
     } else {
       error.hidden = false;
