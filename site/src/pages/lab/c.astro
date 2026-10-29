@@ -1,0 +1,37 @@
+---
+import Base from "../../layouts/Base.astro";
+import "../../lab/c/lab.css";
+---
+
+<Base title="Time as a material · svjeez lab" description="Drag a paper plane's flight, its timing and its easing, and watch svjeez recompile the SVG live." wide>
+  <main class="wrap wide lab-c">
+    <div class="lc-bench" data-lab-c>
+      <section class="lc-work" aria-label="The scene and its timeline">
+        <div class="lc-stage">
+          <div class="lc-frame">
+            <img class="lc-img" alt="A paper plane flies over green hills, leaving puffs behind it." decoding="async" />
+            <iframe class="lc-still" title="The scene paused at the playhead" tabindex="-1" aria-hidden="true"></iframe>
+            <iframe class="lc-still" title="The scene paused at the playhead" tabindex="-1" aria-hidden="true"></iframe>
+          </div>
+          <svg class="lc-over" viewBox="-48 -8 736 316" aria-hidden="true"></svg>
+        </div>
+        <div class="lc-transport">
+          <button class="lc-play" type="button" aria-label="Pause"><span class="lc-play-icon"></span></button>
+          <output class="lc-clock">0.00s</output>
+          <p class="lc-stats" aria-live="off"></p>
+        </div>
+        <div class="lc-timeline">
+          <div class="lc-ruler"></div>
+          <div class="lc-track"></div>
+        </div>
+        <p class="lc-hint" hidden></p>
+      </section>
+      <pre class="lc-code"><code></code></pre>
+    </div>
+  </main>
+</Base>
+
+<script>
+  import { start } from "../../lab/c/app";
+  start(document.querySelector<HTMLElement>("[data-lab-c]")!);
+</script>
