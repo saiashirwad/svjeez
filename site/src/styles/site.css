@@ -529,7 +529,7 @@ kbd {
 }
 .hero h1 {
   font-size: clamp(3.25rem, 1rem + 9.5vw, 6.5rem);
-  line-height: 0.92;
+  line-height: 1.02;
   letter-spacing: -0.055em;
   padding-block-end: 0.07em;
 }
@@ -537,7 +537,7 @@ kbd {
   text-decoration: underline;
   text-decoration-color: var(--accent);
   text-decoration-thickness: 0.07em;
-  text-underline-offset: 0.09em;
+  text-underline-offset: 0.07em;
   text-decoration-skip-ink: none;
 }
 .lede {
