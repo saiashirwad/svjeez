@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fit } from "svjeez/params";
-  import { paramFor, write, type LiteralOf } from "@svjeez/live/source";
+  import { paramFor } from "@svjeez/live/controls";
+  import { write, type LiteralOf } from "@svjeez/live/source";
   import { flushSync } from "svelte";
   import { getLab } from "./lab.svelte";
   import { params } from "./meadow";

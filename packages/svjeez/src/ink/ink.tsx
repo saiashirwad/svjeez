@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import type { Paint } from "../attributes";
 import { def, type Ref } from "../defs";
 import { ease as easing, motion, type Ease, type Span, type Stack } from "../motion";

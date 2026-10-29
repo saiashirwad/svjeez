@@ -1,0 +1,47 @@
+{
+  "name": "@svjeez/svelte",
+  "version": "0.6.1",
+  "private": true,
+  "description": "Svelte components for editing a svjeez scene: its source with a control on every value, and its picture with handles, bound to an @svjeez/live editor.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/svelte"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "svelte": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json --threshold warning",
+    "build:package": "bun ../../scripts/package-svelte.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "dependencies": {
+    "@svjeez/live": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^3.0.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@types/bun": "latest",
+    "playwright-core": "^1.64.1",
+    "svelte": "^5.57.3",
+    "svelte-check": "^4.7.7",
+    "svjeez": "workspace:*",
+    "typescript": "6",
+    "vite": "8.3.5"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0",
+    "svjeez": ">=0.6.0 <1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

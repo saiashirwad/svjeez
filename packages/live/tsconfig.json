@@ -15,5 +15,6 @@
     "types": ["bun"],
     "lib": ["ESNext", "DOM"]
   },
-  "include": ["src", "test"]
+  "include": ["src", "test", "scripts"],
+  "exclude": ["test/consumer"]
 }

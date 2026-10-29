@@ -1,20 +1,31 @@
 {
   "name": "@svjeez/live",
+  "version": "0.6.1",
   "private": true,
-  "description": "Scene source as data for the site's editors: parse, highlight and edit TSX, compile source in a worker, and edit a scene by the handles on its picture in Svelte. Never published.",
+  "description": "Edit a svjeez scene's source through controls: every number, color and ease in the file as a control, one store that compiles in a worker and keeps the picture's clock, for any framework to bind.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/live"
+  },
   "type": "module",
   "exports": {
+    ".": "./src/index.ts",
     "./source": "./src/source.ts",
-    "./doc": "./src/doc.ts",
+    "./controls": "./src/controls.ts",
+    "./editor": "./src/editor.ts",
     "./compile": "./src/compile.ts",
     "./client": "./src/client.ts",
     "./gzip": "./src/gzip.ts",
-    "./svelte": "./src/svelte/index.ts"
+    "./editor.css": "./src/editor.css"
   },
   "scripts": {
+    "generate": "bun scripts/generate.ts",
     "test": "bun test --conditions @svjeez/source",
-    "typecheck": "svelte-check --tsconfig ./tsconfig.json --threshold warning"
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
   "dependencies": {
     "@lezer/common": "^1.5.4",
@@ -32,11 +43,10 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "svelte": "^5.57.3",
-    "svelte-check": "^4.7.7",
-    "typescript": "6"
+    "playwright-core": "^1.64.1",
+    "typescript": "latest"
   },
-  "peerDependencies": {
-    "svelte": "^5.57.3"
+  "engines": {
+    "node": ">=20"
   }
 }

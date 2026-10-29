@@ -8,6 +8,7 @@
     ".preview/**",
     "**/dist/**",
     "**/package-dist/**",
+    "**/.svelte-kit/**",
     "site/.alchemy/**",
     "site/.astro/**",
     "tools/oxlint/anti-slop/**"

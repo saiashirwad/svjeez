@@ -2,7 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { validateSvg } from "svjeez";
 import { compileBuild, compileScene } from "../src/compile";
-import { errorFixes, FIXES, fixFor } from "../src/fixes";
+import { errorFixes, errorTable, FIXES, fixFor } from "../src/fixes";
+import generated from "../src/skill-errors";
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
 
@@ -62,6 +63,10 @@ describe("compileScene", () => {
 });
 
 describe("fixes", () => {
+  test("the generated table is the skill's, so run `bun run generate` after editing it", () => {
+    expect(generated).toBe(errorTable(read("../../svjeez/skills/svjeez/SKILL.md")));
+  });
+
   test("every runtime error in the skill's table has a fix", () => {
     const skill = read("../../svjeez/skills/svjeez/SKILL.md");
 
@@ -78,5 +83,19 @@ describe("fixes", () => {
     );
     expect(fixFor("something else")).toBeUndefined();
     expect(errorFixes("no table here")).toEqual([]);
+  });
+});
+
+describe("what a scene declares", () => {
+  test("a compile reports the scene's size and length, its params, and where each param's handle sits and moves", async () => {
+    const result = await compileScene(read("../../site/src/lab/live/pendulum.tsx"));
+
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.scene).toMatchObject({ width: 480, height: 320, title: "Pendulum" });
+    expect(Object.keys(result.params ?? {})).toEqual(["length", "swing", "bob"]);
+    // The length handle sits at the bottom of the arc, 190 below the pivot at (240, 36), and moves straight down.
+    expect(result.handles?.length?.at).toEqual({ x: 240, y: 226 });
+    expect(result.handles?.length?.way.x).toBeCloseTo(0);
+    expect(result.handles?.length?.way.y).toBeCloseTo(1);
   });
 });

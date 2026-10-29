@@ -1,16 +1,21 @@
 <script lang="ts">
-  import { live, Picture, Source } from "@svjeez/live/svelte";
-  import * as pendulum from "./pendulum";
+  import { Code, editor, Picture, Transport } from "@svjeez/svelte";
+  import { onDestroy } from "svelte";
+  import "../sj.css";
   import text from "./pendulum.tsx?raw";
   import first from "./pendulum.tsx?svjeez";
 
-  const scene = live(text, pendulum, { first });
+  const scene = editor(text, { first });
+
+  onDestroy(scene.destroy);
 </script>
 
 <main class="live">
-  <Picture {scene} />
-  <Source {scene} file="pendulum.tsx" />
-  <p class="error" role="status" hidden={!scene.error}>{scene.error}</p>
+  <div class="side">
+    <Picture editor={scene} />
+    <Transport editor={scene} />
+  </div>
+  <Code editor={scene} file="pendulum.tsx" />
 </main>
 
 <style>
@@ -21,21 +26,22 @@
     margin-inline: auto;
     padding-block: 1rem 3rem;
   }
+
+  .side {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+
   @media (width >= 60rem) {
     .live {
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
       align-items: start;
     }
-    .live > :global(.picture) {
+
+    .side {
       position: sticky;
       inset-block-start: 1rem;
     }
-  }
-
-  .error {
-    grid-column: 1 / -1;
-    margin: 0;
-    color: var(--warn);
-    font: 0.85rem var(--mono);
   }
 </style>

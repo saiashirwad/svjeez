@@ -1,0 +1,535 @@
+// A scene file being edited, as one state, the messages that change it and the work each change asks for, in the Elm
+// shape: `update` is pure and returns the next state with the commands to run, and `createEditor` runs them. Every
+// framework binds the same store, and an agent drives it with the same messages a drag sends.
+import { restyle, type Point } from "svjeez";
+import type { Schema } from "svjeez/params";
+import { createCompiler, latestWins } from "./client.ts";
+import type { Compiled, SceneSize, SourceError } from "./compile.ts";
+import { valuesOf, type Settable, type Value } from "./controls.ts";
+import { measureMove, type Move } from "./probe.ts";
+import { apply, linesOf, parse, write, type Line, type Literal, type Source } from "./source.ts";
+
+/** The picture on screen: an image URL, and the file it shows when it came from a compile rather than the build. */
+export interface Picture {
+  readonly url: string;
+  readonly scene: SceneSize;
+  /** The compiled file and the source it came from. A picture made at build time has neither until the first compile. */
+  readonly svg?: string;
+  readonly text?: string;
+}
+
+/**
+ * A handle on the picture for a number: where it sat when the value was `from`, and how far it moves per unit of the
+ * value. A scene's `handles` declare some; the editor measures one for the selected number in any scene.
+ */
+export interface Grip extends Move {
+  readonly from: number;
+  readonly declared: boolean;
+}
+
+/** The scene's clock. Playing, it read 0 at page time `origin`, in milliseconds; paused, it holds `at` seconds. */
+export type Clock =
+  | { readonly playing: true; readonly origin: number }
+  | { readonly playing: false; readonly at: number };
+
+export interface State {
+  /** The file. Every edit is to this text, and everything else here is read from it or made from it. */
+  readonly text: string;
+  readonly source: Source;
+  /** Every literal a control can edit, in source order. */
+  readonly values: readonly Value[];
+  /** The file as highlighted lines, each value a piece of its own. */
+  readonly lines: readonly Line[];
+  /** The params the scene declares, as of its last good compile. */
+  readonly schema: Schema;
+  /** The value whose control has focus, by key. */
+  readonly selected: string | null;
+  readonly picture: Picture | null;
+  /** The handles on the picture, by value key. */
+  readonly grips: { readonly [key: string]: Grip };
+  /** Why the newest compile failed, until one succeeds. The picture stays the last good one. */
+  readonly error: SourceError | null;
+  readonly clock: Clock;
+  readonly history: { readonly past: readonly string[]; readonly future: readonly string[] };
+}
+
+type Valued = {
+  [K in Value["kind"]]: { readonly key: string; readonly value: Settable[K] };
+}[Value["kind"]];
+
+export type Msg =
+  /** Writes a value into the file. `continues` marks a step of a drag already under way, so undo takes the drag whole. */
+  | ({ readonly type: "set"; readonly continues?: boolean } & Valued)
+  /** Replaces the file: typing, or an agent's rewrite. */
+  | { readonly type: "replace"; readonly text: string }
+  | { readonly type: "undo" }
+  | { readonly type: "redo" }
+  | { readonly type: "select"; readonly key: string | null; readonly now: number }
+  | { readonly type: "play"; readonly now: number }
+  | { readonly type: "pause"; readonly now: number }
+  | { readonly type: "seek"; readonly at: number; readonly now: number }
+  | {
+      readonly type: "compiled";
+      readonly text: string;
+      readonly result: Compiled;
+      readonly now: number;
+    }
+  | { readonly type: "shown"; readonly picture: Picture; readonly now: number }
+  | {
+      readonly type: "probed";
+      readonly key: string;
+      readonly text: string;
+      readonly grip: Grip | null;
+    };
+
+export type Cmd =
+  | { readonly type: "compile"; readonly text: string }
+  /** Show `svg` from `at` seconds in, playing on or held there. */
+  | {
+      readonly type: "show";
+      readonly svg: string;
+      readonly at: number;
+      readonly playing: boolean;
+      readonly picture: Omit<Picture, "url">;
+    }
+  /** Find what the number at `key` moves: compile `nudged`, the file with it `by` more, and compare it with `svg`. */
+  | {
+      readonly type: "probe";
+      readonly key: string;
+      readonly text: string;
+      readonly svg: string;
+      readonly nudged: string;
+      readonly from: number;
+      readonly by: number;
+      readonly at: number;
+    };
+
+/** Where the clock reads at page time `now`, in seconds. */
+export const timeAt = (clock: Clock, now: number): number =>
+  clock.playing ? Math.max(0, (now - clock.origin) / 1000) : clock.at;
+
+/** The value with this key, if the file still has it. */
+export const valueOf = (state: State, key: string): Value | undefined =>
+  state.values.find((v) => v.key === key);
+
+/** The handle a value has on the picture, if it has one. */
+export const handleOf = (state: State, key: string): Grip | undefined => state.grips[key];
+
+/** Where a handle sits with its value at `v`, along the way it moves. */
+export const handleAt = (grip: Grip, v: number): Point => ({
+  x: grip.at.x + grip.way.x * (v - grip.from),
+  y: grip.at.y + grip.way.y * (v - grip.from),
+});
+
+/** `v` written as a literal's text, to six places at most. */
+const placesOf = (v: number) => Math.min(6, (String(v).split(".")[1] ?? "").length);
+
+const isEditable = (literal: Literal, values: readonly Value[]) =>
+  values.some((v) => v.literal === literal);
+
+/** The state for `text`, read through `schema`, with everything else carried over. */
+const read = (state: Omit<State, "source" | "values" | "lines">): State => {
+  const source = parse(state.text);
+  const values = valuesOf(source, state.schema);
+
+  const selected =
+    state.selected && values.some((v) => v.key === state.selected) ? state.selected : null;
+
+  return {
+    ...state,
+    source,
+    values,
+    lines: linesOf(source, (l) => isEditable(l, values)),
+    selected,
+  };
+};
+
+export interface Init {
+  readonly text: string;
+  /** A picture to show until the first compile, such as the one a `?svjeez` import made at build time. */
+  readonly first?: { readonly url: string; readonly scene: SceneSize };
+  /** Page time now, in milliseconds. */
+  readonly now: number;
+}
+
+export const init = ({ text, first, now }: Init): [State, Cmd[]] => [
+  read({
+    text,
+    schema: {},
+    selected: null,
+    picture: first ?? null,
+    grips: {},
+    error: null,
+    clock: { playing: true, origin: now },
+    history: { past: [], future: [] },
+  }),
+  [{ type: "compile", text }],
+];
+
+/** The state with `text` as the file, the old one remembered for undo unless `continues`, and a compile asked for. */
+const edited = (state: State, text: string, continues = false): [State, Cmd[]] => {
+  if (text === state.text) return [state, []];
+  const past = continues ? state.history.past : [...state.history.past, state.text];
+
+  return [read({ ...state, text, history: { past, future: [] } }), [{ type: "compile", text }]];
+};
+
+/** The picture shown again under a new clock, when there is a compiled file to show. */
+const reshown = (state: State, clock: Clock, now: number): [State, Cmd[]] => {
+  const picture = state.picture;
+  const next = { ...state, clock };
+
+  if (!picture?.svg) return [next, []];
+  const { url: _, ...rest } = picture;
+
+  return [
+    next,
+    [
+      {
+        type: "show",
+        svg: picture.svg,
+        at: timeAt(clock, now),
+        playing: clock.playing,
+        picture: rest,
+      },
+    ],
+  ];
+};
+
+/** The grips a compile of `text` declares, keyed by value: a param's value key is `params.<key>`. */
+const declaredGrips = (text: string, handles: { readonly [key: string]: Move } = {}) => {
+  const keys = Object.keys(handles);
+
+  if (!keys.length) return {};
+  const literals = parse(text).literals;
+
+  return Object.fromEntries(
+    keys.flatMap((key): [string, Grip][] => {
+      const literal = literals.find((l) => l.key === `params.${key}`);
+
+      return literal?.kind === "number"
+        ? [[literal.key, { ...handles[key]!, from: literal.value, declared: true }]]
+        : [];
+    }),
+  );
+};
+
+const onlyDeclared = (grips: State["grips"]) =>
+  Object.fromEntries(Object.entries(grips).filter(([, g]) => g.declared));
+
+/** The probed grip, if any, kept beside a fresh set of declared ones. */
+const withDeclared = (grips: State["grips"], declared: State["grips"]) => ({
+  ...Object.fromEntries(Object.entries(grips).filter(([, g]) => !g.declared)),
+  ...declared,
+});
+
+/**
+ * A probe of the selected number when it has no declared grip and the picture shows the file as it stands. The nudge
+ * is a two-hundredth of the number's range, never less than a step.
+ */
+const probeOf = (state: State, now: number): Cmd[] => {
+  const value = state.selected ? valueOf(state, state.selected) : undefined;
+  const { picture } = state;
+
+  if (value?.kind !== "number" || state.grips[value.key]?.declared) return [];
+
+  if (!picture?.svg || picture.text !== state.text) return [];
+  const from = value.literal.value;
+  const by = Math.max(value.param.step, (value.param.max - value.param.min) / 200);
+  const nudged = { ...value.literal, value: from + by };
+
+  return [
+    {
+      type: "probe",
+      key: value.key,
+      text: state.text,
+      svg: picture.svg,
+      nudged: apply(state.text, [
+        { range: value.literal.range, text: write(nudged, placesOf(from + by)) },
+      ]),
+      from,
+      by,
+      at: timeAt(state.clock, now),
+    },
+  ];
+};
+
+export const update = (state: State, msg: Msg): [State, Cmd[]] => {
+  switch (msg.type) {
+    case "set": {
+      const value = valueOf(state, msg.key);
+
+      if (!value) return [state, []];
+      // SAFETY: a message's value is typed by its key's kind, and `kind` names that same kind on the literal.
+      const literal = { ...value.literal, value: msg.value } as Literal;
+
+      // A number goes in as precise as it was sent: controls fit what they send to the step.
+      const places = value.kind === "number" ? placesOf(Number(msg.value)) : undefined;
+
+      const text = apply(state.text, [
+        { range: value.literal.range, text: write(literal, places) },
+      ]);
+
+      return edited(state, text, msg.continues);
+    }
+
+    case "replace":
+      return edited(state, msg.text);
+    case "undo": {
+      const text = state.history.past.at(-1);
+
+      if (text === undefined) return [state, []];
+
+      const history = {
+        past: state.history.past.slice(0, -1),
+        future: [state.text, ...state.history.future],
+      };
+
+      return [read({ ...state, text, history }), [{ type: "compile", text }]];
+    }
+
+    case "redo": {
+      const [text, ...future] = state.history.future;
+
+      if (text === undefined) return [state, []];
+      const history = { past: [...state.history.past, state.text], future };
+
+      return [read({ ...state, text, history }), [{ type: "compile", text }]];
+    }
+
+    case "select": {
+      // Selecting the selected value again keeps its measured grip.
+      if (msg.key === state.selected) return [state, []];
+      const selected = { ...state, selected: msg.key, grips: onlyDeclared(state.grips) };
+
+      return [selected, probeOf(selected, msg.now)];
+    }
+
+    case "play":
+      return state.clock.playing
+        ? [state, []]
+        : reshown(state, { playing: true, origin: msg.now - state.clock.at * 1000 }, msg.now);
+    case "pause":
+      return state.clock.playing
+        ? reshown(state, { playing: false, at: timeAt(state.clock, msg.now) }, msg.now)
+        : [state, []];
+    case "seek":
+      return reshown(
+        state,
+        state.clock.playing
+          ? { playing: true, origin: msg.now - msg.at * 1000 }
+          : { playing: false, at: msg.at },
+        msg.now,
+      );
+    case "compiled": {
+      if (!msg.result.ok) return [{ ...state, error: msg.result.error }, []];
+      const { svg, scene, params = {}, handles } = msg.result;
+      const current = msg.text === state.text;
+
+      const next = read({
+        ...state,
+        schema: current ? params : state.schema,
+        grips: withDeclared(state.grips, declaredGrips(msg.text, handles)),
+        error: null,
+      });
+
+      const picture = {
+        scene: scene ?? state.picture?.scene ?? { width: 0, height: 0, duration: 0, title: "" },
+        svg,
+        text: msg.text,
+      };
+
+      return [
+        next,
+        [
+          {
+            type: "show",
+            svg,
+            at: timeAt(state.clock, msg.now),
+            playing: state.clock.playing,
+            picture,
+          },
+        ],
+      ];
+    }
+
+    case "shown": {
+      const shown = { ...state, picture: msg.picture };
+
+      return [shown, msg.picture.text === state.text ? probeOf(shown, msg.now) : []];
+    }
+
+    case "probed": {
+      if (msg.key !== state.selected || !valueOf(state, msg.key)) return [state, []];
+      const grips = onlyDeclared(state.grips);
+
+      return [{ ...state, grips: msg.grip ? { ...grips, [msg.key]: msg.grip } : grips }, []];
+    }
+  }
+};
+
+// ----- the runtime
+
+/** What a page can send: any message but the runtime's own, with the clock's `now` stamped on arrival. */
+export type Input =
+  Exclude<Msg, { type: "compiled" | "shown" | "probed" }> extends infer M
+    ? M extends { readonly now: number }
+      ? Omit<M, "now">
+      : M
+    : never;
+
+/** The work the runtime does for `update`. A page swaps one out to compile elsewhere, or a test to run without a browser. */
+export interface Effects {
+  /** Compiles the file. A `stop` on it is called when the editor is destroyed. */
+  readonly compile: ((text: string) => Promise<Compiled>) & { readonly stop?: () => void };
+  /** An image URL for `svg` started `at` seconds in, playing on or held, once it is ready to draw. */
+  readonly show: (svg: string, at: number, playing: boolean) => Promise<string>;
+  /** Frees a URL `show` made, once nothing shows it. */
+  readonly release: (url: string) => void;
+  /** How the parts of `before` that differ in `after` moved, per unit of a value nudged `by`, held `at` seconds in. */
+  readonly measure: (
+    before: string,
+    after: string,
+    by: number,
+    at: number,
+  ) => Promise<Move | undefined>;
+  readonly now: () => number;
+}
+
+export interface Editor {
+  readonly getState: () => State;
+  /**
+   * Calls `listener` after every change, and returns the call that stops it. The editor compiles nothing until its first
+   * subscriber, so a page rendered on a server reads the state without starting a worker.
+   */
+  readonly subscribe: (listener: (state: State) => void) => () => void;
+  readonly send: (input: Input) => void;
+  /** Stops the compiler and frees every URL the editor made. */
+  readonly destroy: () => void;
+}
+
+/** Decodes the image before handing back its URL, so swapping it in never shows a blank frame. */
+const showInBrowser = async (svg: string, at: number, playing: boolean) => {
+  const url = URL.createObjectURL(
+    new Blob([restyle(svg, { at, paused: !playing })], { type: "image/svg+xml" }),
+  );
+
+  const img = new Image();
+  img.src = url;
+  await img.decode().catch(() => undefined);
+
+  return url;
+};
+
+/** The worker compiler, started on its first compile. */
+const lazyCompiler = (): Effects["compile"] => {
+  let compiler: ReturnType<typeof createCompiler> | undefined;
+
+  return Object.assign((text: string) => (compiler ??= createCompiler())(text), {
+    stop: () => compiler?.stop(),
+  });
+};
+
+/** A store for editing `text`: state, a way to send messages, and the compiles and pictures they ask for. */
+export const createEditor = (
+  { text, first }: Omit<Init, "now">,
+  effects: Partial<Effects> = {},
+): Editor => {
+  const run: Effects = {
+    compile: effects.compile ?? lazyCompiler(),
+    show: effects.show ?? showInBrowser,
+    release: effects.release ?? ((url) => URL.revokeObjectURL(url)),
+    measure: effects.measure ?? measureMove,
+    now: effects.now ?? (() => performance.now()),
+  };
+
+  const listeners = new Set<(state: State) => void>();
+  const made = new Set<string>();
+  /** Commands asked for before anything subscribed, run on the first subscribe. */
+  let waiting: Cmd[] | null = [];
+  let alive = true;
+
+  const release = (url: string) => {
+    if (made.delete(url)) run.release(url);
+  };
+
+  const compile = latestWins(async (text: string) => {
+    const result = await run.compile(text);
+    dispatch({ type: "compiled", text, result, now: run.now() });
+  });
+
+  const show = latestWins(async (cmd: Extract<Cmd, { type: "show" }>) => {
+    const url = await run.show(cmd.svg, cmd.at, cmd.playing);
+    made.add(url);
+
+    if (!alive) return release(url);
+    dispatch({ type: "shown", picture: { ...cmd.picture, url }, now: run.now() });
+  });
+
+  const probe = latestWins(async (cmd: Extract<Cmd, { type: "probe" }>) => {
+    const after = await run.compile(cmd.nudged);
+    const move = after.ok ? await run.measure(cmd.svg, after.svg, cmd.by, cmd.at) : undefined;
+    const grip = move ? { ...move, from: cmd.from, declared: false } : null;
+    dispatch({ type: "probed", key: cmd.key, text: cmd.text, grip });
+  });
+
+  const perform = (cmd: Cmd) => {
+    if (waiting) waiting.push(cmd);
+    else if (cmd.type === "compile") compile(cmd.text);
+    else if (cmd.type === "show") show(cmd);
+    else probe(cmd);
+  };
+
+  const [initial, cmds] = init({ text, first, now: run.now() });
+  let state = initial;
+  cmds.forEach(perform);
+
+  const dispatch = (msg: Msg) => {
+    if (!alive) return;
+    const [next, cmds] = update(state, msg);
+
+    if (msg.type === "shown" && state.picture && state.picture.url !== next.picture?.url)
+      release(state.picture.url);
+
+    if (next !== state) {
+      state = next;
+      listeners.forEach((listener) => listener(state));
+    }
+
+    cmds.forEach(perform);
+  };
+
+  const stamp = (input: Input): Msg => {
+    switch (input.type) {
+      case "play":
+      case "pause":
+      case "seek":
+      case "select":
+        return { ...input, now: run.now() };
+      default:
+        return input;
+    }
+  };
+
+  return {
+    getState: () => state,
+    subscribe: (listener) => {
+      listeners.add(listener);
+
+      if (waiting) {
+        const queued = waiting;
+        waiting = null;
+        queued.forEach(perform);
+      }
+
+      return () => listeners.delete(listener);
+    },
+    send: (input) => dispatch(stamp(input)),
+    destroy: () => {
+      alive = false;
+      listeners.clear();
+      run.compile.stop?.();
+      [...made].forEach(release);
+    },
+  };
+};

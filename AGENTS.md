@@ -16,7 +16,8 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
-- `packages/live/` is `@svjeez/live`, private and never published. For the site's editors it parses scene source into literals, elements and highlighting with exact edits, reads the `params` a scene declares through `svjeez/params`, and compiles source in the browser.
+- `packages/live/` is `@svjeez/live`, the scene editor's core with no framework in it. `createEditor` is an Elm-style store: `update` is pure, every edit is a message (a drag, a keystroke or an agent sends the same ones), and the runtime compiles in a worker and shows each picture from where the clock was. It also parses scene source into literals with stable keys, picks a control for each, and measures what a number moves on the picture.
+- `packages/svelte/` is `@svjeez/svelte` and `packages/react/` is `@svjeez/react`: the editor's components (the code with a control on every value, the picture with handles, a transport) for each framework. Both render the same markup and share `@svjeez/live/editor.css`, so neither carries styles of its own.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax.
 - `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid flowcharts, sequence diagrams and state diagrams into svjeez diagrams.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
@@ -92,7 +93,7 @@ Each package's source explains its own internals. These are the rules that aren'
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro charts code fonts geo icons math mermaid video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro charts code fonts geo icons live math mermaid react svelte video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 

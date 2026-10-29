@@ -1,13 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { ease } from "svjeez";
-import { count } from "svjeez/params";
 import {
   apply,
   callsIn,
   linesOf,
   literalAt,
-  paramFor,
   paramLiteral,
   parse,
   set,
@@ -207,27 +205,55 @@ describe("linking", () => {
   });
 });
 
-describe("paramFor", () => {
-  test("a declared number drags in its declared range, any other around its value", () => {
-    const source = parse(meadow);
-    const flowers = numberOf(paramLiteral(source, "flowers"));
-    const r = numbers("<circle r={16.5} />")[0]!;
+describe("keys", () => {
+  const scene = `export const params = { swing: count(3, { min: 1, max: 9 }) };
+const legs = [{ over: 1.5 }, { over: 1.2 }];
+export default function build() {
+  return <rect fill="#3EE6D6" stroke="#181f2e8c" x={30_000} width={4} opacity={0.5} />;
+}
+`;
 
-    expect(
-      paramFor(flowers, { flowers: count(5, { min: 1, max: 12, label: "how many" }) }),
-    ).toMatchObject({
-      min: 1,
-      max: 12,
-      step: 1,
-      label: "how many",
+  test("a param, a path and an unnamed literal each get a key of their own", () => {
+    expect(parse(scene).literals.map((l) => l.key)).toEqual([
+      "params.swing",
+      "params.swing.min",
+      "params.swing.max",
+      "legs.0.over",
+      "legs.1.over",
+      "default#0",
+      "default#1",
+      "default#2",
+      "default#3",
+      "default#4",
+    ]);
+  });
+
+  test("a key stays with its literal when another value changes length", () => {
+    const before = parse(scene);
+    const x = before.literals.find((l) => l.key === "default#2")!;
+    const after = parse(set(before, { ...numberOf(x), value: -12.25 }));
+
+    expect(after.literals.map((l) => l.key)).toEqual(before.literals.map((l) => l.key));
+    expect(after.literals.find((l) => l.key === "default#3")).toMatchObject({ value: 4 });
+  });
+
+  test("a key survives an edit to another declaration", () => {
+    const rewritten = scene.replace("const legs", "const speed = 2;\nconst legs");
+
+    expect(parse(rewritten).literals.find((l) => l.key === "default#3")).toMatchObject({
+      value: 4,
     });
-    expect(paramFor(r)).toEqual({
-      kind: "number",
-      value: 16.5,
-      min: 0,
-      max: 49.5,
-      step: 0.1,
-      label: "r",
+  });
+
+  test("quoted attributes, eight-digit colors and numeric separators read as what they are", () => {
+    const [fill, stroke, x] = parse(scene).literals.filter((l) => l.key.startsWith("default"));
+
+    expect(fill).toMatchObject({
+      kind: "color",
+      value: "#3EE6D6",
+      role: { kind: "attribute", name: "fill", tag: "rect" },
     });
+    expect(stroke).toMatchObject({ kind: "color", value: "#181f2e8c" });
+    expect(x).toMatchObject({ kind: "number", value: 30000 });
   });
 });

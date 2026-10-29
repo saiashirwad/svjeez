@@ -1,5 +1,5 @@
 // Compiles scene source off the main thread. Request {id, source, sources?}; reply {id, ...Compiled}.
-import { compileScene } from "./compile";
+import { compileScene } from "./compile.ts";
 
 self.onmessage = async ({
   data,

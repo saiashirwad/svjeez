@@ -6,8 +6,10 @@ import * as extras from "svjeez/extras";
 import * as jsxDevRuntime from "svjeez/jsx-dev-runtime";
 import * as jsxRuntime from "svjeez/jsx-runtime";
 import * as params from "svjeez/params";
-import { fixFor } from "./fixes";
-import { gzipSize } from "./gzip";
+import type { Point } from "svjeez";
+import type { Schema } from "svjeez/params";
+import { fixFor } from "./fixes.ts";
+import { gzipSize } from "./gzip.ts";
 
 const modules = new Map<string, object>([
   ["svjeez", svjeez],
@@ -20,6 +22,8 @@ const modules = new Map<string, object>([
 // What a scene's module object holds once its code has run.
 interface SceneModule {
   default?: unknown;
+  params?: unknown;
+  handles?: unknown;
 }
 
 export interface SceneStats {
@@ -39,8 +43,35 @@ export interface SourceError {
   readonly fix?: string;
 }
 
+/** What the scene passed to `render`: its size, how long one loop lasts, and its title. */
+export interface SceneSize {
+  readonly width: number;
+  readonly height: number;
+  readonly duration: number;
+  readonly title: string;
+}
+
+/** Where a number param's handle sits, and which way and how fast it moves per unit of the value, in scene units. */
+export interface Handle {
+  readonly at: Point;
+  readonly way: Point;
+}
+
+/** What a scene declares beyond its picture: its params and where their handles sit, when it exports them. */
+export interface Declared {
+  readonly params?: Schema;
+  readonly handles?: { readonly [key: string]: Handle };
+}
+
 export type Compiled =
-  | { readonly ok: true; readonly svg: string; readonly stats: SceneStats; readonly ms: number }
+  | ({
+      readonly ok: true;
+      readonly svg: string;
+      readonly stats: SceneStats;
+      /** Read from the scene's own `render` call, so only a compile from source knows it. */
+      readonly scene?: SceneSize;
+      readonly ms: number;
+    } & Declared)
   | { readonly ok: false; readonly error: SourceError; readonly ms: number };
 
 /** A JSON file as a default export that sucrase's import interop keeps as is. */
@@ -58,8 +89,14 @@ const packages = new Map<string, () => Promise<object>>([
   ["@svjeez/icons/tabler", () => import("@svjeez/icons/tabler")],
   ["@svjeez/math", () => import("@svjeez/math")],
   ["@svjeez/mermaid", () => import("@svjeez/mermaid")],
-  ["world-atlas/countries-110m.json", () => json(import("world-atlas/countries-110m.json"))],
-  ["world-atlas/land-110m.json", () => json(import("world-atlas/land-110m.json"))],
+  [
+    "world-atlas/countries-110m.json",
+    () => json(import("world-atlas/countries-110m.json", { with: { type: "json" } })),
+  ],
+  [
+    "world-atlas/land-110m.json",
+    () => json(import("world-atlas/land-110m.json", { with: { type: "json" } })),
+  ],
 ]);
 
 const known = () => [...modules.keys(), ...packages.keys()].filter((name) => !name.includes("jsx"));
@@ -124,15 +161,42 @@ const measure = async (svg: string): Promise<SceneStats> => ({
   ),
 });
 
-// The scene's own render() call, with `sources` turned on.
-const sourced = {
-  ...svjeez,
-  render: (...[options, content]: Parameters<typeof svjeez.render>) =>
-    svjeez.render({ ...options, sources: true }, content),
+const isSchema = (value: unknown): value is Schema =>
+  value instanceof Object && Object.values(value).every((p) => p instanceof Object && "kind" in p);
+
+const isHandles = (value: unknown): value is params.Handles<Schema> => typeof value === "function";
+
+/** Each number param's handle, and the way it moves, from the scene's `handles` at its values and a hair past each. */
+const handlesOf = (schema: Schema, handles: params.Handles<Schema>) => {
+  const values = params.defaults(schema);
+  const here: { readonly [key: string]: Point | undefined } = handles(values);
+
+  return Object.fromEntries(
+    Object.entries(schema).flatMap(([key, p]): [string, Handle][] => {
+      const at = here[key];
+
+      if (p.kind !== "number" || !at) return [];
+      const h = (p.max - p.min) / 10_000;
+
+      const next: { readonly [key: string]: Point | undefined } = handles({
+        ...values,
+        [key]: p.value + h,
+      });
+
+      const to = next[key] ?? at;
+
+      return [[key, { at, way: { x: (to.x - at.x) / h, y: (to.y - at.y) / h } }]];
+    }),
+  );
 };
 
-/** The scene's default export, called. Throws what the author's code throws. */
-const run = async (source: string, sources: boolean): Promise<string> => {
+interface Built extends Declared {
+  readonly svg: string;
+  readonly scene?: SceneSize;
+}
+
+/** The scene's default export, called, with what it declares. Throws what the author's code throws. */
+const run = async (source: string, sources: boolean): Promise<Built> => {
   const { code } = transform(source, {
     transforms: ["typescript", "jsx", "imports"],
     jsxRuntime: "automatic",
@@ -141,9 +205,26 @@ const run = async (source: string, sources: boolean): Promise<string> => {
   });
 
   await load(code);
+  let scene: SceneSize | undefined;
+
+  // The scene's own render() call, read for its size and length, and with `sources` turned on when asked.
+  const watched = {
+    ...svjeez,
+    render: (...[options, content]: Parameters<typeof svjeez.render>) => {
+      scene ??= {
+        width: options.width,
+        height: options.height,
+        duration: options.duration ?? 0,
+        title: options.title ?? "",
+      };
+
+      return svjeez.render(sources ? { ...options, sources: true } : options, content);
+    },
+  };
+
   const exports: SceneModule = {};
   new Function("require", "exports", code)(
-    (name: string) => (sources && name === "svjeez" ? sourced : requireModule(name)),
+    (name: string) => (name === "svjeez" ? watched : requireModule(name)),
     exports,
   );
 
@@ -154,19 +235,26 @@ const run = async (source: string, sources: boolean): Promise<string> => {
   const svg: unknown = exports.default();
 
   if (!isText(svg)) throw new Error("build() should return the string from render().");
+  const declared = isSchema(exports.params) ? exports.params : undefined;
 
-  return svg;
+  return {
+    svg,
+    ...(scene && { scene }),
+    ...(declared && { params: declared }),
+    ...(declared &&
+      isHandles(exports.handles) && { handles: handlesOf(declared, exports.handles) }),
+  };
 };
 
 /** Runs `make`, then measures the file it returns. Whatever it throws comes back as the error. */
-const outcome = async (make: () => Promise<string>): Promise<Compiled> => {
+const outcome = async (make: () => Promise<Built>): Promise<Compiled> => {
   const start = performance.now();
 
   try {
-    const svg = await make();
-    const stats = await measure(svg);
+    const built = await make();
+    const stats = await measure(built.svg);
 
-    return { ok: true, svg, stats, ms: performance.now() - start };
+    return { ok: true, ...built, stats, ms: performance.now() - start };
   } catch (thrown) {
     const error = thrown instanceof Error ? thrown : new Error(String(thrown));
 
@@ -192,4 +280,4 @@ export const compileScene = (source: string, { sources = false } = {}): Promise<
 
 /** For a page that ships its scene as code instead of source text: calls `build` and measures what it returns. */
 export const compileBuild = (build: () => string): Promise<Compiled> =>
-  outcome(async () => build());
+  outcome(async () => ({ svg: build() }));

@@ -4,7 +4,6 @@ import type { SyntaxNode, Tree } from "@lezer/common";
 import { highlightTree, tagHighlighter, tags, type Tag } from "@lezer/highlight";
 import { parser as js } from "@lezer/javascript";
 import { ease, type Ease, type Hex } from "svjeez";
-import type { NumberParam, Schema } from "svjeez/params";
 
 const parser = js.configure({ dialect: "jsx ts" });
 
@@ -70,6 +69,12 @@ export type PathStep = string | number;
 export type EaseName = "linear" | "in" | "out" | "inOut" | "pop";
 
 interface LiteralBase {
+  /**
+   * Where the literal is, as a name that survives edits to other values and mostly survives rewrites elsewhere in the
+   * file: `params.swing` for a param, the path from its const as in `legs.1.over`, else the top-level declaration it
+   * sits in and its place among the other literals there, as in `default#3`.
+   */
+  readonly key: string;
   readonly range: Range;
   /** The literal as written, quotes and sign included. */
   readonly text: string;
@@ -134,6 +139,12 @@ const nameOfProperty = (src: string, property: SyntaxNode) =>
     "",
   );
 
+const attributeRole = (src: string, attr: SyntaxNode): Role => {
+  const tag = attr.parent?.getChild("JSXBuiltin") ?? attr.parent?.getChild("JSXIdentifier");
+
+  return { kind: "attribute", name: textOf(src, attr.firstChild), tag: textOf(src, tag) };
+};
+
 const roleOf = (src: string, literal: SyntaxNode): Role => {
   const at = outer(literal);
   const context = at.parent;
@@ -143,14 +154,12 @@ const roleOf = (src: string, literal: SyntaxNode): Role => {
       return { kind: "const", name: textOf(src, context.getChild("VariableDefinition")) };
     case "Property":
       return { kind: "property", name: nameOfProperty(src, context) };
-    case "JSXEscape": {
-      const attr = context.parent;
-
-      if (attr?.name !== "JSXAttribute") return { kind: "other" };
-      const tag = attr.parent?.getChild("JSXBuiltin") ?? attr.parent?.getChild("JSXIdentifier");
-
-      return { kind: "attribute", name: textOf(src, attr.firstChild), tag: textOf(src, tag) };
-    }
+    case "JSXAttribute":
+      return attributeRole(src, context);
+    case "JSXEscape":
+      return context.parent?.name === "JSXAttribute"
+        ? attributeRole(src, context.parent)
+        : { kind: "other" };
 
     case "ArgList":
       return {
@@ -226,18 +235,57 @@ const signed = (src: string, num: SyntaxNode) =>
     ? num.parent
     : num;
 
-const COLOR = /^(["'])#[0-9A-Fa-f]{6}\1$/;
+const COLOR = /^(["'])#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\1$/;
+
+/** A number as written, `30_000` and `0xff` included. */
+const numberOf = (text: string) => Number(text.replaceAll("_", ""));
+
+/** The name of the top-level statement a node sits in: a const or function name, `default`, or its place in the file. */
+const scopeOf = (src: string, node: SyntaxNode): string => {
+  let at = node;
+
+  while (at.parent && at.parent.parent) at = at.parent;
+  const declaration = at.name === "ExportDeclaration" ? at.lastChild : at;
+
+  if (at.getChild("default")) return "default";
+  const name = declaration?.getChild("VariableDefinition");
+
+  return name ? textOf(src, name) : `@${at.from}`;
+};
+
+type Unkeyed = Literal extends infer L ? (L extends Literal ? Omit<L, "key"> : never) : never;
+
+/** Each literal's key: its param, its path, else its scope and how many unnamed literals in that scope came before it. */
+const keyed = (literals: readonly (Unkeyed & { readonly scope: string })[]): Literal[] => {
+  const seen = new Map<string, number>();
+
+  const keyOf = ({ scope, param, path }: { scope: string } & Omit<LiteralBase, "key">) => {
+    if (param) return ["params", param.key, param.option].filter(Boolean).join(".");
+
+    if (path) return path.join(".");
+    const n = seen.get(scope) ?? 0;
+    seen.set(scope, n + 1);
+
+    return `${scope}#${n}`;
+  };
+
+  return literals.map(({ scope, ...literal }): Literal => ({
+    ...literal,
+    key: keyOf({ scope, ...literal }),
+  }));
+};
 
 /** Every literal in the file, in order. An ease call is one literal, so its numbers are not also numbers. */
 const literalsOf = (src: string, tree: Tree): Literal[] => {
-  const out: Literal[] = [];
+  const out: (Unkeyed & { readonly scope: string })[] = [];
   const params = paramsObject(src, tree);
 
-  const base = (node: SyntaxNode): LiteralBase => {
+  const base = (node: SyntaxNode): Omit<LiteralBase, "key"> & { readonly scope: string } => {
     const path = pathOf(src, node);
     const param = paramOf(src, node, params);
 
     return {
+      scope: scopeOf(src, node),
       range: [node.from, node.to],
       text: textOf(src, node),
       role: roleOf(src, node),
@@ -254,7 +302,7 @@ const literalsOf = (src: string, tree: Tree): Literal[] => {
 
       if (node.name === "String" || node.name === "JSXAttributeValue") {
         if (COLOR.test(text))
-          // SAFETY: COLOR matched a quoted `#` and six hex digits, which is a Hex once the quotes are off.
+          // SAFETY: COLOR matched a quoted `#` and three, six or eight hex digits, which is a Hex once the quotes are off.
           out.push({ ...base(node), kind: "color", value: text.slice(1, -1) as Hex });
         else out.push({ ...base(node), kind: "string", value: text.slice(1, -1) });
 
@@ -262,7 +310,7 @@ const literalsOf = (src: string, tree: Tree): Literal[] => {
       }
 
       if (node.name === "CallExpression" && textOf(src, node.firstChild) === "ease.bezier") {
-        const args = items(node.getChild("ArgList")!).map((n) => Number(textOf(src, n)));
+        const args = items(node.getChild("ArgList")!).map((n) => numberOf(textOf(src, n)));
 
         const [x1, y1, x2, y2] = args;
 
@@ -297,14 +345,14 @@ const literalsOf = (src: string, tree: Tree): Literal[] => {
 
       if (node.name === "Number") {
         const literal = signed(src, node);
-        out.push({ ...base(literal), kind: "number", value: Number(textOf(src, literal)) });
+        out.push({ ...base(literal), kind: "number", value: numberOf(textOf(src, literal)) });
       }
 
       return undefined;
     },
   });
 
-  return out.sort((a, b) => a.range[0] - b.range[0]);
+  return keyed(out.sort((a, b) => a.range[0] - b.range[0]));
 };
 
 // ----- elements and consts
@@ -692,40 +740,4 @@ export const callsIn = (source: Source, element: Element, method: string): Range
   });
 
   return out.sort((a, b) => nameAt(a) - nameAt(b)).map((call) => [nameAt(call), call.to] as const);
-};
-
-// ----- what a drag on a number does
-
-const labelOf = (role: Role) => {
-  switch (role.kind) {
-    case "attribute":
-    case "const":
-    case "property":
-      return role.name;
-    case "argument":
-      return `${role.callee}()`;
-    case "other":
-      return "";
-  }
-};
-
-/**
- * The param a control for this number edits: the one `schema` declares for it, else a range around its value with a
- * step as fine as it is written, named for where it sits.
- */
-export const paramFor = (literal: LiteralOf<"number">, schema: Schema = {}): NumberParam => {
-  const declared = literal.param && !literal.param.option ? schema[literal.param.key] : undefined;
-
-  if (declared?.kind === "number") return { ...declared, value: literal.value };
-  const v = literal.value;
-  const decimals = decimalsOf(literal.text);
-
-  return {
-    kind: "number",
-    value: v,
-    min: Math.min(0, v * 3),
-    max: Math.max(10, v * 3),
-    step: decimals ? 10 ** -decimals : 1,
-    label: labelOf(literal.role),
-  };
 };
