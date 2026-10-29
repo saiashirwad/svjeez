@@ -1,5 +1,5 @@
 import { createContext } from "svelte";
-import { compilerFor, latestWins } from "../compiler";
+import { compilerFor, latestWins } from "@svjeez/live/client";
 import { svgUrl } from "../util";
 import { defaults, fitValues } from "svjeez/params";
 import { params, type Feel } from "./scene";

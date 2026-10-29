@@ -1,16 +1,19 @@
 {
   "name": "@svjeez/live",
   "private": true,
-  "description": "Scene source as data for the site's editors: parse, highlight and edit TSX, and compile source in the browser. Never published.",
+  "description": "Scene source as data for the site's editors: parse, highlight and edit TSX, compile source in a worker, and edit a scene by the handles on its picture in Svelte. Never published.",
   "license": "MIT",
   "type": "module",
   "exports": {
     "./source": "./src/source.ts",
-    "./compile": "./src/compile.ts"
+    "./doc": "./src/doc.ts",
+    "./compile": "./src/compile.ts",
+    "./client": "./src/client.ts",
+    "./svelte": "./src/svelte/index.ts"
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json --threshold warning"
   },
   "dependencies": {
     "@lezer/common": "^1.5.4",
@@ -28,6 +31,11 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "typescript": "latest"
+    "svelte": "^5.57.3",
+    "svelte-check": "^4.7.7",
+    "typescript": "6"
+  },
+  "peerDependencies": {
+    "svelte": "^5.57.3"
   }
 }

@@ -1,4 +1,5 @@
-import type { Compiled } from "@svjeez/live/compile";
+// The page side of a compile worker: one promise per job, and a queue that keeps only the newest job.
+import type { Compiled } from "./compile";
 
 /**
  * A client for a worker that answers `{ id, ...Compiled }` to `{ id, ...message(job) }`. A worker that fails to load
@@ -36,12 +37,12 @@ export const compilerFor = <Job>(worker: Worker, message: (job: Job) => object) 
         });
 };
 
-/** Scene source in, compiled file out, on the playground's worker. */
-export const createCompiler = () =>
-  compilerFor<string>(
-    new Worker(new URL("../playground/worker.ts", import.meta.url), { type: "module" }),
-    (source) => ({ source }),
-  );
+/** A worker that compiles scene source with `compileScene`. */
+export const sceneWorker = () =>
+  new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+
+/** Scene source in, compiled file out, on a worker of its own. */
+export const createCompiler = () => compilerFor<string>(sceneWorker(), (source) => ({ source }));
 
 /**
  * Runs jobs one at a time, and while one runs keeps only the newest of the jobs that arrive, so a drag never builds a

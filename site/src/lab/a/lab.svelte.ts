@@ -3,7 +3,7 @@ import { createContext, untrack } from "svelte";
 import { restyle } from "svjeez";
 import { seek } from "svjeez/page";
 import type { Compiled } from "@svjeez/live/compile";
-import { compilerFor, latestWins } from "../compiler";
+import { compilerFor, latestWins } from "@svjeez/live/client";
 import { svgUrl } from "../util";
 import initial from "./meadow.tsx?raw";
 import meadow from "./meadow.tsx?svjeez";

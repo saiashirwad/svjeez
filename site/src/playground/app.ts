@@ -1,3 +1,4 @@
+import { sceneWorker } from "@svjeez/live/client";
 import type { Compiled, SceneStats, SourceError } from "@svjeez/live/compile";
 import { EditorView, editorState } from "./editor";
 import { examples, type PlaygroundExample } from "./examples";
@@ -14,7 +15,7 @@ const createCompiler = () => {
   let next = 0;
 
   const start = () => {
-    worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+    worker = sceneWorker();
     worker.onmessage = ({ data }: MessageEvent<{ id: number } & Compiled>) => {
       waiting.get(data.id)?.(data);
       waiting.delete(data.id);

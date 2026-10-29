@@ -1,6 +1,6 @@
 import { createContext, untrack } from "svelte";
 import { restyle } from "svjeez";
-import { compilerFor } from "../compiler";
+import { compilerFor } from "@svjeez/live/client";
 import { svgUrl } from "../util";
 import { outlineOf, type Outline, type Point } from "./outline";
 import first from "./first.tsx?svjeez";

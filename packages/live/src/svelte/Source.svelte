@@ -1,10 +1,21 @@
+<!--
+  The scene's source as it now stands, highlighted, with each param's value marked and the active one marked more.
+  Long lines scroll sideways. Colours come from the page: --win-bg, --line, --muted, --mono, --radius, --ring, --shadow,
+  --out, and --code-plain, -keyword, -string, -number, -fn, -tag, -punct, -comment and -muted.
+-->
 <script lang="ts">
-  import { linesOf, parse } from "@svjeez/live/source";
+  import { linesOf, parse } from "../source";
 
-  let { file, source, active }: { file: string; source: string; active: string | null } = $props();
+  let {
+    scene,
+    file,
+  }: { scene: { readonly source: string; readonly active: string | null }; file: string } =
+    $props();
 
   /** The file as highlighted lines, with each param's value a piece of its own. */
-  const lines = $derived(linesOf(parse(source.trimEnd()), (l) => !!l.param && !l.param.option));
+  const lines = $derived(
+    linesOf(parse(scene.source.trimEnd()), (l) => !!l.param && !l.param.option),
+  );
 </script>
 
 <section class="window" aria-label="Scene source">
@@ -12,7 +23,7 @@
   <pre class="code"><code
       >{#each lines as line (line.n)}<span class="line"
           >{#each line.pieces as piece (piece.start)}{#if piece.kind === "literal"}<mark
-                class={{ active: piece.literal.param?.key === active }}>{piece.text}</mark
+                class={{ active: piece.literal.param?.key === scene.active }}>{piece.text}</mark
               >{:else}<span class="c-{piece.kind}">{piece.text}</span>{/if}{/each}</span
         >{/each}</code
     ></pre>

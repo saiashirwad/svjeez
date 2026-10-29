@@ -2,7 +2,7 @@
 // the scene source, recompiles it in the playground's worker and shows the real SVG.
 import { createContext } from "svelte";
 import { restyle } from "svjeez";
-import { createCompiler, latestWins } from "../compiler";
+import { createCompiler, latestWins } from "@svjeez/live/client";
 import { clamp, svgUrl } from "../util";
 import {
   curve,

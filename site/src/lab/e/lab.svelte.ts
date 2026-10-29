@@ -1,7 +1,7 @@
 import { createContext } from "svelte";
 import { restyle } from "svjeez";
 import type { Compiled } from "@svjeez/live/compile";
-import { compilerFor, latestWins } from "../compiler";
+import { compilerFor, latestWins } from "@svjeez/live/client";
 import { svgUrl } from "../util";
 import type { At } from "./drags";
 import { carryDrag, type Carrying } from "./drags";
