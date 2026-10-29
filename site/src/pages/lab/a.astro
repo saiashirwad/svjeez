@@ -1,0 +1,67 @@
+---
+import Base from "../../layouts/Base.astro";
+import "../../lab/a/lab.css";
+---
+
+<Base title="Lab A · svjeez" description="The code is the control panel: drag a number, bend an ease, and a new SVG compiles in your browser." wide>
+  <main class="la" data-lab-a>
+    <header class="la-head">
+      <p class="la-kicker">Lab A</p>
+      <h1>The code is the control panel.</h1>
+      <p class="la-lede">
+        Drag any <span class="la-chip la-chip-num">number</span> sideways. Drag a
+        <span class="la-chip la-chip-color"><i></i>color</span> to turn its hue. Click a
+        <span class="la-chip la-chip-ease"><svg viewBox="-2 -8 28 28" aria-hidden="true"><path d="M0 18C6 -6 10 0 24 0"></path></svg>curve</span>
+        to bend it. Every change compiles a new SVG file, right here in your browser.
+      </p>
+    </header>
+
+    <div class="la-grid">
+      <section class="la-win la-codewin" aria-label="Scene source">
+        <div class="la-bar-top">
+          <span class="la-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="la-file">meadow.tsx</span>
+          <button type="button" class="la-btn la-reset">Reset</button>
+        </div>
+        <div class="la-code" spellcheck="false"></div>
+      </section>
+
+      <section class="la-out" aria-label="The compiled SVG">
+        <div class="la-stage">
+          <img class="la-img" alt="The compiled meadow scene" />
+          <div class="la-ghost" aria-hidden="true"></div>
+          <div class="la-boxes" aria-hidden="true"></div>
+        </div>
+
+        <div class="la-timeline">
+          <div class="la-tl-head">
+            <button type="button" class="la-btn la-play">Pause</button>
+            <span class="la-time">0.00s</span>
+            <span class="la-tl-hint">Drag across the lanes to scrub the file’s own clock.</span>
+          </div>
+          <div class="la-lanes">
+            <div class="la-ticks"></div>
+            <div class="la-rows"></div>
+            <div class="la-playhead"></div>
+          </div>
+        </div>
+
+        <p class="la-error" role="status" hidden></p>
+        <p class="la-stats" aria-live="off"></p>
+        <a class="la-download" download="meadow.svg">Download this file</a>
+      </section>
+    </div>
+
+    <div class="la-hud" hidden><span class="la-hud-track"><i></i></span><span class="la-hud-label"></span></div>
+    <div class="la-ease-pop" hidden>
+      <svg viewBox="0 0 200 240"></svg>
+      <code class="la-ease-text"></code>
+      <p>Drag the two handles. Above the box is overshoot.</p>
+    </div>
+    <input class="la-color-input" type="color" tabindex="-1" aria-hidden="true" />
+  </main>
+</Base>
+
+<script>
+  import "../../lab/a/app";
+</script>

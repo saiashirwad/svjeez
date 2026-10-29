@@ -1,0 +1,36 @@
+import { ease, motion, render } from "svjeez";
+
+const sky = "#BFE6FF";
+const sun = "#FFC23D";
+const petal = "#FF5D8F";
+const grass = "#3C9D5D";
+
+const flowers = 5;
+const gap = 85;
+const stagger = 0.18;
+const beat = 1;
+const rise = ease.bezier(0.2, 0.8, 0.2, 1);
+const pop = ease.bezier(0.3, 1.8, 0.5, 1);
+
+export default () => render(
+  { width: 480, height: 300, duration: 6, title: "Meadow" },
+  <>
+    <rect width={480} height={300} fill={sky} />
+    <circle cx={360} cy={90} r={34} fill={sun} animation={motion({ y: 160 })
+      .to({ y: 0 }, 1.4, rise)
+      .at(5.2).to({ y: 160 }, 0.8, ease.in)} />
+    {Array.from({ length: flowers }, (_, i) => (
+      <g transform={`translate(${240 + (i - (flowers - 1) / 2) * gap} 240)`}>
+        <g animation={motion({ y: 120 })
+          .at(0.8 + i * stagger).to({ y: 0 }, 0.6, pop)
+          .at(4.8).to({ y: 120 }, 0.4, ease.in)}>
+          <path d="M0 0V-64" stroke={grass} strokeWidth={5} strokeLinecap="round" />
+          <circle cy={-70} r={16} fill={petal} animation={motion({ scale: 1 })
+            .to({ scale: 1.3 }, 0.12)
+            .to({ scale: 1 }, 0.4).loop(beat)} />
+        </g>
+      </g>
+    ))}
+    <path d="M0 236Q120 206 240 236T480 236V300H0Z" fill={grass} />
+  </>
+);
