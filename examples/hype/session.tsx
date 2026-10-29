@@ -1,8 +1,8 @@
 import { def, ease, motion, rect, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
-import { appWindow, code, cut, typewriter, type CodePiece } from "svjeez/extras";
+import { appWindow, code, shot, typewriter, type CodePiece } from "svjeez/extras";
 import { mono, theme } from "../style";
 import { COLD } from "./cold";
-import { C, rise, show } from "./kit";
+import { C, show } from "./kit";
 
 const TERM_AT = COLD.at + COLD.over;
 const FS = 15;
@@ -362,17 +362,15 @@ const spinner = (
 );
 
 export const terminalShot = (
-  <g animation={cut(TERM)}>
-    <g animation={rise(TERM.at, 0.5, 20)}>
-      {shell.node}
-      <g clipPath={body}>
-        <g animation={follow((t) => -scroll(t) * ROW)}>
-          {lines.map(({ at, node }) => (
-            <g animation={show(at)}>{node}</g>
-          ))}
-          {spinner}
-          <g animation={show(welcomeAt)}>{inputBox}</g>
-        </g>
+  <g animation={shot(TERM, { enter: "rise", exit: "zoom" })}>
+    {shell.node}
+    <g clipPath={body}>
+      <g animation={follow((t) => -scroll(t) * ROW)}>
+        {lines.map(({ at, node }) => (
+          <g animation={show(at)}>{node}</g>
+        ))}
+        {spinner}
+        <g animation={show(welcomeAt)}>{inputBox}</g>
       </g>
     </g>
   </g>

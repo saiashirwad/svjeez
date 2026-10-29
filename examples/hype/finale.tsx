@@ -1,5 +1,17 @@
-import { Glyphs, draw, ease, enter, motion } from "svjeez";
-import { code, cut, typewriter } from "svjeez/extras";
+import {
+  chartBar,
+  code as codeIcon,
+  bolt,
+  mathFunction,
+  icons,
+  rocket,
+  sitemap,
+  typography,
+  video,
+  world,
+} from "@svjeez/icons/tabler";
+import { Glyphs, Icon, draw, ease, enter, motion } from "svjeez";
+import { code, shot, typewriter } from "svjeez/extras";
 import { mono, theme } from "../style";
 import { C, centered, display, rise, show, W } from "./kit";
 import { HAND } from "./write";
@@ -14,7 +26,7 @@ const FACT = 64;
 export const FACTS_SPAN = { at: HAND.at + HAND.over, over: 3.4 };
 
 export const facts = (
-  <g animation={cut(FACTS_SPAN)}>
+  <g animation={shot(FACTS_SPAN, { exit: "zoom" })}>
     {FACTS.map((fact, i) => {
       const x = (W - display.measure(fact.lead + fact.rest, FACT)) / 2;
       const y = 270 + i * 110;
@@ -54,7 +66,61 @@ const installCode = code([[["blue", "❯"], " ", ["plain", INSTALL]]], {
 });
 
 const install = typewriter(installCode, { at: END_AT + 1.8, cps: 34, cursor: C.accent });
-export const D = install.end + 3.2;
+const PACKAGES = [
+  ["charts", chartBar],
+  ["code", codeIcon],
+  ["fonts", typography],
+  ["geo", world],
+  ["icons", icons],
+  ["math", mathFunction],
+  ["mermaid", sitemap],
+  ["video", video],
+  ["vite", bolt],
+  ["astro", rocket],
+] as const;
+
+const CHIP = { h: 34, gap: 10, icon: 16, pad: 14, fontSize: 14 };
+const chipW = (name: string) => CHIP.pad * 2 + CHIP.icon + 8 + mono.measure(name, CHIP.fontSize);
+const rowW = PACKAGES.reduce((w, [name]) => w + chipW(name), 0) + CHIP.gap * (PACKAGES.length - 1);
+const chipsAt = install.end + 0.25;
+
+/** The family, one chip per package, left to right. */
+const chips = PACKAGES.map(([name, icon], i) => {
+  const x = (W - rowW) / 2 + PACKAGES.slice(0, i).reduce((w, [n]) => w + chipW(n) + CHIP.gap, 0);
+  const y = 530;
+
+  return (
+    <g animation={rise(chipsAt + i * 0.06, 0.4, 10)}>
+      <rect
+        x={x}
+        y={y}
+        width={chipW(name)}
+        height={CHIP.h}
+        rx={CHIP.h / 2}
+        fill="none"
+        stroke={C.hairline}
+      />
+      <Icon
+        icon={icon}
+        x={x + CHIP.pad}
+        y={y + (CHIP.h - CHIP.icon) / 2}
+        size={CHIP.icon}
+        stroke={C.accent}
+      />
+      <text
+        x={x + CHIP.pad + CHIP.icon + 8}
+        y={y + CHIP.h / 2 + 5}
+        fontSize={CHIP.fontSize}
+        fill={C.text}
+      >
+        {name}
+      </text>
+    </g>
+  );
+});
+
+const sizeAt = chipsAt + PACKAGES.length * 0.06 + 0.5;
+export const D = sizeAt + 3;
 
 export const finale = (size: string) => (
   <g animation={show(END_AT)}>
@@ -105,8 +171,9 @@ export const finale = (size: string) => (
       />
     </g>
     {install.node}
-    <g animation={rise(install.end + 0.5, 0.6, 8)}>
-      <text x={W / 2} y={620} fontSize={14} textAnchor="middle" fill={C.soft}>
+    {chips}
+    <g animation={rise(sizeAt, 0.6, 8)}>
+      <text x={W / 2} y={622} fontSize={14} textAnchor="middle" fill={C.soft}>
         {"this entire video is "}
         <tspan fill={C.ink}>{`one ${size} SVG`}</tspan>
         {". no video file, no JavaScript."}

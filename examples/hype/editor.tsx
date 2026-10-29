@@ -1,43 +1,9 @@
 import { ease, enter, motion, rect } from "svjeez";
-import {
-  Marker,
-  appWindow,
-  code,
-  cut,
-  typewriter,
-  type CodePiece,
-  type CodeRole,
-} from "svjeez/extras";
+import { highlight } from "@svjeez/code";
+import { Marker, appWindow, code, shot, typewriter } from "svjeez/extras";
 import { mono, theme } from "../style";
 import { C, rise, show } from "./kit";
 import { TERM } from "./session";
-
-// No highlighter ships with the library; one regex with a named group per role covers this screen of TSX.
-const TOKEN =
-  /(?<string>"[^"]*")|(?<number>\b\d+(?:\.\d+)?)|(?<keyword>\b(?:import|from|export|default)\b)|(?<fn>\w+(?=\())|(?<type>\w+(?==))|(?<tag>(?<=<\/?)[a-z]+)|(?<punct>[^\s\w"]+)/g;
-
-const ROLES = [
-  "string",
-  "number",
-  "keyword",
-  "fn",
-  "type",
-  "tag",
-  "punct",
-] as const satisfies readonly CodeRole[];
-
-const highlight = (source: string): CodePiece[] => {
-  const out: CodePiece[] = [];
-  let end = 0;
-
-  for (const m of source.matchAll(TOKEN)) {
-    const role = ROLES.find((r) => m.groups?.[r])!;
-    out.push(source.slice(end, m.index), [role, m[0]]);
-    end = m.index + m[0].length;
-  }
-
-  return [...out, source.slice(end)].filter(Boolean);
-};
 
 const SOURCE = [
   `import { draw, ease, enter, motion, render } from "svjeez";`,
@@ -59,7 +25,7 @@ const CODE_AT = TERM.at + TERM.over;
 const editor = appWindow(rect(40, 96, 810, 568), { theme, title: "launch.tsx" });
 const preview = appWindow(rect(870, 96, 370, 568), { theme, title: "dist/launch.svg" });
 
-const src = code(SOURCE.map(highlight), {
+const src = code(highlight(SOURCE.join("\n"), "tsx"), {
   theme,
   font: mono,
   fontSize: 16.5,
@@ -209,7 +175,7 @@ const previewArt = (
 const lineRect = (first: number, last = first) => src.lines(first, last).pad(4);
 
 export const codeShot = (
-  <g animation={cut(CODE)}>
+  <g animation={shot(CODE, { exit: "rise" })}>
     <g animation={rise(CODE.at, 0.45, 20)}>
       {editor.node}
       <g

@@ -1,5 +1,5 @@
 import { ease, motion } from "svjeez";
-import { code, cut, typewriter } from "svjeez/extras";
+import { code, shot, typewriter } from "svjeez/extras";
 import { mono, theme } from "../style";
 import { C, H, W, rise } from "./kit";
 
@@ -23,7 +23,7 @@ const enterAt = opening.end + 0.35;
 export const COLD = { at: 0, over: enterAt + 1.9 };
 
 export const coldOpen = (
-  <g animation={cut(COLD)}>
+  <g animation={shot(COLD, { exit: "rise" })}>
     <g animation={motion({ y: 0 }).at(enterAt).to({ y: -28 }, 0.5, ease.inOut)}>
       {opening.node}
       <g animation={rise(enterAt + 0.15, 0.45, 10)}>

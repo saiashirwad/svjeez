@@ -5,7 +5,7 @@ import { theme } from "../style";
 export const W = 1280;
 export const H = 720;
 
-export const display = await google("Archivo Black");
+export const display = await google("Inter Tight", { weight: 800 });
 
 export const hand = await strokeFont.load(new URL("../fonts/EMSAllure.svg", import.meta.url));
 
