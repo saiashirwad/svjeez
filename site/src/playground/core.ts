@@ -149,11 +149,12 @@ const run = async (source: string): Promise<string> => {
   return svg;
 };
 
-export const compileScene = async (source: string): Promise<Compiled> => {
+/** Runs `make`, then measures the file it returns. Whatever it throws comes back as the error. */
+const outcome = async (make: () => Promise<string>): Promise<Compiled> => {
   const start = performance.now();
 
   try {
-    const svg = await run(source);
+    const svg = await make();
     const stats = await measure(svg);
 
     return { ok: true, svg, stats, ms: performance.now() - start };
@@ -170,3 +171,8 @@ export const compileScene = async (source: string): Promise<Compiled> => {
     };
   }
 };
+
+export const compileScene = (source: string): Promise<Compiled> => outcome(() => run(source));
+
+/** For a page that ships its scene as code instead of source text: calls `build` and measures what it returns. */
+export const compileBuild = (build: () => string): Promise<Compiled> => outcome(async () => build());

@@ -1,7 +1,7 @@
-import { createCompiler, latestWins } from "../compiler";
+import { compilerFor, latestWins } from "../compiler";
 import { $, $$, svgUrl } from "../util";
-import sceneSource from "./catoid.tsx?raw";
-import { layout, type Layout, W, H } from "./catoid";
+import { DURATION, H, W } from "./geometry";
+import { layout, type Layout } from "./layout";
 import {
   breed,
   certificate,
@@ -17,11 +17,8 @@ import {
   type Genome,
 } from "./genome";
 
-const DURATION = 8;
 const SHELF_SIZE = 18;
 const STORE = "svjeez-lab-e-shelf";
-
-const sourceFor = (g: Genome) => sceneSource.replace(/\/\*genome\*\/.*?\/\*end\*\//s, () => `/*genome*/ ${JSON.stringify(g)} /*end*/`);
 
 // ---------- state ----------
 
@@ -49,7 +46,7 @@ const set = (next: Genome, opts: { lineage?: string; shelve?: boolean } = {}) =>
 
 // ---------- compiling ----------
 
-const compile = createCompiler();
+const compile = compilerFor<Genome>(new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }), (genome) => ({ genome }));
 
 const img = $<HTMLImageElement>("[data-stage]");
 const statFile = $("[data-file]");
@@ -91,7 +88,7 @@ const show = (svg: string) =>
   });
 
 const draw = async ({ genome: g, shelve: keep }: Job) => {
-  const result = await compile(sourceFor(g));
+  const result = await compile(g);
   if (result.ok) {
     await show(result.svg);
     const no = specimenNo(g);
@@ -190,7 +187,7 @@ const restoreShelf = async () => {
   paintShelf();
   for (const s of [...shelf]) {
     if (s.thumb) continue;
-    const r = await compile(sourceFor(s.genome));
+    const r = await compile(s.genome);
     if (r.ok && !s.thumb && shelf.includes(s)) s.thumb = svgUrl(still(r.svg, 1.4));
   }
   paintShelf();
