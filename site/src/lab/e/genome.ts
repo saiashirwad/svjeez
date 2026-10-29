@@ -50,38 +50,62 @@ export interface Genome {
   readonly ink: number;
 }
 
-type Numeric = { [K in keyof Genome]: Genome[K] extends number ? K : never }[keyof Genome];
-type Choice = { [K in keyof Genome]: Genome[K] extends string ? K : never }[keyof Genome];
+type GeneKey = Exclude<keyof Genome, "seed">;
 
-/** Every number gene's range and step. Clamping and mutation both read it. */
-export const RANGES: Record<Exclude<Numeric, "seed">, { min: number; max: number; step: number }> = {
-  length: { min: 0.4, max: 12, step: 0.1 },
-  girth: { min: 16, max: 72, step: 1 },
-  heads: { min: 0, max: 5, step: 1 },
-  ears: { min: 0, max: 6, step: 1 },
-  eyes: { min: 0, max: 7, step: 1 },
-  bodyEyes: { min: 0, max: 9, step: 1 },
-  legs: { min: 0, max: 12, step: 1 },
-  legLength: { min: 0.3, max: 2.6, step: 0.05 },
-  tails: { min: 0, max: 5, step: 1 },
-  tailLength: { min: 0.3, max: 3, step: 0.05 },
-  tailAt: { min: 0, max: 1, step: 0.01 },
-  slice: { min: 0, max: 1, step: 0.01 },
-  oidness: { min: 0, max: 1, step: 0.01 },
-  ink: { min: 0, max: 3, step: 0.1 },
-};
+export interface NumberSpec {
+  readonly kind: "number";
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+  /** A random value is drawn toward `min` by this exponent. */
+  readonly skew?: number;
+  /** The most a mutation that goes too far may push this gene to. */
+  readonly extremeCap?: number;
+}
+export interface ChoiceSpec<T extends string> {
+  readonly kind: "choice";
+  readonly options: readonly T[];
+}
+type SpecOf<K extends GeneKey> = [Genome[K]] extends [number] ? NumberSpec : [Genome[K]] extends [infer V extends string] ? ChoiceSpec<V> : never;
 
-export const CHOICES: { readonly [K in Choice]: readonly Genome[K][] } = {
-  plan: PLANS,
-  arrangement: ARRANGEMENTS,
-  legSide: SIDES,
-  tip: TIPS,
-  dimension: DIMENSIONS,
-  oid: OIDS,
-  fur: FURS,
-  pattern: PATTERNS,
-  quirk: QUIRKS,
-};
+/**
+ * Every gene but the seed: its range and step, or its options. Clamping, mutation, breeding and the controls all read
+ * it. Numbers come first, in the order mutation draws them.
+ */
+export const SPEC = {
+  length: { kind: "number", min: 0.4, max: 12, step: 0.1, skew: 2.2, extremeCap: 9 },
+  girth: { kind: "number", min: 16, max: 72, step: 1 },
+  heads: { kind: "number", min: 0, max: 5, step: 1 },
+  ears: { kind: "number", min: 0, max: 6, step: 1 },
+  eyes: { kind: "number", min: 0, max: 7, step: 1 },
+  bodyEyes: { kind: "number", min: 0, max: 9, step: 1 },
+  legs: { kind: "number", min: 0, max: 12, step: 1 },
+  legLength: { kind: "number", min: 0.3, max: 2.6, step: 0.05 },
+  tails: { kind: "number", min: 0, max: 5, step: 1 },
+  tailLength: { kind: "number", min: 0.3, max: 3, step: 0.05 },
+  tailAt: { kind: "number", min: 0, max: 1, step: 0.01 },
+  slice: { kind: "number", min: 0, max: 1, step: 0.01 },
+  oidness: { kind: "number", min: 0, max: 1, step: 0.01 },
+  ink: { kind: "number", min: 0, max: 3, step: 0.1 },
+  plan: { kind: "choice", options: PLANS },
+  arrangement: { kind: "choice", options: ARRANGEMENTS },
+  legSide: { kind: "choice", options: SIDES },
+  tip: { kind: "choice", options: TIPS },
+  dimension: { kind: "choice", options: DIMENSIONS },
+  oid: { kind: "choice", options: OIDS },
+  fur: { kind: "choice", options: FURS },
+  pattern: { kind: "choice", options: PATTERNS },
+  quirk: { kind: "choice", options: QUIRKS },
+} as const satisfies { readonly [K in GeneKey]: SpecOf<K> };
+
+export type NumericKey = { [K in GeneKey]: Genome[K] extends number ? K : never }[GeneKey];
+export type ChoiceKey = Exclude<GeneKey, NumericKey>;
+
+const KEYS = Object.keys(SPEC).filter((key): key is GeneKey => key in SPEC);
+
+export const isNumeric = (key: keyof Genome): key is NumericKey => key !== "seed" && SPEC[key].kind === "number";
+export const numberSpec = (key: NumericKey): NumberSpec => SPEC[key];
+export const choiceSpec = (key: ChoiceKey): ChoiceSpec<Genome[ChoiceKey]> => SPEC[key];
 
 export const CAT: Genome = {
   seed: 412,
@@ -115,10 +139,17 @@ export const FIRST: Genome = { ...CAT, length: 3.4, heads: 2, tailAt: 0.5, legs:
 
 const roundTo = (v: number, step: number) => Number((Math.round(v / step) * step).toFixed(4));
 
-export const clampGene = <K extends Exclude<Numeric, "seed">>(key: K, v: number): number => {
-  const { min, max, step } = RANGES[key];
+export const clampGene = (key: NumericKey, v: number): number => {
+  const { min, max, step } = numberSpec(key);
   return roundTo(Math.min(max, Math.max(min, v)), step);
 };
+
+export const withGene = <K extends keyof Genome>(g: Genome, key: K, value: Genome[K]): Genome => ({
+  ...g,
+  [key]: isNumeric(key) && typeof value === "number" ? clampGene(key, value) : value,
+});
+
+const oneOf = <T extends string>(options: readonly T[], v: unknown): v is T => options.some((o) => o === v);
 
 /**
  * A genome read back from storage. Numbers are clamped, choices must be real, and a gene the saved genome lacks takes
@@ -126,48 +157,54 @@ export const clampGene = <K extends Exclude<Numeric, "seed">>(key: K, v: number)
  */
 export const parseGenome = (raw: unknown): Genome | undefined => {
   if (typeof raw !== "object" || raw === null) return undefined;
-  const saved = raw as Record<string, unknown>;
-  const out: Record<string, unknown> = {};
-  for (const key of Object.keys(FIRST) as (keyof Genome)[]) {
-    const v = saved[key] ?? FIRST[key];
-    if (key === "seed") {
-      if (typeof v !== "number" || !Number.isInteger(v) || v < 0 || v > 9999) return undefined;
-      out[key] = v;
-    } else if (key in RANGES) {
+  const seed = Reflect.get(raw, "seed") ?? FIRST.seed;
+  if (typeof seed !== "number" || !Number.isInteger(seed) || seed < 0 || seed > 9999) return undefined;
+  let g: Genome = { ...FIRST, seed };
+  for (const key of KEYS) {
+    const v: unknown = Reflect.get(raw, key);
+    if (v === undefined) continue;
+    if (isNumeric(key)) {
       if (typeof v !== "number" || !Number.isFinite(v)) return undefined;
-      out[key] = clampGene(key as Exclude<Numeric, "seed">, v);
+      g = withGene(g, key, v);
     } else {
-      if (!(CHOICES[key as Choice] as readonly unknown[]).includes(v)) return undefined;
-      out[key] = v;
+      const options = choiceSpec(key).options;
+      if (!oneOf(options, v)) return undefined;
+      g = withGene(g, key, v);
     }
   }
-  return out as unknown as Genome;
+  return g;
 };
 
-export const withGene = <K extends keyof Genome>(g: Genome, key: K, value: Genome[K]): Genome => ({
-  ...g,
-  [key]: key in RANGES ? clampGene(key as Exclude<Numeric, "seed">, value as number) : value,
-});
+/** The number gene a control names. Throws on a name the page markup should never hold. */
+export const numericKey = (name: string | undefined): NumericKey => {
+  const key = KEYS.find((k): k is NumericKey => k === name && isNumeric(k));
+  if (!key) throw new Error(`No number gene named ${name}`);
+  return key;
+};
+
+/** Sets the choice gene a control names to one of its options. */
+export const withChoice = (g: Genome, name: string | undefined, value: string | undefined): Genome => {
+  for (const key of KEYS) {
+    if (key !== name || isNumeric(key)) continue;
+    const options = choiceSpec(key).options;
+    if (oneOf(options, value)) return withGene(g, key, value);
+  }
+  throw new Error(`No option ${value} for gene ${name}`);
+};
 
 const pick = <T>(xs: readonly T[], r = Math.random()) => xs[Math.floor(r * xs.length)]!;
-const NUMERIC = Object.keys(RANGES) as Exclude<Numeric, "seed">[];
-const CHOICE = Object.keys(CHOICES) as Choice[];
-const GENES = [...NUMERIC, ...CHOICE];
 
-const randomValue = (key: (typeof GENES)[number]): number | string => {
-  if (key in RANGES) {
-    const { min, max } = RANGES[key as Exclude<Numeric, "seed">];
-    // Lengths skew short so a tube is a find, not the norm.
-    const r = key === "length" ? Math.random() ** 2.2 : Math.random();
-    return clampGene(key as Exclude<Numeric, "seed">, min + r * (max - min));
-  }
-  return pick(CHOICES[key as Choice]);
+const randomValue = (key: GeneKey): number | string => {
+  if (!isNumeric(key)) return pick(choiceSpec(key).options);
+  const { min, max, skew } = numberSpec(key);
+  const r = skew ? Math.random() ** skew : Math.random();
+  return clampGene(key, min + r * (max - min));
 };
 
 const reseed = () => Math.floor(Math.random() * 9999);
 
 export const random = (): Genome =>
-  GENES.reduce<Genome>((g, key) => ({ ...g, [key]: randomValue(key) }), { ...CAT, seed: reseed() });
+  KEYS.reduce<Genome>((g, key) => ({ ...g, [key]: randomValue(key) }), { ...CAT, seed: reseed() });
 
 export interface Mutation {
   readonly genome: Genome;
@@ -179,35 +216,31 @@ export interface Mutation {
 /** Nudges one to three genes. One time in seven it pushes every gene to an end of its range. */
 export const mutate = (g: Genome): Mutation => {
   if (Math.random() < 1 / 7) {
-    const extreme = GENES.reduce<Genome>((out, key) => {
-      if (!(key in RANGES)) return { ...out, [key]: randomValue(key) };
-      const { min, max } = RANGES[key as Exclude<Numeric, "seed">];
+    const extreme = KEYS.reduce<Genome>((out, key) => {
+      if (!isNumeric(key)) return { ...out, [key]: randomValue(key) };
+      const { min, max, extremeCap = Infinity } = numberSpec(key);
       const end = Math.random() < 0.75 ? max : min;
-      return { ...out, [key]: clampGene(key as Exclude<Numeric, "seed">, end + (Math.random() - 0.5) * (max - min) * 0.2) };
+      return { ...out, [key]: Math.min(clampGene(key, end + (Math.random() - 0.5) * (max - min) * 0.2), extremeCap) };
     }, g);
-    return { genome: { ...extreme, seed: reseed(), length: Math.min(extreme.length, 9) }, tooFar: true, changed: GENES };
+    return { genome: { ...extreme, seed: reseed() }, tooFar: true, changed: KEYS };
   }
   const count = 1 + Math.floor(Math.random() * 3);
-  const changed = Array.from({ length: count }, () => pick(GENES));
+  const changed = Array.from({ length: count }, () => pick(KEYS));
   const genome = changed.reduce<Genome>((out, key) => {
-    if (!(key in RANGES)) return { ...out, [key]: randomValue(key) };
-    const { min, max, step } = RANGES[key as Exclude<Numeric, "seed">];
+    if (!isNumeric(key)) return { ...out, [key]: randomValue(key) };
+    const { min, max, step } = numberSpec(key);
     const span = Math.max((max - min) * 0.35, step * 1.5);
-    const v = (out[key] as number) + (Math.random() - 0.4) * span;
-    return { ...out, [key]: clampGene(key as Exclude<Numeric, "seed">, v) };
+    return { ...out, [key]: clampGene(key, out[key] + (Math.random() - 0.4) * span) };
   }, g);
   return { genome: { ...genome, seed: Math.random() < 0.3 ? reseed() : genome.seed }, tooFar: false, changed };
 };
 
 /** Each gene from one parent or the other; numbers sometimes land between them. */
 export const breed = (a: Genome, b: Genome): Genome =>
-  GENES.reduce<Genome>(
+  KEYS.reduce<Genome>(
     (out, key) => {
       const from = Math.random() < 0.5 ? a : b;
-      if (key in RANGES && Math.random() < 0.4) {
-        const mid = ((a[key] as number) + (b[key] as number)) / 2;
-        return { ...out, [key]: clampGene(key as Exclude<Numeric, "seed">, mid) };
-      }
+      if (isNumeric(key) && Math.random() < 0.4) return { ...out, [key]: clampGene(key, (a[key] + b[key]) / 2) };
       return { ...out, [key]: from[key] };
     },
     { ...a, seed: reseed() },

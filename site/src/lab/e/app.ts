@@ -5,15 +5,17 @@ import { layout, type Layout } from "./layout";
 import {
   breed,
   certificate,
-  clampGene,
   FIRST,
   mutate,
   parseGenome,
+  numberSpec,
+  numericKey,
   random,
-  RANGES,
   specimenNo,
   taxon,
+  withChoice,
   withGene,
+  type NumericKey,
   type Genome,
 } from "./genome";
 
@@ -273,7 +275,7 @@ const carryDrag = (
 
 // ---------- genes ----------
 
-const UNITS: Partial<Record<keyof typeof RANGES, (v: number) => string>> = {
+const UNITS: Partial<Record<NumericKey, (v: number) => string>> = {
   length: (v) => `${v.toFixed(1)} cats`,
   girth: (v) => `${v} px girth`,
   legLength: (v) => `${v.toFixed(2)}× legs`,
@@ -285,13 +287,13 @@ const UNITS: Partial<Record<keyof typeof RANGES, (v: number) => string>> = {
 
 const paintControls = () => {
   for (const b of $$<HTMLButtonElement>("[data-gene]")) {
-    const on = String(genome[b.dataset.gene as keyof Genome]) === b.dataset.value;
+    const on = String(Reflect.get(genome, b.dataset.gene ?? "")) === b.dataset.value;
     b.setAttribute("aria-checked", String(on));
   }
   for (const b of $$<HTMLButtonElement>("[data-scrub]")) {
-    const key = b.dataset.scrub as keyof typeof RANGES;
+    const key = numericKey(b.dataset.scrub);
     const v = genome[key];
-    const { min, max } = RANGES[key];
+    const { min, max } = numberSpec(key);
     b.textContent = UNITS[key]?.(v) ?? String(v);
     b.style.setProperty("--p", String((v - min) / (max - min)));
     b.disabled = (key === "slice" && genome.dimension !== "4d") || (key === "oidness" && genome.oid === "cat");
@@ -300,24 +302,24 @@ const paintControls = () => {
 
 for (const b of $$<HTMLButtonElement>("[data-gene]"))
   b.addEventListener("click", () => {
-    set(withGene(genome, b.dataset.gene as keyof Genome, b.dataset.value as never));
+    set(withChoice(genome, b.dataset.gene, b.dataset.value));
     restamp();
   });
 
 /** Drag a value sideways; arrow keys step it. */
 for (const b of $$<HTMLButtonElement>("[data-scrub]")) {
-  const key = b.dataset.scrub as keyof typeof RANGES;
-  const { min, max, step } = RANGES[key];
+  const key = numericKey(b.dataset.scrub);
+  const { min, max, step } = numberSpec(key);
   b.addEventListener("pointerdown", (e) => {
     if (b.disabled) return;
     const v0 = genome[key];
-    drag(e, { move: (m) => set(withGene(genome, key, clampGene(key, v0 + ((m.clientX - e.clientX) / 160) * (max - min)))) });
+    drag(e, { move: (m) => set(withGene(genome, key, v0 + ((m.clientX - e.clientX) / 160) * (max - min))) });
   });
   b.addEventListener("keydown", (e) => {
     const d = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
     if (!d) return;
     e.preventDefault();
-    set(withGene(genome, key, clampGene(key, genome[key] + d * Math.max(step, (max - min) / 40))));
+    set(withGene(genome, key, genome[key] + d * Math.max(step, (max - min) / 40)));
   });
 }
 
