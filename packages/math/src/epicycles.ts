@@ -353,9 +353,11 @@ export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): E
   const ring = tint(theme, "blue");
   const ink = options.color ?? tint(theme, "yellow");
 
+  // Each circle sits inside the one before it and already turns with it, so it spins only by the difference.
   const chain = terms.reduceRight<SvgNode | undefined>((inner, { k, r, phase }, i) => {
     const arm: Point = [r * Math.cos(phase), r * Math.sin(phase)];
     const previous = terms[i - 1];
+    const spin = k - (previous?.k ?? 0);
 
     const offset: Point = previous
       ? [previous.r * Math.cos(previous.phase), previous.r * Math.sin(previous.phase)]
@@ -367,7 +369,7 @@ export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): E
           style: { transformOrigin: "0 0", transformBox: "view-box" },
           animation: motion({ rotate: 0 })
             .at(at)
-            .to({ rotate: 360 * k }, over, ease.linear),
+            .to({ rotate: 360 * spin }, over, ease.linear),
         },
         [
           i < circles
