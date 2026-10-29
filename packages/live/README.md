@@ -26,11 +26,11 @@ editor.send({ type: "replace", text: rewritten }); // typing, or an AI rewrite
 editor.send({ type: "undo" });
 ```
 
-The editor compiles nothing until something subscribes, so a server can render the code panel from `getState()` without starting a worker.
+The editor compiles nothing until something subscribes, so a server can render the code panel from `getState()` without starting a worker. When its last listener unsubscribes it pauses: it stops the worker and holds what it was asked to do, and the next subscribe carries on from there. `destroy()` ends it for good and frees its last picture.
 
 ### Values
 
-`state.values` lists every literal a control can edit, in source order. Each has a `key` that stays with its literal as other values change: `params.swing` for a param, `legs.1.over` for a literal inside a const, else its top-level declaration and its place there, as in `default#3`.
+`state.values` lists every literal a control can edit, in source order. Each has a `key` that stays with its literal as other values change: `params.swing` for a param, `legs.1.over` for a literal inside a top-level const, else its top-level declaration and its place there, as in `default#3`. No two literals share a key.
 
 A number's `param` gives the range a drag moves it through. A scene can declare it with `export const params` from `svjeez/params`; otherwise it is read from where the number sits, so `opacity` runs 0 to 1, `rotate` −360 to 360, and an `at`, an `over` or the length passed to `.to()` is in seconds.
 
@@ -48,7 +48,11 @@ A number's `param` gives the range a drag moves it through. A scene can declare 
 
 ### Handles
 
-A scene that exports `handles` from `svjeez/params` gets a handle on its picture for each number param. `handleOf(state, key)` says where it sits and which way it moves, and `follow` from `svjeez/params` turns a drag into a value.
+A scene that exports `handles` from `svjeez/params` gets a handle on its picture for each number param. `state.grips[key]` says where it sits and which way it moves, and `handleAt(grip, value)` places it for a value. A number with no declared handle gets a measured one while it is selected.
+
+### Gestures
+
+`scrubbing`, `following`, `bending`, `arrowNumber` and `arrowEase` turn a drag or an arrow key into `set` messages that make one undo step, and `selection(editor, key)` selects a value while its control has focus. Each framework's controls only read the DOM events and call these. `stroke(editor, key)` is the primitive under them, for a control of your own.
 
 ### Styles
 

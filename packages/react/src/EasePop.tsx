@@ -1,6 +1,13 @@
-import { bend, bezierOf, curveOf, type ValueOf } from "@svjeez/live";
+import {
+  arrowEase,
+  BEND_Y,
+  bending,
+  bezierOf,
+  curveOf,
+  type Editor,
+  type ValueOf,
+} from "@svjeez/live";
 import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type PointerEvent } from "react";
-import type { SceneEditor } from "./editor.ts";
 
 // The unit square sits low in the box so a curve can overshoot above and below it.
 const W = 200;
@@ -9,15 +16,6 @@ const X = (u: number) => 20 + u * (W - 60);
 const Y = (v: number) => 195 - v * 85;
 const UX = (x: number) => (x - 20) / (W - 60);
 const UY = (y: number) => (195 - y) / 85;
-const MIN_Y = -0.8;
-const MAX_Y = 2.2;
-
-const ARROWS = new Map<string, readonly [number, number]>([
-  ["ArrowLeft", [-1, 0]],
-  ["ArrowRight", [1, 0]],
-  ["ArrowUp", [0, 1]],
-  ["ArrowDown", [0, -1]],
-]);
 
 export function EasePop({
   editor,
@@ -25,7 +23,7 @@ export function EasePop({
   anchor,
   onClose,
 }: {
-  editor: SceneEditor;
+  editor: Editor;
   value: ValueOf<"ease">;
   /** The glyph the popover opened from, which it sits under and returns focus to. */
   anchor: HTMLElement;
@@ -39,8 +37,7 @@ export function EasePop({
 
   const pop = useRef<HTMLSpanElement>(null);
   const svg = useRef<SVGSVGElement>(null);
-  const held = useRef<0 | 1 | null>(null);
-  const going = useRef(false);
+  const drag = useRef<ReturnType<typeof bending> | null>(null);
   const close = useRef(onClose);
   close.current = onClose;
 
@@ -91,49 +88,30 @@ export function EasePop({
     };
   }, [anchor]);
 
-  const set = (which: 0 | 1, x: number, y: number) => {
-    editor.send({
-      type: "set",
-      key: value.key,
-      value: bend(value.literal.value, which, x, Math.min(MAX_Y, Math.max(MIN_Y, y))),
-      continues: going.current,
-    });
-    going.current = true;
-  };
-
   const grab = (e: PointerEvent, which: 0 | 1) => {
     e.preventDefault();
     svg.current?.setPointerCapture(e.pointerId);
-    held.current = which;
-    going.current = false;
+    drag.current = bending(editor, value, which);
   };
 
   const move = (e: PointerEvent) => {
-    const which = held.current;
     const el = svg.current;
 
-    if (which === null || !el) return;
+    if (!drag.current || !el) return;
     const box = el.getBoundingClientRect();
 
-    set(
-      which,
-      UX(((e.clientX - box.left) / box.width) * W),
-      UY(((e.clientY - box.top) / box.height) * H),
-    );
+    drag.current({
+      x: UX(((e.clientX - box.left) / box.width) * W),
+      y: UY(((e.clientY - box.top) / box.height) * H),
+    });
   };
 
   const release = () => {
-    held.current = null;
+    drag.current = null;
   };
 
   const key = (e: KeyboardEvent, which: 0 | 1) => {
-    const by = ARROWS.get(e.key);
-
-    if (!by) return;
-    e.preventDefault();
-    const step = e.shiftKey ? 0.25 : 0.05;
-    going.current = false;
-    set(which, p[which * 2]! + by[0] * step, p[which * 2 + 1]! + by[1] * step);
+    if (arrowEase(editor, value, which, e.key, e.shiftKey)) e.preventDefault();
   };
 
   return (
@@ -159,8 +137,8 @@ export function EasePop({
             tabIndex={0}
             data-which={which}
             aria-label={`${which ? "Second" : "First"} control point`}
-            aria-valuemin={MIN_Y}
-            aria-valuemax={MAX_Y}
+            aria-valuemin={BEND_Y.min}
+            aria-valuemax={BEND_Y.max}
             aria-valuenow={p[which * 2 + 1]}
             aria-valuetext={`x ${p[which * 2]}, y ${p[which * 2 + 1]}`}
             cx={X(p[which * 2]!)}

@@ -123,9 +123,6 @@ export const timeAt = (clock: Clock, now: number): number =>
 export const valueOf = (state: State, key: string): Value | undefined =>
   state.values.find((v) => v.key === key);
 
-/** The handle a value has on the picture, if it has one. */
-export const handleOf = (state: State, key: string): Grip | undefined => state.grips[key];
-
 /** Where a handle sits with its value at `v`, along the way it moves. */
 export const handleAt = (grip: Grip, v: number): Point => ({
   x: grip.at.x + grip.way.x * (v - grip.from),
@@ -155,10 +152,21 @@ const read = (state: Omit<State, "source" | "values" | "lines">): State => {
   };
 };
 
+/**
+ * A picture made at build time, as a `?svjeez` import gives it, to show until the first compile. With its `duration`
+ * the transport works before then too.
+ */
+export interface First {
+  readonly src: string;
+  readonly width: number;
+  readonly height: number;
+  readonly title: string;
+  readonly duration?: number;
+}
+
 export interface Init {
   readonly text: string;
-  /** A picture to show until the first compile, such as the one a `?svjeez` import made at build time. */
-  readonly first?: { readonly url: string; readonly scene: SceneSize };
+  readonly first?: First;
   /** Page time now, in milliseconds. */
   readonly now: number;
 }
@@ -168,7 +176,17 @@ export const init = ({ text, first, now }: Init): [State, Cmd[]] => [
     text,
     schema: {},
     selected: null,
-    picture: first ?? null,
+    picture: first
+      ? {
+          url: first.src,
+          scene: {
+            width: first.width,
+            height: first.height,
+            duration: first.duration ?? 0,
+            title: first.title,
+          },
+        }
+      : null,
     compiled: null,
     grips: {},
     error: null,
@@ -400,7 +418,10 @@ export type Input =
 
 /** The work the runtime does for `update`. A page swaps one out to compile elsewhere, or a test to run without a browser. */
 export interface Effects {
-  /** Compiles the file. A `stop` on it is called when the editor is destroyed. */
+  /**
+   * Compiles the file. A `stop` on it is called whenever the editor goes idle, when its last listener leaves or it is
+   * destroyed, and a compile after a stop starts the compiler again.
+   */
   readonly compile: ((text: string) => Promise<Compiled>) & { readonly stop?: () => void };
   /** An image URL for `svg` started `at` seconds in, playing on or held, once it is ready to draw. */
   readonly show: (svg: string, at: number, playing: boolean) => Promise<string>;
@@ -424,7 +445,11 @@ export interface Editor {
    */
   readonly subscribe: (listener: (state: State) => void) => () => void;
   readonly send: (input: Input) => void;
-  /** Stops the compiler and frees every URL the editor made. */
+  /**
+   * Stops the compiler and frees every URL the editor made, for good. An editor whose last listener unsubscribes only
+   * pauses: it stops its compiler and holds its commands, and the next subscribe picks up where it left off, as a
+   * component hidden and shown again needs.
+   */
   readonly destroy: () => void;
 }
 
@@ -441,12 +466,15 @@ const showInBrowser = async (svg: string, at: number, playing: boolean) => {
   return url;
 };
 
-/** The worker compiler, started on its first compile. */
+/** The worker compiler, started on the first compile after it was made or stopped. */
 const lazyCompiler = (): Effects["compile"] => {
   let compiler: ReturnType<typeof createCompiler> | undefined;
 
   return Object.assign((text: string) => (compiler ??= createCompiler())(text), {
-    stop: () => compiler?.stop(),
+    stop: () => {
+      compiler?.stop();
+      compiler = undefined;
+    },
   });
 };
 
@@ -465,9 +493,11 @@ export const createEditor = (
 
   const listeners = new Set<(state: State) => void>();
   const made = new Set<string>();
-  /** Commands asked for before anything subscribed, run on the first subscribe. */
+  /** Commands asked for while nothing listens, run when something subscribes. */
   let waiting: Cmd[] | null = [];
   let alive = true;
+  /** Bumped on every pause, so a compile the pause cut short is not mistaken for the file's error. */
+  let epoch = 0;
 
   /** A compile that throws, a page's fetch say, fails like a scene that does. */
   const compiling = async (text: string): Promise<Compiled> => {
@@ -484,9 +514,13 @@ export const createEditor = (
     if (made.delete(url)) run.release(url);
   };
 
+  // A compile or probe that a pause stopped, or that was queued behind one, waits with the rest for the next subscribe.
   const compile = latestWins(async (text: string) => {
-    const result = await compiling(text);
-    dispatch({ type: "compiled", text, result, now: run.now() });
+    const started = epoch;
+    const result = waiting ? undefined : await compiling(text);
+
+    if (result && started === epoch) dispatch({ type: "compiled", text, result, now: run.now() });
+    else perform({ type: "compile", text });
   });
 
   const show = latestWins(async (cmd: Extract<Cmd, { type: "show" }>) => {
@@ -498,13 +532,18 @@ export const createEditor = (
   });
 
   const probe = latestWins(async (cmd: Extract<Cmd, { type: "probe" }>) => {
-    const after = await compiling(cmd.nudged);
+    const started = epoch;
+    const after = waiting ? undefined : await compiling(cmd.nudged);
+
+    if (!after || started !== epoch) return perform(cmd);
     const move = after.ok ? await run.measure(cmd.svg, after.svg, cmd.by, cmd.at) : undefined;
     const grip = move ? { ...move, from: cmd.from, declared: false } : null;
     dispatch({ type: "probed", key: cmd.key, text: cmd.text, grip });
   });
 
   const perform = (cmd: Cmd) => {
+    if (!alive) return;
+
     if (waiting) waiting.push(cmd);
     else if (cmd.type === "compile") compile(cmd.text);
     else if (cmd.type === "show") show(cmd);
@@ -547,13 +586,18 @@ export const createEditor = (
     subscribe: (listener) => {
       listeners.add(listener);
 
-      if (waiting) {
+      if (waiting && alive) {
         const queued = waiting;
         waiting = null;
         queued.forEach(perform);
       }
 
-      return () => listeners.delete(listener);
+      return () => {
+        if (!listeners.delete(listener) || listeners.size || waiting) return;
+        waiting = [];
+        epoch++;
+        run.compile.stop?.();
+      };
     },
     send: (input) => dispatch(stamp(input)),
     destroy: () => {

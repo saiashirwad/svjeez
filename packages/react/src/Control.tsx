@@ -1,11 +1,10 @@
-import type { Value } from "@svjeez/live";
+import type { Editor, Value } from "@svjeez/live";
 import { ChoiceControl } from "./ChoiceControl.tsx";
 import { ColorControl } from "./ColorControl.tsx";
 import { EaseControl } from "./EaseControl.tsx";
-import type { SceneEditor } from "./editor.ts";
 import { NumberControl } from "./NumberControl.tsx";
 
-export function Control({ editor, value }: { editor: SceneEditor; value: Value }) {
+export function Control({ editor, value }: { editor: Editor; value: Value }) {
   switch (value.kind) {
     case "number":
       return <NumberControl editor={editor} value={value} />;

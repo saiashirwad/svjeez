@@ -1,15 +1,9 @@
-import type { ValueOf } from "@svjeez/live";
-import type { SceneEditor } from "./editor.ts";
-import { selection } from "./selection.ts";
+import type { Editor, ValueOf } from "@svjeez/live";
+import { useEditorState } from "./editor.ts";
+import { focusing } from "./selection.ts";
 
-export function ChoiceControl({
-  editor,
-  value,
-}: {
-  editor: SceneEditor;
-  value: ValueOf<"choice">;
-}) {
-  const selected = editor.state.selected === value.key;
+export function ChoiceControl({ editor, value }: { editor: Editor; value: ValueOf<"choice"> }) {
+  const selected = useEditorState(editor, (s) => s.selected === value.key);
 
   return (
     <select
@@ -19,7 +13,7 @@ export function ChoiceControl({
       aria-label={value.label || "choice"}
       value={value.literal.value}
       onChange={(e) => editor.send({ type: "set", key: value.key, value: e.currentTarget.value })}
-      {...selection(editor, value.key)}
+      {...focusing(editor, value.key)}
     >
       {value.options.map((option) => (
         <option key={option} value={option}>

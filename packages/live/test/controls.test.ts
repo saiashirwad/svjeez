@@ -102,6 +102,8 @@ describe("gestures", () => {
   test("bending an ease keeps x in range and turns a named ease into a bezier", () => {
     expect(bend(ease.pop, 0, 1.4, -0.333)).toEqual(ease.bezier(1, -0.33, 0.64, 1));
     expect(bend(ease.linear, 1, 0.5, 0.5)).toEqual(ease.bezier(0, 0, 0.5, 0.5));
+    expect(bend(ease.linear, 1, 0.5, 9)).toEqual(ease.bezier(0, 0, 0.5, 2.2));
+    expect(bend(ease.linear, 0, 0.5, -9)).toEqual(ease.bezier(0.5, -0.8, 1, 1));
   });
 
   test("a color input's #rrggbb goes back in the case and alpha it came from", () => {

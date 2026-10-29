@@ -1,11 +1,11 @@
-import { timeAt } from "@svjeez/live";
+import { timeAt, type Editor } from "@svjeez/live";
 import { useEffect, useState } from "react";
-import type { SceneEditor } from "./editor.ts";
+import { useEditorState } from "./editor.ts";
 
-export function Transport({ editor }: { editor: SceneEditor }) {
-  const doc = editor.state;
-  const playing = doc.clock.playing;
-  const duration = doc.picture?.scene.duration ?? 0;
+export function Transport({ editor }: { editor: Editor }) {
+  const clock = useEditorState(editor, (s) => s.clock);
+  const duration = useEditorState(editor, (s) => s.picture?.scene.duration ?? 0);
+  const { playing } = clock;
 
   const [now, setNow] = useState(0);
   /** The time under the thumb while it is held, so the playhead does not fight the drag. */
@@ -25,7 +25,7 @@ export function Transport({ editor }: { editor: SceneEditor }) {
     return () => cancelAnimationFrame(frame);
   }, [playing]);
 
-  const t = timeAt(doc.clock, now);
+  const t = timeAt(clock, now);
   const time = scrubbing ?? (duration ? t % duration : t);
   const done = () => setScrubbing(null);
 

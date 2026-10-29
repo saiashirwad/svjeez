@@ -3,7 +3,6 @@
 export {
   createEditor,
   handleAt,
-  handleOf,
   init,
   timeAt,
   update,
@@ -12,6 +11,7 @@ export {
   type Cmd,
   type Editor,
   type Effects,
+  type First,
   type Grip,
   type Init,
   type Input,
@@ -21,6 +21,7 @@ export {
 } from "./editor.ts";
 
 export {
+  BEND_Y,
   bend,
   bezierOf,
   curveOf,
@@ -35,6 +36,16 @@ export {
   type Value,
   type ValueOf,
 } from "./controls.ts";
+
+export {
+  arrowEase,
+  arrowNumber,
+  bending,
+  following,
+  scrubbing,
+  selection,
+  stroke,
+} from "./gestures.ts";
 
 export { measureMove, type Move } from "./probe.ts";
 

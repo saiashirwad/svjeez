@@ -1,77 +1,33 @@
-import { createEditor, type Editor, type Effects, type Input, type State } from "@svjeez/live";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-
-/** A picture made at build time, as a `?svjeez` import gives it. */
-export interface First {
-  readonly src: string;
-  readonly width: number;
-  readonly height: number;
-  readonly title: string;
-}
+import { createEditor, type Editor, type Effects, type First, type State } from "@svjeez/live";
+import { useState, useSyncExternalStore } from "react";
 
 export interface Options {
-  /** Shown until the first compile finishes. */
+  /** Shown until the first compile finishes: a `?svjeez` import, with a `duration` if the page knows it. */
   readonly first?: First;
   /** Swaps how the editor compiles and shows pictures, such as a test running without a worker. */
   readonly effects?: Partial<Effects>;
 }
 
 /**
- * An `@svjeez/live` editor read from React: `state` is always the editor's latest, and `useEditor` re-renders its
- * component on every change. The compile worker starts when `useEditor` first subscribes in an effect, so a server
- * render starts none.
+ * An `@svjeez/live` editor for the scene source `text`, made once per component; later `text` and `options` are
+ * ignored, so send a `replace` message to change the file. Components read it through `useEditorState`. The editor
+ * pauses, its worker stopped, whenever no component reads it, as under a hidden `<Activity>` or after an unmount, and
+ * picks up again when one does. Call `destroy` to free its last picture for good.
  */
-export class SceneEditor {
-  readonly #store: Editor;
-
-  constructor(text: string, { first, effects }: Options = {}) {
-    this.#store = createEditor(
-      {
-        text,
-        first: first && {
-          url: first.src,
-          scene: { width: first.width, height: first.height, duration: 0, title: first.title },
-        },
-      },
-      effects,
-    );
-  }
-
-  get state(): State {
-    return this.#store.getState();
-  }
-
-  readonly send = (input: Input) => this.#store.send(input);
-
-  readonly subscribe = (onChange: () => void) => this.#store.subscribe(() => onChange());
-
-  /** Stops the compiler and frees every picture URL. `useEditor` calls it when the component goes away. */
-  readonly destroy = () => this.#store.destroy();
-}
-
-/**
- * An editor for the scene source `text`, made once per component. Later `text` and `options` are ignored: send a
- * `replace` message to change the file.
- */
-export const useEditor = (text: string, options?: Options): SceneEditor => {
-  const [editor] = useState(() => new SceneEditor(text, options));
-  const leaving = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  // StrictMode and fast refresh run this cleanup and the effect again at once on the same editor, so the destroy waits
-  // a tick and a remount cancels it.
-  useEffect(() => {
-    clearTimeout(leaving.current);
-
-    return () => {
-      leaving.current = setTimeout(editor.destroy);
-    };
-  }, [editor]);
-
-  useSyncExternalStore(
-    editor.subscribe,
-    () => editor.state,
-    () => editor.state,
-  );
+export const useEditor = (text: string, options: Options = {}): Editor => {
+  const [editor] = useState(() => createEditor({ text, first: options.first }, options.effects));
 
   return editor;
 };
+
+/**
+ * The editor's state, or the part `select` picks, re-rendering the component when it changes. `select` must return a
+ * part of the state or a primitive, never a new object, or the component re-renders forever.
+ */
+export function useEditorState(editor: Editor): State;
+export function useEditorState<T>(editor: Editor, select: (state: State) => T): T;
+export function useEditorState<T>(editor: Editor, select?: (state: State) => T): State | T {
+  const read = () => (select ? select(editor.getState()) : editor.getState());
+
+  return useSyncExternalStore(editor.subscribe, read, read);
+}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ValueOf } from "@svjeez/live";
   import type { SceneEditor } from "./editor.js";
-  import { selection } from "./selection.js";
+  import { focusing } from "./selection.js";
 
   let { editor, value }: { editor: SceneEditor; value: ValueOf<"choice"> } = $props();
 
@@ -16,7 +16,7 @@
   value={value.literal.value}
   onchange={(e) =>
     editor.send({ type: "set", key: value.key, value: e.currentTarget.value })}
-  {...selection(editor, () => value.key)}
+  {...focusing(editor, () => value.key)}
 >
   {#each value.options as option (option)}
     <option value={option}>{option}</option>

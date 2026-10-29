@@ -1,10 +1,10 @@
-import { valueOf } from "@svjeez/live";
+import { valueOf, type Editor } from "@svjeez/live";
 import { Grip } from "./Grip.tsx";
-import type { SceneEditor } from "./editor.ts";
+import { useEditorState } from "./editor.ts";
 
-export function Picture({ editor }: { editor: SceneEditor }) {
-  const doc = editor.state;
-  const { picture } = doc;
+export function Picture({ editor }: { editor: Editor }) {
+  const state = useEditorState(editor);
+  const { picture } = state;
 
   return (
     <figure className="sj-picture">
@@ -17,8 +17,8 @@ export function Picture({ editor }: { editor: SceneEditor }) {
             width={picture.scene.width || undefined}
             height={picture.scene.height || undefined}
           />
-          {Object.entries(doc.grips).map(([key, grip]) => {
-            const value = valueOf(doc, key);
+          {Object.entries(state.grips).map(([key, grip]) => {
+            const value = valueOf(state, key);
 
             return value?.kind === "number" ? (
               <Grip key={key} editor={editor} value={value} grip={grip} scene={picture.scene} />

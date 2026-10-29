@@ -152,12 +152,18 @@ export const bezierOf = (e: Ease): Bezier => (e.kind === "bezier" ? e.points : [
 export const curveOf = (e: Ease, samples = 40): Point[] =>
   Array.from({ length: samples + 1 }, (_, k) => ({ x: k / samples, y: easeAt(e, k / samples) }));
 
-/** The ease with control point `which` moved to `(x, y)`. x stays in 0 to 1, where a CSS bezier needs it. */
+/** How far a control point's y can overshoot below 0 and past 1, which is as far as a curve editor draws. */
+export const BEND_Y = { min: -0.8, max: 2.2 } as const;
+
+/**
+ * The ease with control point `which` moved to `(x, y)`. x stays in 0 to 1, where a CSS bezier needs it, and y in
+ * `BEND_Y`.
+ */
 export const bend = (e: Ease, which: 0 | 1, x: number, y: number): Ease => {
   const p = [...bezierOf(e)];
   const round = (n: number) => Math.round(n * 100) / 100;
   p[which * 2] = round(Math.min(1, Math.max(0, x)));
-  p[which * 2 + 1] = round(y);
+  p[which * 2 + 1] = round(Math.min(BEND_Y.max, Math.max(BEND_Y.min, y)));
 
   return ease.bezier(p[0]!, p[1]!, p[2]!, p[3]!);
 };

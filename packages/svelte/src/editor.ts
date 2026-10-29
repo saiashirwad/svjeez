@@ -1,16 +1,15 @@
-import { createEditor, type Editor, type Effects, type Input, type State } from "@svjeez/live";
+import {
+  createEditor,
+  type Editor,
+  type Effects,
+  type First,
+  type Input,
+  type State,
+} from "@svjeez/live";
 import { createSubscriber } from "svelte/reactivity";
 
-/** A picture made at build time, as a `?svjeez` import gives it. */
-export interface First {
-  readonly src: string;
-  readonly width: number;
-  readonly height: number;
-  readonly title: string;
-}
-
 export interface Options {
-  /** Shown until the first compile finishes. */
+  /** Shown until the first compile finishes: a `?svjeez` import, with a `duration` if the page knows it. */
   readonly first?: First;
   /** Swaps how the editor compiles and shows pictures, such as a test running without a worker. */
   readonly effects?: Partial<Effects>;
@@ -18,24 +17,15 @@ export interface Options {
 
 /**
  * An `@svjeez/live` editor whose state is reactive: read `state` in a template or an effect and it updates on every
- * change. The compile worker starts when `state` is first read in an effect, so a server render starts none.
+ * change. The compile worker starts when `state` is first read in an effect, so a server render starts none, and the
+ * editor pauses whenever no effect reads it.
  */
-export class SceneEditor {
+export class SceneEditor implements Editor {
   readonly #store: Editor;
   readonly #subscribe: () => void;
 
   constructor(text: string, { first, effects }: Options = {}) {
-    this.#store = createEditor(
-      {
-        text,
-        first: first && {
-          url: first.src,
-          scene: { width: first.width, height: first.height, duration: 0, title: first.title },
-        },
-      },
-      effects,
-    );
-
+    this.#store = createEditor({ text, first }, effects);
     this.#subscribe = createSubscriber((update) => this.#store.subscribe(() => update()));
   }
 
@@ -44,6 +34,10 @@ export class SceneEditor {
 
     return this.#store.getState();
   }
+
+  readonly getState = () => this.#store.getState();
+
+  readonly subscribe = (listener: (state: State) => void) => this.#store.subscribe(listener);
 
   readonly send = (input: Input) => this.#store.send(input);
 

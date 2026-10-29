@@ -29,9 +29,9 @@ export const Lanterns = ({ source }: { source: string }) => {
 };
 ```
 
-`useEditor(text, { first })` reads its arguments once. `first` is a picture to show until the first compile: with [`@svjeez/vite`](https://www.npmjs.com/package/@svjeez/vite), pass the module `import first from "./lanterns.tsx?svjeez"` gives. The editor compiles in a worker that starts when the component mounts, so a server render starts none, and it stops when the component unmounts.
+`useEditor(text, { first })` reads its arguments once. `first` is a picture to show until the first compile: with [`@svjeez/vite`](https://www.npmjs.com/package/@svjeez/vite), pass the module `import first from "./lanterns.tsx?svjeez"` gives. Add `duration` to `first` if the page knows it, and the transport works before the first compile. The editor compiles in a worker that starts when a component first reads it, so a server render starts none. It pauses whenever no component reads it, under a hidden `<Activity>` or after an unmount, and picks up again when one does; `scene.destroy()` frees its last picture for good.
 
-`scene.state` is the `@svjeez/live` state and `scene.send(message)` changes it: the same messages a control sends, so a page or an agent can drive the editor too. To load a new file, send `{ type: "replace", text }`.
+`useEditorState(scene)` reads the `@svjeez/live` state and re-renders on each change, and `useEditorState(scene, (s) => s.selected)` reads one part of it. `scene.send(message)` changes it: the same messages a control sends, so a page or an agent can drive the editor too. To load a new file, send `{ type: "replace", text }`.
 
 ### Your own controls
 
@@ -41,7 +41,7 @@ export const Lanterns = ({ source }: { source: string }) => {
 <Code editor={scene} control={(value, plain) => (value.label === "swing" ? <Knob value={value} editor={scene} /> : plain)} />
 ```
 
-Send `{ type: "set", key: value.key, value: next }` from it, with `continues: true` on every step of a drag after the first so undo takes the drag whole.
+Send `{ type: "set", key: value.key, value: next }` from it, or use the gestures `@svjeez/live` exports, such as `scrubbing(scene, value, x)`, which make a whole drag one undo step.
 
 ### Styles
 

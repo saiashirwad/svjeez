@@ -1,11 +1,11 @@
-import { curveOf, type ValueOf } from "@svjeez/live";
+import { curveOf, type Editor, type ValueOf } from "@svjeez/live";
 import { useState } from "react";
 import { EasePop } from "./EasePop.tsx";
-import type { SceneEditor } from "./editor.ts";
-import { selection } from "./selection.ts";
+import { useEditorState } from "./editor.ts";
+import { focusing } from "./selection.ts";
 
-export function EaseControl({ editor, value }: { editor: SceneEditor; value: ValueOf<"ease"> }) {
-  const selected = editor.state.selected === value.key;
+export function EaseControl({ editor, value }: { editor: Editor; value: ValueOf<"ease"> }) {
+  const selected = useEditorState(editor, (s) => s.selected === value.key);
   const [open, setOpen] = useState(false);
   const [glyph, setGlyph] = useState<HTMLButtonElement | null>(null);
 
@@ -18,7 +18,7 @@ export function EaseControl({ editor, value }: { editor: SceneEditor; value: Val
       className="sj-ease"
       data-sj-key={value.key}
       data-selected={selected || undefined}
-      {...selection(editor, value.key)}
+      {...focusing(editor, value.key)}
     >
       <button
         ref={setGlyph}

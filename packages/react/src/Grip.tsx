@@ -1,8 +1,15 @@
-import { handleAt, nudge, type Grip as GripOf, type SceneSize, type ValueOf } from "@svjeez/live";
-import { fit, follow } from "svjeez/params";
+import {
+  arrowNumber,
+  following,
+  handleAt,
+  type Editor,
+  type Grip as GripOf,
+  type SceneSize,
+  type ValueOf,
+} from "@svjeez/live";
 import { useRef, type KeyboardEvent, type PointerEvent } from "react";
-import type { SceneEditor } from "./editor.ts";
-import { ARROWS, selection } from "./selection.ts";
+import { useEditorState } from "./editor.ts";
+import { focusing } from "./selection.ts";
 
 export function Grip({
   editor,
@@ -10,22 +17,14 @@ export function Grip({
   grip,
   scene,
 }: {
-  editor: SceneEditor;
+  editor: Editor;
   value: ValueOf<"number">;
   grip: GripOf;
   scene: SceneSize;
 }) {
-  const selected = editor.state.selected === value.key;
+  const selected = useEditorState(editor, (s) => s.selected === value.key);
   const at = handleAt(grip, value.literal.value);
-
-  /** A drag carries the value as far as it carries the handle, along the way the handle travels. */
-  const held = useRef<{ raw: number; scale: number; x: number; y: number } | null>(null);
-  const going = useRef(false);
-
-  const set = (v: number) => {
-    editor.send({ type: "set", key: value.key, value: v, continues: going.current });
-    going.current = true;
-  };
+  const drag = useRef<ReturnType<typeof following> | null>(null);
 
   const down = (e: PointerEvent<HTMLElement>) => {
     if (e.button !== 0) return;
@@ -35,37 +34,16 @@ export function Grip({
     e.currentTarget.setPointerCapture(e.pointerId);
     // The picture keeps its size for the drag, so measure it once rather than on every move.
     const picture = e.currentTarget.parentElement;
-    held.current = {
-      raw: value.literal.value,
-      scale: picture ? scene.width / picture.clientWidth : 1,
-      x: e.clientX,
-      y: e.clientY,
-    };
-    going.current = false;
-  };
-
-  const move = (e: PointerEvent) => {
-    const h = held.current;
-
-    if (!h) return;
-    const by = { x: (e.clientX - h.x) * h.scale, y: (e.clientY - h.y) * h.scale };
-    h.x = e.clientX;
-    h.y = e.clientY;
-    h.raw = follow(value.param, (v) => handleAt(grip, v), h.raw, by);
-    set(fit(value.param, h.raw));
+    const scale = picture ? scene.width / picture.clientWidth : 1;
+    drag.current = following(editor, value, grip, { x: e.clientX, y: e.clientY }, scale);
   };
 
   const release = () => {
-    held.current = null;
+    drag.current = null;
   };
 
   const key = (e: KeyboardEvent) => {
-    const by = ARROWS.get(e.key);
-
-    if (!by) return;
-    e.preventDefault();
-    going.current = false;
-    set(nudge(value.param, value.literal.value, by, e.shiftKey));
+    if (arrowNumber(editor, value, e.key, e.shiftKey)) e.preventDefault();
   };
 
   return (
@@ -82,11 +60,11 @@ export function Grip({
       aria-valuenow={value.literal.value}
       style={{ left: `${(at.x / scene.width) * 100}%`, top: `${(at.y / scene.height) * 100}%` }}
       onPointerDown={down}
-      onPointerMove={move}
+      onPointerMove={(e) => drag.current?.({ x: e.clientX, y: e.clientY })}
       onPointerUp={release}
       onPointerCancel={release}
       onKeyDown={key}
-      {...selection(editor, value.key)}
+      {...focusing(editor, value.key)}
     />
   );
 }

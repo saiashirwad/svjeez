@@ -1,20 +1,20 @@
-import { rgbOf, withRgb, type ValueOf } from "@svjeez/live";
+import { rgbOf, stroke, withRgb, type Editor, type ValueOf } from "@svjeez/live";
 import { useEffect, useRef } from "react";
-import type { SceneEditor } from "./editor.ts";
-import { selection } from "./selection.ts";
+import { useEditorState } from "./editor.ts";
+import { focusing } from "./selection.ts";
 
-export function ColorControl({ editor, value }: { editor: SceneEditor; value: ValueOf<"color"> }) {
-  const selected = editor.state.selected === value.key;
+export function ColorControl({ editor, value }: { editor: Editor; value: ValueOf<"color"> }) {
+  const selected = useEditorState(editor, (s) => s.selected === value.key);
   const input = useRef<HTMLInputElement>(null);
-  /** Whether the picker has sent a step already, so undo takes one pick whole. */
-  const going = useRef(false);
+  /** The pick under way, so undo takes it whole. */
+  const pick = useRef<ReturnType<typeof stroke<"color">> | null>(null);
 
   // React's onChange is the native input event, so the end of a pick is only seen on the native change event.
   useEffect(() => {
     const el = input.current;
 
     const done = () => {
-      going.current = false;
+      pick.current = null;
     };
 
     el?.addEventListener("change", done);
@@ -27,7 +27,7 @@ export function ColorControl({ editor, value }: { editor: SceneEditor; value: Va
       className="sj-color"
       data-sj-key={value.key}
       data-selected={selected || undefined}
-      {...selection(editor, value.key)}
+      {...focusing(editor, value.key)}
     >
       <input
         ref={input}
@@ -35,15 +35,11 @@ export function ColorControl({ editor, value }: { editor: SceneEditor; value: Va
         type="color"
         aria-label={`${value.label || "color"}, ${value.literal.value}`}
         value={rgbOf(value.literal.value)}
-        onChange={(e) => {
-          editor.send({
-            type: "set",
-            key: value.key,
-            value: withRgb(value.literal.value, e.currentTarget.value),
-            continues: going.current,
-          });
-          going.current = true;
-        }}
+        onChange={(e) =>
+          (pick.current ??= stroke<"color">(editor, value.key))(
+            withRgb(value.literal.value, e.currentTarget.value),
+          )
+        }
       />
       <span className="sj-string">{value.literal.text}</span>
     </span>

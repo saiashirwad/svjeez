@@ -2,7 +2,7 @@
   import { curveOf, type ValueOf } from "@svjeez/live";
   import type { SceneEditor } from "./editor.js";
   import EasePop from "./EasePop.svelte";
-  import { selection } from "./selection.js";
+  import { focusing } from "./selection.js";
 
   let { editor, value }: { editor: SceneEditor; value: ValueOf<"ease"> } = $props();
 
@@ -21,7 +21,7 @@
   class="sj-ease"
   data-sj-key={value.key}
   data-selected={selected || undefined}
-  {...selection(editor, () => value.key)}
+  {...focusing(editor, () => value.key)}
   ><button
     bind:this={glyph}
     class="sj-glyph"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { bend, bezierOf, curveOf, type ValueOf } from "@svjeez/live";
+  import { arrowEase, BEND_Y, bending, bezierOf, curveOf, type ValueOf } from "@svjeez/live";
   import type { Attachment } from "svelte/attachments";
   import type { SceneEditor } from "./editor.js";
 
@@ -23,8 +23,6 @@
   const Y = (v: number) => 195 - v * 85;
   const UX = (x: number) => (x - 20) / (W - 60);
   const UY = (y: number) => (195 - y) / 85;
-  const MIN_Y = -0.8;
-  const MAX_Y = 2.2;
 
   const p = $derived(bezierOf(value.literal.value));
 
@@ -36,8 +34,7 @@
 
   let pop: HTMLElement | undefined = $state();
   let svg: SVGSVGElement | undefined = $state();
-  let held: 0 | 1 | null = null;
-  let going = false;
+  let drag: ReturnType<typeof bending> | null = null;
 
   /** The popover sits in the top layer, so the code panel's scrolling never clips it. */
   const place: Attachment<HTMLElement> = (el) => {
@@ -51,49 +48,24 @@
     el.querySelector<SVGElement>(".sj-handle")?.focus();
   };
 
-  const set = (which: 0 | 1, x: number, y: number) => {
-    editor.send({
-      type: "set",
-      key: value.key,
-      value: bend(value.literal.value, which, x, Math.min(MAX_Y, Math.max(MIN_Y, y))),
-      continues: going,
-    });
-    going = true;
-  };
-
   const grab = (e: PointerEvent, which: 0 | 1) => {
     e.preventDefault();
     svg?.setPointerCapture(e.pointerId);
-    held = which;
-    going = false;
+    drag = bending(editor, value, which);
   };
 
   const move = (e: PointerEvent) => {
-    if (held === null || !svg) return;
+    if (!drag || !svg) return;
     const box = svg.getBoundingClientRect();
 
-    set(
-      held,
-      UX(((e.clientX - box.left) / box.width) * W),
-      UY(((e.clientY - box.top) / box.height) * H),
-    );
+    drag({
+      x: UX(((e.clientX - box.left) / box.width) * W),
+      y: UY(((e.clientY - box.top) / box.height) * H),
+    });
   };
 
-  const ARROWS = new Map<string, readonly [number, number]>([
-    ["ArrowLeft", [-1, 0]],
-    ["ArrowRight", [1, 0]],
-    ["ArrowUp", [0, 1]],
-    ["ArrowDown", [0, -1]],
-  ]);
-
   const key = (e: KeyboardEvent, which: 0 | 1) => {
-    const by = ARROWS.get(e.key);
-
-    if (!by) return;
-    e.preventDefault();
-    const step = e.shiftKey ? 0.25 : 0.05;
-    going = false;
-    set(which, p[which * 2]! + by[0] * step, p[which * 2 + 1]! + by[1] * step);
+    if (arrowEase(editor, value, which, e.key, e.shiftKey)) e.preventDefault();
   };
 
   const outside = (e: PointerEvent) => {
@@ -119,8 +91,8 @@
     viewBox="0 0 {W} {H}"
     role="presentation"
     onpointermove={move}
-    onpointerup={() => (held = null)}
-    onpointercancel={() => (held = null)}
+    onpointerup={() => (drag = null)}
+    onpointercancel={() => (drag = null)}
     ><rect class="sj-box" x={X(0)} y={Y(1)} width={X(1) - X(0)} height={Y(0) - Y(1)} /><line
       class="sj-arm"
       x1={X(0)}
@@ -136,8 +108,8 @@
         tabindex="0"
         data-which={which}
         aria-label="{which ? 'Second' : 'First'} control point"
-        aria-valuemin={MIN_Y}
-        aria-valuemax={MAX_Y}
+        aria-valuemin={BEND_Y.min}
+        aria-valuemax={BEND_Y.max}
         aria-valuenow={p[which * 2 + 1]}
         aria-valuetext="x {p[which * 2]}, y {p[which * 2 + 1]}"
         cx={X(p[which * 2]!)}

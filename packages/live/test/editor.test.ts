@@ -307,6 +307,69 @@ describe("grips", () => {
   });
 });
 
+describe("an editor nothing listens to", () => {
+  test("pauses when its last listener leaves, and the next subscribe compiles what changed meanwhile", async () => {
+    const { compiles, effects } = manual();
+    let stops = 0;
+    const compile = Object.assign(effects.compile, { stop: () => void stops++ });
+    const editor = createEditor({ text: scene }, { ...effects, compile });
+
+    const leave = editor.subscribe(() => {});
+    compiles[0]!.finish(ok("<svg/>"));
+    await settle();
+    leave();
+    expect(stops).toBe(1);
+
+    editor.send({ type: "set", key: "default#0", value: 50 });
+    await settle();
+    expect(compiles).toHaveLength(1);
+
+    editor.subscribe(() => {});
+    await settle();
+    expect(compiles.map((c) => c.text)).toEqual([scene, editor.getState().text]);
+    compiles[1]!.finish(ok("<svg id='2'/>"));
+    await settle();
+    expect(editor.getState().picture?.svg).toBe("<svg id='2'/>");
+  });
+
+  test("a compile cut short by a pause runs again on the next subscribe, and never shows as an error", async () => {
+    const { compiles, effects } = manual();
+    const editor = createEditor({ text: scene }, effects);
+
+    const leave = editor.subscribe(() => {});
+    leave();
+    compiles[0]!.finish({ ok: false, error: { kind: "runtime", message: "stopped" }, ms: 0 });
+    await settle();
+
+    editor.subscribe(() => {});
+    await settle();
+    expect(editor.getState().error).toBeNull();
+    expect(compiles.map((c) => c.text)).toEqual([scene, scene]);
+  });
+
+  test("a destroyed editor starts nothing, even when something subscribes", async () => {
+    const { compiles, effects } = manual();
+    const editor = createEditor({ text: scene }, effects);
+    editor.destroy();
+    editor.subscribe(() => {});
+    await settle();
+
+    expect(compiles).toHaveLength(0);
+  });
+
+  test("a build-time picture with a duration gives the transport its length before any compile", () => {
+    const editor = createEditor({
+      text: scene,
+      first: { src: "/a.svg", width: 200, height: 120, title: "t", duration: 4 },
+    });
+
+    expect(editor.getState().picture).toEqual({
+      url: "/a.svg",
+      scene: { width: 200, height: 120, title: "t", duration: 4 },
+    });
+  });
+});
+
 describe("createEditor when things go wrong", () => {
   test("a compile that throws shows as the file's error, and the next edit still compiles", async () => {
     const texts: string[] = [];
