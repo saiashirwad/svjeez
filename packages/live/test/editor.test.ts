@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { ease } from "svjeez";
 import { choice } from "svjeez/params";
+import { nudge } from "../src/controls";
 import type { Compiled } from "../src/compile";
 import {
   createEditor,
@@ -62,6 +63,29 @@ describe("update", () => {
 
     expect(state.text).toContain('fill="#FF0000"');
     expect(state.text).toContain("ease.bezier(0.1, 0.2, 0.3, 1.4)");
+  });
+
+  test("arrow keys keep a number's decimals, through a whole number and back", () => {
+    let [state] = init({ text: `const k = 0.5;\nexport default () => k;\n`, now: 0 });
+
+    const step = (by: 1 | -1) => {
+      const v = valueOf(state, "k");
+
+      if (v?.kind !== "number") throw new Error("k is a number");
+      [state] = update(state, {
+        type: "set",
+        key: "k",
+        value: nudge(v.param, v.literal.value, by),
+      });
+    };
+
+    for (let i = 0; i < 5; i++) step(1);
+    expect(state.text).toContain("const k = 1.0;");
+
+    for (let i = 0; i < 2; i++) step(1);
+
+    for (let i = 0; i < 3; i++) step(-1);
+    expect(state.text).toContain("const k = 0.9;");
   });
 
   test("a drag is one undo step, and redo puts it back", () => {
@@ -251,6 +275,22 @@ describe("grips", () => {
       state.grips,
     );
     expect(play([{ type: "select", key: "default#1", now: 0 }], state).state.grips).toEqual({});
+  });
+
+  test("a measurement of an older file is kept only when the measured number is all that changed since", () => {
+    const selected = play(
+      [{ type: "select", key: "default#0", now: 0 }],
+      compiled(scene).state,
+    ).state;
+
+    const grip = { at: { x: 40, y: 60 }, way: { x: 1, y: 0 }, from: 40, declared: false };
+    const probed: Msg = { type: "probed", key: "default#0", text: scene, grip };
+
+    const dragged = play([{ type: "set", key: "default#0", value: 55 }, probed], selected).state;
+    expect(dragged.grips["default#0"]).toEqual(grip);
+
+    const elsewhere = play([{ type: "set", key: "default#1", value: 12 }, probed], selected).state;
+    expect(elsewhere.grips["default#0"]).toBeUndefined();
   });
 
   test("a scene's declared handles are grips, keyed by their params, and are never probed", () => {

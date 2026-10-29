@@ -7,7 +7,16 @@ import { createCompiler, latestWins } from "./client.ts";
 import type { Compiled, SceneSize, SourceError } from "./compile.ts";
 import { valuesOf, type Settable, type Value } from "./controls.ts";
 import { measureMove, type Move } from "./probe.ts";
-import { apply, linesOf, parse, write, type Line, type Literal, type Source } from "./source.ts";
+import {
+  apply,
+  decimalsOf,
+  linesOf,
+  parse,
+  write,
+  type Line,
+  type Literal,
+  type Source,
+} from "./source.ts";
 
 /** The picture on screen: an image URL, and the file it shows when it came from a compile rather than the build. */
 export interface Picture {
@@ -124,7 +133,7 @@ export const handleAt = (grip: Grip, v: number): Point => ({
 });
 
 /** `v` written as a literal's text, to six places at most. */
-const placesOf = (v: number) => Math.min(6, (String(v).split(".")[1] ?? "").length);
+const placesOf = (v: number) => Math.min(6, decimalsOf(String(v)));
 
 const isEditable = (literal: Literal, values: readonly Value[]) =>
   values.some((v) => v.literal === literal);
@@ -252,6 +261,21 @@ const probeOf = (state: State, now: number): Cmd[] => {
   ];
 };
 
+/**
+ * Whether a grip measured on `text` still fits the file: it is the file, or differs from it only in the value at `key`,
+ * which the grip extrapolates from. Any other change may have moved what the value moves.
+ */
+const measures = (state: State, key: string, text: string) => {
+  const now = valueOf(state, key)?.literal;
+
+  if (!now) return false;
+
+  if (text === state.text) return true;
+  const then = parse(text).literals.find((l) => l.key === key);
+
+  return !!then && apply(state.text, [{ range: now.range, text: then.text }]) === text;
+};
+
 export const update = (state: State, msg: Msg): [State, Cmd[]] => {
   switch (msg.type) {
     case "set": {
@@ -261,8 +285,16 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
       // SAFETY: a message's value is typed by its key's kind, and `kind` names that same kind on the literal.
       const literal = { ...value.literal, value: msg.value } as Literal;
 
-      // A number goes in as precise as it was sent: controls fit what they send to the step.
-      const places = value.kind === "number" ? placesOf(Number(msg.value)) : undefined;
+      // A number goes in as precise as it was sent, its step or its text, whichever is finest, so `0.9` up to `1.0`
+      // keeps the tenths that the next step is read from.
+      const places =
+        value.kind === "number"
+          ? Math.max(
+              placesOf(Number(msg.value)),
+              placesOf(value.param.step),
+              decimalsOf(value.literal.text),
+            )
+          : undefined;
 
       const text = apply(state.text, [
         { range: value.literal.range, text: write(literal, places) },
@@ -348,7 +380,7 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
     }
 
     case "probed": {
-      if (msg.key !== state.selected || !valueOf(state, msg.key)) return [state, []];
+      if (msg.key !== state.selected || !measures(state, msg.key, msg.text)) return [state, []];
       const grips = onlyDeclared(state.grips);
 
       return [{ ...state, grips: msg.grip ? { ...grips, [msg.key]: msg.grip } : grips }, []];

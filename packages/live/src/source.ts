@@ -598,13 +598,16 @@ export const linesOf = (
 
 // ----- writing values back
 
-const numberText = (v: number, decimals: number) => {
-  const text = String(Number(v.toFixed(decimals)));
+/** `v` to `decimals` places, with trailing zeros kept when `exact`. */
+const numberText = (v: number, decimals: number, exact = false) => {
+  const fixed = v.toFixed(decimals);
+  const text = exact ? fixed : String(Number(fixed));
 
-  return text === "-0" ? "0" : text;
+  return Number(text) === 0 ? text.replace("-", "") : text;
 };
 
-const decimalsOf = (text: string) => (text.split(".")[1] ?? "").length;
+/** How many decimals a number is written with, as in `2` for `0.50`. */
+export const decimalsOf = (text: string) => (text.split(".")[1] ?? "").length;
 
 /** An ease as code: `ease.name` when it is that very ease, else `ease.bezier(…)` to two decimals. */
 export const easeText = (value: Ease): string => {
@@ -619,13 +622,16 @@ export const easeText = (value: Ease): string => {
 };
 
 /**
- * How a literal is written with the value it holds: a number to as many decimals as its text had (or `decimals`), a
- * color or string in its own quotes, an ease through `easeText`. Pass `{ ...literal, value }` to write a new value.
+ * How a literal is written with the value it holds: a number to as many decimals as its text had with trailing zeros
+ * dropped (or to exactly `decimals`, zeros kept), a color or string in its own quotes, an ease through `easeText`. Pass
+ * `{ ...literal, value }` to write a new value.
  */
 export const write = (literal: Literal, decimals?: number): string => {
   switch (literal.kind) {
     case "number":
-      return numberText(literal.value, decimals ?? decimalsOf(literal.text));
+      return decimals === undefined
+        ? numberText(literal.value, decimalsOf(literal.text))
+        : numberText(literal.value, decimals, true);
     case "color":
     case "string":
       return `${literal.text[0]}${literal.value}${literal.text[0]}`;

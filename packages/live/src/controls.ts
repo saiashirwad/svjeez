@@ -3,7 +3,7 @@
 // scene nobody annotated still gets sensible controls.
 import { ease, easeAt, type Ease, type Hex, type Point } from "svjeez";
 import { fit, type NumberParam, type Schema } from "svjeez/params";
-import type { Literal, LiteralOf, Role, Source } from "./source.ts";
+import { decimalsOf, type Literal, type LiteralOf, type Role, type Source } from "./source.ts";
 
 interface Base<K extends Literal["kind"]> {
   readonly key: string;
@@ -89,8 +89,6 @@ const MEANINGS: readonly {
 
 const MEANING = new Map(MEANINGS.flatMap(({ names, range }) => names.map((n) => [n, range])));
 
-const decimals = (text: string) => (text.split(".")[1] ?? "").length;
-
 /**
  * The param a control for this number edits: the one `schema` declares for it, else a range read from where it sits,
  * else a span around its value, with a step as fine as the literal is written.
@@ -100,7 +98,8 @@ export const paramFor = (literal: LiteralOf<"number">, schema: Schema = {}): Num
 
   if (declared?.kind === "number") return { ...declared, value: literal.value };
   const v = literal.value;
-  const written = decimals(literal.text) ? 10 ** -decimals(literal.text) : 1;
+  const places = decimalsOf(literal.text);
+  const written = places ? 10 ** -places : 1;
   const range = MEANING.get(nameOf(literal.role))?.(v) ?? {};
   const step = Math.min(written, range.step ?? written);
   const min = Math.min(range.min ?? v - span(v, 10), v);
