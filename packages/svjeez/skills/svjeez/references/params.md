@@ -54,4 +54,34 @@ Every kind takes an optional `label` for the control. `scale: "log"` spreads a s
 - `positionOf(param, v)` and `valueAt(param, position)` convert between a value and a slider position from 0 to 1, on the param's scale.
 - `withValues(params, values)` returns the declaration with each param holding its current value, so one object carries a control's kind, range and value.
 
+## Handles in the picture
+
+A scene can also say where in its own picture each number sits, so a page can put a handle there and let someone drag the value. `handles` is a function from every value to a point in scene coordinates, one per number param it covers. Put each handle on the thing its value draws.
+
+```tsx
+import { defaults, number, type Handles, type Values } from "svjeez/params";
+
+export const params = {
+  length: number(190, { min: 80, max: 240, step: 1 }),
+  swing: number(30, { min: 10, max: 50, step: 1, unit: "°" }),
+};
+
+const end = (r: number, deg: number) => ({
+  x: 240 + r * Math.sin((deg * Math.PI) / 180),
+  y: 36 + r * Math.cos((deg * Math.PI) / 180),
+});
+
+export const handles: Handles<typeof params> = (p) => ({
+  length: end(p.length, 0), // the bottom of the arc
+  swing: end(p.length, -p.swing), // its far end
+});
+```
+
+The scene never says which way a handle moves. `follow(param, at, v, by)` works it out from where the handle sits at `v` and a little past it, and returns `v` moved as far as a pointer move `by` (in scene units) carries the handle that way. A handle on an arc follows the arc. The result stays in range but is not rounded, so a page keeps it through the drag and writes `fit(param, raw)`:
+
+```ts
+raw = follow(params.swing, (v) => handles({ ...values, swing: v }).swing!, raw, by);
+values = { ...values, swing: fit(params.swing, raw) };
+```
+
 The declaration is plain data, so it crosses `postMessage` to a worker unchanged. A page that compiles edits off the main thread sends the values, and the worker calls the scene's default export with them.

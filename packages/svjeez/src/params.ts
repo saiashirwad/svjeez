@@ -5,6 +5,7 @@
 //
 // The schema crosses a worker boundary as is, and a page reads it to draw controls and to keep values in range.
 import type { Hex } from "./color";
+import type { Point } from "./layout/box";
 import type { Ease } from "./motion";
 
 interface Labelled {
@@ -158,4 +159,29 @@ export const withValues = <S extends Schema>(schema: S, values: Values<S>): S =>
   return Object.fromEntries(
     Object.entries(schema).map(([key, p]) => [key, { ...p, value: current[key] ?? p.value }]),
   ) as S;
+};
+
+type NumberKeys<S extends Schema> = {
+  [K in keyof S]: S[K] extends NumberParam ? K : never;
+}[keyof S];
+
+/** Where the handle for each number param sits in the picture, in scene coordinates, given every value. */
+export type Handles<S extends Schema> = (values: Values<S>) => {
+  readonly [K in NumberKeys<S>]?: Point;
+};
+
+/**
+ * `v` moved as far as a drag `by` carries a handle that sits at `at(v)`. The drag counts only along the way the handle
+ * travels as `v` grows, so a handle on an arc follows the arc. The result is clamped to the range but not rounded, so a
+ * slow drag still adds up: `fit` it for the value to write.
+ */
+export const follow = (p: NumberParam, at: (v: number) => Point, v: number, by: Point): number => {
+  const h = (p.max - p.min) / 10_000;
+  const [from, to] = [at(v), at(v + h)];
+  const way = { x: (to.x - from.x) / h, y: (to.y - from.y) / h };
+  const length = way.x ** 2 + way.y ** 2;
+
+  if (!length) return v;
+
+  return Math.min(p.max, Math.max(p.min, v + (by.x * way.x + by.y * way.y) / length));
 };
