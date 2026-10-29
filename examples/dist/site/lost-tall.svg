@@ -81,8 +81,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g transform="translate(189 154) rotate(14.6)">
       <g class="a m2 fb">
-        <path d="M0 0L174.4 -29.9A177 177 0 0 1 174.4 29.9Z" fill="url(#g1)"/>
-        <path d="M0 0L-174.4 -29.9A177 177 0 0 0 -174.4 29.9Z" fill="none"/>
+        <path d="M0 0L150.8 -25.9A153 153 0 0 1 150.8 25.9Z" fill="url(#g1)"/>
+        <path d="M0 0L-150.8 -25.9A153 153 0 0 0 -150.8 25.9Z" fill="none"/>
       </g>
     </g>
     <g class="a m3">

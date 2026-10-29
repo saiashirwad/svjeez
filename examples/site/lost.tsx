@@ -121,10 +121,13 @@ export const make = (tall = false): string => {
   const found = motion({ opacity: 0.18 }).at(FOUND).to({ opacity: 1 }, 0.3);
 
   // The beam is drawn along +x from the bulb and sweeps down onto the playhead. A mirrored copy with no paint makes the
-  // group's box centered on the bulb, so it turns about the bulb.
+  // group's box centered on the bulb, so it turns about the bulb. It reaches past the playhead but stops short of the
+  // window's right edge.
   const target = { x: lost, y: y - 30 };
   const angle = (Math.atan2(target.y - bulb.y, target.x - bulb.x) * 180) / Math.PI;
-  const L = Math.round(Math.hypot(target.x - bulb.x, target.y - bulb.y) + 50);
+  const L = Math.round(
+    Math.min(Math.hypot(target.x - bulb.x, target.y - bulb.y) + 50, W - 16 - bulb.x),
+  );
   const [cos, sin] = [Math.cos(0.17), Math.sin(0.17)].map((n) => +(n * L).toFixed(1));
   const wedge = (dir: 1 | -1) =>
     `M0 0L${dir * cos!} ${-sin!}A${L} ${L} 0 0 ${dir > 0 ? 1 : 0} ${dir * cos!} ${sin!}Z`;
