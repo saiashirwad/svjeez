@@ -15,6 +15,8 @@ const result = await Bun.build({
     "./src/cli.ts",
   ],
   external: ["playwright-core"],
+  // Bun 1.4 roots the output at the package instead of src once there are nine entrypoints, so name the root.
+  root: "./src",
   outdir: "./package-dist",
   target: "node",
   splitting: true,

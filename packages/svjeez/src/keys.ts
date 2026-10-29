@@ -1,5 +1,8 @@
-import { valueOf, type Target, type TargetValues } from "./channels";
+import { valueOf, type Target, type TargetValue, type TargetValues } from "./channels";
+import { easeAt } from "./ease-at";
+import { num } from "./format";
 import { EPSILON, NUDGE, ease, type Ease, type Seconds, type Step } from "./motion";
+import { NUMBER } from "./paths";
 
 export interface Key {
   readonly t: Seconds;
@@ -57,5 +60,42 @@ export const moving = (keys: readonly Key[], index: number): boolean => {
   return next !== undefined && !same(keys[index]!.values, next.values);
 };
 
-export const valueAt = (keys: readonly Key[], t: Seconds): TargetValues =>
-  keys.findLast((key) => key.t <= t + EPSILON)!.values;
+export const isNumber = (value: TargetValue | undefined): value is number =>
+  typeof value === "number";
+
+/** `target` eased from `a` toward `b` by `amount`, as SMIL interpolates numbers and path data. Colors hold. */
+const blend = (
+  target: Target,
+  a: TargetValue,
+  b: TargetValue | undefined,
+  amount: number,
+): TargetValue => {
+  if (isNumber(a) && isNumber(b)) return a + (b - a) * amount;
+
+  if (target !== "d" || b === undefined) return a;
+  // A d motion moves between paths with the same commands, so their numbers pair up one to one.
+  const to = (String(b).match(NUMBER) ?? []).map(Number);
+  let k = 0;
+
+  // SAFETY: the replacement keeps every command letter of a, so the result is path data like a.
+  return String(a).replace(NUMBER, (n) =>
+    num(Number(n) + (to[k++]! - Number(n)) * amount),
+  ) as TargetValue;
+};
+
+/** What the keys draw at `t`, as the browser plays them: the last key's values eased toward the next key's. */
+export const valueAt = (keys: readonly Key[], t: Seconds): TargetValues => {
+  const index = keys.findLastIndex((key) => key.t <= t + EPSILON);
+  const [from, to] = [keys[index]!, keys[index + 1]];
+
+  if (!to) return from.values;
+  const amount = easeAt(from.ease, (t - from.t) / (to.t - from.t));
+
+  // SAFETY: from.values and the result share their keys, each a Target name with a value of that target's kind.
+  return Object.fromEntries(
+    (Object.keys(from.values) as Target[]).map((target) => [
+      target,
+      blend(target, valueOf(from.values, target)!, valueOf(to.values, target), amount),
+    ]),
+  ) as TargetValues;
+};

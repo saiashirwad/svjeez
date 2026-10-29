@@ -6,8 +6,7 @@ import {
   type TargetValue,
   type TargetValues,
 } from "./channels";
-import { easeAt } from "./ease-at";
-import { keysOf, snapPeriod } from "./keys";
+import { isNumber, keysOf, snapPeriod, valueAt } from "./keys";
 import { dataOf, type Motion, type Seconds, type Stack } from "./motion";
 import type { NumericProperty } from "./properties";
 
@@ -29,8 +28,6 @@ const STACKED: Partial<Record<Target, (outer: number, inner: number) => number>>
   y: (a, b) => a + b,
   blur: Math.hypot,
 };
-
-const isNumber = (value: TargetValue | undefined): value is number => typeof value === "number";
 
 const layerAt = (layer: Motion, t: Seconds, { duration, loop = true }: SampleOptions) => {
   const data = dataOf(layer);
@@ -69,16 +66,8 @@ const layerAt = (layer: Motion, t: Seconds, { duration, loop = true }: SampleOpt
       period,
     );
 
-    const index = keys.findLastIndex((key) => key.t <= local);
-    const [from, to] = [keys[index]!, keys[index + 1]];
-    // SAFETY: every key holds this numeric target, from start or a step of the same target.
-    const a = valueOf(from.values, target) as number;
-
-    if (!to) return [[target, a]];
-    // SAFETY: as for a.
-    const b = valueOf(to.values, target) as number;
-
-    return [[target, a + (b - a) * easeAt(from.ease, (local - from.t) / (to.t - from.t))]];
+    // SAFETY: every key holds this numeric target, from start or a step of the same target, so valueAt blends a number.
+    return [[target, valueOf(valueAt(keys, local), target) as number]];
   });
 };
 

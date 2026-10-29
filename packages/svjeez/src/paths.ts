@@ -15,7 +15,7 @@ interface Ring {
   readonly closed: boolean;
 }
 
-const NUMBER = /-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi;
+export const NUMBER = /-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi;
 
 const ARITY = new Map([
   ["M", 2],

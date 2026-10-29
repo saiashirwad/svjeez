@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { ease } from "svjeez";
-import { count } from "../src/params";
+import { count } from "svjeez/params";
 import {
   apply,
   callsIn,
