@@ -239,8 +239,30 @@ kbd {
   color: var(--muted);
 }
 .top nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   text-decoration: none;
   padding-block: 0.5rem;
+}
+.top nav .gh {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+/* The palette menu and the light and dark toggle share one outlined pill, so they read as the page's settings. */
+.controls {
+  display: flex;
+  align-items: center;
+  padding: 0.1875rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.controls .pick {
+  border-radius: 999px;
+}
+.controls .theme {
+  inline-size: 2rem;
+  block-size: 2rem;
 }
 @media (hover: hover) and (pointer: fine) {
   .top nav a:hover {
@@ -292,11 +314,13 @@ kbd {
 /* The palette picker: three dots in the page's own colors, and a menu of palettes, each on its own background. */
 .pick {
   position: relative;
-  display: grid;
-  place-items: center;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  block-size: 2rem;
+  padding: 0 0.5rem 0 0.625rem;
+  color: var(--muted);
+  font: 500 0.8125rem / 1 var(--sans);
   background: none;
   border: 0;
   border-radius: 50%;
@@ -309,6 +333,15 @@ kbd {
 }
 .pick:active {
   translate: 0 1px;
+}
+.pick .chev {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  margin-inline-start: -0.125rem;
+}
+.pick[aria-expanded="true"],
+.pick:has(+ .palettes:popover-open) {
+  color: var(--ink);
 }
 .pick .dots {
   display: flex;
@@ -331,7 +364,8 @@ kbd {
   background: var(--code-fn);
 }
 @media (hover: hover) and (pointer: fine) {
-  .pick:hover {
+  .pick:hover,
+  .controls .theme:hover {
     background: color-mix(in oklch, var(--ink) 7%, transparent);
   }
 }
@@ -1279,6 +1313,9 @@ pre.side {
     gap: 0.5rem;
   }
   .top nav .opt {
+    display: none;
+  }
+  .pick-label {
     display: none;
   }
 }
