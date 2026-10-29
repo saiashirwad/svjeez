@@ -88,7 +88,7 @@ describe("fixes", () => {
 
 describe("what a scene declares", () => {
   test("a compile reports the scene's size and length, its params, and where each param's handle sits and moves", async () => {
-    const result = await compileScene(read("../../site/src/lab/live/pendulum.tsx"));
+    const result = await compileScene(read("../../../site/src/lab/live/pendulum.tsx"));
 
     if (!result.ok) throw new Error(result.error.message);
     expect(result.scene).toMatchObject({ width: 480, height: 320, title: "Pendulum" });

@@ -58,34 +58,45 @@ export const createCompiler = ({ sources = false, timeout = 10_000 } = {}) => {
 
   let worker = start();
   let stopped = false;
-  const waiting = new Set<(result: Compiled) => void>();
+  /** Every job the current worker owes an answer, with the timer that gives up on it. */
+  const waiting = new Map<(result: Compiled) => void, ReturnType<typeof setTimeout>>();
+
+  const settleAll = (result: Compiled) => {
+    for (const [resolve, timer] of waiting) {
+      clearTimeout(timer);
+      resolve(result);
+    }
+
+    waiting.clear();
+  };
 
   const compile = (source: string) =>
     new Promise<Compiled>((resolve) => {
       if (stopped) return resolve(STOPPED);
-      waiting.add(resolve);
 
+      // A stuck job holds up every job behind it on the same worker, so they all fail with it and a fresh worker
+      // takes the next.
       const timer = setTimeout(() => {
         worker.terminate();
         worker = start();
 
-        const late: Compiled = {
+        settleAll({
           ok: false,
           error: {
             kind: "runtime",
             message: `The scene ran for over ${timeout / 1000}s without finishing, so it was stopped.`,
           },
           ms: timeout,
-        };
-
-        for (const pending of waiting) pending(late);
-        waiting.clear();
+        });
       }, timeout);
 
-      void worker.compile(source).then((result) => {
-        clearTimeout(timer);
+      waiting.set(resolve, timer);
 
-        if (waiting.delete(resolve)) resolve(result);
+      void worker.compile(source).then((result) => {
+        if (!waiting.has(resolve)) return;
+        clearTimeout(waiting.get(resolve));
+        waiting.delete(resolve);
+        resolve(result);
       });
     });
 
@@ -93,9 +104,7 @@ export const createCompiler = ({ sources = false, timeout = 10_000 } = {}) => {
     stop: () => {
       stopped = true;
       worker.terminate();
-
-      for (const pending of waiting) pending(STOPPED);
-      waiting.clear();
+      settleAll(STOPPED);
     },
   });
 };
@@ -122,11 +131,13 @@ export const latestWins = <T>(run: (job: T) => Promise<void>) => {
 
     try {
       await run(job);
+    } catch (error) {
+      // The queue outlives a failed job: the next one still runs.
+      console.error(error);
     } finally {
       busy = false;
+      void pump();
     }
-
-    void pump();
   };
 
   return (job: T) => {

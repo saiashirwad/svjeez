@@ -45,6 +45,8 @@ export interface State {
   /** The value whose control has focus, by key. */
   readonly selected: string | null;
   readonly picture: Picture | null;
+  /** The newest good compile, which a play, pause or seek shows again. It runs ahead of `picture` while it decodes. */
+  readonly compiled: Required<Omit<Picture, "url">> | null;
   /** The handles on the picture, by value key. */
   readonly grips: { readonly [key: string]: Grip };
   /** Why the newest compile failed, until one succeeds. The picture stays the last good one. */
@@ -158,6 +160,7 @@ export const init = ({ text, first, now }: Init): [State, Cmd[]] => [
     schema: {},
     selected: null,
     picture: first ?? null,
+    compiled: null,
     grips: {},
     error: null,
     clock: { playing: true, origin: now },
@@ -174,26 +177,21 @@ const edited = (state: State, text: string, continues = false): [State, Cmd[]] =
   return [read({ ...state, text, history: { past, future: [] } }), [{ type: "compile", text }]];
 };
 
-/** The picture shown again under a new clock, when there is a compiled file to show. */
+/** The newest compiled file shown under `clock`, from where it reads at `now`. */
+const showOf = (picture: Required<Omit<Picture, "url">>, clock: Clock, now: number): Cmd => ({
+  type: "show",
+  svg: picture.svg,
+  at: timeAt(clock, now),
+  playing: clock.playing,
+  picture,
+});
+
+/** The newest compiled file shown again under a new clock, once there is one. */
 const reshown = (state: State, clock: Clock, now: number): [State, Cmd[]] => {
-  const picture = state.picture;
   const next = { ...state, clock };
+  const { compiled } = state;
 
-  if (!picture?.svg) return [next, []];
-  const { url: _, ...rest } = picture;
-
-  return [
-    next,
-    [
-      {
-        type: "show",
-        svg: picture.svg,
-        at: timeAt(clock, now),
-        playing: clock.playing,
-        picture: rest,
-      },
-    ],
-  ];
+  return [next, compiled ? [showOf(compiled, clock, now)] : []];
 };
 
 /** The grips a compile of `text` declares, keyed by value: a param's value key is `params.<key>`. */
@@ -326,31 +324,21 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
       const { svg, scene, params = {}, handles } = msg.result;
       const current = msg.text === state.text;
 
-      const next = read({
-        ...state,
-        schema: current ? params : state.schema,
-        grips: withDeclared(state.grips, declaredGrips(msg.text, handles)),
-        error: null,
-      });
-
-      const picture = {
+      const compiled = {
         scene: scene ?? state.picture?.scene ?? { width: 0, height: 0, duration: 0, title: "" },
         svg,
         text: msg.text,
       };
 
-      return [
-        next,
-        [
-          {
-            type: "show",
-            svg,
-            at: timeAt(state.clock, msg.now),
-            playing: state.clock.playing,
-            picture,
-          },
-        ],
-      ];
+      const next = read({
+        ...state,
+        schema: current ? params : state.schema,
+        grips: withDeclared(state.grips, declaredGrips(msg.text, handles)),
+        error: null,
+        compiled,
+      });
+
+      return [next, [showOf(compiled, state.clock, msg.now)]];
     }
 
     case "shown": {
@@ -449,12 +437,23 @@ export const createEditor = (
   let waiting: Cmd[] | null = [];
   let alive = true;
 
+  /** A compile that throws, a page's fetch say, fails like a scene that does. */
+  const compiling = async (text: string): Promise<Compiled> => {
+    try {
+      return await run.compile(text);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      return { ok: false, error: { kind: "runtime", message }, ms: 0 };
+    }
+  };
+
   const release = (url: string) => {
     if (made.delete(url)) run.release(url);
   };
 
   const compile = latestWins(async (text: string) => {
-    const result = await run.compile(text);
+    const result = await compiling(text);
     dispatch({ type: "compiled", text, result, now: run.now() });
   });
 
@@ -467,7 +466,7 @@ export const createEditor = (
   });
 
   const probe = latestWins(async (cmd: Extract<Cmd, { type: "probe" }>) => {
-    const after = await run.compile(cmd.nudged);
+    const after = await compiling(cmd.nudged);
     const move = after.ok ? await run.measure(cmd.svg, after.svg, cmd.by, cmd.at) : undefined;
     const grip = move ? { ...move, from: cmd.from, declared: false } : null;
     dispatch({ type: "probed", key: cmd.key, text: cmd.text, grip });

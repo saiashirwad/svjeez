@@ -266,3 +266,70 @@ describe("grips", () => {
     expect(play([{ type: "select", key: "params.swing", now: 0 }], state).cmds).toEqual([]);
   });
 });
+
+describe("createEditor when things go wrong", () => {
+  test("a compile that throws shows as the file's error, and the next edit still compiles", async () => {
+    const texts: string[] = [];
+
+    const editor = createEditor(
+      { text: scene },
+      {
+        compile: async (text) => {
+          texts.push(text);
+
+          if (texts.length === 1) throw new Error("network down");
+
+          return ok("<svg/>");
+        },
+        show: async () => "blob:1",
+        release: () => {},
+        now: () => 0,
+      },
+    );
+
+    editor.subscribe(() => {});
+    await settle();
+    expect(editor.getState().error?.message).toContain("network down");
+
+    editor.send({ type: "set", key: "default#0", value: 50 });
+    await settle();
+    expect(texts).toHaveLength(2);
+    expect(editor.getState().error).toBeNull();
+    editor.destroy();
+  });
+
+  test("pausing while a new picture is still being drawn keeps the new picture", async () => {
+    let n = 0;
+    let draw: (() => void) | undefined;
+
+    const editor = createEditor(
+      { text: "export default () => 1;" },
+      {
+        compile: async (text) => ok(`<svg>${text}</svg>`),
+        show: (svg) =>
+          new Promise((resolve) => {
+            const url = `blob:${++n}:${svg}`;
+
+            if (n === 2) draw = () => resolve(url);
+            else resolve(url);
+          }),
+        release: () => {},
+        now: () => 0,
+      },
+    );
+
+    editor.subscribe(() => {});
+    await settle();
+    editor.send({ type: "replace", text: "export default () => 2;" });
+    await settle();
+    editor.send({ type: "pause" });
+    await settle();
+    draw?.();
+    await settle();
+    await settle();
+
+    expect(editor.getState().picture?.text).toBe("export default () => 2;");
+    expect(editor.getState().picture?.svg).toContain("() => 2");
+    editor.destroy();
+  });
+});
