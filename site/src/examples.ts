@@ -29,8 +29,12 @@ const SECTIONS = [
   },
   {
     title: "Building blocks",
-    blurb: "Explore diagrams, terminals, fonts, images, and effects.",
+    blurb: "Explore charts, diagrams, code, equations, fonts, and effects.",
     names: [
+      "charts",
+      "mermaid",
+      "code",
+      "math",
       "flowchart",
       "sequence",
       "state",

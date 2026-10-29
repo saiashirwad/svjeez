@@ -602,6 +602,10 @@ kbd {
   color: var(--muted);
   align-self: end;
 }
+.sec > h2 + .sub {
+  align-self: start;
+  margin-block-start: -0.5rem;
+}
 .sub code,
 .get code,
 .foot code,
@@ -967,6 +971,38 @@ pre.side {
   }
   100% {
     --split: 50%;
+  }
+}
+
+/* Packages: a name and one line each, between hairlines. */
+.pkgs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  align-self: end;
+}
+.pkgs li {
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) 1fr;
+  gap: 0.25rem 1.5rem;
+  padding-block: 0.85rem;
+  border-block-end: 1px solid var(--line);
+  font-size: 0.9375rem;
+}
+.pkgs li:first-child {
+  border-block-start: 1px solid var(--line);
+}
+.pkgs a {
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+.pkgs span {
+  color: var(--muted);
+}
+@media (max-width: 30rem) {
+  .pkgs li {
+    grid-template-columns: 1fr;
   }
 }
 

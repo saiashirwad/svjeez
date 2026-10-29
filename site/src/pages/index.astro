@@ -4,6 +4,7 @@ import { getScene } from "@svjeez/astro/scene";
 import agents from "@examples/site/agents.tsx";
 import agentsTall from "@examples/site/agents-tall.tsx";
 import breaker from "@examples/breaker/index.tsx";
+import charts from "@examples/site/charts.tsx";
 import explainer from "@examples/site/explainer.tsx";
 import fonts from "@examples/site/fonts.tsx";
 import geo from "@examples/site/geo.tsx";
@@ -61,6 +62,7 @@ const s = {
   mathTaylor: live(mathTaylor),
   mathPythagoras: live(mathPythagoras),
   geo: live(geo),
+  charts: live(charts),
   fonts: live(fonts),
   breaker: live(breaker),
   agents: live(agents),
@@ -164,6 +166,18 @@ const route = map.route(london, tokyo);
 <path d={map.land} />
 <path d={line(route)} animation={draw({ at: 2, over: 1.6 })} />`;
 
+const chartUse = `import { chart } from "@svjeez/charts";
+
+const c = chart({
+  width, height,
+  x: { kind: "band", domain: months },
+  y: { domain: [0, 80] },
+});
+const bars = c.bars(merged, { at: 0.6, stagger: 0.12 });
+const trend = c.line(Object.entries(opened), { at: bars.end });
+
+<g>{c.node}{bars.node}{trend.node}</g>`;
+
 const adaptive = `const { theme, css } = adaptive({
   dark: systemDark,
   light: systemLight,
@@ -231,6 +245,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
 
     <section class="wrap sec g" id="diagrams">
       <h2 class="c1-8 xl"><a class="anchor" href="#diagrams">Bring diagrams to life.</a></h2>
+      <p class="sub c1-8">Build flowcharts, sequence diagrams and state machines in TypeScript, or turn Mermaid text into animated diagrams with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/mermaid">@svjeez/mermaid</a>.</p>
       <div class="big c1-12">
         <div class="win">
           <LiveScene class="wide" scene={s.pipeline} cost={44} alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
@@ -244,6 +259,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
     <div class="tint">
       <section class="wrap sec g" id="code">
         <h2 class="c1-6"><a class="anchor" href="#code">Explain code and show terminal sessions.</a></h2>
+        <p class="sub c1-8">Highlight source with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/code">@svjeez/code</a>, then animate it alongside callouts, markers and terminal output.</p>
         <figure class="c1-6"><div class="win"><LiveScene scene={s.explainer} cost={23} alt="Five lines of TSX with a spotlight moving across them and a note explaining draw and enter." /></div></figure>
         <figure class="c7-12"><div class="win"><LiveScene scene={s.recording} cost={28} alt="Three svjeez commands in a terminal: frames, svg and skill, each followed by its output." /></div></figure>
       </section>
@@ -251,25 +267,36 @@ npx svjeez svg scene.tsx --out scene.svg`;
 
     <section class="wrap sec g" id="type">
       <h2 class="c1-6"><a class="anchor" href="#type">Animate handwriting. Embed your fonts.</a></h2>
+      <p class="sub c1-8">Load Google Fonts by name with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/fonts">@svjeez/fonts</a>, or bring your own fonts.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.ink} cost={17} alt="The word hello is handwritten stroke by stroke, then a brush swash is inked underneath." /></div></figure>
       <figure class="c7-12"><div class="win"><LiveScene scene={s.fonts} cost={20} alt="The words Aa Type draw on as outlines in an embedded display font, with real italic text below." /></div></figure>
     </section>
 
     <section class="wrap sec g" id="icons">
       <h2 class="c1-6"><a class="anchor" href="#icons">Make any of 8,000 icons move.</a></h2>
+      <p class="sub c1-8">Draw and animate Tabler and Lucide icons with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/icons">@svjeez/icons</a>.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.icons} cost={24} alt="Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings." /></div></figure>
       <Code class="code side c7-12" code={iconUse} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="math">
       <h2 class="c1-8"><a class="anchor" href="#math">Typeset equations, then morph them.</a></h2>
+      <p class="sub c1-8">Turn TeX into glyph paths with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/math">@svjeez/math</a>.</p>
       <Switcher name="math" label="Math scenes" items={maths} />
     </section>
 
     <section class="wrap sec g" id="maps">
       <h2 class="c1-6"><a class="anchor" href="#maps">Draw real maps, then fly across them.</a></h2>
+      <p class="sub c1-8">Project GeoJSON or TopoJSON with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/geo">@svjeez/geo</a>, then animate regions, places and routes.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.geo} cost={20} alt="The world's countries fill in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city is labelled as its flight lands." /></div></figure>
       <Code class="code side c7-12" code={geoUse} lang="tsx" theme={shikiTheme} />
+    </section>
+
+    <section class="wrap sec g" id="charts">
+      <h2 class="c1-8"><a class="anchor" href="#charts">Chart your data as it grows.</a></h2>
+      <p class="sub c1-8">Draw bar, line and area charts with <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/charts">@svjeez/charts</a>, then grow the bars and draw the lines in.</p>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.charts} cost={10} alt="Six bars grow up from the baseline one month at a time, then an orange line draws across the chart and its dots pop in as the stroke reaches them." /></div></figure>
+      <Code class="code side c7-12" code={chartUse} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="light-dark">
@@ -309,6 +336,15 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <figure class="c9-12"><div class="win"><LiveScene scene={s.whereMail} cost={4} alt="An email with a bar chart that grows inside the message." /></div><h3>Email</h3><p>SVG support varies across email clients. Provide a still image as a fallback.</p></figure>
     </section>
 
+    <section class="wrap sec g" id="packages">
+      <h2 class="c1-6"><a class="anchor" href="#packages">Export video, or build scenes into your site.</a></h2>
+      <ul class="pkgs c7-12">
+        <li><a href="https://github.com/saiashirwad/svjeez/tree/main/packages/video">@svjeez/video</a><span>Export a scene as MP4 or WebM.</span></li>
+        <li><a href="https://github.com/saiashirwad/svjeez/tree/main/packages/vite">@svjeez/vite</a><span>Import scenes into a Vite app.</span></li>
+        <li><a href="https://github.com/saiashirwad/svjeez/tree/main/packages/astro">@svjeez/astro</a><span>Add scenes and poster stills to an Astro site.</span></li>
+      </ul>
+    </section>
+
     <section class="wrap sec g" id="start">
       <div class="c1-6">
         <h2><a class="anchor" href="#start">Start making animated SVGs.</a></h2>
@@ -317,7 +353,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
       <div class="get c7-12">
         <h3>In a project</h3>
         <pre class="code">{start}</pre>
-        <p>The library has no runtime dependencies and supports Node 20 and newer. Frame rendering also requires Playwright and Chromium; running TSX on Node requires tsx.</p>
+        <p>The core library has no runtime dependencies and supports Node 20 and newer. Optional packages add features and integrations. Frame rendering requires Playwright and Chromium; running TSX on Node requires tsx.</p>
         <h3>With a coding agent</h3>
         <pre class="code">npx svjeez skill --install</pre>
         <p>Install the guide, references, and worked examples into <code>.claude/skills</code> for your coding agent.</p>
