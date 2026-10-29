@@ -10,7 +10,7 @@ import {
   type TargetValue,
   type TargetValues,
 } from "./channels";
-import { baseRule, classBody, cssKeyframes, freezeRule, type Emit } from "./css";
+import { baseRule, classBody, cssKeyframes, freezeRule, onceRule, type Emit } from "./css";
 import { isRef, refNode, refTag, type AnyRef, type DefTag } from "./defs";
 import { fontFaceRule, fontFaces, isFontValue, type Font, type FontValue } from "./font/font";
 import { num } from "./format";
@@ -72,6 +72,7 @@ interface State {
   readonly rules: string[];
   readonly stills: string[];
   pivot: boolean;
+  once: boolean;
 }
 
 const MAX_KEYS = 2000;
@@ -386,7 +387,22 @@ const keyframesName = (state: State, body: string, label?: string): string => {
   return name;
 };
 
-const className = (state: State, lanes: readonly Lane[]): string => {
+/** The canvas a lane plays on: inside `<Once>`, a looping scene's timeline plays one time. */
+const canvasOf = (state: State, once: boolean): Canvas =>
+  once ? { ...state.canvas, loop: false } : state.canvas;
+
+/** SMIL inside `<Once>` carries this, so `restyle` can start it on the once clock. */
+const ONCE_ATTR = "data-once";
+
+const animateOn = (state: State, attribute: string, lane: Lane, once: boolean): SvgNode => {
+  const node = animate(canvasOf(state, once), attribute, lane);
+
+  return once && node.kind === "element"
+    ? { ...node, attrs: { ...node.attrs, [ONCE_ATTR]: "" } }
+    : node;
+};
+
+const className = (state: State, lanes: readonly Lane[], once: boolean): string => {
   const frames = lanes.map((lane) =>
     cssKeyframes(
       isProperty(lane.key) ? propertyName(state, lane.key) : lane.key,
@@ -399,7 +415,7 @@ const className = (state: State, lanes: readonly Lane[]): string => {
   const names = frames.map(({ body }, index) => keyframesName(state, body, lanes[index]!.label));
 
   const body = classBody(
-    state.canvas,
+    canvasOf(state, once),
     lanes,
     names,
     frames.map((frame) => frame.timing),
@@ -422,8 +438,8 @@ const local = (state: State, lane: Lane): number => {
   return ((at % lane.snapped) / lane.snapped) * lane.period;
 };
 
-const blurFilter = (state: State, lane: Lane): string => {
-  const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}`;
+const blurFilter = (state: State, lane: Lane, once: boolean): string => {
+  const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}|${once}`;
   const known = state.blurs.get(signature);
 
   if (known) return known;
@@ -432,7 +448,7 @@ const blurFilter = (state: State, lane: Lane): string => {
   const still = formatValue(valueAt(lane.keys, local(state, lane)).blur);
 
   const blur = element("feGaussianBlur", { stdDeviation: still }, [
-    animate(state.canvas, "stdDeviation", lane),
+    animateOn(state, "stdDeviation", lane, once),
   ]);
 
   addDef(state, element("filter", { id, ...canvasRegion(state.canvas) }, [blur]));
@@ -454,7 +470,12 @@ const pin = (attrs: Record<string, AttrValue>, el: Element, lane: Lane): void =>
   }
 };
 
-const emitShell = (state: State, target: Element, lanes: readonly Lane[]): SvgNode => {
+const emitShell = (
+  state: State,
+  target: Element,
+  lanes: readonly Lane[],
+  once: boolean,
+): SvgNode => {
   const attrs = { ...target.attrs };
   const children = [...target.children];
   const css = lanes.filter((lane) => lane.backend === "css");
@@ -464,25 +485,27 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): SvgNo
     !/transform-(?:box|origin)/.test(String(attrs.style ?? ""));
 
   state.pivot ||= pivot;
+  state.once ||= once && css.length > 0;
 
   for (const lane of lanes) {
     pin(attrs, target, lane);
 
-    if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane)})`;
+    if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane, once)})`;
 
     if (lane.backend === "smil") {
       // SAFETY: a smil lane animates an SVG attribute, never a custom property, so its first target is a Channel.
       attrs[lane.key] = formatValue(
         valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel],
       );
-      children.push(animate(state.canvas, lane.key, lane));
+      children.push(animateOn(state, lane.key, lane, once));
     }
   }
 
   const classes = [
     attrs.class,
     css.length > 0 && `${state.canvas.prefix}a`,
-    css.length > 0 && className(state, css),
+    css.length > 0 && once && `${state.canvas.prefix}o`,
+    css.length > 0 && className(state, css, once),
     pivot && `${state.canvas.prefix}fb`,
   ].filter(Boolean);
 
@@ -532,7 +555,7 @@ const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
       : lanes;
   });
 
-const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
+const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNode => {
   switch (node.kind) {
     case "text":
       state.texts.push(node.value);
@@ -541,9 +564,13 @@ const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
     case "raw":
       return node;
     case "fragment":
-      return { ...node, children: node.children.map((child) => walk(state, child, veiled)) };
+      return {
+        ...node,
+        children: node.children.map((child) => walk(state, child, veiled, once)),
+      };
     case "element": {
       const bare = element(node.tag, resolveAttrs(state, node.attrs), []);
+      const inOnce = once || node.once === true;
 
       const shells = veil(
         node.motions.length > 0
@@ -558,12 +585,24 @@ const walk = (state: State, node: SvgNode, veiled = false): SvgNode => {
       const hides =
         veiled || shells.some((shell) => shell.some((lane) => lane.emit === "visibility"));
 
-      const el = { ...bare, children: node.children.map((child) => walk(state, child, hides)) };
+      const el = {
+        ...bare,
+        children: node.children.map((child) => walk(state, child, hides, inOnce)),
+      };
+
+      // A wrapper layer turns about the point the element asked for, not the centre of its box.
+      const pivot = String(bare.attrs.style ?? "").match(/transform-(?:box|origin)\s*:[^;]*/g);
+      const wrapper: Record<string, AttrValue> = pivot ? { style: pivot.join(";") } : {};
 
       return shells.reduce<SvgNode>(
         (inner, lanes, index) =>
           // SAFETY: only the first shell can carry `d` and come back as a fragment, and every later shell wraps it in a <g>.
-          emitShell(state, index === 0 ? (inner as Element) : element("g", {}, [inner]), lanes),
+          emitShell(
+            state,
+            index === 0 ? (inner as Element) : element("g", wrapper, [inner]),
+            lanes,
+            inOnce,
+          ),
         el,
       );
     }
@@ -597,6 +636,7 @@ export const compile = (
     rules: [],
     stills: [],
     pivot: false,
+    once: false,
   };
 
   const body = content.map((node) => walk(state, node));
@@ -607,6 +647,7 @@ export const compile = (
     ...fontRules,
     ...state.registrations,
     state.rules.length > 0 && baseRule(canvas),
+    state.once && onceRule(canvas),
     state.pivot && `.${canvas.prefix}fb{transform-box:fill-box;transform-origin:center}`,
     ...state.rules,
     freezeRule(canvas, state.rules.length > 0, state.stills),

@@ -3,6 +3,7 @@ import { num } from "./format";
 import type { Seconds } from "./motion";
 import type { Css } from "./properties";
 import { children, element, raw, serialize, type Child } from "./svg";
+import { withSources } from "./sources";
 import { validateSvg } from "./validate";
 
 export interface RenderOptions {
@@ -27,6 +28,12 @@ export interface RenderOptions {
   readonly loop?: boolean;
   /** Comment above the root element. */
   readonly comment?: string;
+  /**
+   * Write `data-source` on every element made by the development JSX runtime (`svjeez/jsx-dev-runtime`): where it was
+   * written, as `file:line:column` with the parts the JSX transform reports. For tools that link a picture back to its
+   * code. Default false, and the output is unchanged.
+   */
+  readonly sources?: boolean;
 }
 
 /** Compile motions and refs, serialize, and validate. Throws on invalid output. */
@@ -53,8 +60,10 @@ export const render = (options: RenderOptions, content: Child): string => {
       ? undefined
       : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
 
+  const nodes = children(content);
+
   const { css, ...compiled } = compile(
-    children(content),
+    options.sources ? nodes.map(withSources) : nodes,
     { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
     options.css,
   );

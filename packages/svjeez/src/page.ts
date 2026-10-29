@@ -1,25 +1,34 @@
 import type { Seconds } from "./motion";
 
-/** Runs in the page: pause every CSS and SMIL animation at `time` playback seconds. */
-export const seek = (time: Seconds): void => {
-  for (const animation of document.getAnimations()) {
+/**
+ * Runs in the page: pause every CSS and SMIL animation in `root`, the whole document by default, at `time` playback
+ * seconds. Pass an inline `<svg>` to scrub that picture alone.
+ */
+export const seek = (time: Seconds, root: Document | Element = document): void => {
+  const animations =
+    root instanceof Element ? root.getAnimations({ subtree: true }) : root.getAnimations();
+
+  for (const animation of animations) {
     animation.pause();
     animation.currentTime = time * 1000;
   }
 
-  for (const svg of document.querySelectorAll("svg")) {
+  const svgs = [...root.querySelectorAll("svg"), ...(root instanceof SVGSVGElement ? [root] : [])];
+
+  for (const svg of svgs) {
     svg.pauseAnimations();
     svg.setCurrentTime(time);
   }
 };
 
-/** Runs in the page: one loop of the scene, the least common multiple of every CSS and SMIL period, in seconds. */
-export const loopLength = (): Seconds => {
-  const css = document
-    .getAnimations()
-    .map((animation) => Number(animation.effect?.getTiming().duration) || 0);
+/** Runs in the page: one loop of the scene in `root`, the whole document by default, the least common multiple of every CSS and SMIL period, in seconds. */
+export const loopLength = (root: Document | Element = document): Seconds => {
+  const animations =
+    root instanceof Element ? root.getAnimations({ subtree: true }) : root.getAnimations();
 
-  const smil = [...document.querySelectorAll("animate, animateTransform, animateMotion, set")].map(
+  const css = animations.map((animation) => Number(animation.effect?.getTiming().duration) || 0);
+
+  const smil = [...root.querySelectorAll("animate, animateTransform, animateMotion, set")].map(
     (element) => parseFloat(element.getAttribute("dur") ?? "") * 1000 || 0,
   );
 

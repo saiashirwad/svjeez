@@ -52,10 +52,27 @@ interface Complex {
   im: number;
 }
 
-interface Term {
+/** One circle of a Fourier series: it turns `k` times per loop, with radius `r` and starting angle `phase` in radians. */
+export interface FourierTerm {
   readonly k: number;
   readonly r: number;
   readonly phase: number;
+}
+
+export interface FourierOptions {
+  /** Points taken around the outline, evenly by arc length. An even number of at least 4. Default 1024. */
+  readonly samples?: number;
+  /** Terms kept, largest first. Default every one, `samples - 1`. */
+  readonly terms?: number;
+}
+
+export interface Fourier {
+  /** The point every circle spins around: the outline's mean, the series' constant term. */
+  readonly mean: Point;
+  /** The circles that sum to the outline, largest first. */
+  readonly terms: readonly FourierTerm[];
+  /** The samples the series was taken from. */
+  readonly points: readonly Point[];
 }
 
 const NUMBER = /-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi;
@@ -204,17 +221,16 @@ const toContours = (source: EpicyclesSource): Point[][] => {
 };
 
 /** One closed loop through every contour in order, joined by straight bridges, and back to the start. */
-const loop = (lines: readonly Point[][]): Point[] => {
+const loop = (lines: readonly Point[][], caller: string): Point[] => {
   const points = lines.flat();
 
-  if (points.length < 3)
-    throw new Error("epicycles() needs an outline with at least three points.");
+  if (points.length < 3) throw new Error(`${caller} needs an outline with at least three points.`);
 
   return [...points, points[0]!];
 };
 
 /** `count` points evenly spaced by arc length along a polyline. */
-const resample = (points: readonly Point[], count: number): Point[] => {
+const resample = (points: readonly Point[], count: number, caller: string): Point[] => {
   const cumulative = [0];
 
   for (let i = 1; i < points.length; i++)
@@ -224,7 +240,7 @@ const resample = (points: readonly Point[], count: number): Point[] => {
     );
   const total = cumulative.at(-1)!;
 
-  if (!(total > 0)) throw new Error("epicycles() needs an outline with some length.");
+  if (!(total > 0)) throw new Error(`${caller} needs an outline with some length.`);
   let j = 1;
 
   return Array.from({ length: count }, (_, i) => {
@@ -246,7 +262,7 @@ const spectrum = (points: readonly Point[], count: number) => {
     Math.sin((2 * Math.PI * m) / n),
   ]);
 
-  const all: Term[] = [];
+  const all: FourierTerm[] = [];
   let mean: Point = [0, 0];
 
   for (let k = -n / 2 + 1; k <= n / 2; k++) {
@@ -265,8 +281,25 @@ const spectrum = (points: readonly Point[], count: number) => {
 
   all.sort((a, b) => b.r - a.r || Math.abs(a.k) - Math.abs(b.k));
 
-  return { mean, terms: all.slice(0, count) } satisfies { mean: Point; terms: Term[] };
+  return { mean, terms: all.slice(0, count) } satisfies { mean: Point; terms: FourierTerm[] };
 };
+
+/**
+ * The Fourier series of any closed outline, the one `epicycles()` draws: the outline sampled evenly by arc length, then
+ * taken apart into circles. Use it to draw the series some other way, as a formula, a spectrum or circles of your own.
+ */
+export function fourier(source: EpicyclesSource, options: FourierOptions = {}): Fourier {
+  const { samples = SAMPLES, terms = samples - 1 } = options;
+
+  if (!Number.isInteger(samples) || samples < 4 || samples % 2 !== 0)
+    throw new Error(`fourier() needs an even number of samples, 4 or more, got ${samples}.`);
+
+  if (!Number.isInteger(terms) || terms < 1 || terms > samples - 1)
+    throw new Error(`fourier() keeps 1 to ${samples - 1} terms, got ${terms}.`);
+  const points = resample(loop(toContours(source), "fourier()"), samples, "fourier()");
+
+  return { ...spectrum(points, terms), points };
+}
 
 const tenth = (v: number): number => Math.round(v * 10) / 10 + 0;
 
@@ -295,7 +328,7 @@ export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): E
       `epicycles() needs 1 to ${SAMPLES / 2 - 1} terms, a non-negative number of circles and fade, got terms ${count}, circles ${circles} and fade ${fade}.`,
     );
 
-  const points = resample(loop(toContours(source)), SAMPLES);
+  const points = resample(loop(toContours(source), "epicycles()"), SAMPLES, "epicycles()");
   const [xs, ys] = [points.map(([x]) => x), points.map(([, y]) => y)];
 
   const [left, right, top, bottom] = [

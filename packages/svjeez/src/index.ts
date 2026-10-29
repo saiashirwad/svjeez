@@ -12,6 +12,14 @@ export {
   type Ease,
 } from "./motion";
 
+export { easeAt } from "./ease-at";
+
+export { sample, type SampleOptions } from "./sample";
+
+export { random } from "./random";
+
+export { Pivot, type PivotProps } from "./pivot";
+
 export {
   enter,
   exit,
@@ -52,6 +60,10 @@ export { Glyphs, type GlyphsProps } from "./glyphs";
 
 export { Icon, type IconData, type IconProps } from "./icon";
 
+export { Once, type OnceProps } from "./once";
+
+export { spline, type Spline } from "./spline";
+
 export {
   Ink,
   inkPath,
@@ -76,7 +88,15 @@ export type { SvgNode, Child } from "./svg";
 
 export { validateSvg, type ValidationResult } from "./validate";
 
-export { rect, type Rect, type Point, type Edge } from "./geometry";
+export {
+  rect,
+  resample,
+  polylinePath,
+  type Rect,
+  type Point,
+  type Edge,
+  type PolylinePathOptions,
+} from "./geometry";
 
 export {
   matchPaths,
