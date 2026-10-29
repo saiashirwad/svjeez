@@ -1,6 +1,7 @@
+import { polylinePath } from "svjeez";
 import { clamp } from "../util";
 import { add } from "./geometry";
-import { polyline, r1, type Cx } from "./look";
+import { r1, type Cx } from "./look";
 import { meltBy, meltMotion, partMotion } from "./motions";
 import { PALETTES } from "./palette";
 
@@ -36,7 +37,7 @@ export const body = (cx: Cx) => {
   const stripes = g.pattern === "tabby" ? `${r1(G * 0.22)} ${r1(G * 0.4)}` : undefined;
 
   const layer = (kind: Layer, from: number, to: number, cap: Cap) => {
-    const d = polyline(spine.slice(from, to + 1));
+    const d = polylinePath(spine.slice(from, to + 1));
 
     if (kind === "co")
       return (
@@ -93,7 +94,7 @@ export const body = (cx: Cx) => {
 
   const melted = (["co", "cf", "ct"] as const).map((kind) =>
     segments.map(([a, b]) => (
-      <g animation={meltMotion(meltBy(cx, spine[Math.round((a + b) / 2)]!))}>
+      <g animation={meltMotion(meltBy(cx.lay, spine[Math.round((a + b) / 2)]!))}>
         {layer(kind, a, b, "round")}
       </g>
     )),
@@ -101,7 +102,7 @@ export const body = (cx: Cx) => {
 
   return {
     /** The outline as path data, for the 4D ghost. */
-    d: polyline(spine),
+    d: polylinePath(spine),
     /** The whole body. Built on each call because the file may hold it twice. */
     whole: () => (f.liquid ? melted : stretch(0, spine.length - 1, "round")),
     /** The stretches that cross over themselves, drawn again on top. */

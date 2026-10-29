@@ -1,6 +1,7 @@
-import { wiggle, type Child } from "svjeez";
-import { blinkAt, Eye, Pivot, Speech } from "./bits";
+import { Pivot, wiggle, type Child, type Stack } from "svjeez";
+import { blinkAt, Eye, Speech } from "./bits";
 import { Face } from "./face";
+import { tailTip } from "./layout";
 import { r1, type Cx } from "./look";
 
 /** A tail and what's on the end of it, pointing up from 0,0 before its rotation. */
@@ -9,16 +10,18 @@ export const Tail = ({
   length: Lt,
   width: tw,
   seed,
+  wag,
 }: {
   cx: Cx;
   length: number;
   width: number;
   seed: string;
+  wag: Stack<"rotate">;
 }) => {
   const { g, pal, ink, rand, lay } = cx;
   const c = Lt * 0.22;
   const d = `M0 0C${r1(c)} ${r1(-Lt * 0.35)} ${r1(-c * 1.4)} ${r1(-Lt * 0.6)} ${r1(c * 0.4)} ${r1(-Lt * 0.86)}S${r1(c * 1.5)} ${r1(-Lt * 1.04)} ${r1(c * 1.1)} ${r1(-Lt)}`;
-  const tip = { x: c * 1.1, y: -Lt };
+  const tip = tailTip(Lt);
 
   const stroke = (dd: string, w: number) => (
     <>
@@ -64,10 +67,7 @@ export const Tail = ({
     const kr = Math.max(9, lay.G * 0.32);
     end = (
       <g transform={`translate(${r1(tip.x)} ${r1(tip.y - kr * 0.6)})`}>
-        <Pivot
-          size={kr * 2}
-          animation={wiggle({ rotate: 18 }, { seed: `kit${seed}`, rate: 1.5, period: 4 })}
-        >
+        <Pivot animation={wiggle({ rotate: 18 }, { seed: `kit${seed}`, rate: 1.5, period: 4 })}>
           <Face cx={cx} r={kr} face={1} eyes={2} ears={2} seed={`k${seed}`} mini />
         </Pivot>
         <g transform={`translate(${r1(kr * 0.8)} ${r1(-kr * 1.4)})`}>
@@ -78,10 +78,7 @@ export const Tail = ({
   } else {
     const branch = (a: number, i: number) => (
       <g transform={`translate(${r1(tip.x)} ${r1(tip.y)}) rotate(${a})`}>
-        <Pivot
-          size={Lt * 0.4}
-          animation={wiggle({ rotate: 20 }, { seed: `fork${seed}${i}`, rate: 2, period: 2 })}
-        >
+        <Pivot animation={wiggle({ rotate: 20 }, { seed: `fork${seed}${i}`, rate: 2, period: 2 })}>
           {stroke(
             `M0 0C${r1(Lt * 0.06)} ${r1(-Lt * 0.12)} ${r1(-Lt * 0.06)} ${r1(-Lt * 0.2)} 0 ${r1(-Lt * 0.3)}`,
             tw * 0.7,
@@ -101,10 +98,7 @@ export const Tail = ({
   }
 
   return (
-    <Pivot
-      size={Lt * 1.15}
-      animation={wiggle({ rotate: 13 }, { seed: `tail${seed}`, rate: 1.1, period: 4 })}
-    >
+    <Pivot animation={wag}>
       {stroke(d, tw)}
       {end}
     </Pivot>

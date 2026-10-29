@@ -8,11 +8,12 @@
     "preview": "astro preview",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
-    "typecheck": "astro check",
+    "typecheck": "astro check && svelte-check --tsconfig ./tsconfig.json --threshold warning",
     "test": "bun test --conditions @svjeez/source"
   },
   "dependencies": {
     "@alchemy.run/cloudflare": "^2.0.0-beta.84",
+    "@astrojs/svelte": "^9.1.2",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/language": "^6.13.1",
@@ -20,19 +21,19 @@
     "@codemirror/view": "^6.43.15",
     "@effect/platform-bun": "^4.0.6",
     "@effect/platform-node": "^4.0.6",
-    "@lezer/highlight": "^1.2.5",
     "@svjeez/astro": "workspace:*",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
+    "@svjeez/live": "workspace:*",
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
     "@svjeez/vite": "workspace:*",
     "alchemy": "^2.0.0-beta.84",
     "astro": "^7.4.3",
     "effect": "^4.0.6",
-    "sucrase": "^3.35.1",
+    "svelte": "^5.57.3",
     "svjeez": "workspace:*",
     "world-atlas": "^2.0.2"
   },
@@ -41,6 +42,7 @@
     "@astrojs/check": "^0.9.12",
     "@types/bun": "^1.4.4",
     "playwright-core": "^1.64.1",
+    "svelte-check": "^4.7.7",
     "typescript": "6",
     "vite": "8.3.5"
   }

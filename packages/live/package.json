@@ -1,0 +1,33 @@
+{
+  "name": "@svjeez/live",
+  "private": true,
+  "description": "Scene source as data for the site's editors: parse, highlight and edit TSX, and compile source in the browser. Never published.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./source": "./src/source.ts",
+    "./compile": "./src/compile.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lezer/common": "^1.5.4",
+    "@lezer/highlight": "^1.2.5",
+    "@lezer/javascript": "^1.5.6",
+    "@svjeez/charts": "workspace:*",
+    "@svjeez/code": "workspace:*",
+    "@svjeez/geo": "workspace:*",
+    "@svjeez/icons": "workspace:*",
+    "@svjeez/math": "workspace:*",
+    "@svjeez/mermaid": "workspace:*",
+    "sucrase": "^3.35.1",
+    "svjeez": "workspace:*",
+    "world-atlas": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "latest"
+  }
+}

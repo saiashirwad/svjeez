@@ -3,7 +3,7 @@ import { body, spots } from "./body";
 import { bodyEyes, headless, heads, legs, tails } from "./parts";
 import { drips, ghost, shadow } from "./extras";
 import type { Genome } from "./genome";
-import { DURATION, H, W } from "./geometry";
+import { DURATION, H, STILL_AT, W } from "./geometry";
 import { newCx, r1 } from "./look";
 import { breathing } from "./motions";
 import { PAPER } from "./palette";
@@ -65,7 +65,7 @@ export const build = (g: Genome): string => {
       title: "Catoid",
       desc: `A catoid with ${g.heads} heads, ${g.legs} legs and ${g.tails} tails, ${r1(g.length)} cats long.`,
       css: style,
-      reducedMotion: { at: 0.4 },
+      reducedMotion: { at: STILL_AT },
     },
     <>
       <rect width={W} height={H} fill={PAPER} />

@@ -1,7 +1,6 @@
-import type { Hex } from "svjeez";
+import { random, type Hex } from "svjeez";
 import { form, type Form } from "./form";
 import type { Genome } from "./genome";
-import { mulberry, type Pt } from "./geometry";
 import { layout, type Layout } from "./layout";
 import { BREAD, INK, PALETTES, type Palette } from "./palette";
 
@@ -23,13 +22,10 @@ export const newCx = (g: Genome): Cx => {
     g,
     f,
     lay: layout(g),
-    rand: mulberry(g.seed),
+    rand: random(g.seed),
     pal: f.bread ? BREAD : PALETTES[g.fur],
     ink: !f.bread && (g.fur === "void" || g.fur === "cosmic") ? "#8C7DAA" : INK,
   };
 };
 
 export const r1 = (v: number) => Math.round(v * 10) / 10;
-
-export const polyline = (pts: readonly Pt[]) =>
-  pts.map((p, i) => `${i ? "L" : "M"}${r1(p.x)} ${r1(p.y)}`).join("");

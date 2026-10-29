@@ -1,4 +1,4 @@
-import type { Compiled } from "../playground/core";
+import type { Compiled } from "@svjeez/live/compile";
 
 /**
  * A client for a worker that answers `{ id, ...Compiled }` to `{ id, ...message(job) }`. A worker that fails to load

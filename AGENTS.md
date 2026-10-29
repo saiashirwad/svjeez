@@ -16,6 +16,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
+- `packages/live/` is `@svjeez/live`, private and never published. For the site's editors it parses scene source into literals, elements and highlighting with exact edits, reads the `params` a scene declares through `svjeez/params`, and compiles source in the browser.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax.
 - `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid flowcharts, sequence diagrams and state diagrams into svjeez diagrams.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
@@ -53,7 +54,7 @@ Paths in this section are relative to `packages/svjeez/`.
 - `src/` holds the core: `motion.ts` (timeline), `recipes.ts`, `channels.ts` (the channel table), `keys.ts` (keyframe math), `css.ts` and `smil.ts` (emit CSS and SMIL), `compile.ts` and `render.ts` (orchestrate them), `validate.ts`.
 - `src/extras/` holds code, terminal, annotations, themes, and the diagrams in `extras/diagrams/`.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
-- `src/frames.ts` and `src/cli.ts` rasterize frames. They are the only code that touches a browser.
+- `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
 ## Packages
@@ -74,7 +75,7 @@ Each package's source explains its own internals. These are the rules that aren'
 
 ## Rules
 
-- Import `svjeez`, `svjeez/extras`, `svjeez/voxel` and `svjeez/frames`. In `packages/svjeez/` the tsconfig maps them to `src/`.
+- Import `svjeez`, `svjeez/extras`, `svjeez/voxel`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. In `packages/svjeez/` the tsconfig maps them to `src/`.
 - Keep the library dependency-free and runnable on Node 20. Don't use APIs newer than Node 20, such as `Map.groupBy` or `Set.prototype.union`. `bun run test:node` under Node 20 catches these.
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `examples/dist/` files and commit them with the change.

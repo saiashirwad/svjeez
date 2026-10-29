@@ -1,4 +1,4 @@
-import type { Compiled, SceneStats, SourceError } from "./core";
+import type { Compiled, SceneStats, SourceError } from "@svjeez/live/compile";
 import { EditorView, editorState } from "./editor";
 import { examples, type PlaygroundExample } from "./examples";
 
