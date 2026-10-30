@@ -56,7 +56,7 @@ Paths in this section are relative to `packages/svjeez/`.
 - `src/extras/` holds code, terminal, annotations, themes, and the diagrams in `extras/diagrams/`.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
 - `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
-- `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
+- `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `test/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
 ## Packages
 
@@ -67,7 +67,7 @@ Each package's source explains its own internals. These are the rules that aren'
 - `@svjeez/code` returns `[role, text]` runs, never hex, so `adaptive()` and `variables()` keep working.
 - `@svjeez/charts`, `@svjeez/math` and `@svjeez/mermaid` end their relative imports in `.ts` so the packed declarations resolve.
 - `@svjeez/mermaid` never drops a line. Anything it cannot draw throws a `MermaidSyntaxError`. When svjeez gains a feature, move it from the rejected list to the parser and the mapper together, and update the README and `references/mermaid.md`.
-- `@svjeez/fonts` is the only package that touches the network. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/tests/fixtures/`.
+- `@svjeez/fonts` is the only package that touches the network. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/test/fixtures/`.
 - A package that scene writers use has an example scene in `examples/` and a reference in `skills/svjeez/references/`.
 
 ## Site

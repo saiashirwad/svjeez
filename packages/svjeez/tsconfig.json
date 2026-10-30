@@ -22,5 +22,5 @@
       "svjeez/voxel": ["./src/voxel.ts"]
     }
   },
-  "include": ["src", "scripts", "skills", "tests"]
+  "include": ["src", "scripts", "skills", "test"]
 }

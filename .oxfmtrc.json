@@ -11,7 +11,7 @@
     "**/*.astro",
     "**/*.md",
     "examples/site/plain-narrow.ts",
-    "packages/svjeez/tests/types.check.tsx",
+    "packages/svjeez/test/types.check.tsx",
     "**/dist/**",
     "**/package-dist/**",
     "**/.svelte-kit/**",

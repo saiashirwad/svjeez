@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { google } from "../src/index.ts";
 
-const fixture = new URL("../../svjeez/tests/fixtures/ABeeZee-Regular.ttf", import.meta.url);
+const fixture = new URL("../../svjeez/test/fixtures/ABeeZee-Regular.ttf", import.meta.url);
 
 const realFetch = globalThis.fetch;
 let cache: string;
