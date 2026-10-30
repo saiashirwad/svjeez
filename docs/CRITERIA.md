@@ -488,7 +488,7 @@ Each `automated` R-row owns a directory `test/R-n/` in the package that owns the
 
 ### Known bugs
 
-Defects found while mapping the code. Each becomes a tracker ticket, and the Q-item that names the behavior is in RATIONALE.md.
+Defects found while mapping the code. They are tracked, grouped by cause, in issues #31 to #46, and the Q-item that names each behavior is in RATIONALE.md.
 
 #### Timeline and motion
 
