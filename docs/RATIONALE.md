@@ -22,22 +22,22 @@ Why each current choice in [ONTOLOGY.md](ONTOLOGY.md) was made, what else was co
 ### D-4 Seeded randomness is part of the library (`random`, `wiggle`) — *Decided*
 - **Alternatives:** `Math.random()` (non-deterministic); require the user to bring a PRNG; a hash of the seed into one number per call.
 - **Why:** Determinism (G-7) needs a stream fixed by the seed on every runtime. FNV-1a hashes a string seed, mulberry32 is a tiny PRNG with no dependencies (G-6). A whole-number seed is not hashed so the known stream is checkable; `wiggle` takes `random(String(seed))` so number and string seeds meet.
-- **Evidence:** `Measured by: bun test tests/random.test.tsx → random(1)() === 0.6270739405881613`; `Source: ec59149 "what the labs needed, in the library: ... random ..."`.
+- **Evidence:** `Measured by: the R-17 tests → random(1)() === 0.6270739405881613`; `Source: ec59149 "what the labs needed, in the library: ... random ..."`.
 
 ### D-5 `sampled` bakes a function and simplifies per lane, cutting at jumps — *Decided*
 - **Alternatives:** keep all samples; fixed keyframe count; one global tolerance; tween across a jump.
 - **Why:** a dense sample bloats the file (G-1); a per-lane tolerance in the lane's units (px for translate) makes the error bound meaningful and checkable (G-3). A function that resets (360 to 0) must not spin back, so a change that survives repeated halving becomes a cut.
-- **Evidence:** `Source: 999a27d "sampled() cuts at a jump instead of tweening across it, and a cut at the end of the timeline lands on 100% (#21)"`; `Measured by: bun test tests/sampled.test.tsx → replay within 1px, far fewer keys`.
+- **Evidence:** `Source: 999a27d "sampled() cuts at a jump instead of tweening across it, and a cut at the end of the timeline lands on 100% (#21)"`; `Measured by: the R-21 tests → replay within 1px, far fewer keys`.
 
 ### D-6 `sample()` shares `keysOf`/`valueAt` with compile — *Decided*
 - **Alternatives:** a separate evaluator; reading computed styles in a browser.
 - **Why:** a readout or companion element placed beside a moving part must agree with what plays. Reusing the same key builder as emission keeps them in lockstep, and the Chromium test compares to the drawn box (G-3). `valueAt` blends toward the next key with the transition's ease so still frames agree with playback.
-- **Evidence:** `Source: 74d2d7b "Still frames ease between keys: valueAt blends numbers and morph paths toward the next key, sample() shares it"`; `Measured by: bun test tests/sample.test.tsx "matches where the browser draws the element" → positions within 0.5px`.
+- **Evidence:** `Source: 74d2d7b "Still frames ease between keys: valueAt blends numbers and morph paths toward the next key, sample() shares it"`; `Measured by: the R-12 and R-24 tests → positions within 0.5px`.
 
 ### D-7 `restyle` re-times a rendered SVG through CSS variables and SMIL begin — *Decided*
 - **Alternatives:** re-render the scene; rewrite keyframes with a delay; a script in the file.
 - **Why:** a page can recolor, start in, or pause an `<img>` without recompiling or running script (G-1, G-2, G-5). CSS animations offset by `--t0`; SMIL cannot be paused from markup, so an `<animate>` is made to end just after the copy starts and freeze (`HOLD`, one millisecond, because Chromium shows the base value for an animation that ends at 0).
-- **Evidence:** `Source: restyle.ts HOLD comment; commits 4b5c346, 2bbbc20`; `Measured by: bun test tests/once.test.tsx → begin="-2.999s" end="0.001s" fill="freeze"`.
+- **Evidence:** `Source: restyle.ts HOLD comment; commits 4b5c346, 2bbbc20`; `Measured by: the R-34 tests → begin="-2.999s" end="0.001s" fill="freeze"`.
 
 ### D-8 Times are compared with an absolute epsilon and keys one relative nudge apart — *Proposed*
 - **Alternatives:** exact comparisons; per-scene tolerances.
@@ -62,7 +62,7 @@ Why each current choice in [ONTOLOGY.md](ONTOLOGY.md) was made, what else was co
 ### D-12 Scene parameters are plain data with a pure `fit` — *Decided*
 - **Alternatives:** a reactive framework store; arbitrary-closure schemas; zod-style schemas.
 - **Why:** the schema must cross `postMessage` to a worker and be read by any framework's controls (G-10); scenes stay pure functions of values (G-7). `fit` clamps and steps without float dust so a raw slider or drag reading is always writable. `follow` derives drag direction numerically from the handle's own position function so the scene never states which way a handle moves.
-- **Evidence:** `Source: params.ts header comment; 3e95557 "handles() and follow() in svjeez/params placing each handle and turning a drag into a value"`; `Measured by: bun test tests/params.test.ts → arc handle follows 30 to 60`.
+- **Evidence:** `Source: params.ts header comment; 3e95557 "handles() and follow() in svjeez/params placing each handle and turning a drag into a value"`; `Measured by: the R-38 tests → arc handle follows 30 to 60`.
 
 ### D-13 `Pivot` and `Once` are groups, not new channels or attributes — *Decided*
 - **Alternatives:** a `pivot` prop on every element; a `once` flag on `motion()`.
@@ -113,7 +113,7 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-18 A hard 0/1 opacity cut compiles to `visibility`, falling back to `opacity` inside a hidden parent — *Decided*
 - **Alternatives:** always opacity; `display`.
 - **Why:** `visibility` lets the browser skip painting hidden parts. A descendant's `visibility:visible` overrides a hidden ancestor, so cuts inside a toggled element would show through, hence the fallback.
-- **Evidence:** `Source: 80f3663 "hard cuts inside a hidden parent fall back to opacity"`; `Source: compile.ts veil comment`; `Measured by: bun test tests/render.test.tsx -t "a cut inside a cut" → pass`.
+- **Evidence:** `Source: 80f3663 "hard cuts inside a hidden parent fall back to opacity"`; `Source: compile.ts veil comment`; `Measured by: the R-63 tests → pass`.
 
 ### D-19 Composition uses shells: stacking channels nest on `<g>` wrappers, others replace — *Decided*
 - **Alternatives:** one `transform` string per element (loses independent timing); rely on SMIL `additive`.
@@ -133,7 +133,7 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-22 Validation warns instead of failing on performance and portability hazards — *Decided*
 - **Alternatives:** fail on external hrefs; ignore filter cost.
 - **Why:** An external image works on a web page and fails through `<img>`; the author may know. A filter over 40+ animated elements re-renders per frame and can drop Safari far below 60 fps. Errors are for output the browser would reject or misread (G-4, G-9).
-- **Evidence:** `Source: e194ddb "Warn when a filter sits over 40 or more animated elements"`; `Source: picture.test.tsx "without failing the render"`.
+- **Evidence:** `Source: e194ddb "Warn when a filter sits over 40 or more animated elements"`; `Source: the R-84 tests "without failing the render"`.
 
 ### D-23 `playbackRate` divides emitted durations and leaves the timeline in scene seconds — *Decided*
 - **Alternatives:** rescale the timeline; add an `animation-play-rate`-style CSS (none exists).
@@ -163,7 +163,7 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-28 Source locations come from a separate dev JSX runtime — *Decided*
 - **Alternatives:** always write `data-source`; a babel plugin.
 - **Why:** The editor links a picture to its code (G-10); production output stays unchanged (G-7).
-- **Evidence:** `Source: ec59149 "render sources"`; `Source: RenderOptions.sources comment`; `Measured by: bun test tests/sources.test.tsx → "changes nothing else, and nothing by default"`.
+- **Evidence:** `Source: ec59149 "render sources"`; `Source: RenderOptions.sources comment`; `Measured by: the R-79 tests → "changes nothing else, and nothing by default"`.
 
 #### Deliberately left out
 - Runtime scripting or the Web Animations API in the output — G-2 forbids code in the viewer (AGENTS.md "Nothing runs in the viewer's browser").
@@ -194,7 +194,7 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-29 Voxels paint by depth sort with instanced symbols, and buried blocks are dropped — *Decided*
 - **Alternatives:** Per-block paths; a z-buffer (not available in SVG); keeping every block and letting overdraw hide the buried ones.
 - **Why:** Back to front is exact for unit cubes under an orthographic camera. One symbol per visible-face texture tuple keeps a large world small (G-1), and dropping buried blocks drops elements the viewer's browser would otherwise paint (G-2).
-- **Evidence:** `Source: fad7c02 "Draw blocks back to front as instanced symbols with lifetimes and buried culling"`; `Measured by: bun test tests/voxel.test.tsx → "a solid 3x3x3 cube keeps only the blocks on its three nearer faces" (19 of 27)`.
+- **Evidence:** `Source: fad7c02 "Draw blocks back to front as instanced symbols with lifetimes and buried culling"`; `Measured by: the R-128 tests → "a solid 3x3x3 cube keeps only the blocks on its three nearer faces" (19 of 27)`.
 
 ### D-30 Path morphs go through cubic Béziers with equal command text — *Decided*
 - **Alternatives:** Interpolate in the original command language; flatten every path to a polyline.
@@ -204,12 +204,12 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-31 `sampledPath` samples densely and keeps only keys that stay within a px tolerance — *Decided*
 - **Alternatives:** Emit every sample; fit curves; a fixed key count.
 - **Why:** Shape animations from physics or projections have thousands of points per frame. Recursive worst-point splitting bounds the error in px (G-3) and the file size (G-1). `slack` lets points nobody sees stray further, which the turning globes use for the side folded out past the clip.
-- **Evidence:** `Source: fd541f8, a20af25 "Turning globes, projection morphs..."`; `Measured by: bun test tests/paths.test.tsx → steady motion keeps 2 values; slack case keeps 2 values, no slack more than 5`.
+- **Evidence:** `Source: fd541f8, a20af25 "Turning globes, projection morphs..."`; `Measured by: the R-109 tests → steady motion keeps 2 values; slack case keeps 2 values, no slack more than 5`.
 
 ### D-32 A subset embed happens only when no layout lookup can differ; otherwise the whole font embeds — *Decided*
 - **Alternatives:** Always subset and let ligatures break; subset and keep GSUB/GPOS (subsetting those tables is large work and brings a dependency); never subset.
 - **Why:** The browser, not svjeez, shapes `<text>`. A subset without GSUB/GPOS would no longer apply ligatures or contextual alternates (G-5 text must look right), so the cut is skipped whenever `liga`, `clig`, `rlig` fires or `typesetter.beyond` finds any other default-on lookup that could act. Pair kerning is preserved by rebuilding it as a legacy `kern` table. Output is often a tenth of the file (G-1).
-- **Evidence:** `Source: 9b6ad05 "Embed fonts cut down to the glyphs a scene uses", 82c634f "embed whole when layout lookups could apply, format 12 cmap beyond the BMP"`; code comments in `subset.ts` and `FontOptions.subset`; `Measured by: bun test tests/font.test.tsx → cut is under a quarter of the file; measure of the cut equals the whole font`.
+- **Evidence:** `Source: 9b6ad05 "Embed fonts cut down to the glyphs a scene uses", 82c634f "embed whole when layout lookups could apply, format 12 cmap beyond the BMP"`; code comments in `subset.ts` and `FontOptions.subset`; `Measured by: the R-117 tests → cut is under a quarter of the file; measure of the cut equals the whole font`.
 
 ### D-33 Fonts are parsed in house, and only TTF and OTF can be measured or drawn — *Decided*
 - **Alternatives:** A runtime dependency (opentype.js, fontkit); decompress WOFF2 (needs Brotli); read via the browser.
@@ -219,7 +219,7 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-34 Font parsing is bounded against hostile files — *Decided*
 - **Alternatives:** Trust the file; a wall-clock timeout.
 - **Why:** Fonts come from URLs and disks. Table bounds are checked at parse, composite glyph nesting is capped at `MAX_COMPOSITE_DEPTH`, and total components at `MAX_COMPONENTS`, because nesting can fan out exponentially. Family names are CSS-escaped so a name cannot close the string and start a rule (G-1 safe single file).
-- **Evidence:** `Source: aa40409 "Fix review findings: CSS-escape family names, off-curve-only contours, composite fan-out budget, CSS weight matching, dedupe fonts by bytes"`; `Measured by: bun test tests/font.test.tsx → "composites that fan out exponentially throw instead of hanging", "a family name cannot break out of the CSS string"`.
+- **Evidence:** `Source: aa40409 "Fix review findings: CSS-escape family names, off-curve-only contours, composite fan-out budget, CSS weight matching, dedupe fonts by bytes"`; `Measured by: the R-114 and R-116 tests → "composites that fan out exponentially throw instead of hanging", "a family name cannot break out of the CSS string"`.
 
 ### D-35 Hand-drawn strokes are filled outlines, revealed through a mask that is replaced by a plain copy — *Decided*
 - **Alternatives:** Real `stroke` with `stroke-width` (no variable width); animate `stroke-dashoffset` on the filled outline (shows the outline, not the centerline); keep the mask forever.
@@ -234,7 +234,7 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-37 Stroke fonts are read from SVG font markup and smoothed with sharp corners preserved — *Decided*
 - **Alternatives:** Hershey JHF files; bake the smoothing into the tool; smooth every vertex.
 - **Why:** Hershey and EMS fonts ship as SVG fonts. Their strokes are short polylines that a wide nib would show as facets, so they are turned into Catmull-Rom cubics, except at corners sharper than a right angle (G-8).
-- **Evidence:** `Source: code comments in font/stroke.ts; tests/strokefont.test.ts "keeps a corner sharper than a right angle as a corner, and smooths gentle turns"`.
+- **Evidence:** `Source: code comments in font/stroke.ts; the R-120 tests "keeps a corner sharper than a right angle as a corner, and smooths gentle turns"`.
 
 ### D-38 Tool widths are closed-form functions of position and direction with seeded noise — *Decided*
 - **Alternatives:** Pressure samples recorded from a tablet; random per-render noise.
@@ -249,7 +249,7 @@ Authors chain `motion()` calls, use recipes, optionally `sampled()` for function
 ### D-40 `ligatures: false` is the author's way to keep a coding font cut down — *Decided*
 - **Alternatives:** Always detect ligature forming sequences and embed whole; strip ligature lookups silently.
 - **Why:** JetBrains Mono turns `=>` into a ligature, which forces a whole-font embed. With the option off, `measure`, `path` and the embedded cut agree on one glyph per character (G-3).
-- **Evidence:** `Source: JSDoc on FontOptions.ligatures; Measured by: bun test tests/font.test.tsx → "with ligatures off, text draws one glyph per character and the font still cuts down"`.
+- **Evidence:** `Source: JSDoc on FontOptions.ligatures; Measured by: the R-113 and R-118 tests → "with ligatures off, text draws one glyph per character and the font still cuts down"`.
 
 ### D-41 The same font bytes embed once, even when loaded twice — *Decided*
 - **Alternatives:** Dedupe by family name; embed per use.
@@ -283,7 +283,7 @@ Authors load fonts and images from disk or URLs at compile time, and pass string
 ### D-42 Layout math lives in `src/layout`, pure, with no imports outside the folder — *Decided*
 - **Alternatives:** layout code next to the drawing code in `extras/diagrams`; a third-party graph layout library.
 - **Why:** keeps geometry testable without SVG or fonts and lets `extras/field` and `voxel` reuse it (G-6, G-2).
-- **Evidence:** `Source: AGENTS.md "src/layout/ ... imports nothing outside src/layout, and a test enforces this"; tests/layout.test.ts last test`.
+- **Evidence:** `Source: AGENTS.md "src/layout/ ... imports nothing outside src/layout, and a test enforces this"; packages/svjeez/test/R-132/layout-imports-stay-inside.test.ts`.
 
 ### D-43 Layered layout is hand-written "Sugiyama-lite" — *Decided*
 - **Alternatives:** dagre / elkjs as a dependency; a simple rank-grid.
@@ -318,7 +318,7 @@ Authors load fonts and images from disk or URLs at compile time, and pass string
 ### D-49 Diagram specs are typed by their ids (`const` generics, `NoInfer`) — *Decided*
 - **Alternatives:** string ids checked at runtime only.
 - **Why:** a misspelled node id is a compile error `Type '"c"' is not assignable to type '"a" | "b"'`, never a broken SVG (G-4, G-9, quality *typed authoring*). Runtime errors remain for untyped callers.
-- **Evidence:** `Source: skills/svjeez/SKILL.md error table row; flowchart.ts/state.ts/tree.ts signatures; tests/types.check.tsx not in this area`.
+- **Evidence:** `Source: skills/svjeez/SKILL.md error table row; flowchart.ts/state.ts/tree.ts signatures; packages/svjeez/test/unit/diagram-types.check.tsx`.
 
 ### D-50 Layout stays in TB space; diagrams attach edges to shape outlines afterward — *Decided*
 - **Alternatives:** make the layout shape-aware.
@@ -527,7 +527,7 @@ Authors call these from scene source and put the returned nodes in the tree. The
 ### D-83 The shipped skill is tested like code — *Decided*
 - **Alternatives:** unchecked prose.
 - **Why:** Agents write scenes from the skill and its error table (G-9); a doc path that does not exist, a reference nobody routes to, or an error message that no longer exists silently misleads them.
-- **Evidence:** `Source: tests/skill.test.ts; AGENTS.md "Library layout"`
+- **Evidence:** `Source: the R-225 tests; AGENTS.md "Library layout"`
 
 ### D-84 Plugin and component packages export TypeScript source in the workspace and build `package-dist/` for npm — *Decided*
 - **Alternatives:** compile in place; the `@svjeez/source` condition.
@@ -557,7 +557,7 @@ Frames and video are run by a scene author or an agent after writing a scene; th
 | `getScene` serving a file by traversal (`/_svjeez/../x`) | The middleware looks the decoded path up in `assets.files` (a Map), never the file system | R-233 |
 | A release rerun double-publishes | `npm` flag from the registry, `github` flag from the release list; each step skipped when done | R-240 |
 | Leaking `workspace:*` to npm | `writeManifest` rewrites ranges in `dependencies` only; peer ranges are literal | R-238 |
-| A doc that points an agent to a deleted error or file | `skill.test.ts` | R-225 |
+| A doc that points an agent to a deleted error or file | the R-225 tests | R-225 |
 | A dev server serving a stale scene | Module graph and evaluated-module invalidation, importers transitively | R-233 |
 
 ## Live editor
@@ -580,12 +580,12 @@ Frames and video are run by a scene author or an agent after writing a scene; th
 ### D-89 Compile in a worker, with a timeout that kills only the stuck worker — *Decided*
 - **Alternatives:** Compile on the main thread (a scene that never returns hangs the page).
 - **Why:** A scene is arbitrary user code; an endless loop must cost the worker, not the page (G-4, G-6 keeps svjeez light via lazy package loading).
-- **Evidence:** `Source: compile.ts header "a scene that never returns costs the worker, not the page"; commit d5b12ec "a compile timeout fails only the stuck worker's jobs and no worker starts after stop"; Measured by: bun test packages/live/test/client.test.ts`.
+- **Evidence:** `Source: compile.ts header "a scene that never returns costs the worker, not the page"; commit d5b12ec "a compile timeout fails only the stuck worker's jobs and no worker starts after stop"; Measured by: the R-274 tests`.
 
 ### D-90 Only the newest job runs next (`latestWins`) — *Decided*
 - **Alternatives:** Debounce by time; queue everything.
 - **Why:** A drag emits many sets; a backlog would lag the picture (G-10).
-- **Evidence:** `Source: client.ts comment "so a drag never builds a backlog"; editor.test.ts "while a compile runs, only the newest edit waits"`.
+- **Evidence:** `Source: client.ts comment "so a drag never builds a backlog"; the R-264 tests "while a compile runs, only the newest edit waits"`.
 
 ### D-91 Handles for any number come from compiling the file twice and comparing shapes — *Decided*
 - **Alternatives:** Require authors to annotate every number; static analysis of the JSX.
@@ -620,7 +620,7 @@ Frames and video are run by a scene author or an agent after writing a scene; th
 ### D-97 A number keeps the decimals it was written with; a set number is as precise as its step or text — *Decided*
 - **Alternatives:** Always print shortest float; fixed two decimals.
 - **Why:** `0.9` up to `1.0` keeps tenths so the next step is read from them; the file looks hand-edited (G-7 for stable output of the same edit).
-- **Evidence:** `Source: editor.ts comment in "set"; commit 213f96a; editor.test.ts "arrow keys keep a number's decimals"`.
+- **Evidence:** `Source: editor.ts comment in "set"; commit 213f96a; the R-255 tests "arrow keys keep a number's decimals"`.
 
 ### D-98 The fix for a runtime error is copied from the skill's table, never invented — *Decided*
 - **Alternatives:** Hand-written fixes in the editor.
@@ -681,7 +681,7 @@ The editor runs the user's own scene source in a worker in their own browser. A 
 ### D-105 Series colors are the theme's accents in a fixed order, not a palette of the package's own — *Proposed*
 - **Alternatives:** Categorical palette inside the package; random hue steps.
 - **Why:** G-5 and G-7: follows light/dark themes and stays deterministic. Whether the order (blue, number, green, magenta, cyan, yellow, red) is a design choice or just the first seven slots is not stated.
-- **Evidence:** `Source: charts/src/types.ts doc "series take the accents in order"; charts.test.ts accent-order test.`
+- **Evidence:** `Source: charts/src/types.ts doc "series take the accents in order"; the R-296 tests.`
 
 ### D-106 `within()` tolerates a relative 1e-9 slack — *Proposed*
 - **Alternatives:** Exact comparison; fixed absolute tolerance.
@@ -898,7 +898,7 @@ Options: (a) keep `\bid="` (matches `data-id="…"`, so two elements with the sa
 `reducedMotion: { at: NaN }` fails with `Expected a finite number, received NaN` from `num`, which does not name the option. `duration: Infinity` and `width: Infinity` pass the guards. Options: (a) guard in `render()` with `Number.isFinite`; (b) leave. Recommendation: (a), naming `reducedMotion.at`, `duration`, `width`, `height`.
 
 ### Q-12 Which runtime errors belong in SKILL.md's error table?
-Compile-time errors the code throws but the table omits: `<…> cannot animate ….`, `… needs …="…"; this <…> sets …`, `Two different fonts claim …` (only mentioned in images-fonts.md), `Two keys are too close to tell apart …`, `render() needs a positive …`, `render() needs a prefix …`, `Unsupported SVG child`, `Unsupported value for …`, `Unresolved ref in …`. `tests/skill.test.ts` checks that table rows exist in `src/`, not the reverse. Options: add rows; keep the table to common mistakes. Recommendation: add `cannot animate`, `needs … sets`, render guards and `Unsupported …`; G-9 says a coding agent should find the fix from the message.
+Compile-time errors the code throws but the table omits: `<…> cannot animate ….`, `… needs …="…"; this <…> sets …`, `Two different fonts claim …` (only mentioned in images-fonts.md), `Two keys are too close to tell apart …`, `render() needs a positive …`, `render() needs a prefix …`, `Unsupported SVG child`, `Unsupported value for …`, `Unresolved ref in …`. The R-225 tests check that table rows exist in `src/`, not the reverse. Options: add rows; keep the table to common mistakes. Recommendation: add `cannot animate`, `needs … sets`, render guards and `Unsupported …`; G-9 says a coding agent should find the fix from the message.
 
 ### Q-13 Should `picture()` dedupe by content or by object?
 `symbols` is a `WeakMap` keyed by `PictureData` identity, so two `picture()` calls on the same bytes embed twice. Options: key by `href`; keep identity and document. Recommendation: key by `href` in a per-render map (the symbol def is already per-ref per render). Cheap and removes a surprise.
@@ -941,7 +941,7 @@ Options: (a) today's self-loop on the composite; (b) a line into the container's
 Options: check ids before recursing; or keep first-wins. Recommendation: reject (see Known bugs in CRITERIA.md).
 
 ### Q-25 Should the diagram runtime errors be in SKILL.md's runtime error table?
-Options: add the five most common (`No path`, `No edge`, `walk() has no way`, `tree() needs exactly one root`, `… needs N times`); keep them in references/diagrams.md only. Recommendation: add; G-9 says the skill covers error messages, and `tests/skill.test.ts` would then check they exist in `src/`.
+Options: add the five most common (`No path`, `No edge`, `walk() has no way`, `tree() needs exactly one root`, `… needs N times`); keep them in references/diagrams.md only. Recommendation: add; G-9 says the skill covers error messages, and the R-225 tests would then check they exist in `src/`.
 
 ### Q-26 Should `layered`/`place` cap or document its cost on large graphs?
 Options: a warning in the reference; an iteration budget scaled by size. Recommendation: measure on a 200-node graph first; no number exists today.
@@ -1002,7 +1002,7 @@ Options: keep the regex; export it from `render()` as metadata. Recommendation: 
 `stage` interpolates the SVG into `<div id="stage">…</div>` of an HTML page (inline SVG, not `<img>`). That differs from how viewers show it (`<img>`), so a scene that behaves differently inline than as an image would be misjudged. Options: capture through `<img src=data:…>`; keep inline (allows `getAnimations()`). Recommendation: keep inline because seeking needs the DOM; add a manual check that the `<img>` rendering matches for the example set.
 
 ### Q-44 Is `scheme.ts` in the core's public surface?
-`systemColorScheme` is imported by `frames.ts` only and not exported from `index.ts`; it imports `node:child_process`. Options: keep it internal; move it to `frames.ts`'s folder. Recommendation: keep internal, and add a unit test (currently only `frames.test.tsx` touches it, with a stub of the host).
+`systemColorScheme` is imported by `frames.ts` only and not exported from `index.ts`; it imports `node:child_process`. Options: keep it internal; move it to `frames.ts`'s folder. Recommendation: keep internal, and add a unit test (currently only `packages/svjeez/test/R-212/color-scheme-and-embeds.test.tsx` touches it, with a stub of the host).
 
 ## Live editor
 

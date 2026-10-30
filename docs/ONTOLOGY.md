@@ -3899,7 +3899,7 @@ run(args).catch(e => fail(e.stack ?? e.message))   // stderr, exit code 1
 
 #### Skill documentation is checked against the code — [D]
 *Serves:* G-9
-*Code:* `tests/skill.test.ts`
+*Code:* `packages/svjeez/test/R-225/skill-docs.test.ts`, `packages/svjeez/test/R-225/skill-examples-render.test.ts`
 ```pseudo
 each skills/svjeez/examples/*.tsx default export builds an SVG with no validateSvg errors and contains "@keyframes"
 every `examples/x.ext` / `references/x.ext` path mentioned in SKILL.md or a reference exists (> 10 mentions)
@@ -5466,7 +5466,7 @@ Every tunable constant. Elsewhere the docs and tests name the constant, never it
 | mulberry32 increment [P] (inline) | 0x6d2b79f5 | PRNG constant | random.ts | D-4 |
 | `SIGNIFICANT_DIGITS_MIN` [P] (inline `6` in `significant`) | 6 | digits | format.ts (used by calc) | D-11 |
 | calc operator precedence (`PRECEDENCE`) | + - : 1, * / : 2 | rank | calc.ts | none |
-| Sampled-match tolerance in test | 0.5px, 0.005 opacity | px, unit | tests/sample.test.tsx | not a tunable |
+| Sampled-match tolerance in test | 0.5px, 0.005 opacity | px, unit | the R-12 and R-24 tests | not a tunable |
 | `MAX_KEYS` | 2000 | keys per lane | compile.ts | D-21 |
 | default `reducedMotion.at` (inline `duration * 0.85`; propose `STILL_FRACTION`) [P] | 0.85 | fraction of duration | render.ts | D-16 |
 | `BASE_TIMING` | `timing(ease.out)`, the curve is “Timeline and motion”'s `ease.out` | CSS timing | css.ts | D-21 |
@@ -5966,7 +5966,7 @@ None in this area. The `svjeez dev` scrubber and `render-png` read this area's d
 | Internal, not exported from `svjeez`: `pathLength`, `blendPaths`, `commandsOf`, `flatten`, `fontFaces`, `fontFaceRule`, `isFontValue`, `textWidth`, `regularFace` | | | Used by compiler, keys, extras, glyphs | |
 
 #### CLI / build commands
-None in this area. Tests run in `packages/svjeez` with `bun test`; fonts for tests are the TTFs in `tests/fixtures/`.
+None in this area. Tests run in `packages/svjeez` with `bun test`; fonts for tests are the TTFs in `packages/svjeez/test/fixtures/`.
 
 #### Errors
 | Message (use … for filled-in values) | Thrown when | Code |
@@ -6025,7 +6025,6 @@ Messages thrown by neighbours on this area's behalf: `Two different fonts claim 
 #### CLI / build commands (if any)
 | Command | Effect |
 |---|---|
-| `bun test tests/layout.test.ts tests/diagrams.test.ts` (in `packages/svjeez/`) | runs this area's 157 tests |
 | `bun run render-png <file> --sheet` | looks at a diagram's frames (AGENTS.md rule for visual changes) |
 
 #### Errors
@@ -6083,7 +6082,7 @@ Messages thrown by neighbours on this area's behalf: `Two different fonts claim 
 | `streamlines`, `fieldLines`, `fieldFlow`, `vectorField`, `slopeField`, `slopeSolution`, `contours`, `contourSweep` | see rules | positive numeric options | path data / nodes | per-call |
 
 #### CLI / build commands
-None owned. (`tests/skill.test.ts` renders the skill's examples, which include `examples/explainer.tsx` and `examples/terminal.tsx`.)
+None owned. (`packages/svjeez/test/R-225/skill-examples-render.test.ts` renders the skill's examples, which include `examples/explainer.tsx` and `examples/terminal.tsx`.)
 
 #### Errors
 | Message (use … for filled-in values) | Thrown when | Code |

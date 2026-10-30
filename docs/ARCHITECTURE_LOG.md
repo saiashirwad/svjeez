@@ -2,6 +2,10 @@
 
 Dated design changes, newest first. This is the only doc that records what something used to be.
 
+### 2026-10-30 — Tests move into one directory per criteria row
+
+Every test that proves a criteria row now lives in `test/<ID>/` of the package that owns the code, and asserts only that row. A test that asserted several rows was split, with shared setup in `test/helpers/`. Tests that prove no row went to `test/unit/` and `test/integration/`. `packages/svjeez/tests/` became `packages/svjeez/test/`, as in every other package. `packages/svjeez/test/unit/criteria.test.ts` now fails when CRITERIA.md and the directories disagree. Moving the tests settled three rows: R-236 had no test of its own and is `not yet covered`, R-237 is checked by `test:package` and is `manual`, and R-99's only test checked anchoring, so it moved into R-155 and R-99 is `not yet covered`. No assertion was dropped. Each package's `expect()` count is the same or higher.
+
 ### 2026-10-30 — The ontology doc set becomes the design reference
 
 `docs/ONTOLOGY.md`, `docs/CRITERIA.md`, `docs/RATIONALE.md` and this log now describe svjeez. Before them the design lived in the shipped skill (`packages/svjeez/skills/svjeez/`), the package READMEs, `AGENTS.md` and code comments, and those stay as user documentation. The docs were mapped from the code, and where the code and the older documents disagreed the docs describe the code. These are the places they disagreed. Each one is open until the designer rules on it, and the related Q-items are in RATIONALE.md.
@@ -16,7 +20,7 @@ Dated design changes, newest first. This is the only doc that records what somet
 #### Compile and output
 
 - SKILL.md error table lists `Node cannot load …. Install tsx`; that error is thrown by `src/cli.ts` (Frames, CLI, plugins and release), not compile code.
-- SKILL.md "Runtime errors" table omits errors this area throws (see Q-12); the table is not exhaustive and `tests/skill.test.ts` only checks table-to-source, not source-to-table.
+- SKILL.md "Runtime errors" table omits errors this area throws (see Q-12); the table is not exhaustive and the R-225 tests only check table-to-source, not source-to-table.
 - SKILL.md `render` paragraph does not mention that `reducedMotion.at` is clamped to `[0, duration]`, or the 85% default; `RenderOptions` JSDoc states the default only.
 - without-jsx.md says the default prefix is none and "the output is unchanged"; code agrees. It says classes and ids written by the author are not renamed; code agrees. But `render({ comment })` and authored `css` are also emitted verbatim (not documented).
 - images-fonts.md "validateSvg warns past 256 KB" — code measures characters of the data URI (`uri.length > 262144`), which is the encoded size, not the source file size; a 190 KB PNG (base64 ≈ 253 KB) does not warn, while the doc's "Keep each image under 100 KB" refers to the file. Consistent but the unit differs between sentences.
@@ -58,7 +62,7 @@ Dated design changes, newest first. This is the only doc that records what somet
 - `AGENTS.md` "`@svjeez/vite` and `@svjeez/astro` never import svjeez" vs `packages/vite/src/posters.ts` imports `renderFrames` from `svjeez/frames` (svjeez is a peer dependency of `@svjeez/vite`); the scene environment imports svjeez at runtime.
 - `AGENTS.md` "Releasing: ci.yml … checks the packed packages" and "In each [package], … `test:package`" vs `ci.yml`, which has no `test:package` step for `packages/icons` (it has the script and a `test/consumer/`).
 - `packages/vite/README.md` "posters.quality … Default 0.8" vs `encode.ts` default parameter 0.82 (never reached through `posters.ts`).
-- `AGENTS.md` "`bun test` — every test, including frame tests in headless Chromium" vs `tests/frames.test.tsx`, which skips every browser test with a console warning when Chromium is missing, unless `CI` is set.
+- `AGENTS.md` "`bun test` — every test, including frame tests in headless Chromium" vs `packages/svjeez/test/helpers/frames-browser.tsx`, which skips every browser test with a console warning when Chromium is missing, unless `CI` is set.
 
 #### Live editor
 

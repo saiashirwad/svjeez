@@ -4,6 +4,15 @@ svjeez is a TypeScript library that compiles scenes written in TypeScript into o
 
 To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md) and the references it points to. It ships in the npm package, and `svjeez skill --install` copies it into a project. This file covers working on the repository.
 
+## Design docs
+
+`docs/` holds the design of every package. [`ONTOLOGY.md`](docs/ONTOLOGY.md) is the implementation reference: the purpose and goals (`G-n`), the entities, invariants and rules, the numbers and the public interface. [`CRITERIA.md`](docs/CRITERIA.md) gives each rule its criteria rows (`R-n`, `U-n`, `X-n`) and their status. [`RATIONALE.md`](docs/RATIONALE.md) records why each choice was made (`D-n`) and the open questions (`Q-n`). [`ARCHITECTURE_LOG.md`](docs/ARCHITECTURE_LOG.md) is the dated history, newest first.
+
+- Cite stable IDs in code, tests, commits and the docs, never section numbers. IDs are never reused: a removed criterion stays as a `retired` row.
+- Tags: [D] is the designer's decision, [P] is a proposal, [T] is a tunable number. Only the designer makes something [D].
+- Every doc but the log describes the current state. "Formerly" and before → after belong in the log.
+- When a rule or a number changes, change the ONTOLOGY rule, its RATIONALE entry, its CRITERIA row, its tests and the log in the same commit.
+
 ## Workspace
 
 The repository is a Bun workspace. The root `package.json` is private and lists the workspaces:
@@ -56,7 +65,7 @@ Paths in this section are relative to `packages/svjeez/`.
 - `src/extras/` holds code, terminal, annotations, themes, and the diagrams in `extras/diagrams/`.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
 - `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
-- `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `test/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
+- `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. The `R-225` tests render the examples, check that every `examples/` and `references/` path the skill mentions exists, and check that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
 ## Packages
 
@@ -76,6 +85,7 @@ Each package's source explains its own internals. These are the rules that aren'
 
 ## Rules
 
+- A test that proves a criteria row lives in `test/<ID>/` of the package that owns the code, such as `packages/svjeez/test/R-210/loop-false-holds-last-frame.test.tsx`, and asserts only that row. Tests that prove no row go in `test/unit/` or `test/integration/`, and shared setup in `test/helpers/`. `packages/svjeez/test/unit/criteria.test.ts` fails when an `automated` row has no directory, or a directory has no `automated` row.
 - Import `svjeez`, `svjeez/extras`, `svjeez/voxel`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. In `packages/svjeez/` the tsconfig maps them to `src/`.
 - Keep the library dependency-free and runnable on Node 20. Don't use APIs newer than Node 20, such as `Map.groupBy` or `Set.prototype.union`. `bun run test:node` under Node 20 catches these.
 - Don't change the behavior of an existing public function without being asked.

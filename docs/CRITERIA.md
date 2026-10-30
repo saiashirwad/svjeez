@@ -429,7 +429,7 @@ Each `automated` R-row owns a directory `test/R-n/` in the package that owns the
 - R-27: the lane, composition, identity, range and tags of each row; only that `fe*` primitives animate through SMIL is asserted
 - R-28: the bad-name and unknown-syntax throws
 - R-74: the well-formedness check runs only where `xmllint` is installed
-- R-77: the runtime throws for an unknown attribute and a non-motion `animation` entry (only the type errors in `types.check.tsx` are checked)
+- R-77: the runtime throws for an unknown attribute and a non-motion `animation` entry (only the type errors in `packages/svjeez/test/R-77/unknown-attribute.check.tsx` and `packages/svjeez/test/R-8/channels-per-tag.check.tsx` are checked)
 - R-95: an 8-digit hex where alpha is not allowed
 - R-68: `reducedMotion: false` emits no block, and `at` defaults to 85% of the duration
 - X-1: line breaks (the painted text is one line)
@@ -550,7 +550,7 @@ Defects found while mapping the code. Each becomes a tracker ticket, and the Q-i
 - `scripts/release.ts:~85` `gh release list --limit 1000` silently truncates; a package whose tag falls outside the newest 1000 releases would be republished to GitHub and fail.
 - `packages/svjeez/src/page.ts` `loopLength` returns `longest/1000` silently when no common period is found in 1000 multiples; `count` frame spacing and video length then do not cover a true loop.
 - `scripts/package-manifest.ts:~38` only `dependencies` get `workspace:` rewritten; a `workspace:` range in `peerDependencies` or `optionalDependencies` would be published verbatim (no package does that today).
-- `packages/svjeez/scripts/node-check.ts` accepts a scene with no animation, while `tests/skill.test.ts` requires `@keyframes`; the two checks of the same examples disagree.
+- `packages/svjeez/scripts/node-check.ts` accepts a scene with no animation, while the R-225 tests require `@keyframes`; the two checks of the same examples disagree.
 
 #### Live editor
 
@@ -560,7 +560,7 @@ Defects found while mapping the code. Each becomes a tracker ticket, and the Q-i
 - packages/live/src/source.ts:633-641 `write` for `string`/`color` re-quotes without escaping: a choice option containing the quote character, a backslash or a newline writes invalid source.
 - packages/live/src/source.ts:617-626 `easeText` throws for an `Ease` that is not named or a bezier; `update` "set" does not catch it, so `send` throws out of the store.
 - packages/live/src/editor.ts:295 `measures` rebuilds the older literal with `parse(text)` on every probe result; a parse of a large file per `probed` message (performance only).
-- packages/react/test/editor.test.ts:7-8 the screenshot directory is a literal path under a previous session's scratchpad; the test writes PNGs outside the repo and breaks on another machine.
+- packages/react/test/helpers/react-app.ts:7 the screenshot directory is a literal path under a previous session's scratchpad; the test writes PNGs outside the repo and breaks on another machine.
 - packages/live/src/client.ts `createCompiler`: a timeout settles every owed job, including a job sent to the stuck worker after the stuck one; documented, but a short job queued behind an endless one fails as well.
 
 #### Charts, code, fonts, icons and Mermaid
@@ -571,7 +571,7 @@ Defects found while mapping the code. Each becomes a tracker ticket, and the Q-i
 - packages/code/src/index.ts (expandTabs) counts columns with `out.length` (UTF-16 units), so a line containing an astral character before a tab misaligns by one column against `code()`'s one-column-per-character layout.
 - packages/fonts/src/index.ts (slug) `Open Sans` and `Open-Sans`/`Open_Sans` map to one cache file name, so two different family strings can collide in the cache.
 - packages/fonts/src/index.ts (bytesOf) a cached file is trusted without validation; a torn file from an older tool or a corrupt TTF fails inside `font()` with no cache-file hint.
-- packages/fonts/test/google.test.ts ("a real load…", "an unknown family…") require live network; CI without network fails them.
+- packages/fonts/test/R-312/ and packages/fonts/test/R-313/ ("a real load…", "an unknown family…") require live network; CI without network fails them.
 
 #### Maps and math
 
