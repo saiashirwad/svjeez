@@ -113,7 +113,7 @@ Each `automated` R-row owns a directory `test/R-n/` in the package that owns the
 | R-96 | `index.ts` exports | Public names exist and the package types check | automated |
 | R-97 | Points and a count | Exactly `count` evenly spaced points, ends kept; < 2 points or non-integer / < 2 count throws | automated |
 | R-98 | Points, options | `M` then `L`, 1 decimal default, `Z` when closed; empty throws | automated |
-| R-99 | `rect(x,y,w,h)` | Edge midpoints, centre, `pad`, `union`, `side(edge,t)` are as defined | automated |
+| R-99 | `rect(x,y,w,h)` | Edge midpoints, centre, `pad`, `union`, `side(edge,t)` are as defined | not yet covered |
 | R-100 | Points | Passes through each at integer positions; `i+u` is Catmull-Rom u; positions outside the range hold the ends; < 2 points throws | automated |
 | R-101 | `d`, `path(from,to)` | One cubic per leg; cut equals the exact sub-curve inside a leg and across legs | automated |
 | R-102 | `tangent`, `angle` | Tangent is the rate of change of `point`; angle follows travel in degrees | automated |
@@ -250,8 +250,8 @@ Each `automated` R-row owns a directory `test/R-n/` in the package that owns the
 | R-233 | Edit the scene file, then a file it imports, in a running dev server | A reload/update message is sent and the next fetched SVG shows the change | automated |
 | R-234 | Same SVG text twice; a scene with `&amp;` in its title | Same URL; alt text is unescaped | not yet covered |
 | R-235 | Two requests for one poster; cache hit; 10 scenes at once | One render; cached bytes returned; at most `LANES` Chromium renders at once | not yet covered |
-| R-236 | A build in Astro/Vite after `getScene()` ran | Every registered file written under `_svjeez/` and the count returned | automated |
-| R-237 | Packed Astro consumer builds a page using `<Scene>`, `getScene` posters and `?svjeez` | Output has the SVG, a WebP poster, the imported file | automated |
+| R-236 | A build in Astro/Vite after `getScene()` ran | Every registered file written under `_svjeez/` and the count returned | not yet covered |
+| R-237 | Packed Astro consumer builds a page using `<Scene>`, `getScene` posters and `?svjeez` | Output has the SVG, a WebP poster, the imported file | manual — `bun run test:package` in packages/astro; CI runs it on Node 22 |
 | R-238 | `build:package` for a plugin with `workspace:*` dependencies | Published manifest has caret ranges, no private/scripts/devDependencies; `new URL("./w.ts", …)` becomes `.js` | manual — run `build:package` in `packages/astro` and read `package-dist/package.json` |
 | R-239 | `test:package` in vite/video/astro/react/svelte | Tarballs install on plain Node and the consumer's `check` passes | manual — CI runs it |
 | R-240 | Registry/GitHub states: nothing new; npm done, release missing; both missing; prerelease | Pending set, dist-tag, tag name, `--latest` flag follow the rule | not yet covered |
@@ -411,9 +411,9 @@ Each `automated` R-row owns a directory `test/R-n/` in the package that owns the
 
 2026-10-30.
 
-**Not yet covered:** R-1, R-4, R-6, R-7, R-14, R-15, R-42, R-43, R-44, R-45, R-48, R-52, R-54, R-55, R-56, R-78, R-80, R-81, R-106, R-107, R-148, R-153, R-161, R-168, R-206, R-217, R-218, R-219, R-220, R-234, R-235, R-240, R-241, R-243, R-286, R-287, R-288, R-289, R-290, R-304, R-309, R-315, X-2, X-3.
+**Not yet covered:** R-1, R-4, R-6, R-7, R-14, R-15, R-42, R-43, R-44, R-45, R-48, R-52, R-54, R-55, R-56, R-78, R-80, R-81, R-99, R-106, R-107, R-148, R-153, R-161, R-168, R-206, R-217, R-218, R-219, R-220, R-234, R-235, R-236, R-240, R-241, R-243, R-286, R-287, R-288, R-289, R-290, R-304, R-309, R-315, X-2, X-3.
 
-**Manual only:** R-226, R-227, R-228, R-238, R-239, R-242, R-244, U-1, U-2, U-3, U-4, U-5, U-6, U-7.
+**Manual only:** R-226, R-227, R-228, R-237, R-238, R-239, R-242, R-244, U-1, U-2, U-3, U-4, U-5, U-6, U-7.
 
 **Retired:** none.
 
@@ -432,7 +432,6 @@ Each `automated` R-row owns a directory `test/R-n/` in the package that owns the
 - R-77: the runtime throws for an unknown attribute and a non-motion `animation` entry (only the type errors in `types.check.tsx` are checked)
 - R-95: an 8-digit hex where alpha is not allowed
 - R-68: `reducedMotion: false` emits no block, and `at` defaults to 85% of the duration
-- R-99: the right, bottom and left edge midpoints, `pad`, `union` and `side(edge, t)` (only `center` and `top` are asserted, through a state diagram's bounds)
 - X-1: line breaks (the painted text is one line)
 - R-133: duplicate ids and an empty group throw; the message texts
 - R-140: a back edge in a tall cycle climbs a side channel
