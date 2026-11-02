@@ -101,7 +101,9 @@ export const CHANNELS = {
     lane: "draw",
     composition: "replace",
     range: [0, 1],
-    pins: { pathLength: "1", "stroke-dasharray": "1" },
+    // A gap of 2 keeps the next dash off the path. With a gap of 1 it starts at the path's end while the draw is
+    // near 0, and a round cap paints that zero-length dash as a dot.
+    pins: { pathLength: "1", "stroke-dasharray": "1 2" },
   },
   d: {
     value: pathData,

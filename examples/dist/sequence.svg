@@ -86,7 +86,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g>
       <g>
-        <path d="M98.45 135L247.69 135" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+        <path d="M98.45 135L247.69 135" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
         <path d="M254.69 135L246.69 139L246.69 131Z" fill="var(--base04)" class="a m2"/>
       </g>
       <g class="a m3">
@@ -96,7 +96,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g>
       <g>
-        <path d="M254.69 171L502.29 171" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+        <path d="M254.69 171L502.29 171" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
         <path d="M509.28999999999996 171L501.28999999999996 175L501.28999999999996 167Z" fill="var(--base04)" class="a m5"/>
       </g>
       <g class="a m6">
@@ -116,7 +116,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g>
       <g>
-        <path d="M254.69 225L273.69 225C278.64 225 282.69 229.05 282.69 234L282.69 234C282.69 238.95 278.64 243 273.69 243L261.69 243" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m10"/>
+        <path d="M254.69 225L273.69 225C278.64 225 282.69 229.05 282.69 234L282.69 234C282.69 238.95 278.64 243 273.69 243L261.69 243" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
         <path d="M254.69 243L262.69 239L262.69 247Z" fill="var(--base04)" class="a m11"/>
       </g>
       <g class="a m12">
@@ -131,7 +131,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g>
       <g>
-        <path d="M254.69 321.66L381.09 321.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
+        <path d="M254.69 321.66L381.09 321.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m14"/>
         <path d="M388.09 321.65999999999997L380.09 325.65999999999997L380.09 317.65999999999997Z" fill="var(--base04)" class="a m15"/>
       </g>
       <g class="a m16">

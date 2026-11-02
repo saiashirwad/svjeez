@@ -61,24 +61,24 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <g transform="translate(28 129.6256637010992) scale(0.7955534246088825)">
       <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
         <g>
-          <path d="M78.7 28.5L126 28.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+          <path d="M78.7 28.5L126 28.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
           <path d="M133 28.49999999999652L125 32.49999999999652L125 24.49999999999652Z" fill="var(--base04)" class="a m2"/>
         </g>
         <g>
-          <path d="M200.6 28.5L241.6 28.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+          <path d="M200.6 28.5L241.6 28.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
           <path d="M248.60000000000662 28.49999999999652L240.60000000000662 32.49999999999652L240.60000000000662 24.49999999999652Z" fill="var(--base04)" class="a m4"/>
         </g>
         <g>
-          <path d="M357.15 28.5L481.93 28.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+          <path d="M357.15 28.5L481.93 28.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
           <path d="M488.92999999999995 28.5L480.92999999999995 32.5L480.92999999999995 24.5Z" fill="var(--base04)" class="a m6"/>
         </g>
         <g>
-          <path d="M302.88 57L302.88 83C302.88 88.5 298.38 93 292.88 93L176.8 93C171.3 93 166.8 88.5 166.8 83L166.8 53.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+          <path d="M302.88 57L302.88 83C302.88 88.5 298.38 93 292.88 93L176.8 93C171.3 93 166.8 88.5 166.8 83L166.8 53.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
           <path d="M166.8 46.49999999999652L170.8 54.49999999999652L162.8 54.49999999999652Z" fill="var(--base04)" class="a m6"/>
         </g>
       </g>
       <g>
-        <path d="M78.7 28.49999999999652L133 28.49999999999652L200.6 28.49999999999652L248.60000000000662 28.49999999999652L357.15 28.5L488.92999999999995 28.5" fill="none" stroke="var(--base09)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m7"/>
+        <path d="M78.7 28.49999999999652L133 28.49999999999652L200.6 28.49999999999652L248.60000000000662 28.49999999999652L357.15 28.5L488.92999999999995 28.5" fill="none" stroke="var(--base09)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
         <circle r="4.5" fill="var(--base09)" class="a m8"/>
         <circle cx="488.93" cy="28.5" r="9" fill="none" stroke="var(--base09)" stroke-width="1.5" class="a m9 fb"/>
       </g>

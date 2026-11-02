@@ -105,7 +105,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
     </g>
     <g>
-      <path d="M96.7,157.3C118.5,152,140.2,146.7,162,143.2C183.8,139.7,205.5,139.7,227.3,136.2C249.1,132.7,270.9,126.8,292.7,122.1C314.5,117.4,336.2,113.1,358,108C379.8,102.9,401.5,97.2,423.3,91.5" fill="none" stroke="var(--base09)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m8"/>
+      <path d="M96.7,157.3C118.5,152,140.2,146.7,162,143.2C183.8,139.7,205.5,139.7,227.3,136.2C249.1,132.7,270.9,126.8,292.7,122.1C314.5,117.4,336.2,113.1,358,108C379.8,102.9,401.5,97.2,423.3,91.5" fill="none" stroke="var(--base09)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
       <circle cx="96.7" cy="157.3" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m9 fb"/>
       <circle cx="162" cy="143.2" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m10 fb"/>
       <circle cx="227.3" cy="136.2" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m11 fb"/>

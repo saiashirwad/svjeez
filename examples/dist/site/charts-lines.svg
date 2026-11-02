@@ -127,7 +127,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
     </g>
     <g>
-      <path d="M64,158.9C80.4,162,96.7,165.1,113.1,165.1C129.5,165.1,145.9,163.6,162.3,163.6C178.7,163.6,195,172.7,211.4,176.1C227.8,179.5,244.2,182.1,260.6,183.9C277,185.7,293.3,185.3,309.7,187.1C326.1,188.9,342.5,192.8,358.9,194.9C375.3,197,391.6,198.3,408,199.6" fill="none" stroke="var(--base0B)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m2"/>
+      <path d="M64,158.9C80.4,162,96.7,165.1,113.1,165.1C129.5,165.1,145.9,163.6,162.3,163.6C178.7,163.6,195,172.7,211.4,176.1C227.8,179.5,244.2,182.1,260.6,183.9C277,185.7,293.3,185.3,309.7,187.1C326.1,188.9,342.5,192.8,358.9,194.9C375.3,197,391.6,198.3,408,199.6" fill="none" stroke="var(--base0B)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
       <circle cx="64" cy="158.9" r="3" fill="var(--base0B)" stroke="var(--base00)" stroke-width="2" class="a m3 fb"/>
       <circle cx="113.1" cy="165.1" r="3" fill="var(--base0B)" stroke="var(--base00)" stroke-width="2" class="a m4 fb"/>
       <circle cx="162.3" cy="163.6" r="3" fill="var(--base0B)" stroke="var(--base00)" stroke-width="2" class="a m5 fb"/>
@@ -139,7 +139,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="419" y="203.1" font-size="10" fill="var(--base0B)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m11">linux</text>
     </g>
     <g>
-      <path d="M64,124.4L113.1,129.1L162.3,143.2L211.4,140.1L260.6,154.2L309.7,160.4L358.9,165.1L408,174.5" fill="none" stroke="var(--base0D)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m12"/>
+      <path d="M64,124.4L113.1,129.1L162.3,143.2L211.4,140.1L260.6,154.2L309.7,160.4L358.9,165.1L408,174.5" fill="none" stroke="var(--base0D)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
       <circle cx="64" cy="124.4" r="3" fill="var(--base0D)" stroke="var(--base00)" stroke-width="2" class="a m10 fb"/>
       <circle cx="113.1" cy="129.1" r="3" fill="var(--base0D)" stroke="var(--base00)" stroke-width="2" class="a m13 fb"/>
       <circle cx="162.3" cy="143.2" r="3" fill="var(--base0D)" stroke="var(--base00)" stroke-width="2" class="a m14 fb"/>
@@ -151,7 +151,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="419" y="178" font-size="10" fill="var(--base0D)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m20">macos</text>
     </g>
     <g>
-      <path d="M64,80.5L88.6,80.5L88.6,80.5L137.7,80.5L137.7,105.6L186.9,105.6L186.9,105.6L236,105.6L236,105.6L285.2,105.6L285.2,129.1L334.3,129.1L334.3,129.1L383.5,129.1L383.5,140.1L408,140.1" fill="none" stroke="var(--base09)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m21"/>
+      <path d="M64,80.5L88.6,80.5L88.6,80.5L137.7,80.5L137.7,105.6L186.9,105.6L186.9,105.6L236,105.6L236,105.6L285.2,105.6L285.2,129.1L334.3,129.1L334.3,129.1L383.5,129.1L383.5,140.1L408,140.1" fill="none" stroke="var(--base09)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m21"/>
       <text x="418.5" y="143.6" font-size="10" fill="var(--base09)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m22">windows</text>
     </g>
     <g class="a m23">
