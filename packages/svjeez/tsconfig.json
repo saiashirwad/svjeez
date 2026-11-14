@@ -18,8 +18,7 @@
       "svjeez/extras": ["./src/extras.ts"],
       "svjeez/frames": ["./src/frames.ts"],
       "svjeez/page": ["./src/page.ts"],
-      "svjeez/params": ["./src/params.ts"],
-      "svjeez/voxel": ["./src/voxel.ts"]
+      "svjeez/params": ["./src/params.ts"]
     }
   },
   "include": ["src", "scripts", "skills", "tests"]

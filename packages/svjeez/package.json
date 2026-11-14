@@ -46,11 +46,6 @@
       "types": "./package-dist/extras.d.ts",
       "default": "./package-dist/extras.js"
     },
-    "./voxel": {
-      "@svjeez/source": "./src/voxel.ts",
-      "types": "./package-dist/voxel.d.ts",
-      "default": "./package-dist/voxel.js"
-    },
     "./frames": {
       "@svjeez/source": "./src/frames.ts",
       "types": "./package-dist/frames.d.ts",

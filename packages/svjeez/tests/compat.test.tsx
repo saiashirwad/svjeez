@@ -1,6 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { render, sampled } from "svjeez";
-import { voxel } from "svjeez/voxel";
 import { flowchart, stateMachine } from "svjeez/extras";
 
 // Node 20 has no Map.groupBy; remove it so these run as they would there.
@@ -57,19 +56,5 @@ describe("without Map.groupBy, as on Node 20", () => {
     );
 
     expect(svg).toContain("@keyframes");
-  });
-
-  test("voxel scenes group blocks by cell", () => {
-    const view = voxel.camera({ yaw: 45, pitch: 30, unit: 8 });
-    const skin = voxel.texture({ g: "#5DA03A" }, "g");
-    expect(
-      voxel.scene({
-        camera: view,
-        blocks: [
-          { at: [0, 0, 0], skin },
-          { at: [0, 0, 0], skin },
-        ],
-      }),
-    ).toBeDefined();
   });
 });

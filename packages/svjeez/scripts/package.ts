@@ -6,7 +6,6 @@ const result = await Bun.build({
   entrypoints: [
     "./src/index.ts",
     "./src/extras.ts",
-    "./src/voxel.ts",
     "./src/jsx-runtime.ts",
     "./src/jsx-dev-runtime.ts",
     "./src/frames.ts",

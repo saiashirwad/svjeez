@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 
-// The diagrams, the field, calculus and axes kits and the voxel scene will each become a package. A package can import
+// The diagrams and the field, calculus and axes kits will each become a package. A package can import
 // only what svjeez exports, so until then these files may use core internals only by names the entries already publish.
 const src = join(import.meta.dir, "../src");
 
@@ -17,7 +17,6 @@ const files = (dir: string): string[] =>
 const kit = [
   /^extras\/diagrams\//,
   /^extras\/(field|calculus|axes)$/,
-  /^(voxel|texture|space)$/,
   /^layout\/(layered|lanes|sequence|tree|contour|field|route)$/,
 ];
 
@@ -68,9 +67,6 @@ const scanned = [
   "extras/field.ts",
   "extras/calculus.ts",
   "extras/axes.ts",
-  "voxel.ts",
-  "texture.ts",
-  "space.ts",
 ];
 
 test("the kit files exist", () => {
