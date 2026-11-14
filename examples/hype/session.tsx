@@ -16,7 +16,7 @@ import {
 
 import { mono, theme } from "../style";
 import { COLD } from "./cold";
-import { C, show } from "./kit";
+import { C, Chick, show } from "./kit";
 
 const TERM_AT = COLD.at + COLD.over;
 const FS = 15;
@@ -65,37 +65,21 @@ const asterisk = (x: number, y: number, animation?: Stack<"rotate" | "scale">) =
   </g>
 );
 
-/** The welcome mascot, one `#` per half-cell. */
-const MASCOT = [
-  "...############...",
-  "...##.######.##...",
-  ".################.",
-  "...############...",
-  "....#.#....#.#....",
-];
-
 const BOX = { x: left - 8, w: shell.body.w - 32, top: 1.2, rows: 8 };
 const split = BOX.x + BOX.w * 0.56;
 
 const centerAt = (text: string, row: number, piece: (text: string) => CodePiece = (t) => t) =>
   sayAt([piece(text)], row, BOX.x + (split - BOX.x) / 2 - width(text) / 2);
 
-const mascot = (row: number) => {
-  const [w, h] = [width("W") / 2, ROW / 2];
-  const x = BOX.x + (split - BOX.x) / 2 - (MASCOT[0]!.length * w) / 2;
-
-  return MASCOT.flatMap((line, r) =>
-    [...line.matchAll(/#+/g)].map((run) => (
-      <rect
-        x={x + run.index * w}
-        y={top(row) + r * h}
-        width={run[0].length * w}
-        height={h + 0.3}
-        fill={C.accent}
-      />
-    )),
-  );
-};
+/** The welcome card's mascot is the svjeez chick, blinking up at the reader. */
+const mascot = (row: number) => (
+  <Chick
+    x={BOX.x + (split - BOX.x) / 2}
+    y={top(row) + ROW * 2.6}
+    size={(ROW * 2.4) / 139}
+    blinks={[6.2, 9.4]}
+  />
+);
 
 const muted = (text: string): CodePiece => ["muted", text];
 

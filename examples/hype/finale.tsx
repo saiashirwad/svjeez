@@ -13,7 +13,8 @@ import {
 import { Glyphs, Icon, draw, ease, enter, motion, code, shot, typewriter } from "svjeez";
 
 import { mono, theme } from "../style";
-import { C, centered, display, rise, show, W } from "./kit";
+import { hopAcross, jumps } from "../site/lib/chick";
+import { C, Chick, centered, display, rise, show, W } from "./kit";
 import { HAND } from "./write";
 
 const FACTS = [
@@ -25,8 +26,19 @@ const FACTS = [
 const FACT = 64;
 export const FACTS_SPAN = { at: HAND.at + HAND.over, over: 3.4 };
 
+// The chick hops down the facts, landing on the end of each one as it rises.
+const factEnds = FACTS.map((fact, i) => ({
+  x: (W + display.measure(fact.lead + fact.rest, FACT)) / 2 + 40,
+  y: 270 + i * 110,
+}));
+
+const factHops = hopAcross(factEnds, FACTS_SPAN.at + 0.8, 0.45, 0.25);
+
 export const facts = (
   <g animation={shot(FACTS_SPAN, { exit: "zoom" })}>
+    <g animation={factHops.animation}>
+      <Chick x={0} y={0} size={0.42} pop={FACTS_SPAN.at + 0.35} blinks={[FACTS_SPAN.at + 2.6]} />
+    </g>
     {FACTS.map((fact, i) => {
       const x = (W - display.measure(fact.lead + fact.rest, FACT)) / 2;
       const y = 270 + i * 110;
@@ -121,6 +133,28 @@ const chips = PACKAGES.map(([name, icon], i) => {
 });
 
 const sizeAt = chipsAt + PACKAGES.length * 0.06 + 0.5;
+
+// The chick drops onto the end of the wordmark, and cheers when the install line has typed.
+const perch = { x: logoX + display.measure(LOGO, 190) - 46, y: 186 };
+
+const drop = motion({ y: -260, opacity: 0 })
+  .at(END_AT + 1.2)
+  .set({ opacity: 1 })
+  .to({ y: 0 }, 0.45, ease.in)
+  .to({ y: -14 }, 0.15, ease.out)
+  .to({ y: 0 }, 0.15, ease.in);
+
+const cheer = jumps([
+  { land: install.span.end + 0.3, height: 60 },
+  { land: install.span.end + 1.4, height: 36 },
+]);
+
+const glow = motion({ fill: "#FFC21A" })
+  .at(install.span.end + 0.1)
+  .to({ fill: "#FFF3B0" }, 0.15)
+  .wait(0.8)
+  .to({ fill: "#FFC21A" }, 0.4);
+
 export const D = sizeAt + 3;
 
 export const finale = (size: string) => (
@@ -157,6 +191,18 @@ export const finale = (size: string) => (
         .at(END_AT + 1.1)
         .to({ scale: 1 }, 0.7, ease.inOut)}
     />
+    <g animation={drop}>
+      <Chick
+        x={perch.x}
+        y={perch.y}
+        size={0.5}
+        blinks={[END_AT + 2.2, sizeAt + 0.8]}
+        body={cheer.body}
+        stretch={cheer.stretch}
+        bulb={cheer.bulb}
+        glow={glow}
+      />
+    </g>
     <g animation={rise(END_AT + 1.35, 0.5, 10)}>
       <Glyphs font={display} text={TAG} size={24} x={centered(TAG, 24)} y={402} fill={C.soft} />
     </g>

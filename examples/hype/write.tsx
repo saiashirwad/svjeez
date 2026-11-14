@@ -1,6 +1,8 @@
 import { fieldLines, streamlines } from "@svjeez/math";
 import { Ink, ease, tool, shot } from "svjeez";
-import { C, Caption, H, W, hand } from "./kit";
+import { motion } from "svjeez";
+import { jumps } from "../site/lib/chick";
+import { C, Caption, Chick, H, W, hand } from "./kit";
 import { MONTAGE } from "./montage";
 
 const HAND_AT = MONTAGE.at + MONTAGE.over;
@@ -33,6 +35,7 @@ for (const d of strokePaths) {
 
 const inked = strokes.at(-1)!.at + strokes.at(-1)!.over;
 export const HAND = { at: HAND_AT, over: inked - HAND_AT + 1.8 };
+const cheer = jumps([{ land: inked + 1.35, height: 40 }]);
 const nibTool = tool.nib({ size: 6, angle: 35, thin: 0.25 });
 
 // Wind that curls around the word, drawn on behind it as the pen starts.
@@ -52,6 +55,18 @@ export const handwriting = (
       tool={tool.brush({ size: 7, seed: 5 })}
       fill={C.accent}
       draw={{ at: inked + 0.1, over: 0.5 }}
+    />
+    {/* The chick pops up at the end of the swoosh and admires the lettering. */}
+    <Chick
+      x={W - handX - 6}
+      y={440}
+      size={0.42}
+      pop={inked + 0.45}
+      blinks={[inked + 1.1]}
+      look={motion({ x: -6, y: -4 })}
+      body={cheer.body}
+      stretch={cheer.stretch}
+      bulb={cheer.bulb}
     />
     <Caption
       at={HAND.at + 0.2}

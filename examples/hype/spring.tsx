@@ -2,7 +2,7 @@ import { tex } from "@svjeez/math";
 import { def, ease, motion, sampled, type Span, Brace } from "svjeez";
 
 import { theme } from "../style";
-import { C, Caption, H } from "./kit";
+import { C, Caption, Chick, H } from "./kit";
 
 const FORMULA = String.raw`x(t) = A\,\cssId{decay}{e^{-\gamma t}}\,\cssId{wobble}{\cos(\omega t)}`;
 const formula = tex(FORMULA, { x: 640, y: 76, fontSize: 46, theme, anchor: [0.5, 0] });
@@ -54,7 +54,7 @@ export const springShot = ({ at, over }: Span) => {
     />,
   );
 
-  const hung = def.clipPath({}, <rect x={BOB - 60} y={230} width={120} height={360} />);
+  const hung = def.clipPath({}, <rect x={BOB - 60} y={230} width={120} height={400} />);
   const notes = { at: written.at + written.over, over: over - written.over - 0.6 };
 
   return (
@@ -81,8 +81,15 @@ export const springShot = ({ at, over }: Span) => {
       <path d={`M${BOB - 40} 230H${BOB + 40}`} stroke={C.muted} strokeWidth={2} />
       <g clipPath={hung}>
         <g animation={weight}>
-          <path d={`M${BOB} ${REST - 400}V${REST}`} stroke={C.muted} strokeWidth={2} />
-          <rect x={BOB - 24} y={REST - 24} width={48} height={48} rx={8} fill={C.ink} />
+          <path d={`M${BOB} ${REST - 400}V${REST - 30}`} stroke={C.muted} strokeWidth={2} />
+          {/* The weight is the chick, bungee-jumping by its antenna. */}
+          <Chick
+            x={BOB}
+            y={REST - 32 + 139 * 0.45}
+            size={0.45}
+            blinks={[run.at + 1.6]}
+            look={motion({ x: 0, y: 0 }).at(run.at).to({ x: 0, y: 6 }, 0.3)}
+          />
         </g>
       </g>
       <path d={`M${PLOT.x} ${REST}H${PLOT.x + PLOT.w}`} stroke={C.hairline} strokeDasharray="3 5" />

@@ -1,7 +1,8 @@
 import { chart } from "@svjeez/charts";
 import { enter, type Span } from "svjeez";
+import { jumps } from "../site/lib/chick";
 import { mono, theme } from "../style";
-import { C, Caption } from "./kit";
+import { C, Caption, Chick } from "./kit";
 
 const STARS = [42, 61, 55, 88, 120, 164, 230, 312];
 const WEEKS = STARS.map((_, i) => `W${i + 1}`);
@@ -34,11 +35,30 @@ export const dataShot = ({ at }: Span) => {
     label: "stars",
   });
 
+  // The chick pops up on the second tallest bar once the bars are in, and cheers when the trend line lands.
+  const last = pairs.at(-2)!;
+  const perch = { x: plot.x(last[0]), y: plot.y(last[1]) };
+
+  const cheer = jumps([
+    { land: trend.span.end + 0.2, height: 70 },
+    { land: trend.span.end + 1.3, height: 40 },
+  ]);
+
   return (
     <>
       <g animation={enter({ at: at + 0.15, over: 0.5 }, { opacity: 0 })}>{plot.node}</g>
       {bars.node}
       {trend.node}
+      <Chick
+        x={perch.x}
+        y={perch.y}
+        size={0.36}
+        pop={bars.span.end}
+        blinks={[bars.span.end + 0.9]}
+        body={cheer.body}
+        stretch={cheer.stretch}
+        bulb={cheer.bulb}
+      />
       <Caption
         at={at + 0.1}
         tag="@svjeez/charts"
