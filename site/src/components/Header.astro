@@ -65,6 +65,33 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
 
 <script>
   import { PALETTES } from "../palettes";
+
+  // Each header icon is a svjeez scene held at its first frame. Pointing at its button plays it, and it always finishes
+  // the loop it is in before it rests, so it never freezes halfway. Every few seconds one of them plays on its own.
+  const LOOP = 1200;
+  const icons = [...document.querySelectorAll<HTMLElement>(".top .nav-ico")];
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
+
+  const play = (icon: HTMLElement, hovered: () => boolean) => {
+    if (calm.matches || icon.hasAttribute("data-on")) return;
+    icon.setAttribute("data-on", "");
+    const tick = setInterval(() => {
+      if (hovered()) return;
+      icon.removeAttribute("data-on");
+      clearInterval(tick);
+    }, LOOP);
+  };
+
+  for (const icon of icons) {
+    const host = icon.closest("a, button")!;
+    host.addEventListener("pointerenter", () => play(icon, () => host.matches(":hover")));
+  }
+
+  let next = 0;
+  setInterval(() => {
+    const shown = icons.filter((icon) => icon.offsetParent !== null);
+    if (shown.length) play(shown[next++ % shown.length]!, () => false);
+  }, 6000);
   import { choose, palette } from "../scripts/palette";
   import { scheme, THEMECHANGE } from "../scripts/scheme";
 

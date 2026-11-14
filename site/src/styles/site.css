@@ -249,7 +249,8 @@ kbd {
   inline-size: 1.25rem;
   block-size: 1.25rem;
 }
-/* The header's icons are svjeez scenes inlined in the page. They hold still until you point at their button, then play. */
+/* The header's icons are svjeez scenes inlined in the page. They hold still until you point at their button, then play
+   a whole loop, and now and then one plays on its own. */
 .nav-ico {
   display: inline-flex;
 }
@@ -263,19 +264,16 @@ kbd {
 .nav-ico svg * {
   animation-play-state: paused !important;
 }
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  :is(a, button):hover .nav-ico svg,
-  :is(a, button):hover .nav-ico svg * {
-    animation-play-state: running !important;
-  }
+/* A script sets data-on while an icon plays, and lets each run finish its loop before it rests again. */
+.nav-ico[data-on] svg,
+.nav-ico[data-on] svg * {
+  animation-play-state: running !important;
 }
-/* The palette menu and the light and dark toggle sit after a hairline, set like the links so the row stays even. */
+/* The palette menu and the light and dark toggle, set like the links so the row stays even. */
 .controls {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding-inline-start: clamp(0.75rem, 3vw, 1.5rem);
-  border-inline-start: 1px solid var(--line);
 }
 .controls .theme {
   inline-size: 2rem;
