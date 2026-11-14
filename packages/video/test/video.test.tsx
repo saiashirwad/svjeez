@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { ALL_FORMATS, BufferSource, EncodedPacketSink, Input } from "mediabunny";
 import { motion, render } from "svjeez";
-import { renderVideo } from "@svjeez/video";
+import { video } from "@svjeez/video";
 
 const scene = (width: number, height: number) =>
   render(
@@ -38,12 +38,12 @@ const read = async (bytes: Uint8Array) => {
   };
 };
 
-describe("renderVideo", () => {
+describe("video", () => {
   test("webm is VP9 by default, one frame per 1/fps of the loop", async () => {
-    const video = await renderVideo(slide, { format: "webm", fps: 12, colorScheme: "light" });
+    const clip = await video(slide, { format: "webm", fps: 12, colorScheme: "light" });
 
-    expect(video).toMatchObject({ mime: "video/webm", codec: "vp9", frames: 12, duration: 1 });
-    expect(await read(video.bytes)).toMatchObject({
+    expect(clip).toMatchObject({ mime: "video/webm", codec: "vp9", frames: 12, duration: 1 });
+    expect(await read(clip.bytes)).toMatchObject({
       mime: expect.stringContaining("video/webm"),
       codec: "vp9",
       width: 64,
@@ -55,7 +55,7 @@ describe("renderVideo", () => {
   });
 
   test("loops, scale and codec shape the video", async () => {
-    const video = await renderVideo(slide, {
+    const clip = await video(slide, {
       format: "webm",
       codec: "vp8",
       fps: 10,
@@ -63,8 +63,8 @@ describe("renderVideo", () => {
       scale: 2,
     });
 
-    expect(video).toMatchObject({ codec: "vp8", frames: 30, duration: 3 });
-    expect(await read(video.bytes)).toMatchObject({
+    expect(clip).toMatchObject({ codec: "vp8", frames: 30, duration: 3 });
+    expect(await read(clip.bytes)).toMatchObject({
       codec: "vp8",
       width: 128,
       height: 96,
@@ -74,16 +74,16 @@ describe("renderVideo", () => {
   });
 
   test("a transparent background keeps alpha in webm", async () => {
-    const video = await renderVideo(slide, { format: "webm", fps: 6, background: "transparent" });
+    const clip = await video(slide, { format: "webm", fps: 6, background: "transparent" });
 
-    expect(await read(video.bytes)).toMatchObject({ transparent: true, alpha: 6, packets: 6 });
+    expect(await read(clip.bytes)).toMatchObject({ transparent: true, alpha: 6, packets: 6 });
   });
 
   test("mp4 is H.264 by default", async () => {
-    const video = await renderVideo(slide, { fps: 12 });
+    const clip = await video(slide, { fps: 12 });
 
-    expect(video).toMatchObject({ mime: "video/mp4", codec: "avc", frames: 12 });
-    expect(await read(video.bytes)).toMatchObject({
+    expect(clip).toMatchObject({ mime: "video/mp4", codec: "avc", frames: 12 });
+    expect(await read(clip.bytes)).toMatchObject({
       mime: expect.stringContaining("video/mp4"),
       codec: "avc",
       width: 64,
@@ -94,14 +94,14 @@ describe("renderVideo", () => {
   });
 
   test("an odd-sized scene loses its last device pixel row and column, which H.264 can't encode", async () => {
-    const video = await renderVideo(scene(65, 49), { fps: 6 });
+    const clip = await video(scene(65, 49), { fps: 6 });
 
-    expect(await read(video.bytes)).toMatchObject({ codec: "avc", width: 64, height: 48 });
+    expect(await read(clip.bytes)).toMatchObject({ codec: "avc", width: 64, height: 48 });
   });
 
   test("an mp4 can't be transparent", async () => {
-    await expect(renderVideo(slide, { background: "transparent" })).rejects.toThrow(
-      'renderVideo() can\'t keep a transparent background in mp4. Use format: "webm"',
+    await expect(video(slide, { background: "transparent" })).rejects.toThrow(
+      'video() can\'t keep a transparent background in mp4. Use format: "webm"',
     );
   });
 
@@ -111,25 +111,25 @@ describe("renderVideo", () => {
       <rect width={8} height={8} />,
     );
 
-    const error = await renderVideo(still, { format: "webm" }).catch((error: Error) => error);
+    const error = await video(still, { format: "webm" }).catch((error: Error) => error);
 
     expect(error).toBeInstanceOf(Error);
     expect(String(error)).toContain(
-      "renderVideo() needs an animated scene, got one whose loop lasts 0s.",
+      "video() needs an animated scene, got one whose loop lasts 0s.",
     );
   });
 
   test("bad options are rejected by name", async () => {
-    await expect(renderVideo(slide, { fps: 0 })).rejects.toThrow(
-      "renderVideo() needs a positive, finite fps, got 0.",
+    await expect(video(slide, { fps: 0 })).rejects.toThrow(
+      "video() needs a positive, finite fps, got 0.",
     );
-    await expect(renderVideo(slide, { loops: 1.5 })).rejects.toThrow("loops, got 1.5.");
-    await expect(renderVideo(slide, { scale: 0 })).rejects.toThrow(
-      "renderVideo() needs a positive, finite scale, got 0.",
+    await expect(video(slide, { loops: 1.5 })).rejects.toThrow("loops, got 1.5.");
+    await expect(video(slide, { scale: 0 })).rejects.toThrow(
+      "video() needs a positive, finite scale, got 0.",
     );
     // @ts-expect-error mp4 cannot hold VP8
-    await expect(renderVideo(slide, { format: "mp4", codec: "vp8" })).rejects.toThrow(
-      "renderVideo() needs a mp4 codec of avc, hevc, vp9, av1, got vp8.",
+    await expect(video(slide, { format: "mp4", codec: "vp8" })).rejects.toThrow(
+      "video() needs a mp4 codec of avc, hevc, vp9, av1, got vp8.",
     );
   });
 });

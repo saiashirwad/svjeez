@@ -130,25 +130,29 @@ const parseScheme = (value: string | undefined) =>
       : fail(`--color-scheme is system, light or dark, got "${value}".`);
 
 /** The part of @svjeez/video the CLI uses. svjeez doesn't depend on it, so it is typed here. */
+type VideoFn = (
+  svg: string,
+  options: {
+    format: string;
+    fps?: number;
+    loops?: number;
+    quality?: string;
+    scale?: number;
+    colorScheme?: string;
+    background?: string;
+  },
+) => Promise<{
+  bytes: Uint8Array;
+  codec: string;
+  frames: number;
+  duration: number;
+  colorScheme: string;
+}>;
+
+/** `video` since 0.7, `renderVideo` before. */
 interface VideoModule {
-  renderVideo: (
-    svg: string,
-    options: {
-      format: string;
-      fps?: number;
-      loops?: number;
-      quality?: string;
-      scale?: number;
-      colorScheme?: string;
-      background?: string;
-    },
-  ) => Promise<{
-    bytes: Uint8Array;
-    codec: string;
-    frames: number;
-    duration: number;
-    colorScheme: string;
-  }>;
+  readonly video?: VideoFn;
+  readonly renderVideo?: VideoFn;
 }
 
 const VIDEO = "@svjeez/video";
@@ -196,11 +200,12 @@ const videoCommand = async (args: string[]): Promise<void> => {
     fail(`--format ${format} doesn't match --out ${values.out}. Pass one, or make them agree.`);
   const out = values.out ?? `${basename(file, extname(file))}.${format}`;
   const colorScheme = parseScheme(values["color-scheme"]);
-  const { renderVideo } = await loadVideo();
+  const loaded = await loadVideo();
+  const encode = loaded.video ?? loaded.renderVideo ?? fail(`${VIDEO} has no video().`);
   const svg = await loadSvg(file);
   report(svg);
 
-  const video = await renderVideo(svg, {
+  const video = await encode(svg, {
     format,
     fps: number("fps", values.fps),
     loops: number("loops", values.loops),

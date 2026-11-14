@@ -66,41 +66,40 @@ type Page = typeof globalThis & {
 };
 
 /** Encode one loop, or several, of an SVG's animation as a video, in headless Chromium. Needs `playwright-core`. */
-export const renderVideo = async (svg: string, options: VideoOptions = {}): Promise<Video> => {
+export const video = async (svg: string, options: VideoOptions = {}): Promise<Video> => {
   const format = options.format ?? "mp4";
 
-  if (!isFormat(format))
-    throw new Error(`renderVideo() needs a format of mp4 or webm, got ${format}.`);
+  if (!isFormat(format)) throw new Error(`video() needs a format of mp4 or webm, got ${format}.`);
   const { mime, codecs, alpha } = FORMATS[format];
   const codec = options.codec ?? codecs[0];
 
   if (!allows(format, codec))
-    throw new Error(`renderVideo() needs a ${format} codec of ${codecs.join(", ")}, got ${codec}.`);
+    throw new Error(`video() needs a ${format} codec of ${codecs.join(", ")}, got ${codec}.`);
   const fps = options.fps ?? 30;
 
   if (!(fps > 0 && Number.isFinite(fps)))
-    throw new Error(`renderVideo() needs a positive, finite fps, got ${fps}.`);
+    throw new Error(`video() needs a positive, finite fps, got ${fps}.`);
   const loops = options.loops ?? 1;
 
   if (!(Number.isInteger(loops) && loops > 0))
-    throw new Error(`renderVideo() needs a positive whole number of loops, got ${loops}.`);
+    throw new Error(`video() needs a positive whole number of loops, got ${loops}.`);
   const quality = options.quality ?? "high";
 
   if (!isQuality(quality))
-    throw new Error(`renderVideo() needs a quality of low, medium or high, got ${quality}.`);
+    throw new Error(`video() needs a quality of low, medium or high, got ${quality}.`);
   const transparent = options.background === "transparent";
 
   if (transparent && !alpha)
     throw new Error(
-      `renderVideo() can't keep a transparent background in ${format}. Use format: "webm", or pass a background color.`,
+      `video() can't keep a transparent background in ${format}. Use format: "webm", or pass a background color.`,
     );
 
-  const scene = await openScene(svg, options, "renderVideo()");
+  const scene = await openScene(svg, options, "video()");
 
   try {
     if (!(scene.duration > 0))
       throw new Error(
-        "renderVideo() needs an animated scene, got one whose loop lasts 0s. Use renderFrames() for a still.",
+        "video() needs an animated scene, got one whose loop lasts 0s. Use renderFrames() for a still.",
       );
     const frames = Math.max(1, Math.round(scene.duration * loops * fps));
     await scene.addScript(BUNDLE);
@@ -129,7 +128,7 @@ export const renderVideo = async (svg: string, options: VideoOptions = {}): Prom
 
     if (!supported)
       throw new Error(
-        `renderVideo() needs a Chromium that can encode ${codec} at ${width} by ${height}, and this one can't. Try another codec or format: "webm", or pass executablePath to Google Chrome.`,
+        `video() needs a Chromium that can encode ${codec} at ${width} by ${height}, and this one can't. Try another codec or format: "webm", or pass executablePath to Google Chrome.`,
       );
 
     await scene.evaluate(
@@ -206,3 +205,6 @@ export const renderVideo = async (svg: string, options: VideoOptions = {}): Prom
     await scene.close();
   }
 };
+
+/** @deprecated use `video` */
+export const renderVideo = video;

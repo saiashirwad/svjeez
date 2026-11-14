@@ -18,10 +18,10 @@ npx playwright-core install chromium-headless-shell
 
 ```ts
 import { writeFile } from "node:fs/promises";
-import { renderVideo } from "@svjeez/video";
+import { video } from "@svjeez/video";
 
-const video = await renderVideo(svg, { fps: 30, loops: 2, scale: 2 });
-await writeFile("scene.mp4", video.bytes);
+const mp4 = await video(svg, { fps: 30, loops: 2, scale: 2 });
+await writeFile("scene.mp4", mp4.bytes);
 ```
 
 Or from the command line, through svjeez's CLI:
@@ -31,7 +31,7 @@ npx svjeez video scene.tsx --out scene.mp4 --loops 2 --scale 2
 npx svjeez video scene.tsx --out scene.webm --background transparent
 ```
 
-`renderVideo(svg, options)` returns `{ bytes, mime, format, codec, duration, frames, colorScheme }`. Frame `i` shows the scene at `i / fps` seconds, and the video holds `round(loop × loops × fps)` frames, where `loop` is one loop of the scene.
+`video(svg, options)` returns `{ bytes, mime, format, codec, duration, frames, colorScheme }`. Frame `i` shows the scene at `i / fps` seconds, and the video holds `round(loop × loops × fps)` frames, where `loop` is one loop of the scene.
 
 | Option | Default | |
 | --- | --- | --- |
@@ -51,7 +51,7 @@ Each side of the video is a whole, even number of device pixels, because 4:2:0 v
 
 Node has no video encoder, so encoding happens in the headless Chromium that `svjeez/frames` drives. svjeez seeks the paused scene to each frame's time and captures it, and [Mediabunny](https://mediabunny.dev) encodes the frames with the browser's WebCodecs and writes the container. Nothing is installed besides Mediabunny, and no ffmpeg is needed.
 
-Before it captures, `renderVideo()` asks the browser whether it can encode the codec at that size, and throws if it can't. The error suggests another codec, WebM, or `executablePath` pointing at Google Chrome.
+Before it captures, `video()` asks the browser whether it can encode the codec at that size, and throws if it can't. The error suggests another codec, WebM, or `executablePath` pointing at Google Chrome.
 
 ## Errors
 
