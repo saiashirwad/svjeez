@@ -36,7 +36,7 @@ Code and terminal runs use them by role:
 | `variable`, `tag`, `red` | `base08` |
 | `cyan` | `base0C` |
 
-`variables(dark, light?)` does the same for colors a scene paints itself. It returns `vars`, where `vars.sky` is `var(--sky)`, and `css` for `render`. With `light`, those values win under `prefers-color-scheme: light`. Names must be CSS identifiers.
+`variables(dark, light?, { prefix? })` does the same for colors a scene paints itself. It returns `vars`, where `vars.sky` is `var(--sky)`, and `css` for `render`. With `light`, those values win under `prefers-color-scheme: light`. Names must be CSS identifiers. `adaptive` takes `prefix` too. Pass the `prefix` you give `render` when several scenes share a page: the rule then selects `svg.<prefix>root`, which `render` puts on the root, so each scene keeps its own colors. Without a prefix the rule is a plain `svg` and applies to every inlined scene.
 
 ```tsx
 
@@ -47,7 +47,9 @@ const { vars, css } = variables({ sky: "#14162A", sea: "#1F3A5C" }, { sky: "#FBF
 
 `restyle(svg, { css, at, onceAt, paused, still })` returns a copy of a rendered SVG with more CSS after the scene's own. A page uses it to recolor an `<img>` without restarting the animation. `at` is how many playback seconds the copy starts in, written to `--t0` on the root, which delays every CSS animation, and to `begin` on every SMIL `<animate>`. Any value works, so a page never needs the scene's loop length. `paused: true` holds the frame at `at` (0 when left out) instead of playing on, whatever the viewer's setting, so a page can show any moment in an `<img>`. SMIL holds through `begin`, `end` and `fill="freeze"`. Parts inside `<Once>` keep their own clock, which follows `at` unless `onceAt` sets it, so `restyle(next, { at, onceAt: 0 })` swaps in a new file that keeps the loop's place while its once parts play from the top. `still: true` holds the reduced-motion frame instead, ignoring `at` and `paused`. Both pause every animation, your own CSS included, and your own CSS animations stay where they start. A scene rendered with `reducedMotion: false` has no still frame to hold.
 
-To scrub a picture inlined in the page instead, `seek(time, svg)` from `svjeez/page` pauses every CSS and SMIL animation in that `<svg>` at `time`, and `loopLength(svg)` returns its loop in seconds. Both default to the whole document and run only in a browser.
+To override a scene's colors from the page, restyle with the same variables on the scene's root: `restyle(svg, { css: "svg.a-root{--sky:#400}" })` for a scene rendered with `prefix: "a-"` (`svg{--sky:#400}` without one). The page needs no rebuild and the animation keeps its place.
+
+To scrub a picture inlined in the page instead, `seek(time, svg)` from `svjeez/page` pauses every CSS and SMIL animation in that `<svg>` at `time`, and `loopLength(svg)` returns its loop in seconds. Both default to the whole document and run only in a browser. To drive a scene from scroll, call `seek(progress * loopLength(svg), svg)` from a scroll handler, with `progress` from 0 to 1.
 
 ```ts
 import {
