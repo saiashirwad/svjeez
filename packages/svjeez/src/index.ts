@@ -52,6 +52,8 @@ export {
   type GlyphPath,
   type PathOptions,
   type TextPath,
+  type FontValue,
+  textWidth,
 } from "./font/font";
 
 export { strokeFont, type StrokeFont } from "./font/stroke";
@@ -80,9 +82,9 @@ export { el, type ElementProps } from "./el";
 
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 
-export type { Hex } from "./color";
+export { hexBytes, hexOf, type Hex } from "./color";
 
-export type { Channel, Values } from "./channels";
+export type { Channel, TagChannels, Values } from "./channels";
 
 export type { SvgNode, Child } from "./svg";
 
@@ -92,6 +94,7 @@ export {
   rect,
   resample,
   polylinePath,
+  pathLength,
   type Rect,
   type Point,
   type Edge,
@@ -105,3 +108,9 @@ export {
   type PathData,
   type SampledPathOptions,
 } from "./paths";
+
+export { num } from "./format";
+
+export { groupBy } from "./layout/group";
+
+export type { Box, Size } from "./layout/box";
