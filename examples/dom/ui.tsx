@@ -279,7 +279,7 @@ export const pieces = {
             All 14 checks passed
           </CardContent>
         )}
-        <CardFooter className="justify-between" part="footer">
+        <CardFooter className="justify-between">
           <div className="flex items-center gap-2 text-sm">
             <Switch checked={merged} part="switch" /> Auto-merge
           </div>

@@ -1,5 +1,5 @@
 import { google } from "@svjeez/fonts";
-import { Dom, size, snapshots } from "@svjeez/dom";
+import { Dom, size, snapshots, type Action } from "@svjeez/dom";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { render, span, variables } from "svjeez";
@@ -7,7 +7,8 @@ import { tailwind } from "./tailwind.ts";
 import { pieces } from "./ui.tsx";
 
 // Real shadcn components rendered by React, laid out by Chromium with Tailwind 4, then drawn as SVG.
-// Each card is a live page: the sign-in card is typed into, focused and hovered, and every state is read off it.
+// Each card is a live page that runs its steps in order: the sign-in card is typed into, focused and hovered, and
+// every state is read off it.
 // The snapshots are kept in snapshots.json, so a build without changes never starts Chromium.
 const geist = await google.family("Geist", [400, 500, 600]);
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
@@ -19,29 +20,33 @@ const html = {
   merged: pieces.pr(true),
 };
 
+// The sign-in card's steps as plain data, so they are part of the inputs: changing one reads the page again.
+const login = [
+  { snap: "idle" },
+  { fill: ["[data-part=email]", "sai@exmaple.com"] },
+  { snap: "typed" },
+  { fill: ["[data-part=password]", "hunter2hunter2"] },
+  { snap: "password" },
+  { hover: "[data-part=submit]" },
+  { snap: "hovered" },
+  // The server says no: the same card, re-rendered, with the pointer moved off.
+  { render: html.failed },
+  { move: [0, 0] },
+  { snap: "failed" },
+] as const satisfies readonly Action[];
+
 const { idle, typed, password, hovered, failed, open, merged } = await snapshots(
   here("snapshots.json"),
-  { inputs: { html, theme: readFileSync(here("theme.css"), "utf8") }, fonts: [geist] },
+  { inputs: { html, login, theme: readFileSync(here("theme.css"), "utf8") }, fonts: [geist] },
   async (dom) => {
     const css = await tailwind(Object.values(html));
+    const signIn = await dom.mount(html.signIn, { css });
+    const pr = await dom.mount(html.open, { css });
 
-    const login = await dom.mount(html.signIn, { css });
-    const idle = await login.snap();
-    const typed = await login.snap((page) => page.fill("[data-part=email]", "sai@exmaple.com"));
-    const password = await login.snap((page) =>
-      page.fill("[data-part=password]", "hunter2hunter2"),
-    );
-    const hovered = await login.snap((page) => page.hover("[data-part=submit]"));
-
-    // The server says no: the same card, re-rendered, with the pointer moved off.
-    await login.render(html.failed);
-    const failed = await login.snap((page) => page.mouse.move(0, 0));
-
-    const card = await dom.mount(html.open, { css });
-    const open = await card.snap();
-    await card.render(html.merged);
-
-    return { idle, typed, password, hovered, failed, open, merged: await card.snap() };
+    return {
+      ...(await signIn.steps(login)),
+      ...(await pr.steps({ open: null, merged: { html: html.merged } })),
+    };
   },
 );
 

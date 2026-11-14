@@ -132,6 +132,60 @@ describe("snap", () => {
     await card.close();
   });
 
+  test("steps: an object of named steps runs in order on one page, and keeps its keys in order", async () => {
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
+      css: CSS,
+    });
+    const snaps = await card.steps({
+      typed: (page) => page.fill("input", "hi"),
+      idle: null,
+      failed: { html: '<div class="card"><input placeholder="email"><p>failed</p></div>' },
+      again: { action: (page) => page.fill("input", "yo") },
+    });
+
+    expect(Object.keys(snaps)).toEqual(["typed", "idle", "failed", "again"]);
+    // "idle" ran after "typed", so the typed text is still there.
+    expect(JSON.stringify(snaps.idle)).toContain('"text":"hi"');
+    expect(JSON.stringify(snaps.failed)).toContain('"text":"failed"');
+    expect(JSON.stringify(snaps.failed)).not.toContain('"text":"hi"');
+    expect(JSON.stringify(snaps.again)).toContain('"text":"yo"');
+    await card.close();
+  });
+
+  test("steps: a list of actions as data snaps where it says, by name, in order", async () => {
+    const card = await dom.mount(
+      '<div class="card"><input placeholder="email"><button class="badge">go</button></div>',
+      { css: CSS },
+    );
+    const snaps = await card.steps([
+      { snap: "idle" },
+      { click: "input" },
+      { press: "h" },
+      { fill: ["input", "hey"] },
+      { snap: "typed" },
+      { hover: "button" },
+      { move: [0, 0] },
+      { render: '<div class="card"><p>done</p></div>' },
+      { snap: "done" },
+    ]);
+
+    expect(Object.keys(snaps)).toEqual(["idle", "typed", "done"]);
+    expect(JSON.stringify(snaps.typed)).toContain('"text":"hey"');
+    expect(JSON.stringify(snaps.done)).toContain('"text":"done"');
+    // @ts-expect-error The result has only the names the list snaps.
+    expect(snaps.missing).toBeUndefined();
+
+    const failure = (p: Promise<unknown>) =>
+      p.then(
+        () => "",
+        (e: Error) => e.message,
+      );
+
+    expect(await failure(card.steps([{ snap: "a" }, { snap: "a" }]))).toContain('"a" twice');
+    expect(await failure(card.steps([{ scroll: "x" } as never]))).toContain("scroll");
+    await card.close();
+  });
+
   test("css can be built from the markup", async () => {
     const card = await dom.mount('<div class="card">Hi</div>', {
       css: (html) => CSS + `.card::after{content:"${html.length}"}`,
@@ -158,6 +212,27 @@ describe("Dom", () => {
     expect(validateSvg(svg).errors).toEqual([]);
     // "last" moves down as one text element; it is not drawn twice to crossfade.
     expect(svg.match(/>last</g)).toHaveLength(1);
+    await card.close();
+  });
+
+  test("a box inserted before a sibling with the same tag pairs by what each says", async () => {
+    const card = await dom.mount(
+      '<div class="card"><div>title</div><div>Auto-merge <span class="badge">+214</span></div></div>',
+      { css: CSS },
+    );
+    const before = await card.snap();
+
+    await card.render(
+      '<div class="card"><div>title</div><div>All 14 checks passed</div><div>Auto-merge <span class="badge">+230</span></div></div>',
+    );
+    const after = await card.snap();
+    const svg = draw([before, after], { at: [0.5] });
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // The footer slides down as itself, so its label is drawn once and its number counts; the new row fades in.
+    expect(svg.match(/>Auto-merge</g)).toHaveLength(1);
+    expect(svg).toContain(">+222<");
+    expect(svg.match(/>All 14 checks passed</g)).toHaveLength(1);
     await card.close();
   });
 

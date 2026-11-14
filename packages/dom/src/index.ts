@@ -2,7 +2,9 @@ export {
   browser,
   type Browser,
   type BrowserOptions,
+  type Action,
   type Card,
+  type StepSpec,
   type MountOptions,
   type OpenOptions,
 } from "./browser.ts";

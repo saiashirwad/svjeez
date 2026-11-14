@@ -1,5 +1,5 @@
 {
-  "hash": "36d5984571d6f9c5d1fc4a533987c73ee4148743a0190ee1ddd94cc3bb81bc8e",
+  "hash": "0647f314e1835a955fe1ecdb682edfafdc9fbd7e08130ff20fbe51fd4bf4f6c1",
   "data": {
     "idle": {
       "width": 392,
@@ -2123,7 +2123,6 @@
           {
             "kind": "box",
             "tag": "div",
-            "part": "footer",
             "box": { "x": 17, "y": 99, "width": 418, "height": 22 },
             "radii": [0, 0, 0, 0],
             "shadows": [],
@@ -2505,7 +2504,6 @@
           {
             "kind": "box",
             "tag": "div",
-            "part": "footer",
             "box": { "x": 17, "y": 143, "width": 418, "height": 22 },
             "radii": [0, 0, 0, 0],
             "shadows": [],

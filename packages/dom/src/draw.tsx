@@ -191,9 +191,25 @@ const signature = (it: Item, pair?: (box: Box) => string | undefined): string =>
   return it.part !== undefined ? `#${it.part}` : it.tag;
 };
 
+/** All the text under an item, so siblings that share a signature can be told apart by what they say. */
+const textOf = (it: Item): string =>
+  it.kind === "text" ? it.text : it.kind === "box" ? it.children.map(textOf).join(" ") : "";
+
+/** How alike two texts are, from 0 to 1: the words they share over the words either has. */
+const likeness = (a: string, b: string): number => {
+  if (a === b) return 1;
+  const x = new Set(a.split(/\s+/).filter(Boolean));
+  const y = new Set(b.split(/\s+/).filter(Boolean));
+  const shared = [...x].filter((w) => y.has(w)).length;
+
+  return shared / (x.size + y.size - shared || 1);
+};
+
 /**
  * Pairs two lists of siblings by their longest common run of signatures, so an element inserted in the middle leaves
- * the ones around it paired. Unpaired items come back with the other side undefined, in drawing order.
+ * the ones around it paired. Among pairings of the same length, the one whose pairs say the most alike wins, so a
+ * `<div>` inserted before another `<div>` doesn't take its place. Unpaired items come back with the other side
+ * undefined, in drawing order.
  */
 const align = (
   olds: readonly Item[],
@@ -202,19 +218,33 @@ const align = (
 ): [Item | undefined, Item | undefined][] => {
   const a = olds.map((it) => signature(it, pair));
   const b = news.map((it) => signature(it, pair));
+  const ta = olds.map(textOf);
+  const tb = news.map(textOf);
+  // A pair counts 1, plus a likeness bonus too small for all of them together to outweigh one more pair.
+  const bonus = 0.5 / (Math.min(a.length, b.length) + 1);
+  const weight = (i: number, j: number) => 1 + bonus * likeness(ta[i]!, tb[j]!);
   const lcs = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0));
 
   for (let i = a.length - 1; i >= 0; i--)
     for (let j = b.length - 1; j >= 0; j--)
-      lcs[i]![j] =
-        a[i] === b[j] ? lcs[i + 1]![j + 1]! + 1 : Math.max(lcs[i + 1]![j]!, lcs[i]![j + 1]!);
+      lcs[i]![j] = Math.max(
+        a[i] === b[j] ? lcs[i + 1]![j + 1]! + weight(i, j) : 0,
+        lcs[i + 1]![j]!,
+        lcs[i]![j + 1]!,
+      );
 
   const out: [Item | undefined, Item | undefined][] = [];
   let i = 0;
   let j = 0;
 
   while (i < a.length || j < b.length) {
-    if (i < a.length && j < b.length && a[i] === b[j]) out.push([olds[i++], news[j++]]);
+    if (
+      i < a.length &&
+      j < b.length &&
+      a[i] === b[j] &&
+      lcs[i]![j]! === lcs[i + 1]![j + 1]! + weight(i, j)
+    )
+      out.push([olds[i++], news[j++]]);
     else if (j < b.length && (i >= a.length || lcs[i]![j + 1]! >= lcs[i + 1]![j]!))
       out.push([undefined, news[j++]]);
     else out.push([olds[i++], undefined]);

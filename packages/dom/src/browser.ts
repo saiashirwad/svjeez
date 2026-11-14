@@ -36,6 +36,30 @@ export interface MountOptions extends PageOptions {
   readonly root?: { readonly class?: string };
 }
 
+/** One step as plain data, the way Playwright's codegen writes it, so a step list can be part of `snapshots()` inputs. */
+export type Action =
+  | { readonly click: string }
+  | { readonly fill: readonly [selector: string, text: string] }
+  | { readonly hover: string }
+  | { readonly press: string }
+  | { readonly move: readonly [x: number, y: number] }
+  /** New markup for a mounted card, as `render`. */
+  | { readonly render: string }
+  /** Read the page into the snapshot of this name. */
+  | { readonly snap: string };
+
+type PageAction = (page: Page) => Promise<unknown>;
+
+/** A named step: `null` just reads the page, a function acts first, `html` renders new markup before `action`. */
+export type StepSpec =
+  | null
+  | undefined
+  | PageAction
+  | { readonly html?: string; readonly action?: PageAction };
+
+/** The names a list of actions snaps. */
+type Snapped<A extends readonly Action[]> = Extract<A[number], { readonly snap: string }>["snap"];
+
 export interface OpenOptions extends PageOptions {
   /** The element to snapshot. */
   readonly root: string;
@@ -44,7 +68,18 @@ export interface OpenOptions extends PageOptions {
 /** One live page, kept open so state (typed text, focus, hover) carries from one snapshot to the next. */
 export interface Card {
   /** Run `action` on the page, if given, then read the page into a snapshot. */
-  readonly snap: (action?: (page: Page) => Promise<unknown>) => Promise<Snapshot>;
+  readonly snap: (action?: PageAction) => Promise<Snapshot>;
+  /**
+   * Runs steps in order on this page and snaps each, so state carries from one to the next. An object names each
+   * step; a list of actions snaps where it says `{ snap: name }`. Either way the result keeps the order, so
+   * `Object.values` is the timeline.
+   */
+  readonly steps: {
+    <const A extends readonly Action[]>(actions: A): Promise<{ [K in Snapped<A>]: Snapshot }>;
+    <const S extends Readonly<Record<string, StepSpec>>>(
+      spec: S,
+    ): Promise<{ [K in keyof S]: Snapshot }>;
+  };
   /** Swap the markup of a mounted card, running its `css` again if that is a function. */
   readonly render: (html: string) => Promise<void>;
   readonly close: () => Promise<void>;
@@ -121,38 +156,75 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
 
     await scheme(resting);
 
-    return {
-      snap: async (action) => {
-        if (action) await action(page);
-        // tsx and esbuild's keepNames wrap named functions in __name(), which the page doesn't have.
-        await page.evaluate("globalThis.__name ??= (fn) => fn");
-        // Transitions and finite animations that the action started must land before the page is read.
-        await page.evaluate(async () => {
-          await document.fonts.ready;
-          await Promise.all(
-            document
-              .getAnimations()
-              .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
-              .map((a) => a.finished.catch(() => undefined)),
-          );
-        });
+    const snap: Card["snap"] = async (action) => {
+      if (action) await action(page);
+      // tsx and esbuild's keepNames wrap named functions in __name(), which the page doesn't have.
+      await page.evaluate("globalThis.__name ??= (fn) => fn");
+      // Transitions and finite animations that the action started must land before the page is read.
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        await Promise.all(
+          document
+            .getAnimations()
+            .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+            .map((a) => a.finished.catch(() => undefined)),
+        );
+      });
 
-        // Light goes last, so the page ends in the scheme it rests in.
-        const dark = schemes === "light" ? undefined : await read("dark");
-        const light = schemes === "dark" ? undefined : await read("light");
-        const root = dark && light ? merge(light, dark) : (light ?? dark)!;
+      // Light goes last, so the page ends in the scheme it rests in.
+      const dark = schemes === "light" ? undefined : await read("dark");
+      const light = schemes === "dark" ? undefined : await read("light");
+      const root = dark && light ? merge(light, dark) : (light ?? dark)!;
 
-        return {
-          width: Math.ceil(root.box.width + 2 * pad),
-          height: Math.ceil(root.box.height + 2 * pad),
-          pad,
-          box: root.box,
-          root,
-        };
-      },
-      render,
-      close: () => page.close(),
+      return {
+        width: Math.ceil(root.box.width + 2 * pad),
+        height: Math.ceil(root.box.height + 2 * pad),
+        pad,
+        box: root.box,
+        root,
+      };
     };
+
+    const act = (action: Action): Promise<unknown> => {
+      if ("click" in action) return page.click(action.click);
+      if ("fill" in action) return page.fill(...action.fill);
+      if ("hover" in action) return page.hover(action.hover);
+      if ("press" in action) return page.keyboard.press(action.press);
+      if ("move" in action) return page.mouse.move(...action.move);
+      if ("render" in action) return render(action.render);
+
+      throw new Error(`steps() doesn't know the action ${JSON.stringify(action)}.`);
+    };
+
+    const steps = async (input: readonly Action[] | Readonly<Record<string, StepSpec>>) => {
+      const out: Record<string, Snapshot> = {};
+
+      if (Array.isArray(input)) {
+        const names = (input as readonly Action[]).flatMap((a) => ("snap" in a ? [a.snap] : []));
+        const twice = names.find((name, i) => names.indexOf(name) !== i);
+
+        // Checked before anything runs, so a typo doesn't cost a page's worth of steps.
+        if (twice !== undefined) throw new Error(`steps() snaps "${twice}" twice.`);
+
+        for (const action of input as readonly Action[])
+          if ("snap" in action) out[action.snap] = await snap();
+          else await act(action);
+
+        return out;
+      }
+
+      for (const [name, step] of Object.entries(input as Readonly<Record<string, StepSpec>>)) {
+        if (typeof step === "function") out[name] = await snap(step);
+        else {
+          if (step?.html !== undefined) await render(step.html);
+          out[name] = await snap(step?.action);
+        }
+      }
+
+      return out;
+    };
+
+    return { snap, steps: steps as Card["steps"], render, close: () => page.close() };
   };
 
   const close = () => chromium.close();
