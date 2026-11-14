@@ -8,7 +8,6 @@ const before = `import { Camera, Steady, flow, Pivot, sample, sampledPath, rende
 import { flowchart, type Diagram } from "svjeez/extras";
 import { axes, fieldFlow, type Line } from "svjeez/extras";
 import { tomorrowNight, timeline, readout } from "svjeez/extras";
-import { voxel, type VoxelBlock } from "svjeez/voxel";
 import { fit, number, type Schema } from "svjeez/params";
 import { renderVideo } from "@svjeez/video";
 import type { Icon } from "@svjeez/icons";
@@ -33,10 +32,6 @@ export default () => (
     <Pivot at={{ x: 5, y: 5 }} animation={spin} />
     {flow(points, { at: 1, loop: 4, style: "comet" }).node}
     {fieldFlow(lines, { at: 3.5, speed: 110 })}
-    {voxel.scene({
-      camera: eye,
-      blocks: [{ at: [0, 0, 0], skin: dirt, animation: enter({ at: 1, over: 1 }) }],
-    })}
   </g>
 );
 `;
@@ -46,7 +41,6 @@ import { flowchart, type Diagram } from "@svjeez/diagrams";
 import { axes, type CalculusLine } from "@svjeez/math";
 import { tomorrowNight } from "@svjeez/code";
 import { timeline, readout } from "svjeez";
-import { voxel, type VoxelBlock } from "@svjeez/voxel";
 import { fit } from "@svjeez/live";
 import { number, type Schema } from "svjeez/params";
 import { video } from "@svjeez/video";
@@ -72,10 +66,6 @@ export default () => (
     <Pivot origin={{ x: 5, y: 5 }} animation={spin} />
     {flow(points, { at: 1, period: 4, style: "comet" }).node}
     {flow(lines, { at: 3.5, speed: 110 }).node}
-    {voxel.scene({
-      camera: eye,
-      blocks: [{ cell: [0, 0, 0], skin: dirt, animation: enter({ at: 1, over: 1 }) }],
-    })}
   </g>
 );
 `;
@@ -111,7 +101,7 @@ test("what it cannot rewrite is a warning, and the file is otherwise left alone"
   const { warnings } = rewrite("a.ts", source);
   expect(warnings.length).toBe(2);
   expect(warnings.join("\n")).toContain("a.ts:1:");
-  expect(warnings.join("\n")).toContain("at is now cell");
+  expect(warnings.join("\n")).toContain("Voxels were removed");
 });
 
 test("a folder is rewritten in place, and --dry only reports", () => {
@@ -139,7 +129,6 @@ test("a folder is rewritten in place, and --dry only reports", () => {
 
 const timeBefore = `import { cut, during, flow, sampled, terminal, timeline, typewriter, visible } from "svjeez";
 import { globe, nightfall } from "@svjeez/geo";
-import { voxel } from "@svjeez/voxel";
 
 const tl = timeline({ intro: 3, body: 5 });
 const session = terminal([{ cmd: "ls" }], { at: 1 });
@@ -160,22 +149,12 @@ export default () => (
     <g animation={sampled.path((t) => "M" + t, { duration, tolerance: 0.5 })} />
     {globe(world, { frame, spin, duration: 24 })}
     {nightfall(map, date, { duration: 20 })}
-    {voxel.scene({
-      camera: eye,
-      blocks: [
-        { at: [0, 0, 0], skin: dirt, from: 2, to: 6 },
-        { at: [1, 0, 0], skin: dirt, from: arrives },
-        { at: [2, 0, 0], skin: dirt, to: gone },
-        { at: [3, 0, 0], skin: dirt, from, to: until, animation: life },
-      ],
-    })}
   </g>
 );
 `;
 
 const timeAfter = `import { show, flow, sampled, terminal, timeline, typewriter } from "svjeez";
 import { globe, nightfall } from "@svjeez/geo";
-import { voxel } from "@svjeez/voxel";
 
 const tl = timeline({ intro: 3, body: 5 });
 const session = terminal([{ cmd: "ls" }], { at: 1 });
@@ -196,25 +175,16 @@ export default () => (
     <g animation={sampled.path((t) => "M" + t, { over: duration, tolerance: 0.5 })} />
     {globe(world, { frame, spin, over: 24 })}
     {nightfall(map, date, { over: 20 })}
-    {voxel.scene({
-      camera: eye,
-      blocks: [
-        { cell: [0, 0, 0], skin: dirt, show: { at: 2, over: 4 } },
-        { cell: [1, 0, 0], skin: dirt, show: { at: arrives } },
-        { cell: [2, 0, 0], skin: dirt, show: { at: 0, over: gone } },
-        { cell: [3, 0, 0], skin: dirt, show: { at: from, over: until - from }, animation: life },
-      ],
-    })}
   </g>
 );
 `;
 
-test("the time model's moves are rewritten: show, over, a voxel block's show and the span of a result", () => {
+test("the time model's moves are rewritten: show, over, and the span of a result", () => {
   const { text, warnings } = rewrite("time.tsx", timeBefore);
 
   expect(text).toBe(timeAfter);
   expect(warnings).toEqual([
-    "time.tsx:16: visible() faded outside its spans and show() fades inside them, so check the timing.",
+    "time.tsx:15: visible() faded outside its spans and show() fades inside them, so check the timing.",
   ]);
   expect(rewrite("time.tsx", timeAfter).text).toBe(timeAfter);
 });

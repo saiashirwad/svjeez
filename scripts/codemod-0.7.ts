@@ -1,7 +1,7 @@
-// Rewrites a project's source for svjeez 0.7: the import moves (svjeez/extras, svjeez/voxel and the params control math
-// now live in svjeez and the @svjeez packages) and the renames (Values, sample, sampledPath, Steady, Pivot at, voxel
-// block at, flow loop, fieldFlow, renderVideo and the icon type), and the time model: during, cut, visible, tl.show and
-// tl.enter become show(), sampled and globe duration become over, a voxel block's from and to become show, and the .end
+// Rewrites a project's source for svjeez 0.7: the import moves (svjeez/extras and the params control math
+// now live in svjeez and the @svjeez packages) and the renames (Values, sample, sampledPath, Steady, Pivot at,
+// flow loop, fieldFlow, renderVideo and the icon type), and the time model: during, cut, visible, tl.show and
+// tl.enter become show(), sampled and globe duration become over, and the .end
 // of a typewriter, terminal, reveal, flow or morph result becomes .span.end.
 //
 //   bun codemod-0.7.ts [--dry] <file or folder>...
@@ -123,8 +123,6 @@ interface Spot {
 
 /** Where an import from the module called name is found now. */
 const moved = (module: string, name: string): Spot => {
-  if (module === "svjeez/voxel") return { module: "@svjeez/voxel", name };
-
   if (module === "svjeez/params") return { module: LIVE.has(name) ? "@svjeez/live" : module, name };
 
   if (module !== "svjeez/extras") return { module, name };
@@ -397,7 +395,6 @@ export const rewrite = (fileName: string, source: string): Result => {
     bindings.find(predicate);
 
   const pivot = find((b) => b.to.module === "svjeez" && b.to.name === "Pivot");
-  const voxel = find((b) => b.to.module === "@svjeez/voxel" && b.to.name === "voxel");
   const flow = find((b) => b.to.module === "svjeez" && b.to.name === "flow" && b.local === "flow");
   const path = find((b) => b.to.rewrite === "path");
   const steady = find((b) => b.to.rewrite === "steady");
@@ -609,77 +606,6 @@ export const rewrite = (fileName: string, source: string): Result => {
     if (b.to.module === "@svjeez/geo" && b.to.name === "nightfall") windowed(b.local, 2);
   }
 
-  if (voxel) {
-    const open: number[] = [];
-    let renamedCells = 0;
-
-    for (let i = 0; i < code.length; i++) {
-      if (code[i] === "{") open.push(i);
-      else if (code[i] === "}" && open.length > 0) {
-        const from = open.pop()!;
-        const parts = pieces(code, from + 1, i);
-        const keys = parts.flatMap((p) => keyOf(code, p) ?? []);
-
-        if (keys.some((k) => k.name === "skin")) {
-          const start = parts.findIndex((p) => keyOf(code, p)?.name === "from");
-          const stop = parts.findIndex((p) => keyOf(code, p)?.name === "to");
-
-          const valueOf = (index: number): string => {
-            const piece = parts[index]!;
-            const text = source.slice(piece[0], piece[1]);
-
-            return /^\s*[\w$]+\s*$/.test(text)
-              ? text.trim()
-              : text.slice(text.indexOf(":") + 1).trim();
-          };
-
-          if (start >= 0 || stop >= 0) {
-            const numeric = (text: string): boolean => /^\d+(\.\d+)?$/.test(text);
-            const [a, b] = [start >= 0 ? valueOf(start) : "0", stop >= 0 ? valueOf(stop) : ""];
-
-            const over =
-              b === ""
-                ? ""
-                : numeric(a) && numeric(b)
-                  ? String(Math.round((Number(b) - Number(a)) * 1e9) / 1e9)
-                  : a === "0"
-                    ? b
-                    : b + " - " + a;
-
-            const text = "show: { at: " + a + (over === "" ? "" : ", over: " + over) + " }";
-            const first = start >= 0 ? start : stop;
-            const old = source.slice(parts[first]![0], parts[first]![1]);
-            edit(
-              parts[first]![0],
-              parts[first]![1],
-              /^\s*/.exec(old)![0] + text + /\s*$/.exec(old)![0],
-            );
-
-            if (start >= 0 && stop >= 0) {
-              const last = stop === parts.length - 1;
-              const [from, to] = parts[stop]!;
-              const trimmedEnd = from + source.slice(from, to).trimEnd().length;
-              edit(last ? from - 1 : from, last ? trimmedEnd : to + 1, "");
-            }
-          }
-
-          const cell = keys.find((k) => k.name === "at");
-
-          if (cell) {
-            edit(cell.at, cell.at + 2, cell.shorthand ? "cell: at" : "cell");
-            renamedCells++;
-          }
-        }
-      }
-    }
-
-    if (renamedCells === 0)
-      for (const m of code.matchAll(
-        new RegExp("(?<![\\w$.])" + voxel.local + "\\.scene\\s*\\(", "g"),
-      ))
-        warn(m.index, "a voxel block's at is now cell. Rename it where the blocks are built.");
-  }
-
   if (usesShow && !bindings.some((b) => b.to.module === "svjeez" && b.to.name === "show")) {
     const last = Math.max(0, ...matches.map((m) => m.index + m[0].length));
     edit(last, last, '\nimport { show } from "svjeez";');
@@ -689,11 +615,14 @@ export const rewrite = (fileName: string, source: string): Result => {
     .sort((a, b) => b.start - a.start || b.end - a.end)
     .reduce((out, e) => out.slice(0, e.start) + e.text + out.slice(e.end), source);
 
-  for (const m of text.matchAll(/(?<![\w@/])svjeez\/(extras|voxel)\b/g))
+  for (const m of text.matchAll(/(?<![\w@/])svjeez\/extras\b/g))
     warn(
       m.index,
       'still mentions "' + m[0] + '". Import its names from the packages they moved to.',
     );
+
+  for (const m of text.matchAll(/(?<![\w@/])(?:@?svjeez\/)voxel\b/g))
+    warn(m.index, 'still mentions "' + m[0] + '". Voxels were removed; there is no replacement.');
 
   return { text, warnings };
 };

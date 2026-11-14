@@ -141,12 +141,10 @@ More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for ea
 | Before | Now |
 | --- | --- |
 | `svjeez/extras` | `svjeez`. Diagrams are in `@svjeez/diagrams`; `axes`, calculus and the fields in `@svjeez/math`; editor palettes in `@svjeez/code` |
-| `svjeez/voxel` | `@svjeez/voxel` |
 | `fit`, `positionOf`, `valueAt`, `fitValues`, `withValues`, `follow` from `svjeez/params` | `@svjeez/live` |
 | `Values` (channel values) | `ChannelValues` |
 | `sample`, `SampleOptions` | `valuesAt`, `ValuesAtOptions` |
 | `<Pivot at>` | `<Pivot origin>` |
-| `{ at: [x, y, z] }` on a voxel block | `{ cell: [x, y, z] }` |
 | `flow(points, { loop })` | `flow(points, { period })` |
 | `fieldFlow(lines, options)` | `flow(lines, options).node`, which takes a list of lines |
 | `sampledPath(fn, options)` | `sampled.path(fn, options)` |
@@ -155,7 +153,6 @@ More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for ea
 | `Icon` type of `@svjeez/icons` | `IconData` |
 | `during(span, fade)`, `cut(span)`, `visible(spans, fade)`, `tl.show(name)`, `tl.enter(name)` | `show(span, { fade })`, `show(span, { fade: 0 })`, `show(spans)`, `show(tl.name)`, `show({ at: tl.name.at })`. `show` fades inside the span, where `visible` faded outside it |
 | `sampled(fn, { duration })`, `sampled.path`, `nightfall` and `globe` with `duration` | `{ over }`, plus `at` to start later, with the function given time from 0 |
-| `{ from, to }` on a voxel block | `show: { at, over }` |
 | `.end` of a `typewriter`, `terminal`, `reveal`, `flow` or `morph` result | `.span.end` |
 | `.end` of a `derive`, `epicycles`, `traffic`, `walk`, chart or construction result (by hand) | `.span.end` |
 | `during` on `Arrow`, `Brace`, `Callout`, `Underline`, and on `Focus`, `Marker` and `Camera` stops (by hand) | `show` |
@@ -168,7 +165,7 @@ bun codemod-0.7.ts --dry src   # list the files it would change
 bun codemod-0.7.ts src         # rewrite them, then run your formatter
 ```
 
-It prints a warning for what it cannot rewrite by hand, such as a voxel block built away from `voxel.scene()`.
+It prints a warning for what it cannot rewrite by hand.
 
 ## Contributing
 
