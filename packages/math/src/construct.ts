@@ -533,8 +533,14 @@ export function construct(options: ConstructOptions = {}): Construction {
         `intersect() found no crossing of ${describe(a)} and ${describe(b)}. Raise a radius, move a center, or use lines that are not parallel.`,
       );
 
+    if (o.pick !== undefined && o.pick !== 0 && o.pick !== 1)
+      throw new Error(`intersect() pick is 0 or 1, got ${o.pick}.`);
+
+    // Only the crossings that are kept have to lie on their segments, so pick can choose the one that does.
+    const checked = o.pick === undefined || found.length === 1 ? found : [found[o.pick]!];
+
     for (const s of [a, b])
-      for (const p of found)
+      for (const p of checked)
         if (s.kind === "line" && !withinSegment(s, p))
           throw new Error(
             `intersect() crossing (${round(p.x)}, ${round(p.y)}) lies past the end of segment ${name(s.a)}${name(s.b)}. Draw it with g.line() so it runs on, or use g.line(…, { extend }).`,
@@ -551,9 +557,6 @@ export function construct(options: ConstructOptions = {}): Construction {
     if (found.length === 1) return [keep(found[0]!, o.label ?? o.labels?.[0])];
 
     if (o.pick !== undefined) {
-      if (o.pick !== 0 && o.pick !== 1)
-        throw new Error(`intersect() pick is 0 or 1, got ${o.pick}.`);
-
       return [keep(found[o.pick]!, o.label ?? o.labels?.[o.pick])];
     }
 
@@ -941,7 +944,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   };
 
   const world = (): World => {
-    const anchors = points.filter((_, i) => i >= 0);
+    const anchors = points;
 
     return {
       points,

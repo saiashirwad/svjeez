@@ -299,3 +299,25 @@ describe("lanes", () => {
     expect(() => valid(run.node)).not.toThrow();
   });
 });
+
+describe("state scopes", () => {
+  test("a composite and its inner state cannot share an id", () => {
+    expect(() =>
+      stateMachine({
+        states: { a: { label: "A", initial: "a", states: { a: "Inner" } } },
+        initial: "a",
+        transitions: [],
+      }),
+    ).toThrow('two states named "a"');
+  });
+
+  test("a transition between a composite and its own inner state is rejected, not drawn as a loop", () => {
+    expect(() =>
+      stateMachine({
+        states: { box: { label: "Box", initial: "in", states: { in: "In" } } },
+        initial: "box",
+        transitions: [["box", "in"]],
+      }),
+    ).toThrow("one holds the other");
+  });
+});

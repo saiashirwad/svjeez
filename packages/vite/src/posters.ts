@@ -85,6 +85,12 @@ export const poster = (
     );
     pending.set(file, job);
     job.catch(() => pending.delete(file));
+
+    // A rendered poster is on disk, so the oldest jobs go once there are more than the dev server keeps.
+    for (const old of pending.keys()) {
+      if (pending.size <= (assets.limit ?? Infinity)) break;
+      pending.delete(old);
+    }
   }
 
   return job;
