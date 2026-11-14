@@ -25,7 +25,7 @@ type GroupStack = Stack<TagChannels<"g">>;
 
 type Parts = Readonly<Record<string, GroupStack | ((index: number) => GroupStack)>>;
 
-/** A state, optionally with when it turns into the next one, and how. The last state's span is never used. */
+/** A state, optionally with when the timeline arrives at it from the previous one, and how. The first state's span is never used. */
 export type Step = Snapshot | readonly [Snapshot, Span] | readonly [Snapshot, Span, Ease];
 
 export interface DomProps {
@@ -33,7 +33,7 @@ export interface DomProps {
   readonly states: Snapshot | readonly Step[];
   /** The fonts the page used, so the drawn text matches the layout. */
   readonly fonts?: readonly FontValue[];
-  /** When each transition starts, on the clock around it: `at[i]` is `states[i]` turning into `states[i + 1]`. */
+  /** When each transition starts, on the clock around it: `at[i]` is `states[i]` turning into `states[i + 1]`, unless that step has a span. */
   readonly at?: readonly number[];
   /** How long a transition runs when its step has no span. Default 0.6. */
   readonly over?: number;
@@ -657,6 +657,11 @@ export function Dom({
 
   if (steps.length === 0) throw new Error("<Dom> needs at least one state.");
 
+  if (steps[0]!.span)
+    throw new Error(
+      "<Dom> the first state has a span, but nothing arrives at it. Put the span on the next state.",
+    );
+
   let segments: SvgNode[];
 
   if (steps.length === 1) {
@@ -668,12 +673,13 @@ export function Dom({
   } else {
     if (text) throw new Error("<Dom text> works on a single snapshot, not on states.");
 
-    const tweens: Tween[] = steps.slice(0, -1).map((step, i) => {
+    // A step's span is when the timeline arrives at it, so transition i reads step i + 1.
+    const tweens: Tween[] = steps.slice(1).map((step, i) => {
       const when = step.span ?? (starts[i] === undefined ? undefined : { at: starts[i]!, over });
 
       if (!when)
         throw new Error(
-          `<Dom> needs to know when state ${i} turns into the next: give it a span, or at[${i}].`,
+          `<Dom> needs to know when state ${i} turns into state ${i + 1}: give state ${i + 1} a span, or at[${i}].`,
         );
 
       return { at: when.at, over: when.over, ease: step.ease ?? ease };

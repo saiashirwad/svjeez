@@ -219,7 +219,7 @@ describe("Dom", () => {
     await card.render('<div class="card"><input placeholder="email"><p>failed</p></div>');
     const failed = await card.snap();
 
-    const svg = draw([idle, [typed, span(1.5, 0.5)], failed], { at: [0.5] });
+    const svg = draw([idle, typed, [failed, span(1.5, 0.5)]], { at: [0.5] });
 
     expect(validateSvg(svg).errors).toEqual([]);
     // Two transitions, each a drawing of its own, handed over once.
@@ -228,6 +228,7 @@ describe("Dom", () => {
     expect(size([idle, typed, failed]).height).toBe(failed.height);
 
     expect(() => draw([idle, typed, failed], { at: [0.5] })).toThrow("at[1]");
+    expect(() => draw([[idle, span(0, 1)], typed], { at: [0.5] })).toThrow("first state");
     expect(() => draw([idle, typed, failed], { at: [0.5, 0.8], over: 0.6 })).toThrow("overlap");
     await card.close();
   });

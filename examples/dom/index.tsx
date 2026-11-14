@@ -54,9 +54,9 @@ const signIn = [
   idle,
   typed,
   password,
-  [hovered, span(4.1, 0.7)],
-  [failed, span(6.6, 0.7)],
-  idle,
+  hovered,
+  [failed, span(4.1, 0.7)],
+  [idle, span(6.6, 0.7)],
 ] as const;
 const left = size(signIn);
 const right = size(prStates);
