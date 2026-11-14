@@ -13,7 +13,10 @@ export interface OpenSpan {
 }
 
 /** Anything `show()` and `<Clip>` take for "when": a span, or a start that runs to the end. */
-export type When = Span | OpenSpan;
+export interface When {
+  readonly at: Seconds;
+  readonly over?: Seconds;
+}
 
 /** A span with the helpers `span()` adds. */
 export interface Spanned extends Span {

@@ -146,6 +146,7 @@ describe("deprecated names from before 0.7 still work", () => {
     const typed = typewriter(code("ab"), { at: 1 });
     const shell = terminal([{ cmd: "ls" }], { at: 1 });
     const blocks = reveal(code("a\n\nb"), { at: 1 });
+
     const trip = flow(
       [
         { x: 0, y: 0 },
