@@ -54,11 +54,11 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m13{animation-name:k16}
 @keyframes k17{0%,28.197%,42.951%,100%{opacity:0}28.689%,42.459%{opacity:1}}
 .m14{animation-name:k17}
-@keyframes k18{0%,29.508%,31.23%,43.955%,45.676%,100%{opacity:0}29.754%,30.984%,44.2%,45.43%{opacity:1}}
+@keyframes k18{0%,29.508%,30.984%,43.955%,45.43%,100%{opacity:0}29.754%,30.738%,44.2%,45.184%{opacity:1}}
 .m15{animation-name:k18}
-@keyframes k19{0%,31.803%,33.525%,37.346%,39.067%,100%{opacity:0}32.049%,33.279%,37.592%,38.822%{opacity:1}}
+@keyframes k19{0%,31.803%,33.279%,37.346%,38.822%,100%{opacity:0}32.049%,33.033%,37.592%,38.576%{opacity:1}}
 .m16{animation-name:k19}
-@keyframes k20{0%,34.098%,35.82%,39.641%,41.363%,100%{opacity:0}34.344%,35.574%,39.887%,41.117%{opacity:1}}
+@keyframes k20{0%,34.098%,35.574%,39.641%,41.117%,100%{opacity:0}34.344%,35.328%,39.887%,40.871%{opacity:1}}
 .m17{animation-name:k20}
 @keyframes k21{0%,31.803%,100%{visibility:hidden}30.984%{visibility:visible}}
 @keyframes k22{0%,30.984%{translate:820px 234px}31.803%,100%{translate:820px 344px}}
@@ -255,11 +255,11 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m91{animation-name:k139}
 @keyframes k140{0%,62.951%{opacity:0}63.361%,100%{opacity:1}}
 .m92{animation-name:k140}
-@keyframes k141{0%,43.934%,49.769%,62.951%,68.77%,100%{opacity:0}44.18%,49.523%,63.197%,68.525%{opacity:1}}
+@keyframes k141{0%,43.934%,49.523%,62.951%,68.525%,100%{opacity:0}44.18%,49.277%,63.197%,68.279%{opacity:1}}
 .m93{animation-name:k141}
-@keyframes k142{0%,50.328%,56.982%,100%{opacity:0}50.574%,56.736%{opacity:1}}
+@keyframes k142{0%,50.328%,56.736%,100%{opacity:0}50.574%,56.49%{opacity:1}}
 .m94{animation-name:k142}
-@keyframes k143{0%,57.541%,60.492%,100%{opacity:0}57.787%,60.246%{opacity:1}}
+@keyframes k143{0%,57.541%,60.246%,100%{opacity:0}57.787%,60%{opacity:1}}
 .m95{animation-name:k143}
 @keyframes k144{0%,50.328%,100%{visibility:hidden}49.523%{visibility:visible}}
 @keyframes k145{0%,49.523%{translate:880.59px 251px}50.328%,100%{translate:880.59px 359px}}

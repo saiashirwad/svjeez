@@ -11,7 +11,7 @@ import {
   flow,
   type FlowOptions,
   beats,
-  visible,
+  show,
   type Beats,
 } from "svjeez";
 import { el } from "svjeez/internal";
@@ -490,7 +490,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
             fill: "none",
             stroke: theme.base09,
             strokeWidth: 2,
-            animation: visible(spans),
+            animation: show(spans, { fade: 0.15 }),
           });
         }),
         tokens,

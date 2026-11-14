@@ -8,7 +8,7 @@ import {
   toBars,
   type Topology,
 } from "@svjeez/geo";
-import { motion, rect, render, type SvgNode, cut, during } from "svjeez";
+import { motion, rect, render, show, type SvgNode } from "svjeez";
 
 import { createRequire } from "node:module";
 import { LIFE_EXPECTANCY, POPULATION, YEARS } from "./data";
@@ -79,17 +79,17 @@ const Heading = (): SvgNode => (
     <text x={40} y={54} fontSize={26} fontWeight={700} fill={INK}>
       Life expectancy at birth
     </text>
-    <g animation={during({ at: 0, over: CARTOGRAM - 0.2 }, 0.5)}>
+    <g animation={show({ at: 0, over: CARTOGRAM - 0.2 }, { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         Years a newborn can expect to live, 1960 to 2020
       </text>
     </g>
-    <g animation={during({ at: CARTOGRAM - 0.2, over: BARS - CARTOGRAM }, 0.5)}>
+    <g animation={show({ at: CARTOGRAM - 0.2, over: BARS - CARTOGRAM }, { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         Circle area is population in 2020. Color is life expectancy in 2020.
       </text>
     </g>
-    <g animation={during({ at: BARS - 0.2, over: OUT - BARS + 0.2 }, 0.5)}>
+    <g animation={show({ at: BARS - 0.2, over: OUT - BARS + 0.2 }, { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         The ten most populous countries, 2020 (millions of people)
       </text>
@@ -107,12 +107,15 @@ const Year = (): SvgNode => (
         fontSize={44}
         fontWeight={700}
         fill={INK}
-        animation={cut({
-          at: i === 0 ? 0 : AT[i]! + 0.3,
-          over:
-            (YEARS.length - 1 === i ? CARTOGRAM + 0.3 : AT[i + 1]! + 0.3) -
-            (i === 0 ? 0 : AT[i]! + 0.3),
-        })}
+        animation={show(
+          {
+            at: i === 0 ? 0 : AT[i]! + 0.3,
+            over:
+              (YEARS.length - 1 === i ? CARTOGRAM + 0.3 : AT[i + 1]! + 0.3) -
+              (i === 0 ? 0 : AT[i]! + 0.3),
+          },
+          { fade: 0 },
+        )}
       >
         {String(year)}
       </text>
@@ -127,7 +130,7 @@ const Names = (): SvgNode => (
     fontSize={11}
     fontWeight={650}
     fill="#0b1118"
-    animation={during({ at: CARTOGRAM + MORPH, over: BARS - CARTOGRAM - MORPH - 0.4 }, 0.5)}
+    animation={show({ at: CARTOGRAM + MORPH, over: BARS - CARTOGRAM - MORPH - 0.4 }, { fade: 0.5 })}
   >
     {[...circles.bubbles]
       .sort((a, b) => b.value - a.value)
@@ -191,7 +194,7 @@ export default function build(): string {
       <g animation={fadeOut}>{bars.node}</g>
       <Names />
       <Labels />
-      <g animation={during({ at: 0, over: OUT + 0.7 }, 0.5)}>
+      <g animation={show({ at: 0, over: OUT + 0.7 }, { fade: 0.5 })}>
         {legend(scale, {
           x: 40,
           y: H - 44,

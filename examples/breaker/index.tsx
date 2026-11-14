@@ -11,7 +11,7 @@ import {
   morph,
   timeline,
   reveal,
-  visible,
+  show,
   appWindow,
   type CodePiece,
   type CodeTokens,
@@ -101,7 +101,7 @@ const Heading = ({
     fontSize={30}
     fontWeight={600}
     fill={theme.base05}
-    animation={tl.show(scene)}
+    animation={show(tl[scene])}
   >
     {children}
   </text>
@@ -357,7 +357,7 @@ export default function build(): string {
       </g>
 
       <Heading scene="code">The whole thing is one class</Heading>
-      <g animation={tl.show("code")}>
+      <g animation={show(tl.code)}>
         <g fontFamily={mono}>{editor.node}</g>
         <g clipPath={clip}>
           <Focus
@@ -398,7 +398,7 @@ export default function build(): string {
       </g>
 
       <Heading scene="machine">Three states, four transitions</Heading>
-      <g animation={tl.show("machine")}>
+      <g animation={show(tl.machine)}>
         {machine.node}
         {walk.node}
         <g class="sans">
@@ -408,7 +408,7 @@ export default function build(): string {
               y={220 + i * 60}
               fontSize={18}
               fill={theme.base04}
-              animation={visible(walk.spans[s])}
+              animation={show(walk.spans[s], { fade: 0.15 })}
             >
               {
                 {
@@ -423,14 +423,14 @@ export default function build(): string {
       </g>
 
       <Heading scene="together">The same story, message by message</Heading>
-      <g animation={tl.show("together")}>
+      <g animation={show(tl.together)}>
         {story.node}
         {mini.node}
         {synced.node}
       </g>
 
       <Heading scene="backoff">Backoff is a two-line change</Heading>
-      <g animation={tl.show("backoff")}>
+      <g animation={show(tl.backoff)}>
         <g fontFamily={mono}>{editorFor(after).node}</g>
         {morphed.node}
         <g class="sans">
@@ -448,7 +448,7 @@ export default function build(): string {
       </g>
 
       <Heading scene="recap">call(), end to end</Heading>
-      <g animation={tl.show("recap")}>
+      <g animation={show(tl.recap)}>
         {decide.layers.under}
         {trips.map((t) => t.node)}
         {decide.layers.over}

@@ -8,9 +8,10 @@ import {
   type Color,
   type Motion,
   type Point,
+  type Span,
   type SvgNode,
+  show,
   travel,
-  visible,
 } from "svjeez";
 
 import { SPEED, end, graph, messages, type Kind, type Thread } from "./data";
@@ -285,6 +286,21 @@ function Labels({ thread }: { thread: Thread }): SvgNode {
 
 const arrivals = new Map<number, number[]>();
 
+/** Runs a fade or two apart read as one run, so the beacon does not blink between them. */
+const joined = (runs: Thread["runs"]): Span[] => {
+  const spans: Span[] = [];
+
+  for (const [at, to] of runs) {
+    const last = spans.at(-1);
+
+    if (last && at - (last.at + last.over) < 0.3)
+      spans[spans.length - 1] = { at: last.at, over: to - last.at };
+    else spans.push({ at, over: to - at });
+  }
+
+  return spans;
+};
+
 function Beacon({ thread }: { thread: Thread }): SvgNode {
   const rays = Array.from({ length: 6 }, (_, k) => {
     const angle = (k * Math.PI) / 3 + Math.PI / 6;
@@ -301,12 +317,7 @@ function Beacon({ thread }: { thread: Thread }): SvgNode {
   });
 
   return (
-    <g
-      animation={visible(
-        thread.runs.map(([at, to]) => ({ at, over: to - at })),
-        0.15,
-      )}
-    >
+    <g animation={show(joined(thread.runs), { fade: 0.15 })}>
       <g
         stroke={C.ink}
         strokeWidth={1.5}
@@ -343,7 +354,7 @@ function Node({ thread }: { thread: Thread }): SvgNode {
           fill="none"
           stroke={C.orange}
           strokeWidth={1.5}
-          animation={visible(flashes, 0.08)}
+          animation={show(flashes, { fade: 0.08 })}
         />
         <circle
           r={R}
