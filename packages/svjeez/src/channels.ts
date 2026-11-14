@@ -200,9 +200,6 @@ export type Channel = keyof Table;
 
 export type ChannelValues<K extends Channel = Channel> = { readonly [P in K]?: Table[P]["value"] };
 
-/** @deprecated use `ChannelValues`, because `svjeez/params` has a `Values` of its own */
-export type Values<K extends Channel = Channel> = ChannelValues<K>;
-
 export type NumericChannel = {
   [C in Channel]: Table[C]["value"] extends number ? C : never;
 }[Channel];

@@ -41,11 +41,6 @@
       "types": "./package-dist/jsx-dev-runtime.d.ts",
       "default": "./package-dist/jsx-dev-runtime.js"
     },
-    "./extras": {
-      "@svjeez/source": "./src/extras.ts",
-      "types": "./package-dist/extras.d.ts",
-      "default": "./package-dist/extras.js"
-    },
     "./internal": {
       "@svjeez/source": "./src/internal.ts",
       "types": "./package-dist/internal.d.ts",

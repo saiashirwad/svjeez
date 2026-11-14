@@ -247,12 +247,6 @@ describe("nightfall()", () => {
     ).not.toThrow();
   });
 
-  test("duration is the older spelling of over", () => {
-    const date = () => new Date(Date.UTC(2026, 5, 21, 12));
-
-    expect(nightfall(map, date, { duration: 1 })).toEqual(nightfall(map, date, { over: 1 }));
-  });
-
   test("lights the north pole in June", () => {
     const june = nightfall(map, () => new Date(Date.UTC(2026, 5, 21, 12)), { over: 1 });
     const north = map.point([0, 85]);

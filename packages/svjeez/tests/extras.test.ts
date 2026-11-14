@@ -14,7 +14,6 @@ import {
   adaptive,
   variables,
   code,
-  cut,
   shot,
   defaultDark,
   defaultLight,
@@ -28,7 +27,6 @@ import {
   timeline,
   travel,
   typewriter,
-  visible,
   appWindow,
   flow,
 } from "svjeez";
@@ -275,7 +273,7 @@ describe("terminal", () => {
     });
 
     expect(shell.bounds).toMatchObject({ x: 10, y: 20, h: 80 });
-    expect(shell.end).toBeCloseTo(1 + 0.4 + 0.5 + 0.12 + 0.5 + 0.5 + 0.5, 5);
+    expect(shell.span.end).toBeCloseTo(1 + 0.4 + 0.5 + 0.12 + 0.5 + 0.5 + 0.5, 5);
     expect(() => terminal([])).toThrow();
   });
 
@@ -309,9 +307,8 @@ test("morph reports when each transition runs and when the last settles", () => 
     { at: 1, over: 0.5 },
     { at: 3, over: 0.5 },
   ]);
-  expect(two.end).toBe(3.5);
-  expect(two.span.end).toBeCloseTo(two.end, 9);
-  expect(morph([a], { at: [] })).toMatchObject({ spans: [], end: 0 });
+  expect(two.span.end).toBe(3.5);
+  expect(morph([a], { at: [] })).toMatchObject({ spans: [], span: { at: 0, over: 0 } });
 });
 
 test("a brace runs along the bottom or top of a target, and centers its label there", () => {
@@ -520,28 +517,6 @@ describe("time helpers", () => {
     return held;
   };
 
-  test("visible is on during each span and stays on across gaps shorter than two fades", () => {
-    const track = visible(
-      [
-        { at: 5, over: 1 },
-        { at: 1, over: 1 },
-        { at: 2.2, over: 0.8 },
-      ],
-      0.15,
-    );
-
-    expect([0.5, 1.5, 2.1, 2.5, 4, 5.5, 7].map((t) => at(track, t).opacity)).toEqual([
-      0, 1, 1, 1, 0, 1, 0,
-    ]);
-  });
-
-  test("cut is on only during its span, with no fade either side", () => {
-    expect([0.9, 1.01, 2.99, 3.01].map((t) => at(cut({ at: 1, over: 2 }), t).opacity)).toEqual([
-      0, 1, 1, 0,
-    ]);
-    expect([0, 0.5, 1.01].map((t) => at(cut({ at: 0, over: 1 }), t).opacity)).toEqual([1, 1, 0]);
-  });
-
   test("a shot moves in and out inside its span, and cuts by default", () => {
     const risen = shot({ at: 10, over: 10 }, { enter: "rise", exit: "rise", over: 1 });
     expect([9.9, 15, 20.1].map((t) => at(risen, t).opacity)).toEqual([0, 1, 0]);
@@ -553,21 +528,14 @@ describe("time helpers", () => {
     expect(() => shot({ at: 1, over: 0 })).toThrow("positive length");
   });
 
-  test("a timeline's show fades a scene in and out, and its enter fades in and stays", () => {
-    const tl = timeline({ intro: 4, body: 4 }, { fade: 0.5 });
-    expect([3, 6, 50].map((t) => at(tl.show("body"), t).opacity)).toEqual([0, 1, 0]);
-    expect([3, 6, 50].map((t) => at(tl.enter("body"), t).opacity)).toEqual([0, 1, 1]);
-    expect(() => timeline({ enter: 1 })).toThrow('"enter" is reserved');
-  });
-
   test("typewriter reports when each line types, a blank line taking only its newline", () => {
-    const { spans, end } = typewriter(code("ab\n\ncde"), { at: 1, cps: 10 });
+    const { spans, span } = typewriter(code("ab\n\ncde"), { at: 1, cps: 10 });
     expect(spans.map(({ at, over }) => [at, over].map((n) => Number(n.toFixed(9))))).toEqual([
       [1, 0.2],
       [1.3, 0],
       [1.4, 0.3],
     ]);
-    expect(end).toBeCloseTo(spans.at(-1)!.at + spans.at(-1)!.over, 9);
+    expect(span.end).toBeCloseTo(spans.at(-1)!.at + spans.at(-1)!.over, 9);
   });
 
   test("travel crosses each leg at one speed, then hides", () => {
@@ -591,7 +559,7 @@ describe("reveal", () => {
   test("trailing blank lines are not a block of their own", () => {
     const shown = reveal(code("a\n\n"), { at: 0 });
     expect(shown.spans).toHaveLength(1);
-    expect(shown.end).toBeCloseTo(0.4, 9);
+    expect(shown.span.end).toBeCloseTo(0.4, 9);
   });
 
   const source = code("class A {\n  a = 1;\n\n  b() {}\n}");
@@ -602,7 +570,7 @@ describe("reveal", () => {
       { at: 1, over: 0.4 },
       { at: 1.5, over: 0.4 },
     ]);
-    expect(shown.end).toBeCloseTo(1.9, 9);
+    expect(shown.span.end).toBeCloseTo(1.9, 9);
     expect(reveal(source, { at: [0.5, 3] }).spans.map((s) => s.at)).toEqual([0.5, 3]);
   });
 

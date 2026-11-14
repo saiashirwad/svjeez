@@ -14,13 +14,11 @@ import {
   show,
   span,
   terminal,
-  timeline,
   typewriter,
   type Motion,
 } from "svjeez";
 import { restyle } from "svjeez/page";
 import { rotateKeys, valueAt, keysOf } from "../src/keys";
-import { during, cut } from "../src/extras/timeline";
 
 const DURATION = 10;
 
@@ -660,16 +658,6 @@ describe("show()", () => {
     expect(() => show({ at: -1, over: 2 })).toThrow(/start of 0 or later/);
     expect(() => show({ at: 1, over: 0 })).toThrow(/positive over/);
   });
-
-  test("during and cut are show with a fade and with none, and timeline's show and enter still work", () => {
-    expect(scene(rect(during(span(2, 4), 0.5)))).toBe(scene(rect(show(span(2, 4), { fade: 0.5 }))));
-    expect(scene(rect(cut(span(2, 4))))).toBe(scene(rect(show(span(2, 4), { fade: 0 }))));
-    const tl = timeline({ a: 3, b: 4 });
-
-    expect(scene(rect(tl.show("b")))).toBe(scene(rect(show(tl.b))));
-    expect(tl.b.next(2).at).toBe(7);
-    expect(keys(scene(rect(tl.enter("b"))), "opacity").at(-1)?.value).toBe(1);
-  });
 });
 
 describe("sampled() with a window", () => {
@@ -698,14 +686,10 @@ describe("sampled() with a window", () => {
     expect(held.find((key) => key.value === 20)?.t).toBe(6);
   });
 
-  test("without at it starts at 0, and duration is the same as over", () => {
+  test("without at it starts at 0", () => {
     const viaOver = scene(rect(line({ over: 4 })));
 
-    const viaDuration = scene(
-      rect(sampled((t) => ({ x: t * 10 }), { duration: 4, tolerance: { translate: 0.01 } })),
-    );
-
-    expect(viaDuration).toBe(viaOver);
+    expect(viaOver).toBe(scene(rect(line({ at: 0, over: 4 }))));
   });
 
   test("asks for a positive over and an at of 0 or later", () => {
@@ -729,7 +713,7 @@ describe("sampled() with a window", () => {
 });
 
 describe("results return a span", () => {
-  test("typewriter, terminal, reveal and flow say when they run, and end stays as the span's end", () => {
+  test("typewriter, terminal, reveal and flow say when they run", () => {
     const typed = typewriter(code("ab\ncd"), { at: 1, cps: 10 });
     const shell = terminal([{ cmd: "ls", output: ["a"] }, { cmd: "pwd" }], { at: 2 });
     const blocks = reveal(code("a\n\nb"), { at: 3, over: 0.5 });
@@ -742,12 +726,12 @@ describe("results return a span", () => {
       { at: 4, over: 2, arrive: true },
     );
 
-    expect([typed.span.at, typed.span.end]).toEqual([1, typed.end]);
-    expect([shell.span.at, shell.span.end]).toEqual([2, shell.end]);
-    expect([blocks.span.at, blocks.span.end]).toEqual([3, blocks.end]);
-    expect([trip.span.at, trip.span.end]).toEqual([4, trip.end]);
+    expect([typed.span.at, typed.span.end]).toEqual([1, typed.span.end]);
+    expect([shell.span.at, shell.span.end]).toEqual([2, shell.span.end]);
+    expect([blocks.span.at, blocks.span.end]).toEqual([3, blocks.span.end]);
+    expect([trip.span.at, trip.span.end]).toEqual([4, trip.span.end]);
     expect(trip.span.end).toBeCloseTo(6.7, 9);
-    expect(typed.span.next(1, 0.5).at).toBeCloseTo(typed.end + 0.5, 9);
+    expect(typed.span.next(1, 0.5).at).toBeCloseTo(typed.span.end + 0.5, 9);
   });
 });
 

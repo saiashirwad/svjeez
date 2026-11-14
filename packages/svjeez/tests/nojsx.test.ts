@@ -101,11 +101,11 @@ const review = (): string => {
     {
       width: x(steps.length) - GAP + M,
       height: H + 2 * M,
-      duration: Math.ceil(trip.end) + 2,
+      duration: Math.ceil(trip.span.end) + 2,
       title: "Deploy flow",
       desc: "Four steps appear one after another, then a comet runs from push to deploy.",
       css,
-      reducedMotion: { at: trip.end },
+      reducedMotion: { at: trip.span.end },
     },
     [
       el.rect({ width: "100%", height: "100%", fill: theme.base00 }),

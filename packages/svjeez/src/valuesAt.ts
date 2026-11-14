@@ -114,9 +114,3 @@ export function valuesAt(
 
   return Object.fromEntries(out);
 }
-
-/** @deprecated use `valuesAt` */
-export const sample = valuesAt;
-
-/** @deprecated use `ValuesAtOptions` */
-export type SampleOptions = ValuesAtOptions;

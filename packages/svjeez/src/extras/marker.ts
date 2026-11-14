@@ -4,7 +4,7 @@ import type { Rect } from "../geometry";
 import type { Color } from "../attributes";
 import { defaultDark, type Base16 } from "./theme";
 import type { SvgNode } from "../svg";
-import { shownSpan, type Shown } from "./timeline";
+import type { Shown } from "./timeline";
 
 export function Marker({
   stops,
@@ -26,7 +26,7 @@ export function Marker({
 
   for (const stop of stops.slice(1)) {
     const { target } = stop;
-    const { at } = shownSpan(stop.show, stop.during, "Marker()");
+    const { at } = stop.show;
     position = position.at(at).to({ x: target.x - first.x, y: target.y - first.y }, over);
     size = size.at(at).to({ width: target.w, height: target.h }, over);
   }

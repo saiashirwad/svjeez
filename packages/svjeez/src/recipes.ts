@@ -370,6 +370,3 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
  * `precision` the decimal places of the path data. Every sample must have the same commands, as `matchPaths()` writes them.
  */
 sampled.path = samplePath;
-
-/** @deprecated use `sampled.path` */
-export const sampledPath = samplePath;

@@ -18,7 +18,7 @@ describe("without Map.groupBy, as on Node 20", () => {
       { width: 10, height: 10, duration: 1, title: "t" },
       <circle
         r={2}
-        animation={sampled((t) => ({ x: t, y: t }), { duration: 1, tolerance: { translate: 0.1 } })}
+        animation={sampled((t) => ({ x: t, y: t }), { over: 1, tolerance: { translate: 0.1 } })}
       />,
     );
 

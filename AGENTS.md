@@ -77,7 +77,7 @@ Each package's source explains its own internals. These are the rules that aren'
 
 ## Rules
 
-- Import `svjeez`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. `svjeez/internal` (`el`) is for the `@svjeez` packages and may change in any release; scenes, examples and docs write JSX, or call `jsx` from `svjeez/jsx-runtime`. `restyle` is in `svjeez/page` and `validateSvg` in `svjeez/frames`. `svjeez/extras` is a deprecated re-export that goes away in 1.0, and nothing is defined behind it any more. In `packages/svjeez/` the tsconfig maps them to `src/`.
+- Import `svjeez`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. `svjeez/internal` (`el`) is for the `@svjeez` packages and may change in any release; scenes, examples and docs write JSX, or call `jsx` from `svjeez/jsx-runtime`. `restyle` is in `svjeez/page` and `validateSvg` in `svjeez/frames`. In `packages/svjeez/` the tsconfig maps them to `src/`.
 - Keep the library dependency-free and runnable on Node 20. Don't use APIs newer than Node 20, such as `Map.groupBy` or `Set.prototype.union`. `bun run test:node` under Node 20 catches these.
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `examples/dist/` files and commit them with the change.

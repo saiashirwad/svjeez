@@ -306,7 +306,6 @@ export {
 export {
   contours,
   contourSweep,
-  fieldFlow,
   fieldLines,
   slopeField,
   slopeSolution,
@@ -319,7 +318,6 @@ export {
   type ContourOptions,
   type ContourSweep,
   type ContourSweepOptions,
-  type FieldFlowOptions,
   type FieldLinesOptions,
   type Grid,
   type SlopeFieldOptions,

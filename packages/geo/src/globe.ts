@@ -39,8 +39,6 @@ export interface GlobeOptions {
   readonly spin: Spin | ((t: Seconds) => LonLat);
   /** Seconds every motion runs. Default the end of `spin`. A function `spin` needs it. */
   readonly over?: Seconds;
-  /** @deprecated use `over` */
-  readonly duration?: Seconds;
   /** The TopoJSON object to read. Default the topology's first object. */
   readonly object?: string;
   /** Keep only the features this returns true for. */
@@ -178,7 +176,6 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
 
   const duration =
     options.over ??
-    options.duration ??
     (spin instanceof Function
       ? (() => {
           throw new Error("globe() with a spin function needs an over, as in { over: 24 }.");

@@ -118,21 +118,17 @@ export function span(at: Seconds, over?: Seconds): Spanned | OpenSpanned {
 }
 
 /** Where a sampled motion plays: `over` seconds from `at` (default 0). The function it samples is given time from 0 to `over`. */
-export type SampleWindow =
-  | { readonly at?: Seconds; readonly over: Seconds; readonly duration?: never }
-  | {
-      /** @deprecated use `over` */
-      readonly duration: Seconds;
-      readonly at?: never;
-      readonly over?: never;
-    };
+export interface SampleWindow {
+  readonly at?: Seconds;
+  readonly over: Seconds;
+}
 
-/** The `at` and `over` of a sampled window, from `over` or the old `duration`. */
+/** The `at` and `over` of a sampled window, . */
 export const sampleWindow = (options: SampleWindow, what: string): Span => {
-  const over = options.over ?? options.duration;
+  const { over } = options;
   const at = options.at ?? 0;
 
-  if (over === undefined || !Number.isFinite(over) || over <= 0)
+  if (!Number.isFinite(over) || over <= 0)
     throw new Error(`${what} needs a positive over, got ${over}.`);
 
   if (!Number.isFinite(at) || at < 0)

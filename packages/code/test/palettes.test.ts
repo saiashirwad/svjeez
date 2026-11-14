@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import * as legacy from "svjeez/extras";
 import * as palettes from "../src/palettes.ts";
 import * as code from "../src/index.ts";
 
@@ -21,11 +20,4 @@ test("every palette fills all sixteen slots", () => {
 
 test("the package root carries them too", () => {
   expect(code.tomorrowNight).toBe(palettes.tomorrowNight);
-});
-
-// svjeez/extras keeps its own copy for one release; the two must not drift.
-test("svjeez/extras has the same colors", () => {
-  const old = new Map<string, unknown>(Object.entries(legacy));
-
-  for (const [name, palette] of Object.entries(palettes)) expect(old.get(name)).toEqual(palette);
 });

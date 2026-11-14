@@ -208,6 +208,3 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
     await scene.close();
   }
 };
-
-/** @deprecated use `video` */
-export const renderVideo = video;

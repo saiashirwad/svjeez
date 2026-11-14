@@ -5,7 +5,6 @@ await rm("package-dist", { recursive: true, force: true });
 const result = await Bun.build({
   entrypoints: [
     "./src/index.ts",
-    "./src/extras.ts",
     "./src/jsx-runtime.ts",
     "./src/jsx-dev-runtime.ts",
     "./src/internal.ts",

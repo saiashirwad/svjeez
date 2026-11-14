@@ -6,7 +6,7 @@ import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
 import { defaultDark, type Base16 } from "./theme";
-import { show as showing, shownSpan, type Shown } from "./timeline";
+import { show as showing, type Shown } from "./timeline";
 
 type Common = Shown & {
   /** Default `defaultDark`; `color` defaults to its `base09`. */
@@ -30,12 +30,11 @@ export function Arrow({
   to,
   bend = 0,
   show,
-  during,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
 }: Common & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
-  const span = shownSpan(show, during, "Arrow()");
+  const span = show;
 
   const [cx, cy] = [
     (from.x + to.x) / 2 - (to.y - from.y) * bend,
@@ -67,7 +66,6 @@ export function Callout({
   target,
   side = "right",
   show,
-  during,
   children,
   theme = defaultDark,
   color = theme.base09,
@@ -83,7 +81,7 @@ export function Callout({
   readonly font?: FontValue;
   readonly columns?: number;
 }): SvgNode {
-  const span = shownSpan(show, during, "Callout()");
+  const span = show;
 
   if (!(columns >= 1)) throw new Error(`Callout needs columns of at least 1, got ${columns}.`);
 
@@ -155,7 +153,6 @@ export function Brace({
   label,
   fontSize = 12,
   show,
-  during,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
@@ -166,7 +163,7 @@ export function Brace({
   readonly label?: string;
   readonly fontSize?: number;
 }): SvgNode {
-  const span = shownSpan(show, during, "Brace()");
+  const span = show;
   const along = side === "above" || side === "below";
   const dir = side === "left" || side === "above" ? -1 : 1;
 
@@ -206,12 +203,11 @@ export function Underline({
   target: r,
   variant = "straight",
   show,
-  during,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
 }: Common & { readonly target: Rect; readonly variant?: "straight" | "squiggle" }): SvgNode {
-  const span = shownSpan(show, during, "Underline()");
+  const span = show;
   const [y, count] = [r.y + r.h - 2, Math.max(1, Math.ceil(r.w / 8))];
 
   const d =

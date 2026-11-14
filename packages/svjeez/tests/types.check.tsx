@@ -33,8 +33,8 @@ export const valid = [
   el.rect({ x: 12, y: 34, fill: bg, filter: glow, animation: enter({ at: 0, over: 1 }) }),
   el.g({ opacity: 0.5 }, [el.circle({ r: 2 }), "hi"]),
   el.text({ x: 4 }, "hi"),
-  <circle r={2} animation={sampled((t) => ({ x: t, y: t, opacity: 1 }), { duration: 1, tolerance: { translate: 1, opacity: 0.02 } })} />,
-  <circle r={2} animation={sampled((t) => ({ x: t, [px]: t }), { duration: 1, tolerance: { translate: 1, [px]: 0.01 } })} />,
+  <circle r={2} animation={sampled((t) => ({ x: t, y: t, opacity: 1 }), { over: 1, tolerance: { translate: 1, opacity: 0.02 } })} />,
+  <circle r={2} animation={sampled((t) => ({ x: t, [px]: t }), { over: 1, tolerance: { translate: 1, [px]: 0.01 } })} />,
   <g animation={motion().to({ [yaw]: 360, opacity: 1 }, 12, ease.linear)}>
     <circle r={2} style={{ [px]: 0.5, [py]: -0.5, [tint]: "#f80" }} />
   </g>,
@@ -46,8 +46,6 @@ export const syntax: SyntaxOf<typeof yaw> = "angle";
 export const invalid = [
   // @ts-expect-error a transition needs a span with an over
   <rect animation={motion({ x: 0 }).to({ x: 5 }, span(1))} />,
-  // @ts-expect-error sampled takes over or the older duration, not both
-  <circle animation={sampled((t) => ({ x: t }), { over: 2, duration: 2, tolerance: { translate: 1 } })} />,
   // @ts-expect-error misspelled attribute
   <path strokeLineCap="round" />,
   // @ts-expect-error a string url() where a ref is required
@@ -71,15 +69,15 @@ export const invalid = [
   // @ts-expect-error wiggle needs a seed
   wiggle({ x: 2 }, { rate: 8 }),
   // @ts-expect-error scale is sampled but has no tolerance
-  sampled((t) => ({ x: t, scale: 1 }), { duration: 1, tolerance: { translate: 1 } }),
+  sampled((t) => ({ x: t, scale: 1 }), { over: 1, tolerance: { translate: 1 } }),
   // @ts-expect-error foo is not an animatable channel
-  sampled((t) => ({ x: t, foo: 1 }), { duration: 1, tolerance: { translate: 1 } }),
+  sampled((t) => ({ x: t, foo: 1 }), { over: 1, tolerance: { translate: 1 } }),
   // @ts-expect-error tolerances are keyed by lane, not channel
-  sampled((t) => ({ x: t }), { duration: 1, tolerance: { x: 1 } }),
+  sampled((t) => ({ x: t }), { over: 1, tolerance: { x: 1 } }),
   // @ts-expect-error py is sampled but has no tolerance
-  sampled((t) => ({ [px]: t, [py]: t }), { duration: 1, tolerance: { [px]: 0.01 } }),
+  sampled((t) => ({ [px]: t, [py]: t }), { over: 1, tolerance: { [px]: 0.01 } }),
   // @ts-expect-error a color property cannot be sampled
-  sampled(() => ({ [tint]: "#fff" }), { duration: 1, tolerance: { [tint]: 1 } }),
+  sampled(() => ({ [tint]: "#fff" }), { over: 1, tolerance: { [tint]: 1 } }),
   // @ts-expect-error a color into an angle property
   motion().to({ [yaw]: "#fff" }, 1),
   // @ts-expect-error a color into an angle property, set statically

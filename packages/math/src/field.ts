@@ -2,14 +2,12 @@ import {
   defaultDark,
   draw,
   ease,
-  flow,
   matchPaths,
   motion,
   num,
   tint,
   type Base16,
   type Color,
-  type FlowOptions,
   type Motion,
   type Point,
   type Seconds,
@@ -142,20 +140,6 @@ export function fieldLines(
       }),
     ),
   );
-}
-
-/** @deprecated use `FlowOptions` from "svjeez" */
-export type FieldFlowOptions = Omit<FlowOptions, "style" | "loop" | "period" | "over"> & {
-  /** `dot` is one animated element per line, `comet` adds a short tail (a few more). Default `dot`. */
-  readonly style?: "dot" | "comet";
-};
-
-/** @deprecated use `flow(lines, options).node`, which takes a list of lines */
-export function fieldFlow(
-  lines: readonly (readonly Point[])[],
-  options: FieldFlowOptions,
-): SvgNode {
-  return flow(lines, options).node;
 }
 
 export interface VectorFieldOptions {

@@ -8,10 +8,6 @@ export type Timeline<K extends string> = { readonly [P in K]: Spanned } & {
   readonly duration: Seconds;
   /** When the last scene ends. */
   readonly end: Seconds;
-  /** @deprecated use `show(tl.name)` */
-  show(name: K): Motion<"opacity">;
-  /** @deprecated use `show({ at: tl.name.at })` */
-  enter(name: K): Motion<"opacity">;
 };
 
 export interface TimelineOptions {
@@ -78,29 +74,10 @@ export const show = (
   );
 };
 
-/** When a thing is on screen: `show`, or the old name `during`. */
-export type Shown =
-  | { readonly show: Span; readonly during?: undefined }
-  | {
-      /** @deprecated use `show` */
-      readonly during: Span;
-      readonly show?: undefined;
-    };
-
-/** The span of a `Shown`, from `show` or the old `during`. */
-export const shownSpan = (show: Span | undefined, during: Span | undefined, what: string): Span => {
-  const span = show ?? during;
-
-  if (span === undefined) throw new Error(`${what} needs a show span, got none.`);
-
-  return span;
-};
-
-/** @deprecated use `show(span, { fade })` */
-export const during = (span: Span, fade: Seconds = 0.3): Motion<"opacity"> => show(span, { fade });
-
-/** @deprecated use `show(span, { fade: 0 })` */
-export const cut = (span: Span): Motion<"opacity"> => show(span, { fade: 0 });
+/** When a thing is on screen. */
+export interface Shown {
+  readonly show: Span;
+}
 
 /** How a shot arrives or leaves. Each move but `cut` passes through these values while transparent. No blur: a shot holds many animated elements, and a filter over them repaints every frame. */
 const MOVES = {
@@ -198,18 +175,6 @@ export const mergeSpans = (spans: readonly When[], gap: Seconds = 0): [Seconds, 
 
       return out;
     }, []);
-
-/** @deprecated use `show(spans, { fade })`, whose fades sit inside the spans */
-export const visible = (spans: readonly Span[], fade: Seconds = 0.15): Motion<"opacity"> =>
-  mergeSpans(spans, fade * 2).reduce(
-    (track, [a, b]) =>
-      track
-        .at(a)
-        .to({ opacity: 1 }, Math.min(fade, (b - a) / 2))
-        .at(b)
-        .to({ opacity: 0 }, fade),
-    motion({ opacity: 0 }),
-  );
 
 export interface TravelOptions {
   readonly at: Seconds;
@@ -349,7 +314,7 @@ export function timeline<const T extends Record<string, Seconds>>(
   let end = start;
 
   for (const [i, [name, length]] of Object.entries(durations).entries()) {
-    if (name === "duration" || name === "end" || name === "show" || name === "enter")
+    if (name === "duration" || name === "end")
       throw new Error(`"${name}" is reserved in a timeline.`);
 
     if (!(length > 0)) throw new Error(`Scene ${name} needs a positive length, got ${length}.`);
@@ -358,23 +323,10 @@ export function timeline<const T extends Record<string, Seconds>>(
     end = at + length * pace;
   }
 
-  const span = (name: string): Spanned => {
-    const found = spans[name];
-
-    if (!found) throw new Error(`No scene named ${name}.`);
-
-    return found;
-  };
-
   // SAFETY: the loop above sets a span for every name in `durations`, so the keys of `spans` are exactly K.
   return {
     ...spans,
     duration: end - start,
     end,
-    show: (name: string) => show(span(name), { fade }),
-    enter: (name: string) =>
-      motion({ opacity: 0 })
-        .at(span(name).at)
-        .to({ opacity: 1 }, Math.min(fade, span(name).over)),
   } as Timeline<keyof T & string>;
 }

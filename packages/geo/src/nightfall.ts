@@ -9,18 +9,9 @@ export type NightfallOptions = {
   readonly tolerance?: number;
   /** Columns across the map. Default 73, one every 5 degrees. */
   readonly columns?: number;
-} & (
-  | {
-      /** Seconds the motion runs. */
-      readonly over: Seconds;
-      readonly duration?: never;
-    }
-  | {
-      /** @deprecated use `over` */
-      readonly duration: Seconds;
-      readonly over?: never;
-    }
-);
+  /** Seconds the motion runs. */
+  readonly over: Seconds;
+};
 
 const fmt = (v: number) => (Math.round(v * 10) / 10).toString();
 
@@ -35,7 +26,7 @@ export function nightfall(
   options: NightfallOptions,
 ): Turning {
   const { tolerance = 0.5, columns = 73 } = options;
-  const duration = options.over ?? options.duration;
+  const duration = options.over;
   const middle = -map.projection.rotate()[0];
   const { frame } = map;
 

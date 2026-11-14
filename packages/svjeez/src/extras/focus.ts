@@ -3,7 +3,7 @@ import { el } from "../el";
 import type { Rect } from "../geometry";
 import { motion, type Seconds } from "../motion";
 import type { Child, SvgNode } from "../svg";
-import { mergeSpans, show, shownSpan, type Shown } from "./timeline";
+import { mergeSpans, show, type Shown } from "./timeline";
 
 export type FocusStop = Shown & {
   readonly target: Rect | readonly Rect[];
@@ -24,9 +24,7 @@ export function Focus({
   if (!(dim >= 0 && dim <= 1)) throw new Error(`Focus() needs dim between 0 and 1, got ${dim}.`);
 
   /** Stops that touch merge, so back-to-back stops keep the dim instead of flashing bright between them. */
-  const shade = mergeSpans(
-    stops.map((stop) => shownSpan(stop.show, stop.during, "Focus()")),
-  ).reduce(
+  const shade = mergeSpans(stops.map((stop) => stop.show)).reduce(
     (track, [at, end]) => {
       const f = Math.min(fade, (end - at) / 2);
 
@@ -50,7 +48,7 @@ export function Focus({
     }),
     stops.map((stop) =>
       el.g(
-        { animation: show(shownSpan(stop.show, stop.during, "Focus()"), { fade }) },
+        { animation: show(stop.show, { fade }) },
         [stop.target]
           .flat()
           .map((r) => el.rect({ x: r.x, y: r.y, width: r.w, height: r.h, fill: "#fff" })),

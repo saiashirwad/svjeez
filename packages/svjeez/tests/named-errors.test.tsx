@@ -23,7 +23,7 @@ describe("named errors", () => {
 
   test("sampled() keeps a channel that is never finite out of the initial values", () => {
     const m = sampled(() => ({ x: Number("nope") }), {
-      duration: 1,
+      over: 1,
       tolerance: { translate: 1 },
     });
 

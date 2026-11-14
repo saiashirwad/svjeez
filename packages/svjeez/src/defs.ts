@@ -1,5 +1,4 @@
 import type { Attrs } from "./attributes";
-import { property } from "./properties";
 import { children, node, type Child, type Element, type Props } from "./svg";
 
 export type DefTag =
@@ -53,7 +52,6 @@ const make =
 /**
  * `def.<tag>(attrs, children)`: emitted into <defs> only if the rendered tree references it, with a
  * deterministic id. Filters default to a userSpaceOnUse region covering the canvas.
- * `def.property` is the old name of `css.property`.
  */
 export const def = {
   linearGradient: make("linearGradient"),
@@ -64,6 +62,4 @@ export const def = {
   filter: make("filter"),
   marker: make("marker"),
   symbol: make("symbol"),
-  /** @deprecated Use `css.property`, which takes the same options. */
-  property,
 } as const;

@@ -56,7 +56,7 @@ describe("sampled", () => {
     const step = 0.05;
 
     const keys = translateKeys(
-      scene(sampled(circle, { duration: PERIOD, step, tolerance: { translate: 1 } }), PERIOD),
+      scene(sampled(circle, { over: PERIOD, step, tolerance: { translate: 1 } }), PERIOD),
       PERIOD,
     );
 
@@ -75,7 +75,7 @@ describe("sampled", () => {
   test("a flat opacity lane keeps only its two end keys beside a moving translate", () => {
     const svg = scene(
       sampled((t) => ({ ...circle(t), opacity: 0.5 }), {
-        duration: PERIOD,
+        over: PERIOD,
         tolerance: { translate: 1, opacity: 0.02 },
       }),
       PERIOD,
@@ -90,7 +90,7 @@ describe("sampled", () => {
     const flat = css.property("flat", { syntax: "number", inherits: false, initial: 0 });
 
     const motion = sampled((t) => ({ ...circle(t), [depth]: circle(t).x, [flat]: 2 }), {
-      duration: PERIOD,
+      over: PERIOD,
       tolerance: { translate: 1, [depth]: 0.001, [flat]: 0.01 },
     });
 
@@ -107,7 +107,7 @@ describe("sampled", () => {
   test("a step that leaves a sliver before the end still renders", () => {
     const svg = scene(
       sampled((t) => ({ x: 10 * t }), {
-        duration: 1,
+        over: 1,
         step: 0.3333333,
         tolerance: { translate: 0.001 },
       }),
@@ -119,7 +119,7 @@ describe("sampled", () => {
 
   test("a last step shorter than the scene can tell apart still renders", () => {
     const motion = sampled((t) => ({ x: 100 * t }), {
-      duration: 0.1,
+      over: 0.1,
       step: 0.09999,
       tolerance: { translate: 0 },
     });
@@ -137,7 +137,7 @@ describe("sampled", () => {
         width={10}
         height={10}
         animation={sampled((t) => ({ rotate: t < 1 ? 360 * t : 0 }), {
-          duration: 2,
+          over: 2,
           tolerance: { rotate: 0.5 },
         })}
       />,
@@ -165,7 +165,7 @@ describe("sampled", () => {
     const steep = (t: number) => ({ x: 100 / (1 + Math.exp(-(t - 1) * 400)) });
 
     const [body] = lane(
-      scene(sampled(steep, { duration: 2, tolerance: { translate: 0.5 } }), 2),
+      scene(sampled(steep, { over: 2, tolerance: { translate: 0.5 } }), 2),
       "translate",
     );
 
@@ -174,13 +174,13 @@ describe("sampled", () => {
 
   test("a lane without a tolerance is an error", () => {
     // @ts-expect-error opacity has no tolerance
-    expect(() => sampled(() => ({ opacity: 1 }), { duration: 1, tolerance: {} })).toThrow(
+    expect(() => sampled(() => ({ opacity: 1 }), { over: 1, tolerance: {} })).toThrow(
       /tolerance for `opacity`/,
     );
   });
 
   test("samples whose keys change partway are an error", () => {
-    const options = { duration: 2, tolerance: { translate: 1, opacity: 0.1 } };
+    const options = { over: 2, tolerance: { translate: 1, opacity: 0.1 } };
     expect(() => sampled((t) => (t < 1 ? { x: t, opacity: 1 } : { x: t }), options)).toThrow(
       /different channels at t=1/,
     );
@@ -196,10 +196,7 @@ describe("sampled", () => {
     const wave = (t: number) => ({ x: 10.123456 * Math.sin(t), y: 3.98765 * t });
 
     const keys = translateKeys(
-      scene(
-        sampled(wave, { duration: PERIOD, precision: 1, tolerance: { translate: 0.2 } }),
-        PERIOD,
-      ),
+      scene(sampled(wave, { over: PERIOD, precision: 1, tolerance: { translate: 0.2 } }), PERIOD),
       PERIOD,
     );
 
@@ -210,8 +207,8 @@ describe("sampled", () => {
       expect(String(key.y)).toMatch(/^-?\d+(\.\d)?$/);
     }
 
-    expect(() =>
-      sampled(wave, { duration: 1, precision: 0.5, tolerance: { translate: 1 } }),
-    ).toThrow(/whole, non-negative precision, got 0.5/);
+    expect(() => sampled(wave, { over: 1, precision: 0.5, tolerance: { translate: 1 } })).toThrow(
+      /whole, non-negative precision, got 0.5/,
+    );
   });
 });

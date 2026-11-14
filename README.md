@@ -134,9 +134,9 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 
 More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for each in [`examples/`](https://github.com/saiashirwad/svjeez/tree/main/examples).
 
-## Upgrading to 0.7
+## Upgrading from 0.5 or 0.6
 
-0.7 moves things out of core, renames some, and gives time one model: spans on clocks, with `<Clip>`, `show`, `.repeat` and `.rewind`. The old names still work and are marked `@deprecated`; 1.0 removes them.
+0.7 moves things out of core, renames some, and gives time one model: spans on clocks, with `<Clip>`, `show`, `.repeat` and `.rewind`. The old names are gone: 0.7 keeps no aliases, and the table is what to change.
 
 | Before | Now |
 | --- | --- |
@@ -153,6 +153,8 @@ More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for ea
 | `Icon` type of `@svjeez/icons` | `IconData` |
 | `during(span, fade)`, `cut(span)`, `visible(spans, fade)`, `tl.show(name)`, `tl.enter(name)` | `show(span, { fade })`, `show(span, { fade: 0 })`, `show(spans)`, `show(tl.name)`, `show({ at: tl.name.at })`. `show` fades inside the span, where `visible` faded outside it |
 | `sampled(fn, { duration })`, `sampled.path`, `nightfall` and `globe` with `duration` | `{ over }`, plus `at` to start later, with the function given time from 0 |
+| `fx.blur(6)` (by hand) | `fx.blur({ by: 6 })` |
+| `def.property` (by hand) | `css.property` |
 | `.end` of a `typewriter`, `terminal`, `reveal`, `flow` or `morph` result | `.span.end` |
 | `.end` of a `derive`, `epicycles`, `traffic`, `walk`, chart or construction result (by hand) | `.span.end` |
 | `during` on `Arrow`, `Brace`, `Callout`, `Underline`, and on `Focus`, `Marker` and `Camera` stops (by hand) | `show` |

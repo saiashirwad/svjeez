@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
 import { describe, expect, test } from "bun:test";
-import { css, def, render, Style } from "svjeez";
+import { css, render, Style } from "svjeez";
 
 const scene = (
   content: Parameters<typeof render>[1],
@@ -43,9 +43,8 @@ describe("<Style>", () => {
 });
 
 describe("css.property", () => {
-  test("inherits defaults to false, and def.property is the same function", () => {
+  test("inherits defaults to false", () => {
     const own = css.property("own", { syntax: "length", initial: 0 });
-    expect(def.property).toBe(css.property);
 
     expect(scene(<rect width={2} height={2} style={{ [own]: 1 }} />)).toContain("inherits:false");
   });

@@ -362,7 +362,6 @@ describe("image filters", () => {
   test("each filter renders into the scene", () => {
     expect(filtered(fx.grayscale({ amount: 0.25 }))).toContain('values="0.75"');
     expect(filtered(fx.blur({ by: 3 }))).toContain('stdDeviation="3"');
-    expect(filtered(fx.blur(3))).toContain('stdDeviation="3"');
     expect(
       filtered(fx.shadow({ dx: 2, dy: 3, blur: 4, color: "#000000", opacity: 0.5 })),
     ).toContain("<feDropShadow");

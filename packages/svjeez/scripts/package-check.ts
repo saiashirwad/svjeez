@@ -10,7 +10,6 @@ const BIN = join(ROOT, "node_modules/.bin");
 
 const ENTRIES = [
   "svjeez",
-  "svjeez/extras",
   "svjeez/jsx-runtime",
   "svjeez/jsx-dev-runtime",
   "svjeez/internal",

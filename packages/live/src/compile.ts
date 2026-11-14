@@ -2,7 +2,6 @@
 // never returns costs the worker, not the page.
 import { transform } from "sucrase";
 import * as svjeez from "svjeez";
-import * as extras from "svjeez/extras";
 import * as jsxDevRuntime from "svjeez/jsx-dev-runtime";
 import * as jsxRuntime from "svjeez/jsx-runtime";
 import * as params from "svjeez/params";
@@ -14,7 +13,6 @@ import type { Move } from "./probe.ts";
 
 const modules = new Map<string, object>([
   ["svjeez", svjeez],
-  ["svjeez/extras", extras],
   ["svjeez/jsx-runtime", jsxRuntime],
   ["svjeez/jsx-dev-runtime", jsxDevRuntime],
   ["svjeez/params", params],

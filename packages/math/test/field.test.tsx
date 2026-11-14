@@ -4,7 +4,6 @@ import {
   axes,
   contours,
   contourSweep,
-  fieldFlow,
   fieldLines,
   slopeField,
   slopeSolution,
@@ -202,15 +201,6 @@ describe("flow along several lines", () => {
 
     expect(svg.match(/<circle/g)!.length).toBeGreaterThanOrEqual(lines.length);
     expect(new Set(svg.match(/translate:[\d.]+px [\d.]+px/g)).size).toBeGreaterThan(lines.length);
-  });
-
-  test("fieldFlow is flow(lines).node", () => {
-    const [a, b] = [
-      fieldFlow(lines, { at: 1, color: "#f80" }),
-      flow(lines, { at: 1, color: "#f80" }).node,
-    ];
-
-    expect(String(a)).toBe(String(b));
   });
 
   test("flow rejects a period shorter than the trip", () => {

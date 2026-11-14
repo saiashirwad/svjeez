@@ -2,7 +2,7 @@ import { el } from "../el";
 import type { Point, Rect } from "../geometry";
 import { ease, motion, type Motion, type Seconds } from "../motion";
 import type { Child, SvgNode } from "../svg";
-import { shownSpan, type Shown } from "./timeline";
+import type { Shown } from "./timeline";
 
 export type CameraStop = Shown & {
   /** Fit and center this region in the frame. `"all"` leaves the content unmoved. */
@@ -61,7 +61,7 @@ export function Camera({
   if (steady) {
     const hold = stops.reduce<Motion<"scale">>(
       (t, stop) => {
-        const span = shownSpan(stop.show, stop.during, "Camera()");
+        const span = stop.show;
         const { target } = stop;
         const scale = 1 / fit(frame, target).scale;
 
@@ -78,7 +78,7 @@ export function Camera({
 
   const track = stops.reduce<Motion<"x" | "y" | "scale">>(
     (t, stop) => {
-      const { at } = shownSpan(stop.show, stop.during, "Camera()");
+      const { at } = stop.show;
 
       return at === 0
         ? t.set(fit(frame, stop.target))
@@ -91,15 +91,4 @@ export function Camera({
     { style: { transformOrigin: "0 0", transformBox: "view-box" }, animation: track },
     children,
   );
-}
-
-/** @deprecated use `<Camera steady origin={...}>`, where `origin` is this `at` */
-export function Steady({
-  at,
-  ...rest
-}: CameraBase & {
-  /** The point `children` is drawn around, in the camera's content space. */
-  readonly at: Point;
-}): SvgNode {
-  return Camera({ ...rest, steady: true, origin: at });
 }

@@ -125,7 +125,7 @@ const moved = shot(tl.change, { enter: "rise", exit: "zoom" }); // a shot that m
 
 `shot(span, { enter, exit, over })` takes the moves `cut`, `fade`, `rise`, `zoom` and `slide`, each `over` seconds (default 0.45) inside the span. Put it on the `<g>` that holds the whole shot. Shots laid end to end hand over through the background.
 
-`readingTime(text)` is seconds to read: words at 3.5 per second plus a second to settle, at least 2. `pace` scales every beat but not `gap`. `duration`, `end`, `show` and `enter` are reserved scene names (`tl.show(name)` and `tl.enter(name)` are older spellings of `show`). A start time like `at` in `play` or `reveal` is a `Beats`: one number (items follow `step` apart) or one time per item.
+`readingTime(text)` is seconds to read: words at 3.5 per second plus a second to settle, at least 2. `pace` scales every beat but not `gap`. `duration` and `end` are reserved scene names. A start time like `at` in `play` or `reveal` is a `Beats`: one number (items follow `step` apart) or one time per item.
 
 ## Moving code
 

@@ -16,7 +16,7 @@ export { Clip, type ClipProps } from "./clip";
 
 export { easeAt } from "./ease-at";
 
-export { sample, valuesAt, type SampleOptions, type ValuesAtOptions } from "./valuesAt";
+export { valuesAt, type ValuesAtOptions } from "./valuesAt";
 
 export { random } from "./random";
 
@@ -29,7 +29,6 @@ export {
   shake,
   wiggle,
   sampled,
-  sampledPath,
   type WiggleOptions,
   type SampledOptions,
 } from "./recipes";
@@ -87,7 +86,7 @@ export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 
 export { hexBytes, hexOf, type Hex } from "./color";
 
-export type { Channel, ChannelValues, TagChannels, Values } from "./channels";
+export type { Channel, ChannelValues, TagChannels } from "./channels";
 
 export type { SvgNode, Child } from "./svg";
 
@@ -113,14 +112,11 @@ export type { Box, Size } from "./layout/box";
 export {
   timeline,
   show,
-  during,
-  cut,
   shot,
   type ShowOptions,
   type ShotMove,
   type ShotOptions,
   readingTime,
-  visible,
   travel,
   type Beats,
   type HeadingOptions,
@@ -156,7 +152,7 @@ export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
 
 export { Marker } from "./extras/marker";
 
-export { Camera, Steady, type CameraProps, type CameraStop } from "./extras/camera";
+export { Camera, type CameraProps, type CameraStop } from "./extras/camera";
 
 export {
   base16,
