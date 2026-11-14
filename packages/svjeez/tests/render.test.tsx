@@ -148,7 +148,7 @@ describe("motion timing", () => {
 describe("requirements", () => {
   test("draw adds pathLength and dasharray to its element", () => {
     const svg = scene(<path d="M0 0H10" stroke="#fff" animation={draw({ at: 0, over: 1 })} />);
-    expect(svg).toContain('pathLength="1" stroke-dasharray="1"');
+    expect(svg).toContain('pathLength="1" stroke-dasharray="1 2"');
     expect(keyframes(svg)).toEqual([
       "0%{stroke-dashoffset:1;visibility:hidden}10%,100%{stroke-dashoffset:0;visibility:visible}",
     ]);

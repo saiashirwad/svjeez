@@ -162,28 +162,28 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g>
       <g>
-        <path d="M270.8 77L270.8 108" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m11"/>
+        <path d="M270.8 77L270.8 108" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
         <path d="M270.8 115L266.8 107L274.8 107Z" fill="var(--base04)" class="a m12"/>
       </g>
       <circle r="4" fill="var(--base09)" class="a m13"/>
     </g>
     <g>
       <g>
-        <path d="M414.8 77L414.8 164" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m14"/>
+        <path d="M414.8 77L414.8 164" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m14"/>
         <path d="M414.8 171L410.8 163L418.8 163Z" fill="var(--base04)" class="a m15"/>
       </g>
       <circle r="4" fill="var(--base09)" class="a m16"/>
     </g>
     <g>
       <g>
-        <path d="M594.8 115L594.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m17"/>
+        <path d="M594.8 115L594.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
         <path d="M594.8 77L598.8 85L590.8 85Z" fill="var(--base04)" class="a m18"/>
       </g>
       <circle r="4" fill="var(--base09)" class="a m19"/>
     </g>
     <g>
       <g>
-        <path d="M828.8 171L828.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m20"/>
+        <path d="M828.8 171L828.8 84" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m20"/>
         <path d="M828.8 77L832.8 85L824.8 85Z" fill="var(--base04)" class="a m21"/>
       </g>
       <circle r="4" fill="var(--base09)" class="a m22"/>

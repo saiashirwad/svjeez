@@ -35,7 +35,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <rect width="100%" height="100%" fill="var(--base00)"/>
   <text x="90" y="74" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="36" font-weight="700" fill="#FF4FA3" text-anchor="middle" filter="url(#f1)">OPEN</text>
   <g filter="url(#f2)" fill="none" stroke="var(--base0C)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M200 100V60L240 30L280 60V100Z" pathLength="1" stroke-dasharray="1" class="a m1"/>
-    <path d="M230 100V80H250V100" pathLength="1" stroke-dasharray="1" class="a m2"/>
+    <path d="M200 100V60L240 30L280 60V100Z" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <path d="M230 100V80H250V100" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
   </g>
 </svg>

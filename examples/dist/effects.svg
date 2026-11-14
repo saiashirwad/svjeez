@@ -76,8 +76,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <rect width="200" height="180" rx="14" fill="var(--base01)" stroke="var(--base02)"/>
     <text x="16" y="162" class="mono" font-size="11" letter-spacing="1.5" fill="var(--base04)">FX.BOIL + DRAW</text>
     <g filter="url(#f2)" fill="none" stroke="var(--base08)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M40 120V70L100 30L160 70V120Z" pathLength="1" stroke-dasharray="1" class="a m4"/>
-      <path d="M85 120V90H115V120" pathLength="1" stroke-dasharray="1" class="a m5"/>
+      <path d="M40 120V70L100 30L160 70V120Z" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+      <path d="M85 120V90H115V120" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
     </g>
   </g>
   <g transform="translate(230 220)">

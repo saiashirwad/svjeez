@@ -29,11 +29,11 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <rect width="100%" height="100%" fill="var(--base00)"/>
   <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
     <g>
-      <path d="M109.45 60L109.45 64C109.45 80 61.7 80 61.7 91L61.7 93" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+      <path d="M109.45 60L109.45 64C109.45 80 61.7 80 61.7 91L61.7 93" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
       <path d="M61.7 100L57.7 92L65.7 92Z" fill="var(--base04)" class="a m2"/>
     </g>
     <g>
-      <path d="M109.45 60L109.45 64C109.45 80 157.2 80 157.2 91L157.2 93" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+      <path d="M109.45 60L109.45 64C109.45 80 157.2 80 157.2 91L157.2 93" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
       <path d="M157.2 100L153.2 92L161.2 92Z" fill="var(--base04)" class="a m4"/>
     </g>
     <g>

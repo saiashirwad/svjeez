@@ -390,7 +390,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g class="sans a m2">
     <text x="640" y="300" font-size="64" font-weight="700" text-anchor="middle" fill="var(--base05)">Circuit breakers</text>
     <text x="640" y="350" font-size="22" text-anchor="middle" fill="var(--base04)">Fail fast while a dependency is down, then check if it's back.</text>
-    <path d="M520 390h240" stroke="var(--base0A)" stroke-width="2" pathLength="1" stroke-dasharray="1" class="a m1"/>
+    <path d="M520 390h240" stroke="var(--base0A)" stroke-width="2" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
   </g>
   <text x="64" y="78" class="sans a m3" font-size="30" font-weight="600" fill="var(--base05)">The whole thing is one class</text>
   <g class="a m3">
@@ -835,7 +835,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g>
         <g>
-          <path d="M118.25 215L250.3 215" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m64"/>
+          <path d="M118.25 215L250.3 215" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m64"/>
           <path d="M257.3 215L249.3 219L249.3 211Z" fill="var(--base04)" class="a m65"/>
         </g>
         <g class="a m66">
@@ -845,7 +845,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g>
         <g>
-          <path d="M257.3 251L392.5 251" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m67"/>
+          <path d="M257.3 251L392.5 251" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m67"/>
           <path d="M399.5 251L391.5 255L391.5 247Z" fill="var(--base04)" class="a m68"/>
         </g>
         <g class="a m69">
@@ -870,7 +870,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g>
         <g>
-          <path d="M118.25 365.66L250.3 365.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m74"/>
+          <path d="M118.25 365.66L250.3 365.66" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m74"/>
           <path d="M257.3 365.65999999999997L249.3 369.65999999999997L249.3 361.65999999999997Z" fill="var(--base04)" class="a m75"/>
         </g>
         <g class="a m76">
@@ -895,7 +895,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g>
         <g>
-          <path d="M118.25 480.32L250.3 480.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m81"/>
+          <path d="M118.25 480.32L250.3 480.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m81"/>
           <path d="M257.3 480.31999999999994L249.3 484.31999999999994L249.3 476.31999999999994Z" fill="var(--base04)" class="a m82"/>
         </g>
         <g class="a m83">
@@ -905,7 +905,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g>
         <g>
-          <path d="M257.3 516.32L392.5 516.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m84"/>
+          <path d="M257.3 516.32L392.5 516.32" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m84"/>
           <path d="M399.5 516.3199999999999L391.5 520.3199999999999L391.5 512.3199999999999Z" fill="var(--base04)" class="a m85"/>
         </g>
         <g class="a m86">
@@ -1205,31 +1205,31 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g class="a m109">
     <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
       <g>
-        <path d="M151.73 352.5L199.56 352.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m110"/>
+        <path d="M151.73 352.5L199.56 352.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m110"/>
         <path d="M206.5599999999999 352.49982529431577L198.5599999999999 356.49982529431577L198.5599999999999 348.49982529431577Z" fill="var(--base04)" class="a m111"/>
       </g>
       <g>
-        <path d="M298.95 365.5L374.88 365.5C390.88 365.5 390.88 386 406.88 386L784.74 386" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m112"/>
+        <path d="M298.95 365.5L374.88 365.5C390.88 365.5 390.88 386 406.88 386L784.74 386" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m112"/>
         <path d="M791.7400000000001 386L783.7400000000001 390L783.7400000000001 382Z" fill="var(--base04)" class="a m113"/>
       </g>
       <g>
-        <path d="M298.95 339.5L374.88 339.5C390.88 339.5 390.88 319 406.88 319L451.3 319" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m114"/>
+        <path d="M298.95 339.5L374.88 339.5C390.88 339.5 390.88 319 406.88 319L451.3 319" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m114"/>
         <path d="M458.29999999999995 319L450.29999999999995 323L450.29999999999995 315Z" fill="var(--base04)" class="a m115"/>
       </g>
       <g>
-        <path d="M603.12 307.5L763.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m116"/>
+        <path d="M603.12 307.5L763.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m116"/>
         <path d="M770.94 307.5L762.94 311.5L762.94 303.5Z" fill="var(--base04)" class="a m117"/>
       </g>
       <g>
-        <path d="M598.82 332L687.52 332C703.52 332 703.52 382.5 719.52 382.5L784.74 382.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m112"/>
+        <path d="M598.82 332L687.52 332C703.52 332 703.52 382.5 719.52 382.5L784.74 382.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m112"/>
         <path d="M791.7400000000001 382.5L783.7400000000001 386.5L783.7400000000001 378.5Z" fill="var(--base04)" class="a m113"/>
       </g>
       <g>
-        <path d="M922.54 376.5L1009.04 376.5C1025.04 376.5 1025.04 307.5 1041.04 307.5L1103.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m118"/>
+        <path d="M922.54 376.5L1009.04 376.5C1025.04 376.5 1025.04 307.5 1041.04 307.5L1103.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m118"/>
         <path d="M1110.94 307.5L1102.94 311.5L1102.94 303.5Z" fill="var(--base04)" class="a m119"/>
       </g>
       <g>
-        <path d="M922.54 388.5L1099.74 388.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m120"/>
+        <path d="M922.54 388.5L1099.74 388.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m120"/>
         <path d="M1106.7400000000002 388.5L1098.7400000000002 392.5L1098.7400000000002 384.5Z" fill="var(--base04)" class="a m121"/>
       </g>
     </g>
@@ -1241,7 +1241,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle cx="770.94" cy="307.5" r="9" fill="none" stroke="var(--base08)" stroke-width="1.5" class="a m123 fb"/>
     </g>
     <g>
-      <path d="M151.73499999999987 352.49982529431577L206.5599999999999 352.49982529431577L298.94870967741923 365.49982529431577L374.87999999999994 365.49982529431577L380.1925 366.3806921762006L384.37999999999994 368.7029775920789L387.81749999999994 371.98620869728614L390.88 375.7499126471579L393.94249999999994 379.51361659702957L397.37999999999994 382.79684770223685L401.5674999999999 385.11913311811514L406.87999999999994 386L791.7400000000001 386L922.5400000000001 376.5L1009.04 376.5L1014.3525 373.53515625L1018.54 365.71875L1021.9775000000001 354.66796875L1025.04 342L1028.1025 329.33203125L1031.54 318.28125L1035.7275 310.46484375L1041.04 307.5L1110.94 307.5" fill="none" stroke="var(--base0B)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m124"/>
+      <path d="M151.73499999999987 352.49982529431577L206.5599999999999 352.49982529431577L298.94870967741923 365.49982529431577L374.87999999999994 365.49982529431577L380.1925 366.3806921762006L384.37999999999994 368.7029775920789L387.81749999999994 371.98620869728614L390.88 375.7499126471579L393.94249999999994 379.51361659702957L397.37999999999994 382.79684770223685L401.5674999999999 385.11913311811514L406.87999999999994 386L791.7400000000001 386L922.5400000000001 376.5L1009.04 376.5L1014.3525 373.53515625L1018.54 365.71875L1021.9775000000001 354.66796875L1025.04 342L1028.1025 329.33203125L1031.54 318.28125L1035.7275 310.46484375L1041.04 307.5L1110.94 307.5" fill="none" stroke="var(--base0B)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m124"/>
       <circle r="4.5" fill="var(--base0B)" class="a m125"/>
       <circle cx="1110.94" cy="307.5" r="9" fill="none" stroke="var(--base0B)" stroke-width="1.5" class="a m126 fb"/>
     </g>

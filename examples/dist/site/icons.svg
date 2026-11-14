@@ -102,9 +102,9 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g class="a m29">
     <g>
       <g transform="translate(43 84) scale(1.6666666666666667)" fill="none" stroke="var(--base0D)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
-        <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3" pathLength="1" stroke-dasharray="1" class="a m1"/>
-        <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3" pathLength="1" stroke-dasharray="1" class="a m2"/>
-        <path d="M14 9a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" pathLength="1" stroke-dasharray="1" class="a m3"/>
+        <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+        <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+        <path d="M14 9a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
       </g>
     </g>
     <g class="sans a m4">
@@ -180,8 +180,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g class="a m26 fb">
       <g transform="translate(421 196) scale(1.6666666666666667)" fill="none" stroke="var(--base06)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
-        <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" pathLength="1" stroke-dasharray="1" class="a m24"/>
-        <path d="M9 17v1a3 3 0 0 0 6 0v-1" pathLength="1" stroke-dasharray="1" class="a m25"/>
+        <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" pathLength="1" stroke-dasharray="1 2" class="a m24"/>
+        <path d="M9 17v1a3 3 0 0 0 6 0v-1" pathLength="1" stroke-dasharray="1 2" class="a m25"/>
       </g>
     </g>
     <g class="sans a m27">

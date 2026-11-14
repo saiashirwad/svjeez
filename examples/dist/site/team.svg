@@ -61,23 +61,23 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g class="a m17">
     <g class="sans">
       <g>
-        <path d="M252 133L252 137C252 153 146 153 146 164L146 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+        <path d="M252 133L252 137C252 153 146 153 146 164L146 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
         <path d="M146 173L142 165L150 165Z" fill="var(--base04)" class="a m2"/>
       </g>
       <g>
-        <path d="M252 133L252 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+        <path d="M252 133L252 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
         <path d="M252 173L248 165L256 165Z" fill="var(--base04)" class="a m4"/>
       </g>
       <g>
-        <path d="M252 133L252 137C252 153 358 153 358 164L358 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+        <path d="M252 133L252 137C252 153 358 153 358 164L358 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
         <path d="M358 173L354 165L362 165Z" fill="var(--base04)" class="a m6"/>
       </g>
       <g>
-        <path d="M146 207L146 240" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m7"/>
+        <path d="M146 207L146 240" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
         <path d="M146 247L142 239L150 239Z" fill="var(--base04)" class="a m8"/>
       </g>
       <g>
-        <path d="M252 207L252 240" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m9"/>
+        <path d="M252 207L252 240" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
         <path d="M252 247L248 239L256 239Z" fill="var(--base04)" class="a m10"/>
       </g>
       <g>
