@@ -1,4 +1,5 @@
 import {
+  act,
   click,
   Dom,
   duration,
@@ -30,6 +31,14 @@ const app = {
 };
 
 const flow: Flow = [
+  // Logseq indexes the graph for search a moment after it opens, behind a progress badge in the header. The picture
+  // starts once that's done, so the badge never shows.
+  act(async (page) => {
+    const badge = ".search-index-progress";
+
+    await page.waitForSelector(badge, { timeout: 5000 }).catch(() => undefined);
+    await page.waitForSelector(badge, { state: "detached", timeout: 30_000 });
+  }),
   snap("journal"),
   wait(0.8),
   click(".block-add-button"),
@@ -59,7 +68,7 @@ const flow: Flow = [
 ];
 
 // The site changes under us, which the recording can't see: bump this to read it again on purpose.
-const steps = await snapshots(here("snapshots.json"), { inputs: "logseq 1" }, (dom) =>
+const steps = await snapshots(here("snapshots.json"), { inputs: "logseq 2" }, (dom) =>
   dom.run(app, flow),
 );
 

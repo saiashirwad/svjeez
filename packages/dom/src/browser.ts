@@ -259,26 +259,31 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     // a read the page must go quiet for a moment, or a few seconds pass. A scheme change only needs two frames.
     const settle = (quiet: boolean) =>
       page.evaluate(async (quiet) => {
-        await new Promise<void>((done) => {
-          if (!quiet) return done();
+        const frames = () =>
+          new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
 
-          let timer = setTimeout(() => finish(), 150);
-          const observer = new MutationObserver(() => {
-            clearTimeout(timer);
-            timer = setTimeout(() => finish(), 150);
+        if (!quiet) await frames();
+        else
+          await new Promise<void>((done) => {
+            // Two frames with no change and the page is done. A page that changes is live, so it must then stay
+            // still for a longer moment, which lets a script's answer land.
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const observer = new MutationObserver(() => {
+              clearTimeout(timer);
+              timer = setTimeout(() => finish(), 150);
+            });
+            const limit = setTimeout(() => finish(), 3000);
+
+            const finish = () => {
+              observer.disconnect();
+              clearTimeout(timer);
+              clearTimeout(limit);
+              done();
+            };
+
+            observer.observe(document, { subtree: true, childList: true, characterData: true });
+            void frames().then(() => timer === undefined && finish());
           });
-          const limit = setTimeout(() => finish(), 3000);
-
-          const finish = () => {
-            observer.disconnect();
-            clearTimeout(timer);
-            clearTimeout(limit);
-            done();
-          };
-
-          observer.observe(document, { subtree: true, childList: true, characterData: true });
-        });
-        await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
         await document.fonts.ready;
         await Promise.all(
           document
