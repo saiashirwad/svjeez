@@ -12,7 +12,6 @@ const ENTRIES = [
   "svjeez",
   "svjeez/jsx-runtime",
   "svjeez/jsx-dev-runtime",
-  "svjeez/internal",
   "svjeez/frames",
   "svjeez/page",
   "svjeez/params",

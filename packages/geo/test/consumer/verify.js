@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { project } from "@svjeez/geo";
 import { rect, render, Camera } from "svjeez";
-import { el } from "svjeez/internal";
+import { jsx } from "svjeez/jsx-runtime";
 
 const world = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 const map = project(world, { frame: rect(0, 0, 640, 360) });
@@ -20,7 +20,10 @@ const svg = render(
   Camera({
     frame: rect(0, 0, 640, 360),
     stops: [{ show: { at: 1, over: 1 }, target }],
-    children: [el.path({ d: map.land }), el.path({ d: map.lines, fill: "none", stroke: "#000" })],
+    children: [
+      jsx("path", { d: map.land }),
+      jsx("path", { d: map.lines, fill: "none", stroke: "#000" }),
+    ],
   }),
 );
 

@@ -15,7 +15,6 @@
       "svjeez": ["./src/index.ts"],
       "svjeez/jsx-runtime": ["./src/jsx-runtime.ts"],
       "svjeez/jsx-dev-runtime": ["./src/jsx-dev-runtime.ts"],
-      "svjeez/internal": ["./src/internal.ts"],
       "svjeez/frames": ["./src/frames.ts"],
       "svjeez/page": ["./src/page.ts"],
       "svjeez/params": ["./src/params.ts"]

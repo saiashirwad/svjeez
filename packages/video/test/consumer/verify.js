@@ -5,11 +5,16 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ALL_FORMATS, BufferSource, Input } from "mediabunny";
 import { motion, render } from "svjeez";
-import { el } from "svjeez/internal";
+import { jsx } from "svjeez/jsx-runtime";
 import { video } from "@svjeez/video";
 
 const svg = render({ width: 64, height: 48, duration: 1, title: "Slide" }, [
-  el.rect({ width: 16, height: 48, fill: "#3EE6D6", animation: motion({ x: 0 }).to({ x: 48 }, 1) }),
+  jsx("rect", {
+    width: 16,
+    height: 48,
+    fill: "#3EE6D6",
+    animation: motion({ x: 0 }).to({ x: 48 }, 1),
+  }),
 ]);
 
 for (const format of ["mp4", "webm"]) {

@@ -12,7 +12,7 @@ import {
   wiggle,
   type Child,
 } from "svjeez";
-import { el } from "svjeez/internal";
+import { el } from "../src/el";
 
 const scene = (content: Child, duration = 10) =>
   render({ width: 100, height: 100, duration, title: "Test" }, content);

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { google } from "@svjeez/fonts";
 import { render } from "svjeez";
-import { el } from "svjeez/internal";
+import { jsx } from "svjeez/jsx-runtime";
 
 const cache = mkdtempSync(join(tmpdir(), "svjeez-fonts-consumer-"));
 
@@ -18,7 +18,7 @@ try {
   assert.deepEqual(readdirSync(cache), ["Geist-500-normal.ttf"]);
 
   const svg = render({ width: 200, height: 60, duration: 1, title: "Hello" }, [
-    el.text({ x: 10, y: 40, fontFamily: geist, fontSize: 24 }, "Hello"),
+    jsx("text", { x: 10, y: 40, fontFamily: geist, fontSize: 24, children: "Hello" }),
   ]);
 
   assert.match(svg, /@font-face/);

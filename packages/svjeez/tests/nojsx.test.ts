@@ -11,7 +11,7 @@ import {
   systemDark,
   systemLight,
 } from "svjeez";
-import { el } from "svjeez/internal";
+import { el } from "../src/el";
 import jsxReview from "../skills/svjeez/examples/review-flow";
 import jsxToast from "../skills/svjeez/examples/toast";
 

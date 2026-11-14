@@ -13,7 +13,7 @@ import {
   wiggle,
   type SyntaxOf,
 } from "svjeez";
-import { el } from "svjeez/internal";
+import { el } from "../src/el";
 
 const bg = def.linearGradient({}, <stop offset={0} stopColor="#000" />);
 const glow = fx.glow();

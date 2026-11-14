@@ -4,8 +4,10 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
     "strict": true,
     "noEmit": true
   },
-  "files": ["main.ts"]
+  "files": ["main.tsx"]
 }

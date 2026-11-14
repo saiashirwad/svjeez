@@ -31,7 +31,7 @@ import {
   flow,
 } from "svjeez";
 import { validateSvg } from "svjeez/frames";
-import { el } from "svjeez/internal";
+import { el } from "../src/el";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
