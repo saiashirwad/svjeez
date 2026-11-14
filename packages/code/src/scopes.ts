@@ -1,4 +1,4 @@
-import type { CodeRole } from "svjeez/extras";
+import type { CodeRole } from "svjeez";
 
 /**
  * TextMate scope prefix to role. A token takes the role of its longest matching prefix, so `keyword.operator`

@@ -1,15 +1,13 @@
 // The palettes a reader can pick in the header. Scenes that paint with the base16 variables, the page and its code all follow the pick.
+import { systemDark, systemLight, type Base16 } from "svjeez";
 import {
   gruvboxDark,
   gruvboxLight,
   solarizedDark,
   solarizedLight,
-  systemDark,
-  systemLight,
   tomorrow,
   tomorrowNight,
-  type Base16,
-} from "svjeez/extras";
+} from "@svjeez/code/palettes";
 
 export interface Palette {
   readonly id: string;

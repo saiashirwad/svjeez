@@ -1,4 +1,4 @@
-import type { CodeRole, CodeRun } from "svjeez/extras";
+import type { CodeRole, CodeRun } from "svjeez";
 import {
   createHighlighterCoreSync,
   type LanguageRegistration,
@@ -8,7 +8,9 @@ import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { LANGS, type DefaultLang } from "./langs.ts";
 import { SCOPES } from "./scopes.ts";
 
-export type { CodePiece, CodeRole, CodeTokens } from "svjeez/extras";
+export type { CodePiece, CodeRole, CodeTokens } from "svjeez";
+
+export * from "./palettes.ts";
 
 export type { DefaultLang } from "./langs.ts";
 

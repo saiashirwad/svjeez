@@ -19,8 +19,8 @@ npm i -D @svjeez/code svjeez
 
 ```tsx
 import { highlight } from "@svjeez/code";
-import { render } from "svjeez";
-import { code, defaultDark } from "svjeez/extras";
+import { render, code, defaultDark } from "svjeez";
+
 
 const source = `export const greet = (name: string) => \`hello \${name}\`;`;
 const snippet = code(highlight(source, "ts"), { x: 24, y: 24, fontSize: 20, theme: defaultDark });
@@ -52,7 +52,7 @@ A name that is neither bundled nor passed throws `highlight() does not know the 
 
 ## Roles
 
-`src/scopes.ts` is one table from TextMate scope prefix to role, and the longest matching prefix wins. A token that no row matches is plain. The roles are the ones `svjeez/extras` defines: `plain`, `comment`, `punct`, `keyword`, `fn`, `string`, `number`, `constant`, `type`, `variable` and `tag`, plus `red`, `green`, `yellow` and `cyan` for diffs. A theme that wants a different look changes the colors of its slots, and a theme cannot tell the roles apart if it gives two slots one color.
+`src/scopes.ts` is one table from TextMate scope prefix to role, and the longest matching prefix wins. A token that no row matches is plain. The roles are the ones `svjeez` defines: `plain`, `comment`, `punct`, `keyword`, `fn`, `string`, `number`, `constant`, `type`, `variable` and `tag`, plus `red`, `green`, `yellow` and `cyan` for diffs. A theme that wants a different look changes the colors of its slots, and a theme cannot tell the roles apart if it gives two slots one color.
 
 ## Notes
 

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { highlight } from "@svjeez/code";
-import { render } from "svjeez";
-import { code, defaultDark, tint } from "svjeez/extras";
+import { render, code, defaultDark, tint } from "svjeez";
 
 const tokens = highlight("const answer = 42;", "ts");
 

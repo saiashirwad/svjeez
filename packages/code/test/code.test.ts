@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { render } from "svjeez";
-import { adaptive, code, defaultDark, systemDark, systemLight, tint } from "svjeez/extras";
+import { render, adaptive, code, defaultDark, systemDark, systemLight, tint } from "svjeez";
+
 import toml from "shiki/langs/toml.mjs";
 import { highlight } from "../src/index.ts";
 
