@@ -44,7 +44,7 @@ bun run render-png <file> --times 0,1,2 --sheet --out frames/
 
 `examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/hero`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
 
-Frame rendering needs Chromium once per machine: `bunx playwright-core install chromium-headless-shell`.
+Frame rendering needs Chromium once per machine: `./node_modules/.bin/playwright-core install chromium-headless-shell` (not `bunx`, which can fetch a newer playwright-core than the locked one, whose browser build the tests then miss).
 
 ## Library layout
 
