@@ -1,4 +1,4 @@
-import { indexing, union, type Box, type Point, type Size } from "./box";
+import { indexing, maxOf, union, type Box, type Point, type Size } from "./box";
 
 interface LanesInput {
   readonly lanes: readonly { readonly id: string; readonly label: Size }[];
@@ -54,8 +54,8 @@ export function lanes(input: LanesInput): LanesLayout {
     throw new Error(
       "lanes() times must be finite and non-negative, and each span must end after it starts.",
     );
-  const end = Math.max(1, ...times);
-  const column = Math.max(...input.lanes.map((l) => l.label.w)) + 24;
+  const end = Math.max(1, maxOf(times));
+  const column = maxOf(input.lanes.map((l) => l.label.w)) + 24;
   const x = (t: number) => column + t * scale;
   const mid = (i: number) => i * rowHeight + rowHeight / 2;
 

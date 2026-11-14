@@ -155,26 +155,36 @@ const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
   return Uint8Array.from([...head, ...bmp, ...full.done()]);
 };
 
-/** A version 0 `kern` table with one format 0 subtable. Browsers fall back to it when a font has no GPOS. */
-const kernTable = (
+/**
+ * A version 0 `kern` table of format 0 subtables. Browsers fall back to it when a font has no GPOS. A subtable's length is
+ * a u16, so it holds at most 10920 pairs, and more pairs go into further subtables in sorted order, none dropped.
+ */
+export const kernTable = (
   pairs: readonly (readonly [number, number, number])[],
+  perSubtable = 10000,
 ): Uint8Array | undefined => {
   if (pairs.length === 0) return undefined;
-  const sorted = [...pairs].sort((a, b) => a[0] - b[0] || a[1] - b[1]).slice(0, 10000);
-  const { range, selector, shift } = search(sorted.length, 6);
+  const sorted = [...pairs].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const chunks: (typeof sorted)[] = [];
 
-  const w = new Writer()
-    .u16(0)
-    .u16(1)
-    .u16(0)
-    .u16(14 + 6 * sorted.length)
-    .u16(1)
-    .u16(sorted.length)
-    .u16(range)
-    .u16(selector)
-    .u16(shift);
+  for (let i = 0; i < sorted.length; i += perSubtable)
+    chunks.push(sorted.slice(i, i + perSubtable));
 
-  for (const [left, right, value] of sorted) w.u16(left).u16(right).i16(value);
+  const w = new Writer().u16(0).u16(chunks.length);
+
+  for (const chunk of chunks) {
+    const { range, selector, shift } = search(chunk.length, 6);
+
+    w.u16(0)
+      .u16(14 + 6 * chunk.length)
+      .u16(1)
+      .u16(chunk.length)
+      .u16(range)
+      .u16(selector)
+      .u16(shift);
+
+    for (const [left, right, value] of chunk) w.u16(left).u16(right).i16(value);
+  }
 
   return w.done();
 };
