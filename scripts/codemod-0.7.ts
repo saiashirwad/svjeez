@@ -1,6 +1,8 @@
 // Rewrites a project's source for svjeez 0.7: the import moves (svjeez/extras, svjeez/voxel and the params control math
 // now live in svjeez and the @svjeez packages) and the renames (Values, sample, sampledPath, Steady, Pivot at, voxel
-// block at, flow loop, fieldFlow, renderVideo and the icon type).
+// block at, flow loop, fieldFlow, renderVideo and the icon type), and the time model: during, cut, visible, tl.show and
+// tl.enter become show(), sampled and globe duration become over, a voxel block's from and to become show, and the .end
+// of a typewriter, terminal, reveal or flow result becomes .span.end.
 //
 //   bun codemod-0.7.ts [--dry] <file or folder>...
 //
@@ -110,7 +112,7 @@ const PALETTES = new Set([
 
 const LIVE = new Set(["fit", "positionOf", "valueAt", "fitValues", "withValues", "follow"]);
 
-type Rewrite = "path" | "steady" | "fieldFlow";
+type Rewrite = "path" | "steady" | "fieldFlow" | "during" | "cut" | "visible";
 
 interface Spot {
   readonly module: string;
@@ -143,6 +145,9 @@ const RENAMES = new Map<string, Spot>([
   ["svjeez Steady", { module: "svjeez", name: "Camera", rewrite: "steady" }],
   ["@svjeez/math fieldFlow", { module: "svjeez", name: "flow", rewrite: "fieldFlow" }],
   ["@svjeez/math FieldFlowOptions", { module: "svjeez", name: "FlowOptions" }],
+  ["svjeez during", { module: "svjeez", name: "show", rewrite: "during" }],
+  ["svjeez cut", { module: "svjeez", name: "show", rewrite: "cut" }],
+  ["svjeez visible", { module: "svjeez", name: "show", rewrite: "visible" }],
   ["@svjeez/video renderVideo", { module: "@svjeez/video", name: "video" }],
   ["@svjeez/icons Icon", { module: "@svjeez/icons", name: "IconData" }],
 ]);
@@ -481,6 +486,128 @@ export const rewrite = (fileName: string, source: string): Result => {
       }
     }
 
+  /** The calls of local( as [name start, argument pieces, close]. */
+  const calls = (local: string): [number, [number, number][], number][] =>
+    [
+      ...code.matchAll(
+        new RegExp("(?<![\\w$.])" + local.replaceAll(".", "\\.") + "(?=\\s*\\()", "g"),
+      ),
+    ].flatMap((m) => {
+      if (inImport(m.index)) return [];
+      const open = code.indexOf("(", m.index);
+      const close = closing(code, open);
+
+      return close < 0 ? [] : [[m.index, pieces(code, open + 1, close), close]];
+    });
+
+  const trimmed = ([a, b]: [number, number]): string => source.slice(a, b).trim();
+  let usesShow = bindings.some((b) => b.to.module === "svjeez" && b.to.name === "show");
+
+  for (const b of bindings.filter(
+    (x) => x.to.rewrite === "during" || x.to.rewrite === "cut" || x.to.rewrite === "visible",
+  )) {
+    if (b.aliased) {
+      warn(
+        0,
+        b.local + " is an alias of " + b.from + ", so its uses need rewriting to show() by hand.",
+      );
+      continue;
+    }
+
+    for (const [at, args, close] of calls(b.local)) {
+      edit(at, at + b.local.length, "show");
+
+      if (b.to.rewrite === "cut") edit(args[0]![1], args[0]![1], ", { fade: 0 }");
+      else if (args[1] && trimmed(args[1]) !== "") {
+        const lead = /^\s*/.exec(source.slice(args[1][0], args[1][1]))![0];
+        edit(args[1][0], args[1][1], lead + "{ fade: " + trimmed(args[1]) + " }");
+      }
+
+      if (b.to.rewrite === "visible")
+        warn(
+          at,
+          "visible() faded outside its spans and show() fades inside them, so check the timing.",
+        );
+      void close;
+    }
+  }
+
+  const hasTimeline = bindings.some((b) => b.to.module === "svjeez" && b.to.name === "timeline");
+
+  const timelines = [
+    ...code.matchAll(/\b(?:const|let|var)\s+([\w$]+)\s*=\s*(?:await\s+)?timeline\s*\(/g),
+  ].flatMap((m) => (hasTimeline ? [m[1]!] : []));
+
+  for (const name of timelines)
+    for (const m of code.matchAll(
+      new RegExp("(?<![\\w$.])" + name + "\\.(show|enter)\\s*\\(", "g"),
+    )) {
+      const open = m.index + m[0].length - 1;
+      const close = closing(code, open);
+      const arg = source.slice(open + 1, close).trim();
+
+      if (close < 0 || arg === "") continue;
+      const scene = /^(["'])([\w$]+)\1$/.exec(arg);
+      const at = scene ? name + "." + scene[2] : name + "[" + arg + "]";
+      edit(
+        m.index,
+        close + 1,
+        m[1] === "show" ? "show(" + at + ")" : "show({ at: " + at + ".at })",
+      );
+      usesShow = true;
+    }
+
+  const results = bindings.flatMap((b) =>
+    b.to.module === "svjeez" && ["typewriter", "terminal", "reveal", "flow"].includes(b.to.name)
+      ? [b.local]
+      : [],
+  );
+
+  for (const local of results)
+    for (const m of code.matchAll(
+      new RegExp(
+        "\\b(?:const|let|var)\\s+([\\w$]+)\\s*=\\s*(?:await\\s+)?" + local + "\\s*\\(",
+        "g",
+      ),
+    ))
+      for (const use of code.matchAll(new RegExp("(?<![\\w$.])" + m[1] + "\\.end(?![\\w$])", "g")))
+        edit(use.index + m[1]!.length + 1, use.index + m[1]!.length + 4, "span.end");
+
+  const windowed = (local: string, which: number): void => {
+    for (const [, args] of calls(local)) {
+      const options = args[which];
+      const brace = options ? code.indexOf("{", options[0]) : -1;
+
+      if (
+        !options ||
+        brace < 0 ||
+        brace >= options[1] ||
+        code.slice(options[0], brace).trim() !== ""
+      )
+        continue;
+
+      for (const piece of pieces(code, brace + 1, closing(code, brace))) {
+        const key = keyOf(code, piece);
+
+        if (key?.name === "duration")
+          edit(key.at, key.at + 8, key.shorthand ? "over: duration" : "over");
+      }
+    }
+  };
+
+  for (const b of bindings) {
+    if (b.to.module === "svjeez" && b.to.name === "sampled" && !b.to.rewrite && !b.aliased) {
+      windowed(b.local, 1);
+      windowed(b.local + ".path", 1);
+    }
+
+    if (b.to.rewrite === "path" && !b.aliased) windowed(b.local, 1);
+
+    if (b.to.module === "@svjeez/geo" && b.to.name === "globe") windowed(b.local, 1);
+
+    if (b.to.module === "@svjeez/geo" && b.to.name === "nightfall") windowed(b.local, 2);
+  }
+
   if (voxel) {
     const open: number[] = [];
     let renamedCells = 0;
@@ -489,9 +616,52 @@ export const rewrite = (fileName: string, source: string): Result => {
       if (code[i] === "{") open.push(i);
       else if (code[i] === "}" && open.length > 0) {
         const from = open.pop()!;
-        const keys = pieces(code, from + 1, i).flatMap((p) => keyOf(code, p) ?? []);
+        const parts = pieces(code, from + 1, i);
+        const keys = parts.flatMap((p) => keyOf(code, p) ?? []);
 
         if (keys.some((k) => k.name === "skin")) {
+          const start = parts.findIndex((p) => keyOf(code, p)?.name === "from");
+          const stop = parts.findIndex((p) => keyOf(code, p)?.name === "to");
+
+          const valueOf = (index: number): string => {
+            const piece = parts[index]!;
+            const text = source.slice(piece[0], piece[1]);
+
+            return /^\s*[\w$]+\s*$/.test(text)
+              ? text.trim()
+              : text.slice(text.indexOf(":") + 1).trim();
+          };
+
+          if (start >= 0 || stop >= 0) {
+            const numeric = (text: string): boolean => /^\d+(\.\d+)?$/.test(text);
+            const [a, b] = [start >= 0 ? valueOf(start) : "0", stop >= 0 ? valueOf(stop) : ""];
+
+            const over =
+              b === ""
+                ? ""
+                : numeric(a) && numeric(b)
+                  ? String(Math.round((Number(b) - Number(a)) * 1e9) / 1e9)
+                  : a === "0"
+                    ? b
+                    : b + " - " + a;
+
+            const text = "show: { at: " + a + (over === "" ? "" : ", over: " + over) + " }";
+            const first = start >= 0 ? start : stop;
+            const old = source.slice(parts[first]![0], parts[first]![1]);
+            edit(
+              parts[first]![0],
+              parts[first]![1],
+              /^\s*/.exec(old)![0] + text + /\s*$/.exec(old)![0],
+            );
+
+            if (start >= 0 && stop >= 0) {
+              const last = stop === parts.length - 1;
+              const [from, to] = parts[stop]!;
+              const trimmedEnd = from + source.slice(from, to).trimEnd().length;
+              edit(last ? from - 1 : from, last ? trimmedEnd : to + 1, "");
+            }
+          }
+
           const cell = keys.find((k) => k.name === "at");
 
           if (cell) {
@@ -507,6 +677,11 @@ export const rewrite = (fileName: string, source: string): Result => {
         new RegExp("(?<![\\w$.])" + voxel.local + "\\.scene\\s*\\(", "g"),
       ))
         warn(m.index, "a voxel block's at is now cell. Rename it where the blocks are built.");
+  }
+
+  if (usesShow && !bindings.some((b) => b.to.module === "svjeez" && b.to.name === "show")) {
+    const last = Math.max(0, ...matches.map((m) => m.index + m[0].length));
+    edit(last, last, '\nimport { show } from "svjeez";');
   }
 
   const text = [...edits]

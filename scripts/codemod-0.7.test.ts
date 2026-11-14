@@ -55,7 +55,7 @@ import type { IconData } from "@svjeez/icons";
 const values: ChannelValues<"x"> = { x: 1 };
 const options: ValuesAtOptions = { duration: 2 };
 const now = valuesAt(slide, 1, options);
-const wave = sampled.path((t) => "M" + t, { duration: 4, tolerance: 0.5 });
+const wave = sampled.path((t) => "M" + t, { over: 4, tolerance: 0.5 });
 const dot: CalculusLine | undefined = undefined;
 const icon: IconData = rocket;
 const clip = await video(svg, { fps: 30 });
@@ -135,4 +135,95 @@ test("a folder is rewritten in place, and --dry only reports", () => {
   } finally {
     rmSync(dir, { recursive: true });
   }
+});
+
+const timeBefore = `import { cut, during, flow, sampled, terminal, timeline, typewriter, visible } from "svjeez";
+import { globe, nightfall } from "@svjeez/geo";
+import { voxel } from "@svjeez/voxel";
+
+const tl = timeline({ intro: 3, body: 5 });
+const session = terminal([{ cmd: "ls" }], { at: 1 });
+const typed = typewriter(code("a"), { at: 2 });
+const trip = flow(line, { at: 1, over: 2 });
+const D = Math.ceil(session.end + typed.end) + trip.end;
+
+export default () => (
+  <g>
+    <g animation={during(tl.body, 0.5)} />
+    <g animation={during(tl.body)} />
+    <g animation={cut({ at: 1, over: 2 })} />
+    <g animation={visible(flashes, 0.08)} />
+    <g animation={tl.show("intro")} />
+    <g animation={tl.enter("body")} />
+    <g animation={tl.show(scene)} />
+    <g animation={sampled((t) => ({ x: t }), { duration: D, tolerance: { translate: 1 } })} />
+    <g animation={sampled.path((t) => "M" + t, { duration, tolerance: 0.5 })} />
+    {globe(world, { frame, spin, duration: 24 })}
+    {nightfall(map, date, { duration: 20 })}
+    {voxel.scene({
+      camera: eye,
+      blocks: [
+        { at: [0, 0, 0], skin: dirt, from: 2, to: 6 },
+        { at: [1, 0, 0], skin: dirt, from: arrives },
+        { at: [2, 0, 0], skin: dirt, to: gone },
+        { at: [3, 0, 0], skin: dirt, from, to: until, animation: life },
+      ],
+    })}
+  </g>
+);
+`;
+
+const timeAfter = `import { show, flow, sampled, terminal, timeline, typewriter } from "svjeez";
+import { globe, nightfall } from "@svjeez/geo";
+import { voxel } from "@svjeez/voxel";
+
+const tl = timeline({ intro: 3, body: 5 });
+const session = terminal([{ cmd: "ls" }], { at: 1 });
+const typed = typewriter(code("a"), { at: 2 });
+const trip = flow(line, { at: 1, over: 2 });
+const D = Math.ceil(session.span.end + typed.span.end) + trip.span.end;
+
+export default () => (
+  <g>
+    <g animation={show(tl.body, { fade: 0.5 })} />
+    <g animation={show(tl.body)} />
+    <g animation={show({ at: 1, over: 2 }, { fade: 0 })} />
+    <g animation={show(flashes, { fade: 0.08 })} />
+    <g animation={show(tl.intro)} />
+    <g animation={show({ at: tl.body.at })} />
+    <g animation={show(tl[scene])} />
+    <g animation={sampled((t) => ({ x: t }), { over: D, tolerance: { translate: 1 } })} />
+    <g animation={sampled.path((t) => "M" + t, { over: duration, tolerance: 0.5 })} />
+    {globe(world, { frame, spin, over: 24 })}
+    {nightfall(map, date, { over: 20 })}
+    {voxel.scene({
+      camera: eye,
+      blocks: [
+        { cell: [0, 0, 0], skin: dirt, show: { at: 2, over: 4 } },
+        { cell: [1, 0, 0], skin: dirt, show: { at: arrives } },
+        { cell: [2, 0, 0], skin: dirt, show: { at: 0, over: gone } },
+        { cell: [3, 0, 0], skin: dirt, show: { at: from, over: until - from }, animation: life },
+      ],
+    })}
+  </g>
+);
+`;
+
+test("the time model's moves are rewritten: show, over, a voxel block's show and the span of a result", () => {
+  const { text, warnings } = rewrite("time.tsx", timeBefore);
+
+  expect(text).toBe(timeAfter);
+  expect(warnings).toEqual([
+    "time.tsx:16: visible() faded outside its spans and show() fades inside them, so check the timing.",
+  ]);
+  expect(rewrite("time.tsx", timeAfter).text).toBe(timeAfter);
+});
+
+test("a timeline's show and enter get the show import when nothing else brought it", () => {
+  const source =
+    'import { timeline } from "svjeez";\nconst tl = timeline({ a: 1 });\nconst fade = tl.show("a");\n';
+
+  expect(rewrite("a.ts", source).text).toBe(
+    'import { timeline } from "svjeez";\nimport { show } from "svjeez";\nconst tl = timeline({ a: 1 });\nconst fade = show(tl.a);\n',
+  );
 });
