@@ -144,6 +144,15 @@ describe("cartogram()", () => {
 });
 
 describe("toBars()", () => {
+  test("top must be a whole number of at least 1", () => {
+    const frame = rect(0, 0, 100, 100);
+
+    for (const top of [0, -1, 1.5])
+      expect(() => toBars(map, { France: 1 }, { at: 0, frame, top })).toThrow(
+        `toBars() needs top to be a whole number of at least 1, got ${top}.`,
+      );
+  });
+
   const people = { France: 67, Germany: 83, Spain: 47, Italy: 60 };
   const frame = rect(600, 100, 300, 200);
   const { bars } = toBars(map, people, { at: 1, frame });

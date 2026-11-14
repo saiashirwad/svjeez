@@ -53,10 +53,11 @@ export const getScene = (
   const text = new TextEncoder().encode(svg);
   register(`${name}.svg`, { type: "image/svg+xml", bytes: async () => text });
 
-  const [, , width, height] = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/
-    .exec(svg)!
-    .slice(1)
-    .map(Number);
+  const box = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/.exec(svg);
+
+  if (!box) throw new Error("getScene() needs a scene whose svg has a viewBox, found none.");
+
+  const [, , width, height] = box.slice(1).map(Number);
 
   let posters: Record<Scheme, string> | undefined;
 

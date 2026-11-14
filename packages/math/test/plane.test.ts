@@ -18,6 +18,12 @@ const shear = base.apply(
 const numbers = (d: string) => (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
 
 describe("plane", () => {
+  test("an extent with hi below lo is rejected", () => {
+    expect(() =>
+      plane({ origin: { x: 0, y: 0 }, unit: 10, extent: { x: [3, -3], y: [-3, 3] } }),
+    ).toThrow("plane() needs an extent with lo <= hi on each axis, got x [3, -3] and y [-3, 3].");
+  });
+
   test("point() puts (0, 0) at the origin, with y up", () => {
     expect(base.point(0, 0)).toEqual({ x: 200, y: 150 });
     expect(base.point(1, 2)).toEqual({ x: 220, y: 110 });

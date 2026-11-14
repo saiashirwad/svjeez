@@ -300,6 +300,31 @@ describe("lanes", () => {
   });
 });
 
+describe("named errors", () => {
+  test("walk() names a state the machine does not have", () => {
+    const machine = stateMachine({
+      states: { a: "A", b: "B" },
+      initial: "a",
+      transitions: [["a", "b"]],
+    });
+
+    // @ts-expect-error "zz" is not a state
+    expect(() => machine.walk(["a", "zz"], { at: 0 })).toThrow('walk() has no state "zz"');
+  });
+
+  test("flowchart() needs a node", () => {
+    expect(() => flowchart({ nodes: {}, edges: [] })).toThrow(
+      "flowchart() needs at least one node",
+    );
+  });
+
+  test("lanes() rejects a link from a lane to itself", () => {
+    expect(() =>
+      lanes({ lanes: { a: "A" }, links: [{ from: "a", to: "a", at: 1 }] }, { scale: 10 }),
+    ).toThrow("lanes() needs a link between two different lanes");
+  });
+});
+
 describe("state scopes", () => {
   test("a composite and its inner state cannot share an id", () => {
     expect(() =>

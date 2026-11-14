@@ -554,6 +554,11 @@ export function plane(options: PlaneOptions): Plane {
       `plane() needs a finite origin and a positive unit and step, got origin (${origin.x}, ${origin.y}), unit ${unit} and step ${step}.`,
     );
 
+  if (!isRadius(extent) && !(extent.x[0] <= extent.x[1] && extent.y[0] <= extent.y[1]))
+    throw new Error(
+      `plane() needs an extent with lo <= hi on each axis, got x [${extent.x.join(", ")}] and y [${extent.y.join(", ")}].`,
+    );
+
   const [x, y]: readonly [Vec2, Vec2] = isRadius(extent)
     ? [
         [-extent, extent],

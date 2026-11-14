@@ -2,6 +2,7 @@ import { afterAll, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { build, createServer, type HotPayload } from "vite";
+import { getScene } from "../src/scene.ts";
 import { appConfig } from "./app/config.ts";
 
 const scratch = mkdtempSync(join(import.meta.dirname, ".scratch-"));
@@ -101,3 +102,7 @@ export default () => render({ width: ${size}, height: 100, duration: 1, title: l
     await server.close();
   }
 }, 60_000);
+
+test("getScene() names an svg with no viewBox", () => {
+  expect(() => getScene("<svg></svg>")).toThrow("getScene() needs a scene whose svg has a viewBox");
+});

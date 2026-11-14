@@ -430,6 +430,12 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
       if (path.length === 0) throw new Error("walk() needs at least one state, got none.");
 
+      for (const s of path)
+        if (!nodes.has(s))
+          throw new Error(
+            `walk() has no state ${JSON.stringify(s)}. States are ${[...nodes.keys()].map((k) => JSON.stringify(k)).join(", ")}.`,
+          );
+
       const legs = path.slice(1).map((next, k) => {
         const points = step(path[k]!, next);
 
