@@ -32,10 +32,20 @@ const ENTITIES = new Map([
   ["apos", "'"],
 ]);
 
+const codePoint = (entity: string, value: number): string => {
+  if (!(value <= 0x10ffff))
+    throw new Error(
+      `strokeFont() found the entity ${entity}, which is past the last code point U+10FFFF.`,
+    );
+
+  return String.fromCodePoint(value);
+};
+
 const decode = (value: string): string =>
   value.replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (whole, name: string) =>
     name[0] === "#"
-      ? String.fromCodePoint(
+      ? codePoint(
+          whole,
           name[1]?.toLowerCase() === "x" ? parseInt(name.slice(2), 16) : Number(name.slice(1)),
         )
       : (ENTITIES.get(name) ?? whole),
