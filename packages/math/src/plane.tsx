@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   css,
   ease,
@@ -15,13 +16,12 @@ import {
   type SvgNode,
   defaultDark,
 } from "svjeez";
-import { el } from "svjeez/internal";
 
-import { calculus, type Calculus } from "./calculus.ts";
-import { faintGrid, frameOf, furniture, sample, type Frame, type SampleOptions } from "./graph.ts";
+import { calculus, type Calculus } from "./calculus.tsx";
+import { faintGrid, frameOf, furniture, sample, type Frame, type SampleOptions } from "./graph.tsx";
 import { tex, type Tex } from "./index.ts";
 import { apply, identity, multiply, round, type Matrix } from "./matrix.ts";
-import { LEAN, warp, type Move, type PathAttrs, type Placement, type Vec2 } from "./warp.ts";
+import { LEAN, warp, type Move, type PathAttrs, type Placement, type Vec2 } from "./warp.tsx";
 
 export type { Vec2 };
 
@@ -295,11 +295,13 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
   const flat = `translate(${origin.x} ${origin.y})`;
 
   /** In pixels from the origin, where heads and labels read the unit, or in plane units, where paths don't. */
-  const scope = (pixels: boolean, child: SvgNode) =>
-    el.g(
-      { transform: pixels ? flat : `${flat} scale(${sx} ${-sy})` },
-      el.g({ animation: timeline, style: pixels ? { [UX]: sx, [UY]: sy } : undefined }, child),
-    );
+  const scope = (pixels: boolean, child: SvgNode) => (
+    <g transform={pixels ? flat : `${flat} scale(${sx} ${-sy})`}>
+      <g animation={timeline} style={pixels ? { [UX]: sx, [UY]: sy } : undefined}>
+        {child}
+      </g>
+    </g>
+  );
 
   /** A point and a direction for the rules to read. Zeros are left out, since every property starts at 0. */
   const at = (x: number, y: number, dx = 0, dy = 0, k = 0) => ({
@@ -316,38 +318,37 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
 
       return scope(
         false,
-        el.g(
-          { class: "plane-map" },
-          el.path({
-            ...attrs,
-            d: plain(polylines, closed),
-            class: grow ? "plane-grow" : undefined,
-            style: grow ? at(x, y) : undefined,
-            animation: grow
-              ? motion({ [GROW]: 0 })
-                  .at(grow.at)
-                  .to({ [GROW]: 1 }, grow.over, ease.inOut)
-              : undefined,
-          }),
-        ),
+        <g class="plane-map">
+          <path
+            {...attrs}
+            d={plain(polylines, closed)}
+            class={grow ? "plane-grow" : undefined}
+            style={grow ? at(x, y) : undefined}
+            animation={
+              grow
+                ? motion({ [GROW]: 0 })
+                    .at(grow.at)
+                    .to({ [GROW]: 1 }, grow.over, ease.inOut)
+                : undefined
+            }
+          />
+        </g>,
       );
     },
     head(from, to, polygon, fill) {
       return scope(
         true,
-        el.g(
-          { class: "plane-head", style: at(to[0], to[1], to[0] - from[0], to[1] - from[1]) },
-          el.polygon({ points: polygon.map((p) => p.join(",")).join(" "), fill }),
-        ),
+        <g class="plane-head" style={at(to[0], to[1], to[0] - from[0], to[1] - from[1])}>
+          <polygon points={polygon.map((p) => p.join(",")).join(" ")} fill={fill} />
+        </g>,
       );
     },
     ride(point, direction, push, content) {
       return scope(
         true,
-        el.g(
-          { class: "plane-at", style: at(point[0], point[1], direction[0], direction[1], push) },
-          content,
-        ),
+        <g class="plane-at" style={at(point[0], point[1], direction[0], direction[1], push)}>
+          {content}
+        </g>,
       );
     },
   };
@@ -377,12 +378,11 @@ const warpDrawing = (frame: Frame, steps: readonly Step[]): Drawing => {
     path(polylines, closed, attrs, grow) {
       const node = w.path(w.rings(polylines, closed), closed, attrs);
 
-      return grow
-        ? el.g(
-            { animation: motion({ opacity: 0 }).at(grow.at).to({ opacity: 1 }, grow.over) },
-            node,
-          )
-        : node;
+      return grow ? (
+        <g animation={motion({ opacity: 0 }).at(grow.at).to({ opacity: 1 }, grow.over)}>{node}</g>
+      ) : (
+        node
+      );
     },
     head(from, to, polygon, fill) {
       return w.head(w.rings([[from, to]], false)[0]!, polygon, fill);
@@ -391,8 +391,9 @@ const warpDrawing = (frame: Frame, steps: readonly Step[]): Drawing => {
   };
 };
 
-const appear = (at: number, over: number, child: SvgNode) =>
-  el.g({ animation: motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over) }, child);
+const appear = (at: number, over: number, child: SvgNode) => (
+  <g animation={motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)}>{child}</g>
+);
 
 const isSource = (content: string | Tex | SvgNode): content is string =>
   typeof content === "string";
@@ -410,7 +411,7 @@ const centered = (
   const { x, y, w, h } = formula.bounds;
 
   return [
-    el.g({ transform: `translate(${round(-x - w / 2)} ${round(-y - h / 2)})` }, formula.node),
+    <g transform={`translate(${round(-x - w / 2)} ${round(-y - h / 2)})`}>{formula.node}</g>,
     Math.hypot(w, h) / 2,
   ];
 };
@@ -474,14 +475,23 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     const words = options.label === undefined ? undefined : centered(options.label, color, 17);
     const label = words && draw().ride(to, direction, (4 / 3) * width + 6 + words[1], words[0]);
 
-    if (!enter) return el.g({}, [shaft, tip, label]);
+    if (!enter)
+      return (
+        <g>
+          {shaft}
+          {tip}
+          {label}
+        </g>
+      );
     const { at, over } = enter;
 
-    return el.g({}, [
-      shaft,
-      appear(at + over * 0.8, over * 0.4, tip),
-      label && appear(at + over, over * 0.8, label),
-    ]);
+    return (
+      <g>
+        {shaft}
+        {appear(at + over * 0.8, over * 0.4, tip)}
+        {label && appear(at + over, over * 0.8, label)}
+      </g>
+    );
   };
 
   const graph = calculus({
@@ -544,9 +554,11 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     get grid() {
       const lines = rules(frame, true);
 
-      return lines.length === 0
-        ? el.g({}, [])
-        : draw().path(lines, false, { fill: "none", stroke: theme.base0D, strokeOpacity: 0.55 });
+      return lines.length === 0 ? (
+        <g />
+      ) : (
+        draw().path(lines, false, { fill: "none", stroke: theme.base0D, strokeOpacity: 0.55 })
+      );
     },
     get axes() {
       return draw().path(axisLines(frame), false, {
@@ -569,29 +581,33 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
       return {
         d: curve.d,
         points: curve.points,
-        node: el.g(
-          { clipPath: frame.clip },
-          steps.length > 0
-            ? draw().path(
+        node: (
+          <g clipPath={frame.clip}>
+            {steps.length > 0 ? (
+              draw().path(
                 curve.runs.filter((run) => run.length > 1),
                 false,
                 { ...look, ...joins },
               )
-            : el.path({ d: curve.d, ...look, ...joins, animation: options.animation }),
+            ) : (
+              <path d={curve.d} {...look} {...joins} animation={options.animation} />
+            )}
+          </g>
         ),
       };
     },
     ...still,
     vector,
-    basis: ({ enter } = {}) =>
-      el.g({}, [
-        vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath`, enter }),
-        vector([0, 1], {
+    basis: ({ enter } = {}) => (
+      <g>
+        {vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath`, enter })}
+        {vector([0, 1], {
           color: theme.base08,
           label: String.raw`\hat\jmath`,
           enter: enter && { at: enter.at + 0.2, over: enter.over },
-        }),
-      ]),
+        })}
+      </g>
+    ),
     polygon: (points, { color = theme.base0A, fillOpacity = 0.22, strokeWidth = 1.5 } = {}) =>
       draw().path([points], true, {
         fill: color,

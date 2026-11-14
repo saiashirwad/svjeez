@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import { area as d3area, curveLinear, curveMonotoneX, curveStep, line as d3line } from "d3-shape";
 import {
   def,
@@ -13,7 +14,6 @@ import {
   tint,
   type Base16,
 } from "svjeez";
-import { el } from "svjeez/internal";
 import { span as spanOf } from "svjeez";
 
 import type {
@@ -119,7 +119,7 @@ export function buildSeries(f: Frame) {
   };
 
   const clipTo = (box: Rect) =>
-    def.clipPath({}, el.rect({ x: box.x, y: box.y, width: box.w, height: box.h }));
+    def.clipPath({}, <rect x={box.x} y={box.y} width={box.w} height={box.h} />);
 
   function bars(values: Readonly<Record<string, number>>, options: BarsOptions = {}): Bars {
     const { stagger = 0.08, radius = 3, group = { index: 0, count: 1 } } = options;
@@ -198,43 +198,44 @@ export function buildSeries(f: Frame) {
         const to = up ? { height: long, y: 0 } : { height: long };
 
         (up ? rising : falling).push(
-          el.rect({
-            x,
-            y: round(up ? tip : zero - radiusPx),
-            width: barWidth,
-            height: round(long),
-            rx: radiusPx,
-            fill: color,
-            animation: grow.at(start).to(to, over, ease.out),
-          }),
+          <rect
+            x={x}
+            y={round(up ? tip : zero - radiusPx)}
+            width={barWidth}
+            height={round(long)}
+            rx={radiusPx}
+            fill={color}
+            animation={grow.at(start).to(to, over, ease.out)}
+          />,
         );
 
         if (format)
           labels.push(
-            el.text(
-              {
-                x: round(x + barWidth / 2),
-                y: round(up ? tip - 6 : tip + fontSize + 2),
-                fontSize,
-                textAnchor: "middle",
-                fill: ink,
-                fontFamily: font,
-                animation: enter(
-                  { at: start + over * 0.6, over: 0.35 },
-                  { opacity: 0, y: up ? 4 : -4 },
-                ),
-              },
-              format(value),
-            ),
+            <text
+              x={round(x + barWidth / 2)}
+              y={round(up ? tip - 6 : tip + fontSize + 2)}
+              fontSize={fontSize}
+              textAnchor="middle"
+              fill={ink}
+              fontFamily={font}
+              animation={enter(
+                { at: start + over * 0.6, over: 0.35 },
+                { opacity: 0, y: up ? 4 : -4 },
+              )}
+            >
+              {format(value)}
+            </text>,
           );
       });
 
     return {
-      node: el.g({}, [
-        rising.length ? el.g({ clipPath: above }, rising) : undefined,
-        falling.length ? el.g({ clipPath: below }, falling) : undefined,
-        labels,
-      ]),
+      node: (
+        <g>
+          {rising.length ? <g clipPath={above}>{rising}</g> : undefined}
+          {falling.length ? <g clipPath={below}>{falling}</g> : undefined}
+          {labels}
+        </g>
+      ),
       bars: placed,
       span: spanOf(at, end - at),
     };
@@ -271,49 +272,50 @@ export function buildSeries(f: Frame) {
     const total = reached.at(-1) || 1;
     const last = points.at(-1)!;
 
-    const node = el.g({}, [
-      stroked
-        ? el.path({
-            d,
-            fill: "none",
-            stroke: color,
-            strokeWidth,
-            strokeLinejoin: "round",
-            strokeLinecap: "round",
-            animation: draw({ at, over }, ease.linear),
-          })
-        : undefined,
-      radius > 0
-        ? points.map((p, i) =>
-            el.circle({
-              cx: p.x,
-              cy: p.y,
-              r: radius,
-              fill: color,
-              stroke: theme.base00,
-              strokeWidth: 2,
-              animation: enter(
-                { at: at + (over * reached[i]!) / total, over: 0.3 },
-                { scale: 0 },
-                ease.pop,
-              ),
-            }),
-          )
-        : undefined,
-      options.label
-        ? el.text(
-            {
-              x: round(last.x + (radius || strokeWidth) + 8),
-              y: round(last.y + fontSize * 0.35),
-              fontSize,
-              fill: color,
-              fontFamily: font,
-              animation: enter({ at: at + over, over: 0.4 }, { opacity: 0, x: -8 }),
-            },
-            options.label,
-          )
-        : undefined,
-    ]);
+    const node = (
+      <g>
+        {stroked ? (
+          <path
+            d={d}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            animation={draw({ at, over }, ease.linear)}
+          />
+        ) : undefined}
+        {radius > 0
+          ? points.map((p, i) => (
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={radius}
+                fill={color}
+                stroke={theme.base00}
+                strokeWidth={2}
+                animation={enter(
+                  { at: at + (over * reached[i]!) / total, over: 0.3 },
+                  { scale: 0 },
+                  ease.pop,
+                )}
+              />
+            ))
+          : undefined}
+        {options.label ? (
+          <text
+            x={round(last.x + (radius || strokeWidth) + 8)}
+            y={round(last.y + fontSize * 0.35)}
+            fontSize={fontSize}
+            fill={color}
+            fontFamily={font}
+            animation={enter({ at: at + over, over: 0.4 }, { opacity: 0, x: -8 })}
+          >
+            {options.label}
+          </text>
+        ) : undefined}
+      </g>
+    );
 
     return { d, node };
   }
@@ -350,25 +352,32 @@ export function buildSeries(f: Frame) {
       throw new Error(`area() could not draw a shape through ${placed.length} points.`);
 
     const shade = def.linearGradient({ x1: 0, y1: 0, x2: 0, y2: 1 }, [
-      el.stop({ offset: 0, stopColor: color, stopOpacity: 0.4 }),
-      el.stop({ offset: 1, stopColor: color, stopOpacity: 0 }),
+      <stop offset={0} stopColor={color} stopOpacity={0.4} />,
+      <stop offset={1} stopColor={color} stopOpacity={0} />,
     ]);
 
     const wipe = def.clipPath(
       {},
-      el.rect({
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.w,
-        height: bounds.h,
-        animation: motion({ width: 0 }).at(at).to({ width: bounds.w }, over, ease.linear),
-      }),
+      <rect
+        x={bounds.x}
+        y={bounds.y}
+        width={bounds.w}
+        height={bounds.h}
+        animation={motion({ width: 0 }).at(at).to({ width: bounds.w }, over, ease.linear)}
+      />,
     );
 
     const { d, node } = trace("area()", placed, options, color, span, options.line !== false);
 
     return {
-      node: el.g({}, [el.g({ clipPath: wipe }, el.path({ d: fill, fill: shade })), node]),
+      node: (
+        <g>
+          <g clipPath={wipe}>
+            <path d={fill} fill={shade} />
+          </g>
+          {node}
+        </g>
+      ),
       d,
       fill,
       points: placed,

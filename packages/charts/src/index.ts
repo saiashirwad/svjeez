@@ -1,4 +1,4 @@
-export { chart } from "./chart.ts";
+export { chart } from "./chart.tsx";
 
 export type {
   Area,

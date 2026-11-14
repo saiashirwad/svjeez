@@ -14,7 +14,7 @@ import {
   type Diagram,
   type DiagramOptions,
   type NodeRole,
-} from "./kit.ts";
+} from "./kit.tsx";
 
 /** A label, or a node naming its `parent`. Exactly one node has no parent. */
 export type TreeSpec<N extends string> =

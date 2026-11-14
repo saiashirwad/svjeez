@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   def,
   rect,
@@ -10,7 +11,6 @@ import {
   type Ref,
   type SvgNode,
 } from "svjeez";
-import { el } from "svjeez/internal";
 
 export type Range = readonly [number, number];
 
@@ -129,21 +129,31 @@ export function frameOf(options: FrameOptions): Frame {
     theme,
     fontSize,
     font,
-    clip: def.clipPath({}, el.rect({ x: at.x, y: at.y, width, height })),
+    clip: def.clipPath({}, <rect x={at.x} y={at.y} width={width} height={height} />),
   };
 }
 
-const lineOf = (frame: Frame, x1: number, y1: number, x2: number, y2: number, strokeWidth = 1) =>
-  el.line({ x1, y1, x2, y2, stroke: tint(frame.theme, "comment"), strokeWidth });
+const lineOf = (frame: Frame, x1: number, y1: number, x2: number, y2: number, strokeWidth = 1) => (
+  <line
+    x1={x1}
+    y1={y1}
+    x2={x2}
+    y2={y2}
+    stroke={tint(frame.theme, "comment")}
+    strokeWidth={strokeWidth}
+  />
+);
 
 /** Faint lines across the plot at the ticks. */
 export function faintGrid(frame: Frame): SvgNode {
   const { bounds, xs, ys, point } = frame;
 
-  return el.g({ strokeOpacity: 0.25 }, [
-    ...xs.map((v) => lineOf(frame, point(v, 0).x, bounds.y, point(v, 0).x, bounds.y + bounds.h)),
-    ...ys.map((v) => lineOf(frame, bounds.x, point(0, v).y, bounds.x + bounds.w, point(0, v).y)),
-  ]);
+  return (
+    <g strokeOpacity={0.25}>
+      {xs.map((v) => lineOf(frame, point(v, 0).x, bounds.y, point(v, 0).x, bounds.y + bounds.h))}
+      {ys.map((v) => lineOf(frame, bounds.x, point(0, v).y, bounds.x + bounds.w, point(0, v).y))}
+    </g>
+  );
 }
 
 /** The axis lines, their ticks and the numbers at them, drawn at rest. */
@@ -156,27 +166,29 @@ export function furniture(frame: Frame): SvgNode {
   const line = (x1: number, y1: number, x2: number, y2: number, strokeWidth?: number) =>
     lineOf(frame, x1, y1, x2, y2, strokeWidth);
 
-  const text = (tx: number, ty: number, anchor: "middle" | "end", value: number) =>
-    el.text(
-      { x: tx, y: ty, fontSize, textAnchor: anchor, fill: labelColor, fontFamily: font },
-      compact(value),
-    );
+  const text = (tx: number, ty: number, anchor: "middle" | "end", value: number) => (
+    <text x={tx} y={ty} fontSize={fontSize} textAnchor={anchor} fill={labelColor} fontFamily={font}>
+      {compact(value)}
+    </text>
+  );
 
-  return el.g({}, [
-    frame.grid ? faintGrid(frame) : undefined,
-    line(bounds.x, y, bounds.x + bounds.w, y, 1.5),
-    line(x, bounds.y, x, bounds.y + bounds.h, 1.5),
-    ...xs.map((v) => line(point(v, 0).x, y - TICK, point(v, 0).x, y + TICK)),
-    ...ys.map((v) => line(x - TICK, point(0, v).y, x + TICK, point(0, v).y)),
-    frame.labels
-      ? [
-          ...xs.map((v) => text(point(v, 0).x, y + TICK + fontSize, "middle", v)),
-          ...ys
-            .filter((v) => !(v === 0 && zeroInY))
-            .map((v) => text(x - TICK - 3, point(0, v).y + fontSize * 0.35, "end", v)),
-        ]
-      : undefined,
-  ]);
+  return (
+    <g>
+      {frame.grid ? faintGrid(frame) : undefined}
+      {line(bounds.x, y, bounds.x + bounds.w, y, 1.5)}
+      {line(x, bounds.y, x, bounds.y + bounds.h, 1.5)}
+      {xs.map((v) => line(point(v, 0).x, y - TICK, point(v, 0).x, y + TICK))}
+      {ys.map((v) => line(x - TICK, point(0, v).y, x + TICK, point(0, v).y))}
+      {frame.labels
+        ? [
+            ...xs.map((v) => text(point(v, 0).x, y + TICK + fontSize, "middle", v)),
+            ...ys
+              .filter((v) => !(v === 0 && zeroInY))
+              .map((v) => text(x - TICK - 3, point(0, v).y + fontSize * 0.35, "end", v)),
+          ]
+        : undefined}
+    </g>
+  );
 }
 
 export interface SampleOptions {

@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   type Color,
   textWidth,
@@ -21,7 +22,6 @@ import {
   type Base16,
   type Slot,
 } from "svjeez";
-import { el } from "svjeez/internal";
 import { curve } from "./curve.ts";
 
 /** What a node is, so the theme can draw it. */
@@ -209,7 +209,11 @@ export const look = (options: DiagramOptions) => {
     font,
     small,
     smallLook: { theme, fontSize: small } satisfies Look,
-    root: (children: Child): SvgNode => el.g({ class: cls, fontFamily: font }, children),
+    root: (children: Child): SvgNode => (
+      <g class={cls} fontFamily={font}>
+        {children}
+      </g>
+    ),
   };
 };
 
@@ -226,44 +230,45 @@ export const drawNode = (
   const tint = tintOf(theme, role);
 
   const details =
-    role === "tool"
-      ? el.path({
-          d: `M${b.x + 8} ${b.y}V${b.y + b.h}M${b.x + b.w - 8} ${b.y}V${b.y + b.h}`,
-          stroke: tint,
-          strokeOpacity: 0.7,
-          fill: "none",
-        })
-      : role === "store"
-        ? el.path({
-            d: `M${b.x} ${b.y + LID}A${b.w / 2} ${LID} 0 0 0 ${b.x + b.w} ${b.y + LID}`,
-            stroke: tint,
-            fill: "none",
-          })
-        : undefined;
+    role === "tool" ? (
+      <path
+        d={`M${b.x + 8} ${b.y}V${b.y + b.h}M${b.x + b.w - 8} ${b.y}V${b.y + b.h}`}
+        stroke={tint}
+        strokeOpacity={0.7}
+        fill="none"
+      />
+    ) : role === "store" ? (
+      <path
+        d={`M${b.x} ${b.y + LID}A${b.w / 2} ${LID} 0 0 0 ${b.x + b.w} ${b.y + LID}`}
+        stroke={tint}
+        fill="none"
+      />
+    ) : undefined;
 
-  return el.g({ animation }, [
-    el.path({ d: outline(role, b), fill: theme.base00 }),
-    el.path({
-      d: outline(role, b),
-      fill: tint,
-      fillOpacity: 0.14,
-      stroke: tint,
-      strokeWidth: 1.5,
-      strokeLinejoin: "round",
-    }),
-    details,
-    extra,
-    el.text(
-      {
-        x: b.x + b.w / 2,
-        y: b.y + b.h / 2 + (role === "store" ? LID / 2 : 0) + fontSize * 0.35,
-        fontSize,
-        textAnchor: "middle",
-        fill: theme.base05,
-      },
-      label,
-    ),
-  ]);
+  return (
+    <g animation={animation}>
+      <path d={outline(role, b)} fill={theme.base00} />
+      <path
+        d={outline(role, b)}
+        fill={tint}
+        fillOpacity={0.14}
+        stroke={tint}
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+      />
+      {details}
+      {extra}
+      <text
+        x={b.x + b.w / 2}
+        y={b.y + b.h / 2 + (role === "store" ? LID / 2 : 0) + fontSize * 0.35}
+        fontSize={fontSize}
+        textAnchor="middle"
+        fill={theme.base05}
+      >
+        {label}
+      </text>
+    </g>
+  );
 };
 
 const HEAD = 8;
@@ -286,32 +291,36 @@ export const arrow = (
   const head = `M${b.x} ${b.y}L${b.x - ux * HEAD - uy * HEAD * 0.5} ${b.y - uy * HEAD + ux * HEAD * 0.5}L${b.x - ux * HEAD + uy * HEAD * 0.5} ${b.y - uy * HEAD - ux * HEAD * 0.5}Z`;
   const { at, over = 0.4 } = look;
 
-  return el.g({}, [
-    el.path({
-      d: curve(trimmed).d,
-      fill: "none",
-      stroke: color,
-      strokeWidth: 1.5,
-      strokeLinejoin: "round",
-      strokeDasharray: look.dashed ? "5 4" : undefined,
-      animation:
-        at === undefined
-          ? undefined
-          : look.dashed
-            ? motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)
-            : draw({ at, over }),
-    }),
-    el.path({
-      d: head,
-      fill: color,
-      animation:
-        at === undefined
-          ? undefined
-          : motion({ opacity: 0 })
-              .at(at + over * 0.85)
-              .to({ opacity: 1 }, over * 0.15),
-    }),
-  ]);
+  return (
+    <g>
+      <path
+        d={curve(trimmed).d}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+        strokeDasharray={look.dashed ? "5 4" : undefined}
+        animation={
+          at === undefined
+            ? undefined
+            : look.dashed
+              ? motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)
+              : draw({ at, over })
+        }
+      />
+      <path
+        d={head}
+        fill={color}
+        animation={
+          at === undefined
+            ? undefined
+            : motion({ opacity: 0 })
+                .at(at + over * 0.85)
+                .to({ opacity: 1 }, over * 0.15)
+        }
+      />
+    </g>
+  );
 };
 
 /** A text label on a knockout of the background color, so the line it sits on breaks around it. */
@@ -320,27 +329,20 @@ export const chip = (
   text: string,
   look: Look & { readonly fill?: Color; readonly ground?: Color | "none" },
   animation?: Stack<"opacity">,
-): SvgNode =>
-  el.g({ animation }, [
-    el.rect({
-      x: b.x,
-      y: b.y,
-      width: b.w,
-      height: b.h,
-      rx: 3,
-      fill: look.ground ?? look.theme.base00,
-    }),
-    el.text(
-      {
-        x: b.x + b.w / 2,
-        y: b.y + b.h / 2 + look.fontSize * 0.35,
-        fontSize: look.fontSize,
-        textAnchor: "middle",
-        fill: look.fill ?? look.theme.base04,
-      },
-      text,
-    ),
-  ]);
+): SvgNode => (
+  <g animation={animation}>
+    <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={3} fill={look.ground ?? look.theme.base00} />
+    <text
+      x={b.x + b.w / 2}
+      y={b.y + b.h / 2 + look.fontSize * 0.35}
+      fontSize={look.fontSize}
+      textAnchor="middle"
+      fill={look.fill ?? look.theme.base04}
+    >
+      {text}
+    </text>
+  </g>
+);
 
 /** The knockout box an inline edge label needs. */
 export const labelSize = (text: string, fontSize: number, font?: FontValue): Size => ({

@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   motion,
   type Color,
@@ -7,7 +8,6 @@ import {
   tint,
   type Base16,
 } from "svjeez";
-import { el } from "svjeez/internal";
 
 import { tex } from "./index.ts";
 
@@ -182,16 +182,17 @@ export function counter(
 
       const [a, b, c, d] = g.matrix;
 
-      return el.g(
-        { animation: track },
-        el.path({
-          d: g.d,
-          transform: `matrix(${a} ${b} ${c} ${d} ${Math.round((x + left[p]!) * 1000) / 1000} ${Math.round(baseline * 1000) / 1000})`,
-          fill: ink,
-        }),
+      return (
+        <g animation={track}>
+          <path
+            d={g.d}
+            transform={`matrix(${a} ${b} ${c} ${d} ${Math.round((x + left[p]!) * 1000) / 1000} ${Math.round(baseline * 1000) / 1000})`}
+            fill={ink}
+          />
+        </g>
       );
     });
   });
 
-  return { node: el.g({}, nodes.flat()), width, height };
+  return { node: <g>{nodes.flat()}</g>, width, height };
 }

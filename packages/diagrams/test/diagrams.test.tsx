@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { render, type Rect, type SvgNode } from "svjeez";
-import { el } from "svjeez/internal";
 import { flowchart, lanes, sequence, stateMachine, tree } from "../src/index.ts";
 
 const valid = (node: SvgNode) =>
@@ -136,7 +135,14 @@ describe("state", () => {
     expect(walk.spans.idle.map((s) => s.at)).toEqual([1, expect.closeTo(3.7, 9)]);
     expect(walk.spans.done[0]!.at).toBeCloseTo(1 + 4 * 1.35, 9);
     expect(walk.span.end).toBeCloseTo(1 + 5 + 4 * 0.35, 9);
-    expect(() => valid(el.g({}, [machine.node, walk.node]))).not.toThrow();
+    expect(() =>
+      valid(
+        <g>
+          {machine.node}
+          {walk.node}
+        </g>,
+      ),
+    ).not.toThrow();
   });
 
   test("with one time per state, each lights then, the token arriving as it does", () => {
@@ -214,7 +220,14 @@ describe("state", () => {
 
       expect(walk.spans.screening).toHaveLength(1);
       expect(() => review.walk(["draft", "decision"], { at: 0 })).toThrow();
-      expect(() => valid(el.g({}, [review.node, walk.node]))).not.toThrow();
+      expect(() =>
+        valid(
+          <g>
+            {review.node}
+            {walk.node}
+          </g>,
+        ),
+      ).not.toThrow();
     });
   });
 });

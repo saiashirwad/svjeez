@@ -15,7 +15,8 @@
     "lib": ["ESNext"],
     "paths": {
       "svjeez": ["../svjeez/src/index.ts"],
-      "svjeez/internal": ["../svjeez/src/internal.ts"]
+      "svjeez/jsx-runtime": ["../svjeez/src/jsx-runtime.ts"],
+      "svjeez/jsx-dev-runtime": ["../svjeez/src/jsx-dev-runtime.ts"]
     }
   },
   "include": ["src", "test"],

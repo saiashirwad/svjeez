@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   ease,
   motion,
@@ -10,7 +11,6 @@ import {
   type Base16,
 } from "svjeez";
 import { span as spanOf, type Spanned } from "svjeez";
-import { el } from "svjeez/internal";
 
 import { apply, identity, type Matrix } from "./matrix.ts";
 
@@ -408,43 +408,36 @@ export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): E
       ? [previous.r * Math.cos(previous.phase), previous.r * Math.sin(previous.phase)]
       : mean;
 
-    return el.g({ transform: `translate(${tenth(offset[0])} ${tenth(offset[1])})` }, [
-      el.g(
-        {
-          style: { transformOrigin: "0 0", transformBox: "view-box" },
-          animation: motion({ rotate: 0 })
+    return (
+      <g transform={`translate(${tenth(offset[0])} ${tenth(offset[1])})`}>
+        <g
+          style={{ transformOrigin: "0 0", transformBox: "view-box" }}
+          animation={motion({ rotate: 0 })
             .at(at)
-            .to({ rotate: 360 * spin }, over, ease.linear),
-        },
-        [
-          i < circles
+            .to({ rotate: 360 * spin }, over, ease.linear)}
+        >
+          {i < circles
             ? [
-                el.circle({
-                  r: tenth(r),
-                  fill: "none",
-                  stroke: ring,
-                  strokeOpacity: 0.4,
-                  strokeWidth: 1,
-                }),
-                el.line({
-                  x2: tenth(arm[0]),
-                  y2: tenth(arm[1]),
-                  stroke: ring,
-                  strokeOpacity: 0.8,
-                  strokeWidth: 1.25,
-                }),
+                <circle
+                  r={tenth(r)}
+                  fill="none"
+                  stroke={ring}
+                  strokeOpacity={0.4}
+                  strokeWidth={1}
+                />,
+                <line
+                  x2={tenth(arm[0])}
+                  y2={tenth(arm[1])}
+                  stroke={ring}
+                  strokeOpacity={0.8}
+                  strokeWidth={1.25}
+                />,
               ]
-            : [],
-          inner ??
-            el.circle({
-              cx: tenth(arm[0]),
-              cy: tenth(arm[1]),
-              r: 4,
-              fill: ink,
-            }),
-        ],
-      ),
-    ]);
+            : []}
+          {inner ?? <circle cx={tenth(arm[0])} cy={tenth(arm[1])} r={4} fill={ink} />}
+        </g>
+      </g>
+    );
   }, undefined);
 
   const entry = Math.min(0.5, over / 4);
@@ -456,27 +449,31 @@ export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): E
   })();
 
   return {
-    node: el.g({}, [
-      options.fill
-        ? el.path({
-            d,
-            fill: options.fill,
-            animation: motion({ opacity: 0 })
+    node: (
+      <g>
+        {options.fill ? (
+          <path
+            d={d}
+            fill={options.fill}
+            animation={motion({ opacity: 0 })
               .at(at + over)
-              .to({ opacity: 1 }, Math.max(fade, 0.4)),
-          })
-        : [],
-      el.path({
-        d,
-        fill: "none",
-        stroke: ink,
-        strokeWidth,
-        strokeLinejoin: "round",
-        strokeLinecap: "round",
-        animation: trail,
-      }),
-      el.g({ animation: visible }, chain ?? []),
-    ]),
+              .to({ opacity: 1 }, Math.max(fade, 0.4))}
+          />
+        ) : (
+          []
+        )}
+        <path
+          d={d}
+          fill="none"
+          stroke={ink}
+          strokeWidth={strokeWidth}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          animation={trail}
+        />
+        <g animation={visible}>{chain ?? []}</g>
+      </g>
+    ),
     span: spanOf(at, over + fade),
     d,
   };

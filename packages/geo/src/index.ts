@@ -390,7 +390,7 @@ export {
   type Choropleth,
   type ChoroplethOptions,
   type RegionValues,
-} from "./choropleth.ts";
+} from "./choropleth.tsx";
 
 export {
   cartogram,
@@ -403,7 +403,7 @@ export {
   type CartogramOptions,
   type MorphOptions,
   type Morphed,
-} from "./morph.ts";
+} from "./morph.tsx";
 
 export {
   diverging,
@@ -416,7 +416,7 @@ export {
   type LegendOptions,
   type ScaleOptions,
   type SequentialOptions,
-} from "./scale.ts";
+} from "./scale.tsx";
 
 export {
   arc,
@@ -425,7 +425,7 @@ export {
   type Traffic,
   type TrafficLine,
   type TrafficOptions,
-} from "./traffic.ts";
+} from "./traffic.tsx";
 
 export {
   globe,

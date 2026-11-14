@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   motion,
   type Motion,
@@ -9,7 +10,6 @@ import {
   type PathData,
   type SvgNode,
 } from "svjeez";
-import { el } from "svjeez/internal";
 import { round } from "./matrix.ts";
 
 export type Vec2 = readonly [x: number, y: number];
@@ -163,11 +163,7 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
     path(lines, closed, attrs) {
       const ds = frames(lines).map((f) => write(f, closed));
 
-      return el.path({
-        ...attrs,
-        d: ds[0]!,
-        animation: moves.length > 0 ? morph(ds) : undefined,
-      });
+      return <path {...attrs} d={ds[0]!} animation={moves.length > 0 ? morph(ds) : undefined} />;
     },
     head(shaft, polygon, fill) {
       const [tips, backs] = [shaft.at(-1)!, shaft.at(-2)!].map((p) => places.map((f) => f(p)));
@@ -190,11 +186,15 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
         return at(lerp(tips![i]!, tips![j]!, u), lerp(backs![i]!, backs![j]!, u));
       };
 
-      return el.path({
-        d: d(0),
-        fill,
-        animation: end ? sampled.path(d, { over: end.at + end.over, tolerance: 0.25 }) : undefined,
-      });
+      return (
+        <path
+          d={d(0)}
+          fill={fill}
+          animation={
+            end ? sampled.path(d, { over: end.at + end.over, tolerance: 0.25 }) : undefined
+          }
+        />
+      );
     },
     ride(point, direction, push, content) {
       const step = 1e-3;
@@ -207,7 +207,7 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
         return { x: round(p[0] + push * Math.cos(turn)), y: round(p[1] + push * Math.sin(turn)) };
       });
 
-      return el.g({ animation: travel(spots) }, content);
+      return <g animation={travel(spots)}>{content}</g>;
     },
   };
 }

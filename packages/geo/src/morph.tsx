@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   ease,
   matchPaths,
@@ -10,8 +11,7 @@ import {
   type Seconds,
   type SvgNode,
 } from "svjeez";
-import { el } from "svjeez/internal";
-import { resolveRegions, type RegionValues } from "./choropleth.ts";
+import { resolveRegions, type RegionValues } from "./choropleth.tsx";
 import type { GeoMap, Region } from "./index.ts";
 import { straighten } from "./writer.ts";
 
@@ -169,19 +169,22 @@ function morphs(targets: readonly Target[], map: GeoMap, options: MorphOptions):
     const crumbs = pieces.slice(1).map(() => circle(center, 0.01));
     const [start, end] = matchPaths([pieces.join(""), to + crumbs.join("")], { precision: 1 });
 
-    return el.path({
-      d: start,
-      fill: isPainter(fill) ? fill(region, value) : fill,
-      animation: motion({ d: start })
-        .at(at + i * stagger)
-        .to({ d: end }, over, curve),
-    });
+    return (
+      <path
+        d={start}
+        fill={isPainter(fill) ? fill(region, value) : fill}
+        animation={motion({ d: start })
+          .at(at + i * stagger)
+          .to({ d: end }, over, curve)}
+      />
+    );
   });
 
   return {
-    node: el.g(
-      { class: options.class, animation: motion({ opacity: 0 }).at(at).set({ opacity: 1 }) },
-      paths,
+    node: (
+      <g class={options.class} animation={motion({ opacity: 0 }).at(at).set({ opacity: 1 })}>
+        {paths}
+      </g>
     ),
     rest: map.regions
       .filter((r) => !used.has(r))

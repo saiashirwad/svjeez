@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   textWidth,
   type Point,
@@ -10,7 +11,6 @@ import {
   beats,
   type Beats,
 } from "svjeez";
-import { el } from "svjeez/internal";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
 import {
@@ -29,7 +29,7 @@ import {
   type DiagramOptions,
   type Labelled,
   type NodeRole,
-} from "./kit.ts";
+} from "./kit.tsx";
 
 export type FlowchartEdge<N extends string> =
   | readonly [from: N, to: N]
@@ -149,28 +149,29 @@ export function flowchart<
       const b = laid.groups.get(id)!;
       const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
 
-      return el.g({ animation: play && at >= 0 ? enter({ at, over: 0.4 }) : undefined }, [
-        el.rect({
-          x: b.x,
-          y: b.y,
-          width: b.w,
-          height: b.h,
-          rx: 10,
-          fill: "none",
-          stroke: theme.base0E,
-          strokeOpacity: 0.45,
-          strokeDasharray: "4 3",
-        }),
-        el.text(
-          {
-            x: b.x + 12,
-            y: b.y + 8 + small.fontSize,
-            fontSize: small.fontSize,
-            fill: theme.base04,
-          },
-          g.label,
-        ),
-      ]);
+      return (
+        <g animation={play && at >= 0 ? enter({ at, over: 0.4 }) : undefined}>
+          <rect
+            x={b.x}
+            y={b.y}
+            width={b.w}
+            height={b.h}
+            rx={10}
+            fill="none"
+            stroke={theme.base0E}
+            strokeOpacity={0.45}
+            strokeDasharray="4 3"
+          />
+          <text
+            x={b.x + 12}
+            y={b.y + 8 + small.fontSize}
+            fontSize={small.fontSize}
+            fill={theme.base04}
+          >
+            {g.label}
+          </text>
+        </g>
+      );
     }),
     laid.lines.map((line) =>
       arrow(line.points, { ...l, at: play && drawAt(line.from, line.to), over: drawOver }),
@@ -195,7 +196,12 @@ export function flowchart<
   ]);
 
   return {
-    node: el.g({}, [under, over]),
+    node: (
+      <g>
+        {under}
+        {over}
+      </g>
+    ),
     layers: { under, over },
     bounds: laid.bounds,
     get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])),

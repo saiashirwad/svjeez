@@ -4,7 +4,7 @@ export {
   type DiagramOptions,
   type Labelled,
   type NodeRole,
-} from "./kit.ts";
+} from "./kit.tsx";
 
 export {
   flowchart,
@@ -12,9 +12,14 @@ export {
   type FlowchartOptions,
   type FlowchartEdge,
   type FlowchartGroup,
-} from "./flowchart.ts";
+} from "./flowchart.tsx";
 
-export { sequence, type Sequence, type SequenceMessage, type SequenceOptions } from "./sequence.ts";
+export {
+  sequence,
+  type Sequence,
+  type SequenceMessage,
+  type SequenceOptions,
+} from "./sequence.tsx";
 
 export {
   lanes,
@@ -23,7 +28,7 @@ export {
   type LaneEvent,
   type LaneLink,
   type LaneSpan,
-} from "./lanes.ts";
+} from "./lanes.tsx";
 
 export { tree, type Tree, type TreeOptions, type TreeSpec } from "./tree.ts";
 
@@ -37,4 +42,4 @@ export {
   type WalkToken,
   type Transition,
   type Walk,
-} from "./state.ts";
+} from "./state.tsx";

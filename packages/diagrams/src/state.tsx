@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   type Color,
   textWidth,
@@ -14,7 +15,6 @@ import {
   show,
   type Beats,
 } from "svjeez";
-import { el } from "svjeez/internal";
 import { span as spanOf, type Spanned } from "svjeez";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
@@ -28,7 +28,7 @@ import {
   placer,
   type Diagram,
   type DiagramOptions,
-} from "./kit.ts";
+} from "./kit.tsx";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =
@@ -336,47 +336,57 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     const b = boxes.get(n.id)!;
     const fill = ground(n.depth + 1);
 
-    const frame = el.rect({
-      x: b.x,
-      y: b.y,
-      width: b.w,
-      height: b.h,
-      rx: n.inner ? 10 : 8,
-      fill,
-      stroke: theme.base03,
-    });
+    const frame = (
+      <rect
+        x={b.x}
+        y={b.y}
+        width={b.w}
+        height={b.h}
+        rx={n.inner ? 10 : 8}
+        fill={fill}
+        stroke={theme.base03}
+      />
+    );
 
-    const title = (y: number) =>
-      el.text(
-        {
-          x: b.center.x,
-          y: y + fontSize * 0.35,
-          fontSize,
-          textAnchor: "middle",
-          fill: theme.base05,
-        },
-        n.label,
+    const title = (y: number) => (
+      <text
+        x={b.center.x}
+        y={y + fontSize * 0.35}
+        fontSize={fontSize}
+        textAnchor="middle"
+        fill={theme.base05}
+      >
+        {n.label}
+      </text>
+    );
+
+    if (!n.inner)
+      return (
+        <g>
+          {frame}
+          {title(b.center.y)}
+        </g>
       );
 
-    if (!n.inner) return el.g({}, [frame, title(b.center.y)]);
-
-    return el.g({}, [
-      frame,
-      el.path({ d: `M${b.x} ${b.y + header}h${b.w}`, stroke: theme.base03 }),
-      title(b.y + header / 2),
-    ]);
+    return (
+      <g>
+        {frame}
+        <path d={`M${b.x} ${b.y + header}h${b.w}`} stroke={theme.base03} />
+        {title(b.y + header / 2)}
+      </g>
+    );
   };
 
   const node = base.root([
     [...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawn),
     lines.map((l) => arrow(l.points, base)),
-    dots.map(({ center: { x, y } }) => el.circle({ cx: x, cy: y, r: DOT / 2, fill: theme.base05 })),
-    ends.map(({ center: { x: cx, y: cy } }) =>
-      el.g({}, [
-        el.circle({ cx, cy, r: RING / 2, fill: "none", stroke: theme.base05, strokeWidth: 1.5 }),
-        el.circle({ cx, cy, r: RING / 2 - 4, fill: theme.base05 }),
-      ]),
-    ),
+    dots.map(({ center: { x, y } }) => <circle cx={x} cy={y} r={DOT / 2} fill={theme.base05} />),
+    ends.map(({ center: { x: cx, y: cy } }) => (
+      <g>
+        <circle cx={cx} cy={cy} r={RING / 2} fill="none" stroke={theme.base05} strokeWidth={1.5} />
+        <circle cx={cx} cy={cy} r={RING / 2 - 4} fill={theme.base05} />
+      </g>
+    )),
     lines.map(
       (l) =>
         isTransitionLine(l) &&
@@ -478,24 +488,28 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
             .node,
       );
 
-      const overlay = el.g({}, [
-        [...lit].map(([s, spans]) => {
-          const b = boxes.get(s)!.pad(4);
+      const overlay = (
+        <g>
+          {[...lit].map(([s, spans]) => {
+            const b = boxes.get(s)!.pad(4);
 
-          return el.rect({
-            x: b.x,
-            y: b.y,
-            width: b.w,
-            height: b.h,
-            rx: nodes.get(s)!.inner ? 13 : 11,
-            fill: "none",
-            stroke: theme.base09,
-            strokeWidth: 2,
-            animation: show(spans, { fade: 0.15 }),
-          });
-        }),
-        tokens,
-      ]);
+            return (
+              <rect
+                x={b.x}
+                y={b.y}
+                width={b.w}
+                height={b.h}
+                rx={nodes.get(s)!.inner ? 13 : 11}
+                fill="none"
+                stroke={theme.base09}
+                strokeWidth={2}
+                animation={show(spans, { fade: 0.15 })}
+              />
+            );
+          })}
+          {tokens}
+        </g>
+      );
 
       // SAFETY: nodes.keys() are exactly the ids of S, and each one gets an entry (empty when never lit)
       const spans = Object.fromEntries(

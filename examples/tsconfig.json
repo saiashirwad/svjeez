@@ -16,11 +16,17 @@
       "svjeez": ["../packages/svjeez/src/index.ts"],
       "svjeez/jsx-runtime": ["../packages/svjeez/src/jsx-runtime.ts"],
       "svjeez/jsx-dev-runtime": ["../packages/svjeez/src/jsx-dev-runtime.ts"],
-      "svjeez/internal": ["../packages/svjeez/src/internal.ts"],
       "svjeez/page": ["../packages/svjeez/src/page.ts"],
       "svjeez/frames": ["../packages/svjeez/src/frames.ts"]
     }
   },
-  "include": [".", "../packages/svjeez/src"],
+  "include": [
+    ".",
+    "../packages/svjeez/src",
+    "../packages/math/src",
+    "../packages/geo/src",
+    "../packages/charts/src",
+    "../packages/diagrams/src"
+  ],
   "exclude": ["dist", "node_modules"]
 }

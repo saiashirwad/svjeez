@@ -1,8 +1,8 @@
+/** @jsxImportSource svjeez */
 import { scaleBand, scaleLinear } from "d3-scale";
 import { rect, type Color, type SvgNode, defaultDark, tint } from "svjeez";
-import { el } from "svjeez/internal";
 
-import { buildSeries, round, type Frame } from "./series.ts";
+import { buildSeries, round, type Frame } from "./series.tsx";
 import type { Chart, ChartOptions, Datum, XScale } from "./types.ts";
 
 // Same strokes, label slot, tick length and label offsets as plane() in @svjeez/math, so the two sit in one scene.
@@ -80,21 +80,29 @@ export function chart<X extends XScale>(options: ChartOptions<X>): Chart<X["kind
   const stroke = tint(theme, "comment");
   const labelColor = tint(theme, "muted");
 
-  const line = (x1: number, y1: number, x2: number, y2: number, strokeWidth = 1) =>
-    el.line({ x1: round(x1), y1: round(y1), x2: round(x2), y2: round(y2), stroke, strokeWidth });
+  const line = (x1: number, y1: number, x2: number, y2: number, strokeWidth = 1) => (
+    <line
+      x1={round(x1)}
+      y1={round(y1)}
+      x2={round(x2)}
+      y2={round(y2)}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+    />
+  );
 
-  const text = (x: number, y: number, anchor: "middle" | "end", value: string) =>
-    el.text(
-      {
-        x: round(x),
-        y: round(y),
-        fontSize,
-        textAnchor: anchor,
-        fill: labelColor,
-        fontFamily: font,
-      },
-      value,
-    );
+  const text = (x: number, y: number, anchor: "middle" | "end", value: string) => (
+    <text
+      x={round(x)}
+      y={round(y)}
+      fontSize={fontSize}
+      textAnchor={anchor}
+      fill={labelColor}
+      fontFamily={font}
+    >
+      {value}
+    </text>
+  );
 
   if (xs.kind === "band") {
     const seen = new Set<string>();
@@ -189,17 +197,19 @@ export function chart<X extends XScale>(options: ChartOptions<X>): Chart<X["kind
     ...xGridNodes,
   ];
 
-  const node = el.g({}, [
-    grid ? el.g({ strokeOpacity: 0.25 }, gridNodes) : undefined,
-    low < 0 && high > 0 ? line(at.x, yScale(0), at.x + width, yScale(0)) : undefined,
-    line(at.x, bottom, at.x + width, bottom, 1.5),
-    line(at.x, at.y, at.x, bottom, 1.5),
-    ...yTickValues.map((v) => line(at.x - TICK, yScale(v), at.x + TICK, yScale(v))),
-    ...yTickValues.map((v) =>
-      text(at.x - TICK - 3, yScale(v) + fontSize * 0.35, "end", yFormat(v)),
-    ),
-    ...xTickNodes,
-  ]);
+  const node = (
+    <g>
+      {grid ? <g strokeOpacity={0.25}>{gridNodes}</g> : undefined}
+      {low < 0 && high > 0 ? line(at.x, yScale(0), at.x + width, yScale(0)) : undefined}
+      {line(at.x, bottom, at.x + width, bottom, 1.5)}
+      {line(at.x, at.y, at.x, bottom, 1.5)}
+      {yTickValues.map((v) => line(at.x - TICK, yScale(v), at.x + TICK, yScale(v)))}
+      {yTickValues.map((v) =>
+        text(at.x - TICK - 3, yScale(v) + fontSize * 0.35, "end", yFormat(v)),
+      )}
+      {xTickNodes}
+    </g>
+  );
 
   let used = 0;
 

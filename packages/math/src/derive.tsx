@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   ease,
   motion,
@@ -8,7 +9,6 @@ import {
   tint,
   type Base16,
 } from "svjeez";
-import { el } from "svjeez/internal";
 
 import { rect, type Color, type Rect } from "svjeez";
 import { span as spanOf, type Spanned } from "svjeez";
@@ -144,41 +144,44 @@ export function derive(
         : shown.at(start(i + 1) - 0.01).to({ opacity: 0 }, Math.min(0.3, over / 2));
     })();
 
-    return el.g({ animation: track }, [
-      el.path({
-        d: `M${a} ${mid}H${b}M${b - head} ${mid - head}L${b} ${mid}L${b - head} ${mid + head}`,
-        fill: "none",
-        stroke: muted,
-        strokeWidth: 1.5,
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-      }),
-      note.node,
-    ]);
+    return (
+      <g animation={track}>
+        <path
+          d={`M${a} ${mid}H${b}M${b - head} ${mid - head}L${b} ${mid}L${b - head} ${mid + head}`}
+          fill="none"
+          stroke={muted}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {note.node}
+      </g>
+    );
   });
 
   const body = stack
-    ? lines.map((line, i) =>
-        el.g(
-          {
-            animation:
-              i === 0
-                ? motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)
-                : motion({ opacity: 0, y: -fontSize * 0.3 })
-                    .at(start(i))
-                    .to({ opacity: 1, y: 0 }, over, ease.out),
-          },
-          line.node,
-        ),
-      )
+    ? lines.map((line, i) => (
+        <g
+          animation={
+            i === 0
+              ? motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)
+              : motion({ opacity: 0, y: -fontSize * 0.3 })
+                  .at(start(i))
+                  .to({ opacity: 1, y: 0 }, over, ease.out)
+          }
+        >
+          {line.node}
+        </g>
+      ))
     : [
-        el.g(
-          { animation: motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over) },
-          morph(lines, {
-            at: lines.slice(1).map((_, i) => start(i + 1)),
-            over,
-          }).node,
-        ),
+        <g animation={motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)}>
+          {
+            morph(lines, {
+              at: lines.slice(1).map((_, i) => start(i + 1)),
+              over,
+            }).node
+          }
+        </g>,
       ];
 
   const noteBoxes = list.flatMap((_, i) => (notes[i] ? [lines[i]!.bounds] : []));
@@ -186,7 +189,12 @@ export function derive(
   const full = noteBoxes.length > 0 ? box.union(rect(right, box.y, fontSize * 8, box.h)) : box;
 
   return {
-    node: el.g({}, [body, notes.filter((n): n is SvgNode => n !== undefined)]),
+    node: (
+      <g>
+        {body}
+        {notes.filter((n): n is SvgNode => n !== undefined)}
+      </g>
+    ),
     span: spanOf(at, start(list.length - 1) + (list.length > 1 ? over : 0) - at),
     lines,
     bounds: full,

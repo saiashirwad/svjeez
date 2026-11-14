@@ -1,6 +1,6 @@
+/** @jsxImportSource svjeez */
 import { ease, motion, type Color, type SvgNode, defaultDark, type Base16 } from "svjeez";
 import { span as spanOf, type Spanned } from "svjeez";
-import { el } from "svjeez/internal";
 
 import { tex } from "./index.ts";
 
@@ -477,16 +477,16 @@ export function construct(options: ConstructOptions = {}): Construction {
     add(look.aid, (world) => {
       const { x, y } = place(world, { w: formula.width, h: formula.height });
 
-      return el.g(
-        { transform: `translate(${round(x)} ${round(y)})` },
-        el.g(
-          {
-            animation: motion({ opacity: 0 })
+      return (
+        <g transform={`translate(${round(x)} ${round(y)})`}>
+          <g
+            animation={motion({ opacity: 0 })
               .at(span.at + span.over * 0.5)
-              .to({ opacity: 1 }, pace.label),
-          },
-          formula.node,
-        ),
+              .to({ opacity: 1 }, pace.label)}
+          >
+            {formula.node}
+          </g>
+        </g>
       );
     });
     end = Math.max(end, span.at + span.over * 0.5 + pace.label);
@@ -507,15 +507,16 @@ export function construct(options: ConstructOptions = {}): Construction {
       add(o.aid, (world) => {
         const c = world.px(p);
 
-        return el.g(
-          { transform: `translate(${round(c.x)} ${round(c.y)})` },
-          el.circle({
-            r: DOT,
-            fill: color,
-            animation: motion({ opacity: 0, scale: 0.2 })
-              .at(span.at)
-              .to({ opacity: 1, scale: 1 }, span.over, ease.pop),
-          }),
+        return (
+          <g transform={`translate(${round(c.x)} ${round(c.y)})`}>
+            <circle
+              r={DOT}
+              fill={color}
+              animation={motion({ opacity: 0, scale: 0.2 })
+                .at(span.at)
+                .to({ opacity: 1, scale: 1 }, span.over, ease.pop)}
+            />
+          </g>
         );
       });
     label(label_, span, o, (world, box) => {
@@ -597,18 +598,25 @@ export function construct(options: ConstructOptions = {}): Construction {
       const stroke = (from: number, to: number) => {
         const [p, q] = [reach(from), reach(to)];
 
-        return el.path({
-          d: `M${round(p.x)} ${round(p.y)}L${round(q.x)} ${round(q.y)}`,
-          fill: "none",
-          stroke: color,
-          strokeWidth: o.aid ? 1.2 : 1.8,
-          strokeLinecap: "round",
-          animation: drawOn(span),
-        });
+        return (
+          <path
+            d={`M${round(p.x)} ${round(p.y)}L${round(q.x)} ${round(q.y)}`}
+            fill="none"
+            stroke={color}
+            strokeWidth={o.aid ? 1.2 : 1.8}
+            strokeLinecap="round"
+            animation={drawOn(span)}
+          />
+        );
       };
 
       // Runs outward from `a` both ways when the line runs past it, so it grows from the first point.
-      return el.g({}, [stroke(0, len + extend[1]), extend[0] > 0 && stroke(0, -extend[0])]);
+      return (
+        <g>
+          {stroke(0, len + extend[1])}
+          {extend[0] > 0 && stroke(0, -extend[0])}
+        </g>
+      );
     });
     label(o.label, span, o, (world, box) => {
       const mid = { kind: "point" as const, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
@@ -658,14 +666,16 @@ export function construct(options: ConstructOptions = {}): Construction {
         ? `M${spot(o.arc.from * DEG)}${arc(o.arc.to * DEG, (o.arc.to - o.arc.from) % 360 > 180)}`
         : `M${spot(start)}${arc(start + Math.PI, false)}${arc(start + 2 * Math.PI, false)}`;
 
-      return el.path({
-        d,
-        fill: "none",
-        stroke: color,
-        strokeWidth: o.aid ? 1.2 : 1.8,
-        strokeLinecap: "round",
-        animation: drawOn(span, ease.inOut),
-      });
+      return (
+        <path
+          d={d}
+          fill="none"
+          stroke={color}
+          strokeWidth={o.aid ? 1.2 : 1.8}
+          strokeLinecap="round"
+          animation={drawOn(span, ease.inOut)}
+        />
+      );
     });
 
     return ring;
@@ -817,23 +827,26 @@ export function construct(options: ConstructOptions = {}): Construction {
         .map((p, i) => `${i ? "L" : "M"}${round(world.px(p).x)} ${round(world.px(p).y)}`)
         .join("")}Z`;
 
-      return el.g({}, [
-        el.path({
-          d,
-          fill: color,
-          fillOpacity: o.opacity ?? 0.2,
-          animation: motion({ opacity: 0 }).at(span.at).to({ opacity: 1 }, span.over),
-        }),
-        o.outline &&
-          el.path({
-            d,
-            fill: "none",
-            stroke: color,
-            strokeWidth: 1.8,
-            strokeLinejoin: "round",
-            animation: drawOn(span),
-          }),
-      ]);
+      return (
+        <g>
+          <path
+            d={d}
+            fill={color}
+            fillOpacity={o.opacity ?? 0.2}
+            animation={motion({ opacity: 0 }).at(span.at).to({ opacity: 1 }, span.over)}
+          />
+          {o.outline && (
+            <path
+              d={d}
+              fill="none"
+              stroke={color}
+              strokeWidth={1.8}
+              strokeLinejoin="round"
+              animation={drawOn(span)}
+            />
+          )}
+        </g>
+      );
     });
 
     const middle: GeoPoint = {
@@ -880,15 +893,17 @@ export function construct(options: ConstructOptions = {}): Construction {
             return `M${at(ua, r)}A${r} ${r} 0 0 ${turn > 0 ? 0 : 1} ${at(uc, r)}`;
           }).join("");
 
-      return el.path({
-        d,
-        fill: "none",
-        stroke: color,
-        strokeWidth: 1.6,
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        animation: drawOn(span),
-      });
+      return (
+        <path
+          d={d}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          animation={drawOn(span)}
+        />
+      );
     });
     label(
       o.label,
@@ -924,14 +939,16 @@ export function construct(options: ConstructOptions = {}): Construction {
         return `M${round(cx - across[0] * 5)} ${round(cy - across[1] * 5)}L${round(cx + across[0] * 5)} ${round(cy + across[1] * 5)}`;
       }).join("");
 
-      return el.path({
-        d,
-        fill: "none",
-        stroke: color,
-        strokeWidth: 1.6,
-        strokeLinecap: "round",
-        animation: motion({ opacity: 0 }).at(span.at).to({ opacity: 1 }, span.over),
-      });
+      return (
+        <path
+          d={d}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          animation={motion({ opacity: 0 }).at(span.at).to({ opacity: 1 }, span.over)}
+        />
+      );
     });
   };
 
@@ -967,22 +984,24 @@ export function construct(options: ConstructOptions = {}): Construction {
   const render = (): SvgNode => {
     const w = world();
 
-    return el.g(
-      {},
-      parts.map((part) => {
-        const drawn = part.render(w);
+    return (
+      <g>
+        {parts.map((part) => {
+          const drawn = part.render(w);
 
-        return part.settle
-          ? el.g(
-              {
-                animation: motion({ opacity: 1 })
-                  .at(part.settle.at)
-                  .to({ opacity: part.settle.faint }, part.settle.over),
-              },
-              drawn,
-            )
-          : drawn;
-      }),
+          return part.settle ? (
+            <g
+              animation={motion({ opacity: 1 })
+                .at(part.settle.at)
+                .to({ opacity: part.settle.faint }, part.settle.over)}
+            >
+              {drawn}
+            </g>
+          ) : (
+            drawn
+          );
+        })}
+      </g>
     );
   };
 

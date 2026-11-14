@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import { textWidth, type Point, motion, type Seconds, type Span, beats, type Beats } from "svjeez";
-import { el } from "svjeez/internal";
 import { sequence as layout } from "./layout/sequence.ts";
 import {
   arrow,
@@ -14,7 +14,7 @@ import {
   type Diagram,
   type DiagramOptions,
   type Labelled,
-} from "./kit.ts";
+} from "./kit.tsx";
 
 /** `[from, to, label]`, dashed with `{ reply: true }`; a message to its own sender loops on the right. */
 export type SequenceMessage<A extends string> =
@@ -93,53 +93,53 @@ export function sequence<const A extends Record<string, Labelled>>(
     [...out.lifelines].map(([, [a, b]]) => {
       const [p, q] = [at.point(a), at.point(b)];
 
-      return el.path({
-        d: `M${p.x} ${p.y}V${q.y}`,
-        stroke: theme.base03,
-        strokeDasharray: "3 4",
-        fill: "none",
-      });
+      return (
+        <path d={`M${p.x} ${p.y}V${q.y}`} stroke={theme.base03} strokeDasharray="3 4" fill="none" />
+      );
     }),
     actors.map((a) => drawNode(a.role, heads.get(a.id)!, a.label, l)),
     rows.map((row, i) => {
       const { points, box } = placed[i]!;
 
       if (row.kind === "note") {
-        return el.g({ animation: fade(i) }, [
-          el.rect({ x: box.x, y: box.y, width: box.w, height: box.h, rx: 4, fill: theme.base00 }),
-          el.rect({
-            x: box.x,
-            y: box.y,
-            width: box.w,
-            height: box.h,
-            rx: 4,
-            fill: theme.base0A,
-            fillOpacity: 0.12,
-            stroke: theme.base0A,
-            strokeOpacity: 0.7,
-          }),
-          el.text(
-            {
-              x: box.center.x,
-              y: box.center.y + small * 0.35,
-              fontSize: small,
-              textAnchor: "middle",
-              fill: theme.base05,
-            },
-            row.text,
-          ),
-        ]);
+        return (
+          <g animation={fade(i)}>
+            <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={4} fill={theme.base00} />
+            <rect
+              x={box.x}
+              y={box.y}
+              width={box.w}
+              height={box.h}
+              rx={4}
+              fill={theme.base0A}
+              fillOpacity={0.12}
+              stroke={theme.base0A}
+              strokeOpacity={0.7}
+            />
+            <text
+              x={box.center.x}
+              y={box.center.y + small * 0.35}
+              fontSize={small}
+              textAnchor="middle"
+              fill={theme.base05}
+            >
+              {row.text}
+            </text>
+          </g>
+        );
       }
 
-      return el.g({}, [
-        arrow(points, {
-          ...l,
-          dashed: row.reply,
-          at: play && span(i).at,
-          over: Math.min(0.5, span(i).over * 0.7) || 0.3,
-        }),
-        chip(box, row.text, { ...l.smallLook, fill: theme.base05 }, fade(i)),
-      ]);
+      return (
+        <g>
+          {arrow(points, {
+            ...l,
+            dashed: row.reply,
+            at: play && span(i).at,
+            over: Math.min(0.5, span(i).over * 0.7) || 0.3,
+          })}
+          {chip(box, row.text, { ...l.smallLook, fill: theme.base05 }, fade(i))}
+        </g>
+      );
     }),
   ]);
 

@@ -1,7 +1,7 @@
+/** @jsxImportSource svjeez */
 import { ease, motion, type Color, type Ease, type Seconds, type SvgNode } from "svjeez";
-import { el } from "svjeez/internal";
 import type { GeoMap, Region } from "./index.ts";
-import type { ColorScale, Hex } from "./scale.ts";
+import type { ColorScale, Hex } from "./scale.tsx";
 
 /** A value per region, by `id` or `properties.name`. A list is the region's value at each time in `at`. */
 export type RegionValues = Readonly<Record<string, number | readonly number[]>>;
@@ -130,20 +130,23 @@ export function choropleth(
         );
 
   return {
-    node: el.g({ class: options.class }, [
-      [...groups.values()].map(({ colors, d }) =>
-        el.path({ d, fill: colors.at(-1), animation: track(colors) }),
-      ),
-      rest.length > 0 && el.path({ d: rest.join(""), fill: scale.empty }),
-      options.lines !== undefined &&
-        el.path({
-          d: map.lines,
-          fill: "none",
-          stroke: options.lines,
-          strokeWidth: options.lineWidth ?? 0.4,
-          strokeLinejoin: "round",
-        }),
-    ]),
+    node: (
+      <g class={options.class}>
+        {[...groups.values()].map(({ colors, d }) => (
+          <path d={d} fill={colors.at(-1)} animation={track(colors)} />
+        ))}
+        {rest.length > 0 && <path d={rest.join("")} fill={scale.empty} />}
+        {options.lines !== undefined && (
+          <path
+            d={map.lines}
+            fill="none"
+            stroke={options.lines}
+            strokeWidth={options.lineWidth ?? 0.4}
+            strokeLinejoin="round"
+          />
+        )}
+      </g>
+    ),
     unmatched,
     groups: groups.size,
   };

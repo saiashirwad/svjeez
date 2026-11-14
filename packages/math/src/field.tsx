@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   defaultDark,
   draw,
@@ -13,10 +14,9 @@ import {
   type Seconds,
   type SvgNode,
 } from "svjeez";
-import { el } from "svjeez/internal";
 import { marchingSquares } from "./layout/contour.ts";
 import { simplify, traceStreamlines, type VectorField } from "./layout/field.ts";
-import type { Plane } from "./plane.ts";
+import type { Plane } from "./plane.tsx";
 
 export type { VectorField };
 
@@ -122,23 +122,24 @@ export function fieldLines(
   positive("fieldLines()", "over", over);
   positive("fieldLines()", "each", each);
 
-  return el.g(
-    { fill: "none", stroke: options.color ?? tint(theme, "comment"), strokeOpacity: opacity },
-    lines.map((line, i) =>
-      el.path({
-        d: pathOf(line),
-        strokeWidth,
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        animation: draw(
-          {
-            at: at + (lines.length > 1 ? (i / (lines.length - 1)) * Math.max(0, over - each) : 0),
-            over: each,
-          },
-          ease.inOut,
-        ),
-      }),
-    ),
+  return (
+    <g fill="none" stroke={options.color ?? tint(theme, "comment")} strokeOpacity={opacity}>
+      {lines.map((line, i) => (
+        <path
+          d={pathOf(line)}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          animation={draw(
+            {
+              at: at + (lines.length > 1 ? (i / (lines.length - 1)) * Math.max(0, over - each) : 0),
+              over: each,
+            },
+            ease.inOut,
+          )}
+        />
+      ))}
+    </g>
   );
 }
 

@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import type { Color, Point, Span, SvgNode } from "svjeez";
-import { el } from "svjeez/internal";
 import { span as spanOf, type Spanned } from "svjeez";
 import { flow, type FlowOptions } from "svjeez";
 import type { GeoMap, LonLat } from "./index.ts";
@@ -90,7 +90,7 @@ export function traffic(
     return run.node;
   });
 
-  return { node: el.g({}, nodes), count, span: spanOf(during.at, end - during.at) };
+  return { node: <g>{nodes}</g>, count, span: spanOf(during.at, end - during.at) };
 }
 
 export interface ArcOptions {

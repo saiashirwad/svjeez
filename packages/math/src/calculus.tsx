@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   ease,
   easeAt,
@@ -19,7 +20,6 @@ import {
   type Stack,
   type SvgNode,
 } from "svjeez";
-import { el } from "svjeez/internal";
 
 type Fn = (x: number) => number;
 
@@ -266,12 +266,17 @@ export function calculus(graph: GraphContext): Calculus {
   const [sx, sy] = [bounds.w / xSpan, bounds.h / ySpan];
 
   /** A path whose data `at(t)` writes, baked into a `d` motion when it moves before `end`. */
-  const movingPath = (end: Seconds, at: (t: Seconds) => PathData, attrs: Attrs<"path">): SvgNode =>
-    el.path({
-      ...attrs,
-      d: at(0),
-      animation: end > 0 ? sampled.path(at, { over: end, tolerance: 0.4 }) : undefined,
-    });
+  const movingPath = (
+    end: Seconds,
+    at: (t: Seconds) => PathData,
+    attrs: Attrs<"path">,
+  ): SvgNode => (
+    <path
+      {...attrs}
+      d={at(0)}
+      animation={end > 0 ? sampled.path(at, { over: end, tolerance: 0.4 }) : undefined}
+    />
+  );
 
   const dotAt = (
     where: (t: Seconds) => Point,
@@ -297,7 +302,11 @@ export function calculus(graph: GraphContext): Calculus {
     return {
       motion: travel,
       point: where,
-      node: el.g({ animation: travel }, el.circle({ r, fill: color })),
+      node: (
+        <g animation={travel}>
+          <circle r={r} fill={color} />
+        </g>
+      ),
     };
   };
 
@@ -339,13 +348,19 @@ export function calculus(graph: GraphContext): Calculus {
     if (options.length !== undefined && !(options.length > 0))
       throw new Error(`${what} needs a positive length, got ${options.length}.`);
 
-    return el.g({}, [
-      el.g(
-        { clipPath: clip },
-        movingPath(end, path, { fill: "none", stroke: color, strokeWidth, strokeLinecap: "round" }),
-      ),
-      ...dots.map((where) => dotAt(where, end, { r: 4, ...dotOptions }).node),
-    ]);
+    return (
+      <g>
+        <g clipPath={clip}>
+          {movingPath(end, path, {
+            fill: "none",
+            stroke: color,
+            strokeWidth,
+            strokeLinecap: "round",
+          })}
+        </g>
+        {dots.map((where) => dotAt(where, end, { r: 4, ...dotOptions }).node)}
+      </g>
+    );
   };
 
   function dot(f: Fn, x: Moving, options?: CalculusDotOptions): CalculusDot {
@@ -448,9 +463,10 @@ export function calculus(graph: GraphContext): Calculus {
 
     return {
       value,
-      node: el.g(
-        { clipPath: clip },
-        movingPath(endOf(from, to), path, { fill: color, fillOpacity: opacity, stroke: "none" }),
+      node: (
+        <g clipPath={clip}>
+          {movingPath(endOf(from, to), path, { fill: color, fillOpacity: opacity, stroke: "none" })}
+        </g>
       ),
     };
   }
@@ -497,20 +513,22 @@ export function calculus(graph: GraphContext): Calculus {
 
     return {
       sums,
-      node: el.g(
-        { clipPath: clip },
-        el.path({
-          d: ds[0]!,
-          fill: color,
-          fillOpacity: opacity,
-          stroke: color,
-          strokeWidth: 1.5,
-          strokeLinejoin: "round",
-          animation:
-            ds.length > 1
-              ? stagesOf(ds, options.at ?? [], over, options.ease ?? ease.inOut)
-              : undefined,
-        }),
+      node: (
+        <g clipPath={clip}>
+          <path
+            d={ds[0]!}
+            fill={color}
+            fillOpacity={opacity}
+            stroke={color}
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+            animation={
+              ds.length > 1
+                ? stagesOf(ds, options.at ?? [], over, options.ease ?? ease.inOut)
+                : undefined
+            }
+          />
+        </g>
       ),
     };
   }
@@ -550,19 +568,19 @@ export function calculus(graph: GraphContext): Calculus {
     d: PathData,
     options: CalculusCurveOptions,
     animation?: Stack<"draw" | "d" | "stroke">,
-  ) =>
-    el.g(
-      { clipPath: clip },
-      el.path({
-        d,
-        fill: "none",
-        stroke: options.color ?? tint(theme, "blue"),
-        strokeWidth: options.strokeWidth ?? 2.5,
-        strokeLinejoin: "round",
-        strokeLinecap: "round",
-        animation,
-      }),
-    );
+  ) => (
+    <g clipPath={clip}>
+      <path
+        d={d}
+        fill="none"
+        stroke={options.color ?? tint(theme, "blue")}
+        strokeWidth={options.strokeWidth ?? 2.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        animation={animation}
+      />
+    </g>
+  );
 
   const curveOf = (
     what: string,

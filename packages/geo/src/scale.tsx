@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import { type Color, type Font, type FontFamily, type SvgNode } from "svjeez";
-import { el } from "svjeez/internal";
 
 /** A hex color such as `#1f77b4`. */
 export type Hex = `#${string}`;
@@ -218,46 +218,44 @@ export function legend(scale: ColorScale, options: LegendOptions): SvgNode {
   const top = y + (options.title ? fontSize + 6 : 0);
   const text = { fontSize, fontFamily: options.font, fill: ink };
 
-  return el.g({ class: options.class }, [
-    options.title && el.text({ x, y: y + fontSize - 2, fontWeight: 600, ...text }, options.title),
-    scale.colors.map((fill, i) =>
-      el.rect({ x: x + i * step, y: top, width: step + 0.5, height, fill }),
-    ),
-    scale.edges.flatMap((value, i) =>
-      i % every === 0 || i === count
-        ? [
-            el.line({
-              x1: x + i * step,
-              x2: x + i * step,
-              y1: top + height,
-              y2: top + height + 3,
-              stroke: ink,
-              strokeWidth: 1,
-            }),
-            el.text(
-              { x: x + i * step, y: top + height + 5 + fontSize, textAnchor: "middle", ...text },
-              format(value),
-            ),
-          ]
-        : [],
-    ),
-    options.empty !== undefined && [
-      el.rect({
-        x: x + width + 26,
-        y: top,
-        width: height,
-        height,
-        fill: scale.empty,
-      }),
-      el.text(
-        {
-          x: x + width + 26 + height / 2,
-          y: top + height + 5 + fontSize,
-          textAnchor: "middle",
-          ...text,
-        },
-        options.empty,
-      ),
-    ],
-  ]);
+  return (
+    <g class={options.class}>
+      {options.title && (
+        <text x={x} y={y + fontSize - 2} fontWeight={600} {...text}>
+          {options.title}
+        </text>
+      )}
+      {scale.colors.map((fill, i) => (
+        <rect x={x + i * step} y={top} width={step + 0.5} height={height} fill={fill} />
+      ))}
+      {scale.edges.flatMap((value, i) =>
+        i % every === 0 || i === count
+          ? [
+              <line
+                x1={x + i * step}
+                x2={x + i * step}
+                y1={top + height}
+                y2={top + height + 3}
+                stroke={ink}
+                strokeWidth={1}
+              />,
+              <text x={x + i * step} y={top + height + 5 + fontSize} textAnchor="middle" {...text}>
+                {format(value)}
+              </text>,
+            ]
+          : [],
+      )}
+      {options.empty !== undefined && [
+        <rect x={x + width + 26} y={top} width={height} height={height} fill={scale.empty} />,
+        <text
+          x={x + width + 26 + height / 2}
+          y={top + height + 5 + fontSize}
+          textAnchor="middle"
+          {...text}
+        >
+          {options.empty}
+        </text>,
+      ]}
+    </g>
+  );
 }
