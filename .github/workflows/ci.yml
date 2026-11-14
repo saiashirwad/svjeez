@@ -17,6 +17,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bunx playwright-core install --with-deps chromium-headless-shell
+        working-directory: packages/svjeez
       - run: bun run typecheck
       - run: bun run test
       - run: npm pack --dry-run
@@ -75,6 +76,7 @@ jobs:
       - run: npm run test:package
         working-directory: packages/react
       - run: bunx playwright-core install --with-deps chromium-headless-shell
+        working-directory: packages/svjeez
       - run: npm run test:package
         working-directory: packages/vite
       - run: npm run test:package
