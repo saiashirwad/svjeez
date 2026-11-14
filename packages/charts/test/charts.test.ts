@@ -326,3 +326,30 @@ describe("errors name the call, what it got and the fix", () => {
     expect(() => linear.bars({ a: 1 })).toThrow("bars() needs a band x scale, got a linear one.");
   });
 });
+
+describe("band keys", () => {
+  test("a category named after an Object.prototype member is a category, not a NaN bar", () => {
+    const c = chart({
+      width: 400,
+      height: 200,
+      x: { kind: "band", domain: ["constructor", "a"] },
+      y: { domain: [0, 10] },
+    });
+
+    const { bars } = c.bars({ a: 5 });
+
+    expect(bars.map((b) => b.key)).toEqual(["a"]);
+    expect(Number.isNaN(bars[0]!.value)).toBe(false);
+  });
+
+  test("data for a key missing from x.domain is rejected up front", () => {
+    expect(() =>
+      chart({
+        width: 400,
+        height: 200,
+        x: { kind: "band", domain: quarters },
+        data: [["Q9", 1]],
+      }),
+    ).toThrow('chart() got data for "Q9", which is not in x.domain');
+  });
+});

@@ -178,7 +178,7 @@ export function buildSeries(f: Frame) {
     let end = at;
 
     categories
-      .filter((key) => key in values)
+      .filter((key) => Object.hasOwn(values, key))
       .forEach((key, i) => {
         const value = values[key]!;
         const start = at + i * stagger;
