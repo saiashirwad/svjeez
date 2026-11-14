@@ -114,3 +114,71 @@ export { num } from "./format";
 export { groupBy } from "./layout/group";
 
 export type { Box, Size } from "./layout/box";
+
+export {
+  timeline,
+  during,
+  cut,
+  shot,
+  type ShotMove,
+  type ShotOptions,
+  readingTime,
+  visible,
+  travel,
+  type Beats,
+  type HeadingOptions,
+  type TravelOptions,
+  type Timeline,
+  type TimelineOptions,
+  beats,
+} from "./extras/timeline";
+
+export {
+  code,
+  type Code,
+  type CodeOptions,
+  type CodeToken,
+  type CodeTokens,
+  type CodeRun,
+  type CodePiece,
+  type CodeWord,
+  type CodeMetrics,
+} from "./extras/code";
+
+export { readout, type ReadoutOptions } from "./extras/readout";
+
+export { morph, type MorphOptions, type Morphable, type MorphPiece } from "./extras/morph";
+
+export { typewriter, type TypewriterOptions } from "./extras/typewriter";
+
+export { reveal, type RevealOptions } from "./extras/reveal";
+
+export { Focus, type FocusStop } from "./extras/focus";
+
+export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
+
+export { Marker } from "./extras/marker";
+
+export { Camera, Steady, type CameraStop } from "./extras/camera";
+
+export {
+  base16,
+  tint,
+  adaptive,
+  variables,
+  defaultDark,
+  defaultLight,
+  systemLight,
+  systemDark,
+  type Base16,
+  type Slot,
+  type CodeRole,
+} from "./extras/theme";
+
+export { appWindow, type WindowOptions } from "./extras/window";
+
+export { terminal, type TerminalCommand, type TerminalOptions } from "./extras/terminal";
+
+export { flow, type FlowOptions, type FlowStyle } from "./extras/flow";
+
+export type { Direction } from "./layout/box";
