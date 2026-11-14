@@ -35,6 +35,7 @@ export { boxes, find, rect } from "./find.ts";
 
 export type {
   Box,
+  Face,
   Graphic,
   Item,
   Paint,
@@ -44,5 +45,6 @@ export type {
   Shadow,
   Snapshot,
   TextRun,
+  Transform,
   Vector,
 } from "./tree.ts";

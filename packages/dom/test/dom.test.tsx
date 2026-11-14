@@ -497,6 +497,92 @@ describe("Dom", () => {
   });
 });
 
+describe("real pages", () => {
+  // The page's own web font, as an app ships it: an @font-face rule under a family nobody passed in.
+  const probe = `@font-face{font-family:Probe;src:url(data:font/ttf;base64,${readFileSync(
+    join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
+  ).toString("base64")}) format("truetype")}`;
+  const page = `${probe} .p { font: 16px Probe; padding: 8px }`;
+
+  test("the page's own web fonts come with the snapshot and embed in the drawing", async () => {
+    const card = await dom.mount('<div class="p">Hello</div>', { css: page });
+    const snap = await card.snap();
+
+    expect(snap.fonts).toEqual([
+      {
+        family: "Probe",
+        weight: "400",
+        style: "normal",
+        src: expect.stringMatching(/^data:font\/ttf;base64,/),
+      },
+    ]);
+    expect(draw(snap, { fonts: [] })).toContain("font-family:'Probe'");
+    await card.close();
+  });
+
+  test("snapshots() keeps each font file once, however many snapshots use it", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "svjeez-dom-"));
+    const file = join(dir, "snapshots.json");
+
+    try {
+      const steps = await snapshots(file, { fonts: [regular] }, (d) =>
+        d.run('<div class="p">Hello</div>', [snap("a"), snap("b")], { css: page }),
+      );
+      const saved = JSON.parse(readFileSync(file, "utf8"));
+
+      expect(Object.keys(saved.fonts)).toHaveLength(1);
+      expect(saved.tapes[0].snaps[1].fonts[0].src).toBe(Object.keys(saved.fonts)[0]);
+
+      const again = await snapshots(
+        file,
+        { fonts: [regular], executablePath: "/nowhere/chrome" },
+        (d) => d.run('<div class="p">Hello</div>', [snap("a"), snap("b")], { css: page }),
+      );
+
+      expect(again).toEqual(JSON.parse(JSON.stringify(steps)));
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  test("a turned element is read as laid out and drawn with its transform", async () => {
+    const card = await dom.mount(
+      '<div class="card"><div class="turn" style="width:40px;height:10px;background:#c00;rotate:90deg"></div></div>',
+      { css: CSS },
+    );
+    const turned = (await card.snap()).root.children[0];
+
+    expect(turned).toMatchObject({ box: { width: 40, height: 10 } });
+    expect(turned?.kind === "box" && turned.transform?.matrix).toEqual([0, 1, -1, 0, 0, 0]);
+    expect(draw(await card.snap())).toContain("matrix(0 1 -1 0 0 0)");
+    await card.close();
+  });
+
+  test("inset shadows are read apart from outer ones", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="box-shadow:inset 0 0 0 999px rgb(0 0 0 / .1), 0 1px 2px #000">x</div>',
+      { css: CSS },
+    );
+    const { root } = await card.snap();
+
+    expect(root.shadows).toHaveLength(1);
+    expect(root.insets).toEqual([{ color: "rgba(0,0,0,0.1)", x: 0, y: 0, blur: 0, spread: 999 }]);
+    await card.close();
+  });
+
+  test("z-index paints in stacking order, and a fixed element escapes the parent that clips it", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="position:relative"><div data-key="top" style="position:relative;z-index:2">a</div><div data-key="flow">b</div><div style="overflow:hidden;height:4px"><div data-key="fixed" style="position:fixed;z-index:1">c</div></div></div>',
+      { css: CSS },
+    );
+    const { root } = await card.snap();
+    const keys = root.children.map((c) => (c.kind === "box" ? (c.key ?? c.tag) : c.kind));
+
+    expect(keys).toEqual(["flow", "div", "fixed", "top"]);
+    await card.close();
+  });
+});
+
 describe("snapshots", () => {
   test("a second call reads the file and never launches, and timing on a snap is never stale", async () => {
     const dir = mkdtempSync(join(tmpdir(), "svjeez-dom-"));

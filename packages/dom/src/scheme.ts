@@ -1,4 +1,4 @@
-import type { Box, Item, Paint, Vector } from "./tree.ts";
+import type { Box, Item, Paint, Shadow, Vector } from "./tree.ts";
 
 type Pair = Exclude<Paint, string>;
 
@@ -44,8 +44,11 @@ export const schemeCss = (used: ReadonlyMap<string, Pair>): string => {
   return `svg{${decl("light")}}@media (prefers-color-scheme:dark){svg{${decl("dark")}}}`;
 };
 
+/** The two passes read different pages: an app still changing, or a scheme that changes the markup. */
+export class Differ extends Error {}
+
 const differ = (where: string): never => {
-  throw new Error(
+  throw new Differ(
     `snap() laid the dark scheme out differently from the light one at ${where}. Both schemes must have the same elements and text.`,
   );
 };
@@ -101,16 +104,12 @@ export const merge = (light: Box, dark: Box): Box => {
       ? paint((l ?? transparent(d as string)) as string, (d ?? transparent(l as string)) as string)
       : undefined;
 
-  const shadows = Array.from(
-    { length: Math.max(light.shadows.length, dark.shadows.length) },
-    (_, i) => {
-      const l = light.shadows[i];
-      const d = dark.shadows[i];
-      const base = l ?? d!;
-
-      return { ...base, color: pick(l?.color, d?.color)! };
-    },
-  );
+  const both = (l: readonly Shadow[], d: readonly Shadow[]) =>
+    Array.from({ length: Math.max(l.length, d.length) }, (_, i) => ({
+      ...(l[i] ?? d[i]!),
+      color: pick(l[i]?.color, d[i]?.color)!,
+    }));
+  const insets = both(light.insets ?? [], dark.insets ?? []);
 
   return {
     ...light,
@@ -122,7 +121,8 @@ export const merge = (light: Box, dark: Box): Box => {
             color: pick(light.border?.color, dark.border?.color)!,
           }
         : undefined,
-    shadows,
+    shadows: both(light.shadows, dark.shadows),
+    ...(insets.length > 0 ? { insets } : {}),
     children: light.children.map((c, i) => mergeItem(c, dark.children[i]!)),
   };
 };

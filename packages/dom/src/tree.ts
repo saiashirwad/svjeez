@@ -39,6 +39,12 @@ export interface TextRun {
   readonly placeholder?: boolean;
 }
 
+/** A CSS transform other than a plain move, as an SVG matrix about `origin`, in the snapshot's coordinates. */
+export interface Transform {
+  readonly matrix: readonly [number, number, number, number, number, number];
+  readonly origin: readonly [number, number];
+}
+
 /** A shape inside an inline `<svg>`, with fill and stroke resolved from the page's CSS. */
 export interface Vector {
   readonly tag: string;
@@ -51,6 +57,7 @@ export interface Graphic {
   readonly box: Rect;
   readonly viewBox: readonly [number, number, number, number];
   readonly children: readonly Vector[];
+  readonly transform?: Transform;
 }
 
 export interface Picture {
@@ -58,6 +65,7 @@ export interface Picture {
   readonly box: Rect;
   readonly radii: Radii;
   readonly href: string;
+  readonly transform?: Transform;
 }
 
 export interface Box {
@@ -76,12 +84,27 @@ export interface Box {
     readonly color: Paint;
   };
   readonly shadows: readonly Shadow[];
+  /** Inset shadows, drawn inside the padding box over the background. */
+  readonly insets?: readonly Shadow[];
   readonly opacity: number;
   readonly clip: boolean;
+  readonly transform?: Transform;
   readonly children: readonly Item[];
 }
 
 export type Item = Box | TextRun | Graphic | Picture;
+
+/** A web font the page loaded for its text, so the drawing can embed the same one. */
+export interface Face {
+  readonly family: string;
+  /** A CSS weight: one number, or a range for a variable font. */
+  readonly weight: string;
+  readonly style: "normal" | "italic";
+  /** The characters this file covers, when the page split the family across files. */
+  readonly unicodeRange?: string;
+  /** The file, as a data URI. */
+  readonly src: string;
+}
 
 /** One state of a component, read from a live page. Plain data: it survives `JSON.stringify`. */
 export interface Snapshot {
@@ -95,4 +118,6 @@ export interface Snapshot {
   /** The root's border box, in the snapshot's coordinates. */
   readonly box: Rect;
   readonly root: Box;
+  /** The page's own web fonts that its text used. Fonts given to `browser()` aren't repeated here. */
+  readonly fonts?: readonly Face[];
 }

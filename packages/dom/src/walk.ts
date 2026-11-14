@@ -104,15 +104,15 @@ export function walk({
     return r.map((n) => round(n * f)) as unknown as [number, number, number, number];
   };
 
-  const shadows = (value: string) =>
+  const shadows = (value: string, inset: boolean) =>
     value === "none"
       ? []
       : value
           .split(/,(?![^(]*\))/)
           .map((part) => part.trim())
-          .filter((part) => !/\binset\b/.test(part))
+          .filter((part) => /\binset\b/.test(part) === inset)
           .flatMap((part) => {
-            const m = /^(.*\)|\S+)\s+(.*)$/.exec(part);
+            const m = /^(.*\)|\S+)\s+(.*)$/.exec(part.replace(/\s*\binset\b/, ""));
             const c = m && color(m[1]!);
 
             if (!m || !c) return [];
@@ -274,10 +274,102 @@ export function walk({
     return { tag: el.tagName, attrs, children: [...el.children].map(shape) };
   };
 
+  const TRANSFORMS = ["transform", "rotate", "scale", "translate"] as const;
+
+  /**
+   * Elements with a z-index, and fixed ones, are painted by the nearest stacking context around them, not where they
+   * sit in the tree: each context keeps a list of the layers found under it.
+   */
+  const layers: { z: number; item: unknown }[][] = [];
+
+  /** The z-index an element is painted at by its stacking context, when it doesn't paint in tree order. */
+  const layerOf = (el: Element, parent: CSSStyleDeclaration): number | undefined => {
+    const s = getComputedStyle(el);
+    const z = s.zIndex === "auto" ? undefined : Number(s.zIndex);
+
+    if (s.position === "fixed") return z ?? 0;
+
+    return s.position !== "static" || /flex|grid/.test(parent.display) ? z : undefined;
+  };
+
+  const isContext = (s: CSSStyleDeclaration): boolean =>
+    (s.zIndex !== "auto" && s.position !== "static") ||
+    s.position === "fixed" ||
+    s.position === "sticky" ||
+    px(s.opacity) < 1 ||
+    TRANSFORMS.some((p) => s[p] !== "none") ||
+    s.filter !== "none" ||
+    s.backdropFilter !== "none" ||
+    s.isolation === "isolate" ||
+    s.mixBlendMode !== "normal" ||
+    /paint|layout|strict|content/.test(s.contain);
+
+  /**
+   * The element's own 2D transform, from `translate`, `rotate`, `scale` and `transform` in the order CSS applies
+   * them. A pure translation needs nothing: the boxes the browser reports already moved.
+   */
+  const matrixOf = (s: CSSStyleDeclaration): DOMMatrix | undefined => {
+    if (TRANSFORMS.every((p) => s[p] === "none")) return undefined;
+    const m = new DOMMatrix();
+
+    if (s.translate !== "none") {
+      const [x = 0, y = 0] = s.translate.split(/\s+/).map(px);
+      m.translateSelf(x, y);
+    }
+
+    if (s.rotate !== "none") {
+      const turn = /(-?[\d.]+)(deg|rad|turn|grad)$/.exec(s.rotate);
+      const unit = { deg: 1, rad: 180 / Math.PI, turn: 360, grad: 0.9 }[turn?.[2] ?? "deg"]!;
+      m.rotateSelf(turn ? Number(turn[1]) * unit : 0);
+    }
+
+    if (s.scale !== "none") {
+      const [x = 1, y = x] = s.scale.split(/\s+/).map(Number);
+      m.scaleSelf(x, y);
+    }
+
+    if (s.transform !== "none") m.multiplySelf(new DOMMatrix(s.transform));
+
+    return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 ? undefined : m;
+  };
+
+  /**
+   * An element turned, scaled or skewed is read as laid out, with its transform switched off for the moment, and the
+   * transform is kept to draw it with. Transitions are off meanwhile, so putting it back doesn't animate.
+   */
   const element = (el: Element): unknown => {
     const s = getComputedStyle(el);
 
     if (s.display === "none") return undefined;
+    const m = matrixOf(s);
+
+    if (!m || !(el instanceof HTMLElement || el instanceof SVGElement)) return laid(el, s);
+    const saved = ["transition", ...TRANSFORMS].map(
+      (p) => [p, el.style.getPropertyValue(p), el.style.getPropertyPriority(p)] as const,
+    );
+
+    for (const [p] of saved) el.style.setProperty(p, "none", "important");
+    const [ox = 0, oy = 0] = s.transformOrigin.split(/\s+/).map(px);
+    const item = laid(el, s, true) as { box: { x: number; y: number } } | undefined;
+
+    for (const [p, value, priority] of saved.slice(1)) el.style.setProperty(p, value, priority);
+    void getComputedStyle(el).transform;
+    const [p, value, priority] = saved[0]!;
+    el.style.setProperty(p, value, priority);
+
+    if (!item) return undefined;
+
+    return {
+      ...item,
+      transform: {
+        matrix: [m.a, m.b, m.c, m.d, m.e, m.f].map(round),
+        origin: [round(item.box.x + ox), round(item.box.y + oy)],
+      },
+    };
+  };
+
+  /** `turned`: the element has a transform, switched off while it's read, so it is a stacking context. */
+  const laid = (el: Element, s: CSSStyleDeclaration, turned = false): unknown => {
     const r = el.getBoundingClientRect();
     const tag = el.tagName.toLowerCase();
 
@@ -320,15 +412,31 @@ export function walk({
 
     const sides = [s.borderTopColor, s.borderRightColor, s.borderBottomColor, s.borderLeftColor];
     const borderColor = color(sides[widths.findIndex((w) => w > 0)] ?? "");
-    const children: unknown[] = [];
+    let children: unknown[] = [];
+    const context = el === root || turned || isContext(s);
+
+    if (context) layers.push([]);
 
     for (const child of el.childNodes) {
       if (child.nodeType === Node.TEXT_NODE) texts(child as Text, s, children);
       else if (child.nodeType === Node.ELEMENT_NODE) {
         const item = element(child as Element);
+        const z = item ? layerOf(child as Element, s) : undefined;
 
-        if (item) children.push(item);
+        if (item && z !== undefined) layers.at(-1)!.push({ z, item });
+        else if (item) children.push(item);
       }
+    }
+
+    // A stacking context paints its layers below zero, then its own flow, then the rest by z-index, ties in tree order.
+    if (context) {
+      const raised = layers.pop()!.sort((a, b) => a.z - b.z);
+
+      children = [
+        ...raised.filter((l) => l.z < 0).map((l) => l.item),
+        ...children,
+        ...raised.filter((l) => l.z >= 0).map((l) => l.item),
+      ];
     }
 
     if (
@@ -370,7 +478,8 @@ export function walk({
         visible && borderColor && widths.some((w) => w > 0)
           ? { widths, color: borderColor }
           : undefined,
-      shadows: visible ? shadows(s.boxShadow) : [],
+      shadows: visible ? shadows(s.boxShadow, false) : [],
+      ...(visible && /\binset\b/.test(s.boxShadow) ? { insets: shadows(s.boxShadow, true) } : {}),
       opacity: px(s.opacity),
       clip: s.overflowX !== "visible" || s.overflowY !== "visible",
       children,

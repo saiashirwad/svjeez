@@ -19,7 +19,19 @@ import {
 import { jsx } from "svjeez/jsx-runtime";
 import { mapPaint, schemeCss, sides, transparent, variable } from "./scheme.ts";
 import type { Timing, Wait } from "./flow.ts";
-import type { Box, Item, Paint, Radii, Rect, Snapshot, TextRun, Vector } from "./tree.ts";
+import type {
+  Box,
+  Face,
+  Item,
+  Paint,
+  Radii,
+  Rect,
+  Shadow,
+  Snapshot,
+  TextRun,
+  Transform,
+  Vector,
+} from "./tree.ts";
 
 type GroupStack = Stack<TagChannels<"g">>;
 
@@ -330,9 +342,116 @@ const countOf = (a: string, b: string): Count | undefined => {
   };
 };
 
+type Turned = Exclude<Item, TextRun>;
+
+/** The SVG for a CSS transform: its matrix about its origin. */
+const matrix = ({ matrix: [a, b, c, d, e, f], origin: [x, y] }: Transform): string =>
+  `translate(${num(x)} ${num(y)}) matrix(${[a, b, c, d, e, f].map(num).join(" ")}) translate(${num(-x)} ${num(-y)})`;
+
+const transformed = (it: Turned, node: SvgNode): SvgNode =>
+  it.transform ? <g transform={matrix(it.transform)}>{node}</g> : node;
+
+const sameTransform = (a: Turned, b: Turned): boolean =>
+  JSON.stringify(a.transform) === JSON.stringify(b.transform);
+
+/** Both boxes with the same number of inset shadows: the missing ones are clear copies of the other side's. */
+const padInsets = (a: Box, b: Box): [Box, Box] => {
+  const n = Math.max(a.insets?.length ?? 0, b.insets?.length ?? 0);
+
+  const pad = (own: Box, other: Box): Box => ({
+    ...own,
+    insets: Array.from({ length: n }, (_, i) => {
+      const s = own.insets?.[i];
+
+      return s ?? { ...other.insets![i]!, color: clear(other.insets![i]!.color) };
+    }),
+  });
+
+  return [pad(a, b), pad(b, a)];
+};
+
+/** An inset shadow's shape: the padding box with a hole the shadow doesn't reach. */
+const insetPath = (b: Box, s: Shadow, extra = 0): string => {
+  const { rect, radii } = contentOf(b);
+  const by = -(s.spread + extra);
+
+  return rounded(rect, radii) + rounded(grow(rect, by, s.x, s.y), growRadii(radii, by));
+};
+
+/** Faces from every state, once each, by family. */
+const groupFaces = (faces: readonly Face[]): Map<string, Face[]> => {
+  const out = new Map<string, Face[]>();
+  const seen = new Set<string>();
+
+  for (const face of faces) {
+    const key = JSON.stringify(face);
+
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.set(face.family, [...(out.get(face.family) ?? []), face]);
+  }
+
+  return out;
+};
+
+// Decoding a font is the slow part, and every `Dom` drawn from the same snapshots shares the files.
+const decoded = new Map<string, Font | undefined>();
+
+const fontOf = (face: Face): Font | undefined => {
+  const key = `${face.family}|${face.weight}|${face.style}|${face.src}`;
+
+  if (!decoded.has(key)) {
+    const bytes = Uint8Array.from(atob(face.src.slice(face.src.indexOf(",") + 1)), (c) =>
+      c.charCodeAt(0),
+    );
+
+    try {
+      decoded.set(
+        key,
+        font(bytes, { family: face.family, weight: Number(face.weight), style: face.style }),
+      );
+    } catch {
+      decoded.set(key, undefined);
+    }
+  }
+
+  return decoded.get(key);
+};
+
+/** One `FontFamily`, when every face is a whole file of one weight and style. */
+const asFamily = (faces: readonly Face[]): FontValue | undefined => {
+  const kinds = new Set(faces.map((f) => `${f.weight} ${f.style}`));
+
+  if (kinds.size !== faces.length || faces.some((f) => f.unicodeRange || !/^\d+$/.test(f.weight)))
+    return undefined;
+  const fonts = faces.map(fontOf);
+
+  return fonts.every((f) => f !== undefined)
+    ? font.family(...(fonts as [Font, ...Font[]]))
+    : undefined;
+};
+
+const FACE_FORMATS: Readonly<Record<string, string>> = {
+  "font/woff2": "woff2",
+  "font/woff": "woff",
+  "font/otf": "opentype",
+  "font/ttf": "truetype",
+};
+
+/** The page's own `@font-face` rule for a face svjeez can't hold as a `Font`: a range, or a variable weight. */
+const faceRule = (face: Face): string => {
+  const mime = face.src.slice(5, face.src.indexOf(";"));
+
+  return (
+    `@font-face{font-family:${JSON.stringify(face.family)};src:url(${face.src}) format("${FACE_FORMATS[mime] ?? "truetype"}");` +
+    `font-weight:${face.weight};font-style:${face.style}${face.unicodeRange ? `;unicode-range:${face.unicodeRange}` : ""}}`
+  );
+};
+
 /** The drawing code for `Dom`. */
 const painter = (
   fonts: readonly FontValue[],
+  captured: readonly Face[],
   parts: Parts,
   pairOf?: (box: Box) => string | undefined,
 ) => {
@@ -359,6 +478,18 @@ const painter = (
 
   for (const [name, faces] of grouped)
     byName.set(name, faces.length === 1 ? faces[0]! : font.family(...(faces as [Font, ...Font[]])));
+
+  // The page's own fonts, for families `fonts` doesn't cover. A family svjeez can hold as one face per weight and
+  // style becomes a `Font`, so it embeds only where drawn and a TTF is cut down; the rest embed as the page had them.
+  const rules: string[] = [];
+
+  for (const [name, list] of groupFaces(captured)) {
+    if (byName.has(name)) continue;
+    const family = asFamily(list);
+
+    if (family) byName.set(name, family);
+    else rules.push(...list.map(faceRule));
+  }
 
   const seen = new Map<string, number>();
 
@@ -431,7 +562,7 @@ const painter = (
         const [vx, vy, vw, vh] = it.viewBox;
         const t = `translate(${num(it.box.x)} ${num(it.box.y)}) scale(${num(it.box.width / vw)} ${num(it.box.height / vh)}) translate(${num(-vx)} ${num(-vy)})`;
 
-        return <g transform={t}>{it.children.map(vector)}</g>;
+        return transformed(it, <g transform={t}>{it.children.map(vector)}</g>);
       }
 
       case "image": {
@@ -439,14 +570,17 @@ const painter = (
           ? def.clipPath({}, <path d={rounded(it.box, it.radii)} />)
           : undefined;
 
-        return jsx("image", {
-          href: it.href,
-          x: num(it.box.x),
-          y: num(it.box.y),
-          width: num(it.box.width),
-          height: num(it.box.height),
-          clipPath: clip,
-        } as never);
+        return transformed(
+          it,
+          jsx("image", {
+            href: it.href,
+            x: num(it.box.x),
+            y: num(it.box.y),
+            width: num(it.box.width),
+            height: num(it.box.height),
+            clipPath: clip,
+          } as never),
+        );
       }
 
       case "box":
@@ -624,7 +758,8 @@ const painter = (
     if (
       a.kind === "graphic" &&
       b.kind === "graphic" &&
-      JSON.stringify(a.children) === JSON.stringify(b.children)
+      JSON.stringify(a.children) === JSON.stringify(b.children) &&
+      sameTransform(a, b)
     )
       return (
         <g
@@ -768,6 +903,43 @@ const painter = (
       return null;
     };
 
+    // Inset shadows: the padding box less a copy shrunk by the spread and moved by the offset, kept inside the
+    // padding box, with a blur drawn as nested faint copies like an outer shadow's.
+    const [insetA, insetB] = both ? padInsets(both.a, b) : [undefined, b];
+    const insetClip =
+      (insetB.insets?.length ?? 0) > 0
+        ? def.clipPath(
+            {},
+            path(
+              clipD,
+              "#000",
+              clipFrom === undefined ? undefined : { d: clipFrom, fill: "#000" },
+              tween,
+            ),
+          )
+        : undefined;
+
+    const insets = (insetB.insets ?? []).flatMap((s, i) => {
+      const was = insetA?.insets?.[i];
+
+      if (invisible(s.color) && (!was || invisible(was.color))) return [];
+      const n = layersFor(Math.max(s.blur, was?.blur ?? 0));
+
+      return Array.from({ length: n }, (_, k) =>
+        path(
+          insetPath(insetB, s, spreadAt(s.blur, k, n)),
+          v(layerColor(s.color, n)),
+          insetA &&
+            was && {
+              d: insetPath(insetA, was, spreadAt(was.blur, k, n)),
+              fill: v(layerColor(was.color, n)),
+            },
+          tween,
+          { fillRule: "evenodd" },
+        ),
+      );
+    });
+
     const ring = (x: Box) => {
       const c = contentOf(x);
 
@@ -796,7 +968,9 @@ const painter = (
 
         if (!old) return <g animation={fade(both.tween, "enter")}>{item(it)}</g>;
 
-        if (old.kind === "box" && it.kind === "box") return box(it, old, both.tween);
+        // A box that turned or scaled crossfades: a matrix doesn't tween as a whole.
+        if (old.kind === "box" && it.kind === "box" && sameTransform(old, it))
+          return box(it, old, both.tween);
 
         if (old.kind === it.kind) return pair(old, it, both.tween);
 
@@ -816,7 +990,8 @@ const painter = (
             .to({ opacity: b.opacity }, both.tween.over, both.tween.ease)
         : undefined;
 
-    return (
+    return transformed(
+      b,
       <g
         opacity={!opacity && b.opacity < 1 ? b.opacity : undefined}
         animation={[...[partMotion(b)].flat(), opacity] as GroupStack}
@@ -826,15 +1001,16 @@ const painter = (
           (x) => x.background,
           (x) => rounded(x.box, x.radii),
         )}
+        {insetClip && insets.length > 0 && <g clipPath={insetClip}>{insets}</g>}
         {layer((x) => x.border?.color, ring, { fillRule: "evenodd" })}
         {clip ? <g clipPath={clip}>{children}</g> : children}
-      </g>
+      </g>,
     );
   };
 
-  /** The rule that defines the variables drawn so far. */
+  /** The rules that define the variables drawn so far, and the page's fonts svjeez doesn't embed itself. */
   const style = (): SvgNode | null => {
-    const css = schemeCss(used);
+    const css = rules.join("") + schemeCss(used);
 
     return css ? <Style css={css} /> : null;
   };
@@ -933,8 +1109,13 @@ export function Dom({
   y = 0,
   animation,
 }: DomProps): SvgNode {
-  const paint = painter(fonts, parts, pair);
   const { snaps, moves } = timeline(states);
+  const paint = painter(
+    fonts,
+    snaps.flatMap((s) => s.fonts ?? []),
+    parts,
+    pair,
+  );
 
   if (snaps.length === 0) throw new Error("<Dom> needs at least one state.");
 

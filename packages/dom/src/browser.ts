@@ -1,9 +1,10 @@
 import type { Page } from "playwright-core";
 import type { Font, FontValue } from "svjeez";
-import { merge } from "./scheme.ts";
+import { dataUri, families, sources } from "./fonts.ts";
+import { Differ, merge } from "./scheme.ts";
 import type { Step } from "./draw.tsx";
 import type { Action, Flow, Instruction } from "./flow.ts";
-import type { Snapshot } from "./tree.ts";
+import type { Box, Face, Snapshot } from "./tree.ts";
 import { walk } from "./walk.ts";
 
 /** CSS for the page: your Tailwind build, a theme, anything. A function gets the markup, for CSS built from it. */
@@ -48,6 +49,10 @@ type PageAction = (page: Page) => unknown;
 export interface OpenOptions extends PageOptions {
   /** The element to snapshot. */
   readonly root: string;
+  /** Height of the viewport the app lays out in. Default 1000. */
+  readonly height?: number;
+  /** A selector to wait for before anything runs, for an app that renders after it loads. Default `root`. */
+  readonly ready?: string;
 }
 
 /** A running app to open, as `open` takes it. */
@@ -212,6 +217,9 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   const darkClass = options.dark?.class ?? "dark";
   // The scheme a card rests in between snapshots, so actions run in the scheme the page was written for.
   const resting = schemes === "dark" ? "dark" : "light";
+  const given = new Set((options.fonts ?? []).flatMap(facesOf).map((f) => f.family));
+  // Font files by URL, fetched once for every card.
+  const files = new Map<string, Promise<string | undefined>>();
 
   const io = async (
     page: Page,
@@ -246,18 +254,31 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       ] as const);
     };
 
-    const pass = async (value: "light" | "dark") => {
-      await scheme(value);
+    // Transitions and finite animations that an action or a scheme change started must land before the page is read.
+    // An app that answers an action from script (search results arriving) changes the DOM a little later, so before
+    // a read the page must go quiet for a moment, or a few seconds pass. A scheme change only needs two frames.
+    const settle = (quiet: boolean) =>
+      page.evaluate(async (quiet) => {
+        await new Promise<void>((done) => {
+          if (!quiet) return done();
 
-      return page.evaluate(walk, { selector, pad, parts });
-    };
+          let timer = setTimeout(() => finish(), 150);
+          const observer = new MutationObserver(() => {
+            clearTimeout(timer);
+            timer = setTimeout(() => finish(), 150);
+          });
+          const limit = setTimeout(() => finish(), 3000);
 
-    await scheme(resting);
+          const finish = () => {
+            observer.disconnect();
+            clearTimeout(timer);
+            clearTimeout(limit);
+            done();
+          };
 
-    const read = async (): Promise<Snapshot> => {
-      await shim();
-      // Transitions and finite animations that an action started must land before the page is read.
-      await page.evaluate(async () => {
+          observer.observe(document, { subtree: true, childList: true, characterData: true });
+        });
+        await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
         await document.fonts.ready;
         await Promise.all(
           document
@@ -265,12 +286,70 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
             .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
             .map((a) => a.finished.catch(() => undefined)),
         );
-      });
+      }, quiet);
 
-      // Light goes last, so the page ends in the scheme it rests in.
-      const dark = schemes === "light" ? undefined : await pass("dark");
-      const light = schemes === "dark" ? undefined : await pass("light");
-      const root = dark && light ? merge(light, dark) : (light ?? dark)!;
+    const pass = async (value: "light" | "dark") => {
+      await scheme(value);
+      await settle(false);
+
+      return page.evaluate(walk, { selector, pad, parts });
+    };
+
+    await scheme(resting);
+
+    // The page's own web fonts, fetched from Node so a cross-origin file needs no CORS.
+    const capture = async (used: string[]): Promise<Face[]> => {
+      if (used.length === 0) return [];
+      const found = await page.evaluate(sources, used);
+
+      const download = async (url: string) => {
+        if (url.startsWith("data:")) return new Uint8Array(await (await fetch(url)).arrayBuffer());
+        const response = await page.request.get(url);
+
+        return response.ok() ? new Uint8Array(await response.body()) : undefined;
+      };
+
+      const faces = await Promise.all(
+        found.map(async ({ url, ...face }) => {
+          let file = files.get(url);
+
+          if (!file) {
+            // A file that won't download leaves its text to a fallback font, as a page without it would.
+            file = download(url).then(
+              (bytes) => bytes && dataUri(bytes),
+              () => undefined,
+            );
+            files.set(url, file);
+          }
+          const src = await file;
+
+          return src ? [{ ...face, src }] : [];
+        }),
+      );
+
+      return faces.flat();
+    };
+
+    const read = async (): Promise<Snapshot> => {
+      await shim();
+      await settle(true);
+
+      // Light goes last, so the page ends in the scheme it rests in. A live app may still be changing between the two
+      // passes (a progress badge, results arriving), so a mismatch reads both again before it counts.
+      const both = async (tries: number): Promise<Box> => {
+        const dark = schemes === "light" ? undefined : await pass("dark");
+        const light = schemes === "dark" ? undefined : await pass("light");
+
+        try {
+          return dark && light ? merge(light, dark) : (light ?? dark)!;
+        } catch (error) {
+          if (!(error instanceof Differ) || tries <= 1) throw error;
+
+          return both(tries - 1);
+        }
+      };
+      const root = await both(3);
+      const fonts = await capture([...families(root)].filter((f) => !given.has(f)));
 
       return {
         width: Math.ceil(root.box.width + 2 * pad),
@@ -278,6 +357,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         pad,
         box: root.box,
         root,
+        ...(fonts.length > 0 ? { fonts } : {}),
       };
     };
 
@@ -340,15 +420,15 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         await page.mouse.move(-1, -1);
       });
     },
-    open: async (url, { root, width, ...rest }) => {
+    open: async (url, { root, width, height, ready, ...rest }) => {
       const page = await chromium.newPage({
-        viewport: { width: Math.ceil(width ?? 1280), height: 1000 },
+        viewport: { width: Math.ceil(width ?? 1280), height: Math.ceil(height ?? 1000) },
       });
 
       await page.goto(url);
 
       if (faces) await page.addStyleTag({ content: faces });
-      await page.waitForSelector(root);
+      await page.waitForSelector(ready ?? root);
 
       return io(page, root, rest, async () => {
         throw new Error(

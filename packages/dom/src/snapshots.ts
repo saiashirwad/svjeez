@@ -12,7 +12,7 @@ import {
 import type { Snapshot } from "./tree.ts";
 
 /** Bump when the shape of the file changes, so stale files are read again. */
-const FORMAT = 3;
+const FORMAT = 4;
 
 export interface SnapshotsOptions extends BrowserOptions {
   /**
@@ -73,6 +73,42 @@ const record = (pages: Pages, tapes: Tape[]): Pages => {
     close: pages.close,
   };
 };
+
+/** The file as written: each font once, by digest, however many snapshots use it. */
+interface Saved {
+  readonly hash?: string;
+  readonly fonts?: Readonly<Record<string, string>>;
+  readonly tapes?: Tape[];
+}
+
+const pack = (tapes: readonly Tape[]): Pick<Saved, "fonts" | "tapes"> => {
+  const fonts: Record<string, string> = {};
+
+  const snaps = (snap: Snapshot): Snapshot =>
+    snap.fonts
+      ? {
+          ...snap,
+          fonts: snap.fonts.map((face) => {
+            const key = digest(face.src);
+            fonts[key] = face.src;
+
+            return { ...face, src: key };
+          }),
+        }
+      : snap;
+
+  return { fonts, tapes: tapes.map((t) => ({ ...t, snaps: t.snaps.map(snaps) })) };
+};
+
+const unpack = (tapes: readonly Tape[], fonts: Readonly<Record<string, string>> = {}): Tape[] =>
+  tapes.map((t) => ({
+    ...t,
+    snaps: t.snaps.map((snap) =>
+      snap.fonts
+        ? { ...snap, fonts: snap.fonts.map((face) => ({ ...face, src: fonts[face.src]! })) }
+        : snap,
+    ),
+  }));
 
 class Stale extends Error {}
 
@@ -152,12 +188,12 @@ export const snapshots = async <T>(
 
   if (!process.env.SVJEEZ_DOM_REFRESH) {
     const saved = await readFile(file, "utf8").then(
-      (text) => JSON.parse(text) as { hash?: string; tapes?: Tape[] },
+      (text) => JSON.parse(text) as Saved,
       () => undefined,
     );
 
     if (saved?.hash === hash && saved.tapes) {
-      const { dom, whole } = replay(saved.tapes);
+      const { dom, whole } = replay(unpack(saved.tapes, saved.fonts));
       const out = await run(dom).then(
         (value) => ({ value }),
         (error: unknown) => {
@@ -177,7 +213,7 @@ export const snapshots = async <T>(
     const value = await run(browserOf(record(pages, tapes)));
 
     await mkdir(dirname(file), { recursive: true });
-    await writeFile(file, JSON.stringify({ hash, tapes }));
+    await writeFile(file, JSON.stringify({ hash, ...pack(tapes) }));
 
     return value;
   } finally {
