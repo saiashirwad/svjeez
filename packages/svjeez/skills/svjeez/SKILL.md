@@ -168,7 +168,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
 | Code walkthroughs, terminals, annotations, camera, themes, recoloring, axes and calculus (`@svjeez/math`), pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
-| Flowchart, sequence, state, tree, lanes, `flow` | [`references/diagrams.md`](references/diagrams.md) |
+| Flowchart, sequence, state, tree, lanes (`@svjeez/diagrams`), `flow` | [`references/diagrams.md`](references/diagrams.md) |
 | Pixel-art voxel scenes (`@svjeez/voxel`) | [`references/voxels.md`](references/voxels.md) |
 | Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |
@@ -187,6 +187,6 @@ Each file in `examples/` renders. Copy one and change it.
 
 - `examples/toast.tsx`: a `motion()` chain, stacked `enter` and `shake`, `draw` on a check.
 - `examples/orbit.tsx`: `sampled()` orbit, a `.loop()` spin, a `wiggle` breath.
-- `examples/review-flow.tsx`: a typed `flowchart`, a `flow` comet, an adaptive theme.
+- `examples/review-flow.tsx`: hand-placed boxes, a `flow` comet along them, an adaptive theme.
 - `examples/explainer.tsx`: `code`, `morph`, `timeline`, `Focus`, `Marker`, `Callout`.
 - `examples/terminal.tsx`: `appWindow` with a typed `terminal` session.

@@ -1,6 +1,6 @@
 # Diagrams
 
-`flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. Import them from `svjeez/extras`. Each returns `{ node, get(id), bounds }` plus helpers.
+`flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. They are in `@svjeez/diagrams`, a separate package: `npm i -D @svjeez/diagrams`. `flow` and `travel` are in `svjeez`. Each returns `{ node, get(id), bounds }` plus helpers.
 
 Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`.
 
@@ -20,7 +20,7 @@ Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or 
 
 ```tsx
 import { flow } from "svjeez";
-import { flowchart } from "svjeez/extras";
+import { flowchart } from "@svjeez/diagrams";
 
 const chart = flowchart(
   {
@@ -41,7 +41,7 @@ const picture = <>{chart.layers.under}{trip.node}{chart.layers.over}</>; // the 
 ## Sequence
 
 ```tsx
-import { sequence } from "svjeez/extras";
+import { sequence } from "@svjeez/diagrams";
 
 const login = sequence(
   {
@@ -56,7 +56,7 @@ const slot = login.message(2); // { span, points }: when it plays and where it r
 ## State machine
 
 ```tsx
-import { stateMachine } from "svjeez/extras";
+import { stateMachine } from "@svjeez/diagrams";
 
 const agent = stateMachine(
   {
@@ -74,7 +74,7 @@ const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwe
 ## Tree
 
 ```tsx
-import { tree } from "svjeez/extras";
+import { tree } from "@svjeez/diagrams";
 
 const team = tree({ nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } }, { play: { at: 0.5 } });
 const hop = team.route("a", "b"); // up through the common ancestor and down
@@ -85,7 +85,7 @@ Exactly one node has no `parent`.
 ## Lanes
 
 ```tsx
-import { lanes } from "svjeez/extras";
+import { lanes } from "@svjeez/diagrams";
 
 const run = lanes(
   {

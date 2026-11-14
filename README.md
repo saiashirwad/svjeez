@@ -70,7 +70,7 @@ svjeez runs on Node 20+ or Bun and has no runtime dependencies. On Node, install
 
 - `motion()` timelines, recipes like `enter`, `draw` and `wiggle`, and `sampled()` to bake physics into keyframes
 - Code walkthroughs with token `morph()`, markers, callouts and terminals
-- Flowcharts, sequence diagrams, state machines, trees and lanes, with node IDs checked by TypeScript
+- Flowcharts, sequence diagrams, state machines, trees and lanes from `@svjeez/diagrams`, with node IDs checked by TypeScript
 - Variable-width `<Ink>`, embedded fonts and images, filters, and typed CSS `@property`
 
 [`SKILL.md`](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/SKILL.md) covers all of it.

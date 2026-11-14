@@ -1,6 +1,6 @@
 # Diagrams from Mermaid text with @svjeez/mermaid
 
-`@svjeez/mermaid` is a separate package: `npm i -D @svjeez/mermaid`. `mermaid()` reads a Mermaid flowchart, sequence diagram or state diagram and calls `flowchart()`, `sequence()` or `stateMachine()` with it, so the result is themed, laid out and animated like any svjeez diagram. It has no dependencies and needs no DOM. Reach for it when the diagram already exists as Mermaid text; to build one from scratch, use the typed functions in [`diagrams.md`](diagrams.md).
+`@svjeez/mermaid` is a separate package: `npm i -D @svjeez/mermaid`. `mermaid()` reads a Mermaid flowchart, sequence diagram or state diagram and calls `flowchart()`, `sequence()` or `stateMachine()` with it, so the result is themed, laid out and animated like any svjeez diagram. It depends on `@svjeez/diagrams` and needs no DOM. Reach for it when the diagram already exists as Mermaid text; to build one from scratch, use the typed functions in [`diagrams.md`](diagrams.md).
 
 ```tsx
 import { mermaid } from "@svjeez/mermaid";
