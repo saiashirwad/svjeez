@@ -1,10 +1,10 @@
 # Voxels
 
-Voxels live in their own entry, `svjeez/voxel`. It exports `voxel` with `camera`, `texture` and `scene`.
+Voxels live in a separate package: `npm i -D @svjeez/voxel`. It exports `voxel` with `camera`, `texture` and `scene`.
 
 ```tsx
 import { ease, enter, sampled } from "svjeez";
-import { voxel } from "svjeez/voxel";
+import { voxel } from "@svjeez/voxel";
 
 const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 }); // unit: px per block edge
 const dirt = voxel.texture({ d: "#7A5534", e: "#6A4A2C" }, `

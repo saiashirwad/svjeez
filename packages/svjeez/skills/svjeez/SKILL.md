@@ -169,7 +169,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
 | Code walkthroughs, terminals, annotations, camera, themes, recoloring, pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
 | Flowchart, sequence, state, tree, lanes, `flow` | [`references/diagrams.md`](references/diagrams.md) |
-| Pixel-art voxel scenes | [`references/voxels.md`](references/voxels.md) |
+| Pixel-art voxel scenes (`@svjeez/voxel`) | [`references/voxels.md`](references/voxels.md) |
 | Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |
 | Equations: TeX, equation transforms, `morph()` over formulas (`@svjeez/math`) | [`references/math.md`](references/math.md) |

@@ -69,6 +69,8 @@ jobs:
       - run: npm run test:package
         working-directory: packages/math
       - run: npm run test:package
+        working-directory: packages/voxel
+      - run: npm run test:package
         working-directory: packages/charts
       - run: npm run test:package
         working-directory: packages/mermaid

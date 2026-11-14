@@ -1,4 +1,4 @@
-import { voxel, type VoxelSkin } from "svjeez/voxel";
+import { voxel, type VoxelSkin } from "@svjeez/voxel";
 
 const art = voxel.texture;
 

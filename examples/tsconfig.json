@@ -17,8 +17,7 @@
       "svjeez/jsx-runtime": ["../packages/svjeez/src/jsx-runtime.ts"],
       "svjeez/jsx-dev-runtime": ["../packages/svjeez/src/jsx-dev-runtime.ts"],
       "svjeez/extras": ["../packages/svjeez/src/extras.ts"],
-      "svjeez/frames": ["../packages/svjeez/src/frames.ts"],
-      "svjeez/voxel": ["../packages/svjeez/src/voxel.ts"]
+      "svjeez/frames": ["../packages/svjeez/src/frames.ts"]
     }
   },
   "include": [".", "../packages/svjeez/src"],

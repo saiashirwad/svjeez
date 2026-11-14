@@ -10,7 +10,7 @@ import {
   type Seconds,
   type SvgNode,
 } from "svjeez";
-import { voxel } from "svjeez/voxel";
+import { voxel } from "@svjeez/voxel";
 import { BEAT, C, CAMERA, D, GRID, H, ORIGIN, W, clamp, lerp, random } from "./kit";
 import { SKIN } from "./textures";
 import { LIGHTS } from "./world";

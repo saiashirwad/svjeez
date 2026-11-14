@@ -1,6 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { ease, enter, type Span } from "svjeez";
-import { voxel } from "svjeez/voxel";
+import { voxel } from "@svjeez/voxel";
 import { mono, theme } from "../style";
 import { C, Caption } from "./kit";
 

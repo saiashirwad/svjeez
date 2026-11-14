@@ -1,5 +1,5 @@
 import { ease, motion, type Motion, type Seconds } from "svjeez";
-import type { Vec3, VoxelBlock } from "svjeez/voxel";
+import type { Vec3, VoxelBlock } from "@svjeez/voxel";
 import { BEAT, GRID, random, tenth } from "./kit";
 import { COLUMNS, LAKE, PLOT, columnOf, type Column } from "./terrain";
 import { SKIN } from "./textures";

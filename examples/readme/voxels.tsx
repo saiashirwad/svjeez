@@ -1,5 +1,5 @@
 import { ease, enter, render } from "svjeez";
-import { voxel } from "svjeez/voxel";
+import { voxel } from "@svjeez/voxel";
 import { css, theme } from "../style";
 
 const view = voxel.camera({ yaw: 45, pitch: 30, unit: 24 });
