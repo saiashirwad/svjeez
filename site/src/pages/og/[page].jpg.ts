@@ -1,8 +1,8 @@
-// Link-preview cards, one per page, each a still svjeez scene starring the chick (examples/site/og.tsx). An example's
+// Link-preview cards, one per page, each a still svjeez scene starring the chick (examples/site/lib/og.tsx). An example's
 // card shows that example's own still in a window.
 import type { APIRoute, GetStaticPaths } from "astro";
 import { renderFrames } from "svjeez/frames";
-import { card, exampleCard, type Mood } from "@examples/site/og.tsx";
+import { card, exampleCard, type Mood } from "@examples/site/lib/og.tsx";
 import { close, encode } from "@svjeez/vite/encode";
 import { examples } from "../../examples";
 
