@@ -544,6 +544,51 @@ describe(".loop() inside a clip", () => {
   });
 });
 
+describe("clips, loops and repeats together", () => {
+  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, 2, ease.linear).loop(5);
+
+  test("a loop inside nested clips takes the sum of their starts as its phase", () => {
+    const nested = scene(
+      <Clip at={1}>
+        <Clip at={1.5}>{rect(spin)}</Clip>
+      </Clip>,
+    );
+
+    expect(nested).toBe(scene(<Clip at={2.5}>{rect(spin)}</Clip>));
+  });
+
+  test("a repeat that stops mid-pass moves every channel it touches to where that pass had got", () => {
+    const both = motion({ x: 0, opacity: 0 })
+      .to({ x: 100, opacity: 1 }, 2, ease.linear)
+      .repeat({ until: 5 });
+
+    const svg = scene(rect(both));
+
+    expect(keys(svg, "translate").at(-2)).toEqual({ t: 5, value: 50 });
+    expect(keys(svg, "opacity").at(-2)).toEqual({ t: 5, value: 0.5 });
+  });
+
+  test("a repeat of a path morph can stop partway too", () => {
+    // SAFETY: both literals start with M, as PathData requires.
+    const [from, to] = ["M0 0L10 0", "M0 0L30 0"] as [`M${string}`, `M${string}`];
+    const morph = motion({ d: from }).to({ d: to }, 2, ease.linear);
+
+    const svg = scene(<path d="M0 0L10 0" animation={morph.repeat({ until: 3 })} />);
+
+    expect(svg).toContain("M0 0L20 0");
+  });
+
+  test("a repeat inside a clip that has an over ends within it", () => {
+    expect(() =>
+      scene(
+        <Clip at={1} over={3}>
+          {rect(motion({ x: 0 }).to({ x: 1 }, 2).repeat(2))}
+        </Clip>,
+      ),
+    ).toThrow("A motion on <rect> runs until 4s, past the 3s <Clip at={1} over={3}>.");
+  });
+});
+
 describe("show()", () => {
   const fade = (spans: Parameters<typeof show>[0], options?: Parameters<typeof show>[1]) =>
     keys(scene(rect(show(spans, options))), "opacity");
