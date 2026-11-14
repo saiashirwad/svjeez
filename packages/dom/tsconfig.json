@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "customConditions": ["@svjeez/source"],
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["bun"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "paths": {
+      "svjeez": ["../svjeez/src/index.ts"],
+      "svjeez/jsx-runtime": ["../svjeez/src/jsx-runtime.ts"],
+      "svjeez/jsx-dev-runtime": ["../svjeez/src/jsx-dev-runtime.ts"],
+      "svjeez/frames": ["../svjeez/src/frames.ts"]
+    }
+  },
+  "include": ["src", "test"],
+  "exclude": ["test/consumer"]
+}
