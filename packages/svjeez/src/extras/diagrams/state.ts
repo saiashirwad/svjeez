@@ -167,6 +167,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   const { theme, fontSize, font, small } = base;
   const header = Math.round(fontSize * 2.6);
   const nodes = new Map<string, Node>();
+  const claimed = new Set<string>();
 
   const scope = (
     states: Record<string, StateSpec>,
@@ -175,8 +176,10 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     owner?: string,
   ): Scope => {
     const list = Object.entries(states).map(([id, s]): Node => {
-      if (nodes.has(id))
+      if (nodes.has(id) || claimed.has(id))
         throw new Error(`stateMachine() has two states named ${JSON.stringify(id)}.`);
+
+      claimed.add(id);
 
       const node: Node = isBareLabel(s)
         ? { id, label: s, final: false, parent: owner, depth }
@@ -219,6 +222,11 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     let k = 0;
 
     while (k < a.length - 1 && k < b.length - 1 && a[k] === b[k]) k++;
+
+    if (from !== to && (a.includes(to) || b.includes(from)))
+      throw new Error(
+        `stateMachine() cannot draw a transition between ${JSON.stringify(from)} and ${JSON.stringify(to)}, because one holds the other. Draw it from a sibling of the composite, or from one of its inner states.`,
+      );
 
     return { owner: k === 0 ? undefined : a[k - 1], from: a[k]!, to: b[k]! };
   };

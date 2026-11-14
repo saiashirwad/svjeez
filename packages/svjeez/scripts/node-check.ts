@@ -14,9 +14,13 @@ let failed = 0;
 for (const scene of scenes) {
   try {
     const { default: build }: { default: () => string } = await import(join(ROOT, scene));
-    const { errors } = validateSvg(build());
+    const svg = build();
+    const { errors } = validateSvg(svg);
 
     if (errors.length > 0) throw new Error(errors.join("\n"));
+
+    // The skill tests ask the same of these examples.
+    if (!svg.includes("@keyframes")) throw new Error("the scene has no animation.");
     console.log(`✓ ${scene}`);
   } catch (error) {
     failed++;

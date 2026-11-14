@@ -16,7 +16,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bunx playwright-core install --with-deps chromium-headless-shell
+      # The locked playwright-core, since bunx fetches the latest and its Chromium build isn't the one the tests launch.
+      - run: bun run playwright-core install --with-deps chromium-headless-shell
+        working-directory: packages/svjeez
       - run: bun run typecheck
       - run: bun run test
       - run: npm pack --dry-run
@@ -63,12 +65,16 @@ jobs:
       - run: npm run test:package
         working-directory: packages/geo
       - run: npm run test:package
+        working-directory: packages/icons
+      - run: npm run test:package
         working-directory: packages/math
       - run: npm run test:package
         working-directory: packages/charts
       - run: npm run test:package
         working-directory: packages/mermaid
-      - run: bunx playwright-core install --with-deps chromium-headless-shell
+      # The locked playwright-core, since bunx fetches the latest and its Chromium build isn't the one the tests launch.
+      - run: bun run playwright-core install --with-deps chromium-headless-shell
+        working-directory: packages/svjeez
       - run: npm run test:package
         working-directory: packages/vite
       - run: npm run test:package

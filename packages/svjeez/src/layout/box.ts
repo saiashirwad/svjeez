@@ -16,14 +16,32 @@ export const flip = <T extends Box | Point>(value: T): T =>
     ? { x: value.y, y: value.x, w: value.h, h: value.w }
     : { x: value.y, y: value.x }) as T;
 
+/** The largest of `values`, or -Infinity when there are none. Unlike `Math.max(...values)`, it has no limit on the count. */
+export const maxOf = (values: readonly number[]): number => {
+  let max = -Infinity;
+
+  for (const v of values) if (v > max) max = v;
+
+  return max;
+};
+
+/** The smallest of `values`, or Infinity when there are none. */
+export const minOf = (values: readonly number[]): number => {
+  let min = Infinity;
+
+  for (const v of values) if (v < min) min = v;
+
+  return min;
+};
+
 export const union = (boxes: readonly Box[]): Box => {
-  const [left, top] = [Math.min(...boxes.map((b) => b.x)), Math.min(...boxes.map((b) => b.y))];
+  const [left, top] = [minOf(boxes.map((b) => b.x)), minOf(boxes.map((b) => b.y))];
 
   return {
     x: left,
     y: top,
-    w: Math.max(...boxes.map((b) => b.x + b.w)) - left,
-    h: Math.max(...boxes.map((b) => b.y + b.h)) - top,
+    w: maxOf(boxes.map((b) => b.x + b.w)) - left,
+    h: maxOf(boxes.map((b) => b.y + b.h)) - top,
   };
 };
 

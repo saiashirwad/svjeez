@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Box, Point } from "../src/layout/box";
+import { union, type Box, type Point } from "../src/layout/box";
 import { lanes } from "../src/layout/lanes";
 import { layered, type LayeredInput } from "../src/layout/layered";
 import { sequence } from "../src/layout/sequence";
@@ -486,6 +486,24 @@ describe("lanes", () => {
     const [p, q] = out.links[0]!;
     expect([p.x, q.x]).toEqual([out.x(2.5), out.x(2.5)]);
     expect(p.y > a.y && p.y < a.y + a.h && q.y > b.y && q.y < b.y + b.h).toBe(true);
+  });
+});
+
+describe("size limits", () => {
+  test("union and lanes take hundreds of thousands of boxes without a RangeError", () => {
+    const boxes = Array.from({ length: 300_000 }, (_, i) => ({ x: i, y: 0, w: 1, h: 1 }));
+
+    expect(union(boxes)).toEqual({ x: 0, y: 0, w: 300_000, h: 1 });
+
+    const out = lanes({
+      lanes: [{ id: "a", label: { w: 10, h: 10 } }],
+      spans: [],
+      events: boxes.map((b) => ({ lane: "a", at: b.x })),
+      links: [],
+      scale: 1,
+    });
+
+    expect(out.x(299_999)).toBeGreaterThan(out.x(0));
   });
 });
 
