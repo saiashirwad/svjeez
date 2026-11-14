@@ -18,6 +18,9 @@ const WINDOWS = {
   enter: [0.5, 0.5, 0, 1],
   swapOut: [0.45, 0.4, 1, 0],
   swapIn: [0.15, 0.4, 0, 1],
+  // A shadow only one side has comes or goes over the whole tween, as a color fading would.
+  in: [0, 1, 0, 1],
+  out: [0, 1, 1, 0],
 } as const;
 
 export const fade = (tween: Tween, mode: keyof typeof WINDOWS) => {

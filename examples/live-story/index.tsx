@@ -103,8 +103,6 @@ const css = `${editorCss}
   color-scheme: light dark;
   --sj-bg: light-dark(${palette.light.base00}, ${palette.dark.base00});
   --sj-mono: "${mono.family}";
-  /* A wide, soft shadow draws as bands, so the panels keep only their ring. */
-  --sj-shadow: transparent;
   ${sj}
 }
 .story { display: grid; grid-template-columns: 29rem 15rem; gap: 1rem; align-items: start; }

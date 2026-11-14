@@ -9,13 +9,14 @@ import {
   type Color,
   type FontValue,
   type PathData,
+  type Ref,
   type Stack,
   type SvgNode,
   type TagChannels,
 } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { clear, invisible, isPair, opaque, schemeCss, variable } from "../paint.ts";
-import type { Box, Face, Item, Paint, Pair, TextRun, Vector } from "../tree.ts";
+import type { Box, Face, Item, Paint, Pair, Shadow, TextRun, Vector } from "../tree.ts";
 import { typefaces } from "./faces.ts";
 import {
   borderRing,
@@ -39,14 +40,14 @@ import {
   type PairBy,
 } from "./pairing.ts";
 import {
-  insetPath,
-  layerColor,
-  layersFor,
+  fainter,
+  insetPieces,
+  outerPieces,
   outside,
   padInsets,
   padShadows,
-  shadowPath,
-  spreadAt,
+  type Fill,
+  type Piece,
 } from "./shadows.ts";
 import { blank, countOf, counting, FIELDS, typable, typing, type Ink } from "./text.tsx";
 import { fade, slideIn, type Tween } from "./tween.ts";
@@ -251,36 +252,144 @@ export const painter = (
     );
   };
 
-  /** A blurred shadow's nested copies, for each of `list`, tweened from `was`'s same-numbered one. */
-  const blurred = (
-    list: readonly Paint[],
-    blurs: readonly number[],
-    was: (i: number) => { readonly color: Paint; readonly blur: number } | undefined,
-    pathAt: (i: number, extra: number) => PathData,
-    wasPathAt: (i: number, extra: number) => PathData,
-    tween: Tween | undefined,
-    extra?: Extra,
-  ): SvgNode[] =>
-    list.flatMap((color, i) => {
-      const before = was(i);
+  // Shadow gradients, by fill and color: the same fade on the same color is one server however big the piece.
+  const fades = new Map<string, Ref<"linearGradient" | "radialGradient">>();
 
-      if (invisible(color) && (!before || invisible(before.color))) return [];
+  /** A gradient piece's paint: a shared server for its fade in `color`. */
+  const gradientOf = (
+    fill: Exclude<Fill, { kind: "solid" }>,
+    color: Paint,
+  ): Ref<"linearGradient" | "radialGradient"> => {
+    const stopColor = v(color);
+    const key = JSON.stringify([fill, stopColor]);
+    let ref = fades.get(key);
 
-      const blur = blurs[i]!;
-      const n = layersFor(Math.max(blur, before?.blur ?? 0));
-
-      return Array.from({ length: n }, (_, k) =>
-        path(
-          pathAt(i, spreadAt(blur, k, n)),
-          v(layerColor(color, n)),
-          before && {
-            d: wasPathAt(i, spreadAt(before.blur, k, n)),
-            fill: v(layerColor(before.color, n)),
-          },
-          tween,
-          extra,
-        ),
+    if (!ref) {
+      const last = fill.stops.length - 1;
+      const from = fill.kind === "radial" ? fill.from : 0;
+      const stops = fill.stops.map((stopOpacity, k) =>
+        jsx("stop", { offset: num(from + (k / last) * (1 - from), 4), stopColor, stopOpacity }),
       );
+
+      // Bounding-box units, so one gradient fits every piece it paints and follows a piece's tweened shape.
+      ref =
+        fill.kind === "linear"
+          ? def.linearGradient(
+              [
+                { x1: 0, y1: 1, x2: 0, y2: 0 },
+                { x1: 0, y1: 0, x2: 1, y2: 0 },
+                { x1: 0, y1: 0, x2: 0, y2: 1 },
+                { x1: 1, y1: 0, x2: 0, y2: 0 },
+              ][fill.side]!,
+              stops,
+            )
+          : def.radialGradient(
+              {
+                cx: fill.corner === 1 || fill.corner === 2 ? 0 : 1,
+                cy: fill.corner < 2 ? 1 : 0,
+                r: 1,
+              },
+              stops,
+            );
+      fades.set(key, ref);
+    }
+
+    return ref;
+  };
+
+  /** Pieces that morph into each other: the same count, and the same paint wherever it is a gradient. */
+  const morphs = (a: readonly Piece[], b: readonly Piece[], ca: Paint, cb: Paint): boolean =>
+    a.length === b.length &&
+    a.every((p, i) => {
+      const q = b[i]!;
+
+      return p.fill.kind === "solid"
+        ? q.fill.kind === "solid"
+        : JSON.stringify([p.fill, v(ca)]) === JSON.stringify([q.fill, v(cb)]);
+    });
+
+  /** Pieces in `color`, each tweened from the same-numbered one of `was`. A piece empty on both sides is left out. */
+  const pieces = (
+    now: readonly Piece[],
+    color: Paint,
+    was?: { readonly pieces: readonly Piece[]; readonly color: Paint },
+    tween?: Tween,
+  ): SvgNode[] =>
+    now.flatMap((p, i) => {
+      const before = was?.pieces[i];
+
+      if (p.empty && (!before || before.empty)) return [];
+
+      const extra: Extra = p.evenodd ? { fillRule: "evenodd" } : {};
+
+      if (p.fill.kind === "solid")
+        return [
+          path(
+            p.d,
+            v(fainter(color, p.fill.opacity)),
+            before?.fill.kind === "solid"
+              ? { d: before.d, fill: v(fainter(was!.color, before.fill.opacity)) }
+              : undefined,
+            tween,
+            extra,
+          ),
+        ];
+
+      return [
+        jsx("path", {
+          d: before && tween ? before.d : p.d,
+          fill: gradientOf(p.fill, color),
+          ...extra,
+          animation:
+            before && tween && before.d !== p.d
+              ? motion({ d: before.d }).at(tween.at).to({ d: p.d }, tween.over, tween.ease)
+              : undefined,
+        }),
+      ];
+    });
+
+  /**
+   * Shadows of `b`, each turning from `a`'s same-numbered one. Pieces that match morph; otherwise the old shadow fades
+   * out and the new one in, each following the box from one shape to the other.
+   */
+  const cast = (
+    b: Box,
+    now: readonly Shadow[],
+    a: Box | undefined,
+    was: readonly Shadow[] | undefined,
+    tween: Tween | undefined,
+    piecesOf: (x: Box, s: Shadow) => Piece[],
+  ): SvgNode[] =>
+    now.flatMap((s, i) => {
+      const p = was?.[i];
+      const shown = !invisible(s.color);
+
+      if (!a || !p || !tween) return shown ? pieces(piecesOf(b, s), s.color) : [];
+
+      if (!shown && invisible(p.color)) return [];
+
+      const start = piecesOf(a, p);
+      const end = piecesOf(b, s);
+
+      if (morphs(start, end, p.color, s.color))
+        return pieces(end, s.color, { pieces: start, color: p.color }, tween);
+
+      /** One side's shadow on both boxes, morphing when it can. */
+      const follow = (shadow: Shadow) => {
+        const from = piecesOf(a, shadow);
+        const to = piecesOf(b, shadow);
+
+        return morphs(from, to, shadow.color, shadow.color)
+          ? pieces(to, shadow.color, { pieces: from, color: shadow.color }, tween)
+          : pieces(to, shadow.color);
+      };
+
+      return [
+        !invisible(p.color) && (
+          <g animation={fade(tween, shown ? "swapOut" : "out")}>{follow(p)}</g>
+        ),
+        shown && <g animation={fade(tween, invisible(p.color) ? "in" : "swapIn")}>{follow(s)}</g>,
+      ].filter((n): n is SvgNode => Boolean(n));
     });
 
   /**
@@ -313,14 +422,11 @@ export const painter = (
 
     const [from, to] = a ? padShadows(a, b) : [undefined, b];
 
-    const shadows = blurred(
-      to.shadows.map((s) => s.color),
-      to.shadows.map((s) => s.blur),
-      (i) => from?.shadows[i],
-      (i, extra) => shadowPath(to, i, extra),
-      (i, extra) => shadowPath(from!, i, extra),
-      tween,
-    ).reverse();
+    // CSS paints the first shadow on top.
+    const shadows = to.shadows
+      .map((s, i) => cast(b, [s], a, from && [from.shadows[i]!], tween, outerPieces))
+      .reverse()
+      .flat();
 
     return mask ? <g mask={mask}>{shadows}</g> : shadows;
   };
@@ -334,15 +440,7 @@ export const painter = (
 
     const clip = def.clipPath({}, padding());
 
-    const drawn = blurred(
-      insets.map((s) => s.color),
-      insets.map((s) => s.blur),
-      (i) => from?.insets?.[i],
-      (i, extra) => insetPath(to, insets[i]!, extra),
-      (i, extra) => insetPath(from!, from!.insets![i]!, extra),
-      tween,
-      { fillRule: "evenodd" },
-    );
+    const drawn = cast(b, insets, a, from?.insets, tween, insetPieces);
 
     return drawn.length > 0 && <g clipPath={clip}>{drawn}</g>;
   };
