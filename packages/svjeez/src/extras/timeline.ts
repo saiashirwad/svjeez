@@ -78,6 +78,24 @@ export const show = (
   );
 };
 
+/** When a thing is on screen: `show`, or the old name `during`. */
+export type Shown =
+  | { readonly show: Span; readonly during?: undefined }
+  | {
+      /** @deprecated use `show` */
+      readonly during: Span;
+      readonly show?: undefined;
+    };
+
+/** The span of a `Shown`, from `show` or the old `during`. */
+export const shownSpan = (show: Span | undefined, during: Span | undefined, what: string): Span => {
+  const span = show ?? during;
+
+  if (span === undefined) throw new Error(`${what} needs a show span, got none.`);
+
+  return span;
+};
+
 /** @deprecated use `show(span, { fade })` */
 export const during = (span: Span, fade: Seconds = 0.3): Motion<"opacity"> => show(span, { fade });
 

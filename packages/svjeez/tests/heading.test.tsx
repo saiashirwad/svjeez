@@ -65,8 +65,8 @@ describe("Camera steady", () => {
   const frame = rect(0, 0, 400, 300);
 
   const stops: CameraStop[] = [
-    { during: { at: 0, over: 2 }, target: "all" },
-    { during: { at: 3, over: 2 }, target: rect(100, 100, 100, 75) },
+    { show: { at: 0, over: 2 }, target: "all" },
+    { show: { at: 3, over: 2 }, target: rect(100, 100, 100, 75) },
   ];
 
   test("scales by the inverse of the camera's zoom around its anchor", () => {

@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
+  Brace,
   Camera,
+  Focus,
+  Marker,
   Pivot,
   Steady,
   code,
@@ -77,6 +80,23 @@ describe("deprecated names from before 0.7 still work", () => {
         </Pivot>,
       ),
     ).toContain("transform-origin:3px 4px");
+  });
+
+  test("during is the old name of show on annotations, Focus, Marker and Camera stops", () => {
+    const box = rect(0, 0, 10, 10);
+    const when = { at: 1, over: 2 };
+
+    expect(scene(<Brace target={box} during={when} />)).toBe(
+      scene(<Brace target={box} show={when} />),
+    );
+    expect(scene(<Marker stops={[{ during: when, target: box }]} />)).toBe(
+      scene(<Marker stops={[{ show: when, target: box }]} />),
+    );
+    expect(scene(<Focus stops={[{ during: when, target: box }]}>{<g />}</Focus>)).toBe(
+      scene(<Focus stops={[{ show: when, target: box }]}>{<g />}</Focus>),
+    );
+    // SAFETY: the missing show is the case under test
+    expect(() => Brace({ target: box } as never)).toThrow("Brace() needs a show span");
   });
 
   test("Steady is a steady Camera", () => {

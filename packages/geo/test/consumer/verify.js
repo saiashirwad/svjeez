@@ -19,7 +19,7 @@ const svg = render(
   { width: 640, height: 360, duration: 2, title: "World" },
   Camera({
     frame: rect(0, 0, 640, 360),
-    stops: [{ during: { at: 1, over: 1 }, target }],
+    stops: [{ show: { at: 1, over: 1 }, target }],
     children: [el.path({ d: map.land }), el.path({ d: map.lines, fill: "none", stroke: "#000" })],
   }),
 );

@@ -439,7 +439,7 @@ describe("extras with a font", () => {
       Number(
         /<rect x="[^"]*" y="[^"]*" width="([^"]+)"/.exec(
           scene(
-            <Callout target={target} during={{ at: 0, over: 1 }} font={sans}>
+            <Callout target={target} show={{ at: 0, over: 1 }} font={sans}>
               {text}
             </Callout>,
           ),

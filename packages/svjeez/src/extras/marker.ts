@@ -1,9 +1,10 @@
 import { el } from "../el";
-import { motion, type Motion, type Span } from "../motion";
+import { motion, type Motion } from "../motion";
 import type { Rect } from "../geometry";
 import type { Color } from "../attributes";
 import { defaultDark, type Base16 } from "./theme";
 import type { SvgNode } from "../svg";
+import { shownSpan, type Shown } from "./timeline";
 
 export function Marker({
   stops,
@@ -11,7 +12,7 @@ export function Marker({
   color = theme.base09,
   over = 0.4,
 }: {
-  readonly stops: readonly { readonly during: Span; readonly target: Rect }[];
+  readonly stops: readonly (Shown & { readonly target: Rect })[];
   readonly theme?: Base16;
   readonly color?: Color;
   readonly over?: number;
@@ -23,9 +24,11 @@ export function Marker({
   let position: Motion<"x" | "y"> = motion({ x: 0, y: 0 });
   let size: Motion<"width" | "height"> = motion({ width: first.w, height: first.h });
 
-  for (const { during, target } of stops.slice(1)) {
-    position = position.at(during.at).to({ x: target.x - first.x, y: target.y - first.y }, over);
-    size = size.at(during.at).to({ width: target.w, height: target.h }, over);
+  for (const stop of stops.slice(1)) {
+    const { target } = stop;
+    const { at } = shownSpan(stop.show, stop.during, "Marker()");
+    position = position.at(at).to({ x: target.x - first.x, y: target.y - first.y }, over);
+    size = size.at(at).to({ width: target.w, height: target.h }, over);
   }
 
   return el.g(

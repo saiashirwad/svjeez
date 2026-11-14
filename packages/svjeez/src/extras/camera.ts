@@ -1,13 +1,13 @@
 import { el } from "../el";
 import type { Point, Rect } from "../geometry";
-import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
+import { ease, motion, type Motion, type Seconds } from "../motion";
 import type { Child, SvgNode } from "../svg";
+import { shownSpan, type Shown } from "./timeline";
 
-export interface CameraStop {
-  readonly during: Span;
+export type CameraStop = Shown & {
   /** Fit and center this region in the frame. `"all"` leaves the content unmoved. */
   readonly target: Rect | "all";
-}
+};
 
 /** The x, y and scale that fit `target` inside `frame`, centered. */
 export const fit = (frame: Rect, target: Rect | "all") => {
@@ -60,7 +60,9 @@ export function Camera({
 }: CameraProps): SvgNode {
   if (steady) {
     const hold = stops.reduce<Motion<"scale">>(
-      (t, { during: span, target }) => {
+      (t, stop) => {
+        const span = shownSpan(stop.show, stop.during, "Camera()");
+        const { target } = stop;
         const scale = 1 / fit(frame, target).scale;
 
         return span.at === 0 ? t.set({ scale }) : t.at(span.at).to({ scale }, over, ease.inOut);
@@ -75,10 +77,13 @@ export function Camera({
   }
 
   const track = stops.reduce<Motion<"x" | "y" | "scale">>(
-    (t, { during: span, target }) =>
-      span.at === 0
-        ? t.set(fit(frame, target))
-        : t.at(span.at).to(fit(frame, target), over, ease.inOut),
+    (t, stop) => {
+      const { at } = shownSpan(stop.show, stop.during, "Camera()");
+
+      return at === 0
+        ? t.set(fit(frame, stop.target))
+        : t.at(at).to(fit(frame, stop.target), over, ease.inOut);
+    },
     motion({ x: 0, y: 0, scale: 1 }),
   );
 

@@ -54,21 +54,21 @@ export default function build(): string {
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      <Focus stops={[{ during: tl.intro, target: one.lines(1) }]} dim={0.35}>
+      <Focus stops={[{ show: tl.intro, target: one.lines(1) }]} dim={0.35}>
         {move.node}
       </Focus>
       <Marker
         theme={theme}
         stops={[
-          { during: tl.intro, target: one.get("call").pad(4) },
-          { during: tl.change, target: two.get("call").pad(4) },
+          { show: tl.intro, target: one.get("call").pad(4) },
+          { show: tl.change, target: two.get("call").pad(4) },
         ]}
       />
       <Callout
         theme={theme}
         target={two.lines(1)}
         side="bottom"
-        during={tl.outro}
+        show={tl.outro}
         columns={28}
         class="sans"
       >

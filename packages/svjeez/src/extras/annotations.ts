@@ -1,21 +1,20 @@
 import type { Color } from "../attributes";
 import { el } from "../el";
 import type { Edge, Point, Rect } from "../geometry";
-import { motion, type Span } from "../motion";
+import { motion } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
 import { defaultDark, type Base16 } from "./theme";
-import { during } from "./timeline";
+import { show as showing, shownSpan, type Shown } from "./timeline";
 
-interface Common {
-  readonly during: Span;
+type Common = Shown & {
   /** Default `defaultDark`; `color` defaults to its `base09`. */
   readonly theme?: Base16;
   readonly color?: Color;
   /** On the root element, so fonts come from your CSS. */
   readonly class?: string;
-}
+};
 
 const ink = (color: Color) =>
   ({
@@ -30,11 +29,14 @@ export function Arrow({
   from,
   to,
   bend = 0,
-  during: span,
+  show,
+  during,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
 }: Common & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
+  const span = shownSpan(show, during, "Arrow()");
+
   const [cx, cy] = [
     (from.x + to.x) / 2 - (to.y - from.y) * bend,
     (from.y + to.y) / 2 + (to.x - from.x) * bend,
@@ -44,7 +46,7 @@ export function Arrow({
   const barb = (a: number) => `${to.x - 8 * Math.cos(angle + a)} ${to.y - 8 * Math.sin(angle + a)}`;
   const stroke = Math.min(0.6, span.over / 2);
 
-  return el.g({ class: cls, animation: during(span, 0.2) }, [
+  return el.g({ class: cls, animation: showing(span, { fade: 0.2 }) }, [
     el.path({
       d: `M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`,
       ...ink(color),
@@ -64,7 +66,8 @@ export function Arrow({
 export function Callout({
   target,
   side = "right",
-  during: span,
+  show,
+  during,
   children,
   theme = defaultDark,
   color = theme.base09,
@@ -80,6 +83,8 @@ export function Callout({
   readonly font?: FontValue;
   readonly columns?: number;
 }): SvgNode {
+  const span = shownSpan(show, during, "Callout()");
+
   if (!(columns >= 1)) throw new Error(`Callout needs columns of at least 1, got ${columns}.`);
 
   if (children.trim() === "") throw new Error("Callout needs some text, got an empty string.");
@@ -125,7 +130,7 @@ export function Callout({
     },
   ];
 
-  return el.g({ class: cls, fontFamily: font, animation: during(span, 0.2) }, [
+  return el.g({ class: cls, fontFamily: font, animation: showing(span, { fade: 0.2 }) }, [
     el.path({ d: `M${end.x} ${end.y}L${start.x} ${start.y}`, ...ink(color), strokeOpacity: 0.6 }),
     el.rect({
       x,
@@ -149,7 +154,8 @@ export function Brace({
   side = "left",
   label,
   fontSize = 12,
-  during: span,
+  show,
+  during,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
@@ -160,6 +166,7 @@ export function Brace({
   readonly label?: string;
   readonly fontSize?: number;
 }): SvgNode {
+  const span = shownSpan(show, during, "Brace()");
   const along = side === "above" || side === "below";
   const dir = side === "left" || side === "above" ? -1 : 1;
 
@@ -171,7 +178,7 @@ export function Brace({
     ? `M${target.x} ${edge}q0 ${dir * 8} 8 ${dir * 8}H${mid - 8}q8 0 8 ${dir * 8}q0 ${-dir * 8} 8 ${-dir * 8}H${target.x + target.w - 8}q8 0 8 ${-dir * 8}`
     : `M${edge} ${target.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${target.y + target.h - 8}q0 8 ${-dir * 8} 8`;
 
-  return el.g({ class: cls, animation: during(span, 0.2) }, [
+  return el.g({ class: cls, animation: showing(span, { fade: 0.2 }) }, [
     el.path({ d, ...ink(color) }),
     label &&
       el.text(
@@ -198,11 +205,13 @@ export function Brace({
 export function Underline({
   target: r,
   variant = "straight",
-  during: span,
+  show,
+  during,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
 }: Common & { readonly target: Rect; readonly variant?: "straight" | "squiggle" }): SvgNode {
+  const span = shownSpan(show, during, "Underline()");
   const [y, count] = [r.y + r.h - 2, Math.max(1, Math.ceil(r.w / 8))];
 
   const d =
@@ -214,6 +223,9 @@ export function Underline({
     d,
     ...ink(color),
     class: cls,
-    animation: [during(span, 0.2), draw({ at: span.at, over: Math.min(0.5, span.over / 2) })],
+    animation: [
+      showing(span, { fade: 0.2 }),
+      draw({ at: span.at, over: Math.min(0.5, span.over / 2) }),
+    ],
   });
 }

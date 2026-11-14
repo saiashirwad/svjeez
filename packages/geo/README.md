@@ -39,7 +39,7 @@ const atlantic = map.bounds([newYork, london], 40);
 export default () =>
   render(
     { width: 960, height: 540, duration: 8, title: "New York to London" },
-    <Camera frame={rect(0, 0, 960, 540)} stops={[{ during: { at: 2, over: 6 }, target: atlantic }]}>
+    <Camera frame={rect(0, 0, 960, 540)} stops={[{ show: { at: 2, over: 6 }, target: atlantic }]}>
       <path d={map.land} fill="#1C3A4F" />
       <path d={map.lines} fill="none" stroke="#5D8BA5" strokeWidth={0.6} />
       {flow(route, { at: 3, over: 3, style: "comet" }).node}
@@ -118,7 +118,7 @@ The shapes start as the outline and hide until `at`. Keep the map under them and
 
 ## Traffic
 
-`traffic(lines, { during, rate, seed, speed, style, color, size, back })` sends `rate` particles a second over the span `during`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, end }`.
+`traffic(lines, { during, rate, seed, speed, style, color, size, back })` sends `rate` particles a second over the span `during`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
 
 `arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
 
