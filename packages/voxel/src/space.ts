@@ -1,4 +1,4 @@
-import type { Point } from "./layout/box";
+import type { Point } from "svjeez";
 
 export type Degrees = number;
 

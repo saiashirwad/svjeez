@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { motion, render } from "svjeez";
-import { voxel, type Vec3, type VoxelBlock } from "svjeez/voxel";
+import { voxel, type Vec3, type VoxelBlock } from "../src/index.ts";
 
 const DURATION = 10;
 const camera = voxel.camera({ yaw: 45, pitch: 30, unit: 10 });

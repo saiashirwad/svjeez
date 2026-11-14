@@ -1,9 +1,14 @@
-import { hexBytes, hexOf, type Hex } from "./color";
-import { def, type Ref } from "./defs";
-import { el } from "./el";
-import { num } from "./format";
-import type { Point } from "./layout/box";
-import type { SvgNode } from "./svg";
+import {
+  def,
+  el,
+  hexBytes,
+  hexOf,
+  num,
+  type Hex,
+  type Point,
+  type Ref,
+  type SvgNode,
+} from "svjeez";
 
 /** One character per color. `null` is a transparent pixel. */
 export type VoxelPalette = Readonly<Record<string, Hex | null>>;

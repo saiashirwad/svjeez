@@ -1,10 +1,16 @@
-import { groupBy } from "./layout/group";
-import type { TagChannels } from "./channels";
-import { def, type Ref } from "./defs";
-import { el } from "./el";
-import { motion, type Motion, type Seconds, type Stack } from "./motion";
-import { camera, facingOf, type VoxelCamera, type Facing, type Vec3 } from "./space";
-import type { SvgNode } from "./svg";
+import {
+  def,
+  el,
+  groupBy,
+  motion,
+  type Motion,
+  type Ref,
+  type Seconds,
+  type Stack,
+  type SvgNode,
+  type TagChannels,
+} from "svjeez";
+import { camera, facingOf, type VoxelCamera, type Facing, type Vec3 } from "./space.ts";
 import {
   face,
   isOpaque,
@@ -13,7 +19,7 @@ import {
   type VoxelFace,
   type VoxelSkin,
   type VoxelTexture,
-} from "./texture";
+} from "./texture.ts";
 
 export interface VoxelBlock {
   /** Integer cell; the cube spans `at` to `at + 1`. */
@@ -83,9 +89,9 @@ const check = ({ at, from = 0, to = Infinity }: VoxelBlock): void => {
 // SAFETY: SIDES is typed Record<VoxelFace, Side>, so its keys are exactly the faces.
 const FACES = Object.keys(SIDES) as VoxelFace[];
 
-export type { VoxelCamera, VoxelCameraOptions, Vec3 } from "./space";
+export type { VoxelCamera, VoxelCameraOptions, Vec3 } from "./space.ts";
 
-export type { VoxelFace, VoxelPalette, VoxelSkin, VoxelTexture } from "./texture";
+export type { VoxelFace, VoxelPalette, VoxelSkin, VoxelTexture } from "./texture.ts";
 
 const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
   blocks.forEach(check);
