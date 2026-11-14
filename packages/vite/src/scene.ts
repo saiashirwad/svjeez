@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
-import { assets, ROUTE } from "./assets.ts";
+import { register, ROUTE } from "./assets.ts";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 
 /** A scene's default export, or the string render() returned. */
@@ -51,12 +51,13 @@ export const getScene = (
   const svg = compile(scene);
   const name = hash(svg);
   const text = new TextEncoder().encode(svg);
-  assets.files.set(`${name}.svg`, { type: "image/svg+xml", bytes: async () => text });
+  register(`${name}.svg`, { type: "image/svg+xml", bytes: async () => text });
 
-  const [, , width, height] = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/
-    .exec(svg)!
-    .slice(1)
-    .map(Number);
+  const box = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/.exec(svg);
+
+  if (!box) throw new Error("getScene() needs a scene whose svg has a viewBox, found none.");
+
+  const [, , width, height] = box.slice(1).map(Number);
 
   let posters: Record<Scheme, string> | undefined;
 
@@ -67,7 +68,7 @@ export const getScene = (
 
     for (const scheme of ["light", "dark"] as const) {
       const file = `${name}-${variant}-${scheme}.webp`;
-      assets.files.set(file, {
+      register(file, {
         type: "image/webp",
         bytes: () => poster(file, svg, scheme, settings),
       });

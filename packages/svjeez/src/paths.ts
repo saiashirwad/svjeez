@@ -1,4 +1,5 @@
 import { num } from "./format";
+import { segments } from "./pathTokens";
 import { NUDGE, ease, motion, type Motion, type Seconds } from "./motion";
 
 /** SVG path data, as a `<path d>` takes it. */
@@ -14,8 +15,6 @@ interface Ring {
   readonly curves: readonly Cubic[];
   readonly closed: boolean;
 }
-
-const NUMBER = /-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi;
 
 const ARITY = new Map([
   ["M", 2],
@@ -118,14 +117,14 @@ const parse = (d: string): Ring[] => {
     open = false;
   };
 
-  for (const [, letter, body] of d.matchAll(/([A-Za-z])([^A-Za-z]*)/g)) {
-    const upper = letter!.toUpperCase();
+  for (const { letter, numbers: n } of segments(d)) {
+    if (letter === "") continue;
+    const upper = letter.toUpperCase();
     const arity = ARITY.get(upper);
 
     if (arity === undefined)
       throw new Error(`matchPaths() cannot read the "${letter}" command in "${d}".`);
     const relative = letter !== upper;
-    const n = (body!.match(NUMBER) ?? []).map(Number);
 
     if (upper === "Z") {
       if (open && (pen[0] !== start[0] || pen[1] !== start[1])) curves.push(line(pen, start));
@@ -366,17 +365,24 @@ export function matchPaths(paths: readonly string[], options: MatchOptions = {})
  * `matchPaths()` writes them, so their numbers pair up one to one.
  */
 export const blendPaths = (a: string, b: string, amount: number): PathData => {
-  const to = (b.match(NUMBER) ?? []).map(Number);
+  const to = segments(b).flatMap((s) => s.numbers);
   let k = 0;
 
-  // SAFETY: the replacement keeps every command letter of `a`, so the result is path data like `a`.
-  return a.replace(NUMBER, (n) => num(Number(n) + (to[k++]! - Number(n)) * amount)) as PathData;
+  // SAFETY: every command letter of `a` is kept, so the result is path data like `a`.
+  return segments(a)
+    .map(
+      ({ letter, numbers: n }) => letter + n.map((x) => num(x + (to[k++]! - x) * amount)).join(" "),
+    )
+    .join("") as PathData;
 };
 
 /** The commands of a path with every number taken out, so two paths can be checked for a smooth morph. */
-export const commandsOf = (d: string): string => d.replace(NUMBER, "#").replace(/[\s,]+/g, "");
+export const commandsOf = (d: string): string =>
+  segments(d)
+    .map((s) => s.letter + "#".repeat(s.numbers.length))
+    .join("");
 
-const numbers = (d: string): number[] => (d.match(NUMBER) ?? []).map(Number);
+const numbers = (d: string): number[] => segments(d).flatMap((s) => s.numbers);
 
 export interface SampledPathOptions {
   readonly duration: Seconds;
@@ -479,8 +485,10 @@ export function sampledPath(
   const rounded = (i: number) => {
     let k = 0;
 
-    // SAFETY: the replacement keeps every command letter, so the result is path data like the sample.
-    return frames[i]!.replace(NUMBER, () => num(values[i]![k++]!, places)) as PathData;
+    // SAFETY: every command letter is kept, so the result is path data like the sample.
+    return segments(frames[i]!)
+      .map((s) => s.letter + s.numbers.map(() => num(values[i]![k++]!, places)).join(" "))
+      .join("") as PathData;
   };
 
   let track: Motion<"d"> = motion({ d: rounded(0) });

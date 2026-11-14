@@ -138,11 +138,11 @@ export class Font {
     this.fallback = options.fallback ?? [
       readable && isFixedPitch(readable) ? "monospace" : "sans-serif",
     ];
-    this.href = `data:${FORMATS[format].mime};base64,${base64(bytes)}`;
-    this.bytes = this.href.length;
 
     if (!(this.weight >= 1 && this.weight <= 1000))
       throw new Error(`font() needs a weight between 1 and 1000, got ${this.weight}.`);
+    this.href = `data:${FORMATS[format].mime};base64,${base64(bytes)}`;
+    this.bytes = this.href.length;
   }
 
   #readable(what: string): Sfnt {
@@ -194,6 +194,8 @@ export class Font {
 
   /** Whether the font has a glyph for this character. The browser draws a missing one from the fallback font. */
   has(char: string): boolean {
+    if (char === "") return false;
+
     this.#typesetter ??= typesetter(this.#readable("has()"), this.ligatures);
 
     return this.#typesetter.glyph(char) !== 0;

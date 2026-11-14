@@ -284,6 +284,10 @@ describe.if(browser)("renderFrames", () => {
     expect(renderFrames(fade, { times: [0], sheet: { columns: 1.5 } })).rejects.toThrow("columns");
   });
 
+  test("an empty list of times is rejected before a sheet is sized", async () => {
+    expect(renderFrames(fade, { times: [], sheet: true })).rejects.toThrow("at least one time");
+  });
+
   test("an open scene captures what renderFrames renders, in a secure context, until closed", async () => {
     const scene = await openScene(fade, { scale: 2, colorScheme: "light" });
 

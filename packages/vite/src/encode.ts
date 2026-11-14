@@ -7,9 +7,17 @@ let browser: Promise<Browser> | undefined;
 let page: Promise<Page> | undefined;
 
 const open = (): Promise<Page> => {
-  browser ??= import("playwright-core").then(({ chromium }) =>
-    chromium.launch().catch(() => chromium.launch({ channel: "chrome" })),
-  );
+  browser ??= import("playwright-core").then(async ({ chromium }) => {
+    try {
+      return await chromium.launch();
+    } catch {
+      return chromium.launch({ channel: "chrome" }).catch(() => {
+        throw new Error(
+          "No Chromium to encode posters with. Run `npx playwright-core install chromium-headless-shell`.",
+        );
+      });
+    }
+  });
   page ??= browser.then((b) => b.newPage());
 
   return page;
@@ -19,7 +27,7 @@ const open = (): Promise<Page> => {
 export const encode = async (
   png: Uint8Array,
   format: Format,
-  quality = 0.82,
+  quality = 0.8,
 ): Promise<Uint8Array> => {
   const p = await open();
 

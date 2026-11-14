@@ -1,5 +1,5 @@
 import { el } from "../el";
-import { ease, motion, type Motion, type Seconds, type Span, type Stack } from "../motion";
+import { EPSILON, ease, motion, type Motion, type Seconds, type Span, type Stack } from "../motion";
 import type { SvgNode } from "../svg";
 import { number, type Code } from "./code";
 
@@ -124,7 +124,7 @@ export function morph(
       `morph() needs one start per transition and a positive duration, got ${versions.length} versions, ${at.length} starts and over ${over}.`,
     );
   at.forEach((start, i) => {
-    if (i > 0 && start < at[i - 1]! + over)
+    if (i > 0 && start < at[i - 1]! + over - EPSILON)
       throw new Error(`morph() transition ${i} starts before transition ${i - 1} ends.`);
   });
 

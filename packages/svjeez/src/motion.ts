@@ -30,8 +30,14 @@ type EaseBody =
 // SAFETY: easeBrand is declare-only, so no runtime value carries it. Every caller passes a finished EaseBody, and this only adds the compile-time brand.
 const brand = (body: EaseBody): Ease => body as Ease;
 
-const bezier = (x1: number, y1: number, x2: number, y2: number): Ease =>
-  brand({ kind: "bezier", points: [x1, y1, x2, y2] });
+const bezier = (x1: number, y1: number, x2: number, y2: number): Ease => {
+  if (![x1, y1, x2, y2].every(Number.isFinite) || x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1)
+    throw new Error(
+      `ease.bezier needs x1 and x2 between 0 and 1 and a finite y1 and y2, got ${x1}, ${y1}, ${x2}, ${y2}.`,
+    );
+
+  return brand({ kind: "bezier", points: [x1, y1, x2, y2] });
+};
 
 const steps = (count: number): Ease => {
   if (!Number.isInteger(count) || count < 1)
@@ -114,10 +120,11 @@ const time = (value: Seconds, what: string): Seconds => {
 
 const isNumeric = (value: TargetValue | undefined): value is number => typeof value === "number";
 
-const checkValues = (values: TargetValues): TargetValues => {
+const checkValues = (values: TargetValues, what = "A transition"): TargetValues => {
   const keys = Object.keys(values);
 
-  if (keys.length === 0) throw new Error("A transition needs at least one channel.");
+  if (keys.length === 0 && what === "A transition")
+    throw new Error("A transition needs at least one channel.");
 
   for (const key of keys) {
     if (isProperty(key)) declarationOf(key);
@@ -126,7 +133,7 @@ const checkValues = (values: TargetValues): TargetValues => {
     const value = valueOf(values, key as Target);
 
     if (isNumeric(value) && !Number.isFinite(value))
-      throw new Error(`A transition needs a finite ${key}, got ${value}.`);
+      throw new Error(`${what} needs a finite ${key}, got ${value}.`);
   }
 
   return values;
@@ -219,7 +226,11 @@ class Track implements Motion {
 export function motion<const V extends TargetValues = {}>(
   initial?: Exact<V, Target>,
 ): Motion<keyof V & Target> {
-  return new Track({ initial: initial ?? {}, steps: [], cursor: 0 });
+  return new Track({
+    initial: initial ? checkValues(initial, "motion()") : {},
+    steps: [],
+    cursor: 0,
+  });
 }
 
 // SAFETY: Track is the only class that implements Motion, and motion() is its only constructor, so a Motion is always a Track.

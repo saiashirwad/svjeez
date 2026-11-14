@@ -80,6 +80,10 @@ export function Callout({
   readonly font?: FontValue;
   readonly columns?: number;
 }): SvgNode {
+  if (!(columns >= 1)) throw new Error(`Callout needs columns of at least 1, got ${columns}.`);
+
+  if (children.trim() === "") throw new Error("Callout needs some text, got an empty string.");
+
   const lines = children
     .split(/\s+/)
     .filter(Boolean)

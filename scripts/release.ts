@@ -103,10 +103,17 @@ const published = async (name: string): Promise<ReadonlySet<string> | undefined>
   return new Set(Object.keys(versions));
 };
 
+/** Every release's tag. The API is paged, so --paginate reads them all and no package's tag falls outside a fixed count. */
 const releases = (): readonly string[] =>
-  JSON.parse(run("gh", ["release", "list", "--limit", "1000", "--json", "tagName"])).map(
-    (release: { tagName: string }) => release.tagName,
-  );
+  run("gh", [
+    "api",
+    "--paginate",
+    "repos/{owner}/{repo}/releases?per_page=100",
+    "--jq",
+    ".[].tag_name",
+  ])
+    .split("\n")
+    .filter(Boolean);
 
 const pending = async (): Promise<Pending[]> => {
   const tags = releases();

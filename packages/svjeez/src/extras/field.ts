@@ -27,6 +27,8 @@ const round = (n: number): number => Math.round(n * 10) / 10;
 const pathOf = (points: readonly Point[], closed = false): string =>
   `${points.map((p, i) => `${i ? "L" : "M"}${num(round(p.x))} ${num(round(p.y))}`).join("")}${closed ? "Z" : ""}`;
 
+const MAX_MARKS = 10_000;
+
 const positive = (what: string, name: string, n: number): void => {
   if (!(n > 0) || !Number.isFinite(n))
     throw new Error(`${what} needs a positive ${name}, got ${n}.`);
@@ -358,6 +360,14 @@ export function slopeField(
 
   positive("slopeField()", "x step", xs);
   positive("slopeField()", "y step", ys);
+
+  const count =
+    (Math.floor((ya[0] - xa[0]) / xs + 1e-9) + 1) * (Math.floor((ya[1] - xa[1]) / ys + 1e-9) + 1);
+
+  if (count > MAX_MARKS)
+    throw new Error(
+      `slopeField() would draw ${count} marks. Raise the step to draw at most ${MAX_MARKS}.`,
+    );
 
   const length = options.length ?? 0.6 * Math.min(xs * Math.abs(sx), ys * Math.abs(sy));
   const marks: string[] = [];

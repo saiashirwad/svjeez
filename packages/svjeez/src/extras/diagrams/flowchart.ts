@@ -85,6 +85,9 @@ export function flowchart<
   const l = look(options);
   const { theme, fontSize, font, smallLook: small } = l;
 
+  if (Object.keys(spec.nodes).length === 0)
+    throw new Error("flowchart() needs at least one node, got none.");
+
   const nodes = Object.entries(spec.nodes).map(([id, s]) => ({
     id,
     ...labelOf(s),

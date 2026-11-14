@@ -101,7 +101,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   </g>
   <g class="a m29">
     <g>
-      <g transform="translate(43 84) scale(1.6666666666666667)" fill="none" stroke="var(--base0D)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+      <g transform="translate(43 84) scale(1.6667)" fill="none" stroke="var(--base0D)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
         <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
         <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
         <path d="M14 9a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
@@ -112,7 +112,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g class="a m6 fb">
       <g class="a m5 fb">
-        <g transform="translate(169 84) scale(1.6666666666666667)" fill="var(--base08)" aria-hidden="true">
+        <g transform="translate(169 84) scale(1.6667)" fill="var(--base08)" aria-hidden="true">
           <path d="M6.979 3.074a6 6 0 0 1 4.988 1.425l.037 .033l.034 -.03a6 6 0 0 1 4.733 -1.44l.246 .036a6 6 0 0 1 3.364 10.008l-.18 .185l-.048 .041l-7.45 7.379a1 1 0 0 1 -1.313 .082l-.094 -.082l-7.493 -7.422a6 6 0 0 1 3.176 -10.215z"/>
         </g>
       </g>
@@ -121,7 +121,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="189" y="152" font-size="12" text-anchor="middle" fill="var(--base03)">pop</text>
     </g>
     <g class="a m8">
-      <g transform="translate(295 84) scale(1.6666666666666667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+      <g transform="translate(295 84) scale(1.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
         <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/>
         <path d="M12 12l8 -4.5"/>
         <path d="M12 12l0 9"/>
@@ -133,7 +133,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g class="a m11 fb">
       <g class="a m10 fb">
-        <g transform="translate(421 84) scale(1.6666666666666667)" fill="none" stroke="var(--base0E)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+        <g transform="translate(421 84) scale(1.6667)" fill="none" stroke="var(--base0E)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
           <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/>
           <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
         </g>
@@ -143,7 +143,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="441" y="152" font-size="12" text-anchor="middle" fill="var(--base03)">spin</text>
     </g>
     <g filter="url(#f1)" class="a m13 fb">
-      <g transform="translate(43 196) scale(1.6666666666666667)" fill="none" stroke="var(--base0C)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+      <g transform="translate(43 196) scale(1.6667)" fill="none" stroke="var(--base0C)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
         <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/>
         <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/>
       </g>
@@ -152,7 +152,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="63" y="264" font-size="12" text-anchor="middle" fill="var(--base03)">focus</text>
     </g>
     <g>
-      <g transform="translate(169 196) scale(1.6666666666666667)" fill="none" stroke="var(--base0B)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+      <g transform="translate(169 196) scale(1.6667)" fill="none" stroke="var(--base0B)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
         <path d="M12 18l.01 0" class="a m15"/>
         <path d="M9.172 15.172a4 4 0 0 1 5.656 0" class="a m16"/>
         <path d="M6.343 12.343a8 8 0 0 1 11.314 0" class="a m17"/>
@@ -164,14 +164,14 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g class="a m21 fb">
       <g class="a m20 fb">
-        <g transform="translate(295 196) scale(1.6666666666666667)" fill="none" stroke="var(--base0A)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+        <g transform="translate(295 196) scale(1.6667)" fill="none" stroke="var(--base0A)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
           <path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
           <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/>
         </g>
       </g>
     </g>
     <g class="a m22 fb">
-      <g transform="translate(295 196) scale(1.6666666666666667)" fill="none" stroke="var(--base0E)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+      <g transform="translate(295 196) scale(1.6667)" fill="none" stroke="var(--base0E)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
         <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/>
       </g>
     </g>
@@ -179,7 +179,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="315" y="264" font-size="12" text-anchor="middle" fill="var(--base03)">swap</text>
     </g>
     <g class="a m26 fb">
-      <g transform="translate(421 196) scale(1.6666666666666667)" fill="none" stroke="var(--base06)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
+      <g transform="translate(421 196) scale(1.6667)" fill="none" stroke="var(--base06)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" aria-hidden="true">
         <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" pathLength="1" stroke-dasharray="1 2" class="a m24"/>
         <path d="M9 17v1a3 3 0 0 0 6 0v-1" pathLength="1" stroke-dasharray="1 2" class="a m25"/>
       </g>

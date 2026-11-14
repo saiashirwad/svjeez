@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { blendPaths, commandsOf } from "../src/paths";
 import { ease, matchPaths, motion, render, sampledPath, type Motion } from "svjeez";
 
 const scene = (animation: Motion<"d">, reducedMotion?: false) =>
@@ -96,5 +97,12 @@ describe("sampledPath", () => {
 
     expect(keys((x) => (x > 5 ? 100 : 0))).toBe(2);
     expect(keys()).toBeGreaterThan(5);
+  });
+});
+
+describe("blendPaths", () => {
+  test("reads packed arc flags as two flags", () => {
+    expect(blendPaths("M0 0a5 5 0 1010 0", "M10 0a5 5 0 1010 0", 0.5)).toBe("M5 0a5 5 0 1 0 10 0");
+    expect(commandsOf("M0 0a5 5 0 1010 0")).toBe("M##a#######");
   });
 });

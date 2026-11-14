@@ -116,3 +116,13 @@ describe("construct", () => {
     expect(() => construct({ unit: 0 })).toThrow(/positive unit/);
   });
 });
+
+describe("intersect on segments", () => {
+  test("pick keeps the crossing that lies on the segment", () => {
+    const g = construct();
+    const [a, b, c] = [g.point(0, 0), g.point(10, 0), g.point(9, 0)];
+    const p = g.intersect(g.segment(a, b), g.circle(c, g.point(12, 0)), { pick: 0 });
+
+    expect(p).toMatchObject({ x: 6, y: 0 });
+  });
+});

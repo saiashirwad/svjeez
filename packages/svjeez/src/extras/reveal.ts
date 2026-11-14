@@ -49,6 +49,8 @@ export function reveal(
       ? Array.from({ length: code.lineCount }, (_, i) => [i + 1, i + 1] as const)
       : blocks.map(([first, last = first]) => [first, last] as const);
 
+  if (ranges.length === 0) throw new Error("reveal() needs at least one block of lines, got none.");
+
   const owner = new Map<number, number>();
   ranges.forEach(([first, last], k) => {
     if (
@@ -98,7 +100,7 @@ const paragraphs = (code: Code): [number, number][] => {
     const ends = line === code.lineCount || (filled.has(line) && !filled.has(line + 1));
 
     if (ends) {
-      out.push([start, line]);
+      if (filled.has(line)) out.push([start, line]);
       start = line + 1;
     }
   }

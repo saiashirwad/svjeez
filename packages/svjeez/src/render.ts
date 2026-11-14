@@ -40,10 +40,11 @@ export interface RenderOptions {
 export const render = (options: RenderOptions, content: Child): string => {
   const { width, height, duration } = options;
 
-  if (!(width > 0) || !(height > 0))
+  if (!(width > 0 && width < Infinity) || !(height > 0 && height < Infinity))
     throw new Error(`render() needs a positive width and height, got ${width} by ${height}.`);
 
-  if (!(duration > 0)) throw new Error(`render() needs a positive duration, got ${duration}.`);
+  if (!(duration > 0 && duration < Infinity))
+    throw new Error(`render() needs a positive duration, got ${duration}.`);
   const playbackRate = options.playbackRate ?? 1;
 
   if (!(playbackRate > 0 && Number.isFinite(playbackRate)))
@@ -54,6 +55,9 @@ export const render = (options: RenderOptions, content: Child): string => {
     throw new Error(
       `render() needs a prefix of letters, digits, _ and -, starting with a letter, got ${JSON.stringify(prefix)}.`,
     );
+
+  if (options.reducedMotion && !Number.isFinite(options.reducedMotion.at))
+    throw new Error(`render() needs a finite reducedMotion.at, got ${options.reducedMotion.at}.`);
 
   const stillAt =
     options.reducedMotion === false
@@ -97,5 +101,12 @@ export const render = (options: RenderOptions, content: Child): string => {
       `Generated SVG is invalid:\n${errors.map((error) => `  - ${error}`).join("\n")}`,
     );
 
-  return `${options.comment ? `<!-- ${options.comment} -->\n` : ""}${source}\n`;
+  const { comment } = options;
+
+  if (comment !== undefined && (comment.includes("--") || comment.endsWith("-")))
+    throw new Error(
+      `render() comment can't contain "--" or end in "-", since XML comments can't: got "${comment}".`,
+    );
+
+  return `${comment ? `<!-- ${comment} -->\n` : ""}${source}\n`;
 };

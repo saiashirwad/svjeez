@@ -1,4 +1,5 @@
 import { pathLength } from "../geometry";
+import { segments } from "../pathTokens";
 import type { Point } from "../layout/box";
 
 /** One continuous run of a path, flattened to points. `closed` when it ended in Z. */
@@ -27,8 +28,8 @@ const isArgument = (token: string | number | undefined): token is number =>
   typeof token === "number";
 
 const tokens = (d: string): (string | number)[] =>
-  [...d.matchAll(/([MLHVCSQTAZmlhvcsqtaz])|(-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)/g)].map((m) =>
-    m[1] !== undefined ? m[1] : Number(m[2]),
+  segments(d).flatMap(({ letter, numbers }) =>
+    letter === "" ? numbers : letter.toLowerCase() in ARGS ? [letter, ...numbers] : [],
   );
 
 /** Points per curve: enough that no chord strays far from the curve, judged from the control polygon's length. */

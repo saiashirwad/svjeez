@@ -2136,7 +2136,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <circle r="5" fill="var(--base00)" stroke="var(--base09)" stroke-width="2.5" class="a m123 fb"/>
       </g>
       <g class="a m164">
-        <g transform="translate(64 128) scale(1.0833333333333333)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(64 128) scale(1.0833)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/>
           <path d="M7 11l5 5l5 -5"/>
           <path d="M12 4l0 12"/>
@@ -2272,7 +2272,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         </g>
       </g>
       <g class="a m181">
-        <g transform="translate(64 278) scale(1.0833333333333333)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(64 278) scale(1.0833)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
           <path d="M3.6 9h16.8"/>
           <path d="M3.6 15h16.8"/>
@@ -2947,7 +2947,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f17)" class="a m440">
         <rect x="133.4" y="530" width="102.4" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(147.40000000000003 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(147.4 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -6"/>
           <path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10"/>
           <path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14"/>
@@ -2957,7 +2957,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f18)" class="a m441">
         <rect x="245.8" y="530" width="85.6" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(259.80000000000007 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(259.8 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M7 8l-4 4l4 4"/>
           <path d="M17 8l4 4l-4 4"/>
           <path d="M14 4l-4 16"/>
@@ -2966,7 +2966,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f19)" class="a m442">
         <rect x="341.4" y="530" width="94" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(355.40000000000003 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(355.4 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M4 20l3 0"/>
           <path d="M14 20l7 0"/>
           <path d="M6.9 15l6.9 0"/>
@@ -2977,7 +2977,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f20)" class="a m443">
         <rect x="445.4" y="530" width="77.2" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(459.40000000000003 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(459.4 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
           <path d="M3.6 9h16.8"/>
           <path d="M3.6 15h16.8"/>
@@ -2988,7 +2988,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f21)" class="a m444">
         <rect x="532.6" y="530" width="94" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(546.6 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(546.6 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M3 6.5a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0 -7 0"/>
           <path d="M2.5 21h8l-4 -7l-4 7"/>
           <path d="M14 3l7 7"/>
@@ -2999,7 +2999,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f22)" class="a m445">
         <rect x="636.6" y="530" width="85.6" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(650.6 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(650.6 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M3 19a2 2 0 0 0 2 2c2 0 2 -4 3 -9s1 -9 3 -9a2 2 0 0 1 2 2"/>
           <path d="M5 12h6"/>
           <path d="M15 12l6 6"/>
@@ -3009,7 +3009,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f23)" class="a m446">
         <rect x="732.2" y="530" width="110.8" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(746.2 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(746.2 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M3 17a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -2"/>
           <path d="M15 17a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -2"/>
           <path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -2"/>
@@ -3020,7 +3020,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f24)" class="a m447">
         <rect x="853" y="530" width="94" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(867 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(867 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M15 10l4.553 -2.276a1 1 0 0 1 1.447 .894v6.764a1 1 0 0 1 -1.447 .894l-4.553 -2.276v-4"/>
           <path d="M3 8a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2l0 -8"/>
         </g>
@@ -3028,14 +3028,14 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g filter="url(#f25)" class="a m448">
         <rect x="957" y="530" width="85.6" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(971 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(971 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/>
         </g>
         <text x="995" y="552" font-size="14" fill="var(--base05)">vite</text>
       </g>
       <g filter="url(#f26)" class="a m449">
         <rect x="1052.6" y="530" width="94" height="34" rx="17" fill="none" stroke="var(--base02)"/>
-        <g transform="translate(1066.6 539) scale(0.6666666666666666)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
+        <g transform="translate(1066.6 539) scale(0.6667)" fill="none" stroke="var(--base09)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true">
           <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"/>
           <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"/>
           <path d="M14 9a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
@@ -3043,7 +3043,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <text x="1090.6" y="552" font-size="14" fill="var(--base05)">astro</text>
       </g>
       <g filter="url(#f27)" class="a m450">
-        <text x="640" y="622" font-size="14" text-anchor="middle" fill="var(--base04)">this entire video is <tspan fill="var(--base06)">one 442 KB SVG</tspan>. no video file, no JavaScript.</text>
+        <text x="640" y="622" font-size="14" text-anchor="middle" fill="var(--base04)">this entire video is <tspan fill="var(--base06)">one 441 KB SVG</tspan>. no video file, no JavaScript.</text>
       </g>
     </g>
     <g class="a m453">

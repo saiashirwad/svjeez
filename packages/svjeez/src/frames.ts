@@ -217,6 +217,9 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
   const settings = resolve("renderFrames()", svg, options);
 
   if (options.times !== undefined) {
+    if (options.times.length === 0)
+      throw new Error("renderFrames() needs at least one time, got an empty list.");
+
     for (const time of options.times)
       if (!(Number.isFinite(time) && time >= 0))
         throw new Error(`renderFrames() needs finite, non-negative times, got ${time}.`);
