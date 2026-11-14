@@ -112,11 +112,13 @@ const set = (
   highlight?: { line: number; from: string; word: string },
 ) => {
   const last = lines.length - 1;
+
   // The last line carries the chick, about one em wide with its gap.
   const widest = (size: number) =>
     Math.max(
       ...lines.map((line, i) => display.measure(line, size) + (i === last ? size * 0.98 : 0)),
     );
+
   let size = max;
 
   while (widest(size) > W - 2 * X) size -= 2;
@@ -145,6 +147,7 @@ const set = (
 
   return {
     // Where the chick's antenna tops out, for an arrow to point at.
+    top,
     chick: { x: end, y: base(last), head: base(last) - size * 0.95 },
     scale,
     draw: (
@@ -184,7 +187,7 @@ const CARDS: Record<Mood, () => string> = {
     const t = set(
       ["Animated SVGs", "from TypeScript"],
       128,
-      40,
+      30,
       { look: { x: -3, y: 3 } },
       { line: 1, from: "from ", word: "TypeScript" },
     );
@@ -192,11 +195,11 @@ const CARDS: Record<Mood, () => string> = {
     return frame(
       "svjeez",
       t.draw,
-      <Hand text="that's one <img>!" x={t.chick.x - 400} y={t.chick.head - 64} />,
+      <Hand text="that's one <img>!" x={t.chick.x - 330} y={t.top - 40} />,
       <Arrow
-        from={[t.chick.x - 104, t.chick.head - 52]}
-        to={[t.chick.x + 18, t.chick.head - 6]}
-        bow={-30}
+        from={[t.chick.x - 40, t.top - 52]}
+        to={[t.chick.x + 14, t.chick.head - 10]}
+        bow={-40}
       />,
     );
   },
@@ -223,7 +226,7 @@ const CARDS: Record<Mood, () => string> = {
   examples: () => {
     const t = set(
       ["Look what", "it made"],
-      150,
+      176,
       -24,
       { rotate: 8, look: { x: 6, y: -4 } },
       { line: 1, from: "it ", word: "made" },
@@ -238,8 +241,8 @@ const CARDS: Record<Mood, () => string> = {
   play: () => {
     const t = set(
       ["Poke it.", "It moves"],
-      150,
-      24,
+      176,
+      30,
       { rotate: 14, look: { x: 6, y: 6 } },
       { line: 1, from: "It ", word: "moves" },
     );
@@ -265,28 +268,28 @@ const CARDS: Record<Mood, () => string> = {
     );
   },
   lost: () => {
-    const size = 300;
+    const size = 360;
     const four = display.measure("4", size);
-    const gap = 210;
+    const gap = 250;
     const x2 = X + four + gap;
-    const base = 400;
+    const base = 410;
 
     return frame(
       "Page not found",
       <>
         <Glyphs font={display} text="4" size={size} x={X} y={base} fill={INK} />
-        <Chick x={X + four + gap / 2} y={base} size={1.45} rotate={-10} look={{ x: -4, y: -6 }} />
+        <Chick x={X + four + gap / 2} y={base} size={1.75} rotate={-10} look={{ x: -4, y: -6 }} />
         <Glyphs font={display} text="4" size={size} x={x2} y={base} fill={INK} />
         <Glyphs
           font={display}
           text="This page wandered off."
           size={48}
           x={X}
-          y={base + 90}
+          y={base + 84}
           fill={INK}
         />
-        <Hand text="it wasn't me" x={x2 + four + 60} y={250} size={44} />
-        <Arrow from={[x2 + four + 120, 270]} to={[X + four + gap / 2 + 50, 230]} bow={-60} />
+        <Hand text="it wasn't me" x={x2 + four + 36} y={200} size={44} />
+        <Arrow from={[x2 + four + 90, 224]} to={[X + four + gap / 2 + 56, 170]} bow={-50} />
       </>,
     );
   },
