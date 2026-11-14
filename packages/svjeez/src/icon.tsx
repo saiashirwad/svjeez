@@ -1,6 +1,7 @@
 import type { Paint } from "./attributes";
 import type { TagChannels } from "./channels";
 import type { Ref } from "./defs";
+import { num } from "./format";
 import type { Stack } from "./motion";
 import type { SvgNode } from "./svg";
 
@@ -62,7 +63,10 @@ export function Icon({
 }: IconProps): SvgNode {
   const scale = size / icon.grid;
 
-  const transform = [x || y ? `translate(${x} ${y})` : "", scale === 1 ? "" : `scale(${scale})`]
+  const transform = [
+    x || y ? `translate(${num(x)} ${num(y)})` : "",
+    scale === 1 ? "" : `scale(${num(scale, 4)})`,
+  ]
     .filter(Boolean)
     .join(" ");
 

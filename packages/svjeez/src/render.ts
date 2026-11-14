@@ -92,5 +92,12 @@ export const render = (options: RenderOptions, content: Child): string => {
       `Generated SVG is invalid:\n${errors.map((error) => `  - ${error}`).join("\n")}`,
     );
 
-  return `${options.comment ? `<!-- ${options.comment} -->\n` : ""}${source}\n`;
+  const { comment } = options;
+
+  if (comment !== undefined && (comment.includes("--") || comment.endsWith("-")))
+    throw new Error(
+      `render() comment can't contain "--" or end in "-", since XML comments can't: got "${comment}".`,
+    );
+
+  return `${comment ? `<!-- ${comment} -->\n` : ""}${source}\n`;
 };

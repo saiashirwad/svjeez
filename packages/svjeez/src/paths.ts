@@ -1,4 +1,5 @@
 import { num } from "./format";
+import { segments } from "./pathTokens";
 import { NUDGE, ease, motion, type Motion, type Seconds } from "./motion";
 
 /** SVG path data, as a `<path d>` takes it. */
@@ -118,14 +119,14 @@ const parse = (d: string): Ring[] => {
     open = false;
   };
 
-  for (const [, letter, body] of d.matchAll(/([A-Za-z])([^A-Za-z]*)/g)) {
-    const upper = letter!.toUpperCase();
+  for (const { letter, numbers: n } of segments(d)) {
+    if (letter === "") continue;
+    const upper = letter.toUpperCase();
     const arity = ARITY.get(upper);
 
     if (arity === undefined)
       throw new Error(`matchPaths() cannot read the "${letter}" command in "${d}".`);
     const relative = letter !== upper;
-    const n = (body!.match(NUMBER) ?? []).map(Number);
 
     if (upper === "Z") {
       if (open && (pen[0] !== start[0] || pen[1] !== start[1])) curves.push(line(pen, start));
