@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import { timeAt, type Editor } from "@svjeez/live";
 import { useEffect, useState, type CSSProperties } from "react";
 import { useEditorState } from "./editor.ts";

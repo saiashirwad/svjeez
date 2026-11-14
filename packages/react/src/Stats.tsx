@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import { statsOf, type Editor } from "@svjeez/live";
 import { useEditorState } from "./editor.ts";
 

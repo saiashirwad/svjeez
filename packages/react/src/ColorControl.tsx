@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import { rgbOf, stroke, withRgb, type Editor, type ValueOf } from "@svjeez/live";
 import { useEffect, useRef } from "react";
 import { useEditorState } from "./editor.ts";

@@ -38,7 +38,33 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 - Live apps: `dom.open(url, { root, ready, width, height })` waits for `ready` before anything runs. A read waits for the DOM to go quiet, so results that arrive from script are in it. `z-index` and fixed elements paint in stacking order, `rotate`, `scale` and `transform` are drawn as matrices (a changed one crossfades), and inset shadows are drawn.
 - `linear-gradient` and `radial-gradient` layers (repeating ones too) are drawn as SVG gradients that ride along with their box. `::before` and `::after` are read where Chromium laid them out, through the DevTools protocol, and drawn as boxes named `::before` and `::after` with their text. A see-through fill under `backdrop-filter: blur()` is drawn more solid instead of blurred.
 - Text that leaves one element and arrives in another, saying the same thing in nearly the same place (an app swapping its editor for the rendered text), stays put instead of fading.
-- Not drawn yet: conic gradients, `background-size` tiles, background images, and clips between an element with a `z-index` and its stacking context.
+- A `::before` or `::after` draws the text Chromium laid out for it, so counters and `attr()` come along, and a color input draws its value in its swatch.
+- Not drawn yet: range inputs' tracks and thumbs, conic gradients, `background-size` tiles, background images, and clips between an element with a `z-index` and its stacking context.
+
+## Stories
+
+An app written as `update` and `view` (Elm, Redux, `@svjeez/live`) can be filmed by the messages it takes. `story` from `@svjeez/dom/story` runs them through `update`, renders each model with `view`, and gives back the first markup and a flow for `dom.run`:
+
+```ts
+import { given, message, story, timed } from "@svjeez/dom/story";
+
+const { html, flow } = await story(
+  { update, view, resolve }, // view: model => HTML, from any framework
+  [
+    given(start, cmds),
+    message({ type: "select", key }),
+    timed(message({ type: "set", key, value: 34 }), { over: 1, hold: 0.5 }),
+    message({ type: "undo" }),
+  ],
+  { hold: 0.6 }, // the default for every beat
+);
+
+const steps = await snapshots(file, { css }, (dom) => dom.run(html, flow));
+```
+
+- `update(model, msg)` returns `[model, commands]`. `resolve(cmd, model)` answers a command with the messages the runtime would send back (a compile finished, a picture shown), and those go through `update` too, so one beat shows a message with all it led to.
+- Each beat whose view changed is an `html()` and a `snap()`; one that changed nothing on screen adds no time. `timed(beat, { over, ease, hold })` sets its move and the wait after it, and `{ wait }` is a beat too.
+- Nothing needs a hand-added key: elements pair by tag and order as usual, so a number that changes counts, and a class or attribute change morphs. `examples/live-story` films the scene editor this way, with `@svjeez/react`'s components.
 
 The snapshot's types (`Snapshot`, `Box`, `TextRun`, `Item`, `Paint` and the rest) are exported for reading one by hand.
 

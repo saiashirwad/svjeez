@@ -72,26 +72,56 @@ const settle = (page: Page, quiet: boolean) =>
       });
 
     await document.fonts.ready;
+    // Only animations on the page's clock end by waiting: one a scroll drives holds until something scrolls.
     await Promise.all(
       document
         .getAnimations()
-        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .filter(
+          (a) =>
+            a.timeline === document.timeline &&
+            a.effect?.getComputedTiming().iterations !== Infinity,
+        )
         .map((a) => a.finished.catch(() => undefined)),
     );
   }, quiet);
 
+/** The text each pseudo-element laid out, by backend node: a counter or `attr()` is only known once it is. */
+const pseudoTexts = async (session: CDPSession) => {
+  const { documents, strings } = await session.send("DOMSnapshot.captureSnapshot", {
+    computedStyles: [],
+  });
+
+  const texts = new Map<number, string>();
+
+  for (const { nodes, layout } of documents)
+    layout.nodeIndex.forEach((n, i) => {
+      const text = layout.text[i] ?? -1;
+
+      if (text < 0 || !nodes.pseudoType?.index.includes(n)) return;
+      const id = nodes.backendNodeId![n]!;
+      texts.set(id, (texts.get(id) ?? "") + strings[text]);
+    });
+
+  return texts;
+};
+
 /**
  * Chromium knows where it laid out each ::before and ::after, but the page has no node to ask. The DevTools protocol
- * does: their border quads are handed to the page by element, in a map `walk` reads.
+ * does: their border quads and laid-out text are handed to the page by element, in a map `walk` reads.
  */
 const markPseudos = async (session: CDPSession, page: Page) => {
   const { root } = await session.send("DOM.getDocument", { depth: -1, pierce: true });
-  const owners: { id: number; pseudos: { id: number; type: "before" | "after" }[] }[] = [];
+  const texts = await pseudoTexts(session);
+
+  const owners: {
+    id: number;
+    pseudos: { id: number; type: "before" | "after"; text?: string }[];
+  }[] = [];
 
   const visit = (node: typeof root) => {
     const own = (node.pseudoElements ?? []).flatMap((p) =>
       p.pseudoType === "before" || p.pseudoType === "after"
-        ? [{ id: p.nodeId, type: p.pseudoType }]
+        ? [{ id: p.nodeId, type: p.pseudoType, text: texts.get(p.backendNodeId) }]
         : [],
     );
 
@@ -120,6 +150,9 @@ const markPseudos = async (session: CDPSession, page: Page) => {
       const marks: Marks = {
         own,
         ...Object.fromEntries(pseudos.flatMap((p, i) => (quads[i] ? [[p.type, quads[i]]] : []))),
+        text: Object.fromEntries(
+          pseudos.flatMap((p) => (p.text === undefined ? [] : [[p.type, p.text]])),
+        ),
       };
 
       const { object } = await session.send("DOM.resolveNode", { nodeId: id });

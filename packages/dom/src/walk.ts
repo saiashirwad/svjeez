@@ -18,6 +18,8 @@ export interface Marks {
   readonly own: readonly number[];
   readonly before?: readonly number[];
   readonly after?: readonly number[];
+  /** What each pseudo-element's `content` came to as laid out, counters and `attr()` filled in. */
+  readonly text?: { readonly before?: string; readonly after?: string };
 }
 
 declare global {
@@ -702,7 +704,7 @@ export function walk({
     };
   };
 
-  /** The text a pseudo-element's `content` puts in: its strings, joined. Counters and images give none. */
+  /** The text a pseudo-element's `content` puts in, when Chromium's layout didn't say: its strings, joined. */
   const contentText = (content: string): string =>
     [...content.matchAll(/"((?:[^"\\]|\\.)*)"/g)]
       .map((m) =>
@@ -762,7 +764,7 @@ export function walk({
 
     const b = rel(r);
     const children: Item[] = [];
-    const text = contentText(s.content);
+    const text = mark.text?.[which] ?? contentText(s.content);
     const c = color(s.color);
 
     if (text.trim() && c && s.visibility !== "hidden") {
@@ -899,6 +901,30 @@ export function walk({
 
         children.push(run(s, text, x, lineTop, c, measure(s, text), !value));
       }
+    }
+
+    // A color input paints its value in a swatch the page can't reach: its content box, inside the browser's own
+    // wrapper padding unless the page turned its appearance off.
+    if (el instanceof HTMLInputElement && el.type === "color") {
+      const [dy, dx] = s.appearance === "none" ? [0, 0] : [4, 2];
+      const left = r.left + px(s.borderLeftWidth) + px(s.paddingLeft) + dx;
+      const top = r.top + px(s.borderTopWidth) + px(s.paddingTop) + dy;
+      const right = r.right - px(s.borderRightWidth) - px(s.paddingRight) - dx;
+      const bottom = r.bottom - px(s.borderBottomWidth) - px(s.paddingBottom) - dy;
+      const swatch = new DOMRect(left, top, right - left, bottom - top);
+
+      if (swatch.width > 0 && swatch.height > 0)
+        children.push({
+          kind: "box",
+          tag: "::swatch",
+          box: rel(swatch),
+          radii: radii(s, swatch.width, swatch.height),
+          background: color(el.value),
+          shadows: [],
+          opacity: 1,
+          clip: false,
+          children: [],
+        });
     }
 
     const named = Object.keys(parts).find((name) => el.matches(parts[name]!));

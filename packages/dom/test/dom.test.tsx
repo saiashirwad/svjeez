@@ -861,6 +861,73 @@ describe("real pages", () => {
     await card.close();
   });
 
+  test("a ::before's counter and attr() content is read as Chromium wrote it", async () => {
+    const card = await dom.mount(
+      `<ol class="card" style="counter-reset: n; list-style: none"><li data-x="a">one</li><li data-x="b">two</li></ol>
+      <style>li::before { counter-increment: n; content: counter(n) ". " attr(data-x) }</style>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+
+    const befores = (it: Item): string[] =>
+      it.kind !== "box"
+        ? []
+        : it.tag === "::before"
+          ? it.children.flatMap((c) => (c.kind === "text" ? [c.text] : []))
+          : it.children.flatMap(befores);
+
+    const texts = befores(snap.root);
+
+    expect(texts).toEqual(["1. a", "2. b"]);
+  });
+
+  test("a color input's swatch is drawn in its value", async () => {
+    const card = await dom.mount(
+      `<div class="card"><input type="color" value="#ff0000" style="appearance: none; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 4px"></div>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+    const input = snap.root.children.find((c): c is Box => c.kind === "box" && c.tag === "input");
+
+    expect(input?.children).toMatchObject([
+      { tag: "::swatch", background: "rgb(255,0,0)", box: input!.box, radii: [4, 4, 4, 4] },
+    ]);
+  });
+
+  test("a rounded image is drawn clipped to its corners", async () => {
+    const dot = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="red"/></svg>')}`;
+
+    const card = await dom.mount(
+      `<div class="card"><img src="${dot}" style="width: 40px; height: 40px; border-radius: 8px"></div>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+    const svg = draw(snap);
+
+    expect(svg).toMatch(/<g clip-path="url\(#[^"]+\)">\s*<image /);
+    expect(validateSvg(svg).errors).toEqual([]);
+  });
+
+  test("a read waits for animations on the page's clock, not ones a scroll drives", async () => {
+    // A scroll-driven animation runs on the scroller's timeline and never finishes while nothing scrolls.
+    const card = await dom.mount(
+      `<div class="card"><p style="animation: grow linear; animation-timeline: scroll(self)">hi</p></div>
+      <style>@keyframes grow { to { opacity: 0.5 } }</style>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+
+    expect(snap.root.children.length).toBeGreaterThan(0);
+  }, 10_000);
+
   test("z-index paints in stacking order, and a fixed element escapes the parent that clips it", async () => {
     const card = await dom.mount(
       '<div class="card" style="position:relative"><div data-key="top" style="position:relative;z-index:2">a</div><div data-key="flow">b</div><div style="overflow:hidden;height:4px"><div data-key="fixed" style="position:fixed;z-index:1">c</div></div></div>',

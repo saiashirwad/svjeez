@@ -179,17 +179,16 @@ export const painter = (
           ? def.clipPath({}, <path d={rounded(it.box, it.radii)} />)
           : undefined;
 
-        return transformed(
-          it,
-          jsx("image", {
-            href: it.href,
-            x: num(it.box.x),
-            y: num(it.box.y),
-            width: num(it.box.width),
-            height: num(it.box.height),
-            clipPath: clip,
-          }),
-        );
+        const image = jsx("image", {
+          href: it.href,
+          x: num(it.box.x),
+          y: num(it.box.y),
+          width: num(it.box.width),
+          height: num(it.box.height),
+        });
+
+        // An `<image>` takes no clip-path in svjeez, so a group around it does.
+        return transformed(it, clip ? <g clipPath={clip}>{image}</g> : image);
       }
 
       case "box":
