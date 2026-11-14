@@ -28,4 +28,4 @@ export const svg: string = render({ width: 440, height: 240, duration: 4, title:
   trend.node,
 ]);
 
-export const end: number = sales.end;
+export const end: number = sales.span.end;
