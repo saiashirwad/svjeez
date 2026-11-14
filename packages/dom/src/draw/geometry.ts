@@ -135,4 +135,4 @@ export const spills = (b: Box): boolean => {
 
 /** The SVG for a CSS transform: its matrix about its origin. */
 export const matrix = ({ matrix: [a, b, c, d, e, f], origin: [x, y] }: Transform): string =>
-  `translate(${num(x)} ${num(y)}) matrix(${[a, b, c, d, e, f].map(num).join(" ")}) translate(${num(-x)} ${num(-y)})`;
+  `translate(${num(x)} ${num(y)}) matrix(${[a, b, c, d, e, f].map((n) => num(n)).join(" ")}) translate(${num(-x)} ${num(-y)})`;
