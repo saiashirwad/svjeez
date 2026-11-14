@@ -134,6 +134,35 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 
 More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for each in [`examples/`](https://github.com/saiashirwad/svjeez/tree/main/examples).
 
+## Upgrading to 0.7
+
+0.7 moves things out of core and renames some. The old names still work and are marked `@deprecated`; 1.0 removes them.
+
+| Before | Now |
+| --- | --- |
+| `svjeez/extras` | `svjeez`. Diagrams are in `@svjeez/diagrams`; `axes`, calculus and the fields in `@svjeez/math`; editor palettes in `@svjeez/code` |
+| `svjeez/voxel` | `@svjeez/voxel` |
+| `fit`, `positionOf`, `valueAt`, `fitValues`, `withValues`, `follow` from `svjeez/params` | `@svjeez/live` |
+| `Values` (channel values) | `ChannelValues` |
+| `sample`, `SampleOptions` | `valuesAt`, `ValuesAtOptions` |
+| `<Pivot at>` | `<Pivot origin>` |
+| `{ at: [x, y, z] }` on a voxel block | `{ cell: [x, y, z] }` |
+| `flow(points, { loop })` | `flow(points, { period })` |
+| `fieldFlow(lines, options)` | `flow(lines, options).node`, which takes a list of lines |
+| `sampledPath(fn, options)` | `sampled.path(fn, options)` |
+| `<Steady at>` | `<Camera steady origin>` |
+| `renderVideo` | `video` |
+| `Icon` type of `@svjeez/icons` | `IconData` |
+
+[`scripts/codemod-0.7.ts`](scripts/codemod-0.7.ts) rewrites a project's `.ts`, `.tsx`, `.js` and `.jsx` files for all of it. It needs nothing installed. Download it, commit your work, and run it from the project:
+
+```sh
+bun codemod-0.7.ts --dry src   # list the files it would change
+bun codemod-0.7.ts src         # rewrite them, then run your formatter
+```
+
+It prints a warning for what it cannot rewrite by hand, such as a voxel block built away from `voxel.scene()`.
+
 ## Contributing
 
 ```sh
