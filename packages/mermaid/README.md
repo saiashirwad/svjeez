@@ -1,6 +1,6 @@
 # @svjeez/mermaid
 
-Mermaid text for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `mermaid()` reads a flowchart, sequence diagram or state diagram and hands it to svjeez's `flowchart()`, `sequence()` or `stateMachine()`, so the diagram comes out themed, laid out and animated like any other svjeez diagram. The parser is a small hand-written one with no dependencies, and it never needs a DOM, so it runs while the scene builds.
+Mermaid text for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `mermaid()` reads a flowchart, sequence diagram or state diagram and hands it to `flowchart()`, `sequence()` or `stateMachine()` from [`@svjeez/diagrams`](https://www.npmjs.com/package/@svjeez/diagrams), so the diagram comes out themed, laid out and animated like any other svjeez diagram. The parser is a small hand-written one with no dependencies, and it never needs a DOM, so it runs while the scene builds.
 
 <p align="center">
   <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/mermaid"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/mermaid.svg" width="320" alt="A deploy pipeline written as Mermaid text appears node by node as a svjeez flowchart, then a token runs from the push to the live release." /></a>
@@ -12,6 +12,8 @@ Mermaid text for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `mermaid
 ```sh
 npm i -D @svjeez/mermaid svjeez
 ```
+
+`@svjeez/diagrams` comes with it. Import `flowchart()` and the rest from there when you build a diagram by hand.
 
 ## Use
 

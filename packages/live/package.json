@@ -37,6 +37,7 @@
   "devDependencies": {
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
+    "@svjeez/diagrams": "workspace:*",
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/math": "workspace:*",
@@ -50,6 +51,7 @@
   "peerDependencies": {
     "@svjeez/charts": ">=0.6.0 <1",
     "@svjeez/code": ">=0.6.0 <1",
+    "@svjeez/diagrams": ">=0.6.0 <1",
     "@svjeez/geo": ">=0.6.0 <1",
     "@svjeez/icons": ">=0.6.0 <1",
     "@svjeez/math": ">=0.6.0 <1",
@@ -62,6 +64,9 @@
       "optional": true
     },
     "@svjeez/code": {
+      "optional": true
+    },
+    "@svjeez/diagrams": {
       "optional": true
     },
     "@svjeez/geo": {

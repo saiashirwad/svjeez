@@ -86,6 +86,7 @@ const json = async (name: string, load: () => Promise<{ default: unknown }>) => 
 const packages = new Map<string, () => Promise<object>>([
   ["@svjeez/charts", () => import("@svjeez/charts")],
   ["@svjeez/code", () => import("@svjeez/code")],
+  ["@svjeez/diagrams", () => import("@svjeez/diagrams")],
   ["@svjeez/geo", () => import("@svjeez/geo")],
   ["@svjeez/icons/lucide", () => import("@svjeez/icons/lucide")],
   ["@svjeez/icons/tabler", () => import("@svjeez/icons/tabler")],

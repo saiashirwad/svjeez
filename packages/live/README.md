@@ -10,7 +10,7 @@ This package is the store and the control math, with no framework in it. [`@svje
 npm i @svjeez/live svjeez
 ```
 
-A scene can import `@svjeez/charts`, `@svjeez/code`, `@svjeez/geo`, `@svjeez/icons`, `@svjeez/math`, `@svjeez/mermaid` and `world-atlas`'s maps when the page installs them. Each loads the first time a scene imports it.
+A scene can import `@svjeez/charts`, `@svjeez/code`, `@svjeez/diagrams`, `@svjeez/geo`, `@svjeez/icons`, `@svjeez/math`, `@svjeez/mermaid` and `world-atlas`'s maps when the page installs them. Each loads the first time a scene imports it.
 
 ## Use
 

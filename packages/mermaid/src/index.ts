@@ -10,7 +10,7 @@ import {
   type StateMachine,
   type StateOptions,
   type StateSpec,
-} from "svjeez/extras";
+} from "@svjeez/diagrams";
 import { parse } from "./parse.ts";
 import type { FlowchartDoc, FlowForm, SequenceDoc, StateDoc, StateNode } from "./types.ts";
 

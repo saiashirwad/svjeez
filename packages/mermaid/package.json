@@ -19,6 +19,9 @@
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
+  "dependencies": {
+    "@svjeez/diagrams": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "svjeez": "workspace:*",
