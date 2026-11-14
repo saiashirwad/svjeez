@@ -1,7 +1,7 @@
 ---
 import { getScene } from "@svjeez/astro/scene";
 import mascot from "@examples/site/mascot.tsx";
-import { dots, github, moon, sun, system } from "@examples/site/nav-icons.tsx";
+import { github, moon, sun, system, word } from "@examples/site/nav-icons.tsx";
 import { PALETTES, type Palette } from "../palettes";
 
 interface Props {
@@ -30,41 +30,40 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   <nav aria-label="Main">
     {
       links.map((link) => (
-        <a href={link.href} class:list={{ opt: optional.includes(link.label) }} aria-current={current && link.page === current ? "page" : undefined}>
+        <a href={link.href} aria-label={link.label === "GitHub" ? "GitHub" : undefined} class:list={{ opt: optional.includes(link.label) }} aria-current={current && link.page === current ? "page" : undefined}>
           {link.label === "GitHub" && (
             <span class="gh nav-ico" aria-hidden="true" set:html={github()} />
           )}
-          <span>{link.label}</span>
+          {link.label === "GitHub" ? <span class="word" aria-hidden="true" set:html={word("GitHub", "ghw")} /> : <span>{link.label}</span>}
         </a>
       ))
     }
     <div class="controls">
-    <button class="pick" type="button" popovertarget="palettes" aria-haspopup="menu" aria-label="Choose a color palette" title="Color palette">
-      <span class="dots nav-ico" aria-hidden="true" set:html={dots()} />
-      <span class="pick-label" aria-hidden="true">Colors</span>
-      <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"></path></svg>
-    </button>
-    <div class="palettes" id="palettes" popover role="menu" aria-label="Color palette">
-      {
-        PALETTES.map((p) => (
-          <button type="button" role="menuitemradio" aria-checked="false" tabindex="-1" data-palette={p.id} style={swatches(p)}>
-            <span class="sw" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-            {p.label}
-          </button>
-        ))
-      }
-    </div>
-    <button class="theme" type="button" aria-label="Color scheme: system" title="Color scheme: system">
-      <span class="system nav-ico" aria-hidden="true" set:html={system()} />
-      <span class="sun nav-ico" aria-hidden="true" set:html={sun()} />
-      <span class="moon nav-ico" aria-hidden="true" set:html={moon()} />
-    </button>
+      {/* Four palettes, one little color wheel each: click one to wear it. */}
+      <div class="palettes" role="radiogroup" aria-label="Color palette">
+        {
+          PALETTES.map((p) => (
+            <button type="button" role="radio" aria-checked="false" data-palette={p.id} style={swatches(p)} title={p.label} aria-label={p.label}>
+              <span class="pie" aria-hidden="true" />
+            </button>
+          ))
+        }
+      </div>
+      {/* Light, system and dark on a slider, with the chick riding the knob. */}
+      <div class="scheme" role="radiogroup" aria-label="Color scheme" data-at="system">
+        <span class="knob" aria-hidden="true"><img src={chick.src} width="26" height="26" alt="" /></span>
+        <button type="button" role="radio" aria-checked="false" data-scheme="light" aria-label="Light" title="Light"><span class="nav-ico" aria-hidden="true" set:html={sun()} /></button>
+        <button type="button" role="radio" aria-checked="true" data-scheme="system" aria-label="System" title="System"><span class="nav-ico" aria-hidden="true" set:html={system()} /></button>
+        <button type="button" role="radio" aria-checked="false" data-scheme="dark" aria-label="Dark" title="Dark"><span class="nav-ico" aria-hidden="true" set:html={moon()} /></button>
+      </div>
     </div>
   </nav>
 </header>
 
 <script>
   import { PALETTES } from "../palettes";
+  import { choose, palette } from "../scripts/palette";
+  import { scheme, THEMECHANGE } from "../scripts/scheme";
 
   // Each header icon is a svjeez scene held at its first frame. Pointing at its button plays it, and it always finishes
   // the loop it is in before it rests, so it never freezes halfway. Every few seconds one of them plays on its own.
@@ -89,31 +88,31 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
     const shown = icons.filter((icon) => icon.offsetParent !== null);
     if (shown.length) play(shown[next++ % shown.length]!);
   }, 6000);
-  import { choose, palette } from "../scripts/palette";
-  import { scheme, THEMECHANGE } from "../scripts/scheme";
 
-  // The toggle cycles system, light and dark. It sets `color-scheme` on the page, and Chromium hands that to every
-  // <img> SVG on it; system removes the choice so the page follows the OS again.
-  const toggle = document.querySelector<HTMLButtonElement>(".theme")!;
-
-  const NEXT = new Map([
-    ["system", "light"],
-    ["light", "dark"],
-    ["dark", "system"],
-  ]);
-
+  // The slider picks light, system or dark. It sets `color-scheme` on the page, and Chromium hands that to every <img>
+  // SVG on it; system removes the choice so the page follows the OS again. The chick on the knob hops on every move.
+  const slider = document.querySelector<HTMLElement>(".scheme")!;
+  const stops = [...slider.querySelectorAll<HTMLButtonElement>("[data-scheme]")];
   const chosen = () => document.documentElement.dataset.theme ?? "system";
 
-  const label = () => {
-    const text = `Color scheme: ${chosen()}`;
-    toggle.ariaLabel = text;
-    toggle.title = text;
+  const showScheme = () => {
+    slider.dataset.at = chosen();
+    stops.forEach((stop) => stop.setAttribute("aria-checked", String(stop.dataset.scheme === chosen())));
   };
 
-  label();
+  const bump = (element: HTMLElement) => {
+    element.removeAttribute("data-bump");
+    void element.offsetWidth;
+    element.setAttribute("data-bump", "");
+  };
 
-  toggle.addEventListener("click", () => {
-    const next = NEXT.get(chosen()) ?? "system";
+  showScheme();
+
+  slider.addEventListener("click", (event) => {
+    const stop = event.target instanceof Element ? event.target.closest<HTMLButtonElement>("[data-scheme]") : null;
+    const next = stop?.dataset.scheme;
+
+    if (!next || next === chosen()) return;
     const before = scheme();
 
     if (next === "system") delete document.documentElement.dataset.theme;
@@ -124,51 +123,25 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
       else localStorage.setItem("theme", next);
     } catch {}
 
-    label();
+    showScheme();
+    bump(slider);
 
     if (scheme() !== before) dispatchEvent(new Event(THEMECHANGE));
   });
 
-  // A menu of radio items: arrows move between them, Enter or a click picks one, Escape and Tab close it.
-  const menu = document.querySelector<HTMLElement>("#palettes")!;
-  const items = [...menu.querySelectorAll<HTMLButtonElement>("[role=menuitemradio]")];
-  const mark = () => items.forEach((item) => item.setAttribute("aria-checked", String(item.dataset.palette === palette())));
+  // The palettes: a click wears one, and its wheel gives a happy spin.
+  const wheels = [...document.querySelectorAll<HTMLButtonElement>(".palettes [data-palette]")];
+  const mark = () => wheels.forEach((wheel) => wheel.setAttribute("aria-checked", String(wheel.dataset.palette === palette())));
 
   mark();
 
-  menu.addEventListener("toggle", (event) => {
-    // SAFETY: the popover fires toggle as a ToggleEvent, which carries newState.
-    if ((event as ToggleEvent).newState === "open") items.find((item) => item.ariaChecked === "true")?.focus();
-  });
+  for (const wheel of wheels)
+    wheel.addEventListener("click", () => {
+      const picked = PALETTES.find((p) => p.id === wheel.dataset.palette);
 
-  menu.addEventListener("click", (event) => {
-    const item =
-      event.target instanceof Element
-        ? event.target.closest<HTMLButtonElement>("[role=menuitemradio]")
-        : null;
-
-    const picked = PALETTES.find((p) => p.id === item?.dataset.palette);
-
-    if (!picked) return;
-    choose(picked.id);
-    mark();
-    menu.hidePopover();
-  });
-
-  menu.addEventListener("keydown", (event) => {
-    const at = items.findIndex((item) => item === document.activeElement);
-
-    const to = new Map([
-      ["ArrowDown", at + 1],
-      ["ArrowUp", at - 1],
-      ["Home", 0],
-      ["End", -1],
-    ]).get(event.key);
-
-    if (event.key === "Tab") return menu.hidePopover();
-
-    if (to === undefined) return;
-    event.preventDefault();
-    items.at(to % items.length)!.focus();
-  });
+      if (!picked) return;
+      choose(picked.id);
+      mark();
+      bump(wheel);
+    });
 </script>
