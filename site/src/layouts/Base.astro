@@ -20,6 +20,21 @@ interface Props {
 const { title, description, share = { title, description }, class: className, current, wide, card = "home" } = Astro.props;
 const url = new URL(Astro.url.pathname, Astro.site);
 const image = new URL(`/og/${card}.jpg`, Astro.site);
+const home = Astro.url.pathname === "/";
+
+const site = { "@type": "WebSite", name: "svjeez", url: new URL("/", Astro.site).href };
+
+const software = {
+  "@type": "SoftwareSourceCode",
+  name: "svjeez",
+  description,
+  url: site.url,
+  codeRepository: "https://github.com/saiashirwad/svjeez",
+  programmingLanguage: "TypeScript",
+  license: "https://opensource.org/license/mit",
+};
+
+const jsonLd = { "@context": "https://schema.org", "@graph": home ? [site, software] : [site] };
 const picked = PALETTES.map(({ id }) => id).filter((id) => id !== DEFAULT_PALETTE);
 ---
 
@@ -31,13 +46,17 @@ const picked = PALETTES.map(({ id }) => id).filter((id) => id !== DEFAULT_PALETT
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={url} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="svjeez" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content={url} />
     <meta property="og:title" content={share.title} />
     <meta property="og:description" content={share.description} />
@@ -60,6 +79,7 @@ const picked = PALETTES.map(({ id }) => id).filter((id) => id !== DEFAULT_PALETT
         if (picked.indexOf(p) >= 0) document.documentElement.dataset.palette = p;
       } catch (e) {}
     </script>
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <Font cssVariable="--font-mono" preload />
     <style is:inline set:html={codeVars}></style>
     <slot name="head" />
