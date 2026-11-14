@@ -180,7 +180,7 @@ const CARDS: Record<Mood, () => string> = {
     return frame(
       "svjeez",
       t.draw,
-      <Hand text="that's one <img>, btw" x={720} y={110} />,
+      <Hand text="that's one <img>!" x={720} y={110} />,
       <Arrow from={[1000, 124]} to={[t.chick.x + 24, t.chick.head - 8]} bow={-30} />,
     );
   },
