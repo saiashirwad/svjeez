@@ -18,7 +18,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
 - `packages/live/` is `@svjeez/live`, the scene editor's core with no framework in it. `createEditor` is an Elm-style store: `update` is pure, every edit is a message (a drag, a keystroke or an agent sends the same ones), and the runtime compiles in a worker and shows each picture from where the clock was. It also parses scene source into literals with stable keys, picks a control for each, and measures what a number moves on the picture. `@svjeez/live/fit` has the control math for params (`fit`, `positionOf`, `valueAt`, `follow`); the scene-facing kinds stay in `svjeez/params`.
 - `packages/svelte/` is `@svjeez/svelte` and `packages/react/` is `@svjeez/react`: the editor's components (the code with a control on every value, the picture with handles, a transport) for each framework. Both render the same markup and share `@svjeez/live/editor.css`, so neither carries styles of its own.
-- `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax.
+- `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax and draws graph axes, calculus on them, vector fields and contour lines.
 - `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid flowcharts, sequence diagrams and state diagrams into svjeez diagrams.
 - `packages/voxel/` is `@svjeez/voxel`, which draws pixel-art voxel scenes: blocks on a grid, textured faces and a fixed camera.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
@@ -54,7 +54,7 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 Paths in this section are relative to `packages/svjeez/`.
 
 - `src/` holds the core: `motion.ts` (timeline), `recipes.ts`, `channels.ts` (the channel table), `keys.ts` (keyframe math), `css.ts` and `smil.ts` (emit CSS and SMIL), `compile.ts` and `render.ts` (orchestrate them), `validate.ts`.
-- `src/extras/` holds timeline, code, terminal, annotations and themes, all exported from the root `svjeez` entry, plus the diagrams in `extras/diagrams/`, `field.ts`, `calculus.ts` and `axes.ts`, which are on their way to packages. `tests/kit-imports.test.ts` keeps those files importing core only by names the entries publish, so moving them out is mechanical.
+- `src/extras/` holds timeline, code, terminal, annotations and themes, all exported from the root `svjeez` entry, plus the diagrams in `extras/diagrams/`, which are on their way to a package. `tests/kit-imports.test.ts` keeps those files importing core only by names the entries publish, so moving them out is mechanical.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
 - `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
@@ -77,7 +77,7 @@ Each package's source explains its own internals. These are the rules that aren'
 
 ## Rules
 
-- Import `svjeez`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. `svjeez/extras` is a deprecated re-export that goes away in 1.0, and only the diagrams, axes, calculus and fields are still defined behind it. In `packages/svjeez/` the tsconfig maps them to `src/`.
+- Import `svjeez`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. `svjeez/extras` is a deprecated re-export that goes away in 1.0, and only the diagrams are still defined behind it. In `packages/svjeez/` the tsconfig maps them to `src/`.
 - Keep the library dependency-free and runnable on Node 20. Don't use APIs newer than Node 20, such as `Map.groupBy` or `Set.prototype.union`. `bun run test:node` under Node 20 catches these.
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `examples/dist/` files and commit them with the change.

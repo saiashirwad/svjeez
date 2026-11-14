@@ -4,7 +4,7 @@ import { el, rect, type Color, type SvgNode, defaultDark, tint } from "svjeez";
 import { buildSeries, round, type Frame } from "./series.ts";
 import type { Chart, ChartOptions, Datum, XScale } from "./types.ts";
 
-// Same strokes, label slot, tick length and label offsets as axes() in svjeez/extras, so the two sit in one scene.
+// Same strokes, label slot, tick length and label offsets as axes() in @svjeez/math, so the two sit in one scene.
 const TICK = 4;
 
 const ACCENTS = ["blue", "number", "green", "magenta", "cyan", "yellow", "red"] as const;

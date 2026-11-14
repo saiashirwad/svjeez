@@ -167,13 +167,13 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Gradients, clip paths, filters, custom properties, `calc` | [`references/defs-css.md`](references/defs-css.md) |
 | Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
-| Code walkthroughs, terminals, annotations, camera, themes, recoloring, pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
+| Code walkthroughs, terminals, annotations, camera, themes, recoloring, axes and calculus (`@svjeez/math`), pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
 | Flowchart, sequence, state, tree, lanes, `flow` | [`references/diagrams.md`](references/diagrams.md) |
 | Pixel-art voxel scenes (`@svjeez/voxel`) | [`references/voxels.md`](references/voxels.md) |
 | Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |
 | Equations: TeX, equation transforms, `morph()` over formulas (`@svjeez/math`) | [`references/math.md`](references/math.md) |
-| Vector fields, streamlines, slope fields, contour lines, implicit curves | [`references/fields.md`](references/fields.md) |
+| Vector fields, streamlines, slope fields, contour lines, implicit curves (`@svjeez/math`) | [`references/fields.md`](references/fields.md) |
 | Syntax highlighting for `code()` and `terminal()`, themed by role (`@svjeez/code`) | [`references/code.md`](references/code.md) |
 | Bar, line and area charts that animate in (`@svjeez/charts`) | [`references/charts.md`](references/charts.md) |
 | Mermaid text drawn as a flowchart, sequence or state diagram (`@svjeez/mermaid`) | [`references/mermaid.md`](references/mermaid.md) |

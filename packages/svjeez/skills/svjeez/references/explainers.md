@@ -242,11 +242,13 @@ const scene = (
 
 ## Axes and function plots
 
+`axes()` and the calculus below come from `@svjeez/math` (`npm i -D @svjeez/math`).
+
 `axes(options)` draws coordinate axes over a graph range and returns `{ node, bounds, point, plot }`. `x` and `y` are `[min, max]` ranges, `width` and `height` the plot area in px, and `at` its top-left. `ticks: { x, y }` are steps in graph units, and an axis without a step has no ticks. `labels` (default true) numbers the ticks, `grid` adds faint lines, and `theme`, `fontSize` and `font` style it. Each axis crosses at 0 when 0 is in its range, else sits on the bottom or left edge.
 
 ```tsx
+import { axes } from "@svjeez/math";
 import { draw } from "svjeez";
-import { axes } from "svjeez/extras";
 
 const theme = tomorrowNight;
 const ax = axes({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 }, theme, ticks: { x: 1, y: 2 } });
@@ -263,8 +265,8 @@ const scene = <g>{ax.node}{parabola.node}<circle cx={dot.x} cy={dot.y} r={4} fil
 The axes also carry calculus. A value that moves is a `Moving`: a number holds still, `{ from, to, at, over, ease }` sweeps it (default `ease.inOut`), and an array of sweeps chains them, holding in between. Lines and areas whose shape changes bake into a `d` motion through `sampledPath()`, so they morph in Safari too.
 
 ```tsx
+import { axes } from "@svjeez/math";
 import { draw, enter } from "svjeez";
-import { axes } from "svjeez/extras";
 
 const graph = axes({ x: [-3, 3], y: [0, 4], width: 300, height: 240, at: { x: 40, y: 60 }, theme });
 const f = (x: number) => 2 + Math.sin(x);

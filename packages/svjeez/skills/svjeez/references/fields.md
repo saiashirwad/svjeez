@@ -1,9 +1,9 @@
 # Fields and level sets
 
-Vector fields, streamlines, slope fields and contour lines, all from `svjeez/extras`. They work in scene px, or in graph units through an `axes()` plot. Each returns path data or point lists, so you draw the result with `<path>`, `flow()` and the recipes you already know.
+Vector fields, streamlines, slope fields and contour lines, all from `@svjeez/math` (`npm i -D @svjeez/math`). They work in scene px, or in graph units through an `axes()` plot. Each returns path data or point lists, so you draw the result with `<path>`, `flow()` and the recipes you already know.
 
 ```tsx
-import { contours, fieldFlow, fieldLines, streamlines, vectorField } from "svjeez/extras";
+import { contours, fieldFlow, fieldLines, streamlines, vectorField } from "@svjeez/math";
 ```
 
 ## Streamlines

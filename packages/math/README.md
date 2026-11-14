@@ -1,6 +1,6 @@
 # @svjeez/math
 
-TeX equations for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `tex()` typesets a formula with MathJax while the scene compiles and gives back one `<path>` per glyph, placed in scene pixels. Because every glyph is its own piece, `morph()` can carry an equation from one form to the next the way Manim does, and the SVG it ends up in is still one file with no JavaScript and no font to load.
+TeX equations, graph axes, calculus and vector fields for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `tex()` typesets a formula with MathJax while the scene compiles and gives back one `<path>` per glyph, placed in scene pixels. Because every glyph is its own piece, `morph()` can carry an equation from one form to the next the way Manim does, and the SVG it ends up in is still one file with no JavaScript and no font to load.
 
 <p align="center">
   <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/math"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/math.svg" width="640" alt="(a+b)^2 morphs into a^2+2ab+b^2 with a brace on the cross term, divides by a+b, and generalizes to the binomial theorem." /></a>
@@ -186,6 +186,16 @@ const p = plane({ origin: { x: 160, y: 240 }, unit: 34, extent: 10 }).apply(
 - `point(x, y)` and `map(x, y)` give scene pixels before and after every step.
 
 When every step is a matrix, the plane is one CSS transform driven by registered properties, so the file stays small. A function step, such as z ↦ z² written as `(x, y) => [x * x - y * y, 2 * x * y]`, samples every outline and morphs it through `d`.
+
+## Axes, calculus and fields
+
+`axes()` draws coordinate axes and plots functions on them. The plot also carries calculus: `dot()`, `tangent()`, `secant()`, `area()`, `riemann()`, `morph()`, `parametric()` and `polar()`. Their result types are `CalculusDot`, `CalculusLine`, `CalculusArea` and `CalculusCurve`. `streamlines()`, `fieldLines()`, `fieldFlow()`, `vectorField()`, `slopeField()`, `slopeSolution()`, `contours()` and `contourSweep()` work in scene pixels, or in graph units through an `axes()` plot.
+
+```tsx
+import { axes, streamlines } from "@svjeez/math";
+```
+
+These came from `svjeez/extras`, which no longer exports them. See [explainers](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/explainers.md) and [fields](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/fields.md) in the skill.
 
 ## Errors
 
