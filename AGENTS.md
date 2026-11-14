@@ -29,7 +29,7 @@ Run `bun install` once at the root. From the root, `bun run typecheck` and `bun 
 
 The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
-Every other package points its exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. In each, `bun run build:package` writes `package-dist/` with the package.json that npm publishes, and `bun run test:package` installs the packed tarball into a copy of `test/consumer/` and checks it on plain Node. Both use the scripts in the root `scripts/` folder, which also holds `codemod-0.7.ts`, the rewrite users run on their own files for 0.7's moves and renames. Keep it and its test in step with any later rename. Packages with a third-party dependency stay out of `svjeez` so the core keeps none.
+Every other package points its exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. In each, `bun run build:package` writes `package-dist/` with the package.json that npm publishes, and `bun run test:package` installs the packed tarball into a copy of `test/consumer/` and checks it on plain Node. Both use the scripts in the root `scripts/` folder Packages with a third-party dependency stay out of `svjeez` so the core keeps none.
 
 ## Library commands
 

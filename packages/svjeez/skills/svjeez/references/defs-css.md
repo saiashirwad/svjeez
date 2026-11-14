@@ -21,8 +21,7 @@ const dots = [0, 1, 2].map((i) => <use href={dot} x={20 + i * 12} y={20} />);
 
 ## Custom properties
 
-`css.property(name, { syntax, inherits, initial })` registers a typed CSS custom property. `syntax` is `number`, `length`, `angle` or `color`. `inherits` is false unless you say otherwise, as in CSS. The returned key animates like a channel on any tag except filter primitives, and works in `style` and in `css`. `def.property` is the old name and still works.
-
+`css.property(name, { syntax, inherits, initial })` registers a typed CSS custom property. `syntax` is `number`, `length`, `angle` or `color`. `inherits` is false unless you say otherwise, as in CSS. The returned key animates like a channel on any tag except filter primitives, and works in `style` and in `css`.
 ```tsx
 const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
 const reach = css.property("reach", { syntax: "number", initial: 0 });

@@ -190,8 +190,7 @@ When every step is a matrix, the plane is one CSS transform driven by registered
 
 ## Calculus and fields
 
-A `plane()` also carries calculus: `dot()`, `tangent()`, `secant()`, `area()`, `riemann()`, `morph()`, `parametric()` and `polar()`. Their result types are `CalculusDot`, `CalculusLine`, `CalculusArea` and `CalculusCurve`. `streamlines()`, `fieldLines()`, `vectorField()`, `slopeField()`, `slopeSolution()`, `contours()` and `contourSweep()` work in scene pixels, or in graph units through a `plane()`. Run particles along streamlines with `flow(lines, { at })` from `svjeez`, which takes a list of lines. `fieldFlow()` is the old name for it.
-
+A `plane()` also carries calculus: `dot()`, `tangent()`, `secant()`, `area()`, `riemann()`, `morph()`, `parametric()` and `polar()`. Their result types are `CalculusDot`, `CalculusLine`, `CalculusArea` and `CalculusCurve`. `streamlines()`, `fieldLines()`, `vectorField()`, `slopeField()`, `slopeSolution()`, `contours()` and `contourSweep()` work in scene pixels, or in graph units through a `plane()`. Run particles along streamlines with `flow(lines, { at })` from `svjeez`, which takes a list of lines.
 ```tsx
 import { plane, streamlines } from "@svjeez/math";
 ```
