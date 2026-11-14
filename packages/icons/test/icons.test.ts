@@ -2,14 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { exportName } from "../scripts/generate.ts";
-import type { Icon } from "../src/icon.ts";
+import type { IconData } from "../src/icon.ts";
 import * as lucide from "../src/lucide.ts";
 import * as tabler from "../src/tabler.ts";
 
 const sets = { tabler, lucide } as const;
 
 describe.each(Object.entries(sets))("%s", (_, set) => {
-  const icons: [string, Icon][] = Object.entries(set);
+  const icons: [string, IconData][] = Object.entries(set);
 
   test("every icon is a square grid of nonempty paths", () => {
     expect(icons.length).toBeGreaterThan(1000);

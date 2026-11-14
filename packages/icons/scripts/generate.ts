@@ -1,8 +1,8 @@
 // Reads the upstream SVG files of @tabler/icons and lucide-static from node_modules and writes src/tabler.ts and
-// src/lucide.ts, one `export const name: Icon` per icon. Rerunning it produces no diff.
+// src/lucide.ts, one `export const name: IconData` per icon. Rerunning it produces no diff.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Icon } from "../src/icon.ts";
+import type { IconData } from "../src/icon.ts";
 
 const ROOT = join(import.meta.dirname, "..");
 
@@ -134,13 +134,13 @@ const attributes = (source: string): Attrs =>
   Object.fromEntries([...source.matchAll(ATTR)].map(([, name, value]) => [name!, value!]));
 
 interface Parsed {
-  readonly icon: Icon;
+  readonly icon: IconData;
   /** The icon draws a solid piece inside an outline icon; it is stroked like the rest. */
   readonly mixed: boolean;
 }
 
 /** `root` is what the file's <svg> must say: the paint of the whole icon. */
-function parse(file: string, svg: string, kind: Icon["kind"]): Parsed {
+function parse(file: string, svg: string, kind: IconData["kind"]): Parsed {
   const clean = svg.replace(/<!--[\s\S]*?-->/g, "");
   const root = clean.match(/<svg\b([^>]*)>/);
 
@@ -193,7 +193,7 @@ interface Source {
   /** Folders of SVG files and the kind of icon each holds, with the suffix their names take. */
   readonly folders: readonly {
     readonly dir: string;
-    readonly kind: Icon["kind"];
+    readonly kind: IconData["kind"];
     readonly suffix: string;
   }[];
 }
@@ -226,7 +226,7 @@ function generate({ pkg, out, folders }: Source): Generated {
 
   if (license.includes("*/")) throw new Error(`${pkg} LICENSE contains a comment terminator`);
 
-  const icons = new Map<string, { readonly file: string; readonly icon: Icon }>();
+  const icons = new Map<string, { readonly file: string; readonly icon: IconData }>();
   const mixed: string[] = [];
   const problems: string[] = [];
 
@@ -259,7 +259,7 @@ function generate({ pkg, out, folders }: Source): Generated {
     .map((name) => {
       const { grid, kind, paths } = icons.get(name)!.icon;
 
-      return `export const ${name}: Icon = { grid: ${grid}, kind: ${JSON.stringify(kind)}, paths: ${JSON.stringify(paths)} };`;
+      return `export const ${name}: IconData = { grid: ${grid}, kind: ${JSON.stringify(kind)}, paths: ${JSON.stringify(paths)} };`;
     });
 
   const header = [
@@ -272,7 +272,7 @@ function generate({ pkg, out, folders }: Source): Generated {
 
   writeFileSync(
     join(ROOT, "src", out),
-    `${header.join("\n")}\nimport type { Icon } from "./icon.ts";\n\n${lines.join("\n")}\n`,
+    `${header.join("\n")}\nimport type { IconData } from "./icon.ts";\n\n${lines.join("\n")}\n`,
   );
 
   return { count: icons.size, mixed };

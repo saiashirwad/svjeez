@@ -37,7 +37,7 @@ const scene = (
 ## The data
 
 ```ts
-interface Icon {
+interface IconData {
   readonly grid: number; // side of the square viewBox the paths are drawn on
   readonly kind: "stroke" | "fill"; // outlines to stroke, or shapes to fill
   readonly paths: readonly string[]; // one path per drawn piece, in source order
