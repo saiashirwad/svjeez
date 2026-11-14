@@ -4,7 +4,7 @@ Instructions for a coding agent. 0.7 is breaking and keeps no aliases: every old
 
 ## How to use this
 
-1. Bump `svjeez` and every `@svjeez/*` package the project uses (`vite`, `astro`, ...) to 0.7. Install a package below only if the project uses what moved there: `@svjeez/diagrams`, `@svjeez/code`.
+1. Bump `svjeez` and every `@svjeez/*` package the project uses to 0.7. npm has `vite`, `astro`, `charts`, `code`, `fonts`, `geo`, `icons`, `math` and `mermaid` up to 0.6.1. `@svjeez/diagrams`, `@svjeez/video` and `@svjeez/live` are new and were never on npm; install `diagrams` only if the project uses what moved there (step 2), and `code` is already a dependency if it highlights.
 2. Before editing, render the project's scenes and keep the frames: `svjeez frames <scene> --sheet --out before/`, or the project's own build.
 3. Apply the steps. Run the project's typecheck after each group, since every removed name is a type error.
 4. Render again into `after/` and compare the frames. Differences are expected only where a step says so (step 8).
@@ -78,7 +78,7 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 + sampled(fn, { over: 4, tolerance })
 ```
 
-**11. Results carry a `span`, not `end`.** Search `.end` on the results of `typewriter`, `terminal`, `reveal`, `flow` and `morph`. Use `.span.end` (also `.span.at`, `.span.over`). `timeline()` keeps its own `.end` and `.duration`.
+**11. Results carry a `span`, not `end`.** Search `.end` on the results of `typewriter`, `terminal`, `reveal`, `flow`, `morph` and the `@svjeez/charts` series (`bars`, `line`, `area` of `chart(...)`). Use `.span.end` (also `.span.at`, `.span.over`). `timeline()` keeps its own `.end` and `.duration`.
 
 ```ts
 - const next = typewriter(...).end + 0.5;
@@ -86,6 +86,8 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 ```
 
 **12. Tools take scene seconds.** `svjeez frames --times`, `restyle({ at })` and `seek(time)` used playback seconds. They now use the seconds your motions are written in. The numbers are the same unless the scene sets `render({ playbackRate })` other than 1: then multiply each old playback time by `playbackRate`. Check scrub, poster and scroll code that calls `seek` or `restyle`.
+
+**11b. `Icon` is `IconData`** (type of `@svjeez/icons`, 0.6.1 exported `Icon`). Search `\bIcon\b` imported from `@svjeez/icons`. The tabler and lucide path data are unchanged. `<Icon>` the component, from `svjeez`, keeps its name.
 
 ## Escape hatches
 
@@ -115,9 +117,9 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 
 **17. Voxels.** Search `voxel` imported from `svjeez` (0.5), `svjeez/voxel` (0.6) or `@svjeez/voxel`. There is no replacement. Ask the user whether to keep a pre-rendered SVG of the scene, redraw it with plain shapes, or drop it. Do not guess.
 
-## Only if the project ran an unreleased build of main
+## Only if the project ran an unpublished build of main
 
-0.5.0 and 0.6.1 never shipped these. Skip this section unless the code imports `@svjeez/math`, `@svjeez/video`, `@svjeez/icons`, `svjeez/params` or `svjeez/internal`.
+These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*` packages do not export them, and `@svjeez/math` 0.6.1 had only `tex`, `Tex`, `Glyph` and `Matrix`. Skip this section unless the code came from a git checkout of main and imports `@svjeez/math` beyond `tex`, `@svjeez/video`, `svjeez/params` or `svjeez/internal`.
 
 | Search | Now |
 | --- | --- |
@@ -130,10 +132,9 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 | `flow(points, { loop })` | `flow(points, { period })` |
 | `fieldFlow(lines, options)` | `flow(lines, options).node` |
 | `sampledPath(fn, options)` | `sampled.path(fn, options)` |
-| `sampled`, `sampled.path`, `globe`, `nightfall` with `duration` | `over` |
-| `.end` of `derive`, `epicycles`, `traffic`, `walk`, charts, constructions | `.span.end` |
+| `sampled.path`, `globe`, `nightfall` with `duration` | `over` |
+| `.end` of `derive`, `epicycles`, `traffic`, `walk`, constructions | `.span.end` |
 | `renderVideo` (`@svjeez/video`) | `video` |
-| `Icon` type of `@svjeez/icons` | `IconData` |
 | voxel block `at`, `from`, `to` | gone with voxels (step 17) |
 | `fit`, `positionOf`, `valueAt`, `fitValues`, `withValues`, `follow` from `svjeez/params` | `@svjeez/live` |
 | `el` from `svjeez/internal` | JSX (step 15) |
