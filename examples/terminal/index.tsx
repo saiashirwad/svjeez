@@ -1,5 +1,5 @@
-import { rect, render } from "svjeez";
-import { terminal, appWindow } from "svjeez/extras";
+import { rect, render, terminal, appWindow } from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const W = 960;

@@ -10,8 +10,9 @@ import {
   sampled,
   type Hex,
   type SvgNode,
+  morph,
 } from "svjeez";
-import { morph } from "svjeez/extras";
+
 import type { Outline } from "./outline";
 
 /** What one compile draws: the first `n` circles of a drawing's Fourier series, and the formula it morphs from. */

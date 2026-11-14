@@ -1,6 +1,6 @@
 import { chart } from "@svjeez/charts";
-import { enter, render } from "svjeez";
-import { adaptive, systemDark, systemLight, tint } from "svjeez/extras";
+import { enter, render, adaptive, systemDark, systemLight, tint } from "svjeez";
+
 
 const { theme, css } = adaptive({
   light: systemLight,

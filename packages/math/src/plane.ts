@@ -10,8 +10,10 @@ import {
   type Point,
   type Span,
   type SvgNode,
+  defaultDark,
+  type Base16,
 } from "svjeez";
-import { defaultDark, type Base16 } from "svjeez/extras";
+
 import { tex, type Tex } from "./index.ts";
 import { apply, identity, multiply, round, type Matrix } from "./matrix.ts";
 import { LEAN, warp, type Move, type PathAttrs, type Placement, type Vec2 } from "./warp.ts";

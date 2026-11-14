@@ -1,5 +1,4 @@
-import type { Attrs, Color, Point, Rect, SvgNode } from "svjeez";
-import type { Base16 } from "svjeez/extras";
+import type { Attrs, Color, Point, Rect, SvgNode, Base16 } from "svjeez";
 
 export type FontAttr = NonNullable<Attrs<"text">["fontFamily"]>;
 

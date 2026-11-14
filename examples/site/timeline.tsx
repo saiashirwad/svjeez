@@ -1,5 +1,5 @@
-import { ease, enter, motion, render } from "svjeez";
-import { Marker, code } from "svjeez/extras";
+import { ease, enter, motion, render, Marker, code } from "svjeez";
+
 import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";

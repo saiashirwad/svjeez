@@ -1,6 +1,6 @@
 import { tex } from "@svjeez/math";
-import { render } from "svjeez";
-import { adaptive, morph, systemDark, systemLight } from "svjeez/extras";
+import { render, adaptive, morph, systemDark, systemLight } from "svjeez";
+
 
 const { theme, css } = adaptive({
   light: systemLight,

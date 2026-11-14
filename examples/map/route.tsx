@@ -8,8 +8,11 @@ import {
   type Point,
   type Rect,
   type SvgNode,
+  Camera,
+  travel,
+  type CameraStop,
 } from "svjeez";
-import { Camera, travel, type CameraStop } from "svjeez/extras";
+
 import { trace } from "./curve";
 import { C, H, W, n } from "./kit";
 import { CINDER, PLACES } from "./places";

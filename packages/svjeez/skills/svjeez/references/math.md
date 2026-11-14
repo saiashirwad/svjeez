@@ -4,8 +4,8 @@
 
 ```tsx
 import { tex } from "@svjeez/math";
-import { render } from "svjeez";
-import { Brace, morph } from "svjeez/extras";
+import { render, Brace, morph } from "svjeez";
+
 import { css, theme } from "./style";
 
 const at = { x: 40, y: 80, fontSize: 40, theme };

@@ -19,7 +19,12 @@ test("svjeez/extras hands out the same values as svjeez", () => {
   expect(shared).toContain("readout");
   expect(shared).toContain("terminal");
 
-  for (const name of shared) expect(Reflect.get(legacy, name)).toBe(Reflect.get(root, name));
+  const [old, now] = [
+    new Map<string, unknown>(Object.entries(legacy)),
+    new Map<string, unknown>(Object.entries(root)),
+  ];
+
+  for (const name of shared) expect(old.get(name)).toBe(now.get(name));
 });
 
 test("svjeez/extras still has the editor palettes and the kits", () => {

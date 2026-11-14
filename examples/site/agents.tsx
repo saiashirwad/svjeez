@@ -1,5 +1,17 @@
-import { def, ease, enter, motion, rect, render } from "svjeez";
-import { appWindow, code, reveal, terminal, type CodeTokens } from "svjeez/extras";
+import {
+  def,
+  ease,
+  enter,
+  motion,
+  rect,
+  render,
+  appWindow,
+  code,
+  reveal,
+  terminal,
+  type CodeTokens,
+} from "svjeez";
+
 import { CSS } from "./kit";
 import { mono, theme } from "../style";
 

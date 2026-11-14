@@ -1,5 +1,5 @@
-import { render } from "svjeez";
-import { flow, flowchart } from "svjeez/extras";
+import { render, flow } from "svjeez";
+import { flowchart } from "svjeez/extras";
 import { CSS, chrome, outro } from "./kit";
 import { theme } from "../style";
 

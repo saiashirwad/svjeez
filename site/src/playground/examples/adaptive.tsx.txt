@@ -1,5 +1,5 @@
-import { enter, ease, render } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import { enter, ease, render, adaptive, systemDark, systemLight } from "svjeez";
+
 
 // adaptive() takes a light and a dark palette. `theme` holds CSS
 // variables, and `css` defines them with a prefers-color-scheme

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { tex } from "@svjeez/math";
-import { render } from "svjeez";
-import { morph } from "svjeez/extras";
+import { render, morph } from "svjeez";
 
 const at = { x: 20, y: 20, fontSize: 40 };
 const square = tex(String.raw`(a+b)^2`, at);

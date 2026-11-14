@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { draw, ease, enter, render } from "svjeez";
-import { Marker, code } from "svjeez/extras";
+import { draw, ease, enter, render, Marker, code } from "svjeez";
+
 import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";

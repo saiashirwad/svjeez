@@ -1,6 +1,6 @@
 import { mermaid } from "@svjeez/mermaid";
-import { enter, render } from "svjeez";
-import { flow } from "svjeez/extras";
+import { enter, render, flow } from "svjeez";
+
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 

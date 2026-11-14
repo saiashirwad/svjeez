@@ -1,6 +1,5 @@
 import { bell, bolt, cloud, heartFilled, mail, moon, rocket, search } from "@svjeez/icons/tabler";
-import { draw, ease, Icon, motion, render, type IconData } from "svjeez";
-import { variables } from "svjeez/extras";
+import { draw, ease, Icon, motion, render, type IconData, variables } from "svjeez";
 
 const W = 640;
 const H = 360;

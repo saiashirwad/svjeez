@@ -1,6 +1,6 @@
 import { bell, heartFilled, rocket, settings } from "@svjeez/icons/tabler";
-import { Icon, draw, ease, enter, render, shake } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import { Icon, draw, ease, enter, render, shake, adaptive, systemDark, systemLight } from "svjeez";
+
 
 const { theme, css } = adaptive({
   light: systemLight,

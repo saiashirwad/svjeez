@@ -1,5 +1,19 @@
-import { def, ease, motion, rect, type Color, type Motion, type Stack, type SvgNode } from "svjeez";
-import { appWindow, code, shot, typewriter, type CodePiece } from "svjeez/extras";
+import {
+  def,
+  ease,
+  motion,
+  rect,
+  type Color,
+  type Motion,
+  type Stack,
+  type SvgNode,
+  appWindow,
+  code,
+  shot,
+  typewriter,
+  type CodePiece,
+} from "svjeez";
+
 import { mono, theme } from "../style";
 import { COLD } from "./cold";
 import { C, show } from "./kit";

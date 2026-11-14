@@ -1,6 +1,6 @@
 import { chart } from "@svjeez/charts";
-import { ease, enter, motion, render, type Color } from "svjeez";
-import { tint } from "svjeez/extras";
+import { ease, enter, motion, render, type Color, tint } from "svjeez";
+
 import { geist, geistMono } from "../fonts/faces";
 import { css, theme } from "../style";
 

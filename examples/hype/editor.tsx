@@ -1,6 +1,6 @@
-import { ease, enter, motion, rect } from "svjeez";
+import { ease, enter, motion, rect, Marker, appWindow, code, shot, typewriter } from "svjeez";
 import { highlight } from "@svjeez/code";
-import { Marker, appWindow, code, shot, typewriter } from "svjeez/extras";
+
 import { mono, theme } from "../style";
 import { C, rise, show } from "./kit";
 import { TERM } from "./session";

@@ -1,6 +1,6 @@
 // The one look for code in every example: editors, code explainers, terminals and code labels.
 // The site's code blocks and playground read the same palette and font, so a scene and the page around it match.
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import { adaptive, systemDark, systemLight } from "svjeez";
 import { mono } from "./fonts/faces";
 
 /** The palette, light and dark. */

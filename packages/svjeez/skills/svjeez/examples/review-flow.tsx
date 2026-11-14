@@ -1,7 +1,7 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { render } from "svjeez";
-import { adaptive, flow, flowchart, systemDark, systemLight } from "svjeez/extras";
+import { render, adaptive, flow, systemDark, systemLight } from "svjeez";
+import { flowchart } from "svjeez/extras";
 
 const { theme, css: colors } = adaptive({ dark: systemDark, light: systemLight });
 const css = `${colors}\n.sans text{font-family:system-ui,sans-serif}`;

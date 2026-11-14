@@ -1,4 +1,4 @@
-import { shot, timeline } from "svjeez/extras";
+import { shot, timeline } from "svjeez";
 import { CODE } from "./editor";
 import { dataShot } from "./data";
 import { mapShot } from "./map";

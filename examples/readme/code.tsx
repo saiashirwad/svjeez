@@ -1,5 +1,5 @@
-import { render } from "svjeez";
-import { Marker, code, morph, type CodeRun, type CodeTokens } from "svjeez/extras";
+import { render, Marker, code, morph, type CodeRun, type CodeTokens } from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const kw = (text: string): CodeRun => ["keyword", text];

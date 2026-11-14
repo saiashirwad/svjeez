@@ -1,5 +1,5 @@
-import { render } from "svjeez";
-import { terminal } from "svjeez/extras";
+import { render, terminal } from "svjeez";
+
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 

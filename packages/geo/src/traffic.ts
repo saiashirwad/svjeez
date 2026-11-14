@@ -1,6 +1,6 @@
 import type { Color, Point, Seconds, Span, SvgNode } from "svjeez";
 import { el } from "svjeez";
-import { flow, type FlowOptions } from "svjeez/extras";
+import { flow, type FlowOptions } from "svjeez";
 import type { GeoMap, LonLat } from "./index.ts";
 
 /** A route for `traffic()`, with how much of the traffic takes it and, if it differs, its color. */

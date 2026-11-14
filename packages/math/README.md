@@ -17,8 +17,8 @@ npm i -D @svjeez/math svjeez
 
 ```tsx
 import { tex } from "@svjeez/math";
-import { render } from "svjeez";
-import { Brace, morph } from "svjeez/extras";
+import { render, Brace, morph } from "svjeez";
+
 
 const at = { x: 40, y: 80, fontSize: 40 };
 const square = tex(String.raw`(a+b)^2`, at);

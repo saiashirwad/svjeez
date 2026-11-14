@@ -10,8 +10,8 @@ import {
   video,
   world,
 } from "@svjeez/icons/tabler";
-import { Glyphs, Icon, draw, ease, enter, motion } from "svjeez";
-import { code, shot, typewriter } from "svjeez/extras";
+import { Glyphs, Icon, draw, ease, enter, motion, code, shot, typewriter } from "svjeez";
+
 import { mono, theme } from "../style";
 import { C, centered, display, rise, show, W } from "./kit";
 import { HAND } from "./write";

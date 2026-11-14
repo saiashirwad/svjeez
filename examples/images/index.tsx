@@ -1,5 +1,16 @@
-import { Picture, ease, enter, fx, motion, picture, render, type PictureProps } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import {
+  Picture,
+  ease,
+  enter,
+  fx,
+  motion,
+  picture,
+  render,
+  type PictureProps,
+  adaptive,
+  systemDark,
+  systemLight,
+} from "svjeez";
 
 const W = 680;
 const H = 400;

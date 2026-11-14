@@ -1,5 +1,5 @@
-import { enter, render } from "svjeez";
-import { Callout, Focus, code } from "svjeez/extras";
+import { enter, render, Callout, Focus, code } from "svjeez";
+
 import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";

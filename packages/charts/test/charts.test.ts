@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { render } from "svjeez";
-import { tint, defaultDark } from "svjeez/extras";
+import { render, tint, defaultDark } from "svjeez";
+
 import { chart } from "../src/index.ts";
 
 const scene = (...children: Parameters<typeof render>[1][]) =>

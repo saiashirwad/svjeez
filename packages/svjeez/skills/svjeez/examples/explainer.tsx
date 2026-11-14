@@ -1,7 +1,7 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { render } from "svjeez";
 import {
+  render,
   Callout,
   Focus,
   Marker,
@@ -12,7 +12,7 @@ import {
   systemDark as theme,
   type CodeRun,
   type CodeTokens,
-} from "svjeez/extras";
+} from "svjeez";
 
 // A code explainer: two versions of a function, a timeline that names the beats, and annotations aimed at runs by id.
 const kw = (text: string): CodeRun => ["keyword", text];

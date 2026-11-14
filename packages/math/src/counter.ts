@@ -1,5 +1,14 @@
-import { el, motion, type Color, type Seconds, type SvgNode } from "svjeez";
-import { defaultDark, tint, type Base16 } from "svjeez/extras";
+import {
+  el,
+  motion,
+  type Color,
+  type Seconds,
+  type SvgNode,
+  defaultDark,
+  tint,
+  type Base16,
+} from "svjeez";
+
 import { tex } from "./index.ts";
 
 /** A value from `at` on, until the next one. */

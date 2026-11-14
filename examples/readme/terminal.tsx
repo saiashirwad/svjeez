@@ -1,5 +1,5 @@
-import { rect, render } from "svjeez";
-import { terminal, appWindow } from "svjeez/extras";
+import { rect, render, terminal, appWindow } from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const shell = appWindow(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic" });

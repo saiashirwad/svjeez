@@ -1,6 +1,6 @@
 import { project } from "@svjeez/geo";
-import { draw, enter, rect, render } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import { draw, enter, rect, render, adaptive, systemDark, systemLight } from "svjeez";
+
 import world from "world-atlas/countries-110m.json";
 
 const { theme, css } = adaptive({

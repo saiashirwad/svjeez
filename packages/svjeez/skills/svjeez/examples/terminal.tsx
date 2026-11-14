@@ -1,7 +1,6 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { rect, render } from "svjeez";
-import { adaptive, appWindow, terminal, systemDark, systemLight } from "svjeez/extras";
+import { rect, render, adaptive, appWindow, terminal, systemDark, systemLight } from "svjeez";
 
 // A shell session typed out in a window, in a theme that follows the viewer's light or dark mode.
 const { theme, css: colors } = adaptive({ dark: systemDark, light: systemLight });

@@ -1,6 +1,6 @@
 import { mermaid } from "@svjeez/mermaid";
-import { render } from "svjeez";
-import { flow } from "svjeez/extras";
+import { render, flow } from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const M = 40;

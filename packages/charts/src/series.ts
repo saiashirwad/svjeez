@@ -11,8 +11,10 @@ import {
   type Point,
   type Rect,
   type SvgNode,
+  tint,
+  type Base16,
 } from "svjeez";
-import { tint, type Base16 } from "svjeez/extras";
+
 import type {
   Area,
   AreaOptions,

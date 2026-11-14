@@ -1,20 +1,22 @@
-import { def, ease, motion, rect, render } from "svjeez";
 import {
+  def,
+  ease,
+  motion,
+  rect,
+  render,
   Callout,
   Focus,
   code,
   flow,
-  flowchart,
   morph,
-  sequence,
-  stateMachine,
   timeline,
   reveal,
   visible,
   appWindow,
   type CodePiece,
   type CodeTokens,
-} from "svjeez/extras";
+} from "svjeez";
+import { flowchart, sequence, stateMachine } from "svjeez/extras";
 import { css, mono, theme } from "../style";
 
 const W = 1280;

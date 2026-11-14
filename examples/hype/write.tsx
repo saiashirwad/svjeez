@@ -1,5 +1,5 @@
-import { Ink, ease, tool } from "svjeez";
-import { fieldLines, shot, streamlines } from "svjeez/extras";
+import { Ink, ease, tool, shot } from "svjeez";
+import { fieldLines, streamlines } from "svjeez/extras";
 import { C, Caption, H, W, hand } from "./kit";
 import { MONTAGE } from "./montage";
 

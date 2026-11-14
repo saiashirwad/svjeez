@@ -1,6 +1,20 @@
 import { distance, project, type LonLat, type Topology } from "@svjeez/geo";
-import { draw, ease, motion, rect, render, type Child, type Rect, type SvgNode } from "svjeez";
-import { Camera, Steady, flow, variables, type CameraStop } from "svjeez/extras";
+import {
+  draw,
+  ease,
+  motion,
+  rect,
+  render,
+  type Child,
+  type Rect,
+  type SvgNode,
+  Camera,
+  Steady,
+  flow,
+  variables,
+  type CameraStop,
+} from "svjeez";
+
 import { createRequire } from "node:module";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-50m.json");

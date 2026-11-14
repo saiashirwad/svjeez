@@ -1,6 +1,6 @@
 import { tex } from "@svjeez/math";
-import { def, ease, motion, sampled, type Span } from "svjeez";
-import { Brace } from "svjeez/extras";
+import { def, ease, motion, sampled, type Span, Brace } from "svjeez";
+
 import { theme } from "../style";
 import { C, Caption, H } from "./kit";
 

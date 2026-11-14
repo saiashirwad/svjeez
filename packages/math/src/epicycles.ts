@@ -1,5 +1,16 @@
-import { ease, el, motion, sampled, type Color, type Seconds, type SvgNode } from "svjeez";
-import { defaultDark, tint, type Base16 } from "svjeez/extras";
+import {
+  ease,
+  el,
+  motion,
+  sampled,
+  type Color,
+  type Seconds,
+  type SvgNode,
+  defaultDark,
+  tint,
+  type Base16,
+} from "svjeez";
+
 import { apply, identity, type Matrix } from "./matrix.ts";
 
 export type Point = readonly [x: number, y: number];

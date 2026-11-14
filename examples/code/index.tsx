@@ -1,6 +1,6 @@
 import { highlight } from "@svjeez/code";
-import { ease, motion, rect, render } from "svjeez";
-import { appWindow, code, morph } from "svjeez/extras";
+import { ease, motion, rect, render, appWindow, code, morph } from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const W = 960;

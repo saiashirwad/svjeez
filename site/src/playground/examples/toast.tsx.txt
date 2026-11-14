@@ -1,5 +1,15 @@
-import { draw, ease, enter, motion, render, shake } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import {
+  draw,
+  ease,
+  enter,
+  motion,
+  render,
+  shake,
+  adaptive,
+  systemDark,
+  systemLight,
+} from "svjeez";
+
 
 const { theme, css } = adaptive({
   light: systemLight,

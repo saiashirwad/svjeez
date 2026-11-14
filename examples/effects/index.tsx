@@ -1,5 +1,16 @@
-import { draw, ease, enter, fx, motion, render, wiggle, type Child } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import {
+  draw,
+  ease,
+  enter,
+  fx,
+  motion,
+  render,
+  wiggle,
+  type Child,
+  adaptive,
+  systemDark,
+  systemLight,
+} from "svjeez";
 
 const W = 660;
 const H = 420;

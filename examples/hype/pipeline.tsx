@@ -1,6 +1,16 @@
 import { mermaid } from "@svjeez/mermaid";
-import { enter, rect, type Span } from "svjeez";
-import { appWindow, code, flow, typewriter, type CodePiece, type CodeRole } from "svjeez/extras";
+import {
+  enter,
+  rect,
+  type Span,
+  appWindow,
+  code,
+  flow,
+  typewriter,
+  type CodePiece,
+  type CodeRole,
+} from "svjeez";
+
 import { mono, theme } from "../style";
 import { C, Caption, rise } from "./kit";
 

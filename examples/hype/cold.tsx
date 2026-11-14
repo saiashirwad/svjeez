@@ -1,5 +1,5 @@
-import { ease, motion } from "svjeez";
-import { code, shot, typewriter } from "svjeez/extras";
+import { ease, motion, code, shot, typewriter } from "svjeez";
+
 import { mono, theme } from "../style";
 import { C, H, W, rise } from "./kit";
 

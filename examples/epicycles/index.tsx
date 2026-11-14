@@ -1,7 +1,7 @@
 import { epicycles } from "@svjeez/math";
 import { tex } from "@svjeez/math";
-import { render } from "svjeez";
-import { tint } from "svjeez/extras";
+import { render, tint } from "svjeez";
+
 import { css, theme } from "../style";
 
 const W = 960;

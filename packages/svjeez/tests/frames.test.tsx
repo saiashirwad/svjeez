@@ -13,8 +13,11 @@ import {
   restyle,
   type Child,
   type SvgNode,
+  adaptive,
+  systemDark,
+  systemLight,
 } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+
 import { openScene, renderFrames } from "svjeez/frames";
 import { loopLength, seek } from "svjeez/page";
 import { systemColorScheme } from "../src/scheme";

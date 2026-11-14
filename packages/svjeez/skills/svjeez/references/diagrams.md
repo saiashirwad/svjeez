@@ -19,7 +19,8 @@ Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or 
 ## Flowchart
 
 ```tsx
-import { flow, flowchart } from "svjeez/extras";
+import { flow } from "svjeez";
+import { flowchart } from "svjeez/extras";
 
 const chart = flowchart(
   {

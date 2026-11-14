@@ -1,5 +1,9 @@
-import { draw, ease, motion, rect, render } from "svjeez";
 import {
+  draw,
+  ease,
+  motion,
+  rect,
+  render,
   Arrow,
   Brace,
   Focus,
@@ -13,7 +17,8 @@ import {
   type CodePiece,
   type CodeRun,
   type CodeTokens,
-} from "svjeez/extras";
+} from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const W = 1200;

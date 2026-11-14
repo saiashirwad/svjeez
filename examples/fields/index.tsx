@@ -1,4 +1,4 @@
-import { draw, enter, motion, render } from "svjeez";
+import { draw, enter, motion, render, tint } from "svjeez";
 import {
   axes,
   contours,
@@ -8,7 +8,6 @@ import {
   slopeField,
   slopeSolution,
   streamlines,
-  tint,
   vectorField,
   type VectorField,
 } from "svjeez/extras";

@@ -15,8 +15,10 @@ import {
   type Point,
   type Ref,
   type SvgNode,
+  flow,
+  travel,
 } from "svjeez";
-import { flow, travel } from "svjeez/extras";
+
 import { createRequire } from "node:module";
 import { geist, geistMono } from "../fonts/faces";
 

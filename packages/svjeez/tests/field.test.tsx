@@ -1,12 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { render } from "svjeez";
+import { render, flow } from "svjeez";
 import {
   axes,
   contours,
   contourSweep,
   fieldFlow,
   fieldLines,
-  flow,
   slopeField,
   slopeSolution,
   streamlines,

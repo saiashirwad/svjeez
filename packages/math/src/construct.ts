@@ -1,5 +1,5 @@
-import { ease, el, motion, type Color, type SvgNode } from "svjeez";
-import { defaultDark, type Base16 } from "svjeez/extras";
+import { ease, el, motion, type Color, type SvgNode, defaultDark, type Base16 } from "svjeez";
+
 import { tex } from "./index.ts";
 
 /** A point of the construction, in construction units with y up. `g.point()` and `g.intersect()` make them. */

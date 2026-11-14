@@ -1,6 +1,6 @@
 import { tex } from "@svjeez/math";
-import { draw, ease, enter, motion, render, sampled, type Color } from "svjeez";
-import { morph } from "svjeez/extras";
+import { draw, ease, enter, motion, render, sampled, type Color, morph } from "svjeez";
+
 import { CSS, chrome, outro } from "./kit";
 import { theme } from "../style";
 

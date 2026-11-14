@@ -12,17 +12,15 @@ import {
   strokeFont,
   tool,
   type Child,
-} from "svjeez";
-import {
   Marker,
   code,
   flow,
-  flowchart,
   morph,
   typewriter,
   type CodeRun,
   type CodeTokens,
-} from "svjeez/extras";
+} from "svjeez";
+import { flowchart } from "svjeez/extras";
 import { css, mono, theme } from "../style";
 
 const W = 960;

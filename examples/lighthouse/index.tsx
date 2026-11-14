@@ -10,8 +10,10 @@ import {
   type Motion,
   type Point,
   type SvgNode,
+  travel,
+  visible,
 } from "svjeez";
-import { travel, visible } from "svjeez/extras";
+
 import { SPEED, end, graph, messages, type Kind, type Thread } from "./data";
 
 const W = 1280;

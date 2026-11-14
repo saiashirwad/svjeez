@@ -4,8 +4,8 @@
 
 ```tsx
 import { highlight } from "@svjeez/code";
-import { render } from "svjeez";
-import { code } from "svjeez/extras";
+import { render, code } from "svjeez";
+
 import { css, mono, theme } from "./style";
 
 const snippet = code(highlight("const answer = 42;", "ts"), { x: 40, y: 60, fontSize: 20, theme, font: mono });

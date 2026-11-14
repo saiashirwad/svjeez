@@ -7,7 +7,7 @@ Import from `svjeez/extras`. `code` and `terminal` take `theme` (default `defaul
 Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made: `tomorrowNight`, `tomorrow`, `systemDark`, `systemLight`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`, `defaultDark`, `defaultLight`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
 
 ```tsx
-import { adaptive, tomorrow, tomorrowNight } from "svjeez/extras";
+import { tomorrow, tomorrowNight, solarizedDark, solarizedLight } from "@svjeez/code";
 
 const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
 const fonts = `${css}\n.sans text{font-family:system-ui,sans-serif}`; // pass as render's css, then class="sans"
@@ -39,7 +39,7 @@ Code and terminal runs use them by role:
 `variables(dark, light?)` does the same for colors a scene paints itself. It returns `vars`, where `vars.sky` is `var(--sky)`, and `css` for `render`. With `light`, those values win under `prefers-color-scheme: light`. Names must be CSS identifiers.
 
 ```tsx
-import { variables } from "svjeez/extras";
+
 
 const { vars, css } = variables({ sky: "#14162A", sea: "#1F3A5C" }, { sky: "#FBF1DE", sea: "#9DCFCF" });
 // <rect fill={vars.sky} />, and render({ ..., css }, ...)
@@ -50,8 +50,35 @@ const { vars, css } = variables({ sky: "#14162A", sea: "#1F3A5C" }, { sky: "#FBF
 To scrub a picture inlined in the page instead, `seek(time, svg)` from `svjeez/page` pauses every CSS and SMIL animation in that `<svg>` at `time`, and `loopLength(svg)` returns its loop in seconds. Both default to the whole document and run only in a browser.
 
 ```ts
-import { restyle } from "svjeez";
-import { adaptive, solarizedDark, solarizedLight } from "svjeez/extras";
+import {
+  restyle,
+  adaptive,
+  variables,
+  code,
+  type CodeRun,
+  timeline,
+  readingTime,
+  during,
+  cut,
+  shot,
+  visible,
+  morph,
+  reveal,
+  typewriter,
+  Arrow,
+  Brace,
+  Callout,
+  Camera,
+  Focus,
+  Marker,
+  Underline,
+  type CameraStop,
+  tint,
+  readout,
+  appWindow,
+  terminal,
+} from "svjeez";
+
 
 const text = await (await fetch(img.src)).text();
 const at = (performance.now() - shownAt) / 1000; // shownAt: when the img started playing
@@ -64,7 +91,7 @@ img.src = URL.createObjectURL(new Blob([restyle(text, { css, at })], { type: "im
 `code(lines, options)` lays out monospaced code. A line is an array of pieces: plain text, a run `[role, text, id?]`, or a Shiki-style token `{ content, color, fontStyle }`.
 
 ```tsx
-import { code, tomorrowNight, type CodeRun } from "svjeez/extras";
+
 
 const kw = (text: string): CodeRun => ["keyword", text];
 const src = code(
@@ -85,7 +112,7 @@ const aim = [src.get("call"), src.find("total"), src.lines(1, 2), src.at(2, 8)];
 `timeline` names consecutive beats so annotations and animations share one clock.
 
 ```tsx
-import { timeline, readingTime, during, cut, shot, visible } from "svjeez/extras";
+
 
 const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
 tl.intro; tl.change.at; tl.end; tl.duration; // spans are { at, over }
@@ -105,7 +132,7 @@ const lit = visible([tl.intro, tl.outro]); // on for each span, off between
 Each returns an object with `node` and times to hang other beats on.
 
 ```tsx
-import { morph, reveal, typewriter } from "svjeez/extras";
+
 
 const after = code([[kw("return"), " total", ["punct", ";"]]], { x: 40, y: 60, fontSize: 16, theme: tomorrowNight, gutter: true });
 const m = morph([src, after], { at: [tl.change.at], gutter: true }); // { node, spans, end }
@@ -122,7 +149,7 @@ const shown2 = reveal(src, { at: 1, step: 0.6 });                      // { node
 Each takes `during: Span` and aims at a `Rect` with `target`.
 
 ```tsx
-import { Arrow, Brace, Callout, Camera, Focus, Marker, Underline } from "svjeez/extras";
+
 
 const notes = (
   <>
@@ -149,7 +176,7 @@ const notes = (
 
 ```tsx
 import { rect } from "svjeez";
-import type { CameraStop } from "svjeez/extras";
+
 
 const FRAME = rect(0, 0, 800, 450);
 const stops: CameraStop[] = [{ during: { at: 4, over: 4 }, target: rect(300, 200, 160, 90) }, { during: { at: 8, over: 3 }, target: "all" }];
@@ -217,7 +244,7 @@ const scene = (
 
 ```tsx
 import { draw } from "svjeez";
-import { axes, tint, tomorrowNight } from "svjeez/extras";
+import { axes } from "svjeez/extras";
 
 const theme = tomorrowNight;
 const ax = axes({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 }, theme, ticks: { x: 1, y: 2 } });
@@ -235,7 +262,7 @@ The axes also carry calculus. A value that moves is a `Moving`: a number holds s
 
 ```tsx
 import { draw, enter } from "svjeez";
-import { axes, readout } from "svjeez/extras";
+import { axes } from "svjeez/extras";
 
 const graph = axes({ x: [-3, 3], y: [0, 4], width: 300, height: 240, at: { x: 40, y: 60 }, theme });
 const f = (x: number) => 2 + Math.sin(x);
@@ -261,7 +288,7 @@ const taylor = graph.morph([p0, p2, p4], { at: [3, 4.5], over: 0.8, animation: d
 
 ```tsx
 import { rect } from "svjeez";
-import { appWindow, terminal } from "svjeez/extras";
+
 
 const shell = appWindow(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic" }); // { node, body }
 const session = terminal(

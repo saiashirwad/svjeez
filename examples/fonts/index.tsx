@@ -1,6 +1,15 @@
 import { google } from "@svjeez/fonts";
-import { Glyphs, draw, ease, enter, motion, render } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import {
+  Glyphs,
+  draw,
+  ease,
+  enter,
+  motion,
+  render,
+  adaptive,
+  systemDark,
+  systemLight,
+} from "svjeez";
 
 const W = 680;
 const H = 360;

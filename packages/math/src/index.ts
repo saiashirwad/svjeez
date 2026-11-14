@@ -8,8 +8,13 @@ import {
   type Span,
   type Stack,
   type SvgNode,
+  defaultDark,
+  tint,
+  type Base16,
+  type Morphable,
+  type MorphPiece,
 } from "svjeez";
-import { defaultDark, tint, type Base16, type Morphable, type MorphPiece } from "svjeez/extras";
+
 import { compile } from "./mathjax.ts";
 import { apply, multiply, round, roundMatrix, scale, translate, type Matrix } from "./matrix.ts";
 import { pathPoints } from "./path.ts";

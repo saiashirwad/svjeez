@@ -1,6 +1,6 @@
 import { globe, sun, type LonLat, type Topology } from "@svjeez/geo";
-import { def, enter, fx, rect, render } from "svjeez";
-import { variables } from "svjeez/extras";
+import { def, enter, fx, rect, render, variables } from "svjeez";
+
 import { createRequire } from "node:module";
 import { geist, geistMono } from "../fonts/faces";
 

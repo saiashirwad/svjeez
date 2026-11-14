@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { render } from "svjeez";
-import { morph } from "svjeez/extras";
+import { render, morph } from "svjeez";
+
 import { tex } from "../src/index";
 
 const svg = (...children: Parameters<typeof render>[1][]) =>

@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { el, rect, render, validateSvg, type Motion, type SvgNode } from "svjeez";
 import {
+  el,
+  rect,
+  render,
+  validateSvg,
+  type Motion,
+  type SvgNode,
   Arrow,
   Brace,
   Callout,
@@ -15,6 +20,7 @@ import {
   shot,
   defaultDark,
   defaultLight,
+  systemLight,
   morph,
   type Morphable,
   type MorphPiece,
@@ -27,8 +33,7 @@ import {
   visible,
   appWindow,
   flow,
-  tomorrow,
-} from "svjeez/extras";
+} from "svjeez";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -410,13 +415,13 @@ describe("accent color", () => {
         ],
         { theme, at: 0 },
       ).node,
-  } satisfies Record<string, (theme?: typeof tomorrow) => ReturnType<typeof Marker>>;
+  } satisfies Record<string, (theme?: typeof systemLight) => ReturnType<typeof Marker>>;
 
   for (const [name, make] of Object.entries(items)) {
     test(`${name} takes its default color from the theme's base09`, () => {
       expect(scene(make(undefined))).toContain(defaultDark.base09);
-      expect(scene(make(tomorrow))).toContain(tomorrow.base09);
-      expect(scene(make(tomorrow))).not.toContain("#f6c96b");
+      expect(scene(make(systemLight))).toContain(systemLight.base09);
+      expect(scene(make(systemLight))).not.toContain("#f6c96b");
     });
   }
 });

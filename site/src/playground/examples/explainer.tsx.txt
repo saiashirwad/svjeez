@@ -1,5 +1,6 @@
-import { rect, render } from "svjeez";
 import {
+  rect,
+  render,
   Callout,
   adaptive,
   Focus,
@@ -12,7 +13,8 @@ import {
   systemLight,
   type CodeRun,
   type CodeTokens,
-} from "svjeez/extras";
+} from "svjeez";
+
 
 const { theme, css: colors } = adaptive({
   light: systemLight,

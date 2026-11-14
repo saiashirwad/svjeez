@@ -1,6 +1,6 @@
 import { highlight } from "@svjeez/code";
-import { render } from "svjeez";
-import { adaptive, code, morph, systemDark, systemLight } from "svjeez/extras";
+import { render, adaptive, code, morph, systemDark, systemLight } from "svjeez";
+
 
 const { theme, css } = adaptive({
   light: systemLight,

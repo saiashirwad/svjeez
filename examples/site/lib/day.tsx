@@ -1,5 +1,5 @@
-import { def, ease, motion, render, type Color, type SvgNode } from "svjeez";
-import { code } from "svjeez/extras";
+import { def, ease, motion, render, type Color, type SvgNode, code } from "svjeez";
+
 import { highlight } from "@svjeez/code";
 import { CSS, chrome } from "../kit";
 import { mono, theme } from "../../style";

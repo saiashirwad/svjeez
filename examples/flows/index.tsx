@@ -1,5 +1,5 @@
-import { render } from "svjeez";
-import { flow, type FlowOptions } from "svjeez/extras";
+import { render, flow, type FlowOptions } from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const W = 800;

@@ -1,7 +1,7 @@
 // The code palette as CSS custom properties, from the same palette the example scenes use, and the page in every other palette.
 import type { Code } from "astro:components";
 import type { ComponentProps } from "astro/types";
-import { tint, type CodeRole, type Slot } from "svjeez/extras";
+import { tint, type CodeRole, type Slot } from "svjeez";
 import { palette } from "@examples/style";
 import { DEFAULT_PALETTE, PALETTES, type Palette } from "../palettes";
 

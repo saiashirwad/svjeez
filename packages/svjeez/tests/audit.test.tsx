@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { Icon, matchPaths, render, validateSvg, type IconData } from "svjeez";
-import { code, fieldFlow, morph } from "svjeez/extras";
+import { Icon, matchPaths, render, validateSvg, type IconData, code, morph } from "svjeez";
+import { fieldFlow } from "svjeez/extras";
 import { flatten } from "../src/ink/path";
 
 const scene = (child: Parameters<typeof render>[1], comment?: string) =>

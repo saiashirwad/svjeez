@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { project } from "@svjeez/geo";
-import { rect, render, el } from "svjeez";
-import { Camera } from "svjeez/extras";
+import { rect, render, el, Camera } from "svjeez";
 
 const world = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 const map = project(world, { frame: rect(0, 0, 640, 360) });

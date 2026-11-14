@@ -1,6 +1,6 @@
 import { derive } from "@svjeez/math";
-import { render } from "svjeez";
-import { adaptive, systemDark, systemLight } from "svjeez/extras";
+import { render, adaptive, systemDark, systemLight } from "svjeez";
+
 
 const { theme, css } = adaptive({
   light: systemLight,

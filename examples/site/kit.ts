@@ -1,5 +1,5 @@
-import { el, motion, rect, type Color, type SvgNode } from "svjeez";
-import { appWindow } from "svjeez/extras";
+import { el, motion, rect, type Color, type SvgNode, appWindow } from "svjeez";
+
 import { css, mono, theme } from "../style";
 
 const SANS = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif";

@@ -1,7 +1,7 @@
 import { arc, project, traffic, type LonLat, type Topology } from "@svjeez/geo";
 import { plane } from "@svjeez/icons/tabler";
-import { Icon, draw, ease, motion, rect, render, type SvgNode } from "svjeez";
-import { travel, variables } from "svjeez/extras";
+import { Icon, draw, ease, motion, rect, render, type SvgNode, travel, variables } from "svjeez";
+
 import { createRequire } from "node:module";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");

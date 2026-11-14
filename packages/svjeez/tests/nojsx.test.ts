@@ -1,6 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { draw, ease, el, enter, motion, render, shake } from "svjeez";
-import { adaptive, flow, flowchart, systemDark, systemLight } from "svjeez/extras";
+import {
+  draw,
+  ease,
+  el,
+  enter,
+  motion,
+  render,
+  shake,
+  adaptive,
+  flow,
+  systemDark,
+  systemLight,
+} from "svjeez";
+import { flowchart } from "svjeez/extras";
 import jsxReview from "../skills/svjeez/examples/review-flow";
 import jsxToast from "../skills/svjeez/examples/toast";
 

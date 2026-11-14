@@ -1,6 +1,6 @@
 import { chart } from "@svjeez/charts";
-import { enter, render } from "svjeez";
-import { tint } from "svjeez/extras";
+import { enter, render, tint } from "svjeez";
+
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 

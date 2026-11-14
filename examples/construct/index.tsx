@@ -1,6 +1,6 @@
 import { construct, tex } from "@svjeez/math";
-import { motion, render } from "svjeez";
-import { tint } from "svjeez/extras";
+import { motion, render, tint } from "svjeez";
+
 import { css, theme } from "../style";
 
 const W = 960;

@@ -24,8 +24,8 @@ npm i -D world-atlas
 
 ```tsx
 import { project } from "@svjeez/geo";
-import { rect, render } from "svjeez";
-import { Camera, flow } from "svjeez/extras";
+import { rect, render, Camera, flow } from "svjeez";
+
 import { createRequire } from "node:module";
 
 const world = createRequire(import.meta.url)("world-atlas/countries-50m.json");

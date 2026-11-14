@@ -1,6 +1,5 @@
 import { tex, type Glyph, type Tex } from "@svjeez/math";
-import { render, type Rect } from "svjeez";
-import { morph } from "svjeez/extras";
+import { render, type Rect, morph } from "svjeez";
 
 const square: Tex = tex(String.raw`(a+b)^2`, { x: 20, y: 20, fontSize: 40 });
 const expanded: Tex = tex(String.raw`a^2 + \cssId{mid}{2ab} + b^2`, { x: 20, y: 20, fontSize: 40 });

@@ -8,8 +8,8 @@ import {
   toBars,
   type Topology,
 } from "@svjeez/geo";
-import { motion, rect, render, type SvgNode } from "svjeez";
-import { cut, during } from "svjeez/extras";
+import { motion, rect, render, type SvgNode, cut, during } from "svjeez";
+
 import { createRequire } from "node:module";
 import { LIFE_EXPECTANCY, POPULATION, YEARS } from "./data";
 
