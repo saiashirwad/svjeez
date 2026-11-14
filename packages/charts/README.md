@@ -51,7 +51,7 @@ export default () =>
 - `x`, a band scale `{ kind: "band", domain: ["Q1", …], padding? }` or a linear one `{ kind: "linear", domain?, ticks?, format? }`. A linear scale without a `domain` fits `data`.
 - `y`, `{ domain?, ticks?, zero?, format? }`. The domain widens to round numbers. Fitted from `data`, it includes 0 unless `zero` is `false`.
 - `data`, every point the chart will draw, as `[x, y]` pairs. It is needed only for a domain you left out. `Object.entries(record)` gives the pairs for bars.
-- `grid`, `theme`, `fontSize` and `font`. The theme is a `Base16` palette and defaults to `defaultDark`. Axis lines use its `comment` color and labels its `muted` color, the same as `axes()`, so the two sit in one scene.
+- `grid`, `theme`, `fontSize` and `font`. The theme is a `Base16` palette and defaults to `defaultDark`. Axis lines use its `comment` color and labels its `muted` color, the same as `plane()`, so the two sit in one scene.
 
 The chart has:
 

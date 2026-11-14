@@ -131,13 +131,14 @@ Time the text beside the figure from `g.time`, read before the elements it expla
 
 ## Planes and transformations
 
-`plane()` draws a coordinate grid that moves, as in 3Blue1Brown's linear algebra videos. `origin` is where (0, 0) sits in scene pixels, `unit` is pixels per unit, and y points up. `extent` is how far the grid reaches: a number for ±n on both axes, or `{ x: [lo, hi], y: [lo, hi] }`. `step` spaces the lines, default 1.
+`plane()` is the one coordinate system of `@svjeez/math`, and it can move, as in 3Blue1Brown's linear algebra videos. `x` and `y` are the graph ranges, `width` and `height` the plot area in px, `at` its top-left, and y points up. `ticks` spaces the grid lines: a number for both axes, or `{ x, y }`. Ticks, labels, `plot()` and calculus are in `explainers.md` (Planes, axes and function plots); this section is the steps.
 
 ```tsx
 import { plane } from "@svjeez/math";
 import { css, enter, render } from "svjeez";
 
-const p = plane({ origin: { x: 160, y: 240 }, unit: 34, extent: 10, theme })
+// 34px a unit, with (0, 0) at (160, 240).
+const p = plane({ x: [-10, 10], y: [-10, 10], width: 680, height: 680, at: { x: -180, y: -100 }, ticks: 1, theme })
   .apply([[2, -1], [1, 1]], { at: 2, over: 2.5 })
   .reset({ at: 6, over: 1.5 });
 
@@ -152,13 +153,14 @@ render({ ..., css: css`${p.css}` },
 
 - Steps chain, and each returns a new plane. Draw everything from the last one. `apply(matrix, { at, over, ease })` moves the plane by a matrix written by rows, as on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy), and a third number in a row translates. Each step applies on top of the steps before it. `reset()` moves every point home. `ease` defaults to `ease.inOut`. Steps must not overlap.
 - Pass `p.css` to `render`'s `css`. Without it the matrix steps do not move anything.
-- `background` is the grid as it was, and it stays put. `grid` is the moving lines without the axes, and `axes` is the two axes.
+- `background` is the grid at the ticks as it was, and it stays put, as does `node`, the axes with their ticks and numbers. `grid` is the moving lines without the axes, and `axes` is the two axis lines.
+- `plot(f)` drawn from a plane with steps follows them and takes no `animation`. The calculus methods draw at rest, so call them on the plane before its first step.
 - `vector(to, { color, width, label, from, enter })` draws an arrow. Its head stays a proper arrowhead however the plane shears, and its label stays just past the tip, turned off the arrow's line. `label` is TeX source or a `tex()` formula. `enter` grows the shaft over the span, then shows the head and label. `basis()` draws î and ĵ.
 - `polygon(points)` fills a shape whose corners move with the plane, so the unit square's area shows the determinant. `span(direction)` is the line through the origin along a vector: an eigenvector's line stays on itself.
 - `label(at, content)` centers TeX, a `tex()` formula or a node on a point of the plane and moves it with the point.
-- `point(x, y)` is the scene pixels of a point before any step, and `map(x, y)` is where it ends after every step.
+- `point(x, y)` is the scene pixels of a point before any step, with the pixels per unit taken from the range and the size, so the two axes may differ, and `map(x, y)` is where it ends after every step.
 
-When every step is a matrix, the scene carries one CSS transform driven by registered properties. Lines keep their width with `vector-effect: non-scaling-stroke`, and the file stays small. `applyFunction((x, y) => [x2, y2], { at, over })` moves every point p to f(p) along a straight line. A complex map is the same thing: z ↦ z² is `(x, y) => [x * x - y * y, 2 * x * y]`. Once a plane has a function step, every outline is sampled densely enough to stay smooth and morphs through `d`, so the grid costs a few KB per step. Keep its `extent` to the region the scene shows.
+When every step is a matrix, the scene carries one CSS transform driven by registered properties. Lines keep their width with `vector-effect: non-scaling-stroke`, and the file stays small. `applyFunction((x, y) => [x2, y2], { at, over })` moves every point p to f(p) along a straight line. A complex map is the same thing: z ↦ z² is `(x, y) => [x * x - y * y, 2 * x * y]`. Once a plane has a function step, every outline is sampled densely enough to stay smooth and morphs through `d`, so the grid costs a few KB per step. Keep its range to the region the scene shows.
 
 ## Errors
 
@@ -194,9 +196,14 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `together() cannot nest. Put the elements in one together() block.` | Flatten the blocks. |
 | `A plane step starts at …s, before the previous step ends at …s.` | Start each step after the one before it ends. |
 | `A plane step needs a non-negative start and a positive length, got …` | Pass `at` of 0 or more and `over` above 0. |
-| `plane() needs a finite origin and a positive unit and step, got …` | Pass numbers. |
+| `plane() needs a finite … range with max above min, got […, …].` | Pass `x` and `y` as `[min, max]` with finite numbers and min below max. |
+| `plane() needs a positive width and height, got … and ….` | Pass sizes above 0. |
+| `plane() needs a positive … tick step, got ….` | Pass `ticks` above 0. |
+| `plane() would draw … ticks. Raise the step … to draw at most ….` | Raise the tick step. |
+| `plot() cannot draw on a plane that has steps. …` | Plot on the plane before its first step, or leave out `animation`. |
+| `plane.…() draws on a plane that does not move. …` | Call `dot`, `tangent`, `secant`, `area`, `riemann`, `morph`, `parametric` and `polar` on the plane before its first step. |
 | `plane.apply() needs finite numbers in its matrix, got …` | Every entry must be a finite number. |
-| `plane.applyFunction() sent (…, …) to (…, …), which is not a finite point.` | The function divides by zero or overflows somewhere on the grid. Shrink `extent` to avoid that point, or guard the function. |
+| `plane.applyFunction() sent (…, …) to (…, …), which is not a finite point.` | The function divides by zero or overflows somewhere on the grid. Shrink the range to avoid that point, or guard the function. |
 | `plane.vector() needs a finite arrow of nonzero length, from … to …` | Give the arrow a tip different from its tail. |
 | `plane.span() needs a nonzero direction, got …` | Pass a nonzero vector. |
 

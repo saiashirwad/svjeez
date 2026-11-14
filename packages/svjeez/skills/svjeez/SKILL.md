@@ -217,7 +217,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Gradients, clip paths, filters, custom properties, `<Style>` | [`references/defs-css.md`](references/defs-css.md) |
 | Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
-| Code walkthroughs, terminals, annotations, camera, themes, recoloring, axes and calculus (`@svjeez/math`), pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
+| Code walkthroughs, terminals, annotations, camera, themes, recoloring, planes, axes and calculus (`@svjeez/math`), pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
 | Flowchart, sequence, state, tree, lanes (`@svjeez/diagrams`), `flow` | [`references/diagrams.md`](references/diagrams.md) |
 | Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |

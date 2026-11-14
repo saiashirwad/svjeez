@@ -157,12 +157,13 @@ g.angle(B, A, C, { label: "60^\\circ" });
 - `settle()` fades every aid made so far, to `faint` opacity. Mark compass arcs and helper points with `aid: true`.
 
 Time the text beside the figure from `g.time`, read before the elements it explains. `examples/construct/index.tsx` does so with `tex().write()`.
-## Planes and transformations
+## Planes, axes and transformations
 
-`plane({ origin, unit, extent, step, theme })` draws a coordinate grid that moves. Chain `apply(matrix, { at, over, ease })`, `applyFunction(f, { at, over, ease })` and `reset({ at, over })`, then draw from the plane those calls return. Pass `p.css` to `render`'s `css`.
+`plane({ x, y, width, height, at, ticks, theme })` is the coordinate system for axes, function plots, calculus and fields, and it can move. `x` and `y` are `[min, max]` graph ranges, `width` and `height` the plot area in px, `at` its top-left, and `ticks` the grid step, a number or `{ x, y }`. `node` draws the axes with their ticks and numbers, `point(x, y)` maps graph units to scene px, and `plot(f)` draws a function. To move the plane, chain `apply(matrix, { at, over, ease })`, `applyFunction(f, { at, over, ease })` and `reset({ at, over })`, then draw from the plane those calls return. Pass `p.css` to `render`'s `css`.
 
 ```tsx
-const p = plane({ origin: { x: 160, y: 240 }, unit: 34, extent: 10 }).apply(
+// 34px a unit, with (0, 0) at (160, 240).
+const p = plane({ x: [-10, 10], y: [-10, 10], width: 680, height: 680, at: { x: -180, y: -100 }, ticks: 1 }).apply(
   [
     [2, -1],
     [1, 1],
@@ -180,19 +181,19 @@ const p = plane({ origin: { x: 160, y: 240 }, unit: 34, extent: 10 }).apply(
 ```
 
 - A matrix is written by rows: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy). A third number in a row translates. Each step applies on top of the ones before it.
-- `background` stays put. `grid` and `axes` move.
+- `background` and `node` stay put. `grid` and `axes` move, and so does a `plot()` drawn from a plane with steps. The calculus methods draw at rest, so call them before the first step.
 - `vector(to, { color, width, label, from, enter })` is an arrow whose head stays upright under any shear and whose TeX label rides past its tip. `basis()` draws î and ĵ.
 - `polygon(points)`, `span(direction)` and `label(at, content)` move with the plane. An eigenvector's span stays on itself.
 - `point(x, y)` and `map(x, y)` give scene pixels before and after every step.
 
 When every step is a matrix, the plane is one CSS transform driven by registered properties, so the file stays small. A function step, such as z ↦ z² written as `(x, y) => [x * x - y * y, 2 * x * y]`, samples every outline and morphs it through `d`.
 
-## Axes, calculus and fields
+## Calculus and fields
 
-`axes()` draws coordinate axes and plots functions on them. The plot also carries calculus: `dot()`, `tangent()`, `secant()`, `area()`, `riemann()`, `morph()`, `parametric()` and `polar()`. Their result types are `CalculusDot`, `CalculusLine`, `CalculusArea` and `CalculusCurve`. `streamlines()`, `fieldLines()`, `vectorField()`, `slopeField()`, `slopeSolution()`, `contours()` and `contourSweep()` work in scene pixels, or in graph units through an `axes()` plot. Run particles along streamlines with `flow(lines, { at })` from `svjeez`, which takes a list of lines. `fieldFlow()` is the old name for it.
+A `plane()` also carries calculus: `dot()`, `tangent()`, `secant()`, `area()`, `riemann()`, `morph()`, `parametric()` and `polar()`. Their result types are `CalculusDot`, `CalculusLine`, `CalculusArea` and `CalculusCurve`. `streamlines()`, `fieldLines()`, `vectorField()`, `slopeField()`, `slopeSolution()`, `contours()` and `contourSweep()` work in scene pixels, or in graph units through a `plane()`. Run particles along streamlines with `flow(lines, { at })` from `svjeez`, which takes a list of lines. `fieldFlow()` is the old name for it.
 
 ```tsx
-import { axes, streamlines } from "@svjeez/math";
+import { plane, streamlines } from "@svjeez/math";
 ```
 
 These came from `svjeez/extras`, which no longer exports them. See [explainers](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/explainers.md) and [fields](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/fields.md) in the skill.

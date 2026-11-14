@@ -238,35 +238,35 @@ const scene = (
 </Camera>
 ```
 
-## Axes and function plots
+## Planes, axes and function plots
 
-`axes()` and the calculus below come from `@svjeez/math` (`npm i -D @svjeez/math`).
+`plane()` and the calculus below come from `@svjeez/math` (`npm i -D @svjeez/math`). One `plane()` is the coordinate system for axes, function plots, calculus, fields and moving grids; the grid steps, vectors and shapes are in `math.md` (Planes and transformations).
 
-`axes(options)` draws coordinate axes over a graph range and returns `{ node, bounds, point, plot }`. `x` and `y` are `[min, max]` ranges, `width` and `height` the plot area in px, and `at` its top-left. `ticks: { x, y }` are steps in graph units, and an axis without a step has no ticks. `labels` (default true) numbers the ticks, `grid` adds faint lines, and `theme`, `fontSize` and `font` style it. Each axis crosses at 0 when 0 is in its range, else sits on the bottom or left edge.
+`plane(options)` draws coordinate axes over a graph range and returns `{ node, bounds, point, plot, … }`. `x` and `y` are `[min, max]` ranges, `width` and `height` the plot area in px, and `at` its top-left. `ticks` are steps in graph units, `{ x, y }` or one number for both, and an axis without a step has no ticks or grid lines. `labels` (default true) numbers the ticks, `grid` adds faint lines, and `theme`, `fontSize` and `font` style it. Each axis crosses at 0 when 0 is in its range, else sits on the bottom or left edge.
 
 ```tsx
-import { axes } from "@svjeez/math";
+import { plane } from "@svjeez/math";
 import { draw } from "svjeez";
 
 const theme = tomorrowNight;
-const ax = axes({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 }, theme, ticks: { x: 1, y: 2 } });
+const ax = plane({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 }, theme, ticks: { x: 1, y: 2 } });
 const parabola = ax.plot((x) => x * x, { samples: 120, color: tint(theme, "blue"), animation: draw({ at: 1, over: 1.5 }) });
 const dot = ax.point(2, 4); // graph coordinates to a scene Point
 
 const scene = <g>{ax.node}{parabola.node}<circle cx={dot.x} cy={dot.y} r={4} fill={tint(theme, "yellow")} /></g>;
 ```
 
-`plot(f, options)` samples `f` evenly (`samples`, default 200, over `from`..`to`, default the x range) and returns `{ node, d, points }`. The curve breaks where `f` is not finite, leaves the y range by more than one range height, or jumps by more than the range, so `1 / x` and `Math.tan` draw no vertical spikes. Clipping to the plot area is built in. `color`, `strokeWidth` and `animation` (such as `draw()`) style the path. `axes()` and `plot()` throw on empty ranges, non-positive sizes, steps or sample counts.
+`plot(f, options)` samples `f` evenly (`samples`, default 200, over `from`..`to`, default the x range) and returns `{ node, d, points }`. The curve breaks where `f` is not finite, leaves the y range by more than one range height, or jumps by more than the range, so `1 / x` and `Math.tan` draw no vertical spikes. Clipping to the plot area is built in. `color`, `strokeWidth` and `animation` (such as `draw()`) style the path. `plane()` and `plot()` throw on empty ranges, non-positive sizes, steps or sample counts.
 
-## Calculus on axes
+## Calculus on a plane
 
-The axes also carry calculus. A value that moves is a `Moving`: a number holds still, `{ from, to, at, over, ease }` sweeps it (default `ease.inOut`), and an array of sweeps chains them, holding in between. Lines and areas whose shape changes bake into a `d` motion through `sampled.path()`, so they morph in Safari too.
+The plane also carries calculus. A value that moves is a `Moving`: a number holds still, `{ from, to, at, over, ease }` sweeps it (default `ease.inOut`), and an array of sweeps chains them, holding in between. Lines and areas whose shape changes bake into a `d` motion through `sampled.path()`, so they morph in Safari too.
 
 ```tsx
-import { axes } from "@svjeez/math";
+import { plane } from "@svjeez/math";
 import { draw, enter } from "svjeez";
 
-const graph = axes({ x: [-3, 3], y: [0, 4], width: 300, height: 240, at: { x: 40, y: 60 }, theme });
+const graph = plane({ x: [-3, 3], y: [0, 4], width: 300, height: 240, at: { x: 40, y: 60 }, theme });
 const f = (x: number) => 2 + Math.sin(x);
 
 const rider = graph.dot(f, { from: -2, to: 2, at: 1, over: 3 });         // { node, motion, point(t) }

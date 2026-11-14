@@ -1,6 +1,6 @@
 # Fields and level sets
 
-Vector fields, streamlines, slope fields and contour lines, all from `@svjeez/math` (`npm i -D @svjeez/math`). They work in scene px, or in graph units through an `axes()` plot. Each returns path data or point lists, so you draw the result with `<path>`, `flow()` and the recipes you already know.
+Vector fields, streamlines, slope fields and contour lines, all from `@svjeez/math` (`npm i -D @svjeez/math`). They work in scene px, or in graph units through a `plane()`. Each returns path data or point lists, so you draw the result with `<path>`, `flow()` and the recipes you already know.
 
 ```tsx
 import { contours, fieldLines, streamlines, vectorField } from "@svjeez/math";
@@ -19,7 +19,7 @@ Lines keep `spacing` px between neighbours. They start at the middle of `bounds`
 
 | Option | Meaning |
 | --- | --- |
-| `bounds` | The region to fill. `axes().bounds` fits. |
+| `bounds` | The region to fill. `plane().bounds` fits. |
 | `spacing` | Gap between lines in px. Default 24. |
 | `seeds` | Trace from exactly these points and fill nothing else. |
 | `step` | Integration step in px. Default 2. |
@@ -44,7 +44,7 @@ Every line has its own length and so its own period, and each particle starts a 
 
 ## Slope fields
 
-`slopeField(f, axes)` draws short marks along dy/dx = `f(x, y)`, in graph units over the plot's range. `step` is the spacing along x in graph units, `stepY` along y (default `step`), and `length` is a mark's length in px. A `NaN` slope draws nothing, and an infinite one draws a vertical mark. `slopeSolution(f, axes, { x, y })` integrates the curve through a point, both ways, and returns `{ points, d }`. Draw it on with `draw()`.
+`slopeField(f, plane)` draws short marks along dy/dx = `f(x, y)`, in graph units over the plot's range. `step` is the spacing along x in graph units, `stepY` along y (default `step`), and `length` is a mark's length in px. A `NaN` slope draws nothing, and an infinite one draws a vertical mark. `slopeSolution(f, plane, { x, y })` integrates the curve through a point, both ways, and returns `{ points, d }`. Draw it on with `draw()`.
 
 ```tsx
 const f = (x, y) => x - y;
@@ -54,13 +54,13 @@ const curve = slopeSolution(f, plot, { x: -3, y: 2 });
 
 ## Contours
 
-`contours(source, { levels, bounds | axes })` runs marching squares and returns one `{ level, lines, d }` per level. `lines` are `{ points, closed }`, with segments joined into polylines. `d` is the level as one path, closed rings ending in `Z`. A line that leaves the bounds ends there.
+`contours(source, { levels, bounds | plane })` runs marching squares and returns one `{ level, lines, d }` per level. `lines` are `{ points, closed }`, with segments joined into polylines. `d` is the level as one path, closed rings ending in `Z`. A line that leaves the bounds ends there.
 
-`source` is a function of `(x, y)`, called in graph units when you pass `axes` and in scene px when you pass `bounds`, or a precomputed `Grid`:
+`source` is a function of `(x, y)`, called in graph units when you pass `plane` and in scene px when you pass `bounds`, or a precomputed `Grid`:
 
 ```tsx
 // An implicit curve: x² + y² = 1 is the level 0 of x² + y² − 1.
-const [circle] = contours((x, y) => x * x + y * y - 1, { axes: plot, levels: [0] });
+const [circle] = contours((x, y) => x * x + y * y - 1, { plane: plot, levels: [0] });
 
 // Elevation lines from your own samples. Row 0 is the top of the bounds.
 const rings = contours({ cols: 90, rows: 60, values: elevations }, { bounds, levels: [100, 200, 300] });
@@ -70,10 +70,10 @@ const rings = contours({ cols: 90, rows: 60, values: elevations }, { bounds, lev
 
 ### A level that moves
 
-`contourSweep(source, { axes | bounds, from, to, at, over })` returns `{ d, animation }`. Give `d` to a `<path>` and `animation` to its `animation`. It morphs one level line as the level rises, through `matchPaths()`. It reads well while lines grow, shrink and bend, as a circle widens or a heart grows from a point at its center. Each frame is a full outline, so `frames` (default 16) sets both how closely the curve is followed and the size.
+`contourSweep(source, { plane | bounds, from, to, at, over })` returns `{ d, animation }`. Give `d` to a `<path>` and `animation` to its `animation`. It morphs one level line as the level rises, through `matchPaths()`. It reads well while lines grow, shrink and bend, as a circle widens or a heart grows from a point at its center. Each frame is a full outline, so `frames` (default 16) sets both how closely the curve is followed and the size.
 
 ```tsx
-const sweep = contourSweep(heart, { axes: plot, from: -0.97, to: 0, at: 2, over: 2.6 });
+const sweep = contourSweep(heart, { plane: plot, from: -0.97, to: 0, at: 2, over: 2.6 });
 <path d={sweep.d} animation={sweep.animation} />;
 ```
 
@@ -84,8 +84,8 @@ Where loops split or merge, rings pair by order and one grows from a point, whic
 | Error | Fix |
 | --- | --- |
 | `streamlines() needs a positive …, got ….` | Pass a number above 0 for `spacing`, `step` or `maxLength`. |
-| `… needs bounds with a positive w and h, got … by ….` | Pass `{ x, y, w, h }`, such as `axes().bounds`. |
-| `contours() needs bounds or axes to place the samples.` | Pass one of them. |
+| `… needs bounds with a positive w and h, got … by ….` | Pass `{ x, y, w, h }`, such as `plane().bounds`. |
+| `contours() needs bounds or plane to place the samples.` | Pass one of them. |
 | `contours() needs a grid of at least 2 by 2 with cols * rows values, got ….` | Make `values` as long as `cols * rows`. |
 | `contourSweep() found no line at level ….` | Sweep only levels the bounds cross, or widen the bounds. |
 | `flow() needs a period past …s to hold the trip and the comet's tail, got …s.` | Raise `period`. |
