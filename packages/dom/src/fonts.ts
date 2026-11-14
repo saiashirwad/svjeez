@@ -1,3 +1,4 @@
+import { inflateSync } from "node:zlib";
 import type { Face, Item } from "./tree.ts";
 
 /** A face the page loaded, with the URL its `@font-face` rule points at, before the bytes are fetched. */
@@ -76,6 +77,63 @@ export function sources(used: string[]): Source[] {
     ];
   });
 }
+
+/** A WOFF file's tables, inflated back into the TrueType or OpenType file it wraps. */
+const woff = (bytes: Uint8Array): Uint8Array => {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const count = view.getUint16(12);
+  const tables = Array.from({ length: count }, (_, i) => {
+    const at = 44 + i * 20;
+    const offset = view.getUint32(at + 4);
+    const packed = view.getUint32(at + 8);
+    const length = view.getUint32(at + 12);
+    const raw = bytes.subarray(offset, offset + packed);
+
+    return {
+      tag: view.getUint32(at),
+      checksum: view.getUint32(at + 16),
+      data: packed < length ? new Uint8Array(inflateSync(raw)) : raw,
+    };
+  });
+  const pad = (n: number) => (n + 3) & ~3;
+  const size = tables.reduce((n, t) => n + pad(t.data.length), 12 + 16 * count);
+  const out = new Uint8Array(size);
+  const o = new DataView(out.buffer);
+  const log = Math.floor(Math.log2(count));
+
+  o.setUint32(0, view.getUint32(4));
+  o.setUint16(4, count);
+  o.setUint16(6, 16 * 2 ** log);
+  o.setUint16(8, log);
+  o.setUint16(10, 16 * count - 16 * 2 ** log);
+  let at = 12 + 16 * count;
+
+  tables.forEach((t, i) => {
+    o.setUint32(12 + i * 16, t.tag);
+    o.setUint32(16 + i * 16, t.checksum);
+    o.setUint32(20 + i * 16, at);
+    o.setUint32(24 + i * 16, t.data.length);
+    out.set(t.data, at);
+    at += pad(t.data.length);
+  });
+
+  return out;
+};
+
+/**
+ * The TrueType or OpenType file inside a WOFF or WOFF2, so the drawing can cut the font down to the characters it
+ * draws: svjeez subsets only a plain font file, and a page's whole woff2 is most of a picture's size.
+ */
+export const unwrap = async (bytes: Uint8Array): Promise<Uint8Array> => {
+  const tag = String.fromCharCode(...bytes.subarray(0, 4));
+
+  if (tag === "wOFF") return woff(bytes);
+
+  if (tag !== "wOF2") return bytes;
+  const { default: decompress } = await import("woff2-encoder/decompress");
+
+  return decompress(bytes);
+};
 
 const MIME: Readonly<Record<string, string>> = {
   wOF2: "font/woff2",

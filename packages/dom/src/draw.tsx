@@ -22,6 +22,7 @@ import type { Timing, Wait } from "./flow.ts";
 import type {
   Box,
   Face,
+  Gradient,
   Item,
   Paint,
   Radii,
@@ -264,6 +265,69 @@ const align = (
   return out;
 };
 
+/** Every text run under an item, but none under a box that turned: those can't slide on their own. */
+const runsOf = (it: Item, out: TextRun[] = []): TextRun[] => {
+  if (it.kind === "text") out.push(it);
+  else if (it.kind === "box" && !it.transform) for (const child of it.children) runsOf(child, out);
+
+  return out;
+};
+
+/** An item without the runs in `drop`, or nothing when it is one of them. */
+const without = (it: Item, drop: ReadonlySet<TextRun>): Item | undefined => {
+  if (it.kind === "text") return drop.has(it) ? undefined : it;
+
+  if (it.kind !== "box" || it.transform || !runsOf(it).some((r) => drop.has(r))) return it;
+
+  return { ...it, children: it.children.flatMap((c) => without(c, drop) ?? []) };
+};
+
+/** Roughly where an item can paint: its box and shadows, its text's line, all it holds. Unknown under a transform. */
+const reachOf = (it: Item): Rect | undefined => {
+  if (it.kind === "text") {
+    const width = it.advances.at(-1) ?? it.size * it.text.length;
+
+    return { x: it.x - 2, y: it.y - it.size * 1.2, width: width + 4, height: it.size * 1.6 };
+  }
+
+  if (it.transform) return undefined;
+
+  if (it.kind !== "box") return it.box;
+  const parts = [it.box, ...it.shadows.map((_, i) => shadowBounds(it, i))];
+
+  if (!it.clip)
+    for (const child of it.children) {
+      const r = reachOf(child);
+
+      if (!r) return undefined;
+      parts.push(r);
+    }
+
+  return union(parts);
+};
+
+/**
+ * Whether a box that clips has anything to clip: what it holds reaches past its padding box, less its corners. Most
+ * `overflow: hidden` boxes hold everything inside, and every clip is one more thing to redraw while zooming.
+ */
+const spills = (b: Box): boolean => {
+  if (!b.clip) return false;
+  const { rect, radii } = contentOf(b);
+  const inside = grow(rect, -Math.max(...radii));
+
+  return b.children.some((child) => {
+    const r = reachOf(child);
+
+    return (
+      !r ||
+      r.x < inside.x - 0.5 ||
+      r.y < inside.y - 0.5 ||
+      r.x + r.width > inside.x + inside.width + 0.5 ||
+      r.y + r.height > inside.y + inside.height + 0.5
+    );
+  });
+};
+
 /** Code points, so a character outside the BMP types as one keystroke. */
 const chars = (s: string): string[] => Array.from(s);
 
@@ -408,7 +472,14 @@ const fontOf = (face: Face): Font | undefined => {
     try {
       decoded.set(
         key,
-        font(bytes, { family: face.family, weight: Number(face.weight), style: face.style }),
+        // Without ligatures, so the file always cuts down to the characters drawn: a UI font like Inter carries
+        // contextual alternates that would otherwise keep the whole face, several hundred KB of it.
+        font(bytes, {
+          family: face.family,
+          weight: Number(face.weight),
+          style: face.style,
+          ligatures: false,
+        }),
       );
     } catch {
       decoded.set(key, undefined);
@@ -490,6 +561,72 @@ const painter = (
     if (family) byName.set(name, family);
     else rules.push(...list.map(faceRule));
   }
+
+  // A gradient as a paint server in its box's bounding-box units, so it rides along as the box moves and resizes.
+  // A linear one is turned into those units whole, so its stripes stay square to its line however the box stretches.
+  const servers = new Map<
+    string,
+    ReturnType<typeof def.linearGradient | typeof def.radialGradient>
+  >();
+
+  const server = (g: Gradient, r: Rect) => {
+    const { x, y, width: w, height: h } = r;
+    const n = (k: number) => num(k, 5);
+    let attrs: Record<string, string>;
+
+    if (w <= 0 || h <= 0) return undefined;
+
+    if (g.kind === "linear") {
+      const ex = g.x2 - g.x1;
+      const ey = g.y2 - g.y1;
+      const e = ex * ex + ey * ey;
+
+      if (!e) return undefined;
+      // Where along the line a point falls, written over the box's units: a gradient with that slope and start.
+      const a = (w * ex) / e;
+      const b = (h * ey) / e;
+      const c = ((x - g.x1) * ex + (y - g.y1) * ey) / e;
+      const len = a * a + b * b;
+      const x1 = (-c * a) / len;
+      const y1 = (-c * b) / len;
+
+      attrs = { x1: n(x1), y1: n(y1), x2: n(x1 + a / len), y2: n(y1 + b / len) };
+    } else {
+      const cx = (g.cx - x) / w;
+      const cy = (g.cy - y) / h;
+      const k = g.ry / h / (g.rx / w);
+
+      attrs = {
+        cx: n(cx),
+        cy: n(cy),
+        r: n(g.rx / w),
+        ...(Math.abs(k - 1) > 1e-4
+          ? {
+              gradientTransform: `translate(${n(cx)} ${n(cy)}) scale(1 ${n(k)}) translate(${n(-cx)} ${n(-cy)})`,
+            }
+          : {}),
+      };
+    }
+
+    if (g.repeat) attrs.spreadMethod = "repeat";
+    const stops = g.stops.map((s) => [num(s.offset, 4), v(s.color)] as const);
+    const key = JSON.stringify([g.kind, attrs, stops]);
+
+    if (!servers.has(key)) {
+      const children = stops.map(([offset, color]) =>
+        jsx("stop", { offset, stopColor: color } as never),
+      );
+
+      servers.set(
+        key,
+        g.kind === "linear"
+          ? def.linearGradient(attrs as never, children)
+          : def.radialGradient(attrs as never, children),
+      );
+    }
+
+    return { key, ref: servers.get(key)! };
+  };
 
   const seen = new Map<string, number>();
 
@@ -590,13 +727,14 @@ const painter = (
 
   /**
    * Opacity over part of the tween. An element that leaves goes in the first half and one that arrives comes in the
-   * second, so neither overlaps siblings still sliding. Two versions of one element swap in the middle.
+   * second, so neither overlaps siblings still sliding. Two versions of one element swap in the middle: the new one
+   * comes in over the old before the old goes, so where they overlap the two never add up to much less than one.
    */
   const WINDOWS = {
     exit: [0, 0.5, 1, 0],
     enter: [0.5, 0.5, 0, 1],
-    swapOut: [0.2, 0.5, 1, 0],
-    swapIn: [0.2, 0.5, 0, 1],
+    swapOut: [0.45, 0.4, 1, 0],
+    swapIn: [0.15, 0.4, 0, 1],
   } as const;
 
   const fade = (tween: Tween, mode: keyof typeof WINDOWS) => {
@@ -605,6 +743,51 @@ const painter = (
     return motion({ opacity: from })
       .at(tween.at + start * tween.over)
       .to({ opacity: to }, length * tween.over, tween.ease);
+  };
+
+  // Per transition: text that left with one element and arrived with another, saying the same in the same face at
+  // nearly the same place, as when an app swaps an editor for the rendered text. Each arrival maps to what left.
+  let moved = new Map<TextRun, TextRun>();
+  let gone = new Set<TextRun>();
+
+  const rematch = (a: Box, b: Box) => {
+    const olds: TextRun[] = [];
+    const news: TextRun[] = [];
+
+    // The same walk `box` makes, collecting runs it would fade out and in.
+    const visit = (x: Box, y: Box) => {
+      for (const [old, it] of align(x.children, y.children, pairOf)) {
+        if (old && it) {
+          if (old.kind === "box" && it.kind === "box" && sameTransform(old, it)) visit(old, it);
+        } else if (old) runsOf(old, olds);
+        else runsOf(it!, news);
+      }
+    };
+
+    visit(a, b);
+    moved = new Map();
+    gone = new Set();
+
+    for (const n of news) {
+      let best: TextRun | undefined;
+      let far = n.size * 0.75;
+
+      for (const o of olds) {
+        if (gone.has(o) || o.placeholder || n.placeholder || o.text !== n.text || !sameFace(o, n))
+          continue;
+        const d = Math.hypot(o.x - n.x, o.y - n.y);
+
+        if (d <= far) {
+          best = o;
+          far = d;
+        }
+      }
+
+      if (best) {
+        moved.set(n, best);
+        gone.add(best);
+      }
+    }
   };
 
   const center = (it: Item) => (it.kind === "text" ? { x: it.x, y: it.y } : it.box);
@@ -805,7 +988,7 @@ const painter = (
     const before = both && contentOf(both.a);
     const clipD = rounded(content.rect, content.radii);
     const clipFrom = before && rounded(before.rect, before.radii);
-    const clipped = b.clip || (both?.a.clip ?? false);
+    const clipped = spills(b) || (both ? spills(both.a) : false);
 
     const clip = clipped
       ? def.clipPath(
@@ -903,6 +1086,38 @@ const painter = (
       return null;
     };
 
+    // Gradients paint over the fill in the box's shape. The same ones on both sides ride along; others crossfade.
+    const gradients = (): Child => {
+      const now = (b.gradients ?? []).flatMap((g) => server(g, b.box) ?? []);
+      const d = rounded(b.box, b.radii);
+
+      if (!both) return now.map((s) => jsx("path", { d, fill: s.ref } as never));
+      const before = (both.a.gradients ?? []).flatMap((g) => server(g, both.a.box) ?? []);
+      const from = rounded(both.a.box, both.a.radii);
+      const same = now.length === before.length && now.every((s, i) => s.key === before[i]!.key);
+      const { tween } = both;
+
+      const shape = (fill: unknown, opacity?: ReturnType<typeof fade>) =>
+        jsx("path", {
+          d: from,
+          fill,
+          animation: [
+            from !== d &&
+              motion({ d: from as never })
+                .at(tween.at)
+                .to({ d: d as never }, tween.over, tween.ease),
+            opacity,
+          ].filter(Boolean),
+        } as never);
+
+      if (same) return now.map((s) => shape(s.ref));
+
+      return [
+        ...before.map((s) => shape(s.ref, fade(tween, "swapOut"))),
+        ...now.map((s) => shape(s.ref, fade(tween, "swapIn"))),
+      ];
+    };
+
     // Inset shadows: the padding box less a copy shrunk by the spread and moved by the offset, kept inside the
     // padding box, with a blur drawn as nested faint copies like an outer shadow's.
     const [insetA, insetB] = both ? padInsets(both.a, b) : [undefined, b];
@@ -946,11 +1161,25 @@ const painter = (
       return rounded(x.box, x.radii) + rounded(c.rect, c.radii);
     };
 
-    let children: SvgNode[];
+    let children: Child[];
 
     if (!both) children = b.children.map((it) => item(it, textMotion));
     else {
+      const slides = (it: Item) =>
+        runsOf(it).flatMap((r) => {
+          const was = moved.get(r);
+
+          return was ? [pair(was, r, both.tween)] : [];
+        });
+      const arrived = new Set(moved.keys());
+
       children = align(both.a.children, b.children, pairOf).map(([old, it]) => {
+        // Text that moved to another element slides there, drawn where it arrives.
+        if (!it && old!.kind === "text" && gone.has(old!)) return null;
+
+        if (!old && it!.kind === "text" && moved.has(it!))
+          return pair(moved.get(it!)!, it!, both.tween);
+
         // Text that appears in or leaves a field is typed in or deleted.
         if (!it && old!.kind === "text" && FIELDS.has(both.a.tag)) {
           const gone = blank(old!, both.a.box, b.box);
@@ -964,9 +1193,22 @@ const painter = (
           if (typable(empty, it!)) return typing(empty, it!, both.tween);
         }
 
-        if (!it) return <g animation={fade(both.tween, "exit")}>{item(old!)}</g>;
+        if (!it) {
+          const left = without(old!, gone);
 
-        if (!old) return <g animation={fade(both.tween, "enter")}>{item(it)}</g>;
+          return left && <g animation={fade(both.tween, "exit")}>{item(left)}</g>;
+        }
+
+        if (!old) {
+          const came = without(it, arrived);
+
+          return (
+            <>
+              {came && <g animation={fade(both.tween, "enter")}>{item(came)}</g>}
+              {slides(it)}
+            </>
+          );
+        }
 
         // A box that turned or scaled crossfades: a matrix doesn't tween as a whole.
         if (old.kind === "box" && it.kind === "box" && sameTransform(old, it))
@@ -990,20 +1232,32 @@ const painter = (
             .to({ opacity: b.opacity }, both.tween.over, both.tween.ease)
         : undefined;
 
-    return transformed(
-      b,
-      <g
-        opacity={!opacity && b.opacity < 1 ? b.opacity : undefined}
-        animation={[...[partMotion(b)].flat(), opacity] as GroupStack}
-      >
+    const motions = [...[partMotion(b)].flat(), opacity].filter(Boolean);
+
+    const inner = (
+      <>
         {anyShadows && (mask ? <g mask={mask}>{shadows}</g> : shadows)}
         {layer(
           (x) => x.background,
           (x) => rounded(x.box, x.radii),
         )}
+        {gradients()}
         {insetClip && insets.length > 0 && <g clipPath={insetClip}>{insets}</g>}
         {layer((x) => x.border?.color, ring, { fillRule: "evenodd" })}
         {clip ? <g clipPath={clip}>{children}</g> : children}
+      </>
+    );
+
+    // A box with nothing of its own to apply adds no group: deep pages nest hundreds of plain wrappers.
+    if (motions.length === 0 && b.opacity >= 1) return transformed(b, inner);
+
+    return transformed(
+      b,
+      <g
+        opacity={!opacity && b.opacity < 1 ? b.opacity : undefined}
+        animation={motions as GroupStack}
+      >
+        {inner}
       </g>,
     );
   };
@@ -1023,6 +1277,8 @@ const painter = (
     textMotion?: (run: TextRun) => Stack<TagChannels<"text">> | undefined,
   ) => {
     seen.clear();
+
+    if (a) rematch(a, b);
 
     return box(b, a, tween, textMotion);
   };

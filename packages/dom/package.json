@@ -17,6 +17,9 @@
     "test": "bun test --conditions @svjeez/source",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "woff2-encoder": "^2.0.0"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",

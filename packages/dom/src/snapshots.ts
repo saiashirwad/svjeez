@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { brotliCompressSync, brotliDecompressSync } from "node:zlib";
 import {
   browserOf,
   chromiumPages,
@@ -12,7 +13,7 @@ import {
 import type { Snapshot } from "./tree.ts";
 
 /** Bump when the shape of the file changes, so stale files are read again. */
-const FORMAT = 4;
+const FORMAT = 5;
 
 export interface SnapshotsOptions extends BrowserOptions {
   /**
@@ -74,6 +75,22 @@ const record = (pages: Pages, tapes: Tape[]): Pages => {
   };
 };
 
+/**
+ * A font as the file keeps it: brotli over the bytes, behind the data URI's type. A font comes out of a page as a
+ * plain TTF, several times the WOFF2 it was served as.
+ */
+const squeeze = (src: string): string => {
+  const comma = src.indexOf(",");
+
+  return `${src.slice(0, comma).replace(";base64", ";br")},${brotliCompressSync(Buffer.from(src.slice(comma + 1), "base64")).toString("base64")}`;
+};
+
+const unsqueeze = (kept: string): string => {
+  const comma = kept.indexOf(",");
+
+  return `${kept.slice(0, comma).replace(";br", ";base64")},${brotliDecompressSync(Buffer.from(kept.slice(comma + 1), "base64")).toString("base64")}`;
+};
+
 /** The file as written: each font once, by digest, however many snapshots use it. */
 interface Saved {
   readonly hash?: string;
@@ -90,7 +107,7 @@ const pack = (tapes: readonly Tape[]): Pick<Saved, "fonts" | "tapes"> => {
           ...snap,
           fonts: snap.fonts.map((face) => {
             const key = digest(face.src);
-            fonts[key] = face.src;
+            fonts[key] ??= squeeze(face.src);
 
             return { ...face, src: key };
           }),
@@ -100,15 +117,24 @@ const pack = (tapes: readonly Tape[]): Pick<Saved, "fonts" | "tapes"> => {
   return { fonts, tapes: tapes.map((t) => ({ ...t, snaps: t.snaps.map(snaps) })) };
 };
 
-const unpack = (tapes: readonly Tape[], fonts: Readonly<Record<string, string>> = {}): Tape[] =>
-  tapes.map((t) => ({
+const unpack = (tapes: readonly Tape[], fonts: Readonly<Record<string, string>> = {}): Tape[] => {
+  const opened = new Map<string, string>();
+
+  const open = (key: string): string => {
+    if (!opened.has(key)) opened.set(key, unsqueeze(fonts[key]!));
+
+    return opened.get(key)!;
+  };
+
+  return tapes.map((t) => ({
     ...t,
     snaps: t.snaps.map((snap) =>
       snap.fonts
-        ? { ...snap, fonts: snap.fonts.map((face) => ({ ...face, src: fonts[face.src]! })) }
+        ? { ...snap, fonts: snap.fonts.map((face) => ({ ...face, src: open(face.src) })) }
         : snap,
     ),
   }));
+};
 
 class Stale extends Error {}
 

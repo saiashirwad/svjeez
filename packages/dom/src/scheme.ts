@@ -1,4 +1,4 @@
-import type { Box, Item, Paint, Shadow, Vector } from "./tree.ts";
+import type { Box, Gradient, Item, Paint, Shadow, Vector } from "./tree.ts";
 
 type Pair = Exclude<Paint, string>;
 
@@ -111,6 +111,25 @@ export const merge = (light: Box, dark: Box): Box => {
     }));
   const insets = both(light.insets ?? [], dark.insets ?? []);
 
+  // A layer one scheme lacks is there but clear in it, as a fill is. Where the stops differ in number, light's shape
+  // holds and each scheme keeps its own colors by position.
+  const layers = (l: readonly Gradient[], d: readonly Gradient[]): Gradient[] =>
+    Array.from({ length: Math.max(l.length, d.length) }, (_, i) => {
+      const own = (l[i] ?? d[i])!;
+      const other = l[i] ? d[i] : l[i];
+
+      return {
+        ...own,
+        stops: own.stops.map((stop, k) => {
+          const c = stop.color as string;
+          const o = other?.stops[Math.min(k, other.stops.length - 1)]?.color as string | undefined;
+
+          return { ...stop, color: l[i] ? pick(c, o)! : pick(o, c)! };
+        }),
+      };
+    });
+  const gradients = layers(light.gradients ?? [], dark.gradients ?? []);
+
   return {
     ...light,
     background: pick(light.background, dark.background),
@@ -122,6 +141,7 @@ export const merge = (light: Box, dark: Box): Box => {
           }
         : undefined,
     shadows: both(light.shadows, dark.shadows),
+    ...(gradients.length > 0 ? { gradients } : {}),
     ...(insets.length > 0 ? { insets } : {}),
     children: light.children.map((c, i) => mergeItem(c, dark.children[i]!)),
   };

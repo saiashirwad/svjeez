@@ -1,11 +1,11 @@
-import type { Page } from "playwright-core";
+import type { CDPSession, Page } from "playwright-core";
 import type { Font, FontValue } from "svjeez";
-import { dataUri, families, sources } from "./fonts.ts";
+import { dataUri, families, sources, unwrap } from "./fonts.ts";
 import { Differ, merge } from "./scheme.ts";
 import type { Step } from "./draw.tsx";
 import type { Action, Flow, Instruction } from "./flow.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
-import { walk } from "./walk.ts";
+import { walk, type Marks } from "./walk.ts";
 
 /** CSS for the page: your Tailwind build, a theme, anything. A function gets the markup, for CSS built from it. */
 type Css = string | ((html: string) => string | Promise<string>);
@@ -288,9 +288,66 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         );
       }, quiet);
 
+    // Chromium knows where it laid out each ::before and ::after, but the page has no node to ask. The DevTools
+    // protocol does: their border quads are handed to the page by element, in a map `walk` reads.
+    let cdp: CDPSession | undefined;
+
+    const pseudos = async () => {
+      cdp ??= await page.context().newCDPSession(page);
+      const session = cdp;
+      const { root } = await session.send("DOM.getDocument", { depth: -1, pierce: true });
+      const owners: { id: number; pseudos: { id: number; type: "before" | "after" }[] }[] = [];
+
+      const visit = (node: typeof root) => {
+        const own = (node.pseudoElements ?? []).flatMap((p) =>
+          p.pseudoType === "before" || p.pseudoType === "after"
+            ? [{ id: p.nodeId, type: p.pseudoType }]
+            : [],
+        );
+
+        if (own.length > 0) owners.push({ id: node.nodeId, pseudos: own });
+        for (const child of node.children ?? []) visit(child);
+        if (node.contentDocument) visit(node.contentDocument);
+      };
+
+      visit(root);
+      await page.evaluate("globalThis.__svjeezPseudo = new WeakMap()");
+
+      const quad = (nodeId: number) =>
+        session.send("DOM.getBoxModel", { nodeId }).then(
+          (r) => r.model.border,
+          () => undefined,
+        );
+
+      await Promise.all(
+        owners.map(async ({ id, pseudos }) => {
+          const [own, ...quads] = await Promise.all([id, ...pseudos.map((p) => p.id)].map(quad));
+
+          if (!own || quads.every((q) => !q)) return;
+          const marks: Marks = {
+            own,
+            ...Object.fromEntries(
+              pseudos.flatMap((p, i) => (quads[i] ? [[p.type, quads[i]]] : [])),
+            ),
+          };
+          const { object } = await session.send("DOM.resolveNode", { nodeId: id });
+
+          if (!object.objectId) return;
+          await session.send("Runtime.callFunctionOn", {
+            objectId: object.objectId,
+            functionDeclaration:
+              "function (marks) { globalThis.__svjeezPseudo?.set(this, marks); }",
+            arguments: [{ value: marks }],
+          });
+          await session.send("Runtime.releaseObject", { objectId: object.objectId });
+        }),
+      );
+    };
+
     const pass = async (value: "light" | "dark") => {
       await scheme(value);
       await settle(false);
+      await pseudos();
 
       return page.evaluate(walk, { selector, pad, parts });
     };
@@ -316,7 +373,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
           if (!file) {
             // A file that won't download leaves its text to a fallback font, as a page without it would.
             file = download(url).then(
-              (bytes) => bytes && dataUri(bytes),
+              async (bytes) => bytes && dataUri(await unwrap(bytes).catch(() => bytes)),
               () => undefined,
             );
             files.set(url, file);

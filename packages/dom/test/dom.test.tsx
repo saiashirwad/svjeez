@@ -3,7 +3,10 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Clip, ease, font, render } from "svjeez";
+import { deflateSync } from "node:zlib";
+import { Clip, ease, font, render, valuesAt, type SvgNode } from "svjeez";
+import { compress } from "woff2-encoder";
+import { unwrap } from "../src/fonts.ts";
 import { validateSvg } from "svjeez/frames";
 import {
   act,
@@ -21,9 +24,11 @@ import {
   snap,
   snapshots,
   wait,
+  type Box,
   type Browser,
   type Flow,
   type Snapshot,
+  type TextRun,
 } from "../src/index.ts";
 
 const regular = font(
@@ -45,6 +50,19 @@ const draw = (snap: Parameters<typeof size>[0], props: Partial<Parameters<typeof
     { ...size(snap), duration: 4, title: "dom" },
     <Dom states={snap} fonts={[regular]} {...props} />,
   );
+
+/** How much of `text` shows at `t`, for each copy drawn: every opacity above it, multiplied. */
+const inkOf = (node: SvgNode, text: string, t: number): number[] => {
+  if (node.kind !== "element") return [];
+  const own =
+    Number(node.attrs.opacity ?? 1) *
+    node.motions.reduce((o, m) => o * (valuesAt(m, t, { duration: 4 }).opacity ?? 1), 1);
+
+  if (node.tag === "text")
+    return node.children.some((c) => c.kind === "text" && c.value === text) ? [own] : [];
+
+  return node.children.flatMap((c) => inkOf(c, text, t).map((o) => o * own));
+};
 
 let dom: Browser;
 
@@ -495,6 +513,51 @@ describe("Dom", () => {
     expect(draw(again)).toBe(draw(snap));
     await card.close();
   });
+
+  test("text that moves to another element slides there instead of fading out and in", async () => {
+    const css =
+      CSS +
+      "textarea, .out { all: unset; display: block; font: 16px 'Space Mono'; white-space: pre }";
+    const card = await dom.mount('<div class="card"><textarea>Drawing it</textarea></div>', {
+      css,
+    });
+    const editing = await card.snap();
+
+    await card.html('<div class="card"><div class="out">Drawing it</div><p>after</p></div>');
+    const saved = await card.snap();
+    const node = <Dom states={[editing, wait(0.5), saved]} fonts={[regular]} />;
+    const svg = render({ ...size([editing, saved]), duration: 4, title: "dom" }, node);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // Drawn once, and fully there all through the move.
+    expect(svg.match(/>Drawing it</g)).toHaveLength(1);
+    for (const t of [0.5, 0.7, 0.8, 0.9, 1.1]) expect(inkOf(node, "Drawing it", t)).toEqual([1]);
+
+    // Different words don't move: one goes, the other comes.
+    await card.html('<div class="card"><div class="out">Drawn it</div></div>');
+    const other = draw([editing, wait(0.5), await card.snap()]);
+
+    expect(other).toContain(">Drawing it<");
+    expect(other).toContain(">Drawn it<");
+    await card.close();
+  });
+
+  test("changed text crossfades without dimming in the middle", async () => {
+    const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+    const before = await card.snap();
+
+    await card.html('<div class="card"><p>no lines</p></div>');
+    const node = <Dom states={[before, wait(0.5), await card.snap()]} fonts={[regular]} />;
+
+    // Where the two overlap, the new one over the old covers nearly as much as either alone.
+    for (let t = 0.5; t <= 1.1; t += 0.05) {
+      const [old] = inkOf(node, "214 lines", t);
+      const [now] = inkOf(node, "no lines", t);
+
+      expect(now! + old! * (1 - now!)).toBeGreaterThan(0.9);
+    }
+    await card.close();
+  });
 });
 
 describe("real pages", () => {
@@ -567,6 +630,165 @@ describe("real pages", () => {
 
     expect(root.shadows).toHaveLength(1);
     expect(root.insets).toEqual([{ color: "rgba(0,0,0,0.1)", x: 0, y: 0, blur: 0, spread: 999 }]);
+    await card.close();
+  });
+
+  test("a woff2 the page loaded comes back as a TTF the drawing cuts down to what it draws", async () => {
+    const ttf = readFileSync(
+      join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
+    );
+    const woff2 = Buffer.from(await compress(ttf)).toString("base64");
+    const css = `@font-face{font-family:Packed;src:url(data:font/woff2;base64,${woff2}) format("woff2")} .p { font: 16px Packed; padding: 8px }`;
+    const card = await dom.mount('<div class="p">Hi</div>', { css });
+    const snap = await card.snap();
+
+    expect(snap.fonts?.[0]?.src).toMatch(/^data:font\/ttf;base64,/);
+    const svg = draw(snap, { fonts: [] });
+
+    expect(svg).toContain("font-family:'Packed'");
+    // Two glyphs, not the whole face.
+    expect(svg.length).toBeLessThan(ttf.length / 4);
+    await card.close();
+  });
+
+  test("a woff unwraps into the same tables", async () => {
+    const ttf = new Uint8Array(
+      readFileSync(join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf")),
+    );
+    const view = new DataView(ttf.buffer, ttf.byteOffset);
+    const count = view.getUint16(4);
+    const tables = Array.from({ length: count }, (_, i) => {
+      const at = 12 + i * 16;
+      const data = ttf.subarray(
+        view.getUint32(at + 8),
+        view.getUint32(at + 8) + view.getUint32(at + 12),
+      );
+
+      const packed = deflateSync(data);
+
+      // A table that doesn't shrink is stored as is, as WOFF requires.
+      return {
+        tag: view.getUint32(at),
+        sum: view.getUint32(at + 4),
+        data,
+        packed: packed.length < data.length ? packed : data,
+      };
+    });
+    const size = 44 + 20 * count + tables.reduce((n, t) => n + ((t.packed.length + 3) & ~3), 0);
+    const woff = new Uint8Array(size);
+    const w = new DataView(woff.buffer);
+    let at = 44 + 20 * count;
+
+    w.setUint32(0, 0x774f4646);
+    w.setUint32(4, view.getUint32(0));
+    w.setUint16(12, count);
+    tables.forEach((t, i) => {
+      const e = 44 + i * 20;
+      w.setUint32(e, t.tag);
+      w.setUint32(e + 4, at);
+      w.setUint32(e + 8, t.packed.length);
+      w.setUint32(e + 12, t.data.length);
+      w.setUint32(e + 16, t.sum);
+      woff.set(t.packed, at);
+      at += (t.packed.length + 3) & ~3;
+    });
+
+    const back = font(await unwrap(woff), { family: "Space Mono" });
+
+    expect(back.format).toBe("ttf");
+    expect(back.metrics).toEqual(regular.metrics);
+  });
+
+  test("linear and radial gradients are read as layers, in sRGB, and drawn as paint servers", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="height:60px;background:linear-gradient(to right, oklch(0.7 0.2 30), transparent), radial-gradient(circle at 25% 50%, red 10px, blue)"></div>',
+      { css: CSS },
+    );
+    const { root } = await card.snap();
+    const [radial, linear] = root.gradients ?? [];
+
+    expect(root.gradients).toHaveLength(2);
+    expect(radial).toMatchObject({ kind: "radial", cx: 16 + 1 + 68, rx: expect.any(Number) });
+    expect(linear).toMatchObject({ kind: "linear", x1: 17, x2: 16 + 1 + 272 });
+    expect(linear?.kind === "linear" && linear.y1 === linear.y2).toBe(true);
+    // The clear end keeps the color it fades from, so the blend never goes gray.
+    const [from, to] = linear!.stops.map((s) => s.color as string);
+
+    expect(from).toMatch(/^rgb\(/);
+    expect(to).toBe(from!.replace("rgb(", "rgba(").replace(")", ",0)"));
+
+    const svg = draw(await card.snap());
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    expect(svg).toContain("<linearGradient");
+    expect(svg).toContain("<radialGradient");
+
+    await card.html(
+      '<div class="card" style="height:60px;background:repeating-linear-gradient(45deg, #000 0 4px, #fff 4px 8px)"></div>',
+    );
+    const striped = await card.snap();
+
+    expect(striped.root.gradients?.[0]).toMatchObject({ repeat: true });
+    expect(draw(striped)).toContain('spreadMethod="repeat"');
+    await card.close();
+  });
+
+  test("::before and ::after are drawn as boxes with their text, where Chromium put them", async () => {
+    const css =
+      CSS +
+      `.tag::before { content: "#"; color: #c00; padding-right: 4px }
+       .dot { position: relative }
+       .dot::after { content: ""; position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #0a0 }
+       .turn { display: block; position: relative; height: 10px }
+       .turn::after { content: ""; position: absolute; left: 0; top: 0; width: 20px; height: 10px; background: #00c; rotate: 90deg }`;
+    const card = await dom.mount(
+      '<div class="card dot"><span class="tag">design</span><i class="turn"></i></div>',
+      { css },
+    );
+    const { root } = await card.snap();
+    const [tag, i, dot] = root.children as Box[];
+    const turned = i!.children[0] as Box;
+
+    expect(tag).toMatchObject({ tag: "span" });
+    expect(tag!.children[0]).toMatchObject({
+      kind: "box",
+      tag: "::before",
+      children: [{ text: "#" }],
+    });
+    const hash = (tag!.children[0] as Box).children[0] as TextRun;
+    const word = tag!.children[1] as TextRun;
+
+    expect(hash.color).toBe("rgb(204,0,0)");
+    expect(word.x).toBeGreaterThan(hash.x + hash.advances.at(-1)!);
+    expect(word.y).toBe(hash.y);
+    expect(dot).toMatchObject({
+      tag: "::after",
+      background: "rgb(0,170,0)",
+      radii: [4, 4, 4, 4],
+      box: {
+        x: root.box.x + root.box.width - 1 - 4 - 8,
+        y: root.box.y + 1 + 4,
+        width: 8,
+        height: 8,
+      },
+    });
+    // Read as laid out, with its turn kept to draw it with.
+    expect(turned).toMatchObject({ tag: "::after", box: { ...i!.box, width: 20, height: 10 } });
+    expect(turned!.transform?.matrix).toEqual([0, 1, -1, 0, 0, 0]);
+    expect(validateSvg(draw(await card.snap())).errors).toEqual([]);
+    await card.close();
+  });
+
+  test("a see-through fill under backdrop-filter: blur() draws more solid, with no filter", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="background:rgb(255 255 255 / .2);backdrop-filter:blur(12px)">x</div>',
+      { css: CSS },
+    );
+    const { root } = await card.snap();
+    const light = typeof root.background === "string" ? root.background : root.background!.light;
+
+    expect(light).toBe("rgba(255,255,255,0.6)");
+    expect(draw(await card.snap())).not.toContain("<filter");
     await card.close();
   });
 

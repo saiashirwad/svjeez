@@ -1,5 +1,12 @@
 import type { Box } from "./tree.ts";
 
+/** Border quads from Chromium, eight numbers each: an element's own, and its `::before` and `::after` when drawn. */
+export interface Marks {
+  readonly own: readonly number[];
+  readonly before?: readonly number[];
+  readonly after?: readonly number[];
+}
+
 /**
  * Reads the element at `selector` into a `Box` tree. `parts` names elements by CSS selector. Runs inside the page, so
  * it must not reference anything outside its own body.
@@ -14,6 +21,8 @@ export function walk({
   parts: Record<string, string>;
 }): Box {
   const root = document.querySelector(selector);
+  // Where Chromium put each element's ::before and ::after, left by `pseudos`: the DOM has no node to measure.
+  const marks = (globalThis as { __svjeezPseudo?: WeakMap<Element, Marks> }).__svjeezPseudo;
 
   if (!root) throw new Error(`snap() found nothing at ${selector}.`);
   const origin = root.getBoundingClientRect();
@@ -120,6 +129,305 @@ export function walk({
 
             return [{ color: c, x, y, blur, spread }];
           });
+
+  /** Splits at `by` outside parentheses. */
+  const split = (text: string, by: RegExp = /,/): string[] => {
+    const out: string[] = [];
+    let depth = 0;
+    let start = 0;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i]!;
+
+      if (c === "(") depth++;
+      else if (c === ")") depth--;
+      else if (depth === 0 && by.test(c)) {
+        out.push(text.slice(start, i).trim());
+        start = i + 1;
+      }
+    }
+
+    out.push(text.slice(start).trim());
+
+    return out.filter(Boolean);
+  };
+
+  const alpha = (c: string) => Number(/rgba\(.*,\s*([\d.]+)\)$/.exec(c)?.[1] ?? 1);
+  const rgb = (c: string) => (c.match(/[\d.]+/g) ?? []).slice(0, 3).join(",");
+
+  /**
+   * Color stops at fractions of a gradient line `length` px long, placed as CSS places the ones without a position.
+   * A clear stop takes its neighbors' color, since CSS fades to clear without the gray an unmixed blend would pass.
+   */
+  const stopsOf = (args: string[], length: number) => {
+    const raw: { color: string; at?: number }[] = [];
+
+    for (const arg of args) {
+      const [c = "", ...at] = split(arg, /\s/);
+
+      // A lone length is a hint at where the midpoint falls; the blend stays even.
+      if (/^[-\d.]/.test(c)) continue;
+      const value = color(c) ?? "rgba(0,0,0,0)";
+      const pos = (t: string) =>
+        t.endsWith("%") ? px(t) / 100 : t.endsWith("px") ? px(t) / (length || 1) : undefined;
+
+      if (at.length === 0) raw.push({ color: value });
+
+      for (const t of at) raw.push({ color: value, at: pos(t) });
+    }
+
+    if (raw.length === 0) return [];
+    raw[0]!.at ??= 0;
+    raw[raw.length - 1]!.at ??= 1;
+
+    for (let i = 1, top = raw[0]!.at; i < raw.length; i++) {
+      const at = raw[i]!.at;
+
+      if (at === undefined) continue;
+      raw[i]!.at = Math.max(at, top);
+      top = raw[i]!.at!;
+    }
+
+    for (let i = 1; i < raw.length; i++) {
+      if (raw[i]!.at !== undefined) continue;
+      const from = i - 1;
+      let to = i;
+
+      while (raw[to]!.at === undefined) to++;
+
+      for (let k = i; k < to; k++)
+        raw[k]!.at = raw[from]!.at! + ((raw[to]!.at! - raw[from]!.at!) * (k - from)) / (to - from);
+    }
+
+    return raw.flatMap((stop, i) => {
+      if (alpha(stop.color) > 0) return [{ offset: stop.at!, color: stop.color }];
+      const before = raw.slice(0, i).findLast((s) => alpha(s.color) > 0);
+      const after = raw.slice(i + 1).find((s) => alpha(s.color) > 0);
+      const sides = [...new Set([before, after].flatMap((s) => (s ? [rgb(s.color)] : [])))];
+
+      return (sides.length ? sides : ["0,0,0"]).map((side) => ({
+        offset: stop.at!,
+        color: `rgba(${side},0)`,
+      }));
+    });
+  };
+
+  /** Stops renumbered from `lo`..`hi` to 0..1, for a gradient line drawn from `lo` to `hi`. */
+  const span = (stops: { offset: number; color: string }[], lo: number, hi: number) =>
+    stops.map((s) => ({ ...s, offset: round((s.offset - lo) / (hi - lo)) }));
+
+  /**
+   * `linear-gradient` and `radial-gradient` layers, bottom first, in the snapshot's coordinates, laid out over the
+   * padding box as CSS does by default. Conic gradients and images are skipped.
+   */
+  const gradientsOf = (
+    s: CSSStyleDeclaration,
+    b: { x: number; y: number; width: number; height: number },
+  ) => {
+    if (s.backgroundImage === "none" || s.visibility === "hidden") return [];
+    const [bt, br, bb, bl] = [
+      s.borderTopWidth,
+      s.borderRightWidth,
+      s.borderBottomWidth,
+      s.borderLeftWidth,
+    ].map(px) as [number, number, number, number];
+    const x0 = b.x + bl;
+    const y0 = b.y + bt;
+    const w = b.width - bl - br;
+    const h = b.height - bt - bb;
+
+    if (w <= 0 || h <= 0) return [];
+
+    return split(s.backgroundImage)
+      .flatMap((layer): object[] => {
+        const m = /^(repeating-)?(linear|radial)-gradient\((.*)\)$/s.exec(layer);
+
+        if (!m) return [];
+        const repeat = Boolean(m[1]);
+        const args = split(m[3]!);
+
+        if (m[2] === "linear") {
+          let dx = 0;
+          let dy = 1;
+          const lead = args[0]!.replace(/\s*\bin\b.*$/, "").trim();
+
+          if (/^(to\b|-?[\d.]+(deg|rad|turn|grad)$|in\b)/.test(args[0]!)) {
+            args.shift();
+            const angle = /^(-?[\d.]+)(deg|rad|turn|grad)$/.exec(lead);
+
+            if (angle) {
+              const deg =
+                Number(angle[1]) *
+                { deg: 1, rad: 180 / Math.PI, turn: 360, grad: 0.9 }[angle[2] as "deg"];
+              dx = Math.sin((deg * Math.PI) / 180);
+              dy = -Math.cos((deg * Math.PI) / 180);
+            } else if (lead.startsWith("to")) {
+              const sx = /right/.test(lead) ? 1 : /left/.test(lead) ? -1 : 0;
+              const sy = /bottom/.test(lead) ? 1 : /top/.test(lead) ? -1 : 0;
+              // To a corner, the line runs square to the diagonal between the other two corners.
+              [dx, dy] = sx && sy ? [sx * h, sy * w] : [sx, sy];
+              const n = Math.hypot(dx, dy) || 1;
+              dx /= n;
+              dy /= n;
+            }
+          }
+
+          const length = Math.abs(w * dx) + Math.abs(h * dy);
+          const stops = stopsOf(args, length);
+
+          if (stops.length === 0) return [];
+          const first = stops[0]!.offset;
+          const last = stops.at(-1)!.offset;
+          const [lo, hi] = repeat ? [first, last] : [Math.min(0, first), Math.max(1, last)];
+
+          if (hi - lo <= 0) return [];
+          const at = (t: number): [number, number] => [
+            round(x0 + w / 2 + dx * length * (t - 0.5)),
+            round(y0 + h / 2 + dy * length * (t - 0.5)),
+          ];
+          const [x1, y1] = at(lo);
+          const [x2, y2] = at(hi);
+
+          return [
+            {
+              kind: "linear",
+              x1,
+              y1,
+              x2,
+              y2,
+              stops: span(stops, lo, hi),
+              ...(repeat ? { repeat } : {}),
+            },
+          ];
+        }
+
+        let shape = "";
+
+        if (/^(circle|ellipse|closest|farthest|at\b|in\b|[\d.])/.test(args[0]!))
+          shape = args.shift()!;
+        const [size = "", where = ""] = shape
+          .replace(/\s*\bin\b.*$/, "")
+          .split(/\bat\b/)
+          .map((t) => t.trim());
+        let cx: number | undefined;
+        let cy: number | undefined;
+        const loose: string[] = [];
+
+        for (const t of where.split(/\s+/).filter(Boolean)) {
+          if (t === "left") cx = 0;
+          else if (t === "right") cx = w;
+          else if (t === "top") cy = 0;
+          else if (t === "bottom") cy = h;
+          else loose.push(t);
+        }
+
+        for (const t of loose) {
+          const v = (side: number) =>
+            t === "center" ? side / 2 : t.endsWith("%") ? (px(t) / 100) * side : px(t);
+
+          if (cx === undefined) cx = v(w);
+          else if (cy === undefined) cy = v(h);
+        }
+
+        cx ??= w / 2;
+        cy ??= h / 2;
+        const words = size.split(/\s+/).filter(Boolean);
+        const lengths = words.filter((t) => /^[\d.]/.test(t));
+        const circle =
+          words.includes("circle") || (lengths.length === 1 && !words.includes("ellipse"));
+        const near = [Math.min(cx, w - cx), Math.min(cy, h - cy)] as const;
+        const far = [Math.max(cx, w - cx), Math.max(cy, h - cy)] as const;
+        let rx: number;
+        let ry: number;
+
+        if (lengths.length > 0) {
+          rx = lengths[0]!.endsWith("%") ? (px(lengths[0]!) / 100) * w : px(lengths[0]!);
+          ry = circle
+            ? rx
+            : lengths[1]?.endsWith("%")
+              ? (px(lengths[1]) / 100) * h
+              : px(lengths[1] ?? lengths[0]!);
+        } else {
+          const key = words.find((t) => /closest|farthest/.test(t)) ?? "farthest-corner";
+          const [sx, sy] = key.startsWith("closest") ? near : far;
+
+          const pick = key.startsWith("closest") ? Math.min : Math.max;
+
+          if (key.endsWith("side")) [rx, ry] = circle ? [pick(sx, sy), pick(sx, sy)] : [sx, sy];
+          else if (circle) rx = ry = Math.hypot(sx, sy);
+          else [rx, ry] = [sx * Math.SQRT2, sy * Math.SQRT2];
+        }
+
+        if (rx <= 0 || ry <= 0) return [];
+        const stops = stopsOf(args, rx);
+
+        if (stops.length === 0) return [];
+        // SVG has no ring a radial gradient starts at, so stops before the center sit on it.
+        const hi = repeat ? stops.at(-1)!.offset : Math.max(1, stops.at(-1)!.offset);
+
+        if (hi <= 0) return [];
+
+        return [
+          {
+            kind: "radial",
+            cx: round(x0 + cx),
+            cy: round(y0 + cy),
+            rx: round(rx * hi),
+            ry: round(ry * hi),
+            stops: span(stops, 0, hi).map((st) => ({ ...st, offset: Math.max(0, st.offset) })),
+            ...(repeat ? { repeat } : {}),
+          },
+        ];
+      })
+      .reverse();
+  };
+
+  /**
+   * A see-through fill under `backdrop-filter: blur()` drawn more solid instead: what shows through is blurred on the
+   * page, and blurring it here would need a filter, which makes zooming stutter.
+   */
+  const frost = (c: string | undefined, s: CSSStyleDeclaration) => {
+    const blur = /blur\(([\d.]+)px\)/.exec(s.backdropFilter);
+
+    if (!c || !blur || alpha(c) >= 1) return c;
+
+    const a = alpha(c);
+
+    return `rgba(${rgb(c)},${round(a + (1 - a) * Math.min(0.5, Number(blur[1]) / 24))})`;
+  };
+
+  /** What an element or pseudo-element paints of itself: corners, fill, gradients, border, shadows. */
+  const surface = (
+    s: CSSStyleDeclaration,
+    r: { width: number; height: number },
+    b: { x: number; y: number; width: number; height: number },
+  ) => {
+    const visible = s.visibility !== "hidden";
+
+    const widths = [
+      px(s.borderTopWidth),
+      px(s.borderRightWidth),
+      px(s.borderBottomWidth),
+      px(s.borderLeftWidth),
+    ];
+
+    const sides = [s.borderTopColor, s.borderRightColor, s.borderBottomColor, s.borderLeftColor];
+    const borderColor = color(sides[widths.findIndex((w) => w > 0)] ?? "");
+    const gradients = gradientsOf(s, b);
+
+    return {
+      radii: radii(s, r.width, r.height),
+      background: visible ? frost(color(s.backgroundColor), s) : undefined,
+      ...(gradients.length > 0 ? { gradients } : {}),
+      border:
+        visible && borderColor && widths.some((w) => w > 0)
+          ? { widths, color: borderColor }
+          : undefined,
+      shadows: visible ? shadows(s.boxShadow, false) : [],
+      ...(visible && /\binset\b/.test(s.boxShadow) ? { insets: shadows(s.boxShadow, true) } : {}),
+      opacity: px(s.opacity),
+    };
+  };
 
   const family = (s: CSSStyleDeclaration) =>
     s.fontFamily
@@ -283,8 +591,7 @@ export function walk({
   const layers: { z: number; item: unknown }[][] = [];
 
   /** The z-index an element is painted at by its stacking context, when it doesn't paint in tree order. */
-  const layerOf = (el: Element, parent: CSSStyleDeclaration): number | undefined => {
-    const s = getComputedStyle(el);
+  const layerOf = (s: CSSStyleDeclaration, parent: CSSStyleDeclaration): number | undefined => {
     const z = s.zIndex === "auto" ? undefined : Number(s.zIndex);
 
     if (s.position === "fixed") return z ?? 0;
@@ -368,6 +675,110 @@ export function walk({
     };
   };
 
+  /** The text a pseudo-element's `content` puts in: its strings, joined. Counters and images give none. */
+  const contentText = (content: string): string =>
+    [...content.matchAll(/"((?:[^"\\]|\\.)*)"/g)]
+      .map((m) =>
+        m[1]!
+          .replace(/\\([0-9a-fA-F]{1,6})\s?/g, (_, hex: string) =>
+            String.fromCodePoint(parseInt(hex, 16)),
+          )
+          .replace(/\\(.)/g, "$1"),
+      )
+      .join("");
+
+  /**
+   * A `::before` or `::after`, from where Chromium laid it out (`marks`) and its computed style. The box comes moved by
+   * however far `el` moved since it was measured, so a transform switched off for reading still holds. Its text is
+   * one line, placed as the box aligns it.
+   */
+  const pseudo = (el: Element, which: "before" | "after", now: DOMRect): unknown => {
+    const mark = marks?.get(el);
+    const quad = mark?.[which];
+
+    if (!mark || !quad) return undefined;
+    const s = getComputedStyle(el, `::${which}`);
+
+    if (s.display === "none" || s.content === "none" || s.content === "normal") return undefined;
+    const dx = now.left - mark.own[0]!;
+    const dy = now.top - mark.own[1]!;
+    const xs = [quad[0]!, quad[2]!, quad[4]!, quad[6]!];
+    const ys = [quad[1]!, quad[3]!, quad[5]!, quad[7]!];
+    const m = matrixOf(s);
+    const [ox = 0, oy = 0] = s.transformOrigin.split(/\s+/).map(px);
+    let r = new DOMRect(
+      Math.min(...xs) + dx,
+      Math.min(...ys) + dy,
+      Math.max(...xs) - Math.min(...xs),
+      Math.max(...ys) - Math.min(...ys),
+    );
+
+    if (m) {
+      // The quad is the box after its transform: its first corner, carried back through the matrix about the origin.
+      const outer = s.boxSizing === "border-box" ? 0 : 1;
+      const w =
+        px(s.width) +
+        outer *
+          (px(s.paddingLeft) + px(s.paddingRight) + px(s.borderLeftWidth) + px(s.borderRightWidth));
+      const h =
+        px(s.height) +
+        outer *
+          (px(s.paddingTop) + px(s.paddingBottom) + px(s.borderTopWidth) + px(s.borderBottomWidth));
+      const x = quad[0]! - m.e + m.a * ox + m.c * oy - ox;
+      const y = quad[1]! - m.f + m.b * ox + m.d * oy - oy;
+      r = new DOMRect(x + dx, y + dy, w, h);
+    }
+
+    const b = rel(r);
+    const children: unknown[] = [];
+    const text = contentText(s.content);
+    const c = color(s.color);
+
+    if (text.trim() && c && s.visibility !== "hidden") {
+      const ends = measure(s, text);
+      const width = ends.at(-1) ?? 0;
+      const left = r.left + px(s.borderLeftWidth) + px(s.paddingLeft);
+      const top = r.top + px(s.borderTopWidth) + px(s.paddingTop);
+      const cw = r.width - (left - r.left) - px(s.borderRightWidth) - px(s.paddingRight);
+      const ch = r.height - (top - r.top) - px(s.borderBottomWidth) - px(s.paddingBottom);
+      const boxy = /flex|grid/.test(s.display);
+      const { area } = probe(s);
+      const line = s.lineHeight === "normal" ? area : px(s.lineHeight);
+
+      const x =
+        s.textAlign === "center" || (boxy && s.justifyContent === "center")
+          ? left + (cw - width) / 2
+          : /right|end/.test(s.textAlign) || (boxy && /end/.test(s.justifyContent))
+            ? left + cw - width
+            : left;
+      const y =
+        s.display === "inline"
+          ? top
+          : boxy && s.alignItems === "center"
+            ? top + (ch - area) / 2
+            : top + (line - area) / 2;
+
+      children.push(run(s, text, x, y, c, ends));
+    }
+
+    return {
+      kind: "box",
+      tag: `::${which}`,
+      box: b,
+      ...surface(s, r, b),
+      clip: s.overflowX !== "visible" || s.overflowY !== "visible",
+      children,
+      ...(m
+        ? {
+            transform: {
+              matrix: [m.a, m.b, m.c, m.d, m.e, m.f].map(round),
+              origin: [round(b.x + ox), round(b.y + oy)],
+            },
+          }
+        : {}),
+    };
+  };
+
   /** `turned`: the element has a transform, switched off while it's read, so it is a stacking context. */
   const laid = (el: Element, s: CSSStyleDeclaration, turned = false): unknown => {
     const r = el.getBoundingClientRect();
@@ -401,32 +812,27 @@ export function walk({
       }
     }
 
-    const visible = s.visibility !== "hidden";
-
-    const widths = [
-      px(s.borderTopWidth),
-      px(s.borderRightWidth),
-      px(s.borderBottomWidth),
-      px(s.borderLeftWidth),
-    ];
-
-    const sides = [s.borderTopColor, s.borderRightColor, s.borderBottomColor, s.borderLeftColor];
-    const borderColor = color(sides[widths.findIndex((w) => w > 0)] ?? "");
     let children: unknown[] = [];
     const context = el === root || turned || isContext(s);
 
     if (context) layers.push([]);
 
+    const place = (item: unknown, own: CSSStyleDeclaration) => {
+      const z = item ? layerOf(own, s) : undefined;
+
+      if (item && z !== undefined) layers.at(-1)!.push({ z, item });
+      else if (item) children.push(item);
+    };
+
+    place(pseudo(el, "before", r), getComputedStyle(el, "::before"));
+
     for (const child of el.childNodes) {
       if (child.nodeType === Node.TEXT_NODE) texts(child as Text, s, children);
-      else if (child.nodeType === Node.ELEMENT_NODE) {
-        const item = element(child as Element);
-        const z = item ? layerOf(child as Element, s) : undefined;
-
-        if (item && z !== undefined) layers.at(-1)!.push({ z, item });
-        else if (item) children.push(item);
-      }
+      else if (child.nodeType === Node.ELEMENT_NODE)
+        place(element(child as Element), getComputedStyle(child as Element));
     }
+
+    place(pseudo(el, "after", r), getComputedStyle(el, "::after"));
 
     // A stacking context paints its layers below zero, then its own flow, then the rest by z-index, ties in tree order.
     if (context) {
@@ -472,15 +878,7 @@ export function walk({
       key: el.getAttribute("data-key") ?? undefined,
       id: el.id || undefined,
       box: rel(r),
-      radii: radii(s, r.width, r.height),
-      background: visible ? color(s.backgroundColor) : undefined,
-      border:
-        visible && borderColor && widths.some((w) => w > 0)
-          ? { widths, color: borderColor }
-          : undefined,
-      shadows: visible ? shadows(s.boxShadow, false) : [],
-      ...(visible && /\binset\b/.test(s.boxShadow) ? { insets: shadows(s.boxShadow, true) } : {}),
-      opacity: px(s.opacity),
+      ...surface(s, r, rel(r)),
       clip: s.overflowX !== "visible" || s.overflowY !== "visible",
       children,
     };

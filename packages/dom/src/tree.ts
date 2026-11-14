@@ -68,8 +68,40 @@ export interface Picture {
   readonly transform?: Transform;
 }
 
+/** A color at a fraction of the way along a gradient. */
+export interface Stop {
+  readonly offset: number;
+  readonly color: Paint;
+}
+
+/** A CSS linear gradient, as the line its stops run along, in the snapshot's coordinates. */
+export interface LinearGradient {
+  readonly kind: "linear";
+  readonly x1: number;
+  readonly y1: number;
+  readonly x2: number;
+  readonly y2: number;
+  readonly stops: readonly Stop[];
+  /** A `repeating-` gradient: the stops repeat past both ends. */
+  readonly repeat?: boolean;
+}
+
+/** A CSS radial gradient: its center and the radii its last stop reaches, in the snapshot's coordinates. */
+export interface RadialGradient {
+  readonly kind: "radial";
+  readonly cx: number;
+  readonly cy: number;
+  readonly rx: number;
+  readonly ry: number;
+  readonly stops: readonly Stop[];
+  readonly repeat?: boolean;
+}
+
+export type Gradient = LinearGradient | RadialGradient;
+
 export interface Box {
   readonly kind: "box";
+  /** The tag, or `::before` and `::after` for those pseudo-elements. */
   readonly tag: string;
   /** The element's `data-part`, or the name of the `parts` selector it matched. `<Dom parts>` animates by it. */
   readonly part?: string;
@@ -79,6 +111,8 @@ export interface Box {
   readonly box: Rect;
   readonly radii: Radii;
   readonly background?: Paint;
+  /** `background-image` gradients, bottom layer first, painted over `background`. */
+  readonly gradients?: readonly Gradient[];
   readonly border?: {
     readonly widths: readonly [number, number, number, number];
     readonly color: Paint;
