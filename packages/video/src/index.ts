@@ -101,7 +101,9 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
       throw new Error(
         "video() needs an animated scene, got one whose loop lasts 0s. Use renderFrames() for a still.",
       );
-    const frames = Math.max(1, Math.round(scene.duration * loops * fps));
+    // A loop lasts `duration` scene seconds, which play in `duration / playbackRate` seconds of video.
+    const { playbackRate } = scene;
+    const frames = Math.max(1, Math.round((scene.duration / playbackRate) * loops * fps));
     await scene.addScript(BUNDLE);
     const first = await scene.capture(0);
     const view = new DataView(first.buffer, first.byteOffset);
@@ -156,7 +158,8 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
     );
 
     for (let i = 0; i < frames; i++) {
-      const png = i === 0 ? first : await scene.capture((i / fps) % scene.duration);
+      const png =
+        i === 0 ? first : await scene.capture(((i / fps) * playbackRate) % scene.duration);
 
       await scene.evaluate(
         async ({ png, i, fps, width, height }) => {

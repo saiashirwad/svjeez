@@ -1,11 +1,12 @@
 import { REDUCED_MOTION } from "./css";
 import { num } from "./format";
 import type { Seconds } from "./motion";
+import { rateOf } from "./rate";
 
 export interface RestyleOptions {
   /** CSS added after the scene's own, so its rules win: a scheme's `--base00`…`--base0F`, for one. */
   readonly css?: string;
-  /** Start this many playback seconds in, as if the copy had been playing that long. */
+  /** Start this many scene seconds in, as if the copy had been playing that long. */
   readonly at?: Seconds;
   /** Where the parts inside `<Once>` start, or are held with `paused`. Default `at`, as if they had played as long as the rest: `onceAt: 0` plays them from the top while the rest starts `at` seconds in. */
   readonly onceAt?: Seconds;
@@ -37,13 +38,15 @@ export const restyle = (
   { css, at, onceAt, paused, still }: RestyleOptions,
 ): string => {
   let out = svg;
+  const rate = rateOf(svg);
 
   const extra = [css, (still || paused) && PAUSE].filter(Boolean).join("\n");
 
   if (still) out = out.replace(REDUCED_MOTION, "@media all{");
   else if (at || paused || onceAt !== undefined) {
-    const loop = at ?? 0;
-    const once = onceAt ?? loop;
+    // The tools take scene seconds, and the animations run in playback seconds.
+    const loop = (at ?? 0) / rate;
+    const once = (onceAt ?? at ?? 0) / rate;
     const clocks = `--t0:-${num(loop)}s${onceAt === undefined ? "" : `;--t1:-${num(once)}s`}`;
     out = out.replace(/<svg\b[^>]*>/, (root) =>
       /\sstyle="/.test(root)

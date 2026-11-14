@@ -14,7 +14,7 @@ const USAGE = `usage:
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css]
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
-Times are playback seconds. Without --times, frames takes --count frames (default 6) across one loop.
+Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
 --background transparent keeps alpha, in webm only.
 On Node, .tsx files load through tsx when it is installed.

@@ -1,4 +1,5 @@
 import { compile } from "./compile";
+import { RATE_ATTR } from "./rate";
 import { num } from "./format";
 import type { Seconds } from "./motion";
 import type { Css } from "./properties";
@@ -81,20 +82,17 @@ export const render = (options: RenderOptions, content: Child): string => {
     "aria-labelledby": options.desc ? `${prefix}t ${prefix}d` : `${prefix}t`,
   };
 
+  const rated =
+    playbackRate === 1 ? rootAttributes : { ...rootAttributes, [RATE_ATTR]: num(playbackRate) };
+
   // The class lets `variables({ prefix })` scope its rule to this scene.
-  const root = element(
-    "svg",
-    prefix ? { ...rootAttributes, class: `${prefix}root` } : rootAttributes,
-    [
-      element("title", { id: `${prefix}t` }, children(options.title, true)),
-      ...(options.desc
-        ? [element("desc", { id: `${prefix}d` }, children(options.desc, true))]
-        : []),
-      ...(compiled.defs.length > 0 ? [element("defs", {}, compiled.defs)] : []),
-      ...(css ? [element("style", {}, [raw(`\n${css}\n`)])] : []),
-      ...compiled.body,
-    ],
-  );
+  const root = element("svg", prefix ? { ...rated, class: `${prefix}root` } : rated, [
+    element("title", { id: `${prefix}t` }, children(options.title, true)),
+    ...(options.desc ? [element("desc", { id: `${prefix}d` }, children(options.desc, true))] : []),
+    ...(compiled.defs.length > 0 ? [element("defs", {}, compiled.defs)] : []),
+    ...(css ? [element("style", {}, [raw(`\n${css}\n`)])] : []),
+    ...compiled.body,
+  ]);
 
   const source = serialize(root);
   const { errors } = validateSvg(source);

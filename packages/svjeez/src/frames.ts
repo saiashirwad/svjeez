@@ -1,12 +1,13 @@
 import type { Seconds } from "./motion";
 import { loopLength, seek } from "./page";
+import { rateOf } from "./rate";
 import { systemColorScheme } from "./scheme";
 
 export { validateSvg, type ValidationResult } from "./validate";
 
 export type ColorScheme = "light" | "dark";
 
-/** When to capture: exact playback times, or `count` frames spread evenly over one loop. */
+/** When to capture: exact scene times, or `count` frames spread evenly over one loop. */
 export type FrameTimes =
   | { readonly times: readonly Seconds[]; readonly count?: never }
   | { readonly count: number; readonly times?: never };
@@ -28,17 +29,19 @@ export type FrameOptions = FrameTimes &
     readonly sheet?: boolean | { readonly columns?: number };
   };
 
-/** An SVG open in headless Chromium, paused, ready to capture at any playback time. Close it when done. */
+/** An SVG open in headless Chromium, paused, ready to capture at any scene time. Close it when done. */
 export interface Scene {
   /** The SVG's size in CSS pixels. Captures are `scale` times larger. */
   readonly width: number;
   readonly height: number;
   readonly scale: number;
-  /** The longest animation in the SVG, in playback seconds: one loop of the scene. */
+  /** The longest animation in the SVG, in scene seconds: one loop of the scene. */
   readonly duration: Seconds;
+  /** The `playbackRate` the scene was rendered with. One loop takes `duration / playbackRate` seconds to play. */
+  readonly playbackRate: number;
   /** The scheme the scene renders in, after resolving "system". */
   readonly colorScheme: ColorScheme;
-  /** Seek every animation to `time` and return a PNG of the SVG. */
+  /** Seek every animation to scene second `time` and return a PNG of the SVG. */
   capture(time: Seconds): Promise<Uint8Array>;
   /** Run `fn` in the page. It is serialized, so it can use only `arg` and the page's globals. */
   evaluate<A, R>(fn: (arg: A) => R | Promise<R>, arg: A): Promise<R>;
@@ -55,7 +58,7 @@ export interface Frame {
 export interface Frames {
   /** The scheme the frames were rendered in, after resolving "system". */
   readonly colorScheme: ColorScheme;
-  /** The longest animation in the SVG, in playback seconds: one loop of the scene. */
+  /** The longest animation in the SVG, in scene seconds: one loop of the scene. */
   readonly duration: Seconds;
   readonly frames: readonly Frame[];
   readonly sheet?: Uint8Array;
@@ -118,7 +121,7 @@ const isSheetOptions = (sheet: FrameOptions["sheet"]): sheet is { readonly colum
 
 type Browser = Awaited<ReturnType<typeof launch>>;
 
-type Stage = Pick<Scene, "width" | "height" | "scale" | "colorScheme"> & {
+type Stage = Pick<Scene, "width" | "height" | "scale" | "colorScheme" | "playbackRate"> & {
   readonly background: string;
 };
 
@@ -143,6 +146,7 @@ const resolve = (caller: string, svg: string, options: SceneOptions): Stage => {
     height,
     scale,
     colorScheme,
+    playbackRate: rateOf(svg),
     background: options.background ?? "Canvas",
   };
 };
@@ -153,7 +157,7 @@ const ORIGIN = "https://svjeez.local/";
 const stage = async (
   browser: Browser,
   svg: string,
-  { width, height, scale, colorScheme, background }: Stage,
+  { width, height, scale, colorScheme, playbackRate, background }: Stage,
 ): Promise<Omit<Scene, "close">> => {
   const page = await browser.newPage({
     viewport: { width: Math.ceil(width), height: Math.ceil(height) },
@@ -178,6 +182,7 @@ const stage = async (
     scale,
     colorScheme,
     duration,
+    playbackRate,
     capture: async (time) => {
       await page.evaluate(seek, time);
 
@@ -214,7 +219,7 @@ export const openScene = async (
   }
 };
 
-/** Rasterize an SVG at chosen playback times in headless Chromium. Needs `playwright-core` and a Chromium build. */
+/** Rasterize an SVG at chosen scene times in headless Chromium. Needs `playwright-core` and a Chromium build. */
 export const renderFrames = async (svg: string, options: FrameOptions): Promise<Frames> => {
   const settings = resolve("renderFrames()", svg, options);
 

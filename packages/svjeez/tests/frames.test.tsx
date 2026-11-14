@@ -819,4 +819,48 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       await chrome.close();
     }
   });
+
+  test("take scene seconds on a scene played at another rate", async () => {
+    const fast = render(
+      { width: 20, height: 20, duration: 4, title: "Fast", playbackRate: 2 },
+      <rect
+        width={20}
+        height={20}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, 4, ease.linear)}
+      />,
+    );
+
+    const { chromium } = await import("playwright-core");
+    const chrome = await chromium.launch();
+
+    try {
+      const page = await chrome.newPage();
+      await page.setContent(`<!doctype html><body>${fast}`);
+      await page.addScriptTag({
+        content: `window.seek = ${seek};window.loopLength = ${loopLength};`,
+      });
+
+      const state = await page.evaluate(() => {
+        window.seek!(1);
+
+        return {
+          opacity: Number(getComputedStyle(document.querySelector("rect")!).opacity),
+          length: window.loopLength!(),
+        };
+      });
+
+      expect(state.opacity).toBeCloseTo(0.25, 2);
+      expect(state.length).toBe(4);
+    } finally {
+      await chrome.close();
+    }
+
+    const scene = await openScene(fast);
+
+    try {
+      expect([scene.duration, scene.playbackRate]).toEqual([4, 2]);
+    } finally {
+      await scene.close();
+    }
+  });
 });
