@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/hero.svg" width="840" alt="The svjeez wordmark inks on above a four-quadrant showcase: code morphing with a gliding marker, a typed flowchart traced by comets, hand-inked calligraphy written stroke by stroke, and a damped spring physics simulation plotted in real time." />
+  <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/hero.svg" width="840" alt="The title &quot;Animated SVGs from TypeScript&quot; rises in word by word, a yellow highlighter swipes under TypeScript, and a little yellow chick hops in to stand in for the full stop while a hand-lettered note points out it's all one img." />
 </p>
 
 <p align="center">
