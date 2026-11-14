@@ -28,7 +28,7 @@ const session = terminal(
   { theme, font: mono, x: 24, y: BAR + 22, fontSize: 12.5, lineHeight: 1.75, cps: 90, gap: 0.35 },
 );
 
-const D = Math.ceil(session.end) + 3;
+const D = Math.ceil(session.span.end) + 3;
 
 export default function build(): string {
   return render(

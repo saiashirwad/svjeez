@@ -105,9 +105,9 @@ export const make = (tall = false): string => {
     },
   );
 
-  const SHOW = session.end + 0.6;
+  const SHOW = session.span.end + 0.6;
   const shown = reveal(transcript, { at: SHOW, blocks: "line", step: 0.6, over: 0.3 });
-  const D = Math.ceil((shown.end + 4) / 2) * 2;
+  const D = Math.ceil((shown.span.end + 4) / 2) * 2;
 
   const spin = {
     x: agentWin.body.x + 20,

@@ -48,7 +48,7 @@ export const make = (tall = false): string => {
     color: theme.base0D,
   });
 
-  const D = Math.ceil(trip.end) + 3;
+  const D = Math.ceil(trip.span.end) + 3;
 
   return render(
     {

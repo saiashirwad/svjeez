@@ -152,7 +152,7 @@ const launch = typewriter(
   { at: TERM_AT + 0.35, cps: 18, cursor: true, blink: false },
 );
 
-const welcomeAt = launch.end + 0.25;
+const welcomeAt = launch.span.end + 0.25;
 const PROMPT = "make our launch page pop with svjeez";
 
 const ask = typewriter(
@@ -167,7 +167,7 @@ const ask = typewriter(
   { at: welcomeAt + 0.5, cps: 32, cursor: true, blink: false },
 );
 
-const SENT = ask.end + 0.3;
+const SENT = ask.span.end + 0.3;
 
 /** One transcript line: where it sits, when it shows, what it draws. */
 type Line = { row: number; at: number; node: SvgNode };

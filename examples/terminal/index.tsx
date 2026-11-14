@@ -30,8 +30,8 @@ export default function build(): string {
       height: H,
       title: "Terminal",
       desc: "Installing svjeez and building the examples, typed out in a terminal that follows the viewer's light or dark mode.",
-      duration: session.end + 2,
-      reducedMotion: { at: session.end + 1 },
+      duration: session.span.end + 2,
+      reducedMotion: { at: session.span.end + 1 },
       css,
     },
     <>

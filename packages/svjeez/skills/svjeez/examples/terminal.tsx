@@ -27,10 +27,10 @@ export default function build(): string {
       width: 608,
       height: 238,
       // session.end is when the last line lands. Hold it for a beat before the loop restarts.
-      duration: session.end + 2,
+      duration: session.span.end + 2,
       title: "Install and run",
       desc: "Two commands typed into a terminal window, each followed by its output.",
-      reducedMotion: { at: session.end + 1 },
+      reducedMotion: { at: session.span.end + 1 },
       css,
     },
     <>

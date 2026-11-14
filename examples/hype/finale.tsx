@@ -83,7 +83,7 @@ const PACKAGES = [
 const CHIP = { h: 34, gap: 10, icon: 16, pad: 14, fontSize: 14 };
 const chipW = (name: string) => CHIP.pad * 2 + CHIP.icon + 8 + mono.measure(name, CHIP.fontSize);
 const rowW = PACKAGES.reduce((w, [name]) => w + chipW(name), 0) + CHIP.gap * (PACKAGES.length - 1);
-const chipsAt = install.end + 0.25;
+const chipsAt = install.span.end + 0.25;
 
 /** The family, one chip per package, left to right. */
 const chips = PACKAGES.map(([name, icon], i) => {

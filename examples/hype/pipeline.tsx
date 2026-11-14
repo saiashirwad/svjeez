@@ -72,8 +72,8 @@ export const pipelineShot = ({ at, over }: Span) => {
   if (chart.kind !== "flowchart") throw new Error("the pipeline is a flowchart");
 
   const trip = flow(chart.route("idea", "svg"), {
-    at: typed.end + 0.6,
-    over: Math.min(1.3, at + over - typed.end - 1.2),
+    at: typed.span.end + 0.6,
+    over: Math.min(1.3, at + over - typed.span.end - 1.2),
     style: "comet",
     arrive: true,
     color: C.accent,

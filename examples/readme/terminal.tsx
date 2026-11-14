@@ -17,11 +17,11 @@ export default function build(): string {
     {
       width: 440,
       height: 210,
-      duration: session.end + 2,
+      duration: session.span.end + 2,
       title: "Terminal",
       desc: "Two commands typed into a terminal window, each followed by its output.",
       css,
-      reducedMotion: { at: session.end + 1 },
+      reducedMotion: { at: session.span.end + 1 },
     },
     <>
       <rect width="100%" height="100%" fill={theme.base01} />

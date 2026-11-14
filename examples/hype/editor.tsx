@@ -36,7 +36,7 @@ const src = code(highlight(SOURCE.join("\n"), "tsx"), {
 
 const typed = typewriter(src, { at: CODE_AT + 0.45, cps: 150, cursor: C.accent, blink: false });
 const landed = (n: number) => typed.spans[n - 1]!.at + typed.spans[n - 1]!.over;
-const runAt = typed.end + 0.25;
+const runAt = typed.span.end + 0.25;
 
 /** Live edits after the first run: each swaps one value in the source, and the preview follows a beat later. */
 const EDITS = [

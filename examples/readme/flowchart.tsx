@@ -35,7 +35,7 @@ export default function build(): string {
     {
       width: chart.bounds.w + 2 * M,
       height: chart.bounds.h + 2 * M,
-      duration: Math.ceil(trip.end) + 2,
+      duration: Math.ceil(trip.span.end) + 2,
       title: "Flowchart",
       desc: "A review flowchart revealed rank by rank, then a trace runs from the opened PR to the posted review.",
       css,

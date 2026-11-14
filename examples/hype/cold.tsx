@@ -19,7 +19,7 @@ const opening = typewriter(
   { at: 0.5, cps: 13, cursor: C.accent, blink: false },
 );
 
-const enterAt = opening.end + 0.35;
+const enterAt = opening.span.end + 0.35;
 export const COLD = { at: 0, over: enterAt + 1.9 };
 
 export const coldOpen = (

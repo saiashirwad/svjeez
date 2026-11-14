@@ -84,7 +84,7 @@ export function traffic(
     const route = routes[index < 0 ? routes.length - 1 : index]!;
     const points = random() < back ? [...route.points].reverse() : route.points;
     const run = flow(points, { ...token, color: route.color ?? token.color, at });
-    end = Math.max(end, run.end);
+    end = Math.max(end, run.span.end);
 
     return run.node;
   });
