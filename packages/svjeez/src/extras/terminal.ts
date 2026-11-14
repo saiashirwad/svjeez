@@ -78,7 +78,7 @@ export function terminal(
       blink: n === session.length - 1,
     });
 
-    const printed = typed.end + think;
+    const printed = typed.span.end + think;
 
     const lines = output.map((out, i) =>
       el.g(

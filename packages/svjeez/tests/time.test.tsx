@@ -603,7 +603,7 @@ describe("show()", () => {
 
   test("takes a span, a list, a plain literal; asks for something to show and a fade of 0 or more", () => {
     expect(scene(rect(show({ at: 2, over: 3 })))).toBe(scene(rect(show(span(2, 3)))));
-    expect(() => show([])).toThrow(/at least one span/);
+    expect(scene(rect(show([])))).toBe(scene(rect(motion({ opacity: 0 }))));
     expect(() => show(span(1, 2), { fade: -1 })).toThrow(/fade of 0 or more/);
     expect(() => show({ at: -1, over: 2 })).toThrow(/start of 0 or later/);
     expect(() => show({ at: 1, over: 0 })).toThrow(/positive over/);

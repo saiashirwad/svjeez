@@ -1,4 +1,18 @@
-import { css, def, draw, ease, enter, fx, motion, sampled, wiggle, type SyntaxOf } from "svjeez";
+import {
+  Clip,
+  css,
+  def,
+  draw,
+  ease,
+  enter,
+  fx,
+  motion,
+  sampled,
+  show,
+  span,
+  wiggle,
+  type SyntaxOf,
+} from "svjeez";
 import { el } from "svjeez/internal";
 
 const bg = def.linearGradient({}, <stop offset={0} stopColor="#000" />);
@@ -9,6 +23,10 @@ const py = css.property("py", { syntax: "number", inherits: false, initial: 0 })
 const tint = css.property("tint", { syntax: "color", inherits: false, initial: "#000" });
 
 export const valid = [
+  <Clip at={3.1} over={2}>
+    <rect animation={[motion({ x: 0 }).to({ x: 5 }, span(0, 1)).repeat(2).rewind(0.5), show([span(1), { at: 2, over: 1 }])]} />
+  </Clip>,
+  <circle r={2} animation={sampled((t) => ({ x: t }), { at: 1, over: 2, tolerance: { translate: 1 } })} />,
   <rect fill={bg} filter={glow} animation={[enter({ at: 0, over: 1 }), draw({ at: 1, over: 1 })]} />,
   <feTurbulence animation={motion({ seed: 1 }).to({ seed: 4 }, 0.4, ease.steps(3)).loop(0.4)} />,
   <text data-role="caption" aria-hidden="true" class={["mono", false]} style={{ letterSpacing: 2 }} animation={wiggle({ x: 1 }, { seed: 1 })} />,
@@ -26,6 +44,10 @@ export const valid = [
 export const syntax: SyntaxOf<typeof yaw> = "angle";
 
 export const invalid = [
+  // @ts-expect-error a transition needs a span with an over
+  <rect animation={motion({ x: 0 }).to({ x: 5 }, span(1))} />,
+  // @ts-expect-error sampled takes over or the older duration, not both
+  <circle animation={sampled((t) => ({ x: t }), { over: 2, duration: 2, tolerance: { translate: 1 } })} />,
   // @ts-expect-error misspelled attribute
   <path strokeLineCap="round" />,
   // @ts-expect-error a string url() where a ref is required

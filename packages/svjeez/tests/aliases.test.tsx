@@ -3,15 +3,24 @@ import {
   Camera,
   Pivot,
   Steady,
+  code,
+  cut,
+  during,
   ease,
   flow,
   motion,
   rect,
   render,
+  reveal,
   sample,
   sampled,
   sampledPath,
+  show,
+  terminal,
+  timeline,
+  typewriter,
   valuesAt,
+  visible,
   type CameraStop,
   type Child,
   type ChannelValues,
@@ -104,5 +113,52 @@ describe("deprecated names from before 0.7 still work", () => {
     expect(String(flow(line, { at: 0, over: 1, loop: 3 }).node)).toBe(
       String(flow(line, { at: 0, over: 1, period: 3 }).node),
     );
+  });
+
+  test("sampled duration is over", () => {
+    const fn = (t: number) => ({ x: t });
+    const tolerance = { translate: 0.1 };
+
+    expect(scene(<g animation={sampled(fn, { duration: 3, tolerance })} />)).toBe(
+      scene(<g animation={sampled(fn, { over: 3, tolerance })} />),
+    );
+  });
+
+  test("during, cut, tl.show and tl.enter are show", () => {
+    const tl = timeline({ a: 1, b: 2 });
+
+    expect(scene(<g animation={during({ at: 1, over: 2 }, 0.4)} />)).toBe(
+      scene(<g animation={show({ at: 1, over: 2 }, { fade: 0.4 })} />),
+    );
+    expect(scene(<g animation={cut({ at: 1, over: 2 })} />)).toBe(
+      scene(<g animation={show({ at: 1, over: 2 }, { fade: 0 })} />),
+    );
+    expect(scene(<g animation={tl.show("b")} />)).toBe(scene(<g animation={show(tl.b)} />));
+  });
+
+  test("visible still fades outside its spans, where show fades inside them", () => {
+    const spans = [{ at: 1, over: 1 }];
+
+    expect(scene(<g animation={visible(spans)} />)).not.toBe(scene(<g animation={show(spans)} />));
+  });
+
+  test("a result's end is its span's end", () => {
+    const typed = typewriter(code("ab"), { at: 1 });
+    const shell = terminal([{ cmd: "ls" }], { at: 1 });
+    const blocks = reveal(code("a\n\nb"), { at: 1 });
+    const trip = flow(
+      [
+        { x: 0, y: 0 },
+        { x: 9, y: 0 },
+      ],
+      { at: 1, over: 1 },
+    );
+
+    expect([typed.end, shell.end, blocks.end, trip.end]).toEqual([
+      typed.span.end,
+      shell.span.end,
+      blocks.span.end,
+      trip.span.end,
+    ]);
   });
 });

@@ -32,7 +32,7 @@ export interface ShowOptions {
 /**
  * On during each span, off outside. Fades sit inside the span: in over its first `fade` seconds and out over its last.
  * Spans that overlap or touch merge, so fades never collide, and a span shorter than two fades shrinks them. `fade: 0`
- * cuts: a shot in an edit. A span without `over` stays to the end and never fades out.
+ * cuts: a shot in an edit. A span without `over` stays to the end and never fades out. No spans, never shown.
  */
 const isList = (spans: When | readonly When[]): spans is readonly When[] => Array.isArray(spans);
 
@@ -45,7 +45,7 @@ export const show = (
   if (!(fade >= 0 && Number.isFinite(fade)))
     throw new Error(`show() needs a fade of 0 or more, got ${fade}.`);
 
-  if (list.length === 0) throw new Error("show() needs at least one span.");
+  if (list.length === 0) return motion({ opacity: 0 });
 
   for (const { at, over } of list) {
     if (!Number.isFinite(at) || at < 0)
