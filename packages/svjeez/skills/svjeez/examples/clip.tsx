@@ -5,7 +5,7 @@ import { Clip, ease, motion, render, show, span, type Point, type SvgNode } from
 // One gesture written from 0: a cursor reaches a card, drags it while a key is held, and the card rewinds at the end.
 // Every part reads the same spans, so moving a span moves all of them, and the clip places the whole gesture.
 const reach = span(0, 0.7);
-const grab = reach.then(1, 0.2);
+const grab = reach.next(1, 0.2);
 const down = grab.pad(0.15);
 
 const HOME: Point = { x: 30, y: 30 };

@@ -115,7 +115,7 @@ const aim = [src.get("call"), src.find("total"), src.lines(1, 2), src.at(2, 8)];
 
 
 const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
-tl.intro; tl.change.at; tl.end; tl.duration; // spans are span(at, over): tl.intro.then(2) is the next beat
+tl.intro; tl.change.at; tl.end; tl.duration; // spans are span(at, over): tl.intro.next(2) is the next beat
 const fade = show(tl.intro);                    // fade in at the start, out by the end
 const stays = show({ at: tl.change.at });       // fade in at the start and stay to the end
 const hard = show(tl.outro, { fade: 0 });       // on for the span, hard cuts, for a shot in an edit
@@ -146,19 +146,19 @@ const shown2 = reveal(src, { at: 1, step: 0.6 });                      // { node
 
 ## Annotations
 
-Each takes `during: Span` and aims at a `Rect` with `target`.
+Each takes `show: Span` and aims at a `Rect` with `target`.
 
 ```tsx
 
 
 const notes = (
   <>
-    <Focus stops={[{ during: tl.intro, target: src.lines(2) }]} dim={0.3}>{src.node}</Focus>
-    <Marker stops={[{ during: tl.intro, target: src.get("call").pad(4) }, { during: tl.change, target: src.find("total").pad(4) }]} />
-    <Callout target={src.get("call")} side="right" during={tl.outro} columns={24}>Handlers send intent</Callout>
-    <Arrow from={src.at(1, 1)} to={src.at(2, 3)} bend={0.2} during={tl.change} />
-    <Brace target={src.lines(1, 2)} side="left" label="two lines" during={tl.change} />
-    <Underline target={src.find("total")} variant="squiggle" during={tl.outro} />
+    <Focus stops={[{ show: tl.intro, target: src.lines(2) }]} dim={0.3}>{src.node}</Focus>
+    <Marker stops={[{ show: tl.intro, target: src.get("call").pad(4) }, { show: tl.change, target: src.find("total").pad(4) }]} />
+    <Callout target={src.get("call")} side="right" show={tl.outro} columns={24}>Handlers send intent</Callout>
+    <Arrow from={src.at(1, 1)} to={src.at(2, 3)} bend={0.2} show={tl.change} />
+    <Brace target={src.lines(1, 2)} side="left" label="two lines" show={tl.change} />
+    <Underline target={src.find("total")} variant="squiggle" show={tl.outro} />
   </>
 );
 ```
@@ -179,7 +179,7 @@ import { rect } from "svjeez";
 
 
 const FRAME = rect(0, 0, 800, 450);
-const stops: CameraStop[] = [{ during: { at: 4, over: 4 }, target: rect(300, 200, 160, 90) }, { during: { at: 8, over: 3 }, target: "all" }];
+const stops: CameraStop[] = [{ show: { at: 4, over: 4 }, target: rect(300, 200, 160, 90) }, { show: { at: 8, over: 3 }, target: "all" }];
 const zoomed = <Camera frame={FRAME} stops={stops} over={0.8}>{src.node}</Camera>;
 ```
 

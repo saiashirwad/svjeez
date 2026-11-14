@@ -18,7 +18,7 @@ const D = 9;
 // One gesture, written from 0 on a clock of its own: the cursor reaches for the title bar, grabs the window and drags
 // it while a key is held. Every part reads the same three spans, so moving a span moves all of them.
 const reach = span(0, 0.7);
-const grab = reach.then(1, 0.2);
+const grab = reach.next(1, 0.2);
 const down = grab.pad(0.15);
 const leave = span(down.end + 0.1, 0.5);
 

@@ -88,13 +88,13 @@ Custom properties from `css.property` animate on every tag above except filter p
 
 ```tsx
 const reach = span(0, 0.7);
-const grab = reach.then(1, 0.2); // the next span: 1s long, starting 0.2s after reach ends
+const grab = reach.next(1, 0.2); // the next span: 1s long, starting 0.2s after reach ends
 const down = grab.pad(0.15);     // grown 0.15s each side; negative shrinks
 reach.end; reach.shift(2);       // 0.7; the same span 2s later
 span(5);                         // from 5s to the end of the clock; its end is Infinity
 ```
 
-A plain `{ at, over }` is a span too. `span()` only adds `.end`, `.shift(dt)`, `.then(over, gap?)` and `.pad(before, after?)`. `typewriter`, `terminal`, `reveal` and `flow` return `.span`, so `typed.span.then(1)` is the next beat and `typed.span.end` is when it lands.
+A plain `{ at, over }` is a span too. `span()` only adds `.end`, `.shift(dt)`, `.next(over, gap?)` and `.pad(before, after?)`. `typewriter`, `terminal`, `reveal` and `flow` return `.span`, so `typed.span.next(1)` is the next beat and `typed.span.end` is when it lands.
 
 ### Clips
 

@@ -25,7 +25,7 @@ export interface Spanned extends Span {
   /** The same span `dt` seconds later. */
   shift(dt: Seconds): Spanned;
   /** The next span: `over` long, starting `gap` seconds after this one ends. */
-  then(over: Seconds, gap?: Seconds): Spanned;
+  next(over: Seconds, gap?: Seconds): Spanned;
   /** Grow it `before` seconds earlier and `after` (default `before`) seconds later. Negative shrinks. */
   pad(before: Seconds, after?: Seconds): Spanned;
 }
@@ -60,10 +60,10 @@ class Range implements Span {
     return build(this.at + dt, this.over, "shift()");
   }
 
-  then(over: Seconds, gap: Seconds = 0): Range {
-    finite(gap, "then()");
+  next(over: Seconds, gap: Seconds = 0): Range {
+    finite(gap, "next()");
 
-    return build(this.end + gap, over, "then()");
+    return build(this.end + gap, over, "next()");
   }
 
   pad(before: Seconds, after: Seconds = before): Range {
@@ -109,7 +109,7 @@ function build(at: Seconds, over: Seconds | undefined, what: string): Range | Ta
 
 /**
  * A span of a clock, `over` seconds long from `at`. Without `over` it runs to the end. Spans chain:
- * `span(0, 0.7).then(1, 0.2)` starts a gap after the first ends, and `.pad(0.15)` grows one on both sides.
+ * `span(0, 0.7).next(1, 0.2)` starts a gap after the first ends, and `.pad(0.15)` grows one on both sides.
  */
 export function span(at: Seconds, over: Seconds): Spanned;
 export function span(at: Seconds): OpenSpanned;

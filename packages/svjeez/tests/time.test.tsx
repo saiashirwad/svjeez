@@ -57,7 +57,7 @@ const rect = (animation: Motion<any>) => <rect width={10} height={10} animation=
 describe("span()", () => {
   test("a span knows its end, and shifts, chains and pads into new spans", () => {
     const reach = span(0, 0.7);
-    const grab = reach.then(1, 0.2);
+    const grab = reach.next(1, 0.2);
     const down = grab.pad(0.15);
 
     expect(reach.end).toBeCloseTo(0.7, 9);
@@ -65,9 +65,16 @@ describe("span()", () => {
     expect(down.at).toBeCloseTo(0.75, 9);
     expect(down.over).toBeCloseTo(1.3, 9);
     expect(span(1, 2).shift(2)).toMatchObject({ at: 3, over: 2 });
-    expect(span(1, 2).then(1)).toMatchObject({ at: 3, over: 1 });
+    expect(span(1, 2).next(1)).toMatchObject({ at: 3, over: 1 });
     expect(span(1, 2).pad(1, 0)).toMatchObject({ at: 0, over: 3 });
     expect(span(1, 2).pad(-0.5)).toMatchObject({ at: 1.5, over: 1 });
+  });
+
+  test("a span is not a thenable, so awaiting or returning one from an async function works", async () => {
+    expect("then" in span(1, 2)).toBe(false);
+    expect("then" in span(1)).toBe(false);
+    expect(await span(1, 2)).toMatchObject({ at: 1, over: 2 });
+    expect(await (async () => span(1, 2).next(1))()).toMatchObject({ at: 3, over: 1 });
   });
 
   test("a span without over runs to the end, and never ends", () => {
@@ -660,7 +667,7 @@ describe("show()", () => {
     const tl = timeline({ a: 3, b: 4 });
 
     expect(scene(rect(tl.show("b")))).toBe(scene(rect(show(tl.b))));
-    expect(tl.b.then(2).at).toBe(7);
+    expect(tl.b.next(2).at).toBe(7);
     expect(keys(scene(rect(tl.enter("b"))), "opacity").at(-1)?.value).toBe(1);
   });
 });
@@ -740,7 +747,7 @@ describe("results return a span", () => {
     expect([blocks.span.at, blocks.span.end]).toEqual([3, blocks.end]);
     expect([trip.span.at, trip.span.end]).toEqual([4, trip.end]);
     expect(trip.span.end).toBeCloseTo(6.7, 9);
-    expect(typed.span.then(1, 0.5).at).toBeCloseTo(typed.end + 0.5, 9);
+    expect(typed.span.next(1, 0.5).at).toBeCloseTo(typed.end + 0.5, 9);
   });
 });
 
