@@ -80,6 +80,10 @@ describe("highlight", () => {
     expect(line).toContainEqual(["string", '"svjeez"']);
   });
 
+  test("a tab after an astral character pads by code points", () => {
+    expect(flat(highlight("😀\tx", "js", { tabSize: 4 }))).toEqual(["😀   x"]);
+  });
+
   test("a bad tab size throws", () => {
     expect(() => highlight("x", "js", { tabSize: 0 })).toThrow(/tabSize/);
   });
