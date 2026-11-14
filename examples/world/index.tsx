@@ -100,12 +100,12 @@ function scaleOf(target: Rect): number {
 const BACK = legs.at(-1)!.land + 0.8;
 
 const stops: CameraStop[] = [
-  { during: { at: 0, over: INTRO }, target: "all" },
+  { show: { at: 0, over: INTRO }, target: "all" },
   ...legs.map(({ camera, target }) => ({
-    during: { at: camera, over: PAN + FLIGHT + PAUSE },
+    show: { at: camera, over: PAN + FLIGHT + PAUSE },
     target,
   })),
-  { during: { at: BACK, over: D - BACK }, target: "all" },
+  { show: { at: BACK, over: D - BACK }, target: "all" },
 ];
 
 const Follow = ({ children }: { children: Child }): SvgNode => (

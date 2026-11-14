@@ -156,7 +156,9 @@ More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for ea
 | `during(span, fade)`, `cut(span)`, `visible(spans, fade)`, `tl.show(name)`, `tl.enter(name)` | `show(span, { fade })`, `show(span, { fade: 0 })`, `show(spans)`, `show(tl.name)`, `show({ at: tl.name.at })`. `show` fades inside the span, where `visible` faded outside it |
 | `sampled(fn, { duration })`, `sampled.path`, `nightfall` and `globe` with `duration` | `{ over }`, plus `at` to start later, with the function given time from 0 |
 | `{ from, to }` on a voxel block | `show: { at, over }` |
-| `.end` of a `typewriter`, `terminal`, `reveal` or `flow` result | `.span.end` |
+| `.end` of a `typewriter`, `terminal`, `reveal`, `flow` or `morph` result | `.span.end` |
+| `.end` of a `derive`, `epicycles`, `traffic`, `walk`, chart or construction result (by hand) | `.span.end` |
+| `during` on `Arrow`, `Brace`, `Callout`, `Underline`, and on `Focus`, `Marker` and `Camera` stops (by hand) | `show` |
 | `frames --times`, `restyle({ at, onceAt })` and `seek` in playback seconds | Scene seconds, the same numbers unless `playbackRate` is not 1 |
 
 [`scripts/codemod-0.7.ts`](scripts/codemod-0.7.ts) rewrites a project's `.ts`, `.tsx`, `.js` and `.jsx` files for all of it. It needs nothing installed. Download it, commit your work, and run it from the project:

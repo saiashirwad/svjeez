@@ -55,7 +55,7 @@ export const handwriting = (
     />
     <Caption
       at={HAND.at + 0.2}
-      tag="ink · svjeez/extras"
+      tag="Ink · svjeez · @svjeez/math"
       call="<Ink tool={tool.nib()} /> + streamlines(wind)"
       line="single-line fonts inked stroke by stroke, over a vector field"
     />

@@ -48,7 +48,7 @@ const walk = agent.walk(
   { at: 0.6, dwell: 0.8, token: { style: "comet", arrive: true } },
 );
 
-const D = Math.ceil(walk.end + 1.5);
+const D = Math.ceil(walk.span.end + 1.5);
 
 export default function build(): string {
   return render(
@@ -58,7 +58,7 @@ export default function build(): string {
       duration: D,
       title: "Agent lifecycle",
       desc: "A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.",
-      reducedMotion: { at: walk.end - 0.3 },
+      reducedMotion: { at: walk.span.end - 0.3 },
       css,
     },
     <>

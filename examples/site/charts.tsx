@@ -29,7 +29,7 @@ const c = chart({
 const bars = c.bars(merged, { at: 0.6, stagger: 0.12, radius: 3 });
 
 const trend = c.line(Object.entries(opened), {
-  at: bars.end,
+  at: bars.span.end,
   over: 1.4,
   curve: "monotone",
   dots: 3,

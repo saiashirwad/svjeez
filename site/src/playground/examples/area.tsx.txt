@@ -42,7 +42,7 @@ export default function build(): string {
       <rect width={340} height={170} fill={theme.base00} />
       {c.node}
       {wait.node}
-      <g animation={enter({ at: wait.end, over: 0.5 })}>
+      <g animation={enter({ at: wait.span.end, over: 0.5 })}>
         <line
           x1={week}
           y1={c.y(30)}

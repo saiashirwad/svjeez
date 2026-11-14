@@ -48,8 +48,8 @@ export default function build(): string {
       <g animation={outro(D)}>
         <Focus
           stops={[
-            { during: one, target: src.lines(1, 3).pad(6) },
-            { during: two, target: src.lines(7, 8).pad(6) },
+            { show: one, target: src.lines(1, 3).pad(6) },
+            { show: two, target: src.lines(7, 8).pad(6) },
           ]}
           dim={0.28}
         >
@@ -60,7 +60,7 @@ export default function build(): string {
           color={theme.base0D}
           target={src.find("draw")}
           side="bottom"
-          during={one}
+          show={one}
           font={mono}
           fontSize={14}
           columns={30}
@@ -72,7 +72,7 @@ export default function build(): string {
           color={theme.base09}
           target={src.find("enter")}
           side="bottom"
-          during={two}
+          show={two}
           font={mono}
           fontSize={14}
           columns={30}

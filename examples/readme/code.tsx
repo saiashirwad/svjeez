@@ -49,9 +49,9 @@ export default function build(): string {
       <Marker
         theme={theme}
         stops={[
-          { during: { at: 0.5, over: 1 }, target: one.get("call").pad(3) },
-          { during: { at: 2, over: 3 }, target: two.get("call").pad(3) },
-          { during: { at: 5.5, over: 2 }, target: one.get("call").pad(3) },
+          { show: { at: 0.5, over: 1 }, target: one.get("call").pad(3) },
+          { show: { at: 2, over: 3 }, target: two.get("call").pad(3) },
+          { show: { at: 5.5, over: 2 }, target: one.get("call").pad(3) },
         ]}
       />
       {m.node}

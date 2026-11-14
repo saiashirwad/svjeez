@@ -53,7 +53,7 @@ export const dataShot = ({ at }: Span) => {
   const bars = plot.bars(Object.fromEntries(pairs), { at: grow, stagger: STEP, color: C.hairline });
 
   const trend = plot.line(pairs, {
-    at: bars.end,
+    at: bars.span.end,
     over: 0.8,
     curve: "monotone",
     dots: true,
@@ -82,7 +82,7 @@ export const dataShot = ({ at }: Span) => {
       <g transform="translate(690 450)">{voxel.scene({ camera: view, blocks })}</g>
       <Caption
         at={at + 0.1}
-        tag="@svjeez/charts · svjeez/voxel"
+        tag="@svjeez/charts · @svjeez/voxel"
         call="chart().bars(stars) + voxel.scene()"
         line="one dataset, drawn as a chart and as a skyline"
       />

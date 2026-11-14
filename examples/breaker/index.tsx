@@ -363,9 +363,9 @@ export default function build(): string {
           <Focus
             dim={0.3}
             stops={[
-              { during: beat.guard, target: source.lines(6, 9).pad(2) },
+              { show: beat.guard, target: source.lines(6, 9).pad(2) },
               {
-                during: beat.trip,
+                show: beat.trip,
                 target: [source.lines(15, 18).pad(2), source.lines(21, 24).pad(2)],
               },
             ]}
@@ -377,7 +377,7 @@ export default function build(): string {
           <Callout
             target={source.lines(6, 9)}
             side="right"
-            during={beat.guard}
+            show={beat.guard}
             color={theme.base0A}
             fontSize={14}
             columns={22}
@@ -387,7 +387,7 @@ export default function build(): string {
           <Callout
             target={source.get("trip")}
             side="right"
-            during={beat.trip}
+            show={beat.trip}
             color={theme.base08}
             fontSize={14}
             columns={22}
@@ -437,7 +437,7 @@ export default function build(): string {
           <Callout
             target={after.lines(25)}
             side="right"
-            during={{ at: change + 1.3, over: 4 }}
+            show={{ at: change + 1.3, over: 4 }}
             color={theme.base0B}
             fontSize={14}
             columns={22}

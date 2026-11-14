@@ -66,7 +66,7 @@ export default function build(): string {
         side="below"
         label="cross term"
         fontSize={18}
-        during={{ at: 3.4, over: 2.8 }}
+        show={{ at: 3.4, over: 2.8 }}
       />
       <g animation={motion({ opacity: 0 }).at(1.6).to({ opacity: 1 }, 0.6)}>
         {graph.node}

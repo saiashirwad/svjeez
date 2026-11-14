@@ -26,11 +26,11 @@ export default function build(): string {
     {
       width: 400,
       height: 180,
-      duration: session.end + 2,
+      duration: session.span.end + 2,
       title: "Install and build",
       desc: "A terminal installs svjeez, then compiles a scene to one SVG with no JavaScript.",
       css: `${css}\n.mono text{font-family:ui-monospace,Menlo,monospace}`,
-      reducedMotion: { at: session.end },
+      reducedMotion: { at: session.span.end },
     },
     <>
       <g fontFamily="system-ui, sans-serif">{shell.node}</g>

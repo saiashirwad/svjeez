@@ -26,7 +26,7 @@ const c = chart({
 
 const bars = c.bars(stars, { at: 0.4, stagger: 0.12 });
 const trend = c.line(Object.entries(stars), {
-  at: bars.end,
+  at: bars.span.end,
   curve: "monotone",
   dots: 3,
 });

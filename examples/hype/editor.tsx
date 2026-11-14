@@ -189,7 +189,7 @@ export const codeShot = (
           color={C.accent}
           over={0.2}
           stops={[lineRect(6), lineRect(7, 8), lineRect(9, 11)].map((r, i) => ({
-            during: { at: landed([6, 8, 9][i]!) - 0.05, over: 0.2 },
+            show: { at: landed([6, 8, 9][i]!) - 0.05, over: 0.2 },
             target: r,
           }))}
         />

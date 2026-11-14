@@ -53,7 +53,7 @@ export default function build(): string {
       <g animation={outro(D)}>
         <g animation={enter({ at: 0.2, over: 0.5 })}>{c.node}</g>
         {wait.node}
-        <g animation={enter({ at: wait.end, over: 0.6 }, { opacity: 0, y: -6 })}>
+        <g animation={enter({ at: wait.span.end, over: 0.6 }, { opacity: 0, y: -6 })}>
           <line
             x1={ships}
             y1={c.y(30)}
@@ -73,7 +73,7 @@ export default function build(): string {
             bot ships
           </text>
         </g>
-        <g animation={enter({ at: wait.end + 0.4, over: 0.6 }, { opacity: 0, y: 6 })}>
+        <g animation={enter({ at: wait.span.end + 0.4, over: 0.6 }, { opacity: 0, y: 6 })}>
           <text
             x={W / 2}
             y={H - 26}

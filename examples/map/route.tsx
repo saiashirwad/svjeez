@@ -46,16 +46,16 @@ const view = (center: Point, width: number): Rect =>
 const PAN = 1.1;
 
 const STOPS: CameraStop[] = [
-  { during: { at: 5, over: PAN }, target: view(PLACES.bramblecott.at, 300) },
+  { show: { at: 5, over: PAN }, target: view(PLACES.bramblecott.at, 300) },
   ...[PLACES.ford.at, PLACES.elder.at, PLACES.pass.at, PLACES.ashfall.at].map((p) => ({
-    during: { at: reach(p) - PAN * 0.8, over: PAN },
+    show: { at: reach(p) - PAN * 0.8, over: PAN },
     target: view(p, 320),
   })),
   {
-    during: { at: reach(CINDER) - PAN * 0.6, over: PAN },
+    show: { at: reach(CINDER) - PAN * 0.6, over: PAN },
     target: view({ x: CINDER.x - 6, y: CINDER.y - 22 }, 210),
   },
-  { during: { at: 18.2, over: PAN }, target: "all" },
+  { show: { at: 18.2, over: PAN }, target: "all" },
 ];
 
 /** The camera. The map and what moves over it each ride one, so they zoom together. */

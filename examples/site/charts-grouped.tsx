@@ -38,7 +38,7 @@ const open = c.bars(opened, {
 });
 
 const done = c.bars(merged, {
-  at: open.end,
+  at: open.span.end,
   stagger: 0.1,
   group: { index: 1, count: 2 },
   color: blue,
@@ -70,10 +70,10 @@ export default function build(): string {
       <g animation={outro(D)}>
         <g animation={enter({ at: 0.2, over: 0.5 })}>{c.node}</g>
         {key(64, tint(theme, "comment"), "opened", 0.4)}
-        {key(140, blue, "merged", open.end - 0.2)}
+        {key(140, blue, "merged", open.span.end - 0.2)}
         {open.node}
         {done.node}
-        <g animation={enter({ at: done.end, over: 0.6 }, { opacity: 0, y: 6 })}>
+        <g animation={enter({ at: done.span.end, over: 0.6 }, { opacity: 0, y: 6 })}>
           <text
             x={W / 2}
             y={H - 22}

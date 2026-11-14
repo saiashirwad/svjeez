@@ -23,11 +23,11 @@ export default function build(): string {
     {
       width: 320,
       height: 110,
-      duration: d.end + 2,
+      duration: d.span.end + 2,
       title: "Solve for x",
       desc: "2x + 4 = 10 becomes 2x = 6, then x = 3, with the equals sign held still.",
       css,
-      reducedMotion: { at: d.end },
+      reducedMotion: { at: d.span.end },
     },
     <>
       <rect width={320} height={110} fill={theme.base00} />

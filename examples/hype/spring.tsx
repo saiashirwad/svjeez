@@ -67,7 +67,7 @@ export const springShot = ({ at, over }: Span) => {
         fontSize={15}
         theme={theme}
         color={C.accent}
-        during={notes}
+        show={notes}
       />
       <Brace
         target={formula.get("wobble")}
@@ -76,7 +76,7 @@ export const springShot = ({ at, over }: Span) => {
         fontSize={15}
         theme={theme}
         color={C.accent}
-        during={notes}
+        show={notes}
       />
       <path d={`M${BOB - 40} 230H${BOB + 40}`} stroke={C.muted} strokeWidth={2} />
       <g clipPath={hung}>

@@ -29,7 +29,7 @@ export default function build(): string {
     {
       width: agent.bounds.w + 2 * M,
       height: agent.bounds.h + 2 * M,
-      duration: Math.ceil(walk.end) + 2,
+      duration: Math.ceil(walk.span.end) + 2,
       title: "State machine",
       desc: "An agent's states light up in turn as a token runs from idle through plan and act to done.",
       css,

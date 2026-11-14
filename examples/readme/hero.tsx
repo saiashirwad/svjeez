@@ -319,9 +319,9 @@ const q1 = (
     <Marker
       theme={theme}
       stops={[
-        { during: { at: 0.8, over: 3.1 }, target: beforeCode.get("call").pad(4) },
-        { during: { at: 4.3, over: 4.2 }, target: afterCode.get("call").pad(4) },
-        { during: { at: 8.9, over: 2.3 }, target: beforeCode.get("ret").pad(4) },
+        { show: { at: 0.8, over: 3.1 }, target: beforeCode.get("call").pad(4) },
+        { show: { at: 4.3, over: 4.2 }, target: afterCode.get("call").pad(4) },
+        { show: { at: 8.9, over: 2.3 }, target: beforeCode.get("ret").pad(4) },
       ]}
     />
     {morphed.node}

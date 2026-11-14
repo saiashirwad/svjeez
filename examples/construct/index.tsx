@@ -56,7 +56,7 @@ const tDone = g.time;
 const note = (source: string, y: number) =>
   tex(source, { x: 690, y, fontSize: 25, theme, anchor: [0, 0.5], display: false });
 
-const duration = Math.ceil(g.end + 3);
+const duration = Math.ceil(g.span.end + 3);
 
 export default function build(): string {
   return render(

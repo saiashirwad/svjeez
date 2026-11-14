@@ -42,7 +42,7 @@ const linux = c.line(pairs(builds.linux), {
 });
 
 const macos = c.line(pairs(builds.macos), {
-  at: linux.end - 0.4,
+  at: linux.span.end - 0.4,
   curve: "linear",
   dots: 3,
   label: "macos",
@@ -50,7 +50,7 @@ const macos = c.line(pairs(builds.macos), {
 });
 
 const windows = c.line(pairs(builds.windows), {
-  at: macos.end - 0.4,
+  at: macos.span.end - 0.4,
   curve: "step",
   label: "windows",
   color: tint(theme, "number"),
@@ -74,7 +74,7 @@ export default function build(): string {
         {linux.node}
         {macos.node}
         {windows.node}
-        <g animation={enter({ at: windows.end, over: 0.6 }, { opacity: 0, y: 6 })}>
+        <g animation={enter({ at: windows.span.end, over: 0.6 }, { opacity: 0, y: 6 })}>
           <text
             x={W / 2}
             y={H - 26}

@@ -260,18 +260,18 @@ export default function build(): string {
 
       <Focus
         stops={[
-          { during: tl.problem, target: rect(frame.x, one.lines(5).y, frame.w, one.lines(5).h) },
+          { show: tl.problem, target: rect(frame.x, one.lines(5).y, frame.w, one.lines(5).h) },
         ]}
         dim={0.28}
       >
         <Marker
           color={C.accent}
           stops={[
-            { during: tl.setup, target: one.lines(2).pad(5) },
-            { during: tl.problem, target: rule.pad(4) },
-            { during: tl.refactor, target: two.find("useReducer(reducer, 0)").pad(4) },
-            { during: tl.result, target: two.get("send").pad(4) },
-            { during: tl.rewind, target: one.lines(2).pad(5) },
+            { show: tl.setup, target: one.lines(2).pad(5) },
+            { show: tl.problem, target: rule.pad(4) },
+            { show: tl.refactor, target: two.find("useReducer(reducer, 0)").pad(4) },
+            { show: tl.result, target: two.get("send").pad(4) },
+            { show: tl.rewind, target: one.lines(2).pad(5) },
           ]}
         />
         {m.node}
@@ -280,34 +280,34 @@ export default function build(): string {
       <g class="note">
         <Underline
           target={one.find("count", 1)}
-          during={{ at: tl.setup.at + 0.8, over: tl.setup.over - 0.8 }}
+          show={{ at: tl.setup.at + 0.8, over: tl.setup.over - 0.8 }}
           color={C.accent}
         />
         <Underline
           target={one.find("setCount", 1)}
-          during={{ at: tl.setup.at + 1.4, over: tl.setup.over - 1.4 }}
+          show={{ at: tl.setup.at + 1.4, over: tl.setup.over - 1.4 }}
           color={C.accent}
         />
         <Arrow
           from={rule.pad(4).bottom}
           to={{ x: panel.x - 16, y: 317 }}
           bend={0.22}
-          during={tl.problem}
+          show={tl.problem}
           color={C.accent}
         />
-        <Underline target={two.find("useReducer")} during={tl.refactor} color={C.accent} />
+        <Underline target={two.find("useReducer")} show={tl.refactor} color={C.accent} />
         <Brace
           target={two.lines(11, 13)}
           side="right"
           label="the rule"
-          during={tl.result}
+          show={tl.result}
           color={C.accent}
         />
         <Arrow
           from={two.get("send").bottom}
           to={two.get("def").top}
           bend={0.35}
-          during={tl.result}
+          show={tl.result}
           color={C.accent}
         />
       </g>
