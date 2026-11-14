@@ -1,4 +1,4 @@
-import type { Attrs, Color, Point, Rect, SvgNode, Base16 } from "svjeez";
+import type { Attrs, Color, Point, Rect, Spanned, SvgNode, Base16 } from "svjeez";
 
 export type FontAttr = NonNullable<Attrs<"text">["fontFamily"]>;
 
@@ -107,7 +107,9 @@ export interface Bar {
 export interface Bars {
   readonly node: SvgNode;
   readonly bars: readonly Bar[];
-  /** Seconds into the scene when the last bar has grown. */
+  /** From `at` to when the last bar has grown. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: number;
 }
 
@@ -117,6 +119,9 @@ export interface Line {
   readonly d: string;
   /** Every point, in scene px. */
   readonly points: readonly Point[];
+  /** From `at` to when the line has drawn, with its label. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: number;
 }
 

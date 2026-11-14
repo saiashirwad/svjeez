@@ -185,8 +185,8 @@ describe("reduced motion", () => {
       { width: 100, height: 100, duration: 6, title: "Marker", reducedMotion: { at: 4 } },
       Marker({
         stops: [
-          { during: { at: 0, over: 1 }, target: rect(0, 0, 10, 20) },
-          { during: { at: 2, over: 1 }, target: rect(10, 10, 30, 40) },
+          { show: { at: 0, over: 1 }, target: rect(0, 0, 10, 20) },
+          { show: { at: 2, over: 1 }, target: rect(10, 10, 30, 40) },
         ],
       }),
     );
@@ -206,7 +206,7 @@ describe("reduced motion", () => {
     const svg = render(
       { width: 100, height: 100, duration: 6, title: "Focus", reducedMotion: { at: 3 } },
       Focus({
-        stops: [{ during: { at: 2, over: 2 }, target: rect(0, 0, 10, 10) }],
+        stops: [{ show: { at: 2, over: 2 }, target: rect(0, 0, 10, 10) }],
         dim: 0.3,
         children: el.rect({ width: 10, height: 10 }),
       }),
@@ -310,6 +310,7 @@ test("morph reports when each transition runs and when the last settles", () => 
     { at: 3, over: 0.5 },
   ]);
   expect(two.end).toBe(3.5);
+  expect(two.span.end).toBeCloseTo(two.end, 9);
   expect(morph([a], { at: [] })).toMatchObject({ spans: [], end: 0 });
 });
 
@@ -319,7 +320,7 @@ test("a brace runs along the bottom or top of a target, and centers its label th
   const draw = (side: "above" | "below") =>
     render(
       { width: 300, height: 200, duration: 4, title: "brace" },
-      Brace({ target, side, label: "term", during: { at: 1, over: 2 } }),
+      Brace({ target, side, label: "term", show: { at: 1, over: 2 } }),
     );
 
   const [below, above] = [draw("below"), draw("above")];
@@ -363,7 +364,7 @@ describe("errors name the call, the constraint and the value", () => {
     ["Marker", () => Marker({ stops: [] }), "Marker() needs at least one stop, got none."],
     [
       "Marker over",
-      () => Marker({ stops: [{ during: span, target: rect(0, 0, 1, 1) }], over: 0 }),
+      () => Marker({ stops: [{ show: span, target: rect(0, 0, 1, 1) }], over: 0 }),
       "Marker() needs a positive over, got 0.",
     ],
     [
@@ -379,12 +380,12 @@ describe("errors name the call, the constraint and the value", () => {
     ["terminal", () => terminal([]), "terminal() needs at least one command, got none."],
     [
       "Callout columns",
-      () => Callout({ target: rect(0, 0, 1, 1), during: span, children: "hi", columns: 0 }),
+      () => Callout({ target: rect(0, 0, 1, 1), show: span, children: "hi", columns: 0 }),
       "Callout needs columns of at least 1, got 0.",
     ],
     [
       "Callout text",
-      () => Callout({ target: rect(0, 0, 1, 1), during: span, children: "  " }),
+      () => Callout({ target: rect(0, 0, 1, 1), show: span, children: "  " }),
       "Callout needs some text, got an empty string.",
     ],
     [
@@ -404,11 +405,11 @@ describe("accent color", () => {
   const [span, box] = [{ at: 0, over: 2 }, rect(10, 10, 30, 20)];
 
   const items = {
-    Marker: (theme) => Marker({ theme, stops: [{ during: span, target: box }] }),
-    Arrow: (theme) => Arrow({ theme, from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, during: span }),
-    Callout: (theme) => Callout({ theme, target: box, during: span, children: "hi" }),
-    Brace: (theme) => Brace({ theme, target: box, during: span }),
-    Underline: (theme) => Underline({ theme, target: box, during: span }),
+    Marker: (theme) => Marker({ theme, stops: [{ show: span, target: box }] }),
+    Arrow: (theme) => Arrow({ theme, from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, show: span }),
+    Callout: (theme) => Callout({ theme, target: box, show: span, children: "hi" }),
+    Brace: (theme) => Brace({ theme, target: box, show: span }),
+    Underline: (theme) => Underline({ theme, target: box, show: span }),
     flow: (theme) =>
       flow(
         [
@@ -458,13 +459,13 @@ describe("timed components render valid SVG that moves only inside their span", 
       ).node,
       [2, 5],
     ],
-    Arrow: [Arrow({ from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, during: span }), [2, 5]],
-    Brace: [Brace({ target: box, during: span }), [2, 5]],
-    Underline: [Underline({ target: box, during: span }), [2, 5]],
+    Arrow: [Arrow({ from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, show: span }), [2, 5]],
+    Brace: [Brace({ target: box, show: span }), [2, 5]],
+    Underline: [Underline({ target: box, show: span }), [2, 5]],
     Camera: [
       Camera({
         frame: rect(0, 0, 100, 100),
-        stops: [{ during: span, target: box }],
+        stops: [{ show: span, target: box }],
         over: 0.5,
         children: el.rect({ width: 5, height: 5 }),
       }),

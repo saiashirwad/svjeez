@@ -94,13 +94,13 @@ The shapes start as the outline and hide until `at`. Keep the map under them and
 
 ## Traffic
 
-`traffic(lines, { during, rate, seed, speed, style, color, size, back })` sends `rate` particles a second over the span `during`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, end }`.
+`traffic(lines, { during, rate, seed, speed, style, color, size, back })` sends `rate` particles a second over the span `during`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
 
 `arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
 
 ```tsx
 const routes = flights.map(([a, b]) => ({ points: arc(map, a, b), weight: 3 }));
-const { node } = traffic(routes, { during: { at: 1, over: 8 }, rate: 6, seed: 4, style: "comet", size: 2.5 });
+const { node } = traffic(routes, { show: { at: 1, over: 8 }, rate: 6, seed: 4, style: "comet", size: 2.5 });
 ```
 
 Particles still in flight at the end of the scene fail the scene's length check, so end `during` a trip's length before the scene ends.

@@ -120,6 +120,7 @@ describe("bars", () => {
     const c = band();
     const result = c.bars({ Q1: 12, Q2: 48, Q3: 31, Q4: 87 }, { at: 1, over: 0.5, stagger: 0.2 });
     expect(result.end).toBeCloseTo(2.1, 6);
+    expect(result.span.end).toBeCloseTo(result.end, 9);
     const svg = scene(result.node);
     expect(svg).toContain("@keyframes");
     expect(svg.match(/animation-name:/g)?.length).toBe(4);
@@ -181,6 +182,7 @@ describe("line and area", () => {
     expect(line.points).toHaveLength(3);
     expect(line.points[1]).toEqual({ x: c.x(5), y: c.y(60) });
     expect(line.end).toBe(3);
+    expect(line.span.end).toBeCloseTo(line.end, 9);
     expect(line.d).toMatch(/^M/);
     expect(scene(line.node)).toContain("stroke-dasharray");
   });

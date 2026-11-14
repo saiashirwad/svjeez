@@ -1,5 +1,6 @@
 import type { Color, Point, Seconds, Span, SvgNode } from "svjeez";
 import { el } from "svjeez/internal";
+import { span as spanOf, type Spanned } from "svjeez";
 import { flow, type FlowOptions } from "svjeez";
 import type { GeoMap, LonLat } from "./index.ts";
 
@@ -29,7 +30,9 @@ export interface Traffic {
   readonly node: SvgNode;
   /** How many particles leave. */
   readonly count: number;
-  /** When the last one arrives. */
+  /** From the first departure window to when the last one arrives. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
 }
 
@@ -89,7 +92,7 @@ export function traffic(
     return run.node;
   });
 
-  return { node: el.g({}, nodes), count, end };
+  return { node: el.g({}, nodes), count, span: spanOf(during.at, end - during.at), end };
 }
 
 export interface ArcOptions {

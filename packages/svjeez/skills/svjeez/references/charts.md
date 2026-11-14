@@ -21,7 +21,7 @@ const c = chart({
 });
 
 const bars = c.bars(sales, { at: 0.8 });
-const trend = c.line(Object.entries(sales), { at: bars.end, curve: "monotone", dots: true, label: "trend" });
+const trend = c.line(Object.entries(sales), { at: bars.span.end, curve: "monotone", dots: true, label: "trend" });
 
 <>
   <g animation={enter({ at: 0.2, over: 0.6 })}>{c.node}</g>

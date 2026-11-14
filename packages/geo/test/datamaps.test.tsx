@@ -208,6 +208,7 @@ describe("traffic()", () => {
     expect(scene(a.node)).toBe(scene(b.node));
     expect(scene(a.node)).not.toBe(scene(c.node));
     expect(a.end).toBeGreaterThan(5);
+    expect(a.span.end).toBeCloseTo(a.end, 9);
   });
 
   test("favors heavier routes", () => {

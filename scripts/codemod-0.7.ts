@@ -2,7 +2,7 @@
 // now live in svjeez and the @svjeez packages) and the renames (Values, sample, sampledPath, Steady, Pivot at, voxel
 // block at, flow loop, fieldFlow, renderVideo and the icon type), and the time model: during, cut, visible, tl.show and
 // tl.enter become show(), sampled and globe duration become over, a voxel block's from and to become show, and the .end
-// of a typewriter, terminal, reveal or flow result becomes .span.end.
+// of a typewriter, terminal, reveal, flow or morph result becomes .span.end.
 //
 //   bun codemod-0.7.ts [--dry] <file or folder>...
 //
@@ -558,7 +558,8 @@ export const rewrite = (fileName: string, source: string): Result => {
     }
 
   const results = bindings.flatMap((b) =>
-    b.to.module === "svjeez" && ["typewriter", "terminal", "reveal", "flow"].includes(b.to.name)
+    b.to.module === "svjeez" &&
+    ["typewriter", "terminal", "reveal", "flow", "morph"].includes(b.to.name)
       ? [b.local]
       : [],
   );

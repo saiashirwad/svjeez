@@ -14,6 +14,7 @@ import {
   type Base16,
 } from "svjeez";
 import { el } from "svjeez/internal";
+import { span as spanOf } from "svjeez";
 
 import type {
   Area,
@@ -235,6 +236,7 @@ export function buildSeries(f: Frame) {
         labels,
       ]),
       bars: placed,
+      span: spanOf(at, end - at),
       end,
     };
   }
@@ -322,7 +324,9 @@ export function buildSeries(f: Frame) {
     const placed = place("line()", points);
     const { d, node } = trace("line()", placed, options, options.color ?? f.nextColor(), span);
 
-    return { node, d, points: placed, end: span.at + span.over + (options.label ? 0.4 : 0) };
+    const end = span.at + span.over + (options.label ? 0.4 : 0);
+
+    return { node, d, points: placed, span: spanOf(span.at, end - span.at), end };
   }
 
   function area(points: Raw, options: AreaOptions = {}): Area {
@@ -369,6 +373,7 @@ export function buildSeries(f: Frame) {
       d,
       fill,
       points: placed,
+      span: spanOf(at, over + (options.label ? 0.4 : 0)),
       end: at + over + (options.label ? 0.4 : 0),
     };
   }

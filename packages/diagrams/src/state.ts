@@ -15,6 +15,7 @@ import {
   type Beats,
 } from "svjeez";
 import { el } from "svjeez/internal";
+import { span as spanOf, type Spanned } from "svjeez";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
 import {
@@ -64,7 +65,9 @@ export interface Walk<S extends string> {
   readonly node: SvgNode;
   /** When each state is lit. */
   readonly spans: Record<S, readonly Span[]>;
-  /** When the last state goes dark. */
+  /** From the first state lit to when the last goes dark. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
 }
 
@@ -501,7 +504,9 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
         [...nodes.keys()].map((s) => [s, lit.get(s) ?? []]),
       ) as Record<Id, Span[]>;
 
-      return { node: overlay, spans, end: arrive.at(-1)! + dwell };
+      const end = arrive.at(-1)! + dwell;
+
+      return { node: overlay, spans, span: spanOf(arrive[0]!, end - arrive[0]!), end };
     },
   };
 }

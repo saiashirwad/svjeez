@@ -11,6 +11,7 @@ import {
 import { el } from "svjeez/internal";
 
 import { rect, type Color, type Rect } from "svjeez";
+import { span as spanOf, type Spanned } from "svjeez";
 import { tex, type Tex } from "./index.ts";
 
 /** One line of a derivation: TeX, and what was done to reach it. */
@@ -47,7 +48,9 @@ export interface DeriveOptions {
 
 export interface Derivation {
   readonly node: SvgNode;
-  /** When the last change settles. */
+  /** From the first line to when the last change settles. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
   /** Every line as typeset, aligned. */
   readonly lines: readonly Tex[];
@@ -186,6 +189,7 @@ export function derive(
 
   return {
     node: el.g({}, [body, notes.filter((n): n is SvgNode => n !== undefined)]),
+    span: spanOf(at, start(list.length - 1) + (list.length > 1 ? over : 0) - at),
     end: start(list.length - 1) + (list.length > 1 ? over : 0),
     lines,
     bounds: full,

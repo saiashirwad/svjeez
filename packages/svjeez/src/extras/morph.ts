@@ -1,5 +1,6 @@
 import { el } from "../el";
 import { EPSILON, ease, motion, type Motion, type Seconds, type Span, type Stack } from "../motion";
+import { span as spanOf, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
 import { number, type Code } from "./code";
 
@@ -103,6 +104,9 @@ interface Chain {
 export interface MorphResult {
   readonly node: SvgNode;
   readonly spans: readonly Span[];
+  /** From the first move to when the last one settles. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
 }
 
@@ -189,6 +193,7 @@ export function morph(
   return {
     node: el.g({}, [numbers, chains.map((chain) => chain.source.draw(chain.word, chain.track))]),
     spans: at.map((start): Span => ({ at: start, over })),
+    span: spanOf(at[0] ?? 0, at.length > 0 ? at.at(-1)! + over - at[0]! : 0),
     end: at.length > 0 ? at.at(-1)! + over : 0,
   };
 }

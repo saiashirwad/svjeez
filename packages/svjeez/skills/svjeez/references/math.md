@@ -15,7 +15,7 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 
 <>
   {m.node}
-  <Brace target={expanded.get("mid")} side="below" label="cross term" fontSize={18} during={{ at: 2.5, over: 1.5 }} />
+  <Brace target={expanded.get("mid")} side="below" label="cross term" fontSize={18} show={{ at: 2.5, over: 1.5 }} />
 </>;
 ```
 
@@ -124,7 +124,7 @@ g.angle(B, A, C, { label: "60^\\circ" });
 - `midpoint`, `parallel(line, p)`, `perpendicular(line, p)`, `perpendicularBisector(a, b)` and `angleBisector(a, b, c)`, the angle at `b`. The two bisectors draw the compass arcs that find them, as aids. `{ compass: false }` draws only the result.
 - `polygon(points, { fill, opacity, outline, label })`, `angle(a, b, c, { label, count, mark })` (a square at a right angle, an arc otherwise) and `tick(segment, { count })` for congruence marks.
 - Labels are `tex()` formulas. Each sits off its point, away from the lines and circles that meet there, and away from the figure's center when nothing does. Segment and line labels sit beside the middle on the outer side.
-- Every element takes `at` and `over`, `color`, and `aid`. Without `at` it starts when the one before it ends. `together(() => { … })` starts what it holds at once. `step(pause?)` waits and returns when the next beat starts, as does reading `g.time`. `g.end` is when the last element finishes, so `duration` can follow it.
+- Every element takes `at` and `over`, `color`, and `aid`. Without `at` it starts when the one before it ends. `together(() => { … })` starts what it holds at once. `step(pause?)` waits and returns when the next beat starts, as does reading `g.time`. `g.span.end` is when the last element finishes, so `duration` can follow it.
 - `settle()` fades every aid made so far, to `faint` opacity. Mark compass arcs and helper points with `aid: true`.
 
 Time the text beside the figure from `g.time`, read before the elements it explains. `examples/construct/index.tsx` does so with `tex().write()`.

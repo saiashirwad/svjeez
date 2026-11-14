@@ -1,4 +1,5 @@
 import { ease, motion, type Color, type SvgNode, defaultDark, type Base16 } from "svjeez";
+import { span as spanOf, type Spanned } from "svjeez";
 import { el } from "svjeez/internal";
 
 import { tex } from "./index.ts";
@@ -146,7 +147,9 @@ export interface Construction {
   readonly node: SvgNode;
   /** When the next element starts, in seconds. Use it to time captions and other nodes beside the figure. */
   readonly time: number;
-  /** When the last element finishes. */
+  /** From the start to when the last element finishes. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: number;
   /** A point at `x`, `y` in units. */
   point(x: number, y: number, label?: string, options?: PointOptions): GeoPoint;
@@ -417,6 +420,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   const circles: GeoCircle[] = [];
   const polygons: (readonly GeoPoint[])[] = [];
   let cursor = options.start ?? 0;
+  const firstAt = cursor;
   let end = cursor;
   let batch: { start: number; end: number } | undefined;
 
@@ -990,6 +994,9 @@ export function construct(options: ConstructOptions = {}): Construction {
     },
     get time() {
       return cursor;
+    },
+    get span() {
+      return spanOf(firstAt, end - firstAt);
     },
     get end() {
       return end;

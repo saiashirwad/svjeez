@@ -32,7 +32,7 @@ const c = chart({
 });
 
 const bars = c.bars(sales, { at: 0.6 });
-const trend = c.line(Object.entries(sales), { at: bars.end, curve: "monotone", dots: true });
+const trend = c.line(Object.entries(sales), { at: bars.span.end, curve: "monotone", dots: true });
 
 export default () =>
   render(
