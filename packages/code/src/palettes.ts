@@ -133,10 +133,10 @@ export const rosePine: Base16 = /* @__PURE__ */ base16(
   "#eb6f92",
   "#f6c177",
   "#ebbcba",
+  "#31748f",
   "#9ccfd8",
   "#3e8fb0",
   "#c4a7e7",
-  "#eb6f92",
   "#524f67",
 );
 
@@ -153,9 +153,9 @@ export const rosePineDawn: Base16 = /* @__PURE__ */ base16(
   "#b4637a",
   "#ea9d34",
   "#d7827e",
+  "#286983",
   "#56949f",
   "#286983",
   "#907aa9",
-  "#b4637a",
   "#cecacd",
 );
