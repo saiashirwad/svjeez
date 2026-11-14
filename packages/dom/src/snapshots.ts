@@ -139,7 +139,15 @@ export const snapshots = async <T>(
   run: (dom: Browser) => Promise<T>,
 ): Promise<T> => {
   const hash = createHash("sha256")
-    .update(JSON.stringify([inputs, await version(), FORMAT]))
+    // CSS given once as a string is data, so it counts like a mount's own; built by a function, it goes in `inputs`.
+    .update(
+      JSON.stringify([
+        inputs,
+        typeof options.css === "string" ? options.css : null,
+        await version(),
+        FORMAT,
+      ]),
+    )
     .digest("hex");
 
   if (!process.env.SVJEEZ_DOM_REFRESH) {

@@ -3,22 +3,27 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ease, font, render, span } from "svjeez";
+import { Clip, ease, font, render } from "svjeez";
 import { validateSvg } from "svjeez/frames";
 import {
   act,
   boxes,
+  click,
   browser,
   Dom,
   fill,
   find,
   rect,
-  render as markup,
+  duration,
+  html,
+  hover,
   size,
   snap,
   snapshots,
+  wait,
   type Browser,
   type Flow,
+  type Snapshot,
 } from "../src/index.ts";
 
 const regular = font(
@@ -141,45 +146,44 @@ describe("snap", () => {
     // The focus ring is a shadow that only the typed state has.
     expect(typed.root.children[0]).toMatchObject({ shadows: [{ spread: 3 }] });
 
-    await card.render('<div class="card"><input placeholder="email"></div>');
+    await card.html('<div class="card"><input placeholder="email"></div>');
     expect(JSON.stringify(await card.snap())).not.toContain('"text":"hi"');
     await card.close();
   });
 
-  test("run: a generator composes sub-flows with yield*, and each snap carries its name and timing", async () => {
+  test("run: sub-flows spread in, and each snap carries its name and timing", async () => {
     const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
       css: CSS,
     });
 
-    async function* type(text: string, at: number) {
-      yield fill("input", text);
-      yield snap("typed", span(at, 1));
-    }
+    const type = (text: string) => [fill("input", text), snap("typed", { over: 1 })];
 
-    async function* flow() {
-      yield snap("idle");
-      yield* type("hi", 0.5);
-      yield act((page) => page.fill("input", ""));
+    const steps = await card.run([
+      snap("idle"),
+      wait(0.5),
+      ...type("hi"),
+      act((page) => page.fill("input", "")),
       // Back where it started: names may repeat.
-      yield snap("idle", { at: 2, over: 0.5, ease: ease.pop });
-      yield markup('<div class="card"><p>done</p></div>');
-      yield snap(span(3, 0.5));
-    }
+      snap("idle", { over: 0.5, ease: ease.pop }),
+      html('<div class="card"><p>done</p></div>'),
+      snap(),
+    ]);
+    const names = steps.map((s) => ("wait" in s ? "wait" : ("root" in s ? s : s[0]).name));
 
-    const steps = await card.run(flow());
-    const names = steps.map((s) => ("root" in s ? s : s[0]).name);
-
-    expect(names).toEqual(["idle", "typed", "idle", undefined]);
-    expect(steps[1]).toMatchObject([{ name: "typed" }, { at: 0.5, over: 1 }]);
-    expect(steps[2]).toEqual([expect.anything(), { at: 2, over: 0.5 }, ease.pop]);
+    expect(names).toEqual(["idle", "wait", "typed", "idle", undefined]);
+    expect(steps[1]).toEqual({ wait: 0.5 });
+    expect(steps[2]).toMatchObject([{ name: "typed" }, { over: 1 }]);
+    expect(steps[3]).toEqual([expect.anything(), { over: 0.5, ease: ease.pop }]);
     expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hi"');
-    expect(JSON.stringify(steps[2])).not.toContain('"text":"hi"');
-    expect(JSON.stringify(steps[3])).toContain('"text":"done"');
+    expect(JSON.stringify(steps[3])).not.toContain('"text":"hi"');
+    expect(JSON.stringify(steps[4])).toContain('"text":"done"');
+    // 0.5 held, 1 typing, 0.5 back, 0.6 by default.
+    expect(duration(steps)).toBeCloseTo(2.6);
     expect(validateSvg(draw(steps)).errors).toEqual([]);
     await card.close();
   });
 
-  test("run: a list of instructions as data runs the same way, checked before it starts", async () => {
+  test("run: plain data runs the same way, checked before it starts", async () => {
     const card = await dom.mount(
       '<div class="card"><input placeholder="email"><button class="badge">go</button></div>',
       { css: CSS },
@@ -189,14 +193,20 @@ describe("snap", () => {
       { click: "input" },
       { press: "h" },
       { fill: ["input", "hey"] },
-      { snap: "typed", at: 0.5, over: 1 },
+      { snap: "typed", over: 1 },
       { hover: "button" },
       { move: [0, 0] },
-      { render: '<div class="card"><p>done</p></div>' },
-      { snap: "done", at: 2, over: 0.5 },
+      { wait: 1 },
+      { html: '<div class="card"><p>done</p></div>' },
+      { snap: "done", over: 0.5 },
     ]);
 
-    expect(steps.map((s) => ("root" in s ? s : s[0]).name)).toEqual(["idle", "typed", "done"]);
+    expect(steps.map((s) => ("wait" in s ? s.wait : ("root" in s ? s : s[0]).name))).toEqual([
+      "idle",
+      "typed",
+      1,
+      "done",
+    ]);
     expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hey"');
     expect(JSON.stringify(find(steps, "done"))).toContain('"text":"done"');
 
@@ -206,20 +216,62 @@ describe("snap", () => {
         (e: Error) => e.message,
       );
 
-    // The first snap's span would be read before anything runs, so the page is never touched.
-    expect(await failure(card.run([fill("input", "x"), snap("a", span(0, 1))]))).toContain(
-      "first snap has a span",
+    // Checked before anything runs, so the page is never touched.
+    expect(await failure(card.run([fill("input", "x"), snap("a", { over: 1 })]))).toContain(
+      "first snap has timing",
     );
-    expect(await failure(card.run([snap("a"), { snap: "b", at: 1 }]))).toContain("at and over");
+    expect(await failure(card.run([act(() => undefined), wait(1), snap("a")]))).toContain(
+      "before the first snap",
+    );
     expect(await failure(card.run([{ scroll: "x" } as never]))).toContain("scroll");
-
-    async function* late() {
-      yield act(() => undefined);
-      yield snap("a", span(0, 1));
-    }
-
-    expect(await failure(card.run(late()))).toContain("first snap has a span");
     await card.close();
+  });
+
+  test("instructions take a part name, by data-part or the parts option, else a selector", async () => {
+    const markup =
+      '<div class="card"><input data-part="email" placeholder="email"><input class="pw" placeholder="password"><button class="badge">go</button></div>';
+    const card = await dom.mount(markup, { css: CSS, parts: { password: ".pw" } });
+    const [typed] = (await card.run([
+      fill("email", "a@b.c"),
+      fill("password", "secret"),
+      click("button"),
+      snap("typed"),
+    ])) as [Snapshot];
+
+    expect(JSON.stringify(boxes(typed, "email"))).toContain('"text":"a@b.c"');
+    expect(JSON.stringify(boxes(typed, "password"))).toContain('"text":"secret"');
+    await card.close();
+  });
+
+  test("html() clears hover and focus, so the new markup starts at rest", async () => {
+    const button = (label: string) =>
+      `<div class="card"><input placeholder="email"><button class="hov">${label}</button></div>`;
+    const css = CSS + ".hov{background:#eee}.hov:hover{background:#c00}";
+    const card = await dom.mount(button("go"), { css });
+    const [hovered, after] = (await card.run([
+      hover("button"),
+      snap("hovered"),
+      html(button("again")),
+      snap("after"),
+    ])) as [Snapshot, Snapshot];
+
+    expect(JSON.stringify(hovered)).toContain("rgb(204,0,0)");
+    expect(JSON.stringify(after)).not.toContain("rgb(204,0,0)");
+    await card.close();
+  });
+
+  test("dom.run mounts, runs the flow and closes the page", async () => {
+    await using local = await browser({ fonts: [regular], css: CSS });
+    const steps = await local.run('<div class="card"><input placeholder="email"></div>', [
+      snap("idle"),
+      fill("input", "hi"),
+      snap("typed"),
+    ]);
+
+    expect(steps).toHaveLength(2);
+    // The browser's css applies: the card's border is there.
+    expect(find(steps, "idle")!.root.border?.widths).toEqual([1, 1, 1, 1]);
+    expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hi"');
   });
 
   test("css can be built from the markup", async () => {
@@ -228,7 +280,7 @@ describe("snap", () => {
     });
 
     expect((await card.snap()).root.shadows).toHaveLength(1);
-    await card.render('<div class="card badge">Hi again</div>');
+    await card.html('<div class="card badge">Hi again</div>');
     expect((await card.snap()).root.children[0]).toMatchObject({ text: "Hi again" });
     await card.close();
   });
@@ -239,11 +291,11 @@ describe("Dom", () => {
     const card = await dom.mount('<div class="card"><p>first</p><p>last</p></div>', { css: CSS });
     const before = await card.snap();
 
-    await card.render(
+    await card.html(
       '<div class="card"><p>first</p><span class="badge">new</span><p>last</p></div>',
     );
     const after = await card.snap();
-    const svg = draw([before, after], { at: [0.5] });
+    const svg = draw([before, wait(0.5), after]);
 
     expect(validateSvg(svg).errors).toEqual([]);
     // "last" moves down as one text element; it is not drawn twice to crossfade.
@@ -258,11 +310,11 @@ describe("Dom", () => {
     );
     const before = await card.snap();
 
-    await card.render(
+    await card.html(
       '<div class="card"><div>title</div><div>All 14 checks passed</div><div>Auto-merge <span class="badge">+230</span></div></div>',
     );
     const after = await card.snap();
-    const svg = draw([before, after], { at: [0.5] });
+    const svg = draw([before, wait(0.5), after]);
 
     expect(validateSvg(svg).errors).toEqual([]);
     // The footer slides down as itself, so its label is drawn once and its number counts; the new row fades in.
@@ -278,9 +330,9 @@ describe("Dom", () => {
     });
     const before = await card.snap();
 
-    await card.render('<div class="card"><span class="badge wide">new</span></div>');
+    await card.html('<div class="card"><span class="badge wide">new</span></div>');
     const after = await card.snap();
-    const svg = draw([before, after], { at: [0.5] });
+    const svg = draw([before, wait(0.5), after]);
 
     expect(svg.match(/>new</g)).toHaveLength(1);
     expect(svg).toContain("@keyframes");
@@ -296,23 +348,22 @@ describe("Dom", () => {
     );
     const before = await card.snap();
 
-    await card.render(
+    await card.html(
       '<div class="card"><section class="badge wide" data-key="s">new</section></div>',
     );
     const after = await card.snap();
 
-    expect(draw([before, after], { at: [0.5] }).match(/>new</g)).toHaveLength(1);
+    expect(draw([before, wait(0.5), after]).match(/>new</g)).toHaveLength(1);
 
     // The same two states without the key: different tags, so each fades.
-    await card.render('<div class="card"><div class="badge">new</div></div>');
+    await card.html('<div class="card"><div class="badge">new</div></div>');
     const plain = await card.snap();
-    await card.render('<div class="card"><section class="badge wide">new</section></div>');
+    await card.html('<div class="card"><section class="badge wide">new</section></div>');
     const plainAfter = await card.snap();
 
-    expect(draw([plain, plainAfter], { at: [0.5] }).match(/>new</g)).toHaveLength(2);
+    expect(draw([plain, wait(0.5), plainAfter]).match(/>new</g)).toHaveLength(2);
 
-    const pair = draw([plain, plainAfter], {
-      at: [0.5],
+    const pair = draw([plain, wait(0.5), plainAfter], {
       pair: (box) => (box.tag === "div" || box.tag === "section" ? "badge" : undefined),
     });
 
@@ -327,20 +378,24 @@ describe("Dom", () => {
     const idle = await card.snap();
     const typed = await card.snap((page) => page.fill("input", "hi"));
 
-    await card.render('<div class="card"><input placeholder="email"><p>failed</p></div>');
+    await card.html('<div class="card"><input placeholder="email"><p>failed</p></div>');
     const failed = await card.snap();
 
-    const svg = draw([idle, typed, [failed, span(1.5, 0.5)]], { at: [0.5] });
+    const steps = [idle, wait(0.5), typed, wait(0.4), [failed, { over: 0.5 }]] as const;
+    const svg = draw(steps);
 
     expect(validateSvg(svg).errors).toEqual([]);
     // Two transitions, each a drawing of its own, handed over once.
     expect(svg.match(/animation-name:/g)?.length).toBeGreaterThan(2);
     expect(svg).toContain(">failed<");
     expect(size([idle, typed, failed]).height).toBe(failed.height);
+    // 0.5 held, 0.6 by default, 0.4 held, 0.5.
+    expect(duration(steps)).toBeCloseTo(2);
+    expect(duration([idle, typed, wait(1)])).toBeCloseTo(1.6);
 
-    expect(() => draw([idle, typed, failed], { at: [0.5] })).toThrow("at[1]");
-    expect(() => draw([[idle, span(0, 1)], typed], { at: [0.5] })).toThrow("first state");
-    expect(() => draw([idle, typed, failed], { at: [0.5, 0.8], over: 0.6 })).toThrow("overlap");
+    expect(() => draw([wait(1), idle, typed])).toThrow("before the first state");
+    expect(() => draw([[idle, { over: 1 }], typed])).toThrow("first state");
+    expect(() => draw([idle, wait(-1), typed])).toThrow("wait of 0 or more");
     await card.close();
   });
 
@@ -356,7 +411,7 @@ describe("Dom", () => {
     expect(advances).toHaveLength(8);
     expect(advances.every((n, i) => n > (advances[i - 1] ?? 0))).toBe(true);
 
-    const svg = draw([idle, typed], { at: [0.5], over: 0.8 });
+    const svg = draw([idle, wait(0.5), [typed, { over: 0.8 }]]);
 
     expect(validateSvg(svg).errors).toEqual([]);
     // Drawn once, behind a clip that widens in steps; the placeholder is drawn once and cut.
@@ -366,7 +421,7 @@ describe("Dom", () => {
     expect(svg).toMatch(/width:\s*[\d.]+px/);
 
     // Deleting un-types the same text backwards, and the placeholder returns.
-    const back = draw([typed, idle], { at: [0.5], over: 0.8 });
+    const back = draw([typed, wait(0.5), [idle, { over: 0.8 }]]);
 
     expect(back.match(/>hi there</g)).toHaveLength(1);
     expect(back.match(/>email</g)).toHaveLength(1);
@@ -378,21 +433,55 @@ describe("Dom", () => {
     const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
     const before = await card.snap();
 
-    await card.render('<div class="card"><p>230 lines</p></div>');
+    await card.html('<div class="card"><p>230 lines</p></div>');
     const after = await card.snap();
-    const svg = draw([before, after], { at: [0.5] });
+    const svg = draw([before, wait(0.5), after]);
 
     expect(validateSvg(svg).errors).toEqual([]);
     expect(svg).toContain(">222 lines<");
     expect(svg.match(/ lines</g)).toHaveLength(17);
 
-    await card.render('<div class="card"><p>no lines</p></div>');
-    const other = draw([before, await card.snap()], { at: [0.5] });
+    await card.html('<div class="card"><p>no lines</p></div>');
+    const other = draw([before, wait(0.5), await card.snap()]);
 
     expect(other).toContain(">214 lines<");
     expect(other).toContain(">no lines<");
     expect(other).not.toContain("<clipPath");
     expect(other.match(/ lines</g)).toHaveLength(2);
+    await card.close();
+  });
+
+  test("a flow reused later through <Clip at> plays the same moves, shifted", async () => {
+    const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+    const steps = await card.run([
+      snap(),
+      wait(0.5),
+      html('<div class="card"><p>230 lines</p><span class="badge">new</span></div>'),
+      snap({ over: 1 }),
+      wait(0.5),
+      html('<div class="card"><p>214 lines</p></div>'),
+      snap(),
+    ]);
+    const scene = (node: Parameters<typeof render>[1]) =>
+      render({ ...size(steps), duration: 8, title: "dom" }, node);
+    const now = scene(<Dom states={steps} fonts={[regular]} />);
+    const later = scene(
+      <Clip at={3}>
+        <Dom states={steps} fonts={[regular]} />
+      </Clip>,
+    );
+    // Every key time, as a fraction of the 8s loop.
+    const keys = (svg: string) =>
+      [...svg.matchAll(/([\d.]+)%\s*\{/g)]
+        .map((m) => (Number(m[1]) / 100) * 8)
+        .filter((s) => s > 0.01 && s < 7.99);
+
+    expect(validateSvg(later).errors).toEqual([]);
+    expect(now).not.toBe(later);
+    // Nothing moves before the clip starts, and the first move starts 0.5s in, as it does unclipped.
+    expect(Math.min(...keys(now))).toBeCloseTo(0.5, 1);
+    expect(Math.min(...keys(later))).toBeCloseTo(3.5, 1);
+    expect(Math.max(...keys(later)) - Math.max(...keys(now))).toBeCloseTo(3, 1);
     await card.close();
   });
 
@@ -414,11 +503,12 @@ describe("snapshots", () => {
     const file = join(dir, "nested", "snapshots.json");
     let runs = 0;
 
-    async function* flow(text: string, at: number) {
-      yield snap("idle");
-      yield fill("input", text);
-      yield snap("typed", { at, over: 1, ease: ease.pop });
-    }
+    const flow = (text: string, hold: number): Flow => [
+      snap("idle"),
+      wait(hold),
+      fill("input", text),
+      snap("typed", { over: 1, ease: ease.pop }),
+    ];
 
     const run = (f: Flow) => async (d: Browser) => {
       runs++;
@@ -443,13 +533,15 @@ describe("snapshots", () => {
       // New timing replays the same snapshots; new text, a new instruction or new inputs read the page again.
       const later = await snapshots(file, bogus, run(flow("hi", 2)));
 
-      expect(later.steps[1]).toEqual([find(second.steps, "typed")!, { at: 2, over: 1 }, ease.pop]);
+      expect(later.steps[1]).toEqual({ wait: 2 });
+      expect(later.steps[2]).toEqual([find(second.steps, "typed")!, { over: 1, ease: ease.pop }]);
+      expect(duration(later.steps)).toBe(3);
       await expect(snapshots(file, bogus, run(flow("yo", 1)))).rejects.toThrow();
       await expect(
         snapshots(
           file,
           bogus,
-          run([snap("idle"), fill("input", "hi"), snap("typed", span(1, 1)), snap()]),
+          run([snap("idle"), fill("input", "hi"), snap("typed", { over: 1 }), snap()]),
         ),
       ).rejects.toThrow();
       await expect(

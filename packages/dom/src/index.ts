@@ -5,6 +5,7 @@ export {
   type Card,
   type MountOptions,
   type OpenOptions,
+  type Url,
 } from "./browser.ts";
 
 export {
@@ -14,19 +15,21 @@ export {
   hover,
   move,
   press,
-  render,
+  html,
   snap,
+  wait,
   type Act,
   type Action,
   type Flow,
   type Instruction,
   type Snap,
   type Timing,
+  type Wait,
 } from "./flow.ts";
 
 export { snapshots, type SnapshotsOptions } from "./snapshots.ts";
 
-export { Dom, size, type DomProps, type Step } from "./draw.tsx";
+export { Dom, duration, size, type DomProps, type Step } from "./draw.tsx";
 
 export { boxes, find, rect } from "./find.ts";
 

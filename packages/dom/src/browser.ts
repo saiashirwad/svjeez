@@ -2,11 +2,16 @@ import type { Page } from "playwright-core";
 import type { Font, FontValue } from "svjeez";
 import { merge } from "./scheme.ts";
 import type { Step } from "./draw.tsx";
-import type { Action, Flow, Snap } from "./flow.ts";
+import type { Action, Flow, Instruction } from "./flow.ts";
 import type { Snapshot } from "./tree.ts";
 import { walk } from "./walk.ts";
 
+/** CSS for the page: your Tailwind build, a theme, anything. A function gets the markup, for CSS built from it. */
+type Css = string | ((html: string) => string | Promise<string>);
+
 export interface BrowserOptions {
+  /** CSS for every mounted card, unless a mount brings its own. */
+  readonly css?: Css;
   /** Fonts the page uses, embedded as @font-face so layout and the drawn text match. Pass the same ones to `<Dom fonts>`. */
   readonly fonts?: readonly FontValue[];
   /**
@@ -23,7 +28,7 @@ export interface BrowserOptions {
 }
 
 interface PageOptions {
-  /** Named elements, by CSS selector. An element also gets a part from its `data-part`. */
+  /** Named elements, by CSS selector. An element also gets a part from its `data-part`, and instructions take either name. */
   readonly parts?: Readonly<Record<string, string>>;
   /** Room around the element for shadows and rings, in px. Default 16. */
   readonly pad?: number;
@@ -32,8 +37,8 @@ interface PageOptions {
 }
 
 export interface MountOptions extends PageOptions {
-  /** CSS for the page: your Tailwind build, a theme, anything. A function gets the markup, for CSS built from it. */
-  readonly css?: string | ((html: string) => string | Promise<string>);
+  /** Overrides the browser's `css` for this card. */
+  readonly css?: Css;
   /** Classes on `<html>`. */
   readonly root?: { readonly class?: string };
 }
@@ -45,17 +50,22 @@ export interface OpenOptions extends PageOptions {
   readonly root: string;
 }
 
+/** A running app to open, as `open` takes it. */
+export interface Url extends OpenOptions {
+  readonly url: string;
+}
+
 /** One live page, kept open so state (typed text, focus, hover) carries from one snapshot to the next. */
 export interface Card {
   /** Run `action` on the page, if given, then read the page into a snapshot. */
   readonly snap: (action?: PageAction) => Promise<Snapshot>;
   /**
-   * Runs a flow on this page, so state carries from one instruction to the next, and resolves to a step per snap,
-   * in order, ready for `<Dom states>`.
+   * Runs a flow on this page, so state carries from one instruction to the next, and resolves to a step per snap
+   * and wait, in order, ready for `<Dom states>`.
    */
   readonly run: (flow: Flow) => Promise<Step[]>;
-  /** Swap the markup of a mounted card, running its `css` again if that is a function. */
-  readonly render: (html: string) => Promise<void>;
+  /** Swap the markup of a mounted card, running its `css` again if that is a function. Hover and focus are cleared. */
+  readonly html: (markup: string) => Promise<void>;
   readonly close: () => Promise<void>;
 }
 
@@ -64,6 +74,11 @@ export interface Browser {
   readonly mount: (html: string, options?: MountOptions) => Promise<Card>;
   /** Open a running app (a dev server, Storybook) and snapshot the element at `options.root`. */
   readonly open: (url: string, options: OpenOptions) => Promise<Card>;
+  /** Mount `html` (or open a `{ url, root }`), run `flow` on it and close it again. */
+  readonly run: {
+    (html: string, flow: Flow, options?: MountOptions): Promise<Step[]>;
+    (app: Url, flow: Flow): Promise<Step[]>;
+  };
   readonly close: () => Promise<void>;
   readonly [Symbol.asyncDispose]: () => Promise<void>;
 }
@@ -82,25 +97,18 @@ export interface Pages {
   readonly close: () => Promise<void>;
 }
 
-/** The span and ease a snap carries, checked so a mistake shows before a page's worth of instructions runs. */
-const timing = (step: Snap, first: boolean) => {
-  const name = step.snap === true ? "a snap" : `snap "${step.snap}"`;
+/**
+ * Checks an instruction's timing where it stands, so a mistake shows before a page's worth of instructions runs.
+ * `first` says no snapshot has been read yet.
+ */
+const check = (step: Instruction, first: boolean) => {
+  if ("wait" in step && first)
+    throw new Error("run(): a wait comes before the first snap, but nothing is drawn yet.");
 
-  if ((step.at === undefined) !== (step.over === undefined))
-    throw new Error(`run(): ${name} needs both at and over, or neither.`);
-
-  if (step.at === undefined) {
-    if (step.ease) throw new Error(`run(): ${name} has an ease but no span.`);
-
-    return undefined;
-  }
-
-  if (first)
+  if ("snap" in step && first && (step.over !== undefined || step.ease))
     throw new Error(
-      `run(): the first snap has a span, but nothing arrives at it. Put the span on the next snap.`,
+      "run(): the first snap has timing, but nothing moves into it. Put it on the next snap.",
     );
-
-  return { span: { at: step.at, over: step.over! }, ease: step.ease };
 };
 
 const cardOf = (io: Io): Card => ({
@@ -110,40 +118,60 @@ const cardOf = (io: Io): Card => ({
     return io.read();
   },
   run: async (flow) => {
-    // A list can be checked before anything runs; a generator only as it goes.
-    if (!(Symbol.asyncIterator in flow))
-      flow.filter((s): s is Snap => "snap" in s).forEach((s, i) => timing(s, i === 0));
+    // Checked before anything runs, so a mistake never costs a page's worth of instructions.
+    flow.forEach((step, i) => check(step, !flow.slice(0, i).some((s) => "snap" in s)));
 
     const steps: Step[] = [];
 
-    for await (const step of flow) {
+    for (const step of flow) {
+      if ("wait" in step) {
+        steps.push({ wait: step.wait });
+        continue;
+      }
+
       if (!("snap" in step)) {
         await io.act("act" in step ? step.act : step);
         continue;
       }
 
-      const when = timing(step, steps.length === 0);
       const read = await io.read();
       const state = step.snap === true ? read : { name: step.snap, ...read };
+      const { snap: _, ...timing } = step;
 
-      steps.push(when ? (when.ease ? [state, when.span, when.ease] : [state, when.span]) : state);
+      steps.push(Object.keys(timing).length > 0 ? [state, timing] : state);
     }
 
     return steps;
   },
-  render: async (html) => {
-    await io.act({ render: html });
+  html: async (markup) => {
+    await io.act({ html: markup });
   },
   close: io.close,
 });
 
 /** A Browser over any pages. */
-export const browserOf = (pages: Pages): Browser => ({
-  mount: async (html, options) => cardOf(await pages.mount(html, options)),
-  open: async (url, options) => cardOf(await pages.open(url, options)),
-  close: pages.close,
-  [Symbol.asyncDispose]: pages.close,
-});
+export const browserOf = (pages: Pages): Browser => {
+  const mount = async (html: string, options?: MountOptions) =>
+    cardOf(await pages.mount(html, options));
+  const open = async (url: string, options: OpenOptions) => cardOf(await pages.open(url, options));
+
+  return {
+    mount,
+    open,
+    run: async (page: string | Url, flow: Flow, options?: MountOptions) => {
+      const card =
+        typeof page === "string" ? await mount(page, options) : await open(page.url, page);
+
+      try {
+        return await card.run(flow);
+      } finally {
+        await card.close();
+      }
+    },
+    close: pages.close,
+    [Symbol.asyncDispose]: pages.close,
+  };
+};
 
 const FORMAT = { ttf: "truetype", otf: "opentype", woff: "woff", woff2: "woff2" } as const;
 
@@ -191,6 +219,25 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     { parts = {}, pad = 16 }: PageOptions,
     render: (html: string) => Promise<void>,
   ): Promise<Io> => {
+    // tsx and esbuild's keepNames wrap named functions in __name(), which the page doesn't have.
+    const shim = () => page.evaluate("globalThis.__name ??= (fn) => fn");
+
+    /** A part name, by the `parts` option or `data-part`, found in the page under the root; else a CSS selector. */
+    const target = async (name: string) => {
+      await shim();
+
+      const handle = await page.evaluateHandle(
+        ([name, root, css]) => {
+          const top = document.querySelector(root);
+          const pick = (s: string) => (top?.matches(s) ? top : top?.querySelector(s));
+
+          return (css ? pick(css) : undefined) ?? pick(`[data-part="${CSS.escape(name)}"]`) ?? null;
+        },
+        [name, selector, parts[name]] as const,
+      );
+
+      return handle.asElement() ?? undefined;
+    };
     const scheme = async (value: "light" | "dark") => {
       await page.emulateMedia({ colorScheme: value });
       await page.evaluate(([name, on]) => document.documentElement.classList.toggle(name, on), [
@@ -208,8 +255,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     await scheme(resting);
 
     const read = async (): Promise<Snapshot> => {
-      // tsx and esbuild's keepNames wrap named functions in __name(), which the page doesn't have.
-      await page.evaluate("globalThis.__name ??= (fn) => fn");
+      await shim();
       // Transitions and finite animations that an action started must land before the page is read.
       await page.evaluate(async () => {
         await document.fonts.ready;
@@ -237,12 +283,28 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
     const act = async (action: Action | PageAction): Promise<unknown> => {
       if (typeof action === "function") return action(page);
-      if ("click" in action) return page.click(action.click);
-      if ("fill" in action) return page.fill(...action.fill);
-      if ("hover" in action) return page.hover(action.hover);
+      if ("click" in action) {
+        const el = await target(action.click);
+
+        return el ? el.click() : page.click(action.click);
+      }
+
+      if ("fill" in action) {
+        const [name, text] = action.fill;
+        const el = await target(name);
+
+        return el ? el.fill(text) : page.fill(name, text);
+      }
+
+      if ("hover" in action) {
+        const el = await target(action.hover);
+
+        return el ? el.hover() : page.hover(action.hover);
+      }
+
       if ("press" in action) return page.keyboard.press(action.press);
       if ("move" in action) return page.mouse.move(...action.move);
-      if ("render" in action) return render(action.render);
+      if ("html" in action) return render(action.html);
 
       throw new Error(`run() doesn't know the instruction ${JSON.stringify(action)}.`);
     };
@@ -251,7 +313,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   };
 
   return {
-    mount: async (html, { css = "", width, root, ...rest } = {}) => {
+    mount: async (html, { css = options.css ?? "", width, root, ...rest } = {}) => {
       const page = await chromium.newPage({
         viewport: { width: Math.ceil(width ?? 1600), height: 1000 },
       });
@@ -270,9 +332,12 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
           ([markup, rules]) => {
             document.getElementById("svjeez-css")!.textContent = rules;
             document.getElementById("svjeez-dom")!.innerHTML = markup;
+            (document.activeElement as HTMLElement | null)?.blur();
           },
           [next, css] as const,
         );
+        // New markup starts as a fresh render would: nothing under the pointer.
+        await page.mouse.move(-1, -1);
       });
     },
     open: async (url, { root, width, ...rest }) => {
@@ -287,7 +352,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
       return io(page, root, rest, async () => {
         throw new Error(
-          "render() swaps markup in a mounted card. A card from open() is the app's own page.",
+          "html() swaps markup in a mounted card. A card from open() is the app's own page.",
         );
       });
     },

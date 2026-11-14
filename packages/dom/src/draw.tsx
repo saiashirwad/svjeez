@@ -12,32 +12,31 @@ import {
   type Ease,
   type Font,
   type FontValue,
-  type Span,
   type Stack,
   type SvgNode,
   type TagChannels,
 } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { mapPaint, schemeCss, sides, transparent, variable } from "./scheme.ts";
+import type { Timing, Wait } from "./flow.ts";
 import type { Box, Item, Paint, Radii, Rect, Snapshot, TextRun, Vector } from "./tree.ts";
 
 type GroupStack = Stack<TagChannels<"g">>;
 
 type Parts = Readonly<Record<string, GroupStack | ((index: number) => GroupStack)>>;
 
-/** A state, optionally with when the timeline arrives at it from the previous one, and how. The first state's span is never used. */
-export type Step = Snapshot | readonly [Snapshot, Span] | readonly [Snapshot, Span, Ease];
+/**
+ * A state, with how the timeline moves into it if not the default, or a wait. What `card.run` gives, and what
+ * `<Dom states>` plays.
+ */
+export type Step = Snapshot | readonly [Snapshot, Timing] | Wait;
 
 export interface DomProps {
-  /** One snapshot draws statically. Several play in order, each turning into the next. */
+  /** One snapshot draws statically. Several play in order, each turning into the next, with waits between. */
   readonly states: Snapshot | readonly Step[];
   /** The fonts the page used, so the drawn text matches the layout. */
   readonly fonts?: readonly FontValue[];
-  /** When each transition starts, on the clock around it: `at[i]` is `states[i]` turning into `states[i + 1]`, unless that step has a span. */
-  readonly at?: readonly number[];
-  /** How long a transition runs when its step has no span. Default 0.6. */
-  readonly over?: number;
-  /** Default `ease.inOut`. */
+  /** The ease of a move whose step has none. Default `ease.inOut`. */
   readonly ease?: Ease;
   /** Motions by part. A function gets each element with that part, in document order. */
   readonly parts?: Parts;
@@ -857,16 +856,54 @@ const painter = (
 
 const at = (x: number, y: number) => (x || y ? `translate(${num(x)} ${num(y)})` : undefined);
 
-const stepsOf = (states: Snapshot | readonly Step[]) =>
-  ("root" in states ? [states] : states).map((step) =>
-    "root" in step
-      ? { state: step, span: undefined, ease: undefined }
-      : { state: step[0], span: step[1], ease: step[2] },
-  );
+/** Default length of a move into a snapshot. */
+const OVER = 0.6;
+
+const isWait = (step: Step): step is Wait => "wait" in step;
+
+/**
+ * Walks a cursor over the steps: the first snapshot holds from 0, each later one moves in from where the cursor is
+ * and leaves it at the move's end, and a wait pushes it on.
+ */
+const timeline = (states: Snapshot | readonly Step[]) => {
+  const snaps: Snapshot[] = [];
+  const moves: { at: number; over: number; ease?: Ease }[] = [];
+  let cursor = 0;
+
+  for (const step of "root" in states ? [states] : states) {
+    if (isWait(step)) {
+      if (snaps.length === 0)
+        throw new Error("<Dom> a wait comes before the first state, but nothing is drawn yet.");
+
+      if (!(step.wait >= 0)) throw new Error(`<Dom> needs a wait of 0 or more, got ${step.wait}.`);
+      cursor += step.wait;
+      continue;
+    }
+
+    const [state, timing] = "root" in step ? [step, undefined] : step;
+
+    if (snaps.length === 0 && timing)
+      throw new Error(
+        "<Dom> the first state has timing, but nothing moves into it. Put it on the next state.",
+      );
+
+    if (snaps.length > 0) {
+      const over = timing?.over ?? OVER;
+
+      if (!(over > 0)) throw new Error(`<Dom> needs a positive over, got ${over}.`);
+      moves.push({ at: cursor, over, ease: timing?.ease });
+      cursor += over;
+    }
+
+    snaps.push(state);
+  }
+
+  return { snaps, moves, length: cursor };
+};
 
 /** The picture's size: the largest of the states, so one frame holds them all. */
 export const size = (states: Snapshot | readonly Step[]): { width: number; height: number } => {
-  const all = stepsOf(states).map((s) => s.state);
+  const all = timeline(states).snaps;
 
   return {
     width: Math.max(...all.map((s) => s.width)),
@@ -874,10 +911,13 @@ export const size = (states: Snapshot | readonly Step[]): { width: number; heigh
   };
 };
 
+/** Seconds from the first state to the end of the last move or wait, so a scene can pick its duration. */
+export const duration = (states: Snapshot | readonly Step[]): number => timeline(states).length;
+
 /**
  * Draws snapshots as svjeez nodes: one `<g>` per element, text in the page's own fonts. With several states, each
  * turns into the next. Paired boxes reshape and recolor, paired text and icons slide (crossfading when they changed),
- * and the rest fade out or in.
+ * and the rest fade out or in. Time starts at 0 on the clock around it, so a `<Clip at>` places a whole flow.
  *
  * Transition `i` is one two-state drawing, shown from the middle of the gap before it to the middle of the gap after,
  * so only one is up at a time and the cut between two shows the same picture on both sides.
@@ -885,8 +925,6 @@ export const size = (states: Snapshot | readonly Step[]): { width: number; heigh
 export function Dom({
   states,
   fonts = [],
-  at: starts = [],
-  over = 0.6,
   ease = eases.inOut,
   parts = {},
   text,
@@ -896,52 +934,28 @@ export function Dom({
   animation,
 }: DomProps): SvgNode {
   const paint = painter(fonts, parts, pair);
-  const steps = stepsOf(states);
+  const { snaps, moves } = timeline(states);
 
-  if (steps.length === 0) throw new Error("<Dom> needs at least one state.");
-
-  if (steps[0]!.span)
-    throw new Error(
-      "<Dom> the first state has a span, but nothing arrives at it. Put the span on the next state.",
-    );
+  if (snaps.length === 0) throw new Error("<Dom> needs at least one state.");
 
   let segments: SvgNode[];
 
-  if (steps.length === 1) {
+  if (snaps.length === 1) {
     let lines = 0;
 
     segments = [
-      paint.root(steps[0]!.state.root, undefined, undefined, text && ((run) => text(run, lines++))),
+      paint.root(snaps[0]!.root, undefined, undefined, text && ((run) => text(run, lines++))),
     ];
   } else {
     if (text) throw new Error("<Dom text> works on a single snapshot, not on states.");
 
-    // A step's span is when the timeline arrives at it, so transition i reads step i + 1.
-    const tweens: Tween[] = steps.slice(1).map((step, i) => {
-      const when = step.span ?? (starts[i] === undefined ? undefined : { at: starts[i]!, over });
-
-      if (!when)
-        throw new Error(
-          `<Dom> needs to know when state ${i} turns into state ${i + 1}: give state ${i + 1} a span, or at[${i}].`,
-        );
-
-      return { at: when.at, over: when.over, ease: step.ease ?? ease };
-    });
+    const tweens: Tween[] = moves.map((m) => ({ at: m.at, over: m.over, ease: m.ease ?? ease }));
 
     // Where each hand-over happens: halfway between one transition's end and the next one's start.
-    const cuts = tweens.slice(1).map((next, i) => {
-      const end = tweens[i]!.at + tweens[i]!.over;
-
-      if (next.at < end)
-        throw new Error(
-          `<Dom> transitions ${i} and ${i + 1} overlap. Start the second after the first ends.`,
-        );
-
-      return (end + next.at) / 2;
-    });
+    const cuts = tweens.slice(1).map((next, i) => (tweens[i]!.at + tweens[i]!.over + next.at) / 2);
 
     segments = tweens.map((tween, i) => {
-      const drawn = paint.root(steps[i + 1]!.state.root, steps[i]!.state.root, tween);
+      const drawn = paint.root(snaps[i + 1]!.root, snaps[i]!.root, tween);
 
       if (tweens.length === 1) return drawn;
       const from = i === 0 ? 0 : cuts[i - 1]!;
