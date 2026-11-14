@@ -24,7 +24,7 @@ const S = 0.38;
 const HOME = { x: W / 2, y: 84 };
 
 const casual = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
-const marker = tool.pen({ size: 3.4, seed: 7 });
+export const marker = tool.pen({ size: 3.4, seed: 7 });
 
 /** Px on the page in the chick's own units. */
 const u = (px: number) => px / S;
@@ -39,16 +39,16 @@ const lengthOf = (d: string) => {
   return sum;
 };
 
-/** The words, centered, split into pen strokes one after another, paced by length. */
-const lettering = () => {
-  const probe = casual.path("play with svjeez", { size: 40, x: 0, y: 0 }).d;
+/** The words, centered in `width`, split into pen strokes one after another, paced by length. */
+export const lettering = (text: string, width = W, y = 128) => {
+  const probe = casual.path(text, { size: 40, x: 0, y: 0 }).d;
   const xs = (probe.match(/-?[\d.]+/g) ?? []).map(Number).filter((_, i) => i % 2 === 0);
-  const width = Math.max(...xs) - Math.min(...xs);
+  const wide = Math.max(...xs) - Math.min(...xs);
 
-  const d = casual.path("play with svjeez", {
+  const d = casual.path(text, {
     size: 40,
-    x: (W - width) / 2 - Math.min(...xs),
-    y: 128,
+    x: (width - wide) / 2 - Math.min(...xs),
+    y,
   }).d;
 
   let t = 0.3;
@@ -63,7 +63,7 @@ const lettering = () => {
 };
 
 export default function build(): string {
-  const strokes = lettering();
+  const strokes = lettering("play with svjeez");
 
   const walks = [
     waddle(span(0.3, 1.2), u(100), 0, 5),

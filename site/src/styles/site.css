@@ -791,11 +791,15 @@ kbd {
 .hero-next {
   align-self: end;
   justify-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 clamp(1rem, 4vw, 3rem);
   padding-block: 0.5rem 1.5rem;
 }
 .hero-next .cue {
   display: block;
-  inline-size: min(22rem, 80vw);
+  inline-size: min(20rem, 42vw);
   block-size: auto;
 }
 @media (prefers-reduced-motion: no-preference) {

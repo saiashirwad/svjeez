@@ -1,6 +1,7 @@
 // The hero scene, compiled at build time: its size is what the headline states, so it describes the file on screen.
 import scene from "@examples/site/hero.tsx";
 import cue from "@examples/site/cue.tsx";
+import introCue from "@examples/site/intro-cue.tsx";
 import { live } from "./live";
 import { facts, kb } from "./proof";
 
@@ -23,3 +24,6 @@ export const hero = {
 
 /** "play with svjeez", handwritten with the chick playing under it, on the way down to the editor. */
 export const cueImage = live(cue);
+
+/** "watch the intro", handwritten with the chick playing projector, on the way to the intro reel. */
+export const introCueImage = live(introCue);

@@ -1,6 +1,6 @@
 ---
 // The hero: one scene at the size it plays, and what it is, said with the real size of the file on screen.
-import { hero, heroImage, cueImage } from "../hero";
+import { hero, heroImage, cueImage, introCueImage } from "../hero";
 import LiveScene from "./LiveScene.astro";
 ---
 
@@ -9,7 +9,8 @@ import LiveScene from "./LiveScene.astro";
   <div class="hero-stage">
     <LiveScene class="hero-scene" scene={heroImage} cost={hero.cost} alt={hero.alt} />
   </div>
-  <a class="hero-next" href="#play" aria-label="Play with svjeez">
-    <LiveScene class="cue" scene={cueImage} cost={6} alt="" />
-  </a>
+  <nav class="hero-next" aria-label="Next">
+    <a href="#play" aria-label="Play with svjeez"><LiveScene class="cue" scene={cueImage} cost={6} alt="" /></a>
+    <a href="/intro" aria-label="Watch the intro"><LiveScene class="cue" scene={introCueImage} cost={4} alt="" /></a>
+  </nav>
 </section>
