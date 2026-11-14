@@ -242,7 +242,7 @@ const CARDS: Record<Mood, () => string> = {
     const t = set(
       ["Poke it.", "It moves"],
       176,
-      30,
+      12,
       { rotate: 14, look: { x: 6, y: 6 } },
       { line: 1, from: "It ", word: "moves" },
     );
@@ -288,8 +288,12 @@ const CARDS: Record<Mood, () => string> = {
           y={base + 84}
           fill={INK}
         />
-        <Hand text="it wasn't me" x={x2 + four + 36} y={200} size={44} />
-        <Arrow from={[x2 + four + 90, 224]} to={[X + four + gap / 2 + 56, 170]} bow={-50} />
+        <Hand text="it wasn't me" x={X + four + gap / 2 - 110} y={92} size={44} />
+        <Arrow
+          from={[X + four + gap / 2 + 96, 104]}
+          to={[X + four + gap / 2 + 20, 168]}
+          bow={-24}
+        />
       </>,
     );
   },
