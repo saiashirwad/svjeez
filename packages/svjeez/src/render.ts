@@ -72,16 +72,19 @@ export const render = (options: RenderOptions, content: Child): string => {
     options.css,
   );
 
+  const rootAttributes = {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: `0 0 ${num(width)} ${num(height)}`,
+    width: num(width),
+    height: num(height),
+    role: "img",
+    "aria-labelledby": options.desc ? `${prefix}t ${prefix}d` : `${prefix}t`,
+  };
+
+  // The class lets `variables({ prefix })` scope its rule to this scene.
   const root = element(
     "svg",
-    {
-      xmlns: "http://www.w3.org/2000/svg",
-      viewBox: `0 0 ${num(width)} ${num(height)}`,
-      width: num(width),
-      height: num(height),
-      role: "img",
-      "aria-labelledby": options.desc ? `${prefix}t ${prefix}d` : `${prefix}t`,
-    },
+    prefix ? { ...rootAttributes, class: `${prefix}root` } : rootAttributes,
     [
       element("title", { id: `${prefix}t` }, children(options.title, true)),
       ...(options.desc

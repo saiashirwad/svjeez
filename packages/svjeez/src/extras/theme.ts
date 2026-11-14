@@ -65,11 +65,17 @@ export interface VariablesResult<K extends string> {
   readonly css: string;
 }
 
-/** CSS variables with defaults. `vars.sky` is `var(--sky)`; pass `css` to `render`. With `light`, those values win under prefers-color-scheme: light. */
+/**
+ * CSS variables with defaults. `vars.sky` is `var(--sky)`; pass `css` to `render`. With `light`, those values win under prefers-color-scheme: light.
+ * With `prefix`, the same one `render` gets, the variables apply to that scene's root only, so inlined scenes keep their own.
+ */
 export const variables = <const K extends string>(
   dark: Readonly<Record<K, string>>,
   light?: Readonly<Record<K, string>>,
+  options: { readonly prefix?: string } = {},
 ): VariablesResult<K> => {
+  const scope = options.prefix ? `svg.${options.prefix}root` : "svg";
+
   // SAFETY: Object.keys of a Record<K, string> lists exactly its K keys, and those are strings.
   const names = Object.keys(dark) as K[];
 
@@ -85,7 +91,7 @@ export const variables = <const K extends string>(
     vars: Object.fromEntries(names.map((name) => [name, `var(--${name})`])) as {
       [N in K]: `var(--${N})`;
     },
-    css: `svg{${declarations(dark)}}${light ? `\n@media (prefers-color-scheme:light){svg{${declarations(light)}}}` : ""}`,
+    css: `${scope}{${declarations(dark)}}${light ? `\n@media (prefers-color-scheme:light){${scope}{${declarations(light)}}}` : ""}`,
   };
 };
 
@@ -101,11 +107,13 @@ export interface AdaptiveResult {
 export const adaptive = ({
   dark,
   light,
+  prefix,
 }: {
   readonly dark: Base16;
   readonly light: Base16;
+  readonly prefix?: string;
 }): AdaptiveResult => {
-  const { vars, css } = variables(dark, light);
+  const { vars, css } = variables(dark, light, { prefix });
 
   return { theme: vars, css };
 };
