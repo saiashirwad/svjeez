@@ -15,7 +15,6 @@ const { current, wide } = Astro.props;
 const chick = getScene(mascot);
 
 const links = [
-  { href: "/examples/", label: "Examples", page: "examples" },
   ...(current === "play" ? [{ href: "/play", label: "Playground", page: "play" }] : []),
   { href: "https://github.com/saiashirwad/svjeez", label: "GitHub" },
 ];

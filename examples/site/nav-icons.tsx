@@ -53,14 +53,14 @@ export const dots = () =>
       {(["var(--code-tag)", "var(--code-string)", "var(--code-fn)"] as const).map((fill, i) => (
         <circle
           cx={7 + i * 7}
-          cy={17}
+          cy={14}
           r={4.5}
           fill={fill}
           stroke="var(--bg)"
           strokeWidth={1.5}
           animation={motion({ y: 0 })
             .at(i * 0.15)
-            .to({ y: -8 }, 0.22, ease.out)
+            .to({ y: -7 }, 0.22, ease.out)
             .to({ y: 0 }, 0.22, ease.in)}
         />
       ))}

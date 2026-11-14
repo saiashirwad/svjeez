@@ -820,7 +820,7 @@ kbd {
 }
 .hero-next .cue {
   display: block;
-  inline-size: min(20rem, 42vw);
+  inline-size: min(18rem, 30vw);
   block-size: auto;
 }
 @media (prefers-reduced-motion: no-preference) {

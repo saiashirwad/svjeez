@@ -2,6 +2,7 @@
 import scene from "@examples/site/hero.tsx";
 import cue from "@examples/site/cue.tsx";
 import introCue from "@examples/site/intro-cue.tsx";
+import examplesCue from "@examples/site/examples-cue.tsx";
 import { live } from "./live";
 import { facts, kb } from "./proof";
 
@@ -27,3 +28,6 @@ export const cueImage = live(cue);
 
 /** "watch the intro", handwritten with the chick playing projector, on the way to the intro reel. */
 export const introCueImage = live(introCue);
+
+/** "browse examples", handwritten with the chick dealing out picture cards, on the way to the gallery. */
+export const examplesCueImage = live(examplesCue);
