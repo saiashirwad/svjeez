@@ -106,13 +106,11 @@ export interface MorphResult {
   readonly spans: readonly Span[];
   /** From the first move to when the last one settles. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
 }
 
 /**
  * Animate code, or any `Morphable` such as a `tex()` formula, from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
- * `spans[i]` is when the move into `versions[i + 1]` runs; `end` is when the last one settles, or 0 for a single version.
+ * `spans[i]` is when the move into `versions[i + 1]` runs; `span` runs to when the last one settles, and is empty for a single version.
  */
 export function morph(versions: readonly Code[], options: MorphOptions): MorphResult;
 export function morph(
@@ -194,7 +192,6 @@ export function morph(
     node: el.g({}, [numbers, chains.map((chain) => chain.source.draw(chain.word, chain.track))]),
     spans: at.map((start): Span => ({ at: start, over })),
     span: spanOf(at[0] ?? 0, at.length > 0 ? at.at(-1)! + over - at[0]! : 0),
-    end: at.length > 0 ? at.at(-1)! + over : 0,
   };
 }
 

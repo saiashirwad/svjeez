@@ -135,8 +135,7 @@ describe("state", () => {
 
     expect(walk.spans.idle.map((s) => s.at)).toEqual([1, expect.closeTo(3.7, 9)]);
     expect(walk.spans.done[0]!.at).toBeCloseTo(1 + 4 * 1.35, 9);
-    expect(walk.end).toBeCloseTo(1 + 5 + 4 * 0.35, 9);
-    expect(walk.span.end).toBeCloseTo(walk.end, 9);
+    expect(walk.span.end).toBeCloseTo(1 + 5 + 4 * 0.35, 9);
     expect(() => valid(el.g({}, [machine.node, walk.node]))).not.toThrow();
   });
 
@@ -147,8 +146,7 @@ describe("state", () => {
     ]);
     expect(walk.spans.idle[0]!.over).toBeCloseTo(4 - 0.35, 9);
     expect(walk.spans.run[0]!.over).toBeCloseTo(1 - 0.35, 9);
-    expect(walk.end).toBe(8);
-    expect(walk.span.end).toBeCloseTo(walk.end, 9);
+    expect(walk.span.end).toBe(8);
     expect(() => machine.walk(["idle", "run"], { at: [2, 1] })).toThrow();
   });
 

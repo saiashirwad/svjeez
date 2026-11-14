@@ -41,8 +41,6 @@ export interface FlowOptions {
   readonly class?: string;
   /** Run again every this many seconds, for a `dot`, `comet` or `packet`. The period must cover the trip and the comet's tail. */
   readonly period?: Seconds;
-  /** @deprecated use `period` */
-  readonly loop?: Seconds;
   /** Dots trailing a `comet`. Default 8. Each one is its own animated element, so a crowd of comets wants fewer. */
   readonly tail?: number;
   /** Along several lines: seconds a particle waits between trips. Default 0.4 of the length of its trip. */
@@ -60,8 +58,6 @@ export interface FlowResult {
   readonly node: SvgNode;
   /** From `at` to when it arrives, ring included. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
 }
 
 const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
@@ -77,7 +73,7 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
     tail = TAIL,
   } = options;
 
-  const period = options.period ?? options.loop;
+  const period = options.period;
 
   if (period !== undefined && (style === "trace" || arrive))
     throw new Error(
@@ -187,7 +183,7 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
 
   const done = end + (arrive ? 0.7 : 0);
 
-  return { node: el.g({ class: cls }, [body, ring]), span: span(at, done - at), end: done };
+  return { node: el.g({ class: cls }, [body, ring]), span: span(at, done - at) };
 };
 
 /** Same as the golden angle on a circle: consecutive indices land far apart, and the sequence never repeats. */
@@ -228,7 +224,7 @@ const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowR
   if (!(speed > 0) || !Number.isFinite(speed))
     throw new Error(`flow() needs a positive speed, got ${speed}.`);
 
-  if (options.period !== undefined || options.loop !== undefined || options.over !== undefined)
+  if (options.period !== undefined || options.over !== undefined)
     throw new Error(
       "flow() sets the period and the trip of every line itself, from speed. Drop period and over, or pass one line.",
     );
@@ -265,7 +261,7 @@ const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowR
     }),
   );
 
-  return { node, span: span(at, FADE_IN), end: at + FADE_IN };
+  return { node, span: span(at, FADE_IN) };
 };
 
 const isLines = (

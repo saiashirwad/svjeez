@@ -329,7 +329,7 @@ describe("mermaid", () => {
     if (d.kind !== "state") throw new Error("not a state diagram");
     const walk = d.walk(["Idle", "Run", "Step", "Step2", "Done"], { at: 0.5 });
 
-    expect(walk.end).toBeGreaterThan(0.5);
+    expect(walk.span.end).toBeGreaterThan(0.5);
     expect(svg([d.node, walk.node])).toContain(">go<");
     expect(d.get("Step").y).toBeGreaterThan(d.get("Run").y);
   });

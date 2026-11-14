@@ -94,8 +94,7 @@ describe("derive", () => {
     expect(stacked.lines[1]!.bounds.y - stacked.lines[0]!.bounds.y).toBeCloseTo(70, 0);
     const level = derive(steps, { at: 0 });
     expect(level.lines[1]!.bounds.y).toBeCloseTo(level.lines[0]!.bounds.y, 0);
-    expect(level.end).toBeCloseTo(2.5 + 0.9, 5);
-    expect(level.span.end).toBeCloseTo(level.end, 9);
+    expect(level.span.end).toBeCloseTo(2.5 + 0.9, 5);
   });
 
   test("in place, one morphing line carries the notes and renders", () => {

@@ -207,8 +207,7 @@ describe("traffic()", () => {
     expect(a.count).toBe(20);
     expect(scene(a.node)).toBe(scene(b.node));
     expect(scene(a.node)).not.toBe(scene(c.node));
-    expect(a.end).toBeGreaterThan(5);
-    expect(a.span.end).toBeCloseTo(a.end, 9);
+    expect(a.span.end).toBeGreaterThan(5);
   });
 
   test("favors heavier routes", () => {

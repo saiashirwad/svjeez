@@ -21,8 +21,6 @@ export interface TypewriterResult {
   readonly node: SvgNode;
   /** From `at` to when the last character lands. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
   readonly spans: readonly Span[];
 }
 
@@ -83,7 +81,6 @@ export function typewriter(
         caret(lines, m, cursor === true ? tint(m.theme, "plain") : cursor, at, t, cps, blink),
     ]),
     span: span(at, t - at),
-    end: t,
     spans: lines.map(({ start, chars }) => ({ at: start, over: chars / cps })),
   };
 }

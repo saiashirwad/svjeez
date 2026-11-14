@@ -151,8 +151,7 @@ describe("morph over equations", () => {
 
   test("a version morphs back to itself, so a loop can close", () => {
     const m = morph([a, b, a], { at: [1, 3], over: 1 });
-    expect(m.end).toBe(4);
-    expect(m.span.end).toBeCloseTo(m.end, 9);
+    expect(m.span.end).toBeCloseTo(4, 9);
     expect(() => svg(m.node)).not.toThrow();
   });
 });

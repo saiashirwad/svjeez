@@ -90,8 +90,7 @@ describe("construct", () => {
       g.point(3, 0, undefined, { over: 3 });
     });
     expect(g.time).toBe(9);
-    expect(g.end).toBe(9);
-    expect(g.span.end).toBeCloseTo(g.end, 9);
+    expect(g.span.end).toBeCloseTo(9, 9);
   });
 
   test("settle fades aids but not the figure", () => {

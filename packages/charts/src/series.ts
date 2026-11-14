@@ -237,7 +237,6 @@ export function buildSeries(f: Frame) {
       ]),
       bars: placed,
       span: spanOf(at, end - at),
-      end,
     };
   }
 
@@ -326,7 +325,7 @@ export function buildSeries(f: Frame) {
 
     const end = span.at + span.over + (options.label ? 0.4 : 0);
 
-    return { node, d, points: placed, span: spanOf(span.at, end - span.at), end };
+    return { node, d, points: placed, span: spanOf(span.at, end - span.at) };
   }
 
   function area(points: Raw, options: AreaOptions = {}): Area {
@@ -374,7 +373,6 @@ export function buildSeries(f: Frame) {
       fill,
       points: placed,
       span: spanOf(at, over + (options.label ? 0.4 : 0)),
-      end: at + over + (options.label ? 0.4 : 0),
     };
   }
 

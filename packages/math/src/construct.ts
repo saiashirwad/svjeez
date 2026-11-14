@@ -149,8 +149,6 @@ export interface Construction {
   readonly time: number;
   /** From the start to when the last element finishes. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: number;
   /** A point at `x`, `y` in units. */
   point(x: number, y: number, label?: string, options?: PointOptions): GeoPoint;
   /** A segment from `a` to `b`, drawn from `a`. */
@@ -997,9 +995,6 @@ export function construct(options: ConstructOptions = {}): Construction {
     },
     get span() {
       return spanOf(firstAt, end - firstAt);
-    },
-    get end() {
-      return end;
     },
     point,
     segment: (a, b, o = {}) => addLine(a, b, false, [0, 0], o),

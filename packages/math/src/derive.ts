@@ -50,8 +50,6 @@ export interface Derivation {
   readonly node: SvgNode;
   /** From the first line to when the last change settles. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
   /** Every line as typeset, aligned. */
   readonly lines: readonly Tex[];
   /** Everything the derivation can draw, notes included. */
@@ -190,7 +188,6 @@ export function derive(
   return {
     node: el.g({}, [body, notes.filter((n): n is SvgNode => n !== undefined)]),
     span: spanOf(at, start(list.length - 1) + (list.length > 1 ? over : 0) - at),
-    end: start(list.length - 1) + (list.length > 1 ? over : 0),
     lines,
     bounds: full,
   };

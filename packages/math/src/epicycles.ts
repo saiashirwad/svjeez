@@ -55,8 +55,6 @@ export interface Epicycles {
   readonly node: SvgNode;
   /** From `at` to when the rings have faded: the scene's end for this drawing. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
   /** The trace as path data, closed: what the chain draws. */
   readonly d: string;
 }
@@ -480,7 +478,6 @@ export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): E
       el.g({ animation: visible }, chain ?? []),
     ]),
     span: spanOf(at, over + fade),
-    end: at + over + fade,
     d,
   };
 }

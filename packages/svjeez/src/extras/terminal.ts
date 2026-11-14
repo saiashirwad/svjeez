@@ -33,8 +33,6 @@ export interface TerminalResult {
   readonly node: SvgNode;
   /** From `at` to when the last line lands. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
   readonly bounds: Rect;
 }
 
@@ -99,7 +97,6 @@ export function terminal(
   return {
     node: el.g({}, nodes),
     span: span(at, clock - gap - at),
-    end: clock - gap,
     bounds: laid.map((c) => c.bounds).reduce((a, b) => a.union(b)),
   };
 }

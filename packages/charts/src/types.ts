@@ -109,8 +109,6 @@ export interface Bars {
   readonly bars: readonly Bar[];
   /** From `at` to when the last bar has grown. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: number;
 }
 
 export interface Line {
@@ -121,8 +119,6 @@ export interface Line {
   readonly points: readonly Point[];
   /** From `at` to when the line has drawn, with its label. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: number;
 }
 
 export interface Area extends Line {

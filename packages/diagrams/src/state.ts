@@ -67,8 +67,6 @@ export interface Walk<S extends string> {
   readonly spans: Record<S, readonly Span[]>;
   /** From the first state lit to when the last goes dark. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
 }
 
 /** How the walk's token looks; `at` and timing come from the walk. */
@@ -506,7 +504,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
 
       const end = arrive.at(-1)! + dwell;
 
-      return { node: overlay, spans, span: spanOf(arrive[0]!, end - arrive[0]!), end };
+      return { node: overlay, spans, span: spanOf(arrive[0]!, end - arrive[0]!) };
     },
   };
 }

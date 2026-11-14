@@ -28,8 +28,6 @@ export interface RevealResult {
   readonly spans: readonly Span[];
   /** From the first block's start to when the last one settles. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
 }
 
 /** Show `code` a block of lines at a time. `spans[i]` is when block `i` enters; `span` runs to when the last one settles. */
@@ -94,7 +92,6 @@ export function reveal(
     ]),
     spans,
     span: spanOf(first, end - first),
-    end,
   };
 }
 

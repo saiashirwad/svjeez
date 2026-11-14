@@ -1,4 +1,4 @@
-import type { Color, Point, Seconds, Span, SvgNode } from "svjeez";
+import type { Color, Point, Span, SvgNode } from "svjeez";
 import { el } from "svjeez/internal";
 import { span as spanOf, type Spanned } from "svjeez";
 import { flow, type FlowOptions } from "svjeez";
@@ -32,8 +32,6 @@ export interface Traffic {
   readonly count: number;
   /** From the first departure window to when the last one arrives. */
   readonly span: Spanned;
-  /** @deprecated use `span.end` */
-  readonly end: Seconds;
 }
 
 /** A small seeded generator (mulberry32), so a scene builds the same every time. */
@@ -92,7 +90,7 @@ export function traffic(
     return run.node;
   });
 
-  return { node: el.g({}, nodes), count, span: spanOf(during.at, end - during.at), end };
+  return { node: el.g({}, nodes), count, span: spanOf(during.at, end - during.at) };
 }
 
 export interface ArcOptions {
