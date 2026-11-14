@@ -823,6 +823,11 @@ kbd {
   inline-size: min(18rem, 30vw);
   block-size: auto;
 }
+@media (width < 40rem) {
+  .hero-next .cue {
+    inline-size: 44vw;
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
