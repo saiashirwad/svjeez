@@ -48,6 +48,9 @@ export default function svjeez(options: Options = {}): Plugin {
       assets.cache = pathToFileURL(`${options.cacheDir ?? join(config.cacheDir, "svjeez")}/`);
     },
     configureServer(server) {
+      // Every edit of a scene registers a new hash, so a long session keeps only the newest.
+      assets.limit = 500;
+
       server.middlewares.use(ROUTE, async (request, response, next) => {
         const asset = assets.files.get(
           decodeURIComponent(new URL(request.url!, "http://dev").pathname.slice(1)),

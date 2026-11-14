@@ -89,6 +89,12 @@ describe("slope fields", () => {
     }
   });
 
+  test("a step that would draw millions of marks throws", () => {
+    expect(() => slopeField(() => 0, plot, { step: 0.001 })).toThrow(
+      /slopeField\(\) would draw .* marks/,
+    );
+  });
+
   test("solution follows the slope", () => {
     const { points } = slopeSolution((x) => x, plot, { x: -2, y: 0 });
     const low = plot.point(0, -2);
