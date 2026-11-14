@@ -60,10 +60,8 @@ import {
   type CodeRun,
   timeline,
   readingTime,
-  during,
-  cut,
+  show,
   shot,
-  visible,
   morph,
   reveal,
   typewriter,
@@ -117,17 +115,17 @@ const aim = [src.get("call"), src.find("total"), src.lines(1, 2), src.at(2, 8)];
 
 
 const tl = timeline({ intro: readingTime("One piece of state"), change: 5, outro: 3 }, { gap: 0.5, pace: 1.2 });
-tl.intro; tl.change.at; tl.end; tl.duration; // spans are { at, over }
-const fade = tl.show("intro"); // fade in at the start, out by the end; tl.enter("intro") fades in and stays
-const shown = during(tl.outro); // fade a span in and out
-const hard = cut(tl.outro);     // on for the span, hard cuts, for a shot in an edit
+tl.intro; tl.change.at; tl.end; tl.duration; // spans are span(at, over): tl.intro.then(2) is the next beat
+const fade = show(tl.intro);                    // fade in at the start, out by the end
+const stays = show({ at: tl.change.at });       // fade in at the start and stay to the end
+const hard = show(tl.outro, { fade: 0 });       // on for the span, hard cuts, for a shot in an edit
+const lit = show([tl.intro, tl.outro]);         // on for each span, off between
 const moved = shot(tl.change, { enter: "rise", exit: "zoom" }); // a shot that moves in and out inside its span
-const lit = visible([tl.intro, tl.outro]); // on for each span, off between
 ```
 
 `shot(span, { enter, exit, over })` takes the moves `cut`, `fade`, `rise`, `zoom` and `slide`, each `over` seconds (default 0.45) inside the span. Put it on the `<g>` that holds the whole shot. Shots laid end to end hand over through the background.
 
-`readingTime(text)` is seconds to read: words at 3.5 per second plus a second to settle, at least 2. `pace` scales every beat but not `gap`. `duration`, `end`, `show` and `enter` are reserved scene names. A start time like `at` in `play` or `reveal` is a `Beats`: one number (items follow `step` apart) or one time per item.
+`readingTime(text)` is seconds to read: words at 3.5 per second plus a second to settle, at least 2. `pace` scales every beat but not `gap`. `duration`, `end`, `show` and `enter` are reserved scene names (`tl.show(name)` and `tl.enter(name)` are older spellings of `show`). A start time like `at` in `play` or `reveal` is a `Beats`: one number (items follow `step` apart) or one time per item.
 
 ## Moving code
 
@@ -138,8 +136,8 @@ Each returns an object with `node` and times to hang other beats on.
 
 const after = code([[kw("return"), " total", ["punct", ";"]]], { x: 40, y: 60, fontSize: 16, theme: tomorrowNight, gutter: true });
 const m = morph([src, after], { at: [tl.change.at], gutter: true }); // { node, spans, end }
-const typed = typewriter(src, { at: 1, cps: 28, cursor: true });      // { node, end, spans }
-const shown2 = reveal(src, { at: 1, step: 0.6 });                      // { node, spans, end }
+const typed = typewriter(src, { at: 1, cps: 28, cursor: true });      // { node, span, spans }
+const shown2 = reveal(src, { at: 1, step: 0.6 });                      // { node, spans, span }
 ```
 
 - `morph(versions, { at, over })` moves words that survive, fades the rest, and pairs runs by id first. One `at` per transition. Give a run an id when the text changes but the meaning does not. `morph()` also takes anything with `words` and `draw()`, such as a `tex()` formula from `@svjeez/math`; `gutter` needs `code()` versions.
@@ -302,7 +300,7 @@ const session = terminal(
   ],
   { theme, x: shell.body.x + 20, y: shell.body.y + 16, fontSize: 14 },
 );
-// duration: session.end + 2 holds the last line before the loop restarts
+// duration: session.span.end + 2 holds the last line before the loop restarts
 ```
 
-`output` entries are one string or one line of pieces. `terminal` takes `at`, `prompt`, `cps`, `think` and `gap` too, and returns `{ node, end, bounds }`. `dots` is `"muted"`, `"traffic"` or `false`.
+`output` entries are one string or one line of pieces. `terminal` takes `at`, `prompt`, `cps`, `think` and `gap` too, and returns `{ node, span, bounds }`. `dots` is `"muted"`, `"traffic"` or `false`.

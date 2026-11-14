@@ -54,7 +54,7 @@ const clip = def.clipPath({}, <path d={earth.sphere} />);
 - `route(from, to)`, `circle(center, degrees)`, `night(date)` and `terminator(date)` return one path each. `date` is a `Date` or a function of time.
 - `place(at)` gives a `<g>` a moving `x`, `y` and `opacity`, so a marker rides the globe and fades out at the horizon. Draw its content at the origin.
 - `simplify` (default 0.6 degrees) and `tolerance` (default 1px) set the file size. One turn of 110m land in 24s with a 226px radius is about 500 KB at `simplify: 0.8`. Tilt the globe 20 degrees or more so its hidden pole holds the fold; an upright globe needs more keys.
-- `spin` also takes `(t) => [lon, lat]` with a `duration`.
+- `spin` also takes `(t) => [lon, lat]` with an `over`.
 
 `examples/globe` in the svjeez repository turns a day this way. The dot globe above stays smaller for a long loop.
 
@@ -68,7 +68,7 @@ const [a, b] = maps.land;
 <path d={a} animation={motion({ d: a }).at(1).to({ d: b }, 1.8, ease.inOut)} />;
 ```
 
-`trueSize(map, region, [lon, lat], { at, over })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `nightfall(map, (t) => date, { duration })` moves the night side of a flat map through a day or a year with one fixed shape, even across an equinox. `examples/projections` does the Mercator morph and the slide.
+`trueSize(map, region, [lon, lat], { at, over })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `nightfall(map, (t) => date, { over })` moves the night side of a flat map through a day or a year with one fixed shape, even across an equinox. `examples/projections` does the Mercator morph and the slide.
 
 ## Data maps
 
@@ -121,7 +121,7 @@ Particles still in flight at the end of the scene fail the scene's length check,
 | `sequential() needs a domain that rises, got […]` | Put the low value first. |
 | `traffic() needs a positive rate, got …` | Pass departures per second above 0. |
 | `arc() needs two different places.` | The two ends must not coincide. |
-| `globe() with a spin function needs a duration, as in { duration: 24 }.` | Pass `duration` beside a function `spin`. |
+| `globe() with a spin function needs an over, as in { over: 24 }.` | Pass `over` beside a function `spin`. |
 | `globe() found no parallel behind the globe clear of every outline …` | Tilt the globe further, simplify less, or filter out shapes that cross every parallel. |
 | `globe().borders() needs TopoJSON, which knows which edges two regions share.` | Load TopoJSON, or draw outlines with `path()`. |
 | `reproject() puts … far outside the frame under projection ….` | Filter that region out: Mercator stretches the poles without end. |

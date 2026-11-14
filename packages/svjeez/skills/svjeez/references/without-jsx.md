@@ -17,7 +17,7 @@ const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
 ```
 
 - Children are one node, a string, or an array of them. An array is a fragment, so `render` takes an array as its content and a `map` result nests anywhere.
-- Components are plain functions. Call them with `children` as a prop: `Callout({ target, during, children: "Click here" })`.
+- Components are plain functions. Call them with `children` as a prop: `Callout({ target, during, children: "Click here" })`, or `Clip({ at: 3.1, children: [window, cursor] })`.
 - `key` is accepted and ignored. Nothing diffs these trees.
 - `null`, `undefined` and booleans are skipped, as children and as props.
 

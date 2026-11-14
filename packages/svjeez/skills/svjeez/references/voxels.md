@@ -26,14 +26,14 @@ const island = (
       camera: view,
       blocks: [
         { cell: [0, 0, 0], skin: { side: dirt, top: grass } },
-        { cell: [1, 0, 0], skin: dirt, from: 3, to: 9 }, // visible from 3s until 9s
-        { cell: [0, 0, 1], skin: dirt, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
+        { cell: [1, 0, 0], skin: dirt, show: { at: 3, over: 6 } }, // visible from 3s until 9s
+        { cell: [0, 0, 1], skin: dirt, show: { at: 1 }, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
       ],
     })}
   </g>
 );
 
-const flyer = sampled((t) => view.project([2, 3 - t, 1]), { duration: 3, tolerance: { translate: 0.5 } }); // a free point
+const flyer = sampled((t) => view.project([2, 3 - t, 1]), { over: 3, tolerance: { translate: 0.5 } }); // a free point
 ```
 
 - Coordinates are whole cells, `y` up. The cube spans `cell` to `cell + 1`.
@@ -41,8 +41,8 @@ const flyer = sampled((t) => view.project([2, 3 - t, 1]), { duration: 3, toleran
 - A texture is pixel art. Each line is a row and each character a palette key. A `null` palette value is a transparent pixel. Colors are `#rgb`, `#rrggbb` or `#rrggbbaa`.
 - A skin is one texture for every face, or `{ side, top?, north?, south?, east?, west? }`, where a missing face falls back to `side`.
 - Blocks draw back to front. Two blocks in one cell keep array order, so an overlay is a second block on the cell.
-- `from` and `to` own the block's opacity, so a block's `animation` cannot animate it.
+- `show` is a span: `{ at, over }` shows the block from `at` for `over` seconds, `{ at }` from `at` to the end. It owns the block's opacity, so a block's `animation` cannot animate it. `from` and `to` are the older spelling.
 - Blocks fully hidden by opaque, unanimated neighbours are not drawn.
 - `view.project([x, y, z])` returns a `{ x, y }` screen point in the scene's `x` and `y` channels, so it feeds `sampled()` and `travel()` directly.
 
-Errors read `voxel.scene() needs blocks on whole cells, got [...]`, `voxel.scene() needs 0 <= from < to, ...`, `camera() needs a pitch between 0 and 90 degrees, got ...`, and `texture() row 1 uses "x", which the palette lacks.`
+Errors read `voxel.scene() needs blocks on whole cells, got [...]`, `voxel.scene() needs a show that starts at 0 or later and lasts, ...`, `camera() needs a pitch between 0 and 90 degrees, got ...`, and `texture() row 1 uses "x", which the palette lacks.`

@@ -54,7 +54,7 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 
 Paths in this section are relative to `packages/svjeez/`.
 
-- `src/` holds the core: `motion.ts` (timeline), `recipes.ts`, `channels.ts` (the channel table), `keys.ts` (keyframe math), `css.ts` and `smil.ts` (emit CSS and SMIL), `compile.ts` and `render.ts` (orchestrate them), `validate.ts`.
+- `src/` holds the core: `motion.ts` (timeline), `span.ts` and `clip.ts` (spans, and `<Clip>`, a clock of its own), `recipes.ts`, `channels.ts` (the channel table), `keys.ts` (keyframe math, including cutting and rotating keys), `resolve.ts` (a lane's `.repeat` and `.rewind` steps written out), `css.ts` and `smil.ts` (emit CSS and SMIL), `compile.ts` and `render.ts` (orchestrate them; compile adds a clip's offset to every motion inside it, so the output stays on one clock), `validate.ts`.
 - `src/extras/` holds timeline, code, terminal, annotations and themes, all exported from the root `svjeez` entry.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this. The diagram layouts (layered, route, tree, sequence, lanes) are in `packages/diagrams/src/layout/`.
 - `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
@@ -84,6 +84,7 @@ Each package's source explains its own internals. These are the rules that aren'
 - After changing an example or the compiler, rebuild the affected `examples/dist/` files and commit them with the change.
 - Keep the library free of Astro. Astro code belongs in `packages/astro/`.
 - Scenes that show code, an explainer or a terminal take `theme`, `css` and `mono` from `examples/style.ts`, and the site's code blocks and playground read the same palette through `site/src/styles/code.ts`. `examples/tests/style.test.ts` fails on a scene that brings its own code palette or mono font.
+- Time is spans on clocks: write `show`, `<Clip>` and `{ at, over }`, never absolute seconds inside a component. `frames`, `restyle` and `seek` take scene seconds, so `render` writes `data-playback-rate` on the root and they read it.
 - Check visual changes by looking at frames: run `bun run render-png <file> --sheet`, then open `sheet.png`. Passing tests don't show timing or layout bugs.
 
 ## Releasing

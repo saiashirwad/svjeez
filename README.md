@@ -68,7 +68,7 @@ svjeez runs on Node 20+ or Bun and has no runtime dependencies. On Node, install
 
 ## What's in the box
 
-- `motion()` timelines, recipes like `enter`, `draw` and `wiggle`, and `sampled()` to bake physics into keyframes
+- `motion()` timelines, spans and `<Clip>` clocks so a component is written from 0, `show()`, recipes like `enter`, `draw` and `wiggle`, and `sampled()` to bake physics into keyframes
 - Code walkthroughs with token `morph()`, markers, callouts and terminals
 - Flowcharts, sequence diagrams, state machines, trees and lanes from `@svjeez/diagrams`, with node IDs checked by TypeScript
 - Variable-width `<Ink>`, embedded fonts and images, filters, and typed CSS `@property`
@@ -136,7 +136,7 @@ More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for ea
 
 ## Upgrading to 0.7
 
-0.7 moves things out of core and renames some. The old names still work and are marked `@deprecated`; 1.0 removes them.
+0.7 moves things out of core, renames some, and gives time one model: spans on clocks, with `<Clip>`, `show`, `.repeat` and `.rewind`. The old names still work and are marked `@deprecated`; 1.0 removes them.
 
 | Before | Now |
 | --- | --- |
@@ -153,6 +153,11 @@ More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for ea
 | `<Steady at>` | `<Camera steady origin>` |
 | `renderVideo` | `video` |
 | `Icon` type of `@svjeez/icons` | `IconData` |
+| `during(span, fade)`, `cut(span)`, `visible(spans, fade)`, `tl.show(name)`, `tl.enter(name)` | `show(span, { fade })`, `show(span, { fade: 0 })`, `show(spans)`, `show(tl.name)`, `show({ at: tl.name.at })`. `show` fades inside the span, where `visible` faded outside it |
+| `sampled(fn, { duration })`, `sampled.path`, `nightfall` and `globe` with `duration` | `{ over }`, plus `at` to start later, with the function given time from 0 |
+| `{ from, to }` on a voxel block | `show: { at, over }` |
+| `.end` of a `typewriter`, `terminal`, `reveal` or `flow` result | `.span.end` |
+| `frames --times`, `restyle({ at, onceAt })` and `seek` in playback seconds | Scene seconds, the same numbers unless `playbackRate` is not 1 |
 
 [`scripts/codemod-0.7.ts`](scripts/codemod-0.7.ts) rewrites a project's `.ts`, `.tsx`, `.js` and `.jsx` files for all of it. It needs nothing installed. Download it, commit your work, and run it from the project:
 

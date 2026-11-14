@@ -39,17 +39,17 @@ Never call a scene done from its source. Timing bugs only show in frames.
 npx svjeez frames scene.tsx --times 0,0.5,1.2,3 --sheet --out frames/
 ```
 
-Times are playback seconds. The command writes one PNG per time plus `sheet.png`, a labelled grid. Open `sheet.png` first. Without `--times` you get `--count` frames (default 6) over one loop. Add `--scale 2` for small text and `--color-scheme light` or `dark` for adaptive themes. `svjeez svg scene.tsx --out scene.svg` writes the SVG. Frames need `npm i -D playwright-core` and `npx playwright-core install chromium-headless-shell`. On Node, `.tsx` needs `npm i -D tsx`. Under Bun use `bunx --bun svjeez`.
+Times are scene seconds, the clock your motions are written on, even when `playbackRate` is not 1. The command writes one PNG per time plus `sheet.png`, a labelled grid. Open `sheet.png` first. Without `--times` you get `--count` frames (default 6) over one loop. Add `--scale 2` for small text and `--color-scheme light` or `dark` for adaptive themes. `svjeez svg scene.tsx --out scene.svg` writes the SVG. Frames need `npm i -D playwright-core` and `npx playwright-core install chromium-headless-shell`. On Node, `.tsx` needs `npm i -D tsx`. Under Bun use `bunx --bun svjeez`.
 
-1. Pick `duration` first and plan beats in absolute seconds.
+1. Pick `duration` first and plan the beats as spans.
 2. Run `tsc --noEmit`. Fix type errors with the table below.
 3. Render a sheet at each beat's start, middle and end, plus `0` and just before `duration`.
 4. Check: nothing visible at `t = 0` that should be hidden; each element arrives and leaves on cue; nothing clipped or off center; text legible in both color schemes; the last frame close to the first.
 5. Fix, render again, and report only after a sheet shows the intended motion. Name the times you checked. Two times that should differ but render identically mean the motion is not attached or starts later than you think.
 
-## The timeline
+## Time
 
-Every motion lives on the scene timeline, `0` to `duration`. Attach motions with the `animation` prop.
+Every motion is written on a clock that starts at 0. The scene is the root clock, `0` to `duration`; a `<Clip>` starts another. A span is `{ at, over }` on the clock around it, and a span without `over` runs to the end. Recipes, `.to`, `show`, `<Clip>` and the results of `typewriter`, `terminal`, `flow` and `reveal` all take or return spans. Attach motions with the `animation` prop.
 
 ```tsx
 motion({ opacity: 0 })          // initial values, held until the first transition
@@ -58,10 +58,12 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
   .wait(2)                      // values hold; cursor is now 3.5
   .to({ opacity: 0, scale: 0.8 }, 0.4, ease.in)
   .set({ scale: 1 })            // hard cut at the cursor
-  .loop(6);                     // repeat every 6s; snapped to divide duration
+  .loop(6);                     // repeat every 6s, forever; snapped to divide duration
 ```
 
-- `.to(values, over, ease?)`: `over` is a length, never an end time. Default ease is `ease.out`. Between transitions every value holds.
+- `.to(values, over, ease?)`: `over` is a length, never an end time. `.to(values, span, ease?)` moves the cursor to `span.at` and takes `span.over`. Default ease is `ease.out`. Between transitions every value holds.
+- `.repeat(3)` plays the passage written so far three times in all; `.repeat({ until: 10 })` repeats it until 10s, cutting the last pass short, then holds. Each pass starts from the initial values. Passes become keyframes, so a spin that never stops is `.loop()`, and a long repeat hits the key cap.
+- `.rewind(0.8)` glides every channel back to its initial value, ending at the end of the clock: the scene's, a `<Clip>`'s, or a loop's period. It is how a loop closes without a hand-written reset. Nothing can follow it.
 - Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign. `easeAt(curve, progress)` gives an ease's value at a progress from 0 to 1, to reuse it inside `sampled()` or draw it beside the scene.
 - Stack with an array: `animation={[enter(...), wiggle(...)]}`. Index 0 is outermost, like a wrapper `<g>`. Falsy entries drop out.
 - Only `opacity x y scale rotate blur` stack. Every other channel takes one motion per element, or render throws `Two motions both animate`. Within one motion, `x` and `y` share a lane, so move them in one `.to()`.
@@ -82,6 +84,49 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
 
 Custom properties from `css.property` animate on every tag above except filter primitives.
 
+### Spans
+
+```tsx
+const reach = span(0, 0.7);
+const grab = reach.then(1, 0.2); // the next span: 1s long, starting 0.2s after reach ends
+const down = grab.pad(0.15);     // grown 0.15s each side; negative shrinks
+reach.end; reach.shift(2);       // 0.7; the same span 2s later
+span(5);                         // from 5s to the end of the clock; its end is Infinity
+```
+
+A plain `{ at, over }` is a span too. `span()` only adds `.end`, `.shift(dt)`, `.then(over, gap?)` and `.pad(before, after?)`. `typewriter`, `terminal`, `reveal` and `flow` return `.span`, so `typed.span.then(1)` is the next beat and `typed.span.end` is when it lands.
+
+### Clips
+
+`<Clip at over?>` starts a clock of its own. Everything inside is written from 0 and placed with one number, so a component is a function of its props and nothing else. Clips nest and add up. A clip draws no element.
+
+```tsx
+<Clip at={3.1}>
+  <Window from={home} to={dropped} drag={grab} />
+  <Key label="opt" held={[down]} />
+  <Cursor from={idle} moves={[[grip, reach], [gripDropped, grab]]} />
+</Clip>
+```
+
+- With `over`, every motion inside must end by then, or render throws and names the clip. Without it the clip runs to the end of the clock around it, which is where `.rewind()` ends.
+- Before a clip starts a motion holds its first value, and after it ends its last. That costs no keys.
+- A `.loop()` inside a clip only shifts its phase, so the loop starts counting at the clip's start. A loop cannot cut a color glide or a `steps()` transition off a step edge to do it, and render says so.
+- Motions on a `<filter>` in `def` play on the clock of the clip that uses it.
+- `frames --times`, `restyle({ at })` and `seek` take scene seconds, not clip time.
+- See `examples/clip.tsx`.
+
+### show
+
+`show(span | spans, { fade })` is opacity on while a span runs and off outside. It is the one way to show and hide.
+
+```tsx
+show(span(2, 4));                           // fades in over 0.3s, holds, fades out over the last 0.3s
+show([tl.intro, { at: 8 }], { fade: 0.2 }); // several spans; { at: 8 } stays to the end and never fades out
+show(tl.intro, { fade: 0 });                // hard cuts, a shot in an edit
+```
+
+Fades sit inside the span. Spans that overlap or touch merge, a span shorter than two fades shrinks them, and no spans means never shown, so nothing throws for a click shorter than its fade. `during`, `cut`, `visible`, `tl.show` and `tl.enter` are older spellings of the same thing.
+
 ## Recipes
 
 ```tsx
@@ -93,23 +138,23 @@ shake({ at: 2, over: 0.5 }, { x: 6 });               // damped shake on x, y or 
 wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; change the seed to reroll
 ```
 
-Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. To fly along a smooth route, `spline(points)` draws a Catmull-Rom curve through `{ x, y }` points: position `i + u` is `u` along leg `i`, `point(at)` and `angle(at)` feed `sampled()`, `tangent(at)` is the velocity, `path(from, to)` cuts exact path data (`d` is the whole route), and `nearest(p, from, to)` finds the position closest to a point.
+Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { over, at?, tolerance })` bakes a function of time into keyframes: `fn` is given time from 0 to `over`, plays from `at` (default 0) and holds its first and last values outside, so a motion that belongs to one scene costs keys only for that scene. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. To fly along a smooth route, `spline(points)` draws a Catmull-Rom curve through `{ x, y }` points: position `i + u` is `u` along leg `i`, `point(at)` and `angle(at)` feed `sampled()`, `tangent(at)` is the velocity, `path(from, to)` cuts exact path data (`d` is the whole route), and `nearest(p, from, to)` finds the position closest to a point.
 `precision: 1` rounds each sample to one decimal place before the keys are kept, which keeps the file small. `random(seed)` is the seeded stream `wiggle` uses: the same numbers from 0 up to 1 on every run, from a whole number or a string such as `"leg-3"`.
 
 `valuesAt(stack, t, { duration })` reads what a motion or stack draws at scene time `t`, eased and looped as `render()` plays it, for placing something beside a moving part or drawing a readout of it. It returns the numeric channels and properties. Across layers `x`, `y` and `rotate` add and `opacity` and `scale` multiply.
 
 ```tsx
-sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translate: 1 } });
+sampled((t) => ({ x: 100 * Math.cos(t) }), { over: 12, tolerance: { translate: 1 } });
 ```
 
 ## Shape morphs
 
-`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampled.path(fn, { duration, tolerance })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is one number, in px, and `precision` (default 1) the decimal places of the path data. It takes the same `duration` and `step` as `sampled`.
+`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampled.path(fn, { over, at?, tolerance })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is one number, in px, and `precision` (default 1) the decimal places of the path data. It takes the same `over`, `at` and `step` as `sampled`.
 
 ```tsx
 const [square, star] = matchPaths([squareD, starD]);
 <path d={square} animation={motion({ d: square }).at(1).to({ d: star }, 0.8, ease.inOut)} />;
-sampled.path((t) => wavePath(t), { duration: 6, tolerance: 0.5 });
+sampled.path((t) => wavePath(t), { over: 6, tolerance: 0.5 });
 ```
 
 Reduced motion shows a still copy of the path at `reducedMotion.at`.
@@ -141,7 +186,12 @@ Runtime errors. `…` stands for a value the message fills in.
 | `… on <…> has no starting value.` | Pass it in `motion({ width: 10 })` or set the attribute |
 | ``Two motions both animate `…` on <…>: put them in one motion().`` | Only the stacking channels may repeat |
 | ``Two transitions move `…` between …s and …s.`` | Merge into one `.to({ x, y })`, or stack two motions |
-| `A motion on <…> runs until …s, past the …s scene.` | Raise `duration`, or end the motion earlier |
+| `A motion on <…> runs until …s, past the …s scene.` | Raise `duration`, or end the motion earlier. Inside a `<Clip>` the message names the clip |
+| `to() needs a span with an over, got { at: … } alone. A transition takes time: use span(…, over).` | `.to()` takes a span with an `over` |
+| `repeat() would unroll … passes of … steps into keyframes. Use .loop(period) for a motion that never stops.` | `.loop(period)`, or fewer passes |
+| `rewind(…) on … needs the last …s of its …s clock, but the motion runs until …s.` | End the motion earlier, or rewind over less time |
+| `… cuts a steps(…) transition between two of its steps. Cut it on a step edge, or use ease.out.` | `repeat({ until })` or a loop in a `<Clip>` fell inside a `steps()` transition |
+| `… stops … partway through a transition from … to …, and only numbers and paths can be cut there. Cut it between transitions.` | Same, for a color transition |
 | `loop(…) is shorter than the motion, which runs until …s.` | The period must cover every step |
 | `A step ending at …s overruns loop(…).` | Same, for a later step |
 | `d on <path> moves between paths with different commands, so it would jump. Write them through matchPaths() first.` | `matchPaths([a, b])` and animate between its results |
@@ -186,6 +236,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 Each file in `examples/` renders. Copy one and change it.
 
 - `examples/toast.tsx`: a `motion()` chain, stacked `enter` and `shake`, `draw` on a check.
+- `examples/clip.tsx`: a `<Clip>` with a card, a cursor and a key driven by three spans, and `.rewind()` to close the loop.
 - `examples/orbit.tsx`: `sampled()` orbit, a `.loop()` spin, a `wiggle` breath.
 - `examples/review-flow.tsx`: hand-placed boxes, a `flow` comet along them, an adaptive theme.
 - `examples/explainer.tsx`: `code`, `morph`, `timeline`, `Focus`, `Marker`, `Callout`.
