@@ -38,7 +38,7 @@ The options are:
 
 ## Palettes
 
-The editor palettes are base16 themes for `code()`, `terminal()` and `adaptive()`: `tomorrow` and `tomorrowNight`, `solarizedLight` and `solarizedDark`, `gruvboxLight` and `gruvboxDark`. Import them from `@svjeez/code`, or from `@svjeez/code/palettes` to leave Shiki out of the bundle.
+The editor palettes are base16 themes for `code()`, `terminal()` and `adaptive()`: `tomorrow` and `tomorrowNight`, `solarizedLight` and `solarizedDark`, `gruvboxLight` and `gruvboxDark`, `rosePineDawn` and `rosePine`. Import them from `@svjeez/code`, or from `@svjeez/code/palettes` to leave Shiki out of the bundle.
 
 ```tsx
 import { tomorrow, tomorrowNight } from "@svjeez/code/palettes";

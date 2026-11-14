@@ -280,17 +280,8 @@ kbd {
     color: var(--ink);
   }
 }
-.top nav .word {
-  display: inline-flex;
-  block-size: 1.6rem;
-}
-.top nav .word svg {
-  block-size: 100%;
-  inline-size: auto;
-  overflow: visible;
-}
 
-/* The palettes: four little color wheels in each palette's own colors. Pointing spins one, and the one being worn sits
+/* The palettes: four little color wheels, half each palette's own background and half two of its accents. Pointing spins one, and the one being worn sits
    a size up with a ring. */
 .palettes {
   display: flex;
@@ -304,10 +295,8 @@ kbd {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: conic-gradient(var(--s1) 0 33.3%, var(--s2) 0 66.6%, var(--s3) 0);
-  box-shadow:
-    0 0 0 2px var(--s0),
-    0 0 0 3px var(--line);
+  background: conic-gradient(from -90deg, var(--s1) 0 25%, var(--s4) 0 50%, var(--s0) 0);
+  box-shadow: 0 0 0 1.5px var(--line);
   cursor: pointer;
   transition:
     scale 0.3s cubic-bezier(0.34, 1.8, 0.64, 1),
@@ -317,7 +306,7 @@ kbd {
 .palettes button[aria-checked="true"] {
   scale: 1.2;
   box-shadow:
-    0 0 0 2px var(--s0),
+    0 0 0 2px var(--bg),
     0 0 0 3.5px var(--ink);
 }
 .palettes button:focus-visible {

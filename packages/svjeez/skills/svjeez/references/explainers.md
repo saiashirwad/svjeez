@@ -4,7 +4,7 @@ Import from `svjeez`. `code` and `terminal` take `theme` (default `defaultDark`)
 
 ## Themes
 
-Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made in `svjeez`: `systemDark`, `systemLight`, `defaultDark`, `defaultLight`. `@svjeez/code` has the editor palettes: `tomorrowNight`, `tomorrow`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
+Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made in `svjeez`: `systemDark`, `systemLight`, `defaultDark`, `defaultLight`. `@svjeez/code` has the editor palettes: `tomorrowNight`, `tomorrow`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`, `rosePine`, `rosePineDawn`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
 
 ```tsx
 import { tomorrow, tomorrowNight, solarizedDark, solarizedLight } from "@svjeez/code";

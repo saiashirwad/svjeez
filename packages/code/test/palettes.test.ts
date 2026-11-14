@@ -8,6 +8,8 @@ test("every palette fills all sixteen slots", () => {
   expect(Object.keys(palettes).toSorted()).toEqual([
     "gruvboxDark",
     "gruvboxLight",
+    "rosePine",
+    "rosePineDawn",
     "solarizedDark",
     "solarizedLight",
     "tomorrow",

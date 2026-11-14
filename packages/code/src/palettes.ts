@@ -119,3 +119,43 @@ export const gruvboxLight: Base16 = /* @__PURE__ */ base16(
   "#8f3f71",
   "#d65d0e",
 );
+
+/** Rosé Pine, soho vibes after dark: muted violets, pinks and gold. Pairs with `rosePineDawn` in `adaptive`. */
+export const rosePine: Base16 = /* @__PURE__ */ base16(
+  "#191724",
+  "#1f1d2e",
+  "#26233a",
+  "#6e6a86",
+  "#908caa",
+  "#e0def4",
+  "#e0def4",
+  "#f4f2ff",
+  "#eb6f92",
+  "#f6c177",
+  "#ebbcba",
+  "#9ccfd8",
+  "#3e8fb0",
+  "#c4a7e7",
+  "#eb6f92",
+  "#524f67",
+);
+
+/** Rosé Pine Dawn, the same palette by day on warm paper. Pairs with `rosePine` in `adaptive`. */
+export const rosePineDawn: Base16 = /* @__PURE__ */ base16(
+  "#faf4ed",
+  "#fffaf3",
+  "#f2e9de",
+  "#9893a5",
+  "#797593",
+  "#575279",
+  "#575279",
+  "#26233a",
+  "#b4637a",
+  "#ea9d34",
+  "#d7827e",
+  "#56949f",
+  "#286983",
+  "#907aa9",
+  "#b4637a",
+  "#cecacd",
+);

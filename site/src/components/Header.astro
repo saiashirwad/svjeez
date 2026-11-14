@@ -1,7 +1,7 @@
 ---
 import { getScene } from "@svjeez/astro/scene";
 import mascot from "@examples/site/mascot.tsx";
-import { github, moon, sun, system, word } from "@examples/site/nav-icons.tsx";
+import { github, moon, sun, system } from "@examples/site/nav-icons.tsx";
 import { PALETTES, type Palette } from "../palettes";
 
 interface Props {
@@ -34,7 +34,7 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
           {link.label === "GitHub" && (
             <span class="gh nav-ico" aria-hidden="true" set:html={github()} />
           )}
-          {link.label === "GitHub" ? <span class="word" aria-hidden="true" set:html={word("GitHub", "ghw")} /> : <span>{link.label}</span>}
+          {link.label !== "GitHub" && <span>{link.label}</span>}
         </a>
       ))
     }

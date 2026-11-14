@@ -1,4 +1,4 @@
-import { Ink, Pivot, ease, motion, render, strokeFont, tool, type Child } from "svjeez";
+import { Pivot, ease, motion, render, type Child } from "svjeez";
 
 // The header's icons, drawn with svjeez and inlined in the page. Each loops a little bit of business, and the page
 // keeps it paused until the pointer is over its button, so they come alive only when you go to use them.
@@ -164,46 +164,3 @@ export const system = () =>
       />
     </>,
   );
-
-const casual = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
-
-/** A word for the header, hand-lettered in the page's text color, written once when the page loads. */
-export const word = (text: string, prefix: string) => {
-  const size = 24;
-  const probe = casual.path(text, { size, x: 0, y: 0 }).d;
-  const xs = (probe.match(/-?[\d.]+/g) ?? []).map(Number).filter((_, i) => i % 2 === 0);
-  const width = Math.ceil(Math.max(...xs) - Math.min(...xs)) + 6;
-  const d = casual.path(text, { size, x: 3 - Math.min(...xs), y: 21 }).d;
-  const pen = tool.pen({ size: 2, seed: 3 });
-  let t = 0.2;
-  const strokes = d.split(/(?=M)/).map((piece) => {
-    const over = 0.12;
-    const stroke = { d: piece, at: t, over };
-    t += over;
-
-    return stroke;
-  });
-
-  return render(
-    {
-      width,
-      height: 28,
-      duration: t + 0.1,
-      loop: false,
-      title: text,
-      prefix,
-      reducedMotion: { at: t + 0.1 },
-    },
-    <>
-      {strokes.map((s) => (
-        <Ink
-          d={s.d}
-          tool={pen}
-          fill="currentColor"
-          draw={{ at: s.at, over: s.over }}
-          ease={ease.linear}
-        />
-      ))}
-    </>,
-  );
-};

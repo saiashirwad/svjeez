@@ -5,8 +5,8 @@ import {
   gruvboxLight,
   solarizedDark,
   solarizedLight,
-  tomorrow,
-  tomorrowNight,
+  rosePine,
+  rosePineDawn,
 } from "@svjeez/code/palettes";
 
 export interface Palette {
@@ -19,9 +19,9 @@ export interface Palette {
 /** In picker order. The first is the default, the look the scenes are built with (`palette` in examples/style.ts). */
 export const PALETTES = [
   { id: "system", label: "System", light: systemLight, dark: systemDark },
-  { id: "tomorrow", label: "Tomorrow", light: tomorrow, dark: tomorrowNight },
   { id: "solarized", label: "Solarized", light: solarizedLight, dark: solarizedDark },
   { id: "gruvbox", label: "Gruvbox", light: gruvboxLight, dark: gruvboxDark },
+  { id: "rose-pine", label: "Rosé Pine", light: rosePineDawn, dark: rosePine },
 ] as const satisfies readonly Palette[];
 
 export type PaletteId = (typeof PALETTES)[number]["id"];
