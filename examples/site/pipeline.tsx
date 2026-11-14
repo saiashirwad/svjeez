@@ -1,7 +1,7 @@
 import { ease, motion, render, sampled, show, type Color } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
-import { theme } from "../style";
+import { mono, theme } from "../style";
 import { GROUND, chick } from "./lib/chick";
 
 const BAR = 40;
@@ -98,7 +98,6 @@ export const make = (tall = false): string => {
       direction: tall ? "TB" : "LR",
       fontSize: 13,
       class: "sans",
-      play: { at: 0.5, step: 0.45 },
     },
   );
 
@@ -132,7 +131,7 @@ export const make = (tall = false): string => {
     { kind: "hop", to: top("ship"), over: HOP },
   ];
 
-  const START = 4;
+  const START = 0.8;
   const length = legs.reduce((s, l) => s + l.over, 0);
   const until = (n: number) => START + legs.slice(0, n).reduce((s, l) => s + l.over, 0);
   const where = placeOf(top("prompt"), legs);
@@ -142,7 +141,7 @@ export const make = (tall = false): string => {
 
   // The bubbles over the decision: "???" the first time, "yes!" the second.
   const bubble = (text: string, at: number, over: number, color: Color) => {
-    const w = text.length * 9 + 22;
+    const w = text.length * 8 + 22;
     const { x, y } = top("ok");
 
     return (
@@ -159,8 +158,9 @@ export const make = (tall = false): string => {
             x={w / 2}
             y={18}
             textAnchor="middle"
-            fontSize={14}
-            fontWeight={700}
+            fontFamily={mono}
+            fontSize={13}
+            fontWeight={600}
             fill={theme.base00}
           >
             {text}
