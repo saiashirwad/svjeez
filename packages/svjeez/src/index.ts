@@ -1,14 +1,18 @@
 export { render, type RenderOptions } from "./render";
 
+export { motion, ease, type Motion, type Stack, type Seconds, type Ease } from "./motion";
+
 export {
-  motion,
-  ease,
-  type Motion,
-  type Stack,
+  span,
   type Span,
-  type Seconds,
-  type Ease,
-} from "./motion";
+  type OpenSpan,
+  type Spanned,
+  type OpenSpanned,
+  type When,
+  type SampleWindow,
+} from "./span";
+
+export { Clip, type ClipProps } from "./clip";
 
 export { easeAt } from "./ease-at";
 
@@ -108,9 +112,11 @@ export type { Box, Size } from "./layout/box";
 
 export {
   timeline,
+  show,
   during,
   cut,
   shot,
+  type ShowOptions,
   type ShotMove,
   type ShotOptions,
   readingTime,

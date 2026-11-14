@@ -22,9 +22,10 @@ import {
   type CssPart,
   type Property,
 } from "./properties";
-import { keysOf, snapPeriod, valueAt, type Key } from "./keys";
-import { EPSILON, dataOf, type Motion } from "./motion";
+import { MAX_KEYS, keysOf, rotateKeys, snapPeriod, valueAt, type Key } from "./keys";
+import { EPSILON, dataOf, type Motion, type Step } from "./motion";
 import { commandsOf } from "./paths";
+import { resolveSteps } from "./resolve";
 import { animate } from "./smil";
 import { element, type AttrValue, type Element, type SvgNode } from "./svg";
 
@@ -54,9 +55,26 @@ interface Lane {
   readonly label?: string;
 }
 
+/** A `<Clip>` a motion sits in, in scene seconds. An open clip runs to the end of the clip around it. */
+interface ClipFrame {
+  readonly label: string;
+  readonly start: number;
+  readonly end: number;
+  readonly open: boolean;
+}
+
+/** The clock a motion's times are on: scene seconds minus `offset`. `end` is when it stops, in scene seconds. */
+interface Clock {
+  readonly offset: number;
+  readonly end: number;
+  readonly clips: readonly ClipFrame[];
+}
+
 interface State {
   readonly canvas: Canvas;
-  readonly ids: Map<AnyRef, string>;
+  /** Each def's ids by the clock offset it was walked at, since a def with motions plays on the clock of the clip that first uses it. */
+  readonly ids: Map<AnyRef, Map<number, string>>;
+  clock: Clock;
   readonly blurs: Map<string, string>;
   readonly properties: Map<Property, string>;
   readonly registrations: string[];
@@ -76,8 +94,6 @@ interface State {
   pivot: boolean;
   once: boolean;
 }
-
-const MAX_KEYS = 2000;
 
 const PREFIX: Record<DefTag, string> = {
   filter: "f",
@@ -102,7 +118,7 @@ const nextName = (state: State, base: string, lead = ""): string => {
 const hasSmil = (node: SvgNode): boolean =>
   node.kind === "element"
     ? node.tag === "animate" || node.children.some(hasSmil)
-    : node.kind === "fragment" && node.children.some(hasSmil);
+    : (node.kind === "fragment" || node.kind === "clip") && node.children.some(hasSmil);
 
 const withoutSmil = (node: Element): Element => ({
   ...node,
@@ -130,12 +146,13 @@ const canvasRegion = ({ width, height }: Canvas) => ({
 });
 
 const refId = (state: State, ref: AnyRef): string => {
-  const known = state.ids.get(ref);
+  const { offset } = state.clock;
+  const known = state.ids.get(ref)?.get(offset);
 
   if (known) return known;
   const def = refNode(ref);
   const id = nextName(state, PREFIX[refTag(ref)]);
-  state.ids.set(ref, id);
+  state.ids.set(ref, (state.ids.get(ref) ?? new Map()).set(offset, id));
 
   const region =
     def.tag === "filter" && !REGION.some((name) => name in def.attrs)
@@ -257,7 +274,11 @@ const isDiscrete = (keys: readonly Key[], channel: Target): boolean =>
 const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   const data = dataOf(value);
   const { duration } = state.canvas;
+  const { clock } = state;
   const period = data.period ?? duration;
+  // A loop repeats on a clock of its own, which a clip only moves by a phase. Anything else plays on the clip's clock.
+  const offset = data.period === undefined ? clock.offset : 0;
+  const clockEnd = data.period === undefined ? clock.end - clock.offset : period;
   const snapped = data.period === undefined ? duration : snapPeriod(data.period, duration);
 
   // SAFETY: each key is a channel or property that motion() validated, so it is a Target name.
@@ -292,25 +313,44 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
       channels.map((c) => [c, startValue(el, c, backend, valueOf(data.initial, c))]),
     ) as TargetValues;
 
-    const segments = data.steps
-      .filter((step) => channels.some((c) => c in step.values))
-      .map((step) => ({ ...step, values: pick(step.values) }));
+    const mine = (c: Target) => channels.includes(c);
 
+    const pickStep = (step: Step): Step => {
+      const values = pick(step.values);
+
+      return step.restore
+        ? { ...step, values, restore: step.restore.filter(mine) }
+        : { ...step, values };
+    };
+
+    const picked = data.steps
+      .filter((step) =>
+        step.restore ? step.restore.some(mine) : channels.some((c) => c in step.values),
+      )
+      .map(pickStep);
+
+    const segments = resolveSteps(initial, picked, data.rewind, clockEnd, `<${el.tag}>`);
     const last = Math.max(0, ...segments.map((step) => step.start + step.over));
+    reach(el, clock, data.period === undefined, offset + last, duration, period);
 
-    if (last > period + EPSILON)
-      throw new Error(
-        `A motion on <${el.tag}> runs until ${num(last)}s, past the ${num(duration)}s scene.`,
-      );
-
-    const keys = keysOf(
+    let keys = keysOf(
       initial,
-      segments.sort((a, b) => a.start - b.start),
+      segments.map((step) => ({ ...step, start: step.start + offset })),
       period,
     );
 
+    if (data.period !== undefined && clock.offset > 0)
+      keys = rotateKeys(
+        keys,
+        ((clock.offset % snapped) / snapped) * period,
+        period,
+        `A loop on <${el.tag}> inside ${clock.clips.at(-1)?.label ?? "a clip"}`,
+      );
+
     if (keys.length > MAX_KEYS)
-      throw new Error(`${key} on <${el.tag}> has ${keys.length} keys; the cap is ${MAX_KEYS}.`);
+      throw new Error(
+        `${key} on <${el.tag}> has ${keys.length} keys; the cap is ${MAX_KEYS}.${data.repeated ? " repeat() unrolls every pass, so use .loop(period) for a motion that never stops." : ""}`,
+      );
 
     if (key === "d") {
       const commands = new Set(keys.map((k) => commandsOf(String(k.values.d))));
@@ -337,6 +377,40 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
       label: data.label,
     };
   });
+};
+
+/** Throws when a motion that ends at `until` scene seconds runs past the scene or the clip it sits in. A loop only has to fit its own period. */
+const reach = (
+  el: Element,
+  clock: Clock,
+  onClock: boolean,
+  until: number,
+  duration: number,
+  period: number,
+): void => {
+  if (!onClock) {
+    if (until > period + EPSILON)
+      throw new Error(
+        `A motion on <${el.tag}> runs until ${num(until)}s, past the ${num(duration)}s scene.`,
+      );
+
+    return;
+  }
+
+  for (const clip of [...clock.clips].reverse()) {
+    if (!clip.open && until > clip.end + EPSILON)
+      throw new Error(
+        `A motion on <${el.tag}> runs until ${num(until - clip.start)}s, past the ${num(clip.end - clip.start)}s ${clip.label}.`,
+      );
+  }
+
+  if (until > duration + EPSILON) {
+    const inside = clock.clips.at(-1);
+
+    throw new Error(
+      `A motion on <${el.tag}> runs until ${num(until)}s${inside ? ` (${num(until - clock.offset)}s into ${inside.label})` : ""}, past the ${num(duration)}s scene.`,
+    );
+  }
 };
 
 const collides = (el: Element, lane: Lane): boolean =>
@@ -557,6 +631,9 @@ const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
       : lanes;
   });
 
+const clipLabel = ({ at, over }: { readonly at: number; readonly over?: number }): string =>
+  `<Clip at={${num(at)}}${over === undefined ? "" : ` over={${num(over)}}`}>`;
+
 const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNode => {
   switch (node.kind) {
     case "text":
@@ -578,6 +655,36 @@ const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNod
         ...node,
         children: node.children.map((child) => walk(state, child, veiled, once)),
       };
+    case "clip": {
+      const parent = state.clock;
+      const start = parent.offset + node.at;
+      const end = node.over === undefined ? parent.end : start + node.over;
+      const label = clipLabel(node);
+
+      if (start > parent.end + EPSILON || end > parent.end + EPSILON) {
+        const around = parent.clips.at(-1);
+
+        throw new Error(
+          `A ${label} runs until ${num(end - parent.offset)}s, past the ${num(parent.end - parent.offset)}s ${around ? around.label : "scene"}.`,
+        );
+      }
+
+      state.clock = {
+        offset: start,
+        end,
+        clips: [...parent.clips, { label, start, end, open: node.over === undefined }],
+      };
+
+      try {
+        return {
+          kind: "fragment",
+          children: node.children.map((child) => walk(state, child, veiled, once)),
+        };
+      } finally {
+        state.clock = parent;
+      }
+    }
+
     case "element": {
       const bare = element(node.tag, resolveAttrs(state, node.attrs), []);
       const inOnce = once || node.once === true;
@@ -633,6 +740,7 @@ export const compile = (
   const state: State = {
     canvas,
     ids: new Map(),
+    clock: { offset: 0, end: canvas.duration, clips: [] },
     blurs: new Map(),
     properties: new Map(),
     registrations: [],

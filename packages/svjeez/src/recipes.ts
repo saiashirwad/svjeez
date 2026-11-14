@@ -11,6 +11,7 @@ import {
 import { samplePath } from "./paths";
 import type { NumericProperty } from "./properties";
 import { random } from "./random";
+import { sampleWindow, type SampleWindow } from "./span";
 import {
   NUDGE,
   ease,
@@ -24,7 +25,7 @@ import {
 
 type Shake = "x" | "y" | "rotate";
 
-const span = ({ at, over }: Span, what: string): Span => {
+const closed = ({ at, over }: Span, what: string): Span => {
   if (!Number.isFinite(at) || at < 0)
     throw new Error(`${what} needs a start of 0 or later, got ${at}.`);
 
@@ -52,7 +53,7 @@ export function enter(
   from: ChannelValues<RestChannel> = { opacity: 0 },
   curve: Ease = ease.out,
 ): Motion {
-  const { at: start, over } = span(at, "enter()");
+  const { at: start, over } = closed(at, "enter()");
 
   return motion(from).at(start).to(rest(from), over, curve);
 }
@@ -69,14 +70,14 @@ export function exit(
   to: ChannelValues<RestChannel> = { opacity: 0 },
   curve: Ease = ease.out,
 ): Motion {
-  const { at: start, over } = span(at, "exit()");
+  const { at: start, over } = closed(at, "exit()");
 
   return motion().at(start).to(to, over, curve);
 }
 
 /** Stroke a shape on, 0 → 1. Render adds pathLength/dasharray and hides the round-cap dot at 0. */
 export const draw = (at: Span, curve: Ease = ease.out): Motion<"draw"> => {
-  const { at: start, over } = span(at, "draw()");
+  const { at: start, over } = closed(at, "draw()");
 
   return motion({ draw: 0 }).at(start).to({ draw: 1 }, over, curve);
 };
@@ -87,7 +88,7 @@ export function shake<V extends ChannelValues<Shake>>(
   amplitude: Exact<V, Shake>,
   options: { readonly rate?: number } = {},
 ): Motion<keyof V & Shake> {
-  const { at: start, over } = span(at, "shake()");
+  const { at: start, over } = closed(at, "shake()");
   const count = Math.max(2, Math.round(over * (options.rate ?? 12)));
   const amounts: ChannelValues<Shake> = amplitude;
 
@@ -171,14 +172,13 @@ type Covered<T extends Tolerance> = {
   readonly [P in keyof T & NumericProperty]?: number;
 };
 
-export interface SampledOptions<T extends Tolerance> {
-  readonly duration: Seconds;
+export type SampledOptions<T extends Tolerance> = SampleWindow & {
   /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
   readonly tolerance: T;
   /** Decimal places each sampled value is rounded to before simplifying. Default none. */
   readonly precision?: number;
-}
+};
 
 const ramerDouglasPeucker = (
   samples: readonly (readonly number[])[],
@@ -247,16 +247,15 @@ const jump = (
 /**
  * Sample `(t) => values` densely, then keep only the keys each lane needs. Morphs come out dense and
  * holds sparse, and a jump in the function comes out as a cut. Every channel or property returned needs a
- * tolerance for its lane.
+ * tolerance for its lane. The function is given time from 0 to `over`, and plays from `at` (default 0), holding its
+ * first value before and its last after.
  */
 export function sampled<T extends Tolerance, V extends Covered<T>>(
   sample: (t: Seconds) => V & { readonly [P in Exclude<keyof V, keyof Covered<T>>]: never },
   options: SampledOptions<T>,
 ): Motion<keyof V & Sampled> {
-  const { duration, step = 0.05, precision } = options;
-
-  if (!Number.isFinite(duration) || duration <= 0)
-    throw new Error(`sampled() needs a positive duration, got ${duration}.`);
+  const { step = 0.05, precision } = options;
+  const { at: from, over: duration } = sampleWindow(options, "sampled()");
 
   if (!Number.isFinite(step) || step <= 0)
     throw new Error(`sampled() needs a positive step, got ${step}.`);
@@ -345,7 +344,7 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
     }
 
     runs.forEach((run, r) => {
-      if (r > 0) track = track.at(run[0]!.t).set(valuesOf(run[0]!));
+      if (r > 0) track = track.at(from + run[0]!.t).set(valuesOf(run[0]!));
 
       const kept =
         run.length > 1
@@ -356,8 +355,8 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
           : [];
 
       for (let j = 1; j < kept.length; j++) {
-        const [from, to] = [run[kept[j - 1]!]!, run[kept[j]!]!];
-        track = track.at(from.t).to(valuesOf(to), to.t - from.t, ease.linear);
+        const [a, b] = [run[kept[j - 1]!]!, run[kept[j]!]!];
+        track = track.at(from + a.t).to(valuesOf(b), b.t - a.t, ease.linear);
       }
     });
   }

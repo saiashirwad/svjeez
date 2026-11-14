@@ -4,6 +4,7 @@ import { pathLength, simplify, type Point } from "../geometry";
 import { EPSILON, ease, motion, type Seconds } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
+import { span, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
 import { defaultDark, type Base16 } from "./theme";
 import { travel } from "./timeline";
@@ -57,6 +58,9 @@ const REACH = 36;
 
 export interface FlowResult {
   readonly node: SvgNode;
+  /** From `at` to when it arrives, ring included. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
 }
 
@@ -181,7 +185,9 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
         .to({ opacity: 0, scale: 3 }, 0.7),
     });
 
-  return { node: el.g({ class: cls }, [body, ring]), end: end + (arrive ? 0.7 : 0) };
+  const done = end + (arrive ? 0.7 : 0);
+
+  return { node: el.g({ class: cls }, [body, ring]), span: span(at, done - at), end: done };
 };
 
 /** Same as the golden angle on a circle: consecutive indices land far apart, and the sequence never repeats. */
@@ -259,7 +265,7 @@ const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowR
     }),
   );
 
-  return { node, end: at + FADE_IN };
+  return { node, span: span(at, FADE_IN), end: at + FADE_IN };
 };
 
 const isLines = (
@@ -267,13 +273,13 @@ const isLines = (
 ): points is readonly (readonly Point[])[] => Array.isArray(points[0]);
 
 /**
- * Something running `points` from `at`. `end` is when it arrives.
+ * Something running `points` from `at`. `span` runs until it arrives.
  *
  * Give it a list of lines, such as the `lines` of `streamlines()`, and one particle runs along every line, again and
  * again. Every line has its own length and so its own period, and the particle starts a different way along it, set by
  * the line's index, so the field flows without pulsing in unison. A particle that starts part way runs as two pieces,
  * so a comet's tail is cut where its line starts over. Costs one or two animated elements per line for `dot`, four to
- * eight for `comet`. `end` is then when the particles have faded in.
+ * eight for `comet`. `span` is then the time the particles take to fade in.
  */
 export function flow(
   points: readonly Point[] | readonly (readonly Point[])[],

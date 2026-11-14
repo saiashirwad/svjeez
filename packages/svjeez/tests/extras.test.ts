@@ -114,10 +114,12 @@ test("morph pairs runs by id before content, so a renamed word moves instead of 
   expect(match(before, after)).toContainEqual([0, 1]);
 });
 
+const plain = ({ at, over }: { at: number; over: number }) => ({ at, over });
+
 describe("pacing", () => {
   test("pace scales scenes, not gaps", () => {
     const tl = timeline({ intro: 2, body: 3 }, { gap: 0.5, pace: 2 });
-    expect([tl.intro, tl.body, tl.duration]).toEqual([
+    expect([plain(tl.intro), plain(tl.body), tl.duration]).toEqual([
       { at: 0, over: 4 },
       { at: 4.5, over: 6 },
       10.5,
@@ -127,7 +129,7 @@ describe("pacing", () => {
   test("a timeline starting inside another's scene lays out its beats from there", () => {
     const outer = timeline({ intro: 2, body: 6 }, { gap: 1 });
     const beats = timeline({ setup: 1, punchline: 2 }, { at: outer.body.at, gap: 0.5 });
-    expect([beats.setup, beats.punchline, beats.duration, beats.end]).toEqual([
+    expect([plain(beats.setup), plain(beats.punchline), beats.duration, beats.end]).toEqual([
       { at: 3, over: 1 },
       { at: 4.5, over: 2 },
       3.5,

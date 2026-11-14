@@ -1,5 +1,6 @@
 import { num } from "./format";
 import { segments } from "./pathTokens";
+import { sampleWindow, type SampleWindow } from "./span";
 import { NUDGE, ease, motion, type Motion, type Seconds } from "./motion";
 
 /** SVG path data, as a `<path d>` takes it. */
@@ -384,8 +385,7 @@ export const commandsOf = (d: string): string =>
 
 const numbers = (d: string): number[] => segments(d).flatMap((s) => s.numbers);
 
-export interface SampledPathOptions {
-  readonly duration: Seconds;
+export type SampledPathOptions = SampleWindow & {
   /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
   /** How far, in px, any point of the replay may stray from the samples. */
@@ -397,18 +397,16 @@ export interface SampledPathOptions {
    * the hidden side of a globe folded out past its clip. Numbers are read in pairs as points. Default none.
    */
   readonly slack?: (x: number, y: number) => number;
-}
+};
 
 /** What `sampled.path()` does when `sample` returns path data and `tolerance` is a number of px. */
 export function samplePath(
   sample: (t: Seconds) => string,
   options: SampledPathOptions,
 ): Motion<"d"> {
-  const { duration, step = 0.05, tolerance } = options;
+  const { step = 0.05, tolerance } = options;
   const places = options.precision ?? 1;
-
-  if (!Number.isFinite(duration) || duration <= 0)
-    throw new Error(`sampled.path() needs a positive duration, got ${duration}.`);
+  const { at: from, over: duration } = sampleWindow(options, "sampled.path()");
 
   if (!Number.isFinite(step) || step <= 0)
     throw new Error(`sampled.path() needs a positive step, got ${step}.`);
@@ -491,8 +489,8 @@ export function samplePath(
   let track: Motion<"d"> = motion({ d: rounded(0) });
 
   for (let j = 1; j < kept.length; j++) {
-    const [from, to] = [kept[j - 1]!, kept[j]!];
-    track = track.at(times[from]!).to({ d: rounded(to) }, times[to]! - times[from]!, ease.linear);
+    const [a, b] = [kept[j - 1]!, kept[j]!];
+    track = track.at(from + times[a]!).to({ d: rounded(b) }, times[b]! - times[a]!, ease.linear);
   }
 
   return track;

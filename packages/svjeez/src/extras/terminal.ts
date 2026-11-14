@@ -1,6 +1,7 @@
 import { el } from "../el";
 import type { Rect } from "../geometry";
 import { motion, type Seconds } from "../motion";
+import { span, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
 import { code, type Code, type CodeOptions, type CodePiece } from "./code";
 import { defaultDark, type CodeRole } from "./theme";
@@ -30,6 +31,9 @@ const isPlainOutput = (out: string | readonly CodePiece[]): out is string =>
 
 export interface TerminalResult {
   readonly node: SvgNode;
+  /** From `at` to when the last line lands. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
   readonly bounds: Rect;
 }
@@ -94,6 +98,7 @@ export function terminal(
 
   return {
     node: el.g({}, nodes),
+    span: span(at, clock - gap - at),
     end: clock - gap,
     bounds: laid.map((c) => c.bounds).reduce((a, b) => a.union(b)),
   };

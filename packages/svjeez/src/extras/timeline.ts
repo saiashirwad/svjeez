@@ -1,15 +1,16 @@
 import { pathLength, type Point } from "../geometry";
 import type { ChannelValues } from "../channels";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
+import { span as makeSpan, type Spanned, type When } from "../span";
 
-export type Timeline<K extends string> = { readonly [P in K]: Span } & {
+export type Timeline<K extends string> = { readonly [P in K]: Spanned } & {
   /** From the first scene's start to the last one's end. */
   readonly duration: Seconds;
   /** When the last scene ends. */
   readonly end: Seconds;
-  /** Fade in at the scene's start and out by its end. */
+  /** @deprecated use `show(tl.name)` */
   show(name: K): Motion<"opacity">;
-  /** Fade in at the scene's start and stay. */
+  /** @deprecated use `show({ at: tl.name.at })` */
   enter(name: K): Motion<"opacity">;
 };
 
@@ -23,22 +24,65 @@ export interface TimelineOptions {
   readonly pace?: number;
 }
 
-/** Fade in at the span's start, hold, fade out by its end. */
-export const during = ({ at, over }: Span, fade: Seconds = 0.3): Motion<"opacity"> => {
-  const f = Math.min(fade, over / 2);
+export interface ShowOptions {
+  /** Seconds each fade takes, inside the span. A span shorter than two fades shrinks them. 0 cuts. Default 0.3. */
+  readonly fade?: Seconds;
+}
 
-  return motion({ opacity: 0 })
-    .at(at)
-    .to({ opacity: 1 }, f)
-    .at(at + over - f)
-    .to({ opacity: 0 }, f);
+/**
+ * On during each span, off outside. Fades sit inside the span: in over its first `fade` seconds and out over its last.
+ * Spans that overlap or touch merge, so fades never collide, and a span shorter than two fades shrinks them. `fade: 0`
+ * cuts: a shot in an edit. A span without `over` stays to the end and never fades out.
+ */
+const isList = (spans: When | readonly When[]): spans is readonly When[] => Array.isArray(spans);
+
+export const show = (
+  spans: When | readonly When[],
+  { fade = 0.3 }: ShowOptions = {},
+): Motion<"opacity"> => {
+  const list: readonly When[] = isList(spans) ? spans : [spans];
+
+  if (!(fade >= 0 && Number.isFinite(fade)))
+    throw new Error(`show() needs a fade of 0 or more, got ${fade}.`);
+
+  if (list.length === 0) throw new Error("show() needs at least one span.");
+
+  for (const { at, over } of list) {
+    if (!Number.isFinite(at) || at < 0)
+      throw new Error(`show() needs a start of 0 or later, got ${at}.`);
+
+    if (over !== undefined && !(over > 0 && Number.isFinite(over)))
+      throw new Error(`show() needs a positive over, or none to stay to the end, got ${over}.`);
+  }
+
+  const merged = mergeSpans(list);
+
+  if (fade === 0)
+    return merged.reduce(
+      (track, [a, b], i) => {
+        const on = i === 0 && a === 0 ? track : track.at(a).set({ opacity: 1 });
+
+        return b === Infinity ? on : on.at(b).set({ opacity: 0 });
+      },
+      motion({ opacity: merged[0]![0] === 0 ? 1 : 0 }),
+    );
+
+  return merged.reduce(
+    (track, [a, b]) => {
+      const f = Math.min(fade, (b - a) / 2);
+      const on = track.at(a).to({ opacity: 1 }, f);
+
+      return b === Infinity ? on : on.at(b - f).to({ opacity: 0 }, f);
+    },
+    motion({ opacity: 0 }),
+  );
 };
 
-/** On for the span and off outside it, with hard cuts: a shot in an edit. */
-export const cut = ({ at, over }: Span): Motion<"opacity"> =>
-  (at > 0 ? motion({ opacity: 0 }).at(at).set({ opacity: 1 }) : motion({ opacity: 1 }))
-    .at(at + over)
-    .set({ opacity: 0 });
+/** @deprecated use `show(span, { fade })` */
+export const during = (span: Span, fade: Seconds = 0.3): Motion<"opacity"> => show(span, { fade });
+
+/** @deprecated use `show(span, { fade: 0 })` */
+export const cut = (span: Span): Motion<"opacity"> => show(span, { fade: 0 });
 
 /** How a shot arrives or leaves. Each move but `cut` passes through these values while transparent. No blur: a shot holds many animated elements, and a filter over them repaints every frame. */
 const MOVES = {
@@ -124,9 +168,9 @@ export const beats = (at: Beats, count: number, step: Seconds, what: string): Se
 };
 
 /** Spans as `[start, end]` pairs in order, with those that overlap, touch or sit closer than `gap` joined into one. */
-export const mergeSpans = (spans: readonly Span[], gap: Seconds = 0): [Seconds, Seconds][] =>
+export const mergeSpans = (spans: readonly When[], gap: Seconds = 0): [Seconds, Seconds][] =>
   spans
-    .map(({ at, over }): [Seconds, Seconds] => [at, at + over])
+    .map(({ at, over }): [Seconds, Seconds] => [at, over === undefined ? Infinity : at + over])
     .sort((a, b) => a[0] - b[0])
     .reduce<[Seconds, Seconds][]>((out, [a, b]) => {
       const last = out.at(-1);
@@ -137,7 +181,7 @@ export const mergeSpans = (spans: readonly Span[], gap: Seconds = 0): [Seconds, 
       return out;
     }, []);
 
-/** On during each span, off between. Spans closer than two fades merge, so fades never overlap. */
+/** @deprecated use `show(spans, { fade })`, whose fades sit inside the spans */
 export const visible = (spans: readonly Span[], fade: Seconds = 0.15): Motion<"opacity"> =>
   mergeSpans(spans, fade * 2).reduce(
     (track, [a, b]) =>
@@ -283,7 +327,7 @@ export function timeline<const T extends Record<string, Seconds>>(
     throw new Error(
       `timeline() needs a non-negative start and gap, a positive fade and a positive pace, got at ${start}, gap ${gap}, fade ${fade} and pace ${pace}.`,
     );
-  const spans: Record<string, Span> = {};
+  const spans: Record<string, Spanned> = {};
   let end = start;
 
   for (const [i, [name, length]] of Object.entries(durations).entries()) {
@@ -292,11 +336,11 @@ export function timeline<const T extends Record<string, Seconds>>(
 
     if (!(length > 0)) throw new Error(`Scene ${name} needs a positive length, got ${length}.`);
     const at = i === 0 ? start : end + gap;
-    spans[name] = { at, over: length * pace };
+    spans[name] = makeSpan(at, length * pace);
     end = at + length * pace;
   }
 
-  const span = (name: string): Span => {
+  const span = (name: string): Spanned => {
     const found = spans[name];
 
     if (!found) throw new Error(`No scene named ${name}.`);
@@ -309,7 +353,7 @@ export function timeline<const T extends Record<string, Seconds>>(
     ...spans,
     duration: end - start,
     end,
-    show: (name: string) => during(span(name), fade),
+    show: (name: string) => show(span(name), { fade }),
     enter: (name: string) =>
       motion({ opacity: 0 })
         .at(span(name).at)

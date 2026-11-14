@@ -35,6 +35,13 @@ export type SvgNode =
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }
   | { readonly kind: "fragment"; readonly children: readonly SvgNode[] }
+  /** `<Clip>`: no element of its own. Every motion inside it runs on a clock that starts at `at` and, if `over` is given, ends `over` later. Never serialized. */
+  | {
+      readonly kind: "clip";
+      readonly at: number;
+      readonly over?: number;
+      readonly children: readonly SvgNode[];
+    }
   /** `<Style>`: a global rule that compile moves into the scene's `<style>`. Never serialized. */
   | { readonly kind: "style"; readonly css: string | Css };
 
@@ -164,6 +171,7 @@ const inline = (node: SvgNode, rawText = false): string => {
     case "style":
       return "";
     case "fragment":
+    case "clip":
       return node.children.map((child) => inline(child, rawText)).join("");
     case "element": {
       const open = `<${node.tag}${serializeAttrs(node.attrs)}`;
@@ -188,6 +196,7 @@ const serializeNode = (node: SvgNode, depth: number): string => {
     case "style":
       return "";
     case "fragment":
+    case "clip":
       return node.children
         .map((child) => serializeNode(child, depth))
         .filter(Boolean)

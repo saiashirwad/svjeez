@@ -19,6 +19,12 @@
       "specifier": "./tools/oxlint/anti-slop/index.ts"
     }
   ],
+  "overrides": [
+    {
+      "files": ["packages/svjeez/src/span.ts"],
+      "rules": { "unicorn/no-thenable": "off" }
+    }
+  ],
   "rules": {
     "oxc/no-accumulating-spread": "error",
     "anti-slop/no-array-filter-map": "error",

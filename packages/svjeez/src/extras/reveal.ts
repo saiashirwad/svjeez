@@ -2,6 +2,7 @@ import type { RestChannel, ChannelValues } from "../channels";
 import { el } from "../el";
 import { ease, type Seconds, type Span } from "../motion";
 import { enter } from "../recipes";
+import { span as spanOf, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
 import { number, text, type Code } from "./code";
 import { beats, type Beats } from "./timeline";
@@ -25,10 +26,13 @@ export interface RevealOptions {
 export interface RevealResult {
   readonly node: SvgNode;
   readonly spans: readonly Span[];
+  /** From the first block's start to when the last one settles. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
 }
 
-/** Show `code` a block of lines at a time. `spans[i]` is when block `i` enters; `end` is when the last one settles. */
+/** Show `code` a block of lines at a time. `spans[i]` is when block `i` enters; `span` runs to when the last one settles. */
 export function reveal(
   code: Code,
   {
@@ -80,13 +84,17 @@ export function reveal(
       code.words.filter((w) => w.line === line).map((w) => text(w, code.metrics)),
     ]);
 
+  const first = Math.min(...spans.map((span) => span.at));
+  const end = Math.max(...spans.map((span) => span.at + span.over));
+
   return {
     node: el.g({}, [
       draw(undefined),
       spans.map((span, k) => el.g({ animation: enter(span, from, ease.out) }, draw(k))),
     ]),
     spans,
-    end: Math.max(...spans.map((span) => span.at + span.over)),
+    span: spanOf(first, end - first),
+    end,
   };
 }
 

@@ -36,6 +36,7 @@ export const withSources = (node: SvgNode): SvgNode => {
     }
 
     case "fragment":
+    case "clip":
       return { ...node, children: node.children.map(withSources) };
     default:
       return node;

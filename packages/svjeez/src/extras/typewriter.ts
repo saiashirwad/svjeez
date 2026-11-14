@@ -2,6 +2,7 @@ import type { Color } from "../attributes";
 import { def } from "../defs";
 import { el } from "../el";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
+import { span, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
 import { number, text, type Code, type CodeMetrics } from "./code";
 import { tint } from "./theme";
@@ -18,6 +19,9 @@ export interface TypewriterOptions {
 
 export interface TypewriterResult {
   readonly node: SvgNode;
+  /** From `at` to when the last character lands. */
+  readonly span: Spanned;
+  /** @deprecated use `span.end` */
   readonly end: Seconds;
   readonly spans: readonly Span[];
 }
@@ -78,6 +82,7 @@ export function typewriter(
       cursor &&
         caret(lines, m, cursor === true ? tint(m.theme, "plain") : cursor, at, t, cps, blink),
     ]),
+    span: span(at, t - at),
     end: t,
     spans: lines.map(({ start, chars }) => ({ at: start, over: chars / cps })),
   };
