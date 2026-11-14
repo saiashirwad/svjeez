@@ -139,6 +139,9 @@ export function wiggle<V extends Values<RestChannel>>(
   options: WiggleOptions,
 ): Motion<keyof V & RestChannel> {
   const period = options.period ?? 2;
+
+  if (!Number.isFinite(period) || period <= 0)
+    throw new Error(`wiggle() needs a positive period, got ${period}.`);
   const count = Math.max(2, Math.round((options.rate ?? 8) * period));
   const random = mulberry32(fnv1a(String(options.seed)));
   const amounts: Values<RestChannel> = amplitude;
@@ -298,8 +301,11 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
 
   const frames = times.map(frameAt);
   const lanes = groupBy(channels, (channel) => spec(channel).lane);
+
   // SAFETY: every frame passed the same-keys check in frameAt, so frame 0 is an object of Sampled names to numbers.
-  let track: Motion = motion(first as TargetValues);
+  let track: Motion = motion(
+    Object.fromEntries(channels.map((channel) => [channel, first[channel]])) as TargetValues,
+  );
 
   for (const [lane, members] of lanes) {
     // SAFETY: tolerance is keyed by lane names, and lane comes from spec(), so the lookup is a tolerance or undefined, which the check below rejects.
