@@ -14,7 +14,7 @@
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "typecheck": "tsc --noEmit && bun run --filter '*' typecheck",
-    "test": "bun run --filter '*' test",
+    "test": "cd scripts && bun test && cd .. && bun run --filter '*' test",
     "build:examples": "bun run --filter svjeez-examples build",
     "dev": "bun run --filter svjeez-site dev",
     "deploy": "bun run --filter svjeez-site deploy"
