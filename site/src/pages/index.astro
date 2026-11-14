@@ -2,7 +2,7 @@
 import { Code } from "astro:components";
 import agents from "@examples/site/agents.tsx";
 import agentsTall from "@examples/site/agents-tall.tsx";
-import breaker from "@examples/breaker/index.tsx";
+import dayNight from "@examples/site/day-night.tsx";
 import charts from "@examples/site/charts.tsx";
 import chartsLines from "@examples/site/charts-lines.tsx";
 import explainer from "@examples/site/explainer.tsx";
@@ -45,7 +45,7 @@ const s = {
   handshakeTall: live(handshakeTall),
   explainer: live(explainer),
   recording: live(recording),
-  breaker: live(breaker),
+  dayNight: live(dayNight),
   agents: live(agents),
   agentsTall: live(agentsTall),
   whereReadme: live(whereReadme),
@@ -253,7 +253,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     <section class="wrap sec g" id="light-dark">
       <h2 class="c1-8"><a class="anchor" href="#light-dark">One SVG, made for light and dark.</a></h2>
       <div class="stagewrap c1-8">
-        <DayNight scene={s.breaker} alt="A slide deck on circuit breakers: a title, then breaker code with a callout, then a state machine and a sequence diagram. The light version is black text on white, the dark version light text on charcoal." />
+        <DayNight scene={s.dayNight} alt="The svjeez chick by day and by night, from one file. In light it bounces beside an open flower under the sun while a butterfly loops around. In dark it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking." />
       </div>
       <Code class="code side c9-12" code={adaptive} lang="tsx" theme={shikiTheme} />
     </section>

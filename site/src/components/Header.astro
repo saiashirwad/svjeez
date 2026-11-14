@@ -1,6 +1,7 @@
 ---
 import { getScene } from "@svjeez/astro/scene";
 import mascot from "@examples/site/mascot.tsx";
+import { dots, github, moon, sun, system } from "@examples/site/nav-icons.tsx";
 import { PALETTES, type Palette } from "../palettes";
 
 interface Props {
@@ -16,12 +17,11 @@ const chick = getScene(mascot);
 const links = [
   { href: "/examples/", label: "Examples", page: "examples" },
   ...(current === "play" ? [{ href: "/play", label: "Playground", page: "play" }] : []),
-  { href: "/intro", label: "Intro", page: "intro" },
   { href: "https://github.com/saiashirwad/svjeez", label: "GitHub" },
 ];
 
-// On the playground page the extra link would crowd a phone, so the last two give way.
-const optional = current === "play" ? ["Intro", "GitHub"] : [];
+// On the playground page the extra link would crowd a phone, so GitHub gives way.
+const optional = current === "play" ? ["GitHub"] : [];
 const SWATCH = ["base00", "base08", "base0B", "base0D", "base0E"] as const;
 const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}: light-dark(${light[slot]}, ${dark[slot]})`).join("; ");
 ---
@@ -33,7 +33,7 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
       links.map((link) => (
         <a href={link.href} class:list={{ opt: optional.includes(link.label) }} aria-current={current && link.page === current ? "page" : undefined}>
           {link.label === "GitHub" && (
-            <svg class="gh" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"></path></svg>
+            <span class="gh nav-ico" aria-hidden="true" set:html={github()} />
           )}
           <span>{link.label}</span>
         </a>
@@ -41,7 +41,7 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
     }
     <div class="controls">
     <button class="pick" type="button" popovertarget="palettes" aria-haspopup="menu" aria-label="Choose a color palette" title="Color palette">
-      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="dots nav-ico" aria-hidden="true" set:html={dots()} />
       <span class="pick-label" aria-hidden="true">Colors</span>
       <svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"></path></svg>
     </button>
@@ -56,9 +56,9 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
       }
     </div>
     <button class="theme" type="button" aria-label="Color scheme: system" title="Color scheme: system">
-      <svg class="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12.5" rx="2"></rect><path d="M8.5 20.5h7M12 16.5v4"></path></svg>
-      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"></path></svg>
-      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"></path></svg>
+      <span class="system nav-ico" aria-hidden="true" set:html={system()} />
+      <span class="sun nav-ico" aria-hidden="true" set:html={sun()} />
+      <span class="moon nav-ico" aria-hidden="true" set:html={moon()} />
     </button>
     </div>
   </nav>

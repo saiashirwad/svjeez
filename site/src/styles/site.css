@@ -246,8 +246,28 @@ kbd {
 }
 .top nav .gh {
   flex: none;
-  inline-size: 1rem;
-  block-size: 1rem;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+/* The header's icons are svjeez scenes inlined in the page. They hold still until you point at their button, then play. */
+.nav-ico {
+  display: inline-flex;
+}
+.nav-ico svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+.nav-ico svg,
+.nav-ico svg * {
+  animation-play-state: paused !important;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :is(a, button):hover .nav-ico svg,
+  :is(a, button):hover .nav-ico svg * {
+    animation-play-state: running !important;
+  }
 }
 /* The palette menu and the light and dark toggle sit after a hairline, set like the links so the row stays even. */
 .controls {
@@ -281,9 +301,9 @@ kbd {
 .theme:active {
   translate: 0 1px;
 }
-.theme svg {
-  inline-size: 1.2rem;
-  block-size: 1.2rem;
+.theme .nav-ico {
+  inline-size: 1.3rem;
+  block-size: 1.3rem;
 }
 /* One icon at a time: a screen while the page follows the system, else the sun or the moon that was chosen. */
 .theme .sun,
@@ -337,7 +357,8 @@ kbd {
   color: var(--ink);
 }
 .pick .dots {
-  display: flex;
+  inline-size: 1.6rem;
+  block-size: 1.6rem;
 }
 .pick i {
   inline-size: 0.625rem;

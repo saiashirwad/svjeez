@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-labelledby="t d">
+  <title id="t">The chick by day and by night</title>
+  <desc id="d">In light mode the svjeez chick bounces beside an open flower under the sun while a butterfly loops around. In dark mode, in the same file, it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking.</desc>
+  <style><![CDATA[
+svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
+@media (prefers-color-scheme:light){svg{--sky:#d6ecf5;--hill:#8fcf9a;--far:#b4e0bb;--stem:#4f9e66;--glow:#FFE58A}}.night{display:none}@media (prefers-color-scheme:dark){.day{display:none}.night{display:inline}}
+  .sq {
+    transform-box: view-box;
+    transform-origin: 104px 162px;
+    scale: var(--p1) var(--p2);
+  }
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,AAEAAAAMAIAAAwBAT1MvMhDxBoEAAADMAAAAYGNtYXABcwDNAAABLAAAADRnYXNwAAAAEAAAAWAAAAAIZ2x5ZvV8dqAAAAFoAAAAYGhlYWQUkPFDAAAByAAAADZoaGVhAcoFnAAAAgAAAAAkaG10eBhMohgAAAIkAAASLmxvY2Fd2F4IAAAUVAAACSBtYXhwBQcCbwAAHXQAAAAgbmFtZTilXeQAAB2UAAACgHBvc3T/aAAzAAAgFAAAACBwcmVwaAaMhQAAIDQAAAAHAAQCWgGQAAUAAAKKAlgAAABLAooCWAAAAV4AMgFAAAACAAAJAAAAAAAAoAAC/xAA+OsAAAAIAAAAAEpCAAAAwAAN/v8D/P7UAAAD/AEsIAABn9/XAAACJgLaAAAAIAAFAAAAAgAAAAMAAAAUAAMAAQAAABQABAAgAAAABAAEAAEAAAB6//8AAAB6//8A7gABAAAAAAABAAH//wAPAAMAWgAAAf4C2gADAAYACQAAMxEhESUhEQEBIVoBpP6iASz+wAEs/tQC2v0mMgI7/gACOwABAFoAAAH+AiYACQAAMzUBITUhFQEhFVoBNP7UAZH+xgFFWgF6Ulr+hlIAAAEAAAACNgRay1ZgXw889QADA+gAAAAA29KmmgAAAADb2tDy+Tn+1ASSA/wAAAAGAAIAAAAAAAAAAQAAA/z+1AAABLD5Of2PBJIAAQAAAAAAAAAAAAAAAAAABIgCWABaAlgAMgJYADICWAAyAlgAMgJYADICWAAyAlgAMgJYADICWAAyAlgAMgJYADICWAAyAlgAMgJYADICWAAyAlgAMgJYADICWAAyAlgAMgJYADICWAAyAlgAMgJYADICWAAeAlgAHgJYAF0CWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABcAlgACgJYAFwCWAAKAlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAXwJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABdAlgACgJYAF0CWABpAlgAaQJYAGkCWABpAlgAaQJYAGkCWABpAlgAaQJYAGkCWABpAlgAaQJYAGkCWAAtAlgALQJYAFwCWABcAlgAcwJYAGcCWABzAlgAcwJYAHMCWAAUAlgATAJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWAAjAlgAIwJYAFgCWAAoAlgAXAJYAFoCWABQAlgAXAJYAFwCWABcAlgAXAJYAEgCWABIAlgASAJYAEgCWABIAlgASAJYAFwCWABaAlgANwJYADcCWAA3AlgANwJYADcCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAMgJYABkCWAAZAlgAGQJYABkCWAAZAlgAKAJYACMCWAAjAlgAIwJYACMCWAAjAlgAIwJYACMCWAAjAlgAIwJYAFUCWABVAlgAVQJYAFUCWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYACMCWAAjAlgAXAJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABGAlgAPwJYAFoCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAWAJYAFUCWABaAlgAPAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABcAlgAAAJY/+ECWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAXwJYAF8CWABhAlgAHgJYAB4CWAAeAlgAHgJYAAoCWAAeAlgAQgJYAFwCWABcAlgAAAJYAFwCWABcAlgAXgJYAFwCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABYAlgAIwJYACMCWABVAlgAIwJYAFwCWABXAlgAWAJYAG8CWABvAlgAbwJYABkCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABcAlgApQJYADcCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYADcCWAAjAlgAIwJYACMCWAAjAlgAIwJYADICWAA3AlgANwJYADcCWAA3AlgANwJYADcCWAA3AlgANwJYADcCWABaAlgAWgJYAFoCWABaAlgArwJYALkCWAAyAlgAXgJYAF0CWABuAlgAbgJYAG4CWAAZAlgAZAJYAGQCWAAMAlgANQJYAFoCWABaAlgAXAJYAFwCWAAUAlgATAJYAF0CWABYAlgAXgJYAFwCWABYAlgANwJYADICWAAyAlgANgJYACgCWABLAlgAXgJYAEACWABAAlgAXgJYAF4CWP/7AlgAQQJY//sCWAA1AlgASAJYAFoCWABUAlgAaQJYAGkCWAAtAlgAAAJYADwCWAA4AlgAAAJYACMCWABaAlgAQQJYAFoCWABeAlgAggJYAIICWACCAlgAHgJYAFUCWABVAlgAEgJYAEECWABeAlgAXgJYAGECWABhAlgAGQJYAEwCWABeAlgAVQJYAF4CWABcAlgAUwJYADcCWAA3AlgANwJYADYCWAAyAlgATgJYAF4CWABAAlgAQAJYAF4CWABiAlgAAAJYAEECWAAFAlgAQAJYAFoCWABaAlgAVAJYAFUCWABVAlgAVQJYAAACWAA+AlgAPAJYAAACWAA8AlgAWgJYADICWABdAlgAbgJYADICWABkAlgAVQJYAF0CWABYAlgAaQJYAFwCWAAyAlgATAJYAFoCWABQAlgAWAJYAF4CWABcAlgANwJYADcCWAAjAlgANgJYACgCWAA2AlgAMgJYAAoCWP+NAlj/jQJY/40CWP+wAlj/gwJY/7ACWABpAlgAIwJYAFwCWABaAlgAXAJYADwCWABGAlgAUAJYAEQCWABcAlgAWAJYADcCWABhAlgAMgJYAF0CWAA3AlgAQgJYAFUCWAAZAlgAXgJYAFgCWABYAlgANwJYAFoCWAA3AlgAKAJYADYCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAVQJYADcCWABaAlgAUAJYAFwCWABeAlgAWgJYAFACWABaAlgASAJYAEYCWABQAlgAVQJYAEQCWABQAlgAUAJYAEQCWACRAlgAmwJYAJcCWACIAlgAkgJYAIkCWACRAlgAmwJYAJYCWACSAlgAkQJYAJsCWACXAlgAiAJYAJICWACJAlgAkQJYAJsCWACWAlgAkgJYAFoCWAAeAlgAHgJYABoCWADZAlgApQJYANkCWACqAlgAPAJYAOECWADhAlgAhwJYAG4CWADZAlgAtAJYACMCWAAjAlgA2QJYAEsCWABLAAD/GQAA/3gCWAC5AlgAcwJYAFUCWABVAlgAzQJYAJYCWABuAlgAlgJYAGkCWACTAlgAjAJYAIwCWABQAlgAAAJYAIwCWAA8AlgApQJYAFUCWABLAlgAVQJYAOYCWACgAlgAHgJYAB4CWACTAlgAkwJYAJYCWAD2Alj+NAJY+9wCWPumAlj+XAJY/f0CWPulAlj9/QJY+6UCWP4RAlj+QwJY/rsCWPn8Alj+jgJY/j4CWP7TAlj8jwJY/HACWP6BAlj+XAJY/tECWPzJAlj8RAJY/rMCWPwsAlj+UgJY/oECWP6BAlj+ogJY/sUCWP34Alj7oAJY/pUCWP6VAlj+YQJY/lcCWPubAlj9xQJY/f0CWP3LAlj9ywJY/csCWP3LAlj9ywJY/csCWP3pAlj7kQJY+TkCWP3LAlj9ywJY+3MCWP3zAlj+EQJY+6ACWP4WAlj+PgJY+/oCWPwTAlj8IgJY/eQCWAB9AlgAcwJYANkCWACqAlgAAAJYAAACWAAAAAAAAAJYAF0CWABVAlgAKwJYAEgCWABaAlgAEwJYAAACWAAeAlgASwJYAC0CWAAjAlgA2QJYACgCWAD/AlgAWgJYACMCWABQAlgAUAJYAEECWAAjAlgAIwJYACMCWAAeAlgAQQJYAIwCWABpAlgAZAJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAEECWABBAlgAQQJYAEYCWABQAlgAIwJYADwCWAA8AlgAAAJYACgCWAA3AlgAHgJYAFoCWABaAlgAmwJYAA4CWP/4AlgAoAJYADcCWAAjAlgAHgJYALQCWABBAlgAIwJYACMCWAAeAlgAMgJYAAoCWAAKAlgAKAJYAAoCWAAKAlgALQJYACgCWAAtAlj/sAJYAAoCWAAPAlgACgSwACgEsAAeBLAAKAJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2AlgBLAJYAg0CWP/2AlgBLAJY//YCWP/2Alj/9gJY//YCWP/2AlgBLAJY//YCWP/2AlgAPAJYAAACWAAAAlj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWAA8AlgAAAJYAAACWACWAlgAlgJYAAACWAAAAlgAAAJYAAACWAAAAlj/9gJYAAACWP/2Alj/9gJY//YCWAAAAlj/9gJY//YCWAAAAlj/9gJYAAACWP/2AlgAlgJYAJYCWACWAlgAjAJYAJYCWACWAlgAlgJYAIwCWP/sAlj/7AJYAJYCWP/sAlj/7AJY/+wCWACWAlgAlgJY/+wCWP/sAlgAlgJY/+wCWP/sAlgAlgJY/+wCWP/sAlj/7AJYAMgCWADIAlj/7AJY/+wCWP/sAlj/7AJYAPoCWADIAlj/7AJY/+wCWP/sAlgA+gJYAEsCWADIAlgAyAJY/+wCWP/sAlgAyAJY/+wCWP/sAlj/7AJYABkCWADIAlgA+gJYACUCWADIAlgAyAJY/+wCWP/sAlgAyAJYAMgCWADIAlj/7AJY/+wCWADIAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlgA+gJY/+wCWAD6Alj/7AJY/+wCWP/sAlgARgJYAPoCWAD6Alj/7AJY/+wCWAD6Alj/7AJY/+wCWP/sAlgAGQJYAPoCWAD6AlgAJQJYAPoCWAD6AlgAyAJY/+wCWP/sAlgA+gJYAPoCWP/sAlj/7AJYAPoCWP/sAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlgAlgJY/+wCWP/sAlj/7AJY/+wCWADIAlgAyAJY/+wCWP/sAlj/7AJY/+wCWADIAlgA+gJY/+wCWP/sAlgA+gJY/+wCWP/sAlgAlgJY/+wCWP/sAlgAyAJY/+wCWP/sAlgA+gJY/+wCWP/sAlgA+gJYAF4CWP/2AlgAFAJYAEICWAAtAlgANwJYAEECWABNAlgALQJYAC0CWAAPAlgAlgJYAKUCWABVAlgA/wJYAP8CWABQAlgARgJYAFACWAAeAlgAPAJYADwCWABRAlgACgJYAA8CWP/sAlj/7AJY/+wCWAD1AlgABgJYADwCWAC0AlgAjAJY/dUCWP39Alj7wwJY/hECWP6nAlj70gJY/rsCWP67Alj+4wJY/KQCWPrJAlj8pAJY/NYCWP6nAlj70gJY/rsCWP4TAlj+IAJY+/8CWP3aAlj7oAJY+6ACWP34Alj7oAJY+6UCWP39Alj7pQJY+6UCWPuMAlj+DAJY+7MCWP5hAlj+iQJY/s8CWPuzAlj+KgJY+7MCWPuzAlj8bQJY/fMCWPubAlj7mwJY+5sCWPubAlj+iQJY+UMCWP3uAlj7tAJY/pgCWPx3Alj6fgJY++YCWP4HAlj7vgJY+UMCWP3uAlj7tAJY/s8CWPubAlj7mwJY+UMCWPubAlj7mwJY/jQCWP5HAlj7mwJY+5sCWPv1Alj98wJY+7QCWPubAlj+KgJY+/UCWP4RAlj96QJY/e4CWP5XAlj7lgJY/jkCWAClAlgApQJYAKUCWAA3AlgAjAJYAKUAAAB9AAAA5QAAALYAAADUAAAAkwAAAb0AAAB3AAAAdwAAAIwAAAC0AAAAjAAAAIwAAADSAAAASAAAANIAAP+gAAAA5QAAALQAAAC+AAAAzQAAALkAAP2KAAAAeAJYAH0CWADlAlgAtgJYANQCWACTAlgAdwJYAHcCWACMAlgAtAJYAIwCWACMAlgAzQJYALkAAAB9AAAA5QAAALYAAADUAAAAkwAAAHcAAAB3AAAAjAAAALQAAACMAAAAjAAAANIAAABIAAAA0gAAAXMAAADlAAAAvgAAAM0AAAC5AlgAfQJYAOUCWAC2AlgA1AJYAJMCWAB3AlgAdwJYAIwCWAC0AlgAjAJYAIwCWADUAlgA4QJYAH0AAACCAAAAggAAAIIAAACMAAAAeAAAAHgAAAB4AAAAeAAAAIcAAACHAAAAhwAAAIcAAAB4AAAAeAAAAHgAAAB4AlgAWgBpADIAAAAAAAAAAAAAAAAAAAAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAMAABAAAEjwG4AG4AtAAGAAEAAAAAAAAAAAAAAAAAAwACAAAADACWAAMAAQQJAAAAvAEuAAMAAQQJAAEAHAESAAMAAQQJAAIADgEEAAMAAQQJAAMAPADIAAMAAQQJAAQALACcAAMAAQQJAAUAGgCCAAMAAQQJAAYAKgBYAAMAAQQJAA4ANgAiAAMAAQQJAQAADAAWAAMAAQQJAQQADgEEAAMAAQQJAQ8ADAAKAAMAAQQJARAACgAAAFIAbwBtAGEAbgBJAHQAYQBsAGkAYwBXAGUAaQBnAGgAdABoAHQAdABwAHMAOgAvAC8AcwBjAHIAaQBwAHQAcwAuAHMAaQBsAC4AbwByAGcALwBPAEYATABKAGUAdABCAHIAYQBpAG4AcwBNAG8AbgBvAC0AUgBlAGcAdQBsAGEAcgBWAGUAcgBzAGkAbwBuACAAMgAuADIAMQAxAEoAZQB0AEIAcgBhAGkAbgBzACAATQBvAG4AbwAgAFIAZQBnAHUAbABhAHIAMgAuADIAMQAxADsASgBCADsASgBlAHQAQgByAGEAaQBuAHMATQBvAG4AbwAtAFIAZQBnAHUAbABhAHIAUgBlAGcAdQBsAGEAcgBKAGUAdABCAHIAYQBpAG4AcwAgAE0AbwBuAG8AQwBvAHAAeQByAGkAZwBoAHQAIAAyADAAMgAwACAAVABoAGUAIABKAGUAdABCAHIAYQBpAG4AcwAgAE0AbwBuAG8AIABQAHIAbwBqAGUAYwB0ACAAQQB1AHQAaABvAHIAcwAgACgAaAB0AHQAcABzADoALwAvAGcAaQB0AGgAdQBiAC4AYwBvAG0ALwBKAGUAdABCAHIAYQBpAG4AcwAvAEoAZQB0AEIAcgBhAGkAbgBzAE0AbwBuAG8AKQADAAAAAAAA/2UAMgAAAAEAAAAAAAAAAAAAAAAAAAAAuAH/hbAEjQA=) format('truetype');font-weight:400;font-style:normal}
+@property --p1{syntax:'<number>';inherits:false;initial-value:1}
+@property --p2{syntax:'<number>';inherits:false;initial-value:1}
+.a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,16.667%,100%{opacity:1}6.667%{opacity:0.3}}
+.m1{animation-name:k1}
+@keyframes k2{0%,11.667%,28.333%,100%{opacity:1}18.333%{opacity:0.3}}
+.m2{animation-name:k2}
+@keyframes k3{0%,23.333%,40%,100%{opacity:1}30%{opacity:0.3}}
+.m3{animation-name:k3}
+@keyframes k4{0%,35%,51.667%,100%{opacity:1}41.667%{opacity:0.3}}
+.m4{animation-name:k4}
+@keyframes k5{0%,46.667%,63.333%,100%{opacity:1}53.333%{opacity:0.3}}
+.m5{animation-name:k5}
+@keyframes k6{0%,58.333%,75%,100%{opacity:1}65%{opacity:0.3}}
+.m6{animation-name:k6}
+@keyframes k7{0%,70%,86.667%,100%{opacity:1}76.667%{opacity:0.3}}
+.m7{animation-name:k7}
+@keyframes k8{0%,100%{rotate:3.185deg}50%{rotate:-2.449deg}}
+.m8{animation-name:k8;animation-duration:2s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k9{0%,22.833%,42.833%,72.833%,100%{translate:0px 0px}9.441%,30.769%,58.878%{translate:0px 0px;animation-timing-function:cubic-bezier(.23,1,.32,1)}10.774%,32.102%,60.212%{translate:0px 5px}13.72%,34.384%,63.439%{translate:0px -5px}15.667%,35.667%,65.667%{translate:0px -5px;animation-timing-function:cubic-bezier(.23,1,.32,1)}16.667%,36.667%,66.667%{translate:0px -2px;animation-timing-function:cubic-bezier(.23,1,.32,1)}17.5%,37.5%,67.5%{translate:0px 6px}18.833%,38.833%,68.833%{translate:0px -4px}20.167%,40.167%,70.167%{translate:0px 2.5px}21.5%,41.5%,71.5%{translate:0px -1px}}
+.m9{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k10{0%,26.667%,30.667%,76.667%,80.667%,100%{opacity:1}27.333%,29.333%,77.333%,79.333%{opacity:0}}
+.m10{animation-name:k10}
+@keyframes k11{0%,26.667%,30.667%,76.667%,80.667%,100%{opacity:0}27.333%,29.333%,77.333%,79.333%{opacity:1}}
+.m11{animation-name:k11}
+@keyframes k12{0%,100%{translate:5px -3px}}
+.m12{animation-name:k12}
+@keyframes k13{0%,5.774%,13.72%,15.333%,22%,27.102%,34.384%,35.333%,42%,55.212%,63.439%,65.333%,72%,100%{--p1:1}9.441%,30.769%,58.878%{--p1:1.14}10.774%,32.102%,60.212%{--p1:0.86}12.247%,33.243%,61.825%{--p1:0.96}16.667%,36.667%,66.667%{--p1:0.92}17.667%,37.667%,67.667%{--p1:1.26}19.667%,39.667%,69.667%{--p1:0.95;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
+@keyframes k14{0%,5.774%,13.72%,15.333%,22%,27.102%,34.384%,35.333%,42%,55.212%,63.439%,65.333%,72%,100%{--p2:1}9.441%,30.769%,58.878%{--p2:0.8}10.774%,32.102%,60.212%{--p2:1.22}12.247%,33.243%,61.825%{--p2:1.06}16.667%,36.667%,66.667%{--p2:1.1}17.667%,37.667%,67.667%{--p2:0.74}19.667%,39.667%,69.667%{--p2:1.07;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
+.m13{animation-name:k13,k14}
+@keyframes k15{0%,10.774%,16.667%,32.102%,36.667%,60.212%,66.667%,100%{translate:0px 0px}13.72%{translate:0px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}34.384%{translate:0px -30px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}63.439%{translate:0px -60px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m14{animation-name:k15}
+@keyframes k16{0%,100%{scale:1}50%{scale:0.3}}
+.m15{animation-name:k16;animation-duration:0.24s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k17{0%,100%{translate:780px 340px}4.167%{translate:818.823px 375px}6.667%{translate:841.01px 392.02px}8.333%{translate:855px 400.622px}10%{translate:868.168px 406.574px}12.5%{translate:886.066px 410px}15%{translate:901.353px 406.574px}16.667%{translate:909.904px 400.622px}18.333%{translate:917.032px 392.02px}20%{translate:922.658px 381.145px}21.667%{translate:926.722px 368.472px}25%{translate:930px 340px}27.5%{translate:928.153px 318.369px}29.167%{translate:924.889px 305px}30.833%{translate:920.037px 293.161px}32.5%{translate:913.651px 283.369px}34.167%{translate:905.801px 276.052px}35.833%{translate:896.572px 271.53px}38.333%{translate:880.37px 270.383px}40.833%{translate:861.696px 276.052px}42.5%{translate:848.099px 283.369px}44.167%{translate:833.755px 293.161px}46.667%{translate:811.187px 311.528px}54.167%{translate:741.177px 375px}56.667%{translate:718.99px 392.02px}59.167%{translate:698.304px 403.948px}61.667%{translate:679.63px 409.617px}64.167%{translate:663.428px 408.47px}66.667%{translate:650.096px 400.622px}69.167%{translate:639.963px 386.839px}70.833%{translate:635.111px 375px}73.333%{translate:630.822px 354.554px}75.833%{translate:630.206px 332.683px}78.333%{translate:633.278px 311.528px}80.833%{translate:639.963px 293.161px}82.5%{translate:646.349px 283.369px}84.167%{translate:654.199px 276.052px}85.833%{translate:663.428px 271.53px}87.5%{translate:673.934px 270px}89.167%{translate:685.602px 271.53px}90.833%{translate:698.304px 276.052px}92.5%{translate:711.901px 283.369px}94.167%{translate:726.245px 293.161px}95.833%{translate:741.177px 305px}}
+.m16{animation-name:k17;animation-timing-function:linear}
+@keyframes k18{0%,100%{opacity:0.25}50%{opacity:0.5}}
+@keyframes k19{0%,100%{scale:0.9}50%{scale:1.1}}
+.m17{animation-name:k18,k19;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k20{0%,100%{fill:#FFF3B0}}
+.m18{animation-name:k20}
+@keyframes k21{0%,50%,100%{scale:1}25%,75%{scale:1.035}}
+.m19{animation-name:k21;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k22{0%{translate:0px 0px}13.333%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}33.333%,100%{translate:70px -130px}}
+@keyframes k23{0%,33.333%,100%{opacity:0}13.333%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m20{animation-name:k22,k23}
+@keyframes k24{0%,33.333%{translate:0px 0px}46.667%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}66.667%,100%{translate:70px -130px}}
+@keyframes k25{0%,33.333%,66.667%,100%{opacity:0}46.667%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m21{animation-name:k24,k25}
+@keyframes k26{0%,66.667%{translate:0px 0px}80%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}100%{translate:70px -130px}}
+@keyframes k27{0%,66.667%,100%{opacity:0}80%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m22{animation-name:k26,k27}
+@keyframes k28{0%,25%,100%{opacity:0.2}10%{opacity:1}}
+@keyframes k29{0%,100%{translate:-17.358px -8.678px}50%{translate:8.156px 16.446px}}
+.m23{animation-name:k28,k29;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k30{0%,13.333%,38.333%,100%{opacity:0.2}23.333%{opacity:1}}
+@keyframes k31{0%,100%{translate:29.849px -7.781px}50%{translate:17.944px 7.402px}}
+.m24{animation-name:k30,k31;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k32{0%,26.667%,51.667%,100%{opacity:0.2}36.667%{opacity:1}}
+@keyframes k33{0%,100%{translate:-16.639px -16.413px}50%{translate:-22.2px -13.8px}}
+.m25{animation-name:k32,k33;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k34{0%,40%,65%,100%{opacity:0.2}50%{opacity:1}}
+@keyframes k35{0%,100%{translate:-17.297px -16.366px}50%{translate:-10.557px -3.482px}}
+.m26{animation-name:k34,k35;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k36{0%,53.333%,78.333%,100%{opacity:0.2}63.333%{opacity:1}}
+@keyframes k37{0%,100%{translate:23.142px 6.559px}50%{translate:13.677px -2.83px}}
+.m27{animation-name:k36,k37;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-0.3s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="1280" height="720" fill="var(--sky)"/>
+  <g class="day">
+    <circle cx="1060" cy="150" r="70" fill="#FFC21A"/>
+  </g>
+  <g class="night">
+    <circle cx="120" cy="90" r="2.5" fill="#eef1ff" class="a m1"/>
+    <circle cx="300" cy="160" r="2.5" fill="#eef1ff" class="a m2"/>
+    <circle cx="520" cy="70" r="2.5" fill="#eef1ff" class="a m3"/>
+    <circle cx="700" cy="140" r="2.5" fill="#eef1ff" class="a m4"/>
+    <circle cx="880" cy="60" r="2.5" fill="#eef1ff" class="a m5"/>
+    <circle cx="1180" cy="220" r="2.5" fill="#eef1ff" class="a m6"/>
+    <circle cx="80" cy="300" r="2.5" fill="#eef1ff" class="a m7"/>
+    <circle cx="1060" cy="150" r="64" fill="#f3ecd2"/>
+    <circle cx="1088" cy="128" r="56" fill="var(--sky)"/>
+  </g>
+  <path d="M0 520C260 450 520 470 760 500S1100 470 1280 480V720H0Z" fill="var(--far)"/>
+  <path d="M0 600C300 560 700 570 1280 600V720H0Z" fill="var(--hill)"/>
+  <g style="transform-box:view-box;transform-origin:780px 590px" class="a m8">
+    <path d="M780 590C760 500 800 440 780 380" stroke="var(--stem)" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="754" cy="500" rx="26" ry="10" fill="var(--stem)" transform="rotate(-25 754 500)"/>
+    <g class="day" transform="translate(780 380)">
+      <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(0)"/>
+      <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(60)"/>
+      <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(120)"/>
+      <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(180)"/>
+      <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(240)"/>
+      <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(300)"/>
+      <circle r="16" fill="#FFC21A"/>
+    </g>
+    <g class="night" transform="translate(780 380)">
+      <path d="M0 -40C22 -20 18 10 0 14C-18 10 -22 -20 0 -40Z" fill="#c76b8a"/>
+    </g>
+  </g>
+  <g class="day">
+    <g transform="translate(500 590) scale(1.25) translate(-104 -162)">
+      <g class="a m14">
+        <g style="transform-box:view-box;transform-origin:104px 162px">
+          <g class="sq a m13">
+            <ellipse cx="84" cy="162" rx="12" ry="6" fill="#F08A00"/>
+            <ellipse cx="124" cy="162" rx="12" ry="6" fill="#F08A00"/>
+            <path d="M104 60V36" stroke="#E3A100" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="104" cy="38" r="9" fill="#FFC21A" class="a m9"/>
+            <path d="M38 150C38 94 68 60 104 60S170 94 170 150C170 158 165 162 157 162H51C43 162 38 158 38 150Z" fill="#FFC21A"/>
+            <path d="M38 150C38 158 43 162 51 162H157C165 162 170 158 170 150C170 146 170 143 169 140C160 148 150 150 104 150S48 148 39 140C38 143 38 146 38 150Z" fill="#F2A900"/>
+            <ellipse cx="66" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+            <ellipse cx="142" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+            <g class="a m12">
+              <g class="a m10">
+                <ellipse cx="84" cy="110" rx="7" ry="9" fill="#26262A"/>
+                <circle cx="86" cy="106" r="2.4" fill="#FFF"/>
+              </g>
+              <ellipse cx="84" cy="112" rx="7.5" ry="1.6" fill="#26262A" class="a m11"/>
+              <g class="a m10">
+                <ellipse cx="124" cy="110" rx="7" ry="9" fill="#26262A"/>
+                <circle cx="126" cy="106" r="2.4" fill="#FFF"/>
+              </g>
+              <ellipse cx="124" cy="112" rx="7.5" ry="1.6" fill="#26262A" class="a m11"/>
+            </g>
+            <path d="M97 124Q104 131 111 124" fill="none" stroke="#26262A" stroke-width="4.5" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+    </g>
+    <g class="a m16">
+      <g class="a m15 fb">
+        <path d="M0 0L-22 -18L-18 10Z" fill="#7C9CFF"/>
+        <path d="M0 0L22 -18L18 10Z" fill="#7C9CFF"/>
+      </g>
+      <ellipse rx="3" ry="9" fill="#2b2b3a"/>
+    </g>
+  </g>
+  <g class="night">
+    <g transform="translate(500 435)">
+      <g class="a m17 fb">
+        <circle r="60" fill="var(--glow)" opacity="0.12"/>
+        <circle r="34" fill="var(--glow)" opacity="0.22"/>
+      </g>
+    </g>
+    <g transform="translate(500 590) scale(1.25) translate(-104 -162)">
+      <g style="transform-box:view-box;transform-origin:104px 162px" class="a m19">
+        <g>
+          <g style="transform-box:view-box;transform-origin:104px 162px">
+            <g>
+              <ellipse cx="84" cy="162" rx="12" ry="6" fill="#F08A00"/>
+              <ellipse cx="124" cy="162" rx="12" ry="6" fill="#F08A00"/>
+              <path d="M104 60V36" stroke="#E3A100" stroke-width="7" stroke-linecap="round"/>
+              <circle cx="104" cy="38" r="9" fill="#FFC21A" class="a m18"/>
+              <path d="M38 150C38 94 68 60 104 60S170 94 170 150C170 158 165 162 157 162H51C43 162 38 158 38 150Z" fill="#FFC21A"/>
+              <path d="M38 150C38 158 43 162 51 162H157C165 162 170 158 170 150C170 146 170 143 169 140C160 148 150 150 104 150S48 148 39 140C38 143 38 146 38 150Z" fill="#F2A900"/>
+              <ellipse cx="66" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+              <ellipse cx="142" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+              <g>
+                <g>
+                  <ellipse cx="84" cy="110" rx="7" ry="9" fill="#26262A"/>
+                  <circle cx="86" cy="106" r="2.4" fill="#FFF"/>
+                </g>
+                <g>
+                  <ellipse cx="124" cy="110" rx="7" ry="9" fill="#26262A"/>
+                  <circle cx="126" cy="106" r="2.4" fill="#FFF"/>
+                </g>
+              </g>
+              <path d="M97 124Q104 131 111 124" fill="none" stroke="#26262A" stroke-width="4.5" stroke-linecap="round"/>
+            </g>
+          </g>
+        </g>
+        <ellipse cx="84" cy="110" rx="10" ry="12" fill="#FFC21A"/>
+        <path d="M76 110Q84 117 92 110" fill="none" stroke="#26262A" stroke-width="3.5" stroke-linecap="round"/>
+        <ellipse cx="124" cy="110" rx="10" ry="12" fill="#FFC21A"/>
+        <path d="M116 110Q124 117 132 110" fill="none" stroke="#26262A" stroke-width="3.5" stroke-linecap="round"/>
+      </g>
+    </g>
+    <text x="557.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="28" font-weight="700" fill="#cfd8ff" class="a m20">z</text>
+    <text x="557.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="36" font-weight="700" fill="#cfd8ff" class="a m21">z</text>
+    <text x="557.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="44" font-weight="700" fill="#cfd8ff" class="a m22">z</text>
+    <circle cx="700" cy="330" r="4" fill="#FFF3B0" class="a m23"/>
+    <circle cx="860" cy="420" r="4" fill="#FFF3B0" class="a m24"/>
+    <circle cx="960" cy="300" r="4" fill="#FFF3B0" class="a m25"/>
+    <circle cx="640" cy="260" r="4" fill="#FFF3B0" class="a m26"/>
+    <circle cx="1040" cy="470" r="4" fill="#FFF3B0" class="a m27"/>
+  </g>
+</svg>
