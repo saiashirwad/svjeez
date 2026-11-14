@@ -107,6 +107,12 @@ export function chart<X extends XScale>(options: ChartOptions<X>): Chart<X["kind
     if (xs.domain.length === 0)
       throw new Error("chart() needs at least one x.domain category, got none.");
 
+    for (const [x] of data)
+      if (!seen.has(String(x)))
+        throw new Error(
+          `chart() got data for "${x}", which is not in x.domain (${xs.domain.join(", ")}). Add it to x.domain.`,
+        );
+
     const padding = xs.padding ?? 0.3;
 
     if (!(padding >= 0 && padding < 1))
