@@ -211,8 +211,8 @@ export default function build(): string {
       <g class="night">
         <g transform={`translate(${bulb.x} ${bulb.y})`}>
           <g animation={halo}>
-            <circle r={60} fill={vars.glow} opacity={0.12} />
-            <circle r={34} fill={vars.glow} opacity={0.22} />
+            <circle r={60} fill="#FFC94D" opacity={0.16} />
+            <circle r={34} fill="#FFD76B" opacity={0.3} />
           </g>
         </g>
         <g transform={placed}>

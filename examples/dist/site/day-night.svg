@@ -155,8 +155,8 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
   <g class="night">
     <g transform="translate(640 435)">
       <g class="a m17 fb">
-        <circle r="60" fill="var(--glow)" opacity="0.12"/>
-        <circle r="34" fill="var(--glow)" opacity="0.22"/>
+        <circle r="60" fill="#FFC94D" opacity="0.16"/>
+        <circle r="34" fill="#FFD76B" opacity="0.3"/>
       </g>
     </g>
     <g transform="translate(640 590) scale(1.25) translate(-104 -162)">
