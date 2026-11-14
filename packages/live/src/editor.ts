@@ -303,6 +303,10 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
       const value = valueOf(state, msg.key);
 
       if (!value) return [state, []];
+
+      // A number that is not finite is not written.
+      if (value.kind === "number" && !Number.isFinite(msg.value)) return [state, []];
+
       // SAFETY: a message's value is typed by its key's kind, and `kind` names that same kind on the literal.
       const literal = { ...value.literal, value: msg.value } as Literal;
 
@@ -317,9 +321,16 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
             )
           : undefined;
 
-      const text = apply(state.text, [
-        { range: value.literal.range, text: write(literal, places) },
-      ]);
+      // An ease that is neither named nor a bezier has no code to write, so the file stays as it is.
+      let written: string;
+
+      try {
+        written = write(literal, places);
+      } catch {
+        return [state, []];
+      }
+
+      const text = apply(state.text, [{ range: value.literal.range, text: written }]);
 
       return edited(state, text, msg.continues);
     }
@@ -351,6 +362,9 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
     case "select": {
       // Selecting the selected value again keeps its measured grip.
       if (msg.key === state.selected) return [state, []];
+
+      // A key the file has no value for selects nothing.
+      if (msg.key !== null && !valueOf(state, msg.key)) return [state, []];
       const selected = { ...state, selected: msg.key, grips: onlyDeclared(state.grips) };
 
       return [selected, probeOf(selected, msg.now)];
@@ -364,16 +378,25 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
       return state.clock.playing
         ? reshown(state, { playing: false, at: timeAt(state.clock, msg.now) }, msg.now)
         : [state, []];
-    case "seek":
+    case "seek": {
+      // A time before the start, or one that is not a number, is the start or nothing.
+      if (Number.isNaN(msg.at)) return [state, []];
+      const at = Math.max(0, msg.at);
+
       return reshown(
         state,
         state.clock.playing
-          ? { playing: true, origin: msg.now - msg.at * 1000 }
-          : { playing: false, at: msg.at },
+          ? { playing: true, origin: msg.now - at * 1000 }
+          : { playing: false, at },
         msg.now,
       );
+    }
+
     case "compiled": {
-      if (!msg.result.ok) return [{ ...state, error: msg.result.error }, []];
+      // The error of a file the editor has since left is not the current file's.
+      if (!msg.result.ok)
+        return msg.text === state.text ? [{ ...state, error: msg.result.error }, []] : [state, []];
+
       const { svg, scene, params = {}, handles } = msg.result;
       const current = msg.text === state.text;
 

@@ -163,6 +163,45 @@ describe("update", () => {
     });
   });
 
+  test("selecting a key the file has no value for changes nothing", () => {
+    const before = play([{ type: "select", key: "default#1", now: 0 }]);
+    const after = play([{ type: "select", key: "nope", now: 0 }], before.state);
+
+    expect(after.state).toBe(before.state);
+    expect(after.cmds).toEqual(before.cmds);
+    expect(play([{ type: "select", key: null, now: 0 }], before.state).state.selected).toBeNull();
+  });
+
+  test("seeking before the start seeks the start, and to a time that is not a number does nothing", () => {
+    const paused = play([{ type: "pause", now: 1500 }]).state;
+
+    expect(timeAt(play([{ type: "seek", at: -3, now: 9000 }], paused).state.clock, 9000)).toBe(0);
+    expect(play([{ type: "seek", at: Number.NaN, now: 9000 }], paused).state).toBe(paused);
+  });
+
+  test("a set that cannot be written leaves the file alone and never throws", () => {
+    const state = play([]).state;
+    const eased = state.values.find((v) => v.kind === "ease");
+
+    // An ease that is neither named nor a bezier has no code to write.
+    expect(play([{ type: "set", key: eased?.key ?? "", value: ease.hold }]).state.text).toBe(
+      state.text,
+    );
+    expect(play([{ type: "set", key: "default#0", value: Number.NaN }]).state.text).toBe(
+      state.text,
+    );
+  });
+
+  test("the error of a compile of an older file is not shown over the current one", () => {
+    const old = "export default () => <g />;";
+    const failed = { ok: false, error: { kind: "runtime", message: "old" }, ms: 1 } as const;
+
+    expect(play([{ type: "compiled", text: old, result: failed, now: 0 }]).state.error).toBeNull();
+    expect(
+      play([{ type: "compiled", text: scene, result: failed, now: 0 }]).state.error?.message,
+    ).toBe("old");
+  });
+
   test("pausing holds the time, seeking moves it, and playing goes on from there", () => {
     const paused = play([{ type: "pause", now: 1500 }]).state;
     expect(timeAt(paused.clock, 9000)).toBe(1.5);
