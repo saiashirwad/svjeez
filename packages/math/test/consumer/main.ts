@@ -1,8 +1,8 @@
 import {
-  axes,
+  plane,
   contours,
   tex,
-  type Axes,
+  type Plane,
   type CalculusCurve,
   type Glyph,
   type Tex,
@@ -20,7 +20,14 @@ export const svg: string = render({ width: 400, height: 120, duration: 4, title:
 export const cross: Rect = expanded.get("mid");
 export const key: string | undefined = first?.text;
 
-const graph: Axes = axes({ x: [-3, 3], y: [-1, 9], width: 200, height: 100, at: { x: 10, y: 10 } });
+const graph: Plane = plane({
+  x: [-3, 3],
+  y: [-1, 9],
+  width: 200,
+  height: 100,
+  at: { x: 10, y: 10 },
+});
+
 const curve: CalculusCurve = graph.parametric((t) => [t, t * t], [-3, 3]);
 
 export const plotted: string = render({ width: 240, height: 120, duration: 2, title: "Graph" }, [

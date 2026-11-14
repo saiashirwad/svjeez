@@ -14,21 +14,22 @@
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
-.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}.plane-map{transform:matrix(var(--p1),var(--p2),var(--p3),var(--p11),var(--p12),var(--p13))}.plane-map *{vector-effect:non-scaling-stroke}.plane-head{translate:calc((var(--p1) * var(--p5) + var(--p3) * var(--p6) + var(--p12)) * var(--p4) * 1px) calc((var(--p2) * var(--p5) + var(--p11) * var(--p6) + var(--p13)) * var(--p4) * -1px);rotate:atan2(calc(0 - var(--p2) * var(--p8) - var(--p11) * var(--p10)), calc(var(--p1) * var(--p8) + var(--p3) * var(--p10)))}.plane-at{translate:calc((var(--p1) * var(--p5) + var(--p3) * var(--p6) + var(--p12)) * var(--p4) * 1px + var(--p9) * cos(atan2(calc(0 - var(--p2) * var(--p8) - var(--p11) * var(--p10)), calc(var(--p1) * var(--p8) + var(--p3) * var(--p10))) - 35deg) * 1px) calc((var(--p2) * var(--p5) + var(--p11) * var(--p6) + var(--p13)) * var(--p4) * -1px + var(--p9) * sin(atan2(calc(0 - var(--p2) * var(--p8) - var(--p11) * var(--p10)), calc(var(--p1) * var(--p8) + var(--p3) * var(--p10))) - 35deg) * 1px)}.plane-grow{scale:var(--p7);transform-origin:calc(var(--p5) * 1px) calc(var(--p6) * 1px)}
+.round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}.plane-map{transform:matrix(var(--p1),var(--p2),var(--p3),var(--p12),var(--p13),var(--p14))}.plane-map *{vector-effect:non-scaling-stroke}.plane-head{translate:calc((var(--p1) * var(--p6) + var(--p3) * var(--p7) + var(--p13)) * var(--p4) * 1px) calc((var(--p2) * var(--p6) + var(--p12) * var(--p7) + var(--p14)) * var(--p5) * -1px);rotate:atan2(calc(0 - (var(--p2) * var(--p9) + var(--p12) * var(--p11)) * var(--p5)), calc((var(--p1) * var(--p9) + var(--p3) * var(--p11)) * var(--p4)))}.plane-at{translate:calc((var(--p1) * var(--p6) + var(--p3) * var(--p7) + var(--p13)) * var(--p4) * 1px + var(--p10) * cos(atan2(calc(0 - (var(--p2) * var(--p9) + var(--p12) * var(--p11)) * var(--p5)), calc((var(--p1) * var(--p9) + var(--p3) * var(--p11)) * var(--p4))) - 35deg) * 1px) calc((var(--p2) * var(--p6) + var(--p12) * var(--p7) + var(--p14)) * var(--p5) * -1px + var(--p10) * sin(atan2(calc(0 - (var(--p2) * var(--p9) + var(--p12) * var(--p11)) * var(--p5)), calc((var(--p1) * var(--p9) + var(--p3) * var(--p11)) * var(--p4))) - 35deg) * 1px)}.plane-grow{scale:var(--p8);transform-origin:calc(var(--p6) * 1px) calc(var(--p7) * 1px)}
 
 @property --p1{syntax:'<number>';inherits:true;initial-value:1}
 @property --p2{syntax:'<number>';inherits:true;initial-value:0}
 @property --p3{syntax:'<number>';inherits:true;initial-value:0}
 @property --p4{syntax:'<number>';inherits:true;initial-value:1}
-@property --p5{syntax:'<number>';inherits:false;initial-value:0}
+@property --p5{syntax:'<number>';inherits:true;initial-value:1}
 @property --p6{syntax:'<number>';inherits:false;initial-value:0}
-@property --p7{syntax:'<number>';inherits:false;initial-value:1}
-@property --p8{syntax:'<number>';inherits:false;initial-value:0}
+@property --p7{syntax:'<number>';inherits:false;initial-value:0}
+@property --p8{syntax:'<number>';inherits:false;initial-value:1}
 @property --p9{syntax:'<number>';inherits:false;initial-value:0}
 @property --p10{syntax:'<number>';inherits:false;initial-value:0}
-@property --p11{syntax:'<number>';inherits:true;initial-value:1}
-@property --p12{syntax:'<number>';inherits:true;initial-value:0}
+@property --p11{syntax:'<number>';inherits:false;initial-value:0}
+@property --p12{syntax:'<number>';inherits:true;initial-value:1}
 @property --p13{syntax:'<number>';inherits:true;initial-value:0}
+@property --p14{syntax:'<number>';inherits:true;initial-value:0}
 .a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,1.818%{opacity:0}7.273%,100%{opacity:1}}
 .m2{animation-name:k1}
@@ -46,13 +47,13 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m7{animation-name:k8}
 @keyframes k9{0%,22.727%{opacity:0}27.273%,100%{opacity:1}}
 .m8{animation-name:k9}
-@keyframes k10{0%,11.818%{--p7:0}16.364%,100%{--p7:1}}
+@keyframes k10{0%,11.818%{--p8:0}16.364%,100%{--p8:1}}
 .m9{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k11{0%,15.455%{opacity:0}17.273%,100%{opacity:1}}
 .m10{animation-name:k11}
 @keyframes k12{0%,16.364%{opacity:0}20%,100%{opacity:1}}
 .m11{animation-name:k12}
-@keyframes k13{0%,13.636%{--p7:0}18.182%,100%{--p7:1}}
+@keyframes k13{0%,13.636%{--p8:0}18.182%,100%{--p8:1}}
 .m12{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k14{0%,17.273%{opacity:0}19.091%,100%{opacity:1}}
 .m13{animation-name:k14}
@@ -150,8 +151,57 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g class="a m46">
     <g mask="url(#m1)">
       <g class="a m2">
-        <g transform="translate(126 238) scale(34 -34)">
-          <path d="M-12 -12V12M-11 -12V12M-10 -12V12M-9 -12V12M-8 -12V12M-7 -12V12M-6 -12V12M-5 -12V12M-4 -12V12M-3 -12V12M-2 -12V12M-1 -12V12M0 -12V12M1 -12V12M2 -12V12M3 -12V12M4 -12V12M5 -12V12M6 -12V12M7 -12V12M8 -12V12M9 -12V12M10 -12V12M11 -12V12M12 -12V12M-12 -12H12M-12 -11H12M-12 -10H12M-12 -9H12M-12 -8H12M-12 -7H12M-12 -6H12M-12 -5H12M-12 -4H12M-12 -3H12M-12 -2H12M-12 -1H12M-12 0H12M-12 1H12M-12 2H12M-12 3H12M-12 4H12M-12 5H12M-12 6H12M-12 7H12M-12 8H12M-12 9H12M-12 10H12M-12 11H12M-12 12H12" fill="none" stroke="var(--base02)" style="vector-effect:non-scaling-stroke"/>
+        <g stroke-opacity="0.25">
+          <line x1="-282" y1="-170" x2="-282" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-248" y1="-170" x2="-248" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-214" y1="-170" x2="-214" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-180" y1="-170" x2="-180" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-146" y1="-170" x2="-146" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-112" y1="-170" x2="-112" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-78" y1="-170" x2="-78" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-44" y1="-170" x2="-44" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-10" y1="-170" x2="-10" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="24" y1="-170" x2="24" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="58" y1="-170" x2="58" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="92" y1="-170" x2="92" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="126" y1="-170" x2="126" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="160" y1="-170" x2="160" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="194" y1="-170" x2="194" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="228" y1="-170" x2="228" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="262" y1="-170" x2="262" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="296" y1="-170" x2="296" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="330" y1="-170" x2="330" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="364" y1="-170" x2="364" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="398" y1="-170" x2="398" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="432" y1="-170" x2="432" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="466" y1="-170" x2="466" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="500" y1="-170" x2="500" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="534" y1="-170" x2="534" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="646" x2="534" y2="646" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="612" x2="534" y2="612" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="578" x2="534" y2="578" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="544" x2="534" y2="544" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="510" x2="534" y2="510" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="476" x2="534" y2="476" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="442" x2="534" y2="442" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="408" x2="534" y2="408" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="374" x2="534" y2="374" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="340" x2="534" y2="340" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="306" x2="534" y2="306" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="272" x2="534" y2="272" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="238" x2="534" y2="238" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="204" x2="534" y2="204" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="170" x2="534" y2="170" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="136" x2="534" y2="136" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="102" x2="534" y2="102" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="68" x2="534" y2="68" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="34" x2="534" y2="34" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="0" x2="534" y2="0" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="-34" x2="534" y2="-34" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="-68" x2="534" y2="-68" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="-102" x2="534" y2="-102" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="-136" x2="534" y2="-136" stroke="var(--base03)" stroke-width="1"/>
+          <line x1="-282" y1="-170" x2="534" y2="-170" stroke="var(--base03)" stroke-width="1"/>
         </g>
       </g>
       <g class="a m4">
@@ -181,8 +231,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g class="a m8">
         <g transform="translate(126 238)">
-          <g style="--p4:34" class="a m3">
-            <g class="plane-at" style="--p5:0.5;--p6:0.5">
+          <g style="--p4:34;--p5:34" class="a m3">
+            <g class="plane-at" style="--p6:0.5;--p7:0.5">
               <g>
                 <g class="a m6">
                   <path d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z" transform="matrix(0.015 0 0 -0.015 -3.75 4.995)" fill="var(--base0A)"/>
@@ -206,8 +256,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           </g>
           <g class="a m10">
             <g transform="translate(126 238)">
-              <g style="--p4:34" class="a m3">
-                <g class="plane-head" style="--p5:1;--p8:1">
+              <g style="--p4:34;--p5:34" class="a m3">
+                <g class="plane-head" style="--p6:1;--p9:1">
                   <polygon points="4,0 -8,-5.5 -8,5.5" fill="var(--base0B)"/>
                 </g>
               </g>
@@ -215,8 +265,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           </g>
           <g class="a m11">
             <g transform="translate(126 238)">
-              <g style="--p4:34" class="a m3">
-                <g class="plane-at" style="--p5:1;--p8:1;--p9:17.545">
+              <g style="--p4:34;--p5:34" class="a m3">
+                <g class="plane-at" style="--p6:1;--p9:1;--p10:17.545">
                   <g transform="translate(0 0)">
                     <g>
                       <g>
@@ -242,8 +292,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           </g>
           <g class="a m13">
             <g transform="translate(126 238)">
-              <g style="--p4:34" class="a m3">
-                <g class="plane-head" style="--p6:1;--p10:1">
+              <g style="--p4:34;--p5:34" class="a m3">
+                <g class="plane-head" style="--p7:1;--p11:1">
                   <polygon points="4,0 -8,-5.5 -8,5.5" fill="var(--base08)"/>
                 </g>
               </g>
@@ -251,8 +301,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
           </g>
           <g class="a m14">
             <g transform="translate(126 238)">
-              <g style="--p4:34" class="a m3">
-                <g class="plane-at" style="--p6:1;--p10:1;--p9:19.069">
+              <g style="--p4:34;--p5:34" class="a m3">
+                <g class="plane-at" style="--p7:1;--p11:1;--p10:19.069">
                   <g transform="translate(0 0)">
                     <g>
                       <g>

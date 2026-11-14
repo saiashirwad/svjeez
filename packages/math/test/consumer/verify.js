@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { axes, contours, tex } from "@svjeez/math";
+import { plane, contours, tex } from "@svjeez/math";
 import { render, morph } from "svjeez";
 
 const at = { x: 20, y: 20, fontSize: 40 };
@@ -18,7 +18,7 @@ assert.ok(expanded.get("mid").w > 0);
 
 assert.throws(() => tex(String.raw`\frac{`), /could not parse/);
 
-const graph = axes({ x: [-3, 3], y: [-1, 9], width: 200, height: 100, at: { x: 10, y: 10 } });
+const graph = plane({ x: [-3, 3], y: [-1, 9], width: 200, height: 100, at: { x: 10, y: 10 } });
 const plotted = render({ width: 240, height: 120, duration: 2, title: "Graph" }, [graph.node]);
 
 assert.match(plotted, /^<svg[\s\S]*<line /);

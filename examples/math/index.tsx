@@ -1,4 +1,4 @@
-import { axes, tex } from "@svjeez/math";
+import { plane, tex } from "@svjeez/math";
 import { draw, motion, render, Brace, morph, tint } from "svjeez";
 import { css, mono, theme } from "../style";
 
@@ -20,7 +20,7 @@ const theorem = tex(String.raw`(a+b)^n = \sum_{k=0}^{n} \binom{n}{k}\, a^{n-k} b
 });
 
 /** The square as a curve, with b fixed at 1. */
-const graph = axes({
+const graph = plane({
   x: [-4, 2],
   y: [0, 9],
   width: 280,

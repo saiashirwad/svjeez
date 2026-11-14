@@ -2,17 +2,23 @@ import {
   css,
   ease,
   motion,
+  tint,
+  type Base16,
   type Color,
   type Ease,
+  type FontValue,
+  type Motion,
   type PathData,
   type Point,
+  type Rect,
   type Span,
   type SvgNode,
   defaultDark,
-  type Base16,
 } from "svjeez";
 import { el } from "svjeez/internal";
 
+import { calculus, type Calculus } from "./calculus.ts";
+import { faintGrid, frameOf, furniture, sample, type Frame, type SampleOptions } from "./graph.ts";
 import { tex, type Tex } from "./index.ts";
 import { apply, identity, multiply, round, type Matrix } from "./matrix.ts";
 import { LEAN, warp, type Move, type PathAttrs, type Placement, type Vec2 } from "./warp.ts";
@@ -33,16 +39,25 @@ export interface StepOptions extends Span {
 }
 
 export interface PlaneOptions {
-  /** Where (0, 0) sits, in scene pixels. */
-  readonly origin: Point;
-  /** Pixels per unit. */
-  readonly unit: number;
-  /** How far the grid reaches, in units: a number for ±n on both axes, or a range per axis. Default 10. */
-  readonly extent?: number | { readonly x: Vec2; readonly y: Vec2 };
-  /** Units between grid lines. Default 1. */
-  readonly step?: number;
-  /** Paints the grid and axes. Default `defaultDark`. */
+  /** Graph range of the x axis, `[min, max]`. */
+  readonly x: Vec2;
+  /** Graph range of the y axis, `[min, max]`. */
+  readonly y: Vec2;
+  /** Size of the plot area in px. The pixels per unit follow from it and the range, and may differ per axis. */
+  readonly width: number;
+  readonly height: number;
+  /** Top-left of the plot area. Default the origin of the scene. */
+  readonly at?: Point;
+  /** Tick step in graph units: a number for both axes, or one per axis. An axis without one has no ticks and no grid lines. */
+  readonly ticks?: number | { readonly x?: number; readonly y?: number };
+  /** Numbers at the ticks. Default true. */
+  readonly labels?: boolean;
+  /** Faint lines across the plot at the ticks, in `node`. Default false. */
+  readonly grid?: boolean;
+  /** Paints the axes, the grid and the curves. Default `defaultDark`. */
   readonly theme?: Base16;
+  readonly fontSize?: number;
+  readonly font?: FontValue | string;
 }
 
 export interface VectorOptions {
@@ -82,12 +97,31 @@ export interface LabelOptions {
   readonly fontSize?: number;
 }
 
+export interface Plot {
+  /** The curve. On a plane with steps it moves with them. */
+  readonly node: SvgNode;
+  /** The path data before any step. A gap in the curve starts a new `M`. */
+  readonly d: string;
+  /** Every sampled point that was drawn before any step, in scene px. */
+  readonly points: readonly Point[];
+}
+
+export interface PlotOptions extends SampleOptions {
+  readonly animation?: Motion<"draw">;
+}
+
 /**
- * A coordinate plane that moves. Steps chain, each returning a new plane, and everything drawn from the final
- * plane follows every step. When every step is a matrix, the scene carries one CSS transform driven by
- * registered properties; once a step is a function, outlines are sampled and morph through `d`.
+ * Coordinate axes over a graph range that can also move. `point()` maps graph units to scene px, `plot()`
+ * draws a function, and the calculus methods draw on the curve. Steps chain, each returning a new plane, and
+ * what is drawn from the final plane (grid, axes, vectors, shapes, labels and plots) follows every step. When
+ * every step is a matrix, the scene carries one CSS transform driven by registered properties; once a step is
+ * a function, outlines are sampled and morph through `d`.
  */
-export interface Plane {
+export interface Plane extends Calculus {
+  /** The axis lines, ticks and numbers, and the grid when `grid` is set. It stays put through every step. */
+  readonly node: SvgNode;
+  /** The plot area. */
+  readonly bounds: Rect;
   /** Scene pixels of a point before any step. */
   point(x: number, y: number): Point;
   /** Scene pixels of a point after every step. */
@@ -100,11 +134,14 @@ export interface Plane {
   reset(step: StepOptions): Plane;
   /** The rules the plane's elements read. Pass it to `render`'s `css`. */
   readonly css: ReturnType<typeof css>;
-  /** The grid as it was, staying put. */
+  /** The grid lines at the ticks as they were, staying put. */
   readonly background: SvgNode;
-  /** The grid lines that move, without the axes. */
+  /** The grid lines at the ticks that move, without the axes. */
   readonly grid: SvgNode;
+  /** The two axis lines, which move. */
   readonly axes: SvgNode;
+  /** `f` across the range. Drawn from a plane with steps, the curve follows them and takes no `animation`. */
+  plot(f: (x: number) => number, options?: PlotOptions): Plot;
   /** An arrow to `to`, its head upright however the plane shears. */
   vector(to: Vec2, options?: VectorOptions): SvgNode;
   /** î and ĵ, labelled, with ĵ entering 0.2s after î. */
@@ -128,15 +165,6 @@ interface Step {
   readonly ease: Ease;
 }
 
-interface Frame {
-  readonly origin: Point;
-  readonly unit: number;
-  readonly x: Vec2;
-  readonly y: Vec2;
-  readonly step: number;
-  readonly theme: Base16;
-}
-
 const shared = { syntax: "number", inherits: true } as const;
 const A = css.property("plane-a", { ...shared, initial: 1 });
 const B = css.property("plane-b", { ...shared, initial: 0 });
@@ -144,7 +172,8 @@ const C = css.property("plane-c", { ...shared, initial: 0 });
 const D = css.property("plane-d", { ...shared, initial: 1 });
 const E = css.property("plane-e", { ...shared, initial: 0 });
 const F = css.property("plane-f", { ...shared, initial: 0 });
-const UNIT = css.property("plane-u", { ...shared, initial: 1 });
+const UX = css.property("plane-ux", { ...shared, initial: 1 });
+const UY = css.property("plane-uy", { ...shared, initial: 1 });
 const MATRIX = [A, B, C, D, E, F] as const;
 
 const own = { syntax: "number", inherits: false, initial: 0 } as const;
@@ -155,9 +184,9 @@ const DY = css.property("plane-dy", own);
 const K = css.property("plane-k", own);
 const GROW = css.property("plane-grow", { ...own, initial: 1 });
 
-const px = css`(${A} * ${X} + ${C} * ${Y} + ${E}) * ${UNIT}`;
-const py = css`(${B} * ${X} + ${D} * ${Y} + ${F}) * ${UNIT}`;
-const angle = css`atan2(calc(0 - ${B} * ${DX} - ${D} * ${DY}), calc(${A} * ${DX} + ${C} * ${DY}))`;
+const px = css`(${A} * ${X} + ${C} * ${Y} + ${E}) * ${UX}`;
+const py = css`(${B} * ${X} + ${D} * ${Y} + ${F}) * ${UY}`;
+const angle = css`atan2(calc(0 - (${B} * ${DX} + ${D} * ${DY}) * ${UY}), calc((${A} * ${DX} + ${C} * ${DY}) * ${UX}))`;
 
 const PLANE_CSS = css`.plane-map{transform:matrix(${A},${B},${C},${D},${E},${F})}.plane-map *{vector-effect:non-scaling-stroke}.plane-head{translate:calc(${px} * 1px) calc(${py} * -1px);rotate:${angle}}.plane-at{translate:calc(${px} * 1px + ${K} * cos(${angle} - ${(LEAN * 180) / Math.PI}deg) * 1px) calc(${py} * -1px + ${K} * sin(${angle} - ${(LEAN * 180) / Math.PI}deg) * 1px)}.plane-grow{scale:${GROW};transform-origin:calc(${X} * 1px) calc(${Y} * 1px)}`;
 
@@ -187,26 +216,38 @@ const then = (before: Place, next: Place): Place => {
 
 const IDENTITY: Place = { kind: "matrix", m: identity };
 
-/** Grid lines at every multiple of `step` in range, as two-point polylines. */
-const lines = (frame: Frame, keep: (k: number) => boolean): Vec2[][] => {
-  const ticks = ([lo, hi]: Vec2) =>
-    Array.from({ length: Math.floor(hi / frame.step) - Math.ceil(lo / frame.step) + 1 }, (_, i) =>
-      round((Math.ceil(lo / frame.step) + i) * frame.step),
-    ).filter(keep);
-
+/** The grid lines at the ticks as two-point polylines in graph units, without the ones under the axes when `bare`. */
+const rules = (frame: Frame, bare: boolean): Vec2[][] => {
   const [[x0, x1], [y0, y1]] = [frame.x, frame.y];
+  const [cx, cy] = frame.cross;
 
   return [
-    ...ticks(frame.x).map((k): Vec2[] => [
-      [k, y0],
-      [k, y1],
-    ]),
-    ...ticks(frame.y).map((k): Vec2[] => [
-      [x0, k],
-      [x1, k],
-    ]),
+    ...frame.xs
+      .filter((k) => !bare || k !== cx)
+      .map((k): Vec2[] => [
+        [k, y0],
+        [k, y1],
+      ]),
+    ...frame.ys
+      .filter((k) => !bare || k !== cy)
+      .map((k): Vec2[] => [
+        [x0, k],
+        [x1, k],
+      ]),
   ];
 };
+
+/** The two axis lines in graph units. */
+const axisLines = (frame: Frame): Vec2[][] => [
+  [
+    [frame.cross[0], frame.y[0]],
+    [frame.cross[0], frame.y[1]],
+  ],
+  [
+    [frame.x[0], frame.cross[1]],
+    [frame.x[1], frame.cross[1]],
+  ],
+];
 
 /** How one plane draws: one CSS transform for matrices, or sampled outlines once a function moves it. */
 interface Drawing {
@@ -239,7 +280,7 @@ const plain = (polylines: readonly (readonly Vec2[])[], closed: boolean): PathDa
     .join("") as PathData;
 
 const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matrix[]): Drawing => {
-  const { origin, unit } = frame;
+  const { origin, sx, sy } = frame;
   const matrices = [identity, ...placed];
   const moving = MATRIX.filter((_, i) => matrices.some((m) => m[i] !== identity[i]));
 
@@ -256,8 +297,8 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
   /** In pixels from the origin, where heads and labels read the unit, or in plane units, where paths don't. */
   const scope = (pixels: boolean, child: SvgNode) =>
     el.g(
-      { transform: pixels ? flat : `${flat} scale(${unit} ${-unit})` },
-      el.g({ animation: timeline, style: pixels ? { [UNIT]: unit } : undefined }, child),
+      { transform: pixels ? flat : `${flat} scale(${sx} ${-sy})` },
+      el.g({ animation: timeline, style: pixels ? { [UX]: sx, [UY]: sy } : undefined }, child),
     );
 
   /** A point and a direction for the rules to read. Zeros are left out, since every property starts at 0. */
@@ -313,14 +354,14 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
 };
 
 const warpDrawing = (frame: Frame, steps: readonly Step[]): Drawing => {
-  const { origin, unit } = frame;
+  const { origin, sx, sy } = frame;
 
   const scene =
     (f: PlaneFunction): Placement =>
     (p) => {
       const [x, y] = f(p[0], p[1]);
 
-      return [origin.x + x * unit, origin.y - y * unit];
+      return [origin.x + x * sx, origin.y - y * sy];
     };
 
   const moves = steps.map((s): Move => ({
@@ -330,7 +371,7 @@ const warpDrawing = (frame: Frame, steps: readonly Step[]): Drawing => {
     ease: s.ease,
   }));
 
-  const w = warp(scene(functionOf(IDENTITY)), moves, 16 / unit);
+  const w = warp(scene(functionOf(IDENTITY)), moves, 16 / Math.min(sx, sy));
 
   return {
     path(polylines, closed, attrs, grow) {
@@ -355,9 +396,6 @@ const appear = (at: number, over: number, child: SvgNode) =>
 
 const isSource = (content: string | Tex | SvgNode): content is string =>
   typeof content === "string";
-
-const isRadius = (extent: number | { readonly x: Vec2; readonly y: Vec2 }): extent is number =>
-  typeof extent === "number";
 
 const centered = (
   content: string | Tex | SvgNode,
@@ -388,11 +426,6 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
       matrices.length === steps.length
         ? cssDrawing(frame, steps, matrices)
         : warpDrawing(frame, steps));
-
-  const toScene = (x: number, y: number): Point => ({
-    x: round(frame.origin.x + x * frame.unit),
-    y: round(frame.origin.y - y * frame.unit),
-  });
 
   const push = (place: Place, step: StepOptions): Plane => {
     const last = steps.at(-1);
@@ -451,9 +484,39 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     ]);
   };
 
+  const graph = calculus({
+    x: frame.x,
+    y: frame.y,
+    bounds: frame.bounds,
+    theme,
+    clip: frame.clip,
+    point: frame.point,
+  });
+
+  // The calculus methods draw at rest, so on a plane with steps they say where to call them.
+  const refuse = (name: string) => (): never => {
+    throw new Error(
+      `plane.${name}() draws on a plane that does not move. Call it on the plane before its first step.`,
+    );
+  };
+
+  const still: Calculus =
+    steps.length === 0
+      ? graph
+      : {
+          dot: refuse("dot"),
+          tangent: refuse("tangent"),
+          secant: refuse("secant"),
+          area: refuse("area"),
+          riemann: refuse("riemann"),
+          morph: refuse("morph"),
+          parametric: refuse("parametric"),
+          polar: refuse("polar"),
+        };
+
   return {
-    point: toScene,
-    map: (x, y) => toScene(...functionOf(current)(x, y)),
+    point: frame.point,
+    map: (x, y) => frame.point(...functionOf(current)(x, y)),
     apply: (matrix, step) => push(then(current, { kind: "matrix", m: toMatrix(matrix) }), step),
     applyFunction: (f, step) => {
       const checked: PlaneFunction = (x, y) => {
@@ -471,36 +534,54 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     },
     reset: (step) => push(IDENTITY, step),
     css: PLANE_CSS,
+    get node() {
+      return furniture(frame);
+    },
+    bounds: frame.bounds,
     get background() {
-      return el.g(
-        {
-          transform: `translate(${frame.origin.x} ${frame.origin.y}) scale(${frame.unit} ${-frame.unit})`,
-        },
-        el.path({
-          d: plain(
-            lines(frame, () => true),
-            false,
-          ),
-          fill: "none",
-          stroke: theme.base02,
-          style: "vector-effect:non-scaling-stroke",
-        }),
-      );
+      return faintGrid(frame);
     },
     get grid() {
-      return draw().path(
-        lines(frame, (k) => k !== 0),
-        false,
-        { fill: "none", stroke: theme.base0D, strokeOpacity: 0.55 },
-      );
+      const lines = rules(frame, true);
+
+      return lines.length === 0
+        ? el.g({}, [])
+        : draw().path(lines, false, { fill: "none", stroke: theme.base0D, strokeOpacity: 0.55 });
     },
     get axes() {
-      return draw().path(
-        lines(frame, (k) => k === 0),
-        false,
-        { fill: "none", stroke: theme.base05, strokeWidth: 1.5 },
-      );
+      return draw().path(axisLines(frame), false, {
+        fill: "none",
+        stroke: theme.base05,
+        strokeWidth: 1.5,
+      });
     },
+    plot(f, options = {}) {
+      const curve = sample(frame, f, options);
+      const { color = tint(theme, "blue"), strokeWidth = 2.5 } = options;
+      const look = { fill: "none", stroke: color, strokeWidth } as const;
+      const joins = { strokeLinejoin: "round", strokeLinecap: "round" } as const;
+
+      if (steps.length > 0 && options.animation)
+        throw new Error(
+          `plot() cannot draw on a plane that has steps. Plot on the plane before its first step, or leave out animation.`,
+        );
+
+      return {
+        d: curve.d,
+        points: curve.points,
+        node: el.g(
+          { clipPath: frame.clip },
+          steps.length > 0
+            ? draw().path(
+                curve.runs.filter((run) => run.length > 1),
+                false,
+                { ...look, ...joins },
+              )
+            : el.path({ d: curve.d, ...look, ...joins, animation: options.animation }),
+        ),
+      };
+    },
+    ...still,
     vector,
     basis: ({ enter } = {}) =>
       el.g({}, [
@@ -544,28 +625,10 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 };
 
 /**
- * A coordinate plane at `origin`, `unit` pixels to a unit, with y up. Chain `apply`, `applyFunction` and
- * `reset` to move it, then draw from the plane those calls return: its grid, axes, vectors, shapes and labels.
+ * Axes over `x` and `y`, in a plot area of `width` by `height` at `at`, with y up. Draw its `node`, `plot()`
+ * curves, or chain `apply`, `applyFunction` and `reset` to move it and draw from the plane those calls return:
+ * its grid, axes, vectors, shapes, labels and plots.
  */
 export function plane(options: PlaneOptions): Plane {
-  const { origin, unit, extent = 10, step = 1, theme = defaultDark } = options;
-
-  if (!(unit > 0) || !(step > 0) || !finite(origin.x, origin.y))
-    throw new Error(
-      `plane() needs a finite origin and a positive unit and step, got origin (${origin.x}, ${origin.y}), unit ${unit} and step ${step}.`,
-    );
-
-  if (!isRadius(extent) && !(extent.x[0] <= extent.x[1] && extent.y[0] <= extent.y[1]))
-    throw new Error(
-      `plane() needs an extent with lo <= hi on each axis, got x [${extent.x.join(", ")}] and y [${extent.y.join(", ")}].`,
-    );
-
-  const [x, y]: readonly [Vec2, Vec2] = isRadius(extent)
-    ? [
-        [-extent, extent],
-        [-extent, extent],
-      ]
-    : [extent.x, extent.y];
-
-  return make({ origin, unit, x, y, step, theme }, []);
+  return make(frameOf({ ...options, theme: options.theme ?? defaultDark }), []);
 }

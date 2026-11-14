@@ -1,5 +1,5 @@
 import {
-  axes,
+  plane,
   contours,
   contourSweep,
   fieldLines,
@@ -56,7 +56,7 @@ const orange = tint(theme, "number");
 const green = tint(theme, "string");
 const muted = tint(theme, "muted");
 
-const heart = axes({
+const heart = plane({
   x: [-1.6, 1.6],
   y: [-1.4, 1.5],
   width: 280,
@@ -71,7 +71,7 @@ const heart = axes({
 const implicit = (x: number, y: number) => (x * x + y * y - 1) ** 3 - x * x * y ** 3;
 
 const sweep = contourSweep(implicit, {
-  axes: heart,
+  plane: heart,
   from: -0.97,
   to: 0,
   at: 5,
@@ -79,9 +79,9 @@ const sweep = contourSweep(implicit, {
   frames: 14,
 });
 
-const [rim] = contours(implicit, { axes: heart, levels: [0] });
+const [rim] = contours(implicit, { plane: heart, levels: [0] });
 
-const slopes = axes({
+const slopes = plane({
   x: [-3, 3],
   y: [-3, 3],
   width: 280,

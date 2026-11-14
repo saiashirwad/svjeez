@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { render, flow } from "svjeez";
 import {
-  axes,
+  plane,
   contours,
   contourSweep,
   fieldLines,
@@ -72,7 +72,7 @@ describe("vectorField", () => {
 });
 
 describe("slope fields", () => {
-  const plot = axes({ x: [-2, 2], y: [-2, 2], width: 200, height: 200 });
+  const plot = plane({ x: [-2, 2], y: [-2, 2], width: 200, height: 200 });
 
   test("draw flat marks for a zero slope", () => {
     const { d } = slopeField(() => 0, plot, { step: 1 });
@@ -139,9 +139,9 @@ describe("contours", () => {
     expect(level!.lines[0]!.points.every((p) => Math.abs(p.y - 75) < 0.01)).toBe(true);
   });
 
-  test("sample in graph units through axes", () => {
-    const plot = axes({ x: [-2, 2], y: [-2, 2], width: 200, height: 200, at: { x: 10, y: 10 } });
-    const [level] = contours((x, y) => x * x + y * y - 1, { axes: plot, levels: [0] });
+  test("sample in graph units through plane", () => {
+    const plot = plane({ x: [-2, 2], y: [-2, 2], width: 200, height: 200, at: { x: 10, y: 10 } });
+    const [level] = contours((x, y) => x * x + y * y - 1, { plane: plot, levels: [0] });
     const center = plot.point(0, 0);
 
     for (const p of level!.lines[0]!.points)
@@ -160,11 +160,11 @@ describe("contours", () => {
 });
 
 describe("contourSweep", () => {
-  const plot = axes({ x: [-2, 2], y: [-2, 2], width: 200, height: 200 });
+  const plot = plane({ x: [-2, 2], y: [-2, 2], width: 200, height: 200 });
 
   test("morphs one path through every level", () => {
     const sweep = contourSweep((x, y) => x * x + y * y, {
-      axes: plot,
+      plane: plot,
       from: 0.25,
       to: 3,
       at: 1,
@@ -182,7 +182,7 @@ describe("contourSweep", () => {
 
   test("names the level that has no line", () => {
     expect(() =>
-      contourSweep((x, y) => x * x + y * y, { axes: plot, from: -1, to: 1, at: 0, over: 1 }),
+      contourSweep((x, y) => x * x + y * y, { plane: plot, from: -1, to: 1, at: 0, over: 1 }),
     ).toThrow("contourSweep() found no line at level -1.");
   });
 });

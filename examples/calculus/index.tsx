@@ -1,4 +1,4 @@
-import { axes, tex } from "@svjeez/math";
+import { plane, tex } from "@svjeez/math";
 import { draw, enter, exit, render, readout } from "svjeez";
 import { css, mono, theme } from "../style";
 
@@ -13,7 +13,7 @@ const TOP = 132;
 const left = (i: number) => 48 + i * 312;
 
 const panel = (i: number, x: readonly [number, number], y: readonly [number, number]) =>
-  axes({
+  plane({
     x,
     y,
     width: PANEL.width,

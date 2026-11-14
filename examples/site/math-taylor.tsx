@@ -1,4 +1,4 @@
-import { axes, tex } from "@svjeez/math";
+import { plane, tex } from "@svjeez/math";
 import { def, draw, enter, motion, render, type Color, morph } from "svjeez";
 import { CSS, chrome, outro } from "./kit";
 import { theme } from "../style";
@@ -11,7 +11,7 @@ const win = chrome(W, H, "taylor.tsx");
 
 const COS = theme.base0D;
 
-const graph = axes({
+const graph = plane({
   x: [-2 * Math.PI, 2 * Math.PI],
   y: [-1.7, 1.7],
   width: 448,

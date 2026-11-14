@@ -12,7 +12,25 @@ const M = [
   [0, 2],
 ] as const;
 
-const linear = plane({ origin: { x: 200, y: 320 }, unit: 40, extent: 9, theme })
+/** A plane over `x` and `y` with (0, 0) at `origin`, `unit` pixels to a unit, and a tick every `ticks`. */
+const view = (
+  origin: { x: number; y: number },
+  unit: number,
+  x: readonly [number, number],
+  y: readonly [number, number],
+  ticks: number,
+) =>
+  plane({
+    x,
+    y,
+    width: (x[1] - x[0]) * unit,
+    height: (y[1] - y[0]) * unit,
+    at: { x: origin.x + x[0] * unit, y: origin.y - y[1] * unit },
+    ticks,
+    theme,
+  });
+
+const linear = view({ x: 200, y: 320 }, 40, [-9, 9], [-9, 9], 1)
   .apply(M, { at: 2.4, over: 2.4 })
   .reset({ at: 6.4, over: 1.6 });
 
@@ -22,21 +40,12 @@ const exp = (x: number, y: number) =>
 
 const at = { x: 600, y: 300 };
 
-const complex = plane({
-  origin: at,
-  unit: 88,
-  extent: { x: [-1.25, 0.75], y: [-1.5, 1.5] },
-  step: 0.25,
-  theme,
-}).applyFunction(exp, { at: 9, over: 3 });
-
-const backdrop = plane({
-  origin: at,
-  unit: 88,
-  extent: { x: [-1.25, 3.5], y: [-2.75, 2.75] },
-  step: 0.25,
-  theme,
+const complex = view(at, 88, [-1.25, 0.75], [-1.5, 1.5], 0.25).applyFunction(exp, {
+  at: 9,
+  over: 3,
 });
+
+const backdrop = view(at, 88, [-1.25, 3.5], [-2.75, 2.75], 0.25);
 
 const V1 = theme.base0A;
 const V2 = theme.base0E;

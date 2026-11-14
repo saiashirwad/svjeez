@@ -15,7 +15,16 @@ const I = theme.base0B;
 const J = theme.base08;
 const AREA = theme.base0A;
 
-const p = plane({ origin: { x: 126, y: 238 }, unit: 34, extent: 12, theme }).apply(
+// 34px a unit, with (0, 0) at (126, 238).
+const p = plane({
+  x: [-12, 12],
+  y: [-12, 12],
+  width: 816,
+  height: 816,
+  at: { x: -282, y: -170 },
+  ticks: 1,
+  theme,
+}).apply(
   [
     [2, -1],
     [1, 1],

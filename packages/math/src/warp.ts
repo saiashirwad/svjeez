@@ -4,6 +4,7 @@ import {
   type Point,
   sampled,
   type Color,
+  type Paint,
   type Ease,
   type PathData,
   type SvgNode,
@@ -121,9 +122,11 @@ export interface Warp {
 export type PathAttrs = {
   readonly fill?: Color | "none";
   readonly fillOpacity?: number;
-  readonly stroke?: Color;
+  readonly stroke?: Paint;
   readonly strokeWidth?: number;
   readonly strokeOpacity?: number;
+  readonly strokeLinejoin?: "round";
+  readonly strokeLinecap?: "round";
 };
 
 export function warp(start: Placement, moves: readonly Move[], spacing: number): Warp {

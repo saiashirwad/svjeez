@@ -278,13 +278,13 @@ export {
   type PlaneFunction,
   type PlaneMatrix,
   type PlaneOptions,
+  type Plot,
+  type PlotOptions,
   type PolygonOptions as PlanePolygonOptions,
   type StepOptions,
   type Vec2,
   type VectorOptions,
 } from "./plane.ts";
-
-export { axes, type Axes, type AxesOptions, type Plot, type PlotOptions } from "./axes.ts";
 
 export {
   type CalculusArea,

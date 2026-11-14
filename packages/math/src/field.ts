@@ -16,11 +16,11 @@ import {
 import { el } from "svjeez/internal";
 import { marchingSquares } from "./layout/contour.ts";
 import { simplify, traceStreamlines, type VectorField } from "./layout/field.ts";
-import type { Axes } from "./axes.ts";
+import type { Plane } from "./plane.ts";
 
 export type { VectorField };
 
-/** A region of the scene in px. A `Rect`, such as `axes().bounds`, fits. */
+/** A region of the scene in px. A `Rect`, such as `plane().bounds`, fits. */
 export interface Bounds {
   readonly x: number;
   readonly y: number;
@@ -46,7 +46,7 @@ const checkBounds = (what: string, { x, y, w, h }: Bounds): void => {
 };
 
 export interface StreamlinesOptions {
-  /** The region to fill, in scene px. `axes().bounds` fits. */
+  /** The region to fill, in scene px. `plane().bounds` fits. */
   readonly bounds: Bounds;
   /** Gap between neighbouring lines in px. Default 24. */
   readonly spacing?: number;
@@ -235,10 +235,10 @@ export interface SlopeFieldResult {
   readonly d: string;
 }
 
-/** Graph units to px and back, read from the axes' own mapping. */
-const frame = (axes: Axes) => {
-  const origin = axes.point(0, 0);
-  const [ex, ey] = [axes.point(1, 0), axes.point(0, 1)];
+/** Graph units to px and back, read from the plane's own mapping. */
+const frame = (plane: Plane) => {
+  const origin = plane.point(0, 0);
+  const [ex, ey] = [plane.point(1, 0), plane.point(0, 1)];
   const [sx, sy] = [ex.x - origin.x, ey.y - origin.y];
 
   return {
@@ -248,14 +248,14 @@ const frame = (axes: Axes) => {
   };
 };
 
-/** Short marks along dy/dx = `f(x, y)` over the axes' range. Where `f` is not finite no mark is drawn; at infinity, the mark is vertical. */
+/** Short marks along dy/dx = `f(x, y)` over the plane's range. Where `f` is not finite no mark is drawn; at infinity, the mark is vertical. */
 export function slopeField(
   f: (x: number, y: number) => number,
-  axes: Axes,
+  plane: Plane,
   options: SlopeFieldOptions = {},
 ): SlopeFieldResult {
-  const { bounds } = axes;
-  const { sx, sy, graph } = frame(axes);
+  const { bounds } = plane;
+  const { sx, sy, graph } = frame(plane);
 
   const [xa, ya] = [
     graph({ x: bounds.x, y: bounds.y + bounds.h }),
@@ -287,7 +287,7 @@ export function slopeField(
 
       const [dx, dy] = Number.isFinite(slope) ? [sx, sy * slope] : [0, Math.sign(slope) * -1];
       const m = Math.hypot(dx, dy);
-      const c = axes.point(gx, gy);
+      const c = plane.point(gx, gy);
       const [hx, hy] = [(dx / m) * (length / 2), (dy / m) * (length / 2)];
 
       marks.push(
@@ -314,15 +314,15 @@ export interface SlopeSolution {
   readonly d: string;
 }
 
-/** The curve through `start` that follows `slopeField(f, axes)`, by Runge-Kutta, as points in scene px and as path data. */
+/** The curve through `start` that follows `slopeField(f, plane)`, by Runge-Kutta, as points in scene px and as path data. */
 export function slopeSolution(
   f: (x: number, y: number) => number,
-  axes: Axes,
+  plane: Plane,
   start: Point,
   options: SolutionOptions = {},
 ): SlopeSolution {
-  const { bounds } = axes;
-  const { graph } = frame(axes);
+  const { bounds } = plane;
+  const { graph } = frame(plane);
   const [left, top] = graph({ x: bounds.x, y: bounds.y });
   const [right, bottom] = graph({ x: bounds.x + bounds.w, y: bounds.y + bounds.h });
   const [lo, hi] = [options.from ?? left, options.to ?? right];
@@ -354,7 +354,7 @@ export function slopeSolution(
 
   const points = [...run(-1).reverse(), [start.x, start.y] as const, ...run(1)].flatMap(([x, y]) =>
     x! >= lo - 1e-9 && x! <= hi + 1e-9 && y! >= yMin - span && y! <= yMax + span
-      ? [axes.point(x!, y!)]
+      ? [plane.point(x!, y!)]
       : [],
   );
 
@@ -370,10 +370,10 @@ export interface Grid {
 
 export interface ContourOptions {
   readonly levels: readonly number[];
-  /** Scene px to sample over. Needed unless `axes` is given. */
+  /** Scene px to sample over. Needed unless `plane` is given. */
   readonly bounds?: Bounds;
   /** Sample over this plot, calling the function in graph units rather than px. */
-  readonly axes?: Axes;
+  readonly plane?: Plane;
   /** px between samples of a function. Default 4. Finer costs time, not file size. */
   readonly resolution?: number;
   /** How far, in px, the drawn line may stray from the traced one. Default 0.2. */
@@ -406,9 +406,9 @@ const gridOf = (
   source: ((x: number, y: number) => number) | Grid,
   options: Omit<ContourOptions, "levels">,
 ): Sampled => {
-  const bounds = options.bounds ?? options.axes?.bounds;
+  const bounds = options.bounds ?? options.plane?.bounds;
 
-  if (!bounds) throw new Error(`${what} needs bounds or axes to place the samples.`);
+  if (!bounds) throw new Error(`${what} needs bounds or plane to place the samples.`);
 
   checkBounds(what, bounds);
 
@@ -426,7 +426,7 @@ const gridOf = (
   positive(what, "resolution", resolution);
 
   const [cols, rows] = [Math.ceil(bounds.w / resolution) + 1, Math.ceil(bounds.h / resolution) + 1];
-  const graph = options.axes ? frame(options.axes).graph : undefined;
+  const graph = options.plane ? frame(options.plane).graph : undefined;
   const values = new Float64Array(cols * rows);
 
   for (let j = 0; j < rows; j++)
@@ -468,7 +468,7 @@ const levelOf = (grid: Grid, bounds: Bounds, level: number, tolerance: number): 
 
 /**
  * Level lines of a scalar field: where `source` crosses each of `levels`. `source` is a function of `(x, y)`, in graph
- * units with `axes` and in scene px with `bounds`, or a `Grid` of samples you computed. Use it for implicit curves
+ * units with `plane` and in scene px with `bounds`, or a `Grid` of samples you computed. Use it for implicit curves
  * (`x*x + y*y - 1` at level 0) and for elevation lines. A line that leaves the bounds ends there.
  */
 export function contours(

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { ease, render, type Child, readout } from "svjeez";
 import { validateSvg } from "svjeez/frames";
-import { axes } from "../src/index.ts";
+import { plane } from "../src/index.ts";
 
 const graph = () =>
-  axes({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 } });
+  plane({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 } });
 
 const svgOf = (...nodes: Child[]): string =>
   render({ width: 800, height: 400, duration: 6, title: "Calculus", reducedMotion: false }, nodes);
