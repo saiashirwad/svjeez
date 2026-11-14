@@ -9,7 +9,7 @@ export const valid = [
     camera: eye,
     blocks: [
       {
-        at: [0, 0, 0],
+        cell: [0, 0, 0],
         skin: { side: stone, top: stone },
         from: 1,
         animation: enter({ at: 1, over: 1 }, { y: -8 }),
@@ -23,14 +23,14 @@ export const invalid = [
   // @ts-expect-error a voxel palette takes hex colors, not named ones
   voxel.texture({ s: "red" }, "s"),
   // @ts-expect-error a block sits on three coordinates
-  voxel.scene({ camera: eye, blocks: [{ at: [0, 0], skin: stone }] }),
+  voxel.scene({ camera: eye, blocks: [{ cell: [0, 0], skin: stone }] }),
   // @ts-expect-error a skin that names faces still needs a side to fall back on
-  voxel.scene({ camera: eye, blocks: [{ at: [0, 0, 0], skin: { top: stone } }] }),
+  voxel.scene({ camera: eye, blocks: [{ cell: [0, 0, 0], skin: { top: stone } }] }),
   voxel.scene({
     camera: eye,
     blocks: [
       {
-        at: [0, 0, 0],
+        cell: [0, 0, 0],
         skin: stone,
         // @ts-expect-error a block's <use> cannot draw
         animation: draw({ at: 0, over: 1 }),

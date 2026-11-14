@@ -21,9 +21,7 @@ import {
   type VoxelTexture,
 } from "./texture.ts";
 
-export interface VoxelBlock {
-  /** Integer cell; the cube spans `at` to `at + 1`. */
-  readonly at: Vec3;
+interface BlockBase {
   readonly skin: VoxelSkin;
   /** Visible from this time. Default 0. */
   readonly from?: Seconds;
@@ -32,6 +30,22 @@ export interface VoxelBlock {
   /** Moves the block's `<use>` on the scene timeline. `from`/`to` own opacity, so this cannot animate it. */
   readonly animation?: Stack<Exclude<TagChannels<"use">, "opacity">>;
 }
+
+export type VoxelBlock = BlockBase &
+  (
+    | {
+        /** Integer cell; the cube spans `cell` to `cell + 1`. */
+        readonly cell: Vec3;
+        readonly at?: undefined;
+      }
+    | {
+        /** @deprecated use `cell` */
+        readonly at: Vec3;
+        readonly cell?: undefined;
+      }
+  );
+
+const cellOf = (block: VoxelBlock): Vec3 => block.cell ?? block.at;
 
 export interface VoxelScene {
   readonly camera: VoxelCamera;
@@ -76,13 +90,16 @@ const lifetime = (from: Seconds, to: Seconds): Motion<"opacity"> | undefined => 
   return to === Infinity ? arrive : arrive.at(to).set({ opacity: 0 });
 };
 
-const check = ({ at, from = 0, to = Infinity }: VoxelBlock): void => {
-  if (!at.every(Number.isInteger))
-    throw new Error(`voxel.scene() needs blocks on whole cells, got [${at.join(", ")}].`);
+const check = (block: VoxelBlock): void => {
+  const { from = 0, to = Infinity } = block;
+  const cell = cellOf(block);
+
+  if (!cell.every(Number.isInteger))
+    throw new Error(`voxel.scene() needs blocks on whole cells, got [${cell.join(", ")}].`);
 
   if (!(from >= 0 && from < to))
     throw new Error(
-      `voxel.scene() needs 0 <= from < to, got from ${from} to ${to} on the block at [${at.join(", ")}].`,
+      `voxel.scene() needs 0 <= from < to, got from ${from} to ${to} on the block at [${cell.join(", ")}].`,
     );
 };
 
@@ -98,7 +115,7 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
   const facing = facingOf(view);
   const [fx, , fz] = facing;
   const faces = visibleFaces(facing);
-  const cells = groupBy(blocks, (block) => cellKey(block.at));
+  const cells = groupBy(blocks, (block) => cellKey(cellOf(block)));
 
   const opaque = new Map<VoxelSkin, boolean>();
 
@@ -119,7 +136,7 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
     (cover.to ?? Infinity) >= (block.to ?? Infinity);
 
   const buried = (block: VoxelBlock): boolean => {
-    const [x, y, z] = block.at;
+    const [x, y, z] = cellOf(block);
 
     const near: Vec3[] = [
       [x, y + 1, z],
@@ -168,7 +185,11 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
     return symbol;
   };
 
-  const depth = ({ at }: VoxelBlock): number => fx * at[0] + facing[1] * at[1] + fz * at[2];
+  const depth = (block: VoxelBlock): number => {
+    const cell = cellOf(block);
+
+    return fx * cell[0] + facing[1] * cell[1] + fz * cell[2];
+  };
 
   const visible = blocks
     .filter((block) => !buried(block))
@@ -179,7 +200,7 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
   return el.g(
     {},
     visible.map((block) => {
-      const { x, y } = view.project(block.at);
+      const { x, y } = view.project(cellOf(block));
 
       return el.use({
         href: symbolOf(block.skin),

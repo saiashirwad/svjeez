@@ -25,9 +25,9 @@ const island = (
     {voxel.scene({
       camera: view,
       blocks: [
-        { at: [0, 0, 0], skin: { side: dirt, top: grass } },
-        { at: [1, 0, 0], skin: dirt, from: 3, to: 9 }, // visible from 3s until 9s
-        { at: [0, 0, 1], skin: dirt, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
+        { cell: [0, 0, 0], skin: { side: dirt, top: grass } },
+        { cell: [1, 0, 0], skin: dirt, from: 3, to: 9 }, // visible from 3s until 9s
+        { cell: [0, 0, 1], skin: dirt, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
       ],
     })}
   </g>
@@ -36,7 +36,7 @@ const island = (
 const flyer = sampled((t) => view.project([2, 3 - t, 1]), { duration: 3, tolerance: { translate: 0.5 } }); // a free point
 ```
 
-- Coordinates are whole cells, `y` up. The cube spans `at` to `at + 1`.
+- Coordinates are whole cells, `y` up. The cube spans `cell` to `cell + 1`.
 - `yaw` turns about `y`; 45 looks from +x +z. `pitch` is between 0 and 90 exclusive: 30 is the 2:1 pixel-art look, 35.264 is true isometric.
 - A texture is pixel art. Each line is a row and each character a palette key. A `null` palette value is a transparent pixel. Colors are `#rgb`, `#rrggbb` or `#rrggbbaa`.
 - A skin is one texture for every face, or `{ side, top?, north?, south?, east?, west? }`, where a missing face falls back to `side`.

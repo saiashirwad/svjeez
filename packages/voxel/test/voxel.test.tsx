@@ -13,8 +13,8 @@ const build = (blocks: readonly VoxelBlock[]) =>
     voxel.scene({ camera, blocks }),
   );
 
-const place = (at: Vec3, extra: Partial<VoxelBlock> = {}): VoxelBlock => ({
-  at,
+const place = (cell: Vec3, extra: Partial<Omit<VoxelBlock, "cell" | "at">> = {}): VoxelBlock => ({
+  cell,
   skin: red,
   ...extra,
 });
@@ -75,7 +75,7 @@ describe("voxel.scene", () => {
     ];
 
     const depth = (cell: Vec3) => cell[0] + cell[1] + cell[2];
-    const order = uses(build(cells.map((at) => place(at)))).map(cellAt(cells));
+    const order = uses(build(cells.map((cell) => place(cell)))).map(cellAt(cells));
     expect(order.map((cell) => depth(cell!))).toEqual(cells.map(depth).sort((a, b) => a - b));
   });
 
@@ -124,7 +124,7 @@ describe("voxel.scene", () => {
           [0, 1, 0],
           [0, 0, 1],
         ] as const
-      ).map((at) => place(at, { skin: green, ...extra }));
+      ).map((cell) => place(cell, { skin: green, ...extra }));
 
     const count = (covers: readonly VoxelBlock[]) => uses(build([hidden, ...covers])).length;
 
@@ -156,7 +156,7 @@ describe("voxel.scene", () => {
       Math.floor(i / 9),
     ]);
 
-    const shown = uses(build(cells.map((at) => place(at)))).map(cellAt(cells));
+    const shown = uses(build(cells.map((cell) => place(cell)))).map(cellAt(cells));
     expect(shown.length).toBe(19);
     expect(shown.every((cell) => cell!.some((axis) => axis === 2))).toBe(true);
   });
@@ -178,8 +178,12 @@ describe("voxel.scene", () => {
   });
 
   test("a skin names a face and the rest fall back to its side", () => {
-    const svg = build([{ at: [0, 0, 0], skin: { side: red, top: green } }]);
+    const svg = build([{ cell: [0, 0, 0], skin: { side: red, top: green } }]);
     expect(topColor(svg, uses(svg)[0]!.href)).toBe("#00ff00");
+  });
+
+  test("a block still takes at, the name from before 0.7, for cell", () => {
+    expect(build([{ at: [1, 0, 2], skin: red }])).toBe(build([{ cell: [1, 0, 2], skin: red }]));
   });
 
   test("output is byte-identical across runs", () => {

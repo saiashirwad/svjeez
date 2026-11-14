@@ -66,7 +66,7 @@ export const dataShot = ({ at }: Span) => {
       const from = grow + i * STEP + h * 0.06;
 
       return {
-        at: [i * 2, h, 0] as const,
+        cell: [i * 2, h, 0] as const,
         skin: i === heights.length - 1 ? ember : stone,
         from,
         animation: enter({ at: from, over: 0.35 }, { y: -26 }, ease.pop),

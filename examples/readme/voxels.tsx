@@ -41,10 +41,10 @@ export default function build(): string {
         {voxel.scene({
           camera: view,
           blocks: [
-            { at: [0, 0, 0], skin: { side: dirt, top: grass } },
-            { at: [1, 0, 0], skin: dirt, from: 3, to: 9 },
+            { cell: [0, 0, 0], skin: { side: dirt, top: grass } },
+            { cell: [1, 0, 0], skin: dirt, from: 3, to: 9 },
             {
-              at: [0, 0, 1],
+              cell: [0, 0, 1],
               skin: { side: dirt, top: grass },
               from: 1,
               animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop),

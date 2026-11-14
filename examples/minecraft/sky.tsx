@@ -213,7 +213,7 @@ export function Clouds(): SvgNode {
             {voxel.scene({
               camera: CAMERA,
               blocks: cells.map(([a, b]) => ({
-                at: [x0 + a, SKY_HEIGHT, z0 + b] as const,
+                cell: [x0 + a, SKY_HEIGHT, z0 + b] as const,
                 skin: SKIN.cloud,
               })),
             })}

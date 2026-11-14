@@ -31,8 +31,8 @@ export default () =>
       {voxel.scene({
         camera: view,
         blocks: [
-          { at: [0, 0, 0], skin: dirt },
-          { at: [1, 0, 0], skin: dirt, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
+          { cell: [0, 0, 0], skin: dirt },
+          { cell: [1, 0, 0], skin: dirt, from: 1, animation: enter({ at: 1, over: 0.6 }, { y: -30 }, ease.pop) },
         ],
       })}
     </g>,

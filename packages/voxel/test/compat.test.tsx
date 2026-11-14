@@ -21,8 +21,8 @@ test("voxel scenes group blocks by cell without Map.groupBy", () => {
     voxel.scene({
       camera: view,
       blocks: [
-        { at: [0, 0, 0], skin },
-        { at: [0, 0, 0], skin },
+        { cell: [0, 0, 0], skin },
+        { cell: [0, 0, 0], skin },
       ],
     }),
   ).toBeDefined();
