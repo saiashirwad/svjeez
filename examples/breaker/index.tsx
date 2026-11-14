@@ -16,7 +16,7 @@ import {
   type CodePiece,
   type CodeTokens,
 } from "svjeez";
-import { flowchart, sequence, stateMachine } from "svjeez/extras";
+import { flowchart, sequence, stateMachine } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
 const W = 1280;

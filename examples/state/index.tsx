@@ -1,5 +1,5 @@
 import { render } from "svjeez";
-import { stateMachine } from "svjeez/extras";
+import { stateMachine } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
 const M = 40;

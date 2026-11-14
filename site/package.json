@@ -24,6 +24,7 @@
     "@svjeez/astro": "workspace:*",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
+    "@svjeez/diagrams": "workspace:*",
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/live": "workspace:*",

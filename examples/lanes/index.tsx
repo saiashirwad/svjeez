@@ -1,5 +1,5 @@
 import { render } from "svjeez";
-import { lanes } from "svjeez/extras";
+import { lanes } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
 const M = 40;

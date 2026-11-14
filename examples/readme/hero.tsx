@@ -20,7 +20,7 @@ import {
   type CodeRun,
   type CodeTokens,
 } from "svjeez";
-import { flowchart } from "svjeez/extras";
+import { flowchart } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
 const W = 960;

@@ -1,5 +1,5 @@
 import { render, travel } from "svjeez";
-import { tree } from "svjeez/extras";
+import { tree } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
 const M = 40;

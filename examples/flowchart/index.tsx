@@ -1,5 +1,5 @@
 import { render, flow } from "svjeez";
-import { flowchart } from "svjeez/extras";
+import { flowchart } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
 const M = 40;

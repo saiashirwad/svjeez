@@ -1,5 +1,5 @@
 import { render } from "svjeez";
-import { sequence } from "svjeez/extras";
+import { sequence } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./kit";
 import { theme } from "../style";
 

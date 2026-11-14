@@ -1,5 +1,5 @@
 import { render, travel } from "svjeez";
-import { sequence } from "svjeez/extras";
+import { sequence } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
 const M = 40;
