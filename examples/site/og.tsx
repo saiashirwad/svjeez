@@ -10,11 +10,12 @@ import {
   type Child,
   type Color,
 } from "svjeez";
+import { systemLight } from "svjeez";
 import { mono } from "../style";
 import { CHICK, GROUND, chick } from "./lib/chick";
 
 // Link-preview cards for the site, one per page, each starring the chick doing that page's job. Every card is a still
-// svjeez scene at 1200 by 630: a warm paper background, the title in big type on the left, a hand-lettered aside, and
+// svjeez scene at 1200 by 630 in the site's default palette: a white background, the title in big type on the left, a hand-lettered aside, and
 // the chick in its little set piece on the right.
 
 const W = 1200;
@@ -23,13 +24,13 @@ const display = await google("Inter Tight", { weight: 800 });
 const casual = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
 const pen = tool.pen({ size: 3.2, seed: 4 });
 
-const PAPER: Color = "#FFF6E3";
-const INK: Color = "#2A2733";
-const SOFT: Color = "#7A7280";
-const CORAL: Color = "#FF8C6B";
-const SKY: Color = "#CFE6EE";
-const GREEN: Color = "#7FBF8F";
-const BLUE: Color = "#5B8CFF";
+const PAPER: Color = systemLight.base00;
+const INK: Color = systemLight.base05;
+const SOFT: Color = systemLight.base04;
+const CORAL: Color = systemLight.base09;
+const SKY: Color = "#DCEBFF";
+const GREEN: Color = systemLight.base0B;
+const BLUE: Color = systemLight.base0D;
 
 /** The chick standing with its feet at x, y, `size` times the favicon, posed by the given still motions. */
 const Chick = ({
@@ -187,7 +188,7 @@ const SCENES: Record<Mood, { title: string; line: string; aside: string; art: ()
         <path d="M842 266L960 160V380Z" fill="#FFE58A" opacity={0.8} />
         <rect x={960} y={150} width={200} height={240} rx={16} fill={INK} />
         <path d="M1040 236L1092 270L1040 304Z" fill={CORAL} />
-        <text x={1060} y={366} textAnchor="middle" fontFamily={mono} fontSize={22} fill="#FFF6E3">
+        <text x={1060} y={366} textAnchor="middle" fontFamily={mono} fontSize={22} fill={PAPER}>
           1:00
         </text>
         <Chick x={800} y={420} size={1.25} look={{ x: 6, y: -4 }} />
@@ -253,7 +254,7 @@ const SCENES: Record<Mood, { title: string; line: string; aside: string; art: ()
                 height={200}
                 rx={14}
                 fill="#FFFFFF"
-                stroke="#E7DCC4"
+                stroke=systemLight.base02
                 strokeWidth={3}
               />
               {picture()}
@@ -333,7 +334,7 @@ const frame = (
       <rect width={W} height={H} fill={PAPER} />
       {Array.from({ length: 26 }, (_, i) =>
         Array.from({ length: 14 }, (_, j) => (
-          <circle cx={24 + i * 46} cy={24 + j * 46} r={1.6} fill="#E9DCC0" />
+          <circle cx={24 + i * 46} cy={24 + j * 46} r={1.6} fill=systemLight.base02 />
         )),
       )}
       <g transform="translate(72 64) scale(0.25) translate(-38 -30)">{chick({ feet: {} })}</g>
@@ -390,7 +391,7 @@ export const exampleCard = (title: string, png: string, ratio: number): string =
         height={h + 44}
         rx={16}
         fill="#FFFFFF"
-        stroke="#E7DCC4"
+        stroke=systemLight.base02
         strokeWidth={3}
       />
       {[0, 1, 2].map((i) => (
