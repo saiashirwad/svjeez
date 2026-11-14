@@ -1,7 +1,8 @@
-import { render, travel } from "svjeez";
+import { render, show } from "svjeez";
 import { tree } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
+import { GROUND, chick, hopAcross } from "./lib/chick";
 
 const W = 504;
 const H = 340;
@@ -38,7 +39,7 @@ export default function build(): string {
       height: H,
       duration: D,
       title: "A tree that grows",
-      desc: "An agent team revealed level by level: a lead, three workers and two children, then a dot runs between branches.",
+      desc: "An agent team revealed level by level: a lead, three workers and two children, then the svjeez chick hops across the tree from node to node.",
       css: CSS,
       reducedMotion: { at: D - 2 },
     },
@@ -46,11 +47,21 @@ export default function build(): string {
       {win.node}
       <g animation={outro(D)}>
         {team.node}
-        <circle
-          r={4.5}
-          fill={theme.base09}
-          animation={travel(team.route("a", "b"), { at: 3, speed: 170 })}
-        />
+        <g
+          animation={[
+            show({ at: 2.8, over: 3.9 }, { fade: 0.2 }),
+            ...hopAcross(
+              (["a", "search", "lead", "build", "b"] as const).map((id) => team.get(id).top),
+              3,
+              0.5,
+              0.25,
+            ).animation,
+          ]}
+        >
+          <g transform={`scale(0.2) translate(${-GROUND.x} ${-GROUND.y})`}>
+            {chick({ blinks: [4.2], feet: {} })}
+          </g>
+        </g>
       </g>
     </>,
   );

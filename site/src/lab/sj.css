@@ -1,6 +1,6 @@
 @import "@svjeez/live/editor.css";
 
-:where(.sj-code, .sj-picture, .sj-transport) {
+:where(.sj-code, .sj-picture, .sj-transport, .sj-stats) {
   --sj-bg: var(--win-bg);
   --sj-fg: var(--code-plain);
   --sj-muted: var(--muted);

@@ -13,8 +13,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @keyframes k1{0%,0.909%{opacity:0}5.455%,100%{opacity:1}}
 @keyframes k2{0%,0.909%{translate:0px 6px}5.455%,100%{translate:0px 0px}}
 .m1{animation-name:k1,k2}
-@keyframes k3{0%,19.091%,22.727%,100%{width:308.4px}}
-@keyframes k4{0%,19.091%,22.727%,100%{height:128.4px}}
+@keyframes k3{0%,19.091%,22.727%,100%{width:300px}}
+@keyframes k4{0%,19.091%,22.727%,100%{height:134.4px}}
 .m2{animation-name:k3,k4}
 @keyframes k5{0%,19.091%{translate:0px 0px}22.727%,100%{translate:0px 122.4px}}
 .m3{animation-name:k5}
@@ -132,7 +132,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
     </g>
     <g class="a m3">
-      <rect x="19" y="73.4" width="308.4" height="128.4" rx="6" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4" stroke-width="1" class="a m2"/>
+      <rect x="30.4" y="70.4" width="300" height="134.4" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2"/>
     </g>
     <g class="a m6">
       <rect x="20" y="376" width="318" height="130" rx="12" fill="var(--base01)"/>

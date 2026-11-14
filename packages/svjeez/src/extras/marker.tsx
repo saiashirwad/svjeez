@@ -38,12 +38,9 @@ export function Marker({
         y={first.y}
         width={first.w}
         height={first.h}
-        rx={6}
+        rx={8}
         fill={color}
-        fillOpacity={0.1}
-        stroke={color}
-        strokeOpacity={0.4}
-        strokeWidth={1}
+        fillOpacity={0.14}
         animation={size}
       />
     </g>

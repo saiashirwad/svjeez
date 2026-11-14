@@ -192,7 +192,7 @@ describe("reduced motion", () => {
     expect(svg).toContain(
       ".a{animation-delay:-4s!important;animation-play-state:paused!important}",
     );
-    const marker = /<rect [^>]*rx="6"[^>]*class="a (m\d+)"/;
+    const marker = /<rect [^>]*rx="8"[^>]*class="a (m\d+)"/;
     expect([
       frozen(svg, marker, "width", (4 / 6) * 100),
       frozen(svg, marker, "height", (4 / 6) * 100),

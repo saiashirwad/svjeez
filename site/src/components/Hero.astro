@@ -1,0 +1,15 @@
+---
+// The hero: one scene at the size it plays, and what it is, said with the real size of the file on screen.
+import { hero, heroImage, cueImage } from "../hero";
+import LiveScene from "./LiveScene.astro";
+---
+
+<section class="wrap hero">
+  <h1>This is a <span class="ul">{hero.size}</span> SVG in an <code>&lt;img&gt;</code> tag.</h1>
+  <div class="hero-stage">
+    <LiveScene class="hero-scene" scene={heroImage} cost={hero.cost} alt={hero.alt} />
+  </div>
+  <a class="hero-next" href="#play" aria-label="Play with svjeez">
+    <LiveScene class="cue" scene={cueImage} cost={6} alt="" />
+  </a>
+</section>

@@ -1,32 +1,25 @@
-// The hero and every variant its knobs can reach, compiled at build time. Only the default gets posters: it is the one
-// the page preloads and shows first, and the others hold their own still frame when they need one.
-import { getScene } from "@svjeez/astro/scene";
-import { KNOBS, VARIANTS } from "@examples/site/hero-knobs";
+// The hero scene, compiled at build time: its size is what the headline states, so it describes the file on screen.
+import scene from "@examples/site/hero.tsx";
+import cue from "@examples/site/cue.tsx";
 import { live } from "./live";
-import { facts, type FileFacts } from "./proof";
+import { facts, kb } from "./proof";
 
-export { KNOBS };
+// Main-thread milliseconds per second the scene costs while it plays, measured in headless Chromium at 1056px wide.
+const COST = 60;
 
-const [first, ...rest] = VARIANTS;
+/** The hero as the page's `LiveScene` takes it. */
+export const heroImage = live(scene);
 
-export const hero = { wide: live(first!.wide), tall: live(first!.tall) };
+/** The file's facts, for the page's tally. */
+export const heroFile = facts(heroImage);
 
-/** What the browser needs to swap the hero to a variant: its files and the alt text each describes itself with. */
-export interface HeroVariant {
-  readonly key: string;
-  readonly knobs: Readonly<Record<string, string>>;
-  readonly wide: FileFacts & { readonly alt: string };
-  readonly tall: FileFacts & { readonly alt: string };
-}
+export const hero = {
+  /** Gzipped size, as the headline states it. */
+  size: kb(heroImage.gzip),
+  src: heroImage.src,
+  alt: heroImage.desc || heroImage.title,
+  cost: COST,
+};
 
-const file = (scene: ReturnType<typeof getScene>) => ({ ...facts(scene), alt: scene.desc });
-
-export const variants: readonly HeroVariant[] = [
-  { key: first!.key, knobs: { ...first!.knobs }, wide: file(hero.wide), tall: file(hero.tall) },
-  ...rest.map((v) => ({
-    key: v.key,
-    knobs: { ...v.knobs },
-    wide: file(getScene(v.wide)),
-    tall: file(getScene(v.tall)),
-  })),
-];
+/** "play with svjeez", handwritten with the chick playing under it, on the way down to the editor. */
+export const cueImage = live(cue);

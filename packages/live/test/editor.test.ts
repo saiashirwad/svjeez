@@ -144,6 +144,38 @@ describe("update", () => {
     expect(failed.error?.message).toBe("boom");
   });
 
+  test("stats are the page's own until a compile measures the file, and a failed compile keeps them", () => {
+    const first = { src: "/a.svg", width: 200, height: 120, title: "t" };
+    const stats = { gzip: 900, keyframes: 12, scriptBytes: 0 };
+
+    const [measured] = init({ text: scene, first: { ...first, stats }, now: 0 });
+    expect(measured.stats).toEqual({ ...stats, ms: null });
+    expect(init({ text: scene, first, now: 0 })[0].stats).toBeNull();
+
+    const compiled = play(
+      [
+        {
+          type: "compiled",
+          text: scene,
+          result: ok("<svg/>", {
+            stats: { bytes: 5, gzip: 700, keyframes: 9, scriptBytes: 0 },
+            ms: 4.5,
+          }),
+          now: 0,
+        },
+        {
+          type: "compiled",
+          text: scene,
+          result: { ok: false, error: { kind: "runtime", message: "boom" }, ms: 1 },
+          now: 0,
+        },
+      ],
+      measured,
+    ).state;
+
+    expect(compiled.stats).toEqual({ gzip: 700, keyframes: 9, scriptBytes: 0, ms: 4.5 });
+  });
+
   test("a choice param becomes a control once a compile of the file declares it", () => {
     const before = play([]).state;
 

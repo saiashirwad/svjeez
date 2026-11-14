@@ -40,6 +40,18 @@ export interface Grip extends Move {
   readonly declared: boolean;
 }
 
+/** What the newest good compile measured about its file. */
+export interface Stats {
+  /** Bytes gzipped, as a browser sends it. */
+  readonly gzip: number;
+  /** How many `@keyframes` rules it holds. */
+  readonly keyframes: number;
+  /** Bytes of script inside it. Zero for every svjeez scene. */
+  readonly scriptBytes: number;
+  /** Milliseconds the compile took, or null for the stats of a picture built ahead of time. */
+  readonly ms: number | null;
+}
+
 /** The scene's clock. Playing, it read 0 at page time `origin`, in milliseconds; paused, it holds `at` seconds. */
 export type Clock =
   | { readonly playing: true; readonly origin: number }
@@ -60,6 +72,8 @@ export interface State {
   readonly picture: Picture | null;
   /** The newest good compile, which a play, pause or seek shows again. It runs ahead of `picture` while it decodes. */
   readonly compiled: CompiledFile | null;
+  /** What the newest good compile measured, or `first.stats` until there is one. */
+  readonly stats: Stats | null;
   /** The handles on the picture, by value key. */
   readonly grips: { readonly [key: string]: Grip };
   /** Why the newest compile failed, until one succeeds. The picture stays the last good one. */
@@ -166,6 +180,8 @@ export interface First {
   readonly height: number;
   readonly title: string;
   readonly duration?: number;
+  /** The file's size and keyframes, if the page measured them, so a readout has numbers before the first compile. */
+  readonly stats?: Omit<Stats, "ms">;
 }
 
 export interface Init {
@@ -192,6 +208,7 @@ export const init = ({ text, first, now }: Init): [State, Cmd[]] => [
         }
       : null,
     compiled: null,
+    stats: first?.stats ? { ...first.stats, ms: null } : null,
     grips: {},
     error: null,
     clock: { playing: true, origin: now },
@@ -413,6 +430,12 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
         grips: withDeclared(state.grips, declaredGrips(msg.text, handles)),
         error: null,
         compiled,
+        stats: {
+          gzip: msg.result.stats.gzip,
+          keyframes: msg.result.stats.keyframes,
+          scriptBytes: msg.result.stats.scriptBytes,
+          ms: msg.result.ms,
+        },
       });
 
       return [next, [showOf(compiled, state.clock, msg.now)]];

@@ -47,10 +47,10 @@ export const make = (tall = false): string => {
   const T0 = 0.9;
 
   const lit = [
-    { show: { at: T0 + 0.5, over: 0.6 }, target: src.lines(2, 3).pad(3) },
-    { show: { at: T0 + 1.1, over: 1.5 }, target: src.lines(4, 4).pad(3) },
-    { show: { at: T0 + 2.6, over: 0.5 }, target: src.lines(5, 5).pad(3) },
-    { show: { at: T0 + 3.1, over: 0.4 }, target: src.lines(6, 6).pad(3) },
+    { show: { at: T0 + 0.5, over: 0.6 }, target: src.lines(2, 3).pad(6) },
+    { show: { at: T0 + 1.1, over: 1.5 }, target: src.lines(4, 4).pad(6) },
+    { show: { at: T0 + 2.6, over: 0.5 }, target: src.lines(5, 5).pad(6) },
+    { show: { at: T0 + 3.1, over: 0.4 }, target: src.lines(6, 6).pad(6) },
   ];
 
   const D = Math.ceil(T0 + 3.5 + 2.2);

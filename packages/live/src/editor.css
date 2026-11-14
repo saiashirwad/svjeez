@@ -28,9 +28,12 @@
  *
  * Transport
  *   div.sj-transport > button.sj-play[data-playing], input.sj-scrub[type=range], output.sj-time
+ *
+ * Stats
+ *   p.sj-stats > span.sj-stat* > b, the value, then its label: gzipped size, keyframes, script and build time
  */
 
-:where(.sj-code, .sj-picture, .sj-transport) {
+:where(.sj-code, .sj-picture, .sj-transport, .sj-stats) {
   --_bg: var(--sj-bg, light-dark(oklch(98% 0.005 270), oklch(20% 0.012 270)));
   --_fg: var(--sj-fg, light-dark(oklch(28% 0.02 270), oklch(88% 0.01 270)));
   --_muted: var(--sj-muted, light-dark(oklch(52% 0.02 270), oklch(66% 0.02 270)));
@@ -442,30 +445,33 @@
   outline: none;
 }
 
+/* A grip is a bright knob in the accent color that pings now and then to say it can be dragged, grows under the
+   pointer, and squashes when it is grabbed. */
 .sj-grip::before {
   content: "";
   position: absolute;
-  inset: 0.5625rem;
+  inset: 0.5rem;
   border-radius: 50%;
-  background: oklch(20% 0.02 300 / 0.6);
+  background: var(--_accent);
   box-shadow:
-    inset 0 0 0 2px oklch(97% 0.01 300),
-    0 0 0 4px oklch(97% 0.01 300 / 0);
+    0 0 0 2.5px oklch(99% 0 0),
+    0 0.2rem 0.6rem oklch(0% 0 0 / 0.35);
 }
 
 .sj-grip:hover::before,
-.sj-grip:active::before,
 .sj-grip[data-selected]::before {
-  scale: 1.25;
-  box-shadow:
-    inset 0 0 0 2px oklch(97% 0.01 300),
-    0 0 0 4px oklch(97% 0.01 300 / 0.22);
+  scale: 1.3;
+}
+
+.sj-grip:active::before {
+  scale: 1.1 0.85;
 }
 
 .sj-grip[data-selected]::before {
   box-shadow:
-    inset 0 0 0 2px oklch(97% 0.01 300),
-    0 0 0 3px var(--_accent);
+    0 0 0 2.5px oklch(99% 0 0),
+    0 0 0 6px color-mix(in oklch, var(--_accent) 40%, transparent),
+    0 0.2rem 0.6rem oklch(0% 0 0 / 0.35);
 }
 
 /* A grip says what it holds while it is held or selected. */
@@ -485,6 +491,7 @@
   opacity: 0;
 }
 
+.sj-grip:hover::after,
 .sj-grip[data-selected]::after,
 .sj-grip:active::after {
   opacity: 1;
@@ -494,8 +501,37 @@
 @media (prefers-reduced-motion: no-preference) {
   .sj-grip::before {
     transition:
-      scale 0.15s var(--_out),
+      scale 0.25s cubic-bezier(0.34, 1.8, 0.64, 1),
       box-shadow 0.15s var(--_out);
+    animation: sj-ping 2.4s var(--_out) infinite;
+  }
+
+  /* Grips take turns to ping, and stop once one is in hand. */
+  .sj-grip:nth-of-type(2n)::before {
+    animation-delay: 1.2s;
+  }
+
+  .sj-grip:hover::before,
+  .sj-grip:active::before,
+  .sj-grip[data-selected]::before {
+    animation: none;
+  }
+
+  @keyframes sj-ping {
+    0%,
+    55% {
+      box-shadow:
+        0 0 0 2.5px oklch(99% 0 0),
+        0 0 0 2.5px color-mix(in oklch, var(--_accent) 70%, transparent),
+        0 0.2rem 0.6rem oklch(0% 0 0 / 0.35);
+    }
+
+    100% {
+      box-shadow:
+        0 0 0 2.5px oklch(99% 0 0),
+        0 0 0 16px color-mix(in oklch, var(--_accent) 0%, transparent),
+        0 0.2rem 0.6rem oklch(0% 0 0 / 0.35);
+    }
   }
 
   .sj-grip::after {
@@ -519,34 +555,133 @@
   display: grid;
   place-items: center;
   flex: none;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
+  inline-size: 2rem;
+  block-size: 2rem;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: var(--_accent);
   color: var(--_bg);
+  box-shadow: 0 0.25rem 0.75rem -0.25rem var(--_accent);
   cursor: pointer;
+  transition: scale 0.15s var(--_out);
+}
+
+.sj-play:hover {
+  scale: 1.06;
 }
 
 .sj-play:active {
-  scale: 0.94;
+  scale: 0.92;
 }
 
 .sj-play svg {
-  inline-size: 1rem;
-  block-size: 1rem;
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
   fill: currentColor;
 }
 
+/* A thin track filled up to the playhead (--sj-p, set by the component), and a small round thumb that grows when held. */
 .sj-scrub {
+  --_track: 0.25rem;
+  --_thumb: 0.875rem;
   flex: 1;
   min-inline-size: 0;
-  accent-color: var(--_accent);
+  block-size: 1.5rem;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+
+.sj-scrub::-webkit-slider-runnable-track {
+  block-size: var(--_track);
+  border-radius: var(--_track);
+  background: linear-gradient(
+    to right,
+    var(--_accent) var(--sj-p, 0%),
+    var(--_line) var(--sj-p, 0%)
+  );
+}
+
+.sj-scrub::-moz-range-track {
+  block-size: var(--_track);
+  border-radius: var(--_track);
+  background: var(--_line);
+}
+
+.sj-scrub::-moz-range-progress {
+  block-size: var(--_track);
+  border-radius: var(--_track);
+  background: var(--_accent);
+}
+
+.sj-scrub::-webkit-slider-thumb {
+  inline-size: var(--_thumb);
+  block-size: var(--_thumb);
+  margin-block-start: calc((var(--_track) - var(--_thumb)) / 2);
+  border: 0;
+  border-radius: 50%;
+  background: var(--_bg);
+  box-shadow:
+    0 0 0 0.125rem var(--_accent),
+    0 0.125rem 0.375rem oklch(0% 0 0 / 0.25);
+  appearance: none;
+  transition: scale 0.15s var(--_out);
+}
+
+.sj-scrub::-moz-range-thumb {
+  inline-size: var(--_thumb);
+  block-size: var(--_thumb);
+  border: 0;
+  border-radius: 50%;
+  background: var(--_bg);
+  box-shadow:
+    0 0 0 0.125rem var(--_accent),
+    0 0.125rem 0.375rem oklch(0% 0 0 / 0.25);
+  transition: scale 0.15s var(--_out);
+}
+
+.sj-scrub:hover::-webkit-slider-thumb {
+  scale: 1.15;
+}
+
+.sj-scrub:active::-webkit-slider-thumb {
+  scale: 1.3;
+}
+
+.sj-scrub:hover::-moz-range-thumb {
+  scale: 1.15;
+}
+
+.sj-scrub:active::-moz-range-thumb {
+  scale: 1.3;
+}
+
+.sj-scrub:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .sj-time {
   min-inline-size: 7ch;
   text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- stats */
+
+.sj-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  margin: 0;
+  font: 0.78rem var(--_mono);
+  color: var(--_muted);
+}
+
+.sj-stat b {
+  color: var(--_fg);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

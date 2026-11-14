@@ -234,7 +234,8 @@ export const drawNode = (
       <path
         d={`M${b.x + 8} ${b.y}V${b.y + b.h}M${b.x + b.w - 8} ${b.y}V${b.y + b.h}`}
         stroke={tint}
-        strokeOpacity={0.7}
+        strokeOpacity={0.5}
+        strokeWidth={1.5}
         fill="none"
       />
     ) : role === "store" ? (
@@ -248,14 +249,7 @@ export const drawNode = (
   return (
     <g animation={animation}>
       <path d={outline(role, b)} fill={theme.base00} />
-      <path
-        d={outline(role, b)}
-        fill={tint}
-        fillOpacity={0.14}
-        stroke={tint}
-        strokeWidth={1.5}
-        strokeLinejoin="round"
-      />
+      <path d={outline(role, b)} fill={tint} fillOpacity={0.2} />
       {details}
       {extra}
       <text
@@ -263,6 +257,7 @@ export const drawNode = (
         y={b.y + b.h / 2 + (role === "store" ? LID / 2 : 0) + fontSize * 0.35}
         fontSize={fontSize}
         textAnchor="middle"
+        fontWeight={600}
         fill={theme.base05}
       >
         {label}

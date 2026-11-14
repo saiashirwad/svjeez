@@ -36,19 +36,19 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <path d="M272.3299999999999 70V248.47" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
     <g>
       <path d="M32 29H75.8Q83.8 29 83.8 37V57Q83.8 65 75.8 65H32Q24 65 24 57V37Q24 29 32 29Z" fill="var(--base00)"/>
-      <path d="M32 29H75.8Q83.8 29 83.8 37V57Q83.8 65 75.8 65H32Q24 65 24 57V37Q24 29 32 29Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="53.9" y="51.55" font-size="13" text-anchor="middle" fill="var(--base05)">User</text>
+      <path d="M32 29H75.8Q83.8 29 83.8 37V57Q83.8 65 75.8 65H32Q24 65 24 57V37Q24 29 32 29Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="53.9" y="51.55" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">User</text>
     </g>
     <g>
       <path d="M150.82999999999996 29H186.82999999999996Q194.82999999999996 29 194.82999999999996 37V57Q194.82999999999996 65 186.82999999999996 65H150.82999999999996Q142.82999999999996 65 142.82999999999996 57V37Q142.82999999999996 29 150.82999999999996 29Z" fill="var(--base00)"/>
-      <path d="M150.82999999999996 29H186.82999999999996Q194.82999999999996 29 194.82999999999996 37V57Q194.82999999999996 65 186.82999999999996 65H150.82999999999996Q142.82999999999996 65 142.82999999999996 57V37Q142.82999999999996 29 150.82999999999996 29Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="168.83" y="51.55" font-size="13" text-anchor="middle" fill="var(--base05)">API</text>
+      <path d="M150.82999999999996 29H186.82999999999996Q194.82999999999996 29 194.82999999999996 37V57Q194.82999999999996 65 186.82999999999996 65H150.82999999999996Q142.82999999999996 65 142.82999999999996 57V37Q142.82999999999996 29 150.82999999999996 29Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="168.83" y="51.55" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">API</text>
     </g>
     <g>
       <path d="M226.82999999999996 29A45.5 5 0 0 1 317.8299999999999 29V65A45.5 5 0 0 1 226.82999999999996 65Z" fill="var(--base00)"/>
-      <path d="M226.82999999999996 29A45.5 5 0 0 1 317.8299999999999 29V65A45.5 5 0 0 1 226.82999999999996 65Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M226.82999999999996 29A45.5 5 0 0 1 317.8299999999999 29V65A45.5 5 0 0 1 226.82999999999996 65Z" fill="var(--base0E)" fill-opacity="0.2"/>
       <path d="M226.82999999999996 29A45.5 5 0 0 0 317.8299999999999 29" stroke="var(--base0E)" fill="none"/>
-      <text x="272.33" y="54.05" font-size="13" text-anchor="middle" fill="var(--base05)">Postgres</text>
+      <text x="272.33" y="54.05" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Postgres</text>
     </g>
     <g>
       <g>

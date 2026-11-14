@@ -104,51 +104,51 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g>
       <path d="M341.03999999999996 40H469.49L455.84000000000003 79H327.39Z" fill="var(--base00)"/>
-      <path d="M341.03999999999996 40H469.49L455.84000000000003 79H327.39Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="398.44" y="64.4" font-size="14" text-anchor="middle" fill="var(--base05)">TH-01 lead</text>
+      <path d="M341.03999999999996 40H469.49L455.84000000000003 79H327.39Z" fill="var(--base0B)" fill-opacity="0.2"/>
+      <text x="398.44" y="64.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-01 lead</text>
     </g>
     <g class="a m17">
       <path d="M102.5 130.5H234.90000000000003Q242.90000000000003 130.5 242.90000000000003 138.5V161.5Q242.90000000000003 169.5 234.90000000000003 169.5H102.5Q94.5 169.5 94.5 161.5V138.5Q94.5 130.5 102.5 130.5Z" fill="var(--base00)"/>
-      <path d="M102.5 130.5H234.90000000000003Q242.90000000000003 130.5 242.90000000000003 138.5V161.5Q242.90000000000003 169.5 234.90000000000003 169.5H102.5Q94.5 169.5 94.5 161.5V138.5Q94.5 130.5 102.5 130.5Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="168.7" y="154.9" font-size="14" text-anchor="middle" fill="var(--base05)">TH-02 research</text>
+      <path d="M102.5 130.5H234.90000000000003Q242.90000000000003 130.5 242.90000000000003 138.5V161.5Q242.90000000000003 169.5 234.90000000000003 169.5H102.5Q94.5 169.5 94.5 161.5V138.5Q94.5 130.5 102.5 130.5Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="168.7" y="154.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-02 research</text>
     </g>
     <g class="a m18">
       <path d="M387.9 130.5H495.1Q503.1 130.5 503.1 138.5V161.5Q503.1 169.5 495.1 169.5H387.9Q379.9 169.5 379.9 161.5V138.5Q379.9 130.5 387.9 130.5Z" fill="var(--base00)"/>
-      <path d="M387.9 130.5H495.1Q503.1 130.5 503.1 138.5V161.5Q503.1 169.5 495.1 169.5H387.9Q379.9 169.5 379.9 161.5V138.5Q379.9 130.5 387.9 130.5Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="441.5" y="154.9" font-size="14" text-anchor="middle" fill="var(--base05)">TH-03 build</text>
+      <path d="M387.9 130.5H495.1Q503.1 130.5 503.1 138.5V161.5Q503.1 169.5 495.1 169.5H387.9Q379.9 169.5 379.9 161.5V138.5Q379.9 130.5 387.9 130.5Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="441.5" y="154.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-03 build</text>
     </g>
     <g class="a m19">
       <path d="M628.1800000000001 119L729.26 150L628.1800000000001 181L527.1 150Z" fill="var(--base00)"/>
-      <path d="M628.1800000000001 119L729.26 150L628.1800000000001 181L527.1 150Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="628.18" y="154.9" font-size="14" text-anchor="middle" fill="var(--base05)">TH-04 review</text>
+      <path d="M628.1800000000001 119L729.26 150L628.1800000000001 181L527.1 150Z" fill="var(--base0A)" fill-opacity="0.2"/>
+      <text x="628.18" y="154.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-04 review</text>
     </g>
     <g class="a m20">
       <path d="M40 226A57.400000000000006 5 0 0 1 154.8 226V265A57.400000000000006 5 0 0 1 40 265Z" fill="var(--base00)"/>
-      <path d="M40 226A57.400000000000006 5 0 0 1 154.8 226V265A57.400000000000006 5 0 0 1 40 265Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M40 226A57.400000000000006 5 0 0 1 154.8 226V265A57.400000000000006 5 0 0 1 40 265Z" fill="var(--base0E)" fill-opacity="0.2"/>
       <path d="M40 226A57.400000000000006 5 0 0 0 154.8 226" stroke="var(--base0E)" fill="none"/>
-      <text x="97.4" y="252.9" font-size="14" text-anchor="middle" fill="var(--base05)">TH-05 docs</text>
+      <text x="97.4" y="252.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-05 docs</text>
     </g>
     <g class="a m21">
       <path d="M181.80000000000004 226H298.20000000000005Q301.20000000000005 226 301.20000000000005 229V262Q301.20000000000005 265 298.20000000000005 265H181.80000000000004Q178.80000000000004 265 178.80000000000004 262V229Q178.80000000000004 226 181.80000000000004 226Z" fill="var(--base00)"/>
-      <path d="M181.80000000000004 226H298.20000000000005Q301.20000000000005 226 301.20000000000005 229V262Q301.20000000000005 265 298.20000000000005 265H181.80000000000004Q178.80000000000004 265 178.80000000000004 262V229Q178.80000000000004 226 181.80000000000004 226Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M186.80000000000004 226V265M293.20000000000005 226V265" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="240" y="250.4" font-size="14" text-anchor="middle" fill="var(--base05)">TH-06 web</text>
+      <path d="M181.80000000000004 226H298.20000000000005Q301.20000000000005 226 301.20000000000005 229V262Q301.20000000000005 265 298.20000000000005 265H181.80000000000004Q178.80000000000004 265 178.80000000000004 262V229Q178.80000000000004 226 181.80000000000004 226Z" fill="var(--base08)" fill-opacity="0.2"/>
+      <path d="M186.80000000000004 226V265M293.20000000000005 226V265" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+      <text x="240" y="250.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-06 web</text>
     </g>
     <g class="a m22">
       <path d="M333.20000000000005 226H423.6Q431.6 226 431.6 234V257Q431.6 265 423.6 265H333.20000000000005Q325.20000000000005 265 325.20000000000005 257V234Q325.20000000000005 226 333.20000000000005 226Z" fill="var(--base00)"/>
-      <path d="M333.20000000000005 226H423.6Q431.6 226 431.6 234V257Q431.6 265 423.6 265H333.20000000000005Q325.20000000000005 265 325.20000000000005 257V234Q325.20000000000005 226 333.20000000000005 226Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="378.4" y="250.4" font-size="14" text-anchor="middle" fill="var(--base05)">TH-07 api</text>
+      <path d="M333.20000000000005 226H423.6Q431.6 226 431.6 234V257Q431.6 265 423.6 265H333.20000000000005Q325.20000000000005 265 325.20000000000005 257V234Q325.20000000000005 226 333.20000000000005 226Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="378.4" y="250.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-07 api</text>
     </g>
     <g class="a m23">
       <path d="M463.6 226H545.6Q553.6 226 553.6 234V257Q553.6 265 545.6 265H463.6Q455.6 265 455.6 257V234Q455.6 226 463.6 226Z" fill="var(--base00)"/>
-      <path d="M463.6 226H545.6Q553.6 226 553.6 234V257Q553.6 265 545.6 265H463.6Q455.6 265 455.6 257V234Q455.6 226 463.6 226Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="504.6" y="250.4" font-size="14" text-anchor="middle" fill="var(--base05)">TH-08 ui</text>
+      <path d="M463.6 226H545.6Q553.6 226 553.6 234V257Q553.6 265 545.6 265H463.6Q455.6 265 455.6 257V234Q455.6 226 463.6 226Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="504.6" y="250.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-08 ui</text>
     </g>
     <g class="a m24">
       <path d="M438 310H571.2Q574.2 310 574.2 313V346Q574.2 349 571.2 349H438Q435 349 435 346V313Q435 310 438 310Z" fill="var(--base00)"/>
-      <path d="M438 310H571.2Q574.2 310 574.2 313V346Q574.2 349 571.2 349H438Q435 349 435 346V313Q435 310 438 310Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M443 310V349M566.2 310V349" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="504.6" y="334.4" font-size="14" text-anchor="middle" fill="var(--base05)">TH-09 tests</text>
+      <path d="M438 310H571.2Q574.2 310 574.2 313V346Q574.2 349 571.2 349H438Q435 349 435 346V313Q435 310 438 310Z" fill="var(--base08)" fill-opacity="0.2"/>
+      <path d="M443 310V349M566.2 310V349" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+      <text x="504.6" y="334.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">TH-09 tests</text>
     </g>
   </g>
   <circle r="5" fill="var(--base09)" class="a m25"/>

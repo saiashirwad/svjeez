@@ -38,18 +38,18 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
     <g>
       <path d="M87.55000000000001 24H131.35000000000002Q139.35000000000002 24 139.35000000000002 32V52Q139.35000000000002 60 131.35000000000002 60H87.55000000000001Q79.55000000000001 60 79.55000000000001 52V32Q79.55000000000001 24 87.55000000000001 24Z" fill="var(--base00)"/>
-      <path d="M87.55000000000001 24H131.35000000000002Q139.35000000000002 24 139.35000000000002 32V52Q139.35000000000002 60 131.35000000000002 60H87.55000000000001Q79.55000000000001 60 79.55000000000001 52V32Q79.55000000000001 24 87.55000000000001 24Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="109.45" y="46.55" font-size="13" text-anchor="middle" fill="var(--base05)">Lead</text>
+      <path d="M87.55000000000001 24H131.35000000000002Q139.35000000000002 24 139.35000000000002 32V52Q139.35000000000002 60 131.35000000000002 60H87.55000000000001Q79.55000000000001 60 79.55000000000001 52V32Q79.55000000000001 24 87.55000000000001 24Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="109.45" y="46.55" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Lead</text>
     </g>
     <g class="a m5">
       <path d="M32 100H91.4Q99.4 100 99.4 108V128Q99.4 136 91.4 136H32Q24 136 24 128V108Q24 100 32 100Z" fill="var(--base00)"/>
-      <path d="M32 100H91.4Q99.4 100 99.4 108V128Q99.4 136 91.4 136H32Q24 136 24 128V108Q24 100 32 100Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="61.7" y="122.55" font-size="13" text-anchor="middle" fill="var(--base05)">Search</text>
+      <path d="M32 100H91.4Q99.4 100 99.4 108V128Q99.4 136 91.4 136H32Q24 136 24 128V108Q24 100 32 100Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="61.7" y="122.55" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Search</text>
     </g>
     <g class="a m6">
       <path d="M131.39999999999998 100H183Q191 100 191 108V128Q191 136 183 136H131.39999999999998Q123.39999999999999 136 123.39999999999999 128V108Q123.39999999999999 100 131.39999999999998 100Z" fill="var(--base00)"/>
-      <path d="M131.39999999999998 100H183Q191 100 191 108V128Q191 136 183 136H131.39999999999998Q123.39999999999999 136 123.39999999999999 128V108Q123.39999999999999 100 131.39999999999998 100Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="157.2" y="122.55" font-size="13" text-anchor="middle" fill="var(--base05)">Build</text>
+      <path d="M131.39999999999998 100H183Q191 100 191 108V128Q191 136 183 136H131.39999999999998Q123.39999999999999 136 123.39999999999999 128V108Q123.39999999999999 100 131.39999999999998 100Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="157.2" y="122.55" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Build</text>
     </g>
   </g>
   <circle r="4" fill="var(--base09)" class="a m7"/>

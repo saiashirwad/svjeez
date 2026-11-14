@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
-import { Code, Picture, Transport, useEditor } from "../src/index.ts";
+import { Code, Picture, Stats, Transport, useEditor } from "../src/index.ts";
 
 const scene = `import { render } from "svjeez";
 export default () => render({ width: 400, height: 240, duration: 2, title: "Dot" }, <circle cx={120} r={30} fill="#FF5D8F" />);
@@ -38,5 +38,25 @@ describe("rendering on a server", () => {
     expect(html).toContain('<header class="sj-file">scene.tsx</header>');
     expect(html).toContain('<figure class="sj-picture"></figure>');
     expect(compiled).toEqual([]);
+  });
+
+  test("reads the page's own stats until a compile has measured the file", () => {
+    const first = {
+      src: "/dot.svg",
+      width: 400,
+      height: 240,
+      title: "Dot",
+      stats: { gzip: 38000, keyframes: 12, scriptBytes: 0 },
+    };
+
+    const Page = () => (
+      <Stats
+        editor={useEditor(scene, { first, effects: { compile: () => new Promise(() => {}) } })}
+      />
+    );
+
+    expect(renderToString(<Page />)).toBe(
+      '<p class="sj-stats"><span class="sj-stat"><b>37 KB</b> gzip</span><span class="sj-stat"><b>12</b> keyframes</span><span class="sj-stat"><b>0 B</b> JS</span></p>',
+    );
   });
 });

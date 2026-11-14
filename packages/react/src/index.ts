@@ -8,4 +8,6 @@ export { Control } from "./Control.tsx";
 
 export { Picture } from "./Picture.tsx";
 
+export { Stats } from "./Stats.tsx";
+
 export { Transport } from "./Transport.tsx";

@@ -105,7 +105,7 @@ const src = code(
 const aim = [src.get("call"), src.find("total"), src.lines(1, 2), src.at(2, 8)]; // Rects, and a Point
 ```
 
-`get(id)` is the bounds of every run with that id. `find(text, nth?)` the first match. `lines(first, last?)` is a row range. `at(line, column)` is a point. All are 1-based and throw when out of range. Rects have `x y w h`, edge midpoints (`top`, `center`), `pad(n)`, `union(r)` and `side(edge, t)`. The `font` option must be monospaced.
+`get(id)` is the bounds of every run with that id. `find(text, nth?)` the first match. `lines(first, last?)` is a row range, from the lines' shared indent to the end of the longest, so a box around it hugs the code. `at(line, column)` is a point. All are 1-based and throw when out of range. Rects have `x y w h`, edge midpoints (`top`, `center`), `pad(n)`, `union(r)` and `side(edge, t)`. The `font` option must be monospaced.
 
 ## Timeline
 
@@ -164,7 +164,7 @@ const notes = (
 ```
 
 - `Focus` dims its children except the stop's rects. A stop's `target` may be a list of rects.
-- `Marker` is a box that glides between stops.
+- `Marker` is a soft rounded box that glides between stops. Give its targets room, such as `src.lines(4).pad(6)`.
 - `Callout` takes text as children, wrapped at `columns` characters, on any `side`. With `font` it sizes by measuring.
 - `Brace` takes `side` `"left"`, `"right"`, `"above"` or `"below"`. The last two run along the top or bottom of the target, which suits a term of an equation.
 - `Underline` has `variant` `"straight"` or `"squiggle"`.

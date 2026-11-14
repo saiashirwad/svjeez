@@ -21,10 +21,10 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m2{animation-name:k1}
 @keyframes k2{0%,20.988%,41.564%,100%{opacity:0}22.222%,40.329%{opacity:1}}
 .m3{animation-name:k2}
-@keyframes k3{0%,20.988%,95.885%,100%{width:394px}22.634%,44.033%{width:190.4px}45.679%,67.078%{width:219.2px}68.724%,94.239%{width:152px}}
+@keyframes k3{0%,20.988%,95.885%,100%{width:374.8px}22.634%,44.033%{width:190.4px}45.679%,67.078%{width:219.2px}68.724%,94.239%{width:152px}}
 @keyframes k4{0%,20.988%,95.885%,100%{height:38px}22.634%,44.033%,45.679%,67.078%,68.724%,94.239%{height:36px}}
 .m4{animation-name:k3,k4}
-@keyframes k5{0%,20.988%,95.885%,100%{translate:0px 0px}22.634%,44.033%,68.724%,94.239%{translate:260.2px 85px}45.679%,67.078%{translate:269.8px 1px}}
+@keyframes k5{0%,20.988%,95.885%,100%{translate:0px 0px}22.634%,44.033%,68.724%,94.239%{translate:241px 85px}45.679%,67.078%{translate:250.6px 1px}}
 .m5{animation-name:k5}
 @keyframes k6{0%,100%{visibility:visible}}
 .m6{animation-name:k6}
@@ -114,7 +114,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   </g>
   <g mask="url(#m1)">
     <g class="a m5">
-      <rect x="99" y="131" width="394" height="38" rx="6" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4" stroke-width="1" class="a m4"/>
+      <rect x="118.2" y="131" width="374.8" height="38" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m4"/>
     </g>
     <g>
       <text x="84.8" y="127.6" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="16" fill="var(--base03)" class="a m6">1</text>

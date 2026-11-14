@@ -1,6 +1,5 @@
 ---
 import { Code } from "astro:components";
-import { getScene } from "@svjeez/astro/scene";
 import agents from "@examples/site/agents.tsx";
 import agentsTall from "@examples/site/agents-tall.tsx";
 import breaker from "@examples/breaker/index.tsx";
@@ -12,7 +11,6 @@ import geo from "@examples/site/geo.tsx";
 import handshake from "@examples/site/handshake.tsx";
 import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
-import likeThis from "@examples/site/like-this.tsx";
 import math from "@examples/site/math.tsx";
 import mathFourier from "@examples/site/math-fourier.tsx";
 import nojsx from "@examples/site/nojsx.tsx";
@@ -23,25 +21,22 @@ import recording from "@examples/site/recording.tsx";
 import team from "@examples/site/team.tsx";
 import timeline from "@examples/site/timeline.tsx";
 import timelineTall from "@examples/site/timeline-tall.tsx";
-import toast from "@examples/site/toast.tsx";
-import toastSource from "@examples/site/toast.tsx?raw";
 import whereDocs from "@examples/site/where-docs.tsx";
 import whereMail from "@examples/site/where-mail.tsx";
 import whereReadme from "@examples/site/where-readme.tsx";
 import DayNight from "../components/DayNight.astro";
-import HeroDemo from "../components/HeroDemo.astro";
-import Install from "../components/Install.astro";
+import Hero from "../components/Hero.astro";
 import LiveScene from "../components/LiveScene.astro";
-import Playground from "../components/Playground.astro";
 import Base from "../layouts/Base.astro";
-import { hero, variants } from "../hero";
+import { hero, heroFile } from "../hero";
 import { live } from "../live";
+import Editor from "../landing/Editor.svelte";
+import { first } from "../landing/first";
 import { facts, type FileFacts } from "../proof";
 import { REPO } from "../examples";
 import { shikiTheme } from "../styles/code";
 
 const s = {
-  toast: live(toast),
   timeline: live(timeline),
   timelineTall: live(timelineTall),
   pipeline: live(pipeline),
@@ -57,9 +52,6 @@ const s = {
   whereDocs: live(whereDocs),
   whereMail: live(whereMail),
 };
-
-// The note beside the hero plays once and holds, so it needs no poster or play budget.
-const like = getScene(likeThis);
 
 const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
 
@@ -163,21 +155,17 @@ const start = `npm i svjeez
 npx svjeez frames scene.tsx --sheet
 npx svjeez svg scene.tsx --out scene.svg`;
 
-// Every file this page shows as an <img>, counted once each: the scenes, their phone cuts, the wall, the note beside
-// the hero, and all of the hero's variants, played or not.
+// Every file this page shows as an <img>, counted once each: the scenes, their phone cuts, the wall and the hero.
 const files = new Map<string, FileFacts>(
   [
     ...Object.values(s),
     ...tiles.map((tile) => tile.scene),
     strip.wide,
     strip.tall,
-    like,
-    hero.wide,
-    hero.tall,
   ].map((scene) => [scene.src, facts(scene)]),
 );
 
-for (const variant of variants) for (const file of [variant.wide, variant.tall]) files.set(file.src, file);
+files.set(heroFile.src, heroFile);
 
 const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, file) => sum + file[field], 0);
 ---
@@ -192,35 +180,13 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
   }}
   class="home"
 >
-  <link slot="head" rel="preload" as="image" href={hero.wide.src} media="(prefers-reduced-motion: no-preference) and (min-width: 64rem)" />
-  <link slot="head" rel="preload" as="image" href={hero.tall.src} media="(prefers-reduced-motion: no-preference) and (max-width: 63.99rem)" />
+  <link slot="head" rel="preload" as="image" href={hero.src} media="(prefers-reduced-motion: no-preference)" />
   <main>
-    <div class="lead">
-      <section class="wrap hero g">
-        <h1 class="c1-12">Animated <span class="ul">SVGs</span>, written in TypeScript.</h1>
-        <p class="lede c1-12">Build diagrams, code walkthroughs, charts and more. <span>Ship one SVG file, <strong>zero runtime JavaScript</strong>.</span></p>
-        <div class="cta c1-12"><Install command="npm i svjeez" /></div>
-        <img class="like" src={like.src} width={like.width} height={like.height} alt="" />
-      </section>
+    <Hero />
 
-      <div class="wrap hero-demo">
-        <HeroDemo />
-      </div>
-    </div>
-
-    <section class="wrap sec g" id="play">
-      <h2 class="c1-8"><a class="anchor" href="#play">Try it yourself.</a></h2>
-      <p class="sub c1-8">Edit a scene and the SVG recompiles in your browser. Charts, equations, icons, maps and Mermaid load their packages as you need them.</p>
-      <div class="playground c1-12">
-        <div class="pg-fallback win" aria-hidden="false">
-          <div class="pg-bar"><span class="dots"><i></i><i></i><i></i></span><b>toast.tsx</b></div>
-          <div class="pg-body">
-            <Code class="code" code={toastSource.trimEnd()} lang="tsx" theme={shikiTheme} />
-            <div class="pg-view"><LiveScene scene={s.toast} cost={6} alt="A toast slides up, a check mark draws itself inside a green dot, and the words Changes saved appear." /></div>
-          </div>
-        </div>
-        <Playground initial="toast" />
-      </div>
+    <section class="wrap sec" id="play">
+      <Editor client:visible first={first} />
+      <p class="playlink"><a href="/play">Open the playground</a></p>
     </section>
 
     <section class="wrap sec g" id="timeline">
@@ -309,7 +275,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap close" id="start">
       <h2><a class="anchor" href="#start">Everything you just watched was an <code>&lt;img&gt;</code>.</a></h2>
-      <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped all together, counting every phone cut and all {variants.length} versions of the sky at the top. <b>{total("script")}</b> bytes of JavaScript inside any of them.</p>
+      <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped all together, counting every phone cut. <b>{total("script")}</b> bytes of JavaScript inside any of them.</p>
       <div class="ways">
         <div class="way">
           <h3>Start yourself</h3>

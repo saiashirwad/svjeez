@@ -1,5 +1,5 @@
 import { timeAt, type Editor } from "@svjeez/live";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useEditorState } from "./editor.ts";
 
 export function Transport({ editor }: { editor: Editor }) {
@@ -49,6 +49,8 @@ export function Transport({ editor }: { editor: Editor }) {
         max={duration}
         step="any"
         aria-label="Time"
+        // SAFETY: React types style keys as known CSS properties; --sj-p is a custom property the stylesheet reads.
+        style={{ "--sj-p": `${duration ? (time / duration) * 100 : 0}%` } as CSSProperties}
         value={time}
         disabled={!duration}
         onChange={(e) => {

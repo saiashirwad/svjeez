@@ -147,60 +147,60 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
     <g>
       <path d="M68.64639153119992 45H213.89639153119995L200.24639153119995 84H54.99639153119992Z" fill="var(--base00)"/>
-      <path d="M68.64639153119992 45H213.89639153119995L200.24639153119995 84H54.99639153119992Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="134.446" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">Push to main</text>
+      <path d="M68.64639153119992 45H213.89639153119995L200.24639153119995 84H54.99639153119992Z" fill="var(--base0B)" fill-opacity="0.2"/>
+      <text x="134.446" y="69.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Push to main</text>
     </g>
     <g class="a m23">
       <path d="M97.52919752732157 137H204.7291975273216Q212.7291975273216 137 212.7291975273216 145V168Q212.7291975273216 176 204.7291975273216 176H97.52919752732157Q89.52919752732157 176 89.52919752732157 168V145Q89.52919752732157 137 97.52919752732157 137Z" fill="var(--base00)"/>
-      <path d="M97.52919752732157 137H204.7291975273216Q212.7291975273216 137 212.7291975273216 145V168Q212.7291975273216 176 204.7291975273216 176H97.52919752732157Q89.52919752732157 176 89.52919752732157 168V145Q89.52919752732157 137 97.52919752732157 137Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="151.129" y="161.4" font-size="14" text-anchor="middle" fill="var(--base05)">Build image</text>
+      <path d="M97.52919752732157 137H204.7291975273216Q212.7291975273216 137 212.7291975273216 145V168Q212.7291975273216 176 204.7291975273216 176H97.52919752732157Q89.52919752732157 176 89.52919752732157 168V145Q89.52919752732157 137 97.52919752732157 137Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="151.129" y="161.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Build image</text>
     </g>
     <g class="a m24">
       <path d="M168.00077953895666 224L262.99077953895664 255L168.00077953895666 286L73.01077953895665 255Z" fill="var(--base00)"/>
-      <path d="M168.00077953895666 224L262.99077953895664 255L168.00077953895666 286L73.01077953895665 255Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="168.001" y="259.9" font-size="14" text-anchor="middle" fill="var(--base05)">Tests pass?</text>
+      <path d="M168.00077953895666 224L262.99077953895664 255L168.00077953895666 286L73.01077953895665 255Z" fill="var(--base0A)" fill-opacity="0.2"/>
+      <text x="168.001" y="259.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Tests pass?</text>
     </g>
     <g class="a m25">
       <path d="M53.65 394H207.3L193.65 433H40Z" fill="var(--base00)"/>
-      <path d="M53.65 394H207.3L193.65 433H40Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="123.65" y="418.4" font-size="14" text-anchor="middle" fill="var(--base05)">Notify author</text>
+      <path d="M53.65 394H207.3L193.65 433H40Z" fill="var(--base0B)" fill-opacity="0.2"/>
+      <text x="123.65" y="418.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Notify author</text>
     </g>
     <g class="a m26">
       <path d="M251.30000000000004 394H350.1Q358.1 394 358.1 402V425Q358.1 433 350.1 433H251.30000000000004Q243.30000000000004 433 243.30000000000004 425V402Q243.30000000000004 394 251.30000000000004 394Z" fill="var(--base00)"/>
-      <path d="M251.30000000000004 394H350.1Q358.1 394 358.1 402V425Q358.1 433 350.1 433H251.30000000000004Q243.30000000000004 433 243.30000000000004 425V402Q243.30000000000004 394 251.30000000000004 394Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="300.7" y="418.4" font-size="14" text-anchor="middle" fill="var(--base05)">Scan image</text>
+      <path d="M251.30000000000004 394H350.1Q358.1 394 358.1 402V425Q358.1 433 350.1 433H251.30000000000004Q243.30000000000004 433 243.30000000000004 425V402Q243.30000000000004 394 251.30000000000004 394Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="300.7" y="418.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Scan image</text>
     </g>
     <g>
       <path d="M249.89639153119992 45A49 5 0 0 1 347.8963915311999 45V84A49 5 0 0 1 249.89639153119992 84Z" fill="var(--base00)"/>
-      <path d="M249.89639153119992 45A49 5 0 0 1 347.8963915311999 45V84A49 5 0 0 1 249.89639153119992 84Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M249.89639153119992 45A49 5 0 0 1 347.8963915311999 45V84A49 5 0 0 1 249.89639153119992 84Z" fill="var(--base0E)" fill-opacity="0.2"/>
       <path d="M249.89639153119992 45A49 5 0 0 0 347.8963915311999 45" stroke="var(--base0E)" fill="none"/>
-      <text x="298.896" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Registry</text>
+      <text x="298.896" y="71.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Registry</text>
     </g>
     <g class="a m27">
       <path d="M221.89999993410896 481H379.49999993410904Q387.49999993410904 481 387.49999993410904 489V512Q387.49999993410904 520 379.49999993410904 520H221.89999993410896Q213.89999993410896 520 213.89999993410896 512V489Q213.89999993410896 481 221.89999993410896 481Z" fill="var(--base00)"/>
-      <path d="M221.89999993410896 481H379.49999993410904Q387.49999993410904 481 387.49999993410904 489V512Q387.49999993410904 520 379.49999993410904 520H221.89999993410896Q213.89999993410896 520 213.89999993410896 512V489Q213.89999993410896 481 221.89999993410896 481Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="300.7" y="505.4" font-size="14" text-anchor="middle" fill="var(--base05)">Deploy to staging</text>
+      <path d="M221.89999993410896 481H379.49999993410904Q387.49999993410904 481 387.49999993410904 489V512Q387.49999993410904 520 379.49999993410904 520H221.89999993410896Q213.89999993410896 520 213.89999993410896 512V489Q213.89999993410896 481 221.89999993410896 481Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="300.7" y="505.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Deploy to staging</text>
     </g>
     <g class="a m28">
       <path d="M300.699999934109 568L395.689999934109 599L300.699999934109 630L205.70999993410896 599Z" fill="var(--base00)"/>
-      <path d="M300.699999934109 568L395.689999934109 599L300.699999934109 630L205.70999993410896 599Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="300.7" y="603.9" font-size="14" text-anchor="middle" fill="var(--base05)">Smoke test?</text>
+      <path d="M300.699999934109 568L395.689999934109 599L300.699999934109 630L205.70999993410896 599Z" fill="var(--base0A)" fill-opacity="0.2"/>
+      <text x="300.7" y="603.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Smoke test?</text>
     </g>
     <g class="a m29">
       <path d="M146.89999993410893 738H296.09999993410895Q304.09999993410895 738 304.09999993410895 746V769Q304.09999993410895 777 296.09999993410895 777H146.89999993410893Q138.89999993410893 777 138.89999993410893 769V746Q138.89999993410893 738 146.89999993410893 738Z" fill="var(--base00)"/>
-      <path d="M146.89999993410893 738H296.09999993410895Q304.09999993410895 738 304.09999993410895 746V769Q304.09999993410895 777 296.09999993410895 777H146.89999993410893Q138.89999993410893 777 138.89999993410893 769V746Q138.89999993410893 738 146.89999993410893 738Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="221.5" y="762.4" font-size="14" text-anchor="middle" fill="var(--base05)">Roll out to prod</text>
+      <path d="M146.89999993410893 738H296.09999993410895Q304.09999993410895 738 304.09999993410895 746V769Q304.09999993410895 777 296.09999993410895 777H146.89999993410893Q138.89999993410893 777 138.89999993410893 769V746Q138.89999993410893 738 146.89999993410893 738Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="221.5" y="762.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Roll out to prod</text>
     </g>
     <g class="a m30">
       <path d="M343.099999934109 738H459.49999993410904Q462.49999993410904 738 462.49999993410904 741V774Q462.49999993410904 777 459.49999993410904 777H343.099999934109Q340.099999934109 777 340.099999934109 774V741Q340.099999934109 738 343.099999934109 738Z" fill="var(--base00)"/>
-      <path d="M343.099999934109 738H459.49999993410904Q462.49999993410904 738 462.49999993410904 741V774Q462.49999993410904 777 459.49999993410904 777H343.099999934109Q340.099999934109 777 340.099999934109 774V741Q340.099999934109 738 343.099999934109 738Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M348.099999934109 738V777M454.49999993410904 738V777" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="401.3" y="762.4" font-size="14" text-anchor="middle" fill="var(--base05)">Roll back</text>
+      <path d="M343.099999934109 738H459.49999993410904Q462.49999993410904 738 462.49999993410904 741V774Q462.49999993410904 777 459.49999993410904 777H343.099999934109Q340.099999934109 777 340.099999934109 774V741Q340.099999934109 738 343.099999934109 738Z" fill="var(--base08)" fill-opacity="0.2"/>
+      <path d="M348.099999934109 738V777M454.49999993410904 738V777" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+      <text x="401.3" y="762.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Roll back</text>
     </g>
     <g class="a m31">
       <path d="M200.99999986821788 825H241.99999986821786A19.5 19.5 0 0 1 241.99999986821786 864H200.99999986821788A19.5 19.5 0 0 1 200.99999986821788 825Z" fill="var(--base00)"/>
-      <path d="M200.99999986821788 825H241.99999986821786A19.5 19.5 0 0 1 241.99999986821786 864H200.99999986821788A19.5 19.5 0 0 1 200.99999986821788 825Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="221.5" y="849.4" font-size="14" text-anchor="middle" fill="var(--base05)">Live</text>
+      <path d="M200.99999986821788 825H241.99999986821786A19.5 19.5 0 0 1 241.99999986821786 864H200.99999986821788A19.5 19.5 0 0 1 200.99999986821788 825Z" fill="var(--base0C)" fill-opacity="0.2"/>
+      <text x="221.5" y="849.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Live</text>
     </g>
     <g class="a m32">
       <rect x="111.51" y="331" width="24.28" height="18" rx="3" fill="var(--base00)"/>

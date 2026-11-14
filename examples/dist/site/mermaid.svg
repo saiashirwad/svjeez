@@ -85,23 +85,23 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
         <g>
           <path d="M12.6 10.499999999996518H85L72.4 46.49999999999652H0Z" fill="var(--base00)"/>
-          <path d="M12.6 10.499999999996518H85L72.4 46.49999999999652H0Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-          <text x="42.5" y="33.05" font-size="13" text-anchor="middle" fill="var(--base05)">Push</text>
+          <path d="M12.6 10.499999999996518H85L72.4 46.49999999999652H0Z" fill="var(--base0B)" fill-opacity="0.2"/>
+          <text x="42.5" y="33.05" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Push</text>
         </g>
         <g class="a m10">
           <path d="M141 10.499999999996518H192.6Q200.6 10.499999999996518 200.6 18.49999999999652V38.49999999999652Q200.6 46.49999999999652 192.6 46.49999999999652H141Q133 46.49999999999652 133 38.49999999999652V18.49999999999652Q133 10.499999999996518 141 10.499999999996518Z" fill="var(--base00)"/>
-          <path d="M141 10.499999999996518H192.6Q200.6 10.499999999996518 200.6 18.49999999999652V38.49999999999652Q200.6 46.49999999999652 192.6 46.49999999999652H141Q133 46.49999999999652 133 38.49999999999652V18.49999999999652Q133 10.499999999996518 141 10.499999999996518Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-          <text x="166.8" y="33.05" font-size="13" text-anchor="middle" fill="var(--base05)">Build</text>
+          <path d="M141 10.499999999996518H192.6Q200.6 10.499999999996518 200.6 18.49999999999652V38.49999999999652Q200.6 46.49999999999652 192.6 46.49999999999652H141Q133 46.49999999999652 133 38.49999999999652V18.49999999999652Q133 10.499999999996518 141 10.499999999996518Z" fill="var(--base0D)" fill-opacity="0.2"/>
+          <text x="166.8" y="33.05" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Build</text>
         </g>
         <g class="a m11">
           <path d="M302.875 0L357.15 28.5L302.875 57L248.6 28.5Z" fill="var(--base00)"/>
-          <path d="M302.875 0L357.15 28.5L302.875 57L248.6 28.5Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-          <text x="302.875" y="33.05" font-size="13" text-anchor="middle" fill="var(--base05)">Pass?</text>
+          <path d="M302.875 0L357.15 28.5L302.875 57L248.6 28.5Z" fill="var(--base0A)" fill-opacity="0.2"/>
+          <text x="302.875" y="33.05" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Pass?</text>
         </g>
         <g class="a m12">
           <path d="M506.92999999999995 10.500000000002721H545.13A18 18 0 0 1 545.13 46.50000000000272H506.92999999999995A18 18 0 0 1 506.92999999999995 10.500000000002721Z" fill="var(--base00)"/>
-          <path d="M506.92999999999995 10.500000000002721H545.13A18 18 0 0 1 545.13 46.50000000000272H506.92999999999995A18 18 0 0 1 506.92999999999995 10.500000000002721Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
-          <text x="526.03" y="33.05" font-size="13" text-anchor="middle" fill="var(--base05)">Ship</text>
+          <path d="M506.92999999999995 10.500000000002721H545.13A18 18 0 0 1 545.13 46.50000000000272H506.92999999999995A18 18 0 0 1 506.92999999999995 10.500000000002721Z" fill="var(--base0C)" fill-opacity="0.2"/>
+          <text x="526.03" y="33.05" font-size="13" text-anchor="middle" font-weight="600" fill="var(--base05)">Ship</text>
         </g>
         <g class="a m13">
           <rect x="408.095" y="20" width="29.89" height="17" rx="3" fill="var(--base00)"/>

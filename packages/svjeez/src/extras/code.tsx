@@ -224,10 +224,20 @@ export function code(input: string | CodeTokens, options: CodeOptions = {}): Cod
     )
       throw new Error(`code.lines(${first}, ${last}) is outside lines 1-${rows.length}.`);
 
+    // From the first character any of the lines shows, past their shared indent, to the end of the longest.
+    const shown = texts.slice(first - 1, last);
+    const written = shown.filter((t) => t.trim() !== "");
+
+    const indent = written.length
+      ? Math.min(...written.map((t) => t.length - t.trimStart().length))
+      : 0;
+
+    const end = Math.max(...shown.map((t) => t.trimEnd().length));
+
     return rect(
-      m.origin,
+      m.origin + indent * advance,
       top(first),
-      Math.max(...texts.slice(first - 1, last).map((t) => t.length)) * advance,
+      Math.max(0, end - indent) * advance,
       (last - first + 1) * m.height,
     );
   };

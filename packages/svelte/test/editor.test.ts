@@ -59,6 +59,16 @@ const dragBy = async (page: Page, selector: string, dx: number) => {
   await page.mouse.up();
 };
 
+describe("the stats readout", () => {
+  test("says what the compile measured once the first one finishes", async () => {
+    const page = await open();
+    await page.locator(".sj-stat", { hasText: "to build" }).waitFor();
+    const text = await page.locator(".sj-stats").evaluate((el) => el.textContent ?? "");
+    expect(text).toMatch(/^\d+(\.\d)? (B|KB) gzip\d+ keyframes?0 B JS\d+\.\d ms to build$/);
+    await page.close();
+  });
+});
+
 describe("editing a scene with no annotations", () => {
   test("dragging a number rewrites the source and recompiles the picture", async () => {
     const page = await open();

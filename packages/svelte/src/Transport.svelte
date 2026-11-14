@@ -58,6 +58,7 @@
     max={duration}
     step="any"
     aria-label="Time"
+    style:--sj-p="{duration ? (time / duration) * 100 : 0}%"
     value={time}
     disabled={!duration}
     oninput={(e) => {

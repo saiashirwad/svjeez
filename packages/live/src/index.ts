@@ -19,6 +19,7 @@ export {
   type Msg,
   type Picture,
   type State,
+  type Stats,
 } from "./editor.ts";
 
 export {
@@ -51,6 +52,8 @@ export {
 export { fit, fitValues, follow, positionOf, valueAt, withValues } from "./fit.ts";
 
 export { measureMove, type Move } from "./probe.ts";
+
+export { sizeOf, statsOf, type Stat } from "./stats.ts";
 
 export type { Compiled, SceneSize, SourceError } from "./compile.ts";
 

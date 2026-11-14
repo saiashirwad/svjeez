@@ -30,7 +30,6 @@
   --gutter: clamp(1rem, 4vw, 2rem);
   --content: 66rem;
   --gap: 1.5rem;
-  --hero-step: clamp(2rem, 4vw, 3rem);
   --radius: 0.75rem;
   --out: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -189,8 +188,7 @@ kbd {
   block-size: 1.1em;
   flex: none;
 }
-.btn:active,
-.install button:active {
+.btn:active {
   translate: 0 1px;
 }
 @media (hover: hover) and (pointer: fine) {
@@ -776,40 +774,44 @@ kbd {
     inline-size: 28rem;
   }
 }
-/* The live editor needs a keyboard and room, so phones skip it. */
-@media (max-width: 47.99rem) {
-  #play {
-    display: none;
+/* Hero: the headline says what the picture is, and the picture plays under it at its own size. */
+.hero {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  justify-items: start;
+  row-gap: 1.25rem;
+  padding-block: clamp(1.5rem, 4vw, 2.25rem) 0;
+}
+/* On a wide screen the first screen is the hero alone, with the way down to the editor at its foot. */
+@media (width >= 56rem) {
+  .hero {
+    min-block-size: calc(100svh - 4.25rem);
   }
 }
-
-/* Hero: one left-aligned column on the page grid, the headline, a short paragraph, then the install line.
-   Spacing steps on 8px: 32px under the underline, then the same 48px step above and below the install line. */
-.hero {
-  position: relative;
-  padding-block: clamp(1.5rem, 4vw, 2.25rem) 0;
-  row-gap: 2rem;
+.hero-next {
+  align-self: end;
+  justify-self: center;
+  padding-block: 0.5rem 1.5rem;
 }
-/* A handwritten "like this!" whose arrow lands on the demo below. It needs the room beside the install pill. */
-.like {
-  position: absolute;
-  inset-block-end: calc(-1 * var(--hero-step) - 1rem);
-  inset-inline-start: 54%;
-  inline-size: min(29.625rem, 42.35vw);
+.hero-next .cue {
+  display: block;
+  inline-size: min(22rem, 80vw);
   block-size: auto;
-  z-index: 1;
-  pointer-events: none;
 }
-@media (max-width: 63.99rem) {
-  .like {
-    display: none;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 .hero h1 {
-  font-size: clamp(3.25rem, 1rem + 9.5vw, 6.5rem);
-  line-height: 1.02;
+  font-size: clamp(2.25rem, 0.75rem + 5vw, 4rem);
+  line-height: 1.04;
   letter-spacing: -0.035em;
   padding-block-end: 0.07em;
+}
+.hero h1 code {
+  font-size: 0.82em;
+  letter-spacing: -0.03em;
 }
 .ul {
   text-decoration: underline;
@@ -838,243 +840,34 @@ kbd {
     display: block;
   }
 }
-.cta {
-  display: flex;
-  margin-block-start: calc(var(--hero-step) - 2rem);
-}
-.install {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-block-size: 3rem;
-  padding-inline: 1.1rem 0.4rem;
-  background: var(--sunken);
-  border-radius: 0.625rem;
-  box-shadow: 0 0 0 1px var(--line);
-  font: 500 1rem / 1 var(--mono);
-}
-.install code {
-  font-size: inherit;
-}
-.install b {
-  color: var(--accent);
-  font-weight: 600;
-}
-.install button {
-  display: grid;
-  place-items: center;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-  padding: 0;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-.install {
+.hero-stage {
   position: relative;
+  inline-size: 100%;
 }
-.install button svg {
-  inline-size: 1.1rem;
-  block-size: 1.1rem;
+.hero-scene {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
 }
-@media (hover: hover) and (pointer: fine) {
-  .install button:hover {
-    color: var(--ink);
-    background: var(--bg);
-  }
+/* The editor right under the hero, and the way out to a page where the whole file can be typed. */
+#play {
+  margin-block-start: clamp(3.5rem, 9vw, 6.5rem);
+  padding-block-start: 0;
+  border-block-start: 0;
 }
-.hero-demo {
-  margin-block: var(--hero-step) clamp(3rem, 7vw, 5rem);
+#play .playlink {
+  margin-block-start: 1rem;
+  font-size: 0.9375rem;
 }
-@media (max-width: 63.99rem) {
-  .hero-demo .wide {
-    display: none;
-  }
-  .hero-demo .tall {
-    display: block;
-  }
-  .hero-demo .win {
-    inline-size: min(100%, 22.5rem);
-    margin-inline: auto;
-  }
-}
-/* On a tablet the tall demo stands beside the headline instead of under it, so the right half of the page isn't empty. */
-@media (min-width: 42rem) and (max-width: 63.99rem) {
-  .lead {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) clamp(16rem, 40%, 19rem);
-    column-gap: 2.5rem;
-    align-items: center;
-    inline-size: min(100% - 2 * var(--gutter), var(--content));
-    margin-inline: auto;
-    margin-block-end: clamp(3rem, 7vw, 5rem);
-  }
-  .lead > .wrap {
-    inline-size: auto;
-    margin-inline: 0;
-  }
-  .lead .hero h1 {
-    font-size: clamp(2.75rem, 0.25rem + 6vw, 4.25rem);
-  }
-  .lead .lede span {
-    display: inline;
-  }
-  .lead .hero-demo {
-    margin-block: var(--hero-step) 0;
-  }
-  .lead .hero-demo .win {
-    inline-size: 100%;
-  }
-}
-
-/* The hero's knobs: a segmented control per knob, drawn like the page's buttons, with the chosen key lifted out of
-   its track and marked with the color its knob changes in the code. They are radio buttons under the paint, so arrows
-   move along a row and the form works with a keyboard alone. */
-.knobs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: end;
-  gap: 1rem 1.5rem;
-  margin-block-start: 1.75rem;
-}
-.knob {
-  display: grid;
-  gap: 0.5rem;
-  justify-items: start;
-}
-.knob[data-knob="sky"] {
-  --hue: var(--code-number);
-}
-.knob[data-knob="feel"] {
-  --hue: var(--code-string);
-}
-.knob[data-knob="speed"] {
-  --hue: var(--code-keyword);
-}
-.knob-label {
-  padding-inline-start: 0.875rem;
-  font: 600 0.6875rem / 1 var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+#play .playlink a {
   color: var(--muted);
 }
-.keys {
-  display: flex;
-  gap: 0.125rem;
-  padding: 0.1875rem;
-  background: var(--sunken);
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.key {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  min-block-size: 2.375rem;
-  padding: 0 0.875rem;
-  font: 500 0.875rem / 1 var(--sans);
-  color: var(--muted);
-  white-space: nowrap;
-  border-radius: 999px;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.key input {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: inherit;
-}
-.key:has(input:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-.keys .key:has(input:checked) {
-  color: var(--ink);
-  background: light-dark(var(--bg), oklch(27% 0.006 270));
-  box-shadow:
-    0 0 0 1px var(--line),
-    0 1px 2px var(--shadow);
-}
-.keys .key::before {
-  content: "";
-  inline-size: 0.4375rem;
-  block-size: 0.4375rem;
-  flex: none;
-  border-radius: 50%;
-  background: var(--line);
-  transition: inherit;
-}
-.keys .key:has(input:checked)::before {
-  background: var(--hue);
-}
-.key:active {
-  translate: 0 1px;
+#play .playlink a::after {
+  content: " →";
 }
 @media (hover: hover) and (pointer: fine) {
-  .key:hover {
+  #play .playlink a:hover {
     color: var(--ink);
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .key {
-    transition:
-      background-color 0.15s,
-      box-shadow 0.15s,
-      color 0.15s;
-  }
-}
-.die {
-  inline-size: 2.75rem;
-  min-block-size: 2.75rem;
-  padding: 0;
-  color: var(--ink);
-  background: var(--bg);
-  border: 1px solid var(--line);
-}
-.die svg {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-}
-@media (hover: hover) and (pointer: fine) {
-  .die:hover {
-    border-color: color-mix(in oklch, var(--ink) 35%, var(--line));
-  }
-}
-/* On a phone each knob is a row, its name in a column of its own and its keys sharing the rest, with the die in the
-   last row. The same holds in the tablet's side column, so it asks the demo's width, not the screen's. */
-.hero-demo {
-  container-type: inline-size;
-}
-@container (width < 42rem) {
-  .knobs {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 0.75rem 0.875rem;
-  }
-  .knob {
-    grid-column: 1 / -1;
-    grid-template-columns: subgrid;
-    align-items: center;
-    justify-items: stretch;
-  }
-  .knob-label {
-    padding-inline-start: 0;
-  }
-  .keys .key {
-    flex: 1;
-    padding-inline: 0.5rem;
-  }
-  .die {
-    margin-block-end: 0;
   }
 }
 
@@ -1168,82 +961,6 @@ pre.code {
 pre.code {
   --pre-bg: var(--sunken);
   font-variant-ligatures: none;
-}
-.pg-body pre.code {
-  --pre-bg: transparent;
-}
-
-/* The playground block: a window on the grid like every other. The embed fills it once it loads; until then a static editor and preview stand in. */
-.playground {
-  display: grid;
-  min-block-size: 34.5rem;
-}
-.playground > * {
-  grid-area: 1 / 1;
-  min-inline-size: 0;
-}
-.playground [data-playground] {
-  align-self: start;
-}
-.playground [data-playground]:empty {
-  display: none;
-}
-.playground:has([data-playground]:not(:empty)) .pg-fallback {
-  display: none;
-}
-.pg-fallback {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: clip;
-  background: var(--win-bg);
-}
-.pg-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-block-size: 2.5rem;
-  padding-inline: 1rem;
-  border-block-end: 1px solid var(--line);
-  font: 500 0.8125rem / 1 var(--sans);
-  color: var(--muted);
-}
-.pg-bar .dots {
-  display: flex;
-  gap: 0.5rem;
-}
-.pg-bar i {
-  inline-size: 0.6875rem;
-  block-size: 0.6875rem;
-  border-radius: 50%;
-  background: var(--line);
-}
-.pg-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-block-size: 0;
-}
-@media (min-width: 56rem) {
-  .pg-body {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  }
-  .pg-view {
-    border-inline-start: 1px solid var(--line);
-  }
-}
-.pg-body pre.code {
-  border-radius: 0;
-  box-shadow: none;
-  font-size: 0.78rem;
-  padding: 1.25rem;
-  overflow-x: auto;
-}
-.pg-view {
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
-}
-.pg-view .scene {
-  inline-size: min(100%, 28rem);
 }
 
 /* Light and dark, side by side. */

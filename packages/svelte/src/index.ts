@@ -8,4 +8,6 @@ export { default as Control } from "./Control.svelte";
 
 export { default as Picture } from "./Picture.svelte";
 
+export { default as Stats } from "./Stats.svelte";
+
 export { default as Transport } from "./Transport.svelte";

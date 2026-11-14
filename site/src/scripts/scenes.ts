@@ -66,7 +66,9 @@ const balance = () => {
       .filter((img) => {
         const cost = Number(img.dataset.cost ?? COST);
 
-        if (spent + cost > BUDGET) return false;
+        // The scene most on screen always plays, however much it costs, so a page whose big scene is alone in view
+        // still shows it moving. It leaves nothing for the rest.
+        if (spent > 0 && spent + cost > BUDGET) return false;
         spent += cost;
 
         return true;

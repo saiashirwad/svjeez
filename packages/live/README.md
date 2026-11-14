@@ -52,6 +52,10 @@ A number's `param` gives the range a drag moves it through. A scene can declare 
 
 A scene that exports `handles` from `svjeez/params` gets a handle on its picture for each number param. `state.grips[key]` says where it sits and which way it moves, and `handleAt(grip, value)` places it for a value. A number with no declared handle gets a measured one while it is selected.
 
+### Stats
+
+`state.stats` is what the newest good compile measured: `gzip` bytes, `keyframes`, `scriptBytes` and the `ms` it took. Pass `first.stats` (`gzip`, `keyframes`, `scriptBytes`) with a picture built ahead of time and it reads those, with `ms` null, until the first compile. `statsOf(stats)` turns it into labelled values for a readout.
+
 ### Gestures
 
 `scrubbing`, `following`, `bending`, `arrowNumber` and `arrowEase` turn a drag or an arrow key into `set` messages that make one undo step, and `selection(editor, key)` selects a value while its control has focus. Each framework's controls only read the DOM events and call these. `stroke(editor, key)` is the primitive under them, for a control of your own.

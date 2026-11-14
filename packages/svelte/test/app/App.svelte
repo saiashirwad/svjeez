@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@svjeez/live/editor.css";
   import { onDestroy } from "svelte";
-  import { Code, editor, Picture, Transport } from "../../src/index";
+  import { Code, editor, Picture, Stats, Transport } from "../../src/index";
   import handled from "./handles.tsx?raw";
   import plain from "./scene.tsx?raw";
 
@@ -14,6 +14,7 @@
 <main>
   <Picture editor={ed} />
   <Transport editor={ed} />
+  <Stats editor={ed} />
   <Code editor={ed} file="scene.tsx" />
   <button type="button" onclick={() => ed.send({ type: "undo" })}>Undo</button>
   <button

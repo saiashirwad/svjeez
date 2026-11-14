@@ -120,46 +120,46 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
     <g>
       <path d="M252.00000000000006 45H372.05000000000007L358.4000000000001 84H238.35000000000005Z" fill="var(--base00)"/>
-      <path d="M252.00000000000006 45H372.05000000000007L358.4000000000001 84H238.35000000000005Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="69.4" font-size="14" text-anchor="middle" fill="var(--base05)">PR opened</text>
+      <path d="M252.00000000000006 45H372.05000000000007L358.4000000000001 84H238.35000000000005Z" fill="var(--base0B)" fill-opacity="0.2"/>
+      <text x="305.2" y="69.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">PR opened</text>
     </g>
     <g class="a m19">
       <path d="M238.60000000000002 137H371.80000000000007Q374.80000000000007 137 374.80000000000007 140V173Q374.80000000000007 176 371.80000000000007 176H238.60000000000002Q235.60000000000002 176 235.60000000000002 173V140Q235.60000000000002 137 238.60000000000002 137Z" fill="var(--base00)"/>
-      <path d="M238.60000000000002 137H371.80000000000007Q374.80000000000007 137 374.80000000000007 140V173Q374.80000000000007 176 371.80000000000007 176H238.60000000000002Q235.60000000000002 176 235.60000000000002 173V140Q235.60000000000002 137 238.60000000000002 137Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M243.60000000000002 137V176M366.80000000000007 137V176" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="305.2" y="161.4" font-size="14" text-anchor="middle" fill="var(--base05)">Gather diff</text>
+      <path d="M238.60000000000002 137H371.80000000000007Q374.80000000000007 137 374.80000000000007 140V173Q374.80000000000007 176 371.80000000000007 176H238.60000000000002Q235.60000000000002 176 235.60000000000002 173V140Q235.60000000000002 137 238.60000000000002 137Z" fill="var(--base08)" fill-opacity="0.2"/>
+      <path d="M243.60000000000002 137V176M366.80000000000007 137V176" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+      <text x="305.2" y="161.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Gather diff</text>
     </g>
     <g>
       <path d="M62.34999999999998 45A70.00000000000001 5 0 0 1 202.35000000000002 45V84A70.00000000000001 5 0 0 1 62.34999999999998 84Z" fill="var(--base00)"/>
-      <path d="M62.34999999999998 45A70.00000000000001 5 0 0 1 202.35000000000002 45V84A70.00000000000001 5 0 0 1 62.34999999999998 84Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M62.34999999999998 45A70.00000000000001 5 0 0 1 202.35000000000002 45V84A70.00000000000001 5 0 0 1 62.34999999999998 84Z" fill="var(--base0E)" fill-opacity="0.2"/>
       <path d="M62.34999999999998 45A70.00000000000001 5 0 0 0 202.35000000000002 45" stroke="var(--base0E)" fill="none"/>
-      <text x="132.35" y="71.9" font-size="14" text-anchor="middle" fill="var(--base05)">Review memory</text>
+      <text x="132.35" y="71.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Review memory</text>
     </g>
     <g class="a m20">
       <path d="M234.8 224H375.6Q383.6 224 383.6 232V255Q383.6 263 375.6 263H234.8Q226.8 263 226.8 255V232Q226.8 224 234.8 224Z" fill="var(--base00)"/>
-      <path d="M234.8 224H375.6Q383.6 224 383.6 232V255Q383.6 263 375.6 263H234.8Q226.8 263 226.8 255V232Q226.8 224 234.8 224Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="248.4" font-size="14" text-anchor="middle" fill="var(--base05)">Analyze changes</text>
+      <path d="M234.8 224H375.6Q383.6 224 383.6 232V255Q383.6 263 375.6 263H234.8Q226.8 263 226.8 255V232Q226.8 224 234.8 224Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="305.2" y="248.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Analyze changes</text>
     </g>
     <g class="a m21">
       <path d="M238.60000000000002 311H371.80000000000007Q374.80000000000007 311 374.80000000000007 314V347Q374.80000000000007 350 371.80000000000007 350H238.60000000000002Q235.60000000000002 350 235.60000000000002 347V314Q235.60000000000002 311 238.60000000000002 311Z" fill="var(--base00)"/>
-      <path d="M238.60000000000002 311H371.80000000000007Q374.80000000000007 311 374.80000000000007 314V347Q374.80000000000007 350 371.80000000000007 350H238.60000000000002Q235.60000000000002 350 235.60000000000002 347V314Q235.60000000000002 311 238.60000000000002 311Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-      <path d="M243.60000000000002 311V350M366.80000000000007 311V350" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-      <text x="305.2" y="335.4" font-size="14" text-anchor="middle" fill="var(--base05)">Run linters</text>
+      <path d="M238.60000000000002 311H371.80000000000007Q374.80000000000007 311 374.80000000000007 314V347Q374.80000000000007 350 371.80000000000007 350H238.60000000000002Q235.60000000000002 350 235.60000000000002 347V314Q235.60000000000002 311 238.60000000000002 311Z" fill="var(--base08)" fill-opacity="0.2"/>
+      <path d="M243.60000000000002 311V350M366.80000000000007 311V350" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+      <text x="305.2" y="335.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Run linters</text>
     </g>
     <g class="a m22">
       <path d="M305.20000000000005 398L375.83000000000004 429L305.20000000000005 460L234.57000000000005 429Z" fill="var(--base00)"/>
-      <path d="M305.20000000000005 398L375.83000000000004 429L305.20000000000005 460L234.57000000000005 429Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="433.9" font-size="14" text-anchor="middle" fill="var(--base05)">Issues?</text>
+      <path d="M305.20000000000005 398L375.83000000000004 429L305.20000000000005 460L234.57000000000005 429Z" fill="var(--base0A)" fill-opacity="0.2"/>
+      <text x="305.2" y="433.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Issues?</text>
     </g>
     <g class="a m23">
       <path d="M251.60000000000002 568H358.80000000000007Q366.80000000000007 568 366.80000000000007 576V599Q366.80000000000007 607 358.80000000000007 607H251.60000000000002Q243.60000000000002 607 243.60000000000002 599V576Q243.60000000000002 568 251.60000000000002 568Z" fill="var(--base00)"/>
-      <path d="M251.60000000000002 568H358.80000000000007Q366.80000000000007 568 366.80000000000007 576V599Q366.80000000000007 607 358.80000000000007 607H251.60000000000002Q243.60000000000002 607 243.60000000000002 599V576Q243.60000000000002 568 251.60000000000002 568Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="305.2" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Draft fixes</text>
+      <path d="M251.60000000000002 568H358.80000000000007Q366.80000000000007 568 366.80000000000007 576V599Q366.80000000000007 607 358.80000000000007 607H251.60000000000002Q243.60000000000002 607 243.60000000000002 599V576Q243.60000000000002 568 251.60000000000002 568Z" fill="var(--base0D)" fill-opacity="0.2"/>
+      <text x="305.2" y="592.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Draft fixes</text>
     </g>
     <g class="a m24">
       <path d="M59.5 568H159.3A19.5 19.5 0 0 1 159.3 607H59.5A19.5 19.5 0 0 1 59.5 568Z" fill="var(--base00)"/>
-      <path d="M59.5 568H159.3A19.5 19.5 0 0 1 159.3 607H59.5A19.5 19.5 0 0 1 59.5 568Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
-      <text x="109.4" y="592.4" font-size="14" text-anchor="middle" fill="var(--base05)">Post review</text>
+      <path d="M59.5 568H159.3A19.5 19.5 0 0 1 159.3 607H59.5A19.5 19.5 0 0 1 59.5 568Z" fill="var(--base0C)" fill-opacity="0.2"/>
+      <text x="109.4" y="592.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Post review</text>
     </g>
     <g class="a m25">
       <rect x="289.49" y="505" width="31.42" height="18" rx="3" fill="var(--base00)"/>

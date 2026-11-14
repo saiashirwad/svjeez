@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 340" width="504" height="340" role="img" aria-labelledby="t d">
   <title id="t">A tree that grows</title>
-  <desc id="d">An agent team revealed level by level: a lead, three workers and two children, then a dot runs between branches.</desc>
+  <desc id="d">An agent team revealed level by level: a lead, three workers and two children, then the svjeez chick hops across the tree from node to node.</desc>
   <style><![CDATA[
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
@@ -43,11 +43,17 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @keyframes k19{0%,35.714%{opacity:0}40.714%,100%{opacity:1}}
 @keyframes k20{0%,35.714%{translate:0px 6px}40.714%,100%{translate:0px 0px}}
 .m15{animation-name:k19,k20}
-@keyframes k21{0%,68.863%,100%{visibility:hidden}42.857%{visibility:visible}}
-@keyframes k22{0%,42.857%{translate:146px 247px}46.218%{translate:146px 207px}49.076%{translate:146px 173px}49.412%{translate:146px 169px}50%{translate:150.555px 163.688px}51.068%{translate:162.563px 159.5px}52.524%{translate:179.539px 156.063px}54.18%{translate:199px 153px}55.835%{translate:218.461px 149.938px}57.291%{translate:235.438px 146.5px}58.359%{translate:247.445px 142.313px}58.947%{translate:252px 137px}59.283%{translate:252px 133px}62.645%{translate:252px 173px}65.502%{translate:252px 207px}68.863%,100%{translate:252px 247px}}
-.m16{animation-name:k21,k22;animation-timing-function:steps(1),linear}
-@keyframes k23{0%,92.857%{opacity:1}100%{opacity:0}}
-.m17{animation-name:k23}
+@keyframes k21{0%,60%,63.429%,100%{opacity:1}60.571%,62.286%{opacity:0}}
+.m16{animation-name:k21}
+@keyframes k22{0%,60%,63.429%,100%{opacity:0}60.571%,62.286%{opacity:1}}
+.m17{animation-name:k22}
+@keyframes k23{0%,42.857%,82.143%,100%{translate:0px 247px}46.429%,78.571%{translate:0px 137px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}50%,53.571%,71.429%,75%{translate:0px 173px}57.143%,67.857%{translate:0px 63px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}60.714%,64.286%{translate:0px 99px}}
+.m18{animation-name:k23}
+@keyframes k24{0%,42.857%,50%,53.571%{translate:146px 0px}60.714%,64.286%,71.429%,75%,82.143%,100%{translate:252px 0px}}
+@keyframes k25{0%,40%,95.714%,100%{opacity:0}42.857%,92.857%{opacity:1}}
+.m19{animation-name:k24,k25;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k26{0%,92.857%{opacity:1}100%{opacity:0}}
+.m20{animation-name:k26}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-5s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">
@@ -58,7 +64,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
     <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">team.tsx</text>
   </g>
-  <g class="a m17">
+  <g class="a m20">
     <g class="sans">
       <g>
         <path d="M252 133L252 137C252 153 146 153 146 164L146 166" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
@@ -82,38 +88,70 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g>
         <path d="M232.39999999999998 99H271.59999999999997Q279.59999999999997 99 279.59999999999997 107V125Q279.59999999999997 133 271.59999999999997 133H232.39999999999998Q224.39999999999998 133 224.39999999999998 125V107Q224.39999999999998 99 232.39999999999998 99Z" fill="var(--base00)"/>
-        <path d="M232.39999999999998 99H271.59999999999997Q279.59999999999997 99 279.59999999999997 107V125Q279.59999999999997 133 271.59999999999997 133H232.39999999999998Q224.39999999999998 133 224.39999999999998 125V107Q224.39999999999998 99 232.39999999999998 99Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="252" y="120.2" font-size="12" text-anchor="middle" fill="var(--base05)">Lead</text>
+        <path d="M232.39999999999998 99H271.59999999999997Q279.59999999999997 99 279.59999999999997 107V125Q279.59999999999997 133 271.59999999999997 133H232.39999999999998Q224.39999999999998 133 224.39999999999998 125V107Q224.39999999999998 99 232.39999999999998 99Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <text x="252" y="120.2" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">Lead</text>
       </g>
       <g class="a m11">
         <path d="M106.19999999999999 173H185.79999999999998Q188.79999999999998 173 188.79999999999998 176V204Q188.79999999999998 207 185.79999999999998 207H106.19999999999999Q103.19999999999999 207 103.19999999999999 204V176Q103.19999999999999 173 106.19999999999999 173Z" fill="var(--base00)"/>
-        <path d="M106.19999999999999 173H185.79999999999998Q188.79999999999998 173 188.79999999999998 176V204Q188.79999999999998 207 185.79999999999998 207H106.19999999999999Q103.19999999999999 207 103.19999999999999 204V176Q103.19999999999999 173 106.19999999999999 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-        <path d="M111.19999999999999 173V207M180.79999999999998 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-        <text x="146" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Search</text>
+        <path d="M106.19999999999999 173H185.79999999999998Q188.79999999999998 173 188.79999999999998 176V204Q188.79999999999998 207 185.79999999999998 207H106.19999999999999Q103.19999999999999 207 103.19999999999999 204V176Q103.19999999999999 173 106.19999999999999 173Z" fill="var(--base08)" fill-opacity="0.2"/>
+        <path d="M111.19999999999999 173V207M180.79999999999998 173V207" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+        <text x="146" y="194.2" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">Search</text>
       </g>
       <g class="a m12">
         <path d="M215.79999999999998 173H288.2Q291.2 173 291.2 176V204Q291.2 207 288.2 207H215.79999999999998Q212.79999999999998 207 212.79999999999998 204V176Q212.79999999999998 173 215.79999999999998 173Z" fill="var(--base00)"/>
-        <path d="M215.79999999999998 173H288.2Q291.2 173 291.2 176V204Q291.2 207 288.2 207H215.79999999999998Q212.79999999999998 207 212.79999999999998 204V176Q212.79999999999998 173 215.79999999999998 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-        <path d="M220.79999999999998 173V207M283.2 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-        <text x="252" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Build</text>
+        <path d="M215.79999999999998 173H288.2Q291.2 173 291.2 176V204Q291.2 207 288.2 207H215.79999999999998Q212.79999999999998 207 212.79999999999998 204V176Q212.79999999999998 173 215.79999999999998 173Z" fill="var(--base08)" fill-opacity="0.2"/>
+        <path d="M220.79999999999998 173V207M283.2 173V207" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+        <text x="252" y="194.2" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">Build</text>
       </g>
       <g class="a m13">
         <path d="M318.2 173H397.79999999999995Q400.79999999999995 173 400.79999999999995 176V204Q400.79999999999995 207 397.79999999999995 207H318.2Q315.2 207 315.2 204V176Q315.2 173 318.2 173Z" fill="var(--base00)"/>
-        <path d="M318.2 173H397.79999999999995Q400.79999999999995 173 400.79999999999995 176V204Q400.79999999999995 207 397.79999999999995 207H318.2Q315.2 207 315.2 204V176Q315.2 173 318.2 173Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-        <path d="M323.2 173V207M392.79999999999995 173V207" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-        <text x="358" y="194.2" font-size="12" text-anchor="middle" fill="var(--base05)">Review</text>
+        <path d="M318.2 173H397.79999999999995Q400.79999999999995 173 400.79999999999995 176V204Q400.79999999999995 207 397.79999999999995 207H318.2Q315.2 207 315.2 204V176Q315.2 173 318.2 173Z" fill="var(--base08)" fill-opacity="0.2"/>
+        <path d="M323.2 173V207M392.79999999999995 173V207" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+        <text x="358" y="194.2" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">Review</text>
       </g>
       <g class="a m14">
         <path d="M126.39999999999998 247H165.59999999999997Q173.59999999999997 247 173.59999999999997 255V273Q173.59999999999997 281 165.59999999999997 281H126.39999999999998Q118.39999999999998 281 118.39999999999998 273V255Q118.39999999999998 247 126.39999999999998 247Z" fill="var(--base00)"/>
-        <path d="M126.39999999999998 247H165.59999999999997Q173.59999999999997 247 173.59999999999997 255V273Q173.59999999999997 281 165.59999999999997 281H126.39999999999998Q118.39999999999998 281 118.39999999999998 273V255Q118.39999999999998 247 126.39999999999998 247Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="146" y="268.2" font-size="12" text-anchor="middle" fill="var(--base05)">Docs</text>
+        <path d="M126.39999999999998 247H165.59999999999997Q173.59999999999997 247 173.59999999999997 255V273Q173.59999999999997 281 165.59999999999997 281H126.39999999999998Q118.39999999999998 281 118.39999999999998 273V255Q118.39999999999998 247 126.39999999999998 247Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <text x="146" y="268.2" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">Docs</text>
       </g>
       <g class="a m15">
         <path d="M228.79999999999998 247H275.2Q283.2 247 283.2 255V273Q283.2 281 275.2 281H228.79999999999998Q220.79999999999998 281 220.79999999999998 273V255Q220.79999999999998 247 228.79999999999998 247Z" fill="var(--base00)"/>
-        <path d="M228.79999999999998 247H275.2Q283.2 247 283.2 255V273Q283.2 281 275.2 281H228.79999999999998Q220.79999999999998 281 220.79999999999998 273V255Q220.79999999999998 247 228.79999999999998 247Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="252" y="268.2" font-size="12" text-anchor="middle" fill="var(--base05)">Tests</text>
+        <path d="M228.79999999999998 247H275.2Q283.2 247 283.2 255V273Q283.2 281 275.2 281H228.79999999999998Q220.79999999999998 281 220.79999999999998 273V255Q220.79999999999998 247 228.79999999999998 247Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <text x="252" y="268.2" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">Tests</text>
       </g>
     </g>
-    <circle r="4.5" fill="var(--base09)" class="a m16"/>
+    <g class="a m19">
+      <g class="a m18">
+        <g transform="scale(0.2) translate(-104 -162)">
+          <g>
+            <g style="transform-box:view-box;transform-origin:104px 162px">
+              <g>
+                <ellipse cx="84" cy="162" rx="12" ry="6" fill="#F08A00"/>
+                <ellipse cx="124" cy="162" rx="12" ry="6" fill="#F08A00"/>
+                <path d="M104 60V36" stroke="#E3A100" stroke-width="7" stroke-linecap="round"/>
+                <circle cx="104" cy="38" r="9" fill="#FFC21A"/>
+                <path d="M38 150C38 94 68 60 104 60S170 94 170 150C170 158 165 162 157 162H51C43 162 38 158 38 150Z" fill="#FFC21A"/>
+                <path d="M38 150C38 158 43 162 51 162H157C165 162 170 158 170 150C170 146 170 143 169 140C160 148 150 150 104 150S48 148 39 140C38 143 38 146 38 150Z" fill="#F2A900"/>
+                <ellipse cx="66" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+                <ellipse cx="142" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
+                <g>
+                  <g class="a m16">
+                    <ellipse cx="84" cy="110" rx="7" ry="9" fill="#26262A"/>
+                    <circle cx="86" cy="106" r="2.4" fill="#FFF"/>
+                  </g>
+                  <ellipse cx="84" cy="112" rx="7.5" ry="1.6" fill="#26262A" class="a m17"/>
+                  <g class="a m16">
+                    <ellipse cx="124" cy="110" rx="7" ry="9" fill="#26262A"/>
+                    <circle cx="126" cy="106" r="2.4" fill="#FFF"/>
+                  </g>
+                  <ellipse cx="124" cy="112" rx="7.5" ry="1.6" fill="#26262A" class="a m17"/>
+                </g>
+                <path d="M97 124Q104 131 111 124" fill="none" stroke="#26262A" stroke-width="4.5" stroke-linecap="round"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
   </g>
 </svg>

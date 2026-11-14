@@ -8,11 +8,11 @@
     <mask id="m4">
       <rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" class="a m5"/>
       <g class="a m6">
-        <rect x="117.2" y="253" width="464.2" height="76.8" fill="#fff"/>
+        <rect x="148.4" y="253" width="433" height="76.8" fill="#fff"/>
       </g>
       <g class="a m7">
-        <rect x="117.2" y="416.8" width="581.2" height="76.8" fill="#fff"/>
-        <rect x="117.2" y="526" width="308.2" height="76.8" fill="#fff"/>
+        <rect x="148.4" y="416.8" width="550" height="76.8" fill="#fff"/>
+        <rect x="132.8" y="526" width="292.6" height="76.8" fill="#fff"/>
       </g>
     </mask>
   </defs>
@@ -818,20 +818,20 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <path d="M399.5 169V610.3199999999999" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
       <g>
         <path d="M77.65 125H172.5L158.85 164H64Z" fill="var(--base00)"/>
-        <path d="M77.65 125H172.5L158.85 164H64Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="118.25" y="149.4" font-size="14" text-anchor="middle" fill="var(--base05)">Client</text>
+        <path d="M77.65 125H172.5L158.85 164H64Z" fill="var(--base0B)" fill-opacity="0.2"/>
+        <text x="118.25" y="149.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Client</text>
       </g>
       <g>
         <path d="M207.5 125H307.1Q310.1 125 310.1 128V161Q310.1 164 307.1 164H207.5Q204.5 164 204.5 161V128Q204.5 125 207.5 125Z" fill="var(--base00)"/>
-        <path d="M207.5 125H307.1Q310.1 125 310.1 128V161Q310.1 164 307.1 164H207.5Q204.5 164 204.5 161V128Q204.5 125 207.5 125Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-        <path d="M212.5 125V164M302.1 125V164" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-        <text x="257.3" y="149.4" font-size="14" text-anchor="middle" fill="var(--base05)">Breaker</text>
+        <path d="M207.5 125H307.1Q310.1 125 310.1 128V161Q310.1 164 307.1 164H207.5Q204.5 164 204.5 161V128Q204.5 125 207.5 125Z" fill="var(--base08)" fill-opacity="0.2"/>
+        <path d="M212.5 125V164M302.1 125V164" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+        <text x="257.3" y="149.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Breaker</text>
       </g>
       <g>
         <path d="M342.1 125A57.400000000000006 5 0 0 1 456.90000000000003 125V164A57.400000000000006 5 0 0 1 342.1 164Z" fill="var(--base00)"/>
-        <path d="M342.1 125A57.400000000000006 5 0 0 1 456.90000000000003 125V164A57.400000000000006 5 0 0 1 342.1 164Z" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M342.1 125A57.400000000000006 5 0 0 1 456.90000000000003 125V164A57.400000000000006 5 0 0 1 342.1 164Z" fill="var(--base0E)" fill-opacity="0.2"/>
         <path d="M342.1 125A57.400000000000006 5 0 0 0 456.90000000000003 125" stroke="var(--base0E)" fill="none"/>
-        <text x="399.5" y="151.9" font-size="14" text-anchor="middle" fill="var(--base05)">Quotes API</text>
+        <text x="399.5" y="151.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">Quotes API</text>
       </g>
       <g>
         <g>
@@ -1248,39 +1248,39 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
       <g>
         <path d="M46.909999999999876 332.99982529431577H158.5599999999999L144.90999999999988 371.99982529431577H33.25999999999988Z" fill="var(--base00)"/>
-        <path d="M46.909999999999876 332.99982529431577H158.5599999999999L144.90999999999988 371.99982529431577H33.25999999999988Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="95.91" y="357.4" font-size="14" text-anchor="middle" fill="var(--base05)">call(fn)</text>
+        <path d="M46.909999999999876 332.99982529431577H158.5599999999999L144.90999999999988 371.99982529431577H33.25999999999988Z" fill="var(--base0B)" fill-opacity="0.2"/>
+        <text x="95.91" y="357.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">call(fn)</text>
       </g>
       <g class="a m127">
         <path d="M265.0099999999999 321.49982529431577L323.4599999999999 352.49982529431577L265.0099999999999 383.49982529431577L206.5599999999999 352.49982529431577Z" fill="var(--base00)"/>
-        <path d="M265.0099999999999 321.49982529431577L323.4599999999999 352.49982529431577L265.0099999999999 383.49982529431577L206.5599999999999 352.49982529431577Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="265.01" y="357.4" font-size="14" text-anchor="middle" fill="var(--base05)">open?</text>
+        <path d="M265.0099999999999 321.49982529431577L323.4599999999999 352.49982529431577L265.0099999999999 383.49982529431577L206.5599999999999 352.49982529431577Z" fill="var(--base0A)" fill-opacity="0.2"/>
+        <text x="265.01" y="357.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">open?</text>
       </g>
       <g class="a m128">
         <path d="M547.1999999999999 288L636.0999999999999 319L547.1999999999999 350L458.29999999999995 319Z" fill="var(--base00)"/>
-        <path d="M547.1999999999999 288L636.0999999999999 319L547.1999999999999 350L458.29999999999995 319Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="547.2" y="323.9" font-size="14" text-anchor="middle" fill="var(--base05)">retry due?</text>
+        <path d="M547.1999999999999 288L636.0999999999999 319L547.1999999999999 350L458.29999999999995 319Z" fill="var(--base0A)" fill-opacity="0.2"/>
+        <text x="547.2" y="323.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">retry due?</text>
       </g>
       <g class="a m129">
         <path d="M790.44 288H923.8400000000001A19.5 19.5 0 0 1 923.8400000000001 327H790.44A19.5 19.5 0 0 1 790.44 288Z" fill="var(--base00)"/>
-        <path d="M790.44 288H923.8400000000001A19.5 19.5 0 0 1 923.8400000000001 327H790.44A19.5 19.5 0 0 1 790.44 288Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="857.14" y="312.4" font-size="14" text-anchor="middle" fill="var(--base05)">throw OpenError</text>
+        <path d="M790.44 288H923.8400000000001A19.5 19.5 0 0 1 923.8400000000001 327H790.44A19.5 19.5 0 0 1 790.44 288Z" fill="var(--base0C)" fill-opacity="0.2"/>
+        <text x="857.14" y="312.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">throw OpenError</text>
       </g>
       <g class="a m130">
         <path d="M794.7400000000001 363H919.5400000000002Q922.5400000000002 363 922.5400000000002 366V399Q922.5400000000002 402 919.5400000000002 402H794.7400000000001Q791.7400000000001 402 791.7400000000001 399V366Q791.7400000000001 363 794.7400000000001 363Z" fill="var(--base00)"/>
-        <path d="M794.7400000000001 363H919.5400000000002Q922.5400000000002 363 922.5400000000002 366V399Q922.5400000000002 402 919.5400000000002 402H794.7400000000001Q791.7400000000001 402 791.7400000000001 399V366Q791.7400000000001 363 794.7400000000001 363Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-        <path d="M799.7400000000001 363V402M914.5400000000002 363V402" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-        <text x="857.14" y="387.4" font-size="14" text-anchor="middle" fill="var(--base05)">await fn()</text>
+        <path d="M794.7400000000001 363H919.5400000000002Q922.5400000000002 363 922.5400000000002 366V399Q922.5400000000002 402 919.5400000000002 402H794.7400000000001Q791.7400000000001 402 791.7400000000001 399V366Q791.7400000000001 363 794.7400000000001 363Z" fill="var(--base08)" fill-opacity="0.2"/>
+        <path d="M799.7400000000001 363V402M914.5400000000002 363V402" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+        <text x="857.14" y="387.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">await fn()</text>
       </g>
       <g class="a m131">
         <path d="M1118.94 288H1234.54Q1242.54 288 1242.54 296V319Q1242.54 327 1234.54 327H1118.94Q1110.94 327 1110.94 319V296Q1110.94 288 1118.94 288Z" fill="var(--base00)"/>
-        <path d="M1118.94 288H1234.54Q1242.54 288 1242.54 296V319Q1242.54 327 1234.54 327H1118.94Q1110.94 327 1110.94 319V296Q1110.94 288 1118.94 288Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="1176.74" y="312.4" font-size="14" text-anchor="middle" fill="var(--base05)">close, reset</text>
+        <path d="M1118.94 288H1234.54Q1242.54 288 1242.54 296V319Q1242.54 327 1234.54 327H1118.94Q1110.94 327 1110.94 319V296Q1110.94 288 1118.94 288Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <text x="1176.74" y="312.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">close, reset</text>
       </g>
       <g class="a m132">
         <path d="M1114.7400000000002 363H1238.7400000000002Q1246.7400000000002 363 1246.7400000000002 371V394Q1246.7400000000002 402 1238.7400000000002 402H1114.7400000000002Q1106.7400000000002 402 1106.7400000000002 394V371Q1106.7400000000002 363 1114.7400000000002 363Z" fill="var(--base00)"/>
-        <path d="M1114.7400000000002 363H1238.7400000000002Q1246.7400000000002 363 1246.7400000000002 371V394Q1246.7400000000002 402 1238.7400000000002 402H1114.7400000000002Q1106.7400000000002 402 1106.7400000000002 394V371Q1106.7400000000002 363 1114.7400000000002 363Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="1176.74" y="387.4" font-size="14" text-anchor="middle" fill="var(--base05)">count failure</text>
+        <path d="M1114.7400000000002 363H1238.7400000000002Q1246.7400000000002 363 1246.7400000000002 371V394Q1246.7400000000002 402 1238.7400000000002 402H1114.7400000000002Q1106.7400000000002 402 1106.7400000000002 394V371Q1106.7400000000002 363 1114.7400000000002 363Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <text x="1176.74" y="387.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">count failure</text>
       </g>
       <g class="a m133">
         <rect x="579.17" y="377" width="24.28" height="18" rx="3" fill="var(--base00)"/>

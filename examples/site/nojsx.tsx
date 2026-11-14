@@ -41,12 +41,12 @@ export const make = (tall = false): string => {
 
   const lit = tall
     ? [
-        { show: { at: T0 + 0.2, over: 1.4 }, target: src.lines(2, 7).pad(3) },
-        { show: { at: T0 + 1.2, over: 1.2 }, target: src.lines(8, 13).pad(3) },
+        { show: { at: T0 + 0.2, over: 1.4 }, target: src.lines(2, 7).pad(6) },
+        { show: { at: T0 + 1.2, over: 1.2 }, target: src.lines(8, 13).pad(6) },
       ]
     : [
-        { show: { at: T0 + 0.2, over: 1.4 }, target: src.lines(9, 15).pad(3) },
-        { show: { at: T0 + 1.2, over: 1.2 }, target: src.lines(16, 22).pad(3) },
+        { show: { at: T0 + 0.2, over: 1.4 }, target: src.lines(9, 15).pad(6) },
+        { show: { at: T0 + 1.2, over: 1.2 }, target: src.lines(16, 22).pad(6) },
       ];
 
   const panel = tall

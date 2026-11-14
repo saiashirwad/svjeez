@@ -1,6 +1,6 @@
 # @svjeez/svelte
 
-Svelte components for editing a [svjeez](https://www.npmjs.com/package/svjeez) scene through its own source. `Code` shows the file with a control on every number, color and ease: drag a number sideways, pick a color, bend an ease's curve. `Picture` shows the scene as it compiles, with a handle to drag for the selected number, and `Transport` plays, pauses and scrubs it. Every change rewrites one literal in the file, so the code stays the code.
+Svelte components for editing a [svjeez](https://www.npmjs.com/package/svjeez) scene through its own source. `Code` shows the file with a control on every number, color and ease: drag a number sideways, pick a color, bend an ease's curve. `Picture` shows the scene as it compiles, with a handle to drag for the selected number, and `Transport` plays, pauses and scrubs it, and `Stats` reads out the file's gzipped size, keyframes, script and build time. Every change rewrites one literal in the file, so the code stays the code.
 
 The store underneath is [`@svjeez/live`](https://www.npmjs.com/package/@svjeez/live); [`@svjeez/react`](https://www.npmjs.com/package/@svjeez/react) renders the same components for React.
 

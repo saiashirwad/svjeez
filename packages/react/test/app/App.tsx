@@ -1,6 +1,6 @@
 import "@svjeez/live/editor.css";
 import { Activity, memo as memoized, useState } from "react";
-import { Code, Picture, Transport, useEditor } from "../../src/index.ts";
+import { Code, Picture, Stats, Transport, useEditor } from "../../src/index.ts";
 import handled from "./handles.tsx?raw";
 import plain from "./scene.tsx?raw";
 
@@ -39,6 +39,7 @@ function Editor({ scene, wrap, memo }: Props) {
     <main>
       {memo ? <Memo editor={editor} /> : <Picture editor={editor} />}
       <Transport editor={editor} />
+      <Stats editor={editor} />
       <Code
         editor={editor}
         file="scene.tsx"

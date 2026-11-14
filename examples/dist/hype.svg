@@ -514,7 +514,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @keyframes k46{0%,6.688%,20.899%,100%{opacity:0}7.474%{opacity:1}20.112%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
 @keyframes k47{0%,6.688%,7.474%,20.112%{scale:1}20.899%,100%{scale:1.06}}
 .m39{animation-name:k45,k46,k47;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
-@keyframes k48{0%,25.105%{width:602px}25.454%,25.757%{width:720.8px}26.107%,100%{width:592.1px}}
+@keyframes k48{0%,25.105%{width:562.4px}25.454%,25.757%{width:681.2px}26.107%,100%{width:552.5px}}
 @keyframes k49{0%,25.105%{height:40.175px}25.454%,25.757%{height:72.35px}26.107%,100%{height:104.525px}}
 .m40{animation-name:k48,k49}
 @keyframes k50{0%,25.105%{translate:0px 0px}25.454%,25.757%{translate:0px 32.175px}26.107%,100%{translate:0px 96.525px}}
@@ -1702,7 +1702,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         </g>
         <g class="a m42">
           <g class="a m41">
-            <rect x="60" y="332.875" width="602" height="40.175" rx="6" fill="var(--base09)" fill-opacity="0.1" stroke="var(--base09)" stroke-opacity="0.4" stroke-width="1" class="a m40"/>
+            <rect x="99.6" y="332.875" width="562.4" height="40.175" rx="8" fill="var(--base09)" fill-opacity="0.14" class="a m40"/>
           </g>
         </g>
         <g>
@@ -2347,29 +2347,29 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
           <g>
             <path d="M860.7649998035673 54.5H986.3649998035673L969.5649998035674 102.5H843.9649998035674Z" fill="var(--base00)"/>
-            <path d="M860.7649998035673 54.5H986.3649998035673L969.5649998035674 102.5H843.9649998035674Z" fill="var(--base0B)" fill-opacity="0.14" stroke="var(--base0B)" stroke-width="1.5" stroke-linejoin="round"/>
-            <text x="915.165" y="84.45" font-size="17" text-anchor="middle" fill="var(--base05)">an idea</text>
+            <path d="M860.7649998035673 54.5H986.3649998035673L969.5649998035674 102.5H843.9649998035674Z" fill="var(--base0B)" fill-opacity="0.2"/>
+            <text x="915.165" y="84.45" font-size="17" text-anchor="middle" font-weight="600" fill="var(--base05)">an idea</text>
           </g>
           <g class="a m211">
             <path d="M860.8649998035673 150.5H969.4649998035674Q972.4649998035674 150.5 972.4649998035674 153.5V195.5Q972.4649998035674 198.5 969.4649998035674 198.5H860.8649998035673Q857.8649998035673 198.5 857.8649998035673 195.5V153.5Q857.8649998035673 150.5 860.8649998035673 150.5Z" fill="var(--base00)"/>
-            <path d="M860.8649998035673 150.5H969.4649998035674Q972.4649998035674 150.5 972.4649998035674 153.5V195.5Q972.4649998035674 198.5 969.4649998035674 198.5H860.8649998035673Q857.8649998035673 198.5 857.8649998035673 195.5V153.5Q857.8649998035673 150.5 860.8649998035673 150.5Z" fill="var(--base08)" fill-opacity="0.14" stroke="var(--base08)" stroke-width="1.5" stroke-linejoin="round"/>
-            <path d="M865.8649998035673 150.5V198.5M964.4649998035674 150.5V198.5" stroke="var(--base08)" stroke-opacity="0.7" fill="none"/>
-            <text x="915.165" y="180.45" font-size="17" text-anchor="middle" fill="var(--base05)">Claude</text>
+            <path d="M860.8649998035673 150.5H969.4649998035674Q972.4649998035674 150.5 972.4649998035674 153.5V195.5Q972.4649998035674 198.5 969.4649998035674 198.5H860.8649998035673Q857.8649998035673 198.5 857.8649998035673 195.5V153.5Q857.8649998035673 150.5 860.8649998035673 150.5Z" fill="var(--base08)" fill-opacity="0.2"/>
+            <path d="M865.8649998035673 150.5V198.5M964.4649998035674 150.5V198.5" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+            <text x="915.165" y="180.45" font-size="17" text-anchor="middle" font-weight="600" fill="var(--base05)">Claude</text>
           </g>
           <g class="a m212">
             <path d="M858.5649998984317 246.5H971.7649998984317Q979.7649998984317 246.5 979.7649998984317 254.5V286.5Q979.7649998984317 294.5 971.7649998984317 294.5H858.5649998984317Q850.5649998984317 294.5 850.5649998984317 286.5V254.5Q850.5649998984317 246.5 858.5649998984317 246.5Z" fill="var(--base00)"/>
-            <path d="M858.5649998984317 246.5H971.7649998984317Q979.7649998984317 246.5 979.7649998984317 254.5V286.5Q979.7649998984317 294.5 971.7649998984317 294.5H858.5649998984317Q850.5649998984317 294.5 850.5649998984317 286.5V254.5Q850.5649998984317 246.5 858.5649998984317 246.5Z" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-width="1.5" stroke-linejoin="round"/>
-            <text x="915.165" y="276.45" font-size="17" text-anchor="middle" fill="var(--base05)">scene.tsx</text>
+            <path d="M858.5649998984317 246.5H971.7649998984317Q979.7649998984317 246.5 979.7649998984317 254.5V286.5Q979.7649998984317 294.5 971.7649998984317 294.5H858.5649998984317Q850.5649998984317 294.5 850.5649998984317 286.5V254.5Q850.5649998984317 246.5 858.5649998984317 246.5Z" fill="var(--base0D)" fill-opacity="0.2"/>
+            <text x="915.165" y="276.45" font-size="17" text-anchor="middle" font-weight="600" fill="var(--base05)">scene.tsx</text>
           </g>
           <g class="a m213">
             <path d="M915.165 342.5L1037.905 380L915.165 417.5L792.425 380Z" fill="var(--base00)"/>
-            <path d="M915.165 342.5L1037.905 380L915.165 417.5L792.425 380Z" fill="var(--base0A)" fill-opacity="0.14" stroke="var(--base0A)" stroke-width="1.5" stroke-linejoin="round"/>
-            <text x="915.165" y="385.95" font-size="17" text-anchor="middle" fill="var(--base05)">looks right?</text>
+            <path d="M915.165 342.5L1037.905 380L915.165 417.5L792.425 380Z" fill="var(--base0A)" fill-opacity="0.2"/>
+            <text x="915.165" y="385.95" font-size="17" text-anchor="middle" font-weight="600" fill="var(--base05)">looks right?</text>
           </g>
           <g class="a m214">
             <path d="M875.1650000646656 533.5H955.1650000646656A24 24 0 0 1 955.1650000646656 581.5H875.1650000646656A24 24 0 0 1 875.1650000646656 533.5Z" fill="var(--base00)"/>
-            <path d="M875.1650000646656 533.5H955.1650000646656A24 24 0 0 1 955.1650000646656 581.5H875.1650000646656A24 24 0 0 1 875.1650000646656 533.5Z" fill="var(--base0C)" fill-opacity="0.14" stroke="var(--base0C)" stroke-width="1.5" stroke-linejoin="round"/>
-            <text x="915.165" y="563.45" font-size="17" text-anchor="middle" fill="var(--base05)">ship it</text>
+            <path d="M875.1650000646656 533.5H955.1650000646656A24 24 0 0 1 955.1650000646656 581.5H875.1650000646656A24 24 0 0 1 875.1650000646656 533.5Z" fill="var(--base0C)" fill-opacity="0.2"/>
+            <text x="915.165" y="563.45" font-size="17" text-anchor="middle" font-weight="600" fill="var(--base05)">ship it</text>
           </g>
           <g class="a m215">
             <rect x="1060.235" y="314.25" width="27.34" height="22" rx="3" fill="var(--base00)"/>
