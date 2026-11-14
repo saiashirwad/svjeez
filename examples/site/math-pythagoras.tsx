@@ -1,6 +1,6 @@
 import { tex } from "@svjeez/math";
 import { draw, ease, enter, exit, motion, render, type Color } from "svjeez";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 // The rearrangement proof: four copies of one right triangle fill a square of side a + b twice over. One way they leave a tilted square c², the other way two squares a² and b², so a² + b² = c².

@@ -1,5 +1,5 @@
 import { ease, motion, render } from "svjeez";
-import { CSS, chrome, skeleton } from "./kit";
+import { CSS, chrome, skeleton } from "./lib/kit";
 import { theme } from "../style";
 
 // A docs page: sidebar, text, and a diagram image whose packet keeps travelling.

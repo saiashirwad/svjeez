@@ -1,6 +1,6 @@
 import { render, flow } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 const BAR = 40;

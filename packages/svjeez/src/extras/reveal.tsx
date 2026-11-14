@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import type { RestChannel, ChannelValues } from "../channels";
-import { el } from "../el";
 import { ease, type Seconds, type Span } from "../motion";
 import { enter } from "../recipes";
 import { span as spanOf, type Spanned } from "../span";
@@ -86,10 +86,14 @@ export function reveal(
   const end = Math.max(...spans.map((span) => span.at + span.over));
 
   return {
-    node: el.g({}, [
-      draw(undefined),
-      spans.map((span, k) => el.g({ animation: enter(span, from, ease.out) }, draw(k))),
-    ]),
+    node: (
+      <g>
+        {draw(undefined)}
+        {spans.map((span, k) => (
+          <g animation={enter(span, from, ease.out)}>{draw(k)}</g>
+        ))}
+      </g>
+    ),
     spans,
     span: spanOf(first, end - first),
   };

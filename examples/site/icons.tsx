@@ -22,7 +22,7 @@ import {
   type IconData,
   type Stack,
 } from "svjeez";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 // Eight Tabler icons, each arriving its own way, then a few of them keep moving.

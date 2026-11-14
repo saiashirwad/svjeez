@@ -80,7 +80,7 @@ export {
   type PencilOptions,
 } from "./ink/ink";
 
-export type { ElementProps } from "./el";
+export type { ElementProps } from "./jsx-runtime";
 
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 

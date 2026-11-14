@@ -1,7 +1,7 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, type Color, tint } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // Two series side by side in each month: opened grows first, merged catches up and writes its count.

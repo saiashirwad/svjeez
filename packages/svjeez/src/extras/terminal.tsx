@@ -1,4 +1,4 @@
-import { el } from "../el";
+/** @jsxImportSource svjeez */
 import type { Rect } from "../geometry";
 import { motion, type Seconds } from "../motion";
 import { span, type Spanned } from "../span";
@@ -78,24 +78,28 @@ export function terminal(
 
     const printed = typed.span.end + think;
 
-    const lines = output.map((out, i) =>
-      el.g(
-        {
-          animation: motion({ opacity: 0 })
-            .at(printed + i * 0.06)
-            .set({ opacity: 1 }),
-        },
-        line(isPlainOutput(out) ? [out] : out).node,
-      ),
-    );
+    const lines = output.map((out, i) => (
+      <g
+        animation={motion({ opacity: 0 })
+          .at(printed + i * 0.06)
+          .set({ opacity: 1 })}
+      >
+        {line(isPlainOutput(out) ? [out] : out).node}
+      </g>
+    ));
 
     clock = printed + output.length * 0.06 + gap;
 
-    return el.g({ animation: shown }, [typed.node, lines]);
+    return (
+      <g animation={shown}>
+        {typed.node}
+        {lines}
+      </g>
+    );
   });
 
   return {
-    node: el.g({}, nodes),
+    node: <g>{nodes}</g>,
     span: span(at, clock - gap - at),
     bounds: laid.map((c) => c.bounds).reduce((a, b) => a.union(b)),
   };

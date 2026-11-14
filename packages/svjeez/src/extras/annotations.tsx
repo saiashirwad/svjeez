@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import type { Color } from "../attributes";
-import { el } from "../el";
 import type { Edge, Point, Rect } from "../geometry";
 import { motion } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
@@ -45,20 +45,22 @@ export function Arrow({
   const barb = (a: number) => `${to.x - 8 * Math.cos(angle + a)} ${to.y - 8 * Math.sin(angle + a)}`;
   const stroke = Math.min(0.6, span.over / 2);
 
-  return el.g({ class: cls, animation: showing(span, { fade: 0.2 }) }, [
-    el.path({
-      d: `M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`,
-      ...ink(color),
-      animation: draw({ at: span.at, over: stroke }),
-    }),
-    el.path({
-      d: `M${barb(0.45)}L${to.x} ${to.y}L${barb(-0.45)}`,
-      ...ink(color),
-      animation: motion({ opacity: 0, scale: 0.5 })
-        .at(span.at + stroke)
-        .to({ opacity: 1, scale: 1 }, Math.min(0.15, span.over - stroke)),
-    }),
-  ]);
+  return (
+    <g class={cls} animation={showing(span, { fade: 0.2 })}>
+      <path
+        d={`M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`}
+        {...ink(color)}
+        animation={draw({ at: span.at, over: stroke })}
+      />
+      <path
+        d={`M${barb(0.45)}L${to.x} ${to.y}L${barb(-0.45)}`}
+        {...ink(color)}
+        animation={motion({ opacity: 0, scale: 0.5 })
+          .at(span.at + stroke)
+          .to({ opacity: 1, scale: 1 }, Math.min(0.15, span.over - stroke))}
+      />
+    </g>
+  );
 }
 
 /** A note box beside `target`, joined to it by a short leader. `columns` is the line length in characters. With `font`, the box fits the measured lines. */
@@ -128,23 +130,27 @@ export function Callout({
     },
   ];
 
-  return el.g({ class: cls, fontFamily: font, animation: showing(span, { fade: 0.2 }) }, [
-    el.path({ d: `M${end.x} ${end.y}L${start.x} ${start.y}`, ...ink(color), strokeOpacity: 0.6 }),
-    el.rect({
-      x,
-      y,
-      width: w,
-      height: h,
-      rx: 6,
-      fill: color,
-      fillOpacity: 0.08,
-      stroke: color,
-      strokeOpacity: 0.4,
-    }),
-    lines.map((line, i) =>
-      el.text({ x: x + 10, y: y + 8 + fontSize + i * fontSize * 1.4, fontSize, fill: color }, line),
-    ),
-  ]);
+  return (
+    <g class={cls} fontFamily={font} animation={showing(span, { fade: 0.2 })}>
+      <path d={`M${end.x} ${end.y}L${start.x} ${start.y}`} {...ink(color)} strokeOpacity={0.6} />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx={6}
+        fill={color}
+        fillOpacity={0.08}
+        stroke={color}
+        strokeOpacity={0.4}
+      />
+      {lines.map((line, i) => (
+        <text x={x + 10} y={y + 8 + fontSize + i * fontSize * 1.4} fontSize={fontSize} fill={color}>
+          {line}
+        </text>
+      ))}
+    </g>
+  );
 }
 
 export function Brace({
@@ -175,28 +181,30 @@ export function Brace({
     ? `M${target.x} ${edge}q0 ${dir * 8} 8 ${dir * 8}H${mid - 8}q8 0 8 ${dir * 8}q0 ${-dir * 8} 8 ${-dir * 8}H${target.x + target.w - 8}q8 0 8 ${-dir * 8}`
     : `M${edge} ${target.y}q${dir * 8} 0 ${dir * 8} 8V${mid - 8}q0 8 ${dir * 8} 8q${-dir * 8} 0 ${-dir * 8} 8V${target.y + target.h - 8}q0 8 ${-dir * 8} 8`;
 
-  return el.g({ class: cls, animation: showing(span, { fade: 0.2 }) }, [
-    el.path({ d, ...ink(color) }),
-    label &&
-      el.text(
-        along
-          ? {
-              x: mid,
-              y: edge + (dir < 0 ? -4 - fontSize : 10 + fontSize),
-              textAnchor: "middle",
-              fontSize,
-              fill: color,
-            }
-          : {
-              x: edge + dir * 20,
-              y: mid + fontSize / 3,
-              textAnchor: side === "left" ? "end" : "start",
-              fontSize,
-              fill: color,
-            },
-        label,
-      ),
-  ]);
+  return (
+    <g class={cls} animation={showing(span, { fade: 0.2 })}>
+      <path d={d} {...ink(color)} />
+      {label && (
+        <text
+          {...(along
+            ? {
+                x: mid,
+                y: edge + (dir < 0 ? -4 - fontSize : 10 + fontSize),
+                textAnchor: "middle" as const,
+              }
+            : {
+                x: edge + dir * 20,
+                y: mid + fontSize / 3,
+                textAnchor: side === "left" ? ("end" as const) : ("start" as const),
+              })}
+          fontSize={fontSize}
+          fill={color}
+        >
+          {label}
+        </text>
+      )}
+    </g>
+  );
 }
 
 export function Underline({
@@ -215,13 +223,15 @@ export function Underline({
       ? `M${r.x} ${y}h${r.w}`
       : `M${r.x} ${y}${`l${r.w / count / 2} -2l${r.w / count / 2} 2`.repeat(count)}`;
 
-  return el.path({
-    d,
-    ...ink(color),
-    class: cls,
-    animation: [
-      showing(span, { fade: 0.2 }),
-      draw({ at: span.at, over: Math.min(0.5, span.over / 2) }),
-    ],
-  });
+  return (
+    <path
+      d={d}
+      {...ink(color)}
+      class={cls}
+      animation={[
+        showing(span, { fade: 0.2 }),
+        draw({ at: span.at, over: Math.min(0.5, span.over / 2) }),
+      ]}
+    />
+  );
 }

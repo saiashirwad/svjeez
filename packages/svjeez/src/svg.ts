@@ -12,7 +12,7 @@ export type AttrValue = string | AnyRef | Css | FontValue;
 /** CSS declarations as a JSX `style` object: property name to value. */
 export type Style = Readonly<Record<string, string | number | undefined>>;
 
-/** A prop as JSX or `el` passes it. `children` and `animation` are typed in `Props`. */
+/** A prop as JSX passes it. `children` and `animation` are typed in `Props`. */
 export type Prop = Child | Stack | AttrValue | Style;
 
 /** The props `node` reads. Every key but `children` and `animation` is an attribute. */

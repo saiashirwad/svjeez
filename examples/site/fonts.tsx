@@ -1,6 +1,6 @@
 import { google } from "@svjeez/fonts";
 import { Glyphs, draw, ease, enter, render } from "svjeez";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // Two real fonts embedded in one file. Each is cut down to the glyphs this card uses.

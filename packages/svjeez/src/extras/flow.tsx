@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import type { Color } from "../attributes";
-import { el } from "../el";
 import { pathLength, simplify, type Point } from "../geometry";
 import { EPSILON, ease, motion, type Seconds } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
@@ -95,7 +95,7 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
     return period === undefined ? trip : trip.loop(period);
   };
 
-  const head = el.circle({ r: size, fill: color, animation: run() });
+  const head = <circle r={size} fill={color} animation={run()} />;
 
   const body = (() => {
     switch (style) {
@@ -103,33 +103,36 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
         return head;
       case "comet":
         return [
-          el.g({ opacity: 0.22 }, el.circle({ r: size * 2.4, fill: color, animation: run() })),
+          <g opacity={0.22}>
+            <circle r={size * 2.4} fill={color} animation={run()} />
+          </g>,
           Array.from({ length: tail }, (_, i) => {
             const k = (i + 1) / (tail + 1);
 
-            return el.g(
-              { opacity: 0.6 * (1 - k) },
-              el.circle({ r: size * (1 - 0.7 * k), fill: color, animation: run(lag * (i + 1)) }),
+            return (
+              <g opacity={0.6 * (1 - k)}>
+                <circle r={size * (1 - 0.7 * k)} fill={color} animation={run(lag * (i + 1))} />
+              </g>
             );
           }),
           head,
         ];
       case "trace":
         return [
-          el.path({
-            d: points.map((p, i) => `${i ? "L" : "M"}${p.x} ${p.y}`).join(""),
-            fill: "none",
-            stroke: color,
-            strokeWidth: size * 0.6,
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            animation: [
+          <path
+            d={points.map((p, i) => `${i ? "L" : "M"}${p.x} ${p.y}`).join("")}
+            fill="none"
+            stroke={color}
+            strokeWidth={size * 0.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            animation={[
               motion()
                 .at(end + 0.15)
                 .to({ opacity: 0 }, 0.6),
               draw({ at, over }, ease.linear),
-            ],
-          }),
+            ]}
+          />,
           head,
         ];
       case "packet": {
@@ -137,53 +140,62 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
         const fontSize = options.fontSize ?? 11;
         const [w, h] = [textWidth(text, fontSize, options.font) + 14, fontSize + 9];
 
-        return el.g({ animation: run() }, [
-          el.rect({
-            x: -w / 2,
-            y: -h / 2,
-            width: w,
-            height: h,
-            rx: h / 2,
-            fill: options.fill ?? color,
-            fillOpacity: options.fill ? 1 : 0.18,
-            stroke: color,
-            strokeWidth: 1.25,
-          }),
-          el.text(
-            {
-              y: fontSize * 0.35,
-              textAnchor: "middle",
-              fontSize,
-              fontFamily: options.font,
-              fill: options.ink ?? color,
-            },
-            text,
-          ),
-        ]);
+        return (
+          <g animation={run()}>
+            <rect
+              x={-w / 2}
+              y={-h / 2}
+              width={w}
+              height={h}
+              rx={h / 2}
+              fill={options.fill ?? color}
+              fillOpacity={options.fill ? 1 : 0.18}
+              stroke={color}
+              strokeWidth={1.25}
+            />
+            <text
+              y={fontSize * 0.35}
+              textAnchor="middle"
+              fontSize={fontSize}
+              fontFamily={options.font}
+              fill={options.ink ?? color}
+            >
+              {text}
+            </text>
+          </g>
+        );
       }
     }
   })();
 
   const last = points.at(-1)!;
 
-  const ring =
-    arrive &&
-    el.circle({
-      cx: last.x,
-      cy: last.y,
-      r: size * 2,
-      fill: "none",
-      stroke: color,
-      strokeWidth: 1.5,
-      animation: motion({ opacity: 0, scale: 0.5 })
+  const ring = arrive && (
+    <circle
+      cx={last.x}
+      cy={last.y}
+      r={size * 2}
+      fill="none"
+      stroke={color}
+      strokeWidth={1.5}
+      animation={motion({ opacity: 0, scale: 0.5 })
         .at(end)
         .set({ opacity: 0.9 })
-        .to({ opacity: 0, scale: 3 }, 0.7),
-    });
+        .to({ opacity: 0, scale: 3 }, 0.7)}
+    />
+  );
 
   const done = end + (arrive ? 0.7 : 0);
 
-  return { node: el.g({ class: cls }, [body, ring]), span: span(at, done - at) };
+  return {
+    node: (
+      <g class={cls}>
+        {body}
+        {ring}
+      </g>
+    ),
+    span: span(at, done - at),
+  };
 };
 
 /** Same as the golden angle on a circle: consecutive indices land far apart, and the sequence never repeats. */
@@ -229,36 +241,37 @@ const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowR
       "flow() sets the period and the trip of every line itself, from speed. Drop period and over, or pass one line.",
     );
 
-  const node = el.g(
-    { class: cls, animation: motion({ opacity: 0 }).at(at).to({ opacity: 1 }, FADE_IN) },
-    lines.flatMap((line, i) => {
-      const points = simplify(line, tolerance);
-      const length = pathLength(points);
+  const node = (
+    <g class={cls} animation={motion({ opacity: 0 }).at(at).to({ opacity: 1 }, FADE_IN)}>
+      {lines.flatMap((line, i) => {
+        const points = simplify(line, tolerance);
+        const length = pathLength(points);
 
-      if (!(length > 0)) return [];
+        if (!(length > 0)) return [];
 
-      const trip = length / speed;
-      const wait = options.rest ?? trip * 0.4;
-      const period = trip + reach + wait;
-      const [ahead, behind] = cut(points, (((i + 1) * GOLDEN) % 1) * length);
+        const trip = length / speed;
+        const wait = options.rest ?? trip * 0.4;
+        const period = trip + reach + wait;
+        const [ahead, behind] = cut(points, (((i + 1) * GOLDEN) % 1) * length);
 
-      const piece = (part: readonly Point[], start: Seconds) =>
-        pathLength(part) > 0
-          ? [
-              one(part, {
-                ...shared,
-                at: start,
-                over: pathLength(part) / speed,
-                period,
-                style,
-                tail,
-                size: options.size ?? 2.5,
-              }).node,
-            ]
-          : [];
+        const piece = (part: readonly Point[], start: Seconds) =>
+          pathLength(part) > 0
+            ? [
+                one(part, {
+                  ...shared,
+                  at: start,
+                  over: pathLength(part) / speed,
+                  period,
+                  style,
+                  tail,
+                  size: options.size ?? 2.5,
+                }).node,
+              ]
+            : [];
 
-      return [...piece(ahead, 0), ...piece(behind, pathLength(ahead) / speed + wait)];
-    }),
+        return [...piece(ahead, 0), ...piece(behind, pathLength(ahead) / speed + wait)];
+      })}
+    </g>
   );
 
   return { node, span: span(at, FADE_IN) };

@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import { def } from "../defs";
-import { el } from "../el";
 import type { Rect } from "../geometry";
 import { motion, type Seconds } from "../motion";
 import type { Child, SvgNode } from "../svg";
@@ -38,23 +38,15 @@ export function Focus({
   );
 
   const mask = def.mask({}, [
-    el.rect({
-      x: "-10%",
-      y: "-10%",
-      width: "120%",
-      height: "120%",
-      fill: "#fff",
-      animation: shade,
-    }),
-    stops.map((stop) =>
-      el.g(
-        { animation: show(stop.show, { fade }) },
-        [stop.target]
-          .flat()
-          .map((r) => el.rect({ x: r.x, y: r.y, width: r.w, height: r.h, fill: "#fff" })),
-      ),
-    ),
+    <rect x="-10%" y="-10%" width="120%" height="120%" fill="#fff" animation={shade} />,
+    stops.map((stop) => (
+      <g animation={show(stop.show, { fade })}>
+        {[stop.target].flat().map((r) => (
+          <rect x={r.x} y={r.y} width={r.w} height={r.h} fill="#fff" />
+        ))}
+      </g>
+    )),
   ]);
 
-  return el.g({ mask }, children);
+  return <g mask={mask}>{children}</g>;
 }

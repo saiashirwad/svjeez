@@ -1,7 +1,7 @@
 import { ease, enter, motion, render, Marker, code } from "svjeez";
 
 import { highlight } from "@svjeez/code";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // A motion() chain on the left, the same chain drawn as tracks on the right, and a square that obeys it.

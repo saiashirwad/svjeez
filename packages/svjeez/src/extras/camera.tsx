@@ -1,4 +1,4 @@
-import { el } from "../el";
+/** @jsxImportSource svjeez */
 import type { Point, Rect } from "../geometry";
 import { ease, motion, type Motion, type Seconds } from "../motion";
 import type { Child, SvgNode } from "../svg";
@@ -70,9 +70,10 @@ export function Camera({
       motion({ scale: 1 }),
     );
 
-    return el.g(
-      { style: { transformOrigin: `${origin.x}px ${origin.y}px` }, animation: hold },
-      children,
+    return (
+      <g style={{ transformOrigin: `${origin.x}px ${origin.y}px` }} animation={hold}>
+        {children}
+      </g>
     );
   }
 
@@ -87,8 +88,9 @@ export function Camera({
     motion({ x: 0, y: 0, scale: 1 }),
   );
 
-  return el.g(
-    { style: { transformOrigin: "0 0", transformBox: "view-box" }, animation: track },
-    children,
+  return (
+    <g style={{ transformOrigin: "0 0", transformBox: "view-box" }} animation={track}>
+      {children}
+    </g>
   );
 }

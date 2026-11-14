@@ -1,6 +1,6 @@
 import { render, terminal } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 const W = 504;

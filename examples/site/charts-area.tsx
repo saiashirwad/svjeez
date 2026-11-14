@@ -1,7 +1,7 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, tint } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // An area wipes on from the left, then a marker shows where the curve turned.

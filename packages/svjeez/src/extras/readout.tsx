@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import type { Attrs } from "../attributes";
-import { el } from "../el";
 import { motion, type Motion, type Seconds, type Span } from "../motion";
 import type { SvgNode } from "../svg";
 
@@ -38,21 +38,26 @@ export function readout(text: (t: Seconds) => string, options: ReadoutOptions): 
     current = s;
   });
 
-  return el.g(
-    {},
-    [...windows].map(([s, spans]) => {
-      const shown = spans[0]![0] === 0;
+  return (
+    <g>
+      {[...windows].map(([s, spans]) => {
+        const shown = spans[0]![0] === 0;
 
-      const track = spans.reduce<Motion<"opacity">>(
-        (m, [on, off], i) => {
-          const lit = i === 0 && shown ? m : m.at(on).set({ opacity: 1 });
+        const track = spans.reduce<Motion<"opacity">>(
+          (m, [on, off], i) => {
+            const lit = i === 0 && shown ? m : m.at(on).set({ opacity: 1 });
 
-          return off === undefined ? lit : lit.at(off).set({ opacity: 0 });
-        },
-        motion({ opacity: shown ? 1 : 0 }),
-      );
+            return off === undefined ? lit : lit.at(off).set({ opacity: 0 });
+          },
+          motion({ opacity: shown ? 1 : 0 }),
+        );
 
-      return el.text({ ...attrs, animation: track }, s);
-    }),
+        return (
+          <text {...attrs} animation={track}>
+            {s}
+          </text>
+        );
+      })}
+    </g>
   );
 }

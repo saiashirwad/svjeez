@@ -1,4 +1,4 @@
-import { el } from "../el";
+/** @jsxImportSource svjeez */
 import { EPSILON, ease, motion, type Motion, type Seconds, type Span, type Stack } from "../motion";
 import { span as spanOf, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
@@ -189,7 +189,12 @@ export function morph(
   const numbers = gutter ? lineNumbers(codes, at, over) : [];
 
   return {
-    node: el.g({}, [numbers, chains.map((chain) => chain.source.draw(chain.word, chain.track))]),
+    node: (
+      <g>
+        {numbers}
+        {chains.map((chain) => chain.source.draw(chain.word, chain.track))}
+      </g>
+    ),
     spans: at.map((start): Span => ({ at: start, over })),
     span: spanOf(at[0] ?? 0, at.length > 0 ? at.at(-1)! + over - at[0]! : 0),
   };

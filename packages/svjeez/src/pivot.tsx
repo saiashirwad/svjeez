@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import type { TagChannels } from "./channels";
-import { el } from "./el";
 import { num } from "./format";
 import type { Point } from "./geometry";
 import type { Stack } from "./motion";
@@ -16,8 +16,12 @@ export interface PivotProps {
 export const Pivot = ({ origin, animation, children }: PivotProps): SvgNode => {
   const { x, y } = origin ?? { x: 0, y: 0 };
 
-  return el.g(
-    { style: { transformBox: "view-box", transformOrigin: `${num(x)}px ${num(y)}px` }, animation },
-    children,
+  return (
+    <g
+      style={{ transformBox: "view-box", transformOrigin: `${num(x)}px ${num(y)}px` }}
+      animation={animation}
+    >
+      {children}
+    </g>
   );
 };

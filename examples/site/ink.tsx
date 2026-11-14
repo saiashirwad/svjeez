@@ -1,5 +1,5 @@
 import { Ink, draw, ease, enter, render, strokeFont, tool } from "svjeez";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 // Handwriting from a single-line font, then a brush swash under it.

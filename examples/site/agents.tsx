@@ -12,7 +12,7 @@ import {
   type CodeTokens,
 } from "svjeez";
 
-import { CSS } from "./kit";
+import { CSS } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // A desktop: a soft wallpaper, a menu bar, a terminal installing the skill, and an agent writing a scene with it.

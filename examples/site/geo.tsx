@@ -3,7 +3,7 @@ import { google } from "@svjeez/fonts";
 import { draw, ease, enter, rect, render, type Point, flow } from "svjeez";
 
 import { createRequire } from "node:module";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // The world's countries fill in from west to east, then great-circle flights leave London for six cities.

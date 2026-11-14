@@ -1,7 +1,7 @@
 import { plane, tex } from "@svjeez/math";
 import { css, def, enter, render, morph } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 // A linear transformation, 3Blue1Brown style: the grid, î and ĵ and the unit square move as one under A, and the square's area becomes det A.

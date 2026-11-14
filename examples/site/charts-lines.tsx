@@ -1,7 +1,7 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, tint } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // Three lines draw one after another, each in its own curve, and write their names at the end.

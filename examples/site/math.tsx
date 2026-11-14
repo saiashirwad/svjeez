@@ -1,7 +1,7 @@
 import { tex } from "@svjeez/math";
 import { draw, ease, enter, motion, render, sampled, type Color, morph } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 // Euler's formula: a point turns once round the unit circle, then stops at π, and the formula follows it to e^{iπ} + 1 = 0.

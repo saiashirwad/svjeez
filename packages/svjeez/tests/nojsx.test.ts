@@ -11,9 +11,25 @@ import {
   systemDark,
   systemLight,
 } from "svjeez";
-import { el } from "../src/el";
+import { jsx } from "svjeez/jsx-runtime";
+import type { Child, Props } from "../src/svg";
 import jsxReview from "../skills/svjeez/examples/review-flow";
 import jsxToast from "../skills/svjeez/examples/toast";
+
+type Tag = (props?: Props, content?: Child) => ReturnType<typeof jsx>;
+
+const tag =
+  (name: string): Tag =>
+  (props = {}, content) =>
+    jsx(name, { ...props, children: content });
+
+const el = {
+  rect: tag("rect"),
+  g: tag("g"),
+  circle: tag("circle"),
+  path: tag("path"),
+  text: tag("text"),
+};
 
 const toast = (): string => {
   const { rect, g, circle, path, text } = el;
@@ -146,7 +162,7 @@ const review = (): string => {
   );
 };
 
-describe("building scenes with el instead of JSX", () => {
+describe("building scenes with jsx() instead of JSX syntax", () => {
   test("the toast renders the same bytes", () => {
     expect(toast()).toBe(jsxToast());
   });

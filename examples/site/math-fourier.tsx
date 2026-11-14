@@ -1,7 +1,7 @@
 import { tex } from "@svjeez/math";
 import { enter, motion, render, sampled, morph } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 // A square wave from epicycles: circles for the odd harmonics join one at a time, each spinning on the tip of the last, and the tip's height traces a partial Fourier sum that grows squarer with every circle.

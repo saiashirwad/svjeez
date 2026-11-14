@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { motion, render } from "svjeez";
-import { el } from "../src/el";
 import { Fragment, jsxDEV } from "svjeez/jsx-dev-runtime";
 
 const options = { width: 100, height: 60, duration: 2, title: "Sources" };
@@ -37,7 +36,7 @@ describe("render sources", () => {
   });
 
   test("a component's root takes the place the component was used, unless it has one of its own", () => {
-    const Dot = () => el.circle({ r: 3 });
+    const Dot = () => <circle r={3} />;
 
     const svg = render(
       { ...options, sources: true },

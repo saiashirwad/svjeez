@@ -1,7 +1,7 @@
 import { enter, render, Callout, Focus, code } from "svjeez";
 
 import { highlight } from "@svjeez/code";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 const W = 504;

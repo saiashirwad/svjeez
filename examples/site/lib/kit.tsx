@@ -1,7 +1,6 @@
-import { jsx } from "svjeez/jsx-runtime";
 import { motion, rect, type Color, type SvgNode, appWindow } from "svjeez";
 
-import { css, mono, theme } from "../style";
+import { css, mono, theme } from "../../style";
 
 const SANS = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif";
 const ROUND = "ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif";
@@ -37,7 +36,7 @@ export const chrome = (
     class: options.mono ? undefined : "sans",
   });
 
-  return options.mono ? { ...win, node: jsx("g", { fontFamily: mono, children: win.node }) } : win;
+  return options.mono ? { ...win, node: <g fontFamily={mono}>{win.node}</g> } : win;
 };
 
 /** Fade everything out just before the loop restarts, so the jump back to the first frame is not seen. */
@@ -57,4 +56,6 @@ export const skeleton = (
     fill = theme.base02,
   }: { gap?: number; height?: number; fill?: Color } = {},
 ): SvgNode[] =>
-  widths.map((w, i) => jsx("rect", { x, y: y + i * gap, width: w, height, rx: height / 2, fill }));
+  widths.map((w, i) => (
+    <rect x={x} y={y + i * gap} width={w} height={height} rx={height / 2} fill={fill} />
+  ));

@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { draw, ease, enter, render, Marker, code } from "svjeez";
 
 import { highlight } from "@svjeez/code";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // Without JSX: the same scene built from jsx() calls, shown from the real file so it type-checks.

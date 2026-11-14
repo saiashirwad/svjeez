@@ -1,7 +1,7 @@
 import { mermaid } from "@svjeez/mermaid";
 import { enter, render, flow } from "svjeez";
 
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
 // A Mermaid flowchart builds node by node, then a token traces the happy path.

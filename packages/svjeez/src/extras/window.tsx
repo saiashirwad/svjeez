@@ -1,4 +1,4 @@
-import { el } from "../el";
+/** @jsxImportSource svjeez */
 import { rect, type Rect } from "../geometry";
 import type { SvgNode } from "../svg";
 import { defaultDark, tint, type Base16 } from "./theme";
@@ -35,33 +35,35 @@ export function appWindow(
   const dot = (i: number) =>
     dots === "traffic" ? tint(theme, (["red", "yellow", "green"] as const)[i]!) : theme.base02;
 
-  const node = el.g({ class: cls }, [
-    el.rect({
-      x: frame.x,
-      y: frame.y,
-      width: frame.w,
-      height: frame.h,
-      rx: radius,
-      fill: theme.base00,
-      stroke: theme.base02,
-    }),
-    el.path({ d: `M${frame.x} ${frame.y + bar}h${frame.w}`, stroke: theme.base01 }),
-    dots &&
-      [0, 1, 2].map((i) =>
-        el.circle({ cx: frame.x + bar / 2 + i * 18, cy: frame.y + bar / 2, r: 5.5, fill: dot(i) }),
-      ),
-    title &&
-      el.text(
-        {
-          x: frame.center.x,
-          y: frame.y + bar / 2 + 4,
-          fontSize: 12,
-          textAnchor: "middle",
-          fill: theme.base04,
-        },
-        title,
-      ),
-  ]);
+  const node = (
+    <g class={cls}>
+      <rect
+        x={frame.x}
+        y={frame.y}
+        width={frame.w}
+        height={frame.h}
+        rx={radius}
+        fill={theme.base00}
+        stroke={theme.base02}
+      />
+      <path d={`M${frame.x} ${frame.y + bar}h${frame.w}`} stroke={theme.base01} />
+      {dots &&
+        [0, 1, 2].map((i) => (
+          <circle cx={frame.x + bar / 2 + i * 18} cy={frame.y + bar / 2} r={5.5} fill={dot(i)} />
+        ))}
+      {title && (
+        <text
+          x={frame.center.x}
+          y={frame.y + bar / 2 + 4}
+          fontSize={12}
+          textAnchor="middle"
+          fill={theme.base04}
+        >
+          {title}
+        </text>
+      )}
+    </g>
+  );
 
   return { node, body: rect(frame.x, frame.y + bar, frame.w, frame.h - bar) };
 }

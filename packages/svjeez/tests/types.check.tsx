@@ -13,7 +13,6 @@ import {
   wiggle,
   type SyntaxOf,
 } from "svjeez";
-import { el } from "../src/el";
 
 const bg = def.linearGradient({}, <stop offset={0} stopColor="#000" />);
 const glow = fx.glow();
@@ -30,9 +29,6 @@ export const valid = [
   <rect fill={bg} filter={glow} animation={[enter({ at: 0, over: 1 }), draw({ at: 1, over: 1 })]} />,
   <feTurbulence animation={motion({ seed: 1 }).to({ seed: 4 }, 0.4, ease.steps(3)).loop(0.4)} />,
   <text data-role="caption" aria-hidden="true" class={["mono", false]} style={{ letterSpacing: 2 }} animation={wiggle({ x: 1 }, { seed: 1 })} />,
-  el.rect({ x: 12, y: 34, fill: bg, filter: glow, animation: enter({ at: 0, over: 1 }) }),
-  el.g({ opacity: 0.5 }, [el.circle({ r: 2 }), "hi"]),
-  el.text({ x: 4 }, "hi"),
   <circle r={2} animation={sampled((t) => ({ x: t, y: t, opacity: 1 }), { over: 1, tolerance: { translate: 1, opacity: 0.02 } })} />,
   <circle r={2} animation={sampled((t) => ({ x: t, [px]: t }), { over: 1, tolerance: { translate: 1, [px]: 0.01 } })} />,
   <g animation={motion().to({ [yaw]: 360, opacity: 1 }, 12, ease.linear)}>
@@ -62,10 +58,6 @@ export const invalid = [
   fx.duotone({ dark: "red", light: "#fff" }),
   // @ts-expect-error misspelled channel
   motion().to({ opcity: 1 }, 1),
-  // @ts-expect-error misspelled attribute through el
-  el.path({ strokeLineCap: "round" }),
-  // @ts-expect-error <g> cannot draw, through el too
-  el.g({ animation: draw({ at: 0, over: 1 }) }),
   // @ts-expect-error wiggle needs a seed
   wiggle({ x: 2 }, { rate: 8 }),
   // @ts-expect-error scale is sampled but has no tolerance

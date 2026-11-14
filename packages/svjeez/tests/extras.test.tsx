@@ -31,7 +31,6 @@ import {
   flow,
 } from "svjeez";
 import { validateSvg } from "svjeez/frames";
-import { el } from "../src/el";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 
@@ -206,7 +205,7 @@ describe("reduced motion", () => {
       Focus({
         stops: [{ show: { at: 2, over: 2 }, target: rect(0, 0, 10, 10) }],
         dim: 0.3,
-        children: el.rect({ width: 10, height: 10 }),
+        children: <rect width={10} height={10} />,
       }),
     );
 
@@ -330,8 +329,9 @@ test("a brace runs along the bottom or top of a target, and centers its label th
 describe("morph over any Morphable", () => {
   const dots = (...pieces: MorphPiece[]): Morphable => ({
     words: pieces,
-    draw: (p, animation) =>
-      el.circle({ cx: p.x, cy: p.y, r: 2, class: `dot-${p.text}`, animation }),
+    draw: (p, animation) => (
+      <circle cx={p.x} cy={p.y} r={2} class={`dot-${p.text}`} animation={animation} />
+    ),
   });
 
   test("a piece present in both versions travels, one only in the second fades in, and each is drawn by its own source", () => {
@@ -464,7 +464,7 @@ describe("timed components render valid SVG that moves only inside their span", 
         frame: rect(0, 0, 100, 100),
         stops: [{ show: span, target: box }],
         over: 0.5,
-        children: el.rect({ width: 5, height: 5 }),
+        children: <rect width={5} height={5} />,
       }),
       [2, 2.5],
     ],
@@ -488,7 +488,7 @@ describe("time helpers", () => {
   const at = (track: Motion<"opacity" | "x" | "y" | "scale">, t: number): Held => {
     const svg = render(
       { width: 10, height: 10, duration: 100, title: "probe" },
-      el.rect({ width: 1, height: 1, animation: track }),
+      <rect width={1} height={1} animation={track} />,
     );
 
     const held: Held = {};

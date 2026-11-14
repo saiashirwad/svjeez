@@ -1,7 +1,7 @@
 import { def, ease, motion, render, type Color, type SvgNode, code } from "svjeez";
 
 import { highlight } from "@svjeez/code";
-import { CSS, chrome } from "../kit";
+import { CSS, chrome } from "./kit";
 import { mono, theme } from "../../style";
 
 // The home page hero: a day in ten seconds, written as one motion() chain beside the sky it paints. As each step of the

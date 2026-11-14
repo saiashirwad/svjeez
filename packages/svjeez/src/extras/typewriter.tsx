@@ -1,6 +1,6 @@
+/** @jsxImportSource svjeez */
 import type { Color } from "../attributes";
 import { def } from "../defs";
-import { el } from "../el";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import { span, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
@@ -62,24 +62,20 @@ export function typewriter(
 
     const clip = def.clipPath(
       {},
-      el.rect({ x: from, y: top, width: 0, height: m.height, animation: reveal }),
+      <rect x={from} y={top} width={0} height={m.height} animation={reveal} />,
     );
 
-    return [
-      numbered,
-      el.g(
-        { clipPath: clip },
-        words.map((w) => text(w, m)),
-      ),
-    ];
+    return [numbered, <g clipPath={clip}>{words.map((w) => text(w, m))}</g>];
   });
 
   return {
-    node: el.g({}, [
-      rows,
-      cursor &&
-        caret(lines, m, cursor === true ? tint(m.theme, "plain") : cursor, at, t, cps, blink),
-    ]),
+    node: (
+      <g>
+        {rows}
+        {cursor &&
+          caret(lines, m, cursor === true ? tint(m.theme, "plain") : cursor, at, t, cps, blink)}
+      </g>
+    ),
     span: span(at, t - at),
     spans: lines.map(({ start, chars }) => ({ at: start, over: chars / cps })),
   };
@@ -116,21 +112,24 @@ const caret = (
 
   const height = m.fontSize * 1.25;
 
-  const block = (animation: Motion<"opacity">) =>
-    el.rect({
-      x,
-      y: y + (m.height - height) / 2,
-      width: m.advance,
-      height,
-      fill: color,
-      fillOpacity: 0.8,
-      animation,
-    });
+  const block = (animation: Motion<"opacity">) => (
+    <rect
+      x={x}
+      y={y + (m.height - height) / 2}
+      width={m.advance}
+      height={height}
+      fill={color}
+      fillOpacity={0.8}
+      animation={animation}
+    />
+  );
 
   const shown = motion({ opacity: 0 }).at(at).set({ opacity: 1 });
 
-  return el.g({ animation: [path, blink ? shown : shown.at(end).set({ opacity: 0 })] }, [
-    block(motion({ opacity: 1 }).at(0.5).set({ opacity: 0 }).loop(1)),
-    block(motion({ opacity: 0 }).at(at).set({ opacity: 1 }).at(end).set({ opacity: 0 })),
-  ]);
+  return (
+    <g animation={[path, blink ? shown : shown.at(end).set({ opacity: 0 })]}>
+      {block(motion({ opacity: 1 }).at(0.5).set({ opacity: 0 }).loop(1))}
+      {block(motion({ opacity: 0 }).at(at).set({ opacity: 1 }).at(end).set({ opacity: 0 }))}
+    </g>
+  );
 };

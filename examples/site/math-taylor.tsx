@@ -1,6 +1,6 @@
 import { plane, tex } from "@svjeez/math";
 import { def, draw, enter, motion, render, type Color, morph } from "svjeez";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 // Taylor polynomials of cos x around 0: each new term bends the polynomial to hug the curve a little further out.

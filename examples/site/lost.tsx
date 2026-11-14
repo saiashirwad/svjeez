@@ -1,5 +1,5 @@
 import { def, ease, motion, render } from "svjeez";
-import { CSS, chrome, random } from "./kit";
+import { CSS, chrome, random } from "./lib/kit";
 import { CHICK, chick } from "./lib/chick";
 import { theme } from "../style";
 

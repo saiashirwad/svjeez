@@ -1,4 +1,4 @@
-import { el } from "../el";
+/** @jsxImportSource svjeez */
 import { motion, type Motion } from "../motion";
 import type { Rect } from "../geometry";
 import type { Color } from "../attributes";
@@ -31,20 +31,21 @@ export function Marker({
     size = size.at(at).to({ width: target.w, height: target.h }, over);
   }
 
-  return el.g(
-    { animation: position },
-    el.rect({
-      x: first.x,
-      y: first.y,
-      width: first.w,
-      height: first.h,
-      rx: 6,
-      fill: color,
-      fillOpacity: 0.1,
-      stroke: color,
-      strokeOpacity: 0.4,
-      strokeWidth: 1,
-      animation: size,
-    }),
+  return (
+    <g animation={position}>
+      <rect
+        x={first.x}
+        y={first.y}
+        width={first.w}
+        height={first.h}
+        rx={6}
+        fill={color}
+        fillOpacity={0.1}
+        stroke={color}
+        strokeOpacity={0.4}
+        strokeWidth={1}
+        animation={size}
+      />
+    </g>
   );
 }

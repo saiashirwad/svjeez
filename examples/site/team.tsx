@@ -1,6 +1,6 @@
 import { render, travel } from "svjeez";
 import { tree } from "@svjeez/diagrams";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 const W = 504;

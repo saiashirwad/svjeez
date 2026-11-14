@@ -1,6 +1,11 @@
-import type { ElementProps } from "./el";
-import type { Tag } from "./attributes";
+import type { Attrs, Tag } from "./attributes";
+import type { AnimatedTag, TagChannels } from "./channels";
+import type { Stack } from "./motion";
 import { children, node, type Child, type Props, type SvgNode } from "./svg";
+
+/** The props of an element: its attributes, plus `animation` on the tags that animate. */
+export type ElementProps<T extends Tag> = Attrs<T> &
+  (T extends AnimatedTag ? { readonly animation?: Stack<TagChannels<T>> } : {});
 
 export const Fragment = Symbol.for("svjeez.fragment");
 

@@ -1,4 +1,5 @@
-import type { ElementProps } from "./el";
+/** @jsxImportSource svjeez */
+import type { ElementProps } from "./jsx-runtime";
 import { node, type Child, type Element } from "./svg";
 
 export type OnceProps = ElementProps<"g"> & { readonly children?: Child };

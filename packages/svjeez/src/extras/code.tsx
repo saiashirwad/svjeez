@@ -1,5 +1,5 @@
+/** @jsxImportSource svjeez */
 import type { Color } from "../attributes";
-import { el } from "../el";
 import { regularFace, type Font, type FontValue } from "../font/font";
 import { rect, type Point, type Rect } from "../geometry";
 import { defaultDark, tint, type Base16, type CodeRole } from "./theme";
@@ -87,39 +87,39 @@ export const text = (
   { text, x, y, color, fontStyle = 0 }: CodeWord,
   m: CodeMetrics,
   animation?: Stack<"x" | "y" | "opacity">,
-): SvgNode =>
-  el.text(
-    {
-      x,
-      y: baseline(m, y),
-      fontFamily: m.fontFamily,
-      fontSize: m.fontSize,
-      fill: color ?? tint(m.theme, "plain"),
-      fontStyle: fontStyle & 1 ? "italic" : undefined,
-      fontWeight: fontStyle & 2 ? "bold" : undefined,
-      animation,
-    },
-    text,
-  );
+): SvgNode => (
+  <text
+    x={x}
+    y={baseline(m, y)}
+    fontFamily={m.fontFamily}
+    fontSize={m.fontSize}
+    fill={color ?? tint(m.theme, "plain")}
+    fontStyle={fontStyle & 1 ? "italic" : undefined}
+    fontWeight={fontStyle & 2 ? "bold" : undefined}
+    animation={animation}
+  >
+    {text}
+  </text>
+);
 
 /** Line number `n`, right-aligned in the gutter. */
 export const number = (
   n: number,
   m: CodeMetrics,
   animation?: Stack<"x" | "y" | "opacity">,
-): SvgNode =>
-  el.text(
-    {
-      x: m.origin - 2 * m.advance,
-      y: baseline(m, m.y + (n - 1) * m.height),
-      textAnchor: "end",
-      fontFamily: m.fontFamily,
-      fontSize: m.fontSize,
-      fill: tint(m.theme, "comment"),
-      animation,
-    },
-    String(n),
-  );
+): SvgNode => (
+  <text
+    x={m.origin - 2 * m.advance}
+    y={baseline(m, m.y + (n - 1) * m.height)}
+    textAnchor="end"
+    fontFamily={m.fontFamily}
+    fontSize={m.fontSize}
+    fill={tint(m.theme, "comment")}
+    animation={animation}
+  >
+    {String(n)}
+  </text>
+);
 
 /** Columns, typewriter and morph all step by one advance, so every glyph must share it. */
 const monospaceAdvance = (face: Font, fontSize: number): number => {
@@ -268,10 +268,12 @@ export function code(input: string | CodeTokens, options: CodeOptions = {}): Cod
       .reduce((a, b) => a.union(b));
   };
 
-  const node = el.g({}, [
-    gutter && rows.map((_, i) => number(i + 1, m)),
-    words.map((w) => text(w, m)),
-  ]);
+  const node = (
+    <g>
+      {gutter && rows.map((_, i) => number(i + 1, m))}
+      {words.map((w) => text(w, m))}
+    </g>
+  );
 
   return {
     node,

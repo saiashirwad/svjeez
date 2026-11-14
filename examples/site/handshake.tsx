@@ -1,6 +1,6 @@
 import { render } from "svjeez";
 import { sequence } from "@svjeez/diagrams";
-import { CSS, chrome, outro } from "./kit";
+import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
 const W = 504;
