@@ -13,11 +13,13 @@ interface Props {
   class?: string;
   current?: "examples" | "intro" | "play";
   wide?: boolean;
+  /** Which link-preview card the page shares: one of /og/<card>.jpg. */
+  card?: string;
 }
 
-const { title, description, share = { title, description }, class: className, current, wide } = Astro.props;
+const { title, description, share = { title, description }, class: className, current, wide, card = "home" } = Astro.props;
 const url = new URL(Astro.url.pathname, Astro.site);
-const image = new URL("/og.jpg", Astro.site);
+const image = new URL(`/og/${card}.jpg`, Astro.site);
 const picked = PALETTES.map(({ id }) => id).filter((id) => id !== DEFAULT_PALETTE);
 ---
 

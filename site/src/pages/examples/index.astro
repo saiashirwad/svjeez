@@ -10,7 +10,7 @@ const slug = (title: string) => title.toLowerCase().replaceAll(" ", "-");
 const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] });
 ---
 
-<Base title="Examples · svjeez" description="Explore animated scenes and building blocks made with svjeez. Each is a self-contained SVG." class="gallery" current="examples">
+<Base title="Examples · svjeez" description="Explore animated scenes and building blocks made with svjeez. Each is a self-contained SVG." class="gallery" current="examples" card="examples">
   <script slot="head" type="speculationrules" is:inline set:html={speculation} />
   <main class="wrap">
     <div class="page-head">

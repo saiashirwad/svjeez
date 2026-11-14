@@ -13,7 +13,7 @@ const next = examples[(i + 1) % examples.length]!;
 const { light, dark } = scene.posters!;
 ---
 
-<Base title={`${scene.title} · svjeez`} description={scene.desc || `${scene.title}, made with svjeez`} class="viewer" current="examples">
+<Base title={`${scene.title} · svjeez`} description={scene.desc || `${scene.title}, made with svjeez`} class="viewer" current="examples" card={`ex-${name}`}>
   <main class="wrap" style={`--ratio: ${(scene.width / scene.height).toFixed(4)}`}>
     <figure class="plate" style={`--poster: url(${light})`}>
       <picture>
