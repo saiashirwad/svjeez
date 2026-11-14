@@ -9,6 +9,7 @@ import explainer from "@examples/site/explainer.tsx";
 import fonts from "@examples/site/fonts.tsx";
 import geo from "@examples/site/geo.tsx";
 import handshake from "@examples/site/handshake.tsx";
+import handshakeTall from "@examples/site/handshake-tall.tsx";
 import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
 import math from "@examples/site/math.tsx";
@@ -18,7 +19,6 @@ import nojsxTall from "@examples/site/nojsx-tall.tsx";
 import pipeline from "@examples/site/pipeline.tsx";
 import pipelineTall from "@examples/site/pipeline-tall.tsx";
 import recording from "@examples/site/recording.tsx";
-import team from "@examples/site/team.tsx";
 import timeline from "@examples/site/timeline.tsx";
 import timelineTall from "@examples/site/timeline-tall.tsx";
 import whereDocs from "@examples/site/where-docs.tsx";
@@ -42,7 +42,7 @@ const s = {
   pipeline: live(pipeline),
   pipelineTall: live(pipelineTall),
   handshake: live(handshake),
-  team: live(team),
+  handshakeTall: live(handshakeTall),
   explainer: live(explainer),
   recording: live(recording),
   breaker: live(breaker),
@@ -204,12 +204,16 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
       <p class="sub c1-8">Build flowcharts, sequence diagrams and state machines in TypeScript, or turn Mermaid text into animated diagrams with <a href={pkg("mermaid")}>@svjeez/mermaid</a>.</p>
       <div class="big c1-12">
         <div class="win">
-          <LiveScene class="wide" scene={s.pipeline} cost={44} name="pipeline" alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
-          <LiveScene class="tall" scene={s.pipelineTall} cost={30} name="pipeline" alt="A flowchart from prompt to finished SVG appears node by node, then a comet runs the route." />
+          <LiveScene class="wide" scene={s.pipeline} cost={44} name="pipeline" alt="A flowchart from prompt to finished SVG. The svjeez chick hops along it, is puzzled at Frames ok? the first time, walks the no line back, then says yes and reaches the SVG." />
+          <LiveScene class="tall" scene={s.pipelineTall} cost={30} name="pipeline" alt="A flowchart from prompt to finished SVG. The svjeez chick hops along it, is puzzled at Frames ok? the first time, walks the no line back, then says yes and reaches the SVG." />
         </div>
       </div>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.handshake} cost={11} name="sequence" alt="A sequence diagram: a browser image asks a CDN for one SVG file, gets it back and starts the animation." /></div></figure>
-      <figure class="c7-12"><div class="win"><LiveScene scene={s.team} cost={32} name="team" alt="An agent team grows level by level as a tree, then a dot walks between two branches." /></div></figure>
+      <div class="big c1-12">
+        <div class="win">
+          <LiveScene class="wide" scene={s.handshake} cost={30} name="sequence" alt="A sequence diagram plays while the svjeez chick acts it out: it opens a README, asks a sleepy CDN cloud for hello.svg, catches the file, watches it play and cheers." />
+          <LiveScene class="tall" scene={s.handshakeTall} cost={30} name="sequence" alt="A sequence diagram plays while the svjeez chick acts it out: it opens a README, asks a sleepy CDN cloud for hello.svg, catches the file, watches it play and cheers." />
+        </div>
+      </div>
     </section>
 
     <div class="tint">
