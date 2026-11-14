@@ -1,7 +1,7 @@
-import { base16 } from "./theme";
+import { base16, type Base16 } from "./theme";
 
 /** @deprecated Import `tomorrowNight` from "@svjeez/code". */
-export const tomorrowNight = /* @__PURE__ */ base16(
+export const tomorrowNight: Base16 = /* @__PURE__ */ base16(
   "#1d1f21",
   "#282a2e",
   "#373b41",
@@ -21,7 +21,7 @@ export const tomorrowNight = /* @__PURE__ */ base16(
 );
 
 /** @deprecated Import `tomorrow` from "@svjeez/code". */
-export const tomorrow = /* @__PURE__ */ base16(
+export const tomorrow: Base16 = /* @__PURE__ */ base16(
   "#ffffff",
   "#e0e0e0",
   "#d6d6d6",
@@ -44,7 +44,7 @@ export const tomorrow = /* @__PURE__ */ base16(
  * Solarized by night. Pairs with `solarizedLight` in `adaptive`.
  * @deprecated Import `solarizedDark` from "@svjeez/code".
  */
-export const solarizedDark = /* @__PURE__ */ base16(
+export const solarizedDark: Base16 = /* @__PURE__ */ base16(
   "#002b36",
   "#073642",
   "#586e75",
@@ -67,7 +67,7 @@ export const solarizedDark = /* @__PURE__ */ base16(
  * Solarized by day: the dark ramp reversed, the same accents. Pairs with `solarizedDark` in `adaptive`.
  * @deprecated Import `solarizedLight` from "@svjeez/code".
  */
-export const solarizedLight = /* @__PURE__ */ base16(
+export const solarizedLight: Base16 = /* @__PURE__ */ base16(
   "#fdf6e3",
   "#eee8d5",
   "#93a1a1",
@@ -90,7 +90,7 @@ export const solarizedLight = /* @__PURE__ */ base16(
  * Gruvbox medium by night. Pairs with `gruvboxLight` in `adaptive`.
  * @deprecated Import `gruvboxDark` from "@svjeez/code".
  */
-export const gruvboxDark = /* @__PURE__ */ base16(
+export const gruvboxDark: Base16 = /* @__PURE__ */ base16(
   "#282828",
   "#3c3836",
   "#504945",
@@ -113,7 +113,7 @@ export const gruvboxDark = /* @__PURE__ */ base16(
  * Gruvbox medium by day. Pairs with `gruvboxDark` in `adaptive`.
  * @deprecated Import `gruvboxLight` from "@svjeez/code".
  */
-export const gruvboxLight = /* @__PURE__ */ base16(
+export const gruvboxLight: Base16 = /* @__PURE__ */ base16(
   "#fbf1c7",
   "#ebdbb2",
   "#d5c4a1",
