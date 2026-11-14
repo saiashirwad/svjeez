@@ -1,4 +1,4 @@
-import type { Box, Point } from "./box";
+import type { Box, Point } from "svjeez";
 
 /** A 2D vector field: the arrow `[u, v]` at `(x, y)`. */
 export type VectorField = (x: number, y: number) => readonly [number, number];

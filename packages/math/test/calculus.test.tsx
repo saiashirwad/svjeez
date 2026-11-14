@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { ease, render, validateSvg, type Child, readout } from "svjeez";
-import { axes } from "svjeez/extras";
+import { axes } from "../src/index.ts";
 
 const graph = () =>
   axes({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 } });

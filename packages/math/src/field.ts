@@ -1,16 +1,23 @@
-import type { Color } from "../attributes";
-import { el } from "../el";
-import type { Point } from "../geometry";
-import { num } from "../format";
-import { ease, motion, type Motion, type Seconds } from "../motion";
-import { matchPaths } from "../paths";
-import { draw } from "../recipes";
-import type { SvgNode } from "../svg";
-import { marchingSquares } from "../layout/contour";
-import { simplify, traceStreamlines, type VectorField } from "../layout/field";
-import type { Axes } from "./axes";
-import { flow } from "./flow";
-import { defaultDark, tint, type Base16 } from "./theme";
+import {
+  defaultDark,
+  draw,
+  ease,
+  el,
+  flow,
+  matchPaths,
+  motion,
+  num,
+  tint,
+  type Base16,
+  type Color,
+  type Motion,
+  type Point,
+  type Seconds,
+  type SvgNode,
+} from "svjeez";
+import { marchingSquares } from "./layout/contour.ts";
+import { simplify, traceStreamlines, type VectorField } from "./layout/field.ts";
+import type { Axes } from "./axes.ts";
 
 export type { VectorField };
 

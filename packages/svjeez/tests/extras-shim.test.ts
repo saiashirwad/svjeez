@@ -27,11 +27,11 @@ test("svjeez/extras hands out the same values as svjeez", () => {
   for (const name of shared) expect(old.get(name)).toBe(now.get(name));
 });
 
-test("svjeez/extras still has the editor palettes and the kits", () => {
+test("svjeez/extras still has the editor palettes and the diagrams", () => {
   for (const name of [...palettes, "flowchart", "sequence", "lanes", "tree", "stateMachine"])
     expect(legacy).toHaveProperty(name);
 
-  for (const name of ["axes", "contours", "vectorField"]) expect(legacy).toHaveProperty(name);
+  for (const name of ["axes", "contours", "vectorField"]) expect(legacy).not.toHaveProperty(name);
 });
 
 test("the root has what moved out of svjeez/extras", () => {

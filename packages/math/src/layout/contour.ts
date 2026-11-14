@@ -1,4 +1,4 @@
-import type { Point } from "./box";
+import type { Point } from "svjeez";
 
 /** One level line, in the grid's own units: `x` runs over columns and `y` over rows. */
 export interface Polyline {

@@ -10,7 +10,7 @@ import {
   slopeSolution,
   streamlines,
   vectorField,
-} from "svjeez/extras";
+} from "../src/index.ts";
 
 const bounds = { x: 0, y: 0, w: 400, h: 300 };
 
@@ -211,5 +211,18 @@ describe("fieldFlow", () => {
     expect(() => flow(lines[0]!, { at: 0, style: "trace", loop: 4 })).toThrow(
       "flow() loops a dot, comet or packet.",
     );
+  });
+});
+
+describe("fieldFlow", () => {
+  test("comets never trip the loop-period check on random lines", () => {
+    let seed = 7;
+    const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    for (let n = 0; n < 300; n++) {
+      const line = Array.from({ length: 6 }, () => ({ x: random() * 300, y: random() * 300 }));
+
+      expect(() => fieldFlow([line], { at: 0, style: "comet" })).not.toThrow();
+    }
   });
 });

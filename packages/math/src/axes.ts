@@ -1,12 +1,18 @@
-import type { Paint } from "../attributes";
-import { def } from "../defs";
-import { el } from "../el";
-import type { FontValue } from "../font/font";
-import { rect, type Point, type Rect } from "../geometry";
-import type { Motion } from "../motion";
-import type { SvgNode } from "../svg";
-import { defaultDark, tint, type Base16 } from "./theme";
-import { calculus, type Calculus } from "./calculus";
+import {
+  def,
+  defaultDark,
+  el,
+  rect,
+  tint,
+  type Base16,
+  type FontValue,
+  type Motion,
+  type Paint,
+  type Point,
+  type Rect,
+  type SvgNode,
+} from "svjeez";
+import { calculus, type Calculus } from "./calculus.ts";
 
 export interface AxesOptions {
   /** Graph range of the x axis, `[min, max]`. */

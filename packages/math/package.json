@@ -2,7 +2,7 @@
   "name": "@svjeez/math",
   "version": "0.6.1",
   "private": true,
-  "description": "TeX equations for svjeez: formulas compiled to glyph paths while the scene builds, ready for morph() and annotations.",
+  "description": "TeX equations, graph axes, calculus and vector fields for svjeez: formulas compiled to glyph paths while the scene builds, ready for morph() and annotations.",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { Icon, matchPaths, render, validateSvg, type IconData, code, morph } from "svjeez";
-import { fieldFlow } from "svjeez/extras";
 import { flatten } from "../src/ink/path";
 
 const scene = (child: Parameters<typeof render>[1], comment?: string) =>
@@ -12,17 +11,6 @@ describe("float rounding in timings", () => {
 
     expect(() => morph([a, b, c], { at: [1.1, 1.9], over: 0.8 })).not.toThrow();
     expect(() => morph([a, b, c], { at: [1.1, 1.8], over: 0.8 })).toThrow(/starts before/);
-  });
-
-  test("fieldFlow comets never trip the loop-period check on random lines", () => {
-    let seed = 7;
-    const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-
-    for (let n = 0; n < 300; n++) {
-      const line = Array.from({ length: 6 }, () => ({ x: random() * 300, y: random() * 300 }));
-
-      expect(() => fieldFlow([line], { at: 0, style: "comet" })).not.toThrow();
-    }
   });
 });
 

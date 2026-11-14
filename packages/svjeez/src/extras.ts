@@ -1,5 +1,5 @@
-// "svjeez/extras" is deprecated: everything here now comes from "svjeez", except the kits that are still on their way
-// to packages of their own (diagrams, axes, calculus, fields), and the editor palettes, which are in "@svjeez/code".
+// "svjeez/extras" is deprecated: everything here now comes from "svjeez", except the diagrams, which are still on their
+// way to a package of their own, and the editor palettes, which are in "@svjeez/code".
 // It goes away in 1.0.
 import * as root from "./index";
 
@@ -204,25 +204,6 @@ export {
   gruvboxLight,
 } from "./extras/palettes";
 
-export { axes, type Axes, type AxesOptions, type Plot, type PlotOptions } from "./extras/axes";
-
-export {
-  type Area,
-  type AreaOptions,
-  type Calculus,
-  type Curve,
-  type CurveOptions,
-  type Dot,
-  type DotOptions,
-  type Line,
-  type LineOptions,
-  type MorphCurveOptions,
-  type Moving,
-  type Riemann,
-  type RiemannOptions,
-  type Sweep,
-} from "./extras/calculus";
-
 export {
   type Anchor,
   type Diagram,
@@ -268,33 +249,3 @@ export {
   type Transition,
   type Walk,
 } from "./extras/diagrams/state";
-
-export {
-  contours,
-  contourSweep,
-  fieldFlow,
-  fieldLines,
-  slopeField,
-  slopeSolution,
-  streamlines,
-  vectorField,
-  type FieldArrow,
-  type Bounds,
-  type ContourLevel,
-  type ContourLine,
-  type ContourOptions,
-  type ContourSweep,
-  type ContourSweepOptions,
-  type FieldFlowOptions,
-  type FieldLinesOptions,
-  type Grid,
-  type SlopeFieldOptions,
-  type SlopeFieldResult,
-  type SlopeSolution,
-  type SolutionOptions,
-  type Streamlines,
-  type StreamlinesOptions,
-  type VectorField,
-  type VectorFieldOptions,
-  type VectorFieldResult,
-} from "./extras/field";

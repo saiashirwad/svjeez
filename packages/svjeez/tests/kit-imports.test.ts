@@ -2,8 +2,7 @@ import { expect, test } from "bun:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 
-// The diagrams and the field, calculus and axes kits will each become a package. A package can import
-// only what svjeez exports, so until then these files may use core internals only by names the entries already publish.
+// The diagrams will become a package. A package can import only what svjeez exports, so until then these files may use core internals only by names the entries already publish.
 const src = join(import.meta.dir, "../src");
 
 const read = (file: string) => readFileSync(join(src, file), "utf8");
@@ -14,11 +13,7 @@ const files = (dir: string): string[] =>
   );
 
 /** Modules that move together, so they can keep importing each other. */
-const kit = [
-  /^extras\/diagrams\//,
-  /^extras\/(field|calculus|axes)$/,
-  /^layout\/(layered|lanes|sequence|tree|contour|field|route)$/,
-];
+const kit = [/^extras\/diagrams\//, /^layout\/(layered|lanes|sequence|tree|route)$/];
 
 const inKit = (module: string) => kit.some((pattern) => pattern.test(module));
 
@@ -62,12 +57,7 @@ const imports = (file: string) =>
 const entries = ["index.ts", "frames.ts", "page.ts", "params.ts", "jsx-runtime.ts"];
 const published = new Set(entries.flatMap((entry) => [...exported(entry)]));
 
-const scanned = [
-  ...files("extras/diagrams"),
-  "extras/field.ts",
-  "extras/calculus.ts",
-  "extras/axes.ts",
-];
+const scanned = [...files("extras/diagrams")];
 
 test("the kit files exist", () => {
   for (const file of scanned) expect(existsSync(join(src, file))).toBe(true);

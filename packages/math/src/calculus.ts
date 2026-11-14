@@ -1,21 +1,26 @@
-import type { Attrs, Color, Paint } from "../attributes";
-import type { Ref } from "../defs";
-import { easeAt } from "../ease-at";
-import { el } from "../el";
-import type { Point, Rect } from "../geometry";
 import {
   ease,
+  easeAt,
+  el,
   motion,
+  sampled,
+  sampledPath,
+  tint,
+  type Attrs,
+  type Base16,
+  type Color,
   type Ease,
   type Motion,
+  type Paint,
+  type PathData,
+  type Point,
+  type Rect,
+  type Ref,
   type Seconds,
   type Span,
   type Stack,
-} from "../motion";
-import { sampledPath, type PathData } from "../paths";
-import { sampled } from "../recipes";
-import type { SvgNode } from "../svg";
-import { tint, type Base16 } from "./theme";
+  type SvgNode,
+} from "svjeez";
 
 type Fn = (x: number) => number;
 
@@ -29,14 +34,14 @@ export interface Sweep extends Span {
 /** A graph value over time: a number holds still, a sweep moves it, and sweeps in a row chain, holding between them. */
 export type Moving = number | Sweep | readonly Sweep[];
 
-export interface DotOptions {
+export interface CalculusDotOptions {
   /** Radius in px. Default 5. */
   readonly r?: number;
   /** Default the theme's yellow. */
   readonly color?: Paint;
 }
 
-export interface Dot {
+export interface CalculusDot {
   readonly node: SvgNode;
   /** The dot's travel as `x`/`y`. Put it on a `<g>` to carry a label with the dot. */
   readonly motion: Motion<"x" | "y">;
@@ -44,23 +49,23 @@ export interface Dot {
   point(t: Seconds): Point;
 }
 
-export interface LineOptions {
+export interface CalculusLineOptions {
   /** Length in px. Default half the plot width. A secant grows past it to reach both points. */
   readonly length?: number;
   /** Default the theme's red. */
   readonly color?: Paint;
   readonly strokeWidth?: number;
   /** Dots where the line meets the curve. Default true for a secant, false for a tangent. */
-  readonly points?: boolean | DotOptions;
+  readonly points?: boolean | CalculusDotOptions;
 }
 
-export interface Line {
+export interface CalculusLine {
   readonly node: SvgNode;
   /** The line's slope in graph units at scene time `t`. */
   slope(t: Seconds): number;
 }
 
-export interface AreaOptions {
+export interface CalculusAreaOptions {
   /** Default the theme's blue. */
   readonly color?: Paint;
   /** Default 0.25. */
@@ -71,7 +76,7 @@ export interface AreaOptions {
   readonly samples?: number;
 }
 
-export interface Area {
+export interface CalculusArea {
   readonly node: SvgNode;
   /** The signed area between the curve and `base` at scene time `t`. */
   value(t: Seconds): number;
@@ -103,7 +108,7 @@ export interface Riemann {
   readonly sums: readonly number[];
 }
 
-export interface CurveOptions {
+export interface CalculusCurveOptions {
   /** Points along the curve. Default 200, or 400 for parametric and polar curves. */
   readonly samples?: number;
   /** Default the theme's blue. */
@@ -112,7 +117,7 @@ export interface CurveOptions {
   readonly animation?: Motion<"draw">;
 }
 
-export interface MorphCurveOptions extends Omit<CurveOptions, "color"> {
+export interface CalculusMorphOptions extends Omit<CalculusCurveOptions, "color"> {
   /** When each curve after the first begins, one time per later curve. */
   readonly at: readonly Seconds[];
   /** Seconds each bend takes. Default 1. */
@@ -126,7 +131,7 @@ export interface MorphCurveOptions extends Omit<CurveOptions, "color"> {
   readonly color?: Color | readonly Color[];
 }
 
-export interface Curve {
+export interface CalculusCurve {
   readonly node: SvgNode;
   /** The path data. A gap in the curve starts a new `M`. */
   readonly d: PathData;
@@ -137,29 +142,29 @@ export interface Curve {
 /** Calculus on a set of axes: values that move along a function, lines that touch it, areas under it, curves that bend. */
 export interface Calculus {
   /** A dot on `f` at `x`, which rides the curve as `x` moves. */
-  dot(f: Fn, x: Moving, options?: DotOptions): Dot;
+  dot(f: Fn, x: Moving, options?: CalculusDotOptions): CalculusDot;
   /** The tangent to `f` at `x`, sliding along the curve as `x` moves. */
-  tangent(f: Fn, x: Moving, options?: LineOptions): Line;
+  tangent(f: Fn, x: Moving, options?: CalculusLineOptions): CalculusLine;
   /** The line through `f` at `x` and `x + h`. Move `h` to 0 and it settles onto the tangent. */
-  secant(f: Fn, x: Moving, h: Moving, options?: LineOptions): Line;
+  secant(f: Fn, x: Moving, h: Moving, options?: CalculusLineOptions): CalculusLine;
   /** The region between `f` and `base` from `from` to `to`; either bound can move. */
-  area(f: Fn, from: Moving, to: Moving, options?: AreaOptions): Area;
+  area(f: Fn, from: Moving, to: Moving, options?: CalculusAreaOptions): CalculusArea;
   /** Riemann rectangles under `f` that split into the next stage's count, as one path whose `d` morphs. */
   riemann(f: Fn, options: RiemannOptions): Riemann;
   /** One curve that bends from each function into the next, sampled on one grid so its `d` morphs. */
-  morph(fs: readonly Fn[], options: MorphCurveOptions): Curve;
+  morph(fs: readonly Fn[], options: CalculusMorphOptions): CalculusCurve;
   /** The curve `(t) => [x, y]` for `t` across `range`. */
   parametric(
     fn: (t: number) => readonly [number, number],
     range: readonly [number, number],
-    options?: CurveOptions,
-  ): Curve;
+    options?: CalculusCurveOptions,
+  ): CalculusCurve;
   /** The curve `r = fn(θ)` around the origin, for `θ` across `range` (default a full turn). */
   polar(
     fn: (theta: number) => number,
     range?: readonly [number, number],
-    options?: CurveOptions,
-  ): Curve;
+    options?: CalculusCurveOptions,
+  ): CalculusCurve;
 }
 
 /** What `axes()` hands the calculus methods. */
@@ -269,7 +274,11 @@ export function calculus(graph: GraphContext): Calculus {
       animation: end > 0 ? sampledPath(at, { duration: end, tolerance: 0.4 }) : undefined,
     });
 
-  const dotAt = (where: (t: Seconds) => Point, end: Seconds, options: DotOptions = {}): Dot => {
+  const dotAt = (
+    where: (t: Seconds) => Point,
+    end: Seconds,
+    options: CalculusDotOptions = {},
+  ): CalculusDot => {
     const { r = 5 } = options;
     const color = options.color ?? tint(theme, "yellow");
     const start = where(0);
@@ -322,7 +331,7 @@ export function calculus(graph: GraphContext): Calculus {
     end: Seconds,
     path: (t: Seconds) => PathData,
     dots: readonly ((t: Seconds) => Point)[],
-    options: LineOptions,
+    options: CalculusLineOptions,
   ): SvgNode => {
     const { strokeWidth = 2 } = options;
     const color = options.color ?? tint(theme, "red");
@@ -340,7 +349,7 @@ export function calculus(graph: GraphContext): Calculus {
     ]);
   };
 
-  function dot(f: Fn, x: Moving, options?: DotOptions): Dot {
+  function dot(f: Fn, x: Moving, options?: CalculusDotOptions): CalculusDot {
     const at = valueOf(x, "dot() x");
 
     return dotAt(
@@ -354,7 +363,7 @@ export function calculus(graph: GraphContext): Calculus {
     );
   }
 
-  function tangent(f: Fn, x: Moving, options: LineOptions = {}): Line {
+  function tangent(f: Fn, x: Moving, options: CalculusLineOptions = {}): CalculusLine {
     const at = valueOf(x, "tangent() x");
     const length = options.length ?? bounds.w / 2;
 
@@ -380,7 +389,7 @@ export function calculus(graph: GraphContext): Calculus {
     };
   }
 
-  function secant(f: Fn, x: Moving, h: Moving, options: LineOptions = {}): Line {
+  function secant(f: Fn, x: Moving, h: Moving, options: CalculusLineOptions = {}): CalculusLine {
     const [at, step] = [valueOf(x, "secant() x"), valueOf(h, "secant() h")];
     const length = options.length ?? bounds.w / 2;
     const near = xSpan * 1e-6;
@@ -412,7 +421,7 @@ export function calculus(graph: GraphContext): Calculus {
     };
   }
 
-  function area(f: Fn, from: Moving, to: Moving, options: AreaOptions = {}): Area {
+  function area(f: Fn, from: Moving, to: Moving, options: CalculusAreaOptions = {}): CalculusArea {
     const { opacity = 0.25, base = 0, samples = 120 } = options;
     const color = options.color ?? tint(theme, "blue");
     const [a, b] = [valueOf(from, "area() from"), valueOf(to, "area() to")];
@@ -511,7 +520,7 @@ export function calculus(graph: GraphContext): Calculus {
   const trace = (
     what: string,
     samples: readonly (readonly [number, number])[],
-  ): Omit<Curve, "node"> => {
+  ): Omit<CalculusCurve, "node"> => {
     const runs: Point[][] = [];
     let previous: readonly [number, number] | undefined;
 
@@ -540,7 +549,7 @@ export function calculus(graph: GraphContext): Calculus {
 
   const stroked = (
     d: PathData,
-    options: CurveOptions,
+    options: CalculusCurveOptions,
     animation?: Stack<"draw" | "d" | "stroke">,
   ) =>
     el.g(
@@ -559,8 +568,8 @@ export function calculus(graph: GraphContext): Calculus {
   const curveOf = (
     what: string,
     samples: readonly (readonly [number, number])[],
-    options: CurveOptions,
-  ): Curve => {
+    options: CalculusCurveOptions,
+  ): CalculusCurve => {
     const { d, points } = trace(what, samples);
 
     return { d, points, node: stroked(d, options, options.animation) };
@@ -569,8 +578,8 @@ export function calculus(graph: GraphContext): Calculus {
   function parametric(
     fn: (t: number) => readonly [number, number],
     range: readonly [number, number],
-    options: CurveOptions = {},
-  ): Curve {
+    options: CalculusCurveOptions = {},
+  ): CalculusCurve {
     const { samples = 400 } = options;
     const [t0, t1] = range;
 
@@ -591,8 +600,8 @@ export function calculus(graph: GraphContext): Calculus {
   function polar(
     fn: (theta: number) => number,
     range: readonly [number, number] = [0, 2 * Math.PI],
-    options: CurveOptions = {},
-  ): Curve {
+    options: CalculusCurveOptions = {},
+  ): CalculusCurve {
     return parametric(
       (theta) => {
         const r = fn(theta);
@@ -604,7 +613,7 @@ export function calculus(graph: GraphContext): Calculus {
     );
   }
 
-  function morph(fs: readonly Fn[], options: MorphCurveOptions): Curve {
+  function morph(fs: readonly Fn[], options: CalculusMorphOptions): CalculusCurve {
     const { samples = 200, from = xr[0], to = xr[1], over = 1 } = options;
 
     const palette = [options.color].flat().filter((c) => c !== undefined);

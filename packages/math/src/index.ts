@@ -283,3 +283,52 @@ export {
   type Vec2,
   type VectorOptions,
 } from "./plane.ts";
+
+export { axes, type Axes, type AxesOptions, type Plot, type PlotOptions } from "./axes.ts";
+
+export {
+  type CalculusArea,
+  type CalculusAreaOptions,
+  type Calculus,
+  type CalculusCurve,
+  type CalculusCurveOptions,
+  type CalculusDot,
+  type CalculusDotOptions,
+  type CalculusLine,
+  type CalculusLineOptions,
+  type CalculusMorphOptions,
+  type Moving,
+  type Riemann,
+  type RiemannOptions,
+  type Sweep,
+} from "./calculus.ts";
+
+export {
+  contours,
+  contourSweep,
+  fieldFlow,
+  fieldLines,
+  slopeField,
+  slopeSolution,
+  streamlines,
+  vectorField,
+  type FieldArrow,
+  type Bounds,
+  type ContourLevel,
+  type ContourLine,
+  type ContourOptions,
+  type ContourSweep,
+  type ContourSweepOptions,
+  type FieldFlowOptions,
+  type FieldLinesOptions,
+  type Grid,
+  type SlopeFieldOptions,
+  type SlopeFieldResult,
+  type SlopeSolution,
+  type SolutionOptions,
+  type Streamlines,
+  type StreamlinesOptions,
+  type VectorField,
+  type VectorFieldOptions,
+  type VectorFieldResult,
+} from "./field.ts";
