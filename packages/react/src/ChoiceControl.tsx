@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import type { Editor, ValueOf } from "@svjeez/live";
 import { useEditorState } from "./editor.ts";
 import { focusing } from "./selection.ts";

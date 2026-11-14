@@ -1,0 +1,1000 @@
+/** @jsxImportSource svjeez */
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { deflateSync } from "node:zlib";
+import { Clip, ease, font, render, valuesAt, type SvgNode } from "svjeez";
+import { compress } from "woff2-encoder";
+import { validateSvg } from "svjeez/frames";
+import { boxes } from "../src/find.ts";
+import { unwrap } from "../src/fonts.ts";
+import { sides } from "../src/paint.ts";
+import {
+  act,
+  click,
+  browser,
+  Dom,
+  fill,
+  find,
+  rect,
+  duration,
+  html,
+  hover,
+  size,
+  snap,
+  snapshots,
+  wait,
+  type Box,
+  type Browser,
+  type Flow,
+  type Item,
+  type TextRun,
+} from "../src/index.ts";
+
+const regular = font(
+  readFileSync(join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf")),
+  { family: "Space Mono" },
+);
+
+const CSS = `
+  .card { font: 16px "Space Mono"; color: #111; background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 16px; width: 240px; box-shadow: 0 1px 3px rgb(0 0 0 / .1) }
+  .badge { display: inline-block; background: #222; color: #fff; border-radius: 6px; padding: 2px 8px }
+  .wide { padding: 8px 24px; background: #06c }
+  input { font: 16px "Space Mono"; width: 100%; box-sizing: border-box; border: 1px solid #ccc }
+  input:focus { outline: none; box-shadow: 0 0 0 3px #6af }
+  @media (prefers-color-scheme: dark) { .card { background: #111; color: #eee } }
+`;
+
+const draw = (snap: Parameters<typeof size>[0], props: Partial<Parameters<typeof Dom>[0]> = {}) =>
+  render(
+    { ...size(snap), duration: 4, title: "dom" },
+    <Dom states={snap} fonts={[regular]} {...props} />,
+  );
+
+/** How much of `text` shows at `t`, for each copy drawn: every opacity above it, multiplied. */
+const inkOf = (node: SvgNode, text: string, t: number): number[] => {
+  if (node.kind !== "element") return [];
+
+  const own =
+    Number(node.attrs.opacity ?? 1) *
+    node.motions.reduce((o, m) => o * (valuesAt(m, t, { duration: 4 }).opacity ?? 1), 1);
+
+  if (node.tag === "text")
+    return node.children.some((c) => c.kind === "text" && c.value === text) ? [own] : [];
+
+  return node.children.flatMap((c) => inkOf(c, text, t).map((o) => o * own));
+};
+
+/** The box at `i` among `items`; anything else fails the test. */
+const boxAt = (items: readonly Item[], i: number): Box => {
+  const it = items[i];
+
+  if (it?.kind !== "box") throw new Error(`Expected a box at ${i}, got ${it?.kind}.`);
+
+  return it;
+};
+
+/** The text run at `i` among `items`; anything else fails the test. */
+const runAt = (items: readonly Item[], i: number): TextRun => {
+  const it = items[i];
+
+  if (it?.kind !== "text") throw new Error(`Expected text at ${i}, got ${it?.kind}.`);
+
+  return it;
+};
+
+let dom: Browser;
+
+beforeAll(async () => {
+  dom = await browser({ fonts: [regular] });
+});
+
+afterAll(() => dom.close());
+
+describe("snap", () => {
+  test("reads boxes, radii, shadows and text lines as the browser laid them out", async () => {
+    const card = await dom.mount(
+      '<div class="card">Hello there <span class="badge" data-part="badge">new</span></div>',
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+
+    expect(snap.pad).toBe(16);
+    expect(snap.box).toEqual({ x: 16, y: 16, width: 274, height: expect.any(Number) });
+    expect(snap.root.box).toEqual(snap.box);
+    expect(snap.width).toBe(306);
+    expect(snap.root.radii).toEqual([12, 12, 12, 12]);
+    expect(snap.root.border?.widths).toEqual([1, 1, 1, 1]);
+    expect(snap.root.shadows).toHaveLength(1);
+    expect(snap.root.children[0]).toMatchObject({
+      kind: "text",
+      text: "Hello there",
+      family: "Space Mono",
+      size: 16,
+    });
+    expect(boxes(snap, "badge")).toHaveLength(1);
+    await card.close();
+  });
+
+  test("an element gets a part from a selector or a data-part, and keeps its key and id", async () => {
+    const card = await dom.mount(
+      '<div class="card"><p id="a" data-key="k">one</p><span class="badge">two</span><i data-part="third">3</i></div>',
+      { css: CSS, parts: { two: ".badge", first: "#a" } },
+    );
+
+    const snap = await card.snap();
+
+    expect(rect(snap, "two")).toMatchObject({ width: expect.any(Number) });
+    expect(rect(snap, "third")).toBeDefined();
+    expect(rect(snap, "missing")).toBeUndefined();
+    expect(rect(snap, "two", 1)).toBeUndefined();
+    expect(boxes(snap, "first")[0]).toMatchObject({ id: "a", key: "k", tag: "p" });
+    await card.close();
+  });
+
+  test("colors that differ between schemes are pairs, and the drawing defines their variables", async () => {
+    await using local = await browser({ fonts: [regular] });
+    const card = await local.mount('<div class="card">Hi</div>', { css: CSS });
+    const snap = await card.snap();
+
+    expect(snap.root.background).toEqual({ light: "rgb(255,255,255)", dark: "rgb(17,17,17)" });
+    expect(snap.root.border?.color).toBe("rgb(221,221,221)");
+
+    const svg = draw(snap);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    expect(svg).toContain("prefers-color-scheme:dark");
+    expect(svg).not.toContain("<filter");
+  });
+
+  test("schemes: light reads one pass and plain colors", async () => {
+    await using local = await browser({ schemes: "light" });
+    const card = await local.mount('<div class="card">Hi</div>', { css: CSS });
+
+    expect((await card.snap()).root.background).toBe("rgb(255,255,255)");
+  });
+
+  test("a line break the browser chose stays a line break", async () => {
+    const card = await dom.mount('<div class="card">one two three four five six seven</div>', {
+      css: CSS,
+    });
+
+    const snap = await card.snap();
+    const lines = snap.root.children.filter((it) => it.kind === "text");
+
+    expect(lines.length).toBeGreaterThan(1);
+    expect(lines.map((l) => l.kind === "text" && l.text).join(" ")).toBe(
+      "one two three four five six seven",
+    );
+    await card.close();
+  });
+
+  test("the page stays open, so state carries from one snap to the next", async () => {
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
+      css: CSS,
+    });
+
+    const idle = await card.snap();
+    const typed = await card.snap((page) => page.fill("input", "hi"));
+    const same = await card.snap();
+
+    expect(idle.root.children[0]).toMatchObject({ tag: "input" });
+    expect(typed.root.children[0]).toMatchObject({ tag: "input" });
+    expect(JSON.stringify(typed)).toContain('"text":"hi"');
+    expect(JSON.stringify(same)).toContain('"text":"hi"');
+    expect(JSON.stringify(idle)).not.toContain('"text":"hi"');
+    // The focus ring is a shadow that only the typed state has.
+    expect(typed.root.children[0]).toMatchObject({ shadows: [{ spread: 3 }] });
+
+    await card.html('<div class="card"><input placeholder="email"></div>');
+    expect(JSON.stringify(await card.snap())).not.toContain('"text":"hi"');
+    await card.close();
+  });
+
+  test("run: sub-flows spread in, and each snap carries its name and timing", async () => {
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
+      css: CSS,
+    });
+
+    const type = (text: string) => [fill("input", text), snap("typed", { over: 1 })];
+
+    const steps = await card.run([
+      snap("idle"),
+      wait(0.5),
+      ...type("hi"),
+      act((page) => page.fill("input", "")),
+      // Back where it started: names may repeat.
+      snap("idle", { over: 0.5, ease: ease.pop }),
+      html('<div class="card"><p>done</p></div>'),
+      snap(),
+    ]);
+
+    const names = steps.map((s) => ("wait" in s ? "wait" : ("root" in s ? s : s[0]).name));
+
+    expect(names).toEqual(["idle", "wait", "typed", "idle", undefined]);
+    expect(steps[1]).toEqual({ wait: 0.5 });
+    expect(steps[2]).toMatchObject([{ name: "typed" }, { over: 1 }]);
+    expect(steps[3]).toEqual([expect.anything(), { over: 0.5, ease: ease.pop }]);
+    expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hi"');
+    expect(JSON.stringify(steps[3])).not.toContain('"text":"hi"');
+    expect(JSON.stringify(steps[4])).toContain('"text":"done"');
+    // 0.5 held, 1 typing, 0.5 back, 0.6 by default.
+    expect(duration(steps)).toBeCloseTo(2.6);
+    expect(validateSvg(draw(steps)).errors).toEqual([]);
+    await card.close();
+  });
+
+  test("run: plain data runs the same way, checked before it starts", async () => {
+    const card = await dom.mount(
+      '<div class="card"><input placeholder="email"><button class="badge">go</button></div>',
+      { css: CSS },
+    );
+
+    const steps = await card.run([
+      { snap: "idle" },
+      { click: "input" },
+      { press: "h" },
+      { fill: ["input", "hey"] },
+      { snap: "typed", over: 1 },
+      { hover: "button" },
+      { move: [0, 0] },
+      { wait: 1 },
+      { html: '<div class="card"><p>done</p></div>' },
+      { snap: "done", over: 0.5 },
+    ]);
+
+    expect(steps.map((s) => ("wait" in s ? s.wait : ("root" in s ? s : s[0]).name))).toEqual([
+      "idle",
+      "typed",
+      1,
+      "done",
+    ]);
+    expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hey"');
+    expect(JSON.stringify(find(steps, "done"))).toContain('"text":"done"');
+
+    const failure = (p: Promise<unknown>) =>
+      p.then(
+        () => "",
+        (e: Error) => e.message,
+      );
+
+    // Checked before anything runs, so the page is never touched.
+    expect(await failure(card.run([fill("input", "x"), snap("a", { over: 1 })]))).toContain(
+      "first snap has timing",
+    );
+    expect(await failure(card.run([act(() => undefined), wait(1), snap("a")]))).toContain(
+      "before the first snap",
+    );
+    // SAFETY: deliberately not an instruction, to see run() reject what the types would.
+    expect(await failure(card.run([{ scroll: "x" } as never]))).toContain("scroll");
+    await card.close();
+  });
+
+  test("instructions take a part name, by data-part or the parts option, else a selector", async () => {
+    const markup =
+      '<div class="card"><input data-part="email" placeholder="email"><input class="pw" placeholder="password"><button class="badge">go</button></div>';
+
+    const card = await dom.mount(markup, { css: CSS, parts: { password: ".pw" } });
+
+    const steps = await card.run([
+      fill("email", "a@b.c"),
+      fill("password", "secret"),
+      click("button"),
+      snap("typed"),
+    ]);
+
+    const typed = find(steps, "typed")!;
+
+    expect(JSON.stringify(boxes(typed, "email"))).toContain('"text":"a@b.c"');
+    expect(JSON.stringify(boxes(typed, "password"))).toContain('"text":"secret"');
+    await card.close();
+  });
+
+  test("html() clears hover and focus, so the new markup starts at rest", async () => {
+    const button = (label: string) =>
+      `<div class="card"><input placeholder="email"><button class="hov">${label}</button></div>`;
+
+    const css = CSS + ".hov{background:#eee}.hov:hover{background:#c00}";
+    const card = await dom.mount(button("go"), { css });
+
+    const steps = await card.run([
+      hover("button"),
+      snap("hovered"),
+      html(button("again")),
+      snap("after"),
+    ]);
+
+    const hovered = find(steps, "hovered");
+    const after = find(steps, "after");
+
+    expect(JSON.stringify(hovered)).toContain("rgb(204,0,0)");
+    expect(JSON.stringify(after)).not.toContain("rgb(204,0,0)");
+    await card.close();
+  });
+
+  test("dom.run mounts, runs the flow and closes the page", async () => {
+    await using local = await browser({ fonts: [regular], css: CSS });
+
+    const steps = await local.run('<div class="card"><input placeholder="email"></div>', [
+      snap("idle"),
+      fill("input", "hi"),
+      snap("typed"),
+    ]);
+
+    expect(steps).toHaveLength(2);
+    // The browser's css applies: the card's border is there.
+    expect(find(steps, "idle")!.root.border?.widths).toEqual([1, 1, 1, 1]);
+    expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hi"');
+  });
+
+  test("css can be built from the markup", async () => {
+    const card = await dom.mount('<div class="card">Hi</div>', {
+      css: (html) => CSS + `.card::after{content:"${html.length}"}`,
+    });
+
+    expect((await card.snap()).root.shadows).toHaveLength(1);
+    await card.html('<div class="card badge">Hi again</div>');
+    expect((await card.snap()).root.children[0]).toMatchObject({ text: "Hi again" });
+    await card.close();
+  });
+});
+
+describe("Dom", () => {
+  test("pairs elements across an insertion, so the ones after it slide instead of swapping", async () => {
+    const card = await dom.mount('<div class="card"><p>first</p><p>last</p></div>', { css: CSS });
+    const before = await card.snap();
+
+    await card.html(
+      '<div class="card"><p>first</p><span class="badge">new</span><p>last</p></div>',
+    );
+    const after = await card.snap();
+    const svg = draw([before, wait(0.5), after]);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // "last" moves down as one text element; it is not drawn twice to crossfade.
+    expect(svg.match(/>last</g)).toHaveLength(1);
+    await card.close();
+  });
+
+  test("a box inserted before a sibling with the same tag pairs by what each says", async () => {
+    const card = await dom.mount(
+      '<div class="card"><div>title</div><div>Auto-merge <span class="badge">+214</span></div></div>',
+      { css: CSS },
+    );
+
+    const before = await card.snap();
+
+    await card.html(
+      '<div class="card"><div>title</div><div>All 14 checks passed</div><div>Auto-merge <span class="badge">+230</span></div></div>',
+    );
+    const after = await card.snap();
+    const svg = draw([before, wait(0.5), after]);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // The footer slides down as itself, so its label is drawn once and its number counts; the new row fades in.
+    expect(svg.match(/>Auto-merge</g)).toHaveLength(1);
+    expect(svg).toContain(">+222<");
+    expect(svg.match(/>All 14 checks passed</g)).toHaveLength(1);
+    await card.close();
+  });
+
+  test("a class change morphs the element, drawn once, whatever its tag or classes", async () => {
+    const card = await dom.mount('<div class="card"><span class="badge">new</span></div>', {
+      css: CSS,
+    });
+
+    const before = await card.snap();
+
+    await card.html('<div class="card"><span class="badge wide">new</span></div>');
+    const after = await card.snap();
+    const svg = draw([before, wait(0.5), after]);
+
+    expect(svg.match(/>new</g)).toHaveLength(1);
+    expect(svg).toContain("@keyframes");
+    await card.close();
+  });
+
+  test("data-key pairs elements across a tag change", async () => {
+    const card = await dom.mount(
+      '<div class="card"><div class="badge" data-key="s">new</div></div>',
+      {
+        css: CSS,
+      },
+    );
+
+    const before = await card.snap();
+
+    await card.html(
+      '<div class="card"><section class="badge wide" data-key="s">new</section></div>',
+    );
+    const after = await card.snap();
+
+    expect(draw([before, wait(0.5), after]).match(/>new</g)).toHaveLength(1);
+
+    // The same two states without the key: different tags, so each fades.
+    await card.html('<div class="card"><div class="badge">new</div></div>');
+    const plain = await card.snap();
+    await card.html('<div class="card"><section class="badge wide">new</section></div>');
+    const plainAfter = await card.snap();
+
+    expect(draw([plain, wait(0.5), plainAfter]).match(/>new</g)).toHaveLength(2);
+
+    const pair = draw([plain, wait(0.5), plainAfter], {
+      pair: (box) => (box.tag === "div" || box.tag === "section" ? "badge" : undefined),
+    });
+
+    expect(pair.match(/>new</g)).toHaveLength(1);
+    await card.close();
+  });
+
+  test("any number of states play on one timeline", async () => {
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
+      css: CSS,
+    });
+
+    const idle = await card.snap();
+    const typed = await card.snap((page) => page.fill("input", "hi"));
+
+    await card.html('<div class="card"><input placeholder="email"><p>failed</p></div>');
+    const failed = await card.snap();
+
+    const steps = [idle, wait(0.5), typed, wait(0.4), [failed, { over: 0.5 }]] as const;
+    const svg = draw(steps);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // Two transitions, each a drawing of its own, handed over once.
+    expect(svg.match(/animation-name:/g)?.length).toBeGreaterThan(2);
+    expect(svg).toContain(">failed<");
+    expect(size([idle, typed, failed]).height).toBe(failed.height);
+    // 0.5 held, 0.6 by default, 0.4 held, 0.5.
+    expect(duration(steps)).toBeCloseTo(2);
+    expect(duration([idle, typed, wait(1)])).toBeCloseTo(1.6);
+
+    expect(() => draw([wait(1), idle, typed])).toThrow("before the first state");
+    expect(() => draw([[idle, { over: 1 }], typed])).toThrow("first state");
+    expect(() => draw([idle, wait(-1), typed])).toThrow("wait of 0 or more");
+    await card.close();
+  });
+
+  test("text typed into a field reveals one character at a time instead of crossfading", async () => {
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
+      css: CSS,
+    });
+
+    const idle = await card.snap();
+    const typed = await card.snap((page) => page.fill("input", "hi there"));
+    const run = JSON.stringify(typed).match(/"text":"hi there"[^}]*"advances":(\[[^\]]*\])/);
+    const advances: number[] = JSON.parse(run![1]!);
+
+    expect(advances).toHaveLength(8);
+    expect(advances.every((n, i) => n > (advances[i - 1] ?? 0))).toBe(true);
+
+    const svg = draw([idle, wait(0.5), [typed, { over: 0.8 }]]);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // Drawn once, behind a clip that widens in steps; the placeholder is drawn once and cut.
+    expect(svg.match(/>hi there</g)).toHaveLength(1);
+    expect(svg.match(/>email</g)).toHaveLength(1);
+    expect(svg).toContain("<clipPath");
+    expect(svg).toMatch(/width:\s*[\d.]+px/);
+
+    // Deleting un-types the same text backwards, and the placeholder returns.
+    const back = draw([typed, wait(0.5), [idle, { over: 0.8 }]]);
+
+    expect(back.match(/>hi there</g)).toHaveLength(1);
+    expect(back.match(/>email</g)).toHaveLength(1);
+    expect(back).toContain("<clipPath");
+    await card.close();
+  });
+
+  test("a changed number counts, and other changed text still crossfades", async () => {
+    const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+    const before = await card.snap();
+
+    await card.html('<div class="card"><p>230 lines</p></div>');
+    const after = await card.snap();
+    const svg = draw([before, wait(0.5), after]);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    expect(svg).toContain(">222 lines<");
+    expect(svg.match(/ lines</g)).toHaveLength(17);
+
+    await card.html('<div class="card"><p>no lines</p></div>');
+    const other = draw([before, wait(0.5), await card.snap()]);
+
+    expect(other).toContain(">214 lines<");
+    expect(other).toContain(">no lines<");
+    expect(other).not.toContain("<clipPath");
+    expect(other.match(/ lines</g)).toHaveLength(2);
+    await card.close();
+  });
+
+  test("a flow reused later through <Clip at> plays the same moves, shifted", async () => {
+    const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+
+    const steps = await card.run([
+      snap(),
+      wait(0.5),
+      html('<div class="card"><p>230 lines</p><span class="badge">new</span></div>'),
+      snap({ over: 1 }),
+      wait(0.5),
+      html('<div class="card"><p>214 lines</p></div>'),
+      snap(),
+    ]);
+
+    const scene = (node: Parameters<typeof render>[1]) =>
+      render({ ...size(steps), duration: 8, title: "dom" }, node);
+
+    const now = scene(<Dom states={steps} fonts={[regular]} />);
+
+    const later = scene(
+      <Clip at={3}>
+        <Dom states={steps} fonts={[regular]} />
+      </Clip>,
+    );
+
+    // Every key time, as a fraction of the 8s loop.
+    const keys = (svg: string) =>
+      [...svg.matchAll(/([\d.]+)%\s*\{/g)].flatMap((m) => {
+        const s = (Number(m[1]) / 100) * 8;
+
+        return s > 0.01 && s < 7.99 ? [s] : [];
+      });
+
+    expect(validateSvg(later).errors).toEqual([]);
+    expect(now).not.toBe(later);
+    // Nothing moves before the clip starts, and the first move starts 0.5s in, as it does unclipped.
+    expect(Math.min(...keys(now))).toBeCloseTo(0.5, 1);
+    expect(Math.min(...keys(later))).toBeCloseTo(3.5, 1);
+    expect(Math.max(...keys(later)) - Math.max(...keys(now))).toBeCloseTo(3, 1);
+    await card.close();
+  });
+
+  test("a snapshot survives JSON and draws the same", async () => {
+    const card = await dom.mount('<div class="card">Hi <span class="badge">new</span></div>', {
+      css: CSS,
+    });
+
+    const snap = await card.snap();
+    const again = JSON.parse(JSON.stringify(snap));
+
+    expect(draw(again)).toBe(draw(snap));
+    await card.close();
+  });
+
+  test("text that moves to another element slides there instead of fading out and in", async () => {
+    const css =
+      CSS +
+      "textarea, .out { all: unset; display: block; font: 16px 'Space Mono'; white-space: pre }";
+
+    const card = await dom.mount('<div class="card"><textarea>Drawing it</textarea></div>', {
+      css,
+    });
+
+    const editing = await card.snap();
+
+    await card.html('<div class="card"><div class="out">Drawing it</div><p>after</p></div>');
+    const saved = await card.snap();
+    const node = <Dom states={[editing, wait(0.5), saved]} fonts={[regular]} />;
+    const svg = render({ ...size([editing, saved]), duration: 4, title: "dom" }, node);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // Drawn once, and fully there all through the move.
+    expect(svg.match(/>Drawing it</g)).toHaveLength(1);
+
+    for (const t of [0.5, 0.7, 0.8, 0.9, 1.1]) expect(inkOf(node, "Drawing it", t)).toEqual([1]);
+
+    // Different words don't move: one goes, the other comes.
+    await card.html('<div class="card"><div class="out">Drawn it</div></div>');
+    const other = draw([editing, wait(0.5), await card.snap()]);
+
+    expect(other).toContain(">Drawing it<");
+    expect(other).toContain(">Drawn it<");
+    await card.close();
+  });
+
+  test("changed text crossfades without dimming in the middle", async () => {
+    const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+    const before = await card.snap();
+
+    await card.html('<div class="card"><p>no lines</p></div>');
+    const node = <Dom states={[before, wait(0.5), await card.snap()]} fonts={[regular]} />;
+
+    // Where the two overlap, the new one over the old covers nearly as much as either alone.
+    for (let t = 0.5; t <= 1.1; t += 0.05) {
+      const [old] = inkOf(node, "214 lines", t);
+      const [now] = inkOf(node, "no lines", t);
+
+      expect(now! + old! * (1 - now!)).toBeGreaterThan(0.9);
+    }
+
+    await card.close();
+  });
+});
+
+describe("real pages", () => {
+  // The page's own web font, as an app ships it: an @font-face rule under a family nobody passed in.
+  const probe = `@font-face{font-family:Probe;src:url(data:font/ttf;base64,${readFileSync(
+    join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
+  ).toString("base64")}) format("truetype")}`;
+
+  const page = `${probe} .p { font: 16px Probe; padding: 8px }`;
+
+  test("the page's own web fonts come with the snapshot and embed in the drawing", async () => {
+    const card = await dom.mount('<div class="p">Hello</div>', { css: page });
+    const snap = await card.snap();
+
+    expect(snap.fonts).toEqual([
+      {
+        family: "Probe",
+        weight: "400",
+        style: "normal",
+        src: expect.stringMatching(/^data:font\/ttf;base64,/),
+      },
+    ]);
+    expect(draw(snap, { fonts: [] })).toContain("font-family:'Probe'");
+    await card.close();
+  });
+
+  test("snapshots() keeps each font file once, however many snapshots use it", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "svjeez-dom-"));
+    const file = join(dir, "snapshots.json");
+
+    try {
+      const steps = await snapshots(file, { fonts: [regular] }, (d) =>
+        d.run('<div class="p">Hello</div>', [snap("a"), snap("b")], { css: page }),
+      );
+
+      const saved = JSON.parse(readFileSync(file, "utf8"));
+
+      expect(Object.keys(saved.fonts)).toHaveLength(1);
+      expect(saved.tapes[0].snaps[1].fonts[0].src).toBe(Object.keys(saved.fonts)[0]);
+
+      const again = await snapshots(
+        file,
+        { fonts: [regular], executablePath: "/nowhere/chrome" },
+        (d) => d.run('<div class="p">Hello</div>', [snap("a"), snap("b")], { css: page }),
+      );
+
+      expect(again).toEqual(JSON.parse(JSON.stringify(steps)));
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  test("a turned element is read as laid out and drawn with its transform", async () => {
+    const card = await dom.mount(
+      '<div class="card"><div class="turn" style="width:40px;height:10px;background:#c00;rotate:90deg"></div></div>',
+      { css: CSS },
+    );
+
+    const turned = (await card.snap()).root.children[0];
+
+    expect(turned).toMatchObject({ box: { width: 40, height: 10 } });
+    expect(turned?.kind === "box" && turned.transform?.matrix).toEqual([0, 1, -1, 0, 0, 0]);
+    expect(draw(await card.snap())).toContain("matrix(0 1 -1 0 0 0)");
+    await card.close();
+  });
+
+  test("inset shadows are read apart from outer ones", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="box-shadow:inset 0 0 0 999px rgb(0 0 0 / .1), 0 1px 2px #000">x</div>',
+      { css: CSS },
+    );
+
+    const { root } = await card.snap();
+
+    expect(root.shadows).toHaveLength(1);
+    expect(root.insets).toEqual([{ color: "rgba(0,0,0,0.1)", x: 0, y: 0, blur: 0, spread: 999 }]);
+    await card.close();
+  });
+
+  test("a woff2 the page loaded comes back as a TTF the drawing cuts down to what it draws", async () => {
+    const ttf = readFileSync(
+      join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
+    );
+
+    const woff2 = Buffer.from(await compress(ttf)).toString("base64");
+    const css = `@font-face{font-family:Packed;src:url(data:font/woff2;base64,${woff2}) format("woff2")} .p { font: 16px Packed; padding: 8px }`;
+    const card = await dom.mount('<div class="p">Hi</div>', { css });
+    const snap = await card.snap();
+
+    expect(snap.fonts?.[0]?.src).toMatch(/^data:font\/ttf;base64,/);
+    const svg = draw(snap, { fonts: [] });
+
+    expect(svg).toContain("font-family:'Packed'");
+    // Two glyphs, not the whole face.
+    expect(svg.length).toBeLessThan(ttf.length / 4);
+    await card.close();
+  });
+
+  test("a woff unwraps into the same tables", async () => {
+    const ttf = new Uint8Array(
+      readFileSync(join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf")),
+    );
+
+    const view = new DataView(ttf.buffer, ttf.byteOffset);
+    const count = view.getUint16(4);
+
+    const tables = Array.from({ length: count }, (_, i) => {
+      const at = 12 + i * 16;
+
+      const data = ttf.subarray(
+        view.getUint32(at + 8),
+        view.getUint32(at + 8) + view.getUint32(at + 12),
+      );
+
+      const packed = deflateSync(data);
+
+      // A table that doesn't shrink is stored as is, as WOFF requires.
+      return {
+        tag: view.getUint32(at),
+        sum: view.getUint32(at + 4),
+        data,
+        packed: packed.length < data.length ? packed : data,
+      };
+    });
+
+    const size = 44 + 20 * count + tables.reduce((n, t) => n + ((t.packed.length + 3) & ~3), 0);
+    const woff = new Uint8Array(size);
+    const w = new DataView(woff.buffer);
+    let at = 44 + 20 * count;
+
+    w.setUint32(0, 0x774f4646);
+    w.setUint32(4, view.getUint32(0));
+    w.setUint16(12, count);
+    tables.forEach((t, i) => {
+      const e = 44 + i * 20;
+      w.setUint32(e, t.tag);
+      w.setUint32(e + 4, at);
+      w.setUint32(e + 8, t.packed.length);
+      w.setUint32(e + 12, t.data.length);
+      w.setUint32(e + 16, t.sum);
+      woff.set(t.packed, at);
+      at += (t.packed.length + 3) & ~3;
+    });
+
+    const back = font(await unwrap(woff), { family: "Space Mono" });
+
+    expect(back.format).toBe("ttf");
+    expect(back.metrics).toEqual(regular.metrics);
+  });
+
+  test("linear and radial gradients are read as layers, in sRGB, and drawn as paint servers", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="height:60px;background:linear-gradient(to right, oklch(0.7 0.2 30), transparent), radial-gradient(circle at 25% 50%, red 10px, blue)"></div>',
+      { css: CSS },
+    );
+
+    const { root } = await card.snap();
+    const [radial, linear] = root.gradients ?? [];
+
+    expect(root.gradients).toHaveLength(2);
+    expect(radial).toMatchObject({ kind: "radial", cx: 16 + 1 + 68, rx: expect.any(Number) });
+    expect(linear).toMatchObject({ kind: "linear", x1: 17, x2: 16 + 1 + 272 });
+    expect(linear?.kind === "linear" && linear.y1 === linear.y2).toBe(true);
+    // The clear end keeps the color it fades from, so the blend never goes gray.
+    const [from, to] = linear!.stops.map((s) => s.color);
+
+    expect(from).toMatch(/^rgb\(/);
+    expect(String(to)).toBe(String(from).replace("rgb(", "rgba(").replace(")", ",0)"));
+
+    const svg = draw(await card.snap());
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    expect(svg).toContain("<linearGradient");
+    expect(svg).toContain("<radialGradient");
+
+    await card.html(
+      '<div class="card" style="height:60px;background:repeating-linear-gradient(45deg, #000 0 4px, #fff 4px 8px)"></div>',
+    );
+    const striped = await card.snap();
+
+    expect(striped.root.gradients?.[0]).toMatchObject({ repeat: true });
+    expect(draw(striped)).toContain('spreadMethod="repeat"');
+    await card.close();
+  });
+
+  test("::before and ::after are drawn as boxes with their text, where Chromium put them", async () => {
+    const css =
+      CSS +
+      `.tag::before { content: "#"; color: #c00; padding-right: 4px }
+       .dot { position: relative }
+       .dot::after { content: ""; position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #0a0 }
+       .turn { display: block; position: relative; height: 10px }
+       .turn::after { content: ""; position: absolute; left: 0; top: 0; width: 20px; height: 10px; background: #00c; rotate: 90deg }`;
+
+    const card = await dom.mount(
+      '<div class="card dot"><span class="tag">design</span><i class="turn"></i></div>',
+      { css },
+    );
+
+    const { root } = await card.snap();
+    const tag = boxAt(root.children, 0);
+    const i = boxAt(root.children, 1);
+    const dot = boxAt(root.children, 2);
+    const turned = boxAt(i.children, 0);
+
+    expect(tag).toMatchObject({ tag: "span" });
+    expect(tag.children[0]).toMatchObject({
+      kind: "box",
+      tag: "::before",
+      children: [{ text: "#" }],
+    });
+    const hash = runAt(boxAt(tag.children, 0).children, 0);
+    const word = runAt(tag.children, 1);
+
+    expect(hash.color).toBe("rgb(204,0,0)");
+    expect(word.x).toBeGreaterThan(hash.x + hash.advances.at(-1)!);
+    expect(word.y).toBe(hash.y);
+    expect(dot).toMatchObject({
+      tag: "::after",
+      background: "rgb(0,170,0)",
+      radii: [4, 4, 4, 4],
+      box: {
+        x: root.box.x + root.box.width - 1 - 4 - 8,
+        y: root.box.y + 1 + 4,
+        width: 8,
+        height: 8,
+      },
+    });
+    // Read as laid out, with its turn kept to draw it with.
+    expect(turned).toMatchObject({ tag: "::after", box: { ...i.box, width: 20, height: 10 } });
+    expect(turned.transform?.matrix).toEqual([0, 1, -1, 0, 0, 0]);
+    expect(validateSvg(draw(await card.snap())).errors).toEqual([]);
+    await card.close();
+  });
+
+  test("a see-through fill under backdrop-filter: blur() draws more solid, with no filter", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="background:rgb(255 255 255 / .2);backdrop-filter:blur(12px)">x</div>',
+      { css: CSS },
+    );
+
+    const { root } = await card.snap();
+    const [light] = sides(root.background!);
+
+    expect(light).toBe("rgba(255,255,255,0.6)");
+    expect(draw(await card.snap())).not.toContain("<filter");
+    await card.close();
+  });
+
+  test("a ::before's counter and attr() content is read as Chromium wrote it", async () => {
+    const card = await dom.mount(
+      `<ol class="card" style="counter-reset: n; list-style: none"><li data-x="a">one</li><li data-x="b">two</li></ol>
+      <style>li::before { counter-increment: n; content: counter(n) ". " attr(data-x) }</style>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+
+    const befores = (it: Item): string[] =>
+      it.kind !== "box"
+        ? []
+        : it.tag === "::before"
+          ? it.children.flatMap((c) => (c.kind === "text" ? [c.text] : []))
+          : it.children.flatMap(befores);
+
+    const texts = befores(snap.root);
+
+    expect(texts).toEqual(["1. a", "2. b"]);
+  });
+
+  test("a color input's swatch is drawn in its value", async () => {
+    const card = await dom.mount(
+      `<div class="card"><input type="color" value="#ff0000" style="appearance: none; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 4px"></div>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+    const input = snap.root.children.find((c): c is Box => c.kind === "box" && c.tag === "input");
+
+    expect(input?.children).toMatchObject([
+      { tag: "::swatch", background: "rgb(255,0,0)", box: input!.box, radii: [4, 4, 4, 4] },
+    ]);
+  });
+
+  test("a rounded image is drawn clipped to its corners", async () => {
+    const dot = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="red"/></svg>')}`;
+
+    const card = await dom.mount(
+      `<div class="card"><img src="${dot}" style="width: 40px; height: 40px; border-radius: 8px"></div>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+    const svg = draw(snap);
+
+    expect(svg).toMatch(/<g clip-path="url\(#[^"]+\)">\s*<image /);
+    expect(validateSvg(svg).errors).toEqual([]);
+  });
+
+  test("a read waits for animations on the page's clock, not ones a scroll drives", async () => {
+    // A scroll-driven animation runs on the scroller's timeline and never finishes while nothing scrolls.
+    const card = await dom.mount(
+      `<div class="card"><p style="animation: grow linear; animation-timeline: scroll(self)">hi</p></div>
+      <style>@keyframes grow { to { opacity: 0.5 } }</style>`,
+      { css: CSS },
+    );
+
+    const snap = await card.snap();
+    await card.close();
+
+    expect(snap.root.children.length).toBeGreaterThan(0);
+  }, 10_000);
+
+  test("z-index paints in stacking order, and a fixed element escapes the parent that clips it", async () => {
+    const card = await dom.mount(
+      '<div class="card" style="position:relative"><div data-key="top" style="position:relative;z-index:2">a</div><div data-key="flow">b</div><div style="overflow:hidden;height:4px"><div data-key="fixed" style="position:fixed;z-index:1">c</div></div></div>',
+      { css: CSS },
+    );
+
+    const { root } = await card.snap();
+    const keys = root.children.map((c) => (c.kind === "box" ? (c.key ?? c.tag) : c.kind));
+
+    expect(keys).toEqual(["flow", "div", "fixed", "top"]);
+    await card.close();
+  });
+});
+
+describe("snapshots", () => {
+  test("a second call reads the file and never launches, and timing on a snap is never stale", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "svjeez-dom-"));
+    const file = join(dir, "nested", "snapshots.json");
+    let runs = 0;
+
+    const flow = (text: string, hold: number): Flow => [
+      snap("idle"),
+      wait(hold),
+      fill("input", text),
+      snap("typed", { over: 1, ease: ease.pop }),
+    ];
+
+    const run = (f: Flow) => async (d: Browser) => {
+      runs++;
+
+      const card = await d.mount('<div class="card"><input placeholder="email"></div>', {
+        css: CSS,
+      });
+
+      return { hi: await card.snap(), steps: await card.run(f) };
+    };
+
+    try {
+      const first = await snapshots(file, { inputs: ["v1"], fonts: [regular] }, run(flow("hi", 1)));
+      // A browser that can't start proves nothing was launched.
+      const bogus = { inputs: ["v1"], executablePath: "/nowhere/chrome" };
+      const second = await snapshots(file, bogus, run(flow("hi", 1)));
+
+      expect(runs).toBe(2);
+      expect(second).toEqual(JSON.parse(JSON.stringify(first)));
+      expect(draw(second.steps)).toBe(draw(first.steps));
+      expect(JSON.parse(readFileSync(file, "utf8")).hash).toMatch(/^[0-9a-f]{64}$/);
+
+      // New timing replays the same snapshots; new text, a new instruction or new inputs read the page again.
+      const later = await snapshots(file, bogus, run(flow("hi", 2)));
+
+      expect(later.steps[1]).toEqual({ wait: 2 });
+      expect(later.steps[2]).toEqual([find(second.steps, "typed")!, { over: 1, ease: ease.pop }]);
+      expect(duration(later.steps)).toBe(3);
+      await expect(snapshots(file, bogus, run(flow("yo", 1)))).rejects.toThrow();
+      await expect(
+        snapshots(
+          file,
+          bogus,
+          run([snap("idle"), fill("input", "hi"), snap("typed", { over: 1 }), snap()]),
+        ),
+      ).rejects.toThrow();
+      await expect(
+        snapshots(file, { ...bogus, inputs: ["v2"] }, run(flow("hi", 1))),
+      ).rejects.toThrow();
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+});

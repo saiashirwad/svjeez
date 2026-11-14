@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import { valueOf, type Editor } from "@svjeez/live";
 import { Grip } from "./Grip.tsx";
 import { useEditorState } from "./editor.ts";

@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import { curveOf, type Editor, type ValueOf } from "@svjeez/live";
 import { useState } from "react";
 import { EasePop } from "./EasePop.tsx";

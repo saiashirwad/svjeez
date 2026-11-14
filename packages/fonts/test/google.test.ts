@@ -95,6 +95,27 @@ describe("google", () => {
     expect(readFileSync(join(cache, "ABeeZee-400-normal.ttf")).length).toBe(whole.length);
   });
 
+  test("two loads of one font at once share a download", async () => {
+    const whole = readFileSync(fixture);
+    let fetches = 0;
+
+    globalThis.fetch = Object.assign(
+      async (url: string | URL | Request) => {
+        fetches++;
+
+        return String(url).includes("googleapis")
+          ? new Response("@font-face { src: url(https://fonts.gstatic.com/a.ttf) }")
+          : new Response(whole);
+      },
+      { preconnect: realFetch.preconnect },
+    );
+
+    await Promise.all([google("ABeeZee"), google("ABeeZee", { fallback: ["serif"] })]);
+
+    expect(fetches).toBe(2);
+    expect(readdirSync(cache)).toEqual(["ABeeZee-400-normal.ttf"]);
+  });
+
   test("a failed network on a cold cache names the family and the cache path", async () => {
     stubFetch(() => Promise.reject(new TypeError("fetch failed")));
 
