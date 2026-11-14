@@ -8,6 +8,7 @@ import {
   type Stack,
   type SvgNode,
   type TagChannels,
+  type When,
 } from "svjeez";
 import { el } from "svjeez/internal";
 import { camera, facingOf, type VoxelCamera, type Facing, type Vec3 } from "./space.ts";
@@ -23,11 +24,13 @@ import {
 
 interface BlockBase {
   readonly skin: VoxelSkin;
-  /** Visible from this time. Default 0. */
+  /** When the block shows: from `at`, for `over` seconds, or to the end without `over`. Default always. */
+  readonly show?: When;
+  /** @deprecated use `show: { at }` */
   readonly from?: Seconds;
-  /** Gone from this time. Default never. */
+  /** @deprecated use `show: { at, over }` */
   readonly to?: Seconds;
-  /** Moves the block's `<use>` on the scene timeline. `from`/`to` own opacity, so this cannot animate it. */
+  /** Moves the block's `<use>` on the scene timeline. `show` owns opacity, so this cannot animate it. */
   readonly animation?: Stack<Exclude<TagChannels<"use">, "opacity">>;
 }
 
@@ -90,16 +93,27 @@ const lifetime = (from: Seconds, to: Seconds): Motion<"opacity"> | undefined => 
   return to === Infinity ? arrive : arrive.at(to).set({ opacity: 0 });
 };
 
+/** When a block shows, as the time it appears and the time it goes. */
+const lifeOf = ({ show, from = 0, to = Infinity }: BlockBase): readonly [Seconds, Seconds] =>
+  show ? [show.at, show.over === undefined ? Infinity : show.at + show.over] : [from, to];
+
 const check = (block: VoxelBlock): void => {
-  const { from = 0, to = Infinity } = block;
+  const [from, to] = lifeOf(block);
   const cell = cellOf(block);
 
   if (!cell.every(Number.isInteger))
     throw new Error(`voxel.scene() needs blocks on whole cells, got [${cell.join(", ")}].`);
 
+  if (block.show && (block.from !== undefined || block.to !== undefined))
+    throw new Error(
+      `voxel.scene() takes show or from and to, not both, on the block at [${cell.join(", ")}].`,
+    );
+
   if (!(from >= 0 && from < to))
     throw new Error(
-      `voxel.scene() needs 0 <= from < to, got from ${from} to ${to} on the block at [${cell.join(", ")}].`,
+      block.show
+        ? `voxel.scene() needs a show that starts at 0 or later and lasts, got at ${from} over ${to - from} on the block at [${cell.join(", ")}].`
+        : `voxel.scene() needs 0 <= from < to, got from ${from} to ${to} on the block at [${cell.join(", ")}].`,
     );
 };
 
@@ -132,8 +146,8 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
   const covers = (cover: VoxelBlock, block: VoxelBlock): boolean =>
     cover.animation === undefined &&
     solid(cover.skin) &&
-    (cover.from ?? 0) <= (block.from ?? 0) &&
-    (cover.to ?? Infinity) >= (block.to ?? Infinity);
+    lifeOf(cover)[0] <= lifeOf(block)[0] &&
+    lifeOf(cover)[1] >= lifeOf(block)[1];
 
   const buried = (block: VoxelBlock): boolean => {
     const [x, y, z] = cellOf(block);
@@ -206,7 +220,7 @@ const scene = ({ camera: view, blocks }: VoxelScene): SvgNode => {
         href: symbolOf(block.skin),
         x,
         y,
-        animation: [lifetime(block.from ?? 0, block.to ?? Infinity), block.animation].flat(),
+        animation: [lifetime(...lifeOf(block)), block.animation].flat(),
       });
     }),
   );

@@ -96,8 +96,8 @@ describe("voxel.scene", () => {
     ]);
   });
 
-  test("from and to toggle visibility at those times", () => {
-    const svg = build([place([0, 0, 0], { from: 2, to: 6 })]);
+  test("show toggles visibility at those times", () => {
+    const svg = build([place([0, 0, 0], { show: { at: 2, over: 4 } })]);
     const cls = uses(svg)[0]!.cls!;
     expect([0, 1.9, 2.1, 5.9, 6.1, 9.9].map((t) => presenceAt(svg, cls, t))).toEqual([
       0, 0, 1, 1, 0, 0,
@@ -133,18 +133,30 @@ describe("voxel.scene", () => {
     test.each([
       ["an animation", { animation: motion({ y: -5 }).to({ y: 0 }, 1) }],
       ["a transparent skin", { skin: voxel.texture({ x: "#00ff00", ".": null }, "x.") }],
-      ["a later start", { from: 1 }],
+      ["a later start", { show: { at: 1 } }],
     ] as const)("is present when a neighbor has %s", (_, extra) => {
       expect(count([cover(extra)[0]!, ...cover().slice(1)])).toBe(4);
     });
 
     test("is present when a neighbor lives a shorter time", () => {
-      expect(uses(build([place([0, 0, 0], { to: 8 }), ...cover({ to: 5 })])).length).toBe(4);
+      expect(
+        uses(
+          build([
+            place([0, 0, 0], { show: { at: 0, over: 8 } }),
+            ...cover({ show: { at: 0, over: 5 } }),
+          ]),
+        ).length,
+      ).toBe(4);
     });
 
     test("is absent when a neighbor outlives it", () => {
       expect(
-        uses(build([place([0, 0, 0], { from: 2, to: 5 }), ...cover({ from: 1, to: 7 })])).length,
+        uses(
+          build([
+            place([0, 0, 0], { show: { at: 2, over: 3 } }),
+            ...cover({ show: { at: 1, over: 6 } }),
+          ]),
+        ).length,
       ).toBe(3);
     });
   });
@@ -189,7 +201,7 @@ describe("voxel.scene", () => {
   test("output is byte-identical across runs", () => {
     const blocks = [
       place([0, 0, 0]),
-      place([1, 0, 0], { skin: green, from: 1, to: 4 }),
+      place([1, 0, 0], { skin: green, show: { at: 1, over: 3 } }),
       place([0, 1, 0], { skin: blue }),
     ];
 
@@ -197,13 +209,26 @@ describe("voxel.scene", () => {
   });
 
   test("nothing animated sits inside a def", () => {
-    const svg = build([place([0, 0, 0], { from: 1 })]);
+    const svg = build([place([0, 0, 0], { show: { at: 1 } })]);
     expect(svg.slice(svg.indexOf("<defs>"), svg.indexOf("</defs>"))).not.toContain('class="a');
   });
 
   test("a cell must be whole and a lifetime must run forward", () => {
     expect(() => build([place([0.5, 0, 0])])).toThrow(/whole cell/);
+    expect(() => build([place([0, 0, 0], { show: { at: 4, over: 0 } })])).toThrow(
+      /show that starts at 0 or later and lasts/,
+    );
+  });
+
+  test("a block still takes from and to, the names from before 0.7, for show", () => {
+    expect(build([place([0, 0, 0], { from: 2, to: 6 })])).toBe(
+      build([place([0, 0, 0], { show: { at: 2, over: 4 } })]),
+    );
+    expect(build([place([0, 0, 0], { from: 2 })])).toBe(
+      build([place([0, 0, 0], { show: { at: 2 } })]),
+    );
     expect(() => build([place([0, 0, 0], { from: 4, to: 4 })])).toThrow(/from < to/);
+    expect(() => build([place([0, 0, 0], { show: { at: 1 }, to: 4 })])).toThrow(/not both/);
   });
 });
 

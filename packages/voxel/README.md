@@ -39,6 +39,6 @@ export default () =>
   );
 ```
 
-`voxel.camera` fixes the view, `voxel.texture` parses a pixel grid from a palette of hex colors, and `voxel.scene` draws the visible faces. A block's `from` and `to` set when it shows; `animation` moves it.
+`voxel.camera` fixes the view, `voxel.texture` parses a pixel grid from a palette of hex colors, and `voxel.scene` draws the visible faces. A block's `show` (`{ at, over }`, or `{ at }` to stay) sets when it shows; `animation` moves it.
 
 See the [voxel reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/voxels.md) and the [minecraft example](https://github.com/saiashirwad/svjeez/tree/main/examples/minecraft).

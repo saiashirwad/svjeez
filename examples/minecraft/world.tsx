@@ -1,4 +1,4 @@
-import { ease, motion, type Motion, type Seconds } from "svjeez";
+import { ease, motion, span, type Motion, type Seconds } from "svjeez";
 import type { Vec3, VoxelBlock } from "@svjeez/voxel";
 import { BEAT, GRID, random, tenth } from "./kit";
 import { COLUMNS, LAKE, PLOT, columnOf, type Column } from "./terrain";
@@ -23,6 +23,9 @@ const snowsAt = (column: Column): number =>
       (1 - nearness(column)) * (BEAT.snowed - BEAT.snow - 1) +
       jitter(column.x, column.z),
   );
+
+/** A block shows from `from` until `to`. */
+const lives = (from: Seconds, to: Seconds) => span(from, to - from);
 
 const DROP = 18;
 const SINK = 90;
@@ -61,15 +64,13 @@ const terrain = (column: Column): VoxelBlock[] => {
       ? {
           cell: [x, y, z],
           skin: skinAt(column, i),
-          from: landed,
-          to: snowy(column) ? snowsAt(column) : until,
+          show: lives(landed, snowy(column) ? snowsAt(column) : until),
           animation: life(landed, until),
         }
       : {
           cell: [x, y, z],
           skin: skinAt(column, i),
-          from,
-          to: until,
+          show: lives(from, until),
           animation: shallow ? sinks(until) : undefined,
         };
   });
@@ -86,11 +87,10 @@ const water = ({ x, z, top }: Column): VoxelBlock[] => {
     {
       cell: [x, top, z],
       skin: SKIN.water,
-      from: filled,
-      to: frozen,
+      show: lives(filled, frozen),
       animation: motion({ y: -6 }).at(filled).to({ y: 0 }, 0.6),
     },
-    { cell: [x, top, z], skin: SKIN.ice, from: frozen, to: until, animation: sinks(until) },
+    { cell: [x, top, z], skin: SKIN.ice, show: lives(frozen, until), animation: sinks(until) },
   ];
 };
 
@@ -100,8 +100,7 @@ const snow = (column: Column): VoxelBlock[] =>
         {
           cell: [column.x, column.top - 1, column.z],
           skin: SKIN.snow,
-          from: snowsAt(column),
-          to: leavesAt(column),
+          show: lives(snowsAt(column), leavesAt(column)),
           animation: sinks(leavesAt(column)),
         },
       ]
@@ -121,7 +120,7 @@ const built = (
   parts.map(({ cell, skin }, i): VoxelBlock => {
     const [from, until] = [tenth(start + i * step), gone(cell)];
 
-    return { cell, skin, from, to: until, animation: life(from, until) };
+    return { cell, skin, show: lives(from, until), animation: life(from, until) };
   });
 
 const nearPlot = ({ x, z }: Column, margin: number): boolean =>
@@ -224,8 +223,7 @@ const crownTops = ({ x, z, top }: Column): VoxelBlock[] =>
     return {
       cell,
       skin: SKIN.snowCap,
-      from: tenth(BEAT.snow + 1.5 + (1 - nearness({ x: cell[0], z: cell[2] })) * 3),
-      to: until,
+      show: lives(tenth(BEAT.snow + 1.5 + (1 - nearness({ x: cell[0], z: cell[2] })) * 3), until),
       animation: sinks(until),
     };
   });
@@ -248,8 +246,7 @@ const flowers = (): VoxelBlock[] => {
     return {
       cell: [x, top, z],
       skin: i % 2 ? SKIN.flowerYellow : SKIN.flowerRed,
-      from,
-      to: until,
+      show: lives(from, until),
       animation: life(from, until),
     };
   });
@@ -319,15 +316,13 @@ const lantern = (): VoxelBlock[] => {
     {
       cell: [POST.x, POST.top, POST.z],
       skin: SKIN.log,
-      from,
-      to: until,
+      show: lives(from, until),
       animation: life(from, until),
     },
     {
       cell: [POST.x, POST.top + 1, POST.z],
       skin: SKIN.lampOff,
-      from: tenth(from + 0.3),
-      to: until,
+      show: lives(tenth(from + 0.3), until),
       animation: life(tenth(from + 0.3), until),
     },
   ];
@@ -344,8 +339,7 @@ const lit = (): VoxelBlock[] => {
   return lamps.map((cell): VoxelBlock => ({
     cell,
     skin: SKIN.lampOn,
-    from: BEAT.lights,
-    to: BEAT.lightsOut,
+    show: lives(BEAT.lights, BEAT.lightsOut),
   }));
 };
 
