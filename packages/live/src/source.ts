@@ -90,8 +90,14 @@ interface LiteralBase {
 
 export type Literal =
   | (LiteralBase & { readonly kind: "number"; readonly value: number })
-  | (LiteralBase & { readonly kind: "color"; readonly value: Hex })
-  | (LiteralBase & { readonly kind: "string"; readonly value: string })
+  | (LiteralBase & { readonly kind: "color"; readonly value: Hex; readonly jsx?: true })
+  | (LiteralBase & {
+      readonly kind: "string";
+      /** What the string holds, escapes read, so `'a\\n'` holds a newline. A JSX attribute has no escapes, so it holds its text. */
+      readonly value: string;
+      /** Set for a JSX attribute's quoted value, `fill="red"`, whose text has no escapes. */
+      readonly jsx?: true;
+    })
   | (LiteralBase & {
       readonly kind: "ease";
       readonly value: Ease;
@@ -339,10 +345,18 @@ const literalsOf = (src: string, tree: Tree): Literal[] => {
       if (text.includes("\n")) return undefined;
 
       if (node.name === "String" || node.name === "JSXAttributeValue") {
+        const jsx = node.name === "JSXAttributeValue" ? ({ jsx: true } as const) : {};
+
         if (COLOR.test(text))
           // SAFETY: COLOR matched a quoted `#` and three, six or eight hex digits, which is a Hex once the quotes are off.
-          out.push({ ...base(node), kind: "color", value: text.slice(1, -1) as Hex });
-        else out.push({ ...base(node), kind: "string", value: text.slice(1, -1) });
+          out.push({ ...base(node), ...jsx, kind: "color", value: text.slice(1, -1) as Hex });
+        else
+          out.push({
+            ...base(node),
+            ...jsx,
+            kind: "string",
+            value: jsx.jsx ? text.slice(1, -1) : unescape(text.slice(1, -1)),
+          });
 
         return false;
       }
@@ -613,6 +627,62 @@ export const decimalsOf = (text: string) => {
   return /^-?\d*\.?\d+$/.test(plain) ? (plain.split(".")[1] ?? "").length : 0;
 };
 
+const ESCAPES = new Map(
+  Object.entries({
+    n: "\n",
+    r: "\r",
+    t: "\t",
+    b: "\b",
+    f: "\f",
+    v: "\v",
+    "0": "\0",
+  }),
+);
+
+/** What the body of a quoted JavaScript string holds: `\n`, `\'`, `\\`, `\xHH`, `\uHHHH` and `\u{H…}` read as their characters. */
+export const unescape = (body: string) =>
+  body.replace(
+    /\\(?:u\{([0-9a-fA-F]+)\}|u([0-9a-fA-F]{4})|x([0-9a-fA-F]{2})|([\s\S]))/g,
+    (all, braced?: string, four?: string, two?: string, one?: string) => {
+      const code = braced ?? four ?? two;
+
+      if (code !== undefined) {
+        const point = Number.parseInt(code, 16);
+
+        return point <= 0x10ffff ? String.fromCodePoint(point) : all;
+      }
+
+      return ESCAPES.get(one!) ?? one!;
+    },
+  );
+
+/** `value` as the body of a JavaScript string quoted with `quote`, so that reading it back gives `value`. */
+const escape = (value: string, quote: string) =>
+  value.replace(/[\\\n\r\u2028\u2029'"]/g, (c) =>
+    c === quote || c === "\\"
+      ? `\\${c}`
+      : c === "\n"
+        ? "\\n"
+        : c === "\r"
+          ? "\\r"
+          : c === "\u2028" || c === "\u2029"
+            ? `\\u${c.charCodeAt(0).toString(16)}`
+            : c,
+  );
+
+/** A string or color as code, in the quotes it had: escaped in JavaScript, and in a JSX attribute, which has no escapes, in the other quotes, or in braces when it holds both. */
+const quoted = (literal: LiteralOf<"string" | "color">) => {
+  const value: string = literal.value;
+  const quote = literal.text[0]!;
+
+  if (!literal.jsx) return `${quote}${escape(value, quote)}${quote}`;
+
+  if (!value.includes(quote)) return `${quote}${value}${quote}`;
+  const other = quote === '"' ? "'" : '"';
+
+  return value.includes(other) ? `{"${escape(value, '"')}"}` : `${other}${value}${other}`;
+};
+
 /** An ease as code: `ease.name` when it is that very ease, else `ease.bezier(…)` to two decimals. */
 export const easeText = (value: Ease): string => {
   const name = [...NAMED_EASES].find((n) => isNamedEase(n) && ease[n] === value);
@@ -638,7 +708,7 @@ export const write = (literal: Literal, decimals?: number): string => {
         : numberText(literal.value, decimals, true);
     case "color":
     case "string":
-      return `${literal.text[0]}${literal.value}${literal.text[0]}`;
+      return quoted(literal);
     case "ease":
       return easeText(literal.value);
   }

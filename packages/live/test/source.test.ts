@@ -132,6 +132,51 @@ describe("edits", () => {
     );
   });
 
+  test("a string with a quote, a backslash or a newline is written so it reads back the same", () => {
+    const strings = ["it's", 'say "hi"', "a\\b", "line\nbreak", "tab\t\u2028", "'\"\\\n"];
+
+    for (const quote of ["'", '"']) {
+      for (const value of strings) {
+        const source = parse(`const s = ${quote}x${quote};`);
+        const [literal] = source.literals;
+
+        if (literal?.kind !== "string") throw new Error("a string literal");
+
+        const text = set(source, { ...literal, value });
+
+        // The file is valid JavaScript and holds the string.
+        expect(new Function(`${text.replace("const s =", "return")}`)()).toBe(value);
+        expect(parse(text).literals[0]).toMatchObject({ kind: "string", value });
+      }
+    }
+  });
+
+  test("a string read from the file has its escapes read", () => {
+    expect(parse(String.raw`const s = 'a\'b\\c\n\x41\u0042\u{43}';`).literals[0]).toMatchObject({
+      kind: "string",
+      value: "a'b\\c\nABC",
+    });
+  });
+
+  test("a JSX attribute has no escapes: a quote in it goes in the other quotes, or in braces", () => {
+    const attr = (value: string) => {
+      const source = parse('const a = <g class="x" />;');
+      const literal = source.literals.find((l): l is LiteralOf<"string"> => l.kind === "string");
+
+      if (!literal) throw new Error("a string literal");
+
+      return set(source, { ...literal, value });
+    };
+
+    expect(attr("a'b")).toBe('const a = <g class="a\'b" />;');
+    expect(attr('a"b')).toBe("const a = <g class='a\"b' />;");
+    expect(attr("a\\b")).toBe('const a = <g class="a\\b" />;');
+    expect(attr(`a"b'c`)).toBe('const a = <g class={"a\\"b\'c"} />;');
+    expect(parse(attr(`a"b'c`)).literals.find((l) => l.kind === "string")).toMatchObject({
+      value: `a"b'c`,
+    });
+  });
+
   test("apply makes several edits against the original ranges", () => {
     const source = parse(plane);
     const a = literalAt(source, ["legs", 0, "over"])!;
