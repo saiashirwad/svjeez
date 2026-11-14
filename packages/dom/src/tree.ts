@@ -85,6 +85,8 @@ export type Item = Box | TextRun | Graphic | Picture;
 
 /** One state of a component, read from a live page. Plain data: it survives `JSON.stringify`. */
 export interface Snapshot {
+  /** The name `snap(name)` gave it. */
+  readonly name?: string;
   /** Size of the picture: the element plus `pad` on every side. */
   readonly width: number;
   readonly height: number;

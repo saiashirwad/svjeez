@@ -1,5 +1,15 @@
 import { google } from "@svjeez/fonts";
-import { Dom, size, snapshots, type Action } from "@svjeez/dom";
+import {
+  Dom,
+  fill,
+  hover,
+  move,
+  render as rerender,
+  size,
+  snap,
+  snapshots,
+  type Flow,
+} from "@svjeez/dom";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { render, span, variables } from "svjeez";
@@ -7,7 +17,7 @@ import { tailwind } from "./tailwind.ts";
 import { pieces } from "./ui.tsx";
 
 // Real shadcn components rendered by React, laid out by Chromium with Tailwind 4, then drawn as SVG.
-// Each card is a live page that runs its steps in order: the sign-in card is typed into, focused and hovered, and
+// Each card is a live page that runs a flow in order: the sign-in card is typed into, focused and hovered, and
 // every state is read off it.
 // The snapshots are kept in snapshots.json, so a build without changes never starts Chromium.
 const geist = await google.family("Geist", [400, 500, 600]);
@@ -20,52 +30,56 @@ const html = {
   merged: pieces.pr(true),
 };
 
-// The sign-in card's steps as plain data, so they are part of the inputs: changing one reads the page again.
-const login = [
-  { snap: "idle" },
-  { fill: ["[data-part=email]", "sai@exmaple.com"] },
-  { snap: "typed" },
-  { fill: ["[data-part=password]", "hunter2hunter2"] },
-  { snap: "password" },
-  { hover: "[data-part=submit]" },
-  { snap: "hovered" },
+// A sub-flow any sign-in card can reuse: each field types in over about a second, starting at `at`.
+async function* login(email: string, password: string, at: number) {
+  yield fill("[data-part=email]", email);
+  yield snap("typed", span(at, 1.1));
+  yield fill("[data-part=password]", password);
+  yield snap("password", span(at + 1.4, 1));
+}
+
+async function* signIn() {
+  yield snap("idle");
+  yield* login("sai@exmaple.com", "hunter2hunter2", 0.5);
+  yield hover("[data-part=submit]");
+  yield snap("hovered", span(3.2, 0.35));
   // The server says no: the same card, re-rendered, with the pointer moved off.
-  { render: html.failed },
-  { move: [0, 0] },
-  { snap: "failed" },
-] as const satisfies readonly Action[];
+  yield rerender(html.failed);
+  yield move(0, 0);
+  yield snap("failed", span(4.1, 0.7));
+  // Then back to the start, and both fields delete.
+  yield rerender(html.signIn);
+  yield snap("idle", span(6.6, 0.8));
+}
 
-const { idle, typed, password, hovered, failed, open, merged } = await snapshots(
+// The pull request card as data: it turns merged, then opens again.
+const pr = [
+  { snap: "open" },
+  { render: html.merged },
+  { snap: "merged", at: 2, over: 0.7 },
+  { render: html.open },
+  { snap: "open", at: 6, over: 0.7 },
+] as const satisfies Flow;
+
+// snapshots.json records the markup and every instruction, so changing one reads the pages again. The theme is
+// read by Tailwind, out of its sight.
+let built: Promise<string> | undefined;
+const sheet = () => (built ??= tailwind(Object.values(html)));
+
+const cards = await snapshots(
   here("snapshots.json"),
-  { inputs: { html, login, theme: readFileSync(here("theme.css"), "utf8") }, fonts: [geist] },
-  async (dom) => {
-    const css = await tailwind(Object.values(html));
-    const signIn = await dom.mount(html.signIn, { css });
-    const pr = await dom.mount(html.open, { css });
-
-    return {
-      ...(await signIn.steps(login)),
-      ...(await pr.steps({ open: null, merged: { html: html.merged } })),
-    };
-  },
+  { inputs: readFileSync(here("theme.css"), "utf8"), fonts: [geist] },
+  async (dom) => ({
+    signIn: await (await dom.mount(html.signIn, { css: sheet })).run(signIn()),
+    pr: await (await dom.mount(html.open, { css: sheet })).run(pr),
+  }),
 );
 
 const D = 9;
 const GAP = 16;
 const MARGIN = 24;
-// The pull request card turns merged, then opens again.
-const prStates = [open, merged, open];
-// Each fill types in over its span: about a second per field.
-const signIn = [
-  idle,
-  [typed, span(0.5, 1.1)],
-  [password, span(1.9, 1)],
-  [hovered, span(3.2, 0.35)],
-  [failed, span(4.1, 0.7)],
-  [idle, span(6.6, 0.8)],
-] as const;
-const left = size(signIn);
-const right = size(prStates);
+const left = size(cards.signIn);
+const right = size(cards.pr);
 const W = MARGIN * 2 + left.width + GAP + right.width;
 const H = MARGIN * 2 + Math.max(left.height, right.height);
 const { vars, css } = variables({ backdrop: "#09090b" }, { backdrop: "#f4f4f5" });
@@ -82,15 +96,8 @@ export default function build(): string {
     },
     <>
       <rect width={W} height={H} fill={vars.backdrop} />
-      <Dom states={signIn} fonts={[geist]} x={MARGIN} y={MARGIN} />
-      <Dom
-        states={prStates}
-        fonts={[geist]}
-        at={[2, 6]}
-        over={0.7}
-        x={MARGIN + left.width + GAP}
-        y={MARGIN}
-      />
+      <Dom states={cards.signIn} fonts={[geist]} x={MARGIN} y={MARGIN} />
+      <Dom states={cards.pr} fonts={[geist]} x={MARGIN + left.width + GAP} y={MARGIN} />
     </>,
   );
 }

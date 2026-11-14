@@ -3,9 +3,23 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { font, render, span } from "svjeez";
+import { ease, font, render, span } from "svjeez";
 import { validateSvg } from "svjeez/frames";
-import { boxes, browser, Dom, rect, size, snapshots, type Browser } from "../src/index.ts";
+import {
+  act,
+  boxes,
+  browser,
+  Dom,
+  fill,
+  find,
+  rect,
+  render as markup,
+  size,
+  snap,
+  snapshots,
+  type Browser,
+  type Flow,
+} from "../src/index.ts";
 
 const regular = font(
   readFileSync(join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf")),
@@ -132,48 +146,59 @@ describe("snap", () => {
     await card.close();
   });
 
-  test("steps: an object of named steps runs in order on one page, and keeps its keys in order", async () => {
+  test("run: a generator composes sub-flows with yield*, and each snap carries its name and timing", async () => {
     const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
       css: CSS,
     });
-    const snaps = await card.steps({
-      typed: (page) => page.fill("input", "hi"),
-      idle: null,
-      failed: { html: '<div class="card"><input placeholder="email"><p>failed</p></div>' },
-      again: { action: (page) => page.fill("input", "yo") },
-    });
 
-    expect(Object.keys(snaps)).toEqual(["typed", "idle", "failed", "again"]);
-    // "idle" ran after "typed", so the typed text is still there.
-    expect(JSON.stringify(snaps.idle)).toContain('"text":"hi"');
-    expect(JSON.stringify(snaps.failed)).toContain('"text":"failed"');
-    expect(JSON.stringify(snaps.failed)).not.toContain('"text":"hi"');
-    expect(JSON.stringify(snaps.again)).toContain('"text":"yo"');
+    async function* type(text: string, at: number) {
+      yield fill("input", text);
+      yield snap("typed", span(at, 1));
+    }
+
+    async function* flow() {
+      yield snap("idle");
+      yield* type("hi", 0.5);
+      yield act((page) => page.fill("input", ""));
+      // Back where it started: names may repeat.
+      yield snap("idle", { at: 2, over: 0.5, ease: ease.pop });
+      yield markup('<div class="card"><p>done</p></div>');
+      yield snap(span(3, 0.5));
+    }
+
+    const steps = await card.run(flow());
+    const names = steps.map((s) => ("root" in s ? s : s[0]).name);
+
+    expect(names).toEqual(["idle", "typed", "idle", undefined]);
+    expect(steps[1]).toMatchObject([{ name: "typed" }, { at: 0.5, over: 1 }]);
+    expect(steps[2]).toEqual([expect.anything(), { at: 2, over: 0.5 }, ease.pop]);
+    expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hi"');
+    expect(JSON.stringify(steps[2])).not.toContain('"text":"hi"');
+    expect(JSON.stringify(steps[3])).toContain('"text":"done"');
+    expect(validateSvg(draw(steps)).errors).toEqual([]);
     await card.close();
   });
 
-  test("steps: a list of actions as data snaps where it says, by name, in order", async () => {
+  test("run: a list of instructions as data runs the same way, checked before it starts", async () => {
     const card = await dom.mount(
       '<div class="card"><input placeholder="email"><button class="badge">go</button></div>',
       { css: CSS },
     );
-    const snaps = await card.steps([
+    const steps = await card.run([
       { snap: "idle" },
       { click: "input" },
       { press: "h" },
       { fill: ["input", "hey"] },
-      { snap: "typed" },
+      { snap: "typed", at: 0.5, over: 1 },
       { hover: "button" },
       { move: [0, 0] },
       { render: '<div class="card"><p>done</p></div>' },
-      { snap: "done" },
+      { snap: "done", at: 2, over: 0.5 },
     ]);
 
-    expect(Object.keys(snaps)).toEqual(["idle", "typed", "done"]);
-    expect(JSON.stringify(snaps.typed)).toContain('"text":"hey"');
-    expect(JSON.stringify(snaps.done)).toContain('"text":"done"');
-    // @ts-expect-error The result has only the names the list snaps.
-    expect(snaps.missing).toBeUndefined();
+    expect(steps.map((s) => ("root" in s ? s : s[0]).name)).toEqual(["idle", "typed", "done"]);
+    expect(JSON.stringify(find(steps, "typed"))).toContain('"text":"hey"');
+    expect(JSON.stringify(find(steps, "done"))).toContain('"text":"done"');
 
     const failure = (p: Promise<unknown>) =>
       p.then(
@@ -181,8 +206,19 @@ describe("snap", () => {
         (e: Error) => e.message,
       );
 
-    expect(await failure(card.steps([{ snap: "a" }, { snap: "a" }]))).toContain('"a" twice');
-    expect(await failure(card.steps([{ scroll: "x" } as never]))).toContain("scroll");
+    // The first snap's span would be read before anything runs, so the page is never touched.
+    expect(await failure(card.run([fill("input", "x"), snap("a", span(0, 1))]))).toContain(
+      "first snap has a span",
+    );
+    expect(await failure(card.run([snap("a"), { snap: "b", at: 1 }]))).toContain("at and over");
+    expect(await failure(card.run([{ scroll: "x" } as never]))).toContain("scroll");
+
+    async function* late() {
+      yield act(() => undefined);
+      yield snap("a", span(0, 1));
+    }
+
+    expect(await failure(card.run(late()))).toContain("first snap has a span");
     await card.close();
   });
 
@@ -373,29 +409,52 @@ describe("Dom", () => {
 });
 
 describe("snapshots", () => {
-  test("a second call with the same inputs reads the file and never launches", async () => {
+  test("a second call reads the file and never launches, and timing on a snap is never stale", async () => {
     const dir = mkdtempSync(join(tmpdir(), "svjeez-dom-"));
     const file = join(dir, "nested", "snapshots.json");
     let runs = 0;
 
-    const run = async (d: Browser) => {
-      runs++;
-      const card = await d.mount('<div class="card">Hi</div>', { css: CSS });
+    async function* flow(text: string, at: number) {
+      yield snap("idle");
+      yield fill("input", text);
+      yield snap("typed", { at, over: 1, ease: ease.pop });
+    }
 
-      return { hi: await card.snap(), two: [await card.snap(), await card.snap()] };
+    const run = (f: Flow) => async (d: Browser) => {
+      runs++;
+      const card = await d.mount('<div class="card"><input placeholder="email"></div>', {
+        css: CSS,
+      });
+
+      return { hi: await card.snap(), steps: await card.run(f) };
     };
 
     try {
-      const first = await snapshots(file, { inputs: ["v1"], fonts: [regular] }, run);
+      const first = await snapshots(file, { inputs: ["v1"], fonts: [regular] }, run(flow("hi", 1)));
       // A browser that can't start proves nothing was launched.
       const bogus = { inputs: ["v1"], executablePath: "/nowhere/chrome" };
-      const second = await snapshots(file, bogus, run);
+      const second = await snapshots(file, bogus, run(flow("hi", 1)));
 
-      expect(runs).toBe(1);
+      expect(runs).toBe(2);
       expect(second).toEqual(JSON.parse(JSON.stringify(first)));
+      expect(draw(second.steps)).toBe(draw(first.steps));
       expect(JSON.parse(readFileSync(file, "utf8")).hash).toMatch(/^[0-9a-f]{64}$/);
 
-      await expect(snapshots(file, { ...bogus, inputs: ["v2"] }, run)).rejects.toThrow();
+      // New timing replays the same snapshots; new text, a new instruction or new inputs read the page again.
+      const later = await snapshots(file, bogus, run(flow("hi", 2)));
+
+      expect(later.steps[1]).toEqual([find(second.steps, "typed")!, { at: 2, over: 1 }, ease.pop]);
+      await expect(snapshots(file, bogus, run(flow("yo", 1)))).rejects.toThrow();
+      await expect(
+        snapshots(
+          file,
+          bogus,
+          run([snap("idle"), fill("input", "hi"), snap("typed", span(1, 1)), snap()]),
+        ),
+      ).rejects.toThrow();
+      await expect(
+        snapshots(file, { ...bogus, inputs: ["v2"] }, run(flow("hi", 1))),
+      ).rejects.toThrow();
     } finally {
       rmSync(dir, { recursive: true });
     }

@@ -1,6 +1,8 @@
 import type { Page } from "playwright-core";
 import type { Font, FontValue } from "svjeez";
 import { merge } from "./scheme.ts";
+import type { Step } from "./draw.tsx";
+import type { Action, Flow, Snap } from "./flow.ts";
 import type { Snapshot } from "./tree.ts";
 import { walk } from "./walk.ts";
 
@@ -36,29 +38,7 @@ export interface MountOptions extends PageOptions {
   readonly root?: { readonly class?: string };
 }
 
-/** One step as plain data, the way Playwright's codegen writes it, so a step list can be part of `snapshots()` inputs. */
-export type Action =
-  | { readonly click: string }
-  | { readonly fill: readonly [selector: string, text: string] }
-  | { readonly hover: string }
-  | { readonly press: string }
-  | { readonly move: readonly [x: number, y: number] }
-  /** New markup for a mounted card, as `render`. */
-  | { readonly render: string }
-  /** Read the page into the snapshot of this name. */
-  | { readonly snap: string };
-
-type PageAction = (page: Page) => Promise<unknown>;
-
-/** A named step: `null` just reads the page, a function acts first, `html` renders new markup before `action`. */
-export type StepSpec =
-  | null
-  | undefined
-  | PageAction
-  | { readonly html?: string; readonly action?: PageAction };
-
-/** The names a list of actions snaps. */
-type Snapped<A extends readonly Action[]> = Extract<A[number], { readonly snap: string }>["snap"];
+type PageAction = (page: Page) => unknown;
 
 export interface OpenOptions extends PageOptions {
   /** The element to snapshot. */
@@ -70,16 +50,10 @@ export interface Card {
   /** Run `action` on the page, if given, then read the page into a snapshot. */
   readonly snap: (action?: PageAction) => Promise<Snapshot>;
   /**
-   * Runs steps in order on this page and snaps each, so state carries from one to the next. An object names each
-   * step; a list of actions snaps where it says `{ snap: name }`. Either way the result keeps the order, so
-   * `Object.values` is the timeline.
+   * Runs a flow on this page, so state carries from one instruction to the next, and resolves to a step per snap,
+   * in order, ready for `<Dom states>`.
    */
-  readonly steps: {
-    <const A extends readonly Action[]>(actions: A): Promise<{ [K in Snapped<A>]: Snapshot }>;
-    <const S extends Readonly<Record<string, StepSpec>>>(
-      spec: S,
-    ): Promise<{ [K in keyof S]: Snapshot }>;
-  };
+  readonly run: (flow: Flow) => Promise<Step[]>;
   /** Swap the markup of a mounted card, running its `css` again if that is a function. */
   readonly render: (html: string) => Promise<void>;
   readonly close: () => Promise<void>;
@@ -93,6 +67,83 @@ export interface Browser {
   readonly close: () => Promise<void>;
   readonly [Symbol.asyncDispose]: () => Promise<void>;
 }
+
+/** What a card does to its page. A card is built on these, so `snapshots()` can record and replay them. */
+export interface Io {
+  readonly read: () => Promise<Snapshot>;
+  readonly act: (action: Action | PageAction) => Promise<unknown>;
+  readonly close: () => Promise<void>;
+}
+
+/** Where cards come from: Chromium, or a recording of it. */
+export interface Pages {
+  readonly mount: (html: string, options?: MountOptions) => Promise<Io>;
+  readonly open: (url: string, options: OpenOptions) => Promise<Io>;
+  readonly close: () => Promise<void>;
+}
+
+/** The span and ease a snap carries, checked so a mistake shows before a page's worth of instructions runs. */
+const timing = (step: Snap, first: boolean) => {
+  const name = step.snap === true ? "a snap" : `snap "${step.snap}"`;
+
+  if ((step.at === undefined) !== (step.over === undefined))
+    throw new Error(`run(): ${name} needs both at and over, or neither.`);
+
+  if (step.at === undefined) {
+    if (step.ease) throw new Error(`run(): ${name} has an ease but no span.`);
+
+    return undefined;
+  }
+
+  if (first)
+    throw new Error(
+      `run(): the first snap has a span, but nothing arrives at it. Put the span on the next snap.`,
+    );
+
+  return { span: { at: step.at, over: step.over! }, ease: step.ease };
+};
+
+const cardOf = (io: Io): Card => ({
+  snap: async (action) => {
+    if (action) await io.act(action);
+
+    return io.read();
+  },
+  run: async (flow) => {
+    // A list can be checked before anything runs; a generator only as it goes.
+    if (!(Symbol.asyncIterator in flow))
+      flow.filter((s): s is Snap => "snap" in s).forEach((s, i) => timing(s, i === 0));
+
+    const steps: Step[] = [];
+
+    for await (const step of flow) {
+      if (!("snap" in step)) {
+        await io.act("act" in step ? step.act : step);
+        continue;
+      }
+
+      const when = timing(step, steps.length === 0);
+      const read = await io.read();
+      const state = step.snap === true ? read : { name: step.snap, ...read };
+
+      steps.push(when ? (when.ease ? [state, when.span, when.ease] : [state, when.span]) : state);
+    }
+
+    return steps;
+  },
+  render: async (html) => {
+    await io.act({ render: html });
+  },
+  close: io.close,
+});
+
+/** A Browser over any pages. */
+export const browserOf = (pages: Pages): Browser => ({
+  mount: async (html, options) => cardOf(await pages.mount(html, options)),
+  open: async (url, options) => cardOf(await pages.open(url, options)),
+  close: pages.close,
+  [Symbol.asyncDispose]: pages.close,
+});
 
 const FORMAT = { ttf: "truetype", otf: "opentype", woff: "woff", woff2: "woff2" } as const;
 
@@ -125,8 +176,8 @@ const launch = async (executablePath?: string) => {
 
 const ROOT = "#svjeez-dom";
 
-/** One browser for many cards. Close it when done, or `await using` it. */
-export const browser = async (options: BrowserOptions = {}): Promise<Browser> => {
+/** Pages in one Chromium. */
+export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages> => {
   const chromium = await launch(options.executablePath);
   const faces = fontFaces(options.fonts ?? []);
   const schemes = options.schemes ?? "both";
@@ -134,12 +185,12 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
   // The scheme a card rests in between snapshots, so actions run in the scheme the page was written for.
   const resting = schemes === "dark" ? "dark" : "light";
 
-  const card = async (
+  const io = async (
     page: Page,
     selector: string,
     { parts = {}, pad = 16 }: PageOptions,
-    render: Card["render"],
-  ): Promise<Card> => {
+    render: (html: string) => Promise<void>,
+  ): Promise<Io> => {
     const scheme = async (value: "light" | "dark") => {
       await page.emulateMedia({ colorScheme: value });
       await page.evaluate(([name, on]) => document.documentElement.classList.toggle(name, on), [
@@ -148,7 +199,7 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
       ] as const);
     };
 
-    const read = async (value: "light" | "dark") => {
+    const pass = async (value: "light" | "dark") => {
       await scheme(value);
 
       return page.evaluate(walk, { selector, pad, parts });
@@ -156,11 +207,10 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
 
     await scheme(resting);
 
-    const snap: Card["snap"] = async (action) => {
-      if (action) await action(page);
+    const read = async (): Promise<Snapshot> => {
       // tsx and esbuild's keepNames wrap named functions in __name(), which the page doesn't have.
       await page.evaluate("globalThis.__name ??= (fn) => fn");
-      // Transitions and finite animations that the action started must land before the page is read.
+      // Transitions and finite animations that an action started must land before the page is read.
       await page.evaluate(async () => {
         await document.fonts.ready;
         await Promise.all(
@@ -172,8 +222,8 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
       });
 
       // Light goes last, so the page ends in the scheme it rests in.
-      const dark = schemes === "light" ? undefined : await read("dark");
-      const light = schemes === "dark" ? undefined : await read("light");
+      const dark = schemes === "light" ? undefined : await pass("dark");
+      const light = schemes === "dark" ? undefined : await pass("light");
       const root = dark && light ? merge(light, dark) : (light ?? dark)!;
 
       return {
@@ -185,7 +235,8 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
       };
     };
 
-    const act = (action: Action): Promise<unknown> => {
+    const act = async (action: Action | PageAction): Promise<unknown> => {
+      if (typeof action === "function") return action(page);
       if ("click" in action) return page.click(action.click);
       if ("fill" in action) return page.fill(...action.fill);
       if ("hover" in action) return page.hover(action.hover);
@@ -193,41 +244,11 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
       if ("move" in action) return page.mouse.move(...action.move);
       if ("render" in action) return render(action.render);
 
-      throw new Error(`steps() doesn't know the action ${JSON.stringify(action)}.`);
+      throw new Error(`run() doesn't know the instruction ${JSON.stringify(action)}.`);
     };
 
-    const steps = async (input: readonly Action[] | Readonly<Record<string, StepSpec>>) => {
-      const out: Record<string, Snapshot> = {};
-
-      if (Array.isArray(input)) {
-        const names = (input as readonly Action[]).flatMap((a) => ("snap" in a ? [a.snap] : []));
-        const twice = names.find((name, i) => names.indexOf(name) !== i);
-
-        // Checked before anything runs, so a typo doesn't cost a page's worth of steps.
-        if (twice !== undefined) throw new Error(`steps() snaps "${twice}" twice.`);
-
-        for (const action of input as readonly Action[])
-          if ("snap" in action) out[action.snap] = await snap();
-          else await act(action);
-
-        return out;
-      }
-
-      for (const [name, step] of Object.entries(input as Readonly<Record<string, StepSpec>>)) {
-        if (typeof step === "function") out[name] = await snap(step);
-        else {
-          if (step?.html !== undefined) await render(step.html);
-          out[name] = await snap(step?.action);
-        }
-      }
-
-      return out;
-    };
-
-    return { snap, steps: steps as Card["steps"], render, close: () => page.close() };
+    return { read, act, close: () => page.close() };
   };
-
-  const close = () => chromium.close();
 
   return {
     mount: async (html, { css = "", width, root, ...rest } = {}) => {
@@ -242,7 +263,7 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
         `<!doctype html><html class="${root?.class ?? ""}"><head><meta charset="utf-8"><style>${faces}</style><style id="svjeez-css">${await sheet(html)}</style></head><body style="margin:0;background:none"><div id="svjeez-dom" style="${wrap}">${html}</div></body></html>`,
       );
 
-      return card(page, `${ROOT} > *`, rest, async (next) => {
+      return io(page, `${ROOT} > *`, rest, async (next) => {
         const css = await sheet(next);
 
         await page.evaluate(
@@ -264,13 +285,16 @@ export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
       if (faces) await page.addStyleTag({ content: faces });
       await page.waitForSelector(root);
 
-      return card(page, root, rest, async () => {
+      return io(page, root, rest, async () => {
         throw new Error(
           "render() swaps markup in a mounted card. A card from open() is the app's own page.",
         );
       });
     },
-    close,
-    [Symbol.asyncDispose]: close,
+    close: () => chromium.close(),
   };
 };
+
+/** One browser for many cards. Close it when done, or `await using` it. */
+export const browser = async (options: BrowserOptions = {}): Promise<Browser> =>
+  browserOf(await chromiumPages(options));

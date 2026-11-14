@@ -2,18 +2,33 @@ export {
   browser,
   type Browser,
   type BrowserOptions,
-  type Action,
   type Card,
-  type StepSpec,
   type MountOptions,
   type OpenOptions,
 } from "./browser.ts";
+
+export {
+  act,
+  click,
+  fill,
+  hover,
+  move,
+  press,
+  render,
+  snap,
+  type Act,
+  type Action,
+  type Flow,
+  type Instruction,
+  type Snap,
+  type Timing,
+} from "./flow.ts";
 
 export { snapshots, type SnapshotsOptions } from "./snapshots.ts";
 
 export { Dom, size, type DomProps, type Step } from "./draw.tsx";
 
-export { boxes, rect } from "./find.ts";
+export { boxes, find, rect } from "./find.ts";
 
 export type {
   Box,
