@@ -1,0 +1,44 @@
+{
+  "name": "@svjeez/react",
+  "version": "0.6.1",
+  "private": true,
+  "description": "React components for editing a svjeez scene: its source with a control on every value, and its picture with handles, bound to an @svjeez/live editor.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/react"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "dependencies": {
+    "@svjeez/live": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "playwright-core": "^1.64.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "svjeez": "workspace:*",
+    "typescript": "latest",
+    "vite": "8.3.5"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "svjeez": ">=0.6.0 <1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

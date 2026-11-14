@@ -31,25 +31,17 @@ export const drag = (
   window.addEventListener("pointercancel", cancel);
 };
 
-/** A floating copy of a part that follows the pointer while it's carried. */
-const carry = (html: string, e: PointerEvent) => {
-  const ghost = document.createElement("div");
-  ghost.className = "le-ghost";
-  ghost.innerHTML = html;
-  document.body.append(ghost);
+/** A point on the screen in client px, where a carried copy floats. */
+export interface At {
+  readonly x: number;
+  readonly y: number;
+}
 
-  const place = (m: PointerEvent) =>
-    ghost.style.setProperty("translate", `${m.clientX}px ${m.clientY}px`);
-
-  place(e);
-
-  return { place, drop: () => ghost.remove() };
-};
-
-interface Carrying {
-  readonly html: string;
+export interface Carrying {
   /** How far the pointer moves before the copy lifts, in px. 0 lifts it at once. */
   readonly slop: number;
+  /** Where the floating copy sits, from the moment it lifts; undefined once it is put down. */
+  readonly float: (at: At | undefined) => void;
   readonly over: (m: PointerEvent, lifted: boolean) => void;
   /** The pointer lifted. `lifted` is whether the copy had come off. A cancel never reaches this. */
   readonly end: (u: PointerEvent, lifted: boolean) => void;
@@ -57,28 +49,24 @@ interface Carrying {
   readonly clear: () => void;
 }
 
-/** A drag that carries a floating copy of `html`. */
+/** A drag that carries a floating copy of what was grabbed once the pointer has moved `slop` px. */
 export const carryDrag = (down: PointerEvent, o: Carrying) => {
-  let held: ReturnType<typeof carry> | undefined;
+  let lifted = !o.slop;
 
-  const lift = (at: PointerEvent) => {
-    held = carry(o.html, at);
-    document.body.classList.add("le-carrying");
-  };
-
-  if (!o.slop) lift(down);
+  if (lifted) o.float({ x: down.clientX, y: down.clientY });
   drag(down, {
     move(m) {
-      if (!held && Math.hypot(m.clientX - down.clientX, m.clientY - down.clientY) > o.slop) lift(m);
-      held?.place(m);
-      o.over(m, !!held);
+      if (!lifted && Math.hypot(m.clientX - down.clientX, m.clientY - down.clientY) > o.slop)
+        lifted = true;
+
+      if (lifted) o.float({ x: m.clientX, y: m.clientY });
+      o.over(m, lifted);
     },
     end(u, cancelled) {
-      held?.drop();
-      document.body.classList.remove("le-carrying");
+      o.float(undefined);
       o.clear();
 
-      if (!cancelled) o.end(u, !!held);
+      if (!cancelled) o.end(u, lifted);
     },
   });
 };

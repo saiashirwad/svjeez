@@ -88,12 +88,12 @@
       <rect x="796" y="468" width="120" height="28"/>
     </clipPath>
     <filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
-      <feGaussianBlur stdDeviation="12">
+      <feGaussianBlur stdDeviation="0">
         <animate attributeName="stdDeviation" values="12;12;0;0;14;14" keyTimes="0;0.45167;0.54333;0.72583;0.77583;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19;0 0 1 1" dur="12s" repeatCount="indefinite"/>
       </feGaussianBlur>
     </filter>
     <filter id="f3s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
-      <feGaussianBlur stdDeviation="12"/>
+      <feGaussianBlur stdDeviation="0"/>
     </filter>
     <filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="0">

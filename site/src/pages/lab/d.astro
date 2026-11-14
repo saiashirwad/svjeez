@@ -1,54 +1,8 @@
 ---
 import Base from "../../layouts/Base.astro";
-import "../../lab/d/lab.css";
-
-const presets = ["heart", "chick", "star", "pi", "squiggle"];
+import Lab from "../../lab/d/Lab.svelte";
 ---
 
 <Base title="Math · svjeez lab" description="Draw a shape and svjeez compiles the chain of spinning circles that draws it, beside the Fourier sum, typeset." wide>
-  <main class="ld" data-lab-d>
-    <figure class="ld-stage">
-      <div class="ld-canvas">
-        <img alt="Spinning circles trace the drawing beside the Fourier sum that draws it" width="960" height="540" />
-        <svg class="ld-ink" viewBox="0 0 960 540" aria-label="Draw a closed shape" role="img"><path /></svg>
-      </div>
-      <figcaption>
-        <span class="ld-file">fourier.svg</span>
-        <span data-gzip></span>
-        <span class="ld-muted" data-ms></span>
-        <a data-save download="fourier.svg">save</a>
-      </figcaption>
-      <p class="ld-error" data-error hidden></p>
-    </figure>
-
-    <section class="ld-panel" aria-label="Controls">
-      <label class="ld-count">
-        <output data-n>24</output>
-        <span class="ld-muted">circles</span>
-        <input type="range" min="0" max="1000" step="1" data-slider aria-label="Circles" />
-      </label>
-
-      <div class="ld-tiles" role="radiogroup" aria-label="Shape">
-        <button type="button" class="ld-tile" data-pen aria-label="Draw your own" role="radio" aria-checked="false">
-          <svg viewBox="-1.2 -1.2 2.4 2.4" aria-hidden="true">
-            <path class="ld-pencil" d="M-0.5 0.55 L-0.42 0.25 L0.3 -0.47 a0.12 0.12 0 0 1 0.17 0 l0.06 0.06 a0.12 0.12 0 0 1 0 0.17 L-0.19 0.48 Z M0.18 -0.35 L0.35 -0.18" />
-            <path class="ld-thumb" />
-          </svg>
-        </button>
-        {
-          presets.map((name) => (
-            <button type="button" class="ld-tile" data-preset={name} aria-label={name} role="radio" aria-checked="false">
-              <svg viewBox="-1.2 -1.2 2.4 2.4" aria-hidden="true"><path class="ld-thumb" /></svg>
-            </button>
-          ))
-        }
-      </div>
-    </section>
-  </main>
+  <Lab client:load />
 </Base>
-
-<script>
-  import { start } from "../../lab/d/app";
-
-  start(document.querySelector<HTMLElement>("[data-lab-d]")!);
-</script>

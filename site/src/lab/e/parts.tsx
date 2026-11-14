@@ -1,11 +1,11 @@
-import { ease, motion, sampled, wiggle } from "svjeez";
+import { ease, motion, Pivot, sampled, wiggle } from "svjeez";
 import { clamp } from "../util";
-import { blinkAt, Eye, Pivot, Speech } from "./bits";
+import { blinkAt, Eye, Speech } from "./bits";
 import { Face } from "./face";
 import { DURATION, sub } from "./geometry";
 import { wordFor, speechSize } from "./layout";
 import { r1, type Cx } from "./look";
-import { meltScale, partMotion } from "./motions";
+import { meltScale, partMotion, wag, walk } from "./motions";
 import { INK } from "./palette";
 import { QUIRK_AT } from "./quirk";
 import { Tail } from "./tail";
@@ -14,25 +14,13 @@ export const legs = (cx: Cx) => {
   const { g, f, lay, pal, ink, rand } = cx;
 
   return lay.legs.map((l, i) => {
-    const phase = (i * 0.19 + (i % 2) * 0.5) % 1;
-    const swing = 20 - Math.min(10, g.legs);
-
-    const walk = sampled(
-      (t) => ({ rotate: Math.round(swing * Math.sin(Math.PI * 2 * (t - phase)) * 10) / 10 }),
-      {
-        duration: 1,
-        step: 0.05,
-        tolerance: { rotate: 0.8 },
-      },
-    ).loop(1);
-
     const paw = g.pattern === "socks" ? "#FFFFFF" : f.hoofed ? INK : pal.base;
 
     return (
       <g transform={`translate(${r1(l.at.x)} ${r1(l.at.y)})`}>
         <g animation={partMotion(cx, l.at, (rand() - 0.5) * 2)}>
           <g transform={`rotate(${r1(l.angle)})`}>
-            <Pivot size={l.length + l.width} animation={[walk, f.liquid && meltScale(0.25)]}>
+            <Pivot animation={[walk(g, i), f.liquid && meltScale(0.25)]}>
               <path
                 d={`M0 0V${r1(l.length)}`}
                 stroke={ink}
@@ -66,7 +54,13 @@ export const tails = (cx: Cx) =>
     <g transform={`translate(${r1(t.at.x)} ${r1(t.at.y)})`}>
       <g animation={partMotion(cx, t.at, (cx.rand() - 0.5) * 2)}>
         <g transform={`rotate(${r1(t.angle)})`}>
-          <Tail cx={cx} length={t.length} width={t.width} seed={`${cx.g.seed}-${i}`} />
+          <Tail
+            cx={cx}
+            length={t.length}
+            width={t.width}
+            seed={`${cx.g.seed}-${i}`}
+            wag={wag(cx.g, i)}
+          />
         </g>
       </g>
     </g>
@@ -102,9 +96,9 @@ export const heads = (cx: Cx) => {
           (t) => {
             const a = (Math.PI * 2 * t) / DURATION + (Math.PI * 2 * i) / lay.heads.length;
 
-            return { x: r1(lay.orbit!.rx * Math.cos(a)), y: r1(lay.orbit!.ry * Math.sin(a)) };
+            return { x: lay.orbit!.rx * Math.cos(a), y: lay.orbit!.ry * Math.sin(a) };
           },
-          { duration: DURATION, step: 0.1, tolerance: { translate: 1 } },
+          { duration: DURATION, step: 0.1, precision: 1, tolerance: { translate: 1 } },
         )
       : undefined;
 
@@ -139,7 +133,7 @@ export const heads = (cx: Cx) => {
               />
             </>
           )}
-          <Pivot size={h.r * (1.9 + f.hat)} animation={[i === 0 ? spin : undefined, look]}>
+          <Pivot animation={[i === 0 ? spin : undefined, look]}>
             <Face cx={cx} r={h.r} face={h.face} eyes={g.eyes} ears={g.ears} seed={`${i}`} />
           </Pivot>
           <g transform={`translate(${r1(h.face * h.r * 0.55)} ${r1(-h.r * (1.45 + f.hat * 0.9))})`}>

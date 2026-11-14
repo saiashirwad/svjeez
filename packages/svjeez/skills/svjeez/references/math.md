@@ -56,6 +56,8 @@ const e = epicycles(pi.words, { at: 0.8, over: 10, size: 360, center: [480, 270]
 - `fade` is how long the rings take to fade after the pen is done, 0.6 by default. `0` leaves them. The result has `node`, `end` (when the rings have gone) and `d` (the trace as closed path data).
 - Each circle is one two-keyframe rotation on a group nested in the last, and the trace is a `draw` track sampled from its own arc length. A 10 second scene with 80 terms is about 90 KB.
 
+`fourier(outline, { samples, terms })` is the series `epicycles()` draws, for drawing it some other way: as a formula, a spectrum, or circles of your own. It takes the same outlines and returns `{ mean, terms, points }`, where each term `{ k, r, phase }` turns `k` times per loop and `terms` runs largest first. The pen at `s` of a loop is `mean` plus the sum of `r·(cos, sin)(2πks + phase)`. `samples` defaults to 1024 and must be even; `terms` defaults to all of them.
+
 ## Derivations
 
 `derive(steps, { at })` shows a step-by-step derivation. Every line sits with its `=` on one x, so the equals sign stays put while the sides change.

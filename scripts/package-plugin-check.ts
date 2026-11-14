@@ -1,5 +1,5 @@
 // Checks the plugin package in the current directory the way users install it. It builds and lints package-dist/,
-// packs it with svjeez and every workspace package it depends on, installs the tarballs into a copy of
+// packs it with svjeez and every workspace package it depends on, directly or through another, installs the tarballs into a copy of
 // test/consumer/, and runs that project's `check` script, which builds the project and reads what the build wrote.
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -47,21 +47,33 @@ try {
     ([, target]) => isPath(target) && target.endsWith(".ts"),
   );
 
-  run(join(ROOT, "packages/svjeez/node_modules/.bin/attw"), [
-    tarball,
-    "--profile",
-    "esm-only",
-    "--entrypoints",
-    ...compiled.map(([key]) => key),
-  ]);
-  console.log("✓ arethetypeswrong");
+  // A component package exports its source for the app's compiler, so only packages with compiled entries are checked.
+  if (compiled.length) {
+    run(join(ROOT, "packages/svjeez/node_modules/.bin/attw"), [
+      tarball,
+      "--profile",
+      "esm-only",
+      "--entrypoints",
+      ...compiled.map(([key]) => key),
+    ]);
+    console.log("✓ arethetypeswrong");
+  }
+
   const tarballs = [pack(join(ROOT, "packages/svjeez")), tarball];
 
-  for (const name of Object.keys(manifest(dir).dependencies ?? {})) {
-    if (!name.startsWith("@svjeez/")) continue;
-    run("bun", ["run", "build:package"], workspace(name));
-    tarballs.push(pack(join(workspace(name), "package-dist")));
-  }
+  const packed = new Set<string>();
+
+  const packWorkspace = (from: string) => {
+    for (const name of Object.keys(manifest(from).dependencies ?? {})) {
+      if (!name.startsWith("@svjeez/") || packed.has(name)) continue;
+      packed.add(name);
+      run("bun", ["run", "build:package"], workspace(name));
+      tarballs.push(pack(join(workspace(name), "package-dist")));
+      packWorkspace(workspace(name));
+    }
+  };
+
+  packWorkspace(dir);
 
   // Posters launch the Chromium that this repository's playwright-core installed, so the consumer uses the same version.
   const playwright = manifest(join(ROOT, "packages/svjeez/node_modules/playwright-core")).version;

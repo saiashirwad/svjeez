@@ -1,3 +1,4 @@
+import svelte from "@astrojs/svelte";
 import svjeez from "@svjeez/astro";
 import { defineConfig, fontProviders } from "astro/config";
 import { defaultClientConditions, defaultServerConditions, type Plugin } from "vite";
@@ -28,7 +29,7 @@ export default defineConfig({
   site: "https://svjeez.texoport.in",
   // /intro and /examples/map are files, as they were before Astro; /examples/ stays a directory index.
   build: { format: "preserve" },
-  integrations: [svjeez()],
+  integrations: [svjeez(), svelte()],
   // The font every code block and scene on the site uses, self-hosted.
   fonts: [
     {

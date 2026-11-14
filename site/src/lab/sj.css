@@ -1,0 +1,24 @@
+@import "@svjeez/live/editor.css";
+
+:where(.sj-code, .sj-picture, .sj-transport) {
+  --sj-bg: var(--win-bg);
+  --sj-fg: var(--code-plain);
+  --sj-muted: var(--muted);
+  --sj-line: var(--line);
+  --sj-ring: var(--ring);
+  --sj-shadow: var(--shadow);
+  --sj-accent: var(--accent);
+  --sj-error: var(--warn);
+  --sj-radius: var(--radius);
+  --sj-mono: var(--mono);
+  --sj-out: var(--out);
+  --sj-keyword: var(--code-keyword);
+  --sj-string: var(--code-string);
+  --sj-number: var(--code-number);
+  --sj-comment: var(--code-comment);
+  --sj-fn: var(--code-fn);
+  --sj-definition: var(--code-type);
+  --sj-tag: var(--code-tag);
+  --sj-attr: var(--code-muted);
+  --sj-punct: var(--code-punct);
+}

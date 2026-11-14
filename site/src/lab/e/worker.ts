@@ -1,4 +1,4 @@
-import { compileBuild } from "../../playground/core";
+import { compileBuild } from "@svjeez/live/compile";
 import { build } from "./build";
 import type { Genome } from "./genome";
 

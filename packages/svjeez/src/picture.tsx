@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import type { TagChannels } from "./channels";
 import { def, type Ref } from "./defs";
 import type { Stack } from "./motion";

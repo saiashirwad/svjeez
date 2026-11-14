@@ -7,3 +7,5 @@ site/.alchemy
 packages/svjeez/README.md
 packages/svjeez/LICENSE
 packages/vite/test/.scratch-*
+packages/react/test/.scratch-*
+.svelte-kit

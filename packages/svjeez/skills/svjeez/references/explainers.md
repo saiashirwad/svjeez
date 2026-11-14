@@ -45,7 +45,9 @@ const { vars, css } = variables({ sky: "#14162A", sea: "#1F3A5C" }, { sky: "#FBF
 // <rect fill={vars.sky} />, and render({ ..., css }, ...)
 ```
 
-`restyle(svg, { css, at, still })` returns a copy of a rendered SVG with more CSS after the scene's own. A page uses it to recolor an `<img>` without restarting the animation. `at` is how many playback seconds the copy starts in, written to `--t0` on the root, which delays every CSS animation, and to `begin` on every SMIL `<animate>`. Any value works, so a page never needs the scene's loop length. `still: true` holds the reduced-motion frame whatever the viewer's setting, and pauses every animation, your own CSS included. A scene rendered with `reducedMotion: false` has no frame to hold.
+`restyle(svg, { css, at, onceAt, paused, still })` returns a copy of a rendered SVG with more CSS after the scene's own. A page uses it to recolor an `<img>` without restarting the animation. `at` is how many playback seconds the copy starts in, written to `--t0` on the root, which delays every CSS animation, and to `begin` on every SMIL `<animate>`. Any value works, so a page never needs the scene's loop length. `paused: true` holds the frame at `at` (0 when left out) instead of playing on, whatever the viewer's setting, so a page can show any moment in an `<img>`. SMIL holds through `begin`, `end` and `fill="freeze"`. Parts inside `<Once>` keep their own clock, which follows `at` unless `onceAt` sets it, so `restyle(next, { at, onceAt: 0 })` swaps in a new file that keeps the loop's place while its once parts play from the top. `still: true` holds the reduced-motion frame instead, ignoring `at` and `paused`. Both pause every animation, your own CSS included, and your own CSS animations stay where they start. A scene rendered with `reducedMotion: false` has no still frame to hold.
+
+To scrub a picture inlined in the page instead, `seek(time, svg)` from `svjeez/page` pauses every CSS and SMIL animation in that `<svg>` at `time`, and `loopLength(svg)` returns its loop in seconds. Both default to the whole document and run only in a browser.
 
 ```ts
 import { restyle } from "svjeez";

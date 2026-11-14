@@ -1,8 +1,9 @@
-import { def, ease, motion, sampled } from "svjeez";
+import { def, ease, motion, sampled, wiggle } from "svjeez";
 import { clamp } from "../util";
 import { DURATION, sub, type Pt } from "./geometry";
-import type { Cx } from "./look";
-import { r1 } from "./look";
+import type { Genome } from "./genome";
+import type { Layout } from "./layout";
+import { r1, type Cx } from "./look";
 
 /** When the melt starts, how long it takes, when it reverses and how long the rebound is. */
 export const MELT = { at: 0.6, over: 2.4, back: 5.2, rebound: 1.4 };
@@ -30,17 +31,35 @@ export const sliceAt = (slice: number, w: number, t: number) => {
 };
 
 const sliced = (slice: number, w: number) =>
-  sampled((t) => ({ scale: Math.round(sliceAt(slice, w, t) * 50) / 50 }), {
+  sampled((t) => ({ scale: sliceAt(slice, w, t) }), {
     duration: DURATION,
     step: 0.1,
+    precision: 2,
     tolerance: { scale: 0.03 },
   });
 
-export const meltBy = (cx: Cx, p: Pt) => sub(cx.lay.melt(p), p);
+export const meltBy = (lay: Layout, p: Pt) => sub(lay.melt(p), p);
+
+/** Leg `i` swings about its hip once a second, each leg on its own phase. */
+export const walk = (g: Genome, i: number) => {
+  const phase = (i * 0.19 + (i % 2) * 0.5) % 1;
+  const swing = 20 - Math.min(10, g.legs);
+
+  return sampled((t) => ({ rotate: swing * Math.sin(Math.PI * 2 * (t - phase)) }), {
+    duration: 1,
+    step: 0.05,
+    precision: 1,
+    tolerance: { rotate: 0.8 },
+  }).loop(1);
+};
+
+/** Tail `i` sways about its root. */
+export const wag = (g: Genome, i: number) =>
+  wiggle({ rotate: 13 }, { seed: `tail${g.seed}-${i}`, rate: 1.1, period: 4 });
 
 /** The part's own motions: melting toward the floor, or flickering through the slice. */
 export const partMotion = (cx: Cx, p: Pt, w: number) =>
-  cx.f.liquid ? meltMotion(meltBy(cx, p)) : cx.f.four ? sliced(cx.g.slice, w) : undefined;
+  cx.f.liquid ? meltMotion(meltBy(cx.lay, p)) : cx.f.four ? sliced(cx.g.slice, w) : undefined;
 
 /** The body's thickness is a registered property, so one motion on it swells every stroke at once. */
 export const breathing = (cx: Cx) => {
@@ -51,13 +70,9 @@ export const breathing = (cx: Cx) => {
     ? sampled(
         (t) => ({
           [breath]:
-            Math.round(
-              (1 + 0.05 * Math.sin((Math.PI * 2 * t) / 2)) *
-                (0.35 + 0.65 * sliceAt(g.slice, 0, t)) *
-                100,
-            ) / 100,
+            (1 + 0.05 * Math.sin((Math.PI * 2 * t) / 2)) * (0.35 + 0.65 * sliceAt(g.slice, 0, t)),
         }),
-        { duration: DURATION, step: 0.1, tolerance: { [breath]: 0.02 } },
+        { duration: DURATION, step: 0.1, precision: 2, tolerance: { [breath]: 0.02 } },
       )
     : f.liquid
       ? motion({ [breath]: 1 })

@@ -167,7 +167,7 @@ const stage = async (
   );
   await page.goto(ORIGIN);
   await page.evaluate(() => document.fonts.ready);
-  const duration = await page.evaluate(loopLength);
+  const duration = await page.evaluate(loopLength, undefined);
   const locator = page.locator("#stage");
 
   return {

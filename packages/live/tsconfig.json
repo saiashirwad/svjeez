@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "customConditions": ["@svjeez/source"],
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["bun"],
+    "lib": ["ESNext", "DOM"]
+  },
+  "include": ["src", "test", "scripts"],
+  "exclude": ["test/consumer"]
+}

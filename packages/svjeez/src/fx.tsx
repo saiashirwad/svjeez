@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import type { Color } from "./attributes";
 import { hexBytes, hexOf, type Hex } from "./color";
 import { def, type Ref } from "./defs";

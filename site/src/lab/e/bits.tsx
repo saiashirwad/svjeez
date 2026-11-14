@@ -1,22 +1,6 @@
-import { ease, enter, exit, motion, type Child, type Stack } from "svjeez";
+import { ease, enter, exit, motion, type Stack } from "svjeez";
 import { r1, type Cx } from "./look";
 import { INK } from "./palette";
-
-/** A group whose rotate and scale pivot on 0,0: an invisible square makes its box symmetric. */
-export const Pivot = ({
-  size,
-  children,
-  animation,
-}: {
-  size: number;
-  children: Child;
-  animation?: Stack<"rotate" | "scale">;
-}) => (
-  <g animation={animation}>
-    <rect x={-size} y={-size} width={size * 2} height={size * 2} fill="none" />
-    {children}
-  </g>
-);
 
 /** When an eye closes for its two blinks of the loop. */
 export type Blink = readonly [number, number];

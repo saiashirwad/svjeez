@@ -15,7 +15,7 @@ import {
   keymap,
   lineNumbers,
 } from "@codemirror/view";
-import { tags as t } from "@lezer/highlight";
+import { KINDS } from "@svjeez/live/source";
 
 // Colors come from custom properties in playground.css, so one theme serves light and dark.
 const chrome = EditorView.theme({
@@ -49,20 +49,23 @@ const chrome = EditorView.theme({
   "&.cm-focused .cm-matchingBracket": { backgroundColor: "var(--pg-select)", outline: "none" },
 });
 
+// The same highlight classes the labs' code panels read from @svjeez/live, each with its playground color.
+const color = (kind: keyof typeof KINDS, value: string, style: { fontStyle?: "italic" } = {}) => ({
+  tag: [...KINDS[kind]],
+  color: value,
+  ...style,
+});
+
 const highlight = HighlightStyle.define([
-  { tag: [t.keyword, t.controlKeyword, t.moduleKeyword, t.operatorKeyword], color: "var(--pg-kw)" },
-  { tag: [t.string, t.regexp], color: "var(--pg-str)" },
-  { tag: [t.number, t.bool, t.null], color: "var(--pg-num)" },
-  {
-    tag: [t.comment, t.lineComment, t.blockComment],
-    color: "var(--pg-faint)",
-    fontStyle: "italic",
-  },
-  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: "var(--pg-fn)" },
-  { tag: [t.definition(t.variableName), t.typeName, t.className], color: "var(--pg-fn)" },
-  { tag: [t.tagName, t.angleBracket], color: "var(--pg-tag)" },
-  { tag: t.attributeName, color: "var(--pg-attr)" },
-  { tag: [t.punctuation, t.operator, t.bracket, t.separator], color: "var(--pg-muted)" },
+  color("keyword", "var(--pg-kw)"),
+  color("string", "var(--pg-str)"),
+  color("number", "var(--pg-num)"),
+  color("comment", "var(--pg-faint)", { fontStyle: "italic" }),
+  color("fn", "var(--pg-fn)"),
+  color("definition", "var(--pg-fn)"),
+  color("tag", "var(--pg-tag)"),
+  color("attr", "var(--pg-attr)"),
+  color("punct", "var(--pg-muted)"),
 ]);
 
 export const editorExtensions = (onChange: () => void): Extension[] => [

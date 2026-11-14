@@ -72,6 +72,12 @@ jobs:
         working-directory: packages/charts
       - run: npm run test:package
         working-directory: packages/mermaid
+      - run: npm run test:package
+        working-directory: packages/live
+      - run: npm run test:package
+        working-directory: packages/svelte
+      - run: npm run test:package
+        working-directory: packages/react
       # The locked playwright-core, since bunx fetches the latest and its Chromium build isn't the one the tests launch.
       - run: bun run playwright-core install --with-deps chromium-headless-shell
         working-directory: packages/svjeez

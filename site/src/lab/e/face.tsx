@@ -1,5 +1,5 @@
-import { motion, shake, wiggle } from "svjeez";
-import { blinkAt, Eye, Pivot } from "./bits";
+import { motion, Pivot, shake, wiggle } from "svjeez";
+import { blinkAt, Eye } from "./bits";
 import { r1, type Cx } from "./look";
 import { INK, PINK } from "./palette";
 
@@ -59,7 +59,6 @@ export const Face = ({
         transform={`translate(${r1(x)} ${r1(y)}) rotate(${r1(f.floppy ? a + Math.sign(a || face) * 60 : a)})`}
       >
         <Pivot
-          size={h}
           animation={
             i === twitch ? shake({ at: 2.4 + rand() * 4, over: 0.45 }, { rotate: 14 }) : undefined
           }

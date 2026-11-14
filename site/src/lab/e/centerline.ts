@@ -1,5 +1,4 @@
-import { type Pt } from "./geometry";
-import { clamp } from "../util";
+import type { Pt } from "./geometry";
 import type { Plan } from "./genome";
 
 type Centerline = (L: number, G: number, reach: number) => Pt[];
@@ -105,27 +104,3 @@ const knot: Centerline = (L, G) => {
 
 /** The body's centerline before resampling, dense enough that its length is its arc length. */
 export const CENTERLINES: Record<Plan, Centerline> = { line, loop, spiral, knot };
-
-/** Resamples a polyline to `count` points evenly spaced along its length. */
-export const resample = (pts: readonly Pt[], count: number): Pt[] => {
-  const acc = [0];
-
-  for (let i = 1; i < pts.length; i++)
-    acc.push(acc[i - 1]! + Math.hypot(pts[i]!.x - pts[i - 1]!.x, pts[i]!.y - pts[i - 1]!.y));
-  const total = acc.at(-1)!;
-  const out: Pt[] = [];
-  let j = 1;
-
-  for (let i = 0; i < count; i++) {
-    const d = (total * i) / (count - 1);
-
-    while (j < pts.length - 1 && acc[j]! < d) j++;
-    const a = pts[j - 1]!;
-    const b = pts[j]!;
-    const span = acc[j]! - acc[j - 1]! || 1;
-    const u = clamp((d - acc[j - 1]!) / span, 0, 1);
-    out.push({ x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u });
-  }
-
-  return out;
-};

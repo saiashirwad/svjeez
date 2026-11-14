@@ -213,23 +213,6 @@ export const parseGenome = (raw: Stored): Genome | undefined => {
   return g;
 };
 
-/** What a gene holds, by the name a control gives it. Undefined for a name that is no gene. */
-export const geneValue = (
-  g: Genome,
-  name: string | undefined,
-): Genome[keyof Genome] | undefined => {
-  for (const [key, value] of Object.entries(g)) if (key === name) return value;
-};
-
-/** The number gene a control names. Throws on a name the page markup should never hold. */
-export const numericKey = (name: string | undefined): NumericKey => {
-  const key = KEYS.find((k): k is NumericKey => k === name && isNumeric(k));
-
-  if (!key) throw new Error(`No number gene named ${name}`);
-
-  return key;
-};
-
 /** Sets the choice gene a control names to one of its options. */
 export const withChoice = (
   g: Genome,

@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import type { Paint } from "./attributes";
 import type { TagChannels } from "./channels";
 import type { Ref } from "./defs";

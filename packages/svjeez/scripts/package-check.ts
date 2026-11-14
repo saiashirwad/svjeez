@@ -15,6 +15,8 @@ const ENTRIES = [
   "svjeez/jsx-runtime",
   "svjeez/jsx-dev-runtime",
   "svjeez/frames",
+  "svjeez/page",
+  "svjeez/params",
 ];
 
 // The @ts-expect-error fails the check if typed ids stop being checked, as they do when NoInfer is missing.

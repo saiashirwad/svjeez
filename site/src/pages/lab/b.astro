@@ -1,46 +1,8 @@
 ---
 import Base from "../../layouts/Base.astro";
-import "../../lab/b/lab.css";
-
-const cards = [
-  { name: "spring", title: "Landing", hint: "Pull the gummy down to set the squash. Drag the wave’s first dip for stiffness, its tail for damping.", box: "0 0 260 190" },
-  { name: "ease", title: "Fall", hint: "Drag the two handles. The dots are the fall sampled at even times: bunched means slow.", box: "0 0 260 210" },
-  { name: "comb", title: "Rhythm", hint: "Drag sideways to fan the hops out. Drag past straight and they run the other way.", box: "0 0 260 162" },
-  { name: "tempo", title: "Tempo", hint: "Slide the weight. Higher on the rod swings slower, as on a real metronome.", box: "0 0 180 220" },
-  { name: "sun", title: "Hour", hint: "Drag the sun across the day, or the moon across the night.", box: "0 0 260 160" },
-];
+import Studio from "../../lab/b/Studio.svelte";
 ---
 
 <Base title="Feel instruments · svjeez lab" description="Turn bespoke instruments and watch svjeez write a new SVG file with every turn.">
-  <main class="lab-b">
-    <div class="studio">
-      <figure class="lb-stage">
-        <img data-stage alt="Five gummies hop in a rhythm, squashing as they land" width="640" height="360" />
-        <figcaption>
-          <span class="file" data-file>compiling…</span>
-          <span data-gzip></span>
-          <span class="muted">built in <span data-ms></span></span>
-          <a data-save download="gummies.svg">save</a>
-        </figcaption>
-        <p class="error" data-error hidden></p>
-      </figure>
-
-      <section class="instruments" aria-label="Instruments">
-        {
-          cards.map((c) => (
-            <article class="lb-card" data-card={c.name}>
-              <h2>
-                {c.title} <output data-readout={c.name} />
-              </h2>
-              <svg data-instrument={c.name} viewBox={c.box} tabindex="0" role="img" aria-label={c.hint} />
-            </article>
-          ))
-        }
-      </section>
-    </div>
-  </main>
+  <Studio client:load />
 </Base>
-
-<script>
-  import "../../lab/b/app.ts";
-</script>

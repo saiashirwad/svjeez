@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { matchPaths, motion, render, sampledPath, type Motion } from "svjeez";
+import { blendPaths, commandsOf } from "../src/paths";
+import { ease, matchPaths, motion, render, sampledPath, type Motion } from "svjeez";
 
 const scene = (animation: Motion<"d">, reducedMotion?: false) =>
   render(
@@ -46,6 +47,18 @@ describe("the d channel", () => {
     expect(svg).toMatch(/prefers-reduced-motion:reduce\)\{[^}]*dm\{display:none\}/);
   });
 
+  test("the still twin draws the shape the morph has reached at the still moment", () => {
+    const svg = render(
+      { width: 100, height: 100, duration: 4, title: "Test", reducedMotion: { at: 2 } },
+      <path
+        d="M0 0H10"
+        animation={motion({ d: "M0 0H10" }).at(1).to({ d: "M0 10H20" }, 2, ease.linear)}
+      />,
+    );
+
+    expect(svg).toMatch(/<path[^>]*d="M0 5H15"[^>]*class="[^"]*ds"/);
+  });
+
   test("needs no twin when reduced motion is off", () => {
     const [a, b] = matchPaths(["M0 0H10V10Z", "M5 0L10 10H0Z"]);
 
@@ -84,5 +97,12 @@ describe("sampledPath", () => {
 
     expect(keys((x) => (x > 5 ? 100 : 0))).toBe(2);
     expect(keys()).toBeGreaterThan(5);
+  });
+});
+
+describe("blendPaths", () => {
+  test("reads packed arc flags as two flags", () => {
+    expect(blendPaths("M0 0a5 5 0 1010 0", "M10 0a5 5 0 1010 0", 0.5)).toBe("M5 0a5 5 0 1 0 10 0");
+    expect(commandsOf("M0 0a5 5 0 1010 0")).toBe("M##a#######");
   });
 });

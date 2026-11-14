@@ -1,0 +1,85 @@
+{
+  "name": "@svjeez/live",
+  "version": "0.6.1",
+  "private": true,
+  "description": "Edit a svjeez scene's source through controls: every number, color and ease in the file as a control, one store that compiles in a worker and keeps the picture's clock, for any framework to bind.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/live"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./source": "./src/source.ts",
+    "./controls": "./src/controls.ts",
+    "./editor": "./src/editor.ts",
+    "./compile": "./src/compile.ts",
+    "./client": "./src/client.ts",
+    "./gzip": "./src/gzip.ts",
+    "./editor.css": "./src/editor.css"
+  },
+  "scripts": {
+    "generate": "bun scripts/generate.ts",
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "dependencies": {
+    "@lezer/common": "^1.5.4",
+    "@lezer/highlight": "^1.2.5",
+    "@lezer/javascript": "^1.5.6",
+    "sucrase": "^3.35.1"
+  },
+  "devDependencies": {
+    "@svjeez/charts": "workspace:*",
+    "@svjeez/code": "workspace:*",
+    "@svjeez/geo": "workspace:*",
+    "@svjeez/icons": "workspace:*",
+    "@svjeez/math": "workspace:*",
+    "@svjeez/mermaid": "workspace:*",
+    "@types/bun": "latest",
+    "playwright-core": "^1.64.1",
+    "svjeez": "workspace:*",
+    "typescript": "latest",
+    "world-atlas": "^2.0.2"
+  },
+  "peerDependencies": {
+    "@svjeez/charts": ">=0.6.0 <1",
+    "@svjeez/code": ">=0.6.0 <1",
+    "@svjeez/geo": ">=0.6.0 <1",
+    "@svjeez/icons": ">=0.6.0 <1",
+    "@svjeez/math": ">=0.6.0 <1",
+    "@svjeez/mermaid": ">=0.6.0 <1",
+    "svjeez": ">=0.6.0 <1",
+    "world-atlas": "^2.0.2"
+  },
+  "peerDependenciesMeta": {
+    "@svjeez/charts": {
+      "optional": true
+    },
+    "@svjeez/code": {
+      "optional": true
+    },
+    "@svjeez/geo": {
+      "optional": true
+    },
+    "@svjeez/icons": {
+      "optional": true
+    },
+    "@svjeez/math": {
+      "optional": true
+    },
+    "@svjeez/mermaid": {
+      "optional": true
+    },
+    "world-atlas": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
