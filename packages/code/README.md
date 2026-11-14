@@ -36,6 +36,17 @@ The options are:
 - `tabSize`, the spaces per tab stop. `code()` lays out one column per character, so tabs become spaces. It defaults to 2.
 - `grammars`, extra Shiki grammars for languages the package does not bundle.
 
+## Palettes
+
+The editor palettes are base16 themes for `code()`, `terminal()` and `adaptive()`: `tomorrow` and `tomorrowNight`, `solarizedLight` and `solarizedDark`, `gruvboxLight` and `gruvboxDark`. Import them from `@svjeez/code`, or from `@svjeez/code/palettes` to leave Shiki out of the bundle.
+
+```tsx
+import { tomorrow, tomorrowNight } from "@svjeez/code/palettes";
+import { adaptive } from "svjeez";
+
+const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
+```
+
 ## Languages
 
 These names, and their aliases, work out of the box: `ts`, `tsx`, `js`, `jsx`, `json`, `css`, `html`, `bash` (also `sh`, `shell`, `zsh`), `python`, `rust`, `go`, `sql`, `yaml`, `md` and `diff`. HTML highlights its embedded CSS and JavaScript, and Markdown highlights the fenced code blocks it can resolve.

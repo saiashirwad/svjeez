@@ -49,6 +49,9 @@ Every kind takes an optional `label` for the control. `scale: "log"` spreads a s
 ## Reading values
 
 - `defaults(params)` returns every declared value, typed per key: a `count` is a `number`, a `choice` is the union of its options. `Values<typeof params>` is that type.
+
+A page that draws controls uses the helpers in `@svjeez/live/fit`, so the scene's bundle never carries them:
+
 - `fit(param, v)` clamps `v` into a number param's range and rounds it to its step without float dust, as in `fit(count(5, { max: 12 }), 7.6)` returning `8`.
 - `fitValues(params, patch)` fits every number in a partial set of values, so a control can pass a raw reading.
 - `positionOf(param, v)` and `valueAt(param, position)` convert between a value and a slider position from 0 to 1, on the param's scale.
@@ -77,7 +80,7 @@ export const handles: Handles<typeof params> = (p) => ({
 });
 ```
 
-The scene never says which way a handle moves. `follow(param, at, v, by)` works it out from where the handle sits at `v` and a little past it, and returns `v` moved as far as a pointer move `by` (in scene units) carries the handle that way. A handle on an arc follows the arc. The result stays in range but is not rounded, so a page keeps it through the drag and writes `fit(param, raw)`:
+The scene never says which way a handle moves. `follow(param, at, v, by)` from `@svjeez/live/fit` works it out from where the handle sits at `v` and a little past it, and returns `v` moved as far as a pointer move `by` (in scene units) carries the handle that way. A handle on an arc follows the arc. The result stays in range but is not rounded, so a page keeps it through the drag and writes `fit(param, raw)`:
 
 ```ts
 raw = follow(params.swing, (v) => handles({ ...values, swing: v }).swing!, raw, by);
