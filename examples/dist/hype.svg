@@ -2680,7 +2680,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <g filter="url(#f10)" class="a m302">
         <text x="64" y="632" font-size="30" fill="var(--base06)">chart().bars(stars) + voxel.scene()</text>
         <text x="64" y="664" font-size="14" fill="var(--base04)">one dataset, drawn as a chart and as a skyline</text>
-        <text x="1216" y="664" font-size="13" text-anchor="end" fill="var(--base03)">@svjeez/charts · svjeez/voxel</text>
+        <text x="1216" y="664" font-size="13" text-anchor="end" fill="var(--base03)">@svjeez/charts · @svjeez/voxel</text>
       </g>
     </g>
     <g class="a m417">
@@ -2801,7 +2801,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <g filter="url(#f11)" class="a m416">
         <text x="64" y="632" font-size="30" fill="var(--base06)">&lt;Ink tool={tool.nib()} /&gt; + streamlines(wind)</text>
         <text x="64" y="664" font-size="14" fill="var(--base04)">single-line fonts inked stroke by stroke, over a vector field</text>
-        <text x="1216" y="664" font-size="13" text-anchor="end" fill="var(--base03)">ink · svjeez/extras</text>
+        <text x="1216" y="664" font-size="13" text-anchor="end" fill="var(--base03)">Ink · svjeez · @svjeez/math</text>
       </g>
     </g>
     <g class="a m421 fb">
