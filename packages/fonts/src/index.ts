@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
@@ -28,7 +29,34 @@ const HEADERS = { "user-agent": "svjeez-fonts" };
 
 const isWeight = (face: number | GoogleFace): face is number => typeof face === "number";
 
-const slug = (family: string): string => family.replace(/[^A-Za-z0-9]+/g, "-");
+/** Open Sans keeps its plain name. A family that needed other characters turned into dashes gets a hash of its exact name, so Open-Sans and Open_Sans don't share a file. */
+const slug = (family: string): string => {
+  const plain = family.replace(/[^A-Za-z0-9]+/g, "-");
+
+  if (/^[A-Za-z0-9]+( [A-Za-z0-9]+)*$/.test(family)) return plain;
+
+  return `${plain}-${createHash("sha256").update(family).digest("hex").slice(0, 8)}`;
+};
+
+/** Whether `bytes` is a font file whose table directory fits inside it, which a torn write is not. */
+const isFont = (bytes: Uint8Array): boolean => {
+  if (bytes.length < 12) return false;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const tag = view.getUint32(0);
+
+  if (tag !== 0x00010000 && tag !== 0x74727565 && tag !== 0x4f54544f) return false;
+  const tables = view.getUint16(4);
+
+  if (bytes.length < 12 + 16 * tables) return false;
+
+  for (let i = 0; i < tables; i++) {
+    const at = 12 + 16 * i;
+
+    if (view.getUint32(at + 8) + view.getUint32(at + 12) > bytes.length) return false;
+  }
+
+  return true;
+};
 
 const cssUrl = (family: string, weight: number, style: FontStyle): string => {
   const name = encodeURIComponent(family).replace(/%20/g, "+");
@@ -75,7 +103,10 @@ const bytesOf = async (family: string, weight: number, style: FontStyle): Promis
   const path = join(cacheDir(), `${slug(family)}-${weight}-${style}.ttf`);
 
   try {
-    return await readFile(path);
+    const cached = await readFile(path);
+
+    if (isFont(cached)) return cached;
+    // A torn or corrupt file: fetch it again and write it over.
   } catch {
     // Cold cache: fall through to the network.
   }
@@ -92,6 +123,11 @@ const bytesOf = async (family: string, weight: number, style: FontStyle): Promis
       { cause: error },
     );
   }
+
+  if (!isFont(bytes))
+    throw new GoogleError(
+      `Google Fonts answered for ${family} ${weight} ${style} with a file that is not a font.`,
+    );
 
   // Rename is atomic, so a crashed or concurrent run never leaves a torn file where readFile looks.
   const temp = `${path}.${process.pid}.${Date.now()}.tmp`;

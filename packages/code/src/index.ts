@@ -56,8 +56,19 @@ const supported = () => highlighter.getLoadedLanguages().toSorted();
 
 const expandTabs = (line: string, tabSize: number): string => {
   let out = "";
+  let column = 0;
 
-  for (const ch of line) out += ch === "\t" ? " ".repeat(tabSize - (out.length % tabSize)) : ch;
+  // code() lays out one column per character, so a column counts code points, not UTF-16 units.
+  for (const ch of line) {
+    if (ch === "\t") {
+      const pad = tabSize - (column % tabSize);
+      out += " ".repeat(pad);
+      column += pad;
+    } else {
+      out += ch;
+      column++;
+    }
+  }
 
   return out;
 };
