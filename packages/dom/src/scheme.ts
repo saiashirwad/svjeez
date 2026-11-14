@@ -1,10 +1,6 @@
-import type { Box, Item, Vector } from "./tree.ts";
+import type { Box, Item, Paint, Vector } from "./tree.ts";
 
-/**
- * Colors that differ between the light and dark scheme become CSS variables. A variable's name comes from its two
- * values, so the same pair always gets the same name and two snapshots can share one.
- */
-const pairs = new Map<string, { readonly light: string; readonly dark: string }>();
+type Pair = Exclude<Paint, string>;
 
 const hash = (text: string): string => {
   let h = 0x811c9dc5;
@@ -14,50 +10,43 @@ const hash = (text: string): string => {
   return (h >>> 0).toString(36);
 };
 
-const nameOf = (color: string): string | undefined => /^var\(--(dom-[a-z0-9]+)\)$/.exec(color)?.[1];
+/** One paint for both schemes: the color itself when they agree. */
+export const paint = (light: string, dark: string): Paint =>
+  light === dark ? light : { light, dark };
 
-/** One color for both schemes: the color itself when they agree, else a variable. */
-export const adaptive = (light: string, dark: string): string => {
-  if (light === dark) return light;
-  const name = `dom-${hash(`${light}|${dark}`)}`;
-  pairs.set(name, { light, dark });
+/** Both values of a paint, or the color alone. */
+export const sides = (color: Paint): readonly string[] =>
+  typeof color === "string" ? [color] : [color.light, color.dark];
 
-  return `var(--${name})`;
+/** Apply `fn` to a color, or to both sides of a paint that has two. */
+export const mapPaint = (color: Paint, fn: (color: string) => string): Paint =>
+  typeof color === "string" ? fn(color) : paint(fn(color.light), fn(color.dark));
+
+/** The same color with nothing showing. */
+export const transparent = (color: string): string => {
+  const [r = 0, g = 0, b = 0] = (color.match(/[\d.]+/g) ?? []).map(Number);
+
+  return `rgba(${r},${g},${b},0)`;
 };
 
-/** Apply `fn` to a color, or to both sides of an adaptive one. */
-export const mapColor = (color: string, fn: (color: string) => string): string => {
-  const name = nameOf(color);
-  const pair = name === undefined ? undefined : pairs.get(name);
+/** The CSS variable a two-sided paint is drawn with. Its name comes from its two values, so one pair is one variable. */
+export const variable = (color: Pair): string => `dom-${hash(`${color.light}|${color.dark}`)}`;
 
-  return pair ? adaptive(fn(pair.light), fn(pair.dark)) : fn(color);
-};
-
-/** Both values of an adaptive color, or the color alone. */
-export const sides = (color: string): readonly string[] => {
-  const name = nameOf(color);
-  const pair = name === undefined ? undefined : pairs.get(name);
-
-  return pair ? [pair.light, pair.dark] : [color];
-};
-
-/** The rules that define the variables `used`: light by default, dark when the viewer prefers it. */
-export const schemeCss = (used: Iterable<string>): string => {
-  const names = [
-    ...new Set([...used].map(nameOf).filter((n): n is string => n !== undefined)),
-  ].sort();
+/** The rules that define `used`: light by default, dark when the viewer prefers it. */
+export const schemeCss = (used: ReadonlyMap<string, Pair>): string => {
+  const names = [...used.keys()].sort();
 
   if (names.length === 0) return "";
 
   const decl = (side: "light" | "dark") =>
-    names.map((n) => `--${n}:${pairs.get(n)![side]}`).join(";");
+    names.map((n) => `--${n}:${used.get(n)![side]}`).join(";");
 
   return `svg{${decl("light")}}@media (prefers-color-scheme:dark){svg{${decl("dark")}}}`;
 };
 
 const differ = (where: string): never => {
   throw new Error(
-    `snapshot() laid the dark scheme out differently from the light one at ${where}. Both schemes must have the same elements and text.`,
+    `snap() laid the dark scheme out differently from the light one at ${where}. Both schemes must have the same elements and text.`,
   );
 };
 
@@ -66,7 +55,9 @@ const mergeVector = (light: Vector, dark: Vector): Vector => ({
   attrs: Object.fromEntries(
     Object.entries(light.attrs).map(([k, v]) => [
       k,
-      (k === "fill" || k === "stroke") && dark.attrs[k] ? adaptive(v, dark.attrs[k]) : v,
+      (k === "fill" || k === "stroke") && dark.attrs[k]
+        ? paint(v as string, dark.attrs[k] as string)
+        : v,
     ]),
   ),
   children: light.children.map((c, i) => mergeVector(c, dark.children[i] ?? differ(light.tag))),
@@ -81,7 +72,7 @@ const mergeItem = (light: Item, dark: Item): Item => {
 
       if (d.text !== light.text) differ(`"${light.text}"`);
 
-      return { ...light, color: adaptive(light.color, d.color) };
+      return { ...light, color: paint(light.color as string, d.color as string) };
     }
 
     case "graphic": {
@@ -101,15 +92,14 @@ const mergeItem = (light: Item, dark: Item): Item => {
   }
 };
 
-/** One box tree whose colors follow the viewer's scheme, from a light and a dark snapshot of the same markup. */
+/** One box tree whose colors follow the viewer's scheme, from a light and a dark read of the same page. */
 export const merge = (light: Box, dark: Box): Box => {
   if (light.children.length !== dark.children.length) differ(`<${light.tag}>`);
 
-  const clear = (c: string) =>
-    c.replace(/rgba?\(([^,]+),([^,]+),([^,)]+)(,[^)]*)?\)/, "rgba($1,$2,$3,0)");
-
-  const pick = (l?: string, d?: string) =>
-    l || d ? adaptive(l ?? clear(d!), d ?? clear(l!)) : undefined;
+  const pick = (l?: Paint, d?: Paint) =>
+    l || d
+      ? paint((l ?? transparent(d as string)) as string, (d ?? transparent(l as string)) as string)
+      : undefined;
 
   const shadows = Array.from(
     { length: Math.max(light.shadows.length, dark.shadows.length) },

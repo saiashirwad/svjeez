@@ -6,48 +6,47 @@ import {
   font,
   motion,
   num,
+  show,
   type Child,
   Style,
   type Ease,
   type Font,
   type FontValue,
-  type Ref,
+  type Span,
   type Stack,
   type SvgNode,
   type TagChannels,
 } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
-import { mapColor, schemeCss, sides } from "./scheme.ts";
-import type { Snapshot } from "./snapshot.ts";
-import type { Box, Item, Radii, Rect, TextRun, Vector } from "./tree.ts";
+import { mapPaint, schemeCss, sides, transparent, variable } from "./scheme.ts";
+import type { Box, Item, Paint, Radii, Rect, Snapshot, TextRun, Vector } from "./tree.ts";
 
 type GroupStack = Stack<TagChannels<"g">>;
 
 type Parts = Readonly<Record<string, GroupStack | ((index: number) => GroupStack)>>;
 
-export interface DomProps {
-  readonly snapshot: Snapshot;
-  readonly x?: number;
-  readonly y?: number;
-  /** Motions by `data-part`. A function gets each element with that part, in document order. */
-  readonly parts?: Parts;
-  /** Runs on every text line, as in `(run, i) => enter(...)`. */
-  readonly text?: (run: TextRun, index: number) => Stack<TagChannels<"text">> | undefined;
-  readonly animation?: GroupStack;
-}
+/** A state, optionally with when it turns into the next one, and how. The last state's span is never used. */
+export type Step = Snapshot | readonly [Snapshot, Span] | readonly [Snapshot, Span, Ease];
 
-export interface MorphProps {
-  readonly from: Snapshot;
-  readonly to: Snapshot;
-  /** When the change starts, on the clock around it. */
-  readonly at: number;
-  /** Default 0.6. */
+export interface DomProps {
+  /** One snapshot draws statically. Several play in order, each turning into the next. */
+  readonly states: Snapshot | readonly Step[];
+  /** The fonts the page used, so the drawn text matches the layout. */
+  readonly fonts?: readonly FontValue[];
+  /** When each transition starts, on the clock around it: `at[i]` is `states[i]` turning into `states[i + 1]`. */
+  readonly at?: readonly number[];
+  /** How long a transition runs when its step has no span. Default 0.6. */
   readonly over?: number;
   /** Default `ease.inOut`. */
   readonly ease?: Ease;
+  /** Motions by part. A function gets each element with that part, in document order. */
+  readonly parts?: Parts;
+  /** Runs on every text line, as in `(run, i) => enter(...)`. Only on a single snapshot. */
+  readonly text?: (run: TextRun, index: number) => Stack<TagChannels<"text">> | undefined;
+  /** Overrides how elements pair across states: boxes that get the same string pair, whatever their tag. */
+  readonly pair?: (box: Box) => string | undefined;
   readonly x?: number;
   readonly y?: number;
-  readonly parts?: Parts;
   readonly animation?: GroupStack;
 }
 
@@ -128,18 +127,13 @@ const union = (rects: readonly Rect[]): Rect | undefined => {
   };
 };
 
-const opaque = (color: string | undefined): boolean =>
+const opaque = (color: Paint | undefined): boolean =>
   color !== undefined && sides(color).every((c) => c.startsWith("rgb("));
 
-const invisible = (color: string): boolean => sides(color).every((c) => /,\s*0\)$/.test(c));
+const invisible = (color: Paint): boolean => sides(color).every((c) => /,\s*0\)$/.test(c));
 
 /** The same color with nothing showing, so a fill one side lacks fades as a color change. */
-const clear = (color: string): string =>
-  mapColor(color, (c) => {
-    const [r = 0, g = 0, b = 0] = (c.match(/[\d.]+/g) ?? []).map(Number);
-
-    return `rgba(${r},${g},${b},0)`;
-  });
+const clear = (color: Paint): Paint => mapPaint(color, transparent);
 
 /** Both boxes with the same number of shadows: the missing ones are clear copies of the other side's. */
 const padShadows = (a: Box, b: Box): [Box, Box] => {
@@ -173,18 +167,29 @@ const spreadAt = (blur: number, k: number, n: number): number =>
   n === 1 ? 0 : blur * ((2 * k + 1) / n - 1) * 0.8;
 
 /** The alpha each of n stacked copies needs so the middle, where all overlap, matches the shadow's color. */
-const layerColor = (color: string, n: number): string =>
+const layerColor = (color: Paint, n: number): Paint =>
   n === 1
     ? color
-    : mapColor(color, (c) => {
+    : mapPaint(color, (c) => {
         const [r = 0, g = 0, b = 0, a = 1] = (c.match(/[\d.]+/g) ?? []).map(Number);
 
         return `rgba(${r},${g},${b},${Math.round((1 - (1 - a) ** (1 / n)) * 1000) / 1000})`;
       });
 
-/** What two children must share to pair up: a part, or a tag and classes. Text pairs with text, in order. */
-const signature = (it: Item): string =>
-  it.kind === "box" ? (it.part !== undefined ? `#${it.part}` : `${it.tag}.${it.classes}`) : it.kind;
+/**
+ * What two children must share to pair up: a key, else a part, else the tag. Classes don't count, because a state
+ * change is often a class change and that element should morph. Text pairs with text, in order.
+ */
+const signature = (it: Item, pair?: (box: Box) => string | undefined): string => {
+  if (it.kind !== "box") return it.kind;
+  const own = pair?.(it);
+
+  if (own !== undefined) return `pair:${own}`;
+
+  if (it.key !== undefined) return `key:${it.key}`;
+
+  return it.part !== undefined ? `#${it.part}` : it.tag;
+};
 
 /**
  * Pairs two lists of siblings by their longest common run of signatures, so an element inserted in the middle leaves
@@ -193,9 +198,10 @@ const signature = (it: Item): string =>
 const align = (
   olds: readonly Item[],
   news: readonly Item[],
+  pair?: (box: Box) => string | undefined,
 ): [Item | undefined, Item | undefined][] => {
-  const a = olds.map(signature);
-  const b = news.map(signature);
+  const a = olds.map((it) => signature(it, pair));
+  const b = news.map((it) => signature(it, pair));
   const lcs = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0));
 
   for (let i = a.length - 1; i >= 0; i--)
@@ -217,15 +223,22 @@ const align = (
   return out;
 };
 
-/** The shared drawing code for `Dom` and `Morph`. */
-const painter = (fonts: readonly FontValue[], parts: Parts) => {
-  // Every color drawn, so the scene gets the variables its adaptive ones need and no others.
-  const used = new Set<string>();
+/** The drawing code for `Dom`. */
+const painter = (
+  fonts: readonly FontValue[],
+  parts: Parts,
+  pairOf?: (box: Box) => string | undefined,
+) => {
+  // The variables the drawn paints need, so the scene defines those and no others.
+  const used = new Map<string, Exclude<Paint, string>>();
 
-  const use = <T extends string | undefined>(color: T): T => {
-    if (color) used.add(color);
+  /** A paint as CSS: the color, or the variable that follows the viewer's scheme. */
+  const v = (color: Paint): string => {
+    if (typeof color === "string") return color;
+    const name = variable(color);
+    used.set(name, color);
 
-    return color;
+    return `var(--${name})`;
   };
 
   // Faces that share a family name become one family, so `font-weight` picks among them as on the page.
@@ -260,7 +273,7 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
       fontWeight: String(run.weight),
       fontStyle: run.style === "italic" ? "italic" : undefined,
       letterSpacing: run.letterSpacing ? num(run.letterSpacing) : undefined,
-      fill: use(run.color),
+      fill: v(run.color),
       animation,
       children: run.text,
     } as never);
@@ -268,9 +281,9 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
   const vector = ({ tag, attrs, children }: Vector): SvgNode =>
     jsx(tag, {
       ...Object.fromEntries(
-        Object.entries(attrs).map(([k, v]) => [
+        Object.entries(attrs).map(([k, value]) => [
           k.replace(/-(\w)/g, (_, c: string) => c.toUpperCase()),
-          k === "fill" || k === "stroke" ? use(v) : v,
+          v(value),
         ]),
       ),
       children: children.map(vector),
@@ -284,8 +297,6 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
     tween?: Tween,
     extra: Record<string, unknown> = {},
   ): SvgNode => {
-    use(fill);
-    use(from?.fill);
     const moving = from && tween && (from.d !== d || from.fill !== fill);
 
     const animation = moving
@@ -372,13 +383,13 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
       a.weight === b.weight &&
       a.family === b.family
     )
-      return dx === 0 && dy === 0 && a.color === b.color
+      return dx === 0 && dy === 0 && v(a.color) === v(b.color)
         ? text(b)
         : text(
             b,
-            motion({ x: dx, y: dy, fill: a.color as never })
+            motion({ x: dx, y: dy, fill: v(a.color) as never })
               .at(tween.at)
-              .to({ x: 0, y: 0, fill: b.color as never }, tween.over, tween.ease),
+              .to({ x: 0, y: 0, fill: v(b.color) as never }, tween.over, tween.ease),
           );
 
     if (
@@ -492,11 +503,11 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
           return Array.from({ length: n }, (_, k) =>
             path(
               shadowPath(owner, i, spreadAt(s.blur, k, n)),
-              layerColor(s.color, n),
+              v(layerColor(s.color, n)),
               from &&
                 was && {
                   d: shadowPath(from, i, spreadAt(was.blur, k, n)),
-                  fill: layerColor(was.color, n),
+                  fill: v(layerColor(was.color, n)),
                 },
               tween,
             ),
@@ -508,21 +519,22 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
 
     // A fill that only one side has fades, drawn on the shape of the side that has it.
     const layer = (
-      pick: (x: Box) => string | undefined,
+      pick: (x: Box) => Paint | undefined,
       shape: (x: Box) => string,
       extra: Record<string, unknown> = {},
     ): Child => {
       const end = pick(b);
       const start = both && pick(both.a);
 
-      if (!both) return end ? path(shape(b), end, undefined, undefined, extra) : null;
+      if (!both) return end ? path(shape(b), v(end), undefined, undefined, extra) : null;
 
-      if (end && start) return path(shape(b), end, { d: shape(both.a), fill: start }, tween, extra);
+      const from = (fill: Paint) => ({ d: shape(both.a), fill: v(fill) });
 
-      if (end) return path(shape(b), end, { d: shape(both.a), fill: clear(end) }, tween, extra);
+      if (end && start) return path(shape(b), v(end), from(start), tween, extra);
 
-      if (start)
-        return path(shape(b), clear(start), { d: shape(both.a), fill: start }, tween, extra);
+      if (end) return path(shape(b), v(end), from(clear(end)), tween, extra);
+
+      if (start) return path(shape(b), v(clear(start)), from(start), tween, extra);
 
       return null;
     };
@@ -537,7 +549,7 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
 
     if (!both) children = b.children.map((it) => item(it, textMotion));
     else {
-      children = align(both.a.children, b.children).map(([old, it]) => {
+      children = align(both.a.children, b.children, pairOf).map(([old, it]) => {
         if (!it) return <g animation={fade(both.tween, "exit")}>{item(old!)}</g>;
 
         if (!old) return <g animation={fade(both.tween, "enter")}>{item(it)}</g>;
@@ -564,7 +576,6 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
 
     return (
       <g
-        class={b.part}
         opacity={!opacity && b.opacity < 1 ? b.opacity : undefined}
         animation={[...[partMotion(b)].flat(), opacity] as GroupStack}
       >
@@ -579,62 +590,130 @@ const painter = (fonts: readonly FontValue[], parts: Parts) => {
     );
   };
 
-  /** The rule that defines the adaptive colors drawn so far. */
+  /** The rule that defines the variables drawn so far. */
   const style = (): SvgNode | null => {
     const css = schemeCss(used);
 
     return css ? <Style css={css} /> : null;
   };
 
-  return { box, text, style };
+  /** A whole tree, as `b`, or as `a` turning into `b`. */
+  const root = (
+    b: Box,
+    a?: Box,
+    tween?: Tween,
+    textMotion?: (run: TextRun) => Stack<TagChannels<"text">> | undefined,
+  ) => {
+    seen.clear();
+
+    return box(b, a, tween, textMotion);
+  };
+
+  return { root, text, style };
 };
 
 const at = (x: number, y: number) => (x || y ? `translate(${num(x)} ${num(y)})` : undefined);
 
-/** Draws a snapshot as svjeez nodes: one `<g>` per element, text in the page's own fonts. */
-export function Dom({ snapshot, x = 0, y = 0, parts = {}, text, animation }: DomProps): SvgNode {
-  const paint = painter(snapshot.fonts, parts);
-  let lines = 0;
-
-  const drawn = paint.box(
-    snapshot.root,
-    undefined,
-    undefined,
-    text && ((run) => text(run, lines++)),
+const stepsOf = (states: Snapshot | readonly Step[]) =>
+  ("root" in states ? [states] : states).map((step) =>
+    "root" in step
+      ? { state: step, span: undefined, ease: undefined }
+      : { state: step[0], span: step[1], ease: step[2] },
   );
 
-  return (
-    <g transform={at(x, y)} animation={animation}>
-      {paint.style()}
-      {drawn}
-    </g>
-  );
-}
+/** The picture's size: the largest of the states, so one frame holds them all. */
+export const size = (states: Snapshot | readonly Step[]): { width: number; height: number } => {
+  const all = stepsOf(states).map((s) => s.state);
+
+  return {
+    width: Math.max(...all.map((s) => s.width)),
+    height: Math.max(...all.map((s) => s.height)),
+  };
+};
 
 /**
- * Two snapshots of the same markup in two states, drawn as one picture that changes from the first to the second.
- * Elements pair up by `data-part`, else by their place in the tree. Paired boxes reshape and recolor, paired text and
- * icons slide (crossfading when they changed), and the rest fade out or in.
+ * Draws snapshots as svjeez nodes: one `<g>` per element, text in the page's own fonts. With several states, each
+ * turns into the next. Paired boxes reshape and recolor, paired text and icons slide (crossfading when they changed),
+ * and the rest fade out or in.
+ *
+ * Transition `i` is one two-state drawing, shown from the middle of the gap before it to the middle of the gap after,
+ * so only one is up at a time and the cut between two shows the same picture on both sides.
  */
-export function Morph({
-  from,
-  to,
-  at: start,
+export function Dom({
+  states,
+  fonts = [],
+  at: starts = [],
   over = 0.6,
   ease = eases.inOut,
+  parts = {},
+  text,
+  pair,
   x = 0,
   y = 0,
-  parts = {},
   animation,
-}: MorphProps): SvgNode {
-  const paint = painter([...new Set([...from.fonts, ...to.fonts])], parts);
+}: DomProps): SvgNode {
+  const paint = painter(fonts, parts, pair);
+  const steps = stepsOf(states);
 
-  const drawn = paint.box(to.root, from.root, { at: start, over, ease });
+  if (steps.length === 0) throw new Error("<Dom> needs at least one state.");
+
+  let segments: SvgNode[];
+
+  if (steps.length === 1) {
+    let lines = 0;
+
+    segments = [
+      paint.root(steps[0]!.state.root, undefined, undefined, text && ((run) => text(run, lines++))),
+    ];
+  } else {
+    if (text) throw new Error("<Dom text> works on a single snapshot, not on states.");
+
+    const tweens: Tween[] = steps.slice(0, -1).map((step, i) => {
+      const when = step.span ?? (starts[i] === undefined ? undefined : { at: starts[i]!, over });
+
+      if (!when)
+        throw new Error(
+          `<Dom> needs to know when state ${i} turns into the next: give it a span, or at[${i}].`,
+        );
+
+      return { at: when.at, over: when.over, ease: step.ease ?? ease };
+    });
+
+    // Where each hand-over happens: halfway between one transition's end and the next one's start.
+    const cuts = tweens.slice(1).map((next, i) => {
+      const end = tweens[i]!.at + tweens[i]!.over;
+
+      if (next.at < end)
+        throw new Error(
+          `<Dom> transitions ${i} and ${i + 1} overlap. Start the second after the first ends.`,
+        );
+
+      return (end + next.at) / 2;
+    });
+
+    segments = tweens.map((tween, i) => {
+      const drawn = paint.root(steps[i + 1]!.state.root, steps[i]!.state.root, tween);
+
+      if (tweens.length === 1) return drawn;
+      const from = i === 0 ? 0 : cuts[i - 1]!;
+      const to = i === cuts.length ? undefined : cuts[i]!;
+
+      return (
+        <g
+          animation={show(to === undefined ? { at: from } : { at: from, over: to - from }, {
+            fade: 0,
+          })}
+        >
+          {drawn}
+        </g>
+      );
+    });
+  }
 
   return (
     <g transform={at(x, y)} animation={animation}>
       {paint.style()}
-      {drawn}
+      {segments}
     </g>
   );
 }

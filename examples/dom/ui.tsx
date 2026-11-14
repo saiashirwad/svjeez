@@ -7,13 +7,15 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const cn = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" ");
 
+// The hover and focus classes are shadcn's, so a real pointer or keyboard in the live page restyles them.
 const BUTTON = {
-  base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium shrink-0 [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 outline-none",
-  default: "bg-primary text-primary-foreground shadow-xs",
-  outline: "border bg-background shadow-xs",
-  secondary: "bg-secondary text-secondary-foreground shadow-xs",
-  ghost: "",
-  destructive: "bg-destructive text-white shadow-xs",
+  base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium shrink-0 [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+  default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+  outline:
+    "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+  secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+  ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+  destructive: "bg-destructive text-white shadow-xs hover:bg-destructive/90",
 };
 
 export const Button = ({
@@ -120,19 +122,22 @@ export const Input = ({
   placeholder,
   value,
   part,
+  type,
   invalid,
 }: {
   placeholder?: string;
   value?: string;
   part?: string;
+  type?: string;
   invalid?: boolean;
 }) => (
   <input
     data-part={part}
+    type={type}
     placeholder={placeholder}
     defaultValue={value}
     className={cn(
-      "placeholder:text-muted-foreground border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none",
+      "placeholder:text-muted-foreground border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
       invalid && "border-destructive ring-destructive/20 ring-[3px]",
     )}
   />
@@ -209,7 +214,7 @@ export const pieces = {
           </div>
           <div className="grid gap-2" data-part="field">
             <Label>Password</Label>
-            <Input value="hunter2hunter2" part="password" />
+            <Input type="password" value={error ? "hunter2hunter2" : undefined} part="password" />
           </div>
         </CardContent>
         <CardFooter className="flex-col gap-2">

@@ -1,0 +1,2438 @@
+{
+  "hash": "5fa90e12cbfcb98f82a7893b7119089272ce108aee7cc3a1383cf442d4ab80f3",
+  "data": {
+    "idle": {
+      "width": 392,
+      "height": 384,
+      "pad": 16,
+      "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+      "root": {
+        "kind": "box",
+        "tag": "div",
+        "part": "card",
+        "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+        "radii": [14, 14, 14, 14],
+        "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+        "border": {
+          "widths": [1, 1, 1, 1],
+          "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+        },
+        "shadows": [
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 3, "spread": 0 },
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 2, "spread": -1 }
+        ],
+        "opacity": 1,
+        "clip": false,
+        "children": [
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 41, "width": 358, "height": 42 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 41, "width": 310, "height": 16 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in to your account",
+                    "x": 41,
+                    "y": 54,
+                    "family": "Geist",
+                    "weight": 600,
+                    "style": "normal",
+                    "size": 16,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 63, "width": 310, "height": 20 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Enter your email below to sign in.",
+                    "x": 41,
+                    "y": 78,
+                    "family": "Geist",
+                    "weight": 400,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 107, "width": 358, "height": 132 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 107, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 107, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Email",
+                        "x": 41,
+                        "y": 119,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "email",
+                    "box": { "x": 41, "y": 129, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                    },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "m@example.com",
+                        "x": 54,
+                        "y": 152,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 181, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 181, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Password",
+                        "x": 41,
+                        "y": 193,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "password",
+                    "box": { "x": 41, "y": 203, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                    },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 263, "width": 358, "height": 80 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "submit",
+                "box": { "x": 41, "y": 263, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(23,23,23)", "dark": "rgb(229,229,229)" },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in",
+                    "x": 161.56,
+                    "y": 286,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                    "letterSpacing": 0
+                  },
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 214.42, "y": 273, "width": 16, "height": 16 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M5 12h14",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "m12 5 7 7-7 7",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "secondary",
+                "box": { "x": 41, "y": 307, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(255,255,255)", "dark": "rgba(255,255,255,0.04)" },
+                "border": {
+                  "widths": [1, 1, 1, 1],
+                  "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in with GitHub",
+                    "x": 133.53,
+                    "y": 330,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "typed": {
+      "width": 392,
+      "height": 384,
+      "pad": 16,
+      "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+      "root": {
+        "kind": "box",
+        "tag": "div",
+        "part": "card",
+        "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+        "radii": [14, 14, 14, 14],
+        "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+        "border": {
+          "widths": [1, 1, 1, 1],
+          "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+        },
+        "shadows": [
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 3, "spread": 0 },
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 2, "spread": -1 }
+        ],
+        "opacity": 1,
+        "clip": false,
+        "children": [
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 41, "width": 358, "height": 42 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 41, "width": 310, "height": 16 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in to your account",
+                    "x": 41,
+                    "y": 54,
+                    "family": "Geist",
+                    "weight": 600,
+                    "style": "normal",
+                    "size": 16,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 63, "width": 310, "height": 20 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Enter your email below to sign in.",
+                    "x": 41,
+                    "y": 78,
+                    "family": "Geist",
+                    "weight": 400,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 107, "width": 358, "height": 132 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 107, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 107, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Email",
+                        "x": 41,
+                        "y": 119,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "email",
+                    "box": { "x": 41, "y": 129, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(161,161,161)", "dark": "rgb(115,115,115)" }
+                    },
+                    "shadows": [
+                      {
+                        "color": {
+                          "light": "rgba(161,161,161,0.5)",
+                          "dark": "rgba(116,116,116,0.5)"
+                        },
+                        "x": 0,
+                        "y": 0,
+                        "blur": 0,
+                        "spread": 3
+                      },
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "sai@exmaple.com",
+                        "x": 54,
+                        "y": 152,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 181, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 181, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Password",
+                        "x": 41,
+                        "y": 193,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "password",
+                    "box": { "x": 41, "y": 203, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                    },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 263, "width": 358, "height": 80 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "submit",
+                "box": { "x": 41, "y": 263, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(23,23,23)", "dark": "rgb(229,229,229)" },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in",
+                    "x": 161.56,
+                    "y": 286,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                    "letterSpacing": 0
+                  },
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 214.42, "y": 273, "width": 16, "height": 16 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M5 12h14",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "m12 5 7 7-7 7",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "secondary",
+                "box": { "x": 41, "y": 307, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(255,255,255)", "dark": "rgba(255,255,255,0.04)" },
+                "border": {
+                  "widths": [1, 1, 1, 1],
+                  "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in with GitHub",
+                    "x": 133.53,
+                    "y": 330,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "password": {
+      "width": 392,
+      "height": 384,
+      "pad": 16,
+      "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+      "root": {
+        "kind": "box",
+        "tag": "div",
+        "part": "card",
+        "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+        "radii": [14, 14, 14, 14],
+        "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+        "border": {
+          "widths": [1, 1, 1, 1],
+          "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+        },
+        "shadows": [
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 3, "spread": 0 },
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 2, "spread": -1 }
+        ],
+        "opacity": 1,
+        "clip": false,
+        "children": [
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 41, "width": 358, "height": 42 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 41, "width": 310, "height": 16 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in to your account",
+                    "x": 41,
+                    "y": 54,
+                    "family": "Geist",
+                    "weight": 600,
+                    "style": "normal",
+                    "size": 16,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 63, "width": 310, "height": 20 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Enter your email below to sign in.",
+                    "x": 41,
+                    "y": 78,
+                    "family": "Geist",
+                    "weight": 400,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 107, "width": 358, "height": 132 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 107, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 107, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Email",
+                        "x": 41,
+                        "y": 119,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "email",
+                    "box": { "x": 41, "y": 129, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                    },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "sai@exmaple.com",
+                        "x": 54,
+                        "y": 152,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 181, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 181, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Password",
+                        "x": 41,
+                        "y": 193,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "password",
+                    "box": { "x": 41, "y": 203, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(161,161,161)", "dark": "rgb(115,115,115)" }
+                    },
+                    "shadows": [
+                      {
+                        "color": {
+                          "light": "rgba(161,161,161,0.5)",
+                          "dark": "rgba(116,116,116,0.5)"
+                        },
+                        "x": 0,
+                        "y": 0,
+                        "blur": 0,
+                        "spread": 3
+                      },
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "••••••••••••••",
+                        "x": 54,
+                        "y": 226,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 263, "width": 358, "height": 80 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "submit",
+                "box": { "x": 41, "y": 263, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(23,23,23)", "dark": "rgb(229,229,229)" },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in",
+                    "x": 161.56,
+                    "y": 286,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                    "letterSpacing": 0
+                  },
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 214.42, "y": 273, "width": 16, "height": 16 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M5 12h14",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "m12 5 7 7-7 7",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "secondary",
+                "box": { "x": 41, "y": 307, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(255,255,255)", "dark": "rgba(255,255,255,0.04)" },
+                "border": {
+                  "widths": [1, 1, 1, 1],
+                  "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in with GitHub",
+                    "x": 133.53,
+                    "y": 330,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "hovered": {
+      "width": 392,
+      "height": 384,
+      "pad": 16,
+      "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+      "root": {
+        "kind": "box",
+        "tag": "div",
+        "part": "card",
+        "box": { "x": 16, "y": 16, "width": 360, "height": 352 },
+        "radii": [14, 14, 14, 14],
+        "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+        "border": {
+          "widths": [1, 1, 1, 1],
+          "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+        },
+        "shadows": [
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 3, "spread": 0 },
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 2, "spread": -1 }
+        ],
+        "opacity": 1,
+        "clip": false,
+        "children": [
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 41, "width": 358, "height": 42 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 41, "width": 310, "height": 16 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in to your account",
+                    "x": 41,
+                    "y": 54,
+                    "family": "Geist",
+                    "weight": 600,
+                    "style": "normal",
+                    "size": 16,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 63, "width": 310, "height": 20 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Enter your email below to sign in.",
+                    "x": 41,
+                    "y": 78,
+                    "family": "Geist",
+                    "weight": 400,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 107, "width": 358, "height": 132 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 107, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 107, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Email",
+                        "x": 41,
+                        "y": 119,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "email",
+                    "box": { "x": 41, "y": 129, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                    },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "sai@exmaple.com",
+                        "x": 54,
+                        "y": 152,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 181, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 181, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Password",
+                        "x": 41,
+                        "y": 193,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "password",
+                    "box": { "x": 41, "y": 203, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(161,161,161)", "dark": "rgb(115,115,115)" }
+                    },
+                    "shadows": [
+                      {
+                        "color": {
+                          "light": "rgba(161,161,161,0.5)",
+                          "dark": "rgba(116,116,116,0.5)"
+                        },
+                        "x": 0,
+                        "y": 0,
+                        "blur": 0,
+                        "spread": 3
+                      },
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "••••••••••••••",
+                        "x": 54,
+                        "y": 226,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 263, "width": 358, "height": 80 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "submit",
+                "box": { "x": 41, "y": 263, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgba(23,23,23,0.9)", "dark": "rgba(230,230,230,0.9)" },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in",
+                    "x": 161.56,
+                    "y": 286,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                    "letterSpacing": 0
+                  },
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 214.42, "y": 273, "width": 16, "height": 16 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M5 12h14",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "m12 5 7 7-7 7",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "secondary",
+                "box": { "x": 41, "y": 307, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(255,255,255)", "dark": "rgba(255,255,255,0.04)" },
+                "border": {
+                  "widths": [1, 1, 1, 1],
+                  "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in with GitHub",
+                    "x": 133.53,
+                    "y": 330,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "failed": {
+      "width": 392,
+      "height": 471,
+      "pad": 16,
+      "box": { "x": 16, "y": 16, "width": 360, "height": 438.75 },
+      "root": {
+        "kind": "box",
+        "tag": "div",
+        "part": "card",
+        "box": { "x": 16, "y": 16, "width": 360, "height": 438.75 },
+        "radii": [14, 14, 14, 14],
+        "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+        "border": {
+          "widths": [1, 1, 1, 1],
+          "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+        },
+        "shadows": [
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 3, "spread": 0 },
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 2, "spread": -1 }
+        ],
+        "opacity": 1,
+        "clip": false,
+        "children": [
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 41, "width": 358, "height": 42 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 41, "width": 310, "height": 16 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in to your account",
+                    "x": 41,
+                    "y": 54,
+                    "family": "Geist",
+                    "weight": 600,
+                    "style": "normal",
+                    "size": 16,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 63, "width": 310, "height": 20 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Enter your email below to sign in.",
+                    "x": 41,
+                    "y": 78,
+                    "family": "Geist",
+                    "weight": 400,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 107, "width": 358, "height": 218.75 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "alert",
+                "box": { "x": 41, "y": 107, "width": 310, "height": 70.75 },
+                "radii": [10, 10, 10, 10],
+                "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+                "border": {
+                  "widths": [1, 1, 1, 1],
+                  "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+                },
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 58, "y": 122, "width": 16, "height": 16 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "circle",
+                        "attrs": {
+                          "cx": "12",
+                          "cy": "12",
+                          "r": "10",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(231,0,11)", "dark": "rgb(255,100,103)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "line",
+                        "attrs": {
+                          "x1": "12",
+                          "y1": "8",
+                          "x2": "12",
+                          "y2": "12",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(231,0,11)", "dark": "rgb(255,100,103)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "line",
+                        "attrs": {
+                          "x1": "12",
+                          "y1": "16",
+                          "x2": "12.01",
+                          "y2": "16",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(231,0,11)", "dark": "rgb(255,100,103)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "div",
+                    "box": { "x": 86, "y": 120, "width": 248, "height": 20 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Unable to sign in.",
+                        "x": 86,
+                        "y": 135,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(231,0,11)", "dark": "rgb(255,100,103)" },
+                        "letterSpacing": -0.35
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "div",
+                    "box": { "x": 86, "y": 142, "width": 248, "height": 22.75 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "box",
+                        "tag": "p",
+                        "box": { "x": 86, "y": 142, "width": 207.09, "height": 22.75 },
+                        "radii": [0, 0, 0, 0],
+                        "shadows": [],
+                        "opacity": 1,
+                        "clip": false,
+                        "children": [
+                          {
+                            "kind": "text",
+                            "text": "Check your email and password.",
+                            "x": 86,
+                            "y": 158,
+                            "family": "Geist",
+                            "weight": 400,
+                            "style": "normal",
+                            "size": 14,
+                            "color": {
+                              "light": "rgba(231,0,11,0.9)",
+                              "dark": "rgba(255,100,103,0.9)"
+                            },
+                            "letterSpacing": 0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 193.75, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 193.75, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Email",
+                        "x": 41,
+                        "y": 205.75,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "email",
+                    "box": { "x": 41, "y": 215.75, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                    },
+                    "shadows": [
+                      {
+                        "color": { "light": "rgba(230,0,10,0.2)", "dark": "rgba(255,100,105,0.2)" },
+                        "x": 0,
+                        "y": 0,
+                        "blur": 0,
+                        "spread": 3
+                      },
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "sai@exmaple.com",
+                        "x": 54,
+                        "y": 238.75,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "part": "field",
+                "box": { "x": 41, "y": 267.75, "width": 310, "height": 58 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "label",
+                    "box": { "x": 41, "y": 267.75, "width": 310, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Password",
+                        "x": 41,
+                        "y": 279.75,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "input",
+                    "part": "password",
+                    "box": { "x": 41, "y": 289.75, "width": 310, "height": 36 },
+                    "radii": [8, 8, 8, 8],
+                    "border": {
+                      "widths": [1, 1, 1, 1],
+                      "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                    },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": true,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "••••••••••••••",
+                        "x": 54,
+                        "y": 312.75,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 349.75, "width": 358, "height": 80 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "submit",
+                "box": { "x": 41, "y": 349.75, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(23,23,23)", "dark": "rgb(229,229,229)" },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Try again",
+                    "x": 154.17,
+                    "y": 372.75,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                    "letterSpacing": 0
+                  },
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 221.83, "y": 359.75, "width": 16, "height": 16 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M5 12h14",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "m12 5 7 7-7 7",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "button",
+                "part": "secondary",
+                "box": { "x": 41, "y": 393.75, "width": 310, "height": 36 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(255,255,255)", "dark": "rgba(255,255,255,0.04)" },
+                "border": {
+                  "widths": [1, 1, 1, 1],
+                  "color": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" }
+                },
+                "shadows": [
+                  { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                ],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "Sign in with GitHub",
+                    "x": 133.53,
+                    "y": 416.75,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "open": {
+      "width": 452,
+      "height": 162,
+      "pad": 16,
+      "box": { "x": 16, "y": 16, "width": 420, "height": 130 },
+      "root": {
+        "kind": "box",
+        "tag": "div",
+        "box": { "x": 16, "y": 16, "width": 420, "height": 130 },
+        "radii": [14, 14, 14, 14],
+        "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+        "border": {
+          "widths": [1, 1, 1, 1],
+          "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+        },
+        "shadows": [
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 3, "spread": 0 },
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 2, "spread": -1 }
+        ],
+        "opacity": 1,
+        "clip": false,
+        "children": [
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 41, "width": 418, "height": 34 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "span",
+                "box": { "x": 41, "y": 42, "width": 32, "height": 32 },
+                "radii": [16, 16, 16, 16],
+                "shadows": [],
+                "opacity": 1,
+                "clip": true,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "span",
+                    "box": { "x": 41, "y": 42, "width": 32, "height": 32 },
+                    "radii": [16, 16, 16, 16],
+                    "background": { "light": "rgb(245,245,245)", "dark": "rgb(38,38,38)" },
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "SA",
+                        "x": 49.16,
+                        "y": 62,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 12,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 85, "y": 41, "width": 249.92, "height": 34 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "div",
+                    "box": { "x": 85, "y": 41, "width": 249.92, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Snapshot DOM into svjeez",
+                        "x": 85,
+                        "y": 53,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "div",
+                    "box": { "x": 85, "y": 59, "width": 249.92, "height": 16 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "#412 · dom-snapshot-prototype",
+                        "x": 85,
+                        "y": 71,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 12,
+                        "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "span",
+                "part": "status",
+                "box": { "x": 346.92, "y": 47, "width": 64.08, "height": 22 },
+                "radii": [8, 8, 8, 8],
+                "border": {
+                  "widths": [1, 1, 1, 1],
+                  "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+                },
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 355.92, "y": 52, "width": 12, "height": 12 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "circle",
+                        "attrs": {
+                          "cx": "18",
+                          "cy": "18",
+                          "r": "3",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "circle",
+                        "attrs": {
+                          "cx": "6",
+                          "cy": "6",
+                          "r": "3",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M13 6h3a2 2 0 0 1 2 2v7",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "line",
+                        "attrs": {
+                          "x1": "6",
+                          "y1": "9",
+                          "x2": "6",
+                          "y2": "21",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Open",
+                    "x": 371.92,
+                    "y": 62,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 12,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 99, "width": 418, "height": 22 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 100, "width": 116.48, "height": 20 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "button",
+                    "part": "switch",
+                    "box": { "x": 41, "y": 100.8, "width": 32, "height": 18.39 },
+                    "radii": [9.2, 9.2, 9.2, 9.2],
+                    "background": { "light": "rgb(229,229,229)", "dark": "rgba(255,255,255,0.15)" },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "box",
+                        "tag": "span",
+                        "part": "switch-thumb",
+                        "box": { "x": 42, "y": 101.98, "width": 16, "height": 16 },
+                        "radii": [8, 8, 8, 8],
+                        "background": { "light": "rgb(255,255,255)", "dark": "rgb(10,10,10)" },
+                        "shadows": [
+                          {
+                            "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                            "x": 0,
+                            "y": 0,
+                            "blur": 0,
+                            "spread": 0
+                          }
+                        ],
+                        "opacity": 1,
+                        "clip": false,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Auto-merge",
+                    "x": 81,
+                    "y": 115,
+                    "family": "Geist",
+                    "weight": 400,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "span",
+                "box": { "x": 345.06, "y": 99, "width": 65.94, "height": 22 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(245,245,245)", "dark": "rgb(38,38,38)" },
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "+214 −12",
+                    "x": 354.06,
+                    "y": 114,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 12,
+                    "color": { "light": "rgb(23,23,23)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "merged": {
+      "width": 452,
+      "height": 206,
+      "pad": 16,
+      "box": { "x": 16, "y": 16, "width": 420, "height": 174 },
+      "root": {
+        "kind": "box",
+        "tag": "div",
+        "box": { "x": 16, "y": 16, "width": 420, "height": 174 },
+        "radii": [14, 14, 14, 14],
+        "background": { "light": "rgb(255,255,255)", "dark": "rgb(23,23,23)" },
+        "border": {
+          "widths": [1, 1, 1, 1],
+          "color": { "light": "rgb(229,229,229)", "dark": "rgba(245,255,255,0.1)" }
+        },
+        "shadows": [
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 3, "spread": 0 },
+          { "color": "rgba(0,0,0,0.1)", "x": 0, "y": 1, "blur": 2, "spread": -1 }
+        ],
+        "opacity": 1,
+        "clip": false,
+        "children": [
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 41, "width": 418, "height": 34 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "span",
+                "box": { "x": 41, "y": 42, "width": 32, "height": 32 },
+                "radii": [16, 16, 16, 16],
+                "shadows": [],
+                "opacity": 1,
+                "clip": true,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "span",
+                    "box": { "x": 41, "y": 42, "width": 32, "height": 32 },
+                    "radii": [16, 16, 16, 16],
+                    "background": { "light": "rgb(245,245,245)", "dark": "rgb(38,38,38)" },
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "SA",
+                        "x": 49.16,
+                        "y": 62,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 12,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 85, "y": 41, "width": 237.14, "height": 34 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "div",
+                    "box": { "x": 85, "y": 41, "width": 237.14, "height": 14 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "Snapshot DOM into svjeez",
+                        "x": 85,
+                        "y": 53,
+                        "family": "Geist",
+                        "weight": 500,
+                        "style": "normal",
+                        "size": 14,
+                        "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "box",
+                    "tag": "div",
+                    "box": { "x": 85, "y": 59, "width": 237.14, "height": 16 },
+                    "radii": [0, 0, 0, 0],
+                    "shadows": [],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "text",
+                        "text": "#412 · dom-snapshot-prototype",
+                        "x": 85,
+                        "y": 71,
+                        "family": "Geist",
+                        "weight": 400,
+                        "style": "normal",
+                        "size": 12,
+                        "color": { "light": "rgb(115,115,115)", "dark": "rgb(161,161,161)" },
+                        "letterSpacing": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "span",
+                "part": "status",
+                "box": { "x": 334.14, "y": 47, "width": 76.86, "height": 22 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(23,23,23)", "dark": "rgb(229,229,229)" },
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 343.14, "y": 52, "width": 12, "height": 12 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "circle",
+                        "attrs": {
+                          "cx": "18",
+                          "cy": "18",
+                          "r": "3",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "circle",
+                        "attrs": {
+                          "cx": "6",
+                          "cy": "6",
+                          "r": "3",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M13 6h3a2 2 0 0 1 2 2v7",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      },
+                      {
+                        "tag": "line",
+                        "attrs": {
+                          "x1": "6",
+                          "y1": "9",
+                          "x2": "6",
+                          "y2": "21",
+                          "fill": "none",
+                          "stroke": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Merged",
+                    "x": 359.14,
+                    "y": 62,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 12,
+                    "color": { "light": "rgb(250,250,250)", "dark": "rgb(23,23,23)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 99, "width": 418, "height": 20 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "span",
+                "part": "checks",
+                "box": { "x": 41, "y": 99, "width": 20, "height": 20 },
+                "radii": [10, 10, 10, 10],
+                "background": "rgb(0,153,102)",
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "graphic",
+                    "box": { "x": 45, "y": 103, "width": 12, "height": 12 },
+                    "viewBox": [0, 0, 24, 24],
+                    "children": [
+                      {
+                        "tag": "path",
+                        "attrs": {
+                          "d": "M20 6 9 17l-5-5",
+                          "fill": "none",
+                          "stroke": "rgb(255,255,255)",
+                          "stroke-width": "2",
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round"
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "All 14 checks passed",
+                "x": 69,
+                "y": 114,
+                "family": "Geist",
+                "weight": 400,
+                "style": "normal",
+                "size": 14,
+                "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                "letterSpacing": 0
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "tag": "div",
+            "box": { "x": 17, "y": 143, "width": 418, "height": 22 },
+            "radii": [0, 0, 0, 0],
+            "shadows": [],
+            "opacity": 1,
+            "clip": false,
+            "children": [
+              {
+                "kind": "box",
+                "tag": "div",
+                "box": { "x": 41, "y": 144, "width": 116.48, "height": 20 },
+                "radii": [0, 0, 0, 0],
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "box",
+                    "tag": "button",
+                    "part": "switch",
+                    "box": { "x": 41, "y": 144.8, "width": 32, "height": 18.39 },
+                    "radii": [9.2, 9.2, 9.2, 9.2],
+                    "background": { "light": "rgb(23,23,23)", "dark": "rgb(229,229,229)" },
+                    "shadows": [
+                      { "color": "rgba(0,0,0,0.05)", "x": 0, "y": 1, "blur": 2, "spread": 0 }
+                    ],
+                    "opacity": 1,
+                    "clip": false,
+                    "children": [
+                      {
+                        "kind": "box",
+                        "tag": "span",
+                        "part": "switch-thumb",
+                        "box": { "x": 56, "y": 145.98, "width": 16, "height": 16 },
+                        "radii": [8, 8, 8, 8],
+                        "background": { "light": "rgb(255,255,255)", "dark": "rgb(10,10,10)" },
+                        "shadows": [
+                          {
+                            "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                            "x": 0,
+                            "y": 0,
+                            "blur": 0,
+                            "spread": 0
+                          }
+                        ],
+                        "opacity": 1,
+                        "clip": false,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Auto-merge",
+                    "x": 81,
+                    "y": 159,
+                    "family": "Geist",
+                    "weight": 400,
+                    "style": "normal",
+                    "size": 14,
+                    "color": { "light": "rgb(10,10,10)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              },
+              {
+                "kind": "box",
+                "tag": "span",
+                "box": { "x": 345.06, "y": 143, "width": 65.94, "height": 22 },
+                "radii": [8, 8, 8, 8],
+                "background": { "light": "rgb(245,245,245)", "dark": "rgb(38,38,38)" },
+                "shadows": [],
+                "opacity": 1,
+                "clip": false,
+                "children": [
+                  {
+                    "kind": "text",
+                    "text": "+214 −12",
+                    "x": 354.06,
+                    "y": 158,
+                    "family": "Geist",
+                    "weight": 500,
+                    "style": "normal",
+                    "size": 12,
+                    "color": { "light": "rgb(23,23,23)", "dark": "rgb(250,250,250)" },
+                    "letterSpacing": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

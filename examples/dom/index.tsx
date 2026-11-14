@@ -1,12 +1,16 @@
 import { google } from "@svjeez/fonts";
-import { Morph, snapshotter, type Snapshot } from "@svjeez/dom";
-import { render, show, span, variables } from "svjeez";
+import { Dom, size, snapshots } from "@svjeez/dom";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { render, span, variables } from "svjeez";
 import { tailwind } from "./tailwind.ts";
 import { pieces } from "./ui.tsx";
 
 // Real shadcn components rendered by React, laid out by Chromium with Tailwind 4, then drawn as SVG.
-// Each card is two snapshots, one per state; Morph turns one into the other.
+// Each card is a live page: the sign-in card is typed into, focused and hovered, and every state is read off it.
+// The snapshots are kept in snapshots.json, so a build without changes never starts Chromium.
 const geist = await google.family("Geist", [400, 500, 600]);
+const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 
 const html = {
   signIn: pieces.login(false),
@@ -15,45 +19,50 @@ const html = {
   merged: pieces.pr(true),
 };
 
-const shot = await snapshotter({ css: await tailwind(Object.values(html)), fonts: [geist] });
-const signIn = await shot.html(html.signIn);
-const failed = await shot.html(html.failed);
-const open = await shot.html(html.open);
-const merged = await shot.html(html.merged);
+const { idle, typed, password, hovered, failed, open, merged } = await snapshots(
+  here("snapshots.json"),
+  { inputs: { html, theme: readFileSync(here("theme.css"), "utf8") }, fonts: [geist] },
+  async (dom) => {
+    const css = await tailwind(Object.values(html));
 
-await shot.close();
+    const login = await dom.mount(html.signIn, { css });
+    const idle = await login.snap();
+    const typed = await login.snap((page) => page.fill("[data-part=email]", "sai@exmaple.com"));
+    const password = await login.snap((page) =>
+      page.fill("[data-part=password]", "hunter2hunter2"),
+    );
+    const hovered = await login.snap((page) => page.hover("[data-part=submit]"));
 
-const W = 920;
-const H = 470;
-const D = 8;
-const HALF = D / 2;
-const { vars, css } = variables({ backdrop: "#09090b" }, { backdrop: "#f4f4f5" });
+    // The server says no: the same card, re-rendered, with the pointer moved off.
+    await login.render(html.failed);
+    const failed = await login.snap((page) => page.mouse.move(0, 0));
 
-/** `a` becomes `b` at `there`, then `b` goes back to `a` at `back`. The two halves meet at HALF, where both show `b`. */
-const ThereAndBack = ({
-  a,
-  b,
-  there,
-  back,
-  x,
-  y,
-}: {
-  a: Snapshot;
-  b: Snapshot;
-  there: number;
-  back: number;
-  x: number;
-  y: number;
-}) => (
-  <>
-    <g animation={show(span(0, HALF), { fade: 0 })}>
-      <Morph from={a} to={b} at={there} over={0.7} x={x} y={y} />
-    </g>
-    <g animation={show(span(HALF), { fade: 0 })}>
-      <Morph from={b} to={a} at={back} over={0.7} x={x} y={y} />
-    </g>
-  </>
+    const card = await dom.mount(html.open, { css });
+    const open = await card.snap();
+    await card.render(html.merged);
+
+    return { idle, typed, password, hovered, failed, open, merged: await card.snap() };
+  },
 );
+
+const D = 9;
+const GAP = 16;
+const MARGIN = 24;
+// The pull request card turns merged, then opens again.
+const prStates = [open, merged, open];
+const signIn = [
+  idle,
+  typed,
+  password,
+  [hovered, span(4.1, 0.7)],
+  [failed, span(6.6, 0.7)],
+  idle,
+] as const;
+const left = size(signIn);
+const right = size(prStates);
+const W = MARGIN * 2 + left.width + GAP + right.width;
+const H = MARGIN * 2 + Math.max(left.height, right.height);
+const { vars, css } = variables({ backdrop: "#09090b" }, { backdrop: "#f4f4f5" });
 
 export default function build(): string {
   return render(
@@ -63,12 +72,19 @@ export default function build(): string {
       duration: D,
       css,
       title: "shadcn components changing state",
-      desc: "A sign-in card shows an error and its fields slide down to make room; a pull request card turns merged and grows a row of passing checks.",
+      desc: "A sign-in card has an email typed into it, then a password, the button hovered and an error shown, and goes back to empty; a pull request card turns merged and grows a row of passing checks, then opens again.",
     },
     <>
       <rect width={W} height={H} fill={vars.backdrop} />
-      <ThereAndBack a={signIn} b={failed} there={1} back={5} x={24} y={24} />
-      <ThereAndBack a={open} b={merged} there={1.6} back={5.6} x={24 + signIn.width + 16} y={24} />
+      <Dom states={signIn} fonts={[geist]} at={[0.8, 1.9, 3]} over={0.35} x={MARGIN} y={MARGIN} />
+      <Dom
+        states={prStates}
+        fonts={[geist]}
+        at={[2, 6]}
+        over={0.7}
+        x={MARGIN + left.width + GAP}
+        y={MARGIN}
+      />
     </>,
   );
 }

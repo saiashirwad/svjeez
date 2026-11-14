@@ -1,8 +1,7 @@
-import type { Snapshot } from "./snapshot.ts";
-import type { Box, Item } from "./tree.ts";
+import type { Box, Item, Rect, Snapshot } from "./tree.ts";
 
-/** Every element with this `data-part`, in document order. Their `box` says where each landed. */
-export const parts = (snapshot: Snapshot, part: string): Box[] => {
+/** Every element with this part, in document order. Their `box` says where each landed. */
+export const boxes = (snapshot: Snapshot, part: string): Box[] => {
   const found: Box[] = [];
 
   const visit = (item: Item) => {
@@ -16,3 +15,7 @@ export const parts = (snapshot: Snapshot, part: string): Box[] => {
 
   return found;
 };
+
+/** Where the `index`th element with this part landed, in the snapshot's coordinates. */
+export const rect = (snapshot: Snapshot, part: string, index = 0): Rect | undefined =>
+  boxes(snapshot, part)[index]?.box;

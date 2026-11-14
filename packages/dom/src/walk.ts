@@ -1,13 +1,21 @@
 import type { Box } from "./tree.ts";
 
 /**
- * Reads the element at `selector` into a `Box` tree. Runs inside the page, so it must not reference anything outside
- * its own body.
+ * Reads the element at `selector` into a `Box` tree. `parts` names elements by CSS selector. Runs inside the page, so
+ * it must not reference anything outside its own body.
  */
-export function walk({ selector, pad }: { selector: string; pad: number }): Box {
+export function walk({
+  selector,
+  pad,
+  parts,
+}: {
+  selector: string;
+  pad: number;
+  parts: Record<string, string>;
+}): Box {
   const root = document.querySelector(selector);
 
-  if (!root) throw new Error(`snapshot() found nothing at ${selector}.`);
+  if (!root) throw new Error(`snap() found nothing at ${selector}.`);
   const origin = root.getBoundingClientRect();
   const px = (value: string): number => parseFloat(value) || 0;
   const round = (n: number): number => Math.round(n * 100) / 100;
@@ -284,7 +292,10 @@ export function walk({ selector, pad }: { selector: string; pad: number }): Box 
       (el instanceof HTMLInputElement && !/checkbox|radio|range|color|file/.test(el.type)) ||
       el instanceof HTMLTextAreaElement
     ) {
-      const value = el.value;
+      const value =
+        el instanceof HTMLInputElement && el.type === "password"
+          ? "•".repeat(el.value.length)
+          : el.value;
       const text = value || el.placeholder;
       const c = color(value ? s.color : getComputedStyle(el, "::placeholder").color);
 
@@ -301,11 +312,14 @@ export function walk({ selector, pad }: { selector: string; pad: number }): Box 
       }
     }
 
+    const named = Object.keys(parts).find((name) => el.matches(parts[name]!));
+
     return {
       kind: "box",
       tag,
-      part: el.getAttribute("data-part") ?? undefined,
-      classes: el.getAttribute("class") ?? "",
+      part: el.getAttribute("data-part") ?? named,
+      key: el.getAttribute("data-key") ?? undefined,
+      id: el.id || undefined,
       box: rel(r),
       radii: radii(s, r.width, r.height),
       background: visible ? color(s.backgroundColor) : undefined,

@@ -1,13 +1,28 @@
 export {
-  snapshot,
-  snapshotter,
-  type Snapshot,
-  type SnapshotOptions,
-  type Snapshotter,
-} from "./snapshot.ts";
+  browser,
+  type Browser,
+  type BrowserOptions,
+  type Card,
+  type MountOptions,
+  type OpenOptions,
+} from "./browser.ts";
 
-export { Dom, Morph, type DomProps, type MorphProps } from "./draw.tsx";
+export { snapshots, type SnapshotsOptions } from "./snapshots.ts";
 
-export { parts } from "./find.ts";
+export { Dom, size, type DomProps, type Step } from "./draw.tsx";
 
-export type { Box, Graphic, Item, Picture, Radii, Rect, Shadow, Vector, TextRun } from "./tree.ts";
+export { boxes, rect } from "./find.ts";
+
+export type {
+  Box,
+  Graphic,
+  Item,
+  Paint,
+  Picture,
+  Radii,
+  Rect,
+  Shadow,
+  Snapshot,
+  TextRun,
+  Vector,
+} from "./tree.ts";
