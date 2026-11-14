@@ -120,6 +120,18 @@ describe("point()", () => {
   });
 });
 
+describe("dots() and route() errors", () => {
+  test("dots() needs a positive finite step", () => {
+    for (const step of [0, -2, Infinity, NaN])
+      expect(() => map.dots(step)).toThrow("dots() needs a positive, finite step");
+  });
+
+  test("route() on the far side says it is not visible, not that it crosses the edge", () => {
+    const globe = project(world, { frame, projection: geoOrthographic().rotate([0, 0]) });
+    expect(() => globe.route([180, 0], [170, 10])).toThrow("is not visible");
+  });
+});
+
 describe("route()", () => {
   test("arcs north along the great circle from end to end", () => {
     const route = map.route(NEW_YORK, LONDON);

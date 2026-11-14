@@ -370,6 +370,21 @@ describe("errors name the call, the constraint and the value", () => {
       "typewriter() needs a non-negative start and a positive cps, got at -1 and cps 28.",
     ],
     ["terminal", () => terminal([]), "terminal() needs at least one command, got none."],
+    [
+      "Callout columns",
+      () => Callout({ target: rect(0, 0, 1, 1), during: span, children: "hi", columns: 0 }),
+      "Callout needs columns of at least 1, got 0.",
+    ],
+    [
+      "Callout text",
+      () => Callout({ target: rect(0, 0, 1, 1), during: span, children: "  " }),
+      "Callout needs some text, got an empty string.",
+    ],
+    [
+      "reveal blocks",
+      () => reveal(code("a"), { at: 0, blocks: [] }),
+      "reveal() needs at least one block of lines, got none.",
+    ],
   ])("%s", (_, make, message) => {
     expect(make).toThrow(message);
   });
@@ -565,6 +580,12 @@ describe("time helpers", () => {
 });
 
 describe("reveal", () => {
+  test("trailing blank lines are not a block of their own", () => {
+    const shown = reveal(code("a\n\n"), { at: 0 });
+    expect(shown.spans).toHaveLength(1);
+    expect(shown.end).toBeCloseTo(0.4, 9);
+  });
+
   const source = code("class A {\n  a = 1;\n\n  b() {}\n}");
 
   test("by default each paragraph enters in turn, a blank line joining the block after it", () => {

@@ -313,6 +313,9 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
       ),
     point,
     dots(step = 2) {
+      if (!(Number.isFinite(step) && step > 0))
+        throw new Error(`dots() needs a positive, finite step in degrees, got ${step}.`);
+
       const boxes = kept.map(({ f, id }) => ({ f, id, box: geoBounds(f) }));
       const rows = Math.round(180 / step);
 
@@ -334,6 +337,11 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
     },
     route(from, to, { steps } = {}) {
       const cut = lines({ type: "LineString", coordinates: arc(from, to, steps) });
+
+      if (cut.length === 0)
+        throw new Error(
+          `route() from [${from.join(", ")}] to [${to.join(", ")}] is not visible: the whole arc is clipped away by the projection. Rotate the projection so the route faces the viewer, as in geoOrthographic().rotate([-150, 0]).`,
+        );
 
       if (cut.length !== 1)
         throw new Error(

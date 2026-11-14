@@ -314,6 +314,9 @@ export function cartogram(map: GeoMap, values: RegionValues, options: CartogramO
 export function toBars(map: GeoMap, values: RegionValues, options: BarsOptions): Bars {
   const { frame, order = "desc", top = 12 } = options;
 
+  if (!(Number.isInteger(top) && top >= 1))
+    throw new Error(`toBars() needs top to be a whole number of at least 1, got ${top}.`);
+
   const biggest = singles(map, values, "toBars()")
     .sort((a, b) => b[1] - a[1])
     .slice(0, top);

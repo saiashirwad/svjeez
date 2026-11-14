@@ -76,6 +76,12 @@ export function lanes<const L extends Record<string, Labelled>>(
 
   const [spans, events, links] = [spec.spans ?? [], spec.events ?? [], spec.links ?? []];
 
+  for (const link of links)
+    if (link.from === link.to)
+      throw new Error(
+        `lanes() needs a link between two different lanes, got ${JSON.stringify(link.from)} on both ends.`,
+      );
+
   const out = layout({
     lanes: rows.map((r) => ({
       id: r.id,
