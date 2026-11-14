@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { el, motion, render } from "svjeez";
+import { motion, render } from "svjeez";
+import { el } from "svjeez/internal";
 import { Fragment, jsxDEV } from "svjeez/jsx-dev-runtime";
 
 const options = { width: 100, height: 60, duration: 2, title: "Sources" };

@@ -80,7 +80,7 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
 | `stop` | `stopColor stopOpacity` |
 | filter primitives | `stdDeviation baseFrequency seed displace dx dy floodColor floodOpacity` |
 
-Custom properties from `def.property` animate on every tag above except filter primitives.
+Custom properties from `css.property` animate on every tag above except filter primitives.
 
 ## Recipes
 
@@ -150,7 +150,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `to() needs a positive duration, got …. Use set() for a cut.` | Use `.set()` for an instant change |
 | `<…> has no attribute "…".` | camelCase: `strokeWidth`, not `stroke-width` |
 | `A def ref is not a string. Pass it as the attribute value itself.` | `fill={grad}`, never `url(#id)` |
-| `… was never declared with def.property().` | Declare the property before animating it |
+| `… was never declared with css.property().` | Declare the property before animating it |
 | `animation takes motions built with motion() or a recipe.` | Pass motions, an array of them, or a falsy value |
 | `Unknown image format. picture() reads …` | The bytes are not an image. Try `picture.load(path)` |
 | `Unknown font format. font() reads …` | Pass font bytes or `font.load(path)` |
@@ -164,7 +164,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 
 | Task | Read |
 | --- | --- |
-| Gradients, clip paths, filters, custom properties, `calc` | [`references/defs-css.md`](references/defs-css.md) |
+| Gradients, clip paths, filters, custom properties, `<Style>` | [`references/defs-css.md`](references/defs-css.md) |
 | Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
 | Code walkthroughs, terminals, annotations, camera, themes, recoloring, axes and calculus (`@svjeez/math`), pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |

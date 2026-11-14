@@ -46,6 +46,11 @@
       "types": "./package-dist/extras.d.ts",
       "default": "./package-dist/extras.js"
     },
+    "./internal": {
+      "@svjeez/source": "./src/internal.ts",
+      "types": "./package-dist/internal.d.ts",
+      "default": "./package-dist/internal.js"
+    },
     "./frames": {
       "@svjeez/source": "./src/frames.ts",
       "types": "./package-dist/frames.d.ts",

@@ -35,7 +35,8 @@ export type PropertyValues = { readonly [S in Syntax as Property<string, S>]?: S
 
 export interface Declaration<S extends Syntax = Syntax> {
   readonly syntax: S;
-  readonly inherits: boolean;
+  /** Whether children read the value. Default false, as in CSS. */
+  readonly inherits?: boolean;
   readonly initial: SyntaxValue<S>;
 }
 
@@ -47,13 +48,13 @@ export const isProperty = (key: string): key is Property =>
 export const declarationOf = (key: Property): Declaration => {
   const found = declared.get(key);
 
-  if (!found) throw new Error(`${key} was never declared with def.property().`);
+  if (!found) throw new Error(`${key} was never declared with css.property().`);
 
   return found;
 };
 
 const same = (a: Declaration, b: Declaration): boolean =>
-  a.inherits === b.inherits && a.initial === b.initial;
+  (a.inherits ?? false) === (b.inherits ?? false) && a.initial === b.initial;
 
 /** Declaring the same property twice returns the same key; declaring it differently throws. */
 export const property = <const N extends string, const S extends Syntax>(
@@ -70,7 +71,7 @@ export const property = <const N extends string, const S extends Syntax>(
 
   if (known && !same(known, declaration))
     throw new Error(
-      `${key} is already declared with inherits ${known.inherits} and initial ${known.initial}.`,
+      `${key} is already declared with inherits ${known.inherits ?? false} and initial ${known.initial}.`,
     );
   declared.set(key, declaration);
 
@@ -88,7 +89,7 @@ export const formatProperty = (key: Property, value: number | string): string =>
 export const propertyRule = (name: string, key: Property): string => {
   const { syntax, inherits, initial } = declarationOf(key);
 
-  return `@property ${name}{syntax:'${SYNTAX[syntax].css}';inherits:${inherits};initial-value:${formatProperty(key, initial)}}`;
+  return `@property ${name}{syntax:'${SYNTAX[syntax].css}';inherits:${inherits ?? false};initial-value:${formatProperty(key, initial)}}`;
 };
 
 export type CssPart = string | { readonly property: Property };
@@ -101,7 +102,7 @@ export class Css {
 export const isCss = (value: unknown): value is Css => value instanceof Css;
 
 /** `` css`.dot{translate:calc(${px} * 1px) 0}` ``: a property hole becomes `var(--pN)`. */
-export const css = (
+const cssTag = (
   strings: TemplateStringsArray,
   ...holes: readonly (Property | Css | number)[]
 ): Css =>
@@ -117,3 +118,9 @@ export const css = (
       return [text, "var(", { property: hole }, ")"];
     }),
   );
+
+/**
+ * Template tag for CSS that names registered properties, and `css.property(name, { syntax, inherits, initial })`, which
+ * registers one with @property. The returned key animates like a channel and works in `style` and in `css`.
+ */
+export const css = Object.assign(cssTag, { property });

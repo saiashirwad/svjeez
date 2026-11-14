@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { Once, ease, motion, render, restyle } from "svjeez";
+import { Once, ease, motion, render } from "svjeez";
+import { restyle } from "svjeez/page";
 
 const scene = (content: Parameters<typeof render>[1], prefix?: string) =>
   render({ width: 20, height: 20, duration: 4, title: "Once", prefix }, content);

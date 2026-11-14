@@ -1,16 +1,18 @@
 # Without JSX
 
-`el` builds the same elements as JSX, with the same props and type checking. Each tag is a function of `(props, children)`. A scene built with `el` renders the same bytes as its JSX twin. `.ts` files work with no pragma and no `jsxImportSource`.
+`jsx(tag, props)` from `svjeez/jsx-runtime` builds the same elements JSX does, with the same props and type checking. Children go in the `children` prop. A scene built with `jsx` renders the same bytes as its JSX twin. `.ts` files work with no pragma and no `jsxImportSource`.
 
 ```ts
-import { draw, ease, el, enter, render } from "svjeez";
-
-const { circle, g, path } = el;
+import { draw, ease, enter, render } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
 
 const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
-  path({ d: "M20 100C60 20 140 20 180 100", fill: "none", stroke: "#FF5FA8", strokeWidth: 4, animation: draw({ at: 0.2, over: 1.2 }) }),
-  g({ opacity: 0.9 }, [circle({ cx: 100, cy: 40, r: 8, fill: "#3EE6D6", animation: enter({ at: 1.2, over: 0.5 }, { scale: 0 }, ease.pop) })]),
-  el.text({ x: 4, y: 10 }, "hi"),
+  jsx("path", { d: "M20 100C60 20 140 20 180 100", fill: "none", stroke: "#FF5FA8", strokeWidth: 4, animation: draw({ at: 0.2, over: 1.2 }) }),
+  jsx("g", {
+    opacity: 0.9,
+    children: jsx("circle", { cx: 100, cy: 40, r: 8, fill: "#3EE6D6", animation: enter({ at: 1.2, over: 0.5 }, { scale: 0 }, ease.pop) }),
+  }),
+  jsx("text", { x: 4, y: 10, children: "hi" }),
 ]);
 ```
 
@@ -27,7 +29,7 @@ const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
 - **Load it as an image.** An `<img src="data:image/svg+xml,...">` is its own document and needs no prefix. The scene plays, but its text cannot be selected and the page cannot style it.
 
 ```ts
-const scene = el.rect({ width: 10, height: 10, fill: "#3EE6D6" });
+const scene = jsx("rect", { width: 10, height: 10, fill: "#3EE6D6" });
 const hello = render({ width: 200, height: 120, duration: 4, title: "Hello", prefix: "hello-" }, scene);
 const saved = render({ width: 320, height: 120, duration: 5, title: "Saved", prefix: "saved-" }, scene);
 

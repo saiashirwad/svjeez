@@ -34,7 +34,9 @@ export type SvgNode =
     }
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }
-  | { readonly kind: "fragment"; readonly children: readonly SvgNode[] };
+  | { readonly kind: "fragment"; readonly children: readonly SvgNode[] }
+  /** `<Style>`: a global rule that compile moves into the scene's `<style>`. Never serialized. */
+  | { readonly kind: "style"; readonly css: string | Css };
 
 export type Element = Extract<SvgNode, { kind: "element" }>;
 
@@ -159,6 +161,8 @@ const inline = (node: SvgNode, rawText = false): string => {
       return rawText ? node.value : escapeText(node.value);
     case "raw":
       return node.value;
+    case "style":
+      return "";
     case "fragment":
       return node.children.map((child) => inline(child, rawText)).join("");
     case "element": {
@@ -181,6 +185,8 @@ const serializeNode = (node: SvgNode, depth: number): string => {
       return pad + escapeText(node.value);
     case "raw":
       return pad + node.value;
+    case "style":
+      return "";
     case "fragment":
       return node.children
         .map((child) => serializeNode(child, depth))

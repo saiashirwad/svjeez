@@ -96,9 +96,19 @@ const duotone = ({ dark, light }: { readonly dark: Hex; readonly light: Hex }): 
   );
 };
 
-/** Gaussian blur with the given standard deviation in px. */
-const blur = (deviation: number): Ref<"filter"> =>
-  def.filter({}, <feGaussianBlur stdDeviation={deviation} />);
+const isNumber = (value: BlurOptions | number): value is number => typeof value === "number";
+
+export interface BlurOptions {
+  /** Standard deviation in px. */
+  readonly by?: number;
+}
+
+/** Gaussian blur by `by` px, 4 by default. `blur(6)` still works but is deprecated: write `blur({ by: 6 })`. */
+const blur = (options: BlurOptions | number = {}): Ref<"filter"> => {
+  const by = isNumber(options) ? options : (options.by ?? 4);
+
+  return def.filter({}, <feGaussianBlur stdDeviation={by} />);
+};
 
 export interface ShadowOptions {
   readonly dx?: number;

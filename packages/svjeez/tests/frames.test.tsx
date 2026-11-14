@@ -10,7 +10,6 @@ import {
   motion,
   picture,
   render,
-  restyle,
   type Child,
   type SvgNode,
   adaptive,
@@ -19,7 +18,7 @@ import {
 } from "svjeez";
 
 import { openScene, renderFrames } from "svjeez/frames";
-import { loopLength, seek } from "svjeez/page";
+import { loopLength, seek, restyle } from "svjeez/page";
 import { systemColorScheme } from "../src/scheme";
 
 const browser = await renderFrames(

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { validateSvg } from "svjeez";
+import { validateSvg } from "svjeez/frames";
 
 describe("validation", () => {
   test("accepts a minimal valid scene", () => {

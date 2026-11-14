@@ -2,6 +2,8 @@ import type { Seconds } from "./motion";
 import { loopLength, seek } from "./page";
 import { systemColorScheme } from "./scheme";
 
+export { validateSvg, type ValidationResult } from "./validate";
+
 export type ColorScheme = "light" | "dark";
 
 /** When to capture: exact playback times, or `count` frames spread evenly over one loop. */

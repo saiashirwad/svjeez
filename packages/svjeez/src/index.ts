@@ -1,7 +1,5 @@
 export { render, type RenderOptions } from "./render";
 
-export { restyle, type RestyleOptions } from "./restyle";
-
 export {
   motion,
   ease,
@@ -35,8 +33,6 @@ export { def, type Ref, type DefTag } from "./defs";
 
 export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./properties";
 
-export { calc, type Calc } from "./calc";
-
 export { fx } from "./fx";
 
 export { picture, Picture, type ImageFormat, type PictureData, type PictureProps } from "./picture";
@@ -64,6 +60,8 @@ export { Icon, type IconData, type IconProps } from "./icon";
 
 export { Once, type OnceProps } from "./once";
 
+export { Style, type StyleProps } from "./style";
+
 export { spline, type Spline } from "./spline";
 
 export {
@@ -78,7 +76,7 @@ export {
   type PencilOptions,
 } from "./ink/ink";
 
-export { el, type ElementProps } from "./el";
+export type { ElementProps } from "./el";
 
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 
@@ -87,8 +85,6 @@ export { hexBytes, hexOf, type Hex } from "./color";
 export type { Channel, TagChannels, Values } from "./channels";
 
 export type { SvgNode, Child } from "./svg";
-
-export { validateSvg, type ValidationResult } from "./validate";
 
 export {
   rect,

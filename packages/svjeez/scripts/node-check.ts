@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { validateSvg } from "svjeez";
+import { validateSvg } from "svjeez/frames";
 
 // Renders the skill's examples on the running runtime; CI runs it on Node 20 and 22 through tsx.
 const ROOT = join(import.meta.dirname, "..");

@@ -70,6 +70,8 @@ interface State {
   readonly keyframes: Map<string, string>;
   readonly classes: Map<string, string>;
   readonly rules: string[];
+  /** The rules of every `<Style>`, in document order. */
+  readonly styles: string[];
   readonly stills: string[];
   pivot: boolean;
   once: boolean;
@@ -563,6 +565,14 @@ const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNod
       return node;
     case "raw":
       return node;
+    case "style": {
+      const rule = isCss(node.css) ? resolveCss(state, node.css) : node.css;
+
+      if (rule.trim()) state.styles.push(rule.trim());
+
+      return { kind: "fragment", children: [] };
+    }
+
     case "fragment":
       return {
         ...node,
@@ -634,6 +644,7 @@ export const compile = (
     keyframes: new Map(),
     classes: new Map(),
     rules: [],
+    styles: [],
     stills: [],
     pivot: false,
     once: false,
@@ -655,5 +666,9 @@ export const compile = (
     .filter(Boolean)
     .join("\n");
 
-  return { body, defs: state.defs, css: [authored, generated].filter(Boolean).join("\n\n") };
+  return {
+    body,
+    defs: state.defs,
+    css: [authored, ...state.styles, generated].filter(Boolean).join("\n\n"),
+  };
 };

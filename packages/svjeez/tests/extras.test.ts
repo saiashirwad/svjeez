@@ -1,9 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  el,
   rect,
   render,
-  validateSvg,
   type Motion,
   type SvgNode,
   Arrow,
@@ -34,6 +32,8 @@ import {
   appWindow,
   flow,
 } from "svjeez";
+import { validateSvg } from "svjeez/frames";
+import { el } from "svjeez/internal";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
 

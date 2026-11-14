@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { def, font, fx, motion, render, validateSvg } from "svjeez";
+import { def, font, fx, motion, render } from "svjeez";
+import { validateSvg } from "svjeez/frames";
 
 const scene = (prefix?: string) =>
   render(
@@ -84,7 +85,7 @@ test("a prefixed scene still warns about a filter over many animated elements", 
   const svg = (prefix?: string) =>
     render(
       { width: 100, height: 100, duration: 2, title: "Glow", prefix },
-      <g filter={fx.blur(2)}>
+      <g filter={fx.blur({ by: 2 })}>
         {Array.from({ length: 45 }, (_, i) => (
           <circle
             cx={i}

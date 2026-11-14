@@ -53,7 +53,7 @@ const make =
 /**
  * `def.<tag>(attrs, children)`: emitted into <defs> only if the rendered tree references it, with a
  * deterministic id. Filters default to a userSpaceOnUse region covering the canvas.
- * `def.property(name, { syntax, inherits, initial })` is registered with @property the same way.
+ * `def.property` is the old name of `css.property`.
  */
 export const def = {
   linearGradient: make("linearGradient"),
@@ -64,5 +64,6 @@ export const def = {
   filter: make("filter"),
   marker: make("marker"),
   symbol: make("symbol"),
+  /** @deprecated Use `css.property`, which takes the same options. */
   property,
 } as const;

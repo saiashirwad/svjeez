@@ -4,7 +4,6 @@ import {
   def,
   draw,
   ease,
-  el,
   enter,
   exit,
   motion,
@@ -13,6 +12,7 @@ import {
   wiggle,
   type Child,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 const scene = (content: Child, duration = 10) =>
   render({ width: 100, height: 100, duration, title: "Test" }, content);
@@ -375,9 +375,9 @@ describe("el", () => {
 });
 
 describe("properties", () => {
-  const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
-  const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
-  const tint = def.property("tint", { syntax: "color", inherits: false, initial: "#000" });
+  const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
+  const px = css.property("px", { syntax: "number", inherits: false, initial: 0 });
+  const tint = css.property("tint", { syntax: "color", inherits: false, initial: "#000" });
   const spin = () => motion().to({ [yaw]: 90 }, 1, ease.linear);
 
   test("an animated property is registered once and keyframed under its render name", () => {
@@ -425,8 +425,8 @@ describe("properties", () => {
   });
 
   test("declaring a property again returns the same key, and declaring it differently throws", () => {
-    expect(def.property("yaw", { syntax: "angle", inherits: true, initial: 0 })).toBe(yaw);
-    expect(() => def.property("yaw", { syntax: "angle", inherits: false, initial: 0 })).toThrow(
+    expect(css.property("yaw", { syntax: "angle", inherits: true, initial: 0 })).toBe(yaw);
+    expect(() => css.property("yaw", { syntax: "angle", inherits: false, initial: 0 })).toThrow(
       /already declared/,
     );
   });

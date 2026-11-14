@@ -1,5 +1,7 @@
 import type { Seconds } from "./motion";
 
+export { restyle, type RestyleOptions } from "./restyle";
+
 /**
  * Runs in the page: pause every CSS and SMIL animation in `root`, the whole document by default, at `time` playback
  * seconds. Pass an inline `<svg>` to scrub that picture alone.

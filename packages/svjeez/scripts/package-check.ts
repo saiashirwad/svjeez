@@ -13,17 +13,18 @@ const ENTRIES = [
   "svjeez/extras",
   "svjeez/jsx-runtime",
   "svjeez/jsx-dev-runtime",
+  "svjeez/internal",
   "svjeez/frames",
   "svjeez/page",
   "svjeez/params",
 ];
 
-// The @ts-expect-error fails the check if typed operands stop being checked, as they do when NoInfer is missing.
-const CONSUMER = `import { calc, ease, enter, render } from "svjeez";
+// The @ts-expect-error fails the check if css holes stop being checked.
+const CONSUMER = `import { css, ease, enter, render } from "svjeez";
 import { renderFrames } from "svjeez/frames";
 
-// @ts-expect-error a length plus a number
-calc.add(calc.length(1), 2);
+// @ts-expect-error a css hole takes a property, a number or css, not a string
+css\`.dot{fill:\${"red"}}\`;
 export const svg: string = render({ width: 10, height: 10, duration: 1, title: "t" }, <circle r={2} animation={enter({ at: 0, over: 1 }, { scale: 0 }, ease.pop)} />);
 export { renderFrames };
 `;

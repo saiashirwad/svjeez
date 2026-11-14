@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { def, render, sampled, type Motion } from "svjeez";
+import { render, sampled, type Motion, css } from "svjeez";
 
 interface Key {
   readonly at: number;
@@ -86,8 +86,8 @@ describe("sampled", () => {
   });
 
   test("a property is its own lane with its own tolerance", () => {
-    const depth = def.property("depth", { syntax: "number", inherits: false, initial: 0 });
-    const flat = def.property("flat", { syntax: "number", inherits: false, initial: 0 });
+    const depth = css.property("depth", { syntax: "number", inherits: false, initial: 0 });
+    const flat = css.property("flat", { syntax: "number", inherits: false, initial: 0 });
 
     const motion = sampled((t) => ({ ...circle(t), [depth]: circle(t).x, [flat]: 2 }), {
       duration: PERIOD,

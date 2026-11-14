@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { def, ease, motion, render, sample } from "svjeez";
+import { ease, motion, render, sample, css } from "svjeez";
 import { openScene, renderFrames } from "svjeez/frames";
 
 const browser = await renderFrames(
@@ -64,7 +64,7 @@ describe("sample", () => {
   });
 
   test("reads numeric properties, and leaves colors out", () => {
-    const glow = def.property("glow", { syntax: "number", inherits: false, initial: 0 });
+    const glow = css.property("glow", { syntax: "number", inherits: false, initial: 0 });
 
     const lit = motion({ [glow]: 0, fill: "#000000" }).to(
       { [glow]: 1, fill: "#ffffff" },

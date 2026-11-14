@@ -21,11 +21,11 @@ const dots = [0, 1, 2].map((i) => <use href={dot} x={20 + i * 12} y={20} />);
 
 ## Custom properties
 
-`def.property(name, { syntax, inherits, initial })` registers a typed CSS custom property. `syntax` is `number`, `length`, `angle` or `color`. The returned key animates like a channel on any tag except filter primitives, and works in `style` and in `css`.
+`css.property(name, { syntax, inherits, initial })` registers a typed CSS custom property. `syntax` is `number`, `length`, `angle` or `color`. `inherits` is false unless you say otherwise, as in CSS. The returned key animates like a channel on any tag except filter primitives, and works in `style` and in `css`. `def.property` is the old name and still works.
 
 ```tsx
-const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
-const reach = def.property("reach", { syntax: "number", inherits: false, initial: 0 });
+const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
+const reach = css.property("reach", { syntax: "number", initial: 0 });
 
 const orbit = render(
   {
@@ -45,21 +45,18 @@ const orbit = render(
 );
 ```
 
-Animate an angle on a parent and let children read it with `cos` and `sin` in `calc`. This is how one motion drives many elements with different phases.
+Animate an angle on a parent and let children read it with `cos` and `sin` in `calc()`. This is how one motion drives many elements with different phases. There is no builder for the expressions: write `calc()`, `clamp()`, `sin()` and the rest as CSS inside `css`, and put properties and numbers in the holes. A hole is never a string.
 
-## calc
+## A global rule from inside a scene
 
-`calc` builds CSS expressions and checks units: a length times a length is a type error, and `cos` takes an angle.
+`<Style>` puts one rule into the scene's `<style>`, after `render({ css })` and before the generated rules. It takes `css` or plain text, and holes become the same prefixed `var(--…)` names as in `render({ css })`, so two scenes on one page do not collide. Selectors you write, such as `.dot`, are not renamed.
 
 ```tsx
-const { add, mul, div, sin, cos, length } = calc;
-
-const slide = css`.dot { translate: ${add(length(100), mul(length(60), reach, cos(yaw)))} 100px }`;
-const depth = add(mul(reach, sin(yaw)), mul(reach, cos(yaw)));
-const shrink = css`.dot { scale: ${div(720, add(720, depth))} }`;
+<Style css={css`.dot { translate: calc(${reach} * 60px) 0 }`} />
+<Style>{".label { letter-spacing: 2px }"}</Style>
 ```
 
-Also `sub`, `clamp`, `angle`, `min` and `max`.
+Use it for a rule that belongs to a component. A component that returns `<Style>` beside its shapes carries its CSS with it, so the caller does not have to know to add it to `render`.
 
 ## Filters
 
@@ -74,7 +71,7 @@ const boil = <g filter={fx.boil({ strength: 2, rate: 10 })}>{glow}</g>;
 | `fx.boil({ strength, rate, seed, detail })` | Hand-drawn wobble from stepped turbulence |
 | `fx.grayscale({ amount })` | 1 is fully gray, 0 leaves the source alone |
 | `fx.duotone({ dark, light })` | Maps luminance onto a ramp. Hex colors only |
-| `fx.blur(deviation)` | Gaussian blur, standard deviation in px |
+| `fx.blur({ by })` | Gaussian blur, standard deviation `by` in px |
 | `fx.shadow({ dx, dy, blur, color, opacity })` | Drop shadow |
 
 To animate a filter, build it with `def.filter` and put `animation` on its primitive. Primitives take `stdDeviation`, `baseFrequency`, `seed`, `displace`, `dx`, `dy`, `floodColor` and `floodOpacity`, compiled to SMIL.
@@ -84,4 +81,4 @@ const pulse = def.filter({}, <feGaussianBlur stdDeviation={0} animation={motion(
 const lit = <circle r={10} filter={pulse} />;
 ```
 
-A filter over many animated elements re-renders every frame. `validateSvg` warns past 40. Paint a glow with a gradient, or filter something that holds still.
+A filter over many animated elements re-renders every frame. `validateSvg` (from `svjeez/frames`) warns past 40. Paint a glow with a gradient, or filter something that holds still.
