@@ -1,6 +1,5 @@
-import { tex } from "@svjeez/math";
+import { axes, tex } from "@svjeez/math";
 import { draw, enter, exit, render, readout } from "svjeez";
-import { axes } from "svjeez/extras";
 import { css, mono, theme } from "../style";
 
 // Three ideas of calculus on three sets of axes: a secant collapsing into the tangent, Riemann sums refining

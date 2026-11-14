@@ -1,4 +1,3 @@
-import { draw, enter, motion, render, tint } from "svjeez";
 import {
   axes,
   contours,
@@ -10,7 +9,8 @@ import {
   streamlines,
   vectorField,
   type VectorField,
-} from "svjeez/extras";
+} from "@svjeez/math";
+import { draw, enter, motion, render, tint } from "svjeez";
 import { css, mono, theme } from "../style";
 
 const W = 960;

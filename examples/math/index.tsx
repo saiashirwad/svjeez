@@ -1,6 +1,5 @@
-import { tex } from "@svjeez/math";
+import { axes, tex } from "@svjeez/math";
 import { draw, motion, render, Brace, morph, tint } from "svjeez";
-import { axes } from "svjeez/extras";
 import { css, mono, theme } from "../style";
 
 const W = 960;
