@@ -2527,7 +2527,7 @@ svg{--night:#08121C;--sea:#0D1E2C;--land:#1A3446;--line:#2C4B60;--arc:#F4B740;--
     </g>
   </g>
   <g class="a m402 fb">
-    <g transform="translate(-10 -10) scale(0.8333333333333334)" fill="none" stroke="var(--text)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" aria-hidden="true">
+    <g transform="translate(-10 -10) scale(0.8333)" fill="none" stroke="var(--text)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" aria-hidden="true">
       <path d="M16 10h4a2 2 0 0 1 0 4h-4l-4 7h-3l2 -7h-4l-2 2h-3l2 -4l-2 -4h3l2 2h4l-2 -7h3l4 7"/>
     </g>
   </g>

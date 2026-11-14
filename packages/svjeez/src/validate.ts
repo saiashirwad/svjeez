@@ -20,7 +20,11 @@ const FILTERED_ANIMATION_LIMIT = 40;
 const filteredAnimation = (source: string): string[] => {
   const warnings: string[] = [];
   const open: { tag: string; filter?: string; animated: number }[] = [];
-  const base = /\.([A-Za-z][\w-]*)\{animation-duration/.exec(source)?.[1] ?? "a";
+
+  const base =
+    /\.([A-Za-z][\w-]*)\{animation-duration:[^;}]*;animation-iteration-count:/.exec(source)?.[1] ??
+    "a";
+
   const animatedClass = new RegExp(`\\bclass="(?:[^"]*\\s)?${base}(?:\\s[^"]*)?"`);
 
   for (const [, closing, tag, attrs = "", selfClosing] of source.matchAll(
@@ -98,7 +102,7 @@ export const validateSvg = (source: string): ValidationResult => {
 
   if (!/\bviewBox="/.test(source)) warnings.push("The root <svg> has no viewBox.");
 
-  const ids = collect(source, /\bid="([^"]*)"/g);
+  const ids = collect(source, /(?<![-\w:])id="([^"]*)"/g);
   const idSet = new Set<string>();
 
   for (const id of ids) {

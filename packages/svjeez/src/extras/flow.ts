@@ -1,7 +1,7 @@
 import type { Color } from "../attributes";
 import { el } from "../el";
 import { pathLength, type Point } from "../geometry";
-import { ease, motion, type Seconds } from "../motion";
+import { EPSILON, ease, motion, type Seconds } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
 import type { SvgNode } from "../svg";
@@ -77,7 +77,7 @@ export function flow(points: readonly Point[], options: FlowOptions): FlowResult
   const end = at + over;
   const lag = REACH / tail / (pathLength(points) / over);
 
-  if (loop !== undefined && style === "comet" && at + over + lag * tail > loop)
+  if (loop !== undefined && style === "comet" && at + over + lag * tail > loop + EPSILON)
     throw new Error(
       `flow() needs a loop period past ${Math.ceil((at + over + lag * tail) * 100) / 100}s to hold the trip and the comet's tail, got ${loop}s.`,
     );
