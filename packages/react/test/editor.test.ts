@@ -3,9 +3,7 @@ import { mkdirSync } from "node:fs";
 import { chromium, type Browser, type Page } from "playwright-core";
 import { createServer, defaultClientConditions, type ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react";
-
-const SHOTS =
-  "/private/tmp/claude-501/-Users-texoport-code-svjeez/6b516b5e-bf9c-48f6-bcc8-50b03db7137a/scratchpad/react-shots";
+import { SHOTS } from "./shots.ts";
 
 let server: ViteDevServer;
 let browser: Browser;
