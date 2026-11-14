@@ -3,6 +3,7 @@ import {
   Glyphs,
   Ink,
   Pivot,
+  def,
   motion,
   render,
   strokeFont,
@@ -76,7 +77,7 @@ const wrap = (text: string, width: number) => {
 
 /** The title, centered on the card's height, under a small mark. */
 const Title = ({ title }: { title: string }) => {
-  const { lines, size } = wrap(title, 600);
+  const { lines, size } = wrap(title, 640);
   const top = (H - lines.length * size * 1.05) / 2 + size * 0.8;
 
   return (
@@ -137,7 +138,7 @@ const SCENES: Record<Mood, { title: string; art: () => Child }> = {
     art: () => (
       <>
         <Chick x={920} y={460} size={1.8} rotate={10} look={{ x: -5, y: -6 }} />
-        <Hand text="?" x={1050} y={250} size={72} />
+        <Hand text="?" x={1040} y={270} size={110} />
       </>
     ),
   },
@@ -168,10 +169,7 @@ export const exampleCard = (title: string, png: string, ratio: number): string =
   return frame(
     title,
     <>
-      <clipPath id="pic">
-        <rect x={720} y={top} width={w} height={h} rx={18} />
-      </clipPath>
-      <g clip-path="url(#pic)">
+      <g clipPath={def.clipPath({}, <rect x={720} y={top} width={w} height={h} rx={18} />)}>
         <image
           href={`data:image/png;base64,${png}`}
           x={720}
