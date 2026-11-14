@@ -72,6 +72,7 @@ const Arrow = ({
   const mx = (x1 + x2) / 2 - ((y2 - y1) / Math.hypot(x2 - x1, y2 - y1)) * bow;
   const my = (y1 + y2) / 2 + ((x2 - x1) / Math.hypot(x2 - x1, y2 - y1)) * bow;
   const a = Math.atan2(y2 - my, x2 - mx);
+
   const head = (turn: number) =>
     `M${x2} ${y2}L${x2 - 16 * Math.cos(a + turn)} ${y2 - 16 * Math.sin(a + turn)}`;
 
@@ -114,10 +115,12 @@ const set = (
   const last = lines.length - 1;
   const end = X + display.measure(lines[last]!, size) + size * 0.56;
   const scale = size / 150;
+
   const swipe =
     highlight &&
     (() => {
       const x = X + display.measure(highlight.from, size);
+
       return (
         <Swipe
           x={x}
@@ -173,6 +176,7 @@ const CARDS: Record<Mood, () => string> = {
       { look: { x: -3, y: 3 } },
       { line: 1, from: "from ", word: "TypeScript" },
     );
+
     return frame(
       "svjeez",
       t.draw,
@@ -188,6 +192,7 @@ const CARDS: Record<Mood, () => string> = {
       { rotate: -6, look: { x: -5, y: -2 } },
       { line: 0, from: "The ", word: "one-minute" },
     );
+
     return frame(
       "The one-minute intro",
       t.draw,
@@ -207,6 +212,7 @@ const CARDS: Record<Mood, () => string> = {
       { rotate: 8, look: { x: 6, y: -4 } },
       { line: 1, from: "it ", word: "made" },
     );
+
     return frame(
       "Examples",
       t.draw,
@@ -221,6 +227,7 @@ const CARDS: Record<Mood, () => string> = {
       { rotate: 14, look: { x: 6, y: 6 } },
       { line: 1, from: "It ", word: "moves" },
     );
+
     return frame(
       "Playground",
       t.draw,
@@ -228,6 +235,7 @@ const CARDS: Record<Mood, () => string> = {
         const a = (deg * Math.PI) / 180;
         const cx = t.chick.x;
         const cy = t.chick.y - 70;
+
         return (
           <path
             d={`M${cx + Math.cos(a) * 115} ${cy + Math.sin(a) * 115}L${cx + Math.cos(a) * 145} ${cy + Math.sin(a) * 145}`}
@@ -278,20 +286,26 @@ export const exampleCard = (title: string, png: string, ratio: number): string =
   const x = 640;
   const y = (H - h) / 2;
   const words = title.split(" ");
+
   const fits = (size: number, width: number) => {
     const lines: string[] = [];
+
     for (const word of words) {
       const last = lines.at(-1);
+
       if (last !== undefined && display.measure(`${last} ${word}`, size) <= width)
         lines[lines.length - 1] = `${last} ${word}`;
       else lines.push(word);
     }
+
     return lines;
   };
+
   const size =
     [96, 84, 72, 62, 54].find(
       (s) => fits(s, 470).length <= 3 && fits(s, 470).every((l) => display.measure(l, s) <= 470),
     ) ?? 48;
+
   const lines = fits(size, 470);
   const t = set(lines, size, (H - lines.length * size * LEAD) / 2 - 20, { look: { x: 6, y: 2 } });
 
