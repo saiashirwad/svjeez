@@ -1,4 +1,4 @@
-import { indexing, union, type Box, type Point, type Size } from "./box";
+import { indexing, union, type Box, type Point, type Size } from "./box.ts";
 
 type SequenceRow =
   | { readonly kind: "message"; readonly from: string; readonly to: string; readonly label: Size }

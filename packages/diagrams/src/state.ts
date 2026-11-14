@@ -1,14 +1,22 @@
-import type { Color } from "../../attributes";
-import { el } from "../../el";
-import { textWidth } from "../../font/font";
-import { pathLength, type Point } from "../../geometry";
-import type { Box, Direction } from "../../layout/box";
-import { layered } from "../../layout/layered";
-import type { Seconds, Span } from "../../motion";
-import type { SvgNode } from "../../svg";
-import { flow, type FlowOptions } from "../flow";
-import { beats, visible, type Beats } from "../timeline";
-import { curve } from "./curve";
+import {
+  type Color,
+  el,
+  textWidth,
+  pathLength,
+  type Point,
+  type Box,
+  type Direction,
+  type Seconds,
+  type Span,
+  type SvgNode,
+  flow,
+  type FlowOptions,
+  beats,
+  visible,
+  type Beats,
+} from "svjeez";
+import { layered } from "./layout/layered.ts";
+import { curve } from "./curve.ts";
 import {
   arrow,
   chip,
@@ -19,7 +27,7 @@ import {
   placer,
   type Diagram,
   type DiagramOptions,
-} from "./kit";
+} from "./kit.ts";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =

@@ -12,7 +12,6 @@ import {
   systemDark,
   systemLight,
 } from "svjeez";
-import { flowchart } from "svjeez/extras";
 import jsxReview from "../skills/svjeez/examples/review-flow";
 import jsxToast from "../skills/svjeez/examples/toast";
 
@@ -88,48 +87,61 @@ const toast = (): string => {
 const review = (): string => {
   const { theme, css: colors } = adaptive({ dark: systemDark, light: systemLight });
   const css = `${colors}\n.sans text{font-family:system-ui,sans-serif}`;
-  const M = 24;
+  const [M, W, H, GAP] = [24, 96, 40, 40];
+  const steps = ["git push", "Run CI", "Green?", "Deploy"];
+  const x = (i: number) => M + i * (W + GAP);
+  const y = M + H / 2;
 
-  const chart = flowchart(
-    {
-      nodes: {
-        push: { label: "git push", role: "input" },
-        ci: { label: "Run CI", role: "tool" },
-        green: { label: "Green?", role: "decision" },
-        ship: { label: "Deploy", role: "output" },
-      },
-      edges: [
-        ["push", "ci"],
-        ["ci", "green"],
-        ["green", "ship", { label: "yes" }],
-        ["green", "ci", { label: "retry" }],
-      ],
-    },
-    { theme, x: M, y: M, fontSize: 13, class: "sans", play: { at: 0.4, step: 0.4 } },
+  const trip = flow(
+    steps.map((_, i) => ({ x: x(i) + W / 2, y })),
+    { at: 2.6, style: "comet", arrive: true, color: theme.base09 },
   );
-
-  const trip = flow(chart.route("push", "ship"), {
-    at: 2.6,
-    style: "comet",
-    arrive: true,
-    color: theme.base09,
-  });
 
   return render(
     {
-      width: chart.bounds.w + 2 * M,
-      height: chart.bounds.h + 2 * M,
+      width: x(steps.length) - GAP + M,
+      height: H + 2 * M,
       duration: Math.ceil(trip.end) + 2,
       title: "Deploy flow",
-      desc: "A CI flowchart revealed rank by rank, then a comet runs from push to deploy.",
+      desc: "Four steps appear one after another, then a comet runs from push to deploy.",
       css,
       reducedMotion: { at: trip.end },
     },
     [
       el.rect({ width: "100%", height: "100%", fill: theme.base00 }),
-      chart.layers.under,
+      steps.slice(1).map((_, i) =>
+        el.path({
+          d: `M${x(i) + W} ${y}H${x(i + 1)}`,
+          stroke: theme.base03,
+          strokeWidth: 1.5,
+          animation: draw({ at: 0.6 + i * 0.4, over: 0.3 }),
+        }),
+      ),
+      steps.map((label, i) =>
+        el.g({ class: "sans", animation: enter({ at: 0.4 + i * 0.4, over: 0.4 }) }, [
+          el.rect({
+            x: x(i),
+            y: M,
+            width: W,
+            height: H,
+            rx: 8,
+            fill: theme.base01,
+            stroke: theme.base03,
+          }),
+          el.text(
+            {
+              x: x(i) + W / 2,
+              y,
+              textAnchor: "middle",
+              dominantBaseline: "central",
+              fontSize: 13,
+              fill: theme.base05,
+            },
+            label,
+          ),
+        ]),
+      ),
       trip.node,
-      chart.layers.over,
     ],
   );
 };

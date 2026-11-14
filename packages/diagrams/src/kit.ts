@@ -1,13 +1,28 @@
-import type { Color } from "../../attributes";
-import { el } from "../../el";
-import { textWidth, type FontValue } from "../../font/font";
-import { rect, type Edge, type Point, type Rect } from "../../geometry";
-import type { Box, Size } from "../../layout/box";
-import { ease, motion, type Motion, type Seconds, type Stack } from "../../motion";
-import { draw, enter } from "../../recipes";
-import type { Child, SvgNode } from "../../svg";
-import { defaultDark, type Base16, type Slot } from "../theme";
-import { curve } from "./curve";
+import {
+  type Color,
+  el,
+  textWidth,
+  type FontValue,
+  rect,
+  type Edge,
+  type Point,
+  type Rect,
+  type Box,
+  type Size,
+  ease,
+  motion,
+  type Motion,
+  type Seconds,
+  type Stack,
+  draw,
+  enter,
+  type Child,
+  type SvgNode,
+  defaultDark,
+  type Base16,
+  type Slot,
+} from "svjeez";
+import { curve } from "./curve.ts";
 
 /** What a node is, so the theme can draw it. */
 export type NodeRole = "task" | "input" | "output" | "tool" | "decision" | "store";

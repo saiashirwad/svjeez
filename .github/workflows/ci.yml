@@ -73,6 +73,8 @@ jobs:
       - run: npm run test:package
         working-directory: packages/charts
       - run: npm run test:package
+        working-directory: packages/diagrams
+      - run: npm run test:package
         working-directory: packages/mermaid
       - run: npm run test:package
         working-directory: packages/live

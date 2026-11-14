@@ -1,5 +1,5 @@
-import type { Point } from "../../geometry";
-import { BEND } from "../../layout/layered";
+import { type Point } from "svjeez";
+import { BEND } from "./layout/layered.ts";
 
 const CORNER = 10;
 

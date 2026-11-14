@@ -18,15 +18,13 @@ const ENTRIES = [
   "svjeez/params",
 ];
 
-// The @ts-expect-error fails the check if typed ids stop being checked, as they do when NoInfer is missing.
-const CONSUMER = `import { ease, enter, render } from "svjeez";
-import { flowchart } from "svjeez/extras";
+// The @ts-expect-error fails the check if typed operands stop being checked, as they do when NoInfer is missing.
+const CONSUMER = `import { calc, ease, enter, render } from "svjeez";
 import { renderFrames } from "svjeez/frames";
 
-const chart = flowchart({ nodes: { a: "A", b: "B" }, edges: [["a", "b"]] });
-// @ts-expect-error "c" is not a node id
-chart.route("a", "c");
-export const svg: string = render({ width: 10, height: 10, duration: 1, title: "t" }, <g animation={enter({ at: 0, over: 1 }, { scale: 0 }, ease.pop)}>{chart.node}</g>);
+// @ts-expect-error a length plus a number
+calc.add(calc.length(1), 2);
+export const svg: string = render({ width: 10, height: 10, duration: 1, title: "t" }, <circle r={2} animation={enter({ at: 0, over: 1 }, { scale: 0 }, ease.pop)} />);
 export { renderFrames };
 `;
 

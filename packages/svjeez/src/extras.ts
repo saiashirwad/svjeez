@@ -1,5 +1,5 @@
-// "svjeez/extras" is deprecated: everything here now comes from "svjeez", except the diagrams, which are still on their
-// way to a package of their own, and the editor palettes, which are in "@svjeez/code".
+// "svjeez/extras" is deprecated: everything here now comes from "svjeez", except the editor palettes, which are in
+// "@svjeez/code". The diagrams are in "@svjeez/diagrams".
 // It goes away in 1.0.
 import * as root from "./index";
 
@@ -203,49 +203,3 @@ export {
   gruvboxDark,
   gruvboxLight,
 } from "./extras/palettes";
-
-export {
-  type Anchor,
-  type Diagram,
-  type DiagramOptions,
-  type Labelled,
-  type NodeRole,
-} from "./extras/diagrams/kit";
-
-export {
-  flowchart,
-  type Flowchart,
-  type FlowchartOptions,
-  type FlowchartEdge,
-  type FlowchartGroup,
-} from "./extras/diagrams/flowchart";
-
-export {
-  sequence,
-  type Sequence,
-  type SequenceMessage,
-  type SequenceOptions,
-} from "./extras/diagrams/sequence";
-
-export {
-  lanes,
-  type Lanes,
-  type LanesOptions,
-  type LaneEvent,
-  type LaneLink,
-  type LaneSpan,
-} from "./extras/diagrams/lanes";
-
-export { tree, type Tree, type TreeOptions, type TreeSpec } from "./extras/diagrams/tree";
-
-export {
-  stateMachine,
-  type Checked,
-  type StateIds,
-  type StateMachine,
-  type StateOptions,
-  type StateSpec,
-  type WalkToken,
-  type Transition,
-  type Walk,
-} from "./extras/diagrams/state";

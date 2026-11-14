@@ -1,13 +1,18 @@
-import { el } from "../../el";
-import { textWidth } from "../../font/font";
-import type { Point, Rect } from "../../geometry";
-import type { Direction } from "../../layout/box";
-import { layered } from "../../layout/layered";
-import { motion, type Seconds } from "../../motion";
-import { enter } from "../../recipes";
-import type { SvgNode } from "../../svg";
-import { beats, type Beats } from "../timeline";
-import { curve } from "./curve";
+import {
+  el,
+  textWidth,
+  type Point,
+  type Rect,
+  type Direction,
+  motion,
+  type Seconds,
+  enter,
+  type SvgNode,
+  beats,
+  type Beats,
+} from "svjeez";
+import { layered } from "./layout/layered.ts";
+import { curve } from "./curve.ts";
 import {
   arrow,
   chip,
@@ -24,7 +29,7 @@ import {
   type DiagramOptions,
   type Labelled,
   type NodeRole,
-} from "./kit";
+} from "./kit.ts";
 
 export type FlowchartEdge<N extends string> =
   | readonly [from: N, to: N]

@@ -1,4 +1,4 @@
-import { groupBy } from "./group";
+import { groupBy } from "svjeez";
 import {
   around,
   flip,
@@ -9,8 +9,8 @@ import {
   type Direction,
   type Point,
   type Size,
-} from "./box";
-import { placeLabels, tracks, type Crossing } from "./route";
+} from "./box.ts";
+import { placeLabels, tracks, type Crossing } from "./route.ts";
 
 export interface LayeredInput {
   /** In order; the order seeds the left-to-right order within ranks. */

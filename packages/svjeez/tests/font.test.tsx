@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
-import { Glyphs, draw, font, render, validateSvg, type Child, Callout, code } from "svjeez";
-import { flowchart } from "svjeez/extras";
+import { Glyphs, draw, font, rect, render, validateSvg, type Child, Callout, code } from "svjeez";
 import { contours, pathData } from "../src/font/glyf";
 import { sfnt } from "../src/font/sfnt";
 import { typesetter } from "../src/font/shape";
@@ -432,26 +431,8 @@ describe("extras with a font", () => {
     expect(() => code("x", { font: sans })).toThrow("needs a monospaced font");
   });
 
-  test("diagram chips fit their measured labels", () => {
-    const width = (label: string) =>
-      flowchart({ nodes: { a: label }, edges: [] }, { font: sans }).bounds.w;
-
-    expect(width("WWWW") - width("iiii")).toBeCloseTo(
-      sans.measure("WWWW", 14) - sans.measure("iiii", 14),
-      3,
-    );
-    expect(faces(scene(flowchart({ nodes: { a: "A" }, edges: [] }, { font: sans }).node))).toEqual([
-      "'ABeeZee' 400 normal",
-    ]);
-  });
-
-  test("without a font, extras keep the monospace estimate", () => {
-    const width = (label: string) => flowchart({ nodes: { a: label }, edges: [] }).bounds.w;
-    expect(width("WWWW")).toBe(width("iiii"));
-  });
-
   test("a callout box fits its measured lines", () => {
-    const target = flowchart({ nodes: { a: "A" }, edges: [] }).bounds;
+    const target = rect(0, 0, 40, 20);
 
     const box = (text: string) =>
       Number(

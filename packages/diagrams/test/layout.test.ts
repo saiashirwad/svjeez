@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { union, type Box, type Point } from "../src/layout/box";
-import { lanes } from "../src/layout/lanes";
-import { layered, type LayeredInput } from "../src/layout/layered";
-import { sequence } from "../src/layout/sequence";
-import { tree } from "../src/layout/tree";
+import { union, type Box, type Point } from "../src/layout/box.ts";
+import { lanes } from "../src/layout/lanes.ts";
+import { layered, type LayeredInput } from "../src/layout/layered.ts";
+import { sequence } from "../src/layout/sequence.ts";
+import { tree } from "../src/layout/tree.ts";
 
 const overlap = (a: Box, b: Box) =>
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
@@ -507,7 +507,7 @@ describe("size limits", () => {
   });
 });
 
-test("src/layout imports nothing outside src/layout", () => {
+test("src/layout imports nothing outside src/layout but svjeez", () => {
   const dir = join(import.meta.dir, "../src/layout");
 
   for (const file of readdirSync(dir)) {
@@ -515,6 +515,6 @@ test("src/layout imports nothing outside src/layout", () => {
       (m) => m[1]!,
     );
 
-    for (const path of imports) expect(`${file}: ${path}`).toMatch(/: \.\/[\w-]+$/);
+    for (const path of imports) expect(`${file}: ${path}`).toMatch(/: (svjeez|\.\/[\w-]+\.ts)$/);
   }
 });

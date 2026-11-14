@@ -17,6 +17,7 @@
       "devDependencies": {
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
+        "@svjeez/diagrams": "workspace:*",
         "@svjeez/fonts": "workspace:*",
         "@svjeez/geo": "workspace:*",
         "@svjeez/icons": "workspace:*",
@@ -71,6 +72,18 @@
       "dependencies": {
         "shiki": "4.5.0",
       },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "svjeez": "workspace:*",
+        "typescript": "latest",
+      },
+      "peerDependencies": {
+        "svjeez": ">=0.6.0 <1",
+      },
+    },
+    "packages/diagrams": {
+      "name": "@svjeez/diagrams",
+      "version": "0.6.1",
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -135,6 +148,7 @@
       "devDependencies": {
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
+        "@svjeez/diagrams": "workspace:*",
         "@svjeez/geo": "workspace:*",
         "@svjeez/icons": "workspace:*",
         "@svjeez/math": "workspace:*",
@@ -148,6 +162,7 @@
       "peerDependencies": {
         "@svjeez/charts": ">=0.6.0 <1",
         "@svjeez/code": ">=0.6.0 <1",
+        "@svjeez/diagrams": ">=0.6.0 <1",
         "@svjeez/geo": ">=0.6.0 <1",
         "@svjeez/icons": ">=0.6.0 <1",
         "@svjeez/math": ">=0.6.0 <1",
@@ -158,6 +173,7 @@
       "optionalPeers": [
         "@svjeez/charts",
         "@svjeez/code",
+        "@svjeez/diagrams",
         "@svjeez/geo",
         "@svjeez/icons",
         "@svjeez/math",
@@ -183,6 +199,9 @@
     "packages/mermaid": {
       "name": "@svjeez/mermaid",
       "version": "0.6.1",
+      "dependencies": {
+        "@svjeez/diagrams": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -330,6 +349,7 @@
         "@svjeez/astro": "workspace:*",
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
+        "@svjeez/diagrams": "workspace:*",
         "@svjeez/geo": "workspace:*",
         "@svjeez/icons": "workspace:*",
         "@svjeez/live": "workspace:*",
@@ -816,6 +836,8 @@
     "@svjeez/charts": ["@svjeez/charts@workspace:packages/charts"],
 
     "@svjeez/code": ["@svjeez/code@workspace:packages/code"],
+
+    "@svjeez/diagrams": ["@svjeez/diagrams@workspace:packages/diagrams"],
 
     "@svjeez/fonts": ["@svjeez/fonts@workspace:packages/fonts"],
 

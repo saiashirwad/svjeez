@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { el, render, type Rect, type SvgNode } from "svjeez";
-import { flowchart, lanes, sequence, stateMachine, tree } from "svjeez/extras";
+import { flowchart, lanes, sequence, stateMachine, tree } from "../src/index.ts";
 
 const valid = (node: SvgNode) =>
   render({ width: 800, height: 600, duration: 10, title: "diagram" }, node);

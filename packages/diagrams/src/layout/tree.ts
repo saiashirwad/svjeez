@@ -7,7 +7,7 @@ import {
   type Direction,
   type Point,
   type Size,
-} from "./box";
+} from "./box.ts";
 
 interface TreeInput {
   /** In order; siblings keep this order. Exactly one node has no parent. */

@@ -1,6 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { render, sampled } from "svjeez";
-import { flowchart, stateMachine } from "svjeez/extras";
 
 // Node 20 has no Map.groupBy; remove it so these run as they would there.
 const native = Map.groupBy;
@@ -12,38 +11,6 @@ describe("without Map.groupBy, as on Node 20", () => {
   });
   afterAll(() => {
     Map.groupBy = native;
-  });
-
-  test("flowchart lays out a graph with a back edge", () => {
-    const chart = flowchart(
-      {
-        nodes: { a: "A", b: "B", c: "C" },
-        edges: [
-          ["a", "b"],
-          ["b", "c"],
-          ["c", "a"],
-        ],
-      },
-      {},
-    );
-
-    expect(chart.bounds.h).toBeGreaterThan(0);
-  });
-
-  test("state lays out a machine", () => {
-    const machine = stateMachine(
-      {
-        states: { idle: "Idle", busy: "Busy" },
-        initial: "idle",
-        transitions: [
-          ["idle", "busy"],
-          ["busy", "idle"],
-        ],
-      },
-      {},
-    );
-
-    expect(machine.bounds.w).toBeGreaterThan(0);
   });
 
   test("sampled groups channels by lane", () => {

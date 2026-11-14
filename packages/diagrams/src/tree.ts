@@ -1,9 +1,6 @@
-import type { Point } from "../../geometry";
-import type { Direction } from "../../layout/box";
-import { tree as layout } from "../../layout/tree";
-import type { Seconds } from "../../motion";
-import { beats, type Beats } from "../timeline";
-import { curve } from "./curve";
+import { type Point, type Direction, type Seconds, beats, type Beats } from "svjeez";
+import { tree as layout } from "./layout/tree.ts";
+import { curve } from "./curve.ts";
 import {
   arrow,
   drawNode,
@@ -17,7 +14,7 @@ import {
   type Diagram,
   type DiagramOptions,
   type NodeRole,
-} from "./kit";
+} from "./kit.ts";
 
 /** A label, or a node naming its `parent`. Exactly one node has no parent. */
 export type TreeSpec<N extends string> =

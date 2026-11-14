@@ -1,4 +1,4 @@
-import { indexing, maxOf, union, type Box, type Point, type Size } from "./box";
+import { indexing, maxOf, union, type Box, type Point, type Size } from "./box.ts";
 
 interface LanesInput {
   readonly lanes: readonly { readonly id: string; readonly label: Size }[];

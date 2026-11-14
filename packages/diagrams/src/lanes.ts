@@ -1,9 +1,5 @@
-import { el } from "../../el";
-import { textWidth } from "../../font/font";
-import { lanes as layout } from "../../layout/lanes";
-import { ease, motion, type Seconds } from "../../motion";
-import { enter } from "../../recipes";
-import { travel } from "../timeline";
+import { el, textWidth, ease, motion, type Seconds, enter, travel } from "svjeez";
+import { lanes as layout } from "./layout/lanes.ts";
 import {
   arrow,
   chip,
@@ -17,7 +13,7 @@ import {
   type DiagramOptions,
   type Labelled,
   type NodeRole,
-} from "./kit";
+} from "./kit.ts";
 
 export interface LaneSpan<L extends string> {
   readonly lane: L;

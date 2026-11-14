@@ -1,4 +1,4 @@
-import type { Box, Point, Size } from "./box";
+import type { Box, Point, Size } from "./box.ts";
 
 /** A run of edge between two ranks: it leaves the upper rank at `xa` and enters the lower one at `xb`. */
 export interface Crossing {

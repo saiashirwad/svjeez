@@ -1,9 +1,14 @@
-import { el } from "../../el";
-import { textWidth } from "../../font/font";
-import type { Point } from "../../geometry";
-import { sequence as layout } from "../../layout/sequence";
-import { motion, type Seconds, type Span } from "../../motion";
-import { beats, type Beats } from "../timeline";
+import {
+  el,
+  textWidth,
+  type Point,
+  motion,
+  type Seconds,
+  type Span,
+  beats,
+  type Beats,
+} from "svjeez";
+import { sequence as layout } from "./layout/sequence.ts";
 import {
   arrow,
   chip,
@@ -17,7 +22,7 @@ import {
   type Diagram,
   type DiagramOptions,
   type Labelled,
-} from "./kit";
+} from "./kit.ts";
 
 /** `[from, to, label]`, dashed with `{ reply: true }`; a message to its own sender loops on the right. */
 export type SequenceMessage<A extends string> =

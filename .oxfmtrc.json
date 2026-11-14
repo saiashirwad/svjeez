@@ -12,6 +12,7 @@
     "**/*.md",
     "examples/site/plain-narrow.ts",
     "packages/svjeez/tests/types.check.tsx",
+    "packages/diagrams/test/types.check.tsx",
     "**/dist/**",
     "**/package-dist/**",
     "**/.svelte-kit/**",
