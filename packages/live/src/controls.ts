@@ -2,7 +2,8 @@
 // one of a choice param's options. A declared param says exactly; any other literal is read from where it sits, so a
 // scene nobody annotated still gets sensible controls.
 import { ease, easeAt, type Ease, type Hex, type Point } from "svjeez";
-import { fit, type NumberParam, type Schema } from "svjeez/params";
+import type { NumberParam, Schema } from "svjeez/params";
+import { fit } from "./fit.ts";
 import { decimalsOf, type Literal, type LiteralOf, type Role, type Source } from "./source.ts";
 
 interface Base<K extends Literal["kind"]> {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fit } from "svjeez/params";
+  import { fit } from "@svjeez/live/fit";
   import { polylinePath } from "svjeez";
   import { clamp } from "../util";
   import { drag } from "./attach";

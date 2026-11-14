@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fit } from "svjeez/params";
+  import { fit } from "@svjeez/live/fit";
   import { drag } from "./attach";
   import { COLORS } from "./feel";
   import Instrument from "./Instrument.svelte";

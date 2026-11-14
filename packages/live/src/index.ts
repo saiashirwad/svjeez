@@ -48,6 +48,8 @@ export {
   stroke,
 } from "./gestures.ts";
 
+export { fit, fitValues, follow, positionOf, valueAt, withValues } from "./fit.ts";
+
 export { measureMove, type Move } from "./probe.ts";
 
 export type { Compiled, SceneSize, SourceError } from "./compile.ts";

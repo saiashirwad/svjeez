@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fit } from "svjeez/params";
+  import { fit } from "@svjeez/live/fit";
   import { paramFor } from "@svjeez/live/controls";
   import { write, type LiteralOf } from "@svjeez/live/source";
   import { flushSync } from "svelte";

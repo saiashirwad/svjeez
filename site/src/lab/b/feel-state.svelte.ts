@@ -1,7 +1,8 @@
 import { createContext } from "svelte";
 import { compilerFor, latestWins } from "@svjeez/live/client";
 import { lazy, svgUrl } from "../util";
-import { defaults, fitValues } from "svjeez/params";
+import { defaults } from "svjeez/params";
+import { fitValues } from "@svjeez/live/fit";
 import { params, type Feel } from "./scene";
 import first from "./scene.tsx?svjeez";
 

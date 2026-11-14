@@ -1,7 +1,7 @@
 // What a control does with a pointer, a key or focus, with the DOM events already read: each gesture sends the editor
 // `set` messages that make it one undo step, and focus selects a value. Every framework's controls wire events to these.
 import type { Point } from "svjeez";
-import { fit, follow } from "svjeez/params";
+import { fit, follow } from "./fit.ts";
 import { bend, bezierOf, nudge, scrub, type Settable, type ValueOf } from "./controls.ts";
 import { handleAt, type Editor, type Grip } from "./editor.ts";
 

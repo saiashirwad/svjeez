@@ -1,13 +1,6 @@
 <script lang="ts" generics="S extends Schema">
-  import {
-    positionOf,
-    valueAt,
-    withValues,
-    type NumberParam,
-    type Param,
-    type Schema,
-    type Values,
-  } from "svjeez/params";
+  import type { NumberParam, Param, Schema, Values } from "svjeez/params";
+  import { positionOf, valueAt, withValues } from "@svjeez/live/fit";
   import { easeText } from "@svjeez/live/source";
   import { easePoints } from "./util";
   import { ease, type Ease } from "svjeez";

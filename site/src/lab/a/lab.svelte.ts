@@ -8,7 +8,8 @@ import { gzipSize } from "@svjeez/live/gzip";
 import { clamp, svgUrl } from "../util";
 import initial from "./meadow.tsx?raw";
 import meadow from "./meadow.tsx?svjeez";
-import { positionOf, type NumberParam } from "svjeez/params";
+import type { NumberParam } from "svjeez/params";
+import { positionOf } from "@svjeez/live/fit";
 import { linesOf, parse, madeBy, type Literal, type Source } from "@svjeez/live/source";
 import { readTimeline, type Bar, type Timeline } from "./timeline";
 

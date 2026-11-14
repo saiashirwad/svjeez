@@ -12,6 +12,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./fit": "./src/fit.ts",
     "./source": "./src/source.ts",
     "./controls": "./src/controls.ts",
     "./editor": "./src/editor.ts",
