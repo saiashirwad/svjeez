@@ -46,7 +46,7 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
 .m14{animation-name:k15}
 @keyframes k16{0%,100%{scale:1}50%{scale:0.3}}
 .m15{animation-name:k16;animation-duration:0.24s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k17{0%,100%{translate:780px 340px}4.167%{translate:818.823px 375px}6.667%{translate:841.01px 392.02px}8.333%{translate:855px 400.622px}10%{translate:868.168px 406.574px}12.5%{translate:886.066px 410px}15%{translate:901.353px 406.574px}16.667%{translate:909.904px 400.622px}18.333%{translate:917.032px 392.02px}20%{translate:922.658px 381.145px}21.667%{translate:926.722px 368.472px}25%{translate:930px 340px}27.5%{translate:928.153px 318.369px}29.167%{translate:924.889px 305px}30.833%{translate:920.037px 293.161px}32.5%{translate:913.651px 283.369px}34.167%{translate:905.801px 276.052px}35.833%{translate:896.572px 271.53px}38.333%{translate:880.37px 270.383px}40.833%{translate:861.696px 276.052px}42.5%{translate:848.099px 283.369px}44.167%{translate:833.755px 293.161px}46.667%{translate:811.187px 311.528px}54.167%{translate:741.177px 375px}56.667%{translate:718.99px 392.02px}59.167%{translate:698.304px 403.948px}61.667%{translate:679.63px 409.617px}64.167%{translate:663.428px 408.47px}66.667%{translate:650.096px 400.622px}69.167%{translate:639.963px 386.839px}70.833%{translate:635.111px 375px}73.333%{translate:630.822px 354.554px}75.833%{translate:630.206px 332.683px}78.333%{translate:633.278px 311.528px}80.833%{translate:639.963px 293.161px}82.5%{translate:646.349px 283.369px}84.167%{translate:654.199px 276.052px}85.833%{translate:663.428px 271.53px}87.5%{translate:673.934px 270px}89.167%{translate:685.602px 271.53px}90.833%{translate:698.304px 276.052px}92.5%{translate:711.901px 283.369px}94.167%{translate:726.245px 293.161px}95.833%{translate:741.177px 305px}}
+@keyframes k17{0%,100%{translate:880px 340px}4.167%{translate:918.823px 375px}6.667%{translate:941.01px 392.02px}8.333%{translate:955px 400.622px}10%{translate:968.168px 406.574px}12.5%{translate:986.066px 410px}15%{translate:1001.353px 406.574px}16.667%{translate:1009.904px 400.622px}18.333%{translate:1017.032px 392.02px}20%{translate:1022.658px 381.145px}21.667%{translate:1026.722px 368.472px}25%{translate:1030px 340px}27.5%{translate:1028.153px 318.369px}29.167%{translate:1024.889px 305px}30.833%{translate:1020.037px 293.161px}32.5%{translate:1013.651px 283.369px}34.167%{translate:1005.801px 276.052px}35.833%{translate:996.572px 271.53px}38.333%{translate:980.37px 270.383px}40.833%{translate:961.696px 276.052px}42.5%{translate:948.099px 283.369px}44.167%{translate:933.755px 293.161px}46.667%{translate:911.187px 311.528px}54.167%{translate:841.177px 375px}56.667%{translate:818.99px 392.02px}59.167%{translate:798.304px 403.948px}61.667%{translate:779.63px 409.617px}64.167%{translate:763.428px 408.47px}66.667%{translate:750.096px 400.622px}69.167%{translate:739.963px 386.839px}70.833%{translate:735.111px 375px}73.333%{translate:730.822px 354.554px}75.833%{translate:730.206px 332.683px}78.333%{translate:733.278px 311.528px}80.833%{translate:739.963px 293.161px}82.5%{translate:746.349px 283.369px}84.167%{translate:754.199px 276.052px}85.833%{translate:763.428px 271.53px}87.5%{translate:773.934px 270px}89.167%{translate:785.602px 271.53px}90.833%{translate:798.304px 276.052px}92.5%{translate:811.901px 283.369px}94.167%{translate:826.245px 293.161px}95.833%{translate:841.177px 305px}}
 .m16{animation-name:k17;animation-timing-function:linear}
 @keyframes k18{0%,100%{opacity:0.25}50%{opacity:0.5}}
 @keyframes k19{0%,100%{scale:0.9}50%{scale:1.1}}
@@ -83,7 +83,7 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
 ]]></style>
   <rect width="1280" height="720" fill="var(--sky)"/>
   <g class="day">
-    <circle cx="1060" cy="150" r="70" fill="#FFC21A"/>
+    <circle cx="220" cy="150" r="70" fill="#FFC21A"/>
   </g>
   <g class="night">
     <circle cx="120" cy="90" r="2.5" fill="#eef1ff" class="a m1"/>
@@ -98,10 +98,10 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
   </g>
   <path d="M0 520C260 450 520 470 760 500S1100 470 1280 480V720H0Z" fill="var(--far)"/>
   <path d="M0 600C300 560 700 570 1280 600V720H0Z" fill="var(--hill)"/>
-  <g style="transform-box:view-box;transform-origin:780px 590px" class="a m8">
-    <path d="M780 590C760 500 800 440 780 380" stroke="var(--stem)" stroke-width="8" stroke-linecap="round" fill="none"/>
-    <ellipse cx="754" cy="500" rx="26" ry="10" fill="var(--stem)" transform="rotate(-25 754 500)"/>
-    <g class="day" transform="translate(780 380)">
+  <g style="transform-box:view-box;transform-origin:880px 590px" class="a m8">
+    <path d="M880 590C860 500 900 440 880 380" stroke="var(--stem)" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="854" cy="500" rx="26" ry="10" fill="var(--stem)" transform="rotate(-25 854 500)"/>
+    <g class="day" transform="translate(880 380)">
       <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(0)"/>
       <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(60)"/>
       <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(120)"/>
@@ -110,12 +110,12 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
       <ellipse cx="0" cy="-26" rx="15" ry="24" fill="#FF8FB1" transform="rotate(300)"/>
       <circle r="16" fill="#FFC21A"/>
     </g>
-    <g class="night" transform="translate(780 380)">
+    <g class="night" transform="translate(880 380)">
       <path d="M0 -40C22 -20 18 10 0 14C-18 10 -22 -20 0 -40Z" fill="#c76b8a"/>
     </g>
   </g>
   <g class="day">
-    <g transform="translate(500 590) scale(1.25) translate(-104 -162)">
+    <g transform="translate(640 590) scale(1.25) translate(-104 -162)">
       <g class="a m14">
         <g style="transform-box:view-box;transform-origin:104px 162px">
           <g class="sq a m13">
@@ -153,13 +153,13 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
     </g>
   </g>
   <g class="night">
-    <g transform="translate(500 435)">
+    <g transform="translate(640 435)">
       <g class="a m17 fb">
         <circle r="60" fill="var(--glow)" opacity="0.12"/>
         <circle r="34" fill="var(--glow)" opacity="0.22"/>
       </g>
     </g>
-    <g transform="translate(500 590) scale(1.25) translate(-104 -162)">
+    <g transform="translate(640 590) scale(1.25) translate(-104 -162)">
       <g style="transform-box:view-box;transform-origin:104px 162px" class="a m19">
         <g>
           <g style="transform-box:view-box;transform-origin:104px 162px">
@@ -192,9 +192,9 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
         <path d="M116 110Q124 117 132 110" fill="none" stroke="#26262A" stroke-width="3.5" stroke-linecap="round"/>
       </g>
     </g>
-    <text x="557.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="28" font-weight="700" fill="#cfd8ff" class="a m20">z</text>
-    <text x="557.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="36" font-weight="700" fill="#cfd8ff" class="a m21">z</text>
-    <text x="557.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="44" font-weight="700" fill="#cfd8ff" class="a m22">z</text>
+    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="28" font-weight="700" fill="#cfd8ff" class="a m20">z</text>
+    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="36" font-weight="700" fill="#cfd8ff" class="a m21">z</text>
+    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="44" font-weight="700" fill="#cfd8ff" class="a m22">z</text>
     <circle cx="700" cy="330" r="4" fill="#FFF3B0" class="a m23"/>
     <circle cx="860" cy="420" r="4" fill="#FFF3B0" class="a m24"/>
     <circle cx="960" cy="300" r="4" fill="#FFF3B0" class="a m25"/>

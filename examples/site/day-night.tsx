@@ -10,8 +10,8 @@ const W = 1280;
 const H = 720;
 const D = 6;
 const S = 1.25;
-const SPOT = { x: 500, y: 590 };
-const FLOWER = { x: 780, base: 590, head: 380 };
+const SPOT = { x: 640, y: 590 };
+const FLOWER = { x: 880, base: 590, head: 380 };
 
 const { vars, css: paint } = variables(
   { sky: "#151a2b", hill: "#24392f", far: "#1c2c25", stem: "#3f7a55", glow: "#FFE58A" },
@@ -150,7 +150,7 @@ export default function build(): string {
     <>
       <rect width={W} height={H} fill={vars.sky} />
       <g class="day">
-        <circle cx={1060} cy={150} r={70} fill={CHICK.yellow} />
+        <circle cx={220} cy={150} r={70} fill={CHICK.yellow} />
       </g>
       <g class="night">
         {stars}
