@@ -5,7 +5,7 @@ import { browser, type Browser, type BrowserOptions } from "./browser.ts";
 import type { Snapshot } from "./tree.ts";
 
 /** Bump when the shape of a Snapshot changes, so stale files are read again. */
-const FORMAT = 1;
+const FORMAT = 2;
 
 export interface SnapshotsOptions extends BrowserOptions {
   /** Everything the snapshots depend on: the markup, the CSS, the actions. A new value reads the page again. */

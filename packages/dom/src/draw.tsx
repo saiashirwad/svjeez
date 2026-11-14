@@ -223,6 +223,84 @@ const align = (
   return out;
 };
 
+/** Code points, so a character outside the BMP types as one keystroke. */
+const chars = (s: string): string[] => Array.from(s);
+
+/** What a field shows as typed: a placeholder is an empty field. */
+const shown = (run: TextRun): string => (run.placeholder ? "" : run.text);
+
+const sameFace = (a: TextRun, b: TextRun): boolean =>
+  a.size === b.size &&
+  a.weight === b.weight &&
+  a.family === b.family &&
+  a.style === b.style &&
+  a.letterSpacing === b.letterSpacing;
+
+/** One text grew from or shrank to the other, and the longer one knows where its characters end. */
+const typable = (a: TextRun, b: TextRun): boolean => {
+  const from = shown(a);
+  const to = shown(b);
+  const long = to.length > from.length ? b : a;
+
+  return (
+    from !== to &&
+    (to.startsWith(from) || from.startsWith(to)) &&
+    long.advances?.length === chars(long.text).length
+  );
+};
+
+/** An empty run in `run`'s place, moved as its field moved, so text that appears in a field types in from nothing. */
+const blank = (run: TextRun, from: Rect, to: Rect): TextRun => ({
+  ...run,
+  x: run.x + to.x - from.x,
+  y: run.y + to.y - from.y,
+  text: "",
+  advances: [],
+  placeholder: false,
+});
+
+const FIELDS = new Set(["input", "textarea"]);
+
+/** At most this many values between two counted numbers, so a big jump stays a few keyframes. */
+const MAX_COUNTS = 20;
+
+interface Count {
+  readonly before: string;
+  readonly after: string;
+  readonly from: number;
+  readonly to: number;
+  readonly format: (n: number) => string;
+}
+
+const NUMBER = /(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)/;
+
+/** The one number that differs between two texts that are otherwise the same, written as the texts write it. */
+const countOf = (a: string, b: string): Count | undefined => {
+  const pa = a.split(NUMBER);
+  const pb = b.split(NUMBER);
+
+  if (pa.length !== pb.length) return undefined;
+  const changed = pa.flatMap((p, i) => (p === pb[i] ? [] : [i]));
+
+  // Odd pieces are the numbers split matched.
+  if (changed.length !== 1 || changed[0]! % 2 === 0) return undefined;
+  const i = changed[0]!;
+  const decimals = Math.max(...[pa[i]!, pb[i]!].map((s) => s.split(".")[1]?.length ?? 0));
+  const grouped = pa[i]!.includes(",") || pb[i]!.includes(",");
+
+  return {
+    before: pa.slice(0, i).join(""),
+    after: pa.slice(i + 1).join(""),
+    from: Number(pa[i]!.replaceAll(",", "")),
+    to: Number(pb[i]!.replaceAll(",", "")),
+    format: (n) => {
+      const s = n.toFixed(decimals);
+
+      return grouped ? s.replace(/^\d+/, (w) => w.replace(/\B(?=(\d{3})+$)/g, ",")) : s;
+    },
+  };
+};
+
 /** The drawing code for `Dom`. */
 const painter = (
   fonts: readonly FontValue[],
@@ -368,6 +446,121 @@ const painter = (
 
   const center = (it: Item) => (it.kind === "text" ? { x: it.x, y: it.y } : it.box);
 
+  /**
+   * One run typed into or deleted from: the longer text drawn once behind a clip whose width steps from character to
+   * character, with a caret at its edge. A placeholder leaves at the first keystroke and comes back at the last.
+   */
+  const typing = (a: TextRun, b: TextRun, tween: Tween): SvgNode => {
+    const from = chars(shown(a)).length;
+    const to = chars(shown(b)).length;
+    const long = to > from ? b : a;
+    const count = Math.abs(to - from);
+    const step = tween.over / count;
+    const pad = long.size;
+    const edge = (k: number) => (k === 0 ? 0 : long.advances[k - 1]!);
+    // Past the last character the clip opens wide, so a glyph that overhangs its advance isn't cut.
+    const width = (k: number) => pad + edge(k) + (k === chars(long.text).length ? pad : 0);
+    const times = Array.from({ length: count }, (_, i) => tween.at + i * step);
+    const lengths = times.map((_, i) => (to > from ? from + i + 1 : from - i - 1));
+
+    const reveal = times.reduce(
+      (m, t, i) => m.at(t).set({ width: width(lengths[i]!) }),
+      motion({ width: width(from) }),
+    );
+
+    const caret = times
+      .reduce(
+        (m, t, i) => m.at(t).set({ x: edge(lengths[i]!), opacity: 1 }),
+        motion({ x: edge(from), opacity: 0 }),
+      )
+      .at(tween.at + tween.over)
+      .set({ opacity: 0 });
+
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    const recolor = !a.placeholder && !b.placeholder && v(a.color) !== v(b.color);
+
+    const clip = def.clipPath(
+      {},
+      jsx("rect", {
+        x: num(b.x - pad),
+        y: num(b.y - 2 * pad),
+        width: num(width(from)),
+        height: num(3 * pad),
+        animation: reveal,
+      } as never),
+    );
+
+    return (
+      <>
+        {a.placeholder && text(a, motion({ opacity: 1 }).at(tween.at).set({ opacity: 0 }))}
+        {b.placeholder && text(b, motion({ opacity: 0 }).at(times.at(-1)!).set({ opacity: 1 }))}
+        <g
+          animation={
+            dx || dy
+              ? motion({ x: dx, y: dy }).at(tween.at).to({ x: 0, y: 0 }, tween.over, tween.ease)
+              : undefined
+          }
+        >
+          <g clipPath={clip}>
+            {text(
+              { ...long, x: b.x, y: b.y },
+              recolor
+                ? motion({ fill: v(a.color) as never })
+                    .at(tween.at)
+                    .to({ fill: v(b.color) as never }, tween.over, tween.ease)
+                : undefined,
+            )}
+          </g>
+          {jsx("rect", {
+            x: num(b.x),
+            y: num(b.y - long.size * 0.9),
+            width: num(Math.max(1, long.size / 14)),
+            height: num(long.size * 1.15),
+            fill: v(long.color),
+            animation: caret,
+          } as never)}
+        </g>
+      </>
+    );
+  };
+
+  /** One run whose only change is a number: the in-between values, each shown for its slice of the tween. */
+  const counting = (a: TextRun, b: TextRun, change: Count, tween: Tween): SvgNode => {
+    const { before, after, from, to, format } = change;
+    const n = Math.min(
+      MAX_COUNTS,
+      Number.isInteger(from - to) ? Math.abs(to - from) - 1 : MAX_COUNTS,
+    );
+    const slices = n + 1;
+    const switchAt = (k: number) => tween.at + (tween.over * (k - 0.5)) / slices;
+
+    return (
+      <>
+        {Array.from({ length: n + 2 }, (_, k) => {
+          const p = k / slices;
+          const run =
+            k === 0
+              ? a
+              : k === slices
+                ? b
+                : {
+                    ...b,
+                    text: before + format(from + (to - from) * p) + after,
+                    x: a.x + (b.x - a.x) * p,
+                    y: a.y + (b.y - a.y) * p,
+                  };
+          const at = k === 0 ? 0 : switchAt(k);
+
+          return text(
+            run,
+            show(k === slices ? { at } : { at, over: switchAt(k + 1) - at }, { fade: 0 }),
+          );
+        })}
+      </>
+    );
+  };
+
   /** Two versions of one leaf: slide from the old place to the new, crossfading when they differ. */
   const pair = (a: Item, b: Item, tween: Tween): SvgNode => {
     const from = center(a);
@@ -391,6 +584,13 @@ const painter = (
               .at(tween.at)
               .to({ x: 0, y: 0, fill: v(b.color) as never }, tween.over, tween.ease),
           );
+
+    if (a.kind === "text" && b.kind === "text" && sameFace(a, b)) {
+      if (typable(a, b)) return typing(a, b, tween);
+      const change = !a.placeholder && !b.placeholder && countOf(a.text, b.text);
+
+      if (change) return counting(a, b, change, tween);
+    }
 
     if (
       a.kind === "graphic" &&
@@ -550,6 +750,19 @@ const painter = (
     if (!both) children = b.children.map((it) => item(it, textMotion));
     else {
       children = align(both.a.children, b.children, pairOf).map(([old, it]) => {
+        // Text that appears in or leaves a field is typed in or deleted.
+        if (!it && old!.kind === "text" && FIELDS.has(both.a.tag)) {
+          const gone = blank(old!, both.a.box, b.box);
+
+          if (typable(old!, gone)) return typing(old!, gone, both.tween);
+        }
+
+        if (!old && it!.kind === "text" && FIELDS.has(b.tag)) {
+          const empty = blank(it!, b.box, both.a.box);
+
+          if (typable(empty, it!)) return typing(empty, it!, both.tween);
+        }
+
         if (!it) return <g animation={fade(both.tween, "exit")}>{item(old!)}</g>;
 
         if (!old) return <g animation={fade(both.tween, "enter")}>{item(it)}</g>;

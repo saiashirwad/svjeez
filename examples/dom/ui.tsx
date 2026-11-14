@@ -107,10 +107,16 @@ export const CardContent = ({
 export const CardFooter = ({
   children,
   className,
+  part,
 }: {
   children: ReactNode;
   className?: string;
-}) => <div className={cn("flex items-center px-6", className)}>{children}</div>;
+  part?: string;
+}) => (
+  <div data-part={part} className={cn("flex items-center px-6", className)}>
+    {children}
+  </div>
+);
 
 export const Label = ({ children }: { children: ReactNode }) => (
   <label className="flex items-center gap-2 text-sm leading-none font-medium select-none">
@@ -273,11 +279,11 @@ export const pieces = {
             All 14 checks passed
           </CardContent>
         )}
-        <CardFooter className="justify-between">
+        <CardFooter className="justify-between" part="footer">
           <div className="flex items-center gap-2 text-sm">
             <Switch checked={merged} part="switch" /> Auto-merge
           </div>
-          <Badge variant="secondary">+214 −12</Badge>
+          <Badge variant="secondary">{merged ? "+230 −12" : "+214 −12"}</Badge>
         </CardFooter>
       </Card>,
     ),

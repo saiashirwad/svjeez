@@ -27,6 +27,7 @@ const { idle, typed, failed } = await snapshots(
 - An element is a part when it has `data-part="name"` or matches `parts.name`. `<Dom parts>` animates parts, and `rect(snapshot, part)` says where one landed.
 - `<Dom states>` takes one snapshot, drawn as is, or several that each turn into the next. A step is a snapshot, or `[snapshot, span]` or `[snapshot, span, ease]` for when the timeline arrives at it from the previous one; otherwise `at[i]` starts the move into `states[i + 1]` and it runs `over` seconds.
 - Elements pair across states by `data-key`, else part, else tag in sibling order. Classes don't count, so a class change morphs. `pair` overrides it. Paired boxes reshape and recolor, text and icons slide, and the rest fade.
+- Changed text animates by what changed. Text that grows from or shrinks to the other types in or deletes one character at a time, with a caret, and a field's placeholder leaves at the first keystroke. Text that differs only in one number counts to it. Anything else crossfades.
 - `snapshots()` reads again when `inputs` or this package's version changes. `SVJEEZ_DOM_REFRESH=1` forces it.
 - Not drawn yet: gradients, rotated or scaled elements, `::before` and `::after`, `z-index`.
 

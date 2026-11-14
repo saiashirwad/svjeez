@@ -50,13 +50,14 @@ const GAP = 16;
 const MARGIN = 24;
 // The pull request card turns merged, then opens again.
 const prStates = [open, merged, open];
+// Each fill types in over its span: about a second per field.
 const signIn = [
   idle,
-  typed,
-  password,
-  hovered,
+  [typed, span(0.5, 1.1)],
+  [password, span(1.9, 1)],
+  [hovered, span(3.2, 0.35)],
   [failed, span(4.1, 0.7)],
-  [idle, span(6.6, 0.7)],
+  [idle, span(6.6, 0.8)],
 ] as const;
 const left = size(signIn);
 const right = size(prStates);
@@ -72,11 +73,11 @@ export default function build(): string {
       duration: D,
       css,
       title: "shadcn components changing state",
-      desc: "A sign-in card has an email typed into it, then a password, the button hovered and an error shown, and goes back to empty; a pull request card turns merged and grows a row of passing checks, then opens again.",
+      desc: "A sign-in card has an email typed into it, then a password, the button hovered and an error shown, and both fields are deleted; a pull request card turns merged, its diff stat counts up and it grows a row of passing checks, then opens again.",
     },
     <>
       <rect width={W} height={H} fill={vars.backdrop} />
-      <Dom states={signIn} fonts={[geist]} at={[0.8, 1.9, 3]} over={0.35} x={MARGIN} y={MARGIN} />
+      <Dom states={signIn} fonts={[geist]} x={MARGIN} y={MARGIN} />
       <Dom
         states={prStates}
         fonts={[geist]}

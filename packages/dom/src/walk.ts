@@ -136,7 +136,15 @@ export function walk({
           ? text.replace(/(^|\s)(\S)/g, (_, a: string, b: string) => a + b.toUpperCase())
           : text;
 
-  const run = (s: CSSStyleDeclaration, text: string, x: number, top: number, c: string) => ({
+  const run = (
+    s: CSSStyleDeclaration,
+    text: string,
+    x: number,
+    top: number,
+    c: string,
+    advances: number[],
+    placeholder = false,
+  ) => ({
     kind: "text" as const,
     text: transform(text, s),
     x: round(x - origin.left + pad),
@@ -147,7 +155,35 @@ export function walk({
     size: px(s.fontSize),
     color: c,
     letterSpacing: s.letterSpacing === "normal" ? 0 : px(s.letterSpacing),
+    advances: advances.map(round),
+    ...(placeholder ? { placeholder } : {}),
   });
+
+  // Where each character of an input's value ends: the value isn't in the DOM, so lay it out in a probe.
+  const measure = (s: CSSStyleDeclaration, text: string): number[] => {
+    const span = document.createElement("span");
+    span.style.cssText = "position:absolute;left:0;top:0;white-space:pre;visibility:hidden";
+    span.style.font = s.font;
+    span.style.letterSpacing = s.letterSpacing;
+    span.append(text);
+    document.body.append(span);
+    const node = span.firstChild as Text;
+    const range = document.createRange();
+    const left = span.getBoundingClientRect().left;
+    const ends: number[] = [];
+
+    for (let i = 0; i < text.length;) {
+      const len = text.codePointAt(i)! > 0xffff ? 2 : 1;
+      range.setStart(node, i);
+      range.setEnd(node, i + len);
+      i += len;
+      ends.push(range.getBoundingClientRect().right - left);
+    }
+
+    span.remove();
+
+    return ends;
+  };
 
   // One run per line: walk the characters, start a line where the top jumps.
   const texts = (node: Text, s: CSSStyleDeclaration, out: unknown[]) => {
@@ -156,7 +192,9 @@ export function walk({
     if (!c || s.visibility === "hidden") return;
     const range = document.createRange();
     const data = node.data;
-    let line: { top: number; left: number; height: number; text: string } | undefined;
+    let line:
+      | { top: number; left: number; height: number; text: string; ends: number[] }
+      | undefined;
     const lines: (typeof line & {})[] = [];
 
     for (let i = 0; i < data.length;) {
@@ -174,15 +212,20 @@ export function walk({
 
       if (!line || Math.abs(r.top - line.top) > line.height / 2) {
         if (space) continue;
-        line = { top: r.top, left: r.left, height: r.height, text: "" };
+        line = { top: r.top, left: r.left, height: r.height, text: "", ends: [] };
         lines.push(line);
       }
 
       if (space && line.text.endsWith(" ")) continue;
       line.text += space ? " " : ch;
+      line.ends.push(r.right - line.left);
     }
 
-    for (const l of lines) if (l.text.trim()) out.push(run(s, l.text.trimEnd(), l.left, l.top, c));
+    for (const l of lines) {
+      const text = l.text.trimEnd();
+
+      if (text.trim()) out.push(run(s, text, l.left, l.top, c, l.ends.slice(0, [...text].length)));
+    }
   };
 
   const GEOMETRY = [
@@ -308,7 +351,7 @@ export function walk({
         const lineTop =
           el instanceof HTMLTextAreaElement ? r.top + top : r.top + top + (inner - area) / 2;
 
-        children.push(run(s, text, x, lineTop, c));
+        children.push(run(s, text, x, lineTop, c, measure(s, text), !value));
       }
     }
 

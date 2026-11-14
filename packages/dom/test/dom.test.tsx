@@ -233,6 +233,58 @@ describe("Dom", () => {
     await card.close();
   });
 
+  test("text typed into a field reveals one character at a time instead of crossfading", async () => {
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
+      css: CSS,
+    });
+    const idle = await card.snap();
+    const typed = await card.snap((page) => page.fill("input", "hi there"));
+    const run = JSON.stringify(typed).match(/"text":"hi there"[^}]*"advances":(\[[^\]]*\])/);
+    const advances = JSON.parse(run![1]!) as number[];
+
+    expect(advances).toHaveLength(8);
+    expect(advances.every((n, i) => n > (advances[i - 1] ?? 0))).toBe(true);
+
+    const svg = draw([idle, typed], { at: [0.5], over: 0.8 });
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    // Drawn once, behind a clip that widens in steps; the placeholder is drawn once and cut.
+    expect(svg.match(/>hi there</g)).toHaveLength(1);
+    expect(svg.match(/>email</g)).toHaveLength(1);
+    expect(svg).toContain("<clipPath");
+    expect(svg).toMatch(/width:\s*[\d.]+px/);
+
+    // Deleting un-types the same text backwards, and the placeholder returns.
+    const back = draw([typed, idle], { at: [0.5], over: 0.8 });
+
+    expect(back.match(/>hi there</g)).toHaveLength(1);
+    expect(back.match(/>email</g)).toHaveLength(1);
+    expect(back).toContain("<clipPath");
+    await card.close();
+  });
+
+  test("a changed number counts, and other changed text still crossfades", async () => {
+    const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+    const before = await card.snap();
+
+    await card.render('<div class="card"><p>230 lines</p></div>');
+    const after = await card.snap();
+    const svg = draw([before, after], { at: [0.5] });
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    expect(svg).toContain(">222 lines<");
+    expect(svg.match(/ lines</g)).toHaveLength(17);
+
+    await card.render('<div class="card"><p>no lines</p></div>');
+    const other = draw([before, await card.snap()], { at: [0.5] });
+
+    expect(other).toContain(">214 lines<");
+    expect(other).toContain(">no lines<");
+    expect(other).not.toContain("<clipPath");
+    expect(other.match(/ lines</g)).toHaveLength(2);
+    await card.close();
+  });
+
   test("a snapshot survives JSON and draws the same", async () => {
     const card = await dom.mount('<div class="card">Hi <span class="badge">new</span></div>', {
       css: CSS,

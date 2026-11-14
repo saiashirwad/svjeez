@@ -33,6 +33,10 @@ export interface TextRun {
   readonly size: number;
   readonly color: Paint;
   readonly letterSpacing: number;
+  /** Where each character ends, in px from `x`, one per code point. Typing reveals the text up to these. */
+  readonly advances: readonly number[];
+  /** An empty input's placeholder: typing into the field hides it. */
+  readonly placeholder?: boolean;
 }
 
 /** A shape inside an inline `<svg>`, with fill and stroke resolved from the page's CSS. */
