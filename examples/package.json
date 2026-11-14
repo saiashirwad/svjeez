@@ -21,7 +21,6 @@
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
     "@svjeez/video": "workspace:*",
-    "@svjeez/voxel": "workspace:*",
     "@types/bun": "latest",
     "@types/d3-geo": "^3.1.0",
     "d3-geo": "^3.1.1",

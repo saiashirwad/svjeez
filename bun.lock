@@ -24,7 +24,6 @@
         "@svjeez/math": "workspace:*",
         "@svjeez/mermaid": "workspace:*",
         "@svjeez/video": "workspace:*",
-        "@svjeez/voxel": "workspace:*",
         "@types/bun": "latest",
         "@types/d3-geo": "^3.1.0",
         "d3-geo": "^3.1.1",
@@ -322,18 +321,6 @@
         "playwright-core",
       ],
     },
-    "packages/voxel": {
-      "name": "@svjeez/voxel",
-      "version": "0.6.1",
-      "devDependencies": {
-        "@types/bun": "latest",
-        "svjeez": "workspace:*",
-        "typescript": "latest",
-      },
-      "peerDependencies": {
-        "svjeez": ">=0.6.0 <1",
-      },
-    },
     "site": {
       "name": "svjeez-site",
       "dependencies": {
@@ -357,7 +344,6 @@
         "@svjeez/mermaid": "workspace:*",
         "@svjeez/svelte": "workspace:*",
         "@svjeez/vite": "workspace:*",
-        "@svjeez/voxel": "workspace:*",
         "alchemy": "^2.0.0-beta.84",
         "astro": "^7.4.3",
         "effect": "^4.0.6",
@@ -858,8 +844,6 @@
     "@svjeez/video": ["@svjeez/video@workspace:packages/video"],
 
     "@svjeez/vite": ["@svjeez/vite@workspace:packages/vite"],
-
-    "@svjeez/voxel": ["@svjeez/voxel@workspace:packages/voxel"],
 
     "@tabler/icons": ["@tabler/icons@3.50.0", "", {}, "sha512-HflLxyrH1cqC7s7jzQGSjpsTAVIoaf7+/yHjbdM59rJQBMjliibp+LYhDPFxOMcwa1M8DNpOk6ENzQiWn9a1Dg=="],
 

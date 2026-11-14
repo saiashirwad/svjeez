@@ -21,7 +21,6 @@ const SECTIONS = [
       "newspaper",
       "horizon",
       "lighthouse",
-      "minecraft",
       "breaker",
       "neon",
       "explainer",
