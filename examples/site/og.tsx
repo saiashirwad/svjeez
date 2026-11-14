@@ -254,7 +254,7 @@ const SCENES: Record<Mood, { title: string; line: string; aside: string; art: ()
                 height={200}
                 rx={14}
                 fill="#FFFFFF"
-                stroke=systemLight.base02
+                stroke={systemLight.base02}
                 strokeWidth={3}
               />
               {picture()}
@@ -334,7 +334,7 @@ const frame = (
       <rect width={W} height={H} fill={PAPER} />
       {Array.from({ length: 26 }, (_, i) =>
         Array.from({ length: 14 }, (_, j) => (
-          <circle cx={24 + i * 46} cy={24 + j * 46} r={1.6} fill=systemLight.base02 />
+          <circle cx={24 + i * 46} cy={24 + j * 46} r={1.6} fill={systemLight.base02} />
         )),
       )}
       <g transform="translate(72 64) scale(0.25) translate(-38 -30)">{chick({ feet: {} })}</g>
@@ -391,7 +391,7 @@ export const exampleCard = (title: string, png: string, ratio: number): string =
         height={h + 44}
         rx={16}
         fill="#FFFFFF"
-        stroke=systemLight.base02
+        stroke={systemLight.base02}
         strokeWidth={3}
       />
       {[0, 1, 2].map((i) => (
