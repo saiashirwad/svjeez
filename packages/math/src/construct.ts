@@ -1,4 +1,5 @@
-import { ease, el, motion, type Color, type SvgNode, defaultDark, type Base16 } from "svjeez";
+import { ease, motion, type Color, type SvgNode, defaultDark, type Base16 } from "svjeez";
+import { el } from "svjeez/internal";
 
 import { tex } from "./index.ts";
 

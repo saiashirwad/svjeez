@@ -6,7 +6,7 @@ import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./kit";
 import { mono, theme } from "../style";
 
-// Without JSX: the same scene built from el() calls, shown from the real file so it type-checks.
+// Without JSX: the same scene built from jsx() calls, shown from the real file so it type-checks.
 const BAR = 40;
 const D = 11;
 
@@ -24,14 +24,19 @@ export const make = (tall = false): string => {
   const full = read(tall ? "./plain-narrow.ts" : "./plain.ts").split("\n");
 
   const lines = tall
-    ? full.slice(full.findIndex((l) => l.startsWith("    g({}"))).map((l) => l.slice(4))
+    ? full
+        .slice(
+          full.findIndex((l) => l.startsWith("      children: [")),
+          full.indexOf("      ],") + 1,
+        )
+        .map((l) => l.slice(6))
     : full;
 
   const src = code(
     highlight(lines.join("\n"), "tsx"),
     tall
       ? { theme, font: mono, fontSize: 12, lineHeight: 1.7, x: 22, y: BAR + 16 }
-      : { theme, font: mono, fontSize: 12, lineHeight: 1.75, x: 28, y: BAR + 22 },
+      : { theme, font: mono, fontSize: 12, lineHeight: 1.6, x: 28, y: BAR + 22 },
   );
 
   const lit = tall
@@ -40,8 +45,8 @@ export const make = (tall = false): string => {
         { during: { at: T0 + 1.2, over: 1.2 }, target: src.lines(8, 13).pad(3) },
       ]
     : [
-        { during: { at: T0 + 0.2, over: 1.4 }, target: src.lines(9, 11).pad(3) },
-        { during: { at: T0 + 1.2, over: 1.2 }, target: src.lines(12, 13).pad(3) },
+        { during: { at: T0 + 0.2, over: 1.4 }, target: src.lines(9, 15).pad(3) },
+        { during: { at: T0 + 1.2, over: 1.2 }, target: src.lines(16, 22).pad(3) },
       ];
 
   const panel = tall
@@ -57,7 +62,7 @@ export const make = (tall = false): string => {
       height: H,
       duration: D,
       title: "Without JSX",
-      desc: "A scene written with el() calls instead of JSX types out. Its prefix option namespaces ids and classes, so the result can be inlined in a page next to other scenes. The preview below plays it.",
+      desc: "A scene written with jsx() calls instead of JSX types out. Its prefix option namespaces ids and classes, so the result can be inlined in a page next to other scenes. The preview below plays it.",
       css: CSS,
       reducedMotion: { at: D - 2 },
     },

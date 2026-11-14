@@ -1,6 +1,5 @@
 import {
   type Color,
-  el,
   textWidth,
   pathLength,
   type Point,
@@ -15,6 +14,7 @@ import {
   visible,
   type Beats,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
 import {

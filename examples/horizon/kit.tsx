@@ -1,7 +1,6 @@
 import {
   def,
   ease,
-  el,
   motion,
   type Channel,
   type Color,
@@ -101,7 +100,9 @@ export const glow = (
     <>
       <feGaussianBlur stdDeviation={blur} result="blur" />
       <feMerge>
-        {Array.from({ length: strength }, () => el.feMergeNode({ in: "blur" }))}
+        {Array.from({ length: strength }, () => (
+          <feMergeNode in="blur" />
+        ))}
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </>,

@@ -1,13 +1,5 @@
-import {
-  el,
-  textWidth,
-  type Point,
-  motion,
-  type Seconds,
-  type Span,
-  beats,
-  type Beats,
-} from "svjeez";
+import { textWidth, type Point, motion, type Seconds, type Span, beats, type Beats } from "svjeez";
+import { el } from "svjeez/internal";
 import { sequence as layout } from "./layout/sequence.ts";
 import {
   arrow,

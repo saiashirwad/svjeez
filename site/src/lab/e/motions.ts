@@ -1,4 +1,4 @@
-import { def, ease, motion, sampled, wiggle } from "svjeez";
+import { ease, motion, sampled, wiggle, css } from "svjeez";
 import { clamp } from "../util";
 import { DURATION, sub, type Pt } from "./geometry";
 import type { Genome } from "./genome";
@@ -63,7 +63,7 @@ export const partMotion = (cx: Cx, p: Pt, w: number) =>
 
 /** The body's thickness is a registered property, so one motion on it swells every stroke at once. */
 export const breathing = (cx: Cx) => {
-  const breath = def.property("breath", { syntax: "number", inherits: true, initial: 1 });
+  const breath = css.property("breath", { syntax: "number", inherits: true, initial: 1 });
   const { f, g } = cx;
 
   const motionOf = f.four

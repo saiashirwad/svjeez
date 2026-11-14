@@ -1,5 +1,4 @@
 import {
-  el,
   motion,
   type Motion,
   type Point,
@@ -9,6 +8,7 @@ import {
   type PathData,
   type SvgNode,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { round } from "./matrix.ts";
 
 export type Vec2 = readonly [x: number, y: number];

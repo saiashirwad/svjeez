@@ -1,6 +1,5 @@
 import {
   ease,
-  el,
   motion,
   type Seconds,
   type SvgNode,
@@ -9,6 +8,7 @@ import {
   tint,
   type Base16,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 import { rect, type Color, type Rect } from "svjeez";
 import { tex, type Tex } from "./index.ts";

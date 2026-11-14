@@ -1,4 +1,4 @@
-import { def, draw, ease, el, motion, type SvgNode } from "svjeez";
+import { def, draw, ease, motion, type SvgNode } from "svjeez";
 import { C, D, T, TILT, heat, phased, pivot, random } from "./kit";
 
 const INNER = 78;
@@ -86,24 +86,24 @@ const band = ({ r, t, width, dash, laps }: Ring): SvgNode[] => {
   const fade = 0.95 - t * 0.6;
 
   return [
-    el.circle({
-      r,
-      fill: "none",
-      stroke: color,
-      strokeWidth: width * 0.6,
-      opacity: fade * 0.45,
-      animation: draw({ at: arrive(t), over: 1 })
+    <circle
+      r={r}
+      fill="none"
+      stroke={color}
+      strokeWidth={width * 0.6}
+      opacity={fade * 0.45}
+      animation={draw({ at: arrive(t), over: 1 })
         .at(T.black)
-        .set({ draw: 0 }),
-    }),
-    el.circle({
-      r,
-      fill: "none",
-      stroke: color,
-      strokeWidth: width,
-      strokeDasharray: dash,
-      strokeLinecap: "round",
-      animation: [
+        .set({ draw: 0 })}
+    />,
+    <circle
+      r={r}
+      fill="none"
+      stroke={color}
+      strokeWidth={width}
+      strokeDasharray={dash}
+      strokeLinecap="round"
+      animation={[
         motion({ opacity: 0 })
           .at(arrive(t) + 0.3)
           .to({ opacity: fade }, 0.9)
@@ -112,8 +112,8 @@ const band = ({ r, t, width, dash, laps }: Ring): SvgNode[] => {
         motion({ rotate: 0 })
           .to({ rotate: 360 }, D / laps, ease.linear)
           .loop(D / laps),
-      ],
-    }),
+      ]}
+    />,
   ];
 };
 
@@ -131,17 +131,19 @@ function Debris(): SvgNode {
       {DEBRIS.map(({ r, angle, period, offset, size }) => {
         const a = (angle * Math.PI) / 180;
 
-        return el.circle({
-          cx: Math.cos(a) * r,
-          cy: Math.sin(a) * r,
-          r: size,
-          style: pivot,
-          animation: phased(period, offset, (u) => ({
-            rotate: 320 * u,
-            scale: 1 - 0.8 * u * u,
-            opacity: Math.min(1, u * 6, (1 - u) * 5),
-          })),
-        });
+        return (
+          <circle
+            cx={Math.cos(a) * r}
+            cy={Math.sin(a) * r}
+            r={size}
+            style={pivot}
+            animation={phased(period, offset, (u) => ({
+              rotate: 320 * u,
+              scale: 1 - 0.8 * u * u,
+              opacity: Math.min(1, u * 6, (1 - u) * 5),
+            }))}
+          />
+        );
       })}
     </g>
   );

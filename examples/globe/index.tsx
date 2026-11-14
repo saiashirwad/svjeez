@@ -78,7 +78,14 @@ export default function build(): string {
     },
     <>
       <rect width={W} height={H} fill={C.space} />
-      <circle cx={cx} cy={cy} r={R + 14} fill={C.land} opacity={0.06} filter={fx.blur(10)} />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={R + 14}
+        fill={C.land}
+        opacity={0.06}
+        filter={fx.blur({ by: 10 })}
+      />
       <path d={earth.sphere} fill={C.sea} />
       <g clipPath={clip}>
         {earth.land().map((piece) => (
@@ -91,7 +98,7 @@ export default function build(): string {
           stroke={C.dawn}
           strokeWidth={10}
           opacity={0.35}
-          filter={fx.blur(6)}
+          filter={fx.blur({ by: 6 })}
         />
       </g>
       <path d={earth.sphere} fill="none" stroke={C.land} strokeOpacity={0.3} strokeWidth={1} />

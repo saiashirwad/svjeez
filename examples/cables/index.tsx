@@ -373,7 +373,7 @@ function Cables(): SvgNode {
  * Packets are dashes on a copy of the cable. With `pathLength` 1 a dash is a fraction of the piece, and moving its
  * offset from the start to past the end runs it along. The head and its tail share a timing and an end point.
  */
-const offset = def.property("offset", { syntax: "number", inherits: false, initial: 0 });
+const offset = css.property("offset", { syntax: "number", inherits: false, initial: 0 });
 
 const packetCss = css`
   .pk {

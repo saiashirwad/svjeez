@@ -1,7 +1,8 @@
 // The palette on the page, and the scenes that follow it. A scene that paints with the base16 variables (marked
 // data-themed) gets a recolored copy as a Blob URL, started where the copy it replaces had got to, so a switch never
 // restarts it. Every live `src` goes through `show`, which remembers how far in each img's scene is.
-import { restyle, adaptive } from "svjeez";
+import { adaptive } from "svjeez";
+import { restyle } from "svjeez/page";
 
 import { DEFAULT_PALETTE, PALETTES, themed, type PaletteId } from "../palettes";
 import { calm } from "./scheme";

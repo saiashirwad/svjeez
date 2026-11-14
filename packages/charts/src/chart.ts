@@ -1,5 +1,6 @@
 import { scaleBand, scaleLinear } from "d3-scale";
-import { el, rect, type Color, type SvgNode, defaultDark, tint } from "svjeez";
+import { rect, type Color, type SvgNode, defaultDark, tint } from "svjeez";
+import { el } from "svjeez/internal";
 
 import { buildSeries, round, type Frame } from "./series.ts";
 import type { Chart, ChartOptions, Datum, XScale } from "./types.ts";

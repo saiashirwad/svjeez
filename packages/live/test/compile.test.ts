@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { validateSvg } from "svjeez";
+import { validateSvg } from "svjeez/frames";
 import { compileBuild, compileScene } from "../src/compile";
 import { errorFixes, errorTable, FIXES, fixFor } from "../src/fixes";
 import generated from "../src/skill-errors";

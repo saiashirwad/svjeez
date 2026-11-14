@@ -1,5 +1,5 @@
 import { createContext } from "svelte";
-import { restyle } from "svjeez";
+import { restyle } from "svjeez/page";
 import { compilerFor, latestWins } from "@svjeez/live/client";
 import { lazy, svgUrl } from "../util";
 import type { At } from "./drags";

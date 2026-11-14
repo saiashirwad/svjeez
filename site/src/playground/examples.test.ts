@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { compileScene } from "@svjeez/live/compile";
-import { validateSvg } from "svjeez";
+import { validateSvg } from "svjeez/frames";
 
 const dir = new URL("examples/", import.meta.url);
 

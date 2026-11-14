@@ -1,7 +1,6 @@
 import {
   def,
   defaultDark,
-  el,
   rect,
   tint,
   type Base16,
@@ -12,6 +11,7 @@ import {
   type Rect,
   type SvgNode,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { calculus, type Calculus } from "./calculus.ts";
 
 export interface AxesOptions {

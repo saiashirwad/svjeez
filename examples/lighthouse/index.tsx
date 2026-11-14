@@ -2,7 +2,6 @@ import {
   def,
   draw,
   ease,
-  el,
   enter,
   motion,
   render,
@@ -291,12 +290,14 @@ function Beacon({ thread }: { thread: Thread }): SvgNode {
     const angle = (k * Math.PI) / 3 + Math.PI / 6;
     const [inner, outer] = [R + 5, R + (k % 3 === 1 ? 11 : 17)];
 
-    return el.line({
-      x1: Math.cos(angle) * inner,
-      y1: Math.sin(angle) * inner,
-      x2: Math.cos(angle) * outer,
-      y2: Math.sin(angle) * outer,
-    });
+    return (
+      <line
+        x1={Math.cos(angle) * inner}
+        y1={Math.sin(angle) * inner}
+        x2={Math.cos(angle) * outer}
+        y2={Math.sin(angle) * outer}
+      />
+    );
   });
 
   return (
@@ -381,15 +382,16 @@ function Edge({ thread }: { thread: Thread }): SvgNode {
   const [j, p] = [junction[thread.index]!, position[thread.index]!];
   const fork = { x: parent.x + STUB, y: parent.y };
 
-  const dot = (at: Point) =>
-    el.rect({
-      x: at.x - 2.5,
-      y: at.y - 2.5,
-      width: 5,
-      height: 5,
-      fill: C.ink,
-      animation: enter({ at: thread.born, over: 0.2 }),
-    });
+  const dot = (at: Point) => (
+    <rect
+      x={at.x - 2.5}
+      y={at.y - 2.5}
+      width={5}
+      height={5}
+      fill={C.ink}
+      animation={enter({ at: thread.born, over: 0.2 })}
+    />
+  );
 
   return (
     <>
@@ -428,15 +430,15 @@ const flights = messages.map((message) => {
 function Messages(): SvgNode {
   return (
     <g fill={C.orange}>
-      {flights.map((flight) =>
-        el.rect({
-          x: -4,
-          y: -4,
-          width: 8,
-          height: 8,
-          animation: travel(flight.path, { at: flight.t, over: flight.over }),
-        }),
-      )}
+      {flights.map((flight) => (
+        <rect
+          x={-4}
+          y={-4}
+          width={8}
+          height={8}
+          animation={travel(flight.path, { at: flight.t, over: flight.over })}
+        />
+      ))}
     </g>
   );
 }
@@ -483,20 +485,13 @@ function Hud(): SvgNode {
 /** Paper grain: a tile of faint specks. */
 const grain = def.pattern(
   { width: 97, height: 97, patternUnits: "userSpaceOnUse" },
-  el.g(
-    { fill: C.ink },
-    Array.from({ length: 90 }, (_, i) => {
+  <g fill={C.ink}>
+    {Array.from({ length: 90 }, (_, i) => {
       const r = (k: number) => Math.abs(Math.sin(i * 91.7 + k * 47.3) * 9631.1) % 1;
 
-      return el.rect({
-        x: r(1) * 97,
-        y: r(2) * 97,
-        width: 1,
-        height: 1,
-        opacity: 0.04 + r(3) * 0.08,
-      });
-    }),
-  ),
+      return <rect x={r(1) * 97} y={r(2) * 97} width={1} height={1} opacity={0.04 + r(3) * 0.08} />;
+    })}
+  </g>,
 );
 
 export default function build(): string {

@@ -1,4 +1,5 @@
-import { el, motion, rect, type Color, type SvgNode, appWindow } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { motion, rect, type Color, type SvgNode, appWindow } from "svjeez";
 
 import { css, mono, theme } from "../style";
 
@@ -36,7 +37,7 @@ export const chrome = (
     class: options.mono ? undefined : "sans",
   });
 
-  return options.mono ? { ...win, node: el.g({ fontFamily: mono }, [win.node]) } : win;
+  return options.mono ? { ...win, node: jsx("g", { fontFamily: mono, children: win.node }) } : win;
 };
 
 /** Fade everything out just before the loop restarts, so the jump back to the first frame is not seen. */
@@ -56,4 +57,4 @@ export const skeleton = (
     fill = theme.base02,
   }: { gap?: number; height?: number; fill?: Color } = {},
 ): SvgNode[] =>
-  widths.map((w, i) => el.rect({ x, y: y + i * gap, width: w, height, rx: height / 2, fill }));
+  widths.map((w, i) => jsx("rect", { x, y: y + i * gap, width: w, height, rx: height / 2, fill }));

@@ -4,7 +4,8 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ALL_FORMATS, BufferSource, Input } from "mediabunny";
-import { el, motion, render } from "svjeez";
+import { motion, render } from "svjeez";
+import { el } from "svjeez/internal";
 import { renderVideo } from "@svjeez/video";
 
 const svg = render({ width: 64, height: 48, duration: 1, title: "Slide" }, [

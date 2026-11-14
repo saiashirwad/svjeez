@@ -3,7 +3,6 @@ import {
   def,
   draw,
   ease,
-  el,
   enter,
   motion,
   rect,
@@ -14,6 +13,7 @@ import {
   tint,
   type Base16,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 import type {
   Area,

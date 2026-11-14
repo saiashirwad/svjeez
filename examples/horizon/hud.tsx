@@ -1,4 +1,4 @@
-import { def, draw, ease, el, enter, motion, wiggle, type SvgNode } from "svjeez";
+import { def, draw, ease, enter, motion, wiggle, type SvgNode } from "svjeez";
 import { C, D, H, T, W, envelope, on } from "./kit";
 
 /** `.mono` is 10px, and every monospace face here advances 0.6em. */
@@ -21,9 +21,11 @@ function Typed({
   return (
     <g class="mono" fill={dim ? C.hudDim : C.hud}>
       {[...text].map((char, i) =>
-        char === " "
-          ? null
-          : el.text({ x: x + i * ADVANCE, y, animation: on(at + i * 0.022) }, char),
+        char === " " ? null : (
+          <text x={x + i * ADVANCE} y={y} animation={on(at + i * 0.022)}>
+            {char}
+          </text>
+        ),
       )}
     </g>
   );
@@ -41,19 +43,23 @@ function Wheel({
   period: number;
 }): SvgNode {
   const width = labels[0]!.length * ADVANCE;
-  const window = def.clipPath({}, el.rect({ x, y: y - LINE + 3, width, height: LINE }));
+  const window = def.clipPath({}, <rect x={x} y={y - LINE + 3} width={width} height={LINE} />);
   const count = labels.length;
 
-  return el.g(
-    { clipPath: window },
-    el.g(
-      {
-        animation: motion({ y: 0 })
+  return (
+    <g clipPath={window}>
+      <g
+        animation={motion({ y: 0 })
           .to({ y: -count * LINE }, period, ease.steps(count))
-          .loop(period),
-      },
-      [...labels, labels[0]!].map((label, k) => el.text({ x, y: y + k * LINE }, label)),
-    ),
+          .loop(period)}
+      >
+        {[...labels, labels[0]!].map((label, k) => (
+          <text x={x} y={y + k * LINE}>
+            {label}
+          </text>
+        ))}
+      </g>
+    </g>
   );
 }
 
@@ -61,36 +67,44 @@ const digits = (count: number, pad = 1) =>
   Array.from({ length: count }, (_, k) => String(k).padStart(pad, "0"));
 
 function Clock({ x, y }: { x: number; y: number }): SvgNode {
-  return el.g({ class: "mono", fill: C.white }, [
-    el.text({ x, y }, "T+"),
-    <Wheel x={x + 3 * ADVANCE} y={y} labels={digits(D, 2)} period={D} />,
-    el.text({ x: x + 5 * ADVANCE, y }, "."),
-    <Wheel x={x + 6 * ADVANCE} y={y} labels={digits(10)} period={1} />,
-    <Wheel x={x + 7 * ADVANCE} y={y} labels={digits(10)} period={0.1} />,
-    el.text({ x: x + 8 * ADVANCE, y, fill: C.hudDim }, "s"),
-  ]);
+  return (
+    <g class="mono" fill={C.white}>
+      <text x={x} y={y}>
+        T+
+      </text>
+      {<Wheel x={x + 3 * ADVANCE} y={y} labels={digits(D, 2)} period={D} />}
+      <text x={x + 5 * ADVANCE} y={y}>
+        .
+      </text>
+      {<Wheel x={x + 6 * ADVANCE} y={y} labels={digits(10)} period={1} />}
+      {<Wheel x={x + 7 * ADVANCE} y={y} labels={digits(10)} period={0.1} />}
+      <text x={x + 8 * ADVANCE} y={y} fill={C.hudDim}>
+        s
+      </text>
+    </g>
+  );
 }
 
 function Flux({ x, y }: { x: number; y: number }): SvgNode {
   const bars = 24;
-  const window = def.clipPath({}, el.rect({ x, y: y - 28, width: bars * 5, height: 28 }));
+  const window = def.clipPath({}, <rect x={x} y={y - 28} width={bars * 5} height={28} />);
 
   return (
     <>
       <Typed x={x} y={y - 36} text="HAWKING FLUX" at={T.hud + 0.6} dim />
       <g clipPath={window} fill={C.hud}>
-        {Array.from({ length: bars }, (_, i) =>
-          el.rect({
-            x: x + i * 5,
-            y: y - 14,
-            width: 3,
-            height: 40,
-            animation: wiggle(
+        {Array.from({ length: bars }, (_, i) => (
+          <rect
+            x={x + i * 5}
+            y={y - 14}
+            width={3}
+            height={40}
+            animation={wiggle(
               { y: 13 },
               { seed: `flux-${i}`, rate: 9, ease: ease.hold, period: D / 4 },
-            ),
-          }),
-        )}
+            )}
+          />
+        ))}
       </g>
     </>
   );
@@ -109,7 +123,9 @@ function Brackets(): SvgNode {
 
   return (
     <g fill="none" stroke={C.hud} strokeWidth={1.2}>
-      {corners.map((d, i) => el.path({ d, animation: draw({ at: T.hud + i * 0.06, over: 0.4 }) }))}
+      {corners.map((d, i) => (
+        <path d={d} animation={draw({ at: T.hud + i * 0.06, over: 0.4 })} />
+      ))}
     </g>
   );
 }
@@ -192,13 +208,9 @@ export function Reticle(): SvgNode {
         opacity={0.3}
         animation={motion({ rotate: 0 }).to({ rotate: -60 }, D, ease.linear)}
       />
-      {ticks.map((d, i) =>
-        el.path({
-          d,
-          strokeWidth: 1.2,
-          animation: draw({ at: T.hud + 0.4 + i * 0.08, over: 0.3 }),
-        }),
-      )}
+      {ticks.map((d, i) => (
+        <path d={d} strokeWidth={1.2} animation={draw({ at: T.hud + 0.4 + i * 0.08, over: 0.3 })} />
+      ))}
       <path
         d={arc(-40, 40, 178)}
         strokeWidth={1.4}
@@ -224,26 +236,22 @@ export function Title(): SvgNode {
       {[...word].map((letter, i) => {
         const spread = Math.abs(i - middle) * 0.07;
 
-        return letter === " "
-          ? null
-          : el.text(
-              {
-                x: left + i * pitch,
-                y: H - 72,
-                class: "sans",
-                fontSize: 30,
-                fontWeight: 200,
-                fill: C.white,
-                textAnchor: "middle",
-                animation: enter(
-                  { at: T.title + spread, over: 1.1 },
-                  { opacity: 0, blur: 12, y: 10 },
-                )
-                  .at(T.collapse - 0.3 + spread / 2)
-                  .to({ opacity: 0, blur: 14, y: -6 }, 0.6, ease.in),
-              },
-              letter,
-            );
+        return letter === " " ? null : (
+          <text
+            x={left + i * pitch}
+            y={H - 72}
+            class="sans"
+            fontSize={30}
+            fontWeight={200}
+            fill={C.white}
+            textAnchor="middle"
+            animation={enter({ at: T.title + spread, over: 1.1 }, { opacity: 0, blur: 12, y: 10 })
+              .at(T.collapse - 0.3 + spread / 2)
+              .to({ opacity: 0, blur: 14, y: -6 }, 0.6, ease.in)}
+          >
+            {letter}
+          </text>
+        );
       })}
       <g animation={envelope(T.title + 0.8, T.collapse - 0.2, 0.6)}>
         <text

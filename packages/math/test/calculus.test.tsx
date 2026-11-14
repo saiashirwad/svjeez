@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { ease, render, validateSvg, type Child, readout } from "svjeez";
+import { ease, render, type Child, readout } from "svjeez";
+import { validateSvg } from "svjeez/frames";
 import { axes } from "../src/index.ts";
 
 const graph = () =>

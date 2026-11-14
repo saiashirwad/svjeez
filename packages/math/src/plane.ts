@@ -1,8 +1,6 @@
 import {
   css,
-  def,
   ease,
-  el,
   motion,
   type Color,
   type Ease,
@@ -13,6 +11,7 @@ import {
   defaultDark,
   type Base16,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 import { tex, type Tex } from "./index.ts";
 import { apply, identity, multiply, round, type Matrix } from "./matrix.ts";
@@ -139,22 +138,22 @@ interface Frame {
 }
 
 const shared = { syntax: "number", inherits: true } as const;
-const A = def.property("plane-a", { ...shared, initial: 1 });
-const B = def.property("plane-b", { ...shared, initial: 0 });
-const C = def.property("plane-c", { ...shared, initial: 0 });
-const D = def.property("plane-d", { ...shared, initial: 1 });
-const E = def.property("plane-e", { ...shared, initial: 0 });
-const F = def.property("plane-f", { ...shared, initial: 0 });
-const UNIT = def.property("plane-u", { ...shared, initial: 1 });
+const A = css.property("plane-a", { ...shared, initial: 1 });
+const B = css.property("plane-b", { ...shared, initial: 0 });
+const C = css.property("plane-c", { ...shared, initial: 0 });
+const D = css.property("plane-d", { ...shared, initial: 1 });
+const E = css.property("plane-e", { ...shared, initial: 0 });
+const F = css.property("plane-f", { ...shared, initial: 0 });
+const UNIT = css.property("plane-u", { ...shared, initial: 1 });
 const MATRIX = [A, B, C, D, E, F] as const;
 
 const own = { syntax: "number", inherits: false, initial: 0 } as const;
-const X = def.property("plane-x", own);
-const Y = def.property("plane-y", own);
-const DX = def.property("plane-dx", own);
-const DY = def.property("plane-dy", own);
-const K = def.property("plane-k", own);
-const GROW = def.property("plane-grow", { ...own, initial: 1 });
+const X = css.property("plane-x", own);
+const Y = css.property("plane-y", own);
+const DX = css.property("plane-dx", own);
+const DY = css.property("plane-dy", own);
+const K = css.property("plane-k", own);
+const GROW = css.property("plane-grow", { ...own, initial: 1 });
 
 const px = css`(${A} * ${X} + ${C} * ${Y} + ${E}) * ${UNIT}`;
 const py = css`(${B} * ${X} + ${D} * ${Y} + ${F}) * ${UNIT}`;

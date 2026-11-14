@@ -1,5 +1,6 @@
 import { project, type GeoMap, type LonLat, type Topology } from "@svjeez/geo";
-import { el, rect, render } from "svjeez";
+import { rect, render } from "svjeez";
+import { el } from "svjeez/internal";
 import { createRequire } from "node:module";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");

@@ -1,5 +1,4 @@
 import {
-  el,
   motion,
   type Color,
   type Seconds,
@@ -8,6 +7,7 @@ import {
   tint,
   type Base16,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 import { tex } from "./index.ts";
 

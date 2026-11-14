@@ -1,5 +1,5 @@
 import type { Color, Point, Seconds, Span, SvgNode } from "svjeez";
-import { el } from "svjeez";
+import { el } from "svjeez/internal";
 import { flow, type FlowOptions } from "svjeez";
 import type { GeoMap, LonLat } from "./index.ts";
 

@@ -1,7 +1,6 @@
 // Direction A: the scene's source is the control panel. Every edit recompiles a real svjeez SVG in a worker.
 import { createContext, untrack } from "svelte";
-import { restyle } from "svjeez";
-import { seek } from "svjeez/page";
+import { seek, restyle } from "svjeez/page";
 import type { Compiled } from "@svjeez/live/compile";
 import { createCompiler, latestWins } from "@svjeez/live/client";
 import { gzipSize } from "@svjeez/live/gzip";

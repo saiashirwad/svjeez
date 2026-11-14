@@ -1,10 +1,10 @@
-import { css, def, ease, motion, render } from "svjeez";
+import { css, ease, motion, render } from "svjeez";
 import { palette } from "../style";
 
 const theme = palette.dark;
 
-const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
-const px = def.property("px", { syntax: "number", inherits: false, initial: 0 });
+const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
+const px = css.property("px", { syntax: "number", inherits: false, initial: 0 });
 
 export default function build(): string {
   return render(

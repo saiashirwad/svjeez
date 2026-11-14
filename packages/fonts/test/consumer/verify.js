@@ -3,7 +3,8 @@ import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { google } from "@svjeez/fonts";
-import { el, render } from "svjeez";
+import { render } from "svjeez";
+import { el } from "svjeez/internal";
 
 const cache = mkdtempSync(join(tmpdir(), "svjeez-fonts-consumer-"));
 

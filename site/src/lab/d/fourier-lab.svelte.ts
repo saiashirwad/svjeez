@@ -1,5 +1,6 @@
 import { createContext, untrack } from "svelte";
-import { polylinePath, restyle } from "svjeez";
+import { polylinePath } from "svjeez";
+import { restyle } from "svjeez/page";
 import { compilerFor } from "@svjeez/live/client";
 import { lazy, svgUrl } from "../util";
 import { outlineOf, type Outline, type Point } from "./outline";

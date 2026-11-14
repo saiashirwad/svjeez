@@ -1,4 +1,5 @@
-import { ease, el, motion, type Color, type Ease, type Seconds, type SvgNode } from "svjeez";
+import { ease, motion, type Color, type Ease, type Seconds, type SvgNode } from "svjeez";
+import { el } from "svjeez/internal";
 import type { GeoMap, Region } from "./index.ts";
 import type { ColorScale, Hex } from "./scale.ts";
 

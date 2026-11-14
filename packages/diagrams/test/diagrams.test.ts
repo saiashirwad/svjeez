@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { el, render, type Rect, type SvgNode } from "svjeez";
+import { render, type Rect, type SvgNode } from "svjeez";
+import { el } from "svjeez/internal";
 import { flowchart, lanes, sequence, stateMachine, tree } from "../src/index.ts";
 
 const valid = (node: SvgNode) =>

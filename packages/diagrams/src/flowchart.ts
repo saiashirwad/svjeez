@@ -1,5 +1,4 @@
 import {
-  el,
   textWidth,
   type Point,
   type Rect,
@@ -11,6 +10,7 @@ import {
   beats,
   type Beats,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
 import {

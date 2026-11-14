@@ -1,4 +1,5 @@
-import { el, type Color, type Font, type FontFamily, type SvgNode } from "svjeez";
+import { type Color, type Font, type FontFamily, type SvgNode } from "svjeez";
+import { el } from "svjeez/internal";
 
 /** A hex color such as `#1f77b4`. */
 export type Hex = `#${string}`;

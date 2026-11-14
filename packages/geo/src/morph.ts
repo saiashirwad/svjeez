@@ -1,6 +1,5 @@
 import {
   ease,
-  el,
   matchPaths,
   motion,
   rect,
@@ -11,6 +10,7 @@ import {
   type Seconds,
   type SvgNode,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { resolveRegions, type RegionValues } from "./choropleth.ts";
 import type { GeoMap, Region } from "./index.ts";
 import { straighten } from "./writer.ts";

@@ -15,6 +15,7 @@
     "lib": ["ESNext", "DOM"],
     "paths": {
       "svjeez": ["../svjeez/src/index.ts"],
+      "svjeez/internal": ["../svjeez/src/internal.ts"],
       "svjeez/frames": ["../svjeez/src/frames.ts"]
     }
   },

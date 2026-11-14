@@ -1,6 +1,5 @@
 import {
   type Color,
-  el,
   textWidth,
   type FontValue,
   rect,
@@ -22,6 +21,7 @@ import {
   type Base16,
   type Slot,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { curve } from "./curve.ts";
 
 /** What a node is, so the theme can draw it. */

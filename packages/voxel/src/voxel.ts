@@ -1,6 +1,5 @@
 import {
   def,
-  el,
   groupBy,
   motion,
   type Motion,
@@ -10,6 +9,7 @@ import {
   type SvgNode,
   type TagChannels,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { camera, facingOf, type VoxelCamera, type Facing, type Vec3 } from "./space.ts";
 import {
   face,

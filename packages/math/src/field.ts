@@ -2,7 +2,6 @@ import {
   defaultDark,
   draw,
   ease,
-  el,
   flow,
   matchPaths,
   motion,
@@ -15,6 +14,7 @@ import {
   type Seconds,
   type SvgNode,
 } from "svjeez";
+import { el } from "svjeez/internal";
 import { marchingSquares } from "./layout/contour.ts";
 import { simplify, traceStreamlines, type VectorField } from "./layout/field.ts";
 import type { Axes } from "./axes.ts";

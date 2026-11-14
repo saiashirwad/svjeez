@@ -1,6 +1,5 @@
 import {
   ease,
-  el,
   motion,
   rect,
   type Color,
@@ -14,6 +13,7 @@ import {
   type Morphable,
   type MorphPiece,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 import { compile } from "./mathjax.ts";
 import { apply, multiply, round, roundMatrix, scale, translate, type Matrix } from "./matrix.ts";

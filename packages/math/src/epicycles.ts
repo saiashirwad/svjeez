@@ -1,6 +1,5 @@
 import {
   ease,
-  el,
   motion,
   sampled,
   type Color,
@@ -10,6 +9,7 @@ import {
   tint,
   type Base16,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 import { apply, identity, type Matrix } from "./matrix.ts";
 

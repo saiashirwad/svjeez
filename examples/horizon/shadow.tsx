@@ -1,4 +1,4 @@
-import { def, draw, ease, el, motion, wiggle, type SvgNode } from "svjeez";
+import { def, draw, ease, motion, wiggle, type SvgNode } from "svjeez";
 import { C, D, H, T, envelope, glow, pivot } from "./kit";
 
 const SHADOW = 57;
@@ -81,23 +81,25 @@ function Jet({ dir }: { dir: 1 | -1 }): SvgNode {
   const stroke = beam(dir);
   const length = dir * 560;
 
-  return el.g({ fill: "none", stroke, strokeLinecap: "round" }, [
-    el.path({ d: `M0 ${dir * 58}V${length}`, strokeWidth: 14, opacity: 0.18 }),
-    el.path({
-      d: `M0 ${dir * 58}V${length}`,
-      strokeWidth: 2.4,
-      animation: draw({ at: T.ignite, over: 0.35 }),
-    }),
-    el.path({
-      d: `M0 ${dir * (58 - PITCH)}V${length}`,
-      strokeWidth: 1.6,
-      stroke: C.white,
-      strokeDasharray: `16 ${PITCH - 16}`,
-      animation: motion({ y: 0 })
-        .to({ y: dir * PITCH }, 0.1, ease.linear)
-        .loop(0.1),
-    }),
-  ]);
+  return (
+    <g fill="none" stroke={stroke} strokeLinecap="round">
+      <path d={`M0 ${dir * 58}V${length}`} strokeWidth={14} opacity={0.18} />
+      <path
+        d={`M0 ${dir * 58}V${length}`}
+        strokeWidth={2.4}
+        animation={draw({ at: T.ignite, over: 0.35 })}
+      />
+      <path
+        d={`M0 ${dir * (58 - PITCH)}V${length}`}
+        strokeWidth={1.6}
+        stroke={C.white}
+        strokeDasharray={`16 ${PITCH - 16}`}
+        animation={motion({ y: 0 })
+          .to({ y: dir * PITCH }, 0.1, ease.linear)
+          .loop(0.1)}
+      />
+    </g>
+  );
 }
 
 export function Jets(): SvgNode {

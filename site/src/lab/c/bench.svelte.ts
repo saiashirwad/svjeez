@@ -1,7 +1,7 @@
 // Direction C: time as a material. The flight is shown all at once over the compiled picture, and every drag rewrites
 // the scene source, recompiles it in the playground's worker and shows the real SVG.
 import { createContext } from "svelte";
-import { restyle } from "svjeez";
+import { restyle } from "svjeez/page";
 import { createCompiler, latestWins } from "@svjeez/live/client";
 import { clamp, svgUrl } from "../util";
 import {

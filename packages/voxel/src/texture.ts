@@ -1,14 +1,5 @@
-import {
-  def,
-  el,
-  hexBytes,
-  hexOf,
-  num,
-  type Hex,
-  type Point,
-  type Ref,
-  type SvgNode,
-} from "svjeez";
+import { def, hexBytes, hexOf, num, type Hex, type Point, type Ref, type SvgNode } from "svjeez";
+import { el } from "svjeez/internal";
 
 /** One character per color. `null` is a transparent pixel. */
 export type VoxelPalette = Readonly<Record<string, Hex | null>>;

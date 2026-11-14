@@ -1,7 +1,8 @@
 // A scene file being edited, as one state, the messages that change it and the work each change asks for, in the Elm
 // shape: `update` is pure and returns the next state with the commands to run, and `createEditor` runs them. Every
 // framework binds the same store, and an agent drives it with the same messages a drag sends.
-import { restyle, type Point } from "svjeez";
+import { type Point } from "svjeez";
+import { restyle } from "svjeez/page";
 import type { Schema } from "svjeez/params";
 import { createCompiler, latestWins } from "./client.ts";
 import type { Compiled, SceneSize, SourceError } from "./compile.ts";

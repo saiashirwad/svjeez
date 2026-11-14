@@ -1,7 +1,6 @@
 import {
   ease,
   easeAt,
-  el,
   motion,
   sampled,
   sampledPath,
@@ -21,6 +20,7 @@ import {
   type Stack,
   type SvgNode,
 } from "svjeez";
+import { el } from "svjeez/internal";
 
 type Fn = (x: number) => number;
 

@@ -44,9 +44,9 @@ const COS_T = Math.cos(TILT * RAD);
  * reads it with its own `lat` and `lon` to find where it is, how far it faces the viewer and how much sun it gets.
  * The sun stays put relative to the viewer, so the night shading and the terminator below never move.
  */
-const yaw = def.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
-const lat = def.property("lat", { syntax: "angle", inherits: true, initial: 0 });
-const lon = def.property("lon", { syntax: "angle", inherits: false, initial: 0 });
+const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
+const lat = css.property("lat", { syntax: "angle", inherits: true, initial: 0 });
+const lon = css.property("lon", { syntax: "angle", inherits: false, initial: 0 });
 
 const spin = motion({ [yaw]: -middle }).to({ [yaw]: 360 - middle }, D, ease.linear);
 
@@ -214,7 +214,7 @@ function Globe(): SvgNode {
     <>
       <circle cx={cx} cy={cy} r={R * 1.22} fill={halo} />
       <path d={map.sphere} fill={ocean} />
-      <path d={map.path(nightSide)} fill={C.deep} opacity={0.75} filter={fx.blur(18)} />
+      <path d={map.path(nightSide)} fill={C.deep} opacity={0.75} filter={fx.blur({ by: 18 })} />
       <path
         d={map.path({
           type: "MultiLineString",
@@ -233,7 +233,7 @@ function Globe(): SvgNode {
         stroke={C.dawn}
         strokeWidth={14}
         opacity={0.28}
-        filter={fx.blur(10)}
+        filter={fx.blur({ by: 10 })}
       />
       <g transform={`translate(${cx} ${cy})`} animation={spin}>
         {[...rows].map(([la, row]) => (

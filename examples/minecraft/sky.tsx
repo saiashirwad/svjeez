@@ -1,7 +1,6 @@
 import {
   def,
   ease,
-  el,
   motion,
   sampled,
   wiggle,
@@ -86,17 +85,17 @@ export function Stars(): SvgNode {
 
   return (
     <g fill={C.star} animation={dark}>
-      {STARS.map(({ x, y, size, twinkle }, i) =>
-        el.rect({
-          x,
-          y,
-          width: size,
-          height: size,
-          animation: twinkle
-            ? wiggle({ opacity: 0.6 }, { seed: i, rate: 2, period: 5 })
-            : undefined,
-        }),
-      )}
+      {STARS.map(({ x, y, size, twinkle }, i) => (
+        <rect
+          x={x}
+          y={y}
+          width={size}
+          height={size}
+          animation={
+            twinkle ? wiggle({ opacity: 0.6 }, { seed: i, rate: 2, period: 5 }) : undefined
+          }
+        />
+      ))}
     </g>
   );
 }
@@ -209,15 +208,16 @@ export function Clouds(): SvgNode {
           .set(wind(0))
           .to(wind(phase * TRAVEL), phase * D, ease.linear);
 
-        return el.g(
-          { animation: drift },
-          voxel.scene({
-            camera: CAMERA,
-            blocks: cells.map(([a, b]) => ({
-              at: [x0 + a, SKY_HEIGHT, z0 + b] as const,
-              skin: SKIN.cloud,
-            })),
-          }),
+        return (
+          <g animation={drift}>
+            {voxel.scene({
+              camera: CAMERA,
+              blocks: cells.map(([a, b]) => ({
+                at: [x0 + a, SKY_HEIGHT, z0 + b] as const,
+                skin: SKIN.cloud,
+              })),
+            })}
+          </g>
         );
       })}
     </>
@@ -285,7 +285,7 @@ export function Glow(): SvgNode {
       {LIGHTS.map((light) => {
         const { x, y } = CAMERA.project(light);
 
-        return el.circle({ cx: x + ORIGIN.x, cy: y + ORIGIN.y, r: 52, fill: lamplight });
+        return <circle cx={x + ORIGIN.x} cy={y + ORIGIN.y} r={52} fill={lamplight} />;
       })}
     </g>
   );
@@ -339,18 +339,20 @@ export function Snow(): SvgNode {
         const [period, fall] = FALLS[i % FALLS.length]!;
         const size = i % 3 ? 4 : 5;
 
-        return el.rect({
-          width: size,
-          height: size,
-          animation: flake(
-            pick() * 14,
-            pick() * 14,
-            pick() * (period - fall),
-            fall,
-            period,
-            pick(),
-          ),
-        });
+        return (
+          <rect
+            width={size}
+            height={size}
+            animation={flake(
+              pick() * 14,
+              pick() * 14,
+              pick() * (period - fall),
+              fall,
+              period,
+              pick(),
+            )}
+          />
+        );
       })}
     </g>
   );

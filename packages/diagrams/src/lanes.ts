@@ -1,4 +1,5 @@
-import { el, textWidth, ease, motion, type Seconds, enter, travel } from "svjeez";
+import { textWidth, ease, motion, type Seconds, enter, travel } from "svjeez";
+import { el } from "svjeez/internal";
 import { lanes as layout } from "./layout/lanes.ts";
 import {
   arrow,
