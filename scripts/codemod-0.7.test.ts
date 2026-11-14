@@ -6,7 +6,7 @@ import { rewrite, run } from "./codemod-0.7.ts";
 
 const before = `import { Camera, Steady, flow, Pivot, sample, sampledPath, render, type Values, type SampleOptions } from "svjeez";
 import { flowchart, type Diagram } from "svjeez/extras";
-import { axes, fieldFlow, type Line } from "svjeez/extras";
+import { axes, contours, fieldFlow, type Line } from "svjeez/extras";
 import { tomorrowNight, timeline, readout } from "svjeez/extras";
 import { fit, number, type Schema } from "svjeez/params";
 import { renderVideo } from "@svjeez/video";
@@ -17,6 +17,8 @@ const options: SampleOptions = { duration: 2 };
 const now = sample(slide, 1, options);
 const wave = sampledPath((t) => "M" + t, { duration: 4, tolerance: 0.5 });
 const dot: Line | undefined = undefined;
+const graph = axes({ x: [-3, 3], y: [0, 4], width: 300, height: 240 });
+const rim = contours(heart, { axes: graph, levels: [0] });
 const icon: Icon = rocket;
 const clip = await renderVideo(svg, { fps: 30 });
 // sample( in a comment and "Steady" in a string stay as they are
@@ -38,7 +40,7 @@ export default () => (
 
 const after = `import { Camera, flow, Pivot, valuesAt, sampled, render, type ChannelValues, type ValuesAtOptions } from "svjeez";
 import { flowchart, type Diagram } from "@svjeez/diagrams";
-import { axes, type CalculusLine } from "@svjeez/math";
+import { plane, contours, type CalculusLine } from "@svjeez/math";
 import { tomorrowNight } from "@svjeez/code";
 import { timeline, readout } from "svjeez";
 import { fit } from "@svjeez/live";
@@ -51,6 +53,8 @@ const options: ValuesAtOptions = { duration: 2 };
 const now = valuesAt(slide, 1, options);
 const wave = sampled.path((t) => "M" + t, { over: 4, tolerance: 0.5 });
 const dot: CalculusLine | undefined = undefined;
+const graph = plane({ x: [-3, 3], y: [0, 4], width: 300, height: 240 });
+const rim = contours(heart, { plane: graph, levels: [0] });
 const icon: IconData = rocket;
 const clip = await video(svg, { fps: 30 });
 // sample( in a comment and "Steady" in a string stay as they are
@@ -102,6 +106,27 @@ test("what it cannot rewrite is a warning, and the file is otherwise left alone"
   expect(warnings.length).toBe(2);
   expect(warnings.join("\n")).toContain("a.ts:1:");
   expect(warnings.join("\n")).toContain("Voxels were removed");
+});
+
+test("an old plane() is a warning, since its range and size depend on its numbers", () => {
+  const source = [
+    'import { plane } from "@svjeez/math";',
+    "const old = plane({ origin: { x: 1, y: 2 }, unit: 30, extent: 4 });",
+    "const now = plane({ x: [0, 1], y: [0, 1], width: 10, height: 10 });",
+    "",
+  ].join("\n");
+
+  const { text, warnings } = rewrite("a.ts", source);
+  expect(text).toBe(source);
+  expect(warnings.length).toBe(1);
+  expect(warnings[0]).toContain("a.ts:2: plane() takes x, y, width, height, at and ticks now.");
+});
+
+test("a shorthand axes option becomes plane: axes", () => {
+  const source =
+    'import { contourSweep } from "svjeez/extras";\ncontourSweep(f, { axes, from: 0 });\n';
+
+  expect(rewrite("a.ts", source).text).toContain("contourSweep(f, { plane: axes, from: 0 });");
 });
 
 test("a folder is rewritten in place, and --dry only reports", () => {

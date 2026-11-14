@@ -140,8 +140,11 @@ More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for ea
 
 | Before | Now |
 | --- | --- |
-| `svjeez/extras` | `svjeez`. Diagrams are in `@svjeez/diagrams`; `axes`, calculus and the fields in `@svjeez/math`; editor palettes in `@svjeez/code` |
+| `svjeez/extras` | `svjeez`. Diagrams are in `@svjeez/diagrams`; `axes` as `plane`, calculus and the fields in `@svjeez/math`; editor palettes in `@svjeez/code` |
 | `fit`, `positionOf`, `valueAt`, `fitValues`, `withValues`, `follow` from `svjeez/params` | `@svjeez/live` |
+| `axes(options)` from `svjeez/extras`, with `Axes` and `AxesOptions` | `plane(options)`, `Plane` and `PlaneOptions` from `@svjeez/math`. The options, `point()`, `plot()` and the calculus methods are the same |
+| `{ axes }` of `contours` and `contourSweep` | `{ plane }` |
+| `plane({ origin, unit, extent, step })` from 0.6 (by hand) | `plane({ x, y, width, height, at, ticks })`: `x` and `y` are the ranges `extent` was, `width` is `(x[1] - x[0]) * unit`, `at` is `{ x: origin.x + x[0] * unit, y: origin.y - y[1] * unit }`, and `ticks` is `step` |
 | `Values` (channel values) | `ChannelValues` |
 | `sample`, `SampleOptions` | `valuesAt`, `ValuesAtOptions` |
 | `<Pivot at>` | `<Pivot origin>` |

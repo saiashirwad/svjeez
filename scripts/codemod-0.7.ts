@@ -2,7 +2,9 @@
 // now live in svjeez and the @svjeez packages) and the renames (Values, sample, sampledPath, Steady, Pivot at,
 // flow loop, fieldFlow, renderVideo and the icon type), and the time model: during, cut, visible, tl.show and
 // tl.enter become show(), sampled and globe duration become over, and the .end
-// of a typewriter, terminal, reveal, flow or morph result becomes .span.end.
+// of a typewriter, terminal, reveal, flow or morph result becomes .span.end. axes() is now plane(), and the axes option
+// of contours() and contourSweep() is plane. A plane() written with origin, unit and extent is a warning, since it takes
+// ranges and a size now.
 //
 //   bun codemod-0.7.ts [--dry] <file or folder>...
 //
@@ -146,6 +148,9 @@ const RENAMES = new Map<string, Spot>([
   ["svjeez during", { module: "svjeez", name: "show", rewrite: "during" }],
   ["svjeez cut", { module: "svjeez", name: "show", rewrite: "cut" }],
   ["svjeez visible", { module: "svjeez", name: "show", rewrite: "visible" }],
+  ["@svjeez/math axes", { module: "@svjeez/math", name: "plane" }],
+  ["@svjeez/math Axes", { module: "@svjeez/math", name: "Plane" }],
+  ["@svjeez/math AxesOptions", { module: "@svjeez/math", name: "PlaneOptions" }],
   ["@svjeez/video renderVideo", { module: "@svjeez/video", name: "video" }],
   ["@svjeez/icons Icon", { module: "@svjeez/icons", name: "IconData" }],
 ]);
@@ -604,6 +609,49 @@ export const rewrite = (fileName: string, source: string): Result => {
     if (b.to.module === "@svjeez/geo" && b.to.name === "globe") windowed(b.local, 1);
 
     if (b.to.module === "@svjeez/geo" && b.to.name === "nightfall") windowed(b.local, 2);
+  }
+
+  for (const b of bindings) {
+    if (b.to.module !== "@svjeez/math") continue;
+
+    if (b.to.name === "contours" || b.to.name === "contourSweep")
+      for (const [, args] of calls(b.local)) {
+        const options = args[1];
+        const brace = options ? code.indexOf("{", options[0]) : -1;
+
+        if (
+          !options ||
+          brace < 0 ||
+          brace >= options[1] ||
+          code.slice(options[0], brace).trim() !== ""
+        )
+          continue;
+
+        for (const piece of pieces(code, brace + 1, closing(code, brace))) {
+          const key = keyOf(code, piece);
+
+          if (key?.name === "axes")
+            edit(key.at, key.at + 4, key.shorthand ? "plane: axes" : "plane");
+        }
+      }
+
+    // An old plane({ origin, unit, extent }) has no safe rewrite: the range and size depend on its numbers.
+    if (b.from === "plane" && b.to.name === "plane")
+      for (const [at, args] of calls(b.local)) {
+        const first = args[0];
+
+        const old = first
+          ? pieces(code, first[0] + code.slice(first[0]).indexOf("{") + 1, first[1] - 1)
+          : [];
+
+        if (
+          old.some((p) => ["origin", "unit", "extent", "step"].includes(keyOf(code, p)?.name ?? ""))
+        )
+          warn(
+            at,
+            "plane() takes x, y, width, height, at and ticks now. Rewrite origin, unit, extent and step by hand: width is (x[1] - x[0]) * unit, at is { x: origin.x + x[0] * unit, y: origin.y - y[1] * unit }, and ticks is step.",
+          );
+      }
   }
 
   if (usesShow && !bindings.some((b) => b.to.module === "svjeez" && b.to.name === "show")) {
