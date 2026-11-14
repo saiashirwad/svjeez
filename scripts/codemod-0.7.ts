@@ -6,6 +6,8 @@
 // of contours() and contourSweep() is plane. A plane() written with origin, unit and extent is a warning, since it takes
 // ranges and a size now.
 //
+// UPGRADING.md at the repo root lists every change and which ones this leaves by hand.
+//
 //   bun codemod-0.7.ts [--dry] <file or folder>...
 //
 // It reads source as text, with strings and comments set aside, so it needs nothing installed. It rewrites .ts, .tsx,

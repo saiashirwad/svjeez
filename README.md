@@ -134,43 +134,9 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 
 More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for each in [`examples/`](https://github.com/saiashirwad/svjeez/tree/main/examples).
 
-## Upgrading from 0.5 or 0.6
+## Upgrading
 
-0.7 moves things out of core, renames some, and gives time one model: spans on clocks, with `<Clip>`, `show`, `.repeat` and `.rewind`. The old names are gone: 0.7 keeps no aliases, and the table is what to change.
-
-| Before | Now |
-| --- | --- |
-| `svjeez/extras` | `svjeez`. Diagrams are in `@svjeez/diagrams`; `axes` as `plane`, calculus and the fields in `@svjeez/math`; editor palettes in `@svjeez/code` |
-| `fit`, `positionOf`, `valueAt`, `fitValues`, `withValues`, `follow` from `svjeez/params` | `@svjeez/live` |
-| `axes(options)` from `svjeez/extras`, with `Axes` and `AxesOptions` | `plane(options)`, `Plane` and `PlaneOptions` from `@svjeez/math`. The options, `point()`, `plot()` and the calculus methods are the same |
-| `{ axes }` of `contours` and `contourSweep` | `{ plane }` |
-| `plane({ origin, unit, extent, step })` from 0.6 (by hand) | `plane({ x, y, width, height, at, ticks })`: `x` and `y` are the ranges `extent` was, `width` is `(x[1] - x[0]) * unit`, `at` is `{ x: origin.x + x[0] * unit, y: origin.y - y[1] * unit }`, and `ticks` is `step` |
-| `Values` (channel values) | `ChannelValues` |
-| `sample`, `SampleOptions` | `valuesAt`, `ValuesAtOptions` |
-| `<Pivot at>` | `<Pivot origin>` |
-| `flow(points, { loop })` | `flow(points, { period })` |
-| `fieldFlow(lines, options)` | `flow(lines, options).node`, which takes a list of lines |
-| `sampledPath(fn, options)` | `sampled.path(fn, options)` |
-| `<Steady at>` | `<Camera steady origin>` |
-| `renderVideo` | `video` |
-| `Icon` type of `@svjeez/icons` | `IconData` |
-| `during(span, fade)`, `cut(span)`, `visible(spans, fade)`, `tl.show(name)`, `tl.enter(name)` | `show(span, { fade })`, `show(span, { fade: 0 })`, `show(spans)`, `show(tl.name)`, `show({ at: tl.name.at })`. `show` fades inside the span, where `visible` faded outside it |
-| `sampled(fn, { duration })`, `sampled.path`, `nightfall` and `globe` with `duration` | `{ over }`, plus `at` to start later, with the function given time from 0 |
-| `fx.blur(6)` (by hand) | `fx.blur({ by: 6 })` |
-| `def.property` (by hand) | `css.property` |
-| `.end` of a `typewriter`, `terminal`, `reveal`, `flow` or `morph` result | `.span.end` |
-| `.end` of a `derive`, `epicycles`, `traffic`, `walk`, chart or construction result (by hand) | `.span.end` |
-| `during` on `Arrow`, `Brace`, `Callout`, `Underline`, and on `Focus`, `Marker` and `Camera` stops (by hand) | `show` |
-| `frames --times`, `restyle({ at, onceAt })` and `seek` in playback seconds | Scene seconds, the same numbers unless `playbackRate` is not 1 |
-
-[`scripts/codemod-0.7.ts`](scripts/codemod-0.7.ts) rewrites a project's `.ts`, `.tsx`, `.js` and `.jsx` files for all of it. It needs nothing installed. Download it, commit your work, and run it from the project:
-
-```sh
-bun codemod-0.7.ts --dry src   # list the files it would change
-bun codemod-0.7.ts src         # rewrite them, then run your formatter
-```
-
-It prints a warning for what it cannot rewrite by hand.
+From 0.5 or 0.6, see [`UPGRADING.md`](UPGRADING.md).
 
 ## Contributing
 
