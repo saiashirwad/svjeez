@@ -2,26 +2,27 @@ import { ease, enter, motion, render, Marker, code } from "svjeez";
 
 import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./lib/kit";
+import { GROUND, chick } from "./lib/chick";
 import { mono, theme } from "../style";
 
-// A motion() chain on the left, the same chain drawn as tracks on the right, and a square that obeys it.
-// `tall` stacks the three for a phone: the chain, the square, then the tracks.
+// A motion() chain on the left, the same chain drawn as tracks on the right, and the svjeez chick obeying it.
+// `tall` stacks the three for a phone: the chain, the chick, then the tracks.
 const BAR = 40;
 
 const shown = `motion({ opacity: 0, y: 40 })
   .at(0.5)
   .to({ opacity: 1, y: 0 }, 0.6, ease.pop)
   .wait(1.5)
-  .to({ scale: 1.5, fill: theme.base09 }, 0.5)
-  .to({ scale: 1 }, 0.4, ease.inOut)`;
+  .to({ scale: 1.4, rotate: -12 }, 0.5)
+  .to({ scale: 1, rotate: 0 }, 0.4, ease.inOut)`;
 
 const chain = (t0: number) =>
   motion({ opacity: 0, y: 40 })
     .at(t0 + 0.5)
     .to({ opacity: 1, y: 0 }, 0.6, ease.pop)
     .wait(1.5)
-    .to({ scale: 1.5, fill: theme.base09 }, 0.5)
-    .to({ scale: 1 }, 0.4, ease.inOut);
+    .to({ scale: 1.4, rotate: -12 }, 0.5)
+    .to({ scale: 1, rotate: 0 }, 0.4, ease.inOut);
 
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
@@ -32,7 +33,7 @@ export const make = (tall = false): string => {
   const src = code(
     highlight(shown, "tsx"),
     tall
-      ? { theme, font: mono, fontSize: 12.5, lineHeight: 1.9, x: 22, y: BAR + 18 }
+      ? { theme, font: mono, fontSize: 11.5, lineHeight: 2, x: 20, y: BAR + 18 }
       : { theme, font: mono, fontSize: 14, lineHeight: 1.9, x: 28, y: BAR + 28 },
   );
 
@@ -72,7 +73,14 @@ export const make = (tall = false): string => {
         [3.1, 3.5],
       ],
     },
-    { name: "fill", color: theme.base09, bars: [[2.6, 3.1]] },
+    {
+      name: "rotate",
+      color: theme.base09,
+      bars: [
+        [2.6, 3.1],
+        [3.1, 3.5],
+      ],
+    },
   ] as const;
 
   const rowY = (i: number) => rowY0 + i * gap;
@@ -83,7 +91,7 @@ export const make = (tall = false): string => {
       height: H,
       duration: D,
       title: "Motions on a timeline",
-      desc: "A motion chain types out. Beside it the same chain is drawn as one track per channel, a playhead sweeps across them, and a square fades in, drops into place, grows and turns orange exactly as the chain says.",
+      desc: "A motion chain types out. Beside it the same chain is drawn as one track per channel, a playhead sweeps across them, and the svjeez chick fades in, drops into place, grows and tilts its head exactly as the chain says.",
       css: CSS,
       reducedMotion: { at: D - 1 },
     },
@@ -103,15 +111,13 @@ export const make = (tall = false): string => {
           rx={10}
           fill={theme.base01}
         />
-        <rect
-          x={panel.x + panel.w / 2 - 28}
-          y={panel.y + panel.h / 2 - 28}
-          width={56}
-          height={56}
-          rx={14}
-          fill={theme.base0D}
-          animation={chain(T0)}
-        />
+        <g animation={chain(T0)}>
+          <g
+            transform={`translate(${panel.x + panel.w / 2} ${panel.y + panel.h / 2 + 34}) scale(0.48) translate(${-GROUND.x} ${-GROUND.y})`}
+          >
+            {chick({ blinks: [T0 + 1.6, T0 + 3.7], feet: {} })}
+          </g>
+        </g>
         <g class="round" fontSize={11} fill={theme.base03}>
           {[0, 1, 2, 3, 4].map((s) => (
             <g>
