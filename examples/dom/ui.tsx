@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 /** @jsxRuntime automatic */
 // shadcn/ui components (MIT), trimmed to plain class strings so the example needs no cva or tailwind-merge.
-import { AlertCircle, ArrowRight, Check, GitPullRequest, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, GitPullRequest } from "lucide-react";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -13,12 +13,9 @@ const BUTTON = {
   default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
   outline:
     "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-  secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-  ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-  destructive: "bg-destructive text-white shadow-xs hover:bg-destructive/90",
 };
 
-export const Button = ({
+const Button = ({
   variant = "default",
   children,
   part,
@@ -40,11 +37,10 @@ export const Button = ({
 const BADGE = {
   default: "border-transparent bg-primary text-primary-foreground",
   secondary: "border-transparent bg-secondary text-secondary-foreground",
-  destructive: "border-transparent bg-destructive text-white",
   outline: "text-foreground",
 };
 
-export const Badge = ({
+const Badge = ({
   variant = "default",
   children,
   part,
@@ -64,7 +60,7 @@ export const Badge = ({
   </span>
 );
 
-export const Card = ({
+const Card = ({
   children,
   className,
   part,
@@ -84,27 +80,23 @@ export const Card = ({
   </div>
 );
 
-export const CardHeader = ({ children }: { children: ReactNode }) => (
+const CardHeader = ({ children }: { children: ReactNode }) => (
   <div className="grid auto-rows-min items-start gap-1.5 px-6">{children}</div>
 );
 
-export const CardTitle = ({ children }: { children: ReactNode }) => (
+const CardTitle = ({ children }: { children: ReactNode }) => (
   <div className="leading-none font-semibold">{children}</div>
 );
 
-export const CardDescription = ({ children }: { children: ReactNode }) => (
+const CardDescription = ({ children }: { children: ReactNode }) => (
   <div className="text-muted-foreground text-sm">{children}</div>
 );
 
-export const CardContent = ({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) => <div className={cn("px-6", className)}>{children}</div>;
+const CardContent = ({ children, className }: { children: ReactNode; className?: string }) => (
+  <div className={cn("px-6", className)}>{children}</div>
+);
 
-export const CardFooter = ({
+const CardFooter = ({
   children,
   className,
   part,
@@ -118,13 +110,13 @@ export const CardFooter = ({
   </div>
 );
 
-export const Label = ({ children }: { children: ReactNode }) => (
+const Label = ({ children }: { children: ReactNode }) => (
   <label className="flex items-center gap-2 text-sm leading-none font-medium select-none">
     {children}
   </label>
 );
 
-export const Input = ({
+const Input = ({
   placeholder,
   value,
   part,
@@ -149,7 +141,7 @@ export const Input = ({
   />
 );
 
-export const Switch = ({ checked, part }: { checked: boolean; part?: string }) => (
+const Switch = ({ checked, part }: { checked: boolean; part?: string }) => (
   <button
     role="switch"
     data-part={part}
@@ -164,7 +156,7 @@ export const Switch = ({ checked, part }: { checked: boolean; part?: string }) =
   </button>
 );
 
-export const Alert = ({
+const Alert = ({
   title,
   children,
   part,
@@ -186,7 +178,7 @@ export const Alert = ({
   </div>
 );
 
-export const Avatar = ({ initials, part }: { initials: string; part?: string }) => (
+const Avatar = ({ initials, part }: { initials: string; part?: string }) => (
   <span data-part={part} className="relative flex size-8 shrink-0 overflow-hidden rounded-full">
     <span className="bg-muted flex size-full items-center justify-center rounded-full text-xs font-medium">
       {initials}
@@ -233,28 +225,6 @@ export const pieces = {
         </CardFooter>
       </Card>,
     ),
-  loading: renderToStaticMarkup(
-    <Button className="w-[312px]" part="submit">
-      <span data-part="spinner" className="inline-flex">
-        <Loader2 />
-      </span>{" "}
-      Signing in…
-    </Button>,
-  ),
-  buttons: renderToStaticMarkup(
-    <div className="flex items-center gap-3">
-      <Button part="button">Default</Button>
-      <Button variant="secondary" part="button">
-        Secondary
-      </Button>
-      <Button variant="outline" part="button">
-        Outline
-      </Button>
-      <Button variant="destructive" part="button">
-        Delete
-      </Button>
-    </div>,
-  ),
   pr: (merged: boolean) =>
     renderToStaticMarkup(
       <Card className="w-[420px] gap-4 py-4">
@@ -287,11 +257,4 @@ export const pieces = {
         </CardFooter>
       </Card>,
     ),
-  alert: renderToStaticMarkup(
-    <div className="w-[420px]">
-      <Alert title="Unable to sign in." part="alert">
-        <p>Check your email and password, then try again.</p>
-      </Alert>
-    </div>,
-  ),
 };

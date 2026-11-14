@@ -3,7 +3,8 @@
 Turns real HTML and CSS into svjeez nodes you can animate. Chromium lays the markup out, and `@svjeez/dom` reads every box, border, shadow, text line and inline icon back as SVG. It works the same whatever made the markup: React, Svelte, plain HTML, or a page in a running app.
 
 ```tsx
-import { Dom, duration, fill, html, snap, snapshots, wait } from "@svjeez/dom";
+import { Dom, duration, fill, html, size, snap, snapshots, wait } from "@svjeez/dom";
+import { ease, render } from "svjeez";
 
 // A flow is a list. A sub-flow is a function that returns one, spread in.
 const login = (email: string) => [fill("email", email), snap("typed", { over: 1 })];
@@ -25,11 +26,11 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 ```
 
 - Time is relative. The first `snap` holds from 0; each later one moves in from the cursor over `over` seconds (default 0.6) and leaves the cursor at its end, and `wait(s)` pushes it on. `duration(steps)` is where it ends. To start a flow later, wrap the `<Dom>` in `<Clip at>`.
-- `dom.run(html, flow, options?)` mounts the markup, runs the flow and closes the page; `dom.run({ url, root }, flow)` does the same on a running app. `browser(options)` is the lower level: `await using dom = await browser({ fonts, css })`, then `dom.mount(html, { css, width, pad, parts })` or `dom.open(url, { root, ... })` give a card, one open page, with `card.run(flow)`, `card.snap(action?)` and `card.html(markup)`. `css` given to `browser()` or `snapshots()` applies to every mount; a mount's own `css` overrides it.
+- `dom.run(html, flow, options?)` mounts the markup, runs the flow and closes the page; `dom.run({ url, root }, flow)` does the same on a running app. `browser(options)` is the lower level: `await using dom = await browser({ fonts, css })`, then `dom.mount(html, { css, width, pad, parts, root })` or `dom.open(url, { root, ... })` give a card, one open page, with `card.run(flow)`, `card.snap(action?)`, `card.html(markup)` and `card.close()`. `css` given to `browser()` or `snapshots()` applies to every mount; a mount's own `css` overrides it.
 - Instructions are `snap(name?, { over, ease }?)`, `wait(s)`, `fill(target, text)`, `click(target)`, `hover(target)`, `press(key)`, `move(x, y)`, `html(markup)` and `act((page) => ...)` for anything else Playwright does. A target is a part name, else a CSS selector. All but `act` are plain objects, so a flow can be written as data: `[{ snap: "idle" }, { fill: ["email", "sai@example.com"] }, { snap: "typed", over: 1 }]`. `card.run` resolves to one step per `snap` and `wait`; `find(steps, name)` gets a snapshot back by name.
 - A snapshot is plain JSON: `{ name?, width, height, pad, box, root }`. Colors that differ between the light and dark scheme are stored as `{ light, dark }`, so the drawing follows the viewer's scheme. `schemes` picks one scheme instead, and `dark: { class }` is the class the dark pass adds to `<html>` (default `dark`).
-- An element is a part when it has `data-part="name"` or matches `parts.name`. `<Dom parts>` animates parts, and `rect(snapshot, part)` says where one landed.
-- `<Dom states>` takes one snapshot, drawn as is, or steps: snapshots, `[snapshot, { over, ease }]` and `{ wait }`, as `card.run` gives them or written by hand.
+- An element is a part when it has `data-part="name"` or matches `parts.name`. `<Dom parts>` animates parts, and `rect(snapshot, part, index?)` says where one landed.
+- `<Dom states>` takes one snapshot, drawn as is, or steps: snapshots, `[snapshot, { over, ease }]` and `{ wait }`, as `card.run` gives them or written by hand. `size(states)` is the picture's size. `ease` is for moves without one (default `ease.inOut`), `text` animates each line of a single snapshot, and `x`, `y` and `animation` place and move the whole drawing.
 - Elements pair across states by `data-key`, else part, else tag in sibling order, preferring siblings whose text matches, so a `<div>` inserted before another doesn't take its place. Classes don't count, so a class change morphs. `pair` overrides it. Paired boxes reshape and recolor, text and icons slide, and the rest fade.
 - Changed text animates by what changed. Text that grows from or shrinks to the other types in or deletes one character at a time, with a caret, and a field's placeholder leaves at the first keystroke. Text that differs only in one number counts to it. Anything else crossfades.
 - `snapshots(file, options, run)` records what each card was opened with, every data instruction, and every snapshot. Later builds run `run` again against the recording, so timing changes never need Chromium; anything else new (markup, a fill, a step) reads the pages again. Put what the recording can't see in `inputs`: an `act` function's body, the app behind `open()`, a theme a CSS function reads. A new package version or `SVJEEZ_DOM_REFRESH=1` reads again too.
@@ -38,5 +39,7 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 - `linear-gradient` and `radial-gradient` layers (repeating ones too) are drawn as SVG gradients that ride along with their box. `::before` and `::after` are read where Chromium laid them out, through the DevTools protocol, and drawn as boxes named `::before` and `::after` with their text. A see-through fill under `backdrop-filter: blur()` is drawn more solid instead of blurred.
 - Text that leaves one element and arrives in another, saying the same thing in nearly the same place (an app swapping its editor for the rendered text), stays put instead of fading.
 - Not drawn yet: conic gradients, `background-size` tiles, background images, and clips between an element with a `z-index` and its stacking context.
+
+The snapshot's types (`Snapshot`, `Box`, `TextRun`, `Item`, `Paint` and the rest) are exported for reading one by hand.
 
 Needs `playwright-core` and `npx playwright-core install chromium-headless-shell`.

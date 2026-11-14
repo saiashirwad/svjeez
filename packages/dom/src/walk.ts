@@ -1,4 +1,17 @@
-import type { Box } from "./tree.ts";
+import type {
+  Box,
+  Gradient,
+  Graphic,
+  Item,
+  Picture,
+  Radii,
+  Rect,
+  Rgb,
+  Shadow,
+  Stop,
+  TextRun,
+  Vector,
+} from "./tree.ts";
 
 /** Border quads from Chromium, eight numbers each: an element's own, and its `::before` and `::after` when drawn. */
 export interface Marks {
@@ -6,6 +19,17 @@ export interface Marks {
   readonly before?: readonly number[];
   readonly after?: readonly number[];
 }
+
+declare global {
+  /** Where Chromium put each element's ::before and ::after, left by `markPseudos`: the DOM has no node to measure. */
+  var __svjeezPseudo: WeakMap<Element, Marks> | undefined;
+}
+
+/** What an element or pseudo-element paints of itself. */
+type Surface = Pick<
+  Box,
+  "radii" | "background" | "gradients" | "border" | "shadows" | "insets" | "opacity"
+>;
 
 /**
  * Reads the element at `selector` into a `Box` tree. `parts` names elements by CSS selector. Runs inside the page, so
@@ -21,15 +45,18 @@ export function walk({
   parts: Record<string, string>;
 }): Box {
   const root = document.querySelector(selector);
-  // Where Chromium put each element's ::before and ::after, left by `pseudos`: the DOM has no node to measure.
-  const marks = (globalThis as { __svjeezPseudo?: WeakMap<Element, Marks> }).__svjeezPseudo;
+  const marks = globalThis.__svjeezPseudo;
 
   if (!root) throw new Error(`snap() found nothing at ${selector}.`);
   const origin = root.getBoundingClientRect();
   const px = (value: string): number => parseFloat(value) || 0;
   const round = (n: number): number => Math.round(n * 100) / 100;
 
-  const rel = (r: DOMRect) => ({
+  /** Degrees in one of an angle's units. */
+  const degrees = (unit: string): number =>
+    unit === "rad" ? 180 / Math.PI : unit === "turn" ? 360 : unit === "grad" ? 0.9 : 1;
+
+  const rel = (r: DOMRect): Rect => ({
     x: round(r.left - origin.left + pad),
     y: round(r.top - origin.top + pad),
     width: round(r.width),
@@ -40,9 +67,9 @@ export function walk({
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 1;
   const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
-  const colors = new Map<string, string | undefined>();
+  const colors = new Map<string, Rgb | undefined>();
 
-  const color = (css: string): string | undefined => {
+  const color = (css: string): Rgb | undefined => {
     if (!css || css === "transparent" || css === "none") return undefined;
 
     if (colors.has(css)) return colors.get(css);
@@ -50,9 +77,9 @@ export function walk({
     ctx.fillStyle = "#000";
     ctx.fillStyle = css;
     ctx.fillRect(0, 0, 1, 1);
-    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data as unknown as number[];
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
 
-    const value =
+    const value: Rgb | undefined =
       a === 0
         ? undefined
         : a === 255
@@ -76,13 +103,15 @@ export function walk({
     div.style.cssText =
       "position:absolute;left:0;top:0;white-space:nowrap;line-height:normal;visibility:hidden";
     div.style.font = `${s.fontStyle} ${s.fontWeight} ${s.fontSize}/normal ${s.fontFamily}`;
-    div.append("x");
+    const x = document.createTextNode("x");
+
+    div.append(x);
     const mark = document.createElement("i");
     mark.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
     div.append(mark);
     document.body.append(div);
     const range = document.createRange();
-    range.selectNodeContents(div.firstChild!);
+    range.selectNodeContents(x);
     const text = range.getBoundingClientRect();
     found = { ascent: mark.getBoundingClientRect().top - text.top, area: text.height };
     div.remove();
@@ -91,29 +120,28 @@ export function walk({
     return found;
   };
 
-  const radii = (s: CSSStyleDeclaration, w: number, h: number) => {
+  const radii = (s: CSSStyleDeclaration, w: number, h: number): Radii => {
     const corner = (v: string, side: number) =>
       v.trim().endsWith("%") ? (px(v) / 100) * side : px(v);
 
-    const r = [
-      corner(s.borderTopLeftRadius, w),
-      corner(s.borderTopRightRadius, w),
-      corner(s.borderBottomRightRadius, w),
-      corner(s.borderBottomLeftRadius, w),
-    ];
+    const tl = corner(s.borderTopLeftRadius, w);
+    const tr = corner(s.borderTopRightRadius, w);
+    const br = corner(s.borderBottomRightRadius, w);
+    const bl = corner(s.borderBottomLeftRadius, w);
 
+    // Corners that overlap shrink together, as CSS scales them.
     const f = Math.min(
       1,
-      w / (r[0]! + r[1]! || 1),
-      w / (r[3]! + r[2]! || 1),
-      h / (r[0]! + r[3]! || 1),
-      h / (r[1]! + r[2]! || 1),
+      w / (tl + tr || 1),
+      w / (bl + br || 1),
+      h / (tl + bl || 1),
+      h / (tr + br || 1),
     );
 
-    return r.map((n) => round(n * f)) as unknown as [number, number, number, number];
+    return [round(tl * f), round(tr * f), round(br * f), round(bl * f)];
   };
 
-  const shadows = (value: string, inset: boolean) =>
+  const shadows = (value: string, inset: boolean): Shadow[] =>
     value === "none"
       ? []
       : value
@@ -152,15 +180,15 @@ export function walk({
     return out.filter(Boolean);
   };
 
-  const alpha = (c: string) => Number(/rgba\(.*,\s*([\d.]+)\)$/.exec(c)?.[1] ?? 1);
+  const alpha = (c: string): number => Number(/rgba\(.*,\s*([\d.]+)\)$/.exec(c)?.[1] ?? 1);
   const rgb = (c: string) => (c.match(/[\d.]+/g) ?? []).slice(0, 3).join(",");
 
   /**
    * Color stops at fractions of a gradient line `length` px long, placed as CSS places the ones without a position.
    * A clear stop takes its neighbors' color, since CSS fades to clear without the gray an unmixed blend would pass.
    */
-  const stopsOf = (args: string[], length: number) => {
-    const raw: { color: string; at?: number }[] = [];
+  const stopsOf = (args: string[], length: number): Stop[] => {
+    const raw: { color: Rgb; at?: number }[] = [];
 
     for (const arg of args) {
       const [c = "", ...at] = split(arg, /\s/);
@@ -168,6 +196,7 @@ export function walk({
       // A lone length is a hint at where the midpoint falls; the blend stays even.
       if (/^[-\d.]/.test(c)) continue;
       const value = color(c) ?? "rgba(0,0,0,0)";
+
       const pos = (t: string) =>
         t.endsWith("%") ? px(t) / 100 : t.endsWith("px") ? px(t) / (length || 1) : undefined;
 
@@ -205,7 +234,7 @@ export function walk({
       const after = raw.slice(i + 1).find((s) => alpha(s.color) > 0);
       const sides = [...new Set([before, after].flatMap((s) => (s ? [rgb(s.color)] : [])))];
 
-      return (sides.length ? sides : ["0,0,0"]).map((side) => ({
+      return (sides.length ? sides : ["0,0,0"]).map((side): Stop => ({
         offset: stop.at!,
         color: `rgba(${side},0)`,
       }));
@@ -213,24 +242,19 @@ export function walk({
   };
 
   /** Stops renumbered from `lo`..`hi` to 0..1, for a gradient line drawn from `lo` to `hi`. */
-  const span = (stops: { offset: number; color: string }[], lo: number, hi: number) =>
+  const span = (stops: Stop[], lo: number, hi: number): Stop[] =>
     stops.map((s) => ({ ...s, offset: round((s.offset - lo) / (hi - lo)) }));
 
   /**
    * `linear-gradient` and `radial-gradient` layers, bottom first, in the snapshot's coordinates, laid out over the
    * padding box as CSS does by default. Conic gradients and images are skipped.
    */
-  const gradientsOf = (
-    s: CSSStyleDeclaration,
-    b: { x: number; y: number; width: number; height: number },
-  ) => {
+  const gradientsOf = (s: CSSStyleDeclaration, b: Rect): Gradient[] => {
     if (s.backgroundImage === "none" || s.visibility === "hidden") return [];
-    const [bt, br, bb, bl] = [
-      s.borderTopWidth,
-      s.borderRightWidth,
-      s.borderBottomWidth,
-      s.borderLeftWidth,
-    ].map(px) as [number, number, number, number];
+    const bt = px(s.borderTopWidth);
+    const br = px(s.borderRightWidth);
+    const bb = px(s.borderBottomWidth);
+    const bl = px(s.borderLeftWidth);
     const x0 = b.x + bl;
     const y0 = b.y + bt;
     const w = b.width - bl - br;
@@ -239,7 +263,7 @@ export function walk({
     if (w <= 0 || h <= 0) return [];
 
     return split(s.backgroundImage)
-      .flatMap((layer): object[] => {
+      .flatMap((layer): Gradient[] => {
         const m = /^(repeating-)?(linear|radial)-gradient\((.*)\)$/s.exec(layer);
 
         if (!m) return [];
@@ -256,9 +280,7 @@ export function walk({
             const angle = /^(-?[\d.]+)(deg|rad|turn|grad)$/.exec(lead);
 
             if (angle) {
-              const deg =
-                Number(angle[1]) *
-                { deg: 1, rad: 180 / Math.PI, turn: 360, grad: 0.9 }[angle[2] as "deg"];
+              const deg = Number(angle[1]) * degrees(angle[2]!);
               dx = Math.sin((deg * Math.PI) / 180);
               dy = -Math.cos((deg * Math.PI) / 180);
             } else if (lead.startsWith("to")) {
@@ -281,10 +303,12 @@ export function walk({
           const [lo, hi] = repeat ? [first, last] : [Math.min(0, first), Math.max(1, last)];
 
           if (hi - lo <= 0) return [];
+
           const at = (t: number): [number, number] => [
             round(x0 + w / 2 + dx * length * (t - 0.5)),
             round(y0 + h / 2 + dy * length * (t - 0.5)),
           ];
+
           const [x1, y1] = at(lo);
           const [x2, y2] = at(hi);
 
@@ -296,19 +320,21 @@ export function walk({
               x2,
               y2,
               stops: span(stops, lo, hi),
-              ...(repeat ? { repeat } : {}),
+              repeat: repeat || undefined,
             },
           ];
         }
 
-        let shape = "";
+        let ending = "";
 
         if (/^(circle|ellipse|closest|farthest|at\b|in\b|[\d.])/.test(args[0]!))
-          shape = args.shift()!;
-        const [size = "", where = ""] = shape
+          ending = args.shift()!;
+
+        const [size = "", where = ""] = ending
           .replace(/\s*\bin\b.*$/, "")
           .split(/\bat\b/)
           .map((t) => t.trim());
+
         let cx: number | undefined;
         let cy: number | undefined;
         const loose: string[] = [];
@@ -333,8 +359,10 @@ export function walk({
         cy ??= h / 2;
         const words = size.split(/\s+/).filter(Boolean);
         const lengths = words.filter((t) => /^[\d.]/.test(t));
+
         const circle =
           words.includes("circle") || (lengths.length === 1 && !words.includes("ellipse"));
+
         const near = [Math.min(cx, w - cx), Math.min(cy, h - cy)] as const;
         const far = [Math.max(cx, w - cx), Math.max(cy, h - cy)] as const;
         let rx: number;
@@ -375,7 +403,7 @@ export function walk({
             rx: round(rx * hi),
             ry: round(ry * hi),
             stops: span(stops, 0, hi).map((st) => ({ ...st, offset: Math.max(0, st.offset) })),
-            ...(repeat ? { repeat } : {}),
+            repeat: repeat || undefined,
           },
         ];
       })
@@ -386,7 +414,7 @@ export function walk({
    * A see-through fill under `backdrop-filter: blur()` drawn more solid instead: what shows through is blurred on the
    * page, and blurring it here would need a filter, which makes zooming stutter.
    */
-  const frost = (c: string | undefined, s: CSSStyleDeclaration) => {
+  const frost = (c: Rgb | undefined, s: CSSStyleDeclaration): Rgb | undefined => {
     const blur = /blur\(([\d.]+)px\)/.exec(s.backdropFilter);
 
     if (!c || !blur || alpha(c) >= 1) return c;
@@ -397,11 +425,7 @@ export function walk({
   };
 
   /** What an element or pseudo-element paints of itself: corners, fill, gradients, border, shadows. */
-  const surface = (
-    s: CSSStyleDeclaration,
-    r: { width: number; height: number },
-    b: { x: number; y: number; width: number; height: number },
-  ) => {
+  const surface = (s: CSSStyleDeclaration, r: DOMRect, b: Rect): Surface => {
     const visible = s.visibility !== "hidden";
 
     const widths = [
@@ -409,7 +433,7 @@ export function walk({
       px(s.borderRightWidth),
       px(s.borderBottomWidth),
       px(s.borderLeftWidth),
-    ];
+    ] as const;
 
     const sides = [s.borderTopColor, s.borderRightColor, s.borderBottomColor, s.borderLeftColor];
     const borderColor = color(sides[widths.findIndex((w) => w > 0)] ?? "");
@@ -418,13 +442,13 @@ export function walk({
     return {
       radii: radii(s, r.width, r.height),
       background: visible ? frost(color(s.backgroundColor), s) : undefined,
-      ...(gradients.length > 0 ? { gradients } : {}),
+      gradients: gradients.length > 0 ? gradients : undefined,
       border:
         visible && borderColor && widths.some((w) => w > 0)
           ? { widths, color: borderColor }
           : undefined,
       shadows: visible ? shadows(s.boxShadow, false) : [],
-      ...(visible && /\binset\b/.test(s.boxShadow) ? { insets: shadows(s.boxShadow, true) } : {}),
+      insets: visible && /\binset\b/.test(s.boxShadow) ? shadows(s.boxShadow, true) : undefined,
       opacity: px(s.opacity),
     };
   };
@@ -449,22 +473,22 @@ export function walk({
     text: string,
     x: number,
     top: number,
-    c: string,
+    c: Rgb,
     advances: number[],
     placeholder = false,
-  ) => ({
-    kind: "text" as const,
+  ): TextRun => ({
+    kind: "text",
     text: transform(text, s),
     x: round(x - origin.left + pad),
     y: round(top + probe(s).ascent - origin.top + pad),
     family: family(s),
     weight: px(s.fontWeight),
-    style: (s.fontStyle === "italic" ? "italic" : "normal") as "normal" | "italic",
+    style: s.fontStyle === "italic" ? "italic" : "normal",
     size: px(s.fontSize),
     color: c,
     letterSpacing: s.letterSpacing === "normal" ? 0 : px(s.letterSpacing),
     advances: advances.map(round),
-    ...(placeholder ? { placeholder } : {}),
+    placeholder: placeholder || undefined,
   });
 
   // Where each character of an input's value ends: the value isn't in the DOM, so lay it out in a probe.
@@ -473,9 +497,10 @@ export function walk({
     span.style.cssText = "position:absolute;left:0;top:0;white-space:pre;visibility:hidden";
     span.style.font = s.font;
     span.style.letterSpacing = s.letterSpacing;
-    span.append(text);
+    const node = document.createTextNode(text);
+
+    span.append(node);
     document.body.append(span);
-    const node = span.firstChild as Text;
     const range = document.createRange();
     const left = span.getBoundingClientRect().left;
     const ends: number[] = [];
@@ -494,15 +519,17 @@ export function walk({
   };
 
   // One run per line: walk the characters, start a line where the top jumps.
-  const texts = (node: Text, s: CSSStyleDeclaration, out: unknown[]) => {
+  const texts = (node: Text, s: CSSStyleDeclaration, out: Item[]) => {
     const c = color(s.color);
 
     if (!c || s.visibility === "hidden") return;
     const range = document.createRange();
     const data = node.data;
+
     let line:
       | { top: number; left: number; height: number; text: string; ends: number[] }
       | undefined;
+
     const lines: (typeof line & {})[] = [];
 
     for (let i = 0; i < data.length;) {
@@ -556,7 +583,7 @@ export function walk({
     "fill-rule",
   ];
 
-  const shape = (el: Element): unknown => {
+  const vector = (el: Element): Vector => {
     const s = getComputedStyle(el);
     const attrs: Record<string, string> = {};
 
@@ -579,7 +606,7 @@ export function walk({
 
     if (s.opacity !== "1") attrs.opacity = s.opacity;
 
-    return { tag: el.tagName, attrs, children: [...el.children].map(shape) };
+    return { tag: el.tagName, attrs, children: [...el.children].map(vector) };
   };
 
   const TRANSFORMS = ["transform", "rotate", "scale", "translate"] as const;
@@ -588,7 +615,7 @@ export function walk({
    * Elements with a z-index, and fixed ones, are painted by the nearest stacking context around them, not where they
    * sit in the tree: each context keeps a list of the layers found under it.
    */
-  const layers: { z: number; item: unknown }[][] = [];
+  const layers: { z: number; item: Item }[][] = [];
 
   /** The z-index an element is painted at by its stacking context, when it doesn't paint in tree order. */
   const layerOf = (s: CSSStyleDeclaration, parent: CSSStyleDeclaration): number | undefined => {
@@ -626,8 +653,7 @@ export function walk({
 
     if (s.rotate !== "none") {
       const turn = /(-?[\d.]+)(deg|rad|turn|grad)$/.exec(s.rotate);
-      const unit = { deg: 1, rad: 180 / Math.PI, turn: 360, grad: 0.9 }[turn?.[2] ?? "deg"]!;
-      m.rotateSelf(turn ? Number(turn[1]) * unit : 0);
+      m.rotateSelf(turn ? Number(turn[1]) * degrees(turn[2]!) : 0);
     }
 
     if (s.scale !== "none") {
@@ -644,20 +670,21 @@ export function walk({
    * An element turned, scaled or skewed is read as laid out, with its transform switched off for the moment, and the
    * transform is kept to draw it with. Transitions are off meanwhile, so putting it back doesn't animate.
    */
-  const element = (el: Element): unknown => {
+  const element = (el: Element): Item | undefined => {
     const s = getComputedStyle(el);
 
     if (s.display === "none") return undefined;
     const m = matrixOf(s);
 
     if (!m || !(el instanceof HTMLElement || el instanceof SVGElement)) return laid(el, s);
+
     const saved = ["transition", ...TRANSFORMS].map(
       (p) => [p, el.style.getPropertyValue(p), el.style.getPropertyPriority(p)] as const,
     );
 
     for (const [p] of saved) el.style.setProperty(p, "none", "important");
     const [ox = 0, oy = 0] = s.transformOrigin.split(/\s+/).map(px);
-    const item = laid(el, s, true) as { box: { x: number; y: number } } | undefined;
+    const item = laid(el, s, true);
 
     for (const [p, value, priority] of saved.slice(1)) el.style.setProperty(p, value, priority);
     void getComputedStyle(el).transform;
@@ -669,7 +696,7 @@ export function walk({
     return {
       ...item,
       transform: {
-        matrix: [m.a, m.b, m.c, m.d, m.e, m.f].map(round),
+        matrix: [round(m.a), round(m.b), round(m.c), round(m.d), round(m.e), round(m.f)],
         origin: [round(item.box.x + ox), round(item.box.y + oy)],
       },
     };
@@ -692,7 +719,7 @@ export function walk({
    * however far `el` moved since it was measured, so a transform switched off for reading still holds. Its text is
    * one line, placed as the box aligns it.
    */
-  const pseudo = (el: Element, which: "before" | "after", now: DOMRect): unknown => {
+  const pseudo = (el: Element, which: "before" | "after", now: DOMRect): Box | undefined => {
     const mark = marks?.get(el);
     const quad = mark?.[which];
 
@@ -706,6 +733,7 @@ export function walk({
     const ys = [quad[1]!, quad[3]!, quad[5]!, quad[7]!];
     const m = matrixOf(s);
     const [ox = 0, oy = 0] = s.transformOrigin.split(/\s+/).map(px);
+
     let r = new DOMRect(
       Math.min(...xs) + dx,
       Math.min(...ys) + dy,
@@ -716,21 +744,24 @@ export function walk({
     if (m) {
       // The quad is the box after its transform: its first corner, carried back through the matrix about the origin.
       const outer = s.boxSizing === "border-box" ? 0 : 1;
+
       const w =
         px(s.width) +
         outer *
           (px(s.paddingLeft) + px(s.paddingRight) + px(s.borderLeftWidth) + px(s.borderRightWidth));
+
       const h =
         px(s.height) +
         outer *
           (px(s.paddingTop) + px(s.paddingBottom) + px(s.borderTopWidth) + px(s.borderBottomWidth));
+
       const x = quad[0]! - m.e + m.a * ox + m.c * oy - ox;
       const y = quad[1]! - m.f + m.b * ox + m.d * oy - oy;
       r = new DOMRect(x + dx, y + dy, w, h);
     }
 
     const b = rel(r);
-    const children: unknown[] = [];
+    const children: Item[] = [];
     const text = contentText(s.content);
     const c = color(s.color);
 
@@ -751,6 +782,7 @@ export function walk({
           : /right|end/.test(s.textAlign) || (boxy && /end/.test(s.justifyContent))
             ? left + cw - width
             : left;
+
       const y =
         s.display === "inline"
           ? top
@@ -768,19 +800,19 @@ export function walk({
       ...surface(s, r, b),
       clip: s.overflowX !== "visible" || s.overflowY !== "visible",
       children,
-      ...(m
-        ? {
-            transform: {
-              matrix: [m.a, m.b, m.c, m.d, m.e, m.f].map(round),
-              origin: [round(b.x + ox), round(b.y + oy)],
-            },
-          }
-        : {}),
+      transform: m && {
+        matrix: [round(m.a), round(m.b), round(m.c), round(m.d), round(m.e), round(m.f)],
+        origin: [round(b.x + ox), round(b.y + oy)],
+      },
     };
   };
 
   /** `turned`: the element has a transform, switched off while it's read, so it is a stacking context. */
-  const laid = (el: Element, s: CSSStyleDeclaration, turned = false): unknown => {
+  const laid = (
+    el: Element,
+    s: CSSStyleDeclaration,
+    turned = false,
+  ): Box | Graphic | Picture | undefined => {
     const r = el.getBoundingClientRect();
     const tag = el.tagName.toLowerCase();
 
@@ -788,10 +820,10 @@ export function walk({
       if (!r.width || !r.height) return undefined;
       const vb = el.viewBox.baseVal;
 
-      const viewBox =
+      const viewBox: Graphic["viewBox"] =
         vb && vb.width ? [vb.x, vb.y, vb.width, vb.height] : [0, 0, r.width, r.height];
 
-      return { kind: "graphic", box: rel(r), viewBox, children: [...el.children].map(shape) };
+      return { kind: "graphic", box: rel(r), viewBox, children: [...el.children].map(vector) };
     }
 
     if (el instanceof HTMLImageElement) {
@@ -812,12 +844,12 @@ export function walk({
       }
     }
 
-    let children: unknown[] = [];
+    let children: Item[] = [];
     const context = el === root || turned || isContext(s);
 
     if (context) layers.push([]);
 
-    const place = (item: unknown, own: CSSStyleDeclaration) => {
+    const place = (item: Item | undefined, own: CSSStyleDeclaration) => {
       const z = item ? layerOf(own, s) : undefined;
 
       if (item && z !== undefined) layers.at(-1)!.push({ z, item });
@@ -827,9 +859,8 @@ export function walk({
     place(pseudo(el, "before", r), getComputedStyle(el, "::before"));
 
     for (const child of el.childNodes) {
-      if (child.nodeType === Node.TEXT_NODE) texts(child as Text, s, children);
-      else if (child.nodeType === Node.ELEMENT_NODE)
-        place(element(child as Element), getComputedStyle(child as Element));
+      if (child instanceof Text) texts(child, s, children);
+      else if (child instanceof Element) place(element(child), getComputedStyle(child));
     }
 
     place(pseudo(el, "after", r), getComputedStyle(el, "::after"));
@@ -853,6 +884,7 @@ export function walk({
         el instanceof HTMLInputElement && el.type === "password"
           ? "•".repeat(el.value.length)
           : el.value;
+
       const text = value || el.placeholder;
       const c = color(value ? s.color : getComputedStyle(el, "::placeholder").color);
 
@@ -884,5 +916,9 @@ export function walk({
     };
   };
 
-  return element(root) as Box;
+  const tree = element(root);
+
+  if (tree?.kind !== "box") throw new Error(`snap() found no element to draw at ${selector}.`);
+
+  return tree;
 }

@@ -10,8 +10,17 @@ export interface Rect {
 /** Top-left, top-right, bottom-right, bottom-left. */
 export type Radii = readonly [number, number, number, number];
 
-/** A color: one string when the light and dark scheme agree, else both. */
-export type Paint = string | { readonly light: string; readonly dark: string };
+/** A color as the page computed it, in sRGB. */
+export type Rgb = `rgb(${string})` | `rgba(${string})`;
+
+/** The light and dark scheme's colors, where they differ. */
+export interface Pair<C extends string = Rgb> {
+  readonly light: C;
+  readonly dark: C;
+}
+
+/** A color: one when the light and dark scheme agree, else both. */
+export type Paint<C extends string = Rgb> = C | Pair<C>;
 
 export interface Shadow {
   readonly color: Paint;
@@ -45,10 +54,10 @@ export interface Transform {
   readonly origin: readonly [number, number];
 }
 
-/** A shape inside an inline `<svg>`, with fill and stroke resolved from the page's CSS. */
+/** A shape inside an inline `<svg>`: its geometry attributes as written, and fill and stroke resolved from the page's CSS. */
 export interface Vector {
   readonly tag: string;
-  readonly attrs: Readonly<Record<string, Paint>>;
+  readonly attrs: Readonly<Record<string, Paint<string>>>;
   readonly children: readonly Vector[];
 }
 

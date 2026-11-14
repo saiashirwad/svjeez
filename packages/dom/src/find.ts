@@ -1,4 +1,4 @@
-import type { Step } from "./draw.tsx";
+import type { Step } from "./timeline.ts";
 import type { Box, Item, Rect, Snapshot } from "./tree.ts";
 
 /** Every element with this part, in document order. Their `box` says where each landed. */

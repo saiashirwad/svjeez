@@ -2,7 +2,7 @@ import { inflateSync } from "node:zlib";
 import type { Face, Item } from "./tree.ts";
 
 /** A face the page loaded, with the URL its `@font-face` rule points at, before the bytes are fetched. */
-export type Source = Omit<Face, "src"> & { readonly url: string };
+type Source = Omit<Face, "src"> & { readonly url: string };
 
 /** The first family of every text run in a tree: the ones whose faces a snapshot needs. */
 export const families = (item: Item, out = new Set<string>()): Set<string> => {
@@ -19,19 +19,21 @@ export const families = (item: Item, out = new Set<string>()): Set<string> => {
  */
 export function sources(used: string[]): Source[] {
   const unquote = (s: string) => s.trim().replace(/^["']|["']$/g, "");
+
   // "U+0000-00FF" and "U+0-FF" are one range.
   const range = (s: string) =>
     (s || "U+0-10FFFF")
       .toUpperCase()
       .replace(/\s/g, "")
       .replace(/(^|[+-])0+(?=[0-9A-F])/g, "$1");
+
   const rules: CSSFontFaceRule[] = [];
 
   const collect = (list: CSSRuleList) => {
     for (const rule of list) {
       if (rule instanceof CSSFontFaceRule) rules.push(rule);
       else if (rule instanceof CSSImportRule && rule.styleSheet) read(rule.styleSheet);
-      else if ("cssRules" in rule) collect((rule as CSSGroupingRule).cssRules);
+      else if ("cssRules" in rule && rule.cssRules instanceof CSSRuleList) collect(rule.cssRules);
     }
   };
 
@@ -44,6 +46,7 @@ export function sources(used: string[]): Source[] {
   };
 
   for (const sheet of document.styleSheets) read(sheet);
+
   for (const sheet of document.adoptedStyleSheets) read(sheet);
 
   const loaded = [...document.fonts].filter(
@@ -59,6 +62,7 @@ export function sources(used: string[]): Source[] {
         (r.style.getPropertyValue("font-style") || "normal") === face.style &&
         range(r.style.getPropertyValue("unicode-range")) === range(face.unicodeRange),
     );
+
     // The first url() is the one a modern browser takes: authors list woff2 first.
     const url = rule && /url\(\s*(["']?)(.*?)\1\s*\)/.exec(rule.style.getPropertyValue("src"))?.[2];
 
@@ -71,7 +75,7 @@ export function sources(used: string[]): Source[] {
         family: unquote(face.family),
         weight: face.weight.replace("normal", "400").replace("bold", "700"),
         style: face.style === "italic" || face.style.startsWith("oblique") ? "italic" : "normal",
-        ...(unicodeRange === "U+0-10FFFF" ? {} : { unicodeRange }),
+        unicodeRange: unicodeRange === "U+0-10FFFF" ? undefined : unicodeRange,
         url: new URL(url, base).href,
       },
     ];
@@ -82,6 +86,7 @@ export function sources(used: string[]): Source[] {
 const woff = (bytes: Uint8Array): Uint8Array => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const count = view.getUint16(12);
+
   const tables = Array.from({ length: count }, (_, i) => {
     const at = 44 + i * 20;
     const offset = view.getUint32(at + 4);
@@ -95,6 +100,7 @@ const woff = (bytes: Uint8Array): Uint8Array => {
       data: packed < length ? new Uint8Array(inflateSync(raw)) : raw,
     };
   });
+
   const pad = (n: number) => (n + 3) & ~3;
   const size = tables.reduce((n, t) => n + pad(t.data.length), 12 + 16 * count);
   const out = new Uint8Array(size);
@@ -135,15 +141,25 @@ export const unwrap = async (bytes: Uint8Array): Promise<Uint8Array> => {
   return decompress(bytes);
 };
 
-const MIME: Readonly<Record<string, string>> = {
-  wOF2: "font/woff2",
-  wOFF: "font/woff",
-  OTTO: "font/otf",
-};
+/** The type a font file's first four bytes say it is. */
+const mime = (tag: string): string =>
+  tag === "wOF2"
+    ? "font/woff2"
+    : tag === "wOFF"
+      ? "font/woff"
+      : tag === "OTTO"
+        ? "font/otf"
+        : "font/ttf";
 
 /** A font file as a data URI, its type read from the bytes. */
-export const dataUri = (bytes: Uint8Array): string => {
-  const tag = String.fromCharCode(...bytes.subarray(0, 4));
+export const dataUri = (bytes: Uint8Array): string =>
+  `data:${mime(String.fromCharCode(...bytes.subarray(0, 4)))};base64,${Buffer.from(bytes).toString("base64")}`;
 
-  return `data:${MIME[tag] ?? "font/ttf"};base64,${Buffer.from(bytes).toString("base64")}`;
-};
+/** The `format()` hint for a font file of this type: `woff2`, `woff`, `otf` or `ttf`. */
+export const formatOf = (type: string): string =>
+  type === "woff2" ? "woff2" : type === "woff" ? "woff" : type === "otf" ? "opentype" : "truetype";
+
+/** An `@font-face` rule, for the page that lays text out and for a drawing that embeds a page's own file. */
+export const fontFace = (face: Omit<Face, "src">, url: string, format: string): string =>
+  `@font-face{font-family:${JSON.stringify(face.family)};src:url(${url}) format("${format}");` +
+  `font-weight:${face.weight};font-style:${face.style}${face.unicodeRange ? `;unicode-range:${face.unicodeRange}` : ""}}`;

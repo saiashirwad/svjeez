@@ -31,9 +31,12 @@ export interface Wait {
   readonly wait: number;
 }
 
-/** Anything Playwright can do. It isn't data, so a flow with one needs what it depends on in `snapshots()` inputs. */
+/** Anything Playwright can do to the page. Whatever it resolves to is awaited and dropped. */
+export type PageAction = (page: Page) => void;
+
+/** A `PageAction` in a flow. It isn't data, so a flow with one needs what it depends on in `snapshots()` inputs. */
 export interface Act {
-  readonly act: (page: Page) => unknown;
+  readonly act: PageAction;
 }
 
 export type Instruction = Action | Snap | Wait | Act;
@@ -41,22 +44,32 @@ export type Instruction = Action | Snap | Wait | Act;
 /** What `card.run` takes: a list of instructions. A sub-flow is a function that returns one, spread in. */
 export type Flow = readonly Instruction[];
 
+/** A snap while `snap()` builds it. */
+interface Draft {
+  snap: string | true;
+  over?: number;
+  ease?: Ease;
+}
+
+const isTiming = (value: string | Timing | undefined): value is Timing => typeof value === "object";
+
 /** Read the page here. A name lets `find` look the snapshot up; the timing is how the timeline moves to it. */
 export function snap(name?: string, timing?: Timing): Snap;
 export function snap(timing: Timing): Snap;
 export function snap(first?: string | Timing, second?: Timing): Snap {
-  const name = typeof first === "object" ? undefined : first;
-  const timing = typeof first === "object" ? first : second;
+  const [name, timing] = isTiming(first) ? [undefined, first] : [first, second];
+  // Keys for the timing given only: `card.run` reads a snap without any as untimed.
+  const out: Draft = { snap: name ?? true };
 
-  return {
-    snap: name ?? true,
-    ...(timing?.over !== undefined && { over: timing.over }),
-    ...(timing?.ease && { ease: timing.ease }),
-  };
+  if (timing?.over !== undefined) out.over = timing.over;
+
+  if (timing?.ease) out.ease = timing.ease;
+
+  return out;
 }
 
 export const wait = (seconds: number): Wait => ({ wait: seconds });
-export const act = (fn: Act["act"]): Act => ({ act: fn });
+export const act = (fn: PageAction): Act => ({ act: fn });
 export const html = (markup: string): Action => ({ html: markup });
 export const fill = (target: string, text: string): Action => ({ fill: [target, text] });
 export const click = (target: string): Action => ({ click: target });

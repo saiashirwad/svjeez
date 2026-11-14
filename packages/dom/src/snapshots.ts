@@ -4,12 +4,16 @@ import { dirname } from "node:path";
 import { brotliCompressSync, brotliDecompressSync } from "node:zlib";
 import {
   browserOf,
-  chromiumPages,
+  isCssText,
   type Browser,
   type BrowserOptions,
   type Io,
+  type MountOptions,
+  type OpenOptions,
   type Pages,
 } from "./browser.ts";
+import { chromiumPages } from "./chromium.ts";
+import type { Action } from "./flow.ts";
 import type { Snapshot } from "./tree.ts";
 
 /** Bump when the shape of the file changes, so stale files are read again. */
@@ -30,16 +34,18 @@ interface Tape {
   readonly snaps: Snapshot[];
 }
 
+const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
+
+/** What a trace records: how a card was opened, or an instruction. */
+type Entry = string | Action | readonly (string | MountOptions | OpenOptions | undefined)[];
+
 /** A trace keeps a digest of each entry, not the markup and CSS themselves, so the file stays small. */
-const digest = (value: unknown) =>
-  createHash("sha256")
-    .update(JSON.stringify(value) ?? "")
-    .digest("hex")
-    .slice(0, 16);
+const digest = (entry: Entry) => sha256(JSON.stringify(entry)).slice(0, 16);
+
+const SNAP = digest("snap");
 
 /** A function isn't data, so the trace says only that one ran. */
-const entry = (action: Parameters<Io["act"]>[0]) =>
-  digest(typeof action === "function" ? "act" : action);
+const ACT = digest("act");
 
 const record = (pages: Pages, tapes: Tape[]): Pages => {
   const tape = async (opened: string, io: () => Promise<Io>): Promise<Io> => {
@@ -59,9 +65,14 @@ const record = (pages: Pages, tapes: Tape[]): Pages => {
         return snapshot;
       },
       act: (action) => {
-        t.trace.push(entry(action));
+        t.trace.push(digest(action));
 
         return inner.act(action);
+      },
+      drive: (fn) => {
+        t.trace.push(ACT);
+
+        return inner.drive(fn);
       },
       close: inner.close,
     };
@@ -138,8 +149,6 @@ const unpack = (tapes: readonly Tape[], fonts: Readonly<Record<string, string>> 
 
 class Stale extends Error {}
 
-const SNAP = digest("snap");
-
 /** Cards that give back what the tapes read, as long as `run` asks for the same things in the same order. */
 const replay = (tapes: readonly Tape[]) => {
   const played: number[] = [];
@@ -163,7 +172,8 @@ const replay = (tapes: readonly Tape[]) => {
 
         return tape.snaps[snaps++]!;
       },
-      act: async (action) => step(entry(action)),
+      act: async (action) => step(digest(action)),
+      drive: async () => step(ACT),
       close: async () => {},
     };
   };
@@ -181,12 +191,13 @@ const replay = (tapes: readonly Tape[]) => {
   };
 };
 
-const version = async (): Promise<string> =>
-  (
-    JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")) as {
-      version: string;
-    }
-  ).version;
+const version = async (): Promise<string> => {
+  const manifest: { version: string } = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  );
+
+  return manifest.version;
+};
 
 /**
  * Runs `run` against snapshots kept in `file`, so a build without changes never starts Chromium. The file records
@@ -200,35 +211,25 @@ export const snapshots = async <T>(
   { inputs, ...options }: SnapshotsOptions,
   run: (dom: Browser) => Promise<T>,
 ): Promise<T> => {
-  const hash = createHash("sha256")
-    // CSS given once as a string is data, so it counts like a mount's own; built by a function, it goes in `inputs`.
-    .update(
-      JSON.stringify([
-        inputs,
-        typeof options.css === "string" ? options.css : null,
-        await version(),
-        FORMAT,
-      ]),
-    )
-    .digest("hex");
+  // CSS given once as a string is data, so it counts like a mount's own; built by a function, it goes in `inputs`.
+  const hash = sha256(
+    JSON.stringify([inputs, isCssText(options.css) ? options.css : null, await version(), FORMAT]),
+  );
 
   if (!process.env.SVJEEZ_DOM_REFRESH) {
-    const saved = await readFile(file, "utf8").then(
-      (text) => JSON.parse(text) as Saved,
-      () => undefined,
-    );
+    // The file is our own, and its hash says the format that wrote it.
+    const saved: Saved | undefined = await readFile(file, "utf8").then(JSON.parse, () => undefined);
 
     if (saved?.hash === hash && saved.tapes) {
       const { dom, whole } = replay(unpack(saved.tapes, saved.fonts));
-      const out = await run(dom).then(
-        (value) => ({ value }),
-        (error: unknown) => {
-          if (error instanceof Stale) return undefined;
-          throw error;
-        },
-      );
 
-      if (out && whole()) return out.value;
+      try {
+        const value = await run(dom);
+
+        if (whole()) return value;
+      } catch (error) {
+        if (!(error instanceof Stale)) throw error;
+      }
     }
   }
 

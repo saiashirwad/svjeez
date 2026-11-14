@@ -6,11 +6,12 @@ import { join } from "node:path";
 import { deflateSync } from "node:zlib";
 import { Clip, ease, font, render, valuesAt, type SvgNode } from "svjeez";
 import { compress } from "woff2-encoder";
-import { unwrap } from "../src/fonts.ts";
 import { validateSvg } from "svjeez/frames";
+import { boxes } from "../src/find.ts";
+import { unwrap } from "../src/fonts.ts";
+import { sides } from "../src/paint.ts";
 import {
   act,
-  boxes,
   click,
   browser,
   Dom,
@@ -27,7 +28,7 @@ import {
   type Box,
   type Browser,
   type Flow,
-  type Snapshot,
+  type Item,
   type TextRun,
 } from "../src/index.ts";
 
@@ -54,6 +55,7 @@ const draw = (snap: Parameters<typeof size>[0], props: Partial<Parameters<typeof
 /** How much of `text` shows at `t`, for each copy drawn: every opacity above it, multiplied. */
 const inkOf = (node: SvgNode, text: string, t: number): number[] => {
   if (node.kind !== "element") return [];
+
   const own =
     Number(node.attrs.opacity ?? 1) *
     node.motions.reduce((o, m) => o * (valuesAt(m, t, { duration: 4 }).opacity ?? 1), 1);
@@ -62,6 +64,24 @@ const inkOf = (node: SvgNode, text: string, t: number): number[] => {
     return node.children.some((c) => c.kind === "text" && c.value === text) ? [own] : [];
 
   return node.children.flatMap((c) => inkOf(c, text, t).map((o) => o * own));
+};
+
+/** The box at `i` among `items`; anything else fails the test. */
+const boxAt = (items: readonly Item[], i: number): Box => {
+  const it = items[i];
+
+  if (it?.kind !== "box") throw new Error(`Expected a box at ${i}, got ${it?.kind}.`);
+
+  return it;
+};
+
+/** The text run at `i` among `items`; anything else fails the test. */
+const runAt = (items: readonly Item[], i: number): TextRun => {
+  const it = items[i];
+
+  if (it?.kind !== "text") throw new Error(`Expected text at ${i}, got ${it?.kind}.`);
+
+  return it;
 };
 
 let dom: Browser;
@@ -78,6 +98,7 @@ describe("snap", () => {
       '<div class="card">Hello there <span class="badge" data-part="badge">new</span></div>',
       { css: CSS },
     );
+
     const snap = await card.snap();
 
     expect(snap.pad).toBe(16);
@@ -102,6 +123,7 @@ describe("snap", () => {
       '<div class="card"><p id="a" data-key="k">one</p><span class="badge">two</span><i data-part="third">3</i></div>',
       { css: CSS, parts: { two: ".badge", first: "#a" } },
     );
+
     const snap = await card.snap();
 
     expect(rect(snap, "two")).toMatchObject({ width: expect.any(Number) });
@@ -138,6 +160,7 @@ describe("snap", () => {
     const card = await dom.mount('<div class="card">one two three four five six seven</div>', {
       css: CSS,
     });
+
     const snap = await card.snap();
     const lines = snap.root.children.filter((it) => it.kind === "text");
 
@@ -152,6 +175,7 @@ describe("snap", () => {
     const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
       css: CSS,
     });
+
     const idle = await card.snap();
     const typed = await card.snap((page) => page.fill("input", "hi"));
     const same = await card.snap();
@@ -186,6 +210,7 @@ describe("snap", () => {
       html('<div class="card"><p>done</p></div>'),
       snap(),
     ]);
+
     const names = steps.map((s) => ("wait" in s ? "wait" : ("root" in s ? s : s[0]).name));
 
     expect(names).toEqual(["idle", "wait", "typed", "idle", undefined]);
@@ -206,6 +231,7 @@ describe("snap", () => {
       '<div class="card"><input placeholder="email"><button class="badge">go</button></div>',
       { css: CSS },
     );
+
     const steps = await card.run([
       { snap: "idle" },
       { click: "input" },
@@ -241,6 +267,7 @@ describe("snap", () => {
     expect(await failure(card.run([act(() => undefined), wait(1), snap("a")]))).toContain(
       "before the first snap",
     );
+    // SAFETY: deliberately not an instruction, to see run() reject what the types would.
     expect(await failure(card.run([{ scroll: "x" } as never]))).toContain("scroll");
     await card.close();
   });
@@ -248,13 +275,17 @@ describe("snap", () => {
   test("instructions take a part name, by data-part or the parts option, else a selector", async () => {
     const markup =
       '<div class="card"><input data-part="email" placeholder="email"><input class="pw" placeholder="password"><button class="badge">go</button></div>';
+
     const card = await dom.mount(markup, { css: CSS, parts: { password: ".pw" } });
-    const [typed] = (await card.run([
+
+    const steps = await card.run([
       fill("email", "a@b.c"),
       fill("password", "secret"),
       click("button"),
       snap("typed"),
-    ])) as [Snapshot];
+    ]);
+
+    const typed = find(steps, "typed")!;
 
     expect(JSON.stringify(boxes(typed, "email"))).toContain('"text":"a@b.c"');
     expect(JSON.stringify(boxes(typed, "password"))).toContain('"text":"secret"');
@@ -264,14 +295,19 @@ describe("snap", () => {
   test("html() clears hover and focus, so the new markup starts at rest", async () => {
     const button = (label: string) =>
       `<div class="card"><input placeholder="email"><button class="hov">${label}</button></div>`;
+
     const css = CSS + ".hov{background:#eee}.hov:hover{background:#c00}";
     const card = await dom.mount(button("go"), { css });
-    const [hovered, after] = (await card.run([
+
+    const steps = await card.run([
       hover("button"),
       snap("hovered"),
       html(button("again")),
       snap("after"),
-    ])) as [Snapshot, Snapshot];
+    ]);
+
+    const hovered = find(steps, "hovered");
+    const after = find(steps, "after");
 
     expect(JSON.stringify(hovered)).toContain("rgb(204,0,0)");
     expect(JSON.stringify(after)).not.toContain("rgb(204,0,0)");
@@ -280,6 +316,7 @@ describe("snap", () => {
 
   test("dom.run mounts, runs the flow and closes the page", async () => {
     await using local = await browser({ fonts: [regular], css: CSS });
+
     const steps = await local.run('<div class="card"><input placeholder="email"></div>', [
       snap("idle"),
       fill("input", "hi"),
@@ -326,6 +363,7 @@ describe("Dom", () => {
       '<div class="card"><div>title</div><div>Auto-merge <span class="badge">+214</span></div></div>',
       { css: CSS },
     );
+
     const before = await card.snap();
 
     await card.html(
@@ -346,6 +384,7 @@ describe("Dom", () => {
     const card = await dom.mount('<div class="card"><span class="badge">new</span></div>', {
       css: CSS,
     });
+
     const before = await card.snap();
 
     await card.html('<div class="card"><span class="badge wide">new</span></div>');
@@ -364,6 +403,7 @@ describe("Dom", () => {
         css: CSS,
       },
     );
+
     const before = await card.snap();
 
     await card.html(
@@ -393,6 +433,7 @@ describe("Dom", () => {
     const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
       css: CSS,
     });
+
     const idle = await card.snap();
     const typed = await card.snap((page) => page.fill("input", "hi"));
 
@@ -421,10 +462,11 @@ describe("Dom", () => {
     const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
       css: CSS,
     });
+
     const idle = await card.snap();
     const typed = await card.snap((page) => page.fill("input", "hi there"));
     const run = JSON.stringify(typed).match(/"text":"hi there"[^}]*"advances":(\[[^\]]*\])/);
-    const advances = JSON.parse(run![1]!) as number[];
+    const advances: number[] = JSON.parse(run![1]!);
 
     expect(advances).toHaveLength(8);
     expect(advances.every((n, i) => n > (advances[i - 1] ?? 0))).toBe(true);
@@ -471,6 +513,7 @@ describe("Dom", () => {
 
   test("a flow reused later through <Clip at> plays the same moves, shifted", async () => {
     const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+
     const steps = await card.run([
       snap(),
       wait(0.5),
@@ -480,19 +523,25 @@ describe("Dom", () => {
       html('<div class="card"><p>214 lines</p></div>'),
       snap(),
     ]);
+
     const scene = (node: Parameters<typeof render>[1]) =>
       render({ ...size(steps), duration: 8, title: "dom" }, node);
+
     const now = scene(<Dom states={steps} fonts={[regular]} />);
+
     const later = scene(
       <Clip at={3}>
         <Dom states={steps} fonts={[regular]} />
       </Clip>,
     );
+
     // Every key time, as a fraction of the 8s loop.
     const keys = (svg: string) =>
-      [...svg.matchAll(/([\d.]+)%\s*\{/g)]
-        .map((m) => (Number(m[1]) / 100) * 8)
-        .filter((s) => s > 0.01 && s < 7.99);
+      [...svg.matchAll(/([\d.]+)%\s*\{/g)].flatMap((m) => {
+        const s = (Number(m[1]) / 100) * 8;
+
+        return s > 0.01 && s < 7.99 ? [s] : [];
+      });
 
     expect(validateSvg(later).errors).toEqual([]);
     expect(now).not.toBe(later);
@@ -507,6 +556,7 @@ describe("Dom", () => {
     const card = await dom.mount('<div class="card">Hi <span class="badge">new</span></div>', {
       css: CSS,
     });
+
     const snap = await card.snap();
     const again = JSON.parse(JSON.stringify(snap));
 
@@ -518,9 +568,11 @@ describe("Dom", () => {
     const css =
       CSS +
       "textarea, .out { all: unset; display: block; font: 16px 'Space Mono'; white-space: pre }";
+
     const card = await dom.mount('<div class="card"><textarea>Drawing it</textarea></div>', {
       css,
     });
+
     const editing = await card.snap();
 
     await card.html('<div class="card"><div class="out">Drawing it</div><p>after</p></div>');
@@ -531,6 +583,7 @@ describe("Dom", () => {
     expect(validateSvg(svg).errors).toEqual([]);
     // Drawn once, and fully there all through the move.
     expect(svg.match(/>Drawing it</g)).toHaveLength(1);
+
     for (const t of [0.5, 0.7, 0.8, 0.9, 1.1]) expect(inkOf(node, "Drawing it", t)).toEqual([1]);
 
     // Different words don't move: one goes, the other comes.
@@ -556,6 +609,7 @@ describe("Dom", () => {
 
       expect(now! + old! * (1 - now!)).toBeGreaterThan(0.9);
     }
+
     await card.close();
   });
 });
@@ -565,6 +619,7 @@ describe("real pages", () => {
   const probe = `@font-face{font-family:Probe;src:url(data:font/ttf;base64,${readFileSync(
     join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
   ).toString("base64")}) format("truetype")}`;
+
   const page = `${probe} .p { font: 16px Probe; padding: 8px }`;
 
   test("the page's own web fonts come with the snapshot and embed in the drawing", async () => {
@@ -591,6 +646,7 @@ describe("real pages", () => {
       const steps = await snapshots(file, { fonts: [regular] }, (d) =>
         d.run('<div class="p">Hello</div>', [snap("a"), snap("b")], { css: page }),
       );
+
       const saved = JSON.parse(readFileSync(file, "utf8"));
 
       expect(Object.keys(saved.fonts)).toHaveLength(1);
@@ -613,6 +669,7 @@ describe("real pages", () => {
       '<div class="card"><div class="turn" style="width:40px;height:10px;background:#c00;rotate:90deg"></div></div>',
       { css: CSS },
     );
+
     const turned = (await card.snap()).root.children[0];
 
     expect(turned).toMatchObject({ box: { width: 40, height: 10 } });
@@ -626,6 +683,7 @@ describe("real pages", () => {
       '<div class="card" style="box-shadow:inset 0 0 0 999px rgb(0 0 0 / .1), 0 1px 2px #000">x</div>',
       { css: CSS },
     );
+
     const { root } = await card.snap();
 
     expect(root.shadows).toHaveLength(1);
@@ -637,6 +695,7 @@ describe("real pages", () => {
     const ttf = readFileSync(
       join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
     );
+
     const woff2 = Buffer.from(await compress(ttf)).toString("base64");
     const css = `@font-face{font-family:Packed;src:url(data:font/woff2;base64,${woff2}) format("woff2")} .p { font: 16px Packed; padding: 8px }`;
     const card = await dom.mount('<div class="p">Hi</div>', { css });
@@ -655,10 +714,13 @@ describe("real pages", () => {
     const ttf = new Uint8Array(
       readFileSync(join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf")),
     );
+
     const view = new DataView(ttf.buffer, ttf.byteOffset);
     const count = view.getUint16(4);
+
     const tables = Array.from({ length: count }, (_, i) => {
       const at = 12 + i * 16;
+
       const data = ttf.subarray(
         view.getUint32(at + 8),
         view.getUint32(at + 8) + view.getUint32(at + 12),
@@ -674,6 +736,7 @@ describe("real pages", () => {
         packed: packed.length < data.length ? packed : data,
       };
     });
+
     const size = 44 + 20 * count + tables.reduce((n, t) => n + ((t.packed.length + 3) & ~3), 0);
     const woff = new Uint8Array(size);
     const w = new DataView(woff.buffer);
@@ -704,6 +767,7 @@ describe("real pages", () => {
       '<div class="card" style="height:60px;background:linear-gradient(to right, oklch(0.7 0.2 30), transparent), radial-gradient(circle at 25% 50%, red 10px, blue)"></div>',
       { css: CSS },
     );
+
     const { root } = await card.snap();
     const [radial, linear] = root.gradients ?? [];
 
@@ -712,10 +776,10 @@ describe("real pages", () => {
     expect(linear).toMatchObject({ kind: "linear", x1: 17, x2: 16 + 1 + 272 });
     expect(linear?.kind === "linear" && linear.y1 === linear.y2).toBe(true);
     // The clear end keeps the color it fades from, so the blend never goes gray.
-    const [from, to] = linear!.stops.map((s) => s.color as string);
+    const [from, to] = linear!.stops.map((s) => s.color);
 
     expect(from).toMatch(/^rgb\(/);
-    expect(to).toBe(from!.replace("rgb(", "rgba(").replace(")", ",0)"));
+    expect(String(to)).toBe(String(from).replace("rgb(", "rgba(").replace(")", ",0)"));
 
     const svg = draw(await card.snap());
 
@@ -741,22 +805,26 @@ describe("real pages", () => {
        .dot::after { content: ""; position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #0a0 }
        .turn { display: block; position: relative; height: 10px }
        .turn::after { content: ""; position: absolute; left: 0; top: 0; width: 20px; height: 10px; background: #00c; rotate: 90deg }`;
+
     const card = await dom.mount(
       '<div class="card dot"><span class="tag">design</span><i class="turn"></i></div>',
       { css },
     );
+
     const { root } = await card.snap();
-    const [tag, i, dot] = root.children as Box[];
-    const turned = i!.children[0] as Box;
+    const tag = boxAt(root.children, 0);
+    const i = boxAt(root.children, 1);
+    const dot = boxAt(root.children, 2);
+    const turned = boxAt(i.children, 0);
 
     expect(tag).toMatchObject({ tag: "span" });
-    expect(tag!.children[0]).toMatchObject({
+    expect(tag.children[0]).toMatchObject({
       kind: "box",
       tag: "::before",
       children: [{ text: "#" }],
     });
-    const hash = (tag!.children[0] as Box).children[0] as TextRun;
-    const word = tag!.children[1] as TextRun;
+    const hash = runAt(boxAt(tag.children, 0).children, 0);
+    const word = runAt(tag.children, 1);
 
     expect(hash.color).toBe("rgb(204,0,0)");
     expect(word.x).toBeGreaterThan(hash.x + hash.advances.at(-1)!);
@@ -773,8 +841,8 @@ describe("real pages", () => {
       },
     });
     // Read as laid out, with its turn kept to draw it with.
-    expect(turned).toMatchObject({ tag: "::after", box: { ...i!.box, width: 20, height: 10 } });
-    expect(turned!.transform?.matrix).toEqual([0, 1, -1, 0, 0, 0]);
+    expect(turned).toMatchObject({ tag: "::after", box: { ...i.box, width: 20, height: 10 } });
+    expect(turned.transform?.matrix).toEqual([0, 1, -1, 0, 0, 0]);
     expect(validateSvg(draw(await card.snap())).errors).toEqual([]);
     await card.close();
   });
@@ -784,8 +852,9 @@ describe("real pages", () => {
       '<div class="card" style="background:rgb(255 255 255 / .2);backdrop-filter:blur(12px)">x</div>',
       { css: CSS },
     );
+
     const { root } = await card.snap();
-    const light = typeof root.background === "string" ? root.background : root.background!.light;
+    const [light] = sides(root.background!);
 
     expect(light).toBe("rgba(255,255,255,0.6)");
     expect(draw(await card.snap())).not.toContain("<filter");
@@ -797,6 +866,7 @@ describe("real pages", () => {
       '<div class="card" style="position:relative"><div data-key="top" style="position:relative;z-index:2">a</div><div data-key="flow">b</div><div style="overflow:hidden;height:4px"><div data-key="fixed" style="position:fixed;z-index:1">c</div></div></div>',
       { css: CSS },
     );
+
     const { root } = await card.snap();
     const keys = root.children.map((c) => (c.kind === "box" ? (c.key ?? c.tag) : c.kind));
 
@@ -820,6 +890,7 @@ describe("snapshots", () => {
 
     const run = (f: Flow) => async (d: Browser) => {
       runs++;
+
       const card = await d.mount('<div class="card"><input placeholder="email"></div>', {
         css: CSS,
       });

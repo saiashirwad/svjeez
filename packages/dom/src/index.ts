@@ -13,15 +13,16 @@ export {
   click,
   fill,
   hover,
+  html,
   move,
   press,
-  html,
   snap,
   wait,
   type Act,
   type Action,
   type Flow,
   type Instruction,
+  type PageAction,
   type Snap,
   type Timing,
   type Wait,
@@ -29,22 +30,10 @@ export {
 
 export { snapshots, type SnapshotsOptions } from "./snapshots.ts";
 
-export { Dom, duration, size, type DomProps, type Step } from "./draw.tsx";
+export { Dom, type DomProps } from "./draw/dom.tsx";
 
-export { boxes, find, rect } from "./find.ts";
+export { duration, size, type Step } from "./timeline.ts";
 
-export type {
-  Box,
-  Face,
-  Graphic,
-  Item,
-  Paint,
-  Picture,
-  Radii,
-  Rect,
-  Shadow,
-  Snapshot,
-  TextRun,
-  Transform,
-  Vector,
-} from "./tree.ts";
+export { find, rect } from "./find.ts";
+
+export type * from "./tree.ts";
