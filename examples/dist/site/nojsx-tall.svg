@@ -131,7 +131,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <g class="a m6">
       <rect x="20" y="376" width="318" height="130" rx="12" fill="var(--base01)"/>
       <g transform="translate(71 369) scale(1.8)">
-        <path d="M20 66Q60 -6 100 66" fill="none" stroke="var(--base0B)" stroke-width="4" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m4"/>
+        <path d="M20 66Q60 -6 100 66" fill="none" stroke="var(--base0B)" stroke-width="4" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
         <circle cx="60" cy="30" r="6" fill="var(--base0D)" class="a m5 fb"/>
       </g>
     </g>

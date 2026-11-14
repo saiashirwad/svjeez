@@ -9,6 +9,6 @@
 .m2{animation-name:k2;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3.4s!important;animation-play-state:paused!important}}
 ]]></style>
-  <path d="M40 150C100 30 220 30 280 150" fill="none" stroke="#34C759" stroke-width="6" pathLength="1" stroke-dasharray="1" class="a m1"/>
+  <path d="M40 150C100 30 220 30 280 150" fill="none" stroke="#34C759" stroke-width="6" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
   <circle cx="160" cy="62" r="9" fill="#0A6CFF" class="a m2 fb"/>
 </svg>

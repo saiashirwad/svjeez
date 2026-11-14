@@ -196,19 +196,19 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     </g>
   </g>
   <g class="note">
-    <path d="M190.39999999999998 162h48" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m19"/>
-    <path d="M257.6 162h76.8" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m20"/>
+    <path d="M190.39999999999998 162h48" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m19"/>
+    <path d="M257.6 162h76.8" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m20"/>
     <g class="a m23">
-      <path d="M454.4 252Q600.9000000000001 355.252 776 317" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m21"/>
+      <path d="M454.4 252Q600.9000000000001 355.252 776 317" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m21"/>
       <path d="M768.2197380620172 315.1378710634394L776 317L769.7050559183891 321.93697063080106" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m22 fb"/>
     </g>
-    <path d="M372.8 162h96" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m24"/>
+    <path d="M372.8 162h96" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m24"/>
     <g class="a m25">
       <path d="M553.5999999999999 388q8 0 8 8V422q0 8 8 8q-8 0 -8 8V464q0 8 -8 8" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <text x="573.6" y="434" text-anchor="start" font-size="12" fill="var(--base0D)">the rule</text>
     </g>
     <g class="a m25">
-      <path d="M435.2 248Q280.59999999999997 244.07999999999998 223.99999999999997 388" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m26"/>
+      <path d="M435.2 248Q280.59999999999997 244.07999999999998 223.99999999999997 388" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m26"/>
       <path d="M229.8747248017312 382.56975060389266L223.99999999999997 388L223.39812701964374 380.02267282133187" fill="none" stroke="var(--base0D)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m27 fb"/>
     </g>
   </g>
@@ -247,10 +247,10 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <path d="M977 510h82.5" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
     <path d="M1069.5 510h82.5" stroke="var(--base02)" stroke-width="2" stroke-linecap="round"/>
     <g class="a m36">
-      <path d="M792 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m32"/>
-      <path d="M884.5 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m33"/>
-      <path d="M977 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m34"/>
-      <path d="M1069.5 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1" class="a m35"/>
+      <path d="M792 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m32"/>
+      <path d="M884.5 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m33"/>
+      <path d="M977 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m34"/>
+      <path d="M1069.5 510h82.5" fill="none" stroke="var(--base0D)" stroke-width="2" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
     </g>
   </g>
 </svg>

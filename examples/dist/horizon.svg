@@ -1227,49 +1227,49 @@
       <g transform="rotate(-12) scale(1 0.22)">
         <g clip-path="url(#c1)" mask="url(#m66)">
           <g class="a m111 fb">
-            <circle r="78" fill="none" stroke="#FFFBEA" stroke-width="2.334" opacity="0.428" pathLength="1" stroke-dasharray="1" class="a m67"/>
+            <circle r="78" fill="none" stroke="#FFFBEA" stroke-width="2.334" opacity="0.428" pathLength="1" stroke-dasharray="1 2" class="a m67"/>
             <circle r="78" fill="none" stroke="#FFFBEA" stroke-width="3.89" stroke-dasharray="7 10 74 55 43 34 39 23" stroke-linecap="round" class="a m68 fb"/>
-            <circle r="83.606" fill="none" stroke="#fff3d3" stroke-width="2.249" opacity="0.415" pathLength="1" stroke-dasharray="1" class="a m69"/>
+            <circle r="83.606" fill="none" stroke="#fff3d3" stroke-width="2.249" opacity="0.415" pathLength="1" stroke-dasharray="1 2" class="a m69"/>
             <circle r="83.606" fill="none" stroke="#fff3d3" stroke-width="3.749" stroke-dasharray="57 24 17 59 42 20 32 27" stroke-linecap="round" class="a m70 fb"/>
-            <circle r="91.333" fill="none" stroke="#ffecbd" stroke-width="2.249" opacity="0.402" pathLength="1" stroke-dasharray="1" class="a m71"/>
+            <circle r="91.333" fill="none" stroke="#ffecbd" stroke-width="2.249" opacity="0.402" pathLength="1" stroke-dasharray="1 2" class="a m71"/>
             <circle r="91.333" fill="none" stroke="#ffecbd" stroke-width="3.748" stroke-dasharray="27 74 23 67 19 16 17 26" stroke-linecap="round" class="a m72 fb"/>
-            <circle r="100.132" fill="none" stroke="#ffe4a6" stroke-width="3.15" opacity="0.389" pathLength="1" stroke-dasharray="1" class="a m73"/>
+            <circle r="100.132" fill="none" stroke="#ffe4a6" stroke-width="3.15" opacity="0.389" pathLength="1" stroke-dasharray="1 2" class="a m73"/>
             <circle r="100.132" fill="none" stroke="#ffe4a6" stroke-width="5.249" stroke-dasharray="59 11 70 45 50 54 74 50" stroke-linecap="round" class="a m74 fb"/>
-            <circle r="109.71" fill="none" stroke="#ffd995" stroke-width="1.741" opacity="0.376" pathLength="1" stroke-dasharray="1" class="a m75"/>
+            <circle r="109.71" fill="none" stroke="#ffd995" stroke-width="1.741" opacity="0.376" pathLength="1" stroke-dasharray="1 2" class="a m75"/>
             <circle r="109.71" fill="none" stroke="#ffd995" stroke-width="2.902" stroke-dasharray="64 9 18 31 36 7 12 60" stroke-linecap="round" class="a m76 fb"/>
-            <circle r="119.912" fill="none" stroke="#ffcd84" stroke-width="1.157" opacity="0.363" pathLength="1" stroke-dasharray="1" class="a m77"/>
+            <circle r="119.912" fill="none" stroke="#ffcd84" stroke-width="1.157" opacity="0.363" pathLength="1" stroke-dasharray="1 2" class="a m77"/>
             <circle r="119.912" fill="none" stroke="#ffcd84" stroke-width="1.928" stroke-dasharray="36 39 72 55 54 29 31 16" stroke-linecap="round" class="a m78 fb"/>
-            <circle r="130.64" fill="none" stroke="#ffc273" stroke-width="2.108" opacity="0.35" pathLength="1" stroke-dasharray="1" class="a m79"/>
+            <circle r="130.64" fill="none" stroke="#ffc273" stroke-width="2.108" opacity="0.35" pathLength="1" stroke-dasharray="1 2" class="a m79"/>
             <circle r="130.64" fill="none" stroke="#ffc273" stroke-width="3.513" stroke-dasharray="70 29 19 50 30 9 54 70" stroke-linecap="round" class="a m80 fb"/>
-            <circle r="141.826" fill="none" stroke="#ffb662" stroke-width="2.725" opacity="0.338" pathLength="1" stroke-dasharray="1" class="a m81"/>
+            <circle r="141.826" fill="none" stroke="#ffb662" stroke-width="2.725" opacity="0.338" pathLength="1" stroke-dasharray="1 2" class="a m81"/>
             <circle r="141.826" fill="none" stroke="#ffb662" stroke-width="4.542" stroke-dasharray="64 52 70 14 43 51 68 73" stroke-linecap="round" class="a m82 fb"/>
-            <circle r="153.42" fill="none" stroke="#ffa958" stroke-width="2.423" opacity="0.325" pathLength="1" stroke-dasharray="1" class="a m83"/>
+            <circle r="153.42" fill="none" stroke="#ffa958" stroke-width="2.423" opacity="0.325" pathLength="1" stroke-dasharray="1 2" class="a m83"/>
             <circle r="153.42" fill="none" stroke="#ffa958" stroke-width="4.038" stroke-dasharray="48 73 74 44 63 6 42 29" stroke-linecap="round" class="a m84 fb"/>
-            <circle r="165.384" fill="none" stroke="#ff9b52" stroke-width="2.01" opacity="0.312" pathLength="1" stroke-dasharray="1" class="a m85"/>
+            <circle r="165.384" fill="none" stroke="#ff9b52" stroke-width="2.01" opacity="0.312" pathLength="1" stroke-dasharray="1 2" class="a m85"/>
             <circle r="165.384" fill="none" stroke="#ff9b52" stroke-width="3.351" stroke-dasharray="44 59 74 45 64 36 51 58" stroke-linecap="round" class="a m86 fb"/>
-            <circle r="177.684" fill="none" stroke="#ff8e4c" stroke-width="2.113" opacity="0.299" pathLength="1" stroke-dasharray="1" class="a m87"/>
+            <circle r="177.684" fill="none" stroke="#ff8e4c" stroke-width="2.113" opacity="0.299" pathLength="1" stroke-dasharray="1 2" class="a m87"/>
             <circle r="177.684" fill="none" stroke="#ff8e4c" stroke-width="3.522" stroke-dasharray="28 23 7 8 72 64 50 7" stroke-linecap="round" class="a m88 fb"/>
-            <circle r="190.297" fill="none" stroke="#ff8046" stroke-width="2.494" opacity="0.286" pathLength="1" stroke-dasharray="1" class="a m89"/>
+            <circle r="190.297" fill="none" stroke="#ff8046" stroke-width="2.494" opacity="0.286" pathLength="1" stroke-dasharray="1 2" class="a m89"/>
             <circle r="190.297" fill="none" stroke="#ff8046" stroke-width="4.157" stroke-dasharray="48 56 76 25 75 51 62 50" stroke-linecap="round" class="a m90 fb"/>
-            <circle r="203.2" fill="none" stroke="#ff7241" stroke-width="2.502" opacity="0.273" pathLength="1" stroke-dasharray="1" class="a m91"/>
+            <circle r="203.2" fill="none" stroke="#ff7241" stroke-width="2.502" opacity="0.273" pathLength="1" stroke-dasharray="1 2" class="a m91"/>
             <circle r="203.2" fill="none" stroke="#ff7241" stroke-width="4.169" stroke-dasharray="16 76 41 46 17 34 21 63" stroke-linecap="round" class="a m92 fb"/>
-            <circle r="216.374" fill="none" stroke="#fa643f" stroke-width="1.929" opacity="0.26" pathLength="1" stroke-dasharray="1" class="a m93"/>
+            <circle r="216.374" fill="none" stroke="#fa643f" stroke-width="1.929" opacity="0.26" pathLength="1" stroke-dasharray="1 2" class="a m93"/>
             <circle r="216.374" fill="none" stroke="#fa643f" stroke-width="3.215" stroke-dasharray="58 52 75 49 58 73 40 22" stroke-linecap="round" class="a m94 fb"/>
-            <circle r="229.805" fill="none" stroke="#ec5643" stroke-width="1.63" opacity="0.248" pathLength="1" stroke-dasharray="1" class="a m95"/>
+            <circle r="229.805" fill="none" stroke="#ec5643" stroke-width="1.63" opacity="0.248" pathLength="1" stroke-dasharray="1 2" class="a m95"/>
             <circle r="229.805" fill="none" stroke="#ec5643" stroke-width="2.717" stroke-dasharray="62 66 19 45 39 43 19 24" stroke-linecap="round" class="a m96 fb"/>
-            <circle r="243.478" fill="none" stroke="#df4847" stroke-width="0.944" opacity="0.235" pathLength="1" stroke-dasharray="1" class="a m97"/>
+            <circle r="243.478" fill="none" stroke="#df4847" stroke-width="0.944" opacity="0.235" pathLength="1" stroke-dasharray="1 2" class="a m97"/>
             <circle r="243.478" fill="none" stroke="#df4847" stroke-width="1.574" stroke-dasharray="39 18 6 18 8 14 67 75" stroke-linecap="round" class="a m98 fb"/>
-            <circle r="257.381" fill="none" stroke="#d2394c" stroke-width="2.177" opacity="0.222" pathLength="1" stroke-dasharray="1" class="a m99"/>
+            <circle r="257.381" fill="none" stroke="#d2394c" stroke-width="2.177" opacity="0.222" pathLength="1" stroke-dasharray="1 2" class="a m99"/>
             <circle r="257.381" fill="none" stroke="#d2394c" stroke-width="3.629" stroke-dasharray="18 34 41 57 32 31 61 56" stroke-linecap="round" class="a m100 fb"/>
-            <circle r="271.503" fill="none" stroke="#c12d4e" stroke-width="1.245" opacity="0.209" pathLength="1" stroke-dasharray="1" class="a m101"/>
+            <circle r="271.503" fill="none" stroke="#c12d4e" stroke-width="1.245" opacity="0.209" pathLength="1" stroke-dasharray="1 2" class="a m101"/>
             <circle r="271.503" fill="none" stroke="#c12d4e" stroke-width="2.076" stroke-dasharray="43 62 35 45 26 43 60 12" stroke-linecap="round" class="a m102 fb"/>
-            <circle r="285.834" fill="none" stroke="#a42748" stroke-width="1.576" opacity="0.196" pathLength="1" stroke-dasharray="1" class="a m103"/>
+            <circle r="285.834" fill="none" stroke="#a42748" stroke-width="1.576" opacity="0.196" pathLength="1" stroke-dasharray="1 2" class="a m103"/>
             <circle r="285.834" fill="none" stroke="#a42748" stroke-width="2.626" stroke-dasharray="64 64 60 36 31 70 24 31" stroke-linecap="round" class="a m104 fb"/>
-            <circle r="300.366" fill="none" stroke="#862143" stroke-width="2.147" opacity="0.183" pathLength="1" stroke-dasharray="1" class="a m105"/>
+            <circle r="300.366" fill="none" stroke="#862143" stroke-width="2.147" opacity="0.183" pathLength="1" stroke-dasharray="1 2" class="a m105"/>
             <circle r="300.366" fill="none" stroke="#862143" stroke-width="3.579" stroke-dasharray="64 34 74 45 37 30 44 27" stroke-linecap="round" class="a m106 fb"/>
-            <circle r="315.09" fill="none" stroke="#691c3d" stroke-width="1.77" opacity="0.17" pathLength="1" stroke-dasharray="1" class="a m107"/>
+            <circle r="315.09" fill="none" stroke="#691c3d" stroke-width="1.77" opacity="0.17" pathLength="1" stroke-dasharray="1 2" class="a m107"/>
             <circle r="315.09" fill="none" stroke="#691c3d" stroke-width="2.95" stroke-dasharray="46 75 65 41 37 55 71 45" stroke-linecap="round" class="a m108 fb"/>
-            <circle r="330" fill="none" stroke="#4b1638" stroke-width="1.763" opacity="0.158" pathLength="1" stroke-dasharray="1" class="a m109"/>
+            <circle r="330" fill="none" stroke="#4b1638" stroke-width="1.763" opacity="0.158" pathLength="1" stroke-dasharray="1 2" class="a m109"/>
             <circle r="330" fill="none" stroke="#4b1638" stroke-width="2.938" stroke-dasharray="17 55 33 49 66 33 27 12" stroke-linecap="round" class="a m110 fb"/>
           </g>
         </g>
@@ -1320,12 +1320,12 @@
           <g transform="rotate(-12)">
             <g fill="none" stroke="url(#g7)" stroke-linecap="round">
               <path d="M0 -58V-560" stroke-width="14" opacity="0.18"/>
-              <path d="M0 -58V-560" stroke-width="2.4" pathLength="1" stroke-dasharray="1" class="a m147"/>
+              <path d="M0 -58V-560" stroke-width="2.4" pathLength="1" stroke-dasharray="1 2" class="a m147"/>
               <path d="M0 12V-560" stroke-width="1.6" stroke="#FFF6E6" stroke-dasharray="16 54" class="a m148"/>
             </g>
             <g fill="none" stroke="url(#g8)" stroke-linecap="round">
               <path d="M0 58V560" stroke-width="14" opacity="0.18"/>
-              <path d="M0 58V560" stroke-width="2.4" pathLength="1" stroke-dasharray="1" class="a m147"/>
+              <path d="M0 58V560" stroke-width="2.4" pathLength="1" stroke-dasharray="1 2" class="a m147"/>
               <path d="M0 -12V560" stroke-width="1.6" stroke="#FFF6E6" stroke-dasharray="16 54" class="a m149"/>
             </g>
           </g>
@@ -1333,62 +1333,62 @@
       </g>
       <g style="transform-box:view-box;transform-origin:0 0" class="a m157">
         <g fill="none" stroke="url(#g9)" stroke-linecap="round" filter="url(#f2)">
-          <path d="M-98 4A98 90 0 0 1 98 4" stroke-width="16" opacity="0.35" pathLength="1" stroke-dasharray="1" class="a m152"/>
-          <path d="M-76 4A76 72 0 0 1 76 4" stroke-width="5" pathLength="1" stroke-dasharray="1" class="a m153"/>
-          <path d="M-70 -4A70 64 0 0 0 70 -4" stroke-width="2.5" opacity="0.5" pathLength="1" stroke-dasharray="1" class="a m154"/>
+          <path d="M-98 4A98 90 0 0 1 98 4" stroke-width="16" opacity="0.35" pathLength="1" stroke-dasharray="1 2" class="a m152"/>
+          <path d="M-76 4A76 72 0 0 1 76 4" stroke-width="5" pathLength="1" stroke-dasharray="1 2" class="a m153"/>
+          <path d="M-70 -4A70 64 0 0 0 70 -4" stroke-width="2.5" opacity="0.5" pathLength="1" stroke-dasharray="1 2" class="a m154"/>
         </g>
         <circle r="57" fill="#000"/>
         <g fill="none" stroke="#FFF6E6" filter="url(#f2)">
-          <circle r="60" stroke-width="2.2" transform="rotate(-90)" pathLength="1" stroke-dasharray="1" class="a m155"/>
-          <circle r="63" stroke-width="0.8" opacity="0.5" transform="rotate(90)" pathLength="1" stroke-dasharray="1" class="a m156"/>
+          <circle r="60" stroke-width="2.2" transform="rotate(-90)" pathLength="1" stroke-dasharray="1 2" class="a m155"/>
+          <circle r="63" stroke-width="0.8" opacity="0.5" transform="rotate(90)" pathLength="1" stroke-dasharray="1 2" class="a m156"/>
         </g>
       </g>
       <g transform="rotate(-12) scale(1 0.22)">
         <g clip-path="url(#c2)" mask="url(#m66)">
           <g class="a m111 fb">
-            <circle r="78" fill="none" stroke="#FFFBEA" stroke-width="2.334" opacity="0.428" pathLength="1" stroke-dasharray="1" class="a m67"/>
+            <circle r="78" fill="none" stroke="#FFFBEA" stroke-width="2.334" opacity="0.428" pathLength="1" stroke-dasharray="1 2" class="a m67"/>
             <circle r="78" fill="none" stroke="#FFFBEA" stroke-width="3.89" stroke-dasharray="7 10 74 55 43 34 39 23" stroke-linecap="round" class="a m68 fb"/>
-            <circle r="83.606" fill="none" stroke="#fff3d3" stroke-width="2.249" opacity="0.415" pathLength="1" stroke-dasharray="1" class="a m69"/>
+            <circle r="83.606" fill="none" stroke="#fff3d3" stroke-width="2.249" opacity="0.415" pathLength="1" stroke-dasharray="1 2" class="a m69"/>
             <circle r="83.606" fill="none" stroke="#fff3d3" stroke-width="3.749" stroke-dasharray="57 24 17 59 42 20 32 27" stroke-linecap="round" class="a m70 fb"/>
-            <circle r="91.333" fill="none" stroke="#ffecbd" stroke-width="2.249" opacity="0.402" pathLength="1" stroke-dasharray="1" class="a m71"/>
+            <circle r="91.333" fill="none" stroke="#ffecbd" stroke-width="2.249" opacity="0.402" pathLength="1" stroke-dasharray="1 2" class="a m71"/>
             <circle r="91.333" fill="none" stroke="#ffecbd" stroke-width="3.748" stroke-dasharray="27 74 23 67 19 16 17 26" stroke-linecap="round" class="a m72 fb"/>
-            <circle r="100.132" fill="none" stroke="#ffe4a6" stroke-width="3.15" opacity="0.389" pathLength="1" stroke-dasharray="1" class="a m73"/>
+            <circle r="100.132" fill="none" stroke="#ffe4a6" stroke-width="3.15" opacity="0.389" pathLength="1" stroke-dasharray="1 2" class="a m73"/>
             <circle r="100.132" fill="none" stroke="#ffe4a6" stroke-width="5.249" stroke-dasharray="59 11 70 45 50 54 74 50" stroke-linecap="round" class="a m74 fb"/>
-            <circle r="109.71" fill="none" stroke="#ffd995" stroke-width="1.741" opacity="0.376" pathLength="1" stroke-dasharray="1" class="a m75"/>
+            <circle r="109.71" fill="none" stroke="#ffd995" stroke-width="1.741" opacity="0.376" pathLength="1" stroke-dasharray="1 2" class="a m75"/>
             <circle r="109.71" fill="none" stroke="#ffd995" stroke-width="2.902" stroke-dasharray="64 9 18 31 36 7 12 60" stroke-linecap="round" class="a m76 fb"/>
-            <circle r="119.912" fill="none" stroke="#ffcd84" stroke-width="1.157" opacity="0.363" pathLength="1" stroke-dasharray="1" class="a m77"/>
+            <circle r="119.912" fill="none" stroke="#ffcd84" stroke-width="1.157" opacity="0.363" pathLength="1" stroke-dasharray="1 2" class="a m77"/>
             <circle r="119.912" fill="none" stroke="#ffcd84" stroke-width="1.928" stroke-dasharray="36 39 72 55 54 29 31 16" stroke-linecap="round" class="a m78 fb"/>
-            <circle r="130.64" fill="none" stroke="#ffc273" stroke-width="2.108" opacity="0.35" pathLength="1" stroke-dasharray="1" class="a m79"/>
+            <circle r="130.64" fill="none" stroke="#ffc273" stroke-width="2.108" opacity="0.35" pathLength="1" stroke-dasharray="1 2" class="a m79"/>
             <circle r="130.64" fill="none" stroke="#ffc273" stroke-width="3.513" stroke-dasharray="70 29 19 50 30 9 54 70" stroke-linecap="round" class="a m80 fb"/>
-            <circle r="141.826" fill="none" stroke="#ffb662" stroke-width="2.725" opacity="0.338" pathLength="1" stroke-dasharray="1" class="a m81"/>
+            <circle r="141.826" fill="none" stroke="#ffb662" stroke-width="2.725" opacity="0.338" pathLength="1" stroke-dasharray="1 2" class="a m81"/>
             <circle r="141.826" fill="none" stroke="#ffb662" stroke-width="4.542" stroke-dasharray="64 52 70 14 43 51 68 73" stroke-linecap="round" class="a m82 fb"/>
-            <circle r="153.42" fill="none" stroke="#ffa958" stroke-width="2.423" opacity="0.325" pathLength="1" stroke-dasharray="1" class="a m83"/>
+            <circle r="153.42" fill="none" stroke="#ffa958" stroke-width="2.423" opacity="0.325" pathLength="1" stroke-dasharray="1 2" class="a m83"/>
             <circle r="153.42" fill="none" stroke="#ffa958" stroke-width="4.038" stroke-dasharray="48 73 74 44 63 6 42 29" stroke-linecap="round" class="a m84 fb"/>
-            <circle r="165.384" fill="none" stroke="#ff9b52" stroke-width="2.01" opacity="0.312" pathLength="1" stroke-dasharray="1" class="a m85"/>
+            <circle r="165.384" fill="none" stroke="#ff9b52" stroke-width="2.01" opacity="0.312" pathLength="1" stroke-dasharray="1 2" class="a m85"/>
             <circle r="165.384" fill="none" stroke="#ff9b52" stroke-width="3.351" stroke-dasharray="44 59 74 45 64 36 51 58" stroke-linecap="round" class="a m86 fb"/>
-            <circle r="177.684" fill="none" stroke="#ff8e4c" stroke-width="2.113" opacity="0.299" pathLength="1" stroke-dasharray="1" class="a m87"/>
+            <circle r="177.684" fill="none" stroke="#ff8e4c" stroke-width="2.113" opacity="0.299" pathLength="1" stroke-dasharray="1 2" class="a m87"/>
             <circle r="177.684" fill="none" stroke="#ff8e4c" stroke-width="3.522" stroke-dasharray="28 23 7 8 72 64 50 7" stroke-linecap="round" class="a m88 fb"/>
-            <circle r="190.297" fill="none" stroke="#ff8046" stroke-width="2.494" opacity="0.286" pathLength="1" stroke-dasharray="1" class="a m89"/>
+            <circle r="190.297" fill="none" stroke="#ff8046" stroke-width="2.494" opacity="0.286" pathLength="1" stroke-dasharray="1 2" class="a m89"/>
             <circle r="190.297" fill="none" stroke="#ff8046" stroke-width="4.157" stroke-dasharray="48 56 76 25 75 51 62 50" stroke-linecap="round" class="a m90 fb"/>
-            <circle r="203.2" fill="none" stroke="#ff7241" stroke-width="2.502" opacity="0.273" pathLength="1" stroke-dasharray="1" class="a m91"/>
+            <circle r="203.2" fill="none" stroke="#ff7241" stroke-width="2.502" opacity="0.273" pathLength="1" stroke-dasharray="1 2" class="a m91"/>
             <circle r="203.2" fill="none" stroke="#ff7241" stroke-width="4.169" stroke-dasharray="16 76 41 46 17 34 21 63" stroke-linecap="round" class="a m92 fb"/>
-            <circle r="216.374" fill="none" stroke="#fa643f" stroke-width="1.929" opacity="0.26" pathLength="1" stroke-dasharray="1" class="a m93"/>
+            <circle r="216.374" fill="none" stroke="#fa643f" stroke-width="1.929" opacity="0.26" pathLength="1" stroke-dasharray="1 2" class="a m93"/>
             <circle r="216.374" fill="none" stroke="#fa643f" stroke-width="3.215" stroke-dasharray="58 52 75 49 58 73 40 22" stroke-linecap="round" class="a m94 fb"/>
-            <circle r="229.805" fill="none" stroke="#ec5643" stroke-width="1.63" opacity="0.248" pathLength="1" stroke-dasharray="1" class="a m95"/>
+            <circle r="229.805" fill="none" stroke="#ec5643" stroke-width="1.63" opacity="0.248" pathLength="1" stroke-dasharray="1 2" class="a m95"/>
             <circle r="229.805" fill="none" stroke="#ec5643" stroke-width="2.717" stroke-dasharray="62 66 19 45 39 43 19 24" stroke-linecap="round" class="a m96 fb"/>
-            <circle r="243.478" fill="none" stroke="#df4847" stroke-width="0.944" opacity="0.235" pathLength="1" stroke-dasharray="1" class="a m97"/>
+            <circle r="243.478" fill="none" stroke="#df4847" stroke-width="0.944" opacity="0.235" pathLength="1" stroke-dasharray="1 2" class="a m97"/>
             <circle r="243.478" fill="none" stroke="#df4847" stroke-width="1.574" stroke-dasharray="39 18 6 18 8 14 67 75" stroke-linecap="round" class="a m98 fb"/>
-            <circle r="257.381" fill="none" stroke="#d2394c" stroke-width="2.177" opacity="0.222" pathLength="1" stroke-dasharray="1" class="a m99"/>
+            <circle r="257.381" fill="none" stroke="#d2394c" stroke-width="2.177" opacity="0.222" pathLength="1" stroke-dasharray="1 2" class="a m99"/>
             <circle r="257.381" fill="none" stroke="#d2394c" stroke-width="3.629" stroke-dasharray="18 34 41 57 32 31 61 56" stroke-linecap="round" class="a m100 fb"/>
-            <circle r="271.503" fill="none" stroke="#c12d4e" stroke-width="1.245" opacity="0.209" pathLength="1" stroke-dasharray="1" class="a m101"/>
+            <circle r="271.503" fill="none" stroke="#c12d4e" stroke-width="1.245" opacity="0.209" pathLength="1" stroke-dasharray="1 2" class="a m101"/>
             <circle r="271.503" fill="none" stroke="#c12d4e" stroke-width="2.076" stroke-dasharray="43 62 35 45 26 43 60 12" stroke-linecap="round" class="a m102 fb"/>
-            <circle r="285.834" fill="none" stroke="#a42748" stroke-width="1.576" opacity="0.196" pathLength="1" stroke-dasharray="1" class="a m103"/>
+            <circle r="285.834" fill="none" stroke="#a42748" stroke-width="1.576" opacity="0.196" pathLength="1" stroke-dasharray="1 2" class="a m103"/>
             <circle r="285.834" fill="none" stroke="#a42748" stroke-width="2.626" stroke-dasharray="64 64 60 36 31 70 24 31" stroke-linecap="round" class="a m104 fb"/>
-            <circle r="300.366" fill="none" stroke="#862143" stroke-width="2.147" opacity="0.183" pathLength="1" stroke-dasharray="1" class="a m105"/>
+            <circle r="300.366" fill="none" stroke="#862143" stroke-width="2.147" opacity="0.183" pathLength="1" stroke-dasharray="1 2" class="a m105"/>
             <circle r="300.366" fill="none" stroke="#862143" stroke-width="3.579" stroke-dasharray="64 34 74 45 37 30 44 27" stroke-linecap="round" class="a m106 fb"/>
-            <circle r="315.09" fill="none" stroke="#691c3d" stroke-width="1.77" opacity="0.17" pathLength="1" stroke-dasharray="1" class="a m107"/>
+            <circle r="315.09" fill="none" stroke="#691c3d" stroke-width="1.77" opacity="0.17" pathLength="1" stroke-dasharray="1 2" class="a m107"/>
             <circle r="315.09" fill="none" stroke="#691c3d" stroke-width="2.95" stroke-dasharray="46 75 65 41 37 55 71 45" stroke-linecap="round" class="a m108 fb"/>
-            <circle r="330" fill="none" stroke="#4b1638" stroke-width="1.763" opacity="0.158" pathLength="1" stroke-dasharray="1" class="a m109"/>
+            <circle r="330" fill="none" stroke="#4b1638" stroke-width="1.763" opacity="0.158" pathLength="1" stroke-dasharray="1 2" class="a m109"/>
             <circle r="330" fill="none" stroke="#4b1638" stroke-width="2.938" stroke-dasharray="17 55 33 49 66 33 27 12" stroke-linecap="round" class="a m110 fb"/>
           </g>
         </g>
@@ -1402,12 +1402,12 @@
       <g fill="none" stroke="#8FA3C7" class="a m167">
         <circle r="150" stroke-width="1" stroke-dasharray="1 5" opacity="0.5" class="a m160 fb"/>
         <circle r="190" stroke-width="0.6" stroke-dasharray="40 8 2 8" opacity="0.3" class="a m161 fb"/>
-        <path d="M160 0L172 0" stroke-width="1.2" pathLength="1" stroke-dasharray="1" class="a m162"/>
-        <path d="M9.797174393178826e-15 160L1.0531962472667237e-14 172" stroke-width="1.2" pathLength="1" stroke-dasharray="1" class="a m163"/>
-        <path d="M-160 1.9594348786357652e-14L-172 2.1063924945334474e-14" stroke-width="1.2" pathLength="1" stroke-dasharray="1" class="a m164"/>
-        <path d="M-2.9391523179536473e-14 -160L-3.159588741800171e-14 -172" stroke-width="1.2" pathLength="1" stroke-dasharray="1" class="a m165"/>
-        <path d="M136.36 -114.42A178 178 0 0 1 136.36 114.42" stroke-width="1.4" pathLength="1" stroke-dasharray="1" class="a m166"/>
-        <path d="M-136.36 114.42A178 178 0 0 1 -136.36 -114.42" stroke-width="1.4" pathLength="1" stroke-dasharray="1" class="a m166"/>
+        <path d="M160 0L172 0" stroke-width="1.2" pathLength="1" stroke-dasharray="1 2" class="a m162"/>
+        <path d="M9.797174393178826e-15 160L1.0531962472667237e-14 172" stroke-width="1.2" pathLength="1" stroke-dasharray="1 2" class="a m163"/>
+        <path d="M-160 1.9594348786357652e-14L-172 2.1063924945334474e-14" stroke-width="1.2" pathLength="1" stroke-dasharray="1 2" class="a m164"/>
+        <path d="M-2.9391523179536473e-14 -160L-3.159588741800171e-14 -172" stroke-width="1.2" pathLength="1" stroke-dasharray="1 2" class="a m165"/>
+        <path d="M136.36 -114.42A178 178 0 0 1 136.36 114.42" stroke-width="1.4" pathLength="1" stroke-dasharray="1 2" class="a m166"/>
+        <path d="M-136.36 114.42A178 178 0 0 1 -136.36 -114.42" stroke-width="1.4" pathLength="1" stroke-dasharray="1 2" class="a m166"/>
       </g>
       <g stroke="#DCE6FF" stroke-linecap="round">
         <g style="transform-box:view-box;transform-origin:0 0" class="a m168">
@@ -1519,10 +1519,10 @@
   <g class="a m304">
     <rect width="960" height="1.5" fill="url(#g10)" class="a m176"/>
     <g fill="none" stroke="#8FA3C7" stroke-width="1.2">
-      <path d="M22 48V22H48" pathLength="1" stroke-dasharray="1" class="a m177"/>
-      <path d="M912 22H938V48" pathLength="1" stroke-dasharray="1" class="a m178"/>
-      <path d="M938 492V518H912" pathLength="1" stroke-dasharray="1" class="a m179"/>
-      <path d="M48 518H22V492" pathLength="1" stroke-dasharray="1" class="a m180"/>
+      <path d="M22 48V22H48" pathLength="1" stroke-dasharray="1 2" class="a m177"/>
+      <path d="M912 22H938V48" pathLength="1" stroke-dasharray="1 2" class="a m178"/>
+      <path d="M938 492V518H912" pathLength="1" stroke-dasharray="1 2" class="a m179"/>
+      <path d="M48 518H22V492" pathLength="1" stroke-dasharray="1 2" class="a m180"/>
     </g>
     <g class="mono" fill="#8FA3C7">
       <text x="44" y="50" class="a m181">S</text>

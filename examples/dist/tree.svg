@@ -71,35 +71,35 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <rect width="100%" height="100%" fill="var(--base00)"/>
   <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
     <g>
-      <path d="M398.44 79L398.44 83C398.44 99 168.7 99 168.7 115L168.7 123.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m1"/>
+      <path d="M398.44 79L398.44 83C398.44 99 168.7 99 168.7 115L168.7 123.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
       <path d="M168.70000000000002 130.5L164.70000000000002 122.5L172.70000000000002 122.5Z" fill="var(--base04)" class="a m2"/>
     </g>
     <g>
-      <path d="M398.44 79L398.44 83C398.44 99 441.5 99 441.5 115L441.5 123.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m3"/>
+      <path d="M398.44 79L398.44 83C398.44 99 441.5 99 441.5 115L441.5 123.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
       <path d="M441.5 130.5L437.5 122.5L445.5 122.5Z" fill="var(--base04)" class="a m4"/>
     </g>
     <g>
-      <path d="M398.44 79L398.44 83C398.44 99 628.18 99 628.18 110L628.18 112" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m5"/>
+      <path d="M398.44 79L398.44 83C398.44 99 628.18 99 628.18 110L628.18 112" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
       <path d="M628.1800000000001 119L624.1800000000001 111L632.1800000000001 111Z" fill="var(--base04)" class="a m6"/>
     </g>
     <g>
-      <path d="M168.7 169.5L168.7 185C168.7 201 97.4 201 97.4 212L97.4 214" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m7"/>
+      <path d="M168.7 169.5L168.7 185C168.7 201 97.4 201 97.4 212L97.4 214" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
       <path d="M97.4 221L93.4 213L101.4 213Z" fill="var(--base04)" class="a m8"/>
     </g>
     <g>
-      <path d="M168.7 169.5L168.7 185C168.7 201 240 201 240 217L240 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m9"/>
+      <path d="M168.7 169.5L168.7 185C168.7 201 240 201 240 217L240 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
       <path d="M240.00000000000003 226L236.00000000000003 218L244.00000000000003 218Z" fill="var(--base04)" class="a m10"/>
     </g>
     <g>
-      <path d="M441.5 169.5L441.5 185C441.5 201 378.4 201 378.4 217L378.4 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m11"/>
+      <path d="M441.5 169.5L441.5 185C441.5 201 378.4 201 378.4 217L378.4 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
       <path d="M378.4 226L374.4 218L382.4 218Z" fill="var(--base04)" class="a m12"/>
     </g>
     <g>
-      <path d="M441.5 169.5L441.5 185C441.5 201 504.6 201 504.6 217L504.6 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m13"/>
+      <path d="M441.5 169.5L441.5 185C441.5 201 504.6 201 504.6 217L504.6 219" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m13"/>
       <path d="M504.6 226L500.6 218L508.6 218Z" fill="var(--base04)" class="a m14"/>
     </g>
     <g>
-      <path d="M504.6 265L504.6 303" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="a m15"/>
+      <path d="M504.6 265L504.6 303" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m15"/>
       <path d="M504.6 310L500.6 302L508.6 302Z" fill="var(--base04)" class="a m16"/>
     </g>
     <g>

@@ -1372,24 +1372,24 @@ svg{--paper:#faf7ea;--ink:#181f2e;--muted:#181f2e8c;--faint:#181f2e29;--orange:#
   <rect width="1280" height="720" fill="url(#p1)"/>
   <g style="transform-box:view-box;transform-origin:0 0" class="a m477">
     <g class="a m476">
-      <path d="M18 0H120L120 0H222" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m1"/>
+      <path d="M18 0H120L120 0H222" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
       <rect x="117.5" y="-2.5" width="5" height="5" fill="var(--ink)" class="a m2"/>
-      <path d="M18 0H120L220 -100H322" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m3"/>
+      <path d="M18 0H120L220 -100H322" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
       <rect x="117.5" y="-2.5" width="5" height="5" fill="var(--ink)" class="a m4"/>
       <rect x="217.5" y="-102.5" width="5" height="5" fill="var(--ink)" class="a m4"/>
-      <path d="M18 0H120L220 100H322" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m5"/>
+      <path d="M18 0H120L220 100H322" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
       <rect x="117.5" y="-2.5" width="5" height="5" fill="var(--ink)" class="a m6"/>
       <rect x="217.5" y="97.5" width="5" height="5" fill="var(--ink)" class="a m6"/>
-      <path d="M18 0H120L320 -200H422" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m7"/>
+      <path d="M18 0H120L320 -200H422" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
       <rect x="117.5" y="-2.5" width="5" height="5" fill="var(--ink)" class="a m8"/>
       <rect x="317.5" y="-202.5" width="5" height="5" fill="var(--ink)" class="a m8"/>
-      <path d="M18 0H120L320 200H422" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m9"/>
+      <path d="M18 0H120L320 200H422" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
       <rect x="117.5" y="-2.5" width="5" height="5" fill="var(--ink)" class="a m10"/>
       <rect x="317.5" y="197.5" width="5" height="5" fill="var(--ink)" class="a m10"/>
-      <path d="M18 0H120L420 -300H522" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m11"/>
+      <path d="M18 0H120L420 -300H522" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
       <rect x="117.5" y="-2.5" width="5" height="5" fill="var(--ink)" class="a m12"/>
       <rect x="417.5" y="-302.5" width="5" height="5" fill="var(--ink)" class="a m12"/>
-      <path d="M18 0H120L420 300H522" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m13"/>
+      <path d="M18 0H120L420 300H522" fill="none" stroke="var(--ink)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m13"/>
       <rect x="117.5" y="-2.5" width="5" height="5" fill="var(--ink)" class="a m14"/>
       <rect x="417.5" y="297.5" width="5" height="5" fill="var(--ink)" class="a m14"/>
       <g fill="var(--orange)">
@@ -2412,6 +2412,6 @@ svg{--paper:#faf7ea;--ink:#181f2e;--muted:#181f2e8c;--faint:#181f2e29;--orange:#
   <text x="142" y="694" class="mono" font-size="11" fill="var(--muted)">GPT</text>
   <g stroke-width="3" stroke-linecap="round">
     <line x1="240" y1="694" x2="1256" y2="694" stroke="var(--faint)"/>
-    <line x1="240" y1="694" x2="1256" y2="694" stroke="var(--orange)" pathLength="1" stroke-dasharray="1" class="a m478"/>
+    <line x1="240" y1="694" x2="1256" y2="694" stroke="var(--orange)" pathLength="1" stroke-dasharray="1 2" class="a m478"/>
   </g>
 </svg>

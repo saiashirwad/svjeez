@@ -3,6 +3,7 @@ import { deflateSync } from "node:zlib";
 import {
   Picture,
   def,
+  draw,
   ease,
   font,
   motion,
@@ -109,6 +110,31 @@ describe.if(browser)("renderFrames", () => {
     expect(same(before, middle)).toBe(false);
     expect(same(middle, after)).toBe(false);
     expect(same(after, later)).toBe(true);
+  });
+
+  test("a curve starting to draw shows no round-cap dot at its far end", async () => {
+    // With a gap as long as the path, the dash after the visible one starts at the path's end while the offset is
+    // near 1, and a curve's measured length leaves it there as a zero-length dash that a round cap paints as a dot.
+    // The rect hides the curve's start, so anything painted in the draw's first frames is that dot.
+    const curve = render(
+      { width: 70, height: 40, duration: 1, title: "Curve" },
+      <>
+        <path
+          d="M10 30C31.25 30 47.08 19.52 62.1 7.48"
+          fill="none"
+          stroke="#000"
+          strokeWidth={2}
+          strokeLinecap="round"
+          animation={draw({ at: 0, over: 0.45 }, ease.inOut)}
+        />
+        <rect width={45} height={40} fill="#fff" />
+      </>,
+    );
+
+    const { frames } = await renderFrames(curve, { times: [0, 0.004, 0.008, 0.012], scale: 2 });
+    const [blank, ...early] = frames.map((frame) => frame.png);
+
+    for (const frame of early) expect(same(frame, blank!)).toBe(true);
   });
 
   test("the same time renders the same pixels every run", async () => {

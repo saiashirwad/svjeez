@@ -90,7 +90,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         </g>
       </g>
     </g>
-    <circle cx="128" cy="190" r="78" fill="none" stroke="var(--base03)" stroke-width="1.5" pathLength="1" stroke-dasharray="1" class="a m2"/>
+    <circle cx="128" cy="190" r="78" fill="none" stroke="var(--base03)" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
     <g transform="translate(128 190)" class="a m8">
       <rect y="-1.25" height="2.5" rx="1.25" fill="var(--base0D)" class="a m3"/>
       <rect x="-1" width="2" fill="var(--base0B)" class="a m4"/>
