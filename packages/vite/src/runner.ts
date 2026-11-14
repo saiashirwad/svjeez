@@ -56,7 +56,15 @@ export const createRunner = (app: ResolvedConfig): Runner => {
         environments: {
           svjeez: {
             consumer: "server",
-            resolve: { conditions, externalConditions, noExternal, external },
+            resolve: {
+              conditions,
+              externalConditions,
+              // A runtime that bundles everything (Cloudflare's server environment) sets noExternal: true. Scenes run in
+              // Node's module runner, which cannot evaluate a CommonJS dependency such as MathJax, so they keep Vite's
+              // default: linked workspace packages compile and installed packages load through Node.
+              noExternal: noExternal === true ? undefined : noExternal,
+              external,
+            },
           },
         },
       },

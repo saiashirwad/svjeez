@@ -103,6 +103,46 @@ export default () => render({ width: ${size}, height: 100, duration: 1, title: l
   }
 }, 60_000);
 
+// Cloudflare's server environment sets ssr.resolve.noExternal to true, and scenes must still load a CommonJS package.
+test("a scene imports a CommonJS package when the server environment bundles everything", async () => {
+  const dir = join(scratch, "bundled");
+  mkdirSync(join(dir, "node_modules/cjs-label"), { recursive: true });
+  writeFileSync(
+    join(dir, "node_modules/cjs-label/package.json"),
+    `{"name":"cjs-label","version":"1.0.0","main":"index.js"}`,
+  );
+  writeFileSync(
+    join(dir, "node_modules/cjs-label/index.js"),
+    `Object.defineProperty(exports, "__esModule", { value: true });\nexports.label = "cjs";`,
+  );
+  writeFileSync(join(dir, "main.ts"), `export { default } from "./scene.tsx?svjeez";`);
+  writeFileSync(
+    join(dir, "scene.tsx"),
+    `import { render } from "svjeez";
+import { label } from "cjs-label";
+export default () => render({ width: 100, height: 100, duration: 1, title: label }, <text x="10" y="50">{label}</text>);`,
+  );
+
+  const config = appConfig(dir);
+
+  const server = await createServer({
+    ...config,
+    ssr: { ...config.ssr, noExternal: true },
+    server: { port: 0, fs: { allow: [join(import.meta.dirname, "../..")] } },
+  });
+
+  try {
+    await server.listen();
+    const origin = server.resolvedUrls!.local[0]!.replace(/\/$/, "");
+    const main = await (await fetch(`${origin}/main.ts`)).text();
+    const response = await fetch(origin + /from "([^"]+[?&]svjeez)"/.exec(main)![1]!);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain(`"title": "cjs"`);
+  } finally {
+    await server.close();
+  }
+}, 60_000);
+
 test("getScene() names an svg with no viewBox", () => {
   expect(() => getScene("<svg></svg>")).toThrow("getScene() needs a scene whose svg has a viewBox");
 });
