@@ -230,13 +230,13 @@ const scene = (
 </g>
 ```
 
-`Steady` keeps what it holds at its size on screen while a `Camera` zooms. Give it the camera's `frame`, `stops` and `over`, and `at`, the point it is drawn around. Put it inside the `Camera`'s children.
+`<Camera steady origin={…}>` keeps what it holds at its size on screen while another `Camera` zooms. Give it the camera's `frame`, `stops` and `over`, and `origin`, the point it is drawn around. Put it inside the first `Camera`'s children.
 
 ```tsx
 <Camera frame={FRAME} stops={stops} over={0.8}>
-  <Steady frame={FRAME} stops={stops} over={0.8} at={{ x: city.x, y: city.y }}>
+  <Camera frame={FRAME} stops={stops} over={0.8} steady origin={{ x: city.x, y: city.y }}>
     <circle cx={city.x} cy={city.y} r={4} />
-  </Steady>
+  </Camera>
 </Camera>
 ```
 
@@ -262,7 +262,7 @@ const scene = <g>{ax.node}{parabola.node}<circle cx={dot.x} cy={dot.y} r={4} fil
 
 ## Calculus on axes
 
-The axes also carry calculus. A value that moves is a `Moving`: a number holds still, `{ from, to, at, over, ease }` sweeps it (default `ease.inOut`), and an array of sweeps chains them, holding in between. Lines and areas whose shape changes bake into a `d` motion through `sampledPath()`, so they morph in Safari too.
+The axes also carry calculus. A value that moves is a `Moving`: a number holds still, `{ from, to, at, over, ease }` sweeps it (default `ease.inOut`), and an array of sweeps chains them, holding in between. Lines and areas whose shape changes bake into a `d` motion through `sampled.path()`, so they morph in Safari too.
 
 ```tsx
 import { axes } from "@svjeez/math";

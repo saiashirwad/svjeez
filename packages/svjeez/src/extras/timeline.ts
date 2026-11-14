@@ -1,5 +1,5 @@
 import { pathLength, type Point } from "../geometry";
-import type { Values } from "../channels";
+import type { ChannelValues } from "../channels";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 
 export type Timeline<K extends string> = { readonly [P in K]: Span } & {
@@ -47,7 +47,7 @@ const MOVES = {
   rise: { y: 24 },
   zoom: { scale: 0.94 },
   slide: { x: 80 },
-} as const satisfies Record<string, Values<"x" | "y" | "scale">>;
+} as const satisfies Record<string, ChannelValues<"x" | "y" | "scale">>;
 
 export type ShotMove = keyof typeof MOVES;
 
@@ -76,11 +76,11 @@ export const shot = (
     );
   const f = Math.min(move, over / 2);
   const from = MOVES[enter];
-  const to: Values<ShotChannel> = { opacity: 0, ...mirror(MOVES[exit]) };
+  const to: ChannelValues<ShotChannel> = { opacity: 0, ...mirror(MOVES[exit]) };
   const channels = { ...from, ...to };
   const still = Object.fromEntries(Object.keys(channels).map((c) => [c, c === "scale" ? 1 : 0]));
 
-  const start: Values<ShotChannel> =
+  const start: ChannelValues<ShotChannel> =
     at === 0 && enter === "cut" ? { ...still, opacity: 1 } : { ...still, ...from, opacity: 0 };
 
   // SAFETY: every key of start, still and to is a ShotChannel, from MOVES or opacity.
@@ -99,7 +99,7 @@ export const shot = (
 };
 
 /** The leaving side of a move: what rose in from below lifts away above, what grew in keeps growing. */
-const mirror = (values: Values<"x" | "y" | "scale">): Values<"x" | "y" | "scale"> =>
+const mirror = (values: ChannelValues<"x" | "y" | "scale">): ChannelValues<"x" | "y" | "scale"> =>
   Object.fromEntries(Object.entries(values).map(([c, v]) => [c, c === "scale" ? 2 - v : -v]));
 
 /** When each of several things happens: a start, from which they follow `step` apart, or one time each. */

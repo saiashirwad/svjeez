@@ -2,7 +2,7 @@ import {
   motion,
   type Motion,
   type Point,
-  sampledPath,
+  sampled,
   type Color,
   type Ease,
   type PathData,
@@ -191,7 +191,7 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
         d: d(0),
         fill,
         animation: end
-          ? sampledPath(d, { duration: end.at + end.over, tolerance: 0.25 })
+          ? sampled.path(d, { duration: end.at + end.over, tolerance: 0.25 })
           : undefined,
       });
     },

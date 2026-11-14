@@ -12,7 +12,7 @@ export {
 
 export { easeAt } from "./ease-at";
 
-export { sample, type SampleOptions } from "./sample";
+export { sample, valuesAt, type SampleOptions, type ValuesAtOptions } from "./valuesAt";
 
 export { random } from "./random";
 
@@ -25,6 +25,7 @@ export {
   shake,
   wiggle,
   sampled,
+  sampledPath,
   type WiggleOptions,
   type SampledOptions,
 } from "./recipes";
@@ -82,7 +83,7 @@ export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 
 export { hexBytes, hexOf, type Hex } from "./color";
 
-export type { Channel, TagChannels, Values } from "./channels";
+export type { Channel, ChannelValues, TagChannels, Values } from "./channels";
 
 export type { SvgNode, Child } from "./svg";
 
@@ -97,13 +98,7 @@ export {
   type PolylinePathOptions,
 } from "./geometry";
 
-export {
-  matchPaths,
-  sampledPath,
-  type MatchOptions,
-  type PathData,
-  type SampledPathOptions,
-} from "./paths";
+export { matchPaths, type MatchOptions, type PathData, type SampledPathOptions } from "./paths";
 
 export { num } from "./format";
 
@@ -155,7 +150,7 @@ export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
 
 export { Marker } from "./extras/marker";
 
-export { Camera, Steady, type CameraStop } from "./extras/camera";
+export { Camera, Steady, type CameraProps, type CameraStop } from "./extras/camera";
 
 export {
   base16,

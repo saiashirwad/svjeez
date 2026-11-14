@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ease, motion, render, sample, css } from "svjeez";
+import { css, ease, motion, render, valuesAt } from "svjeez";
 import { openScene, renderFrames } from "svjeez/frames";
 
 const browser = await renderFrames(
@@ -17,12 +17,12 @@ const browser = await renderFrames(
 
 const slide = motion({ x: 0 }).to({ x: 10 }, 1, ease.linear);
 
-describe("sample", () => {
+describe("valuesAt", () => {
   test("blends between keys with the transition's ease", () => {
-    expect(sample(slide, 0.5, { duration: 2 })).toEqual({ x: 5 });
-    expect(sample(slide, 1.5, { duration: 2 })).toEqual({ x: 10 });
+    expect(valuesAt(slide, 0.5, { duration: 2 })).toEqual({ x: 5 });
+    expect(valuesAt(slide, 1.5, { duration: 2 })).toEqual({ x: 10 });
 
-    const popped = sample(motion({ scale: 1 }).to({ scale: 2 }, 1, ease.pop), 0.6, {
+    const popped = valuesAt(motion({ scale: 1 }).to({ scale: 2 }, 1, ease.pop), 0.6, {
       duration: 1,
     });
 
@@ -32,24 +32,24 @@ describe("sample", () => {
   test("a cut holds the old value up to it", () => {
     const cut = motion({ opacity: 1 }).at(1).set({ opacity: 0 });
 
-    expect(sample(cut, 0.99, { duration: 2 })).toEqual({ opacity: 1 });
-    expect(sample(cut, 1.01, { duration: 2 })).toEqual({ opacity: 0 });
+    expect(valuesAt(cut, 0.99, { duration: 2 })).toEqual({ opacity: 1 });
+    expect(valuesAt(cut, 1.01, { duration: 2 })).toEqual({ opacity: 0 });
   });
 
   test("the scene loops unless loop is false, which holds the last frame", () => {
-    expect(sample(slide, 2.5, { duration: 2 })).toEqual({ x: 5 });
-    expect(sample(slide, -1.5, { duration: 2 })).toEqual({ x: 5 });
-    expect(sample(slide, 2.5, { duration: 2, loop: false })).toEqual({ x: 10 });
+    expect(valuesAt(slide, 2.5, { duration: 2 })).toEqual({ x: 5 });
+    expect(valuesAt(slide, -1.5, { duration: 2 })).toEqual({ x: 5 });
+    expect(valuesAt(slide, 2.5, { duration: 2, loop: false })).toEqual({ x: 10 });
   });
 
   test("a loop snaps to divide the scene, as render runs it", () => {
     const spin = motion({ rotate: 0 }).to({ rotate: 360 }, 0.9, ease.linear).loop(0.9);
 
-    expect(sample(spin, 1.5, { duration: 3 }).rotate).toBeCloseTo(180);
+    expect(valuesAt(spin, 1.5, { duration: 3 }).rotate).toBeCloseTo(180);
   });
 
   test("layers add up: x, y and rotate add, opacity and scale multiply", () => {
-    const values = sample(
+    const values = valuesAt(
       [
         motion({ x: 4, opacity: 0.5, rotate: 10 }),
         motion({ x: 1, y: 2, opacity: 0.5, scale: 2 }),
@@ -72,16 +72,16 @@ describe("sample", () => {
       ease.linear,
     );
 
-    expect(sample(lit, 0.25, { duration: 1 })).toEqual({ [glow]: 0.25 });
+    expect(valuesAt(lit, 0.25, { duration: 1 })).toEqual({ [glow]: 0.25 });
   });
 
   test("errors name what is missing", () => {
-    expect(() => sample(motion().to({ width: 10 }, 1), 0, { duration: 1 })).toThrow(
-      "sample() needs a starting value for width. Pass it to motion({ width: … }).",
+    expect(() => valuesAt(motion().to({ width: 10 }, 1), 0, { duration: 1 })).toThrow(
+      "valuesAt() needs a starting value for width. Pass it to motion({ width: … }).",
     );
-    expect(() => sample([motion({ width: 1 }), motion({ width: 2 })], 0, { duration: 1 })).toThrow(
-      "Two motions both animate `width` in sample(): put them in one motion().",
-    );
+    expect(() =>
+      valuesAt([motion({ width: 1 }), motion({ width: 2 })], 0, { duration: 1 }),
+    ).toThrow("Two motions both animate `width` in valuesAt(): put them in one motion().");
   });
 
   test.if(browser)("matches where the browser draws the element", async () => {
@@ -116,7 +116,7 @@ describe("sample", () => {
           return { x, y, opacity };
         }, undefined);
 
-        const values = sample(stack, time, { duration: 3 });
+        const values = valuesAt(stack, time, { duration: 3 });
 
         expect(drawn.x).toBeCloseTo(values.x ?? NaN, 0);
         expect(drawn.y).toBeCloseTo(values.y ?? NaN, 0);

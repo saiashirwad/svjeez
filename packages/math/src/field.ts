@@ -9,6 +9,7 @@ import {
   tint,
   type Base16,
   type Color,
+  type FlowOptions,
   type Motion,
   type Point,
   type Seconds,
@@ -143,103 +144,18 @@ export function fieldLines(
   );
 }
 
-export interface FieldFlowOptions {
-  /** When the particles appear. Each line then starts at its own point in its cycle. */
-  readonly at: Seconds;
-  /** px/s along every line. Default 120. */
-  readonly speed?: number;
+/** @deprecated use `FlowOptions` from "svjeez" */
+export type FieldFlowOptions = Omit<FlowOptions, "style" | "loop" | "period" | "over"> & {
   /** `dot` is one animated element per line, `comet` adds a short tail (a few more). Default `dot`. */
   readonly style?: "dot" | "comet";
-  /** Seconds a particle waits between trips. Default 0.4 of the length of its trip. */
-  readonly rest?: Seconds;
-  /** px a particle may stray from its line, which keeps the keyframes few. Default 1. */
-  readonly tolerance?: number;
-  /** Default the theme's orange. */
-  readonly color?: Color;
-  readonly size?: number;
-  readonly theme?: Base16;
-}
-
-/** Same as the golden angle on a circle: consecutive indices land far apart, and the sequence never repeats. */
-const GOLDEN = 0.6180339887498949;
-
-const lengthOf = (points: readonly Point[]): number =>
-  points
-    .slice(1)
-    .reduce((sum, p, k) => sum + Math.hypot(p.x - points[k]!.x, p.y - points[k]!.y), 0);
-
-/** The line cut `distance` along its length: the point of the cut belongs to both halves. */
-const cut = (points: readonly Point[], distance: number): [Point[], Point[]] => {
-  let left = distance;
-
-  for (let k = 1; k < points.length; k++) {
-    const [a, b] = [points[k - 1]!, points[k]!];
-    const leg = Math.hypot(b.x - a.x, b.y - a.y);
-
-    if (left <= leg && leg > 0) {
-      const t = left / leg;
-      const mid = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
-
-      return [
-        [...points.slice(0, k), mid],
-        [mid, ...points.slice(k)],
-      ];
-    }
-
-    left -= leg;
-  }
-
-  return [[...points], [points.at(-1)!]];
 };
 
-/**
- * One particle per line, each running its line again and again. Every line has its own length and so its own period,
- * and the particle starts a different way along it, set by the line's index, so the field flows without pulsing in
- * unison. A particle that starts part way runs as two pieces, so a comet's tail is cut where its line starts over.
- * Costs one or two animated elements per line for `dot`, four to eight for `comet`.
- */
+/** @deprecated use `flow(lines, options).node`, which takes a list of lines */
 export function fieldFlow(
   lines: readonly (readonly Point[])[],
   options: FieldFlowOptions,
 ): SvgNode {
-  const { at, speed = 120, style = "dot", theme = defaultDark, tolerance = 1 } = options;
-  const tail = style === "comet" ? 3 : 0;
-  const reach = style === "comet" ? 36 / speed : 0;
-
-  positive("fieldFlow()", "speed", speed);
-
-  return el.g(
-    { animation: motion({ opacity: 0 }).at(at).to({ opacity: 1 }, 0.6) },
-    lines.flatMap((line, i) => {
-      const points = simplify(line, tolerance);
-      const length = lengthOf(points);
-
-      if (!(length > 0)) return [];
-
-      const trip = length / speed;
-      const rest = options.rest ?? trip * 0.4;
-      const period = trip + reach + rest;
-      const [ahead, behind] = cut(points, (((i + 1) * GOLDEN) % 1) * length);
-
-      const piece = (part: readonly Point[], start: Seconds) =>
-        lengthOf(part) > 0
-          ? [
-              flow(part, {
-                at: start,
-                over: lengthOf(part) / speed,
-                loop: period,
-                style,
-                tail: tail || undefined,
-                color: options.color,
-                theme,
-                size: options.size ?? 2.5,
-              }).node,
-            ]
-          : [];
-
-      return [...piece(ahead, 0), ...piece(behind, lengthOf(ahead) / speed + rest)];
-    }),
-  );
+  return flow(lines, options).node;
 }
 
 export interface VectorFieldOptions {

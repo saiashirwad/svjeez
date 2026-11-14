@@ -306,8 +306,8 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("openScene() rejects a bad scale under the caller's name, before launching", async () => {
-    expect(openScene(fade, { scale: -1 }, "renderVideo()")).rejects.toThrow(
-      "renderVideo() needs a positive, finite scale, got -1.",
+    expect(openScene(fade, { scale: -1 }, "video()")).rejects.toThrow(
+      "video() needs a positive, finite scale, got -1.",
     );
   });
 

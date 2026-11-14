@@ -1,4 +1,4 @@
-import type { RestChannel, Values } from "../channels";
+import type { RestChannel, ChannelValues } from "../channels";
 import { el } from "../el";
 import { ease, type Seconds, type Span } from "../motion";
 import { enter } from "../recipes";
@@ -19,7 +19,7 @@ export interface RevealOptions {
   /** Each block's entrance. Default 0.4. */
   readonly over?: Seconds;
   /** Where each block enters from. Default `{ opacity: 0, y: 6 }`. */
-  readonly from?: Values<RestChannel>;
+  readonly from?: ChannelValues<RestChannel>;
 }
 
 export interface RevealResult {

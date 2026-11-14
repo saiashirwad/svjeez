@@ -8,7 +8,7 @@ import {
   exit,
   motion,
   render,
-  sample,
+  valuesAt,
   wiggle,
   type Child,
 } from "svjeez";
@@ -314,7 +314,7 @@ describe("effects", () => {
     expect(body(svg)).toContain('<rect width="10" height="10" filter="url(#f1)"/>');
   });
 
-  test("the reduced-motion still of a blur is the blur sample() reads at that moment, mid-transition included", () => {
+  test("the reduced-motion still of a blur is the blur valuesAt() reads at that moment, mid-transition included", () => {
     for (const curve of [ease.linear, ease.out, ease.pop, ease.steps(4)]) {
       const blur = motion({ blur: 0 }).at(1).to({ blur: 4 }, 3, curve);
 
@@ -324,7 +324,7 @@ describe("effects", () => {
       );
 
       const still = svg.match(/<filter id="f1s"[^>]*>\s*<feGaussianBlur stdDeviation="([^"]+)"/);
-      expect(Number(still?.[1])).toBeCloseTo(sample(blur, 3, { duration: 6 }).blur, 2);
+      expect(Number(still?.[1])).toBeCloseTo(valuesAt(blur, 3, { duration: 6 }).blur, 2);
       expect(Number(still?.[1])).toBeGreaterThan(0);
     }
   });

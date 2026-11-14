@@ -2,15 +2,7 @@ import { geoContains } from "d3-geo";
 import type { Feature, FeatureCollection } from "geojson";
 import { feature, merge, mesh } from "topojson-client";
 import type { GeometryObject, MultiPolygon, Polygon } from "topojson-specification";
-import {
-  sampled,
-  sampledPath,
-  type Motion,
-  type PathData,
-  type Point,
-  type Rect,
-  type Seconds,
-} from "svjeez";
+import { sampled, type Motion, type PathData, type Point, type Rect, type Seconds } from "svjeez";
 import type { GeoData, LonLat } from "./index.ts";
 import { sun } from "./sun.ts";
 import {
@@ -167,7 +159,7 @@ const features = (data: GeoData, object: string | undefined): Feature[] => {
   return "features" in read ? read.features : [read];
 };
 
-/** A turning globe whose land, borders, grid, routes and night are real paths, each a `sampledPath()` with a fixed point count. */
+/** A turning globe whose land, borders, grid, routes and night are real paths, each a `sampled.path()` with a fixed point count. */
 export function globe(data: GeoData, options: GlobeOptions): Globe {
   const { frame, tilt = 0, spin, simplify = 0.6, step = 6, tolerance = 1 } = options;
   const radius = Math.min(frame.w, frame.h) / 2;
@@ -308,7 +300,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     Math.max(0, (Math.hypot(x - center.x, y - center.y) - radius - 1) / 2);
 
   const turning = (sample: (t: Seconds) => string): Turning => {
-    const animation = sampledPath(sample, { duration, tolerance, slack });
+    const animation = sampled.path(sample, { duration, tolerance, slack });
 
     // SAFETY: sample writes every frame starting with M.
     return { d: sample(0) as PathData, animation };

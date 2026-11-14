@@ -188,7 +188,7 @@ describe("contourSweep", () => {
   });
 });
 
-describe("fieldFlow", () => {
+describe("flow along several lines", () => {
   const { lines } = streamlines(() => [1, 0], { bounds, spacing: 50 });
 
   test("loops one particle per line out of step with the others", () => {
@@ -196,7 +196,7 @@ describe("fieldFlow", () => {
       { width: 400, height: 300, duration: 8, title: "Flow", reducedMotion: false },
       <>
         {fieldLines(lines, { at: 0, over: 2 }).toString()}
-        {fieldFlow(lines, { at: 1 })}
+        {flow(lines, { at: 1 }).node}
       </>,
     );
 
@@ -204,25 +204,34 @@ describe("fieldFlow", () => {
     expect(new Set(svg.match(/translate:[\d.]+px [\d.]+px/g)).size).toBeGreaterThan(lines.length);
   });
 
-  test("flow rejects a loop shorter than the trip", () => {
-    expect(() => flow(lines[0]!, { at: 0, over: 3, style: "comet", loop: 2 })).toThrow(
-      "flow() needs a loop period past",
+  test("fieldFlow is flow(lines).node", () => {
+    const [a, b] = [
+      fieldFlow(lines, { at: 1, color: "#f80" }),
+      flow(lines, { at: 1, color: "#f80" }).node,
+    ];
+
+    expect(String(a)).toBe(String(b));
+  });
+
+  test("flow rejects a period shorter than the trip", () => {
+    expect(() => flow(lines[0]!, { at: 0, over: 3, style: "comet", period: 2 })).toThrow(
+      "flow() needs a period past",
     );
-    expect(() => flow(lines[0]!, { at: 0, style: "trace", loop: 4 })).toThrow(
+    expect(() => flow(lines[0]!, { at: 0, style: "trace", period: 4 })).toThrow(
       "flow() loops a dot, comet or packet.",
     );
   });
 });
 
-describe("fieldFlow", () => {
-  test("comets never trip the loop-period check on random lines", () => {
+describe("flow along several lines, comets", () => {
+  test("never trip the loop-period check on random lines", () => {
     let seed = 7;
     const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 
     for (let n = 0; n < 300; n++) {
       const line = Array.from({ length: 6 }, () => ({ x: random() * 300, y: random() * 300 }));
 
-      expect(() => fieldFlow([line], { at: 0, style: "comet" })).not.toThrow();
+      expect(() => flow([line], { at: 0, style: "comet" })).not.toThrow();
     }
   });
 });

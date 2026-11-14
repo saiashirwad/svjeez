@@ -65,7 +65,7 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
 - Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign. `easeAt(curve, progress)` gives an ease's value at a progress from 0 to 1, to reuse it inside `sampled()` or draw it beside the scene.
 - Stack with an array: `animation={[enter(...), wiggle(...)]}`. Index 0 is outermost, like a wrapper `<g>`. Falsy entries drop out.
 - Only `opacity x y scale rotate blur` stack. Every other channel takes one motion per element, or render throws `Two motions both animate`. Within one motion, `x` and `y` share a lane, so move them in one `.to()`.
-- `scale` and `rotate` pivot on the center of the element's box, which for a group is the box of everything in it. To turn about a chosen point, use `<Pivot at={{ x, y }} animation={spin}>…</Pivot>`: `at` is in the coordinates the children are drawn in (default 0,0), and every layer of the stack turns about it.
+- `scale` and `rotate` pivot on the center of the element's box, which for a group is the box of everything in it. To turn about a chosen point, use `<Pivot origin={{ x, y }} animation={spin}>…</Pivot>`: `origin` is in the coordinates the children are drawn in (default 0,0), and every layer of the stack turns about it.
 - `<Once>…</Once>` is a `<g>` whose motions, and every motion inside it, play the timeline one time and hold their last frame while the rest of a looping scene repeats: an intro, or a part that pops in when a page swaps in a new file with `restyle(svg, { at, onceAt: 0 })`.
 - Units: px, degrees for `rotate`, standard deviation in px for `blur`, CSS strings for colors.
 
@@ -96,7 +96,7 @@ wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; ch
 Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { duration, tolerance })` bakes a function of time into keyframes. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. To fly along a smooth route, `spline(points)` draws a Catmull-Rom curve through `{ x, y }` points: position `i + u` is `u` along leg `i`, `point(at)` and `angle(at)` feed `sampled()`, `tangent(at)` is the velocity, `path(from, to)` cuts exact path data (`d` is the whole route), and `nearest(p, from, to)` finds the position closest to a point.
 `precision: 1` rounds each sample to one decimal place before the keys are kept, which keeps the file small. `random(seed)` is the seeded stream `wiggle` uses: the same numbers from 0 up to 1 on every run, from a whole number or a string such as `"leg-3"`.
 
-`sample(stack, t, { duration })` reads what a motion or stack draws at scene time `t`, eased and looped as `render()` plays it, for placing something beside a moving part or drawing a readout of it. It returns the numeric channels and properties. Across layers `x`, `y` and `rotate` add and `opacity` and `scale` multiply.
+`valuesAt(stack, t, { duration })` reads what a motion or stack draws at scene time `t`, eased and looped as `render()` plays it, for placing something beside a moving part or drawing a readout of it. It returns the numeric channels and properties. Across layers `x`, `y` and `rotate` add and `opacity` and `scale` multiply.
 
 ```tsx
 sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translate: 1 } });
@@ -104,19 +104,19 @@ sampled((t) => ({ x: 100 * Math.cos(t) }), { duration: 12, tolerance: { translat
 
 ## Shape morphs
 
-`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampledPath(fn, { duration, tolerance })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is in px.
+`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampled.path(fn, { duration, tolerance })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is one number, in px, and `precision` (default 1) the decimal places of the path data. It takes the same `duration` and `step` as `sampled`.
 
 ```tsx
 const [square, star] = matchPaths([squareD, starD]);
 <path d={square} animation={motion({ d: square }).at(1).to({ d: star }, 0.8, ease.inOut)} />;
-sampledPath((t) => wavePath(t), { duration: 6, tolerance: 0.5 });
+sampled.path((t) => wavePath(t), { duration: 6, tolerance: 0.5 });
 ```
 
 Reduced motion shows a still copy of the path at `reducedMotion.at`.
 
 `polylinePath(points, { closed, precision })` writes the path data for straight runs through points (one decimal place by default), and `resample(points, count)` spaces `count` points evenly along them.
 
-`sampledPath`'s `slack: (x, y) => px` lets points that nobody sees stray further, which saves keys; `@svjeez/geo`'s turning globes use it for the side folded out past the clip.
+The path form's `slack: (x, y) => px` lets points that nobody sees stray further, which saves keys; `@svjeez/geo`'s turning globes use it for the side folded out past the clip.
 
 ## Errors and fixes
 
@@ -145,7 +145,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `loop(…) is shorter than the motion, which runs until …s.` | The period must cover every step |
 | `A step ending at …s overruns loop(…).` | Same, for a later step |
 | `d on <path> moves between paths with different commands, so it would jump. Write them through matchPaths() first.` | `matchPaths([a, b])` and animate between its results |
-| `sampledPath() returned a path with different commands at t=… than at t=0.` | Write every sample with the same points, or through `matchPaths()` |
+| `sampled.path() returned a path with different commands at t=… than at t=0.` | Write every sample with the same points, or through `matchPaths()` |
 | `… on <…> has … keys; the cap is ….` | Raise `tolerance`, or shorten it |
 | `to() needs a positive duration, got …. Use set() for a cut.` | Use `.set()` for an instant change |
 | `<…> has no attribute "…".` | camelCase: `strokeWidth`, not `stroke-width` |

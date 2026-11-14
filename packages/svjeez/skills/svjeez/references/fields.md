@@ -3,7 +3,7 @@
 Vector fields, streamlines, slope fields and contour lines, all from `@svjeez/math` (`npm i -D @svjeez/math`). They work in scene px, or in graph units through an `axes()` plot. Each returns path data or point lists, so you draw the result with `<path>`, `flow()` and the recipes you already know.
 
 ```tsx
-import { contours, fieldFlow, fieldLines, streamlines, vectorField } from "@svjeez/math";
+import { contours, fieldLines, streamlines, vectorField } from "@svjeez/math";
 ```
 
 ## Streamlines
@@ -29,11 +29,11 @@ Lines keep `spacing` px between neighbours. They start at the middle of `bounds`
 
 A line ends at the bounds, at a stagnation point, beside another line, or at `maxLength`.
 
-`fieldLines(lines, { at, over })` draws the lines on one after another, nearest the middle first. `each` sets how long one line takes, and `color`, `strokeWidth` and `opacity` style them. `fieldFlow(lines, { at })` runs one particle along every line, again and again:
+`fieldLines(lines, { at, over })` draws the lines on one after another, nearest the middle first. `each` sets how long one line takes, and `color`, `strokeWidth` and `opacity` style them. `flow(lines, { at })` from `svjeez` takes the whole list and runs one particle along every line, again and again:
 
 ```tsx
 {fieldLines(lines, { at: 1, over: 3, color: blue })}
-{fieldFlow(lines, { at: 3, speed: 110, color: orange })}
+{flow(lines, { at: 3, speed: 110, color: orange }).node}
 ```
 
 Every line has its own length and so its own period, and each particle starts a different way along its line, so the field never pulses. `style: "comet"` gives each particle a short tail. `rest` is the pause between trips. Mind the size. A `dot` costs one or two animated elements per line and the keyframes of its path, around 1 KB. `examples/fields/index.tsx` has about 55 lines, and with its two plots the scene is 212 KB. Use a larger `spacing` or `tolerance` to shrink it, and prefer `dot` over `comet` for more than about 30 lines.
@@ -88,4 +88,4 @@ Where loops split or merge, rings pair by order and one grows from a point, whic
 | `contours() needs bounds or axes to place the samples.` | Pass one of them. |
 | `contours() needs a grid of at least 2 by 2 with cols * rows values, got ….` | Make `values` as long as `cols * rows`. |
 | `contourSweep() found no line at level ….` | Sweep only levels the bounds cross, or widen the bounds. |
-| `flow() needs a loop period past …s to hold the trip and the comet's tail, got …s.` | Raise `loop`. |
+| `flow() needs a period past …s to hold the trip and the comet's tail, got …s.` | Raise `period`. |

@@ -6,7 +6,7 @@ import {
   type Color,
   type Motion,
   type Ref,
-  type Values,
+  type ChannelValues,
 } from "svjeez";
 
 export const W = 960;
@@ -117,7 +117,7 @@ export const envelope = (at: number, off: number, over = 0.4): Motion<"opacity">
 export const phased = <K extends Channel>(
   period: number,
   offset: number,
-  at: (u: number) => Values<K>,
+  at: (u: number) => ChannelValues<K>,
   pieces = 8,
 ): Motion<K> => {
   const shift = ((offset % period) + period) % period;
@@ -130,18 +130,18 @@ export const phased = <K extends Channel>(
   );
 
   const times = [...grid, wrap].sort((a, b) => a - b);
-  // SAFETY: K extends Target, so the keys of the Values<K> that at() returns are Target keys
-  let track: Motion = motion(at(progress(0)) as Values);
+  // SAFETY: K extends Target, so the keys of the ChannelValues<K> that at() returns are Target keys
+  let track: Motion = motion(at(progress(0)) as ChannelValues);
 
   for (let j = 1; j < times.length; j++) {
     const [from, to] = [times[j - 1]!, times[j]!];
     const cut = to === wrap;
-    // SAFETY: same Values<K> to Target widening as the first frame, since at() returns K values
-    track = track.at(from).to(at(cut ? 1 : progress(to)) as Values, to - from, ease.linear);
+    // SAFETY: same ChannelValues<K> to Target widening as the first frame, since at() returns K values
+    track = track.at(from).to(at(cut ? 1 : progress(to)) as ChannelValues, to - from, ease.linear);
 
     if (cut && wrap < period) {
-      // SAFETY: same Values<K> to Target widening as the first frame
-      track = track.set(at(0) as Values);
+      // SAFETY: same ChannelValues<K> to Target widening as the first frame
+      track = track.set(at(0) as ChannelValues);
     }
   }
 

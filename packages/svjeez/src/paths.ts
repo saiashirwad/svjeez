@@ -390,7 +390,7 @@ export interface SampledPathOptions {
   readonly step?: Seconds;
   /** How far, in px, any point of the replay may stray from the samples. */
   readonly tolerance: number;
-  /** Decimal places in the output. Default 1. */
+  /** Decimal places in the path data. Default 1. */
   readonly precision?: number;
   /**
    * Px beyond `tolerance` that a point may stray, given where it sits in a sample, for points nobody sees, such as
@@ -399,11 +399,8 @@ export interface SampledPathOptions {
   readonly slack?: (x: number, y: number) => number;
 }
 
-/**
- * Sample `(t) => d` densely, then keep only the keys the shape needs. Every sample must have the same commands,
- * as `matchPaths()` writes them.
- */
-export function sampledPath(
+/** What `sampled.path()` does when `sample` returns path data and `tolerance` is a number of px. */
+export function samplePath(
   sample: (t: Seconds) => string,
   options: SampledPathOptions,
 ): Motion<"d"> {
@@ -411,13 +408,13 @@ export function sampledPath(
   const places = options.precision ?? 1;
 
   if (!Number.isFinite(duration) || duration <= 0)
-    throw new Error(`sampledPath() needs a positive duration, got ${duration}.`);
+    throw new Error(`sampled.path() needs a positive duration, got ${duration}.`);
 
   if (!Number.isFinite(step) || step <= 0)
-    throw new Error(`sampledPath() needs a positive step, got ${step}.`);
+    throw new Error(`sampled.path() needs a positive step, got ${step}.`);
 
   if (!(tolerance >= 0))
-    throw new Error(`sampledPath() needs a non-negative tolerance, got ${tolerance}.`);
+    throw new Error(`sampled.path() needs a non-negative tolerance, got ${tolerance}.`);
   const edge = duration * NUDGE;
 
   const times = Array.from(
@@ -430,7 +427,7 @@ export function sampledPath(
   frames.forEach((d, i) => {
     if (commandsOf(d) !== commands)
       throw new Error(
-        `sampledPath() returned a path with different commands at t=${num(times[i]!)} than at t=0. Write every sample through matchPaths() or with the same points.`,
+        `sampled.path() returned a path with different commands at t=${num(times[i]!)} than at t=0. Write every sample through matchPaths() or with the same points.`,
       );
   });
   const values = frames.map(numbers);

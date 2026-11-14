@@ -1,4 +1,4 @@
-import { sample } from "svjeez";
+import { valuesAt } from "svjeez";
 import type { Part } from "./edit";
 import { form } from "./form";
 import type { Genome } from "./genome";
@@ -35,7 +35,7 @@ export const anchorsOf = (g: Genome, lay: Layout) => {
   const melted = (p: Pt) => (liquid ? meltMotion(meltBy(lay, p)) : undefined);
 
   const moved = (p: Pt, melt: ReturnType<typeof melted>, t: number): Pt =>
-    melt ? add(p, sample(melt, t, FILE)) : p;
+    melt ? add(p, valuesAt(melt, t, FILE)) : p;
 
   const legs = lay.legs.map((l, i) => ({
     l,
@@ -56,7 +56,7 @@ export const anchorsOf = (g: Genome, lay: Layout) => {
       eyeOnBody: false,
     })),
     ...legs.map(({ l, melt, swing }, i) => {
-      const { rotate = 0, scale = 1 } = sample(swing, t, FILE);
+      const { rotate = 0, scale = 1 } = valuesAt(swing, t, FILE);
 
       return {
         key: `legs-${i}`,
@@ -69,7 +69,7 @@ export const anchorsOf = (g: Genome, lay: Layout) => {
     ...tails.map(({ l, melt, wag }, i) => ({
       key: `tails-${i}`,
       part: "tails" as const,
-      at: turned(moved(l.at, melt, t), l.angle + sample(wag, t, FILE).rotate, tailTip(l.length)),
+      at: turned(moved(l.at, melt, t), l.angle + valuesAt(wag, t, FILE).rotate, tailTip(l.length)),
       r: l.width * 1.4,
       eyeOnBody: false,
     })),

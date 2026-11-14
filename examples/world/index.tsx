@@ -9,7 +9,6 @@ import {
   type Rect,
   type SvgNode,
   Camera,
-  Steady,
   flow,
   variables,
   type CameraStop,
@@ -169,7 +168,7 @@ function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
   const origin = { transformOrigin: `${x}px ${y}px` };
 
   return (
-    <Steady frame={rect(0, 0, W, H)} stops={stops} over={PAN} at={{ x, y }}>
+    <Camera frame={rect(0, 0, W, H)} stops={stops} over={PAN} steady origin={{ x, y }}>
       <g
         animation={motion({ opacity: 0, scale: 0.4 })
           .at(at)
@@ -192,7 +191,7 @@ function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
           {stop.city}
         </text>
       </g>
-    </Steady>
+    </Camera>
   );
 }
 

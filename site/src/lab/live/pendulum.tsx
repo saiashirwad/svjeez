@@ -61,7 +61,7 @@ export default (p: Values<typeof params> = defaults(params)) => {
         stroke="#F2B84B"
         strokeOpacity={0.35}
       />
-      <Pivot at={pivot} animation={swinging}>
+      <Pivot origin={pivot} animation={swinging}>
         <line x1={pivot.x} y1={pivot.y} x2={rest.x} y2={rest.y} stroke="#D9D2E3" strokeWidth={2} />
         <circle cx={rest.x} cy={rest.y} r={p.bob} fill="#F2B84B" />
         <circle cx={rest.x - p.bob / 3} cy={rest.y - p.bob / 3} r={p.bob / 3} fill="#FFE3A6" />

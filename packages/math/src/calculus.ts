@@ -3,7 +3,6 @@ import {
   easeAt,
   motion,
   sampled,
-  sampledPath,
   tint,
   type Attrs,
   type Base16,
@@ -271,7 +270,7 @@ export function calculus(graph: GraphContext): Calculus {
     el.path({
       ...attrs,
       d: at(0),
-      animation: end > 0 ? sampledPath(at, { duration: end, tolerance: 0.4 }) : undefined,
+      animation: end > 0 ? sampled.path(at, { duration: end, tolerance: 0.4 }) : undefined,
     });
 
   const dotAt = (

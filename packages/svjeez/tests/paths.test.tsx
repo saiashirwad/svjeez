@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { blendPaths, commandsOf } from "../src/paths";
-import { ease, matchPaths, motion, render, sampledPath, type Motion } from "svjeez";
+import { ease, matchPaths, motion, render, sampled, type Motion } from "svjeez";
 
 const scene = (animation: Motion<"d">, reducedMotion?: false) =>
   render(
@@ -72,9 +72,9 @@ describe("the d channel", () => {
   });
 });
 
-describe("sampledPath", () => {
+describe("sampled with path data", () => {
   test("keeps few keys for a shape that moves steadily", () => {
-    const m = sampledPath((t) => `M${10 * t} 0L${10 * t + 5} 5`, { duration: 4, tolerance: 0.1 });
+    const m = sampled.path((t) => `M${10 * t} 0L${10 * t + 5} 5`, { duration: 4, tolerance: 0.1 });
     const svg = scene(m);
     const values = svg.match(/values="([^"]*)"/)![1]!.split(";");
 
@@ -83,15 +83,15 @@ describe("sampledPath", () => {
 
   test("rejects samples with different commands", () => {
     expect(() =>
-      sampledPath((t) => (t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), { duration: 2, tolerance: 1 }),
-    ).toThrow("sampledPath() returned a path with different commands at t=1 than at t=0.");
+      sampled.path((t) => (t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), { duration: 2, tolerance: 1 }),
+    ).toThrow("sampled.path() returned a path with different commands at t=1 than at t=0.");
   });
 
   test("lets points stray by their slack", () => {
     const wave = (t: number) => `M0 0L${50 + 40 * Math.sin(t)} 0`;
 
     const keys = (slack?: (x: number, y: number) => number) =>
-      scene(sampledPath(wave, { duration: 4, tolerance: 0.5, slack }))
+      scene(sampled.path(wave, { duration: 4, tolerance: 0.5, slack }))
         .match(/values="([^"]*)"/)![1]!
         .split(";").length;
 

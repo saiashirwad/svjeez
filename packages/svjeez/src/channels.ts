@@ -198,7 +198,10 @@ type Table = typeof CHANNELS;
 
 export type Channel = keyof Table;
 
-export type Values<K extends Channel = Channel> = { readonly [P in K]?: Table[P]["value"] };
+export type ChannelValues<K extends Channel = Channel> = { readonly [P in K]?: Table[P]["value"] };
+
+/** @deprecated use `ChannelValues`, because `svjeez/params` has a `Values` of its own */
+export type Values<K extends Channel = Channel> = ChannelValues<K>;
 
 export type NumericChannel = {
   [C in Channel]: Table[C]["value"] extends number ? C : never;
@@ -212,7 +215,7 @@ export type AnimatedTag = Table[Channel]["tags"][number];
 
 export type Target = Channel | Property;
 
-export type TargetValues = Values & PropertyValues;
+export type TargetValues = ChannelValues & PropertyValues;
 
 export type TargetValue = number | Color | PathData;
 
@@ -251,9 +254,9 @@ export const laneOf = (tag: string, channel: Target): string => {
   return backendOf(tag, channel) === "smil" ? (row.attr ?? channel) : row.lane;
 };
 
-const isNumeric = (value: Values[Channel]): value is number => typeof value === "number";
+const isNumeric = (value: ChannelValues[Channel]): value is number => typeof value === "number";
 
-export const formatValue = (value: Values[Channel]): string =>
+export const formatValue = (value: ChannelValues[Channel]): string =>
   isNumeric(value) ? num(value) : String(value);
 
 export const clamp = (channel: Channel, value: number): number => {

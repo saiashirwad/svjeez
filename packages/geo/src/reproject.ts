@@ -12,7 +12,7 @@ import type {
   MultiPolygon as TopoMultiPolygon,
   Polygon as TopoPolygon,
 } from "topojson-specification";
-import { sampledPath, type PathData, type Rect, type Seconds } from "svjeez";
+import { sampled, type PathData, type Rect, type Seconds } from "svjeez";
 import type { Turning } from "./globe.ts";
 import type { GeoData, GeoMap, LonLat, Region } from "./index.ts";
 import { RAD, add, angle, cross, dot, lonLat, scale, unit, vec, type Vec3 } from "./sphere.ts";
@@ -332,5 +332,5 @@ export function trueSize(
     );
   };
 
-  return { d: sample(0), animation: sampledPath(sample, { duration, tolerance }) };
+  return { d: sample(0), animation: sampled.path(sample, { duration, tolerance }) };
 }

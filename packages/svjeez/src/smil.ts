@@ -1,13 +1,17 @@
-import { formatValue, type Channel, type Target, type Values } from "./channels";
+import { formatValue, type Channel, type Target, type ChannelValues } from "./channels";
 import type { Canvas } from "./compile";
 import { num } from "./format";
 import { moving, type Key } from "./keys";
 import type { Seconds } from "./motion";
 import { element, type SvgNode } from "./svg";
 
-const isNumeric = (value: Values[Channel]): value is number => typeof value === "number";
+const isNumeric = (value: ChannelValues[Channel]): value is number => typeof value === "number";
 
-const lerp = (from: Values[Channel], to: Values[Channel], amount: number): Values[Channel] =>
+const lerp = (
+  from: ChannelValues[Channel],
+  to: ChannelValues[Channel],
+  amount: number,
+): ChannelValues[Channel] =>
   isNumeric(from) && isNumeric(to) ? from + (to - from) * amount : amount < 1 ? from : to;
 
 export const smilAttributes = (
@@ -20,7 +24,7 @@ export const smilAttributes = (
 ) => {
   const movingKeys = keys.filter((_, index) => moving(keys, index));
   const discrete = movingKeys.length > 0 && movingKeys.every((key) => key.ease.kind === "steps");
-  const points: { t: Seconds; value: Values[Channel]; spline: string }[] = [];
+  const points: { t: Seconds; value: ChannelValues[Channel]; spline: string }[] = [];
   keys.forEach((key, index) => {
     const value = key.values[channel];
     const next = keys[index + 1];

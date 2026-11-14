@@ -40,7 +40,7 @@ const centerAt = async (svg: string, time: number) => {
 describe("Pivot", () => {
   test("gives every layer of the stack its own group, each turning about `at`", () => {
     const svg = scene(
-      <Pivot at={{ x: 50, y: 40.5 }} animation={[quarter, false, quarter]}>
+      <Pivot origin={{ x: 50, y: 40.5 }} animation={[quarter, false, quarter]}>
         <rect width={4} height={4} />
       </Pivot>,
     );
@@ -55,7 +55,7 @@ describe("Pivot", () => {
     "two stacked turns of 90 degrees carry a box halfway round the point",
     async () => {
       const svg = scene(
-        <Pivot at={{ x: 50, y: 50 }} animation={[quarter, quarter]}>
+        <Pivot origin={{ x: 50, y: 50 }} animation={[quarter, quarter]}>
           <rect id="box" x={86} y={46} width={8} height={8} />
         </Pivot>,
       );

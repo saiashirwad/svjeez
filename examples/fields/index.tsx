@@ -2,7 +2,6 @@ import {
   axes,
   contours,
   contourSweep,
-  fieldFlow,
   fieldLines,
   slopeField,
   slopeSolution,
@@ -10,7 +9,7 @@ import {
   vectorField,
   type VectorField,
 } from "@svjeez/math";
-import { draw, enter, motion, render, tint } from "svjeez";
+import { draw, enter, flow, motion, render, tint } from "svjeez";
 import { css, mono, theme } from "../style";
 
 const W = 960;
@@ -143,7 +142,7 @@ export default function build(): string {
       </g>
 
       {fieldLines(lines.lines, { at: 1.2, over: 3.2, color: blue, opacity: 0.5, theme })}
-      {fieldFlow(lines.lines, { at: 3.5, color: orange, size: 3, speed: 110, theme })}
+      {flow(lines.lines, { at: 3.5, color: orange, size: 3, speed: 110, theme }).node}
       {label(32, 512, "streamlines of a wind", 1.2)}
 
       <g>

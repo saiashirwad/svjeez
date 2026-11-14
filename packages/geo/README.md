@@ -131,7 +131,7 @@ Particles still in flight at the end of the scene fail the scene's length check,
 
 ## Turning globes
 
-`globe(data, { frame, tilt, spin })` turns an orthographic globe whose land, borders, grid, routes and night side are real paths. Each is a `sampledPath()` from svjeez with a fixed point count. A point behind the globe is folded out past the rim rather than clipped, so a ring keeps its points as it crosses the horizon, and the fold runs around the hidden pole, or a clear parallel, so no ring wraps the wrong way. Clip every layer to `globe.sphere`.
+`globe(data, { frame, tilt, spin })` turns an orthographic globe whose land, borders, grid, routes and night side are real paths. Each is a `sampled.path()` from svjeez with a fixed point count. A point behind the globe is folded out past the rim rather than clipped, so a ring keeps its points as it crosses the horizon, and the fold runs around the hidden pole, or a clear parallel, so no ring wraps the wrong way. Clip every layer to `globe.sphere`.
 
 ```tsx
 const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 24 } });

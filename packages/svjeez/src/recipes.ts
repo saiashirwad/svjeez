@@ -6,8 +6,9 @@ import {
   type NumericChannel,
   type RestChannel,
   type TargetValues,
-  type Values,
+  type ChannelValues,
 } from "./channels";
+import { samplePath } from "./paths";
 import type { NumericProperty } from "./properties";
 import { random } from "./random";
 import {
@@ -33,22 +34,22 @@ const span = ({ at, over }: Span, what: string): Span => {
   return { at, over };
 };
 
-// SAFETY: values is typed Values<RestChannel>, so its keys are rest channel names.
-const rest = (values: Values<RestChannel>): Values<RestChannel> =>
+// SAFETY: values is typed ChannelValues<RestChannel>, so its keys are rest channel names.
+const rest = (values: ChannelValues<RestChannel>): ChannelValues<RestChannel> =>
   Object.fromEntries(
     (Object.keys(values) as RestChannel[]).map((channel) => [channel, CHANNELS[channel].identity]),
   );
 
 /** Arrive from `from` to rest. Without `from` it is a fade-in. */
 export function enter(at: Span, from?: undefined, curve?: Ease): Motion<"opacity">;
-export function enter<V extends Values<RestChannel>>(
+export function enter<V extends ChannelValues<RestChannel>>(
   at: Span,
   from: Exact<V, RestChannel>,
   curve?: Ease,
 ): Motion<keyof V & RestChannel>;
 export function enter(
   at: Span,
-  from: Values<RestChannel> = { opacity: 0 },
+  from: ChannelValues<RestChannel> = { opacity: 0 },
   curve: Ease = ease.out,
 ): Motion {
   const { at: start, over } = span(at, "enter()");
@@ -58,14 +59,14 @@ export function enter(
 
 /** Leave rest for `to`. Without `to` it is a fade-out. */
 export function exit(at: Span, to?: undefined, curve?: Ease): Motion<"opacity">;
-export function exit<V extends Values<RestChannel>>(
+export function exit<V extends ChannelValues<RestChannel>>(
   at: Span,
   to: Exact<V, RestChannel>,
   curve?: Ease,
 ): Motion<keyof V & RestChannel>;
 export function exit(
   at: Span,
-  to: Values<RestChannel> = { opacity: 0 },
+  to: ChannelValues<RestChannel> = { opacity: 0 },
   curve: Ease = ease.out,
 ): Motion {
   const { at: start, over } = span(at, "exit()");
@@ -81,16 +82,16 @@ export const draw = (at: Span, curve: Ease = ease.out): Motion<"draw"> => {
 };
 
 /** Damped oscillation around rest. Deterministic. `rate` is direction changes per second. */
-export function shake<V extends Values<Shake>>(
+export function shake<V extends ChannelValues<Shake>>(
   at: Span,
   amplitude: Exact<V, Shake>,
   options: { readonly rate?: number } = {},
 ): Motion<keyof V & Shake> {
   const { at: start, over } = span(at, "shake()");
   const count = Math.max(2, Math.round(over * (options.rate ?? 12)));
-  const amounts: Values<Shake> = amplitude;
+  const amounts: ChannelValues<Shake> = amplitude;
 
-  const swing = (k: number): Values<Shake> =>
+  const swing = (k: number): ChannelValues<Shake> =>
     Object.fromEntries(
       Object.entries(amounts).map(([channel, amp]) => [
         channel,
@@ -119,7 +120,7 @@ export interface WiggleOptions {
 }
 
 /** Seeded noise around rest, looping seamlessly. Values are baked at call time, so output is reproducible. */
-export function wiggle<V extends Values<RestChannel>>(
+export function wiggle<V extends ChannelValues<RestChannel>>(
   amplitude: Exact<V, RestChannel>,
   options: WiggleOptions,
 ): Motion<keyof V & RestChannel> {
@@ -129,8 +130,8 @@ export function wiggle<V extends Values<RestChannel>>(
     throw new Error(`wiggle() needs a positive period, got ${period}.`);
   const count = Math.max(2, Math.round((options.rate ?? 8) * period));
   const next = random(String(options.seed));
-  const amounts: Values<RestChannel> = amplitude;
-  // SAFETY: amounts is typed Values<RestChannel>, so its keys are rest channel names.
+  const amounts: ChannelValues<RestChannel> = amplitude;
+  // SAFETY: amounts is typed ChannelValues<RestChannel>, so its keys are rest channel names.
   const channels = (Object.keys(amounts) as RestChannel[]).sort();
 
   const samples = channels.map((channel) => {
@@ -140,7 +141,7 @@ export function wiggle<V extends Values<RestChannel>>(
     return Array.from({ length: count }, () => clamp(channel, base + amp * (next() * 2 - 1)));
   });
 
-  const at = (i: number): Values<RestChannel> =>
+  const at = (i: number): ChannelValues<RestChannel> =>
     Object.fromEntries(channels.map((channel, c) => [channel, samples[c]![i % count]]));
 
   let track: Motion = motion(at(0));
@@ -364,3 +365,12 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   // SAFETY: every step was built from frame keys that are Sampled names, so track only moves keyof V & Sampled.
   return track as Motion<keyof V & Sampled>;
 }
+
+/**
+ * Sample `(t) => d` densely, then keep only the keys the shape needs. `tolerance` is one number of px, and
+ * `precision` the decimal places of the path data. Every sample must have the same commands, as `matchPaths()` writes them.
+ */
+sampled.path = samplePath;
+
+/** @deprecated use `sampled.path` */
+export const sampledPath = samplePath;

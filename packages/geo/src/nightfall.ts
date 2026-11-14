@@ -1,4 +1,4 @@
-import { sampledPath, type PathData, type Seconds } from "svjeez";
+import { sampled, type PathData, type Seconds } from "svjeez";
 import type { Turning } from "./globe.ts";
 import type { GeoMap } from "./index.ts";
 import { RAD } from "./sphere.ts";
@@ -60,5 +60,5 @@ export function nightfall(
     return `M${[...top, ...bottom].map(([x, y]) => `${fmt(x)} ${fmt(y)}`).join(" ")}Z` as PathData;
   };
 
-  return { d: sample(0), animation: sampledPath(sample, { duration, tolerance }) };
+  return { d: sample(0), animation: sampled.path(sample, { duration, tolerance }) };
 }

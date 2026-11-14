@@ -10,7 +10,7 @@ import { isNumber, keysOf, snapPeriod, valueAt } from "./keys";
 import { dataOf, type Motion, type Seconds, type Stack } from "./motion";
 import type { NumericProperty } from "./properties";
 
-export interface SampleOptions {
+export interface ValuesAtOptions {
   /** The scene's `duration`, as passed to `render()`. */
   readonly duration: Seconds;
   /** The scene's `loop`, as passed to `render()`. False holds the last frame after `duration`. Default true. */
@@ -29,7 +29,7 @@ const STACKED: Partial<Record<Target, (outer: number, inner: number) => number>>
   blur: Math.hypot,
 };
 
-const layerAt = (layer: Motion, t: Seconds, { duration, loop = true }: SampleOptions) => {
+const layerAt = (layer: Motion, t: Seconds, { duration, loop = true }: ValuesAtOptions) => {
   const data = dataOf(layer);
   const period = data.period ?? duration;
   const snapped = data.period === undefined ? duration : snapPeriod(data.period, duration);
@@ -50,7 +50,7 @@ const layerAt = (layer: Motion, t: Seconds, { duration, loop = true }: SampleOpt
 
     if (!isNumber(start))
       throw new Error(
-        `sample() needs a starting value for ${target}. Pass it to motion({ ${target}: … }).`,
+        `valuesAt() needs a starting value for ${target}. Pass it to motion({ ${target}: … }).`,
       );
 
     // SAFETY: the one entry pairs target with a value read for it, so the object is a TargetValues.
@@ -77,26 +77,26 @@ const layerAt = (layer: Motion, t: Seconds, { duration, loop = true }: SampleOpt
  * `rotate` add, `opacity` and `scale` multiply. A layer that turns or scales outside one that moves is not
  * composed as a matrix, so read those layers one at a time.
  */
-export function sample<K extends Target>(
+export function valuesAt<K extends Target>(
   motion: Motion<K>,
   t: Seconds,
-  options: SampleOptions,
+  options: ValuesAtOptions,
 ): { readonly [P in Extract<K, NumericTarget>]: number };
 /** A stack's channels are optional, since a falsy layer adds none. */
-export function sample<K extends Target>(
+export function valuesAt<K extends Target>(
   stack: Stack<K>,
   t: Seconds,
-  options: SampleOptions,
+  options: ValuesAtOptions,
 ): { readonly [P in Extract<K, NumericTarget>]?: number };
-export function sample(
+export function valuesAt(
   stack: Stack,
   t: Seconds,
-  options: SampleOptions,
+  options: ValuesAtOptions,
 ): { readonly [target: string]: number } {
   if (!(options.duration > 0))
-    throw new Error(`sample() needs a positive duration, got ${options.duration}.`);
+    throw new Error(`valuesAt() needs a positive duration, got ${options.duration}.`);
 
-  if (!Number.isFinite(t)) throw new Error(`sample() needs a finite time, got ${t}.`);
+  if (!Number.isFinite(t)) throw new Error(`valuesAt() needs a finite time, got ${t}.`);
   const layers = (Array.isArray(stack) ? stack : [stack]).filter((layer) => !!layer);
   const out = new Map<Target, number>();
 
@@ -107,10 +107,16 @@ export function sample(
 
       if (known !== undefined && !add)
         throw new Error(
-          `Two motions both animate \`${target}\` in sample(): put them in one motion().`,
+          `Two motions both animate \`${target}\` in valuesAt(): put them in one motion().`,
         );
       out.set(target, known === undefined ? value : add!(known, value));
     }
 
   return Object.fromEntries(out);
 }
+
+/** @deprecated use `valuesAt` */
+export const sample = valuesAt;
+
+/** @deprecated use `ValuesAtOptions` */
+export type SampleOptions = ValuesAtOptions;

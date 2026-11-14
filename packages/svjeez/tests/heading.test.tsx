@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { rect, render, type SvgNode, Camera, Steady, travel, type CameraStop } from "svjeez";
+import { rect, render, type SvgNode, Camera, travel, type CameraStop } from "svjeez";
 
 const scene = (...children: SvgNode[]) =>
   render({ width: 400, height: 300, duration: 10, title: "Test" }, <>{children}</>);
@@ -61,7 +61,7 @@ describe("travel with heading", () => {
   });
 });
 
-describe("Steady", () => {
+describe("Camera steady", () => {
   const frame = rect(0, 0, 400, 300);
 
   const stops: CameraStop[] = [
@@ -72,9 +72,9 @@ describe("Steady", () => {
   test("scales by the inverse of the camera's zoom around its anchor", () => {
     const svg = scene(
       <Camera frame={frame} stops={stops}>
-        <Steady frame={frame} stops={stops} at={{ x: 150, y: 120 }}>
+        <Camera frame={frame} stops={stops} steady origin={{ x: 150, y: 120 }}>
           <circle r={4} />
-        </Steady>
+        </Camera>
       </Camera>,
     );
 

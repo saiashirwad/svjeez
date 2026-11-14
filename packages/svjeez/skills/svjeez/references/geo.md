@@ -36,7 +36,7 @@ Dots turn more cheaply than paths, through CSS alone. Register `lat` and `lon` w
 
 ## Turning globes
 
-`globe(data, { frame, tilt, spin: { from, to, over } })` turns a globe whose outlines are real paths. `from` and `to` are the longitude at the middle; a day turns from `lon` to `lon - 360`. Every layer is a `sampledPath()` with a fixed point count: the hidden side folds out past the rim instead of being clipped, so clip every layer to `globe.sphere`.
+`globe(data, { frame, tilt, spin: { from, to, over } })` turns a globe whose outlines are real paths. `from` and `to` are the longitude at the middle; a day turns from `lon` to `lon - 360`. Every layer is a `sampled.path()` with a fixed point count: the hidden side folds out past the rim instead of being clipped, so clip every layer to `globe.sphere`.
 
 ```tsx
 const earth = globe(world, { frame: rect(430, 44, 452, 452), tilt: 22, spin: { from: 0, to: -360, over: 24 } });
