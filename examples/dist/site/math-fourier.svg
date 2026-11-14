@@ -221,7 +221,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
     </g>
     <g class="sans a m26">
-      <text x="248" y="318" font-size="12" fill="var(--base03)">sampled((t) =&gt; tip(t), { duration })</text>
+      <text x="248" y="318" font-size="12" fill="var(--base03)">sampled((t) =&gt; tip(t), { over })</text>
     </g>
     <g class="a m55">
       <g>

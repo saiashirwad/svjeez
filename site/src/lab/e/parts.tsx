@@ -98,7 +98,7 @@ export const heads = (cx: Cx) => {
 
             return { x: lay.orbit!.rx * Math.cos(a), y: lay.orbit!.ry * Math.sin(a) };
           },
-          { duration: DURATION, step: 0.1, precision: 1, tolerance: { translate: 1 } },
+          { over: DURATION, step: 0.1, precision: 1, tolerance: { translate: 1 } },
         )
       : undefined;
 

@@ -389,7 +389,7 @@ export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): E
   };
 
   const trail = sampled((t) => ({ draw: drawn(t) }), {
-    duration: at + over,
+    over: at + over,
     step: over / 160,
     tolerance: { draw: 0.002 },
   });

@@ -62,11 +62,11 @@ export default (feel: Feel = defaults(params)): string => {
 
         return { x: (W - w) / 2, y: H - h, width: w, height: h };
       },
-      { duration, step: 1 / 60, tolerance: { translate: 0.4, width: 0.4, height: 0.4 } },
+      { over: duration, step: 1 / 60, tolerance: { translate: 0.4, width: 0.4, height: 0.4 } },
     );
 
     const eyes = sampled((t) => ({ y: H * s(t) * 0.75 }), {
-      duration,
+      over: duration,
       step: 1 / 60,
       tolerance: { translate: 0.4 },
     });

@@ -332,5 +332,5 @@ export function trueSize(
     );
   };
 
-  return { d: sample(0), animation: sampled.path(sample, { duration, tolerance }) };
+  return { d: sample(0), animation: sampled.path(sample, { over: duration, tolerance }) };
 }

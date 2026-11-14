@@ -9,7 +9,7 @@ const R = 70;
 const moon = sampled(
   (t) => ({ x: R * Math.cos((2 * Math.PI * t) / D), y: 0.4 * R * Math.sin((2 * Math.PI * t) / D) }),
   {
-    duration: D,
+    over: D,
     tolerance: { translate: 0.5 },
   },
 );

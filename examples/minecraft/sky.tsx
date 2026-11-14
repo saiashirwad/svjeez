@@ -136,7 +136,7 @@ const moonHalo = halo(C.moon);
 
 export function Sun(): SvgNode {
   return (
-    <g animation={sampled(sunPath, { duration: D, tolerance: { translate: 0.5, opacity: 0.05 } })}>
+    <g animation={sampled(sunPath, { over: D, tolerance: { translate: 0.5, opacity: 0.05 } })}>
       <circle r={96} fill={sunHalo} />
       <rect x={-28} y={-28} width={56} height={56} fill={C.sun} />
       <rect x={-20} y={-20} width={40} height={40} fill={C.sunCore} />
@@ -146,7 +146,7 @@ export function Sun(): SvgNode {
 
 export function Moon(): SvgNode {
   return (
-    <g animation={sampled(moonPath, { duration: D, tolerance: { translate: 0.5 } })}>
+    <g animation={sampled(moonPath, { over: D, tolerance: { translate: 0.5 } })}>
       <circle r={80} fill={moonHalo} />
       <rect x={-22} y={-22} width={44} height={44} fill={C.moon} />
       <rect x={-14} y={-12} width={10} height={10} fill={C.moonShade} />
@@ -315,7 +315,7 @@ const flake = (
 
       return { x: sx + ORIGIN.x, y: sy + ORIGIN.y, opacity: clamp((1 - down) * 10) };
     },
-    { duration: period, tolerance: { translate: 0.5, opacity: 0.05 } },
+    { over: period, tolerance: { translate: 0.5, opacity: 0.05 } },
   ).loop(period);
 
 const FALLS = [

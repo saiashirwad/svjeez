@@ -510,13 +510,13 @@ const wavePath = Array.from({ length: 181 }, (_, i) => SPRING.at + (i / 180) * S
   .join("");
 
 const weightMotion = sampled((t) => ({ y: springY(t) }), {
-  duration: D,
+  over: D,
   step: 1 / 50,
   tolerance: { translate: 0.4 },
 });
 
 const playheadMotion = sampled((t) => ({ x: plotX(t), y: SPRING.midY + springY(t) }), {
-  duration: D,
+  over: D,
   step: 1 / 50,
   tolerance: { translate: 0.4 },
 });

@@ -115,7 +115,7 @@ export default () =>
             .to({ opacity: 0, scale: 2.4 }, 1)}
         />
       ))}
-      <g animation={sampled(fly, { duration, tolerance: { translate: 0.5, rotate: 1 } })}>
+      <g animation={sampled(fly, { over: duration, tolerance: { translate: 0.5, rotate: 1 } })}>
         <path
           d="M-19 -12L22 0L-19 12L-11 0Z"
           fill="#FFFFFF"

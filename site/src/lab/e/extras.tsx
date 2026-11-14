@@ -18,7 +18,7 @@ export const ghost = (cx: Cx, bodyD: string) =>
           x: 14 * Math.cos((Math.PI * 2 * t) / 4),
           y: 10 * Math.sin((Math.PI * 4 * t) / 4),
         }),
-        { duration: 4, step: 0.1, precision: 1, tolerance: { translate: 1 } },
+        { over: 4, step: 0.1, precision: 1, tolerance: { translate: 1 } },
       ).loop(4)}
     />
   );

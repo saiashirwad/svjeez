@@ -149,7 +149,7 @@ const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 2
 
 `reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
 
-`trueSize(map, region, to, { at, over })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. `nightfall(map, (t) => date, { duration })` moves the night side of a flat map through a day or a year as one shape, a column of darkness per longitude, so it holds together across an equinox. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
+`trueSize(map, region, to, { at, over })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. `nightfall(map, (t) => date, { over })` moves the night side of a flat map through a day or a year as one shape, a column of darkness per longitude, so it holds together across an equinox. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
 
 ## Errors
 

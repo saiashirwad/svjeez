@@ -38,6 +38,8 @@ export interface GlobeOptions {
   /** The turn, or a function from time to the `[lon, lat]` at the globe's middle, which ignores `tilt`. */
   readonly spin: Spin | ((t: Seconds) => LonLat);
   /** Seconds every motion runs. Default the end of `spin`. A function `spin` needs it. */
+  readonly over?: Seconds;
+  /** @deprecated use `over` */
   readonly duration?: Seconds;
   /** The TopoJSON object to read. Default the topology's first object. */
   readonly object?: string;
@@ -175,14 +177,15 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
         };
 
   const duration =
+    options.over ??
     options.duration ??
     (spin instanceof Function
       ? (() => {
-          throw new Error("globe() with a spin function needs a duration, as in { duration: 24 }.");
+          throw new Error("globe() with a spin function needs an over, as in { over: 24 }.");
         })()
       : (spin.at ?? 0) + spin.over);
 
-  if (!(duration > 0)) throw new Error(`globe() needs a positive duration, got ${duration}.`);
+  if (!(duration > 0)) throw new Error(`globe() needs a positive over, got ${duration}.`);
 
   const times = Array.from({ length: Math.ceil(duration / SAMPLE) + 1 }, (_, i) =>
     Math.min(duration, i * SAMPLE),
@@ -300,7 +303,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     Math.max(0, (Math.hypot(x - center.x, y - center.y) - radius - 1) / 2);
 
   const turning = (sample: (t: Seconds) => string): Turning => {
-    const animation = sampled.path(sample, { duration, tolerance, slack });
+    const animation = sampled.path(sample, { over: duration, tolerance, slack });
 
     // SAFETY: sample writes every frame starting with M.
     return { d: sample(0) as PathData, animation };
@@ -577,7 +580,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
 
             return { x, y, opacity: Math.min(1, Math.max(0, dot(p, v.toward) / fade)) };
           },
-          { duration, tolerance: { translate: tolerance, opacity: 0.02 } },
+          { over: duration, tolerance: { translate: tolerance, opacity: 0.02 } },
         ),
       };
     },

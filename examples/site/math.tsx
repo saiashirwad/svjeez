@@ -37,22 +37,22 @@ const sample =
 
 const point = sampled(
   sample((x, y) => ({ x, y })),
-  { duration: D, tolerance: { translate: 0.3 } },
+  { over: D, tolerance: { translate: 0.3 } },
 );
 
 const radius = sampled((t) => ({ rotate: (-theta(t) * 180) / Math.PI }), {
-  duration: D,
+  over: D,
   tolerance: { rotate: 0.4 },
 });
 
 const cosine = sampled(
   sample((x) => ({ x: Math.min(0, x), width: Math.abs(x) })),
-  { duration: D, tolerance: { translate: 0.3, width: 0.3 } },
+  { over: D, tolerance: { translate: 0.3, width: 0.3 } },
 );
 
 const sine = sampled(
   sample((x, y) => ({ x, y: Math.min(0, y), height: Math.abs(y) })),
-  { duration: D, tolerance: { translate: 0.3, height: 0.3 } },
+  { over: D, tolerance: { translate: 0.3, height: 0.3 } },
 );
 
 const at = { x: 238, y: CY - 22, fontSize: 25, theme } as const;

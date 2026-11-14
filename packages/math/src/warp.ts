@@ -190,9 +190,7 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
       return el.path({
         d: d(0),
         fill,
-        animation: end
-          ? sampled.path(d, { duration: end.at + end.over, tolerance: 0.25 })
-          : undefined,
+        animation: end ? sampled.path(d, { over: end.at + end.over, tolerance: 0.25 }) : undefined,
       });
     },
     ride(point, direction, push, content) {

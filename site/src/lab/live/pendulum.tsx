@@ -27,7 +27,7 @@ export default (p: Values<typeof params> = defaults(params)) => {
   const period = 2 * Math.PI * Math.sqrt(p.length / 2000);
 
   const swinging = sampled((t) => ({ rotate: -p.swing * Math.cos((2 * Math.PI * t) / period) }), {
-    duration: period,
+    over: period,
     tolerance: { rotate: 0.2 },
   });
 

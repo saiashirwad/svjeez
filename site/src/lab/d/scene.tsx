@@ -150,7 +150,7 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
 
       return { draw: (along[j]! + (along[j + 1]! - along[j]!) * (u - j)) / length };
     },
-    { duration: D, step: D / 240, tolerance: { draw: 0.001 } },
+    { over: D, step: D / 240, tolerance: { draw: 0.001 } },
   );
 
   /** Each circle turns relative to the one it rides, so its own arm points at its true angle. */

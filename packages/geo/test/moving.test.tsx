@@ -164,9 +164,9 @@ describe("globe()", () => {
     expect(svg).toMatch(/opacity:0/);
   });
 
-  test("needs a duration with a spin function", () => {
+  test("needs an over with a spin function", () => {
     expect(() => globe(world, { frame, spin: (t) => [t, 0] })).toThrow(
-      "globe() with a spin function needs a duration",
+      "globe() with a spin function needs an over",
     );
   });
 });
@@ -240,15 +240,21 @@ describe("nightfall()", () => {
 
   test("keeps one shape through an equinox", () => {
     const start = Date.UTC(2026, 2, 10, 12);
-    const night = nightfall(map, (t) => new Date(start + t * 86_400_000), { duration: 20 });
+    const night = nightfall(map, (t) => new Date(start + t * 86_400_000), { over: 20 });
 
     expect(() =>
       render({ width: 400, height: 400, duration: 20, title: "Year" }, <path {...night} />),
     ).not.toThrow();
   });
 
+  test("duration is the older spelling of over", () => {
+    const date = () => new Date(Date.UTC(2026, 5, 21, 12));
+
+    expect(nightfall(map, date, { duration: 1 })).toEqual(nightfall(map, date, { over: 1 }));
+  });
+
   test("lights the north pole in June", () => {
-    const june = nightfall(map, () => new Date(Date.UTC(2026, 5, 21, 12)), { duration: 1 });
+    const june = nightfall(map, () => new Date(Date.UTC(2026, 5, 21, 12)), { over: 1 });
     const north = map.point([0, 85]);
     const south = map.point([0, -85]);
 

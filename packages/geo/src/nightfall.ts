@@ -4,14 +4,23 @@ import type { GeoMap } from "./index.ts";
 import { RAD } from "./sphere.ts";
 import { sun } from "./sun.ts";
 
-export interface NightfallOptions {
-  /** Seconds the motion runs. */
-  readonly duration: Seconds;
+export type NightfallOptions = {
   /** Px. Default 0.5. */
   readonly tolerance?: number;
   /** Columns across the map. Default 73, one every 5 degrees. */
   readonly columns?: number;
-}
+} & (
+  | {
+      /** Seconds the motion runs. */
+      readonly over: Seconds;
+      readonly duration?: never;
+    }
+  | {
+      /** @deprecated use `over` */
+      readonly duration: Seconds;
+      readonly over?: never;
+    }
+);
 
 const fmt = (v: number) => (Math.round(v * 10) / 10).toString();
 
@@ -25,7 +34,8 @@ export function nightfall(
   date: (t: Seconds) => Date,
   options: NightfallOptions,
 ): Turning {
-  const { duration, tolerance = 0.5, columns = 73 } = options;
+  const { tolerance = 0.5, columns = 73 } = options;
+  const duration = options.over ?? options.duration;
   const middle = -map.projection.rotate()[0];
   const { frame } = map;
 
@@ -60,5 +70,5 @@ export function nightfall(
     return `M${[...top, ...bottom].map(([x, y]) => `${fmt(x)} ${fmt(y)}`).join(" ")}Z` as PathData;
   };
 
-  return { d: sample(0), animation: sampled.path(sample, { duration, tolerance }) };
+  return { d: sample(0), animation: sampled.path(sample, { over: duration, tolerance }) };
 }

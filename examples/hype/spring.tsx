@@ -29,13 +29,13 @@ export const springShot = ({ at, over }: Span) => {
     .join("");
 
   const weight = sampled((t) => ({ y: spring(t) }), {
-    duration: run.at + run.over + 0.05,
+    over: run.at + run.over + 0.05,
     step: 1 / 60,
     tolerance,
   });
 
   const playhead = sampled((t) => ({ x: plotX(t), y: REST + spring(t) }), {
-    duration: run.at + run.over + 0.05,
+    over: run.at + run.over + 0.05,
     step: 1 / 60,
     tolerance,
   });

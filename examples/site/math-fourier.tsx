@@ -68,7 +68,7 @@ const center = (t: number, i: number) => {
   return { x, y };
 };
 
-const FINE = { duration: D, step: 1 / 120 };
+const FINE = { over: D, step: 1 / 120 };
 
 const circles = HARMONICS.map(({ n, r, color }, i) => ({
   r,
@@ -239,7 +239,7 @@ export default function build(): string {
         </g>
         <g class="sans" animation={enter({ at: 1.8, over: 0.6 })}>
           <text x={X0} y={H - 22} fontSize={12} fill={theme.base03}>
-            {"sampled((t) => tip(t), { duration })"}
+            {"sampled((t) => tip(t), { over })"}
           </text>
         </g>
         <g animation={motion({ opacity: 1 }).at(WRITTEN).set({ opacity: 0 })}>

@@ -270,7 +270,7 @@ export function calculus(graph: GraphContext): Calculus {
     el.path({
       ...attrs,
       d: at(0),
-      animation: end > 0 ? sampled.path(at, { duration: end, tolerance: 0.4 }) : undefined,
+      animation: end > 0 ? sampled.path(at, { over: end, tolerance: 0.4 }) : undefined,
     });
 
   const dotAt = (
@@ -290,7 +290,7 @@ export function calculus(graph: GraphContext): Calculus {
 
               return { x: round(p.x), y: round(p.y) };
             },
-            { duration: end, tolerance: { translate: 0.3 } },
+            { over: end, tolerance: { translate: 0.3 } },
           )
         : motion({ x: round(start.x), y: round(start.y) });
 
