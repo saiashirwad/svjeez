@@ -76,8 +76,8 @@ const wrap = (text: string, width: number) => {
 };
 
 /** The title, centered on the card's height, under a small mark. */
-const Title = ({ title }: { title: string }) => {
-  const { lines, size } = wrap(title, 640);
+const Title = ({ title, width = 640 }: { title: string; width?: number }) => {
+  const { lines, size } = wrap(title, width);
   const top = (H - lines.length * size * 1.05) / 2 + size * 0.8;
 
   return (
@@ -122,14 +122,6 @@ const SCENES: Record<Mood, { title: string; art: () => Child }> = {
     art: () => (
       <>
         <Chick x={920} y={460} size={1.8} rotate={6} look={{ x: 6, y: 4 }} />
-        <circle
-          cx={1080}
-          cy={420}
-          r={13}
-          fill={systemLight.base0B}
-          stroke={PAPER}
-          strokeWidth={4}
-        />
       </>
     ),
   },
@@ -144,12 +136,12 @@ const SCENES: Record<Mood, { title: string; art: () => Child }> = {
   },
 };
 
-const frame = (title: string, art: Child) =>
+const frame = (title: string, art: Child, width?: number) =>
   render(
     { width: W, height: H, duration: 1, title, reducedMotion: false },
     <>
       <rect width={W} height={H} fill={PAPER} />
-      <Title title={title} />
+      <Title title={title} width={width} />
       {art}
       <text x={88} y={H - 64} fontFamily={mono} fontSize={20} fill={SOFT}>
         svjeez
@@ -191,6 +183,7 @@ export const exampleCard = (title: string, png: string, ratio: number): string =
       />
       <Chick x={1060} y={top + 4} size={0.7} look={{ x: -5, y: 4 }} />
     </>,
+    560,
   );
 };
 
