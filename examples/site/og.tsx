@@ -101,18 +101,30 @@ const X = 80;
 const LEAD = 0.96;
 
 /**
- * Big tight lines of the title, set from `top`, with the chick standing in for the full stop at the end of the last
+ * Big tight lines of the title, as large as fits up to `max` and centered on the card (moved down by `nudge`), with the chick standing in for the full stop at the end of the last
  * line. Returns the drawing and where that chick stands, so a card can hang a note on it.
  */
 const set = (
   lines: string[],
-  size: number,
-  top: number,
+  max: number,
+  nudge: number,
   pose: { rotate?: number; look?: { x: number; y: number } } = {},
   highlight?: { line: number; from: string; word: string },
 ) => {
-  const base = (i: number) => top + size * 0.8 + i * size * LEAD;
   const last = lines.length - 1;
+  // The last line carries the chick, about one em wide with its gap.
+  const widest = (size: number) =>
+    Math.max(
+      ...lines.map((line, i) => display.measure(line, size) + (i === last ? size * 0.98 : 0)),
+    );
+  let size = max;
+
+  while (widest(size) > W - 2 * X) size -= 2;
+
+  // From the cap height of the first line down to the baseline of the last.
+  const block = size * 0.72 + last * size * LEAD;
+  const top = (H - block) / 2 + nudge;
+  const base = (i: number) => top + size * 0.72 + i * size * LEAD;
   const end = X + display.measure(lines[last]!, size) + size * 0.56;
   const scale = size / 150;
 
@@ -172,7 +184,7 @@ const CARDS: Record<Mood, () => string> = {
     const t = set(
       ["Animated SVGs", "from TypeScript"],
       128,
-      150,
+      40,
       { look: { x: -3, y: 3 } },
       { line: 1, from: "from ", word: "TypeScript" },
     );
@@ -180,15 +192,19 @@ const CARDS: Record<Mood, () => string> = {
     return frame(
       "svjeez",
       t.draw,
-      <Hand text="that's one <img>!" x={720} y={110} />,
-      <Arrow from={[1000, 124]} to={[t.chick.x + 24, t.chick.head - 8]} bow={-30} />,
+      <Hand text="that's one <img>!" x={t.chick.x - 400} y={t.chick.head - 64} />,
+      <Arrow
+        from={[t.chick.x - 104, t.chick.head - 52]}
+        to={[t.chick.x + 18, t.chick.head - 6]}
+        bow={-30}
+      />,
     );
   },
   intro: () => {
     const t = set(
       ["The one-minute", "intro"],
       124,
-      150,
+      0,
       { rotate: -6, look: { x: -5, y: -2 } },
       { line: 0, from: "The ", word: "one-minute" },
     );
@@ -208,7 +224,7 @@ const CARDS: Record<Mood, () => string> = {
     const t = set(
       ["Look what", "it made"],
       150,
-      120,
+      -24,
       { rotate: 8, look: { x: 6, y: -4 } },
       { line: 1, from: "it ", word: "made" },
     );
@@ -223,7 +239,7 @@ const CARDS: Record<Mood, () => string> = {
     const t = set(
       ["Poke it.", "It moves"],
       150,
-      120,
+      24,
       { rotate: 14, look: { x: 6, y: 6 } },
       { line: 1, from: "It ", word: "moves" },
     );
@@ -307,7 +323,7 @@ export const exampleCard = (title: string, png: string, ratio: number): string =
     ) ?? 48;
 
   const lines = fits(size, 470);
-  const t = set(lines, size, (H - lines.length * size * LEAD) / 2 - 20, { look: { x: 6, y: 2 } });
+  const t = set(lines, size, -24, { look: { x: 6, y: 2 } });
 
   return frame(
     title,
