@@ -1,5 +1,5 @@
 ---
-import { POSTER_WIDTH, SMALL_POSTER_WIDTH, sections, SOURCES } from "../../examples";
+import { POSTER_WIDTH, SMALL_POSTER_WIDTH, examples, SOURCES } from "../../examples";
 import { themed } from "../../palettes";
 import Base from "../../layouts/Base.astro";
 import { getScene } from "@svjeez/astro/scene";
@@ -7,9 +7,6 @@ import yourAgent from "@examples/site/your-agent.tsx";
 
 /** "your agent", handwritten by a scene and inlined so it takes the accent color. */
 const { svg: handwriting } = getScene(yourAgent);
-
-/** A section's anchor: "Building blocks" is #building-blocks. */
-const slug = (title: string) => title.toLowerCase().replaceAll(" ", "-");
 
 /** The cards in the first row, which load at once instead of lazily. */
 const FIRST_ROW = 3;
@@ -29,16 +26,9 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
         Explore what <span class="edit"><s>you</s><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M-4 25C14 17 30 29 50 21S86 24 104 15M2 31C24 24 52 33 98 23" /></svg><ins><span>your agent</span><span aria-hidden="true" set:html={handwriting} /></ins></span> can make.
       </h1>
     </div>
-    {
-      sections.map((section) => (
-        <section id={slug(section.title)}>
-          <h2>
-            <a class="anchor" href={`#${slug(section.title)}`}>{section.title}</a>
-            <small>{section.blurb}</small>
-          </h2>
-          <div class="grid">
-            {section.examples.map(({ name, scene, small }, i) => {
-              const first = section.title === sections[0]!.title && i < FIRST_ROW;
+    <div class="grid">
+      {examples.map(({ name, scene, small }, i) => {
+              const first = i < FIRST_ROW;
               const loading = first ? { fetchpriority: "high" } as const : { loading: "lazy" } as const;
               const set = (scheme: "light" | "dark") => `${small.posters![scheme]} ${SMALL_POSTER_WIDTH}w, ${scene.posters![scheme]} ${POSTER_WIDTH}w`;
 
@@ -71,10 +61,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
                 </a>
               );
             })}
-          </div>
-        </section>
-      ))
-    }
+    </div>
   </main>
   <footer class="wrap foot">
     <span>Find the source for every scene on GitHub.</span>

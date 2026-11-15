@@ -3132,6 +3132,4 @@
   </g>
   <rect width="960" height="540" filter="url(#f1)" opacity="0.2"/>
   <rect width="960" height="540" fill="url(#g2)"/>
-  <rect x="6" y="6" width="948" height="528" fill="none" stroke="#3B2A1A" stroke-width="2"/>
-  <rect x="11" y="11" width="938" height="518" fill="none" stroke="#3B2A1A" stroke-width="0.6"/>
 </svg>

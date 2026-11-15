@@ -75,16 +75,6 @@ export default function build(): string {
       <Live />
       <rect width={W} height={H} filter={grain} opacity={0.2} />
       <rect width={W} height={H} fill={vignette} />
-      <rect x={6} y={6} width={W - 12} height={H - 12} fill="none" stroke={C.ink} strokeWidth={2} />
-      <rect
-        x={11}
-        y={11}
-        width={W - 22}
-        height={H - 22}
-        fill="none"
-        stroke={C.ink}
-        strokeWidth={0.6}
-      />
     </>,
   );
 }
