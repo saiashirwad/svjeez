@@ -46,11 +46,29 @@ export function walk({
   pad: number;
   parts: Record<string, string>;
 }): Box {
-  const root = document.querySelector(selector);
+  const found = document.querySelector(selector);
+  // The page itself is read as a screenshot would be: the viewport, from the page's origin.
+  const wholePage = found === document.body || found === document.documentElement;
+  const root = wholePage ? document.documentElement : found;
   const marks = globalThis.__svjeezPseudo;
 
   if (!root) throw new Error(`snap() found nothing at ${selector}.`);
-  const origin = root.getBoundingClientRect();
+  const origin = wholePage
+    ? { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
+    : root.getBoundingClientRect();
+  // The camera: what lies wholly outside it is neither read nor drawn. A page is the viewport; an element, its box and the pad.
+  const frame = wholePage
+    ? { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
+    : {
+        left: origin.left - pad,
+        top: origin.top - pad,
+        right: origin.right + pad,
+        bottom: origin.bottom + pad,
+      };
+
+  const outside = (r: { left: number; top: number; right: number; bottom: number }): boolean =>
+    r.right <= frame.left || r.left >= frame.right || r.bottom <= frame.top || r.top >= frame.bottom;
+
   const px = (value: string): number => parseFloat(value) || 0;
   const round = (n: number): number => Math.round(n * 100) / 100;
 
@@ -561,6 +579,9 @@ export function walk({
     for (const l of lines) {
       const text = l.text.trimEnd();
 
+      if (outside({ left: l.left, top: l.top, right: l.left + (l.ends.at(-1) ?? 0), bottom: l.top + px(s.fontSize) * 2 }))
+        continue;
+
       if (text.trim()) out.push(run(s, text, l.left, l.top, c, l.ends.slice(0, [...text].length)));
     }
   };
@@ -585,19 +606,67 @@ export function walk({
     "fill-rule",
   ];
 
-  const vector = (el: Element): Vector => {
+  /** The only elements that draw. defs, symbol, clipPath, mask and gradients draw nothing of themselves. */
+  const SHAPES = ["path", "rect", "circle", "ellipse", "line", "polyline", "polygon"];
+  const CONTAINERS = ["g", "svg", "a", "switch"];
+
+  /**
+   * A drawn element of an inline `<svg>`, or nothing when it draws nothing. `<use>` is written out in place of
+   * its target (a symbol's children, or the element), taking the paint the `<use>` gives it. `via` is that
+   * `<use>`'s style, for what the target doesn't set itself.
+   */
+  const vector = (el: Element, via?: CSSStyleDeclaration, depth = 0): Vector | undefined => {
+    const tag = el.tagName.toLowerCase();
     const s = getComputedStyle(el);
+
+    if (s.display === "none" || depth > 8) return undefined;
+
     const attrs: Record<string, string> = {};
 
     for (const name of GEOMETRY) {
       const v = el.getAttribute(name);
 
-      if (v !== null) attrs[name] = v;
+      if (v !== null && !(CONTAINERS.includes(tag) && name !== "transform")) attrs[name] = v;
     }
 
-    if (el.tagName !== "g") {
-      attrs.fill = s.fill === "none" ? "none" : (color(s.fill) ?? "none");
-      attrs.stroke = s.stroke === "none" ? "none" : (color(s.stroke) ?? "none");
+    if (tag === "use") {
+      const id = (el.getAttribute("href") ?? el.getAttribute("xlink:href") ?? "").replace(/^.*#/, "");
+      const target = id ? el.ownerDocument.getElementById(id) : null;
+
+      if (!target) return undefined;
+
+      const move = `translate(${px(el.getAttribute("x") ?? "0")} ${px(el.getAttribute("y") ?? "0")})`;
+      const place = [el.getAttribute("transform"), move].filter(Boolean).join(" ");
+
+      const inner = (
+        target.tagName.toLowerCase() === "symbol" ? [...target.children] : [target]
+      ).flatMap((c) => vector(c, s, depth + 1) ?? []);
+
+      return {
+        tag: "g",
+        attrs: { transform: place, ...(s.opacity !== "1" ? { opacity: s.opacity } : {}) },
+        children: inner,
+      };
+    }
+
+    const container = CONTAINERS.includes(tag);
+
+    if (!container && !SHAPES.includes(tag)) return undefined;
+
+    if (container) {
+      if (tag === "svg") {
+        const x = px(el.getAttribute("x") ?? "0");
+        const y = px(el.getAttribute("y") ?? "0");
+
+        if (x || y) attrs.transform = `translate(${x} ${y})`;
+      }
+    } else {
+      // A paint the shape doesn't write itself is the `<use>`'s.
+      const own = (name: string) => el.hasAttribute(name) || (el as SVGElement).style.getPropertyValue(name) !== "";
+      const paint = (name: "fill" | "stroke") => (via && !own(name) ? via : s)[name];
+
+      attrs.fill = paint("fill") === "none" ? "none" : (color(paint("fill")) ?? "none");
+      attrs.stroke = paint("stroke") === "none" ? "none" : (color(paint("stroke")) ?? "none");
 
       if (attrs.stroke !== "none") {
         attrs["stroke-width"] = String(px(s.strokeWidth));
@@ -608,7 +677,11 @@ export function walk({
 
     if (s.opacity !== "1") attrs.opacity = s.opacity;
 
-    return { tag: el.tagName, attrs, children: [...el.children].map(vector) };
+    return {
+      tag: tag === "svg" || tag === "a" || tag === "switch" ? "g" : tag,
+      attrs,
+      children: container ? [...el.children].flatMap((c) => vector(c, via, depth) ?? []) : [],
+    };
   };
 
   const TRANSFORMS = ["transform", "rotate", "scale", "translate"] as const;
@@ -672,10 +745,21 @@ export function walk({
    * An element turned, scaled or skewed is read as laid out, with its transform switched off for the moment, and the
    * transform is kept to draw it with. Transitions are off meanwhile, so putting it back doesn't animate.
    */
+  /** An element wholly outside the frame, whose descendants stay inside its own box, so none of them can be in it. */
+  const culled = (el: Element): boolean => {
+    const r = el.getBoundingClientRect();
+
+    if ((!r.width && !r.height) || !outside(r)) return false;
+
+    return !(el instanceof HTMLElement) || (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1) || el.clientWidth === 0;
+  };
+
   const element = (el: Element): Item | undefined => {
     const s = getComputedStyle(el);
 
     if (s.display === "none") return undefined;
+
+    if (el !== root && culled(el)) return undefined;
     const m = matrixOf(s);
 
     if (!m || !(el instanceof HTMLElement || el instanceof SVGElement)) return laid(el, s);
@@ -825,7 +909,7 @@ export function walk({
       const viewBox: Graphic["viewBox"] =
         vb && vb.width ? [vb.x, vb.y, vb.width, vb.height] : [0, 0, r.width, r.height];
 
-      return { kind: "graphic", box: rel(r), viewBox, children: [...el.children].map(vector) };
+      return { kind: "graphic", box: rel(r), viewBox, children: [...el.children].flatMap((c) => vector(c) ?? []) };
     }
 
     if (el instanceof HTMLImageElement) {
@@ -946,5 +1030,15 @@ export function walk({
 
   if (tree?.kind !== "box") throw new Error(`snap() found no element to draw at ${selector}.`);
 
-  return tree;
+  if (!wholePage) return tree;
+
+  // A body's background paints the canvas when the page's own element has none.
+  const body = color(getComputedStyle(document.body).backgroundColor);
+
+  return {
+    ...tree,
+    box: { x: pad, y: pad, width: innerWidth, height: innerHeight },
+    background: tree.background ?? body,
+    clip: true,
+  };
 }
