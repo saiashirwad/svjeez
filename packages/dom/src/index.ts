@@ -28,11 +28,11 @@ export {
   type Wait,
 } from "./flow.ts";
 
-export { snapshots, type SnapshotsOptions } from "./snapshots.ts";
+export { snapshots, shotsDir, type Recording, type SnapshotsOptions } from "./snapshots.ts";
 
 export { Dom, type DomProps } from "./draw/dom.tsx";
 
-export { duration, size, type Step } from "./timeline.ts";
+export { duration, size, steady, type Step } from "./timeline.ts";
 
 export { find, rect } from "./find.ts";
 

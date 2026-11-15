@@ -3,6 +3,7 @@ import type { Font, FontValue } from "svjeez";
 import {
   isCssText,
   type Io,
+  type Shots,
   type PageOptions,
   type Pages,
   type BrowserOptions,
@@ -17,7 +18,7 @@ type Scheme = "light" | "dark";
 
 const facesOf = (value: FontValue): readonly Font[] => ("faces" in value ? value.faces : [value]);
 
-const launch = async (executablePath?: string): Promise<Chromium> => {
+export const launch = async (executablePath?: string): Promise<Chromium> => {
   const { chromium } = await import("playwright-core").catch(() => {
     throw new Error(
       "@svjeez/dom needs playwright-core. Install it with `npm i -D playwright-core`.",
@@ -266,13 +267,68 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       ] as const);
     };
 
+    let shots: Shots = {};
+
     const pass = async (value: Scheme) => {
       await scheme(value);
       await settle(page, false);
       cdp ??= await page.context().newCDPSession(page);
       await markPseudos(cdp, page);
 
-      return page.evaluate(walk, { selector, pad, parts });
+      const root = await page.evaluate(walk, { selector, pad, parts });
+
+      if (options.screenshots) {
+        // The snapshot's own frame: the element's box, `pad` all round. Transparent where the page paints nothing.
+        const at = await page.evaluate((s) => {
+          const r = document.querySelector(s)!.getBoundingClientRect();
+
+          return { x: r.left, y: r.top };
+        }, selector);
+
+        const frame = {
+          x: at.x - pad,
+          y: at.y - pad,
+          width: Math.ceil(root.box.width + 2 * pad),
+          height: Math.ceil(root.box.height + 2 * pad),
+        };
+
+        // Chromium can't shoot left of or above the page, where a card at the corner has its padding.
+        const clip = { ...frame, x: Math.max(0, frame.x), y: Math.max(0, frame.y) };
+        clip.width = frame.width - (clip.x - frame.x);
+        clip.height = frame.height - (clip.y - frame.y);
+
+        const png = await page.screenshot({ clip, omitBackground: true, caret: "hide" });
+
+        shots[value] =
+          clip.x === frame.x && clip.y === frame.y
+            ? new Uint8Array(png)
+            : Buffer.from(
+                await page.evaluate(
+                  async ([data, frame, dx, dy]) => {
+                    const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+                    const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
+                    const canvas = new OffscreenCanvas(frame.width, frame.height);
+
+                    canvas.getContext("2d")!.drawImage(bitmap, dx, dy);
+
+                    const out = new Uint8Array(
+                      await (await canvas.convertToBlob({ type: "image/png" })).arrayBuffer(),
+                    );
+
+                    let text = "";
+
+                    for (let i = 0; i < out.length; i += 0x8000)
+                      text += String.fromCharCode(...out.subarray(i, i + 0x8000));
+
+                    return btoa(text);
+                  },
+                  [png.toString("base64"), frame, clip.x - frame.x, clip.y - frame.y] as const,
+                ),
+                "base64",
+              );
+      }
+
+      return root;
     };
 
     // Light goes last, so the page ends in the scheme it rests in. A live app may still be changing between the two
@@ -293,6 +349,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     await scheme(resting);
 
     const read = async (): Promise<Snapshot> => {
+      shots = {};
       await shim(page);
       await settle(page, true);
 
@@ -344,6 +401,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
     return {
       read,
+      shots: () => shots,
       act,
       drive: async (fn) => {
         await fn(page);

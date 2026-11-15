@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
 import { brotliCompressSync, brotliDecompressSync } from "node:zlib";
 import {
   browserOf,
@@ -14,24 +14,46 @@ import {
 } from "./browser.ts";
 import { chromiumPages } from "./chromium.ts";
 import type { Action } from "./flow.ts";
+import type { Step } from "./timeline.ts";
 import type { Snapshot } from "./tree.ts";
 
 /** Bump when the shape of the file changes, so stale files are read again. */
 const FORMAT = 5;
 
-export interface SnapshotsOptions extends BrowserOptions {
+export interface SnapshotsOptions extends Omit<BrowserOptions, "screenshots"> {
   /**
    * What the pages depend on that `run` doesn't show as data: `act()` functions, the app behind `open()`, CSS
    * built by a function. A new value reads the pages again.
    */
   readonly inputs?: unknown;
+  /**
+   * A folder to also write what the fidelity check needs into: a PNG of the card per snapshot and scheme, and the
+   * steps and fonts as `run` gave them, in a subfolder named after `file`. Reads Chromium again, and nothing here
+   * goes in `file`. Defaults to `SVJEEZ_DOM_SHOTS`.
+   */
+  readonly screenshots?: string;
 }
+
+/** What the fidelity check reads, in `recording.json` next to the PNGs. */
+export interface Recording {
+  readonly fonts: readonly { family: string; weight: number; style: "normal" | "italic"; href: string }[];
+  readonly cards: readonly { readonly steps: Step[]; readonly snaps: number }[];
+}
+
+/** The subfolder of `root` a recording's screenshots go in. */
+export const shotsDir = (root: string, file: string) =>
+  join(root, `${basename(dirname(resolve(file)))}-${basename(file, ".json")}`);
+
+/** The PNG of one card's `snap`th snapshot in a scheme. */
+export const shotName = (card: number, snap: number, scheme: string) => `${card}-${snap}-${scheme}.png`;
 
 /** One card: how it was opened, what it was told as data, and what it read. */
 interface Tape {
   readonly opened: string;
   readonly trace: string[];
   readonly snaps: Snapshot[];
+  /** What `run` gave back, when the screenshots are being kept. */
+  steps?: Step[];
 }
 
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
@@ -47,12 +69,12 @@ const SNAP = digest("snap");
 /** A function isn't data, so the trace says only that one ran. */
 const ACT = digest("act");
 
-const record = (pages: Pages, tapes: Tape[]): Pages => {
+const record = (pages: Pages, tapes: Tape[], shots?: string): Pages => {
   const tape = async (opened: string, io: () => Promise<Io>): Promise<Io> => {
     // Pushed before the page opens, so cards opened together keep the order they were asked for in.
     const t: Tape = { opened, trace: [], snaps: [] };
 
-    tapes.push(t);
+    const card = tapes.push(t) - 1;
     const inner = await io();
 
     return {
@@ -60,6 +82,11 @@ const record = (pages: Pages, tapes: Tape[]): Pages => {
         const snapshot = await inner.read();
 
         t.trace.push(SNAP);
+
+        if (shots)
+          for (const [scheme, png] of Object.entries(inner.shots?.() ?? {}))
+            await writeFile(join(shots, shotName(card, t.snaps.length, scheme)), png);
+
         t.snaps.push(snapshot);
 
         return snapshot;
@@ -73,6 +100,9 @@ const record = (pages: Pages, tapes: Tape[]): Pages => {
         t.trace.push(ACT);
 
         return inner.drive(fn);
+      },
+      ran: (steps) => {
+        t.steps = steps;
       },
       close: inner.close,
     };
@@ -208,7 +238,7 @@ const version = async (): Promise<string> => {
  */
 export const snapshots = async <T>(
   file: string,
-  { inputs, ...options }: SnapshotsOptions,
+  { inputs, screenshots = process.env.SVJEEZ_DOM_SHOTS, ...options }: SnapshotsOptions,
   run: (dom: Browser) => Promise<T>,
 ): Promise<T> => {
   // CSS given once as a string is data, so it counts like a mount's own; built by a function, it goes in `inputs`.
@@ -216,7 +246,7 @@ export const snapshots = async <T>(
     JSON.stringify([inputs, isCssText(options.css) ? options.css : null, await version(), FORMAT]),
   );
 
-  if (!process.env.SVJEEZ_DOM_REFRESH) {
+  if (!process.env.SVJEEZ_DOM_REFRESH && !screenshots) {
     // The file is our own, and its hash says the format that wrote it.
     const saved: Saved | undefined = await readFile(file, "utf8").then(JSON.parse, () => undefined);
 
@@ -234,10 +264,30 @@ export const snapshots = async <T>(
   }
 
   const tapes: Tape[] = [];
-  const pages = await chromiumPages(options);
+  const shots = screenshots ? shotsDir(screenshots, file) : undefined;
+
+  if (shots) {
+    await rm(shots, { recursive: true, force: true });
+    await mkdir(shots, { recursive: true });
+  }
+
+  const pages = await chromiumPages({ ...options, screenshots: shots !== undefined });
 
   try {
-    const value = await run(browserOf(record(pages, tapes)));
+    const value = await run(browserOf(record(pages, tapes, shots)));
+
+    if (shots) {
+      const recording: Recording = {
+        fonts: (options.fonts ?? []).flatMap((value) =>
+          ("faces" in value ? value.faces : [value]).map(
+            ({ family, weight, style, href }) => ({ family, weight, style, href }),
+          ),
+        ),
+        cards: tapes.map((t) => ({ steps: t.steps ?? [], snaps: t.snaps.length })),
+      };
+
+      await writeFile(join(shots, "recording.json"), JSON.stringify(recording));
+    }
 
     await mkdir(dirname(file), { recursive: true });
     await writeFile(file, JSON.stringify({ hash, ...pack(tapes) }));

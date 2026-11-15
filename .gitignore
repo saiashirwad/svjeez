@@ -9,3 +9,4 @@ packages/svjeez/LICENSE
 packages/vite/test/.scratch-*
 packages/react/test/.scratch-*
 .svelte-kit
+examples/.fidelity
