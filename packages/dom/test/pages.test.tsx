@@ -23,8 +23,8 @@ afterAll(() => dom.close());
 const runs = (it: Item): TextRun[] =>
   it.kind === "text" ? [it] : it.kind === "box" ? it.children.flatMap(runs) : [];
 
-const draw = async (markup: string, css = "") => {
-  const card = await dom.mount(markup, { css });
+const draw = async (markup: string, css = "", pad?: number) => {
+  const card = await dom.mount(markup, { css, pad });
   const state = await card.snap();
   await card.close();
 
@@ -168,5 +168,14 @@ describe("real pages", () => {
     const svg = render({ ...size(state), duration: 1, title: "dom" }, <Dom states={[state]} />);
 
     expect(svg).toContain("mix-blend-mode:overlay");
+  });
+  test("a fixed header inside a zero-height wrapper is read", async () => {
+    const state = await draw(
+      '<div style="height:100px;width:200px"><div><header style="position:fixed;width:100px">Product</header></div></div>',
+      "",
+      0,
+    );
+
+    expect(runs(state.root).map((r) => r.text)).toContain("Product");
   });
 });

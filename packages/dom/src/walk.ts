@@ -977,7 +977,8 @@ export function walk({
   const culled = (el: Element): boolean => {
     const r = el.getBoundingClientRect();
 
-    if ((!r.width && !r.height) || !outside(r)) return false;
+    // A box with no width or height says nothing about where its fixed or overflowing content is.
+    if (!r.width || !r.height || !outside(r)) return false;
 
     return !(el instanceof HTMLElement) || (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1) || el.clientWidth === 0;
   };
