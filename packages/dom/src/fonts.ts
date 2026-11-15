@@ -1,5 +1,5 @@
 import { inflateSync } from "node:zlib";
-import type { Face, Item } from "./tree.ts";
+import type { Face, Item, Vector } from "./tree.ts";
 
 /** A face the page loaded, with the URL its `@font-face` rule points at, before the bytes are fetched. */
 type Source = Omit<Face, "src"> & { readonly url: string };
@@ -8,6 +8,14 @@ type Source = Omit<Face, "src"> & { readonly url: string };
 export const families = (item: Item, out = new Set<string>()): Set<string> => {
   if (item.kind === "text") out.add(item.family);
   else if (item.kind === "box") for (const child of item.children) families(child, out);
+  else if (item.kind === "graphic") {
+    const vectors = (v: Vector) => {
+      if (v.run) out.add(v.run.family);
+      for (const c of [...(v.mask ?? []), ...v.children]) vectors(c);
+    };
+
+    item.children.forEach(vectors);
+  }
 
   return out;
 };

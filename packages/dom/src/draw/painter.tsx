@@ -113,6 +113,8 @@ export const painter = (
   };
 
   const { byName, rules } = typefaces(fonts, captured);
+  const embedded = new Set([...byName.keys(), ...captured.map((f) => f.family)]);
+  const SYSTEM = /^(system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|sans-serif|serif|monospace|cursive|fantasy)$/;
   const server = paintServers(v);
   // How many boxes of each part are drawn so far, so a part's function gets each one's index.
   const seen = new Map<string, number>();
@@ -186,6 +188,9 @@ export const painter = (
     return <g mask={mask}>{drawn}</g>;
   };
 
+  const unembedded = (run: TextRun) =>
+    run.advances.length > 0 && !embedded.has(run.family) && !SYSTEM.test(run.family);
+
   const text = (run: TextRun, animation?: Stack<TagChannels<"text">>): SvgNode =>
     jsx("text", {
       x: num(run.x),
@@ -198,6 +203,9 @@ export const painter = (
       fontStretch: run.stretch ? `${run.stretch}%` : undefined,
       textDecoration: run.decoration,
       letterSpacing: run.letterSpacing ? num(run.letterSpacing) : undefined,
+      // A face the SVG doesn't carry is drawn in a fallback of another width: keep the page's, so runs don't collide.
+      textLength: unembedded(run) ? num(run.advances.at(-1)!) : undefined,
+      lengthAdjust: unembedded(run) ? "spacing" : undefined,
       fill: v(run.color),
       animation,
       children: run.text,
@@ -205,16 +213,22 @@ export const painter = (
 
   const ink: Ink = { v, text };
 
-  const vector = ({ tag, attrs, children }: Vector): SvgNode =>
-    jsx(tag, {
+  /** `back` undoes the graphic's scaling, for a mask's text, whose position is in the page's coordinates. */
+  const vector = ({ tag, attrs, children, mask, run }: Vector, back?: string): SvgNode => {
+    if (run) return <g transform={back}>{text(run)}</g>;
+
+    const drawn = jsx(tag, {
       ...Object.fromEntries(
         Object.entries(attrs).map(([k, value]) => [
           k.replace(/-(\w)/g, (_, c: string) => c.toUpperCase()),
           v(value),
         ]),
       ),
-      children: children.map(vector),
+      children: children.map((c) => vector(c, back)),
     });
+
+    return mask ? <g mask={def.mask({}, mask.map((c) => vector(c, back)))}>{drawn}</g> : drawn;
+  };
 
   /** A path, tweened from `from` when given and different. */
   const path = (
@@ -247,7 +261,9 @@ export const painter = (
         const [vx, vy, vw, vh] = it.viewBox;
         const t = `translate(${num(it.box.x)} ${num(it.box.y)}) scale(${num(it.box.width / vw)} ${num(it.box.height / vh)}) translate(${num(-vx)} ${num(-vy)})`;
 
-        return transformed(it, <g transform={t}>{it.children.map(vector)}</g>);
+        const back = `translate(${num(vx)} ${num(vy)}) scale(${num(vw / it.box.width)} ${num(vh / it.box.height)}) translate(${num(-it.box.x)} ${num(-it.box.y)})`;
+
+        return transformed(it, <g transform={t}>{it.children.map((c) => vector(c, back))}</g>);
       }
 
       case "image": {

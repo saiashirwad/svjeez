@@ -708,7 +708,7 @@ export function walk({
   const measure = (s: CSSStyleDeclaration, text: string): number[] => {
     const span = document.createElement("span");
     span.style.cssText = "position:absolute;left:0;top:0;white-space:pre;visibility:hidden";
-    span.style.font = s.font;
+    span.style.font = s.font || `${s.fontStyle} ${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
     span.style.letterSpacing = s.letterSpacing;
     const node = document.createTextNode(text);
 
@@ -838,11 +838,37 @@ export function walk({
   /** The size of the `<svg>` being read, which a percentage in a shape is a share of. */
   let extent: readonly [number, number] = [0, 0];
 
+  /**
+   * A `<text>` inside a `<mask>`, which the browser doesn't lay out: set where its `x`, `y`, `dy`, `text-anchor` and
+   * `dominant-baseline` put it, in the page's coordinates, and drawn like any other run.
+   */
+  const maskText = (el: Element, s: CSSStyleDeclaration): Vector | undefined => {
+    const svg = (el as SVGElement).ownerSVGElement;
+    const c = color(s.fill);
+    const text = el.textContent?.trim();
+
+    if (!svg || !c || !text) return undefined;
+    const box = svg.getBoundingClientRect();
+    const kx = box.width / (extent[0] || 1);
+    const ky = box.height / (extent[1] || 1);
+    const at = (name: string, of: number) => lengthOf(el.getAttribute(name) ?? "0", of) ?? 0;
+    const ends = measure(s, text);
+    const width = ends.at(-1) ?? 0;
+    const { ascent, area } = probe(s);
+    const x = box.left + at("x", extent[0]) * kx - (s.textAnchor === "middle" ? width / 2 : s.textAnchor === "end" ? width : 0);
+    const y = box.top + (at("y", extent[1]) + at("dy", extent[1])) * ky;
+    const centered = /central|middle/.test(s.dominantBaseline);
+
+    return { tag: "text", attrs: {}, children: [], run: run(s, text, x, centered ? y - area / 2 : y - ascent, c, ends) };
+  };
+
   const vector = (el: Element, via?: CSSStyleDeclaration, depth = 0): Vector | undefined => {
     const tag = el.tagName.toLowerCase();
     const s = getComputedStyle(el);
 
     if (s.display === "none" || depth > 8) return undefined;
+
+    if (tag === "text" && el.closest("mask")) return maskText(el, s);
 
     const attrs: Record<string, string> = {};
 
@@ -905,11 +931,24 @@ export function walk({
 
     if (s.opacity !== "1") attrs.opacity = s.opacity;
 
-    return {
+    const shape: Vector = {
       tag: tag === "svg" || tag === "a" || tag === "switch" ? "g" : tag,
       attrs,
       children: container ? [...el.children].flatMap((c) => vector(c, via, depth) ?? []) : [],
     };
+
+    // `mask="url(#id)"`: the mask's shapes and text, which show `shape` where they are light.
+    const ref = /url\(["']?#([^)"']+)/.exec(el.getAttribute("mask") ?? "");
+    const mask = ref ? el.ownerDocument.getElementById(ref[1]!) : null;
+
+    return mask?.tagName.toLowerCase() === "mask"
+      ? {
+          tag: "g",
+          attrs: {},
+          children: [shape],
+          mask: [...mask.children].flatMap((c) => vector(c, via, depth + 1) ?? []),
+        }
+      : shape;
   };
 
   const TRANSFORMS = ["transform", "rotate", "scale", "translate"] as const;
@@ -1312,7 +1351,8 @@ export function walk({
       id: el.id || undefined,
       box: rel(r),
       ...surface(s, r, rel(r)),
-      clip: s.overflowX !== "visible" || s.overflowY !== "visible",
+      // A mask, even one drawn as a gradient, shows nothing outside the border box.
+      clip: s.overflowX !== "visible" || s.overflowY !== "visible" || (s.maskImage || "none") !== "none",
       children,
     };
   };

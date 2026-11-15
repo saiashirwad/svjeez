@@ -65,6 +65,10 @@ export interface Vector {
   readonly tag: string;
   readonly attrs: Readonly<Record<string, Paint<string>>>;
   readonly children: readonly Vector[];
+  /** What this shape shows only where the mask's shapes are light. */
+  readonly mask?: readonly Vector[];
+  /** A `<text>` in a mask, as a run in the page's coordinates (not the drawing's). */
+  readonly run?: TextRun;
 }
 
 export interface Graphic {

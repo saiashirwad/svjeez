@@ -178,4 +178,32 @@ describe("real pages", () => {
 
     expect(runs(state.root).map((r) => r.text)).toContain("Product");
   });
+
+  test("a gradient mask clips what sticks out of its box", async () => {
+    const state = await draw(
+      '<div style="height:40px;width:100px"><p style="height:20px;margin:0;position:relative;mask-image:linear-gradient(#000,#fff)">a<span style="position:absolute;top:20px">b</span></p></div>',
+    );
+
+    const p = state.root.children[0];
+
+    expect(p?.kind === "box" && p.clip).toBe(true);
+  });
+
+  test("text cut out of an SVG mask is drawn in the mask", async () => {
+    const state = await draw(
+      '<div><svg width="100" height="40" style="display:block"><defs><mask id="cut"><rect width="100%" height="100%" fill="white"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-size="14" fill="black">Sign in</text></mask></defs><rect width="100%" height="100%" fill="#08f" mask="url(#cut)"/></svg></div>',
+    );
+
+    const svg = render({ ...size(state), duration: 1, title: "dom" }, <Dom states={[state]} />);
+
+    expect(svg).toContain("<mask");
+    expect(svg).toContain("Sign in");
+  });
+
+  test("a run in a face the SVG doesn't carry keeps the width the page gave it", async () => {
+    const state = await draw('<p style="font:14px Nope Sans, sans-serif;margin:0">hello there</p>');
+    const svg = render({ ...size(state), duration: 1, title: "dom" }, <Dom states={[state]} />);
+
+    expect(svg).toMatch(/textLength="[\d.]+"/);
+  });
 });
