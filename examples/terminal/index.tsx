@@ -1,26 +1,26 @@
 import { rect, render, terminal, appWindow } from "svjeez";
 
-import { css, mono, theme } from "../style";
+import { HEIGHT, MARGIN, WIDTH, css, mono, theme } from "../gallery-style";
 
-const W = 960;
-const H = 440;
+const W = WIDTH;
+const H = HEIGHT;
 
-const frame = rect(80, 50, 800, 340);
-const shell = appWindow(frame, { theme, title: "~/hello", dots: "traffic" });
+const frame = rect(MARGIN, MARGIN, W - 2 * MARGIN, H - 2 * MARGIN);
+const shell = appWindow(frame, { theme, title: "~/app", dots: "traffic" });
 
 const session = terminal(
   [
-    { cmd: "bun add svjeez", output: [[["muted", "installed svjeez@0.2.0"]]] },
+    { cmd: "bun install", output: [[["muted", "installed 142 packages"]]] },
+    { cmd: "bun test", output: [[["green", "✓"], " 38 tests passed"]] },
     {
       cmd: "bun run build",
       output: [
-        [["green", "✓"], " dist/explainer.svg  ", ["muted", "29.4 KB"]],
-        [["green", "✓"], " dist/terminal.svg   ", ["muted", " 6.0 KB"]],
+        [["green", "✓"], " dist/app.js   ", ["muted", "29.4 KB"]],
+        [["green", "✓"], " dist/app.css  ", ["muted", " 6.0 KB"]],
       ],
     },
-    { cmd: "open dist/explainer.svg" },
   ],
-  { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 16, lineHeight: 1.75, font: mono },
+  { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 20, lineHeight: 1.75, font: mono },
 );
 
 export default function build(): string {
@@ -28,8 +28,8 @@ export default function build(): string {
     {
       width: W,
       height: H,
-      title: "Terminal",
-      desc: "Installing svjeez and building the examples, typed out in a terminal that follows the viewer's light or dark mode.",
+      title: "Terminal session",
+      desc: "A terminal session installs dependencies, runs tests and builds, typed out line by line.",
       duration: session.span.end + 2,
       reducedMotion: { at: session.span.end + 1 },
       css,

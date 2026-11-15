@@ -33,13 +33,16 @@ describe("the examples' drawn edges never cross", () => {
     const { chart } = await import("../flowchart/index");
 
     const pairs = [
-      ["pr", "gather"],
-      ["gather", "analyze"],
+      ["pr", "lint"],
+      ["pr", "tests"],
+      ["pr", "secrets"],
+      ["lint", "analyze"],
+      ["tests", "analyze"],
+      ["secrets", "analyze"],
       ["memory", "analyze"],
-      ["analyze", "lint"],
-      ["lint", "issues"],
+      ["analyze", "issues"],
       ["issues", "fix"],
-      ["fix", "lint"],
+      ["fix", "analyze"],
       ["issues", "post"],
     ] as const;
 
@@ -57,6 +60,7 @@ describe("the examples' drawn edges never cross", () => {
       ["waiting", "working"],
       ["working", "done"],
       ["working", "failed"],
+      ["working", "cancelled"],
     ] as const;
 
     expect(count(pairs.map(([a, b]) => agent.edge(a, b)))).toBe(0);

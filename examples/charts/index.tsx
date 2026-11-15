@@ -1,8 +1,7 @@
 import { chart } from "@svjeez/charts";
-import { ease, enter, motion, render, type Color, tint } from "svjeez";
+import { enter, render, type Color, tint } from "svjeez";
 
-import { geist, geistMono } from "../fonts/faces";
-import { css, theme } from "../style";
+import { color, css, geist, leave, mono, rise, theme, Title } from "../gallery-style";
 
 const W = 960;
 const H = 540;
@@ -17,12 +16,12 @@ const weeks = hours.map((_, i) => i + 1);
 const pairs = <K extends string | number>(keys: readonly K[], values: readonly number[]) =>
   keys.map((key, i) => [key, values[i]!] as const);
 
-const look = { theme, font: geistMono, fontSize: 12, grid: true } as const;
+const look = { theme, font: mono, fontSize: 12, grid: true } as const;
 
 const plain = tint(theme, "plain");
 const muted = tint(theme, "muted");
 const blue = tint(theme, "blue");
-const orange = tint(theme, "number");
+const accent = color.accent;
 
 /** Left: pull requests opened and merged, side by side in each month. */
 const volume = chart({
@@ -46,22 +45,22 @@ const turnaround = chart({
 });
 
 const open = volume.bars(Object.fromEntries(pairs(months, opened)), {
-  at: 1.1,
+  at: 0.6,
   group: { index: 0, count: 2 },
   color: muted,
 });
 
 const done = volume.bars(Object.fromEntries(pairs(months, merged)), {
-  at: 1.35,
+  at: 0.8,
   group: { index: 1, count: 2 },
   color: blue,
 });
 
 const wait = turnaround.area(pairs(weeks, hours), {
-  at: 2.2,
-  over: 2.2,
+  at: 1.2,
+  over: 1.8,
   curve: "monotone",
-  color: orange,
+  color: accent,
   dots: 3.5,
   label: "median",
 });
@@ -69,7 +68,7 @@ const wait = turnaround.area(pairs(weeks, hours), {
 const ships = turnaround.x(8);
 
 const heading = (x: number, title: string, note: string, at: number) => (
-  <g animation={enter({ at, over: 0.7 }, { opacity: 0, y: 8 })}>
+  <g animation={rise(at)}>
     <text x={x} y={140} fontFamily={geist} fontWeight={600} fontSize={18} fill={plain}>
       {title}
     </text>
@@ -88,42 +87,34 @@ const key = (x: number, color: Color, name: string, at: number) => (
   </g>
 );
 
-const leave = motion({ opacity: 1 })
-  .at(D - 0.8)
-  .to({ opacity: 0 }, 0.6, ease.in);
-
 export default function build(): string {
   return render(
     {
       width: W,
       height: H,
       duration: D,
-      title: "Review turnaround",
-      desc: "Two charts animate in. Grouped bars show pull requests opened and merged per month, merged catching up with opened. An area chart shows the median hours to a first review falling from about 26 to 7 after a review bot ships in week 8.",
+      title: "Pull request review time",
+      desc: "Two charts animate in. Grouped bars show pull requests opened and merged per month, merged catching up with opened. An area chart shows the median hours to a first review falling from about 26 to 7 after a review bot ships in week 8. Sample data.",
       css,
       reducedMotion: { at: 6 },
     },
     <>
-      <rect width="100%" height="100%" fill={theme.base00} />
-      <g animation={leave}>
-        <g animation={enter({ at: 0.1, over: 0.8 }, { opacity: 0, y: 10 })}>
-          <text x={48} y={64} fontFamily={geist} fontWeight={600} fontSize={30} fill={plain}>
-            The review queue stopped being the bottleneck
-          </text>
-          <text x={48} y={90} fontFamily={geist} fontSize={15} fill={muted}>
-            One review bot, six months of pull requests.
-          </text>
-        </g>
-        {heading(48, "Opened and merged", "Pull requests per month", 0.5)}
-        {key(260, muted, "opened", 0.9)}
-        {key(330, blue, "merged", 0.9)}
-        {heading(532, "Time to first review", "Median hours, by week", 1.5)}
-        <g animation={enter({ at: 0.6, over: 0.8 })}>{volume.node}</g>
+      <rect width="100%" height="100%" fill={color.bg} />
+      <g animation={leave(D)}>
+        <Title
+          title="Median time to first review fell from 26 to 7 hours"
+          subtitle="Pull requests, January to June"
+        />
+        {heading(48, "Opened and merged", "Pull requests per month", 0.3)}
+        {key(260, muted, "opened", 0.5)}
+        {key(330, blue, "merged", 0.5)}
+        {heading(532, "Time to first review", "Median hours, by week", 0.8)}
+        <g animation={enter({ at: 0.4, over: 0.6 })}>{volume.node}</g>
         {open.node}
         {done.node}
-        <g animation={enter({ at: 1.6, over: 0.8 })}>{turnaround.node}</g>
+        <g animation={enter({ at: 0.9, over: 0.6 })}>{turnaround.node}</g>
         {wait.node}
-        <g animation={enter({ at: 4.6, over: 0.6 }, { opacity: 0, y: -6 })}>
+        <g animation={rise(2.8)}>
           <line
             x1={ships}
             y1={turnaround.y(30)}
@@ -140,7 +131,7 @@ export default function build(): string {
             fontSize={13}
             fill={plain}
           >
-            bot ships
+            Review bot ships
           </text>
         </g>
       </g>
