@@ -6,8 +6,9 @@ export const REPO = "https://github.com/saiashirwad/svjeez";
 /** Where the examples' sources live on GitHub. */
 export const SOURCES = `${REPO}/tree/main/examples`;
 
-/** A poster's width in device pixels: a card is at most about 560px wide on a phone, and screens draw it at 2x or more. */
+/** The posters' widths in device pixels. A card is at most about 560px wide, so most screens take the small one; the big one is for 2x screens and the example's own page. */
 export const POSTER_WIDTH = 1200;
+export const SMALL_POSTER_WIDTH = 600;
 
 const SECTIONS = [
   {
@@ -51,9 +52,12 @@ const SECTIONS = [
 export interface Example {
   readonly name: string;
   readonly scene: SceneImage;
+  /** The same scene with posters at `SMALL_POSTER_WIDTH`. */
+  readonly small: SceneImage;
 }
 
-const modules = import.meta.glob<() => string>("../../examples/*/index.tsx", {
+// The dom example is not in the gallery, and it imports Tailwind, whose native binary the site's bundle cannot load.
+const modules = import.meta.glob<() => string>(["../../examples/*/index.tsx", "!../../examples/dom/index.tsx"], {
   eager: true,
   import: "default",
 });
@@ -67,6 +71,7 @@ const example = (name: string): Example => {
   return {
     name,
     scene: getScene(build, { posters: { scale: POSTER_WIDTH / width, quality: 0.85 } }),
+    small: getScene(build, { posters: { scale: SMALL_POSTER_WIDTH / width, quality: 0.85 } }),
   };
 };
 
