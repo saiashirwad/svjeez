@@ -5,6 +5,7 @@ import { cueImage } from "../../hero";
 import { kb } from "../../proof";
 import Base from "../../layouts/Base.astro";
 import LiveScene from "../../components/LiveScene.astro";
+import Proof from "../../components/Proof.astro";
 import { getScene } from "@svjeez/astro/scene";
 import yourAgent from "@examples/site/your-agent.tsx";
 import { note } from "@examples/site/gallery-note.tsx";
@@ -22,6 +23,7 @@ const ABOVE_FOLD = 5;
 
 /** How wide a card draws, for the browser to pick a poster by: its columns of 66rem from 56rem, two up from 40rem. */
 const WIDTH: Record<Span, string> = { 4: "21rem", 5: "27rem", 6: "32rem", 7: "38rem" };
+
 const sizes = (span: Span, i: number) =>
   `(min-width: 56rem) ${WIDTH[span]}, (min-width: 40rem) ${i === 0 ? "100vw" : "50vw"}, 100vw`;
 
@@ -44,7 +46,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
               const set = (scheme: "light" | "dark") => `${small.posters![scheme]} ${SMALL_POSTER_WIDTH}w, ${scene.posters![scheme]} ${POSTER_WIDTH}w`;
 
               return (
-                <a class="card" href={`/examples/${name}`} style={`--span: ${span}`}>
+                <div class="card" style={`--span: ${span}`}>
                   <span
                     class="shot"
                     data-live={scene.src}
@@ -68,8 +70,8 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
                       />
                     </picture>
                   </span>
-                  <span class="cap"><b>{scene.title}</b> <span class="kb">{kb(scene.gzip)}</span></span>
-                </a>
+                  <span class="cap"><a class="title" href={`/examples/${name}`}>{scene.title}</a>{"\u2060"}<Proof scene={scene} name={name} alt={scene.desc || scene.title} /></span>
+                </div>
               );
             })}
       <span class="note" aria-hidden="true"><span set:html={sizeNote} /></span>
@@ -98,6 +100,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   /** The smallest poster that is sharp at the card's size and this screen. */
   const posterOf = (shot: HTMLElement) => {
     const wide = shot.clientWidth * devicePixelRatio > 600;
+    // SAFETY: scheme() is "light" or "dark", and the suffix is "" or "Small", so the key is one of these four.
     const key = `${scheme()}${wide ? "" : "Small"}` as "light" | "dark" | "lightSmall" | "darkSmall";
 
     return shot.dataset[key]!;
@@ -146,11 +149,22 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
     let timer: ReturnType<typeof setTimeout>;
 
     for (const shot of shots) {
-      const card = shot.closest("a")!;
-      card.addEventListener("pointerenter", () => (timer = setTimeout(() => run(shot), 150)));
+      const card = shot.closest(".card")!;
+      const link = card.querySelector("a.title")!;
+      const proof = card.querySelector<HTMLElement>(".proof")!;
+      const later = () => (clearTimeout(timer), (timer = setTimeout(() => run(shot), 150)));
+
+      // The size chip and its menu belong to the card but are not a way into the scene, so pointing at them never starts it.
+      card.addEventListener("pointerenter", later);
       card.addEventListener("pointerleave", () => (clearTimeout(timer), rest(shot)));
-      card.addEventListener("focus", () => run(shot));
-      card.addEventListener("blur", () => rest(shot));
+      proof.addEventListener("pointerenter", () => clearTimeout(timer));
+      proof.addEventListener("pointerleave", (event) => {
+        const to = event.relatedTarget;
+
+        if (to instanceof Node && card.contains(to) && !proof.contains(to)) later();
+      });
+      link.addEventListener("focus", () => run(shot));
+      link.addEventListener("blur", () => rest(shot));
     }
   } else {
     const seen = new IntersectionObserver(
@@ -179,6 +193,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
 
         if (!entry.isIntersecting) return void delete shot.dataset.near;
         shot.dataset.near = "";
+
         if (shot.dataset.want !== "1" && shot.dataset.key !== keyOf(shot)) still(shot);
       }),
     { rootMargin: "250px 0px" },
@@ -189,6 +204,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   const restill = (fade: boolean) =>
     shots.forEach((shot) => {
       if (shot.dataset.want === "1") return;
+
       if (shot.dataset.near !== undefined && shot.dataset.key !== keyOf(shot)) still(shot, fade);
     });
 

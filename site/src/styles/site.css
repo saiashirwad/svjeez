@@ -1311,8 +1311,10 @@ pre.side {
   }
 }
 /* Each card is two rows of the grid, the picture and its caption, so pictures in a row share a bottom edge and captions
-   a top one, however long a title runs. */
+   a top one, however long a title runs. The title is the card's link and stretches over all of it; only the size chip
+   sits above it. */
 .card {
+  position: relative;
   display: grid;
   grid-row: span 2;
   grid-template-rows: subgrid;
@@ -1339,39 +1341,52 @@ pre.side {
   object-fit: cover;
   object-position: 50% 25%;
 }
-/* Captions as on the landing page's wall: the title, then the file's gzipped size in mono. */
+/* The caption: the title, then the file's proof chip, which opens the same menu as on the landing page. */
 .card .cap {
   align-self: start;
   padding-inline: 0.25rem;
   font: 400 1rem / 1.3 var(--sans);
 }
-.card b {
+.card .title {
   font-weight: 600;
   color: var(--ink);
+  text-decoration: none;
 }
-.card .kb {
+.card .title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+/* The chip follows the title's last word, and wraps with it, a little up from the baseline so it centers on the line. */
+.card .proof {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  inset: auto;
   margin-inline-start: 0.5rem;
-  font: 400 0.8125rem / 1 var(--mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  white-space: nowrap;
+  vertical-align: 0.0625rem;
+  translate: none;
+}
+.card .proof-chip {
+  margin-block: -0.25rem;
+  background: none;
 }
 /* The ring goes on the picture, with its corners, not round the card. */
-.card:focus-visible {
+.card .title:focus-visible {
   outline: none;
 }
-.card:focus-visible .shot {
+.card:has(.title:focus-visible) .shot {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-.card:focus-visible .shot,
-.card:active .shot {
+.card:has(.title:focus-visible) .shot,
+.card:has(.title:active) .shot {
   box-shadow:
     0 0 0 1px var(--ring),
     0 1.25rem 2.5rem -1rem var(--shadow);
 }
 @media (hover: hover) and (pointer: fine) {
-  .card:hover .shot {
+  .card:hover:not(:has(.proof:hover)) .shot {
     box-shadow:
       0 0 0 1px var(--ring),
       0 1.25rem 2.5rem -1rem var(--shadow);
@@ -1383,15 +1398,15 @@ pre.side {
       translate 0.2s var(--out),
       box-shadow 0.2s var(--out);
   }
-  .card:focus-visible .shot {
+  .card:has(.title:focus-visible) .shot {
     translate: 0 -3px;
   }
-  .card:active .shot {
+  .card:has(.title:active) .shot {
     translate: 0 -2px;
   }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .card:hover .shot {
+  .card:hover:not(:has(.proof:hover)) .shot {
     translate: 0 -3px;
   }
 }

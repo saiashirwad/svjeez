@@ -18,6 +18,7 @@ const STOPS = 7;
 export const normal = (x: number): number => {
   const z = Math.abs(x) / Math.SQRT2;
   const t = 1 / (1 + 0.3275911 * z);
+
   const tail =
     ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
     t *
@@ -111,6 +112,7 @@ export const softPieces = (rect: Rect, radii: Radii, blur: number, around?: Rect
     return strength((normal(-d / sigma) - low) / (high - low));
   });
 
+  // SAFETY: cornersFor returns one radius per corner, so exactly four numbers.
   const [tl, tr, br, bl] = cornersFor(radii, inner, w, h) as [number, number, number, number];
   const [l, t, r, b] = [x, y, x + w, y + h];
 
@@ -138,6 +140,7 @@ export const softPieces = (rect: Rect, radii: Radii, blur: number, around?: Rect
   });
 
   const middle = strength(1);
+
   const pieces: Piece[] = [
     corner(0, l - blur, t - blur, l + tl, t + tl, tl),
     strip(0, l + tl, t - blur, r - tr, t + inner),

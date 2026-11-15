@@ -14,6 +14,7 @@ const DELAY = 1.9;
 /** Pen strokes for an arrow along `d`, ending at `tip` and heading the way `from` to `tip` does. */
 const arrow = (d: string, from: [number, number], tip: [number, number], arm = 9) => {
   const back = Math.atan2(from[1] - tip[1], from[0] - tip[0]);
+
   const end = (turn: number) =>
     `${(tip[0] + arm * Math.cos(back + turn)).toFixed(1)} ${(tip[1] + arm * Math.sin(back + turn)).toFixed(1)}`;
 
@@ -25,6 +26,7 @@ export const note = (size: string): string => {
   const done = words[words.length - 1]!;
   const shaft = arrow("M60 34C42 24 18 30 8 62", [12, 48], [8, 62]);
   let t = done.at + done.over + 0.12;
+
   const strokes = [
     ...words.map((s) => ({ ...s, d: s.d, dx: 56 })),
     ...shaft.map((d, i) => {
@@ -35,6 +37,7 @@ export const note = (size: string): string => {
       return stroke;
     }),
   ];
+
   const D = t + 0.3;
 
   return render(

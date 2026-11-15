@@ -20,6 +20,7 @@ const look = { theme, font: mono, fontSize: 12, grid: true } as const;
 
 const plain = tint(theme, "plain");
 const muted = tint(theme, "muted");
+
 // Opened is orange and merged is blue; the review time is purple, so each series has its own hue.
 const [orange, blue, violet] = [hue.orange, hue.blue, hue.purple];
 
