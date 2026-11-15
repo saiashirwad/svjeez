@@ -23,6 +23,7 @@ const ABOVE_FOLD = 5;
 
 /** How wide a card draws, for the browser to pick a poster by: its columns of 66rem from 56rem, two up from 40rem. */
 const WIDTH: Record<Span, string> = { 4: "21rem", 5: "27rem", 6: "32rem", 7: "38rem" };
+
 const sizes = (span: Span, i: number) =>
   `(min-width: 56rem) ${WIDTH[span]}, (min-width: 40rem) ${i === 0 ? "100vw" : "50vw"}, 100vw`;
 
@@ -99,6 +100,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   /** The smallest poster that is sharp at the card's size and this screen. */
   const posterOf = (shot: HTMLElement) => {
     const wide = shot.clientWidth * devicePixelRatio > 600;
+    // SAFETY: scheme() is "light" or "dark", and the suffix is "" or "Small", so the key is one of these four.
     const key = `${scheme()}${wide ? "" : "Small"}` as "light" | "dark" | "lightSmall" | "darkSmall";
 
     return shot.dataset[key]!;
@@ -158,6 +160,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
       proof.addEventListener("pointerenter", () => clearTimeout(timer));
       proof.addEventListener("pointerleave", (event) => {
         const to = event.relatedTarget;
+
         if (to instanceof Node && card.contains(to) && !proof.contains(to)) later();
       });
       link.addEventListener("focus", () => run(shot));
@@ -190,6 +193,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
 
         if (!entry.isIntersecting) return void delete shot.dataset.near;
         shot.dataset.near = "";
+
         if (shot.dataset.want !== "1" && shot.dataset.key !== keyOf(shot)) still(shot);
       }),
     { rootMargin: "250px 0px" },
@@ -200,6 +204,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   const restill = (fade: boolean) =>
     shots.forEach((shot) => {
       if (shot.dataset.want === "1") return;
+
       if (shot.dataset.near !== undefined && shot.dataset.key !== keyOf(shot)) still(shot, fade);
     });
 

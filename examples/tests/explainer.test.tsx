@@ -10,6 +10,7 @@ import { blip } from "../site/lib/blip";
 describe("the explainer's code is what plays", () => {
   const squash = (text: string) => text.replace(/\s+/g, "");
   const styleOf = (svg: string) => squash(svg.match(/<style>[\s\S]*<\/style>/)![0]);
+
   const keyframes = (css: string) =>
     css.match(/@keyframesk\d+\{.*?\}\}/g)!.map((k) => k.replace(/^@keyframesk\d+/, ""));
 
@@ -18,6 +19,7 @@ describe("the explainer's code is what plays", () => {
       "export const hop",
       "const hop",
     );
+
     const lines = states[0]!.lines;
 
     expect(file).toContain(lines.slice(0, 3).join("\n"));
@@ -47,6 +49,7 @@ describe("the explainer's code is what plays", () => {
       const own = styleOf(render(frame, blip(propsOf(state))));
 
       expect(keyframes(own).length).toBeGreaterThan(0);
+
       for (const frames of keyframes(own)) expect(played).toContain(frames);
     }
 

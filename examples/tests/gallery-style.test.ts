@@ -77,9 +77,9 @@ describe("gallery scenes follow examples/gallery-style.ts", () => {
 
   test("no text under 11px and no letterspaced capitals", () => {
     const found = sceneProblems((name, file, source) => [
-      ...[...source.matchAll(/fontSize(?:=\{|: )(\d+(?:\.\d+)?)\b/g)]
-        .filter((match) => Number(match[1]) < 11)
-        .map((match) => `${name}/${file}: font size ${match[1]} is under 11`),
+      ...[...source.matchAll(/fontSize(?:=\{|: )(\d+(?:\.\d+)?)\b/g)].flatMap((match) =>
+        Number(match[1]) < 11 ? [`${name}/${file}: font size ${match[1]} is under 11`] : [],
+      ),
       ...(/textTransform|text-transform: ?uppercase/.test(source)
         ? [`${name}/${file}: letterspaced capitals`]
         : []),

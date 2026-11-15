@@ -98,6 +98,7 @@ describe("soft shadows", () => {
     const box = card([], {
       insets: [{ color: "rgba(0,0,0,0.5)", x: 0, y: 2, blur: 8, spread: 0 }],
     });
+
     const pieces = insetPieces(box, box.insets![0]!);
     const strip = pieces.find((p) => p.fill.kind === "linear")!;
 
@@ -108,10 +109,12 @@ describe("soft shadows", () => {
 
   test("draws with gradients and no filter, sharing one gradient across equal fades", () => {
     const twin = { ...soft };
+
     const root = card([], {
       background: undefined,
       children: [card([soft]), card([twin], { box: { x: 60, y: 60, width: 200, height: 120 } })],
     });
+
     const svg = render(
       { width: 280, height: 200, duration: 1, title: "shadow" },
       <Dom states={snap(root)} />,
@@ -127,6 +130,7 @@ describe("soft shadows", () => {
   test("a box that grows morphs its shadow's pieces; a new blur crossfades", () => {
     const small = card([soft]);
     const tall = card([soft], { box: { x: 40, y: 40, width: 200, height: 180 } });
+
     const grown = render(
       { width: 280, height: 260, duration: 2, title: "shadow" },
       <Dom states={[snap(small), snap(tall)]} />,
@@ -136,6 +140,7 @@ describe("soft shadows", () => {
     expect(grown).not.toMatch(/opacity:/);
 
     const blurrier = card([{ ...soft, blur: 40 }]);
+
     const swapped = render(
       { width: 280, height: 200, duration: 2, title: "shadow" },
       <Dom states={[snap(small), snap(blurrier)]} />,

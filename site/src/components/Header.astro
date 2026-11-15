@@ -84,8 +84,10 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   }
 
   let next = 0;
+
   setInterval(() => {
     const shown = icons.filter((icon) => icon.offsetParent !== null);
+
     if (shown.length) play(shown[next++ % shown.length]!);
   }, 6000);
 

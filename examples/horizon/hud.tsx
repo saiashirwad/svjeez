@@ -1,4 +1,4 @@
-import { def, draw, ease, enter, motion, wiggle, type SvgNode } from "svjeez";
+import { def, draw, ease, enter, motion, type SvgNode } from "svjeez";
 import { geist, mono } from "../gallery-style";
 import { C, D, H, T, W, envelope, on } from "./kit";
 

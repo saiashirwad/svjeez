@@ -66,6 +66,7 @@ export const color = {
   text: theme.base05,
   ink: theme.base06,
   accent: theme.base0D,
+  // SAFETY: the theme's base colors are hex strings, which are valid Colors.
   series: [theme.base0D, theme.base09, theme.base0E, theme.base0C] as readonly Color[],
   error: theme.base08,
 } as const;

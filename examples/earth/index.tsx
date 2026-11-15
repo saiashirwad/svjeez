@@ -4,7 +4,6 @@ import { css, def, ease, fx, motion, rect, render, type SvgNode } from "svjeez";
 import { createRequire } from "node:module";
 import {
   paletteCss,
-  color,
   HEIGHT,
   MARGIN,
   mono,

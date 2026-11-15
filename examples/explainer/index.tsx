@@ -48,12 +48,15 @@ export const states: readonly State[] = edits.reduce<State[]>(
 
     lines.splice(line, insert ? 0 : 1, text);
 
-    return [...all, { lines, changed: line }];
+    all.push({ lines, changed: line });
+
+    return all;
   },
   [{ lines: start, changed: -1 }],
 );
 
 /** What Blip plays: the props a state's lines write. They are run, so what plays is what is shown. */
+// SAFETY: the state's lines are a `blip({...})` call whose props are exactly BlipMotions, and they are written to be run.
 export const propsOf = ({ lines }: State) =>
   new Function(
     "motion",
@@ -88,7 +91,8 @@ const repeated = (layer: Layer): any =>
     ? undefined
     : Array.isArray(layer)
       ? layer.map((m) => m && m.loop(PERIOD))
-      : (layer as Motion<any>).loop(PERIOD);
+      : // SAFETY: Array.isArray rules out the array branch, and undefined was handled first, so layer is one Motion.
+        (layer as Motion<any>).loop(PERIOD);
 
 /** The Blip the explainer shows for a state: the same props, each looping on the scene's clock. */
 export const blipOf = (state: State) => {
@@ -140,6 +144,7 @@ const slot = (state: State, text: string) => state.lines.indexOf(text);
 const rows = new Map<string, CodeTokens[number]>();
 
 for (const state of states) {
+  // SAFETY: highlight returns one token run list per input line, which is the shape CodeTokens names.
   const tokens = highlight(state.lines.join("\n"), "tsx") as CodeTokens;
 
   state.lines.forEach((text, i) => text && !rows.has(text) && rows.set(text, tokens[i]!));
@@ -218,12 +223,14 @@ const blips = states.map((state, i) => {
 
   if (i > 0) on = on.at(from).set({ opacity: 1 });
   on = on.at(to).set({ opacity: 0 });
+
   if (i === 0) on = on.at(BACK).set({ opacity: 1 });
 
   return <g animation={on}>{blipOf(state)}</g>;
 });
 
 const SCALE = 1.9;
+
 /** Blip's whole travel, from the flip's top to the feet, is about y 0 to 268 of the scene, and a flip reaches 82 either side of its middle. It centers on the code block's middle, in the space the code leaves, with the right margin the code has on the left. */
 const picture = { x: 940 - 104 * SCALE, y: H / 2 - 134 * SCALE };
 

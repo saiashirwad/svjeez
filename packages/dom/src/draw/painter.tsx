@@ -267,6 +267,7 @@ export const painter = (
     if (!ref) {
       const last = fill.stops.length - 1;
       const from = fill.kind === "radial" ? fill.from : 0;
+
       const stops = fill.stops.map((stopOpacity, k) =>
         jsx("stop", { offset: num(from + (k / last) * (1 - from), 4), stopColor, stopOpacity }),
       );

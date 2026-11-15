@@ -12,6 +12,7 @@ const at = { x: MARGIN, y: 280, fontSize: 60, theme } as const;
 const paint = (c: string, s: string) => String.raw`\textcolor{${c}}{${s}}`;
 const [a, b] = [(s: string) => paint(hue.blue, s), (s: string) => paint(hue.purple, s)];
 const square = tex(String.raw`(${a("a")}+${b("b")})^2`, at);
+
 const expanded = tex(
   String.raw`${a("a^2")} + \cssId{cross}{${paint(hue.orange, "2")}${a("a")}${b("b")}} + ${b("b^2")}`,
   at,

@@ -24,7 +24,11 @@ const still = async (svg: string) => {
 const svgFor = async (page: string) => {
   const example = examples.find(({ name }) => `ex-${name}` === page);
 
-  if (!example) return card(page as Mood);
+  if (!example) {
+    // SAFETY: the route's static paths are only example names and the mood names, so a non-example page is a Mood.
+    return card(page as Mood);
+  }
+
   const { svg, title, width, height } = example.scene;
 
   return exampleCard(title, await still(svg), width / height);
