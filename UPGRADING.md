@@ -163,6 +163,7 @@ Smaller breaking changes, in the order a typecheck will find them.
 - `variables(dark, light?, { prefix })` is `variables({ dark, light?, prefix? })`, like `adaptive`.
 - `hexBytes` and `hexOf` are no longer exported from `svjeez`, and neither is `groupBy`.
 - `<Marker theme>` is gone: pass `color`. A marker now appears at its first stop's `show.at` instead of at 0.
+- `systemDark` is darker: `base00` `#090A0C`, `base01` `#18181B`, `base02` `#27272A` (were `#1E1E20`, `#2A2A2D`, `#3A3A3D`). Re-render dark frames; pin the old hexes in your own palette if you need them.
 - `Video.duration` (`@svjeez/video`) is `playTime`: playback seconds. `Scene.duration` stays in scene seconds.
 - `<Focus fade={0}>` cuts instead of throwing.
 - These now throw: NaN or infinite `number`, `count` and `seconds` values and bounds; non-integer `count` bounds; duplicate `choice` options; a `color()` that is not hex; a `shake` or `wiggle` `rate` that is not positive; `restyle` `at` or `onceAt` below 0 or not finite; a non-finite `valuesAt` `duration`; `<Camera>` with no stops; `fx.boil` with a `seed` that is not a whole number of 1 or more or a `rate` that is not positive; `fx.grayscale` outside 0 to 1; `readingTime` with a non-positive `wps`. `recipes` and `sampled` say `needs a positive over` where they said `positive duration`.

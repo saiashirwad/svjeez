@@ -184,9 +184,9 @@ export const systemLight = /* @__PURE__ */ base16(
 
 /** Near-black by night, with the system accent colors. Pairs with `systemLight` in `adaptive`. */
 export const systemDark = /* @__PURE__ */ base16(
-  "#1E1E20",
-  "#2A2A2D",
-  "#3A3A3D",
+  "#090A0C",
+  "#18181B",
+  "#27272A",
   "#7C7C82",
   "#A1A1A6",
   "#E5E5EA",
