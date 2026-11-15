@@ -82,4 +82,5 @@ for (const dir of dirs) {
 }
 
 console.log(failed > 0 ? `\n${failed} state(s) over the threshold` : "\nall states match");
+
 process.exit(failed > 0 ? 1 : 0);

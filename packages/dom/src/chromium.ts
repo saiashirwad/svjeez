@@ -205,7 +205,9 @@ const RANGE_STYLE = new Set([
  */
 const markRanges = async (session: CDPSession, page: Page) => {
   const { root } = await session.send("DOM.getDocument", { depth: -1, pierce: true });
+
   type N = typeof root;
+
   const owners: { id: number; track: N; thumb: N }[] = [];
 
   const attr = (n: N, name: string) => {

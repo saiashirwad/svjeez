@@ -1022,7 +1022,7 @@ export function walk({
 
     const named = Object.keys(parts).find((name) => el.matches(parts[name]!));
 
-    return {
+    const box: Box = {
       kind: "box",
       tag,
       part: el.getAttribute("data-part") ?? named,
@@ -1030,13 +1030,14 @@ export function walk({
       id: el.id || undefined,
       box: rel(r),
       ...surface(s, r, rel(r)),
-      // The browser's own range control paints no box of its own, whatever the dark scheme's field color says.
-      ...(el instanceof HTMLInputElement && el.type === "range" && s.appearance !== "none"
-        ? { background: undefined, border: undefined }
-        : {}),
       clip: s.overflowX !== "visible" || s.overflowY !== "visible",
       children,
     };
+
+    // The browser's own range control paints no box of its own, whatever the dark scheme's field color says.
+    const bare = el instanceof HTMLInputElement && el.type === "range" && s.appearance !== "none";
+
+    return bare ? { ...box, background: undefined, border: undefined } : box;
   };
 
   const tree = element(root);

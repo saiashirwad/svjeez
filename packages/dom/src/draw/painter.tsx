@@ -631,17 +631,12 @@ export const painter = (
 
     // Faded in one scheme only: the opacity is a variable that follows the viewer's scheme, as colors are.
     const faded = dim
-      ? (v({ light: String(b.opacity), dark: String(b.darkOpacity) }) as unknown as number)
+      ? v({ light: String(b.opacity), dark: String(b.darkOpacity) })
       : !opacity && b.opacity < 1
         ? b.opacity
         : undefined;
 
-    return transformed(
-      b,
-      <g opacity={faded} animation={motions}>
-        {drawn}
-      </g>,
-    );
+    return transformed(b, jsx("g", { opacity: faded, animation: motions, children: drawn }));
   };
 
   /** The rules that define the variables drawn so far, and the page's fonts svjeez doesn't embed itself. */
