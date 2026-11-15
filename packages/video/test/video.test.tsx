@@ -42,7 +42,7 @@ describe("video", () => {
   test("webm is VP9 by default, one frame per 1/fps of the loop", async () => {
     const clip = await video(slide, { format: "webm", fps: 12, colorScheme: "light" });
 
-    expect(clip).toMatchObject({ mime: "video/webm", codec: "vp9", frames: 12, duration: 1 });
+    expect(clip).toMatchObject({ mime: "video/webm", codec: "vp9", frames: 12, playTime: 1 });
     expect(await read(clip.bytes)).toMatchObject({
       mime: expect.stringContaining("video/webm"),
       codec: "vp9",
@@ -63,7 +63,7 @@ describe("video", () => {
       scale: 2,
     });
 
-    expect(clip).toMatchObject({ codec: "vp8", frames: 30, duration: 3 });
+    expect(clip).toMatchObject({ codec: "vp8", frames: 30, playTime: 3 });
     expect(await read(clip.bytes)).toMatchObject({
       codec: "vp8",
       width: 128,
