@@ -1,9 +1,15 @@
 import { def, draw, ease, enter, motion, wiggle, type SvgNode } from "svjeez";
+import { geist, mono } from "../gallery-style";
 import { C, D, H, T, W, envelope, on } from "./kit";
 
-/** `.mono` is 10px, and every monospace face here advances 0.6em. */
-const ADVANCE = 6;
-const LINE = 14;
+/** The HUD is 12px JetBrains Mono, which advances 0.6em. */
+const SIZE = 12;
+const ADVANCE = 7.2;
+const LINE = 17;
+const EDGE = 48;
+
+/** The right-hand readouts are one block, left-aligned at the width of the longest line. */
+const RIGHT = W - EDGE - 29 * ADVANCE;
 
 function Typed({
   x,
@@ -19,7 +25,7 @@ function Typed({
   dim?: boolean;
 }): SvgNode {
   return (
-    <g class="mono" fill={dim ? C.hudDim : C.hud}>
+    <g fontFamily={mono} fontSize={SIZE} fill={dim ? C.hudDim : C.hud}>
       {[...text].map((char, i) =>
         char === " " ? null : (
           <text x={x + i * ADVANCE} y={y} animation={on(at + i * 0.022)}>
@@ -68,7 +74,7 @@ const digits = (count: number, pad = 1) =>
 
 function Clock({ x, y }: { x: number; y: number }): SvgNode {
   return (
-    <g class="mono" fill={C.white}>
+    <g fontFamily={mono} fontSize={SIZE} fill={C.white}>
       <text x={x} y={y}>
         T+
       </text>
@@ -85,33 +91,8 @@ function Clock({ x, y }: { x: number; y: number }): SvgNode {
   );
 }
 
-function Flux({ x, y }: { x: number; y: number }): SvgNode {
-  const bars = 24;
-  const window = def.clipPath({}, <rect x={x} y={y - 28} width={bars * 5} height={28} />);
-
-  return (
-    <>
-      <Typed x={x} y={y - 36} text="HAWKING FLUX" at={T.hud + 0.6} dim />
-      <g clipPath={window} fill={C.hud}>
-        {Array.from({ length: bars }, (_, i) => (
-          <rect
-            x={x + i * 5}
-            y={y - 14}
-            width={3}
-            height={40}
-            animation={wiggle(
-              { y: 13 },
-              { seed: `flux-${i}`, rate: 9, ease: ease.hold, period: D / 4 },
-            )}
-          />
-        ))}
-      </g>
-    </>
-  );
-}
-
 function Brackets(): SvgNode {
-  const inset = 22;
+  const inset = 32;
   const arm = 26;
 
   const corners = [
@@ -157,23 +138,23 @@ function Scan(): SvgNode {
 }
 
 export function Hud(): SvgNode {
+  const top = EDGE + SIZE;
+
   return (
     <g animation={envelope(T.hud, T.collapse, 0.3)}>
       <Scan />
       <Brackets />
-      <Typed x={44} y={50} text="SGR A* // EVENT HORIZON ARRAY" at={T.hud + 0.2} />
-      <Typed x={44} y={50 + LINE} text="OBS 2026.10.23  230 GHZ  LOCK" at={T.hud + 0.5} dim />
-      <Typed x={W - 44 - 18 * ADVANCE} y={50} text="MASS  4.297E6 MSUN" at={T.hud + 0.3} dim />
+      <Typed x={EDGE} y={top} text="Sgr A*" at={T.hud + 0.2} />
+      <Typed x={EDGE} y={top + LINE} text="230 GHz" at={T.hud + 0.5} dim />
+      <Typed x={RIGHT} y={top} text="Mass 4.3 million solar masses" at={T.hud + 0.3} dim />
+      <Clock x={RIGHT} y={top + LINE} />
       <Typed
-        x={W - 44 - 18 * ADVANCE}
-        y={50 + LINE}
-        text="SPIN  A* = 0.998"
-        at={T.hud + 0.45}
+        x={EDGE}
+        y={H - EDGE}
+        text="Schwarzschild radius 12.7 million km"
+        at={T.hud + 0.7}
         dim
       />
-      <Clock x={W - 44 - 18 * ADVANCE} y={50 + 2 * LINE} />
-      <Typed x={44} y={H - 44} text="R_S  1.27E7 KM" at={T.hud + 0.7} dim />
-      <Flux x={W - 44 - 24 * 5} y={H - 44} />
     </g>
   );
 }
@@ -240,9 +221,8 @@ export function Title(): SvgNode {
           <text
             x={left + i * pitch}
             y={H - 72}
-            class="sans"
+            fontFamily={geist}
             fontSize={30}
-            fontWeight={200}
             fill={C.white}
             textAnchor="middle"
             animation={enter({ at: T.title + spread, over: 1.1 }, { opacity: 0, blur: 12, y: 10 })
@@ -253,18 +233,6 @@ export function Title(): SvgNode {
           </text>
         );
       })}
-      <g animation={envelope(T.title + 0.8, T.collapse - 0.2, 0.6)}>
-        <text
-          x={W / 2}
-          y={H - 46}
-          class="mono"
-          letterSpacing={6}
-          fill={C.hudDim}
-          textAnchor="middle"
-        >
-          THE POINT OF NO RETURN
-        </text>
-      </g>
     </>
   );
 }
