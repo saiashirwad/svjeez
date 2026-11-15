@@ -116,7 +116,7 @@ const plain = ({ at, over }: { at: number; over: number }) => ({ at, over });
 describe("pacing", () => {
   test("pace scales scenes, not gaps", () => {
     const tl = timeline({ intro: 2, body: 3 }, { gap: 0.5, pace: 2 });
-    expect([plain(tl.intro), plain(tl.body), tl.duration]).toEqual([
+    expect([plain(tl.intro), plain(tl.body), tl.end]).toEqual([
       { at: 0, over: 4 },
       { at: 4.5, over: 6 },
       10.5,
@@ -126,12 +126,12 @@ describe("pacing", () => {
   test("a timeline starting inside another's scene lays out its beats from there", () => {
     const outer = timeline({ intro: 2, body: 6 }, { gap: 1 });
     const beats = timeline({ setup: 1, punchline: 2 }, { at: outer.body.at, gap: 0.5 });
-    expect([plain(beats.setup), plain(beats.punchline), beats.duration, beats.end]).toEqual([
-      { at: 3, over: 1 },
-      { at: 4.5, over: 2 },
-      3.5,
-      6.5,
-    ]);
+    expect([
+      plain(beats.setup),
+      plain(beats.punchline),
+      beats.end - beats.setup.at,
+      beats.end,
+    ]).toEqual([{ at: 3, over: 1 }, { at: 4.5, over: 2 }, 3.5, 6.5]);
   });
 
   test("readingTime holds for words / wps + settle, at least min", () => {
@@ -227,20 +227,20 @@ describe("themes", () => {
   });
 
   test("variables() names each value as a CSS variable, with the light values under prefers-color-scheme: light", () => {
-    const { vars, css } = variables(
-      { sky: "#001", "ground-2": "#010" },
-      { sky: "#ddf", "ground-2": "#dfd" },
-    );
+    const { vars, css } = variables({
+      dark: { sky: "#001", "ground-2": "#010" },
+      light: { sky: "#ddf", "ground-2": "#dfd" },
+    });
 
     expect(vars).toEqual({ sky: "var(--sky)", "ground-2": "var(--ground-2)" });
     expect(css).toBe(
       "svg{--sky:#001;--ground-2:#010}\n@media (prefers-color-scheme:light){svg{--sky:#ddf;--ground-2:#dfd}}",
     );
-    expect(variables({ sky: "#001" }).css).toBe("svg{--sky:#001}");
+    expect(variables({ dark: { sky: "#001" } }).css).toBe("svg{--sky:#001}");
   });
 
   test("variables() rejects a name that is not a CSS identifier", () => {
-    expect(() => variables({ "not valid": "#000" })).toThrow(
+    expect(() => variables({ dark: { "not valid": "#000" } })).toThrow(
       'variables() needs CSS identifiers for names, got "not valid".',
     );
   });
@@ -402,7 +402,7 @@ describe("accent color", () => {
   const [span, box] = [{ at: 0, over: 2 }, rect(10, 10, 30, 20)];
 
   const items = {
-    Marker: (theme) => Marker({ theme, stops: [{ show: span, target: box }] }),
+    Marker: (theme) => Marker({ color: theme?.base09, stops: [{ show: span, target: box }] }),
     Arrow: (theme) => Arrow({ theme, from: { x: 0, y: 0 }, to: { x: 50, y: 50 }, show: span }),
     Callout: (theme) => Callout({ theme, target: box, show: span, children: "hi" }),
     Brace: (theme) => Brace({ theme, target: box, show: span }),
