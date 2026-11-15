@@ -1,5 +1,4 @@
 import { google } from "@svjeez/fonts";
-import { theme } from "../gallery-style";
 import { def, type Font, type Paint, type Ref, type SvgNode } from "svjeez";
 
 export const W = 960;
@@ -9,16 +8,16 @@ export const H = 540;
 export const Y = (y: number): number => Math.round((70 + (y - 108) * 0.885) * 10) / 10;
 export const D = 22;
 
-/** Base16 slots, so the site's palette picker and light and dark recolor the map. Paper, land and sea step through the scheme's three background slots. */
+/** A fixed parchment palette: it never follows the site theme. */
 export const C = {
-  paper: theme.base00,
-  land: theme.base01,
-  sea: theme.base02,
-  ink: theme.base06,
-  faded: theme.base04,
-  river: theme.base0D,
-  red: theme.base08,
-  ember: theme.base09,
+  paper: "#EBDDBB",
+  land: "#F1E5C6",
+  sea: "#DCCDA6",
+  ink: "#3B2A1A",
+  faded: "#7A6142",
+  river: "#3F5E6E",
+  red: "#9E2B1E",
+  ember: "#E0662A",
 } as const;
 
 export const roman = await google("Cinzel");

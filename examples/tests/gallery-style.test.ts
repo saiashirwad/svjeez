@@ -11,7 +11,7 @@ const names = [...readFileSync(SITE, "utf8").matchAll(/^\s+"([\w-]+)",$/gm)].map
 );
 
 // Scenes whose material is the point: they keep their own palette. Everything else paints with var(--base0X).
-const OWN_PALETTE = ["horizon", "newspaper"];
+const OWN_PALETTE = ["horizon", "map", "newspaper"];
 
 // Scenes that show specimen faces or embed their own art keep their own fonts.
 const OWN_FONTS = ["fonts", "map", "newspaper"];

@@ -10,37 +10,26 @@ export const SOURCES = `${REPO}/tree/main/examples`;
 export const POSTER_WIDTH = 1200;
 export const SMALL_POSTER_WIDTH = 600;
 
-const SECTIONS = [
-  {
-    title: "Scenes",
-    blurb: "Complete animated scenes, each in a single SVG.",
-    names: [
-      "earth",
-      "cables",
-      "map",
-      "newspaper",
-      "horizon",
-      "explainer",
-    ],
-  },
-  {
-    title: "Building blocks",
-    blurb: "Explore charts, diagrams, code, equations, fonts, and effects.",
-    names: [
-      "charts",
-      "code",
-      "math",
-      "flowchart",
-      "sequence",
-      "state",
-      "lanes",
-      "terminal",
-      "effects",
-      "fonts",
-      "images",
-    ],
-  },
-] as const;
+/** One grid, strongest scenes first. */
+const NAMES = [
+  "earth",
+  "cables",
+  "map",
+  "newspaper",
+  "horizon",
+  "explainer",
+  "charts",
+  "code",
+  "math",
+  "flowchart",
+  "sequence",
+  "state",
+  "lanes",
+  "terminal",
+  "effects",
+  "fonts",
+  "images",
+];
 
 export interface Example {
   readonly name: string;
@@ -68,9 +57,4 @@ const example = (name: string): Example => {
   };
 };
 
-export const sections = SECTIONS.map((section) => ({
-  ...section,
-  examples: section.names.map(example),
-}));
-
-export const examples = sections.flatMap((section) => section.examples);
+export const examples = NAMES.map(example);
