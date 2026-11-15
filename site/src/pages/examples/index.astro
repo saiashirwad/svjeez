@@ -1,10 +1,21 @@
 ---
-import { POSTER_WIDTH, sections, SOURCES } from "../../examples";
+import { POSTER_WIDTH, SMALL_POSTER_WIDTH, sections, SOURCES } from "../../examples";
 import { themed } from "../../palettes";
 import Base from "../../layouts/Base.astro";
+import { getScene } from "@svjeez/astro/scene";
+import yourAgent from "@examples/site/your-agent.tsx";
+
+/** "your agent", handwritten by a scene and inlined so it takes the accent color. */
+const { svg: handwriting } = getScene(yourAgent);
 
 /** A section's anchor: "Building blocks" is #building-blocks. */
 const slug = (title: string) => title.toLowerCase().replaceAll(" ", "-");
+
+/** The cards in the first row, which load at once instead of lazily. */
+const FIRST_ROW = 3;
+
+/** How wide a card draws, for the browser to pick a poster by. */
+const SIZES = "(min-width: 1000px) 25vw, (min-width: 600px) 50vw, 100vw";
 
 /** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
 const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] });
@@ -15,7 +26,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   <main class="wrap">
     <div class="page-head">
       <h1>
-        Explore what <span class="edit"><s>you</s><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M-4 25C14 17 30 29 50 21S86 24 104 15M2 31C24 24 52 33 98 23" /></svg><ins>your agent</ins></span> can make.
+        Explore what <span class="edit"><s>you</s><svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M-4 25C14 17 30 29 50 21S86 24 104 15M2 31C24 24 52 33 98 23" /></svg><ins><span>your agent</span><span aria-hidden="true" set:html={handwriting} /></ins></span> can make.
       </h1>
     </div>
     {
@@ -26,14 +37,40 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
             <small>{section.blurb}</small>
           </h2>
           <div class="grid">
-            {section.examples.map(({ name, scene }) => (
-              <a class="card" href={`/examples/${name}`}>
-                <span class="shot" data-live={scene.src} data-light={scene.posters!.light} data-dark={scene.posters!.dark}>
-                  <img width={POSTER_WIDTH} height={Math.round((POSTER_WIDTH * scene.height) / scene.width)} alt="" decoding="async" data-themed={themed(scene.svg) ? "" : undefined} />
-                </span>
-                <b>{scene.title}</b>
-              </a>
-            ))}
+            {section.examples.map(({ name, scene, small }, i) => {
+              const first = section.title === sections[0]!.title && i < FIRST_ROW;
+              const loading = first ? { fetchpriority: "high" } as const : { loading: "lazy" } as const;
+              const set = (scheme: "light" | "dark") => `${small.posters![scheme]} ${SMALL_POSTER_WIDTH}w, ${scene.posters![scheme]} ${POSTER_WIDTH}w`;
+
+              return (
+                <a class="card" href={`/examples/${name}`}>
+                  <span
+                    class="shot"
+                    data-live={scene.src}
+                    data-light={scene.posters!.light}
+                    data-dark={scene.posters!.dark}
+                    data-light-small={small.posters!.light}
+                    data-dark-small={small.posters!.dark}
+                  >
+                    <picture>
+                      <source media="(prefers-color-scheme: dark)" srcset={set("dark")} sizes={SIZES} />
+                      <img
+                        src={small.posters!.light}
+                        srcset={set("light")}
+                        sizes={SIZES}
+                        width={POSTER_WIDTH}
+                        height={Math.round((POSTER_WIDTH * scene.height) / scene.width)}
+                        alt=""
+                        decoding="async"
+                        {...loading}
+                        data-themed={themed(scene.svg) ? "" : undefined}
+                      />
+                    </picture>
+                  </span>
+                  <b>{scene.title}</b>
+                </a>
+              );
+            })}
           </div>
         </section>
       ))
@@ -46,33 +83,63 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
 </Base>
 
 <script>
-  import { frozen, PALETTECHANGE, playing, replay, show } from "../../scripts/palette";
+  import { DEFAULT_PALETTE } from "../../palettes";
+  import { type Frame, frozen, palette, PALETTECHANGE, playing, replay, show } from "../../scripts/palette";
   import { calm, scheme, THEMECHANGE } from "../../scripts/scheme";
-
-  // The Network Information API ships in Chromium only, so lib.dom has no type for it.
-  declare global {
-    interface Navigator {
-      readonly connection?: { readonly saveData?: boolean };
-    }
-  }
 
   // A card shows a still until you hover it (or, on a touch screen, until it is mostly in view).
   // Only then does its SVG download, and it goes back to the still when you leave.
+  // The still is in the HTML, a lazy <picture> the browser sizes and fetches by itself. This script takes the card over
+  // (drops the srcset) only to swap it: to play, to rest, or when the scheme or palette is not the one the HTML shows.
   const shots = document.querySelectorAll<HTMLElement>(".shot[data-live]");
   const image = (shot: HTMLElement) => shot.querySelector("img")!;
-  const stillOf = (shot: HTMLElement) => frozen(image(shot), shot.dataset.live!, shot.dataset[scheme()]!);
+  const systemScheme = () => (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+  /** The smallest poster that is sharp at the card's size and this screen. */
+  const posterOf = (shot: HTMLElement) => {
+    const wide = shot.clientWidth * devicePixelRatio > 600;
+    const key = `${scheme()}${wide ? "" : "Small"}` as "light" | "dark" | "lightSmall" | "darkSmall";
+
+    return shot.dataset[key]!;
+  };
+
+  const stillOf = (shot: HTMLElement) => frozen(image(shot), shot.dataset.live!, posterOf(shot));
+
+  /** What the card's still was made for: the scheme, and the palette when the scene follows one. */
+  const keyOf = (shot: HTMLElement) => (image(shot).dataset.themed === undefined ? scheme() : `${scheme()} ${palette()}`);
+
+  /** Show `next` in the card, and with it let go of the HTML's srcset, which would win over the new src. */
+  const swap = async (shot: HTMLElement, next: Promise<Frame>, options?: { fade?: boolean }) => {
+    const img = image(shot);
+    const shown = await show(img, next, options);
+
+    if (shown) {
+      img.removeAttribute("srcset");
+      shot.querySelectorAll("source").forEach((source) => source.remove());
+    }
+
+    return shown;
+  };
+
+  /** Show the still for the current scheme and palette. */
+  const still = (shot: HTMLElement, fade = false) => {
+    shot.dataset.key = keyOf(shot);
+
+    return swap(shot, stillOf(shot), { fade });
+  };
 
   const run = (shot: HTMLElement) => {
     if (shot.dataset.want === "1" || calm.matches) return;
     shot.dataset.want = "1";
-    show(image(shot), playing(image(shot), shot.dataset.live!)).then((shown) => shown && (shot.dataset.playing = "1"));
+    delete shot.dataset.key;
+    swap(shot, playing(image(shot), shot.dataset.live!)).then((shown) => shown && (shot.dataset.playing = "1"));
   };
 
   const rest = (shot: HTMLElement) => {
     if (shot.dataset.want !== "1") return;
     shot.dataset.want = "0";
     delete shot.dataset.playing;
-    show(image(shot), stillOf(shot));
+    still(shot);
   };
 
   if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -100,55 +167,41 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
     shots.forEach((shot) => seen.observe(shot));
   }
 
+  // The HTML shows the system's scheme and the default palette. A card near the screen gets its still redone when the
+  // reader's choice differs, and a card far from it waits until it comes near, so a change costs only what is in view.
+  for (const shot of shots) shot.dataset.key = image(shot).dataset.themed === undefined ? systemScheme() : `${systemScheme()} ${DEFAULT_PALETTE}`;
+
   const near = new IntersectionObserver(
     (entries) =>
       entries.forEach((entry) => {
-        if (!entry.isIntersecting || !(entry.target instanceof HTMLElement)) return;
+        if (!(entry.target instanceof HTMLElement)) return;
         const shot = entry.target;
 
-        if (!shot.dataset.want) show(image(shot), stillOf(shot));
-        near.unobserve(shot);
+        if (!entry.isIntersecting) return void delete shot.dataset.near;
+        shot.dataset.near = "";
+        if (shot.dataset.want !== "1" && shot.dataset.key !== keyOf(shot)) still(shot);
       }),
     { rootMargin: "250px 0px" },
   );
 
   shots.forEach((shot) => near.observe(shot));
 
-  // Once the page has loaded, fetch every card's still and scene in the background, a few at a time and in page order,
-  // so a card shows and plays at once wherever you scroll or point. The files are immutable, so the HTTP cache keeps them.
-  const prefetch = async () => {
-    if (navigator.connection?.saveData) return;
-    const other = scheme() === "light" ? "dark" : "light";
+  const restill = (fade: boolean) =>
+    shots.forEach((shot) => {
+      if (shot.dataset.want === "1") return;
+      if (shot.dataset.near !== undefined && shot.dataset.key !== keyOf(shot)) still(shot, fade);
+    });
 
-    const urls = [
-      ...[...shots].map((shot) => shot.dataset[scheme()]!),
-      ...[...shots].map((shot) => shot.dataset.live!),
-      ...[...shots].map((shot) => shot.dataset[other]!),
-    ];
+  addEventListener(THEMECHANGE, () => restill(false));
 
-    const lane = async () => {
-      for (let url = urls.shift(); url; url = urls.shift()) await fetch(url, { priority: "low" }).then((r) => r.blob()).catch(() => {});
-    };
-
-    await Promise.all([lane(), lane(), lane()]);
-  };
-
-  const idle = () => ("requestIdleCallback" in window ? requestIdleCallback(() => prefetch()) : setTimeout(prefetch, 200));
-
-  if (document.readyState === "complete") idle();
-  else addEventListener("load", idle, { once: true });
-
-  // A recolored still follows light and dark by itself; a poster has to be swapped.
-  addEventListener(THEMECHANGE, () => shots.forEach((shot) => !shot.dataset.playing && image(shot).src && !image(shot).src.startsWith("blob:") && show(image(shot), stillOf(shot))));
-
-  addEventListener(PALETTECHANGE, () =>
+  addEventListener(PALETTECHANGE, () => {
     shots.forEach((shot) => {
       if (shot.dataset.playing) replay(image(shot));
       else if (shot.dataset.want === "1") {
         delete shot.dataset.want;
         run(shot);
       }
-      else if (image(shot).src) show(image(shot), stillOf(shot), { fade: true });
-    }),
-  );
+    });
+    restill(true);
+  });
 </script>
