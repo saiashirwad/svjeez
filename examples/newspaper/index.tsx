@@ -1,4 +1,5 @@
 import { google } from "@svjeez/fonts";
+import { leave } from "../gallery-style";
 import {
   Glyphs,
   def,
@@ -15,7 +16,10 @@ import {
 
 const W = 1280;
 const H = 720;
-const D = 11;
+const D = 9;
+
+/** The page fills the canvas, inside a 64px margin (48px at 960 wide). */
+const EDGE = 64;
 
 const blackletter = await google("UnifrakturMaguntia", { fallback: ["serif"] });
 const fat = await google("Abril Fatface", { fallback: ["Georgia", "serif"] });
@@ -26,12 +30,9 @@ const C = {
   shade: "#E4DCC8",
   ink: "#1C1A16",
   soft: "#5B5548",
-  red: "#B3261E",
-  desk: "#2A2622",
 } as const;
 
-const PAGE = { x: 40, y: 32, w: W - 80, h: H - 64 };
-const INNER = { x: PAGE.x + 32, w: PAGE.w - 64 };
+const INNER = { x: EDGE, w: W - 2 * EDGE };
 
 const centered = (face: Font, text: string, size: number) =>
   INNER.x + (INNER.w - face.measure(text, size)) / 2;
@@ -90,43 +91,42 @@ const Row = ({ line, x, ...props }: ElementProps<"text"> & { line: Line; x: numb
 );
 
 const ARTICLE = `
-Type has arrived in the animated SVG. A scene can now load a real font file, embed it once, and set whole columns of text in it, measured to the pixel before the browser ever sees a glyph.
+HOUSTON, July 20 - Two American astronauts landed on the Moon today and walked on its surface, eight years after President Kennedy set the goal. The lunar module Eagle touched down in the Sea of Tranquility at 4:17 p.m. Eastern time.
 
-The letters at the top of this page are not text at all. Each one is an outline read straight from the font's glyph table, drawn on stroke by stroke and then filled. Outlines stay sharp at any zoom and embed no font, which suits a masthead.
+"Houston, Tranquility Base here," Neil Armstrong reported. "The Eagle has landed." Mission control, which had held its breath through the last minutes of the descent, replied that it was breathing again.
 
-This column is the other kind. It is real text in an embedded serif, so it can be selected, searched and read aloud. Every line was broken and justified ahead of time by measuring each word, kerning included, and each word was placed where the browser would put it.
+At 10:56 p.m. Armstrong, the 38-year-old commander, stepped onto the surface. "That's one small step for man," he said, "one giant leap for mankind." Edwin Aldrin, 39, followed about twenty minutes later and called the view "magnificent desolation."
 
-Experts consulted for this report were unanimous. The 0.6em guess, long the standard for a label's width, has been retired. Diagram boxes now fit their labels, callouts fit their notes, and code sits on its columns in any monospaced face.
+The two men spent about two and a half hours outside. They planted an American flag, set up a seismometer and a laser reflector, and gathered about 47 pounds of lunar rock and soil. A plaque left on the lander reads: "We came in peace for all mankind."
 
-Readers are advised that a whole font downloads before the first frame. Editors recommend outlines for short titles and an embedded face for body copy, which keeps a page like this one well under a hundred kilobytes.
+President Nixon spoke with the astronauts by radio-telephone from the White House. He called it the most historic telephone call ever made from there.
 
-The halftone letter on this page shows what outlines allow. A glyph is a shape like any other, so it takes a gradient, a pattern or a filter, and it can be scaled to fill a frame without a single blurred edge.
+The landing was not without trouble. Computer alarms sounded during the descent, and Armstrong took manual control to steer past a field of boulders.
 
-Ligatures and kerning came along for the ride. A pair such as AV tucks together exactly as it does in the browser, because the same tables the browser reads were read here first. Where a font lacks a letter, the fallback named alongside it takes over.
+Michael Collins, 38, orbited the Moon alone aboard the command module Columbia while his crewmates were on the surface.
 
-Nothing on this page was fetched from the web. The three typefaces travel inside the file as data, the motion runs as plain CSS keyframes, and the whole edition plays wherever an image does, from a README to a slide.
+The flight began on July 16 with the launch of a Saturn V rocket from Cape Kennedy, Fla., and reached the Moon on the fourth day. An estimated 600 million people watched the first steps on television.
 
-Printers of an earlier age set every line by hand and justified it with thin strips of lead. This edition was set by a few lines of TypeScript that weigh each word before placing it. The compositors' union has been informed.
-
-In other news, the masthead above is set in a blackletter cut that would have looked at home on a broadsheet two centuries ago. It costs nothing to embed, because it is not embedded. Only its outlines made the trip.
+The astronauts are to lift off from the Moon later today and return to Earth for a splashdown in the Pacific on Thursday.
 
 Continued on page A2.
 `;
 
 // Five columns: the story runs down the first four under the headline, and the photo stands in the fifth.
-const COLUMN = { y: 318, gap: 22, size: 13, leading: 19.5 };
+const COLUMN = { y: 318, gap: 22, size: 14, leading: 21.5 };
+const BOTTOM = H - EDGE;
 const columnWidth = (INNER.w - 4 * COLUMN.gap) / 5;
 const columnX = (i: number) => INNER.x + i * (columnWidth + COLUMN.gap);
 const STORY = { x: INNER.x, w: columnX(4) - COLUMN.gap - INNER.x };
 
-const PHOTO = { x: columnX(4), y: 198, w: columnWidth, h: 400 };
+const PHOTO = { x: columnX(4), y: 198, w: columnWidth, h: columnWidth };
 
 const halftone = def.pattern(
   { width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" },
   <circle cx={2.5} cy={2.5} r={1.55} fill={C.ink} />,
 );
 
-const rows = Math.floor((PAGE.y + PAGE.h - 30 - COLUMN.y) / COLUMN.leading);
+const rows = Math.floor((BOTTOM - COLUMN.y) / COLUMN.leading);
 const rest = justify(ARTICLE, columnWidth, COLUMN.size);
 const perColumn = Math.ceil(rest.length / 4);
 const columns = [0, 1, 2, 3].map(() => rest.splice(0, Math.min(rows, perColumn)));
@@ -134,16 +134,15 @@ const columns = [0, 1, 2, 3].map(() => rest.splice(0, Math.min(rows, perColumn))
 if (rest.length)
   throw new Error(`The article overruns its columns by ${rest.length} lines. Cut it.`);
 
-const SPIN = 1.8;
-const MAST = "The Svjeez Gazette";
+const MAST = "The Daily Chronicle";
 const MAST_SIZE = 64;
-const HEAD = "TYPE ARRIVES IN EVERY SVG";
+const HEAD = "ASTRONAUTS LAND ON THE MOON";
 const HEAD_SIZE = Math.min(64, STORY.w / fat.measure(HEAD, 1));
-const DECK = "Letters draw themselves, columns justify by measure, and nothing loads from the web.";
+const DECK = "Armstrong and Aldrin spend two and a half hours on the surface; Collins waits in orbit.";
 
 function Masthead(): SvgNode {
   const x = centered(blackletter, MAST, MAST_SIZE);
-  const y = 128;
+  const y = 132;
 
   return (
     <>
@@ -157,7 +156,7 @@ function Masthead(): SvgNode {
         stroke={C.ink}
         strokeWidth={1.1}
         alt=""
-        animation={(_, i) => draw({ at: SPIN + 0.1 + i * 0.07, over: 0.9 }, ease.inOut)}
+        animation={(_, i) => draw({ at: 0.2 + i * 0.07, over: 0.9 }, ease.inOut)}
       />
       <Glyphs
         font={blackletter}
@@ -168,7 +167,7 @@ function Masthead(): SvgNode {
         fill={C.ink}
         animation={(_, i) =>
           motion({ opacity: 0 })
-            .at(SPIN + 0.7 + i * 0.07)
+            .at(0.8 + i * 0.07)
             .to({ opacity: 1 }, 0.5)
         }
       />
@@ -177,13 +176,14 @@ function Masthead(): SvgNode {
 }
 
 function Dateline(): SvgNode {
-  const y = 170;
-  const small = 11;
+  const y = 176;
+  const small = 12;
+  const day = "MONDAY, JULY 21, 1969";
+  const price = "TEN CENTS";
 
   const items: [string, number][] = [
-    ["VOL. I  No. 1", INNER.x],
-    ["TUESDAY, OCTOBER 27, 2026", centered(body, "TUESDAY, OCTOBER 27, 2026", small)],
-    ["ONE CENT", INNER.x + INNER.w - body.measure("ONE CENT", small)],
+    [day, centered(body, day, small)],
+    [price, INNER.x + INNER.w - body.measure(price, small)],
   ];
 
   return (
@@ -191,7 +191,7 @@ function Dateline(): SvgNode {
       fontFamily={body}
       fontSize={small}
       fill={C.soft}
-      animation={enter({ at: SPIN + 0.9, over: 0.5 }, { opacity: 0 })}
+      animation={enter({ at: 0.9, over: 0.5 }, { opacity: 0 })}
     >
       {items.map(([text, x]) => (
         <text x={x} y={y}>
@@ -212,7 +212,7 @@ function Headline(): SvgNode {
       y={252}
       fill={C.ink}
       animation={(_, i) =>
-        enter({ at: 3.4 + i * 0.045, over: 0.45 }, { opacity: 0, y: -28, scale: 1.4 }, ease.pop)
+        enter({ at: 1.3 + i * 0.04, over: 0.45 }, { opacity: 0, y: -16 }, ease.out)
       }
     />
   );
@@ -228,7 +228,7 @@ function Deck(): SvgNode {
       fontFamily={body}
       fontSize={size}
       fill={C.soft}
-      animation={enter({ at: 4.7, over: 0.6 }, { opacity: 0, y: 6 })}
+      animation={enter({ at: 2.3, over: 0.6 }, { opacity: 0, y: 6 })}
     >
       {DECK}
     </text>
@@ -248,7 +248,7 @@ function Columns(): SvgNode {
             y={COLUMN.y + 10 + row * COLUMN.leading}
             fontSize={COLUMN.size}
             fill={C.ink}
-            animation={enter({ at: 5 + index++ * 0.028, over: 0.25 }, { opacity: 0 })}
+            animation={enter({ at: 2.4 + index++ * 0.025, over: 0.25 }, { opacity: 0 })}
           />
         )),
       )}
@@ -257,127 +257,88 @@ function Columns(): SvgNode {
 }
 
 function Photo(): SvgNode {
-  const letter = "A";
-  const size = (PHOTO.w - 24) / fat.measure(letter, 1);
-  const x = PHOTO.x + (PHOTO.w - fat.measure(letter, size)) / 2;
-  const caption = "The letter A, set as outlines and filled with a halftone screen.";
+  const r = (PHOTO.w - 40) / 2;
+  const [cx, cy] = [PHOTO.x + PHOTO.w / 2, PHOTO.y + PHOTO.h / 2];
+  const disc = def.clipPath({}, <circle cx={cx} cy={cy} r={r} />);
 
-  const lines = justify(caption, PHOTO.w, 10.5);
+  const crew = [
+    ["Neil Armstrong, 38", "Commander"],
+    ["Edwin Aldrin, 39", "Lunar module pilot"],
+    ["Michael Collins, 38", "Command module pilot"],
+  ] as const;
 
-  return (
-    <g animation={enter({ at: 6.2, over: 0.6 }, { opacity: 0 })}>
-      <rect
-        x={PHOTO.x}
-        y={PHOTO.y}
-        width={PHOTO.w}
-        height={PHOTO.h}
-        fill={C.shade}
-        stroke={C.ink}
-        strokeWidth={0.75}
-      />
-      <g
-        animation={motion({ scale: 0.6, opacity: 0 })
-          .at(6.3)
-          .to({ scale: 1, opacity: 1 }, 0.9, ease.out)}
-      >
-        <Glyphs
-          font={fat}
-          text={letter}
-          size={size}
-          x={x}
-          y={PHOTO.y + PHOTO.h / 2 + size * 0.36}
-          fill={halftone}
-          alt="A halftone letter A"
-        />
-      </g>
-      {lines.map((line, row) => (
-        <Row
-          line={line}
-          x={PHOTO.x}
-          y={PHOTO.y + PHOTO.h + 18 + row * 13}
-          fontSize={10.5}
-          fill={C.soft}
-        />
-      ))}
-    </g>
-  );
-}
-
-function Stamp(): SvgNode {
-  const text = "EXTRA!";
-  const size = 54;
-  const width = fat.measure(text, size);
-  const [cx, cy] = [columnX(3) - COLUMN.gap / 2, 500];
+  const top = PHOTO.y + PHOTO.h + 40;
 
   return (
-    <g transform={`translate(${cx} ${cy}) rotate(-14)`}>
-      <g
-        animation={motion({ opacity: 0, scale: 3 })
-          .at(8.2)
-          .to({ opacity: 1, scale: 1 }, 0.35, ease.in)}
-      >
+    <>
+      <g animation={enter({ at: 2.8, over: 0.6 }, { opacity: 0 })}>
         <rect
-          x={-width / 2 - 12}
-          y={-size * 0.62}
-          width={width + 24}
-          height={size * 1.04}
-          rx={4}
-          fill="none"
-          stroke={C.red}
-          strokeWidth={3}
+          x={PHOTO.x}
+          y={PHOTO.y}
+          width={PHOTO.w}
+          height={PHOTO.h}
+          fill={C.shade}
+          stroke={C.ink}
+          strokeWidth={0.75}
         />
-        <Glyphs
-          font={fat}
-          text={text}
-          size={size}
-          x={-width / 2}
-          y={size * 0.28}
-          fill={C.red}
-          opacity={0.92}
-        />
+        <g
+          animation={motion({ scale: 0.8, opacity: 0 })
+            .at(2.9)
+            .to({ scale: 1, opacity: 1 }, 0.8, ease.out)}
+        >
+          <circle cx={cx} cy={cy} r={r} fill={C.paper} />
+          <circle cx={cx} cy={cy} r={r} fill={halftone} />
+          <g clipPath={disc}>
+            <circle cx={cx + r * 0.55} cy={cy} r={r * 1.05} fill={C.shade} opacity={0.9} />
+          </g>
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.ink} strokeWidth={0.75} />
+        </g>
       </g>
-    </g>
+      <g fontFamily={body} animation={enter({ at: 3.3, over: 0.6 }, { opacity: 0 })}>
+        <Glyphs font={fat} text="The crew" size={17} x={PHOTO.x} y={top} fill={C.ink} />
+        {crew.map(([name, role], i) => (
+          <g>
+            <text x={PHOTO.x} y={top + 30 + i * 44} fontSize={14} fill={C.ink}>
+              {name}
+            </text>
+            <text x={PHOTO.x} y={top + 48 + i * 44} fontSize={13} fill={C.soft}>
+              {role}
+            </text>
+          </g>
+        ))}
+      </g>
+    </>
   );
 }
 
 export default function build(): string {
   const page = (
     <>
-      <rect
-        x={PAGE.x + 6}
-        y={PAGE.y + 8}
-        width={PAGE.w}
-        height={PAGE.h}
-        fill="#000"
-        opacity={0.35}
-      />
-      <rect x={PAGE.x} y={PAGE.y} width={PAGE.w} height={PAGE.h} fill={C.paper} />
-      {rule(58, SPIN, 0.75)}
+      {rule(EDGE, 0.1, 0.75)}
       <Masthead />
-      {rule(146, SPIN + 0.4, 2.5)}
-      {rule(152, SPIN + 0.5, 0.75)}
+      {rule(146, 0.3, 2.5)}
+      {rule(152, 0.4, 0.75)}
       <Dateline />
-      {rule(180, SPIN + 0.6, 0.75)}
+      {rule(186, 0.5, 0.75)}
       <Headline />
-      {rule(302, 4.6, 0.75, STORY.x, STORY.x + STORY.w)}
+      {rule(302, 2.2, 0.75, STORY.x, STORY.x + STORY.w)}
       <Deck />
       <path
-        d={`M${columnX(4) - COLUMN.gap / 2} ${PHOTO.y}V${PAGE.y + PAGE.h - 24}`}
+        d={`M${columnX(4) - COLUMN.gap / 2} ${PHOTO.y}V${BOTTOM}`}
         stroke={C.ink}
         strokeWidth={0.5}
-        animation={draw({ at: 4.8, over: 0.8 })}
+        animation={draw({ at: 2.4, over: 0.8 })}
       />
       {[1, 2, 3].map((i) => (
         <path
-          d={`M${columnX(i) - COLUMN.gap / 2} ${COLUMN.y + 2}V${PAGE.y + PAGE.h - 24}`}
+          d={`M${columnX(i) - COLUMN.gap / 2} ${COLUMN.y + 2}V${BOTTOM}`}
           stroke={C.ink}
           strokeWidth={0.5}
-          animation={draw({ at: 4.9 + i * 0.1, over: 0.8 })}
+          animation={draw({ at: 2.5 + i * 0.1, over: 0.8 })}
         />
       ))}
       <Columns />
       <Photo />
-      <Stamp />
     </>
   );
 
@@ -386,24 +347,13 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "The Svjeez Gazette",
-      desc: "A newspaper spins in and lands. Its blackletter masthead draws on letter by letter, the headline TYPE ARRIVES IN EVERY SVG drops in, four justified columns of text fade in line by line beside a halftone letter A, and a red EXTRA! stamp slams onto the page.",
-      reducedMotion: { at: D - 0.5 },
+      title: "Newspaper front page",
+      desc: "A newspaper front page sets itself: the masthead draws on, the headline drops in, and four justified columns fill with text.",
+      reducedMotion: { at: D - 1 },
     },
     <>
-      <rect width={W} height={H} fill={C.desk} />
-      <g
-        animation={[
-          motion({ scale: 0.04, rotate: -1080, opacity: 0 }).to(
-            { scale: 1, rotate: 0, opacity: 1 },
-            SPIN,
-            ease.out,
-          ),
-          motion().at(8.5).to({ scale: 1.012 }, 0.08).to({ scale: 1 }, 0.25, ease.out),
-        ]}
-      >
-        {page}
-      </g>
+      <rect width={W} height={H} fill={C.paper} />
+      <g animation={leave(D)}>{page}</g>
     </>,
   );
 }
