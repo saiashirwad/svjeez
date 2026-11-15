@@ -20,6 +20,7 @@ import type { Box, Face, Item, Paint, Pair, Shadow, TextRun, Vector } from "../t
 import { typefaces } from "./faces.ts";
 import {
   borderRing,
+  outlineRing,
   matrix,
   paddingBox,
   rounded,
@@ -619,15 +620,25 @@ export const painter = (
         {insetShadows(b, padding, a, tween)}
         {layer(b, a, tween, (x) => x.border?.color, borderRing, { fillRule: "evenodd" })}
         {clip ? <g clipPath={clip}>{kids}</g> : kids}
+        {layer(b, a, tween, (x) => x.outline?.color, outlineRing, { fillRule: "evenodd" })}
       </>
     );
 
     // A box with nothing of its own to apply adds no group: deep pages nest hundreds of plain wrappers.
-    if (motions.length === 0 && b.opacity >= 1) return transformed(b, drawn);
+    const dim = b.darkOpacity !== undefined && !opacity;
+
+    if (motions.length === 0 && b.opacity >= 1 && !dim) return transformed(b, drawn);
+
+    // Faded in one scheme only: the opacity is a variable that follows the viewer's scheme, as colors are.
+    const faded = dim
+      ? (v({ light: String(b.opacity), dark: String(b.darkOpacity) }) as unknown as number)
+      : !opacity && b.opacity < 1
+        ? b.opacity
+        : undefined;
 
     return transformed(
       b,
-      <g opacity={!opacity && b.opacity < 1 ? b.opacity : undefined} animation={motions}>
+      <g opacity={faded} animation={motions}>
         {drawn}
       </g>,
     );

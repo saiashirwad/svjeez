@@ -22,15 +22,28 @@ export interface Marks {
   readonly text?: { readonly before?: string; readonly after?: string };
 }
 
+/** A range input's track and thumb: their border boxes (x, y, width, height) and the styles `surface` reads. */
+export interface RangeMarks {
+  readonly track: RangePart;
+  readonly thumb: RangePart;
+}
+
+interface RangePart {
+  readonly rect: readonly [number, number, number, number];
+  readonly style: Readonly<Record<string, string>>;
+}
+
 declare global {
   /** Where Chromium put each element's ::before and ::after, left by `markPseudos`: the DOM has no node to measure. */
   var __svjeezPseudo: WeakMap<Element, Marks> | undefined;
+  /** The parts of each range input's user-agent shadow tree, left by `markRanges`. */
+  var __svjeezRange: WeakMap<Element, RangeMarks> | undefined;
 }
 
 /** What an element or pseudo-element paints of itself. */
 type Surface = Pick<
   Box,
-  "radii" | "background" | "gradients" | "border" | "shadows" | "insets" | "opacity"
+  "radii" | "background" | "gradients" | "border" | "outline" | "shadows" | "insets" | "opacity"
 >;
 
 /**
@@ -48,6 +61,7 @@ export function walk({
 }): Box {
   const root = document.querySelector(selector);
   const marks = globalThis.__svjeezPseudo;
+  const marked = globalThis.__svjeezRange;
 
   if (!root) throw new Error(`snap() found nothing at ${selector}.`);
   const origin = root.getBoundingClientRect();
@@ -440,6 +454,8 @@ export function walk({
     const sides = [s.borderTopColor, s.borderRightColor, s.borderBottomColor, s.borderLeftColor];
     const borderColor = color(sides[widths.findIndex((w) => w > 0)] ?? "");
     const gradients = gradientsOf(s, b);
+    const ring = color(s.outlineColor);
+    const auto = s.outlineStyle === "auto";
 
     return {
       radii: radii(s, r.width, r.height),
@@ -448,6 +464,15 @@ export function walk({
       border:
         visible && borderColor && widths.some((w) => w > 0)
           ? { widths, color: borderColor }
+          : undefined,
+      // `auto` is Chromium's focus ring: two px just inside the border box, whatever the width asks.
+      outline:
+        visible && ring && !/^(none|hidden)$/.test(s.outlineStyle) && px(s.outlineWidth) > 0
+          ? {
+              width: auto ? Math.max(2, px(s.outlineWidth)) : px(s.outlineWidth),
+              offset: auto ? -Math.max(2, px(s.outlineWidth)) : px(s.outlineOffset),
+              color: ring,
+            }
           : undefined,
       shadows: visible ? shadows(s.boxShadow, false) : [],
       insets: visible && /\binset\b/.test(s.boxShadow) ? shadows(s.boxShadow, true) : undefined,
@@ -927,6 +952,74 @@ export function walk({
         });
     }
 
+    // A range input's track and thumb are parts of the browser's own shadow tree: their boxes and styles come marked
+    // by the protocol, and are read here through a probe element that takes the same properties.
+    const range = el instanceof HTMLInputElement && el.type === "range" ? marked?.get(el) : undefined;
+
+    if (range) {
+      const probe = document.createElement("div");
+
+      probe.style.cssText = "position:fixed;visibility:hidden;pointer-events:none";
+      document.documentElement.append(probe);
+
+      // Left to its default look, the browser draws both itself, in its theme's colors: a gray track filled with the
+      // accent up to the thumb, and an accent circle.
+      const native = s.appearance !== "none";
+      const accent = color(s.accentColor === "auto" ? "rgb(0, 117, 255)" : s.accentColor);
+
+      if (native && accent) {
+        const [tx, ty, tw, th] = range.track.rect;
+        const [hx, hy, hw, hh] = range.thumb.rect;
+        const r2 = (n: number): Radii => [n, n, n, n];
+
+        const fill = (box: Rect, radius: number, c: Rgb): Box => ({
+          kind: "box",
+          tag: "::native",
+          box,
+          radii: r2(radius),
+          background: c,
+          shadows: [],
+          opacity: 1,
+          clip: false,
+          children: [],
+        });
+
+        // Their boxes are bigger than what's drawn: a 6px groove down the middle of the track, a 16px dot on the thumb.
+        const groove = 6;
+        const dot = 16;
+        const mid = ty + th / 2;
+        const cx = hx + hw / 2;
+        const cy = hy + hh / 2;
+
+        children.push(
+          fill(rel(new DOMRect(tx, mid - groove / 2, tw, groove)), groove / 2, "rgb(239,239,239)"),
+          fill(rel(new DOMRect(tx, mid - groove / 2, cx - tx, groove)), groove / 2, accent),
+          fill(rel(new DOMRect(cx - dot / 2, cy - dot / 2, dot, dot)), dot / 2, accent),
+        );
+        probe.remove();
+      }
+
+      for (const [tag, part] of native ? [] : ([["::track", range.track], ["::thumb", range.thumb]] as const)) {
+        probe.removeAttribute("style");
+        probe.style.cssText = "position:fixed;pointer-events:none";
+
+        for (const [name, value] of Object.entries(part.style)) probe.style.setProperty(name, value);
+
+        const rect = new DOMRect(...part.rect);
+
+        children.push({
+          kind: "box",
+          tag,
+          box: rel(rect),
+          ...surface(getComputedStyle(probe), rect, rel(rect)),
+          clip: false,
+          children: [],
+        });
+      }
+
+      probe.remove();
+    }
+
     const named = Object.keys(parts).find((name) => el.matches(parts[name]!));
 
     return {
@@ -937,6 +1030,10 @@ export function walk({
       id: el.id || undefined,
       box: rel(r),
       ...surface(s, r, rel(r)),
+      // The browser's own range control paints no box of its own, whatever the dark scheme's field color says.
+      ...(el instanceof HTMLInputElement && el.type === "range" && s.appearance !== "none"
+        ? { background: undefined, border: undefined }
+        : {}),
       clip: s.overflowX !== "visible" || s.overflowY !== "visible",
       children,
     };

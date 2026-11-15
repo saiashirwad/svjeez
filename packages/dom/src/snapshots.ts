@@ -18,7 +18,7 @@ import type { Step } from "./timeline.ts";
 import type { Snapshot } from "./tree.ts";
 
 /** Bump when the shape of the file changes, so stale files are read again. */
-const FORMAT = 5;
+const FORMAT = 6;
 
 export interface SnapshotsOptions extends Omit<BrowserOptions, "screenshots"> {
   /**

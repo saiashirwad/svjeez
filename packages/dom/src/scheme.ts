@@ -95,6 +95,15 @@ export const merge = (light: Box, dark: Box): Box => {
             color: pick(light.border?.color, dark.border?.color)!,
           }
         : undefined,
+    outline:
+      light.outline || dark.outline
+        ? {
+            width: (light.outline ?? dark.outline)!.width,
+            offset: (light.outline ?? dark.outline)!.offset,
+            color: pick(light.outline?.color, dark.outline?.color)!,
+          }
+        : undefined,
+    darkOpacity: dark.opacity !== light.opacity ? dark.opacity : undefined,
     shadows: mergeShadows(light.shadows, dark.shadows),
     gradients: gradients.length > 0 ? gradients : undefined,
     insets: insets.length > 0 ? insets : undefined,

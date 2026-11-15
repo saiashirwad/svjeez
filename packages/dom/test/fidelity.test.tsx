@@ -15,12 +15,14 @@ const regular = font(
 const css = `
   .card { font: 16px "Space Mono"; color: #111; background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 16px; width: 240px; box-shadow: 0 2px 8px rgb(0 0 0 / .2) }
   .badge { display: inline-block; background: #222; color: #fff; border-radius: 6px; padding: 2px 8px }
-  input { font: 16px "Space Mono"; width: 100%; box-sizing: border-box; border: 1px solid #ccc }
-  input:focus { outline: none }
-  @media (prefers-color-scheme: dark) { .card { background: #111; color: #eee } }
+  input { font: 16px "Space Mono"; width: 100%; box-sizing: border-box; border: 1px solid #ccc }  .custom { appearance: none; display: block; width: 200px; height: 20px; margin: 0; background: transparent }
+  .custom::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, #06c 60%, #ccc 60%) }
+  .custom::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: #06c; box-shadow: 0 1px 3px rgb(0 0 0 / .4) }
+  .dim { display: block; background: #fc0; color: #000 }
+  @media (prefers-color-scheme: dark) { .dim { opacity: .4 } .card { background: #111; color: #eee } }
 `;
 
-const markup = '<div class="card">Hello <span class="badge" data-part="badge">new</span><input data-part="name"></div>';
+const markup = '<div class="card">Hello <span class="badge" data-part="badge">new</span><span class="dim">dim in dark</span><input data-part="name"><input type="range" value="30" style="display:block;width:200px;margin:8px 0"><input type="range" class="custom" value="60"></div>';
 
 let root: string;
 let dir: string;
