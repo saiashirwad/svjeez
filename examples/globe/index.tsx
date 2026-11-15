@@ -27,8 +27,8 @@ const earth = globe(countries, {
   simplify: 0.8,
 });
 
-const { vars: C, css } = variables(
-  {
+const { vars: C, css } = variables({
+  dark: {
     space: "#04060C",
     sea: "#0B1A2C",
     land: "#9FCBEA",
@@ -38,7 +38,7 @@ const { vars: C, css } = variables(
     text: "#EEF4FA",
     dim: "#7F93A8",
   },
-  {
+  light: {
     space: "#EEF2F7",
     sea: "#D6E4F0",
     land: "#2E5878",
@@ -48,7 +48,7 @@ const { vars: C, css } = variables(
     text: "#0F1E2C",
     dim: "#5B6F82",
   },
-);
+});
 
 const CITIES: readonly { readonly name: string; readonly at: LonLat }[] = [
   { name: "London", at: [-0.13, 51.51] },

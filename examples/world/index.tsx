@@ -23,8 +23,8 @@ const H = 540;
 const D = 22;
 
 /** Each color is a CSS variable, so the map follows the viewer's light or dark mode. */
-const { vars: C, css } = variables(
-  {
+const { vars: C, css } = variables({
+  dark: {
     night: "#08121C",
     sea: "#0D1E2C",
     grid: "#15293A",
@@ -35,7 +35,7 @@ const { vars: C, css } = variables(
     text: "#E8EEF2",
     dim: "#93AAB9",
   },
-  {
+  light: {
     night: "#E9EEF2",
     sea: "#D6E3EC",
     grid: "#C4D5E0",
@@ -46,7 +46,7 @@ const { vars: C, css } = variables(
     text: "#13202A",
     dim: "#5A6F7D",
   },
-);
+});
 
 const map = project(countries, {
   frame: rect(24, 24, W - 48, H - 48),

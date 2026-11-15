@@ -42,8 +42,8 @@ const SRC = `render(<>
   <Cloud animation={drift} />
 </>)`;
 
-const { vars, css: paint } = variables(
-  {
+const { vars, css: paint } = variables({
+  dark: {
     sky: "#2c3440",
     mist: "#8fa3b8",
     hill: "#5f9e76",
@@ -55,7 +55,7 @@ const { vars, css: paint } = variables(
     ray: "transparent",
     star: "#f3ecd2",
   },
-  {
+  light: {
     sky: "#cfe6ee",
     mist: "#8fb8c7",
     hill: "#7fbf8f",
@@ -67,7 +67,7 @@ const { vars, css: paint } = variables(
     ray: "#FFC21A",
     star: "transparent",
   },
-);
+});
 
 const CORAL = CHICK.cheek;
 const YELLOW = CHICK.yellow;
