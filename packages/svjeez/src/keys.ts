@@ -66,14 +66,18 @@ const FOLD_TOLERANCE = 0.1;
  */
 export const foldKeys = (lane: string, keys: readonly Key[]): readonly Key[] => {
   if (!FOLD_LANES.has(lane) || keys.length < 3) return keys;
+  // SAFETY: Object.keys of a key's values lists its targets, and the values are keyed by Target.
   const targets = Object.keys(keys[0]!.values) as Target[];
+
   const nums = keys.map((key) =>
     targets.map((target) => {
       const value = valueOf(key.values, target);
 
-      return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+      // SAFETY: Number.isFinite is true only for a number, so the value is one when it passes.
+      return Number.isFinite(value) ? (value as number) : undefined;
     }),
   );
+
   if (nums.some((row) => row.some((value) => value === undefined))) return keys;
 
   const linear = (index: number): boolean => keys[index]!.ease.kind === "linear";
@@ -88,6 +92,7 @@ export const foldKeys = (lane: string, keys: readonly Key[]): readonly Key[] => 
 
       for (let c = 0; c < targets.length; c++) {
         const [a, b] = [nums[from]![c]!, nums[to]![c]!];
+
         if (Math.abs(a + (b - a) * amount - nums[k]![c]!) > FOLD_TOLERANCE) return false;
       }
     }
@@ -100,6 +105,7 @@ export const foldKeys = (lane: string, keys: readonly Key[]): readonly Key[] => 
 
   while (anchor < keys.length - 1) {
     let next = anchor + 1;
+
     while (next + 1 < keys.length && fits(anchor, next + 1)) next++;
     kept.push(keys[next]!);
     anchor = next;

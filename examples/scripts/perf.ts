@@ -16,12 +16,16 @@ import { basename, join, relative, resolve } from "node:path";
 import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 
 const args = process.argv.slice(2);
+
 const flag = (name: string) => {
   const i = args.indexOf(name);
+
   if (i < 0) return undefined;
   const [, value] = args.splice(i, 2);
+
   return value;
 };
+
 const all = args.includes("--all") && args.splice(args.indexOf("--all"), 1).length > 0;
 const ms = Number(flag("--ms") ?? 3000);
 const runs = Number(flag("--runs") ?? 1);
@@ -32,6 +36,7 @@ const DIST = resolve(flag("--dist") ?? join(import.meta.dir, "..", "dist"));
 const svgs = (dir: string): string[] =>
   readdirSync(dir).flatMap((f) => {
     const p = join(dir, f);
+
     return statSync(p).isDirectory() ? svgs(p) : p.endsWith(".svg") ? [p] : [];
   });
 
@@ -71,7 +76,9 @@ window.from = (share) => {
 
 const run = (...cmd: string[]) => {
   const r = Bun.spawnSync(["agent-browser", "--session", session, "--allow-file-access", ...cmd]);
+
   if (r.exitCode !== 0) throw new Error(`agent-browser ${cmd[0]}: ${r.stderr.toString() || r.stdout.toString()}`);
+
   return r.stdout.toString();
 };
 
@@ -82,8 +89,10 @@ const summarize = (path: string) => {
   const raw = JSON.parse(readFileSync(path, "utf8"));
   const events: any[] = raw.traceEvents ?? raw;
   const names = new Map<string, string>();
+
   for (const e of events) if (e.ph === "M" && e.name === "thread_name") names.set(`${e.pid}:${e.tid}`, e.args.name);
   const busy = new Map<string, number>();
+
   for (const e of events)
     if (e.dur && names.get(`${e.pid}:${e.tid}`) === "CrRendererMain")
       busy.set(`${e.pid}:${e.tid}`, (busy.get(`${e.pid}:${e.tid}`) ?? 0) + e.dur);
@@ -91,10 +100,12 @@ const summarize = (path: string) => {
   const sum = { task: 0, style: 0, smil: 0, paint: 0, worst: 0 };
   let first = Infinity;
   let last = 0;
+
   for (const e of events) {
     if (!e.dur || `${e.pid}:${e.tid}` !== main) continue;
     first = Math.min(first, e.ts);
     last = Math.max(last, e.ts + e.dur);
+
     if (e.name === "ThreadControllerImpl::RunTask" || e.name === "RunTask") {
       sum.task += e.dur;
       sum.worst = Math.max(sum.worst, e.dur);
@@ -103,8 +114,10 @@ const summarize = (path: string) => {
     else if (e.name === "PageAnimator::serviceScriptedAnimations") sum.smil += e.dur;
     else if (e.name === "Paint") sum.paint += e.dur;
   }
+
   const seconds = (last - first) / 1e6;
   const per = (us: number) => Math.round(us / 1000 / seconds);
+
   return {
     main: per(sum.task),
     style: per(sum.style),
@@ -120,15 +133,19 @@ const measureOnce = (file: string, tag: string) => {
   const text = readFileSync(file);
   run("open", `file://${join(work, "bench.html")}?svg=${basename(copy)}`);
   run("eval", "ready");
+
   const parts = Array.from({ length: windows }, (_, k) => {
     run("eval", `from(${k / windows})`);
     const trace = join(work, `${tag}-${k}-${basename(file)}.json`);
     run("profiler", "start", "--categories", CATEGORIES);
     run("wait", String(ms));
     run("profiler", "stop", trace);
+
     return summarize(trace);
   });
+
   const mean = (key: keyof (typeof parts)[number]) => parts.reduce((a, p) => a + p[key], 0) / parts.length;
+
   return {
     kb: text.length / 1024,
     gz: gzipSync(text).length / 1024,
@@ -144,18 +161,22 @@ const measureOnce = (file: string, tag: string) => {
 /** Each number's lowest over `runs` runs: background work only ever adds time. */
 const measure = (file: string, tag: string) => {
   const all = Array.from({ length: runs }, () => measureOnce(file, tag));
+
+  // SAFETY: every row has the same numeric keys, so each key indexes a number and the entries rebuild a row.
   return Object.fromEntries(
     Object.keys(all[0]!).map((key) => [key, Math.min(...all.map((row) => row[key as keyof typeof row]))]),
   ) as ReturnType<typeof measureOnce>;
 };
 
 type Row = ReturnType<typeof measure>;
+
 const cell = (now: number, was: number | undefined, unit = "") =>
   was === undefined || Math.abs(now - was) < 0.05 * Math.max(1, was)
     ? `${Math.round(now)}${unit}`
     : `${Math.round(now)}${unit} (${now < was ? "" : "+"}${Math.round(((now - was) / Math.max(was, 1e-9)) * 100)}%)`;
 
 const rows: string[][] = [["svg", "raw", "gzip", "brotli", "main ms/s", "style", "smil", "paint", "worst task ms"]];
+
 try {
   for (const name of names) {
     const file = join(DIST, `${name}.svg`);
@@ -180,4 +201,5 @@ try {
 }
 
 const widths = rows[0]!.map((_, i) => Math.max(...rows.map((r) => r[i]!.length)));
+
 for (const r of rows) console.log(r.map((c, i) => (i === 0 ? c.padEnd(widths[i]!) : c.padStart(widths[i]!))).join("  "));

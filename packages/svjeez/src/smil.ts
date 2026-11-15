@@ -61,6 +61,7 @@ const smilPoints = (keys: readonly Key[], channel: Channel) => {
         spline: "0 0 1 1",
       });
   });
+
   return { points, discrete };
 };
 
@@ -121,6 +122,7 @@ const windowed = (
   let last = values.length - 1;
 
   while (last > 0 && values[last] === values[last - 1]) last--;
+
   if (first > last || times[0] !== 0 || times[times.length - 1] !== 1) return undefined;
   const from = times[first - 1]!;
   const to = times[last]!;

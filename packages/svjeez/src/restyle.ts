@@ -50,8 +50,10 @@ const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean)
   const id = attr(tag, "id");
   const name = attr(tag, "attributeName");
   const values = attr(tag, "values").split(";");
+
   const hold = (value: string | undefined, dur?: Seconds) =>
     `<set attributeName="${name}" to="${value}" begin="0s"${dur === undefined ? "" : ` dur="${num(dur)}s" fill="freeze"`}/>`;
+
   const rest = (begin: string) => tag.replace(/(\sbegin=")[^"]*/, `$1${begin}`);
 
   if (paused) {

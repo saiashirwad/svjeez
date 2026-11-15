@@ -101,7 +101,7 @@ const noteCss = (state: State, css: string): void => {
   state.css.weight ||= FONT_WEIGHT_CSS.test(css);
 };
 
-const weightOf = (value: unknown): number | null => {
+const weightOf = (value: AttrValue): number | null => {
   const text = String(value).trim();
 
   if (text === "normal") return 400;
@@ -111,7 +111,7 @@ const weightOf = (value: unknown): number | null => {
   return /^\d+(?:\.\d+)?$/.test(text) ? Number(text) : null;
 };
 
-const styleOf = (value: unknown): string | null => {
+const styleOf = (value: AttrValue): string | null => {
   const text = String(value).trim();
 
   return text === "normal" || text === "italic" ? text : null;
@@ -143,8 +143,10 @@ const fontOf = (state: State, node: Element, attrs: Element["attrs"], parent: Fo
 
   if (attrs.font !== undefined) [family, weight, style] = [null, null, null];
 
-  if (typeof attrs.style === "string" && /font/i.test(attrs.style)) {
-    for (const declaration of attrs.style.split(";")) {
+  const inline = String(attrs.style);
+
+  if (/font/i.test(inline)) {
+    for (const declaration of inline.split(";")) {
       const at = declaration.indexOf(":");
       const name = declaration.slice(0, at).trim().toLowerCase();
       const value = declaration.slice(at + 1);
@@ -674,10 +676,8 @@ const blurFilter = (state: State, lane: Lane, once: boolean): string => {
   const nodes = animateOn(state, "stdDeviation", lane, once);
   const end = windowEnd(nodes);
 
-  const blur = {
-    ...element("feGaussianBlur", { stdDeviation: end ?? still }, nodes),
-    ...(end === undefined ? {} : { still: { stdDeviation: still } }),
-  };
+  const plain = element("feGaussianBlur", { stdDeviation: end ?? still }, nodes);
+  const blur = end === undefined ? plain : { ...plain, still: { stdDeviation: still } };
 
   addDef(state, element("filter", { id, ...canvasRegion(state.canvas) }, [blur]));
 
@@ -731,6 +731,7 @@ const emitShell = (
       const end = windowEnd(nodes);
 
       attrs[lane.key] = end ?? value;
+
       if (end !== undefined) still[lane.key] = value;
       children.push(...nodes);
     }
@@ -745,10 +746,9 @@ const emitShell = (
   ].filter(Boolean);
 
   if (classes.length > 0) attrs.class = classes.join(" ");
-  const emitted = {
-    ...element(target.tag, attrs, children),
-    ...(Object.keys(still).length > 0 ? { still } : {}),
-  };
+
+  const shell = element(target.tag, attrs, children);
+  const emitted = Object.keys(still).length > 0 ? { ...shell, still } : shell;
 
   if (state.canvas.stillAt === undefined || !lanes.some((lane) => lane.key === "d")) return emitted;
 

@@ -526,6 +526,7 @@ describe("playbackRate", () => {
 
     const strip =
       /(?:animation-duration:|animation-delay:-)[\d.,s]+|(?:dur|data-loop|begin)="[^"]*"/g;
+
     const [normal, fast] = [scene(1), scene(2)];
     expect(durations(normal).sort()).toEqual([1, 2, 3, 3, 6]);
     expect(durations(fast)).toEqual(durations(normal).map((d) => d / 2));
