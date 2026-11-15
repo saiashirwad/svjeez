@@ -6,7 +6,7 @@ import { join } from "node:path";
 const EXAMPLES = join(import.meta.dir, "..");
 const SITE = join(EXAMPLES, "..", "site", "src", "examples.ts");
 
-const names = [...readFileSync(SITE, "utf8").matchAll(/^\s+"([\w-]+)",$/gm)].map(
+const names = [...readFileSync(SITE, "utf8").matchAll(/^\s+\["([\w-]+)", \d+\],$/gm)].map(
   (match) => match[1]!,
 );
 

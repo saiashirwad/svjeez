@@ -1,18 +1,29 @@
 ---
-import { POSTER_WIDTH, SMALL_POSTER_WIDTH, examples, SOURCES } from "../../examples";
+import { POSTER_WIDTH, SMALL_POSTER_WIDTH, examples, SOURCES, type Span } from "../../examples";
 import { themed } from "../../palettes";
+import { cueImage } from "../../hero";
+import { kb } from "../../proof";
 import Base from "../../layouts/Base.astro";
+import LiveScene from "../../components/LiveScene.astro";
 import { getScene } from "@svjeez/astro/scene";
 import yourAgent from "@examples/site/your-agent.tsx";
+import { note } from "@examples/site/gallery-note.tsx";
 
 /** "your agent", handwritten by a scene and inlined so it takes the accent color. */
 const { svg: handwriting } = getScene(yourAgent);
 
-/** The cards in the first row, which load at once instead of lazily. */
-const FIRST_ROW = 3;
+/** The lead's size, handwritten over the card beside it and pointing back. Measured here, so it is always true. */
+const [lead] = examples;
+const { svg: sizeNote } = getScene(() => note(kb(lead!.scene.gzip)));
 
-/** How wide a card draws, for the browser to pick a poster by. */
-const SIZES = "(min-width: 1000px) 25vw, (min-width: 600px) 50vw, 100vw";
+/** The cards in the first row, which load at once at high priority; the second row loads at once too. */
+const FIRST_ROW = 2;
+const ABOVE_FOLD = 5;
+
+/** How wide a card draws, for the browser to pick a poster by: its columns of 66rem from 56rem, two up from 40rem. */
+const WIDTH: Record<Span, string> = { 4: "21rem", 5: "27rem", 6: "32rem", 7: "38rem" };
+const sizes = (span: Span, i: number) =>
+  `(min-width: 56rem) ${WIDTH[span]}, (min-width: 40rem) ${i === 0 ? "100vw" : "50vw"}, 100vw`;
 
 /** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
 const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] });
@@ -27,13 +38,13 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
       </h1>
     </div>
     <div class="grid">
-      {examples.map(({ name, scene, small }, i) => {
-              const first = i < FIRST_ROW;
-              const loading = first ? { fetchpriority: "high" } as const : { loading: "lazy" } as const;
+      {examples.map(({ name, span, scene, small }, i) => {
+              const loading = i < FIRST_ROW ? { fetchpriority: "high" } as const : i < ABOVE_FOLD ? {} : { loading: "lazy" } as const;
+              const SIZES = sizes(span, i);
               const set = (scheme: "light" | "dark") => `${small.posters![scheme]} ${SMALL_POSTER_WIDTH}w, ${scene.posters![scheme]} ${POSTER_WIDTH}w`;
 
               return (
-                <a class="card" href={`/examples/${name}`}>
+                <a class="card" href={`/examples/${name}`} style={`--span: ${span}`}>
                   <span
                     class="shot"
                     data-live={scene.src}
@@ -57,11 +68,13 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
                       />
                     </picture>
                   </span>
-                  <b>{scene.title}</b>
+                  <span class="cap"><b>{scene.title}</b> <span class="kb">{kb(scene.gzip)}</span></span>
                 </a>
               );
             })}
+      <span class="note" aria-hidden="true"><span set:html={sizeNote} /></span>
     </div>
+    <a class="end" href="/play" aria-label="Play with svjeez"><LiveScene class="cue" scene={cueImage} cost={6} alt="" /></a>
   </main>
   <footer class="wrap foot">
     <span>Find the source for every scene on GitHub.</span>
@@ -119,14 +132,14 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
     if (shot.dataset.want === "1" || calm.matches) return;
     shot.dataset.want = "1";
     delete shot.dataset.key;
-    swap(shot, playing(image(shot), shot.dataset.live!)).then((shown) => shown && (shot.dataset.playing = "1"));
+    swap(shot, playing(image(shot), shot.dataset.live!), { fade: true }).then((shown) => shown && (shot.dataset.playing = "1"));
   };
 
   const rest = (shot: HTMLElement) => {
     if (shot.dataset.want !== "1") return;
     shot.dataset.want = "0";
     delete shot.dataset.playing;
-    still(shot);
+    still(shot, true);
   };
 
   if (matchMedia("(hover: hover) and (pointer: fine)").matches) {

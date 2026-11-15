@@ -1270,21 +1270,53 @@ pre.side {
     animation: scratch 0.7s 0.5s var(--out) backwards;
   }
 }
+/* On a phone "you" wraps to the second line, so the lines part enough for "your agent" to be written between them. */
+@media (width < 40rem) {
+  .page-head h1 {
+    line-height: 1.7;
+  }
+}
 @keyframes scratch {
   from {
     stroke-dashoffset: 1;
   }
 }
+/* The gallery is set like a front page: a wide card and a narrow one, then three, on the page's twelve columns, so
+   every scene draws near its own size and the diagrams can be read. Each card's span is in --span. Cards sit on their
+   captions, so over the narrow card of a pair there is air, and the lead's size is written into it. Two columns on a
+   tablet, with the lead across both, and one on a phone. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-  gap: 1.5rem 1.25rem;
-  margin-block-start: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem var(--gap);
+  margin-block-start: 1.25rem;
 }
+@media (min-width: 40rem) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid .card:first-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 56rem) {
+  .grid {
+    position: relative;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem var(--gap);
+  }
+  .grid .card,
+  .grid .card:first-child {
+    grid-column: span var(--span);
+  }
+}
+/* Each card is two rows of the grid, the picture and its caption, so pictures in a row share a bottom edge and captions
+   a top one, however long a title runs. */
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 0.75rem;
   min-inline-size: 0;
   color: inherit;
   text-decoration: none;
@@ -1292,6 +1324,7 @@ pre.side {
 .card .shot {
   position: relative;
   display: block;
+  align-self: end;
   aspect-ratio: 16 / 9;
   overflow: clip;
   background: var(--surface);
@@ -1306,50 +1339,161 @@ pre.side {
   object-fit: cover;
   object-position: 50% 25%;
 }
-.card b {
-  display: block;
-  font: 600 1.0625rem / 1.2 var(--sans);
+/* Captions as on the landing page's wall: the title, then the file's gzipped size in mono. */
+.card .cap {
+  align-self: start;
+  padding-inline: 0.25rem;
+  font: 400 1rem / 1.3 var(--sans);
 }
+.card b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.card .kb {
+  margin-inline-start: 0.5rem;
+  font: 400 0.8125rem / 1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+/* The ring goes on the picture, with its corners, not round the card. */
+.card:focus-visible {
+  outline: none;
+}
+.card:focus-visible .shot {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.card:focus-visible .shot,
 .card:active .shot {
-  translate: 0 1px;
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1.25rem 2.5rem -1rem var(--shadow);
 }
 @media (hover: hover) and (pointer: fine) {
-  .card:hover b {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
   .card:hover .shot {
     box-shadow:
       0 0 0 1px var(--ring),
-      0 1rem 2rem -1rem var(--shadow);
+      0 1.25rem 2.5rem -1rem var(--shadow);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
   .card .shot {
     transition:
-      translate 0.15s var(--out),
-      box-shadow 0.2s;
+      translate 0.2s var(--out),
+      box-shadow 0.2s var(--out);
+  }
+  .card:focus-visible .shot {
+    translate: 0 -3px;
+  }
+  .card:active .shot {
+    translate: 0 -2px;
   }
 }
-.gallery .grid {
-  margin-block-start: 1.25rem;
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .card:hover .shot {
+    translate: 0 -3px;
+  }
 }
-.gallery .shot[data-live]::after {
-  content: "";
-  position: absolute;
-  inset-block-end: 0.5rem;
-  inset-inline-end: 0.5rem;
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  border-radius: 50%;
-  background: oklch(20% 0.005 270 / 0.7)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6.5v11l9-5.5z' fill='white'/%3E%3C/svg%3E")
-    center / 1rem no-repeat;
-  opacity: 0.85;
-  pointer-events: none;
+/* While a card's SVG downloads, a hairline draws along the bottom of the picture; it completes and fades as the scene
+   crossfades in, so the wait is seen. Only for a pointer: on a touch screen scenes play as they come into view. */
+@media (hover: hover) and (pointer: fine) {
+  .gallery .shot::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    block-size: 2px;
+    background: var(--accent);
+    transform-origin: 0 50%;
+    scale: 0 1;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.2s,
+      scale 0s 0.2s;
+  }
+  .gallery .shot[data-want="1"]::after {
+    scale: 0.7 1;
+    opacity: 1;
+    transition: scale 0.6s var(--out);
+  }
+  .gallery .shot[data-want="1"][data-playing]::after {
+    scale: 1 1;
+    opacity: 0;
+    transition:
+      scale 0.15s var(--out),
+      opacity 0.3s 0.1s var(--out);
+  }
 }
-.gallery .shot[data-playing]::after {
+/* The first two rows rise into place behind the headline's scratch. The rest are below the fold and simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  .grid .card:nth-child(-n + 5) {
+    animation: rise 0.5s 0.15s var(--out) backwards;
+  }
+  .grid .card:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .grid .card:nth-child(3) {
+    animation-delay: 0.25s;
+  }
+  .grid .card:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .grid .card:nth-child(5) {
+    animation-delay: 0.35s;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+/* The lead's size, a scene (examples/site/gallery-note.tsx) inlined so its ink takes the accent. It sits in the first
+   row's area over the second card, on a 16:9 block as wide as that card, so it lands just above the picture at any width
+   and points back at the first. */
+.note {
   display: none;
+}
+@media (min-width: 56rem) {
+  .note {
+    position: absolute;
+    grid-row: 1 / 2;
+    grid-column: 8 / -1;
+    inset-block-end: 0;
+    inset-inline: 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .note::after {
+    content: "";
+    aspect-ratio: 16 / 9;
+  }
+  .note > span {
+    inline-size: min(10rem, 14vw);
+    margin: 0 0 0.5rem -1.5rem;
+    color: var(--accent);
+    rotate: -3deg;
+  }
+  .note svg {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+  }
+}
+/* The page ends on the way to the playground. */
+.end {
+  display: block;
+  inline-size: min(18rem, 60vw);
+  margin: 3rem auto 0;
+  border-radius: var(--radius);
+}
+.end .cue {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
 }
 .viewer main {
   /* The scene and the row under it share one width: the window's, or less so a wide scene fits its height. */
