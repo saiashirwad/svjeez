@@ -47,7 +47,7 @@ export function Cartouche({ play }: { play: Play }): SvgNode {
   const mid = x + w / 2;
 
   return (
-    <g animation={play(enter({ at: 0.4, over: 0.8 }, { opacity: 0, y: -8 }))}>
+    <g animation={play(enter({ at: 0.2, over: 0.6 }, { opacity: 0, y: -8 }))}>
       <rect x={x} y={y} width={w} height={h} fill={C.land} stroke={C.ink} strokeWidth={1.4} />
       <rect
         x={x + 5}
@@ -74,8 +74,8 @@ export function Cartouche({ play }: { play: Play }): SvgNode {
       />
       <Words
         face={roman}
-        text="Being a map of the long road to Mount Cinder"
-        size={9}
+        text="The road to Mount Cinder"
+        size={13}
         x={mid}
         y={y + 78}
         fill={C.faded}
@@ -105,13 +105,13 @@ export function ScaleBar({ x, y, play }: { x: number; y: number; play: Play }): 
         <Words
           face={roman}
           text={String(v)}
-          size={8}
+          size={11}
           x={x + i * segment * 2}
           y={y + 16}
           anchor="middle"
         />
       ))}
-      <Words face={roman} text="Leagues" size={9} x={x + segment * 2} y={y - 6} anchor="middle" />
+      <Words face={roman} text="Leagues" size={11} x={x + segment * 2} y={y - 6} anchor="middle" />
     </g>
   );
 }
