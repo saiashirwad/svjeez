@@ -1,54 +1,39 @@
-import {
-  Picture,
-  ease,
-  enter,
-  fx,
-  motion,
-  picture,
-  render,
-  type PictureProps,
-  adaptive,
-  systemDark,
-  systemLight,
-} from "svjeez";
+import { Picture, ease, enter, fx, motion, picture, render, type PictureProps } from "svjeez";
 
-const W = 680;
-const H = 400;
-const D = 8;
+import { HEIGHT, MARGIN, WIDTH, color, css, duotone, geist, leave, size } from "../gallery-style";
 
-const photo = await picture.load(new URL("./nebula.jpg", import.meta.url));
+const W = WIDTH;
+const H = HEIGHT;
+const D = 10;
+
+const photo = await picture.load(new URL("./hills.jpg", import.meta.url));
 const emblem = await picture.load(new URL("./emblem.svg", import.meta.url));
 
-const { theme, css } = adaptive({ light: systemLight, dark: systemDark });
-
-const C = {
-  bg: theme.base00,
-  tile: theme.base01,
-  edge: theme.base02,
-  label: theme.base04,
-} as const;
-
-const CSS = `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}`;
-
-const SIZE = 140;
+/** Four tiles across, two rows, inside the margins. The last tile spans two columns. */
+const SIZE = 168;
+const GAP = (W - 2 * MARGIN - 4 * SIZE) / 3;
+const col = (i: number) => MARGIN + i * (SIZE + GAP);
+const ROW = [64, 64 + SIZE + 58] as const;
 
 function Slot({ label, at, ...picture }: PictureProps & { label: string; at: number }) {
   const { x = 0, y = 0, width = SIZE } = picture;
 
   return (
-    <g animation={enter({ at, over: 0.6 }, { y: 10 })}>
-      <rect x={x} y={y} width={width} height={SIZE} fill={C.tile} stroke={C.edge} />
+    <g animation={enter({ at, over: 0.5 }, { opacity: 0, y: 8 }, ease.out)}>
+      <rect x={x} y={y} width={width} height={SIZE} fill={color.panel} stroke={color.edge} />
       <Picture {...picture} width={width} height={SIZE} />
-      <text x={x} y={y + SIZE + 18} class="mono" fontSize={11} letterSpacing={1.5} fill={C.label}>
+      <text x={x} y={y + SIZE + 20} fontFamily={geist} fontSize={size.label} fill={color.dim}>
         {label}
       </text>
     </g>
   );
 }
 
+/** A slow pan and zoom inside a fixed frame, out and back. */
 const pan = motion({ scale: 1, x: 0 })
-  .to({ scale: 1.35, x: -24 }, D / 2, ease.inOut)
-  .to({ scale: 1, x: 0 }, D / 2, ease.inOut);
+  .at(0.5)
+  .to({ scale: 1.35, x: -24 }, (D - 2.6) / 2, ease.inOut)
+  .to({ scale: 1, x: 0 }, (D - 2.6) / 2, ease.inOut);
 
 export default function build(): string {
   return render(
@@ -56,70 +41,48 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "Embedded images",
-      desc: "A nebula photo in three fit modes, an SVG emblem with rounded corners and a shadow, duotone and grayscale treatments, and a slow pan-zoom inside a fixed frame.",
-      css: [css, CSS].join("\n"),
+      title: "Image treatments",
+      desc: "A landscape image in three fit modes, an SVG badge with rounded corners and a shadow, duotone and grayscale treatments, and a slow pan and zoom inside a fixed frame.",
+      css,
     },
     <>
-      <rect width={W} height={H} fill={C.bg} />
-      <Slot
-        x={30}
-        y={30}
-        label="COVER"
-        at={0}
-        src={photo}
-        fit="cover"
-        alt="A nebula, cropped to fill the frame"
-      />
-      <Slot
-        x={190}
-        y={30}
-        label="CONTAIN"
-        at={0.15}
-        src={photo}
-        fit="contain"
-        alt="A nebula, letterboxed"
-      />
-      <Slot x={350} y={30} label="FILL" at={0.3} src={photo} fit="fill" alt="A nebula, stretched" />
-      <Slot
-        x={510}
-        y={30}
-        label="SVG + SHADOW"
-        at={0.45}
-        src={emblem}
-        radius={24}
-        filter={fx.shadow({ dy: 6, blur: 7, opacity: 0.6 })}
-        alt="A sun over mountains"
-      />
-      <Slot
-        x={30}
-        y={220}
-        label="DUOTONE"
-        at={0.6}
-        src={photo}
-        filter={fx.duotone({ dark: "#1B1464", light: "#FFB36B" })}
-        alt="The nebula in indigo and amber"
-      />
-      <Slot
-        x={190}
-        y={220}
-        label="GRAYSCALE"
-        at={0.75}
-        src={photo}
-        filter={fx.grayscale()}
-        alt="The nebula in gray"
-      />
-      <Slot
-        x={350}
-        y={220}
-        width={300}
-        label="KEN BURNS"
-        at={0.9}
-        src={photo}
-        radius={14}
-        animation={pan}
-        alt="A slow pan and zoom across the nebula"
-      />
+      <rect width={W} height={H} fill={color.bg} />
+      <g animation={leave(D)}>
+        <Slot x={col(0)} y={ROW[0]} label="Cover" at={0.1} src={photo} fit="cover" alt="Hills at dusk, cropped to fill the frame" />
+        <Slot x={col(1)} y={ROW[0]} label="Contain" at={0.2} src={photo} fit="contain" alt="Hills at dusk, letterboxed" />
+        <Slot x={col(2)} y={ROW[0]} label="Fill" at={0.3} src={photo} fit="fill" alt="Hills at dusk, stretched" />
+        <Slot
+          x={col(3)}
+          y={ROW[0]}
+          label="Rounded with shadow"
+          at={0.4}
+          src={emblem}
+          radius={24}
+          filter={fx.shadow({ dy: 6, blur: 7, opacity: 0.6 })}
+          alt="A star in a ring on a green badge"
+        />
+        <Slot
+          x={col(0)}
+          y={ROW[1]}
+          label="Duotone"
+          at={0.5}
+          src={photo}
+          filter={fx.duotone(duotone)}
+          alt="The hills in blue and yellow"
+        />
+        <Slot x={col(1)} y={ROW[1]} label="Grayscale" at={0.6} src={photo} filter={fx.grayscale()} alt="The hills in gray" />
+        <Slot
+          x={col(2)}
+          y={ROW[1]}
+          width={2 * SIZE + GAP}
+          label="Slow pan and zoom"
+          at={0.7}
+          src={photo}
+          radius={8}
+          animation={pan}
+          alt="A slow pan and zoom across the hills"
+        />
+      </g>
     </>,
   );
 }

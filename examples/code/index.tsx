@@ -1,16 +1,16 @@
 import { highlight } from "@svjeez/code";
-import { ease, motion, rect, render, appWindow, code, morph } from "svjeez";
+import { ease, motion, render, code, morph } from "svjeez";
 
-import { css, mono, theme } from "../style";
+import { HEIGHT, MARGIN, WIDTH, RADIUS, css, mono, theme } from "../gallery-style";
 
-const W = 960;
-const H = 420;
+const W = WIDTH;
+const H = HEIGHT;
 
 // One function in four languages. @svjeez/code gives every token a role, so the colors below come from
 // style.ts and the scene still follows the viewer between light and dark.
 const SOURCES = [
   {
-    label: "ts",
+    label: "TS",
     lang: "ts",
     source: `function fib(n: number): number {
   if (n < 2) return n;
@@ -18,7 +18,7 @@ const SOURCES = [
 }`,
   },
   {
-    label: "py",
+    label: "Python",
     lang: "python",
     source: `def fib(n: int) -> int:
     if n < 2:
@@ -26,7 +26,7 @@ const SOURCES = [
     return fib(n - 1) + fib(n - 2)`,
   },
   {
-    label: "rs",
+    label: "Rust",
     lang: "rust",
     source: `fn fib(n: u32) -> u32 {
     if n < 2 {
@@ -36,7 +36,7 @@ const SOURCES = [
 }`,
   },
   {
-    label: "go",
+    label: "Go",
     lang: "go",
     source: `func fib(n int) int {
     if n < 2 {
@@ -47,17 +47,16 @@ const SOURCES = [
   },
 ] as const;
 
-const win = appWindow(rect(40, 40, W - 80, H - 80), { theme, title: "fib", bar: 40 });
-
-const CHIP = { w: 64, gap: 8, h: 28 };
-const chipX = (i: number) => win.body.x + 28 + i * (CHIP.w + CHIP.gap);
-const chipY = win.body.y + 22;
+// The code block is the whole canvas: tabs on the top margin, then the code at a large size.
+const CHIP = { w: 108, gap: 10, h: 36 };
+const chipX = (i: number) => MARGIN + i * (CHIP.w + CHIP.gap);
+const chipY = MARGIN;
 
 const settings = {
-  x: win.body.x + 36,
-  y: chipY + CHIP.h + 30,
-  fontSize: 20,
-  lineHeight: 1.7,
+  x: MARGIN,
+  y: chipY + CHIP.h + 40,
+  fontSize: 40,
+  lineHeight: 1.5,
   theme,
   font: mono,
 };
@@ -83,29 +82,29 @@ export default function build(): string {
     {
       width: W,
       height: H,
-      title: "One function, four languages",
+      title: "Fibonacci in four languages",
       desc: "A Fibonacci function morphs between TypeScript, Python, Rust and Go, highlighted by role from the scene's theme.",
       duration: at[3]! + OVER + HOLD,
       css,
     },
     <>
-      <g fontFamily={mono}>{win.node}</g>
+      <rect width={W} height={H} fill={theme.base01} />
       <rect
         x={chipX(0)}
         y={chipY}
         width={CHIP.w}
         height={CHIP.h}
-        rx={8}
+        rx={RADIUS}
         fill={theme.base02}
         animation={slide}
       />
       {SOURCES.map(({ label }, i) => (
         <text
           x={chipX(i) + CHIP.w / 2}
-          y={chipY + CHIP.h / 2 + 5}
+          y={chipY + CHIP.h / 2 + 6}
           textAnchor="middle"
           fontFamily={mono}
-          fontSize={15}
+          fontSize={18}
           fill={theme.base05}
         >
           {label}

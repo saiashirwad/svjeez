@@ -22,7 +22,7 @@ import { CHICK, GROUND, chick } from "./chick";
 const W = 1200;
 const H = 630;
 const display = await google("Inter Tight", { weight: 800 });
-const casual = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
+const casual = await strokeFont.load(new URL("../../fonts/EMSCasualHand.svg", import.meta.url));
 const pen = tool.pen({ size: 3.2, seed: 4 });
 
 const PAPER: Color = systemLight.base00;

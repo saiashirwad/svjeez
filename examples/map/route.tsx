@@ -14,22 +14,22 @@ import {
 } from "svjeez";
 
 import { trace } from "./curve";
-import { C, H, W, n } from "./kit";
+import { C, H, W, Y, n } from "./kit";
 import { CINDER, PLACES } from "./places";
 
 const STEPS = 24;
 
 const POINTS: Point[] = [
   PLACES.bramblecott.at,
-  { x: 286, y: 330 },
+  { x: 286, y: Y(330) },
   PLACES.ford.at,
-  { x: 396, y: 392 },
+  { x: 396, y: Y(392) },
   PLACES.elder.at,
-  { x: 520, y: 392 },
+  { x: 520, y: Y(392) },
   PLACES.pass.at,
-  { x: 640, y: 372 },
+  { x: 640, y: Y(372) },
   PLACES.ashfall.at,
-  { x: 742, y: 372 },
+  { x: 742, y: Y(372) },
   CINDER,
 ];
 
@@ -41,7 +41,7 @@ const reach = (p: Point) =>
   JOURNEY.at + (JOURNEY.over * ROUTE.len[POINTS.indexOf(p) * STEPS]!) / ROUTE.total;
 
 const view = (center: Point, width: number): Rect =>
-  rect(center.x - width / 2, center.y - width / 3, width, (width * 2) / 3);
+  rect(center.x - width / 2, center.y - (width * 9) / 32, width, (width * 9) / 16);
 
 const PAN = 1.1;
 

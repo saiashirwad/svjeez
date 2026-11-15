@@ -1,6 +1,6 @@
 import { Ink, def, enter, tool, type Point, type SvgNode } from "svjeez";
 import { pts, smooth, trace } from "./curve";
-import { C, H, W, n, pathSymbol, random, type Play } from "./kit";
+import { C, H, W, Y, n, pathSymbol, random, type Play } from "./kit";
 import { CINDER } from "./places";
 
 /** A coastline: an ellipse pushed in and out by a few seeded waves. */
@@ -32,10 +32,10 @@ const shore = (
 };
 
 const LAND = [
-  shore(490, 334, 392, 226, 7),
-  shore(96, 548, 46, 26, 3, 1.4, 28),
-  shore(70, 168, 26, 16, 11, 1.4, 24),
-  shore(912, 120, 20, 30, 5, 1.6, 24),
+  shore(494, 256, 380, 180, 7),
+  shore(86, 432, 44, 24, 3, 1.4, 28),
+  shore(64, 140, 26, 16, 11, 1.4, 24),
+  shore(912, Y(120), 20, 30, 5, 1.6, 24),
 ].join("");
 
 const landSymbol = pathSymbol(LAND);
@@ -101,7 +101,7 @@ function Rivers({ play }: { play: Play }): SvgNode {
       ))}
       <ellipse
         cx={352}
-        cy={304}
+        cy={Y(304)}
         rx={16}
         ry={8}
         fill={C.sea}
@@ -123,12 +123,12 @@ interface Wood {
 }
 
 const WOODS: Wood[] = [
-  { cx: 420, cy: 330, rx: 68, ry: 40, seed: 21, at: 1.6 },
-  { cx: 268, cy: 440, rx: 46, ry: 26, seed: 22, at: 1.8 },
-  { cx: 545, cy: 470, rx: 60, ry: 30, seed: 23, at: 2 },
-  { cx: 196, cy: 230, rx: 44, ry: 24, seed: 24, at: 1.9 },
-  { cx: 740, cy: 196, rx: 56, ry: 26, seed: 25, at: 2.1 },
-  { cx: 420, cy: 520, rx: 40, ry: 18, seed: 26, at: 2.2 },
+  { cx: 420, cy: Y(330), rx: 68, ry: 40, seed: 21, at: 1.6 },
+  { cx: 268, cy: Y(440), rx: 46, ry: 26, seed: 22, at: 1.8 },
+  { cx: 545, cy: Y(470), rx: 60, ry: 30, seed: 23, at: 2 },
+  { cx: 196, cy: Y(230), rx: 44, ry: 24, seed: 24, at: 1.9 },
+  { cx: 740, cy: Y(196), rx: 56, ry: 26, seed: 25, at: 2.1 },
+  { cx: 420, cy: Y(520), rx: 40, ry: 18, seed: 26, at: 2.2 },
 ];
 
 /** Lollipop trees scattered inside an ellipse, in four bands that fade in one after another. */

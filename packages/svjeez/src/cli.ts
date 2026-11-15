@@ -145,7 +145,7 @@ type VideoFn = (
   bytes: Uint8Array;
   codec: string;
   frames: number;
-  duration: number;
+  playTime: number;
   colorScheme: string;
 }>;
 
@@ -217,7 +217,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
 
   await writeFile(out, video.bytes);
   console.log(
-    `${out}: ${video.codec}, ${video.frames} frames, ${Number(video.duration.toFixed(3))}s, ${video.colorScheme}`,
+    `${out}: ${video.codec}, ${video.frames} frames, ${Number(video.playTime.toFixed(3))}s, ${video.colorScheme}`,
   );
 };
 

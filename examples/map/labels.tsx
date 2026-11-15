@@ -15,22 +15,23 @@ interface Label {
 const LABELS: Label[] = [
   {
     text: "THE IRON TEETH",
-    size: 13,
-    path: pts([630, 170, 648, 250, 640, 318]),
+    size: 12,
+    tracking: 0.2,
+    path: pts([626, 128, 650, 226, 642, 298]),
     at: 3,
   },
   {
     text: "ELDERWOOD",
     size: 12,
-    path: pts([360, 336, 420, 326, 482, 336]),
-    tracking: 0.5,
+    path: pts([366, 388, 424, 394, 486, 388]),
+    tracking: 0.12,
     fill: C.faded,
     at: 3.2,
   },
   {
     text: "THE ASHLANDS",
     size: 12,
-    path: pts([700, 268, 772, 252, 846, 276]),
+    path: pts([700, 252, 772, 234, 846, 258]),
     tracking: 0.4,
     fill: C.red,
     at: 3.4,
@@ -46,7 +47,7 @@ const LABELS: Label[] = [
   {
     text: "SEA OF WHISPERS",
     size: 17,
-    path: pts([300, 600, 470, 618, 640, 596]),
+    path: pts([320, 604, 480, 618, 640, 602]),
     tracking: 0.6,
     fill: C.faded,
     at: 3.6,
@@ -54,7 +55,7 @@ const LABELS: Label[] = [
   {
     text: "THE GREAT WEST",
     size: 15,
-    path: pts([52, 470, 46, 330, 64, 200]),
+    path: pts([52, 470, 46, 340, 56, 240]),
     tracking: 0.5,
     fill: C.faded,
     at: 3.7,
@@ -62,7 +63,7 @@ const LABELS: Label[] = [
   {
     text: "WESTWOLD",
     size: 9.5,
-    path: pts([156, 205, 196, 198, 236, 205]),
+    path: pts([156, 268, 196, 262, 236, 268]),
     tracking: 0.45,
     fill: C.faded,
     at: 3.75,
