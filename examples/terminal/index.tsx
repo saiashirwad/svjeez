@@ -10,13 +10,13 @@ const shell = appWindow(frame, { theme, title: "~/app", dots: "traffic" });
 
 const session = terminal(
   [
-    { cmd: "bun install", output: [[["muted", "installed 142 packages"]]] },
+    { cmd: "bun install", output: [[["blue", "installed 142 packages"]]] },
     { cmd: "bun test", output: [[["green", "✓"], " 38 tests passed"]] },
     {
       cmd: "bun run build",
       output: [
-        [["green", "✓"], " dist/app.js   ", ["muted", "29.4 KB"]],
-        [["green", "✓"], " dist/app.css  ", ["muted", " 6.0 KB"]],
+        [["green", "✓"], " dist/app.js   ", ["magenta", "29.4 KB"]],
+        [["green", "✓"], " dist/app.css  ", ["magenta", " 6.0 KB"]],
       ],
     },
   ],

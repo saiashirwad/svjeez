@@ -1,6 +1,6 @@
 import { render } from "svjeez";
 import { lanes } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, mono, theme } from "../gallery-style";
+import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
 
 const run = lanes(
   {
@@ -35,7 +35,24 @@ const run = lanes(
       { from: "search", to: "lead", at: 4.6 },
       { from: "build", to: "lead", at: 7.2 },    ],
   },
-  { theme, x: 0, y: 0, font: mono, scale: 100, fontSize: 16, play: { at: 0.2 } },
+  {
+    theme,
+    x: 0,
+    y: 0,
+    font: mono,
+    scale: 100,
+    fontSize: 16,
+    play: { at: 0.2 },
+    // The lead is blue, the workers purple and cyan, and the test lane's checks orange.
+    tints: {
+      input: hue.blue,
+      task: hue.purple,
+      tool: hue.cyan,
+      output: hue.blue,
+      store: hue.purple,
+      decision: hue.orange,
+    },
+  },
 );
 
 const D = 11;

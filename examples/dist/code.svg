@@ -65,7 +65,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-14.11s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="960" height="540" fill="var(--base01)"/>
-  <rect x="48" y="48" width="108" height="36" rx="8" fill="var(--base02)" class="a m1"/>
+  <rect x="48" y="48" width="108" height="36" rx="8" fill="var(--base0D)" fill-opacity="0.2" stroke="var(--base0D)" stroke-width="1.5" class="a m1"/>
   <text x="102" y="72" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="18" fill="var(--base05)">TS</text>
   <text x="220" y="72" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="18" fill="var(--base05)">Python</text>
   <text x="338" y="72" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="18" fill="var(--base05)">Rust</text>

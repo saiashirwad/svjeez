@@ -65,10 +65,33 @@ export const color = {
   dim: theme.base04,
   text: theme.base05,
   ink: theme.base06,
-  accent: theme.base0B,
-  series: [theme.base0D, theme.base0E, theme.base0C, theme.base09] as readonly Color[],
+  accent: theme.base0D,
+  series: [theme.base0D, theme.base09, theme.base0E, theme.base0C] as readonly Color[],
   error: theme.base08,
 } as const;
+
+/**
+ * The palette's hues, which carry the data and structure; greys stay for the background, text and scaffolding.
+ * A scene takes two or three, in `series` order: blue, then orange, then purple. Cyan is the fourth, for a map or a diagram
+ * that needs one more. Green and red keep their meaning (done, error), and `yellow` is for a highlight. Rosé Pine's green
+ * is its blue, so a scene that already uses blue never adds green.
+ */
+export const hue = {
+  blue: theme.base0D,
+  orange: theme.base09,
+  purple: theme.base0E,
+  cyan: theme.base0C,
+  green: theme.base0B,
+  red: theme.base08,
+  yellow: theme.base0A,
+} as const;
+
+/** A hue at low opacity: a fill for an area, a box or a land mass. Spread it onto the element: `<rect {...wash(hue.blue)} />`. */
+export const wash = (hue: Color, opacity = 0.18) => ({ fill: hue, fillOpacity: opacity }) as const;
+
+/** A washed fill with a stroke of the same hue: a box or a panel that belongs to a series. */
+export const boxed = (hue: Color, opacity = 0.16, width = 1.5) =>
+  ({ ...wash(hue, opacity), stroke: hue, strokeWidth: width }) as const;
 
 /** Motion. Entrances ease out over 0.4 to 0.6s with an 8px rise. Moves ease in and out. Clocks and progress are linear. */
 export const motions = {

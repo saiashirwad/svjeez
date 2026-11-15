@@ -4,9 +4,9 @@
   <desc id="d">A globe of dots turns through 21 June 2026, one hour per second. Night moves across it, and the 50 largest cities light up as the sun sets on them. A clock shows UTC.</desc>
   <defs>
     <radialGradient id="g1" gradientUnits="userSpaceOnUse" cx="630" cy="292" r="231.8">
-      <stop offset="0.8" stop-color="var(--base05)" stop-opacity="0.16"/>
-      <stop offset="0.84" stop-color="var(--base05)" stop-opacity="0.07"/>
-      <stop offset="1" stop-color="var(--base05)" stop-opacity="0"/>
+      <stop offset="0.8" stop-color="var(--base0C)" stop-opacity="0.16"/>
+      <stop offset="0.84" stop-color="var(--base0C)" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="var(--base0C)" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="g2" gradientUnits="userSpaceOnUse" cx="464.2" cy="242.1" r="399">
       <stop offset="0" stop-color="var(--base01)"/>
@@ -20,9 +20,9 @@
       <feGaussianBlur stdDeviation="10"/>
     </filter>
     <radialGradient id="g3">
-      <stop offset="0" stop-color="var(--base0A)" stop-opacity="0.9"/>
-      <stop offset="0.35" stop-color="var(--base0A)" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="var(--base0A)" stop-opacity="0"/>
+      <stop offset="0" stop-color="var(--base09)" stop-opacity="0.9"/>
+      <stop offset="0.35" stop-color="var(--base09)" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="var(--base09)" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <style><![CDATA[
@@ -217,38 +217,39 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   </g>
   <circle cx="630" cy="292" r="231.8" fill="url(#g1)"/>
   <path d="M630 482l-19.9-1-13.1-1.9-13-2.7-6.4-1.8-18.8-6.4-18-8.4-11.5-6.7-16.3-11.4-15-13-4.7-4.7-8.8-9.9-4.2-5.1-7.8-10.8-10.3-17-8.4-18-6.4-18.8-1.8-6.4-2.7-13-1.9-13.1-1-19.9 1-19.9 1.9-13.1 2.7-13 1.8-6.4 6.4-18.8 8.4-18 6.7-11.5 11.4-16.3 13-15 4.7-4.7 9.9-8.8 5.1-4.2 10.8-7.8 17-10.3 18-8.4 18.8-6.4 6.4-1.8 13-2.7 13.1-1.9 19.9-1 19.9 1 13.1 1.9 13 2.7 6.4 1.8 18.8 6.4 18 8.4 11.5 6.7 16.3 11.4 15 13 4.7 4.7 8.8 9.9 4.2 5.1 7.8 10.8 10.3 17 8.4 18 6.4 18.8 1.8 6.4 2.7 13 1.9 13.1 1 19.9-1 19.9-1.9 13.1-2.7 13-1.8 6.4-6.4 18.8-8.4 18-6.7 11.5-11.4 16.3-13 15-4.7 4.7-9.9 8.8-5.1 4.2-10.8 7.8-17 10.3-18 8.4-18.8 6.4-6.4 1.8-13 2.7-13.1 1.9-19.9 1z" fill="url(#g2)"/>
+  <path d="M630 482l-19.9-1-13.1-1.9-13-2.7-6.4-1.8-18.8-6.4-18-8.4-11.5-6.7-16.3-11.4-15-13-4.7-4.7-8.8-9.9-4.2-5.1-7.8-10.8-10.3-17-8.4-18-6.4-18.8-1.8-6.4-2.7-13-1.9-13.1-1-19.9 1-19.9 1.9-13.1 2.7-13 1.8-6.4 6.4-18.8 8.4-18 6.7-11.5 11.4-16.3 13-15 4.7-4.7 9.9-8.8 5.1-4.2 10.8-7.8 17-10.3 18-8.4 18.8-6.4 6.4-1.8 13-2.7 13.1-1.9 19.9-1 19.9 1 13.1 1.9 13 2.7 6.4 1.8 18.8 6.4 18 8.4 11.5 6.7 16.3 11.4 15 13 4.7 4.7 8.8 9.9 4.2 5.1 7.8 10.8 10.3 17 8.4 18 6.4 18.8 1.8 6.4 2.7 13 1.9 13.1 1 19.9-1 19.9-1.9 13.1-2.7 13-1.8 6.4-6.4 18.8-8.4 18-6.7 11.5-11.4 16.3-13 15-4.7 4.7-9.9 8.8-5.1 4.2-10.8 7.8-17 10.3-18 8.4-18.8 6.4-6.4 1.8-13 2.7-13.1 1.9-19.9 1z" fill="var(--base0C)" fill-opacity="0.07"/>
   <path d="M575.3 473.9l7.2 1.4 8.6-.5 9.1-2.4 6.2-2.8 9.5-5.7 9.6-7.6 9.8-9.4 9.6-11.1 6.4-8.3 9.3-13.6 9-15 11.3-21.8 5.3-11.5 7.4-18 6.7-18.5 4.1-12.6 5.4-19.2 3.1-12.8 2.7-12.7 3.3-19 2.3-18.5 1.3-17.8 .3-17.1-.7-16-1.8-14.9-2.7-13.5-2.3-8.1-4.3-10.9-5.2-9.2-6-7.4-6.8-5.5-7.5-3.6 18 6.5 6 2.6 11.9 6 11.4 6.8 16.1 11.6 10.1 8.7 9.4 9.3 4.4 4.9 12.4 15.6 10.6 16.8 8.8 17.9 4.8 12.3 5.5 19.1 3.6 19.6 1.5 19.8-.2 13.3-.5 6.6-.6 6.6-2 13.1-4.8 19.3-4.2 12.6-8 18.2-9.9 17.3-11.6 16.1-8.7 10.1-9.3 9.4-4.9 4.4-15.6 12.4-16.8 10.6-17.9 8.8-12.3 4.8-19.1 5.5-19.6 3.6-19.8 1.5-13.3-.2-6.6-.5-6.6-.6-13.1-2-19.3-4.8z" fill="var(--base00)" opacity="0.75" filter="url(#f1)"/>
   <path d="M562.2 469.5l16.9 5.1 14.7 2.9 15.8 1.8 16.4 .8 8.3 0 16.4-.8 15.8-1.9 14.6-2.8 6.8-1.8 9.9-3.3M473.1 398.7l5 5 6 4.9 7.2 4.7 8.3 4.4 9.2 4.1 10.2 3.8 11 3.4 11.8 3.1 12.4 2.7 13 2.3 27.4 3.2 28.4 1.4 14.4 0 14.3-.5 14.1-1 27.4-3.2 13-2.3 12.4-2.7 22.7-6.5 10.2-3.8 9.2-4.2 8.2-4.4 7.1-4.6 6.1-4.9 4.9-5.1 3-4M470 394.5l3.1 4.2M448.9 313.5l5.7 5.8 7 5.6 8.3 5.4 9.5 5.1 10.7 4.8 11.7 4.3 12.7 4 13.6 3.6 14.4 3.1 15 2.6 15.6 2.1 16 1.6 16.3 1.1 16.5 .5 16.6 0 16.5-.5 16.4-1.1 16-1.6 30.5-4.8 14.4-3.1 13.6-3.6 12.6-4 11.7-4.4 10.7-4.7 9.5-5.1 8.2-5.4 7-5.6 5.7-5.9 4.2-6 2.9-6.1 1.4-6.2 .2-3M440 292l.2 3.2 1.5 6.2 2.9 6.1 4.3 6M473.1 222.5l5 5.1 6 4.8 7.2 4.7 8.3 4.4 9.2 4.1 10.2 3.8 11 3.5 24.2 5.7 13 2.3 27.4 3.2 28.4 1.4 14.4 0 14.3-.5 14.1-.9 13.9-1.4 26.5-4.1 12.4-2.7 11.7-3.1 11-3.5 10.2-3.8 9.2-4.1 8.2-4.4 7.1-4.7 6.1-4.9 4.9-5 3.7-5.2 2.5-5.3 1.2-5.4 0-5.3-1.3-5.4-3.1-6.3M470 189.5l-3.2 6.4-1.2 5.4 0 5.4 1.3 5.3 2.5 5.3 3.7 5.2M539.4 150.2l2.9 2.9 7.6 5.5 10.1 4.9 5.9 2.2 13.2 3.8 7.1 1.5 15.3 2.4 8.1 .8 16.4 .8 16.5-.3 16.2-1.3 15.3-2.4 7.1-1.6 13.2-3.8 11.1-4.5 4.8-2.6 7.6-5.5 2.8-2.9 2.2-3 1.4-3.1 .7-3.1 0-3.1-.7-3.1-1.5-3-2.1-3-2.9-2.9-7.6-5.5-4.8-2.6-7.5-3.2M562.2 114.5l-7.6 3.3-8.9 5.2-3.5 2.9-2.8 2.9-2.2 3-1.4 3-.7 3.1 0 3.1 .7 3.1 1.5 3.1 2.1 3" fill="none" stroke="var(--base05)" stroke-opacity="0.08" stroke-width="1"/>
-  <path d="M575.3 473.9l7.2 1.4 8.6-.5 9.1-2.4 6.2-2.8 9.5-5.7 9.6-7.6 9.8-9.4 9.6-11.1 6.4-8.3 9.3-13.6 9-15 11.3-21.8 5.3-11.5 7.4-18 6.7-18.5 4.1-12.6 5.4-19.2 3.1-12.8 2.7-12.7 3.3-19 2.3-18.5 1.3-17.8 .3-17.1-.7-16-1.8-14.9-2.7-13.5-2.3-8.1-4.3-10.9-5.2-9.2-6-7.4-6.8-5.5-4.9-2.6-3.4-1.2" fill="none" stroke="var(--base09)" stroke-width="14" opacity="0.28" filter="url(#f2)"/>
+  <path d="M575.3 473.9l7.2 1.4 8.6-.5 9.1-2.4 6.2-2.8 9.5-5.7 9.6-7.6 9.8-9.4 9.6-11.1 6.4-8.3 9.3-13.6 9-15 11.3-21.8 5.3-11.5 7.4-18 6.7-18.5 4.1-12.6 5.4-19.2 3.1-12.8 2.7-12.7 3.3-19 2.3-18.5 1.3-17.8 .3-17.1-.7-16-1.8-14.9-2.7-13.5-2.3-8.1-4.3-10.9-5.2-9.2-6-7.4-6.8-5.5-4.9-2.6-3.4-1.2" fill="none" stroke="var(--base0E)" stroke-width="14" opacity="0.28" filter="url(#f2)"/>
   <g transform="translate(630 292)" class="a m10">
-    <g style="--p1:-54.844deg" fill="var(--base05)">
+    <g style="--p1:-54.844deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-70.541deg"/>
       <circle class="g d" r="2.1" style="--p2:-65.676deg"/>
     </g>
-    <g style="--p1:-52.031deg" fill="var(--base05)">
+    <g style="--p1:-52.031deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-72.911deg"/>
       <circle class="g d" r="2.1" style="--p2:-59.241deg"/>
     </g>
-    <g style="--p1:-49.219deg" fill="var(--base05)">
+    <g style="--p1:-49.219deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-75deg"/>
       <circle class="g d" r="2.1" style="--p2:-70.714deg"/>
     </g>
-    <g style="--p1:-46.406deg" fill="var(--base05)">
+    <g style="--p1:-46.406deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-72.809deg"/>
       <circle class="g d" r="2.1" style="--p2:-68.764deg"/>
     </g>
-    <g style="--p1:-43.594deg" fill="var(--base05)">
+    <g style="--p1:-43.594deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-69.677deg"/>
       <circle class="g d" r="2.1" style="--p2:-65.806deg"/>
       <circle class="g d" r="2.1" style="--p2:170.323deg"/>
     </g>
-    <g style="--p1:-40.781deg" fill="var(--base05)">
+    <g style="--p1:-40.781deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-70.515deg"/>
       <circle class="g d" r="2.1" style="--p2:-66.804deg"/>
       <circle class="g d" r="2.1" style="--p2:-63.093deg"/>
       <circle class="g d" r="2.1" style="--p2:144.742deg"/>
     </g>
-    <g style="--p1:-37.969deg" fill="var(--base05)">
+    <g style="--p1:-37.969deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-71.287deg"/>
       <circle class="g d" r="2.1" style="--p2:-67.723deg"/>
       <circle class="g d" r="2.1" style="--p2:-64.158deg"/>
@@ -257,7 +258,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:146.139deg"/>
       <circle class="g d" r="2.1" style="--p2:178.218deg"/>
     </g>
-    <g style="--p1:-35.156deg" fill="var(--base05)">
+    <g style="--p1:-35.156deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-72deg"/>
       <circle class="g d" r="2.1" style="--p2:-68.571deg"/>
       <circle class="g d" r="2.1" style="--p2:-65.143deg"/>
@@ -268,7 +269,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:144deg"/>
       <circle class="g d" r="2.1" style="--p2:147.429deg"/>
     </g>
-    <g style="--p1:-32.344deg" fill="var(--base05)">
+    <g style="--p1:-32.344deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-69.358deg"/>
       <circle class="g d" r="2.1" style="--p2:-66.055deg"/>
       <circle class="g d" r="2.1" style="--p2:-62.752deg"/>
@@ -288,7 +289,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:148.624deg"/>
       <circle class="g d" r="2.1" style="--p2:151.927deg"/>
     </g>
-    <g style="--p1:-29.531deg" fill="var(--base05)">
+    <g style="--p1:-29.531deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-69.107deg"/>
       <circle class="g d" r="2.1" style="--p2:-65.893deg"/>
       <circle class="g d" r="2.1" style="--p2:-62.679deg"/>
@@ -314,7 +315,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:149.464deg"/>
       <circle class="g d" r="2.1" style="--p2:152.679deg"/>
     </g>
-    <g style="--p1:-26.719deg" fill="var(--base05)">
+    <g style="--p1:-26.719deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-68.87deg"/>
       <circle class="g d" r="2.1" style="--p2:-65.739deg"/>
       <circle class="g d" r="2.1" style="--p2:-62.609deg"/>
@@ -341,7 +342,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:147.13deg"/>
       <circle class="g d" r="2.1" style="--p2:150.261deg"/>
     </g>
-    <g style="--p1:-23.906deg" fill="var(--base05)">
+    <g style="--p1:-23.906deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-68.644deg"/>
       <circle class="g d" r="2.1" style="--p2:-65.593deg"/>
       <circle class="g d" r="2.1" style="--p2:-62.542deg"/>
@@ -373,7 +374,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:147.966deg"/>
       <circle class="g d" r="2.1" style="--p2:151.017deg"/>
     </g>
-    <g style="--p1:-21.094deg" fill="var(--base05)">
+    <g style="--p1:-21.094deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-67.5deg"/>
       <circle class="g d" r="2.1" style="--p2:-64.5deg"/>
       <circle class="g d" r="2.1" style="--p2:-61.5deg"/>
@@ -404,7 +405,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:145.5deg"/>
       <circle class="g d" r="2.1" style="--p2:148.5deg"/>
     </g>
-    <g style="--p1:-18.281deg" fill="var(--base05)">
+    <g style="--p1:-18.281deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-69.344deg"/>
       <circle class="g d" r="2.1" style="--p2:-66.393deg"/>
       <circle class="g d" r="2.1" style="--p2:-63.443deg"/>
@@ -435,7 +436,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:140.164deg"/>
       <circle class="g d" r="2.1" style="--p2:143.115deg"/>
     </g>
-    <g style="--p1:-15.469deg" fill="var(--base05)">
+    <g style="--p1:-15.469deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-74.032deg"/>
       <circle class="g d" r="2.1" style="--p2:-71.129deg"/>
       <circle class="g d" r="2.1" style="--p2:-68.226deg"/>
@@ -467,7 +468,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:143.71deg"/>
       <circle class="g d" r="2.1" style="--p2:166.935deg"/>
     </g>
-    <g style="--p1:-12.656deg" fill="var(--base05)">
+    <g style="--p1:-12.656deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-74.88deg"/>
       <circle class="g d" r="2.1" style="--p2:-72deg"/>
       <circle class="g d" r="2.1" style="--p2:-69.12deg"/>
@@ -495,7 +496,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:132.48deg"/>
       <circle class="g d" r="2.1" style="--p2:135.36deg"/>
     </g>
-    <g style="--p1:-9.844deg" fill="var(--base05)">
+    <g style="--p1:-9.844deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-76.535deg"/>
       <circle class="g d" r="2.1" style="--p2:-73.701deg"/>
       <circle class="g d" r="2.1" style="--p2:-70.866deg"/>
@@ -522,7 +523,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:36.85deg"/>
       <circle class="g d" r="2.1" style="--p2:39.685deg"/>
     </g>
-    <g style="--p1:-7.031deg" fill="var(--base05)">
+    <g style="--p1:-7.031deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-77.344deg"/>
       <circle class="g d" r="2.1" style="--p2:-74.531deg"/>
       <circle class="g d" r="2.1" style="--p2:-71.719deg"/>
@@ -554,7 +555,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:142.031deg"/>
       <circle class="g d" r="2.1" style="--p2:144.844deg"/>
     </g>
-    <g style="--p1:-4.219deg" fill="var(--base05)">
+    <g style="--p1:-4.219deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-80.156deg"/>
       <circle class="g d" r="2.1" style="--p2:-77.344deg"/>
       <circle class="g d" r="2.1" style="--p2:-74.531deg"/>
@@ -589,7 +590,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:142.031deg"/>
       <circle class="g d" r="2.1" style="--p2:144.844deg"/>
     </g>
-    <g style="--p1:-1.406deg" fill="var(--base05)">
+    <g style="--p1:-1.406deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-78.14deg"/>
       <circle class="g d" r="2.1" style="--p2:-75.349deg"/>
       <circle class="g d" r="2.1" style="--p2:-72.558deg"/>
@@ -620,7 +621,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:131.163deg"/>
       <circle class="g d" r="2.1" style="--p2:133.953deg"/>
     </g>
-    <g style="--p1:1.406deg" fill="var(--base05)">
+    <g style="--p1:1.406deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-78.14deg"/>
       <circle class="g d" r="2.1" style="--p2:-75.349deg"/>
       <circle class="g d" r="2.1" style="--p2:-72.558deg"/>
@@ -650,7 +651,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:117.209deg"/>
       <circle class="g d" r="2.1" style="--p2:128.372deg"/>
     </g>
-    <g style="--p1:4.219deg" fill="var(--base05)">
+    <g style="--p1:4.219deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-77.344deg"/>
       <circle class="g d" r="2.1" style="--p2:-74.531deg"/>
       <circle class="g d" r="2.1" style="--p2:-71.719deg"/>
@@ -679,7 +680,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:102.656deg"/>
       <circle class="g d" r="2.1" style="--p2:116.719deg"/>
     </g>
-    <g style="--p1:7.031deg" fill="var(--base05)">
+    <g style="--p1:7.031deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-77.344deg"/>
       <circle class="g d" r="2.1" style="--p2:-74.531deg"/>
       <circle class="g d" r="2.1" style="--p2:-71.719deg"/>
@@ -713,7 +714,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:99.844deg"/>
       <circle class="g d" r="2.1" style="--p2:125.156deg"/>
     </g>
-    <g style="--p1:9.844deg" fill="var(--base05)">
+    <g style="--p1:9.844deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-85.039deg"/>
       <circle class="g d" r="2.1" style="--p2:-73.701deg"/>
       <circle class="g d" r="2.1" style="--p2:-70.866deg"/>
@@ -744,7 +745,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:48.189deg"/>
       <circle class="g d" r="2.1" style="--p2:76.535deg"/>
     </g>
-    <g style="--p1:12.656deg" fill="var(--base05)">
+    <g style="--p1:12.656deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-86.4deg"/>
       <circle class="g d" r="2.1" style="--p2:-83.52deg"/>
       <circle class="g d" r="2.1" style="--p2:-14.4deg"/>
@@ -772,7 +773,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:106.56deg"/>
       <circle class="g d" r="2.1" style="--p2:120.96deg"/>
     </g>
-    <g style="--p1:15.469deg" fill="var(--base05)">
+    <g style="--p1:15.469deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-91.452deg"/>
       <circle class="g d" r="2.1" style="--p2:-88.548deg"/>
       <circle class="g d" r="2.1" style="--p2:-85.645deg"/>
@@ -807,7 +808,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:105.968deg"/>
       <circle class="g d" r="2.1" style="--p2:120.484deg"/>
     </g>
-    <g style="--p1:18.281deg" fill="var(--base05)">
+    <g style="--p1:18.281deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-101.803deg"/>
       <circle class="g d" r="2.1" style="--p2:-98.852deg"/>
       <circle class="g d" r="2.1" style="--p2:-95.902deg"/>
@@ -847,7 +848,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:101.803deg"/>
       <circle class="g d" r="2.1" style="--p2:104.754deg"/>
     </g>
-    <g style="--p1:21.094deg" fill="var(--base05)">
+    <g style="--p1:21.094deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-103.5deg"/>
       <circle class="g d" r="2.1" style="--p2:-100.5deg"/>
       <circle class="g d" r="2.1" style="--p2:-97.5deg"/>
@@ -890,7 +891,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:103.5deg"/>
       <circle class="g d" r="2.1" style="--p2:106.5deg"/>
     </g>
-    <g style="--p1:23.906deg" fill="var(--base05)">
+    <g style="--p1:23.906deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-105.254deg"/>
       <circle class="g d" r="2.1" style="--p2:-102.203deg"/>
       <circle class="g d" r="2.1" style="--p2:-99.153deg"/>
@@ -937,7 +938,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:117.458deg"/>
       <circle class="g d" r="2.1" style="--p2:120.508deg"/>
     </g>
-    <g style="--p1:26.719deg" fill="var(--base05)">
+    <g style="--p1:26.719deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-112.696deg"/>
       <circle class="g d" r="2.1" style="--p2:-109.565deg"/>
       <circle class="g d" r="2.1" style="--p2:-106.435deg"/>
@@ -986,7 +987,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:115.826deg"/>
       <circle class="g d" r="2.1" style="--p2:118.957deg"/>
     </g>
-    <g style="--p1:29.531deg" fill="var(--base05)">
+    <g style="--p1:29.531deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-114.107deg"/>
       <circle class="g d" r="2.1" style="--p2:-110.893deg"/>
       <circle class="g d" r="2.1" style="--p2:-107.679deg"/>
@@ -1036,7 +1037,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:117.321deg"/>
       <circle class="g d" r="2.1" style="--p2:120.536deg"/>
     </g>
-    <g style="--p1:32.344deg" fill="var(--base05)">
+    <g style="--p1:32.344deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-115.596deg"/>
       <circle class="g d" r="2.1" style="--p2:-112.294deg"/>
       <circle class="g d" r="2.1" style="--p2:-108.991deg"/>
@@ -1083,7 +1084,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:115.596deg"/>
       <circle class="g d" r="2.1" style="--p2:118.899deg"/>
     </g>
-    <g style="--p1:35.156deg" fill="var(--base05)">
+    <g style="--p1:35.156deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-120deg"/>
       <circle class="g d" r="2.1" style="--p2:-116.571deg"/>
       <circle class="g d" r="2.1" style="--p2:-113.143deg"/>
@@ -1130,7 +1131,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:133.714deg"/>
       <circle class="g d" r="2.1" style="--p2:137.143deg"/>
     </g>
-    <g style="--p1:37.969deg" fill="var(--base05)">
+    <g style="--p1:37.969deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-121.188deg"/>
       <circle class="g d" r="2.1" style="--p2:-117.624deg"/>
       <circle class="g d" r="2.1" style="--p2:-114.059deg"/>
@@ -1174,7 +1175,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:117.624deg"/>
       <circle class="g d" r="2.1" style="--p2:128.317deg"/>
     </g>
-    <g style="--p1:40.781deg" fill="var(--base05)">
+    <g style="--p1:40.781deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-122.474deg"/>
       <circle class="g d" r="2.1" style="--p2:-118.763deg"/>
       <circle class="g d" r="2.1" style="--p2:-115.052deg"/>
@@ -1222,7 +1223,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:126.186deg"/>
       <circle class="g d" r="2.1" style="--p2:141.031deg"/>
     </g>
-    <g style="--p1:43.594deg" fill="var(--base05)">
+    <g style="--p1:43.594deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-123.871deg"/>
       <circle class="g d" r="2.1" style="--p2:-120deg"/>
       <circle class="g d" r="2.1" style="--p2:-116.129deg"/>
@@ -1270,7 +1271,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:131.613deg"/>
       <circle class="g d" r="2.1" style="--p2:143.226deg"/>
     </g>
-    <g style="--p1:46.406deg" fill="var(--base05)">
+    <g style="--p1:46.406deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-121.348deg"/>
       <circle class="g d" r="2.1" style="--p2:-117.303deg"/>
       <circle class="g d" r="2.1" style="--p2:-113.258deg"/>
@@ -1321,7 +1322,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:133.483deg"/>
       <circle class="g d" r="2.1" style="--p2:137.528deg"/>
     </g>
-    <g style="--p1:49.219deg" fill="var(--base05)">
+    <g style="--p1:49.219deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-122.143deg"/>
       <circle class="g d" r="2.1" style="--p2:-117.857deg"/>
       <circle class="g d" r="2.1" style="--p2:-113.571deg"/>
@@ -1372,7 +1373,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:135deg"/>
       <circle class="g d" r="2.1" style="--p2:139.286deg"/>
     </g>
-    <g style="--p1:52.031deg" fill="var(--base05)">
+    <g style="--p1:52.031deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-127.595deg"/>
       <circle class="g d" r="2.1" style="--p2:-123.038deg"/>
       <circle class="g d" r="2.1" style="--p2:-118.481deg"/>
@@ -1423,7 +1424,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:132.152deg"/>
       <circle class="g d" r="2.1" style="--p2:136.709deg"/>
     </g>
-    <g style="--p1:54.844deg" fill="var(--base05)">
+    <g style="--p1:54.844deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-162.973deg"/>
       <circle class="g d" r="2.1" style="--p2:-128.919deg"/>
       <circle class="g d" r="2.1" style="--p2:-124.054deg"/>
@@ -1467,7 +1468,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:133.784deg"/>
       <circle class="g d" r="2.1" style="--p2:158.108deg"/>
     </g>
-    <g style="--p1:57.656deg" fill="var(--base05)">
+    <g style="--p1:57.656deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-156.522deg"/>
       <circle class="g d" r="2.1" style="--p2:-130.435deg"/>
       <circle class="g d" r="2.1" style="--p2:-125.217deg"/>
@@ -1507,7 +1508,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:135.652deg"/>
       <circle class="g d" r="2.1" style="--p2:161.739deg"/>
     </g>
-    <g style="--p1:60.469deg" fill="var(--base05)">
+    <g style="--p1:60.469deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-160deg"/>
       <circle class="g d" r="2.1" style="--p2:-154.286deg"/>
       <circle class="g d" r="2.1" style="--p2:-148.571deg"/>
@@ -1550,7 +1551,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:154.286deg"/>
       <circle class="g d" r="2.1" style="--p2:165.714deg"/>
     </g>
-    <g style="--p1:63.281deg" fill="var(--base05)">
+    <g style="--p1:63.281deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-158.276deg"/>
       <circle class="g d" r="2.1" style="--p2:-152.069deg"/>
       <circle class="g d" r="2.1" style="--p2:-145.862deg"/>
@@ -1594,7 +1595,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:170.69deg"/>
       <circle class="g d" r="2.1" style="--p2:176.897deg"/>
     </g>
-    <g style="--p1:66.094deg" fill="var(--base05)">
+    <g style="--p1:66.094deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-176.538deg"/>
       <circle class="g d" r="2.1" style="--p2:-162.692deg"/>
       <circle class="g d" r="2.1" style="--p2:-155.769deg"/>
@@ -1639,7 +1640,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:169.615deg"/>
       <circle class="g d" r="2.1" style="--p2:176.538deg"/>
     </g>
-    <g style="--p1:68.906deg" fill="var(--base05)">
+    <g style="--p1:68.906deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-160.435deg"/>
       <circle class="g d" r="2.1" style="--p2:-152.609deg"/>
       <circle class="g d" r="2.1" style="--p2:-144.783deg"/>
@@ -1670,7 +1671,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:168.261deg"/>
       <circle class="g d" r="2.1" style="--p2:176.087deg"/>
     </g>
-    <g style="--p1:71.719deg" fill="var(--base05)">
+    <g style="--p1:71.719deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-121.5deg"/>
       <circle class="g d" r="2.1" style="--p2:-112.5deg"/>
       <circle class="g d" r="2.1" style="--p2:-94.5deg"/>
@@ -1687,7 +1688,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:121.5deg"/>
       <circle class="g d" r="2.1" style="--p2:148.5deg"/>
     </g>
-    <g style="--p1:74.531deg" fill="var(--base05)">
+    <g style="--p1:74.531deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-47.647deg"/>
       <circle class="g d" r="2.1" style="--p2:-37.059deg"/>
       <circle class="g d" r="2.1" style="--p2:-26.471deg"/>
@@ -1695,14 +1696,14 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:90deg"/>
       <circle class="g d" r="2.1" style="--p2:100.588deg"/>
     </g>
-    <g style="--p1:77.344deg" fill="var(--base05)">
+    <g style="--p1:77.344deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-83.571deg"/>
       <circle class="g d" r="2.1" style="--p2:-57.857deg"/>
       <circle class="g d" r="2.1" style="--p2:-45deg"/>
       <circle class="g d" r="2.1" style="--p2:-32.143deg"/>
       <circle class="g d" r="2.1" style="--p2:-19.286deg"/>
     </g>
-    <g style="--p1:80.156deg" fill="var(--base05)">
+    <g style="--p1:80.156deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-90deg"/>
       <circle class="g d" r="2.1" style="--p2:-73.636deg"/>
       <circle class="g d" r="2.1" style="--p2:-57.273deg"/>
@@ -1710,7 +1711,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <circle class="g d" r="2.1" style="--p2:-24.545deg"/>
       <circle class="g d" r="2.1" style="--p2:24.545deg"/>
     </g>
-    <g style="--p1:82.969deg" fill="var(--base05)">
+    <g style="--p1:82.969deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-78.75deg"/>
       <circle class="g d" r="2.1" style="--p2:-33.75deg"/>
     </g>

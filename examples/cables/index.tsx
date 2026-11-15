@@ -31,6 +31,8 @@ import {
   WIDTH,
   rise,
   theme,
+  hue,
+  wash,
 } from "../gallery-style";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
@@ -58,10 +60,10 @@ const C = {
   dim: theme.base04,
 } as const;
 
-/** The five cable colors, in a fixed order. */
-const HUES = [theme.base0C, theme.base0D, theme.base0E, theme.base09, theme.base08] as const;
+/** The five cable colors, in a fixed order: the palette's own hues, so each cable stays its own and the land stays quiet. */
+const HUES = [hue.blue, hue.orange, hue.purple, hue.cyan, hue.red] as const;
 
-const hue = (i: number) => HUES[i % HUES.length]!;
+const cableHue = (i: number) => HUES[i % HUES.length]!;
 
 interface Station {
   readonly name: string;
@@ -254,7 +256,7 @@ const length = (points: readonly Point[]) =>
 
 interface Laid {
   readonly cable: Cable;
-  readonly color: ReturnType<typeof hue>;
+  readonly color: (typeof HUES)[number];
   /** One list of points per piece: a cable across the Pacific leaves one edge of the map and comes back at the other. */
   readonly pieces: Point[][];
   /** Each piece once, for the packets to `<use>`, with a path length of 1 so a dash is a fraction of it. */
@@ -269,7 +271,7 @@ const laid: Laid[] = CABLES.map((cable, i) => {
 
   return {
     cable,
-    color: hue(i),
+    color: cableHue(i),
     pieces,
     tracks: pieces.map((piece) =>
       def.symbol({ style: "overflow:visible" }, <path d={d(piece)} pathLength={1} />),
@@ -295,6 +297,7 @@ function Land(): SvgNode {
       <path d={map.sphere} fill={C.sea} stroke={C.edge} strokeWidth={1} />
       <path d={map.graticule(20)} fill="none" stroke={C.edge} strokeWidth={1} opacity={0.35} />
       <path d={map.land} fill={C.land} />
+      <path d={map.land} {...wash(hue.blue, 0.1)} />
       <path d={map.land} fill={grain} />
     </>
   );
@@ -316,15 +319,15 @@ function Cables(): SvgNode {
               <path
                 d={d(piece)}
                 stroke={color}
-                strokeWidth={5}
-                opacity={0.06}
+                strokeWidth={6}
+                opacity={0.14}
                 animation={draw(span, ease.linear)}
               />
               <path
                 d={d(piece)}
                 stroke={color}
-                strokeWidth={1}
-                opacity={0.38}
+                strokeWidth={1.6}
+                opacity={0.9}
                 animation={draw(span, ease.linear)}
               />
             </>

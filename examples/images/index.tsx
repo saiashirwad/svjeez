@@ -1,6 +1,6 @@
-import { Picture, ease, enter, fx, motion, picture, render, type PictureProps } from "svjeez";
+import { Picture, type Color, ease, enter, fx, motion, picture, render, type PictureProps } from "svjeez";
 
-import { HEIGHT, MARGIN, WIDTH, color, css, duotone, geist, leave, size } from "../gallery-style";
+import { HEIGHT, MARGIN, WIDTH, color, css, duotone, geist, hue, leave, size, wash } from "../gallery-style";
 
 const W = WIDTH;
 const H = HEIGHT;
@@ -15,12 +15,13 @@ const GAP = (W - 2 * MARGIN - 4 * SIZE) / 3;
 const col = (i: number) => MARGIN + i * (SIZE + GAP);
 const ROW = [64, 64 + SIZE + 58] as const;
 
-function Slot({ label, at, ...picture }: PictureProps & { label: string; at: number }) {
+function Slot({ label, at, tint, ...picture }: PictureProps & { label: string; at: number; tint: Color }) {
   const { x = 0, y = 0, width = SIZE } = picture;
 
   return (
     <g animation={enter({ at, over: 0.5 }, { opacity: 0, y: 8 }, ease.out)}>
-      <rect x={x} y={y} width={width} height={SIZE} fill={color.panel} stroke={color.edge} />
+      <rect x={x} y={y} width={width} height={SIZE} fill={color.panel} />
+      <rect x={x} y={y} width={width} height={SIZE} {...wash(tint, 0.14)} stroke={tint} strokeOpacity={0.5} />
       <Picture {...picture} width={width} height={SIZE} />
       <text x={x} y={y + SIZE + 20} fontFamily={geist} fontSize={size.label} fill={color.dim}>
         {label}
@@ -48,10 +49,10 @@ export default function build(): string {
     <>
       <rect width={W} height={H} fill={color.bg} />
       <g animation={leave(D)}>
-        <Slot x={col(0)} y={ROW[0]} label="Cover" at={0.1} src={photo} fit="cover" alt="Hills at dusk, cropped to fill the frame" />
-        <Slot x={col(1)} y={ROW[0]} label="Contain" at={0.2} src={photo} fit="contain" alt="Hills at dusk, letterboxed" />
-        <Slot x={col(2)} y={ROW[0]} label="Fill" at={0.3} src={photo} fit="fill" alt="Hills at dusk, stretched" />
-        <Slot
+        <Slot tint={hue.blue} x={col(0)} y={ROW[0]} label="Cover" at={0.1} src={photo} fit="cover" alt="Hills at dusk, cropped to fill the frame" />
+        <Slot tint={hue.orange} x={col(1)} y={ROW[0]} label="Contain" at={0.2} src={photo} fit="contain" alt="Hills at dusk, letterboxed" />
+        <Slot tint={hue.purple} x={col(2)} y={ROW[0]} label="Fill" at={0.3} src={photo} fit="fill" alt="Hills at dusk, stretched" />
+        <Slot tint={hue.blue}
           x={col(3)}
           y={ROW[0]}
           label="Rounded with shadow"
@@ -61,7 +62,7 @@ export default function build(): string {
           filter={fx.shadow({ dy: 6, blur: 7, opacity: 0.6 })}
           alt="A star in a ring on a green badge"
         />
-        <Slot
+        <Slot tint={hue.orange}
           x={col(0)}
           y={ROW[1]}
           label="Duotone"
@@ -70,8 +71,8 @@ export default function build(): string {
           filter={fx.duotone(duotone)}
           alt="The hills in blue and yellow"
         />
-        <Slot x={col(1)} y={ROW[1]} label="Grayscale" at={0.6} src={photo} filter={fx.grayscale()} alt="The hills in gray" />
-        <Slot
+        <Slot tint={hue.purple} x={col(1)} y={ROW[1]} label="Grayscale" at={0.6} src={photo} filter={fx.grayscale()} alt="The hills in gray" />
+        <Slot tint={hue.blue}
           x={col(2)}
           y={ROW[1]}
           width={2 * SIZE + GAP}

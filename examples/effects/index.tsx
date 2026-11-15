@@ -1,6 +1,6 @@
-import { draw, ease, enter, fx, motion, render, wiggle, type Child } from "svjeez";
+import { draw, ease, enter, fx, motion, render, wiggle, type Child, type Color } from "svjeez";
 
-import { HEIGHT, MARGIN, RADIUS, WIDTH, color, css, mono, size, theme } from "../gallery-style";
+import { HEIGHT, MARGIN, RADIUS, WIDTH, color, css, hue, mono, size, wash } from "../gallery-style";
 
 const W = WIDTH;
 const H = HEIGHT;
@@ -11,15 +11,14 @@ const GAP = 12;
 const TILE = { w: (W - 2 * MARGIN - 2 * GAP) / 3, h: (H - 2 * MARGIN - GAP) / 2 };
 const ZOOM = 1.15;
 
+/** Three hues: each tile is washed in its own, and its effect is drawn in the same one. */
 const C = {
   bg: color.bg,
   tile: color.panel,
-  edge: color.edge,
   label: color.dim,
-  pink: theme.base08,
-  cyan: theme.base0C,
-  gold: theme.base0A,
-  violet: theme.base0E,
+  blue: hue.blue,
+  orange: hue.orange,
+  purple: hue.purple,
 } as const;
 
 const glow = fx.glow({ blur: 4 });
@@ -29,16 +28,19 @@ function Tile({
   col,
   row,
   label,
+  tint,
   children,
 }: {
   col: number;
   row: number;
   label: string;
+  tint: Color;
   children: Child;
 }) {
   return (
     <g transform={`translate(${MARGIN + col * (TILE.w + GAP)} ${MARGIN + row * (TILE.h + GAP)})`}>
-      <rect width={TILE.w} height={TILE.h} rx={RADIUS} fill={C.tile} stroke={C.edge} />
+      <rect width={TILE.w} height={TILE.h} rx={RADIUS} fill={C.tile} />
+      <rect width={TILE.w} height={TILE.h} rx={RADIUS} {...wash(tint, 0.1)} stroke={tint} strokeOpacity={0.4} />
       <g transform={`translate(${(TILE.w - 200 * ZOOM) / 2} 4) scale(${ZOOM})`}>{children}</g>
       <text x={16} y={TILE.h - 16} fontFamily={mono} fontSize={size.label} fill={C.label}>
         {label}
@@ -61,13 +63,13 @@ export function buildEffects(): string {
     },
     <>
       <rect width={W} height={H} fill={C.bg} />
-      <Tile col={0} row={0} label="Blur in and out">
+      <Tile col={0} row={0} label="Blur in and out" tint={C.blue}>
         <text
           x={100}
           y={92}
           fontFamily={mono}
           fontSize={40}
-          fill={C.cyan}
+          fill={C.blue}
           textAnchor="middle"
           animation={enter({ at: 0.4, over: 0.9 }, { opacity: 0, blur: 10 })
             .at(6.4)
@@ -76,34 +78,34 @@ export function buildEffects(): string {
           Blur
         </text>
       </Tile>
-      <Tile col={1} row={0} label="Jitter">
+      <Tile col={1} row={0} label="Jitter" tint={C.orange}>
         <rect
           x={66}
           y={44}
           width={68}
           height={68}
           rx={8}
-          fill={C.gold}
+          fill={C.orange}
           animation={wiggle(
             { x: 3, y: 3, rotate: 8 },
             { seed: "jitter", rate: 12, ease: ease.hold },
           )}
         />
       </Tile>
-      <Tile col={2} row={0} label="Drift">
+      <Tile col={2} row={0} label="Drift" tint={C.purple}>
         <circle
           cx={100}
           cy={78}
           r={30}
-          fill={C.violet}
+          fill={C.purple}
           animation={wiggle({ x: 14, y: 10, scale: 0.12 }, { seed: "drift", rate: 1.5, period: 3 })}
         />
       </Tile>
-      <Tile col={0} row={1} label="Hand-drawn line">
+      <Tile col={0} row={1} label="Hand-drawn line" tint={C.orange}>
         <g
           filter={boil}
           fill="none"
-          stroke={C.pink}
+          stroke={C.orange}
           strokeWidth={3}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -112,13 +114,13 @@ export function buildEffects(): string {
           <path d="M85 120V90H115V120" animation={draw({ at: 1.2, over: 0.6 })} />
         </g>
       </Tile>
-      <Tile col={1} row={1} label="Neon flicker">
+      <Tile col={1} row={1} label="Neon flicker" tint={C.purple}>
         <text
           x={100}
           y={94}
           fontFamily={mono}
           fontSize={44}
-          fill={C.pink}
+          fill={C.purple}
           textAnchor="middle"
           filter={glow}
           animation={wiggle({ opacity: 0.8 }, { seed: "flicker", rate: 14, ease: ease.hold })}
@@ -126,13 +128,13 @@ export function buildEffects(): string {
           Open
         </text>
       </Tile>
-      <Tile col={2} row={1} label="Spinner">
+      <Tile col={2} row={1} label="Spinner" tint={C.blue}>
         <circle
           cx={100}
           cy={78}
           r={34}
           fill="none"
-          stroke={C.cyan}
+          stroke={C.blue}
           strokeWidth={6}
           strokeLinecap="round"
           strokeDasharray="70 150"
@@ -142,7 +144,7 @@ export function buildEffects(): string {
           cx={100}
           cy={78}
           r={7}
-          fill={C.gold}
+          fill={C.orange}
           animation={motion({ scale: 1 })
             .to({ scale: 1.6 }, 0.375, ease.inOut)
             .to({ scale: 1 }, 0.375, ease.inOut)

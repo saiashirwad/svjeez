@@ -1455,7 +1455,9 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <use href="#s1" fill="none" stroke="var(--base02)" stroke-width="9" stroke-linejoin="round" opacity="1"/>
       </g>
     </g>
+    <rect width="960" height="540" fill="var(--base0D)" fill-opacity="0.12"/>
     <use href="#s1" fill="var(--base01)" class="a m6"/>
+    <use href="#s1" fill="var(--base09)" fill-opacity="0.06" class="a m6"/>
     <g fill="var(--base06)">
       <use href="#s2" mask="url(#m7)" class="a m9"/>
       <use href="#s2" class="a m10"/>
@@ -1474,6 +1476,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <use href="#s5" class="a m22"/>
       </g>
       <ellipse cx="352" cy="243.5" rx="16" ry="8" fill="var(--base02)" stroke="var(--base0D)" stroke-width="1" class="a m23"/>
+      <ellipse cx="352" cy="243.5" rx="16" ry="8" fill="var(--base0D)" fill-opacity="0.16" class="a m23"/>
     </g>
     <g stroke="var(--base06)" stroke-width="0.8" fill="var(--base01)">
       <use href="#s6" class="a m24"/>
@@ -2280,13 +2283,16 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <use href="#s1" fill="none" stroke="var(--base04)" stroke-width="13" stroke-linejoin="round" opacity="0.35"/>
         <use href="#s1" fill="none" stroke="var(--base02)" stroke-width="9" stroke-linejoin="round" opacity="1"/>
       </g>
+      <rect width="960" height="540" fill="var(--base0D)" fill-opacity="0.12"/>
       <use href="#s1" fill="var(--base01)"/>
+      <use href="#s1" fill="var(--base09)" fill-opacity="0.06"/>
       <use href="#s2" fill="var(--base06)"/>
       <g clip-path="url(#c1)">
         <use href="#s3" fill="var(--base0D)"/>
         <use href="#s4" fill="var(--base0D)"/>
         <use href="#s5" fill="var(--base0D)"/>
         <ellipse cx="352" cy="243.5" rx="16" ry="8" fill="var(--base02)" stroke="var(--base0D)" stroke-width="1"/>
+        <ellipse cx="352" cy="243.5" rx="16" ry="8" fill="var(--base0D)" fill-opacity="0.16"/>
       </g>
       <g stroke="var(--base06)" stroke-width="0.8" fill="var(--base01)">
         <use href="#s6"/>

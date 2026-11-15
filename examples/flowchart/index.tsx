@@ -1,6 +1,6 @@
 import { render, flow } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, mono, theme } from "../gallery-style";
+import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
 
 export const chart = flowchart(
   {
@@ -35,7 +35,24 @@ export const chart = flowchart(
       ["issues", "post", { label: "no" }],
     ],
   },
-  { theme, x: 0, y: 0, direction: "LR", font: mono, fontSize: 16, play: { at: 0.2, step: 0.3 } },
+  {
+    theme,
+    x: 0,
+    y: 0,
+    direction: "LR",
+    font: mono,
+    fontSize: 16,
+    play: { at: 0.2, step: 0.3 },
+    // Blue for the flow, purple for tools and memory, orange for the decision and the token.
+    tints: {
+      task: hue.blue,
+      input: hue.blue,
+      output: hue.blue,
+      tool: hue.purple,
+      store: hue.purple,
+      decision: hue.orange,
+    },
+  },
 );
 
 const trip = flow(chart.route("pr", "post"), {

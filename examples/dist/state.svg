@@ -326,36 +326,60 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <g transform="translate(48 155.855325612303) scale(0.6835010442377065)">
     <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
       <g>
-        <rect x="62" y="167.497" width="76.8" height="45" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <g>
+          <rect x="62" y="167.497" width="76.8" height="45" rx="8" fill="var(--base01)"/>
+          <rect x="62" y="167.497" width="76.8" height="45" rx="8" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
+        </g>
         <text x="100.4" y="195.597" font-size="16" text-anchor="middle" fill="var(--base05)">Idle</text>
       </g>
       <g>
-        <rect x="296.08" y="107.498" width="529.68" height="165" rx="10" fill="var(--base01)" stroke="var(--base03)"/>
-        <path d="M296.08000000000004 149.49844600653682h529.68" stroke="var(--base03)"/>
+        <g>
+          <rect x="296.08" y="107.498" width="529.68" height="165" rx="10" fill="var(--base01)"/>
+          <rect x="296.08" y="107.498" width="529.68" height="165" rx="10" fill="var(--base0E)" fill-opacity="0.1" stroke="var(--base0E)" stroke-width="1.5"/>
+        </g>
+        <path d="M296.08000000000004 149.49844600653682h529.68" stroke="var(--base0E)"/>
         <text x="560.92" y="134.098" font-size="16" text-anchor="middle" fill="var(--base05)">Working</text>
       </g>
       <g>
-        <rect x="1015.68" y="46" width="182.4" height="45" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <g>
+          <rect x="1015.68" y="46" width="182.4" height="45" rx="8" fill="var(--base01)"/>
+          <rect x="1015.68" y="46" width="182.4" height="45" rx="8" fill="var(--base09)" fill-opacity="0.22" stroke="var(--base09)" stroke-width="1.5"/>
+        </g>
         <text x="1106.88" y="74.1" font-size="16" text-anchor="middle" fill="var(--base05)">Waiting on user</text>
       </g>
       <g>
-        <rect x="1068.48" y="127" width="76.8" height="45" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <g>
+          <rect x="1068.48" y="127" width="76.8" height="45" rx="8" fill="var(--base01)"/>
+          <rect x="1068.48" y="127" width="76.8" height="45" rx="8" fill="var(--base0C)" fill-opacity="0.22" stroke="var(--base0C)" stroke-width="1.5"/>
+        </g>
         <text x="1106.88" y="155.1" font-size="16" text-anchor="middle" fill="var(--base05)">Done</text>
       </g>
       <g>
-        <rect x="1058.88" y="208" width="96" height="45" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <g>
+          <rect x="1058.88" y="208" width="96" height="45" rx="8" fill="var(--base01)"/>
+          <rect x="1058.88" y="208" width="96" height="45" rx="8" fill="var(--base08)" fill-opacity="0.22" stroke="var(--base08)" stroke-width="1.5"/>
+        </g>
         <text x="1106.88" y="236.1" font-size="16" text-anchor="middle" fill="var(--base05)">Failed</text>
       </g>
       <g>
-        <rect x="1044.48" y="289" width="124.8" height="45" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+        <g>
+          <rect x="1044.48" y="289" width="124.8" height="45" rx="8" fill="var(--base01)"/>
+          <rect x="1044.48" y="289" width="124.8" height="45" rx="8" fill="none" fill-opacity="0.22" stroke="var(--base03)"/>
+        </g>
         <text x="1106.88" y="317.1" font-size="16" text-anchor="middle" fill="var(--base05)">Cancelled</text>
       </g>
       <g>
-        <rect x="374.08" y="165.498" width="115.2" height="45" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
+        <g>
+          <rect x="374.08" y="165.498" width="115.2" height="45" rx="8" fill="var(--base00)"/>
+          <rect x="374.08" y="165.498" width="115.2" height="45" rx="8" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
+        </g>
         <text x="431.68" y="193.598" font-size="16" text-anchor="middle" fill="var(--base05)">Planning</text>
       </g>
       <g>
-        <rect x="646.56" y="165.498" width="163.2" height="45" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
+        <g>
+          <rect x="646.56" y="165.498" width="163.2" height="45" rx="8" fill="var(--base00)"/>
+          <rect x="646.56" y="165.498" width="163.2" height="45" rx="8" fill="var(--base09)" fill-opacity="0.22" stroke="var(--base09)" stroke-width="1.5"/>
+        </g>
         <text x="728.16" y="193.598" font-size="16" text-anchor="middle" fill="var(--base05)">Calling tools</text>
       </g>
       <g>
