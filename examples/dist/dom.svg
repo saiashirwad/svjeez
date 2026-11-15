@@ -497,12 +497,12 @@
     <clipPath id="c17">
       <path d="M57 42H57A16 16 0 0 1 73 58V58A16 16 0 0 1 57 74H57A16 16 0 0 1 41 58V58A16 16 0 0 1 57 42Z" fill="#000"/>
     </clipPath>
-    <mask id="m118" maskUnits="userSpaceOnUse" x="37" y="97.8" width="40" height="70.39">
-      <path d="M37 97.8H77A0 0 0 0 1 77 97.8V168.19A0 0 0 0 1 77 168.19H37A0 0 0 0 1 37 168.19V97.8A0 0 0 0 1 37 97.8ZM50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="#fff" fill-rule="evenodd" class="a m119 dm">
+    <mask id="m119" maskUnits="userSpaceOnUse" x="37" y="97.8" width="40" height="70.39">
+      <path d="M37 97.8H77A0 0 0 0 1 77 97.8V168.19A0 0 0 0 1 77 168.19H37A0 0 0 0 1 37 168.19V97.8A0 0 0 0 1 37 97.8ZM50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="#fff" fill-rule="evenodd" class="a m120 dm">
         <animate id="w169" attributeName="d" values="M37 97.8H77A0 0 0 0 1 77 97.8V168.19A0 0 0 0 1 77 168.19H37A0 0 0 0 1 37 168.19V97.8A0 0 0 0 1 37 97.8ZM50.2 144.8H63.8A9.2 9.2 0 0 1 73 154V153.99A9.2 9.2 0 0 1 63.8 163.19H50.2A9.2 9.2 0 0 1 41 153.99V154A9.2 9.2 0 0 1 50.2 144.8Z;M37 97.8H77A0 0 0 0 1 77 97.8V168.19A0 0 0 0 1 77 168.19H37A0 0 0 0 1 37 168.19V97.8A0 0 0 0 1 37 97.8ZM50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w169.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M37 97.8H77A0 0 0 0 1 77 97.8V168.19A0 0 0 0 1 77 168.19H37A0 0 0 0 1 37 168.19V97.8A0 0 0 0 1 37 97.8ZM50.2 144.8H63.8A9.2 9.2 0 0 1 73 154V153.99A9.2 9.2 0 0 1 63.8 163.19H50.2A9.2 9.2 0 0 1 41 153.99V154A9.2 9.2 0 0 1 50.2 144.8Z" begin="0s;w169.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M37 97.8H77A0 0 0 0 1 77 97.8V168.19A0 0 0 0 1 77 168.19H37A0 0 0 0 1 37 168.19V97.8A0 0 0 0 1 37 97.8ZM50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="#fff" fill-rule="evenodd" class="a m119 ds" display="none"/>
+      <path d="M37 97.8H77A0 0 0 0 1 77 97.8V168.19A0 0 0 0 1 77 168.19H37A0 0 0 0 1 37 168.19V97.8A0 0 0 0 1 37 97.8ZM50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="#fff" fill-rule="evenodd" class="a m120 ds" display="none"/>
     </mask>
   </defs>
   <style><![CDATA[
@@ -582,10 +582,10 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
 .m42{animation-name:k33;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k34{0%,45.556%{fill:var(--dom-5ark4d)}53.333%,100%{fill:var(--dom-erbksj)}}
 .m44{animation-name:k34;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k35{0%,49.056%{opacity:1}52.167%,100%{opacity:0}}
+@keyframes k35{0%,45.556%{opacity:1}49.056%,100%{opacity:0}}
 @keyframes k36{0%,45.556%{translate:0px 0px}53.333%,100%{translate:-7.39px 86.75px}}
 .m45{animation-name:k35,k36;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k37{0%,46.722%{opacity:0}49.833%,100%{opacity:1}}
+@keyframes k37{0%,49.056%{opacity:0}53.333%,100%{opacity:1}}
 @keyframes k38{0%,45.556%{translate:7.39px -86.75px}53.333%,100%{translate:0px 0px}}
 .m46{animation-name:k37,k38;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @keyframes k39{0%,45.556%{translate:-7.41px -86.75px}53.333%,100%{translate:0px 0px}}
@@ -630,10 +630,10 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
 .m68{animation-name:k58,k59;animation-timing-function:steps(1),steps(1)}
 @keyframes k60{0%,73.333%,82.222%,100%{fill:var(--dom-erbksj)}}
 .m69{animation-name:k60}
-@keyframes k61{0%,77.333%{opacity:1}80.889%,100%{opacity:0}}
+@keyframes k61{0%,73.333%{opacity:1}77.333%,100%{opacity:0}}
 @keyframes k62{0%,73.333%{translate:0px 0px}82.222%,100%{translate:7.39px -86.75px}}
 .m70{animation-name:k61,k62;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k63{0%,74.667%{opacity:0}78.222%,100%{opacity:1}}
+@keyframes k63{0%,77.333%{opacity:0}82.222%,100%{opacity:1}}
 @keyframes k64{0%,73.333%{translate:-7.39px 86.75px}82.222%,100%{translate:0px 0px}}
 .m71{animation-name:k63,k64;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @keyframes k65{0%,73.333%{translate:7.41px 86.75px}82.222%,100%{translate:0px 0px}}
@@ -652,10 +652,10 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
 .m79{animation-name:k71;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k72{0%,22.222%{fill:var(--dom-1bb6nlz)}30%,100%{fill:var(--dom-1rwkhgp)}}
 .m80{animation-name:k72;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k73{0%,25.722%{opacity:1}28.833%,100%{opacity:0}}
+@keyframes k73{0%,22.222%{opacity:1}25.722%,100%{opacity:0}}
 @keyframes k74{0%,22.222%{translate:0px 0px}30%,100%{translate:-12.78px 0px}}
 .m81{animation-name:k73,k74;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k75{0%,23.389%{opacity:0}26.5%,100%{opacity:1}}
+@keyframes k75{0%,25.722%{opacity:0}30%,100%{opacity:1}}
 @keyframes k76{0%,22.222%{translate:12.78px 0px}30%,100%{translate:0px 0px}}
 .m82{animation-name:k75,k76;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @keyframes k77{0%,26.111%{opacity:0}30%,100%{opacity:1}}
@@ -708,76 +708,80 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
 .m107{animation-name:k100;animation-timing-function:steps(1)}
 @keyframes k101{0%{opacity:0}29.757%,100%{opacity:1}}
 .m108{animation-name:k101;animation-timing-function:steps(1)}
-@keyframes k102{0%{visibility:visible}48.333%,100%{visibility:hidden}}
-.m109{animation-name:k102;animation-timing-function:steps(1)}
-@keyframes k103{0%,66.667%,74.444%,100%{fill:rgba(0,0,0,0.1)}}
-.m110{animation-name:k103}
-@keyframes k104{0%,66.667%,74.444%,100%{fill:var(--dom-t90jc0)}}
+@keyframes k102{0%,22.222%{translate:3.26px -44px}30%,100%{translate:0px 0px}}
+.m109{animation-name:k102;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k103{0%{visibility:visible}48.333%,100%{visibility:hidden}}
+.m110{animation-name:k103;animation-timing-function:steps(1)}
+@keyframes k104{0%,66.667%,74.444%,100%{fill:rgba(0,0,0,0.1)}}
 .m111{animation-name:k104}
-@keyframes k105{0%,66.667%,74.444%,100%{fill:var(--dom-1bb6nlz)}}
+@keyframes k105{0%,66.667%,74.444%,100%{fill:var(--dom-t90jc0)}}
 .m112{animation-name:k105}
-@keyframes k106{0%,66.667%{fill:var(--dom-erbksj)}74.444%,100%{fill:var(--dom-1nbfff3)}}
-.m113{animation-name:k106;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k107{0%,66.667%{fill:var(--dom-1rwkhgp)}74.444%,100%{fill:var(--dom-1bb6nlz)}}
+@keyframes k106{0%,66.667%,74.444%,100%{fill:var(--dom-1bb6nlz)}}
+.m113{animation-name:k106}
+@keyframes k107{0%,66.667%{fill:var(--dom-erbksj)}74.444%,100%{fill:var(--dom-1nbfff3)}}
 .m114{animation-name:k107;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k108{0%,70.167%{opacity:1}73.278%,100%{opacity:0}}
-@keyframes k109{0%,66.667%{translate:0px 0px}74.444%,100%{translate:12.78px 0px}}
-.m115{animation-name:k108,k109;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k110{0%,67.833%{opacity:0}70.944%,100%{opacity:1}}
-@keyframes k111{0%,66.667%{translate:-12.78px 0px}74.444%,100%{translate:0px 0px}}
-.m116{animation-name:k110,k111;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k112{0%,66.667%{opacity:1}70.556%,100%{opacity:0}}
-.m117{animation-name:k112;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k113{0%,66.667%,74.444%,100%{fill:#fff}}
-.m119{animation-name:k113}
-@keyframes k114{0%,66.667%,74.444%,100%{fill:rgba(0,0,0,0.05)}}
+@keyframes k108{0%,66.667%{fill:var(--dom-1rwkhgp)}74.444%,100%{fill:var(--dom-1bb6nlz)}}
+.m115{animation-name:k108;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k109{0%,66.667%{opacity:1}70.167%,100%{opacity:0}}
+@keyframes k110{0%,66.667%{translate:0px 0px}74.444%,100%{translate:12.78px 0px}}
+.m116{animation-name:k109,k110;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k111{0%,70.167%{opacity:0}74.444%,100%{opacity:1}}
+@keyframes k112{0%,66.667%{translate:-12.78px 0px}74.444%,100%{translate:0px 0px}}
+.m117{animation-name:k111,k112;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k113{0%,66.667%{opacity:1}70.556%,100%{opacity:0}}
+.m118{animation-name:k113;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k114{0%,66.667%,74.444%,100%{fill:#fff}}
 .m120{animation-name:k114}
-@keyframes k115{0%,66.667%{fill:var(--dom-erbksj)}74.444%,100%{fill:var(--dom-1rtlzkr)}}
-.m121{animation-name:k115;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k116{0%,66.667%,74.444%,100%{fill:var(--dom-1g5brvd)}}
-.m122{animation-name:k116}
-@keyframes k117{0%,66.667%,74.444%,100%{fill:var(--dom-1e3wvr2)}}
+@keyframes k115{0%,66.667%,74.444%,100%{fill:rgba(0,0,0,0.05)}}
+.m121{animation-name:k115}
+@keyframes k116{0%,66.667%{fill:var(--dom-erbksj)}74.444%,100%{fill:var(--dom-1rtlzkr)}}
+.m122{animation-name:k116;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k117{0%,66.667%,74.444%,100%{fill:var(--dom-1g5brvd)}}
 .m123{animation-name:k117}
-@keyframes k118{0%,66.667%{translate:0px 44px}74.444%,100%{translate:0px 0px}}
-.m124{animation-name:k116,k118;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k119{0%,66.667%,74.444%,100%{fill:var(--dom-mx26mv)}}
-.m125{animation-name:k119}
-@keyframes k120{0%{opacity:1}66.91%,100%{opacity:0}}
-.m126{animation-name:k120;animation-timing-function:steps(1)}
-@keyframes k121{0%,67.396%,100%{opacity:0}66.91%{opacity:1}}
+@keyframes k118{0%,66.667%,74.444%,100%{fill:var(--dom-1e3wvr2)}}
+.m124{animation-name:k118}
+@keyframes k119{0%,66.667%{translate:0px 44px}74.444%,100%{translate:0px 0px}}
+.m125{animation-name:k117,k119;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k120{0%,66.667%,74.444%,100%{fill:var(--dom-mx26mv)}}
+.m126{animation-name:k120}
+@keyframes k121{0%{opacity:1}66.91%,100%{opacity:0}}
 .m127{animation-name:k121;animation-timing-function:steps(1)}
-@keyframes k122{0%,67.882%,100%{opacity:0}67.396%{opacity:1}}
+@keyframes k122{0%,67.396%,100%{opacity:0}66.91%{opacity:1}}
 .m128{animation-name:k122;animation-timing-function:steps(1)}
-@keyframes k123{0%,68.368%,100%{opacity:0}67.882%{opacity:1}}
+@keyframes k123{0%,67.882%,100%{opacity:0}67.396%{opacity:1}}
 .m129{animation-name:k123;animation-timing-function:steps(1)}
-@keyframes k124{0%,68.854%,100%{opacity:0}68.368%{opacity:1}}
+@keyframes k124{0%,68.368%,100%{opacity:0}67.882%{opacity:1}}
 .m130{animation-name:k124;animation-timing-function:steps(1)}
-@keyframes k125{0%,69.34%,100%{opacity:0}68.854%{opacity:1}}
+@keyframes k125{0%,68.854%,100%{opacity:0}68.368%{opacity:1}}
 .m131{animation-name:k125;animation-timing-function:steps(1)}
-@keyframes k126{0%,69.826%,100%{opacity:0}69.34%{opacity:1}}
+@keyframes k126{0%,69.34%,100%{opacity:0}68.854%{opacity:1}}
 .m132{animation-name:k126;animation-timing-function:steps(1)}
-@keyframes k127{0%,70.313%,100%{opacity:0}69.826%{opacity:1}}
+@keyframes k127{0%,69.826%,100%{opacity:0}69.34%{opacity:1}}
 .m133{animation-name:k127;animation-timing-function:steps(1)}
-@keyframes k128{0%,70.799%,100%{opacity:0}70.313%{opacity:1}}
+@keyframes k128{0%,70.313%,100%{opacity:0}69.826%{opacity:1}}
 .m134{animation-name:k128;animation-timing-function:steps(1)}
-@keyframes k129{0%,71.285%,100%{opacity:0}70.799%{opacity:1}}
+@keyframes k129{0%,70.799%,100%{opacity:0}70.313%{opacity:1}}
 .m135{animation-name:k129;animation-timing-function:steps(1)}
-@keyframes k130{0%,71.771%,100%{opacity:0}71.285%{opacity:1}}
+@keyframes k130{0%,71.285%,100%{opacity:0}70.799%{opacity:1}}
 .m136{animation-name:k130;animation-timing-function:steps(1)}
-@keyframes k131{0%,72.257%,100%{opacity:0}71.771%{opacity:1}}
+@keyframes k131{0%,71.771%,100%{opacity:0}71.285%{opacity:1}}
 .m137{animation-name:k131;animation-timing-function:steps(1)}
-@keyframes k132{0%,72.743%,100%{opacity:0}72.257%{opacity:1}}
+@keyframes k132{0%,72.257%,100%{opacity:0}71.771%{opacity:1}}
 .m138{animation-name:k132;animation-timing-function:steps(1)}
-@keyframes k133{0%,73.229%,100%{opacity:0}72.743%{opacity:1}}
+@keyframes k133{0%,72.743%,100%{opacity:0}72.257%{opacity:1}}
 .m139{animation-name:k133;animation-timing-function:steps(1)}
-@keyframes k134{0%,73.715%,100%{opacity:0}73.229%{opacity:1}}
+@keyframes k134{0%,73.229%,100%{opacity:0}72.743%{opacity:1}}
 .m140{animation-name:k134;animation-timing-function:steps(1)}
-@keyframes k135{0%,74.201%,100%{opacity:0}73.715%{opacity:1}}
+@keyframes k135{0%,73.715%,100%{opacity:0}73.229%{opacity:1}}
 .m141{animation-name:k135;animation-timing-function:steps(1)}
-@keyframes k136{0%{opacity:0}74.201%,100%{opacity:1}}
+@keyframes k136{0%,74.201%,100%{opacity:0}73.715%{opacity:1}}
 .m142{animation-name:k136;animation-timing-function:steps(1)}
-@keyframes k137{0%{visibility:hidden}48.333%,100%{visibility:visible}}
+@keyframes k137{0%{opacity:0}74.201%,100%{opacity:1}}
 .m143{animation-name:k137;animation-timing-function:steps(1)}
+@keyframes k138{0%,66.667%{translate:-3.26px 44px}74.444%,100%{translate:0px 0px}}
+.m144{animation-name:k138;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k139{0%{visibility:hidden}48.333%,100%{visibility:visible}}
+.m145{animation-name:k139;animation-timing-function:steps(1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.65s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <rect width="908" height="519" fill="var(--backdrop)"/>
@@ -1755,7 +1759,7 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
   </g>
   <g transform="translate(432 24)">
 
-    <g class="a m109">
+    <g class="a m110">
       <path d="M15 16H30V31H15Z" fill="url(#g21)"/>
       <path d="M422 16H437V31H422Z" fill="url(#g22)"/>
       <path d="M433 31H437V177H433Z" fill="url(#g23)" class="dm">
@@ -1934,25 +1938,27 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
         <set attributeName="d" to="M353.06 99H403A8 8 0 0 1 411 107V113A8 8 0 0 1 403 121H353.06A8 8 0 0 1 345.06 113V107A8 8 0 0 1 353.06 99Z" begin="0s;w152.begin+7s" dur="2s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M349.8 143H403A8 8 0 0 1 411 151V157A8 8 0 0 1 403 165H349.8A8 8 0 0 1 341.8 157V151A8 8 0 0 1 349.8 143Z" fill="var(--dom-mx26mv)" class="a m91 ds" display="none"/>
-      <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m92">+214 −12</text>
-      <text x="353.856" y="116.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m93">+215 −12</text>
-      <text x="353.653" y="119.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m94">+216 −12</text>
-      <text x="353.449" y="122.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m95">+217 −12</text>
-      <text x="353.245" y="125" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m96">+218 −12</text>
-      <text x="353.041" y="127.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m97">+219 −12</text>
-      <text x="352.838" y="130.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m98">+220 −12</text>
-      <text x="352.634" y="133.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m99">+221 −12</text>
-      <text x="352.43" y="136" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m100">+222 −12</text>
-      <text x="352.226" y="138.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m101">+223 −12</text>
-      <text x="352.023" y="141.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m102">+224 −12</text>
-      <text x="351.819" y="144.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m103">+225 −12</text>
-      <text x="351.615" y="147" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m104">+226 −12</text>
-      <text x="351.411" y="149.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m105">+227 −12</text>
-      <text x="351.208" y="152.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m106">+228 −12</text>
-      <text x="351.004" y="155.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m107">+229 −12</text>
-      <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m108">+230 −12</text>
+      <g class="a m109">
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m92">+214 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m93">+215 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m94">+216 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m95">+217 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m96">+218 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m97">+219 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m98">+220 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m99">+221 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m100">+222 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m101">+223 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m102">+224 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m103">+225 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m104">+226 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m105">+227 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m106">+228 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m107">+229 −12</text>
+        <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m108">+230 −12</text>
+      </g>
     </g>
-    <g class="a m143">
+    <g class="a m145">
       <path d="M15 16H30V31H15Z" fill="url(#g21)"/>
       <path d="M422 16H437V31H422Z" fill="url(#g22)"/>
       <path d="M433 31H437V133H433Z" fill="url(#g23)" class="dm">
@@ -1980,11 +1986,11 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
         <set attributeName="d" to="M15 31H19V177H15Z" begin="0s;w157.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M15 31H19V133H15Z" fill="url(#g27)" class="ds" display="none"/>
-      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m110 dm">
+      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m111 dm">
         <animate id="w158" attributeName="d" values="M30 20L422 20L422 31L433 31L433 177L422 177L422 188L30 188L30 177L19 177L19 31L30 31Z;M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w158.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M30 20L422 20L422 31L433 31L433 177L422 177L422 188L30 188L30 177L19 177L19 31L30 31Z" begin="0s;w158.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m110 ds" display="none"/>
+      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m111 ds" display="none"/>
       <path d="M13 14H30V31H13Z" fill="url(#g28)"/>
       <path d="M30 14H422V20H30Z" fill="url(#g29)"/>
       <path d="M422 14H439V31H422Z" fill="url(#g30)"/>
@@ -2013,38 +2019,38 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
         <set attributeName="d" to="M13 31H19V177H13Z" begin="0s;w163.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M13 31H19V133H13Z" fill="url(#g27)" class="ds" display="none"/>
-      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m110 dm">
+      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m111 dm">
         <animate id="w164" attributeName="d" values="M30 20L422 20L422 31L433 31L433 177L422 177L422 188L30 188L30 177L19 177L19 31L30 31Z;M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w164.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M30 20L422 20L422 31L433 31L433 177L422 177L422 188L30 188L30 177L19 177L19 31L30 31Z" begin="0s;w164.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m110 ds" display="none"/>
-      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16Z" fill="var(--dom-t90jc0)" class="a m111 dm">
+      <path d="M30 20L422 20L422 31L433 31L433 133L422 133L422 144L30 144L30 133L19 133L19 31L30 31Z" fill="rgba(0,0,0,0.1)" class="a m111 ds" display="none"/>
+      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16Z" fill="var(--dom-t90jc0)" class="a m112 dm">
         <animate id="w165" attributeName="d" values="M30 16H422A14 14 0 0 1 436 30V176A14 14 0 0 1 422 190H30A14 14 0 0 1 16 176V30A14 14 0 0 1 30 16Z;M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w165.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M30 16H422A14 14 0 0 1 436 30V176A14 14 0 0 1 422 190H30A14 14 0 0 1 16 176V30A14 14 0 0 1 30 16Z" begin="0s;w165.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16Z" fill="var(--dom-t90jc0)" class="a m111 ds" display="none"/>
-      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16ZM30 17H422A13 13 0 0 1 435 30V132A13 13 0 0 1 422 145H30A13 13 0 0 1 17 132V30A13 13 0 0 1 30 17Z" fill="var(--dom-1bb6nlz)" fill-rule="evenodd" class="a m112 dm">
+      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16Z" fill="var(--dom-t90jc0)" class="a m112 ds" display="none"/>
+      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16ZM30 17H422A13 13 0 0 1 435 30V132A13 13 0 0 1 422 145H30A13 13 0 0 1 17 132V30A13 13 0 0 1 30 17Z" fill="var(--dom-1bb6nlz)" fill-rule="evenodd" class="a m113 dm">
         <animate id="w166" attributeName="d" values="M30 16H422A14 14 0 0 1 436 30V176A14 14 0 0 1 422 190H30A14 14 0 0 1 16 176V30A14 14 0 0 1 30 16ZM30 17H422A13 13 0 0 1 435 30V176A13 13 0 0 1 422 189H30A13 13 0 0 1 17 176V30A13 13 0 0 1 30 17Z;M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16ZM30 17H422A13 13 0 0 1 435 30V132A13 13 0 0 1 422 145H30A13 13 0 0 1 17 132V30A13 13 0 0 1 30 17Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w166.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M30 16H422A14 14 0 0 1 436 30V176A14 14 0 0 1 422 190H30A14 14 0 0 1 16 176V30A14 14 0 0 1 30 16ZM30 17H422A13 13 0 0 1 435 30V176A13 13 0 0 1 422 189H30A13 13 0 0 1 17 176V30A13 13 0 0 1 30 17Z" begin="0s;w166.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16ZM30 17H422A13 13 0 0 1 435 30V132A13 13 0 0 1 422 145H30A13 13 0 0 1 17 132V30A13 13 0 0 1 30 17Z" fill="var(--dom-1bb6nlz)" fill-rule="evenodd" class="a m112 ds" display="none"/>
+      <path d="M30 16H422A14 14 0 0 1 436 30V132A14 14 0 0 1 422 146H30A14 14 0 0 1 16 132V30A14 14 0 0 1 30 16ZM30 17H422A13 13 0 0 1 435 30V132A13 13 0 0 1 422 145H30A13 13 0 0 1 17 132V30A13 13 0 0 1 30 17Z" fill="var(--dom-1bb6nlz)" fill-rule="evenodd" class="a m113 ds" display="none"/>
       <g clip-path="url(#c17)">
         <path d="M57 42H57A16 16 0 0 1 73 58V58A16 16 0 0 1 57 74H57A16 16 0 0 1 41 58V58A16 16 0 0 1 57 42Z" fill="var(--dom-mx26mv)"/>
         <text x="49.16" y="62" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1g5brvd)">SA</text>
       </g>
       <text x="85" y="53" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Snapshot DOM into svjeez</text>
       <text x="85" y="71" font-family="'Geist', sans-serif" font-size="12" font-weight="400" fill="var(--dom-4hezww)">#412 · dom-snapshot-prototype</text>
-      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47Z" fill="var(--dom-erbksj)" class="a m113 dm">
+      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47Z" fill="var(--dom-erbksj)" class="a m114 dm">
         <animate id="w167" attributeName="d" values="M342.14 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H342.14A8 8 0 0 1 334.14 61V55A8 8 0 0 1 342.14 47Z;M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w167.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M342.14 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H342.14A8 8 0 0 1 334.14 61V55A8 8 0 0 1 342.14 47Z" begin="0s;w167.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47Z" fill="var(--dom-erbksj)" class="a m113 ds" display="none"/>
-      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47ZM354.92 48H403A7 7 0 0 1 410 55V61A7 7 0 0 1 403 68H354.92A7 7 0 0 1 347.92 61V55A7 7 0 0 1 354.92 48Z" fill="var(--dom-1rwkhgp)" fill-rule="evenodd" class="a m114 dm">
+      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47Z" fill="var(--dom-erbksj)" class="a m114 ds" display="none"/>
+      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47ZM354.92 48H403A7 7 0 0 1 410 55V61A7 7 0 0 1 403 68H354.92A7 7 0 0 1 347.92 61V55A7 7 0 0 1 354.92 48Z" fill="var(--dom-1rwkhgp)" fill-rule="evenodd" class="a m115 dm">
         <animate id="w168" attributeName="d" values="M342.14 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H342.14A8 8 0 0 1 334.14 61V55A8 8 0 0 1 342.14 47ZM342.14 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H342.14A8 8 0 0 1 334.14 61V55A8 8 0 0 1 342.14 47Z;M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47ZM354.92 48H403A7 7 0 0 1 410 55V61A7 7 0 0 1 403 68H354.92A7 7 0 0 1 347.92 61V55A7 7 0 0 1 354.92 48Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w168.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M342.14 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H342.14A8 8 0 0 1 334.14 61V55A8 8 0 0 1 342.14 47ZM342.14 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H342.14A8 8 0 0 1 334.14 61V55A8 8 0 0 1 342.14 47Z" begin="0s;w168.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47ZM354.92 48H403A7 7 0 0 1 410 55V61A7 7 0 0 1 403 68H354.92A7 7 0 0 1 347.92 61V55A7 7 0 0 1 354.92 48Z" fill="var(--dom-1rwkhgp)" fill-rule="evenodd" class="a m114 ds" display="none"/>
-      <g class="a m115">
+      <path d="M354.92 47H403A8 8 0 0 1 411 55V61A8 8 0 0 1 403 69H354.92A8 8 0 0 1 346.92 61V55A8 8 0 0 1 354.92 47ZM354.92 48H403A7 7 0 0 1 410 55V61A7 7 0 0 1 403 68H354.92A7 7 0 0 1 347.92 61V55A7 7 0 0 1 354.92 48Z" fill="var(--dom-1rwkhgp)" fill-rule="evenodd" class="a m115 ds" display="none"/>
+      <g class="a m116">
         <g transform="translate(343.14 52) scale(0.5 0.5) translate(0 0)">
           <circle cx="18" cy="18" r="3" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="6" cy="6" r="3" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -2052,7 +2058,7 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
           <line x1="6" y1="9" x2="6" y2="21" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
       </g>
-      <g class="a m116">
+      <g class="a m117">
         <g transform="translate(355.92 52) scale(0.5 0.5) translate(0 0)">
           <circle cx="18" cy="18" r="3" fill="none" stroke="var(--dom-1g5brvd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="6" cy="6" r="3" fill="none" stroke="var(--dom-1g5brvd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -2060,20 +2066,20 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
           <line x1="6" y1="9" x2="6" y2="21" fill="none" stroke="var(--dom-1g5brvd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
       </g>
-      <g class="a m115">
+      <g class="a m116">
         <text x="359.14" y="62" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-ca084x)">Merged</text>
       </g>
-      <g class="a m116">
+      <g class="a m117">
         <text x="371.92" y="62" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1g5brvd)">Open</text>
       </g>
-      <g class="a m117">
+      <g class="a m118">
         <path d="M51 99H51A10 10 0 0 1 61 109V109A10 10 0 0 1 51 119H51A10 10 0 0 1 41 109V109A10 10 0 0 1 51 99Z" fill="rgb(0,153,102)"/>
         <g transform="translate(45 103) scale(0.5 0.5) translate(0 0)">
           <path d="M20 6 9 17l-5-5" fill="none" stroke="rgb(255,255,255)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
         <text x="69" y="114" font-family="'Geist', sans-serif" font-size="14" font-weight="400" fill="var(--dom-1g5brvd)">All 14 checks passed</text>
       </g>
-      <g mask="url(#m118)">
+      <g mask="url(#m119)">
         <path d="M39 99.8H50.2V111H39Z" fill="url(#g33)" class="dm">
           <animate id="w170" attributeName="d" values="M39 143.8H50.2V155H39Z;M39 99.8H50.2V111H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w170.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
           <set attributeName="d" to="M39 143.8H50.2V155H39Z" begin="0s;w170.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
@@ -2104,50 +2110,52 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1e3wvr2:rgb(255,255,255);--dom-1g5brvd:
           <set attributeName="d" to="M39 155H50.19V166.19H39Z" begin="0s;w175.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
         </path>
         <path d="M39 111H50.19V122.19H39Z" fill="url(#g38)" class="ds" display="none"/>
-        <path d="M50.2 103.8L63.81 103.8L63.81 110.99L71 110.99L71 110.99L63.8 110.99L63.8 118.19L50.19 118.19L50.19 111L43 111L43 111L50.2 111Z" fill="rgba(0,0,0,0.05)" class="a m120 dm">
+        <path d="M50.2 103.8L63.81 103.8L63.81 110.99L71 110.99L71 110.99L63.8 110.99L63.8 118.19L50.19 118.19L50.19 111L43 111L43 111L50.2 111Z" fill="rgba(0,0,0,0.05)" class="a m121 dm">
           <animate id="w176" attributeName="d" values="M50.2 147.8L63.81 147.8L63.81 154.99L71 154.99L71 154.99L63.8 154.99L63.8 162.19L50.19 162.19L50.19 155L43 155L43 155L50.2 155Z;M50.2 103.8L63.81 103.8L63.81 110.99L71 110.99L71 110.99L63.8 110.99L63.8 118.19L50.19 118.19L50.19 111L43 111L43 111L50.2 111Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w176.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
           <set attributeName="d" to="M50.2 147.8L63.81 147.8L63.81 154.99L71 154.99L71 154.99L63.8 154.99L63.8 162.19L50.19 162.19L50.19 155L43 155L43 155L50.2 155Z" begin="0s;w176.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
         </path>
-        <path d="M50.2 103.8L63.81 103.8L63.81 110.99L71 110.99L71 110.99L63.8 110.99L63.8 118.19L50.19 118.19L50.19 111L43 111L43 111L50.2 111Z" fill="rgba(0,0,0,0.05)" class="a m120 ds" display="none"/>
+        <path d="M50.2 103.8L63.81 103.8L63.81 110.99L71 110.99L71 110.99L63.8 110.99L63.8 118.19L50.19 118.19L50.19 111L43 111L43 111L50.2 111Z" fill="rgba(0,0,0,0.05)" class="a m121 ds" display="none"/>
       </g>
-      <path d="M50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="var(--dom-erbksj)" class="a m121 dm">
+      <path d="M50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="var(--dom-erbksj)" class="a m122 dm">
         <animate id="w177" attributeName="d" values="M50.2 144.8H63.8A9.2 9.2 0 0 1 73 154V153.99A9.2 9.2 0 0 1 63.8 163.19H50.2A9.2 9.2 0 0 1 41 153.99V154A9.2 9.2 0 0 1 50.2 144.8Z;M50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w177.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M50.2 144.8H63.8A9.2 9.2 0 0 1 73 154V153.99A9.2 9.2 0 0 1 63.8 163.19H50.2A9.2 9.2 0 0 1 41 153.99V154A9.2 9.2 0 0 1 50.2 144.8Z" begin="0s;w177.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="var(--dom-erbksj)" class="a m121 ds" display="none"/>
-      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1g5brvd)" class="a m122 dm">
+      <path d="M50.2 100.8H63.8A9.2 9.2 0 0 1 73 110V109.99A9.2 9.2 0 0 1 63.8 119.19H50.2A9.2 9.2 0 0 1 41 109.99V110A9.2 9.2 0 0 1 50.2 100.8Z" fill="var(--dom-erbksj)" class="a m122 ds" display="none"/>
+      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1g5brvd)" class="a m123 dm">
         <animate id="w178" attributeName="d" values="M64 145.98H64A8 8 0 0 1 72 153.98V153.98A8 8 0 0 1 64 161.98H64A8 8 0 0 1 56 153.98V153.98A8 8 0 0 1 64 145.98Z;M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w178.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M64 145.98H64A8 8 0 0 1 72 153.98V153.98A8 8 0 0 1 64 161.98H64A8 8 0 0 1 56 153.98V153.98A8 8 0 0 1 64 145.98Z" begin="0s;w178.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1g5brvd)" class="a m122 ds" display="none"/>
-      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1e3wvr2)" class="a m123 dm">
+      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1g5brvd)" class="a m123 ds" display="none"/>
+      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1e3wvr2)" class="a m124 dm">
         <animate id="w179" attributeName="d" values="M64 145.98H64A8 8 0 0 1 72 153.98V153.98A8 8 0 0 1 64 161.98H64A8 8 0 0 1 56 153.98V153.98A8 8 0 0 1 64 145.98Z;M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w179.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M64 145.98H64A8 8 0 0 1 72 153.98V153.98A8 8 0 0 1 64 161.98H64A8 8 0 0 1 56 153.98V153.98A8 8 0 0 1 64 145.98Z" begin="0s;w179.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1e3wvr2)" class="a m123 ds" display="none"/>
-      <text x="81" y="115" font-family="'Geist', sans-serif" font-size="14" font-weight="400" fill="var(--dom-1g5brvd)" class="a m124">Auto-merge</text>
-      <path d="M353.06 99H403A8 8 0 0 1 411 107V113A8 8 0 0 1 403 121H353.06A8 8 0 0 1 345.06 113V107A8 8 0 0 1 353.06 99Z" fill="var(--dom-mx26mv)" class="a m125 dm">
+      <path d="M50 101.98H50A8 8 0 0 1 58 109.98V109.98A8 8 0 0 1 50 117.98H50A8 8 0 0 1 42 109.98V109.98A8 8 0 0 1 50 101.98Z" fill="var(--dom-1e3wvr2)" class="a m124 ds" display="none"/>
+      <text x="81" y="115" font-family="'Geist', sans-serif" font-size="14" font-weight="400" fill="var(--dom-1g5brvd)" class="a m125">Auto-merge</text>
+      <path d="M353.06 99H403A8 8 0 0 1 411 107V113A8 8 0 0 1 403 121H353.06A8 8 0 0 1 345.06 113V107A8 8 0 0 1 353.06 99Z" fill="var(--dom-mx26mv)" class="a m126 dm">
         <animate id="w180" attributeName="d" values="M349.8 143H403A8 8 0 0 1 411 151V157A8 8 0 0 1 403 165H349.8A8 8 0 0 1 341.8 157V151A8 8 0 0 1 349.8 143Z;M353.06 99H403A8 8 0 0 1 411 107V113A8 8 0 0 1 403 121H353.06A8 8 0 0 1 345.06 113V107A8 8 0 0 1 353.06 99Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="6s;w180.begin+9s" dur="0.6999s" fill="freeze" data-loop="9s"/>
         <set attributeName="d" to="M349.8 143H403A8 8 0 0 1 411 151V157A8 8 0 0 1 403 165H349.8A8 8 0 0 1 341.8 157V151A8 8 0 0 1 349.8 143Z" begin="0s;w180.begin+3s" dur="6s" fill="freeze" data-loop="9s"/>
       </path>
-      <path d="M353.06 99H403A8 8 0 0 1 411 107V113A8 8 0 0 1 403 121H353.06A8 8 0 0 1 345.06 113V107A8 8 0 0 1 353.06 99Z" fill="var(--dom-mx26mv)" class="a m125 ds" display="none"/>
-      <text x="350.8" y="158" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m126">+230 −12</text>
-      <text x="351.004" y="155.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m127">+229 −12</text>
-      <text x="351.208" y="152.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m128">+228 −12</text>
-      <text x="351.411" y="149.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m129">+227 −12</text>
-      <text x="351.615" y="147" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m130">+226 −12</text>
-      <text x="351.819" y="144.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m131">+225 −12</text>
-      <text x="352.023" y="141.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m132">+224 −12</text>
-      <text x="352.226" y="138.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m133">+223 −12</text>
-      <text x="352.43" y="136" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m134">+222 −12</text>
-      <text x="352.634" y="133.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m135">+221 −12</text>
-      <text x="352.838" y="130.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m136">+220 −12</text>
-      <text x="353.041" y="127.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m137">+219 −12</text>
-      <text x="353.245" y="125" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m138">+218 −12</text>
-      <text x="353.449" y="122.25" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m139">+217 −12</text>
-      <text x="353.653" y="119.5" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m140">+216 −12</text>
-      <text x="353.856" y="116.75" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m141">+215 −12</text>
-      <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m142">+214 −12</text>
+      <path d="M353.06 99H403A8 8 0 0 1 411 107V113A8 8 0 0 1 403 121H353.06A8 8 0 0 1 345.06 113V107A8 8 0 0 1 353.06 99Z" fill="var(--dom-mx26mv)" class="a m126 ds" display="none"/>
+      <g class="a m144">
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m127">+230 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m128">+229 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m129">+228 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m130">+227 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m131">+226 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m132">+225 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m133">+224 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m134">+223 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m135">+222 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m136">+221 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m137">+220 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m138">+219 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m139">+218 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m140">+217 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m141">+216 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m142">+215 −12</text>
+        <text x="354.06" y="114" font-family="'Geist', sans-serif" font-size="12" font-weight="500" fill="var(--dom-8msvmf)" class="a m143">+214 −12</text>
+      </g>
     </g>
   </g>
 </svg>

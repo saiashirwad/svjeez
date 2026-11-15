@@ -399,10 +399,10 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-15juv12:rgb
 .m45{animation-name:k51;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k52{0%,60%{opacity:0.5}70%,100%{opacity:1}}
 .m46{animation-name:k52;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k53{0%,64.5%{opacity:1}68.5%,100%{opacity:0}}
+@keyframes k53{0%,60%{opacity:1}64.5%,100%{opacity:0}}
 @keyframes k54{0%,60%{translate:0px 0px}70%,100%{translate:-319.41px 0px}}
 .m47{animation-name:k53,k54;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k55{0%,61.5%{opacity:0}65.5%,100%{opacity:1}}
+@keyframes k55{0%,64.5%{opacity:0}70%,100%{opacity:1}}
 @keyframes k56{0%,60%{translate:319.41px 0px}70%,100%{translate:0px 0px}}
 .m48{animation-name:k55,k56;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @keyframes k57{0%,60%,70%,100%{fill:var(--dom-4sz2vv)}}
