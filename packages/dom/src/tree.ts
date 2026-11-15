@@ -148,6 +148,10 @@ export interface Box {
   /** Inset shadows, drawn inside the padding box over the background. */
   readonly insets?: readonly Shadow[];
   readonly opacity: number;
+  /** `mix-blend-mode`, when it isn't `normal`: the box blends with what is drawn under it. */
+  readonly blend?: string;
+  /** `isolation: isolate`: a blend inside the box stays inside it. */
+  readonly isolate?: boolean;
   readonly clip: boolean;
   readonly transform?: Transform;
   readonly children: readonly Item[];

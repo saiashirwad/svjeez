@@ -9,7 +9,7 @@ import {
 } from "./browser.ts";
 import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, sources, unwrap } from "./fonts.ts";
-import { embed, preload } from "./images.ts";
+import { embed, preload, shrink, stills, svgUri, unpack, type Fetched, type Size } from "./images.ts";
 import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { walk, type Marks } from "./walk.ts";
@@ -227,30 +227,112 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   // Image files by URL, fetched once for every card.
   const pictures = new Map<string, Promise<string | undefined>>();
 
-  /** An image the page's CSS or markup names, fetched from Node so a cross-origin file needs no CORS. */
-  const picture = (page: Page) => (url: string) => {
-    let file = pictures.get(url);
+  /** An image's file, fetched from Node so a cross-origin one needs no CORS. */
+  const fetchImage = async (page: Page, url: string): Promise<Fetched | undefined> => {
+    if (url.startsWith("data:")) return unpack(url);
+
+    const response = await page.request.get(url);
+
+    if (!response.ok()) return undefined;
+
+    const type = (response.headers()["content-type"] ?? "").split(";")[0]!.trim();
+
+    const mime = type.startsWith("image/")
+      ? type
+      : /\.svg(\?|$)/i.test(url)
+        ? "image/svg+xml"
+        : undefined;
+
+    return mime ? { mime, bytes: await response.body() } : undefined;
+  };
+
+  /**
+   * An image the page's CSS or markup names, as a data URI cut down to what the drawing needs: a raster is scaled to
+   * at most twice the size it is drawn at and re-encoded, and an SVG is given a size.
+   */
+  const picture = (page: Page) => (url: string, size: Size) => {
+    const key = `${Math.ceil(size[0])}x${Math.ceil(size[1])} ${url}`;
+    let file = pictures.get(key);
 
     if (!file) {
-      file = page.request.get(url).then(
-        async (response) => {
-          if (!response.ok()) return undefined;
+      file = fetchImage(page, url).then(async (got) => {
+        if (!got) return undefined;
 
-          const type = (response.headers()["content-type"] ?? "").split(";")[0]!.trim();
-          const mime = type.startsWith("image/")
-            ? type
-            : /\.svg(\?|$)/i.test(url)
-              ? "image/svg+xml"
-              : undefined;
+        if (got.mime === "image/svg+xml") return svgUri(got.bytes.toString("utf8"));
+        const whole = `data:${got.mime};base64,${got.bytes.toString("base64")}`;
 
-          return mime && `data:${mime};base64,${(await response.body()).toString("base64")}`;
-        },
-        () => undefined,
-      );
-      pictures.set(url, file);
+        // A file the page can't decode is kept as it came.
+        const small = await page
+          .evaluate(shrink, {
+            data: whole.slice(whole.indexOf(",") + 1),
+            mime: got.mime,
+            width: size[0],
+            height: size[1],
+          })
+          .catch(() => undefined);
+
+        return small ?? whole;
+      }, () => undefined);
+      pictures.set(key, file);
     }
 
     return file;
+  };
+
+  /** A still of each canvas the page shows: what the page can't read from one, a screenshot of it alone can. */
+  const canvases = async (page: Page) => {
+    const need = await page.evaluate(stills);
+
+    if (need.length === 0) return;
+
+    const list = await page.evaluateHandle(
+      () => (globalThis as { __svjeezCanvases?: HTMLCanvasElement[] }).__svjeezCanvases ?? [],
+    );
+
+    for (const i of need) {
+      const handle = (await list.evaluateHandle((all, i) => all[i]!, i)).asElement();
+
+      if (!handle) continue;
+
+      // The part of the canvas the viewport shows. Everything but the canvas is hidden for the shot, so its picture
+      // carries none of the text and boxes drawn over it.
+      const at = await page.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const x = Math.max(r.left, 0);
+        const y = Math.max(r.top, 0);
+
+        const style = document.createElement("style");
+
+        style.id = "svjeez-still";
+        style.textContent = "*{visibility:hidden!important}";
+        document.head.append(style);
+        el.style.setProperty("visibility", "visible", "important");
+
+        return {
+          x,
+          y,
+          width: Math.min(r.right, innerWidth) - x,
+          height: Math.min(r.bottom, innerHeight) - y,
+        };
+      }, handle);
+
+      const png =
+        at.width >= 1 && at.height >= 1
+          ? await page
+              .screenshot({ clip: at, omitBackground: true, animations: "allow" })
+              .catch(() => undefined)
+          : undefined;
+
+      await page.evaluate(
+        ([el, uri, at]) => {
+          document.getElementById("svjeez-still")?.remove();
+          el.style.removeProperty("visibility");
+
+          if (uri) (globalThis.__svjeezStills ??= new WeakMap()).set(el, { href: uri, at });
+        },
+        [handle, png && `data:image/png;base64,${png.toString("base64")}`, at] as const,
+      );
+    }
   };
 
   /** The page's own web fonts, fetched from Node so a cross-origin file needs no CORS. */
@@ -273,8 +355,13 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
         if (!file) {
           // A file that won't download leaves its text to a fallback font, as a page without it would.
+          // A face the drawing can't cut down (a variable weight, a width, a range of characters) stays as the page
+          // had it, WOFF2 and all: a variable font's TTF is several times the size.
+          const whole = !/^\d+$/.test(face.weight) || face.stretch || face.unicodeRange;
+
           file = download(url).then(
-            async (bytes) => bytes && dataUri(await unwrap(bytes).catch(() => bytes)),
+            async (bytes) =>
+              bytes && dataUri(whole ? bytes : await unwrap(bytes).catch(() => bytes)),
             () => undefined,
           );
           files.set(url, file);
@@ -330,6 +417,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     const read = async (): Promise<Snapshot> => {
       await shim(page);
       await settle(page, true);
+      await canvases(page);
 
       const root = await embed(await both(), picture(page));
 
