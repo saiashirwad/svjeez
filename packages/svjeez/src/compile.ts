@@ -10,7 +10,15 @@ import {
   type TargetValue,
   type TargetValues,
 } from "./channels";
-import { baseRule, classBody, cssKeyframes, freezeRule, onceRule, type Emit } from "./css";
+import {
+  baseRule,
+  classBody,
+  cssDeclarations,
+  cssKeyframes,
+  freezeRule,
+  onceRule,
+  type Emit,
+} from "./css";
 import { isRef, refNode, refTag, type AnyRef, type DefTag } from "./defs";
 import { fontFaces, isFontValue, type Font, type FontValue } from "./font/font";
 import {
@@ -33,7 +41,7 @@ import {
   type CssPart,
   type Property,
 } from "./properties";
-import { MAX_KEYS, keysOf, rotateKeys, snapPeriod, valueAt, type Key } from "./keys";
+import { MAX_KEYS, keysOf, moving, rotateKeys, snapPeriod, valueAt, type Key } from "./keys";
 import { EPSILON, dataOf, type Motion, type Step } from "./motion";
 import { commandsOf } from "./paths";
 import { resolveSteps } from "./resolve";
@@ -575,6 +583,22 @@ const pin = (attrs: Record<string, AttrValue>, el: Element, lane: Lane): void =>
   }
 };
 
+/** A CSS lane whose every key holds one value, so it can be written as a declaration. */
+const isHeld = (lane: Lane): boolean =>
+  lane.backend === "css" &&
+  lane.emit === "value" &&
+  lane.key !== "draw" &&
+  !isProperty(lane.key) &&
+  !lane.channels.some((channel) => spec(channel).pivot) &&
+  !lane.keys.some((_, index) => moving(lane.keys, index));
+
+/** A translate resting at zero, which needs no declaration. */
+const isRest = (lane: Lane): boolean =>
+  lane.key === "translate" &&
+  lane.channels.every(
+    (channel) => formatValue(valueOf(lane.keys[0]!.values, channel) ?? 0) === "0",
+  );
+
 const emitShell = (
   state: State,
   target: Element,
@@ -584,7 +608,9 @@ const emitShell = (
   const attrs = { ...target.attrs };
   const still: Record<string, AttrValue> = {};
   const children = [...target.children];
-  const css = lanes.filter((lane) => lane.backend === "css");
+  const held = lanes.filter(isHeld);
+  const css = lanes.filter((lane) => lane.backend === "css" && !held.includes(lane));
+  let animated = false;
 
   const pivot =
     lanes.some((lane) => lane.channels.some((channel) => spec(channel).pivot)) &&
@@ -592,6 +618,13 @@ const emitShell = (
 
   state.pivot ||= pivot;
   state.once ||= once && css.length > 0;
+
+  // A CSS lane that never moves is a plain declaration. Animating it would cost style work on every frame.
+  const declared = held.flatMap((lane) =>
+    isRest(lane) ? [] : [cssDeclarations(lane.key, lane.emit, lane.keys[0]!.values)],
+  );
+
+  if (declared.length > 0) attrs.style = [attrs.style, ...declared].filter(Boolean).join(";");
 
   for (const lane of lanes) {
     pin(attrs, target, lane);
@@ -607,6 +640,7 @@ const emitShell = (
       const nodes = animateOn(state, lane.key, lane, once);
       const end = windowEnd(nodes);
 
+      animated ||= nodes.length > 0;
       attrs[lane.key] = end ?? value;
 
       if (end !== undefined) still[lane.key] = value;
@@ -627,7 +661,8 @@ const emitShell = (
   const shell = element(target.tag, attrs, children);
   const emitted = Object.keys(still).length > 0 ? { ...shell, still } : shell;
 
-  if (state.canvas.stillAt === undefined || !lanes.some((lane) => lane.key === "d")) return emitted;
+  if (!animated || state.canvas.stillAt === undefined || !lanes.some((lane) => lane.key === "d"))
+    return emitted;
 
   return stillTwin(state, emitted);
 };

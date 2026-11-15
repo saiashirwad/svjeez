@@ -37,48 +37,44 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
 .m10{animation-name:k10}
 @keyframes k11{0%,26.667%,30.667%,76.667%,80.667%,100%{opacity:0}27.333%,29.333%,77.333%,79.333%{opacity:1}}
 .m11{animation-name:k11}
-@keyframes k12{0%,100%{translate:5px -3px}}
-.m12{animation-name:k12}
-@keyframes k13{0%,5.774%,13.72%,15.333%,22%,27.102%,34.384%,35.333%,42%,55.212%,63.439%,65.333%,72%,100%{--p1:1}9.441%,30.769%,58.878%{--p1:1.14}10.774%,32.102%,60.212%{--p1:0.86}12.247%,33.243%,61.825%{--p1:0.96}16.667%,36.667%,66.667%{--p1:0.92}17.667%,37.667%,67.667%{--p1:1.26}19.667%,39.667%,69.667%{--p1:0.95;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
-@keyframes k14{0%,5.774%,13.72%,15.333%,22%,27.102%,34.384%,35.333%,42%,55.212%,63.439%,65.333%,72%,100%{--p2:1}9.441%,30.769%,58.878%{--p2:0.8}10.774%,32.102%,60.212%{--p2:1.22}12.247%,33.243%,61.825%{--p2:1.06}16.667%,36.667%,66.667%{--p2:1.1}17.667%,37.667%,67.667%{--p2:0.74}19.667%,39.667%,69.667%{--p2:1.07;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
-.m13{animation-name:k13,k14}
-@keyframes k15{0%,10.774%,16.667%,32.102%,36.667%,60.212%,66.667%,100%{translate:0px 0px}13.72%{translate:0px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}34.384%{translate:0px -30px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}63.439%{translate:0px -60px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-.m14{animation-name:k15}
-@keyframes k16{0%,100%{scale:1}50%{scale:0.3}}
-.m15{animation-name:k16;animation-duration:0.24s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k17{0%,100%{translate:880px 340px}4.167%{translate:918.823px 375px}6.667%{translate:941.01px 392.02px}8.333%{translate:955px 400.622px}10%{translate:968.168px 406.574px}12.5%{translate:986.066px 410px}15%{translate:1001.353px 406.574px}16.667%{translate:1009.904px 400.622px}18.333%{translate:1017.032px 392.02px}20%{translate:1022.658px 381.145px}21.667%{translate:1026.722px 368.472px}25%{translate:1030px 340px}27.5%{translate:1028.153px 318.369px}29.167%{translate:1024.889px 305px}30.833%{translate:1020.037px 293.161px}32.5%{translate:1013.651px 283.369px}34.167%{translate:1005.801px 276.052px}35.833%{translate:996.572px 271.53px}38.333%{translate:980.37px 270.383px}40.833%{translate:961.696px 276.052px}42.5%{translate:948.099px 283.369px}44.167%{translate:933.755px 293.161px}46.667%{translate:911.187px 311.528px}54.167%{translate:841.177px 375px}56.667%{translate:818.99px 392.02px}59.167%{translate:798.304px 403.948px}61.667%{translate:779.63px 409.617px}64.167%{translate:763.428px 408.47px}66.667%{translate:750.096px 400.622px}69.167%{translate:739.963px 386.839px}70.833%{translate:735.111px 375px}73.333%{translate:730.822px 354.554px}75.833%{translate:730.206px 332.683px}78.333%{translate:733.278px 311.528px}80.833%{translate:739.963px 293.161px}82.5%{translate:746.349px 283.369px}84.167%{translate:754.199px 276.052px}85.833%{translate:763.428px 271.53px}87.5%{translate:773.934px 270px}89.167%{translate:785.602px 271.53px}90.833%{translate:798.304px 276.052px}92.5%{translate:811.901px 283.369px}94.167%{translate:826.245px 293.161px}95.833%{translate:841.177px 305px}}
-.m16{animation-name:k17;animation-timing-function:linear}
-@keyframes k18{0%,100%{opacity:0.25}50%{opacity:0.5}}
-@keyframes k19{0%,100%{scale:0.9}50%{scale:1.1}}
-.m17{animation-name:k18,k19;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k20{0%,100%{fill:#FFF3B0}}
-.m18{animation-name:k20}
-@keyframes k21{0%,50%,100%{scale:1}25%,75%{scale:1.035}}
-.m19{animation-name:k21;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k22{0%{translate:0px 0px}13.333%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}33.333%,100%{translate:70px -130px}}
-@keyframes k23{0%,33.333%,100%{opacity:0}13.333%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-.m20{animation-name:k22,k23}
-@keyframes k24{0%,33.333%{translate:0px 0px}46.667%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}66.667%,100%{translate:70px -130px}}
-@keyframes k25{0%,33.333%,66.667%,100%{opacity:0}46.667%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-.m21{animation-name:k24,k25}
-@keyframes k26{0%,66.667%{translate:0px 0px}80%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}100%{translate:70px -130px}}
-@keyframes k27{0%,66.667%,100%{opacity:0}80%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
-.m22{animation-name:k26,k27}
-@keyframes k28{0%,25%,100%{opacity:0.2}10%{opacity:1}}
-@keyframes k29{0%,100%{translate:-17.358px -8.678px}50%{translate:8.156px 16.446px}}
-.m23{animation-name:k28,k29;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k30{0%,13.333%,38.333%,100%{opacity:0.2}23.333%{opacity:1}}
-@keyframes k31{0%,100%{translate:29.849px -7.781px}50%{translate:17.944px 7.402px}}
-.m24{animation-name:k30,k31;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k32{0%,26.667%,51.667%,100%{opacity:0.2}36.667%{opacity:1}}
-@keyframes k33{0%,100%{translate:-16.639px -16.413px}50%{translate:-22.2px -13.8px}}
-.m25{animation-name:k32,k33;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k34{0%,40%,65%,100%{opacity:0.2}50%{opacity:1}}
-@keyframes k35{0%,100%{translate:-17.297px -16.366px}50%{translate:-10.557px -3.482px}}
-.m26{animation-name:k34,k35;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k36{0%,53.333%,78.333%,100%{opacity:0.2}63.333%{opacity:1}}
-@keyframes k37{0%,100%{translate:23.142px 6.559px}50%{translate:13.677px -2.83px}}
-.m27{animation-name:k36,k37;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k12{0%,5.774%,13.72%,15.333%,22%,27.102%,34.384%,35.333%,42%,55.212%,63.439%,65.333%,72%,100%{--p1:1}9.441%,30.769%,58.878%{--p1:1.14}10.774%,32.102%,60.212%{--p1:0.86}12.247%,33.243%,61.825%{--p1:0.96}16.667%,36.667%,66.667%{--p1:0.92}17.667%,37.667%,67.667%{--p1:1.26}19.667%,39.667%,69.667%{--p1:0.95;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
+@keyframes k13{0%,5.774%,13.72%,15.333%,22%,27.102%,34.384%,35.333%,42%,55.212%,63.439%,65.333%,72%,100%{--p2:1}9.441%,30.769%,58.878%{--p2:0.8}10.774%,32.102%,60.212%{--p2:1.22}12.247%,33.243%,61.825%{--p2:1.06}16.667%,36.667%,66.667%{--p2:1.1}17.667%,37.667%,67.667%{--p2:0.74}19.667%,39.667%,69.667%{--p2:1.07;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}}
+.m12{animation-name:k12,k13}
+@keyframes k14{0%,10.774%,16.667%,32.102%,36.667%,60.212%,66.667%,100%{translate:0px 0px}13.72%{translate:0px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}34.384%{translate:0px -30px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}63.439%{translate:0px -60px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m13{animation-name:k14}
+@keyframes k15{0%,100%{scale:1}50%{scale:0.3}}
+.m14{animation-name:k15;animation-duration:0.24s;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k16{0%,100%{translate:880px 340px}4.167%{translate:918.823px 375px}6.667%{translate:941.01px 392.02px}8.333%{translate:955px 400.622px}10%{translate:968.168px 406.574px}12.5%{translate:986.066px 410px}15%{translate:1001.353px 406.574px}16.667%{translate:1009.904px 400.622px}18.333%{translate:1017.032px 392.02px}20%{translate:1022.658px 381.145px}21.667%{translate:1026.722px 368.472px}25%{translate:1030px 340px}27.5%{translate:1028.153px 318.369px}29.167%{translate:1024.889px 305px}30.833%{translate:1020.037px 293.161px}32.5%{translate:1013.651px 283.369px}34.167%{translate:1005.801px 276.052px}35.833%{translate:996.572px 271.53px}38.333%{translate:980.37px 270.383px}40.833%{translate:961.696px 276.052px}42.5%{translate:948.099px 283.369px}44.167%{translate:933.755px 293.161px}46.667%{translate:911.187px 311.528px}54.167%{translate:841.177px 375px}56.667%{translate:818.99px 392.02px}59.167%{translate:798.304px 403.948px}61.667%{translate:779.63px 409.617px}64.167%{translate:763.428px 408.47px}66.667%{translate:750.096px 400.622px}69.167%{translate:739.963px 386.839px}70.833%{translate:735.111px 375px}73.333%{translate:730.822px 354.554px}75.833%{translate:730.206px 332.683px}78.333%{translate:733.278px 311.528px}80.833%{translate:739.963px 293.161px}82.5%{translate:746.349px 283.369px}84.167%{translate:754.199px 276.052px}85.833%{translate:763.428px 271.53px}87.5%{translate:773.934px 270px}89.167%{translate:785.602px 271.53px}90.833%{translate:798.304px 276.052px}92.5%{translate:811.901px 283.369px}94.167%{translate:826.245px 293.161px}95.833%{translate:841.177px 305px}}
+.m15{animation-name:k16;animation-timing-function:linear}
+@keyframes k17{0%,100%{opacity:0.25}50%{opacity:0.5}}
+@keyframes k18{0%,100%{scale:0.9}50%{scale:1.1}}
+.m16{animation-name:k17,k18;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k19{0%,50%,100%{scale:1}25%,75%{scale:1.035}}
+.m17{animation-name:k19;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k20{0%{translate:0px 0px}13.333%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}33.333%,100%{translate:70px -130px}}
+@keyframes k21{0%,33.333%,100%{opacity:0}13.333%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m18{animation-name:k20,k21}
+@keyframes k22{0%,33.333%{translate:0px 0px}46.667%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}66.667%,100%{translate:70px -130px}}
+@keyframes k23{0%,33.333%,66.667%,100%{opacity:0}46.667%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m19{animation-name:k22,k23}
+@keyframes k24{0%,66.667%{translate:0px 0px}80%{translate:30px -50px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}100%{translate:70px -130px}}
+@keyframes k25{0%,66.667%,100%{opacity:0}80%{opacity:1;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.m20{animation-name:k24,k25}
+@keyframes k26{0%,25%,100%{opacity:0.2}10%{opacity:1}}
+@keyframes k27{0%,100%{translate:-17.358px -8.678px}50%{translate:8.156px 16.446px}}
+.m21{animation-name:k26,k27;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k28{0%,13.333%,38.333%,100%{opacity:0.2}23.333%{opacity:1}}
+@keyframes k29{0%,100%{translate:29.849px -7.781px}50%{translate:17.944px 7.402px}}
+.m22{animation-name:k28,k29;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k30{0%,26.667%,51.667%,100%{opacity:0.2}36.667%{opacity:1}}
+@keyframes k31{0%,100%{translate:-16.639px -16.413px}50%{translate:-22.2px -13.8px}}
+.m23{animation-name:k30,k31;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k32{0%,40%,65%,100%{opacity:0.2}50%{opacity:1}}
+@keyframes k33{0%,100%{translate:-17.297px -16.366px}50%{translate:-10.557px -3.482px}}
+.m24{animation-name:k32,k33;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k34{0%,53.333%,78.333%,100%{opacity:0.2}63.333%{opacity:1}}
+@keyframes k35{0%,100%{translate:23.142px 6.559px}50%{translate:13.677px -2.83px}}
+.m25{animation-name:k34,k35;animation-duration:6s,2s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-0.3s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="1280" height="720" fill="var(--sky)"/>
@@ -116,9 +112,9 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
   </g>
   <g class="day">
     <g transform="translate(640 590) scale(1.25) translate(-104 -162)">
-      <g class="a m14">
+      <g class="a m13">
         <g style="transform-box:view-box;transform-origin:104px 162px">
-          <g class="sq a m13">
+          <g class="sq a m12">
             <ellipse cx="84" cy="162" rx="12" ry="6" fill="#F08A00"/>
             <ellipse cx="124" cy="162" rx="12" ry="6" fill="#F08A00"/>
             <path d="M104 60V36" stroke="#E3A100" stroke-width="7" stroke-linecap="round"/>
@@ -127,7 +123,7 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
             <path d="M38 150C38 158 43 162 51 162H157C165 162 170 158 170 150C170 146 170 143 169 140C160 148 150 150 104 150S48 148 39 140C38 143 38 146 38 150Z" fill="#F2A900"/>
             <ellipse cx="66" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
             <ellipse cx="142" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
-            <g class="a m12">
+            <g style="translate:5px -3px">
               <g class="a m10">
                 <ellipse cx="84" cy="110" rx="7" ry="9" fill="#26262A"/>
                 <circle cx="86" cy="106" r="2.4" fill="#FFF"/>
@@ -144,8 +140,8 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
         </g>
       </g>
     </g>
-    <g class="a m16">
-      <g class="a m15 fb">
+    <g class="a m15">
+      <g class="a m14 fb">
         <path d="M0 0L-22 -18L-18 10Z" fill="#7C9CFF"/>
         <path d="M0 0L22 -18L18 10Z" fill="#7C9CFF"/>
       </g>
@@ -154,20 +150,20 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
   </g>
   <g class="night">
     <g transform="translate(640 435)">
-      <g class="a m17 fb">
+      <g class="a m16 fb">
         <circle r="60" fill="#FFC94D" opacity="0.16"/>
         <circle r="34" fill="#FFD76B" opacity="0.3"/>
       </g>
     </g>
     <g transform="translate(640 590) scale(1.25) translate(-104 -162)">
-      <g style="transform-box:view-box;transform-origin:104px 162px" class="a m19">
+      <g style="transform-box:view-box;transform-origin:104px 162px" class="a m17">
         <g>
           <g style="transform-box:view-box;transform-origin:104px 162px">
             <g>
               <ellipse cx="84" cy="162" rx="12" ry="6" fill="#F08A00"/>
               <ellipse cx="124" cy="162" rx="12" ry="6" fill="#F08A00"/>
               <path d="M104 60V36" stroke="#E3A100" stroke-width="7" stroke-linecap="round"/>
-              <circle cx="104" cy="38" r="9" fill="#FFC21A" class="a m18"/>
+              <circle cx="104" cy="38" r="9" fill="#FFC21A" style="fill:#FFF3B0"/>
               <path d="M38 150C38 94 68 60 104 60S170 94 170 150C170 158 165 162 157 162H51C43 162 38 158 38 150Z" fill="#FFC21A"/>
               <path d="M38 150C38 158 43 162 51 162H157C165 162 170 158 170 150C170 146 170 143 169 140C160 148 150 150 104 150S48 148 39 140C38 143 38 146 38 150Z" fill="#F2A900"/>
               <ellipse cx="66" cy="124" rx="9" ry="6" fill="#FF8C6B" opacity="0.55"/>
@@ -192,13 +188,13 @@ svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
         <path d="M116 110Q124 117 132 110" fill="none" stroke="#26262A" stroke-width="3.5" stroke-linecap="round"/>
       </g>
     </g>
-    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="28" font-weight="700" fill="#cfd8ff" class="a m20">z</text>
-    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="36" font-weight="700" fill="#cfd8ff" class="a m21">z</text>
-    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="44" font-weight="700" fill="#cfd8ff" class="a m22">z</text>
-    <circle cx="700" cy="330" r="4" fill="#FFF3B0" class="a m23"/>
-    <circle cx="860" cy="420" r="4" fill="#FFF3B0" class="a m24"/>
-    <circle cx="960" cy="300" r="4" fill="#FFF3B0" class="a m25"/>
-    <circle cx="640" cy="260" r="4" fill="#FFF3B0" class="a m26"/>
-    <circle cx="1040" cy="470" r="4" fill="#FFF3B0" class="a m27"/>
+    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="28" font-weight="700" fill="#cfd8ff" class="a m18">z</text>
+    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="36" font-weight="700" fill="#cfd8ff" class="a m19">z</text>
+    <text x="697.5" y="475" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="44" font-weight="700" fill="#cfd8ff" class="a m20">z</text>
+    <circle cx="700" cy="330" r="4" fill="#FFF3B0" class="a m21"/>
+    <circle cx="860" cy="420" r="4" fill="#FFF3B0" class="a m22"/>
+    <circle cx="960" cy="300" r="4" fill="#FFF3B0" class="a m23"/>
+    <circle cx="640" cy="260" r="4" fill="#FFF3B0" class="a m24"/>
+    <circle cx="1040" cy="470" r="4" fill="#FFF3B0" class="a m25"/>
   </g>
 </svg>

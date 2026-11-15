@@ -196,8 +196,13 @@ export const animate = (
   const channel = lane.channels[0] as Channel;
   const duration = lane.snapped / canvas.playbackRate;
 
+  const { points, discrete } = smilPoints(lane.keys, channel);
+  const first = formatValue(points[0]!.value);
+
+  // A lane that never leaves its first value is the attribute itself, so it needs no animation.
+  if (points.every((point) => formatValue(point.value) === first)) return [];
+
   if (canvas.loop) {
-    const { points, discrete } = smilPoints(lane.keys, channel);
     const cut = windowed(points, discrete, attribute, lane.period, duration, name);
 
     if (cut) return cut;
