@@ -126,10 +126,18 @@ export interface Box {
     readonly widths: readonly [number, number, number, number];
     readonly color: Paint;
   };
+  /** An `outline`, painted over the element's content: `offset` px clear of the border box (negative goes inside). */
+  readonly outline?: {
+    readonly width: number;
+    readonly offset: number;
+    readonly color: Paint;
+  };
   readonly shadows: readonly Shadow[];
   /** Inset shadows, drawn inside the padding box over the background. */
   readonly insets?: readonly Shadow[];
   readonly opacity: number;
+  /** The dark scheme's opacity, where an element is faded in one scheme and not the other. */
+  readonly darkOpacity?: number;
   readonly clip: boolean;
   readonly transform?: Transform;
   readonly children: readonly Item[];

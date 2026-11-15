@@ -25,6 +25,11 @@ export interface BrowserOptions {
    */
   readonly dark?: { readonly class?: string };
   readonly executablePath?: string;
+  /**
+   * Also screenshot the card at every read, in each scheme read, over the same box and padding the snapshot covers.
+   * The PNGs come from `Io.shots`; `snapshots()` writes them out for the fidelity check.
+   */
+  readonly screenshots?: boolean;
 }
 
 export interface PageOptions {
@@ -85,9 +90,16 @@ export interface Browser {
   readonly [Symbol.asyncDispose]: () => Promise<void>;
 }
 
+/** The card as Chromium painted it at the last read, one PNG per scheme read. */
+export type Shots = Partial<Record<"light" | "dark", Uint8Array>>;
+
 /** What a card does to its page. A card is built on these, so `snapshots()` can record and replay them. */
 export interface Io {
   readonly read: () => Promise<Snapshot>;
+  /** The screenshots of the last read, when the browser takes them. */
+  readonly shots?: () => Shots;
+  /** Told the steps a `run` gave back, for whoever keeps them. */
+  readonly ran?: (steps: Step[]) => void;
   readonly act: (action: Action) => Promise<void>;
   readonly drive: (fn: PageAction) => Promise<void>;
   readonly close: () => Promise<void>;
@@ -145,6 +157,8 @@ const cardOf = (io: Io): Card => ({
 
       steps.push(Object.keys(timing).length > 0 ? [state, timing] : state);
     }
+
+    io.ran?.(steps);
 
     return steps;
   },
