@@ -20,7 +20,6 @@ const SECTIONS = [
       "map",
       "newspaper",
       "horizon",
-      "neon",
       "explainer",
     ],
   },
