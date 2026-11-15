@@ -49,7 +49,7 @@ Times are scene seconds, the clock your motions are written on, even when `playb
 
 ## Time
 
-Every motion is written on a clock that starts at 0. The scene is the root clock, `0` to `duration`; a `<Clip>` starts another. A span is `{ at, over }` on the clock around it, and a span without `over` runs to the end. Recipes, `.to`, `show`, `<Clip>` and the results of `typewriter`, `terminal`, `flow` and `reveal` all take or return spans. Attach motions with the `animation` prop.
+Every motion is written on a clock that starts at 0. The scene is the root clock, `0` to `duration`; a `<Clip>` starts another. A span is a plain `{ at, over }` on the clock around it, and a span without `over` runs to the end. Write spans that way: `draw({ at: 0.2, over: 1.2 })`. Recipes, `.to`, `show`, `<Clip>` and the results of `typewriter`, `terminal`, `flow` and `reveal` all take or return spans. Attach motions with the `animation` prop.
 
 ```tsx
 motion({ opacity: 0 })          // initial values, held until the first transition
@@ -61,7 +61,7 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
   .loop(6);                     // repeat every 6s, forever; snapped to divide duration
 ```
 
-- `.to(values, over, ease?)`: `over` is a length, never an end time. `.to(values, span, ease?)` moves the cursor to `span.at` and takes `span.over`. Default ease is `ease.out`. Between transitions every value holds.
+- `.to(values, over, ease?)`: `over` is a length, never an end time. `.at(t).to(values, over)` is the chain form of `{ at: t, over }`; `.to(values, { at, over }, ease?)` says the same in one call. Default ease is `ease.out`. Between transitions every value holds.
 - `.repeat(3)` plays the passage written so far three times in all; `.repeat({ until: 10 })` repeats it until 10s, cutting the last pass short, then holds. Each pass starts from the initial values. Passes become keyframes, so a spin that never stops is `.loop()`, and a long repeat hits the key cap.
 - `.rewind(0.8)` glides every channel back to its initial value, ending at the end of the clock: the scene's, a `<Clip>`'s, or a loop's period. It is how a loop closes without a hand-written reset. Nothing can follow it.
 - Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign. `easeAt(curve, progress)` gives an ease's value at a progress from 0 to 1, to reuse it inside `sampled()` or draw it beside the scene.
@@ -85,6 +85,8 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
 Custom properties from `css.property` animate on every tag above except filter primitives.
 
 ### Spans
+
+`span()` is only a helper for `.next` and `.pad`, when a beat is placed relative to another. Everywhere else a plain `{ at, over }` does.
 
 ```tsx
 const reach = span(0, 0.7);

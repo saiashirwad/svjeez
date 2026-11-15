@@ -246,7 +246,7 @@ export default function build(): string {
       height: H,
       title: "From state to reducer",
       desc: "A React counter moves its update rule out of a click handler and into a reducer.",
-      duration: tl.duration,
+      duration: tl.end,
       reducedMotion: { at: tl.result.at + 2 },
       css: [
         css,

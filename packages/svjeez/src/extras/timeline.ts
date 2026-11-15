@@ -4,8 +4,6 @@ import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
 import { span as makeSpan, type Spanned, type When } from "../span";
 
 export type Timeline<K extends string> = { readonly [P in K]: Spanned } & {
-  /** From the first scene's start to the last one's end. */
-  readonly duration: Seconds;
   /** When the last scene ends. */
   readonly end: Seconds;
 };
@@ -15,7 +13,6 @@ export interface TimelineOptions {
   readonly at?: Seconds;
   /** Seconds between scenes. Not scaled by `pace`. */
   readonly gap?: Seconds;
-  readonly fade?: Seconds;
   /** Multiplies every scene length. */
   readonly pace?: number;
 }
@@ -25,13 +22,13 @@ export interface ShowOptions {
   readonly fade?: Seconds;
 }
 
+const isList = (spans: When | readonly When[]): spans is readonly When[] => Array.isArray(spans);
+
 /**
  * On during each span, off outside. Fades sit inside the span: in over its first `fade` seconds and out over its last.
  * Spans that overlap or touch merge, so fades never collide, and a span shorter than two fades shrinks them. `fade: 0`
  * cuts: a shot in an edit. A span without `over` stays to the end and never fades out. No spans, never shown.
  */
-const isList = (spans: When | readonly When[]): spans is readonly When[] => Array.isArray(spans);
-
 export const show = (
   spans: When | readonly When[],
   { fade = 0.3 }: ShowOptions = {},
@@ -147,7 +144,7 @@ export type Beats = Seconds | readonly Seconds[];
 const isStart = (at: Beats): at is Seconds => typeof at === "number";
 
 /** `count` times from `at`. A list must have one time per thing, in order. */
-export const beats = (at: Beats, count: number, step: Seconds, what: string): Seconds[] => {
+export const beats = (at: Beats, count: number, step: Seconds, what = "beats()"): Seconds[] => {
   if (isStart(at)) {
     if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
 
@@ -292,30 +289,53 @@ const facings = (angles: readonly number[], offset: true | number): number[] => 
 /** `angle` brought into -180 to 180. */
 const wrap = (angle: number) => angle - 360 * Math.round(angle / 360);
 
+export interface ReadingOptions {
+  /** Words read per second. Default 3.5. */
+  readonly wps?: number;
+  /** Fewest seconds returned. Default 2. */
+  readonly min?: Seconds;
+  /** Seconds added after the last word. Default 1. */
+  readonly settle?: Seconds;
+}
+
 /** Seconds a viewer needs to read `text`: words / wps + settle, at least `min`. */
 export const readingTime = (
   text: string | readonly string[],
-  { wps = 3.5, min = 2, settle = 1 } = {},
-): Seconds =>
-  Math.max(min, [text].flat().join(" ").split(/\s+/).filter(Boolean).length / wps + settle);
+  { wps = 3.5, min = 2, settle = 1 }: ReadingOptions = {},
+): Seconds => {
+  if (
+    !(
+      wps > 0 &&
+      Number.isFinite(wps) &&
+      min >= 0 &&
+      Number.isFinite(min) &&
+      settle >= 0 &&
+      Number.isFinite(settle)
+    )
+  )
+    throw new Error(
+      `readingTime() needs a positive wps and a min and settle of 0 or more, got wps ${wps}, min ${min} and settle ${settle}.`,
+    );
+
+  return Math.max(min, [text].flat().join(" ").split(/\s+/).filter(Boolean).length / wps + settle);
+};
 
 /** Consecutive named scenes, `gap` apart. */
 export function timeline<const T extends Record<string, Seconds>>(
   durations: T,
   options: TimelineOptions = {},
 ): Timeline<keyof T & string> {
-  const { at: start = 0, gap = 0, fade = 0.3, pace = 1 } = options;
+  const { at: start = 0, gap = 0, pace = 1 } = options;
 
-  if (!(start >= 0 && gap >= 0 && fade > 0 && pace > 0))
+  if (!(start >= 0 && gap >= 0 && pace > 0))
     throw new Error(
-      `timeline() needs a non-negative start and gap, a positive fade and a positive pace, got at ${start}, gap ${gap}, fade ${fade} and pace ${pace}.`,
+      `timeline() needs a non-negative start and gap and a positive pace, got at ${start}, gap ${gap} and pace ${pace}.`,
     );
   const spans: Record<string, Spanned> = {};
   let end = start;
 
   for (const [i, [name, length]] of Object.entries(durations).entries()) {
-    if (name === "duration" || name === "end")
-      throw new Error(`"${name}" is reserved in a timeline.`);
+    if (name === "end") throw new Error(`"${name}" is reserved in a timeline.`);
 
     if (!(length > 0)) throw new Error(`Scene ${name} needs a positive length, got ${length}.`);
     const at = i === 0 ? start : end + gap;
@@ -326,7 +346,6 @@ export function timeline<const T extends Record<string, Seconds>>(
   // SAFETY: the loop above sets a span for every name in `durations`, so the keys of `spans` are exactly K.
   return {
     ...spans,
-    duration: end - start,
     end,
   } as Timeline<keyof T & string>;
 }

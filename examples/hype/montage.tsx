@@ -11,7 +11,7 @@ export const SHOTS = timeline(
   { at: CODE.at + CODE.over },
 );
 
-export const MONTAGE = { at: SHOTS.map.at, over: SHOTS.duration };
+export const MONTAGE = { at: SHOTS.map.at, over: SHOTS.end - SHOTS.map.at };
 
 export const montage = (
   <>
