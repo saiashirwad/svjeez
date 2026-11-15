@@ -20,74 +20,47 @@ import {
 } from "svjeez";
 
 import { createRequire } from "node:module";
-import { geist, geistMono } from "../fonts/faces";
+import {
+  geist,
+  HEIGHT,
+  MARGIN,
+  mono,
+  paletteCss,
+  size,
+  Title,
+  WIDTH,
+  rise,
+  theme,
+} from "../gallery-style";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 
-const W = 960;
-const H = 540;
+const W = WIDTH;
+const H = HEIGHT;
 const D = 18;
 
 /** When the map lets go of the loop: everything fades, and the cables draw in again from the start. */
 const OUT = D - 1;
 
 const map = project(countries, {
-  frame: rect(24, 22, W - 48, 384),
+  frame: rect(MARGIN, 120, W - 2 * MARGIN, H - MARGIN - 120),
   projection: geoNaturalEarth1().rotate([-10, 0]),
   filter: (f) => f.properties?.name !== "Antarctica",
 });
 
-/** Cable colors are numbered CSS variables, so each scheme can tune its own. */
-const style = css`
-  svg {
-    --sea: #04080f;
-    --glow: #0b1a2e;
-    --land: #0b1626;
-    --grain: #274565;
-    --edge: #16283d;
-    --text: #eef3f9;
-    --dim: #71869c;
-    --card: #0a1422;
-    --head: #ffffff;
-    --c0: #2fe0c5;
-    --c1: #5aa9ff;
-    --c2: #b388ff;
-    --c3: #ff78b4;
-    --c4: #ffb547;
-  }
-  @media (prefers-color-scheme: light) {
-    svg {
-      --sea: #f4f7fb;
-      --glow: #e4ecf6;
-      --land: #e2e9f2;
-      --grain: #aebfd1;
-      --edge: #cfdae6;
-      --text: #0d1b29;
-      --dim: #5a6e82;
-      --card: #ffffff;
-      --head: #0d1b29;
-      --c0: #0ca58f;
-      --c1: #1f74d6;
-      --c2: #7b4fd6;
-      --c3: #d6337f;
-      --c4: #d98200;
-    }
-  }
-`;
-
 const C = {
-  sea: "var(--sea)",
-  glow: "var(--glow)",
-  land: "var(--land)",
-  grain: "var(--grain)",
-  edge: "var(--edge)",
-  text: "var(--text)",
-  dim: "var(--dim)",
-  card: "var(--card)",
-  head: "var(--head)",
+  sea: theme.base00,
+  land: theme.base01,
+  grain: theme.base03,
+  edge: theme.base02,
+  text: theme.base06,
+  dim: theme.base04,
 } as const;
 
-const hue = (i: number) => `var(--c${i % 5})` as const;
+/** The five cable colors, in a fixed order. */
+const HUES = [theme.base0C, theme.base0D, theme.base0E, theme.base09, theme.base08] as const;
+
+const hue = (i: number) => HUES[i % HUES.length]!;
 
 interface Station {
   readonly name: string;
@@ -315,19 +288,11 @@ const grain = def.pattern(
   <circle cx={2.25} cy={2.25} r={0.85} fill={C.grain} />,
 );
 
-const haze = def.radialGradient(
-  { cx: 0.5, cy: 0.42, r: 0.6 },
-  <>
-    <stop offset={0} stopColor={C.glow} />
-    <stop offset={1} stopColor={C.sea} />
-  </>,
-);
-
 function Land(): SvgNode {
   return (
     <>
-      <path d={map.sphere} fill={C.sea} stroke={C.edge} strokeWidth={0.8} />
-      <path d={map.graticule(20)} fill="none" stroke={C.edge} strokeWidth={0.5} opacity={0.6} />
+      <path d={map.sphere} fill={C.sea} stroke={C.edge} strokeWidth={1} />
+      <path d={map.graticule(20)} fill="none" stroke={C.edge} strokeWidth={1} opacity={0.6} />
       <path d={map.land} fill={C.land} />
       <path d={map.land} fill={grain} />
     </>
@@ -431,7 +396,7 @@ function Packet({ piece, track, at, color }: PacketProps): SvgNode {
       <use
         href={track}
         class="pk"
-        stroke={C.head}
+        stroke={C.text}
         strokeWidth={2.8}
         strokeDasharray={`${head} 3`}
         animation={run(head)}
@@ -484,19 +449,18 @@ function Stations(): SvgNode {
             style={{ transformOrigin: `${x}px ${y}px` }}
             animation={enter({ at: 1.2 + i * 0.04, over: 0.45 }, { scale: 0 }, ease.pop)}
           >
-            <circle cx={x} cy={y} r={3.6} fill={C.sea} stroke={C.text} strokeWidth={1.1} />
+            <circle cx={x} cy={y} r={3.6} fill={C.sea} stroke={C.text} strokeWidth={1} />
             <circle cx={x} cy={y} r={1.3} fill={C.text} />
             {label && (
               <text
                 x={x + label.dx}
                 y={y + label.dy}
                 textAnchor={label.anchor}
-                fontFamily={geistMono}
-                fontSize={8}
-                letterSpacing={0.8}
+                fontFamily={geist}
+                fontSize={size.smallest}
                 fill={C.dim}
               >
-                {s.name.toUpperCase()}
+                {s.name}
               </text>
             )}
           </g>
@@ -516,9 +480,9 @@ interface Journey {
 }
 
 const JOURNEYS: readonly Journey[] = [
-  { what: "A video call", icon: video, cable: "Grace Hopper", at: 3.6 },
-  { what: "A photo", icon: photo, cable: "SEA-ME-WE 6", at: 8, reverse: true },
-  { what: "A game move", icon: deviceGamepad2, cable: "JUPITER", at: 12.4 },
+  { what: "Video call", icon: video, cable: "Grace Hopper", at: 3.6 },
+  { what: "Photo", icon: photo, cable: "SEA-ME-WE 6", at: 8, reverse: true },
+  { what: "Game move", icon: deviceGamepad2, cable: "JUPITER", at: 12.4 },
 ];
 
 const TRIP = 2.8;
@@ -588,7 +552,7 @@ function Ride({ journey }: { journey: Journey }): SvgNode {
 }
 
 /** Where the readout for the journey under way sits, under the map on the right. */
-const READOUT = rect(572, 436, 348, 72);
+const READOUT = rect(W - MARGIN - 348, MARGIN, 348, 64);
 
 /** The journey under way: a colored rule, what it carries and where, and the time light takes, set large. */
 function Readout({ journey, until }: { journey: Journey; until: number }): SvgNode {
@@ -606,36 +570,34 @@ function Readout({ journey, until }: { journey: Journey; until: number }): SvgNo
     >
       <rect x={x} y={y} width={2} height={h} fill={color} />
       <Icon icon={journey.icon} x={x + 16} y={y + 1} size={14} stroke={color} strokeWidth={2} />
-      <g fontFamily={geistMono} fontSize={9.5}>
-        <text x={x + 37} y={y + 12} fill={color} letterSpacing={1.6}>
-          {journey.what.toUpperCase()}
+      <g fontFamily={mono} fontSize={size.label}>
+        <text x={x + 37} y={y + 12} fill={color}>
+          {journey.what}
         </text>
-        <text x={x + 16} y={y + h - 2} fill={C.dim} letterSpacing={1.6}>
-          {`${journey.cable.toUpperCase()} · ${(Math.round(km / 100) * 100).toLocaleString("en-US")} KM`}
+        <text x={x + 16} y={y + h - 2} fill={C.dim}>
+          {`${journey.cable} · ${(Math.round(km / 100) * 100).toLocaleString("en-US")} km`}
         </text>
-        <text x={right} y={y + h - 2} textAnchor="end" fill={C.dim} letterSpacing={1.6}>
-          ONE WAY
+        <text x={right} y={y + h - 2} textAnchor="end" fill={C.dim}>
+          One-way light travel
         </text>
       </g>
       <text
         x={x + 16}
         y={y + 44}
         fontFamily={geist}
-        fontSize={21}
+        fontSize={size.heading}
         fontWeight={600}
-        letterSpacing={-0.6}
         fill={C.text}
       >
         {`${from.name} → ${to.name}`}
       </text>
       <text
         x={right}
-        y={y + 50}
+        y={y + 46}
         textAnchor="end"
         fontFamily={geist}
-        fontSize={44}
+        fontSize={size.readout}
         fontWeight={600}
-        letterSpacing={-2}
         fill={C.text}
       >
         {Math.round(km / FIBRE)}
@@ -649,34 +611,14 @@ function Readout({ journey, until }: { journey: Journey; until: number }): SvgNo
 
 const fibre = Math.round(laid.reduce((km, l) => km + distance(route(l.cable)), 0) / 1000);
 
-function Title(): SvgNode {
+function Heading(): SvgNode {
   return (
-    <g animation={[leave, enter({ at: 0.4, over: 0.8 }, { y: 8, opacity: 0 })]}>
-      <text
-        x={40}
-        y={448}
-        fontFamily={geistMono}
-        fontSize={10}
-        fontWeight={500}
-        letterSpacing={2.4}
-        fill={hue(0)}
-      >
-        SUBMARINE CABLES
-      </text>
-      <text
-        x={38}
-        y={482}
-        fontFamily={geist}
-        fontSize={32}
-        fontWeight={600}
-        letterSpacing={-1.2}
-        fill={C.text}
-      >
-        The internet is wet
-      </text>
-      <text x={40} y={506} fontFamily={geist} fontSize={13} fill={C.dim}>
-        {`${CABLES.length} of the 500-odd cables on the sea floor, ${fibre},000 km of glass.`}
-      </text>
+    <g animation={[leave, rise(0.4)]}>
+      <Title
+        title="Undersea internet cables"
+        subtitle={`${CABLES.length} of the 500+ cables in service, about ${fibre},000 km in total.`}
+        at={0}
+      />
     </g>
   );
 }
@@ -687,14 +629,14 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "The internet is wet",
-      desc: "A dark world map, dotted where there is land, draws fifteen real submarine cables across the oceans. Packets of light stream along them, and three journeys ride a cable each: a video call from New York to Bude, a photo from Singapore to Marseille and a game move from Tokyo to Oregon that leaves the right edge of the map and comes back on the left.",
+      title: "Undersea internet cables",
+      desc: "A world map draws 15 submarine cables. Packets stream along them, and three journeys show the one-way light travel time: a video call from New York to Bude, a photo from Singapore to Marseille, and a game move from Tokyo to Oregon.",
       reducedMotion: { at: 9.4 },
-      css: css`${style}${packetCss}`,
+      css: css`${paletteCss}${packetCss}`,
       comment: "Generated by svjeez. Edit examples/cables/ instead of this file.",
     },
     <>
-      <rect width={W} height={H} fill={haze} />
+      <rect width={W} height={H} fill={C.sea} />
       <Land />
       <Cables />
       <Traffic />
@@ -702,7 +644,7 @@ export default function build(): string {
       {JOURNEYS.map((journey) => (
         <Ride journey={journey} />
       ))}
-      <Title />
+      <Heading />
       {JOURNEYS.map((journey, i) => (
         <Readout journey={journey} until={JOURNEYS[i + 1]?.at ?? OUT} />
       ))}
