@@ -1241,8 +1241,9 @@ pre.side {
 /* "your agent" is a scene (examples/site/your-agent.tsx) inlined here; its ink is currentColor. */
 .edit ins svg {
   display: block;
-  inline-size: auto;
-  block-size: 2em;
+  inline-size: 6.4em;
+  max-inline-size: none;
+  block-size: 1.92em;
   overflow: visible;
 }
 .edit ins span:first-child {
