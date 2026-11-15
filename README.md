@@ -128,7 +128,7 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 <table>
   <tr>
     <td width="50%"><a href="https://svjeez.texoport.in/examples/horizon"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/horizon.svg" width="100%" alt="A cinematic black hole with a glowing accretion disk, lensed photon ring, relativistic jets, and HUD telemetry." /></a></td>
-    <td width="50%"><a href="https://svjeez.texoport.in/examples/breaker"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/breaker.svg" width="100%" alt="A six-slide explainer on circuit breakers combining code morphs, a state machine, a sequence diagram, and a flowchart." /></a></td>
+    <td width="50%"><a href="https://github.com/saiashirwad/svjeez/tree/main/examples/breaker"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/breaker.svg" width="100%" alt="A six-slide explainer on circuit breakers combining code morphs, a state machine, a sequence diagram, and a flowchart." /></a></td>
   </tr>
 </table>
 
