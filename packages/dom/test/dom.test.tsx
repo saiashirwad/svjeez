@@ -656,8 +656,8 @@ describe("Dom", () => {
     const after = await card.snap();
     const node = <Dom states={[before, wait(0.5), after]} fonts={[regular]} />;
 
-    // No frame draws both shapes at more than a tenth.
-    const shapes = (n: SvgNode, t: number): number[] => {
+    // No frame draws both icons at more than a tenth.
+    const icons = (n: SvgNode, t: number): number[] => {
       if (n.kind !== "element") return [];
 
       const own = Number(n.attrs.opacity ?? 1) * n.motions.reduce((o, m) => o * (valuesAt(m, t, { duration: 4 }).opacity ?? 1), 1);
@@ -665,11 +665,11 @@ describe("Dom", () => {
       // The two icons: the circle and the 12px square.
       if (n.tag === "circle" || (n.tag === "rect" && Number(n.attrs.width) === 12)) return [own];
 
-      return n.children.flatMap((c) => shapes(c, t).map((o) => o * own));
+      return n.children.flatMap((c) => icons(c, t).map((o) => o * own));
     };
 
     for (let t = 0.5; t <= 1.1; t += 0.02) {
-      const on = shapes(node, t).filter((o) => o > 0.1);
+      const on = icons(node, t).filter((o) => o > 0.1);
 
       expect(on.length).toBeLessThanOrEqual(1);
     }

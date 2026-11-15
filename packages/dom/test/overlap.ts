@@ -27,13 +27,16 @@ const attr = (node: SvgNode & { kind: "element" }, name: string): number =>
 export const textsAt = (node: SvgNode, t: number, duration: number, width = 0.6): Seen[] => {
   const walk = (n: SvgNode, dx: number, dy: number, o: number): Seen[] => {
     if (n.kind !== "element")
+      // SAFETY: a node with children that is not an element is a fragment, whose children are SvgNodes.
       return "children" in n ? (n.children as SvgNode[]).flatMap((c) => walk(c, dx, dy, o)) : [];
 
+    // SAFETY: the motions here animate numeric channels only, so every value at t is a number.
     const v = n.motions.reduce<Record<string, number | undefined>>(
-      (all, m) => ({ ...all, ...(valuesAt(m, t, { duration }) as Record<string, number>) }),
+      (all, m) => Object.assign(all, valuesAt(m, t, { duration }) as Record<string, number>),
       {},
     );
 
+    // SAFETY: opacity is a numeric channel, so its value at t is a number when the motion sets it.
     const opacity = o * Number(n.attrs.opacity ?? 1) * n.motions.reduce((p, m) => p * ((valuesAt(m, t, { duration }).opacity as number | undefined) ?? 1), 1);
 
     if (n.tag === "text") {
