@@ -237,17 +237,21 @@ export const painter = (
     )
       return <g animation={slideIn(tween, dx, dy)}>{item(b)}</g>;
 
+    // Glyphs one over the other read as noise, so text and icons leave before the new ones come in.
+    const [out, into] =
+      a.kind === "box" ? (["swapOut", "swapIn"] as const) : (["textOut", "textIn"] as const);
+
     return (
       <>
         <g
           animation={[
             motion({ x: 0, y: 0 }).at(tween.at).to({ x: -dx, y: -dy }, tween.over, tween.ease),
-            fade(tween, "swapOut"),
+            fade(tween, out),
           ]}
         >
           {item(a)}
         </g>
-        <g animation={[slideIn(tween, dx, dy), fade(tween, "swapIn")]}>{item(b)}</g>
+        <g animation={[slideIn(tween, dx, dy), fade(tween, into)]}>{item(b)}</g>
       </>
     );
   };

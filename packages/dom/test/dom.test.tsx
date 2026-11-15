@@ -10,6 +10,7 @@ import { validateSvg } from "svjeez/frames";
 import { boxes } from "../src/find.ts";
 import { unwrap } from "../src/fonts.ts";
 import { sides } from "../src/paint.ts";
+import { clashes } from "./overlap.ts";
 import {
   act,
   click,
@@ -595,19 +596,94 @@ describe("Dom", () => {
     await card.close();
   });
 
-  test("changed text crossfades without dimming in the middle", async () => {
+  test("changed text crossfades one after the other, never both at once", async () => {
     const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
     const before = await card.snap();
 
     await card.html('<div class="card"><p>no lines</p></div>');
     const node = <Dom states={[before, wait(0.5), await card.snap()]} fonts={[regular]} />;
 
-    // Where the two overlap, the new one over the old covers nearly as much as either alone.
+    // The old one is gone before the new one shows, and one of them is always on.
     for (let t = 0.5; t <= 1.1; t += 0.05) {
       const [old] = inkOf(node, "214 lines", t);
       const [now] = inkOf(node, "no lines", t);
 
-      expect(now! + old! * (1 - now!)).toBeGreaterThan(0.9);
+      expect(Math.min(old!, now!)).toBeLessThan(0.01);
+    }
+
+    expect(inkOf(node, "214 lines", 0.5)[0]).toBe(1);
+    expect(inkOf(node, "no lines", 1.1)[0]).toBe(1);
+    expect(clashes(node, 4)).toEqual([]);
+
+    await card.close();
+  });
+
+  test("clashes flags two different texts that overlap while both show", async () => {
+    const card = await dom.mount('<div class="card"><p>214 lines</p></div>', { css: CSS });
+    const before = await card.snap();
+
+    await card.html('<div class="card"><p>no lines</p></div>');
+    const after = await card.snap();
+
+    // The old text drawn over the new one the whole time, as a plain crossfade at the same place would.
+    const both = (
+      <>
+        <Dom states={before} fonts={[regular]} />
+        <Dom states={after} fonts={[regular]} />
+      </>
+    );
+
+    const found = clashes(both, 4, 0, 1);
+
+    expect(found.length).toBeGreaterThan(0);
+    expect(found[0]!.a.text).not.toBe(found[0]!.b.text);
+
+    // The same text never clashes with itself, and a counted number swaps its values one at a time.
+    await card.html('<div class="card"><p>214 lines</p></div>');
+    expect(
+      clashes(<Dom states={[before, wait(0.5), await card.snap()]} fonts={[regular]} />, 4),
+    ).toEqual([]);
+
+    await card.html('<div class="card"><p>230 lines</p></div>');
+    expect(
+      clashes(<Dom states={[before, wait(0.5), await card.snap()]} fonts={[regular]} />, 4),
+    ).toEqual([]);
+
+    await card.close();
+  });
+
+  test("an icon that changes leaves before the new one comes in", async () => {
+    const card = await dom.mount(
+      '<div class="card"><p><svg width="16" height="16"><circle cx="8" cy="8" r="6"/></svg> a</p></div>',
+      { css: CSS },
+    );
+
+    const before = await card.snap();
+
+    await card.html(
+      '<div class="card"><p><svg width="16" height="16"><rect width="12" height="12"/></svg> a</p></div>',
+    );
+    const after = await card.snap();
+    const node = <Dom states={[before, wait(0.5), after]} fonts={[regular]} />;
+
+    // No frame draws both icons at more than a tenth.
+    const icons = (n: SvgNode, t: number): number[] => {
+      if (n.kind !== "element") return [];
+
+      const own =
+        Number(n.attrs.opacity ?? 1) *
+        n.motions.reduce((o, m) => o * (valuesAt(m, t, { duration: 4 }).opacity ?? 1), 1);
+
+      // The two icons: the circle and the 12px square.
+      if (n.tag === "circle" || (n.tag === "rect" && Number(n.attrs.width) === 12)) return [own];
+
+      return n.children.flatMap((c) => icons(c, t).map((o) => o * own));
+    };
+
+    for (let t = 0.5; t <= 1.1; t += 0.02) {
+      const on = icons(node, t).filter((o) => o > 0.1);
+
+      expect(on.length).toBeLessThanOrEqual(1);
     }
 
     await card.close();
