@@ -6,10 +6,12 @@ import { join } from "node:path";
 const EXAMPLES = join(import.meta.dir, "..");
 const SITE = join(EXAMPLES, "..", "site", "src", "examples.ts");
 
-const names = [...readFileSync(SITE, "utf8").matchAll(/^\s+"([\w-]+)",$/gm)].map((match) => match[1]!);
+const names = [...readFileSync(SITE, "utf8").matchAll(/^\s+"([\w-]+)",$/gm)].map(
+  (match) => match[1]!,
+);
 
 // Scenes whose material is the point: they keep their own palette. Everything else paints with var(--base0X).
-const OWN_PALETTE = ["horizon", "neon", "newspaper"];
+const OWN_PALETTE = ["horizon", "newspaper"];
 
 // Scenes that show specimen faces or embed their own art keep their own fonts.
 const OWN_FONTS = ["fonts", "map", "newspaper"];
@@ -64,7 +66,8 @@ describe("gallery scenes follow examples/gallery-style.ts", () => {
 
   test("fonts are embedded: Geist for text, JetBrains Mono for code and figures", () => {
     const found = sceneProblems((name, file, source) =>
-      OWN_FONTS.includes(name) || !/ui-monospace|\bGeist Mono|geistMono|IBM Plex|["']Inter["']|font-family="Inter/.test(source)
+      OWN_FONTS.includes(name) ||
+      !/ui-monospace|\bGeist Mono|geistMono|IBM Plex|["']Inter["']|font-family="Inter/.test(source)
         ? []
         : [`${name}/${file}: use geist and mono from examples/gallery-style.ts`],
     );

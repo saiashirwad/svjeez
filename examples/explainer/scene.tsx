@@ -1,13 +1,13 @@
 import { ease, motion, render } from "svjeez";
-import { chick } from "../site/lib/chick";
+import { SQUASH, chick } from "../site/lib/chick";
 
-export const hop = motion({ y: 60 })
-  .to({ y: 0 }, { at: 0.4, over: 0.4 }, ease.out)
-  .to({ y: 60 }, { at: 0.8, over: 0.4 }, ease.in);
+export const frame = { width: 208, height: 300, duration: 1.5, title: "A chick hops", css: SQUASH };
+
+export const hop = motion({ y: 100 })
+  .at(0.4).to({ y: 10 }, 0.4, ease.out)
+  .to({ y: 100 }, 0.4, ease.in);
 
 export default () =>
-  render(
-    { width: 208, height: 240, duration: 2,
-      title: "A chick hops" },
-    chick({ body: hop }),
-  );
+  render(frame, chick({
+    body: hop,
+  }));
