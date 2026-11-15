@@ -25,7 +25,7 @@ const runs = (it: Item): TextRun[] =>
 
 const draw = async (markup: string, css = "") => {
   const card = await dom.mount(markup, { css });
-  const [state] = await card.run([snap("a")]);
+  const state = await card.snap();
   await card.close();
 
   return state!;
@@ -38,7 +38,7 @@ describe("real pages", () => {
     );
 
     const [a, b] = state.root.children.flatMap(runs);
-    const svg = render({ ...size(state), duration: 1 }, <Dom states={[state]} />);
+    const svg = render({ ...size(state), duration: 1, title: "dom" }, <Dom states={[state]} />);
 
     expect(a).toMatchObject({
       family: "-apple-system",
@@ -56,11 +56,38 @@ describe("real pages", () => {
     );
 
     const all = runs(state.root);
-    const svg = render({ ...size(state), duration: 1 }, <Dom states={[state]} />);
+    const svg = render({ ...size(state), duration: 1, title: "dom" }, <Dom states={[state]} />);
 
     expect(all.filter((r) => r.decoration).map((r) => r.text)).toEqual(["this", "link"]);
     expect(all.find((r) => r.text === "wide")?.stretch).toBe(62);
     expect(svg).toContain('text-decoration="underline"');
     expect(svg).toContain('font-stretch="62%"');
+  });
+
+  test("images: backgrounds, object-fit and a mask draw once per file, as <use>", async () => {
+    const icon = (c: string) =>
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='${c}'/%3E%3C/svg%3E")`;
+
+    const state = await draw(
+      `<div>
+        <i class="a"></i><i class="a"></i>
+        <b class="m"></b>
+        <img style="width:40px;height:20px;object-fit:contain" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3C/svg%3E">
+      </div>`,
+      `i.a { display:block; width:20px; height:20px; background: ${icon("%23f00")} center / 10px 10px no-repeat }
+       b.m { display:block; width:30px; height:30px; background:#06c; mask: ${icon("%23000")} center / calc(100% - 10px) auto no-repeat }`,
+    );
+
+    const boxes = state.root.children.filter((c) => c.kind === "box");
+    const img = state.root.children.find((c) => c.kind === "image");
+    const svg = render({ ...size(state), duration: 1, title: "dom" }, <Dom states={[state]} />);
+
+    expect(boxes[0]).toMatchObject({
+      pictures: [{ tiles: [{ x: 21, y: 21, width: 10, height: 10 }] }],
+    });
+    expect(boxes[2]?.mask?.[0]?.tiles[0]).toMatchObject({ width: 20, height: 20 });
+    expect(img).toMatchObject({ fit: { x: 26, width: 20, height: 20 } });
+    expect(svg.match(/<symbol/g)).toHaveLength(3);
+    expect(svg).toContain("<mask");
   });
 });

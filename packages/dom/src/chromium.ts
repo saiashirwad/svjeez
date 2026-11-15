@@ -9,6 +9,7 @@ import {
 } from "./browser.ts";
 import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, sources, unwrap } from "./fonts.ts";
+import { embed, preload } from "./images.ts";
 import { Differ, merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { walk, type Marks } from "./walk.ts";
@@ -214,6 +215,35 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   // Font files by URL, fetched once for every card.
   const files = new Map<string, Promise<string | undefined>>();
 
+  // Image files by URL, fetched once for every card.
+  const pictures = new Map<string, Promise<string | undefined>>();
+
+  /** An image the page's CSS or markup names, fetched from Node so a cross-origin file needs no CORS. */
+  const picture = (page: Page) => (url: string) => {
+    let file = pictures.get(url);
+
+    if (!file) {
+      file = page.request.get(url).then(
+        async (response) => {
+          if (!response.ok()) return undefined;
+
+          const type = (response.headers()["content-type"] ?? "").split(";")[0]!.trim();
+          const mime = type.startsWith("image/")
+            ? type
+            : /\.svg(\?|$)/i.test(url)
+              ? "image/svg+xml"
+              : undefined;
+
+          return mime && `data:${mime};base64,${(await response.body()).toString("base64")}`;
+        },
+        () => undefined,
+      );
+      pictures.set(url, file);
+    }
+
+    return file;
+  };
+
   /** The page's own web fonts, fetched from Node so a cross-origin file needs no CORS. */
   const capture = async (page: Page, used: string[]): Promise<Face[]> => {
     if (used.length === 0) return [];
@@ -272,6 +302,8 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       cdp ??= await page.context().newCDPSession(page);
       await markPseudos(cdp, page);
 
+      await page.evaluate(preload);
+
       return page.evaluate(walk, { selector, pad, parts });
     };
 
@@ -296,7 +328,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       await shim(page);
       await settle(page, true);
 
-      const root = await both(3);
+      const root = await embed(await both(3), picture(page));
 
       const fonts = await capture(
         page,

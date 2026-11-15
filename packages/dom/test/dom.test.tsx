@@ -910,7 +910,7 @@ describe("real pages", () => {
     await card.close();
     const svg = draw(snap);
 
-    expect(svg).toMatch(/<g clip-path="url\(#[^"]+\)">\s*<image /);
+    expect(svg).toMatch(/<g clip-path="url\(#[^"]+\)">\s*<use /);
     expect(validateSvg(svg).errors).toEqual([]);
   });
 

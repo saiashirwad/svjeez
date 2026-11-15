@@ -175,6 +175,7 @@ const ELEMENTS = {
   clipPath: { clipPathUnits: attr<Units>("clipPathUnits") },
   mask: {
     maskUnits: attr<Units>("maskUnits"),
+    maskType: attr<"alpha" | "luminance">("mask-type"),
     x: attr<Length>("x"),
     y: attr<Length>("y"),
     width: attr<Length>("width"),

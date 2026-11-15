@@ -75,11 +75,19 @@ export interface Graphic {
   readonly transform?: Transform;
 }
 
+/** An image from `background-image` or `mask-image`: its file, and every tile of it the page paints. */
+export interface Placement {
+  readonly href: string;
+  readonly tiles: readonly Rect[];
+}
+
 export interface Picture {
   readonly kind: "image";
   readonly box: Rect;
   readonly radii: Radii;
   readonly href: string;
+  /** Where the image is drawn when `object-fit` or `object-position` move it off the box; the box clips it. */
+  readonly fit?: Rect;
   readonly transform?: Transform;
 }
 
@@ -128,6 +136,10 @@ export interface Box {
   readonly background?: Paint;
   /** `background-image` gradients, bottom layer first, painted over `background`. */
   readonly gradients?: readonly Gradient[];
+  /** `background-image` urls, bottom layer first, painted over the gradients. */
+  readonly pictures?: readonly Placement[];
+  /** `mask-image` urls: the box and what's in it show only where these are opaque. */
+  readonly mask?: readonly Placement[];
   readonly border?: {
     readonly widths: readonly [number, number, number, number];
     readonly color: Paint;

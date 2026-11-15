@@ -4,6 +4,7 @@ import type {
   Graphic,
   Item,
   Picture,
+  Placement,
   Radii,
   Rect,
   Rgb,
@@ -25,12 +26,22 @@ export interface Marks {
 declare global {
   /** Where Chromium put each element's ::before and ::after, left by `markPseudos`: the DOM has no node to measure. */
   var __svjeezPseudo: WeakMap<Element, Marks> | undefined;
+  /** The size of every image a page's CSS names, left by `preload`: the walk is synchronous and can't wait to load one. */
+  var __svjeezImages: Map<string, readonly [number, number]> | undefined;
 }
 
 /** What an element or pseudo-element paints of itself. */
 type Surface = Pick<
   Box,
-  "radii" | "background" | "gradients" | "border" | "shadows" | "insets" | "opacity"
+  | "radii"
+  | "background"
+  | "gradients"
+  | "pictures"
+  | "mask"
+  | "border"
+  | "shadows"
+  | "insets"
+  | "opacity"
 >;
 
 /**
@@ -426,6 +437,94 @@ export function walk({
     return `rgba(${rgb(c)},${round(a + (1 - a) * Math.min(0.5, Number(blur[1]) / 24))})`;
   };
 
+  const natural = (url: string): readonly [number, number] | undefined =>
+    globalThis.__svjeezImages?.get(url);
+
+  /** A length or percentage of `of`; undefined for `auto` and anything else. */
+  const lengthOf = (v: string | undefined, of: number): number | undefined => {
+    const calc = /^calc\(\s*(-?[\d.]+)%\s*([+-])\s*([\d.]+)px\s*\)$/.exec(v ?? "");
+
+    if (calc)
+      return (parseFloat(calc[1]!) / 100) * of + (calc[2] === "-" ? -1 : 1) * parseFloat(calc[3]!);
+    const n = parseFloat(v ?? "");
+
+    return !v || !Number.isFinite(n) ? undefined : v.endsWith("%") ? (n / 100) * of : n;
+  };
+
+  /**
+   * The `url()` layers of `image`, bottom first, each laid out in `area` by its `size`, `position` and `repeat`:
+   * every tile it paints. `cover`, `contain`, lengths and percentages are read; `calc()` positions count as 0.
+   */
+  const placements = (
+    image: string,
+    sizes: string,
+    positions: string,
+    repeats: string,
+    area: Rect,
+  ): Placement[] => {
+    if (!image.includes("url(") || area.width <= 0 || area.height <= 0) return [];
+    const sz = split(sizes);
+    const ps = split(positions);
+    const rp = split(repeats);
+    const pick = (list: string[], i: number, rest: string) =>
+      (list[i % list.length] ?? rest).trim();
+
+    const run = (start: number, len: number, lo: number, hi: number): number[] => {
+      const out: number[] = [];
+
+      for (let s = start - Math.ceil((start - lo) / len) * len; s < hi && out.length < 40; s += len)
+        out.push(s);
+
+      return out;
+    };
+
+    return split(image)
+      .flatMap((layer, i): Placement[] => {
+        const href = /url\(\s*(["']?)(.*?)\1\s*\)/.exec(layer)?.[2];
+
+        if (!href) return [];
+        const [nw, nh] = natural(href) ?? [0, 0];
+        const ratio = nw && nh ? nw / nh : undefined;
+        const size = pick(sz, i, "auto");
+        const [sx, sy = "auto"] = size.match(/calc\([^)]*\)|\S+/g) ?? [];
+        let w: number | undefined;
+        let h: number | undefined;
+
+        if (size === "cover" || size === "contain") {
+          const fit = size === "cover" ? Math.max : Math.min;
+          const k = ratio ? fit(area.width / nw, area.height / nh) : undefined;
+
+          [w, h] = k ? [nw * k, nh * k] : [area.width, area.height];
+        } else {
+          w = lengthOf(sx, area.width);
+          h = lengthOf(sy, area.height);
+
+          if (w === undefined && h === undefined)
+            [w, h] = nw ? [nw, nh] : [area.width, area.height];
+          else if (w === undefined) w = ratio && h ? h * ratio : area.width;
+          else if (h === undefined) h = ratio ? w / ratio : area.height;
+        }
+
+        if (!w || !h || w <= 0 || h <= 0) return [];
+        const [ox = "50%", oy = "50%"] = pick(ps, i, "0% 0%").match(/calc\([^)]*\)|\S+/g) ?? [];
+        const x = area.x + (lengthOf(ox, area.width - w) ?? 0);
+        const y = area.y + (lengthOf(oy, area.height - h) ?? 0);
+        const repeat = pick(rp, i, "repeat");
+        const both = repeat === "repeat" || /space|round/.test(repeat);
+        const xs = both || repeat === "repeat-x" ? run(x, w, area.x, area.x + area.width) : [x];
+        const ys = both || repeat === "repeat-y" ? run(y, h, area.y, area.y + area.height) : [y];
+
+        const tiles = ys
+          .flatMap((ty) =>
+            xs.map((tx) => ({ x: round(tx), y: round(ty), width: round(w), height: round(h) })),
+          )
+          .slice(0, 400);
+
+        return [{ href, tiles }];
+      })
+      .reverse();
+  };
+
   /** What an element or pseudo-element paints of itself: corners, fill, gradients, border, shadows. */
   const surface = (s: CSSStyleDeclaration, r: DOMRect, b: Rect): Surface => {
     const visible = s.visibility !== "hidden";
@@ -441,10 +540,39 @@ export function walk({
     const borderColor = color(sides[widths.findIndex((w) => w > 0)] ?? "");
     const gradients = gradientsOf(s, b);
 
+    const padding = {
+      x: b.x + widths[3],
+      y: b.y + widths[0],
+      width: b.width - widths[1] - widths[3],
+      height: b.height - widths[0] - widths[2],
+    };
+
+    const listed = (list: Placement[]) => (list.length > 0 ? list : undefined);
+
     return {
       radii: radii(s, r.width, r.height),
       background: visible ? frost(color(s.backgroundColor), s) : undefined,
       gradients: gradients.length > 0 ? gradients : undefined,
+      pictures: visible
+        ? listed(
+            placements(
+              s.backgroundImage,
+              s.backgroundSize,
+              s.backgroundPosition,
+              s.backgroundRepeat,
+              padding,
+            ),
+          )
+        : undefined,
+      mask: listed(
+        placements(
+          s.maskImage || s.webkitMaskImage,
+          s.maskSize || s.webkitMaskSize,
+          s.maskPosition || s.webkitMaskPosition,
+          s.maskRepeat || s.webkitMaskRepeat,
+          b,
+        ),
+      ),
       border:
         visible && borderColor && widths.some((w) => w > 0)
           ? { widths, color: borderColor }
@@ -885,21 +1013,48 @@ export function walk({
     }
 
     if (el instanceof HTMLImageElement) {
-      try {
-        const c = document.createElement("canvas");
-        c.width = el.naturalWidth;
-        c.height = el.naturalHeight;
-        c.getContext("2d")!.drawImage(el, 0, 0);
+      const href = el.currentSrc || el.src;
 
-        return {
-          kind: "image",
-          box: rel(r),
-          radii: radii(s, r.width, r.height),
-          href: c.toDataURL("image/png"),
-        };
-      } catch {
-        return undefined;
+      // An image that hasn't loaded (a lazy one below the fold) has nothing to draw.
+      if (!href || !el.complete || r.width === 0 || r.height === 0) return undefined;
+
+      // The content box, which `object-fit` lays the image out in.
+      const cx = r.left + px(s.borderLeftWidth) + px(s.paddingLeft);
+      const cy = r.top + px(s.borderTopWidth) + px(s.paddingTop);
+      const cw =
+        r.width -
+        px(s.borderLeftWidth) -
+        px(s.borderRightWidth) -
+        px(s.paddingLeft) -
+        px(s.paddingRight);
+      const ch =
+        r.height -
+        px(s.borderTopWidth) -
+        px(s.borderBottomWidth) -
+        px(s.paddingTop) -
+        px(s.paddingBottom);
+      const nw = el.naturalWidth;
+      const nh = el.naturalHeight;
+      let fit: Rect | undefined;
+
+      if (nw && nh && cw > 0 && ch > 0 && s.objectFit !== "fill") {
+        const k =
+          s.objectFit === "cover"
+            ? Math.max(cw / nw, ch / nh)
+            : s.objectFit === "none"
+              ? 1
+              : s.objectFit === "scale-down"
+                ? Math.min(1, cw / nw, ch / nh)
+                : Math.min(cw / nw, ch / nh);
+
+        const [ox = "50%", oy = "50%"] = s.objectPosition.split(/\s+/);
+        const at = (v: string, space: number) =>
+          v.endsWith("%") ? (parseFloat(v) / 100) * space : px(v);
+
+        fit = rel(new DOMRect(cx + at(ox, cw - nw * k), cy + at(oy, ch - nh * k), nw * k, nh * k));
       }
+
+      return { kind: "image", box: rel(r), radii: radii(s, r.width, r.height), href, fit };
     }
 
     let children: Item[] = [];

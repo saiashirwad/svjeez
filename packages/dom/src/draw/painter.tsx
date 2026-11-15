@@ -16,7 +16,18 @@ import {
 } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { clear, invisible, isPair, opaque, schemeCss, variable } from "../paint.ts";
-import type { Box, Face, Item, Paint, Pair, Shadow, TextRun, Vector } from "../tree.ts";
+import type {
+  Box,
+  Face,
+  Item,
+  Paint,
+  Pair,
+  Placement,
+  Rect,
+  Shadow,
+  TextRun,
+  Vector,
+} from "../tree.ts";
 import { typefaces } from "./faces.ts";
 import {
   borderRing,
@@ -71,6 +82,12 @@ interface Extra {
   readonly fillRule?: "evenodd";
 }
 
+const within = (r: Rect, outer: Rect): boolean =>
+  r.x >= outer.x &&
+  r.y >= outer.y &&
+  r.x + r.width <= outer.x + outer.width &&
+  r.y + r.height <= outer.y + outer.height;
+
 const transformed = (it: Boxed, node: SvgNode): SvgNode =>
   it.transform ? <g transform={matrix(it.transform)}>{node}</g> : node;
 
@@ -112,6 +129,61 @@ export const painter = (
     const m = parts[b.part];
 
     return m instanceof Function ? m(index) : m;
+  };
+
+  // An image file is defined once however many times it is drawn, scaled into each place it is used.
+  const files = new Map<string, Ref<"symbol">>();
+
+  const tile = (href: string, r: Rect): SvgNode => {
+    let ref = files.get(href);
+
+    if (!ref) {
+      ref = def.symbol(
+        {},
+        jsx("image", { href, x: 0, y: 0, width: 1, height: 1, preserveAspectRatio: "none" }),
+      );
+      files.set(href, ref);
+    }
+
+    return jsx("use", {
+      href: ref,
+      transform: `translate(${num(r.x)} ${num(r.y)}) scale(${num(r.width)} ${num(r.height)})`,
+    });
+  };
+
+  const tiles = (list: readonly Placement[]): SvgNode[] =>
+    list.flatMap((p) => p.tiles.map((r) => tile(p.href, r)));
+
+  /** `background-image` urls, clipped to the box's shape. */
+  const pictures = (b: Box): Child => {
+    if (!b.pictures) return null;
+    const all = tiles(b.pictures);
+    const inside = b.pictures.every((p) => p.tiles.every((r) => within(r, b.box)));
+
+    return b.radii.some((r) => r > 0) || !inside ? (
+      <g clipPath={def.clipPath({}, <path d={rounded(b.box, b.radii)} />)}>{all}</g>
+    ) : (
+      all
+    );
+  };
+
+  /** What shows of `drawn` where the `mask-image` is opaque. */
+  const masked = (b: Box, drawn: SvgNode): SvgNode => {
+    if (!b.mask) return drawn;
+
+    const mask = def.mask(
+      {
+        maskUnits: "userSpaceOnUse",
+        maskType: "alpha",
+        x: b.box.x,
+        y: b.box.y,
+        width: b.box.width,
+        height: b.box.height,
+      },
+      tiles(b.mask),
+    );
+
+    return <g mask={mask}>{drawn}</g>;
   };
 
   const text = (run: TextRun, animation?: Stack<TagChannels<"text">>): SvgNode =>
@@ -179,17 +251,12 @@ export const painter = (
       }
 
       case "image": {
-        const clip = it.radii.some((r) => r > 0)
-          ? def.clipPath({}, <path d={rounded(it.box, it.radii)} />)
-          : undefined;
+        const clip =
+          it.radii.some((r) => r > 0) || it.fit
+            ? def.clipPath({}, <path d={rounded(it.box, it.radii)} />)
+            : undefined;
 
-        const image = jsx("image", {
-          href: it.href,
-          x: num(it.box.x),
-          y: num(it.box.y),
-          width: num(it.box.width),
-          height: num(it.box.height),
-        });
+        const image = tile(it.href, it.fit ?? it.box);
 
         // An `<image>` takes no clip-path in svjeez, so a group around it does.
         return transformed(it, clip ? <g clipPath={clip}>{image}</g> : image);
@@ -604,7 +671,8 @@ export const painter = (
 
     const motions = [...[partMotion(b)].flat(), opacity].filter(Boolean);
 
-    const drawn = (
+    const drawn = masked(
+      b,
       <>
         {shadows}
         {layer(
@@ -615,10 +683,11 @@ export const painter = (
           (x) => rounded(x.box, x.radii),
         )}
         {gradients(b, a, tween)}
+        {pictures(b)}
         {insetShadows(b, padding, a, tween)}
         {layer(b, a, tween, (x) => x.border?.color, borderRing, { fillRule: "evenodd" })}
         {clip ? <g clipPath={clip}>{kids}</g> : kids}
-      </>
+      </>,
     );
 
     // A box with nothing of its own to apply adds no group: deep pages nest hundreds of plain wrappers.
