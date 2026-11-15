@@ -1,6 +1,6 @@
-import { Picture, ease, enter, fx, motion, picture, render, systemDark, type PictureProps } from "svjeez";
+import { Picture, ease, enter, fx, motion, picture, render, type PictureProps } from "svjeez";
 
-import { HEIGHT, MARGIN, WIDTH, color, css, geist, leave, size } from "../gallery-style";
+import { HEIGHT, MARGIN, WIDTH, color, css, duotone, geist, leave, size } from "../gallery-style";
 
 const W = WIDTH;
 const H = HEIGHT;
@@ -67,7 +67,7 @@ export default function build(): string {
           label="Duotone"
           at={0.5}
           src={photo}
-          filter={fx.duotone({ dark: systemDark.base0D, light: systemDark.base0A })}
+          filter={fx.duotone(duotone)}
           alt="The hills in blue and yellow"
         />
         <Slot x={col(1)} y={ROW[1]} label="Grayscale" at={0.6} src={photo} filter={fx.grayscale()} alt="The hills in gray" />

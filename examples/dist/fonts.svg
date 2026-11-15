@@ -101,12 +101,12 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <path d="M758.87 146.05Q769.77 146.05 775.21 152.09Q780.66 158.13 780.66 169.5L780.66 210L757.1 210L757.1 172.34Q757.1 168.32 755.02 165.89Q752.95 163.46 749.16 163.46Q744.78 163.46 742.06 166.3Q739.33 169.15 739.33 173.29L739.33 210L715.77 210L715.77 124.15L739.33 124.15L739.33 153.99Q743.12 150.2 748.21 148.13Q753.31 146.05 758.87 146.05Z" class="a m19"/>
       <path d="M806.12 234.87Q798.42 234.87 792.5 232.74L792.5 218.64L801.98 218.64Q810.86 218.64 812.51 210L787.65 147.48L812.99 147.48L824.95 189.04L825.78 189.04L836.79 147.48L860 147.48L837.74 208.11Q832.88 221.25 825.84 228.06Q818.79 234.87 806.12 234.87Z" class="a m20"/>
     </g>
-    <text x="480" y="240" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)" class="a m21">Archivo Black</text>
+    <text x="480" y="270" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)" class="a m21">Archivo Black</text>
     <g class="a m22">
-      <text x="228.798" y="318" font-family="'ABeeZee', sans-serif" font-size="28" fill="var(--base06)">Sphinx of black quartz, judge my vow.</text>
-      <text x="217.64" y="360" font-family="'ABeeZee', sans-serif" font-style="italic" font-size="28" fill="var(--base04)">Pack my box with five dozen liquor jugs.</text>
+      <text x="228.798" y="330" font-family="'ABeeZee', sans-serif" font-size="28" fill="var(--base06)">Sphinx of black quartz, judge my vow.</text>
+      <text x="217.64" y="372" font-family="'ABeeZee', sans-serif" font-style="italic" font-size="28" fill="var(--base04)">Pack my box with five dozen liquor jugs.</text>
     </g>
-    <rect x="228.798" y="378" width="502.404" height="2" rx="1" fill="var(--base0B)" class="a m23 fb"/>
-    <text x="480" y="408" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)" class="a m24">ABeeZee</text>
+    <rect x="228.798" y="390" width="502.404" height="2" rx="1" fill="var(--base0B)" class="a m23 fb"/>
+    <text x="480" y="420" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)" class="a m24">ABeeZee</text>
   </g>
 </svg>

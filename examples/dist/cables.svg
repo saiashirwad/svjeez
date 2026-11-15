@@ -726,7 +726,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="912" y="110" text-anchor="end" fill="var(--base04)">One-way light travel</text>
     </g>
     <text x="580" y="92" font-family="'Geist', sans-serif" font-size="18" font-weight="600" fill="var(--base06)">New York → Bude</text>
-    <text x="912" y="98" text-anchor="end" font-family="'Geist', sans-serif" font-size="44" font-weight="600" fill="var(--base06)">26<tspan font-size="16" letter-spacing="0" fill="var(--base04)"> ms</tspan></text>
+    <text x="912" y="94" text-anchor="end" font-family="'Geist', sans-serif" font-size="44" font-weight="600" fill="var(--base06)">26<tspan font-size="16" letter-spacing="0" fill="var(--base04)"> ms</tspan></text>
   </g>
   <g class="a m156">
     <rect x="564" y="48" width="2" height="64" fill="var(--base0D)"/>
@@ -742,7 +742,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="912" y="110" text-anchor="end" fill="var(--base04)">One-way light travel</text>
     </g>
     <text x="580" y="92" font-family="'Geist', sans-serif" font-size="18" font-weight="600" fill="var(--base06)">Singapore → Marseille</text>
-    <text x="912" y="98" text-anchor="end" font-family="'Geist', sans-serif" font-size="44" font-weight="600" fill="var(--base06)">66<tspan font-size="16" letter-spacing="0" fill="var(--base04)"> ms</tspan></text>
+    <text x="912" y="94" text-anchor="end" font-family="'Geist', sans-serif" font-size="44" font-weight="600" fill="var(--base06)">66<tspan font-size="16" letter-spacing="0" fill="var(--base04)"> ms</tspan></text>
   </g>
   <g class="a m157">
     <rect x="564" y="48" width="2" height="64" fill="var(--base0C)"/>
@@ -759,6 +759,6 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="912" y="110" text-anchor="end" fill="var(--base04)">One-way light travel</text>
     </g>
     <text x="580" y="92" font-family="'Geist', sans-serif" font-size="18" font-weight="600" fill="var(--base06)">Tokyo → Oregon</text>
-    <text x="912" y="98" text-anchor="end" font-family="'Geist', sans-serif" font-size="44" font-weight="600" fill="var(--base06)">38<tspan font-size="16" letter-spacing="0" fill="var(--base04)"> ms</tspan></text>
+    <text x="912" y="94" text-anchor="end" font-family="'Geist', sans-serif" font-size="44" font-weight="600" fill="var(--base06)">38<tspan font-size="16" letter-spacing="0" fill="var(--base04)"> ms</tspan></text>
   </g>
 </svg>

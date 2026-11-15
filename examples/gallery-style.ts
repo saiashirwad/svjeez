@@ -13,6 +13,9 @@ const text = css;
 const strings = Object.assign([text], { raw: [text] });
 export const paletteCss: Css = cssTag(strings);
 
+/** Colors for `fx.duotone`, which needs hex: the dark palette's blue and yellow. */
+export const duotone = { dark: "#5EA0FF", light: "#FFD60A" } as const;
+
 /** The canvas: 16:9, because a gallery card crops everything to 16:9. Author at this size, or at the same ratio. */
 export const WIDTH = 960;
 export const HEIGHT = 540;

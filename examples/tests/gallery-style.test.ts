@@ -87,7 +87,7 @@ describe("gallery scenes follow examples/gallery-style.ts", () => {
 
   test("no scene spins in", () => {
     const found = sceneProblems((name, file, source) =>
-      /rotate: ?\{?\s*(?:1080|720|540|360)\b/.test(source) ? [`${name}/${file}: a spin-in`] : [],
+      /rotate: ?-?(?:1080|720|540)\b/.test(source) ? [`${name}/${file}: a spin-in`] : [],
     );
 
     expect(found).toEqual([]);

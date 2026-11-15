@@ -4,7 +4,7 @@ import { enter, render } from "svjeez";
 // The explainer shows this scene and the CSS it compiles to. If either changes, update examples/explainer/index.tsx.
 describe("the explainer's code is what svjeez outputs", () => {
   const svg = render(
-    { width: 320, height: 180, duration: 2 },
+    { width: 320, height: 180, duration: 2, title: "A square" },
     <rect
       x={120} y={50} width={80} height={80} rx={12}
       animation={enter({ at: 0.5, over: 1 }, { x: -120 })}
