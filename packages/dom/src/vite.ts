@@ -1,6 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import type { AddressInfo } from "node:net";
-import { dirname } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { InlineConfig, Plugin, ViteDevServer } from "vite";
 import type { BrowserOptions } from "./browser.ts";
@@ -71,7 +72,7 @@ const route = (file: string, demos: () => Readonly<Record<string, Demo>>): Plugi
 });
 
 /** Every file of the app the demo module reaches, read, so a change anywhere in it records again. */
-const sources = async (server: ViteDevServer, file: string): Promise<string> => {
+const sources = async (server: ViteDevServer, file: string, root: string): Promise<string> => {
   const graph = server.environments.ssr.moduleGraph;
   const seen = new Set<string>();
   const paths = new Set<string>();
@@ -89,11 +90,12 @@ const sources = async (server: ViteDevServer, file: string): Promise<string> => 
 
   await visit(file);
 
-  // In path order, so the hash doesn't depend on the order Vite walked the graph.
+  // In path order, so the hash doesn't depend on the order Vite walked the graph, and by paths from the root, so it
+  // doesn't depend on where the checkout is either.
   const sorted = [...paths].sort();
   const texts = await Promise.all(sorted.map((path) => readFile(path, "utf8").catch(() => "")));
 
-  return sha256(sorted.map((path, i) => path + texts[i]).join(""));
+  return sha256(sorted.map((path, i) => relative(root, path) + texts[i]).join(""));
 };
 
 /**
@@ -111,10 +113,14 @@ export const recordings = async <M extends Record<string, unknown>>(
   const frameworks = (["react", "svelte"] as const).filter((f) => source.includes(`@svjeez/dom/${f}`));
   const root = config.root ?? dirname(file);
   let demos: Record<string, Demo> = {};
+  // A dependency cache of its own: two recordings of one app at once (a build runs scenes together) would otherwise
+  // bundle into the same folder, and a page that loads mid-bundle never mounts.
+  const cacheDir = await mkdtemp(join(tmpdir(), "svjeez-vite-"));
 
   const server = await createServer(
     mergeConfig(config, {
       root,
+      cacheDir,
       logLevel: "warn",
       appType: "custom",
       plugins: [route(file, () => demos)],
@@ -132,7 +138,7 @@ export const recordings = async <M extends Record<string, unknown>>(
     demos = Object.fromEntries(Object.entries(mod).filter((e): e is [string, Demo] => isDemo(e[1])));
 
     const { port } = server.httpServer!.address() as AddressInfo;
-    const made = await sources(server, file);
+    const made = await sources(server, file, root);
 
     return (await snapshots(
       cache,
@@ -162,5 +168,6 @@ export const recordings = async <M extends Record<string, unknown>>(
     )) as never;
   } finally {
     await server.close();
+    await rm(cacheDir, { recursive: true, force: true });
   }
 };

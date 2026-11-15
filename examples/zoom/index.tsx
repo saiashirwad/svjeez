@@ -11,7 +11,7 @@ const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 const geist = await google.family("Geist", [400, 500, 600]);
 
 const demos = await recordings<typeof import("../demos/cards.demo.tsx")>(here("../demos/cards.demo.tsx"), {
-  cache: here("../demos/snapshots.json"),
+  cache: here("snapshots.json"),
   fonts: [geist],
 });
 
