@@ -94,11 +94,11 @@ export function SignIn({ error }: { error?: string }) {
             <div className="text-destructive/90 col-start-2 text-sm">Check your email and password.</div>
           </div>
         )}
-        <label className="grid gap-2 text-sm font-medium">
+        <label data-part="email-field" className="grid gap-2 text-sm font-medium">
           Email
           <Input data-part="email" placeholder="m@example.com" value={email} onChange={setEmail} invalid={!!error} />
         </label>
-        <label className="grid gap-2 text-sm font-medium">
+        <label data-part="password-field" className="grid gap-2 text-sm font-medium">
           Password
           <Input data-part="password" type="password" value={password} onChange={setPassword} />
         </label>

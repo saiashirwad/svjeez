@@ -76,6 +76,20 @@ const demos = await recordings<typeof import("./SignIn.demo.tsx")>(here("SignIn.
 - The recording is kept in `cache`. It is made again when a demo's flow changes, or any file the demo file imports, however deep.
 - `examples/demos` films a shadcn sign-in form and a pull request card this way.
 
+## Camera
+
+`shots(steps, plan, { frame })` turns a recording into svjeez's `<Camera>` props, so the picture follows what's changing like a screen recording that zooms in. `plan` names a part (or `"all"`) per snapshot name; the camera moves to it as the timeline moves into that snapshot, and snapshots not in `plan` keep the shot before them.
+
+```tsx
+const frame = rect(0, 0, 400, 300);
+
+<Camera {...shots(steps, { idle: "all", email: "email-field", failed: "all" }, { frame, zoom: 1.6 })}>
+  <Dom states={steps} />
+</Camera>
+```
+
+`margin` (default 16) is room kept around a part, `zoom` (default 2) the most a part is blown up, and `over` (default 0.5) how long each move takes; a shot that comes sooner waits its turn. A part near an edge is framed without showing past the snapshot. Clip the camera to its frame. `examples/zoom` films the sign-in demo this way.
+
 ## Stories
 
 An app written as `update` and `view` (Elm, Redux, `@svjeez/live`) can be filmed by the messages it takes. `story` from `@svjeez/dom/story` runs them through `update`, renders each model with `view`, and gives back the first markup and a flow for `dom.run`:
