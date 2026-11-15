@@ -1,8 +1,6 @@
 import { render } from "svjeez";
 import { stateMachine } from "@svjeez/diagrams";
-import { css, mono, theme } from "../style";
-
-const M = 40;
+import { HEIGHT, WIDTH, css, fit, mono, theme } from "../gallery-style";
 
 export const agent = stateMachine(
   {
@@ -28,7 +26,7 @@ export const agent = stateMachine(
       ["working", "failed", "error"],
     ],
   },
-  { theme, x: M, y: M, font: mono },
+  { theme, x: 0, y: 0, direction: "LR", font: mono },
 );
 
 const walk = agent.walk(
@@ -45,7 +43,7 @@ const walk = agent.walk(
     "acting",
     "done",
   ],
-  { at: 0.6, dwell: 0.8, token: { style: "comet", arrive: true } },
+  { at: 0.2, dwell: 0.7, token: { style: "comet", arrive: true } },
 );
 
 const D = Math.ceil(walk.span.end + 1.5);
@@ -53,8 +51,8 @@ const D = Math.ceil(walk.span.end + 1.5);
 export default function build(): string {
   return render(
     {
-      width: agent.bounds.w + 2 * M,
-      height: agent.bounds.h + 2 * M,
+      width: WIDTH,
+      height: HEIGHT,
       duration: D,
       title: "Agent lifecycle",
       desc: "A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.",
@@ -62,9 +60,11 @@ export default function build(): string {
       css,
     },
     <>
-      <rect width="100%" height="100%" fill={theme.base00} />
-      {agent.node}
-      {walk.node}
+      <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
+      <g transform={fit(agent.bounds.w, agent.bounds.h)}>
+        {agent.node}
+        {walk.node}
+      </g>
     </>,
   );
 }

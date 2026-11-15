@@ -85,6 +85,13 @@ export const leave = (duration: number) =>
     .at(duration - motions.fade)
     .to({ opacity: 0 }, motions.fade, ease.in);
 
+/** The transform that centers a `w` by `h` drawing inside the margins, scaled down to fit and up to at most 1.5x. */
+export const fit = (w: number, h: number): string => {
+  const s = Math.min(1.5, (WIDTH - 2 * MARGIN) / w, (HEIGHT - 2 * MARGIN) / h);
+
+  return `translate(${(WIDTH - s * w) / 2} ${(HEIGHT - s * h) / 2}) scale(${s})`;
+};
+
 /** The scene title and at most one subtitle line, top left. */
 export function Title({
   title,

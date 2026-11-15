@@ -1,8 +1,6 @@
 import { render, flow } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
-import { css, mono, theme } from "../style";
-
-const M = 40;
+import { HEIGHT, WIDTH, css, fit, mono, theme } from "../gallery-style";
 
 export const chart = flowchart(
   {
@@ -30,12 +28,12 @@ export const chart = flowchart(
       ["issues", "post", { label: "no" }],
     ],
   },
-  { theme, x: M, y: M, font: mono, play: { at: 0.4, step: 0.35 } },
+  { theme, x: 0, y: 0, direction: "LR", font: mono, play: { at: 0.2, step: 0.3 } },
 );
 
 const trip = flow(chart.route("pr", "post"), {
-  at: 4,
-  speed: 160,
+  at: 3.5,
+  speed: 240,
   style: "trace",
   color: theme.base09,
   arrive: true,
@@ -46,8 +44,8 @@ const D = 10;
 export default function build(): string {
   return render(
     {
-      width: chart.bounds.w + 2 * M,
-      height: chart.bounds.h + 2 * M,
+      width: WIDTH,
+      height: HEIGHT,
       duration: D,
       title: "Review pipeline",
       desc: "A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.",
@@ -55,10 +53,12 @@ export default function build(): string {
       css,
     },
     <>
-      <rect width="100%" height="100%" fill={theme.base00} />
-      {chart.layers.under}
-      {trip.node}
-      {chart.layers.over}
+      <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
+      <g transform={fit(chart.bounds.w, chart.bounds.h)}>
+        {chart.layers.under}
+        {trip.node}
+        {chart.layers.over}
+      </g>
     </>,
   );
 }
