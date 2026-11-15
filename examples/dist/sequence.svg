@@ -77,34 +77,34 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <path d="M715.26 55V429" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
       <g>
         <path d="M15.749999999999998 5H133.9L118.15 50H0Z" fill="var(--base00)"/>
-        <path d="M15.749999999999998 5H133.9L118.15 50H0Z" fill="var(--base0B)" fill-opacity="0.2"/>
+        <path d="M15.749999999999998 5H133.9L118.15 50H0Z" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
         <text x="66.95" y="33.1" font-size="16" text-anchor="middle" font-weight="600" fill="var(--base05)">Browser</text>
       </g>
       <g>
         <path d="M173.90000000000003 5H260.30000000000007Q268.30000000000007 5 268.30000000000007 13V42Q268.30000000000007 50 260.30000000000007 50H173.90000000000003Q165.90000000000003 50 165.90000000000003 42V13Q165.90000000000003 5 173.90000000000003 5Z" fill="var(--base00)"/>
-        <path d="M173.90000000000003 5H260.30000000000007Q268.30000000000007 5 268.30000000000007 13V42Q268.30000000000007 50 260.30000000000007 50H173.90000000000003Q165.90000000000003 50 165.90000000000003 42V13Q165.90000000000003 5 173.90000000000003 5Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <path d="M173.90000000000003 5H260.30000000000007Q268.30000000000007 5 268.30000000000007 13V42Q268.30000000000007 50 260.30000000000007 50H173.90000000000003Q165.90000000000003 50 165.90000000000003 42V13Q165.90000000000003 5 173.90000000000003 5Z" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
         <text x="217.1" y="33.1" font-size="16" text-anchor="middle" font-weight="600" fill="var(--base05)">Gateway</text>
       </g>
       <g>
         <path d="M308.3 5H356.3Q364.3 5 364.3 13V42Q364.3 50 356.3 50H308.3Q300.3 50 300.3 42V13Q300.3 5 308.3 5Z" fill="var(--base00)"/>
-        <path d="M308.3 5H356.3Q364.3 5 364.3 13V42Q364.3 50 356.3 50H308.3Q300.3 50 300.3 42V13Q300.3 5 308.3 5Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <path d="M308.3 5H356.3Q364.3 5 364.3 13V42Q364.3 50 356.3 50H308.3Q300.3 50 300.3 42V13Q300.3 5 308.3 5Z" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
         <text x="332.3" y="33.1" font-size="16" text-anchor="middle" font-weight="600" fill="var(--base05)">API</text>
       </g>
       <g>
         <path d="M422.46 5A41.6 5 0 0 1 505.65999999999997 5V50A41.6 5 0 0 1 422.46 50Z" fill="var(--base00)"/>
-        <path d="M422.46 5A41.6 5 0 0 1 505.65999999999997 5V50A41.6 5 0 0 1 422.46 50Z" fill="var(--base0E)" fill-opacity="0.2"/>
+        <path d="M422.46 5A41.6 5 0 0 1 505.65999999999997 5V50A41.6 5 0 0 1 422.46 50Z" fill="var(--base0E)" fill-opacity="0.22" stroke="var(--base0E)" stroke-width="1.5"/>
         <path d="M422.46 5A41.6 5 0 0 0 505.65999999999997 5" stroke="var(--base0E)" fill="none"/>
         <text x="464.06" y="35.6" font-size="16" text-anchor="middle" font-weight="600" fill="var(--base05)">Redis</text>
       </g>
       <g>
         <path d="M540.6600000000001 5H624.2600000000001Q627.2600000000001 5 627.2600000000001 8V47Q627.2600000000001 50 624.2600000000001 50H540.6600000000001Q537.6600000000001 50 537.6600000000001 47V8Q537.6600000000001 5 540.6600000000001 5Z" fill="var(--base00)"/>
-        <path d="M540.6600000000001 5H624.2600000000001Q627.2600000000001 5 627.2600000000001 8V47Q627.2600000000001 50 624.2600000000001 50H540.6600000000001Q537.6600000000001 50 537.6600000000001 47V8Q537.6600000000001 5 540.6600000000001 5Z" fill="var(--base08)" fill-opacity="0.2"/>
-        <path d="M545.6600000000001 5V50M619.2600000000001 5V50" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+        <path d="M540.6600000000001 5H624.2600000000001Q627.2600000000001 5 627.2600000000001 8V47Q627.2600000000001 50 624.2600000000001 50H540.6600000000001Q537.6600000000001 50 537.6600000000001 47V8Q537.6600000000001 5 540.6600000000001 5Z" fill="var(--base0E)" fill-opacity="0.22" stroke="var(--base0E)" stroke-width="1.5"/>
+        <path d="M545.6600000000001 5V50M619.2600000000001 5V50" stroke="var(--base0E)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
         <text x="582.46" y="33.1" font-size="16" text-anchor="middle" font-weight="600" fill="var(--base05)">Auth</text>
       </g>
       <g>
         <path d="M659.26 5A56 5 0 0 1 771.26 5V50A56 5 0 0 1 659.26 50Z" fill="var(--base00)"/>
-        <path d="M659.26 5A56 5 0 0 1 771.26 5V50A56 5 0 0 1 659.26 50Z" fill="var(--base0E)" fill-opacity="0.2"/>
+        <path d="M659.26 5A56 5 0 0 1 771.26 5V50A56 5 0 0 1 659.26 50Z" fill="var(--base0E)" fill-opacity="0.22" stroke="var(--base0E)" stroke-width="1.5"/>
         <path d="M659.26 5A56 5 0 0 0 771.26 5" stroke="var(--base0E)" fill="none"/>
         <text x="715.26" y="35.6" font-size="16" text-anchor="middle" font-weight="600" fill="var(--base05)">Postgres</text>
       </g>

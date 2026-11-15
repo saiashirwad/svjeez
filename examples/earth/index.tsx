@@ -15,6 +15,8 @@ import {
   theme,
   Title,
   WIDTH,
+  hue,
+  wash,
 } from "../gallery-style";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
@@ -91,9 +93,11 @@ const C = {
   space: theme.base00,
   sea: theme.base01,
   deep: theme.base00,
-  land: theme.base05,
-  dawn: theme.base09,
-  city: theme.base0A,
+  /** Land is cyan, the dusk band is purple and the city lights are orange. Graticule and rim stay neutral. */
+  land: hue.cyan,
+  grid: theme.base05,
+  dawn: hue.purple,
+  city: hue.orange,
   text: theme.base06,
   dim: theme.base04,
   star: theme.base04,
@@ -204,6 +208,7 @@ function Globe(): SvgNode {
     <>
       <circle cx={cx} cy={cy} r={R * 1.22} fill={halo} />
       <path d={map.sphere} fill={ocean} />
+      <path d={map.sphere} {...wash(hue.cyan, 0.07)} />
       <path d={map.path(nightSide)} fill={C.deep} opacity={0.75} filter={fx.blur({ by: 18 })} />
       <path
         d={map.path({
@@ -213,7 +218,7 @@ function Globe(): SvgNode {
           ),
         })}
         fill="none"
-        stroke={C.land}
+        stroke={C.grid}
         strokeOpacity={0.08}
         strokeWidth={stroke.hairline}
       />
@@ -257,7 +262,7 @@ function Globe(): SvgNode {
             : [],
         )}
       </g>
-      <path d={map.sphere} fill="none" stroke={C.land} strokeOpacity={0.25} strokeWidth={0.8} />
+      <path d={map.sphere} fill="none" stroke={C.grid} strokeOpacity={0.25} strokeWidth={0.8} />
     </>
   );
 }

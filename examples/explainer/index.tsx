@@ -107,13 +107,10 @@ export const chickOf = (state: State) => {
 export const fileKb = (new TextEncoder().encode(scene()).length / 1024).toFixed(1);
 export const fileLine = `scene.svg · ${fileKb} KB · 0 lines of JS`;
 
-/** Two tones and one accent: names and values are ink, punctuation and keywords recede. */
+/** Three hues on ink: keywords are purple, names are blue, numbers are orange, and the rest is plain. */
 const quiet = {
   ...theme,
-  base0E: theme.base04,
-  base0D: theme.base06,
   base0B: theme.base06,
-  base09: theme.base06,
   base0A: theme.base06,
   base08: theme.base06,
   base0C: theme.base06,

@@ -1,7 +1,7 @@
 import { google } from "@svjeez/fonts";
 import { Glyphs, draw, ease, enter, motion, render } from "svjeez";
 
-import { HEIGHT, WIDTH, color, css, leave, mono, size } from "../gallery-style";
+import { HEIGHT, WIDTH, color, css, hue, leave, mono, size } from "../gallery-style";
 
 const W = WIDTH;
 const H = HEIGHT;
@@ -56,7 +56,7 @@ export default function build(): string {
           x={titleX}
           y={210}
           fill="none"
-          stroke={color.accent}
+          stroke={hue.orange}
           strokeWidth={2}
           animation={(_, i) => draw({ at: 0.2 + i * 0.1, over: 1 }, ease.inOut)}
         />
@@ -66,7 +66,7 @@ export default function build(): string {
           size={TITLE_SIZE}
           x={titleX}
           y={210}
-          fill={color.ink}
+          fill={hue.blue}
           alt=""
           animation={(_, i) =>
             enter({ at: 1 + i * 0.08, over: 0.5 }, { opacity: 0, y: 8 }, ease.out)
@@ -83,7 +83,7 @@ export default function build(): string {
             fontFamily={body}
             fontStyle="italic"
             fontSize={LINE_SIZE}
-            fill={color.dim}
+            fill={hue.purple}
           >
             {ITALIC}
           </text>
@@ -94,7 +94,7 @@ export default function build(): string {
           width={lineWidth}
           height={2}
           rx={1}
-          fill={color.accent}
+          fill={hue.orange}
           animation={motion({ scale: 0 }).at(2.6).to({ scale: 1 }, 0.6, ease.out)}
         />
         <Name name="ABeeZee" y={420} at={2.8} />

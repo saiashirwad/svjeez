@@ -110,17 +110,17 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <path d="M294.44 109.86V314.14" stroke="var(--base03)" stroke-dasharray="3 4" fill="none"/>
       <g>
         <path d="M47.56 70.86H79.56Q87.56 70.86 87.56 78.86V96.86Q87.56 104.86 79.56 104.86H47.56Q39.56 104.86 39.56 96.86V78.86Q39.56 70.86 47.56 70.86Z" fill="var(--base00)"/>
-        <path d="M47.56 70.86H79.56Q87.56 70.86 87.56 78.86V96.86Q87.56 104.86 79.56 104.86H47.56Q39.56 104.86 39.56 96.86V78.86Q39.56 70.86 47.56 70.86Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <path d="M47.56 70.86H79.56Q87.56 70.86 87.56 78.86V96.86Q87.56 104.86 79.56 104.86H47.56Q39.56 104.86 39.56 96.86V78.86Q39.56 70.86 47.56 70.86Z" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
         <text x="63.56" y="92.06" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">You</text>
       </g>
       <g>
         <path d="M149.68 70.86H196.08Q204.08 70.86 204.08 78.86V96.86Q204.08 104.86 196.08 104.86H149.68Q141.68 104.86 141.68 96.86V78.86Q141.68 70.86 149.68 70.86Z" fill="var(--base00)"/>
-        <path d="M149.68 70.86H196.08Q204.08 70.86 204.08 78.86V96.86Q204.08 104.86 196.08 104.86H149.68Q141.68 104.86 141.68 96.86V78.86Q141.68 70.86 149.68 70.86Z" fill="var(--base0D)" fill-opacity="0.2"/>
+        <path d="M149.68 70.86H196.08Q204.08 70.86 204.08 78.86V96.86Q204.08 104.86 196.08 104.86H149.68Q141.68 104.86 141.68 96.86V78.86Q141.68 70.86 149.68 70.86Z" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
         <text x="172.88" y="92.06" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">&lt;img&gt;</text>
       </g>
       <g>
         <path d="M270.44 70.86A24 5 0 0 1 318.44 70.86V104.86A24 5 0 0 1 270.44 104.86Z" fill="var(--base00)"/>
-        <path d="M270.44 70.86A24 5 0 0 1 318.44 70.86V104.86A24 5 0 0 1 270.44 104.86Z" fill="var(--base0E)" fill-opacity="0.2"/>
+        <path d="M270.44 70.86A24 5 0 0 1 318.44 70.86V104.86A24 5 0 0 1 270.44 104.86Z" fill="var(--base0E)" fill-opacity="0.22" stroke="var(--base0E)" stroke-width="1.5"/>
         <path d="M270.44 70.86A24 5 0 0 0 318.44 70.86" stroke="var(--base0E)" fill="none"/>
         <text x="294.44" y="94.56" font-size="12" text-anchor="middle" font-weight="600" fill="var(--base05)">CDN</text>
       </g>

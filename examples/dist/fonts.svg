@@ -77,7 +77,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 ]]></style>
   <rect width="960" height="540" fill="var(--base00)"/>
   <g class="a m25">
-    <g role="img" aria-label="Typography" fill="none" stroke="var(--base0B)" stroke-width="2">
+    <g role="img" aria-label="Typography" fill="none" stroke="var(--base09)" stroke-width="2">
       <path d="M155.66 149.37L155.66 210L129.49 210L129.49 149.37L102.72 149.37L102.72 128.53L182.3 128.53L182.3 149.37Z" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
       <path d="M201.96 234.87Q194.26 234.87 188.34 232.74L188.34 218.64L197.81 218.64Q206.69 218.64 208.35 210L183.48 147.48L208.83 147.48L220.79 189.04L221.61 189.04L232.63 147.48L255.84 147.48L233.57 208.11Q228.72 221.25 221.67 228.06Q214.63 234.87 201.96 234.87Z" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
       <path d="M330.56 178.86Q330.56 194.96 323.69 203.19Q316.82 211.42 304.15 211.42Q293.26 211.42 286.63 204.32L286.63 233.33L263.06 233.33L263.06 147.48L282.24 147.48L284.26 156.36Q291.12 146.05 304.15 146.05Q316.82 146.05 323.69 154.34Q330.56 162.63 330.56 178.86ZM286.39 176.72L286.39 180.63Q286.39 186.55 288.99 190.28Q291.6 194.01 296.81 194.01Q306.99 194.01 306.99 181.82L306.99 175.54Q306.99 163.46 296.81 163.46Q291.6 163.46 288.99 167.13Q286.39 170.8 286.39 176.72Z" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
@@ -89,7 +89,7 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <path d="M758.87 146.05Q769.77 146.05 775.21 152.09Q780.66 158.13 780.66 169.5L780.66 210L757.1 210L757.1 172.34Q757.1 168.32 755.02 165.89Q752.95 163.46 749.16 163.46Q744.78 163.46 742.06 166.3Q739.33 169.15 739.33 173.29L739.33 210L715.77 210L715.77 124.15L739.33 124.15L739.33 153.99Q743.12 150.2 748.21 148.13Q753.31 146.05 758.87 146.05Z" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
       <path d="M806.12 234.87Q798.42 234.87 792.5 232.74L792.5 218.64L801.98 218.64Q810.86 218.64 812.51 210L787.65 147.48L812.99 147.48L824.95 189.04L825.78 189.04L836.79 147.48L860 147.48L837.74 208.11Q832.88 221.25 825.84 228.06Q818.79 234.87 806.12 234.87Z" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
     </g>
-    <g role="img" aria-label="" fill="var(--base06)">
+    <g role="img" aria-label="" fill="var(--base0D)">
       <path d="M155.66 149.37L155.66 210L129.49 210L129.49 149.37L102.72 149.37L102.72 128.53L182.3 128.53L182.3 149.37Z" class="a m11"/>
       <path d="M201.96 234.87Q194.26 234.87 188.34 232.74L188.34 218.64L197.81 218.64Q206.69 218.64 208.35 210L183.48 147.48L208.83 147.48L220.79 189.04L221.61 189.04L232.63 147.48L255.84 147.48L233.57 208.11Q228.72 221.25 221.67 228.06Q214.63 234.87 201.96 234.87Z" class="a m12"/>
       <path d="M330.56 178.86Q330.56 194.96 323.69 203.19Q316.82 211.42 304.15 211.42Q293.26 211.42 286.63 204.32L286.63 233.33L263.06 233.33L263.06 147.48L282.24 147.48L284.26 156.36Q291.12 146.05 304.15 146.05Q316.82 146.05 323.69 154.34Q330.56 162.63 330.56 178.86ZM286.39 176.72L286.39 180.63Q286.39 186.55 288.99 190.28Q291.6 194.01 296.81 194.01Q306.99 194.01 306.99 181.82L306.99 175.54Q306.99 163.46 296.81 163.46Q291.6 163.46 288.99 167.13Q286.39 170.8 286.39 176.72Z" class="a m13"/>
@@ -104,9 +104,9 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="480" y="270" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)" class="a m21">Archivo Black</text>
     <g class="a m22">
       <text x="228.798" y="330" font-family="'ABeeZee', sans-serif" font-size="28" fill="var(--base06)">Sphinx of black quartz, judge my vow.</text>
-      <text x="217.64" y="372" font-family="'ABeeZee', sans-serif" font-style="italic" font-size="28" fill="var(--base04)">Pack my box with five dozen liquor jugs.</text>
+      <text x="217.64" y="372" font-family="'ABeeZee', sans-serif" font-style="italic" font-size="28" fill="var(--base0E)">Pack my box with five dozen liquor jugs.</text>
     </g>
-    <rect x="228.798" y="390" width="502.404" height="2" rx="1" fill="var(--base0B)" class="a m23 fb"/>
+    <rect x="228.798" y="390" width="502.404" height="2" rx="1" fill="var(--base09)" class="a m23 fb"/>
     <text x="480" y="420" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)" class="a m24">ABeeZee</text>
   </g>
 </svg>

@@ -58,30 +58,34 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 ]]></style>
   <rect width="960" height="540" fill="var(--base00)"/>
   <g transform="translate(48 48)">
-    <rect width="280" height="216" rx="8" fill="var(--base01)" stroke="var(--base02)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base01)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4"/>
     <g transform="translate(25.000000000000014 4) scale(1.15)">
-      <text x="100" y="92" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="40" fill="var(--base0C)" text-anchor="middle" filter="url(#f1)" class="a m1">Blur</text>
+      <text x="100" y="92" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="40" fill="var(--base0D)" text-anchor="middle" filter="url(#f1)" class="a m1">Blur</text>
     </g>
     <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)">Blur in and out</text>
   </g>
   <g transform="translate(340 48)">
-    <rect width="280" height="216" rx="8" fill="var(--base01)" stroke="var(--base02)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base01)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base09)" fill-opacity="0.1" stroke="var(--base09)" stroke-opacity="0.4"/>
     <g transform="translate(25.000000000000014 4) scale(1.15)">
-      <rect x="66" y="44" width="68" height="68" rx="8" fill="var(--base0A)" class="a m2 fb"/>
+      <rect x="66" y="44" width="68" height="68" rx="8" fill="var(--base09)" class="a m2 fb"/>
     </g>
     <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)">Jitter</text>
   </g>
   <g transform="translate(632 48)">
-    <rect width="280" height="216" rx="8" fill="var(--base01)" stroke="var(--base02)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base01)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base0E)" fill-opacity="0.1" stroke="var(--base0E)" stroke-opacity="0.4"/>
     <g transform="translate(25.000000000000014 4) scale(1.15)">
       <circle cx="100" cy="78" r="30" fill="var(--base0E)" class="a m3 fb"/>
     </g>
     <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)">Drift</text>
   </g>
   <g transform="translate(48 276)">
-    <rect width="280" height="216" rx="8" fill="var(--base01)" stroke="var(--base02)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base01)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base09)" fill-opacity="0.1" stroke="var(--base09)" stroke-opacity="0.4"/>
     <g transform="translate(25.000000000000014 4) scale(1.15)">
-      <g filter="url(#f2)" fill="none" stroke="var(--base08)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#f2)" fill="none" stroke="var(--base09)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M40 120V70L100 30L160 70V120Z" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
         <path d="M85 120V90H115V120" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
       </g>
@@ -89,17 +93,19 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
     <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)">Hand-drawn line</text>
   </g>
   <g transform="translate(340 276)">
-    <rect width="280" height="216" rx="8" fill="var(--base01)" stroke="var(--base02)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base01)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base0E)" fill-opacity="0.1" stroke="var(--base0E)" stroke-opacity="0.4"/>
     <g transform="translate(25.000000000000014 4) scale(1.15)">
-      <text x="100" y="94" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="44" fill="var(--base08)" text-anchor="middle" filter="url(#f3)" class="a m6">Open</text>
+      <text x="100" y="94" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="44" fill="var(--base0E)" text-anchor="middle" filter="url(#f3)" class="a m6">Open</text>
     </g>
     <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)">Neon flicker</text>
   </g>
   <g transform="translate(632 276)">
-    <rect width="280" height="216" rx="8" fill="var(--base01)" stroke="var(--base02)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base01)"/>
+    <rect width="280" height="216" rx="8" fill="var(--base0D)" fill-opacity="0.1" stroke="var(--base0D)" stroke-opacity="0.4"/>
     <g transform="translate(25.000000000000014 4) scale(1.15)">
-      <circle cx="100" cy="78" r="34" fill="none" stroke="var(--base0C)" stroke-width="6" stroke-linecap="round" stroke-dasharray="70 150" class="a m7 fb"/>
-      <circle cx="100" cy="78" r="7" fill="var(--base0A)" class="a m8 fb"/>
+      <circle cx="100" cy="78" r="34" fill="none" stroke="var(--base0D)" stroke-width="6" stroke-linecap="round" stroke-dasharray="70 150" class="a m7 fb"/>
+      <circle cx="100" cy="78" r="7" fill="var(--base09)" class="a m8 fb"/>
     </g>
     <text x="16" y="200" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base04)">Spinner</text>
   </g>

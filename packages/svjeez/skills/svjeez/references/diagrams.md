@@ -2,7 +2,7 @@
 
 `flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. They are in `@svjeez/diagrams`, a separate package: `npm i -D @svjeez/diagrams`. `flow` and `travel` are in `svjeez`. Each returns `{ node, get(id), bounds }` plus helpers.
 
-Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`.
+Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`. `tints: { tool: theme.base09 }` recolors a role, so a scene can hold to two or three hues. A `stateMachine` state takes a `role` too, which tints its box and stroke.
 
 ## Timing
 

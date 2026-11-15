@@ -34,24 +34,39 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <rect width="100%" height="100%" fill="var(--base00)"/>
   <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
     <g>
-      <rect x="58" y="86" width="62.4" height="36" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+      <g>
+        <rect x="58" y="86" width="62.4" height="36" rx="8" fill="var(--base01)"/>
+        <rect x="58" y="86" width="62.4" height="36" rx="8" fill="none" fill-opacity="0.22" stroke="var(--base03)"/>
+      </g>
       <text x="89.2" y="108.55" font-size="13" text-anchor="middle" fill="var(--base05)">Idle</text>
     </g>
     <g>
-      <rect x="24" y="228" width="130.4" height="248" rx="10" fill="var(--base01)" stroke="var(--base03)"/>
+      <g>
+        <rect x="24" y="228" width="130.4" height="248" rx="10" fill="var(--base01)"/>
+        <rect x="24" y="228" width="130.4" height="248" rx="10" fill="none" fill-opacity="0.1" stroke="var(--base03)"/>
+      </g>
       <path d="M24 262h130.39999999999998" stroke="var(--base03)"/>
       <text x="89.2" y="249.55" font-size="13" text-anchor="middle" fill="var(--base05)">Working</text>
     </g>
     <g>
-      <rect x="58" y="582" width="62.4" height="36" rx="8" fill="var(--base01)" stroke="var(--base03)"/>
+      <g>
+        <rect x="58" y="582" width="62.4" height="36" rx="8" fill="var(--base01)"/>
+        <rect x="58" y="582" width="62.4" height="36" rx="8" fill="none" fill-opacity="0.22" stroke="var(--base03)"/>
+      </g>
       <text x="89.2" y="604.55" font-size="13" text-anchor="middle" fill="var(--base05)">Done</text>
     </g>
     <g>
-      <rect x="40" y="340" width="62.4" height="36" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
+      <g>
+        <rect x="40" y="340" width="62.4" height="36" rx="8" fill="var(--base00)"/>
+        <rect x="40" y="340" width="62.4" height="36" rx="8" fill="none" fill-opacity="0.22" stroke="var(--base03)"/>
+      </g>
       <text x="71.2" y="362.55" font-size="13" text-anchor="middle" fill="var(--base05)">Plan</text>
     </g>
     <g>
-      <rect x="43.9" y="424" width="54.6" height="36" rx="8" fill="var(--base00)" stroke="var(--base03)"/>
+      <g>
+        <rect x="43.9" y="424" width="54.6" height="36" rx="8" fill="var(--base00)"/>
+        <rect x="43.9" y="424" width="54.6" height="36" rx="8" fill="none" fill-opacity="0.22" stroke="var(--base03)"/>
+      </g>
       <text x="71.2" y="446.55" font-size="13" text-anchor="middle" fill="var(--base05)">Act</text>
     </g>
     <g>

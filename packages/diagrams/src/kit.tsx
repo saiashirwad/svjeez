@@ -52,6 +52,8 @@ export interface DiagramOptions {
   readonly font?: FontValue;
   /** On the root element, so fonts can come from your CSS. */
   readonly class?: string;
+  /** The color each role is drawn in, over the defaults. A scene that wants two or three hues maps its roles onto them. */
+  readonly tints?: Partial<Record<NodeRole, Color>>;
 }
 
 export type Labelled = string | { readonly label: string; readonly role?: NodeRole };
@@ -74,7 +76,11 @@ const SLOT: Record<NodeRole, Slot> = {
   store: "base0E",
 };
 
-export const tintOf = (theme: Base16, role: NodeRole): Color => theme[SLOT[role]];
+export const tintOf = (
+  theme: Base16,
+  role: NodeRole,
+  tints?: Partial<Record<NodeRole, Color>>,
+): Color => tints?.[role] ?? theme[SLOT[role]];
 
 /** The box a role needs around `label`. */
 export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: FontValue): Size => {
@@ -196,11 +202,12 @@ export const outline = (role: NodeRole, { x, y, w, h }: Box): string => {
 export interface Look {
   readonly theme: Base16;
   readonly fontSize: number;
+  readonly tints?: Partial<Record<NodeRole, Color>>;
 }
 
 /** What every diagram reads from its options: the theme and sizes with defaults applied, a `Look` at both sizes, and the root group that carries the class and font. */
 export const look = (options: DiagramOptions) => {
-  const { theme = defaultDark, fontSize = 14, font, class: cls } = options;
+  const { theme = defaultDark, fontSize = 14, font, class: cls, tints } = options;
   const small = fontSize * 0.85;
 
   return {
@@ -208,7 +215,8 @@ export const look = (options: DiagramOptions) => {
     fontSize,
     font,
     small,
-    smallLook: { theme, fontSize: small } satisfies Look,
+    tints,
+    smallLook: { theme, fontSize: small, tints } satisfies Look,
     root: (children: Child): SvgNode => (
       <g class={cls} fontFamily={font}>
         {children}
@@ -227,7 +235,7 @@ export const drawNode = (
   extra?: SvgNode,
 ): SvgNode => {
   const { theme, fontSize } = look;
-  const tint = tintOf(theme, role);
+  const tint = tintOf(theme, role, look.tints);
 
   const details =
     role === "tool" ? (
@@ -249,7 +257,7 @@ export const drawNode = (
   return (
     <g animation={animation}>
       <path d={outline(role, b)} fill={theme.base00} />
-      <path d={outline(role, b)} fill={tint} fillOpacity={0.2} />
+      <path d={outline(role, b)} fill={tint} fillOpacity={0.22} stroke={tint} strokeWidth={1.5} />
       {details}
       {extra}
       <text

@@ -2,6 +2,7 @@ import { Ink, def, enter, tool, type Point, type SvgNode } from "svjeez";
 import { pts, smooth, trace } from "./curve";
 import { C, H, W, Y, n, pathSymbol, random, type Play } from "./kit";
 import { CINDER } from "./places";
+import { hue, wash } from "../gallery-style";
 
 /** A coastline: an ellipse pushed in and out by a few seeded waves. */
 const shore = (
@@ -75,7 +76,9 @@ function Coast({ play }: { play: Play }): SvgNode {
           />
         ))}
       </g>
+      <rect width={W} height={H} {...wash(hue.blue, 0.12)} />
       <use href={landSymbol} fill={C.land} animation={play(enter({ at: 0.1, over: 1 }))} />
+      <use href={landSymbol} {...wash(hue.orange, 0.06)} animation={play(enter({ at: 0.1, over: 1 }))} />
       <Ink d={LAND} tool={COAST} fill={C.ink} draw={play({ at: 0.1, over: 1.6 })} />
     </>
   );
@@ -107,6 +110,14 @@ function Rivers({ play }: { play: Play }): SvgNode {
         fill={C.sea}
         stroke={C.river}
         strokeWidth={1}
+        animation={play(enter({ at: 2.4, over: 0.6 }))}
+      />
+      <ellipse
+        cx={352}
+        cy={Y(304)}
+        rx={16}
+        ry={8}
+        {...wash(hue.blue, 0.16)}
         animation={play(enter({ at: 2.4, over: 0.6 }))}
       />
     </g>

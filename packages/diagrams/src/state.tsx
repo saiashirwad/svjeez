@@ -26,17 +26,20 @@ import {
   look,
   lookup,
   placer,
+  tintOf,
   type Diagram,
   type DiagramOptions,
+  type NodeRole,
 } from "./kit.tsx";
 
 /** A label, or a state with options; `states` makes it a composite with its own `initial`. */
 export type StateSpec =
   | string
-  | { readonly label: string; readonly final?: boolean }
+  | { readonly label: string; readonly final?: boolean; readonly role?: NodeRole }
   | {
       readonly label: string;
       readonly final?: boolean;
+      readonly role?: NodeRole;
       readonly states: Record<string, StateSpec>;
       readonly initial: string;
     };
@@ -97,6 +100,7 @@ interface Node {
   readonly id: string;
   readonly label: string;
   readonly final: boolean;
+  readonly role?: NodeRole;
   readonly parent?: string;
   readonly depth: number;
   readonly inner?: Scope;
@@ -196,6 +200,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
             id,
             label: s.label,
             final: s.final ?? false,
+            role: s.role,
             parent: owner,
             depth,
             inner: "states" in s ? scope(s.states, s.initial, depth + 1, id) : undefined,
@@ -335,17 +340,23 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   const drawn = (n: Node): SvgNode => {
     const b = boxes.get(n.id)!;
     const fill = ground(n.depth + 1);
+    const tint = n.role && tintOf(theme, n.role, base.tints);
 
     const frame = (
-      <rect
-        x={b.x}
-        y={b.y}
-        width={b.w}
-        height={b.h}
-        rx={n.inner ? 10 : 8}
-        fill={fill}
-        stroke={theme.base03}
-      />
+      <g>
+        <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={n.inner ? 10 : 8} fill={fill} />
+        <rect
+          x={b.x}
+          y={b.y}
+          width={b.w}
+          height={b.h}
+          rx={n.inner ? 10 : 8}
+          fill={tint || "none"}
+          fillOpacity={n.inner ? 0.1 : 0.22}
+          stroke={tint || theme.base03}
+          strokeWidth={tint ? 1.5 : undefined}
+        />
+      </g>
     );
 
     const title = (y: number) => (
@@ -371,7 +382,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     return (
       <g>
         {frame}
-        <path d={`M${b.x} ${b.y + header}h${b.w}`} stroke={theme.base03} />
+        <path d={`M${b.x} ${b.y + header}h${b.w}`} stroke={tint || theme.base03} />
         {title(b.y + header / 2)}
       </g>
     );

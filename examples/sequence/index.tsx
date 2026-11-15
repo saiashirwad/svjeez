@@ -1,6 +1,6 @@
 import { render, travel } from "svjeez";
 import { sequence } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, mono, theme } from "../gallery-style";
+import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
 
 const login = sequence(
   {
@@ -24,7 +24,16 @@ const login = sequence(
       ["api", "user", "200 + Set-Cookie", { reply: true }],
     ],
   },
-  { theme, x: 0, y: 0, font: mono, fontSize: 16, play: { at: 0.2, step: 0.8 } },
+  {
+    theme,
+    x: 0,
+    y: 0,
+    font: mono,
+    fontSize: 16,
+    play: { at: 0.2, step: 0.8 },
+    // Blue for the request path, purple for what it reads and signs with.
+    tints: { task: hue.blue, input: hue.blue, tool: hue.purple, store: hue.purple },
+  },
 );
 
 const D = 10;

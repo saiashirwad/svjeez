@@ -1,7 +1,7 @@
 import { highlight } from "@svjeez/code";
 import { ease, motion, render, code, morph } from "svjeez";
 
-import { HEIGHT, MARGIN, WIDTH, RADIUS, css, mono, theme } from "../gallery-style";
+import { HEIGHT, MARGIN, WIDTH, RADIUS, boxed, css, hue, mono, theme } from "../gallery-style";
 
 const W = WIDTH;
 const H = HEIGHT;
@@ -95,7 +95,7 @@ export default function build(): string {
         width={CHIP.w}
         height={CHIP.h}
         rx={RADIUS}
-        fill={theme.base02}
+        {...boxed(hue.blue, 0.2)}
         animation={slide}
       />
       {SOURCES.map(({ label }, i) => (

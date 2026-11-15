@@ -1,18 +1,23 @@
 import { render } from "svjeez";
 import { stateMachine } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, mono, theme } from "../gallery-style";
+import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
 
 export const agent = stateMachine(
   {
     states: {
-      idle: "Idle",
+      idle: { label: "Idle", role: "task" },
       working: {
         label: "Working",
-        states: { planning: "Planning", acting: "Calling tools" },
+        role: "store",
+        states: {
+          planning: { label: "Planning", role: "task" },
+          acting: { label: "Calling tools", role: "input" },
+        },
         initial: "planning",
       },
-      waiting: "Waiting on user",      done: { label: "Done", final: true },
-      failed: { label: "Failed", final: true },
+      waiting: { label: "Waiting on user", role: "input" },
+      done: { label: "Done", final: true, role: "output" },
+      failed: { label: "Failed", final: true, role: "tool" },
       cancelled: { label: "Cancelled", final: true },
     },
     initial: "idle",
@@ -26,7 +31,22 @@ export const agent = stateMachine(
       ["working", "failed", "error"],
       ["working", "cancelled", "cancel"],    ],
   },
-  { theme, x: 0, y: 0, direction: "LR", font: mono, fontSize: 16 },
+  {
+    theme,
+    x: 0,
+    y: 0,
+    direction: "LR",
+    font: mono,
+    fontSize: 16,
+    // Blue and purple for the run, orange where it acts or waits on someone, cyan for done and red for failed.
+    tints: {
+      task: hue.blue,
+      store: hue.purple,
+      input: hue.orange,
+      output: hue.cyan,
+      tool: hue.red,
+    },
+  },
 );
 
 const walk = agent.walk(

@@ -1,7 +1,7 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, type Color, tint } from "svjeez";
 
-import { color, css, geist, leave, mono, rise, theme, Title } from "../gallery-style";
+import { color, css, geist, hue, leave, mono, rise, theme, Title } from "../gallery-style";
 
 const W = 960;
 const H = 540;
@@ -20,8 +20,8 @@ const look = { theme, font: mono, fontSize: 12, grid: true } as const;
 
 const plain = tint(theme, "plain");
 const muted = tint(theme, "muted");
-const blue = tint(theme, "blue");
-const accent = color.accent;
+// Opened is orange and merged is blue; the review time is purple, so each series has its own hue.
+const [orange, blue, violet] = [hue.orange, hue.blue, hue.purple];
 
 /** Left: pull requests opened and merged, side by side in each month. */
 const volume = chart({
@@ -47,7 +47,7 @@ const turnaround = chart({
 const open = volume.bars(Object.fromEntries(pairs(months, opened)), {
   at: 0.6,
   group: { index: 0, count: 2 },
-  color: muted,
+  color: orange,
 });
 
 const done = volume.bars(Object.fromEntries(pairs(months, merged)), {
@@ -60,7 +60,7 @@ const wait = turnaround.area(pairs(weeks, hours), {
   at: 1.2,
   over: 1.8,
   curve: "monotone",
-  color: accent,
+  color: violet,
   dots: 3.5,
   label: "median",
 });
@@ -106,7 +106,7 @@ export default function build(): string {
           subtitle="Pull requests, January to June"
         />
         {heading(48, "Opened and merged", "Pull requests per month", 0.3)}
-        {key(260, muted, "opened", 0.5)}
+        {key(260, orange, "opened", 0.5)}
         {key(330, blue, "merged", 0.5)}
         {heading(532, "Time to first review", "Median hours, by week", 0.8)}
         <g animation={enter({ at: 0.4, over: 0.6 })}>{volume.node}</g>

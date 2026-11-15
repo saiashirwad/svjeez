@@ -1,6 +1,6 @@
 import { plane, tex } from "@svjeez/math";
-import { draw, motion, render, Brace, morph, tint } from "svjeez";
-import { HEIGHT, MARGIN, WIDTH, css, leave, mono, theme } from "../gallery-style";
+import { draw, motion, render, Brace, morph } from "svjeez";
+import { HEIGHT, MARGIN, WIDTH, css, hue, leave, mono, theme } from "../gallery-style";
 
 const W = WIDTH;
 const H = HEIGHT;
@@ -8,9 +8,14 @@ const D = 9;
 
 const at = { x: MARGIN, y: 280, fontSize: 60, theme } as const;
 
-/** The square, then its expansion with the cross term named. */
-const square = tex(String.raw`(a+b)^2`, at);
-const expanded = tex(String.raw`a^2 + \cssId{cross}{2ab} + b^2`, at);
+/** The square, then its expansion with the cross term named: a is blue, b is purple, and the 2 in the cross term is orange. */
+const paint = (c: string, s: string) => String.raw`\textcolor{${c}}{${s}}`;
+const [a, b] = [(s: string) => paint(hue.blue, s), (s: string) => paint(hue.purple, s)];
+const square = tex(String.raw`(${a("a")}+${b("b")})^2`, at);
+const expanded = tex(
+  String.raw`${a("a^2")} + \cssId{cross}{${paint(hue.orange, "2")}${a("a")}${b("b")}} + ${b("b^2")}`,
+  at,
+);
 
 /** The square as a curve, with b fixed at 1. */
 const graph = plane({
@@ -27,14 +32,14 @@ const graph = plane({
 });
 
 const curve = graph.plot((a) => (a + 1) ** 2, {
-  color: tint(theme, "blue"),
+  color: hue.blue,
   animation: draw({ at: 0.6, over: 1.6 }),
 });
 
 const name = tex(String.raw`b = 1:\ (a+1)^2`, {
   ...graph.point(-3.2, 8.2),
   fontSize: 24,
-  color: tint(theme, "blue"),
+  color: hue.blue,
 });
 
 const m = morph([square, expanded], { at: [2.2], over: 1 });

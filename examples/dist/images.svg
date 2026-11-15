@@ -72,7 +72,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
   <rect width="960" height="540" fill="var(--base00)"/>
   <g class="a m9">
     <g class="a m1">
-      <rect x="48" y="64" width="168" height="168" fill="var(--base01)" stroke="var(--base02)"/>
+      <rect x="48" y="64" width="168" height="168" fill="var(--base01)"/>
+      <rect x="48" y="64" width="168" height="168" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-opacity="0.5"/>
       <g role="img" aria-label="Hills at dusk, cropped to fill the frame">
         <g clip-path="url(#c1)">
           <g transform="translate(-2.4 64) scale(0.336 0.336)">
@@ -83,7 +84,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="48" y="252" font-family="'Geist', sans-serif" font-size="12" fill="var(--base04)">Cover</text>
     </g>
     <g class="a m2">
-      <rect x="280" y="64" width="168" height="168" fill="var(--base01)" stroke="var(--base02)"/>
+      <rect x="280" y="64" width="168" height="168" fill="var(--base01)"/>
+      <rect x="280" y="64" width="168" height="168" fill="var(--base09)" fill-opacity="0.14" stroke="var(--base09)" stroke-opacity="0.5"/>
       <g role="img" aria-label="Hills at dusk, letterboxed">
         <g transform="translate(280 95.5) scale(0.21 0.21)">
           <use href="#s1"/>
@@ -92,7 +94,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="280" y="252" font-family="'Geist', sans-serif" font-size="12" fill="var(--base04)">Contain</text>
     </g>
     <g class="a m3">
-      <rect x="512" y="64" width="168" height="168" fill="var(--base01)" stroke="var(--base02)"/>
+      <rect x="512" y="64" width="168" height="168" fill="var(--base01)"/>
+      <rect x="512" y="64" width="168" height="168" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-opacity="0.5"/>
       <g role="img" aria-label="Hills at dusk, stretched">
         <g transform="translate(512 64) scale(0.21 0.336)">
           <use href="#s1"/>
@@ -101,7 +104,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="512" y="252" font-family="'Geist', sans-serif" font-size="12" fill="var(--base04)">Fill</text>
     </g>
     <g class="a m4">
-      <rect x="744" y="64" width="168" height="168" fill="var(--base01)" stroke="var(--base02)"/>
+      <rect x="744" y="64" width="168" height="168" fill="var(--base01)"/>
+      <rect x="744" y="64" width="168" height="168" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-opacity="0.5"/>
       <g filter="url(#f1)" role="img" aria-label="A star in a ring on a green badge">
         <g clip-path="url(#c2)">
           <g transform="translate(744 64) scale(1.05 1.05)">
@@ -112,7 +116,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="744" y="252" font-family="'Geist', sans-serif" font-size="12" fill="var(--base04)">Rounded with shadow</text>
     </g>
     <g class="a m5">
-      <rect x="48" y="290" width="168" height="168" fill="var(--base01)" stroke="var(--base02)"/>
+      <rect x="48" y="290" width="168" height="168" fill="var(--base01)"/>
+      <rect x="48" y="290" width="168" height="168" fill="var(--base09)" fill-opacity="0.14" stroke="var(--base09)" stroke-opacity="0.5"/>
       <g filter="url(#f2)" role="img" aria-label="The hills in blue and yellow">
         <g clip-path="url(#c3)">
           <g transform="translate(-2.4 290) scale(0.336 0.336)">
@@ -123,7 +128,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="48" y="478" font-family="'Geist', sans-serif" font-size="12" fill="var(--base04)">Duotone</text>
     </g>
     <g class="a m6">
-      <rect x="280" y="290" width="168" height="168" fill="var(--base01)" stroke="var(--base02)"/>
+      <rect x="280" y="290" width="168" height="168" fill="var(--base01)"/>
+      <rect x="280" y="290" width="168" height="168" fill="var(--base0E)" fill-opacity="0.14" stroke="var(--base0E)" stroke-opacity="0.5"/>
       <g filter="url(#f3)" role="img" aria-label="The hills in gray">
         <g clip-path="url(#c4)">
           <g transform="translate(229.6 290) scale(0.336 0.336)">
@@ -134,7 +140,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="280" y="478" font-family="'Geist', sans-serif" font-size="12" fill="var(--base04)">Grayscale</text>
     </g>
     <g class="a m8">
-      <rect x="512" y="290" width="400" height="168" fill="var(--base01)" stroke="var(--base02)"/>
+      <rect x="512" y="290" width="400" height="168" fill="var(--base01)"/>
+      <rect x="512" y="290" width="400" height="168" fill="var(--base0D)" fill-opacity="0.14" stroke="var(--base0D)" stroke-opacity="0.5"/>
       <g role="img" aria-label="A slow pan and zoom across the hills">
         <g clip-path="url(#c5)">
           <g class="a m7 fb">

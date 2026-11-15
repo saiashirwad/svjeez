@@ -81,9 +81,9 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       </g>
       <g class="a m5">
         <g>
-          <text x="80" y="167.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base03)">installed</text>
-          <text x="200" y="167.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base03)">142</text>
-          <text x="248" y="167.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base03)">packages</text>
+          <text x="80" y="167.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0D)">installed</text>
+          <text x="200" y="167.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0D)">142</text>
+          <text x="248" y="167.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0D)">packages</text>
         </g>
       </g>
     </g>
@@ -125,16 +125,16 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
         <g>
           <text x="80" y="307.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0B)">✓</text>
           <text x="104" y="307.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base05)">dist/app.js</text>
-          <text x="272" y="307.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base03)">29.4</text>
-          <text x="332" y="307.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base03)">KB</text>
+          <text x="272" y="307.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0E)">29.4</text>
+          <text x="332" y="307.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0E)">KB</text>
         </g>
       </g>
       <g class="a m16">
         <g>
           <text x="80" y="342.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0B)">✓</text>
           <text x="104" y="342.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base05)">dist/app.css</text>
-          <text x="284" y="342.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base03)">6.0</text>
-          <text x="332" y="342.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base03)">KB</text>
+          <text x="284" y="342.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0E)">6.0</text>
+          <text x="332" y="342.5" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="20" fill="var(--base0E)">KB</text>
         </g>
       </g>
     </g>

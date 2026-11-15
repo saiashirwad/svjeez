@@ -110,7 +110,7 @@ export function lanes<const L extends Record<string, Labelled>>(
           {i % 2 === 0 && (
             <rect x={b.x} y={b.y} width={b.w} height={b.h} fill={theme.base01} fillOpacity={0.5} />
           )}
-          <circle cx={label.x + 5} cy={label.y} r={4} fill={tintOf(theme, r.role)} />
+          <circle cx={label.x + 5} cy={label.y} r={4} fill={tintOf(theme, r.role, l.tints)} />
           <text
             x={label.x + 16}
             y={label.y + fontSize * 0.35}
@@ -145,7 +145,7 @@ export function lanes<const L extends Record<string, Labelled>>(
     }),
     spans.map((s, i) => {
       const b = at.box(out.spans[i]!);
-      const tint = tintOf(theme, s.role ?? role(s.lane));
+      const tint = tintOf(theme, s.role ?? role(s.lane), l.tints);
 
       return (
         <g>
@@ -200,7 +200,7 @@ export function lanes<const L extends Record<string, Labelled>>(
     events.map((e, i) => {
       const { at: point, label } = out.events[i]!;
       const p = at.point(point);
-      const tint = tintOf(theme, e.role ?? role(e.lane));
+      const tint = tintOf(theme, e.role ?? role(e.lane), l.tints);
       const size = BAR / 2 + 1;
 
       return (
