@@ -73,12 +73,15 @@ const route = (file: string, demos: () => Readonly<Record<string, Demo>>): Plugi
 
 /** Every file of the app the demo module reaches, read, so a change anywhere in it records again. */
 const sources = async (server: ViteDevServer, file: string, root: string): Promise<string> => {
+  const bundled = server.config.cacheDir;
+
   const graph = server.environments.ssr.moduleGraph;
   const seen = new Set<string>();
   const paths = new Set<string>();
 
   const visit = async (id: string | null | undefined) => {
-    if (!id || seen.has(id) || id.includes("/node_modules/") || id.startsWith("\0")) return;
+    // Packages and their pre-bundled copies are the lockfile's business, not the app's sources.
+    if (!id || seen.has(id) || id.includes("/node_modules/") || id.startsWith(bundled) || id.startsWith("\0")) return;
     seen.add(id);
 
     const mod = (await graph.getModuleByUrl(id).catch(() => undefined)) ?? graph.getModuleById(id);
