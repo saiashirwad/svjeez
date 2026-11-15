@@ -10,7 +10,7 @@ import {
 import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, sources, unwrap } from "./fonts.ts";
 import { embed, preload } from "./images.ts";
-import { Differ, merge } from "./scheme.ts";
+import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { walk, type Marks } from "./walk.ts";
 
@@ -72,17 +72,26 @@ const settle = (page: Page, quiet: boolean) =>
         void frames().then(() => timer === undefined && finish());
       });
 
-    await document.fonts.ready;
+    // None of these waits may outlast three seconds in all: a font that never loads, or an animation with a long delay or
+    // a huge duration, must not hold the read.
+    const within = (wait: Promise<unknown>) =>
+      Promise.race([wait, deadline]);
+
+    const deadline = new Promise((done) => setTimeout(done, 3000));
+
+    await within(document.fonts.ready);
     // Only animations on the page's clock end by waiting: one a scroll drives holds until something scrolls.
-    await Promise.all(
-      document
-        .getAnimations()
-        .filter(
-          (a) =>
-            a.timeline === document.timeline &&
-            a.effect?.getComputedTiming().iterations !== Infinity,
-        )
-        .map((a) => a.finished.catch(() => undefined)),
+    await within(
+      Promise.all(
+        document
+          .getAnimations()
+          .filter(
+            (a) =>
+              a.timeline === document.timeline &&
+              a.effect?.getComputedTiming().iterations !== Infinity,
+          )
+          .map((a) => a.finished.catch(() => undefined)),
+      ),
     );
   }, quiet);
 
@@ -307,19 +316,13 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       return page.evaluate(walk, { selector, pad, parts });
     };
 
-    // Light goes last, so the page ends in the scheme it rests in. A live app may still be changing between the two
-    // passes (a progress badge, results arriving), so a mismatch reads both again before it counts.
-    const both = async (tries: number): Promise<Box> => {
+    // Light goes last, so the page ends in the scheme it rests in. A page that lays the schemes out differently (a
+    // theme toggle's icon, an image for one scheme) keeps its light read where they differ.
+    const both = async (): Promise<Box> => {
       const dark = schemes === "light" ? undefined : await pass("dark");
       const light = schemes === "dark" ? undefined : await pass("light");
 
-      try {
-        return dark && light ? merge(light, dark) : (light ?? dark)!;
-      } catch (error) {
-        if (!(error instanceof Differ) || tries <= 1) throw error;
-
-        return both(tries - 1);
-      }
+      return dark && light ? merge(light, dark) : (light ?? dark)!;
     };
 
     await scheme(resting);
@@ -328,7 +331,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       await shim(page);
       await settle(page, true);
 
-      const root = await embed(await both(3), picture(page));
+      const root = await embed(await both(), picture(page));
 
       const fonts = await capture(
         page,
@@ -420,7 +423,9 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         viewport: { width: Math.ceil(width ?? 1280), height: Math.ceil(height ?? 1000) },
       });
 
-      await page.goto(url);
+      // A page whose load never ends (a stream, a slow tracker) is read as it stands after a few seconds.
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => undefined);
 
       if (faces) await page.addStyleTag({ content: faces });
 

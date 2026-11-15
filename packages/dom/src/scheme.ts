@@ -1,14 +1,8 @@
 import { isPair, paint, transparent } from "./paint.ts";
 import type { Box, Gradient, Item, Paint, Shadow, Vector } from "./tree.ts";
 
-/** The two passes read different pages: an app still changing, or a scheme that changes the markup. */
-export class Differ extends Error {}
-
-const differ = (where: string): never => {
-  throw new Differ(
-    `snap() laid the dark scheme out differently from the light one at ${where}. Both schemes must have the same elements and text.`,
-  );
-};
+/** Called where the two passes read different markup: that subtree keeps the light scheme's read, colors and all. */
+type Differ = (where: string) => void;
 
 /** The color one pass read. A single pass never pairs, so this is the color itself. */
 const plain = <C extends string>(color: Paint<C>): C => (isPair(color) ? color.light : color);
@@ -19,7 +13,14 @@ const pick = (light?: Paint, dark?: Paint): Paint | undefined =>
     ? paint(plain(light ?? transparent(plain(dark!))), plain(dark ?? transparent(plain(light!))))
     : undefined;
 
-const mergeVector = (light: Vector, dark: Vector): Vector => ({
+const mergeVector = (light: Vector, dark: Vector, differ: Differ): Vector => {
+  if (light.tag !== dark.tag || light.children.length !== dark.children.length) {
+    differ(light.tag);
+
+    return light;
+  }
+
+  return {
   ...light,
   attrs: Object.fromEntries(
     Object.entries(light.attrs).map(([k, v]) => {
@@ -28,27 +29,41 @@ const mergeVector = (light: Vector, dark: Vector): Vector => ({
       return [k, (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v];
     }),
   ),
-  children: light.children.map((c, i) => mergeVector(c, dark.children[i] ?? differ(light.tag))),
-});
+  children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
+  };
+};
 
-const mergeItem = (light: Item, dark: Item): Item => {
+const mergeItem = (light: Item, dark: Item, differ: Differ): Item => {
   if (light.kind === "text" && dark.kind === "text") {
-    if (dark.text !== light.text) differ(`"${light.text}"`);
+    if (dark.text !== light.text) {
+      differ(`"${light.text}"`);
+
+      return light;
+    }
 
     return { ...light, color: paint(plain(light.color), plain(dark.color)) };
   }
 
-  if (light.kind === "graphic" && dark.kind === "graphic")
+  if (light.kind === "graphic" && dark.kind === "graphic") {
+    if (light.children.length !== dark.children.length) {
+      differ("svg");
+
+      return light;
+    }
+
     return {
       ...light,
-      children: light.children.map((c, i) => mergeVector(c, dark.children[i] ?? differ("svg"))),
+      children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
     };
+  }
 
   if (light.kind === "image" && dark.kind === "image") return light;
 
-  if (light.kind === "box" && dark.kind === "box") return merge(light, dark);
+  if (light.kind === "box" && dark.kind === "box") return merge(light, dark, differ);
 
-  return differ(light.kind);
+  differ(light.kind);
+
+  return light;
 };
 
 const mergeShadows = (light: readonly Shadow[], dark: readonly Shadow[]): Shadow[] =>
@@ -79,8 +94,10 @@ const mergeGradients = (light: readonly Gradient[], dark: readonly Gradient[]): 
   });
 
 /** One box tree whose colors follow the viewer's scheme, from a light and a dark read of the same page. */
-export const merge = (light: Box, dark: Box): Box => {
-  if (light.children.length !== dark.children.length) differ(`<${light.tag}>`);
+export const merge = (light: Box, dark: Box, differ: Differ = () => {}): Box => {
+  const same = light.children.length === dark.children.length;
+
+  if (!same) differ(`<${light.tag}>`);
 
   const insets = mergeShadows(light.insets ?? [], dark.insets ?? []);
   const gradients = mergeGradients(light.gradients ?? [], dark.gradients ?? []);
@@ -98,6 +115,6 @@ export const merge = (light: Box, dark: Box): Box => {
     shadows: mergeShadows(light.shadows, dark.shadows),
     gradients: gradients.length > 0 ? gradients : undefined,
     insets: insets.length > 0 ? insets : undefined,
-    children: light.children.map((c, i) => mergeItem(c, dark.children[i]!)),
+    children: same ? light.children.map((c, i) => mergeItem(c, dark.children[i]!, differ)) : light.children,
   };
 };
