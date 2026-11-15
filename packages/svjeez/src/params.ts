@@ -4,7 +4,7 @@
 //   export default (p = defaults(params)) => render(...);
 //
 // The schema crosses a worker boundary as is, and a page reads it to draw controls and to keep values in range.
-import type { Hex } from "./color";
+import { hexOf, type Hex } from "./color";
 import type { Point } from "./layout/box";
 import type { Ease } from "./motion";
 
@@ -54,11 +54,13 @@ type Extras = Partial<Pick<NumberParam, "step" | "unit" | "scale" | "label">>;
 const check = (name: string, p: NumberParam): NumberParam => {
   const at = `${name}(${p.value})`;
 
-  if (!(p.min < p.max)) throw new Error(`${at} needs min below max, got ${p.min} and ${p.max}.`);
+  if (!(Number.isFinite(p.min) && Number.isFinite(p.max) && p.min < p.max))
+    throw new Error(`${at} needs min below max, both finite, got ${p.min} and ${p.max}.`);
 
-  if (!(p.step > 0)) throw new Error(`${at} needs a positive step, got ${p.step}.`);
+  if (!(p.step > 0 && Number.isFinite(p.step)))
+    throw new Error(`${at} needs a positive finite step, got ${p.step}.`);
 
-  if (p.value < p.min || p.value > p.max)
+  if (!(Number.isFinite(p.value) && p.value >= p.min && p.value <= p.max))
     throw new Error(`${at} is outside its range ${p.min} to ${p.max}.`);
 
   if (p.scale === "log" && p.min <= 0)
@@ -78,6 +80,11 @@ export const count = (
 ): NumberParam => {
   if (!Number.isInteger(value)) throw new Error(`count(${value}) needs a whole number.`);
 
+  const { min = 0, max } = options;
+
+  if (!(Number.isInteger(min) && Number.isInteger(max)))
+    throw new Error(`count(${value}) needs whole-number bounds, got ${min} and ${max}.`);
+
   return check("count", { kind: "number", value, min: 0, ...options, step: 1 });
 };
 
@@ -90,7 +97,7 @@ export const seconds = (
 
 export const color = (value: Hex, options: Labelled = {}): ColorParam => ({
   kind: "color",
-  value,
+  value: hexOf(value, "color()"),
   ...options,
 });
 
@@ -105,6 +112,11 @@ export const choice = <const T extends string>(
   options: readonly T[],
   extras: Labelled = {},
 ): ChoiceParam<T> => {
+  if (new Set(options).size !== options.length)
+    throw new Error(
+      `choice("${value}") needs distinct options, got ${options.map((o) => `"${o}"`).join(", ")}.`,
+    );
+
   if (!options.includes(value))
     throw new Error(`choice("${value}") is not one of ${options.map((o) => `"${o}"`).join(", ")}.`);
 

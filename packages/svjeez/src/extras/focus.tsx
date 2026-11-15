@@ -23,16 +23,22 @@ export function Focus({
 }): SvgNode {
   if (!(dim >= 0 && dim <= 1)) throw new Error(`Focus() needs dim between 0 and 1, got ${dim}.`);
 
-  /** Stops that touch merge, so back-to-back stops keep the dim instead of flashing bright between them. */
+  if (!(fade >= 0 && Number.isFinite(fade)))
+    throw new Error(`Focus() needs a fade of 0 or more, got ${fade}.`);
+
+  /** Stops that touch merge, so back-to-back stops keep the dim instead of flashing bright between them. With `fade: 0` the dim cuts, as `show()` does. */
   const shade = mergeSpans(stops.map((stop) => stop.show)).reduce(
     (track, [at, end]) => {
-      const f = Math.min(fade, (end - at) / 2);
+      if (fade === 0) {
+        const on = track.at(at).set({ opacity: dim });
 
-      return track
-        .at(at)
-        .to({ opacity: dim }, f)
-        .at(end - f)
-        .to({ opacity: 1 }, f);
+        return end === Infinity ? on : on.at(end).set({ opacity: 1 });
+      }
+
+      const f = Math.min(fade, (end - at) / 2);
+      const on = track.at(at).to({ opacity: dim }, f);
+
+      return end === Infinity ? on : on.at(end - f).to({ opacity: 1 }, f);
     },
     motion({ opacity: 1 }),
   );

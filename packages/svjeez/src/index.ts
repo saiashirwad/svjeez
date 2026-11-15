@@ -84,7 +84,7 @@ export type { ElementProps } from "./jsx-runtime";
 
 export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
 
-export { hexBytes, hexOf, type Hex } from "./color";
+export { type Hex } from "./color";
 
 export type { Channel, ChannelValues, TagChannels } from "./channels";
 
@@ -105,8 +105,6 @@ export { matchPaths, type MatchOptions, type PathData, type SampledPathOptions }
 
 export { num } from "./format";
 
-export { groupBy } from "./layout/group";
-
 export type { Box, Size } from "./layout/box";
 
 export {
@@ -117,6 +115,7 @@ export {
   type ShotMove,
   type ShotOptions,
   readingTime,
+  type ReadingOptions,
   travel,
   type Beats,
   type HeadingOptions,

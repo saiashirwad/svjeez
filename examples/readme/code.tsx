@@ -47,7 +47,7 @@ export default function build(): string {
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       <Marker
-        theme={theme}
+        color={theme.base09}
         stops={[
           { show: { at: 0.5, over: 1 }, target: one.get("call").pad(3) },
           { show: { at: 2, over: 3 }, target: two.get("call").pad(3) },

@@ -37,6 +37,13 @@ export const restyle = (
   svg: string,
   { css, at, onceAt, paused, still }: RestyleOptions,
 ): string => {
+  for (const [name, value] of [
+    ["at", at],
+    ["onceAt", onceAt],
+  ] as const)
+    if (value !== undefined && !(Number.isFinite(value) && value >= 0))
+      throw new Error(`restyle() needs ${name} of 0 or more, got ${value}.`);
+
   let out = svg;
   const rate = rateOf(svg);
 

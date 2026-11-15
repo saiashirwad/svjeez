@@ -23,11 +23,11 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m3{animation-name:k2}
 @keyframes k3{0%,20.988%,95.885%,100%{width:374.8px}22.634%,44.033%{width:190.4px}45.679%,67.078%{width:219.2px}68.724%,94.239%{width:152px}}
 @keyframes k4{0%,20.988%,95.885%,100%{height:38px}22.634%,44.033%,45.679%,67.078%,68.724%,94.239%{height:36px}}
-.m4{animation-name:k3,k4}
-@keyframes k5{0%,20.988%,95.885%,100%{translate:0px 0px}22.634%,44.033%,68.724%,94.239%{translate:241px 85px}45.679%,67.078%{translate:250.6px 1px}}
-.m5{animation-name:k5}
-@keyframes k6{0%,100%{visibility:visible}}
-.m6{animation-name:k6}
+@keyframes k5{0%,100%{visibility:visible}}
+.m4{animation-name:k3,k4,k5}
+@keyframes k6{0%,20.988%,95.885%,100%{translate:0px 0px}22.634%,44.033%,68.724%,94.239%{translate:241px 85px}45.679%,67.078%{translate:250.6px 1px}}
+.m5{animation-name:k6}
+.m6{animation-name:k5}
 @keyframes k7{0%,45.885%,96.091%,100%{opacity:0}47.737%,94.239%{opacity:1}}
 .m7{animation-name:k7}
 @keyframes k8{0%,44.033%,47.737%,94.239%,97.942%,100%{translate:0px 0px}}

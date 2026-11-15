@@ -15,21 +15,22 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
 .m1{animation-name:k1,k2}
 @keyframes k3{0%,19.091%,22.727%,100%{width:300px}}
 @keyframes k4{0%,19.091%,22.727%,100%{height:134.4px}}
-.m2{animation-name:k3,k4}
-@keyframes k5{0%,19.091%{translate:0px 0px}22.727%,100%{translate:0px 122.4px}}
-.m3{animation-name:k5}
-@keyframes k6{0%,10%{stroke-dashoffset:1;visibility:hidden}19.091%,100%{stroke-dashoffset:0;visibility:visible}}
-.m4{animation-name:k6}
-@keyframes k7{0%,17.273%{scale:0}20.909%,100%{scale:1}}
-.m5{animation-name:k7;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k8{0%,8.182%{opacity:0}12.727%,100%{opacity:1}}
-@keyframes k9{0%,8.182%{translate:0px 8px}12.727%,100%{translate:0px 0px}}
-.m6{animation-name:k8,k9}
-@keyframes k10{0%,15.455%{opacity:0}20%,100%{opacity:1}}
-@keyframes k11{0%,15.455%{translate:0px 6px}20%,100%{translate:0px 0px}}
-.m7{animation-name:k10,k11}
-@keyframes k12{0%,95.455%{opacity:1}100%{opacity:0}}
-.m8{animation-name:k12}
+@keyframes k5{0%,10%{opacity:0}13.636%,100%{opacity:1}}
+.m2{animation-name:k3,k4,k5}
+@keyframes k6{0%,19.091%{translate:0px 0px}22.727%,100%{translate:0px 122.4px}}
+.m3{animation-name:k6}
+@keyframes k7{0%,10%{stroke-dashoffset:1;visibility:hidden}19.091%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k7}
+@keyframes k8{0%,17.273%{scale:0}20.909%,100%{scale:1}}
+.m5{animation-name:k8;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k9{0%,8.182%{opacity:0}12.727%,100%{opacity:1}}
+@keyframes k10{0%,8.182%{translate:0px 8px}12.727%,100%{translate:0px 0px}}
+.m6{animation-name:k9,k10}
+@keyframes k11{0%,15.455%{opacity:0}20%,100%{opacity:1}}
+@keyframes k12{0%,15.455%{translate:0px 6px}20%,100%{translate:0px 0px}}
+.m7{animation-name:k11,k12}
+@keyframes k13{0%,95.455%{opacity:1}100%{opacity:0}}
+.m8{animation-name:k13}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
 ]]></style>
   <g class="sans">

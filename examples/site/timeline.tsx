@@ -100,7 +100,7 @@ export const make = (tall = false): string => {
       <path d={tall ? `M0 ${BAR + 172}H${W}` : `M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
       <g animation={outro(D)}>
         <g animation={enter({ at: 0.1, over: 0.5 }, { opacity: 0, y: 6 })}>{src.node}</g>
-        <Marker theme={theme} stops={lit} color={theme.base0D} />
+        <Marker stops={lit} color={theme.base0D} />
       </g>
       <g animation={outro(D)}>
         <rect

@@ -11,7 +11,7 @@ import {
 import { samplePath } from "./paths";
 import type { NumericProperty } from "./properties";
 import { random } from "./random";
-import { sampleWindow, type SampleWindow } from "./span";
+import { checkWindow, sampleWindow, type SampleWindow } from "./span";
 import {
   NUDGE,
   ease,
@@ -26,13 +26,19 @@ import {
 type Shake = "x" | "y" | "rotate";
 
 const closed = ({ at, over }: Span, what: string): Span => {
-  if (!Number.isFinite(at) || at < 0)
-    throw new Error(`${what} needs a start of 0 or later, got ${at}.`);
-
-  if (!Number.isFinite(over) || over <= 0)
-    throw new Error(`${what} needs a positive duration, got ${over}.`);
+  checkWindow(at, over, what);
 
   return { at, over };
+};
+
+/** A positive finite `rate`, or the default when left out. */
+const rateOf = (rate: number | undefined, fallback: number, what: string): number => {
+  const value = rate ?? fallback;
+
+  if (!(value > 0 && Number.isFinite(value)))
+    throw new Error(`${what} needs a positive rate, got ${value}.`);
+
+  return value;
 };
 
 // SAFETY: values is typed ChannelValues<RestChannel>, so its keys are rest channel names.
@@ -89,7 +95,7 @@ export function shake<V extends ChannelValues<Shake>>(
   options: { readonly rate?: number } = {},
 ): Motion<keyof V & Shake> {
   const { at: start, over } = closed(at, "shake()");
-  const count = Math.max(2, Math.round(over * (options.rate ?? 12)));
+  const count = Math.max(2, Math.round(over * rateOf(options.rate, 12, "shake()")));
   const amounts: ChannelValues<Shake> = amplitude;
 
   const swing = (k: number): ChannelValues<Shake> =>
@@ -129,7 +135,7 @@ export function wiggle<V extends ChannelValues<RestChannel>>(
 
   if (!Number.isFinite(period) || period <= 0)
     throw new Error(`wiggle() needs a positive period, got ${period}.`);
-  const count = Math.max(2, Math.round((options.rate ?? 8) * period));
+  const count = Math.max(2, Math.round(rateOf(options.rate, 8, "wiggle()") * period));
   const next = random(String(options.seed));
   const amounts: ChannelValues<RestChannel> = amplitude;
   // SAFETY: amounts is typed ChannelValues<RestChannel>, so its keys are rest channel names.

@@ -1,5 +1,5 @@
 import { children, type Child, type SvgNode } from "./svg";
-import type { When } from "./span";
+import { checkWindow, type When } from "./span";
 
 export type ClipProps = When & { readonly children?: Child };
 
@@ -9,11 +9,7 @@ export type ClipProps = When & { readonly children?: Child };
  * Outside its span a motion holds its first or last value, so a clip costs no keys.
  */
 export const Clip = ({ at, over, children: content }: ClipProps): SvgNode => {
-  if (!Number.isFinite(at) || at < 0)
-    throw new Error(`<Clip> needs an at of 0 or later, got ${at}.`);
-
-  if (over !== undefined && (!Number.isFinite(over) || over <= 0))
-    throw new Error(`<Clip> needs a positive over, got ${over}.`);
+  checkWindow(at, over ?? 1, "<Clip>");
 
   const inside = children(content);
 
