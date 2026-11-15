@@ -1,243 +1,153 @@
-import {
-  draw,
-  ease,
-  motion,
-  rect,
-  render,
-  Arrow,
-  Brace,
-  Focus,
-  Marker,
-  Underline,
-  code,
-  morph,
-  timeline,
-  appWindow,
-  type CodePiece,
-  type CodeRun,
-  type CodeTokens,
-} from "svjeez";
+import { highlight } from "@svjeez/code";
+import { code, ease, motion, rect, render, type CodeTokens, type Rect } from "svjeez";
 
-import { color, geist, HEIGHT, MARGIN, mono, css, size, stroke, theme, WIDTH } from "../gallery-style";
+import { css, mono, theme } from "../style";
+import scene, { hop } from "./scene.tsx";
+import { chick } from "../site/lib/chick";
 
-const tl = timeline({ write: 3.5, timing: 4, css: 5, result: 4.5, rewind: 1.2 }, { gap: 0.4 });
-const slides = ["write", "timing", "css", "result"] as const;
+// You write a scene in TSX; svjeez compiles it into one SVG that animates with CSS and no JavaScript.
+// The picture on the right is that scene. The left half is its source, then the CSS it compiles to, then the file.
+// Each left panel crossfades as one block. examples/tests/explainer.test.tsx checks the code against scene.tsx and the CSS
+// against what render() writes.
 
-const kw = (text: string): CodeRun => ["keyword", text];
-const fn = (text: string, id?: string): CodeRun => ["fn", text, id];
-const p = (text: string, id?: string): CodeRun => ["punct", text, id];
-const str = (text: string): CodeRun => ["string", text];
-const num = (text: string, id?: string): CodeRun => ["number", text, id];
-const tag = (text: string): CodeRun => ["tag", text];
-const v = (text: string, id?: string): CodeRun => ["plain", text, id];
-const note = (text: string): CodeRun => ["comment", text];
+const W = 960;
+const H = 540;
+const M = 48;
+const D = 14;
+/** The scene's own clock, repeated: the scene's loop divides the explainer's. */
+const PERIOD = 2;
 
-// The scene, exactly as the CSS beside it was rendered from it. examples/tests checks that the two agree.
-const scene: CodeTokens = [
-  [kw("import"), p(" { "), v("enter"), p(", "), v("render"), p(" } "), kw("from"), " ", str('"svjeez"'), p(";")],
-  [],
-  [kw("const"), " svg ", p("= "), fn("render"), p("(")],
-  ["  ", p("{ "), "width", p(": "), num("320"), p(", "), "height", p(": "), num("180"), p(", "), "duration", p(": "), num("2"), p(" },")],
-  ["  ", p("<"), tag("rect")],
-  ["    x", p("={"), num("120"), p("} "), "y", p("={"), num("50"), p("} "), "width", p("={"), num("80"), p("} "), "height", p("={"), num("80"), p("} "), "rx", p("={"), num("12"), p("}")],
-  [
-    "    animation",
-    p("={"),
-    fn("enter"),
-    p("("),
-    p("{ ", "timing"),
-    v("at", "timing"),
-    p(": ", "timing"),
-    num("0.5", "timing"),
-    p(", ", "timing"),
-    v("over", "timing"),
-    p(": ", "timing"),
-    num("1", "timing"),
-    p(" }", "timing"),
-    p(", { "),
-    "x",
-    p(": "),
-    num("-120"),
-    p(" })}"),
-  ],
-  ["  ", p("/>,")],
-  [p(");")],
-];
+/** What the snippet shows, as it is in scene.tsx but for the two lines noted in the test. */
+export const source = `import { ease, motion, render } from "svjeez";
+import { chick } from "./chick";
 
-// What render() writes for it: the keyframes and the rule that plays them, with the whitespace added.
-const keyframes: CodeTokens = [
-  [fn(".a"), p(" {")],
-  ["  animation-duration", p(": "), num("2s"), p(";")],
-  ["  animation-iteration-count", p(": "), ["constant", "infinite"], p(";")],
-  ["  animation-timing-function", p(": "), fn("cubic-bezier"), p("("), num(".23"), p(","), num("1"), p(","), num(".32"), p(","), num("1"), p(");")],
-  [p("}")],
-  [kw("@keyframes"), " ", fn("k1"), p(" {")],
-  ["  ", num("0%"), p(", "), num("25%"), p(" { "), "translate", p(": "), num("-120px 0px"), p(" }")],
-  ["  ", num("75%"), p(", "), num("100%"), p(" { "), "translate", p(": "), num("0px 0px"), p(" }")],
-  [p("}")],
-  [fn(".m1"), p(" { "), "animation-name", p(": "), "k1", p(" }")],
-];
+const hop = motion({ y: 60 })
+  .to({ y: 0 }, { at: 0.4, over: 0.4 }, ease.out)
+  .to({ y: 60 }, { at: 0.8, over: 0.4 }, ease.in);
 
-const page: CodeTokens = [
-  [p("<"), tag("img"), " src", p("="), str('"scene.svg"'), " alt", p("="), str('"A square slides in"'), p(" />")],
-  [],
-  [note("<!-- scene.svg has no script in it -->")],
-];
+export default () =>
+  render(
+    { width: 208, height: 240, duration: 2,
+      title: "A chick hops" },
+    chick({ body: hop }),
+  );`;
 
-const frame = rect(MARGIN, 95, 592, 350);
-const editor = appWindow(frame, { theme, title: "scene.tsx" });
+/** The rules render() writes for that motion, with the whitespace added and the reduced-motion rule left out. */
+export const shownCss = `.a {
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+@keyframes k1 {
+  0%, 20%, 60%, 100% {
+    translate: 0px 60px;
+  }
+  40% {
+    translate: 0px 0px;
+  }
+}
+.m1 { animation-name: k1; }`;
 
-const settings = {
-  x: frame.x + 64,
-  y: editor.body.y + 28,
-  fontSize: 15,
-  lineHeight: 1.75,
-  theme,
-  font: mono,
+/** The size of the file on disk, to a tenth of a KB. */
+export const fileKb = (new TextEncoder().encode(scene()).length / 1024).toFixed(1);
+export const fileLine = `scene.svg · ${fileKb} KB · 0 lines of JS`;
+
+/** Two tones and one accent: names and values are ink, punctuation and keywords recede. */
+const quiet = {
+  ...theme,
+  base0E: theme.base04,
+  base0D: theme.base06,
+  base0B: theme.base06,
+  base09: theme.base06,
+  base0A: theme.base06,
+  base08: theme.base06,
+  base0C: theme.base06,
 };
 
-const one = code(scene, settings);
-const two = code(keyframes, settings);
-const three = code(page, settings);
-const m = morph([one, two, three, one], {
-  at: [tl.css.at, tl.result.at, tl.rewind.at],
-  over: 0.9,
-  gutter: true,
-});
+/** The one accent, and only the highlight uses it. */
+const accent = theme.base0D;
 
-const panel = { x: frame.x + frame.w + 32, w: 240 };
+const FONT = 16;
+const LINE = 28;
+const top = (H - 13 * LINE) / 2;
 
-const copy: Record<(typeof slides)[number], { head: string[]; body: string[] }> = {
-  write: {
-    head: ["A shape and", "a motion"],
-    body: ["enter() slides the square", "in from 120px to the left."],
-  },
-  timing: {
-    head: ["The timing is", "one object"],
-    body: ["Start at 0.5s and take 1s,", "on a clock 2s long."],
-  },
-  css: {
-    head: ["It compiles to", "CSS keyframes"],
-    body: ["0.5s of 2s is 25%.", "1.5s of 2s is 75%.", "The browser does the rest."],
-  },
-  result: {
-    head: ["One SVG file,", "no JavaScript"],
-    body: ["It plays inside an img tag.", "The browser plays it as CSS", "animations."],
-  },
+const style = { x: M, y: top, fontSize: FONT, lineHeight: LINE / FONT, theme: quiet, font: mono };
+const tsx = code(highlight(source, "tsx") as CodeTokens, style);
+const sheet = code(highlight(shownCss, "css") as CodeTokens, style);
+
+/** The file line sits where the middle of the code was. */
+const file = code([[fileLine]], { ...style, fontSize: 24, lineHeight: 1.4, y: H / 2 - 17 });
+
+/** Each panel is one block: it fades with a 10px drift over half a second, eased out. */
+const FADE = 0.5;
+const DRIFT = 10;
+
+/** The crossfades, in seconds on the loop: code to CSS, CSS to the file, the file back to code. */
+const SWAP = { css: 4.6, file: 9.6, back: 13 } as const;
+
+const into = (at: number) => ({ at, over: FADE });
+
+const hidden = { opacity: 0, y: DRIFT };
+const shown = { opacity: 1, y: 0 };
+const gone = { opacity: 0, y: -DRIFT };
+
+const panel = {
+  tsx: motion(shown).at(SWAP.css).to(gone, FADE, ease.out).set(hidden).at(SWAP.back).to(shown, FADE, ease.out),
+  css: motion(hidden).to(shown, into(SWAP.css), ease.out).at(SWAP.file).to(gone, FADE, ease.out).set(hidden),
+  file: motion(hidden).to(shown, into(SWAP.file), ease.out).at(SWAP.back).to(gone, FADE, ease.out).set(hidden),
 };
 
-const slide = (name: (typeof slides)[number]) => {
-  const { at, over } = tl[name];
-  const { head, body } = copy[name];
-  const headTop = frame.y + 110;
-  const bodyTop = headTop + head.length * 32 + 12;
+/** The highlight fades in as a whole bar, pulses each time the chick leaves the ground, and fades out before the swap. */
+const bar = (lines: Rect, from: number, to: number) => (
+  <g animation={motion({ opacity: 0 }).at(from).to({ opacity: 1 }, 0.4, ease.out).at(to).to({ opacity: 0 }, 0.3, ease.out)}>
+    <rect
+      x={lines.x - 12}
+      y={lines.y}
+      width={lines.w + 24}
+      height={lines.h}
+      rx={4}
+      fill={accent}
+      animation={pulse}
+    />
+  </g>
+);
 
-  return (
-    <g
-      fontFamily={geist}
-      animation={motion({ opacity: 0, y: 8 })
-        .at(at)
-        .to({ opacity: 1, y: 0 }, 0.45)
-        .at(at + over - 0.3)
-        .to({ opacity: 0, y: -6 }, 0.3, ease.in)}
-    >
-      {head.map((line, i) => (
-        <text x={panel.x} y={headTop + i * 32} fontSize={26} fontWeight={600} fill={color.ink}>
-          {line}
-        </text>
-      ))}
-      {body.map((line, i) => (
-        <text x={panel.x} y={bodyTop + i * 22} fontSize={size.subtitle} fill={color.dim}>
-          {line}
-        </text>
-      ))}
-    </g>
-  );
-};
+/** Up on the scene's 0.4s to 0.8s, every loop of its clock. */
+const pulse = motion({ opacity: 0.1 })
+  .at(0.4)
+  .to({ opacity: 0.3 }, 0.4, ease.out)
+  .to({ opacity: 0.1 }, 0.4, ease.in)
+  .loop(PERIOD);
 
-const progress = () => {
-  const gap = 10;
-  const seg = (panel.w - gap * (slides.length - 1)) / slides.length;
-  const y = frame.y + frame.h;
-
-  return (
-    <g>
-      {slides.map((_, i) => (
-        <path
-          d={`M${panel.x + i * (seg + gap)} ${y}h${seg}`}
-          stroke={color.edge}
-          strokeWidth={stroke.accent}
-          strokeLinecap="round"
-        />
-      ))}
-      <g animation={motion({ opacity: 1 }).at(tl.rewind.at).to({ opacity: 0 }, 0.5)}>
-        {slides.map((name, i) => (
-          <path
-            d={`M${panel.x + i * (seg + gap)} ${y}h${seg}`}
-            fill="none"
-            stroke={color.accent}
-            strokeWidth={stroke.accent}
-            strokeLinecap="round"
-            animation={draw(
-              { at: tl[name].at, over: tl[name].over + (i < slides.length - 1 ? 0.4 : 0) },
-              ease.linear,
-            )}
-          />
-        ))}
-      </g>
-    </g>
-  );
-};
+/** The picture: the scene itself, on its own 2s clock, as large as the right half allows. */
+const SCALE = 2;
+/** The chick spans y 29 to 222 of the scene, so that range, hop included, is what centers. */
+const picture = rect(744 - 104 * SCALE, H / 2 - 125 * SCALE, 208 * SCALE, 240 * SCALE);
 
 export default function build(): string {
-  const timing = one.get("timing");
-  const body = one.lines(5, 8);
-
   return render(
     {
-      width: WIDTH,
-      height: HEIGHT,
-      title: "How a scene becomes an SVG",
-      desc: "A short svjeez scene in TSX moves a square in with enter({ at, over }). The timing line is highlighted, then the scene turns into the CSS keyframes it compiles to, then into an img tag that plays the one self-contained SVG with no JavaScript.",
-      duration: tl.duration,
-      reducedMotion: { at: tl.result.at + 2 },
+      width: W,
+      height: H,
+      duration: D,
+      title: "A scene in TSX compiles to one animated SVG",
+      desc: "A short svjeez scene in TSX makes a chick hop. The timing line of the code is highlighted while the chick leaves the ground. The code then turns into the CSS keyframes svjeez writes for it, and then into the file: one SVG with no JavaScript.",
+      reducedMotion: { at: 2.2 },
       css,
     },
     <>
-      <rect width={WIDTH} height={HEIGHT} fill={color.bg} />
+      <rect width={W} height={H} fill={theme.base00} />
 
-      <g fontFamily={mono}>{editor.node}</g>
+      <g transform={`translate(${picture.x} ${picture.y}) scale(${SCALE})`}>{chick({ body: hop.loop(PERIOD) })}</g>
 
-      <Focus
-        stops={[{ show: tl.timing, target: rect(frame.x, timing.y, frame.w, timing.h) }]}
-        dim={0.28}
-      >
-        <Marker
-          color={color.accent}
-          stops={[
-            { show: tl.write, target: body.pad(5) },
-            { show: tl.timing, target: timing.pad(4) },
-            { show: tl.css, target: two.lines(7, 8).pad(5) },
-            { show: tl.result, target: three.lines(1).pad(5) },
-            { show: tl.rewind, target: body.pad(5) },
-          ]}
-        />
-        {m.node}
-      </Focus>
-
-      <g fontFamily={geist}>
-        <Brace
-          target={two.lines(7, 8)}
-          side="right"
-          label="25% to 75%"
-          show={tl.css}
-          color={color.accent}
-        />
-        <Underline target={three.find('"scene.svg"')} show={tl.result} color={color.accent} />
+      <g animation={panel.tsx}>
+        {bar(tsx.lines(5), 0.9, SWAP.css - 0.3)}
+        {tsx.node}
       </g>
-
-      {slides.map(slide)}
-      {progress()}
+      <g animation={panel.css}>
+        {bar(sheet.lines(9, 11), SWAP.css + FADE + 0.4, SWAP.file - 0.3)}
+        {sheet.node}
+      </g>
+      <g animation={panel.file}>{file.node}</g>
     </>,
   );
 }

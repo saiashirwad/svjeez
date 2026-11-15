@@ -52,7 +52,7 @@ const map = project(countries, {
 const C = {
   sea: theme.base00,
   land: theme.base01,
-  grain: theme.base03,
+  grain: theme.base02,
   edge: theme.base02,
   text: theme.base06,
   dim: theme.base04,
@@ -285,15 +285,15 @@ const DRAW = 1.4;
 const leave = motion().at(OUT).to({ opacity: 0 }, 0.8, ease.inOut);
 
 const grain = def.pattern(
-  { width: 4.5, height: 4.5, patternUnits: "userSpaceOnUse" },
-  <circle cx={2.25} cy={2.25} r={0.85} fill={C.grain} />,
+  { width: 5.5, height: 5.5, patternUnits: "userSpaceOnUse" },
+  <circle cx={2.75} cy={2.75} r={0.7} fill={C.grain} />,
 );
 
 function Land(): SvgNode {
   return (
     <>
       <path d={map.sphere} fill={C.sea} stroke={C.edge} strokeWidth={1} />
-      <path d={map.graticule(20)} fill="none" stroke={C.edge} strokeWidth={1} opacity={0.6} />
+      <path d={map.graticule(20)} fill="none" stroke={C.edge} strokeWidth={1} opacity={0.35} />
       <path d={map.land} fill={C.land} />
       <path d={map.land} fill={grain} />
     </>
@@ -461,8 +461,13 @@ function Stations(): SvgNode {
                 y={y + label.dy}
                 textAnchor={label.anchor}
                 fontFamily={geist}
-                fontSize={size.smallest}
-                fill={C.dim}
+                fontSize={size.label}
+                fontWeight={500}
+                fill={C.text}
+                stroke={C.sea}
+                strokeWidth={3}
+                strokeLinejoin="round"
+                style={{ paintOrder: "stroke" }}
               >
                 {s.name}
               </text>
