@@ -90,4 +90,83 @@ describe("real pages", () => {
     expect(svg.match(/<symbol/g)).toHaveLength(3);
     expect(svg).toContain("<mask");
   });
+
+  test("a canvas is drawn as a still, and an SVG with only a viewBox gets a size", async () => {
+    const svg =
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 20'%3E%3Crect width='40' height='20' fill='red'/%3E%3C/svg%3E";
+
+    const card = await dom.mount(
+      `<div><canvas id="c" width="40" height="20" style="width:40px;height:20px"></canvas><img src="${svg}" width="40" height="20"></div>`,
+    );
+
+    const state = await card.snap(async (page) => {
+      await page.evaluate(() => {
+        const g = (document.getElementById("c") as HTMLCanvasElement).getContext("2d")!;
+
+        g.fillStyle = "#08f";
+        g.fillRect(0, 0, 40, 20);
+      });
+    });
+
+    await card.close();
+    const json = JSON.stringify(state.root);
+
+    expect(json).toContain("data:image/webp");
+    expect(json).toContain('width=\'40\'');
+  });
+
+  test("a painted canvas is drawn as a WebP still", async () => {
+    const card = await dom.mount('<div><canvas id="c" width="800" height="800"></canvas></div>');
+
+    const state = await card.snap(async (page) => {
+      await page.evaluate(() => {
+        const g = (document.getElementById("c") as HTMLCanvasElement).getContext("2d")!;
+
+        for (let i = 0; i < 800; i += 8) {
+          g.fillStyle = `hsl(${i / 2.2} 80% 50%)`;
+          g.fillRect(i, 0, 8, 800);
+        }
+      });
+    });
+
+    await card.close();
+    // An 800px canvas drawn at 800px is kept at its size, as WebP.
+    expect(JSON.stringify(state.root)).toContain("data:image/webp");
+  });
+
+  test("text-overflow: ellipsis draws the dots, an image's border is a box", async () => {
+    const state = await draw(
+      `<div><p style="width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:14px monospace">a long commit message</p><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="20" height="20" style="border:2px solid red"></div>`,
+    );
+
+    const [line] = runs(state.root);
+    const boxes = (state.root.children as Item[]).flatMap((c) => (c.kind === "box" ? [c] : []));
+
+    expect(line?.text.endsWith("…")).toBe(true);
+    expect(line!.text.length).toBeLessThan("a long commit message".length);
+    expect(boxes.some((b) => b.tag === "img" && b.border)).toBe(true);
+  });
+
+  test("an open shadow root's text is read", async () => {
+    const card = await dom.mount('<div><x-t id="t"></x-t></div>');
+
+    const state = await card.snap(async (page) => {
+      await page.evaluate(() => {
+        document.getElementById("t")!.attachShadow({ mode: "open" }).innerHTML = "<b>2 weeks ago</b>";
+      });
+    });
+
+    await card.close();
+    expect(runs(state.root).map((r) => r.text)).toEqual(["2 weeks ago"]);
+  });
+
+  test("mix-blend-mode is drawn as a blend", async () => {
+    const state = await draw(
+      '<div style="position:relative;width:50px;height:50px;background:#888"><div style="position:absolute;inset:0;background:#fff;mix-blend-mode:overlay;isolation:isolate"></div></div>',
+    );
+
+    const svg = render({ ...size(state), duration: 1, title: "dom" }, <Dom states={[state]} />);
+
+    expect(svg).toContain("mix-blend-mode:overlay");
+  });
 });

@@ -691,11 +691,21 @@ export const painter = (
     );
 
     // A box with nothing of its own to apply adds no group: deep pages nest hundreds of plain wrappers.
-    if (motions.length === 0 && b.opacity >= 1) return transformed(b, drawn);
+    if (motions.length === 0 && b.opacity >= 1 && !b.blend && !b.isolate)
+      return transformed(b, drawn);
+
+    // A blend mode blends this group with what is drawn under it; isolation keeps what's inside from reaching out.
+    const mode = [b.blend && `mix-blend-mode:${b.blend}`, b.isolate && "isolation:isolate"]
+      .filter(Boolean)
+      .join(";");
 
     return transformed(
       b,
-      <g opacity={!opacity && b.opacity < 1 ? b.opacity : undefined} animation={motions}>
+      <g
+        opacity={!opacity && b.opacity < 1 ? b.opacity : undefined}
+        style={mode || undefined}
+        animation={motions}
+      >
         {drawn}
       </g>,
     );
