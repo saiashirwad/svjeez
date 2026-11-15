@@ -55,7 +55,7 @@ export const demoOf = <P>(
  * What a mount tells the recorder: `update` applies a patch to the props, and the host is ready to be read. Both
  * framework mounts end with this call.
  */
-export const host = (element: HTMLElement, update: (patch: Record<string, unknown>) => void): void => {
+export const ready = (element: HTMLElement, update: (patch: Record<string, unknown>) => void): void => {
   window.__svjeez = {
     props: async (patch) => {
       update(patch);

@@ -2,7 +2,7 @@
 import { createElement } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { host as ready, type Demo } from "./demo.ts";
+import { ready, type Demo } from "./demo.ts";
 
 export const mount = (demo: Demo, host: HTMLElement): void => {
   const root = createRoot(host);
