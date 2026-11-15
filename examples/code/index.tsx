@@ -1,16 +1,16 @@
 import { highlight } from "@svjeez/code";
 import { ease, motion, rect, render, appWindow, code, morph } from "svjeez";
 
-import { css, mono, theme } from "../style";
+import { HEIGHT, MARGIN, WIDTH, RADIUS, css, mono, theme } from "../gallery-style";
 
-const W = 960;
-const H = 420;
+const W = WIDTH;
+const H = HEIGHT;
 
 // One function in four languages. @svjeez/code gives every token a role, so the colors below come from
 // style.ts and the scene still follows the viewer between light and dark.
 const SOURCES = [
   {
-    label: "ts",
+    label: "TS",
     lang: "ts",
     source: `function fib(n: number): number {
   if (n < 2) return n;
@@ -18,7 +18,7 @@ const SOURCES = [
 }`,
   },
   {
-    label: "py",
+    label: "Python",
     lang: "python",
     source: `def fib(n: int) -> int:
     if n < 2:
@@ -26,7 +26,7 @@ const SOURCES = [
     return fib(n - 1) + fib(n - 2)`,
   },
   {
-    label: "rs",
+    label: "Rust",
     lang: "rust",
     source: `fn fib(n: u32) -> u32 {
     if n < 2 {
@@ -36,7 +36,7 @@ const SOURCES = [
 }`,
   },
   {
-    label: "go",
+    label: "Go",
     lang: "go",
     source: `func fib(n int) int {
     if n < 2 {
@@ -47,9 +47,9 @@ const SOURCES = [
   },
 ] as const;
 
-const win = appWindow(rect(40, 40, W - 80, H - 80), { theme, title: "fib", bar: 40 });
+const win = appWindow(rect(MARGIN, 105, W - 2 * MARGIN, H - 210), { theme, title: "fib", bar: 40 });
 
-const CHIP = { w: 64, gap: 8, h: 28 };
+const CHIP = { w: 84, gap: 8, h: 28 };
 const chipX = (i: number) => win.body.x + 28 + i * (CHIP.w + CHIP.gap);
 const chipY = win.body.y + 22;
 
@@ -83,7 +83,7 @@ export default function build(): string {
     {
       width: W,
       height: H,
-      title: "One function, four languages",
+      title: "Fibonacci in four languages",
       desc: "A Fibonacci function morphs between TypeScript, Python, Rust and Go, highlighted by role from the scene's theme.",
       duration: at[3]! + OVER + HOLD,
       css,
@@ -95,7 +95,7 @@ export default function build(): string {
         y={chipY}
         width={CHIP.w}
         height={CHIP.h}
-        rx={8}
+        rx={RADIUS}
         fill={theme.base02}
         animation={slide}
       />
