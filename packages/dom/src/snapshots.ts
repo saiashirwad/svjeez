@@ -34,7 +34,7 @@ interface Tape {
   readonly snaps: Snapshot[];
 }
 
-const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
+export const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
 
 /** What a trace records: how a card was opened, or an instruction. */
 type Entry = string | Action | readonly (string | MountOptions | OpenOptions | undefined)[];

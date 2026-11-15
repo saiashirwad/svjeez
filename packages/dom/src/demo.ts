@@ -1,4 +1,7 @@
-import { props as setProps, type Action, type Flow } from "./flow.ts";
+import { props, type Action, type Flow } from "./flow.ts";
+
+/** Room around a demo for shadows and rings, in px, when its layout gives none. */
+export const PAD = 16;
 
 // The flow's words, from here too: a demo file runs in the browser, so it imports nothing that pulls in Chromium.
 // `props` isn't among them: a demo's script gets one typed to its component.
@@ -37,16 +40,30 @@ export interface Demo<P = unknown> {
 export const demoOf = <P>(
   framework: Framework,
   component: unknown,
-  { props, ...layout }: DemoOptions<P>,
+  { props: initial, ...layout }: DemoOptions<P>,
   script: (tools: Script<P>) => Flow,
 ): Demo<P> => ({
   kind: "svjeez-demo",
   framework,
   component,
-  props: (props ?? {}) as P,
+  props: (initial ?? {}) as P,
   layout,
-  flow: script({ props: (patch) => setProps(patch) }),
+  flow: script({ props }),
 });
+
+/**
+ * What a mount tells the recorder: `update` applies a patch to the props, and the host is ready to be read. Both
+ * framework mounts end with this call.
+ */
+export const host = (element: HTMLElement, update: (patch: Record<string, unknown>) => void): void => {
+  window.__svjeez = {
+    props: async (patch) => {
+      update(patch);
+    },
+  };
+
+  element.dataset.ready = "";
+};
 
 export const isDemo = (value: unknown): value is Demo =>
   typeof value === "object" && value !== null && (value as Demo).kind === "svjeez-demo";

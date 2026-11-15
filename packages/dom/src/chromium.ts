@@ -7,8 +7,9 @@ import {
   type Pages,
   type BrowserOptions,
 } from "./browser.ts";
+import { PAD } from "./demo.ts";
 import type { Action } from "./flow.ts";
-import { dataUri, families, fontFace, formatOf, sources, unwrap } from "./fonts.ts";
+import { dataUri, families, fontFace, formatOf, isWholeFile, sources, unwrap } from "./fonts.ts";
 import { embed, preload, shrink, stills, svgUri, unpack, type Fetched, type Size } from "./images.ts";
 import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
@@ -74,10 +75,8 @@ const settle = (page: Page, quiet: boolean) =>
 
     // None of these waits may outlast three seconds in all: a font that never loads, or an animation with a long delay or
     // a huge duration, must not hold the read.
-    const within = (wait: Promise<unknown>) =>
-      Promise.race([wait, deadline]);
-
     const deadline = new Promise((done) => setTimeout(done, 3000));
+    const within = (wait: Promise<unknown>) => Promise.race([wait, deadline]);
 
     await within(document.fonts.ready);
     // Only animations on the page's clock end by waiting: one a scroll drives holds until something scrolls.
@@ -224,7 +223,8 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   // Font files by URL, fetched once for every card.
   const files = new Map<string, Promise<string | undefined>>();
 
-  // Image files by URL, fetched once for every card.
+  // Image files by URL, fetched once for every card, and what each is cut down to by size.
+  const fetched = new Map<string, Promise<Fetched | undefined>>();
   const pictures = new Map<string, Promise<string | undefined>>();
 
   /** An image's file, fetched from Node so a cross-origin one needs no CORS. */
@@ -255,24 +255,27 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     let file = pictures.get(key);
 
     if (!file) {
-      file = fetchImage(page, url).then(async (got) => {
-        if (!got) return undefined;
+      let got = fetched.get(url);
 
-        if (got.mime === "image/svg+xml") return svgUri(got.bytes.toString("utf8"));
-        const whole = `data:${got.mime};base64,${got.bytes.toString("base64")}`;
+      if (!got) {
+        got = fetchImage(page, url).catch(() => undefined);
+        fetched.set(url, got);
+      }
+
+      file = got.then(async (image) => {
+        if (!image) return undefined;
+
+        if (image.mime === "image/svg+xml") return svgUri(image.bytes.toString("utf8"));
+
+        const data = image.bytes.toString("base64");
 
         // A file the page can't decode is kept as it came.
         const small = await page
-          .evaluate(shrink, {
-            data: whole.slice(whole.indexOf(",") + 1),
-            mime: got.mime,
-            width: size[0],
-            height: size[1],
-          })
+          .evaluate(shrink, { data, mime: image.mime, width: size[0], height: size[1] })
           .catch(() => undefined);
 
-        return small ?? whole;
-      }, () => undefined);
+        return small ?? `data:${image.mime};base64,${data}`;
+      });
       pictures.set(key, file);
     }
 
@@ -355,9 +358,9 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
         if (!file) {
           // A file that won't download leaves its text to a fallback font, as a page without it would.
-          // A face the drawing can't cut down (a variable weight, a width, a range of characters) stays as the page
-          // had it, WOFF2 and all: a variable font's TTF is several times the size.
-          const whole = !/^\d+$/.test(face.weight) || face.stretch || face.unicodeRange;
+          // A face the drawing can't cut down stays as the page had it, WOFF2 and all: a variable font's TTF is
+          // several times the size.
+          const whole = isWholeFile(face);
 
           file = download(url).then(
             async (bytes) =>
@@ -379,7 +382,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   const io = async (
     page: Page,
     selector: string,
-    { parts = {}, pad = 16 }: PageOptions,
+    { parts = {}, pad = PAD }: PageOptions,
     render: (html: string) => Promise<void>,
   ): Promise<Io> => {
     let cdp: CDPSession | undefined;
@@ -398,8 +401,6 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       cdp ??= await page.context().newCDPSession(page);
       await markPseudos(cdp, page);
 
-      await page.evaluate(preload);
-
       return page.evaluate(walk, { selector, pad, parts });
     };
 
@@ -409,7 +410,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       const dark = schemes === "light" ? undefined : await pass("dark");
       const light = schemes === "dark" ? undefined : await pass("light");
 
-      return dark && light ? merge(light, dark) : (light ?? dark)!;
+      return dark && light ? merge(light, dark, () => {}) : (light ?? dark)!;
     };
 
     await scheme(resting);
@@ -418,6 +419,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       await shim(page);
       await settle(page, true);
       await canvases(page);
+      await page.evaluate(preload);
 
       const root = await embed(await both(), picture(page));
 

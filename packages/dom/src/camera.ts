@@ -1,5 +1,5 @@
 import { rect, span, type CameraStop, type Rect } from "svjeez";
-import { boxes } from "./find.ts";
+import { rect as partRect } from "./find.ts";
 import { timeline, type Step } from "./timeline.ts";
 import type { Snapshot } from "./tree.ts";
 
@@ -17,30 +17,24 @@ export interface ShotsOptions {
   readonly zoom?: number;
 }
 
-interface Region {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
 /** Grows `r` about its center to at least `w` by `h`. */
-const grow = (r: Region, w: number, h: number): Region => {
+const grow = (r: Rect, w: number, h: number): Rect => {
   const W = Math.max(r.w, w);
   const H = Math.max(r.h, h);
 
-  return { x: r.x - (W - r.w) / 2, y: r.y - (H - r.h) / 2, w: W, h: H };
+  return rect(r.x - (W - r.w) / 2, r.y - (H - r.h) / 2, W, H);
 };
 
 /** Slides `r` inside the snapshot where it fits, so the camera doesn't show past its edges. */
-const inside = (r: Region, s: Snapshot): Region => {
+const inside = (r: Rect, s: Snapshot): Rect => {
   const slide = (at: number, size: number, room: number) => Math.min(Math.max(at, 0), room - size);
 
-  return {
-    ...r,
-    x: r.w >= s.width ? r.x : slide(r.x, r.w, s.width),
-    y: r.h >= s.height ? r.y : slide(r.y, r.h, s.height),
-  };
+  return rect(
+    r.w >= s.width ? r.x : slide(r.x, r.w, s.width),
+    r.h >= s.height ? r.y : slide(r.y, r.h, s.height),
+    r.w,
+    r.h,
+  );
 };
 
 /**
@@ -61,35 +55,34 @@ export const shots = (
 ): { frame: Rect; stops: CameraStop[]; over: number } => {
   const { snaps, moves, length } = timeline(steps);
 
-  const target = (snap: Snapshot, shot: Shot): Region => {
-    if (shot === "all") return { x: 0, y: 0, w: snap.width, h: snap.height };
+  const target = (snap: Snapshot, shot: Shot): Rect => {
+    if (shot === "all") return rect(0, 0, snap.width, snap.height);
 
     const { part, index = 0, zoom: most = zoom } = typeof shot === "string" ? { part: shot } : shot;
-    const box = boxes(snap, part)[index]?.box;
+    const box = partRect(snap, part, index);
 
     if (!box) throw new Error(`shots(): no part "${part}" in the snapshot "${snap.name ?? "unnamed"}".`);
 
-    const padded = { x: box.x - margin, y: box.y - margin, w: box.width + 2 * margin, h: box.height + 2 * margin };
+    const padded = rect(box.x, box.y, box.width, box.height).pad(margin);
 
     return inside(grow(padded, frame.w / most, frame.h / most), snap);
   };
 
-  const framed = (r: Region) => rect(r.x, r.y, r.w, r.h);
-  const first = snaps[0]!;
-  const opening = first.name !== undefined && plan[first.name] !== undefined ? plan[first.name]! : "all";
-  const cuts: [number, Region][] = [[0, target(first, opening)]];
+  // The first snapshot opens at 0; each later one named in the plan cuts in as the timeline moves into it.
+  const cuts: { at: number; target: Rect }[] = [];
 
-  snaps.slice(1).forEach((snap, i) => {
+  snaps.forEach((snap, i) => {
     const shot = snap.name === undefined ? undefined : plan[snap.name];
 
-    if (shot !== undefined)
-      cuts.push([Math.max(moves[i]!.at, cuts.at(-1)![0] + over), target(snap, shot)]);
+    if (i === 0) cuts.push({ at: 0, target: target(snap, shot ?? "all") });
+    else if (shot !== undefined)
+      cuts.push({ at: Math.max(moves[i - 1]!.at, cuts.at(-1)!.at + over), target: target(snap, shot) });
   });
 
   // Each shot holds until the next one starts, the last to the end of the steps.
-  const stops = cuts.map(([at, r], i): CameraStop => ({
-    show: span(at, Math.max((cuts[i + 1]?.[0] ?? Math.max(length, at + over)) - at, over)),
-    target: framed(r),
+  const stops = cuts.map(({ at, target }, i): CameraStop => ({
+    show: span(at, Math.max((cuts[i + 1]?.at ?? Math.max(length, at + over)) - at, over)),
+    target,
   }));
 
   return { frame, stops, over };

@@ -1,6 +1,6 @@
 <script lang="ts">
   // A settings card in Svelte 5 with shadcn's look. The switches are its own state; `saved` comes from the parent.
-  import "./app.css";
+  import "../shadcn.css";
 
   let { saved = false }: { saved?: boolean } = $props();
 

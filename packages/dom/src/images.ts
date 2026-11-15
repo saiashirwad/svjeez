@@ -9,7 +9,8 @@ export async function preload(): Promise<void> {
   const sizes = (globalThis.__svjeezImages ??= new Map());
   const urls = new Set<string>();
 
-  // `querySelectorAll` stops at a shadow root, so each open one is searched in turn.
+  // `querySelectorAll` stops at a shadow root, so each open one is searched in turn. `all` is copied into `stills`:
+  // a page function can't share imports.
   const all = (root: ParentNode): Element[] =>
     [...root.querySelectorAll("*")].flatMap((el) => [el, ...(el.shadowRoot ? all(el.shadowRoot) : [])]);
 
@@ -51,6 +52,7 @@ export async function stills(): Promise<number[]> {
   const found: NonNullable<typeof globalThis.__svjeezStills> = (globalThis.__svjeezStills = new WeakMap());
   const need: number[] = [];
 
+  // The same `all` as in `preload`: a page function can't share imports.
   const all = (root: ParentNode): Element[] =>
     [...root.querySelectorAll("*")].flatMap((el) => [el, ...(el.shadowRoot ? all(el.shadowRoot) : [])]);
 

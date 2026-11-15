@@ -28,6 +28,9 @@ import type {
   TextRun,
   Vector,
 } from "../tree.ts";
+
+/** Generic and system font names: not files the drawing can embed. */
+const SYSTEM = /^(system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|sans-serif|serif|monospace|cursive|fantasy)$/;
 import { typefaces } from "./faces.ts";
 import {
   borderRing,
@@ -114,7 +117,6 @@ export const painter = (
 
   const { byName, rules } = typefaces(fonts, captured);
   const embedded = new Set([...byName.keys(), ...captured.map((f) => f.family)]);
-  const SYSTEM = /^(system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|sans-serif|serif|monospace|cursive|fantasy)$/;
   const server = paintServers(v);
   // How many boxes of each part are drawn so far, so a part's function gets each one's index.
   const seen = new Map<string, number>();

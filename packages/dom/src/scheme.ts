@@ -13,43 +13,37 @@ const pick = (light?: Paint, dark?: Paint): Paint | undefined =>
     ? paint(plain(light ?? transparent(plain(dark!))), plain(dark ?? transparent(plain(light!))))
     : undefined;
 
-const mergeVector = (light: Vector, dark: Vector, differ: Differ): Vector => {
-  if (light.tag !== dark.tag || light.children.length !== dark.children.length) {
-    differ(light.tag);
+/** Where the passes differ, `light` stands: say where, then keep it. */
+const keep = <T>(light: T, where: string, differ: Differ): T => {
+  differ(where);
 
-    return light;
-  }
-
-  return {
-  ...light,
-  attrs: Object.fromEntries(
-    Object.entries(light.attrs).map(([k, v]) => {
-      const other = dark.attrs[k];
-
-      return [k, (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v];
-    }),
-  ),
-  children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
-  };
+  return light;
 };
+
+const mergeVector = (light: Vector, dark: Vector, differ: Differ): Vector =>
+  light.tag !== dark.tag || light.children.length !== dark.children.length
+    ? keep(light, light.tag, differ)
+    : {
+        ...light,
+        attrs: Object.fromEntries(
+          Object.entries(light.attrs).map(([k, v]) => {
+            const other = dark.attrs[k];
+
+            return [k, (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v];
+          }),
+        ),
+        children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
+      };
 
 const mergeItem = (light: Item, dark: Item, differ: Differ): Item => {
   if (light.kind === "text" && dark.kind === "text") {
-    if (dark.text !== light.text) {
-      differ(`"${light.text}"`);
-
-      return light;
-    }
+    if (dark.text !== light.text) return keep(light, `"${light.text}"`, differ);
 
     return { ...light, color: paint(plain(light.color), plain(dark.color)) };
   }
 
   if (light.kind === "graphic" && dark.kind === "graphic") {
-    if (light.children.length !== dark.children.length) {
-      differ("svg");
-
-      return light;
-    }
+    if (light.children.length !== dark.children.length) return keep(light, "svg", differ);
 
     return {
       ...light,
@@ -61,9 +55,7 @@ const mergeItem = (light: Item, dark: Item, differ: Differ): Item => {
 
   if (light.kind === "box" && dark.kind === "box") return merge(light, dark, differ);
 
-  differ(light.kind);
-
-  return light;
+  return keep(light, light.kind, differ);
 };
 
 const mergeShadows = (light: readonly Shadow[], dark: readonly Shadow[]): Shadow[] =>
@@ -94,7 +86,7 @@ const mergeGradients = (light: readonly Gradient[], dark: readonly Gradient[]): 
   });
 
 /** One box tree whose colors follow the viewer's scheme, from a light and a dark read of the same page. */
-export const merge = (light: Box, dark: Box, differ: Differ = () => {}): Box => {
+export const merge = (light: Box, dark: Box, differ: Differ): Box => {
   const same = light.children.length === dark.children.length;
 
   if (!same) differ(`<${light.tag}>`);

@@ -2,7 +2,7 @@
 // shadcn/ui components (MIT), trimmed to plain class strings, as an app would have them. Stateful, like real ones.
 import { AlertCircle, ArrowRight, Check, GitPullRequest } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import "./app.css";
+import "../shadcn.css";
 
 const cn = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" ");
 

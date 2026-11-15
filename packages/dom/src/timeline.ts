@@ -20,6 +20,10 @@ const OVER = 0.6;
 
 const isWait = (step: Step): step is Wait => "wait" in step;
 
+/** The snapshot a step shows, or nothing for a wait. */
+export const snapshotOf = (step: Step): Snapshot | undefined =>
+  isWait(step) ? undefined : "root" in step ? step : step[0];
+
 /**
  * Walks a cursor over the steps: the first snapshot holds from 0, each later one moves in from where the cursor is
  * and leaves it at the move's end, and a wait pushes it on.
@@ -40,7 +44,8 @@ export const timeline = (states: Snapshot | readonly Step[]) => {
       continue;
     }
 
-    const [state, timing] = "root" in step ? [step, undefined] : step;
+    const state = snapshotOf(step)!;
+    const timing = "root" in step ? undefined : step[1];
 
     if (snaps.length === 0 && timing)
       throw new Error(
@@ -70,7 +75,7 @@ export const loop = (
   steps: readonly Step[],
   timing: Timing & { readonly wait?: number } = {},
 ): Step[] => {
-  const first = steps.find((s): s is Snapshot | readonly [Snapshot, Timing] => !isWait(s));
+  const first = steps.map(snapshotOf).find((s) => s !== undefined);
 
   if (!first) throw new Error("loop() needs a snapshot to return to, but the steps have none.");
 
@@ -78,7 +83,7 @@ export const loop = (
 
   return [
     ...steps,
-    ["root" in first ? first : first[0], move],
+    [first, move],
     ...(wait ? [{ wait }] : []),
   ];
 };

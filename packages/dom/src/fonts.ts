@@ -160,6 +160,10 @@ const mime = (tag: string): string =>
         ? "font/otf"
         : "font/ttf";
 
+/** A face the drawing can't cut down (a variable weight, a width, a range of characters) is embedded whole. */
+export const isWholeFile = (face: Pick<Face, "weight" | "stretch" | "unicodeRange">): boolean =>
+  !/^\d+$/.test(face.weight) || !!face.stretch || !!face.unicodeRange;
+
 /** A font file as a data URI, its type read from the bytes. */
 export const dataUri = (bytes: Uint8Array): string =>
   `data:${mime(String.fromCharCode(...bytes.subarray(0, 4)))};base64,${Buffer.from(bytes).toString("base64")}`;

@@ -1,5 +1,5 @@
 import { font, type Font, type FontValue } from "svjeez";
-import { fontFace, formatOf } from "../fonts.ts";
+import { fontFace, formatOf, isWholeFile } from "../fonts.ts";
 import type { Face } from "../tree.ts";
 
 /** Faces from every state, once each, by family. */
@@ -63,7 +63,7 @@ const asFamily = (faces: readonly Face[]): FontValue | undefined => {
 
   if (
     kinds.size !== faces.length ||
-    faces.some((f) => f.unicodeRange || f.stretch || !/^\d+$/.test(f.weight))
+    faces.some(isWholeFile)
   )
     return undefined;
 
