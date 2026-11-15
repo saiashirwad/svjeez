@@ -13,9 +13,7 @@ export const C = {
 } as const;
 
 export const TALLY: Record<Tally, { color: Color; label: string; caption: string }> = {
-  x: { color: "#FF4FA3", label: "X", caption: "X WINS" },
-  o: { color: "#36E2D3", label: "O", caption: "O WINS" },
-  draw: { color: "#A99CFF", label: "DRAW", caption: "DRAW" },
+  x: { color: "#FF4FA3", label: "X", caption: "X wins" },
+  o: { color: "#36E2D3", label: "O", caption: "O wins" },
+  draw: { color: "#A99CFF", label: "Draw", caption: "Draw" },
 };
-
-export const CSS = `.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}`;
