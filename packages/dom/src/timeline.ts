@@ -62,6 +62,27 @@ export const timeline = (states: Snapshot | readonly Step[]) => {
   return { snaps, moves, length: cursor };
 };
 
+/**
+ * A flow that ends where it began: the steps, then a move back into the first snapshot, so the picture loops
+ * without a jump. The return takes `over` seconds (default 0.6) and may hold `wait` seconds after.
+ */
+export const loop = (
+  steps: readonly Step[],
+  timing: Timing & { readonly wait?: number } = {},
+): Step[] => {
+  const first = steps.find((s): s is Snapshot | readonly [Snapshot, Timing] => !isWait(s));
+
+  if (!first) throw new Error("loop() needs a snapshot to return to, but the steps have none.");
+
+  const { wait, ...move } = timing;
+
+  return [
+    ...steps,
+    ["root" in first ? first : first[0], move],
+    ...(wait ? [{ wait }] : []),
+  ];
+};
+
 /** The picture's size: the largest of the states, so one frame holds them all. */
 export const size = (states: Snapshot | readonly Step[]) => {
   const all = timeline(states).snaps;

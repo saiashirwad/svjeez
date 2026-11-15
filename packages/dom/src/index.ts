@@ -33,7 +33,7 @@ export { snapshots, type SnapshotsOptions } from "./snapshots.ts";
 
 export { Dom, type DomProps } from "./draw/dom.tsx";
 
-export { duration, size, type Step } from "./timeline.ts";
+export { duration, loop, size, type Step } from "./timeline.ts";
 
 export { find, rect } from "./find.ts";
 
