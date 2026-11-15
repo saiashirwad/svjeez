@@ -25,8 +25,10 @@ const SLOTS: readonly Slot[] = [
   "base0F",
 ];
 
+type Sixteen<T> = [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T];
+
 /** Build a scheme from 16 hex colors, base00 first. */
-export const base16 = (...colors: readonly Color[]): Base16 => {
+export const base16 = (...colors: Sixteen<Color>): Base16 => {
   if (colors.length !== 16) throw new Error(`base16() needs 16 colors, got ${colors.length}.`);
 
   // SAFETY: the length check above gives one color per slot in SLOTS, so every Slot key is present.
@@ -69,12 +71,16 @@ export interface VariablesResult<K extends string> {
  * CSS variables with defaults. `vars.sky` is `var(--sky)`; pass `css` to `render`. With `light`, those values win under prefers-color-scheme: light.
  * With `prefix`, the same one `render` gets, the variables apply to that scene's root only, so inlined scenes keep their own.
  */
-export const variables = <const K extends string>(
-  dark: Readonly<Record<K, string>>,
-  light?: Readonly<Record<K, string>>,
-  options: { readonly prefix?: string } = {},
-): VariablesResult<K> => {
-  const scope = options.prefix ? `svg.${options.prefix}root` : "svg";
+export const variables = <const K extends string>({
+  dark,
+  light,
+  prefix,
+}: {
+  readonly dark: Readonly<Record<K, string>>;
+  readonly light?: Readonly<Record<K, string>>;
+  readonly prefix?: string;
+}): VariablesResult<K> => {
+  const scope = prefix ? `svg.${prefix}root` : "svg";
 
   // SAFETY: Object.keys of a Record<K, string> lists exactly its K keys, and those are strings.
   const names = Object.keys(dark) as K[];
@@ -113,7 +119,7 @@ export const adaptive = ({
   readonly light: Base16;
   readonly prefix?: string;
 }): AdaptiveResult => {
-  const { vars, css } = variables(dark, light, { prefix });
+  const { vars, css } = variables({ dark, light, prefix });
 
   return { theme: vars, css };
 };

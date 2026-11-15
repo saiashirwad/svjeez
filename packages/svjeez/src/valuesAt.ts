@@ -93,7 +93,7 @@ export function valuesAt(
   t: Seconds,
   options: ValuesAtOptions,
 ): { readonly [target: string]: number } {
-  if (!(options.duration > 0))
+  if (!(options.duration > 0 && Number.isFinite(options.duration)))
     throw new Error(`valuesAt() needs a positive duration, got ${options.duration}.`);
 
   if (!Number.isFinite(t)) throw new Error(`valuesAt() needs a finite time, got ${t}.`);

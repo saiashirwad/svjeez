@@ -27,7 +27,7 @@ const display = await google("Inter Tight", { weight: 800 });
 const casual = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
 const pen = tool.pen({ size: 2.8, seed: 4 });
 
-const { vars, css: paint } = variables({ swipe: "#7A5A00" }, { swipe: "#FFE07A" });
+const { vars, css: paint } = variables({ dark: { swipe: "#7A5A00" }, light: { swipe: "#FFE07A" } });
 
 const LINES = ["Animated SVGs", "from TypeScript"];
 const LEAD = 0.96;

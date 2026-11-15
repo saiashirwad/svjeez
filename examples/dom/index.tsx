@@ -91,7 +91,7 @@ const left = size(cards.signIn);
 const right = size(cards.pr);
 const W = MARGIN * 2 + left.width + GAP + right.width;
 const H = MARGIN * 2 + Math.max(left.height, right.height);
-const { vars, css } = variables({ backdrop: "#09090b" }, { backdrop: "#f4f4f5" });
+const { vars, css } = variables({ dark: { backdrop: "#09090b" }, light: { backdrop: "#f4f4f5" } });
 
 export default function build(): string {
   return render(

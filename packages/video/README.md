@@ -31,7 +31,7 @@ npx svjeez video scene.tsx --out scene.mp4 --loops 2 --scale 2
 npx svjeez video scene.tsx --out scene.webm --background transparent
 ```
 
-`video(svg, options)` returns `{ bytes, mime, format, codec, duration, frames, colorScheme }`. Frame `i` shows the scene at `i / fps` seconds, and the video holds `round(loop × loops × fps)` frames, where `loop` is one loop of the scene.
+`video(svg, options)` returns `{ bytes, mime, format, codec, playTime, frames, colorScheme }`. Frame `i` shows the scene at `i / fps` seconds, and the video holds `round(loop × loops × fps)` frames, where `loop` is one loop of the scene.
 
 | Option | Default | |
 | --- | --- | --- |

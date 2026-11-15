@@ -78,7 +78,7 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 + sampled(fn, { over: 4, tolerance })
 ```
 
-**11. Results carry a `span`, not `end`.** Search `.end` on the results of `typewriter`, `terminal`, `reveal`, `flow`, `morph` and the `@svjeez/charts` series (`bars`, `line`, `area` of `chart(...)`). Use `.span.end` (also `.span.at`, `.span.over`). `timeline()` keeps its own `.end` and `.duration`.
+**11. Results carry a `span`, not `end`.** Search `.end` on the results of `typewriter`, `terminal`, `reveal`, `flow`, `morph` and the `@svjeez/charts` series (`bars`, `line`, `area` of `chart(...)`). Use `.span.end` (also `.span.at`, `.span.over`). `timeline()` keeps its own `.end`.
 
 ```ts
 - const next = typewriter(...).end + 0.5;
@@ -111,7 +111,7 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 
 ## Theme scoping (optional)
 
-**16.** `variables(dark, light)` and `adaptive` styled every `svg` on the page. If the project inlines two scenes that use them, pass the `prefix` given to `render`: `variables(dark, light, { prefix })`, `adaptive({ dark, light, prefix })`. Without `prefix` nothing changes.
+**16.** `variables(dark, light)` and `adaptive` styled every `svg` on the page. If the project inlines two scenes that use them, pass the `prefix` given to `render`: `variables({ dark, light, prefix })`, `adaptive({ dark, light, prefix })`. Without `prefix` nothing changes.
 
 ## Removed, no replacement
 
@@ -154,3 +154,15 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 ```
 
 `unit` was one scale for both axes, so `height` uses it too. Check that `at` lands the graph origin on `origin`: `point(0, 0)` of the new plane should equal the old `origin`.
+
+## API cleanup
+
+Smaller breaking changes, in the order a typecheck will find them.
+
+- `Timeline.duration` is gone. Use `tl.end`, or `tl.end - tl.at` for a length where the timeline starts at `at`. `timeline()` no longer takes `fade`, and a scene may now be named `duration`.
+- `variables(dark, light?, { prefix })` is `variables({ dark, light?, prefix? })`, like `adaptive`.
+- `hexBytes` and `hexOf` are no longer exported from `svjeez`, and neither is `groupBy`.
+- `<Marker theme>` is gone: pass `color`. A marker now appears at its first stop's `show.at` instead of at 0.
+- `Video.duration` (`@svjeez/video`) is `playTime`: playback seconds. `Scene.duration` stays in scene seconds.
+- `<Focus fade={0}>` cuts instead of throwing.
+- These now throw: NaN or infinite `number`, `count` and `seconds` values and bounds; non-integer `count` bounds; duplicate `choice` options; a `color()` that is not hex; a `shake` or `wiggle` `rate` that is not positive; `restyle` `at` or `onceAt` below 0 or not finite; a non-finite `valuesAt` `duration`; `<Camera>` with no stops; `fx.boil` with a `seed` that is not a whole number of 1 or more or a `rate` that is not positive; `fx.grayscale` outside 0 to 1; `readingTime` with a non-positive `wps`. `recipes` and `sampled` say `needs a positive over` where they said `positive duration`.

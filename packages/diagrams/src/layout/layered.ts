@@ -1,4 +1,4 @@
-import { groupBy } from "svjeez";
+import { groupBy } from "./group.ts";
 import {
   around,
   flip,

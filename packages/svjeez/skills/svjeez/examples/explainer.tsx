@@ -58,7 +58,7 @@ export default function build(): string {
         {move.node}
       </Focus>
       <Marker
-        theme={theme}
+        color={theme.base09}
         stops={[
           { show: tl.intro, target: one.get("call").pad(4) },
           { show: tl.change, target: two.get("call").pad(4) },

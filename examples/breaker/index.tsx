@@ -82,7 +82,7 @@ const tl = timeline(scenes, { gap: 0.6 });
 
 // SAFETY: scenes is a literal object, so each of its keys is a key of scenes
 const names = Object.keys(scenes) as (keyof typeof scenes)[];
-const D = Math.ceil(tl.duration + 1);
+const D = Math.ceil(tl.end + 1);
 
 const STAGE = rect(0, 0, W, H - 70);
 
@@ -277,8 +277,8 @@ const BAR = rect(64, H - 40, W - 128, 4);
 
 const segments = names.map((name) => {
   const { at, over } = tl[name];
-  const x = BAR.x + (at / tl.duration) * BAR.w;
-  const w = (over / tl.duration) * BAR.w;
+  const x = BAR.x + (at / tl.end) * BAR.w;
+  const w = (over / tl.end) * BAR.w;
 
   const lit = motion({ fill: theme.base03 })
     .at(at)

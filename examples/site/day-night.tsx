@@ -13,10 +13,10 @@ const S = 1.25;
 const SPOT = { x: 640, y: 590 };
 const FLOWER = { x: 880, base: 590, head: 380 };
 
-const { vars, css: paint } = variables(
-  { sky: "#151a2b", hill: "#24392f", far: "#1c2c25", stem: "#3f7a55", glow: "#FFE58A" },
-  { sky: "#d6ecf5", hill: "#8fcf9a", far: "#b4e0bb", stem: "#4f9e66", glow: "#FFE58A" },
-);
+const { vars, css: paint } = variables({
+  dark: { sky: "#151a2b", hill: "#24392f", far: "#1c2c25", stem: "#3f7a55", glow: "#FFE58A" },
+  light: { sky: "#d6ecf5", hill: "#8fcf9a", far: "#b4e0bb", stem: "#4f9e66", glow: "#FFE58A" },
+});
 
 /** Day shows in light mode, night in dark. */
 const MOODS = `.night{display:none}@media (prefers-color-scheme:dark){.day{display:none}.night{display:inline}}`;

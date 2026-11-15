@@ -38,7 +38,13 @@ const boil = ({
   seed = 1,
   detail = 0.04,
 }: BoilOptions = {}): Ref<"filter"> => {
-  const start = Math.max(1, Math.round(seed));
+  if (!(Number.isInteger(seed) && seed >= 1))
+    throw new Error(`fx.boil() needs a whole-number seed of 1 or more, got ${seed}.`);
+
+  if (!(rate > 0 && Number.isFinite(rate)))
+    throw new Error(`fx.boil() needs a positive rate, got ${rate}.`);
+
+  const start = seed;
   const period = BOIL_FRAMES / rate;
 
   return def.filter(
@@ -65,11 +71,15 @@ const boil = ({
 };
 
 /** Desaturate toward gray: 1 is fully gray, 0 leaves the source alone. */
-const grayscale = ({ amount = 1 }: { readonly amount?: number } = {}): Ref<"filter"> =>
-  def.filter(
+const grayscale = ({ amount = 1 }: { readonly amount?: number } = {}): Ref<"filter"> => {
+  if (!(amount >= 0 && amount <= 1))
+    throw new Error(`fx.grayscale() needs an amount between 0 and 1, got ${amount}.`);
+
+  return def.filter(
     { colorInterpolationFilters: "sRGB" },
-    <feColorMatrix type="saturate" values={num(1 - Math.min(1, Math.max(0, amount)))} />,
+    <feColorMatrix type="saturate" values={num(1 - amount)} />,
   );
+};
 
 const channels = (color: Hex): [number, number, number] => {
   const [r, g, b] = hexBytes(hexOf(color, "fx.duotone()"));

@@ -113,10 +113,10 @@ const steps = await snapshots(here("snapshots.json"), { fonts: [mono], css }, (d
   dom.run(html, flow, { pad: 24 }),
 );
 
-const { vars, css: backdrop } = variables(
-  { backdrop: palette.dark.base01 },
-  { backdrop: palette.light.base01 },
-);
+const { vars, css: backdrop } = variables({
+  dark: { backdrop: palette.dark.base01 },
+  light: { backdrop: palette.light.base01 },
+});
 
 const { width, height } = size(steps);
 

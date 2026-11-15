@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { adaptive, defaultDark, defaultLight, render, variables } from "svjeez";
 
 const scene = (prefix: string, sky: string) => {
-  const { vars, css } = variables({ sky }, { sky: "#fff" }, { prefix });
+  const { vars, css } = variables({ dark: { sky }, light: { sky: "#fff" }, prefix });
 
   return render(
     { width: 10, height: 10, duration: 1, title: prefix, prefix, css },
@@ -25,7 +25,7 @@ describe("scoped theme variables", () => {
   });
 
   test("without a prefix the rule stays on svg", () => {
-    expect(variables({ sky: "#111" }).css).toBe("svg{--sky:#111}");
+    expect(variables({ dark: { sky: "#111" } }).css).toBe("svg{--sky:#111}");
   });
 
   test("adaptive takes the prefix too", () => {

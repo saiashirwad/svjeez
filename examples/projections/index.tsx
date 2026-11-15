@@ -11,22 +11,22 @@ const W = 960;
 const H = 540;
 const D = 16;
 
-const { vars: C, css } = variables(
-  {
+const { vars: C, css } = variables({
+  dark: {
     bg: "#08121C",
     land: "#1E3A4E",
     green: "#5FD38D",
     text: "#E8EEF2",
     dim: "#93AAB9",
   },
-  {
+  light: {
     bg: "#EEF2F5",
     land: "#C5D3DD",
     green: "#1F9254",
     text: "#13202A",
     dim: "#5A6F7D",
   },
-);
+});
 
 const frame = rect(300, 30, 640, 480);
 const filter = (f: { properties: { name?: string } | null }) => f.properties?.name !== "Antarctica";

@@ -96,16 +96,33 @@ class Tail implements OpenSpan {
 function build(at: Seconds, over: Seconds, what: string): Range;
 function build(at: Seconds, over: undefined, what: string): Tail;
 function build(at: Seconds, over: Seconds | undefined, what: string): Range | Tail {
-  if (!Number.isFinite(at) || at < 0)
-    throw new Error(`${what} needs a start of 0 or later, got ${at}.`);
+  if (over === undefined) {
+    checkWindow(at, 1, what);
 
-  if (over === undefined) return new Tail(at);
+    return new Tail(at);
+  }
 
-  if (!Number.isFinite(over) || over < 0)
-    throw new Error(`${what} needs a length of 0 or more, got ${over}.`);
+  checkWindow(at, over, what, true);
 
   return new Range(at, over);
 }
+
+/**
+ * The one rule for an `at` and an `over`: `at` is finite and 0 or later, `over` is finite and positive. Whatever
+ * plays in the window (a recipe, `sampled`, `show`, `<Clip>`) needs time to play in, so `over: 0` throws. `span()`
+ * alone passes `empty`, since a zero-length span is a point on the clock that `.next` and `.pad` can start from.
+ */
+export const checkWindow = (at: Seconds, over: Seconds, what: string, empty = false): void => {
+  if (!Number.isFinite(at) || at < 0)
+    throw new Error(`${what} needs a start of 0 or later, got ${at}.`);
+
+  if (!Number.isFinite(over) || (empty ? over < 0 : over <= 0))
+    throw new Error(
+      empty
+        ? `${what} needs a length of 0 or more, got ${over}.`
+        : `${what} needs a positive over, got ${over}.`,
+    );
+};
 
 /**
  * A span of a clock, `over` seconds long from `at`. Without `over` it runs to the end. Spans chain:
@@ -123,16 +140,12 @@ export interface SampleWindow {
   readonly over: Seconds;
 }
 
-/** The `at` and `over` of a sampled window, . */
+/** The `at` and `over` of a sampled window, checked by `checkWindow`. */
 export const sampleWindow = (options: SampleWindow, what: string): Span => {
   const { over } = options;
   const at = options.at ?? 0;
 
-  if (!Number.isFinite(over) || over <= 0)
-    throw new Error(`${what} needs a positive over, got ${over}.`);
-
-  if (!Number.isFinite(at) || at < 0)
-    throw new Error(`${what} needs an at of 0 or later, got ${at}.`);
+  checkWindow(at, over, what);
 
   return { at, over };
 };

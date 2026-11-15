@@ -37,8 +37,8 @@ export interface Video {
   readonly mime: string;
   readonly format: VideoFormat;
   readonly codec: VideoCodec;
-  /** Playback length: `frames / fps`. */
-  readonly duration: Seconds;
+  /** Playback length in seconds: `frames / fps`. The scene's own length is `Scene.duration`, in scene seconds. */
+  readonly playTime: Seconds;
   readonly frames: number;
   /** The scheme the video was rendered in, after resolving "system". */
   readonly colorScheme: ColorScheme;
@@ -200,7 +200,7 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
       mime,
       format,
       codec,
-      duration: frames / fps,
+      playTime: frames / fps,
       frames,
       colorScheme: scene.colorScheme,
     };

@@ -220,7 +220,7 @@ describe("<Clip>", () => {
   });
 
   test("takes a positive length and a start of 0 or later", () => {
-    expect(() => <Clip at={-1} />).toThrow(/at of 0 or later/);
+    expect(() => <Clip at={-1} />).toThrow(/start of 0 or later/);
     expect(() => <Clip at={1} over={0} />).toThrow(/positive over/);
   });
 
@@ -694,7 +694,7 @@ describe("sampled() with a window", () => {
 
   test("asks for a positive over and an at of 0 or later", () => {
     expect(() => line({ over: 0 })).toThrow(/sampled\(\) needs a positive over, got 0/);
-    expect(() => line({ at: -1, over: 2 })).toThrow(/at of 0 or later/);
+    expect(() => line({ at: -1, over: 2 })).toThrow(/start of 0 or later/);
     // @ts-expect-error neither over nor duration
     expect(() => sampled((t) => ({ x: t }), { tolerance: { translate: 0.1 } })).toThrow(
       /positive over/,

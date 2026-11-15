@@ -36,7 +36,12 @@ export const build = (g: Genome): string => {
 
   const boil =
     g.ink > 0.05
-      ? fx.boil({ strength: r1(g.ink * 1.4), rate: 8, seed: g.seed % 50, detail: 0.035 })
+      ? fx.boil({
+          strength: r1(g.ink * 1.4),
+          rate: 8,
+          seed: Math.max(1, g.seed % 50),
+          detail: 0.035,
+        })
       : undefined;
 
   const creature = () => (

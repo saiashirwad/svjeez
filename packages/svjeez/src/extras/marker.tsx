@@ -2,18 +2,20 @@
 import { motion, type Motion } from "../motion";
 import type { Rect } from "../geometry";
 import type { Color } from "../attributes";
-import { defaultDark, type Base16 } from "./theme";
+import { defaultDark } from "./theme";
 import type { SvgNode } from "../svg";
 import type { Shown } from "./timeline";
 
+/**
+ * A soft box that glides between the targets of `stops`. It appears at the first stop's `show.at` and moves at each
+ * later stop's `show.at`; the `over` of a stop is not used. `color` defaults to the default dark scheme's accent.
+ */
 export function Marker({
   stops,
-  theme = defaultDark,
-  color = theme.base09,
+  color = defaultDark.base09,
   over = 0.4,
 }: {
   readonly stops: readonly (Shown & { readonly target: Rect })[];
-  readonly theme?: Base16;
   readonly color?: Color;
   readonly over?: number;
 }): SvgNode {
@@ -22,7 +24,15 @@ export function Marker({
   if (!(over > 0)) throw new Error(`Marker() needs a positive over, got ${over}.`);
   const first = stops[0]!.target;
   let position: Motion<"x" | "y"> = motion({ x: 0, y: 0 });
-  let size: Motion<"width" | "height"> = motion({ width: first.w, height: first.h });
+  const start = stops[0]!.show.at;
+
+  let size: Motion<"width" | "height" | "opacity"> = motion({
+    width: first.w,
+    height: first.h,
+    opacity: start > 0 ? 0 : 1,
+  });
+
+  if (start > 0) size = size.at(start).to({ opacity: 1 }, over);
 
   for (const stop of stops.slice(1)) {
     const { target } = stop;

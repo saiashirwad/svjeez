@@ -36,12 +36,15 @@ Code and terminal runs use them by role:
 | `variable`, `tag`, `red` | `base08` |
 | `cyan` | `base0C` |
 
-`variables(dark, light?, { prefix? })` does the same for colors a scene paints itself. It returns `vars`, where `vars.sky` is `var(--sky)`, and `css` for `render`. With `light`, those values win under `prefers-color-scheme: light`. Names must be CSS identifiers. `adaptive` takes `prefix` too. Pass the `prefix` you give `render` when several scenes share a page: the rule then selects `svg.<prefix>root`, which `render` puts on the root, so each scene keeps its own colors. Without a prefix the rule is a plain `svg` and applies to every inlined scene.
+`variables({ dark, light?, prefix? })` does the same for colors a scene paints itself. It returns `vars`, where `vars.sky` is `var(--sky)`, and `css` for `render`. With `light`, those values win under `prefers-color-scheme: light`. Names must be CSS identifiers. `adaptive` takes `prefix` too. Pass the `prefix` you give `render` when several scenes share a page: the rule then selects `svg.<prefix>root`, which `render` puts on the root, so each scene keeps its own colors. Without a prefix the rule is a plain `svg` and applies to every inlined scene.
 
 ```tsx
 
 
-const { vars, css } = variables({ sky: "#14162A", sea: "#1F3A5C" }, { sky: "#FBF1DE", sea: "#9DCFCF" });
+const { vars, css } = variables({
+  dark: { sky: "#14162A", sea: "#1F3A5C" },
+  light: { sky: "#FBF1DE", sea: "#9DCFCF" },
+});
 // <rect fill={vars.sky} />, and render({ ..., css }, ...)
 ```
 

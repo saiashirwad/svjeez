@@ -58,6 +58,8 @@ export function Camera({
   origin,
   children,
 }: CameraProps): SvgNode {
+  if (stops.length === 0) throw new Error("Camera() needs at least one stop, got none.");
+
   if (steady) {
     const hold = stops.reduce<Motion<"scale">>(
       (t, stop) => {
