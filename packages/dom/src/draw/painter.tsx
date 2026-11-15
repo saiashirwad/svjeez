@@ -118,10 +118,13 @@ export const painter = (
     jsx("text", {
       x: num(run.x),
       y: num(run.y),
-      fontFamily: byName.get(run.family) ?? run.family,
+      fontFamily:
+        byName.get(run.family) ?? (run.fallback ? `${run.family}, ${run.fallback}` : run.family),
       fontSize: num(run.size),
       fontWeight: String(run.weight),
       fontStyle: run.style === "italic" ? "italic" : undefined,
+      fontStretch: run.stretch ? `${run.stretch}%` : undefined,
+      textDecoration: run.decoration,
       letterSpacing: run.letterSpacing ? num(run.letterSpacing) : undefined,
       fill: v(run.color),
       animation,

@@ -109,6 +109,7 @@ export const sameFace = (a: TextRun, b: TextRun): boolean =>
   a.size === b.size &&
   a.weight === b.weight &&
   a.family === b.family &&
+  a.stretch === b.stretch &&
   a.style === b.style &&
   a.letterSpacing === b.letterSpacing;
 

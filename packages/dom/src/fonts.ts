@@ -75,6 +75,7 @@ export function sources(used: string[]): Source[] {
         family: unquote(face.family),
         weight: face.weight.replace("normal", "400").replace("bold", "700"),
         style: face.style === "italic" || face.style.startsWith("oblique") ? "italic" : "normal",
+        stretch: face.stretch === "normal" || face.stretch === "100%" ? undefined : face.stretch,
         unicodeRange: unicodeRange === "U+0-10FFFF" ? undefined : unicodeRange,
         url: new URL(url, base).href,
       },
@@ -162,4 +163,4 @@ export const formatOf = (type: string): string =>
 /** An `@font-face` rule, for the page that lays text out and for a drawing that embeds a page's own file. */
 export const fontFace = (face: Omit<Face, "src">, url: string, format: string): string =>
   `@font-face{font-family:${JSON.stringify(face.family)};src:url(${url}) format("${format}");` +
-  `font-weight:${face.weight};font-style:${face.style}${face.unicodeRange ? `;unicode-range:${face.unicodeRange}` : ""}}`;
+  `font-weight:${face.weight};font-style:${face.style}${face.stretch ? `;font-stretch:${face.stretch}` : ""}${face.unicodeRange ? `;unicode-range:${face.unicodeRange}` : ""}}`;

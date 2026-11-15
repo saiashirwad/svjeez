@@ -455,11 +455,60 @@ export function walk({
     };
   };
 
-  const family = (s: CSSStyleDeclaration) =>
-    s.fontFamily
-      .split(",")[0]!
-      .trim()
-      .replace(/^["']|["']$/g, "");
+  const stack = (s: CSSStyleDeclaration) =>
+    s.fontFamily.split(",").map((f) => f.trim().replace(/^["']|["']$/g, ""));
+
+  const family = (s: CSSStyleDeclaration) => stack(s)[0]!;
+
+  /** The rest of the font stack, ending in a generic family so an uncaptured font draws like the page, not in serif. */
+  const fallback = (s: CSSStyleDeclaration): string => {
+    const [first, ...rest] = stack(s);
+    const generic = /^(serif|sans-serif|monospace|cursive|fantasy)$/;
+    const names = rest.filter((f) => f && f !== first);
+
+    if (!names.some((f) => generic.test(f)) && !generic.test(first!))
+      names.push(
+        /mono|courier|consolas|menlo|code/i.test(first!)
+          ? "monospace"
+          : /times|georgia|garamond|palatino|cambria|bookman|didot|serif/i.test(first!) &&
+              !/sans/i.test(first!)
+            ? "serif"
+            : "sans-serif",
+      );
+
+    // A name with anything but letters, digits and spaces needs quotes; the "-apple-system" keyword doesn't.
+    return names.map((f) => (/^[\w -]+$/.test(f) && !/^\d/.test(f) ? f : `'${f}'`)).join(", ");
+  };
+
+  /** `font-stretch` as a percentage, when it isn't the normal width. */
+  const stretch = (s: CSSStyleDeclaration): number | undefined => {
+    const n = parseFloat(s.fontStretch);
+
+    return Number.isFinite(n) && n !== 100 ? n : undefined;
+  };
+
+  /**
+   * The line a text node is struck with. A decoration is drawn across the text of its inline descendants too, but
+   * stops at an inline-block, a float or a positioned box, so climb until one of those.
+   */
+  const decorationOf = (node: Text): TextRun["decoration"] => {
+    for (let el = node.parentElement; el && el !== document.body; el = el.parentElement) {
+      const s = getComputedStyle(el);
+      const line = /underline|line-through|overline/.exec(s.textDecorationLine)?.[0];
+
+      if (line) {
+        const c = color(s.textDecorationColor);
+
+        // A link whose underline is clear until hover has the line, but nothing to see.
+        return c && alpha(c) > 0 ? (line as TextRun["decoration"]) : undefined;
+      }
+
+      if (/^inline-/.test(s.display) || s.cssFloat !== "none" || /absolute|fixed/.test(s.position))
+        return undefined;
+    }
+
+    return undefined;
+  };
 
   const transform = (text: string, s: CSSStyleDeclaration) =>
     s.textTransform === "uppercase"
@@ -484,10 +533,12 @@ export function walk({
     x: round(x - origin.left + pad),
     y: round(top + probe(s).ascent - origin.top + pad),
     family: family(s),
+    fallback: fallback(s),
     weight: px(s.fontWeight),
     style: s.fontStyle === "italic" ? "italic" : "normal",
     size: px(s.fontSize),
     color: c,
+    stretch: stretch(s),
     letterSpacing: s.letterSpacing === "normal" ? 0 : px(s.letterSpacing),
     advances: advances.map(round),
     placeholder: placeholder || undefined,
@@ -525,6 +576,7 @@ export function walk({
     const c = color(s.color);
 
     if (!c || s.visibility === "hidden") return;
+    const decoration = decorationOf(node);
     const range = document.createRange();
     const data = node.data;
 
@@ -561,7 +613,11 @@ export function walk({
     for (const l of lines) {
       const text = l.text.trimEnd();
 
-      if (text.trim()) out.push(run(s, text, l.left, l.top, c, l.ends.slice(0, [...text].length)));
+      if (text.trim())
+        out.push({
+          ...run(s, text, l.left, l.top, c, l.ends.slice(0, [...text].length)),
+          decoration,
+        });
     }
   };
 

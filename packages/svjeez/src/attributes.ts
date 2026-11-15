@@ -65,6 +65,7 @@ const FONT = {
   fontFamily: attr<string | FontValue>("font-family"),
   fontSize: attr<Length>("font-size"),
   fontStyle: attr<"normal" | "italic">("font-style"),
+  fontStretch: attr<string>("font-stretch"),
   fontWeight: attr<number | "normal" | "bold">("font-weight"),
 } as const;
 
@@ -76,6 +77,7 @@ const TEXT = {
   dy: attr<Length>("dy"),
   ...FONT,
   letterSpacing: attr<Length>("letter-spacing"),
+  textDecoration: attr<"underline" | "line-through" | "overline">("text-decoration"),
   textAnchor: attr<"start" | "middle" | "end">("text-anchor"),
   dominantBaseline: attr<"auto" | "middle" | "central" | "hanging">("dominant-baseline"),
   textLength: attr<Length>("textLength"),

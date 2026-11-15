@@ -61,7 +61,10 @@ const familyOf = (fonts: readonly Font[]): FontValue | undefined => {
 const asFamily = (faces: readonly Face[]): FontValue | undefined => {
   const kinds = new Set(faces.map((f) => `${f.weight} ${f.style}`));
 
-  if (kinds.size !== faces.length || faces.some((f) => f.unicodeRange || !/^\d+$/.test(f.weight)))
+  if (
+    kinds.size !== faces.length ||
+    faces.some((f) => f.unicodeRange || f.stretch || !/^\d+$/.test(f.weight))
+  )
     return undefined;
 
   const fonts = faces.flatMap((f) => fontOf(f) ?? []);

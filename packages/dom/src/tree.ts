@@ -37,10 +37,16 @@ export interface TextRun {
   readonly x: number;
   readonly y: number;
   readonly family: string;
+  /** The rest of the page's font stack, ending in a generic family, for when `family` isn't embedded. */
+  readonly fallback?: string;
   readonly weight: number;
   readonly style: "normal" | "italic";
   readonly size: number;
   readonly color: Paint;
+  /** `font-stretch` as a percentage, left out at the normal 100. */
+  readonly stretch?: number;
+  /** A line drawn along the text: a link's underline. */
+  readonly decoration?: "underline" | "line-through" | "overline";
   readonly letterSpacing: number;
   /** Where each character ends, in px from `x`, one per code point. Typing reveals the text up to these. */
   readonly advances: readonly number[];
@@ -142,6 +148,8 @@ export interface Face {
   readonly family: string;
   /** A CSS weight: one number, or a range for a variable font. */
   readonly weight: string;
+  /** A CSS `font-stretch` range, for a face that isn't the normal width. */
+  readonly stretch?: string;
   readonly style: "normal" | "italic";
   /** The characters this file covers, when the page split the family across files. */
   readonly unicodeRange?: string;
