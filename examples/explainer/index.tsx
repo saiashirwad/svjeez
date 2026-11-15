@@ -73,8 +73,8 @@ const quiet = {
 /** The one accent, and only the highlight uses it. */
 const accent = theme.base0D;
 
-const FONT = 22;
-const LINE = 40;
+const FONT = 24;
+const LINE = 43;
 const SLOTS = Math.max(...states.map((s) => s.lines.length));
 const top = (H - SLOTS * LINE) / 2;
 
@@ -170,9 +170,9 @@ const chicks = states.map((state, i) => {
   return <g animation={on}>{chick({ body: hopOf(state).loop(PERIOD) })}</g>;
 });
 
-const SCALE = 2.6;
-/** The chick spans y 29 to 222 of the scene, so that range, hop included, is what centers. */
-const picture = { x: W - M - 66 * SCALE - 104 * SCALE, y: H / 2 - 125.5 * SCALE };
+const SCALE = 1.7;
+/** The chick's whole travel, from the antenna at the top of the pop to the feet in the crouch, is y 22 to 232 of the scene. It centers on the code block's middle, in the space the code leaves, with the right margin the code has on the left. */
+const picture = { x: W - M - 120 - 104 * SCALE, y: H / 2 - 127 * SCALE };
 
 export default function build(): string {
   return render(
