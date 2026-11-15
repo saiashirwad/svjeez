@@ -629,6 +629,10 @@ export const painter = (
       if (old.kind === "box" && it.kind === "box" && sameTransform(old, it))
         return box(it, { a: old, tween });
 
+      // A field's text that went elsewhere leaves its placeholder to come back.
+      if (old.kind === "text" && gone.has(old))
+        return it.kind === "text" ? <g animation={fade(tween, "enter")}>{item(it)}</g> : null;
+
       if (old.kind === it.kind) return pair(old, it, tween);
 
       return (
