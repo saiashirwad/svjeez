@@ -1,13 +1,27 @@
 import { night, project, sun, type LonLat, type Topology } from "@svjeez/geo";
 import { geoOrthographic } from "d3-geo";
-import { css, def, ease, enter, fx, motion, rect, render, type SvgNode } from "svjeez";
+import { css, def, ease, fx, motion, rect, render, type SvgNode } from "svjeez";
 import { createRequire } from "node:module";
-import { geist, geistMono } from "../fonts/faces";
+import {
+  paletteCss,
+  color,
+  geist,
+  HEIGHT,
+  MARGIN,
+  mono,
+  rise,
+  size,
+  stroke,
+  SUBTITLE,
+  theme,
+  Title,
+  WIDTH,
+} from "../gallery-style";
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 
-const W = 960;
-const H = 540;
+const W = WIDTH;
+const H = HEIGHT;
 
 /** One turn of the globe: a day in 24 seconds. */
 const D = 24;
@@ -20,7 +34,7 @@ const SUN_OFFSET = -72;
 
 /** The June solstice, at midnight UTC. */
 const DAY = Date.UTC(2026, 5, 21);
-const R = 226;
+const R = 200;
 
 const [sunLon, sunLat] = sun(new Date(DAY));
 
@@ -28,7 +42,7 @@ const [sunLon, sunLat] = sun(new Date(DAY));
 const middle = sunLon - SUN_OFFSET;
 
 const map = project(countries, {
-  frame: rect(656 - R, H / 2 - R, 2 * R, 2 * R),
+  frame: rect(W - MARGIN - 2 * R, H / 2 + 12 - R, 2 * R, 2 * R),
   projection: geoOrthographic().rotate([-middle, -TILT]),
   fit: "sphere",
   filter: (f) => f.properties?.name !== "Antarctica",
@@ -51,30 +65,7 @@ const lon = css.property("lon", { syntax: "angle", inherits: false, initial: 0 }
 const spin = motion({ [yaw]: -middle }).to({ [yaw]: 360 - middle }, D, ease.linear);
 
 const style = css`
-  svg {
-    --space: #04060c;
-    --sea: #0b1a2c;
-    --deep: #050b14;
-    --land: #bfe3ff;
-    --dawn: #ff9d5c;
-    --city: #ffc56b;
-    --text: #eef4fa;
-    --dim: #7f93a8;
-    --star: #c8d6e6;
-  }
-  @media (prefers-color-scheme: light) {
-    svg {
-      --space: #eef2f7;
-      --sea: #d6e4f0;
-      --deep: #9fb3c8;
-      --land: #12324f;
-      --dawn: #e8590c;
-      --city: #f08c00;
-      --text: #0f1e2c;
-      --dim: #5b6f82;
-      --star: #eef2f7;
-    }
-  }
+  ${paletteCss}
   .g {
     --l: calc(${lon} + ${yaw});
     --z: calc(${SIN_T} * sin(${lat}) + ${COS_T} * cos(${lat}) * cos(var(--l)));
@@ -98,15 +89,15 @@ const style = css`
 `;
 
 const C = {
-  space: "var(--space)",
-  sea: "var(--sea)",
-  deep: "var(--deep)",
-  land: "var(--land)",
-  dawn: "var(--dawn)",
-  city: "var(--city)",
-  text: "var(--text)",
-  dim: "var(--dim)",
-  star: "var(--star)",
+  space: theme.base00,
+  sea: theme.base01,
+  deep: theme.base00,
+  land: theme.base05,
+  dawn: theme.base09,
+  city: theme.base0A,
+  text: theme.base06,
+  dim: theme.base04,
+  star: theme.base04,
 } as const;
 
 const dots = map.dots(2.8);
@@ -225,7 +216,7 @@ function Globe(): SvgNode {
         fill="none"
         stroke={C.land}
         strokeOpacity={0.08}
-        strokeWidth={0.6}
+        strokeWidth={stroke.hairline}
       />
       <path
         d={terminator}
@@ -246,7 +237,7 @@ function Globe(): SvgNode {
         {CITIES.map((city) => (
           <g class="g c" style={place(city.at)}>
             <circle r={12} fill={glow} />
-            <circle r={1.8} fill="#fff6e0" />
+            <circle r={1.8} fill={theme.base07} />
           </g>
         ))}
         {CITIES.flatMap((city) =>
@@ -258,9 +249,7 @@ function Globe(): SvgNode {
                   x={7}
                   y={-6}
                   fontFamily={geist}
-                  fontSize={11}
-                  fontWeight={600}
-                  letterSpacing={0.3}
+                  fontSize={size.label}
                   fill={C.text}
                 >
                   {city.name}
@@ -319,13 +308,12 @@ const hours = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")
 /** The UTC time, one hour per second, cut over as the globe turns. */
 function Clock(): SvgNode {
   return (
-    <g fontFamily={geistMono} fill={C.text}>
+    <g fontFamily={mono} fill={C.text}>
       {hours.map((label, h) => (
         <text
-          x={64}
-          y={334}
-          fontSize={44}
-          fontWeight={500}
+          x={MARGIN}
+          y={H - MARGIN - 24}
+          fontSize={size.readout}
           letterSpacing={-1}
           animation={
             h === 0
@@ -340,8 +328,8 @@ function Clock(): SvgNode {
           {label}
         </text>
       ))}
-      <text x={202} y={334} fontSize={15} fill={C.dim} letterSpacing={1.5}>
-        UTC
+      <text x={MARGIN} y={H - MARGIN} fontSize={13} fill={C.dim}>
+        21 June 2026 UTC
       </text>
     </g>
   );
@@ -349,18 +337,10 @@ function Clock(): SvgNode {
 
 function Caption(): SvgNode {
   return (
-    <g fontFamily={geist} animation={enter({ at: 0.2, over: 1 }, { y: 10 })}>
-      <text x={64} y={180} fontFamily={geistMono} fontSize={11} letterSpacing={2.4} fill={C.dawn}>
-        21 JUNE 2026
-      </text>
-      <text x={64} y={226} fontSize={40} fontWeight={600} letterSpacing={-1.6} fill={C.text}>
-        The longest day
-      </text>
-      <text x={64} y={256} fontSize={14} fill={C.dim}>
-        {`One turn of the Earth in ${dots.length.toLocaleString("en-US")} dots of land.`}
-      </text>
-      <text x={64} y={276} fontSize={14} fill={C.dim}>
-        Fifty cities switch on as the sun sets on them.
+    <g animation={rise(0.2)}>
+      <Title title="Sunset across the June solstice" at={0} />
+      <text x={SUBTITLE.x} y={SUBTITLE.y} fontFamily={geist} fontSize={size.subtitle} fill={C.dim}>
+        The 50 largest cities light up as the sun sets on them.
       </text>
       <Clock />
     </g>
@@ -373,8 +353,8 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "The longest day",
-      desc: "A globe of glowing dots turns through the 24 hours of the June solstice. The sun lights the left side, the terminator glows orange, and fifty of the largest cities switch on as night reaches them, while a clock counts the hours in UTC.",
+      title: "Sunset across the June solstice",
+      desc: "A globe of dots turns through 21 June 2026, one hour per second. Night moves across it, and the 50 largest cities light up as the sun sets on them. A clock shows UTC.",
       reducedMotion: { at: 12 },
       css: style,
       comment: "Generated by svjeez. Edit examples/earth/ instead of this file.",

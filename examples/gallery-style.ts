@@ -1,12 +1,17 @@
 // One look for every scene in the examples gallery. Scenes import from here so the cards read as one set.
 // Palette, fonts and the type scale come first, then the rules for layout and motion.
-import { ease, enter, motion, type Color, type SvgNode } from "svjeez";
+import { css as cssTag, ease, enter, motion, type Color, type Css, type SvgNode } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { geist } from "./fonts/faces";
 import { css, mono, theme } from "./style";
 
 /** Palette and fonts. `theme` paints with `var(--base0X)`, so the site's palette picker recolors a scene that uses it. */
 export { css, geist, mono, theme };
+
+/** `css` as a hole for a scene whose own style is a `css` template: css`${paletteCss} .dot { fill: ${color.accent} }`. */
+const text = css;
+const strings = Object.assign([text], { raw: [text] });
+export const paletteCss: Css = cssTag(strings);
 
 /** The canvas: 16:9, because a gallery card crops everything to 16:9. Author at this size, or at the same ratio. */
 export const WIDTH = 960;
