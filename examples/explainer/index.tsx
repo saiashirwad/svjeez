@@ -1,11 +1,13 @@
 import { highlight } from "@svjeez/code";
-import { code, ease, motion, render, type CodeTokens, type Motion } from "svjeez";
+import { code, css as cssTag, ease, motion, render, type CodeTokens, type Motion } from "svjeez";
+
+import { PERIOD, boing, flash, flip, glance, kick } from "./moves";
 
 import { css, mono, theme } from "../style";
 import scene, { frame } from "./scene.tsx";
-import { chick } from "../site/lib/chick";
+import { SQUASH, chick, type ChickMotions } from "../site/lib/chick";
 
-// Edit a scene and the SVG does what the code says. The left side is scene.tsx's hop, edited three times. Each edit swaps
+// Edit a scene and the SVG does what the code says. The left side is scene.tsx's hop, edited five times. Each edit swaps
 // or adds one whole line, and at that moment the chick on the right plays the edited code. Every state is built from
 // the same lines in `states`: they are what the left shows and, evaluated, what the right plays.
 // examples/tests/explainer.test.tsx checks that each state compiles and that what plays is what it shows.
@@ -14,23 +16,24 @@ const W = 1200;
 const H = 675;
 const M = 64;
 
-/** The scene's own clock, repeated. It divides the explainer's. */
-const PERIOD = frame.duration;
-
 /** The hop and the render call as scene.tsx writes them, for the shown part of the file. */
 const start = [
-  "const hop = motion({ y: 60 })",
-  "  .at(0.4).to({ y: 0 }, 0.4, ease.out)",
-  "  .rewind(0.4, ease.in);",
+  "const hop = motion({ y: 100 })",
+  "  .at(0.4).to({ y: 10 }, 0.4, ease.out)",
+  "  .to({ y: 100 }, 0.4, ease.in);",
   "",
-  "render(frame, chick({ body: hop }));",
+  "render(frame, chick({",
+  "  body: hop,",
+  "}));",
 ];
 
 /** Each edit swaps the line at `line`, or inserts before it when `insert` is set. */
 const edits = [
-  { line: 1, text: "  .at(0.4).to({ y: 0, rotate: -10 }, 0.4, ease.out)" },
-  { line: 1, text: "  .at(0.4).to({ y: 0, rotate: -10 }, 0.4, ease.pop)" },
-  { line: 1, text: "  .at(0.2).to({ y: 70 }, 0.2, ease.out)", insert: true },
+  { line: 6, text: "  stretch: boing(),", insert: true },
+  { line: 7, text: "  glow: flash(),", insert: true },
+  { line: 8, text: "  look: glance(),", insert: true },
+  { line: 9, text: "  feet: kick(),", insert: true },
+  { line: 5, text: "  body: [hop, flip()]," },
 ];
 
 export interface State {
@@ -50,9 +53,55 @@ export const states: readonly State[] = edits.reduce<State[]>(
   [{ lines: start, changed: -1 }],
 );
 
-/** The hop a state's lines write: they are run, so what plays is what is shown. */
-export const hopOf = ({ lines }: State) =>
-  new Function("motion", "ease", `${lines.slice(0, lines.indexOf("")).join("\n")}\nreturn hop;`)(motion, ease) as Motion<"y" | "rotate">;
+/** What the chick plays: the props a state's lines write. They are run, so what plays is what is shown. */
+export const propsOf = ({ lines }: State) =>
+  new Function(
+    "motion",
+    "ease",
+    "frame",
+    "chick",
+    "boing",
+    "flash",
+    "glance",
+    "kick",
+    "flip",
+    lines
+      .join("\n")
+      .replace("render(frame, chick(", "return (")
+      .replace(/\)\);\s*$/, ");"),
+  )(
+    motion,
+    ease,
+    frame,
+    (props: ChickMotions) => props,
+    boing,
+    flash,
+    glance,
+    kick,
+    flip,
+  ) as ChickMotions;
+
+type Layer = Motion<any> | readonly (Motion<any> | false | null | undefined)[] | undefined;
+
+const repeated = (layer: Layer): any =>
+  layer === undefined
+    ? undefined
+    : Array.isArray(layer)
+      ? layer.map((m) => m && m.loop(PERIOD))
+      : (layer as Motion<any>).loop(PERIOD);
+
+/** The chick the explainer shows for a state: the same props, each looping on the scene's clock. */
+export const chickOf = (state: State) => {
+  const p = propsOf(state);
+
+  return chick({
+    body: repeated(p.body),
+    stretch: repeated(p.stretch),
+    glow: repeated(p.glow),
+    look: repeated(p.look),
+    feet: p.feet && { left: repeated(p.feet.left), right: repeated(p.feet.right) },
+  });
+};
 
 /** The size of the file on disk, to a tenth of a KB. */
 export const fileKb = (new TextEncoder().encode(scene()).length / 1024).toFixed(1);
@@ -73,18 +122,18 @@ const quiet = {
 /** The one accent, and only the highlight uses it. */
 const accent = theme.base0D;
 
-const FONT = 24;
-const LINE = 43;
+const FONT = 26;
+const LINE = 46;
 const SLOTS = Math.max(...states.map((s) => s.lines.length));
 const top = (H - SLOTS * LINE) / 2;
 
 const style = { x: M, y: top, fontSize: FONT, lineHeight: LINE / FONT, theme: quiet, font: mono };
 
-/** The clock, in seconds. Each state holds three hops. */
-const EDIT = [3.6, 7.2, 10.8] as const;
-const FILE = 14.4;
-const BACK = 16.8;
-const D = 18;
+/** The clock, in seconds. Each state holds two hops. */
+const EDIT = [3, 6, 9, 12, 15] as const;
+const FILE = 18;
+const BACK = 21;
+const D = 22.5;
 const FADE = 0.4;
 const DRIFT = 10;
 
@@ -113,7 +162,10 @@ const lineOf = (text: string) => {
     } else if (from >= 0) {
       m = m.at(at).to({ opacity: 0, y: y(from) - DRIFT }, FADE, ease.out);
     } else if (to >= 0) {
-      m = m.at(at).set({ y: y(to) + DRIFT }).to({ opacity: 1, y: y(to) }, FADE, ease.out);
+      m = m
+        .at(at)
+        .set({ y: y(to) + DRIFT })
+        .to({ opacity: 1, y: y(to) }, FADE, ease.out);
     }
   };
 
@@ -141,7 +193,11 @@ const bar = ({ lines, changed }: State, at: number) => {
       height={h}
       rx={6}
       fill={accent}
-      animation={motion({ opacity: 0 }).at(at).to({ opacity: 0.2 }, FADE, ease.out).at(at + 2.4).to({ opacity: 0 }, FADE, ease.out)}
+      animation={motion({ opacity: 0 })
+        .at(at)
+        .to({ opacity: 0.2 }, FADE, ease.out)
+        .at(at + 2.6)
+        .to({ opacity: 0 }, FADE, ease.out)}
     />
   );
 };
@@ -167,12 +223,12 @@ const chicks = states.map((state, i) => {
   on = on.at(to).set({ opacity: 0 });
   if (i === 0) on = on.at(BACK).set({ opacity: 1 });
 
-  return <g animation={on}>{chick({ body: hopOf(state).loop(PERIOD) })}</g>;
+  return <g animation={on}>{chickOf(state)}</g>;
 });
 
-const SCALE = 1.7;
-/** The chick's whole travel, from the antenna at the top of the pop to the feet in the crouch, is y 22 to 232 of the scene. It centers on the code block's middle, in the space the code leaves, with the right margin the code has on the left. */
-const picture = { x: W - M - 120 - 104 * SCALE, y: H / 2 - 127 * SCALE };
+const SCALE = 1.9;
+/** The chick's whole travel, from the flip's top to the feet, is about y 0 to 268 of the scene, and a flip reaches 82 either side of its middle. It centers on the code block's middle, in the space the code leaves, with the right margin the code has on the left. */
+const picture = { x: 940 - 104 * SCALE, y: H / 2 - 134 * SCALE };
 
 export default function build(): string {
   return render(
@@ -180,10 +236,10 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "Edit a scene and the SVG does what the code says",
-      desc: "A short svjeez scene makes a chick hop. Three edits, each one line of code, add a tilt, a springy launch and a crouch, and the chick does each at once. The scene compiles to one animated SVG with no JavaScript.",
-      reducedMotion: { at: 11.6 },
-      css,
+      title: "Explainer",
+      desc: "A short svjeez scene makes a chick hop. Five edits, each one line of code, add squash and stretch, a flashing bulb, darting eyes, kicking feet and a flip, and the chick does each at once. The scene compiles to one animated SVG with no JavaScript.",
+      reducedMotion: { at: 16 },
+      css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
     },
     <>
       <rect width={W} height={H} fill={theme.base00} />

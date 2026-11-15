@@ -2,22 +2,32 @@ import { readFileSync } from "node:fs";
 import { describe, expect, test } from "bun:test";
 import { render } from "svjeez";
 
-import build, { fileKb, fileLine, hopOf, states } from "../explainer/index.tsx";
+import build, { fileKb, fileLine, propsOf, states } from "../explainer/index.tsx";
 import scene, { frame } from "../explainer/scene.tsx";
 import { chick } from "../site/lib/chick";
 
-// The explainer shows scene.tsx's hop, edited three times. Each state's lines are run to make the chick that plays.
+// The explainer shows scene.tsx's hop, edited five times. Each state's lines are run to make the chick that plays.
 describe("the explainer's code is what plays", () => {
   const squash = (text: string) => text.replace(/\s+/g, "");
   const styleOf = (svg: string) => squash(svg.match(/<style>[\s\S]*<\/style>/)![0]);
-  const keyframes = (css: string) => css.match(/@keyframesk\d+\{.*?\}\}/g)!.map((k) => k.replace(/^@keyframesk\d+/, ""));
+  const keyframes = (css: string) =>
+    css.match(/@keyframesk\d+\{.*?\}\}/g)!.map((k) => k.replace(/^@keyframesk\d+/, ""));
 
   test("the start is scene.tsx", () => {
-    const file = readFileSync(new URL("../explainer/scene.tsx", import.meta.url), "utf8").replace("export const hop", "const hop");
-    const [hop, render] = [states[0]!.lines.slice(0, 3), states[0]!.lines[4]!];
+    const file = readFileSync(new URL("../explainer/scene.tsx", import.meta.url), "utf8").replace(
+      "export const hop",
+      "const hop",
+    );
+    const lines = states[0]!.lines;
 
-    expect(file).toContain(hop.join("\n"));
-    expect(file).toContain(render.replace("render(frame, ", "export default () => render(frame, "));
+    expect(file).toContain(lines.slice(0, 3).join("\n"));
+    expect(file).toContain(
+      lines
+        .slice(4)
+        .map((l) => (l ? `  ${l}` : l))
+        .join("\n")
+        .replace("  render(", "export default () =>\n  render("),
+    );
   });
 
   test("each edit changes one line", () => {
@@ -34,7 +44,7 @@ describe("the explainer's code is what plays", () => {
     const played = styleOf(build());
 
     for (const state of states) {
-      const own = styleOf(render(frame, chick({ body: hopOf(state) })));
+      const own = styleOf(render(frame, chick(propsOf(state))));
 
       expect(keyframes(own).length).toBeGreaterThan(0);
       for (const frames of keyframes(own)) expect(played).toContain(frames);
@@ -43,13 +53,13 @@ describe("the explainer's code is what plays", () => {
     expect(played).toContain("cubic-bezier(.34,1.56,.64,1)");
 
     // Every edit changes what plays.
-    const motions = states.map((s) => styleOf(render(frame, chick({ body: hopOf(s) }))));
+    const motions = states.map((s) => styleOf(render(frame, chick(propsOf(s)))));
 
     expect(new Set(motions).size).toBe(states.length);
   });
 
   test("the start plays what scene.tsx writes", () => {
-    expect(render(frame, chick({ body: hopOf(states[0]!) }))).toBe(scene());
+    expect(render(frame, chick(propsOf(states[0]!)))).toBe(scene());
   });
 
   test("the file line is the real size and says no JavaScript", () => {
