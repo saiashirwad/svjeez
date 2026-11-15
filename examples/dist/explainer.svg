@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-labelledby="t d">
-  <title id="t">Explainer</title>
-  <desc id="d">A short svjeez scene makes a chick hop. Five edits, each one line of code, add squash and stretch, a flashing bulb, darting eyes, kicking feet and a flip, and the chick does each at once. The scene compiles to one animated SVG with no JavaScript.</desc>
+  <title id="t">Blip</title>
+  <desc id="d">A short svjeez scene makes Blip, the svjeez mascot, hop. Each line of code changes what Blip does: five edits add squash and stretch, a flashing bulb, darting eyes, kicking feet and a flip, and Blip does each at once. The scene compiles to one animated SVG with no JavaScript.</desc>
   <style><![CDATA[
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}
@@ -299,8 +299,8 @@ svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04
       <text x="157.6" y="300.6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="26" fill="var(--base04)">(</text>
       <text x="173.2" y="300.6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="26" fill="var(--base05)">frame</text>
       <text x="251.2" y="300.6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="26" fill="var(--base04)">,</text>
-      <text x="282.4" y="300.6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="26" fill="var(--base0D)">chick</text>
-      <text x="360.4" y="300.6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="26" fill="var(--base04)">({</text>
+      <text x="282.4" y="300.6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="26" fill="var(--base0D)">blip</text>
+      <text x="344.8" y="300.6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="26" fill="var(--base04)">({</text>
     </g>
   </g>
   <g class="a m20">

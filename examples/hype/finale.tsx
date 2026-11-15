@@ -13,8 +13,8 @@ import {
 import { Glyphs, Icon, draw, ease, enter, motion, code, shot, typewriter } from "svjeez";
 
 import { mono, theme } from "../style";
-import { hopAcross, jumps } from "../site/lib/chick";
-import { C, Chick, centered, display, rise, show, W } from "./kit";
+import { hopAcross, jumps } from "../site/lib/blip";
+import { C, Blip, centered, display, rise, show, W } from "./kit";
 import { HAND } from "./write";
 
 const FACTS = [
@@ -26,7 +26,7 @@ const FACTS = [
 const FACT = 64;
 export const FACTS_SPAN = { at: HAND.at + HAND.over, over: 3.4 };
 
-// The chick hops down the facts, landing on the end of each one as it rises.
+// Blip hops down the facts, landing on the end of each one as it rises.
 const factEnds = FACTS.map((fact, i) => ({
   x: (W + display.measure(fact.lead + fact.rest, FACT)) / 2 + 40,
   y: 270 + i * 110,
@@ -37,7 +37,7 @@ const factHops = hopAcross(factEnds, FACTS_SPAN.at + 0.8, 0.45, 0.25);
 export const facts = (
   <g animation={shot(FACTS_SPAN, { exit: "zoom" })}>
     <g animation={factHops.animation}>
-      <Chick x={0} y={0} size={0.42} pop={FACTS_SPAN.at + 0.35} blinks={[FACTS_SPAN.at + 2.6]} />
+      <Blip x={0} y={0} size={0.42} pop={FACTS_SPAN.at + 0.35} blinks={[FACTS_SPAN.at + 2.6]} />
     </g>
     {FACTS.map((fact, i) => {
       const x = (W - display.measure(fact.lead + fact.rest, FACT)) / 2;
@@ -134,7 +134,7 @@ const chips = PACKAGES.map(([name, icon], i) => {
 
 const sizeAt = chipsAt + PACKAGES.length * 0.06 + 0.5;
 
-// The chick drops onto the end of the wordmark, and cheers when the install line has typed.
+// Blip drops onto the end of the wordmark, and cheers when the install line has typed.
 const perch = { x: logoX + display.measure(LOGO, 190) - 46, y: 186 };
 
 const drop = motion({ y: -260, opacity: 0 })
@@ -192,7 +192,7 @@ export const finale = (size: string) => (
         .to({ scale: 1 }, 0.7, ease.inOut)}
     />
     <g animation={drop}>
-      <Chick
+      <Blip
         x={perch.x}
         y={perch.y}
         size={0.5}

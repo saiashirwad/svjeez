@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-labelledby="t d">
-  <title id="t">The chick by day and by night</title>
-  <desc id="d">In light mode the svjeez chick bounces beside an open flower under the sun while a butterfly loops around. In dark mode, in the same file, it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking.</desc>
+  <title id="t">Blip by day and by night</title>
+  <desc id="d">In light mode Blip bounces beside an open flower under the sun while a butterfly loops around. In dark mode, in the same file, it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking.</desc>
   <style><![CDATA[
 svg{--sky:#151a2b;--hill:#24392f;--far:#1c2c25;--stem:#3f7a55;--glow:#FFE58A}
 @media (prefers-color-scheme:light){svg{--sky:#d6ecf5;--hill:#8fcf9a;--far:#b4e0bb;--stem:#4f9e66;--glow:#FFE58A}}.night{display:none}@media (prefers-color-scheme:dark){.day{display:none}.night{display:inline}}

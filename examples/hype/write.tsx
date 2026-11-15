@@ -1,8 +1,8 @@
 import { fieldLines, streamlines } from "@svjeez/math";
 import { Ink, ease, tool, shot } from "svjeez";
 import { motion } from "svjeez";
-import { jumps } from "../site/lib/chick";
-import { C, Caption, Chick, H, W, hand } from "./kit";
+import { jumps } from "../site/lib/blip";
+import { C, Caption, Blip, H, W, hand } from "./kit";
 import { MONTAGE } from "./montage";
 
 const HAND_AT = MONTAGE.at + MONTAGE.over;
@@ -56,8 +56,8 @@ export const handwriting = (
       fill={C.accent}
       draw={{ at: inked + 0.1, over: 0.5 }}
     />
-    {/* The chick pops up at the end of the swoosh and admires the lettering. */}
-    <Chick
+    {/* Blip pops up at the end of the swoosh and admires the lettering. */}
+    <Blip
       x={W - handX - 6}
       y={440}
       size={0.42}

@@ -1,10 +1,10 @@
 import { def, ease, motion, render } from "svjeez";
 import { CSS, chrome, random } from "./lib/kit";
-import { CHICK, chick } from "./lib/chick";
+import { BLIP, blip } from "./lib/blip";
 import { theme } from "../style";
 
-// The 404 page: the chick hops along a timeline behind its playhead. The track ends, the chick skids to a stop at the
-// edge, and the playhead sails on into the empty space past it. The chick looks around, lights its antenna bulb like a
+// The 404 page: Blip hops along a timeline behind its playhead. The track ends, Blip skids to a stop at the
+// edge, and the playhead sails on into the empty space past it. Blip looks around, lights its antenna bulb like a
 // flashlight, and finds the playhead out in the dark, parked at 404s. `tall` is the same story on a shorter track.
 
 const D = 10;
@@ -59,7 +59,7 @@ export const make = (tall = false): string => {
   const y = Math.round(BAR + (H - BAR) * 0.63);
   const x1 = x0 + gap * seconds;
 
-  // The chick starts behind the 0s tick and stops with its toes over the end of the track.
+  // Blip starts behind the 0s tick and stops with its toes over the end of the track.
   const start = x0 - 66 * s - 6;
   const stop = x1 - 50 * s;
   const bulb = { x: stop, y: y + (38 - 162) * s };
@@ -101,11 +101,11 @@ export const make = (tall = false): string => {
     .to({ y: 3 }, 0.1, ease.in)
     .to({ y: 0 }, 0.4, ease.pop);
 
-  const glow = motion({ fill: CHICK.yellow })
+  const glow = motion({ fill: BLIP.yellow })
     .at(LIGHT)
     .to({ fill: "#FFF6C2" }, 0.2)
     .at(DARK)
-    .to({ fill: CHICK.yellow }, 0.4);
+    .to({ fill: BLIP.yellow }, 0.4);
 
   // The playhead keeps going past the end, slows, and fades into the dark until the beam finds it.
   const playhead = motion({ x: 0 })
@@ -191,7 +191,7 @@ export const make = (tall = false): string => {
       height: H,
       duration: D,
       title: "404: not on the timeline",
-      desc: `The svjeez chick hops along a timeline behind its playhead. The track ends at ${seconds}s and the chick skids to a stop, but the playhead sails on into the dark. The chick looks around, lights its antenna bulb like a flashlight and finds the playhead parked far away at 404s.`,
+      desc: `Blip hops along a timeline behind its playhead. The track ends at ${seconds}s and Blip skids to a stop, but the playhead sails on into the dark. Blip looks around, lights its antenna bulb like a flashlight and finds the playhead parked far away at 404s.`,
       css: CSS,
       reducedMotion: { at: FOUND + 0.9 },
     },
@@ -258,7 +258,7 @@ export const make = (tall = false): string => {
         </g>
         <g animation={[walk, hops]}>
           <g transform={`translate(${start} ${y - 1.5}) scale(${s}) translate(-104 -162)`}>
-            {chick({ blinks: [5.55, 7.6], body: brake, look, bulb: wobble, glow })}
+            {blip({ blinks: [5.55, 7.6], body: brake, look, bulb: wobble, glow })}
           </g>
         </g>
         {mark("?", 4.9, 1)}

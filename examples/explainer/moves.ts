@@ -1,7 +1,7 @@
 import { ease, motion } from "svjeez";
 
 import { theme } from "../style";
-import { CHICK, sx, sy } from "../site/lib/chick";
+import { BLIP, sx, sy } from "../site/lib/blip";
 
 // The moves the explainer's snippet calls. Each is one hop long, a second and a half, and starts and ends at rest.
 // The hop itself leaves the ground at 0.4s, peaks at 0.8s and lands at 1.2s.
@@ -22,14 +22,14 @@ export const boing = () =>
 
 /** The antenna bulb flashes through five hues and settles back to yellow. */
 export const flash = () =>
-  motion({ fill: CHICK.yellow })
+  motion({ fill: BLIP.yellow })
     .at(0.35)
     .to({ fill: theme.base08 }, 0.1)
     .to({ fill: theme.base0C }, 0.2)
     .to({ fill: theme.base0B }, 0.2)
     .to({ fill: theme.base0E }, 0.2)
     .to({ fill: theme.base08 }, 0.2)
-    .to({ fill: CHICK.yellow }, 0.25);
+    .to({ fill: BLIP.yellow }, 0.25);
 
 /** The eyes dart left, up as it leaves the ground, right at the top, and down on landing. */
 export const glance = () =>

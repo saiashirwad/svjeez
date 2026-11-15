@@ -1,9 +1,9 @@
 import { Pivot, css as cssTag, ease, motion, render, sampled, variables, wiggle } from "svjeez";
 import { mono } from "../style";
-import { CHICK, GROUND, SQUASH, chick, jumps } from "./lib/chick";
+import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// One file, two moods. By day the chick bounces beside a flower that has opened to the sun, and a butterfly loops
-// around it. By night, in the very same file, the chick is fast asleep with its antenna bulb as a night-light, the
+// One file, two moods. By day Blip bounces beside a flower that has opened to the sun, and a butterfly loops
+// around it. By night, in the very same file, Blip is fast asleep with its antenna bulb as a night-light, the
 // flower has closed, and fireflies drift where the butterfly was. The viewer's colour scheme picks which one shows.
 
 const W = 1280;
@@ -21,7 +21,7 @@ const { vars, css: paint } = variables({
 /** Day shows in light mode, night in dark. */
 const MOODS = `.night{display:none}@media (prefers-color-scheme:dark){.day{display:none}.night{display:inline}}`;
 
-/** A point on the chick, in page coordinates. */
+/** A point on Blip, in page coordinates. */
 const at = (x: number, y: number) => ({
   x: SPOT.x + (x - GROUND.x) * S,
   y: SPOT.y + (y - GROUND.y) * S,
@@ -30,7 +30,7 @@ const at = (x: number, y: number) => ({
 const placed = `translate(${SPOT.x} ${SPOT.y}) scale(${S}) translate(${-GROUND.x} ${-GROUND.y})`;
 
 export default function build(): string {
-  // Day: the chick bounces, and the flower sways in the breeze.
+  // Day: Blip bounces, and the flower sways in the breeze.
   const hops = jumps([
     { land: 1.0, height: 50 },
     { land: 2.2, height: 30 },
@@ -54,7 +54,7 @@ export default function build(): string {
     .to({ scale: 1 }, 0.12, ease.inOut)
     .loop(0.24);
 
-  // Night: the chick breathes slowly in its sleep, and Zs drift up from it.
+  // Night: Blip breathes slowly in its sleep, and Zs drift up from it.
   const breathe = motion({ scale: 1 })
     .to({ scale: 1.035 }, D / 4, ease.inOut)
     .to({ scale: 1 }, D / 4, ease.inOut)
@@ -142,15 +142,15 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "The chick by day and by night",
-      desc: "In light mode the svjeez chick bounces beside an open flower under the sun while a butterfly loops around. In dark mode, in the same file, it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking.",
+      title: "Blip by day and by night",
+      desc: "In light mode Blip bounces beside an open flower under the sun while a butterfly loops around. In dark mode, in the same file, it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking.",
       reducedMotion: { at: 0.3 },
       css: cssTag(Object.assign([paint + MOODS, ""], { raw: [paint + MOODS, ""] }), SQUASH),
     },
     <>
       <rect width={W} height={H} fill={vars.sky} />
       <g class="day">
-        <circle cx={220} cy={150} r={70} fill={CHICK.yellow} />
+        <circle cx={220} cy={150} r={70} fill={BLIP.yellow} />
       </g>
       <g class="night">
         {stars}
@@ -179,7 +179,7 @@ export default function build(): string {
         />
         <g class="day" transform={`translate(${FLOWER.x} ${FLOWER.head})`}>
           {petals}
-          <circle r={16} fill={CHICK.yellow} />
+          <circle r={16} fill={BLIP.yellow} />
         </g>
         <g class="night" transform={`translate(${FLOWER.x} ${FLOWER.head})`}>
           <path d="M0 -40C22 -20 18 10 0 14C-18 10 -22 -20 0 -40Z" fill="#c76b8a" />
@@ -189,7 +189,7 @@ export default function build(): string {
       {/* Day: awake and bouncing, with a butterfly about. */}
       <g class="day">
         <g transform={placed}>
-          {chick({
+          {blip({
             blinks: [1.6, 4.6],
             body: hops.body,
             stretch: hops.stretch,
@@ -217,14 +217,14 @@ export default function build(): string {
         </g>
         <g transform={placed}>
           <Pivot origin={GROUND} animation={breathe}>
-            {chick({ glow: motion({ fill: "#FFF3B0" }), feet: {} })}
+            {blip({ glow: motion({ fill: "#FFF3B0" }), feet: {} })}
             {[84, 124].map((x) => (
               <>
-                <ellipse cx={x} cy={110} rx={10} ry={12} fill={CHICK.yellow} />
+                <ellipse cx={x} cy={110} rx={10} ry={12} fill={BLIP.yellow} />
                 <path
                   d={`M${x - 8} 110Q${x} 117 ${x + 8} 110`}
                   fill="none"
-                  stroke={CHICK.ink}
+                  stroke={BLIP.ink}
                   strokeWidth={3.5}
                   strokeLinecap="round"
                 />

@@ -16,7 +16,7 @@ import {
 
 import { mono, theme } from "../style";
 import { COLD } from "./cold";
-import { C, Chick, show } from "./kit";
+import { C, Blip, show } from "./kit";
 
 const TERM_AT = COLD.at + COLD.over;
 const FS = 15;
@@ -71,9 +71,9 @@ const split = BOX.x + BOX.w * 0.56;
 const centerAt = (text: string, row: number, piece: (text: string) => CodePiece = (t) => t) =>
   sayAt([piece(text)], row, BOX.x + (split - BOX.x) / 2 - width(text) / 2);
 
-/** The welcome card's mascot is the svjeez chick, blinking up at the reader. */
+/** The welcome card's mascot is Blip, blinking up at the reader. */
 const mascot = (row: number) => (
-  <Chick
+  <Blip
     x={BOX.x + (split - BOX.x) / 2}
     y={top(row) + ROW * 2.6}
     size={(ROW * 2.4) / 139}

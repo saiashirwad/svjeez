@@ -1,10 +1,10 @@
 import { Ink, Once, Pivot, css as cssTag, ease, motion, render } from "svjeez";
 import { css, theme } from "../style";
 import { lettering, marker } from "./cue";
-import { CHICK, GROUND, SQUASH, chick, jumps } from "./lib/chick";
+import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// The way from the home page's hero to the examples. "browse examples" is hand-lettered once, and above it the chick
-// deals out a little hand of picture cards: they fan out one by one, the chick hops onto the middle one, and the fan
+// The way from the home page's hero to the examples. "browse examples" is hand-lettered once, and above it Blip
+// deals out a little hand of picture cards: they fan out one by one, Blip hops onto the middle one, and the fan
 // folds back up for the next round.
 
 const W = 420;
@@ -17,7 +17,7 @@ const DECK = { x: 270, y: 80 };
 /** Each card's picture: a little sun, a wave and a bar chart. */
 const PICTURES = [
   <>
-    <circle cx={0} cy={-26} r={8} fill={CHICK.yellow} />
+    <circle cx={0} cy={-26} r={8} fill={BLIP.yellow} />
     <path d="M-12 -8H12" stroke={theme.base03} strokeWidth={2} strokeLinecap="round" />
   </>,
   <path
@@ -81,7 +81,7 @@ export default function build(): string {
       height: H,
       duration: D,
       title: "Browse examples",
-      desc: "The words browse examples are handwritten while the yellow svjeez chick fans out a hand of little picture cards and hops with delight.",
+      desc: "The words browse examples are handwritten while Blip, the svjeez mascot, fans out a hand of little picture cards and hops with delight.",
       reducedMotion: { at: 2 },
       css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
     },
@@ -101,7 +101,7 @@ export default function build(): string {
       <g
         transform={`translate(${HOME.x} ${HOME.y}) scale(${S}) translate(${-GROUND.x} ${-GROUND.y})`}
       >
-        {chick({
+        {blip({
           blinks: [1.4, 4.2],
           body: hops.body,
           stretch: hops.stretch,

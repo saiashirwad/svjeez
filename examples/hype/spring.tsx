@@ -2,7 +2,7 @@ import { tex } from "@svjeez/math";
 import { def, ease, motion, sampled, type Span, Brace } from "svjeez";
 
 import { theme } from "../style";
-import { C, Caption, Chick, H } from "./kit";
+import { C, Caption, Blip, H } from "./kit";
 
 const FORMULA = String.raw`x(t) = A\,\cssId{decay}{e^{-\gamma t}}\,\cssId{wobble}{\cos(\omega t)}`;
 const formula = tex(FORMULA, { x: 640, y: 76, fontSize: 46, theme, anchor: [0.5, 0] });
@@ -82,8 +82,8 @@ export const springShot = ({ at, over }: Span) => {
       <g clipPath={hung}>
         <g animation={weight}>
           <path d={`M${BOB} ${REST - 400}V${REST - 30}`} stroke={C.muted} strokeWidth={2} />
-          {/* The weight is the chick, bungee-jumping by its antenna. */}
-          <Chick
+          {/* The weight is Blip, bungee-jumping by its antenna. */}
+          <Blip
             x={BOB}
             y={REST - 32 + 139 * 0.45}
             size={0.45}

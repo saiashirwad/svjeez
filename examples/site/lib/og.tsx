@@ -13,11 +13,11 @@ import {
 } from "svjeez";
 import { systemLight } from "svjeez";
 import { mono } from "../../style";
-import { CHICK, GROUND, chick } from "./chick";
+import { BLIP, GROUND, blip } from "./blip";
 
-// Link-preview cards for the site, one per page, each starring the chick doing that page's job. Every card is a still
+// Link-preview cards for the site, one per page, each starring Blip doing that page's job. Every card is a still
 // svjeez scene at 1200 by 630 in the site's default palette: a white background, the title in big type on the left, a hand-lettered aside, and
-// the chick in its little set piece on the right.
+// Blip in its little set piece on the right.
 
 const W = 1200;
 const H = 630;
@@ -29,10 +29,10 @@ const PAPER: Color = systemLight.base00;
 const INK: Color = systemLight.base05;
 const SOFT: Color = systemLight.base04;
 const CORAL: Color = systemLight.base09;
-const YELLOW: Color = CHICK.yellow;
+const YELLOW: Color = BLIP.yellow;
 
-/** The chick standing with its feet at x, y, `size` times the favicon, posed by the given still motions. */
-const Chick = ({
+/** Blip standing with its feet at x, y, `size` times the favicon, posed by the given still motions. */
+const Blip = ({
   x,
   y,
   size,
@@ -47,7 +47,7 @@ const Chick = ({
 }) => (
   <g transform={`translate(${x} ${y}) scale(${size}) translate(${-GROUND.x} ${-GROUND.y})`}>
     <Pivot origin={GROUND} animation={motion({ rotate })}>
-      {chick({ feet: {}, look: motion(look) })}
+      {blip({ feet: {}, look: motion(look) })}
     </Pivot>
   </g>
 );
@@ -101,8 +101,8 @@ const X = 80;
 const LEAD = 0.96;
 
 /**
- * Big tight lines of the title, as large as fits up to `max` and centered on the card (moved down by `nudge`), with the chick standing in for the full stop at the end of the last
- * line. Returns the drawing and where that chick stands, so a card can hang a note on it.
+ * Big tight lines of the title, as large as fits up to `max` and centered on the card (moved down by `nudge`), with Blip standing in for the full stop at the end of the last
+ * line. Returns the drawing and where that blip stands, so a card can hang a note on it.
  */
 const set = (
   lines: string[],
@@ -113,7 +113,7 @@ const set = (
 ) => {
   const last = lines.length - 1;
 
-  // The last line carries the chick, about one em wide with its gap.
+  // The last line carries Blip, about one em wide with its gap.
   const widest = (size: number) =>
     Math.max(
       ...lines.map((line, i) => display.measure(line, size) + (i === last ? size * 0.98 : 0)),
@@ -146,9 +146,9 @@ const set = (
     })();
 
   return {
-    // Where the chick's antenna tops out, for an arrow to point at.
+    // Where Blip's antenna tops out, for an arrow to point at.
     top,
-    chick: { x: end, y: base(last), head: base(last) - size * 0.95 },
+    blip: { x: end, y: base(last), head: base(last) - size * 0.95 },
     scale,
     draw: (
       <>
@@ -156,7 +156,7 @@ const set = (
         {lines.map((text, i) => (
           <Glyphs font={display} text={text} size={size} x={X} y={base(i)} fill={INK} />
         ))}
-        <Chick
+        <Blip
           x={end}
           y={base(last) + size * 0.02}
           size={scale}
@@ -195,10 +195,10 @@ const CARDS: Record<Mood, () => string> = {
     return frame(
       "svjeez",
       t.draw,
-      <Hand text="that's one <img>!" x={t.chick.x - 330} y={t.top - 40} />,
+      <Hand text="that's one <img>!" x={t.blip.x - 330} y={t.top - 40} />,
       <Arrow
-        from={[t.chick.x - 40, t.top - 52]}
-        to={[t.chick.x + 14, t.chick.head - 10]}
+        from={[t.blip.x - 40, t.top - 52]}
+        to={[t.blip.x + 14, t.blip.head - 10]}
         bow={-40}
       />,
     );
@@ -215,10 +215,10 @@ const CARDS: Record<Mood, () => string> = {
     return frame(
       "The one-minute intro",
       t.draw,
-      <Hand text="starring me!" x={t.chick.x + 130} y={t.chick.y - 20} size={44} />,
+      <Hand text="starring me!" x={t.blip.x + 130} y={t.blip.y - 20} size={44} />,
       <Arrow
-        from={[t.chick.x + 170, t.chick.y + 10]}
-        to={[t.chick.x + 80, t.chick.y - 30]}
+        from={[t.blip.x + 170, t.blip.y + 10]}
+        to={[t.blip.x + 80, t.blip.y - 30]}
         bow={-30}
       />,
     );
@@ -235,7 +235,7 @@ const CARDS: Record<Mood, () => string> = {
     return frame(
       "Examples",
       t.draw,
-      <Hand text="(i helped)" x={t.chick.x - 30} y={t.chick.y + 70} />,
+      <Hand text="(i helped)" x={t.blip.x - 30} y={t.blip.y + 70} />,
     );
   },
   play: () => {
@@ -252,8 +252,8 @@ const CARDS: Record<Mood, () => string> = {
       t.draw,
       [-150, -120, -60, -30].map((deg) => {
         const a = (deg * Math.PI) / 180;
-        const cx = t.chick.x;
-        const cy = t.chick.y - 70;
+        const cx = t.blip.x;
+        const cy = t.blip.y - 70;
 
         return (
           <path
@@ -264,7 +264,7 @@ const CARDS: Record<Mood, () => string> = {
           />
         );
       }),
-      <Hand text="hey!" x={t.chick.x + 120} y={t.chick.y - 170} size={48} />,
+      <Hand text="hey!" x={t.blip.x + 120} y={t.blip.y - 170} size={48} />,
     );
   },
   lost: () => {
@@ -278,7 +278,7 @@ const CARDS: Record<Mood, () => string> = {
       "Page not found",
       <>
         <Glyphs font={display} text="4" size={size} x={X} y={base} fill={INK} />
-        <Chick x={X + four + gap / 2} y={base} size={1.75} rotate={-10} look={{ x: -4, y: -6 }} />
+        <Blip x={X + four + gap / 2} y={base} size={1.75} rotate={-10} look={{ x: -4, y: -6 }} />
         <Glyphs font={display} text="4" size={size} x={x2} y={base} fill={INK} />
         <Glyphs
           font={display}
@@ -302,7 +302,7 @@ const CARDS: Record<Mood, () => string> = {
 /** The card for one of the site's pages. */
 export const card = (mood: Mood): string => CARDS[mood]();
 
-/** The card for an example: its title, chick and all, beside its picture running off the card's right edge. */
+/** The card for an example: its title, Blip and all, beside its picture running off the card's right edge. */
 export const exampleCard = (title: string, png: string, ratio: number): string => {
   const h = 400;
   const w = h * ratio;

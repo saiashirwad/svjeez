@@ -2,8 +2,8 @@ import { ease, enter, motion, rect, Marker, appWindow, code, shot, typewriter } 
 import { highlight } from "@svjeez/code";
 
 import { mono, theme } from "../style";
-import { jumps } from "../site/lib/chick";
-import { Chick, C, rise, show } from "./kit";
+import { jumps } from "../site/lib/blip";
+import { Blip, C, rise, show } from "./kit";
 import { TERM } from "./session";
 
 const SOURCE = [
@@ -225,8 +225,8 @@ export const codeShot = (
         CSS keyframes · no runtime · 2.1 KB
       </text>
     </g>
-    {/* The chick sits in the preview's corner and hops every time an edit lands. */}
-    <Chick
+    {/* Blip sits in the preview's corner and hops every time an edit lands. */}
+    <Blip
       x={preview.body.right.x - 40}
       y={preview.body.bottom.y - 54}
       size={0.32}

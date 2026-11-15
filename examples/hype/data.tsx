@@ -1,8 +1,8 @@
 import { chart } from "@svjeez/charts";
 import { enter, type Span } from "svjeez";
-import { jumps } from "../site/lib/chick";
+import { jumps } from "../site/lib/blip";
 import { mono, theme } from "../style";
-import { C, Caption, Chick } from "./kit";
+import { C, Caption, Blip } from "./kit";
 
 const STARS = [42, 61, 55, 88, 120, 164, 230, 312];
 const WEEKS = STARS.map((_, i) => `W${i + 1}`);
@@ -35,7 +35,7 @@ export const dataShot = ({ at }: Span) => {
     label: "stars",
   });
 
-  // The chick pops up on the second tallest bar once the bars are in, and cheers when the trend line lands.
+  // Blip pops up on the second tallest bar once the bars are in, and cheers when the trend line lands.
   const last = pairs.at(-2)!;
   const perch = { x: plot.x(last[0]), y: plot.y(last[1]) };
 
@@ -49,7 +49,7 @@ export const dataShot = ({ at }: Span) => {
       <g animation={enter({ at: at + 0.15, over: 0.5 }, { opacity: 0 })}>{plot.node}</g>
       {bars.node}
       {trend.node}
-      <Chick
+      <Blip
         x={perch.x}
         y={perch.y}
         size={0.36}

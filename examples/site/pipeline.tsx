@@ -2,19 +2,19 @@ import { ease, motion, render, sampled, show, type Color } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
-import { GROUND, chick } from "./lib/chick";
+import { GROUND, blip } from "./lib/blip";
 
 const BAR = 40;
 
 type Point = { readonly x: number; readonly y: number };
 
-/** One leg of the chick's trip: a hop in an arc, a walk along a line, or a pause. */
+/** One leg of Blip's trip: a hop in an arc, a walk along a line, or a pause. */
 type Leg =
   | { readonly kind: "hop"; readonly to: Point; readonly over: number }
   | { readonly kind: "walk"; readonly along: readonly Point[]; readonly over: number }
   | { readonly kind: "rest"; readonly over: number };
 
-/** Where the chick is `t` seconds into its legs, starting from `from`. */
+/** Where Blip is `t` seconds into its legs, starting from `from`. */
 const placeOf =
   (from: Point, legs: readonly Leg[]) =>
   (t: number): Point => {
@@ -101,7 +101,7 @@ export const make = (tall = false): string => {
     },
   );
 
-  // The chick follows the flow: up the chart node by node, puzzled at the decision the first time, back round the
+  // Blip follows the flow: up the chart node by node, puzzled at the decision the first time, back round the
   // "no" line to try again, and the second time it nods and walks the "yes" line to the finished SVG.
   const top = (id: "prompt" | "agent" | "frames" | "ok" | "ship"): Point => chart.get(id).top;
   const no = chart.edge("ok", "agent");
@@ -194,7 +194,7 @@ export const make = (tall = false): string => {
       height: H,
       duration: D,
       title: "A diagram that builds itself",
-      desc: "A flowchart from prompt to finished SVG appears node by node. The svjeez chick hops along it, is puzzled at Frames ok? the first time and walks the no line back to try again, then says yes and walks on to the finished SVG.",
+      desc: "A flowchart from prompt to finished SVG appears node by node. Blip hops along it, is puzzled at Frames ok? the first time and walks the no line back to try again, then says yes and walks on to the finished SVG.",
       css: CSS,
       reducedMotion: { at: D - 1 },
     },
@@ -208,7 +208,7 @@ export const make = (tall = false): string => {
         <g animation={[show({ at: START - 0.3, over: length + 1.3 }, { fade: 0.2 }), path]}>
           <g animation={[tilt, bounce]}>
             <g transform={`scale(0.22) translate(${-GROUND.x} ${-GROUND.y})`}>
-              {chick({ blinks: [5.2, puzzled + 0.6], feet: {} })}
+              {blip({ blinks: [5.2, puzzled + 0.6], feet: {} })}
             </g>
           </g>
         </g>

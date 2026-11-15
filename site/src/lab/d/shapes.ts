@@ -31,8 +31,8 @@ const along = (d: string, count = 600, flip = false): Point[] => {
   return points;
 };
 
-/** The chick from the favicon: body, then up the stalk and once around the ball. */
-const CHICK =
+/** Blip, from the favicon: body, then up the stalk and once around the ball. */
+const BLIP =
   "M104 60C140 60 170 94 170 150C170 158 165 162 157 162H51C43 162 38 158 38 150C38 94 68 60 104 60V47A9 9 0 0 1 104 29A9 9 0 0 1 104 47V60";
 
 /** MathJax's π, y up, as tex() reads it. */
@@ -57,7 +57,7 @@ export const PRESETS: readonly Preset[] = [
         -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)),
       ]),
   },
-  { name: "chick", points: () => along(CHICK) },
+  { name: "blip", points: () => along(BLIP) },
   {
     name: "star",
     points: () =>

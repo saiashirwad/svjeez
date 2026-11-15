@@ -129,7 +129,7 @@ export const moon = () =>
     </>,
   );
 
-/** The screen, with the chick's antenna popping up from behind it. */
+/** The screen, with Blip's antenna popping up from behind it. */
 export const system = () =>
   icon(
     "sys",

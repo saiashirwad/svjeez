@@ -5,10 +5,10 @@ import { PERIOD, boing, flash, flip, glance, kick } from "./moves";
 
 import { css, mono, theme } from "../style";
 import scene, { frame } from "./scene.tsx";
-import { SQUASH, chick, type ChickMotions } from "../site/lib/chick";
+import { SQUASH, blip, type BlipMotions } from "../site/lib/blip";
 
 // Edit a scene and the SVG does what the code says. The left side is scene.tsx's hop, edited five times. Each edit swaps
-// or adds one whole line, and at that moment the chick on the right plays the edited code. Every state is built from
+// or adds one whole line, and at that moment Blip on the right plays the edited code. Every state is built from
 // the same lines in `states`: they are what the left shows and, evaluated, what the right plays.
 // examples/tests/explainer.test.tsx checks that each state compiles and that what plays is what it shows.
 
@@ -22,7 +22,7 @@ const start = [
   "  .at(0.4).to({ y: 10 }, 0.4, ease.out)",
   "  .to({ y: 100 }, 0.4, ease.in);",
   "",
-  "render(frame, chick({",
+  "render(frame, blip({",
   "  body: hop,",
   "}));",
 ];
@@ -53,13 +53,13 @@ export const states: readonly State[] = edits.reduce<State[]>(
   [{ lines: start, changed: -1 }],
 );
 
-/** What the chick plays: the props a state's lines write. They are run, so what plays is what is shown. */
+/** What Blip plays: the props a state's lines write. They are run, so what plays is what is shown. */
 export const propsOf = ({ lines }: State) =>
   new Function(
     "motion",
     "ease",
     "frame",
-    "chick",
+    "blip",
     "boing",
     "flash",
     "glance",
@@ -67,19 +67,19 @@ export const propsOf = ({ lines }: State) =>
     "flip",
     lines
       .join("\n")
-      .replace("render(frame, chick(", "return (")
+      .replace("render(frame, blip(", "return (")
       .replace(/\)\);\s*$/, ");"),
   )(
     motion,
     ease,
     frame,
-    (props: ChickMotions) => props,
+    (props: BlipMotions) => props,
     boing,
     flash,
     glance,
     kick,
     flip,
-  ) as ChickMotions;
+  ) as BlipMotions;
 
 type Layer = Motion<any> | readonly (Motion<any> | false | null | undefined)[] | undefined;
 
@@ -90,11 +90,11 @@ const repeated = (layer: Layer): any =>
       ? layer.map((m) => m && m.loop(PERIOD))
       : (layer as Motion<any>).loop(PERIOD);
 
-/** The chick the explainer shows for a state: the same props, each looping on the scene's clock. */
-export const chickOf = (state: State) => {
+/** The Blip the explainer shows for a state: the same props, each looping on the scene's clock. */
+export const blipOf = (state: State) => {
   const p = propsOf(state);
 
-  return chick({
+  return blip({
     body: repeated(p.body),
     stretch: repeated(p.stretch),
     glow: repeated(p.glow),
@@ -209,8 +209,8 @@ const fileMotion = motion({ opacity: 0, y: DRIFT })
   .to({ opacity: 0, y: -DRIFT }, 0.3, ease.out)
   .set({ y: DRIFT });
 
-/** Each state's chick is on from its edit until the next, and swaps at the hops' rest. The last gives way to the first as the code returns. */
-const chicks = states.map((state, i) => {
+/** Each state's blip is on from its edit until the next, and swaps at the hops' rest. The last gives way to the first as the code returns. */
+const blips = states.map((state, i) => {
   const from = i === 0 ? 0 : EDIT[i - 1]!;
   const to = i === states.length - 1 ? BACK : EDIT[i]!;
 
@@ -220,11 +220,11 @@ const chicks = states.map((state, i) => {
   on = on.at(to).set({ opacity: 0 });
   if (i === 0) on = on.at(BACK).set({ opacity: 1 });
 
-  return <g animation={on}>{chickOf(state)}</g>;
+  return <g animation={on}>{blipOf(state)}</g>;
 });
 
 const SCALE = 1.9;
-/** The chick's whole travel, from the flip's top to the feet, is about y 0 to 268 of the scene, and a flip reaches 82 either side of its middle. It centers on the code block's middle, in the space the code leaves, with the right margin the code has on the left. */
+/** Blip's whole travel, from the flip's top to the feet, is about y 0 to 268 of the scene, and a flip reaches 82 either side of its middle. It centers on the code block's middle, in the space the code leaves, with the right margin the code has on the left. */
 const picture = { x: 940 - 104 * SCALE, y: H / 2 - 134 * SCALE };
 
 export default function build(): string {
@@ -233,15 +233,15 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "Explainer",
-      desc: "A short svjeez scene makes a chick hop. Five edits, each one line of code, add squash and stretch, a flashing bulb, darting eyes, kicking feet and a flip, and the chick does each at once. The scene compiles to one animated SVG with no JavaScript.",
+      title: "Blip",
+      desc: "A short svjeez scene makes Blip, the svjeez mascot, hop. Each line of code changes what Blip does: five edits add squash and stretch, a flashing bulb, darting eyes, kicking feet and a flip, and Blip does each at once. The scene compiles to one animated SVG with no JavaScript.",
       reducedMotion: { at: 16 },
       css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
     },
     <>
       <rect width={W} height={H} fill={theme.base00} />
 
-      <g transform={`translate(${picture.x} ${picture.y}) scale(${SCALE})`}>{chicks}</g>
+      <g transform={`translate(${picture.x} ${picture.y}) scale(${SCALE})`}>{blips}</g>
 
       {states.slice(1).map((state, i) => bar(state, EDIT[i]!))}
       {[...rows.keys()].map(lineOf)}
