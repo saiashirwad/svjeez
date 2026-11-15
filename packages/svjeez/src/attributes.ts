@@ -90,6 +90,7 @@ const PRIMITIVE = {
 const GRADIENT = {
   gradientUnits: attr<Units>("gradientUnits"),
   gradientTransform: attr<string>("gradientTransform"),
+  spreadMethod: attr<"pad" | "reflect" | "repeat">("spreadMethod"),
 } as const;
 
 const ELEMENTS = {

@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import type { Editor, Value } from "@svjeez/live";
 import { ChoiceControl } from "./ChoiceControl.tsx";
 import { ColorControl } from "./ColorControl.tsx";

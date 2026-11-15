@@ -12,8 +12,8 @@ import {
   type Color,
 } from "svjeez";
 import { systemLight } from "svjeez";
-import { mono } from "../style";
-import { CHICK, GROUND, chick } from "./lib/chick";
+import { mono } from "../../style";
+import { CHICK, GROUND, chick } from "./chick";
 
 // Link-preview cards for the site, one per page, each starring the chick doing that page's job. Every card is a still
 // svjeez scene at 1200 by 630 in the site's default palette: a white background, the title in big type on the left, a hand-lettered aside, and

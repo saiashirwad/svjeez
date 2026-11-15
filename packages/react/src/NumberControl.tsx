@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import { arrowNumber, scrubbing, type Editor, type ValueOf } from "@svjeez/live";
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useEditorState } from "./editor.ts";

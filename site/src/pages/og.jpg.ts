@@ -1,7 +1,7 @@
 // The site's default link-preview card, kept at /og.jpg for links shared before each page had its own: the home card.
 import type { APIRoute } from "astro";
 import { renderFrames } from "svjeez/frames";
-import { card } from "@examples/site/og.tsx";
+import { card } from "@examples/site/lib/og.tsx";
 import { close, encode } from "@svjeez/vite/encode";
 
 export const GET: APIRoute = async () => {

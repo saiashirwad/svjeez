@@ -13,7 +13,15 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["bun"],
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "paths": {
+      "svjeez": ["../svjeez/src/index.ts"],
+      "svjeez/jsx-runtime": ["../svjeez/src/jsx-runtime.ts"],
+      "svjeez/jsx-dev-runtime": ["../svjeez/src/jsx-dev-runtime.ts"],
+      "svjeez/page": ["../svjeez/src/page.ts"],
+      "svjeez/params": ["../svjeez/src/params.ts"],
+      "svjeez/frames": ["../svjeez/src/frames.ts"]
+    }
   },
   "include": ["src", "test"],
   "exclude": ["test/consumer"]

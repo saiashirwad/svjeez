@@ -99,9 +99,27 @@ const download = async (family: string, weight: number, style: FontStyle): Promi
   return new Uint8Array(await file.arrayBuffer());
 };
 
-const bytesOf = async (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
-  const path = join(cacheDir(), `${slug(family)}-${weight}-${style}.ttf`);
+// Scenes load their fonts side by side, so one process often asks for the same file twice before either lands.
+const pending = new Map<string, Promise<Uint8Array>>();
 
+const bytesOf = (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
+  const path = join(cacheDir(), `${slug(family)}-${weight}-${style}.ttf`);
+  let bytes = pending.get(path);
+
+  if (!bytes) {
+    bytes = load(path, family, weight, style).finally(() => pending.delete(path));
+    pending.set(path, bytes);
+  }
+
+  return bytes;
+};
+
+const load = async (
+  path: string,
+  family: string,
+  weight: number,
+  style: FontStyle,
+): Promise<Uint8Array> => {
   try {
     const cached = await readFile(path);
 

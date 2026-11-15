@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import {
   arrowNumber,
   following,

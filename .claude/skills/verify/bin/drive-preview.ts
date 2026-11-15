@@ -28,6 +28,21 @@ await page.waitForFunction(
   () => document.querySelector("#stage svg") || document.querySelector("#error")?.textContent,
 );
 
+// A scene wider than the window pushes the controls off screen, so the window grows to fit the page.
+// The body centers its content, so what spills left isn't in scrollWidth: measure the scene and controls instead.
+const fit = await page.evaluate(() => {
+  const parts = [...document.body.children].map((el) => ({
+    width: Math.max(el.scrollWidth, el.getBoundingClientRect().width),
+    height: el.getBoundingClientRect().height,
+  }));
+
+  return {
+    width: Math.ceil(Math.max(...parts.map((p) => p.width))) + 32,
+    height: Math.ceil(parts.reduce((sum, p) => sum + p.height + 16, 0)) + 32,
+  };
+});
+await page.setViewportSize({ width: Math.max(900, fit.width), height: Math.max(700, fit.height) });
+
 const error = (await page.locator("#error").textContent())?.trim() || null;
 const clock = () => page.locator("#clock").textContent();
 const result: Record<string, unknown> = { url, error };

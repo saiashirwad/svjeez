@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+/** @jsxRuntime automatic */
 import type { Editor, Value } from "@svjeez/live";
 import { Fragment, type KeyboardEvent, type ReactNode } from "react";
 import { Control } from "./Control.tsx";
