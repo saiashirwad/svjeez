@@ -1,9 +1,8 @@
-/** @jsxImportSource react */
 // Demos of the app's real components: what happens to each, as data. recordings() films them.
-import { click, demo, fill, hover, props, snap, wait } from "@svjeez/dom/react";
+import { click, demo, fill, hover, snap, wait } from "@svjeez/dom/react";
 import { PullRequest, SignIn } from "./ui.tsx";
 
-export const signIn = demo(<SignIn />, { width: 360 }, [
+export const signIn = demo(SignIn, { width: 360 }, ({ props }) => [
   snap("idle"),
   wait(0.5),
   fill("email", "sai@example.com"),
@@ -21,7 +20,7 @@ export const signIn = demo(<SignIn />, { width: 360 }, [
   wait(1.8),
 ]);
 
-export const pullRequest = demo(<PullRequest />, { width: 420 }, [
+export const pullRequest = demo(PullRequest, { width: 420 }, ({ props }) => [
   snap("open"),
   wait(1),
   click("auto"),

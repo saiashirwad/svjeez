@@ -1,5 +1,5 @@
 // Runs in the page the recorder opens, inside the app's own Vite build.
-import { cloneElement, type ReactElement } from "react";
+import { createElement } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import type { Demo } from "./react.ts";
@@ -12,14 +12,15 @@ declare global {
 
 export const mount = (demo: Demo, host: HTMLElement): void => {
   const root = createRoot(host);
-  let element: ReactElement = demo.element;
+  let props = demo.props as Record<string, unknown>;
+  const draw = () => flushSync(() => root.render(createElement(demo.component as never, props)));
 
-  flushSync(() => root.render(element));
+  draw();
 
   window.__svjeez = {
     props: async (patch) => {
-      element = cloneElement(element, patch);
-      flushSync(() => root.render(element));
+      props = { ...props, ...patch };
+      draw();
     },
   };
 

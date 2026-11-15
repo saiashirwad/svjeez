@@ -23,7 +23,7 @@ const ROUTE = "/__svjeez/demo";
 const MOUNT = fileURLToPath(new URL("./react-mount.ts", import.meta.url));
 
 const page = (file: string, name: string, demo: Demo) => {
-  const width = demo.options.width === undefined ? "display:inline-block" : `width:${demo.options.width}px`;
+  const width = demo.layout.width === undefined ? "display:inline-block" : `width:${demo.layout.width}px`;
 
   return `<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:none">
 <div id="svjeez-demo" style="${width}"></div>
@@ -85,7 +85,7 @@ const sources = async (server: ViteDevServer, file: string): Promise<string> => 
 export const recordings = async <M extends Record<string, unknown>>(
   file: string,
   { cache, vite: config = {}, inputs, ...options }: RecordingsOptions,
-): Promise<{ [K in keyof M as M[K] extends Demo ? K : never]: Step[] }> => {
+): Promise<{ [K in keyof M as M[K] extends { readonly kind: "svjeez-demo" } ? K : never]: Step[] }> => {
   const { createServer, mergeConfig } = await import("vite");
   const root = config.root ?? fileURLToPath(new URL(".", `file://${file}`));
   let demos: Record<string, Demo> = {};
@@ -128,10 +128,10 @@ export const recordings = async <M extends Record<string, unknown>>(
               url: `${ROUTE}?name=${encodeURIComponent(name)}`,
               root: "#svjeez-demo > *",
               ready: "#svjeez-demo[data-ready] > *",
-              width: (demo.options.width ?? 800) + 2 * (demo.options.pad ?? 16) + 64,
+              width: (demo.layout.width ?? 800) + 2 * (demo.layout.pad ?? 16) + 64,
               height: 1000,
-              pad: demo.options.pad ?? 16,
-              parts: demo.options.parts,
+              pad: demo.layout.pad ?? 16,
+              parts: demo.layout.parts,
             },
             demo.flow,
           );

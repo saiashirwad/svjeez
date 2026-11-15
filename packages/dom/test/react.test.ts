@@ -34,7 +34,7 @@ test(
         schemes: "light",
       });
 
-      expect(Object.keys(demos)).toEqual(["counter"]);
+      expect(Object.keys(demos).sort()).toEqual(["counter", "labelled"]);
       expect(states(demos.counter).map((s) => texts(s).join(""))).toEqual(["Count:0", "Count:1", "Total:1"]);
     } finally {
       await rm(dir, { recursive: true, force: true });

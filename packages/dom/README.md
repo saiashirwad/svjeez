@@ -48,10 +48,10 @@ Film your app's real components, not markup copied out of them. A `.demo.tsx` fi
 
 ```tsx
 // SignIn.demo.tsx
-import { demo, fill, hover, props, snap, wait } from "@svjeez/dom/react";
+import { demo, fill, hover, snap, wait } from "@svjeez/dom/react";
 import { SignIn } from "./SignIn.tsx";
 
-export const signIn = demo(<SignIn />, { width: 360 }, [
+export const signIn = demo(SignIn, { width: 360 }, ({ props }) => [
   snap("idle"),
   fill("email", "sai@example.com"), snap({ over: 0.9 }),   // the component's own state
   hover("submit"), snap({ over: 0.15 }),
@@ -71,7 +71,7 @@ const demos = await recordings<typeof import("./SignIn.demo.tsx")>(here("SignIn.
 <Dom states={demos.signIn} />;
 ```
 
-- `demo(element, { width, pad, parts }, flow)` takes any flow `dom.run` does, plus `props(patch)`, which re-renders the element with the patch merged over its props, as a parent would. Import the flow's words from `@svjeez/dom/react` in a demo file: it runs in the browser too.
+- `demo(Component, { props, width, pad, parts }, script)` starts the component with `props` (required when it has required props). `script({ props })` returns any flow `dom.run` takes; its `props(patch)` re-renders the component with the patch merged over its props, as a parent would, and is typed to the component: a wrong name or type doesn't compile. Patches cross into the page, so their values must be JSON. Import the flow's other words from `@svjeez/dom/react` in a demo file: it runs in the browser too.
 - `recordings(file, options)` starts a Vite dev server for the file's folder (its `vite.config`, merged with `options.vite`), records every demo the file exports, and resolves to their steps by export name. It needs `vite`, `react` and `react-dom`.
 - The recording is kept in `cache`. It is made again when a demo's flow changes, or any file the demo file imports, however deep.
 - `examples/demos` films a shadcn sign-in form and a pull request card this way.
