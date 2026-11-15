@@ -12,28 +12,16 @@ import {
   code,
   morph,
   timeline,
-  tint,
   appWindow,
   type CodePiece,
   type CodeRun,
   type CodeTokens,
 } from "svjeez";
 
-import { css, mono, theme } from "../style";
+import { color, geist, HEIGHT, MARGIN, mono, css, size, stroke, theme, WIDTH } from "../gallery-style";
 
-const W = 1200;
-const H = 550;
-
-const C = {
-  bg: theme.base00,
-  head: theme.base06,
-  body: theme.base04,
-  accent: tint(theme, "fn"),
-  dim: theme.base03,
-} as const;
-
-const tl = timeline({ setup: 4.5, problem: 5, refactor: 5, result: 6, rewind: 1.4 }, { gap: 0.6 });
-const slides = ["setup", "problem", "refactor", "result"] as const;
+const tl = timeline({ write: 3.5, timing: 4, css: 5, result: 4.5, rewind: 1.2 }, { gap: 0.4 });
+const slides = ["write", "timing", "css", "result"] as const;
 
 const kw = (text: string): CodeRun => ["keyword", text];
 const fn = (text: string, id?: string): CodeRun => ["fn", text, id];
@@ -42,160 +30,124 @@ const str = (text: string): CodeRun => ["string", text];
 const num = (text: string, id?: string): CodeRun => ["number", text, id];
 const tag = (text: string): CodeRun => ["tag", text];
 const v = (text: string, id?: string): CodeRun => ["plain", text, id];
+const note = (text: string): CodeRun => ["comment", text];
 
-const head = [kw("function"), " ", fn("Counter"), p("() {")];
-const open = ["  ", kw("return"), p(" (")];
-const label = ["      ", p("{"), "count", p("}")];
-const close = [["    ", p("</"), tag("button"), p(">")], ["  ", p(");")], [p("}")]];
-
-const state = (...rest: CodePiece[]) => [
-  "  ",
-  kw("const"),
-  p(" ["),
-  "count",
-  p(", "),
-  ...rest,
-  p(");"),
-];
-
-const button = (...rest: CodePiece[]) => [
-  "    ",
-  p("<"),
-  tag("button"),
-  " onClick",
-  p("={() => "),
-  ...rest,
-  p("}>"),
-];
-
-const before: CodeTokens = [
-  head,
-  state(v("setCount", "setter"), p("] = "), fn("useState", "hook"), p("("), num("0")),
+// The scene, exactly as the CSS beside it was rendered from it. examples/tests checks that the two agree.
+const scene: CodeTokens = [
+  [kw("import"), p(" { "), v("enter"), p(", "), v("render"), p(" } "), kw("from"), " ", str('"svjeez"'), p(";")],
   [],
-  open,
-  button(
-    fn("setCount", "rule"),
-    p("(", "rule"),
-    v("count", "rule"),
-    p(" + ", "rule"),
-    num("1", "rule"),
-    p(")", "rule"),
-  ),
-  label,
-  ...close,
-];
-
-const after: CodeTokens = [
-  head,
-  state(
-    v("dispatch", "setter"),
-    p("] = "),
-    fn("useReducer", "hook"),
-    p("("),
-    "reducer",
-    p(", "),
-    num("0"),
-  ),
-  [],
-  open,
-  button(fn("dispatch", "send"), p("(", "send"), str('"inc"'), p(")", "send")),
-  label,
-  ...close,
-  [],
-  [kw("function"), " ", fn("reducer", "def"), p("("), "count", p(","), " action", p(") {")],
+  [kw("const"), " svg ", p("= "), fn("render"), p("(")],
+  ["  ", p("{ "), "width", p(": "), num("320"), p(", "), "height", p(": "), num("180"), p(", "), "duration", p(": "), num("2"), p(" },")],
+  ["  ", p("<"), tag("rect")],
+  ["    x", p("={"), num("120"), p("} "), "y", p("={"), num("50"), p("} "), "width", p("={"), num("80"), p("} "), "height", p("={"), num("80"), p("} "), "rx", p("={"), num("12"), p("}")],
   [
-    "  ",
-    kw("return"),
-    " action ",
-    p("==="),
-    " ",
-    str('"inc"'),
-    p(" ? "),
-    "count ",
-    p("+"),
-    " ",
-    num("1"),
-    p(" : "),
-    "count",
-    p(";"),
+    "    animation",
+    p("={"),
+    fn("enter"),
+    p("("),
+    p("{ ", "timing"),
+    v("at", "timing"),
+    p(": ", "timing"),
+    num("0.5", "timing"),
+    p(", ", "timing"),
+    v("over", "timing"),
+    p(": ", "timing"),
+    num("1", "timing"),
+    p(" }", "timing"),
+    p(", { "),
+    "x",
+    p(": "),
+    num("-120"),
+    p(" })}"),
   ],
-  [p("}")],
+  ["  ", p("/>,")],
+  [p(");")],
 ];
 
-const frame = rect(40, 40, 700, 470);
-const editor = appWindow(frame, { theme, title: "Counter.tsx" });
+// What render() writes for it: the keyframes and the rule that plays them, with the whitespace added.
+const keyframes: CodeTokens = [
+  [fn(".a"), p(" {")],
+  ["  animation-duration", p(": "), num("2s"), p(";")],
+  ["  animation-iteration-count", p(": "), ["constant", "infinite"], p(";")],
+  ["  animation-timing-function", p(": "), fn("cubic-bezier"), p("("), num(".23"), p(","), num("1"), p(","), num(".32"), p(","), num("1"), p(");")],
+  [p("}")],
+  [kw("@keyframes"), " ", fn("k1"), p(" {")],
+  ["  ", num("0%"), p(", "), num("25%"), p(" { "), "translate", p(": "), num("-120px 0px"), p(" }")],
+  ["  ", num("75%"), p(", "), num("100%"), p(" { "), "translate", p(": "), num("0px 0px"), p(" }")],
+  [p("}")],
+  [fn(".m1"), p(" { "), "animation-name", p(": "), "k1", p(" }")],
+];
+
+const page: CodeTokens = [
+  [p("<"), tag("img"), " src", p("="), str('"scene.svg"'), " alt", p("="), str('"A square slides in"'), p(" />")],
+  [],
+  [note("<!-- scene.svg has no script in it -->")],
+];
+
+const frame = rect(MARGIN, 95, 592, 350);
+const editor = appWindow(frame, { theme, title: "scene.tsx" });
 
 const settings = {
-  x: 104,
+  x: frame.x + 64,
   y: editor.body.y + 28,
-  fontSize: 16,
+  fontSize: 15,
   lineHeight: 1.75,
   theme,
   font: mono,
 };
 
-const one = code(before, settings);
-const two = code(after, settings);
-const m = morph([one, two, one], { at: [tl.refactor.at, tl.rewind.at], over: 0.9, gutter: true });
+const one = code(scene, settings);
+const two = code(keyframes, settings);
+const three = code(page, settings);
+const m = morph([one, two, three, one], {
+  at: [tl.css.at, tl.result.at, tl.rewind.at],
+  over: 0.9,
+  gutter: true,
+});
 
-const panel = { x: 792, w: 360 };
+const panel = { x: frame.x + frame.w + 32, w: 240 };
 
-const copy: Record<(typeof slides)[number], { kicker: string; head: string[]; body: string[] }> = {
-  setup: {
-    kicker: "01  THE SETUP",
-    head: ["One piece of state"],
-    body: ["useState hands the counter a value", "and a setter to change it."],
+const copy: Record<(typeof slides)[number], { head: string[]; body: string[] }> = {
+  write: {
+    head: ["A shape and", "a motion"],
+    body: ["enter() slides the square", "in from 120px to the left."],
   },
-  problem: {
-    kicker: "02  THE PROBLEM",
-    head: ["The rule hides", "in a handler"],
-    body: ["How count changes is written inline.", "Every new button has to repeat it."],
+  timing: {
+    head: ["The timing is", "one object"],
+    body: ["Start at 0.5s and take 1s,", "on a clock 2s long."],
   },
-  refactor: {
-    kicker: "03  THE MOVE",
-    head: ["Lift the rule", "into a reducer"],
-    body: ["useReducer takes a pure function", "that owns every state change."],
+  css: {
+    head: ["It compiles to", "CSS keyframes"],
+    body: ["0.5s of 2s is 25%.", "1.5s of 2s is 75%.", "The browser does the rest."],
   },
   result: {
-    kicker: "04  THE RESULT",
-    head: ["Handlers send intent"],
-    body: ['The button dispatches "inc".', "The reducer decides what it means,", "in one place."],
+    head: ["One SVG file,", "no JavaScript"],
+    body: ["It plays inside an img tag.", "Nothing runs in the viewer's", "browser."],
   },
 };
 
 const slide = (name: (typeof slides)[number]) => {
   const { at, over } = tl[name];
-  const fade = 0.45;
-  const { kicker, head, body } = copy[name];
-  const headTop = 228;
-  const bodyTop = headTop + head.length * 36 + 22;
+  const { head, body } = copy[name];
+  const headTop = frame.y + 110;
+  const bodyTop = headTop + head.length * 32 + 12;
 
   return (
     <g
-      animation={motion({ opacity: 0, y: 10 })
+      fontFamily={geist}
+      animation={motion({ opacity: 0, y: 8 })
         .at(at)
-        .to({ opacity: 1, y: 0 }, fade)
+        .to({ opacity: 1, y: 0 }, 0.45)
         .at(at + over - 0.3)
         .to({ opacity: 0, y: -6 }, 0.3, ease.in)}
     >
-      <text x={panel.x} y={190} fontFamily={mono} fontSize={11} letterSpacing={2.2} fill={C.accent}>
-        {kicker}
-      </text>
       {head.map((line, i) => (
-        <text
-          x={panel.x}
-          y={headTop + i * 36}
-          class="sans"
-          fontSize={29}
-          fontWeight={600}
-          letterSpacing={-0.6}
-          fill={C.head}
-        >
+        <text x={panel.x} y={headTop + i * 32} fontSize={26} fontWeight={600} fill={color.ink}>
           {line}
         </text>
       ))}
       {body.map((line, i) => (
-        <text x={panel.x} y={bodyTop + i * 24} class="sans" fontSize={15.5} fill={C.body}>
+        <text x={panel.x} y={bodyTop + i * 22} fontSize={size.subtitle} fill={color.dim}>
           {line}
         </text>
       ))}
@@ -213,8 +165,8 @@ const progress = () => {
       {slides.map((_, i) => (
         <path
           d={`M${panel.x + i * (seg + gap)} ${y}h${seg}`}
-          stroke={theme.base02}
-          strokeWidth={2}
+          stroke={color.edge}
+          strokeWidth={stroke.accent}
           strokeLinecap="round"
         />
       ))}
@@ -223,11 +175,11 @@ const progress = () => {
           <path
             d={`M${panel.x + i * (seg + gap)} ${y}h${seg}`}
             fill="none"
-            stroke={C.accent}
-            strokeWidth={2}
+            stroke={color.accent}
+            strokeWidth={stroke.accent}
             strokeLinecap="round"
             animation={draw(
-              { at: tl[name].at, over: tl[name].over + (i < slides.length - 1 ? 0.6 : 0) },
+              { at: tl[name].at, over: tl[name].over + (i < slides.length - 1 ? 0.4 : 0) },
               ease.linear,
             )}
           />
@@ -238,86 +190,52 @@ const progress = () => {
 };
 
 export default function build(): string {
-  const rule = one.get("rule");
+  const timing = one.get("timing");
+  const body = one.lines(5, 8);
 
   return render(
     {
-      width: W,
-      height: H,
-      title: "From state to reducer",
-      desc: "A React counter moves its update rule out of a click handler and into a reducer.",
+      width: WIDTH,
+      height: HEIGHT,
+      title: "How a scene becomes an SVG",
+      desc: "A short svjeez scene in TSX moves a square in with enter({ at, over }). The timing line is highlighted, then the scene turns into the CSS keyframes it compiles to, then into an img tag that plays the one self-contained SVG with no JavaScript.",
       duration: tl.duration,
       reducedMotion: { at: tl.result.at + 2 },
-      css: [
-        css,
-        ".sans,.note text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}",
-      ].join("\n"),
+      css,
     },
     <>
-      <rect width={W} height={H} fill={C.bg} />
+      <rect width={WIDTH} height={HEIGHT} fill={color.bg} />
 
       <g fontFamily={mono}>{editor.node}</g>
 
       <Focus
-        stops={[
-          { show: tl.problem, target: rect(frame.x, one.lines(5).y, frame.w, one.lines(5).h) },
-        ]}
+        stops={[{ show: tl.timing, target: rect(frame.x, timing.y, frame.w, timing.h) }]}
         dim={0.28}
       >
         <Marker
-          color={C.accent}
+          color={color.accent}
           stops={[
-            { show: tl.setup, target: one.lines(2).pad(5) },
-            { show: tl.problem, target: rule.pad(4) },
-            { show: tl.refactor, target: two.find("useReducer(reducer, 0)").pad(4) },
-            { show: tl.result, target: two.get("send").pad(4) },
-            { show: tl.rewind, target: one.lines(2).pad(5) },
+            { show: tl.write, target: body.pad(5) },
+            { show: tl.timing, target: timing.pad(4) },
+            { show: tl.css, target: two.lines(7, 8).pad(5) },
+            { show: tl.result, target: three.lines(1).pad(5) },
+            { show: tl.rewind, target: body.pad(5) },
           ]}
         />
         {m.node}
       </Focus>
 
-      <g class="note">
-        <Underline
-          target={one.find("count", 1)}
-          show={{ at: tl.setup.at + 0.8, over: tl.setup.over - 0.8 }}
-          color={C.accent}
-        />
-        <Underline
-          target={one.find("setCount", 1)}
-          show={{ at: tl.setup.at + 1.4, over: tl.setup.over - 1.4 }}
-          color={C.accent}
-        />
-        <Arrow
-          from={rule.pad(4).bottom}
-          to={{ x: panel.x - 16, y: 317 }}
-          bend={0.22}
-          show={tl.problem}
-          color={C.accent}
-        />
-        <Underline target={two.find("useReducer")} show={tl.refactor} color={C.accent} />
+      <g fontFamily={geist}>
         <Brace
-          target={two.lines(11, 13)}
+          target={two.lines(7, 8)}
           side="right"
-          label="the rule"
-          show={tl.result}
-          color={C.accent}
+          label="25% to 75%"
+          show={tl.css}
+          color={color.accent}
         />
-        <Arrow
-          from={two.get("send").bottom}
-          to={two.get("def").top}
-          bend={0.35}
-          show={tl.result}
-          color={C.accent}
-        />
+        <Underline target={three.find('"scene.svg"')} show={tl.result} color={color.accent} />
       </g>
 
-      <text x={panel.x} y={98} fontFamily={mono} fontSize={11} letterSpacing={2.2} fill={C.dim}>
-        REACT · REFACTOR
-      </text>
-      <text x={panel.x} y={124} class="sans" fontSize={15} fill={C.body}>
-        useState → useReducer
-      </text>
       {slides.map(slide)}
       {progress()}
     </>,
