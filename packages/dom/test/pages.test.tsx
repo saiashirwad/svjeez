@@ -206,4 +206,14 @@ describe("real pages", () => {
 
     expect(svg).toMatch(/textLength="[\d.]+"/);
   });
+
+  test("a block inside an inline box off the frame is still read", async () => {
+    const state = await draw(
+      '<div style="height:50px;width:200px"><div style="height:60px"></div><span>x<div style="position:absolute;top:0;left:0">seen</div></span></div>',
+      "",
+      0,
+    );
+
+    expect(runs(state.root).map((r) => r.text)).toContain("seen");
+  });
 });

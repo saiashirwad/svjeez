@@ -1019,6 +1019,9 @@ export function walk({
     // A box with no width or height says nothing about where its fixed or overflowing content is.
     if (!r.width || !r.height || !outside(r)) return false;
 
+    // An inline box says nothing of where a block inside it (a <picture> around an <img>) lies.
+    if (getComputedStyle(el).display === "inline") return false;
+
     return !(el instanceof HTMLElement) || (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1) || el.clientWidth === 0;
   };
 
