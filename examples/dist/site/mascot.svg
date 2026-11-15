@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 208 208" width="208" height="208" role="img" aria-labelledby="t d">
-  <title id="t">svjeez chick</title>
-  <desc id="d">The yellow svjeez chick sits still, blinks, hops once with its antenna bulb wobbling, blinks twice and lights its bulb.</desc>
+  <title id="t">Blip</title>
+  <desc id="d">Blip, the svjeez mascot, sits still, blinks, hops once with its antenna bulb wobbling, blinks twice and lights its bulb.</desc>
   <style><![CDATA[
 .a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,90%,98.333%,100%{fill:#FFC21A}91.25%,93.333%{fill:#FFEC99}}

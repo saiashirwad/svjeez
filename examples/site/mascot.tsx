@@ -1,7 +1,7 @@
 import { ease, motion, render } from "svjeez";
-import { CHICK, chick } from "./lib/chick";
+import { BLIP, blip } from "./lib/blip";
 
-// The header's chick, alive. It sits exactly as the favicon draws it for most of a 12 second loop, blinks, hops once
+// Blip in the header, alive. It sits exactly as the favicon draws it for most of a 12 second loop, blinks, hops once
 // with its antenna bulb wobbling behind, blinks twice, and lights its bulb for a moment. Reduced motion holds frame 0,
 // which is the favicon.
 
@@ -22,11 +22,11 @@ const bulb = motion({ y: 0 })
   .to({ y: 3 }, 0.12, ease.in)
   .to({ y: 0 }, 0.45, ease.pop);
 
-const glow = motion({ fill: CHICK.yellow })
+const glow = motion({ fill: BLIP.yellow })
   .at(10.8)
   .to({ fill: "#FFEC99" }, 0.15)
   .wait(0.25)
-  .to({ fill: CHICK.yellow }, 0.6);
+  .to({ fill: BLIP.yellow }, 0.6);
 
 export default () =>
   render(
@@ -34,11 +34,11 @@ export default () =>
       width: 208,
       height: 208,
       duration: D,
-      title: "svjeez chick",
-      desc: "The yellow svjeez chick sits still, blinks, hops once with its antenna bulb wobbling, blinks twice and lights its bulb.",
+      title: "Blip",
+      desc: "Blip, the svjeez mascot, sits still, blinks, hops once with its antenna bulb wobbling, blinks twice and lights its bulb.",
       reducedMotion: { at: 0 },
     },
     <g transform="translate(104 104) scale(1.4) translate(-104 -95.5)">
-      {chick({ blinks: [2.6, 8.9, 9.25], body, bulb, glow })}
+      {blip({ blinks: [2.6, 8.9, 9.25], body, bulb, glow })}
     </g>,
   );

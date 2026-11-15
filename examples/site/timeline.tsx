@@ -2,11 +2,11 @@ import { ease, enter, motion, render, Marker, code } from "svjeez";
 
 import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./lib/kit";
-import { GROUND, chick } from "./lib/chick";
+import { GROUND, blip } from "./lib/blip";
 import { mono, theme } from "../style";
 
-// A motion() chain on the left, the same chain drawn as tracks on the right, and the svjeez chick obeying it.
-// `tall` stacks the three for a phone: the chain, the chick, then the tracks.
+// A motion() chain on the left, the same chain drawn as tracks on the right, and Blip obeying it.
+// `tall` stacks the three for a phone: the chain, Blip, then the tracks.
 const BAR = 40;
 
 const shown = `motion({ opacity: 0, y: 40 })
@@ -91,7 +91,7 @@ export const make = (tall = false): string => {
       height: H,
       duration: D,
       title: "Motions on a timeline",
-      desc: "A motion chain types out. Beside it the same chain is drawn as one track per channel, a playhead sweeps across them, and the svjeez chick fades in, drops into place, grows and tilts its head exactly as the chain says.",
+      desc: "A motion chain types out. Beside it the same chain is drawn as one track per channel, a playhead sweeps across them, and Blip fades in, drops into place, grows and tilts its head exactly as the chain says.",
       css: CSS,
       reducedMotion: { at: D - 1 },
     },
@@ -115,7 +115,7 @@ export const make = (tall = false): string => {
           <g
             transform={`translate(${panel.x + panel.w / 2} ${panel.y + panel.h / 2 + 34}) scale(0.48) translate(${-GROUND.x} ${-GROUND.y})`}
           >
-            {chick({ blinks: [T0 + 1.6, T0 + 3.7], feet: {} })}
+            {blip({ blinks: [T0 + 1.6, T0 + 3.7], feet: {} })}
           </g>
         </g>
         <g class="round" fontSize={11} fill={theme.base03}>

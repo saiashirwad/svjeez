@@ -1,7 +1,7 @@
 import { renderFrames } from "svjeez/frames";
 import mark from "../public/favicon.svg?raw";
 
-/** The chick favicon as a PNG, size by size. */
+/** The Blip favicon as a PNG, size by size. */
 export async function iconPng(size: number): Promise<Uint8Array> {
   const { frames } = await renderFrames(mark, {
     times: [0],

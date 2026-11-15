@@ -11,12 +11,12 @@ import {
   type TagChannels,
 } from "svjeez";
 
-// The chick from the site's favicon (site/public/favicon.svg), in the favicon's own coordinates: the body sits on y 162
+// Blip, from the site's favicon (site/public/favicon.svg), in the favicon's own coordinates: the body sits on y 162
 // and is centered on x 104, the antenna bulb on 104,38. Scenes place it with a transform and bring their own motions,
-// written on the clock around the chick, so a scene starts it with <Clip at> and never counts seconds inside it.
+// written on the clock around Blip, so a scene starts it with <Clip at> and never counts seconds inside it.
 // Feet are drawn only when a scene gives them motions.
 
-export const CHICK = {
+export const BLIP = {
   yellow: "#FFC21A",
   belly: "#F2A900",
   stem: "#E3A100",
@@ -50,10 +50,10 @@ const STEM: PathData = "M104 60V36";
 
 type Layers = Stack<TagChannels<"g">>;
 
-export interface ChickMotions {
-  /** Times each blink starts, on the clock around the chick. A blink takes a quarter of a second. */
+export interface BlipMotions {
+  /** Times each blink starts, on the clock around Blip. A blink takes a quarter of a second. */
   readonly blinks?: readonly number[];
-  /** Moves the whole chick: hops, walks and leans. */
+  /** Moves the whole blip: hops, walks and leans. */
   readonly body?: Layers;
   /** Breathes and crouches, scaling about the feet. */
   readonly squash?: Layers;
@@ -71,7 +71,7 @@ export interface ChickMotions {
   readonly cheek?: Color;
 }
 
-export const chick = ({
+export const blip = ({
   blinks = [],
   body,
   squash,
@@ -80,8 +80,8 @@ export const chick = ({
   bulb,
   glow,
   feet,
-  cheek = CHICK.cheek,
-}: ChickMotions = {}) => {
+  cheek = BLIP.cheek,
+}: BlipMotions = {}) => {
   // A blink swaps the open eye for a shut one, which costs a few bytes of keyframes where a morph costs a kilobyte.
   const open = blinks.reduce(
     (m, at) => m.at(at).to({ opacity: 0 }, 0.04).wait(0.12).to({ opacity: 1 }, 0.08),
@@ -96,17 +96,17 @@ export const chick = ({
   const eye = (cx: number) => (
     <>
       <g animation={blinks.length > 0 ? open : undefined}>
-        <ellipse cx={cx} cy={110} rx={7} ry={9} fill={CHICK.ink} />
+        <ellipse cx={cx} cy={110} rx={7} ry={9} fill={BLIP.ink} />
         <circle cx={cx + 2} cy={106} r={2.4} fill="#FFF" />
       </g>
       {blinks.length > 0 && (
-        <ellipse cx={cx} cy={112} rx={7.5} ry={1.6} fill={CHICK.ink} animation={shut} />
+        <ellipse cx={cx} cy={112} rx={7.5} ry={1.6} fill={BLIP.ink} animation={shut} />
       )}
     </>
   );
 
   const foot = (cx: number, layers?: Layers) => (
-    <ellipse cx={cx} cy={162} rx={12} ry={6} fill={CHICK.foot} animation={layers} />
+    <ellipse cx={cx} cy={162} rx={12} ry={6} fill={BLIP.foot} animation={layers} />
   );
 
   return (
@@ -119,15 +119,15 @@ export const chick = ({
               {foot(124, feet.right)}
             </>
           )}
-          <path d={STEM} stroke={CHICK.stem} strokeWidth={7} strokeLinecap="round" />
-          <circle cx={BULB.x} cy={BULB.y} r={9} fill={CHICK.yellow} animation={[bulb, glow]} />
+          <path d={STEM} stroke={BLIP.stem} strokeWidth={7} strokeLinecap="round" />
+          <circle cx={BULB.x} cy={BULB.y} r={9} fill={BLIP.yellow} animation={[bulb, glow]} />
           <path
             d="M38 150C38 94 68 60 104 60S170 94 170 150C170 158 165 162 157 162H51C43 162 38 158 38 150Z"
-            fill={CHICK.yellow}
+            fill={BLIP.yellow}
           />
           <path
             d="M38 150C38 158 43 162 51 162H157C165 162 170 158 170 150C170 146 170 143 169 140C160 148 150 150 104 150S48 148 39 140C38 143 38 146 38 150Z"
-            fill={CHICK.belly}
+            fill={BLIP.belly}
           />
           <ellipse cx={66} cy={124} rx={9} ry={6} fill={cheek} opacity={0.55} />
           <ellipse cx={142} cy={124} rx={9} ry={6} fill={cheek} opacity={0.55} />
@@ -135,7 +135,7 @@ export const chick = ({
           <path
             d="M97 124Q104 131 111 124"
             fill="none"
-            stroke={CHICK.ink}
+            stroke={BLIP.ink}
             strokeWidth={4.5}
             strokeLinecap="round"
           />
@@ -146,20 +146,20 @@ export const chick = ({
 };
 
 export interface Hop {
-  /** When the feet land, in seconds on the clock around the chick. */
+  /** When the feet land, in seconds on the clock around Blip. */
   readonly land: number;
-  /** How high the chick rises, in its own units. */
+  /** How high Blip rises, in its own units. */
   readonly height: number;
 }
 
 export interface Jumps {
-  /** The chick's rise and fall. */
+  /** Blip's rise and fall. */
   readonly body: Motion<"y">;
   /** The squash before the leap, the stretch in the air, and the squash on landing. */
   readonly stretch: Motion<typeof sx | typeof sy>;
   /** The bulb lags the body on its stem, then wobbles to rest after the landing. */
   readonly bulb: Motion<"y">;
-  /** The pad under the chick pressing down and springing back. */
+  /** The pad under Blip pressing down and springing back. */
   readonly press: Motion<"y">;
 }
 
@@ -169,7 +169,7 @@ export const hopTime = (height: number) =>
 
 /**
  * Hops, each landing at its own time: a crouch, a launch, a little air and a squashy landing with a rebound. A hop
- * starts and ends at rest, so a chick standing still can hand over to one that hops, and the hops must be at least
+ * starts and ends at rest, so Blip standing still can hand over to one that hops, and the hops must be at least
  * a second apart.
  */
 export const jumps = (hops: readonly Hop[]): Jumps => {

@@ -1,6 +1,6 @@
 import { google } from "@svjeez/fonts";
 import { Pivot, ease, enter, motion, strokeFont } from "svjeez";
-import { GROUND, chick, type ChickMotions } from "../site/lib/chick";
+import { GROUND, blip, type BlipMotions } from "../site/lib/blip";
 import { theme } from "../style";
 
 export const W = 1280;
@@ -59,14 +59,14 @@ export const Caption = ({
   </g>
 );
 
-/** The svjeez chick standing with its feet at x, y, drawn `size` times the favicon's size, with the motions it is given. */
-export const Chick = ({
+/** Blip standing with its feet at x, y, drawn `size` times the favicon's size, with the motions it is given. */
+export const Blip = ({
   x,
   y,
   size = 0.5,
   pop,
   ...motions
-}: { x: number; y: number; size?: number; pop?: number } & ChickMotions) => (
+}: { x: number; y: number; size?: number; pop?: number } & BlipMotions) => (
   <g transform={`translate(${x} ${y}) scale(${size}) translate(${-GROUND.x} ${-GROUND.y})`}>
     <Pivot
       origin={GROUND}
@@ -76,7 +76,7 @@ export const Chick = ({
           : motion({ scale: 0 }).at(pop).to({ scale: 1 }, 0.45, ease.pop)
       }
     >
-      {chick({ feet: {}, ...motions })}
+      {blip({ feet: {}, ...motions })}
     </Pivot>
   </g>
 );

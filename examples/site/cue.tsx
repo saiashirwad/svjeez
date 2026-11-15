@@ -11,10 +11,10 @@ import {
   tool,
 } from "svjeez";
 import { css, theme } from "../style";
-import { CHICK, GROUND, SQUASH, chick, jumps, waddle } from "./lib/chick";
+import { BLIP, GROUND, SQUASH, blip, jumps, waddle } from "./lib/blip";
 
-// The way down from the home page's hero to its editor. The chick plays on top, "play with svjeez" is hand-lettered
-// once under it. The chick: it waddles off, hops and spins,
+// The way down from the home page's hero to its editor. Blip plays on top, "play with svjeez" is hand-lettered
+// once under it. Blip: it waddles off, hops and spins,
 // waddles the other way, trips on nothing and picks itself up, hops again and waddles home, in an 8 second loop.
 
 const W = 420;
@@ -26,7 +26,7 @@ const HOME = { x: W / 2, y: 84 };
 const casual = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
 export const marker = tool.pen({ size: 3.4, seed: 7 });
 
-/** Px on the page in the chick's own units. */
+/** Px on the page in Blip's own units. */
 const u = (px: number) => px / S;
 
 const lengthOf = (d: string) => {
@@ -105,10 +105,10 @@ export default function build(): string {
     .at(7.6)
     .to({ x: 0, y: 0 }, 0.3);
 
-  const glow = motion({ fill: CHICK.yellow })
+  const glow = motion({ fill: BLIP.yellow })
     .at(2.3)
     .to({ fill: "#FFF3B0" }, 0.1)
-    .to({ fill: CHICK.yellow }, 0.5);
+    .to({ fill: BLIP.yellow }, 0.5);
 
   const travel = walks.map((w) => w.body[0]!);
   const steps = walks.flatMap((w) => w.body.slice(1));
@@ -119,7 +119,7 @@ export default function build(): string {
       height: H,
       duration: D,
       title: "Play with svjeez",
-      desc: "The words play with svjeez are handwritten while the yellow svjeez chick waddles, hops and spins, trips and picks itself up above them.",
+      desc: "The words play with svjeez are handwritten while Blip, the svjeez mascot, waddles, hops and spins, trips and picks itself up above them.",
       reducedMotion: { at: D - 0.01 },
       css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
     },
@@ -143,7 +143,7 @@ export default function build(): string {
           <g animation={hops.body}>
             <Pivot origin={{ x: GROUND.x, y: 110 }} animation={spin}>
               <Pivot origin={{ x: 44, y: GROUND.y + 4 }} animation={trip}>
-                {chick({
+                {blip({
                   blinks: [1.7, 5.4, 7.3],
                   body: steps,
                   stretch: hops.stretch,

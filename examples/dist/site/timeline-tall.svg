@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 358 504" width="358" height="504" role="img" aria-labelledby="t d">
   <title id="t">Motions on a timeline</title>
-  <desc id="d">A motion chain types out. Beside it the same chain is drawn as one track per channel, a playhead sweeps across them, and the svjeez chick fades in, drops into place, grows and tilts its head exactly as the chain says.</desc>
+  <desc id="d">A motion chain types out. Beside it the same chain is drawn as one track per channel, a playhead sweeps across them, and Blip fades in, drops into place, grows and tilts its head exactly as the chain says.</desc>
   <style><![CDATA[
 svg{--base00:#1E1E20;--base01:#2A2A2D;--base02:#3A3A3D;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}

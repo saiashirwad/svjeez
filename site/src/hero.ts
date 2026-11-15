@@ -23,11 +23,11 @@ export const hero = {
   cost: COST,
 };
 
-/** "play with svjeez", handwritten with the chick playing under it, on the way down to the editor. */
+/** "play with svjeez", handwritten with Blip playing under it, on the way down to the editor. */
 export const cueImage = live(cue);
 
-/** "watch the intro", handwritten with the chick playing projector, on the way to the intro reel. */
+/** "watch the intro", handwritten with Blip playing projector, on the way to the intro reel. */
 export const introCueImage = live(introCue);
 
-/** "browse examples", handwritten with the chick dealing out picture cards, on the way to the gallery. */
+/** "browse examples", handwritten with Blip dealing out picture cards, on the way to the gallery. */
 export const examplesCueImage = live(examplesCue);

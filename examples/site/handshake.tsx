@@ -2,9 +2,9 @@ import { css, ease, motion, Pivot, render, show, type Color } from "svjeez";
 import { sequence } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
-import { GROUND, SQUASH, chick, jumps } from "./lib/chick";
+import { GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// A sequence diagram on one side, and on the other the svjeez chick acting it out: it opens a README, asks a sleepy
+// A sequence diagram on one side, and on the other Blip acting it out: it opens a README, asks a sleepy
 // CDN cloud for hello.svg, catches the file as it drops, watches it play, and cheers. `tall` stacks the two.
 
 const BAR = 40;
@@ -217,7 +217,7 @@ const stage = () => {
 
       {sparks}
       <g transform={`translate(80 ${FLOOR}) scale(0.5) translate(${-GROUND.x} ${-GROUND.y})`}>
-        {chick({
+        {blip({
           blinks: [beat(0) + 0.6, beat(2) + 0.9, beat(4) + 0.9],
           body: hops.body,
           stretch: hops.stretch,
@@ -270,7 +270,7 @@ export const make = (tall = false): string => {
       height: H,
       duration: D,
       title: "A sequence diagram, acted out",
-      desc: "A sequence diagram plays message by message while the svjeez chick acts it out beside it: it opens a README, sends GET hello.svg up to a sleepy CDN cloud that wakes up, catches the file as it drops into the README, watches it play, and cheers.",
+      desc: "A sequence diagram plays message by message while Blip acts it out beside it: it opens a README, sends GET hello.svg up to a sleepy CDN cloud that wakes up, catches the file as it drops into the README, watches it play, and cheers.",
       css: css(Object.assign([CSS, ""], { raw: [CSS, ""] }), SQUASH),
       reducedMotion: { at: D - 1 },
     },

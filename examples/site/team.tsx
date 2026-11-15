@@ -2,7 +2,7 @@ import { render, show } from "svjeez";
 import { tree } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
-import { GROUND, chick, hopAcross } from "./lib/chick";
+import { GROUND, blip, hopAcross } from "./lib/blip";
 
 const W = 504;
 const H = 340;
@@ -39,7 +39,7 @@ export default function build(): string {
       height: H,
       duration: D,
       title: "A tree that grows",
-      desc: "An agent team revealed level by level: a lead, three workers and two children, then the svjeez chick hops across the tree from node to node.",
+      desc: "An agent team revealed level by level: a lead, three workers and two children, then Blip hops across the tree from node to node.",
       css: CSS,
       reducedMotion: { at: D - 2 },
     },
@@ -59,7 +59,7 @@ export default function build(): string {
           ]}
         >
           <g transform={`scale(0.2) translate(${-GROUND.x} ${-GROUND.y})`}>
-            {chick({ blinks: [4.2], feet: {} })}
+            {blip({ blinks: [4.2], feet: {} })}
           </g>
         </g>
       </g>

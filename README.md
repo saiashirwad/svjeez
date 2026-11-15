@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://svjeez.texoport.in/intro"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/hype.svg" width="840" alt="The svjeez intro: a short reel hosted by the chick, showing scenes, code, diagrams, ink and charts, all in one animated SVG." /></a>
+  <a href="https://svjeez.texoport.in/intro"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/hype.svg" width="840" alt="The svjeez intro: a short reel hosted by Blip, showing scenes, code, diagrams, ink and charts, all in one animated SVG." /></a>
 </p>
 
 <p align="center">

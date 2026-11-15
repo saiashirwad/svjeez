@@ -16,16 +16,16 @@ import {
 } from "svjeez";
 import { css as codeCss, mono, theme } from "../style";
 import { chrome } from "./lib/kit";
-import { CHICK, GROUND, SQUASH, chick, jumps } from "./lib/chick";
+import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// The home page's hero. A scene's source fills in line by line, and the chick hops down it like the ball over karaoke
+// The home page's hero. A scene's source fills in line by line, and Blip hops down it like the ball over karaoke
 // lyrics. Each word it lands on pops into the picture beside it as what it names: a sun (a moon at night), hills, a
-// kite and a cloud. The chick jumps into the picture it made, holds the kite string, and the loop starts over. A
+// kite and a cloud. Blip jumps into the picture it made, holds the kite string, and the loop starts over. A
 // selection marquee around the whole file says it is all one image.
 //
-// Flat shapes only, no outlines, to match the chick.
+// Flat shapes only, no outlines, to match Blip.
 
-/** The scene is drawn on a 960 by 420 page and shown cropped to the cards, with room above for the chick. */
+/** The scene is drawn on a 960 by 420 page and shown cropped to the cards, with room above for Blip. */
 const CROP = { x: 12, y: -44 };
 const W = 960 - 2 * CROP.x;
 const H = 408 - CROP.y;
@@ -69,8 +69,8 @@ const { vars, css: paint } = variables({
   },
 });
 
-const CORAL = CHICK.cheek;
-const YELLOW = CHICK.yellow;
+const CORAL = BLIP.cheek;
+const YELLOW = BLIP.yellow;
 const LIT = "#FFF3B0";
 
 /** The two cards: the source on the left, the picture on the right. */
@@ -97,7 +97,7 @@ const nightly = layout(SRC.replace("<Sun", "<Moon"));
 
 const SCHEME = `.night{display:none}@media (prefers-color-scheme:dark){.day{display:none}.night{display:inline}}`;
 
-/** The chick, drawn at this size, stands on a word's letters. */
+/** Blip, drawn at this size, stands on a word's letters. */
 const SIZE = 0.4;
 
 const stand = (word: { center: { x: number; y: number } }) => ({
@@ -105,7 +105,7 @@ const stand = (word: { center: { x: number; y: number } }) => ({
   y: word.center.y - 8,
 });
 
-// What each word the chick lands on turns into, and where it goes in the picture.
+// What each word Blip lands on turns into, and where it goes in the picture.
 const sky = {
   x: PICTURE.x + 1,
   y: PICTURE.y + HEADER,
@@ -118,7 +118,7 @@ const FLOOR = sky.y + sky.height;
 const HILL = `M${sky.x + R} ${FLOOR}Q${sky.x} ${FLOOR} ${sky.x} ${FLOOR - R}L${sky.x} ${FLOOR - 58}C${sky.x + 70} ${FLOOR - 100} ${sky.x + 150} ${FLOOR - 104} ${sky.x + 230} ${FLOOR - 70}C${sky.x + 300} ${FLOOR - 42} ${sky.x + 360} ${FLOOR - 50} ${sky.x + sky.width} ${FLOOR - 66}L${sky.x + sky.width} ${FLOOR - R}Q${sky.x + sky.width} ${FLOOR} ${sky.x + sky.width - R} ${FLOOR}Z`;
 const FAR = `M${sky.x} ${FLOOR - 40}C${sky.x + 120} ${FLOOR - 70} ${sky.x + 220} ${FLOOR - 130} ${sky.x + 330} ${FLOOR - 112}C${sky.x + 380} ${FLOOR - 104} ${sky.x + 400} ${FLOOR - 96} ${sky.x + sky.width} ${FLOOR - 92}L${sky.x + sky.width} ${FLOOR}L${sky.x} ${FLOOR}Z`;
 
-/** The top of the near hill, where the chick ends up. */
+/** The top of the near hill, where Blip ends up. */
 const SUMMIT = { x: sky.x + 150, y: FLOOR - 95 };
 
 const circle = (r: number) => `M${-r} 0A${r} ${r} 0 1 0 ${r} 0A${r} ${r} 0 1 0 ${-r} 0Z`;
@@ -166,8 +166,8 @@ export default function build(): string {
   const words = PIECES.map((p) => listing.find(p.word));
   const moon = nightly.find("Moon");
 
-  // The chick starts on the source card's top edge and lands on one word per line. Each line drops into the source
-  // just before the chick jumps for it.
+  // Blip starts on the source card's top edge and lands on one word per line. Each line drops into the source
+  // just before Blip jumps for it.
   const lands = [2.2, 3.6, 5.0, 6.4];
   const appear = lands.map((t) => t - 0.95);
   const start = { x: SOURCE.x + SOURCE.width - 60, y: SOURCE.y };
@@ -187,7 +187,7 @@ export default function build(): string {
     { land: finale + 3.5, height: 40 },
   ]);
 
-  // Between landings the chick travels in a straight line while its hop arcs it up and over.
+  // Between landings Blip travels in a straight line while its hop arcs it up and over.
   const travel = times.reduce(
     (m, land, i) => {
       const air =
@@ -231,7 +231,7 @@ export default function build(): string {
     motion({ x: 0, y: 2 }),
   );
 
-  // Each word pops into the picture where it belongs, a moment after the chick lands on it.
+  // Each word pops into the picture where it belongs, a moment after Blip lands on it.
   const popAt = (i: number) => lands[i]! + 0.12;
 
   const popIn = (i: number) =>
@@ -246,7 +246,7 @@ export default function build(): string {
 
   const fade = motion({ opacity: 1 }).at(OUT).to({ opacity: 0 }, 0.4, ease.in);
 
-  // A little burst of sparks under the chick's feet on every word.
+  // A little burst of sparks under Blip's feet on every word.
   const burstAt = lands.reduce(
     (m, t, i) => m.at(t).set({ x: spots[i]!.x, y: spots[i]!.y }),
     motion({ x: spots[0]!.x, y: spots[0]!.y }),
@@ -361,8 +361,8 @@ export default function build(): string {
       width: W,
       height: H,
       duration: D,
-      title: "A chick hops down a scene's source and builds its picture",
-      desc: "A few lines of svjeez source fill in one at a time. A chick hops down them word by word, and each word it lands on pops into the picture beside it as what it names: a sun, or a moon at night, hills, a kite and a cloud. The chick jumps onto the hill, holds the kite string, and everything clears for the next round.",
+      title: "Blip hops down a scene's source and builds its picture",
+      desc: "A few lines of svjeez source fill in one at a time. Blip hops down them word by word, and each word it lands on pops into the picture beside it as what it names: a sun, or a moon at night, hills, a kite and a cloud. Blip jumps onto the hill, holds the kite string, and everything clears for the next round.",
       reducedMotion: { at: finale + 0.6 },
       css: withText(codeCss + paint + SCHEME + ANTS, SQUASH),
     },
@@ -519,11 +519,11 @@ export default function build(): string {
           ))}
         </g>
 
-        {/* The chick. */}
+        {/* Blip. */}
         <g animation={travel}>
           <g transform={`scale(${SIZE}) translate(${-GROUND.x} ${-GROUND.y})`}>
             <Pivot origin={GROUND} animation={pop}>
-              {chick({
+              {blip({
                 blinks: [1.2, 4.6, finale + 0.9],
                 body: hops.body,
                 stretch: hops.stretch,
