@@ -31,6 +31,8 @@ export type SvgNode =
       readonly motions: readonly Motion[];
       /** Set by `<Once>`: every motion from here down plays the timeline one time. Never serialized. */
       readonly once?: boolean;
+      /** Attributes the still frame has instead of what is written, when a windowed SMIL animation needs the last value there. Never serialized. */
+      readonly still?: Readonly<Record<string, AttrValue>>;
     }
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }

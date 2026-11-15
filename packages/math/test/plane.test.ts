@@ -106,7 +106,11 @@ describe("plane", () => {
   test("a function step morphs the grid through d, with every key written in the same commands", () => {
     const square = base.applyFunction((x, y) => [x * x - y * y, 2 * x * y], { at: 1, over: 2 });
     const out = svg(square.css, square.grid);
-    const values = out.match(/<animate attributeName="d" values="([^"]*)"/)![1]!.split(";");
+
+    const values = out
+      .match(/<animate (?:id="[^"]*" )?attributeName="d" values="([^"]*)"/)![1]!
+      .split(";");
+
     const counts = new Set(values.map((d) => numbers(d).length));
     expect(counts.size).toBe(1);
     expect(values.at(-1)).not.toBe(values[0]);
@@ -122,7 +126,7 @@ describe("plane", () => {
     const out = svg(bent.css, bent.vector([0, 2]));
 
     const heads = out.match(
-      /<path d="[^"]*Z" fill="[^"]*" class="dm">\s*<animate attributeName="d" values="([^"]*)"/,
+      /<path d="[^"]*Z" fill="[^"]*" class="dm">\s*<animate (?:id="[^"]*" )?attributeName="d" values="([^"]*)"/,
     )![1]!;
 
     const sides = heads.split(";").map((d) => {

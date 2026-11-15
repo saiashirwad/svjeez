@@ -8,7 +8,8 @@
     </clipPath>
     <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.0363;0.04416;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w1" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="2.0772s;w1.begin+57.223s" dur="0.4498s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w1.begin+55.1456s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f1s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -16,7 +17,8 @@
     </filter>
     <filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.04329;0.05115;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w2" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="2.4772s;w2.begin+57.223s" dur="0.4498s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w2.begin+54.7456s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f2s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -69,7 +71,8 @@
     </clipPath>
     <filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.20899;0.21685;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w3" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="11.959s;w3.begin+57.223s" dur="0.4498s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w3.begin+45.2638s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f3s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -77,7 +80,8 @@
     </filter>
     <filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.21108;0.21895;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w4" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="12.0786s;w4.begin+57.223s" dur="0.4503s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w4.begin+45.1442s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f4s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -85,7 +89,8 @@
     </filter>
     <filter id="f5" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.26514;0.27213;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w5" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="15.172s;w5.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w5.begin+42.0507s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f5s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -96,7 +101,8 @@
     </clipPath>
     <filter id="f6" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.38747;0.39446;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w6" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="22.1721s;w6.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w6.begin+35.0507s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f6s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -104,7 +110,8 @@
     </filter>
     <filter id="f7" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.4731;0.48097;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w7" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="27.0721s;w7.begin+57.223s" dur="0.4503s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w7.begin+30.1507s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f7s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -130,7 +137,8 @@
     </clipPath>
     <filter id="f8" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.47485;0.48184;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w8" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="27.1722s;w8.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w8.begin+30.0505s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f8s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -144,7 +152,8 @@
     </clipPath>
     <filter id="f9" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.56572;0.57271;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w9" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="32.3721s;w9.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w9.begin+24.8507s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f9s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -155,7 +164,8 @@
     </clipPath>
     <filter id="f10" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.64611;0.6531;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w10" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="36.9722s;w10.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w10.begin+20.2506s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f10s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -283,7 +293,8 @@
     </mask>
     <filter id="f11" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.72824;0.73524;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w11" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="41.6719s;w11.begin+57.223s" dur="0.4006s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w11.begin+15.5509s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f11s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -291,7 +302,8 @@
     </filter>
     <filter id="f12" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.82221;0.83008;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w12" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="47.0491s;w12.begin+57.223s" dur="0.4503s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w12.begin+10.1736s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f12s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -299,7 +311,8 @@
     </filter>
     <filter id="f13" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.83444;0.84231;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w13" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="47.749s;w13.begin+57.223s" dur="0.4503s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w13.begin+9.4738s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f13s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -307,7 +320,8 @@
     </filter>
     <filter id="f14" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.84668;0.85454;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w14" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="48.4494s;w14.begin+57.223s" dur="0.4498s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w14.begin+8.7734s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f14s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -315,7 +329,8 @@
     </filter>
     <filter id="f15" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.90173;0.91046;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w15" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="51.5995s;w15.begin+57.223s" dur="0.4996s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w15.begin+5.6233s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f15s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -323,7 +338,8 @@
     </filter>
     <filter id="f16" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.90609;0.91308;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w16" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="51.849s;w16.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w16.begin+5.3738s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f16s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -334,7 +350,8 @@
     </clipPath>
     <filter id="f17" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.92835;0.93534;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w17" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.1228s;w17.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w17.begin+4.1s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f17s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -342,7 +359,8 @@
     </filter>
     <filter id="f18" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.9294;0.93639;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w18" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.1829s;w18.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w18.begin+4.0399s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f18s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -350,7 +368,8 @@
     </filter>
     <filter id="f19" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.93045;0.93744;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w19" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.2429s;w19.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w19.begin+3.9798s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f19s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -358,7 +377,8 @@
     </filter>
     <filter id="f20" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.9315;0.93849;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w20" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.303s;w20.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w20.begin+3.9198s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f20s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -366,7 +386,8 @@
     </filter>
     <filter id="f21" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.93254;0.93953;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w21" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.3625s;w21.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w21.begin+3.8602s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f21s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -374,7 +395,8 @@
     </filter>
     <filter id="f22" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.93359;0.94058;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w22" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.4226s;w22.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w22.begin+3.8002s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f22s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -382,7 +404,8 @@
     </filter>
     <filter id="f23" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.93464;0.94163;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w23" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.4827s;w23.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w23.begin+3.7401s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f23s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -390,7 +413,8 @@
     </filter>
     <filter id="f24" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.93569;0.94268;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w24" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.5428s;w24.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w24.begin+3.68s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f24s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -398,7 +422,8 @@
     </filter>
     <filter id="f25" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.93674;0.94373;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w25" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.6029s;w25.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w25.begin+3.6199s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f25s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -406,7 +431,8 @@
     </filter>
     <filter id="f26" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.93779;0.94478;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w26" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="53.663s;w26.begin+57.223s" dur="0.4s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w26.begin+3.5598s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f26s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -414,7 +440,8 @@
     </filter>
     <filter id="f27" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
       <feGaussianBlur stdDeviation="0">
-        <animate attributeName="stdDeviation" values="6;6;0;0" keyTimes="0;0.94757;0.95806;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="57.223s" repeatCount="indefinite"/>
+        <animate id="w27" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="54.2226s;w27.begin+57.223s" dur="0.6003s" fill="freeze" data-loop="57.223s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w27.begin+3.0002s" dur="0.001s" fill="freeze" data-loop="57.223s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f27s" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="720">
@@ -673,7 +700,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k129{0%,41.044%{translate:803.9px 191.6px}41.093%{translate:814px 191.6px}41.141%{translate:823.8px 192.1px}41.187%{translate:833.4px 193px}41.232%{translate:842.6px 194.2px}41.277%{translate:851.6px 195.9px}41.32%{translate:860.3px 198px}41.363%{translate:868.7px 200.5px}41.405%{translate:876.8px 203.4px}41.446%{translate:884.6px 206.7px}41.486%{translate:892.1px 210.5px}41.527%{translate:899.4px 214.6px}41.567%{translate:906.3px 219.2px}41.608%{translate:913px 224.1px}41.648%{translate:919.4px 229.5px}41.689%{translate:925.5px 235.3px}41.73%{translate:931.3px 241.5px}41.772%{translate:936.9px 248.1px}41.815%{translate:942.1px 255.1px}41.858%{translate:947.1px 262.5px}41.903%{translate:951.8px 270.4px}41.948%{translate:956.1px 278.6px}41.995%{translate:960.3px 287.3px}42.042%{translate:964.1px 296.3px}42.091%,100%{translate:967.6px 305.8px}}
 .m108{animation-name:k128,k129;animation-timing-function:steps(1),linear}
 @keyframes k130{0%,41.603%,100%{visibility:hidden}41.213%{visibility:visible}}
-@keyframes k131{0%,41.213%{translate:774.7px 194.5px}41.241%{translate:775.3px 188.7px}41.268%{translate:776px 183.3px}41.291%{translate:776.8px 178.5px}41.313%{translate:777.6px 174.1px}41.332%{translate:778.4px 170.3px}41.349%{translate:779.3px 166.9px}41.364%{translate:780.3px 164px}41.376%{translate:781.3px 161.7px}41.386%{translate:782.3px 159.8px}41.395%{translate:783.4px 158.5px}41.402%{translate:784.6px 157.6px}41.408%{translate:785.7px 157.2px}41.414%{translate:787px 157.4px}41.421%{translate:788.3px 158px}41.429%{translate:789.6px 159.1px}41.44%{translate:791px 160.7px}41.452%{translate:792.4px 162.8px}41.467%{translate:793.9px 165.5px}41.484%{translate:795.5px 168.6px}41.503%{translate:797.1px 172.2px}41.524%{translate:798.7px 176.3px}41.548%{translate:800.4px 180.9px}41.574%{translate:802.1px 186px}41.603%,100%{translate:803.9px 191.6px}}
+@keyframes k131{0%,41.213%{translate:774.7px 194.5px}41.268%{translate:776px 183.3px}41.332%{translate:778.4px 170.3px}41.349%{translate:779.3px 166.9px}41.364%{translate:780.3px 164px}41.386%{translate:782.3px 159.8px}41.395%{translate:783.4px 158.5px}41.402%{translate:784.6px 157.6px}41.408%{translate:785.7px 157.2px}41.414%{translate:787px 157.4px}41.421%{translate:788.3px 158px}41.429%{translate:789.6px 159.1px}41.44%{translate:791px 160.7px}41.467%{translate:793.9px 165.5px}41.503%{translate:797.1px 172.2px}41.548%{translate:800.4px 180.9px}41.603%,100%{translate:803.9px 191.6px}}
 .m109{animation-name:k130,k131;animation-timing-function:steps(1),linear}
 @keyframes k132{0%,44.497%,100%{visibility:hidden}41.491%{visibility:visible}}
 @keyframes k133{0%,41.491%{translate:1103.2px 239.7px}41.618%{translate:1077.7px 233.7px}41.745%{translate:1052.2px 228.2px}41.871%{translate:1026.7px 223.2px}41.997%{translate:1001.1px 218.7px}42.123%{translate:975.6px 214.7px}42.248%{translate:950.1px 211.2px}42.372%{translate:924.6px 208.2px}42.497%{translate:899px 205.7px}42.621%{translate:873.5px 203.7px}42.746%{translate:847.9px 202.2px}42.87%{translate:822.4px 201.2px}42.994%{translate:796.8px 200.7px}43.118%{translate:771.2px 200.6px}43.242%{translate:745.7px 201.1px}43.366%{translate:720.1px 202.1px}43.491%{translate:694.5px 203.6px}43.616%{translate:668.9px 205.6px}43.74%{translate:643.3px 208.1px}43.866%{translate:617.7px 211.1px}43.991%{translate:592.1px 214.6px}44.117%{translate:566.5px 218.6px}44.243%{translate:540.9px 223.1px}44.37%{translate:515.3px 228.1px}44.497%,100%{translate:489.7px 233.6px}}
@@ -688,7 +715,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k139{0%,42.057%{translate:1132.6px 441.8px}42.108%{translate:1129.4px 431.7px}42.158%{translate:1125.8px 422px}42.208%{translate:1122px 412.6px}42.255%{translate:1117.8px 403.7px}42.303%{translate:1113.3px 395.1px}42.348%{translate:1108.5px 387px}42.394%{translate:1103.4px 379.2px}42.438%{translate:1098px 371.8px}42.482%{translate:1092.2px 364.8px}42.526%{translate:1086.1px 358.1px}42.569%{translate:1079.7px 351.9px}42.613%{translate:1073px 346px}42.656%{translate:1066px 340.5px}42.699%{translate:1058.6px 335.5px}42.743%{translate:1050.9px 330.8px}42.787%{translate:1043px 326.4px}42.832%{translate:1034.6px 322.5px}42.877%{translate:1026px 319px}42.923%{translate:1017.1px 315.8px}42.97%{translate:1007.8px 313px}43.018%{translate:998.2px 310.6px}43.067%{translate:988.3px 308.6px}43.117%{translate:978.1px 307px}43.169%,100%{translate:967.6px 305.8px}}
 .m113{animation-name:k138,k139;animation-timing-function:steps(1),linear}
 @keyframes k140{0%,42.795%,100%{visibility:hidden}42.405%{visibility:visible}}
-@keyframes k141{0%,42.405%{translate:803.9px 191.6px}42.434%{translate:802.1px 186px}42.46%{translate:800.4px 180.9px}42.484%{translate:798.7px 176.3px}42.505%{translate:797.1px 172.2px}42.524%{translate:795.5px 168.6px}42.541%{translate:793.9px 165.5px}42.556%{translate:792.4px 162.8px}42.568%{translate:791px 160.7px}42.579%{translate:789.6px 159.1px}42.587%{translate:788.3px 158px}42.594%{translate:787px 157.4px}42.6%{translate:785.7px 157.2px}42.606%{translate:784.6px 157.6px}42.613%{translate:783.4px 158.5px}42.622%{translate:782.3px 159.8px}42.632%{translate:781.3px 161.7px}42.644%{translate:780.3px 164px}42.659%{translate:779.3px 166.9px}42.676%{translate:778.4px 170.3px}42.695%{translate:777.6px 174.1px}42.717%{translate:776.8px 178.5px}42.74%{translate:776px 183.3px}42.767%{translate:775.3px 188.7px}42.795%,100%{translate:774.7px 194.5px}}
+@keyframes k141{0%,42.405%{translate:803.9px 191.6px}42.46%{translate:800.4px 180.9px}42.505%{translate:797.1px 172.2px}42.541%{translate:793.9px 165.5px}42.568%{translate:791px 160.7px}42.579%{translate:789.6px 159.1px}42.587%{translate:788.3px 158px}42.594%{translate:787px 157.4px}42.6%{translate:785.7px 157.2px}42.606%{translate:784.6px 157.6px}42.613%{translate:783.4px 158.5px}42.622%{translate:782.3px 159.8px}42.644%{translate:780.3px 164px}42.659%{translate:779.3px 166.9px}42.695%{translate:777.6px 174.1px}42.74%{translate:776px 183.3px}42.795%,100%{translate:774.7px 194.5px}}
 .m114{animation-name:k140,k141;animation-timing-function:steps(1),linear}
 @keyframes k142{0%,45.472%,100%{visibility:hidden}42.466%{visibility:visible}}
 @keyframes k143{0%,42.466%{translate:489.7px 233.6px}42.593%{translate:515.3px 228.1px}42.72%{translate:540.9px 223.1px}42.846%{translate:566.5px 218.6px}42.972%{translate:592.1px 214.6px}43.097%{translate:617.7px 211.1px}43.223%{translate:643.3px 208.1px}43.347%{translate:668.9px 205.6px}43.472%{translate:694.5px 203.6px}43.597%{translate:720.1px 202.1px}43.721%{translate:745.7px 201.1px}43.845%{translate:771.2px 200.6px}43.969%{translate:796.8px 200.7px}44.093%{translate:822.4px 201.2px}44.217%{translate:847.9px 202.2px}44.342%{translate:873.5px 203.7px}44.466%{translate:899px 205.7px}44.591%{translate:924.6px 208.2px}44.715%{translate:950.1px 211.2px}44.84%{translate:975.6px 214.7px}44.966%{translate:1001.1px 218.7px}45.092%{translate:1026.7px 223.2px}45.218%{translate:1052.2px 228.2px}45.344%{translate:1077.7px 233.7px}45.472%,100%{translate:1103.2px 239.7px}}
@@ -718,13 +745,13 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k159{0%,44.35%{translate:1132.6px 441.8px}44.4%{translate:1137.1px 432.6px}44.448%{translate:1141px 423.4px}44.495%{translate:1144.5px 414.3px}44.542%{translate:1147.5px 405.2px}44.587%{translate:1150px 396.3px}44.631%{translate:1152px 387.4px}44.674%{translate:1153.5px 378.6px}44.717%{translate:1154.5px 369.8px}44.759%{translate:1155px 361.2px}44.801%{translate:1155px 352.6px}44.843%{translate:1154.5px 344px}44.884%{translate:1153.5px 335.6px}44.925%{translate:1152.1px 327.2px}44.967%{translate:1150.1px 318.9px}45.009%{translate:1147.6px 310.6px}45.051%{translate:1144.7px 302.5px}45.093%{translate:1141.2px 294.4px}45.137%{translate:1137.3px 286.3px}45.181%{translate:1132.8px 278.4px}45.226%{translate:1127.9px 270.5px}45.272%{translate:1122.5px 262.7px}45.32%{translate:1116.5px 255px}45.368%{translate:1110.1px 247.3px}45.418%,100%{translate:1103.2px 239.7px}}
 .m123{animation-name:k158,k159;animation-timing-function:steps(1),linear}
 @keyframes k160{0%,45.421%,100%{visibility:hidden}44.494%{visibility:visible}}
-@keyframes k161{0%,44.494%{translate:774.7px 194.5px}44.539%{translate:766.6px 190.1px}44.582%{translate:758.6px 186.2px}44.624%{translate:750.7px 182.8px}44.664%{translate:742.8px 179.9px}44.704%{translate:735.1px 177.5px}44.742%{translate:727.4px 175.6px}44.78%{translate:719.8px 174.1px}44.816%{translate:712.4px 173.2px}44.852%{translate:705px 172.8px}44.887%{translate:697.7px 172.8px}44.922%{translate:690.5px 173.3px}44.958%{translate:683.3px 174.4px}44.992%{translate:676.3px 175.9px}45.028%{translate:669.3px 177.9px}45.063%{translate:662.5px 180.4px}45.099%{translate:655.7px 183.4px}45.136%{translate:649px 186.9px}45.173%{translate:642.4px 190.9px}45.212%{translate:635.9px 195.4px}45.251%{translate:629.5px 200.3px}45.291%{translate:623.2px 205.8px}45.333%{translate:616.9px 211.7px}45.376%{translate:610.8px 218.2px}45.421%,100%{translate:604.7px 225.1px}}
+@keyframes k161{0%,44.494%{translate:774.7px 194.5px}44.539%{translate:766.6px 190.1px}44.582%{translate:758.6px 186.2px}44.624%{translate:750.7px 182.8px}44.664%{translate:742.8px 179.9px}44.704%{translate:735.1px 177.5px}44.742%{translate:727.4px 175.6px}44.78%{translate:719.8px 174.1px}44.816%{translate:712.4px 173.2px}44.852%{translate:705px 172.8px}44.887%{translate:697.7px 172.8px}44.922%{translate:690.5px 173.3px}44.958%{translate:683.3px 174.4px}44.992%{translate:676.3px 175.9px}45.028%{translate:669.3px 177.9px}45.063%{translate:662.5px 180.4px}45.099%{translate:655.7px 183.4px}45.136%{translate:649px 186.9px}45.173%{translate:642.4px 190.9px}45.212%{translate:635.9px 195.4px}45.251%{translate:629.5px 200.3px}45.291%{translate:623.2px 205.8px}45.333%{translate:616.9px 211.7px}45.421%,100%{translate:604.7px 225.1px}}
 .m124{animation-name:k160,k161;animation-timing-function:steps(1),linear}
 @keyframes k162{0%,47.842%,100%{visibility:hidden}44.837%{visibility:visible}}
 @keyframes k163{0%,44.837%{translate:1103.2px 239.7px}44.964%{translate:1077.7px 233.7px}45.091%{translate:1052.2px 228.2px}45.217%{translate:1026.7px 223.2px}45.343%{translate:1001.1px 218.7px}45.468%{translate:975.6px 214.7px}45.593%{translate:950.1px 211.2px}45.718%{translate:924.6px 208.2px}45.843%{translate:899px 205.7px}45.967%{translate:873.5px 203.7px}46.091%{translate:847.9px 202.2px}46.215%{translate:822.4px 201.2px}46.34%{translate:796.8px 200.7px}46.464%{translate:771.2px 200.6px}46.588%{translate:745.7px 201.1px}46.712%{translate:720.1px 202.1px}46.836%{translate:694.5px 203.6px}46.961%{translate:668.9px 205.6px}47.086%{translate:643.3px 208.1px}47.211%{translate:617.7px 211.1px}47.337%{translate:592.1px 214.6px}47.462%{translate:566.5px 218.6px}47.588%{translate:540.9px 223.1px}47.715%{translate:515.3px 228.1px}47.842%,100%{translate:489.7px 233.6px}}
 .m125{animation-name:k162,k163;animation-timing-function:steps(1),linear}
 @keyframes k164{0%,46.022%,100%{visibility:hidden}44.995%{visibility:visible}}
-@keyframes k165{0%,44.995%{translate:661.4px 411.7px}45.043%{translate:664.5px 402.3px}45.09%{translate:667.2px 393px}45.136%{translate:669.4px 383.8px}45.181%{translate:671.1px 374.8px}45.224%{translate:672.3px 365.9px}45.267%{translate:673.1px 357.2px}45.309%{translate:673.3px 348.6px}45.349%{translate:673.1px 340.2px}45.39%{translate:672.4px 331.9px}45.429%{translate:671.3px 323.8px}45.469%{translate:669.6px 315.8px}45.509%{translate:667.5px 307.9px}45.548%{translate:664.9px 300.2px}45.588%{translate:661.8px 292.7px}45.627%{translate:658.3px 285.3px}45.668%{translate:654.2px 278px}45.709%{translate:649.7px 270.9px}45.751%{translate:644.7px 263.9px}45.793%{translate:639.2px 257.1px}45.836%{translate:633.3px 250.4px}45.881%{translate:626.9px 243.8px}45.927%{translate:619.9px 237.5px}45.974%{translate:612.6px 231.2px}46.022%,100%{translate:604.7px 225.1px}}
+@keyframes k165{0%,44.995%{translate:661.4px 411.7px}45.043%{translate:664.5px 402.3px}45.09%{translate:667.2px 393px}45.136%{translate:669.4px 383.8px}45.181%{translate:671.1px 374.8px}45.224%{translate:672.3px 365.9px}45.267%{translate:673.1px 357.2px}45.309%{translate:673.3px 348.6px}45.349%{translate:673.1px 340.2px}45.39%{translate:672.4px 331.9px}45.429%{translate:671.3px 323.8px}45.469%{translate:669.6px 315.8px}45.509%{translate:667.5px 307.9px}45.548%{translate:664.9px 300.2px}45.588%{translate:661.8px 292.7px}45.627%{translate:658.3px 285.3px}45.668%{translate:654.2px 278px}45.709%{translate:649.7px 270.9px}45.751%{translate:644.7px 263.9px}45.793%{translate:639.2px 257.1px}45.836%{translate:633.3px 250.4px}45.881%{translate:626.9px 243.8px}45.974%{translate:612.6px 231.2px}46.022%,100%{translate:604.7px 225.1px}}
 .m126{animation-name:k164,k165;animation-timing-function:steps(1),linear}
 @keyframes k166{0%,46.339%,100%{visibility:hidden}45.227%{visibility:visible}}
 @keyframes k167{0%,45.227%{translate:967.6px 305.8px}45.278%{translate:978.1px 307px}45.329%{translate:988.3px 308.6px}45.378%{translate:998.2px 310.6px}45.426%{translate:1007.8px 313px}45.473%{translate:1017.1px 315.8px}45.519%{translate:1026px 319px}45.564%{translate:1034.6px 322.5px}45.609%{translate:1043px 326.4px}45.653%{translate:1050.9px 330.8px}45.696%{translate:1058.6px 335.5px}45.74%{translate:1066px 340.5px}45.783%{translate:1073px 346px}45.826%{translate:1079.7px 351.9px}45.87%{translate:1086.1px 358.1px}45.914%{translate:1092.2px 364.8px}45.958%{translate:1098px 371.8px}46.002%{translate:1103.4px 379.2px}46.047%{translate:1108.5px 387px}46.093%{translate:1113.3px 395.1px}46.14%{translate:1117.8px 403.7px}46.188%{translate:1122px 412.6px}46.237%{translate:1125.8px 422px}46.287%{translate:1129.4px 431.7px}46.339%,100%{translate:1132.6px 441.8px}}
@@ -915,31 +942,31 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k264{0%,49.967%{opacity:0}50.051%,100%{opacity:1}}
 .m215{animation-name:k264}
 @keyframes k265{0%,53.485%,100%{visibility:hidden}51.213%{visibility:visible}}
-@keyframes k266{0%,51.213%{translate:915.165px 102.5px}51.466%{translate:915.165px 150.5px}51.719%{translate:915.165px 198.5px}51.972%{translate:915.165px 246.5px}52.225%{translate:915.165px 294.5px}52.478%{translate:915.165px 342.5px}52.873%{translate:915.165px 417.5px}53.485%,100%{translate:915.165px 533.5px}}
+@keyframes k266{0%,51.213%{translate:915.165px 102.5px}53.485%,100%{translate:915.165px 533.5px}}
 .m216{animation-name:k265,k266;animation-timing-function:steps(1),linear}
 @keyframes k267{0%,53.509%,100%{visibility:hidden}51.237%{visibility:visible}}
-@keyframes k268{0%,51.237%{translate:915.165px 102.5px}51.49%{translate:915.165px 150.5px}51.743%{translate:915.165px 198.5px}51.996%{translate:915.165px 246.5px}52.249%{translate:915.165px 294.5px}52.502%{translate:915.165px 342.5px}52.897%{translate:915.165px 417.5px}53.509%,100%{translate:915.165px 533.5px}}
+@keyframes k268{0%,51.237%{translate:915.165px 102.5px}53.509%,100%{translate:915.165px 533.5px}}
 .m217{animation-name:k267,k268;animation-timing-function:steps(1),linear}
 @keyframes k269{0%,53.532%,100%{visibility:hidden}51.26%{visibility:visible}}
-@keyframes k270{0%,51.26%{translate:915.165px 102.5px}51.514%{translate:915.165px 150.5px}51.767%{translate:915.165px 198.5px}52.02%{translate:915.165px 246.5px}52.273%{translate:915.165px 294.5px}52.526%{translate:915.165px 342.5px}52.921%{translate:915.165px 417.5px}53.532%,100%{translate:915.165px 533.5px}}
+@keyframes k270{0%,51.26%{translate:915.165px 102.5px}53.532%,100%{translate:915.165px 533.5px}}
 .m218{animation-name:k269,k270;animation-timing-function:steps(1),linear}
 @keyframes k271{0%,53.556%,100%{visibility:hidden}51.284%{visibility:visible}}
-@keyframes k272{0%,51.284%{translate:915.165px 102.5px}51.537%{translate:915.165px 150.5px}51.79%{translate:915.165px 198.5px}52.043%{translate:915.165px 246.5px}52.296%{translate:915.165px 294.5px}52.549%{translate:915.165px 342.5px}52.945%{translate:915.165px 417.5px}53.556%,100%{translate:915.165px 533.5px}}
+@keyframes k272{0%,51.284%{translate:915.165px 102.5px}53.556%,100%{translate:915.165px 533.5px}}
 .m219{animation-name:k271,k272;animation-timing-function:steps(1),linear}
 @keyframes k273{0%,53.58%,100%{visibility:hidden}51.308%{visibility:visible}}
-@keyframes k274{0%,51.308%{translate:915.165px 102.5px}51.561%{translate:915.165px 150.5px}51.814%{translate:915.165px 198.5px}52.067%{translate:915.165px 246.5px}52.32%{translate:915.165px 294.5px}52.573%{translate:915.165px 342.5px}52.968%{translate:915.165px 417.5px}53.58%,100%{translate:915.165px 533.5px}}
+@keyframes k274{0%,51.308%{translate:915.165px 102.5px}53.58%,100%{translate:915.165px 533.5px}}
 .m220{animation-name:k273,k274;animation-timing-function:steps(1),linear}
 @keyframes k275{0%,53.603%,100%{visibility:hidden}51.332%{visibility:visible}}
-@keyframes k276{0%,51.332%{translate:915.165px 102.5px}51.585%{translate:915.165px 150.5px}51.838%{translate:915.165px 198.5px}52.091%{translate:915.165px 246.5px}52.344%{translate:915.165px 294.5px}52.597%{translate:915.165px 342.5px}52.992%{translate:915.165px 417.5px}53.603%,100%{translate:915.165px 533.5px}}
+@keyframes k276{0%,51.332%{translate:915.165px 102.5px}53.603%,100%{translate:915.165px 533.5px}}
 .m221{animation-name:k275,k276;animation-timing-function:steps(1),linear}
 @keyframes k277{0%,53.627%,100%{visibility:hidden}51.355%{visibility:visible}}
-@keyframes k278{0%,51.355%{translate:915.165px 102.5px}51.608%{translate:915.165px 150.5px}51.861%{translate:915.165px 198.5px}52.114%{translate:915.165px 246.5px}52.367%{translate:915.165px 294.5px}52.62%{translate:915.165px 342.5px}53.016%{translate:915.165px 417.5px}53.627%,100%{translate:915.165px 533.5px}}
+@keyframes k278{0%,51.355%{translate:915.165px 102.5px}53.627%,100%{translate:915.165px 533.5px}}
 .m222{animation-name:k277,k278;animation-timing-function:steps(1),linear}
 @keyframes k279{0%,53.651%,100%{visibility:hidden}51.379%{visibility:visible}}
-@keyframes k280{0%,51.379%{translate:915.165px 102.5px}51.632%{translate:915.165px 150.5px}51.885%{translate:915.165px 198.5px}52.138%{translate:915.165px 246.5px}52.391%{translate:915.165px 294.5px}52.644%{translate:915.165px 342.5px}53.039%{translate:915.165px 417.5px}53.651%,100%{translate:915.165px 533.5px}}
+@keyframes k280{0%,51.379%{translate:915.165px 102.5px}53.651%,100%{translate:915.165px 533.5px}}
 .m223{animation-name:k279,k280;animation-timing-function:steps(1),linear}
 @keyframes k281{0%,53.675%,100%{visibility:hidden}51.403%{visibility:visible}}
-@keyframes k282{0%,51.403%{translate:915.165px 102.5px}51.656%{translate:915.165px 150.5px}51.909%{translate:915.165px 198.5px}52.162%{translate:915.165px 246.5px}52.415%{translate:915.165px 294.5px}52.668%{translate:915.165px 342.5px}53.063%{translate:915.165px 417.5px}53.675%,100%{translate:915.165px 533.5px}}
+@keyframes k282{0%,51.403%{translate:915.165px 102.5px}53.675%,100%{translate:915.165px 533.5px}}
 .m224{animation-name:k281,k282;animation-timing-function:steps(1),linear}
 @keyframes k283{0%{opacity:0;animation-timing-function:steps(1)}53.485%{opacity:0.9}54.708%,100%{opacity:0}}
 @keyframes k284{0%,53.485%{scale:0.5}54.708%,100%{scale:3}}
@@ -3248,7 +3275,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
         <text x="1090.6" y="552" font-size="14" fill="var(--base05)">astro</text>
       </g>
       <g filter="url(#f27)" class="a m468">
-        <text x="640" y="622" font-size="14" text-anchor="middle" fill="var(--base04)">this entire video is <tspan fill="var(--base06)">one 459 KB SVG</tspan>. no video file, no JavaScript.</text>
+        <text x="640" y="622" font-size="14" text-anchor="middle" fill="var(--base04)">this entire video is <tspan fill="var(--base06)">one 460 KB SVG</tspan>. no video file, no JavaScript.</text>
       </g>
     </g>
     <g class="a m471">

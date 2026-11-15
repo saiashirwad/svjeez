@@ -38,7 +38,7 @@ describe("<Once>", () => {
   });
 
   test("SMIL inside plays one time and is marked for restyle, SMIL outside keeps looping", () => {
-    const blur = () => motion({ blur: 0 }).to({ blur: 4 }, 2, ease.linear);
+    const blur = () => motion({ blur: 0 }).to({ blur: 4 }, 3.5, ease.linear);
 
     const svg = scene(
       <>

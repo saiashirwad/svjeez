@@ -44,7 +44,9 @@ export const loopLength = (root: Document | Element = document): Seconds => {
   const css = animations.map((animation) => Number(animation.effect?.getTiming().duration) || 0);
 
   const smil = [...root.querySelectorAll("animate, animateTransform, animateMotion, set")].map(
-    (element) => parseFloat(element.getAttribute("dur") ?? "") * 1000 || 0,
+    (element) =>
+      parseFloat(element.getAttribute("data-loop") ?? element.getAttribute("dur") ?? "") * 1000 ||
+      0,
   );
 
   // Emitted durations are rounded to a millisecond, so a period such as 12 / 7 = 1714.2857ms

@@ -249,8 +249,11 @@ describe("<Clip>", () => {
     const begins = [...svg.matchAll(/keyTimes="([^"]*)"/g)].map((match) => match[1]);
 
     expect([...svg.matchAll(/<filter /g)]).toHaveLength(2);
-    expect(begins[0]).toBe("0;0.1;1");
-    expect(begins[1]).toBe("0;0.3;0.4;1");
+    // Each filter animates only its own second of the loop, on the clock of the clip that uses it.
+    expect(begins).toEqual(["0;1", "0;1"]);
+    expect([...svg.matchAll(/<animate [^>]* begin="([\d.]+)s;/g)].map((match) => match[1])).toEqual(
+      ["0", "3"],
+    );
   });
 
   test("works inside <Once>", () => {
@@ -708,7 +711,7 @@ describe("sampled() with a window", () => {
 
     const svg = scene(<path d={frame(0)} animation={path} />);
 
-    expect(svg).toContain('keyTimes="0;0.2;0.5;1"');
+    expect(svg).toContain('keyTimes="0;1" begin="2s;w1.begin+10s" dur="3s"');
   });
 });
 
