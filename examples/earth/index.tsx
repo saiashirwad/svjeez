@@ -5,7 +5,6 @@ import { createRequire } from "node:module";
 import {
   paletteCss,
   color,
-  geist,
   HEIGHT,
   MARGIN,
   mono,
@@ -34,7 +33,7 @@ const SUN_OFFSET = -72;
 
 /** The June solstice, at midnight UTC. */
 const DAY = Date.UTC(2026, 5, 21);
-const R = 200;
+const R = 190;
 
 const [sunLon, sunLat] = sun(new Date(DAY));
 
@@ -42,7 +41,7 @@ const [sunLon, sunLat] = sun(new Date(DAY));
 const middle = sunLon - SUN_OFFSET;
 
 const map = project(countries, {
-  frame: rect(W - MARGIN - 2 * R, H / 2 + 12 - R, 2 * R, 2 * R),
+  frame: rect(W - MARGIN - 92 - 2 * R, H / 2 + 22 - R, 2 * R, 2 * R),
   projection: geoOrthographic().rotate([-middle, -TILT]),
   fit: "sphere",
   filter: (f) => f.properties?.name !== "Antarctica",
@@ -248,7 +247,7 @@ function Globe(): SvgNode {
                   style={place(city.at)}
                   x={7}
                   y={-6}
-                  fontFamily={geist}
+                  fontFamily={mono}
                   fontSize={size.label}
                   fill={C.text}
                 >
@@ -338,8 +337,8 @@ function Clock(): SvgNode {
 function Caption(): SvgNode {
   return (
     <g animation={rise(0.2)}>
-      <Title title="Sunset across the June solstice" at={0} />
-      <text x={SUBTITLE.x} y={SUBTITLE.y} fontFamily={geist} fontSize={size.subtitle} fill={C.dim}>
+      <Title title="Sunset across the June solstice" at={0} family={mono} />
+      <text x={SUBTITLE.x} y={SUBTITLE.y} fontFamily={mono} fontSize={size.subtitle} fill={C.dim}>
         The 50 largest cities light up as the sun sets on them.
       </text>
       <Clock />

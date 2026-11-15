@@ -5,7 +5,7 @@ import { HEIGHT, MARGIN, WIDTH, css, mono, theme } from "../gallery-style";
 const W = WIDTH;
 const H = HEIGHT;
 
-const frame = rect(MARGIN, 96, W - 2 * MARGIN, 348);
+const frame = rect(MARGIN, MARGIN, W - 2 * MARGIN, H - 2 * MARGIN);
 const shell = appWindow(frame, { theme, title: "~/app", dots: "traffic" });
 
 const session = terminal(
@@ -20,7 +20,7 @@ const session = terminal(
       ],
     },
   ],
-  { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 16, lineHeight: 1.75, font: mono },
+  { theme, x: shell.body.x + 32, y: shell.body.y + 20, fontSize: 20, lineHeight: 1.75, font: mono },
 );
 
 export default function build(): string {

@@ -1,6 +1,15 @@
 // One look for every scene in the examples gallery. Scenes import from here so the cards read as one set.
 // Palette, fonts and the type scale come first, then the rules for layout and motion.
-import { css as cssTag, ease, enter, motion, type Color, type Css, type SvgNode } from "svjeez";
+import {
+  css as cssTag,
+  ease,
+  enter,
+  motion,
+  type Color,
+  type Css,
+  type FontValue,
+  type SvgNode,
+} from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { geist } from "./fonts/faces";
 import { css, mono, theme } from "./style";
@@ -100,14 +109,17 @@ export function Title({
   title,
   subtitle,
   at = motions.lead,
+  family = geist,
 }: {
   readonly title: string;
   readonly subtitle?: string;
   readonly at?: number;
+  /** The font for both lines; Geist unless a scene sets it. */
+  readonly family?: FontValue;
 }): SvgNode {
   return jsx("g", {
     animation: rise(at),
-    fontFamily: geist,
+    fontFamily: family,
     children: [
       jsx("text", {
         x: TITLE.x,

@@ -1,5 +1,5 @@
 import type { Point } from "svjeez";
-import { n } from "./kit";
+import { Y, n } from "./kit";
 
 type Cubic = readonly [Point, Point, Point, Point];
 
@@ -20,9 +20,9 @@ const cubics = (pts: readonly Point[], closed: boolean): Cubic[] => {
   });
 };
 
-/** Points from a flat list: `pts([x0, y0, x1, y1])`. */
+/** Points from a flat list: `pts([x0, y0, x1, y1])`, with y as laid out on the original 3:2 sheet. */
 export const pts = (xy: number[]): Point[] =>
-  Array.from({ length: xy.length / 2 }, (_, i) => ({ x: xy[i * 2]!, y: xy[i * 2 + 1]! }));
+  Array.from({ length: xy.length / 2 }, (_, i) => ({ x: xy[i * 2]!, y: Y(xy[i * 2 + 1]!) }));
 
 export const smooth = (pts: readonly Point[], closed = false): string => {
   const curves = cubics(pts, closed).map(

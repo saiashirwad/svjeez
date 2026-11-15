@@ -43,7 +43,8 @@ const D = 18;
 const OUT = D - 1;
 
 const map = project(countries, {
-  frame: rect(MARGIN, 120, W - 2 * MARGIN, H - MARGIN - 120),
+  frame: rect(MARGIN, 136, W - 2 * MARGIN, H - MARGIN - 136),
+  fit: "sphere",
   projection: geoNaturalEarth1().rotate([-10, 0]),
   filter: (f) => f.properties?.name !== "Antarctica",
 });
@@ -66,7 +67,7 @@ interface Station {
   readonly name: string;
   readonly at: LonLat;
   /** Which side of the dot its name sits on, if it shows one. */
-  readonly label?: "left" | "right" | "above" | "below";
+  readonly label?: keyof typeof LABEL;
 }
 
 const station = (name: string, at: LonLat, label?: Station["label"]): Station => ({
@@ -76,25 +77,25 @@ const station = (name: string, at: LonLat, label?: Station["label"]): Station =>
 });
 
 const VIRGINIA_BEACH = station("Virginia Beach", [-75.98, 36.85]);
-const NEW_YORK = station("New York", [-72.9, 40.8], "left");
+const NEW_YORK = station("New York", [-72.9, 40.8], "aboveLeft");
 const BUDE = station("Bude", [-4.55, 50.83]);
 const BILBAO = station("Bilbao", [-2.93, 43.4]);
-const FORTALEZA = station("Fortaleza", [-38.5, -3.7], "below");
+const FORTALEZA = station("Fortaleza", [-38.5, -3.7], "belowLeft");
 const LISBON = station("Lisbon", [-9.3, 38.7]);
 const LAGOS = station("Lagos", [3.4, 6.4], "above");
 const LUANDA = station("Luanda", [13.2, -8.8]);
 const CAPE_TOWN = station("Cape Town", [18.44, -33.6], "left");
 const DURBAN = station("Durban", [31.8, -28.95]);
-const MARSEILLE = station("Marseille", [5.37, 43.3], "above");
+const MARSEILLE = station("Marseille", [5.37, 43.3], "aboveRight");
 const MUMBAI = station("Mumbai", [72.8, 19.0], "above");
-const MOMBASA = station("Mombasa", [39.7, -4.05], "left");
-const SINGAPORE = station("Singapore", [103.8, 1.3], "left");
+const MOMBASA = station("Mombasa", [39.7, -4.05], "aboveLeft");
+const SINGAPORE = station("Singapore", [103.8, 1.3], "belowLeft");
 const HONG_KONG = station("Hong Kong", [114.2, 22.2]);
 const TOKYO = station("Tokyo", [139.9, 34.95], "above");
 const SYDNEY = station("Sydney", [151.2, -33.9], "below");
 const PERTH = station("Perth", [115.8, -31.95]);
 const OREGON = station("Oregon", [-124.0, 45.2]);
-const LOS_ANGELES = station("Los Angeles", [-118.4, 33.9], "left");
+const LOS_ANGELES = station("Los Angeles", [-118.4, 33.9], "aboveLeft");
 const VALPARAISO = station("Valparaíso", [-71.6, -33.0]);
 const BOCA_RATON = station("Boca Raton", [-80.1, 26.35]);
 
@@ -433,8 +434,11 @@ const stations = [...new Set(CABLES.flatMap((c) => [c.from, c.to]))];
 const LABEL = {
   left: { dx: -8, dy: 3, anchor: "end" },
   right: { dx: 8, dy: 3, anchor: "start" },
-  above: { dx: 0, dy: -9, anchor: "middle" },
-  below: { dx: 0, dy: 15, anchor: "middle" },
+  above: { dx: 0, dy: -12, anchor: "middle" },
+  below: { dx: 0, dy: 16, anchor: "middle" },
+  aboveLeft: { dx: -6, dy: -10, anchor: "end" },
+  aboveRight: { dx: 6, dy: -10, anchor: "start" },
+  belowLeft: { dx: -6, dy: 17, anchor: "end" },
 } as const;
 
 function Stations(): SvgNode {

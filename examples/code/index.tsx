@@ -1,5 +1,5 @@
 import { highlight } from "@svjeez/code";
-import { ease, motion, rect, render, appWindow, code, morph } from "svjeez";
+import { ease, motion, render, code, morph } from "svjeez";
 
 import { HEIGHT, MARGIN, WIDTH, RADIUS, css, mono, theme } from "../gallery-style";
 
@@ -47,17 +47,16 @@ const SOURCES = [
   },
 ] as const;
 
-const win = appWindow(rect(MARGIN, 105, W - 2 * MARGIN, H - 210), { theme, title: "fib", bar: 40 });
-
-const CHIP = { w: 84, gap: 8, h: 28 };
-const chipX = (i: number) => win.body.x + 28 + i * (CHIP.w + CHIP.gap);
-const chipY = win.body.y + 22;
+// The code block is the whole canvas: tabs on the top margin, then the code at a large size.
+const CHIP = { w: 108, gap: 10, h: 36 };
+const chipX = (i: number) => MARGIN + i * (CHIP.w + CHIP.gap);
+const chipY = MARGIN;
 
 const settings = {
-  x: win.body.x + 36,
-  y: chipY + CHIP.h + 30,
-  fontSize: 20,
-  lineHeight: 1.7,
+  x: MARGIN,
+  y: chipY + CHIP.h + 40,
+  fontSize: 40,
+  lineHeight: 1.5,
   theme,
   font: mono,
 };
@@ -89,7 +88,7 @@ export default function build(): string {
       css,
     },
     <>
-      <g fontFamily={mono}>{win.node}</g>
+      <rect width={W} height={H} fill={theme.base01} />
       <rect
         x={chipX(0)}
         y={chipY}
@@ -102,10 +101,10 @@ export default function build(): string {
       {SOURCES.map(({ label }, i) => (
         <text
           x={chipX(i) + CHIP.w / 2}
-          y={chipY + CHIP.h / 2 + 5}
+          y={chipY + CHIP.h / 2 + 6}
           textAnchor="middle"
           fontFamily={mono}
-          fontSize={15}
+          fontSize={18}
           fill={theme.base05}
         >
           {label}

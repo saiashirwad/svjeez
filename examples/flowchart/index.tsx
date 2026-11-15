@@ -6,29 +6,36 @@ export const chart = flowchart(
   {
     nodes: {
       pr: { label: "PR opened", role: "input" },
-      gather: { label: "Gather diff", role: "tool" },
       memory: { label: "Review memory", role: "store" },
-      analyze: "Analyze changes",
       lint: { label: "Run linters", role: "tool" },
+      tests: { label: "Run tests", role: "tool" },
+      secrets: { label: "Scan secrets", role: "tool" },
+      analyze: "Analyze changes",
       issues: { label: "Issues?", role: "decision" },
       fix: "Draft fixes",
       post: { label: "Post review", role: "output" },
     },
     groups: {
-      agent: { label: "Review agent", nodes: ["gather", "analyze", "lint", "issues", "fix"] },
+      agent: {
+        label: "Review agent",
+        nodes: ["lint", "tests", "secrets", "analyze", "issues", "fix"],
+      },
     },
     edges: [
-      ["pr", "gather"],
-      ["gather", "analyze"],
+      ["pr", "lint"],
+      ["pr", "tests"],
+      ["pr", "secrets"],
+      ["lint", "analyze"],
+      ["tests", "analyze"],
+      ["secrets", "analyze"],
       ["memory", "analyze"],
-      ["analyze", "lint"],
-      ["lint", "issues"],
+      ["analyze", "issues"],
       ["issues", "fix", { label: "yes" }],
-      ["fix", "lint", { label: "re-run" }],
+      ["fix", "analyze", { label: "re-run" }],
       ["issues", "post", { label: "no" }],
     ],
   },
-  { theme, x: 0, y: 0, direction: "LR", font: mono, play: { at: 0.2, step: 0.3 } },
+  { theme, x: 0, y: 0, direction: "LR", font: mono, fontSize: 16, play: { at: 0.2, step: 0.3 } },
 );
 
 const trip = flow(chart.route("pr", "post"), {

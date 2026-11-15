@@ -8,6 +8,8 @@ const run = lanes(
       lead: { label: "TH-01 lead", role: "input" },
       search: { label: "TH-02 search", role: "task" },
       build: { label: "TH-03 build", role: "tool" },
+      test: { label: "TH-04 test", role: "output" },
+      docs: { label: "TH-05 docs", role: "store" },
     },
     spans: [
       { lane: "lead", from: 0, to: 2.6, label: "planning" },
@@ -15,6 +17,8 @@ const run = lanes(
       { lane: "lead", from: 7.2, to: 8.5, label: "merge" },
       { lane: "search", from: 1, to: 4.6, label: "researching" },
       { lane: "build", from: 2.6, to: 7.2, label: "editing" },
+      { lane: "test", from: 4.6, to: 7.2, label: "verifying" },
+      { lane: "docs", from: 5.6, to: 8, label: "writing" },
     ],
     events: [
       { lane: "search", at: 1.8, label: "Read", role: "task" },
@@ -22,15 +26,16 @@ const run = lanes(
       { lane: "build", at: 3.6, label: "Edit", role: "store" },
       { lane: "build", at: 5.2, label: "Test", role: "decision" },
       { lane: "build", at: 6.6, label: "Edit", role: "store" },
+      { lane: "test", at: 5.8, label: "Run", role: "task" },
+      { lane: "docs", at: 6.8, label: "Edit", role: "store" },
     ],
     links: [
       { from: "lead", to: "search", at: 1 },
       { from: "lead", to: "build", at: 2.6 },
       { from: "search", to: "lead", at: 4.6 },
-      { from: "build", to: "lead", at: 7.2 },
-    ],
+      { from: "build", to: "lead", at: 7.2 },    ],
   },
-  { theme, x: 0, y: 0, font: mono, scale: 90, play: { at: 0.2 } },
+  { theme, x: 0, y: 0, font: mono, scale: 100, fontSize: 16, play: { at: 0.2 } },
 );
 
 const D = 11;

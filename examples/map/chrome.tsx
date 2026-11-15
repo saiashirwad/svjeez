@@ -1,4 +1,5 @@
 import { Ink, ease, enter, tool, type SvgNode } from "svjeez";
+import { MARGIN, TITLE } from "../gallery-style";
 import { C, Words, n, roman, uncial, type Play } from "./kit";
 
 const star = (cx: number, cy: number, r: number, inner: number, turn = 0): string =>
@@ -42,32 +43,17 @@ export function Compass({ x, y, play }: { x: number; y: number; play: Play }): S
 
 const RULE = tool.brush({ size: 2.4, taper: 0.45, seed: 12 });
 
+/** The title set straight on the map, left-aligned at the margin. */
 export function Cartouche({ play }: { play: Play }): SvgNode {
-  const [x, y, w, h] = [26, 24, 300, 92];
-  const mid = x + w / 2;
+  const title = "The Western Reaches";
+  const size = 32;
+  const width = uncial.measure(title, size);
 
   return (
     <g animation={play(enter({ at: 0.2, over: 0.6 }, { opacity: 0, y: -8 }))}>
-      <rect x={x} y={y} width={w} height={h} fill={C.land} stroke={C.ink} strokeWidth={1.4} />
-      <rect
-        x={x + 5}
-        y={y + 5}
-        width={w - 10}
-        height={h - 10}
-        fill="none"
-        stroke={C.ink}
-        strokeWidth={0.6}
-      />
-      <Words
-        face={uncial}
-        text="The Western Reaches"
-        size={27}
-        x={mid}
-        y={y + 50}
-        anchor="middle"
-      />
+      <Words face={uncial} text={title} size={size} x={MARGIN} y={TITLE.y} />
       <Ink
-        d={`M${x + 60} ${y + 62}h${w - 120}`}
+        d={`M${MARGIN} ${TITLE.y + 12}h${width}`}
         tool={RULE}
         fill={C.red}
         draw={play({ at: 1, over: 0.8 })}
@@ -76,10 +62,9 @@ export function Cartouche({ play }: { play: Play }): SvgNode {
         face={roman}
         text="The road to Mount Cinder"
         size={13}
-        x={mid}
-        y={y + 78}
+        x={MARGIN}
+        y={TITLE.y + 36}
         fill={C.faded}
-        anchor="middle"
       />
     </g>
   );

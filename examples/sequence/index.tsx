@@ -6,26 +6,29 @@ const login = sequence(
   {
     actors: {
       user: { label: "Browser", role: "input" },
+      gateway: { label: "Gateway", role: "task" },
       api: "API",
+      cache: { label: "Redis", role: "store" },
       auth: { label: "Auth", role: "tool" },
       db: { label: "Postgres", role: "store" },
     },
     messages: [
-      ["user", "api", "POST /login"],
+      ["user", "gateway", "POST /login"],
+      ["gateway", "api", "forward"],
+      ["api", "cache", "get session"],
+      ["cache", "api", "miss", { reply: true }],
       ["api", "db", "select user"],
       ["db", "api", "row", { reply: true }],
-      ["api", "api", "hash check"],
-      { note: "api", text: "password matches" },
       ["api", "auth", "sign token"],
       ["auth", "api", "jwt", { reply: true }],
       ["api", "user", "200 + Set-Cookie", { reply: true }],
     ],
   },
-  { theme, x: 0, y: 0, font: mono, play: { at: 0.2, step: 0.8 } },
+  { theme, x: 0, y: 0, font: mono, fontSize: 16, play: { at: 0.2, step: 0.8 } },
 );
 
 const D = 10;
-const last = login.message(7);
+const last = login.message(8);
 
 export default function build(): string {
   return render(

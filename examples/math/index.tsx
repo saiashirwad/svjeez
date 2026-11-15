@@ -6,7 +6,7 @@ const W = WIDTH;
 const H = HEIGHT;
 const D = 9;
 
-const at = { x: MARGIN, y: 250, fontSize: 52, theme } as const;
+const at = { x: MARGIN, y: 280, fontSize: 60, theme } as const;
 
 /** The square, then its expansion with the cross term named. */
 const square = tex(String.raw`(a+b)^2`, at);
@@ -16,14 +16,14 @@ const expanded = tex(String.raw`a^2 + \cssId{cross}{2ab} + b^2`, at);
 const graph = plane({
   x: [-4, 2],
   y: [0, 9],
-  width: 320,
-  height: 300,
-  at: { x: W - MARGIN - 340, y: 110 },
+  width: 440,
+  height: 340,
+  at: { x: W - MARGIN - 450, y: 84 },
   ticks: { x: 1, y: 3 },
   grid: true,
   theme,
   font: mono,
-  fontSize: 14,
+  fontSize: 16,
 });
 
 const curve = graph.plot((a) => (a + 1) ** 2, {
@@ -33,7 +33,7 @@ const curve = graph.plot((a) => (a + 1) ** 2, {
 
 const name = tex(String.raw`b = 1:\ (a+1)^2`, {
   ...graph.point(-3.2, 8.2),
-  fontSize: 20,
+  fontSize: 24,
   color: tint(theme, "blue"),
 });
 

@@ -11,9 +11,9 @@ export const agent = stateMachine(
         states: { planning: "Planning", acting: "Calling tools" },
         initial: "planning",
       },
-      waiting: "Waiting on user",
-      done: { label: "Done", final: true },
+      waiting: "Waiting on user",      done: { label: "Done", final: true },
       failed: { label: "Failed", final: true },
+      cancelled: { label: "Cancelled", final: true },
     },
     initial: "idle",
     transitions: [
@@ -24,9 +24,9 @@ export const agent = stateMachine(
       ["waiting", "working", "reply"],
       ["working", "done", "finish"],
       ["working", "failed", "error"],
-    ],
+      ["working", "cancelled", "cancel"],    ],
   },
-  { theme, x: 0, y: 0, direction: "LR", font: mono },
+  { theme, x: 0, y: 0, direction: "LR", font: mono, fontSize: 16 },
 );
 
 const walk = agent.walk(

@@ -122,7 +122,7 @@ const copy: Record<(typeof slides)[number], { head: string[]; body: string[] }> 
   },
   result: {
     head: ["One SVG file,", "no JavaScript"],
-    body: ["It plays inside an img tag.", "Nothing runs in the viewer's", "browser."],
+    body: ["It plays inside an img tag.", "The browser plays it as CSS", "animations."],
   },
 };
 

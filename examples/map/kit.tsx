@@ -1,19 +1,24 @@
 import { google } from "@svjeez/fonts";
+import { theme } from "../gallery-style";
 import { def, type Font, type Paint, type Ref, type SvgNode } from "svjeez";
 
 export const W = 960;
-export const H = 640;
+export const H = 540;
+
+/** Where a y from the original 3:2 layout (drawn 108 to 610 tall) lands on the 16:9 sheet. Sizes stay; only places move. */
+export const Y = (y: number): number => Math.round((70 + (y - 108) * 0.885) * 10) / 10;
 export const D = 22;
 
+/** Base16 slots, so the site's palette picker and light and dark recolor the map. Paper, land and sea step through the scheme's three background slots. */
 export const C = {
-  paper: "#EBDDBB",
-  land: "#F1E5C6",
-  sea: "#DCCDA6",
-  ink: "#3B2A1A",
-  faded: "#7A6142",
-  river: "#3F5E6E",
-  red: "#9E2B1E",
-  ember: "#E0662A",
+  paper: theme.base00,
+  land: theme.base01,
+  sea: theme.base02,
+  ink: theme.base06,
+  faded: theme.base04,
+  river: theme.base0D,
+  red: theme.base08,
+  ember: theme.base09,
 } as const;
 
 export const roman = await google("Cinzel");
