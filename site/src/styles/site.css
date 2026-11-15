@@ -20,7 +20,7 @@
   --shadow: light-dark(oklch(30% 0.02 270 / 0.16), oklch(0% 0 0 / 0.6));
   --ring: light-dark(oklch(0% 0 0 / 0.07), oklch(100% 0 0 / 0.11));
   --band: light-dark(oklch(97.2% 0.003 270), oklch(21.5% 0.006 270));
-  --win-bg: light-dark(#ffffff, #1e1e20);
+  --win-bg: light-dark(#ffffff, #090a0c);
   --warn: light-dark(oklch(58% 0.17 45), oklch(78% 0.15 60));
 
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;

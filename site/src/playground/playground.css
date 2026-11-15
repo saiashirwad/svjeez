@@ -1,5 +1,5 @@
 .pg {
-  --pg-panel: var(--win-bg, light-dark(#ffffff, #1e1e20));
+  --pg-panel: var(--win-bg, light-dark(#ffffff, #090a0c));
   --pg-bg: var(--pg-panel);
   --pg-ink: var(--ink, light-dark(#1d1d1f, #f5f5f7));
   --pg-muted: var(--muted, light-dark(#6e6e73, #a1a1a6));
