@@ -1,5 +1,5 @@
 import { highlight } from "@svjeez/code";
-import { code, ease, motion, render, type CodeTokens } from "svjeez";
+import { code, ease, motion, render, type CodeTokens, type Motion } from "svjeez";
 
 import { css, mono, theme } from "../style";
 import scene, { frame } from "./scene.tsx";
@@ -11,7 +11,7 @@ import { chick } from "../site/lib/chick";
 // examples/tests/explainer.test.tsx checks that each state compiles and that what plays is what it shows.
 
 const W = 1200;
-const H = 600;
+const H = 675;
 const M = 64;
 
 /** The scene's own clock, repeated. It divides the explainer's. */
@@ -52,9 +52,7 @@ export const states: readonly State[] = edits.reduce<State[]>(
 
 /** The hop a state's lines write: they are run, so what plays is what is shown. */
 export const hopOf = ({ lines }: State) =>
-  new Function("motion", "ease", `${lines.slice(0, lines.indexOf("")).join("\n")}\nreturn hop;`)(motion, ease) as ReturnType<
-    typeof motion
-  >;
+  new Function("motion", "ease", `${lines.slice(0, lines.indexOf("")).join("\n")}\nreturn hop;`)(motion, ease) as Motion<"y" | "rotate">;
 
 /** The size of the file on disk, to a tenth of a KB. */
 export const fileKb = (new TextEncoder().encode(scene()).length / 1024).toFixed(1);
@@ -172,7 +170,7 @@ const chicks = states.map((state, i) => {
   return <g animation={on}>{chick({ body: hopOf(state).loop(PERIOD) })}</g>;
 });
 
-const SCALE = 2.4;
+const SCALE = 2.6;
 /** The chick spans y 29 to 222 of the scene, so that range, hop included, is what centers. */
 const picture = { x: W - M - 66 * SCALE - 104 * SCALE, y: H / 2 - 125.5 * SCALE };
 
