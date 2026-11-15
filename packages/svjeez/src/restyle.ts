@@ -32,6 +32,53 @@ const activeDuration = (tag: string): Seconds => {
   return dur * repeats || Infinity;
 };
 
+const WINDOWED =
+  /(<animate\b[^>]*\sdata-loop="[^"]*"[^>]*\/>)((?:\s*<set\b[^>]*\sdata-loop="[^"]*"[^>]*\/>)*)/g;
+
+const attr = (tag: string, name: string): string =>
+  new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1] ?? "";
+
+/**
+ * An `<animate>` the compiler cut down to the part of the loop where it moves, with the `<set>`s that hold its first
+ * value before the window, seen `clock` seconds into the loop. Paused, it holds the frame at the clock. Otherwise it
+ * starts there. The attribute itself holds the still frame, so each stretch outside the window is a `<set>`.
+ */
+const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean) => {
+  const loop = parseFloat(attr(tag, "data-loop"));
+  const start = parseFloat(attr(tag, "begin"));
+  const length = parseFloat(attr(tag, "dur"));
+  const id = attr(tag, "id");
+  const name = attr(tag, "attributeName");
+  const values = attr(tag, "values").split(";");
+  const hold = (value: string | undefined, dur?: Seconds) =>
+    `<set attributeName="${name}" to="${value}" begin="0s"${dur === undefined ? "" : ` dur="${num(dur)}s" fill="freeze"`}/>`;
+  const rest = (begin: string) => tag.replace(/(\sbegin=")[^"]*/, `$1${begin}`);
+
+  if (paused) {
+    if (clock <= start) return hold(values[0]);
+    const begin = HOLD - Math.max(Math.min(clock - start, length), HOLD);
+
+    return rest(`${num(begin)}s`).replace(/\/>$/, ` end="${num(HOLD)}s"/>`);
+  }
+
+  const over = clock >= start + length;
+  const begin = `${num(start - clock + (over ? loop : 0))}s;${id}.begin+${num(loop)}s`;
+  const again = /\sbegin="[^"]*;([^"]*\.begin\+[^"]*)"/.exec(sets)?.[1];
+
+  const reset =
+    again === undefined
+      ? ""
+      : `<set attributeName="${name}" to="${values[0]}" begin="${again}" dur="${num(start)}s" fill="freeze"/>`;
+
+  // Before the window the first value shows, and past it the last value, until the next loop begins.
+  return (
+    (over ? hold(values.at(-1), start - clock + loop) : "") +
+    rest(begin) +
+    (clock < start && start > 0 ? hold(values[0], start - clock) : "") +
+    reset
+  );
+};
+
 /** A copy of a rendered SVG with more CSS, started or held `at` seconds in, or held at its still frame. A page uses it to recolor or pause an `<img>` without restarting it. */
 export const restyle = (
   svg: string,
@@ -59,6 +106,9 @@ export const restyle = (
       /\sstyle="/.test(root)
         ? root.replace(/\sstyle="/, `$&${clocks};`)
         : root.replace(/\s*\/?>$/, ` style="${clocks}"$&`),
+    );
+    out = out.replace(WINDOWED, (_, tag: string, sets: string) =>
+      windowedAt(tag, sets, loop % (parseFloat(attr(tag, "data-loop")) || Infinity), paused),
     );
     out = out.replace(/<animate\b(?![^>]*\sbegin=)[^>]*>/g, (tag) => {
       const clock = /\sdata-once=/.test(tag) ? once : loop;

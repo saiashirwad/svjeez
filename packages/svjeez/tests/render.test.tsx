@@ -299,7 +299,7 @@ describe("effects", () => {
     );
 
     const svg = scene(<rect width={10} height={10} filter={warp} />);
-    expect(svg).toContain('<animate attributeName="scale" values="3;3;9;9" keyTimes="0;0.1;0.2;1"');
+    expect(svg).toContain('<animate id="w1" attributeName="scale" values="3;9" keyTimes="0;1"');
   });
 
   test("blur compiles to a generated filter whose stdDeviation animates with SMIL", () => {
@@ -308,7 +308,7 @@ describe("effects", () => {
     );
 
     expect(svg).toMatch(
-      /<feGaussianBlur stdDeviation="0">\s*<animate attributeName="stdDeviation" values="4;4;0;0" keyTimes="0;0.1;0.2;1" calcMode="spline"/,
+      /<feGaussianBlur stdDeviation="0">\s*<animate id="w1" attributeName="stdDeviation" values="4;0" keyTimes="0;1" calcMode="spline"/,
     );
     expect(body(svg)).toContain('<rect width="10" height="10" filter="url(#f1)"/>');
   });
@@ -479,8 +479,7 @@ describe("loop", () => {
     const svg = scene();
     expect(svg).toBe(scene(true));
     expect(svg).toContain("animation-iteration-count:infinite");
-    expect(svg).toContain('repeatCount="indefinite"');
-    expect(svg).not.toContain('fill="freeze"');
+    expect(svg).toContain('begin="2s;w1.begin+6s"');
   });
 
   test("loop: false plays once, repeating shorter loops to fill the scene, and holds the end", () => {
@@ -525,16 +524,16 @@ describe("playbackRate", () => {
         </>,
       );
 
+    const strip =
+      /(?:animation-duration:|animation-delay:-)[\d.,s]+|(?:dur|data-loop|begin)="[^"]*"/g;
     const [normal, fast] = [scene(1), scene(2)];
-    expect(durations(normal).sort()).toEqual([3, 3, 6, 6]);
+    expect(durations(normal).sort()).toEqual([1, 2, 3, 3, 6]);
     expect(durations(fast)).toEqual(durations(normal).map((d) => d / 2));
     // The root also says what rate it plays at, for the tools that take scene seconds.
     expect(fast).toContain('data-playback-rate="2"');
-    expect(
-      fast
-        .replace(' data-playback-rate="2"', "")
-        .replace(/(?:animation-duration:|animation-delay:-|dur=")[\d.,s]+/g, ""),
-    ).toBe(normal.replace(/(?:animation-duration:|animation-delay:-|dur=")[\d.,s]+/g, ""));
+    expect(fast.replace(' data-playback-rate="2"', "").replace(strip, "")).toBe(
+      normal.replace(strip, ""),
+    );
   });
 
   test("playbackRate must be positive", () => {

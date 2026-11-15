@@ -1,7 +1,7 @@
 import { formatValue, valueOf, type Target, type TargetValues } from "./channels";
 import type { Canvas } from "./compile";
 import { num } from "./format";
-import { moving, type Key } from "./keys";
+import { foldKeys, moving, type Key } from "./keys";
 import { ease, type Ease, type Seconds } from "./motion";
 import { formatProperty, isProperty } from "./properties";
 
@@ -39,7 +39,8 @@ const percents = (keys: readonly Key[], period: Seconds): string[] => {
   );
 };
 
-export const cssKeyframes = (lane: string, emit: Emit, keys: readonly Key[], period: Seconds) => {
+export const cssKeyframes = (lane: string, emit: Emit, all: readonly Key[], period: Seconds) => {
+  const keys = emit === "value" ? foldKeys(lane, all) : all;
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
     if (moving(keys, index)) counts.set(timing(key.ease), (counts.get(timing(key.ease)) ?? 0) + 1);

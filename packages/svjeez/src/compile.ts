@@ -70,6 +70,140 @@ interface Clock {
   readonly clips: readonly ClipFrame[];
 }
 
+/** The slot of an embedded face: its family name, weight and style. */
+interface Slot {
+  readonly slot: string;
+  readonly weight: number;
+  readonly style: string;
+}
+
+/** What a text inherits, as far as the compiler can tell. `null` means unknown. */
+interface FontCtx {
+  readonly family: readonly Slot[] | null;
+  readonly weight: number | null;
+  readonly style: string | null;
+}
+
+/** A text and the faces that can draw it: `family` is every face of its family, `exact` the ones matching its weight and style. */
+interface TextRun {
+  readonly text: string;
+  readonly family: readonly string[] | null;
+  readonly exact: readonly string[];
+}
+
+const UNKNOWN_FONT: FontCtx = { family: null, weight: null, style: null };
+
+const FONT_FAMILY_CSS = /font-family|(?:^|[\s;{}"'])font\s*:/i;
+const FONT_WEIGHT_CSS = /font-(?:weight|style|stretch)|(?:^|[\s;{}"'])font\s*:/i;
+
+const noteCss = (state: State, css: string): void => {
+  state.css.family ||= FONT_FAMILY_CSS.test(css);
+  state.css.weight ||= FONT_WEIGHT_CSS.test(css);
+};
+
+const weightOf = (value: unknown): number | null => {
+  const text = String(value).trim();
+
+  if (text === "normal") return 400;
+
+  if (text === "bold") return 700;
+
+  return /^\d+(?:\.\d+)?$/.test(text) ? Number(text) : null;
+};
+
+const styleOf = (value: unknown): string | null => {
+  const text = String(value).trim();
+
+  return text === "normal" || text === "italic" ? text : null;
+};
+
+/** The font an element's children inherit from it, read from its attributes and inline style. */
+const fontOf = (state: State, node: Element, attrs: Element["attrs"], parent: FontCtx): FontCtx => {
+  let { family, weight, style } = parent;
+  const given = node.attrs["font-family"] ?? node.attrs.fontFamily;
+
+  if (given !== undefined) {
+    if (isFontValue(given)) {
+      const { prefix } = state.canvas;
+
+      family = fontFaces(given).faces.map(({ name, font }) => ({
+        slot: `'${prefix + name}' ${font.weight} ${font.style}`,
+        weight: font.weight,
+        style: font.style,
+      }));
+    } else family = null;
+  }
+
+  const w = attrs["font-weight"] ?? attrs.fontWeight;
+  const s = attrs["font-style"] ?? attrs.fontStyle;
+
+  if (w !== undefined) weight = weightOf(w);
+
+  if (s !== undefined) style = styleOf(s);
+
+  if (attrs.font !== undefined) [family, weight, style] = [null, null, null];
+
+  if (typeof attrs.style === "string" && /font/i.test(attrs.style)) {
+    for (const declaration of attrs.style.split(";")) {
+      const at = declaration.indexOf(":");
+      const name = declaration.slice(0, at).trim().toLowerCase();
+      const value = declaration.slice(at + 1);
+
+      if (name === "font") [family, weight, style] = [null, null, null];
+
+      if (name === "font-family") family = null;
+
+      if (name === "font-weight") weight = weightOf(value);
+
+      if (name === "font-style") style = styleOf(value);
+    }
+  }
+
+  return family === parent.family && weight === parent.weight && style === parent.style
+    ? parent
+    : { family, weight, style };
+};
+
+const runOf = (text: string, font: FontCtx): TextRun => {
+  if (font.family === null) return { text, family: null, exact: [] };
+  const all = font.family.map((face) => face.slot);
+
+  const exact = font.family.filter(
+    (face) =>
+      (font.weight === null || face.weight === font.weight) &&
+      (font.style === null || face.style === font.style),
+  );
+
+  return { text, family: all, exact: exact.length > 0 ? exact.map((face) => face.slot) : all };
+};
+
+/** The glyphs each face needs: all the text when anything is unknown, else only what its own runs say. */
+const faceTexts = (state: State): Map<string, string[]> => {
+  const every = state.runs.map((run) => run.text);
+  const shared = state.runs.filter((run) => run.family === null).map((run) => run.text);
+  const byFace = new Map<string, string[]>();
+
+  for (const run of state.runs) {
+    if (run.family === null) continue;
+
+    for (const slot of state.css.weight ? run.family : run.exact) {
+      const list = byFace.get(slot);
+
+      if (list) list.push(run.text);
+      else byFace.set(slot, [run.text]);
+    }
+  }
+
+  const out = new Map<string, string[]>();
+
+  for (const { name, font } of state.faces) {
+    const slot = `'${name}' ${font.weight} ${font.style}`;
+    out.set(slot, state.css.family ? every : [...shared, ...(byFace.get(slot) ?? [])]);
+  }
+
+  return out;
+};
+
 interface State {
   readonly canvas: Canvas;
   /** Each def's ids by the clock offset it was walked at, since a def with motions plays on the clock of the clip that first uses it. */
@@ -81,8 +215,10 @@ interface State {
   /** Embedded faces by family name, weight and style, so two different files never claim one slot. */
   readonly fonts: Map<string, Font>;
   readonly faces: { readonly name: string; readonly font: Font }[];
-  /** Every run of text in the scene, so embedded fonts can be cut down to the glyphs it uses. */
-  readonly texts: string[];
+  /** Every run of text in the scene and the faces that can draw it, so embedded fonts can be cut down to the glyphs they use. */
+  readonly runs: TextRun[];
+  /** The scene's CSS mentions a font property, which can move any text to another face or family. */
+  css: { family: boolean; weight: boolean };
   readonly counters: Map<string, number>;
   readonly defs: SvgNode[];
   readonly keyframes: Map<string, string>;
@@ -120,10 +256,11 @@ const hasSmil = (node: SvgNode): boolean =>
     ? node.tag === "animate" || node.children.some(hasSmil)
     : (node.kind === "fragment" || node.kind === "clip") && node.children.some(hasSmil);
 
-const withoutSmil = (node: Element): Element => ({
+const withoutSmil = ({ still, ...node }: Element): Element => ({
   ...node,
+  attrs: { ...node.attrs, ...still },
   children: node.children
-    .filter((child) => !(child.kind === "element" && child.tag === "animate"))
+    .filter((child) => !(child.kind === "element" && ["animate", "set"].includes(child.tag)))
     .map((child) => (child.kind === "element" ? withoutSmil(child) : child)),
 });
 
@@ -470,12 +607,23 @@ const canvasOf = (state: State, once: boolean): Canvas =>
 /** SMIL inside `<Once>` carries this, so `restyle` can start it on the once clock. */
 const ONCE_ATTR = "data-once";
 
-const animateOn = (state: State, attribute: string, lane: Lane, once: boolean): SvgNode => {
-  const node = animate(canvasOf(state, once), attribute, lane);
+/** The value a windowed animation ends on, which its element holds as the attribute so that a seek past the window shows it. */
+const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
+  const first = nodes[0];
 
-  return once && node.kind === "element"
-    ? { ...node, attrs: { ...node.attrs, [ONCE_ATTR]: "" } }
-    : node;
+  return first?.kind === "element" && first.attrs["data-loop"] !== undefined
+    ? String(first.attrs.values).split(";").at(-1)
+    : undefined;
+};
+
+const animateOn = (state: State, attribute: string, lane: Lane, once: boolean): SvgNode[] => {
+  const nodes = animate(canvasOf(state, once), attribute, lane, () => nextName(state, "w"));
+
+  return once
+    ? nodes.map((node) =>
+        node.kind === "element" ? { ...node, attrs: { ...node.attrs, [ONCE_ATTR]: "" } } : node,
+      )
+    : nodes;
 };
 
 const className = (state: State, lanes: readonly Lane[], once: boolean): string => {
@@ -523,9 +671,13 @@ const blurFilter = (state: State, lane: Lane, once: boolean): string => {
   state.blurs.set(signature, id);
   const still = formatValue(valueAt(lane.keys, local(state, lane)).blur);
 
-  const blur = element("feGaussianBlur", { stdDeviation: still }, [
-    animateOn(state, "stdDeviation", lane, once),
-  ]);
+  const nodes = animateOn(state, "stdDeviation", lane, once);
+  const end = windowEnd(nodes);
+
+  const blur = {
+    ...element("feGaussianBlur", { stdDeviation: end ?? still }, nodes),
+    ...(end === undefined ? {} : { still: { stdDeviation: still } }),
+  };
 
   addDef(state, element("filter", { id, ...canvasRegion(state.canvas) }, [blur]));
 
@@ -553,6 +705,7 @@ const emitShell = (
   once: boolean,
 ): SvgNode => {
   const attrs = { ...target.attrs };
+  const still: Record<string, AttrValue> = {};
   const children = [...target.children];
   const css = lanes.filter((lane) => lane.backend === "css");
 
@@ -570,10 +723,16 @@ const emitShell = (
 
     if (lane.backend === "smil") {
       // SAFETY: a smil lane animates an SVG attribute, never a custom property, so its first target is a Channel.
-      attrs[lane.key] = formatValue(
+      const value = formatValue(
         valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel],
       );
-      children.push(animateOn(state, lane.key, lane, once));
+
+      const nodes = animateOn(state, lane.key, lane, once);
+      const end = windowEnd(nodes);
+
+      attrs[lane.key] = end ?? value;
+      if (end !== undefined) still[lane.key] = value;
+      children.push(...nodes);
     }
   }
 
@@ -586,7 +745,10 @@ const emitShell = (
   ].filter(Boolean);
 
   if (classes.length > 0) attrs.class = classes.join(" ");
-  const emitted = element(target.tag, attrs, children);
+  const emitted = {
+    ...element(target.tag, attrs, children),
+    ...(Object.keys(still).length > 0 ? { still } : {}),
+  };
 
   if (state.canvas.stillAt === undefined || !lanes.some((lane) => lane.key === "d")) return emitted;
 
@@ -599,7 +761,8 @@ const stillTwin = (state: State, moving: Element): SvgNode => {
   const rule = `.${prefix}dm{display:none}.${prefix}ds{display:inline}`;
 
   if (!state.stills.includes(rule)) state.stills.push(rule);
-  const { id: _, ...attrs } = moving.attrs;
+  const plain = withoutSmil(moving);
+  const { id: _, ...attrs } = plain.attrs;
 
   const classes = (name: string, own: AttrValue | undefined) =>
     [own, `${prefix}${name}`].filter(Boolean).join(" ");
@@ -609,7 +772,7 @@ const stillTwin = (state: State, moving: Element): SvgNode => {
     children: [
       { ...moving, attrs: { ...moving.attrs, class: classes("dm", moving.attrs.class) } },
       {
-        ...withoutSmil(moving),
+        ...plain,
         attrs: { ...attrs, class: classes("ds", attrs.class), display: "none" },
       },
     ],
@@ -634,16 +797,24 @@ const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
 const clipLabel = ({ at, over }: { readonly at: number; readonly over?: number }): string =>
   `<Clip at={${num(at)}}${over === undefined ? "" : ` over={${num(over)}}`}>`;
 
-const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNode => {
+const walk = (
+  state: State,
+  node: SvgNode,
+  veiled = false,
+  once = false,
+  font: FontCtx = UNKNOWN_FONT,
+): SvgNode => {
   switch (node.kind) {
     case "text":
-      state.texts.push(node.value);
+      state.runs.push(runOf(node.value, font));
 
       return node;
     case "raw":
       return node;
     case "style": {
       const rule = isCss(node.css) ? resolveCss(state, node.css) : node.css;
+
+      noteCss(state, rule);
 
       if (rule.trim()) state.styles.push(rule.trim());
 
@@ -653,7 +824,7 @@ const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNod
     case "fragment":
       return {
         ...node,
-        children: node.children.map((child) => walk(state, child, veiled, once)),
+        children: node.children.map((child) => walk(state, child, veiled, once, font)),
       };
     case "clip": {
       const parent = state.clock;
@@ -678,7 +849,7 @@ const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNod
       try {
         return {
           kind: "fragment",
-          children: node.children.map((child) => walk(state, child, veiled, once)),
+          children: node.children.map((child) => walk(state, child, veiled, once, font)),
         };
       } finally {
         state.clock = parent;
@@ -702,9 +873,14 @@ const walk = (state: State, node: SvgNode, veiled = false, once = false): SvgNod
       const hides =
         veiled || shells.some((shell) => shell.some((lane) => lane.emit === "visibility"));
 
+      if (node.tag === "style")
+        for (const child of node.children) if (child.kind === "text") noteCss(state, child.value);
+
+      const inherited = fontOf(state, node, bare.attrs, font);
+
       const el = {
         ...bare,
-        children: node.children.map((child) => walk(state, child, hides, inOnce)),
+        children: node.children.map((child) => walk(state, child, hides, inOnce, inherited)),
       };
 
       // A wrapper layer turns about the point the element asked for, not the centre of its box.
@@ -746,7 +922,8 @@ export const compile = (
     registrations: [],
     fonts: new Map(),
     faces: [],
-    texts: [],
+    runs: [],
+    css: { family: false, weight: false },
     counters: new Map(),
     defs: [],
     keyframes: new Map(),
@@ -760,7 +937,13 @@ export const compile = (
 
   const body = content.map((node) => walk(state, node));
   const authored = (isCss(author) ? resolveCss(state, author) : author).trim();
-  const fontRules = state.faces.map(({ name, font }) => fontFaceRule(name, font, state.texts));
+
+  noteCss(state, authored);
+  const texts = faceTexts(state);
+
+  const fontRules = state.faces.map(({ name, font }) =>
+    fontFaceRule(name, font, texts.get(`'${name}' ${font.weight} ${font.style}`) ?? []),
+  );
 
   const generated = [
     ...fontRules,
