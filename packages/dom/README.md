@@ -75,9 +75,30 @@ const demos = await recordings<typeof import("./SignIn.demo.tsx")>(here("SignIn.
 ```
 
 - `demo(Component, { props, width, pad, parts }, script)` starts the component with `props` (required when it has required props). `script({ props })` returns any flow `dom.run` takes; its `props(patch)` re-renders the component with the patch merged over its props, as a parent would, and is typed to the component: a wrong name or type doesn't compile. Patches cross into the page, so their values must be JSON. Import the flow's other words from `@svjeez/dom/react` in a demo file: it runs in the browser too.
-- `recordings(file, options)` starts a Vite dev server for the file's folder (its `vite.config`, merged with `options.vite`), records every demo the file exports, and resolves to their steps by export name. It needs `vite`, `react` and `react-dom`.
+- `recordings(file, options)` starts a Vite dev server for the file's folder (its `vite.config`, merged with `options.vite`), records every demo the file exports, and resolves to their steps by export name. It needs `vite`, and `react` and `react-dom` or `svelte`.
 - The recording is kept in `cache`. It is made again when a demo's flow changes, or any file the demo file imports, however deep.
 - `examples/demos` films a shadcn sign-in form and a pull request card this way.
+
+### Svelte
+
+Svelte 5 components work the same way, from `@svjeez/dom/svelte`. A `.svelte` file can't export demos, so they go in a `.demo.ts` file:
+
+```ts
+// Counter.demo.ts
+import { click, demo, snap } from "@svjeez/dom/svelte";
+import Counter from "./Counter.svelte";
+
+export const counter = demo(Counter, { width: 200 }, ({ props }) => [
+  snap(),
+  click("add"), snap({ over: 0.2 }),
+  props({ label: "Total" }), snap({ over: 0.2 }),
+]);
+```
+
+- The component is mounted with reactive props, so `props(patch)` updates them in place and its own state (`$state`, focus, typed text) stays.
+- `props` is typed by `ComponentProps<typeof Counter>`. Plain `tsc` can't read a `.svelte` file's props, so it types them only through svelte-check or the Svelte language server.
+- The app's `vite.config` needs `@sveltejs/vite-plugin-svelte`, as it does to build the app. `recordings()` tells React and Svelte demos apart by which entry the demo file imports.
+- `examples/svelte-demos` films a Svelte settings card.
 
 ## Camera
 

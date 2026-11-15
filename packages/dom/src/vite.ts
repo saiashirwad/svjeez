@@ -4,7 +4,7 @@ import type { AddressInfo } from "node:net";
 import { fileURLToPath } from "node:url";
 import type { InlineConfig, Plugin, ViteDevServer } from "vite";
 import type { BrowserOptions } from "./browser.ts";
-import { isDemo, type Demo } from "./react.ts";
+import { isDemo, type Demo, type Framework } from "./demo.ts";
 import { snapshots } from "./snapshots.ts";
 import type { Step } from "./timeline.ts";
 
@@ -20,7 +20,16 @@ export interface RecordingsOptions extends Omit<BrowserOptions, "base"> {
 }
 
 const ROUTE = "/__svjeez/demo";
-const MOUNT = fileURLToPath(new URL("./react-mount.ts", import.meta.url));
+const MOUNTS: Record<Framework, string> = {
+  react: fileURLToPath(new URL("./react-mount.ts", import.meta.url)),
+  svelte: fileURLToPath(new URL("./svelte-mount.svelte.ts", import.meta.url)),
+};
+
+/** Bundled up front, so nothing is found late and bundled twice, which would load two copies of the framework. */
+const DEPS: Record<Framework, string[]> = {
+  react: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
+  svelte: [],
+};
 
 const page = (file: string, name: string, demo: Demo) => {
   const width = demo.layout.width === undefined ? "display:inline-block" : `width:${demo.layout.width}px`;
@@ -28,7 +37,7 @@ const page = (file: string, name: string, demo: Demo) => {
   return `<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:none">
 <div id="svjeez-demo" style="${width}"></div>
 <script type="module">
-import { mount } from "/@fs${MOUNT}";
+import { mount } from "/@fs${MOUNTS[demo.framework]}";
 import * as demos from "/@fs${file}";
 mount(demos[${JSON.stringify(name)}], document.getElementById("svjeez-demo"));
 </script></body></html>`;
@@ -87,6 +96,9 @@ export const recordings = async <M extends Record<string, unknown>>(
   { cache, vite: config = {}, inputs, ...options }: RecordingsOptions,
 ): Promise<{ [K in keyof M as M[K] extends { readonly kind: "svjeez-demo" } ? K : never]: Step[] }> => {
   const { createServer, mergeConfig } = await import("vite");
+  // Which frameworks the file's demos use, by the entry it imports them from, before Vite starts.
+  const source = await readFile(file, "utf8");
+  const frameworks = (["react", "svelte"] as const).filter((f) => source.includes(`@svjeez/dom/${f}`));
   const root = config.root ?? fileURLToPath(new URL(".", `file://${file}`));
   let demos: Record<string, Demo> = {};
 
@@ -96,12 +108,8 @@ export const recordings = async <M extends Record<string, unknown>>(
       logLevel: "warn",
       appType: "custom",
       plugins: [route(file, new Proxy({}, { get: (_, name: string) => demos[name] }))],
-      resolve: { dedupe: ["react", "react-dom"] },
-      // Bundled up front from the demo file, so nothing is found late and bundled twice, which would load two Reacts.
-      optimizeDeps: {
-        entries: [file],
-        include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
-      },
+      resolve: { dedupe: frameworks.flatMap((f) => (f === "react" ? ["react", "react-dom"] : [f])) },
+      optimizeDeps: { entries: [file], include: frameworks.flatMap((f) => DEPS[f]) },
       server: { port: 0, strictPort: false, hmr: false, fs: { strict: false } },
     } satisfies InlineConfig),
   );

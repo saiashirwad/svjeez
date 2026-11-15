@@ -2,13 +2,7 @@
 import { createElement } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import type { Demo } from "./react.ts";
-
-declare global {
-  interface Window {
-    __svjeez?: { props: (patch: Record<string, unknown>) => Promise<void> };
-  }
-}
+import type { Demo } from "./demo.ts";
 
 export const mount = (demo: Demo, host: HTMLElement): void => {
   const root = createRoot(host);

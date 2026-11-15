@@ -14,7 +14,8 @@
     ".": "./src/index.ts",
     "./story": "./src/story.ts",
     "./react": "./src/react.ts",
-    "./vite": "./src/vite.ts"
+    "./vite": "./src/vite.ts",
+    "./svelte": "./src/svelte.ts"
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",
@@ -24,14 +25,16 @@
     "woff2-encoder": "^2.0.0"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@types/bun": "latest",
-    "playwright-core": "^1.64.1",
-    "svjeez": "workspace:*",
-    "typescript": "latest",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "playwright-core": "^1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "svelte": "^5.57.3",
+    "svjeez": "workspace:*",
+    "typescript": "latest",
     "vite": "8.3.5"
   },
   "peerDependencies": {
@@ -39,7 +42,8 @@
     "svjeez": ">=0.6.0 <1",
     "react": ">=18",
     "react-dom": ">=18",
-    "vite": ">=8"
+    "vite": ">=8",
+    "svelte": ">=5"
   },
   "engines": {
     "node": ">=20"
@@ -52,6 +56,9 @@
       "optional": true
     },
     "vite": {
+      "optional": true
+    },
+    "svelte": {
       "optional": true
     }
   }
