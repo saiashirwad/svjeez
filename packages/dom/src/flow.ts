@@ -12,7 +12,13 @@ export type Action =
   | { readonly press: string }
   | { readonly move: readonly [x: number, y: number] }
   /** New markup for a mounted card, as `card.html`. Hover and focus don't carry over. */
-  | { readonly html: string };
+  | { readonly html: string }
+  /**
+   * Re-render the component with these props merged over the ones it has. The page must say how, through
+   * `window.__svjeez.props`, as a demo from `@svjeez/dom/react` does. State inside the component (typed text, focus)
+   * stays, as it would when a parent re-renders it.
+   */
+  | { readonly props: Readonly<Record<string, unknown>> };
 
 /** How the timeline arrives at a snapshot: it starts where the one before ended, plus any waits. */
 export interface Timing {
@@ -76,3 +82,4 @@ export const click = (target: string): Action => ({ click: target });
 export const hover = (target: string): Action => ({ hover: target });
 export const press = (key: string): Action => ({ press: key });
 export const move = (x: number, y: number): Action => ({ move: [x, y] });
+export const props = (patch: Readonly<Record<string, unknown>>): Action => ({ props: patch });

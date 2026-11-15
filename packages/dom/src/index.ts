@@ -16,6 +16,7 @@ export {
   html,
   move,
   press,
+  props,
   snap,
   wait,
   type Act,

@@ -42,6 +42,40 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 - A `::before` or `::after` draws the text Chromium laid out for it, so counters and `attr()` come along, and a color input draws its value in its swatch.
 - Not drawn yet: range inputs' tracks and thumbs, conic gradients, `background-size` tiles, background images, and clips between an element with a `z-index` and its stacking context.
 
+## React demos
+
+Film your app's real components, not markup copied out of them. A `.demo.tsx` file next to a component says what happens to it, and `recordings()` renders it through the app's own Vite config, so its CSS, Tailwind, fonts and imports are the app's:
+
+```tsx
+// SignIn.demo.tsx
+import { demo, fill, hover, props, snap, wait } from "@svjeez/dom/react";
+import { SignIn } from "./SignIn.tsx";
+
+export const signIn = demo(<SignIn />, { width: 360 }, [
+  snap("idle"),
+  fill("email", "sai@example.com"), snap({ over: 0.9 }),   // the component's own state
+  hover("submit"), snap({ over: 0.15 }),
+  props({ error: "Unable to sign in." }), snap({ over: 0.25 }), // re-render from outside; typed text stays
+  wait(1.8),
+]);
+```
+
+```tsx
+// scene.tsx
+import { recordings } from "@svjeez/dom/vite";
+
+const demos = await recordings<typeof import("./SignIn.demo.tsx")>(here("SignIn.demo.tsx"), {
+  cache: here("snapshots.json"),
+});
+
+<Dom states={demos.signIn} />;
+```
+
+- `demo(element, { width, pad, parts }, flow)` takes any flow `dom.run` does, plus `props(patch)`, which re-renders the element with the patch merged over its props, as a parent would. Import the flow's words from `@svjeez/dom/react` in a demo file: it runs in the browser too.
+- `recordings(file, options)` starts a Vite dev server for the file's folder (its `vite.config`, merged with `options.vite`), records every demo the file exports, and resolves to their steps by export name. It needs `vite`, `react` and `react-dom`.
+- The recording is kept in `cache`. It is made again when a demo's flow changes, or any file the demo file imports, however deep.
+- `examples/demos` films a shadcn sign-in form and a pull request card this way.
+
 ## Stories
 
 An app written as `update` and `view` (Elm, Redux, `@svjeez/live`) can be filmed by the messages it takes. `story` from `@svjeez/dom/story` runs them through `update`, renders each model with `view`, and gives back the first markup and a flow for `dom.run`:

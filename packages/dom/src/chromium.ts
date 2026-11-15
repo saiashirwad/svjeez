@@ -374,6 +374,18 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
       if ("html" in action) return render(action.html);
 
+      if ("props" in action)
+        return page.evaluate(async (patch) => {
+          const host = (window as { __svjeez?: { props?: (p: unknown) => unknown } }).__svjeez;
+
+          if (!host?.props)
+            throw new Error(
+              "props() re-renders a component, but this page has no window.__svjeez.props. Record it with @svjeez/dom/vite.",
+            );
+
+          await host.props(patch);
+        }, action.props);
+
       throw new Error(`run() doesn't know the instruction ${JSON.stringify(action)}.`);
     };
 
@@ -424,7 +436,9 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       });
 
       // A page whose load never ends (a stream, a slow tracker) is read as it stands after a few seconds.
-      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.goto(options.base ? new URL(url, options.base).href : url, {
+        waitUntil: "domcontentloaded",
+      });
       await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => undefined);
 
       if (faces) await page.addStyleTag({ content: faces });
