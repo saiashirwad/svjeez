@@ -52,9 +52,9 @@ const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean)
   const [first, ...rest] = attr(tag, "values").split(";");
   const last = rest.at(-1);
 
-  // Ends at once and freezes, as the compiler writes its own.
-  const hold = (to: string | undefined, begin = "0s") =>
-    `<set attributeName="${name}" to="${to}" begin="${begin}" dur="${num(HOLD)}s" fill="freeze"/>`;
+  // Frozen, as the compiler writes its own. A hold before the window lasts until it opens, as WebKit drops frozen values.
+  const hold = (to: string | undefined, begin = "0s", dur = HOLD) =>
+    `<set attributeName="${name}" to="${to}" begin="${begin}" dur="${num(dur)}s" fill="freeze"/>`;
 
   const from = (begin: string) => tag.replace(/(\sbegin=")[^"]*/, `$1${begin}`);
 
@@ -73,8 +73,8 @@ const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean)
   return (
     (over ? hold(last) : "") +
     from(begin) +
-    (clock < start ? hold(first) : "") +
-    (again === undefined ? "" : hold(first, again))
+    (clock < start ? hold(first, "0s", start - clock) : "") +
+    (again === undefined ? "" : hold(first, again, start))
   );
 };
 

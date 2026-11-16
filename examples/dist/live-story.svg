@@ -1046,32 +1046,32 @@ svg{--dom-11wnbo3:rgba(33,28,28,0.18);--dom-139mrs1:rgb(229,165,10);--dom-1e1g7f
       <path d="M550 170H640.14A2 2 0 0 1 642.14 172V172A2 2 0 0 1 640.14 174H550A2 2 0 0 1 548 172V172A2 2 0 0 1 550 170Z" fill="url(#g23)" class="a m11"/>
       <path d="M578.06 161H591.06V174H578.06Z" fill="url(#g19)" class="dm">
         <animate id="w1" attributeName="d" values="M542 161H555V174H542Z;M578.06 161H591.06V174H578.06Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="1.1999s;w1.begin+11.8s" dur="0.8s" fill="freeze" data-loop="11.8s"/>
-        <set attributeName="d" to="M542 161H555V174H542Z" begin="0s;w1.begin+10.6001s" dur="0.001s" fill="freeze" data-loop="11.8s"/>
+        <set attributeName="d" to="M542 161H555V174H542Z" begin="0s;w1.begin+10.6001s" dur="1.1999s" fill="freeze" data-loop="11.8s"/>
       </path>
       <path d="M578.06 161H591.06V174H578.06Z" fill="url(#g19)" class="ds" display="none"/>
       <path d="M591.06 161H604.06V174H591.06Z" fill="url(#g20)" class="dm">
         <animate id="w2" attributeName="d" values="M555 161H568V174H555Z;M591.06 161H604.06V174H591.06Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="1.1999s;w2.begin+11.8s" dur="0.8s" fill="freeze" data-loop="11.8s"/>
-        <set attributeName="d" to="M555 161H568V174H555Z" begin="0s;w2.begin+10.6001s" dur="0.001s" fill="freeze" data-loop="11.8s"/>
+        <set attributeName="d" to="M555 161H568V174H555Z" begin="0s;w2.begin+10.6001s" dur="1.1999s" fill="freeze" data-loop="11.8s"/>
       </path>
       <path d="M591.06 161H604.06V174H591.06Z" fill="url(#g20)" class="ds" display="none"/>
       <path d="M591.06 174H604.06V187H591.06Z" fill="url(#g21)" class="dm">
         <animate id="w3" attributeName="d" values="M555 174H568V187H555Z;M591.06 174H604.06V187H591.06Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="1.1999s;w3.begin+11.8s" dur="0.8s" fill="freeze" data-loop="11.8s"/>
-        <set attributeName="d" to="M555 174H568V187H555Z" begin="0s;w3.begin+10.6001s" dur="0.001s" fill="freeze" data-loop="11.8s"/>
+        <set attributeName="d" to="M555 174H568V187H555Z" begin="0s;w3.begin+10.6001s" dur="1.1999s" fill="freeze" data-loop="11.8s"/>
       </path>
       <path d="M591.06 174H604.06V187H591.06Z" fill="url(#g21)" class="ds" display="none"/>
       <path d="M578.06 174H591.06V187H578.06Z" fill="url(#g22)" class="dm">
         <animate id="w4" attributeName="d" values="M542 174H555V187H542Z;M578.06 174H591.06V187H578.06Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="1.1999s;w4.begin+11.8s" dur="0.8s" fill="freeze" data-loop="11.8s"/>
-        <set attributeName="d" to="M542 174H555V187H542Z" begin="0s;w4.begin+10.6001s" dur="0.001s" fill="freeze" data-loop="11.8s"/>
+        <set attributeName="d" to="M542 174H555V187H542Z" begin="0s;w4.begin+10.6001s" dur="1.1999s" fill="freeze" data-loop="11.8s"/>
       </path>
       <path d="M578.06 174H591.06V187H578.06Z" fill="url(#g22)" class="ds" display="none"/>
       <path d="M591.06 163H591.06A9 9 0 0 1 600.06 172V172A9 9 0 0 1 591.06 181H591.06A9 9 0 0 1 582.06 172V172A9 9 0 0 1 591.06 163Z" fill="var(--dom-1mhzg5h)" style="fill:var(--dom-1mhzg5h)" class="dm">
         <animate id="w5" attributeName="d" values="M555 163H555A9 9 0 0 1 564 172V172A9 9 0 0 1 555 181H555A9 9 0 0 1 546 172V172A9 9 0 0 1 555 163Z;M591.06 163H591.06A9 9 0 0 1 600.06 172V172A9 9 0 0 1 591.06 181H591.06A9 9 0 0 1 582.06 172V172A9 9 0 0 1 591.06 163Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="1.1999s;w5.begin+11.8s" dur="0.8s" fill="freeze" data-loop="11.8s"/>
-        <set attributeName="d" to="M555 163H555A9 9 0 0 1 564 172V172A9 9 0 0 1 555 181H555A9 9 0 0 1 546 172V172A9 9 0 0 1 555 163Z" begin="0s;w5.begin+10.6001s" dur="0.001s" fill="freeze" data-loop="11.8s"/>
+        <set attributeName="d" to="M555 163H555A9 9 0 0 1 564 172V172A9 9 0 0 1 555 181H555A9 9 0 0 1 546 172V172A9 9 0 0 1 555 163Z" begin="0s;w5.begin+10.6001s" dur="1.1999s" fill="freeze" data-loop="11.8s"/>
       </path>
       <path d="M591.06 163H591.06A9 9 0 0 1 600.06 172V172A9 9 0 0 1 591.06 181H591.06A9 9 0 0 1 582.06 172V172A9 9 0 0 1 591.06 163Z" fill="var(--dom-1mhzg5h)" style="fill:var(--dom-1mhzg5h)" class="ds" display="none"/>
       <path d="M591.06 165H591.06A7 7 0 0 1 598.06 172V172A7 7 0 0 1 591.06 179H591.06A7 7 0 0 1 584.06 172V172A7 7 0 0 1 591.06 165Z" fill="var(--dom-1gqpz22)" style="fill:var(--dom-1gqpz22)" class="dm">
         <animate id="w6" attributeName="d" values="M555 165H555A7 7 0 0 1 562 172V172A7 7 0 0 1 555 179H555A7 7 0 0 1 548 172V172A7 7 0 0 1 555 165Z;M591.06 165H591.06A7 7 0 0 1 598.06 172V172A7 7 0 0 1 591.06 179H591.06A7 7 0 0 1 584.06 172V172A7 7 0 0 1 591.06 165Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="1.1999s;w6.begin+11.8s" dur="0.8s" fill="freeze" data-loop="11.8s"/>
-        <set attributeName="d" to="M555 165H555A7 7 0 0 1 562 172V172A7 7 0 0 1 555 179H555A7 7 0 0 1 548 172V172A7 7 0 0 1 555 165Z" begin="0s;w6.begin+10.6001s" dur="0.001s" fill="freeze" data-loop="11.8s"/>
+        <set attributeName="d" to="M555 165H555A7 7 0 0 1 562 172V172A7 7 0 0 1 555 179H555A7 7 0 0 1 548 172V172A7 7 0 0 1 555 165Z" begin="0s;w6.begin+10.6001s" dur="1.1999s" fill="freeze" data-loop="11.8s"/>
       </path>
       <path d="M591.06 165H591.06A7 7 0 0 1 598.06 172V172A7 7 0 0 1 591.06 179H591.06A7 7 0 0 1 584.06 172V172A7 7 0 0 1 591.06 165Z" fill="var(--dom-1gqpz22)" style="fill:var(--dom-1gqpz22)" class="ds" display="none"/>
       <g>

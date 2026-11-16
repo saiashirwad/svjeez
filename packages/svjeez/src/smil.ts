@@ -98,9 +98,6 @@ export const smilAttributes = (
   };
 };
 
-/** How long a window's `<set>` runs: just long enough to start, since freezing keeps its value. */
-const RESET = 0.001;
-
 /** A loop whose motion fits in less of the loop than this plays as a window. */
 const WINDOW_SHARE = 0.8;
 
@@ -171,9 +168,10 @@ const windowed = (
       attributeName: attribute,
       to: values[0]!,
       begin: `0s${again}`,
-      // It only has to land once, so it ends at once: an open interval makes the browser apply it on every frame.
-      // Frozen, so no frame falls between the set ending and the window opening. WebKit shows the attribute there.
-      dur: `${RESET}s`,
+      // It stays active until the window opens: WebKit drops a frozen value on setCurrentTime, so a set that ended at
+      // once would show the attribute (the last value) when seeking before the window. Frozen, so no frame falls
+      // between the set ending and the window opening.
+      dur: `${start}s`,
       fill: "freeze",
       "data-loop": `${loop}s`,
     }),

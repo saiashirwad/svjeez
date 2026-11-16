@@ -72,7 +72,7 @@ describe("windowed SMIL markup", () => {
     expect(animate).not.toContain("repeatCount");
     // Past the window it holds B, so the next loop's start resets to A.
     expect(attrsOf(morph, "set")).toEqual([
-      `<set attributeName="d" to="${A}" begin="0s;w1.begin+8s" dur="0.001s" fill="freeze" data-loop="10s"/>`,
+      `<set attributeName="d" to="${A}" begin="0s;w1.begin+8s" dur="2s" fill="freeze" data-loop="10s"/>`,
     ]);
   });
 
@@ -102,7 +102,7 @@ describe("windowed SMIL markup", () => {
 
   test("blur windows at playback speed", () => {
     expect(attrsOf(blur, "animate")[0]).toContain('begin="0.5s;w1.begin+5s" dur="1s"');
-    expect(attrsOf(blur, "set")[0]).toContain('to="6" begin="0s;w1.begin+4.5s" dur="0.001s"');
+    expect(attrsOf(blur, "set")[0]).toContain('to="6" begin="0s;w1.begin+4.5s" dur="0.5s"');
   });
 
   test("ids carry the prefix and stay unique", () => {

@@ -5,7 +5,7 @@
     <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="110">
       <feGaussianBlur stdDeviation="0">
         <animate id="w1" attributeName="stdDeviation" values="6;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.5s;w1.begin+5s" dur="0.8s" fill="freeze" data-loop="5s"/>
-        <set attributeName="stdDeviation" to="6" begin="0s;w1.begin+4.5s" dur="0.001s" fill="freeze" data-loop="5s"/>
+        <set attributeName="stdDeviation" to="6" begin="0s;w1.begin+4.5s" dur="0.5s" fill="freeze" data-loop="5s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f1s" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="110">
