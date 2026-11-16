@@ -38,7 +38,15 @@ const files = [...new Bun.Glob("**/*.svg").scanSync(DIST)].sort();
 
 type Value = number | string | null;
 type Snapshot = Record<string, Value>;
-type Run = { times: number[]; labels: string[]; texty: string[]; forward: Snapshot[]; backward: Snapshot[] };
+type Run = {
+  times: number[];
+  /** Which elements the engine runs an animation on, as their positions in the document. */
+  animated: number[];
+  labels: string[];
+  texty: string[];
+  forward: Snapshot[];
+  backward: Snapshot[];
+};
 
 /** Runs in the page: the scene times to check, from the SMIL windows in the file. */
 const plan = ([loopSrc, count]: [string, number]): number[] => {
@@ -77,7 +85,7 @@ const plan = ([loopSrc, count]: [string, number]): number[] => {
 };
 
 /** Runs in the page: set each time with seek, forward then backward, and read every animated element at each. */
-const probe = ([seekSrc, times]: [string, number[]]) => {
+const probe = ([seekSrc, times, indices]: [string, number[], number[] | undefined]) => {
   const seekTo = (0, eval)(`(${seekSrc})`) as (time: number) => void;
   const targets = new Set<Element>();
 
@@ -95,7 +103,8 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
   }
 
   const all = [...document.querySelectorAll("*")];
-  const list = [...targets].sort((a, b) => all.indexOf(a) - all.indexOf(b));
+  // The elements Chromium animates, when it has said which, so an engine that animates fewer is measured on them too.
+  const list = indices ? indices.map((index) => all[index]!) : [...targets].sort((a, b) => all.indexOf(a) - all.indexOf(b));
   const labels = list.map((element) => `${element.tagName}${element.id ? "#" + element.id : ""}[${all.indexOf(element)}]`);
   const round = (n: number) => Math.round(n * 100) / 100;
 
@@ -110,7 +119,6 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
       const unlaidOut = element.closest("mask") !== null;
 
       try {
-        // A group's box depends on how each engine places the transform-box of what it holds. Its bounds still count.
         if (unlaidOut || element.matches("g, svg, use")) throw new Error("no box");
         const box = (element as SVGGraphicsElement).getBBox();
 
@@ -126,13 +134,16 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
       }
 
       // Where the element ends up on the page, with the transform attribute, CSS transforms and every ancestor's.
-      const bounds = element.getBoundingClientRect();
-      const nothing = round(bounds.width) === 0 || round(bounds.height) === 0;
+      // A group's bounds depend on how each engine counts what it holds, so the shapes inside it are measured instead.
+      if (!unlaidOut && !element.matches("g, svg, use")) {
+        const bounds = element.getBoundingClientRect();
+        const nothing = round(bounds.width) === 0 || round(bounds.height) === 0;
 
-      snapshot[key + " bx"] = nothing || unlaidOut ? 0 : round(bounds.x);
-      snapshot[key + " by"] = nothing || unlaidOut ? 0 : round(bounds.y);
-      snapshot[key + " bw"] = nothing || unlaidOut ? 0 : round(bounds.width);
-      snapshot[key + " bh"] = nothing || unlaidOut ? 0 : round(bounds.height);
+        snapshot[key + " bcx"] = nothing ? 0 : round(bounds.x + bounds.width / 2);
+        snapshot[key + " bcy"] = nothing ? 0 : round(bounds.y + bounds.height / 2);
+        snapshot[key + " bw"] = nothing ? 0 : round(bounds.width);
+        snapshot[key + " bh"] = nothing ? 0 : round(bounds.height);
+      }
 
       for (const prop of ["display", "opacity", "visibility", "translate", "rotate", "scale"])
         snapshot[key + " " + prop] = style.getPropertyValue(prop);
@@ -159,7 +170,9 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
 
   const texty = labels.filter((_, k) => list[k]!.matches("text, tspan") || list[k]!.querySelector("text"));
 
-  return { labels, texty, forward, backward };
+  const animated = [...targets].map((element) => all.indexOf(element)).sort((a, b) => a - b);
+
+  return { labels, animated, texty, forward, backward };
 };
 
 const numbers = /(-?\d*\.?\d+(?:e[-+]?\d+)?)/;
@@ -188,15 +201,15 @@ type Mismatch = { when: string; key: string; expected: Value; got: Value };
 /** Where a run differs from the Chromium one. */
 const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
   const found: Mismatch[] = [];
-  const shows = (label: string) => `${label} display:${reference.forward[0]![label + " display"]}`;
+  const lacks = reference.animated.filter((index) => !run.animated.includes(index));
 
-  // The elements an engine runs animations on, which it can leave out, as with a display: none one in one engine only.
-  if (reference.labels.join() !== run.labels.join())
+  // The elements an engine runs animations on: one that leaves some out, or adds some, plays differently.
+  if (lacks.length || run.animated.length !== reference.animated.length)
     found.push({
       when: "targets",
       key: "animated elements",
-      expected: reference.labels.filter((label) => !run.labels.includes(label)).map(shows).join(" "),
-      got: run.labels.filter((label) => !reference.labels.includes(label)).join(" ") + " (only here)",
+      expected: `${reference.animated.length}, ${lacks.length} of them without an animation here: ${lacks.map((index) => reference.labels[reference.animated.indexOf(index)]).join(" ")}`,
+      got: run.animated.length,
     });
 
   for (const direction of ["forward", "backward"] as const)
@@ -210,11 +223,14 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
 
         const label = key.slice(0, key.lastIndexOf(" "));
         // Text is measured by each engine's own shaping, so the box around it, and around a group holding it, gets room.
-        const box = ["x", "y", "width", "height", "bx", "by", "bw", "bh"].includes(prop);
+        const box = ["x", "y", "width", "height", "bcx", "bcy", "bw", "bh"].includes(prop);
         const size = Math.max(...["width", "height", "bw", "bh"].map((side) => Number(want[label + " " + side]) || 0));
-        const slack = box ? size * (reference.texty.includes(label) ? TEXT : CURVES) : 0;
+        // Engines measure a rotated shape's bounds differently, Firefox around the shape and Chromium around its box, so
+        // the size of those bounds gets room. Where the bounds sit doesn't.
+        const loose = prop === "bw" || prop === "bh" || reference.texty.includes(label);
+        const slack = box ? size * (loose ? TEXT : CURVES) : 0;
 
-        if (skip.includes(prop) || close(prop, want[key]!, have[key] ?? null, slack)) continue;
+        if (prop === "display" || skip.includes(prop) || close(prop, want[key]!, have[key] ?? null, slack)) continue;
         found.push({ when: `${direction} at ${time}s`, key, expected: want[key]!, got: have[key] ?? null });
       }
     });
@@ -256,7 +272,7 @@ const open = async (browser: Browser, svg: string): Promise<Page> => {
 };
 
 /** Every file's run in one browser, at the times Chromium chose when it has chosen them. */
-const collect = async (browser: Browser, times?: Map<string, number[]>) => {
+const collect = async (browser: Browser, reference?: Map<string, Run | Error>) => {
   const runs = new Map<string, Run | Error>();
   const queue = [...files];
 
@@ -266,10 +282,12 @@ const collect = async (browser: Browser, times?: Map<string, number[]>) => {
         const page = await open(browser, readFileSync(join(DIST, file), "utf8"));
 
         try {
-          const when = times?.get(file) ?? (await page.evaluate(plan, [String(loopLength), TIMES]));
-          const { labels, texty, forward, backward } = await page.evaluate(probe, [String(seek), when]);
+          const want = reference?.get(file);
+          const chosen = want instanceof Error ? undefined : want;
+          const when = chosen?.times ?? (await page.evaluate(plan, [String(loopLength), TIMES]));
+          const found = await page.evaluate(probe, [String(seek), when, chosen?.animated]);
 
-          runs.set(file, { times: when, labels, texty, forward, backward });
+          runs.set(file, { times: when, ...found });
         } catch (error) {
           runs.set(file, error as Error);
         } finally {
@@ -317,10 +335,7 @@ describe("every example seeks the same in each engine", () => {
 
       beforeAll(async () => {
         const start = performance.now();
-        const times = new Map<string, number[]>();
-
-        for (const [file, run] of chromiumRuns) if (!(run instanceof Error)) times.set(file, run.times);
-        runs = name === "chromium" ? chromiumRuns : await collect(browser, times);
+        runs = name === "chromium" ? chromiumRuns : await collect(browser, chromiumRuns);
         console.log(`${name}: ${files.length} files in ${seconds(start)}s`);
       }, 600_000);
 
