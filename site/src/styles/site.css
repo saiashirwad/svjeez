@@ -666,7 +666,7 @@ kbd {
     0 1.25rem 2.5rem -1rem var(--shadow);
 }
 .win img,
-.win > .stage {
+.win > .daynight {
   border-radius: inherit;
 }
 /* A scene draws its own window, a 12px radius and a hairline in its own pixels, so the page's frame steps aside and the
@@ -911,7 +911,7 @@ pre.code {
 pre.side {
   align-self: start;
 }
-.stage {
+.daynight {
   --split: 50%;
   position: relative;
   aspect-ratio: 1280 / 720;
@@ -965,7 +965,7 @@ pre.side {
     center / 1.5rem no-repeat;
   box-shadow: 0 2px 8px oklch(0% 0 0 / 0.35);
 }
-.stage:has(input:focus-visible) .handle::after {
+.daynight:has(input:focus-visible) .handle::after {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
@@ -1004,10 +1004,10 @@ pre.side {
   pointer-events: none;
   transition: opacity 0.2s;
 }
-.stage.playing .hint {
+.daynight.playing .hint {
   opacity: 0;
 }
-.stage input {
+.daynight input {
   position: absolute;
   inset: 0;
   inline-size: 100%;
@@ -1016,11 +1016,11 @@ pre.side {
   opacity: 0;
   pointer-events: none;
 }
-.stage.intro {
+.daynight.intro {
   animation: sweep 2.4s 0.2s var(--out) both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .stage.intro {
+  .daynight.intro {
     animation: none;
   }
 }

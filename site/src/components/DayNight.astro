@@ -11,7 +11,7 @@ interface Props {
 const { scene, alt } = Astro.props;
 ---
 
-<div class="stage intro">
+<div class="daynight intro">
   <div class="layer light"><LiveScene scene={scene} scheme="light" manual alt={alt} /></div>
   <div class="layer dark" aria-hidden="true"><LiveScene scene={scene} scheme="dark" manual alt="" /></div>
   <span class="tag l">light</span><span class="tag d">dark</span>
@@ -23,7 +23,7 @@ const { scene, alt } = Astro.props;
 <script>
   import { play, still } from "../scripts/scenes";
 
-  for (const stage of document.querySelectorAll<HTMLElement>(".stage")) {
+  for (const stage of document.querySelectorAll<HTMLElement>(".daynight")) {
     const range = stage.querySelector("input")!;
 
     const set = (percent: number) => {
