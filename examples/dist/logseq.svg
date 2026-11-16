@@ -59,28 +59,28 @@
     <clipPath id="c19">
       <path d="M1018.31 99H1068A0 0 0 0 1 1068 99V118.98A0 0 0 0 1 1068 118.98H1018.31A0 0 0 0 1 1018.31 118.98V99A0 0 0 0 1 1018.31 99Z" fill="#000" style="fill:#000" class="dm">
         <animate id="w2" attributeName="d" values="M972.31 99H1022A0 0 0 0 1 1022 99V118.98A0 0 0 0 1 1022 118.98H972.31A0 0 0 0 1 972.31 118.98V99A0 0 0 0 1 972.31 99Z;M1018.31 99H1068A0 0 0 0 1 1068 99V118.98A0 0 0 0 1 1068 118.98H1018.31A0 0 0 0 1 1018.31 118.98V99A0 0 0 0 1 1018.31 99Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w2.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-        <set attributeName="d" to="M972.31 99H1022A0 0 0 0 1 1022 99V118.98A0 0 0 0 1 1022 118.98H972.31A0 0 0 0 1 972.31 118.98V99A0 0 0 0 1 972.31 99Z" begin="0s;w2.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+        <set attributeName="d" to="M972.31 99H1022A0 0 0 0 1 1022 99V118.98A0 0 0 0 1 1022 118.98H972.31A0 0 0 0 1 972.31 118.98V99A0 0 0 0 1 972.31 99Z" begin="0s;w2.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M1018.31 99H1068A0 0 0 0 1 1068 99V118.98A0 0 0 0 1 1068 118.98H1018.31A0 0 0 0 1 1018.31 118.98V99A0 0 0 0 1 1018.31 99Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
     <clipPath id="c20">
       <path d="M0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="#000" style="fill:#000" class="dm">
         <animate id="w7" attributeName="d" values="M-246 0H-1A0 0 0 0 1 -1 0V702A0 0 0 0 1 -1 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z;M0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w7.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-        <set attributeName="d" to="M-246 0H-1A0 0 0 0 1 -1 0V702A0 0 0 0 1 -1 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z" begin="0s;w7.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+        <set attributeName="d" to="M-246 0H-1A0 0 0 0 1 -1 0V702A0 0 0 0 1 -1 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z" begin="0s;w7.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
     <clipPath id="c21">
       <path d="M18 52H227A6 6 0 0 1 233 58V78A6 6 0 0 1 227 84H18A6 6 0 0 1 12 78V58A6 6 0 0 1 18 52Z" fill="#000" style="fill:#000" class="dm">
         <animate id="w8" attributeName="d" values="M-228 52H-19A6 6 0 0 1 -13 58V78A6 6 0 0 1 -19 84H-228A6 6 0 0 1 -234 78V58A6 6 0 0 1 -228 52Z;M18 52H227A6 6 0 0 1 233 58V78A6 6 0 0 1 227 84H18A6 6 0 0 1 12 78V58A6 6 0 0 1 18 52Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w8.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-        <set attributeName="d" to="M-228 52H-19A6 6 0 0 1 -13 58V78A6 6 0 0 1 -19 84H-228A6 6 0 0 1 -234 78V58A6 6 0 0 1 -228 52Z" begin="0s;w8.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+        <set attributeName="d" to="M-228 52H-19A6 6 0 0 1 -13 58V78A6 6 0 0 1 -19 84H-228A6 6 0 0 1 -234 78V58A6 6 0 0 1 -228 52Z" begin="0s;w8.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M18 52H227A6 6 0 0 1 233 58V78A6 6 0 0 1 227 84H18A6 6 0 0 1 12 78V58A6 6 0 0 1 18 52Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
     <clipPath id="c22">
       <path d="M42 58H101.22A0 0 0 0 1 101.22 58V77.98A0 0 0 0 1 101.22 77.98H42A0 0 0 0 1 42 77.98V58A0 0 0 0 1 42 58Z" fill="#000" style="fill:#000" class="dm">
         <animate id="w10" attributeName="d" values="M-204 58H-144.78A0 0 0 0 1 -144.78 58V77.98A0 0 0 0 1 -144.78 77.98H-204A0 0 0 0 1 -204 77.98V58A0 0 0 0 1 -204 58Z;M42 58H101.22A0 0 0 0 1 101.22 58V77.98A0 0 0 0 1 101.22 77.98H42A0 0 0 0 1 42 77.98V58A0 0 0 0 1 42 58Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w10.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-        <set attributeName="d" to="M-204 58H-144.78A0 0 0 0 1 -144.78 58V77.98A0 0 0 0 1 -144.78 77.98H-204A0 0 0 0 1 -204 77.98V58A0 0 0 0 1 -204 58Z" begin="0s;w10.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+        <set attributeName="d" to="M-204 58H-144.78A0 0 0 0 1 -144.78 58V77.98A0 0 0 0 1 -144.78 77.98H-204A0 0 0 0 1 -204 77.98V58A0 0 0 0 1 -204 58Z" begin="0s;w10.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M42 58H101.22A0 0 0 0 1 101.22 58V77.98A0 0 0 0 1 101.22 77.98H42A0 0 0 0 1 42 77.98V58A0 0 0 0 1 42 58Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
@@ -228,7 +228,7 @@
     <clipPath id="c46">
       <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" fill="#000" style="fill:#000" class="dm">
         <animate id="w17" attributeName="d" values="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595Z;M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w17.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
-        <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595Z" begin="0s;w17.begin+3.6s" dur="0.001s" fill="freeze" data-loop="9s"/>
+        <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595Z" begin="0s;w17.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
       </path>
       <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
@@ -416,7 +416,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <g opacity="0.8">
             <path d="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="dm">
               <animate id="w1" attributeName="d" values="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z;M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="0.8s;w1.begin+9s" dur="0.3s" fill="freeze" data-loop="9s"/>
-              <set attributeName="d" to="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" begin="0s;w1.begin+8.2s" dur="0.001s" fill="freeze" data-loop="9s"/>
+              <set attributeName="d" to="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" begin="0s;w1.begin+8.2s" dur="0.8s" fill="freeze" data-loop="9s"/>
             </path>
             <path d="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="ds" display="none"/>
           </g>
@@ -1082,7 +1082,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         <g opacity="0.8">
           <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="dm">
             <animate id="w3" attributeName="d" values="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z;M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w3.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-            <set attributeName="d" to="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" begin="0s;w3.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+            <set attributeName="d" to="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" begin="0s;w3.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
           </path>
           <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="ds" display="none"/>
         </g>
@@ -1092,19 +1092,19 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <g opacity="0.8">
             <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="dm">
               <animate id="w4" attributeName="d" values="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z;M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w4.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-              <set attributeName="d" to="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" begin="0s;w4.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+              <set attributeName="d" to="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" begin="0s;w4.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
             </path>
             <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="ds" display="none"/>
           </g>
         </g>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="dm">
           <animate id="w5" attributeName="d" values="M-246 0H0A0 0 0 0 1 0 0V702A0 0 0 0 1 0 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z;M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w5.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-          <set attributeName="d" to="M-246 0H0A0 0 0 0 1 0 0V702A0 0 0 0 1 0 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z" begin="0s;w5.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+          <set attributeName="d" to="M-246 0H0A0 0 0 0 1 0 0V702A0 0 0 0 1 0 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z" begin="0s;w5.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
         </path>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="ds" display="none"/>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0ZM0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1vt1yoq)" fill-rule="evenodd" style="fill:var(--dom-1vt1yoq)" class="dm">
           <animate id="w6" attributeName="d" values="M-246 0H0A0 0 0 0 1 0 0V702A0 0 0 0 1 0 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0ZM-246 0H-1A0 0 0 0 1 -1 0V702A0 0 0 0 1 -1 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z;M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0ZM0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w6.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-          <set attributeName="d" to="M-246 0H0A0 0 0 0 1 0 0V702A0 0 0 0 1 0 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0ZM-246 0H-1A0 0 0 0 1 -1 0V702A0 0 0 0 1 -1 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z" begin="0s;w6.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+          <set attributeName="d" to="M-246 0H0A0 0 0 0 1 0 0V702A0 0 0 0 1 0 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0ZM-246 0H-1A0 0 0 0 1 -1 0V702A0 0 0 0 1 -1 702H-246A0 0 0 0 1 -246 702V0A0 0 0 0 1 -246 0Z" begin="0s;w6.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
         </path>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0ZM0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1vt1yoq)" fill-rule="evenodd" style="fill:var(--dom-1vt1yoq)" class="ds" display="none"/>
         <g clip-path="url(#c20)">
@@ -1113,7 +1113,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               <g opacity="var(--dom-1lj8570)">
                 <path d="M18 56H34A4 4 0 0 1 38 60V76A4 4 0 0 1 34 80H18A4 4 0 0 1 14 76V60A4 4 0 0 1 18 56Z" fill="var(--dom-1hnn7dh)" style="fill:var(--dom-1hnn7dh)" class="dm">
                   <animate id="w9" attributeName="d" values="M-228 56H-212A4 4 0 0 1 -208 60V76A4 4 0 0 1 -212 80H-228A4 4 0 0 1 -232 76V60A4 4 0 0 1 -228 56Z;M18 56H34A4 4 0 0 1 38 60V76A4 4 0 0 1 34 80H18A4 4 0 0 1 14 76V60A4 4 0 0 1 18 56Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w9.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-                  <set attributeName="d" to="M-228 56H-212A4 4 0 0 1 -208 60V76A4 4 0 0 1 -212 80H-228A4 4 0 0 1 -232 76V60A4 4 0 0 1 -228 56Z" begin="0s;w9.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+                  <set attributeName="d" to="M-228 56H-212A4 4 0 0 1 -208 60V76A4 4 0 0 1 -212 80H-228A4 4 0 0 1 -232 76V60A4 4 0 0 1 -228 56Z" begin="0s;w9.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
                 </path>
                 <path d="M18 56H34A4 4 0 0 1 38 60V76A4 4 0 0 1 34 80H18A4 4 0 0 1 14 76V60A4 4 0 0 1 18 56Z" fill="var(--dom-1hnn7dh)" style="fill:var(--dom-1hnn7dh)" class="ds" display="none"/>
                 <g opacity="0.7">
@@ -1148,7 +1148,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <g opacity="0.8">
             <path d="M18 124H227A6 6 0 0 1 233 130V150A6 6 0 0 1 227 156H18A6 6 0 0 1 12 150V130A6 6 0 0 1 18 124Z" fill="var(--dom-1hnn7dh)" style="fill:var(--dom-1hnn7dh)" class="dm">
               <animate id="w11" attributeName="d" values="M-228 124H-19A6 6 0 0 1 -13 130V150A6 6 0 0 1 -19 156H-228A6 6 0 0 1 -234 150V130A6 6 0 0 1 -228 124Z;M18 124H227A6 6 0 0 1 233 130V150A6 6 0 0 1 227 156H18A6 6 0 0 1 12 150V130A6 6 0 0 1 18 124Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w11.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-              <set attributeName="d" to="M-228 124H-19A6 6 0 0 1 -13 130V150A6 6 0 0 1 -19 156H-228A6 6 0 0 1 -234 150V130A6 6 0 0 1 -228 124Z" begin="0s;w11.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+              <set attributeName="d" to="M-228 124H-19A6 6 0 0 1 -13 130V150A6 6 0 0 1 -19 156H-228A6 6 0 0 1 -234 150V130A6 6 0 0 1 -228 124Z" begin="0s;w11.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
             </path>
             <path d="M18 124H227A6 6 0 0 1 233 130V150A6 6 0 0 1 227 156H18A6 6 0 0 1 12 150V130A6 6 0 0 1 18 124Z" fill="var(--dom-1hnn7dh)" style="fill:var(--dom-1hnn7dh)" class="ds" display="none"/>
             <g opacity="0.7">
@@ -1208,7 +1208,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
           <path d="M18 88H227A6 6 0 0 1 233 94V114A6 6 0 0 1 227 120H18A6 6 0 0 1 12 114V94A6 6 0 0 1 18 88Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="dm">
             <animate id="w12" attributeName="d" values="M-228 88H-19A6 6 0 0 1 -13 94V114A6 6 0 0 1 -19 120H-228A6 6 0 0 1 -234 114V94A6 6 0 0 1 -228 88Z;M18 88H227A6 6 0 0 1 233 94V114A6 6 0 0 1 227 120H18A6 6 0 0 1 12 114V94A6 6 0 0 1 18 88Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w12.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-            <set attributeName="d" to="M-228 88H-19A6 6 0 0 1 -13 94V114A6 6 0 0 1 -19 120H-228A6 6 0 0 1 -234 114V94A6 6 0 0 1 -228 88Z" begin="0s;w12.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+            <set attributeName="d" to="M-228 88H-19A6 6 0 0 1 -13 94V114A6 6 0 0 1 -19 120H-228A6 6 0 0 1 -234 114V94A6 6 0 0 1 -228 88Z" begin="0s;w12.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
           </path>
           <path d="M18 88H227A6 6 0 0 1 233 94V114A6 6 0 0 1 227 120H18A6 6 0 0 1 12 114V94A6 6 0 0 1 18 88Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="ds" display="none"/>
           <g opacity="0.5">
@@ -1228,7 +1228,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
           <path d="M18 266H227A6 6 0 0 1 233 272V292A6 6 0 0 1 227 298H18A6 6 0 0 1 12 292V272A6 6 0 0 1 18 266Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="dm">
             <animate id="w13" attributeName="d" values="M-228 266H-19A6 6 0 0 1 -13 272V292A6 6 0 0 1 -19 298H-228A6 6 0 0 1 -234 292V272A6 6 0 0 1 -228 266Z;M18 266H227A6 6 0 0 1 233 272V292A6 6 0 0 1 227 298H18A6 6 0 0 1 12 292V272A6 6 0 0 1 18 266Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w13.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-            <set attributeName="d" to="M-228 266H-19A6 6 0 0 1 -13 272V292A6 6 0 0 1 -19 298H-228A6 6 0 0 1 -234 292V272A6 6 0 0 1 -228 266Z" begin="0s;w13.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+            <set attributeName="d" to="M-228 266H-19A6 6 0 0 1 -13 272V292A6 6 0 0 1 -19 298H-228A6 6 0 0 1 -234 292V272A6 6 0 0 1 -228 266Z" begin="0s;w13.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
           </path>
           <path d="M18 266H227A6 6 0 0 1 233 272V292A6 6 0 0 1 227 298H18A6 6 0 0 1 12 292V272A6 6 0 0 1 18 266Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="ds" display="none"/>
           <g opacity="0.5">
@@ -1254,7 +1254,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
           <path d="M18 302H227A6 6 0 0 1 233 308V328A6 6 0 0 1 227 334H18A6 6 0 0 1 12 328V308A6 6 0 0 1 18 302Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="dm">
             <animate id="w14" attributeName="d" values="M-228 302H-19A6 6 0 0 1 -13 308V328A6 6 0 0 1 -19 334H-228A6 6 0 0 1 -234 328V308A6 6 0 0 1 -228 302Z;M18 302H227A6 6 0 0 1 233 308V328A6 6 0 0 1 227 334H18A6 6 0 0 1 12 328V308A6 6 0 0 1 18 302Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w14.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
-            <set attributeName="d" to="M-228 302H-19A6 6 0 0 1 -13 308V328A6 6 0 0 1 -19 334H-228A6 6 0 0 1 -234 328V308A6 6 0 0 1 -228 302Z" begin="0s;w14.begin+5.5s" dur="0.001s" fill="freeze" data-loop="9s"/>
+            <set attributeName="d" to="M-228 302H-19A6 6 0 0 1 -13 308V328A6 6 0 0 1 -19 334H-228A6 6 0 0 1 -234 328V308A6 6 0 0 1 -228 302Z" begin="0s;w14.begin+5.5s" dur="3.5s" fill="freeze" data-loop="9s"/>
           </path>
           <path d="M18 302H227A6 6 0 0 1 233 308V328A6 6 0 0 1 227 334H18A6 6 0 0 1 12 328V308A6 6 0 0 1 18 302Z" fill="var(--dom-ynzzz)" style="fill:var(--dom-ynzzz)" class="ds" display="none"/>
           <g opacity="0.5">
@@ -1856,7 +1856,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <g class="a m29">
             <path d="M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m27 dm">
               <animate id="w15" attributeName="d" values="M102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127Z;M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w15.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
-              <set attributeName="d" to="M102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127Z" begin="0s;w15.begin+3.6s" dur="0.001s" fill="freeze" data-loop="9s"/>
+              <set attributeName="d" to="M102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127Z" begin="0s;w15.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
             </path>
             <path d="M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m27 ds" display="none"/>
             <g class="a m28">
@@ -1975,18 +1975,18 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
             <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" fill="var(--dom-4sz2vv)" style="fill:var(--dom-4sz2vv)" class="dm">
               <animate id="w16" attributeName="d" values="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595Z;M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w16.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
-              <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595Z" begin="0s;w16.begin+3.6s" dur="0.001s" fill="freeze" data-loop="9s"/>
+              <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595Z" begin="0s;w16.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
             </path>
             <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" fill="var(--dom-4sz2vv)" style="fill:var(--dom-4sz2vv)" class="ds" display="none"/>
             <g clip-path="url(#c46)">
               <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd" style="fill:var(--dom-td3va2)" class="dm">
                 <animate id="w18" attributeName="d" values="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595ZM964 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H964A4 4 0 0 1 960 610V598A4 4 0 0 1 964 594Z;M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w18.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
-                <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595ZM964 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H964A4 4 0 0 1 960 610V598A4 4 0 0 1 964 594Z" begin="0s;w18.begin+3.6s" dur="0.001s" fill="freeze" data-loop="9s"/>
+                <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595ZM964 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H964A4 4 0 0 1 960 610V598A4 4 0 0 1 964 594Z" begin="0s;w18.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
               </path>
               <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd" style="fill:var(--dom-td3va2)" class="ds" display="none"/>
               <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd" style="fill:var(--dom-1hcrc6)" class="dm">
                 <animate id="w19" attributeName="d" values="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595ZM964 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H964A4 4 0 0 1 960 610V598A4 4 0 0 1 964 594Z;M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w19.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
-                <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595ZM964 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H964A4 4 0 0 1 960 610V598A4 4 0 0 1 964 594Z" begin="0s;w19.begin+3.6s" dur="0.001s" fill="freeze" data-loop="9s"/>
+                <set attributeName="d" to="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595ZM964 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H964A4 4 0 0 1 960 610V598A4 4 0 0 1 964 594Z" begin="0s;w19.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
               </path>
               <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd" style="fill:var(--dom-1hcrc6)" class="ds" display="none"/>
             </g>

@@ -87,7 +87,7 @@
     <filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="14">
         <animate id="w1" attributeName="stdDeviation" values="12;0;0;14" keyTimes="0;0.28276;0.84576;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19" begin="5.42s;w1.begin+12s" dur="3.8899s" fill="freeze" data-loop="12s"/>
-        <set attributeName="stdDeviation" to="12" begin="0s;w1.begin+6.58s" dur="0.001s" fill="freeze" data-loop="12s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;w1.begin+6.58s" dur="5.42s" fill="freeze" data-loop="12s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f3s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
@@ -96,7 +96,7 @@
     <filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="14">
         <animate id="w2" attributeName="stdDeviation" values="12;0;0;14" keyTimes="0;0.28026;0.84714;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19" begin="5.35s;w2.begin+12s" dur="3.9251s" fill="freeze" data-loop="12s"/>
-        <set attributeName="stdDeviation" to="12" begin="0s;w2.begin+6.65s" dur="0.001s" fill="freeze" data-loop="12s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;w2.begin+6.65s" dur="5.35s" fill="freeze" data-loop="12s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f4s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
@@ -105,7 +105,7 @@
     <filter id="f5" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="14">
         <animate id="w3" attributeName="stdDeviation" values="12;0;0;14" keyTimes="0;0.27779;0.84848;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19" begin="5.28s;w3.begin+12s" dur="3.96s" fill="freeze" data-loop="12s"/>
-        <set attributeName="stdDeviation" to="12" begin="0s;w3.begin+6.72s" dur="0.001s" fill="freeze" data-loop="12s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;w3.begin+6.72s" dur="5.28s" fill="freeze" data-loop="12s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f5s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
@@ -114,7 +114,7 @@
     <filter id="f6" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="14">
         <animate id="w4" attributeName="stdDeviation" values="12;0;0;14" keyTimes="0;0.27533;0.84981;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19" begin="5.21s;w4.begin+12s" dur="3.9949s" fill="freeze" data-loop="12s"/>
-        <set attributeName="stdDeviation" to="12" begin="0s;w4.begin+6.79s" dur="0.001s" fill="freeze" data-loop="12s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;w4.begin+6.79s" dur="5.21s" fill="freeze" data-loop="12s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f6s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
@@ -123,7 +123,7 @@
     <filter id="f7" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="14">
         <animate id="w5" attributeName="stdDeviation" values="12;0;0;14" keyTimes="0;0.27296;0.85112;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19" begin="5.14s;w5.begin+12s" dur="4.0301s" fill="freeze" data-loop="12s"/>
-        <set attributeName="stdDeviation" to="12" begin="0s;w5.begin+6.86s" dur="0.001s" fill="freeze" data-loop="12s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;w5.begin+6.86s" dur="5.14s" fill="freeze" data-loop="12s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f7s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
@@ -132,7 +132,7 @@
     <filter id="f8" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="14">
         <animate id="w6" attributeName="stdDeviation" values="12;0;0;14" keyTimes="0;0.26828;0.85366;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19" begin="5s;w6.begin+12s" dur="4.0999s" fill="freeze" data-loop="12s"/>
-        <set attributeName="stdDeviation" to="12" begin="0s;w6.begin+7s" dur="0.001s" fill="freeze" data-loop="12s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;w6.begin+7s" dur="5s" fill="freeze" data-loop="12s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f8s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
@@ -141,7 +141,7 @@
     <filter id="f9" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
       <feGaussianBlur stdDeviation="14">
         <animate id="w7" attributeName="stdDeviation" values="12;0;0;14" keyTimes="0;0.27061;0.8524;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.55 0.06 0.68 0.19" begin="5.07s;w7.begin+12s" dur="4.065s" fill="freeze" data-loop="12s"/>
-        <set attributeName="stdDeviation" to="12" begin="0s;w7.begin+6.93s" dur="0.001s" fill="freeze" data-loop="12s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;w7.begin+6.93s" dur="5.07s" fill="freeze" data-loop="12s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f9s" filterUnits="userSpaceOnUse" x="0" y="0" width="960" height="540">
