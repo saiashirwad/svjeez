@@ -1,5 +1,16 @@
 import { google } from "@svjeez/fonts";
-import { Pivot, ease, enter, motion, strokeFont } from "svjeez";
+import {
+  Clip,
+  Pivot,
+  ease,
+  enter,
+  motion,
+  shot,
+  strokeFont,
+  type Child,
+  type ShotOptions,
+  type Span,
+} from "svjeez";
 import { GROUND, blip, type BlipMotions } from "../site/lib/blip";
 import { theme } from "../style";
 
@@ -31,6 +42,18 @@ export const rise = (at: number, over = 0.45, y = 16) =>
 export const show = (at: number) => motion({ opacity: 0 }).at(at).set({ opacity: 1 });
 
 export const centered = (text: string, size: number) => (W - display.measure(text, size)) / 2;
+
+/** A shot of the reel: it moves in and out of the span on the scene's clock, and its content is written from 0 on a clock of its own. The clip is open: a flight may land a beat after the shot has faded. */
+export const Shot = ({
+  at,
+  over,
+  children,
+  ...moves
+}: Span & Omit<ShotOptions, "over"> & { children?: Child }) => (
+  <g animation={shot({ at, over }, moves)}>
+    <Clip at={at}>{children}</Clip>
+  </g>
+);
 
 /** The call and its one-line gloss, bottom left, with an optional tag at the right. */
 export const Caption = ({

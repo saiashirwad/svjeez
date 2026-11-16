@@ -1,10 +1,10 @@
-import { ease, enter, motion, Marker, appWindow, code, shot, typewriter } from "svjeez";
+import { ease, enter, motion, Marker, appWindow, code, typewriter } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { highlight } from "@svjeez/code";
 
 import { mono, theme } from "../style";
 import { jumps } from "../site/lib/blip";
-import { Blip, C, rise, show } from "./kit";
+import { Blip, C, Shot, rise, show } from "./kit";
 import { TERM } from "./session";
 
 const SOURCE = [
@@ -23,7 +23,7 @@ const SOURCE = [
   `);`,
 ];
 
-const CODE_AT = TERM.at + TERM.over;
+// Everything here is written from 0, on the clock of a <Shot> that starts when the terminal ends.
 const editor = appWindow(rect(40, 96, 810, 568), { theme, title: "launch.tsx" });
 const preview = appWindow(rect(870, 96, 370, 568), { theme, title: "dist/launch.svg" });
 
@@ -36,7 +36,7 @@ const src = code(highlight(SOURCE.join("\n"), "tsx"), {
   y: editor.body.y + 40,
 });
 
-const typed = typewriter(src, { at: CODE_AT + 0.45, cps: 150, cursor: C.accent, blink: false });
+const typed = typewriter(src, { at: 0.45, cps: 150, cursor: C.accent, blink: false });
 const landed = (n: number) => typed.spans[n - 1]!.at + typed.spans[n - 1]!.over;
 const runAt = typed.span.end + 0.25;
 
@@ -50,7 +50,8 @@ const EDITS = [
 
 const editAt = (i: number) => runAt + 0.8 + i * 1.4;
 const applied = (i: number) => editAt(i) + 0.3;
-export const CODE = { at: CODE_AT, over: applied(EDITS.length - 1) + 1.6 - CODE_AT };
+const OVER = applied(EDITS.length - 1) + 1.6;
+export const CODE = { at: TERM.at + TERM.over, over: OVER };
 
 const edit = ({ from, to, role }: (typeof EDITS)[number], i: number) => {
   const at = editAt(i);
@@ -114,11 +115,7 @@ const turned = 180 * (react(2) - spinAt);
 const spin = motion({ rotate: 0 })
   .at(spinAt)
   .to({ rotate: turned }, react(2) - spinAt, ease.linear)
-  .to(
-    { rotate: turned + 360 * (CODE.at + CODE.over - react(2)) },
-    CODE.at + CODE.over - react(2),
-    ease.linear,
-  );
+  .to({ rotate: turned + 360 * (OVER - react(2)) }, OVER - react(2), ease.linear);
 
 const previewArt = (
   <>
@@ -179,8 +176,8 @@ const editHops = jumps(EDITS.map((_, i) => ({ land: applied(i) + 0.2, height: 40
 const lineRect = (first: number, last = first) => src.lines(first, last).pad(4);
 
 export const codeShot = (
-  <g animation={shot(CODE, { exit: "rise" })}>
-    <g animation={rise(CODE.at, 0.45, 20)}>
+  <Shot {...CODE} exit="rise">
+    <g animation={rise(0, 0.45, 20)}>
       {editor.node}
       <g
         animation={motion({ opacity: 0 })
@@ -201,7 +198,7 @@ export const codeShot = (
       {typed.node}
       {EDITS.map(edit)}
     </g>
-    <g animation={rise(CODE.at + 0.12, 0.45, 20)}>
+    <g animation={rise(0.12, 0.45, 20)}>
       {preview.node}
       {previewArt}
     </g>
@@ -237,5 +234,5 @@ export const codeShot = (
       stretch={editHops.stretch}
       bulb={editHops.bulb}
     />
-  </g>
+  </Shot>
 );

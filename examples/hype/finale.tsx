@@ -10,11 +10,11 @@ import {
   video,
   world,
 } from "@svjeez/icons/tabler";
-import { Glyphs, Icon, draw, ease, enter, motion, code, shot, typewriter } from "svjeez";
+import { Clip, Glyphs, Icon, draw, ease, enter, motion, code, typewriter } from "svjeez";
 
 import { mono, theme } from "../style";
 import { hopAcross, jumps } from "../site/lib/blip";
-import { C, Blip, centered, display, rise, show, W } from "./kit";
+import { C, Blip, Shot, centered, display, rise, show, W } from "./kit";
 import { HAND } from "./write";
 
 const FACTS = [
@@ -23,6 +23,7 @@ const FACTS = [
   { lead: "CSS + SMIL.", rest: " That's it." },
 ] as const;
 
+// Each shot below is written from 0, on the clock of a <Shot> that starts when the one before it ends.
 const FACT = 64;
 export const FACTS_SPAN = { at: HAND.at + HAND.over, over: 3.4 };
 
@@ -32,19 +33,19 @@ const factEnds = FACTS.map((fact, i) => ({
   y: 270 + i * 110,
 }));
 
-const factHops = hopAcross(factEnds, FACTS_SPAN.at + 0.8, 0.45, 0.25);
+const factHops = hopAcross(factEnds, 0.8, 0.45, 0.25);
 
 export const facts = (
-  <g animation={shot(FACTS_SPAN, { exit: "zoom" })}>
+  <Shot {...FACTS_SPAN} exit="zoom">
     <g animation={factHops.animation}>
-      <Blip x={0} y={0} size={0.42} pop={FACTS_SPAN.at + 0.35} blinks={[FACTS_SPAN.at + 2.6]} />
+      <Blip x={0} y={0} size={0.42} pop={0.35} blinks={[2.6]} />
     </g>
     {FACTS.map((fact, i) => {
       const x = (W - display.measure(fact.lead + fact.rest, FACT)) / 2;
       const y = 270 + i * 110;
 
       return (
-        <g animation={rise(FACTS_SPAN.at + 0.2 + i * 0.7, 0.45, 24)}>
+        <g animation={rise(0.2 + i * 0.7, 0.45, 24)}>
           <Glyphs font={display} text={fact.lead} size={FACT} x={x} y={y} fill={C.accent} />
           <Glyphs
             font={display}
@@ -57,11 +58,12 @@ export const facts = (
         </g>
       );
     })}
-  </g>
+  </Shot>
 );
 
 // ─── Shot 6: the logo, the install line, and the reveal. ─────────────────────
 
+/** Where the finale starts on the scene's clock. Everything after this is written from 0. */
 export const END_AT = FACTS_SPAN.at + FACTS_SPAN.over;
 const LOGO = "svjeez";
 const logoX = centered(LOGO, 190);
@@ -77,7 +79,7 @@ const installCode = code([[["blue", "❯"], " ", ["plain", INSTALL]]], {
   y: 448,
 });
 
-const install = typewriter(installCode, { at: END_AT + 1.8, cps: 34, cursor: C.accent });
+const install = typewriter(installCode, { at: 1.8, cps: 34, cursor: C.accent });
 
 const PACKAGES = [
   ["charts", chartBar],
@@ -138,7 +140,7 @@ const sizeAt = chipsAt + PACKAGES.length * 0.06 + 0.5;
 const perch = { x: logoX + display.measure(LOGO, 190) - 46, y: 186 };
 
 const drop = motion({ y: -260, opacity: 0 })
-  .at(END_AT + 1.2)
+  .at(1.2)
   .set({ opacity: 1 })
   .to({ y: 0 }, 0.45, ease.in)
   .to({ y: -14 }, 0.15, ease.out)
@@ -155,76 +157,77 @@ const glow = motion({ fill: "#FFC21A" })
   .wait(0.8)
   .to({ fill: "#FFC21A" }, 0.4);
 
-export const D = sizeAt + 3;
+/** The scene's length: the finale holds three seconds after the size line. */
+export const D = END_AT + sizeAt + 3;
 
 export const finale = (size: string) => (
-  <g animation={show(END_AT)}>
-    <Glyphs
-      font={display}
-      text={LOGO}
-      size={190}
-      x={logoX}
-      y={320}
-      fill="none"
-      stroke={C.ink}
-      strokeWidth={2}
-      animation={(_, i) => draw({ at: END_AT + 0.1 + i * 0.1, over: 0.8 }, ease.inOut)}
-    />
-    <Glyphs
-      font={display}
-      text={LOGO}
-      size={190}
-      x={logoX}
-      y={320}
-      fill={C.ink}
-      alt=""
-      animation={(_, i) => enter({ at: END_AT + 0.75 + i * 0.07, over: 0.45 }, { opacity: 0 })}
-    />
-    <rect
-      x={logoX}
-      y={350}
-      width={display.measure(LOGO, 190)}
-      height={3}
-      rx={1.5}
-      fill={C.accent}
-      animation={motion({ scale: 0 })
-        .at(END_AT + 1.1)
-        .to({ scale: 1 }, 0.7, ease.inOut)}
-    />
-    <g animation={drop}>
-      <Blip
-        x={perch.x}
-        y={perch.y}
-        size={0.5}
-        blinks={[END_AT + 2.2, sizeAt + 0.8]}
-        body={cheer.body}
-        stretch={cheer.stretch}
-        bulb={cheer.bulb}
-        glow={glow}
+  <Clip at={END_AT}>
+    <g animation={show(0)}>
+      <Glyphs
+        font={display}
+        text={LOGO}
+        size={190}
+        x={logoX}
+        y={320}
+        fill="none"
+        stroke={C.ink}
+        strokeWidth={2}
+        animation={(_, i) => draw({ at: 0.1 + i * 0.1, over: 0.8 }, ease.inOut)}
       />
-    </g>
-    <g animation={rise(END_AT + 1.35, 0.5, 10)}>
-      <Glyphs font={display} text={TAG} size={24} x={centered(TAG, 24)} y={402} fill={C.soft} />
-    </g>
-    <g animation={rise(END_AT + 1.6, 0.4, 8)}>
+      <Glyphs
+        font={display}
+        text={LOGO}
+        size={190}
+        x={logoX}
+        y={320}
+        fill={C.ink}
+        alt=""
+        animation={(_, i) => enter({ at: 0.75 + i * 0.07, over: 0.45 }, { opacity: 0 })}
+      />
       <rect
-        x={(W - installW) / 2}
-        y={436}
-        width={installW}
-        height={56}
-        rx={28}
-        fill={C.surface}
-        stroke={C.hairline}
+        x={logoX}
+        y={350}
+        width={display.measure(LOGO, 190)}
+        height={3}
+        rx={1.5}
+        fill={C.accent}
+        animation={motion({ scale: 0 }).at(1.1).to({ scale: 1 }, 0.7, ease.inOut)}
       />
+      <g animation={drop}>
+        <Blip
+          x={perch.x}
+          y={perch.y}
+          size={0.5}
+          blinks={[2.2, sizeAt + 0.8]}
+          body={cheer.body}
+          stretch={cheer.stretch}
+          bulb={cheer.bulb}
+          glow={glow}
+        />
+      </g>
+      <g animation={rise(1.35, 0.5, 10)}>
+        <Glyphs font={display} text={TAG} size={24} x={centered(TAG, 24)} y={402} fill={C.soft} />
+      </g>
+      <g animation={rise(1.6, 0.4, 8)}>
+        <rect
+          x={(W - installW) / 2}
+          y={436}
+          width={installW}
+          height={56}
+          rx={28}
+          fill={C.surface}
+          stroke={C.hairline}
+        />
+      </g>
+      {install.node}
+      {chips}
+      <g animation={rise(sizeAt, 0.6, 8)}>
+        <text x={W / 2} y={622} fontSize={14} textAnchor="middle" fill={C.soft}>
+          {"this entire video is "}
+          <tspan fill={C.ink}>{`one ${size} SVG`}</tspan>
+          {". no video file, no JavaScript."}
+        </text>
+      </g>
     </g>
-    {install.node}
-    {chips}
-    <g animation={rise(sizeAt, 0.6, 8)}>
-      <text x={W / 2} y={622} fontSize={14} textAnchor="middle" fill={C.soft}>
-        {"this entire video is "}
-        <tspan fill={C.ink}>{`one ${size} SVG`}</tspan>
-        {". no video file, no JavaScript."}
-      </text>
-    </g>
-  </g>
+  </Clip>
 );
