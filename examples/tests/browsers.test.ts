@@ -134,7 +134,7 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
       snapshot[key + " bw"] = nothing || unlaidOut ? 0 : round(bounds.width);
       snapshot[key + " bh"] = nothing || unlaidOut ? 0 : round(bounds.height);
 
-      for (const prop of ["opacity", "visibility", "translate", "rotate", "scale"])
+      for (const prop of ["display", "opacity", "visibility", "translate", "rotate", "scale"])
         snapshot[key + " " + prop] = style.getPropertyValue(prop);
 
       const blur = element as SVGFEGaussianBlurElement;
@@ -187,17 +187,17 @@ type Mismatch = { when: string; key: string; expected: Value; got: Value };
 
 /** Where a run differs from the Chromium one. */
 const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
-  if (reference.labels.join() !== run.labels.join())
-    return [
-      {
-        when: "targets",
-        key: "animated elements",
-        expected: reference.labels.filter((label) => !run.labels.includes(label)).join(" ") + " (only in Chromium)",
-        got: run.labels.filter((label) => !reference.labels.includes(label)).join(" ") + " (only here)",
-      },
-    ];
-
   const found: Mismatch[] = [];
+  const shows = (label: string) => `${label} display:${reference.forward[0]![label + " display"]}`;
+
+  // The elements an engine runs animations on, which it can leave out, as with a display: none one in one engine only.
+  if (reference.labels.join() !== run.labels.join())
+    found.push({
+      when: "targets",
+      key: "animated elements",
+      expected: reference.labels.filter((label) => !run.labels.includes(label)).map(shows).join(" "),
+      got: run.labels.filter((label) => !reference.labels.includes(label)).join(" ") + " (only here)",
+    });
 
   for (const direction of ["forward", "backward"] as const)
     reference.times.forEach((time, k) => {
@@ -205,12 +205,13 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
       const have = run[direction][k]!;
 
       for (const key of Object.keys(want)) {
+        if (!(key in have)) continue;
         const prop = key.slice(key.lastIndexOf(" ") + 1);
 
         const label = key.slice(0, key.lastIndexOf(" "));
         // Text is measured by each engine's own shaping, so the box around it, and around a group holding it, gets room.
         const box = ["x", "y", "width", "height", "bx", "by", "bw", "bh"].includes(prop);
-        const size = Math.max(Number(want[label + " width"]), Number(want[label + " height"]), Number(want[label + " bw"]), Number(want[label + " bh"]));
+        const size = Math.max(...["width", "height", "bw", "bh"].map((side) => Number(want[label + " " + side]) || 0));
         const slack = box ? size * (reference.texty.includes(label) ? TEXT : CURVES) : 0;
 
         if (skip.includes(prop) || close(prop, want[key]!, have[key] ?? null, slack)) continue;
