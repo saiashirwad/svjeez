@@ -14,7 +14,7 @@ export const follow = (img: HTMLImageElement) => {
       if (await show(img, frozen(img, live, live))) posters.forEach((source) => source.remove());
     } else if (calm.matches) {
       if (!posters[0]?.isConnected) img.before(...posters);
-      await show(img, { url: live });
+      await show(img, pinned(img) ? playing(img, live) : { url: live });
     } else await (isPlaying(img) ? replay(img) : show(img, playing(img, live), { fade }));
     img.dataset.shown = "";
   };
