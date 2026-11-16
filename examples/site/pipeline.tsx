@@ -136,7 +136,10 @@ export const make = (tall = false): string => {
   const until = (n: number) => START + legs.slice(0, n).reduce((s, l) => s + l.over, 0);
   const where = placeOf(top("prompt"), legs);
 
-  const path = sampled((t) => where(t), { at: START, over: length, tolerance: { translate: 0.6 } });
+  const path = sampled({ at: START, over: length }, (t) => where(t), {
+    tolerance: { translate: 0.6 },
+  });
+
   const D = Math.ceil(START + length) + 3;
 
   // The bubbles over the decision: "???" the first time, "yes!" the second.

@@ -327,5 +327,5 @@ export function trueSize(
     );
   };
 
-  return { d: sample(0), animation: sampled.path(sample, { at, over, tolerance }) };
+  return { d: sample(0), animation: sampled.path({ at, over }, sample, { tolerance }) };
 }

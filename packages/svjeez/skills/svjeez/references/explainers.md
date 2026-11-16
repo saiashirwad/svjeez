@@ -258,7 +258,7 @@ const f = (x: number) => 2 + Math.sin(x);
 
 const rider = graph.dot(f, { from: -2, to: 2, at: 1, over: 3 });         // { node, motion, point(t) }
 const secant = graph.secant(f, 0.5, { from: 2, to: 0, at: 1, over: 3 }); // h shrinks to 0: it lands on the tangent
-const slope = readout((t) => `slope ≈ ${secant.slope(t).toFixed(2)}`, { at: 1, over: 3, x: 190, y: 330, fill: "white" });
+const slope = readout({ at: 1, over: 3 }, (t) => `slope ≈ ${secant.slope(t).toFixed(2)}`, { x: 190, y: 330, fill: "white" });
 
 const sums = graph.riemann([{ at: 5, over: 0.7 }, { at: 6, over: 0.7 }, { at: 7, over: 0.7 }], f, { from: -2, to: 2, n: [4, 8, 16, 32] }); // { node, sums }
 const filled = graph.area(f, -2, { from: -2, to: 2, at: 8, over: 2 });  // { node, value(t) }
@@ -271,7 +271,7 @@ const taylor = graph.morph([{ at: 3, over: 0.8 }, { at: 4.5, over: 0.8 }], [() =
 - `riemann(spans, f, { from, to, n, rule })` draws rectangles as one path. Each stage in `n` splits into the next, and `spans` gives the span of each split, one per later stage (none for one stage). `rule` is `"left"`, `"mid"` (the default) or `"right"`, and `sums` holds each stage's sum.
 - `morph(spans, [f, g, …], { color })` is one curve that bends from each function into the next, each bend during its span, one per later function, so it never draws twice. Values are clamped just past the plot. Give `color` an array, one per function, and the stroke changes color with each bend.
 - `parametric((t) => [x, y], [t0, t1])` and `polar((θ) => r, [θ0, θ1])` draw like `plot()`, with 400 samples by default. They return `{ node, d, points }`.
-- `readout(text, { at, over, step, ...textAttributes })` is text that changes over time. It samples `text(t)` every `step` (default 1/12 s) and shows each distinct string while it holds.
+- `readout({ at, over }, text, { step, ...textAttributes })` is text that changes over time. It samples `text(t)` across the span every `step` (default 1/12 s) and shows each distinct string while it holds.
 
 ## Terminals
 

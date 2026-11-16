@@ -36,23 +36,25 @@ const sample =
     fn(R * Math.cos(theta(t)), -R * Math.sin(theta(t)));
 
 const point = sampled(
+  { at: 0, over: D },
   sample((x, y) => ({ x, y })),
-  { over: D, tolerance: { translate: 0.3 } },
+  { tolerance: { translate: 0.3 } },
 );
 
-const radius = sampled((t) => ({ rotate: (-theta(t) * 180) / Math.PI }), {
-  over: D,
+const radius = sampled({ at: 0, over: D }, (t) => ({ rotate: (-theta(t) * 180) / Math.PI }), {
   tolerance: { rotate: 0.4 },
 });
 
 const cosine = sampled(
+  { at: 0, over: D },
   sample((x) => ({ x: Math.min(0, x), width: Math.abs(x) })),
-  { over: D, tolerance: { translate: 0.3, width: 0.3 } },
+  { tolerance: { translate: 0.3, width: 0.3 } },
 );
 
 const sine = sampled(
+  { at: 0, over: D },
   sample((x, y) => ({ x, y: Math.min(0, y), height: Math.abs(y) })),
-  { over: D, tolerance: { translate: 0.3, height: 0.3 } },
+  { tolerance: { translate: 0.3, height: 0.3 } },
 );
 
 const at = { x: 238, y: CY - 22, fontSize: 25, theme } as const;

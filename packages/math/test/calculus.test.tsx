@@ -159,10 +159,15 @@ describe("parametric() and polar()", () => {
 
 describe("readout()", () => {
   test("shows one text per value it holds", () => {
-    const svg = svgOf(readout((t) => (t < 2 ? "low" : "high"), { at: 1, over: 2, step: 0.5 }));
+    const svg = svgOf(readout({ at: 1, over: 2 }, (t) => (t < 2 ? "low" : "high"), { step: 0.5 }));
 
     expect(svg.match(/<text/g)).toHaveLength(2);
     expect(svg).toContain(">low</text>");
     expect(svg).toContain(">high</text>");
+  });
+
+  test("needs a positive over and an at of 0 or later", () => {
+    expect(() => readout({ at: 1, over: 0 }, () => "x")).toThrow(/positive over/);
+    expect(() => readout({ at: -1, over: 1 }, () => "x")).toThrow(/start of 0 or later/);
   });
 });

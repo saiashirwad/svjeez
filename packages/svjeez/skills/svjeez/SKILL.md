@@ -157,10 +157,10 @@ wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; ch
 
 Recipes take a span `{ at, over }`, and an ease last (`enter`, `exit`, `draw`). `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `shake` and `wiggle` take an amplitude per channel, and `rate` must be positive. `wiggle` also takes `period` (default 2s, snapped to divide the scene) and `ease`.
 
-`sampled(fn, { over, at?, step?, tolerance, precision? })` bakes a function of time into keyframes. `fn` is given time from 0 to `over`, plays from `at` (default 0) and holds its first and last values outside, so a motion that belongs to one scene costs keys only for that scene. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. `precision: 1` rounds each sample to one decimal place before the keys are kept, which keeps the file small.
+`sampled({ at, over }, fn, { tolerance, step?, precision? })` bakes a function of time into keyframes. `fn` is given time from 0 to `over`, plays from `at` and holds its first and last values outside, so a motion that belongs to one scene costs keys only for that scene. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. `precision: 1` rounds each sample to one decimal place before the keys are kept, which keeps the file small.
 
 ```tsx
-sampled((t) => ({ x: 100 * Math.cos(t) }), { over: 12, tolerance: { translate: 1 } });
+sampled({ at: 0, over: 12 }, (t) => ({ x: 100 * Math.cos(t) }), { tolerance: { translate: 1 } });
 ```
 
 `spline(points)` draws a Catmull-Rom curve through `{ x, y }` points, for flying something along a smooth route. Position `i + u` is `u` along leg `i`. `point(at)` and `angle(at)` feed `sampled()`, `tangent(at)` is the velocity, `d` is the whole route as path data, `path(from, to)` cuts exact path data, and `nearest(p, from, to)` finds the position closest to a point.
@@ -171,14 +171,14 @@ sampled((t) => ({ x: 100 * Math.cos(t) }), { over: 12, tolerance: { translate: 1
 
 ## Shape morphs
 
-`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` from `svjeez/geometry` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampled.path(fn, { over, at?, step?, tolerance, precision? })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is one number, in px, and `precision` (default 1) the decimal places of the path data.
+`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` from `svjeez/geometry` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampled.path({ at, over }, fn, { tolerance, step?, precision? })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is one number, in px, and `precision` (default 1) the decimal places of the path data.
 
 ```tsx
 import { matchPaths } from "svjeez/geometry";
 
 const [square, star] = matchPaths([squareD, starD]);
 <path d={square} animation={motion({ d: square }).at(1).to({ d: star }, 0.8, ease.inOut)} />;
-sampled.path((t) => wavePath(t), { over: 6, tolerance: 0.5 });
+sampled.path({ at: 0, over: 6 }, (t) => wavePath(t), { tolerance: 0.5 });
 ```
 
 Reduced motion shows a still copy of the path at `reducedMotion.at`.

@@ -14,11 +14,12 @@ export const ghost = (cx: Cx, bodyD: string) =>
       strokeLinecap="round"
       opacity={0.18}
       animation={sampled(
+        { at: 0, over: 4 },
         (t) => ({
           x: 14 * Math.cos((Math.PI * 2 * t) / 4),
           y: 10 * Math.sin((Math.PI * 4 * t) / 4),
         }),
-        { over: 4, step: 0.1, precision: 1, tolerance: { translate: 1 } },
+        { step: 0.1, precision: 1, tolerance: { translate: 1 } },
       ).loop(4)}
     />
   );

@@ -277,7 +277,7 @@ export function calculus(graph: GraphContext): Calculus {
     <path
       {...attrs}
       d={at(0)}
-      animation={end > 0 ? sampled.path(at, { over: end, tolerance: 0.4 }) : undefined}
+      animation={end > 0 ? sampled.path({ at: 0, over: end }, at, { tolerance: 0.4 }) : undefined}
     />
   );
 
@@ -293,12 +293,13 @@ export function calculus(graph: GraphContext): Calculus {
     const travel =
       end > 0
         ? sampled(
+            { at: 0, over: end },
             (t) => {
               const p = where(t);
 
               return { x: round(p.x), y: round(p.y) };
             },
-            { over: end, tolerance: { translate: 0.3 } },
+            { tolerance: { translate: 0.3 } },
           )
         : motion({ x: round(start.x), y: round(start.y) });
 

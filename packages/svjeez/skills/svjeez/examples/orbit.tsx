@@ -7,11 +7,9 @@ const R = 70;
 
 // sampled() bakes any function of time; the tolerance keeps the keyframe count small.
 const moon = sampled(
+  { at: 0, over: D },
   (t) => ({ x: R * Math.cos((2 * Math.PI * t) / D), y: 0.4 * R * Math.sin((2 * Math.PI * t) / D) }),
-  {
-    over: D,
-    tolerance: { translate: 0.5 },
-  },
+  { tolerance: { translate: 0.5 } },
 );
 
 export default function build(): string {

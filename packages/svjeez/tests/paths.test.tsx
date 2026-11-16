@@ -75,7 +75,10 @@ describe("the d channel", () => {
 
 describe("sampled with path data", () => {
   test("keeps few keys for a shape that moves steadily", () => {
-    const m = sampled.path((t) => `M${10 * t} 0L${10 * t + 5} 5`, { over: 4, tolerance: 0.1 });
+    const m = sampled.path({ at: 0, over: 4 }, (t) => `M${10 * t} 0L${10 * t + 5} 5`, {
+      tolerance: 0.1,
+    });
+
     const svg = scene(m);
     const values = svg.match(/values="([^"]*)"/)![1]!.split(";");
 
@@ -84,7 +87,9 @@ describe("sampled with path data", () => {
 
   test("rejects samples with different commands", () => {
     expect(() =>
-      sampled.path((t) => (t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), { over: 2, tolerance: 1 }),
+      sampled.path({ at: 0, over: 2 }, (t) => (t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), {
+        tolerance: 1,
+      }),
     ).toThrow("sampled.path() returned a path with different commands at t=1 than at t=0.");
   });
 
@@ -92,7 +97,7 @@ describe("sampled with path data", () => {
     const wave = (t: number) => `M0 0L${50 + 40 * Math.sin(t)} 0`;
 
     const keys = (slack?: (x: number, y: number) => number) =>
-      scene(sampled.path(wave, { over: 4, tolerance: 0.5, slack }))
+      scene(sampled.path({ at: 0, over: 4 }, wave, { tolerance: 0.5, slack }))
         .match(/values="([^"]*)"/)![1]!
         .split(";").length;
 

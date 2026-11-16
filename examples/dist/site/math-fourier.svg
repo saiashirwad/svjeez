@@ -216,7 +216,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       </g>
     </g>
     <g class="sans a m25">
-      <text x="248" y="318" font-size="12" fill="var(--base03)">sampled((t) =&gt; tip(t), { over })</text>
+      <text x="248" y="318" font-size="12" fill="var(--base03)">sampled(span, (t) =&gt; tip(t))</text>
     </g>
     <g class="a m54">
       <g>

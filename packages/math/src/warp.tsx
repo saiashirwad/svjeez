@@ -191,7 +191,9 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
           d={d(0)}
           fill={fill}
           animation={
-            end ? sampled.path(d, { over: end.at + end.over, tolerance: 0.25 }) : undefined
+            end
+              ? sampled.path({ at: 0, over: end.at + end.over }, d, { tolerance: 0.25 })
+              : undefined
           }
         />
       );

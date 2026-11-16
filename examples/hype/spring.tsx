@@ -29,17 +29,16 @@ export const springShot = (over: number) => {
     .map((t, i) => `${i ? "L" : "M"}${plotX(t).toFixed(1)} ${(REST + spring(t)).toFixed(1)}`)
     .join("");
 
-  const weight = sampled((t) => ({ y: spring(t) }), {
-    over: run.at + run.over + 0.05,
+  const weight = sampled({ at: 0, over: run.at + run.over + 0.05 }, (t) => ({ y: spring(t) }), {
     step: 1 / 60,
     tolerance,
   });
 
-  const playhead = sampled((t) => ({ x: plotX(t), y: REST + spring(t) }), {
-    over: run.at + run.over + 0.05,
-    step: 1 / 60,
-    tolerance,
-  });
+  const playhead = sampled(
+    { at: 0, over: run.at + run.over + 0.05 },
+    (t) => ({ x: plotX(t), y: REST + spring(t) }),
+    { step: 1 / 60, tolerance },
+  );
 
   // The plot reveals left to right with time, so its tip stays under the playhead.
   const traced = def.clipPath(

@@ -31,8 +31,7 @@ export const sliceAt = (slice: number, w: number, t: number) => {
 };
 
 const sliced = (slice: number, w: number) =>
-  sampled((t) => ({ scale: sliceAt(slice, w, t) }), {
-    over: DURATION,
+  sampled({ at: 0, over: DURATION }, (t) => ({ scale: sliceAt(slice, w, t) }), {
     step: 0.1,
     precision: 2,
     tolerance: { scale: 0.03 },
@@ -45,12 +44,11 @@ export const walk = (g: Genome, i: number) => {
   const phase = (i * 0.19 + (i % 2) * 0.5) % 1;
   const swing = 20 - Math.min(10, g.legs);
 
-  return sampled((t) => ({ rotate: swing * Math.sin(Math.PI * 2 * (t - phase)) }), {
-    over: 1,
-    step: 0.05,
-    precision: 1,
-    tolerance: { rotate: 0.8 },
-  }).loop(1);
+  return sampled(
+    { at: 0, over: 1 },
+    (t) => ({ rotate: swing * Math.sin(Math.PI * 2 * (t - phase)) }),
+    { step: 0.05, precision: 1, tolerance: { rotate: 0.8 } },
+  ).loop(1);
 };
 
 /** Tail `i` sways about its root. */
@@ -68,11 +66,12 @@ export const breathing = (cx: Cx) => {
 
   const motionOf = f.four
     ? sampled(
+        { at: 0, over: DURATION },
         (t) => ({
           [breath]:
             (1 + 0.05 * Math.sin((Math.PI * 2 * t) / 2)) * (0.35 + 0.65 * sliceAt(g.slice, 0, t)),
         }),
-        { over: DURATION, step: 0.1, precision: 2, tolerance: { [breath]: 0.02 } },
+        { step: 0.1, precision: 2, tolerance: { [breath]: 0.02 } },
       )
     : f.liquid
       ? motion({ [breath]: 1 })

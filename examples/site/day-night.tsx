@@ -41,12 +41,13 @@ export default function build(): string {
 
   // A butterfly flies a figure eight around the flower, flapping as it goes.
   const butterfly = sampled(
+    { at: 0, over: D },
     (t) => {
       const a = (2 * Math.PI * t) / D;
 
       return { x: FLOWER.x + 150 * Math.sin(a), y: FLOWER.head - 40 + 70 * Math.sin(2 * a) };
     },
-    { over: D, tolerance: { translate: 1 } },
+    { tolerance: { translate: 1 } },
   );
 
   const flap = motion({ scale: 1 })

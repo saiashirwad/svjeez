@@ -11,7 +11,7 @@ import {
 import { samplePath } from "./paths";
 import type { NumericProperty } from "./properties";
 import { random } from "./random";
-import { checkWindow, sampleWindow, type SampleWindow } from "./span";
+import { checkWindow } from "./span";
 import {
   NUDGE,
   ease,
@@ -178,7 +178,7 @@ type Covered<T extends Tolerance> = {
   readonly [P in keyof T & NumericProperty]?: number;
 };
 
-export type SampledOptions<T extends Tolerance> = SampleWindow & {
+export type SampledOptions<T extends Tolerance> = {
   /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
   readonly tolerance: T;
@@ -253,15 +253,16 @@ const jump = (
 /**
  * Sample `(t) => values` densely, then keep only the keys each lane needs. Morphs come out dense and
  * holds sparse, and a jump in the function comes out as a cut. Every channel or property returned needs a
- * tolerance for its lane. The function is given time from 0 to `over`, and plays from `at` (default 0), holding its
+ * tolerance for its lane. The function is given time from 0 to the span's `over`, and plays from its `at`, holding its
  * first value before and its last after.
  */
 export function sampled<T extends Tolerance, V extends Covered<T>>(
+  window: Span,
   sample: (t: Seconds) => V & { readonly [P in Exclude<keyof V, keyof Covered<T>>]: never },
   options: SampledOptions<T>,
 ): Motion<keyof V & Sampled> {
   const { step = 0.05, precision } = options;
-  const { at: from, over: duration } = sampleWindow(options, "sampled()");
+  const { at: from, over: duration } = closed(window, "sampled()");
 
   if (!Number.isFinite(step) || step <= 0)
     throw new Error(`sampled() needs a positive step, got ${step}.`);

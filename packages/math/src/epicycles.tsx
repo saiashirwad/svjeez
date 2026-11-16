@@ -390,8 +390,7 @@ export function epicycles(
     return (cumulative[j]! + (cumulative[j + 1]! - cumulative[j]!) * (u - j)) / length;
   };
 
-  const trail = sampled((t) => ({ draw: drawn(t) }), {
-    over: at + over,
+  const trail = sampled({ at: 0, over: at + over }, (t) => ({ draw: drawn(t) }), {
     step: over / 160,
     tolerance: { draw: 0.002 },
   });
