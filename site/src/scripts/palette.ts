@@ -5,7 +5,7 @@ import { adaptive } from "svjeez";
 import { restyle } from "svjeez/page";
 
 import { DEFAULT_PALETTE, PALETTES, themed, type PaletteId } from "../palettes";
-import { calm } from "./scheme";
+import { calm, type Scheme } from "./scheme";
 
 export type { PaletteId };
 
@@ -41,13 +41,20 @@ const source = (live: string) => {
   if (!svg) {
     svg = fetch(live)
       .then((response) => (response.ok ? response.text() : undefined))
-      .then((text) => (text && themed(text) ? text : undefined))
+      .then((text) => text || undefined)
       .catch(() => void sources.delete(live));
     sources.set(live, svg);
   }
 
   return svg;
 };
+
+// Safari answers an <img> SVG's prefers-color-scheme with the page's scheme and ignores the img's own color-scheme, so
+// an img pinned to one scheme gets a copy whose queries are answered already.
+const pin = (svg: string, scheme: Scheme) =>
+  svg.replace(/\(\s*prefers-color-scheme\s*:\s*(light|dark)\s*\)/g, (_, query) =>
+    query === scheme ? "(min-width: 0)" : "(max-width: -1px)",
+  );
 
 /**
  * A URL that shows the scene at `live` in the current palette, `at` seconds in or held at its still frame. Undefined
@@ -60,7 +67,8 @@ export const paint = async (
     at = 0,
     still = false,
     always = false,
-  }: { at?: number; still?: boolean; always?: boolean } = {},
+    scheme,
+  }: { at?: number; still?: boolean; always?: boolean; scheme?: Scheme } = {},
 ) => {
   const id = palette();
 
@@ -68,10 +76,15 @@ export const paint = async (
   const svg = await source(live);
 
   if (!svg) return undefined;
-  const css = id === DEFAULT_PALETTE ? undefined : CSS.get(id);
+  const recolor = themed(svg);
+
+  if (!recolor && !scheme) return undefined;
+  const css = recolor && id !== DEFAULT_PALETTE ? CSS.get(id) : undefined;
 
   return URL.createObjectURL(
-    new Blob([restyle(svg, { css, at, still })], { type: "image/svg+xml" }),
+    new Blob([restyle(scheme ? pin(svg, scheme) : svg, { css, at, still })], {
+      type: "image/svg+xml",
+    }),
   );
 };
 
@@ -83,10 +96,12 @@ export interface Frame {
 }
 
 const recolors = (img: HTMLImageElement) => "themed" in img.dataset;
+const pinned = (img: HTMLImageElement) => img.dataset.scheme as Scheme | undefined;
 
 /** The scene at `live` playing from `at` seconds in, in the current palette. */
 export const playing = async (img: HTMLImageElement, live: string, at = 0): Promise<Frame> => {
-  const url = recolors(img) ? await paint(live, { at }) : undefined;
+  const scheme = pinned(img);
+  const url = recolors(img) || scheme ? await paint(live, { at, scheme, always: !!scheme }) : undefined;
 
   return url ? { url, live, at } : { url: live, live, at: 0 };
 };
@@ -101,7 +116,9 @@ export const frozen = async (
   poster: string | undefined,
 ): Promise<Frame> => ({
   url:
-    (recolors(img) ? await paint(live, { still: true, always: !poster }) : undefined) ??
+    (recolors(img)
+      ? await paint(live, { still: true, always: !poster, scheme: pinned(img) })
+      : undefined) ??
     poster ??
     live,
 });
