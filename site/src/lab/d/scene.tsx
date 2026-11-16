@@ -144,13 +144,14 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
   );
 
   const inked = sampled(
+    { at: 0, over: D },
     (t) => {
       const u = Math.min(STEPS - 1e-6, (t / D) * STEPS);
       const j = Math.floor(u);
 
       return { draw: (along[j]! + (along[j + 1]! - along[j]!) * (u - j)) / length };
     },
-    { over: D, step: D / 240, tolerance: { draw: 0.001 } },
+    { step: D / 240, tolerance: { draw: 0.001 } },
   );
 
   /** Each circle turns relative to the one it rides, so its own arm points at its true angle. */

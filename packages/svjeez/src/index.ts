@@ -2,15 +2,7 @@ export { render, type RenderOptions } from "./render";
 
 export { motion, ease, type Motion, type Stack, type Seconds, type Ease } from "./motion";
 
-export {
-  span,
-  type Span,
-  type OpenSpan,
-  type Spanned,
-  type OpenSpanned,
-  type When,
-  type SampleWindow,
-} from "./span";
+export { span, type Span, type OpenSpan, type Spanned, type OpenSpanned, type When } from "./span";
 
 export { Clip, type ClipProps } from "./clip";
 

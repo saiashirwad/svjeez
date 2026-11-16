@@ -93,12 +93,13 @@ export const heads = (cx: Cx) => {
 
     const orbit = lay.orbit
       ? sampled(
+          { at: 0, over: DURATION },
           (t) => {
             const a = (Math.PI * 2 * t) / DURATION + (Math.PI * 2 * i) / lay.heads.length;
 
             return { x: lay.orbit!.rx * Math.cos(a), y: lay.orbit!.ry * Math.sin(a) };
           },
-          { over: DURATION, step: 0.1, precision: 1, tolerance: { translate: 1 } },
+          { step: 0.1, precision: 1, tolerance: { translate: 1 } },
         )
       : undefined;
 

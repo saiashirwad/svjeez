@@ -68,30 +68,35 @@ const center = (t: number, i: number) => {
   return { x, y };
 };
 
-const FINE = { over: D, step: 1 / 120 };
+const SPAN = { at: 0, over: D };
+const FINE = { step: 1 / 120 };
 
 const circles = HARMONICS.map(({ n, r, color }, i) => ({
   r,
   color,
-  place: sampled((t) => center(t, i), { ...FINE, tolerance: { translate: 0.5 } }),
-  grow: sampled((t) => ({ scale: Math.max(0.001, state(t).grow[i]!) }), {
+  place: sampled(SPAN, (t) => center(t, i), { ...FINE, tolerance: { translate: 0.5 } }),
+  grow: sampled(SPAN, (t) => ({ scale: Math.max(0.001, state(t).grow[i]!) }), {
     ...FINE,
     tolerance: { scale: 0.01 },
   }),
-  spin: sampled((t) => ({ rotate: (-n * state(t).theta * 180) / Math.PI }), {
+  spin: sampled(SPAN, (t) => ({ rotate: (-n * state(t).theta * 180) / Math.PI }), {
     ...FINE,
     tolerance: { rotate: 1 },
   }),
 }));
 
-const tip = sampled((t) => center(t, HARMONICS.length), { ...FINE, tolerance: { translate: 0.5 } });
+const tip = sampled(SPAN, (t) => center(t, HARMONICS.length), {
+  ...FINE,
+  tolerance: { translate: 0.5 },
+});
 
-const pen = sampled((t) => ({ x: state(t).pen, y: center(t, HARMONICS.length).y }), {
+const pen = sampled(SPAN, (t) => ({ x: state(t).pen, y: center(t, HARMONICS.length).y }), {
   ...FINE,
   tolerance: { translate: 0.5 },
 });
 
 const connector = sampled(
+  SPAN,
   (t) => {
     const end = center(t, HARMONICS.length);
 
@@ -123,6 +128,7 @@ const trace = (k: number) => {
   return {
     d,
     progress: sampled(
+      SPAN,
       (t) => {
         const u = Math.min(1, Math.max(0, (t - run) / PERIOD)) * 240;
         const i = Math.min(239, Math.floor(u));
@@ -239,7 +245,7 @@ export default function build(): string {
         </g>
         <g class="sans" animation={enter({ at: 1.8, over: 0.6 })}>
           <text x={X0} y={H - 22} fontSize={12} fill={theme.base03}>
-            {"sampled((t) => tip(t), { over })"}
+            {"sampled(span, (t) => tip(t))"}
           </text>
         </g>
         <g animation={motion({ opacity: 1 }).at(WRITTEN).set({ opacity: 0 })}>

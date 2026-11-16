@@ -71,12 +71,16 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 + <Callout target={box} show={{ at: 2, over: 3 }}>Click</Callout>
 ```
 
-**10. `sampled` takes `over`, not `duration`.** Search `sampled(`. The function still receives time from 0; add `at` to start later.
+**10. `sampled` and `readout` take a leading span.** Search `sampled(`, `sampled.path(` and `readout(`. The span is `{ at, over }`, with `at` required (it was 0 by default, and `duration` before that). `sampled`'s function still receives time from 0 to `over`.
 
 ```ts
-- sampled(fn, { duration: 4, tolerance })
-+ sampled(fn, { over: 4, tolerance })
+- sampled(fn, { duration: 4, tolerance })                +  sampled({ at: 0, over: 4 }, fn, { tolerance })
+- sampled(fn, { at: 2, over: 4, step, tolerance })       +  sampled({ at: 2, over: 4 }, fn, { step, tolerance })
+- sampled.path(fn, { over: 6, tolerance })               +  sampled.path({ at: 0, over: 6 }, fn, { tolerance })
+- readout(text, { at: 1, over: 3, step, x, y, fill })    +  readout({ at: 1, over: 3 }, text, { step, x, y, fill })
 ```
+
+`SampleWindow` is gone: pass a `Span`. `readout` also throws the shared `needs a start of 0 or later` and `needs a positive over` errors.
 
 **11. Results carry a `span`, not `end`.** Search `.end` on the results of `typewriter`, `terminal`, `reveal`, `flow`, `morph` and the `@svjeez/charts` series (`bars`, `line`, `area` of `chart(...)`). Use `.span.end` (also `.span.at`, `.span.over`). `timeline()` keeps its own `.end`.
 
@@ -131,8 +135,8 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 | `<Steady at>` | `<Camera steady origin>` |
 | `flow(points, { loop })` | `flow(points, { period })` |
 | `fieldFlow(lines, options)` | `flow(lines, options).node` |
-| `sampledPath(fn, options)` | `sampled.path(fn, options)` |
-| `sampled.path` with `duration` | `over` |
+| `sampledPath(fn, options)` | `sampled.path({ at, over }, fn, options)` |
+| `sampled.path` with `duration` | `sampled.path({ at, over }, fn, { tolerance })` |
 | `globe(data, { spin: { over } })`, `Globe.duration` | `globe(span, data, { spin })`, `Globe.span` (see API cleanup) |
 | `.end` of `derive`, `epicycles`, `traffic`, `walk`, constructions | `.span.end` |
 | `renderVideo` (`@svjeez/video`) | `video` |
@@ -183,6 +187,8 @@ Smaller breaking changes, in the order a typecheck will find them.
 - epicycles(outline, { at, over, ...rest })               + epicycles({ at, over }, outline, rest)
 - derive(steps, { at, every: 2, over: 0.8 })              + derive({ at, over: 5 * 2 + 0.8 }, steps, { change: 0.8 })
 - fieldLines(lines, { at, over })                         + fieldLines({ at, over }, lines)
+- sampled(fn, { at, over, tolerance })                   + sampled({ at, over }, fn, { tolerance })   // also sampled.path
+- readout(text, { at, over, x, y })                       + readout({ at, over }, text, { x, y })
 - contourSweep(f, { at, over, from, to })                 + contourSweep({ at, over }, f, { from, to })
 - counter(fn, { duration: 10, step })                     + counter({ at: 0, over: 10 }, fn, { step })
 - plane.vector(to, { enter: span })                       + plane.vector(span, to)

@@ -56,17 +56,17 @@ export default (feel: Feel = defaults(params)): string => {
     const cx = 120 + i * 100;
 
     const body = sampled(
+      { at: 0, over: duration },
       (t) => {
         const w = W * (1 + 0.8 * s(t));
         const h = H * (1 - s(t));
 
         return { x: (W - w) / 2, y: H - h, width: w, height: h };
       },
-      { over: duration, step: 1 / 60, tolerance: { translate: 0.4, width: 0.4, height: 0.4 } },
+      { step: 1 / 60, tolerance: { translate: 0.4, width: 0.4, height: 0.4 } },
     );
 
-    const eyes = sampled((t) => ({ y: H * s(t) * 0.75 }), {
-      over: duration,
+    const eyes = sampled({ at: 0, over: duration }, (t) => ({ y: H * s(t) * 0.75 }), {
       step: 1 / 60,
       tolerance: { translate: 0.4 },
     });

@@ -1,25 +1,25 @@
 /** @jsxImportSource svjeez */
 import type { Attrs } from "../attributes";
 import { motion, type Motion, type Seconds, type Span } from "../motion";
+import { checkWindow } from "../span";
 import type { SvgNode } from "../svg";
 
-export type ReadoutOptions = Span &
-  Attrs<"text"> & {
-    /** Seconds between samples. Default 1/12. */
-    readonly step?: Seconds;
-  };
+export type ReadoutOptions = Attrs<"text"> & {
+  /** Seconds between samples. Default 1/12. */
+  readonly step?: Seconds;
+};
 
 /**
  * Text that changes with time: `text(t)` sampled across the span, each distinct string shown while it holds. The
- * other options are attributes of every `<text>`, such as `x`, `y`, `fill` and `textAnchor`.
+ * options other than `step` are attributes of every `<text>`, such as `x`, `y`, `fill` and `textAnchor`.
  */
-export function readout(text: (t: Seconds) => string, options: ReadoutOptions): SvgNode {
-  const { at, over, step = 1 / 12, ...attrs } = options;
-
-  if (!(at >= 0) || !(over > 0))
-    throw new Error(
-      `readout() needs a non-negative at and a positive over, got at ${at} and over ${over}.`,
-    );
+export function readout(
+  { at, over }: Span,
+  text: (t: Seconds) => string,
+  options: ReadoutOptions = {},
+): SvgNode {
+  const { step = 1 / 12, ...attrs } = options;
+  checkWindow(at, over, "readout()");
 
   if (!(step > 0)) throw new Error(`readout() needs a positive step, got ${step}.`);
   const count = Math.max(1, Math.round(over / step));

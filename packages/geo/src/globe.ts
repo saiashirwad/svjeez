@@ -307,7 +307,7 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     Math.max(0, (Math.hypot(x - center.x, y - center.y) - radius - 1) / 2);
 
   const turning = (sample: (t: Seconds) => string): Turning => {
-    const animation = sampled.path(sample, { at: start, over, tolerance, slack });
+    const animation = sampled.path({ at: start, over }, sample, { tolerance, slack });
 
     // SAFETY: sample writes every frame starting with M.
     return { d: sample(0) as PathData, animation };
@@ -578,13 +578,14 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
 
       return {
         animation: sampled(
+          { at: start, over },
           (t) => {
             const v = view(t);
             const [x, y] = screen(dot(p, v.right), dot(p, v.up));
 
             return { x, y, opacity: Math.min(1, Math.max(0, dot(p, v.toward) / fade)) };
           },
-          { at: start, over, tolerance: { translate: tolerance, opacity: 0.02 } },
+          { tolerance: { translate: tolerance, opacity: 0.02 } },
         ),
       };
     },

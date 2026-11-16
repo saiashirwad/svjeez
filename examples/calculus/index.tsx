@@ -127,15 +127,12 @@ export default function build(): string {
       <g animation={enter({ at: 1.8, over: 0.5 })}>{secant.node}</g>
       <g animation={enter({ at: 1.8, over: 0.5 })}>
         {readout(
+          { at: 1.8, over: X[0]!.at + X[0]!.over - 1.8 },
           (t) =>
             t < H0.at + H0.over
               ? `slope ≈ ${fixed(secant.slope(t))}`
               : `f′(x) = ${fixed(secant.slope(t))}`,
-          {
-            ...label(0),
-            at: 1.8,
-            over: X[0]!.at + X[0]!.over - 1.8,
-          },
+          label(0),
         )}
       </g>
 
@@ -152,6 +149,7 @@ export default function build(): string {
       <g animation={enter({ at: AREA_AT, over: 0.6 })}>{exact.node}</g>
       <g animation={enter({ at: 3.6, over: 0.5 })}>
         {readout(
+          { at: 3.6, over: AREA_AT - 3.6 + 0.1 },
           (t) => {
             const stage = SPLITS.filter((s) => s + 0.35 <= t).length;
 
@@ -159,18 +157,18 @@ export default function build(): string {
               ? `area = ${exact.value(0).toFixed(3)}`
               : `n = ${N[stage]} · Σ = ${sums.sums[stage]!.toFixed(3)}`;
           },
-          { ...label(1), at: 3.6, over: AREA_AT - 3.6 + 0.1 },
+          label(1),
         )}
       </g>
 
       {cosine.node}
       {poly.node}
       <g animation={enter({ at: 7.6, over: 0.5 })}>
-        {readout((t) => `degree ${DEGREES[BENDS.filter((b) => b + 0.4 <= t).length]}`, {
-          ...label(2),
-          at: 7.6,
-          over: BENDS.at(-1)! - 7.6 + 0.5,
-        })}
+        {readout(
+          { at: 7.6, over: BENDS.at(-1)! - 7.6 + 0.5 },
+          (t) => `degree ${DEGREES[BENDS.filter((b) => b + 0.4 <= t).length]}`,
+          label(2),
+        )}
       </g>
       <g
         fontFamily={mono}

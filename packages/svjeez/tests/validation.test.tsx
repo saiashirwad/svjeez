@@ -76,9 +76,9 @@ describe("one rule for at and over", () => {
   test("recipes, sampled and clips reject over 0; span() allows a point", () => {
     expect(() => draw({ at: 0, over: 0 })).toThrow("draw() needs a positive over, got 0.");
     expect(() => draw({ at: -1, over: 1 })).toThrow("draw() needs a start of 0 or later, got -1.");
-    expect(() => sampled(() => ({ x: 0 }), { over: 0, tolerance: { translate: 1 } })).toThrow(
-      "sampled() needs a positive over, got 0.",
-    );
+    expect(() =>
+      sampled({ at: 0, over: 0 }, () => ({ x: 0 }), { tolerance: { translate: 1 } }),
+    ).toThrow("sampled() needs a positive over, got 0.");
     expect(span(2, 0).end).toBe(2);
     expect(() => span(2, -1)).toThrow("span() needs a length of 0 or more, got -1.");
   });

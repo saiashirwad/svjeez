@@ -26,10 +26,11 @@ export default (p: Values<typeof params> = defaults(params)) => {
   // A real pendulum's period, so a longer rod swings slower.
   const period = 2 * Math.PI * Math.sqrt(p.length / 2000);
 
-  const swinging = sampled((t) => ({ rotate: -p.swing * Math.cos((2 * Math.PI * t) / period) }), {
-    over: period,
-    tolerance: { rotate: 0.2 },
-  });
+  const swinging = sampled(
+    { at: 0, over: period },
+    (t) => ({ rotate: -p.swing * Math.cos((2 * Math.PI * t) / period) }),
+    { tolerance: { rotate: 0.2 } },
+  );
 
   const left = along(p.length, -p.swing);
   const rest = along(p.length, 0);

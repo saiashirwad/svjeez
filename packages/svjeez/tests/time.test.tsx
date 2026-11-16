@@ -648,19 +648,20 @@ describe("show()", () => {
 });
 
 describe("sampled() with a window", () => {
-  const line = (options: { at?: number; over: number }) =>
-    sampled((t) => ({ x: t * 10 }), { ...options, tolerance: { translate: 0.01 } });
+  const line = (options: { at: number; over: number }) =>
+    sampled(options, (t) => ({ x: t * 10 }), { tolerance: { translate: 0.01 } });
 
   test("plays from at, hands the function time from 0 to over, and holds either side", () => {
     const seen: number[] = [];
 
     const motionOf = sampled(
+      { at: 4, over: 2 },
       (t) => {
         seen.push(t);
 
         return { x: t * 10 };
       },
-      { at: 4, over: 2, tolerance: { translate: 0.01 } },
+      { tolerance: { translate: 0.01 } },
     );
 
     const held = keys(scene(rect(motionOf)), "translate");
@@ -673,25 +674,19 @@ describe("sampled() with a window", () => {
     expect(held.find((key) => key.value === 20)?.t).toBe(6);
   });
 
-  test("without at it starts at 0", () => {
-    const viaOver = scene(rect(line({ over: 4 })));
-
-    expect(viaOver).toBe(scene(rect(line({ at: 0, over: 4 }))));
-  });
-
   test("asks for a positive over and an at of 0 or later", () => {
-    expect(() => line({ over: 0 })).toThrow(/sampled\(\) needs a positive over, got 0/);
+    expect(() => line({ at: 0, over: 0 })).toThrow(/sampled\(\) needs a positive over, got 0/);
     expect(() => line({ at: -1, over: 2 })).toThrow(/start of 0 or later/);
-    // @ts-expect-error neither over nor duration
-    expect(() => sampled((t) => ({ x: t }), { tolerance: { translate: 0.1 } })).toThrow(
-      /positive over/,
-    );
+    const atless = { over: 1 };
+    // @ts-expect-error a span needs an at
+    const bad = () => sampled(atless, (t) => ({ x: t }), { tolerance: { translate: 0.1 } });
+    expect(bad).toThrow(/start of 0 or later/);
   });
 
   test("sampled.path takes the same window", () => {
     // SAFETY: the template starts with M, as PathData requires.
     const frame = (t: number) => `M0 0L${10 + t} 0` as `M${string}`;
-    const path = sampled.path(frame, { at: 2, over: 3, tolerance: 0.1 });
+    const path = sampled.path({ at: 2, over: 3 }, frame, { tolerance: 0.1 });
 
     const svg = scene(<path d={frame(0)} animation={path} />);
 

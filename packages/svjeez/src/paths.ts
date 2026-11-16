@@ -1,6 +1,6 @@
 import { num } from "./format";
 import { segments } from "./pathTokens";
-import { sampleWindow, type SampleWindow } from "./span";
+import { checkWindow, type Span } from "./span";
 import { NUDGE, ease, motion, type Motion, type Seconds } from "./motion";
 
 /** SVG path data, as a `<path d>` takes it. */
@@ -385,7 +385,7 @@ export const commandsOf = (d: string): string =>
 
 const numbers = (d: string): number[] => segments(d).flatMap((s) => s.numbers);
 
-export type SampledPathOptions = SampleWindow & {
+export type SampledPathOptions = {
   /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
   /** How far, in px, any point of the replay may stray from the samples. */
@@ -401,12 +401,14 @@ export type SampledPathOptions = SampleWindow & {
 
 /** What `sampled.path()` does when `sample` returns path data and `tolerance` is a number of px. */
 export function samplePath(
+  window: Span,
   sample: (t: Seconds) => string,
   options: SampledPathOptions,
 ): Motion<"d"> {
   const { step = 0.05, tolerance } = options;
   const places = options.precision ?? 1;
-  const { at: from, over: duration } = sampleWindow(options, "sampled.path()");
+  const { at: from, over: duration } = window;
+  checkWindow(from, duration, "sampled.path()");
 
   if (!Number.isFinite(step) || step <= 0)
     throw new Error(`sampled.path() needs a positive step, got ${step}.`);

@@ -131,26 +131,25 @@ const stepping = css.property("stepping", { syntax: "angle", inherits: true, ini
 const beatAt = (t: number) => BEAT0 + (t * BEATS) / D;
 const STEP = 0.004;
 
-const swing = sampled((t) => ({ [theta]: balanceAt(beatAt(t)) }), {
-  over: SWING_TIME,
+const swing = sampled({ at: 0, over: SWING_TIME }, (t) => ({ [theta]: balanceAt(beatAt(t)) }), {
   step: STEP,
   tolerance: { [theta]: 0.5 },
   precision: 1,
 }).loop(SWING_TIME);
 
 const steps = sampled(
+  { at: 0, over: SWING_TIME },
   (t) => ({ [stepping]: wheelAt(beatAt(t)) - wheelAt(BEAT0) - (PITCH / 2) * (beatAt(t) - BEAT0) }),
-  { over: SWING_TIME, step: STEP, tolerance: { [stepping]: 0.04 }, precision: 2 },
+  { step: STEP, tolerance: { [stepping]: 0.04 }, precision: 2 },
 ).loop(SWING_TIME);
 
 const advancing = motion({ [advance]: 0 }).to({ [advance]: (PITCH / 2) * BEATS }, D, ease.linear);
 
-const rocking = sampled((t) => ({ rotate: forkAt(balanceAt(beatAt(t))) }), {
-  over: SWING_TIME,
-  step: STEP,
-  tolerance: { rotate: 0.04 },
-  precision: 2,
-}).loop(SWING_TIME);
+const rocking = sampled(
+  { at: 0, over: SWING_TIME },
+  (t) => ({ rotate: forkAt(balanceAt(beatAt(t))) }),
+  { step: STEP, tolerance: { rotate: 0.04 }, precision: 2 },
+).loop(SWING_TIME);
 
 /** A part that turns about a point by a multiple of the balance's angle or the escape wheel's. */
 const Turns = ({

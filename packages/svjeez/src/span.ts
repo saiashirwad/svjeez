@@ -133,19 +133,3 @@ export function span(at: Seconds): OpenSpanned;
 export function span(at: Seconds, over?: Seconds): Spanned | OpenSpanned {
   return over === undefined ? build(at, undefined, "span()") : build(at, over, "span()");
 }
-
-/** Where a sampled motion plays: `over` seconds from `at` (default 0). The function it samples is given time from 0 to `over`. */
-export interface SampleWindow {
-  readonly at?: Seconds;
-  readonly over: Seconds;
-}
-
-/** The `at` and `over` of a sampled window, checked by `checkWindow`. */
-export const sampleWindow = (options: SampleWindow, what: string): Span => {
-  const { over } = options;
-  const at = options.at ?? 0;
-
-  checkWindow(at, over, what);
-
-  return { at, over };
-};
