@@ -109,8 +109,10 @@ export function counter(
   third?: CounterOptions,
 ): Counter {
   // SAFETY: the overloads pair a list with options, or a span with a function and options.
-  const fn = typeof second === "function" ? second : undefined;
-  const options = (typeof second === "function" ? third : (second as CounterOptions | undefined)) ?? {};
+  const [fn, options]: [((t: Seconds) => number) | undefined, CounterOptions] = isSpan(first)
+    ? [second as (t: Seconds) => number, third ?? {}]
+    : [undefined, (second as CounterOptions | undefined) ?? {}];
+
   const { fontSize = 32, digits = 0, theme = defaultDark, roll = 0, anchor = [0, 0] } = options;
 
   if (!Number.isInteger(digits) || digits < 0 || !(fontSize > 0) || !(roll >= 0))

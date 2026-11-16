@@ -116,11 +116,13 @@ describe("bars", () => {
 
   test("bars grow with a stagger and report when the last one lands", () => {
     const c = band();
+
     const result = c.bars(
       { at: 1, over: 1.1 },
       { Q1: 12, Q2: 48, Q3: 31, Q4: 87 },
       { stagger: 0.2 },
     );
+
     expect(result.span.end).toBeCloseTo(2.1, 6);
     const svg = scene(result.node);
     expect(svg).toContain("@keyframes");
@@ -129,6 +131,7 @@ describe("bars", () => {
 
   test("the last bar lands with the span, however many bars there are", () => {
     const c = band();
+
     const result = c.bars(
       { at: 1, over: 2 },
       [
@@ -137,6 +140,7 @@ describe("bars", () => {
       ],
       { stagger: 0.5 },
     );
+
     const svg = scene(result.node);
     expect(result.span).toMatchObject({ at: 1, over: 2 });
     expect(result.bars.map((b) => b.key)).toEqual(["Q1", "Q4"]);

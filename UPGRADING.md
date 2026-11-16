@@ -124,7 +124,7 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 | Search | Now |
 | --- | --- |
 | `axes(`, `Axes`, `AxesOptions`, `{ axes }` of `contours`, `contourSweep` | `plane`, `Plane`, `PlaneOptions`, `{ plane }` |
-| `plane({ origin, unit, extent, step })` | `plane({ x, y, width, height, at, ticks })`, see below |
+| `plane({ origin, unit, extent, step })` | `plane({ xRange, yRange, frame, ticks })`, see below |
 | `Area`, `Curve`, `Dot`, `Line` (calculus), `MorphCurveOptions` | `CalculusArea`, `CalculusCurve`, `CalculusDot`, `CalculusLine`, `CalculusMorphOptions` |
 | `sample`, `SampleOptions` | `valuesAt`, `ValuesAtOptions` |
 | `<Pivot at>` | `<Pivot origin>` |
@@ -144,16 +144,15 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 ```ts
 - plane({ origin: { x: ox, y: oy }, unit: u, extent: { x: [x0, x1], y: [y0, y1] }, step: s })
 + plane({
-+   x: [x0, x1],
-+   y: [y0, y1],
-+   width: (x1 - x0) * u,
-+   height: (y1 - y0) * u,
-+   at: { x: ox + x0 * u, y: oy - y1 * u }, // top-left of the plot area
++   xRange: [x0, x1],
++   yRange: [y0, y1],
++   // the plot area: its top-left is where the graph's (x0, y1) corner sits
++   frame: rect(ox + x0 * u, oy - y1 * u, (x1 - x0) * u, (y1 - y0) * u),
 +   ticks: s,
 + })
 ```
 
-`unit` was one scale for both axes, so `height` uses it too. Check that `at` lands the graph origin on `origin`: `point(0, 0)` of the new plane should equal the old `origin`.
+`unit` was one scale for both axes, so the frame height uses it too. Check that the frame lands the graph origin on `origin`: `point(0, 0)` of the new plane should equal the old `origin`.
 
 ## API cleanup
 
@@ -174,6 +173,28 @@ Smaller breaking changes, in the order a typecheck will find them.
 + import { rect } from "svjeez/geometry";
 ```
 
+- Placement is a `frame: Rect` (`rect(x, y, w, h)` from `svjeez/geometry`), as `@svjeez/geo` already did. `chart({ width, height, at })` is `chart({ frame })`. `plane({ x, y, width, height, at })` is `plane({ xRange, yRange, frame })`. `vectorField`, `streamlines`, `contours` and `contourSweep` take `frame` where they took `bounds`, and `Bounds` is gone: pass a `Rect`. `construct({ at })` is `construct({ origin })`. `legend(scale, { x, y, width, height, ink })` is `legend(scale, { frame, color, theme })` and returns `{ node, bounds }`, so use `.node`. The text default is the theme's `plain` rather than `#c9d1d9`.
+- Time is a leading span, with options last:
+
+```ts
+- c.bars(record, { at: 0.6, over: 0.7, stagger: 0.08 })   + c.bars({ at: 0.6, over: 1.1 }, record)  // over spans the whole series
+- c.line(points, { at: 1, over: 2 })                      + c.line({ at: 1, over: 2 }, points)
+- epicycles(outline, { at, over, ...rest })               + epicycles({ at, over }, outline, rest)
+- derive(steps, { at, every: 2, over: 0.8 })              + derive({ at, over: 5 * 2 + 0.8 }, steps, { change: 0.8 })
+- fieldLines(lines, { at, over })                         + fieldLines({ at, over }, lines)
+- contourSweep(f, { at, over, from, to })                 + contourSweep({ at, over }, f, { from, to })
+- counter(fn, { duration: 10, step })                     + counter({ at: 0, over: 10 }, fn, { step })
+- plane.vector(to, { enter: span })                       + plane.vector(span, to)
+- plane.basis({ enter: span })                            + plane.basis(span)
+- cartogram(map, values, { at, over })                    + cartogram({ at, over }, map, values)
+- toBars(map, values, { at, over, frame })                + toBars({ at, over }, map, values, { frame })
+- traffic(lines, { during: span, rate })                  + traffic(span, lines, { rate })
+- trueSize(map, region, to, { at, over, duration })       + trueSize({ at, over }, map, region, to)
+- choropleth(map, values, { scale, at: [0, 3] })          + choropleth(map, values, { scale, times: [0, 3] })
+- { lane: "a", from: 1, to: 4 }                           + { lane: "a", at: 1, over: 3 }   // LaneSpan is LaneBar
+```
+
+  Details. A bar series now ends with its span: each bar grows for `over - (bars - 1) * stagger`, `stagger` defaults to 0.08 or less when the span is short, `ease` is an option, and `bars` also takes `[key, value]` pairs. `derive`'s `every` is gone: the changes are spaced evenly across the span and `over` became `change`. `counter(fn)` reads `fn` from 0 at the span's start, not at scene time 0. `cartogram` and `toBars` with `stagger` start the shapes that far apart and land the last with the span. `trueSize` takes a core `Ease` and defaults to `ease.inOut`, a slightly different curve from the old cubic. `Timing` is gone from `@svjeez/math` and `@svjeez/charts`.
 - `.to(values, span, ease?)` is gone: `.to` takes a length. Search `.to(` with a span as the second argument and write `.at(span.at).to(values, span.over, ease)`.
 - `defaultLight` is gone (use `systemLight`), and `inkPath` is no longer exported from `svjeez`.
 - New exports, for typing what functions return: `FlowResult`, `TerminalResult`, `RevealResult`, `TypewriterResult`, `AppWindowResult`, `MorphResult`, `AdaptiveResult`, `VariablesResult`, `Shown`, `Heading` and `Travel`.

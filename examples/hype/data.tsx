@@ -23,6 +23,7 @@ const plot = chart({
 
 export const dataShot = ({ at }: Span) => {
   const grow = at + 0.5;
+
   const bars = plot.bars({ at: grow, over: 0.7 + (pairs.length - 1) * STEP }, pairs, {
     stagger: STEP,
     color: C.hairline,

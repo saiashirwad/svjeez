@@ -453,6 +453,7 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     const [enter, to, options = {}] = Array.isArray(first)
       ? [undefined, first as Vec2, second as VectorOptions | undefined]
       : [first as Span, second as Vec2, third];
+
     const { color = theme.base0D, width = 3, from = [0, 0] } = options;
 
     if (!finite(...to, ...from) || (to[0] === from[0] && to[1] === from[1]))

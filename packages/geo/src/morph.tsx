@@ -155,6 +155,7 @@ function morphs(
   options: MorphOptions,
 ): Morphed {
   const { at, over } = when;
+
   const {
     stagger = 0,
     ease: curve = ease.inOut,

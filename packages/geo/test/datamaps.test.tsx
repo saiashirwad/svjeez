@@ -97,7 +97,7 @@ describe("choropleth()", () => {
     const { node, groups } = choropleth(
       map,
       { France: [10, 90], Germany: [10, 90], Spain: [90, 10] },
-      { scale, at: [0, 3], over: 1 },
+      { scale, times: [0, 3], over: 1 },
     );
 
     expect(groups).toBe(2);
@@ -146,6 +146,7 @@ describe("cartogram()", () => {
     const durations = [...svg.matchAll(/<animate\b[^>]*attributeName="d"[^>]*dur="([\d.]+)s"/g)].map((m) => +m[1]!);
 
     expect(durations).toHaveLength(6);
+
     for (const dur of durations) expect(dur).toBeCloseTo(2 - 5 * 0.3, 6);
 
     expect(() => cartogram({ at: 2, over: 1 }, map, people, { stagger: 0.3 })).toThrow(

@@ -84,6 +84,7 @@ export function derive(
   options: DeriveOptions = {},
 ): Derivation {
   const { at, over: total } = when;
+
   const {
     change: over = 0.9,
     x = 0,
