@@ -91,6 +91,14 @@ const probe = ([seekSrc, times, indices]: [string, number[], number[] | undefine
   const seekTo = (0, eval)(`(${seekSrc})`) as (time: number) => void;
   const targets = new Set<Element>();
 
+  // Chromium runs animations inside a display: none subtree, and Firefox and WebKit don't. Nothing there is on screen.
+  const hidden = (element: Element) => {
+    for (let node: Element | null = element; node; node = node.parentElement)
+      if (getComputedStyle(node).display === "none") return true;
+
+    return false;
+  };
+
   for (const element of document.querySelectorAll("animate, animateTransform, animateMotion, set")) {
     const href = element.getAttribute("href") ?? element.getAttribute("xlink:href");
     const target = href ? document.getElementById(href.slice(1)) : element.parentElement;
@@ -103,6 +111,8 @@ const probe = ([seekSrc, times, indices]: [string, number[], number[] | undefine
 
     if (target) targets.add(target);
   }
+
+  for (const element of targets) if (hidden(element)) targets.delete(element);
 
   const all = [...document.querySelectorAll("*")];
   // The elements Chromium animates, when it has said which, so an engine that animates fewer is measured on them too.
