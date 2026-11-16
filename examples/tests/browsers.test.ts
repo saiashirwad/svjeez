@@ -61,7 +61,8 @@ const plan = ([loopSrc, count]: [string, number]): number[] => {
   for (let k = 0; k < 4; k++) add(loop + (loop * k) / 4 + 0.007);
   add(0);
   add(loop - 0.04);
-  add(loop);
+  // Not at the loop itself: where one interval ends and the next begins, engines may pick either, and no frame lands there.
+  add(loop + 0.002);
   add(loop + 0.04);
   add(loop * 2 - 0.04);
 
@@ -109,7 +110,8 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
       const unlaidOut = element.closest("mask") !== null;
 
       try {
-        if (unlaidOut) throw new Error("no box");
+        // A group's box depends on how each engine places the transform-box of what it holds. Its bounds still count.
+        if (unlaidOut || element.matches("g, svg, use")) throw new Error("no box");
         const box = (element as SVGGraphicsElement).getBBox();
 
         // An empty box has no position worth comparing: Chromium keeps where it is, Firefox and WebKit say 0 0.
@@ -245,6 +247,8 @@ const open = async (browser: Browser, svg: string): Promise<Page> => {
   const page = await browser.newPage({ colorScheme: "light" });
 
   await page.setContent(`<!doctype html><meta charset="utf-8"><body style="margin:0">${svg}</body>`);
+  // Firefox's bounds include the stroke and Chromium's don't, so only the fill is measured.
+  await page.addStyleTag({ content: "*{stroke:none!important}" });
   await page.evaluate(() => document.fonts.ready);
 
   return page;
