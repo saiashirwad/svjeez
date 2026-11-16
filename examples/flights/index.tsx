@@ -1,6 +1,7 @@
 import { arc, project, traffic, type LonLat, type Topology } from "@svjeez/geo";
 import { plane } from "@svjeez/icons/tabler";
-import { Icon, draw, ease, motion, rect, render, type SvgNode, travel, variables } from "svjeez";
+import { Icon, draw, ease, motion, render, type SvgNode, travel, variables } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 

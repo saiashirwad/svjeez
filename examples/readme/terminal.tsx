@@ -1,4 +1,5 @@
-import { rect, render, terminal, appWindow } from "svjeez";
+import { render, terminal, appWindow } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { css, mono, theme } from "../style";
 

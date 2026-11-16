@@ -2,7 +2,6 @@ import {
   def,
   ease,
   motion,
-  rect,
   render,
   Callout,
   Focus,
@@ -16,6 +15,7 @@ import {
   type CodePiece,
   type CodeTokens,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { flowchart, sequence, stateMachine } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 

@@ -1,6 +1,7 @@
 /** @jsxImportSource svjeez */
 import type { Color } from "../attributes";
-import { pathLength, simplify, type Point } from "../geometry";
+import { pathLength, type Point } from "../geometry";
+import { simplify } from "../simplify";
 import { EPSILON, ease, motion, type Seconds } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";

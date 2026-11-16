@@ -17,7 +17,8 @@
       "svjeez/jsx-dev-runtime": ["./src/jsx-dev-runtime.ts"],
       "svjeez/frames": ["./src/frames.ts"],
       "svjeez/page": ["./src/page.ts"],
-      "svjeez/params": ["./src/params.ts"]
+      "svjeez/params": ["./src/params.ts"],
+      "svjeez/geometry": ["./src/geometry.ts"]
     }
   },
   "include": ["src", "scripts", "skills", "tests"]

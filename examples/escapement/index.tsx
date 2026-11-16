@@ -7,13 +7,13 @@ import {
   draw,
   ease,
   motion,
-  rect,
   render,
   sampled,
   show,
   type Rect,
   type SvgNode,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import {
   BALANCE,
   FORK,

@@ -3,9 +3,7 @@ import {
   defaultDark,
   draw,
   ease,
-  matchPaths,
   motion,
-  num,
   tint,
   type Base16,
   type Color,
@@ -14,6 +12,7 @@ import {
   type Seconds,
   type SvgNode,
 } from "svjeez";
+import { matchPaths, num } from "svjeez/geometry";
 import { marchingSquares } from "./layout/contour.ts";
 import { simplify, traceStreamlines, type VectorField } from "./layout/field.ts";
 import type { Plane } from "./plane.tsx";

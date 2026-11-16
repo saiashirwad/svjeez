@@ -1,6 +1,7 @@
 // Where everything on a specimen sits. Pure math: the page lays the overlay's handles out from the same numbers
 // the worker draws the file from.
-import { random, resample } from "svjeez";
+import { random } from "svjeez";
+import { resample } from "svjeez/geometry";
 import { clamp } from "../util";
 import { CENTERLINES } from "./centerline";
 import { form, type Form } from "./form";

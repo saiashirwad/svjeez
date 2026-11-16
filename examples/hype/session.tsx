@@ -2,7 +2,6 @@ import {
   def,
   ease,
   motion,
-  rect,
   type Color,
   type Motion,
   type Stack,
@@ -13,6 +12,7 @@ import {
   typewriter,
   type CodePiece,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { mono, theme } from "../style";
 import { COLD } from "./cold";

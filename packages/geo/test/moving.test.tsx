@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { geoContains, geoEqualEarth, geoMercator, geoNaturalEarth1, geoOrthographic } from "d3-geo";
-import { motion, rect, render } from "svjeez";
+import { motion, render } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { feature } from "topojson-client";
 import { createRequire } from "node:module";
 import {

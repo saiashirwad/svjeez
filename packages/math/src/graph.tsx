@@ -1,7 +1,6 @@
 /** @jsxImportSource svjeez */
 import {
   def,
-  rect,
   tint,
   type Base16,
   type FontValue,
@@ -11,6 +10,7 @@ import {
   type Ref,
   type SvgNode,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 export type Range = readonly [number, number];
 

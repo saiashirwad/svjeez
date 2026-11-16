@@ -2,7 +2,8 @@ import { google } from "@svjeez/fonts";
 import { Dom, duration, loop, shots, size } from "@svjeez/dom";
 import { recordings } from "@svjeez/dom/vite";
 import { fileURLToPath } from "node:url";
-import { Camera, def, rect, render, variables } from "svjeez";
+import { Camera, def, render, variables } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 // The sign-in demo from examples/demos, filmed like a screen recording: a camera follows whatever is changing. It
 // frames the email field while it's typed, then the password and the button, pulls back for the error, and stays back

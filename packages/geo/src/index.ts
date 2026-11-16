@@ -19,7 +19,8 @@ import type {
   Polygon as TopoPolygon,
   Topology,
 } from "topojson-specification";
-import { rect, type Point, type Rect } from "svjeez";
+import { type Point, type Rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { Writer } from "./writer.ts";
 
 export type LonLat = readonly [lon: number, lat: number];

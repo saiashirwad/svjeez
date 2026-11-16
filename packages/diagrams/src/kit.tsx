@@ -3,7 +3,6 @@ import {
   type Color,
   textWidth,
   type FontValue,
-  rect,
   type Edge,
   type Point,
   type Rect,
@@ -22,6 +21,7 @@ import {
   type Base16,
   type Slot,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { curve } from "./curve.ts";
 
 /** What a node is, so the theme can draw it. */

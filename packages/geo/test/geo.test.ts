@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { geoContains, geoOrthographic } from "d3-geo";
-import { rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { createRequire } from "node:module";
 import { distance, night, project, sun, type LonLat, type Topology } from "../src/index.ts";
 

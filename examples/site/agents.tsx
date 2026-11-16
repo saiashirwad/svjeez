@@ -3,7 +3,6 @@ import {
   ease,
   enter,
   motion,
-  rect,
   render,
   appWindow,
   code,
@@ -11,6 +10,7 @@ import {
   terminal,
   type CodeTokens,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { CSS } from "./lib/kit";
 import { mono, theme } from "../style";

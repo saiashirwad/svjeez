@@ -9,7 +9,6 @@ import {
   enter,
   Icon,
   motion,
-  rect,
   render,
   type IconData,
   type Point,
@@ -18,6 +17,7 @@ import {
   flow,
   travel,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 import {

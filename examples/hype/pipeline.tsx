@@ -1,7 +1,6 @@
 import { mermaid } from "@svjeez/mermaid";
 import {
   enter,
-  rect,
   type Span,
   appWindow,
   code,
@@ -10,6 +9,7 @@ import {
   type CodePiece,
   type CodeRole,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { mono, theme } from "../style";
 import { C, Caption, rise } from "./kit";

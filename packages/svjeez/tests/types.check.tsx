@@ -23,7 +23,7 @@ const tint = css.property("tint", { syntax: "color", inherits: false, initial: "
 
 export const valid = [
   <Clip at={3.1} over={2}>
-    <rect animation={[motion({ x: 0 }).to({ x: 5 }, span(0, 1)).repeat(2).rewind(0.5), show([span(1), { at: 2, over: 1 }])]} />
+    <rect animation={[motion({ x: 0 }).to({ x: 5 }, 1).repeat(2).rewind(0.5), show([span(1), { at: 2, over: 1 }])]} />
   </Clip>,
   <circle r={2} animation={sampled((t) => ({ x: t }), { at: 1, over: 2, tolerance: { translate: 1 } })} />,
   <rect fill={bg} filter={glow} animation={[enter({ at: 0, over: 1 }), draw({ at: 1, over: 1 })]} />,
@@ -40,7 +40,7 @@ export const valid = [
 export const syntax: SyntaxOf<typeof yaw> = "angle";
 
 export const invalid = [
-  // @ts-expect-error a transition needs a span with an over
+  // @ts-expect-error a transition takes a length, not a span
   <rect animation={motion({ x: 0 }).to({ x: 5 }, span(1))} />,
   // @ts-expect-error misspelled attribute
   <path strokeLineCap="round" />,

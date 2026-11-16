@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { Icon, matchPaths, render, type IconData, code, morph } from "svjeez";
+import { Icon, render, type IconData, code, morph } from "svjeez";
+import { matchPaths } from "svjeez/geometry";
 import { validateSvg } from "svjeez/frames";
 import { flatten } from "../src/ink/path";
 

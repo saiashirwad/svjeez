@@ -51,6 +51,11 @@
       "types": "./package-dist/page.d.ts",
       "default": "./package-dist/page.js"
     },
+    "./geometry": {
+      "@svjeez/source": "./src/geometry.ts",
+      "types": "./package-dist/geometry.d.ts",
+      "default": "./package-dist/geometry.js"
+    },
     "./params": {
       "@svjeez/source": "./src/params.ts",
       "types": "./package-dist/params.d.ts",

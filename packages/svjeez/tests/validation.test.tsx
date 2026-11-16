@@ -7,7 +7,6 @@ import {
   beats,
   fx,
   readingTime,
-  rect,
   render,
   shake,
   sampled,
@@ -18,6 +17,7 @@ import {
   wiggle,
   draw,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { restyle } from "svjeez/page";
 import { choice, color, count, number, seconds } from "svjeez/params";
 

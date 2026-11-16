@@ -99,12 +99,12 @@ export interface Motion<K extends Target = Target> {
   at(time: Seconds): Motion<K>;
   wait(duration: Seconds): Motion<K>;
   /**
-   * Transition from the current values to `values`. A number starts at the cursor and takes that long; a span moves the
-   * cursor to `span.at` and takes `span.over`. `ease` (default `ease.out`) shapes this transition.
+   * Transition from the current values to `values`. It starts at the cursor and takes `over` seconds. `ease` (default
+   * `ease.out`) shapes this transition.
    */
   to<const V extends TargetValues>(
     values: Exact<V, Target>,
-    over: Seconds | Span,
+    over: Seconds,
     curve?: Ease,
   ): Motion<K | (keyof V & Target)>;
   /** Hard cut at the cursor. */
@@ -135,8 +135,6 @@ const time = (value: Seconds, what: string): Seconds => {
 
   return value;
 };
-
-const isWindow = (value: Seconds | Span): value is Span => typeof value === "object";
 
 const isUntil = (
   value: number | { readonly until: Seconds },
@@ -196,16 +194,7 @@ class Track implements Motion {
     return this.with({ cursor: this.data.cursor + time(duration, "wait()") });
   }
 
-  to(values: TargetValues, over: Seconds | Span, curve: Ease = ease.out): Track {
-    if (isWindow(over)) {
-      if (over.over === undefined)
-        throw new Error(
-          `to() needs a span with an over, got { at: ${over.at} } alone. A transition takes time: use span(${over.at}, over).`,
-        );
-
-      return this.at(over.at).to(values, over.over, curve);
-    }
-
+  to(values: TargetValues, over: Seconds, curve: Ease = ease.out): Track {
     if (!(time(over, "to()") > 0))
       throw new Error(`to() needs a positive duration, got ${over}. Use set() for a cut.`);
 

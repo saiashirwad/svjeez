@@ -1,4 +1,5 @@
-import { ease, enter, motion, rect, Marker, appWindow, code, shot, typewriter } from "svjeez";
+import { ease, enter, motion, Marker, appWindow, code, shot, typewriter } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { highlight } from "@svjeez/code";
 
 import { mono, theme } from "../style";

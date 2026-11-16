@@ -235,7 +235,7 @@ export const waddle = (span: Span, dx: number, dy: number, steps: number): Walk 
   const { at, over } = span;
   const step = over / steps;
 
-  const travel = motion({ x: 0, y: 0 }).to({ x: dx, y: dy }, span, ease.linear);
+  const travel = motion({ x: 0, y: 0 }).at(at).to({ x: dx, y: dy }, over, ease.linear);
 
   let bob = motion({ y: 0 }).at(at);
   let rock = motion({ rotate: 0 }).at(at);

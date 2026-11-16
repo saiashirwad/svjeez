@@ -3,7 +3,6 @@
 import {
   def,
   motion,
-  num,
   Style,
   type Child,
   type Color,
@@ -14,6 +13,9 @@ import {
   type SvgNode,
   type TagChannels,
 } from "svjeez";
+import {
+  num,
+} from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import { clear, invisible, isPair, opaque, schemeCss, variable } from "../paint.ts";
 import type {

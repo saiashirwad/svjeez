@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { adaptive, defaultDark, defaultLight, render, variables } from "svjeez";
+import { adaptive, defaultDark, systemLight, render, variables } from "svjeez";
 
 const scene = (prefix: string, sky: string) => {
   const { vars, css } = variables({ dark: { sky }, light: { sky: "#fff" }, prefix });
@@ -29,7 +29,7 @@ describe("scoped theme variables", () => {
   });
 
   test("adaptive takes the prefix too", () => {
-    expect(adaptive({ dark: defaultDark, light: defaultLight, prefix: "x-" }).css).toContain(
+    expect(adaptive({ dark: defaultDark, light: systemLight, prefix: "x-" }).css).toContain(
       "svg.x-root{",
     );
   });

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { createRequire } from "node:module";
-import { rect, render, type SvgNode } from "svjeez";
+import { render, type SvgNode } from "svjeez";
+import { rect } from "svjeez/geometry";
 import {
   arc,
   cartogram,

@@ -15,7 +15,8 @@ const IDLE: Point = { x: 230, y: 150 };
 const Card = (): SvgNode => (
   <g
     animation={motion({ x: HOME.x, y: HOME.y })
-      .to({ x: DROP.x, y: DROP.y }, grab, ease.inOut)
+      .at(grab.at)
+      .to({ x: DROP.x, y: DROP.y }, grab.over, ease.inOut)
       .rewind(0.6)}
   >
     <rect width={90} height={56} rx={8} fill="#1E2230" stroke="#3EE6D6" strokeOpacity={0.5} />
@@ -47,9 +48,11 @@ const Cursor = (): SvgNode => (
     fill="#E6E8EE"
     stroke="#111318"
     animation={motion({ x: IDLE.x, y: IDLE.y })
-      .to({ x: HOME.x + 45, y: HOME.y + 8 }, reach, ease.inOut)
-      .to({ x: DROP.x + 45, y: DROP.y + 8 }, grab, ease.inOut)
-      .to({ x: IDLE.x, y: IDLE.y }, span(down.end + 0.1, 0.5), ease.inOut)}
+      .to({ x: HOME.x + 45, y: HOME.y + 8 }, reach.over, ease.inOut)
+      .at(grab.at)
+      .to({ x: DROP.x + 45, y: DROP.y + 8 }, grab.over, ease.inOut)
+      .at(down.end + 0.1)
+      .to({ x: IDLE.x, y: IDLE.y }, 0.5, ease.inOut)}
   />
 );
 

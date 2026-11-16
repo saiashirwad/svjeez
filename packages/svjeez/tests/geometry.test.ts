@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { polylinePath, resample } from "svjeez";
+import { polylinePath, resample } from "svjeez/geometry";
 
 describe("resample", () => {
   test("spaces points evenly along the runs, keeping both ends", () => {

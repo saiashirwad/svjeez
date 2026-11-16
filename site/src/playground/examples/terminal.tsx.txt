@@ -1,4 +1,5 @@
-import { rect, render, adaptive, appWindow, systemDark, systemLight, terminal } from "svjeez";
+import { render, adaptive, appWindow, systemDark, systemLight, terminal } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 
 const { theme, css } = adaptive({

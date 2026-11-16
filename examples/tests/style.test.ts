@@ -13,7 +13,7 @@ const SKIP = ["dist", "node_modules", "scripts", "tests"];
 
 const RULES: [RegExp, string][] = [
   [
-    /\b(tomorrow|tomorrowNight|defaultDark|defaultLight)\b/,
+    /\b(tomorrow|tomorrowNight|defaultDark)\b/,
     "a stock code palette: import { theme, css } from examples/style.ts",
   ],
   [/\bbase16\(/, "a hand-made palette: import { theme, css } from examples/style.ts"],

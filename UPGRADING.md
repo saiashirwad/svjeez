@@ -166,4 +166,15 @@ Smaller breaking changes, in the order a typecheck will find them.
 - `systemDark` is darker: `base00` `#090A0C`, `base01` `#18181B`, `base02` `#27272A` (were `#1E1E20`, `#2A2A2D`, `#3A3A3D`). Re-render dark frames; pin the old hexes in your own palette if you need them.
 - `Video.duration` (`@svjeez/video`) is `playTime`: playback seconds. `Scene.duration` stays in scene seconds.
 - `<Focus fade={0}>` cuts instead of throwing.
+- Geometry helpers moved to `svjeez/geometry`: `rect`, `resample`, `polylinePath`, `pathLength`, `matchPaths`, `num` and the types `MatchOptions`, `PolylinePathOptions`, `SampledPathOptions`. The types `Rect`, `Point`, `Edge` and `PathData` stay in `svjeez`.
+
+```ts
+- import { rect, render } from "svjeez";
++ import { render } from "svjeez";
++ import { rect } from "svjeez/geometry";
+```
+
+- `.to(values, span, ease?)` is gone: `.to` takes a length. Search `.to(` with a span as the second argument and write `.at(span.at).to(values, span.over, ease)`.
+- `defaultLight` is gone (use `systemLight`), and `inkPath` is no longer exported from `svjeez`.
+- New exports, for typing what functions return: `FlowResult`, `TerminalResult`, `RevealResult`, `TypewriterResult`, `AppWindowResult`, `MorphResult`, `AdaptiveResult`, `VariablesResult`, `Shown`, `Heading` and `Travel`.
 - These now throw: NaN or infinite `number`, `count` and `seconds` values and bounds; non-integer `count` bounds; duplicate `choice` options; a `color()` that is not hex; a `shake` or `wiggle` `rate` that is not positive; `restyle` `at` or `onceAt` below 0 or not finite; a non-finite `valuesAt` `duration`; `<Camera>` with no stops; `fx.boil` with a `seed` that is not a whole number of 1 or more or a `rate` that is not positive; `fx.grayscale` outside 0 to 1; `readingTime` with a non-positive `wps`. `recipes` and `sampled` say `needs a positive over` where they said `positive duration`.

@@ -1,4 +1,4 @@
-import { polylinePath } from "svjeez";
+import { polylinePath } from "svjeez/geometry";
 import { clamp } from "../util";
 import { add } from "./geometry";
 import { r1, type Cx } from "./look";

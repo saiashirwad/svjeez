@@ -94,22 +94,6 @@ describe("span()", () => {
   });
 });
 
-describe(".to(values, span)", () => {
-  test("moves the cursor to the span and takes its length, like at() then to()", () => {
-    const viaSpan = scene(rect(motion({ x: 0 }).to({ x: 50 }, span(2, 3), ease.linear)));
-    const viaChain = scene(rect(motion({ x: 0 }).at(2).to({ x: 50 }, 3, ease.linear)));
-    const literal = scene(rect(motion({ x: 0 }).to({ x: 50 }, { at: 2, over: 3 }, ease.linear)));
-
-    expect(viaSpan).toBe(viaChain);
-    expect(literal).toBe(viaChain);
-  });
-
-  test("a span without over has no length to take", () => {
-    // @ts-expect-error an open span has no over, so `to` rejects it
-    expect(() => motion({ x: 0 }).to({ x: 5 }, span(2))).toThrow(/needs a span with an over/);
-  });
-});
-
 describe("<Clip>", () => {
   const slide = motion({ x: 0 }).to({ x: 50 }, 2, ease.linear);
 

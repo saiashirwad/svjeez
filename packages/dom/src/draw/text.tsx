@@ -1,15 +1,7 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import {
-  def,
-  motion,
-  num,
-  show,
-  type Color,
-  type Stack,
-  type SvgNode,
-  type TagChannels,
-} from "svjeez";
+import { def, motion, show, type Color, type Stack, type SvgNode, type TagChannels } from "svjeez";
+import { num } from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import type { Paint, Rect, TextRun } from "../tree.ts";
 import { slideIn, type Tween } from "./tween.ts";

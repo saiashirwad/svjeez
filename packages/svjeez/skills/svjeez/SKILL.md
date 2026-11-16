@@ -61,7 +61,7 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
   .loop(6);                     // repeat every 6s, forever; snapped to divide duration
 ```
 
-- `.to(values, over, ease?)`: `over` is a length, never an end time. `.at(t).to(values, over)` is the chain form of `{ at: t, over }`; `.to(values, { at, over }, ease?)` says the same in one call. Default ease is `ease.out`. Between transitions every value holds.
+- `.to(values, over, ease?)`: `over` is a length, never an end time. `.at(t).to(values, over)` is the chain form of `{ at: t, over }`. Default ease is `ease.out`. Between transitions every value holds.
 - `.repeat(3)` plays the passage written so far three times in all; `.repeat({ until: 10 })` repeats it until 10s, cutting the last pass short, then holds. Each pass starts from the initial values. Passes become keyframes, so a spin that never stops is `.loop()`, and a long repeat hits the key cap.
 - `.rewind(0.8)` glides every channel back to its initial value, ending at the end of the clock: the scene's, a `<Clip>`'s, or a loop's period. It is how a loop closes without a hand-written reset. Nothing can follow it.
 - Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign. `easeAt(curve, progress)` gives an ease's value at a progress from 0 to 1, to reuse it inside `sampled()` or draw it beside the scene.
@@ -128,7 +128,7 @@ show([tl.intro, { at: 8 }], { fade: 0.2 }); // several spans; { at: 8 } stays to
 show(tl.intro, { fade: 0 });                // hard cuts, a shot in an edit
 ```
 
-Fades sit inside the span. Spans that overlap or touch merge, a span shorter than two fades shrinks them, and no spans means never shown, so nothing throws for a click shorter than its fade. `during`, `cut`, `visible`, `tl.show` and `tl.enter` are older spellings of the same thing.
+Fades sit inside the span. Spans that overlap or touch merge, a span shorter than two fades shrinks them, and no spans means never shown, so nothing throws for a click shorter than its fade.
 
 ## Recipes
 
@@ -190,7 +190,6 @@ Runtime errors. `…` stands for a value the message fills in.
 | ``Two motions both animate `…` on <…>: put them in one motion().`` | Only the stacking channels may repeat |
 | ``Two transitions move `…` between …s and …s.`` | Merge into one `.to({ x, y })`, or stack two motions |
 | `A motion on <…> runs until …s, past the …s scene.` | Raise `duration`, or end the motion earlier. Inside a `<Clip>` the message names the clip |
-| `to() needs a span with an over, got { at: … } alone. A transition takes time: use span(…, over).` | `.to()` takes a span with an `over` |
 | `repeat() would unroll … passes of … steps into keyframes. Use .loop(period) for a motion that never stops.` | `.loop(period)`, or fewer passes |
 | `rewind(…) on … needs the last …s of its …s clock, but the motion runs until …s.` | End the motion earlier, or rewind over less time |
 | `… cuts a steps(…) transition between two of its steps. Cut it on a step edge, or use ease.out.` | `repeat({ until })` or a loop in a `<Clip>` fell inside a `steps()` transition |

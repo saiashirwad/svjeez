@@ -1,6 +1,7 @@
 import { project, type LonLat, type Topology } from "@svjeez/geo";
 import { google } from "@svjeez/fonts";
-import { draw, ease, enter, rect, render, type Point, flow } from "svjeez";
+import { draw, ease, enter, render, type Point, flow } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 import { CSS, chrome, outro } from "./lib/kit";

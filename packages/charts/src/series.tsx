@@ -6,7 +6,6 @@ import {
   ease,
   enter,
   motion,
-  rect,
   type Color,
   type Point,
   type Rect,
@@ -14,6 +13,7 @@ import {
   tint,
   type Base16,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { span as spanOf } from "svjeez";
 
 import type {

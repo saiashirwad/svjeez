@@ -24,7 +24,8 @@ npm i -D world-atlas
 
 ```tsx
 import { project } from "@svjeez/geo";
-import { rect, render, Camera, flow } from "svjeez";
+import { render, Camera, flow } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 

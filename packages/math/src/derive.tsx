@@ -10,7 +10,8 @@ import {
   type Base16,
 } from "svjeez";
 
-import { rect, type Color, type Rect } from "svjeez";
+import { type Color, type Rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { span as spanOf, type Spanned } from "svjeez";
 import { tex, type Tex } from "./index.ts";
 

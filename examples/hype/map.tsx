@@ -1,7 +1,8 @@
 import { arc, project, traffic, type LonLat, type Topology } from "@svjeez/geo";
 import { download, world } from "@svjeez/icons/tabler";
 import { counter } from "@svjeez/math";
-import { Icon, def, ease, enter, motion, rect, type Span } from "svjeez";
+import { Icon, def, ease, enter, motion, type Span } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { createRequire } from "node:module";
 import { theme } from "../style";
 import { C, Caption, H } from "./kit";

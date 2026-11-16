@@ -1,6 +1,7 @@
 import { project, reproject, trueSize, type Topology } from "@svjeez/geo";
 import { geoEqualEarth, geoMercator } from "d3-geo";
-import { def, ease, motion, rect, render, type PathData, variables } from "svjeez";
+import { def, ease, motion, render, type PathData, variables } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 import { geist, geistMono } from "../fonts/faces";

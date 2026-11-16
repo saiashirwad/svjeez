@@ -2,7 +2,6 @@
 import {
   type Color,
   textWidth,
-  pathLength,
   type Point,
   type Box,
   type Direction,
@@ -15,6 +14,7 @@ import {
   show,
   type Beats,
 } from "svjeez";
+import { pathLength } from "svjeez/geometry";
 import { span as spanOf, type Spanned } from "svjeez";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";

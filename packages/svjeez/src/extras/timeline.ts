@@ -248,9 +248,9 @@ export function travel(
     .set({ opacity: 0 });
 }
 
-type Travel = "x" | "y" | "opacity";
+export type Travel = "x" | "y" | "opacity";
 
-type Heading = Travel | "rotate";
+export type Heading = Travel | "rotate";
 
 /** Where a travelling token starts, hidden: `rotate` only when it follows a heading. */
 type TokenStart = {

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
-import { Glyphs, draw, font, rect, render, type Child, Callout, code } from "svjeez";
+import { Glyphs, draw, font, render, type Child, Callout, code } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { validateSvg } from "svjeez/frames";
 import { contours, pathData } from "../src/font/glyf";
 import { sfnt } from "../src/font/sfnt";

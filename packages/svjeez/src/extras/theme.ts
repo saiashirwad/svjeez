@@ -143,25 +143,6 @@ export const defaultDark = /* @__PURE__ */ base16(
   "#a16946",
 );
 
-export const defaultLight = /* @__PURE__ */ base16(
-  "#f8f8f8",
-  "#e8e8e8",
-  "#d8d8d8",
-  "#b8b8b8",
-  "#585858",
-  "#383838",
-  "#282828",
-  "#181818",
-  "#ab4642",
-  "#dc9656",
-  "#f7ca88",
-  "#a1b56c",
-  "#86c1b9",
-  "#7cafc2",
-  "#ba8baf",
-  "#a16946",
-);
-
 /** White and system gray by day, with the system accent colors. Pairs with `systemDark` in `adaptive`. */
 export const systemLight = /* @__PURE__ */ base16(
   "#FFFFFF",

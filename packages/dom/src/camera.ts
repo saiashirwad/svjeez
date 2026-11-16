@@ -1,4 +1,5 @@
-import { rect, span, type CameraStop, type Rect } from "svjeez";
+import { span, type CameraStop, type Rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { rect as partRect } from "./find.ts";
 import { timeline, type Step } from "./timeline.ts";
 import type { Snapshot } from "./tree.ts";

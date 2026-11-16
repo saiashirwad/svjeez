@@ -4,7 +4,7 @@ Import from `svjeez`. `code` and `terminal` take `theme` (default `defaultDark`)
 
 ## Themes
 
-Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made in `svjeez`: `systemDark`, `systemLight`, `defaultDark`, `defaultLight`. `@svjeez/code` has the editor palettes: `tomorrowNight`, `tomorrow`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`, `rosePine`, `rosePineDawn`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
+Themes are base16: `theme.base00` is the background and `base05` the text, up to `base0F`. Ready-made in `svjeez`: `systemDark`, `systemLight`, `defaultDark`. `@svjeez/code` has the editor palettes: `tomorrowNight`, `tomorrow`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`, `rosePine`, `rosePineDawn`. `base16(...16 colors)` builds one and `tint(theme, role)` reads a color by code role.
 
 ```tsx
 import { tomorrow, tomorrowNight, solarizedDark, solarizedLight } from "@svjeez/code";
@@ -180,7 +180,7 @@ const notes = (
 `Camera` pans and zooms everything inside it to each stop's `target` (a `Rect`, or `"all"` for the whole view). A stop at 0 is the opening view. Each move takes the camera's `over` (default 0.5s), or the stop's own `over` when it has one. Clip it yourself.
 
 ```tsx
-import { rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 
 const FRAME = rect(0, 0, 800, 450);
@@ -294,7 +294,7 @@ const taylor = graph.morph([p0, p2, p4], { at: [3, 4.5], over: 0.8, animation: d
 ## Terminals
 
 ```tsx
-import { rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 
 const shell = appWindow(rect(20, 20, 400, 170), { theme, title: "~/hello", dots: "traffic" }); // { node, body }

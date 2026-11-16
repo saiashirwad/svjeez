@@ -1,6 +1,7 @@
 import { night, project, sun, type LonLat, type Topology } from "@svjeez/geo";
 import { geoOrthographic } from "d3-geo";
-import { css, def, ease, fx, motion, rect, render, type SvgNode } from "svjeez";
+import { css, def, ease, fx, motion, render, type SvgNode } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { createRequire } from "node:module";
 import {
   paletteCss,

@@ -1,9 +1,7 @@
 /** @jsxImportSource svjeez */
 import {
   ease,
-  matchPaths,
   motion,
-  rect,
   type Color,
   type Ease,
   type Point,
@@ -11,6 +9,7 @@ import {
   type Seconds,
   type SvgNode,
 } from "svjeez";
+import { matchPaths, rect } from "svjeez/geometry";
 import { resolveRegions, type RegionValues } from "./choropleth.tsx";
 import type { GeoMap, Region } from "./index.ts";
 import { straighten } from "./writer.ts";
