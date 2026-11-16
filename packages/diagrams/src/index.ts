@@ -27,7 +27,7 @@ export {
   type LanesOptions,
   type LaneEvent,
   type LaneLink,
-  type LaneSpan,
+  type LaneBar,
 } from "./lanes.tsx";
 
 export { tree, type Tree, type TreeOptions, type TreeSpec } from "./tree.ts";

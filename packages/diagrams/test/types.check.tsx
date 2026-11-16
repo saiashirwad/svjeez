@@ -12,7 +12,7 @@ export const diagrams = [
   machine.walk(["idle", "busy", "plan", "act"], { at: 0 }),
   chart.route("a", "b"),
   tree({ nodes: { root: "Root", kid: { label: "Kid", parent: "root" } } }),
-  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", from: 0, to: 1 }] }, { scale: 10 }),
+  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 1 }] }, { scale: 10 }),
 ];
 
 export const badDiagrams = [
@@ -37,7 +37,7 @@ export const badDiagrams = [
   // @ts-expect-error a parent that does not exist
   tree({ nodes: { root: "Root", kid: { label: "Kid", parent: "rot" } } }),
   // @ts-expect-error a span on a lane that does not exist
-  lanes({ lanes: { a: "A" }, spans: [{ lane: "b", from: 0, to: 1 }] }, { scale: 10 }),
+  lanes({ lanes: { a: "A" }, spans: [{ lane: "b", at: 0, over: 1 }] }, { scale: 10 }),
   // @ts-expect-error a link to a lane that does not exist
   lanes({ lanes: { a: "A" }, links: [{ from: "a", to: "b", at: 1 }] }, { scale: 10 }),
 ];

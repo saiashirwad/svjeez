@@ -90,7 +90,7 @@ import { lanes } from "@svjeez/diagrams";
 const run = lanes(
   {
     lanes: { lead: "Lead", build: { label: "Build", role: "tool" } },
-    spans: [{ lane: "lead", from: 0, to: 1, label: "plan" }, { lane: "build", from: 1, to: 4, label: "editing" }],
+    spans: [{ lane: "lead", at: 0, over: 1, label: "plan" }, { lane: "build", at: 1, over: 3, label: "editing" }],
     events: [{ lane: "build", at: 2, label: "TEST" }],
     links: [{ from: "lead", to: "build", at: 1 }],
   },

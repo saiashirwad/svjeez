@@ -299,7 +299,7 @@ describe("lanes", () => {
   const run = lanes(
     {
       lanes: { a: "A", b: { label: "B", role: "tool" } },
-      spans: [{ lane: "a", from: 0, to: 2, label: "busy" }],
+      spans: [{ lane: "a", at: 0, over: 2, label: "busy" }],
       events: [{ lane: "b", at: 1, label: "READ" }],
       links: [{ from: "a", to: "b", at: 1.5 }],
     },
