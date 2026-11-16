@@ -34,7 +34,7 @@ const files = [...new Bun.Glob("**/*.svg").scanSync(DIST)].sort();
 
 type Value = number | string | null;
 type Snapshot = Record<string, Value>;
-type Run = { times: number[]; labels: string[]; forward: Snapshot[]; backward: Snapshot[] };
+type Run = { times: number[]; labels: string[]; texty: string[]; forward: Snapshot[]; backward: Snapshot[] };
 
 /** Runs in the page: the scene times to check, from the SMIL windows in the file. */
 const plan = ([loopSrc, count]: [string, number]): number[] => {
@@ -104,15 +104,26 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
       try {
         const box = (element as SVGGraphicsElement).getBBox();
 
-        snapshot[key + " x"] = round(box.x);
-        snapshot[key + " y"] = round(box.y);
-        snapshot[key + " width"] = round(box.width);
-        snapshot[key + " height"] = round(box.height);
+        // An empty box has no position worth comparing: Chromium keeps where it is, Firefox and WebKit say 0 0.
+        const empty = round(box.width) === 0 || round(box.height) === 0;
+
+        snapshot[key + " x"] = empty ? 0 : round(box.x);
+        snapshot[key + " y"] = empty ? 0 : round(box.y);
+        snapshot[key + " width"] = empty ? 0 : round(box.width);
+        snapshot[key + " height"] = empty ? 0 : round(box.height);
       } catch {
         // Not every element has a box: a filter primitive, a gradient stop.
       }
 
-      for (const prop of ["opacity", "visibility", "transform", "translate", "rotate", "scale"])
+      // Where the element ends up: the transform attribute, CSS transforms and every ancestor's, which WebKit's computed
+      // transform leaves out for the attribute.
+      const ctm = (element as SVGGraphicsElement).getCTM?.();
+
+      snapshot[key + " ctm"] = ctm
+        ? [ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f].map((n) => round(n)).join(" ")
+        : null;
+
+      for (const prop of ["opacity", "visibility", "translate", "rotate", "scale"])
         snapshot[key + " " + prop] = style.getPropertyValue(prop);
 
       const blur = element as SVGFEGaussianBlurElement;
@@ -135,28 +146,33 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
   const forward = times.map(at);
   const backward = [...times].reverse().map(at).reverse();
 
-  return { labels, forward, backward };
+  const texty = labels.filter((_, k) => list[k]!.matches("text, tspan") || list[k]!.querySelector("text"));
+
+  return { labels, texty, forward, backward };
 };
 
 const numbers = /(-?\d*\.?\d+(?:e[-+]?\d+)?)/;
 
 /** Whether two computed values are the same, to within a tolerance on every number in them. */
-const close = (prop: string, a: Value, b: Value): boolean => {
+const close = (prop: string, a: Value, b: Value, slack = 0): boolean => {
   if (a === b) return true;
 
   if (typeof a === "number" && typeof b === "number")
-    return Math.abs(a - b) <= (prop.startsWith("stdDeviation") ? BLUR : GEOMETRY);
+    return Math.abs(a - b) <= (prop.startsWith("stdDeviation") ? BLUR : GEOMETRY + slack);
 
   if (typeof a !== "string" || typeof b !== "string") return false;
   const x = a.split(numbers);
   const y = b.split(numbers);
 
   if (x.length !== y.length) return false;
-  const tolerance = prop === "opacity" ? OPACITY : GEOMETRY;
 
-  return x.every((part, k) =>
-    k % 2 === 0 ? part === y[k] : Math.abs(Number(part) - Number(y[k])) <= tolerance,
-  );
+  return x.every((part, k) => {
+    if (k % 2 === 0) return part === y[k];
+    // A matrix keeps its scale and rotation to a hundredth, and its offset to a pixel.
+    const tolerance = prop === "opacity" ? OPACITY : prop === "ctm" && k < 8 ? 0.01 : GEOMETRY;
+
+    return Math.abs(Number(part) - Number(y[k])) <= tolerance;
+  });
 };
 
 type Mismatch = { when: string; key: string; expected: Value; got: Value };
@@ -178,7 +194,12 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
       for (const key of Object.keys(want)) {
         const prop = key.slice(key.lastIndexOf(" ") + 1);
 
-        if (skip.includes(prop) || close(prop, want[key]!, have[key] ?? null)) continue;
+        const label = key.slice(0, key.lastIndexOf(" "));
+        // Text is measured by each engine's own shaping, so the box around it, and around a group holding it, gets room.
+        const box = ["x", "y", "width", "height"].includes(prop) && reference.texty.includes(label);
+        const slack = box ? 0.08 * Math.max(Number(want[label + " width"]), Number(want[label + " height"])) : 0;
+
+        if (skip.includes(prop) || close(prop, want[key]!, have[key] ?? null, slack)) continue;
         found.push({ when: `${direction} at ${time}s`, key, expected: want[key]!, got: have[key] ?? null });
       }
     });
@@ -186,14 +207,30 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
   return found;
 };
 
-const describeMismatches = (found: Mismatch[]) =>
-  found
-    .slice(0, 25)
-    .map((m) => `  ${m.when}: ${m.key} is ${m.got}, Chromium has ${m.expected}`)
-    .join("\n") + (found.length > 25 ? `\n  ...and ${found.length - 25} more` : "");
+/** One line per kind of difference, with the first time it shows and how many there are. */
+const describeMismatches = (found: Mismatch[]) => {
+  const kinds = new Map<string, Mismatch[]>();
+
+  for (const m of found) {
+    const kind = m.key.replace(/\[\d+\]\S* /, " ");
+
+    kinds.set(kind, [...(kinds.get(kind) ?? []), m]);
+  }
+
+  return [...kinds]
+    .slice(0, 12)
+    .map(([kind, list]) => {
+      const times = [...new Set(list.map((m) => m.when))];
+      const m = list[0]!;
+
+      return `  ${kind} x${list.length}: ${m.when}: ${m.key} is ${m.got}, Chromium has ${m.expected} (also ${times.slice(1, 4).join(", ") || "-"})`;
+    })
+    .join("\n");
+};
 
 const open = async (browser: Browser, svg: string): Promise<Page> => {
-  const page = await browser.newPage();
+  // The same color scheme everywhere: engines differ in which one a headless page starts in.
+  const page = await browser.newPage({ colorScheme: "light" });
 
   await page.setContent(`<!doctype html><meta charset="utf-8"><body style="margin:0">${svg}</body>`);
   await page.evaluate(() => document.fonts.ready);
@@ -213,9 +250,9 @@ const collect = async (browser: Browser, times?: Map<string, number[]>) => {
 
         try {
           const when = times?.get(file) ?? (await page.evaluate(plan, [String(loopLength), TIMES]));
-          const { labels, forward, backward } = await page.evaluate(probe, [String(seek), when]);
+          const { labels, texty, forward, backward } = await page.evaluate(probe, [String(seek), when]);
 
-          runs.set(file, { times: when, labels, forward, backward });
+          runs.set(file, { times: when, labels, texty, forward, backward });
         } catch (error) {
           runs.set(file, error as Error);
         } finally {
@@ -258,8 +295,6 @@ describe("every example seeks the same in each engine", () => {
   }, 600_000);
 
   for (const [name, browser] of launched) {
-    if (name === "chromium") continue;
-
     describe(name, () => {
       let runs: Map<string, Run | Error>;
 
@@ -268,7 +303,7 @@ describe("every example seeks the same in each engine", () => {
         const times = new Map<string, number[]>();
 
         for (const [file, run] of chromiumRuns) if (!(run instanceof Error)) times.set(file, run.times);
-        runs = await collect(browser, times);
+        runs = name === "chromium" ? chromiumRuns : await collect(browser, times);
         console.log(`${name}: ${files.length} files in ${seconds(start)}s`);
       }, 600_000);
 
