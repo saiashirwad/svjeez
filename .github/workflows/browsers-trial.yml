@@ -3,7 +3,7 @@ name: browsers-trial
 # One-off: does every examples/dist SVG seek the same in Chromium, Firefox and WebKit?
 on:
   push:
-    branches: [ci-browsers-trial]
+    branches: [ci-browsers-trial-main]
   workflow_dispatch:
 
 jobs:

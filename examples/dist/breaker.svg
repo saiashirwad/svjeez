@@ -276,112 +276,114 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .m100{animation-name:k151}
 @keyframes k152{0%,72.787%{opacity:0}73.607%,100%{opacity:1}}
 .m101{animation-name:k152}
-@keyframes k153{0%,71.967%{translate:0px 0px}73.607%,100%{translate:0px 18.2px}}
-.m102{animation-name:k153;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k154{0%,71.967%{translate:0px 0px}73.607%,100%{translate:0px 36.4px}}
+@keyframes k153{0%,71.967%,73.607%,100%{translate:0px 0px}}
+.m102{animation-name:k153}
+@keyframes k154{0%,71.967%{translate:0px 0px}73.607%,100%{translate:0px 18.2px}}
 .m103{animation-name:k154;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k155{0%,71.967%{opacity:1}73.607%,100%{opacity:0}}
-.m104{animation-name:k154,k155;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k156{0%,71.967%{translate:0px 0px}73.607%,100%{translate:-140.4px -145.6px}}
-.m105{animation-name:k156;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k157{0%,71.967%{translate:0px -36.4px}73.607%,100%{translate:0px 0px}}
-@keyframes k158{0%,71.967%{opacity:0}73.607%,100%{opacity:1}}
-.m106{animation-name:k157,k158;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k159{0%,74.098%,80.656%,100%{opacity:0}74.426%,80.328%{opacity:1}}
-.m107{animation-name:k159}
-@keyframes k160{0%,83.607%,96.721%,100%{opacity:0}84.098%,96.23%{opacity:1}}
+@keyframes k155{0%,71.967%{translate:0px 0px}73.607%,100%{translate:0px 36.4px}}
+.m104{animation-name:k155;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k156{0%,71.967%{opacity:1}73.607%,100%{opacity:0}}
+.m105{animation-name:k155,k156;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k157{0%,71.967%{translate:0px 0px}73.607%,100%{translate:-140.4px -145.6px}}
+.m106{animation-name:k157;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k158{0%,71.967%{translate:0px -36.4px}73.607%,100%{translate:0px 0px}}
+@keyframes k159{0%,71.967%{opacity:0}73.607%,100%{opacity:1}}
+.m107{animation-name:k158,k159;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k160{0%,74.098%,80.656%,100%{opacity:0}74.426%,80.328%{opacity:1}}
 .m108{animation-name:k160}
-@keyframes k161{0%,83.689%{stroke-dashoffset:1;visibility:hidden}84.098%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k161{0%,83.607%,96.721%,100%{opacity:0}84.098%,96.23%{opacity:1}}
 .m109{animation-name:k161}
-@keyframes k162{0%,84.037%{opacity:0}84.098%,100%{opacity:1}}
+@keyframes k162{0%,83.689%{stroke-dashoffset:1;visibility:hidden}84.098%,100%{stroke-dashoffset:0;visibility:visible}}
 .m110{animation-name:k162}
-@keyframes k163{0%,84.918%{stroke-dashoffset:1;visibility:hidden}85.328%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k163{0%,84.037%{opacity:0}84.098%,100%{opacity:1}}
 .m111{animation-name:k163}
-@keyframes k164{0%,85.266%{opacity:0}85.328%,100%{opacity:1}}
+@keyframes k164{0%,84.918%{stroke-dashoffset:1;visibility:hidden}85.328%,100%{stroke-dashoffset:0;visibility:visible}}
 .m112{animation-name:k164}
-@keyframes k165{0%,84.098%{stroke-dashoffset:1;visibility:hidden}84.508%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k165{0%,85.266%{opacity:0}85.328%,100%{opacity:1}}
 .m113{animation-name:k165}
-@keyframes k166{0%,84.447%{opacity:0}84.508%,100%{opacity:1}}
+@keyframes k166{0%,84.098%{stroke-dashoffset:1;visibility:hidden}84.508%,100%{stroke-dashoffset:0;visibility:visible}}
 .m114{animation-name:k166}
-@keyframes k167{0%,84.508%{stroke-dashoffset:1;visibility:hidden}84.918%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k167{0%,84.447%{opacity:0}84.508%,100%{opacity:1}}
 .m115{animation-name:k167}
-@keyframes k168{0%,84.857%{opacity:0}84.918%,100%{opacity:1}}
+@keyframes k168{0%,84.508%{stroke-dashoffset:1;visibility:hidden}84.918%,100%{stroke-dashoffset:0;visibility:visible}}
 .m116{animation-name:k168}
-@keyframes k169{0%,85.328%{stroke-dashoffset:1;visibility:hidden}85.738%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k169{0%,84.857%{opacity:0}84.918%,100%{opacity:1}}
 .m117{animation-name:k169}
-@keyframes k170{0%,85.676%{opacity:0}85.738%,100%{opacity:1}}
+@keyframes k170{0%,85.328%{stroke-dashoffset:1;visibility:hidden}85.738%,100%{stroke-dashoffset:0;visibility:visible}}
 .m118{animation-name:k170}
-@keyframes k171{0%,85.738%{stroke-dashoffset:1;visibility:hidden}86.148%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k171{0%,85.676%{opacity:0}85.738%,100%{opacity:1}}
 .m119{animation-name:k171}
-@keyframes k172{0%,86.086%{opacity:0}86.148%,100%{opacity:1}}
+@keyframes k172{0%,85.738%{stroke-dashoffset:1;visibility:hidden}86.148%,100%{stroke-dashoffset:0;visibility:visible}}
 .m120{animation-name:k172}
-@keyframes k173{0%,90.82%,100%{visibility:hidden}87.869%{visibility:visible}}
-@keyframes k174{0%,87.869%{translate:151.735px 352.5px}88.126%{translate:206.56px 352.5px}88.565%{translate:298.949px 339.5px}88.921%{translate:374.88px 339.5px}88.947%{translate:380.193px 338.619px}88.969%{translate:384.38px 336.297px}88.992%{translate:387.817px 333.014px}89.037%{translate:393.942px 325.486px}89.059%{translate:397.38px 322.203px}89.082%{translate:401.567px 319.881px}89.107%{translate:406.88px 319px}89.349%{translate:458.3px 319px}90.031%{translate:603.121px 307.5px}90.82%,100%{translate:770.94px 307.5px}}
-.m121{animation-name:k173,k174;animation-timing-function:steps(1),linear}
-@keyframes k175{0%{opacity:0;animation-timing-function:steps(1)}90.82%{opacity:0.9}91.967%,100%{opacity:0}}
-@keyframes k176{0%,90.82%{scale:0.5}91.967%,100%{scale:3}}
-.m122{animation-name:k175,k176}
-@keyframes k177{0%,91.475%{stroke-dashoffset:1;visibility:hidden}94.426%,100%{stroke-dashoffset:0;visibility:visible}}
-@keyframes k178{0%,94.672%{opacity:1}95.656%,100%{opacity:0}}
-.m123{animation-name:k177,k178;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
-@keyframes k179{0%,94.426%,100%{visibility:hidden}91.475%{visibility:visible}}
-@keyframes k180{0%,91.475%{translate:151.735px 352.5px}91.635%{translate:206.56px 352.5px}91.906%{translate:298.949px 365.5px}92.127%{translate:374.88px 365.5px}92.142%{translate:380.193px 366.381px}92.156%{translate:384.38px 368.703px}92.17%{translate:387.817px 371.986px}92.198%{translate:393.942px 379.514px}92.212%{translate:397.38px 382.797px}92.226%{translate:401.567px 385.119px}92.242%{translate:406.88px 386px}93.36%{translate:791.74px 386px}93.742%{translate:922.54px 376.5px}93.993%{translate:1009.04px 376.5px}94.011%{translate:1014.353px 373.535px}94.037%{translate:1018.54px 365.719px}94.07%{translate:1021.978px 354.668px}94.146%{translate:1028.103px 329.332px}94.18%{translate:1031.54px 318.281px}94.205%{translate:1035.728px 310.465px}94.223%{translate:1041.04px 307.5px}94.426%,100%{translate:1110.94px 307.5px}}
-.m124{animation-name:k179,k180;animation-timing-function:steps(1),linear}
-@keyframes k181{0%{opacity:0;animation-timing-function:steps(1)}94.426%{opacity:0.9}95.574%,100%{opacity:0}}
-@keyframes k182{0%,94.426%{scale:0.5}95.574%,100%{scale:3}}
-.m125{animation-name:k181,k182}
-@keyframes k183{0%,84.098%{opacity:0}84.672%,100%{opacity:1}}
-@keyframes k184{0%,84.098%{translate:0px 6px}84.672%,100%{translate:0px 0px}}
-.m126{animation-name:k183,k184}
-@keyframes k185{0%,84.508%{opacity:0}85.082%,100%{opacity:1}}
-@keyframes k186{0%,84.508%{translate:0px 6px}85.082%,100%{translate:0px 0px}}
-.m127{animation-name:k185,k186}
-@keyframes k187{0%,84.918%{opacity:0}85.492%,100%{opacity:1}}
-@keyframes k188{0%,84.918%{translate:0px 6px}85.492%,100%{translate:0px 0px}}
-.m128{animation-name:k187,k188}
-@keyframes k189{0%,85.328%{opacity:0}85.902%,100%{opacity:1}}
-@keyframes k190{0%,85.328%{translate:0px 6px}85.902%,100%{translate:0px 0px}}
-.m129{animation-name:k189,k190}
-@keyframes k191{0%,85.738%{opacity:0}86.311%,100%{opacity:1}}
-@keyframes k192{0%,85.738%{translate:0px 6px}86.311%,100%{translate:0px 0px}}
-.m130{animation-name:k191,k192}
-@keyframes k193{0%,86.148%{opacity:0}86.721%,100%{opacity:1}}
-@keyframes k194{0%,86.148%{translate:0px 6px}86.721%,100%{translate:0px 0px}}
-.m131{animation-name:k193,k194}
-@keyframes k195{0%,85.328%{opacity:0}85.738%,100%{opacity:1}}
-.m132{animation-name:k195}
-@keyframes k196{0%,84.508%{opacity:0}84.918%,100%{opacity:1}}
+@keyframes k173{0%,86.086%{opacity:0}86.148%,100%{opacity:1}}
+.m121{animation-name:k173}
+@keyframes k174{0%,90.82%,100%{visibility:hidden}87.869%{visibility:visible}}
+@keyframes k175{0%,87.869%{translate:151.735px 352.5px}88.126%{translate:206.56px 352.5px}88.565%{translate:298.949px 339.5px}88.921%{translate:374.88px 339.5px}88.947%{translate:380.193px 338.619px}88.969%{translate:384.38px 336.297px}88.992%{translate:387.817px 333.014px}89.014%{translate:390.88px 329.25px}89.037%{translate:393.942px 325.486px}89.059%{translate:397.38px 322.203px}89.082%{translate:401.567px 319.881px}89.107%{translate:406.88px 319px}89.349%{translate:458.3px 319px}90.031%{translate:603.121px 307.5px}90.82%,100%{translate:770.94px 307.5px}}
+.m122{animation-name:k174,k175;animation-timing-function:steps(1),linear}
+@keyframes k176{0%{opacity:0;animation-timing-function:steps(1)}90.82%{opacity:0.9}91.967%,100%{opacity:0}}
+@keyframes k177{0%,90.82%{scale:0.5}91.967%,100%{scale:3}}
+.m123{animation-name:k176,k177}
+@keyframes k178{0%,91.475%{stroke-dashoffset:1;visibility:hidden}94.426%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k179{0%,94.672%{opacity:1}95.656%,100%{opacity:0}}
+.m124{animation-name:k178,k179;animation-timing-function:linear,cubic-bezier(.23,1,.32,1)}
+@keyframes k180{0%,94.426%,100%{visibility:hidden}91.475%{visibility:visible}}
+@keyframes k181{0%,91.475%{translate:151.735px 352.5px}91.635%{translate:206.56px 352.5px}91.906%{translate:298.949px 365.5px}92.127%{translate:374.88px 365.5px}92.142%{translate:380.193px 366.381px}92.156%{translate:384.38px 368.703px}92.17%{translate:387.817px 371.986px}92.184%{translate:390.88px 375.75px}92.198%{translate:393.942px 379.514px}92.212%{translate:397.38px 382.797px}92.226%{translate:401.567px 385.119px}92.242%{translate:406.88px 386px}93.36%{translate:791.74px 386px}93.742%{translate:922.54px 376.5px}93.993%{translate:1009.04px 376.5px}94.011%{translate:1014.353px 373.535px}94.037%{translate:1018.54px 365.719px}94.07%{translate:1021.978px 354.668px}94.108%{translate:1025.04px 342px}94.146%{translate:1028.103px 329.332px}94.18%{translate:1031.54px 318.281px}94.205%{translate:1035.728px 310.465px}94.223%{translate:1041.04px 307.5px}94.426%,100%{translate:1110.94px 307.5px}}
+.m125{animation-name:k180,k181;animation-timing-function:steps(1),linear}
+@keyframes k182{0%{opacity:0;animation-timing-function:steps(1)}94.426%{opacity:0.9}95.574%,100%{opacity:0}}
+@keyframes k183{0%,94.426%{scale:0.5}95.574%,100%{scale:3}}
+.m126{animation-name:k182,k183}
+@keyframes k184{0%,84.098%{opacity:0}84.672%,100%{opacity:1}}
+@keyframes k185{0%,84.098%{translate:0px 6px}84.672%,100%{translate:0px 0px}}
+.m127{animation-name:k184,k185}
+@keyframes k186{0%,84.508%{opacity:0}85.082%,100%{opacity:1}}
+@keyframes k187{0%,84.508%{translate:0px 6px}85.082%,100%{translate:0px 0px}}
+.m128{animation-name:k186,k187}
+@keyframes k188{0%,84.918%{opacity:0}85.492%,100%{opacity:1}}
+@keyframes k189{0%,84.918%{translate:0px 6px}85.492%,100%{translate:0px 0px}}
+.m129{animation-name:k188,k189}
+@keyframes k190{0%,85.328%{opacity:0}85.902%,100%{opacity:1}}
+@keyframes k191{0%,85.328%{translate:0px 6px}85.902%,100%{translate:0px 0px}}
+.m130{animation-name:k190,k191}
+@keyframes k192{0%,85.738%{opacity:0}86.311%,100%{opacity:1}}
+@keyframes k193{0%,85.738%{translate:0px 6px}86.311%,100%{translate:0px 0px}}
+.m131{animation-name:k192,k193}
+@keyframes k194{0%,86.148%{opacity:0}86.721%,100%{opacity:1}}
+@keyframes k195{0%,86.148%{translate:0px 6px}86.721%,100%{translate:0px 0px}}
+.m132{animation-name:k194,k195}
+@keyframes k196{0%,85.328%{opacity:0}85.738%,100%{opacity:1}}
 .m133{animation-name:k196}
-@keyframes k197{0%,84.918%{opacity:0}85.328%,100%{opacity:1}}
+@keyframes k197{0%,84.508%{opacity:0}84.918%,100%{opacity:1}}
 .m134{animation-name:k197}
-@keyframes k198{0%,85.738%{opacity:0}86.148%,100%{opacity:1}}
+@keyframes k198{0%,84.918%{opacity:0}85.328%,100%{opacity:1}}
 .m135{animation-name:k198}
-@keyframes k199{0%,86.148%{opacity:0}86.557%,100%{opacity:1}}
+@keyframes k199{0%,85.738%{opacity:0}86.148%,100%{opacity:1}}
 .m136{animation-name:k199}
-@keyframes k200{0%{width:0px}8.197%,100%{width:95.627px}}
-.m137{animation-name:k200;animation-timing-function:linear}
-@keyframes k201{0%{fill:var(--base05)}8.197%,100%{fill:var(--base03)}}
-.m138{animation-name:k201;animation-timing-function:steps(1)}
-@keyframes k202{0%,9.18%{width:0px}27.213%,100%{width:212.78px}}
-.m139{animation-name:k202;animation-timing-function:linear}
-@keyframes k203{0%,27.213%,100%{fill:var(--base03)}9.18%{fill:var(--base05)}}
-.m140{animation-name:k203;animation-timing-function:steps(1)}
-@keyframes k204{0%,28.197%{width:0px}42.951%,100%{width:173.729px}}
-.m141{animation-name:k204;animation-timing-function:linear}
-@keyframes k205{0%,42.951%,100%{fill:var(--base03)}28.197%{fill:var(--base05)}}
-.m142{animation-name:k205;animation-timing-function:steps(1)}
-@keyframes k206{0%,43.934%{width:0px}68.525%,100%{width:290.881px}}
-.m143{animation-name:k206;animation-timing-function:linear}
-@keyframes k207{0%,68.525%,100%{fill:var(--base03)}43.934%{fill:var(--base05)}}
-.m144{animation-name:k207;animation-timing-function:steps(1)}
-@keyframes k208{0%,69.508%{width:0px}82.623%,100%{width:154.203px}}
-.m145{animation-name:k208;animation-timing-function:linear}
-@keyframes k209{0%,82.623%,100%{fill:var(--base03)}69.508%{fill:var(--base05)}}
-.m146{animation-name:k209;animation-timing-function:steps(1)}
-@keyframes k210{0%,83.607%{width:0px}96.721%,100%{width:154.203px}}
-.m147{animation-name:k210;animation-timing-function:linear}
-@keyframes k211{0%,96.721%,100%{fill:var(--base03)}83.607%{fill:var(--base05)}}
-.m148{animation-name:k211;animation-timing-function:steps(1)}
+@keyframes k200{0%,86.148%{opacity:0}86.557%,100%{opacity:1}}
+.m137{animation-name:k200}
+@keyframes k201{0%{width:0px}8.197%,100%{width:95.627px}}
+.m138{animation-name:k201;animation-timing-function:linear}
+@keyframes k202{0%{fill:var(--base05)}8.197%,100%{fill:var(--base03)}}
+.m139{animation-name:k202;animation-timing-function:steps(1)}
+@keyframes k203{0%,9.18%{width:0px}27.213%,100%{width:212.78px}}
+.m140{animation-name:k203;animation-timing-function:linear}
+@keyframes k204{0%,27.213%,100%{fill:var(--base03)}9.18%{fill:var(--base05)}}
+.m141{animation-name:k204;animation-timing-function:steps(1)}
+@keyframes k205{0%,28.197%{width:0px}42.951%,100%{width:173.729px}}
+.m142{animation-name:k205;animation-timing-function:linear}
+@keyframes k206{0%,42.951%,100%{fill:var(--base03)}28.197%{fill:var(--base05)}}
+.m143{animation-name:k206;animation-timing-function:steps(1)}
+@keyframes k207{0%,43.934%{width:0px}68.525%,100%{width:290.881px}}
+.m144{animation-name:k207;animation-timing-function:linear}
+@keyframes k208{0%,68.525%,100%{fill:var(--base03)}43.934%{fill:var(--base05)}}
+.m145{animation-name:k208;animation-timing-function:steps(1)}
+@keyframes k209{0%,69.508%{width:0px}82.623%,100%{width:154.203px}}
+.m146{animation-name:k209;animation-timing-function:linear}
+@keyframes k210{0%,82.623%,100%{fill:var(--base03)}69.508%{fill:var(--base05)}}
+.m147{animation-name:k210;animation-timing-function:steps(1)}
+@keyframes k211{0%,83.607%{width:0px}96.721%,100%{width:154.203px}}
+.m148{animation-name:k211;animation-timing-function:linear}
+@keyframes k212{0%,96.721%,100%{fill:var(--base03)}83.607%{fill:var(--base05)}}
+.m149{animation-name:k212;animation-timing-function:steps(1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-40.8s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="1280" height="720" fill="var(--base00)"/>
@@ -1056,142 +1058,142 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       <text x="103.6" y="614.45" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base03)" class="a m100">25</text>
       <text x="103.6" y="632.65" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base03)" class="a m101">26</text>
       <text x="103.6" y="650.85" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base03)" class="a m101">27</text>
-      <text x="119.2" y="177.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)">class</text>
-      <text x="166" y="177.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)">Breaker</text>
-      <text x="228.4" y="177.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)">{</text>
-      <text x="134.8" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)">state</text>
-      <text x="173.8" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)">:</text>
-      <text x="189.4" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)">State</text>
-      <text x="236.2" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)">=</text>
-      <text x="251.8" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)">"closed"</text>
-      <text x="314.2" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)">;</text>
-      <text x="134.8" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)">failures</text>
-      <text x="205" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)">=</text>
-      <text x="220.6" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)">0</text>
-      <text x="228.4" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)">;</text>
-      <text x="134.8" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">async</text>
-      <text x="181.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">call</text>
-      <text x="212.8" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">&lt;</text>
-      <text x="220.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">T</text>
-      <text x="228.4" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">&gt;(</text>
-      <text x="244" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">fn</text>
-      <text x="259.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">:</text>
-      <text x="275.2" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">()</text>
-      <text x="298.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">=&gt;</text>
-      <text x="322" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">Promise</text>
-      <text x="376.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">&lt;</text>
-      <text x="384.4" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">T</text>
-      <text x="392.2" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">&gt;):</text>
-      <text x="423.4" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">Promise</text>
-      <text x="478" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">&lt;</text>
-      <text x="485.8" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">T</text>
-      <text x="493.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">&gt;</text>
-      <text x="509.2" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">{</text>
-      <text x="150.4" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">if</text>
-      <text x="173.8" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">(</text>
-      <text x="181.6" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">this</text>
-      <text x="212.8" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">.</text>
-      <text x="220.6" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">state</text>
-      <text x="267.4" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">===</text>
-      <text x="298.6" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m102">"open"</text>
-      <text x="345.4" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">)</text>
-      <text x="361" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">{</text>
-      <text x="166" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">if</text>
-      <text x="189.4" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">(</text>
-      <text x="197.2" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">Date</text>
-      <text x="228.4" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">.</text>
-      <text x="236.2" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m102">now</text>
-      <text x="259.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">()</text>
-      <text x="283" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">&lt;</text>
-      <text x="298.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">this</text>
-      <text x="329.8" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">.</text>
-      <text x="337.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">retryAt</text>
-      <text x="392.2" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">)</text>
-      <text x="407.8" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">throw</text>
-      <text x="454.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">new</text>
-      <text x="485.8" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">OpenError</text>
-      <text x="556" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">();</text>
-      <text x="166" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">this</text>
-      <text x="197.2" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">.</text>
-      <text x="205" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">state</text>
-      <text x="251.8" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">=</text>
-      <text x="267.4" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m102">"half-open"</text>
-      <text x="353.2" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">;</text>
-      <text x="150.4" y="323.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">}</text>
-      <text x="150.4" y="341.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">try</text>
-      <text x="181.6" y="341.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">{</text>
-      <text x="166" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">const</text>
-      <text x="212.8" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">result</text>
-      <text x="267.4" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">=</text>
-      <text x="283" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">await</text>
-      <text x="329.8" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m102">fn</text>
-      <text x="345.4" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">();</text>
-      <text x="166" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">this</text>
-      <text x="197.2" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">.</text>
-      <text x="205" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">state</text>
-      <text x="251.8" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">=</text>
-      <text x="267.4" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m102">"closed"</text>
-      <text x="329.8" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">;</text>
-      <text x="166" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">this</text>
-      <text x="197.2" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">.</text>
-      <text x="205" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">failures</text>
-      <text x="275.2" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">=</text>
-      <text x="290.8" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)" class="a m102">0</text>
-      <text x="298.6" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">;</text>
-      <text x="166" y="414.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">return</text>
-      <text x="220.6" y="414.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">result</text>
-      <text x="267.4" y="414.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">;</text>
-      <text x="150.4" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">}</text>
-      <text x="166" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">catch</text>
-      <text x="212.8" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">(</text>
-      <text x="220.6" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">error</text>
-      <text x="259.6" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">)</text>
-      <text x="275.2" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">{</text>
-      <text x="166" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">if</text>
-      <text x="189.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">(++</text>
-      <text x="212.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
-      <text x="244" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
-      <text x="251.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">failures</text>
-      <text x="322" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&gt;=</text>
-      <text x="345.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)" class="a m103">3</text>
-      <text x="361" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">||</text>
-      <text x="384.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
-      <text x="415.6" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
-      <text x="423.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">state</text>
-      <text x="470.2" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">===</text>
-      <text x="501.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m103">"half-open"</text>
-      <text x="587.2" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">)</text>
-      <text x="602.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
-      <text x="634" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
-      <text x="641.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m103">trip</text>
-      <text x="673" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">();</text>
-      <text x="166" y="468.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">throw</text>
-      <text x="212.8" y="468.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">error</text>
-      <text x="251.8" y="468.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">;</text>
-      <text x="150.4" y="487.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">}</text>
-      <text x="134.8" y="505.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">}</text>
-      <text x="134.8" y="541.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m103">trip</text>
-      <text x="166" y="541.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">()</text>
-      <text x="189.4" y="541.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">{</text>
-      <text x="150.4" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
-      <text x="181.6" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
-      <text x="189.4" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">state</text>
-      <text x="236.2" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">=</text>
-      <text x="251.8" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m103">"open"</text>
-      <text x="298.6" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">;</text>
-      <text x="150.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
-      <text x="181.6" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
-      <text x="189.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">retryAt</text>
-      <text x="251.8" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">=</text>
-      <text x="267.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">Date</text>
-      <text x="298.6" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
-      <text x="306.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m103">now</text>
-      <text x="329.8" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">()</text>
-      <text x="353.2" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">+</text>
-      <text x="368.8" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m104">30_000</text>
-      <text x="415.6" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m105">;</text>
-      <text x="134.8" y="596.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">}</text>
-      <text x="119.2" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">}</text>
+      <text x="119.2" y="177.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m102">class</text>
+      <text x="166" y="177.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">Breaker</text>
+      <text x="228.4" y="177.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">{</text>
+      <text x="134.8" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">state</text>
+      <text x="173.8" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">:</text>
+      <text x="189.4" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m102">State</text>
+      <text x="236.2" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">=</text>
+      <text x="251.8" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m102">"closed"</text>
+      <text x="314.2" y="195.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">;</text>
+      <text x="134.8" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m102">failures</text>
+      <text x="205" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">=</text>
+      <text x="220.6" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)" class="a m102">0</text>
+      <text x="228.4" y="214.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m102">;</text>
+      <text x="134.8" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">async</text>
+      <text x="181.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">call</text>
+      <text x="212.8" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&lt;</text>
+      <text x="220.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">T</text>
+      <text x="228.4" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&gt;(</text>
+      <text x="244" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">fn</text>
+      <text x="259.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">:</text>
+      <text x="275.2" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">()</text>
+      <text x="298.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">=&gt;</text>
+      <text x="322" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">Promise</text>
+      <text x="376.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&lt;</text>
+      <text x="384.4" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">T</text>
+      <text x="392.2" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&gt;):</text>
+      <text x="423.4" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">Promise</text>
+      <text x="478" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&lt;</text>
+      <text x="485.8" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">T</text>
+      <text x="493.6" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&gt;</text>
+      <text x="509.2" y="250.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">{</text>
+      <text x="150.4" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">if</text>
+      <text x="173.8" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">(</text>
+      <text x="181.6" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
+      <text x="212.8" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
+      <text x="220.6" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">state</text>
+      <text x="267.4" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">===</text>
+      <text x="298.6" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m103">"open"</text>
+      <text x="345.4" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">)</text>
+      <text x="361" y="268.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">{</text>
+      <text x="166" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">if</text>
+      <text x="189.4" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">(</text>
+      <text x="197.2" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">Date</text>
+      <text x="228.4" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
+      <text x="236.2" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m103">now</text>
+      <text x="259.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">()</text>
+      <text x="283" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">&lt;</text>
+      <text x="298.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
+      <text x="329.8" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
+      <text x="337.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">retryAt</text>
+      <text x="392.2" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">)</text>
+      <text x="407.8" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">throw</text>
+      <text x="454.6" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">new</text>
+      <text x="485.8" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m103">OpenError</text>
+      <text x="556" y="286.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">();</text>
+      <text x="166" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
+      <text x="197.2" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
+      <text x="205" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">state</text>
+      <text x="251.8" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">=</text>
+      <text x="267.4" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m103">"half-open"</text>
+      <text x="353.2" y="305.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">;</text>
+      <text x="150.4" y="323.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">}</text>
+      <text x="150.4" y="341.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">try</text>
+      <text x="181.6" y="341.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">{</text>
+      <text x="166" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">const</text>
+      <text x="212.8" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">result</text>
+      <text x="267.4" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">=</text>
+      <text x="283" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">await</text>
+      <text x="329.8" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m103">fn</text>
+      <text x="345.4" y="359.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">();</text>
+      <text x="166" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
+      <text x="197.2" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
+      <text x="205" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">state</text>
+      <text x="251.8" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">=</text>
+      <text x="267.4" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m103">"closed"</text>
+      <text x="329.8" y="377.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">;</text>
+      <text x="166" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m103">this</text>
+      <text x="197.2" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">.</text>
+      <text x="205" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m103">failures</text>
+      <text x="275.2" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">=</text>
+      <text x="290.8" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)" class="a m103">0</text>
+      <text x="298.6" y="396.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m103">;</text>
+      <text x="166" y="414.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">return</text>
+      <text x="220.6" y="414.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m104">result</text>
+      <text x="267.4" y="414.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">;</text>
+      <text x="150.4" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">}</text>
+      <text x="166" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">catch</text>
+      <text x="212.8" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">(</text>
+      <text x="220.6" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m104">error</text>
+      <text x="259.6" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">)</text>
+      <text x="275.2" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">{</text>
+      <text x="166" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">if</text>
+      <text x="189.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">(++</text>
+      <text x="212.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">this</text>
+      <text x="244" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">.</text>
+      <text x="251.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m104">failures</text>
+      <text x="322" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">&gt;=</text>
+      <text x="345.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)" class="a m104">3</text>
+      <text x="361" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">||</text>
+      <text x="384.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">this</text>
+      <text x="415.6" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">.</text>
+      <text x="423.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m104">state</text>
+      <text x="470.2" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">===</text>
+      <text x="501.4" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m104">"half-open"</text>
+      <text x="587.2" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">)</text>
+      <text x="602.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">this</text>
+      <text x="634" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">.</text>
+      <text x="641.8" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m104">trip</text>
+      <text x="673" y="450.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">();</text>
+      <text x="166" y="468.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">throw</text>
+      <text x="212.8" y="468.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m104">error</text>
+      <text x="251.8" y="468.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">;</text>
+      <text x="150.4" y="487.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">}</text>
+      <text x="134.8" y="505.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">}</text>
+      <text x="134.8" y="541.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m104">trip</text>
+      <text x="166" y="541.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">()</text>
+      <text x="189.4" y="541.65" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">{</text>
+      <text x="150.4" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">this</text>
+      <text x="181.6" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">.</text>
+      <text x="189.4" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m104">state</text>
+      <text x="236.2" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">=</text>
+      <text x="251.8" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0B)" class="a m104">"open"</text>
+      <text x="298.6" y="559.85" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">;</text>
+      <text x="150.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m104">this</text>
+      <text x="181.6" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">.</text>
+      <text x="189.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m104">retryAt</text>
+      <text x="251.8" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">=</text>
+      <text x="267.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0A)" class="a m104">Date</text>
+      <text x="298.6" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">.</text>
+      <text x="306.4" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m104">now</text>
+      <text x="329.8" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">()</text>
+      <text x="353.2" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">+</text>
+      <text x="368.8" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m105">30_000</text>
+      <text x="415.6" y="578.05" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m106">;</text>
+      <text x="134.8" y="596.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">}</text>
+      <text x="119.2" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m104">}</text>
       <text x="134.8" y="232.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m101">trips</text>
       <text x="181.6" y="232.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m101">=</text>
       <text x="197.2" y="232.25" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)" class="a m101">0</text>
@@ -1201,7 +1203,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       <text x="205" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base05)" class="a m101">trips</text>
       <text x="251.8" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m101">=</text>
       <text x="267.4" y="432.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base09)" class="a m101">0</text>
-      <text x="368.8" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m106">backoff</text>
+      <text x="368.8" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0D)" class="a m107">backoff</text>
       <text x="423.4" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m101">(</text>
       <text x="431.2" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base0E)" class="a m101">this</text>
       <text x="462.4" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m101">.</text>
@@ -1209,7 +1211,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       <text x="509.2" y="614.45" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base04)" class="a m101">++);</text>
     </g>
     <g class="sans">
-      <g class="a m107">
+      <g class="a m108">
         <path d="M560.4 609.9L540.4 609.9" fill="none" stroke="var(--base0B)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6"/>
         <rect x="560.4" y="582.3" width="204.8" height="55.2" rx="6" fill="var(--base0B)" fill-opacity="0.08" stroke="var(--base0B)" stroke-opacity="0.4"/>
         <text x="570.4" y="604.3" font-size="14" fill="var(--base0B)">Each trip waits longer</text>
@@ -1217,49 +1219,49 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       </g>
     </g>
   </g>
-  <text x="64" y="78" class="sans a m108" font-size="30" font-weight="600" fill="var(--base05)">call(), end to end</text>
-  <g class="a m108">
+  <text x="64" y="78" class="sans a m109" font-size="30" font-weight="600" fill="var(--base05)">call(), end to end</text>
+  <g class="a m109">
     <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
       <g>
-        <path d="M151.73 352.5L199.56 352.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m109"/>
-        <path d="M206.5599999999999 352.49982529431577L198.5599999999999 356.49982529431577L198.5599999999999 348.49982529431577Z" fill="var(--base04)" class="a m110"/>
+        <path d="M151.73 352.5L199.56 352.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m110"/>
+        <path d="M206.5599999999999 352.49982529431577L198.5599999999999 356.49982529431577L198.5599999999999 348.49982529431577Z" fill="var(--base04)" class="a m111"/>
       </g>
       <g>
-        <path d="M298.95 365.5L374.88 365.5C390.88 365.5 390.88 386 406.88 386L784.74 386" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m111"/>
-        <path d="M791.7400000000001 386L783.7400000000001 390L783.7400000000001 382Z" fill="var(--base04)" class="a m112"/>
+        <path d="M298.95 365.5L374.88 365.5C390.88 365.5 390.88 386 406.88 386L784.74 386" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m112"/>
+        <path d="M791.7400000000001 386L783.7400000000001 390L783.7400000000001 382Z" fill="var(--base04)" class="a m113"/>
       </g>
       <g>
-        <path d="M298.95 339.5L374.88 339.5C390.88 339.5 390.88 319 406.88 319L451.3 319" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m113"/>
-        <path d="M458.29999999999995 319L450.29999999999995 323L450.29999999999995 315Z" fill="var(--base04)" class="a m114"/>
+        <path d="M298.95 339.5L374.88 339.5C390.88 339.5 390.88 319 406.88 319L451.3 319" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m114"/>
+        <path d="M458.29999999999995 319L450.29999999999995 323L450.29999999999995 315Z" fill="var(--base04)" class="a m115"/>
       </g>
       <g>
-        <path d="M603.12 307.5L763.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m115"/>
-        <path d="M770.94 307.5L762.94 311.5L762.94 303.5Z" fill="var(--base04)" class="a m116"/>
+        <path d="M603.12 307.5L763.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m116"/>
+        <path d="M770.94 307.5L762.94 311.5L762.94 303.5Z" fill="var(--base04)" class="a m117"/>
       </g>
       <g>
-        <path d="M598.82 332L687.52 332C703.52 332 703.52 382.5 719.52 382.5L784.74 382.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m111"/>
-        <path d="M791.7400000000001 382.5L783.7400000000001 386.5L783.7400000000001 378.5Z" fill="var(--base04)" class="a m112"/>
+        <path d="M598.82 332L687.52 332C703.52 332 703.52 382.5 719.52 382.5L784.74 382.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m112"/>
+        <path d="M791.7400000000001 382.5L783.7400000000001 386.5L783.7400000000001 378.5Z" fill="var(--base04)" class="a m113"/>
       </g>
       <g>
-        <path d="M922.54 376.5L1009.04 376.5C1025.04 376.5 1025.04 307.5 1041.04 307.5L1103.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m117"/>
-        <path d="M1110.94 307.5L1102.94 311.5L1102.94 303.5Z" fill="var(--base04)" class="a m118"/>
+        <path d="M922.54 376.5L1009.04 376.5C1025.04 376.5 1025.04 307.5 1041.04 307.5L1103.94 307.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m118"/>
+        <path d="M1110.94 307.5L1102.94 311.5L1102.94 303.5Z" fill="var(--base04)" class="a m119"/>
       </g>
       <g>
-        <path d="M922.54 388.5L1099.74 388.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m119"/>
-        <path d="M1106.7400000000002 388.5L1098.7400000000002 392.5L1098.7400000000002 384.5Z" fill="var(--base04)" class="a m120"/>
+        <path d="M922.54 388.5L1099.74 388.5" fill="none" stroke="var(--base04)" stroke-width="1.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m120"/>
+        <path d="M1106.7400000000002 388.5L1098.7400000000002 392.5L1098.7400000000002 384.5Z" fill="var(--base04)" class="a m121"/>
       </g>
     </g>
     <g>
-      <g class="a m121">
+      <g class="a m122">
         <rect x="-26.8" y="-10" width="53.6" height="20" rx="10" fill="var(--base08)" fill-opacity="0.18" stroke="var(--base08)" stroke-width="1.25"/>
         <text y="3.85" text-anchor="middle" font-size="11" fill="var(--base08)">call()</text>
       </g>
-      <circle cx="770.94" cy="307.5" r="9" fill="none" stroke="var(--base08)" stroke-width="1.5" class="a m122 fb"/>
+      <circle cx="770.94" cy="307.5" r="9" fill="none" stroke="var(--base08)" stroke-width="1.5" class="a m123 fb"/>
     </g>
     <g>
-      <path d="M151.73499999999987 352.49982529431577L206.5599999999999 352.49982529431577L298.94870967741923 365.49982529431577L374.87999999999994 365.49982529431577L380.1925 366.3806921762006L384.37999999999994 368.7029775920789L387.81749999999994 371.98620869728614L390.88 375.7499126471579L393.94249999999994 379.51361659702957L397.37999999999994 382.79684770223685L401.5674999999999 385.11913311811514L406.87999999999994 386L791.7400000000001 386L922.5400000000001 376.5L1009.04 376.5L1014.3525 373.53515625L1018.54 365.71875L1021.9775000000001 354.66796875L1025.04 342L1028.1025 329.33203125L1031.54 318.28125L1035.7275 310.46484375L1041.04 307.5L1110.94 307.5" fill="none" stroke="var(--base0B)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m123"/>
-      <circle r="4.5" fill="var(--base0B)" class="a m124"/>
-      <circle cx="1110.94" cy="307.5" r="9" fill="none" stroke="var(--base0B)" stroke-width="1.5" class="a m125 fb"/>
+      <path d="M151.73499999999987 352.49982529431577L206.5599999999999 352.49982529431577L298.94870967741923 365.49982529431577L374.87999999999994 365.49982529431577L380.1925 366.3806921762006L384.37999999999994 368.7029775920789L387.81749999999994 371.98620869728614L390.88 375.7499126471579L393.94249999999994 379.51361659702957L397.37999999999994 382.79684770223685L401.5674999999999 385.11913311811514L406.87999999999994 386L791.7400000000001 386L922.5400000000001 376.5L1009.04 376.5L1014.3525 373.53515625L1018.54 365.71875L1021.9775000000001 354.66796875L1025.04 342L1028.1025 329.33203125L1031.54 318.28125L1035.7275 310.46484375L1041.04 307.5L1110.94 307.5" fill="none" stroke="var(--base0B)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m124"/>
+      <circle r="4.5" fill="var(--base0B)" class="a m125"/>
+      <circle cx="1110.94" cy="307.5" r="9" fill="none" stroke="var(--base0B)" stroke-width="1.5" class="a m126 fb"/>
     </g>
     <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
       <g>
@@ -1267,58 +1269,58 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
         <path d="M46.909999999999876 332.99982529431577H158.5599999999999L144.90999999999988 371.99982529431577H33.25999999999988Z" fill="var(--base0B)" fill-opacity="0.22" stroke="var(--base0B)" stroke-width="1.5"/>
         <text x="95.91" y="357.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">call(fn)</text>
       </g>
-      <g class="a m126">
+      <g class="a m127">
         <path d="M265.0099999999999 321.49982529431577L323.4599999999999 352.49982529431577L265.0099999999999 383.49982529431577L206.5599999999999 352.49982529431577Z" fill="var(--base00)"/>
         <path d="M265.0099999999999 321.49982529431577L323.4599999999999 352.49982529431577L265.0099999999999 383.49982529431577L206.5599999999999 352.49982529431577Z" fill="var(--base0A)" fill-opacity="0.22" stroke="var(--base0A)" stroke-width="1.5"/>
         <text x="265.01" y="357.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">open?</text>
       </g>
-      <g class="a m127">
+      <g class="a m128">
         <path d="M547.1999999999999 288L636.0999999999999 319L547.1999999999999 350L458.29999999999995 319Z" fill="var(--base00)"/>
         <path d="M547.1999999999999 288L636.0999999999999 319L547.1999999999999 350L458.29999999999995 319Z" fill="var(--base0A)" fill-opacity="0.22" stroke="var(--base0A)" stroke-width="1.5"/>
         <text x="547.2" y="323.9" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">retry due?</text>
       </g>
-      <g class="a m128">
+      <g class="a m129">
         <path d="M790.44 288H923.8400000000001A19.5 19.5 0 0 1 923.8400000000001 327H790.44A19.5 19.5 0 0 1 790.44 288Z" fill="var(--base00)"/>
         <path d="M790.44 288H923.8400000000001A19.5 19.5 0 0 1 923.8400000000001 327H790.44A19.5 19.5 0 0 1 790.44 288Z" fill="var(--base0C)" fill-opacity="0.22" stroke="var(--base0C)" stroke-width="1.5"/>
         <text x="857.14" y="312.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">throw OpenError</text>
       </g>
-      <g class="a m129">
+      <g class="a m130">
         <path d="M794.7400000000001 363H919.5400000000002Q922.5400000000002 363 922.5400000000002 366V399Q922.5400000000002 402 919.5400000000002 402H794.7400000000001Q791.7400000000001 402 791.7400000000001 399V366Q791.7400000000001 363 794.7400000000001 363Z" fill="var(--base00)"/>
         <path d="M794.7400000000001 363H919.5400000000002Q922.5400000000002 363 922.5400000000002 366V399Q922.5400000000002 402 919.5400000000002 402H794.7400000000001Q791.7400000000001 402 791.7400000000001 399V366Q791.7400000000001 363 794.7400000000001 363Z" fill="var(--base08)" fill-opacity="0.22" stroke="var(--base08)" stroke-width="1.5"/>
         <path d="M799.7400000000001 363V402M914.5400000000002 363V402" stroke="var(--base08)" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
         <text x="857.14" y="387.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">await fn()</text>
       </g>
-      <g class="a m130">
+      <g class="a m131">
         <path d="M1118.94 288H1234.54Q1242.54 288 1242.54 296V319Q1242.54 327 1234.54 327H1118.94Q1110.94 327 1110.94 319V296Q1110.94 288 1118.94 288Z" fill="var(--base00)"/>
         <path d="M1118.94 288H1234.54Q1242.54 288 1242.54 296V319Q1242.54 327 1234.54 327H1118.94Q1110.94 327 1110.94 319V296Q1110.94 288 1118.94 288Z" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
         <text x="1176.74" y="312.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">close, reset</text>
       </g>
-      <g class="a m131">
+      <g class="a m132">
         <path d="M1114.7400000000002 363H1238.7400000000002Q1246.7400000000002 363 1246.7400000000002 371V394Q1246.7400000000002 402 1238.7400000000002 402H1114.7400000000002Q1106.7400000000002 402 1106.7400000000002 394V371Q1106.7400000000002 363 1114.7400000000002 363Z" fill="var(--base00)"/>
         <path d="M1114.7400000000002 363H1238.7400000000002Q1246.7400000000002 363 1246.7400000000002 371V394Q1246.7400000000002 402 1238.7400000000002 402H1114.7400000000002Q1106.7400000000002 402 1106.7400000000002 394V371Q1106.7400000000002 363 1114.7400000000002 363Z" fill="var(--base0D)" fill-opacity="0.22" stroke="var(--base0D)" stroke-width="1.5"/>
         <text x="1176.74" y="387.4" font-size="14" text-anchor="middle" font-weight="600" fill="var(--base05)">count failure</text>
       </g>
-      <g class="a m132">
+      <g class="a m133">
         <rect x="579.17" y="377" width="24.28" height="18" rx="3" fill="var(--base00)"/>
         <text x="591.31" y="390.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text>
       </g>
-      <g class="a m133">
+      <g class="a m134">
         <rect x="341.46" y="330.5" width="31.42" height="18" rx="3" fill="var(--base00)"/>
         <text x="357.17" y="343.665" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text>
       </g>
-      <g class="a m134">
+      <g class="a m135">
         <rect x="691.38" y="298.5" width="24.28" height="18" rx="3" fill="var(--base00)"/>
         <text x="703.52" y="311.665" font-size="11.9" text-anchor="middle" fill="var(--base04)">no</text>
       </g>
-      <g class="a m132">
+      <g class="a m133">
         <rect x="654.1" y="323" width="31.42" height="18" rx="3" fill="var(--base00)"/>
         <text x="669.81" y="336.165" font-size="11.9" text-anchor="middle" fill="var(--base04)">yes</text>
       </g>
-      <g class="a m135">
+      <g class="a m136">
         <rect x="961.65" y="367.5" width="24.28" height="18" rx="3" fill="var(--base00)"/>
         <text x="973.79" y="380.665" font-size="11.9" text-anchor="middle" fill="var(--base04)">ok</text>
       </g>
-      <g class="a m136">
+      <g class="a m137">
         <rect x="991.79" y="379.5" width="45.7" height="18" rx="3" fill="var(--base00)"/>
         <text x="1014.64" y="392.665" font-size="11.9" text-anchor="middle" fill="var(--base04)">threw</text>
       </g>
@@ -1326,22 +1328,22 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
   </g>
   <g class="sans">
     <rect x="64" y="680" width="95.627" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="64" y="680" width="95.627" height="4" rx="2" fill="var(--base0A)" class="a m137"/>
-    <text x="66" y="702" font-size="12" fill="var(--base03)" class="a m138">title</text>
+    <rect x="64" y="680" width="95.627" height="4" rx="2" fill="var(--base0A)" class="a m138"/>
+    <text x="66" y="702" font-size="12" fill="var(--base03)" class="a m139">title</text>
     <rect x="173.342" y="680" width="212.78" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="173.342" y="680" width="212.78" height="4" rx="2" fill="var(--base0A)" class="a m139"/>
-    <text x="175.342" y="702" font-size="12" fill="var(--base03)" class="a m140">code</text>
+    <rect x="173.342" y="680" width="212.78" height="4" rx="2" fill="var(--base0A)" class="a m140"/>
+    <text x="175.342" y="702" font-size="12" fill="var(--base03)" class="a m141">code</text>
     <rect x="399.837" y="680" width="173.729" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="399.837" y="680" width="173.729" height="4" rx="2" fill="var(--base0A)" class="a m141"/>
-    <text x="401.837" y="702" font-size="12" fill="var(--base03)" class="a m142">machine</text>
+    <rect x="399.837" y="680" width="173.729" height="4" rx="2" fill="var(--base0A)" class="a m142"/>
+    <text x="401.837" y="702" font-size="12" fill="var(--base03)" class="a m143">machine</text>
     <rect x="587.281" y="680" width="290.881" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="587.281" y="680" width="290.881" height="4" rx="2" fill="var(--base0A)" class="a m143"/>
-    <text x="589.281" y="702" font-size="12" fill="var(--base03)" class="a m144">together</text>
+    <rect x="587.281" y="680" width="290.881" height="4" rx="2" fill="var(--base0A)" class="a m144"/>
+    <text x="589.281" y="702" font-size="12" fill="var(--base03)" class="a m145">together</text>
     <rect x="891.878" y="680" width="154.203" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="891.878" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="a m145"/>
-    <text x="893.878" y="702" font-size="12" fill="var(--base03)" class="a m146">backoff</text>
+    <rect x="891.878" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="a m146"/>
+    <text x="893.878" y="702" font-size="12" fill="var(--base03)" class="a m147">backoff</text>
     <rect x="1059.797" y="680" width="154.203" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="1059.797" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="a m147"/>
-    <text x="1061.797" y="702" font-size="12" fill="var(--base03)" class="a m148">recap</text>
+    <rect x="1059.797" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="a m148"/>
+    <text x="1061.797" y="702" font-size="12" fill="var(--base03)" class="a m149">recap</text>
   </g>
 </svg>

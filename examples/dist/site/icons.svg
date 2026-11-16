@@ -4,8 +4,7 @@
   <defs>
     <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="504" height="340">
       <feGaussianBlur stdDeviation="0">
-        <animate id="w1" attributeName="stdDeviation" values="8;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="1.46s;w1.begin+8s" dur="0.9s" fill="freeze" data-loop="8s"/>
-        <set attributeName="stdDeviation" to="8" begin="0s;w1.begin+6.54s" dur="0.001s" fill="freeze" data-loop="8s"/>
+        <animate attributeName="stdDeviation" values="8;8;0;0" keyTimes="0;0.1825;0.295;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1" dur="8s" repeatCount="indefinite"/>
       </feGaussianBlur>
     </filter>
     <filter id="f1s" filterUnits="userSpaceOnUse" x="0" y="0" width="504" height="340">

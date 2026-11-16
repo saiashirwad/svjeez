@@ -51,16 +51,17 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k24{0%,57.831%{translate:0px 0px}63.253%,78.916%{translate:-48px 0px}84.337%,100%{translate:240px 0px}}
 .m19{animation-name:k23,k24;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
 @keyframes k25{0%,39.458%,81.627%,100%{opacity:0}42.169%,78.916%{opacity:1}}
-.m20{animation-name:k25}
-@keyframes k26{0%,57.831%,63.253%,78.916%{translate:0px 0px}84.337%,100%{translate:0px -120px}}
-.m21{animation-name:k23,k26;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k27{0%,60.542%,81.627%,100%{opacity:0}63.253%,78.916%{opacity:1}}
-.m22{animation-name:k27}
-@keyframes k28{0%,60.542%{opacity:0}63.253%,100%{opacity:1}}
-@keyframes k29{0%,78.916%{translate:0px 0px}84.337%,100%{translate:-48px -120px}}
-.m23{animation-name:k28,k29;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k30{0%,81.627%{opacity:0}84.337%,100%{opacity:1}}
-.m24{animation-name:k30}
+@keyframes k26{0%,57.831%,63.253%,100%{translate:0px 0px}}
+.m20{animation-name:k25,k26}
+@keyframes k27{0%,57.831%,63.253%,78.916%{translate:0px 0px}84.337%,100%{translate:0px -120px}}
+.m21{animation-name:k23,k27;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k28{0%,60.542%,81.627%,100%{opacity:0}63.253%,78.916%{opacity:1}}
+.m22{animation-name:k28}
+@keyframes k29{0%,60.542%{opacity:0}63.253%,100%{opacity:1}}
+@keyframes k30{0%,78.916%{translate:0px 0px}84.337%,100%{translate:-48px -120px}}
+.m23{animation-name:k29,k30;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k31{0%,81.627%{opacity:0}84.337%,100%{opacity:1}}
+.m24{animation-name:k31}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-14.11s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="960" height="540" fill="var(--base01)"/>
