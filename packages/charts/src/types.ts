@@ -1,4 +1,4 @@
-import type { Attrs, Color, Point, Rect, Spanned, SvgNode, Base16 } from "svjeez";
+import type { Attrs, Base16, Color, Ease, Point, Rect, Span, Spanned, SvgNode } from "svjeez";
 
 export type FontAttr = NonNullable<Attrs<"text">["fontFamily"]>;
 
@@ -41,11 +41,8 @@ export type XValue<K extends XScale["kind"]> = K extends "band" ? string : numbe
 export type Datum<K extends XScale["kind"]> = readonly [x: XValue<K>, y: number];
 
 export interface ChartOptions<X extends XScale = XScale> {
-  /** Size of the plot area in px, inside the axes. */
-  readonly width: number;
-  readonly height: number;
-  /** Top-left of the plot area. Default the origin. */
-  readonly at?: Point;
+  /** The plot area in scene px. The axes draw outside it, so leave about 50px on the left and 30px at the bottom. */
+  readonly frame: Rect;
   readonly x: X;
   readonly y?: YScale;
   /** Every point the chart will draw, so the scales fit them. Needed only for a domain left out. */
@@ -58,21 +55,16 @@ export interface ChartOptions<X extends XScale = XScale> {
   readonly font?: FontAttr;
 }
 
-export interface Timing {
-  /** Seconds into the scene when the series starts. Default 0. */
-  readonly at?: number;
-  /** Seconds the series takes. Bars: one bar's growth. Default 0.7 for bars, 1.2 for lines and areas. */
-  readonly over?: number;
-}
-
-export interface SeriesOptions extends Timing {
+export interface SeriesOptions {
   /** Default: the next accent of the theme, in a fixed order. */
   readonly color?: Color;
 }
 
 export interface BarsOptions extends SeriesOptions {
-  /** Seconds between one bar's start and the next's. Default 0.08. */
+  /** Seconds between one bar's start and the next's. The last bar ends with the span, so each bar grows for `over - (bars - 1) * stagger`. Default 0.08, or less when the span is short. */
   readonly stagger?: number;
+  /** How each bar grows. Default `ease.out`. */
+  readonly ease?: Ease;
   /** Draw this series as bar `index` of `count` side by side in each band. */
   readonly group?: { readonly index: number; readonly count: number };
   /** Corner radius of the free end in px. Default 3. */
@@ -107,7 +99,7 @@ export interface Bar {
 export interface Bars {
   readonly node: SvgNode;
   readonly bars: readonly Bar[];
-  /** From `at` to when the last bar has grown. */
+  /** The span you passed: the last bar has grown at its end. */
   readonly span: Spanned;
 }
 
@@ -137,10 +129,16 @@ export interface Chart<K extends XScale["kind"] = XScale["kind"]> {
   y(value: number): number;
   /** The width of one band in px. 0 on a linear scale. */
   readonly bandwidth: number;
-  /** Bars grow up from the baseline. Band scales only. */
+  /** Bars grow up from the baseline over `span`, a record of values or `[key, value]` pairs. Band scales only. */
   readonly bars: K extends "band"
-    ? (values: Readonly<Record<string, number>>, options?: BarsOptions) => Bars
+    ? (
+        span: Span,
+        values: Readonly<Record<string, number>> | readonly Datum<"band">[],
+        options?: BarsOptions,
+      ) => Bars
     : never;
-  line(points: readonly Datum<K>[], options?: LineOptions): Line;
-  area(points: readonly Datum<K>[], options?: AreaOptions): Area;
+  /** The line draws on over `span`. */
+  line(span: Span, points: readonly Datum<K>[], options?: LineOptions): Line;
+  /** The fill wipes in with the line over `span`. */
+  area(span: Span, points: readonly Datum<K>[], options?: AreaOptions): Area;
 }

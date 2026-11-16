@@ -1,5 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, type Color, tint } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
@@ -19,9 +20,7 @@ const muted = tint(theme, "muted");
 const blue = tint(theme, "blue");
 
 const c = chart({
-  width: W - 112,
-  height: H - BAR - 120,
-  at: { x: 64, y: BAR + 52 },
+  frame: rect(64, BAR + 52, W - 112, H - BAR - 120),
   x: { kind: "band", domain: months, padding: 0.25 },
   y: { domain: [0, 80], ticks: 4 },
   theme,
@@ -30,15 +29,13 @@ const c = chart({
   grid: true,
 });
 
-const open = c.bars(opened, {
-  at: 0.6,
+const open = c.bars({ at: 0.6, over: 1.2 }, opened, {
   stagger: 0.1,
   group: { index: 0, count: 2 },
   color: tint(theme, "comment"),
 });
 
-const done = c.bars(merged, {
-  at: open.span.end,
+const done = c.bars({ at: open.span.end, over: 1.2 }, merged, {
   stagger: 0.1,
   group: { index: 1, count: 2 },
   color: blue,

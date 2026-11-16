@@ -6,12 +6,13 @@ import {
   ease,
   enter,
   motion,
+  type Base16,
   type Color,
   type Point,
   type Rect,
+  type Span,
   type SvgNode,
   tint,
-  type Base16,
 } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { span as spanOf } from "svjeez";
@@ -23,10 +24,10 @@ import type {
   Bars,
   BarsOptions,
   Curve,
+  Datum,
   FontAttr,
   Line,
   LineOptions,
-  Timing,
 } from "./types.ts";
 
 /** What a series needs to know about the chart it joins. */
@@ -68,16 +69,14 @@ const within = (v: number, [low, high]: readonly [number, number]): boolean => {
   return v >= low - slack && v <= high + slack;
 };
 
-const timing = (what: string, { at = 0, over }: Timing, fallback: number) => {
-  const length = over ?? fallback;
-
+const timing = (what: string, { at, over }: Span) => {
   if (!Number.isFinite(at) || at < 0)
     throw new Error(`${what} needs an at of 0 or later, got ${at}.`);
 
-  if (!Number.isFinite(length) || length <= 0)
-    throw new Error(`${what} needs a positive over, got ${length}.`);
+  if (!Number.isFinite(over) || over <= 0)
+    throw new Error(`${what} needs a positive over, got ${over}.`);
 
-  return { at, over: length };
+  return { at, over };
 };
 
 export function buildSeries(f: Frame) {
@@ -121,16 +120,24 @@ export function buildSeries(f: Frame) {
   const clipTo = (box: Rect) =>
     def.clipPath({}, <rect x={box.x} y={box.y} width={box.w} height={box.h} />);
 
-  function bars(values: Readonly<Record<string, number>>, options: BarsOptions = {}): Bars {
-    const { stagger = 0.08, radius = 3, group = { index: 0, count: 1 } } = options;
-    const { at, over } = timing("bars()", options, 0.7);
+  function bars(
+    when: Span,
+    input: Readonly<Record<string, number>> | readonly Datum<"band">[],
+    options: BarsOptions = {},
+  ): Bars {
+    const { radius = 3, group = { index: 0, count: 1 }, ease: curve = ease.out } = options;
+    const { at, over } = timing("bars()", when);
     const categories = f.categories;
 
     if (categories === undefined)
       throw new Error("bars() needs a band x scale, got a linear one. Use line() or area() here.");
 
-    if (!Number.isFinite(stagger) || stagger < 0)
-      throw new Error(`bars() needs a stagger of 0 or more, got ${stagger}.`);
+    const values: Record<string, number> = {};
+
+    for (const [key, value] of Array.isArray(input) ? input : Object.entries(input)) {
+      if (Object.hasOwn(values, key)) throw new Error(`bars() got "${key}" twice.`);
+      values[key] = value;
+    }
 
     if (
       !Number.isInteger(group.count) ||
@@ -162,6 +169,19 @@ export function buildSeries(f: Frame) {
         );
     }
 
+    // The last bar ends with the span: each grows for what is left after the staggered starts.
+    const stagger = options.stagger ?? Math.min(0.08, over / (2 * entries.length));
+
+    if (!Number.isFinite(stagger) || stagger < 0)
+      throw new Error(`bars() needs a stagger of 0 or more, got ${stagger}.`);
+
+    const growth = over - (entries.length - 1) * stagger;
+
+    if (!(growth > 0))
+      throw new Error(
+        `bars() needs a span longer than ${entries.length - 1} staggers of ${stagger}s, got over ${over}.`,
+      );
+
     const color = options.color ?? f.nextColor();
     const zero = baselineOf(0);
     const gap = group.count > 1 ? 2 : 0;
@@ -178,7 +198,6 @@ export function buildSeries(f: Frame) {
     const rising: SvgNode[] = [];
     const falling: SvgNode[] = [];
     const labels: SvgNode[] = [];
-    let end = at;
 
     categories
       .filter((key) => Object.hasOwn(values, key))
@@ -191,10 +210,9 @@ export function buildSeries(f: Frame) {
         const up = value >= 0;
         const long = length + radiusPx;
 
-        end = Math.max(end, start + over);
         placed.push({ key, value, bounds: rect(x, Math.min(tip, zero), barWidth, length) });
 
-        const grow = up ? motion({ height: 0, y: long }) : motion({ height: 0 });
+        const from = up ? motion({ height: 0, y: long }) : motion({ height: 0 });
         const to = up ? { height: long, y: 0 } : { height: long };
 
         (up ? rising : falling).push(
@@ -205,7 +223,7 @@ export function buildSeries(f: Frame) {
             height={round(long)}
             rx={radiusPx}
             fill={color}
-            animation={grow.at(start).to(to, over, ease.out)}
+            animation={from.at(start).to(to, growth, curve)}
           />,
         );
 
@@ -219,7 +237,7 @@ export function buildSeries(f: Frame) {
               fill={ink}
               fontFamily={font}
               animation={enter(
-                { at: start + over * 0.6, over: 0.35 },
+                { at: start + growth * 0.6, over: 0.35 },
                 { opacity: 0, y: up ? 4 : -4 },
               )}
             >
@@ -237,7 +255,7 @@ export function buildSeries(f: Frame) {
         </g>
       ),
       bars: placed,
-      span: spanOf(at, end - at),
+      span: spanOf(at, over),
     };
   }
 
@@ -320,8 +338,8 @@ export function buildSeries(f: Frame) {
     return { d, node };
   }
 
-  function line(points: Raw, options: LineOptions = {}): Line {
-    const span = timing("line()", options, 1.2);
+  function line(when: Span, points: Raw, options: LineOptions = {}): Line {
+    const span = timing("line()", when);
     const placed = place("line()", points);
     const { d, node } = trace("line()", placed, options, options.color ?? f.nextColor(), span);
 
@@ -330,8 +348,8 @@ export function buildSeries(f: Frame) {
     return { node, d, points: placed, span: spanOf(span.at, end - span.at) };
   }
 
-  function area(points: Raw, options: AreaOptions = {}): Area {
-    const span = timing("area()", options, 1.2);
+  function area(when: Span, points: Raw, options: AreaOptions = {}): Area {
+    const span = timing("area()", when);
     const { at, over } = span;
     const placed = place("area()", points);
     const color = options.color ?? f.nextColor();

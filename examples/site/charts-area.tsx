@@ -1,5 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, tint } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
@@ -15,9 +16,7 @@ const hours = [26, 28, 25, 27, 29, 26, 24, 15, 11, 9, 8, 7];
 const points = hours.map((h, i) => [i + 1, h] as const);
 
 const c = chart({
-  width: W - 132,
-  height: H - BAR - 112,
-  at: { x: 64, y: BAR + 28 },
+  frame: rect(64, BAR + 28, W - 132, H - BAR - 112),
   x: { kind: "linear", domain: [1, 12], ticks: 11 },
   y: { domain: [0, 30], ticks: 3, format: (h) => `${h}h` },
   theme,
@@ -26,9 +25,7 @@ const c = chart({
   grid: true,
 });
 
-const wait = c.area(points, {
-  at: 0.8,
-  over: 2.4,
+const wait = c.area({ at: 0.8, over: 2.4 }, points, {
   curve: "monotone",
   color: tint(theme, "number"),
   dots: 3,
@@ -82,7 +79,7 @@ export default function build(): string {
             textAnchor="middle"
             fill={theme.base03}
           >
-            {'c.area(points, { curve: "monotone" })'}
+            {'c.area({ at: 0.8, over: 2.4 }, points, { curve: "monotone" })'}
           </text>
         </g>
       </g>

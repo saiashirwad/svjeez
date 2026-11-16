@@ -15,7 +15,6 @@ export type {
   LinearX,
   LineOptions,
   SeriesOptions,
-  Timing,
   XScale,
   XValue,
   YScale,

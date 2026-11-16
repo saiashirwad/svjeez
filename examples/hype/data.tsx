@@ -1,5 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { enter, type Span } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { jumps } from "../site/lib/blip";
 import { mono, theme } from "../style";
 import { C, Caption, Blip } from "./kit";
@@ -10,9 +11,7 @@ const pairs = WEEKS.map((week, i) => [week, STARS[i]!] as const);
 const STEP = 0.11;
 
 const plot = chart({
-  width: 800,
-  height: 330,
-  at: { x: 240, y: 150 },
+  frame: rect(240, 150, 800, 330),
   x: { kind: "band", domain: WEEKS },
   y: { ticks: 4 },
   data: pairs,
@@ -24,11 +23,12 @@ const plot = chart({
 
 export const dataShot = ({ at }: Span) => {
   const grow = at + 0.5;
-  const bars = plot.bars(Object.fromEntries(pairs), { at: grow, stagger: STEP, color: C.hairline });
+  const bars = plot.bars({ at: grow, over: 0.7 + (pairs.length - 1) * STEP }, pairs, {
+    stagger: STEP,
+    color: C.hairline,
+  });
 
-  const trend = plot.line(pairs, {
-    at: bars.span.end,
-    over: 0.8,
+  const trend = plot.line({ at: bars.span.end, over: 0.8 }, pairs, {
     curve: "monotone",
     dots: true,
     color: C.accent,
