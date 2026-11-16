@@ -33,17 +33,87 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 - `<Dom states>` takes one snapshot, drawn as is, or steps: snapshots, `[snapshot, { over, ease }]` and `{ wait }`, as `card.run` gives them or written by hand. `size(states)` is the picture's size. `ease` is for moves without one (default `ease.inOut`), `text` animates each line of a single snapshot, and `x`, `y` and `animation` place and move the whole drawing.
 - Elements pair across states by `data-key`, else part, else tag in sibling order, preferring siblings whose text matches, so a `<div>` inserted before another doesn't take its place. Classes don't count, so a class change morphs. `pair` overrides it. Paired boxes reshape and recolor, text and icons slide, and the rest fade.
 - Changed text animates by what changed. Text that grows from or shrinks to the other types in or deletes one character at a time, with a caret, and a field's placeholder leaves at the first keystroke. Text that differs only in one number counts to it. Anything else crossfades.
+- `loop(steps, { over, ease, wait }?)` ends a flow where it began: it adds a move back into the first snapshot (default 0.6s, then an optional wait), so `duration()` and `<Dom>` include the way back and the picture loops without a jump. The return pairs like any move, so typed text deletes back.
 - `snapshots(file, options, run)` records what each card was opened with, every data instruction, and every snapshot. Later builds run `run` again against the recording, so timing changes never need Chromium; anything else new (markup, a fill, a step) reads the pages again. Put what the recording can't see in `inputs`: an `act` function's body, the app behind `open()`, a theme a CSS function reads. A new package version or `SVJEEZ_DOM_REFRESH=1` reads again too.
 - A page's own web fonts come along: every `@font-face` file its text loaded is fetched, a WOFF or WOFF2 is unwrapped into its TTF, and `<Dom>` embeds only the characters it draws, unless `fonts` covers that family. `snapshots()` stores each file once, brotli-compressed. A face added from script, or from a stylesheet the page can't read, draws in a fallback.
 - Live apps: `dom.open(url, { root, ready, width, height })` waits for `ready` before anything runs. A read waits for the DOM to go quiet, so results that arrive from script are in it. `z-index` and fixed elements paint in stacking order, `rotate`, `scale` and `transform` are drawn as matrices (a changed one crossfades), and inset shadows are drawn.
 - A blurred `box-shadow`, outer or inset, is drawn as nine gradient-filled pieces that follow the blur's falloff, not through a filter, so it stays smooth and cheap however far the picture is zoomed.
 - `linear-gradient` and `radial-gradient` layers (repeating ones too) are drawn as SVG gradients that ride along with their box. `::before` and `::after` are read where Chromium laid them out, through the DevTools protocol, and drawn as boxes named `::before` and `::after` with their text. A see-through fill under `backdrop-filter: blur()` is drawn more solid instead of blurred.
-- Text that leaves one element and arrives in another, saying the same thing in nearly the same place (an app swapping its editor for the rendered text), stays put instead of fading.
+- Text that leaves one element and arrives in another, saying the same thing in nearly the same place (an app swapping its editor for the rendered text), stays put instead of fading. Text a field loses whole (a todo input emptied by Enter) slides to the same text in a new element, wherever it is, and the placeholder fades back; with nowhere to go it deletes character by character.
 - A `::before` or `::after` draws the text Chromium laid out for it, so counters and `attr()` come along, and a color input draws its value in its swatch.
 - `outline` is drawn (Chromium's focus ring too: two px just inside the border box, following the corners), and so are range inputs, their track and thumb read from the browser's shadow parts. An element faded in only one scheme (`opacity` under `prefers-color-scheme`) follows the viewer's.
 - A `<canvas>` is drawn as a still of what it shows at each snapshot (a WebGL one, or a tainted one, through a screenshot of it alone), so an animated canvas holds one frame per snap. Open shadow roots are read like the rest of the page, and `text-overflow: ellipsis` draws its "…". `mix-blend-mode` and `isolation: isolate` are drawn, and an `<img>` with a border, background or shadow is a box around its picture.
 - Pictures are cut down to what the drawing needs: a raster is scaled to at most twice its drawn size and re-encoded as WebP (animated ones and small files stay as they are), and an SVG with only a `viewBox` is given a width and height so it draws at any scale. A page's variable or ranged font stays WOFF2 instead of being unwrapped to a TTF.
 - Not drawn yet: conic gradients, `background-size` tiles, clips between an element with a `z-index` and its stacking context, the fade of a gradient `mask-image` (it only clips to the box), and `<text>` in an inline SVG outside a `<mask>`.
+
+## React demos
+
+Film your app's real components, not markup copied out of them. A `.demo.tsx` file next to a component says what happens to it, and `recordings()` renders it through the app's own Vite config, so its CSS, Tailwind, fonts and imports are the app's:
+
+```tsx
+// SignIn.demo.tsx
+import { demo, fill, hover, snap, wait } from "@svjeez/dom/react";
+import { SignIn } from "./SignIn.tsx";
+
+export const signIn = demo(SignIn, { width: 360 }, ({ props }) => [
+  snap("idle"),
+  fill("email", "sai@example.com"), snap({ over: 0.9 }),   // the component's own state
+  hover("submit"), snap({ over: 0.15 }),
+  props({ error: "Unable to sign in." }), snap({ over: 0.25 }), // re-render from outside; typed text stays
+  wait(1.8),
+]);
+```
+
+```tsx
+// scene.tsx
+import { recordings } from "@svjeez/dom/vite";
+
+const demos = await recordings<typeof import("./SignIn.demo.tsx")>(here("SignIn.demo.tsx"), {
+  cache: here("snapshots.json"),
+});
+
+<Dom states={demos.signIn} />;
+```
+
+- `demo(Component, { props, width, pad, parts }, script)` starts the component with `props` (required when it has required props). `script({ props })` returns any flow `dom.run` takes; its `props(patch)` re-renders the component with the patch merged over its props, as a parent would, and is typed to the component: a wrong name or type doesn't compile. Patches cross into the page, so their values must be JSON. Import the flow's other words from `@svjeez/dom/react` in a demo file: it runs in the browser too.
+- `recordings(file, options)` starts a Vite dev server for the file's folder (its `vite.config`, merged with `options.vite`), records every demo the file exports, and resolves to their steps by export name. It needs `vite`, and `react` and `react-dom` or `svelte`.
+- The recording is kept in `cache`. It is made again when a demo's flow changes, or any file the demo file imports, however deep.
+- `examples/demos` films a shadcn sign-in form and a pull request card this way.
+
+### Svelte
+
+Svelte 5 components work the same way, from `@svjeez/dom/svelte`. A `.svelte` file can't export demos, so they go in a `.demo.ts` file:
+
+```ts
+// Counter.demo.ts
+import { click, demo, snap } from "@svjeez/dom/svelte";
+import Counter from "./Counter.svelte";
+
+export const counter = demo(Counter, { width: 200 }, ({ props }) => [
+  snap(),
+  click("add"), snap({ over: 0.2 }),
+  props({ label: "Total" }), snap({ over: 0.2 }),
+]);
+```
+
+- The component is mounted with reactive props, so `props(patch)` updates them in place and its own state (`$state`, focus, typed text) stays.
+- `props` is typed by `ComponentProps<typeof Counter>`. Plain `tsc` can't read a `.svelte` file's props, so it types them only through svelte-check or the Svelte language server.
+- The app's `vite.config` needs `@sveltejs/vite-plugin-svelte`, as it does to build the app. `recordings()` tells React and Svelte demos apart by which entry the demo file imports.
+- `examples/svelte-demos` films a Svelte settings card.
+
+## Camera
+
+`shots(steps, plan, { frame })` turns a recording into svjeez's `<Camera>` props, so the picture follows what's changing like a screen recording that zooms in. `plan` names a part (or `"all"`) per snapshot name; the camera moves to it as the timeline moves into that snapshot, and snapshots not in `plan` keep the shot before them.
+
+```tsx
+const frame = rect(0, 0, 400, 300);
+
+<Camera {...shots(steps, { idle: "all", email: "email-field", failed: "all" }, { frame, zoom: 1.6 })}>
+  <Dom states={steps} />
+</Camera>
+```
+
+`margin` (default 16) is room kept around a part, `zoom` (default 2) the most a part is blown up, and `over` (default 0.5) how long each move takes; a shot that comes sooner waits its turn. A part near an edge is framed without showing past the snapshot. Clip the camera to its frame. `examples/zoom` films the sign-in demo this way.
 
 ## Stories
 

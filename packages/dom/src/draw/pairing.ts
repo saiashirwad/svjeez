@@ -1,4 +1,5 @@
 import type { Box, Item, TextRun } from "../tree.ts";
+import { FIELDS } from "./text.tsx";
 
 /** Overrides how boxes pair: boxes that get the same string pair, whatever their tag. */
 export type PairBy = (box: Box) => string | undefined;
@@ -131,11 +132,23 @@ export interface Moves {
 export const movesOf = (a: Box, b: Box, pairBy?: PairBy): Moves => {
   const olds: TextRun[] = [];
   const news: TextRun[] = [];
+  // Text a field lost whole (it shows its placeholder now): it may have gone anywhere, so it can land far away.
+  const emptied = new Set<TextRun>();
 
   const visit = (x: Box, y: Box) => {
     for (const [old, it] of align(x.children, y.children, pairBy)) {
       if (old && it) {
         if (old.kind === "box" && it.kind === "box" && sameTransform(old, it)) visit(old, it);
+        else if (
+          old.kind === "text" &&
+          it.kind === "text" &&
+          FIELDS.has(x.tag) &&
+          !old.placeholder &&
+          it.placeholder
+        ) {
+          olds.push(old);
+          emptied.add(old);
+        }
       } else if (old) runsOf(old, olds);
       else if (it) runsOf(it, news);
     }
@@ -149,10 +162,17 @@ export const movesOf = (a: Box, b: Box, pairBy?: PairBy): Moves => {
   for (const n of news) {
     let best: TextRun | undefined;
     let far = n.size * 0.75;
+    let lost: TextRun | undefined;
 
     for (const o of olds) {
-      if (gone.has(o) || o.placeholder || n.placeholder || o.text !== n.text || !sameFace(o, n))
+      if (gone.has(o) || o.placeholder || n.placeholder || o.text !== n.text) continue;
+
+      if (emptied.has(o)) {
+        lost ??= o;
         continue;
+      }
+
+      if (!sameFace(o, n)) continue;
 
       const d = Math.hypot(o.x - n.x, o.y - n.y);
 
@@ -161,6 +181,8 @@ export const movesOf = (a: Box, b: Box, pairBy?: PairBy): Moves => {
         far = d;
       }
     }
+
+    best ??= lost;
 
     if (best) {
       moved.set(n, best);

@@ -30,6 +30,11 @@ export interface BrowserOptions {
    * The PNGs come from `Io.shots`; `snapshots()` writes them out for the fidelity check.
    */
   readonly screenshots?: boolean;
+  /**
+   * Where a relative `open()` URL points, such as a dev server on a port picked at random. It isn't part of what
+   * `snapshots()` records, so the recording still matches when the port changes.
+   */
+  readonly base?: string;
 }
 
 export interface PageOptions {

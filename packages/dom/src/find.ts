@@ -1,4 +1,4 @@
-import type { Step } from "./timeline.ts";
+import { snapshotOf, type Step } from "./timeline.ts";
 import type { Box, Item, Rect, Snapshot } from "./tree.ts";
 
 /** Every element with this part, in document order. Their `box` says where each landed. */
@@ -23,6 +23,4 @@ export const rect = (snapshot: Snapshot, part: string, index = 0): Rect | undefi
 
 /** The first snapshot that `snap(name)` read, among the steps `card.run` gave. */
 export const find = (steps: readonly Step[], name: string): Snapshot | undefined =>
-  steps
-    .flatMap((step) => ("wait" in step ? [] : "root" in step ? [step] : [step[0]]))
-    .find((state) => state.name === name);
+  steps.map(snapshotOf).find((state) => state?.name === name);

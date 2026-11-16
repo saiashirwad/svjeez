@@ -8,6 +8,7 @@ import {
   type Pages,
   type BrowserOptions,
 } from "./browser.ts";
+import { PAD } from "./demo.ts";
 import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, isWholeFile, sources, unwrap } from "./fonts.ts";
 import { embed, preload, shrink, stills, svgUri, unpack, type Fetched, type Size } from "./images.ts";
@@ -492,7 +493,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   const io = async (
     page: Page,
     selector: string,
-    { parts = {}, pad = 16 }: PageOptions,
+    { parts = {}, pad = PAD }: PageOptions,
     render: (html: string) => Promise<void>,
   ): Promise<Io> => {
     let cdp: CDPSession | undefined;
@@ -591,6 +592,18 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
       if ("html" in action) return render(action.html);
 
+      if ("props" in action)
+        return page.evaluate(async (json) => {
+          const host = window.__svjeez;
+
+          if (!host?.props)
+            throw new Error(
+              "props() re-renders a component, but this page has no window.__svjeez.props. Record it with @svjeez/dom/vite.",
+            );
+
+          await host.props(JSON.parse(json));
+        }, JSON.stringify(action.props));
+
       throw new Error(`run() doesn't know the instruction ${JSON.stringify(action)}.`);
     };
 
@@ -642,7 +655,9 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       });
 
       // A page whose load never ends (a stream, a slow tracker) is read as it stands after a few seconds.
-      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.goto(options.base ? new URL(url, options.base).href : url, {
+        waitUntil: "domcontentloaded",
+      });
       await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => undefined);
 
       if (faces) await page.addStyleTag({ content: faces });
