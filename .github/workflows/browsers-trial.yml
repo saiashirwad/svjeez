@@ -16,6 +16,8 @@ jobs:
       # The locked playwright-core, since bunx fetches the latest.
       - run: bun run playwright-core install --with-deps chromium-headless-shell firefox webkit
         working-directory: packages/svjeez
+      - run: bun test tests/diag.test.ts
+        working-directory: examples
       - run: bun test tests/browsers.test.ts
         working-directory: examples
         env:

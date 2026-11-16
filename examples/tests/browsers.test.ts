@@ -22,6 +22,8 @@ const BLUR = 0.1;
 
 /** Room on a box beyond a pixel, as a share of its size: text is shaped by each engine's own rasterizer and fallback font. */
 const TEXT = 0.2;
+/** A rotated shape's bounds can be 41% larger around its box than around the shape. */
+const ROTATED = 0.45;
 const CURVES = 0.02;
 
 /** How many scene times one file is checked at, and how many pages one browser works on at once. */
@@ -118,12 +120,14 @@ const probe = ([seekSrc, times, indices]: [string, number[], number[] | undefine
       // Elements in a mask aren't laid out on their own, and Firefox gives its percentages no size.
       const unlaidOut = element.closest("mask") !== null;
 
+      let empty = true;
+
       try {
         if (unlaidOut || element.matches("g, svg, use")) throw new Error("no box");
         const box = (element as SVGGraphicsElement).getBBox();
 
         // An empty box has no position worth comparing: Chromium keeps where it is, Firefox and WebKit say 0 0.
-        const empty = round(box.width) === 0 || round(box.height) === 0;
+        empty = round(box.width) === 0 || round(box.height) === 0;
 
         snapshot[key + " x"] = empty ? 0 : round(box.x);
         snapshot[key + " y"] = empty ? 0 : round(box.y);
@@ -135,7 +139,8 @@ const probe = ([seekSrc, times, indices]: [string, number[], number[] | undefine
 
       // Where the element ends up on the page, with the transform attribute, CSS transforms and every ancestor's.
       // A group's bounds depend on how each engine counts what it holds, so the shapes inside it are measured instead.
-      if (!unlaidOut && !element.matches("g, svg, use")) {
+      // A line has no area, and engines disagree on the bounds of one that is turned.
+      if (!unlaidOut && !element.matches("g, svg, use, line")) {
         const bounds = element.getBoundingClientRect();
         const nothing = round(bounds.width) === 0 || round(bounds.height) === 0;
 
@@ -227,8 +232,8 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
         const size = Math.max(...["width", "height", "bw", "bh"].map((side) => Number(want[label + " " + side]) || 0));
         // Engines measure a rotated shape's bounds differently, Firefox around the shape and Chromium around its box, so
         // the size of those bounds gets room. Where the bounds sit doesn't.
-        const loose = prop === "bw" || prop === "bh" || reference.texty.includes(label);
-        const slack = box ? size * (loose ? TEXT : CURVES) : 0;
+        const loose = reference.texty.includes(label);
+        const slack = box ? size * (prop === "bw" || prop === "bh" ? ROTATED : loose ? TEXT : CURVES) : 0;
 
         if (prop === "display" || skip.includes(prop) || close(prop, want[key]!, have[key] ?? null, slack)) continue;
         found.push({ when: `${direction} at ${time}s`, key, expected: want[key]!, got: have[key] ?? null });
