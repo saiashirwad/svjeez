@@ -9,7 +9,7 @@ import { rect } from "svjeez/geometry";
 // frames the email field while it's typed, then the password and the button, pulls back for the error, and stays back
 // while the form resets.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
-const geist = await google.family("Geist", { weight: 400 }, { weight: 500 }, { weight: 600 });
+const geist = await google.family("Geist", [{ weight: 400 }, { weight: 500 }, { weight: 600 }]);
 
 const demos = await recordings<typeof import("../demos/cards.demo.tsx")>(
   here("../demos/cards.demo.tsx"),

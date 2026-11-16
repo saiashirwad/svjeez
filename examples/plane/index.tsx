@@ -35,7 +35,7 @@ const view = (
   });
 
 const linear = view({ x: 200, y: 320 }, 40, [-9, 9], [-9, 9], 1)
-  .apply(M, { at: 2.4, over: 2.4 })
+  .apply({ at: 2.4, over: 2.4 }, M)
   .reset({ at: 6.4, over: 1.6 });
 
 /** Right: w = e^z, which rolls vertical lines into circles and horizontal lines into rays. */
@@ -44,10 +44,10 @@ const exp = (x: number, y: number) =>
 
 const at = { x: 600, y: 300 };
 
-const complex = view(at, 88, [-1.25, 0.75], [-1.5, 1.5], 0.25).applyFunction(exp, {
-  at: 9,
-  over: 3,
-});
+const complex = view(at, 88, [-1.25, 0.75], [-1.5, 1.5], 0.25).applyFunction(
+  { at: 9, over: 3 },
+  exp,
+);
 
 const backdrop = view(at, 88, [-1.25, 3.5], [-2.75, 2.75], 0.25);
 

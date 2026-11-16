@@ -41,14 +41,11 @@ const areaGraph = panel(1, [0, 3], [0, 3.2]);
 const N = [2, 4, 8, 16, 32];
 const SPLITS = [4.6, 5.6, 6.6, 7.6];
 
-const sums = areaGraph.riemann(g, {
-  from: 0.4,
-  to: 2.8,
-  n: N,
-  at: SPLITS,
-  over: 0.7,
-  color: theme.base0A,
-});
+const sums = areaGraph.riemann(
+  SPLITS.map((at) => ({ at, over: 0.7 })),
+  g,
+  { from: 0.4, to: 2.8, n: N, color: theme.base0A },
+);
 
 const exact = areaGraph.area(g, 0.4, 2.8, { color: theme.base0A, opacity: 0.45 });
 const AREA_AT = 8.8;
@@ -74,13 +71,15 @@ const cosine = waveGraph.plot(Math.cos, {
   animation: draw({ at: 6.6, over: 1.2 }),
 });
 
-const poly = waveGraph.morph(DEGREES.map(taylor), {
-  at: BENDS,
-  over: 0.8,
-  color: theme.base0E,
-  strokeWidth: 2.5,
-  animation: draw({ at: 7.6, over: 0.6 }),
-});
+const poly = waveGraph.morph(
+  BENDS.map((at) => ({ at, over: 0.8 })),
+  DEGREES.map(taylor),
+  {
+    color: theme.base0E,
+    strokeWidth: 2.5,
+    animation: draw({ at: 7.6, over: 0.6 }),
+  },
+);
 
 const label = (i: number) => ({
   fontFamily: mono,
@@ -179,13 +178,15 @@ export default function build(): string {
         fill={theme.base03}
         animation={enter({ at: 1, over: 0.8 })}
       >
-        {["graph.secant(f, x, h)", "graph.riemann(g, { n })", "graph.morph(taylors)"].map(
-          (call, i) => (
-            <text x={left(i) + PANEL.width / 2} y={H - 40} textAnchor="middle">
-              {call}
-            </text>
-          ),
-        )}
+        {[
+          "graph.secant(f, x, h)",
+          "graph.riemann(spans, g, { n })",
+          "graph.morph(spans, taylors)",
+        ].map((call, i) => (
+          <text x={left(i) + PANEL.width / 2} y={H - 40} textAnchor="middle">
+            {call}
+          </text>
+        ))}
       </g>
     </>,
   );

@@ -21,10 +21,10 @@ const at = (t: number) => new Date(DAY + t * 3_600_000);
 /** The globe turns with the sun, so night stays on the right while the Earth turns under it. */
 const middle = sun(at(0))[0] + 72;
 
-const earth = globe(countries, {
+const earth = globe({ at: 0, over: D }, countries, {
   frame: rect(656 - R, H / 2 - R, 2 * R, 2 * R),
   tilt: 22,
-  spin: { from: middle, to: middle - 360, over: D },
+  spin: { from: middle, to: middle - 360 },
   simplify: 0.8,
 });
 

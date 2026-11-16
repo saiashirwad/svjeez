@@ -132,7 +132,8 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 | `flow(points, { loop })` | `flow(points, { period })` |
 | `fieldFlow(lines, options)` | `flow(lines, options).node` |
 | `sampledPath(fn, options)` | `sampled.path(fn, options)` |
-| `sampled.path`, `globe` with `duration` | `over` |
+| `sampled.path` with `duration` | `over` |
+| `globe(data, { spin: { over } })`, `Globe.duration` | `globe(span, data, { spin })`, `Globe.span` (see API cleanup) |
 | `.end` of `derive`, `epicycles`, `traffic`, `walk`, constructions | `.span.end` |
 | `renderVideo` (`@svjeez/video`) | `video` |
 | voxel block `at`, `from`, `to` | gone with voxels (step 17) |
@@ -190,11 +191,19 @@ Smaller breaking changes, in the order a typecheck will find them.
 - toBars(map, values, { at, over, frame })                + toBars({ at, over }, map, values, { frame })
 - traffic(lines, { during: span, rate })                  + traffic(span, lines, { rate })
 - trueSize(map, region, to, { at, over, duration })       + trueSize({ at, over }, map, region, to)
+- plane.apply(matrix, { at, over, ease })                 + plane.apply({ at, over }, matrix, { ease })
+- plane.applyFunction(f, { at, over })                    + plane.applyFunction({ at, over }, f)
+- plane.reset({ at, over, ease })                         + plane.reset({ at, over }, { ease })
+- plane.riemann(f, { n, at: [5, 6], over: 0.7 })          + plane.riemann([{ at: 5, over: 0.7 }, { at: 6, over: 0.7 }], f, { n })
+- plane.morph(fs, { at: [3, 4.5], over: 0.8 })            + plane.morph([{ at: 3, over: 0.8 }, { at: 4.5, over: 0.8 }], fs)
+- globe(data, { spin: { from, to, over: 24 } })           + globe({ at: 0, over: 24 }, data, { spin: { from, to } })
+- globe(data, { spin: fn, over: 24 })                     + globe({ at: 0, over: 24 }, data, { spin: fn })
+- choropleth(map, values, { scale, times: [0.5, 3], over: 1 }) + choropleth([{ at: 0.5, over: 1 }, { at: 3, over: 1 }], map, values, { scale })
 - choropleth(map, values, { scale, at: [0, 3] })          + choropleth(map, values, { scale, times: [0, 3] })
 - { lane: "a", from: 1, to: 4 }                           + { lane: "a", at: 1, over: 3 }   // LaneSpan is LaneBar
 ```
 
-  Details. A bar series now ends with its span: each bar grows for `over - (bars - 1) * stagger`, `stagger` defaults to 0.08 or less when the span is short, `ease` is an option, and `bars` also takes `[key, value]` pairs. `derive`'s `every` is gone: the changes are spaced evenly across the span and `over` became `change`. `counter(fn)` reads `fn` from 0 at the span's start, not at scene time 0. `cartogram` and `toBars` with `stagger` start the shapes that far apart and land the last with the span. `trueSize` takes a core `Ease` and defaults to `ease.inOut`, a slightly different curve from the old cubic. `Timing` is gone from `@svjeez/math` and `@svjeez/charts`.
+  Details. A bar series now ends with its span: each bar grows for `over - (bars - 1) * stagger`, `stagger` defaults to 0.08 or less when the span is short, `ease` is an option, and `bars` also takes `[key, value]` pairs. `derive`'s `every` is gone: the changes are spaced evenly across the span and `over` became `change`. `counter(fn)` reads `fn` from 0 at the span's start, not at scene time 0. `plane.riemann` and `plane.morph` take one span per change after the first stage, and `choropleth` one span per value (the first with `over: 0` cuts to its colors, as `times: 0` did; a span with a length fades in from `scale.empty`). Spans must not overlap; `choropleth` no longer cuts a change short to fit. `globe` takes the span for all its motion: `spin` runs `from` to `to` across it, `Spin.at` and `Spin.over` are gone (hold or ease with a function `spin`), `facing(t)`, `locate(at, t)` and function arguments take seconds since `span.at`, and `Globe.duration` is `Globe.span`. `cartogram` and `toBars` with `stagger` start the shapes that far apart and land the last with the span. `trueSize` takes a core `Ease` and defaults to `ease.inOut`, a slightly different curve from the old cubic. `Timing` is gone from `@svjeez/math` and `@svjeez/charts`.
 - Names. Types that two packages shared are prefixed with their package, and a few functions were renamed to say what they do:
 
 | Package | Old | New |
@@ -211,11 +220,11 @@ Smaller breaking changes, in the order a typecheck will find them.
 | `@svjeez/geo` | `Bar`, `Bars`, `BarsOptions` | `GeoBar`, `GeoBars`, `GeoBarsOptions` |
 
 - A labelled edge is `[from, to, label?, options?]` in every diagram, with the label a string. A flowchart edge `[from, to, { label }]` is `[from, to, label]`. State transitions and sequence messages already were.
-- `google.family(family, ...faces)` takes faces as `{ weight, style }` objects, like `font.family(...faces)` takes fonts. A face takes the options of `google()`, and the first face's `fallback` is the family's. `GoogleFace` is gone.
+- `google.family(family, faces, options?)` takes faces as `{ weight, style }` objects. `options` is shared by every face and a face's own options override it; the first face's `fallback` is the family's. `GoogleFace` is gone, and a bare weight is `{ weight }`.
 
 ```ts
 - google.family("Geist", [400, { weight: 600, style: "italic" }], { ligatures: false })
-+ google.family("Geist", { weight: 400, ligatures: false }, { weight: 600, style: "italic", ligatures: false })
++ google.family("Geist", [{ weight: 400 }, { weight: 600, style: "italic" }], { ligatures: false })
 ```
 
 - `.to(values, span, ease?)` is gone: `.to` takes a length. Search `.to(` with a span as the second argument and write `.at(span.at).to(values, span.over, ease)`.

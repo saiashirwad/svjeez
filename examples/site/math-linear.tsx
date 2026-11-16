@@ -23,13 +23,10 @@ const p = plane({
   frame: rect(-282, -170, 816, 816),
   ticks: 1,
   theme,
-}).apply(
-  [
-    [2, -1],
-    [1, 1],
-  ],
-  { at: 3.6, over: 2.6 },
-);
+}).apply({ at: 3.6, over: 2.6 }, [
+  [2, -1],
+  [1, 1],
+]);
 
 const at = { x: 404, y: 128, fontSize: 21, theme, anchor: [0.5, 0.5] } as const;
 

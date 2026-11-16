@@ -161,12 +161,16 @@ export const google = Object.assign(
     return font(await bytesOf(family, weight, style), { ...rest, family, weight, style });
   },
   {
-    /** Several weights and styles grouped under one family name, as `font.family()` groups them. Each face takes the options `google()` does. */
+    /**
+     * Several weights and styles grouped under one family name, as `font.family()` groups them. `faces` says which, each with
+     * the options `google()` takes. `options` applies to every face, and a face's own options win. The first face's `fallback` is the family's.
+     */
     family: async (
       family: string,
-      ...faces: readonly [GoogleOptions, ...GoogleOptions[]]
+      faces: readonly [GoogleOptions, ...GoogleOptions[]],
+      options: GoogleOptions = {},
     ): Promise<FontFamily> => {
-      const fonts = await Promise.all(faces.map((face) => google(family, face)));
+      const fonts = await Promise.all(faces.map((face) => google(family, { ...options, ...face })));
 
       // SAFETY: `faces` is a non-empty tuple and Promise.all keeps its length.
       return font.family(...(fonts as [Font, ...Font[]]));

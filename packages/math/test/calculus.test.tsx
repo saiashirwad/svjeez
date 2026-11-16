@@ -87,9 +87,17 @@ describe("area()", () => {
 describe("riemann()", () => {
   test("every stage is one path with the same commands, and the sums converge", () => {
     const sums = (n: number) =>
-      graph().riemann(square, { from: 0, to: 2, n, rule: "left" }).sums[0]!;
+      graph().riemann([], square, { from: 0, to: 2, n, rule: "left" }).sums[0]!;
 
-    const r = graph().riemann(square, { from: 0, to: 2, n: [2, 4, 8], at: [1, 3] });
+    const r = graph().riemann(
+      [
+        { at: 1, over: 0.8 },
+        { at: 3, over: 0.8 },
+      ],
+      square,
+      { from: 0, to: 2, n: [2, 4, 8] },
+    );
+
     const values = smilValues(svgOf(r.node));
 
     expect(sums(2)).toBeCloseTo(1);
@@ -98,9 +106,9 @@ describe("riemann()", () => {
     expect(values[0]!.match(/M/g)).toHaveLength(8);
   });
 
-  test("needs one start time per later stage", () => {
-    expect(() => graph().riemann(square, { n: [4, 8, 16], at: [1] })).toThrow(
-      "riemann() has 3 stages, so it needs 2 start times in at, got 1.",
+  test("needs one span per later stage", () => {
+    expect(() => graph().riemann([{ at: 1, over: 1 }], square, { n: [4, 8, 16] })).toThrow(
+      "riemann() has 3 stages, so it needs 2 spans, one per change, got 1.",
     );
   });
 });
@@ -109,10 +117,14 @@ describe("morph()", () => {
   test("one curve bends through each function, its stroke with it", () => {
     const ax = graph();
 
-    const bend = ax.morph([() => 1, (x) => 1 + x, square], {
-      at: [1, 3],
-      color: ["#ff0000", "#00ff00", "#0000ff"],
-    });
+    const bend = ax.morph(
+      [
+        { at: 1, over: 1 },
+        { at: 3, over: 1 },
+      ],
+      [() => 1, (x) => 1 + x, square],
+      { color: ["#ff0000", "#00ff00", "#0000ff"] },
+    );
 
     const svg = svgOf(bend.node);
     const values = smilValues(svg);

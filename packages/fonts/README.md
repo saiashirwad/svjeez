@@ -20,10 +20,11 @@ import { google } from "@svjeez/fonts";
 
 const display = await google("Archivo Black");
 const mono = await google("JetBrains Mono", { fallback: ["monospace"], ligatures: false });
-const body = await google.family("ABeeZee", { weight: 400 }, { weight: 400, style: "italic" });
+const body = await google.family("ABeeZee", [{ weight: 400 }, { weight: 400, style: "italic" }]);
+const geist = await google.family("Geist", [{ weight: 400 }, { weight: 600 }], { ligatures: false });
 ```
 
-`google(family, options)` takes the options of svjeez's `font()` except `family`, `weight` and `style`, which it sets. `weight` defaults to 400 and `style` to `"normal"`. `google.family(family, ...faces)` loads several faces and groups them with `font.family()`. A face is a `{ weight, style }` object, and takes the same options as `google()`; the first face's `fallback` is the family's.
+`google(family, options)` takes the options of svjeez's `font()` except `family`, `weight` and `style`, which it sets. `weight` defaults to 400 and `style` to `"normal"`. `google.family(family, faces, options?)` loads several faces and groups them with `font.family()`. A face is a `{ weight, style }` object. `options` applies to every face, and a face's own options win. The first face's `fallback` is the family's.
 
 Google serves a static TTF at the exact weight, even for a variable font, so `measure()`, `path()` and `<Glyphs>` work on it.
 

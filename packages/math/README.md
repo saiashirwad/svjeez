@@ -160,17 +160,14 @@ g.angle(B, A, C, { label: "60^\\circ" });
 Time the text beside the figure from `g.time`, read before the elements it explains. `examples/construct/index.tsx` does so with `tex().write()`.
 ## Planes, axes and transformations
 
-`plane({ frame, xRange, yRange, ticks, theme })` is the coordinate system for axes, function plots, calculus and fields, and it can move. `frame` is a `Rect`, the plot area in scene px, `xRange` and `yRange` are `[min, max]` graph ranges, and `ticks` the grid step, a number or `{ x, y }`. `node` draws the axes with their ticks and numbers, `point(x, y)` maps graph units to scene px, and `plot(f)` draws a function. To move the plane, chain `apply(matrix, { at, over, ease })`, `applyFunction(f, { at, over, ease })` and `reset({ at, over })`, then draw from the plane those calls return. Pass `p.css` to `render`'s `css`.
+`plane({ frame, xRange, yRange, ticks, theme })` is the coordinate system for axes, function plots, calculus and fields, and it can move. `frame` is a `Rect`, the plot area in scene px, `xRange` and `yRange` are `[min, max]` graph ranges, and `ticks` the grid step, a number or `{ x, y }`. `node` draws the axes with their ticks and numbers, `point(x, y)` maps graph units to scene px, and `plot(f)` draws a function. To move the plane, chain `apply(span, matrix, { ease })`, `applyFunction(span, f, { ease })` and `reset(span, { ease })`, then draw from the plane those calls return. Pass `p.css` to `render`'s `css`.
 
 ```tsx
 // 34px a unit, with (0, 0) at (160, 240).
-const p = plane({ xRange: [-10, 10], yRange: [-10, 10], frame: rect(-180, -100, 680, 680), ticks: 1 }).apply(
-  [
-    [2, -1],
-    [1, 1],
-  ],
-  { at: 2, over: 2.5 },
-);
+const p = plane({ xRange: [-10, 10], yRange: [-10, 10], frame: rect(-180, -100, 680, 680), ticks: 1 }).apply({ at: 2, over: 2.5 }, [
+  [2, -1],
+  [1, 1],
+]);
 
 <>
   {p.background}

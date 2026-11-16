@@ -107,10 +107,15 @@ const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
 const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectancy (years)", empty: "No data" }); // key.node, key.bounds
 ```
 
-`choropleth(map, values, { scale, times, over, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per time in `times`, and the map fades from `scale.empty` into the first frame unless that time is 0. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
+`choropleth(spans, map, values, { scale, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
 
 ```tsx
-const years = choropleth(map, { "250": [78, 82], "276": [77, 81] }, { scale, times: [0.5, 3], lines: "#0b1118" });
+const years = choropleth(
+  [{ at: 0, over: 0 }, { at: 3, over: 1 }],
+  map,
+  { "250": [78, 82], "276": [77, 81] },
+  { scale, lines: "#0b1118" },
+);
 ```
 
 `cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` (each `{ region, value, x, y, r }`) or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
@@ -132,10 +137,10 @@ Particles still in flight at the end of the scene fail the scene's length check,
 
 ## Turning globes
 
-`globe(data, { frame, tilt, spin })` turns an orthographic globe whose land, borders, grid, routes and night side are real paths. Each is a `sampled.path()` from svjeez with a fixed point count. A point behind the globe is folded out past the rim rather than clipped, so a ring keeps its points as it crosses the horizon, and the fold runs around the hidden pole, or a clear parallel, so no ring wraps the wrong way. Clip every layer to `globe.sphere`.
+`globe(span, data, { frame, tilt, spin })` turns an orthographic globe whose land, borders, grid, routes and night side are real paths. Each is a `sampled.path()` from svjeez with a fixed point count. A point behind the globe is folded out past the rim rather than clipped, so a ring keeps its points as it crosses the horizon, and the fold runs around the hidden pole, or a clear parallel, so no ring wraps the wrong way. Clip every layer to `globe.sphere`.
 
 ```tsx
-const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 24 } });
+const earth = globe({ at: 0, over: 24 }, world, { frame, tilt: 22, spin: { from: 0, to: -360 } });
 
 <g clipPath={def.clipPath({}, <path d={earth.sphere} />)}>
   {earth.land().map((piece) => <path {...piece} fill="#9fcbea" />)}
@@ -144,7 +149,7 @@ const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 2
 <g {...earth.place([-0.13, 51.5])}><circle r={3} /></g>
 ```
 
-`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
+`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `spin` turns across the whole span; give it `(t) => [lon, lat]` instead to hold or ease, with `t` in seconds since the span starts (as in `facing(t)`, `locate(at, t)` and a `night` date function). `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
 
 ## Changing projection
 
@@ -156,7 +161,7 @@ const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 2
 
 | Error | Fix |
 | --- | --- |
-| `choropleth() has … values per region but … times in times. Pass one time per value.` | Give `times` one time per entry of each list. |
+| `choropleth() has … values per region but … spans. Pass one span per value.` | Give `spans` one span per entry of each list. |
 | `choropleth() needs every region to have the same number of values, got lists of …` | Pad or trim the lists to one length. |
 | `cartogram() takes one number per region, but … has a list.` | Pass one time's values. |
 | `toBars() needs positive values, got … for …` | Drop zero and negative values first. |

@@ -42,7 +42,7 @@ const width = display.measure("Wave!", 96); // px, kerning and ligatures include
 const title = <Glyphs font={display} text="Wave!" size={96} x={(400 - width) / 2} y={140} stroke="#FF5FA8" fill="none" animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />;
 ```
 
-- For Google Fonts, `npm i @svjeez/fonts` and `await google("Archivo Black", { weight: 400 })` (from `@svjeez/fonts`) returns the same `Font`, or `google.family("ABeeZee", { weight: 400 }, { weight: 400, style: "italic" })` a family. Files are cached on disk, so only the first build needs the network.
+- For Google Fonts, `npm i @svjeez/fonts` and `await google("Archivo Black", { weight: 400 })` (from `@svjeez/fonts`) returns the same `Font`, or `google.family("ABeeZee", [{ weight: 400 }, { weight: 400, style: "italic" }], { ligatures: false })` a family: the faces, then options shared by every face, which a face's own options override. Files are cached on disk, so only the first build needs the network.
 - `font()` and `font.load()` read the format from the bytes (ttf, otf, woff, woff2) and the family, weight and style from the file. Pass `{ family, weight, style, fallback }` to override, and `subset` or `ligatures` as below.
 - `font.family(...faces)` groups faces under the first one's name. `family.face(weight, style)` picks like the browser. Two faces with the same weight and style throw.
 - `fontFamily={font}` embeds each face the first time the tree uses it, once, and writes the fallback after it (`monospace` for a fixed-pitch font, else `sans-serif`).

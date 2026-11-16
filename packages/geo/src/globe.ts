@@ -2,7 +2,17 @@ import { geoContains } from "d3-geo";
 import type { Feature, FeatureCollection } from "geojson";
 import { feature, merge, mesh } from "topojson-client";
 import type { GeometryObject, MultiPolygon, Polygon } from "topojson-specification";
-import { sampled, type Motion, type PathData, type Point, type Rect, type Seconds } from "svjeez";
+import {
+  sampled,
+  span as spanOf,
+  type Motion,
+  type PathData,
+  type Point,
+  type Rect,
+  type Seconds,
+  type Span,
+  type Spanned,
+} from "svjeez";
 import type { GeoData, LonLat } from "./index.ts";
 import { sun } from "./sun.ts";
 import {
@@ -22,12 +32,10 @@ import {
   type Vec3,
 } from "./sphere.ts";
 
-/** How a globe turns: the longitude at its middle runs from `from` to `to` over the span. West is negative, so a day turns from 0 to -360. */
+/** How a globe turns: the longitude at its middle runs from `from` to `to` over the globe's span. West is negative, so a day turns from 0 to -360. */
 export interface Spin {
   readonly from: number;
   readonly to: number;
-  readonly at?: Seconds;
-  readonly over: Seconds;
 }
 
 export interface GlobeOptions {
@@ -35,10 +43,8 @@ export interface GlobeOptions {
   readonly frame: Rect;
   /** Degrees the north pole leans toward the viewer: the latitude at the globe's middle. Default 0. */
   readonly tilt?: number;
-  /** The turn, or a function from time to the `[lon, lat]` at the globe's middle, which ignores `tilt`. */
+  /** The turn, or a function from the seconds since the span's start to the `[lon, lat]` at the globe's middle, which ignores `tilt`. */
   readonly spin: Spin | ((t: Seconds) => LonLat);
-  /** Seconds every motion runs. Default the end of `spin`. A function `spin` needs it. */
-  readonly over?: Seconds;
   /** The TopoJSON object to read. Default the topology's first object. */
   readonly object?: string;
   /** Keep only the features this returns true for. */
@@ -65,12 +71,13 @@ export interface Riding {
 export interface Globe {
   readonly center: Point;
   readonly radius: number;
-  readonly duration: Seconds;
+  /** When every motion on the globe runs: the span `globe()` was given. */
+  readonly span: Spanned;
   /** The outline of the globe, for the sea, a rim, and the clip every turning path needs. */
   readonly sphere: string;
-  /** The `[lon, lat]` at the globe's middle at `t`. */
+  /** The `[lon, lat]` at the globe's middle `t` seconds after the span starts. */
   facing(t: Seconds): LonLat;
-  /** Where a place is at `t`, and how far it faces the viewer, from 1 at the middle through 0 on the horizon to -1 behind. */
+  /** Where a place is `t` seconds after the span starts, and how far it faces the viewer, from 1 at the middle through 0 on the horizon to -1 behind. */
   locate(at: LonLat, t: Seconds): { readonly point: Point; readonly z: number };
   /**
    * Every region filled, as turning paths. From TopoJSON the shared borders are gone, leaving the land. Layers come
@@ -159,8 +166,13 @@ const features = (data: GeoData, object: string | undefined): Feature[] => {
   return "features" in read ? read.features : [read];
 };
 
-/** A turning globe whose land, borders, grid, routes and night are real paths, each a `sampled.path()` with a fixed point count. */
-export function globe(data: GeoData, options: GlobeOptions): Globe {
+/**
+ * A turning globe whose land, borders, grid, routes and night are real paths, each a `sampled.path()` with a fixed point count.
+ * Every motion runs during `when`, and every time a function here takes, such as `facing(t)` and a `night` date function, is
+ * seconds since `when.at`.
+ */
+export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
+  const { at: start, over } = when;
   const { frame, tilt = 0, spin, simplify = 0.6, step = 6, tolerance = 1 } = options;
   const radius = Math.min(frame.w, frame.h) / 2;
   const center = { x: frame.x + frame.w / 2, y: frame.y + frame.h / 2 };
@@ -169,23 +181,18 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     spin instanceof Function
       ? spin
       : (t: Seconds): LonLat => {
-          const u = Math.min(1, Math.max(0, (t - (spin.at ?? 0)) / spin.over));
+          const u = Math.min(1, Math.max(0, t / over));
 
           return [spin.from + (spin.to - spin.from) * u, tilt];
         };
 
-  const duration =
-    options.over ??
-    (spin instanceof Function
-      ? (() => {
-          throw new Error("globe() with a spin function needs an over, as in { over: 24 }.");
-        })()
-      : (spin.at ?? 0) + spin.over);
+  if (!(over > 0) || !(start >= 0) || !Number.isFinite(start + over))
+    throw new Error(
+      `globe() needs a span that starts at 0 or later and lasts longer than 0, got at ${start} and over ${over}.`,
+    );
 
-  if (!(duration > 0)) throw new Error(`globe() needs a positive over, got ${duration}.`);
-
-  const times = Array.from({ length: Math.ceil(duration / SAMPLE) + 1 }, (_, i) =>
-    Math.min(duration, i * SAMPLE),
+  const times = Array.from({ length: Math.ceil(over / SAMPLE) + 1 }, (_, i) =>
+    Math.min(over, i * SAMPLE),
   );
 
   const views = new Map<Seconds, View>();
@@ -300,7 +307,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     Math.max(0, (Math.hypot(x - center.x, y - center.y) - radius - 1) / 2);
 
   const turning = (sample: (t: Seconds) => string): Turning => {
-    const animation = sampled.path(sample, { over: duration, tolerance, slack });
+    const animation = sampled.path(sample, { at: start, over, tolerance, slack });
 
     // SAFETY: sample writes every frame starting with M.
     return { d: sample(0) as PathData, animation };
@@ -449,7 +456,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
   return {
     center,
     radius,
-    duration,
+    span: spanOf(start, over),
     sphere: `M${fmt(center.x - radius)} ${fmt(center.y)}a${fmt(radius)} ${fmt(radius)} 0 1 0 ${fmt(2 * radius)} 0a${fmt(radius)} ${fmt(radius)} 0 1 0 ${fmt(-2 * radius)} 0Z`,
     facing,
     locate(at, t) {
@@ -577,7 +584,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
 
             return { x, y, opacity: Math.min(1, Math.max(0, dot(p, v.toward) / fade)) };
           },
-          { over: duration, tolerance: { translate: tolerance, opacity: 0.02 } },
+          { at: start, over, tolerance: { translate: tolerance, opacity: 0.02 } },
         ),
       };
     },

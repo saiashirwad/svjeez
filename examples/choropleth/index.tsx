@@ -45,7 +45,12 @@ const lifeNow = Object.fromEntries(
   Object.entries(LIFE_EXPECTANCY).map(([id, series]) => [id, series.at(-1)!]),
 );
 
-const years = choropleth(map, LIFE_EXPECTANCY, { scale, times: AT, over: 1, lines: "#0b1118" });
+const years = choropleth(
+  AT.map((at) => ({ at, over: 1 })),
+  map,
+  LIFE_EXPECTANCY,
+  { scale, lines: "#0b1118" },
+);
 
 const circles = cartogram({ at: CARTOGRAM, over: MORPH }, map, POPULATION, {
   coverage: 0.34,

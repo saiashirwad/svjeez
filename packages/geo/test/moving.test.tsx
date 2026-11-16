@@ -86,11 +86,12 @@ const agreement = (
 };
 
 describe("globe()", () => {
-  const spin = { from: 20, to: -340, over: 12 };
+  const spin = { from: 20, to: -340 };
+  const when = { at: 0, over: 12 };
 
   test("draws the land a viewer would see, at every facing", () => {
     for (const tilt of [22, 0, -40]) {
-      const earth = globe(world, { frame, tilt, spin, simplify: 0.3, step: 3 });
+      const earth = globe(when, world, { frame, tilt, spin, simplify: 0.3, step: 3 });
       const pieces = earth.land();
 
       expect(pieces.length).toBeGreaterThan(4);
@@ -105,7 +106,7 @@ describe("globe()", () => {
   }, 30_000);
 
   test("animates every piece of land through d, with the same commands throughout", () => {
-    const earth = globe(world, { frame, tilt: 22, spin });
+    const earth = globe(when, world, { frame, tilt: 22, spin });
 
     const svg = render(
       { width: 400, height: 400, duration: 12, title: "Globe" },
@@ -127,7 +128,7 @@ describe("globe()", () => {
 
   test("covers the night side and leaves the day side", () => {
     const date = new Date(Date.UTC(2026, 2, 20, 12));
-    const earth = globe(world, { frame, tilt: 10, spin });
+    const earth = globe(when, world, { frame, tilt: 10, spin });
     const night = earth.night(date).d;
     const [lon, lat] = sun(date);
     expect(
@@ -144,7 +145,12 @@ describe("globe()", () => {
   });
 
   test("starts a route at its first place while both ends face the viewer", () => {
-    const earth = globe(world, { frame, tilt: 22, spin: { from: -40, to: -40, over: 1 } });
+    const earth = globe({ at: 0, over: 1 }, world, {
+      frame,
+      tilt: 22,
+      spin: { from: -40, to: -40 },
+    });
+
     const london: LonLat = [-0.13, 51.5];
     const first = rings(earth.route(london, [-74, 40.7]).d)[0]![0]!;
     const { point } = earth.locate(london, 0);
@@ -153,7 +159,7 @@ describe("globe()", () => {
   });
 
   test("fades a place out behind the globe", () => {
-    const earth = globe(world, { frame, tilt: 0, spin: { from: 0, to: -180, over: 4 } });
+    const earth = globe({ at: 0, over: 4 }, world, { frame, tilt: 0, spin: { from: 0, to: -180 } });
 
     const svg = render(
       { width: 400, height: 400, duration: 4, title: "Place" },
@@ -164,9 +170,16 @@ describe("globe()", () => {
     expect(svg).toMatch(/opacity:0/);
   });
 
-  test("needs an over with a spin function", () => {
-    expect(() => globe(world, { frame, spin: (t) => [t, 0] })).toThrow(
-      "globe() with a spin function needs an over",
+  test("runs during its span, and a function spin reads time since the span starts", () => {
+    const earth = globe({ at: 2, over: 4 }, world, { frame, spin: (t) => [t * 10, 0] });
+
+    expect(earth.span).toMatchObject({ at: 2, over: 4, end: 6 });
+    expect(earth.facing(3)).toEqual([30, 0]);
+  });
+
+  test("needs a span with a length", () => {
+    expect(() => globe({ at: 0, over: 0 }, world, { frame, spin })).toThrow(
+      "globe() needs a span that starts at 0 or later and lasts longer than 0",
     );
   });
 });

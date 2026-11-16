@@ -14,13 +14,10 @@ const base = plane({
   ticks: 1,
 });
 
-const shear = base.apply(
-  [
-    [1, 1],
-    [0, 1],
-  ],
-  { at: 1, over: 2 },
-);
+const shear = base.apply({ at: 1, over: 2 }, [
+  [1, 1],
+  [0, 1],
+]);
 
 const numbers = (d: string) => (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
 
@@ -39,11 +36,11 @@ describe("plane", () => {
 
   test("the pixels per unit may differ per axis, and a vector's head turns with the pixels", () => {
     const wide = plane({ xRange: [0, 2], yRange: [0, 2], frame: rect(0, 0, 400, 100) }).apply(
+      { at: 1, over: 1 },
       [
         [1, 0],
         [0, 1],
       ],
-      { at: 1, over: 1 },
     );
 
     expect(wide.point(1, 1)).toEqual({ x: 200, y: 50 });
@@ -92,13 +89,10 @@ describe("plane", () => {
   });
 
   test("steps compose: map() follows each matrix in order, and reset() returns home", () => {
-    const rotate = shear.apply(
-      [
-        [0, -1],
-        [1, 0],
-      ],
-      { at: 3, over: 1 },
-    );
+    const rotate = shear.apply({ at: 3, over: 1 }, [
+      [0, -1],
+      [1, 0],
+    ]);
 
     expect(shear.map(0, 1)).toEqual(base.point(1, 1));
     expect(rotate.map(0, 1)).toEqual(base.point(-1, 1));
@@ -122,7 +116,7 @@ describe("plane", () => {
   });
 
   test("a function step morphs the grid through d, with every key written in the same commands", () => {
-    const square = base.applyFunction((x, y) => [x * x - y * y, 2 * x * y], { at: 1, over: 2 });
+    const square = base.applyFunction({ at: 1, over: 2 }, (x, y) => [x * x - y * y, 2 * x * y]);
     const out = svg(square.css, square.grid);
 
     const values = out
@@ -136,10 +130,10 @@ describe("plane", () => {
   });
 
   test("a vector under a function keeps its head the same triangle at every key", () => {
-    const bent = base.applyFunction((x, y) => [Math.cos(y) * (1 + x), Math.sin(y) * (1 + x)], {
-      at: 1,
-      over: 2,
-    });
+    const bent = base.applyFunction({ at: 1, over: 2 }, (x, y) => [
+      Math.cos(y) * (1 + x),
+      Math.sin(y) * (1 + x),
+    ]);
 
     const out = svg(bent.css, bent.vector([0, 2]));
 
@@ -162,13 +156,10 @@ describe("plane", () => {
 
   test("errors name the fix", () => {
     expect(() =>
-      shear.apply(
-        [
-          [1, 0],
-          [0, 1],
-        ],
-        { at: 2, over: 1 },
-      ),
+      shear.apply({ at: 2, over: 1 }, [
+        [1, 0],
+        [0, 1],
+      ]),
     ).toThrow("A plane step starts at 2s, before the previous step ends at 3s.");
     expect(() => base.vector([0, 0])).toThrow(
       "plane.vector() needs a finite arrow of nonzero length",
@@ -177,7 +168,7 @@ describe("plane", () => {
       "plane() needs a frame with a positive width and height",
     );
 
-    const broken = base.applyFunction((x) => [1 / x, 0], { at: 0, over: 1 });
+    const broken = base.applyFunction({ at: 0, over: 1 }, (x) => [1 / x, 0]);
     expect(() => broken.grid).toThrow("plane.applyFunction() sent (0, -4) to (Infinity, 0)");
   });
 });

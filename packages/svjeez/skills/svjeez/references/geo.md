@@ -37,10 +37,10 @@ Dots turn more cheaply than paths, through CSS alone. Register `lat` and `lon` w
 
 ## Turning a globe
 
-`globe(data, { frame, tilt, spin: { from, to, over } })` turns a globe whose outlines are real paths. `from` and `to` are the longitude at the middle; a day turns from `lon` to `lon - 360`. Every layer is a `sampled.path()` with a fixed point count: the hidden side folds out past the rim instead of being clipped, so clip every layer to `globe.sphere`.
+`globe(span, data, { frame, tilt, spin: { from, to } })` turns a globe whose outlines are real paths during `span`. `from` and `to` are the longitude at the middle, reached across the whole span; a day turns from `lon` to `lon - 360`. Every layer is a `sampled.path()` with a fixed point count: the hidden side folds out past the rim instead of being clipped, so clip every layer to `globe.sphere`.
 
 ```tsx
-const earth = globe(world, { frame: rect(430, 44, 452, 452), tilt: 22, spin: { from: 0, to: -360, over: 24 } });
+const earth = globe({ at: 0, over: 24 }, world, { frame: rect(430, 44, 452, 452), tilt: 22, spin: { from: 0, to: -360 } });
 const clip = def.clipPath({}, <path d={earth.sphere} />);
 
 <path d={earth.sphere} fill="#0b1a2c" />
@@ -52,10 +52,10 @@ const clip = def.clipPath({}, <path d={earth.sphere} />);
 ```
 
 - `land()`, `borders()`, `graticule(15)` and `path(geojson)` return pieces a band of longitude wide, so a piece behind the globe costs no keys. Spread each onto a `<path>`.
-- `route(from, to)`, `circle(center, degrees)`, `night(date)` and `terminator(date)` return one path each. `date` is a `Date` or a function of time.
+- `route(from, to)`, `circle(center, degrees)`, `night(date)` and `terminator(date)` return one path each. `date` is a `Date` or a function of the seconds since the span starts.
 - `place(at)` gives a `<g>` a moving `x`, `y` and `opacity`, so a marker rides the globe and fades out at the horizon. Draw its content at the origin.
 - `simplify` (default 0.6 degrees) and `tolerance` (default 1px) set the file size. One turn of 110m land in 24s with a 226px radius is about 500 KB at `simplify: 0.8`. Tilt the globe 20 degrees or more so its hidden pole holds the fold; an upright globe needs more keys.
-- `spin` also takes `(t) => [lon, lat]` with an `over`.
+- `spin` also takes `(t) => [lon, lat]`, with `t` in seconds since the span starts. `facing(t)` and `locate(at, t)` read the same clock, and `earth.span` is the span.
 
 `examples/globe` in the svjeez repository turns a day this way. The dot globe stays smaller for a long loop.
 
@@ -83,10 +83,15 @@ const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
 const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectancy (years)", empty: "No data" }); // key.node, key.bounds
 ```
 
-`choropleth(map, values, { scale, times, over, ease, lines, lineWidth })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per time in `times`, and the map fades from `scale.empty` into the first frame unless that time is 0. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
+`choropleth(spans, map, values, { scale, ease, lines, lineWidth })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
 
 ```tsx
-const years = choropleth(map, { "250": [78, 82], "276": [77, 81] }, { scale, times: [0.5, 3], lines: "#0b1118" });
+const years = choropleth(
+  [{ at: 0, over: 0 }, { at: 3, over: 1 }],
+  map,
+  { "250": [78, 82], "276": [77, 81] },
+  { scale, lines: "#0b1118" },
+);
 ```
 
 `cartogram(span, map, values, { ease, fill, coverage, gap, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` (default 0, all together) the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max, gap })` morphs the biggest `top` regions (default 12) into horizontal bars in `frame`, a `Rect`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` (each `{ region, value, x, y, r }`) or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
@@ -113,7 +118,7 @@ Particles still in flight at the end of the scene fail the scene's length check,
 | `route() from … to … crosses the edge of the map` | Rotate the projection so both ends sit on one side: `geoNaturalEarth1().rotate([-150, 0])`. |
 | `point(…) falls outside the projection` | The place is on the far side of a globe or outside the clip. Rotate the projection toward it. |
 | `project() has no region …` | Use the feature's `id` or its `properties.name`. world-atlas ids are ISO 3166 numeric codes as strings. |
-| `choropleth() has … values per region but … times in times. Pass one time per value.` | Give `times` one time per entry of each list. |
+| `choropleth() has … values per region but … spans. Pass one span per value.` | Give `spans` one span per entry of each list. |
 | `choropleth() needs every region to have the same number of values, got lists of …` | Pad or trim the lists to one length. |
 | `cartogram() takes one number per region, but … has a list.` | Pass one time's values. |
 | `toBars() needs positive values, got … for …` | Drop zero and negative values first. |
@@ -124,7 +129,7 @@ Particles still in flight at the end of the scene fail the scene's length check,
 | `traffic() needs a positive rate, got …` | Pass departures per second above 0. |
 | `traffic() needs a span with a positive length, got …s.` | Give the span an `over` above 0. |
 | `arc() needs two different places.` | The two ends must not coincide. |
-| `globe() with a spin function needs an over, as in { over: 24 }.` | Pass `over` beside a function `spin`. |
+| `globe() needs a span that starts at 0 or later and lasts longer than 0, got at … and over ….` | Give `globe` a span such as `{ at: 0, over: 24 }`. |
 | `globe() found no parallel behind the globe clear of every outline …` | Tilt the globe further, simplify less, or filter out shapes that cross every parallel. |
 | `globe().borders() needs TopoJSON, which knows which edges two regions share.` | Load TopoJSON, or draw outlines with `path()`. |
 | `reproject() puts … far outside the frame under projection ….` | Filter that region out: Mercator stretches the poles without end. |

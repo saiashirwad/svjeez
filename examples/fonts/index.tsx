@@ -8,7 +8,7 @@ const H = HEIGHT;
 const D = 8;
 
 const display = await google("Archivo Black");
-const body = await google.family("ABeeZee", { weight: 400 }, { weight: 400, style: "italic" });
+const body = await google.family("ABeeZee", [{ weight: 400 }, { weight: 400, style: "italic" }]);
 
 const TITLE = "Typography";
 const TITLE_SIZE = Math.min(120, 760 / display.measure(TITLE, 1));

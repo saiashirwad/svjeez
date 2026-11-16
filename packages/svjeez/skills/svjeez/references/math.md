@@ -145,7 +145,7 @@ import { rect } from "svjeez/geometry";
 
 // 34px a unit, with (0, 0) at (160, 240).
 const p = plane({ xRange: [-10, 10], yRange: [-10, 10], frame: rect(-180, -100, 680, 680), ticks: 1, theme })
-  .apply([[2, -1], [1, 1]], { at: 2, over: 2.5 })
+  .apply({ at: 2, over: 2.5 }, [[2, -1], [1, 1]])
   .reset({ at: 6, over: 1.5 });
 
 render({ ..., css: css`${p.css}` },
@@ -157,7 +157,7 @@ render({ ..., css: css`${p.css}` },
   </>);
 ```
 
-- Steps chain, and each returns a new plane. Draw everything from the last one. `apply(matrix, { at, over, ease })` moves the plane by a matrix written by rows, as on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy), and a third number in a row translates. Each step applies on top of the steps before it. `reset()` moves every point home. `ease` defaults to `ease.inOut`. Steps must not overlap.
+- Steps chain, and each returns a new plane. Draw everything from the last one. `apply(span, matrix, { ease })` moves the plane by a matrix written by rows, as on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy), and a third number in a row translates. Each step applies on top of the steps before it. `reset(span)` moves every point home. `ease` defaults to `ease.inOut`. Steps must not overlap.
 - Pass `p.css` to `render`'s `css`. Without it the matrix steps do not move anything.
 - `background` is the grid at the ticks as it was, and it stays put, as does `node`, the axes with their ticks and numbers. `grid` is the moving lines without the axes, and `axes` is the two axis lines.
 - `plot(f)` drawn from a plane with steps follows them and takes no `animation`. The calculus methods draw at rest, so call them on the plane before its first step.
@@ -166,7 +166,7 @@ render({ ..., css: css`${p.css}` },
 - `label(at, content)` centers TeX, a `tex()` formula or a node on a point of the plane and moves it with the point.
 - `point(x, y)` is the scene pixels of a point before any step, with the pixels per unit taken from the range and the size, so the two axes may differ, and `map(x, y)` is where it ends after every step.
 
-When every step is a matrix, the scene carries one CSS transform driven by registered properties. Lines keep their width with `vector-effect: non-scaling-stroke`, and the file stays small. `applyFunction((x, y) => [x2, y2], { at, over })` moves every point p to f(p) along a straight line. A complex map is the same thing: z ↦ z² is `(x, y) => [x * x - y * y, 2 * x * y]`. Once a plane has a function step, every outline is sampled densely enough to stay smooth and morphs through `d`, so the grid costs a few KB per step. Keep its range to the region the scene shows.
+When every step is a matrix, the scene carries one CSS transform driven by registered properties. Lines keep their width with `vector-effect: non-scaling-stroke`, and the file stays small. `applyFunction(span, (x, y) => [x2, y2])` moves every point p to f(p) along a straight line. A complex map is the same thing: z ↦ z² is `(x, y) => [x * x - y * y, 2 * x * y]`. Once a plane has a function step, every outline is sampled densely enough to stay smooth and morphs through `d`, so the grid costs a few KB per step. Keep its range to the region the scene shows.
 
 ## Errors
 

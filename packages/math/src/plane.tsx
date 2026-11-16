@@ -33,7 +33,7 @@ export type PlaneMatrix = readonly [Row, Row];
 /** A map of the plane that need not be linear, such as z ↦ z² as `(x, y) => [x * x - y * y, 2 * x * y]`. */
 export type PlaneFunction = (x: number, y: number) => Vec2;
 
-export interface StepOptions extends Span {
+export interface StepOptions {
   /** Default `ease.inOut`. */
   readonly ease?: Ease;
 }
@@ -122,11 +122,11 @@ export interface Plane extends Calculus {
   /** Scene pixels of a point after every step. */
   map(x: number, y: number): Point;
   /** Moves the plane by `matrix` during the span, on top of the steps before it. */
-  apply(matrix: PlaneMatrix, step: StepOptions): Plane;
+  apply(span: Span, matrix: PlaneMatrix, options?: StepOptions): Plane;
   /** Moves every point p to `f(p)` during the span, each along a straight line. */
-  applyFunction(f: PlaneFunction, step: StepOptions): Plane;
+  applyFunction(span: Span, f: PlaneFunction, options?: StepOptions): Plane;
   /** Moves every point back to where it started. */
-  reset(step: StepOptions): Plane;
+  reset(span: Span, options?: StepOptions): Plane;
   /** The rules the plane's elements read. Pass it to `render`'s `css`. */
   readonly css: ReturnType<typeof css>;
   /** The grid lines at the ticks as they were, staying put. */
@@ -425,22 +425,22 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         ? cssDrawing(frame, steps, matrices)
         : warpDrawing(frame, steps));
 
-  const push = (place: Place, step: StepOptions): Plane => {
+  const push = (place: Place, span: Span, options: StepOptions = {}): Plane => {
     const last = steps.at(-1);
 
-    if (!(step.over > 0) || !finite(step.at) || step.at < 0)
+    if (!(span.over > 0) || !finite(span.at) || span.at < 0)
       throw new Error(
-        `A plane step needs a non-negative start and a positive length, got at ${step.at} and over ${step.over}.`,
+        `A plane step needs a non-negative start and a positive length, got at ${span.at} and over ${span.over}.`,
       );
 
-    if (last && step.at < last.at + last.over)
+    if (last && span.at < last.at + last.over)
       throw new Error(
-        `A plane step starts at ${step.at}s, before the previous step ends at ${round(last.at + last.over)}s.`,
+        `A plane step starts at ${span.at}s, before the previous step ends at ${round(last.at + last.over)}s.`,
       );
 
     return make(frame, [
       ...steps,
-      { place, at: step.at, over: step.over, ease: step.ease ?? ease.inOut },
+      { place, at: span.at, over: span.over, ease: options.ease ?? ease.inOut },
     ]);
   };
 
@@ -535,8 +535,9 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
   return {
     point: frame.point,
     map: (x, y) => frame.point(...functionOf(current)(x, y)),
-    apply: (matrix, step) => push(then(current, { kind: "matrix", m: toMatrix(matrix) }), step),
-    applyFunction: (f, step) => {
+    apply: (span, matrix, options) =>
+      push(then(current, { kind: "matrix", m: toMatrix(matrix) }), span, options),
+    applyFunction: (span, f, options) => {
       const checked: PlaneFunction = (x, y) => {
         const out = f(x, y);
 
@@ -548,9 +549,9 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         return out;
       };
 
-      return push(then(current, { kind: "function", f: checked }), step);
+      return push(then(current, { kind: "function", f: checked }), span, options);
     },
-    reset: (step) => push(IDENTITY, step),
+    reset: (span, options) => push(IDENTITY, span, options),
     css: PLANE_CSS,
     get node() {
       return furniture(frame);

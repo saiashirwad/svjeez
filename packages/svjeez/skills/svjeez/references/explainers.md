@@ -260,16 +260,16 @@ const rider = graph.dot(f, { from: -2, to: 2, at: 1, over: 3 });         // { no
 const secant = graph.secant(f, 0.5, { from: 2, to: 0, at: 1, over: 3 }); // h shrinks to 0: it lands on the tangent
 const slope = readout((t) => `slope ≈ ${secant.slope(t).toFixed(2)}`, { at: 1, over: 3, x: 190, y: 330, fill: "white" });
 
-const sums = graph.riemann(f, { from: -2, to: 2, n: [4, 8, 16, 32], at: [5, 6, 7], over: 0.7 }); // { node, sums }
+const sums = graph.riemann([{ at: 5, over: 0.7 }, { at: 6, over: 0.7 }, { at: 7, over: 0.7 }], f, { from: -2, to: 2, n: [4, 8, 16, 32] }); // { node, sums }
 const filled = graph.area(f, -2, { from: -2, to: 2, at: 8, over: 2 });  // { node, value(t) }
-const taylor = graph.morph([() => 1, (x) => 1 - x ** 2 / 2, (x) => 1 - x ** 2 / 2 + x ** 4 / 24], { at: [3, 4.5], over: 0.8, animation: draw({ at: 1, over: 1 }) });
+const taylor = graph.morph([{ at: 3, over: 0.8 }, { at: 4.5, over: 0.8 }], [() => 1, (x) => 1 - x ** 2 / 2, (x) => 1 - x ** 2 / 2 + x ** 4 / 24], { animation: draw({ at: 1, over: 1 }) });
 ```
 
 - `dot(f, x, { r, color })` puts a dot on `f` that rides the curve as `x` moves. Put `motion` on a `<g>` to carry a label with it.
 - `tangent(f, x, options)` is a segment `length` px long (default half the plot width) that slides along the curve. `secant(f, x, h, options)` passes through `f` at `x` and `x + h` and draws a dot at each, unless `points: false`. When `h` reaches 0 it becomes the tangent. Both return `{ node, slope(t) }`, with the slope in graph units.
 - `area(f, from, to, { color, opacity, base })` shades the region between `f` and `base` (default 0), and either bound can move. `value(t)` is its signed area.
-- `riemann(f, { from, to, n, at, over, rule })` draws rectangles as one path. Each stage in `n` splits into the next, and `at` gives one start time per later stage. `rule` is `"left"`, `"mid"` (the default) or `"right"`, and `sums` holds each stage's sum.
-- `morph([f, g, …], { at, over, color })` is one curve that bends from each function into the next, so it never draws twice. Values are clamped just past the plot. Give `color` an array, one per function, and the stroke changes color with each bend.
+- `riemann(spans, f, { from, to, n, rule })` draws rectangles as one path. Each stage in `n` splits into the next, and `spans` gives the span of each split, one per later stage (none for one stage). `rule` is `"left"`, `"mid"` (the default) or `"right"`, and `sums` holds each stage's sum.
+- `morph(spans, [f, g, …], { color })` is one curve that bends from each function into the next, each bend during its span, one per later function, so it never draws twice. Values are clamped just past the plot. Give `color` an array, one per function, and the stroke changes color with each bend.
 - `parametric((t) => [x, y], [t0, t1])` and `polar((θ) => r, [θ0, θ1])` draw like `plot()`, with 400 samples by default. They return `{ node, d, points }`.
 - `readout(text, { at, over, step, ...textAttributes })` is text that changes over time. It samples `text(t)` every `step` (default 1/12 s) and shows each distinct string while it holds.
 

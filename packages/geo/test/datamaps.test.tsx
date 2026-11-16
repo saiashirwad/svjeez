@@ -80,6 +80,7 @@ describe("choropleth()", () => {
 
   test("shares one path among regions of the same color and reports keys it can't place", () => {
     const { node, unmatched, groups } = choropleth(
+      { at: 0, over: 0 },
       map,
       { France: 10, Germany: 12, Spain: 90, 999999: 5, Atlantis: 1 },
       { scale },
@@ -95,9 +96,13 @@ describe("choropleth()", () => {
 
   test("plays a list of values through the times, and groups regions that follow the same course", () => {
     const { node, groups } = choropleth(
+      [
+        { at: 0, over: 0 },
+        { at: 3, over: 1 },
+      ],
       map,
       { France: [10, 90], Germany: [10, 90], Spain: [90, 10] },
-      { scale, times: [0, 3], over: 1 },
+      { scale },
     );
 
     expect(groups).toBe(2);
@@ -106,10 +111,18 @@ describe("choropleth()", () => {
     expect(svg.match(/@keyframes/g)!.length).toBeGreaterThan(0);
   });
 
-  test("names the fix when the times don't match the values", () => {
-    expect(() => choropleth(map, { France: [1, 2, 3] }, { scale, times: [0, 1] })).toThrow(
-      "choropleth() has 3 values per region but 2 times in times. Pass one time per value.",
-    );
+  test("names the fix when the spans don't match the values", () => {
+    expect(() =>
+      choropleth(
+        [
+          { at: 0, over: 0 },
+          { at: 1, over: 1 },
+        ],
+        map,
+        { France: [1, 2, 3] },
+        { scale },
+      ),
+    ).toThrow("choropleth() has 3 values per region but 2 spans. Pass one span per value.");
   });
 });
 
