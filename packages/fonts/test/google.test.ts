@@ -127,7 +127,10 @@ describe("google", () => {
   test.skipIf(!online)(
     "a real load measures text, caches the file, and groups into a family",
     async () => {
-      const family = await google.family("ABeeZee", [400, { weight: 400, style: "italic" }]);
+      const family = await google.family("ABeeZee", [
+        { weight: 400 },
+        { weight: 400, style: "italic" },
+      ]);
 
       expect(family.face(400).measure("Hello", 20)).toBeGreaterThan(0);
       expect(readdirSync(cache).sort()).toEqual([

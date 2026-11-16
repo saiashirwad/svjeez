@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import { chart } from "@svjeez/charts";
 import { render } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 const c = chart({
-  width: 360,
-  height: 180,
-  at: { x: 40, y: 20 },
+  frame: rect(40, 20, 360, 180),
   x: { kind: "band", domain: ["Q1", "Q2", "Q3"] },
   data: [
     ["Q1", 4],
@@ -13,9 +12,10 @@ const c = chart({
   ],
 });
 
-const bars = c.bars({ Q1: 4, Q2: 7, Q3: 9 }, { at: 0.5 });
+const bars = c.bars({ at: 0.5, over: 1 }, { Q1: 4, Q2: 7, Q3: 9 });
 
 const trend = c.line(
+  { at: bars.span.end, over: 1 },
   [
     ["Q1", 4],
     ["Q3", 9],
@@ -35,6 +35,6 @@ assert.match(svg, />Q2<\/text>/);
 
 assert.equal(bars.bars.length, 3);
 
-assert.throws(() => c.bars({ Q9: 1 }), /not in the x domain/);
+assert.throws(() => c.bars({ at: 0, over: 1 }, { Q9: 1 }), /not in the x domain/);
 
 console.log(`rendered a chart into ${(svg.length / 1024).toFixed(1)} KB`);

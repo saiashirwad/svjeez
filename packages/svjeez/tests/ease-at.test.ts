@@ -59,3 +59,7 @@ test("steps cut on a step edge split into steps, and between two steps throw", (
     "A cut cuts a steps(4) transition between two of its steps. Cut it on a step edge, or use ease.out.",
   );
 });
+
+test("a single step cut anywhere inside it splits into two holds", () => {
+  expect(splitEase(ease.hold, 0.3, "test")).toEqual([ease.hold, ease.hold]);
+});

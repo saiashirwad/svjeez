@@ -5,7 +5,7 @@ import {
   following,
   handleAt,
   type Editor,
-  type Grip as GripOf,
+  type GripState,
   type SceneSize,
   type ValueOf,
 } from "@svjeez/live";
@@ -21,7 +21,7 @@ export function Grip({
 }: {
   editor: Editor;
   value: ValueOf<"number">;
-  grip: GripOf;
+  grip: GripState;
   scene: SceneSize;
 }) {
   const selected = useEditorState(editor, (s) => s.selected === value.key);

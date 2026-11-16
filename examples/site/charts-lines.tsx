@@ -1,5 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, tint } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
@@ -20,9 +21,7 @@ const builds = {
 };
 
 const c = chart({
-  width: W - 160,
-  height: H - BAR - 112,
-  at: { x: 64, y: BAR + 28 },
+  frame: rect(64, BAR + 28, W - 160, H - BAR - 112),
   x: { kind: "linear", domain: [1, 8], ticks: 7, format: (v) => `v${v}` },
   y: { domain: [0, 12], ticks: 4, format: (m) => `${m}m` },
   theme,
@@ -33,24 +32,21 @@ const c = chart({
 
 const pairs = (values: readonly number[]) => releases.map((r, i) => [r, values[i]!] as const);
 
-const linux = c.line(pairs(builds.linux), {
-  at: 0.8,
+const linux = c.line({ at: 0.8, over: 1.2 }, pairs(builds.linux), {
   curve: "monotone",
   dots: 3,
   label: "linux",
   color: tint(theme, "green"),
 });
 
-const macos = c.line(pairs(builds.macos), {
-  at: linux.span.end - 0.4,
+const macos = c.line({ at: linux.span.end - 0.4, over: 1.2 }, pairs(builds.macos), {
   curve: "linear",
   dots: 3,
   label: "macos",
   color: tint(theme, "blue"),
 });
 
-const windows = c.line(pairs(builds.windows), {
-  at: macos.span.end - 0.4,
+const windows = c.line({ at: macos.span.end - 0.4, over: 1.2 }, pairs(builds.windows), {
   curve: "step",
   label: "windows",
   color: tint(theme, "number"),

@@ -3,30 +3,23 @@ import {
   defaultDark,
   draw,
   ease,
-  matchPaths,
   motion,
-  num,
   tint,
   type Base16,
   type Color,
   type Motion,
   type Point,
+  type Rect,
   type Seconds,
+  type Span,
   type SvgNode,
 } from "svjeez";
+import { matchPaths, num } from "svjeez/geometry";
 import { marchingSquares } from "./layout/contour.ts";
 import { simplify, traceStreamlines, type VectorField } from "./layout/field.ts";
 import type { Plane } from "./plane.tsx";
 
 export type { VectorField };
-
-/** A region of the scene in px. A `Rect`, such as `plane().bounds`, fits. */
-export interface Bounds {
-  readonly x: number;
-  readonly y: number;
-  readonly w: number;
-  readonly h: number;
-}
 
 const round = (n: number): number => Math.round(n * 10) / 10;
 
@@ -40,14 +33,14 @@ const positive = (what: string, name: string, n: number): void => {
     throw new Error(`${what} needs a positive ${name}, got ${n}.`);
 };
 
-const checkBounds = (what: string, { x, y, w, h }: Bounds): void => {
+const checkFrame = (what: string, { x, y, w, h }: Rect): void => {
   if (!Number.isFinite(x + y + w + h) || !(w > 0) || !(h > 0))
-    throw new Error(`${what} needs bounds with a positive w and h, got ${w} by ${h}.`);
+    throw new Error(`${what} needs a frame with a positive w and h, got ${w} by ${h}.`);
 };
 
 export interface StreamlinesOptions {
   /** The region to fill, in scene px. `plane().bounds` fits. */
-  readonly bounds: Bounds;
+  readonly frame: Rect;
   /** Gap between neighbouring lines in px. Default 24. */
   readonly spacing?: number;
   /** Trace from exactly these points and do not fill the gaps. */
@@ -72,18 +65,18 @@ export interface Streamlines {
 /**
  * Evenly spaced streamlines of `field`, the curves that follow its arrows. `field(x, y)` takes scene px and gives
  * `[u, v]`, with y growing down the page. Only the direction matters; the length of the arrow does not.
- * Lines start at the middle of `bounds` and fill outward, so earlier lines are the ones nearest the middle.
+ * Lines start at the middle of `frame` and fill outward, so earlier lines are the ones nearest the middle.
  */
 export function streamlines(field: VectorField, options: StreamlinesOptions): Streamlines {
-  const { bounds, spacing = 24, step = 2, maxLength = 900, tolerance = 0.25 } = options;
+  const { frame, spacing = 24, step = 2, maxLength = 900, tolerance = 0.25 } = options;
 
-  checkBounds("streamlines()", bounds);
+  checkFrame("streamlines()", frame);
   positive("streamlines()", "spacing", spacing);
   positive("streamlines()", "step", step);
   positive("streamlines()", "maxLength", maxLength);
 
   const traced = traceStreamlines(field, {
-    bounds,
+    bounds: frame,
     spacing,
     step,
     maxLength,
@@ -99,10 +92,7 @@ export function streamlines(field: VectorField, options: StreamlinesOptions): St
 }
 
 export interface FieldLinesOptions {
-  readonly at: Seconds;
-  /** Seconds from the first line starting to the last one finishing. */
-  readonly over: Seconds;
-  /** Seconds one line takes to draw. Default a third of `over`. */
+  /** Seconds one line takes to draw. Default a third of the span. */
   readonly each?: Seconds;
   /** Default the theme's `comment` color. */
   readonly color?: Color;
@@ -111,12 +101,14 @@ export interface FieldLinesOptions {
   readonly theme?: Base16;
 }
 
-/** The lines as paths that draw on one after another, nearest the middle first. */
+/** The lines as paths that draw on one after another over `span`, nearest the middle first. */
 export function fieldLines(
+  span: Span,
   lines: readonly (readonly Point[])[],
-  options: FieldLinesOptions,
+  options: FieldLinesOptions = {},
 ): SvgNode {
-  const { at, over, theme = defaultDark, strokeWidth = 1.25, opacity = 0.6 } = options;
+  const { at, over } = span;
+  const { theme = defaultDark, strokeWidth = 1.25, opacity = 0.6 } = options;
   const each = options.each ?? over / 3;
 
   positive("fieldLines()", "over", over);
@@ -144,7 +136,8 @@ export function fieldLines(
 }
 
 export interface VectorFieldOptions {
-  readonly bounds: Bounds;
+  /** The region to fill, in scene px. `plane().bounds` fits. */
+  readonly frame: Rect;
   /** Gap between arrows in px. Default 28. */
   readonly spacing?: number;
   /** px of arrow per unit of field length. Default fits the longest arrow to 0.85 of the spacing. */
@@ -169,17 +162,17 @@ export interface VectorFieldResult {
 
 /** A grid of arrows for `field`, centered on its lattice points, as one path. A zero or non-finite field draws nothing. */
 export function vectorField(field: VectorField, options: VectorFieldOptions): VectorFieldResult {
-  const { bounds, spacing = 28 } = options;
+  const { frame, spacing = 28 } = options;
 
-  checkBounds("vectorField()", bounds);
+  checkFrame("vectorField()", frame);
   positive("vectorField()", "spacing", spacing);
 
-  const columns = Math.max(1, Math.floor(bounds.w / spacing));
-  const rows = Math.max(1, Math.floor(bounds.h / spacing));
+  const columns = Math.max(1, Math.floor(frame.w / spacing));
+  const rows = Math.max(1, Math.floor(frame.h / spacing));
 
   const [x0, y0] = [
-    bounds.x + (bounds.w - (columns - 1) * spacing) / 2,
-    bounds.y + (bounds.h - (rows - 1) * spacing) / 2,
+    frame.x + (frame.w - (columns - 1) * spacing) / 2,
+    frame.y + (frame.h - (rows - 1) * spacing) / 2,
   ];
 
   const samples = Array.from({ length: columns * rows }, (_, k) => {
@@ -237,7 +230,7 @@ export interface SlopeFieldResult {
 }
 
 /** Graph units to px and back, read from the plane's own mapping. */
-const frame = (plane: Plane) => {
+const scaleOf = (plane: Plane) => {
   const origin = plane.point(0, 0);
   const [ex, ey] = [plane.point(1, 0), plane.point(0, 1)];
   const [sx, sy] = [ex.x - origin.x, ey.y - origin.y];
@@ -256,7 +249,7 @@ export function slopeField(
   options: SlopeFieldOptions = {},
 ): SlopeFieldResult {
   const { bounds } = plane;
-  const { sx, sy, graph } = frame(plane);
+  const { sx, sy, graph } = scaleOf(plane);
 
   const [xa, ya] = [
     graph({ x: bounds.x, y: bounds.y + bounds.h }),
@@ -323,7 +316,7 @@ export function slopeSolution(
   options: SolutionOptions = {},
 ): SlopeSolution {
   const { bounds } = plane;
-  const { graph } = frame(plane);
+  const { graph } = scaleOf(plane);
   const [left, top] = graph({ x: bounds.x, y: bounds.y });
   const [right, bottom] = graph({ x: bounds.x + bounds.w, y: bounds.y + bounds.h });
   const [lo, hi] = [options.from ?? left, options.to ?? right];
@@ -365,14 +358,14 @@ export function slopeSolution(
 export interface Grid {
   readonly cols: number;
   readonly rows: number;
-  /** Row-major, `cols * rows` samples. Row 0 is the top of the bounds, and the outer samples sit on its edges. */
+  /** Row-major, `cols * rows` samples. Row 0 is the top of the frame, and the outer samples sit on its edges. */
   readonly values: ArrayLike<number>;
 }
 
 export interface ContourOptions {
   readonly levels: readonly number[];
   /** Scene px to sample over. Needed unless `plane` is given. */
-  readonly bounds?: Bounds;
+  readonly frame?: Rect;
   /** Sample over this plot, calling the function in graph units rather than px. */
   readonly plane?: Plane;
   /** px between samples of a function. Default 4. Finer costs time, not file size. */
@@ -399,7 +392,7 @@ const isGrid = (source: ((x: number, y: number) => number) | Grid): source is Gr
 
 interface Sampled {
   readonly grid: Grid;
-  readonly bounds: Bounds;
+  readonly frame: Rect;
 }
 
 const gridOf = (
@@ -407,11 +400,11 @@ const gridOf = (
   source: ((x: number, y: number) => number) | Grid,
   options: Omit<ContourOptions, "levels">,
 ): Sampled => {
-  const bounds = options.bounds ?? options.plane?.bounds;
+  const frame = options.frame ?? options.plane?.bounds;
 
-  if (!bounds) throw new Error(`${what} needs bounds or plane to place the samples.`);
+  if (!frame) throw new Error(`${what} needs a frame or plane to place the samples.`);
 
-  checkBounds(what, bounds);
+  checkFrame(what, frame);
 
   if (isGrid(source)) {
     if (source.cols < 2 || source.rows < 2 || source.values.length !== source.cols * source.rows)
@@ -419,22 +412,22 @@ const gridOf = (
         `${what} needs a grid of at least 2 by 2 with cols * rows values, got ${source.cols} by ${source.rows} with ${source.values.length}.`,
       );
 
-    return { grid: source, bounds };
+    return { grid: source, frame };
   }
 
   const resolution = options.resolution ?? 4;
 
   positive(what, "resolution", resolution);
 
-  const [cols, rows] = [Math.ceil(bounds.w / resolution) + 1, Math.ceil(bounds.h / resolution) + 1];
-  const graph = options.plane ? frame(options.plane).graph : undefined;
+  const [cols, rows] = [Math.ceil(frame.w / resolution) + 1, Math.ceil(frame.h / resolution) + 1];
+  const graph = options.plane ? scaleOf(options.plane).graph : undefined;
   const values = new Float64Array(cols * rows);
 
   for (let j = 0; j < rows; j++)
     for (let i = 0; i < cols; i++) {
       const p = {
-        x: bounds.x + (i / (cols - 1)) * bounds.w,
-        y: bounds.y + (j / (rows - 1)) * bounds.h,
+        x: frame.x + (i / (cols - 1)) * frame.w,
+        y: frame.y + (j / (rows - 1)) * frame.h,
       };
 
       const [x, y] = graph ? graph(p) : [p.x, p.y];
@@ -442,15 +435,15 @@ const gridOf = (
       values[j * cols + i] = source(x, y);
     }
 
-  return { grid: { cols, rows, values }, bounds };
+  return { grid: { cols, rows, values }, frame };
 };
 
-const levelOf = (grid: Grid, bounds: Bounds, level: number, tolerance: number): ContourLevel => {
+const levelOf = (grid: Grid, frame: Rect, level: number, tolerance: number): ContourLevel => {
   const lines = marchingSquares(grid.values, grid.cols, grid.rows, level).map(
     ({ points, closed }) => {
       const placed = points.map((p) => ({
-        x: bounds.x + (p.x / (grid.cols - 1)) * bounds.w,
-        y: bounds.y + (p.y / (grid.rows - 1)) * bounds.h,
+        x: frame.x + (p.x / (grid.cols - 1)) * frame.w,
+        y: frame.y + (p.y / (grid.rows - 1)) * frame.h,
       }));
 
       const ring = closed ? [...placed, placed[0]!] : placed;
@@ -469,23 +462,21 @@ const levelOf = (grid: Grid, bounds: Bounds, level: number, tolerance: number): 
 
 /**
  * Level lines of a scalar field: where `source` crosses each of `levels`. `source` is a function of `(x, y)`, in graph
- * units with `plane` and in scene px with `bounds`, or a `Grid` of samples you computed. Use it for implicit curves
- * (`x*x + y*y - 1` at level 0) and for elevation lines. A line that leaves the bounds ends there.
+ * units with `plane` and in scene px with `frame`, or a `Grid` of samples you computed. Use it for implicit curves
+ * (`x*x + y*y - 1` at level 0) and for elevation lines. A line that leaves the frame ends there.
  */
 export function contours(
   source: ((x: number, y: number) => number) | Grid,
   options: ContourOptions,
 ): ContourLevel[] {
-  const { grid, bounds } = gridOf("contours()", source, options);
+  const { grid, frame } = gridOf("contours()", source, options);
 
-  return options.levels.map((level) => levelOf(grid, bounds, level, options.tolerance ?? 0.2));
+  return options.levels.map((level) => levelOf(grid, frame, level, options.tolerance ?? 0.2));
 }
 
 export interface ContourSweepOptions extends Omit<ContourOptions, "levels"> {
   readonly from: number;
   readonly to: number;
-  readonly at: Seconds;
-  readonly over: Seconds;
   /** Levels sampled between `from` and `to`. Default 16. More follow the curves closer and cost more keys. */
   readonly frames?: number;
 }
@@ -503,27 +494,29 @@ export interface ContourSweep {
  * pair by order and one grows from a point, so draw a `contours()` level per step instead when that matters.
  */
 export function contourSweep(
+  span: Span,
   source: ((x: number, y: number) => number) | Grid,
   options: ContourSweepOptions,
 ): ContourSweep {
-  const { from, to, at, over, frames = 16 } = options;
+  const { at, over } = span;
+  const { from, to, frames = 16 } = options;
 
   if (!Number.isInteger(frames) || frames < 2)
     throw new Error(`contourSweep() needs a whole number of frames, at least 2, got ${frames}.`);
 
   positive("contourSweep()", "over", over);
 
-  const { grid, bounds } = gridOf("contourSweep()", source, options);
+  const { grid, frame } = gridOf("contourSweep()", source, options);
   const tolerance = options.tolerance ?? 0.4;
 
   const levels = Array.from({ length: frames }, (_, i) => from + ((to - from) * i) / (frames - 1));
 
   const drawn = levels.map((level) => {
-    const { d } = levelOf(grid, bounds, level, tolerance);
+    const { d } = levelOf(grid, frame, level, tolerance);
 
     if (d === "")
       throw new Error(
-        `contourSweep() found no line at level ${num(level)}. Sweep levels that all cross the bounds.`,
+        `contourSweep() found no line at level ${num(level)}. Sweep levels that all cross the frame.`,
       );
 
     return d;

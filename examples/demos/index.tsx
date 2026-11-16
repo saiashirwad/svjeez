@@ -8,7 +8,7 @@ import { render, variables } from "svjeez";
 // through the app's own Vite config (React, Tailwind 4) in Chromium and reads every state back as SVG.
 // snapshots.json keeps the recording: it is made again only when a demo or a file it imports changes.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
-const geist = await google.family("Geist", [400, 500, 600]);
+const geist = await google.family("Geist", [{ weight: 400 }, { weight: 500 }, { weight: 600 }]);
 
 const demos = await recordings<typeof import("./cards.demo.tsx")>(here("cards.demo.tsx"), {
   cache: here("snapshots.json"),

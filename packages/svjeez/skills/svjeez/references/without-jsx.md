@@ -17,7 +17,7 @@ const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
 ```
 
 - Children are one node, a string, or an array of them. An array is a fragment, so `render` takes an array as its content and a `map` result nests anywhere.
-- Components are plain functions. Call them with `children` as a prop: `Callout({ target, during, children: "Click here" })`, or `Clip({ at: 3.1, children: [window, cursor] })`.
+- Components are plain functions. Call them with `children` as a prop: `Callout({ target, show: { at: 1, over: 2 }, children: "Click here" })`, or `Clip({ at: 3.1, children: [window, cursor] })`.
 - `key` is accepted and ignored. Nothing diffs these trees.
 - `null`, `undefined` and booleans are skipped, as children and as props.
 
@@ -29,6 +29,9 @@ const svg = render({ width: 200, height: 120, duration: 4, title: "Hello" }, [
 - **Load it as an image.** An `<img src="data:image/svg+xml,...">` is its own document and needs no prefix. The scene plays, but its text cannot be selected and the page cannot style it.
 
 ```ts
+import { render } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+
 const scene = jsx("rect", { width: 10, height: 10, fill: "#3EE6D6" });
 const hello = render({ width: 200, height: 120, duration: 4, title: "Hello", prefix: "hello-" }, scene);
 const saved = render({ width: 320, height: 120, duration: 5, title: "Saved", prefix: "saved-" }, scene);

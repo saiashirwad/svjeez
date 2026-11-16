@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Code, editor, Picture, Transport } from "@svjeez/svelte";
+  import { Code, Picture, SceneEditor, Transport } from "@svjeez/svelte";
   import { onDestroy } from "svelte";
   import "../sj.css";
   import text from "./pendulum.tsx?raw";
   import first from "./pendulum.tsx?svjeez";
 
-  const scene = editor(text, { first });
+  const scene = new SceneEditor(text, { first });
 
   onDestroy(scene.destroy);
 </script>

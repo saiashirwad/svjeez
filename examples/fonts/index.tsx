@@ -8,7 +8,7 @@ const H = HEIGHT;
 const D = 8;
 
 const display = await google("Archivo Black");
-const body = await google.family("ABeeZee", [400, { weight: 400, style: "italic" }]);
+const body = await google.family("ABeeZee", [{ weight: 400 }, { weight: 400, style: "italic" }]);
 
 const TITLE = "Typography";
 const TITLE_SIZE = Math.min(120, 760 / display.measure(TITLE, 1));
@@ -74,7 +74,13 @@ export default function build(): string {
         />
         <Name name="Archivo Black" y={270} at={1.8} />
         <g animation={enter({ at: 2.2, over: 0.5 }, { opacity: 0, y: 8 }, ease.out)}>
-          <text x={(W - lineWidth) / 2} y={330} fontFamily={body} fontSize={LINE_SIZE} fill={color.ink}>
+          <text
+            x={(W - lineWidth) / 2}
+            y={330}
+            fontFamily={body}
+            fontSize={LINE_SIZE}
+            fill={color.ink}
+          >
             {LINE}
           </text>
           <text

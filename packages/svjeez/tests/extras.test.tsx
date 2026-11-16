@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import {
-  rect,
   render,
   type Motion,
   type SvgNode,
@@ -16,7 +15,6 @@ import {
   code,
   shot,
   defaultDark,
-  defaultLight,
   systemLight,
   morph,
   type Morphable,
@@ -30,6 +28,7 @@ import {
   appWindow,
   flow,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { validateSvg } from "svjeez/frames";
 import { fit } from "../src/extras/camera";
 import { match } from "../src/extras/morph";
@@ -216,11 +215,11 @@ describe("reduced motion", () => {
 
 describe("themes", () => {
   test("adaptive colors are variables that switch to the light scheme under prefers-color-scheme: light", () => {
-    const { theme, css } = adaptive({ dark: defaultDark, light: defaultLight });
+    const { theme, css } = adaptive({ dark: defaultDark, light: systemLight });
     expect(theme.base00).toBe("var(--base00)");
     const [dark, light] = css.split("@media (prefers-color-scheme:light)");
     expect(dark).toContain(`--base00:${defaultDark.base00}`);
-    expect(light).toContain(`--base00:${defaultLight.base00}`);
+    expect(light).toContain(`--base00:${systemLight.base00}`);
   });
 
   test("variables() names each value as a CSS variable, with the light values under prefers-color-scheme: light", () => {
@@ -243,7 +242,7 @@ describe("themes", () => {
   });
 
   test("adaptive() emits one declaration per base16 slot, dark first", () => {
-    const { css } = adaptive({ dark: defaultDark, light: defaultLight });
+    const { css } = adaptive({ dark: defaultDark, light: systemLight });
 
     const slots = (scheme: typeof defaultDark) =>
       Object.entries(scheme)
@@ -251,7 +250,7 @@ describe("themes", () => {
         .join(";");
 
     expect(css).toBe(
-      `svg{${slots(defaultDark)}}\n@media (prefers-color-scheme:light){svg{${slots(defaultLight)}}}`,
+      `svg{${slots(defaultDark)}}\n@media (prefers-color-scheme:light){svg{${slots(systemLight)}}}`,
     );
   });
 });

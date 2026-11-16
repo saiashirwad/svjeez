@@ -18,15 +18,14 @@ const QUALITIES = { low: "QUALITY_LOW", medium: "QUALITY_MEDIUM", high: "QUALITY
 
 export type VideoQuality = keyof typeof QUALITIES;
 
-export type VideoOptions = Omit<SceneOptions, "background"> & {
+/** `background: "transparent"` keeps alpha in WebM only. */
+export type VideoOptions = SceneOptions & {
   /** Frames per second. Default 30. */
   readonly fps?: number;
   /** How many times to play the scene's loop. Default 1. */
   readonly loops?: number;
   /** Bitrate for the frame size and rate. Default "high". */
   readonly quality?: VideoQuality;
-  /** CSS background behind the SVG. Default `Canvas`. "transparent" keeps alpha, in WebM only. */
-  readonly background?: string;
 } & (
     | { readonly format?: "mp4"; readonly codec?: VideoCodec<"mp4"> }
     | { readonly format: "webm"; readonly codec?: VideoCodec<"webm"> }

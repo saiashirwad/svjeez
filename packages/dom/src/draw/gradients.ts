@@ -1,4 +1,5 @@
-import { def, num, type Color, type Ref } from "svjeez";
+import { def, type Color, type Ref } from "svjeez";
+import { num } from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import type { Gradient, Paint, Rect } from "../tree.ts";
 

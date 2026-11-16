@@ -155,7 +155,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       <text x="308.727" y="80" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">bot ships</text>
     </g>
     <g class="a m17">
-      <text x="252" y="314" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" text-anchor="middle" fill="var(--base03)">c.area(points, { curve: "monotone" })</text>
+      <text x="252" y="314" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" text-anchor="middle" fill="var(--base03)">c.area({ at: 0.8, over: 2.4 }, points, { curve: "monotone" })</text>
     </g>
   </g>
 </svg>

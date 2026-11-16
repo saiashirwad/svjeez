@@ -1,5 +1,6 @@
 import { project } from "@svjeez/geo";
-import { draw, enter, rect, render, adaptive, systemDark, systemLight } from "svjeez";
+import { draw, enter, render, adaptive, systemDark, systemLight } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import world from "world-atlas/countries-110m.json";
 

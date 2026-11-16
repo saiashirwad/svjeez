@@ -2,18 +2,22 @@ import { google } from "@svjeez/fonts";
 import { Dom, duration, loop, shots, size } from "@svjeez/dom";
 import { recordings } from "@svjeez/dom/vite";
 import { fileURLToPath } from "node:url";
-import { Camera, def, rect, render, variables } from "svjeez";
+import { Camera, def, render, variables } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 // The sign-in demo from examples/demos, filmed like a screen recording: a camera follows whatever is changing. It
 // frames the email field while it's typed, then the password and the button, pulls back for the error, and stays back
 // while the form resets.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
-const geist = await google.family("Geist", [400, 500, 600]);
+const geist = await google.family("Geist", [{ weight: 400 }, { weight: 500 }, { weight: 600 }]);
 
-const demos = await recordings<typeof import("../demos/cards.demo.tsx")>(here("../demos/cards.demo.tsx"), {
-  cache: here("snapshots.json"),
-  fonts: [geist],
-});
+const demos = await recordings<typeof import("../demos/cards.demo.tsx")>(
+  here("../demos/cards.demo.tsx"),
+  {
+    cache: here("snapshots.json"),
+    fonts: [geist],
+  },
+);
 
 // It ends back where it started, typing deleted, so the loop has no jump.
 const signIn = loop(demos.signIn, { over: 0.8 });

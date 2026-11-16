@@ -18,21 +18,23 @@ npm i -D @svjeez/charts svjeez
 ```tsx
 import { chart } from "@svjeez/charts";
 import { render } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 const quarters = ["Q1", "Q2", "Q3", "Q4"];
 const sales = { Q1: 12, Q2: 48, Q3: 31, Q4: 87 };
 
 const c = chart({
-  width: 360,
-  height: 200,
-  at: { x: 56, y: 24 },
+  frame: rect(56, 24, 360, 200),
   x: { kind: "band", domain: quarters },
   data: Object.entries(sales),
   grid: true,
 });
 
-const bars = c.bars(sales, { at: 0.6 });
-const trend = c.line(Object.entries(sales), { at: bars.span.end, curve: "monotone", dots: true });
+const bars = c.bars({ at: 0.6, over: 1.5 }, sales);
+const trend = c.line({ at: bars.span.end, over: 1.2 }, Object.entries(sales), {
+  curve: "monotone",
+  dots: true,
+});
 
 export default () =>
   render(
@@ -47,7 +49,7 @@ export default () =>
 
 `chart(options)` owns the frame, so the scales are decided once and every series shares them. It takes:
 
-- `width`, `height` and `at`, the plot area in px and its top-left. The axes draw outside it.
+- `frame`, a `Rect` for the plot area in scene px, such as `rect(56, 24, 360, 200)` from `svjeez/geometry`. The axes draw outside it.
 - `x`, a band scale `{ kind: "band", domain: ["Q1", …], padding? }` or a linear one `{ kind: "linear", domain?, ticks?, format? }`. A linear scale without a `domain` fits `data`.
 - `y`, `{ domain?, ticks?, zero?, format? }`. The domain widens to round numbers. Fitted from `data`, it includes 0 unless `zero` is `false`.
 - `data`, every point the chart will draw, as `[x, y]` pairs. It is needed only for a domain you left out. `Object.entries(record)` gives the pairs for bars.
@@ -57,12 +59,12 @@ The chart has:
 
 - `node`, the axes, ticks, labels and grid. They are static. Wrap them in an `enter()` to fade them in.
 - `bounds`, `x(value)`, `y(value)` and `bandwidth`, to place annotations in scene px. On a band scale `x()` is the center of a band.
-- `bars(values, options)`, which grows each bar up from the baseline. Band scales only.
-- `line(points, options)` and `area(points, options)`, with points as `[x, y]` pairs.
+- `bars(span, values, options)`, which grows each bar up from the baseline over `span`. `values` is a record or `[key, value]` pairs. Band scales only.
+- `line(span, points, options)` and `area(span, points, options)`, with points as `[x, y]` pairs.
 
-Every series takes `color`, `at` and `over` in seconds. `color` defaults to the next accent of the theme: blue, orange, green, magenta, cyan, yellow, red. Each returns its `node` and `end`, the second it finishes, so the next series can start there.
+Every series plays in the `{ at, over }` span you pass first, and takes a `color` that defaults to the next accent of the theme: blue, orange, green, magenta, cyan, yellow, red. Each returns its `node` and a `span`, so the next series can start at `span.end`.
 
-- `bars` also takes `stagger` (seconds between bars, 0.08), `group: { index, count }` to put series side by side in each band, `radius` and `values` to write each number at its bar. It returns `bars`, one `{ key, value, bounds }` per bar.
+- `bars` also takes `stagger` (seconds between one bar's start and the next, 0.08, or less when the span is short), `ease` (default `ease.out`), `group: { index, count }` to put series side by side in each band, `radius` and `values` to write each number at its bar. It returns `bars`, one `{ key, value, bounds }` per bar.
 - `line` also takes `curve` (`"linear"`, `"monotone"` or `"step"`), `dots` (`true` or a radius), `strokeWidth` and `label`, the series name written past the last point. It returns `d` and `points` in scene px. The dots pop in as the stroke reaches them.
 - `area` takes the options of `line`, plus `baseline` (default 0) and `line: false` to leave the top edge unstroked. A gradient fill wipes in from the left in step with the line.
 

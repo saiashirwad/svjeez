@@ -15,7 +15,7 @@ describe("epicycles", () => {
   ] as const;
 
   test("a square closes into a trace that stays near its corners", () => {
-    const e = epicycles(square, { at: 0, over: 4, terms: 60 });
+    const e = epicycles({ at: 0, over: 4 }, square, { terms: 60 });
     const xs = [...e.d.matchAll(/[ML](-?[\d.]+) /g)].map((m) => +m[1]!);
     expect(Math.min(...xs)).toBeGreaterThan(85);
     expect(Math.max(...xs)).toBeLessThan(315);
@@ -23,7 +23,7 @@ describe("epicycles", () => {
   });
 
   test("center and size move and scale the outline", () => {
-    const e = epicycles(square, { at: 0, over: 4, center: [500, 50], size: 100 });
+    const e = epicycles({ at: 0, over: 4 }, square, { center: [500, 50], size: 100 });
     const xs = [...e.d.matchAll(/[ML](-?[\d.]+) /g)].map((m) => +m[1]!);
     expect((Math.min(...xs) + Math.max(...xs)) / 2).toBeCloseTo(500, 0);
     expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(115);
@@ -31,20 +31,20 @@ describe("epicycles", () => {
 
   test("a glyph goes in through its matrix and draws upright", () => {
     const pi = tex(String.raw`\pi`, { fontSize: 100 });
-    const e = epicycles(pi.words, { at: 0, over: 4 });
+    const e = epicycles({ at: 0, over: 4 }, pi.words);
     const ys = [...e.d.matchAll(/[ML]-?[\d.]+ (-?[\d.]+)/g)].map((m) => +m[1]!);
     expect(Math.min(...ys)).toBeGreaterThan(pi.bounds.y - 5);
     expect(Math.max(...ys)).toBeLessThan(pi.bounds.y + pi.bounds.h + 5);
   });
 
   test("a trace that draws in sync, with rings that spin", () => {
-    const out = svg(epicycles(square, { at: 1, over: 4, terms: 20 }).node);
+    const out = svg(epicycles({ at: 1, over: 4 }, square, { terms: 20 }).node);
     expect(out).toContain("rotate");
     expect(out).toContain("stroke-dasharray");
   });
 
   test("the pen rides the trace it draws", async () => {
-    const e = epicycles(square, { at: 0, over: 4, terms: 20 });
+    const e = epicycles({ at: 0, over: 4 }, square, { terms: 20 });
 
     const trace = [...e.d.matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)].map((m): [number, number] => [
       +m[1]!,
@@ -72,8 +72,8 @@ describe("epicycles", () => {
   });
 
   test("errors name the fix", () => {
-    expect(() => epicycles(square, { at: 0, over: 0 })).toThrow("epicycles() needs a finite start");
-    expect(() => epicycles("M0 0A5 5 0 0 1 10 0", { at: 0, over: 1 })).toThrow('"A" path command');
+    expect(() => epicycles({ at: 0, over: 0 }, square)).toThrow("epicycles() needs a finite start");
+    expect(() => epicycles({ at: 0, over: 1 }, "M0 0A5 5 0 0 1 10 0")).toThrow('"A" path command');
   });
 });
 
@@ -81,7 +81,7 @@ describe("derive", () => {
   const steps = [String.raw`2x + 4 = 10`, { tex: String.raw`x + 2 = 5`, note: String.raw`\div 2` }];
 
   test("every line puts its equals sign on the same x", () => {
-    const d = derive(steps, { at: 0, x: 200 });
+    const d = derive({ at: 0, over: 3.4 }, steps, { x: 200 });
 
     for (const line of d.lines) {
       const sign = line.words.find((g) => g.char === "=")!;
@@ -90,24 +90,24 @@ describe("derive", () => {
   });
 
   test("stack puts each line lower, in place keeps them level", () => {
-    const stacked = derive(steps, { at: 0, stack: true, lineHeight: 70 });
+    const stacked = derive({ at: 0, over: 3.4 }, steps, { stack: true, lineHeight: 70 });
     expect(stacked.lines[1]!.bounds.y - stacked.lines[0]!.bounds.y).toBeCloseTo(70, 0);
-    const level = derive(steps, { at: 0 });
+    const level = derive({ at: 0, over: 3.4 }, steps);
     expect(level.lines[1]!.bounds.y).toBeCloseTo(level.lines[0]!.bounds.y, 0);
     expect(level.span.end).toBeCloseTo(2.5 + 0.9, 5);
   });
 
   test("in place, one morphing line carries the notes and renders", () => {
-    const out = svg(derive(steps, { at: 0, every: 3 }).node);
+    const out = svg(derive({ at: 0, over: 3.9 }, steps).node);
     expect(out).toContain("<path");
   });
 
   test("aligns on a named part", () => {
-    const d = derive([String.raw`a \cssId{k}{+} b = c`, String.raw`aaaa \cssId{k}{+} b = c`], {
-      at: 0,
-      align: "k",
-      x: 100,
-    });
+    const d = derive(
+      { at: 0, over: 3.4 },
+      [String.raw`a \cssId{k}{+} b = c`, String.raw`aaaa \cssId{k}{+} b = c`],
+      { align: "k", x: 100 },
+    );
 
     for (const line of d.lines) {
       const part = line.get("k");
@@ -116,15 +116,25 @@ describe("derive", () => {
   });
 
   test("errors", () => {
-    expect(() => derive(["x + 1"], { at: 0 })).toThrow('found no "="');
-    expect(() => derive([], { at: 0 })).toThrow("derive() needs a step");
+    expect(() => derive({ at: 0, over: 3 }, ["x + 1"])).toThrow('found no "="');
+    expect(() => derive({ at: 0, over: 3 }, [])).toThrow("derive() needs a step");
   });
 });
 
 describe("counter", () => {
   test("one glyph per place per distinct digit, however often the number changes", () => {
-    const counting = counter((t) => Math.floor(t * 10) % 10, { duration: 10, step: 0.1 });
+    const counting = counter({ at: 0, over: 10 }, (t) => Math.floor(t * 10) % 10, { step: 0.1 });
     expect(svg(counting.node).match(/<path /g)).toHaveLength(10);
+  });
+
+  test("a function reads the time since the span starts, and its changes land from `at`", () => {
+    const r = counter({ at: 2, over: 1 }, (t) => Math.round(t * 10), { step: 0.5 });
+    const out = svg(r.node);
+    expect(out.match(/<path /g)).toHaveLength(3);
+    expect(out).toContain("25%");
+    expect(() => counter({ at: 0, over: 0 }, () => 1)).toThrow(
+      "counter() of a function needs a positive over",
+    );
   });
 
   test("digits fix the places", () => {

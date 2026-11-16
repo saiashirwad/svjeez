@@ -1,19 +1,5 @@
-import {
-  createEditor,
-  type Editor,
-  type Effects,
-  type First,
-  type Input,
-  type State,
-} from "@svjeez/live";
+import { createEditor, type Editor, type EditorOptions, type Input, type State } from "@svjeez/live";
 import { createSubscriber } from "svelte/reactivity";
-
-export interface Options {
-  /** Shown until the first compile finishes: a `?svjeez` import, with a `duration` if the page knows it. */
-  readonly first?: First;
-  /** Swaps how the editor compiles and shows pictures, such as a test running without a worker. */
-  readonly effects?: Partial<Effects>;
-}
 
 /**
  * An `@svjeez/live` editor whose state is reactive: read `state` in a template or an effect and it updates on every
@@ -24,7 +10,7 @@ export class SceneEditor implements Editor {
   readonly #store: Editor;
   readonly #subscribe: () => void;
 
-  constructor(text: string, { first, effects }: Options = {}) {
+  constructor(text: string, { first, effects }: EditorOptions = {}) {
     this.#store = createEditor({ text, first }, effects);
     this.#subscribe = createSubscriber((update) => this.#store.subscribe(() => update()));
   }
@@ -44,6 +30,3 @@ export class SceneEditor implements Editor {
   /** Stops the compiler and frees every picture URL. Call it when the page that made the editor goes away. */
   readonly destroy = () => this.#store.destroy();
 }
-
-/** An editor for the scene source `text`. */
-export const editor = (text: string, options?: Options) => new SceneEditor(text, options);

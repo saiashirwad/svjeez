@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { shots } from "../src/camera.ts";
 import type { Box, Snapshot } from "../src/tree.ts";
 

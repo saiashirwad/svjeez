@@ -18,7 +18,7 @@ Instructions for a coding agent. 0.7 is breaking and keeps no aliases: every old
 + import { Callout, timeline, terminal } from "svjeez";
 ```
 
-**2. Diagrams moved to `@svjeez/diagrams`.** Search `flowchart`, `sequence`, `lanes`, `tree`, `stateMachine` and their types (`Flowchart`, `FlowchartOptions`, `FlowchartEdge`, `FlowchartGroup`, `Sequence*`, `Lanes*`, `Lane*`, `Tree`, `TreeOptions`, `TreeSpec`, `State*`, `StateMachine`, `Checked`, `Transition`, `Walk`, `WalkToken`, `Diagram`, `DiagramOptions`, `Anchor`, `Labelled`, `NodeRole`). Import them from `@svjeez/diagrams`. Behavior is unchanged.
+**2. Diagrams moved to `@svjeez/diagrams`.** Search `flowchart`, `sequence`, `lanes`, `tree`, `stateMachine` and their types (`Flowchart`, `FlowchartOptions`, `FlowchartEdge`, `FlowchartGroup`, `Sequence*`, `Lanes*`, `Lane*`, `Tree`, `TreeOptions`, `TreeSpec`, `State*`, `StateMachine`, `Walk`, `WalkToken`, `Diagram`, `DiagramOptions`, `Anchor`, `Labelled`, `NodeRole`). Import them from `@svjeez/diagrams`. Behavior is unchanged.
 
 **3. Editor palettes moved to `@svjeez/code`.** Search `tomorrowNight`, `tomorrow`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`. Import from `@svjeez/code/palettes`, which does not load Shiki. `defaultDark`, `defaultLight`, `systemDark`, `systemLight`, `base16`, `tint`, `adaptive` and `variables` stay in `svjeez`.
 
@@ -87,7 +87,7 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 
 **12. Tools take scene seconds.** `svjeez frames --times`, `restyle({ at })` and `seek(time)` used playback seconds. They now use the seconds your motions are written in. The numbers are the same unless the scene sets `render({ playbackRate })` other than 1: then multiply each old playback time by `playbackRate`. Check scrub, poster and scroll code that calls `seek` or `restyle`.
 
-**11b. `Icon` is `IconData`** (type of `@svjeez/icons`, 0.6.1 exported `Icon`). Search `\bIcon\b` imported from `@svjeez/icons`. The tabler and lucide path data are unchanged. `<Icon>` the component, from `svjeez`, keeps its name.
+**11b. `Icon` is `IconData`** (type of `svjeez`; 0.6.1 exported `Icon` from `@svjeez/icons`). Search `\bIcon\b` imported from `@svjeez/icons`, and import `IconData` from `svjeez`. The tabler and lucide path data are unchanged. `<Icon>` the component, from `svjeez`, keeps its name.
 
 ## Escape hatches
 
@@ -124,7 +124,7 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 | Search | Now |
 | --- | --- |
 | `axes(`, `Axes`, `AxesOptions`, `{ axes }` of `contours`, `contourSweep` | `plane`, `Plane`, `PlaneOptions`, `{ plane }` |
-| `plane({ origin, unit, extent, step })` | `plane({ x, y, width, height, at, ticks })`, see below |
+| `plane({ origin, unit, extent, step })` | `plane({ xRange, yRange, frame, ticks })`, see below |
 | `Area`, `Curve`, `Dot`, `Line` (calculus), `MorphCurveOptions` | `CalculusArea`, `CalculusCurve`, `CalculusDot`, `CalculusLine`, `CalculusMorphOptions` |
 | `sample`, `SampleOptions` | `valuesAt`, `ValuesAtOptions` |
 | `<Pivot at>` | `<Pivot origin>` |
@@ -132,7 +132,8 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 | `flow(points, { loop })` | `flow(points, { period })` |
 | `fieldFlow(lines, options)` | `flow(lines, options).node` |
 | `sampledPath(fn, options)` | `sampled.path(fn, options)` |
-| `sampled.path`, `globe`, `nightfall` with `duration` | `over` |
+| `sampled.path` with `duration` | `over` |
+| `globe(data, { spin: { over } })`, `Globe.duration` | `globe(span, data, { spin })`, `Globe.span` (see API cleanup) |
 | `.end` of `derive`, `epicycles`, `traffic`, `walk`, constructions | `.span.end` |
 | `renderVideo` (`@svjeez/video`) | `video` |
 | voxel block `at`, `from`, `to` | gone with voxels (step 17) |
@@ -144,16 +145,15 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 ```ts
 - plane({ origin: { x: ox, y: oy }, unit: u, extent: { x: [x0, x1], y: [y0, y1] }, step: s })
 + plane({
-+   x: [x0, x1],
-+   y: [y0, y1],
-+   width: (x1 - x0) * u,
-+   height: (y1 - y0) * u,
-+   at: { x: ox + x0 * u, y: oy - y1 * u }, // top-left of the plot area
++   xRange: [x0, x1],
++   yRange: [y0, y1],
++   // the plot area: its top-left is where the graph's (x0, y1) corner sits
++   frame: rect(ox + x0 * u, oy - y1 * u, (x1 - x0) * u, (y1 - y0) * u),
 +   ticks: s,
 + })
 ```
 
-`unit` was one scale for both axes, so `height` uses it too. Check that `at` lands the graph origin on `origin`: `point(0, 0)` of the new plane should equal the old `origin`.
+`unit` was one scale for both axes, so the frame height uses it too. Check that the frame lands the graph origin on `origin`: `point(0, 0)` of the new plane should equal the old `origin`.
 
 ## API cleanup
 
@@ -166,4 +166,78 @@ Smaller breaking changes, in the order a typecheck will find them.
 - `systemDark` is darker: `base00` `#090A0C`, `base01` `#18181B`, `base02` `#27272A` (were `#1E1E20`, `#2A2A2D`, `#3A3A3D`). Re-render dark frames; pin the old hexes in your own palette if you need them.
 - `Video.duration` (`@svjeez/video`) is `playTime`: playback seconds. `Scene.duration` stays in scene seconds.
 - `<Focus fade={0}>` cuts instead of throwing.
+- Geometry helpers moved to `svjeez/geometry`: `rect`, `resample`, `polylinePath`, `pathLength`, `matchPaths`, `num` and the types `MatchOptions`, `PolylinePathOptions`, `SampledPathOptions`. The types `Rect`, `Point`, `Edge` and `PathData` stay in `svjeez`.
+
+```ts
+- import { rect, render } from "svjeez";
++ import { render } from "svjeez";
++ import { rect } from "svjeez/geometry";
+```
+
+- Placement is a `frame: Rect` (`rect(x, y, w, h)` from `svjeez/geometry`), as `@svjeez/geo` already did. `chart({ width, height, at })` is `chart({ frame })`. `plane({ x, y, width, height, at })` is `plane({ xRange, yRange, frame })`. `vectorField`, `streamlines`, `contours` and `contourSweep` take `frame` where they took `bounds`, and `Bounds` is gone: pass a `Rect`. `construct({ at })` is `construct({ origin })`. `legend(scale, { x, y, width, height, ink })` is `legend(scale, { frame, color, theme })` and returns `{ node, bounds }`, so use `.node`. The text default is the theme's `plain` rather than `#c9d1d9`.
+- Time is a leading span, with options last:
+
+```ts
+- c.bars(record, { at: 0.6, over: 0.7, stagger: 0.08 })   + c.bars({ at: 0.6, over: 1.1 }, record)  // over spans the whole series
+- c.line(points, { at: 1, over: 2 })                      + c.line({ at: 1, over: 2 }, points)
+- epicycles(outline, { at, over, ...rest })               + epicycles({ at, over }, outline, rest)
+- derive(steps, { at, every: 2, over: 0.8 })              + derive({ at, over: 5 * 2 + 0.8 }, steps, { change: 0.8 })
+- fieldLines(lines, { at, over })                         + fieldLines({ at, over }, lines)
+- contourSweep(f, { at, over, from, to })                 + contourSweep({ at, over }, f, { from, to })
+- counter(fn, { duration: 10, step })                     + counter({ at: 0, over: 10 }, fn, { step })
+- plane.vector(to, { enter: span })                       + plane.vector(span, to)
+- plane.basis({ enter: span })                            + plane.basis(span)
+- cartogram(map, values, { at, over })                    + cartogram({ at, over }, map, values)
+- toBars(map, values, { at, over, frame })                + toBars({ at, over }, map, values, { frame })
+- traffic(lines, { during: span, rate })                  + traffic(span, lines, { rate })
+- trueSize(map, region, to, { at, over, duration })       + trueSize({ at, over }, map, region, to)
+- plane.apply(matrix, { at, over, ease })                 + plane.apply({ at, over }, matrix, { ease })
+- plane.applyFunction(f, { at, over })                    + plane.applyFunction({ at, over }, f)
+- plane.reset({ at, over, ease })                         + plane.reset({ at, over }, { ease })
+- plane.riemann(f, { n, at: [5, 6], over: 0.7 })          + plane.riemann([{ at: 5, over: 0.7 }, { at: 6, over: 0.7 }], f, { n })
+- plane.morph(fs, { at: [3, 4.5], over: 0.8 })            + plane.morph([{ at: 3, over: 0.8 }, { at: 4.5, over: 0.8 }], fs)
+- globe(data, { spin: { from, to, over: 24 } })           + globe({ at: 0, over: 24 }, data, { spin: { from, to } })
+- globe(data, { spin: fn, over: 24 })                     + globe({ at: 0, over: 24 }, data, { spin: fn })
+- choropleth(map, values, { scale, times: [0.5, 3], over: 1 }) + choropleth([{ at: 0.5, over: 1 }, { at: 3, over: 1 }], map, values, { scale })
+- choropleth(map, values, { scale, at: [0, 3] })          + choropleth(map, values, { scale, times: [0, 3] })
+- { lane: "a", from: 1, to: 4 }                           + { lane: "a", at: 1, over: 3 }   // LaneSpan is LaneBar
+```
+
+  Details. A bar series now ends with its span: each bar grows for `over - (bars - 1) * stagger`, `stagger` defaults to 0.08 or less when the span is short, `ease` is an option, and `bars` also takes `[key, value]` pairs. `derive`'s `every` is gone: the changes are spaced evenly across the span and `over` became `change`. `counter(fn)` reads `fn` from 0 at the span's start, not at scene time 0. `plane.riemann` and `plane.morph` take one span per change after the first stage, and `choropleth` one span per value (the first with `over: 0` cuts to its colors, as `times: 0` did; a span with a length fades in from `scale.empty`). Spans must not overlap; `choropleth` no longer cuts a change short to fit. `globe` takes the span for all its motion: `spin` runs `from` to `to` across it, `Spin.at` and `Spin.over` are gone (hold or ease with a function `spin`), `facing(t)`, `locate(at, t)` and function arguments take seconds since `span.at`, and `Globe.duration` is `Globe.span`. `cartogram` and `toBars` with `stagger` start the shapes that far apart and land the last with the span. `trueSize` takes a core `Ease` and defaults to `ease.inOut`, a slightly different curve from the old cubic. `Timing` is gone from `@svjeez/math` and `@svjeez/charts`.
+- Names. Types that two packages shared are prefixed with their package, and a few functions were renamed to say what they do:
+
+| Package | Old | New |
+| --- | --- | --- |
+| `@svjeez/mermaid` | `parse` | `parseMermaid` |
+| `@svjeez/mermaid` | `FlowNode`, `FlowEdge`, `Participant`, `SequenceMessage`, `StateTransition` | `MermaidFlowNode`, `MermaidFlowEdge`, `MermaidParticipant`, `MermaidSequenceMessage`, `MermaidStateTransition` |
+| `@svjeez/mermaid` | `FORM_ROLES` | gone (the form-to-role table is in the README) |
+| `@svjeez/diagrams` | `StateOptions`, `Transition` | `StateMachineOptions`, `StateTransition` |
+| `@svjeez/diagrams` | `Checked`, `StateIds` | no longer exported |
+| `@svjeez/math` | `plane.span(direction)`, `SpanOptions` | `plane.line(direction)`, `PlaneLineOptions` |
+| `@svjeez/math` | `GeoPoint`, `GeoLine`, `GeoCircle`, `GeoCurve` | `ConstructPoint`, `ConstructLine`, `ConstructCircle`, `ConstructCurve` |
+| `@svjeez/math` | `Look`, `Pace`, `LineOptions`, `PolygonOptions` (of `construct`) | `ConstructLook`, `ConstructPace`, `ConstructLineOptions`, `ConstructPolygonOptions` |
+| `@svjeez/charts` | `Bar`, `Bars`, `BarsOptions`, `Line`, `LineOptions`, `Area`, `AreaOptions` | `ChartBar`, `ChartBars`, `ChartBarsOptions`, `ChartLine`, `ChartLineOptions`, `ChartArea`, `ChartAreaOptions` |
+| `@svjeez/geo` | `Bar`, `Bars`, `BarsOptions` | `GeoBar`, `GeoBars`, `GeoBarsOptions` |
+
+- A labelled edge is `[from, to, label?, options?]` in every diagram, with the label a string. A flowchart edge `[from, to, { label }]` is `[from, to, label]`. State transitions and sequence messages already were.
+- `google.family(family, faces, options?)` takes faces as `{ weight, style }` objects. `options` is shared by every face and a face's own options override it; the first face's `fallback` is the family's. `GoogleFace` is gone, and a bare weight is `{ weight }`.
+
+```ts
+- google.family("Geist", [400, { weight: 600, style: "italic" }], { ligatures: false })
++ google.family("Geist", [{ weight: 400 }, { weight: 600, style: "italic" }], { ligatures: false })
+```
+
+- `.to(values, span, ease?)` is gone: `.to` takes a length. Search `.to(` with a span as the second argument and write `.at(span.at).to(values, span.over, ease)`.
+- `defaultLight` is gone (use `systemLight`), and `inkPath` is no longer exported from `svjeez`.
+- `@svjeez/code`: the palettes (`tomorrow`, `solarizedDark` and the rest) come from `@svjeez/code/palettes` only, and the root no longer re-exports `CodePiece`, `CodeRole` or `CodeTokens`: import those types from `svjeez`. Importing the package no longer loads Shiki until `highlight()` runs.
+- `@svjeez/icons`: the package root is gone, so `import type { IconData } from "@svjeez/icons"` is `import type { IconData } from "svjeez"`. The `/tabler` and `/lucide` paths stay. `svjeez` is now a peer dependency, for that type.
+- `@svjeez/geo`: `nightfall` is gone, with no users. Use `globe().night(date)` on a globe, or `night(date)` with `map.path()` on a flat map.
+- `@svjeez/fonts`: `cacheDir` is not exported. Set `SVJEEZ_FONTS_CACHE` to move the cache.
+- `@svjeez/vite`: the `Options` type is `SvjeezOptions`.
+- `@svjeez/diagrams`: `flowchart`, `tree`, `sequence` and `lanes` return `span`, from the first reveal to the end of the last (the instant 0 without `play`). The type behind it is `PlayedDiagram`.
+- `svjeez video` calls `video` from `@svjeez/video` and no longer falls back to `renderVideo`.
+- `svjeez/params` exports the `Range` and `Extras` types that `number`, `count` and `seconds` take.
+- `@svjeez/live` (unpublished before 0.7): the `/controls`, `/editor` and `/gzip` paths are gone, so import `paramFor` and the rest from `@svjeez/live`. `measureMove` is not exported. The types `Picture`, `Grip` and `Stats` are `PictureState`, `GripState` and `PictureStats`, so they no longer clash with the components. `EditorOptions` is new.
+- `@svjeez/svelte`: `editor(text, options)` is `new SceneEditor(text, options)`. The `Options` type of `@svjeez/react` and `@svjeez/svelte` is `EditorOptions`, defined in `@svjeez/live`.
+- New exports, for typing what functions return: `FlowResult`, `TerminalResult`, `RevealResult`, `TypewriterResult`, `AppWindowResult`, `MorphResult`, `AdaptiveResult`, `VariablesResult`, `Shown`, `Heading` and `Travel`.
 - These now throw: NaN or infinite `number`, `count` and `seconds` values and bounds; non-integer `count` bounds; duplicate `choice` options; a `color()` that is not hex; a `shake` or `wiggle` `rate` that is not positive; `restyle` `at` or `onceAt` below 0 or not finite; a non-finite `valuesAt` `duration`; `<Camera>` with no stops; `fx.boil` with a `seed` that is not a whole number of 1 or more or a `rate` that is not positive; `fx.grayscale` outside 0 to 1; `readingTime` with a non-positive `wps`. `recipes` and `sampled` say `needs a positive over` where they said `positive duration`.

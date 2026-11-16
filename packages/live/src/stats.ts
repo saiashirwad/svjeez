@@ -1,5 +1,5 @@
 // What a readout under the picture says about the file the newest compile made, as labelled values.
-import type { Stats } from "./editor.ts";
+import type { PictureStats } from "./editor.ts";
 
 export interface Stat {
   readonly value: string;
@@ -11,7 +11,7 @@ export const sizeOf = (bytes: number): string =>
   bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`;
 
 /** The gzipped size, the keyframes, the script and, once a compile has run, how long it took. */
-export const statsOf = (stats: Stats): Stat[] => [
+export const statsOf = (stats: PictureStats): Stat[] => [
   { value: sizeOf(stats.gzip), label: "gzip" },
   { value: String(stats.keyframes), label: stats.keyframes === 1 ? "keyframe" : "keyframes" },
   { value: sizeOf(stats.scriptBytes), label: "JS" },

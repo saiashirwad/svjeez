@@ -37,7 +37,8 @@ interface WindowProps {
 const Window = ({ from, to, drag }: WindowProps): SvgNode => (
   <g
     animation={motion({ x: from.x, y: from.y })
-      .to({ x: to.x, y: to.y }, drag, ease.inOut)
+      .at(drag.at)
+      .to({ x: to.x, y: to.y }, drag.over, ease.inOut)
       .rewind(0.8)}
   >
     <rect
@@ -94,7 +95,8 @@ interface CursorProps {
 const Cursor = ({ from, moves }: CursorProps): SvgNode => {
   let track = motion({ x: from.x, y: from.y });
 
-  for (const [to, when] of moves) track = track.to({ x: to.x, y: to.y }, when, ease.inOut);
+  for (const [to, when] of moves)
+    track = track.at(when.at).to({ x: to.x, y: to.y }, when.over, ease.inOut);
 
   return (
     <path

@@ -11,15 +11,16 @@ export {
   type Cmd,
   type CompiledFile,
   type Editor,
+  type EditorOptions,
   type Effects,
   type First,
-  type Grip,
+  type GripState,
   type Init,
   type Input,
   type Msg,
-  type Picture,
+  type PictureState,
+  type PictureStats,
   type State,
-  type Stats,
 } from "./editor.ts";
 
 export {
@@ -51,7 +52,7 @@ export {
 
 export { fit, fitValues, follow, positionOf, valueAt, withValues } from "./fit.ts";
 
-export { measureMove, type Move } from "./probe.ts";
+export type { Move } from "./probe.ts";
 
 export { sizeOf, statsOf, type Stat } from "./stats.ts";
 

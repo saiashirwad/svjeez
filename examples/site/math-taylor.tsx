@@ -1,5 +1,6 @@
 import { plane, tex } from "@svjeez/math";
 import { def, draw, enter, motion, render, type Color, morph } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
@@ -12,11 +13,9 @@ const win = chrome(W, H, "taylor.tsx");
 const COS = theme.base0D;
 
 const graph = plane({
-  x: [-2 * Math.PI, 2 * Math.PI],
-  y: [-1.7, 1.7],
-  width: 448,
-  height: 158,
-  at: { x: 28, y: 130 },
+  xRange: [-2 * Math.PI, 2 * Math.PI],
+  yRange: [-1.7, 1.7],
+  frame: rect(28, 130, 448, 158),
   labels: false,
   theme,
 });

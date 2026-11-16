@@ -1,5 +1,11 @@
 import { clean, fail, unquote, type Line } from "./errors.ts";
-import type { FlowchartDoc, FlowEdge, FlowNode, FlowForm, FlowSubgraph } from "./types.ts";
+import type {
+  FlowchartDoc,
+  MermaidFlowEdge,
+  MermaidFlowNode,
+  FlowForm,
+  FlowSubgraph,
+} from "./types.ts";
 
 const SUPPORTED =
   "Supported: `flowchart`/`graph` with a direction, nodes `A[text]` `A(text)` `A([text])` `A{text}` `A((text))` `A[[text]]` `A[(text)]`, edges `-->` `---` `-.->` `==>` with `|text|` or `-- text -->` labels, chains, `A & B --> C`, and `subgraph id [title]` ... `end`.";
@@ -26,7 +32,7 @@ interface Ref {
 }
 
 interface Op {
-  readonly line: FlowEdge["line"];
+  readonly line: MermaidFlowEdge["line"];
   readonly arrow: boolean;
   readonly label?: string;
 }
@@ -120,7 +126,7 @@ export const parseFlowchart = (header: Line, body: readonly Line[]): FlowchartDo
     );
 
   const nodes = new Map<string, { label: string; form: FlowForm }>();
-  const edges: FlowEdge[] = [];
+  const edges: MermaidFlowEdge[] = [];
   const subgraphs: { id: string; title: string; nodes: string[]; line: Line }[] = [];
   let open: (typeof subgraphs)[number] | undefined;
 
@@ -215,7 +221,7 @@ export const parseFlowchart = (header: Line, body: readonly Line[]): FlowchartDo
   return {
     kind: "flowchart",
     direction,
-    nodes: [...nodes].map(([id, n]): FlowNode => ({ id, ...n })),
+    nodes: [...nodes].map(([id, n]): MermaidFlowNode => ({ id, ...n })),
     edges,
     subgraphs: subgraphs.map(({ id, title, nodes }): FlowSubgraph => ({ id, title, nodes })),
   };

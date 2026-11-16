@@ -1,4 +1,5 @@
-import { motion, rect, type Color, type SvgNode, appWindow } from "svjeez";
+import { motion, type Color, type SvgNode, appWindow } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { css, mono, theme } from "../../style";
 

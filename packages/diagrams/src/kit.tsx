@@ -3,7 +3,6 @@ import {
   type Color,
   textWidth,
   type FontValue,
-  rect,
   type Edge,
   type Point,
   type Rect,
@@ -13,6 +12,9 @@ import {
   motion,
   type Motion,
   type Seconds,
+  type Span,
+  type Spanned,
+  span,
   type Stack,
   draw,
   enter,
@@ -22,6 +24,7 @@ import {
   type Base16,
   type Slot,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { curve } from "./curve.ts";
 
 /** What a node is, so the theme can draw it. */
@@ -33,6 +36,12 @@ export interface Diagram<Id extends string> {
   get(id: Id): Rect;
   /** Everything drawn, labels included. */
   readonly bounds: Rect;
+}
+
+/** A diagram whose `play` option reveals it over time. */
+export interface PlayedDiagram<Id extends string> extends Diagram<Id> {
+  /** From the first reveal to the end of the last, in scene time. The instant 0 when the diagram has no `play`. */
+  readonly span: Spanned;
 }
 
 /** Which point of `bounds` lands on `x`, `y`: a corner, the center, or the middle of an edge. */
@@ -105,10 +114,23 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
   }
 };
 
+/** Seconds a node takes to pop in. */
+export const POP = 0.35;
+
 /** The pop-in of a node that appears at `at`. It rises a few pixels rather than scaling, because browsers can keep a layer
  * that once animated `scale` rasterized at the smaller size, which leaves the label blurry long after it settles. */
 export const popIn = (at: Seconds): Motion<"opacity" | "y"> =>
-  enter({ at, over: 0.35 }, { opacity: 0, y: 6 }, ease.out);
+  enter({ at, over: POP }, { opacity: 0, y: 6 }, ease.out);
+
+/** The span from the earliest start to the latest end of `reveals`, or the instant 0 when nothing reveals. */
+export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
+  if (reveals.length === 0) return span(0, 0);
+
+  const first = Math.min(...reveals.map((r) => r.at));
+  const last = Math.max(...reveals.map((r) => r.at + r.over));
+
+  return span(first, last - first);
+};
 
 const SKEW = 0.35;
 const LID = 5;

@@ -227,12 +227,18 @@ const replay = (tapes: readonly Tape[]) => {
   };
 };
 
+// The package's own manifest: beside the compiled files when published, one folder up from src/ in the workspace.
 const version = async (): Promise<string> => {
-  const manifest: { version: string } = JSON.parse(
-    await readFile(new URL("../package.json", import.meta.url), "utf8"),
-  );
+  for (const path of ["./package.json", "../package.json"]) {
+    const manifest: { name: string; version: string } | undefined = await readFile(
+      new URL(path, import.meta.url),
+      "utf8",
+    ).then(JSON.parse, () => undefined);
 
-  return manifest.version;
+    if (manifest?.name === "@svjeez/dom") return manifest.version;
+  }
+
+  throw new Error("@svjeez/dom cannot find its own package.json.");
 };
 
 /**

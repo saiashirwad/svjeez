@@ -3,7 +3,6 @@ import {
   draw,
   ease,
   motion,
-  rect,
   render,
   type Child,
   type Rect,
@@ -13,6 +12,7 @@ import {
   variables,
   type CameraStop,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 

@@ -2,6 +2,17 @@
 
 Turns real HTML and CSS into svjeez nodes you can animate. Chromium lays the markup out, and `@svjeez/dom` reads every box, border, shadow, text line and inline icon back as SVG. It works the same whatever made the markup: React, Svelte, plain HTML, or a page in a running app.
 
+## Install
+
+```sh
+npm i -D @svjeez/dom svjeez playwright-core
+npx playwright-core install chromium-headless-shell
+```
+
+`react`, `react-dom`, `svelte` and `vite` are optional: `@svjeez/dom/react` and `@svjeez/dom/svelte` film your own components through your Vite config.
+
+## Use
+
 ```tsx
 import { Dom, duration, fill, html, size, snap, snapshots, wait } from "@svjeez/dom";
 import { ease, render } from "svjeez";
@@ -26,7 +37,7 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 ```
 
 - Time is relative. The first `snap` holds from 0; each later one moves in from the cursor over `over` seconds (default 0.6) and leaves the cursor at its end, and `wait(s)` pushes it on. `duration(steps)` is where it ends. To start a flow later, wrap the `<Dom>` in `<Clip at>`.
-- `dom.run(html, flow, options?)` mounts the markup, runs the flow and closes the page; `dom.run({ url, root }, flow)` does the same on a running app. `browser(options)` is the lower level: `await using dom = await browser({ fonts, css })`, then `dom.mount(html, { css, width, pad, parts, root })` or `dom.open(url, { root, ... })` give a card, one open page, with `card.run(flow)`, `card.snap(action?)`, `card.html(markup)` and `card.close()`. `css` given to `browser()` or `snapshots()` applies to every mount; a mount's own `css` overrides it.
+- `dom.run(html, flow, options?)` mounts the markup, runs the flow and closes the page; `dom.run({ url, root }, flow)` does the same on a running app. `browser(options)` is the lower level: `await using dom = await browser({ fonts, css })` (or call `dom.close()` yourself on Node 20 and 22, which cannot parse `await using`), then `dom.mount(html, { css, width, pad, parts, root })` or `dom.open(url, { root, ... })` give a card, one open page, with `card.run(flow)`, `card.snap(action?)`, `card.html(markup)` and `card.close()`. `css` given to `browser()` or `snapshots()` applies to every mount; a mount's own `css` overrides it.
 - Instructions are `snap(name?, { over, ease }?)`, `wait(s)`, `fill(target, text)`, `click(target)`, `hover(target)`, `press(key)`, `move(x, y)`, `html(markup)` and `act((page) => ...)` for anything else Playwright does. A target is a part name, else a CSS selector. All but `act` are plain objects, so a flow can be written as data: `[{ snap: "idle" }, { fill: ["email", "sai@example.com"] }, { snap: "typed", over: 1 }]`. `card.run` resolves to one step per `snap` and `wait`; `find(steps, name)` gets a snapshot back by name.
 - A snapshot is plain JSON: `{ name?, width, height, pad, box, root }`. Colors that differ between the light and dark scheme are stored as `{ light, dark }`, so the drawing follows the viewer's scheme. `schemes` picks one scheme instead, and `dark: { class }` is the class the dark pass adds to `<html>` (default `dark`).
 - An element is a part when it has `data-part="name"` or matches `parts.name`. `<Dom parts>` animates parts, and `rect(snapshot, part, index?)` says where one landed.

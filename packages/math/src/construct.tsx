@@ -1,11 +1,20 @@
 /** @jsxImportSource svjeez */
-import { ease, motion, type Color, type SvgNode, defaultDark, type Base16 } from "svjeez";
+import {
+  ease,
+  motion,
+  type Base16,
+  type Color,
+  type Point,
+  type Span,
+  type SvgNode,
+  defaultDark,
+} from "svjeez";
 import { span as spanOf, type Spanned } from "svjeez";
 
 import { tex } from "./index.ts";
 
 /** A point of the construction, in construction units with y up. `g.point()` and `g.intersect()` make them. */
-export interface GeoPoint {
+export interface ConstructPoint {
   readonly kind: "point";
   readonly x: number;
   readonly y: number;
@@ -13,10 +22,10 @@ export interface GeoPoint {
 }
 
 /** A segment, a ray or a full line, by two points and how far the drawing reaches past each. */
-export interface GeoLine {
+export interface ConstructLine {
   readonly kind: "line";
-  readonly a: GeoPoint;
-  readonly b: GeoPoint;
+  readonly a: ConstructPoint;
+  readonly b: ConstructPoint;
   /** Intersections treat the line as endless. A segment reaches only from `a` to `b`. */
   readonly endless: boolean;
   /** How far the drawn line runs past `a` and past `b`, in units. */
@@ -24,16 +33,16 @@ export interface GeoLine {
 }
 
 /** A circle by its center and radius in units. */
-export interface GeoCircle {
+export interface ConstructCircle {
   readonly kind: "circle";
-  readonly center: GeoPoint;
+  readonly center: ConstructPoint;
   readonly radius: number;
 }
 
-export type GeoCurve = GeoLine | GeoCircle;
+export type ConstructCurve = ConstructLine | ConstructCircle;
 
 /** Seconds each kind of element takes to draw. `gap` separates one element from the next and `step` is the pause a `g.step()` adds. */
-export interface Pace {
+export interface ConstructPace {
   readonly point: number;
   readonly line: number;
   readonly circle: number;
@@ -50,35 +59,30 @@ export interface ConstructOptions {
   /** Pixels per construction unit. Default 1. */
   readonly unit?: number;
   /** Where the origin sits in the scene, in px. Construction y grows up, scene y grows down. Default 0, 0. */
-  readonly at?: { readonly x: number; readonly y: number };
+  readonly origin?: Point;
   /** Pixels per em for labels. Default 20. */
   readonly fontSize?: number;
   /** Where the first element starts, in seconds. Default 0. */
   readonly start?: number;
-  readonly pace?: Partial<Pace>;
+  readonly pace?: Partial<ConstructPace>;
   /** The opacity construction aids settle to after `g.settle()`. Default 0.22. */
   readonly faint?: number;
 }
 
-/** Every element takes these. Without `at` an element starts when the one before it ends. */
-export interface Timing {
-  readonly at?: number;
-  readonly over?: number;
-}
-
-export interface Look extends Timing {
+/** Every element takes an optional `at` and `over`. Without `at` an element starts when the one before it ends. */
+export interface ConstructLook extends Partial<Span> {
   /** Overrides the theme's color for this element. */
   readonly color?: Color;
   /** A construction aid: drawn in a quieter color, and `g.settle()` fades it back. */
   readonly aid?: boolean;
 }
 
-export interface PointOptions extends Look {
+export interface PointOptions extends ConstructLook {
   /** Draw no dot, only the label. Default true. */
   readonly dot?: boolean;
 }
 
-export interface LineOptions extends Look {
+export interface ConstructLineOptions extends ConstructLook {
   /** A TeX label beside the middle of the line. */
   readonly label?: string;
   /** Units a line, parallel or perpendicular runs past each of its points. Default a quarter of the distance between them. */
@@ -86,14 +90,14 @@ export interface LineOptions extends Look {
 }
 
 /** A segment ends where its points do. */
-export type SegmentOptions = Omit<LineOptions, "extend">;
+export type SegmentOptions = Omit<ConstructLineOptions, "extend">;
 
-export interface CircleOptions extends Look {
+export interface CircleOptions extends ConstructLook {
   /** Draw only this arc, in degrees counterclockwise from the +x axis. Without it the whole circle sweeps, starting at the point it passes through. */
   readonly arc?: { readonly from: number; readonly to: number };
 }
 
-export interface IntersectOptions extends Look {
+export interface IntersectOptions extends ConstructLook {
   /** Which crossing to keep: line and circle give them in the order along the line, two circles give the one on the left of center 1 to center 2 first. */
   readonly pick?: 0 | 1;
   readonly label?: string;
@@ -102,7 +106,7 @@ export interface IntersectOptions extends Look {
   readonly dot?: boolean;
 }
 
-export interface PolygonOptions extends Look {
+export interface ConstructPolygonOptions extends ConstructLook {
   /** Default the theme's blue. */
   readonly fill?: Color;
   /** Fill opacity. Default 0.2. */
@@ -113,7 +117,7 @@ export interface PolygonOptions extends Look {
   readonly label?: string;
 }
 
-export interface AngleOptions extends Look {
+export interface AngleOptions extends ConstructLook {
   /** A TeX label inside the angle. */
   readonly label?: string;
   /** Arc radius in px. Default 26. */
@@ -124,12 +128,12 @@ export interface AngleOptions extends Look {
   readonly mark?: "arc" | "square";
 }
 
-export interface TickOptions extends Look {
+export interface TickOptions extends ConstructLook {
   /** Ticks across the segment. Default 1. */
   readonly count?: number;
 }
 
-export interface BisectOptions extends Look {
+export interface BisectOptions extends ConstructLook {
   /** Draw the compass arcs that find it. Default true. */
   readonly compass?: boolean;
   /** Units the line runs past the points that fix it. Default a fifth of the segment, or of the arm. */
@@ -137,7 +141,7 @@ export interface BisectOptions extends Look {
   readonly label?: string;
 }
 
-export interface SettleOptions extends Timing {
+export interface SettleOptions extends Partial<Span> {
   /** Overrides the construction's faint opacity. */
   readonly faint?: number;
 }
@@ -150,41 +154,63 @@ export interface Construction {
   /** From the start to when the last element finishes. */
   readonly span: Spanned;
   /** A point at `x`, `y` in units. */
-  point(x: number, y: number, label?: string, options?: PointOptions): GeoPoint;
+  point(x: number, y: number, label?: string, options?: PointOptions): ConstructPoint;
   /** A segment from `a` to `b`, drawn from `a`. */
-  segment(a: GeoPoint, b: GeoPoint, options?: SegmentOptions): GeoLine;
+  segment(a: ConstructPoint, b: ConstructPoint, options?: SegmentOptions): ConstructLine;
   /** A line through `a` and `b` that runs past both, drawn outward from `a`. */
-  line(a: GeoPoint, b: GeoPoint, options?: LineOptions): GeoLine;
+  line(a: ConstructPoint, b: ConstructPoint, options?: ConstructLineOptions): ConstructLine;
   /** A circle about `center` that passes through a point, or has a radius in units. */
   circle(
-    center: GeoPoint,
-    through: GeoPoint | { readonly radius: number },
+    center: ConstructPoint,
+    through: ConstructPoint | { readonly radius: number },
     options?: CircleOptions,
-  ): GeoCircle;
+  ): ConstructCircle;
   /** Where two lines cross. */
-  intersect(a: GeoLine, b: GeoLine, options?: IntersectOptions): GeoPoint;
+  intersect(a: ConstructLine, b: ConstructLine, options?: IntersectOptions): ConstructPoint;
   /** One crossing of a line or circle with another. */
   intersect(
-    a: GeoCurve,
-    b: GeoCurve,
+    a: ConstructCurve,
+    b: ConstructCurve,
     options: IntersectOptions & { readonly pick: 0 | 1 },
-  ): GeoPoint;
+  ): ConstructPoint;
   /** Both crossings of a line or circle with another. */
-  intersect(a: GeoCurve, b: GeoCurve, options?: IntersectOptions): readonly [GeoPoint, GeoPoint];
-  midpoint(a: GeoPoint, b: GeoPoint, label?: string, options?: PointOptions): GeoPoint;
+  intersect(
+    a: ConstructCurve,
+    b: ConstructCurve,
+    options?: IntersectOptions,
+  ): readonly [ConstructPoint, ConstructPoint];
+  midpoint(
+    a: ConstructPoint,
+    b: ConstructPoint,
+    label?: string,
+    options?: PointOptions,
+  ): ConstructPoint;
   /** The perpendicular bisector of `a` and `b`, found with two compass arcs unless `compass` is false. */
-  perpendicularBisector(a: GeoPoint, b: GeoPoint, options?: BisectOptions): GeoLine;
+  perpendicularBisector(
+    a: ConstructPoint,
+    b: ConstructPoint,
+    options?: BisectOptions,
+  ): ConstructLine;
   /** The bisector of the angle at `b` between `a` and `c`, as a ray from `b`. */
-  angleBisector(a: GeoPoint, b: GeoPoint, c: GeoPoint, options?: BisectOptions): GeoLine;
+  angleBisector(
+    a: ConstructPoint,
+    b: ConstructPoint,
+    c: ConstructPoint,
+    options?: BisectOptions,
+  ): ConstructLine;
   /** The line through `p` parallel to `line`. */
-  parallel(line: GeoLine, p: GeoPoint, options?: LineOptions): GeoLine;
+  parallel(line: ConstructLine, p: ConstructPoint, options?: ConstructLineOptions): ConstructLine;
   /** The line through `p` perpendicular to `line`. */
-  perpendicular(line: GeoLine, p: GeoPoint, options?: LineOptions): GeoLine;
-  polygon(points: readonly GeoPoint[], options?: PolygonOptions): void;
+  perpendicular(
+    line: ConstructLine,
+    p: ConstructPoint,
+    options?: ConstructLineOptions,
+  ): ConstructLine;
+  polygon(points: readonly ConstructPoint[], options?: ConstructPolygonOptions): void;
   /** Marks the angle at `b` between rays `ba` and `bc`. */
-  angle(a: GeoPoint, b: GeoPoint, c: GeoPoint, options?: AngleOptions): void;
+  angle(a: ConstructPoint, b: ConstructPoint, c: ConstructPoint, options?: AngleOptions): void;
   /** Congruence ticks across a segment. */
-  tick(segment: GeoLine, options?: TickOptions): void;
+  tick(segment: ConstructLine, options?: TickOptions): void;
   /** Everything made inside `build` starts together; the next element waits for the slowest. */
   together(build: () => void): void;
   /** Pauses between beats of the proof. Returns when the next beat starts. */
@@ -193,7 +219,7 @@ export interface Construction {
   settle(options?: SettleOptions): void;
 }
 
-const PACE: Pace = {
+const PACE: ConstructPace = {
   point: 0.3,
   line: 0.7,
   circle: 1,
@@ -211,7 +237,7 @@ const DEG = Math.PI / 180;
 
 type Vec = readonly [number, number];
 
-const sub = (a: GeoPoint, b: GeoPoint): Vec => [a.x - b.x, a.y - b.y];
+const sub = (a: ConstructPoint, b: ConstructPoint): Vec => [a.x - b.x, a.y - b.y];
 const length = (v: Vec): number => Math.hypot(v[0], v[1]);
 
 const unit = (v: Vec): Vec => {
@@ -222,11 +248,11 @@ const unit = (v: Vec): Vec => {
 
 const dot = (a: Vec, b: Vec): number => a[0] * b[0] + a[1] * b[1];
 const polar = (angle: number): Vec => [Math.cos(angle), Math.sin(angle)];
-const name = (p: GeoPoint): string => p.label ?? `(${round(p.x)}, ${round(p.y)})`;
+const name = (p: ConstructPoint): string => p.label ?? `(${round(p.x)}, ${round(p.y)})`;
 const round = (n: number): number => Math.round(n * 100) / 100;
-const dist = (a: GeoPoint, b: GeoPoint): number => length(sub(a, b));
+const dist = (a: ConstructPoint, b: ConstructPoint): number => length(sub(a, b));
 
-const same = (a: GeoPoint, b: GeoPoint): boolean => dist(a, b) < 1e-7;
+const same = (a: ConstructPoint, b: ConstructPoint): boolean => dist(a, b) < 1e-7;
 
 /** A direction, widest-gap first, away from every ray. `away` breaks ties between equally wide gaps. */
 const clearestDirection = (rays: readonly Vec[], away: Vec): Vec => {
@@ -244,9 +270,9 @@ const clearestDirection = (rays: readonly Vec[], away: Vec): Vec => {
   return candidates.reduce((best, c) => (c.score > best.score ? c : best)).direction;
 };
 
-const at = (x: number, y: number): GeoPoint => ({ kind: "point", x, y });
+const at = (x: number, y: number): ConstructPoint => ({ kind: "point", x, y });
 
-const crossLines = (a: GeoLine, b: GeoLine): GeoPoint[] => {
+const crossLines = (a: ConstructLine, b: ConstructLine): ConstructPoint[] => {
   const [d, e] = [sub(a.b, a.a), sub(b.b, b.a)];
   const cross = d[0] * e[1] - d[1] * e[0];
 
@@ -257,7 +283,7 @@ const crossLines = (a: GeoLine, b: GeoLine): GeoPoint[] => {
   return [at(a.a.x + t * d[0], a.a.y + t * d[1])];
 };
 
-const crossCircles = (a: GeoCircle, b: GeoCircle): GeoPoint[] => {
+const crossCircles = (a: ConstructCircle, b: ConstructCircle): ConstructPoint[] => {
   const [u, d] = [unit(sub(b.center, a.center)), dist(a.center, b.center)];
 
   if (d < EPS) return [];
@@ -271,7 +297,7 @@ const crossCircles = (a: GeoCircle, b: GeoCircle): GeoPoint[] => {
   return [at(cx - h * u[1], cy + h * u[0]), at(cx + h * u[1], cy - h * u[0])];
 };
 
-const crossLineCircle = (line: GeoLine, circle: GeoCircle): GeoPoint[] => {
+const crossLineCircle = (line: ConstructLine, circle: ConstructCircle): ConstructPoint[] => {
   const u = unit(sub(line.b, line.a));
   const w = sub(line.a, circle.center);
   const half = dot(w, u);
@@ -283,27 +309,27 @@ const crossLineCircle = (line: GeoLine, circle: GeoCircle): GeoPoint[] => {
   return [-half - root, -half + root].map((t) => at(line.a.x + t * u[0], line.a.y + t * u[1]));
 };
 
-const intersections = (a: GeoCurve, b: GeoCurve): GeoPoint[] => {
+const intersections = (a: ConstructCurve, b: ConstructCurve): ConstructPoint[] => {
   if (a.kind === "line") return b.kind === "line" ? crossLines(a, b) : crossLineCircle(a, b);
 
   return b.kind === "line" ? crossLineCircle(b, a) : crossCircles(a, b);
 };
 
-const withinSegment = (line: GeoLine, p: GeoPoint): boolean => {
+const withinSegment = (line: ConstructLine, p: ConstructPoint): boolean => {
   const [d, w] = [sub(line.b, line.a), sub(p, line.a)];
   const t = dot(w, d) / dot(d, d);
 
   return line.endless || (t > -1e-7 && t < 1 + 1e-7);
 };
 
-const onLine = (line: GeoLine, p: GeoPoint): boolean => {
+const onLine = (line: ConstructLine, p: ConstructPoint): boolean => {
   const u = unit(sub(line.b, line.a));
   const w = sub(p, line.a);
 
   return Math.abs(w[0] * u[1] - w[1] * u[0]) < 1e-6 * Math.max(1, length(w));
 };
 
-const onCircle = (circle: GeoCircle, p: GeoPoint): boolean =>
+const onCircle = (circle: ConstructCircle, p: ConstructPoint): boolean =>
   Math.abs(dist(p, circle.center) - circle.radius) < 1e-6 * Math.max(1, circle.radius);
 
 /** A drawn thing, rendered once every other thing is known so labels can steer clear of them. */
@@ -324,10 +350,10 @@ interface Part {
 }
 
 interface World {
-  readonly points: readonly GeoPoint[];
-  readonly lines: readonly GeoLine[];
-  readonly circles: readonly GeoCircle[];
-  readonly polygons: readonly (readonly GeoPoint[])[];
+  readonly points: readonly ConstructPoint[];
+  readonly lines: readonly ConstructLine[];
+  readonly circles: readonly ConstructCircle[];
+  readonly polygons: readonly (readonly ConstructPoint[])[];
   /** Units to scene px. */
   readonly px: (p: { x: number; y: number }) => { x: number; y: number };
   /** The middle of the figure, in units. */
@@ -335,7 +361,7 @@ interface World {
 }
 
 /** The directions in which drawn lines, circles and polygon edges leave `p`. */
-const raysAt = (world: World, p: GeoPoint): Vec[] => {
+const raysAt = (world: World, p: ConstructPoint): Vec[] => {
   const rays: Vec[] = [];
 
   for (const line of world.lines) {
@@ -389,19 +415,14 @@ const stand = (
  * places away from the lines that meet at their point. Construction y grows up.
  */
 export function construct(options: ConstructOptions = {}): Construction {
-  const {
-    theme = defaultDark,
-    unit: scale = 1,
-    at: origin = { x: 0, y: 0 },
-    fontSize = 20,
-  } = options;
+  const { theme = defaultDark, unit: scale = 1, origin = { x: 0, y: 0 }, fontSize = 20 } = options;
 
   const faint = options.faint ?? 0.22;
-  const pace: Pace = { ...PACE, ...options.pace };
+  const pace: ConstructPace = { ...PACE, ...options.pace };
 
   if (!(scale > 0) || !Number.isFinite(origin.x + origin.y) || !(fontSize > 0))
     throw new Error(
-      `construct() needs a positive unit and fontSize and a finite origin, got unit ${scale}, fontSize ${fontSize} and at ${origin.x}, ${origin.y}.`,
+      `construct() needs a positive unit and fontSize and a finite origin, got unit ${scale}, fontSize ${fontSize} and origin ${origin.x}, ${origin.y}.`,
     );
 
   const palette = {
@@ -413,10 +434,10 @@ export function construct(options: ConstructOptions = {}): Construction {
   };
 
   const parts: Part[] = [];
-  const points: GeoPoint[] = [];
-  const lines: GeoLine[] = [];
-  const circles: GeoCircle[] = [];
-  const polygons: (readonly GeoPoint[])[] = [];
+  const points: ConstructPoint[] = [];
+  const lines: ConstructLine[] = [];
+  const circles: ConstructCircle[] = [];
+  const polygons: (readonly ConstructPoint[])[] = [];
   let cursor = options.start ?? 0;
   const firstAt = cursor;
   let end = cursor;
@@ -428,7 +449,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   });
 
   /** Where an element starts and how long it runs. The cursor moves on unless a `together` block holds it. */
-  const slot = (kind: keyof Pace, timing: Timing): Slot => {
+  const slot = (kind: keyof ConstructPace, timing: Partial<Span>): Slot => {
     const at = timing.at ?? batch?.start ?? cursor;
     const over = timing.over ?? pace[kind];
 
@@ -448,7 +469,8 @@ export function construct(options: ConstructOptions = {}): Construction {
     parts.push({ aid: aid === true, render });
   };
 
-  const colorOf = (look: Look, main: Color): Color => look.color ?? (look.aid ? palette.aid : main);
+  const colorOf = (look: ConstructLook, main: Color): Color =>
+    look.color ?? (look.aid ? palette.aid : main);
 
   /** A stroke drawn on from nothing. It stays invisible until its turn, because a round cap shows a dot at zero length. */
   const drawOn = (span: { at: number; over: number }, curve?: typeof ease.out) =>
@@ -460,7 +482,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   const label = (
     source: string | undefined,
     span: { at: number; over: number },
-    look: Look,
+    look: ConstructLook,
     place: (world: World, box: { w: number; h: number }) => { x: number; y: number },
     main: Color = palette.ink,
   ): void => {
@@ -497,7 +519,7 @@ export function construct(options: ConstructOptions = {}): Construction {
     p.y - world.center[1],
   ];
 
-  const addPoint = (p: GeoPoint, label_: string | undefined, o: PointOptions): void => {
+  const addPoint = (p: ConstructPoint, label_: string | undefined, o: PointOptions): void => {
     const span = slot("point", o);
     const color = colorOf(o, palette.point);
 
@@ -526,10 +548,14 @@ export function construct(options: ConstructOptions = {}): Construction {
     });
   };
 
-  const cross = (a: GeoCurve, b: GeoCurve, o: IntersectOptions = {}): GeoPoint[] => {
+  const cross = (
+    a: ConstructCurve,
+    b: ConstructCurve,
+    o: IntersectOptions = {},
+  ): ConstructPoint[] => {
     const found = intersections(a, b);
 
-    const describe = (s: GeoCurve): string =>
+    const describe = (s: ConstructCurve): string =>
       s.kind === "line" ? `line ${name(s.a)}${name(s.b)}` : `circle about ${name(s.center)}`;
 
     if (found.length === 0)
@@ -550,8 +576,8 @@ export function construct(options: ConstructOptions = {}): Construction {
             `intersect() crossing (${round(p.x)}, ${round(p.y)}) lies past the end of segment ${name(s.a)}${name(s.b)}. Draw it with g.line() so it runs on, or use g.line(…, { extend }).`,
           );
 
-    const keep = (p: GeoPoint, label_: string | undefined): GeoPoint => {
-      const made: GeoPoint = label_ === undefined ? p : { ...p, label: label_ };
+    const keep = (p: ConstructPoint, label_: string | undefined): ConstructPoint => {
+      const made: ConstructPoint = label_ === undefined ? p : { ...p, label: label_ };
 
       addPoint(made, label_, o);
 
@@ -568,24 +594,24 @@ export function construct(options: ConstructOptions = {}): Construction {
   };
 
   const intersect = (
-    a: GeoCurve,
-    b: GeoCurve,
+    a: ConstructCurve,
+    b: ConstructCurve,
     o: IntersectOptions = {},
-  ): GeoPoint | readonly [GeoPoint, GeoPoint] => {
+  ): ConstructPoint | readonly [ConstructPoint, ConstructPoint] => {
     const kept = cross(a, b, o);
 
     return kept.length === 1 ? kept[0]! : [kept[0]!, kept[1]!];
   };
 
   const addLine = (
-    a: GeoPoint,
-    b: GeoPoint,
+    a: ConstructPoint,
+    b: ConstructPoint,
     endless: boolean,
     extend: readonly [number, number],
-    o: LineOptions,
-  ): GeoLine => {
+    o: ConstructLineOptions,
+  ): ConstructLine => {
     if (same(a, b)) throw new Error(`A line needs two different points, got ${name(a)} twice.`);
-    const line: GeoLine = { kind: "line", a, b, endless, extend };
+    const line: ConstructLine = { kind: "line", a, b, endless, extend };
     const span = slot("line", o);
     const color = colorOf(o, palette.ink);
 
@@ -629,23 +655,23 @@ export function construct(options: ConstructOptions = {}): Construction {
     return line;
   };
 
-  const extension = (o: LineOptions, fallback: number): readonly [number, number] => [
+  const extension = (o: ConstructLineOptions, fallback: number): readonly [number, number] => [
     o.extend ?? fallback,
     o.extend ?? fallback,
   ];
 
   const circle = (
-    center: GeoPoint,
-    through: GeoPoint | { readonly radius: number },
+    center: ConstructPoint,
+    through: ConstructPoint | { readonly radius: number },
     o: CircleOptions = {},
-  ): GeoCircle => {
+  ): ConstructCircle => {
     const radius = "radius" in through ? through.radius : dist(center, through);
 
     if (!(radius > 0) || !Number.isFinite(radius))
       throw new Error(
         `circle() needs a positive radius, got ${radius}. Pass a point other than the center, or a radius above 0.`,
       );
-    const ring: GeoCircle = { kind: "circle", center, radius };
+    const ring: ConstructCircle = { kind: "circle", center, radius };
     const span = slot("circle", o);
     const color = colorOf(o, palette.ink);
 
@@ -681,11 +707,11 @@ export function construct(options: ConstructOptions = {}): Construction {
     return ring;
   };
 
-  const point = (x: number, y: number, label_?: string, o: PointOptions = {}): GeoPoint => {
+  const point = (x: number, y: number, label_?: string, o: PointOptions = {}): ConstructPoint => {
     if (!Number.isFinite(x + y))
       throw new Error(`point() needs finite coordinates, got ${x}, ${y}.`);
 
-    const p: GeoPoint =
+    const p: ConstructPoint =
       label_ === undefined ? { kind: "point", x, y } : { kind: "point", x, y, label: label_ };
 
     addPoint(p, label_, o);
@@ -706,18 +732,22 @@ export function construct(options: ConstructOptions = {}): Construction {
   };
 
   /** Aims the composite constructions at `o.at` and drops the timing that belongs to their last element. */
-  const begin = (o: Timing): void => {
+  const begin = (o: Partial<Span>): void => {
     if (o.at !== undefined && !batch) cursor = o.at;
   };
 
-  const finishing = (o: BisectOptions): LineOptions => ({
+  const finishing = (o: BisectOptions): ConstructLineOptions => ({
     color: o.color,
     over: o.over,
     label: o.label,
     aid: false,
   });
 
-  const perpendicularBisector = (a: GeoPoint, b: GeoPoint, o: BisectOptions = {}): GeoLine => {
+  const perpendicularBisector = (
+    a: ConstructPoint,
+    b: ConstructPoint,
+    o: BisectOptions = {},
+  ): ConstructLine => {
     if (same(a, b))
       throw new Error(`perpendicularBisector() needs two different points, got ${name(a)} twice.`);
     begin(o);
@@ -728,7 +758,7 @@ export function construct(options: ConstructOptions = {}): Construction {
       const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
       const n = unit([-(b.y - a.y), b.x - a.x]);
 
-      const [p, q]: GeoPoint[] = [-1, 1].map((s): GeoPoint => ({
+      const [p, q]: ConstructPoint[] = [-1, 1].map((s): ConstructPoint => ({
         kind: "point",
         x: m.x + s * n[0] * len * 0.5,
         y: m.y + s * n[1] * len * 0.5,
@@ -738,7 +768,7 @@ export function construct(options: ConstructOptions = {}): Construction {
     }
 
     const toward = Math.atan2(b.y - a.y, b.x - a.x) / DEG;
-    let arcs: GeoCircle[] = [];
+    let arcs: ConstructCircle[] = [];
 
     together(() => {
       arcs = [
@@ -751,7 +781,12 @@ export function construct(options: ConstructOptions = {}): Construction {
     return addLine(p!, q!, true, [ext, ext], finishing(o));
   };
 
-  const angleBisector = (a: GeoPoint, b: GeoPoint, c: GeoPoint, o: BisectOptions = {}): GeoLine => {
+  const angleBisector = (
+    a: ConstructPoint,
+    b: ConstructPoint,
+    c: ConstructPoint,
+    o: BisectOptions = {},
+  ): ConstructLine => {
     if (same(a, b) || same(b, c))
       throw new Error(
         `angleBisector() needs the vertex in the middle and two other points, got ${name(a)}, ${name(b)} and ${name(c)}.`,
@@ -762,7 +797,7 @@ export function construct(options: ConstructOptions = {}): Construction {
     const middle = unit([ua[0] + uc[0], ua[1] + uc[1]]);
 
     if (length(middle) < EPS || o.compass === false) {
-      const tip: GeoPoint = {
+      const tip: ConstructPoint = {
         kind: "point",
         x: b.x + (middle[0] || -ua[1]) * arm,
         y: b.y + (middle[1] || ua[0]) * arm,
@@ -771,7 +806,7 @@ export function construct(options: ConstructOptions = {}): Construction {
       return addLine(b, tip, true, [0, o.extend ?? arm], finishing(o));
     }
 
-    const [p, q]: GeoPoint[] = [ua, uc].map((u): GeoPoint => ({
+    const [p, q]: ConstructPoint[] = [ua, uc].map((u): ConstructPoint => ({
       kind: "point",
       x: b.x + u[0] * arm,
       y: b.y + u[1] * arm,
@@ -789,10 +824,10 @@ export function construct(options: ConstructOptions = {}): Construction {
 
     const far = dist(cuts[0]!, b) > dist(cuts[1]!, b) ? 0 : 1;
 
-    const heading = (from_: GeoPoint, to: GeoPoint) =>
+    const heading = (from_: ConstructPoint, to: ConstructPoint) =>
       Math.atan2(to.y - from_.y, to.x - from_.x) / DEG;
 
-    let arcs: GeoCircle[] = [];
+    let arcs: ConstructCircle[] = [];
 
     circle(b, p!, { aid: true, arc: { from, to: from + sweep } });
     together(() => {
@@ -808,14 +843,24 @@ export function construct(options: ConstructOptions = {}): Construction {
     return addLine(b, d!, true, [0, o.extend ?? dist(b, d!) * 0.7], finishing(o));
   };
 
-  const through = (line: GeoLine, p: GeoPoint, direction: Vec, o: LineOptions): GeoLine => {
+  const through = (
+    line: ConstructLine,
+    p: ConstructPoint,
+    direction: Vec,
+    o: ConstructLineOptions,
+  ): ConstructLine => {
     const len = dist(line.a, line.b);
-    const q: GeoPoint = { kind: "point", x: p.x + direction[0] * len, y: p.y + direction[1] * len };
+
+    const q: ConstructPoint = {
+      kind: "point",
+      x: p.x + direction[0] * len,
+      y: p.y + direction[1] * len,
+    };
 
     return addLine(p, q, true, extension(o, len * 0.3), o);
   };
 
-  const polygon = (corners: readonly GeoPoint[], o: PolygonOptions = {}): void => {
+  const polygon = (corners: readonly ConstructPoint[], o: ConstructPolygonOptions = {}): void => {
     if (corners.length < 3)
       throw new Error(`polygon() needs at least three points, got ${corners.length}.`);
     const span = slot("fill", o);
@@ -849,7 +894,7 @@ export function construct(options: ConstructOptions = {}): Construction {
       );
     });
 
-    const middle: GeoPoint = {
+    const middle: ConstructPoint = {
       kind: "point",
       x: corners.reduce((s, p) => s + p.x, 0) / corners.length,
       y: corners.reduce((s, p) => s + p.y, 0) / corners.length,
@@ -858,7 +903,12 @@ export function construct(options: ConstructOptions = {}): Construction {
     label(o.label, span, o, (world) => world.px(middle), color);
   };
 
-  const angle = (a: GeoPoint, b: GeoPoint, c: GeoPoint, o: AngleOptions = {}): void => {
+  const angle = (
+    a: ConstructPoint,
+    b: ConstructPoint,
+    c: ConstructPoint,
+    o: AngleOptions = {},
+  ): void => {
     if (same(a, b) || same(b, c))
       throw new Error(
         `angle() needs the vertex in the middle and two other points, got ${name(a)}, ${name(b)} and ${name(c)}.`,
@@ -919,7 +969,7 @@ export function construct(options: ConstructOptions = {}): Construction {
     );
   };
 
-  const tick = (segment: GeoLine, o: TickOptions = {}): void => {
+  const tick = (segment: ConstructLine, o: TickOptions = {}): void => {
     const count = o.count ?? 1;
 
     if (!(count >= 1)) throw new Error(`tick() needs a count of 1 or more, got ${count}.`);

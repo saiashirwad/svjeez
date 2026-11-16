@@ -2,23 +2,22 @@ import {
   def,
   ease,
   motion,
-  rect,
   type Color,
   type Motion,
   type Stack,
   type SvgNode,
   appWindow,
   code,
-  shot,
   typewriter,
   type CodePiece,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { mono, theme } from "../style";
 import { COLD } from "./cold";
-import { C, Blip, show } from "./kit";
+import { C, Blip, Shot, show } from "./kit";
 
-const TERM_AT = COLD.at + COLD.over;
+// Everything here is written from 0, on the clock of a <Shot> that starts when the cold open ends.
 const FS = 15;
 const ROW = FS * 1.6;
 
@@ -77,7 +76,7 @@ const mascot = (row: number) => (
     x={BOX.x + (split - BOX.x) / 2}
     y={top(row) + ROW * 2.6}
     size={(ROW * 2.4) / 139}
-    blinks={[6.2, 9.4]}
+    blinks={[2.37, 5.57]}
   />
 );
 
@@ -133,7 +132,7 @@ const launch = typewriter(
     x: left,
     y: top(0),
   }),
-  { at: TERM_AT + 0.35, cps: 18, cursor: true, blink: false },
+  { at: 0.35, cps: 18, cursor: true, blink: false },
 );
 
 const welcomeAt = launch.span.end + 0.25;
@@ -225,7 +224,7 @@ const reply = (row: number, at: number, pieces: readonly CodePiece[]) =>
     </>,
   );
 
-line(0, TERM_AT + 0.35, launch.node);
+line(0, 0.35, launch.node);
 
 line(BOX.top + BOX.rows - 1, welcomeAt, welcome);
 
@@ -290,7 +289,7 @@ reply(R + 14.2, DONE_AT, [
   " is 18.4 KB, with 0 bytes of JavaScript.",
 ]);
 
-export const TERM = { at: TERM_AT, over: DONE_AT + 1.6 - TERM_AT };
+export const TERM = { at: COLD.at + COLD.over, over: DONE_AT + 1.6 };
 
 // The input box follows the transcript down, and the whole session scrolls once it outgrows the window.
 const spinning = (t: number) => t >= SENT && t < DONE_AT;
@@ -360,7 +359,7 @@ const spinner = (
 );
 
 export const terminalShot = (
-  <g animation={shot(TERM, { enter: "rise", exit: "zoom" })}>
+  <Shot {...TERM} enter="rise" exit="zoom">
     {shell.node}
     <g clipPath={body}>
       <g animation={follow((t) => -scroll(t) * ROW)}>
@@ -371,5 +370,5 @@ export const terminalShot = (
         <g animation={show(welcomeAt)}>{inputBox}</g>
       </g>
     </g>
-  </g>
+  </Shot>
 );

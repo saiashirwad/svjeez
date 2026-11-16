@@ -14,11 +14,8 @@
     ".": "./src/index.ts",
     "./fit": "./src/fit.ts",
     "./source": "./src/source.ts",
-    "./controls": "./src/controls.ts",
-    "./editor": "./src/editor.ts",
     "./compile": "./src/compile.ts",
     "./client": "./src/client.ts",
-    "./gzip": "./src/gzip.ts",
     "./editor.css": "./src/editor.css"
   },
   "scripts": {

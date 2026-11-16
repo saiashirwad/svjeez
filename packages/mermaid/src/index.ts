@@ -8,20 +8,20 @@ import {
   type Sequence,
   type SequenceOptions,
   type StateMachine,
-  type StateOptions,
+  type StateMachineOptions,
   type StateSpec,
 } from "@svjeez/diagrams";
-import { parse } from "./parse.ts";
+import { parseMermaid } from "./parse.ts";
 import type { FlowchartDoc, FlowForm, SequenceDoc, StateDoc, StateNode } from "./types.ts";
 
 export { MermaidSyntaxError } from "./errors.ts";
 
-export { parse } from "./parse.ts";
+export { parseMermaid } from "./parse.ts";
 
 export type * from "./types.ts";
 
 /** The options of all three diagrams; each kind reads its own and ignores the rest. */
-export type MermaidOptions = FlowchartOptions & SequenceOptions & StateOptions;
+export type MermaidOptions = FlowchartOptions & SequenceOptions & StateMachineOptions;
 
 export type MermaidFlowchart = Flowchart<string, string> & {
   readonly kind: "flowchart";
@@ -42,7 +42,7 @@ export type MermaidState = StateMachine<string> & {
 export type MermaidDiagram = MermaidFlowchart | MermaidSequence | MermaidState;
 
 /** Which svjeez node role draws each Mermaid form. */
-export const FORM_ROLES: Record<FlowForm, NodeRole> = {
+const FORM_ROLES: Record<FlowForm, NodeRole> = {
   rect: "task",
   round: "task",
   stadium: "input",
@@ -69,9 +69,7 @@ const flow = (doc: FlowchartDoc, options: MermaidOptions): MermaidFlowchart => {
         doc.subgraphs.map((g) => [g.id, { label: g.title, nodes: g.nodes }]),
       ),
       edges: doc.edges.map((e) =>
-        e.label === undefined
-          ? ([e.from, e.to] as const)
-          : ([e.from, e.to, { label: e.label }] as const),
+        e.label === undefined ? ([e.from, e.to] as const) : ([e.from, e.to, e.label] as const),
       ),
     },
     { ...options, direction },
@@ -134,7 +132,7 @@ const stateOf = (doc: StateDoc, options: MermaidOptions): MermaidState => {
  * diagram's own: `theme`, `font`, `fontSize`, `x`, `y`, `anchor`, `direction` and `play`.
  */
 export function mermaid(text: string, options: MermaidOptions = {}): MermaidDiagram {
-  const doc = parse(text);
+  const doc = parseMermaid(text);
 
   switch (doc.kind) {
     case "flowchart":

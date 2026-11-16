@@ -15,6 +15,7 @@ const ENTRIES = [
   "svjeez/frames",
   "svjeez/page",
   "svjeez/params",
+  "svjeez/geometry",
 ];
 
 // The @ts-expect-error fails the check if css holes stop being checked.

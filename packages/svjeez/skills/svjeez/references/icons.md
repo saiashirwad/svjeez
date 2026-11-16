@@ -1,6 +1,6 @@
 # Icons
 
-`<Icon>` draws an icon from path data. `@svjeez/icons` is a separate package with about 8,000 of them: `npm i -D @svjeez/icons`.
+`<Icon>` draws an icon from path data. `@svjeez/icons` is a separate package with about 8,000 of them: `npm i -D @svjeez/icons`. It has no root import, only the `/tabler` and `/lucide` paths below, and needs `svjeez` as a peer.
 
 ```tsx
 import { rocket, heartFilled } from "@svjeez/icons/tabler";
@@ -24,7 +24,7 @@ A name that is a reserved word or starts with a digit gets an `icon` prefix, as 
 
 ## Props
 
-- `icon` is `{ grid, kind, paths }`. You can pass your own.
+- `icon` is an `IconData`, `{ grid, kind, paths }`, a type exported by `svjeez`. `kind` is `"stroke"` or `"fill"`. You can pass your own.
 - `x`, `y` is the top-left corner. `size` is the side in px and defaults to the icon's grid, 24 for both sets.
 - `stroke` paints an outline icon and `fill` paints a filled one. Both default to `currentColor`, so a `color` on a parent works.
 - `strokeWidth` is in grid units and defaults to 2. It scales with `size`, so a 48px icon strokes at 4px. Outline icons only.

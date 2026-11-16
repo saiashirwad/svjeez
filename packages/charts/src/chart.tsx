@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
 import { scaleBand, scaleLinear } from "d3-scale";
-import { rect, type Color, type SvgNode, defaultDark, tint } from "svjeez";
+import { type Color, type SvgNode, defaultDark, tint } from "svjeez";
 
 import { buildSeries, round, type Frame } from "./series.tsx";
 import type { Chart, ChartOptions, Datum, XScale } from "./types.ts";
@@ -31,12 +31,16 @@ const spread = (low: number, high: number): [number, number] =>
   low === high ? [low, low + 1] : [low, high];
 
 export function chart<X extends XScale>(options: ChartOptions<X>): Chart<X["kind"]> {
-  const { width, height, at = { x: 0, y: 0 }, x: xs, data = [], grid = false } = options;
+  const { frame, x: xs, data = [], grid = false } = options;
+  const { w: width, h: height } = frame;
+  const at = { x: frame.x, y: frame.y };
   const { theme = defaultDark, fontSize = 12, font } = options;
   const ys = options.y ?? {};
 
   if (!(width > 0) || !(height > 0) || !Number.isFinite(width + height))
-    throw new Error(`chart() needs a positive width and height, got ${width} and ${height}.`);
+    throw new Error(
+      `chart() needs a frame with a positive width and height, got ${width} and ${height}.`,
+    );
 
   if (!(fontSize > 0)) throw new Error(`chart() needs a positive fontSize, got ${fontSize}.`);
 
@@ -213,8 +217,8 @@ export function chart<X extends XScale>(options: ChartOptions<X>): Chart<X["kind
 
   let used = 0;
 
-  const frame: Frame = {
-    bounds: rect(at.x, at.y, width, height),
+  const shared: Frame = {
+    bounds: frame,
     theme,
     fontSize,
     font,
@@ -228,17 +232,17 @@ export function chart<X extends XScale>(options: ChartOptions<X>): Chart<X["kind
     categories: xs.kind === "band" ? xs.domain : undefined,
   };
 
-  const series = buildSeries(frame);
+  const series = buildSeries(shared);
 
   return {
     node,
-    bounds: frame.bounds,
+    bounds: frame,
     x: (value) => xOf(value),
     y: (value) => yScale(value),
     bandwidth,
     // SAFETY: the conditional type on `bars` only offers it when the scale is a band, and series.bars throws otherwise.
     bars: series.bars as Chart<X["kind"]>["bars"],
-    line: (points: readonly Datum<X["kind"]>[], o) => series.line(points, o),
-    area: (points: readonly Datum<X["kind"]>[], o) => series.area(points, o),
+    line: (when, points: readonly Datum<X["kind"]>[], o) => series.line(when, points, o),
+    area: (when, points: readonly Datum<X["kind"]>[], o) => series.area(when, points, o),
   };
 }

@@ -5,13 +5,13 @@ import {
   fx,
   motion,
   Once,
-  polylinePath,
   render,
   sampled,
   type Hex,
   type SvgNode,
   morph,
 } from "svjeez";
+import { polylinePath } from "svjeez/geometry";
 
 import type { Outline } from "./outline";
 

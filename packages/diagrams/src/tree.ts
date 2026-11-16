@@ -9,11 +9,13 @@ import {
   look,
   lookup,
   placer,
+  POP,
   popIn,
   sizeOf,
-  type Diagram,
+  spanOfReveals,
   type DiagramOptions,
   type NodeRole,
+  type PlayedDiagram,
 } from "./kit.tsx";
 
 /** A label, or a node naming its `parent`. Exactly one node has no parent. */
@@ -28,7 +30,7 @@ export interface TreeOptions extends DiagramOptions {
   readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
-export interface Tree<N extends string> extends Diagram<N> {
+export interface Tree<N extends string> extends PlayedDiagram<N> {
   /** Up from `from` to the nearest common ancestor, then down to `to`, along the drawn edges. */
   route(from: N, to: N): Point[];
 }
@@ -65,13 +67,16 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   const times = beats(play?.at ?? 0, out.order.length - 1, step, "tree() play");
   /** The root is there from the start, so no frame is empty. */
   const shown = new Map(out.order.map((id, i) => [id, i === 0 ? -Infinity : times[i - 1]!]));
-  const over = Math.min(0.35, step);
+  const over = Math.min(POP, step);
+
+  const drawAt = (e: { from: string; to: string }) =>
+    Math.max(0, shown.get(e.from)!, shown.get(e.to)! - over);
 
   const node = l.root([
     out.edges.map((e) =>
       arrow(edges.get(e.to)!, {
         ...l,
-        at: play && Math.max(0, shown.get(e.from)!, shown.get(e.to)! - over),
+        at: play && drawAt(e),
         over,
       }),
     ),
@@ -94,8 +99,20 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
 
   const down = (id: string) => curve(edges.get(id)!).samples;
 
+  const span = spanOfReveals(
+    play
+      ? [
+          ...out.edges.map((e) => ({ at: drawAt(e), over })),
+          ...nodes.flatMap((n) =>
+            shown.get(n.id)! >= 0 ? [{ at: shown.get(n.id)!, over: POP }] : [],
+          ),
+        ]
+      : [],
+  );
+
   return {
     node,
+    span,
     bounds: at.bounds,
     get: lookup("tree()", boxes),
     route: (from: Id, to: Id): Point[] => {

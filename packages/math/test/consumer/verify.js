@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { plane, contours, tex } from "@svjeez/math";
 import { render, morph } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 const at = { x: 20, y: 20, fontSize: 40 };
 const square = tex(String.raw`(a+b)^2`, at);
@@ -18,7 +19,7 @@ assert.ok(expanded.get("mid").w > 0);
 
 assert.throws(() => tex(String.raw`\frac{`), /could not parse/);
 
-const graph = plane({ x: [-3, 3], y: [-1, 9], width: 200, height: 100, at: { x: 10, y: 10 } });
+const graph = plane({ xRange: [-3, 3], yRange: [-1, 9], frame: rect(10, 10, 200, 100) });
 const plotted = render({ width: 240, height: 120, duration: 2, title: "Graph" }, [graph.node]);
 
 assert.match(plotted, /^<svg[\s\S]*<line /);
@@ -27,7 +28,7 @@ assert.deepEqual(graph.point(-3, 9), { x: 10, y: 10 });
 
 const ring = contours((x, y) => x * x + y * y, {
   levels: [1],
-  bounds: { x: 0, y: 0, w: 100, h: 100 },
+  frame: rect(0, 0, 100, 100),
 });
 
 assert.ok(ring.some((level) => level.lines.length > 0));

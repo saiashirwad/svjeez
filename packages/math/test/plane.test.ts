@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { motion, render, type SvgNode } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { plane } from "../src/index";
 
 const svg = (css: Parameters<typeof render>[0]["css"], ...children: SvgNode[]) =>
@@ -7,28 +8,23 @@ const svg = (css: Parameters<typeof render>[0]["css"], ...children: SvgNode[]) =
 
 /** Four units each way at 20px a unit, with (0, 0) at (200, 150). */
 const base = plane({
-  x: [-4, 4],
-  y: [-4, 4],
-  width: 160,
-  height: 160,
-  at: { x: 120, y: 70 },
+  xRange: [-4, 4],
+  yRange: [-4, 4],
+  frame: rect(120, 70, 160, 160),
   ticks: 1,
 });
 
-const shear = base.apply(
-  [
-    [1, 1],
-    [0, 1],
-  ],
-  { at: 1, over: 2 },
-);
+const shear = base.apply({ at: 1, over: 2 }, [
+  [1, 1],
+  [0, 1],
+]);
 
 const numbers = (d: string) => (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
 
 describe("plane", () => {
   test("a range with max at or below min is rejected", () => {
-    expect(() => plane({ x: [3, -3], y: [-3, 3], width: 100, height: 100 })).toThrow(
-      "plane() needs a finite x range with max above min, got [3, -3].",
+    expect(() => plane({ xRange: [3, -3], yRange: [-3, 3], frame: rect(0, 0, 100, 100) })).toThrow(
+      "plane() needs a finite xRange with max above min, got [3, -3].",
     );
   });
 
@@ -39,12 +35,12 @@ describe("plane", () => {
   });
 
   test("the pixels per unit may differ per axis, and a vector's head turns with the pixels", () => {
-    const wide = plane({ x: [0, 2], y: [0, 2], width: 400, height: 100 }).apply(
+    const wide = plane({ xRange: [0, 2], yRange: [0, 2], frame: rect(0, 0, 400, 100) }).apply(
+      { at: 1, over: 1 },
       [
         [1, 0],
         [0, 1],
       ],
-      { at: 1, over: 1 },
     );
 
     expect(wide.point(1, 1)).toEqual({ x: 200, y: 50 });
@@ -53,8 +49,27 @@ describe("plane", () => {
     expect(out).toContain('style="--p1:200;--p2:50"');
   });
 
+  test("a span first makes a vector grow, then its head and label appear", () => {
+    const still = svg(base.css, base.vector([1, 1], { label: "v" }));
+    const grown = svg(base.css, base.vector({ at: 1, over: 2 }, [1, 1], { label: "v" }));
+    expect(still).not.toContain(`class="plane-grow`);
+    expect(grown).toContain(`class="plane-grow a`);
+  });
+
+  test("basis takes an optional span, and both arrows grow in it", () => {
+    expect(svg(base.css, base.basis())).not.toContain(`class="plane-grow`);
+    const out = svg(base.css, base.basis({ at: 1, over: 1 }));
+    expect(out.match(/class="plane-grow a/g)).toHaveLength(2);
+  });
+
   test("ticks as one number are the same on both axes, and an axis without ticks has no grid lines", () => {
-    const only = plane({ x: [-2, 2], y: [-2, 2], width: 100, height: 100, ticks: { x: 1 } });
+    const only = plane({
+      xRange: [-2, 2],
+      yRange: [-2, 2],
+      frame: rect(0, 0, 100, 100),
+      ticks: { x: 1 },
+    });
+
     expect(svg(undefined, only.grid)).not.toContain("H");
     expect(svg(undefined, only.grid)).toContain("V");
     expect(svg(undefined, base.grid)).toContain("V");
@@ -74,13 +89,10 @@ describe("plane", () => {
   });
 
   test("steps compose: map() follows each matrix in order, and reset() returns home", () => {
-    const rotate = shear.apply(
-      [
-        [0, -1],
-        [1, 0],
-      ],
-      { at: 3, over: 1 },
-    );
+    const rotate = shear.apply({ at: 3, over: 1 }, [
+      [0, -1],
+      [1, 0],
+    ]);
 
     expect(shear.map(0, 1)).toEqual(base.point(1, 1));
     expect(rotate.map(0, 1)).toEqual(base.point(-1, 1));
@@ -104,7 +116,7 @@ describe("plane", () => {
   });
 
   test("a function step morphs the grid through d, with every key written in the same commands", () => {
-    const square = base.applyFunction((x, y) => [x * x - y * y, 2 * x * y], { at: 1, over: 2 });
+    const square = base.applyFunction({ at: 1, over: 2 }, (x, y) => [x * x - y * y, 2 * x * y]);
     const out = svg(square.css, square.grid);
 
     const values = out
@@ -118,10 +130,10 @@ describe("plane", () => {
   });
 
   test("a vector under a function keeps its head the same triangle at every key", () => {
-    const bent = base.applyFunction((x, y) => [Math.cos(y) * (1 + x), Math.sin(y) * (1 + x)], {
-      at: 1,
-      over: 2,
-    });
+    const bent = base.applyFunction({ at: 1, over: 2 }, (x, y) => [
+      Math.cos(y) * (1 + x),
+      Math.sin(y) * (1 + x),
+    ]);
 
     const out = svg(bent.css, bent.vector([0, 2]));
 
@@ -144,22 +156,19 @@ describe("plane", () => {
 
   test("errors name the fix", () => {
     expect(() =>
-      shear.apply(
-        [
-          [1, 0],
-          [0, 1],
-        ],
-        { at: 2, over: 1 },
-      ),
+      shear.apply({ at: 2, over: 1 }, [
+        [1, 0],
+        [0, 1],
+      ]),
     ).toThrow("A plane step starts at 2s, before the previous step ends at 3s.");
     expect(() => base.vector([0, 0])).toThrow(
       "plane.vector() needs a finite arrow of nonzero length",
     );
-    expect(() => plane({ x: [0, 1], y: [0, 1], width: 0, height: 10 })).toThrow(
-      "plane() needs a positive width and height",
+    expect(() => plane({ xRange: [0, 1], yRange: [0, 1], frame: rect(0, 0, 0, 10) })).toThrow(
+      "plane() needs a frame with a positive width and height",
     );
 
-    const broken = base.applyFunction((x) => [1 / x, 0], { at: 0, over: 1 });
+    const broken = base.applyFunction({ at: 0, over: 1 }, (x) => [1 / x, 0]);
     expect(() => broken.grid).toThrow("plane.applyFunction() sent (0, -4) to (Infinity, 0)");
   });
 });

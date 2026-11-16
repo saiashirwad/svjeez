@@ -2,7 +2,6 @@ import {
   def,
   ease,
   motion,
-  rect,
   render,
   Callout,
   Focus,
@@ -16,6 +15,7 @@ import {
   type CodePiece,
   type CodeTokens,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { flowchart, sequence, stateMachine } from "@svjeez/diagrams";
 import { css, mono, theme } from "../style";
 
@@ -234,12 +234,12 @@ const recapSpec = {
   },
   edges: [
     ["call", "open"],
-    ["open", "run", { label: "no" }],
-    ["open", "due", { label: "yes" }],
-    ["due", "fail", { label: "no" }],
-    ["due", "run", { label: "yes" }],
-    ["run", "ok", { label: "ok" }],
-    ["run", "count", { label: "threw" }],
+    ["open", "run", "no"],
+    ["open", "due", "yes"],
+    ["due", "fail", "no"],
+    ["due", "run", "yes"],
+    ["run", "ok", "ok"],
+    ["run", "count", "threw"],
   ],
 } as const;
 

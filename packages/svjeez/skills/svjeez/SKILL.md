@@ -29,7 +29,20 @@ export default function build(): string {
 }
 ```
 
-`render` takes `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `playbackRate`, `reducedMotion: { at }` or `false`, `loop` (`false` plays once and holds), `prefix` and `sources` (`true` writes `data-source="file:line:column"` on every element built by the development JSX runtime, for tools that link the picture back to its code). Attributes are camelCase (`strokeWidth`) and the class attribute is `class`.
+`render` takes `width`, `height`, `title` (required), `duration` (one loop, seconds), `desc`, `css`, `playbackRate`, `reducedMotion: { at }` or `false`, `loop` (`false` plays once and holds), `prefix` (so two scenes can share one page), `comment` and `sources` (`true` writes `data-source="file:line:column"` on every element built by the development JSX runtime, for tools that link the picture back to its code). Attributes are camelCase (`strokeWidth`) and the class attribute is `class`.
+
+Imports:
+
+| Path | Holds |
+| --- | --- |
+| `svjeez` | `render`, `motion`, `ease`, the recipes, spans, `<Clip>`, `show`, `def`, `css`, fonts, pictures, and the explainer parts |
+| `svjeez/geometry` | `rect`, `matchPaths`, `polylinePath`, `resample`, `pathLength`, `num`. The types `Rect`, `Point`, `Edge` and `PathData` come from `svjeez` |
+| `svjeez/frames` | `renderFrames`, `validateSvg` |
+| `svjeez/page` | `restyle`, `seek`, `loopLength`, for a page that holds a rendered SVG |
+| `svjeez/params` | values a page or editor can change |
+| `svjeez/jsx-runtime` | `jsx(tag, props)`, for `.ts` files |
+
+Packages that place something on the canvas take a `frame: Rect`, built with `rect(x, y, w, h)`.
 
 ## Render, look, fix
 
@@ -49,7 +62,7 @@ Times are scene seconds, the clock your motions are written on, even when `playb
 
 ## Time
 
-Every motion is written on a clock that starts at 0. The scene is the root clock, `0` to `duration`; a `<Clip>` starts another. A span is a plain `{ at, over }` on the clock around it, and a span without `over` runs to the end. Write spans that way: `draw({ at: 0.2, over: 1.2 })`. Recipes, `.to`, `show`, `<Clip>` and the results of `typewriter`, `terminal`, `flow` and `reveal` all take or return spans. Attach motions with the `animation` prop.
+Every motion is written on a clock that starts at 0. The scene is the root clock, `0` to `duration`; a `<Clip>` starts another. A span is a plain `{ at, over }` on the clock around it, and a span without `over` runs to the end. Recipes, `show`, `<Clip>` and the results of `typewriter`, `terminal`, `reveal`, `morph` and `flow` take or return spans. Attach motions with the `animation` prop.
 
 ```tsx
 motion({ opacity: 0 })          // initial values, held until the first transition
@@ -61,9 +74,10 @@ motion({ opacity: 0 })          // initial values, held until the first transiti
   .loop(6);                     // repeat every 6s, forever; snapped to divide duration
 ```
 
-- `.to(values, over, ease?)`: `over` is a length, never an end time. `.at(t).to(values, over)` is the chain form of `{ at: t, over }`; `.to(values, { at, over }, ease?)` says the same in one call. Default ease is `ease.out`. Between transitions every value holds.
+- `.to(values, over, ease?)`: `over` is a length, never an end time. `.at(t).to(values, over)` places a transition on the clock. Default ease is `ease.out`. Between transitions every value holds.
 - `.repeat(3)` plays the passage written so far three times in all; `.repeat({ until: 10 })` repeats it until 10s, cutting the last pass short, then holds. Each pass starts from the initial values. Passes become keyframes, so a spin that never stops is `.loop()`, and a long repeat hits the key cap.
 - `.rewind(0.8)` glides every channel back to its initial value, ending at the end of the clock: the scene's, a `<Clip>`'s, or a loop's period. It is how a loop closes without a hand-written reset. Nothing can follow it.
+- `.label(name)` names the keyframes. It changes nothing else.
 - Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign. `easeAt(curve, progress)` gives an ease's value at a progress from 0 to 1, to reuse it inside `sampled()` or draw it beside the scene.
 - Stack with an array: `animation={[enter(...), wiggle(...)]}`. Index 0 is outermost, like a wrapper `<g>`. Falsy entries drop out.
 - Only `opacity x y scale rotate blur` stack. Every other channel takes one motion per element, or render throws `Two motions both animate`. Within one motion, `x` and `y` share a lane, so move them in one `.to()`.
@@ -87,7 +101,7 @@ Custom properties from `css.property` animate on every tag above except filter p
 
 ### Spans
 
-`span()` is only a helper for `.next` and `.pad`, when a beat is placed relative to another. Everywhere else a plain `{ at, over }` does.
+`span()` helps when a beat is placed relative to another.
 
 ```tsx
 const reach = span(0, 0.7);
@@ -97,7 +111,7 @@ reach.end; reach.shift(2);       // 0.7; the same span 2s later
 span(5);                         // from 5s to the end of the clock; its end is Infinity
 ```
 
-A plain `{ at, over }` is a span too. `span()` only adds `.end`, `.shift(dt)`, `.next(over, gap?)` and `.pad(before, after?)`. `typewriter`, `terminal`, `reveal` and `flow` return `.span`, so `typed.span.next(1)` is the next beat and `typed.span.end` is when it lands.
+A `span` is a plain `{ at, over }` that also has `.end`, `.shift(dt)`, `.next(over, gap?)` and `.pad(before, after?)`. `at` is 0 or later and `over` is positive; `span(at, 0)` is allowed as a point to chain from. `typewriter`, `terminal`, `reveal`, `morph` and `flow` return `.span`, so `typed.span.next(1)` is the next beat and `typed.span.end` is when it lands. `timeline({ intro: 4, demo: 6 }, { gap, pace, at })` lays out named scenes as spans, with `.end` for the total.
 
 ### Clips
 
@@ -120,7 +134,7 @@ A plain `{ at, over }` is a span too. `span()` only adds `.end`, `.shift(dt)`, `
 
 ### show
 
-`show(span | spans, { fade })` is opacity on while a span runs and off outside. It is the one way to show and hide.
+`show(span | spans, { fade })` is opacity on while a span runs and off outside. It is how to show and hide.
 
 ```tsx
 show(span(2, 4));                           // fades in over 0.3s, holds, fades out over the last 0.3s
@@ -128,7 +142,7 @@ show([tl.intro, { at: 8 }], { fade: 0.2 }); // several spans; { at: 8 } stays to
 show(tl.intro, { fade: 0 });                // hard cuts, a shot in an edit
 ```
 
-Fades sit inside the span. Spans that overlap or touch merge, a span shorter than two fades shrinks them, and no spans means never shown, so nothing throws for a click shorter than its fade. `during`, `cut`, `visible`, `tl.show` and `tl.enter` are older spellings of the same thing.
+Fades sit inside the span. Spans that overlap or touch merge, a span shorter than two fades shrinks them, and no spans means never shown, so nothing throws for a click shorter than its fade.
 
 ## Recipes
 
@@ -141,20 +155,27 @@ shake({ at: 2, over: 0.5 }, { x: 6 });               // damped shake on x, y or 
 wiggle({ rotate: 4 }, { seed: "leaf", rate: 6 });    // seeded looping noise; change the seed to reroll
 ```
 
-Recipes take a span `{ at, over }`. `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `sampled(fn, { over, at?, tolerance })` bakes a function of time into keyframes: `fn` is given time from 0 to `over`, plays from `at` (default 0) and holds its first and last values outside, so a motion that belongs to one scene costs keys only for that scene. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. To fly along a smooth route, `spline(points)` draws a Catmull-Rom curve through `{ x, y }` points: position `i + u` is `u` along leg `i`, `point(at)` and `angle(at)` feed `sampled()`, `tangent(at)` is the velocity, `path(from, to)` cuts exact path data (`d` is the whole route), and `nearest(p, from, to)` finds the position closest to a point.
-`precision: 1` rounds each sample to one decimal place before the keys are kept, which keeps the file small. `random(seed)` is the seeded stream `wiggle` uses: the same numbers from 0 up to 1 on every run, from a whole number or a string such as `"leg-3"`.
+Recipes take a span `{ at, over }`, and an ease last (`enter`, `exit`, `draw`). `enter` and `exit` take only the rest channels (`opacity x y scale rotate blur`). Use `motion()` for colors. `shake` and `wiggle` take an amplitude per channel, and `rate` must be positive. `wiggle` also takes `period` (default 2s, snapped to divide the scene) and `ease`.
 
-`valuesAt(stack, t, { duration })` reads what a motion or stack draws at scene time `t`, eased and looped as `render()` plays it, for placing something beside a moving part or drawing a readout of it. It returns the numeric channels and properties. Across layers `x`, `y` and `rotate` add and `opacity` and `scale` multiply.
+`sampled(fn, { over, at?, step?, tolerance, precision? })` bakes a function of time into keyframes. `fn` is given time from 0 to `over`, plays from `at` (default 0) and holds its first and last values outside, so a motion that belongs to one scene costs keys only for that scene. Every key needs a tolerance for its lane (`translate` covers `x` and `y`), and every sample must return the same keys. A jump in the function, such as an angle reset from 360 to 0, becomes a cut rather than a spin back. For a reset you don't want seen, keep counting instead. `precision: 1` rounds each sample to one decimal place before the keys are kept, which keeps the file small.
 
 ```tsx
 sampled((t) => ({ x: 100 * Math.cos(t) }), { over: 12, tolerance: { translate: 1 } });
 ```
 
+`spline(points)` draws a Catmull-Rom curve through `{ x, y }` points, for flying something along a smooth route. Position `i + u` is `u` along leg `i`. `point(at)` and `angle(at)` feed `sampled()`, `tangent(at)` is the velocity, `d` is the whole route as path data, `path(from, to)` cuts exact path data, and `nearest(p, from, to)` finds the position closest to a point.
+
+`random(seed)` is the seeded stream `wiggle` uses: the same numbers from 0 up to 1 on every run, from a whole number or a string such as `"leg-3"`.
+
+`valuesAt(stack, t, { duration, loop? })` reads what a motion or stack draws at scene time `t`, eased and looped as `render()` plays it, for placing something beside a moving part or drawing a readout of it. Pass the scene's `duration` and `loop`. It returns the numeric channels and properties. Across layers `x`, `y` and `rotate` add and `opacity` and `scale` multiply.
+
 ## Shape morphs
 
-`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampled.path(fn, { over, at?, tolerance })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is one number, in px, and `precision` (default 1) the decimal places of the path data. It takes the same `over`, `at` and `step` as `sampled`.
+`d` moves a `<path>` from one outline to another through SMIL, so Safari animates it too. Every value in one motion must have the same commands. `matchPaths()` from `svjeez/geometry` rewrites any outlines (squares, circles, glyphs, countries) into that form, with rings paired by order and turned so they don't twist. `sampled.path(fn, { over, at?, step?, tolerance, precision? })` bakes a function of time that returns path data, keeping only the keys the shape needs; `tolerance` is one number, in px, and `precision` (default 1) the decimal places of the path data.
 
 ```tsx
+import { matchPaths } from "svjeez/geometry";
+
 const [square, star] = matchPaths([squareD, starD]);
 <path d={square} animation={motion({ d: square }).at(1).to({ d: star }, 0.8, ease.inOut)} />;
 sampled.path((t) => wavePath(t), { over: 6, tolerance: 0.5 });
@@ -162,9 +183,9 @@ sampled.path((t) => wavePath(t), { over: 6, tolerance: 0.5 });
 
 Reduced motion shows a still copy of the path at `reducedMotion.at`.
 
-`polylinePath(points, { closed, precision })` writes the path data for straight runs through points (one decimal place by default), and `resample(points, count)` spaces `count` points evenly along them.
+Also in `svjeez/geometry`: `polylinePath(points, { closed?, precision? })` writes path data for straight runs through points (one decimal place by default), `resample(points, count)` spaces `count` points evenly along them, and `pathLength(points)` is their total length.
 
-The path form's `slack: (x, y) => px` lets points that nobody sees stray further, which saves keys; `@svjeez/geo`'s turning globes use it for the side folded out past the clip.
+`sampled.path` takes `slack: (x, y) => px`, which lets points that nobody sees stray further and saves keys. `@svjeez/geo`'s turning globes use it for the side folded out past the clip.
 
 ## Errors and fixes
 
@@ -176,6 +197,7 @@ Type errors from `tsc`:
 | `Motion<"draw"> is not assignable to type 'Stack<TagChannels<"g">>` | The tag cannot animate that channel. See the table |
 | `Ref<"linearGradient"> is not assignable to type 'Ref<"clipPath">'` | A def in the wrong slot. Use `def.clipPath` or `def.mask` |
 | `'duration' does not exist in type 'Span'` | Recipes take `{ at, over }` |
+| `Argument of type '{ at: number; over: number; }' is not assignable to parameter of type 'number'` on `.to` | `.to` takes a length: `.at(span.at).to(values, span.over)` |
 | `No overload matches this call` on `enter` or `exit` | A non-rest channel such as `fill`. Use `motion().to()` |
 | `Expected 2 arguments` on `wiggle` | `wiggle(amplitude, { seed: "name" })` |
 | `Property 'title' is missing` | `render` needs `title` |
@@ -190,7 +212,6 @@ Runtime errors. `…` stands for a value the message fills in.
 | ``Two motions both animate `…` on <…>: put them in one motion().`` | Only the stacking channels may repeat |
 | ``Two transitions move `…` between …s and …s.`` | Merge into one `.to({ x, y })`, or stack two motions |
 | `A motion on <…> runs until …s, past the …s scene.` | Raise `duration`, or end the motion earlier. Inside a `<Clip>` the message names the clip |
-| `to() needs a span with an over, got { at: … } alone. A transition takes time: use span(…, over).` | `.to()` takes a span with an `over` |
 | `repeat() would unroll … passes of … steps into keyframes. Use .loop(period) for a motion that never stops.` | `.loop(period)`, or fewer passes |
 | `rewind(…) on … needs the last …s of its …s clock, but the motion runs until …s.` | End the motion earlier, or rewind over less time |
 | `… cuts a steps(…) transition between two of its steps. Cut it on a step edge, or use ease.out.` | `repeat({ until })` or a loop in a `<Clip>` fell inside a `steps()` transition |

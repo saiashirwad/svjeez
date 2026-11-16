@@ -10,6 +10,7 @@
     "directory": "packages/code"
   },
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
     "./palettes": "./src/palettes.ts"

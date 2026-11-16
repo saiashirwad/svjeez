@@ -3,7 +3,6 @@ import {
   ease,
   enter,
   motion,
-  rect,
   type Child,
   type Point,
   type Rect,
@@ -12,6 +11,7 @@ import {
   travel,
   type CameraStop,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { trace } from "./curve";
 import { C, H, W, Y, n } from "./kit";

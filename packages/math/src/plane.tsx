@@ -33,21 +33,18 @@ export type PlaneMatrix = readonly [Row, Row];
 /** A map of the plane that need not be linear, such as z ↦ z² as `(x, y) => [x * x - y * y, 2 * x * y]`. */
 export type PlaneFunction = (x: number, y: number) => Vec2;
 
-export interface StepOptions extends Span {
+export interface StepOptions {
   /** Default `ease.inOut`. */
   readonly ease?: Ease;
 }
 
 export interface PlaneOptions {
+  /** The plot area in scene px. The pixels per unit follow from it and the ranges, and may differ per axis. */
+  readonly frame: Rect;
   /** Graph range of the x axis, `[min, max]`. */
-  readonly x: Vec2;
+  readonly xRange: Vec2;
   /** Graph range of the y axis, `[min, max]`. */
-  readonly y: Vec2;
-  /** Size of the plot area in px. The pixels per unit follow from it and the range, and may differ per axis. */
-  readonly width: number;
-  readonly height: number;
-  /** Top-left of the plot area. Default the origin of the scene. */
-  readonly at?: Point;
+  readonly yRange: Vec2;
   /** Tick step in graph units: a number for both axes, or one per axis. An axis without one has no ticks and no grid lines. */
   readonly ticks?: number | { readonly x?: number; readonly y?: number };
   /** Numbers at the ticks. Default true. */
@@ -69,11 +66,9 @@ export interface VectorOptions {
   readonly label?: string | Tex;
   /** The tail, in plane units. Default the origin. */
   readonly from?: Vec2;
-  /** The shaft grows from the tail during the span, then the head and the label appear. */
-  readonly enter?: Span;
 }
 
-export interface PolygonOptions {
+export interface PlanePolygonOptions {
   /** Default the theme's base0A. */
   readonly color?: Color;
   /** Default 0.22. */
@@ -82,7 +77,7 @@ export interface PolygonOptions {
   readonly strokeWidth?: number;
 }
 
-export interface LineOptions {
+export interface PlaneLineOptions {
   /** Default the theme's base0E. */
   readonly color?: Color;
   /** Default 1.5. */
@@ -90,7 +85,7 @@ export interface LineOptions {
   readonly opacity?: number;
 }
 
-export interface LabelOptions {
+export interface PlaneLabelOptions {
   /** For TeX source. Default the theme's base05. */
   readonly color?: Color;
   /** For TeX source. Default 17. */
@@ -127,11 +122,11 @@ export interface Plane extends Calculus {
   /** Scene pixels of a point after every step. */
   map(x: number, y: number): Point;
   /** Moves the plane by `matrix` during the span, on top of the steps before it. */
-  apply(matrix: PlaneMatrix, step: StepOptions): Plane;
+  apply(span: Span, matrix: PlaneMatrix, options?: StepOptions): Plane;
   /** Moves every point p to `f(p)` during the span, each along a straight line. */
-  applyFunction(f: PlaneFunction, step: StepOptions): Plane;
+  applyFunction(span: Span, f: PlaneFunction, options?: StepOptions): Plane;
   /** Moves every point back to where it started. */
-  reset(step: StepOptions): Plane;
+  reset(span: Span, options?: StepOptions): Plane;
   /** The rules the plane's elements read. Pass it to `render`'s `css`. */
   readonly css: ReturnType<typeof css>;
   /** The grid lines at the ticks as they were, staying put. */
@@ -144,14 +139,16 @@ export interface Plane extends Calculus {
   plot(f: (x: number) => number, options?: PlotOptions): Plot;
   /** An arrow to `to`, its head upright however the plane shears. */
   vector(to: Vec2, options?: VectorOptions): SvgNode;
-  /** î and ĵ, labelled, with ĵ entering 0.2s after î. */
-  basis(options?: { readonly enter?: Span }): SvgNode;
+  /** The same arrow, its shaft growing from the tail during `span`, then the head and the label appear. */
+  vector(span: Span, to: Vec2, options?: VectorOptions): SvgNode;
+  /** î and ĵ, labelled. Given a span, they grow in it, with ĵ entering 0.2s after î. */
+  basis(span?: Span): SvgNode;
   /** A filled polygon whose corners move with the plane, so its area follows the determinant. */
-  polygon(points: readonly Vec2[], options?: PolygonOptions): SvgNode;
+  polygon(points: readonly Vec2[], options?: PlanePolygonOptions): SvgNode;
   /** The line through the origin along `direction`, across the grid. An eigenvector's line stays on itself. */
-  span(direction: Vec2, options?: LineOptions): SvgNode;
+  line(direction: Vec2, options?: PlaneLineOptions): SvgNode;
   /** Content centered on a point of the plane, riding it. A node is placed with its origin there. */
-  label(at: Vec2, content: string | Tex | SvgNode, options?: LabelOptions): SvgNode;
+  label(at: Vec2, content: string | Tex | SvgNode, options?: PlaneLabelOptions): SvgNode;
 }
 
 type Place =
@@ -428,29 +425,40 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         ? cssDrawing(frame, steps, matrices)
         : warpDrawing(frame, steps));
 
-  const push = (place: Place, step: StepOptions): Plane => {
+  const push = (place: Place, span: Span, options: StepOptions = {}): Plane => {
     const last = steps.at(-1);
 
-    if (!(step.over > 0) || !finite(step.at) || step.at < 0)
+    if (!(span.over > 0) || !finite(span.at) || span.at < 0)
       throw new Error(
-        `A plane step needs a non-negative start and a positive length, got at ${step.at} and over ${step.over}.`,
+        `A plane step needs a non-negative start and a positive length, got at ${span.at} and over ${span.over}.`,
       );
 
-    if (last && step.at < last.at + last.over)
+    if (last && span.at < last.at + last.over)
       throw new Error(
-        `A plane step starts at ${step.at}s, before the previous step ends at ${round(last.at + last.over)}s.`,
+        `A plane step starts at ${span.at}s, before the previous step ends at ${round(last.at + last.over)}s.`,
       );
 
     return make(frame, [
       ...steps,
-      { place, at: step.at, over: step.over, ease: step.ease ?? ease.inOut },
+      { place, at: span.at, over: span.over, ease: options.ease ?? ease.inOut },
     ]);
   };
 
   const current = steps.at(-1)?.place ?? IDENTITY;
 
-  const vector = (to: Vec2, options: VectorOptions = {}): SvgNode => {
-    const { color = theme.base0D, width = 3, from = [0, 0], enter } = options;
+  function vector(to: Vec2, options?: VectorOptions): SvgNode;
+  function vector(span: Span, to: Vec2, options?: VectorOptions): SvgNode;
+  function vector(
+    first: Span | Vec2,
+    second?: Vec2 | VectorOptions,
+    third?: VectorOptions,
+  ): SvgNode {
+    // SAFETY: the overloads pair a span with a tip and options, or a tip alone with options.
+    const [enter, to, options = {}] = Array.isArray(first)
+      ? [undefined, first as Vec2, second as VectorOptions | undefined]
+      : [first as Span, second as Vec2, third];
+
+    const { color = theme.base0D, width = 3, from = [0, 0] } = options;
 
     if (!finite(...to, ...from) || (to[0] === from[0] && to[1] === from[1]))
       throw new Error(
@@ -492,7 +500,7 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         {label && appear(at + over, over * 0.8, label)}
       </g>
     );
-  };
+  }
 
   const graph = calculus({
     x: frame.x,
@@ -527,8 +535,9 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
   return {
     point: frame.point,
     map: (x, y) => frame.point(...functionOf(current)(x, y)),
-    apply: (matrix, step) => push(then(current, { kind: "matrix", m: toMatrix(matrix) }), step),
-    applyFunction: (f, step) => {
+    apply: (span, matrix, options) =>
+      push(then(current, { kind: "matrix", m: toMatrix(matrix) }), span, options),
+    applyFunction: (span, f, options) => {
       const checked: PlaneFunction = (x, y) => {
         const out = f(x, y);
 
@@ -540,9 +549,9 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         return out;
       };
 
-      return push(then(current, { kind: "function", f: checked }), step);
+      return push(then(current, { kind: "function", f: checked }), span, options);
     },
-    reset: (step) => push(IDENTITY, step),
+    reset: (span, options) => push(IDENTITY, span, options),
     css: PLANE_CSS,
     get node() {
       return furniture(frame);
@@ -598,14 +607,17 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     },
     ...still,
     vector,
-    basis: ({ enter } = {}) => (
+    basis: (enter) => (
       <g>
-        {vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath`, enter })}
-        {vector([0, 1], {
-          color: theme.base08,
-          label: String.raw`\hat\jmath`,
-          enter: enter && { at: enter.at + 0.2, over: enter.over },
-        })}
+        {enter
+          ? vector(enter, [1, 0], { color: theme.base0B, label: String.raw`\hat\imath` })
+          : vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath` })}
+        {enter
+          ? vector({ at: enter.at + 0.2, over: enter.over }, [0, 1], {
+              color: theme.base08,
+              label: String.raw`\hat\jmath`,
+            })
+          : vector([0, 1], { color: theme.base08, label: String.raw`\hat\jmath` })}
       </g>
     ),
     polygon: (points, { color = theme.base0A, fillOpacity = 0.22, strokeWidth = 1.5 } = {}) =>
@@ -615,11 +627,11 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         stroke: strokeWidth > 0 ? color : undefined,
         strokeWidth: strokeWidth > 0 ? strokeWidth : undefined,
       }),
-    span: ([dx, dy], { color = theme.base0E, width = 1.5, opacity } = {}) => {
+    line: ([dx, dy], { color = theme.base0E, width = 1.5, opacity } = {}) => {
       const len = Math.hypot(dx, dy);
 
       if (!(len > 0))
-        throw new Error(`plane.span() needs a nonzero direction, got [${dx}, ${dy}].`);
+        throw new Error(`plane.line() needs a nonzero direction, got [${dx}, ${dy}].`);
 
       const reach =
         (Math.max(...frame.x.map(Math.abs), ...frame.y.map(Math.abs)) * Math.SQRT2) / len;
@@ -641,7 +653,7 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 };
 
 /**
- * Axes over `x` and `y`, in a plot area of `width` by `height` at `at`, with y up. Draw its `node`, `plot()`
+ * Axes over `xRange` and `yRange`, in a plot area of `frame`, with y up. Draw its `node`, `plot()`
  * curves, or chain `apply`, `applyFunction` and `reset` to move it and draw from the plane those calls return:
  * its grid, axes, vectors, shapes, labels and plots.
  */

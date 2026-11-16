@@ -1,4 +1,5 @@
-import { num, type PathData } from "svjeez";
+import { type PathData } from "svjeez";
+import { num } from "svjeez/geometry";
 import type { Box, Item, Radii, Rect, Transform } from "../tree.ts";
 
 type Sides = readonly [top: number, right: number, bottom: number, left: number];

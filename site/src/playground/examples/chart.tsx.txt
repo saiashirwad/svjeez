@@ -1,6 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { render, adaptive, systemDark, systemLight } from "svjeez";
-
+import { rect } from "svjeez/geometry";
 
 const { theme, css } = adaptive({
   light: systemLight,
@@ -11,11 +11,9 @@ const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 const stars = { Jan: 12, Feb: 19, Mar: 31, Apr: 44, May: 62, Jun: 87 };
 
 // chart() fits the scales once; each series hands back the
-// second it ends, so the next one can start there.
+// span it plays in, so the next one can start where it ends.
 const c = chart({
-  width: 260,
-  height: 130,
-  at: { x: 44, y: 20 },
+  frame: rect(44, 20, 260, 130),
   x: { kind: "band", domain: months },
   data: Object.entries(stars),
   theme,
@@ -24,9 +22,8 @@ const c = chart({
   grid: true,
 });
 
-const bars = c.bars(stars, { at: 0.4, stagger: 0.12 });
-const trend = c.line(Object.entries(stars), {
-  at: bars.span.end,
+const bars = c.bars({ at: 0.4, over: 1.3 }, stars, { stagger: 0.12 });
+const trend = c.line({ at: bars.span.end, over: 1.2 }, Object.entries(stars), {
   curve: "monotone",
   dots: 3,
 });

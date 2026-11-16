@@ -2,7 +2,6 @@
 /** @jsxRuntime automatic */
 import {
   ease as eases,
-  num,
   show,
   type Ease,
   type FontValue,
@@ -10,6 +9,7 @@ import {
   type SvgNode,
   type TagChannels,
 } from "svjeez";
+import { num } from "svjeez/geometry";
 import { timeline, type Step } from "../timeline.ts";
 import type { Snapshot, TextRun } from "../tree.ts";
 import type { PairBy } from "./pairing.ts";

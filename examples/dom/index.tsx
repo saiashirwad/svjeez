@@ -21,7 +21,7 @@ import { pieces } from "./ui.tsx";
 // Each card is a live page that runs a flow in order: the sign-in card is typed into, focused and hovered, and
 // every state is read off it. Timing is relative: each snap moves in from where the last move ended, plus waits.
 // The snapshots are kept in snapshots.json, so a build without changes never starts Chromium.
-const geist = await google.family("Geist", [400, 500, 600]);
+const geist = await google.family("Geist", [{ weight: 400 }, { weight: 500 }, { weight: 600 }]);
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 
 const html = {

@@ -1,15 +1,6 @@
 import { mermaid } from "@svjeez/mermaid";
-import {
-  enter,
-  rect,
-  type Span,
-  appWindow,
-  code,
-  flow,
-  typewriter,
-  type CodePiece,
-  type CodeRole,
-} from "svjeez";
+import { enter, appWindow, code, flow, typewriter, type CodePiece, type CodeRole } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { mono, theme } from "../style";
 import { C, Caption, rise } from "./kit";
@@ -43,7 +34,8 @@ const highlight = (line: string): CodePiece[] => {
 const editor = appWindow(rect(64, 120, 560, 330), { theme, title: "pipeline.mmd" });
 const STEP = 0.32;
 
-export const pipelineShot = ({ at, over }: Span) => {
+/** The pipeline shot, written from 0 and lasting `over` seconds. */
+export const pipelineShot = (over: number) => {
   const typed = typewriter(
     code(SOURCE.split("\n").map(highlight), {
       theme,
@@ -53,7 +45,7 @@ export const pipelineShot = ({ at, over }: Span) => {
       x: editor.body.x + 22,
       y: editor.body.y + 22,
     }),
-    { at: at + 0.35, cps: 120, cursor: C.accent, blink: false },
+    { at: 0.35, cps: 120, cursor: C.accent, blink: false },
   );
 
   // The first node arrives with the line that names it; the rest follow `STEP` apart.
@@ -73,7 +65,7 @@ export const pipelineShot = ({ at, over }: Span) => {
 
   const trip = flow(chart.route("idea", "svg"), {
     at: typed.span.end + 0.6,
-    over: Math.min(1.3, at + over - typed.span.end - 1.2),
+    over: Math.min(1.3, over - typed.span.end - 1.2),
     style: "comet",
     arrive: true,
     color: C.accent,
@@ -82,7 +74,7 @@ export const pipelineShot = ({ at, over }: Span) => {
 
   return (
     <>
-      <g animation={rise(at, 0.45, 16)}>{editor.node}</g>
+      <g animation={rise(0, 0.45, 16)}>{editor.node}</g>
       {typed.node}
       <g animation={enter({ at: shown - 0.3, over: 0.3 }, { opacity: 0, y: 8 })}>
         {chart.layers.under}
@@ -90,7 +82,7 @@ export const pipelineShot = ({ at, over }: Span) => {
         {chart.layers.over}
       </g>
       <Caption
-        at={at + 0.1}
+        at={0.1}
         tag="@svjeez/mermaid"
         call="mermaid(`flowchart TD …`)"
         line="Mermaid text in, an animated diagram out"

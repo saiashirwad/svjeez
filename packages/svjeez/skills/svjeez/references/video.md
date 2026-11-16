@@ -13,10 +13,10 @@ import { writeFile } from "node:fs/promises";
 import { video } from "@svjeez/video";
 
 const mp4 = await video(svg, { format: "mp4", fps: 30, loops: 2, scale: 2 });
-await writeFile("scene.mp4", mp4.bytes);
+await writeFile("scene.mp4", mp4.bytes); // also mp4.mime, format, codec, playTime, frames, colorScheme
 ```
 
-The video plays `loops` loops of the scene (default 1) at `fps` frames per second (default 30). Frame `i` shows the scene at `i / fps` seconds, so a 4-second scene at 30 fps is 120 frames. The format follows `--out`'s extension, else MP4. MP4 is H.264 by default and WebM is VP9; `codec` picks another (`avc`, `hevc`, `vp9` or `av1` in MP4, `vp9`, `vp8` or `av1` in WebM). `quality` is `low`, `medium` or `high` (default).
+The video plays `loops` loops of the scene (default 1) at `fps` frames per second (default 30). Frame `i` shows the scene at `i / fps` playback seconds, so a 4-second scene at 30 fps is 120 frames. If the scene sets `render({ playbackRate })`, a loop of `duration` scene seconds plays in `duration / playbackRate` seconds. `playTime` on the result is the whole video's length in playback seconds. The format follows `--out`'s extension, else MP4, or comes from `--format` (`format` in code). MP4 is H.264 by default and WebM is VP9; the `codec` option picks another (`avc`, `hevc`, `vp9` or `av1` in MP4, `vp9`, `vp8` or `av1` in WebM). `--fps`, `--loops` and `--quality` (`low`, `medium` or `high`, default) set the rest.
 
 ## Size and color
 

@@ -16,3 +16,10 @@ export const lazy = <T>(make: () => T): (() => T) => {
 /** An object URL for an SVG file. The caller revokes it. */
 export const svgUrl = (svg: string) =>
   URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+
+/** How many bytes `text` takes gzipped, measured the way a browser reports it. */
+export const gzipSize = async (text: string): Promise<number> => {
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"));
+
+  return (await new Response(stream).arrayBuffer()).byteLength;
+};

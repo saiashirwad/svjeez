@@ -2,7 +2,7 @@
 // src/lucide.ts, one `export const name: IconData` per icon. Rerunning it produces no diff.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { IconData } from "../src/icon.ts";
+import type { IconData } from "svjeez";
 
 const ROOT = join(import.meta.dirname, "..");
 
@@ -272,7 +272,7 @@ function generate({ pkg, out, folders }: Source): Generated {
 
   writeFileSync(
     join(ROOT, "src", out),
-    `${header.join("\n")}\nimport type { IconData } from "./icon.ts";\n\n${lines.join("\n")}\n`,
+    `${header.join("\n")}\nimport type { IconData } from "svjeez";\n\n${lines.join("\n")}\n`,
   );
 
   return { count: icons.size, mixed };

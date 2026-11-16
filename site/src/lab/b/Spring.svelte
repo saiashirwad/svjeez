@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fit } from "@svjeez/live/fit";
-  import { polylinePath } from "svjeez";
+  import { polylinePath } from "svjeez/geometry";
   import { clamp } from "../util";
   import { drag } from "./attach";
   import { COLORS } from "./feel";

@@ -1,5 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { enter, render } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
@@ -15,9 +16,7 @@ const merged = { Jan: 31, Feb: 38, Mar: 44, Apr: 55, May: 64, Jun: 72 };
 const opened = { Jan: 42, Feb: 48, Mar: 51, Apr: 57, May: 63, Jun: 70 };
 
 const c = chart({
-  width: W - 112,
-  height: H - BAR - 112,
-  at: { x: 64, y: BAR + 28 },
+  frame: rect(64, BAR + 28, W - 112, H - BAR - 112),
   x: { kind: "band", domain: months },
   y: { domain: [0, 80], ticks: 4 },
   theme,
@@ -26,11 +25,9 @@ const c = chart({
   grid: true,
 });
 
-const bars = c.bars(merged, { at: 0.6, stagger: 0.12, radius: 3 });
+const bars = c.bars({ at: 0.6, over: 1.3 }, merged, { stagger: 0.12, radius: 3 });
 
-const trend = c.line(Object.entries(opened), {
-  at: bars.span.end,
-  over: 1.4,
+const trend = c.line({ at: bars.span.end, over: 1.4 }, Object.entries(opened), {
   curve: "monotone",
   dots: 3,
   color: theme.base09,
@@ -62,7 +59,7 @@ export default function build(): string {
             textAnchor="middle"
             fill={theme.base03}
           >
-            {"c.bars(merged, { at: 0.6 })"}
+            {"c.bars({ at: 0.6, over: 1.3 }, merged)"}
           </text>
         </g>
       </g>

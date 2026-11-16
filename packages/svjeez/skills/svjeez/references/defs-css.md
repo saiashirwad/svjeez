@@ -21,8 +21,11 @@ const dots = [0, 1, 2].map((i) => <use href={dot} x={20 + i * 12} y={20} />);
 
 ## Custom properties
 
-`css.property(name, { syntax, inherits, initial })` registers a typed CSS custom property. `syntax` is `number`, `length`, `angle` or `color`. `inherits` is false unless you say otherwise, as in CSS. The returned key animates like a channel on any tag except filter primitives, and works in `style` and in `css`.
+`css.property(name, { syntax, inherits, initial })` registers a typed CSS custom property. `syntax` is `number`, `length`, `angle` or `color`. `inherits` is false unless you say otherwise, as in CSS. `initial` is required and must match the syntax. The returned key animates like a channel on any tag except filter primitives, and works in `style` and in `css`. Declaring the same name again with other `inherits` or `initial` throws.
+
 ```tsx
+import { css, ease, motion, render } from "svjeez";
+
 const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
 const reach = css.property("reach", { syntax: "number", initial: 0 });
 
@@ -51,6 +54,8 @@ Animate an angle on a parent and let children read it with `cos` and `sin` in `c
 `<Style>` puts one rule into the scene's `<style>`, after `render({ css })` and before the generated rules. It takes `css` or plain text, and holes become the same prefixed `var(--…)` names as in `render({ css })`, so two scenes on one page do not collide. Selectors you write, such as `.dot`, are not renamed.
 
 ```tsx
+import { Style, css } from "svjeez";
+
 <Style css={css`.dot { translate: calc(${reach} * 60px) 0 }`} />
 <Style>{".label { letter-spacing: 2px }"}</Style>
 ```
@@ -60,6 +65,8 @@ Use it for a rule that belongs to a component. A component that returns `<Style>
 ## Filters
 
 ```tsx
+import { fx } from "svjeez";
+
 const glow = <text filter={fx.glow({ blur: 4 })}>OPEN</text>;
 const boil = <g filter={fx.boil({ strength: 2, rate: 10 })}>{glow}</g>;
 ```
@@ -73,11 +80,15 @@ const boil = <g filter={fx.boil({ strength: 2, rate: 10 })}>{glow}</g>;
 | `fx.blur({ by })` | Gaussian blur, standard deviation `by` in px |
 | `fx.shadow({ dx, dy, blur, color, opacity })` | Drop shadow |
 
+`fx.boil` throws for a `seed` that is not a whole number of 1 or more and for a `rate` that is not positive. `fx.grayscale` throws outside 0 to 1, and `fx.duotone` throws for a color that is not hex.
+
 To animate a filter, build it with `def.filter` and put `animation` on its primitive. Primitives take `stdDeviation`, `baseFrequency`, `seed`, `displace`, `dx`, `dy`, `floodColor` and `floodOpacity`, compiled to SMIL.
 
 ```tsx
+import { def, motion } from "svjeez";
+
 const pulse = def.filter({}, <feGaussianBlur stdDeviation={0} animation={motion({ stdDeviation: 0 }).to({ stdDeviation: 6 }, 1).to({ stdDeviation: 0 }, 1).loop(2)} />);
 const lit = <circle r={10} filter={pulse} />;
 ```
 
-A filter over many animated elements re-renders every frame. `validateSvg` (from `svjeez/frames`) warns past 40. Paint a glow with a gradient, or filter something that holds still.
+A filter over many animated elements re-renders every frame. `validateSvg` (from `svjeez/frames`) warns at 40 or more. Paint a glow with a gradient, or filter something that holds still.

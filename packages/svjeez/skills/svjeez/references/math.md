@@ -38,13 +38,16 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 
 ## Epicycles
 
-`epicycles(outline, { at, over })` draws any closed outline as circles spinning on the tips of circles, with a pen at the last tip and the trace drawn in step with it. It samples the outline by arc length and Fourier-transforms it while the scene compiles.
+`epicycles(span, outline, options?)` draws any closed outline as circles spinning on the tips of circles, with a pen at the last tip and the trace drawn in step with it. The pen goes once around the outline in `span`. It samples the outline by arc length and Fourier-transforms it while the scene compiles.
 
 ```tsx
 import { epicycles, tex } from "@svjeez/math";
+import { tint } from "svjeez";
+
+import { theme } from "./style";
 
 const pi = tex(String.raw`\pi`, { fontSize: 400, theme });
-const e = epicycles(pi.words, { at: 0.8, over: 10, size: 360, center: [480, 270], fill: tint(theme, "blue") });
+const e = epicycles({ at: 0.8, over: 10 }, pi.words, { size: 360, center: [480, 270], fill: tint(theme, "blue") });
 
 <>{e.node}</>;
 ```
@@ -53,47 +56,49 @@ const e = epicycles(pi.words, { at: 0.8, over: 10, size: 360, center: [480, 270]
 - Path data takes `M L H V C S Q T Z`, absolute or relative. Arcs are not read.
 - `terms` is the number of circles in the chain, default 80, and the trace uses all of them. `circles` is how many of the largest draw their ring and arm, default 24. The rest are too small to see but still move the pen.
 - `center` is where the middle of the outline's box goes, and `size` scales its longer side to that many pixels. `fill` fades in once the pen has closed the outline.
-- `fade` is how long the rings take to fade after the pen is done, 0.6 by default. `0` leaves them. The result has `node`, `end` (when the rings have gone) and `d` (the trace as closed path data).
+- `fade` is how long the rings take to fade after the pen is done, 0.6 by default. `0` leaves them. The result has `node`, `span` (to when the rings have gone) and `d` (the trace as closed path data).
 - Each circle is one two-keyframe rotation on a group nested in the last, and the trace is a `draw` track sampled from its own arc length. A 10 second scene with 80 terms is about 90 KB.
 
 `fourier(outline, { samples, terms })` is the series `epicycles()` draws, for drawing it some other way: as a formula, a spectrum, or circles of your own. It takes the same outlines and returns `{ mean, terms, points }`, where each term `{ k, r, phase }` turns `k` times per loop and `terms` runs largest first. The pen at `s` of a loop is `mean` plus the sum of `r·(cos, sin)(2πks + phase)`. `samples` defaults to 1024 and must be even; `terms` defaults to all of them.
 
 ## Derivations
 
-`derive(steps, { at })` shows a step-by-step derivation. Every line sits with its `=` on one x, so the equals sign stays put while the sides change.
+`derive(span, steps, options?)` shows a step-by-step derivation over `span`. Every line sits with its `=` on one x, so the equals sign stays put while the sides change.
 
 ```tsx
 const d = derive(
+  { at: 0.5, over: 5.9 },
   [
     String.raw`2x + 4 = 10`,
     { tex: String.raw`x + 2 = 5`, note: String.raw`\div 2 \text{ both sides}` },
     { tex: String.raw`x = 3`, note: String.raw`- 2 \text{ both sides}` },
   ],
-  { at: 0.5, every: 2.5, x: 320, y: 120, fontSize: 36, stack: true, theme },
+  { x: 320, y: 120, fontSize: 36, stack: true, theme },
 );
 ```
 
 - By default one line transforms into the next with `morph()`, so glyphs the lines share slide into place and the rest fade. Wrap a part in `\cssId{name}{…}` in both lines to pair it by name. With `stack: true` every line stays and each new one fades in below, `lineHeight` pixels lower.
-- `align` is what the lines line up on: `"="`, the first equals sign, or the id of a `\cssId` in each line. `x` is where that point sits.
+- `align` is what the lines line up on: `"="` (the default), the first equals sign, or the id of a `\cssId` in each line. `x` is where that point sits, as its center, and `y` is the top of the first line. `fontSize` defaults to 36.
 - A step's `note` is TeX set small beside the line after an arrow, such as `\div 2 \text{ both sides}`. In place it fades with the next change, and in a stack it stays.
-- `every` is the time from one change to the next, default 2.5, and `over` is how long a change takes, default 0.9. The result has `node`, `end`, `lines` (every line as a `tex()`, aligned) and `bounds`.
+- The span covers the whole derivation. The changes are spaced evenly so the last one ends with it, and `change` is how long each takes, default 0.9. The span must give every line its `change`, so at least `change` times the number of lines. The result has `node`, `span`, `lines` (every line as a `tex()`, aligned) and `bounds`.
 
 ## Counters
 
-`counter(values, { x, y })` is a number that changes over time, typeset with the same glyphs as `tex()`.
+`counter(values, options?)` is a number that changes over time, typeset with the same glyphs as `tex()`.
 
 ```tsx
 const r = counter(
   [{ at: 0, value: 1 }, { at: 3, value: 3.14 }],
   { x: 100, y: 80, fontSize: 48, digits: 2, theme },
 );
-const counting = counter((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 0.05, x: 100, y: 200 });
+const counting = counter({ at: 0, over: 10 }, (t) => 144 * Math.min(1, t / 3), { step: 0.05, x: 100, y: 200 });
 ```
 
-- A list of `{ at, value }` holds each value until the next. A function is read every `step` seconds, 0.1 by default, up to `duration`.
-- `digits` is the decimal places. Places stay put at the widest value, right-aligned on the decimal point, with a sign place only if a value is negative.
+- A list of `{ at, value }` holds each value until the next. A span and a function, `counter(span, (t) => value)`, reads the function every `step` seconds, 0.1 by default, for the time `t` since the span starts, up to its `over`.
+- `fontSize` defaults to 32. `digits` is the decimal places, default 0. `anchor` places the box like `tex()`'s. Places stay put at the widest value, right-aligned on the decimal point, with a sign place only if a value is negative.
 - Digits cut by default. `roll` seconds makes the old digit lift out as the new one rolls in from below. The changes must be at least `roll` apart.
 - Each place holds one glyph per distinct digit it ever shows, toggled by stepped keyframes, so a number that changes every tenth of a second for ten seconds is still a few dozen paths. `width` and `height` give the box.
+
 ## Constructions
 
 `construct()` draws compass-and-straightedge geometry in the order you write it. Build the figure on the builder, then render `g.node`. Every element draws on in turn: compass circles sweep from the point they pass through, lines grow from their first point, points pop and labels fade in.
@@ -101,7 +106,7 @@ const counting = counter((t) => 144 * Math.min(1, t / 3), { duration: 10, step: 
 ```tsx
 import { construct } from "@svjeez/math";
 
-const g = construct({ theme, at: { x: 200, y: 300 } }); // origin in px, y grows up
+const g = construct({ theme, origin: { x: 200, y: 300 } }); // origin in px, y grows up
 const A = g.point(0, 0, "A");
 const B = g.point(170, 0, "B");
 g.segment(A, B);
@@ -118,7 +123,7 @@ g.angle(B, A, C, { label: "60^\\circ" });
 <>{g.node}</>;
 ```
 
-- `construct({ theme, unit, at, fontSize, start, pace, faint })`. `unit` is pixels per unit and `at` is where the origin sits in the scene. Coordinates have y up. `pace` overrides the seconds each kind of element takes.
+- `construct({ theme, unit, origin, fontSize, start, pace, faint })`. `unit` is pixels per unit, default 1, and `origin` is a point in the scene px where the origin sits, default `{ x: 0, y: 0 }`. Coordinates have y up. `pace` overrides the seconds each kind of element takes.
 - `point(x, y, label?)`, `segment(a, b)`, `line(a, b)` (runs past both points, grows outward from `a`), `circle(center, through)` or `circle(center, { radius })`. A circle takes `arc: { from, to }` in degrees to draw only an arc.
 - `intersect(a, b)` of two lines gives one point. Of a line and a circle, or two circles, it gives `[p, q]`, and `{ pick: 0 | 1 }` keeps one. A line and a circle give crossings in the order along the line. Two circles give the crossing left of the line from center 1 to center 2 first. Intersections count a segment only between its ends and a `line()` as endless.
 - `midpoint`, `parallel(line, p)`, `perpendicular(line, p)`, `perpendicularBisector(a, b)` and `angleBisector(a, b, c)`, the angle at `b`. The two bisectors draw the compass arcs that find them, as aids. `{ compass: false }` draws only the result.
@@ -131,15 +136,16 @@ Time the text beside the figure from `g.time`, read before the elements it expla
 
 ## Planes and transformations
 
-`plane()` is the one coordinate system of `@svjeez/math`, and it can move, as in 3Blue1Brown's linear algebra videos. `x` and `y` are the graph ranges, `width` and `height` the plot area in px, `at` its top-left, and y points up. `ticks` spaces the grid lines: a number for both axes, or `{ x, y }`. Ticks, labels, `plot()` and calculus are in `explainers.md` (Planes, axes and function plots); this section is the steps.
+`plane()` is the one coordinate system of `@svjeez/math`, and it can move, as in 3Blue1Brown's linear algebra videos. `xRange` and `yRange` are the graph ranges, `frame` is the plot area in px as a `Rect`, and y points up. `ticks` spaces the tick marks and grid lines: a number for both axes, or `{ x, y }`; an axis without one has neither. `labels: false` drops the numbers and `grid: true` puts faint grid lines in `node`. Ticks, labels, `plot()` and calculus are in `explainers.md` (Planes, axes and function plots); this section is the steps.
 
 ```tsx
 import { plane } from "@svjeez/math";
 import { css, enter, render } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 // 34px a unit, with (0, 0) at (160, 240).
-const p = plane({ x: [-10, 10], y: [-10, 10], width: 680, height: 680, at: { x: -180, y: -100 }, ticks: 1, theme })
-  .apply([[2, -1], [1, 1]], { at: 2, over: 2.5 })
+const p = plane({ xRange: [-10, 10], yRange: [-10, 10], frame: rect(-180, -100, 680, 680), ticks: 1, theme })
+  .apply({ at: 2, over: 2.5 }, [[2, -1], [1, 1]])
   .reset({ at: 6, over: 1.5 });
 
 render({ ..., css: css`${p.css}` },
@@ -147,20 +153,20 @@ render({ ..., css: css`${p.css}` },
     {p.background}
     <g animation={enter({ at: 0.3, over: 0.8 })}>{p.grid}{p.axes}</g>
     {p.polygon([[0, 0], [1, 0], [1, 1], [0, 1]])}
-    {p.basis({ enter: { at: 1, over: 0.5 } })}
+    {p.basis({ at: 1, over: 0.5 })}
   </>);
 ```
 
-- Steps chain, and each returns a new plane. Draw everything from the last one. `apply(matrix, { at, over, ease })` moves the plane by a matrix written by rows, as on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy), and a third number in a row translates. Each step applies on top of the steps before it. `reset()` moves every point home. `ease` defaults to `ease.inOut`. Steps must not overlap.
+- Steps chain, and each returns a new plane. Draw everything from the last one. `apply(span, matrix, { ease })` moves the plane by a matrix written by rows, as on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy), and a third number in a row translates. Each step applies on top of the steps before it. `reset(span)` moves every point home. `ease` defaults to `ease.inOut`. Steps must not overlap.
 - Pass `p.css` to `render`'s `css`. Without it the matrix steps do not move anything.
 - `background` is the grid at the ticks as it was, and it stays put, as does `node`, the axes with their ticks and numbers. `grid` is the moving lines without the axes, and `axes` is the two axis lines.
 - `plot(f)` drawn from a plane with steps follows them and takes no `animation`. The calculus methods draw at rest, so call them on the plane before its first step.
-- `vector(to, { color, width, label, from, enter })` draws an arrow. Its head stays a proper arrowhead however the plane shears, and its label stays just past the tip, turned off the arrow's line. `label` is TeX source or a `tex()` formula. `enter` grows the shaft over the span, then shows the head and label. `basis()` draws î and ĵ.
-- `polygon(points)` fills a shape whose corners move with the plane, so the unit square's area shows the determinant. `span(direction)` is the line through the origin along a vector: an eigenvector's line stays on itself.
+- `vector(to, { color, width, label, from })` draws an arrow. Its head stays a proper arrowhead however the plane shears, and its label stays just past the tip, turned off the arrow's line. `label` is TeX source or a `tex()` formula. `vector(span, to, options)` grows the shaft over the span, then shows the head and label. `basis()` draws î and ĵ, and `basis(span)` grows them in the span, ĵ starting 0.2s after î.
+- `polygon(points)` fills a shape whose corners move with the plane, so the unit square's area shows the determinant. `line(direction)` is the line through the origin along a vector: an eigenvector's line stays on itself.
 - `label(at, content)` centers TeX, a `tex()` formula or a node on a point of the plane and moves it with the point.
 - `point(x, y)` is the scene pixels of a point before any step, with the pixels per unit taken from the range and the size, so the two axes may differ, and `map(x, y)` is where it ends after every step.
 
-When every step is a matrix, the scene carries one CSS transform driven by registered properties. Lines keep their width with `vector-effect: non-scaling-stroke`, and the file stays small. `applyFunction((x, y) => [x2, y2], { at, over })` moves every point p to f(p) along a straight line. A complex map is the same thing: z ↦ z² is `(x, y) => [x * x - y * y, 2 * x * y]`. Once a plane has a function step, every outline is sampled densely enough to stay smooth and morphs through `d`, so the grid costs a few KB per step. Keep its range to the region the scene shows.
+When every step is a matrix, the scene carries one CSS transform driven by registered properties. Lines keep their width with `vector-effect: non-scaling-stroke`, and the file stays small. `applyFunction(span, (x, y) => [x2, y2])` moves every point p to f(p) along a straight line. A complex map is the same thing: z ↦ z² is `(x, y) => [x * x - y * y, 2 * x * y]`. Once a plane has a function step, every outline is sampled densely enough to stay smooth and morphs through `d`, so the grid costs a few KB per step. Keep its range to the region the scene shows.
 
 ## Errors
 
@@ -175,14 +181,15 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `tex() needs finite coordinates and anchor and a positive fontSize, got …` | Pass numbers. |
 | `tex.write() needs a non-negative span and a positive stroke time, got …` | Pass `over` of 0 or more and `stroke` above 0. |
 | `morph() draws a gutter only for code() versions.` | Drop `gutter`. |
-| `epicycles() needs a finite start and a positive duration, got …` | Pass numbers: `over` above 0. |
+| `fourier() needs an even number of samples, 4 or more, got ….` / `fourier() keeps 1 to … terms, got ….` | Pass an even `samples` of 4 or more and `terms` from 1 to `samples - 1`. |
+| `epicycles() needs a finite start and a positive duration, got …` | Pass numbers: a span with `over` above 0. |
 | `epicycles() needs 1 to … terms, a non-negative number of circles and fade, got …` | Lower `terms`, and pass `circles` and `fade` of 0 or more. |
 | `epicycles() cannot read a "…" path command. …` | Arcs are not read. Write the outline with lines and curves, or pass points. |
 | `epicycles() needs an outline with at least three points.` / `…with some length.` | The path is empty or a single point. |
 | `derive() found no "=" in step …` | Put an equals sign in every step, or pass `align` as the `\cssId` id in each. |
-| `derive() needs a step, a positive over that fits in every, …` | Pass at least one step, `over` above 0 and `every` at least `over`. |
+| `derive() needs a step, a span long enough for each change …` | Pass at least one step, and a span that gives every change its `change` seconds. |
 | `counter() needs at least one value, each with a finite time and number.` | Pass values with finite `at` and `value`. |
-| `counter() of a function needs a positive duration and step, …` | Pass `duration`, and a positive `step`. |
+| `counter() of a function needs a positive over and step, …` | Give the span a positive `over`, and pass a positive `step`. |
 | `counter() needs a whole number of digits, a positive fontSize and a non-negative roll, …` | Pass whole `digits` and `roll` of 0 or more. |
 | `counter() changes faster than its roll of … seconds.` | Lower `roll` or space the changes out. |
 | `intersect() found no crossing of … and …. …` | The circles do not meet or the lines are parallel. Raise a radius, move a center, or change a line. |
@@ -190,14 +197,14 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `intersect() pick is 0 or 1, got ….` | Pass 0 or 1. |
 | `circle() needs a positive radius, got ….` | Pass a point other than the center, or `{ radius }` above 0. |
 | `A line needs two different points, got … twice.` | Pass two points that are not at the same place. |
-| `construct() needs a positive unit and fontSize and a finite origin, got …` | Pass numbers above 0 and a finite `at`. |
+| `construct() needs a positive unit and fontSize and a finite origin, got …` | Pass numbers above 0 and a finite `origin`. |
 | `angle() needs the vertex in the middle and two other points, got …` | Pass `(a, vertex, c)` with distinct points. The same goes for `angleBisector()`. |
 | `polygon() needs at least three points, got ….` | Pass three or more corners. |
 | `together() cannot nest. Put the elements in one together() block.` | Flatten the blocks. |
 | `A plane step starts at …s, before the previous step ends at …s.` | Start each step after the one before it ends. |
 | `A plane step needs a non-negative start and a positive length, got …` | Pass `at` of 0 or more and `over` above 0. |
-| `plane() needs a finite … range with max above min, got […, …].` | Pass `x` and `y` as `[min, max]` with finite numbers and min below max. |
-| `plane() needs a positive width and height, got … and ….` | Pass sizes above 0. |
+| `plane() needs a finite …Range with max above min, got […, …].` | Pass `xRange` and `yRange` as `[min, max]` with finite numbers and min below max. |
+| `plane() needs a frame with a positive width and height, got … and ….` | Pass a `frame` whose width and height are above 0. |
 | `plane() needs a positive … tick step, got ….` | Pass `ticks` above 0. |
 | `plane() would draw … ticks. Raise the step … to draw at most ….` | Raise the tick step. |
 | `plot() cannot draw on a plane that has steps. …` | Plot on the plane before its first step, or leave out `animation`. |
@@ -205,6 +212,6 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `plane.apply() needs finite numbers in its matrix, got …` | Every entry must be a finite number. |
 | `plane.applyFunction() sent (…, …) to (…, …), which is not a finite point.` | The function divides by zero or overflows somewhere on the grid. Shrink the range to avoid that point, or guard the function. |
 | `plane.vector() needs a finite arrow of nonzero length, from … to …` | Give the arrow a tip different from its tail. |
-| `plane.span() needs a nonzero direction, got …` | Pass a nonzero vector. |
+| `plane.line() needs a nonzero direction, got …` | Pass a nonzero vector. |
 
 In Bun, a non-ASCII character in `String.raw` arrives as a `\u{…}` escape. Write such characters in a plain string, or as TeX.

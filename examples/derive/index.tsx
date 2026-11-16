@@ -17,10 +17,9 @@ const steps = [
   { tex: String.raw`x = 2 \pm 3`, note: String.raw`+ 2 \text{ both sides}` },
 ];
 
-const proof = derive(steps, {
-  at: 0.6,
-  every: 2,
-  over: 0.8,
+// Six changes two seconds apart, the last one 0.8s long.
+const proof = derive({ at: 0.6, over: 12.8 }, steps, {
+  change: 0.8,
   x: 330,
   y: 36,
   fontSize: 34,
@@ -43,11 +42,10 @@ const count = (t: number) => {
   return 144 * (1 - (1 - u) ** 3);
 };
 
-const value = counter(count, {
+const value = counter({ at: 0, over: D }, count, {
   x: label.bounds.x + label.width + 14,
   y: 468,
   fontSize: 30,
-  duration: D,
   step: 0.05,
   color: tint(theme, "yellow"),
   theme,

@@ -1,5 +1,4 @@
 import {
-  rect,
   render,
   Callout,
   adaptive,
@@ -14,6 +13,9 @@ import {
   type CodeRun,
   type CodeTokens,
 } from "svjeez";
+import {
+  rect,
+} from "svjeez/geometry";
 
 
 const { theme, css: colors } = adaptive({

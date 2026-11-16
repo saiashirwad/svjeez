@@ -1,16 +1,16 @@
 /** @jsxImportSource svjeez */
 import {
   ease,
-  matchPaths,
   motion,
-  rect,
   type Color,
   type Ease,
   type Point,
   type Rect,
   type Seconds,
+  type Span,
   type SvgNode,
 } from "svjeez";
+import { matchPaths, rect } from "svjeez/geometry";
 import { resolveRegions, type RegionValues } from "./choropleth.tsx";
 import type { GeoMap, Region } from "./index.ts";
 import { straighten } from "./writer.ts";
@@ -20,12 +20,8 @@ type Painter = (region: Region, value: number) => Color;
 const isPainter = (fill: Color | Painter): fill is Painter => typeof fill === "function";
 
 export interface MorphOptions {
-  /** When the regions start to leave the map. */
-  readonly at: Seconds;
-  /** Seconds each takes. Default 1.2. */
-  readonly over?: Seconds;
   readonly ease?: Ease;
-  /** Seconds between one region leaving and the next, in the order of the shapes they become. Default 0. */
+  /** Seconds between one region leaving and the next, in the order of the shapes they become. The last one lands with the span, so each takes `over - (shapes - 1) * stagger`. Default 0: all together. */
   readonly stagger?: Seconds;
   /** The fill of each shape: one color, or a color per region. Default grey. */
   readonly fill?: Color | ((region: Region, value: number) => Color);
@@ -60,7 +56,7 @@ export interface Cartogram extends Morphed {
   readonly bubbles: readonly Bubble[];
 }
 
-export interface BarsOptions extends MorphOptions {
+export interface GeoBarsOptions extends MorphOptions {
   /** Where the bars go. The longest reaches its right edge; the bars share its height. */
   readonly frame: Rect;
   /** Biggest first (default) or smallest first. */
@@ -73,15 +69,15 @@ export interface BarsOptions extends MorphOptions {
   readonly max?: number;
 }
 
-export interface Bar {
+export interface GeoBar {
   readonly region: Region;
   readonly value: number;
   /** Where the bar lands in the scene, to put a label beside. */
   readonly rect: Rect;
 }
 
-export interface Bars extends Morphed {
-  readonly bars: readonly Bar[];
+export interface GeoBars extends Morphed {
+  readonly bars: readonly GeoBar[];
 }
 
 const NUMBER = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
@@ -152,15 +148,22 @@ interface Target {
 }
 
 /** Each region as its outline, then as its target: the pieces other than the mainland shrink into the target's center. */
-function morphs(targets: readonly Target[], map: GeoMap, options: MorphOptions): Morphed {
-  const {
-    at,
-    over = 1.2,
-    stagger = 0,
-    ease: curve = ease.inOut,
-    fill = "#6b7280",
-    detail = 2.5,
-  } = options;
+function morphs(
+  when: Span,
+  targets: readonly Target[],
+  map: GeoMap,
+  options: MorphOptions,
+): Morphed {
+  const { at, over } = when;
+
+  const { stagger = 0, ease: curve = ease.inOut, fill = "#6b7280", detail = 2.5 } = options;
+
+  const each = over - (targets.length - 1) * stagger;
+
+  if (!Number.isFinite(at) || at < 0 || !(each > 0) || !(stagger >= 0))
+    throw new Error(
+      `A morph needs a start of 0 or later and a span longer than its ${targets.length - 1} staggers of ${stagger}s, got at ${at} and over ${over}.`,
+    );
 
   const used = new Set(targets.map((t) => t.region));
 
@@ -175,7 +178,7 @@ function morphs(targets: readonly Target[], map: GeoMap, options: MorphOptions):
         fill={isPainter(fill) ? fill(region, value) : fill}
         animation={motion({ d: start })
           .at(at + i * stagger)
-          .to({ d: end }, over, curve)}
+          .to({ d: end }, each, curve)}
       />
     );
   });
@@ -275,10 +278,15 @@ const tenth = (v: number) => Math.round(v * 10) / 10;
 
 /**
  * A Dorling cartogram: a circle per region with its area in proportion to its value, at the region's centroid and
- * nudged apart until none overlap. Each region morphs from its outline into its circle at `at`. Worked out while the
+ * nudged apart until none overlap. Each region morphs from its outline into its circle during `when`. Worked out while the
  * scene compiles. Regions in `values` need a positive number; the others come back in `rest`.
  */
-export function cartogram(map: GeoMap, values: RegionValues, options: CartogramOptions): Cartogram {
+export function cartogram(
+  when: Span,
+  map: GeoMap,
+  values: RegionValues,
+  options: CartogramOptions = {},
+): Cartogram {
   const { coverage = 0.3, gap = 1 } = options;
   const items = singles(map, values, "cartogram()");
   const total = items.reduce((sum, [, v]) => sum + v, 0);
@@ -303,6 +311,7 @@ export function cartogram(map: GeoMap, values: RegionValues, options: CartogramO
   return {
     bubbles,
     ...morphs(
+      when,
       bubbles.map((b) => ({ region: b.region, value: b.value, to: circle(b, b.r), center: b })),
       map,
       options,
@@ -314,7 +323,12 @@ export function cartogram(map: GeoMap, values: RegionValues, options: CartogramO
  * Regions fly from the map into a bar chart: the largest `top` values, sorted, each outline morphing into its bar.
  * The longest bar reaches the right edge of `frame`, or `max` does. Draw the labels from the returned `bars`.
  */
-export function toBars(map: GeoMap, values: RegionValues, options: BarsOptions): Bars {
+export function toBars(
+  when: Span,
+  map: GeoMap,
+  values: RegionValues,
+  options: GeoBarsOptions,
+): GeoBars {
   const { frame, order = "desc", top = 12 } = options;
 
   if (!(Number.isInteger(top) && top >= 1))
@@ -329,7 +343,7 @@ export function toBars(map: GeoMap, values: RegionValues, options: BarsOptions):
   const slot = frame.h / shown.length;
   const gap = options.gap ?? slot * 0.2;
 
-  const bars = shown.map(([region, value], i): Bar => ({
+  const bars = shown.map(([region, value], i): GeoBar => ({
     region,
     value,
     rect: rect(
@@ -343,6 +357,7 @@ export function toBars(map: GeoMap, values: RegionValues, options: BarsOptions):
   return {
     bars,
     ...morphs(
+      when,
       bars.map((b) => ({
         region: b.region,
         value: b.value,

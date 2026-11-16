@@ -1,6 +1,6 @@
 <script lang="ts">
   import { statsOf, type First } from "@svjeez/live";
-  import { Code, editor, Picture, Transport } from "@svjeez/svelte";
+  import { Code, Picture, SceneEditor, Transport } from "@svjeez/svelte";
   import { onDestroy } from "svelte";
   import "../lab/sj.css";
   import text from "./firework.tsx?raw";
@@ -9,7 +9,7 @@
 
   // The editor reads its first picture once, when the page makes it.
   // svelte-ignore state_referenced_locally
-  const scene = editor(text, { first });
+  const scene = new SceneEditor(text, { first });
 
   // The readout's numbers.
   const stats = $derived(scene.state.stats ? statsOf(scene.state.stats) : []);

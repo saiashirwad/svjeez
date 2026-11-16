@@ -3,12 +3,11 @@
 `<Ink>` draws a path with a hand tool instead of an even SVG stroke. The tool sets the width at every point, and the stroke becomes a filled outline.
 
 ```tsx
-import { Ink, inkPath, tool } from "svjeez";
+import { Ink, tool } from "svjeez";
 
 const wave = "M20 80C80 20 160 140 220 80";
 const brushed = <Ink d={wave} tool={tool.brush({ size: 8, seed: 2 })} fill="#2B2118" draw={{ at: 0.5, over: 1.2 }} />;
 const coast = <Ink d="M10 10L90 40" tool={tool.nib({ size: 3, angle: 40 })} fill="#2B2118" />;
-const outline = inkPath(wave, tool.pen({ size: 1.2 })); // the outline as path data, to fill yourself
 ```
 
 ## Tools
@@ -20,14 +19,14 @@ const outline = inkPath(wave, tool.pen({ size: 1.2 })); // the outline as path d
 | `tool.nib({ size, angle, thin })` | A broad calligraphy nib: thick across its edge, thin along it |
 | `tool.pencil({ size, seed })` | A fine line that wavers with the grain |
 
-A `seed` rerolls the wobble, and the same seed draws the same line. A tool is a plain `{ width(t, s, angle), drift?, size }` object, so you can write your own.
+Sizes default to 1.5 for `pen`, 6 for `brush`, 5 for `nib` (at `angle` 35) and 1.2 for `pencil`. A `seed` rerolls the wobble, and the same seed draws the same line. A tool is a plain `{ width(t, s, angle), drift?, size }` object, so you can write your own.
 
 ## Props
 
 - `d` is any SVG path data, arcs included. It is the centerline of the mark.
 - `fill` is the ink. The outline is filled, so gradients work and `stroke` does not.
 - `draw={{ at, over }}` inks the stroke in along its path through a mask, then swaps to an unmasked copy so it costs nothing once drawn. `ease` shapes the reveal and defaults to `ease.inOut`.
-- `animation` moves, scales, rotates or fades the whole mark.
+- `animation` moves, scales, rotates or fades the whole mark. `opacity` and `class` are plain props.
 - Each path and tool pair embeds its outline once, so reusing a tool object is cheap.
 
 ## Handwriting

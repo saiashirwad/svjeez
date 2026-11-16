@@ -20,6 +20,7 @@
       "svjeez/jsx-dev-runtime": ["../svjeez/src/jsx-dev-runtime.ts"],
       "svjeez/page": ["../svjeez/src/page.ts"],
       "svjeez/params": ["../svjeez/src/params.ts"],
+      "svjeez/geometry": ["../svjeez/src/geometry.ts"],
       "svjeez/frames": ["../svjeez/src/frames.ts"]
     }
   },

@@ -1,5 +1,5 @@
 /** @jsxImportSource svjeez */
-import { textWidth, ease, motion, type Seconds, enter, travel } from "svjeez";
+import { textWidth, ease, motion, type Seconds, type Span, enter, travel } from "svjeez";
 import { lanes as layout } from "./layout/lanes.ts";
 import {
   arrow,
@@ -9,17 +9,17 @@ import {
   look,
   lookup,
   placer,
+  spanOfReveals,
   tintOf,
-  type Diagram,
   type DiagramOptions,
   type Labelled,
   type NodeRole,
+  type PlayedDiagram,
 } from "./kit.tsx";
 
-export interface LaneSpan<L extends string> {
+/** A bar on a lane for the span `{ at, over }`, in lane time. */
+export interface LaneBar<L extends string> extends Span {
   readonly lane: L;
-  readonly from: Seconds;
-  readonly to: Seconds;
   readonly label?: string;
   readonly role?: NodeRole;
 }
@@ -44,7 +44,7 @@ export interface LanesOptions extends DiagramOptions {
   readonly play?: { readonly at: Seconds };
 }
 
-export interface Lanes<L extends string> extends Diagram<L> {
+export interface Lanes<L extends string> extends PlayedDiagram<L> {
   /** The x of time `t` on the lane axis. */
   x(t: Seconds): number;
 }
@@ -54,7 +54,7 @@ const BAR = 18;
 export function lanes<const L extends Record<string, Labelled>>(
   spec: {
     readonly lanes: L;
-    readonly spans?: readonly LaneSpan<NoInfer<keyof L & string>>[];
+    readonly spans?: readonly LaneBar<NoInfer<keyof L & string>>[];
     readonly events?: readonly LaneEvent<NoInfer<keyof L & string>>[];
     readonly links?: readonly LaneLink<NoInfer<keyof L & string>>[];
   },
@@ -84,7 +84,7 @@ export function lanes<const L extends Record<string, Labelled>>(
       id: r.id,
       label: { w: textWidth(r.label, fontSize, font) + 16, h: fontSize },
     })),
-    spans,
+    spans: spans.map((s) => ({ lane: s.lane, from: s.at, to: s.at + s.over })),
     events: events.map((e) => ({
       ...e,
       label: e.label === undefined ? undefined : labelSize(e.label, small, font),
@@ -160,9 +160,7 @@ export function lanes<const L extends Record<string, Labelled>>(
             stroke={tint}
             animation={
               play
-                ? motion({ width: 0 })
-                    .at(when(s.from))
-                    .to({ width: b.w }, s.to - s.from, ease.linear)
+                ? motion({ width: 0 }).at(when(s.at)).to({ width: b.w }, s.over, ease.linear)
                 : undefined
             }
           />
@@ -172,7 +170,7 @@ export function lanes<const L extends Record<string, Labelled>>(
               y={b.y + b.h + small + 3}
               fontSize={small}
               fill={theme.base04}
-              animation={play ? enter({ at: when(s.from), over: 0.2 }) : undefined}
+              animation={play ? enter({ at: when(s.at), over: 0.2 }) : undefined}
             >
               {s.label}
             </text>
@@ -235,5 +233,8 @@ export function lanes<const L extends Record<string, Labelled>>(
     ),
   ]);
 
-  return { node, bounds: at.bounds, get: lookup("lanes()", boxes), x };
+  // The playhead crosses the whole track, so it is the last thing to finish.
+  const span = spanOfReveals(play ? [{ at: when(0), over: out.end }] : []);
+
+  return { node, span, bounds: at.bounds, get: lookup("lanes()", boxes), x };
 }

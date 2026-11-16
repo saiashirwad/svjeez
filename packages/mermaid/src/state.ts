@@ -1,5 +1,5 @@
 import { clean, fail, unquote, type Line } from "./errors.ts";
-import type { StateDoc, StateNode, StateTransition } from "./types.ts";
+import type { StateDoc, StateNode, MermaidStateTransition } from "./types.ts";
 
 const SUPPORTED =
   'Supported: `[*] --> A`, `A --> [*]`, `A --> B : label`, `state "Long name" as A`, composite `state A {` ... `}`, and `direction LR` at the top.';
@@ -31,7 +31,7 @@ export const parseState = (header: Line, body: readonly Line[]): StateDoc => {
   const root: Scope = { states: [], line: header };
   const stack = [root];
   const seen = new Map<string, Mutable>();
-  const transitions: StateTransition[] = [];
+  const transitions: MermaidStateTransition[] = [];
   let direction: StateDoc["direction"];
 
   const state = (id: string): Mutable => {

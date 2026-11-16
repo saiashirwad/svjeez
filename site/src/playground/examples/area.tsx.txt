@@ -1,6 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, adaptive, systemDark, systemLight, tint } from "svjeez";
-
+import { rect } from "svjeez/geometry";
 
 const { theme, css } = adaptive({
   light: systemLight,
@@ -11,9 +11,7 @@ const hours = [26, 28, 25, 27, 29, 26, 24, 15, 11, 9, 8, 7];
 const points = hours.map((h, i) => [i + 1, h] as const);
 
 const c = chart({
-  width: 270,
-  height: 120,
-  at: { x: 40, y: 20 },
+  frame: rect(40, 20, 270, 120),
   x: { kind: "linear", domain: [1, 12], ticks: 6 },
   y: { domain: [0, 30], ticks: 3, format: (h) => `${h}h` },
   theme,
@@ -24,7 +22,7 @@ const c = chart({
 
 // The fill wipes in with its line, and c.x() and c.y() place
 // anything else in the chart's own units.
-const wait = c.area(points, { at: 0.5, over: 2.2, curve: "monotone", dots: 2.5 });
+const wait = c.area({ at: 0.5, over: 2.2 }, points, { curve: "monotone", dots: 2.5 });
 const week = c.x(8);
 
 export default function build(): string {

@@ -87,10 +87,6 @@ export interface RiemannOptions {
   readonly to?: number;
   /** Rectangle counts, one per stage. */
   readonly n: number | readonly number[];
-  /** When each stage after the first begins, one time per later stage. */
-  readonly at?: readonly Seconds[];
-  /** Seconds each split takes. Default 0.8. */
-  readonly over?: Seconds;
   /** Default `ease.inOut`. */
   readonly ease?: Ease;
   /** Where each rectangle meets the curve. Default `"mid"`. */
@@ -117,10 +113,6 @@ export interface CalculusCurveOptions {
 }
 
 export interface CalculusMorphOptions extends Omit<CalculusCurveOptions, "color"> {
-  /** When each curve after the first begins, one time per later curve. */
-  readonly at: readonly Seconds[];
-  /** Seconds each bend takes. Default 1. */
-  readonly over?: Seconds;
   /** Default `ease.inOut`. */
   readonly ease?: Ease;
   /** Default the x range. */
@@ -149,9 +141,9 @@ export interface Calculus {
   /** The region between `f` and `base` from `from` to `to`; either bound can move. */
   area(f: Fn, from: Moving, to: Moving, options?: CalculusAreaOptions): CalculusArea;
   /** Riemann rectangles under `f` that split into the next stage's count, as one path whose `d` morphs. */
-  riemann(f: Fn, options: RiemannOptions): Riemann;
+  riemann(stages: readonly Span[], f: Fn, options: RiemannOptions): Riemann;
   /** One curve that bends from each function into the next, sampled on one grid so its `d` morphs. */
-  morph(fs: readonly Fn[], options: CalculusMorphOptions): CalculusCurve;
+  morph(stages: readonly Span[], fs: readonly Fn[], options?: CalculusMorphOptions): CalculusCurve;
   /** The curve `(t) => [x, y]` for `t` across `range`. */
   parametric(
     fn: (t: number) => readonly [number, number],
@@ -230,18 +222,29 @@ const checkSamples = (what: string, samples: number): void => {
     throw new Error(`${what} needs a whole number of samples, at least 2, got ${samples}.`);
 };
 
-const checkStages = (what: string, count: number, at: readonly Seconds[] | undefined): void => {
-  if ((at?.length ?? 0) !== count - 1)
+const checkStages = (what: string, count: number, spans: readonly Span[]): void => {
+  if (spans.length !== count - 1)
     throw new Error(
-      `${what} has ${count} stages, so it needs ${count - 1} start times in at, got ${at?.length ?? 0}.`,
+      `${what} has ${count} stages, so it needs ${count - 1} spans, one per change, got ${spans.length}.`,
     );
+
+  spans.forEach(({ at, over }, i) => {
+    if (!(at >= 0) || !(over > 0))
+      throw new Error(
+        `${what} needs each span to start at 0 or later and last longer than 0, got ${JSON.stringify(spans[i])}.`,
+      );
+
+    const before = spans[i - 1];
+
+    if (before && at < before.at + before.over - 1e-9)
+      throw new Error(`${what} has a span at ${at}s that starts before the one before it ends.`);
+  });
 };
 
-/** A motion over `times` stages of path data, each later stage starting at its `at`. */
+/** A motion over stages of path data, each later stage reached during its own span. */
 const stagesOf = (
   ds: readonly PathData[],
-  at: readonly Seconds[],
-  over: Seconds,
+  spans: readonly Span[],
   curve: Ease,
   colors?: readonly Color[],
 ): Motion<"d" | "stroke"> => {
@@ -252,7 +255,7 @@ const stagesOf = (
   return ds
     .slice(1)
     .reduce<Motion<"d" | "stroke">>(
-      (track, _, i) => track.at(at[i]!).to(values(i + 1), over, curve),
+      (track, _, i) => track.at(spans[i]!.at).to(values(i + 1), spans[i]!.over, curve),
       motion(values(0)),
     );
 };
@@ -471,8 +474,8 @@ export function calculus(graph: GraphContext): Calculus {
     };
   }
 
-  function riemann(f: Fn, options: RiemannOptions): Riemann {
-    const { from = xr[0], to = xr[1], over = 0.8, rule = "mid", opacity = 0.3 } = options;
+  function riemann(stages: readonly Span[], f: Fn, options: RiemannOptions): Riemann {
+    const { from = xr[0], to = xr[1], rule = "mid", opacity = 0.3 } = options;
     const color = options.color ?? tint(theme, "yellow");
     const ns = [options.n].flat();
 
@@ -483,7 +486,7 @@ export function calculus(graph: GraphContext): Calculus {
 
     if (!Number.isFinite(from + to) || to <= from)
       throw new Error(`riemann() needs from below to, got from ${from} and to ${to}.`);
-    checkStages("riemann()", ns.length, options.at ?? []);
+    checkStages("riemann()", ns.length, stages);
 
     const most = Math.max(...ns);
     const offset = { left: 0, mid: 0.5, right: 1 }[rule];
@@ -522,11 +525,7 @@ export function calculus(graph: GraphContext): Calculus {
             stroke={color}
             strokeWidth={1.5}
             strokeLinejoin="round"
-            animation={
-              ds.length > 1
-                ? stagesOf(ds, options.at ?? [], over, options.ease ?? ease.inOut)
-                : undefined
-            }
+            animation={ds.length > 1 ? stagesOf(ds, stages, options.ease ?? ease.inOut) : undefined}
           />
         </g>
       ),
@@ -630,8 +629,12 @@ export function calculus(graph: GraphContext): Calculus {
     );
   }
 
-  function morph(fs: readonly Fn[], options: CalculusMorphOptions): CalculusCurve {
-    const { samples = 200, from = xr[0], to = xr[1], over = 1 } = options;
+  function morph(
+    stages: readonly Span[],
+    fs: readonly Fn[],
+    options: CalculusMorphOptions = {},
+  ): CalculusCurve {
+    const { samples = 200, from = xr[0], to = xr[1] } = options;
 
     const palette = [options.color].flat().filter((c) => c !== undefined);
     const colors = palette.length > 1 ? palette : undefined;
@@ -639,7 +642,7 @@ export function calculus(graph: GraphContext): Calculus {
     if (fs.length < 2)
       throw new Error(`graph.morph() needs at least two functions, got ${fs.length}.`);
     checkSamples("graph.morph()", samples);
-    checkStages("graph.morph()", fs.length, options.at);
+    checkStages("graph.morph()", fs.length, stages);
 
     if (colors && colors.length !== fs.length)
       throw new Error(
@@ -656,7 +659,7 @@ export function calculus(graph: GraphContext): Calculus {
     );
 
     const ds = lines.map((ps) => polyline(ps));
-    const bend = stagesOf(ds, options.at, over, options.ease ?? ease.inOut, colors);
+    const bend = stagesOf(ds, stages, options.ease ?? ease.inOut, colors);
     const color = palette[0];
 
     return {

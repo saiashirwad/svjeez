@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { exportName } from "../scripts/generate.ts";
-import type { IconData } from "../src/icon.ts";
+import type { IconData } from "svjeez";
 import * as lucide from "../src/lucide.ts";
 import * as tabler from "../src/tabler.ts";
 

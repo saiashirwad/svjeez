@@ -22,7 +22,7 @@ import { flow, render } from "svjeez";
 const chart = flowchart(
   {
     nodes: { pr: { label: "PR opened", role: "input" }, lint: "Run linters", post: "Post review" },
-    edges: [["pr", "lint"], ["lint", "post", { label: "clean" }]],
+    edges: [["pr", "lint"], ["lint", "post", "clean"]],
   },
   { x: 40, y: 40, play: { at: 0.4, step: 0.4 } },
 );
@@ -36,7 +36,7 @@ export default () =>
   );
 ```
 
-Each diagram returns `{ node, get(id), bounds }` plus helpers such as `route()` and `walk()`. Size the canvas from `bounds`.
+Each diagram returns `{ node, get(id), bounds }` plus helpers such as `route()` and `walk()`. Size the canvas from `bounds`. `flowchart()`, `tree()`, `sequence()` and `lanes()` also return `span`, from the first reveal to the end of the last, so the next beat can start at `chart.span.end`.
 
 | Function | Draws |
 | --- | --- |

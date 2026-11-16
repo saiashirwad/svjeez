@@ -1,5 +1,13 @@
 /** @jsxImportSource svjeez */
-import { textWidth, type Point, motion, type Seconds, type Span, beats, type Beats } from "svjeez";
+import {
+  textWidth,
+  type Point,
+  motion,
+  type Seconds,
+  type Span,
+  beats,
+  type Beats,
+} from "svjeez";
 import { sequence as layout } from "./layout/sequence.ts";
 import {
   arrow,
@@ -11,9 +19,10 @@ import {
   lookup,
   placer,
   sizeOf,
-  type Diagram,
+  spanOfReveals,
   type DiagramOptions,
   type Labelled,
+  type PlayedDiagram,
 } from "./kit.tsx";
 
 /** `[from, to, label]`, dashed with `{ reply: true }`; a message to its own sender loops on the right. */
@@ -30,7 +39,7 @@ export interface SequenceOptions extends DiagramOptions {
   readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
-export interface Sequence<A extends string> extends Diagram<A> {
+export interface Sequence<A extends string> extends PlayedDiagram<A> {
   /** Message or note `i` in the order given: its slot on the `play` timeline (from 0 without `play`), and its arrow or, for a note, its center. */
   message(i: number): { readonly span: Span; readonly points: Point[] };
 }
@@ -86,8 +95,13 @@ export function sequence<const A extends Record<string, Labelled>>(
     over: i + 1 < times.length ? times[i + 1]! - times[i]! : step,
   });
 
+  const FADE = 0.25;
+
   const fade = (i: number) =>
-    play && motion({ opacity: 0 }).at(span(i).at).to({ opacity: 1 }, 0.25);
+    play && motion({ opacity: 0 }).at(span(i).at).to({ opacity: 1 }, FADE);
+
+  /** How long row `i`'s arrow draws. */
+  const drawOver = (i: number) => Math.min(0.5, span(i).over * 0.7) || 0.3;
 
   const node = l.root([
     [...out.lifelines].map(([, [a, b]]) => {
@@ -135,7 +149,7 @@ export function sequence<const A extends Record<string, Labelled>>(
             ...l,
             dashed: row.reply,
             at: play && span(i).at,
-            over: Math.min(0.5, span(i).over * 0.7) || 0.3,
+            over: drawOver(i),
           })}
           {chip(box, row.text, { ...l.smallLook, fill: theme.base05 }, fade(i))}
         </g>
@@ -143,8 +157,16 @@ export function sequence<const A extends Record<string, Labelled>>(
     }),
   ]);
 
+  const reveals: Span[] = play
+    ? rows.map((row, i) => ({
+        at: span(i).at,
+        over: row.kind === "note" ? FADE : Math.max(FADE, drawOver(i)),
+      }))
+    : [];
+
   return {
     node,
+    span: spanOfReveals(reveals),
     bounds: at.bounds,
     get: lookup("sequence()", heads),
     message: (i) => {

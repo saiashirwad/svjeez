@@ -8,10 +8,6 @@ import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { LANGS, type DefaultLang } from "./langs.ts";
 import { SCOPES } from "./scopes.ts";
 
-export type { CodePiece, CodeRole, CodeTokens } from "svjeez";
-
-export * from "./palettes.ts";
-
 export type { DefaultLang } from "./langs.ts";
 
 /** What `highlight()` returns: a `CodeTokens` whose pieces are all plain strings or `[role, text]` runs. */
@@ -46,15 +42,19 @@ const THEME: ThemeRegistration & { name: string } = {
   ],
 };
 
-const highlighter = createHighlighterCoreSync({
-  themes: [THEME],
-  langs: LANGS,
-  engine: createJavaScriptRegexEngine(),
-});
+// Built on the first highlight() so that importing the package costs nothing.
+let shiki: ReturnType<typeof createHighlighterCoreSync> | undefined;
+
+const highlighterOf = () =>
+  (shiki ??= createHighlighterCoreSync({
+    themes: [THEME],
+    langs: LANGS,
+    engine: createJavaScriptRegexEngine(),
+  }));
 
 const loaded = new WeakSet<object>();
 
-const supported = () => highlighter.getLoadedLanguages().toSorted();
+const supported = () => highlighterOf().getLoadedLanguages().toSorted();
 
 const expandTabs = (line: string, tabSize: number): string => {
   let out = "";
@@ -87,6 +87,8 @@ export function highlight(source: string, lang: Lang, options: HighlightOptions 
       `highlight() needs tabSize to be a whole number of at least 1, got ${tabSize}.`,
     );
   }
+
+  const highlighter = highlighterOf();
 
   for (const grammar of grammars) {
     if (loaded.has(grammar)) continue;

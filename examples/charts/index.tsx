@@ -1,5 +1,6 @@
 import { chart } from "@svjeez/charts";
 import { enter, render, type Color, tint } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { color, css, geist, hue, leave, mono, rise, theme, Title } from "../gallery-style";
 
@@ -27,9 +28,7 @@ const [orange, blue, violet] = [hue.orange, hue.blue, hue.purple];
 /** Left: pull requests opened and merged, side by side in each month. */
 const volume = chart({
   ...look,
-  width: 380,
-  height: 290,
-  at: { x: 84, y: 196 },
+  frame: rect(84, 196, 380, 290),
   x: { kind: "band", domain: months },
   y: { ticks: 4 },
   data: [...pairs(months, opened), ...pairs(months, merged)],
@@ -38,28 +37,22 @@ const volume = chart({
 /** Right: hours until the first review, by week. */
 const turnaround = chart({
   ...look,
-  width: 300,
-  height: 290,
-  at: { x: 568, y: 196 },
+  frame: rect(568, 196, 300, 290),
   x: { kind: "linear", domain: [1, 12], ticks: 11 },
   y: { domain: [0, 30], ticks: 3 },
 });
 
-const open = volume.bars(Object.fromEntries(pairs(months, opened)), {
-  at: 0.6,
+const open = volume.bars({ at: 0.6, over: 1.1 }, pairs(months, opened), {
   group: { index: 0, count: 2 },
   color: orange,
 });
 
-const done = volume.bars(Object.fromEntries(pairs(months, merged)), {
-  at: 0.8,
+const done = volume.bars({ at: 0.8, over: 1.1 }, pairs(months, merged), {
   group: { index: 1, count: 2 },
   color: blue,
 });
 
-const wait = turnaround.area(pairs(weeks, hours), {
-  at: 1.2,
-  over: 1.8,
+const wait = turnaround.area({ at: 1.2, over: 1.8 }, pairs(weeks, hours), {
   curve: "monotone",
   color: violet,
   dots: 3.5,

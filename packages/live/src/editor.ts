@@ -20,7 +20,7 @@ import {
 } from "./source.ts";
 
 /** The picture on screen: an image URL, and the file it shows when it came from a compile rather than the build. */
-export interface Picture {
+export interface PictureState {
   readonly url: string;
   readonly scene: SceneSize;
   /** The compiled file and the source it came from. A picture made at build time has neither until the first compile. */
@@ -29,19 +29,19 @@ export interface Picture {
 }
 
 /** A compiled file, before it has a URL to show it by. */
-export type CompiledFile = Required<Omit<Picture, "url">>;
+export type CompiledFile = Required<Omit<PictureState, "url">>;
 
 /**
  * A handle on the picture for a number: where it sat when the value was `from`, and how far it moves per unit of the
  * value. A scene's `handles` declare some; the editor measures one for the selected number in any scene.
  */
-export interface Grip extends Move {
+export interface GripState extends Move {
   readonly from: number;
   readonly declared: boolean;
 }
 
 /** What the newest good compile measured about its file. */
-export interface Stats {
+export interface PictureStats {
   /** Bytes gzipped, as a browser sends it. */
   readonly gzip: number;
   /** How many `@keyframes` rules it holds. */
@@ -69,13 +69,13 @@ export interface State {
   readonly schema: Schema;
   /** The value whose control has focus, by key. */
   readonly selected: string | null;
-  readonly picture: Picture | null;
+  readonly picture: PictureState | null;
   /** The newest good compile, which a play, pause or seek shows again. It runs ahead of `picture` while it decodes. */
   readonly compiled: CompiledFile | null;
   /** What the newest good compile measured, or `first.stats` until there is one. */
-  readonly stats: Stats | null;
+  readonly stats: PictureStats | null;
   /** The handles on the picture, by value key. */
-  readonly grips: { readonly [key: string]: Grip };
+  readonly grips: { readonly [key: string]: GripState };
   /** Why the newest compile failed, until one succeeds. The picture stays the last good one. */
   readonly error: SourceError | null;
   readonly clock: Clock;
@@ -103,12 +103,12 @@ export type Msg =
       readonly result: Compiled;
       readonly now: number;
     }
-  | { readonly type: "shown"; readonly picture: Picture; readonly now: number }
+  | { readonly type: "shown"; readonly picture: PictureState; readonly now: number }
   | {
       readonly type: "probed";
       readonly key: string;
       readonly text: string;
-      readonly grip: Grip | null;
+      readonly grip: GripState | null;
     };
 
 export type Cmd =
@@ -119,7 +119,7 @@ export type Cmd =
       readonly svg: string;
       readonly at: number;
       readonly playing: boolean;
-      readonly picture: Omit<Picture, "url">;
+      readonly picture: Omit<PictureState, "url">;
     }
   /** Find what the number at `key` moves: compile `nudged`, the file with it `by` more, and compare it with `svg`. */
   | {
@@ -142,7 +142,7 @@ export const valueOf = (state: State, key: string): Value | undefined =>
   state.values.find((v) => v.key === key);
 
 /** Where a handle sits with its value at `v`, along the way it moves. */
-export const handleAt = (grip: Grip, v: number): Point => ({
+export const handleAt = (grip: GripState, v: number): Point => ({
   x: grip.at.x + grip.way.x * (v - grip.from),
   y: grip.at.y + grip.way.y * (v - grip.from),
 });
@@ -181,7 +181,7 @@ export interface First {
   readonly title: string;
   readonly duration?: number;
   /** The file's size and keyframes, if the page measured them, so a readout has numbers before the first compile. */
-  readonly stats?: Omit<Stats, "ms">;
+  readonly stats?: Omit<PictureStats, "ms">;
 }
 
 export interface Init {
@@ -250,7 +250,7 @@ const declaredGrips = (text: string, handles: { readonly [key: string]: Move } =
   const literals = parse(text).literals;
 
   return Object.fromEntries(
-    keys.flatMap((key): [string, Grip][] => {
+    keys.flatMap((key): [string, GripState][] => {
       const literal = literals.find((l) => l.key === `params.${key}`);
 
       return literal?.kind === "number"
@@ -527,6 +527,14 @@ const lazyCompiler = (): Effects["compile"] => {
     },
   });
 };
+
+/** What a framework binding takes after the scene source `text`. */
+export interface EditorOptions {
+  /** Shown until the first compile finishes: a `?svjeez` import, with a `duration` if the page knows it. */
+  readonly first?: First;
+  /** Swaps how the editor compiles and shows pictures, such as a test running without a worker. */
+  readonly effects?: Partial<Effects>;
+}
 
 /** A store for editing `text`: state, a way to send messages, and the compiles and pictures they ask for. */
 export const createEditor = (

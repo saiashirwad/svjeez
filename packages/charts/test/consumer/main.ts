@@ -1,10 +1,9 @@
-import { chart, type Bars, type Chart } from "@svjeez/charts";
+import { chart, type ChartBars, type Chart } from "@svjeez/charts";
 import { render } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 const quarters: Chart<"band"> = chart({
-  width: 360,
-  height: 180,
-  at: { x: 40, y: 20 },
+  frame: rect(40, 20, 360, 180),
   x: { kind: "band", domain: ["Q1", "Q2", "Q3"] },
   data: [
     ["Q1", 4],
@@ -12,9 +11,10 @@ const quarters: Chart<"band"> = chart({
   ],
 });
 
-const sales: Bars = quarters.bars({ Q1: 4, Q2: 7, Q3: 9 }, { at: 0.5 });
+const sales: ChartBars = quarters.bars({ at: 0.5, over: 1 }, { Q1: 4, Q2: 7, Q3: 9 });
 
 const trend = quarters.line(
+  { at: sales.span.end, over: 1 },
   [
     ["Q1", 4],
     ["Q3", 9],

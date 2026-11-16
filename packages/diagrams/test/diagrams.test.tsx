@@ -27,9 +27,9 @@ describe("flowchart", () => {
       groups: { core: { label: "Core", nodes: ["check", "work"] } },
       edges: [
         ["start", "check"],
-        ["check", "work", { label: "yes" }],
+        ["check", "work", "yes"],
         ["work", "check"],
-        ["check", "db", { label: "no" }],
+        ["check", "db", "no"],
         ["db", "end"],
       ],
     },
@@ -299,7 +299,7 @@ describe("lanes", () => {
   const run = lanes(
     {
       lanes: { a: "A", b: { label: "B", role: "tool" } },
-      spans: [{ lane: "a", from: 0, to: 2, label: "busy" }],
+      spans: [{ lane: "a", at: 0, over: 2, label: "busy" }],
       events: [{ lane: "b", at: 1, label: "READ" }],
       links: [{ from: "a", to: "b", at: 1.5 }],
     },
@@ -358,5 +358,54 @@ describe("state scopes", () => {
         transitions: [["box", "in"]],
       }),
     ).toThrow("one holds the other");
+  });
+});
+
+describe("span", () => {
+  const chain = { nodes: { a: "A", b: "B", c: "C" }, edges: [["a", "b"], ["b", "c"]] } as const;
+
+  const window = (s: { at: number; end: number }) => [s.at, s.end];
+
+  test("a diagram without play is the instant 0", () => {
+    expect(window(flowchart(chain).span)).toEqual([0, 0]);
+    expect(window(tree({ nodes: { r: "R", k: { label: "K", parent: "r" } } }).span)).toEqual([0, 0]);
+  });
+
+  test("a flowchart runs from its first reveal to the last node settling", () => {
+    const { span } = flowchart(chain, { play: { at: [1, 3] } });
+
+    expect(span.at).toBeGreaterThan(0);
+    expect(span.at).toBeLessThan(1);
+    expect(span.end).toBeCloseTo(3.35, 6);
+  });
+
+  test("a tree ends when its last node has popped in", () => {
+    const { span } = tree(
+      { nodes: { r: "R", k: { label: "K", parent: "r" }, j: { label: "J", parent: "r" } } },
+      { play: { at: 2, step: 1 } },
+    );
+
+    expect(span.at).toBeGreaterThanOrEqual(1.65);
+    expect(span.end).toBeCloseTo(3.35, 6);
+  });
+
+  test("a sequence covers its first message to the end of its last", () => {
+    const { span } = sequence(
+      { actors: { a: "A", b: "B" }, messages: [["a", "b", "x"], ["b", "a", "y"]] },
+      { play: { at: 2, step: 0.8 } },
+    );
+
+    expect(span.at).toBe(2);
+    expect(span.end).toBeCloseTo(3.3, 6);
+  });
+
+  test("lanes end with the playhead", () => {
+    const { span } = lanes(
+      { lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 2 }] },
+      { scale: 50, play: { at: 1 } },
+    );
+
+    expect(span.at).toBe(1);
+    expect(span.end).toBeGreaterThanOrEqual(3);
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { Ink, inkPath, render, tool, type Child } from "svjeez";
+import { Ink, render, tool, type Child } from "svjeez";
+import { inkPath } from "../src/ink/ink";
 import { flatten } from "../src/ink/path";
 
 const scene = (child: Child) =>

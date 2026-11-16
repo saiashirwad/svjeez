@@ -6,6 +6,7 @@ import {
   type Direction,
   motion,
   type Seconds,
+  type Span,
   enter,
   type SvgNode,
   beats,
@@ -23,17 +24,19 @@ import {
   lookup,
   onOutline,
   placer,
+  POP,
   popIn,
   sizeOf,
-  type Diagram,
+  spanOfReveals,
   type DiagramOptions,
   type Labelled,
   type NodeRole,
+  type PlayedDiagram,
 } from "./kit.tsx";
 
 export type FlowchartEdge<N extends string> =
   | readonly [from: N, to: N]
-  | readonly [from: N, to: N, options: { readonly label?: string }];
+  | readonly [from: N, to: N, label: string];
 
 export interface FlowchartGroup<N extends string> {
   readonly label: string;
@@ -50,7 +53,7 @@ export interface FlowchartOptions extends DiagramOptions {
   readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
-export interface Flowchart<N extends string, G extends string> extends Diagram<N | G> {
+export interface Flowchart<N extends string, G extends string> extends PlayedDiagram<N | G> {
   /** The drawn line of the first edge `from` → `to`. */
   edge(from: N, to: N): Point[];
   /** The shortest directed path through edges, as one polyline through each node on the way. */
@@ -99,7 +102,7 @@ export function flowchart<
   }));
 
   const roles = new Map(nodes.map((n) => [n.id, n.role]));
-  const edges = spec.edges.map(([from, to, o]) => ({ from, to, label: o?.label }));
+  const edges = spec.edges.map(([from, to, label]) => ({ from, to, label }));
   // SAFETY: G's values are FlowchartGroup<keyof N & string>, and the {} default has no values to mismatch
   const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<Id>>);
 
@@ -140,6 +143,7 @@ export function flowchart<
 
   const appear = (id: string) => (play && shown.get(id)! >= 0 ? popIn(shown.get(id)!) : undefined);
   const drawOver = Math.min(0.4, step);
+  const labelOver = 0.25;
 
   const drawAt = (from: string, to: string) =>
     Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
@@ -190,12 +194,32 @@ export function flowchart<
           play &&
             motion({ opacity: 0 })
               .at(drawAt(line.from, line.to) + drawOver)
-              .to({ opacity: 1 }, 0.25),
+              .to({ opacity: 1 }, labelOver),
         ),
     ),
   ]);
 
+  const reveals: Span[] = play
+    ? [
+        ...[...shown.values()].flatMap((at) => (at >= 0 ? [{ at, over: POP }] : [])),
+        ...groups.flatMap(([, g]) => {
+          const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
+
+          return at >= 0 ? [{ at, over: 0.4 }] : [];
+        }),
+        ...laid.lines.flatMap((line) => {
+          const at = drawAt(line.from, line.to);
+
+          return [
+            { at, over: drawOver },
+            ...(line.label ? [{ at: at + drawOver, over: labelOver }] : []),
+          ];
+        }),
+      ]
+    : [];
+
   return {
+    span: spanOfReveals(reveals),
     node: (
       <g>
         {under}

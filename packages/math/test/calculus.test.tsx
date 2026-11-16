@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { ease, render, type Child, readout } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { validateSvg } from "svjeez/frames";
 import { plane } from "../src/index.ts";
 
-const graph = () =>
-  plane({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 } });
+const graph = () => plane({ xRange: [-3, 3], yRange: [-1, 9], frame: rect(300, 60, 400, 260) });
 
 const svgOf = (...nodes: Child[]): string =>
   render({ width: 800, height: 400, duration: 6, title: "Calculus", reducedMotion: false }, nodes);
@@ -87,9 +87,17 @@ describe("area()", () => {
 describe("riemann()", () => {
   test("every stage is one path with the same commands, and the sums converge", () => {
     const sums = (n: number) =>
-      graph().riemann(square, { from: 0, to: 2, n, rule: "left" }).sums[0]!;
+      graph().riemann([], square, { from: 0, to: 2, n, rule: "left" }).sums[0]!;
 
-    const r = graph().riemann(square, { from: 0, to: 2, n: [2, 4, 8], at: [1, 3] });
+    const r = graph().riemann(
+      [
+        { at: 1, over: 0.8 },
+        { at: 3, over: 0.8 },
+      ],
+      square,
+      { from: 0, to: 2, n: [2, 4, 8] },
+    );
+
     const values = smilValues(svgOf(r.node));
 
     expect(sums(2)).toBeCloseTo(1);
@@ -98,9 +106,9 @@ describe("riemann()", () => {
     expect(values[0]!.match(/M/g)).toHaveLength(8);
   });
 
-  test("needs one start time per later stage", () => {
-    expect(() => graph().riemann(square, { n: [4, 8, 16], at: [1] })).toThrow(
-      "riemann() has 3 stages, so it needs 2 start times in at, got 1.",
+  test("needs one span per later stage", () => {
+    expect(() => graph().riemann([{ at: 1, over: 1 }], square, { n: [4, 8, 16] })).toThrow(
+      "riemann() has 3 stages, so it needs 2 spans, one per change, got 1.",
     );
   });
 });
@@ -109,10 +117,14 @@ describe("morph()", () => {
   test("one curve bends through each function, its stroke with it", () => {
     const ax = graph();
 
-    const bend = ax.morph([() => 1, (x) => 1 + x, square], {
-      at: [1, 3],
-      color: ["#ff0000", "#00ff00", "#0000ff"],
-    });
+    const bend = ax.morph(
+      [
+        { at: 1, over: 1 },
+        { at: 3, over: 1 },
+      ],
+      [() => 1, (x) => 1 + x, square],
+      { color: ["#ff0000", "#00ff00", "#0000ff"] },
+    );
 
     const svg = svgOf(bend.node);
     const values = smilValues(svg);

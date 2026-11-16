@@ -44,7 +44,7 @@ try {
 
   // Only compiled entry points: .astro files and type-only entries reach into other packages, which the consumer covers.
   const compiled = Object.entries(manifest(dir).exports).filter(
-    ([, target]) => isPath(target) && target.endsWith(".ts"),
+    ([, target]) => isPath(target) && /\.tsx?$/.test(target),
   );
 
   // A component package exports its source for the app's compiler, so only packages with compiled entries are checked.

@@ -20,13 +20,13 @@ const lines = (text: string): Line[] =>
   });
 
 /** Reads Mermaid text into a plain model, with no svjeez involved. Throws a `MermaidSyntaxError` that names the line. */
-export function parse(text: string): MermaidDoc {
+export function parseMermaid(text: string): MermaidDoc {
   const all = lines(text);
   const first = all[0];
 
   if (!first)
     throw new Error(
-      `parse() got no Mermaid text. Start with a header such as \`flowchart TD\`. ${KINDS}`,
+      `parseMermaid() got no Mermaid text. Start with a header such as \`flowchart TD\`. ${KINDS}`,
     );
   const word = /^[\w-]+/.exec(first.text)?.[0];
 

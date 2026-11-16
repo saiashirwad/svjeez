@@ -8,7 +8,8 @@ import {
   toBars,
   type Topology,
 } from "@svjeez/geo";
-import { motion, rect, render, show, type SvgNode } from "svjeez";
+import { motion, render, show, type SvgNode } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 import { LIFE_EXPECTANCY, POPULATION, YEARS } from "./data";
@@ -44,19 +45,21 @@ const lifeNow = Object.fromEntries(
   Object.entries(LIFE_EXPECTANCY).map(([id, series]) => [id, series.at(-1)!]),
 );
 
-const years = choropleth(map, LIFE_EXPECTANCY, { scale, at: AT, over: 1, lines: "#0b1118" });
+const years = choropleth(
+  AT.map((at) => ({ at, over: 1 })),
+  map,
+  LIFE_EXPECTANCY,
+  { scale, lines: "#0b1118" },
+);
 
-const circles = cartogram(map, POPULATION, {
-  at: CARTOGRAM,
-  over: MORPH,
+const circles = cartogram({ at: CARTOGRAM, over: MORPH }, map, POPULATION, {
   coverage: 0.34,
   detail: 3,
   fill: (region) => scale(lifeNow[region.id] ?? NaN),
 });
 
-const bars = toBars(map, POPULATION, {
-  at: BARS,
-  over: MORPH,
+// Ten bars start 0.07s apart, each taking MORPH, so the last lands 9 * 0.07s after the first.
+const bars = toBars({ at: BARS, over: MORPH + 9 * 0.07 }, map, POPULATION, {
   stagger: 0.07,
   frame: rect(580, 150, 300, 300),
   top: 10,
@@ -195,18 +198,17 @@ export default function build(): string {
       <Names />
       <Labels />
       <g animation={show({ at: 0, over: OUT + 0.7 }, { fade: 0.5 })}>
-        {legend(scale, {
-          x: 40,
-          y: H - 44,
-          width: 360,
-          height: 10,
-          title: "Life expectancy (years)",
-          every: 1,
-          empty: "No data",
-          fontSize: 11,
-          font: SANS,
-          ink: DIM,
-        })}
+        {
+          legend(scale, {
+            frame: rect(40, H - 27, 360, 10),
+            title: "Life expectancy (years)",
+            every: 1,
+            empty: "No data",
+            fontSize: 11,
+            font: SANS,
+            color: DIM,
+          }).node
+        }
       </g>
     </>,
   );

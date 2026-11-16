@@ -3,7 +3,7 @@ import { flowchart, lanes, sequence, stateMachine, tree } from "@svjeez/diagrams
 import { render } from "svjeez";
 
 const chart = flowchart(
-  { nodes: { a: "A", b: "B" }, edges: [["a", "b", { label: "go" }]] },
+  { nodes: { a: "A", b: "B" }, edges: [["a", "b", "go"]] },
   { play: { at: 0.5 } },
 );
 
@@ -22,7 +22,7 @@ assert.ok(stateMachine({ states: { a: "A" }, initial: "a", transitions: [] }).bo
 assert.ok(tree({ nodes: { root: "Root" } }).bounds.w > 0);
 
 assert.ok(
-  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", from: 0, to: 1 }] }, { scale: 10 }).bounds.w > 0,
+  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 1 }] }, { scale: 10 }).bounds.w > 0,
 );
 
 console.log(`rendered a flowchart into ${(svg.length / 1024).toFixed(1)} KB`);

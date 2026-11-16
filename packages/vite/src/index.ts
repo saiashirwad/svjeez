@@ -26,7 +26,7 @@ export interface SceneModule {
   readonly posters?: { readonly light: string; readonly dark: string };
 }
 
-export interface Options {
+export interface SvjeezOptions {
   /** How `?svjeez&posters` renders its stills. */
   readonly posters?: PosterOptions;
   /** Where posters are kept between runs. Default `svjeez/` in Vite's cache directory. */
@@ -35,7 +35,7 @@ export interface Options {
 
 const QUERY = /\?svjeez(&posters)?$/;
 
-export default function svjeez(options: Options = {}): Plugin {
+export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let config: ResolvedConfig;
   // One runner per environment, since a build closes each environment on its own.
   const runners = new Map<string, Runner>();

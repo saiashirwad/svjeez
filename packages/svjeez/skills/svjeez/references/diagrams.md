@@ -4,6 +4,8 @@
 
 Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`. `tints: { tool: theme.base09 }` recolors a role, so a scene can hold to two or three hues. A `stateMachine` state takes a `role` too, which tints its box and stroke.
 
+A labelled edge is `[from, to, label?]` in a flowchart and a state machine, with the label a string. A sequence message is `[from, to, label, { reply? }?]`.
+
 ## Timing
 
 | Diagram | How it plays |
@@ -14,7 +16,7 @@ Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or 
 | `lanes` | `play: { at }`. Real time: a playhead sweeps, spans grow, events pop |
 | `stateMachine` | No `play`. Call `walk(ids, { at })` |
 
-`at` is a `Beats`: a start time, or an array with one time per item, to keep two diagrams in sync. `lanes` takes a plain start time, because its spans already play in real time. Without `play`, everything is there from the start.
+`at` is a `Beats`: a start time, or an array with one time per item, to keep two diagrams in sync. `lanes` takes a plain start time, because its spans already play in real time. Without `play`, everything is there from the start. `flowchart`, `tree`, `sequence` and `lanes` return `span`, from the first reveal to the end of the last, to time what comes next: `chart.span.end`, or `chart.span.next(1)`. Without `play` it is the instant 0.
 
 ## Flowchart
 
@@ -26,7 +28,7 @@ const chart = flowchart(
   {
     nodes: { pr: { label: "PR opened", role: "input" }, lint: { label: "Run linters", role: "tool" }, ok: { label: "Clean?", role: "decision" }, post: "Post review" },
     groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
-    edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
+    edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", "yes"], ["ok", "lint", "no"]],
   },
   { play: { at: 0.5 }, direction: "TB" },
 );
@@ -66,10 +68,10 @@ const agent = stateMachine(
   },
   { direction: "LR" },
 );
-const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwell: 0.8 }); // { node, spans, end }
+const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwell: 0.8 }); // { node, spans, span }
 ```
 
-`walk` lights each state in turn and runs a token along the transition between them. It throws `walk() has no way from "a" to "b".` when no transition connects two states. `edge(from, to)` gives the drawn line.
+`walk` lights each state in turn and runs a token along the transition between them. `at` is a start time or one time per state. `dwell` (default 1) is how long each state stays lit and `speed` (default 220 px/s) moves the token. `token` takes the `flow` options except `at`, `over` and `speed`. It returns `node` to draw, `spans` (when each state is lit) and `span`, from the first state lit to when the last goes dark. It throws `walk() has no way from "a" to "b".` when no transition connects two states. `edge(from, to)` gives the drawn line.
 
 ## Tree
 
@@ -90,7 +92,7 @@ import { lanes } from "@svjeez/diagrams";
 const run = lanes(
   {
     lanes: { lead: "Lead", build: { label: "Build", role: "tool" } },
-    spans: [{ lane: "lead", from: 0, to: 1, label: "plan" }, { lane: "build", from: 1, to: 4, label: "editing" }],
+    spans: [{ lane: "lead", at: 0, over: 1, label: "plan" }, { lane: "build", at: 1, over: 3, label: "editing" }],
     events: [{ lane: "build", at: 2, label: "TEST" }],
     links: [{ from: "lead", to: "build", at: 1 }],
   },

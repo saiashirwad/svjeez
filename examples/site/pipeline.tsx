@@ -86,8 +86,8 @@ export const make = (tall = false): string => {
         ["prompt", "agent"],
         ["agent", "frames"],
         ["frames", "ok"],
-        ["ok", "ship", { label: "yes" }],
-        ["ok", "agent", { label: "no" }],
+        ["ok", "ship", "yes"],
+        ["ok", "agent", "no"],
       ],
     },
     {

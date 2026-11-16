@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { rect, render, type SvgNode, Camera, travel, type CameraStop } from "svjeez";
+import { render, type SvgNode, Camera, travel, type CameraStop } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 const scene = (...children: SvgNode[]) =>
   render({ width: 400, height: 300, duration: 10, title: "Test" }, <>{children}</>);

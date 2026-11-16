@@ -1,6 +1,7 @@
-import { shot, timeline } from "svjeez";
+import { timeline } from "svjeez";
 import { CODE } from "./editor";
 import { dataShot } from "./data";
+import { Shot } from "./kit";
 import { mapShot } from "./map";
 import { pipelineShot } from "./pipeline";
 import { springShot } from "./spring";
@@ -15,13 +16,17 @@ export const MONTAGE = { at: SHOTS.map.at, over: SHOTS.end - SHOTS.map.at };
 
 export const montage = (
   <>
-    <g animation={shot(SHOTS.map, { enter: "zoom", exit: "rise" })}>{mapShot(SHOTS.map)}</g>
-    <g animation={shot(SHOTS.pipeline, { enter: "rise", exit: "rise" })}>
-      {pipelineShot(SHOTS.pipeline)}
-    </g>
-    <g animation={shot(SHOTS.spring, { enter: "rise", exit: "rise" })}>
-      {springShot(SHOTS.spring)}
-    </g>
-    <g animation={shot(SHOTS.data, { enter: "rise", exit: "zoom" })}>{dataShot(SHOTS.data)}</g>
+    <Shot {...SHOTS.map} enter="zoom" exit="rise">
+      {mapShot(SHOTS.map.over)}
+    </Shot>
+    <Shot {...SHOTS.pipeline} enter="rise" exit="rise">
+      {pipelineShot(SHOTS.pipeline.over)}
+    </Shot>
+    <Shot {...SHOTS.spring} enter="rise" exit="rise">
+      {springShot(SHOTS.spring.over)}
+    </Shot>
+    <Shot {...SHOTS.data} enter="rise" exit="zoom">
+      {dataShot()}
+    </Shot>
   </>
 );

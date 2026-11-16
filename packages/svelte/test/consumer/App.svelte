@@ -1,9 +1,9 @@
 <script>
-  import { Code, editor, Picture, Transport } from "@svjeez/svelte";
+  import { Code, Picture, SceneEditor, Transport } from "@svjeez/svelte";
   import "@svjeez/live/editor.css";
   import { scene } from "./scene.js";
 
-  const dot = editor(scene);
+  const dot = new SceneEditor(scene);
 </script>
 
 <Picture editor={dot} />

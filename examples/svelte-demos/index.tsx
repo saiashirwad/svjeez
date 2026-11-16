@@ -7,12 +7,15 @@ import { render, variables } from "svjeez";
 // A real Svelte 5 component from an app, filmed. notifications.demo.ts says what happens to it; recordings() renders
 // it through the app's own Vite config (Svelte, Tailwind 4) in Chromium and reads every state back as SVG.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
-const geist = await google.family("Geist", [400, 500, 600]);
+const geist = await google.family("Geist", [{ weight: 400 }, { weight: 500 }, { weight: 600 }]);
 
-const demos = await recordings<typeof import("./notifications.demo.ts")>(here("notifications.demo.ts"), {
-  cache: here("snapshots.json"),
-  fonts: [geist],
-});
+const demos = await recordings<typeof import("./notifications.demo.ts")>(
+  here("notifications.demo.ts"),
+  {
+    cache: here("snapshots.json"),
+    fonts: [geist],
+  },
+);
 
 const notifications = loop(demos.notifications);
 const MARGIN = 24;

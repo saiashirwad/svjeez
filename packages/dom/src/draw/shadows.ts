@@ -1,4 +1,5 @@
-import { num, type PathData } from "svjeez";
+import { type PathData } from "svjeez";
+import { num } from "svjeez/geometry";
 import { channels, clear, mapPaint, opaque } from "../paint.ts";
 import type { Box, Paint, Radii, Rect, Shadow } from "../tree.ts";
 import { grow, growRadii, paddingBox, rounded, union } from "./geometry.ts";

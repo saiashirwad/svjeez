@@ -4,6 +4,7 @@ import { transform } from "sucrase";
 import * as svjeez from "svjeez";
 import * as jsxDevRuntime from "svjeez/jsx-dev-runtime";
 import * as jsxRuntime from "svjeez/jsx-runtime";
+import * as geometry from "svjeez/geometry";
 import * as params from "svjeez/params";
 import type { Point } from "svjeez";
 import type { Schema } from "svjeez/params";
@@ -15,6 +16,7 @@ const modules = new Map<string, object>([
   ["svjeez", svjeez],
   ["svjeez/jsx-runtime", jsxRuntime],
   ["svjeez/jsx-dev-runtime", jsxDevRuntime],
+  ["svjeez/geometry", geometry],
   ["svjeez/params", params],
 ]);
 

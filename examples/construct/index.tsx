@@ -8,7 +8,7 @@ const H = 540;
 const SIDE = 200;
 
 // Euclid I.1, then the bisector of the angle at C: the construction below is the whole figure.
-const g = construct({ theme, at: { x: 235, y: 300 }, fontSize: 24 });
+const g = construct({ theme, origin: { x: 235, y: 300 }, fontSize: 24 });
 
 const A = g.point(0, 0, "A", { at: 0.4 });
 const B = g.point(SIDE, 0, "B", { at: 0.4 });

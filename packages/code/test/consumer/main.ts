@@ -1,5 +1,5 @@
-import { highlight, type CodeTokens, type Lang } from "@svjeez/code";
-import { render, code, defaultDark } from "svjeez";
+import { highlight, type Lang } from "@svjeez/code";
+import { render, code, defaultDark, type CodeTokens } from "svjeez";
 
 const lang: Lang = "tsx";
 const tokens: CodeTokens = highlight("const answer = 42;", lang, { tabSize: 4 });

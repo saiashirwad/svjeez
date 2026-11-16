@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { polylinePath } from "svjeez";
+  import { polylinePath } from "svjeez/geometry";
   import type { Attachment } from "svelte/attachments";
   import { MediaQuery } from "svelte/reactivity";
   import first from "./first.tsx?svjeez";

@@ -149,10 +149,8 @@ type VideoFn = (
   colorScheme: string;
 }>;
 
-/** `video` since 0.7, `renderVideo` before. */
 interface VideoModule {
   readonly video?: VideoFn;
-  readonly renderVideo?: VideoFn;
 }
 
 const VIDEO = "@svjeez/video";
@@ -201,7 +199,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
   const out = values.out ?? `${basename(file, extname(file))}.${format}`;
   const colorScheme = parseScheme(values["color-scheme"]);
   const loaded = await loadVideo();
-  const encode = loaded.video ?? loaded.renderVideo ?? fail(`${VIDEO} has no video().`);
+  const encode = loaded.video ?? fail(`${VIDEO} has no video().`);
   const svg = await loadSvg(file);
   report(svg);
 

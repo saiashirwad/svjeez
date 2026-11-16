@@ -20,6 +20,6 @@ test("every palette fills all sixteen slots", () => {
     expect(Object.keys(palette).toSorted()).toEqual(slots.toSorted());
 });
 
-test("the package root carries them too", () => {
-  expect(code.tomorrowNight).toBe(palettes.tomorrowNight);
+test("the package root leaves the palettes to the subpath", () => {
+  expect(Object.keys(code)).toEqual(["highlight"]);
 });

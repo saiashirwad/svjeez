@@ -584,7 +584,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
   </g>
   <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--base03)" class="a m80">
     <text x="180" y="500" text-anchor="middle">graph.secant(f, x, h)</text>
-    <text x="492" y="500" text-anchor="middle">graph.riemann(g, { n })</text>
-    <text x="804" y="500" text-anchor="middle">graph.morph(taylors)</text>
+    <text x="492" y="500" text-anchor="middle">graph.riemann(spans, g, { n })</text>
+    <text x="804" y="500" text-anchor="middle">graph.morph(spans, taylors)</text>
   </g>
 </svg>

@@ -19,7 +19,8 @@ import type {
   Polygon as TopoPolygon,
   Topology,
 } from "topojson-specification";
-import { rect, type Point, type Rect } from "svjeez";
+import { type Point, type Rect } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { Writer } from "./writer.ts";
 
 export type LonLat = readonly [lon: number, lat: number];
@@ -395,9 +396,9 @@ export {
 export {
   cartogram,
   toBars,
-  type Bar,
-  type Bars,
-  type BarsOptions,
+  type GeoBar,
+  type GeoBars,
+  type GeoBarsOptions,
   type Bubble,
   type Cartogram,
   type CartogramOptions,
@@ -413,6 +414,7 @@ export {
   type ColorScale,
   type Hex,
   type DivergingOptions,
+  type Legend,
   type LegendOptions,
   type ScaleOptions,
   type SequentialOptions,
@@ -445,4 +447,3 @@ export {
   type TrueSizeOptions,
 } from "./reproject.ts";
 
-export { nightfall, type NightfallOptions } from "./nightfall.ts";

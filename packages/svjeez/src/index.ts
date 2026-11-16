@@ -72,7 +72,6 @@ export { spline, type Spline } from "./spline";
 
 export {
   Ink,
-  inkPath,
   tool,
   type Tool,
   type InkProps,
@@ -92,20 +91,9 @@ export type { Channel, ChannelValues, TagChannels } from "./channels";
 
 export type { SvgNode, Child } from "./svg";
 
-export {
-  rect,
-  resample,
-  polylinePath,
-  pathLength,
-  type Rect,
-  type Point,
-  type Edge,
-  type PolylinePathOptions,
-} from "./geometry";
+export type { Point, Rect, Edge } from "./geometry";
 
-export { matchPaths, type MatchOptions, type PathData, type SampledPathOptions } from "./paths";
-
-export { num } from "./format";
+export type { PathData } from "./paths";
 
 export type { Box, Size } from "./layout/box";
 
@@ -120,6 +108,9 @@ export {
   type ReadingOptions,
   travel,
   type Beats,
+  type Heading,
+  type Travel,
+  type Shown,
   type HeadingOptions,
   type TravelOptions,
   type Timeline,
@@ -141,11 +132,17 @@ export {
 
 export { readout, type ReadoutOptions } from "./extras/readout";
 
-export { morph, type MorphOptions, type Morphable, type MorphPiece } from "./extras/morph";
+export {
+  morph,
+  type MorphResult,
+  type MorphOptions,
+  type Morphable,
+  type MorphPiece,
+} from "./extras/morph";
 
-export { typewriter, type TypewriterOptions } from "./extras/typewriter";
+export { typewriter, type TypewriterOptions, type TypewriterResult } from "./extras/typewriter";
 
-export { reveal, type RevealOptions } from "./extras/reveal";
+export { reveal, type RevealOptions, type RevealResult } from "./extras/reveal";
 
 export { Focus, type FocusStop } from "./extras/focus";
 
@@ -161,18 +158,24 @@ export {
   adaptive,
   variables,
   defaultDark,
-  defaultLight,
   systemLight,
   systemDark,
   type Base16,
+  type AdaptiveResult,
+  type VariablesResult,
   type Slot,
   type CodeRole,
 } from "./extras/theme";
 
-export { appWindow, type WindowOptions } from "./extras/window";
+export { appWindow, type WindowOptions, type AppWindowResult } from "./extras/window";
 
-export { terminal, type TerminalCommand, type TerminalOptions } from "./extras/terminal";
+export {
+  terminal,
+  type TerminalCommand,
+  type TerminalOptions,
+  type TerminalResult,
+} from "./extras/terminal";
 
-export { flow, type FlowOptions, type FlowStyle } from "./extras/flow";
+export { flow, type FlowOptions, type FlowResult, type FlowStyle } from "./extras/flow";
 
 export type { Direction } from "./layout/box";

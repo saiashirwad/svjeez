@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { blendPaths, commandsOf } from "../src/paths";
-import { ease, matchPaths, motion, render, sampled, type Motion } from "svjeez";
+import { ease, motion, render, sampled, type Motion } from "svjeez";
+import { matchPaths } from "svjeez/geometry";
 
 const scene = (animation: Motion<"d">, reducedMotion?: false) =>
   render(

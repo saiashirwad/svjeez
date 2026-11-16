@@ -47,9 +47,9 @@ export type Schema = { readonly [key: string]: Param };
 
 export type Values<S extends Schema> = { readonly [K in keyof S]: S[K]["value"] };
 
-type Range = Pick<NumberParam, "min" | "max">;
+export type Range = Pick<NumberParam, "min" | "max">;
 
-type Extras = Partial<Pick<NumberParam, "step" | "unit" | "scale" | "label">>;
+export type Extras = Partial<Pick<NumberParam, "step" | "unit" | "scale" | "label">>;
 
 const check = (name: string, p: NumberParam): NumberParam => {
   const at = `${name}(${p.value})`;
