@@ -8,6 +8,7 @@ import {
   type Tex,
 } from "@svjeez/math";
 import { render, type Rect, morph } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 const square: Tex = tex(String.raw`(a+b)^2`, { x: 20, y: 20, fontSize: 40 });
 const expanded: Tex = tex(String.raw`a^2 + \cssId{mid}{2ab} + b^2`, { x: 20, y: 20, fontSize: 40 });
@@ -21,11 +22,9 @@ export const cross: Rect = expanded.get("mid");
 export const key: string | undefined = first?.text;
 
 const graph: Plane = plane({
-  x: [-3, 3],
-  y: [-1, 9],
-  width: 200,
-  height: 100,
-  at: { x: 10, y: 10 },
+  xRange: [-3, 3],
+  yRange: [-1, 9],
+  frame: rect(10, 10, 200, 100),
 });
 
 const curve: CalculusCurve = graph.parametric((t) => [t, t * t], [-3, 3]);
@@ -37,5 +36,5 @@ export const plotted: string = render({ width: 240, height: 120, duration: 2, ti
 
 export const ring = contours((x, y) => x * x + y * y, {
   levels: [1],
-  bounds: { x: 0, y: 0, w: 100, h: 100 },
+  frame: rect(0, 0, 100, 100),
 });

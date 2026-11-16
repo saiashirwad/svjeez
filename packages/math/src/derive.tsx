@@ -3,6 +3,7 @@ import {
   ease,
   motion,
   type Seconds,
+  type Span,
   type SvgNode,
   defaultDark,
   morph,
@@ -24,12 +25,8 @@ export interface DeriveStep {
 }
 
 export interface DeriveOptions {
-  /** When the first line appears. */
-  readonly at: Seconds;
-  /** Seconds from one line's change to the next. Default 2.5. */
-  readonly every?: Seconds;
-  /** Seconds each change takes. Default 0.9. */
-  readonly over?: Seconds;
+  /** Seconds each change takes. The changes are spaced evenly, so the last one ends with the span. Default 0.9. */
+  readonly change?: Seconds;
   /** Where the alignment point of every line sits: `x` is its center, in pixels. Default 0. */
   readonly x?: number;
   /** Top of the first line's box. Default 0. */
@@ -77,18 +74,18 @@ const alignPoint = (line: Tex, align: string, index: number): number => {
 };
 
 /**
- * A step-by-step derivation. Every line sits with its alignment point (the `=` by default) on the same x, so the
+ * A step-by-step derivation over `when`. Every line sits with its alignment point (the `=` by default) on the same x, so the
  * equals sign stays put while the sides change. By default one line transforms into the next with `morph()`; with
  * `stack` each new line appears below the last.
  */
 export function derive(
+  when: Span,
   steps: readonly (string | DeriveStep)[],
-  options: DeriveOptions,
+  options: DeriveOptions = {},
 ): Derivation {
+  const { at, over: total } = when;
   const {
-    at,
-    every = 2.5,
-    over = 0.9,
+    change: over = 0.9,
     x = 0,
     y = 0,
     fontSize = 36,
@@ -100,9 +97,12 @@ export function derive(
   const lineHeight = options.lineHeight ?? fontSize * 1.9;
   const list = steps.map((s): DeriveStep => (isText(s) ? { tex: s } : s));
 
+  // The changes are spaced so the last one ends with the span; a single line just fades in.
+  const every = list.length > 1 ? (total - over) / (list.length - 1) : total;
+
   if (list.length === 0 || !(every >= over) || !(over > 0) || !(fontSize > 0))
     throw new Error(
-      `derive() needs a step, a positive over that fits in every, and a positive fontSize, got ${list.length} steps, over ${over}, every ${every} and fontSize ${fontSize}.`,
+      `derive() needs a step, a span long enough for each change (${list.length} of them, ${over}s each), and a positive fontSize, got ${list.length} steps, over ${total}, change ${over} and fontSize ${fontSize}.`,
     );
 
   const style = { fontSize, theme, color: options.color } as const;
@@ -196,7 +196,7 @@ export function derive(
         {notes.filter((n): n is SvgNode => n !== undefined)}
       </g>
     ),
-    span: spanOf(at, start(list.length - 1) + (list.length > 1 ? over : 0) - at),
+    span: spanOf(at, total),
     lines,
     bounds: full,
   };

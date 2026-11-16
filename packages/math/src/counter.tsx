@@ -3,6 +3,7 @@ import {
   motion,
   type Color,
   type Seconds,
+  type Span,
   type SvgNode,
   defaultDark,
   tint,
@@ -32,9 +33,7 @@ export interface CounterOptions {
   readonly anchor?: readonly [number, number];
   /** Seconds a digit takes to roll out and the next to roll in. 0 cuts. Default 0. */
   readonly roll?: Seconds;
-  /** Needed with a function: how long it runs. */
-  readonly duration?: Seconds;
-  /** Needed with a function: seconds between the values it is asked for. Default 0.1. */
+  /** With a function: seconds between the values it is asked for. Default 0.1. */
   readonly step?: Seconds;
 }
 
@@ -49,9 +48,7 @@ interface Change {
   readonly text: string;
 }
 
-const isFunction = (
-  v: readonly CounterValue[] | ((t: Seconds) => number),
-): v is (t: Seconds) => number => typeof v === "function";
+const isSpan = (v: readonly CounterValue[] | Span): v is Span => !Array.isArray(v);
 
 const MINUS = "-";
 
@@ -62,20 +59,23 @@ const format = (value: number, digits: number): string => {
 };
 
 const changes = (
-  values: readonly CounterValue[] | ((t: Seconds) => number),
+  values: readonly CounterValue[] | Span,
+  fn: ((t: Seconds) => number) | undefined,
   digits: number,
-  { duration, step = 0.1 }: CounterOptions,
+  { step = 0.1 }: CounterOptions,
 ): Change[] => {
   let timeline: CounterValue[];
 
-  if (isFunction(values)) {
-    if (!(duration !== undefined && duration > 0) || !(step > 0))
+  if (isSpan(values)) {
+    const { at, over } = values;
+
+    if (!fn || !(over > 0) || !Number.isFinite(at) || !(step > 0))
       throw new Error(
-        `counter() of a function needs a positive duration and step, got duration ${duration} and step ${step}.`,
+        `counter() of a function needs a positive over and step, got over ${over} and step ${step}.`,
       );
-    timeline = Array.from({ length: Math.floor(duration / step) + 1 }, (_, i) => ({
-      at: i * step,
-      value: values(i * step),
+    timeline = Array.from({ length: Math.floor(over / step) + 1 }, (_, i) => ({
+      at: at + i * step,
+      value: fn(i * step),
     }));
   } else timeline = [...values].sort((a, b) => a.at - b.at);
 
@@ -94,20 +94,30 @@ const changes = (
 
 /**
  * A number that changes over time, set in the same math font as `tex()`. Give it `[{ at, value }]` to hold each value until the next,
- * or a function of time to read at every `step`. Each place holds one glyph per distinct digit it ever shows, toggled by stepped
+ * or a span and a function of the time since its start, read at every `step`. Each place holds one glyph per distinct digit it ever shows, toggled by stepped
  * keyframes, so the output stays small however often the number changes.
  */
+export function counter(values: readonly CounterValue[], options?: CounterOptions): Counter;
 export function counter(
-  values: readonly CounterValue[] | ((t: Seconds) => number),
-  options: CounterOptions = {},
+  span: Span,
+  fn: (t: Seconds) => number,
+  options?: CounterOptions,
+): Counter;
+export function counter(
+  first: readonly CounterValue[] | Span,
+  second?: ((t: Seconds) => number) | CounterOptions,
+  third?: CounterOptions,
 ): Counter {
+  // SAFETY: the overloads pair a list with options, or a span with a function and options.
+  const fn = typeof second === "function" ? second : undefined;
+  const options = (typeof second === "function" ? third : (second as CounterOptions | undefined)) ?? {};
   const { fontSize = 32, digits = 0, theme = defaultDark, roll = 0, anchor = [0, 0] } = options;
 
   if (!Number.isInteger(digits) || digits < 0 || !(fontSize > 0) || !(roll >= 0))
     throw new Error(
       `counter() needs a whole number of digits, a positive fontSize and a non-negative roll, got digits ${digits}, fontSize ${fontSize} and roll ${roll}.`,
     );
-  const list = changes(values, digits, options);
+  const list = changes(first, fn, digits, options);
 
   if (roll > 0 && list.some((c, i) => i > 0 && c.at - list[i - 1]!.at < roll))
     throw new Error(`counter() changes faster than its roll of ${roll} seconds.`);

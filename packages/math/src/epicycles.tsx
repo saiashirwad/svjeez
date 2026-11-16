@@ -5,6 +5,7 @@ import {
   sampled,
   type Color,
   type Seconds,
+  type Span,
   type SvgNode,
   defaultDark,
   tint,
@@ -26,10 +27,6 @@ export interface Outline {
 export type EpicyclesSource = string | Outline | readonly (string | Outline)[] | readonly Point[];
 
 export interface EpicyclesOptions {
-  /** When the pen starts, in seconds. */
-  readonly at: Seconds;
-  /** How long the pen takes to go once around the outline. */
-  readonly over: Seconds;
   /** Circles in the chain. They shape the trace and carry the pen, and the smallest are too small to see. Default 80. */
   readonly terms?: number;
   /** The largest circles that draw their ring and arm. Default 24. */
@@ -53,7 +50,7 @@ export interface EpicyclesOptions {
 export interface Epicycles {
   /** Rings, arms, pen, trace and optional fill. */
   readonly node: SvgNode;
-  /** From `at` to when the rings have faded: the scene's end for this drawing. */
+  /** From the span's start to when the rings have faded: the scene's end for this drawing. */
   readonly span: Spanned;
   /** The trace as path data, closed: what the chain draws. */
   readonly d: string;
@@ -316,12 +313,17 @@ export function fourier(source: EpicyclesSource, options: FourierOptions = {}): 
 const tenth = (v: number): number => Math.round(v * 10) / 10 + 0;
 
 /**
- * Draws any closed outline as a chain of spinning circles, each riding the tip of the one before, with a pen at the last tip
+ * Draws any closed outline as a chain of spinning circles, the pen going once around it during `when`, each riding the tip of the one before, with a pen at the last tip
  * and its trace drawn in step with it. The outline is sampled by arc length and Fourier-transformed while the scene compiles.
  * A glyph from `tex()` goes in whole, not as `d`: its matrix turns the font's upright path to the screen's.
  */
-export function epicycles(source: EpicyclesSource, options: EpicyclesOptions): Epicycles {
-  const { at, over, terms: count = 80, circles = 24, strokeWidth = 2, fade = 0.6 } = options;
+export function epicycles(
+  when: Span,
+  source: EpicyclesSource,
+  options: EpicyclesOptions = {},
+): Epicycles {
+  const { at, over } = when;
+  const { terms: count = 80, circles = 24, strokeWidth = 2, fade = 0.6 } = options;
   const theme = options.theme ?? defaultDark;
 
   if (!(over > 0) || !Number.isFinite(at))

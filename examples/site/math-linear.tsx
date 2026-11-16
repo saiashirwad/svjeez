@@ -1,5 +1,6 @@
 import { plane, tex } from "@svjeez/math";
 import { css, def, enter, render, morph } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
@@ -17,11 +18,9 @@ const AREA = theme.base0A;
 
 // 34px a unit, with (0, 0) at (126, 238).
 const p = plane({
-  x: [-12, 12],
-  y: [-12, 12],
-  width: 816,
-  height: 816,
-  at: { x: -282, y: -170 },
+  xRange: [-12, 12],
+  yRange: [-12, 12],
+  frame: rect(-282, -170, 816, 816),
   ticks: 1,
   theme,
 }).apply(
@@ -93,7 +92,7 @@ export default function build(): string {
             ])}
           </g>
           <g animation={enter({ at: 2.5, over: 0.5 })}>{p.label([0.5, 0.5], areas.node)}</g>
-          {p.basis({ enter: { at: 1.3, over: 0.5 } })}
+          {p.basis({ at: 1.3, over: 0.5 })}
         </g>
         {matrix.write({ at: 2.2, over: 1.4 })}
         {det.write({ at: 7.0, over: 1.0 })}

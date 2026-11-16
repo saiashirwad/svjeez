@@ -11,9 +11,7 @@ const { theme, css } = adaptive({
 // on the tips of circles. Try another letter.
 const pi = tex(String.raw`\pi`, { fontSize: 300, theme });
 
-const e = epicycles(pi.words, {
-  at: 0.5,
-  over: 7,
+const e = epicycles({ at: 0.5, over: 7 }, pi.words, {
   terms: 40,
   circles: 16,
   size: 150,

@@ -39,15 +39,12 @@ export interface StepOptions extends Span {
 }
 
 export interface PlaneOptions {
+  /** The plot area in scene px. The pixels per unit follow from it and the ranges, and may differ per axis. */
+  readonly frame: Rect;
   /** Graph range of the x axis, `[min, max]`. */
-  readonly x: Vec2;
+  readonly xRange: Vec2;
   /** Graph range of the y axis, `[min, max]`. */
-  readonly y: Vec2;
-  /** Size of the plot area in px. The pixels per unit follow from it and the range, and may differ per axis. */
-  readonly width: number;
-  readonly height: number;
-  /** Top-left of the plot area. Default the origin of the scene. */
-  readonly at?: Point;
+  readonly yRange: Vec2;
   /** Tick step in graph units: a number for both axes, or one per axis. An axis without one has no ticks and no grid lines. */
   readonly ticks?: number | { readonly x?: number; readonly y?: number };
   /** Numbers at the ticks. Default true. */
@@ -69,8 +66,6 @@ export interface VectorOptions {
   readonly label?: string | Tex;
   /** The tail, in plane units. Default the origin. */
   readonly from?: Vec2;
-  /** The shaft grows from the tail during the span, then the head and the label appear. */
-  readonly enter?: Span;
 }
 
 export interface PolygonOptions {
@@ -144,8 +139,10 @@ export interface Plane extends Calculus {
   plot(f: (x: number) => number, options?: PlotOptions): Plot;
   /** An arrow to `to`, its head upright however the plane shears. */
   vector(to: Vec2, options?: VectorOptions): SvgNode;
-  /** î and ĵ, labelled, with ĵ entering 0.2s after î. */
-  basis(options?: { readonly enter?: Span }): SvgNode;
+  /** The same arrow, its shaft growing from the tail during `span`, then the head and the label appear. */
+  vector(span: Span, to: Vec2, options?: VectorOptions): SvgNode;
+  /** î and ĵ, labelled. Given a span, they grow in it, with ĵ entering 0.2s after î. */
+  basis(span?: Span): SvgNode;
   /** A filled polygon whose corners move with the plane, so its area follows the determinant. */
   polygon(points: readonly Vec2[], options?: PolygonOptions): SvgNode;
   /** The line through the origin along `direction`, across the grid. An eigenvector's line stays on itself. */
@@ -449,8 +446,14 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 
   const current = steps.at(-1)?.place ?? IDENTITY;
 
-  const vector = (to: Vec2, options: VectorOptions = {}): SvgNode => {
-    const { color = theme.base0D, width = 3, from = [0, 0], enter } = options;
+  function vector(to: Vec2, options?: VectorOptions): SvgNode;
+  function vector(span: Span, to: Vec2, options?: VectorOptions): SvgNode;
+  function vector(first: Span | Vec2, second?: Vec2 | VectorOptions, third?: VectorOptions): SvgNode {
+    // SAFETY: the overloads pair a span with a tip and options, or a tip alone with options.
+    const [enter, to, options = {}] = Array.isArray(first)
+      ? [undefined, first as Vec2, second as VectorOptions | undefined]
+      : [first as Span, second as Vec2, third];
+    const { color = theme.base0D, width = 3, from = [0, 0] } = options;
 
     if (!finite(...to, ...from) || (to[0] === from[0] && to[1] === from[1]))
       throw new Error(
@@ -492,7 +495,7 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         {label && appear(at + over, over * 0.8, label)}
       </g>
     );
-  };
+  }
 
   const graph = calculus({
     x: frame.x,
@@ -598,14 +601,17 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     },
     ...still,
     vector,
-    basis: ({ enter } = {}) => (
+    basis: (enter) => (
       <g>
-        {vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath`, enter })}
-        {vector([0, 1], {
-          color: theme.base08,
-          label: String.raw`\hat\jmath`,
-          enter: enter && { at: enter.at + 0.2, over: enter.over },
-        })}
+        {enter
+          ? vector(enter, [1, 0], { color: theme.base0B, label: String.raw`\hat\imath` })
+          : vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath` })}
+        {enter
+          ? vector({ at: enter.at + 0.2, over: enter.over }, [0, 1], {
+              color: theme.base08,
+              label: String.raw`\hat\jmath`,
+            })
+          : vector([0, 1], { color: theme.base08, label: String.raw`\hat\jmath` })}
       </g>
     ),
     polygon: (points, { color = theme.base0A, fillOpacity = 0.22, strokeWidth = 1.5 } = {}) =>
@@ -641,7 +647,7 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 };
 
 /**
- * Axes over `x` and `y`, in a plot area of `width` by `height` at `at`, with y up. Draw its `node`, `plot()`
+ * Axes over `xRange` and `yRange`, in a plot area of `frame`, with y up. Draw its `node`, `plot()`
  * curves, or chain `apply`, `applyFunction` and `reset` to move it and draw from the plane those calls return:
  * its grid, axes, vectors, shapes, labels and plots.
  */

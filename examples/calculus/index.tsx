@@ -1,5 +1,6 @@
 import { plane, tex } from "@svjeez/math";
 import { draw, enter, exit, render, readout } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { css, mono, theme } from "../style";
 
 // Three ideas of calculus on three sets of axes: a secant collapsing into the tangent, Riemann sums refining
@@ -14,11 +15,9 @@ const left = (i: number) => 48 + i * 312;
 
 const panel = (i: number, x: readonly [number, number], y: readonly [number, number]) =>
   plane({
-    x,
-    y,
-    width: PANEL.width,
-    height: PANEL.height,
-    at: { x: left(i), y: TOP },
+    xRange: x,
+    yRange: y,
+    frame: rect(left(i), TOP, PANEL.width, PANEL.height),
     theme,
     labels: false,
     ticks: { x: 1, y: 1 },

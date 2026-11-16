@@ -1,6 +1,7 @@
 import { fieldLines, streamlines } from "@svjeez/math";
 import { Ink, ease, tool, shot } from "svjeez";
 import { motion } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { jumps } from "../site/lib/blip";
 import { C, Caption, Blip, H, W, hand } from "./kit";
 import { MONTAGE } from "./montage";
@@ -41,12 +42,12 @@ const nibTool = tool.nib({ size: 6, angle: 35, thin: 0.25 });
 // Wind that curls around the word, drawn on behind it as the pen starts.
 const { lines: wind } = streamlines(
   (x, y) => [1, 0.45 * Math.sin(x / 140 + y / 90) - 0.25 * Math.cos(y / 60)],
-  { bounds: { x: 0, y: 40, w: W, h: H - 200 }, spacing: 44, minLength: 140, tolerance: 0.8 },
+  { frame: rect(0, 40, W, H - 200), spacing: 44, minLength: 140, tolerance: 0.8 },
 );
 
 export const handwriting = (
   <g animation={shot(HAND, { enter: "fade", exit: "rise" })}>
-    {fieldLines(wind, { at: HAND.at, over: 1.6, color: C.hairline, opacity: 1, strokeWidth: 1.2 })}
+    {fieldLines({ at: HAND.at, over: 1.6 }, wind, { color: C.hairline, opacity: 1, strokeWidth: 1.2 })}
     {strokes.map(({ d, at, over }) => (
       <Ink d={d} tool={nibTool} fill={C.ink} draw={{ at, over }} ease={ease.linear} />
     ))}

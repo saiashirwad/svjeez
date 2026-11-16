@@ -10,6 +10,7 @@ import {
   type VectorField,
 } from "@svjeez/math";
 import { draw, enter, flow, motion, render, tint } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { css, mono, theme } from "../style";
 
 const W = 960;
@@ -46,10 +47,10 @@ const wind: VectorField = (x, y) => {
   return [u, v];
 };
 
-const bounds = { x: 24, y: 24, w: 600, h: 492 };
+const frame = rect(24, 24, 600, 492);
 
-const lines = streamlines(wind, { bounds, spacing: 22, maxLength: 1400 });
-const arrows = vectorField(wind, { bounds, spacing: 36, normalize: true });
+const lines = streamlines(wind, { frame, spacing: 22, maxLength: 1400 });
+const arrows = vectorField(wind, { frame, spacing: 36, normalize: true });
 
 const blue = tint(theme, "blue");
 const orange = tint(theme, "number");
@@ -57,11 +58,9 @@ const green = tint(theme, "string");
 const muted = tint(theme, "muted");
 
 const heart = plane({
-  x: [-1.6, 1.6],
-  y: [-1.4, 1.5],
-  width: 280,
-  height: 250,
-  at: { x: 660, y: 48 },
+  xRange: [-1.6, 1.6],
+  yRange: [-1.4, 1.5],
+  frame: rect(660, 48, 280, 250),
   ticks: { x: 1, y: 1 },
   theme,
   font: mono,
@@ -70,23 +69,19 @@ const heart = plane({
 
 const implicit = (x: number, y: number) => (x * x + y * y - 1) ** 3 - x * x * y ** 3;
 
-const sweep = contourSweep(implicit, {
+const sweep = contourSweep({ at: 5, over: 2.6 }, implicit, {
   plane: heart,
   from: -0.97,
   to: 0,
-  at: 5,
-  over: 2.6,
   frames: 14,
 });
 
 const [rim] = contours(implicit, { plane: heart, levels: [0] });
 
 const slopes = plane({
-  x: [-3, 3],
-  y: [-3, 3],
-  width: 280,
-  height: 200,
-  at: { x: 660, y: 318 },
+  xRange: [-3, 3],
+  yRange: [-3, 3],
+  frame: rect(660, 318, 280, 200),
   ticks: { x: 1, y: 1 },
   theme,
   font: mono,
@@ -141,7 +136,7 @@ export default function build(): string {
         <path d={arrows.d} />
       </g>
 
-      {fieldLines(lines.lines, { at: 1.2, over: 3.2, color: blue, opacity: 0.5, theme })}
+      {fieldLines({ at: 1.2, over: 3.2 }, lines.lines, { color: blue, opacity: 0.5, theme })}
       {flow(lines.lines, { at: 3.5, color: orange, size: 3, speed: 110, theme }).node}
       {label(32, 512, "streamlines of a wind", 1.2)}
 

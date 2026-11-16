@@ -94,7 +94,7 @@ describe("construct", () => {
   });
 
   test("settle fades aids but not the figure", () => {
-    const g = construct({ at: { x: 50, y: 50 }, unit: 10, faint: 0.3 });
+    const g = construct({ origin: { x: 50, y: 50 }, unit: 10, faint: 0.3 });
     const [a, b] = [g.point(0, 0), g.point(5, 0)];
 
     g.circle(a, b, { aid: true });
@@ -106,7 +106,7 @@ describe("construct", () => {
   });
 
   test("labels are formulas placed off the lines that meet at the point", () => {
-    const g = construct({ at: { x: 100, y: 200 }, unit: 10 });
+    const g = construct({ origin: { x: 100, y: 200 }, unit: 10 });
     const [a, b, c] = [g.point(0, 0, "A"), g.point(10, 0, "B"), g.point(5, 8, "C")];
 
     g.polygon([a, b, c]);

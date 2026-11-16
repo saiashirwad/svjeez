@@ -1,5 +1,14 @@
 /** @jsxImportSource svjeez */
-import { ease, motion, type Color, type SvgNode, defaultDark, type Base16 } from "svjeez";
+import {
+  ease,
+  motion,
+  type Base16,
+  type Color,
+  type Point,
+  type Span,
+  type SvgNode,
+  defaultDark,
+} from "svjeez";
 import { span as spanOf, type Spanned } from "svjeez";
 
 import { tex } from "./index.ts";
@@ -50,7 +59,7 @@ export interface ConstructOptions {
   /** Pixels per construction unit. Default 1. */
   readonly unit?: number;
   /** Where the origin sits in the scene, in px. Construction y grows up, scene y grows down. Default 0, 0. */
-  readonly at?: { readonly x: number; readonly y: number };
+  readonly origin?: Point;
   /** Pixels per em for labels. Default 20. */
   readonly fontSize?: number;
   /** Where the first element starts, in seconds. Default 0. */
@@ -60,13 +69,8 @@ export interface ConstructOptions {
   readonly faint?: number;
 }
 
-/** Every element takes these. Without `at` an element starts when the one before it ends. */
-export interface Timing {
-  readonly at?: number;
-  readonly over?: number;
-}
-
-export interface Look extends Timing {
+/** Every element takes an optional `at` and `over`. Without `at` an element starts when the one before it ends. */
+export interface Look extends Partial<Span> {
   /** Overrides the theme's color for this element. */
   readonly color?: Color;
   /** A construction aid: drawn in a quieter color, and `g.settle()` fades it back. */
@@ -137,7 +141,7 @@ export interface BisectOptions extends Look {
   readonly label?: string;
 }
 
-export interface SettleOptions extends Timing {
+export interface SettleOptions extends Partial<Span> {
   /** Overrides the construction's faint opacity. */
   readonly faint?: number;
 }
@@ -392,7 +396,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   const {
     theme = defaultDark,
     unit: scale = 1,
-    at: origin = { x: 0, y: 0 },
+    origin = { x: 0, y: 0 },
     fontSize = 20,
   } = options;
 
@@ -401,7 +405,7 @@ export function construct(options: ConstructOptions = {}): Construction {
 
   if (!(scale > 0) || !Number.isFinite(origin.x + origin.y) || !(fontSize > 0))
     throw new Error(
-      `construct() needs a positive unit and fontSize and a finite origin, got unit ${scale}, fontSize ${fontSize} and at ${origin.x}, ${origin.y}.`,
+      `construct() needs a positive unit and fontSize and a finite origin, got unit ${scale}, fontSize ${fontSize} and origin ${origin.x}, ${origin.y}.`,
     );
 
   const palette = {
@@ -428,7 +432,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   });
 
   /** Where an element starts and how long it runs. The cursor moves on unless a `together` block holds it. */
-  const slot = (kind: keyof Pace, timing: Timing): Slot => {
+  const slot = (kind: keyof Pace, timing: Partial<Span>): Slot => {
     const at = timing.at ?? batch?.start ?? cursor;
     const over = timing.over ?? pace[kind];
 
@@ -706,7 +710,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   };
 
   /** Aims the composite constructions at `o.at` and drops the timing that belongs to their last element. */
-  const begin = (o: Timing): void => {
+  const begin = (o: Partial<Span>): void => {
     if (o.at !== undefined && !batch) cursor = o.at;
   };
 

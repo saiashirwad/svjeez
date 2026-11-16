@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { render, flow } from "svjeez";
+import { rect } from "svjeez/geometry";
 import {
   plane,
   contours,
@@ -11,11 +12,11 @@ import {
   vectorField,
 } from "../src/index.ts";
 
-const bounds = { x: 0, y: 0, w: 400, h: 300 };
+const frame = rect(0, 0, 400, 300);
 
 describe("streamlines", () => {
   test("keep their spacing in a uniform field", () => {
-    const { lines } = streamlines(() => [1, 0], { bounds, spacing: 30 });
+    const { lines } = streamlines(() => [1, 0], { frame, spacing: 30 });
     const ys = lines.map((line) => line[0]!.y).sort((a, b) => a - b);
 
     expect(lines.length).toBeGreaterThanOrEqual(8);
@@ -30,7 +31,7 @@ describe("streamlines", () => {
 
   test("circle a vortex at a constant radius", () => {
     const [cx, cy] = [200, 150];
-    const { lines } = streamlines((x, y) => [-(y - cy), x - cx], { bounds, spacing: 30 });
+    const { lines } = streamlines((x, y) => [-(y - cy), x - cx], { frame, spacing: 30 });
 
     expect(lines.length).toBeGreaterThan(3);
 
@@ -41,7 +42,7 @@ describe("streamlines", () => {
   });
 
   test("start where the seeds say and nowhere else", () => {
-    const { lines } = streamlines(() => [0, 1], { bounds, seeds: [{ x: 50, y: 20 }] });
+    const { lines } = streamlines(() => [0, 1], { frame, seeds: [{ x: 50, y: 20 }] });
 
     expect(lines).toHaveLength(1);
     expect(lines[0]![0]!.x).toBe(50);
@@ -49,13 +50,13 @@ describe("streamlines", () => {
   });
 
   test("write one subpath per line", () => {
-    const { lines, d } = streamlines(() => [1, 1], { bounds, spacing: 40 });
+    const { lines, d } = streamlines(() => [1, 1], { frame, spacing: 40 });
 
     expect(d.match(/M/g)).toHaveLength(lines.length);
   });
 
   test("name the fix for bad options", () => {
-    expect(() => streamlines(() => [1, 0], { bounds, spacing: 0 })).toThrow(
+    expect(() => streamlines(() => [1, 0], { frame, spacing: 0 })).toThrow(
       "streamlines() needs a positive spacing, got 0.",
     );
   });
@@ -63,7 +64,7 @@ describe("streamlines", () => {
 
 describe("vectorField", () => {
   test("draws one arrow per lattice point that has a field", () => {
-    const { arrows, d } = vectorField((x) => [x < 200 ? 0 : 1, 0], { bounds, spacing: 50 });
+    const { arrows, d } = vectorField((x) => [x < 200 ? 0 : 1, 0], { frame, spacing: 50 });
 
     expect(arrows.length).toBe(4 * 6);
     expect(d.match(/M/g)).toHaveLength(arrows.length * 2);
@@ -72,7 +73,7 @@ describe("vectorField", () => {
 });
 
 describe("slope fields", () => {
-  const plot = plane({ x: [-2, 2], y: [-2, 2], width: 200, height: 200 });
+  const plot = plane({ xRange: [-2, 2], yRange: [-2, 2], frame: rect(0, 0, 200, 200) });
 
   test("draw flat marks for a zero slope", () => {
     const { d } = slopeField(() => 0, plot, { step: 1 });
@@ -108,7 +109,7 @@ describe("slope fields", () => {
 describe("contours", () => {
   test("close a circle around the origin", () => {
     const [level] = contours((x, y) => x * x + y * y - 80 * 80, {
-      bounds: { x: -100, y: -100, w: 200, h: 200 },
+      frame: rect(-100, -100, 200, 200),
       levels: [0],
     });
 
@@ -123,7 +124,7 @@ describe("contours", () => {
 
   test("cross a saddle as two open lines", () => {
     const [level] = contours((x, y) => x * x - y * y, {
-      bounds: { x: -50, y: -50, w: 100, h: 100 },
+      frame: rect(-50, -50, 100, 100),
       levels: [0],
     });
 
@@ -133,14 +134,14 @@ describe("contours", () => {
 
   test("read a precomputed grid and place its row 0 at the top", () => {
     const values = [0, 0, 0, 1, 1, 1, 2, 2, 2];
-    const [level] = contours({ cols: 3, rows: 3, values }, { bounds, levels: [0.5] });
+    const [level] = contours({ cols: 3, rows: 3, values }, { frame, levels: [0.5] });
 
     expect(level!.lines).toHaveLength(1);
     expect(level!.lines[0]!.points.every((p) => Math.abs(p.y - 75) < 0.01)).toBe(true);
   });
 
   test("sample in graph units through plane", () => {
-    const plot = plane({ x: [-2, 2], y: [-2, 2], width: 200, height: 200, at: { x: 10, y: 10 } });
+    const plot = plane({ xRange: [-2, 2], yRange: [-2, 2], frame: rect(10, 10, 200, 200) });
     const [level] = contours((x, y) => x * x + y * y - 1, { plane: plot, levels: [0] });
     const center = plot.point(0, 0);
 
@@ -150,7 +151,7 @@ describe("contours", () => {
 
   test("leave NaN cells empty", () => {
     const [level] = contours((x) => (x < 0 ? NaN : x - 10), {
-      bounds: { x: -50, y: 0, w: 100, h: 20 },
+      frame: rect(-50, 0, 100, 20),
       levels: [0],
     });
 
@@ -160,15 +161,13 @@ describe("contours", () => {
 });
 
 describe("contourSweep", () => {
-  const plot = plane({ x: [-2, 2], y: [-2, 2], width: 200, height: 200 });
+  const plot = plane({ xRange: [-2, 2], yRange: [-2, 2], frame: rect(0, 0, 200, 200) });
 
   test("morphs one path through every level", () => {
-    const sweep = contourSweep((x, y) => x * x + y * y, {
+    const sweep = contourSweep({ at: 1, over: 2 }, (x, y) => x * x + y * y, {
       plane: plot,
       from: 0.25,
       to: 3,
-      at: 1,
-      over: 2,
       frames: 6,
     });
 
@@ -182,19 +181,19 @@ describe("contourSweep", () => {
 
   test("names the level that has no line", () => {
     expect(() =>
-      contourSweep((x, y) => x * x + y * y, { plane: plot, from: -1, to: 1, at: 0, over: 1 }),
+      contourSweep({ at: 0, over: 1 }, (x, y) => x * x + y * y, { plane: plot, from: -1, to: 1 }),
     ).toThrow("contourSweep() found no line at level -1.");
   });
 });
 
 describe("flow along several lines", () => {
-  const { lines } = streamlines(() => [1, 0], { bounds, spacing: 50 });
+  const { lines } = streamlines(() => [1, 0], { frame, spacing: 50 });
 
   test("loops one particle per line out of step with the others", () => {
     const svg = render(
       { width: 400, height: 300, duration: 8, title: "Flow", reducedMotion: false },
       <>
-        {fieldLines(lines, { at: 0, over: 2 }).toString()}
+        {fieldLines({ at: 0, over: 2 }, lines).toString()}
         {flow(lines, { at: 1 }).node}
       </>,
     );

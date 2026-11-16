@@ -10,9 +10,7 @@ const D = 14;
 
 const pi = tex(String.raw`\pi`, { fontSize: 400, theme });
 
-const drawing = epicycles(pi.words, {
-  at: 0.8,
-  over: 10,
+const drawing = epicycles({ at: 0.8, over: 10 }, pi.words, {
   terms: 80,
   circles: 28,
   size: 360,

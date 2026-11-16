@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { ease, render, type Child, readout } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { validateSvg } from "svjeez/frames";
 import { plane } from "../src/index.ts";
 
 const graph = () =>
-  plane({ x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 } });
+  plane({ xRange: [-3, 3], yRange: [-1, 9], frame: rect(300, 60, 400, 260) });
 
 const svgOf = (...nodes: Child[]): string =>
   render({ width: 800, height: 400, duration: 6, title: "Calculus", reducedMotion: false }, nodes);

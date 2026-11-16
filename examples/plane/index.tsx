@@ -1,5 +1,6 @@
 import { plane, tex } from "@svjeez/math";
 import { css as join, def, enter, render } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { css, theme } from "../style";
 
 const W = 960;
@@ -21,11 +22,9 @@ const view = (
   ticks: number,
 ) =>
   plane({
-    x,
-    y,
-    width: (x[1] - x[0]) * unit,
-    height: (y[1] - y[0]) * unit,
-    at: { x: origin.x + x[0] * unit, y: origin.y - y[1] * unit },
+    xRange: x,
+    yRange: y,
+    frame: rect(origin.x + x[0] * unit, origin.y - y[1] * unit, (x[1] - x[0]) * unit, (y[1] - y[0]) * unit),
     ticks,
     theme,
   });
@@ -91,12 +90,11 @@ export default function build(): string {
           {linear.span([1, 0], { color: V1, opacity: 0.7 })}
           {linear.span([1, -1], { color: V2, opacity: 0.7 })}
         </g>
-        {linear.vector([1, 0], { color: V1, label: "v_1", enter: { at: 1.5, over: 0.5 } })}
-        {linear.vector([1, -1], { color: V2, label: "v_2", enter: { at: 1.7, over: 0.5 } })}
-        {linear.vector([0, 1], {
+        {linear.vector({ at: 1.5, over: 0.5 }, [1, 0], { color: V1, label: "v_1" })}
+        {linear.vector({ at: 1.7, over: 0.5 }, [1, -1], { color: V2, label: "v_2" })}
+        {linear.vector({ at: 1.9, over: 0.5 }, [0, 1], {
           color: theme.base08,
           label: String.raw`\hat\jmath`,
-          enter: { at: 1.9, over: 0.5 },
         })}
       </g>
       <g animation={enter({ at: 0.6, over: 0.6 })}>
@@ -129,7 +127,7 @@ export default function build(): string {
           {complex.grid}
           {complex.axes}
         </g>
-        {complex.vector([0, 1.5], { color: theme.base0A, enter: { at: 8.2, over: 0.5 } })}
+        {complex.vector({ at: 8.2, over: 0.5 }, [0, 1.5], { color: theme.base0A })}
         <g animation={enter({ at: 12.2, over: 0.6 })}>
           {complex.label([0.45, 1.5], circle, { color: theme.base0A })}
         </g>

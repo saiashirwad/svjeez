@@ -43,7 +43,6 @@ export {
   type SegmentOptions,
   type SettleOptions,
   type TickOptions,
-  type Timing,
 } from "./construct.tsx";
 
 export {
@@ -88,7 +87,6 @@ export {
   streamlines,
   vectorField,
   type FieldArrow,
-  type Bounds,
   type ContourLevel,
   type ContourLine,
   type ContourOptions,

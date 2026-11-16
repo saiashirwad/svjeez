@@ -10,7 +10,6 @@ import {
   type Ref,
   type SvgNode,
 } from "svjeez";
-import { rect } from "svjeez/geometry";
 
 export type Range = readonly [number, number];
 
@@ -42,11 +41,9 @@ export interface Frame {
 }
 
 export interface FrameOptions {
-  readonly x: Range;
-  readonly y: Range;
-  readonly width: number;
-  readonly height: number;
-  readonly at?: Point;
+  readonly xRange: Range;
+  readonly yRange: Range;
+  readonly frame: Rect;
   readonly ticks?: number | { readonly x?: number; readonly y?: number };
   readonly labels?: boolean;
   readonly grid?: boolean;
@@ -66,7 +63,7 @@ const compact = (n: number): string => String(Number(n.toPrecision(12)) + 0);
 const checkRange = (name: string, [min, max]: Range): void => {
   if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min)
     throw new Error(
-      `plane() needs a finite ${name} range with max above min, got [${min}, ${max}].`,
+      `plane() needs a finite ${name}Range with max above min, got [${min}, ${max}].`,
     );
 };
 
@@ -89,16 +86,20 @@ const isStep = (ticks: FrameOptions["ticks"]): ticks is number => typeof ticks =
 
 /** Checks the options and works out the frame every drawing shares. */
 export function frameOf(options: FrameOptions): Frame {
-  const { x, y, width, height, at = { x: 0, y: 0 }, theme, fontSize = 12, font } = options;
+  const { xRange: x, yRange: y, frame, theme, fontSize = 12, font } = options;
+  const { w: width, h: height } = frame;
+  const at = { x: frame.x, y: frame.y };
 
   checkRange("x", x);
   checkRange("y", y);
 
   if (!(width > 0) || !(height > 0) || !Number.isFinite(width + height))
-    throw new Error(`plane() needs a positive width and height, got ${width} and ${height}.`);
+    throw new Error(
+      `plane() needs a frame with a positive width and height, got ${width} and ${height}.`,
+    );
 
   if (!Number.isFinite(at.x + at.y))
-    throw new Error(`plane() needs a finite at, got (${at.x}, ${at.y}).`);
+    throw new Error(`plane() needs a finite frame position, got (${at.x}, ${at.y}).`);
 
   if (!(fontSize > 0)) throw new Error(`plane() needs a positive fontSize, got ${fontSize}.`);
 
@@ -116,7 +117,7 @@ export function frameOf(options: FrameOptions): Frame {
   return {
     x,
     y,
-    bounds: rect(at.x, at.y, width, height),
+    bounds: frame,
     sx: width / xSpan,
     sy: height / ySpan,
     point,

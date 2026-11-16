@@ -68,8 +68,7 @@ export const mapShot = ({ at, over }: Span) => {
 
   const flying = { at: at + 1.2, over: over - 2.1 };
 
-  const flights = traffic(routes, {
-    during: flying,
+  const flights = traffic(flying, routes, {
     rate: 8,
     seed: 7,
     style: "dot",
@@ -79,8 +78,7 @@ export const mapShot = ({ at, over }: Span) => {
     color: C.accent,
   });
 
-  const installs = counter((t) => 48213 * ease01((t - at - 0.6) / (over - 1.4)), {
-    duration: at + over,
+  const installs = counter({ at, over }, (t) => 48213 * ease01((t - 0.6) / (over - 1.4)), {
     step: 0.15,
     x: 64,
     y: 168,
@@ -88,8 +86,7 @@ export const mapShot = ({ at, over }: Span) => {
     theme,
   });
 
-  const nations = counter((t) => 112 * ease01((t - at - 0.9) / (over - 1.8)), {
-    duration: at + over,
+  const nations = counter({ at, over }, (t) => 112 * ease01((t - 0.9) / (over - 1.8)), {
     step: 0.2,
     x: 64,
     y: 318,

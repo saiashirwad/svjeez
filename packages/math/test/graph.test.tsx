@@ -1,9 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { draw, render, type Child } from "svjeez";
 import { validateSvg } from "svjeez/frames";
+import { rect } from "svjeez/geometry";
 import { plane } from "../src/index.ts";
 
-const base = { x: [-3, 3], y: [-1, 9], width: 400, height: 260, at: { x: 300, y: 60 } } as const;
+const base = {
+  xRange: [-3, 3],
+  yRange: [-1, 9],
+  frame: rect(300, 60, 400, 260),
+} as const;
 
 const svgOf = (...nodes: Child[]): string =>
   render({ width: 800, height: 400, duration: 4, title: "Axes" }, nodes);
@@ -31,7 +36,7 @@ describe("plane()", () => {
   });
 
   test("axes sit on the bottom and left edges when zero is out of range", () => {
-    const ax = plane({ ...base, x: [1, 5], y: [2, 8] });
+    const ax = plane({ ...base, xRange: [1, 5], yRange: [2, 8] });
     const found = lines(ax).join("\n");
 
     expect(found).toContain(`y1="${ax.bounds.y + ax.bounds.h}"`);
@@ -39,7 +44,7 @@ describe("plane()", () => {
   });
 
   test("tick labels have no float noise or negative zero", () => {
-    const ax = plane({ ...base, x: [-0.3, 0.6], ticks: { x: 0.1 } });
+    const ax = plane({ ...base, xRange: [-0.3, 0.6], ticks: { x: 0.1 } });
     const svg = svgOf(ax.node);
 
     for (const wanted of ["-0.3", "0.3", "0.6", "0"]) expect(svg).toContain(`>${wanted}</text>`);
@@ -65,14 +70,14 @@ describe("plane()", () => {
   });
 
   test("plot() breaks at a discontinuity instead of drawing a spike", () => {
-    const ax = plane({ ...base, y: [-4, 4] });
+    const ax = plane({ ...base, yRange: [-4, 4] });
     const hyperbola = ax.plot((x) => 1 / x, { samples: 120 });
 
     expect(hyperbola.d.match(/M/g)).toHaveLength(2);
   });
 
   test("plot() breaks where tan() jumps across an asymptote", () => {
-    const ax = plane({ x: [-4, 4], y: [-3, 3], width: 400, height: 200 });
+    const ax = plane({ xRange: [-4, 4], yRange: [-3, 3], frame: rect(0, 0, 400, 200) });
     const tangent = ax.plot(Math.tan, { samples: 300 });
 
     expect(tangent.d.match(/M/g)!.length).toBeGreaterThanOrEqual(3);
@@ -99,14 +104,14 @@ describe("plane()", () => {
 
 describe("plane() validation", () => {
   test("rejects ranges where max is not above min", () => {
-    expect(() => plane({ ...base, x: [3, -3] })).toThrow(/x range with max above min/);
-    expect(() => plane({ ...base, y: [1, 1] })).toThrow(/y range with max above min/);
-    expect(() => plane({ ...base, y: [0, Infinity] })).toThrow(/y range/);
+    expect(() => plane({ ...base, xRange: [3, -3] })).toThrow(/xRange with max above min/);
+    expect(() => plane({ ...base, yRange: [1, 1] })).toThrow(/yRange with max above min/);
+    expect(() => plane({ ...base, yRange: [0, Infinity] })).toThrow(/yRange/);
   });
 
   test("rejects non-positive sizes and tick steps", () => {
-    expect(() => plane({ ...base, width: 0 })).toThrow(/positive width and height/);
-    expect(() => plane({ ...base, height: -5 })).toThrow(/positive width and height/);
+    expect(() => plane({ ...base, frame: rect(300, 60, 0, 260) })).toThrow(/frame with a positive width and height/);
+    expect(() => plane({ ...base, frame: rect(300, 60, 400, -5) })).toThrow(/frame with a positive width and height/);
     expect(() => plane({ ...base, ticks: { x: 0 } })).toThrow(/positive x tick step/);
     expect(() => plane({ ...base, ticks: { y: -1 } })).toThrow(/positive y tick step/);
     expect(() => plane({ ...base, ticks: { x: 1e-6 } })).toThrow(/at most 500/);

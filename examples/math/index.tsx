@@ -1,5 +1,6 @@
 import { plane, tex } from "@svjeez/math";
 import { draw, motion, render, Brace, morph } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { HEIGHT, MARGIN, WIDTH, css, hue, leave, mono, theme } from "../gallery-style";
 
 const W = WIDTH;
@@ -20,11 +21,9 @@ const expanded = tex(
 
 /** The square as a curve, with b fixed at 1. */
 const graph = plane({
-  x: [-4, 2],
-  y: [0, 9],
-  width: 440,
-  height: 340,
-  at: { x: W - MARGIN - 450, y: 84 },
+  xRange: [-4, 2],
+  yRange: [0, 9],
+  frame: rect(W - MARGIN - 450, 84, 440, 340),
   ticks: { x: 1, y: 3 },
   grid: true,
   theme,
