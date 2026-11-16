@@ -9,8 +9,9 @@ import {
   type BrowserOptions,
 } from "./browser.ts";
 import type { Action } from "./flow.ts";
-import { dataUri, families, fontFace, formatOf, sources, unwrap } from "./fonts.ts";
-import { Differ, merge } from "./scheme.ts";
+import { dataUri, families, fontFace, formatOf, isWholeFile, sources, unwrap } from "./fonts.ts";
+import { embed, preload, shrink, stills, svgUri, unpack, type Fetched, type Size } from "./images.ts";
+import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { shoot } from "./shot.ts";
 import { walk, type Marks } from "./walk.ts";
@@ -74,17 +75,24 @@ const settle = (page: Page, quiet: boolean) =>
         void frames().then(() => timer === undefined && finish());
       });
 
-    await document.fonts.ready;
+    // None of these waits may outlast three seconds in all: a font that never loads, or an animation with a long delay or
+    // a huge duration, must not hold the read.
+    const deadline = new Promise((done) => setTimeout(done, 3000));
+    const within = (wait: Promise<unknown>) => Promise.race([wait, deadline]);
+
+    await within(document.fonts.ready);
     // Only animations on the page's clock end by waiting: one a scroll drives holds until something scrolls.
-    await Promise.all(
-      document
-        .getAnimations()
-        .filter(
-          (a) =>
-            a.timeline === document.timeline &&
-            a.effect?.getComputedTiming().iterations !== Infinity,
-        )
-        .map((a) => a.finished.catch(() => undefined)),
+    await within(
+      Promise.all(
+        document
+          .getAnimations()
+          .filter(
+            (a) =>
+              a.timeline === document.timeline &&
+              a.effect?.getComputedTiming().iterations !== Infinity,
+          )
+          .map((a) => a.finished.catch(() => undefined)),
+      ),
     );
   }, quiet);
 
@@ -325,6 +333,121 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   // Font files by URL, fetched once for every card.
   const files = new Map<string, Promise<string | undefined>>();
 
+  // Image files by URL, fetched once for every card, and what each is cut down to by size.
+  const fetched = new Map<string, Promise<Fetched | undefined>>();
+  const pictures = new Map<string, Promise<string | undefined>>();
+
+  /** An image's file, fetched from Node so a cross-origin one needs no CORS. */
+  const fetchImage = async (page: Page, url: string): Promise<Fetched | undefined> => {
+    if (url.startsWith("data:")) return unpack(url);
+
+    const response = await page.request.get(url);
+
+    if (!response.ok()) return undefined;
+
+    const type = (response.headers()["content-type"] ?? "").split(";")[0]!.trim();
+
+    const mime = type.startsWith("image/")
+      ? type
+      : /\.svg(\?|$)/i.test(url)
+        ? "image/svg+xml"
+        : undefined;
+
+    return mime ? { mime, bytes: await response.body() } : undefined;
+  };
+
+  /**
+   * An image the page's CSS or markup names, as a data URI cut down to what the drawing needs: a raster is scaled to
+   * at most twice the size it is drawn at and re-encoded, and an SVG is given a size.
+   */
+  const picture = (page: Page) => (url: string, size: Size) => {
+    const key = `${Math.ceil(size[0])}x${Math.ceil(size[1])} ${url}`;
+    let file = pictures.get(key);
+
+    if (!file) {
+      let got = fetched.get(url);
+
+      if (!got) {
+        got = fetchImage(page, url).catch(() => undefined);
+        fetched.set(url, got);
+      }
+
+      file = got.then(async (image) => {
+        if (!image) return undefined;
+
+        if (image.mime === "image/svg+xml") return svgUri(image.bytes.toString("utf8"));
+
+        const data = image.bytes.toString("base64");
+
+        // A file the page can't decode is kept as it came.
+        const small = await page
+          .evaluate(shrink, { data, mime: image.mime, width: size[0], height: size[1] })
+          .catch(() => undefined);
+
+        return small ?? `data:${image.mime};base64,${data}`;
+      });
+      pictures.set(key, file);
+    }
+
+    return file;
+  };
+
+  /** A still of each canvas the page shows: what the page can't read from one, a screenshot of it alone can. */
+  const canvases = async (page: Page) => {
+    const need = await page.evaluate(stills);
+
+    if (need.length === 0) return;
+
+    const list = await page.evaluateHandle(
+      () => globalThis.__svjeezCanvases ?? [],
+    );
+
+    for (const i of need) {
+      const handle = (await list.evaluateHandle((all, i) => all[i]!, i)).asElement();
+
+      if (!handle) continue;
+
+      // The part of the canvas the viewport shows. Everything but the canvas is hidden for the shot, so its picture
+      // carries none of the text and boxes drawn over it.
+      const at = await page.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const x = Math.max(r.left, 0);
+        const y = Math.max(r.top, 0);
+
+        const style = document.createElement("style");
+
+        style.id = "svjeez-still";
+        style.textContent = "*{visibility:hidden!important}";
+        document.head.append(style);
+        el.style.setProperty("visibility", "visible", "important");
+
+        return {
+          x,
+          y,
+          width: Math.min(r.right, innerWidth) - x,
+          height: Math.min(r.bottom, innerHeight) - y,
+        };
+      }, handle);
+
+      const png =
+        at.width >= 1 && at.height >= 1
+          ? await page
+              .screenshot({ clip: at, omitBackground: true, animations: "allow" })
+              .catch(() => undefined)
+          : undefined;
+
+      await page.evaluate(
+        ([el, uri, at]) => {
+          document.getElementById("svjeez-still")?.remove();
+          el.style.removeProperty("visibility");
+
+          if (uri) (globalThis.__svjeezStills ??= new WeakMap()).set(el, { href: uri, at });
+        },
+        [handle, png && `data:image/png;base64,${png.toString("base64")}`, at] as const,
+      );
+    }
+  };
+
   /** The page's own web fonts, fetched from Node so a cross-origin file needs no CORS. */
   const capture = async (page: Page, used: string[]): Promise<Face[]> => {
     if (used.length === 0) return [];
@@ -345,8 +468,13 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
         if (!file) {
           // A file that won't download leaves its text to a fallback font, as a page without it would.
+          // A face the drawing can't cut down stays as the page had it, WOFF2 and all: a variable font's TTF is
+          // several times the size.
+          const whole = isWholeFile(face);
+
           file = download(url).then(
-            async (bytes) => bytes && dataUri(await unwrap(bytes).catch(() => bytes)),
+            async (bytes) =>
+              bytes && dataUri(whole ? bytes : await unwrap(bytes).catch(() => bytes)),
             () => undefined,
           );
           files.set(url, file);
@@ -394,18 +522,21 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     };
 
     // Light goes last, so the page ends in the scheme it rests in. A live app may still be changing between the two
-    // passes (a progress badge, results arriving), so a mismatch reads both again before it counts.
-    const both = async (tries: number): Promise<Box> => {
+    // passes (a progress badge, results arriving), so a mismatch reads both again. A page that lays the schemes out
+    // differently for good (a theme toggle's icon, an image for one scheme) keeps its light read where they differ.
+    const both = async (tries = 3): Promise<Box> => {
       const dark = schemes === "light" ? undefined : await pass("dark");
       const light = schemes === "dark" ? undefined : await pass("light");
 
-      try {
-        return dark && light ? merge(light, dark) : (light ?? dark)!;
-      } catch (error) {
-        if (!(error instanceof Differ) || tries <= 1) throw error;
+      if (!dark || !light) return (light ?? dark)!;
 
-        return both(tries - 1);
-      }
+      let differs = false;
+
+      const root = merge(light, dark, () => {
+        differs = true;
+      });
+
+      return differs && tries > 1 ? both(tries - 1) : root;
     };
 
     await scheme(resting);
@@ -414,8 +545,10 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       shots = {};
       await shim(page);
       await settle(page, true);
+      await canvases(page);
+      await page.evaluate(preload);
 
-      const root = await both(3);
+      const root = await embed(await both(), picture(page));
 
       const fonts = await capture(
         page,
@@ -508,7 +641,9 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         viewport: { width: Math.ceil(width ?? 1280), height: Math.ceil(height ?? 1000) },
       });
 
-      await page.goto(url);
+      // A page whose load never ends (a stream, a slow tracker) is read as it stands after a few seconds.
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => undefined);
 
       if (faces) await page.addStyleTag({ content: faces });
 

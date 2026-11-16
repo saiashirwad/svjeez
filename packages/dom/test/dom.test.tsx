@@ -986,7 +986,7 @@ describe("real pages", () => {
     await card.close();
     const svg = draw(snap);
 
-    expect(svg).toMatch(/<g clip-path="url\(#[^"]+\)">\s*<image /);
+    expect(svg).toMatch(/<g clip-path="url\(#[^"]+\)">\s*<use /);
     expect(validateSvg(svg).errors).toEqual([]);
   });
 
@@ -1072,5 +1072,60 @@ describe("snapshots", () => {
     } finally {
       rmSync(dir, { recursive: true });
     }
+  });
+});
+
+describe("real sites", () => {
+  const page = (body: string, css = "") =>
+    "data:text/html;charset=utf-8," + encodeURIComponent(`<!doctype html><style>${css}</style>${body}`);
+
+  test("inline svg: symbol, defs, clipPath and use draw what they should and validate", async () => {
+    const card = await dom.open(
+      page(
+        `<svg width="0" height="0"><defs><clipPath id="c"><rect width="10" height="10"/></clipPath></defs><symbol id="s" viewBox="0 0 10 10"><path d="M0 0h10v10z"/></symbol></svg>
+        <div id="w"><svg width="40" height="40" viewBox="0 0 10 10" fill="red"><g clip-path="url(#c)"><use href="#s"/></g><clipPath id="d"><rect width="5" height="5"/></clipPath></svg></div>`,
+      ),
+      { root: "#w", width: 100, height: 100 },
+    );
+
+    const svg = draw(await card.snap());
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    expect(svg).toContain("M0 0h10v10z");
+    expect(svg).not.toContain("<symbol");
+    await card.close();
+  });
+
+  test("a scheme that changes the markup keeps the light read where it differs", async () => {
+    const card = await dom.open(
+      page(
+        `<p id="a">same</p><p id="b"><i class="l">sun</i><i class="d">moon</i></p>`,
+        `.d{display:none}@media (prefers-color-scheme:dark){.l{display:none}.d{display:inline}}`,
+      ),
+      { root: "body", width: 200, height: 100, pad: 0 },
+    );
+
+    const text = JSON.stringify(await card.snap());
+
+    expect(text).toContain("sun");
+    expect(text).not.toContain("moon");
+    await card.close();
+  });
+
+  test("root body is the viewport from the origin, and what lies outside it is left out", async () => {
+    const card = await dom.open(
+      page(
+        `<p>inside</p><div style="height:3000px"></div><p>far below</p>`,
+        `body{background:#eee}`,
+      ),
+      { root: "body", width: 300, height: 200, pad: 0 },
+    );
+
+    const s = await card.snap();
+
+    expect(s.box).toEqual({ x: 0, y: 0, width: 300, height: 200 });
+    expect(JSON.stringify(s)).toContain("inside");
+    expect(JSON.stringify(s)).not.toContain("far below");
+    await card.close();
   });
 });
