@@ -89,12 +89,14 @@ export interface Frame {
 }
 
 const recolors = (img: HTMLImageElement) => "themed" in img.dataset;
+
 /**
  * The scheme an img must be pinned to: its own data-scheme or the page's, when that is not the OS's. Chromium shows an
  * <img> SVG in the color-scheme around it, but Safari always shows the OS's.
  */
 export const pinned = (img: HTMLImageElement) => {
-  const want = (img.dataset.scheme as Scheme | undefined) ?? pageScheme();
+  const own = img.dataset.scheme;
+  const want: Scheme = own === "light" || own === "dark" ? own : pageScheme();
 
   return want === systemScheme() ? undefined : want;
 };

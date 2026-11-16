@@ -490,6 +490,17 @@ const canvasOf = (state: State, once: boolean): Canvas =>
 /** SMIL inside `<Once>` carries this, so `restyle` can start it on the once clock. */
 const ONCE_ATTR = "data-once";
 
+/** SMIL inside `<Ambient>` carries this, so `restyle({ timeline })` knows it stays on the clock. */
+const AMBIENT_ATTR = "data-ambient";
+
+/** Where an element sits: inside `<Once>`, inside `<Ambient>`, both or neither. */
+interface Within {
+  readonly once: boolean;
+  readonly ambient: boolean;
+}
+
+const NOWHERE: Within = { once: false, ambient: false };
+
 /** The value a windowed animation ends on, which its element holds as the attribute so that a seek past the window shows it. */
 const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
   const first = nodes[0];
@@ -499,12 +510,17 @@ const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
     : undefined;
 };
 
-const animateOn = (state: State, attribute: string, lane: Lane, once: boolean): SvgNode[] => {
-  const nodes = animate(canvasOf(state, once), attribute, lane, () => nextName(state, "w"));
+const animateOn = (state: State, attribute: string, lane: Lane, within: Within): SvgNode[] => {
+  const nodes = animate(canvasOf(state, within.once), attribute, lane, () => nextName(state, "w"));
 
-  return once
+  const marks = {
+    ...(within.once && { [ONCE_ATTR]: "" }),
+    ...(within.ambient && { [AMBIENT_ATTR]: "" }),
+  };
+
+  return within.once || within.ambient
     ? nodes.map((node) =>
-        node.kind === "element" ? { ...node, attrs: { ...node.attrs, [ONCE_ATTR]: "" } } : node,
+        node.kind === "element" ? { ...node, attrs: { ...node.attrs, ...marks } } : node,
       )
     : nodes;
 };
@@ -545,8 +561,8 @@ const local = (state: State, lane: Lane): number => {
   return ((at % lane.snapped) / lane.snapped) * lane.period;
 };
 
-const blurFilter = (state: State, lane: Lane, once: boolean): string => {
-  const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}|${once}`;
+const blurFilter = (state: State, lane: Lane, within: Within): string => {
+  const signature = `blur|${JSON.stringify(lane.keys)}|${lane.snapped}|${within.once}|${within.ambient}`;
   const known = state.blurs.get(signature);
 
   if (known) return known;
@@ -554,7 +570,7 @@ const blurFilter = (state: State, lane: Lane, once: boolean): string => {
   state.blurs.set(signature, id);
   const still = formatValue(valueAt(lane.keys, local(state, lane)).blur);
 
-  const nodes = animateOn(state, "stdDeviation", lane, once);
+  const nodes = animateOn(state, "stdDeviation", lane, within);
   const end = windowEnd(nodes);
 
   const blur = element("feGaussianBlur", { stdDeviation: end ?? still }, nodes);
@@ -603,8 +619,9 @@ const emitShell = (
   state: State,
   target: Element,
   lanes: readonly Lane[],
-  once: boolean,
+  within: Within,
 ): SvgNode => {
+  const { once, ambient } = within;
   const attrs = { ...target.attrs };
   const still: Record<string, AttrValue> = {};
   const children = [...target.children];
@@ -629,7 +646,7 @@ const emitShell = (
   for (const lane of lanes) {
     pin(attrs, target, lane);
 
-    if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane, once)})`;
+    if (lane.backend === "blur") attrs.filter = `url(#${blurFilter(state, lane, within)})`;
 
     if (lane.backend === "smil") {
       // SAFETY: a smil lane animates an SVG attribute, never a custom property, so its first target is a Channel.
@@ -637,7 +654,7 @@ const emitShell = (
         valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel],
       );
 
-      const nodes = animateOn(state, lane.key, lane, once);
+      const nodes = animateOn(state, lane.key, lane, within);
       const end = windowEnd(nodes);
 
       animated ||= nodes.length > 0;
@@ -652,6 +669,7 @@ const emitShell = (
     attrs.class,
     css.length > 0 && `${state.canvas.prefix}a`,
     css.length > 0 && once && `${state.canvas.prefix}o`,
+    css.length > 0 && ambient && `${state.canvas.prefix}c`,
     css.length > 0 && className(state, css, once),
     pivot && `${state.canvas.prefix}fb`,
   ].filter(Boolean);
@@ -719,7 +737,7 @@ const walk = (
   state: State,
   node: SvgNode,
   veiled = false,
-  once = false,
+  within: Within = NOWHERE,
   font: FontCtx = UNKNOWN_FONT,
 ): SvgNode => {
   switch (node.kind) {
@@ -742,7 +760,7 @@ const walk = (
     case "fragment":
       return {
         ...node,
-        children: node.children.map((child) => walk(state, child, veiled, once, font)),
+        children: node.children.map((child) => walk(state, child, veiled, within, font)),
       };
     case "clip": {
       const parent = state.clock;
@@ -767,7 +785,7 @@ const walk = (
       try {
         return {
           kind: "fragment",
-          children: node.children.map((child) => walk(state, child, veiled, once, font)),
+          children: node.children.map((child) => walk(state, child, veiled, within, font)),
         };
       } finally {
         state.clock = parent;
@@ -776,7 +794,11 @@ const walk = (
 
     case "element": {
       const bare = element(node.tag, resolveAttrs(state, node.attrs), []);
-      const inOnce = once || node.once === true;
+
+      const inside: Within = {
+        once: within.once || node.once === true,
+        ambient: within.ambient || node.ambient === true,
+      };
 
       const shells = veil(
         node.motions.length > 0
@@ -799,7 +821,7 @@ const walk = (
 
       const el = {
         ...bare,
-        children: node.children.map((child) => walk(state, child, hides, inOnce, inherited)),
+        children: node.children.map((child) => walk(state, child, hides, inside, inherited)),
       };
 
       // A wrapper layer turns about the point the element asked for, not the centre of its box.
@@ -813,7 +835,7 @@ const walk = (
             state,
             index === 0 ? (inner as Element) : element("g", wrapper, [inner]),
             lanes,
-            inOnce,
+            inside,
           ),
         el,
       );

@@ -82,4 +82,30 @@ describe("Camera steady", () => {
     expect(svg).toMatch(/scale:1\b/);
     expect(svg).toMatch(/scale:0\.25\b/);
   });
+
+  test("a stop's own over times its move, and the camera's over times the rest", () => {
+    const moves: CameraStop[] = [
+      { show: { at: 2, over: 3 }, target: rect(100, 100, 100, 75), over: 1 },
+      { show: { at: 5, over: 5 }, target: "all" },
+    ];
+
+    const svg = render(
+      { width: 400, height: 300, duration: 10, title: "Moves" },
+      <Camera frame={frame} stops={moves} over={2}>
+        <circle r={4} />
+      </Camera>,
+    );
+
+    const steady = render(
+      { width: 400, height: 300, duration: 10, title: "Moves" },
+      <Camera frame={frame} stops={moves} over={2} steady origin={{ x: 0, y: 0 }}>
+        <circle r={4} />
+      </Camera>,
+    );
+
+    // Out from 2s to 3s, back from 5s to 7s.
+    for (const out of [svg, steady]) {
+      expect(out).toMatch(/0%,20%,70%,100%\{scale:1\}30%,50%\{scale:(4|0\.25)\}/);
+    }
+  });
 });

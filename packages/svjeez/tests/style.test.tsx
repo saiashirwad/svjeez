@@ -34,7 +34,9 @@ describe("<Style>", () => {
     );
 
     expect(svg).toContain(".dot{translate:calc(var(--s-p1) * 1px) 0}");
-    expect(svg).toContain("@property --s-p1{syntax:'<number>';inherits:false;initial-value:0}");
+    expect(svg).toContain(
+      "@property --s-p1{syntax:'\\3c number\\3e ';inherits:false;initial-value:0}",
+    );
   });
 
   test("leaves nothing behind in the body", () => {
@@ -42,7 +44,42 @@ describe("<Style>", () => {
   });
 });
 
+describe("style", () => {
+  test("a css value keeps its property holes, beside plain values", () => {
+    const turn = css.property("style-turn", { syntax: "angle", inherits: true, initial: 0 });
+
+    const svg = scene(
+      <g style={{ [turn]: 30 }}>
+        <rect
+          width={2}
+          height={2}
+          style={{ transformOrigin: "1px 1px", rotate: css`calc(${turn} * ${-0.5})` }}
+        />
+      </g>,
+      { prefix: "s-" },
+    );
+
+    expect(svg).toContain('<g style="--s-p1:30deg">');
+    expect(svg).toContain('style="transform-origin:1px 1px;rotate:calc(var(--s-p1) * -0.5)"');
+  });
+
+  test("a css value with no holes is plain text", () => {
+    expect(scene(<rect width={2} height={2} style={{ opacity: css`calc(1 / 2)` }} />)).toContain(
+      'style="opacity:calc(1 / 2)"',
+    );
+  });
+});
+
 describe("css.property", () => {
+  test("the syntax has no angle bracket, so the rule survives an SVG pasted inline into HTML", () => {
+    const hue = css.property("style-hue", { syntax: "angle", initial: 0 });
+    const svg = scene(<rect width={2} height={2} style={{ [hue]: 1 }} />);
+    const rule = /@property [^{]+\{[^}]*\}/.exec(svg)![0];
+
+    expect(rule).toContain("syntax:'\\3c angle\\3e ';");
+    expect(rule).not.toMatch(/[<>]/);
+  });
+
   test("inherits defaults to false", () => {
     const own = css.property("own", { syntax: "length", initial: 0 });
 

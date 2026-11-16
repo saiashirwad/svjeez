@@ -3,14 +3,14 @@ import { isRef, type AnyRef } from "./defs";
 import { isFontValue, type FontValue } from "./font/font";
 import { escapeAttr, escapeText, kebab, num } from "./format";
 import { isMotion, type Motion, type Stack } from "./motion";
-import { Css, formatProperty, isProperty, type CssPart } from "./properties";
+import { Css, formatProperty, isCss, isProperty, type CssPart } from "./properties";
 
 export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
 
 export type AttrValue = string | AnyRef | Css | FontValue;
 
 /** CSS declarations as a JSX `style` object: property name to value. */
-export type Style = Readonly<Record<string, string | number | undefined>>;
+export type Style = Readonly<Record<string, string | number | Css | undefined>>;
 
 /** A prop as JSX passes it. `children` and `animation` are typed in `Props`. */
 export type Prop = Child | Stack | AttrValue | Style;
@@ -31,6 +31,8 @@ export type SvgNode =
       readonly motions: readonly Motion[];
       /** Set by `<Once>`: every motion from here down plays the timeline one time. Never serialized. */
       readonly once?: boolean;
+      /** Set by `<Ambient>`: every motion from here down stays on the clock when `restyle({ timeline })` puts the scene on a scroll timeline. Never serialized. */
+      readonly ambient?: boolean;
       /** Attributes the still frame has instead of what is written, when a windowed SMIL animation needs the last value there. Never serialized. */
       readonly still?: Readonly<Record<string, AttrValue>>;
     }
@@ -102,12 +104,16 @@ const style = (value: string | Style): string | Css => {
 
   const parts = entries.flatMap(([name, entry], index): CssPart[] => [
     index > 0 ? ";" : "",
-    ...(isProperty(name)
-      ? [{ property: name }, `:${formatProperty(name, entry!)}`]
-      : [`${kebab(name)}:${entry}`]),
+    ...(isProperty(name) ? [{ property: name }, ":"] : [`${kebab(name)}:`]),
+    // A css`…` value keeps its property holes, which render names.
+    ...(isCss(entry)
+      ? entry.parts
+      : [isProperty(name) ? formatProperty(name, entry!) : String(entry)]),
   ]);
 
-  return entries.some(([name]) => isProperty(name)) ? new Css(parts) : parts.join("");
+  return entries.some(([name, entry]) => isProperty(name) || isCss(entry))
+    ? new Css(parts)
+    : parts.join("");
 };
 
 const attrValue = (prop: string, value: Prop): AttrValue | undefined => {

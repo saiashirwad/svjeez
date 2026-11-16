@@ -5,6 +5,7 @@
   "scripts": {
     "build": "bun run scripts/build.ts",
     "dev": "bun run ../packages/svjeez/scripts/preview.ts",
+    "scroll": "bun run scroll/serve.ts",
     "render-png": "bun run ../packages/svjeez/src/cli.ts frames",
     "fidelity": "bun run scripts/fidelity.ts",
     "perf": "bun run scripts/perf.ts",

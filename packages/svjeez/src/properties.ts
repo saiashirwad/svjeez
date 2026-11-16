@@ -7,10 +7,10 @@ const NUMBER: number = 0;
 const COLOR = "" as Color;
 
 const SYNTAX = {
-  number: { value: NUMBER, css: "<number>", unit: "" },
-  length: { value: NUMBER, css: "<length>", unit: "px" },
-  angle: { value: NUMBER, css: "<angle>", unit: "deg" },
-  color: { value: COLOR, css: "<color>", unit: "" },
+  number: { value: NUMBER, unit: "" },
+  length: { value: NUMBER, unit: "px" },
+  angle: { value: NUMBER, unit: "deg" },
+  color: { value: COLOR, unit: "" },
 } as const;
 
 export type Syntax = keyof typeof SYNTAX;
@@ -86,10 +86,14 @@ export const formatProperty = (key: Property, value: number | string): string =>
   return isNumeric(value) ? `${num(value)}${unit}` : value;
 };
 
+/**
+ * The angle brackets of a syntax such as `<angle>` are written as CSS escapes. An SVG pasted inline into HTML has its
+ * `<style>` parsed as markup, where a bare `<angle>` would open a tag and swallow the rest of the sheet.
+ */
 export const propertyRule = (name: string, key: Property): string => {
   const { syntax, inherits, initial } = declarationOf(key);
 
-  return `@property ${name}{syntax:'${SYNTAX[syntax].css}';inherits:${inherits ?? false};initial-value:${formatProperty(key, initial)}}`;
+  return `@property ${name}{syntax:'\\3c ${syntax}\\3e ';inherits:${inherits ?? false};initial-value:${formatProperty(key, initial)}}`;
 };
 
 export type CssPart = string | { readonly property: Property };

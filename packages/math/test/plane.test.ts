@@ -91,7 +91,7 @@ describe("plane", () => {
     const out = svg(shear.css, shear.grid);
     expect(out).toMatch(/\.plane-map\{transform:matrix\(var\(--p\d+\),/);
     expect(out).toContain("vector-effect:non-scaling-stroke");
-    expect(out).toMatch(/@property --p\d+\{syntax:'<number>'/);
+    expect(out).toMatch(/@property --p\d+\{syntax:'\\3c number\\3e '/);
     expect(out).toMatch(/@keyframes [\w-]+\{0%,[\d.]+%\{--p\d+:0\}[\d.]+%,100%\{--p\d+:1\}/);
     expect(out).toContain('d="M-4 -4V4M-3 -4V4');
     expect(out).not.toContain("<animate");
