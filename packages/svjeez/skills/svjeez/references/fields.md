@@ -4,6 +4,8 @@ Vector fields, streamlines, slope fields and contour lines, all from `@svjeez/ma
 
 ```tsx
 import { contours, fieldLines, streamlines, vectorField } from "@svjeez/math";
+import { flow } from "svjeez";
+import { rect } from "svjeez/geometry";
 ```
 
 ## Streamlines
@@ -19,7 +21,7 @@ Lines keep `spacing` px between neighbours. They start at the middle of `frame` 
 
 | Option | Meaning |
 | --- | --- |
-| `frame` | The region to fill, a `Rect`. `plane().bounds` fits. |
+| `frame` | The region to fill, a `Rect`. A plane's `bounds` fits. |
 | `spacing` | Gap between lines in px. Default 24. |
 | `seeds` | Trace from exactly these points and fill nothing else. |
 | `step` | Integration step in px. Default 2. |
@@ -29,22 +31,22 @@ Lines keep `spacing` px between neighbours. They start at the middle of `frame` 
 
 A line ends at the frame, at a stagnation point, beside another line, or at `maxLength`.
 
-`fieldLines(span, lines, options?)` draws the lines on one after another over `span`, nearest the middle first. `each` sets how long one line takes, and `color`, `strokeWidth` and `opacity` style them. `flow(lines, { at })` from `svjeez` takes the whole list and runs one particle along every line, again and again:
+`fieldLines(span, lines, options?)` draws the lines on one after another over `span`, nearest the middle first. `each` sets how long one line takes, a third of the span by default, and `color` (the theme's `comment`), `strokeWidth` (1.25), `opacity` (0.6) and `theme` style them. `flow(lines, { at })` from `svjeez` takes the whole list and runs one particle along every line, again and again:
 
 ```tsx
 {fieldLines({ at: 1, over: 3 }, lines, { color: blue })}
 {flow(lines, { at: 3, speed: 110, color: orange }).node}
 ```
 
-Every line has its own length and so its own period, and each particle starts a different way along its line, so the field never pulses. `style: "comet"` gives each particle a short tail. `rest` is the pause between trips. Mind the size. A `dot` costs one or two animated elements per line and the keyframes of its path, around 1 KB. `examples/fields/index.tsx` has about 55 lines, and with its two plots the scene is 212 KB. Use a larger `spacing` or `tolerance` to shrink it, and prefer `dot` over `comet` for more than about 30 lines.
+Every line has its own length and so its own period, and each particle starts a different way along its line, so the field never pulses. `style: "comet"` gives each particle a short tail. `rest` is the pause between trips, 0.4 of a trip by default. Mind the size. A `dot` costs one or two animated elements per line and the keyframes of its path, around 1 KB. `examples/fields/index.tsx` has about 55 lines, and with its two plots the scene is 212 KB. Use a larger `spacing` or `tolerance` to shrink it, and prefer `dot` over `comet` for more than about 30 lines.
 
 ## Arrows
 
-`vectorField(field, { frame, spacing })` returns `{ d, arrows }`: one path with every arrow, and the arrows as `{ from, to, magnitude }` for coloring or revealing them yourself. Arrows are centered on a lattice. The longest fits 0.85 of `spacing` unless you set `scale` (px per unit of field). `normalize: true` gives every arrow one length. Stroke the path with round caps and no fill.
+`vectorField(field, { frame, spacing })` (`spacing` defaults to 28) returns `{ d, arrows }`: one path with every arrow, and the arrows as `{ from, to, magnitude }` for coloring or revealing them yourself. Arrows are centered on a lattice. The longest fits 0.85 of `spacing` unless you set `scale` (px per unit of field). `normalize: true` gives every arrow one length. Stroke the path with round caps and no fill.
 
 ## Slope fields
 
-`slopeField(f, plane)` draws short marks along dy/dx = `f(x, y)`, in graph units over the plot's range. `step` is the spacing along x in graph units, `stepY` along y (default `step`), and `length` is a mark's length in px. A `NaN` slope draws nothing, and an infinite one draws a vertical mark. `slopeSolution(f, plane, { x, y })` integrates the curve through a point, both ways, and returns `{ points, d }`. Draw it on with `draw()`.
+`slopeField(f, plane)` draws short marks along dy/dx = `f(x, y)`, in graph units over the plot's range. `step` is the spacing along x in graph units, `stepY` along y (default `step`), and `length` is a mark's length in px. A `NaN` slope draws nothing, and an infinite one draws a vertical mark. `slopeSolution(f, plane, { x, y }, { from, to, step }?)` integrates the curve through a point, both ways, and returns `{ points, d }`. `from` and `to` limit it in graph x, by default the plot's edges. Draw it on with `draw()`.
 
 ```tsx
 const f = (x, y) => x - y;
@@ -70,7 +72,7 @@ const rings = contours({ cols: 90, rows: 60, values: elevations }, { frame, leve
 
 ### A level that moves
 
-`contourSweep(span, source, { plane | frame, from, to })` returns `{ d, animation }`. Give `d` to a `<path>` and `animation` to its `animation`. It morphs one level line as the level rises, through `matchPaths()`. It reads well while lines grow, shrink and bend, as a circle widens or a heart grows from a point at its center. Each frame is a full outline, so `frames` (default 16) sets both how closely the curve is followed and the size.
+`contourSweep(span, source, { plane | frame, from, to })` returns `{ d, animation }`. Give `d` to a `<path>` and `animation` to its `animation`. It morphs one level line as the level rises, through `matchPaths()`. It reads well while lines grow, shrink and bend, as a circle widens or a heart grows from a point at its center. Each frame is a full outline, so `frames` (default 16) sets both how closely the curve is followed and the size. It takes the `resolution` and `tolerance` of `contours()`, with `tolerance` defaulting to 0.4.
 
 ```tsx
 const sweep = contourSweep({ at: 2, over: 2.6 }, heart, { plane: plot, from: -0.97, to: 0 });
@@ -84,7 +86,7 @@ Where loops split or merge, rings pair by order and one grows from a point, whic
 | Error | Fix |
 | --- | --- |
 | `streamlines() needs a positive …, got ….` | Pass a number above 0 for `spacing`, `step` or `maxLength`. |
-| `… needs a frame with a positive w and h, got … by ….` | Pass a `Rect`, such as `plane().bounds`. |
+| `… needs a frame with a positive w and h, got … by ….` | Pass a `Rect`, such as a plane's `bounds`. |
 | `contours() needs a frame or plane to place the samples.` | Pass one of them. |
 | `contours() needs a grid of at least 2 by 2 with cols * rows values, got ….` | Make `values` as long as `cols * rows`. |
 | `contourSweep() found no line at level ….` | Sweep only levels the frame crosses, or widen the frame. |

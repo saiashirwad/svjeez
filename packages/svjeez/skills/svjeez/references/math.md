@@ -42,6 +42,9 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 
 ```tsx
 import { epicycles, tex } from "@svjeez/math";
+import { tint } from "svjeez";
+
+import { theme } from "./style";
 
 const pi = tex(String.raw`\pi`, { fontSize: 400, theme });
 const e = epicycles({ at: 0.8, over: 10 }, pi.words, { size: 360, center: [480, 270], fill: tint(theme, "blue") });
@@ -75,7 +78,7 @@ const d = derive(
 ```
 
 - By default one line transforms into the next with `morph()`, so glyphs the lines share slide into place and the rest fade. Wrap a part in `\cssId{name}{…}` in both lines to pair it by name. With `stack: true` every line stays and each new one fades in below, `lineHeight` pixels lower.
-- `align` is what the lines line up on: `"="`, the first equals sign, or the id of a `\cssId` in each line. `x` is where that point sits.
+- `align` is what the lines line up on: `"="` (the default), the first equals sign, or the id of a `\cssId` in each line. `x` is where that point sits, as its center, and `y` is the top of the first line. `fontSize` defaults to 36.
 - A step's `note` is TeX set small beside the line after an arrow, such as `\div 2 \text{ both sides}`. In place it fades with the next change, and in a stack it stays.
 - The span covers the whole derivation. The changes are spaced evenly so the last one ends with it, and `change` is how long each takes, default 0.9. The span must give every line its `change`, so at least `change` times the number of lines. The result has `node`, `span`, `lines` (every line as a `tex()`, aligned) and `bounds`.
 
@@ -92,7 +95,7 @@ const counting = counter({ at: 0, over: 10 }, (t) => 144 * Math.min(1, t / 3), {
 ```
 
 - A list of `{ at, value }` holds each value until the next. A span and a function, `counter(span, (t) => value)`, reads the function every `step` seconds, 0.1 by default, for the time `t` since the span starts, up to its `over`.
-- `digits` is the decimal places. Places stay put at the widest value, right-aligned on the decimal point, with a sign place only if a value is negative.
+- `fontSize` defaults to 32. `digits` is the decimal places, default 0. `anchor` places the box like `tex()`'s. Places stay put at the widest value, right-aligned on the decimal point, with a sign place only if a value is negative.
 - Digits cut by default. `roll` seconds makes the old digit lift out as the new one rolls in from below. The changes must be at least `roll` apart.
 - Each place holds one glyph per distinct digit it ever shows, toggled by stepped keyframes, so a number that changes every tenth of a second for ten seconds is still a few dozen paths. `width` and `height` give the box.
 
@@ -120,7 +123,7 @@ g.angle(B, A, C, { label: "60^\\circ" });
 <>{g.node}</>;
 ```
 
-- `construct({ theme, unit, origin, fontSize, start, pace, faint })`. `unit` is pixels per unit and `origin` is where the origin sits in the scene. Coordinates have y up. `pace` overrides the seconds each kind of element takes.
+- `construct({ theme, unit, origin, fontSize, start, pace, faint })`. `unit` is pixels per unit, default 1, and `origin` is a point in the scene px where the origin sits, default `{ x: 0, y: 0 }`. Coordinates have y up. `pace` overrides the seconds each kind of element takes.
 - `point(x, y, label?)`, `segment(a, b)`, `line(a, b)` (runs past both points, grows outward from `a`), `circle(center, through)` or `circle(center, { radius })`. A circle takes `arc: { from, to }` in degrees to draw only an arc.
 - `intersect(a, b)` of two lines gives one point. Of a line and a circle, or two circles, it gives `[p, q]`, and `{ pick: 0 | 1 }` keeps one. A line and a circle give crossings in the order along the line. Two circles give the crossing left of the line from center 1 to center 2 first. Intersections count a segment only between its ends and a `line()` as endless.
 - `midpoint`, `parallel(line, p)`, `perpendicular(line, p)`, `perpendicularBisector(a, b)` and `angleBisector(a, b, c)`, the angle at `b`. The two bisectors draw the compass arcs that find them, as aids. `{ compass: false }` draws only the result.
@@ -133,7 +136,7 @@ Time the text beside the figure from `g.time`, read before the elements it expla
 
 ## Planes and transformations
 
-`plane()` is the one coordinate system of `@svjeez/math`, and it can move, as in 3Blue1Brown's linear algebra videos. `xRange` and `yRange` are the graph ranges, `frame` is the plot area in px as a `Rect`, and y points up. `ticks` spaces the grid lines: a number for both axes, or `{ x, y }`. Ticks, labels, `plot()` and calculus are in `explainers.md` (Planes, axes and function plots); this section is the steps.
+`plane()` is the one coordinate system of `@svjeez/math`, and it can move, as in 3Blue1Brown's linear algebra videos. `xRange` and `yRange` are the graph ranges, `frame` is the plot area in px as a `Rect`, and y points up. `ticks` spaces the tick marks and grid lines: a number for both axes, or `{ x, y }`; an axis without one has neither. `labels: false` drops the numbers and `grid: true` puts faint grid lines in `node`. Ticks, labels, `plot()` and calculus are in `explainers.md` (Planes, axes and function plots); this section is the steps.
 
 ```tsx
 import { plane } from "@svjeez/math";
@@ -178,6 +181,7 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `tex() needs finite coordinates and anchor and a positive fontSize, got …` | Pass numbers. |
 | `tex.write() needs a non-negative span and a positive stroke time, got …` | Pass `over` of 0 or more and `stroke` above 0. |
 | `morph() draws a gutter only for code() versions.` | Drop `gutter`. |
+| `fourier() needs an even number of samples, 4 or more, got ….` / `fourier() keeps 1 to … terms, got ….` | Pass an even `samples` of 4 or more and `terms` from 1 to `samples - 1`. |
 | `epicycles() needs a finite start and a positive duration, got …` | Pass numbers: a span with `over` above 0. |
 | `epicycles() needs 1 to … terms, a non-negative number of circles and fade, got …` | Lower `terms`, and pass `circles` and `fade` of 0 or more. |
 | `epicycles() cannot read a "…" path command. …` | Arcs are not read. Write the outline with lines and curves, or pass points. |

@@ -4,6 +4,8 @@
 
 Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`. `tints: { tool: theme.base09 }` recolors a role, so a scene can hold to two or three hues. A `stateMachine` state takes a `role` too, which tints its box and stroke.
 
+A labelled edge is `[from, to, label?]` in a flowchart and a state machine, with the label a string. A sequence message is `[from, to, label, { reply? }?]`.
+
 ## Timing
 
 | Diagram | How it plays |
@@ -66,10 +68,10 @@ const agent = stateMachine(
   },
   { direction: "LR" },
 );
-const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwell: 0.8 }); // { node, spans, end }
+const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwell: 0.8 }); // { node, spans, span }
 ```
 
-`walk` lights each state in turn and runs a token along the transition between them. It throws `walk() has no way from "a" to "b".` when no transition connects two states. `edge(from, to)` gives the drawn line.
+`walk` lights each state in turn and runs a token along the transition between them. `at` is a start time or one time per state. `dwell` (default 1) is how long each state stays lit and `speed` (default 220 px/s) moves the token. `token` takes the `flow` options except `at`, `over` and `speed`. It returns `node` to draw, `spans` (when each state is lit) and `span`, from the first state lit to when the last goes dark. It throws `walk() has no way from "a" to "b".` when no transition connects two states. `edge(from, to)` gives the drawn line.
 
 ## Tree
 

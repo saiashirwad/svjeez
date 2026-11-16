@@ -27,18 +27,18 @@ const trip = flow(chart.route("push", "ship"), { at: 3, speed: 160, style: "trac
 </>;
 ```
 
-- `mermaid(text, options)` takes svjeez's own options: `theme`, `font`, `fontSize`, `x`, `y`, `anchor`, `class`, `direction` and `play`. Each kind reads the ones it knows. `direction` in the options beats the text.
+- `mermaid(text, options)` takes svjeez's own options: `theme`, `font`, `fontSize`, `x`, `y`, `anchor`, `class`, `tints`, `direction` (flowcharts and state diagrams) and `play` (flowcharts and sequence diagrams). Each kind reads the ones it knows. `direction` in the options beats the text.
 - It returns the svjeez diagram plus `kind` (`"flowchart"`, `"sequence"` or `"state"`) and `doc`. Narrow on `kind` to get `layers`, `route()` and `edge()` on a flowchart, `message(i)` on a sequence diagram, and `walk()` on a state diagram. Ids are the Mermaid ids, as plain strings, so there is no compile-time check on them.
-- `parseMermaid(text)` returns the plain model (`FlowchartDoc`, `SequenceDoc` or `StateDoc`) without importing svjeez.
+- `parseMermaid(text)` returns the plain model (`FlowchartDoc`, `SequenceDoc` or `StateDoc`, told apart by `kind`) without importing svjeez.
 
 ## What it reads
 
-Anything else throws a `MermaidSyntaxError` naming the line number and the line. Comment lines (`%%`), blank lines and a trailing `;` are ignored.
+Anything else throws a `MermaidSyntaxError`, which carries `line` and `source` and names the line number and the line. Comment lines (`%%`), blank lines and a trailing `;` are ignored, and `<br>` in a label becomes a space.
 
-- Flowcharts: `flowchart` or `graph` with `TD`, `TB` or `LR`, node forms `A[ ]` task, `A( )` task, `A([ ])` input, `A{ }` decision, `A(( ))` output, `A[[ ]]` tool and `A[( )]` store, edges `-->` `---` `-.->` `==>` with `|text|` or `-- text -->` labels, chains, `A & B --> C`, and `subgraph id [Title]` ... `end`. Every edge draws as one solid arrow whatever its style. Subgraphs are flat and never empty. `BT` and `RL` throw, because svjeez lays out `TB` and `LR`. Quote a label that holds a bracket: `A["list[0]"]`.
-- Sequence diagrams: `participant` and `actor` with `as`, the messages `->>`, `-->>`, `->`, `-->`, `-x`, `--x`, `-)` and `--)`, and `Note over A: text` on one actor. A `--` arrow draws as a dashed reply. `activate`, `+` and `-` marks, `loop`/`alt`/`opt`/`par`, `autonumber` and notes left of, right of or over several actors throw.
-- State diagrams: `stateDiagram` or `stateDiagram-v2`, `[*] --> A` (the start, once per scope), `A --> [*]` (marks `A` final), `A --> B : label`, `state "Long name" as A`, composite `state A {` ... `}` and `direction LR` at the top. Choice, fork, join, notes, `--` concurrency and `A : description` throw.
-- `classDef`, `class`, `style`, `linkStyle`, `click` and `%%{ }%%` directives throw: svjeez themes and positions the diagram itself.
+- Flowcharts: `flowchart` or `graph` with `TD`, `TB` or `LR`, node forms `A[ ]` task, `A( )` task, `A([ ])` input, `A{ }` decision, `A(( ))` output, `A[[ ]]` tool and `A[( )]` store, edges `-->` `---` `-.->` `==>` with `|text|` or `-- text -->` labels, chains, `A & B --> C`, and `subgraph id [Title]` or `subgraph Title` ... `end`. A header without a direction is `TD`. Every edge draws as one solid arrow whatever its style. Subgraphs are flat, never empty and cannot be an edge's end. `BT` and `RL` throw from `mermaid()`, because svjeez lays out `TB` and `LR`. Quote a label that holds a bracket: `A["list[0]"]`.
+- Sequence diagrams: `participant` and `actor` with `as`, the messages `->>`, `-->>`, `->`, `-->`, `-x`, `--x`, `-)` and `--)`, and `Note over A: text` on one actor. A `--` arrow draws as a dashed reply. `activate`, `deactivate`, `+` and `-` marks, `loop`/`alt`/`opt`/`par` and the other blocks, `autonumber`, `title`, `box`, `create`, `destroy`, `links` and notes left of, right of or over several actors throw.
+- State diagrams: `stateDiagram` or `stateDiagram-v2`, `[*] --> A` (the start, once per scope), `A --> [*]` (marks `A` final), `A --> B : label`, `state "Long name" as A`, composite `state A {` ... `}` and `direction LR` or `TB` once at the top. Every scope needs one start, and a line to or from `[*]` takes no label. Choice, fork, join, notes, `--` concurrency, `A : description` and `direction` inside a composite throw.
+- `%%{ }%%` directives throw in every kind. In flowcharts so do `classDef`, `class`, `style`, `linkStyle`, `click`, `direction`, `title`, `accTitle`, `accDescr`, `:::` classes and other arrow heads such as `--o`: svjeez themes and positions the diagram itself.
 
 ## Errors
 

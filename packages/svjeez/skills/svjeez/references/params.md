@@ -38,13 +38,13 @@ export default (p: Values<typeof params> = defaults(params)) =>
 | Call | Value | Defaults |
 | --- | --- | --- |
 | `number(value, { min, max, step?, unit?, scale? })` | any number in `[min, max]` | `step` 0.01 |
-| `count(value, { min?, max })` | a whole number | `min` 0, `step` 1 |
-| `seconds(value, { min?, max, step? })` | a time | `min` 0, `step` 0.01, `unit` `s` |
+| `count(value, { min?, max, unit?, scale? })` | a whole number | `min` 0, `step` 1 |
+| `seconds(value, { min?, max, step?, unit?, scale? })` | a time | `min` 0, `step` 0.01, `unit` `s` |
 | `color(value)` | a `#rrggbb` hex | |
 | `easing(value)` | an `Ease` from `ease` | |
 | `choice(value, options)` | one of `options`, typed as their union | |
 
-Every kind takes an optional `label` for the control. `scale: "log"` spreads a slider so small values get as much room as large ones, and needs a positive `min`. A number kind throws when `min` is not below `max`, the step is not positive, or the value is out of range, so a bad declaration fails when the module loads.
+Every kind takes an optional `label` for the control. `scale: "log"` spreads a slider so small values get as much room as large ones, and needs a positive `min`. `Range` (`min`, `max`) and `Extras` (`step`, `unit`, `scale`, `label`) are the option types the number kinds take. A number kind throws when `min` is not below `max`, a bound or the value is not finite, the step is not positive, or the value is out of range. `count` also throws on a non-integer value or bound. `choice` throws on duplicate options or a value that is not one of them, and `color` on a value that is not hex. A bad declaration fails when the module loads.
 
 ## Reading values
 
