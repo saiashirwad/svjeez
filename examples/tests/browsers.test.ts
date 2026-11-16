@@ -20,6 +20,10 @@ const GEOMETRY = 1;
 const OPACITY = 0.02;
 const BLUR = 0.1;
 
+/** Room on a box beyond a pixel, as a share of its size: text is shaped by each engine's own rasterizer and fallback font. */
+const TEXT = 0.2;
+const CURVES = 0.02;
+
 /** How many scene times one file is checked at, and how many pages one browser works on at once. */
 const TIMES = 60;
 const PAGES = 4;
@@ -101,7 +105,11 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
       const key = labels[k]!;
       const style = getComputedStyle(element);
 
+      // Elements in a mask aren't laid out on their own, and Firefox gives its percentages no size.
+      const unlaidOut = element.closest("mask") !== null;
+
       try {
+        if (unlaidOut) throw new Error("no box");
         const box = (element as SVGGraphicsElement).getBBox();
 
         // An empty box has no position worth comparing: Chromium keeps where it is, Firefox and WebKit say 0 0.
@@ -115,13 +123,14 @@ const probe = ([seekSrc, times]: [string, number[]]) => {
         // Not every element has a box: a filter primitive, a gradient stop.
       }
 
-      // Where the element ends up: the transform attribute, CSS transforms and every ancestor's, which WebKit's computed
-      // transform leaves out for the attribute.
-      const ctm = (element as SVGGraphicsElement).getCTM?.();
+      // Where the element ends up on the page, with the transform attribute, CSS transforms and every ancestor's.
+      const bounds = element.getBoundingClientRect();
+      const nothing = round(bounds.width) === 0 || round(bounds.height) === 0;
 
-      snapshot[key + " ctm"] = ctm
-        ? [ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f].map((n) => round(n)).join(" ")
-        : null;
+      snapshot[key + " bx"] = nothing || unlaidOut ? 0 : round(bounds.x);
+      snapshot[key + " by"] = nothing || unlaidOut ? 0 : round(bounds.y);
+      snapshot[key + " bw"] = nothing || unlaidOut ? 0 : round(bounds.width);
+      snapshot[key + " bh"] = nothing || unlaidOut ? 0 : round(bounds.height);
 
       for (const prop of ["opacity", "visibility", "translate", "rotate", "scale"])
         snapshot[key + " " + prop] = style.getPropertyValue(prop);
@@ -168,10 +177,7 @@ const close = (prop: string, a: Value, b: Value, slack = 0): boolean => {
 
   return x.every((part, k) => {
     if (k % 2 === 0) return part === y[k];
-    // A matrix keeps its scale and rotation to a hundredth, and its offset to a pixel.
-    const tolerance = prop === "opacity" ? OPACITY : prop === "ctm" && k < 8 ? 0.01 : GEOMETRY;
-
-    return Math.abs(Number(part) - Number(y[k])) <= tolerance;
+    return Math.abs(Number(part) - Number(y[k])) <= (prop === "opacity" ? OPACITY : GEOMETRY);
   });
 };
 
@@ -181,7 +187,12 @@ type Mismatch = { when: string; key: string; expected: Value; got: Value };
 const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
   if (reference.labels.join() !== run.labels.join())
     return [
-      { when: "targets", key: "animated elements", expected: reference.labels.length, got: run.labels.length },
+      {
+        when: "targets",
+        key: "animated elements",
+        expected: reference.labels.filter((label) => !run.labels.includes(label)).join(" ") + " (only in Chromium)",
+        got: run.labels.filter((label) => !reference.labels.includes(label)).join(" ") + " (only here)",
+      },
     ];
 
   const found: Mismatch[] = [];
@@ -196,8 +207,9 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
 
         const label = key.slice(0, key.lastIndexOf(" "));
         // Text is measured by each engine's own shaping, so the box around it, and around a group holding it, gets room.
-        const box = ["x", "y", "width", "height"].includes(prop) && reference.texty.includes(label);
-        const slack = box ? 0.08 * Math.max(Number(want[label + " width"]), Number(want[label + " height"])) : 0;
+        const box = ["x", "y", "width", "height", "bx", "by", "bw", "bh"].includes(prop);
+        const size = Math.max(Number(want[label + " width"]), Number(want[label + " height"]), Number(want[label + " bw"]), Number(want[label + " bh"]));
+        const slack = box ? size * (reference.texty.includes(label) ? TEXT : CURVES) : 0;
 
         if (skip.includes(prop) || close(prop, want[key]!, have[key] ?? null, slack)) continue;
         found.push({ when: `${direction} at ${time}s`, key, expected: want[key]!, got: have[key] ?? null });
