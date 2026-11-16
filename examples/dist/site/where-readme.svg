@@ -15,50 +15,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
 .round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
 
-.a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
-@keyframes k1{0%,50%,95.833%,100%{height:36px}4.167%,37.5%,54.167%,87.5%{height:24px}16.667%,66.667%{height:12px}}
-.m1{animation-name:k1;animation-timing-function:steps(1)}
-@keyframes k2{0%,50%,95.833%,100%{height:36px}12.5%,37.5%,62.5%,87.5%{height:24px}20.833%,70.833%{height:12px}}
-.m2{animation-name:k2;animation-timing-function:steps(1)}
-@keyframes k3{0%,45.833%,95.833%,100%{height:36px}20.833%,33.333%,70.833%,83.333%{height:24px}29.167%,79.167%{height:12px}}
-.m3{animation-name:k3;animation-timing-function:steps(1)}
-@keyframes k4{0%,50%,95.833%,100%{height:48px}16.667%,41.667%,66.667%,91.667%{height:36px}25%,75%{height:24px}}
-.m4{animation-name:k4;animation-timing-function:steps(1)}
-@keyframes k5{0%,50%,95.833%,100%{height:48px}25%,75%{height:36px}}
-.m5{animation-name:k5;animation-timing-function:steps(1)}
-@keyframes k6{0%,29.167%,79.167%,100%{height:36px}4.167%,54.167%{height:48px}}
-.m6{animation-name:k6;animation-timing-function:steps(1)}
-@keyframes k7{0%,29.167%,50%,79.167%,95.833%,100%{height:36px}8.333%,58.333%{height:48px}37.5%,87.5%{height:24px}}
-.m7{animation-name:k7;animation-timing-function:steps(1)}
-@keyframes k8{0%,33.333%,83.333%,100%{height:24px}8.333%,25%,58.333%,75%{height:36px}16.667%,66.667%{height:48px}}
-.m8{animation-name:k8;animation-timing-function:steps(1)}
-@keyframes k9{0%,41.667%,91.667%,100%{height:12px}4.167%,33.333%,54.167%,83.333%{height:24px}16.667%,66.667%{height:36px}}
-.m9{animation-name:k9;animation-timing-function:steps(1)}
-@keyframes k10{0%,41.667%,91.667%,100%{height:12px}12.5%,29.167%,62.5%,79.167%{height:24px}20.833%,70.833%{height:36px}}
-.m10{animation-name:k10;animation-timing-function:steps(1)}
-@keyframes k11{0%,41.667%,91.667%,100%{height:12px}12.5%,33.333%,62.5%,83.333%{height:24px}25%,75%{height:36px}}
-.m11{animation-name:k11;animation-timing-function:steps(1)}
-@keyframes k12{0%,50%,95.833%,100%{height:12px}12.5%,41.667%,62.5%,91.667%{height:24px}20.833%,70.833%{height:36px}}
-.m12{animation-name:k12;animation-timing-function:steps(1)}
-@keyframes k13{0%,50%,95.833%,100%{height:24px}20.833%,37.5%,70.833%,87.5%{height:36px}29.167%,79.167%{height:48px}}
-.m13{animation-name:k13;animation-timing-function:steps(1)}
-@keyframes k14{0%,16.667%,45.833%,66.667%,95.833%,100%{height:36px}8.333%,58.333%{height:24px}25%,75%{height:48px}}
-.m14{animation-name:k14;animation-timing-function:steps(1)}
-@keyframes k15{0%,50%,95.833%,100%{height:36px}25%,75%{height:48px}}
-.m15{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%,29.167%,79.167%,100%{height:48px}4.167%,20.833%,54.167%,70.833%{height:36px}12.5%,62.5%{height:24px}}
-.m16{animation-name:k16;animation-timing-function:steps(1)}
-@keyframes k17{0%,29.167%,50%,79.167%,95.833%,100%{height:36px}8.333%,58.333%{height:24px}37.5%,87.5%{height:48px}}
-.m17{animation-name:k17;animation-timing-function:steps(1)}
-@keyframes k18{0%,37.5%,87.5%,100%{height:36px}8.333%,29.167%,58.333%,79.167%{height:24px}16.667%,66.667%{height:12px}}
-.m18{animation-name:k18;animation-timing-function:steps(1)}
-@keyframes k19{0%,45.833%,95.833%,100%{height:36px}4.167%,33.333%,54.167%,83.333%{height:24px}12.5%,62.5%{height:12px}}
-.m19{animation-name:k19;animation-timing-function:steps(1)}
-@keyframes k20{0%,45.833%,95.833%,100%{height:36px}12.5%,37.5%,62.5%,87.5%{height:24px}20.833%,70.833%{height:12px}}
-.m20{animation-name:k20;animation-timing-function:steps(1)}
-@keyframes k21{0%,45.833%,95.833%,100%{height:36px}20.833%,70.833%{height:24px}}
-.m21{animation-name:k21;animation-timing-function:steps(1)}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-2s!important;animation-play-state:paused!important}}
+@media (prefers-reduced-motion:reduce){.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g class="sans">
     <rect x="0.5" y="0.5" width="327" height="263" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
@@ -76,28 +33,94 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
   <g transform="translate(32 160)">
     <rect width="264" height="60" fill="url(#p1)"/>
     <g transform="translate(0 60) scale(1 -1)">
-      <rect x="0" width="12" height="36" fill="url(#p2)" class="a m1"/>
-      <rect x="12" width="12" height="36" fill="url(#p2)" class="a m2"/>
-      <rect x="24" width="12" height="36" fill="url(#p2)" class="a m3"/>
-      <rect x="36" width="12" height="48" fill="url(#p2)" class="a m4"/>
-      <rect x="48" width="12" height="48" fill="url(#p2)" class="a m5"/>
-      <rect x="60" width="12" height="36" fill="url(#p2)" class="a m6"/>
-      <rect x="72" width="12" height="36" fill="url(#p2)" class="a m7"/>
-      <rect x="84" width="12" height="24" fill="url(#p2)" class="a m8"/>
-      <rect x="96" width="12" height="12" fill="url(#p2)" class="a m9"/>
-      <rect x="108" width="12" height="12" fill="url(#p2)" class="a m10"/>
-      <rect x="120" width="12" height="12" fill="url(#p2)" class="a m11"/>
-      <rect x="132" width="12" height="12" fill="url(#p2)" class="a m12"/>
-      <rect x="144" width="12" height="24" fill="url(#p2)" class="a m13"/>
-      <rect x="156" width="12" height="36" fill="url(#p2)" class="a m14"/>
-      <rect x="168" width="12" height="36" fill="url(#p2)" class="a m15"/>
-      <rect x="180" width="12" height="48" fill="url(#p2)" class="a m16"/>
-      <rect x="192" width="12" height="36" fill="url(#p2)" class="a m17"/>
-      <rect x="204" width="12" height="36" fill="url(#p2)" class="a m18"/>
-      <rect x="216" width="12" height="36" fill="url(#p2)" class="a m19"/>
-      <rect x="228" width="12" height="36" fill="url(#p2)" class="a m1"/>
-      <rect x="240" width="12" height="36" fill="url(#p2)" class="a m20"/>
-      <rect x="252" width="12" height="36" fill="url(#p2)" class="a m21"/>
+      <rect x="0" width="12" height="12" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;12;24;36;24;12;24;36;36" keyTimes="0;0.04167;0.16667;0.375;0.5;0.54167;0.66667;0.875;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="0" width="12" height="12" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="12" width="12" height="12" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;12;24;36;24;12;24;36;36" keyTimes="0;0.125;0.20833;0.375;0.5;0.625;0.70833;0.875;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="12" width="12" height="12" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="24" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;12;24;36;24;12;24;36;36" keyTimes="0;0.20833;0.29167;0.33333;0.45833;0.70833;0.79167;0.83333;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="24" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="36" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="48;36;24;36;48;36;24;36;48;48" keyTimes="0;0.16667;0.25;0.41667;0.5;0.66667;0.75;0.91667;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="36" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="48" width="12" height="36" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="48;36;48;36;48;48" keyTimes="0;0.25;0.5;0.75;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="48" width="12" height="36" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="60" width="12" height="36" fill="url(#p2)" class="dm">
+        <animate id="w1" attributeName="height" values="36;48;36;48;36" keyTimes="0;0.05264;0.36842;0.68421;1" calcMode="discrete" begin="0s;w1.begin+6s" dur="4.75s" fill="freeze" data-loop="6s"/>
+      </rect>
+      <rect x="60" width="12" height="36" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="72" width="12" height="36" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;48;36;24;36;48;36;24;36;36" keyTimes="0;0.08333;0.29167;0.375;0.5;0.58333;0.79167;0.875;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="72" width="12" height="36" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="84" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="24;36;48;36;24;36;48;36;24;24" keyTimes="0;0.08333;0.16667;0.25;0.33333;0.58333;0.66667;0.75;0.83333;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="84" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="96" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="12;24;36;24;12;24;36;24;12;12" keyTimes="0;0.04167;0.16667;0.33333;0.41667;0.54167;0.66667;0.83333;0.91667;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="96" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="108" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="12;24;36;24;12;24;36;24;12;12" keyTimes="0;0.125;0.20833;0.29167;0.41667;0.625;0.70833;0.79167;0.91667;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="108" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="120" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="12;24;36;24;12;24;36;24;12;12" keyTimes="0;0.125;0.25;0.33333;0.41667;0.625;0.75;0.83333;0.91667;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="120" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="132" width="12" height="36" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="12;24;36;24;12;24;36;24;12;12" keyTimes="0;0.125;0.20833;0.41667;0.5;0.625;0.70833;0.91667;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="132" width="12" height="36" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="144" width="12" height="48" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="24;36;48;36;24;36;48;36;24;24" keyTimes="0;0.20833;0.29167;0.375;0.5;0.70833;0.79167;0.875;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="144" width="12" height="48" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="156" width="12" height="48" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;36;48;36;24;36;48;36;36" keyTimes="0;0.08333;0.16667;0.25;0.45833;0.58333;0.66667;0.75;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="156" width="12" height="48" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="168" width="12" height="48" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;48;36;48;36;36" keyTimes="0;0.25;0.5;0.75;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="168" width="12" height="48" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="180" width="12" height="48" fill="url(#p2)" class="dm">
+        <animate id="w2" attributeName="height" values="48;36;24;36;48;36;24;36;48" keyTimes="0;0.05264;0.15789;0.26315;0.36842;0.68421;0.78947;0.89473;1" calcMode="discrete" begin="0s;w2.begin+6s" dur="4.75s" fill="freeze" data-loop="6s"/>
+      </rect>
+      <rect x="180" width="12" height="48" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="192" width="12" height="36" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;36;48;36;24;36;48;36;36" keyTimes="0;0.08333;0.29167;0.375;0.5;0.58333;0.79167;0.875;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="192" width="12" height="36" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="204" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;12;24;36;24;12;24;36;36" keyTimes="0;0.08333;0.16667;0.29167;0.375;0.58333;0.66667;0.79167;0.875;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="204" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="216" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;12;24;36;24;12;24;36;36" keyTimes="0;0.04167;0.125;0.33333;0.45833;0.54167;0.625;0.83333;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="216" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="228" width="12" height="12" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;12;24;36;24;12;24;36;36" keyTimes="0;0.04167;0.16667;0.375;0.5;0.54167;0.66667;0.875;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="228" width="12" height="12" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="240" width="12" height="12" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;12;24;36;24;12;24;36;36" keyTimes="0;0.125;0.20833;0.375;0.45833;0.625;0.70833;0.875;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="240" width="12" height="12" fill="url(#p2)" class="ds" display="none"/>
+      <rect x="252" width="12" height="24" fill="url(#p2)" class="dm">
+        <animate attributeName="height" values="36;24;36;24;36;36" keyTimes="0;0.20833;0.45833;0.70833;0.95833;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="252" width="12" height="24" fill="url(#p2)" class="ds" display="none"/>
     </g>
   </g>
   <rect x="24" y="248" width="220" height="7" rx="3.5" fill="var(--base02)"/>

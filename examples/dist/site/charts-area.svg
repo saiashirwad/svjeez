@@ -3,7 +3,11 @@
   <desc id="d">An orange area of median review hours wipes on from week 1 to week 12, its dots popping in as the line reaches them. A dashed line then marks week 8, where a review bot ships and the hours fall from about 26 to 7.</desc>
   <defs>
     <clipPath id="c1">
-      <rect x="64" y="68" width="372" height="188" class="a m2"/>
+      <rect x="64" y="68" width="372" height="188" class="dm">
+        <animate id="w1" attributeName="width" values="0;372" keyTimes="0;1" begin="0.8s;w1.begin+8s" dur="2.4s" fill="freeze" data-loop="8s"/>
+        <set attributeName="width" to="0" begin="0s;w1.begin+7.2s" dur="0.8s" fill="freeze" data-loop="8s"/>
+      </rect>
+      <rect x="64" y="68" width="372" height="188" class="ds" display="none"/>
     </clipPath>
     <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="var(--base09)" stop-opacity="0.4"/>
@@ -21,46 +25,44 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,2.5%{opacity:0}8.75%,100%{opacity:1}}
 .m1{animation-name:k1}
-@keyframes k2{0%,10%{width:0px}40%,100%{width:372px}}
+@keyframes k2{0%,10%{stroke-dashoffset:1;visibility:hidden}40%,100%{stroke-dashoffset:0;visibility:visible}}
 .m2{animation-name:k2;animation-timing-function:linear}
-@keyframes k3{0%,10%{stroke-dashoffset:1;visibility:hidden}40%,100%{stroke-dashoffset:0;visibility:visible}}
-.m3{animation-name:k3;animation-timing-function:linear}
-@keyframes k4{0%,10%{scale:0}13.75%,100%{scale:1}}
+@keyframes k3{0%,10%{scale:0}13.75%,100%{scale:1}}
+.m3{animation-name:k3;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k4{0%,12.491%{scale:0}16.241%,100%{scale:1}}
 .m4{animation-name:k4;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k5{0%,12.491%{scale:0}16.241%,100%{scale:1}}
+@keyframes k5{0%,15.163%{scale:0}18.913%,100%{scale:1}}
 .m5{animation-name:k5;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k6{0%,15.163%{scale:0}18.913%,100%{scale:1}}
+@keyframes k6{0%,17.658%{scale:0}21.408%,100%{scale:1}}
 .m6{animation-name:k6;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k7{0%,17.658%{scale:0}21.408%,100%{scale:1}}
+@keyframes k7{0%,20.147%{scale:0}23.897%,100%{scale:1}}
 .m7{animation-name:k7;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k8{0%,20.147%{scale:0}23.897%,100%{scale:1}}
+@keyframes k8{0%,22.818%{scale:0}26.568%,100%{scale:1}}
 .m8{animation-name:k8;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k9{0%,22.818%{scale:0}26.568%,100%{scale:1}}
+@keyframes k9{0%,25.307%{scale:0}29.057%,100%{scale:1}}
 .m9{animation-name:k9;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k10{0%,25.307%{scale:0}29.057%,100%{scale:1}}
+@keyframes k10{0%,29.849%{scale:0}33.599%,100%{scale:1}}
 .m10{animation-name:k10;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k11{0%,29.849%{scale:0}33.599%,100%{scale:1}}
+@keyframes k11{0%,32.756%{scale:0}36.506%,100%{scale:1}}
 .m11{animation-name:k11;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k12{0%,32.756%{scale:0}36.506%,100%{scale:1}}
+@keyframes k12{0%,35.252%{scale:0}39.002%,100%{scale:1}}
 .m12{animation-name:k12;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k13{0%,35.252%{scale:0}39.002%,100%{scale:1}}
+@keyframes k13{0%,37.627%{scale:0}41.377%,100%{scale:1}}
 .m13{animation-name:k13;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k14{0%,37.627%{scale:0}41.377%,100%{scale:1}}
+@keyframes k14{0%,40%{scale:0}43.75%,100%{scale:1}}
 .m14{animation-name:k14;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k15{0%,40%{scale:0}43.75%,100%{scale:1}}
-.m15{animation-name:k15;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k16{0%,40%{opacity:0}45%,100%{opacity:1}}
-@keyframes k17{0%,40%{translate:-8px 0px}45%,100%{translate:0px 0px}}
-.m16{animation-name:k16,k17}
-@keyframes k18{0%,45%{opacity:0}52.5%,100%{opacity:1}}
-@keyframes k19{0%,45%{translate:0px -6px}52.5%,100%{translate:0px 0px}}
-.m17{animation-name:k18,k19}
-@keyframes k20{0%,50%{opacity:0}57.5%,100%{opacity:1}}
-@keyframes k21{0%,50%{translate:0px 6px}57.5%,100%{translate:0px 0px}}
-.m18{animation-name:k20,k21}
-@keyframes k22{0%,93.75%{opacity:1}100%{opacity:0}}
-.m19{animation-name:k22}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-7s!important;animation-play-state:paused!important}}
+@keyframes k15{0%,40%{opacity:0}45%,100%{opacity:1}}
+@keyframes k16{0%,40%{translate:-8px 0px}45%,100%{translate:0px 0px}}
+.m15{animation-name:k15,k16}
+@keyframes k17{0%,45%{opacity:0}52.5%,100%{opacity:1}}
+@keyframes k18{0%,45%{translate:0px -6px}52.5%,100%{translate:0px 0px}}
+.m16{animation-name:k17,k18}
+@keyframes k19{0%,50%{opacity:0}57.5%,100%{opacity:1}}
+@keyframes k20{0%,50%{translate:0px 6px}57.5%,100%{translate:0px 0px}}
+.m17{animation-name:k19,k20}
+@keyframes k21{0%,93.75%{opacity:1}100%{opacity:0}}
+.m18{animation-name:k21}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g class="sans">
     <rect x="0.5" y="0.5" width="503" height="339" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
@@ -70,7 +72,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
     <circle cx="56.5" cy="20.5" r="5.5" fill="var(--base0B)"/>
     <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">area.tsx</text>
   </g>
-  <g class="a m19">
+  <g class="a m18">
     <g class="a m1">
       <g>
         <g stroke-opacity="0.25">
@@ -132,27 +134,27 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
         <path d="M64,93.1C75.3,86.8,86.5,80.5,97.8,80.5C109.1,80.5,120.3,99.3,131.6,99.3C142.9,99.3,154.2,91,165.5,86.8C176.8,82.6,188,74.3,199.3,74.3C210.6,74.3,221.8,87.9,233.1,93.1C244.4,98.3,255.6,97.3,266.9,105.6C278.2,113.9,289.4,148.4,300.7,162C312,175.6,323.2,180.8,334.5,187.1C345.8,193.4,357.1,196.5,368.4,199.6C379.7,202.7,390.9,203.8,402.2,205.9C413.5,208,424.7,210,436,212.1L436,256C424.7,256,413.5,256,402.2,256C390.9,256,379.7,256,368.4,256C357.1,256,345.8,256,334.5,256C323.2,256,312,256,300.7,256C289.4,256,278.2,256,266.9,256C255.6,256,244.4,256,233.1,256C221.8,256,210.6,256,199.3,256C188,256,176.8,256,165.5,256C154.2,256,142.9,256,131.6,256C120.3,256,109.1,256,97.8,256C86.5,256,75.3,256,64,256Z" fill="url(#g1)"/>
       </g>
       <g>
-        <path d="M64,93.1C75.3,86.8,86.5,80.5,97.8,80.5C109.1,80.5,120.3,99.3,131.6,99.3C142.9,99.3,154.2,91,165.5,86.8C176.8,82.6,188,74.3,199.3,74.3C210.6,74.3,221.8,87.9,233.1,93.1C244.4,98.3,255.6,97.3,266.9,105.6C278.2,113.9,289.4,148.4,300.7,162C312,175.6,323.2,180.8,334.5,187.1C345.8,193.4,357.1,196.5,368.4,199.6C379.7,202.7,390.9,203.8,402.2,205.9C413.5,208,424.7,210,436,212.1" fill="none" stroke="var(--base09)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
-        <circle cx="64" cy="93.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m4 fb"/>
-        <circle cx="97.8" cy="80.5" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m5 fb"/>
-        <circle cx="131.6" cy="99.3" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m6 fb"/>
-        <circle cx="165.5" cy="86.8" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m7 fb"/>
-        <circle cx="199.3" cy="74.3" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m8 fb"/>
-        <circle cx="233.1" cy="93.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m9 fb"/>
-        <circle cx="266.9" cy="105.6" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m10 fb"/>
-        <circle cx="300.7" cy="162" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m11 fb"/>
-        <circle cx="334.5" cy="187.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m12 fb"/>
-        <circle cx="368.4" cy="199.6" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m13 fb"/>
-        <circle cx="402.2" cy="205.9" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m14 fb"/>
-        <circle cx="436" cy="212.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m15 fb"/>
-        <text x="447" y="215.6" font-size="10" fill="var(--base09)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m16">median</text>
+        <path d="M64,93.1C75.3,86.8,86.5,80.5,97.8,80.5C109.1,80.5,120.3,99.3,131.6,99.3C142.9,99.3,154.2,91,165.5,86.8C176.8,82.6,188,74.3,199.3,74.3C210.6,74.3,221.8,87.9,233.1,93.1C244.4,98.3,255.6,97.3,266.9,105.6C278.2,113.9,289.4,148.4,300.7,162C312,175.6,323.2,180.8,334.5,187.1C345.8,193.4,357.1,196.5,368.4,199.6C379.7,202.7,390.9,203.8,402.2,205.9C413.5,208,424.7,210,436,212.1" fill="none" stroke="var(--base09)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+        <circle cx="64" cy="93.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m3 fb"/>
+        <circle cx="97.8" cy="80.5" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m4 fb"/>
+        <circle cx="131.6" cy="99.3" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m5 fb"/>
+        <circle cx="165.5" cy="86.8" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m6 fb"/>
+        <circle cx="199.3" cy="74.3" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m7 fb"/>
+        <circle cx="233.1" cy="93.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m8 fb"/>
+        <circle cx="266.9" cy="105.6" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m9 fb"/>
+        <circle cx="300.7" cy="162" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m10 fb"/>
+        <circle cx="334.5" cy="187.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m11 fb"/>
+        <circle cx="368.4" cy="199.6" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m12 fb"/>
+        <circle cx="402.2" cy="205.9" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m13 fb"/>
+        <circle cx="436" cy="212.1" r="3" fill="var(--base09)" stroke="var(--base00)" stroke-width="2" class="a m14 fb"/>
+        <text x="447" y="215.6" font-size="10" fill="var(--base09)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m15">median</text>
       </g>
     </g>
-    <g class="a m17">
+    <g class="a m16">
       <line x1="300.727" y1="68" x2="300.727" y2="256" stroke="var(--base03)" stroke-width="1.5" stroke-dasharray="4 4"/>
       <text x="308.727" y="80" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--base05)">bot ships</text>
     </g>
-    <g class="a m18">
+    <g class="a m17">
       <text x="252" y="314" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" text-anchor="middle" fill="var(--base03)">c.area(points, { curve: "monotone" })</text>
     </g>
   </g>

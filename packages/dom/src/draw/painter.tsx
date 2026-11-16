@@ -20,6 +20,7 @@ import type { Box, Face, Item, Paint, Pair, Shadow, TextRun, Vector } from "../t
 import { typefaces } from "./faces.ts";
 import {
   borderRing,
+  outlineRing,
   matrix,
   paddingBox,
   rounded,
@@ -237,17 +238,21 @@ export const painter = (
     )
       return <g animation={slideIn(tween, dx, dy)}>{item(b)}</g>;
 
+    // Glyphs one over the other read as noise, so text and icons leave before the new ones come in.
+    const [out, into] =
+      a.kind === "box" ? (["swapOut", "swapIn"] as const) : (["textOut", "textIn"] as const);
+
     return (
       <>
         <g
           animation={[
             motion({ x: 0, y: 0 }).at(tween.at).to({ x: -dx, y: -dy }, tween.over, tween.ease),
-            fade(tween, "swapOut"),
+            fade(tween, out),
           ]}
         >
           {item(a)}
         </g>
-        <g animation={[slideIn(tween, dx, dy), fade(tween, "swapIn")]}>{item(b)}</g>
+        <g animation={[slideIn(tween, dx, dy), fade(tween, into)]}>{item(b)}</g>
       </>
     );
   };
@@ -616,18 +621,23 @@ export const painter = (
         {insetShadows(b, padding, a, tween)}
         {layer(b, a, tween, (x) => x.border?.color, borderRing, { fillRule: "evenodd" })}
         {clip ? <g clipPath={clip}>{kids}</g> : kids}
+        {layer(b, a, tween, (x) => x.outline?.color, outlineRing, { fillRule: "evenodd" })}
       </>
     );
 
     // A box with nothing of its own to apply adds no group: deep pages nest hundreds of plain wrappers.
-    if (motions.length === 0 && b.opacity >= 1) return transformed(b, drawn);
+    const dim = b.darkOpacity !== undefined && !opacity;
 
-    return transformed(
-      b,
-      <g opacity={!opacity && b.opacity < 1 ? b.opacity : undefined} animation={motions}>
-        {drawn}
-      </g>,
-    );
+    if (motions.length === 0 && b.opacity >= 1 && !dim) return transformed(b, drawn);
+
+    // Faded in one scheme only: the opacity is a variable that follows the viewer's scheme, as colors are.
+    const faded = dim
+      ? v({ light: String(b.opacity), dark: String(b.darkOpacity) })
+      : !opacity && b.opacity < 1
+        ? b.opacity
+        : undefined;
+
+    return transformed(b, jsx("g", { opacity: faded, animation: motions, children: drawn }));
   };
 
   /** The rules that define the variables drawn so far, and the page's fonts svjeez doesn't embed itself. */

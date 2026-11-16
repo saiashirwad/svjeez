@@ -30,7 +30,7 @@ interface Spec {
   readonly collidesWith?: readonly string[];
   /** Tags where this lane always lands on a wrapper (WebKit ignores fill-box on bare <text>). */
   readonly wrapsOn?: readonly Tag[];
-  /** How the lane is animated when CSS would not do: `blur` through a filter, `d` through SMIL, which Safari animates and CSS `d` does not. */
+  /** How the lane is animated when CSS would not do: `blur` through a filter, `d`, `width` and `height` through SMIL, since CSS `d` is not animated in Safari and CSS geometry is not applied in Firefox. */
   readonly backend?: "blur" | "smil";
   /** A hard 0/1 cut compiles to `visibility` when the element sets none of these attributes. */
   readonly toggles?: readonly string[];
@@ -44,6 +44,7 @@ export const CHANNELS = {
     composition: "replace",
     attr: "width",
     range: [0, Infinity],
+    backend: "smil",
   },
   height: {
     value: number,
@@ -52,6 +53,7 @@ export const CHANNELS = {
     composition: "replace",
     attr: "height",
     range: [0, Infinity],
+    backend: "smil",
   },
   opacity: {
     value: number,

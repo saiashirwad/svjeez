@@ -62,6 +62,16 @@ export const borderRing = (b: Box): PathData => {
   return `${rounded(b.box, b.radii)}${rounded(inner.rect, inner.radii)}`;
 };
 
+/** An outline: the ring `width` thick that starts `offset` outside the border box, with the corners grown to match. */
+export const outlineRing = (b: Box): PathData => {
+  const o = b.outline;
+
+  // Without one, a ring of nothing, so it can grow from or fade into another box's.
+  if (!o) return `${rounded(b.box, b.radii)}${rounded(b.box, b.radii)}`;
+
+  return `${rounded(grow(b.box, o.offset + o.width), growRadii(b.radii, o.offset + o.width))}${rounded(grow(b.box, o.offset), growRadii(b.radii, o.offset))}`;
+};
+
 /** Everything a shadow can paint: its shape plus three standard deviations of blur. */
 export const shadowBounds = (b: Box, i: number): Rect => {
   const s = b.shadows[i]!;

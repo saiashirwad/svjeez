@@ -3,13 +3,25 @@
   <desc id="d">Three svjeez commands typed into a terminal: frames, svg and skill, each with its output.</desc>
   <defs>
     <clipPath id="c1">
-      <rect x="24" y="62" width="0" height="21.875" class="a m1"/>
+      <rect x="24" y="62" width="337.5" height="21.875" class="dm">
+        <animate id="w1" attributeName="width" values="0;7.5;15;22.5;30;37.5;45;52.5;60;67.5;75;82.5;90;97.5;105;112.5;120;127.5;135;142.5;150;157.5;165;172.5;180;187.5;195;202.5;210;217.5;225;232.5;240;247.5;255;262.5;270;277.5;285;292.5;300;307.5;315;322.5;330;337.5" keyTimes="0;0.02226;0.04438;0.06664;0.0889;0.11116;0.13328;0.15554;0.1778;0.19992;0.22218;0.24444;0.26669;0.28881;0.31107;0.33333;0.35559;0.37771;0.39997;0.42223;0.44435;0.46661;0.48887;0.51113;0.53325;0.55551;0.57777;0.60003;0.62215;0.64441;0.66667;0.68879;0.71105;0.73331;0.75556;0.77768;0.79994;0.8222;0.84446;0.86658;0.88884;0.9111;0.93336;0.95548;0.97774;1" calcMode="discrete" begin="0.5s;w1.begin+7s" dur="0.5s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w1.begin+6.5s" dur="0.5s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="24" y="62" width="337.5" height="21.875" class="ds" display="none"/>
     </clipPath>
     <clipPath id="c2">
-      <rect x="24" y="171.375" width="0" height="21.875" class="a m10"/>
+      <rect x="24" y="171.375" width="315" height="21.875" class="dm">
+        <animate id="w2" attributeName="width" values="0;7.5;15;22.5;30;37.5;45;52.5;60;67.5;75;82.5;90;97.5;105;112.5;120;127.5;135;142.5;150;157.5;165;172.5;180;187.5;195;202.5;210;217.5;225;232.5;240;247.5;255;262.5;270;277.5;285;292.5;300;307.5;315" keyTimes="0;0.02385;0.0477;0.0714;0.09525;0.11909;0.14294;0.16664;0.19049;0.21434;0.23819;0.26189;0.28574;0.30958;0.33343;0.35713;0.38098;0.40483;0.42853;0.45238;0.47623;0.50007;0.52377;0.54762;0.57147;0.59532;0.61902;0.64287;0.66672;0.69042;0.71426;0.73811;0.76196;0.78566;0.80951;0.83336;0.85721;0.88091;0.90475;0.9286;0.9523;0.97615;1" calcMode="discrete" begin="1.94s;w2.begin+7s" dur="0.4667s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w2.begin+5.06s" dur="1.94s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="24" y="171.375" width="315" height="21.875" class="ds" display="none"/>
     </clipPath>
     <clipPath id="c3">
-      <rect x="24" y="193.25" width="0" height="21.875" class="a m14"/>
+      <rect x="24" y="193.25" width="210" height="21.875" class="dm">
+        <animate id="w3" attributeName="width" values="0;7.5;15;22.5;30;37.5;45;52.5;60;67.5;75;82.5;90;97.5;105;112.5;120;127.5;135;142.5;150;157.5;165;172.5;180;187.5;195;202.5;210" keyTimes="0;0.03578;0.07133;0.10711;0.14289;0.17867;0.21422;0.25;0.28578;0.32156;0.35711;0.39289;0.42867;0.46422;0.5;0.53578;0.57156;0.60711;0.64289;0.67867;0.71445;0.75;0.78578;0.82156;0.85711;0.89289;0.92867;0.96445;1" calcMode="discrete" begin="3.1067s;w3.begin+7s" dur="0.3111s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w3.begin+3.8933s" dur="3.1067s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="24" y="193.25" width="210" height="21.875" class="ds" display="none"/>
     </clipPath>
   </defs>
   <style><![CDATA[
@@ -20,46 +32,40 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 
 @font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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AlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAZAJYAGQCWABkAlgAZAJYAF8CWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAXQJYAAoCWABdAlgAaQJYAGkCWABpAlgAaQJYAGkCWABpAlgAaQJYAGkCWABpAlgAaQJYAGkCWABpAlgALQJYAC0CWABcAlgAXAJYAHMCWABnAlgAcwJYAHMCWABzAlgAFAJYAEwCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAIwJYACMCWABYAlgAKAJYAFwCWABaAlgAUAJYAFwCWABcAlgAXAJYAFwCWABIAlgASAJYAEgCWABIAlgASAJYAEgCWABcAlgAWgJYADcCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYADICWAAZAlgAGQJYABkCWAAZAlgAGQJYACgCWAAjAlgAIwJYACMCWAAjAlgAIwJYACMCWAAjAlgAIwJYACMCWABVAlgAVQJYAFUCWABVAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWABBAlgAQQJYAEECWAAjAlgAIwJYAFwCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgARgJYAD8CWABaAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFgCWABVAlgAWgJYADwCWABYAlgAWAJYAFgCWABYAlgAWAJYAFgCWABYAlgAXAJYAAACWP/hAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAF8CWABfAlgAYQJYAB4CWAAeAlgAHgJYAB4CWAAKAlgAHgJYAEICWABcAlgAXAJYAAACWABcAlgAXAJYAF4CWABcAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABVAlgAWAJYACMCWAAjAlgAVQJYACMCWABcAlgAVwJYAFgCWABvAlgAbwJYAG8CWAAZAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAXAJYAKUCWAA3AlgANwJYADcCWAA3AlgANwJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWABaAlgAWgJYAFoCWAA3AlgAIwJYACMCWAAjAlgAIwJYACMCWAAyAlgANwJYADcCWAA3AlgANwJYADcCWAA3AlgANwJYADcCWAA3AlgAWgJYAFoCWABaAlgAWgJYAK8CWAC5AlgAMgJYAF4CWABdAlgAbgJYAG4CWABuAlgAGQJYAGQCWABkAlgADAJYADUCWABaAlgAWgJYAFwCWABcAlgAFAJYAEwCWABdAlgAWAJYAF4CWABcAlgAWAJYADcCWAAyAlgAMgJYADYCWAAoAlgASwJYAF4CWABAAlgAQAJYAF4CWABeAlj/+wJYAEECWP/7AlgANQJYAEgCWABaAlgAVAJYAGkCWABpAlgALQJYAAACWAA8AlgAOAJYAAACWAAjAlgAWgJYAEECWABaAlgAXgJYAIICWACCAlgAggJYAB4CWABVAlgAVQJYABICWABBAlgAXgJYAF4CWABhAlgAYQJYABkCWABMAlgAXgJYAFUCWABeAlgAXAJYAFMCWAA3AlgANwJYADcCWAA2AlgAMgJYAE4CWABeAlgAQAJYAEACWABeAlgAYgJYAAACWABBAlgABQJYAEACWABaAlgAWgJYAFQCWABVAlgAVQJYAFUCWAAAAlgAPgJYADwCWAAAAlgAPAJYAFoCWAAyAlgAXQJYAG4CWAAyAlgAZAJYAFUCWABdAlgAWAJYAGkCWABcAlgAMgJYAEwCWABaAlgAUAJYAFgCWABeAlgAXAJYADcCWAA3AlgAIwJYADYCWAAoAlgANgJYADICWAAKAlj/jQJY/40CWP+NAlj/sAJY/4MCWP+wAlgAaQJYACMCWABcAlgAWgJYAFwCWAA8AlgARgJYAFACWABEAlgAXAJYAFgCWAA3AlgAYQJYADICWABdAlgANwJYAEICWABVAlgAGQJYAF4CWABYAlgAWAJYADcCWABaAlgANwJYACgCWAA2AlgANwJYADcCWAA3AlgANwJYAFoCWABaAlgAWgJYAFUCWAA3AlgAWgJYAFACWABcAlgAXgJYAFoCWABQAlgAWgJYAEgCWABGAlgAUAJYAFUCWABEAlgAUAJYAFACWABEAlgAkQJYAJsCWACXAlgAiAJYAJICWACJAlgAkQJYAJsCWACWAlgAkgJYAJECWACbAlgAlwJYAIgCWACSAlgAiQJYAJECWACbAlgAlgJYAJICWABaAlgAHgJYAB4CWAAaAlgA2QJYAKUCWADZAlgAqgJYADwCWADhAlgA4QJYAIcCWABuAlgA2QJYALQCWAAjAlgAIwJYANkCWABLAlgASwAA/xkAAP94AlgAuQJYAHMCWABVAlgAVQJYAM0CWACWAlgAbgJYAJYCWABpAlgAkwJYAIwCWACMAlgAUAJYAAACWACMAlgAPAJYAKUCWABVAlgASwJYAFUCWADmAlgAoAJYAB4CWAAeAlgAkwJYAJMCWACWAlgA9gJY/jQCWPvcAlj7pgJY/lwCWP39Alj7pQJY/f0CWPulAlj+EQJY/kMCWP67Alj5/AJY/o4CWP4+Alj+0wJY/I8CWPxwAlj+gQJY/lwCWP7RAlj8yQJY/EQCWP6zAlj8LAJY/lICWP6BAlj+gQJY/qICWP7FAlj9+AJY+6ACWP6VAlj+lQJY/mECWP5XAlj7mwJY/cUCWP39Alj9ywJY/csCWP3LAlj9ywJY/csCWP3LAlj96QJY+5ECWPk5Alj9ywJY/csCWPtzAlj98wJY/hECWPugAlj+FgJY/j4CWPv6Alj8EwJY/CICWP3kAlgAfQJYAHMCWADZAlgAqgJYAAACWAAAAlgAAAAAAAACWABdAlgAVQJYACsCWABIAlgAWgJYABMCWAAAAlgAHgJYAEsCWAAtAlgAIwJYANkCWAAoAlgA/wJYAFoCWAAjAlgAUAJYAFACWABBAlgAIwJYACMCWAAjAlgAHgJYAEECWACMAlgAaQJYAGQCWABVAlgAVQJYAFUCWABVAlgAVQJYAFUCWABBAlgAQQJYAEECWABGAlgAUAJYACMCWAA8AlgAPAJYAAACWAAoAlgANwJYAB4CWABaAlgAWgJYAJsCWAAOAlj/+AJYAKACWAA3AlgAIwJYAB4CWAC0AlgAQQJYACMCWAAjAlgAHgJYADICWAAKAlgACgJYACgCWAAKAlgACgJYAC0CWAAoAlgALQJY/7ACWAAKAlgADwJYAAoEsAAoBLAAHgSwACgCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJYASwCWAINAlj/9gJYASwCWP/2Alj/9gJY//YCWP/2Alj/9gJYASwCWP/2Alj/9gJYADwCWAAAAlgAAAJY//YCWP/2Alj/9gJY//YCWP/2Alj/9gJY//YCWP/2AlgAPAJYAAACWAAAAlgAlgJYAJYCWAAAAlgAAAJYAAACWAAAAlgAAAJY//YCWAAAAlj/9gJY//YCWP/2AlgAAAJY//YCWP/2AlgAAAJY//YCWAAAAlj/9gJYAJYCWACWAlgAlgJYAIwCWACWAlgAlgJYAJYCWACMAlj/7AJY/+wCWACWAlj/7AJY/+wCWP/sAlgAlgJYAJYCWP/sAlj/7AJYAJYCWP/sAlj/7AJYAJYCWP/sAlj/7AJY/+wCWADIAlgAyAJY/+wCWP/sAlj/7AJY/+wCWAD6AlgAyAJY/+wCWP/sAlj/7AJYAPoCWABLAlgAyAJYAMgCWP/sAlj/7AJYAMgCWP/sAlj/7AJY/+wCWAAZAlgAyAJYAPoCWAAlAlgAyAJYAMgCWP/sAlj/7AJYAMgCWADIAlgAyAJY/+wCWP/sAlgAyAJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJYAPoCWP/sAlgA+gJY/+wCWP/sAlj/7AJYAEYCWAD6AlgA+gJY/+wCWP/sAlgA+gJY/+wCWP/sAlj/7AJYABkCWAD6AlgA+gJYACUCWAD6AlgA+gJYAMgCWP/sAlj/7AJYAPoCWAD6Alj/7AJY/+wCWAD6Alj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJY/+wCWP/sAlj/7AJYAJYCWP/sAlj/7AJY/+wCWP/sAlgAyAJYAMgCWP/sAlj/7AJY/+wCWP/sAlgAyAJYAPoCWP/sAlj/7AJYAPoCWP/sAlj/7AJYAJYCWP/sAlj/7AJYAMgCWP/sAlj/7AJYAPoCWP/sAlj/7AJYAPoCWABeAlj/9gJYABQCWABCAlgALQJYADcCWABBAlgATQJYAC0CWAAtAlgADwJYAJYCWAClAlgAVQJYAP8CWAD/AlgAUAJYAEYCWABQAlgAHgJYADwCWAA8AlgAUQJYAAoCWAAPAlj/7AJY/+wCWP/sAlgA9QJYAAYCWAA8AlgAtAJYAIwCWP3VAlj9/QJY+8MCWP4RAlj+pwJY+9ICWP67Alj+uwJY/uMCWPykAlj6yQJY/KQCWPzWAlj+pwJY+9ICWP67Alj+EwJY/iACWPv/Alj92gJY+6ACWPugAlj9+AJY+6ACWPulAlj9/QJY+6UCWPulAlj7jAJY/gwCWPuzAlj+YQJY/okCWP7PAlj7swJY/ioCWPuzAlj7swJY/G0CWP3zAlj7mwJY+5sCWPubAlj7mwJY/okCWPlDAlj97gJY+7QCWP6YAlj8dwJY+n4CWPvmAlj+BwJY+74CWPlDAlj97gJY+7QCWP7PAlj7mwJY+5sCWPlDAlj7mwJY+5sCWP40Alj+RwJY+5sCWPubAlj79QJY/fMCWPu0Alj7mwJY/ioCWPv1Alj+EQJY/ekCWP3uAlj+VwJY+5YCWP45AlgApQJYAKUCWAClAlgANwJYAIwCWAClAAAAfQAAAOUAAAC2AAAA1AAAAJMAAAG9AAAAdwAAAHcAAACMAAAAtAAAAIwAAACMAAAA0gAAAEgAAADSAAD/oAAAAOUAAAC0AAAAvgAAAM0AAAC5AAD9igAAAHgCWAB9AlgA5QJYALYCWADUAlgAkwJYAHcCWAB3AlgAjAJYALQCWACMAlgAjAJYAM0CWAC5AAAAfQAAAOUAAAC2AAAA1AAAAJMAAAB3AAAAdwAAAIwAAAC0AAAAjAAAAIwAAADSAAAASAAAANIAAAFzAAAA5QAAAL4AAADNAAAAuQJYAH0CWADlAlgAtgJYANQCWACTAlgAdwJYAHcCWACMAlgAtAJYAIwCWACMAlgA1AJYAOECWAB9AAAAggAAAIIAAACCAAAAjAAAAHgAAAB4AAAAeAAAAHgAAACHAAAAhwAAAIcAAACHAAAAeAAAAHgAAAB4AAAAeAJYAFoAaQAyAAAAAAAAAAAAAAAAAAAAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAGgAaABoAUgBSAFIAUgBSAFIAUgBSAFIAUgBSAFIAUgBSAFIAUgBSAFIAUgBSAFIAUgBSAFIAUgBSAIAAgACAAIAAgACAALYAtgC2ALYA7ADsAOwA7ADsAOwA7ADsAOwA7ADsAOwA7ADsAOwA7ADsAOwA7AEKAUgBSAFIAUgBSAFIAUgBbAFsAWwBeAGMAYwBjAGMAYwBjAGMAYwBjAGMAYwBjAGYAbABsAHIAcgByAHiAeIB4gHiAeIB4gIaAjwCPAI8AjwCPAI8AjwCbAJsAmwCbAJsAmwCbAJsAmwCbAJsAmwCbAJsAmwCbAJsAmwCbAJsAmwCbAJsAmwCbAJsAqICogKiAsQCxALEAsQDBgMGAwYDBgMGAwYDBgMGAyIDIgMiAyIDIgNAA0ADQANAA0ADQANAA0ADQANAA0ADQANAA0ADQANAA0ADQANAA1wDXANcA1wDXANcA4gDiAOIA4gDiAOIA4gDiAOIA4gDngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA54DngOeA+AD9AQeBEwEZASYBJgEmASYBJgEmASYBJgEmASYBJgEmASYBJgEmASYBJgEmASYBJgEmASYBJgEmASYBJgEmASYBJgErgS8BLwEvAS8BLwEvAS8BLwEvAS8BLwEvAS8BMwEzATMBMwEzATMBMwEzATMBMwEzATeBN4E6gT4BPgE+AT4BPgFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgUuBS4FLgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYFRgVGBUYAAQAABI8BuABuALQABgABAAAAAAAAAAAAAAAAAAMAAgAAAAwAlgADAAEECQAAALwBLgADAAEECQABABwBEgADAAEECQACAA4BBAADAAEECQADADwAyAADAAEECQAEACwAnAADAAEECQAFABoAggADAAEECQAGACoAWAADAAEECQAOADYAIgADAAEECQEAAAwAFgADAAEECQEEAA4BBAADAAEECQEPAAwACgADAAEECQEQAAoAAABSAG8AbQBhAG4ASQB0AGEAbABpAGMAVwBlAGkAZwBoAHQAaAB0AHQAcABzADoALwAvAHMAYwByAGkAcAB0AHMALgBzAGkAbAAuAG8AcgBnAC8ATwBGAEwASgBlAHQAQgByAGEAaQBuAHMATQBvAG4AbwAtAFIAZQBnAHUAbABhAHIAVgBlAHIAcwBpAG8AbgAgADIALgAyADEAMQBKAGUAdABCAHIAYQBpAG4AcwAgAE0AbwBuAG8AIABSAGUAZwB1AGwAYQByADIALgAyADEAMQA7AEoAQgA7AEoAZQB0AEIAcgBhAGkAbgBzAE0AbwBuAG8ALQBSAGUAZwB1AGwAYQByAFIAZQBnAHUAbABhAHIASgBlAHQAQgByAGEAaQBuAHMAIABNAG8AbgBvAEMAbwBwAHkAcgBpAGcAaAB0ACAAMgAwADIAMAAgAFQAaABlACAASgBlAHQAQgByAGEAaQBuAHMAIABNAG8AbgBvACAAUAByAG8AagBlAGMAdAAgAEEAdQB0AGgAbwByAHMAIAAoAGgAdAB0AHAAcwA6AC8ALwBnAGkAdABoAHUAYgAuAGMAbwBtAC8ASgBlAHQAQgByAGEAaQBuAHMALwBKAGUAdABCAHIAYQBpAG4AcwBNAG8AbgBvACkAAwAAAAAAAP9lADIAAAABAAAAAAAAAAAAAAAAAAAAALgB/4WwBI0A) format('truetype');font-weight:400;font-style:normal}
 .a{animation-duration:7s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
-@keyframes k1{0%,7.143%{width:0px}14.286%,100%{width:337.5px}}
-.m1{animation-name:k1;animation-timing-function:steps(45)}
-@keyframes k2{0%{opacity:1}50%,100%{opacity:0}}
-.m2{animation-name:k2;animation-duration:1s;animation-timing-function:steps(1)}
-@keyframes k3{0%,14.286%,100%{opacity:0}7.143%{opacity:1}}
-.m3{animation-name:k3;animation-timing-function:steps(1)}
-@keyframes k4{0%,7.143%{translate:0px 0px}14.286%,100%{translate:337.5px 0px}}
-.m4{animation-name:k3,k4;animation-timing-function:steps(1),steps(45)}
-@keyframes k5{0%{opacity:0}19.286%,100%{opacity:1}}
+@keyframes k1{0%{opacity:1}50%,100%{opacity:0}}
+.m1{animation-name:k1;animation-duration:1s;animation-timing-function:steps(1)}
+@keyframes k2{0%,14.286%,100%{opacity:0}7.143%{opacity:1}}
+.m2{animation-name:k2;animation-timing-function:steps(1)}
+@keyframes k3{0%,7.143%{translate:0px 0px}14.286%,100%{translate:337.5px 0px}}
+.m3{animation-name:k2,k3;animation-timing-function:steps(1),steps(45)}
+@keyframes k4{0%{opacity:0}19.286%,100%{opacity:1}}
+.m4{animation-name:k4;animation-timing-function:steps(1)}
+@keyframes k5{0%{opacity:0}20.143%,100%{opacity:1}}
 .m5{animation-name:k5;animation-timing-function:steps(1)}
-@keyframes k6{0%{opacity:0}20.143%,100%{opacity:1}}
+@keyframes k6{0%{opacity:0}21%,100%{opacity:1}}
 .m6{animation-name:k6;animation-timing-function:steps(1)}
-@keyframes k7{0%{opacity:0}21%,100%{opacity:1}}
+@keyframes k7{0%{opacity:0}21.857%,100%{opacity:1}}
 .m7{animation-name:k7;animation-timing-function:steps(1)}
-@keyframes k8{0%{opacity:0}21.857%,100%{opacity:1}}
+@keyframes k8{0%{visibility:hidden}7.143%,100%{visibility:visible}}
 .m8{animation-name:k8;animation-timing-function:steps(1)}
-@keyframes k9{0%{visibility:hidden}7.143%,100%{visibility:visible}}
+@keyframes k9{0%,34.381%,100%{opacity:0}27.714%{opacity:1}}
 .m9{animation-name:k9;animation-timing-function:steps(1)}
-@keyframes k10{0%,27.714%{width:0px}34.381%,100%{width:315px}}
-.m10{animation-name:k10;animation-timing-function:steps(42)}
-@keyframes k11{0%,34.381%,100%{opacity:0}27.714%{opacity:1}}
+@keyframes k10{0%,27.714%{translate:0px 0px}34.381%,100%{translate:315px 0px}}
+.m10{animation-name:k9,k10;animation-timing-function:steps(1),steps(42)}
+@keyframes k11{0%{visibility:hidden}27.714%,100%{visibility:visible}}
 .m11{animation-name:k11;animation-timing-function:steps(1)}
-@keyframes k12{0%,27.714%{translate:0px 0px}34.381%,100%{translate:315px 0px}}
-.m12{animation-name:k11,k12;animation-timing-function:steps(1),steps(42)}
-@keyframes k13{0%{visibility:hidden}27.714%,100%{visibility:visible}}
-.m13{animation-name:k13;animation-timing-function:steps(1)}
-@keyframes k14{0%,44.381%{width:0px}48.825%,100%{width:210px}}
-.m14{animation-name:k14;animation-timing-function:steps(28)}
-@keyframes k15{0%,48.825%,100%{opacity:0}44.381%{opacity:1}}
-.m15{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%{opacity:0}44.381%,100%{opacity:1}}
-@keyframes k17{0%,44.381%{translate:0px 0px}48.825%,100%{translate:210px 0px}}
-.m16{animation-name:k16,k17;animation-timing-function:steps(1),steps(28)}
-@keyframes k18{0%{opacity:0}53.825%,100%{opacity:1}}
-.m17{animation-name:k18;animation-timing-function:steps(1)}
-@keyframes k19{0%{visibility:hidden}44.381%,100%{visibility:visible}}
-.m18{animation-name:k19;animation-timing-function:steps(1)}
-@keyframes k20{0%,92.857%{opacity:1}100%{opacity:0}}
-.m19{animation-name:k20}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}}
+@keyframes k12{0%,48.825%,100%{opacity:0}44.381%{opacity:1}}
+.m12{animation-name:k12;animation-timing-function:steps(1)}
+@keyframes k13{0%{opacity:0}44.381%,100%{opacity:1}}
+@keyframes k14{0%,44.381%{translate:0px 0px}48.825%,100%{translate:210px 0px}}
+.m13{animation-name:k13,k14;animation-timing-function:steps(1),steps(28)}
+@keyframes k15{0%{opacity:0}53.825%,100%{opacity:1}}
+.m14{animation-name:k15;animation-timing-function:steps(1)}
+@keyframes k16{0%{visibility:hidden}44.381%,100%{visibility:visible}}
+.m15{animation-name:k16;animation-timing-function:steps(1)}
+@keyframes k17{0%,92.857%{opacity:1}100%{opacity:0}}
+.m16{animation-name:k17}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
     <g>
@@ -71,9 +77,9 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       <text x="252" y="24.5" font-size="12" text-anchor="middle" fill="var(--base04)">~/hello, zsh</text>
     </g>
   </g>
-  <g class="a m19">
+  <g class="a m16">
     <g>
-      <g class="a m9">
+      <g class="a m8">
         <g>
           <g clip-path="url(#c1)">
             <text x="24" y="77.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0D)">❯</text>
@@ -84,35 +90,35 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
             <text x="249" y="77.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">--times</text>
             <text x="309" y="77.313" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">0,1.5,3</text>
           </g>
-          <g class="a m4">
+          <g class="a m3">
+            <rect x="24" y="65.125" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m1"/>
             <rect x="24" y="65.125" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m2"/>
-            <rect x="24" y="65.125" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m3"/>
           </g>
         </g>
-        <g class="a m5">
+        <g class="a m4">
           <g>
             <text x="24" y="99.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">loop</text>
             <text x="61.5" y="99.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">4s,</text>
             <text x="91.5" y="99.188" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">light</text>
           </g>
         </g>
-        <g class="a m6">
+        <g class="a m5">
           <g>
             <text x="24" y="121.063" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0B)">frames/frame-00-0_000s.png</text>
           </g>
         </g>
-        <g class="a m7">
+        <g class="a m6">
           <g>
             <text x="24" y="142.938" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0B)">frames/frame-01-1_500s.png</text>
           </g>
         </g>
-        <g class="a m8">
+        <g class="a m7">
           <g>
             <text x="24" y="164.813" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0B)">frames/frame-02-3_000s.png</text>
           </g>
         </g>
       </g>
-      <g class="a m13">
+      <g class="a m11">
         <g>
           <g clip-path="url(#c2)">
             <text x="24" y="186.688" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0D)">❯</text>
@@ -123,13 +129,13 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
             <text x="226.5" y="186.688" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">--out</text>
             <text x="271.5" y="186.688" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">hello.svg</text>
           </g>
-          <g class="a m12">
-            <rect x="24" y="174.5" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m2"/>
-            <rect x="24" y="174.5" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m11"/>
+          <g class="a m10">
+            <rect x="24" y="174.5" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m1"/>
+            <rect x="24" y="174.5" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m9"/>
           </g>
         </g>
       </g>
-      <g class="a m18">
+      <g class="a m15">
         <g>
           <g clip-path="url(#c3)">
             <text x="24" y="208.563" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base0D)">❯</text>
@@ -138,12 +144,12 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
             <text x="121.5" y="208.563" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">skill</text>
             <text x="166.5" y="208.563" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base05)">--install</text>
           </g>
-          <g class="a m16">
-            <rect x="24" y="196.375" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m2"/>
-            <rect x="24" y="196.375" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m15"/>
+          <g class="a m13">
+            <rect x="24" y="196.375" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m1"/>
+            <rect x="24" y="196.375" width="7.5" height="15.625" fill="var(--base05)" fill-opacity="0.8" class="a m12"/>
           </g>
         </g>
-        <g class="a m17">
+        <g class="a m14">
           <g>
             <text x="24" y="230.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">installed</text>
             <text x="99" y="230.438" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12.5" fill="var(--base03)">the</text>

@@ -62,6 +62,21 @@ export const timeline = (states: Snapshot | readonly Step[]) => {
   return { snaps, moves, length: cursor };
 };
 
+/**
+ * When each state is at rest, in seconds: the end of its hold, just before the next move starts (or the end of the
+ * move into it when nothing waits). The last state's moment is held a hair inside the end, so a loop hasn't wrapped.
+ */
+export const steady = (states: Snapshot | readonly Step[]): number[] => {
+  const { snaps, moves, length } = timeline(states);
+
+  return snaps.map((_, i) => {
+    const arrived = i === 0 ? 0 : moves[i - 1]!.at + moves[i - 1]!.over;
+    const leaves = moves[i]?.at ?? length;
+
+    return Math.min(Math.max(arrived, leaves - 0.001), Math.max(length, 1) - 0.001);
+  });
+};
+
 /** The picture's size: the largest of the states, so one frame holds them all. */
 export const size = (states: Snapshot | readonly Step[]) => {
   const all = timeline(states).snaps;

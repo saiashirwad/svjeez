@@ -30,7 +30,7 @@ const names = (svg: string) => {
   const classes = [...source.matchAll(/class="([^"]*)"/g)].flatMap((match) => match[1]!.split(" "));
 
   const others = [
-    ...source.matchAll(/(?:id="|url\(#|href="#|@keyframes |\.)([A-Za-z][\w-]*)/g),
+    ...source.matchAll(/(?:id="|url\(#|href="#|@keyframes |(?<![\w-])\.)([A-Za-z][\w-]*)/g),
   ].map((match) => match[1]!);
 
   const animationNames = [...source.matchAll(/animation-name:([^;}]*)/g)].flatMap((match) =>

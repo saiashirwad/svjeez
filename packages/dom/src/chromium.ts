@@ -3,6 +3,7 @@ import type { Font, FontValue } from "svjeez";
 import {
   isCssText,
   type Io,
+  type Shots,
   type PageOptions,
   type Pages,
   type BrowserOptions,
@@ -11,13 +12,15 @@ import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, sources, unwrap } from "./fonts.ts";
 import { Differ, merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
+import { shoot } from "./shot.ts";
 import { walk, type Marks } from "./walk.ts";
 
 type Scheme = "light" | "dark";
 
-const facesOf = (value: FontValue): readonly Font[] => ("faces" in value ? value.faces : [value]);
+export const facesOf = (value: FontValue): readonly Font[] =>
+  "faces" in value ? value.faces : [value];
 
-const launch = async (executablePath?: string): Promise<Chromium> => {
+export const launch = async (executablePath?: string): Promise<Chromium> => {
   const { chromium } = await import("playwright-core").catch(() => {
     throw new Error(
       "@svjeez/dom needs playwright-core. Install it with `npm i -D playwright-core`.",
@@ -169,6 +172,114 @@ const markPseudos = async (session: CDPSession, page: Page) => {
   );
 };
 
+/** The properties of a range input's track and thumb that `surface` reads, to carry from the protocol into the page. */
+const RANGE_STYLE = new Set([
+  "background-color",
+  "background-image",
+  "background-size",
+  "background-position",
+  "background-repeat",
+  "box-shadow",
+  "opacity",
+  "visibility",
+  ...["top-left", "top-right", "bottom-right", "bottom-left"].map(
+    (corner) => `border-${corner}-radius`,
+  ),
+  ...["top", "right", "bottom", "left"].flatMap((side) => [
+    `border-${side}-width`,
+    `border-${side}-style`,
+    `border-${side}-color`,
+  ]),
+]);
+
+/**
+ * A range input's track and thumb are parts of a user-agent shadow tree: the page can't address them, but the
+ * DevTools protocol shows the tree. Their boxes (after any transform) and styles are handed to the page by input,
+ * in a map `walk` reads.
+ */
+const markRanges = async (session: CDPSession, page: Page) => {
+  const { root } = await session.send("DOM.getDocument", { depth: -1, pierce: true });
+
+  type N = typeof root;
+
+  const owners: { id: number; track: N; thumb: N }[] = [];
+
+  const attr = (n: N, name: string) => {
+    const i = (n.attributes ?? []).indexOf(name);
+
+    return i < 0 ? undefined : n.attributes![i + 1];
+  };
+
+  const within = (n: N, test: (x: N) => boolean): N | undefined => {
+    if (test(n)) return n;
+
+    for (const c of [...(n.shadowRoots ?? []), ...(n.children ?? [])]) {
+      const found = within(c, test);
+
+      if (found) return found;
+    }
+
+    return undefined;
+  };
+
+  const visit = (n: N) => {
+    if (n.nodeName === "INPUT" && attr(n, "type") === "range") {
+      const track = within(n, (x) => attr(x, "pseudo") === "-webkit-slider-runnable-track");
+      const thumb = track?.children?.[0];
+
+      if (track && thumb) owners.push({ id: n.nodeId, track, thumb });
+    }
+
+    for (const c of n.children ?? []) visit(c);
+
+    if (n.contentDocument) visit(n.contentDocument);
+  };
+
+  visit(root);
+  await page.evaluate("globalThis.__svjeezRange = new WeakMap()");
+
+  if (owners.length === 0) return;
+  await session.send("CSS.enable");
+
+  const part = async (n: N) => {
+    const [{ model }, { computedStyle }] = await Promise.all([
+      session.send("DOM.getBoxModel", { nodeId: n.nodeId }),
+      session.send("CSS.getComputedStyleForNode", { nodeId: n.nodeId }),
+    ]);
+
+    const xs = model.border.filter((_, i) => i % 2 === 0);
+    const ys = model.border.filter((_, i) => i % 2 === 1);
+
+    return {
+      rect: [
+        Math.min(...xs),
+        Math.min(...ys),
+        Math.max(...xs) - Math.min(...xs),
+        Math.max(...ys) - Math.min(...ys),
+      ],
+      style: Object.fromEntries(
+        computedStyle.filter((p) => RANGE_STYLE.has(p.name)).map((p) => [p.name, p.value]),
+      ),
+    };
+  };
+
+  for (const { id, track, thumb } of owners) {
+    const marks = { track: await part(track), thumb: await part(thumb) };
+    const { object } = await session.send("DOM.resolveNode", { nodeId: id });
+
+    if (!object.objectId) continue;
+
+    await session.send("Runtime.callFunctionOn", {
+      objectId: object.objectId,
+      functionDeclaration: "function (marks) { globalThis.__svjeezRange?.set(this, marks); }",
+      arguments: [{ value: marks }],
+    });
+    await session.send("Runtime.releaseObject", { objectId: object.objectId });
+  }
+
+  await session.send("CSS.disable");
+};
+
 /** A part name, by the `parts` option or `data-part`, found in the page under the root; else a CSS selector. */
 const target = async (
   page: Page,
@@ -266,13 +377,20 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       ] as const);
     };
 
+    let shots: Shots = {};
+
     const pass = async (value: Scheme) => {
       await scheme(value);
       await settle(page, false);
       cdp ??= await page.context().newCDPSession(page);
       await markPseudos(cdp, page);
+      await markRanges(cdp, page);
 
-      return page.evaluate(walk, { selector, pad, parts });
+      const root = await page.evaluate(walk, { selector, pad, parts });
+
+      if (options.screenshots) shots[value] = await shoot(page, selector, root.box, pad);
+
+      return root;
     };
 
     // Light goes last, so the page ends in the scheme it rests in. A live app may still be changing between the two
@@ -293,6 +411,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     await scheme(resting);
 
     const read = async (): Promise<Snapshot> => {
+      shots = {};
       await shim(page);
       await settle(page, true);
 
@@ -344,6 +463,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
     return {
       read,
+      shots: () => shots,
       act,
       drive: async (fn) => {
         await fn(page);

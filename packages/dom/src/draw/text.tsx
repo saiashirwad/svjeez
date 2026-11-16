@@ -187,22 +187,20 @@ export const counting = (
   const slices = n + 1;
   const switchAt = (k: number) => tween.at + (tween.over * (k - 0.5)) / slices;
 
-  return (
-    <>
-      {Array.from({ length: n + 2 }, (_, k) => {
-        const p = k / slices;
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
 
+  // Every value is drawn in the new place and the group slides in with the same ease as the box that holds it, so the
+  // text never trails or leads its background.
+  return (
+    <g animation={dx || dy ? slideIn(tween, dx, dy) : undefined}>
+      {Array.from({ length: n + 2 }, (_, k) => {
         const run =
           k === 0
-            ? a
+            ? { ...a, x: b.x, y: b.y }
             : k === slices
               ? b
-              : {
-                  ...b,
-                  text: before + format(from + (to - from) * p) + after,
-                  x: a.x + (b.x - a.x) * p,
-                  y: a.y + (b.y - a.y) * p,
-                };
+              : { ...b, text: before + format(from + (to - from) * (k / slices)) + after };
 
         const at = k === 0 ? 0 : switchAt(k);
 
@@ -211,6 +209,6 @@ export const counting = (
           show(k === slices ? { at } : { at, over: switchAt(k + 1) - at }, { fade: 0 }),
         );
       })}
-    </>
+    </g>
   );
 };

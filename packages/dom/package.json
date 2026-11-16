@@ -12,7 +12,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./story": "./src/story.ts"
+    "./story": "./src/story.ts",
+    "./fidelity": "./src/fidelity.tsx"
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",

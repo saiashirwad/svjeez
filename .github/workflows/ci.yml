@@ -43,6 +43,19 @@ jobs:
           git add --intent-to-add dist
           git diff --exit-code --stat dist || { git diff --word-diff=plain --unified=0 dist | head -60; echo "::error::dist/ is stale. Run 'bun run build' and commit the result."; exit 1; }
 
+  # Every example must play and seek the same in Chromium, Firefox and WebKit. dist/ is committed, so nothing is built.
+  browsers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # The locked playwright-core, since bunx fetches the latest and its browser builds aren't the ones the tests launch.
+      - run: bun run playwright-core install --with-deps chromium-headless-shell firefox webkit
+        working-directory: packages/svjeez
+      - run: bun run test:browsers
+        working-directory: examples
+
   node:
     runs-on: ubuntu-latest
     strategy:

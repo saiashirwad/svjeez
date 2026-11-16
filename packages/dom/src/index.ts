@@ -28,7 +28,7 @@ export {
   type Wait,
 } from "./flow.ts";
 
-export { snapshots, type SnapshotsOptions } from "./snapshots.ts";
+export { snapshots, shotsDir, type SnapshotsOptions } from "./snapshots.ts";
 
 export { Dom, type DomProps } from "./draw/dom.tsx";
 

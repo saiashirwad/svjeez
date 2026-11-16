@@ -177,7 +177,7 @@ describe("reduced motion", () => {
     throw new Error(`${prop} is not holding at ${percent}%`);
   };
 
-  test("an animated Marker freezes at its stop's size, with no SMIL", () => {
+  test("an animated Marker swaps in a twin at its stop's size, since CSS cannot pause SMIL", () => {
     const svg = render(
       { width: 100, height: 100, duration: 6, title: "Marker", reducedMotion: { at: 4 } },
       Marker({
@@ -188,15 +188,12 @@ describe("reduced motion", () => {
       }),
     );
 
-    expect(svg).not.toContain("<animate");
-    expect(svg).toContain(
-      ".a{animation-delay:-4s!important;animation-play-state:paused!important}",
-    );
-    const marker = /<rect [^>]*rx="8"[^>]*class="a (m\d+)"/;
-    expect([
-      frozen(svg, marker, "width", (4 / 6) * 100),
-      frozen(svg, marker, "height", (4 / 6) * 100),
-    ]).toEqual(["30px", "40px"]);
+    expect(svg).toContain(".dm{display:none}.ds{display:inline}");
+    expect(svg).toMatch(/<rect [^>]*rx="8"[^>]*class="[^"]*\bdm\b/);
+    const twin = svg.match(/<rect [^>]*rx="8"[^>]*class="[^"]*\bds\b[^>]*>/)![0];
+
+    expect(twin).toContain('width="30" height="40"');
+    expect(twin).not.toContain("<animate");
   });
 
   test("Focus freezes dimmed during its span with the focused rect lit", () => {

@@ -131,7 +131,7 @@ describe("cartogram()", () => {
   test("morphs each outline into a circle through the d channel, and returns the rest of the map", () => {
     const svg = scene(result.node);
 
-    expect(svg.match(/attributeName="d"/g)).toHaveLength(6);
+    expect(svg.match(/<animate\b[^>]*attributeName="d"/g)).toHaveLength(6);
     expect(result.rest).toContain(map.region("Canada").d);
     expect(result.rest).not.toContain(map.region("France").d);
   });
@@ -179,7 +179,7 @@ describe("toBars()", () => {
 
   test("morphs through the d channel", () => {
     expect(
-      scene(toBars(map, people, { at: 1, frame }).node).match(/attributeName="d"/g),
+      scene(toBars(map, people, { at: 1, frame }).node).match(/<animate\b[^>]*attributeName="d"/g),
     ).toHaveLength(4);
   });
 });

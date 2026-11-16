@@ -1,0 +1,40 @@
+<!doctype html>
+<body style="margin:0">
+  <div id="host"></div>
+  <script>
+    window.ready = fetch(new URLSearchParams(location.search).get("svg")).then((r) => r.text()).then((text) => {
+      document.getElementById("host").innerHTML = text;
+      const svg = document.querySelector("#host svg");
+      const smil = [...svg.querySelectorAll("animate, set, animateTransform, animateMotion")].map(
+        (a) => parseFloat(a.getAttribute("data-loop") ?? a.getAttribute("dur") ?? "0") * 1000,
+      );
+      const css = document.getAnimations().map((a) => Number(a.effect.getTiming().duration) || 0);
+      window.loop = Math.max(1, ...smil, ...css);
+    });
+    /** Seek CSS and SMIL to `share` of the loop and play on from there. */
+    window.from = (share) => {
+      const svg = document.querySelector("#host svg");
+      const t = share * window.loop;
+      svg.pauseAnimations();
+      svg.setCurrentTime(t / 1000);
+      for (const a of document.getAnimations()) a.currentTime = t;
+      svg.unpauseAnimations();
+    };
+    /** Frame timestamps from requestAnimationFrame, read and cleared per window. */
+    const stamps = [];
+    const tick = (now) => { stamps.push(now); requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    window.frames = () => {
+      const gaps = stamps.slice(1).map((t, i) => t - stamps[i]).sort((a, b) => a - b);
+      stamps.length = 0;
+      const total = gaps.reduce((a, g) => a + g, 0);
+      const slots = gaps.reduce((a, g) => a + Math.max(1, Math.round(g / (1000 / 60))), 0);
+      return JSON.stringify({
+        fps: gaps.length / (total / 1000),
+        p95: gaps[Math.floor(gaps.length * 0.95)] ?? 0,
+        dropped: 1 - gaps.length / slots,
+      });
+    };
+    window.spin = () => { const t = performance.now(); let n = 0; while (performance.now() - t < 100) n++; return n; };
+  </script>
+</body>

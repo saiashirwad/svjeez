@@ -13,25 +13,23 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k1{0%,0.909%{opacity:0}5.455%,100%{opacity:1}}
 @keyframes k2{0%,0.909%{translate:0px 6px}5.455%,100%{translate:0px 0px}}
 .m1{animation-name:k1,k2}
-@keyframes k3{0%,19.091%{width:300px}22.727%,100%{width:480px}}
-@keyframes k4{0%,19.091%,22.727%,100%{height:146.4px}}
-@keyframes k5{0%,10%{opacity:0}13.636%,100%{opacity:1}}
-.m2{animation-name:k3,k4,k5}
-@keyframes k6{0%,19.091%{translate:0px 0px}22.727%,100%{translate:0px 134.4px}}
-.m3{animation-name:k6}
-@keyframes k7{0%,10%{stroke-dashoffset:1;visibility:hidden}19.091%,100%{stroke-dashoffset:0;visibility:visible}}
-.m4{animation-name:k7}
-@keyframes k8{0%,17.273%{scale:0}20.909%,100%{scale:1}}
-.m5{animation-name:k8;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k9{0%,8.182%{opacity:0}12.727%,100%{opacity:1}}
-@keyframes k10{0%,8.182%{translate:0px 8px}12.727%,100%{translate:0px 0px}}
-.m6{animation-name:k9,k10}
-@keyframes k11{0%,15.455%{opacity:0}20%,100%{opacity:1}}
-@keyframes k12{0%,15.455%{translate:0px 6px}20%,100%{translate:0px 0px}}
-.m7{animation-name:k11,k12}
-@keyframes k13{0%,95.455%{opacity:1}100%{opacity:0}}
-.m8{animation-name:k13}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
+@keyframes k3{0%,10%{opacity:0}13.636%,100%{opacity:1}}
+.m2{animation-name:k3}
+@keyframes k4{0%,19.091%{translate:0px 0px}22.727%,100%{translate:0px 134.4px}}
+.m3{animation-name:k4}
+@keyframes k5{0%,10%{stroke-dashoffset:1;visibility:hidden}19.091%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k5}
+@keyframes k6{0%,17.273%{scale:0}20.909%,100%{scale:1}}
+.m5{animation-name:k6;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k7{0%,8.182%{opacity:0}12.727%,100%{opacity:1}}
+@keyframes k8{0%,8.182%{translate:0px 8px}12.727%,100%{translate:0px 0px}}
+.m6{animation-name:k7,k8}
+@keyframes k9{0%,15.455%{opacity:0}20%,100%{opacity:1}}
+@keyframes k10{0%,15.455%{translate:0px 6px}20%,100%{translate:0px 0px}}
+.m7{animation-name:k9,k10}
+@keyframes k11{0%,95.455%{opacity:1}100%{opacity:0}}
+.m8{animation-name:k11}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g class="sans">
     <rect x="0.5" y="0.5" width="1031" height="579" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
@@ -187,7 +185,11 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       </g>
     </g>
     <g class="a m3">
-      <rect x="79.6" y="209.6" width="300" height="146.4" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2"/>
+      <rect x="79.6" y="209.6" width="480" height="146.4" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2 dm">
+        <animate id="w1" attributeName="width" values="300;480" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="2.1s;w1.begin+11s" dur="0.4s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="300" begin="0s;w1.begin+8.9s" dur="2.1s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="79.6" y="209.6" width="480" height="146.4" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2 ds" display="none"/>
     </g>
     <g class="a m6">
       <rect x="640" y="154" width="356" height="230" rx="12" fill="var(--base01)"/>

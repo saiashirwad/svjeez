@@ -11,13 +11,16 @@ export interface Tween {
  * Opacity over part of the tween, as `[start, length, from, to]`. An element that leaves goes in the first half and
  * one that arrives comes in the second, so neither overlaps siblings still sliding. Two versions of one element swap
  * in the middle: the new one comes in over the old before the old goes, so where they overlap the two never add up
- * to much less than one.
+ * to much less than one. Text and icons can't do that, since two glyphs on top of each other read as noise: the old one
+ * is gone by 45% and the new one comes in after.
  */
 const WINDOWS = {
   exit: [0, 0.5, 1, 0],
   enter: [0.5, 0.5, 0, 1],
   swapOut: [0.45, 0.4, 1, 0],
   swapIn: [0.15, 0.4, 0, 1],
+  textOut: [0, 0.45, 1, 0],
+  textIn: [0.45, 0.55, 0, 1],
   // A shadow only one side has comes or goes over the whole tween, as a color fading would.
   in: [0, 1, 0, 1],
   out: [0, 1, 1, 0],

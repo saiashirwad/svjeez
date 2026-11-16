@@ -40,7 +40,8 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 - `linear-gradient` and `radial-gradient` layers (repeating ones too) are drawn as SVG gradients that ride along with their box. `::before` and `::after` are read where Chromium laid them out, through the DevTools protocol, and drawn as boxes named `::before` and `::after` with their text. A see-through fill under `backdrop-filter: blur()` is drawn more solid instead of blurred.
 - Text that leaves one element and arrives in another, saying the same thing in nearly the same place (an app swapping its editor for the rendered text), stays put instead of fading.
 - A `::before` or `::after` draws the text Chromium laid out for it, so counters and `attr()` come along, and a color input draws its value in its swatch.
-- Not drawn yet: range inputs' tracks and thumbs, conic gradients, `background-size` tiles, background images, and clips between an element with a `z-index` and its stacking context.
+- `outline` is drawn (Chromium's focus ring too: two px just inside the border box, following the corners), and so are range inputs, their track and thumb read from the browser's shadow parts. An element faded in only one scheme (`opacity` under `prefers-color-scheme`) follows the viewer's.
+- Not drawn yet: conic gradients, `background-size` tiles, background images, and clips between an element with a `z-index` and its stacking context.
 
 ## Stories
 
