@@ -1,5 +1,5 @@
 import { inflateSync } from "node:zlib";
-import type { Face, Item } from "./tree.ts";
+import type { Face, Item, Vector } from "./tree.ts";
 
 /** A face the page loaded, with the URL its `@font-face` rule points at, before the bytes are fetched. */
 type Source = Omit<Face, "src"> & { readonly url: string };
@@ -8,6 +8,15 @@ type Source = Omit<Face, "src"> & { readonly url: string };
 export const families = (item: Item, out = new Set<string>()): Set<string> => {
   if (item.kind === "text") out.add(item.family);
   else if (item.kind === "box") for (const child of item.children) families(child, out);
+  else if (item.kind === "graphic") {
+    const vectors = (v: Vector) => {
+      if (v.run) out.add(v.run.family);
+
+      for (const c of [...(v.mask ?? []), ...v.children]) vectors(c);
+    };
+
+    item.children.forEach(vectors);
+  }
 
   return out;
 };
@@ -75,6 +84,7 @@ export function sources(used: string[]): Source[] {
         family: unquote(face.family),
         weight: face.weight.replace("normal", "400").replace("bold", "700"),
         style: face.style === "italic" || face.style.startsWith("oblique") ? "italic" : "normal",
+        stretch: face.stretch === "normal" || face.stretch === "100%" ? undefined : face.stretch,
         unicodeRange: unicodeRange === "U+0-10FFFF" ? undefined : unicodeRange,
         url: new URL(url, base).href,
       },
@@ -151,6 +161,10 @@ const mime = (tag: string): string =>
         ? "font/otf"
         : "font/ttf";
 
+/** A face the drawing can't cut down (a variable weight, a width, a range of characters) is embedded whole. */
+export const isWholeFile = (face: Pick<Face, "weight" | "stretch" | "unicodeRange">): boolean =>
+  !/^\d+$/.test(face.weight) || !!face.stretch || !!face.unicodeRange;
+
 /** A font file as a data URI, its type read from the bytes. */
 export const dataUri = (bytes: Uint8Array): string =>
   `data:${mime(String.fromCharCode(...bytes.subarray(0, 4)))};base64,${Buffer.from(bytes).toString("base64")}`;
@@ -162,4 +176,4 @@ export const formatOf = (type: string): string =>
 /** An `@font-face` rule, for the page that lays text out and for a drawing that embeds a page's own file. */
 export const fontFace = (face: Omit<Face, "src">, url: string, format: string): string =>
   `@font-face{font-family:${JSON.stringify(face.family)};src:url(${url}) format("${format}");` +
-  `font-weight:${face.weight};font-style:${face.style}${face.unicodeRange ? `;unicode-range:${face.unicodeRange}` : ""}}`;
+  `font-weight:${face.weight};font-style:${face.style}${face.stretch ? `;font-stretch:${face.stretch}` : ""}${face.unicodeRange ? `;unicode-range:${face.unicodeRange}` : ""}}`;

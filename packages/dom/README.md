@@ -41,7 +41,9 @@ render({ ...size(steps), duration: duration(steps) }, <Dom states={steps} fonts=
 - Text that leaves one element and arrives in another, saying the same thing in nearly the same place (an app swapping its editor for the rendered text), stays put instead of fading.
 - A `::before` or `::after` draws the text Chromium laid out for it, so counters and `attr()` come along, and a color input draws its value in its swatch.
 - `outline` is drawn (Chromium's focus ring too: two px just inside the border box, following the corners), and so are range inputs, their track and thumb read from the browser's shadow parts. An element faded in only one scheme (`opacity` under `prefers-color-scheme`) follows the viewer's.
-- Not drawn yet: conic gradients, `background-size` tiles, background images, and clips between an element with a `z-index` and its stacking context.
+- A `<canvas>` is drawn as a still of what it shows at each snapshot (a WebGL one, or a tainted one, through a screenshot of it alone), so an animated canvas holds one frame per snap. Open shadow roots are read like the rest of the page, and `text-overflow: ellipsis` draws its "…". `mix-blend-mode` and `isolation: isolate` are drawn, and an `<img>` with a border, background or shadow is a box around its picture.
+- Pictures are cut down to what the drawing needs: a raster is scaled to at most twice its drawn size and re-encoded as WebP (animated ones and small files stay as they are), and an SVG with only a `viewBox` is given a width and height so it draws at any scale. A page's variable or ranged font stays WOFF2 instead of being unwrapped to a TTF.
+- Not drawn yet: conic gradients, `background-size` tiles, clips between an element with a `z-index` and its stacking context, the fade of a gradient `mask-image` (it only clips to the box), and `<text>` in an inline SVG outside a `<mask>`.
 
 ## Stories
 

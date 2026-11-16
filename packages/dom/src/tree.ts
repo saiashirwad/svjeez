@@ -37,10 +37,16 @@ export interface TextRun {
   readonly x: number;
   readonly y: number;
   readonly family: string;
+  /** The rest of the page's font stack, ending in a generic family, for when `family` isn't embedded. */
+  readonly fallback?: string;
   readonly weight: number;
   readonly style: "normal" | "italic";
   readonly size: number;
   readonly color: Paint;
+  /** `font-stretch` as a percentage, left out at the normal 100. */
+  readonly stretch?: number;
+  /** A line drawn along the text: a link's underline. */
+  readonly decoration?: "underline" | "line-through" | "overline";
   readonly letterSpacing: number;
   /** Where each character ends, in px from `x`, one per code point. Typing reveals the text up to these. */
   readonly advances: readonly number[];
@@ -59,6 +65,10 @@ export interface Vector {
   readonly tag: string;
   readonly attrs: Readonly<Record<string, Paint<string>>>;
   readonly children: readonly Vector[];
+  /** What this shape shows only where the mask's shapes are light. */
+  readonly mask?: readonly Vector[];
+  /** A `<text>` in a mask, as a run in the page's coordinates (not the drawing's). */
+  readonly run?: TextRun;
 }
 
 export interface Graphic {
@@ -69,11 +79,19 @@ export interface Graphic {
   readonly transform?: Transform;
 }
 
+/** An image from `background-image` or `mask-image`: its file, and every tile of it the page paints. */
+export interface Placement {
+  readonly href: string;
+  readonly tiles: readonly Rect[];
+}
+
 export interface Picture {
   readonly kind: "image";
   readonly box: Rect;
   readonly radii: Radii;
   readonly href: string;
+  /** Where the image is drawn when `object-fit` or `object-position` move it off the box; the box clips it. */
+  readonly fit?: Rect;
   readonly transform?: Transform;
 }
 
@@ -122,6 +140,10 @@ export interface Box {
   readonly background?: Paint;
   /** `background-image` gradients, bottom layer first, painted over `background`. */
   readonly gradients?: readonly Gradient[];
+  /** `background-image` urls, bottom layer first, painted over the gradients. */
+  readonly pictures?: readonly Placement[];
+  /** `mask-image` urls: the box and what's in it show only where these are opaque. */
+  readonly mask?: readonly Placement[];
   readonly border?: {
     readonly widths: readonly [number, number, number, number];
     readonly color: Paint;
@@ -138,6 +160,10 @@ export interface Box {
   readonly opacity: number;
   /** The dark scheme's opacity, where an element is faded in one scheme and not the other. */
   readonly darkOpacity?: number;
+  /** `mix-blend-mode`, when it isn't `normal`: the box blends with what is drawn under it. */
+  readonly blend?: string;
+  /** `isolation: isolate`: a blend inside the box stays inside it. */
+  readonly isolate?: boolean;
   readonly clip: boolean;
   readonly transform?: Transform;
   readonly children: readonly Item[];
@@ -150,6 +176,8 @@ export interface Face {
   readonly family: string;
   /** A CSS weight: one number, or a range for a variable font. */
   readonly weight: string;
+  /** A CSS `font-stretch` range, for a face that isn't the normal width. */
+  readonly stretch?: string;
   readonly style: "normal" | "italic";
   /** The characters this file covers, when the page split the family across files. */
   readonly unicodeRange?: string;

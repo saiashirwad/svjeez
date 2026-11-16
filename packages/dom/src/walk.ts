@@ -4,6 +4,7 @@ import type {
   Graphic,
   Item,
   Picture,
+  Placement,
   Radii,
   Rect,
   Rgb,
@@ -38,12 +39,29 @@ declare global {
   var __svjeezPseudo: WeakMap<Element, Marks> | undefined;
   /** The parts of each range input's user-agent shadow tree, left by `markRanges`. */
   var __svjeezRange: WeakMap<Element, RangeMarks> | undefined;
+  /** The size of every image a page's CSS names, left by `preload`: the walk is synchronous and can't wait to load one. */
+  var __svjeezImages: Map<string, readonly [number, number]> | undefined;
+  /** A still of each visible canvas as a data URI, left by `canvases`: a canvas has no file to fetch. */
+  var __svjeezStills: WeakMap<Element, { href: string; at?: Rect }> | undefined;
+  /** Every visible canvas, left by `canvases` for the browser to screenshot the ones it can't read. */
+  var __svjeezCanvases: HTMLCanvasElement[] | undefined;
 }
 
 /** What an element or pseudo-element paints of itself. */
 type Surface = Pick<
   Box,
-  "radii" | "background" | "gradients" | "border" | "outline" | "shadows" | "insets" | "opacity"
+  | "radii"
+  | "background"
+  | "gradients"
+  | "pictures"
+  | "mask"
+  | "border"
+  | "outline"
+  | "shadows"
+  | "insets"
+  | "opacity"
+  | "blend"
+  | "isolate"
 >;
 
 /**
@@ -59,12 +77,33 @@ export function walk({
   pad: number;
   parts: Record<string, string>;
 }): Box {
-  const root = document.querySelector(selector);
+  const found = document.querySelector(selector);
+  // The page itself is read as a screenshot would be: the viewport, from the page's origin.
+  const wholePage = found === document.body || found === document.documentElement;
+  const root = wholePage ? document.documentElement : found;
   const marks = globalThis.__svjeezPseudo;
   const marked = globalThis.__svjeezRange;
+  const stills = globalThis.__svjeezStills;
 
   if (!root) throw new Error(`snap() found nothing at ${selector}.`);
-  const origin = root.getBoundingClientRect();
+
+  const origin = wholePage
+    ? { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
+    : root.getBoundingClientRect();
+
+  // The camera: what lies wholly outside it is neither read nor drawn. A page is the viewport; an element, its box and the pad.
+  const frame = wholePage
+    ? { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
+    : {
+        left: origin.left - pad,
+        top: origin.top - pad,
+        right: origin.right + pad,
+        bottom: origin.bottom + pad,
+      };
+
+  const outside = (r: { left: number; top: number; right: number; bottom: number }): boolean =>
+    r.right <= frame.left || r.left >= frame.right || r.bottom <= frame.top || r.top >= frame.bottom;
+
   const px = (value: string): number => parseFloat(value) || 0;
   const round = (n: number): number => Math.round(n * 100) / 100;
 
@@ -440,6 +479,95 @@ export function walk({
     return `rgba(${rgb(c)},${round(a + (1 - a) * Math.min(0.5, Number(blur[1]) / 24))})`;
   };
 
+  const natural = (url: string): readonly [number, number] | undefined =>
+    globalThis.__svjeezImages?.get(url);
+
+  /** A length or percentage of `of`; undefined for `auto` and anything else. */
+  const lengthOf = (v: string | undefined, of: number): number | undefined => {
+    const calc = /^calc\(\s*(-?[\d.]+)%\s*([+-])\s*([\d.]+)px\s*\)$/.exec(v ?? "");
+
+    if (calc)
+      return (parseFloat(calc[1]!) / 100) * of + (calc[2] === "-" ? -1 : 1) * parseFloat(calc[3]!);
+    const n = parseFloat(v ?? "");
+
+    return !v || !Number.isFinite(n) ? undefined : v.endsWith("%") ? (n / 100) * of : n;
+  };
+
+  /**
+   * The `url()` layers of `image`, bottom first, each laid out in `area` by its `size`, `position` and `repeat`:
+   * every tile it paints. `cover`, `contain`, lengths and percentages are read; `calc()` positions count as 0.
+   */
+  const placements = (
+    image: string,
+    sizes: string,
+    positions: string,
+    repeats: string,
+    area: Rect,
+  ): Placement[] => {
+    if (!image.includes("url(") || area.width <= 0 || area.height <= 0) return [];
+    const sz = split(sizes);
+    const ps = split(positions);
+    const rp = split(repeats);
+
+    const pick = (list: string[], i: number, rest: string) =>
+      (list[i % list.length] ?? rest).trim();
+
+    const run = (start: number, len: number, lo: number, hi: number): number[] => {
+      const out: number[] = [];
+
+      for (let s = start - Math.ceil((start - lo) / len) * len; s < hi && out.length < 40; s += len)
+        out.push(s);
+
+      return out;
+    };
+
+    return split(image)
+      .flatMap((layer, i): Placement[] => {
+        const href = /url\(\s*(["']?)(.*?)\1\s*\)/.exec(layer)?.[2];
+
+        if (!href) return [];
+        const [nw, nh] = natural(href) ?? [0, 0];
+        const ratio = nw && nh ? nw / nh : undefined;
+        const size = pick(sz, i, "auto");
+        const [sx, sy = "auto"] = size.match(/calc\([^)]*\)|\S+/g) ?? [];
+        let w: number | undefined;
+        let h: number | undefined;
+
+        if (size === "cover" || size === "contain") {
+          const fit = size === "cover" ? Math.max : Math.min;
+          const k = ratio ? fit(area.width / nw, area.height / nh) : undefined;
+
+          [w, h] = k ? [nw * k, nh * k] : [area.width, area.height];
+        } else {
+          w = lengthOf(sx, area.width);
+          h = lengthOf(sy, area.height);
+
+          if (w === undefined && h === undefined)
+            [w, h] = nw ? [nw, nh] : [area.width, area.height];
+          else if (w === undefined) w = ratio && h ? h * ratio : area.width;
+          else if (h === undefined) h = ratio ? w / ratio : area.height;
+        }
+
+        if (!w || !h || w <= 0 || h <= 0) return [];
+        const [ox = "50%", oy = "50%"] = pick(ps, i, "0% 0%").match(/calc\([^)]*\)|\S+/g) ?? [];
+        const x = area.x + (lengthOf(ox, area.width - w) ?? 0);
+        const y = area.y + (lengthOf(oy, area.height - h) ?? 0);
+        const repeat = pick(rp, i, "repeat");
+        const both = repeat === "repeat" || /space|round/.test(repeat);
+        const xs = both || repeat === "repeat-x" ? run(x, w, area.x, area.x + area.width) : [x];
+        const ys = both || repeat === "repeat-y" ? run(y, h, area.y, area.y + area.height) : [y];
+
+        const tiles = ys
+          .flatMap((ty) =>
+            xs.map((tx) => ({ x: round(tx), y: round(ty), width: round(w), height: round(h) })),
+          )
+          .slice(0, 400);
+
+        return [{ href, tiles }];
+      })
+      .reverse();
+  };
+
   /** What an element or pseudo-element paints of itself: corners, fill, gradients, border, shadows. */
   const surface = (s: CSSStyleDeclaration, r: DOMRect, b: Rect): Surface => {
     const visible = s.visibility !== "hidden";
@@ -457,10 +585,39 @@ export function walk({
     const ring = color(s.outlineColor);
     const auto = s.outlineStyle === "auto";
 
+    const padding = {
+      x: b.x + widths[3],
+      y: b.y + widths[0],
+      width: b.width - widths[1] - widths[3],
+      height: b.height - widths[0] - widths[2],
+    };
+
+    const listed = (list: Placement[]) => (list.length > 0 ? list : undefined);
+
     return {
       radii: radii(s, r.width, r.height),
       background: visible ? frost(color(s.backgroundColor), s) : undefined,
       gradients: gradients.length > 0 ? gradients : undefined,
+      pictures: visible
+        ? listed(
+            placements(
+              s.backgroundImage,
+              s.backgroundSize,
+              s.backgroundPosition,
+              s.backgroundRepeat,
+              padding,
+            ),
+          )
+        : undefined,
+      mask: listed(
+        placements(
+          s.maskImage || s.webkitMaskImage,
+          s.maskSize || s.webkitMaskSize,
+          s.maskPosition || s.webkitMaskPosition,
+          s.maskRepeat || s.webkitMaskRepeat,
+          b,
+        ),
+      ),
       border:
         visible && borderColor && widths.some((w) => w > 0)
           ? { widths, color: borderColor }
@@ -477,14 +634,73 @@ export function walk({
       shadows: visible ? shadows(s.boxShadow, false) : [],
       insets: visible && /\binset\b/.test(s.boxShadow) ? shadows(s.boxShadow, true) : undefined,
       opacity: px(s.opacity),
+      blend: s.mixBlendMode !== "normal" ? s.mixBlendMode : undefined,
+      isolate: s.isolation === "isolate" ? true : undefined,
     };
   };
 
-  const family = (s: CSSStyleDeclaration) =>
-    s.fontFamily
-      .split(",")[0]!
-      .trim()
-      .replace(/^["']|["']$/g, "");
+  const stack = (s: CSSStyleDeclaration) =>
+    s.fontFamily.split(",").map((f) => f.trim().replace(/^["']|["']$/g, ""));
+
+  const family = (s: CSSStyleDeclaration) => stack(s)[0]!;
+
+  /** The rest of the font stack, ending in a generic family so an uncaptured font draws like the page, not in serif. */
+  const fallback = (s: CSSStyleDeclaration): string => {
+    const [first, ...rest] = stack(s);
+    const generic = /^(serif|sans-serif|monospace|cursive|fantasy)$/;
+    const names = rest.filter((f) => f && f !== first);
+
+    if (!names.some((f) => generic.test(f)) && !generic.test(first!))
+      names.push(
+        /mono|courier|consolas|menlo|code/i.test(first!)
+          ? "monospace"
+          : /times|georgia|garamond|palatino|cambria|bookman|didot|serif/i.test(first!) &&
+              !/sans/i.test(first!)
+            ? "serif"
+            : "sans-serif",
+      );
+
+    // A name with anything but letters, digits and spaces needs quotes; the "-apple-system" keyword doesn't.
+    return names.map((f) => (/^[\w -]+$/.test(f) && !/^\d/.test(f) ? f : `'${f}'`)).join(", ");
+  };
+
+  /** `font-stretch` as a percentage, when it isn't the normal width. */
+  const stretch = (s: CSSStyleDeclaration): number | undefined => {
+    const n = parseFloat(s.fontStretch);
+
+    return Number.isFinite(n) && n !== 100 ? n : undefined;
+  };
+
+  /**
+   * The line a text node is struck with. A decoration is drawn across the text of its inline descendants too, but
+   * stops at an inline-block, a float or a positioned box, so climb until one of those.
+   */
+  /** The element around a node: across a shadow root, its host. */
+  const up = (node: Node): Element | null => {
+    const root = node.getRootNode();
+
+    return node.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+  };
+
+  const decorationOf = (node: Text): TextRun["decoration"] => {
+    for (let el = up(node); el && el !== document.body; el = up(el)) {
+      const s = getComputedStyle(el);
+      const line = /underline|line-through|overline/.exec(s.textDecorationLine)?.[0];
+
+      if (line) {
+        const c = color(s.textDecorationColor);
+
+        // A link whose underline is clear until hover has the line, but nothing to see.
+        // SAFETY: the regex matches only the three keywords TextRun["decoration"] names.
+        return c && alpha(c) > 0 ? (line as TextRun["decoration"]) : undefined;
+      }
+
+      if (s.display.startsWith('inline-') || s.cssFloat !== "none" || /absolute|fixed/.test(s.position))
+        return undefined;
+    }
+
+    return undefined;
+  };
 
   const transform = (text: string, s: CSSStyleDeclaration) =>
     s.textTransform === "uppercase"
@@ -509,10 +725,12 @@ export function walk({
     x: round(x - origin.left + pad),
     y: round(top + probe(s).ascent - origin.top + pad),
     family: family(s),
+    fallback: fallback(s) || undefined,
     weight: px(s.fontWeight),
     style: s.fontStyle === "italic" ? "italic" : "normal",
     size: px(s.fontSize),
     color: c,
+    stretch: stretch(s),
     letterSpacing: s.letterSpacing === "normal" ? 0 : px(s.letterSpacing),
     advances: advances.map(round),
     placeholder: placeholder || undefined,
@@ -522,7 +740,7 @@ export function walk({
   const measure = (s: CSSStyleDeclaration, text: string): number[] => {
     const span = document.createElement("span");
     span.style.cssText = "position:absolute;left:0;top:0;white-space:pre;visibility:hidden";
-    span.style.font = s.font;
+    span.style.font = s.font || `${s.fontStyle} ${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
     span.style.letterSpacing = s.letterSpacing;
     const node = document.createTextNode(text);
 
@@ -550,6 +768,7 @@ export function walk({
     const c = color(s.color);
 
     if (!c || s.visibility === "hidden") return;
+    const decoration = decorationOf(node);
     const range = document.createRange();
     const data = node.data;
 
@@ -583,10 +802,39 @@ export function walk({
       line.ends.push(r.right - line.left);
     }
 
+    // `text-overflow: ellipsis` shows "…" where the container cuts a line, and hides the characters after it.
+    let box: Element | null = up(node);
+
+    while (box && /^(inline|contents)$/.test(getComputedStyle(box).display)) box = up(box);
+    const cut = box && getComputedStyle(box);
+
+    const limit =
+      box && cut && cut.textOverflow === "ellipsis" && cut.overflowX !== "visible"
+        ? box.getBoundingClientRect().right - px(cut.borderRightWidth) - px(cut.paddingRight)
+        : undefined;
+
     for (const l of lines) {
+      if (limit !== undefined && l.left + (l.ends.at(-1) ?? 0) > limit + 0.5) {
+        const chars = [...l.text];
+        const dots = measure(s, "…")[0] ?? 0;
+        let keep = 0;
+
+        while (keep < chars.length && l.left + l.ends[keep]! + dots <= limit + 0.5) keep++;
+
+        l.text = chars.slice(0, keep).join("") + "…";
+        l.ends = [...l.ends.slice(0, keep), (l.ends[keep - 1] ?? 0) + dots];
+      }
+
       const text = l.text.trimEnd();
 
-      if (text.trim()) out.push(run(s, text, l.left, l.top, c, l.ends.slice(0, [...text].length)));
+      if (outside({ left: l.left, top: l.top, right: l.left + (l.ends.at(-1) ?? 0), bottom: l.top + px(s.fontSize) * 2 }))
+        continue;
+
+      if (text.trim())
+        out.push({
+          ...run(s, text, l.left, l.top, c, l.ends.slice(0, [...text].length)),
+          decoration,
+        });
     }
   };
 
@@ -610,19 +858,101 @@ export function walk({
     "fill-rule",
   ];
 
-  const vector = (el: Element): Vector => {
+  /** The only elements that draw. defs, symbol, clipPath, mask and gradients draw nothing of themselves. */
+  const DRAWN = ["path", "rect", "circle", "ellipse", "line", "polyline", "polygon"];
+  const CONTAINERS = ["g", "svg", "a", "switch"];
+
+  /** The size of the `<svg>` being read, which a percentage in a shape is a share of. */
+  let extent: readonly [number, number] = [0, 0];
+
+  /**
+   * A `<text>` inside a `<mask>`, which the browser doesn't lay out: set where its `x`, `y`, `dy`, `text-anchor` and
+   * `dominant-baseline` put it, in the page's coordinates, and drawn like any other run.
+   */
+  const maskText = (el: Element, s: CSSStyleDeclaration): Vector | undefined => {
+    // SAFETY: maskText is only called for a `<text>`, which is an SVG element.
+    const svg = (el as SVGElement).ownerSVGElement;
+    const c = color(s.fill);
+    const text = el.textContent?.trim();
+
+    if (!svg || !c || !text) return undefined;
+    const box = svg.getBoundingClientRect();
+    const kx = box.width / (extent[0] || 1);
+    const ky = box.height / (extent[1] || 1);
+    const at = (name: string, of: number) => lengthOf(el.getAttribute(name) ?? "0", of) ?? 0;
+    const ends = measure(s, text);
+    const width = ends.at(-1) ?? 0;
+    const { ascent, area } = probe(s);
+    const x = box.left + at("x", extent[0]) * kx - (s.textAnchor === "middle" ? width / 2 : s.textAnchor === "end" ? width : 0);
+    const y = box.top + (at("y", extent[1]) + at("dy", extent[1])) * ky;
+    const centered = /central|middle/.test(s.dominantBaseline);
+
+    return { tag: "text", attrs: {}, children: [], run: run(s, text, x, centered ? y - area / 2 : y - ascent, c, ends) };
+  };
+
+  /**
+   * A drawn element of an inline `<svg>`, or nothing when it draws nothing. `<use>` is written out in place of
+   * its target (a symbol's children, or the element), taking the paint the `<use>` gives it. `via` is that
+   * `<use>`'s style, for what the target doesn't set itself.
+   */
+  const vector = (el: Element, via?: CSSStyleDeclaration, depth = 0): Vector | undefined => {
+    const tag = el.tagName.toLowerCase();
     const s = getComputedStyle(el);
+
+    if (s.display === "none" || depth > 8) return undefined;
+
+    if (tag === "text" && el.closest("mask")) return maskText(el, s);
+
     const attrs: Record<string, string> = {};
 
     for (const name of GEOMETRY) {
       const v = el.getAttribute(name);
 
-      if (v !== null) attrs[name] = v;
+      if (v === null || (CONTAINERS.includes(tag) && name !== "transform")) continue;
+
+      // A share of the `<svg>`'s own box, not of the picture the drawing ends up in.
+      attrs[name] = v.trim().endsWith("%")
+        ? String(round((px(v) / 100) * (/^(x|cx|rx|width|x1|x2)$/.test(name) ? extent[0] : extent[1])))
+        : v;
     }
 
-    if (el.tagName !== "g") {
-      attrs.fill = s.fill === "none" ? "none" : (color(s.fill) ?? "none");
-      attrs.stroke = s.stroke === "none" ? "none" : (color(s.stroke) ?? "none");
+    if (tag === "use") {
+      const id = (el.getAttribute("href") ?? el.getAttribute("xlink:href") ?? "").replace(/^.*#/, "");
+      const target = id ? el.ownerDocument.getElementById(id) : null;
+
+      if (!target) return undefined;
+
+      const move = `translate(${px(el.getAttribute("x") ?? "0")} ${px(el.getAttribute("y") ?? "0")})`;
+      const place = [el.getAttribute("transform"), move].filter(Boolean).join(" ");
+
+      const inner = (
+        target.tagName.toLowerCase() === "symbol" ? [...target.children] : [target]
+      ).flatMap((c) => vector(c, s, depth + 1) ?? []);
+
+      if (s.opacity === "1") return { tag: "g", attrs: { transform: place }, children: inner };
+
+      return { tag: "g", attrs: { transform: place, opacity: s.opacity }, children: inner };
+    }
+
+    const container = CONTAINERS.includes(tag);
+
+    if (!container && !DRAWN.includes(tag)) return undefined;
+
+    if (container) {
+      if (tag === "svg") {
+        const x = px(el.getAttribute("x") ?? "0");
+        const y = px(el.getAttribute("y") ?? "0");
+
+        if (x || y) attrs.transform = `translate(${x} ${y})`;
+      }
+    } else {
+      // A paint the shape doesn't write itself is the `<use>`'s.
+      // SAFETY: only the elements in DRAWN get this far, and they are SVG elements.
+      const own = (name: string) => el.hasAttribute(name) || (el as SVGElement).style.getPropertyValue(name) !== "";
+      const paint = (name: "fill" | "stroke") => (via && !own(name) ? via : s)[name];
+
+      attrs.fill = paint("fill") === "none" ? "none" : (color(paint("fill")) ?? "none");
+      attrs.stroke = paint("stroke") === "none" ? "none" : (color(paint("stroke")) ?? "none");
 
       if (attrs.stroke !== "none") {
         attrs["stroke-width"] = String(px(s.strokeWidth));
@@ -633,7 +963,24 @@ export function walk({
 
     if (s.opacity !== "1") attrs.opacity = s.opacity;
 
-    return { tag: el.tagName, attrs, children: [...el.children].map(vector) };
+    const drawn: Vector = {
+      tag: tag === "svg" || tag === "a" || tag === "switch" ? "g" : tag,
+      attrs,
+      children: container ? [...el.children].flatMap((c) => vector(c, via, depth) ?? []) : [],
+    };
+
+    // `mask="url(#id)"`: the mask's shapes and text, which show the element where they are light.
+    const ref = /url\(["']?#([^)"']+)/.exec(el.getAttribute("mask") ?? "");
+    const mask = ref ? el.ownerDocument.getElementById(ref[1]!) : null;
+
+    return mask?.tagName.toLowerCase() === "mask"
+      ? {
+          tag: "g",
+          attrs: {},
+          children: [drawn],
+          mask: [...mask.children].flatMap((c) => vector(c, via, depth + 1) ?? []),
+        }
+      : drawn;
   };
 
   const TRANSFORMS = ["transform", "rotate", "scale", "translate"] as const;
@@ -697,10 +1044,34 @@ export function walk({
    * An element turned, scaled or skewed is read as laid out, with its transform switched off for the moment, and the
    * transform is kept to draw it with. Transitions are off meanwhile, so putting it back doesn't animate.
    */
+  /** An element wholly outside the frame, whose descendants stay inside its own box, so none of them can be in it. */
+  const culled = (el: Element): boolean => {
+    const r = el.getBoundingClientRect();
+
+    // A box with no width or height says nothing about where its fixed or overflowing content is.
+    if (!r.width || !r.height || !outside(r)) return false;
+
+    // An inline box says nothing of where a block inside it (a <picture> around an <img>) lies.
+    if (getComputedStyle(el).display === "inline") return false;
+
+    return !(el instanceof HTMLElement) || (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1) || el.clientWidth === 0;
+  };
+
+  /**
+   * What an element's content is made of: its children, or an open shadow root's when it has one, with a `<slot>`
+   * replaced by what is slotted into it (or its own fallback content).
+   */
+  const flat = (parent: Element | ShadowRoot): Node[] =>
+    [...parent.childNodes].flatMap((n) =>
+      n instanceof HTMLSlotElement ? n.assignedNodes({ flatten: true }) : [n],
+    );
+
   const element = (el: Element): Item | undefined => {
     const s = getComputedStyle(el);
 
     if (s.display === "none") return undefined;
+
+    if (el !== root && culled(el)) return undefined;
     const m = matrixOf(s);
 
     if (!m || !(el instanceof HTMLElement || el instanceof SVGElement)) return laid(el, s);
@@ -850,25 +1221,82 @@ export function walk({
       const viewBox: Graphic["viewBox"] =
         vb && vb.width ? [vb.x, vb.y, vb.width, vb.height] : [0, 0, r.width, r.height];
 
-      return { kind: "graphic", box: rel(r), viewBox, children: [...el.children].map(vector) };
+      extent = [viewBox[2], viewBox[3]];
+
+      return { kind: "graphic", box: rel(r), viewBox, children: [...el.children].flatMap((c) => vector(c) ?? []) };
     }
 
-    if (el instanceof HTMLImageElement) {
-      try {
-        const c = document.createElement("canvas");
-        c.width = el.naturalWidth;
-        c.height = el.naturalHeight;
-        c.getContext("2d")!.drawImage(el, 0, 0);
+    if (el instanceof HTMLImageElement || el instanceof HTMLCanvasElement) {
+      // A canvas is drawn as the still `stills` took of it.
+      const still = el instanceof HTMLCanvasElement ? stills?.get(el) : undefined;
+      const href = el instanceof HTMLImageElement ? el.currentSrc || el.src : still?.href;
+      const loaded = el instanceof HTMLImageElement ? el.complete : true;
 
-        return {
-          kind: "image",
-          box: rel(r),
-          radii: radii(s, r.width, r.height),
-          href: c.toDataURL("image/png"),
-        };
-      } catch {
-        return undefined;
+      // An image that hasn't loaded (a lazy one below the fold) has nothing to draw.
+      if (!href || !loaded || r.width === 0 || r.height === 0) return undefined;
+
+      // The content box, which `object-fit` lays the image out in.
+      const cx = r.left + px(s.borderLeftWidth) + px(s.paddingLeft);
+      const cy = r.top + px(s.borderTopWidth) + px(s.paddingTop);
+
+      const cw =
+        r.width -
+        px(s.borderLeftWidth) -
+        px(s.borderRightWidth) -
+        px(s.paddingLeft) -
+        px(s.paddingRight);
+
+      const ch =
+        r.height -
+        px(s.borderTopWidth) -
+        px(s.borderBottomWidth) -
+        px(s.paddingTop) -
+        px(s.paddingBottom);
+
+      const nw = el instanceof HTMLImageElement ? el.naturalWidth : el.width;
+      const nh = el instanceof HTMLImageElement ? el.naturalHeight : el.height;
+      let fit: Rect | undefined;
+
+      if (nw && nh && cw > 0 && ch > 0 && s.objectFit !== "fill") {
+        const k =
+          s.objectFit === "cover"
+            ? Math.max(cw / nw, ch / nh)
+            : s.objectFit === "none"
+              ? 1
+              : s.objectFit === "scale-down"
+                ? Math.min(1, cw / nw, ch / nh)
+                : Math.min(cw / nw, ch / nh);
+
+        const [ox = "50%", oy = "50%"] = s.objectPosition.split(/\s+/);
+
+        const at = (v: string, space: number) =>
+          v.endsWith("%") ? (parseFloat(v) / 100) * space : px(v);
+
+        fit = rel(new DOMRect(cx + at(ox, cw - nw * k), cy + at(oy, ch - nh * k), nw * k, nh * k));
       }
+
+      // A border, background or shadow on the image itself is a box around it, which the picture fills inside.
+      const own = surface(s, r, rel(r));
+      const chrome = own.background || own.border || own.gradients || own.insets || own.shadows.length > 0 || own.opacity < 1 || own.blend;
+
+      // A screenshot holds only the part of the canvas the viewport shows, at its own scale.
+      if (still?.at) fit = rel(new DOMRect(still.at.x, still.at.y, still.at.width, still.at.height));
+
+      if (!chrome) return { kind: "image", box: rel(r), radii: own.radii, href, fit };
+
+      const inner = rel(new DOMRect(cx, cy, Math.max(cw, 0), Math.max(ch, 0)));
+
+      return {
+        kind: "box",
+        tag,
+        part: el.getAttribute("data-part") ?? undefined,
+        key: el.getAttribute("data-key") ?? undefined,
+        id: el.id || undefined,
+        box: rel(r),
+        ...own,
+        clip: own.radii.some((r) => r > 0),
+        children: [{ kind: "image", box: inner, radii: [0, 0, 0, 0], href, fit }],
+      };
     }
 
     let children: Item[] = [];
@@ -885,7 +1313,7 @@ export function walk({
 
     place(pseudo(el, "before", r), getComputedStyle(el, "::before"));
 
-    for (const child of el.childNodes) {
+    for (const child of flat(el.shadowRoot ?? el)) {
       if (child instanceof Text) texts(child, s, children);
       else if (child instanceof Element) place(element(child), getComputedStyle(child));
     }
@@ -1033,7 +1461,8 @@ export function walk({
       id: el.id || undefined,
       box: rel(r),
       ...surface(s, r, rel(r)),
-      clip: s.overflowX !== "visible" || s.overflowY !== "visible",
+      // A mask, even one drawn as a gradient, shows nothing outside the border box.
+      clip: s.overflowX !== "visible" || s.overflowY !== "visible" || (s.maskImage || "none") !== "none",
       children,
     };
 
@@ -1047,5 +1476,15 @@ export function walk({
 
   if (tree?.kind !== "box") throw new Error(`snap() found no element to draw at ${selector}.`);
 
-  return tree;
+  if (!wholePage) return tree;
+
+  // A body's background paints the canvas when the page's own element has none.
+  const body = color(getComputedStyle(document.body).backgroundColor);
+
+  return {
+    ...tree,
+    box: { x: pad, y: pad, width: innerWidth, height: innerHeight },
+    background: tree.background ?? body,
+    clip: true,
+  };
 }

@@ -16,7 +16,22 @@ import {
 } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { clear, invisible, isPair, opaque, schemeCss, variable } from "../paint.ts";
-import type { Box, Face, Item, Paint, Pair, Shadow, TextRun, Vector } from "../tree.ts";
+import type {
+  Box,
+  Face,
+  Item,
+  Paint,
+  Pair,
+  Placement,
+  Rect,
+  Shadow,
+  TextRun,
+  Vector,
+} from "../tree.ts";
+
+/** Generic and system font names: not files the drawing can embed. */
+const SYSTEM = /^(system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|sans-serif|serif|monospace|cursive|fantasy)$/;
+
 import { typefaces } from "./faces.ts";
 import {
   borderRing,
@@ -72,6 +87,12 @@ interface Extra {
   readonly fillRule?: "evenodd";
 }
 
+const within = (r: Rect, outer: Rect): boolean =>
+  r.x >= outer.x &&
+  r.y >= outer.y &&
+  r.x + r.width <= outer.x + outer.width &&
+  r.y + r.height <= outer.y + outer.height;
+
 const transformed = (it: Boxed, node: SvgNode): SvgNode =>
   it.transform ? <g transform={matrix(it.transform)}>{node}</g> : node;
 
@@ -97,6 +118,7 @@ export const painter = (
   };
 
   const { byName, rules } = typefaces(fonts, captured);
+  const embedded = new Set([...byName.keys(), ...captured.map((f) => f.family)]);
   const server = paintServers(v);
   // How many boxes of each part are drawn so far, so a part's function gets each one's index.
   const seen = new Map<string, number>();
@@ -115,15 +137,79 @@ export const painter = (
     return m instanceof Function ? m(index) : m;
   };
 
+  // An image file is defined once however many times it is drawn, scaled into each place it is used.
+  const files = new Map<string, Ref<"symbol">>();
+
+  const tile = (href: string, r: Rect): SvgNode => {
+    let ref = files.get(href);
+
+    if (!ref) {
+      ref = def.symbol(
+        {},
+        jsx("image", { href, x: 0, y: 0, width: 1, height: 1, preserveAspectRatio: "none" }),
+      );
+      files.set(href, ref);
+    }
+
+    return jsx("use", {
+      href: ref,
+      transform: `translate(${num(r.x)} ${num(r.y)}) scale(${num(r.width)} ${num(r.height)})`,
+    });
+  };
+
+  const tiles = (list: readonly Placement[]): SvgNode[] =>
+    list.flatMap((p) => p.tiles.map((r) => tile(p.href, r)));
+
+  /** `background-image` urls, clipped to the box's shape. */
+  const pictures = (b: Box): Child => {
+    if (!b.pictures) return null;
+    const all = tiles(b.pictures);
+    const inside = b.pictures.every((p) => p.tiles.every((r) => within(r, b.box)));
+
+    return b.radii.some((r) => r > 0) || !inside ? (
+      <g clipPath={def.clipPath({}, <path d={rounded(b.box, b.radii)} />)}>{all}</g>
+    ) : (
+      all
+    );
+  };
+
+  /** What shows of `drawn` where the `mask-image` is opaque. */
+  const masked = (b: Box, drawn: SvgNode): SvgNode => {
+    if (!b.mask) return drawn;
+
+    const mask = def.mask(
+      {
+        maskUnits: "userSpaceOnUse",
+        maskType: "alpha",
+        x: b.box.x,
+        y: b.box.y,
+        width: b.box.width,
+        height: b.box.height,
+      },
+      tiles(b.mask),
+    );
+
+    return <g mask={mask}>{drawn}</g>;
+  };
+
+  const unembedded = (run: TextRun) =>
+    run.advances.length > 0 && !embedded.has(run.family) && !SYSTEM.test(run.family);
+
   const text = (run: TextRun, animation?: Stack<TagChannels<"text">>): SvgNode =>
     jsx("text", {
       x: num(run.x),
       y: num(run.y),
-      fontFamily: byName.get(run.family) ?? run.family,
+      fontFamily:
+        byName.get(run.family) ?? (run.fallback ? `${run.family}, ${run.fallback}` : run.family),
       fontSize: num(run.size),
       fontWeight: String(run.weight),
       fontStyle: run.style === "italic" ? "italic" : undefined,
+      fontStretch: run.stretch ? `${run.stretch}%` : undefined,
+      textDecoration: run.decoration,
       letterSpacing: run.letterSpacing ? num(run.letterSpacing) : undefined,
+      // A face the SVG doesn't carry is drawn in a fallback of another width: keep the page's, so runs don't collide.
+      textLength: unembedded(run) ? num(run.advances.at(-1)!) : undefined,
+      lengthAdjust: unembedded(run) ? "spacing" : undefined,
       fill: v(run.color),
       animation,
       children: run.text,
@@ -131,16 +217,22 @@ export const painter = (
 
   const ink: Ink = { v, text };
 
-  const vector = ({ tag, attrs, children }: Vector): SvgNode =>
-    jsx(tag, {
+  /** `back` undoes the graphic's scaling, for a mask's text, whose position is in the page's coordinates. */
+  const vector = ({ tag, attrs, children, mask, run }: Vector, back?: string): SvgNode => {
+    if (run) return <g transform={back}>{text(run)}</g>;
+
+    const drawn = jsx(tag, {
       ...Object.fromEntries(
         Object.entries(attrs).map(([k, value]) => [
           k.replace(/-(\w)/g, (_, c: string) => c.toUpperCase()),
           v(value),
         ]),
       ),
-      children: children.map(vector),
+      children: children.map((c) => vector(c, back)),
     });
+
+    return mask ? <g mask={def.mask({}, mask.map((c) => vector(c, back)))}>{drawn}</g> : drawn;
+  };
 
   /** A path, tweened from `from` when given and different. */
   const path = (
@@ -173,21 +265,18 @@ export const painter = (
         const [vx, vy, vw, vh] = it.viewBox;
         const t = `translate(${num(it.box.x)} ${num(it.box.y)}) scale(${num(it.box.width / vw)} ${num(it.box.height / vh)}) translate(${num(-vx)} ${num(-vy)})`;
 
-        return transformed(it, <g transform={t}>{it.children.map(vector)}</g>);
+        const back = `translate(${num(vx)} ${num(vy)}) scale(${num(vw / it.box.width)} ${num(vh / it.box.height)}) translate(${num(-it.box.x)} ${num(-it.box.y)})`;
+
+        return transformed(it, <g transform={t}>{it.children.map((c) => vector(c, back))}</g>);
       }
 
       case "image": {
-        const clip = it.radii.some((r) => r > 0)
-          ? def.clipPath({}, <path d={rounded(it.box, it.radii)} />)
-          : undefined;
+        const clip =
+          it.radii.some((r) => r > 0) || it.fit
+            ? def.clipPath({}, <path d={rounded(it.box, it.radii)} />)
+            : undefined;
 
-        const image = jsx("image", {
-          href: it.href,
-          x: num(it.box.x),
-          y: num(it.box.y),
-          width: num(it.box.width),
-          height: num(it.box.height),
-        });
+        const image = tile(it.href, it.fit ?? it.box);
 
         // An `<image>` takes no clip-path in svjeez, so a group around it does.
         return transformed(it, clip ? <g clipPath={clip}>{image}</g> : image);
@@ -565,6 +654,10 @@ export const painter = (
       if (old.kind === "box" && it.kind === "box" && sameTransform(old, it))
         return box(it, { a: old, tween });
 
+      // A field's text that went elsewhere leaves its placeholder to come back.
+      if (old.kind === "text" && gone.has(old))
+        return it.kind === "text" ? <g animation={fade(tween, "enter")}>{item(it)}</g> : null;
+
       if (old.kind === it.kind) return pair(old, it, tween);
 
       return (
@@ -607,7 +700,8 @@ export const painter = (
 
     const motions = [...[partMotion(b)].flat(), opacity].filter(Boolean);
 
-    const drawn = (
+    const drawn = masked(
+      b,
       <>
         {shadows}
         {layer(
@@ -618,17 +712,19 @@ export const painter = (
           (x) => rounded(x.box, x.radii),
         )}
         {gradients(b, a, tween)}
+        {pictures(b)}
         {insetShadows(b, padding, a, tween)}
         {layer(b, a, tween, (x) => x.border?.color, borderRing, { fillRule: "evenodd" })}
         {clip ? <g clipPath={clip}>{kids}</g> : kids}
         {layer(b, a, tween, (x) => x.outline?.color, outlineRing, { fillRule: "evenodd" })}
-      </>
+      </>,
     );
 
     // A box with nothing of its own to apply adds no group: deep pages nest hundreds of plain wrappers.
     const dim = b.darkOpacity !== undefined && !opacity;
 
-    if (motions.length === 0 && b.opacity >= 1 && !dim) return transformed(b, drawn);
+    if (motions.length === 0 && b.opacity >= 1 && !dim && !b.blend && !b.isolate)
+      return transformed(b, drawn);
 
     // Faded in one scheme only: the opacity is a variable that follows the viewer's scheme, as colors are.
     const faded = dim
@@ -637,7 +733,15 @@ export const painter = (
         ? b.opacity
         : undefined;
 
-    return transformed(b, jsx("g", { opacity: faded, animation: motions, children: drawn }));
+    // A blend mode blends this group with what is drawn under it; isolation keeps what's inside from reaching out.
+    const mode = [b.blend && `mix-blend-mode:${b.blend}`, b.isolate && "isolation:isolate"]
+      .filter(Boolean)
+      .join(";");
+
+    return transformed(
+      b,
+      jsx("g", { opacity: faded, style: mode || undefined, animation: motions, children: drawn }),
+    );
   };
 
   /** The rules that define the variables drawn so far, and the page's fonts svjeez doesn't embed itself. */
