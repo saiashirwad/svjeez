@@ -37,4 +37,6 @@ export { duration, loop, size, type Step } from "./timeline.ts";
 
 export { find, rect } from "./find.ts";
 
+export { shots, type Shot, type ShotsOptions } from "./camera.ts";
+
 export type * from "./tree.ts";
