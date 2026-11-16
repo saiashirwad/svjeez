@@ -2,6 +2,7 @@ import { sceneWorker } from "@svjeez/live/client";
 import type { Compiled, SceneStats, SourceError } from "@svjeez/live/compile";
 import { EditorView, editorState } from "./editor";
 import { examples, type PlaygroundExample } from "./examples";
+import { pinScheme, systemScheme } from "../scripts/scheme";
 
 const DEBOUNCE_MS = 250;
 const WATCHDOG_MS = 5000;
@@ -155,7 +156,10 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
   const show = (nextSvg: string) => {
     const previous = url;
     svg = nextSvg;
-    url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+    // Safari shows an <img> SVG in the OS's scheme whatever the stage's color-scheme says, so the other one is pinned.
+    url = URL.createObjectURL(
+      new Blob([scheme === systemScheme() ? svg : pinScheme(svg, scheme)], { type: "image/svg+xml" }),
+    );
     img.src = url;
 
     if (previous) img.addEventListener("load", () => URL.revokeObjectURL(previous), { once: true });
@@ -242,8 +246,11 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
     );
 
     button.addEventListener("click", () => {
+      if (scheme === value) return;
       scheme = value;
       paintScheme();
+
+      if (svg) show(svg);
     });
 
     return [value, button] as const;

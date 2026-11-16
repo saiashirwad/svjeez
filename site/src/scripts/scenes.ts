@@ -126,10 +126,12 @@ calm.addEventListener("change", () =>
   scenes.forEach((img) => (img.dataset.state === "live" && calm.matches ? still(img) : undefined)),
 );
 
+// A playing scene is shown again, so Safari gets a copy pinned to the new scheme, or the plain file when the OS's is it.
 addEventListener(THEMECHANGE, () =>
-  scenes.forEach(
-    (img) => img.dataset.state === "still" && !img.src.startsWith("blob:") && still(img),
-  ),
+  scenes.forEach((img) => {
+    if (img.dataset.state === "live") replay(img);
+    else if (img.dataset.state === "still") still(img);
+  }),
 );
 
 addEventListener(PALETTECHANGE, () =>

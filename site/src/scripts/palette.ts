@@ -5,7 +5,7 @@ import { adaptive } from "svjeez";
 import { restyle } from "svjeez/page";
 
 import { DEFAULT_PALETTE, PALETTES, themed, type PaletteId } from "../palettes";
-import { calm, type Scheme } from "./scheme";
+import { calm, pinScheme, scheme as pageScheme, systemScheme, type Scheme } from "./scheme";
 
 export type { PaletteId };
 
@@ -49,13 +49,6 @@ const source = (live: string) => {
   return svg;
 };
 
-// Safari answers an <img> SVG's prefers-color-scheme with the page's scheme and ignores the img's own color-scheme, so
-// an img pinned to one scheme gets a copy whose queries are answered already.
-const pin = (svg: string, scheme: Scheme) =>
-  svg.replace(/\(\s*prefers-color-scheme\s*:\s*(light|dark)\s*\)/g, (_, query) =>
-    query === scheme ? "(min-width: 0)" : "(max-width: -1px)",
-  );
-
 /**
  * A URL that shows the scene at `live` in the current palette, `at` seconds in or held at its still frame. Undefined
  * when the scene's own file already does: the default palette from the start or as a still unless `always`, or a scene
@@ -82,7 +75,7 @@ export const paint = async (
   const css = recolor && id !== DEFAULT_PALETTE ? CSS.get(id) : undefined;
 
   return URL.createObjectURL(
-    new Blob([restyle(scheme ? pin(svg, scheme) : svg, { css, at, still })], {
+    new Blob([restyle(scheme ? pinScheme(svg, scheme) : svg, { css, at, still })], {
       type: "image/svg+xml",
     }),
   );
@@ -96,7 +89,15 @@ export interface Frame {
 }
 
 const recolors = (img: HTMLImageElement) => "themed" in img.dataset;
-const pinned = (img: HTMLImageElement) => img.dataset.scheme as Scheme | undefined;
+/**
+ * The scheme an img must be pinned to: its own data-scheme or the page's, when that is not the OS's. Chromium shows an
+ * <img> SVG in the color-scheme around it, but Safari always shows the OS's.
+ */
+export const pinned = (img: HTMLImageElement) => {
+  const want = (img.dataset.scheme as Scheme | undefined) ?? pageScheme();
+
+  return want === systemScheme() ? undefined : want;
+};
 
 /** The scene at `live` playing from `at` seconds in, in the current palette. */
 export const playing = async (img: HTMLImageElement, live: string, at = 0): Promise<Frame> => {

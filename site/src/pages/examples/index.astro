@@ -208,7 +208,10 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
       if (shot.dataset.near !== undefined && shot.dataset.key !== keyOf(shot)) still(shot, fade);
     });
 
-  addEventListener(THEMECHANGE, () => restill(false));
+  addEventListener(THEMECHANGE, () => {
+    shots.forEach((shot) => shot.dataset.playing && replay(image(shot)));
+    restill(false);
+  });
 
   addEventListener(PALETTECHANGE, () => {
     shots.forEach((shot) => {
