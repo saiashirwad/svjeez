@@ -43,14 +43,16 @@ const unit = (x: number): number => Math.min(1, Math.max(0, x));
 
 /**
  * The two eases that, played back to back over the two parts of a transition cut at `progress`, draw what `curve` draws
- * over the whole. Each runs from 0 to 1 over its own part. A `steps()` can be cut only on a step edge. `where` starts
- * the error when it cannot.
+ * over the whole. Each runs from 0 to 1 over its own part. A `steps()` can be cut only on a step edge, or anywhere in a
+ * single step. `where` starts the error when it cannot.
  */
 export const splitEase = (curve: Ease, progress: number, where: string): readonly [Ease, Ease] => {
   switch (curve.kind) {
     case "linear":
       return [curve, curve];
     case "steps": {
+      // A single step holds the first value until its end, so a cut inside it leaves two holds.
+      if (curve.count === 1 && progress > 0 && progress < 1) return [curve, curve];
       const edge = progress * curve.count;
       const done = Math.round(edge);
 

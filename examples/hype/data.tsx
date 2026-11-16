@@ -1,5 +1,5 @@
 import { chart } from "@svjeez/charts";
-import { enter, type Span } from "svjeez";
+import { enter } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { jumps } from "../site/lib/blip";
 import { mono, theme } from "../style";
@@ -21,8 +21,9 @@ const plot = chart({
   fontSize: 12,
 });
 
-export const dataShot = ({ at }: Span) => {
-  const grow = at + 0.5;
+/** The data shot, written from 0. */
+export const dataShot = () => {
+  const grow = 0.5;
 
   const bars = plot.bars({ at: grow, over: 0.7 + (pairs.length - 1) * STEP }, pairs, {
     stagger: STEP,
@@ -47,7 +48,7 @@ export const dataShot = ({ at }: Span) => {
 
   return (
     <>
-      <g animation={enter({ at: at + 0.15, over: 0.5 }, { opacity: 0 })}>{plot.node}</g>
+      <g animation={enter({ at: 0.15, over: 0.5 }, { opacity: 0 })}>{plot.node}</g>
       {bars.node}
       {trend.node}
       <Blip
@@ -61,7 +62,7 @@ export const dataShot = ({ at }: Span) => {
         bulb={cheer.bulb}
       />
       <Caption
-        at={at + 0.1}
+        at={0.1}
         tag="@svjeez/charts"
         call="chart().bars(stars).line(stars)"
         line="one dataset, drawn as bars with a trend line"

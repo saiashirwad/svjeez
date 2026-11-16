@@ -1,5 +1,5 @@
 import { tex } from "@svjeez/math";
-import { def, ease, motion, sampled, type Span, Brace } from "svjeez";
+import { def, ease, motion, sampled, Brace } from "svjeez";
 
 import { theme } from "../style";
 import { C, Caption, Blip, H } from "./kit";
@@ -13,8 +13,9 @@ const BOB = 300;
 const PLOT = { x: 450, w: 700 };
 
 /** The spring and its plot share one function of time, so the weight and the playhead never drift apart. */
-export const springShot = ({ at, over }: Span) => {
-  const written = { at: at + 0.25, over: 0.9 };
+/** The spring shot, written from 0 and lasting `over` seconds. */
+export const springShot = (over: number) => {
+  const written = { at: 0.25, over: 0.9 };
   const run = { at: written.at + written.over + 0.2, over: over - 1.9 };
   const clamp = (t: number) => Math.min(Math.max(t - run.at, 0), run.over);
 
@@ -98,7 +99,7 @@ export const springShot = ({ at, over }: Span) => {
       </g>
       <circle r={6} fill={C.accent} animation={playhead} />
       <Caption
-        at={at + 0.1}
+        at={0.1}
         tag="@svjeez/math · sampled()"
         call="tex(`x(t) = …`) + sampled(t => x(t))"
         line="typeset the equation, then run it"
