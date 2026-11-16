@@ -360,7 +360,9 @@ describe("properties", () => {
       </>,
     );
 
-    expect(svg).toContain("@property --p1{syntax:'<angle>';inherits:true;initial-value:0deg}");
+    expect(svg).toContain(
+      "@property --p1{syntax:'\\3c angle\\3e ';inherits:true;initial-value:0deg}",
+    );
     expect(svg.match(/@property/g)).toHaveLength(1);
     expect(keyframes(svg)).toEqual(["0%{--p1:0deg}10%,100%{--p1:90deg}"]);
     expect(body(svg).match(/<g class="a m1"\/>/g)).toHaveLength(2);
@@ -372,7 +374,9 @@ describe("properties", () => {
     );
 
     expect(body(svg)).toContain('style="--p1:0.25;--p2:30deg;--p3:#f80;opacity:0.5"');
-    expect(svg).toContain("@property --p3{syntax:'<color>';inherits:false;initial-value:#000}");
+    expect(svg).toContain(
+      "@property --p3{syntax:'\\3c color\\3e ';inherits:false;initial-value:#000}",
+    );
   });
 
   test("a declared property that nothing uses is not registered", () => {

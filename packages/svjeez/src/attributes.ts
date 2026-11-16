@@ -1,5 +1,5 @@
 import type { PaintServer, Ref } from "./defs";
-import type { PropertyValues } from "./properties";
+import type { Css, PropertyValues } from "./properties";
 import type { FontValue } from "./font/font";
 
 export type NamedColor =
@@ -258,7 +258,7 @@ type ClassValue = string | readonly (string | false | null | undefined)[];
 
 type StyleValue =
   | string
-  | ({ readonly [property: string]: string | number | undefined } & PropertyValues);
+  | ({ readonly [property: string]: string | number | Css | undefined } & PropertyValues);
 
 interface Common {
   readonly class?: ClassValue;

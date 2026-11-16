@@ -13,20 +13,20 @@
 svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04:#A1A1A6;--base05:#E5E5EA;--base06:#F5F5F7;--base07:#FFFFFF;--base08:#FF6961;--base09:#FF9F0A;--base0A:#FFD60A;--base0B:#32D74B;--base0C:#64D2FF;--base0D:#5EA0FF;--base0E:#C58AFF;--base0F:#AC8E68}
 @media (prefers-color-scheme:light){svg{--base00:#FFFFFF;--base01:#F5F5F7;--base02:#E5E5EA;--base03:#8E8E93;--base04:#6E6E73;--base05:#1D1D1F;--base06:#1D1D1F;--base07:#000000;--base08:#E5453B;--base09:#E8751A;--base0A:#E5A50A;--base0B:#2FA84F;--base0C:#1B9AAA;--base0D:#0A6CFF;--base0E:#9B51E0;--base0F:#A66B43}}.plane-map{transform:matrix(var(--p1),var(--p12),var(--p2),var(--p3),var(--p13),var(--p14))}.plane-map *{vector-effect:non-scaling-stroke}.plane-head{translate:calc((var(--p1) * var(--p7) + var(--p2) * var(--p10) + var(--p13)) * var(--p5) * 1px) calc((var(--p12) * var(--p7) + var(--p3) * var(--p10) + var(--p14)) * var(--p6) * -1px);rotate:atan2(calc(0 - (var(--p12) * var(--p8) + var(--p3) * var(--p11)) * var(--p6)), calc((var(--p1) * var(--p8) + var(--p2) * var(--p11)) * var(--p5)))}.plane-at{translate:calc((var(--p1) * var(--p7) + var(--p2) * var(--p10) + var(--p13)) * var(--p5) * 1px + var(--p9) * cos(atan2(calc(0 - (var(--p12) * var(--p8) + var(--p3) * var(--p11)) * var(--p6)), calc((var(--p1) * var(--p8) + var(--p2) * var(--p11)) * var(--p5))) - 35deg) * 1px) calc((var(--p12) * var(--p7) + var(--p3) * var(--p10) + var(--p14)) * var(--p6) * -1px + var(--p9) * sin(atan2(calc(0 - (var(--p12) * var(--p8) + var(--p3) * var(--p11)) * var(--p6)), calc((var(--p1) * var(--p8) + var(--p2) * var(--p11)) * var(--p5))) - 35deg) * 1px)}.plane-grow{scale:var(--p4);transform-origin:calc(var(--p7) * 1px) calc(var(--p10) * 1px)}
 
-@property --p1{syntax:'<number>';inherits:true;initial-value:1}
-@property --p2{syntax:'<number>';inherits:true;initial-value:0}
-@property --p3{syntax:'<number>';inherits:true;initial-value:1}
-@property --p4{syntax:'<number>';inherits:false;initial-value:1}
-@property --p5{syntax:'<number>';inherits:true;initial-value:1}
-@property --p6{syntax:'<number>';inherits:true;initial-value:1}
-@property --p7{syntax:'<number>';inherits:false;initial-value:0}
-@property --p8{syntax:'<number>';inherits:false;initial-value:0}
-@property --p9{syntax:'<number>';inherits:false;initial-value:0}
-@property --p10{syntax:'<number>';inherits:false;initial-value:0}
-@property --p11{syntax:'<number>';inherits:false;initial-value:0}
-@property --p12{syntax:'<number>';inherits:true;initial-value:0}
-@property --p13{syntax:'<number>';inherits:true;initial-value:0}
-@property --p14{syntax:'<number>';inherits:true;initial-value:0}
+@property --p1{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p2{syntax:'\3c number\3e ';inherits:true;initial-value:0}
+@property --p3{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p4{syntax:'\3c number\3e ';inherits:false;initial-value:1}
+@property --p5{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p6{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p7{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p8{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p9{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p10{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p11{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p12{syntax:'\3c number\3e ';inherits:true;initial-value:0}
+@property --p13{syntax:'\3c number\3e ';inherits:true;initial-value:0}
+@property --p14{syntax:'\3c number\3e ';inherits:true;initial-value:0}
 .a{animation-duration:15s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,0.667%{opacity:0}4.667%,100%{opacity:1}}
 .m1{animation-name:k1}

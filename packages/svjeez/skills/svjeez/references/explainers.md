@@ -50,6 +50,8 @@ const { vars, css } = variables({
 
 `restyle(svg, { css, at, onceAt, paused, still })`, from `svjeez/page`, returns a copy of a rendered SVG with more CSS after the scene's own. A page uses it to recolor an `<img>` without restarting the animation. `at` is how many playback seconds the copy starts in, written to `--t0` on the root, which delays every CSS animation, and to `begin` on every SMIL `<animate>`. Any value works, so a page never needs the scene's loop length. `paused: true` holds the frame at `at` (0 when left out) instead of playing on, whatever the viewer's setting, so a page can show any moment in an `<img>`. SMIL holds through `begin`, `end` and `fill="freeze"`. Parts inside `<Once>` keep their own clock, which follows `at` unless `onceAt` sets it, so `restyle(next, { at, onceAt: 0 })` swaps in a new file that keeps the loop's place while its once parts play from the top. `still: true` holds the reduced-motion frame instead, ignoring `at` and `paused`. Both pause every animation, your own CSS included, and your own CSS animations stay where they start. A scene rendered with `reducedMotion: false` has no still frame to hold.
 
+`restyle(svg, { timeline: "--story", range: "contain" })` scrubs the scene with a scroll or view timeline the page declares, one loop over the range, with no script. Only CSS animations follow it, so a scene with SMIL throws. Parts inside `<Ambient>` stay on the clock and keep playing while the page stands still, SMIL included.
+
 To override a scene's colors from the page, restyle with the same variables on the scene's root: `restyle(svg, { css: "svg.a-root{--sky:#400}" })` for a scene rendered with `prefix: "a-"` (`svg{--sky:#400}` without one). The page needs no rebuild and the animation keeps its place.
 
 To scrub a picture inlined in the page instead, `seek(time, svg)` from `svjeez/page` pauses every CSS and SMIL animation in that `<svg>` at `time`, and `loopLength(svg)` returns its loop in seconds. Both default to the whole document and run only in a browser. To drive a scene from scroll, call `seek(progress * loopLength(svg), svg)` from a scroll handler, with `progress` from 0 to 1.
@@ -175,14 +177,14 @@ const notes = (
 
 ## Camera
 
-`Camera` pans and zooms everything inside it to each stop's `target` (a `Rect`, or `"all"` for the whole view). A stop at 0 is the opening view. Clip it yourself.
+`Camera` pans and zooms everything inside it to each stop's `target` (a `Rect`, or `"all"` for the whole view). A stop at 0 is the opening view. Each move takes the camera's `over` (default 0.5s), or the stop's own `over` when it has one. Clip it yourself.
 
 ```tsx
 import { rect } from "svjeez";
 
 
 const FRAME = rect(0, 0, 800, 450);
-const stops: CameraStop[] = [{ show: { at: 4, over: 4 }, target: rect(300, 200, 160, 90) }, { show: { at: 8, over: 3 }, target: "all" }];
+const stops: CameraStop[] = [{ show: { at: 4, over: 4 }, target: rect(300, 200, 160, 90) }, { show: { at: 8, over: 3 }, target: "all", over: 1.5 }];
 const zoomed = <Camera frame={FRAME} stops={stops} over={0.8}>{src.node}</Camera>;
 ```
 

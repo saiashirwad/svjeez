@@ -7,6 +7,8 @@ import type { Shown } from "./timeline";
 export type CameraStop = Shown & {
   /** Fit and center this region in the frame. `"all"` leaves the content unmoved. */
   readonly target: Rect | "all";
+  /** How long the move to this stop takes. Default the camera's `over`. */
+  readonly over?: Seconds;
 };
 
 /** The x, y and scale that fit `target` inside `frame`, centered. */
@@ -29,6 +31,7 @@ export const fit = (frame: Rect, target: Rect | "all") => {
 interface CameraBase {
   readonly frame: Rect;
   readonly stops: readonly CameraStop[];
+  /** How long each move takes, for the stops that don't say. Default 0.5. */
   readonly over?: Seconds;
   readonly children: Child;
 }
@@ -44,7 +47,7 @@ export type CameraProps =
 
 /**
  * Pan and zoom `children` to each stop's target as the stop starts; a stop at 0 is the opening view, else it opens on
- * `"all"`. Clip it yourself.
+ * `"all"`. A move takes the stop's own `over`, or the camera's. Clip it yourself.
  *
  * With `steady` it holds `children` at their size on screen while a `Camera` with the same `frame`, `stops` and `over`
  * zooms: it scales them by the inverse of the camera's zoom around `origin`, the point they sit on, so a marker or
@@ -67,7 +70,9 @@ export function Camera({
         const { target } = stop;
         const scale = 1 / fit(frame, target).scale;
 
-        return span.at === 0 ? t.set({ scale }) : t.at(span.at).to({ scale }, over, ease.inOut);
+        return span.at === 0
+          ? t.set({ scale })
+          : t.at(span.at).to({ scale }, stop.over ?? over, ease.inOut);
       },
       motion({ scale: 1 }),
     );
@@ -85,7 +90,7 @@ export function Camera({
 
       return at === 0
         ? t.set(fit(frame, stop.target))
-        : t.at(at).to(fit(frame, stop.target), over, ease.inOut);
+        : t.at(at).to(fit(frame, stop.target), stop.over ?? over, ease.inOut);
     },
     motion({ x: 0, y: 0, scale: 1 }),
   );

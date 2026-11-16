@@ -102,8 +102,8 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
     scale: var(--p1) var(--p2);
   }
 
-@property --p1{syntax:'<number>';inherits:false;initial-value:1}
-@property --p2{syntax:'<number>';inherits:false;initial-value:1}
+@property --p1{syntax:'\3c number\3e ';inherits:false;initial-value:1}
+@property --p2{syntax:'\3c number\3e ';inherits:false;initial-value:1}
 .a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .o{animation-iteration-count:1;animation-delay:var(--t1,var(--t0,0s))}
 @keyframes k1{0%,5%{stroke-dashoffset:1;visibility:hidden}7.22%,100%{stroke-dashoffset:0;visibility:visible}}

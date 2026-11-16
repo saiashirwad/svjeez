@@ -62,6 +62,8 @@ export { Glyphs, type GlyphsProps } from "./glyphs";
 
 export { Icon, type IconData, type IconProps } from "./icon";
 
+export { Ambient, type AmbientProps } from "./ambient";
+
 export { Once, type OnceProps } from "./once";
 
 export { Style, type StyleProps } from "./style";

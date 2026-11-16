@@ -6,8 +6,8 @@
           translate: calc(100px + 60px * var(--p1) * cos(var(--p2))) calc(100px + 60px * var(--p1) * sin(var(--p2)));
         }
 
-@property --p1{syntax:'<number>';inherits:false;initial-value:0}
-@property --p2{syntax:'<angle>';inherits:true;initial-value:0deg}
+@property --p1{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p2{syntax:'\3c angle\3e ';inherits:true;initial-value:0deg}
 .a{animation-duration:4s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%{--p2:0deg}100%{--p2:360deg}}
 .m1{animation-name:k1;animation-timing-function:linear}

@@ -16,20 +16,20 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .sans text,.sans{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif}
 .round text,.round{font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}.plane-map{transform:matrix(var(--p1),var(--p2),var(--p3),var(--p12),var(--p13),var(--p14))}.plane-map *{vector-effect:non-scaling-stroke}.plane-head{translate:calc((var(--p1) * var(--p6) + var(--p3) * var(--p7) + var(--p13)) * var(--p4) * 1px) calc((var(--p2) * var(--p6) + var(--p12) * var(--p7) + var(--p14)) * var(--p5) * -1px);rotate:atan2(calc(0 - (var(--p2) * var(--p9) + var(--p12) * var(--p11)) * var(--p5)), calc((var(--p1) * var(--p9) + var(--p3) * var(--p11)) * var(--p4)))}.plane-at{translate:calc((var(--p1) * var(--p6) + var(--p3) * var(--p7) + var(--p13)) * var(--p4) * 1px + var(--p10) * cos(atan2(calc(0 - (var(--p2) * var(--p9) + var(--p12) * var(--p11)) * var(--p5)), calc((var(--p1) * var(--p9) + var(--p3) * var(--p11)) * var(--p4))) - 35deg) * 1px) calc((var(--p2) * var(--p6) + var(--p12) * var(--p7) + var(--p14)) * var(--p5) * -1px + var(--p10) * sin(atan2(calc(0 - (var(--p2) * var(--p9) + var(--p12) * var(--p11)) * var(--p5)), calc((var(--p1) * var(--p9) + var(--p3) * var(--p11)) * var(--p4))) - 35deg) * 1px)}.plane-grow{scale:var(--p8);transform-origin:calc(var(--p6) * 1px) calc(var(--p7) * 1px)}
 
-@property --p1{syntax:'<number>';inherits:true;initial-value:1}
-@property --p2{syntax:'<number>';inherits:true;initial-value:0}
-@property --p3{syntax:'<number>';inherits:true;initial-value:0}
-@property --p4{syntax:'<number>';inherits:true;initial-value:1}
-@property --p5{syntax:'<number>';inherits:true;initial-value:1}
-@property --p6{syntax:'<number>';inherits:false;initial-value:0}
-@property --p7{syntax:'<number>';inherits:false;initial-value:0}
-@property --p8{syntax:'<number>';inherits:false;initial-value:1}
-@property --p9{syntax:'<number>';inherits:false;initial-value:0}
-@property --p10{syntax:'<number>';inherits:false;initial-value:0}
-@property --p11{syntax:'<number>';inherits:false;initial-value:0}
-@property --p12{syntax:'<number>';inherits:true;initial-value:1}
-@property --p13{syntax:'<number>';inherits:true;initial-value:0}
-@property --p14{syntax:'<number>';inherits:true;initial-value:0}
+@property --p1{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p2{syntax:'\3c number\3e ';inherits:true;initial-value:0}
+@property --p3{syntax:'\3c number\3e ';inherits:true;initial-value:0}
+@property --p4{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p5{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p6{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p7{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p8{syntax:'\3c number\3e ';inherits:false;initial-value:1}
+@property --p9{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p10{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p11{syntax:'\3c number\3e ';inherits:false;initial-value:0}
+@property --p12{syntax:'\3c number\3e ';inherits:true;initial-value:1}
+@property --p13{syntax:'\3c number\3e ';inherits:true;initial-value:0}
+@property --p14{syntax:'\3c number\3e ';inherits:true;initial-value:0}
 .a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,1.818%{opacity:0}7.273%,100%{opacity:1}}
 .m2{animation-name:k1}
