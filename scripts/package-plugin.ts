@@ -40,15 +40,15 @@ const copy = (from: string, to: string) => {
   copyFileSync(join(dir, from), join(out, to));
 };
 
-// "./src/scene.ts" is compiled to "./scene.js" and "./scene.d.ts"; any other file is copied as it is.
+// "./src/scene.ts" (or .tsx) is compiled to "./scene.js" and "./scene.d.ts"; any other file is copied as it is.
 const exports = Object.fromEntries(
   Object.entries(read<Target>(dir).exports ?? {}).map(([key, target]) => {
     if (!isPath(target)) return (copy(target.types, target.types), [key, target]);
     const path = target.replace(/^\.\/src\//, "./");
 
-    if (!path.endsWith(".ts")) return (copy(target, path), [key, path]);
+    if (!/\.tsx?$/.test(path)) return (copy(target, path), [key, path]);
 
-    return [key, { types: path.replace(/\.ts$/, ".d.ts"), default: path.replace(/\.ts$/, ".js") }];
+    return [key, { types: path.replace(/\.tsx?$/, ".d.ts"), default: path.replace(/\.tsx?$/, ".js") }];
   }),
 );
 

@@ -14,6 +14,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/charts/` is `@svjeez/charts`, which draws animated bar, line and area charts with `d3-scale` and `d3-shape`.
 - `packages/code/` is `@svjeez/code`, which highlights source into role-tagged runs for `code()` and `terminal()` through Shiki, and the editor palettes (`tomorrow`, `solarizedDark` and the rest) on `@svjeez/code/palettes`.
 - `packages/diagrams/` is `@svjeez/diagrams`, which lays out and animates flowcharts, sequence diagrams, state machines, trees and swimlanes, with the layered, tree, sequence and lanes layout behind them. `@svjeez/mermaid` builds on it.
+- `packages/dom/` is `@svjeez/dom`, which snapshots real HTML and CSS (or a React or Svelte component) in headless Chromium into svjeez nodes you can animate.
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
@@ -95,7 +96,7 @@ Each package's source explains its own internals. These are the rules that aren'
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro charts code diagrams fonts geo icons live math mermaid react svelte video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro charts code diagrams dom fonts geo icons live math mermaid react svelte video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
