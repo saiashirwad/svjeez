@@ -1,0 +1,22 @@
+name: browsers-trial
+
+# One-off: does every examples/dist SVG seek the same in Chromium, Firefox and WebKit?
+on:
+  push:
+    branches: [ci-browsers-trial]
+  workflow_dispatch:
+
+jobs:
+  browsers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # The locked playwright-core, since bunx fetches the latest.
+      - run: bun run playwright-core install --with-deps chromium-headless-shell firefox webkit
+        working-directory: packages/svjeez
+      - run: bun test tests/browsers.test.ts
+        working-directory: examples
+        env:
+          CI: "true"
