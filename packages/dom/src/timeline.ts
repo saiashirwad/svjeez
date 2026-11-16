@@ -20,6 +20,10 @@ const OVER = 0.6;
 
 const isWait = (step: Step): step is Wait => "wait" in step;
 
+/** The snapshot a step shows, or nothing for a wait. */
+export const snapshotOf = (step: Step): Snapshot | undefined =>
+  isWait(step) ? undefined : "root" in step ? step : step[0];
+
 /**
  * Walks a cursor over the steps: the first snapshot holds from 0, each later one moves in from where the cursor is
  * and leaves it at the move's end, and a wait pushes it on.
@@ -40,7 +44,8 @@ export const timeline = (states: Snapshot | readonly Step[]) => {
       continue;
     }
 
-    const [state, timing] = "root" in step ? [step, undefined] : step;
+    const state = snapshotOf(step)!;
+    const timing = "root" in step ? undefined : step[1];
 
     if (snaps.length === 0 && timing)
       throw new Error(
@@ -75,6 +80,27 @@ export const steady = (states: Snapshot | readonly Step[]): number[] => {
 
     return Math.min(Math.max(arrived, leaves - 0.001), Math.max(length, 1) - 0.001);
   });
+};
+
+/**
+ * A flow that ends where it began: the steps, then a move back into the first snapshot, so the picture loops
+ * without a jump. The return takes `over` seconds (default 0.6) and may hold `wait` seconds after.
+ */
+export const loop = (
+  steps: readonly Step[],
+  timing: Timing & { readonly wait?: number } = {},
+): Step[] => {
+  const first = steps.map(snapshotOf).find((s) => s !== undefined);
+
+  if (!first) throw new Error("loop() needs a snapshot to return to, but the steps have none.");
+
+  const { wait, ...move } = timing;
+
+  return [
+    ...steps,
+    [first, move],
+    ...(wait ? [{ wait }] : []),
+  ];
 };
 
 /** The picture's size: the largest of the states, so one frame holds them all. */

@@ -22,6 +22,8 @@ import {
   duration,
   html,
   hover,
+  loop,
+  press,
   size,
   snap,
   snapshots,
@@ -224,6 +226,25 @@ describe("snap", () => {
     // 0.5 held, 1 typing, 0.5 back, 0.6 by default.
     expect(duration(steps)).toBeCloseTo(2.6);
     expect(validateSvg(draw(steps)).errors).toEqual([]);
+    await card.close();
+  });
+
+  test("loop returns to the first state, so the duration includes the way back", async () => {
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', { css: CSS });
+
+    const steps = await card.run([snap("idle"), fill("input", "hey"), snap("typed", { over: 1 })]);
+    const looped = loop(steps, { over: 0.5, wait: 0.25 });
+
+    expect(looped).toHaveLength(4);
+    expect(looped[2]).toEqual([expect.anything(), { over: 0.5 }]);
+    expect(JSON.stringify(looped[2])).toContain(JSON.stringify(find(steps, "idle")).slice(0, 200));
+    expect(looped[3]).toEqual({ wait: 0.25 });
+    expect(duration(looped)).toBeCloseTo(duration(steps) + 0.75);
+    expect(duration(loop(steps))).toBeCloseTo(duration(steps) + 0.6);
+    expect(() => loop([wait(1)])).toThrow("snapshot to return to");
+
+    // The typed text deletes on the way back.
+    expect(validateSvg(draw(looped)).errors).toEqual([]);
     await card.close();
   });
 
@@ -593,6 +614,44 @@ describe("Dom", () => {
 
     expect(other).toContain(">Drawing it<");
     expect(other).toContain(">Drawn it<");
+    await card.close();
+  });
+
+  test("text that leaves a field for a new element slides there, and the placeholder returns", async () => {
+    const css = `${CSS} li, input { font: 16px "Space Mono"; padding: 0; border: 0 } ul { margin: 8px 0 0; padding: 0 }`;
+
+    const card = await dom.mount(
+      `<div class="card"><input placeholder="What now?"><ul></ul></div>
+      <script>
+        const input = document.querySelector("input");
+        input.addEventListener("keydown", (e) => {
+          if (e.key !== "Enter") return;
+          document.querySelector("ul").insertAdjacentHTML("beforeend", "<li>" + input.value + "</li>");
+          input.value = "";
+        });
+      </script>`,
+      { css },
+    );
+
+    const steps = await card.run([
+      snap("empty"),
+      fill("input", "Ship the SVG"),
+      snap("typed", { over: 0.5 }),
+      wait(0.2),
+      press("Enter"),
+      snap("added", { over: 1 }),
+    ]);
+
+    const node = <Dom states={steps} fonts={[regular]} />;
+    const svg = render({ ...size(steps), duration: 4, title: "dom" }, node);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+
+    // Fully there all through the move into the list, not deleted in the input while the item fades in.
+    for (const t of [0.9, 1.2, 1.5, 1.8]) expect(inkOf(node, "Ship the SVG", t).reduce((a, b) => a + b, 0)).toBeCloseTo(1);
+
+    expect(Math.max(...inkOf(node, "What now?", 0.9))).toBe(0);
+    expect(Math.max(...inkOf(node, "What now?", 2.5))).toBe(1);
     await card.close();
   });
 
