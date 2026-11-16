@@ -219,7 +219,7 @@ describe("trueSize()", () => {
       filter: (f) => f.properties?.name !== "Antarctica",
     });
 
-    const slide = trueSize(map, map.region("Greenland"), [-20, 0], { over: 2 });
+    const slide = trueSize({ at: 0, over: 2 }, map, map.region("Greenland"), [-20, 0]);
 
     const svg = render(
       { width: 400, height: 400, duration: 2, title: "Slide" },

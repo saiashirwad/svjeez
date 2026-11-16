@@ -12,7 +12,7 @@ import type {
   MultiPolygon as TopoMultiPolygon,
   Polygon as TopoPolygon,
 } from "topojson-specification";
-import { sampled, type PathData, type Rect, type Seconds } from "svjeez";
+import { ease, easeAt, sampled, type Ease, type PathData, type Rect, type Span } from "svjeez";
 import type { Turning } from "./globe.ts";
 import type { GeoData, GeoMap, LonLat, Region } from "./index.ts";
 import { RAD, add, angle, cross, dot, lonLat, scale, unit, vec, type Vec3 } from "./sphere.ts";
@@ -249,19 +249,13 @@ export function reproject(
 }
 
 export interface TrueSizeOptions {
-  /** Seconds the motion runs. Default `at + over`. */
-  readonly duration?: Seconds;
-  readonly at?: Seconds;
-  readonly over: Seconds;
-  /** Shapes the slide, from 0 to 1. Default a cubic ease in and out. */
-  readonly ease?: (u: number) => number;
+  /** Shapes the slide. Default `ease.inOut`. */
+  readonly ease?: Ease;
   /** Px. Default 0.5. */
   readonly tolerance?: number;
   /** Degrees. Longer legs are split so the outline bends as it moves. Default 1. */
   readonly step?: number;
 }
-
-const inOut = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - (-2 * u + 2) ** 3 / 2);
 
 /** Turns `p` about `axis` by `theta` radians. */
 const turn = (p: Vec3, axis: Vec3, theta: number): Vec3 =>
@@ -271,17 +265,18 @@ const turn = (p: Vec3, axis: Vec3, theta: number): Vec3 =>
   );
 
 /**
- * A region's real outline sliding over the globe so its middle lands on `to`, drawn through the map's projection at
+ * A region's real outline sliding over the globe during `when` so its middle lands on `to`, drawn through the map's projection at
  * every step: on Mercator, Greenland shrinks as it slides to the equator. Spread it onto a `<path>`.
  */
 export function trueSize(
+  when: Span,
   map: GeoMap,
   region: Region | Feature,
   to: LonLat,
-  options: TrueSizeOptions,
+  options: TrueSizeOptions = {},
 ): Turning {
-  const { at = 0, over, ease = inOut, tolerance = 0.5, step = 1 } = options;
-  const duration = options.duration ?? at + over;
+  const { at, over } = when;
+  const { ease: curve = ease.inOut, tolerance = 0.5, step = 1 } = options;
   const outlined = "feature" in region ? region.feature : region;
   const geometry = outlined.geometry;
 
@@ -318,8 +313,8 @@ export function trueSize(
     }),
   );
 
-  const sample = (t: Seconds) => {
-    const u = ease(Math.min(1, Math.max(0, (t - at) / over)));
+  const sample = (t: number) => {
+    const u = easeAt(curve, t / over);
 
     return write(
       outline.map((ring) =>
@@ -332,5 +327,5 @@ export function trueSize(
     );
   };
 
-  return { d: sample(0), animation: sampled.path(sample, { over: duration, tolerance }) };
+  return { d: sample(0), animation: sampled.path(sample, { at, over, tolerance }) };
 }

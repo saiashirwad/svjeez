@@ -63,11 +63,15 @@ describe("scales", () => {
 describe("legend()", () => {
   test("draws a swatch per class and labels the edges", () => {
     const scale = sequential(palettes.viridis, { domain: [0, 80], steps: 4 });
-    const svg = scene(legend(scale, { x: 10, y: 10, width: 200, every: 1, title: "Years" }));
+    const key = legend(scale, { frame: rect(10, 28, 200, 10), every: 1, title: "Years" });
+    const svg = scene(key.node);
 
     expect(svg.match(/<rect/g)).toHaveLength(4);
 
     for (const label of ["0", "20", "40", "60", "80", "Years"]) expect(svg).toContain(`>${label}<`);
+
+    expect(key.bounds).toMatchObject({ x: 10, y: 11, w: 200 });
+    expect(key.bounds.y + key.bounds.h).toBeGreaterThan(38 + 11);
   });
 });
 
@@ -103,15 +107,15 @@ describe("choropleth()", () => {
   });
 
   test("names the fix when the times don't match the values", () => {
-    expect(() => choropleth(map, { France: [1, 2, 3] }, { scale, at: [0, 1] })).toThrow(
-      "choropleth() has 3 values per region but 2 times in at. Pass one time per value.",
+    expect(() => choropleth(map, { France: [1, 2, 3] }, { scale, times: [0, 1] })).toThrow(
+      "choropleth() has 3 values per region but 2 times in times. Pass one time per value.",
     );
   });
 });
 
 describe("cartogram()", () => {
   const people = { France: 67, Germany: 83, Spain: 47, Italy: 60, Poland: 38, Portugal: 10 };
-  const result = cartogram(map, people, { at: 2, over: 1 });
+  const result = cartogram({ at: 2, over: 1 }, map, people);
 
   test("sizes circles by area and keeps them apart", () => {
     const [de, pt] = ["Germany", "Portugal"].map((n) =>
@@ -126,7 +130,7 @@ describe("cartogram()", () => {
   });
 
   test("is the same every time", () => {
-    expect(cartogram(map, people, { at: 2 }).bubbles).toEqual(result.bubbles);
+    expect(cartogram({ at: 2, over: 1 }, map, people).bubbles).toEqual(result.bubbles);
   });
 
   test("morphs each outline into a circle through the d channel, and returns the rest of the map", () => {
@@ -137,8 +141,20 @@ describe("cartogram()", () => {
     expect(result.rest).not.toContain(map.region("France").d);
   });
 
+  test("a stagger spreads the starts inside the span, so the last shape lands with it", () => {
+    const svg = scene(cartogram({ at: 2, over: 2 }, map, people, { stagger: 0.3 }).node);
+    const durations = [...svg.matchAll(/<animate\b[^>]*attributeName="d"[^>]*dur="([\d.]+)s"/g)].map((m) => +m[1]!);
+
+    expect(durations).toHaveLength(6);
+    for (const dur of durations) expect(dur).toBeCloseTo(2 - 5 * 0.3, 6);
+
+    expect(() => cartogram({ at: 2, over: 1 }, map, people, { stagger: 0.3 })).toThrow(
+      "A morph needs a start of 0 or later and a span longer than its 5 staggers of 0.3s",
+    );
+  });
+
   test("asks for one number per region", () => {
-    expect(() => cartogram(map, { France: [1, 2] }, { at: 0 })).toThrow(
+    expect(() => cartogram({ at: 0, over: 1 }, map, { France: [1, 2] })).toThrow(
       'cartogram() takes one number per region, but "250" has a list.',
     );
   });
@@ -149,14 +165,14 @@ describe("toBars()", () => {
     const frame = rect(0, 0, 100, 100);
 
     for (const top of [0, -1, 1.5])
-      expect(() => toBars(map, { France: 1 }, { at: 0, frame, top })).toThrow(
+      expect(() => toBars({ at: 0, over: 1 }, map, { France: 1 }, { frame, top })).toThrow(
         `toBars() needs top to be a whole number of at least 1, got ${top}.`,
       );
   });
 
   const people = { France: 67, Germany: 83, Spain: 47, Italy: 60 };
   const frame = rect(600, 100, 300, 200);
-  const { bars } = toBars(map, people, { at: 1, frame });
+  const { bars } = toBars({ at: 1, over: 1 }, map, people, { frame });
 
   test("sorts the biggest first and scales width to value", () => {
     expect(bars.map((b) => b.region.properties?.name)).toEqual([
@@ -172,7 +188,7 @@ describe("toBars()", () => {
   });
 
   test("keeps only the top few and can run smallest first", () => {
-    const two = toBars(map, people, { at: 1, frame, top: 2, order: "asc" });
+    const two = toBars({ at: 1, over: 1 }, map, people, { frame, top: 2, order: "asc" });
 
     expect(two.bars.map((b) => b.region.properties?.name)).toEqual(["France", "Germany"]);
     expect(two.rest).toContain(map.region("Spain").d);
@@ -180,7 +196,7 @@ describe("toBars()", () => {
 
   test("morphs through the d channel", () => {
     expect(
-      scene(toBars(map, people, { at: 1, frame }).node).match(/<animate\b[^>]*attributeName="d"/g),
+      scene(toBars({ at: 1, over: 1 }, map, people, { frame }).node).match(/<animate\b[^>]*attributeName="d"/g),
     ).toHaveLength(4);
   });
 });
@@ -201,9 +217,9 @@ describe("traffic()", () => {
   ];
 
   test("sends rate times the span of particles and is deterministic by seed", () => {
-    const a = traffic(lines, { during: { at: 1, over: 4 }, rate: 5, seed: 7 });
-    const b = traffic(lines, { during: { at: 1, over: 4 }, rate: 5, seed: 7 });
-    const c = traffic(lines, { during: { at: 1, over: 4 }, rate: 5, seed: 8 });
+    const a = traffic({ at: 1, over: 4 }, lines, { rate: 5, seed: 7 });
+    const b = traffic({ at: 1, over: 4 }, lines, { rate: 5, seed: 7 });
+    const c = traffic({ at: 1, over: 4 }, lines, { rate: 5, seed: 8 });
 
     expect(a.count).toBe(20);
     expect(scene(a.node)).toBe(scene(b.node));
@@ -212,7 +228,7 @@ describe("traffic()", () => {
   });
 
   test("favors heavier routes", () => {
-    const { node } = traffic(lines, { during: { at: 0, over: 8 }, rate: 25, seed: 3 });
+    const { node } = traffic({ at: 0, over: 8 }, lines, { rate: 25, seed: 3 });
     const svg = scene(node);
     const ends = [...svg.matchAll(/translate:100px (0|80)px/g)].map((m) => m[1]);
 
@@ -222,7 +238,7 @@ describe("traffic()", () => {
   });
 
   test("rejects a rate it can't use", () => {
-    expect(() => traffic(lines, { during: { at: 0, over: 1 }, rate: 0 })).toThrow("positive rate");
+    expect(() => traffic({ at: 0, over: 1 }, lines, { rate: 0 })).toThrow("positive rate");
   });
 });
 

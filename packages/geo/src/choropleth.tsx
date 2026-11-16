@@ -3,7 +3,7 @@ import { ease, motion, type Color, type Ease, type Seconds, type SvgNode } from 
 import type { GeoMap, Region } from "./index.ts";
 import type { ColorScale, Hex } from "./scale.tsx";
 
-/** A value per region, by `id` or `properties.name`. A list is the region's value at each time in `at`. */
+/** A value per region, by `id` or `properties.name`. A list is the region's value at each time in `times`. */
 export type RegionValues = Readonly<Record<string, number | readonly number[]>>;
 
 export interface ChoroplethOptions {
@@ -12,7 +12,7 @@ export interface ChoroplethOptions {
    * When each value takes hold: one time for single values, or one per entry of the lists, in order. The first time
    * fades the map in from the scale's `empty` color unless it is 0. Default 0.
    */
-  readonly at?: Seconds | readonly Seconds[];
+  readonly times?: Seconds | readonly Seconds[];
   /** Seconds a change of color takes, cut short to fit between two times. Default 0.8. */
   readonly over?: Seconds;
   readonly ease?: Ease;
@@ -33,7 +33,7 @@ export interface Choropleth {
 
 const isName = (name: unknown): name is string => typeof name === "string";
 
-const isTime = (at: ChoroplethOptions["at"]): at is Seconds => typeof at === "number";
+const isTime = (times: ChoroplethOptions["times"]): times is Seconds => typeof times === "number";
 
 /** The regions `values` names, with each key resolved. Keys that match no region are returned apart. */
 export const resolveRegions = (map: GeoMap, values: RegionValues) => {
@@ -59,12 +59,12 @@ export const resolveRegions = (map: GeoMap, values: RegionValues) => {
   return { found: [...found], unmatched };
 };
 
-const times = (at: ChoroplethOptions["at"], frames: number): Seconds[] => {
-  const list = isTime(at) ? [at] : [...(at ?? [0])];
+const timesOf = (times: ChoroplethOptions["times"], frames: number): Seconds[] => {
+  const list = isTime(times) ? [times] : [...(times ?? [0])];
 
   if (list.length !== frames)
     throw new Error(
-      `choropleth() has ${frames} value${frames === 1 ? "" : "s"} per region but ${list.length} time${list.length === 1 ? "" : "s"} in at. Pass one time per value.`,
+      `choropleth() has ${frames} value${frames === 1 ? "" : "s"} per region but ${list.length} time${list.length === 1 ? "" : "s"} in times. Pass one time per value.`,
     );
 
   if (list.some((t, i) => !(t >= 0) || (i > 0 && t <= list[i - 1]!)))
@@ -74,7 +74,7 @@ const times = (at: ChoroplethOptions["at"], frames: number): Seconds[] => {
 };
 
 /**
- * Colors every region in `values` from `scale`, and plays a list of values through the times in `at`. Regions whose
+ * Colors every region in `values` from `scale`, and plays a list of values through the times in `times`. Regions whose
  * colors follow the same course share one path, so a map of 180 countries with 9 classes stays small. Regions with no
  * value take the scale's `empty` color.
  */
@@ -94,7 +94,7 @@ export function choropleth(
     throw new Error(
       `choropleth() needs every region to have the same number of values, got lists of ${[...lengths].join(" and ")}.`,
     );
-  const at = times(options.at, frames);
+  const at = timesOf(options.times, frames);
 
   /** The region's color in each frame; a single number holds in all of them. */
   const courses = series.map(({ region, list }) => ({

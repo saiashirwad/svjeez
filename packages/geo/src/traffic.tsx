@@ -16,8 +16,6 @@ export interface TrafficOptions extends Omit<
   FlowOptions,
   "at" | "over" | "label" | "fill" | "ink"
 > {
-  /** When the particles leave: departures are spread over this span. */
-  readonly during: Span;
   /** Departures per second, across all the routes. */
   readonly rate: number;
   /** Changes which routes and moments are picked, with the same result every build. Default 1. */
@@ -49,15 +47,16 @@ const generator = (seed: number) => {
 };
 
 /**
- * Many particles along many routes: flights, trade, migration. `rate` departures a second over `during`, each on a
+ * Many particles along many routes: flights, trade, migration. `rate` departures a second over the span `during`, each on a
  * route picked by weight, at a moment jittered inside its own slot so they spread out evenly without lining up. Each
  * is a `flow()` token. A list of points stands for a route of weight 1.
  */
 export function traffic(
+  during: Span,
   lines: readonly (readonly Point[] | TrafficLine)[],
   options: TrafficOptions,
 ): Traffic {
-  const { during, rate, seed = 1, back = 0, ...token } = options;
+  const { rate, seed = 1, back = 0, ...token } = options;
 
   if (!(rate > 0)) throw new Error(`traffic() needs a positive rate, got ${rate}.`);
 

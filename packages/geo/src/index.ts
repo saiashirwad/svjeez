@@ -414,6 +414,7 @@ export {
   type ColorScale,
   type Hex,
   type DivergingOptions,
+  type Legend,
   type LegendOptions,
   type ScaleOptions,
   type SequentialOptions,

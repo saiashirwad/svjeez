@@ -68,7 +68,7 @@ const [a, b] = maps.land;
 <path d={a} animation={motion({ d: a }).at(1).to({ d: b }, 1.8, ease.inOut)} />;
 ```
 
-`trueSize(map, region, [lon, lat], { at, over })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `nightfall(map, (t) => date, { over })` moves the night side of a flat map through a day or a year with one fixed shape, even across an equinox. `examples/projections` does the Mercator morph and the slide.
+`trueSize(span, map, region, [lon, lat], { ease })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `nightfall(map, (t) => date, { over })` moves the night side of a flat map through a day or a year with one fixed shape, even across an equinox. `examples/projections` does the Mercator morph and the slide.
 
 ## Data maps
 
@@ -79,31 +79,31 @@ A scale turns a number into one of `steps` colors (default 9). Colors are hex, b
 ```tsx
 const scale = sequential(palettes.viridis, { domain: [35, 85], steps: 10, empty: "#2a343f" });
 const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
-const key = legend(scale, { x: 40, y: 480, width: 360, title: "Life expectancy (years)", empty: "No data" });
+const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectancy (years)", empty: "No data" }); // key.node, key.bounds
 ```
 
-`choropleth(map, values, { scale, at, over, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per time in `at`, and the map fades from `scale.empty` into the first frame unless that time is 0. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
+`choropleth(map, values, { scale, times, over, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per time in `times`, and the map fades from `scale.empty` into the first frame unless that time is 0. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
 
 ```tsx
-const years = choropleth(map, { "250": [78, 82], "276": [77, 81] }, { scale, at: [0.5, 3], lines: "#0b1118" });
+const years = choropleth(map, { "250": [78, 82], "276": [77, 81] }, { scale, times: [0.5, 3], lines: "#0b1118" });
 ```
 
-`cartogram(map, values, { at, over, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel. `toBars(map, values, { frame, at, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
+`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
 
-The shapes start as the outline and hide until `at`. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
+The shapes start as the outline and hide until the span starts. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
 
 ## Traffic
 
-`traffic(lines, { during, rate, seed, speed, style, color, size, back })` sends `rate` particles a second over the span `during`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
+`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
 
 `arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
 
 ```tsx
 const routes = flights.map(([a, b]) => ({ points: arc(map, a, b), weight: 3 }));
-const { node } = traffic(routes, { show: { at: 1, over: 8 }, rate: 6, seed: 4, style: "comet", size: 2.5 });
+const { node } = traffic({ at: 1, over: 8 }, routes, { rate: 6, seed: 4, style: "comet", size: 2.5 });
 ```
 
-Particles still in flight at the end of the scene fail the scene's length check, so end `during` a trip's length before the scene ends.
+Particles still in flight at the end of the scene fail the scene's length check, so end the span a trip's length before the scene ends.
 
 ## Errors
 
@@ -112,7 +112,7 @@ Particles still in flight at the end of the scene fail the scene's length check,
 | `route() from … to … crosses the edge of the map` | Rotate the projection so both ends sit on one side: `geoNaturalEarth1().rotate([-150, 0])`. |
 | `point(…) falls outside the projection` | The place is on the far side of a globe or outside the clip. Rotate the projection toward it. |
 | `project() has no region …` | Use the feature's `id` or its `properties.name`. world-atlas ids are ISO 3166 numeric codes as strings. |
-| `choropleth() has … values per region but … times in at. Pass one time per value.` | Give `at` one time per entry of each list. |
+| `choropleth() has … values per region but … times in times. Pass one time per value.` | Give `times` one time per entry of each list. |
 | `choropleth() needs every region to have the same number of values, got lists of …` | Pad or trim the lists to one length. |
 | `cartogram() takes one number per region, but … has a list.` | Pass one time's values. |
 | `toBars() needs positive values, got … for …` | Drop zero and negative values first. |

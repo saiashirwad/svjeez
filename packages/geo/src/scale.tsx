@@ -1,5 +1,15 @@
 /** @jsxImportSource svjeez */
-import { type Color, type Font, type FontFamily, type SvgNode } from "svjeez";
+import {
+  defaultDark,
+  tint,
+  type Base16,
+  type Color,
+  type Font,
+  type FontFamily,
+  type Rect,
+  type SvgNode,
+} from "svjeez";
+import { rect } from "svjeez/geometry";
 
 /** A hex color such as `#1f77b4`. */
 export type Hex = `#${string}`;
@@ -176,12 +186,8 @@ export function diverging(colors: readonly Hex[], options: DivergingOptions): Co
 }
 
 export interface LegendOptions {
-  readonly x: number;
-  readonly y: number;
-  /** Px across all the classes. Default 240. */
-  readonly width?: number;
-  /** Px tall. Default 10. */
-  readonly height?: number;
+  /** The bar of classes, in scene px. The title sits above it and the edge labels below. */
+  readonly frame: Rect;
   /** A line above the bar. */
   readonly title?: string;
   /** Label every n-th class edge. Default as many as fit, about one per 48px. */
@@ -192,22 +198,30 @@ export interface LegendOptions {
   readonly empty?: string;
   readonly fontSize?: number;
   readonly font?: Font | FontFamily | string;
-  /** Text color. Default `#c9d1d9`. */
-  readonly ink?: Color;
+  /** Text color. Default the theme's `plain`. */
+  readonly color?: Color;
+  /** Gives the text its default color. Default `defaultDark`. */
+  readonly theme?: Base16;
   readonly class?: string;
 }
 
+export interface Legend {
+  readonly node: SvgNode;
+  /** The bar with its title, edge labels and no-data swatch. The labels are not measured, so it is an estimate to a few px. */
+  readonly bounds: Rect;
+}
+
 /** The scale as a bar of its classes, labelled at the class edges. A map's key. */
-export function legend(scale: ColorScale, options: LegendOptions): SvgNode {
+export function legend(scale: ColorScale, options: LegendOptions): Legend {
   const {
-    x,
-    y,
-    width = 240,
-    height = 10,
+    frame,
     fontSize = 11,
-    ink = "#c9d1d9",
+    theme = defaultDark,
     format = (v: number) => String(+v.toFixed(2)),
   } = options;
+
+  const { x, y: top, w: width, h: height } = frame;
+  const ink = options.color ?? tint(theme, "plain");
 
   const count = scale.colors.length;
 
@@ -215,13 +229,12 @@ export function legend(scale: ColorScale, options: LegendOptions): SvgNode {
     options.every ?? Math.max(1, Math.ceil(count / Math.max(1, Math.floor(width / 48))));
 
   const step = width / count;
-  const top = y + (options.title ? fontSize + 6 : 0);
   const text = { fontSize, fontFamily: options.font, fill: ink };
 
-  return (
+  const node = (
     <g class={options.class}>
       {options.title && (
-        <text x={x} y={y + fontSize - 2} fontWeight={600} {...text}>
+        <text x={x} y={top - 8} fontWeight={600} {...text}>
           {options.title}
         </text>
       )}
@@ -258,4 +271,12 @@ export function legend(scale: ColorScale, options: LegendOptions): SvgNode {
       ]}
     </g>
   );
+
+  const above = options.title ? fontSize + 6 : 0;
+  const right = x + width + (options.empty === undefined ? 0 : 26 + height);
+
+  return {
+    node,
+    bounds: rect(x, top - above, right - x, above + height + 5 + fontSize * 1.25),
+  };
 }

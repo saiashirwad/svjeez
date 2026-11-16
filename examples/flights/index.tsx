@@ -196,8 +196,7 @@ function Plane(): SvgNode {
 }
 
 export default function build(): string {
-  const { node } = traffic(lines, {
-    during: FLOW,
+  const { node } = traffic(FLOW, lines, {
     rate: 5,
     seed: 7,
     back: 0.45,

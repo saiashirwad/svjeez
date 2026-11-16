@@ -55,11 +55,7 @@ const morph = (a: PathData, b: PathData) =>
     .at(BACK)
     .to({ d: a }, MORPH, ease.inOut);
 
-const slide = trueSize(flat, flat.region("Greenland"), [-12, -3], {
-  at: SLIDE,
-  over: OVER,
-  duration: D,
-});
+const slide = trueSize({ at: SLIDE, over: OVER }, flat, flat.region("Greenland"), [-12, -3]);
 
 const shown = (from: number, until: number) =>
   motion({ opacity: 0 })
