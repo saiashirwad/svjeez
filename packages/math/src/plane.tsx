@@ -68,7 +68,7 @@ export interface VectorOptions {
   readonly from?: Vec2;
 }
 
-export interface PolygonOptions {
+export interface PlanePolygonOptions {
   /** Default the theme's base0A. */
   readonly color?: Color;
   /** Default 0.22. */
@@ -77,7 +77,7 @@ export interface PolygonOptions {
   readonly strokeWidth?: number;
 }
 
-export interface LineOptions {
+export interface PlaneLineOptions {
   /** Default the theme's base0E. */
   readonly color?: Color;
   /** Default 1.5. */
@@ -85,7 +85,7 @@ export interface LineOptions {
   readonly opacity?: number;
 }
 
-export interface LabelOptions {
+export interface PlaneLabelOptions {
   /** For TeX source. Default the theme's base05. */
   readonly color?: Color;
   /** For TeX source. Default 17. */
@@ -144,11 +144,11 @@ export interface Plane extends Calculus {
   /** î and ĵ, labelled. Given a span, they grow in it, with ĵ entering 0.2s after î. */
   basis(span?: Span): SvgNode;
   /** A filled polygon whose corners move with the plane, so its area follows the determinant. */
-  polygon(points: readonly Vec2[], options?: PolygonOptions): SvgNode;
+  polygon(points: readonly Vec2[], options?: PlanePolygonOptions): SvgNode;
   /** The line through the origin along `direction`, across the grid. An eigenvector's line stays on itself. */
-  span(direction: Vec2, options?: LineOptions): SvgNode;
+  line(direction: Vec2, options?: PlaneLineOptions): SvgNode;
   /** Content centered on a point of the plane, riding it. A node is placed with its origin there. */
-  label(at: Vec2, content: string | Tex | SvgNode, options?: LabelOptions): SvgNode;
+  label(at: Vec2, content: string | Tex | SvgNode, options?: PlaneLabelOptions): SvgNode;
 }
 
 type Place =
@@ -448,7 +448,11 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 
   function vector(to: Vec2, options?: VectorOptions): SvgNode;
   function vector(span: Span, to: Vec2, options?: VectorOptions): SvgNode;
-  function vector(first: Span | Vec2, second?: Vec2 | VectorOptions, third?: VectorOptions): SvgNode {
+  function vector(
+    first: Span | Vec2,
+    second?: Vec2 | VectorOptions,
+    third?: VectorOptions,
+  ): SvgNode {
     // SAFETY: the overloads pair a span with a tip and options, or a tip alone with options.
     const [enter, to, options = {}] = Array.isArray(first)
       ? [undefined, first as Vec2, second as VectorOptions | undefined]
@@ -622,11 +626,11 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         stroke: strokeWidth > 0 ? color : undefined,
         strokeWidth: strokeWidth > 0 ? strokeWidth : undefined,
       }),
-    span: ([dx, dy], { color = theme.base0E, width = 1.5, opacity } = {}) => {
+    line: ([dx, dy], { color = theme.base0E, width = 1.5, opacity } = {}) => {
       const len = Math.hypot(dx, dy);
 
       if (!(len > 0))
-        throw new Error(`plane.span() needs a nonzero direction, got [${dx}, ${dy}].`);
+        throw new Error(`plane.line() needs a nonzero direction, got [${dx}, ${dy}].`);
 
       const reach =
         (Math.max(...frame.x.map(Math.abs), ...frame.y.map(Math.abs)) * Math.SQRT2) / len;

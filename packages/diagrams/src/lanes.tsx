@@ -159,9 +159,7 @@ export function lanes<const L extends Record<string, Labelled>>(
             stroke={tint}
             animation={
               play
-                ? motion({ width: 0 })
-                    .at(when(s.at))
-                    .to({ width: b.w }, s.over, ease.linear)
+                ? motion({ width: 0 }).at(when(s.at)).to({ width: b.w }, s.over, ease.linear)
                 : undefined
             }
           />

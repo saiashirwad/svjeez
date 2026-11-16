@@ -1,9 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import { render } from "svjeez";
-import { mermaid, MermaidSyntaxError, parse, type FlowchartDoc, type StateDoc } from "../src/index";
+import {
+  mermaid,
+  MermaidSyntaxError,
+  parseMermaid,
+  type FlowchartDoc,
+  type StateDoc,
+} from "../src/index";
 
 const flow = (text: string): FlowchartDoc => {
-  const doc = parse(text);
+  const doc = parseMermaid(text);
 
   if (doc.kind !== "flowchart") throw new Error(`expected a flowchart, got ${doc.kind}`);
 
@@ -11,7 +17,7 @@ const flow = (text: string): FlowchartDoc => {
 };
 
 const state = (text: string): StateDoc => {
-  const doc = parse(text);
+  const doc = parseMermaid(text);
 
   if (doc.kind !== "state") throw new Error(`expected a state diagram, got ${doc.kind}`);
 
@@ -21,14 +27,14 @@ const state = (text: string): StateDoc => {
 /** The message of the error that `parse` throws for `text`. */
 const message = (text: string): string => {
   try {
-    parse(text);
+    parseMermaid(text);
   } catch (e) {
     if (e instanceof MermaidSyntaxError) return e.message;
 
     throw e;
   }
 
-  throw new Error("parse() did not throw");
+  throw new Error("parseMermaid() did not throw");
 };
 
 const svg = (node: Parameters<typeof render>[1]) =>
@@ -127,8 +133,8 @@ describe("parse errors", () => {
   });
 
   test("carry the line on the error", () => {
-    expect(() => parse("flowchart TD\n%% x\nA --> \n")).toThrow(MermaidSyntaxError);
-    expect(() => parse("flowchart TD\n%% x\nA --> \n")).toThrow(/line 3/);
+    expect(() => parseMermaid("flowchart TD\n%% x\nA --> \n")).toThrow(MermaidSyntaxError);
+    expect(() => parseMermaid("flowchart TD\n%% x\nA --> \n")).toThrow(/line 3/);
   });
 
   test("reject another diagram type", () => {
@@ -137,7 +143,7 @@ describe("parse errors", () => {
   });
 
   test("reject empty text, a bad direction and an unclosed subgraph", () => {
-    expect(() => parse("  \n%% only a comment")).toThrow(/no Mermaid text/);
+    expect(() => parseMermaid("  \n%% only a comment")).toThrow(/no Mermaid text/);
     expect(message("flowchart XY\nA --> B")).toContain("TD, TB, BT, LR or RL");
     expect(message("flowchart TD\nsubgraph s\nA --> B")).toContain("never closed");
   });
@@ -159,7 +165,7 @@ describe("parse errors", () => {
 });
 
 describe("parse sequence", () => {
-  const doc = parse(`sequenceDiagram
+  const doc = parseMermaid(`sequenceDiagram
     actor U as User
     participant A as "The API"
     U->>A: GET /
@@ -192,7 +198,7 @@ describe("parse sequence", () => {
   });
 
   test("an undeclared participant appears at its first mention", () => {
-    const d = parse("sequenceDiagram\nB->A: hi\nA-->B: yo");
+    const d = parseMermaid("sequenceDiagram\nB->A: hi\nA-->B: yo");
 
     expect(d.kind === "sequence" && d.participants.map((p) => p.id)).toEqual(["B", "A"]);
   });

@@ -66,7 +66,13 @@ describe("plane", () => {
   });
 
   test("ticks as one number are the same on both axes, and an axis without ticks has no grid lines", () => {
-    const only = plane({ xRange: [-2, 2], yRange: [-2, 2], frame: rect(0, 0, 100, 100), ticks: { x: 1 } });
+    const only = plane({
+      xRange: [-2, 2],
+      yRange: [-2, 2],
+      frame: rect(0, 0, 100, 100),
+      ticks: { x: 1 },
+    });
+
     expect(svg(undefined, only.grid)).not.toContain("H");
     expect(svg(undefined, only.grid)).toContain("V");
     expect(svg(undefined, base.grid)).toContain("V");

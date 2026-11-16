@@ -30,9 +30,9 @@ export const chart = flowchart(
       ["secrets", "analyze"],
       ["memory", "analyze"],
       ["analyze", "issues"],
-      ["issues", "fix", { label: "yes" }],
-      ["fix", "analyze", { label: "re-run" }],
-      ["issues", "post", { label: "no" }],
+      ["issues", "fix", "yes"],
+      ["fix", "analyze", "re-run"],
+      ["issues", "post", "no"],
     ],
   },
   {

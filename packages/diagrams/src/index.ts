@@ -34,12 +34,10 @@ export { tree, type Tree, type TreeOptions, type TreeSpec } from "./tree.ts";
 
 export {
   stateMachine,
-  type Checked,
-  type StateIds,
   type StateMachine,
-  type StateOptions,
+  type StateMachineOptions,
   type StateSpec,
   type WalkToken,
-  type Transition,
+  type StateTransition,
   type Walk,
 } from "./state.tsx";

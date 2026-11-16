@@ -33,7 +33,7 @@ import {
 
 export type FlowchartEdge<N extends string> =
   | readonly [from: N, to: N]
-  | readonly [from: N, to: N, options: { readonly label?: string }];
+  | readonly [from: N, to: N, label: string];
 
 export interface FlowchartGroup<N extends string> {
   readonly label: string;
@@ -99,7 +99,7 @@ export function flowchart<
   }));
 
   const roles = new Map(nodes.map((n) => [n.id, n.role]));
-  const edges = spec.edges.map(([from, to, o]) => ({ from, to, label: o?.label }));
+  const edges = spec.edges.map(([from, to, label]) => ({ from, to, label }));
   // SAFETY: G's values are FlowchartGroup<keyof N & string>, and the {} default has no values to mismatch
   const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<Id>>);
 

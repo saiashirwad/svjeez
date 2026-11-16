@@ -22,7 +22,7 @@ import { flow, render } from "svjeez";
 const chart = flowchart(
   {
     nodes: { pr: { label: "PR opened", role: "input" }, lint: "Run linters", post: "Post review" },
-    edges: [["pr", "lint"], ["lint", "post", { label: "clean" }]],
+    edges: [["pr", "lint"], ["lint", "post", "clean"]],
   },
   { x: 40, y: 40, play: { at: 0.4, step: 0.4 } },
 );

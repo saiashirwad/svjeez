@@ -24,12 +24,23 @@ const Button = ({
   className?: string;
   "data-part"?: string;
 }) => (
-  <button {...rest} className={cn(BUTTON.base, BUTTON[variant], "h-9 px-4 py-2 has-[>svg]:px-3", className)}>
+  <button
+    {...rest}
+    className={cn(BUTTON.base, BUTTON[variant], "h-9 px-4 py-2 has-[>svg]:px-3", className)}
+  >
     {children}
   </button>
 );
 
-const Badge = ({ outline, children, ...rest }: { outline?: boolean; children: ReactNode; "data-part"?: string }) => (
+const Badge = ({
+  outline,
+  children,
+  ...rest
+}: {
+  outline?: boolean;
+  children: ReactNode;
+  "data-part"?: string;
+}) => (
   <span
     {...rest}
     className={cn(
@@ -42,7 +53,12 @@ const Badge = ({ outline, children, ...rest }: { outline?: boolean; children: Re
 );
 
 const Card = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <div className={cn("bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm", className)}>
+  <div
+    className={cn(
+      "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+      className,
+    )}
+  >
     {children}
   </div>
 );
@@ -91,12 +107,20 @@ export function SignIn({ error }: { error?: string }) {
           >
             <AlertCircle />
             <div className="col-start-2 font-medium tracking-tight">{error}</div>
-            <div className="text-destructive/90 col-start-2 text-sm">Check your email and password.</div>
+            <div className="text-destructive/90 col-start-2 text-sm">
+              Check your email and password.
+            </div>
           </div>
         )}
         <label data-part="email-field" className="grid gap-2 text-sm font-medium">
           Email
-          <Input data-part="email" placeholder="m@example.com" value={email} onChange={setEmail} invalid={!!error} />
+          <Input
+            data-part="email"
+            placeholder="m@example.com"
+            value={email}
+            onChange={setEmail}
+            invalid={!!error}
+          />
         </label>
         <label data-part="password-field" className="grid gap-2 text-sm font-medium">
           Password
@@ -122,7 +146,9 @@ export function PullRequest({ merged = false }: { merged?: boolean }) {
   return (
     <Card className="w-[420px] gap-4 py-4">
       <div className="flex items-center gap-3 px-6">
-        <span className="bg-muted flex size-8 items-center justify-center rounded-full text-xs font-medium">SA</span>
+        <span className="bg-muted flex size-8 items-center justify-center rounded-full text-xs font-medium">
+          SA
+        </span>
         <div className="flex-1 grid gap-1">
           <div className="text-sm font-medium leading-none">Record React components</div>
           <div className="text-muted-foreground text-xs">#418 · react-component-demos</div>

@@ -27,9 +27,9 @@ describe("flowchart", () => {
       groups: { core: { label: "Core", nodes: ["check", "work"] } },
       edges: [
         ["start", "check"],
-        ["check", "work", { label: "yes" }],
+        ["check", "work", "yes"],
         ["work", "check"],
-        ["check", "db", { label: "no" }],
+        ["check", "db", "no"],
         ["db", "end"],
       ],
     },

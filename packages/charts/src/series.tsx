@@ -18,16 +18,16 @@ import { rect } from "svjeez/geometry";
 import { span as spanOf } from "svjeez";
 
 import type {
-  Area,
-  AreaOptions,
-  Bar,
-  Bars,
-  BarsOptions,
+  ChartArea,
+  ChartAreaOptions,
+  ChartBar,
+  ChartBars,
+  ChartBarsOptions,
   Curve,
   Datum,
   FontAttr,
-  Line,
-  LineOptions,
+  ChartLine,
+  ChartLineOptions,
 } from "./types.ts";
 
 /** What a series needs to know about the chart it joins. */
@@ -123,8 +123,8 @@ export function buildSeries(f: Frame) {
   function bars(
     when: Span,
     input: Readonly<Record<string, number>> | readonly Datum<"band">[],
-    options: BarsOptions = {},
-  ): Bars {
+    options: ChartBarsOptions = {},
+  ): ChartBars {
     const { radius = 3, group = { index: 0, count: 1 }, ease: curve = ease.out } = options;
     const { at, over } = timing("bars()", when);
     const categories = f.categories;
@@ -194,7 +194,7 @@ export function buildSeries(f: Frame) {
     const below = clipTo(rect(bounds.x, zero, bounds.w, bottom - zero));
     const format = options.values === true ? f.yFormat : options.values || undefined;
 
-    const placed: Bar[] = [];
+    const placed: ChartBar[] = [];
     const rising: SvgNode[] = [];
     const falling: SvgNode[] = [];
     const labels: SvgNode[] = [];
@@ -263,7 +263,7 @@ export function buildSeries(f: Frame) {
   function trace(
     what: string,
     points: Point[],
-    options: LineOptions,
+    options: ChartLineOptions,
     color: Color,
     { at, over }: { at: number; over: number },
     stroked = true,
@@ -338,7 +338,7 @@ export function buildSeries(f: Frame) {
     return { d, node };
   }
 
-  function line(when: Span, points: Raw, options: LineOptions = {}): Line {
+  function line(when: Span, points: Raw, options: ChartLineOptions = {}): ChartLine {
     const span = timing("line()", when);
     const placed = place("line()", points);
     const { d, node } = trace("line()", placed, options, options.color ?? f.nextColor(), span);
@@ -348,7 +348,7 @@ export function buildSeries(f: Frame) {
     return { node, d, points: placed, span: spanOf(span.at, end - span.at) };
   }
 
-  function area(when: Span, points: Raw, options: AreaOptions = {}): Area {
+  function area(when: Span, points: Raw, options: ChartAreaOptions = {}): ChartArea {
     const span = timing("area()", when);
     const { at, over } = span;
     const placed = place("area()", points);

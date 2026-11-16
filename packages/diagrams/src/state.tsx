@@ -45,22 +45,22 @@ export type StateSpec =
     };
 
 /** Every state id in `S`, nested ones included. */
-export type StateIds<S> = {
+type StateIds<S> = {
   [K in keyof S & string]: K | (S[K] extends { readonly states: infer I } ? StateIds<I> : never);
 }[keyof S & string];
 
 /** Holds each composite's `initial` to its own states. */
-export type Checked<S> = {
+type Checked<S> = {
   readonly [K in keyof S]: S[K] extends { readonly states: infer I }
     ? S[K] & { readonly initial: keyof I & string; readonly states: Checked<I> }
     : S[K];
 };
 
-export type Transition<S extends string> =
+export type StateTransition<S extends string> =
   | readonly [from: S, to: S]
   | readonly [from: S, to: S, label: string];
 
-export interface StateOptions extends DiagramOptions {
+export interface StateMachineOptions extends DiagramOptions {
   readonly direction?: Direction;
 }
 
@@ -169,9 +169,9 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
   spec: {
     readonly states: Checked<S>;
     readonly initial: NoInfer<keyof S & string>;
-    readonly transitions: readonly Transition<NoInfer<StateIds<S>>>[];
+    readonly transitions: readonly StateTransition<NoInfer<StateIds<S>>>[];
   },
-  options: StateOptions = {},
+  options: StateMachineOptions = {},
 ): StateMachine<StateIds<S>> {
   type Id = StateIds<S>;
 
@@ -245,7 +245,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     return { owner: k === 0 ? undefined : a[k - 1], from: a[k]!, to: b[k]! };
   };
 
-  const transitions = spec.transitions.map(([from, to, label]: Transition<string>, i) => ({
+  const transitions = spec.transitions.map(([from, to, label]: StateTransition<string>, i) => ({
     i,
     label,
     ...home(from, to),

@@ -10,11 +10,6 @@ export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
   readonly style?: FontStyle;
 };
 
-export interface GoogleFace {
-  readonly weight?: number;
-  readonly style?: FontStyle;
-}
-
 /** The folder shared by every project on this machine: `$SVJEEZ_FONTS_CACHE`, `$XDG_CACHE_HOME/svjeez/fonts` or `~/.cache/svjeez/fonts`. */
 export const cacheDir = (): string => {
   const { SVJEEZ_FONTS_CACHE, XDG_CACHE_HOME } = process.env;
@@ -26,8 +21,6 @@ export const cacheDir = (): string => {
 
 // Google serves WOFF2 to browsers and static TTF to a user agent it doesn't recognize. Fetch's own differs by runtime.
 const HEADERS = { "user-agent": "svjeez-fonts" };
-
-const isWeight = (face: number | GoogleFace): face is number => typeof face === "number";
 
 /** Open Sans keeps its plain name. A family that needed other characters turned into dashes gets a hash of its exact name, so Open-Sans and Open_Sans don't share a file. */
 const slug = (family: string): string => {
@@ -168,17 +161,12 @@ export const google = Object.assign(
     return font(await bytesOf(family, weight, style), { ...rest, family, weight, style });
   },
   {
-    /** Several weights and styles grouped under one family name. A number is a weight at normal style. */
+    /** Several weights and styles grouped under one family name, as `font.family()` groups them. Each face takes the options `google()` does. */
     family: async (
       family: string,
-      faces: readonly [number | GoogleFace, ...(number | GoogleFace)[]],
-      options: Omit<GoogleOptions, "weight" | "style"> = {},
+      ...faces: readonly [GoogleOptions, ...GoogleOptions[]]
     ): Promise<FontFamily> => {
-      const fonts = await Promise.all(
-        faces.map((face) =>
-          google(family, { ...options, ...(isWeight(face) ? { weight: face } : face) }),
-        ),
-      );
+      const fonts = await Promise.all(faces.map((face) => google(family, face)));
 
       // SAFETY: `faces` is a non-empty tuple and Promise.all keeps its length.
       return font.family(...(fonts as [Font, ...Font[]]));

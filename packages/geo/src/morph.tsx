@@ -56,7 +56,7 @@ export interface Cartogram extends Morphed {
   readonly bubbles: readonly Bubble[];
 }
 
-export interface BarsOptions extends MorphOptions {
+export interface GeoBarsOptions extends MorphOptions {
   /** Where the bars go. The longest reaches its right edge; the bars share its height. */
   readonly frame: Rect;
   /** Biggest first (default) or smallest first. */
@@ -69,15 +69,15 @@ export interface BarsOptions extends MorphOptions {
   readonly max?: number;
 }
 
-export interface Bar {
+export interface GeoBar {
   readonly region: Region;
   readonly value: number;
   /** Where the bar lands in the scene, to put a label beside. */
   readonly rect: Rect;
 }
 
-export interface Bars extends Morphed {
-  readonly bars: readonly Bar[];
+export interface GeoBars extends Morphed {
+  readonly bars: readonly GeoBar[];
 }
 
 const NUMBER = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
@@ -156,12 +156,7 @@ function morphs(
 ): Morphed {
   const { at, over } = when;
 
-  const {
-    stagger = 0,
-    ease: curve = ease.inOut,
-    fill = "#6b7280",
-    detail = 2.5,
-  } = options;
+  const { stagger = 0, ease: curve = ease.inOut, fill = "#6b7280", detail = 2.5 } = options;
 
   const each = over - (targets.length - 1) * stagger;
 
@@ -332,8 +327,8 @@ export function toBars(
   when: Span,
   map: GeoMap,
   values: RegionValues,
-  options: BarsOptions,
-): Bars {
+  options: GeoBarsOptions,
+): GeoBars {
   const { frame, order = "desc", top = 12 } = options;
 
   if (!(Number.isInteger(top) && top >= 1))
@@ -348,7 +343,7 @@ export function toBars(
   const slot = frame.h / shown.length;
   const gap = options.gap ?? slot * 0.2;
 
-  const bars = shown.map(([region, value], i): Bar => ({
+  const bars = shown.map(([region, value], i): GeoBar => ({
     region,
     value,
     rect: rect(

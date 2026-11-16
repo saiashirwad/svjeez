@@ -1,4 +1,4 @@
-import { chart, type Bars, type Chart } from "@svjeez/charts";
+import { chart, type ChartBars, type Chart } from "@svjeez/charts";
 import { render } from "svjeez";
 import { rect } from "svjeez/geometry";
 
@@ -11,7 +11,7 @@ const quarters: Chart<"band"> = chart({
   ],
 });
 
-const sales: Bars = quarters.bars({ at: 0.5, over: 1 }, { Q1: 4, Q2: 7, Q3: 9 });
+const sales: ChartBars = quarters.bars({ at: 0.5, over: 1 }, { Q1: 4, Q2: 7, Q3: 9 });
 
 const trend = quarters.line(
   { at: sales.span.end, over: 1 },

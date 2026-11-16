@@ -24,7 +24,12 @@ const view = (
   plane({
     xRange: x,
     yRange: y,
-    frame: rect(origin.x + x[0] * unit, origin.y - y[1] * unit, (x[1] - x[0]) * unit, (y[1] - y[0]) * unit),
+    frame: rect(
+      origin.x + x[0] * unit,
+      origin.y - y[1] * unit,
+      (x[1] - x[0]) * unit,
+      (y[1] - y[0]) * unit,
+    ),
     ticks,
     theme,
   });
@@ -87,8 +92,8 @@ export default function build(): string {
           {linear.axes}
         </g>
         <g animation={enter({ at: 1.2, over: 0.6 })}>
-          {linear.span([1, 0], { color: V1, opacity: 0.7 })}
-          {linear.span([1, -1], { color: V2, opacity: 0.7 })}
+          {linear.line([1, 0], { color: V1, opacity: 0.7 })}
+          {linear.line([1, -1], { color: V2, opacity: 0.7 })}
         </g>
         {linear.vector({ at: 1.5, over: 0.5 }, [1, 0], { color: V1, label: "v_1" })}
         {linear.vector({ at: 1.7, over: 0.5 }, [1, -1], { color: V2, label: "v_2" })}

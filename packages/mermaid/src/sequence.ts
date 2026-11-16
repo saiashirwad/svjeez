@@ -1,5 +1,10 @@
 import { clean, fail, unquote, type Line } from "./errors.ts";
-import type { Participant, SequenceDoc, SequenceMessage, SequenceNote } from "./types.ts";
+import type {
+  MermaidParticipant,
+  SequenceDoc,
+  MermaidSequenceMessage,
+  SequenceNote,
+} from "./types.ts";
 
 const SUPPORTED =
   "Supported: `participant A`, `actor A`, `participant A as Alice`, messages `A->>B: text` with the arrows ->> -->> -> --> -x --x -) --), and `Note over A: text`.";
@@ -25,7 +30,7 @@ const DECLARE = /^(participant|actor)\s+(\w+)(?:\s+as\s+(.+))?$/;
 const NOTE = /^note\s+(over|left of|right of)\s+([^:]+?)\s*:\s*(.*)$/i;
 const MESSAGE = /^(\w+)\s*(-->>|->>|-->|->|--x|-x|--\)|-\))\s*([+-])?\s*(\w+)\s*:\s*(.*)$/;
 
-const HEADS = new Map<string, SequenceMessage["head"]>([
+const HEADS = new Map<string, MermaidSequenceMessage["head"]>([
   [">>", "filled"],
   [">", "none"],
   ["x", "cross"],
@@ -33,8 +38,8 @@ const HEADS = new Map<string, SequenceMessage["head"]>([
 ]);
 
 export const parseSequence = (header: Line, body: readonly Line[]): SequenceDoc => {
-  const participants = new Map<string, { label: string; role: Participant["role"] }>();
-  const items: (SequenceMessage | SequenceNote)[] = [];
+  const participants = new Map<string, { label: string; role: MermaidParticipant["role"] }>();
+  const items: (MermaidSequenceMessage | SequenceNote)[] = [];
 
   const mention = (id: string) => {
     if (!participants.has(id)) participants.set(id, { label: id, role: "participant" });
@@ -108,7 +113,7 @@ export const parseSequence = (header: Line, body: readonly Line[]): SequenceDoc 
 
   return {
     kind: "sequence",
-    participants: [...participants].map(([id, p]): Participant => ({ id, ...p })),
+    participants: [...participants].map(([id, p]): MermaidParticipant => ({ id, ...p })),
     items,
   };
 };

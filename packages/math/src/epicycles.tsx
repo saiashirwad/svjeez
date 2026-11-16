@@ -14,8 +14,7 @@ import {
 import { span as spanOf, type Spanned } from "svjeez";
 
 import { apply, identity, type Matrix } from "./matrix.ts";
-
-export type Point = readonly [x: number, y: number];
+import type { Vec2 } from "./warp.tsx";
 
 /** Anything with path data: a `tex()` glyph (whose `matrix` flips and places it) or `{ d }` in scene pixels. */
 export interface Outline {
@@ -24,7 +23,7 @@ export interface Outline {
 }
 
 /** What `epicycles()` draws: path data, a glyph, a list of them in order, or a closed list of points. */
-export type EpicyclesSource = string | Outline | readonly (string | Outline)[] | readonly Point[];
+export type EpicyclesSource = string | Outline | readonly (string | Outline)[] | readonly Vec2[];
 
 export interface EpicyclesOptions {
   /** Circles in the chain. They shape the trace and carry the pen, and the smallest are too small to see. Default 80. */
@@ -32,7 +31,7 @@ export interface EpicyclesOptions {
   /** The largest circles that draw their ring and arm. Default 24. */
   readonly circles?: number;
   /** Where the middle of the outline's box goes. Default: where the outline already is. */
-  readonly center?: Point;
+  readonly center?: Vec2;
   /** Scales the outline so its longer side is this many pixels. Default: as it is. */
   readonly size?: number;
   /** Colors the rings and the trace. Default `defaultDark`. */
@@ -77,11 +76,11 @@ export interface FourierOptions {
 
 export interface Fourier {
   /** The point every circle spins around: the outline's mean, the series' constant term. */
-  readonly mean: Point;
+  readonly mean: Vec2;
   /** The circles that sum to the outline, largest first. */
   readonly terms: readonly FourierTerm[];
   /** The samples the series was taken from. */
-  readonly points: readonly Point[];
+  readonly points: readonly Vec2[];
 }
 
 const NUMBER = /-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi;
@@ -102,13 +101,13 @@ const CURVE_STEPS = 16;
 const SAMPLES = 1024;
 const TRACE_POINTS = 400;
 
-const lerp = (a: Point, b: Point, u: number): Point => [
+const lerp = (a: Vec2, b: Vec2, u: number): Vec2 => [
   a[0] + (b[0] - a[0]) * u,
   a[1] + (b[1] - a[1]) * u,
 ];
 
 /** Points along a Bezier curve of any degree, by de Casteljau, without its start. */
-const bezier = (controls: readonly Point[]): Point[] =>
+const bezier = (controls: readonly Vec2[]): Vec2[] =>
   Array.from({ length: CURVE_STEPS }, (_, i) => {
     let level = controls;
 
@@ -119,15 +118,15 @@ const bezier = (controls: readonly Point[]): Point[] =>
   });
 
 /** Every subpath of path data as a polyline. Curves become short chords. Arcs are not drawn. */
-export function contours(d: string): Point[][] {
-  const result: Point[][] = [];
-  let line: Point[] = [];
-  let current: Point = [0, 0];
-  let start: Point = [0, 0];
-  let control: Point = current;
+function pathContours(d: string): Vec2[][] {
+  const result: Vec2[][] = [];
+  let line: Vec2[] = [];
+  let current: Vec2 = [0, 0];
+  let start: Vec2 = [0, 0];
+  let control: Vec2 = current;
   let last = "";
 
-  const go = (to: Point, via: Point[] = []): void => {
+  const go = (to: Vec2, via: Vec2[] = []): void => {
     if (line.length === 0) line.push(current);
     line.push(...via, to);
     current = to;
@@ -154,7 +153,7 @@ export function contours(d: string): Point[][] {
 
     for (let i = 0, first = true; i + arity <= n.length; i += arity, first = false) {
       const [ox, oy] = relative ? current : [0, 0];
-      const at = (j: number): Point => [n[i + j]! + ox, n[i + j + 1]! + oy];
+      const at = (j: number): Vec2 => [n[i + j]! + ox, n[i + j + 1]! + oy];
 
       if (command === "M" && first) {
         if (line.length > 1) result.push(line);
@@ -173,7 +172,7 @@ export function contours(d: string): Point[][] {
       } else if (command === "C" || command === "S") {
         const smooth = command === "S";
 
-        const c1: Point = smooth
+        const c1: Vec2 = smooth
           ? last === "C" || last === "S"
             ? [2 * current[0] - control[0], 2 * current[1] - control[1]]
             : current
@@ -186,7 +185,7 @@ export function contours(d: string): Point[][] {
       } else {
         const q = command === "T";
 
-        const c1: Point = q
+        const c1: Vec2 = q
           ? last === "Q" || last === "T"
             ? [2 * current[0] - control[0], 2 * current[1] - control[1]]
             : current
@@ -209,28 +208,28 @@ export function contours(d: string): Point[][] {
 
 const isText = (value: EpicyclesSource): value is string => typeof value === "string";
 
-const isPoints = (source: EpicyclesSource): source is readonly Point[] =>
+const isPoints = (source: EpicyclesSource): source is readonly Vec2[] =>
   Array.isArray(source) && Array.isArray(source[0]);
 
 const isOutline = (source: Outline | readonly (string | Outline)[]): source is Outline =>
   "d" in source;
 
-const toContours = (source: EpicyclesSource): Point[][] => {
-  if (isText(source)) return contours(source);
+const toContours = (source: EpicyclesSource): Vec2[][] => {
+  if (isText(source)) return pathContours(source);
 
   if (isPoints(source)) return [[...source]];
   const parts: readonly (string | Outline)[] = isOutline(source) ? [source] : source;
 
   return parts.flatMap((part) => {
-    if (isText(part)) return contours(part);
+    if (isText(part)) return pathContours(part);
     const matrix = part.matrix ?? identity;
 
-    return contours(part.d).map((line) => line.map(([x, y]): Point => apply(matrix, x, y)));
+    return pathContours(part.d).map((line) => line.map(([x, y]): Vec2 => apply(matrix, x, y)));
   });
 };
 
 /** One closed loop through every contour in order, joined by straight bridges, and back to the start. */
-const loop = (lines: readonly Point[][], caller: string): Point[] => {
+const loop = (lines: readonly Vec2[][], caller: string): Vec2[] => {
   const points = lines.flat();
 
   if (points.length < 3) throw new Error(`${caller} needs an outline with at least three points.`);
@@ -239,7 +238,7 @@ const loop = (lines: readonly Point[][], caller: string): Point[] => {
 };
 
 /** `count` points evenly spaced by arc length along a polyline. */
-const resample = (points: readonly Point[], count: number, caller: string): Point[] => {
+const resample = (points: readonly Vec2[], count: number, caller: string): Vec2[] => {
   const cumulative = [0];
 
   for (let i = 1; i < points.length; i++)
@@ -263,16 +262,16 @@ const resample = (points: readonly Point[], count: number, caller: string): Poin
 };
 
 /** The circles that sum to the points, largest first, and the point they all spin around. */
-const spectrum = (points: readonly Point[], count: number) => {
+const spectrum = (points: readonly Vec2[], count: number) => {
   const n = points.length;
 
-  const table = Array.from({ length: n }, (_, m): Point => [
+  const table = Array.from({ length: n }, (_, m): Vec2 => [
     Math.cos((2 * Math.PI * m) / n),
     Math.sin((2 * Math.PI * m) / n),
   ]);
 
   const all: FourierTerm[] = [];
-  let mean: Point = [0, 0];
+  let mean: Vec2 = [0, 0];
 
   for (let k = -n / 2 + 1; k <= n / 2; k++) {
     const sum: Complex = { re: 0, im: 0 };
@@ -290,7 +289,7 @@ const spectrum = (points: readonly Point[], count: number) => {
 
   all.sort((a, b) => b.r - a.r || Math.abs(a.k) - Math.abs(b.k));
 
-  return { mean, terms: all.slice(0, count) } satisfies { mean: Point; terms: FourierTerm[] };
+  return { mean, terms: all.slice(0, count) } satisfies { mean: Vec2; terms: FourierTerm[] };
 };
 
 /**
@@ -358,10 +357,10 @@ export function epicycles(
   const [mx, my] = [(left + right) / 2, (top + bottom) / 2];
   const [cx, cy] = options.center ?? [mx, my];
 
-  const placed = points.map(([x, y]): Point => [(x - mx) * scale + cx, (y - my) * scale + cy]);
+  const placed = points.map(([x, y]): Vec2 => [(x - mx) * scale + cx, (y - my) * scale + cy]);
   const { mean, terms } = spectrum(placed, count);
 
-  const at1 = (s: number): Point => {
+  const at1 = (s: number): Vec2 => {
     let [x, y] = mean;
 
     for (const { k, r, phase } of terms) {
@@ -402,11 +401,11 @@ export function epicycles(
 
   // Each circle sits inside the one before it and already turns with it, so it spins only by the difference.
   const chain = terms.reduceRight<SvgNode | undefined>((inner, { k, r, phase }, i) => {
-    const arm: Point = [r * Math.cos(phase), r * Math.sin(phase)];
+    const arm: Vec2 = [r * Math.cos(phase), r * Math.sin(phase)];
     const previous = terms[i - 1];
     const spin = k - (previous?.k ?? 0);
 
-    const offset: Point = previous
+    const offset: Vec2 = previous
       ? [previous.r * Math.cos(previous.phase), previous.r * Math.sin(previous.phase)]
       : mean;
 

@@ -110,8 +110,12 @@ describe("plane() validation", () => {
   });
 
   test("rejects non-positive sizes and tick steps", () => {
-    expect(() => plane({ ...base, frame: rect(300, 60, 0, 260) })).toThrow(/frame with a positive width and height/);
-    expect(() => plane({ ...base, frame: rect(300, 60, 400, -5) })).toThrow(/frame with a positive width and height/);
+    expect(() => plane({ ...base, frame: rect(300, 60, 0, 260) })).toThrow(
+      /frame with a positive width and height/,
+    );
+    expect(() => plane({ ...base, frame: rect(300, 60, 400, -5) })).toThrow(
+      /frame with a positive width and height/,
+    );
     expect(() => plane({ ...base, ticks: { x: 0 } })).toThrow(/positive x tick step/);
     expect(() => plane({ ...base, ticks: { y: -1 } })).toThrow(/positive y tick step/);
     expect(() => plane({ ...base, ticks: { x: 1e-6 } })).toThrow(/at most 500/);

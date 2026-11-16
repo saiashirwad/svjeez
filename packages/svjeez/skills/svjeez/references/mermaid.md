@@ -29,7 +29,7 @@ const trip = flow(chart.route("push", "ship"), { at: 3, speed: 160, style: "trac
 
 - `mermaid(text, options)` takes svjeez's own options: `theme`, `font`, `fontSize`, `x`, `y`, `anchor`, `class`, `direction` and `play`. Each kind reads the ones it knows. `direction` in the options beats the text.
 - It returns the svjeez diagram plus `kind` (`"flowchart"`, `"sequence"` or `"state"`) and `doc`. Narrow on `kind` to get `layers`, `route()` and `edge()` on a flowchart, `message(i)` on a sequence diagram, and `walk()` on a state diagram. Ids are the Mermaid ids, as plain strings, so there is no compile-time check on them.
-- `parse(text)` returns the plain model (`FlowchartDoc`, `SequenceDoc` or `StateDoc`) without importing svjeez.
+- `parseMermaid(text)` returns the plain model (`FlowchartDoc`, `SequenceDoc` or `StateDoc`) without importing svjeez.
 
 ## What it reads
 
@@ -45,5 +45,5 @@ Anything else throws a `MermaidSyntaxError` naming the line number and the line.
 | Error | Fix |
 | --- | --- |
 | `Mermaid syntax error on line N ("…"): …` | The message after the colon says what is unsupported and what is supported. Edit that line. |
-| `parse() got no Mermaid text.` | Start with `flowchart TD`, `sequenceDiagram` or `stateDiagram-v2`. |
+| `parseMermaid() got no Mermaid text.` | Start with `flowchart TD`, `sequenceDiagram` or `stateDiagram-v2`. |
 | `mermaid() cannot draw direction BT: …` | Write `TD` or `LR`, or pass `{ direction }`. |

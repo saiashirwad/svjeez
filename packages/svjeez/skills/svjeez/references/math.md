@@ -158,7 +158,7 @@ render({ ..., css: css`${p.css}` },
 - `background` is the grid at the ticks as it was, and it stays put, as does `node`, the axes with their ticks and numbers. `grid` is the moving lines without the axes, and `axes` is the two axis lines.
 - `plot(f)` drawn from a plane with steps follows them and takes no `animation`. The calculus methods draw at rest, so call them on the plane before its first step.
 - `vector(to, { color, width, label, from })` draws an arrow. Its head stays a proper arrowhead however the plane shears, and its label stays just past the tip, turned off the arrow's line. `label` is TeX source or a `tex()` formula. `vector(span, to, options)` grows the shaft over the span, then shows the head and label. `basis()` draws î and ĵ, and `basis(span)` grows them in the span, ĵ starting 0.2s after î.
-- `polygon(points)` fills a shape whose corners move with the plane, so the unit square's area shows the determinant. `span(direction)` is the line through the origin along a vector: an eigenvector's line stays on itself.
+- `polygon(points)` fills a shape whose corners move with the plane, so the unit square's area shows the determinant. `line(direction)` is the line through the origin along a vector: an eigenvector's line stays on itself.
 - `label(at, content)` centers TeX, a `tex()` formula or a node on a point of the plane and moves it with the point.
 - `point(x, y)` is the scene pixels of a point before any step, with the pixels per unit taken from the range and the size, so the two axes may differ, and `map(x, y)` is where it ends after every step.
 
@@ -207,6 +207,6 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `plane.apply() needs finite numbers in its matrix, got …` | Every entry must be a finite number. |
 | `plane.applyFunction() sent (…, …) to (…, …), which is not a finite point.` | The function divides by zero or overflows somewhere on the grid. Shrink the range to avoid that point, or guard the function. |
 | `plane.vector() needs a finite arrow of nonzero length, from … to …` | Give the arrow a tip different from its tail. |
-| `plane.span() needs a nonzero direction, got …` | Pass a nonzero vector. |
+| `plane.line() needs a nonzero direction, got …` | Pass a nonzero vector. |
 
 In Bun, a non-ASCII character in `String.raw` arrives as a `\u{…}` escape. Write such characters in a plain string, or as TeX.

@@ -8,13 +8,13 @@ export type FlowForm =
   | "subroutine"
   | "cylinder";
 
-export interface FlowNode {
+export interface MermaidFlowNode {
   readonly id: string;
   readonly label: string;
   readonly form: FlowForm;
 }
 
-export interface FlowEdge {
+export interface MermaidFlowEdge {
   readonly from: string;
   readonly to: string;
   readonly label?: string;
@@ -35,18 +35,18 @@ export interface FlowchartDoc {
   readonly kind: "flowchart";
   /** As written: `TD` and `TB` both mean top to bottom. */
   readonly direction: "TD" | "TB" | "BT" | "LR" | "RL";
-  readonly nodes: readonly FlowNode[];
-  readonly edges: readonly FlowEdge[];
+  readonly nodes: readonly MermaidFlowNode[];
+  readonly edges: readonly MermaidFlowEdge[];
   readonly subgraphs: readonly FlowSubgraph[];
 }
 
-export interface Participant {
+export interface MermaidParticipant {
   readonly id: string;
   readonly label: string;
   readonly role: "participant" | "actor";
 }
 
-export interface SequenceMessage {
+export interface MermaidSequenceMessage {
   readonly kind: "message";
   readonly from: string;
   readonly to: string;
@@ -65,8 +65,8 @@ export interface SequenceNote {
 
 export interface SequenceDoc {
   readonly kind: "sequence";
-  readonly participants: readonly Participant[];
-  readonly items: readonly (SequenceMessage | SequenceNote)[];
+  readonly participants: readonly MermaidParticipant[];
+  readonly items: readonly (MermaidSequenceMessage | SequenceNote)[];
 }
 
 export interface StateNode {
@@ -78,7 +78,7 @@ export interface StateNode {
   readonly inner?: { readonly initial: string; readonly states: readonly StateNode[] };
 }
 
-export interface StateTransition {
+export interface MermaidStateTransition {
   readonly from: string;
   readonly to: string;
   readonly label?: string;
@@ -91,7 +91,7 @@ export interface StateDoc {
   readonly initial: string;
   readonly states: readonly StateNode[];
   /** Every transition, with ids from any depth. `[*]` ends are in `initial` and `final`, not here. */
-  readonly transitions: readonly StateTransition[];
+  readonly transitions: readonly MermaidStateTransition[];
 }
 
 export type MermaidDoc = FlowchartDoc | SequenceDoc | StateDoc;

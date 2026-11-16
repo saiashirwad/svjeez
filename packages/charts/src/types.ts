@@ -60,7 +60,7 @@ export interface SeriesOptions {
   readonly color?: Color;
 }
 
-export interface BarsOptions extends SeriesOptions {
+export interface ChartBarsOptions extends SeriesOptions {
   /** Seconds between one bar's start and the next's. The last bar ends with the span, so each bar grows for `over - (bars - 1) * stagger`. Default 0.08, or less when the span is short. */
   readonly stagger?: number;
   /** How each bar grows. Default `ease.out`. */
@@ -73,7 +73,7 @@ export interface BarsOptions extends SeriesOptions {
   readonly values?: boolean | ((value: number) => string);
 }
 
-export interface LineOptions extends SeriesOptions {
+export interface ChartLineOptions extends SeriesOptions {
   readonly curve?: Curve;
   /** A dot on each point as the line reaches it. `true` is radius 4. */
   readonly dots?: boolean | number;
@@ -82,28 +82,28 @@ export interface LineOptions extends SeriesOptions {
   readonly label?: string;
 }
 
-export interface AreaOptions extends LineOptions {
+export interface ChartAreaOptions extends ChartLineOptions {
   /** The y value the fill reaches down to. Default 0, or the bottom of the plot when 0 is outside it. */
   readonly baseline?: number;
   /** Stroke the top edge too. Default true. */
   readonly line?: boolean;
 }
 
-export interface Bar {
+export interface ChartBar {
   readonly key: string;
   readonly value: number;
   /** Where the bar rests, in scene px. */
   readonly bounds: Rect;
 }
 
-export interface Bars {
+export interface ChartBars {
   readonly node: SvgNode;
-  readonly bars: readonly Bar[];
+  readonly bars: readonly ChartBar[];
   /** The span you passed: the last bar has grown at its end. */
   readonly span: Spanned;
 }
 
-export interface Line {
+export interface ChartLine {
   readonly node: SvgNode;
   /** The path data of the line. */
   readonly d: string;
@@ -113,7 +113,7 @@ export interface Line {
   readonly span: Spanned;
 }
 
-export interface Area extends Line {
+export interface ChartArea extends ChartLine {
   /** The path data of the filled shape. */
   readonly fill: string;
 }
@@ -134,11 +134,11 @@ export interface Chart<K extends XScale["kind"] = XScale["kind"]> {
     ? (
         span: Span,
         values: Readonly<Record<string, number>> | readonly Datum<"band">[],
-        options?: BarsOptions,
-      ) => Bars
+        options?: ChartBarsOptions,
+      ) => ChartBars
     : never;
   /** The line draws on over `span`. */
-  line(span: Span, points: readonly Datum<K>[], options?: LineOptions): Line;
+  line(span: Span, points: readonly Datum<K>[], options?: ChartLineOptions): ChartLine;
   /** The fill wipes in with the line over `span`. */
-  area(span: Span, points: readonly Datum<K>[], options?: AreaOptions): Area;
+  area(span: Span, points: readonly Datum<K>[], options?: ChartAreaOptions): ChartArea;
 }

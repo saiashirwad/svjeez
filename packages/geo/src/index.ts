@@ -396,9 +396,9 @@ export {
 export {
   cartogram,
   toBars,
-  type Bar,
-  type Bars,
-  type BarsOptions,
+  type GeoBar,
+  type GeoBars,
+  type GeoBarsOptions,
   type Bubble,
   type Cartogram,
   type CartogramOptions,

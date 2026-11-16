@@ -3,7 +3,7 @@ import { flowchart, lanes, sequence, stateMachine, tree } from "@svjeez/diagrams
 import { render } from "svjeez";
 
 const chart = flowchart(
-  { nodes: { a: "A", b: "B" }, edges: [["a", "b", { label: "go" }]] },
+  { nodes: { a: "A", b: "B" }, edges: [["a", "b", "go"]] },
   { play: { at: 0.5 } },
 );
 

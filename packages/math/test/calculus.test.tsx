@@ -4,8 +4,7 @@ import { rect } from "svjeez/geometry";
 import { validateSvg } from "svjeez/frames";
 import { plane } from "../src/index.ts";
 
-const graph = () =>
-  plane({ xRange: [-3, 3], yRange: [-1, 9], frame: rect(300, 60, 400, 260) });
+const graph = () => plane({ xRange: [-3, 3], yRange: [-1, 9], frame: rect(300, 60, 400, 260) });
 
 const svgOf = (...nodes: Child[]): string =>
   render({ width: 800, height: 400, duration: 6, title: "Calculus", reducedMotion: false }, nodes);

@@ -49,7 +49,7 @@ if (d.kind === "sequence") d.message(0);
 
 The options are svjeez's own, passed straight through: `theme`, `font`, `fontSize`, `x`, `y`, `anchor`, `class`, `direction` (flowcharts and state diagrams) and `play` (flowcharts and sequence diagrams). Each kind reads the options it knows. `direction` in the options wins over the one in the text.
 
-`parse(text)` returns the plain model without importing svjeez: a `FlowchartDoc`, `SequenceDoc` or `StateDoc`, told apart by `kind`. Use it to lint or transform Mermaid text, or to build the svjeez spec yourself.
+`parseMermaid(text)` returns the plain model without importing svjeez: a `FlowchartDoc`, `SequenceDoc` or `StateDoc`, told apart by `kind`. Use it to lint or transform Mermaid text, or to build the svjeez spec yourself.
 
 ## What it reads
 
@@ -70,7 +70,7 @@ Anything else throws a `MermaidSyntaxError` with the line number, the line and w
   | `A[[text]]` | subroutine | `tool` |
   | `A[(text)]` | cylinder | `store` |
 
-  Quote a label that holds a bracket: `A["list[0]"]`. The table is exported as `FORM_ROLES`.
+  Quote a label that holds a bracket: `A["list[0]"]`.
 - Edges `-->`, `---`, `-.->`, `==>`, with labels as `-->|text|` or `-- text -->`. Edge styles are parsed into the model, but svjeez draws every edge as a solid arrow.
 - Chains `A --> B --> C` and lists `A & B --> C & D`.
 - `subgraph id [Title]`, `subgraph Title` and `end`. A node mentioned inside a subgraph belongs to the first subgraph that mentions it. Subgraphs cannot nest, cannot be empty and cannot be an edge's end.
@@ -94,7 +94,7 @@ Anything else throws a `MermaidSyntaxError` with the line number, the line and w
 
 ## The model
 
-`parse()` and `mermaid().doc` give plain data.
+`parseMermaid()` and `mermaid().doc` give plain data.
 
 - `FlowchartDoc`: `direction`, `nodes` (`id`, `label`, `form`), `edges` (`from`, `to`, `label`, `line`, `arrow`) and `subgraphs` (`id`, `title`, `nodes`).
 - `SequenceDoc`: `participants` (`id`, `label`, `role`) and `items`, each a `message` (`from`, `to`, `text`, `line`, `head`) or a `note` (`actor`, `text`).

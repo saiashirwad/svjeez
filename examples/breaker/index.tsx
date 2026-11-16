@@ -234,12 +234,12 @@ const recapSpec = {
   },
   edges: [
     ["call", "open"],
-    ["open", "run", { label: "no" }],
-    ["open", "due", { label: "yes" }],
-    ["due", "fail", { label: "no" }],
-    ["due", "run", { label: "yes" }],
-    ["run", "ok", { label: "ok" }],
-    ["run", "count", { label: "threw" }],
+    ["open", "run", "no"],
+    ["open", "due", "yes"],
+    ["due", "fail", "no"],
+    ["due", "run", "yes"],
+    ["run", "ok", "ok"],
+    ["run", "count", "threw"],
   ],
 } as const;
 

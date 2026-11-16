@@ -184,7 +184,7 @@ const p = plane({ xRange: [-10, 10], yRange: [-10, 10], frame: rect(-180, -100, 
 - A matrix is written by rows: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy). A third number in a row translates. Each step applies on top of the ones before it.
 - `background` and `node` stay put. `grid` and `axes` move, and so does a `plot()` drawn from a plane with steps. The calculus methods draw at rest, so call them before the first step.
 - `vector(to, { color, width, label, from })` is an arrow whose head stays upright under any shear and whose TeX label rides past its tip. Put a span first, `vector(span, to, options)`, and the shaft grows over it, then the head and label appear. `basis()` draws î and ĵ, and `basis(span)` grows them in it, ĵ starting 0.2s after î.
-- `polygon(points)`, `span(direction)` and `label(at, content)` move with the plane. An eigenvector's span stays on itself.
+- `polygon(points)`, `line(direction)` and `label(at, content)` move with the plane. An eigenvector's line stays on itself.
 - `point(x, y)` and `map(x, y)` give scene pixels before and after every step.
 
 When every step is a matrix, the plane is one CSS transform driven by registered properties, so the file stays small. A function step, such as z ↦ z² written as `(x, y) => [x * x - y * y, 2 * x * y]`, samples every outline and morphs it through `d`.

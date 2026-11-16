@@ -16,8 +16,8 @@ const chart = flowchart(
     edges: [
       ["pr", "lint"],
       ["lint", "ok"],
-      ["ok", "post", { label: "yes" }],
-      ["ok", "lint", { label: "no" }],
+      ["ok", "post", "yes"],
+      ["ok", "lint", "no"],
     ],
   },
   { theme, x: M, y: M, font: mono, fontSize: 13, play: { at: 0.5 } },

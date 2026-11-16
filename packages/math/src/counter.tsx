@@ -98,11 +98,7 @@ const changes = (
  * keyframes, so the output stays small however often the number changes.
  */
 export function counter(values: readonly CounterValue[], options?: CounterOptions): Counter;
-export function counter(
-  span: Span,
-  fn: (t: Seconds) => number,
-  options?: CounterOptions,
-): Counter;
+export function counter(span: Span, fn: (t: Seconds) => number, options?: CounterOptions): Counter;
 export function counter(
   first: readonly CounterValue[] | Span,
   second?: ((t: Seconds) => number) | CounterOptions,

@@ -26,7 +26,7 @@ const chart = flowchart(
   {
     nodes: { pr: { label: "PR opened", role: "input" }, lint: { label: "Run linters", role: "tool" }, ok: { label: "Clean?", role: "decision" }, post: "Post review" },
     groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
-    edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", { label: "yes" }], ["ok", "lint", { label: "no" }]],
+    edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", "yes"], ["ok", "lint", "no"]],
   },
   { play: { at: 0.5 }, direction: "TB" },
 );

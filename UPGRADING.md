@@ -18,7 +18,7 @@ Instructions for a coding agent. 0.7 is breaking and keeps no aliases: every old
 + import { Callout, timeline, terminal } from "svjeez";
 ```
 
-**2. Diagrams moved to `@svjeez/diagrams`.** Search `flowchart`, `sequence`, `lanes`, `tree`, `stateMachine` and their types (`Flowchart`, `FlowchartOptions`, `FlowchartEdge`, `FlowchartGroup`, `Sequence*`, `Lanes*`, `Lane*`, `Tree`, `TreeOptions`, `TreeSpec`, `State*`, `StateMachine`, `Checked`, `Transition`, `Walk`, `WalkToken`, `Diagram`, `DiagramOptions`, `Anchor`, `Labelled`, `NodeRole`). Import them from `@svjeez/diagrams`. Behavior is unchanged.
+**2. Diagrams moved to `@svjeez/diagrams`.** Search `flowchart`, `sequence`, `lanes`, `tree`, `stateMachine` and their types (`Flowchart`, `FlowchartOptions`, `FlowchartEdge`, `FlowchartGroup`, `Sequence*`, `Lanes*`, `Lane*`, `Tree`, `TreeOptions`, `TreeSpec`, `State*`, `StateMachine`, `Walk`, `WalkToken`, `Diagram`, `DiagramOptions`, `Anchor`, `Labelled`, `NodeRole`). Import them from `@svjeez/diagrams`. Behavior is unchanged.
 
 **3. Editor palettes moved to `@svjeez/code`.** Search `tomorrowNight`, `tomorrow`, `solarizedDark`, `solarizedLight`, `gruvboxDark`, `gruvboxLight`. Import from `@svjeez/code/palettes`, which does not load Shiki. `defaultDark`, `defaultLight`, `systemDark`, `systemLight`, `base16`, `tint`, `adaptive` and `variables` stay in `svjeez`.
 
@@ -195,6 +195,29 @@ Smaller breaking changes, in the order a typecheck will find them.
 ```
 
   Details. A bar series now ends with its span: each bar grows for `over - (bars - 1) * stagger`, `stagger` defaults to 0.08 or less when the span is short, `ease` is an option, and `bars` also takes `[key, value]` pairs. `derive`'s `every` is gone: the changes are spaced evenly across the span and `over` became `change`. `counter(fn)` reads `fn` from 0 at the span's start, not at scene time 0. `cartogram` and `toBars` with `stagger` start the shapes that far apart and land the last with the span. `trueSize` takes a core `Ease` and defaults to `ease.inOut`, a slightly different curve from the old cubic. `Timing` is gone from `@svjeez/math` and `@svjeez/charts`.
+- Names. Types that two packages shared are prefixed with their package, and a few functions were renamed to say what they do:
+
+| Package | Old | New |
+| --- | --- | --- |
+| `@svjeez/mermaid` | `parse` | `parseMermaid` |
+| `@svjeez/mermaid` | `FlowNode`, `FlowEdge`, `Participant`, `SequenceMessage`, `StateTransition` | `MermaidFlowNode`, `MermaidFlowEdge`, `MermaidParticipant`, `MermaidSequenceMessage`, `MermaidStateTransition` |
+| `@svjeez/mermaid` | `FORM_ROLES` | gone (the form-to-role table is in the README) |
+| `@svjeez/diagrams` | `StateOptions`, `Transition` | `StateMachineOptions`, `StateTransition` |
+| `@svjeez/diagrams` | `Checked`, `StateIds` | no longer exported |
+| `@svjeez/math` | `plane.span(direction)`, `SpanOptions` | `plane.line(direction)`, `PlaneLineOptions` |
+| `@svjeez/math` | `GeoPoint`, `GeoLine`, `GeoCircle`, `GeoCurve` | `ConstructPoint`, `ConstructLine`, `ConstructCircle`, `ConstructCurve` |
+| `@svjeez/math` | `Look`, `Pace`, `LineOptions`, `PolygonOptions` (of `construct`) | `ConstructLook`, `ConstructPace`, `ConstructLineOptions`, `ConstructPolygonOptions` |
+| `@svjeez/charts` | `Bar`, `Bars`, `BarsOptions`, `Line`, `LineOptions`, `Area`, `AreaOptions` | `ChartBar`, `ChartBars`, `ChartBarsOptions`, `ChartLine`, `ChartLineOptions`, `ChartArea`, `ChartAreaOptions` |
+| `@svjeez/geo` | `Bar`, `Bars`, `BarsOptions` | `GeoBar`, `GeoBars`, `GeoBarsOptions` |
+
+- A labelled edge is `[from, to, label?, options?]` in every diagram, with the label a string. A flowchart edge `[from, to, { label }]` is `[from, to, label]`. State transitions and sequence messages already were.
+- `google.family(family, ...faces)` takes faces as `{ weight, style }` objects, like `font.family(...faces)` takes fonts. A face takes the options of `google()`, and the first face's `fallback` is the family's. `GoogleFace` is gone.
+
+```ts
+- google.family("Geist", [400, { weight: 600, style: "italic" }], { ligatures: false })
++ google.family("Geist", { weight: 400, ligatures: false }, { weight: 600, style: "italic", ligatures: false })
+```
+
 - `.to(values, span, ease?)` is gone: `.to` takes a length. Search `.to(` with a span as the second argument and write `.at(span.at).to(values, span.over, ease)`.
 - `defaultLight` is gone (use `systemLight`), and `inkPath` is no longer exported from `svjeez`.
 - New exports, for typing what functions return: `FlowResult`, `TerminalResult`, `RevealResult`, `TypewriterResult`, `AppWindowResult`, `MorphResult`, `AdaptiveResult`, `VariablesResult`, `Shown`, `Heading` and `Travel`.

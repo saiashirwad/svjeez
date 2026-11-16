@@ -132,7 +132,9 @@ describe("counter", () => {
     const out = svg(r.node);
     expect(out.match(/<path /g)).toHaveLength(3);
     expect(out).toContain("25%");
-    expect(() => counter({ at: 0, over: 0 }, () => 1)).toThrow("counter() of a function needs a positive over");
+    expect(() => counter({ at: 0, over: 0 }, () => 1)).toThrow(
+      "counter() of a function needs a positive over",
+    );
   });
 
   test("digits fix the places", () => {
