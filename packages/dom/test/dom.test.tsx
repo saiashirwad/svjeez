@@ -479,7 +479,7 @@ describe("Dom", () => {
     expect(svg.match(/>hi there</g)).toHaveLength(1);
     expect(svg.match(/>email</g)).toHaveLength(1);
     expect(svg).toContain("<clipPath");
-    expect(svg).toMatch(/width:\s*[\d.]+px/);
+    expect(svg).toMatch(/attributeName="width"/);
 
     // Deleting un-types the same text backwards, and the placeholder returns.
     const back = draw([typed, wait(0.5), [idle, { over: 0.8 }]]);

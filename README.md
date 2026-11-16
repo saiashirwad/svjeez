@@ -17,7 +17,7 @@
 ---
 
 - Write a scene in TypeScript, get one self-contained SVG.
-- Motions become CSS `@keyframes`, or SMIL on filter primitives.
+- Motions become CSS `@keyframes`, or SMIL on filter primitives, `d`, `width` and `height`.
 - Fonts are subset and embedded.
 - Follows `prefers-color-scheme` and `prefers-reduced-motion` by itself.
 - Nothing runs in the viewer's browser, so it plays anywhere an `<img>` works, this README included.

@@ -9,7 +9,11 @@
       <rect x="84" y="196" width="380" height="290"/>
     </clipPath>
     <clipPath id="c3">
-      <rect x="568" y="196" width="300" height="290" class="a m19"/>
+      <rect x="568" y="196" width="300" height="290" class="dm">
+        <animate id="w13" attributeName="width" values="0;300" keyTimes="0;1" begin="1.2s;w13.begin+11s" dur="1.8s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w13.begin+9.8s" dur="1.2s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="568" y="196" width="300" height="290" class="ds" display="none"/>
     </clipPath>
     <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="var(--base0E)" stop-opacity="0.4"/>
@@ -38,84 +42,70 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .m4{animation-name:k6,k7}
 @keyframes k8{0%,3.636%{opacity:0}9.091%,100%{opacity:1}}
 .m5{animation-name:k8}
-@keyframes k9{0%,5.455%{height:0px}11.818%,100%{height:155.2px}}
-@keyframes k10{0%,5.455%{translate:0px 155.2px}11.818%,100%{translate:0px 0px}}
-.m6{animation-name:k9,k10}
-@keyframes k11{0%,6.182%{height:0px}12.545%,100%{height:177px}}
-@keyframes k12{0%,6.182%{translate:0px 177px}12.545%,100%{translate:0px 0px}}
-.m7{animation-name:k11,k12}
-@keyframes k13{0%,6.909%{height:0px}13.273%,100%{height:187.9px}}
-@keyframes k14{0%,6.909%{translate:0px 187.9px}13.273%,100%{translate:0px 0px}}
-.m8{animation-name:k13,k14}
-@keyframes k15{0%,7.636%{height:0px}14%,100%{height:209.6px}}
-@keyframes k16{0%,7.636%{translate:0px 209.6px}14%,100%{translate:0px 0px}}
-.m9{animation-name:k15,k16}
-@keyframes k17{0%,8.364%{height:0px}14.727%,100%{height:231.4px}}
-@keyframes k18{0%,8.364%{translate:0px 231.4px}14.727%,100%{translate:0px 0px}}
-.m10{animation-name:k17,k18}
-@keyframes k19{0%,9.091%{height:0px}15.455%,100%{height:256.7px}}
-@keyframes k20{0%,9.091%{translate:0px 256.7px}15.455%,100%{translate:0px 0px}}
-.m11{animation-name:k19,k20}
-@keyframes k21{0%,7.273%{height:0px}13.636%,100%{height:115.4px}}
-@keyframes k22{0%,7.273%{translate:0px 115.4px}13.636%,100%{translate:0px 0px}}
-.m12{animation-name:k21,k22}
-@keyframes k23{0%,8%{height:0px}14.364%,100%{height:140.7px}}
-@keyframes k24{0%,8%{translate:0px 140.7px}14.364%,100%{translate:0px 0px}}
-.m13{animation-name:k23,k24}
-@keyframes k25{0%,8.727%{height:0px}15.091%,100%{height:162.5px}}
-@keyframes k26{0%,8.727%{translate:0px 162.5px}15.091%,100%{translate:0px 0px}}
-.m14{animation-name:k25,k26}
-@keyframes k27{0%,9.455%{height:0px}15.818%,100%{height:202.4px}}
-@keyframes k28{0%,9.455%{translate:0px 202.4px}15.818%,100%{translate:0px 0px}}
-.m15{animation-name:k27,k28}
-@keyframes k29{0%,10.182%{height:0px}16.545%,100%{height:235px}}
-@keyframes k30{0%,10.182%{translate:0px 235px}16.545%,100%{translate:0px 0px}}
-.m16{animation-name:k29,k30}
-@keyframes k31{0%,10.909%{height:0px}17.273%,100%{height:264px}}
-@keyframes k32{0%,10.909%{translate:0px 264px}17.273%,100%{translate:0px 0px}}
-.m17{animation-name:k31,k32}
-@keyframes k33{0%,8.182%{opacity:0}13.636%,100%{opacity:1}}
-.m18{animation-name:k33}
-@keyframes k34{0%,10.909%{width:0px}27.273%,100%{width:300px}}
-.m19{animation-name:k34;animation-timing-function:linear}
-@keyframes k35{0%,10.909%{stroke-dashoffset:1;visibility:hidden}27.273%,100%{stroke-dashoffset:0;visibility:visible}}
-.m20{animation-name:k35;animation-timing-function:linear}
-@keyframes k36{0%,10.909%{scale:0}13.636%,100%{scale:1}}
-.m21{animation-name:k36;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k37{0%,12.146%{scale:0}14.873%,100%{scale:1}}
-.m22{animation-name:k37;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k38{0%,13.614%{scale:0}16.342%,100%{scale:1}}
-.m23{animation-name:k38;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k39{0%,14.849%{scale:0}17.576%,100%{scale:1}}
-.m24{animation-name:k39;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k40{0%,16.084%{scale:0}18.811%,100%{scale:1}}
-.m25{animation-name:k40;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k41{0%,17.555%{scale:0}20.282%,100%{scale:1}}
-.m26{animation-name:k41;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k42{0%,18.786%{scale:0}21.514%,100%{scale:1}}
-.m27{animation-name:k42;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k43{0%,22.154%{scale:0}24.881%,100%{scale:1}}
-.m28{animation-name:k43;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k44{0%,23.903%{scale:0}26.63%,100%{scale:1}}
-.m29{animation-name:k44;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k45{0%,25.138%{scale:0}27.865%,100%{scale:1}}
-.m30{animation-name:k45;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k46{0%,26.204%{scale:0}28.931%,100%{scale:1}}
-.m31{animation-name:k46;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k47{0%,27.273%{scale:0}30%,100%{scale:1}}
-.m32{animation-name:k47;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-@keyframes k48{0%,27.273%{opacity:0}30.909%,100%{opacity:1}}
-@keyframes k49{0%,27.273%{translate:-8px 0px}30.909%,100%{translate:0px 0px}}
-.m33{animation-name:k48,k49}
-@keyframes k50{0%,25.455%{opacity:0}30%,100%{opacity:1}}
-@keyframes k51{0%,25.455%{translate:0px 8px}30%,100%{translate:0px 0px}}
-.m34{animation-name:k50,k51}
-@keyframes k52{0%,94.545%{opacity:1}100%{opacity:0}}
-.m35{animation-name:k52;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}}
+@keyframes k9{0%,5.455%{translate:0px 155.2px}11.818%,100%{translate:0px 0px}}
+.m6{animation-name:k9}
+@keyframes k10{0%,6.182%{translate:0px 177px}12.545%,100%{translate:0px 0px}}
+.m7{animation-name:k10}
+@keyframes k11{0%,6.909%{translate:0px 187.9px}13.273%,100%{translate:0px 0px}}
+.m8{animation-name:k11}
+@keyframes k12{0%,7.636%{translate:0px 209.6px}14%,100%{translate:0px 0px}}
+.m9{animation-name:k12}
+@keyframes k13{0%,8.364%{translate:0px 231.4px}14.727%,100%{translate:0px 0px}}
+.m10{animation-name:k13}
+@keyframes k14{0%,9.091%{translate:0px 256.7px}15.455%,100%{translate:0px 0px}}
+.m11{animation-name:k14}
+@keyframes k15{0%,7.273%{translate:0px 115.4px}13.636%,100%{translate:0px 0px}}
+.m12{animation-name:k15}
+@keyframes k16{0%,8%{translate:0px 140.7px}14.364%,100%{translate:0px 0px}}
+.m13{animation-name:k16}
+@keyframes k17{0%,8.727%{translate:0px 162.5px}15.091%,100%{translate:0px 0px}}
+.m14{animation-name:k17}
+@keyframes k18{0%,9.455%{translate:0px 202.4px}15.818%,100%{translate:0px 0px}}
+.m15{animation-name:k18}
+@keyframes k19{0%,10.182%{translate:0px 235px}16.545%,100%{translate:0px 0px}}
+.m16{animation-name:k19}
+@keyframes k20{0%,10.909%{translate:0px 264px}17.273%,100%{translate:0px 0px}}
+.m17{animation-name:k20}
+@keyframes k21{0%,8.182%{opacity:0}13.636%,100%{opacity:1}}
+.m18{animation-name:k21}
+@keyframes k22{0%,10.909%{stroke-dashoffset:1;visibility:hidden}27.273%,100%{stroke-dashoffset:0;visibility:visible}}
+.m19{animation-name:k22;animation-timing-function:linear}
+@keyframes k23{0%,10.909%{scale:0}13.636%,100%{scale:1}}
+.m20{animation-name:k23;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k24{0%,12.146%{scale:0}14.873%,100%{scale:1}}
+.m21{animation-name:k24;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k25{0%,13.614%{scale:0}16.342%,100%{scale:1}}
+.m22{animation-name:k25;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k26{0%,14.849%{scale:0}17.576%,100%{scale:1}}
+.m23{animation-name:k26;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k27{0%,16.084%{scale:0}18.811%,100%{scale:1}}
+.m24{animation-name:k27;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k28{0%,17.555%{scale:0}20.282%,100%{scale:1}}
+.m25{animation-name:k28;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k29{0%,18.786%{scale:0}21.514%,100%{scale:1}}
+.m26{animation-name:k29;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k30{0%,22.154%{scale:0}24.881%,100%{scale:1}}
+.m27{animation-name:k30;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k31{0%,23.903%{scale:0}26.63%,100%{scale:1}}
+.m28{animation-name:k31;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k32{0%,25.138%{scale:0}27.865%,100%{scale:1}}
+.m29{animation-name:k32;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k33{0%,26.204%{scale:0}28.931%,100%{scale:1}}
+.m30{animation-name:k33;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k34{0%,27.273%{scale:0}30%,100%{scale:1}}
+.m31{animation-name:k34;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k35{0%,27.273%{opacity:0}30.909%,100%{opacity:1}}
+@keyframes k36{0%,27.273%{translate:-8px 0px}30.909%,100%{translate:0px 0px}}
+.m32{animation-name:k35,k36}
+@keyframes k37{0%,25.455%{opacity:0}30%,100%{opacity:1}}
+@keyframes k38{0%,25.455%{translate:0px 8px}30%,100%{translate:0px 0px}}
+.m33{animation-name:k37,k38}
+@keyframes k39{0%,94.545%{opacity:1}100%{opacity:0}}
+.m34{animation-name:k39;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <rect width="100%" height="100%" fill="var(--base00)"/>
-  <g class="a m35">
+  <g class="a m34">
     <g font-family="'Geist', sans-serif" class="a m1">
       <text x="48" y="76" font-size="30" font-weight="600" fill="var(--base06)">Median time to first review fell from 26 to 7 hours</text>
       <text x="48" y="102" font-size="15" fill="var(--base04)">Pull requests, January to June</text>
@@ -167,22 +157,70 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
     </g>
     <g>
       <g clip-path="url(#c1)">
-        <rect x="94.5" y="333.8" width="20.167" height="155.2" rx="3" fill="var(--base09)" class="a m6"/>
-        <rect x="157.8" y="312" width="20.167" height="177" rx="3" fill="var(--base09)" class="a m7"/>
-        <rect x="221.2" y="301.1" width="20.167" height="187.9" rx="3" fill="var(--base09)" class="a m8"/>
-        <rect x="284.5" y="279.4" width="20.167" height="209.6" rx="3" fill="var(--base09)" class="a m9"/>
-        <rect x="347.8" y="257.6" width="20.167" height="231.4" rx="3" fill="var(--base09)" class="a m10"/>
-        <rect x="411.2" y="232.3" width="20.167" height="256.7" rx="3" fill="var(--base09)" class="a m11"/>
+        <rect x="94.5" y="333.8" width="20.167" height="155.2" rx="3" fill="var(--base09)" class="a m6 dm">
+          <animate id="w1" attributeName="height" values="0;155.2" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.6001s;w1.begin+11s" dur="0.6999s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w1.begin+10.4s" dur="0.6001s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="94.5" y="333.8" width="20.167" height="155.2" rx="3" fill="var(--base09)" class="a m6 ds" display="none"/>
+        <rect x="157.8" y="312" width="20.167" height="177" rx="3" fill="var(--base09)" class="a m7 dm">
+          <animate id="w2" attributeName="height" values="0;177" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.68s;w2.begin+11s" dur="0.6999s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w2.begin+10.32s" dur="0.68s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="157.8" y="312" width="20.167" height="177" rx="3" fill="var(--base09)" class="a m7 ds" display="none"/>
+        <rect x="221.2" y="301.1" width="20.167" height="187.9" rx="3" fill="var(--base09)" class="a m8 dm">
+          <animate id="w3" attributeName="height" values="0;187.9" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.76s;w3.begin+11s" dur="0.7s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w3.begin+10.24s" dur="0.76s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="221.2" y="301.1" width="20.167" height="187.9" rx="3" fill="var(--base09)" class="a m8 ds" display="none"/>
+        <rect x="284.5" y="279.4" width="20.167" height="209.6" rx="3" fill="var(--base09)" class="a m9 dm">
+          <animate id="w4" attributeName="height" values="0;209.6" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.84s;w4.begin+11s" dur="0.7s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w4.begin+10.16s" dur="0.84s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="284.5" y="279.4" width="20.167" height="209.6" rx="3" fill="var(--base09)" class="a m9 ds" display="none"/>
+        <rect x="347.8" y="257.6" width="20.167" height="231.4" rx="3" fill="var(--base09)" class="a m10 dm">
+          <animate id="w5" attributeName="height" values="0;231.4" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.92s;w5.begin+11s" dur="0.6999s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w5.begin+10.08s" dur="0.92s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="347.8" y="257.6" width="20.167" height="231.4" rx="3" fill="var(--base09)" class="a m10 ds" display="none"/>
+        <rect x="411.2" y="232.3" width="20.167" height="256.7" rx="3" fill="var(--base09)" class="a m11 dm">
+          <animate id="w6" attributeName="height" values="0;256.7" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="1s;w6.begin+11s" dur="0.7s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w6.begin+10s" dur="1s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="411.2" y="232.3" width="20.167" height="256.7" rx="3" fill="var(--base09)" class="a m11 ds" display="none"/>
       </g>
     </g>
     <g>
       <g clip-path="url(#c2)">
-        <rect x="116.7" y="373.6" width="20.167" height="115.4" rx="3" fill="var(--base0D)" class="a m12"/>
-        <rect x="180" y="348.3" width="20.167" height="140.7" rx="3" fill="var(--base0D)" class="a m13"/>
-        <rect x="243.3" y="326.5" width="20.167" height="162.5" rx="3" fill="var(--base0D)" class="a m14"/>
-        <rect x="306.7" y="286.6" width="20.167" height="202.4" rx="3" fill="var(--base0D)" class="a m15"/>
-        <rect x="370" y="254" width="20.167" height="235" rx="3" fill="var(--base0D)" class="a m16"/>
-        <rect x="433.3" y="225" width="20.167" height="264" rx="3" fill="var(--base0D)" class="a m17"/>
+        <rect x="116.7" y="373.6" width="20.167" height="115.4" rx="3" fill="var(--base0D)" class="a m12 dm">
+          <animate id="w7" attributeName="height" values="0;115.4" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.8s;w7.begin+11s" dur="0.6999s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w7.begin+10.2s" dur="0.8s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="116.7" y="373.6" width="20.167" height="115.4" rx="3" fill="var(--base0D)" class="a m12 ds" display="none"/>
+        <rect x="180" y="348.3" width="20.167" height="140.7" rx="3" fill="var(--base0D)" class="a m13 dm">
+          <animate id="w8" attributeName="height" values="0;140.7" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.88s;w8.begin+11s" dur="0.7s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w8.begin+10.12s" dur="0.88s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="180" y="348.3" width="20.167" height="140.7" rx="3" fill="var(--base0D)" class="a m13 ds" display="none"/>
+        <rect x="243.3" y="326.5" width="20.167" height="162.5" rx="3" fill="var(--base0D)" class="a m14 dm">
+          <animate id="w9" attributeName="height" values="0;162.5" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.96s;w9.begin+11s" dur="0.7s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w9.begin+10.04s" dur="0.96s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="243.3" y="326.5" width="20.167" height="162.5" rx="3" fill="var(--base0D)" class="a m14 ds" display="none"/>
+        <rect x="306.7" y="286.6" width="20.167" height="202.4" rx="3" fill="var(--base0D)" class="a m15 dm">
+          <animate id="w10" attributeName="height" values="0;202.4" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="1.0401s;w10.begin+11s" dur="0.6999s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w10.begin+9.9599s" dur="1.0401s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="306.7" y="286.6" width="20.167" height="202.4" rx="3" fill="var(--base0D)" class="a m15 ds" display="none"/>
+        <rect x="370" y="254" width="20.167" height="235" rx="3" fill="var(--base0D)" class="a m16 dm">
+          <animate id="w11" attributeName="height" values="0;235" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="1.12s;w11.begin+11s" dur="0.6999s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w11.begin+9.88s" dur="1.12s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="370" y="254" width="20.167" height="235" rx="3" fill="var(--base0D)" class="a m16 ds" display="none"/>
+        <rect x="433.3" y="225" width="20.167" height="264" rx="3" fill="var(--base0D)" class="a m17 dm">
+          <animate id="w12" attributeName="height" values="0;264" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="1.2s;w12.begin+11s" dur="0.7s" fill="freeze" data-loop="11s"/>
+          <set attributeName="height" to="0" begin="0s;w12.begin+9.8s" dur="1.2s" fill="freeze" data-loop="11s"/>
+        </rect>
+        <rect x="433.3" y="225" width="20.167" height="264" rx="3" fill="var(--base0D)" class="a m17 ds" display="none"/>
       </g>
     </g>
     <g class="a m18">
@@ -246,23 +284,23 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
         <path d="M568,234.7C577.1,225,586.2,215.3,595.3,215.3C604.4,215.3,613.4,244.3,622.5,244.3C631.6,244.3,640.7,231.4,649.8,225C658.9,218.6,668,205.7,677.1,205.7C686.2,205.7,695.3,226.6,704.4,234.7C713.5,242.7,722.5,241.1,731.6,254C740.7,266.9,749.8,320.1,758.9,341C768,362,777.1,370,786.2,379.7C795.3,389.4,804.4,394.2,813.5,399C822.6,403.8,831.6,405.5,840.7,408.7C849.8,411.9,858.9,415.1,868,418.3L868,486C858.9,486,849.8,486,840.7,486C831.6,486,822.6,486,813.5,486C804.4,486,795.3,486,786.2,486C777.1,486,768,486,758.9,486C749.8,486,740.7,486,731.6,486C722.5,486,713.5,486,704.4,486C695.3,486,686.2,486,677.1,486C668,486,658.9,486,649.8,486C640.7,486,631.6,486,622.5,486C613.4,486,604.4,486,595.3,486C586.2,486,577.1,486,568,486Z" fill="url(#g1)"/>
       </g>
       <g>
-        <path d="M568,234.7C577.1,225,586.2,215.3,595.3,215.3C604.4,215.3,613.4,244.3,622.5,244.3C631.6,244.3,640.7,231.4,649.8,225C658.9,218.6,668,205.7,677.1,205.7C686.2,205.7,695.3,226.6,704.4,234.7C713.5,242.7,722.5,241.1,731.6,254C740.7,266.9,749.8,320.1,758.9,341C768,362,777.1,370,786.2,379.7C795.3,389.4,804.4,394.2,813.5,399C822.6,403.8,831.6,405.5,840.7,408.7C849.8,411.9,858.9,415.1,868,418.3" fill="none" stroke="var(--base0E)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m20"/>
-        <circle cx="568" cy="234.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m21 fb"/>
-        <circle cx="595.3" cy="215.3" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m22 fb"/>
-        <circle cx="622.5" cy="244.3" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m23 fb"/>
-        <circle cx="649.8" cy="225" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m24 fb"/>
-        <circle cx="677.1" cy="205.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m25 fb"/>
-        <circle cx="704.4" cy="234.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m26 fb"/>
-        <circle cx="731.6" cy="254" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m27 fb"/>
-        <circle cx="758.9" cy="341" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m28 fb"/>
-        <circle cx="786.2" cy="379.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m29 fb"/>
-        <circle cx="813.5" cy="399" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m30 fb"/>
-        <circle cx="840.7" cy="408.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m31 fb"/>
-        <circle cx="868" cy="418.3" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m32 fb"/>
-        <text x="879.5" y="422.5" font-size="12" fill="var(--base0E)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m33">median</text>
+        <path d="M568,234.7C577.1,225,586.2,215.3,595.3,215.3C604.4,215.3,613.4,244.3,622.5,244.3C631.6,244.3,640.7,231.4,649.8,225C658.9,218.6,668,205.7,677.1,205.7C686.2,205.7,695.3,226.6,704.4,234.7C713.5,242.7,722.5,241.1,731.6,254C740.7,266.9,749.8,320.1,758.9,341C768,362,777.1,370,786.2,379.7C795.3,389.4,804.4,394.2,813.5,399C822.6,403.8,831.6,405.5,840.7,408.7C849.8,411.9,858.9,415.1,868,418.3" fill="none" stroke="var(--base0E)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m19"/>
+        <circle cx="568" cy="234.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m20 fb"/>
+        <circle cx="595.3" cy="215.3" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m21 fb"/>
+        <circle cx="622.5" cy="244.3" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m22 fb"/>
+        <circle cx="649.8" cy="225" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m23 fb"/>
+        <circle cx="677.1" cy="205.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m24 fb"/>
+        <circle cx="704.4" cy="234.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m25 fb"/>
+        <circle cx="731.6" cy="254" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m26 fb"/>
+        <circle cx="758.9" cy="341" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m27 fb"/>
+        <circle cx="786.2" cy="379.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m28 fb"/>
+        <circle cx="813.5" cy="399" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m29 fb"/>
+        <circle cx="840.7" cy="408.7" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m30 fb"/>
+        <circle cx="868" cy="418.3" r="3.5" fill="var(--base0E)" stroke="var(--base00)" stroke-width="2" class="a m31 fb"/>
+        <text x="879.5" y="422.5" font-size="12" fill="var(--base0E)" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m32">median</text>
       </g>
     </g>
-    <g class="a m34">
+    <g class="a m33">
       <line x1="758.909" y1="196" x2="758.909" y2="486" stroke="var(--base03)" stroke-width="1.5" stroke-dasharray="4 4"/>
       <text x="768.909" y="210" font-family="'Geist', sans-serif" font-size="13" fill="var(--base05)">Review bot ships</text>
     </g>

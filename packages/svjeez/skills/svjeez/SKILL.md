@@ -5,7 +5,7 @@ description: Write animated SVGs with svjeez, a TypeScript library that compiles
 
 # svjeez
 
-svjeez turns a scene written in TypeScript into one self-contained animated SVG. Motions are values on a timeline. `render()` compiles them to CSS keyframes (SMIL for filter primitives), validates the output and returns a string. Nothing runs in the viewer's browser.
+svjeez turns a scene written in TypeScript into one self-contained animated SVG. Motions are values on a timeline. `render()` compiles them to CSS keyframes (SMIL for filter primitives, `d`, `width` and `height`, since Firefox takes no geometry from CSS), validates the output and returns a string. Nothing runs in the viewer's browser.
 
 ## Setup
 

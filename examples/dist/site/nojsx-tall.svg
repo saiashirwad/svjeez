@@ -131,7 +131,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       </g>
     </g>
     <g class="a m3">
-      <rect x="30.4" y="70.4" width="300" height="134.4" rx="8" fill="var(--base0D)" fill-opacity="0.14" style="width:300px;height:134.4px" class="a m2"/>
+      <rect x="30.4" y="70.4" width="300" height="134.4" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2"/>
     </g>
     <g class="a m6">
       <rect x="20" y="376" width="318" height="130" rx="12" fill="var(--base01)"/>

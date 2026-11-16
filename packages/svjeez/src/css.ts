@@ -77,9 +77,6 @@ export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues):
   switch (lane) {
     case "translate":
       return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
-    case "width":
-    case "height":
-      return `${lane}:${formatValue(valueOf(values, lane))}px`;
     case "rotate":
       return `rotate:${formatValue(values.rotate)}deg`;
     case "draw": {

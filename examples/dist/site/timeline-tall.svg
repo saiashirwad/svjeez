@@ -13,32 +13,24 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k1{0%,1.429%{opacity:0}8.571%,100%{opacity:1}}
 @keyframes k2{0%,1.429%{translate:0px 6px}8.571%,100%{translate:0px 0px}}
 .m1{animation-name:k1,k2}
-@keyframes k3{0%,28.571%{width:288px}34.286%,50%{width:81px}55.714%,57.143%{width:267.3px}62.857%,100%{width:322.5px}}
-@keyframes k4{0%,28.571%{height:58px}34.286%,50%,55.714%,57.143%,62.857%,100%{height:35px}}
-@keyframes k5{0%,20%{opacity:0}25.714%,100%{opacity:1}}
-.m2{animation-name:k3,k4,k5}
-@keyframes k6{0%,28.571%{translate:0px 0px}34.286%,50%{translate:0px 46px}55.714%,57.143%{translate:0px 69px}62.857%,100%{translate:0px 92px}}
-.m3{animation-name:k6}
-@keyframes k7{0%,92.857%{opacity:1}100%{opacity:0}}
-.m4{animation-name:k7}
-@keyframes k8{0%,35.714%,39.143%,65.714%,69.143%,100%{opacity:1}36.286%,38%,66.286%,68%{opacity:0}}
-.m5{animation-name:k8}
-@keyframes k9{0%,35.714%,39.143%,65.714%,69.143%,100%{opacity:0}36.286%,38%,66.286%,68%{opacity:1}}
-.m6{animation-name:k9}
-@keyframes k10{0%,20%{opacity:0}28.571%,100%{opacity:1}}
-@keyframes k11{0%,20%{translate:0px 40px}28.571%,100%{translate:0px 0px}}
-@keyframes k12{0%,50%,62.857%,100%{scale:1}57.143%{scale:1.4;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
-@keyframes k13{0%,50%,62.857%,100%{rotate:0deg}57.143%{rotate:-12deg;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
-.m7{animation-name:k10,k11,k12,k13;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1),cubic-bezier(.23,1,.32,1),cubic-bezier(.23,1,.32,1)}
-@keyframes k14{0%,20%{width:0px}28.571%,100%{width:38.7px}}
-.m8{animation-name:k14;animation-timing-function:linear}
-@keyframes k15{0%,50%{width:0px}57.143%,100%{width:32.25px}}
-.m9{animation-name:k15;animation-timing-function:linear}
-@keyframes k16{0%,57.143%{width:0px}62.857%,100%{width:25.8px}}
-.m10{animation-name:k16;animation-timing-function:linear}
-@keyframes k17{0%,12.857%{translate:0px 0px}62.857%,100%{translate:225.75px 0px}}
-.m11{animation-name:k17;animation-timing-function:linear}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}}
+@keyframes k3{0%,20%{opacity:0}25.714%,100%{opacity:1}}
+.m2{animation-name:k3}
+@keyframes k4{0%,28.571%{translate:0px 0px}34.286%,50%{translate:0px 46px}55.714%,57.143%{translate:0px 69px}62.857%,100%{translate:0px 92px}}
+.m3{animation-name:k4}
+@keyframes k5{0%,92.857%{opacity:1}100%{opacity:0}}
+.m4{animation-name:k5}
+@keyframes k6{0%,35.714%,39.143%,65.714%,69.143%,100%{opacity:1}36.286%,38%,66.286%,68%{opacity:0}}
+.m5{animation-name:k6}
+@keyframes k7{0%,35.714%,39.143%,65.714%,69.143%,100%{opacity:0}36.286%,38%,66.286%,68%{opacity:1}}
+.m6{animation-name:k7}
+@keyframes k8{0%,20%{opacity:0}28.571%,100%{opacity:1}}
+@keyframes k9{0%,20%{translate:0px 40px}28.571%,100%{translate:0px 0px}}
+@keyframes k10{0%,50%,62.857%,100%{scale:1}57.143%{scale:1.4;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+@keyframes k11{0%,50%,62.857%,100%{rotate:0deg}57.143%{rotate:-12deg;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.m7{animation-name:k8,k9,k10,k11;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1),cubic-bezier(.23,1,.32,1),cubic-bezier(.23,1,.32,1)}
+@keyframes k12{0%,12.857%{translate:0px 0px}62.857%,100%{translate:225.75px 0px}}
+.m8{animation-name:k12;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g class="sans">
     <rect x="0.5" y="0.5" width="357" height="503" rx="12" fill="var(--base00)" stroke="var(--base02)"/>
@@ -123,7 +115,13 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       </g>
     </g>
     <g class="a m3">
-      <rect x="27.8" y="75" width="288" height="58" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2"/>
+      <rect x="27.8" y="75" width="322.5" height="35" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2 dm">
+        <animate id="w1" attributeName="width" values="288;81;81;267.3;267.3;322.5" keyTimes="0;0.16669;0.62501;0.79166;0.83334;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" begin="2s;w1.begin+7s" dur="2.4s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="288" begin="0s;w1.begin+5s" dur="2s" fill="freeze" data-loop="7s"/>
+        <animate id="w2" attributeName="height" values="58;35" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="2s;w2.begin+7s" dur="0.4001s" fill="freeze" data-loop="7s"/>
+        <set attributeName="height" to="58" begin="0s;w2.begin+5s" dur="2s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="27.8" y="75" width="322.5" height="35" rx="8" fill="var(--base0D)" fill-opacity="0.14" class="a m2 ds" display="none"/>
     </g>
   </g>
   <g class="a m4">
@@ -184,28 +182,52 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
     <g>
       <text x="24" y="366" class="sans" font-size="12" fill="var(--base04)">opacity</text>
       <rect x="108.25" y="354" width="38.7" height="16" rx="8" fill="var(--base02)"/>
-      <rect x="108.25" y="354" width="0" height="16" rx="8" fill="var(--base0D)" class="a m8"/>
+      <rect x="108.25" y="354" width="38.7" height="16" rx="8" fill="var(--base0D)" class="dm">
+        <animate id="w3" attributeName="width" values="0;38.7" keyTimes="0;1" begin="1.4s;w3.begin+7s" dur="0.6s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w3.begin+5.6s" dur="1.4s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="108.25" y="354" width="38.7" height="16" rx="8" fill="var(--base0D)" class="ds" display="none"/>
     </g>
     <g>
       <text x="24" y="402" class="sans" font-size="12" fill="var(--base04)">y</text>
       <rect x="108.25" y="390" width="38.7" height="16" rx="8" fill="var(--base02)"/>
-      <rect x="108.25" y="390" width="0" height="16" rx="8" fill="var(--base0D)" class="a m8"/>
+      <rect x="108.25" y="390" width="38.7" height="16" rx="8" fill="var(--base0D)" class="dm">
+        <animate id="w4" attributeName="width" values="0;38.7" keyTimes="0;1" begin="1.4s;w4.begin+7s" dur="0.6s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w4.begin+5.6s" dur="1.4s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="108.25" y="390" width="38.7" height="16" rx="8" fill="var(--base0D)" class="ds" display="none"/>
     </g>
     <g>
       <text x="24" y="438" class="sans" font-size="12" fill="var(--base04)">scale</text>
       <rect x="243.7" y="426" width="32.25" height="16" rx="8" fill="var(--base02)"/>
-      <rect x="243.7" y="426" width="0" height="16" rx="8" fill="var(--base0E)" class="a m9"/>
+      <rect x="243.7" y="426" width="32.25" height="16" rx="8" fill="var(--base0E)" class="dm">
+        <animate id="w5" attributeName="width" values="0;32.25" keyTimes="0;1" begin="3.5s;w5.begin+7s" dur="0.5s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w5.begin+3.5s" dur="3.5s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="243.7" y="426" width="32.25" height="16" rx="8" fill="var(--base0E)" class="ds" display="none"/>
       <rect x="275.95" y="426" width="25.8" height="16" rx="8" fill="var(--base02)"/>
-      <rect x="275.95" y="426" width="0" height="16" rx="8" fill="var(--base0E)" class="a m10"/>
+      <rect x="275.95" y="426" width="25.8" height="16" rx="8" fill="var(--base0E)" class="dm">
+        <animate id="w6" attributeName="width" values="0;25.8" keyTimes="0;1" begin="4s;w6.begin+7s" dur="0.4s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w6.begin+3s" dur="4s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="275.95" y="426" width="25.8" height="16" rx="8" fill="var(--base0E)" class="ds" display="none"/>
     </g>
     <g>
       <text x="24" y="474" class="sans" font-size="12" fill="var(--base04)">rotate</text>
       <rect x="243.7" y="462" width="32.25" height="16" rx="8" fill="var(--base02)"/>
-      <rect x="243.7" y="462" width="0" height="16" rx="8" fill="var(--base09)" class="a m9"/>
+      <rect x="243.7" y="462" width="32.25" height="16" rx="8" fill="var(--base09)" class="dm">
+        <animate id="w7" attributeName="width" values="0;32.25" keyTimes="0;1" begin="3.5s;w7.begin+7s" dur="0.5s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w7.begin+3.5s" dur="3.5s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="243.7" y="462" width="32.25" height="16" rx="8" fill="var(--base09)" class="ds" display="none"/>
       <rect x="275.95" y="462" width="25.8" height="16" rx="8" fill="var(--base02)"/>
-      <rect x="275.95" y="462" width="0" height="16" rx="8" fill="var(--base09)" class="a m10"/>
+      <rect x="275.95" y="462" width="25.8" height="16" rx="8" fill="var(--base09)" class="dm">
+        <animate id="w8" attributeName="width" values="0;25.8" keyTimes="0;1" begin="4s;w8.begin+7s" dur="0.4s" fill="freeze" data-loop="7s"/>
+        <set attributeName="width" to="0" begin="0s;w8.begin+3s" dur="4s" fill="freeze" data-loop="7s"/>
+      </rect>
+      <rect x="275.95" y="462" width="25.8" height="16" rx="8" fill="var(--base09)" class="ds" display="none"/>
     </g>
-    <g class="a m11">
+    <g class="a m8">
       <path d="M76 348V484" stroke="var(--base06)" stroke-width="1.5"/>
       <circle cx="76" cy="348" r="4" fill="var(--base06)"/>
     </g>

@@ -661,13 +661,19 @@ const emitShell = (
   const shell = element(target.tag, attrs, children);
   const emitted = Object.keys(still).length > 0 ? { ...shell, still } : shell;
 
-  if (!animated || state.canvas.stillAt === undefined || !lanes.some((lane) => lane.key === "d"))
+  // Filter primitives are swapped with the filter as a whole.
+  if (
+    !animated ||
+    state.canvas.stillAt === undefined ||
+    target.tag.startsWith("fe") ||
+    !lanes.some((lane) => lane.backend === "smil")
+  )
     return emitted;
 
   return stillTwin(state, emitted);
 };
 
-/** A path whose `d` moves through SMIL, beside a still twin that reduced motion shows instead, since CSS cannot pause SMIL. */
+/** An element whose `d`, `width` or `height` moves through SMIL, beside a still twin that reduced motion shows instead, since CSS cannot pause SMIL. */
 const stillTwin = (state: State, moving: Element): SvgNode => {
   const { prefix } = state.canvas;
   const rule = `.${prefix}dm{display:none}.${prefix}ds{display:inline}`;

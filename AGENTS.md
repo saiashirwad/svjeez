@@ -1,6 +1,6 @@
 # AGENTS.md
 
-svjeez is a TypeScript library that compiles scenes written in TypeScript into one self-contained animated SVG. Motions become CSS keyframes, or SMIL on filter primitives. Nothing runs in the viewer's browser.
+svjeez is a TypeScript library that compiles scenes written in TypeScript into one self-contained animated SVG. Motions become CSS keyframes, or SMIL on filter primitives, `d`, `width` and `height`. Nothing runs in the viewer's browser.
 
 To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md) and the references it points to. It ships in the npm package, and `svjeez skill --install` copies it into a project. This file covers working on the repository.
 

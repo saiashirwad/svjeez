@@ -358,31 +358,19 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .m135{animation-name:k198}
 @keyframes k199{0%,86.148%{opacity:0}86.557%,100%{opacity:1}}
 .m136{animation-name:k199}
-@keyframes k200{0%{width:0px}8.197%,100%{width:95.627px}}
-.m137{animation-name:k200;animation-timing-function:linear}
-@keyframes k201{0%{fill:var(--base05)}8.197%,100%{fill:var(--base03)}}
+@keyframes k200{0%{fill:var(--base05)}8.197%,100%{fill:var(--base03)}}
+.m137{animation-name:k200;animation-timing-function:steps(1)}
+@keyframes k201{0%,27.213%,100%{fill:var(--base03)}9.18%{fill:var(--base05)}}
 .m138{animation-name:k201;animation-timing-function:steps(1)}
-@keyframes k202{0%,9.18%{width:0px}27.213%,100%{width:212.78px}}
-.m139{animation-name:k202;animation-timing-function:linear}
-@keyframes k203{0%,27.213%,100%{fill:var(--base03)}9.18%{fill:var(--base05)}}
+@keyframes k202{0%,42.951%,100%{fill:var(--base03)}28.197%{fill:var(--base05)}}
+.m139{animation-name:k202;animation-timing-function:steps(1)}
+@keyframes k203{0%,68.525%,100%{fill:var(--base03)}43.934%{fill:var(--base05)}}
 .m140{animation-name:k203;animation-timing-function:steps(1)}
-@keyframes k204{0%,28.197%{width:0px}42.951%,100%{width:173.729px}}
-.m141{animation-name:k204;animation-timing-function:linear}
-@keyframes k205{0%,42.951%,100%{fill:var(--base03)}28.197%{fill:var(--base05)}}
+@keyframes k204{0%,82.623%,100%{fill:var(--base03)}69.508%{fill:var(--base05)}}
+.m141{animation-name:k204;animation-timing-function:steps(1)}
+@keyframes k205{0%,96.721%,100%{fill:var(--base03)}83.607%{fill:var(--base05)}}
 .m142{animation-name:k205;animation-timing-function:steps(1)}
-@keyframes k206{0%,43.934%{width:0px}68.525%,100%{width:290.881px}}
-.m143{animation-name:k206;animation-timing-function:linear}
-@keyframes k207{0%,68.525%,100%{fill:var(--base03)}43.934%{fill:var(--base05)}}
-.m144{animation-name:k207;animation-timing-function:steps(1)}
-@keyframes k208{0%,69.508%{width:0px}82.623%,100%{width:154.203px}}
-.m145{animation-name:k208;animation-timing-function:linear}
-@keyframes k209{0%,82.623%,100%{fill:var(--base03)}69.508%{fill:var(--base05)}}
-.m146{animation-name:k209;animation-timing-function:steps(1)}
-@keyframes k210{0%,83.607%{width:0px}96.721%,100%{width:154.203px}}
-.m147{animation-name:k210;animation-timing-function:linear}
-@keyframes k211{0%,96.721%,100%{fill:var(--base03)}83.607%{fill:var(--base05)}}
-.m148{animation-name:k211;animation-timing-function:steps(1)}
-@media (prefers-reduced-motion:reduce){.a{animation-delay:-40.8s!important;animation-play-state:paused!important}}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-40.8s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <rect width="1280" height="720" fill="var(--base00)"/>
   <g class="sans a m2">
@@ -1326,22 +1314,45 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
   </g>
   <g class="sans">
     <rect x="64" y="680" width="95.627" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="64" y="680" width="95.627" height="4" rx="2" fill="var(--base0A)" class="a m137"/>
-    <text x="66" y="702" font-size="12" fill="var(--base03)" class="a m138">title</text>
+    <rect x="64" y="680" width="95.627" height="4" rx="2" fill="var(--base0A)" class="dm">
+      <animate id="w1" attributeName="width" values="0;95.627" keyTimes="0;1" begin="0s;w1.begin+61s" dur="5.0002s" fill="freeze" data-loop="61s"/>
+    </rect>
+    <rect x="64" y="680" width="95.627" height="4" rx="2" fill="var(--base0A)" class="ds" display="none"/>
+    <text x="66" y="702" font-size="12" fill="var(--base03)" class="a m137">title</text>
     <rect x="173.342" y="680" width="212.78" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="173.342" y="680" width="212.78" height="4" rx="2" fill="var(--base0A)" class="a m139"/>
-    <text x="175.342" y="702" font-size="12" fill="var(--base03)" class="a m140">code</text>
+    <rect x="173.342" y="680" width="212.78" height="4" rx="2" fill="var(--base0A)" class="dm">
+      <animate id="w2" attributeName="width" values="0;212.78" keyTimes="0;1" begin="5.5998s;w2.begin+61s" dur="11.0001s" fill="freeze" data-loop="61s"/>
+      <set attributeName="width" to="0" begin="0s;w2.begin+55.4002s" dur="5.5998s" fill="freeze" data-loop="61s"/>
+    </rect>
+    <rect x="173.342" y="680" width="212.78" height="4" rx="2" fill="var(--base0A)" class="ds" display="none"/>
+    <text x="175.342" y="702" font-size="12" fill="var(--base03)" class="a m138">code</text>
     <rect x="399.837" y="680" width="173.729" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="399.837" y="680" width="173.729" height="4" rx="2" fill="var(--base0A)" class="a m141"/>
-    <text x="401.837" y="702" font-size="12" fill="var(--base03)" class="a m142">machine</text>
+    <rect x="399.837" y="680" width="173.729" height="4" rx="2" fill="var(--base0A)" class="dm">
+      <animate id="w3" attributeName="width" values="0;173.729" keyTimes="0;1" begin="17.2002s;w3.begin+61s" dur="8.9999s" fill="freeze" data-loop="61s"/>
+      <set attributeName="width" to="0" begin="0s;w3.begin+43.7998s" dur="17.2002s" fill="freeze" data-loop="61s"/>
+    </rect>
+    <rect x="399.837" y="680" width="173.729" height="4" rx="2" fill="var(--base0A)" class="ds" display="none"/>
+    <text x="401.837" y="702" font-size="12" fill="var(--base03)" class="a m139">machine</text>
     <rect x="587.281" y="680" width="290.881" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="587.281" y="680" width="290.881" height="4" rx="2" fill="var(--base0A)" class="a m143"/>
-    <text x="589.281" y="702" font-size="12" fill="var(--base03)" class="a m144">together</text>
+    <rect x="587.281" y="680" width="290.881" height="4" rx="2" fill="var(--base0A)" class="dm">
+      <animate id="w4" attributeName="width" values="0;290.881" keyTimes="0;1" begin="26.7997s;w4.begin+61s" dur="15.0005s" fill="freeze" data-loop="61s"/>
+      <set attributeName="width" to="0" begin="0s;w4.begin+34.2003s" dur="26.7997s" fill="freeze" data-loop="61s"/>
+    </rect>
+    <rect x="587.281" y="680" width="271.489" height="4" rx="2" fill="var(--base0A)" class="ds" display="none"/>
+    <text x="589.281" y="702" font-size="12" fill="var(--base03)" class="a m140">together</text>
     <rect x="891.878" y="680" width="154.203" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="891.878" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="a m145"/>
-    <text x="893.878" y="702" font-size="12" fill="var(--base03)" class="a m146">backoff</text>
+    <rect x="891.878" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="dm">
+      <animate id="w5" attributeName="width" values="0;154.203" keyTimes="0;1" begin="42.3999s;w5.begin+61s" dur="8.0002s" fill="freeze" data-loop="61s"/>
+      <set attributeName="width" to="0" begin="0s;w5.begin+18.6001s" dur="42.3999s" fill="freeze" data-loop="61s"/>
+    </rect>
+    <rect x="891.878" y="680" width="0" height="4" rx="2" fill="var(--base0A)" class="ds" display="none"/>
+    <text x="893.878" y="702" font-size="12" fill="var(--base03)" class="a m141">backoff</text>
     <rect x="1059.797" y="680" width="154.203" height="4" rx="2" fill="var(--base02)"/>
-    <rect x="1059.797" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="a m147"/>
-    <text x="1061.797" y="702" font-size="12" fill="var(--base03)" class="a m148">recap</text>
+    <rect x="1059.797" y="680" width="154.203" height="4" rx="2" fill="var(--base0A)" class="dm">
+      <animate id="w6" attributeName="width" values="0;154.203" keyTimes="0;1" begin="51.0003s;w6.begin+61s" dur="7.9995s" fill="freeze" data-loop="61s"/>
+      <set attributeName="width" to="0" begin="0s;w6.begin+9.9997s" dur="51.0003s" fill="freeze" data-loop="61s"/>
+    </rect>
+    <rect x="1059.797" y="680" width="0" height="4" rx="2" fill="var(--base0A)" class="ds" display="none"/>
+    <text x="1061.797" y="702" font-size="12" fill="var(--base03)" class="a m142">recap</text>
   </g>
 </svg>
