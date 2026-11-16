@@ -10,6 +10,7 @@
     "perf": "bun run scripts/perf.ts",
     "render-video": "bun run ../packages/svjeez/src/cli.ts video",
     "test": "bun test",
+    "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
     "typecheck": "tsc --noEmit"
   },
