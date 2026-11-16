@@ -21,8 +21,15 @@ const counter = {
 
 const { html, flow } = await story(counter, [given(0), message(2)]);
 
-await using dom = await browser({ schemes: "light" });
-const steps = await dom.run(html, [...flow, wait(0.5)]);
+// try/finally rather than `await using`, which Node 20 and 22 cannot parse.
+const dom = await browser({ schemes: "light" });
+let steps;
+
+try {
+  steps = await dom.run(html, [...flow, wait(0.5)]);
+} finally {
+  await dom.close();
+}
 
 assert.equal(steps.length, 3);
 
