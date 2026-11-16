@@ -182,7 +182,11 @@
         "@tabler/icons": "3.50.0",
         "@types/bun": "latest",
         "lucide-static": "1.63.0",
+        "svjeez": "workspace:*",
         "typescript": "latest",
+      },
+      "peerDependencies": {
+        "svjeez": ">=0.6.0 <1",
       },
     },
     "packages/live": {

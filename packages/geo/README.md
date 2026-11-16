@@ -113,7 +113,7 @@ const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectan
 const years = choropleth(map, { "250": [78, 82], "276": [77, 81] }, { scale, times: [0.5, 3], lines: "#0b1118" });
 ```
 
-`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
+`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` (each `{ region, value, x, y, r }`) or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
 
 The shapes start as the outline and hide until the span starts. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
 
@@ -150,7 +150,7 @@ const earth = globe(world, { frame, tilt: 22, spin: { from: 0, to: -360, over: 2
 
 `reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
 
-`trueSize(span, map, region, to, { ease })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. `nightfall(map, (t) => date, { over })` moves the night side of a flat map through a day or a year as one shape, a column of darkness per longitude, so it holds together across an equinox. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
+`trueSize(span, map, region, to, { ease })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
 
 ## Errors
 

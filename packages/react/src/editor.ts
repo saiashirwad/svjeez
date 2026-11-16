@@ -1,12 +1,5 @@
-import { createEditor, type Editor, type Effects, type First, type State } from "@svjeez/live";
+import { createEditor, type Editor, type EditorOptions, type State } from "@svjeez/live";
 import { useState, useSyncExternalStore } from "react";
-
-export interface Options {
-  /** Shown until the first compile finishes: a `?svjeez` import, with a `duration` if the page knows it. */
-  readonly first?: First;
-  /** Swaps how the editor compiles and shows pictures, such as a test running without a worker. */
-  readonly effects?: Partial<Effects>;
-}
 
 /**
  * An `@svjeez/live` editor for the scene source `text`, made once per component; later `text` and `options` are
@@ -14,7 +7,7 @@ export interface Options {
  * pauses, its worker stopped, whenever no component reads it, as under a hidden `<Activity>` or after an unmount, and
  * picks up again when one does. Call `destroy` to free its last picture for good.
  */
-export const useEditor = (text: string, options: Options = {}): Editor => {
+export const useEditor = (text: string, options: EditorOptions = {}): Editor => {
   const [editor] = useState(() => createEditor({ text, first: options.first }, options.effects));
 
   return editor;

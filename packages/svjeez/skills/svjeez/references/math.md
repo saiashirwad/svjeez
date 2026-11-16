@@ -95,6 +95,7 @@ const counting = counter({ at: 0, over: 10 }, (t) => 144 * Math.min(1, t / 3), {
 - `digits` is the decimal places. Places stay put at the widest value, right-aligned on the decimal point, with a sign place only if a value is negative.
 - Digits cut by default. `roll` seconds makes the old digit lift out as the new one rolls in from below. The changes must be at least `roll` apart.
 - Each place holds one glyph per distinct digit it ever shows, toggled by stepped keyframes, so a number that changes every tenth of a second for ten seconds is still a few dozen paths. `width` and `height` give the box.
+
 ## Constructions
 
 `construct()` draws compass-and-straightedge geometry in the order you write it. Build the figure on the builder, then render `g.node`. Every element draws on in turn: compass circles sweep from the point they pass through, lines grow from their first point, points pop and labels fade in.
@@ -132,7 +133,7 @@ Time the text beside the figure from `g.time`, read before the elements it expla
 
 ## Planes and transformations
 
-`plane()` is the one coordinate system of `@svjeez/math`, and it can move, as in 3Blue1Brown's linear algebra videos. `x` and `y` are the graph ranges, `width` and `height` the plot area in px, `at` its top-left, and y points up. `ticks` spaces the grid lines: a number for both axes, or `{ x, y }`. Ticks, labels, `plot()` and calculus are in `explainers.md` (Planes, axes and function plots); this section is the steps.
+`plane()` is the one coordinate system of `@svjeez/math`, and it can move, as in 3Blue1Brown's linear algebra videos. `xRange` and `yRange` are the graph ranges, `frame` is the plot area in px as a `Rect`, and y points up. `ticks` spaces the grid lines: a number for both axes, or `{ x, y }`. Ticks, labels, `plot()` and calculus are in `explainers.md` (Planes, axes and function plots); this section is the steps.
 
 ```tsx
 import { plane } from "@svjeez/math";
@@ -198,8 +199,8 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `together() cannot nest. Put the elements in one together() block.` | Flatten the blocks. |
 | `A plane step starts at …s, before the previous step ends at …s.` | Start each step after the one before it ends. |
 | `A plane step needs a non-negative start and a positive length, got …` | Pass `at` of 0 or more and `over` above 0. |
-| `plane() needs a finite … range with max above min, got […, …].` | Pass `x` and `y` as `[min, max]` with finite numbers and min below max. |
-| `plane() needs a positive width and height, got … and ….` | Pass sizes above 0. |
+| `plane() needs a finite …Range with max above min, got […, …].` | Pass `xRange` and `yRange` as `[min, max]` with finite numbers and min below max. |
+| `plane() needs a frame with a positive width and height, got … and ….` | Pass a `frame` whose width and height are above 0. |
 | `plane() needs a positive … tick step, got ….` | Pass `ticks` above 0. |
 | `plane() would draw … ticks. Raise the step … to draw at most ….` | Raise the tick step. |
 | `plot() cannot draw on a plane that has steps. …` | Plot on the plane before its first step, or leave out `animation`. |

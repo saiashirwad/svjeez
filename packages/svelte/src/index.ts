@@ -1,6 +1,8 @@
 // Edit a svjeez scene's source with a control on every value, beside its picture. Import `@svjeez/live/editor.css` once
 // for the styles; the components bring none.
-export { editor, SceneEditor, type Options } from "./editor.js";
+export { SceneEditor } from "./editor.js";
+
+export type { EditorOptions } from "@svjeez/live";
 
 export { default as Code } from "./Code.svelte";
 

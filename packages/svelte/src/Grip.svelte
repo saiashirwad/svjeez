@@ -3,7 +3,7 @@
     arrowNumber,
     following,
     handleAt,
-    type Grip,
+    type GripState,
     type SceneSize,
     type ValueOf,
   } from "@svjeez/live";
@@ -15,7 +15,7 @@
     value,
     grip,
     scene,
-  }: { editor: SceneEditor; value: ValueOf<"number">; grip: Grip; scene: SceneSize } = $props();
+  }: { editor: SceneEditor; value: ValueOf<"number">; grip: GripState; scene: SceneSize } = $props();
 
   const selected = $derived(editor.state.selected === value.key);
   const at = $derived(handleAt(grip, value.literal.value));

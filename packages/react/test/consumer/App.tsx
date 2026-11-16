@@ -1,4 +1,4 @@
-import { Code, Picture, Transport, useEditor, type Options } from "@svjeez/react";
+import { Code, Picture, Transport, useEditor, type EditorOptions } from "@svjeez/react";
 import "@svjeez/live/editor.css";
 
 export const scene = `import { enter, ease, render } from "svjeez";
@@ -9,7 +9,7 @@ export default () =>
   );
 `;
 
-export const App = ({ options }: { options?: Options }) => {
+export const App = ({ options }: { options?: EditorOptions }) => {
   const editor = useEditor(scene, options);
 
   return (

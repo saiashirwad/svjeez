@@ -4,6 +4,7 @@ export {
   type DiagramOptions,
   type Labelled,
   type NodeRole,
+  type PlayedDiagram,
 } from "./kit.tsx";
 
 export {

@@ -6,7 +6,6 @@ import { feature } from "topojson-client";
 import { createRequire } from "node:module";
 import {
   globe,
-  nightfall,
   project,
   reproject,
   sun,
@@ -229,31 +228,5 @@ describe("trueSize()", () => {
     const keys = svg.match(/values="([^"]*)"/)![1]!.split(";");
 
     expect(area(keys.at(-1)!)).toBeLessThan(area(keys[0]!) / 5);
-  });
-});
-
-describe("nightfall()", () => {
-  const map = project(world, {
-    frame,
-    projection: geoNaturalEarth1(),
-    fit: "sphere",
-  });
-
-  test("keeps one shape through an equinox", () => {
-    const start = Date.UTC(2026, 2, 10, 12);
-    const night = nightfall(map, (t) => new Date(start + t * 86_400_000), { over: 20 });
-
-    expect(() =>
-      render({ width: 400, height: 400, duration: 20, title: "Year" }, <path {...night} />),
-    ).not.toThrow();
-  });
-
-  test("lights the north pole in June", () => {
-    const june = nightfall(map, () => new Date(Date.UTC(2026, 5, 21, 12)), { over: 1 });
-    const north = map.point([0, 85]);
-    const south = map.point([0, -85]);
-
-    expect(filled(june.d, north.x, north.y)).toBe(false);
-    expect(filled(june.d, south.x, south.y)).toBe(true);
   });
 });

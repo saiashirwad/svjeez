@@ -68,7 +68,7 @@ const [a, b] = maps.land;
 <path d={a} animation={motion({ d: a }).at(1).to({ d: b }, 1.8, ease.inOut)} />;
 ```
 
-`trueSize(span, map, region, [lon, lat], { ease })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `nightfall(map, (t) => date, { over })` moves the night side of a flat map through a day or a year with one fixed shape, even across an equinox. `examples/projections` does the Mercator morph and the slide.
+`trueSize(span, map, region, [lon, lat], { ease })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `examples/projections` does the Mercator morph and the slide.
 
 ## Data maps
 
@@ -88,7 +88,7 @@ const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectan
 const years = choropleth(map, { "250": [78, 82], "276": [77, 81] }, { scale, times: [0.5, 3], lines: "#0b1118" });
 ```
 
-`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
+`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` (each `{ region, value, x, y, r }`) or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
 
 The shapes start as the outline and hide until the span starts. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
 

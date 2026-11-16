@@ -447,4 +447,3 @@ export {
   type TrueSizeOptions,
 } from "./reproject.ts";
 
-export { nightfall, type NightfallOptions } from "./nightfall.ts";

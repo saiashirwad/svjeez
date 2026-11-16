@@ -36,7 +36,7 @@ export default () =>
   );
 ```
 
-Each diagram returns `{ node, get(id), bounds }` plus helpers such as `route()` and `walk()`. Size the canvas from `bounds`.
+Each diagram returns `{ node, get(id), bounds }` plus helpers such as `route()` and `walk()`. Size the canvas from `bounds`. `flowchart()`, `tree()`, `sequence()` and `lanes()` also return `span`, from the first reveal to the end of the last, so the next beat can start at `chart.span.end`.
 
 | Function | Draws |
 | --- | --- |

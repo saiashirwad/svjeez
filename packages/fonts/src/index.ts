@@ -11,7 +11,7 @@ export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
 };
 
 /** The folder shared by every project on this machine: `$SVJEEZ_FONTS_CACHE`, `$XDG_CACHE_HOME/svjeez/fonts` or `~/.cache/svjeez/fonts`. */
-export const cacheDir = (): string => {
+const cacheDir = (): string => {
   const { SVJEEZ_FONTS_CACHE, XDG_CACHE_HOME } = process.env;
 
   if (SVJEEZ_FONTS_CACHE) return SVJEEZ_FONTS_CACHE;

@@ -87,7 +87,7 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 
 **12. Tools take scene seconds.** `svjeez frames --times`, `restyle({ at })` and `seek(time)` used playback seconds. They now use the seconds your motions are written in. The numbers are the same unless the scene sets `render({ playbackRate })` other than 1: then multiply each old playback time by `playbackRate`. Check scrub, poster and scroll code that calls `seek` or `restyle`.
 
-**11b. `Icon` is `IconData`** (type of `@svjeez/icons`, 0.6.1 exported `Icon`). Search `\bIcon\b` imported from `@svjeez/icons`. The tabler and lucide path data are unchanged. `<Icon>` the component, from `svjeez`, keeps its name.
+**11b. `Icon` is `IconData`** (type of `svjeez`; 0.6.1 exported `Icon` from `@svjeez/icons`). Search `\bIcon\b` imported from `@svjeez/icons`, and import `IconData` from `svjeez`. The tabler and lucide path data are unchanged. `<Icon>` the component, from `svjeez`, keeps its name.
 
 ## Escape hatches
 
@@ -132,7 +132,7 @@ These were never on npm: 0.5.0 and 0.6.1 of `svjeez` and 0.6.1 of the `@svjeez/*
 | `flow(points, { loop })` | `flow(points, { period })` |
 | `fieldFlow(lines, options)` | `flow(lines, options).node` |
 | `sampledPath(fn, options)` | `sampled.path(fn, options)` |
-| `sampled.path`, `globe`, `nightfall` with `duration` | `over` |
+| `sampled.path`, `globe` with `duration` | `over` |
 | `.end` of `derive`, `epicycles`, `traffic`, `walk`, constructions | `.span.end` |
 | `renderVideo` (`@svjeez/video`) | `video` |
 | voxel block `at`, `from`, `to` | gone with voxels (step 17) |
@@ -220,5 +220,15 @@ Smaller breaking changes, in the order a typecheck will find them.
 
 - `.to(values, span, ease?)` is gone: `.to` takes a length. Search `.to(` with a span as the second argument and write `.at(span.at).to(values, span.over, ease)`.
 - `defaultLight` is gone (use `systemLight`), and `inkPath` is no longer exported from `svjeez`.
+- `@svjeez/code`: the palettes (`tomorrow`, `solarizedDark` and the rest) come from `@svjeez/code/palettes` only, and the root no longer re-exports `CodePiece`, `CodeRole` or `CodeTokens`: import those types from `svjeez`. Importing the package no longer loads Shiki until `highlight()` runs.
+- `@svjeez/icons`: the package root is gone, so `import type { IconData } from "@svjeez/icons"` is `import type { IconData } from "svjeez"`. The `/tabler` and `/lucide` paths stay. `svjeez` is now a peer dependency, for that type.
+- `@svjeez/geo`: `nightfall` is gone, with no users. Use `globe().night(date)` on a globe, or `night(date)` with `map.path()` on a flat map.
+- `@svjeez/fonts`: `cacheDir` is not exported. Set `SVJEEZ_FONTS_CACHE` to move the cache.
+- `@svjeez/vite`: the `Options` type is `SvjeezOptions`.
+- `@svjeez/diagrams`: `flowchart`, `tree`, `sequence` and `lanes` return `span`, from the first reveal to the end of the last (the instant 0 without `play`). The type behind it is `PlayedDiagram`.
+- `svjeez video` calls `video` from `@svjeez/video` and no longer falls back to `renderVideo`.
+- `svjeez/params` exports the `Range` and `Extras` types that `number`, `count` and `seconds` take.
+- `@svjeez/live` (unpublished before 0.7): the `/controls`, `/editor` and `/gzip` paths are gone, so import `paramFor` and the rest from `@svjeez/live`. `measureMove` is not exported. The types `Picture`, `Grip` and `Stats` are `PictureState`, `GripState` and `PictureStats`, so they no longer clash with the components. `EditorOptions` is new.
+- `@svjeez/svelte`: `editor(text, options)` is `new SceneEditor(text, options)`. The `Options` type of `@svjeez/react` and `@svjeez/svelte` is `EditorOptions`, defined in `@svjeez/live`.
 - New exports, for typing what functions return: `FlowResult`, `TerminalResult`, `RevealResult`, `TypewriterResult`, `AppWindowResult`, `MorphResult`, `AdaptiveResult`, `VariablesResult`, `Shown`, `Heading` and `Travel`.
 - These now throw: NaN or infinite `number`, `count` and `seconds` values and bounds; non-integer `count` bounds; duplicate `choice` options; a `color()` that is not hex; a `shake` or `wiggle` `rate` that is not positive; `restyle` `at` or `onceAt` below 0 or not finite; a non-finite `valuesAt` `duration`; `<Camera>` with no stops; `fx.boil` with a `seed` that is not a whole number of 1 or more or a `rate` that is not positive; `fx.grayscale` outside 0 to 1; `readingTime` with a non-positive `wps`. `recipes` and `sampled` say `needs a positive over` where they said `positive duration`.

@@ -3,7 +3,7 @@
 import type { Point } from "svjeez";
 import { fit, follow } from "./fit.ts";
 import { bend, bezierOf, nudge, scrub, type Settable, type ValueOf } from "./controls.ts";
-import { handleAt, type Editor, type Grip } from "./editor.ts";
+import { handleAt, type Editor, type GripState } from "./editor.ts";
 
 /** Where each arrow key points, up and right being positive. */
 const ARROWS: ReadonlyMap<string, Point> = new Map([
@@ -43,7 +43,7 @@ export const scrubbing = (editor: Editor, value: ValueOf<"number">, x: number) =
 export const following = (
   editor: Editor,
   value: ValueOf<"number">,
-  grip: Grip,
+  grip: GripState,
   at: Point,
   scale: number,
 ) => {

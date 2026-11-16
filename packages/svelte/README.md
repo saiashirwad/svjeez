@@ -14,12 +14,12 @@ npm i @svjeez/svelte @svjeez/live svjeez
 
 ```svelte
 <script lang="ts">
-  import { Code, editor, Picture, Transport } from "@svjeez/svelte";
+  import { Code, Picture, SceneEditor, Transport } from "@svjeez/svelte";
   import "@svjeez/live/editor.css";
   import { onDestroy } from "svelte";
   import text from "./lanterns.tsx?raw";
 
-  const scene = editor(text);
+  const scene = new SceneEditor(text);
   onDestroy(scene.destroy);
 </script>
 
@@ -28,7 +28,7 @@ npm i @svjeez/svelte @svjeez/live svjeez
 <Code editor={scene} file="lanterns.tsx" />
 ```
 
-`editor(text, { first })` takes a picture to show until the first compile: with [`@svjeez/vite`](https://www.npmjs.com/package/@svjeez/vite), pass the module `import first from "./lanterns.tsx?svjeez"` gives. The editor compiles in a worker, which starts the first time a component reads its state in the browser, so a server render starts none. Add `duration` to `first` if the page knows it, and the transport works before the first compile. The editor pauses, its worker stopped, whenever no component reads its state.
+`new SceneEditor(text, { first })` takes a picture to show until the first compile: with [`@svjeez/vite`](https://www.npmjs.com/package/@svjeez/vite), pass the module `import first from "./lanterns.tsx?svjeez"` gives. The editor compiles in a worker, which starts the first time a component reads its state in the browser, so a server render starts none. Add `duration` to `first` if the page knows it, and the transport works before the first compile. The editor pauses, its worker stopped, whenever no component reads its state.
 
 `scene.state` is the `@svjeez/live` state, reactive, and `scene.send(message)` changes it: the same messages a control sends, so a page or an agent can drive the editor too.
 

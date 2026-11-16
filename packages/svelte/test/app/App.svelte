@@ -1,12 +1,12 @@
 <script lang="ts">
   import "@svjeez/live/editor.css";
   import { onDestroy } from "svelte";
-  import { Code, editor, Picture, Stats, Transport } from "../../src/index";
+  import { Code, Picture, SceneEditor, Stats, Transport } from "../../src/index";
   import handled from "./handles.tsx?raw";
   import plain from "./scene.tsx?raw";
 
   const scene = new URLSearchParams(location.search).get("scene");
-  const ed = editor(scene === "handles" ? handled : plain);
+  const ed = new SceneEditor(scene === "handles" ? handled : plain);
 
   onDestroy(ed.destroy);
 </script>

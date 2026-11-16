@@ -23,7 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import type { IconData } from "./icon.ts";
+import type { IconData } from "svjeez";
 
 export const aB: IconData = { grid: 24, kind: "stroke", paths: ["M3 16v-5.5a2.5 2.5 0 0 1 5 0v5.5m0 -4h-5","M12 6l0 12","M16 16v-8h3a2 2 0 0 1 0 4h-3m3 0a2 2 0 0 1 0 4h-3"] };
 export const aB2: IconData = { grid: 24, kind: "stroke", paths: ["M16 21h3c.81 0 1.48 -.67 1.48 -1.48l.02 -.02c0 -.82 -.69 -1.5 -1.5 -1.5h-3v3","M16 15h2.5c.84 -.01 1.5 .66 1.5 1.5s-.66 1.5 -1.5 1.5h-2.5v-3","M4 9v-4c0 -1.036 .895 -2 2 -2s2 .964 2 2v4","M2.99 11.98a9 9 0 0 0 9 9m9 -9a9 9 0 0 0 -9 -9","M8 7h-4"] };

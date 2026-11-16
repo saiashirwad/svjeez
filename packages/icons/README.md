@@ -1,6 +1,6 @@
 # @svjeez/icons
 
-[Tabler](https://tabler.io/icons) and [Lucide](https://lucide.dev) icons as plain path data for [svjeez](https://www.npmjs.com/package/svjeez) scenes. The package has no dependencies and does not import svjeez. Each icon is an object, so a bundler or compiler keeps only the ones you import.
+[Tabler](https://tabler.io/icons) and [Lucide](https://lucide.dev) icons as plain path data for [svjeez](https://www.npmjs.com/package/svjeez) scenes. The package has no dependencies, and svjeez is a peer only for the `IconData` type. Each icon is an object, so a bundler or compiler keeps only the ones you import.
 
 <p align="center">
   <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/icons"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/icons.svg" width="480" alt="Seven Tabler outline icons draw themselves in one stroke at a time, then a filled heart pops into the last place in the grid." /></a>
@@ -37,6 +37,7 @@ const scene = (
 ## The data
 
 ```ts
+// from svjeez
 interface IconData {
   readonly grid: number; // side of the square viewBox the paths are drawn on
   readonly kind: "stroke" | "fill"; // outlines to stroke, or shapes to fill
@@ -44,7 +45,7 @@ interface IconData {
 }
 ```
 
-The type is exported from `@svjeez/icons`. A path is one piece of the drawing, so each can animate on its own: the shaft of an arrow and its head are two paths.
+A path is one piece of the drawing, so each can animate on its own: the shaft of an arrow and its head are two paths.
 
 ## Sets
 

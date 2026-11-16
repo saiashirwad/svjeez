@@ -9,11 +9,12 @@ import {
   look,
   lookup,
   placer,
+  spanOfReveals,
   tintOf,
-  type Diagram,
   type DiagramOptions,
   type Labelled,
   type NodeRole,
+  type PlayedDiagram,
 } from "./kit.tsx";
 
 /** A bar on a lane for the span `{ at, over }`, in lane time. */
@@ -43,7 +44,7 @@ export interface LanesOptions extends DiagramOptions {
   readonly play?: { readonly at: Seconds };
 }
 
-export interface Lanes<L extends string> extends Diagram<L> {
+export interface Lanes<L extends string> extends PlayedDiagram<L> {
   /** The x of time `t` on the lane axis. */
   x(t: Seconds): number;
 }
@@ -232,5 +233,8 @@ export function lanes<const L extends Record<string, Labelled>>(
     ),
   ]);
 
-  return { node, bounds: at.bounds, get: lookup("lanes()", boxes), x };
+  // The playhead crosses the whole track, so it is the last thing to finish.
+  const span = spanOfReveals(play ? [{ at: when(0), over: out.end }] : []);
+
+  return { node, span, bounds: at.bounds, get: lookup("lanes()", boxes), x };
 }
