@@ -2,6 +2,17 @@
 
 Turns real HTML and CSS into svjeez nodes you can animate. Chromium lays the markup out, and `@svjeez/dom` reads every box, border, shadow, text line and inline icon back as SVG. It works the same whatever made the markup: React, Svelte, plain HTML, or a page in a running app.
 
+## Install
+
+```sh
+npm i -D @svjeez/dom svjeez playwright-core
+npx playwright-core install chromium-headless-shell
+```
+
+`react`, `react-dom`, `svelte` and `vite` are optional: `@svjeez/dom/react` and `@svjeez/dom/svelte` film your own components through your Vite config.
+
+## Use
+
 ```tsx
 import { Dom, duration, fill, html, size, snap, snapshots, wait } from "@svjeez/dom";
 import { ease, render } from "svjeez";

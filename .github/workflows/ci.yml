@@ -96,6 +96,8 @@ jobs:
       - run: npm run test:package
         working-directory: packages/mermaid
       - run: npm run test:package
+        working-directory: packages/dom
+      - run: npm run test:package
         working-directory: packages/live
       - run: npm run test:package
         working-directory: packages/svelte

@@ -20,7 +20,9 @@
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
   "dependencies": {
     "woff2-encoder": "^2.0.0"
