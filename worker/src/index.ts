@@ -64,8 +64,6 @@ const prompted = async (scene: Scene, prompt: string, c: Context<App>) => {
 
 const app = new Hono<App>();
 
-app.use(cache({ cacheName: `svjeez-worker-${BUILD}`, cacheControl: "public, max-age=3600" }));
-
 app.get("/", async (c) =>
   c.html(
     page(
@@ -83,6 +81,9 @@ app.get("/generate", (c) => {
     `/${template}.svg?${new URLSearchParams({ prompt: c.req.query("prompt") ?? "" })}`,
   );
 });
+
+// Below the index, so a browser never keeps an old list of templates.
+app.use(cache({ cacheName: `svjeez-worker-${BUILD}`, cacheControl: "public, max-age=3600" }));
 
 app.get("/:file{[a-z-]+\\.json}", async (c) => {
   const scene = await sceneOf(c, ".json");

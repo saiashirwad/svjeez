@@ -110,6 +110,21 @@ describe("in workerd", () => {
       `source=${encodeURIComponent("sequenceDiagram\n  Alice->>Bob: Hello\n  Bob-->>Alice: Hi")}`,
     ],
     [
+      "sequence",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          actors: [
+            { id: "app", label: "App", role: "task" },
+            { id: "db", label: "Postgres", role: "store" },
+          ],
+          messages: [
+            { from: "app", to: "db", text: "select", reply: "no" },
+            { from: "db", to: "app", text: "rows", reply: "yes" },
+          ],
+        }),
+      )}`,
+    ],
+    [
       "chart",
       `params=${encodeURIComponent(
         JSON.stringify({

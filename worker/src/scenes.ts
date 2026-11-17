@@ -14,6 +14,7 @@ const scenes = {
   code: () => import("./templates/code.tsx"),
   terminal: () => import("./templates/terminal.tsx"),
   diagram: () => import("./templates/diagram.tsx"),
+  sequence: () => import("../../examples/sequence/index.tsx"),
   chart: () => import("./templates/chart.tsx"),
   card: () => import("./templates/card.tsx"),
   list: () => import("../../examples/leaderboard/index.tsx"),

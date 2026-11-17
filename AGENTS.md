@@ -25,7 +25,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
 - `site/` is the Astro site at svjeez.texoport.in.
-- `worker/` is a Cloudflare Worker at svjeez-worker.texoport.in that renders generic templates (code, terminal, diagram, chart, card, list, metrics, math) on request, with params from the query or from a prompt. It is private and never published.
+- `worker/` is a Cloudflare Worker at svjeez-worker.texoport.in that renders generic templates (code, terminal, diagram, sequence, chart, card, list, metrics, math) on request, with params from the query or from a prompt. It is private and never published.
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, `bun run build:examples` rebuilds `examples/dist/`, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 
@@ -80,7 +80,7 @@ Each package's source explains its own internals. These are the rules that aren'
 
 ## Worker
 
-`worker/` serves a small set of generic templates: `src/templates/` holds code, terminal, diagram (Mermaid), chart, card and math, and `src/scenes.ts` adds `examples/leaderboard` and `examples/metrics` as `list` and `metrics`. Each is built to lay out any input within its params' limits, and a query or a model's answer to a prompt fills it, counting only when the values parse and build. Templates are imported lazily, because their fonts load with top-level await and a Worker may not fetch outside a request. `bun run build` bundles it into `dist/worker.js` with the `@svjeez/source` condition, and `bun run test` runs that file in workerd through Miniflare and checks every template against its `build()` byte for byte. `bun run deploy` builds and deploys through Alchemy (`worker/alchemy.run.ts`); set `DEEPSEEK_API_KEY` to turn on `?prompt=`.
+`worker/` serves a small set of generic templates: `src/templates/` holds code, terminal, diagram (Mermaid), chart, card and math, and `src/scenes.ts` adds `examples/sequence`, `examples/leaderboard` and `examples/metrics` as `sequence`, `list` and `metrics`. Each is built to lay out any input within its params' limits, and a query or a model's answer to a prompt fills it, counting only when the values parse and build. Templates are imported lazily, because their fonts load with top-level await and a Worker may not fetch outside a request. `bun run build` bundles it into `dist/worker.js` with the `@svjeez/source` condition, and `bun run test` runs that file in workerd through Miniflare and checks every template against its `build()` byte for byte. `bun run deploy` builds and deploys through Alchemy (`worker/alchemy.run.ts`); set `DEEPSEEK_API_KEY` to turn on `?prompt=`.
 
 ## Rules
 
