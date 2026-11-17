@@ -1,4 +1,4 @@
-import { draw, ease, enter, motion, render } from "svjeez";
+import { draw, ease, enter, motion, render, span, stagger } from "svjeez";
 
 const rise = motion({ y: 90, opacity: 0 })
   .at(0.3)
@@ -27,6 +27,8 @@ const stars = [
   { x: 420, y: 80, r: 2 },
 ];
 
+const twinkle = stagger(span(0.2, 0.6), stars.length, 0.25);
+
 export default () =>
   render(
     {
@@ -39,13 +41,7 @@ export default () =>
     <>
       <rect width={480} height={320} fill="#1B1633" />
       {stars.map((s, i) => (
-        <circle
-          cx={s.x}
-          cy={s.y}
-          r={s.r}
-          fill="#E8E1FF"
-          animation={enter({ at: 0.2 + i * 0.25, over: 0.6 })}
-        />
+        <circle cx={s.x} cy={s.y} r={s.r} fill="#E8E1FF" animation={enter(twinkle[i]!)} />
       ))}
       <circle cx={384} cy={88} r={28} fill="#F4EFD8" animation={rise} />
       <path d="M0 232Q120 204 240 232T480 232V320H0Z" fill="#2B2150" />

@@ -40,7 +40,8 @@ const FRAMEWORKS: Record<Framework, { mount: string; deps: string[]; dedupe: str
 };
 
 const page = (file: string, name: string, demo: Demo) => {
-  const width = demo.layout.width === undefined ? "display:inline-block" : `width:${demo.layout.width}px`;
+  const width =
+    demo.layout.width === undefined ? "display:inline-block" : `width:${demo.layout.width}px`;
 
   return `<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:none">
 <div id="svjeez-demo" style="${width}"></div>
@@ -81,7 +82,14 @@ const sources = async (server: ViteDevServer, file: string, root: string): Promi
 
   const visit = async (id: string | null | undefined) => {
     // Packages and their pre-bundled copies are the lockfile's business, not the app's sources.
-    if (!id || seen.has(id) || id.includes("/node_modules/") || id.startsWith(bundled) || id.startsWith("\0")) return;
+    if (
+      !id ||
+      seen.has(id) ||
+      id.includes("/node_modules/") ||
+      id.startsWith(bundled) ||
+      id.startsWith("\0")
+    )
+      return;
     seen.add(id);
 
     const mod = (await graph.getModuleByUrl(id).catch(() => undefined)) ?? graph.getModuleById(id);
@@ -109,11 +117,17 @@ const sources = async (server: ViteDevServer, file: string, root: string): Promi
 export const recordings = async <M extends Record<string, unknown>>(
   file: string,
   { cache, vite: config = {}, inputs, ...options }: RecordingsOptions,
-): Promise<{ [K in keyof M as M[K] extends { readonly kind: "svjeez-demo" } ? K : never]: Step[] }> => {
+): Promise<{
+  [K in keyof M as M[K] extends { readonly kind: "svjeez-demo" } ? K : never]: Step[];
+}> => {
   const { createServer, mergeConfig } = await import("vite");
   // Which frameworks the file's demos use, by the entry it imports them from, before Vite starts.
   const source = await readFile(file, "utf8");
-  const frameworks = (["react", "svelte"] as const).filter((f) => source.includes(`@svjeez/dom/${f}`));
+
+  const frameworks = (["react", "svelte"] as const).filter((f) =>
+    source.includes(`@svjeez/dom/${f}`),
+  );
+
   const root = config.root ?? dirname(file);
   let demos: Record<string, Demo> = {};
   // A dependency cache of its own: two recordings of one app at once (a build runs scenes together) would otherwise
@@ -138,7 +152,9 @@ export const recordings = async <M extends Record<string, unknown>>(
     await server.listen();
     const mod = await server.ssrLoadModule(file);
 
-    demos = Object.fromEntries(Object.entries(mod).filter((e): e is [string, Demo] => isDemo(e[1])));
+    demos = Object.fromEntries(
+      Object.entries(mod).filter((e): e is [string, Demo] => isDemo(e[1])),
+    );
 
     // SAFETY: the server listens on a port, so its address is an AddressInfo and not a pipe name.
     const { port } = server.httpServer!.address() as AddressInfo;

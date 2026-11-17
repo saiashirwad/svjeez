@@ -12,7 +12,10 @@ export async function preload(): Promise<void> {
   // `querySelectorAll` stops at a shadow root, so each open one is searched in turn. `all` is copied into `stills`:
   // a page function can't share imports.
   const all = (root: ParentNode): Element[] =>
-    [...root.querySelectorAll("*")].flatMap((el) => [el, ...(el.shadowRoot ? all(el.shadowRoot) : [])]);
+    [...root.querySelectorAll("*")].flatMap((el) => [
+      el,
+      ...(el.shadowRoot ? all(el.shadowRoot) : []),
+    ]);
 
   for (const el of all(document)) {
     for (const which of [null, "::before", "::after"]) {
@@ -50,14 +53,22 @@ export async function preload(): Promise<void> {
  * Runs inside the page, so it must not reference anything outside its own body.
  */
 export async function stills(): Promise<number[]> {
-  const found: NonNullable<typeof globalThis.__svjeezStills> = (globalThis.__svjeezStills = new WeakMap());
+  const found: NonNullable<typeof globalThis.__svjeezStills> = (globalThis.__svjeezStills =
+    new WeakMap());
+
   const need: number[] = [];
 
   // The same `all` as in `preload`: a page function can't share imports.
   const all = (root: ParentNode): Element[] =>
-    [...root.querySelectorAll("*")].flatMap((el) => [el, ...(el.shadowRoot ? all(el.shadowRoot) : [])]);
+    [...root.querySelectorAll("*")].flatMap((el) => [
+      el,
+      ...(el.shadowRoot ? all(el.shadowRoot) : []),
+    ]);
 
-  const list = all(document).filter((el): el is HTMLCanvasElement => el instanceof HTMLCanvasElement);
+  const list = all(document).filter(
+    (el): el is HTMLCanvasElement => el instanceof HTMLCanvasElement,
+  );
+
   globalThis.__svjeezCanvases = list;
   const probe = new OffscreenCanvas(32, 32).getContext("2d", { willReadFrequently: true })!;
 
@@ -65,10 +76,23 @@ export async function stills(): Promise<number[]> {
     const r = canvas.getBoundingClientRect();
     const s = getComputedStyle(canvas);
 
-    if (r.width < 1 || r.height < 1 || r.right <= 0 || r.bottom <= 0 || r.left >= innerWidth || r.top >= innerHeight)
+    if (
+      r.width < 1 ||
+      r.height < 1 ||
+      r.right <= 0 ||
+      r.bottom <= 0 ||
+      r.left >= innerWidth ||
+      r.top >= innerHeight
+    )
       return;
 
-    if (s.display === "none" || s.visibility === "hidden" || canvas.width === 0 || canvas.height === 0) return;
+    if (
+      s.display === "none" ||
+      s.visibility === "hidden" ||
+      canvas.width === 0 ||
+      canvas.height === 0
+    )
+      return;
 
     try {
       probe.clearRect(0, 0, 32, 32);
@@ -112,7 +136,11 @@ export async function shrink({
   const head = new TextDecoder("latin1").decode(bytes.subarray(0, 1024));
 
   // An animation would lose all but its first frame.
-  if (mime === "image/gif" || head.includes("acTL") || (mime === "image/webp" && head.includes("ANIM")))
+  if (
+    mime === "image/gif" ||
+    head.includes("acTL") ||
+    (mime === "image/webp" && head.includes("ANIM"))
+  )
     return undefined;
 
   const bitmap = await createImageBitmap(new Blob([bytes], { type: mime }));
@@ -245,7 +273,12 @@ export const unpack = (url: string): Fetched | undefined => {
 export const svgUri = (text: string): string => {
   const sized = text.replace(/<svg\b[^>]*>/, (tag) => {
     const attr = (name: string) => new RegExp(`\\s${name}\\s*=\\s*["']([^"']*)["']`).exec(tag)?.[1];
-    const box = attr("viewBox")?.trim().split(/[\s,]+/).map(Number);
+
+    const box = attr("viewBox")
+      ?.trim()
+      .split(/[\s,]+/)
+      .map(Number);
+
     const fixed = (v: string | undefined) => v !== undefined && /^[\d.]+(px)?$/.test(v.trim());
 
     if (!box || box.length !== 4 || !(box[2]! > 0) || !(box[3]! > 0)) return tag;
@@ -255,7 +288,12 @@ export const svgUri = (text: string): string => {
 
     if (fixed(w) && fixed(h)) return tag;
 
-    const wide = fixed(w) ? parseFloat(w!) : fixed(h) ? (parseFloat(h!) * box[2]!) / box[3]! : box[2]!;
+    const wide = fixed(w)
+      ? parseFloat(w!)
+      : fixed(h)
+        ? (parseFloat(h!) * box[2]!) / box[3]!
+        : box[2]!;
+
     const high = fixed(h) ? parseFloat(h!) : (wide * box[3]!) / box[2]!;
     const bare = tag.replace(/\s(width|height)\s*=\s*(["'])[^"']*\2/g, "");
 

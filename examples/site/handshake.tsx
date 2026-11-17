@@ -1,4 +1,4 @@
-import { css, ease, motion, Pivot, render, show, type Color } from "svjeez";
+import { css, ease, motion, Pivot, render, show, type Color, span, stagger } from "svjeez";
 import { sequence } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
@@ -94,18 +94,13 @@ const stage = () => {
   ];
 
   // Once the file lands it plays: a sun turns and a ball bounces inside the frame.
-  const playing = show({ at: beat(3) + 0.1, over: D - beat(3) - 0.6 }, { fade: 0.2 });
+  const PLAY = span(beat(3) + 0.1).until(D - 0.5);
+  const playing = show(PLAY, { fade: 0.2 });
 
-  const spin = motion({ rotate: 0 })
-    .at(beat(3) + 0.1)
-    .to({ rotate: 180 }, D - beat(3) - 0.7, ease.linear);
+  const spin = motion({ rotate: 0 }).to({ rotate: 180 }, PLAY.pad(0, -0.1), ease.linear);
 
-  const ball = [0, 1, 2, 3].reduce(
-    (m, i) =>
-      m
-        .at(beat(3) + 0.2 + i * 0.6)
-        .to({ y: -26 }, 0.3, ease.out)
-        .to({ y: 0 }, 0.3, ease.in),
+  const ball = stagger(span(PLAY.at + 0.1, 0.3), 4, 0.6).reduce(
+    (m, bounce) => m.to({ y: -26 }, bounce, ease.out).to({ y: 0 }, 0.3, ease.in),
     motion({ y: 0 }),
   );
 

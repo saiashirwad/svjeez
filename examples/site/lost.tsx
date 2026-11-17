@@ -1,5 +1,5 @@
-import { def, ease, motion, render } from "svjeez";
-import { CSS, chrome, random } from "./lib/kit";
+import { def, ease, motion, random, render, span } from "svjeez";
+import { CSS, chrome } from "./lib/kit";
 import { BLIP, blip } from "./lib/blip";
 import { theme } from "../style";
 
@@ -11,8 +11,8 @@ const D = 10;
 const BAR = 40;
 
 // Beats, in seconds.
-const WALK = { at: 0.4, over: 3.6 };
-const STOP = WALK.at + WALK.over;
+const WALK = span(0.4, 3.6);
+const STOP = WALK.end;
 const LIGHT = 6;
 const FOUND = 6.6;
 const DARK = 8.6;
@@ -64,9 +64,7 @@ export const make = (tall = false): string => {
   const stop = x1 - 50 * s;
   const bulb = { x: stop, y: y + (38 - 162) * s };
 
-  const walk = motion({ x: 0 })
-    .at(WALK.at)
-    .to({ x: stop - start }, WALK.over, ease.linear);
+  const walk = motion({ x: 0 }).to({ x: stop - start }, WALK, ease.linear);
 
   const hop = WALK.over / HOPS;
   let hops = motion({ y: 0 }).at(WALK.at);
@@ -109,8 +107,7 @@ export const make = (tall = false): string => {
 
   // The playhead keeps going past the end, slows, and fades into the dark until the beam finds it.
   const playhead = motion({ x: 0 })
-    .at(WALK.at)
-    .to({ x: x1 - x0 }, WALK.over, ease.linear)
+    .to({ x: x1 - x0 }, WALK, ease.linear)
     .to({ x: lost - x0 }, 1.6, ease.out);
 
   const dim = motion({ opacity: 1 })

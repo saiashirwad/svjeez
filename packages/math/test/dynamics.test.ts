@@ -110,8 +110,8 @@ describe("derive", () => {
     );
 
     for (const line of d.lines) {
-      const part = line.get("k");
-      expect(part.x + part.w / 2).toBeCloseTo(100, 0);
+      const { box } = line.part("k");
+      expect(box.x + box.w / 2).toBeCloseTo(100, 0);
     }
   });
 

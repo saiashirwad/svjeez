@@ -32,14 +32,15 @@ Before you embed:
 Load a TTF or OTF the way you load an image. Use it as real text, to measure text, or as outlines.
 
 ```tsx
-import { Glyphs, draw, font } from "svjeez";
+import { Glyphs, draw, fitText, font, span } from "svjeez";
 
 const display = await font.load(new URL("./ArchivoBlack-Regular.ttf", import.meta.url)); // or font(bytes), sync
 const body = font.family(await font.load(new URL("./Body-Regular.ttf", import.meta.url)), await font.load(new URL("./Body-Bold.ttf", import.meta.url)));
 
 const real = <text x={20} y={60} fontFamily={body} fontWeight="bold">Real, selectable text</text>; // also on <g>
 const width = display.measure("Wave!", 96); // px, kerning and ligatures included
-const title = <Glyphs font={display} text="Wave!" size={96} x={(400 - width) / 2} y={140} stroke="#FF5FA8" fill="none" animation={(glyph, i) => draw({ at: i * 0.15, over: 1 })} />;
+const fits = fitText(display, ["Wave!", "and more"], { width: 360, max: 96 }); // the largest whole size where every line fits; `min` floors it, `tail` leaves ems after the last line
+const title = <Glyphs font={display} text="Wave!" size={96} x={(400 - width) / 2} y={140} stroke="#FF5FA8" fill="none" animation={(glyph, each) => draw(each.stagger(span(0, 1), 0.15))} />;
 ```
 
 - For Google Fonts, `npm i @svjeez/fonts` and `await google("Archivo Black", { weight: 400 })` (from `@svjeez/fonts`) returns the same `Font`, or `google.family("ABeeZee", [{ weight: 400 }, { weight: 400, style: "italic" }], { ligatures: false })` a family: the faces, then options shared by every face, which a face's own options override. Files are cached on disk, so only the first build needs the network.
@@ -47,7 +48,7 @@ const title = <Glyphs font={display} text="Wave!" size={96} x={(400 - width) / 2
 - `font.family(...faces)` groups faces under the first one's name. `family.face(weight, style)` picks like the browser. Two faces with the same weight and style throw.
 - `fontFamily={font}` embeds each face the first time the tree uses it, once, and writes the fallback after it (`monospace` for a fixed-pitch font, else `sans-serif`).
 - `measure(text, size)` and `path(text, { size, x, y })` match Chromium's layout, standard ligatures and pair kerning included. `path` returns `{ d, width, glyphs }`. `font.metrics` gives ascent, descent, line gap, cap height and x-height in em. `font.has(char)` tells you whether the font covers a character.
-- `<Glyphs>` draws one path per visible glyph in a group labelled with the text (`alt` overrides the label). `font` may be a family, and `weight` and `style` pick its face. `animation` is a stack applied to every glyph, or a function of `(glyph, index)` for a stagger. To move the word as one, wrap it in an animated `<g>`.
+- `<Glyphs>` draws one path per visible glyph in a group labelled with the text (`alt` overrides the label). `font` may be a family, and `weight` and `style` pick its face. `animation` is a stack applied to every glyph, or a function of `(glyph, each)` for a stagger: `each.index`, `each.count` (spaces count, so it is the length of `text`) and `each.stagger(first, step)`, this glyph's span in a `stagger(first, count, step)` over all of them. `<Icon>` calls its `animation` the same way, per path. To move the word as one, wrap it in an animated `<g>`.
 - Extras take `font` too: `code(src, { font })` (monospaced only), every diagram, `Callout`, and `flow` packet labels. Their boxes are then sized by measuring, not by a 0.6em-per-character guess.
 
 Before you embed:

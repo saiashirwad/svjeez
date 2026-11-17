@@ -1,4 +1,4 @@
-import { def, draw, ease, enter, motion, type SvgNode } from "svjeez";
+import { def, draw, ease, enter, motion, type SvgNode, span, stagger } from "svjeez";
 import { geist, mono } from "../gallery-style";
 import { C, D, H, T, W, envelope, on } from "./kit";
 
@@ -102,10 +102,12 @@ function Brackets(): SvgNode {
     `M${inset + arm} ${H - inset}H${inset}V${H - inset - arm}`,
   ];
 
+  const drawn = stagger(span(T.hud, 0.4), corners.length, 0.06);
+
   return (
     <g fill="none" stroke={C.hud} strokeWidth={1.2}>
       {corners.map((d, i) => (
-        <path d={d} animation={draw({ at: T.hud + i * 0.06, over: 0.4 })} />
+        <path d={d} animation={draw(drawn[i]!)} />
       ))}
     </g>
   );
@@ -166,6 +168,8 @@ export function Reticle(): SvgNode {
     return `M${Math.cos(a) * 160} ${Math.sin(a) * 160}L${Math.cos(a) * 172} ${Math.sin(a) * 172}`;
   });
 
+  const ticked = stagger(span(T.hud + 0.4, 0.3), ticks.length, 0.08);
+
   const arc = (from: number, to: number, r: number) => {
     const p = (deg: number) =>
       `${(Math.cos((deg * Math.PI) / 180) * r).toFixed(2)} ${(Math.sin((deg * Math.PI) / 180) * r).toFixed(2)}`;
@@ -190,7 +194,7 @@ export function Reticle(): SvgNode {
         animation={motion({ rotate: 0 }).to({ rotate: -60 }, D, ease.linear)}
       />
       {ticks.map((d, i) => (
-        <path d={d} strokeWidth={1.2} animation={draw({ at: T.hud + 0.4 + i * 0.08, over: 0.3 })} />
+        <path d={d} strokeWidth={1.2} animation={draw(ticked[i]!)} />
       ))}
       <path
         d={arc(-40, 40, 178)}

@@ -17,6 +17,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @property --p1{syntax:'\3c number\3e ';inherits:false;initial-value:1}
 @property --p2{syntax:'\3c number\3e ';inherits:false;initial-value:1}
 .a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,11.5%{stroke-dashoffset:1;visibility:hidden}16.5%,100%{stroke-dashoffset:0;visibility:visible}}
 @keyframes k2{0%,90%{opacity:1}95%,100%{opacity:0}}
 .m1{animation-name:k1,k2;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
@@ -54,8 +55,13 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .m16{animation-name:k20;animation-timing-function:steps(1)}
 @keyframes k21{0%{visibility:hidden}47%,100%{visibility:visible}}
 .m17{animation-name:k21;animation-timing-function:steps(1)}
-@keyframes k22{0%,47%{stroke-dashoffset:1;visibility:hidden}52%,100%{stroke-dashoffset:0;visibility:visible}}
-.m18{animation-name:k22;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k22{0%,45%{stroke-dashoffset:1;visibility:hidden}51%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k22}
+@keyframes k23{0%,51%{opacity:0}52.5%,100%{opacity:1}}
+@keyframes k24{0%,51%{scale:0.5}52.5%,100%{scale:1}}
+.m19{animation-name:k23,k24}
+@keyframes k25{0%,45%,100%{opacity:0}47%,98%{opacity:1}}
+.m20{animation-name:k25}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <path d="M281.30859375 282L815.8125 276" stroke="var(--swipe)" stroke-width="48" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
@@ -145,6 +151,9 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       <use href="#s1" mask="url(#m14)" class="a m16"/>
       <use href="#s1" class="a m17"/>
     </g>
-    <path d="M831.8125 92Q886.8125 129.5 873.8125 203M873.8125 203L882.5617209130002 192.07062977955633M873.8125 203L869.3429763111169 189.73262053024365" fill="none" stroke="var(--base09)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m18"/>
+    <g class="a m20">
+      <path d="M831.8125 92Q886.8125 134.63513513513513 873.8125 203" fill="none" stroke="var(--base09)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m18"/>
+      <path d="M882.1497785155559 191.75323215523454L873.8125 203L870.1851395343805 189.4780823825738" fill="none" stroke="var(--base09)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="a m19 fb"/>
+    </g>
   </g>
 </svg>

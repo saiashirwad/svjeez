@@ -3,6 +3,7 @@ import type { Paint } from "./attributes";
 import type { TagChannels } from "./channels";
 import type { Ref } from "./defs";
 import { num } from "./format";
+import { eachOf, type Each } from "./each";
 import type { Stack } from "./motion";
 import type { SvgNode } from "./svg";
 
@@ -20,7 +21,7 @@ type IconStack = Stack<TagChannels<"path">>;
 
 const isPerPath = (
   animation: IconProps["animation"],
-): animation is (d: string, index: number) => IconStack => typeof animation === "function";
+): animation is (d: string, each: Each) => IconStack => typeof animation === "function";
 
 export interface IconProps {
   readonly icon: IconData;
@@ -41,10 +42,11 @@ export interface IconProps {
   /** What assistive tech reads. Without it the icon is hidden from it. */
   readonly alt?: string;
   /**
-   * Runs on every path. Pass a function to vary it by path, as in `(d, i) => draw({ at: i * 0.1, over: 0.6 })`.
+   * Runs on every path. Pass a function to vary it by path; its second argument says where the path is in the icon
+   * and cascades it, as in `(d, each) => draw(each.stagger(span(0, 0.6), 0.1))`.
    * To move the whole icon as one, wrap it in an animated `<g>`.
    */
-  readonly animation?: IconStack | ((d: string, index: number) => IconStack);
+  readonly animation?: IconStack | ((d: string, each: Each) => IconStack);
 }
 
 /** An icon drawn as one path per piece, on a group scaled from its grid to `size`. */
@@ -92,7 +94,12 @@ export function Icon({
       {...(alt === undefined ? { "aria-hidden": "true" } : { role: "img", "aria-label": alt })}
     >
       {icon.paths.map((d, index) => (
-        <path d={d} animation={isPerPath(animation) ? animation(d, index) : animation} />
+        <path
+          d={d}
+          animation={
+            isPerPath(animation) ? animation(d, eachOf(index, icon.paths.length)) : animation
+          }
+        />
       ))}
     </g>
   );

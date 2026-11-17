@@ -1,4 +1,4 @@
-import { ease, enter, motion, Marker, appWindow, code, typewriter } from "svjeez";
+import { ease, enter, motion, Marker, appWindow, code, typewriter, span } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { highlight } from "@svjeez/code";
 
@@ -110,12 +110,13 @@ const spinAt = landed(9);
 const react = (i: number) => applied(i) + 0.1;
 
 // The ring turns at 180°/s until the edit doubles it, then at 360°/s to the cut.
-const turned = 180 * (react(2) - spinAt);
+const slow = span(spinAt).until(react(2));
+const fast = span(react(2)).until(OVER);
+const turned = 180 * slow.over;
 
 const spin = motion({ rotate: 0 })
-  .at(spinAt)
-  .to({ rotate: turned }, react(2) - spinAt, ease.linear)
-  .to({ rotate: turned + 360 * (OVER - react(2)) }, OVER - react(2), ease.linear);
+  .to({ rotate: turned }, slow, ease.linear)
+  .to({ rotate: turned + 360 * fast.over }, fast, ease.linear);
 
 const previewArt = (
   <>

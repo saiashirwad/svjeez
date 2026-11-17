@@ -1,4 +1,4 @@
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span, stagger } from "svjeez";
 import { CSS, chrome, outro, skeleton } from "./lib/kit";
 import { theme } from "../style";
 
@@ -8,6 +8,7 @@ const H = 264;
 const D = 6;
 const win = chrome(W, H, "Inbox", { bar: 36 });
 const heights = [34, 52, 44, 68, 80];
+const grow = stagger(span(0.4, 0.7), heights.length, 0.25);
 
 export default function build(): string {
   return render(
@@ -47,9 +48,7 @@ export default function build(): string {
             rx={6}
             fill={i === 4 ? theme.base0B : theme.base0D}
             opacity={i === 4 ? 1 : 0.75}
-            animation={motion({ scale: 0 })
-              .at(0.4 + i * 0.25)
-              .to({ scale: 1 }, 0.7, ease.out)}
+            animation={motion({ scale: 0 }).to({ scale: 1 }, grow[i]!, ease.out)}
           />
         ))}
       </g>

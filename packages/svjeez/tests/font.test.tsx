@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
-import { Glyphs, draw, font, render, type Child, Callout, code } from "svjeez";
+import { Glyphs, draw, fitText, font, render, span, type Child, Callout, code } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { validateSvg } from "svjeez/frames";
 import { contours, pathData } from "../src/font/glyf";
@@ -382,6 +382,30 @@ describe("path", () => {
   });
 });
 
+describe("fitText", () => {
+  test("is the largest whole size whose widest line fits, capped at max", () => {
+    const size = fitText(sans, ["Hi", "a longer line"], { width: 300, max: 500 });
+
+    expect(sans.measure("a longer line", size)).toBeLessThanOrEqual(300);
+    expect(sans.measure("a longer line", size + 1)).toBeGreaterThan(300);
+    expect(fitText(sans, "Hi", { width: 300, max: 20 })).toBe(20);
+  });
+
+  test("reserves tail ems after the last line only, and keeps to min", () => {
+    const plain = fitText(sans, ["wide wide wide", "x"], { width: 300, max: 500 });
+
+    expect(fitText(sans, ["wide wide wide", "x"], { width: 300, max: 500, tail: 5 })).toBe(plain);
+    expect(fitText(sans, ["x", "wide wide wide"], { width: 300, max: 500, tail: 5 })).toBeLessThan(
+      fitText(sans, ["x", "wide wide wide"], { width: 300, max: 500 }),
+    );
+    expect(fitText(sans, "wide wide wide", { width: 1, max: 500, min: 12 })).toBe(12);
+  });
+
+  test("says what to pass when the options cannot work", () => {
+    expect(() => fitText(sans, [], { width: 300, max: 20 })).toThrow("fitText() needs");
+  });
+});
+
 describe("Glyphs", () => {
   test("draws one path per visible glyph, labelled with the text, and embeds no font", () => {
     const svg = scene(<Glyphs font={sans} text="Hi there" size={20} y={40} fill="#fff" />);
@@ -390,8 +414,9 @@ describe("Glyphs", () => {
     expect(svg).not.toContain("@font-face");
   });
 
-  test("a function animation runs once per glyph with its index", () => {
+  test("a function animation runs once per glyph and says where it is and how many there are", () => {
     const seen: [string, number][] = [];
+    const counts = new Set<number>();
 
     const svg = scene(
       <Glyphs
@@ -399,10 +424,11 @@ describe("Glyphs", () => {
         text="ab c"
         size={20}
         stroke="#fff"
-        animation={(glyph, i) => {
-          seen.push([glyph.char, i]);
+        animation={(glyph, each) => {
+          seen.push([glyph.char, each.index]);
+          counts.add(each.count);
 
-          return draw({ at: i * 0.1, over: 0.5 });
+          return draw(each.stagger(span(0, 0.5), 0.1));
         }}
       />,
     );
@@ -412,6 +438,20 @@ describe("Glyphs", () => {
       ["b", 1],
       ["c", 3],
     ]);
+    expect([...counts]).toEqual([4]);
+    // The cascade is the one written by hand: a glyph per 0.1s, spaces counting.
+
+    const by = scene(
+      <Glyphs
+        font={sans}
+        text="ab c"
+        size={20}
+        stroke="#fff"
+        animation={(_, { index }) => draw({ at: index * 0.1, over: 0.5 })}
+      />,
+    );
+
+    expect(svg).toBe(by);
     expect(svg.match(/pathLength="1"/g)?.length).toBe(3);
   });
 

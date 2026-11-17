@@ -1,5 +1,5 @@
 import { google } from "@svjeez/fonts";
-import { Glyphs, draw, ease, enter, motion, render } from "svjeez";
+import { Glyphs, draw, ease, enter, motion, render, span } from "svjeez";
 
 import { HEIGHT, WIDTH, color, css, hue, leave, mono, size } from "../gallery-style";
 
@@ -58,7 +58,7 @@ export default function build(): string {
           fill="none"
           stroke={hue.orange}
           strokeWidth={2}
-          animation={(_, i) => draw({ at: 0.2 + i * 0.1, over: 1 }, ease.inOut)}
+          animation={(_, each) => draw(each.stagger(span(0.2, 1), 0.1), ease.inOut)}
         />
         <Glyphs
           font={display}
@@ -68,8 +68,8 @@ export default function build(): string {
           y={210}
           fill={hue.blue}
           alt=""
-          animation={(_, i) =>
-            enter({ at: 1 + i * 0.08, over: 0.5 }, { opacity: 0, y: 8 }, ease.out)
+          animation={(_, each) =>
+            enter(each.stagger(span(1, 0.5), 0.08), { opacity: 0, y: 8 }, ease.out)
           }
         />
         <Name name="Archivo Black" y={270} at={1.8} />

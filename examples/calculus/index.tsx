@@ -1,5 +1,5 @@
 import { plane, tex } from "@svjeez/math";
-import { draw, enter, exit, render, readout } from "svjeez";
+import { draw, enter, exit, render, readout, span, stagger, type Span } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { css, mono, theme } from "../style";
 
@@ -31,24 +31,32 @@ const fixed = (n: number) => (Math.abs(n) < 0.005 ? 0 : n).toFixed(2);
 /** The derivative: the secant through x and x + h, with h shrinking to 0, then the tangent sliding along. */
 const f = (x: number) => 2 + Math.sin(1.1 * x) + 0.15 * x;
 const slopeGraph = panel(0, [-3, 3], [0, 4]);
-const X = [{ from: -1, to: 2.2, at: 6.4, over: 2.2 }];
-const H0 = { from: 2.2, to: 0, at: 2.4, over: 3 };
-const secant = slopeGraph.secant(f, X, H0, { length: 150, color: theme.base08 });
+const SECANT = span(1.8, 0.5);
+/** h shrinks to 0, then a beat later x slides along the curve. */
+
+const SHRINK = span(2.4, 3);
+const SLIDE = SHRINK.next(2.2, 1);
+
+const secant = slopeGraph.secant(
+  f,
+  [{ ...SLIDE, from: -1, to: 2.2 }],
+  { ...SHRINK, from: 2.2, to: 0 },
+  { length: 150, color: theme.base08 },
+);
 
 /** The integral: rectangles that split in two each stage, then the exact area under them. */
 const g = (x: number) => 0.4 + 0.3 * x * x;
 const areaGraph = panel(1, [0, 3], [0, 3.2]);
 const N = [2, 4, 8, 16, 32];
-const SPLITS = [4.6, 5.6, 6.6, 7.6];
+const SUMS = span(3.6, 0.5);
+/** One split a second, from half a second after the sums arrive; the exact area half a second after the last. */
 
-const sums = areaGraph.riemann(
-  SPLITS.map((at) => ({ at, over: 0.7 })),
-  g,
-  { from: 0.4, to: 2.8, n: N, color: theme.base0A },
-);
+const SPLITS = stagger(SUMS.next(0.7, 0.5), N.length - 1, 1);
+const AREA = SPLITS.at(-1)!.next(0.6, 0.5);
+
+const sums = areaGraph.riemann(SPLITS, g, { from: 0.4, to: 2.8, n: N, color: theme.base0A });
 
 const exact = areaGraph.area(g, 0.4, 2.8, { color: theme.base0A, opacity: 0.45 });
-const AREA_AT = 8.8;
 
 /** Taylor polynomials of cos x around 0, as one curve that bends into each next one. */
 const factorial = (k: number): number => (k <= 1 ? 1 : k * factorial(k - 1));
@@ -63,7 +71,12 @@ const taylor = (n: number) => (x: number) => {
 
 const waveGraph = panel(2, [-2 * Math.PI, 2 * Math.PI], [-1.8, 1.8]);
 const DEGREES = [0, 2, 4, 6, 8, 10];
-const BENDS = [8.6, 9.6, 10.6, 11.6, 12.6];
+const POLY = span(7.6, 0.6);
+const BENDS = stagger(POLY.next(0.8, 0.4), DEGREES.length - 1, 1);
+
+/** How many of `stages` are past halfway at `t`: the readouts change as each morph does. */
+const past = (stages: readonly Span[], t: number) =>
+  stages.filter((s) => s.at + s.over / 2 <= t).length;
 
 const cosine = waveGraph.plot(Math.cos, {
   color: theme.base0D,
@@ -71,15 +84,15 @@ const cosine = waveGraph.plot(Math.cos, {
   animation: draw({ at: 6.6, over: 1.2 }),
 });
 
-const poly = waveGraph.morph(
-  BENDS.map((at) => ({ at, over: 0.8 })),
-  DEGREES.map(taylor),
-  {
-    color: theme.base0E,
-    strokeWidth: 2.5,
-    animation: draw({ at: 7.6, over: 0.6 }),
-  },
-);
+const poly = waveGraph.morph(BENDS, DEGREES.map(taylor), {
+  color: theme.base0E,
+  strokeWidth: 2.5,
+  animation: draw(POLY),
+});
+
+/** The headings and the axes arrive one panel after another. */
+const HEADINGS = stagger(span(0.3, 0.6), 3, 0.25);
+const PANELS = stagger(span(0.2, 0.6), 3, 0.25);
 
 const label = (i: number) => ({
   fontFamily: mono,
@@ -111,10 +124,10 @@ export default function build(): string {
         ),
         heading(2, String.raw`\cos x = \sum_{k} \frac{(-1)^k x^{2k}}{(2k)!}`),
       ].map((h, i) => (
-        <g animation={enter({ at: 0.3 + i * 0.25, over: 0.6 })}>{h.node}</g>
+        <g animation={enter(HEADINGS[i]!)}>{h.node}</g>
       ))}
       {[slopeGraph, areaGraph, waveGraph].map((ax, i) => (
-        <g animation={enter({ at: 0.2 + i * 0.25, over: 0.6 })}>{ax.node}</g>
+        <g animation={enter(PANELS[i]!)}>{ax.node}</g>
       ))}
 
       {
@@ -124,12 +137,12 @@ export default function build(): string {
           animation: draw({ at: 0.8, over: 1.2 }),
         }).node
       }
-      <g animation={enter({ at: 1.8, over: 0.5 })}>{secant.node}</g>
-      <g animation={enter({ at: 1.8, over: 0.5 })}>
+      <g animation={enter(SECANT)}>{secant.node}</g>
+      <g animation={enter(SECANT)}>
         {readout(
-          { at: 1.8, over: X[0]!.at + X[0]!.over - 1.8 },
+          SECANT.until(SLIDE.end),
           (t) =>
-            t < H0.at + H0.over
+            t < SHRINK.end
               ? `slope ≈ ${fixed(secant.slope(t))}`
               : `f′(x) = ${fixed(secant.slope(t))}`,
           label(0),
@@ -143,17 +156,15 @@ export default function build(): string {
           animation: draw({ at: 2.6, over: 1 }),
         }).node
       }
-      <g animation={[enter({ at: 3.6, over: 0.5 }), exit({ at: AREA_AT, over: 0.6 })]}>
-        {sums.node}
-      </g>
-      <g animation={enter({ at: AREA_AT, over: 0.6 })}>{exact.node}</g>
-      <g animation={enter({ at: 3.6, over: 0.5 })}>
+      <g animation={[enter(SUMS), exit(AREA)]}>{sums.node}</g>
+      <g animation={enter(AREA)}>{exact.node}</g>
+      <g animation={enter(SUMS)}>
         {readout(
-          { at: 3.6, over: AREA_AT - 3.6 + 0.1 },
+          SUMS.until(AREA.at + 0.1),
           (t) => {
-            const stage = SPLITS.filter((s) => s + 0.35 <= t).length;
+            const stage = past(SPLITS, t);
 
-            return t >= AREA_AT
+            return t >= AREA.at
               ? `area = ${exact.value(0).toFixed(3)}`
               : `n = ${N[stage]} · Σ = ${sums.sums[stage]!.toFixed(3)}`;
           },
@@ -163,10 +174,10 @@ export default function build(): string {
 
       {cosine.node}
       {poly.node}
-      <g animation={enter({ at: 7.6, over: 0.5 })}>
+      <g animation={enter(POLY.first(0.5))}>
         {readout(
-          { at: 7.6, over: BENDS.at(-1)! - 7.6 + 0.5 },
-          (t) => `degree ${DEGREES[BENDS.filter((b) => b + 0.4 <= t).length]}`,
+          POLY.until(BENDS.at(-1)!.at + 0.5),
+          (t) => `degree ${DEGREES[past(BENDS, t)]}`,
           label(2),
         )}
       </g>

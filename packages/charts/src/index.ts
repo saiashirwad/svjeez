@@ -12,6 +12,7 @@ export type {
   Curve,
   Datum,
   ChartLine,
+  ChartPoint,
   LinearX,
   ChartLineOptions,
   SeriesOptions,

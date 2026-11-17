@@ -230,7 +230,9 @@ describe("snap", () => {
   });
 
   test("loop returns to the first state, so the duration includes the way back", async () => {
-    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', { css: CSS });
+    const card = await dom.mount('<div class="card"><input placeholder="email"></div>', {
+      css: CSS,
+    });
 
     const steps = await card.run([snap("idle"), fill("input", "hey"), snap("typed", { over: 1 })]);
     const looped = loop(steps, { over: 0.5, wait: 0.25 });
@@ -415,6 +417,24 @@ describe("Dom", () => {
 
     expect(svg.match(/>new</g)).toHaveLength(1);
     expect(svg).toContain("@keyframes");
+    await card.close();
+  });
+
+  test("a box with nothing to draw that comes or goes adds no empty animated group", async () => {
+    const card = await dom.mount('<div class="card"><p>first</p><div class="gap"></div></div>', {
+      css: `${CSS} .gap { height: 12px }`,
+    });
+
+    const before = await card.snap();
+
+    await card.html('<div class="card"><p>first</p></div>');
+    const gone = await card.snap();
+    await card.html('<div class="card"><p>first</p><div class="gap"></div></div>');
+    const back = await card.snap();
+    const svg = draw([before, wait(0.5), gone, wait(0.5), back]);
+
+    expect(validateSvg(svg).errors).toEqual([]);
+    expect(svg).not.toMatch(/<g class="[^"]*"\/>/);
     await card.close();
   });
 
@@ -648,7 +668,8 @@ describe("Dom", () => {
     expect(validateSvg(svg).errors).toEqual([]);
 
     // Fully there all through the move into the list, not deleted in the input while the item fades in.
-    for (const t of [0.9, 1.2, 1.5, 1.8]) expect(inkOf(node, "Ship the SVG", t).reduce((a, b) => a + b, 0)).toBeCloseTo(1);
+    for (const t of [0.9, 1.2, 1.5, 1.8])
+      expect(inkOf(node, "Ship the SVG", t).reduce((a, b) => a + b, 0)).toBeCloseTo(1);
 
     expect(Math.max(...inkOf(node, "What now?", 0.9))).toBe(0);
     expect(Math.max(...inkOf(node, "What now?", 2.5))).toBe(1);
@@ -1136,7 +1157,8 @@ describe("snapshots", () => {
 
 describe("real sites", () => {
   const page = (body: string, css = "") =>
-    "data:text/html;charset=utf-8," + encodeURIComponent(`<!doctype html><style>${css}</style>${body}`);
+    "data:text/html;charset=utf-8," +
+    encodeURIComponent(`<!doctype html><style>${css}</style>${body}`);
 
   test("inline svg: symbol, defs, clipPath and use draw what they should and validate", async () => {
     const card = await dom.open(

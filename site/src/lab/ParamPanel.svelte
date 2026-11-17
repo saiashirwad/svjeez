@@ -73,7 +73,7 @@
           {/each}
         </select>
       </label>
-    {:else}
+    {:else if param.kind === "easing"}
       {@const { value } = param}
       <fieldset class="row">
         <legend class="muted">{name}</legend>

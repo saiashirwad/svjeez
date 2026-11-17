@@ -8,7 +8,7 @@ import {
   toBars,
   type Topology,
 } from "@svjeez/geo";
-import { motion, render, show, type SvgNode } from "svjeez";
+import { motion, render, show, span, type SvgNode } from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
@@ -82,17 +82,17 @@ const Heading = (): SvgNode => (
     <text x={40} y={54} fontSize={26} fontWeight={700} fill={INK}>
       Life expectancy at birth
     </text>
-    <g animation={show({ at: 0, over: CARTOGRAM - 0.2 }, { fade: 0.5 })}>
+    <g animation={show(span(0).until(CARTOGRAM - 0.2), { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         Years a newborn can expect to live, 1960 to 2020
       </text>
     </g>
-    <g animation={show({ at: CARTOGRAM - 0.2, over: BARS - CARTOGRAM }, { fade: 0.5 })}>
+    <g animation={show(span(CARTOGRAM - 0.2).until(BARS - 0.2), { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         Circle area is population in 2020. Color is life expectancy in 2020.
       </text>
     </g>
-    <g animation={show({ at: BARS - 0.2, over: OUT - BARS + 0.2 }, { fade: 0.5 })}>
+    <g animation={show(span(BARS - 0.2).until(OUT), { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         The ten most populous countries, 2020 (millions of people)
       </text>
@@ -133,9 +133,9 @@ const Names = (): SvgNode => (
     fontSize={11}
     fontWeight={650}
     fill="#0b1118"
-    animation={show({ at: CARTOGRAM + MORPH, over: BARS - CARTOGRAM - MORPH - 0.4 }, { fade: 0.5 })}
+    animation={show(span(CARTOGRAM + MORPH).until(BARS - 0.4), { fade: 0.5 })}
   >
-    {[...circles.bubbles]
+    {[...circles.parts]
       .sort((a, b) => b.value - a.value)
       .slice(0, 7)
       .filter((b) => String(b.region.properties?.name).length * 6.5 < 2 * b.r)
@@ -155,7 +155,7 @@ const Labels = (): SvgNode => (
       .at(BARS + MORPH + 0.7)
       .to({ opacity: 1 }, 0.5)}
   >
-    {bars.bars.map(({ region, value, rect: r }) => (
+    {bars.parts.map(({ region, value, box: r }) => (
       <>
         <text x={r.x - 8} y={r.y + r.h / 2 + 4} textAnchor="end" fill={INK}>
           {String(region.properties?.name)}

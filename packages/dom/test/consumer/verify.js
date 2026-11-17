@@ -33,10 +33,7 @@ try {
 
 assert.equal(steps.length, 3);
 
-const svg = render(
-  { ...size(steps), duration: duration(steps) },
-  jsx(Dom, { states: steps }),
-);
+const svg = render({ ...size(steps), duration: duration(steps) }, jsx(Dom, { states: steps }));
 
 assert.deepEqual(validateSvg(svg).errors, []);
 
@@ -65,7 +62,11 @@ const texts = (steps) =>
 try {
   for (const framework of ["react", "svelte"]) {
     const file = fileURLToPath(new URL(`./${framework}.demo.js`, import.meta.url));
-    const demos = await recordings(file, { cache: join(dir, `${framework}.json`), schemes: "light" });
+
+    const demos = await recordings(file, {
+      cache: join(dir, `${framework}.json`),
+      schemes: "light",
+    });
 
     assert.deepEqual(texts(demos.counter), ["Count: 0", "Count: 1", "Total: 1"], framework);
   }

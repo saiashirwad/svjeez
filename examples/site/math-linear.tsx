@@ -91,8 +91,8 @@ export default function build(): string {
           <g animation={enter({ at: 2.5, over: 0.5 })}>{p.label([0.5, 0.5], areas.node)}</g>
           {p.basis({ at: 1.3, over: 0.5 })}
         </g>
-        {matrix.write({ at: 2.2, over: 1.4 })}
-        {det.write({ at: 7.0, over: 1.0 })}
+        {matrix.write({ at: 2.2, over: 1.4 }).node}
+        {det.write({ at: 7.0, over: 1.0 }).node}
         <g class="sans" animation={enter({ at: 2.6, over: 0.6 })}>
           <text x={404} y={H - 30} fontSize={12} fill={theme.base03} textAnchor="middle">
             {"matrix.write({ at: 2.2, over: 1.4 })"}

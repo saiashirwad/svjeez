@@ -15,13 +15,14 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 
 <>
   {m.node}
-  <Brace target={expanded.get("mid")} side="below" label="cross term" fontSize={18} show={{ at: 2.5, over: 1.5 }} />
+  <Brace target={expanded.part("mid").box} side="below" label="cross term" fontSize={18} show={{ at: 2.5, over: 1.5 }} />
 </>;
 ```
 
 - `x` and `y` are the top-left of the formula's box. `anchor: [0.5, 0.5]` puts its center there instead, which suits a label on a side or inside an area. `fontSize` is the pixels in one em, default 32. `theme` paints the formula with its `plain` color, and `color` overrides that. `display: false` sets inline style.
-- `.node` draws the formula. `.write({ at, over })` writes it on glyph by glyph, each outline drawing and then filling, and it stays once written. `.bounds`, `.width` and `.height` give its box.
-- `.get("mid")` is the box of everything wrapped in `\cssId{mid}{…}`. `.find("2ab")` is the box of consecutive glyphs that spell it, and `.find("2", 2)` takes the second match. Both return a `Rect` for `Brace` (give its label a `fontSize` to match the formula), `Underline`, `Callout`, `Marker`, `Focus` and `Camera`.
+- `.node` draws the formula. `.write({ at, over })` writes it on glyph by glyph, each outline drawing and then filling, and it stays once written; put its `.node` in the scene. `.bounds`, `.width` and `.height` give its box.
+- The formula and what `.write()` returns have `span`, `bounds`, `parts` and `part(id)`, the shape every svjeez package returns. The parts are what `\cssId{name}{…}` wraps: `.part("mid").box` is the box of everything under `\cssId{mid}{…}`, a `Rect` for `Brace` (give its label a `fontSize` to match the formula), `Underline`, `Callout`, `Marker`, `Focus` and `Camera`. On `tex()` a part's `span` is the instant 0; on a `write()` it is when its glyphs write, so `enter(written.part("mid").span.next(0.4))` lands a note right after.
+- `.find("2ab")` is a part for the consecutive glyphs that spell it, with `"2ab"` as its id, and `.find("2", 2)` takes the second match.
 - `.words` lists the glyphs and bars in reading order. A glyph has `char`, `size`, `d`, `matrix`, `fill`, `bounds` and the `text`, `x`, `y` and `id` that `morph()` uses.
 
 ## Equation transforms
@@ -29,8 +30,8 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 `morph()` takes any `tex()` formulas. A glyph carries over when the next version has the same character at the same size, and moves to its new place. Everything else fades: glyphs only in the old version fade out and glyphs only in the new version fade in. `morph` translates and cannot scale, so a superscript `2` never pairs with a full-size `2`, and a fraction bar pairs only with a bar of the same length.
 
 - Place every version at the same `x` and `y`, so a glyph's move is the move in the algebra.
-- To write a formula and then morph it, cut from `write()` to `morph().node` at one instant after the writing ends. Both draw the same glyphs in the same places, so the cut does not show.
-- Wrap a part in `\cssId{name}{…}` in both versions to pair it by name, even when its glyphs change. Pieces under an id also give you `get(name)`.
+- To write a formula and then morph it, cut from `write().node` to `morph().node` at one instant after the writing ends. Both draw the same glyphs in the same places, so the cut does not show.
+- Wrap a part in `\cssId{name}{…}` in both versions to pair it by name, even when its glyphs change. Pieces under an id also give you `part(name)`.
 - `gutter` is for `code()`. It is a type error with formulas.
 - Bold, italic and upright forms of one letter share a key, so `\mathbf{a}` can pair with `a` and jump in shape. Name both with the same `\cssId` instead.
 
@@ -176,7 +177,7 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `tex() cannot draw "…" in "…": the MathJax font has no glyph for it.` | The character is outside MathJax's font: accents, emoji, CJK. Use TeX, as in `\'e`, or draw the text with `<text>`. |
 | `tex() cannot draw a <svg> element in "…"` | `\overbrace` and `\underbrace` are built from clipped pieces this package cannot place. Draw a `<Brace>` under the part instead. |
 | `tex() could not read the box MathJax drew for …` | `\tag` draws a full-width table. Leave the number out and draw it as text. |
-| `tex.get() found no part named "…".` | Wrap the part in `\cssId{name}{…}`. |
+| `tex.part() found no part named "…". Wrap it in \cssId{…}{…}…` | Wrap the part in `\cssId{name}{…}`. |
 | `tex.find() found … of "…", not ….` | The text spells nothing, or fewer matches, among consecutive glyphs. Fractions list the numerator, the denominator, then the bar. |
 | `tex() needs finite coordinates and anchor and a positive fontSize, got …` | Pass numbers. |
 | `tex.write() needs a non-negative span and a positive stroke time, got …` | Pass `over` of 0 or more and `stroke` above 0. |

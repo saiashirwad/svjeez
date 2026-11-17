@@ -1,5 +1,5 @@
 import { bell, heartFilled, rocket, settings } from "@svjeez/icons/tabler";
-import { Icon, draw, ease, enter, render, shake, adaptive, systemDark, systemLight } from "svjeez";
+import { Icon, draw, ease, enter, render, shake, span, adaptive, systemDark, systemLight } from "svjeez";
 
 
 const { theme, css } = adaptive({
@@ -40,7 +40,7 @@ export default function build(): string {
               stroke={color}
               fill={color}
               strokeWidth={1.75}
-              animation={(d, j) => draw({ at: i * 0.4 + j * 0.12, over: 0.5 })}
+              animation={(d, each) => draw(each.stagger(span(i * 0.4, 0.5), 0.12))}
             />
           </g>
         </g>

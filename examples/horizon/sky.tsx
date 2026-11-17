@@ -1,5 +1,5 @@
-import { def, ease, motion, wiggle, type Color, type SvgNode } from "svjeez";
-import { C, D, H, T, W, pivot, random } from "./kit";
+import { def, ease, motion, random, wiggle, type Color, type SvgNode } from "svjeez";
+import { C, D, H, T, W, pivot } from "./kit";
 
 const depth = def.linearGradient(
   { x1: 0, y1: 0, x2: 0, y2: 1 },

@@ -45,11 +45,11 @@ const play = (msgs: readonly Msg[], from = init({ text: scene, now: 0 })[0]) => 
   return { state, cmds };
 };
 
-const cx = (state: State) => valueOf(state, "default#0")!.literal.value;
+const cx = (state: State) => valueOf(state, "default:circle.cx")!.literal.value;
 
 describe("update", () => {
   test("setting a value rewrites only its literal and asks for a compile of the new file", () => {
-    const { state, cmds } = play([{ type: "set", key: "default#0", value: 64.5 }]);
+    const { state, cmds } = play([{ type: "set", key: "default:circle.cx", value: 64.5 }]);
 
     expect(state.text).toBe(scene.replace("cx={40}", "cx={64.5}"));
     expect(cmds).toEqual([{ type: "compile", text: state.text }]);
@@ -57,8 +57,8 @@ describe("update", () => {
 
   test("a color, an ease and a number each go back as code", () => {
     const { state } = play([
-      { type: "set", key: "default#2", value: "#FF0000" },
-      { type: "set", key: "default#5", value: ease.bezier(0.1, 0.2, 0.3, 1.4) },
+      { type: "set", key: "default:circle.fill", value: "#FF0000" },
+      { type: "set", key: "default:enter.2", value: ease.bezier(0.1, 0.2, 0.3, 1.4) },
     ]);
 
     expect(state.text).toContain('fill="#FF0000"');
@@ -97,9 +97,9 @@ describe("update", () => {
 
   test("a drag is one undo step, and redo puts it back", () => {
     const drag = play([
-      { type: "set", key: "default#0", value: 41 },
-      { type: "set", key: "default#0", value: 42, continues: true },
-      { type: "set", key: "default#0", value: 43, continues: true },
+      { type: "set", key: "default:circle.cx", value: 41 },
+      { type: "set", key: "default:circle.cx", value: 42, continues: true },
+      { type: "set", key: "default:circle.cx", value: 43, continues: true },
     ]).state;
 
     const undone = play([{ type: "undo" }], drag).state;
@@ -108,11 +108,11 @@ describe("update", () => {
   });
 
   test("a rewrite keeps the selected value when its key survives, and drops it when it does not", () => {
-    const selected = play([{ type: "select", key: "default#1", now: 0 }]).state;
+    const selected = play([{ type: "select", key: "default:circle.r", now: 0 }]).state;
     const kept = play([{ type: "replace", text: `const pad = 2;\n${scene}` }], selected).state;
     const gone = play([{ type: "replace", text: "export default () => <g />;" }], selected).state;
 
-    expect(kept.selected).toBe("default#1");
+    expect(kept.selected).toBe("default:circle.r");
     expect(gone.selected).toBeNull();
   });
 
@@ -196,7 +196,7 @@ describe("update", () => {
   });
 
   test("selecting a key the file has no value for changes nothing", () => {
-    const before = play([{ type: "select", key: "default#1", now: 0 }]);
+    const before = play([{ type: "select", key: "default:circle.r", now: 0 }]);
     const after = play([{ type: "select", key: "nope", now: 0 }], before.state);
 
     expect(after.state).toBe(before.state);
@@ -219,7 +219,7 @@ describe("update", () => {
     expect(play([{ type: "set", key: eased?.key ?? "", value: ease.hold }]).state.text).toBe(
       state.text,
     );
-    expect(play([{ type: "set", key: "default#0", value: Number.NaN }]).state.text).toBe(
+    expect(play([{ type: "set", key: "default:circle.cx", value: Number.NaN }]).state.text).toBe(
       state.text,
     );
   });
@@ -284,7 +284,7 @@ describe("createEditor", () => {
     editor.subscribe(() => {});
 
     for (const v of [41, 42, 43, 44])
-      editor.send({ type: "set", key: "default#0", value: v, continues: true });
+      editor.send({ type: "set", key: "default:circle.cx", value: v, continues: true });
     compiles[0]!.finish(ok("<svg/>"));
     await settle();
 
@@ -297,7 +297,7 @@ describe("createEditor", () => {
     editor.subscribe(() => {});
     compiles[0]!.finish(ok("<svg/>"));
     await settle();
-    editor.send({ type: "set", key: "default#0", value: 50 });
+    editor.send({ type: "set", key: "default:circle.cx", value: 50 });
     await settle();
     compiles[1]!.finish(ok("<svg id='2'/>"));
     await settle();
@@ -328,10 +328,15 @@ describe("grips", () => {
 
   test("selecting a number asks to measure what it moves, with the file nudged a little past it", () => {
     const { state } = compiled(scene);
-    const { cmds } = play([{ type: "select", key: "default#0", now: 0 }], state);
+    const { cmds } = play([{ type: "select", key: "default:circle.cx", now: 0 }], state);
 
     expect(cmds).toEqual([
-      expect.objectContaining({ type: "probe", key: "default#0", svg: "<svg id='a'/>", from: 40 }),
+      expect.objectContaining({
+        type: "probe",
+        key: "default:circle.cx",
+        svg: "<svg id='a'/>",
+        from: 40,
+      }),
     ]);
     const [probe] = cmds;
 
@@ -341,34 +346,48 @@ describe("grips", () => {
 
   test("a measured grip sits where it was measured and moves with its value", () => {
     const selected = play(
-      [{ type: "select", key: "default#0", now: 0 }],
+      [{ type: "select", key: "default:circle.cx", now: 0 }],
       compiled(scene).state,
     ).state;
 
     const grip = { at: { x: 40, y: 60 }, way: { x: 1, y: 0 }, from: 40, declared: false };
-    const { state } = play([{ type: "probed", key: "default#0", text: scene, grip }], selected);
 
-    expect(state.grips["default#0"]).toEqual(grip);
-    expect(play([{ type: "select", key: "default#0", now: 0 }], state).state.grips).toEqual(
+    const { state } = play(
+      [{ type: "probed", key: "default:circle.cx", text: scene, grip }],
+      selected,
+    );
+
+    expect(state.grips["default:circle.cx"]).toEqual(grip);
+    expect(play([{ type: "select", key: "default:circle.cx", now: 0 }], state).state.grips).toEqual(
       state.grips,
     );
-    expect(play([{ type: "select", key: "default#1", now: 0 }], state).state.grips).toEqual({});
+    expect(play([{ type: "select", key: "default:circle.r", now: 0 }], state).state.grips).toEqual(
+      {},
+    );
   });
 
   test("a measurement of an older file is kept only when the measured number is all that changed since", () => {
     const selected = play(
-      [{ type: "select", key: "default#0", now: 0 }],
+      [{ type: "select", key: "default:circle.cx", now: 0 }],
       compiled(scene).state,
     ).state;
 
     const grip = { at: { x: 40, y: 60 }, way: { x: 1, y: 0 }, from: 40, declared: false };
-    const probed: Msg = { type: "probed", key: "default#0", text: scene, grip };
+    const probed: Msg = { type: "probed", key: "default:circle.cx", text: scene, grip };
 
-    const dragged = play([{ type: "set", key: "default#0", value: 55 }, probed], selected).state;
-    expect(dragged.grips["default#0"]).toEqual(grip);
+    const dragged = play(
+      [{ type: "set", key: "default:circle.cx", value: 55 }, probed],
+      selected,
+    ).state;
 
-    const elsewhere = play([{ type: "set", key: "default#1", value: 12 }, probed], selected).state;
-    expect(elsewhere.grips["default#0"]).toBeUndefined();
+    expect(dragged.grips["default:circle.cx"]).toEqual(grip);
+
+    const elsewhere = play(
+      [{ type: "set", key: "default:circle.r", value: 12 }, probed],
+      selected,
+    ).state;
+
+    expect(elsewhere.grips["default:circle.cx"]).toBeUndefined();
   });
 
   test("a scene's declared handles are grips, keyed by their params, and are never probed", () => {
@@ -398,7 +417,7 @@ describe("an editor nothing listens to", () => {
     leave();
     expect(stops).toBe(1);
 
-    editor.send({ type: "set", key: "default#0", value: 50 });
+    editor.send({ type: "set", key: "default:circle.cx", value: 50 });
     await settle();
     expect(compiles).toHaveLength(1);
 
@@ -472,7 +491,7 @@ describe("createEditor when things go wrong", () => {
     await settle();
     expect(editor.getState().error?.message).toContain("network down");
 
-    editor.send({ type: "set", key: "default#0", value: 50 });
+    editor.send({ type: "set", key: "default:circle.cx", value: 50 });
     await settle();
     expect(texts).toHaveLength(2);
     expect(editor.getState().error).toBeNull();

@@ -1,4 +1,4 @@
-import { ease, enter, motion, render, Marker, code } from "svjeez";
+import { ease, enter, motion, render, Marker, code, span } from "svjeez";
 
 import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./lib/kit";
@@ -160,9 +160,11 @@ export const make = (tall = false): string => {
                   height={16}
                   rx={8}
                   fill={row.color}
-                  animation={motion({ width: 0 })
-                    .at(T0 + a)
-                    .to({ width: px(b) - px(a) }, b - a, ease.linear)}
+                  animation={motion({ width: 0 }).to(
+                    { width: px(b) - px(a) },
+                    span(T0 + a).until(T0 + b),
+                    ease.linear,
+                  )}
                 />
               </>
             ))}

@@ -13,6 +13,7 @@ import {
   type Color,
   type Stack,
   type TagChannels,
+  span,
 } from "svjeez";
 import { css as codeCss, mono, theme } from "../style";
 import { chrome } from "./lib/kit";
@@ -297,9 +298,7 @@ export default function build(): string {
   const flutter = wiggle({ rotate: 7 }, { seed: "kite", rate: 2 });
   const tail = draw({ at: settle(2), over: 0.6 });
 
-  const drift = motion({ x: 0 })
-    .at(settle(3))
-    .to({ x: -36 }, D - 0.8 - settle(3), ease.inOut);
+  const drift = motion({ x: 0 }).to({ x: -36 }, span(settle(3)).until(D - 0.8), ease.inOut);
 
   const near = motion({ y: 140 })
     .at(popAt(1))

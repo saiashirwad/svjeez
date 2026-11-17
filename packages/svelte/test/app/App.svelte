@@ -4,9 +4,10 @@
   import { Code, Picture, SceneEditor, Stats, Transport } from "../../src/index";
   import handled from "./handles.tsx?raw";
   import plain from "./scene.tsx?raw";
+  import titled from "./text.tsx?raw";
 
   const scene = new URLSearchParams(location.search).get("scene");
-  const ed = new SceneEditor(scene === "handles" ? handled : plain);
+  const ed = new SceneEditor(scene === "handles" ? handled : scene === "text" ? titled : plain);
 
   onDestroy(ed.destroy);
 </script>

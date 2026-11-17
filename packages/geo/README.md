@@ -59,8 +59,8 @@ export default () =>
 
 The map it returns has:
 
-- `regions`, one per feature, each with `id`, `properties`, `feature`, its path data `d`, and the `centroid` and `bounds` of its largest piece. France's centroid sits in France, not out toward French Guiana.
-- `region(key)`, a region by `id` or `properties.name`.
+- `parts`, one region per feature, each with `id`, `properties`, `feature`, its path data `d`, and the `centroid` and `box` of its largest piece. France's centroid sits in France, not out toward French Guiana.
+- `part(key)`, a region by `id` or `properties.name`. These are the names every svjeez package uses for what it laid out; nothing is drawn yet, so a region has no `span` until `choropleth()` gives it one.
 - `land`, every region filled as one path. From TopoJSON the shared borders are merged away.
 - `lines`, every outline as one path. From TopoJSON each shared border is drawn once.
 - `sphere`, the outline of the globe, and `graticule(step)`, lines of longitude and latitude.
@@ -83,7 +83,7 @@ Chromium keeps each animated element on its own raster, and when a camera scales
 
 ```tsx
 <g animation={motion({ opacity: 1 }).at(SWAP).set({ opacity: 0 })}>
-  {map.regions.map((r) => <path d={r.d} animation={draw({ at: 0.5, over: 1 })} />)}
+  {map.parts.map((r) => <path d={r.d} animation={draw({ at: 0.5, over: 1 })} />)}
 </g>
 <g animation={motion({ opacity: 0 }).at(SWAP).set({ opacity: 1 })}>
   <Camera frame={frame} stops={stops}>
@@ -107,7 +107,7 @@ const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
 const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectancy (years)", empty: "No data" }); // key.node, key.bounds
 ```
 
-`choropleth(spans, map, values, { scale, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
+`choropleth(spans, map, values, { scale, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, span, bounds, parts, part, unmatched, groups }`. `unmatched` lists keys that match no region. `parts` are the regions `values` names, and `part("France")` finds one by id or name, with its `span` from the first span that changes its color to the end of the last, so a label can follow it in: `enter(years.part("France").span.next(0.4))`.
 
 ```tsx
 const years = choropleth(
@@ -118,7 +118,7 @@ const years = choropleth(
 );
 ```
 
-`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` (each `{ region, value, x, y, r }`) or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
+`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }` and the shapes as `parts`, each `{ id, region, value, box, span }` with `x`, `y` and `r` on a circle, to place labels from. `part("France")` finds one by id or name, and its `span` is when that region morphs. `fill` is a color or `(region, value) => color`.
 
 The shapes start as the outline and hide until the span starts. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
 
@@ -153,7 +153,7 @@ const earth = globe({ at: 0, over: 24 }, world, { frame, tilt: 22, spin: { from:
 
 ## Changing projection
 
-`reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
+`reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `parts[i].d[k]` is region `i` under projection `k`, `part("Greenland")` finds one, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
 
 `trueSize(span, map, region, to, { ease })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
 

@@ -33,7 +33,9 @@ assert.match(svg, /^<svg[\s\S]*@keyframes[\s\S]*<rect/);
 
 assert.match(svg, />Q2<\/text>/);
 
-assert.equal(bars.bars.length, 3);
+assert.equal(bars.parts.length, 3);
+
+assert.equal(bars.part("Q2").value, 7);
 
 assert.throws(() => c.bars({ at: 0, over: 1 }, { Q9: 1 }), /not in the x domain/);
 

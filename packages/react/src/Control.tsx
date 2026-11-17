@@ -5,6 +5,7 @@ import { ChoiceControl } from "./ChoiceControl.tsx";
 import { ColorControl } from "./ColorControl.tsx";
 import { EaseControl } from "./EaseControl.tsx";
 import { NumberControl } from "./NumberControl.tsx";
+import { TextControl } from "./TextControl.tsx";
 
 export function Control({ editor, value }: { editor: Editor; value: Value }) {
   switch (value.kind) {
@@ -16,5 +17,7 @@ export function Control({ editor, value }: { editor: Editor; value: Value }) {
       return <EaseControl editor={editor} value={value} />;
     case "choice":
       return <ChoiceControl editor={editor} value={value} />;
+    case "text":
+      return <TextControl editor={editor} value={value} />;
   }
 }

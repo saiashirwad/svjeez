@@ -5,6 +5,7 @@ import type { Seconds } from "./motion";
 import type { Css } from "./properties";
 import { children, element, raw, serialize, type Child } from "./svg";
 import { withSources } from "./sources";
+import { tracing } from "./traced";
 import { validateSvg } from "./validate";
 
 export interface RenderOptions {
@@ -68,7 +69,7 @@ export const render = (options: RenderOptions, content: Child): string => {
   const nodes = children(content);
 
   const { css, ...compiled } = compile(
-    options.sources ? nodes.map(withSources) : nodes,
+    (options.sources ?? tracing()) ? nodes.map(withSources) : nodes,
     { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
     options.css,
   );

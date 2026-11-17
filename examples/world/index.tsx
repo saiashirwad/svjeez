@@ -4,6 +4,7 @@ import {
   ease,
   motion,
   render,
+  span,
   type Child,
   type Rect,
   type SvgNode,
@@ -105,7 +106,7 @@ const stops: CameraStop[] = [
     show: { at: camera, over: PAN + FLIGHT + PAUSE },
     target,
   })),
-  { show: { at: BACK, over: D - BACK }, target: "all" },
+  { show: span(BACK).until(D), target: "all" },
 ];
 
 const Follow = ({ children }: { children: Child }): SvgNode => (
@@ -115,8 +116,8 @@ const Follow = ({ children }: { children: Child }): SvgNode => (
 );
 
 /** West to east, the order each country starts to draw. */
-const west = Math.min(...map.regions.map((r) => r.centroid.x));
-const east = Math.max(...map.regions.map((r) => r.centroid.x));
+const west = Math.min(...map.parts.map((r) => r.centroid.x));
+const east = Math.max(...map.parts.map((r) => r.centroid.x));
 const start = (x: number) => 0.2 + (2 * (x - west)) / (east - west);
 
 /**
@@ -127,7 +128,7 @@ const start = (x: number) => 0.2 + (2 * (x - west)) / (east - west);
 function Intro(): SvgNode {
   return (
     <g strokeWidth={0.5} strokeLinejoin="round">
-      {map.regions.map((r) => (
+      {map.parts.map((r) => (
         <path
           d={r.d}
           stroke={C.line}
@@ -151,7 +152,7 @@ function Visited(): SvgNode {
     <g stroke={C.line} strokeWidth={0.25}>
       {STOPS.map(({ country }) => (
         <path
-          d={map.region(country).d}
+          d={map.part(country).d}
           fill={C.lit}
           animation={motion({ opacity: 0 })
             .at(when.get(country) ?? INTRO)

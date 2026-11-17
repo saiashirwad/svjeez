@@ -36,7 +36,7 @@ export default () =>
   );
 ```
 
-Each diagram returns `{ node, get(id), bounds }` plus helpers such as `route()` and `walk()`. Size the canvas from `bounds`. `flowchart()`, `tree()`, `sequence()` and `lanes()` also return `span`, from the first reveal to the end of the last, so the next beat can start at `chart.span.end`.
+Each diagram returns `{ node, span, bounds, parts, part(id) }`, the shape every svjeez package returns, plus helpers such as `route()` and `walk()`. Size the canvas from `bounds`. `span` runs from the first reveal to the end of the last, so the next beat can start at `chart.span.end`. The parts are the nodes, by the spec's ids: `chart.part("build").box` is where one sits and `.span` when it appears, so `enter(chart.part("build").span.next(0.4))` lands a callout right after it. A `flowchart()` or `tree()` shows its nodes in rank order, or in an order of your own with a time per node: `play: { at: { plan: 0.5, build: 1.4 } }`.
 
 | Function | Draws |
 | --- | --- |

@@ -18,7 +18,7 @@ export const svg: string = render({ width: 400, height: 120, duration: 4, title:
   morph([square, expanded], { at: [1], over: 1 }).node,
 ]);
 
-export const cross: Rect = expanded.get("mid");
+export const cross: Rect = expanded.part("mid").box;
 export const key: string | undefined = first?.text;
 
 const graph: Plane = plane({

@@ -1,18 +1,22 @@
 import { google } from "@svjeez/fonts";
 import {
+  Arrow,
   Glyphs,
   Ink,
   draw,
+  fitText,
   ease,
   enter,
   motion,
   render,
+  span,
+  stagger,
   strokeFont,
   tool,
   variables,
 } from "svjeez";
 import { css as codeCss, theme } from "../style";
-import { GROUND, SQUASH, blip, hopTime, jumps } from "../site/lib/blip";
+import { GROUND, SQUASH, blip, flight, jumps } from "../site/lib/blip";
 
 // The README's hero, the share card come to life. The title sets itself, a highlighter swipes under "TypeScript", and
 // Blip hops in from the right to stand in for the full stop. A note inks on to point out that the whole thing is
@@ -34,12 +38,7 @@ const LEAD = 0.96;
 const last = LINES.length - 1;
 
 // As large as fits, with Blip, about one em wide, at the end of the last line.
-const widest = (size: number) =>
-  Math.max(...LINES.map((line, i) => display.measure(line, size) + (i === last ? size * 0.98 : 0)));
-
-let size = 120;
-
-while (widest(size) > W - 2 * X) size -= 2;
+const size = fitText(display, LINES, { width: W - 2 * X, max: 120, tail: 0.98 });
 
 const top = (H - size * 0.72 - last * size * LEAD) / 2 + 22;
 const base = (i: number) => top + size * 0.72 + i * size * LEAD;
@@ -48,18 +47,18 @@ const scale = size / 150;
 /** Where Blip stands: the full stop's place. */
 const SPOT = { x: X + display.measure(LINES[last]!, size) + size * 0.56, y: base(last) };
 
-const OUT = { at: D - 1, over: 0.5 };
-const leave = motion({ opacity: 1 }).at(OUT.at).to({ opacity: 0 }, OUT.over);
+const leave = motion({ opacity: 1 }).to({ opacity: 0 }, span(D - 1, 0.5));
 
 /** Each word rises into place, one after another. */
+const rise = stagger(span(0.2, 0.5), LINES.join(" ").split(" ").length, 0.14);
+let next = 0;
+
 const words = LINES.flatMap((line, i) => {
   let x = X;
 
-  return line.split(" ").map((word, j) => {
-    const at = 0.2 + (i * 2 + j) * 0.14;
-
+  return line.split(" ").map((word) => {
     const node = (
-      <g animation={[enter({ at, over: 0.5 }, { opacity: 0, y: 24 }, ease.out), leave]}>
+      <g animation={[enter(rise[next++]!, { opacity: 0, y: 24 }, ease.out), leave]}>
         <Glyphs font={display} text={word} size={size} x={x} y={base(i)} fill={theme.base05} />
       </g>
     );
@@ -85,11 +84,10 @@ const hop = jumps(HOPS);
 const startX = (W + 120 - SPOT.x) / scale;
 const midX = (W - 60 - SPOT.x) / scale;
 
+/** Blip drifts left only while it is in the air. */
 const slide = motion({ x: startX })
-  .at(HOPS[0]!.land - hopTime(HOPS[0]!.height) + 0.3)
-  .to({ x: midX }, HOPS[0]!.land - (HOPS[0]!.land - hopTime(HOPS[0]!.height) + 0.3), ease.linear)
-  .at(HOPS[1]!.land - hopTime(HOPS[1]!.height) + 0.3)
-  .to({ x: 0 }, HOPS[1]!.land - (HOPS[1]!.land - hopTime(HOPS[1]!.height) + 0.3), ease.linear);
+  .to({ x: midX }, flight(HOPS[0]!), ease.linear)
+  .to({ x: 0 }, flight(HOPS[1]!), ease.linear);
 
 const look = motion({ x: -5, y: 0 })
   .at(3.4)
@@ -107,12 +105,8 @@ const noteSize = 34;
 const note = casual.path(NOTE, { size: noteSize, x: SPOT.x - 330 * (noteSize / 38), y: top - 34 });
 const head = { x: SPOT.x + 12, y: SPOT.y - size * 0.95 - 8 };
 const tail = { x: SPOT.x - 30, y: top - 46 };
-const mid = { x: (tail.x + head.x) / 2 + 34, y: (tail.y + head.y) / 2 - 18 };
-
-const angle = Math.atan2(head.y - mid.y, head.x - mid.x);
-
-const barb = (turn: number) =>
-  `M${head.x} ${head.y}L${head.x - 14 * Math.cos(angle + turn)} ${head.y - 14 * Math.sin(angle + turn)}`;
+// The shaft bows 34px sideways at its middle, whatever the title's size puts between tail and head.
+// Arrow draws its shaft over 0.6s, then the head, so it starts 0.2s early to be whole by about 5.25s.
 
 export default () =>
   render(
@@ -155,14 +149,14 @@ export default () =>
           draw={{ at: 3.6, over: 1.1 }}
           ease={ease.linear}
         />
-        <path
-          d={`M${tail.x} ${tail.y}Q${mid.x} ${mid.y} ${head.x} ${head.y}${barb(0.5)}${barb(-0.5)}`}
-          fill="none"
-          stroke={theme.base09}
-          strokeWidth={3}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          animation={draw({ at: 4.7, over: 0.5 }, ease.inOut)}
+        <Arrow
+          from={tail}
+          to={head}
+          bend={-34 / (head.y - tail.y)}
+          width={3}
+          head={14}
+          theme={theme}
+          show={span(4.5).until(D)}
         />
       </g>
     </>,

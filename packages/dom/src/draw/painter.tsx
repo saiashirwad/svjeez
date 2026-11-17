@@ -13,9 +13,7 @@ import {
   type SvgNode,
   type TagChannels,
 } from "svjeez";
-import {
-  num,
-} from "svjeez/geometry";
+import { num } from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import { clear, invisible, isPair, opaque, schemeCss, variable } from "../paint.ts";
 import type {
@@ -32,7 +30,8 @@ import type {
 } from "../tree.ts";
 
 /** Generic and system font names: not files the drawing can embed. */
-const SYSTEM = /^(system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|sans-serif|serif|monospace|cursive|fantasy)$/;
+const SYSTEM =
+  /^(system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|sans-serif|serif|monospace|cursive|fantasy)$/;
 
 import { typefaces } from "./faces.ts";
 import {
@@ -94,6 +93,22 @@ const within = (r: Rect, outer: Rect): boolean =>
   r.y >= outer.y &&
   r.x + r.width <= outer.x + outer.width &&
   r.y + r.height <= outer.y + outer.height;
+
+/** Whether a node draws nothing: no marks, only groups and fragments around none. */
+const drawsNothing = (node: SvgNode | readonly SvgNode[]): boolean =>
+  "kind" in node
+    ? node.kind === "fragment"
+      ? node.children.every(drawsNothing)
+      : node.kind === "element"
+        ? node.tag === "g" && node.children.every(drawsNothing)
+        : node.kind === "text" && node.value.trim() === ""
+    : node.every(drawsNothing);
+
+/** A group that carries `animation` around `node`, or nothing when `node` draws nothing: an empty animated group is dead weight in the file and in the browser. */
+const animated = (
+  animation: Stack<TagChannels<"g">>,
+  node: SvgNode | readonly SvgNode[],
+): SvgNode => (drawsNothing(node) ? <></> : <g animation={animation}>{node}</g>);
 
 const transformed = (it: Boxed, node: SvgNode): SvgNode =>
   it.transform ? <g transform={matrix(it.transform)}>{node}</g> : node;
@@ -233,7 +248,18 @@ export const painter = (
       children: children.map((c) => vector(c, back)),
     });
 
-    return mask ? <g mask={def.mask({}, mask.map((c) => vector(c, back)))}>{drawn}</g> : drawn;
+    return mask ? (
+      <g
+        mask={def.mask(
+          {},
+          mask.map((c) => vector(c, back)),
+        )}
+      >
+        {drawn}
+      </g>
+    ) : (
+      drawn
+    );
   };
 
   /** A path, tweened from `from` when given and different. */
@@ -327,7 +353,7 @@ export const painter = (
       JSON.stringify(a.children) === JSON.stringify(b.children) &&
       sameTransform(a, b)
     )
-      return <g animation={slideIn(tween, dx, dy)}>{item(b)}</g>;
+      return animated(slideIn(tween, dx, dy), item(b));
 
     // Glyphs one over the other read as noise, so text and icons leave before the new ones come in.
     const [out, into] =
@@ -335,15 +361,14 @@ export const painter = (
 
     return (
       <>
-        <g
-          animation={[
+        {animated(
+          [
             motion({ x: 0, y: 0 }).at(tween.at).to({ x: -dx, y: -dy }, tween.over, tween.ease),
             fade(tween, out),
-          ]}
-        >
-          {item(a)}
-        </g>
-        <g animation={[slideIn(tween, dx, dy), fade(tween, into)]}>{item(b)}</g>
+          ],
+          item(a),
+        )}
+        {animated([slideIn(tween, dx, dy), fade(tween, into)], item(b))}
       </>
     );
   };
@@ -482,10 +507,8 @@ export const painter = (
       };
 
       return [
-        !invisible(p.color) && (
-          <g animation={fade(tween, shown ? "swapOut" : "out")}>{follow(p)}</g>
-        ),
-        shown && <g animation={fade(tween, invisible(p.color) ? "in" : "swapIn")}>{follow(s)}</g>,
+        !invisible(p.color) && animated(fade(tween, shown ? "swapOut" : "out"), follow(p)),
+        shown && animated(fade(tween, invisible(p.color) ? "in" : "swapIn"), follow(s)),
       ].filter((n): n is SvgNode => Boolean(n));
     });
 
@@ -629,7 +652,7 @@ export const painter = (
 
         const left = without(old!, gone);
 
-        return left && <g animation={fade(tween, "exit")}>{item(left)}</g>;
+        return left && animated(fade(tween, "exit"), item(left));
       }
 
       if (!old) {
@@ -646,7 +669,7 @@ export const painter = (
 
         return (
           <>
-            {came && <g animation={fade(tween, "enter")}>{item(came)}</g>}
+            {came && animated(fade(tween, "enter"), item(came))}
             {slides(it)}
           </>
         );
@@ -658,14 +681,14 @@ export const painter = (
 
       // A field's text that went elsewhere leaves its placeholder to come back.
       if (old.kind === "text" && gone.has(old))
-        return it.kind === "text" ? <g animation={fade(tween, "enter")}>{item(it)}</g> : null;
+        return it.kind === "text" ? animated(fade(tween, "enter"), item(it)) : null;
 
       if (old.kind === it.kind) return pair(old, it, tween);
 
       return (
         <>
-          <g animation={fade(tween, "swapOut")}>{item(old)}</g>
-          <g animation={fade(tween, "swapIn")}>{item(it)}</g>
+          {animated(fade(tween, "swapOut"), item(old))}
+          {animated(fade(tween, "swapIn"), item(it))}
         </>
       );
     });
@@ -721,6 +744,8 @@ export const painter = (
         {layer(b, a, tween, (x) => x.outline?.color, outlineRing, { fillRule: "evenodd" })}
       </>,
     );
+
+    if (drawsNothing(drawn)) return <></>;
 
     // A box with nothing of its own to apply adds no group: deep pages nest hundreds of plain wrappers.
     const dim = b.darkOpacity !== undefined && !opacity;

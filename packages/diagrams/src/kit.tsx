@@ -7,6 +7,8 @@ import {
   type Point,
   type Rect,
   type Box,
+  type Drawn,
+  type Part,
   type Size,
   ease,
   motion,
@@ -15,6 +17,8 @@ import {
   type Span,
   type Spanned,
   span,
+  stagger,
+  type Beats,
   type Stack,
   draw,
   enter,
@@ -30,19 +34,19 @@ import { curve } from "./curve.ts";
 /** What a node is, so the theme can draw it. */
 export type NodeRole = "task" | "input" | "output" | "tool" | "decision" | "store";
 
-export interface Diagram<Id extends string> {
-  readonly node: SvgNode;
-  /** A node's box; for a group, a lane or an actor head, its box. */
-  get(id: Id): Rect;
-  /** Everything drawn, labels included. */
-  readonly bounds: Rect;
-}
+/**
+ * A laid-out diagram. Its parts are its nodes, and a flowchart's groups, a sequence's actor heads and the lanes of
+ * `lanes()`, by the ids the spec gave them. A part's `span` is when it appears, or the instant 0 when it is there from
+ * the start, as everything is without `play`. `span` runs from the first reveal to the end of the last, and `bounds`
+ * covers everything drawn, labels included.
+ */
+export type Diagram<Id extends string> = Drawn<Part<Id>>;
 
-/** A diagram whose `play` option reveals it over time. */
-export interface PlayedDiagram<Id extends string> extends Diagram<Id> {
-  /** From the first reveal to the end of the last, in scene time. The instant 0 when the diagram has no `play`. */
-  readonly span: Spanned;
-}
+/**
+ * When a diagram's items appear: a start, after which they follow `step` apart in the diagram's own order; one time per
+ * item, in that order; or a time per node id, in any order, which leaves the nodes it does not name there from the start.
+ */
+export type PlayAt<Id extends string> = Beats | Readonly<Partial<Record<Id, Seconds>>>;
 
 /** Which point of `bounds` lands on `x`, `y`: a corner, the center, or the middle of an edge. */
 export type Anchor = "top-left" | "center" | Edge;
@@ -122,6 +126,48 @@ export const POP = 0.35;
 export const popIn = (at: Seconds): Motion<"opacity" | "y"> =>
   enter({ at, over: POP }, { opacity: 0, y: 6 }, ease.out);
 
+/** Whether `play.at` is a start or a list, rather than a time per node. */
+const isBeats = (at: PlayAt<string>): at is Beats => typeof at === "number" || Array.isArray(at);
+
+/** What a part that is there from the start plays in. */
+export const INSTANT: Spanned = span(0, 0);
+
+/**
+ * When each node appears, `-Infinity` for one there from the start. A start or a list follows `order`, the diagram's
+ * own, which leaves out the nodes there from the start; a record names its nodes from `all`.
+ */
+export const schedule = (
+  at: PlayAt<string>,
+  order: readonly string[],
+  all: readonly string[],
+  step: Seconds,
+  what: string,
+): Map<string, Seconds> => {
+  const shown = new Map(all.map((id) => [id, -Infinity]));
+
+  if (isBeats(at)) {
+    slots(at, order.length, step, what).forEach((s, i) => shown.set(order[i]!, s.at));
+
+    return shown;
+  }
+
+  for (const [id, t] of Object.entries(at)) {
+    if (!shown.has(id))
+      throw new Error(
+        `${what} names ${JSON.stringify(id)}, which is not a node. Its nodes are ${all.map((n) => JSON.stringify(n)).join(", ")}.`,
+      );
+
+    if (t === undefined) continue;
+
+    if (!(Number.isFinite(t) && t >= 0))
+      throw new Error(`${what} needs a time of 0 or later for ${JSON.stringify(id)}, got ${t}.`);
+
+    shown.set(id, t);
+  }
+
+  return shown;
+};
+
 /** The span from the earliest start to the latest end of `reveals`, or the instant 0 when nothing reveals. */
 export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
   if (reveals.length === 0) return span(0, 0);
@@ -130,6 +176,27 @@ export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
   const last = Math.max(...reveals.map((r) => r.at + r.over));
 
   return span(first, last - first);
+};
+
+/**
+ * Each item's slot on a `play` timeline: from when it appears until the next one does, the last one `step` long. From a
+ * start the items follow `step` apart; a list gives one time each, in order, to keep two diagrams in step.
+ */
+const isStart = (at: Beats): at is Seconds => typeof at === "number";
+
+export const slots = (at: Beats, count: number, step: Seconds, what: string): Spanned[] => {
+  if (isStart(at)) {
+    if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
+
+    return stagger(span(at, step), count, step);
+  }
+
+  if (at.length !== count) throw new Error(`${what} needs ${count} times, got ${at.length}.`);
+
+  if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!)))
+    throw new Error(`${what} needs non-negative times in order, got ${at.join(", ")}.`);
+
+  return at.map((t, i) => span(t, i + 1 < at.length ? at[i + 1]! - t : step));
 };
 
 const SKEW = 0.35;
@@ -410,12 +477,29 @@ export const placer = (
   };
 };
 
-export const lookup =
-  <Id extends string>(what: string, boxes: ReadonlyMap<string, Rect>) =>
-  (id: Id): Rect => {
-    const b = boxes.get(id);
+/** A part for each box, in the map's order, appearing during `when(id)`, and `part(id)` over them. */
+export const partsOf = <Id extends string>(
+  what: string,
+  boxes: ReadonlyMap<string, Rect>,
+  when: (id: string) => Spanned = () => INSTANT,
+) => {
+  // SAFETY: the boxes are keyed by the spec's ids, which the diagram's signature types as Id
+  const parts = [...boxes].map(([id, box]): Part<Id> => ({ id: id as Id, box, span: when(id) }));
 
-    if (!b) throw new Error(`${what} has no ${JSON.stringify(id)}.`);
+  return {
+    parts,
+    part: (id: Id): Part<Id> => {
+      const found = parts.find((p) => p.id === id);
 
-    return b;
+      if (!found)
+        throw new Error(
+          `${what} has no ${JSON.stringify(id)}. Its parts are ${parts
+            .slice(0, 6)
+            .map((p) => JSON.stringify(p.id))
+            .join(", ")}${parts.length > 6 ? ", …" : ""}.`,
+        );
+
+      return found;
+    },
   };
+};

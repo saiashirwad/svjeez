@@ -1,5 +1,5 @@
 import { color, count, defaults, easing, number, seconds } from "svjeez/params";
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span, stagger } from "svjeez";
 
 export const params = {
   sky: color("#BFE6FF"),
@@ -23,13 +23,12 @@ export default (p = defaults(params)) => {
     <>
       <rect width={480} height={300} fill={p.sky} />
       <circle cx={360} cy={90} r={34} fill={p.sun} animation={sunrise} />
-      {Array.from({ length: p.flowers }, (_, i) => (
+      {stagger(span(0.8, 0.6), p.flowers, p.stagger).map((grow, i) => (
         <g transform={`translate(${240 + (i - (p.flowers - 1) / 2) * p.gap} 240)`}>
           <g
             animation={motion({ y: 120 })
               .label("flower")
-              .at(0.8 + i * p.stagger)
-              .to({ y: 0 }, 0.6, p.pop)
+              .to({ y: 0 }, grow, p.pop)
               .at(4.8)
               .to({ y: 120 }, 0.4, ease.in)}
           >

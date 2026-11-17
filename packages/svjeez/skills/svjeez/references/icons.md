@@ -5,10 +5,10 @@
 ```tsx
 import { rocket, heartFilled } from "@svjeez/icons/tabler";
 import { circle } from "@svjeez/icons/lucide";
-import { Icon, draw } from "svjeez";
+import { Icon, draw, span } from "svjeez";
 
 const drawn = (
-  <Icon icon={rocket} x={40} y={40} size={48} stroke="#fff" animation={(_, i) => draw({ at: 0.2 + i * 0.1, over: 0.6 })} />
+  <Icon icon={rocket} x={40} y={40} size={48} stroke="#fff" animation={(_, each) => draw(each.stagger(span(0.2, 0.6), 0.1))} />
 );
 const solid = <Icon icon={heartFilled} x={120} y={40} size={48} fill="#e5432d" alt="Favorite" />;
 ```

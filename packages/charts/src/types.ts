@@ -1,4 +1,4 @@
-import type { Attrs, Base16, Color, Ease, Point, Rect, Span, Spanned, SvgNode } from "svjeez";
+import type { Attrs, Base16, Color, Drawn, Ease, Part, Point, Rect, Span, SvgNode } from "svjeez";
 
 export type FontAttr = NonNullable<Attrs<"text">["fontFamily"]>;
 
@@ -89,28 +89,28 @@ export interface ChartAreaOptions extends ChartLineOptions {
   readonly line?: boolean;
 }
 
-export interface ChartBar {
-  readonly key: string;
+/** A bar, by its category. `box` is where it rests and `span` its staggered window, from starting to grow to full height. */
+export interface ChartBar extends Part {
   readonly value: number;
-  /** Where the bar rests, in scene px. */
-  readonly bounds: Rect;
 }
 
-export interface ChartBars {
-  readonly node: SvgNode;
-  readonly bars: readonly ChartBar[];
-  /** The span you passed: the last bar has grown at its end. */
-  readonly span: Spanned;
+/** `span` is the span you passed: the last bar has grown at its end. `bounds` covers the bars. */
+export type ChartBars = Drawn<ChartBar>;
+
+/**
+ * A point of a line or area, by its x value written as a string (`"Q3"`, `"2019"`). `box` is its dot, or has no
+ * size without `dots`. `span` starts when the line reaches it and lasts while its dot pops in, no time without `dots`.
+ */
+export interface ChartPoint extends Part {
+  /** Where the point is, in scene px. */
+  readonly point: Point;
+  readonly value: number;
 }
 
-export interface ChartLine {
-  readonly node: SvgNode;
+/** `span` runs from `at` to when the line has drawn, with its label. `bounds` covers the points. */
+export interface ChartLine extends Drawn<ChartPoint> {
   /** The path data of the line. */
   readonly d: string;
-  /** Every point, in scene px. */
-  readonly points: readonly Point[];
-  /** From `at` to when the line has drawn, with its label. */
-  readonly span: Spanned;
 }
 
 export interface ChartArea extends ChartLine {

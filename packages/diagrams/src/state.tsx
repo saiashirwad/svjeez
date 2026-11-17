@@ -10,7 +10,6 @@ import {
   type SvgNode,
   flow,
   type FlowOptions,
-  beats,
   show,
   type Beats,
 } from "svjeez";
@@ -23,9 +22,11 @@ import {
   chip,
   isBareLabel,
   labelSize,
+  INSTANT,
   look,
-  lookup,
+  partsOf,
   placer,
+  slots,
   tintOf,
   type Diagram,
   type DiagramOptions,
@@ -75,6 +76,7 @@ export interface Walk<S extends string> {
 /** How the walk's token looks; `at` and timing come from the walk. */
 export type WalkToken = Omit<FlowOptions, "at" | "over" | "speed">;
 
+/** Its parts are the states, nested ones included, all there from the start: `walk()` is what plays. */
 export interface StateMachine<S extends string> extends Diagram<S> {
   /** The drawn line of the first transition `from` → `to`, sampled along its curve. */
   edge(from: S, to: S): Point[];
@@ -454,8 +456,9 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
 
   return {
     node,
+    span: INSTANT,
     bounds: at.bounds,
-    get: lookup("stateMachine()", boxes),
+    ...partsOf<Id>("stateMachine()", boxes),
     edge,
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
       if (path.length === 0) throw new Error("walk() needs at least one state, got none.");
@@ -476,7 +479,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
         ? path.map(
             (_, k) => at + k * dwell + legs.slice(0, k).reduce((sum, leg) => sum + leg.over, 0),
           )
-        : beats(at, path.length, 0, "walk()");
+        : slots(at, path.length, 0, "walk()").map((s) => s.at);
 
       const runs = legs.map((leg, k) => {
         const over = isSingleStart(at)

@@ -87,20 +87,26 @@ export default function build(): string {
         }
       </g>
       {g.node}
-      {note(String.raw`AC = AB \quad (\text{circle } A)`, 190).write({
-        at: tCircles + 1.4,
-        over: 1,
-      })}
-      {note(String.raw`BC = AB \quad (\text{circle } B)`, 240).write({
-        at: tCircles + 2.6,
-        over: 1,
-      })}
-      {note(String.raw`AB = AC = BC`, 302).write({ at: tSides + 2.4, over: 1 })}
-      {note(String.raw`\angle A = \angle B = \angle C = 60^\circ`, 352).write({
-        at: tAngles + 0.6,
-        over: 1.2,
-      })}
-      {note(String.raw`CM \perp AB, \; AM = MB`, 440).write({ at: tDone, over: 1 })}
+      {
+        note(String.raw`AC = AB \quad (\text{circle } A)`, 190).write({
+          at: tCircles + 1.4,
+          over: 1,
+        }).node
+      }
+      {
+        note(String.raw`BC = AB \quad (\text{circle } B)`, 240).write({
+          at: tCircles + 2.6,
+          over: 1,
+        }).node
+      }
+      {note(String.raw`AB = AC = BC`, 302).write({ at: tSides + 2.4, over: 1 }).node}
+      {
+        note(String.raw`\angle A = \angle B = \angle C = 60^\circ`, 352).write({
+          at: tAngles + 0.6,
+          over: 1.2,
+        }).node
+      }
+      {note(String.raw`CM \perp AB, \; AM = MB`, 440).write({ at: tDone, over: 1 }).node}
     </>,
   );
 }

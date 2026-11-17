@@ -51,7 +51,7 @@ export default function build(): string {
           animation={[
             show({ at: 2.8, over: 3.9 }, { fade: 0.2 }),
             ...hopAcross(
-              (["a", "search", "lead", "build", "b"] as const).map((id) => team.get(id).top),
+              (["a", "search", "lead", "build", "b"] as const).map((id) => team.part(id).box.top),
               3,
               0.5,
               0.25,

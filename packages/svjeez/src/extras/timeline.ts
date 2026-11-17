@@ -1,7 +1,7 @@
 import { pathLength, type Point } from "../geometry";
 import type { ChannelValues } from "../channels";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
-import { span as makeSpan, type Spanned, type When } from "../span";
+import { span as makeSpan, stagger, type Spanned, type When } from "../span";
 
 export type Timeline<K extends string> = { readonly [P in K]: Spanned } & {
   /** When the last scene ends. */
@@ -138,17 +138,29 @@ export const shot = (
 const mirror = (values: ChannelValues<"x" | "y" | "scale">): ChannelValues<"x" | "y" | "scale"> =>
   Object.fromEntries(Object.entries(values).map(([c, v]) => [c, c === "scale" ? 2 - v : -v]));
 
-/** When each of several things happens: a start, from which they follow `step` apart, or one time each. */
+/**
+ * When each of several things starts, as an option of `reveal` and the diagrams: a start, from which they follow
+ * `step` apart, or one time each, in order, to keep two of them in step.
+ */
 export type Beats = Seconds | readonly Seconds[];
 
 const isStart = (at: Beats): at is Seconds => typeof at === "number";
 
-/** `count` times from `at`. A list must have one time per thing, in order. */
-export const beats = (at: Beats, count: number, step: Seconds, what = "beats()"): Seconds[] => {
+/**
+ * A span `over` long for each of `count` things given as `Beats`, checked: a start of 0 or later, staggered `step`
+ * apart, or exactly `count` times of 0 or later in order. `what` names the caller in errors.
+ */
+export const spansOf = (
+  at: Beats,
+  count: number,
+  step: Seconds,
+  over: Seconds,
+  what: string,
+): Spanned[] => {
   if (isStart(at)) {
     if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
 
-    return Array.from({ length: count }, (_, i) => at + i * step);
+    return stagger(makeSpan(at, over), count, step);
   }
 
   if (at.length !== count) throw new Error(`${what} needs ${count} times, got ${at.length}.`);
@@ -156,7 +168,7 @@ export const beats = (at: Beats, count: number, step: Seconds, what = "beats()")
   if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!)))
     throw new Error(`${what} needs non-negative times in order, got ${at.join(", ")}.`);
 
-  return [...at];
+  return at.map((t) => makeSpan(t, over));
 };
 
 /** Spans as `[start, end]` pairs in order, with those that overlap, touch or sit closer than `gap` joined into one. */

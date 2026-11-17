@@ -129,7 +129,7 @@ const shown2 = reveal(src, { at: 1, step: 0.6 });                      // { node
 
 ## Annotations
 
-A `show` is a `Span`, given on the component or, for `Focus`, `Marker` and `Camera`, on each stop. All but `Arrow` aim at a `Rect` with `target`; `Arrow` takes `from` and `to` points. `Arrow`, `Callout`, `Brace` and `Underline` also take `theme`, `color` and `class`.
+A `show` is a `Span`, given on the component or, for `Focus`, `Marker` and `Camera`, on each stop. All but `Arrow` aim at a `Rect` with `target`; `Arrow` takes `from` and `to` points, a `bend`, a stroke `width` (default 1.5) and the barbs' `head` length (default 8). `Arrow`, `Callout`, `Brace` and `Underline` also take `theme`, `color` and `class`.
 
 ```tsx
 import { Arrow, Brace, Callout, Focus, Marker, Underline } from "svjeez";

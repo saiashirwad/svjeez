@@ -9,6 +9,7 @@ import {
   type FontStyle,
   type GlyphPath,
 } from "./font/font";
+import { eachOf, type Each } from "./each";
 import type { Stack } from "./motion";
 import type { SvgNode } from "./svg";
 
@@ -16,7 +17,7 @@ type GlyphStack = Stack<TagChannels<"path">>;
 
 const isPerGlyph = (
   animation: GlyphsProps["animation"],
-): animation is (glyph: GlyphPath, index: number) => GlyphStack => typeof animation === "function";
+): animation is (glyph: GlyphPath, each: Each) => GlyphStack => typeof animation === "function";
 
 export interface GlyphsProps {
   readonly font: Font | FontFamily;
@@ -38,10 +39,11 @@ export interface GlyphsProps {
   /** What assistive tech reads. Default `text`. */
   readonly alt?: string;
   /**
-   * Runs on every glyph. Pass a function to vary it by glyph, as in `(glyph, i) => draw({ at: i * 0.1, over: 1 })`.
-   * To move the whole word as one, wrap it in an animated `<g>`.
+   * Runs on every glyph. Pass a function to vary it by glyph; its second argument says where the glyph is in the
+   * run and cascades it, as in `(glyph, each) => draw(each.stagger(span(0, 1), 0.1))`. A space counts as a glyph,
+   * so `each.count` is the length of `text`. To move the whole word as one, wrap it in an animated `<g>`.
    */
-  readonly animation?: GlyphStack | ((glyph: GlyphPath, index: number) => GlyphStack);
+  readonly animation?: GlyphStack | ((glyph: GlyphPath, each: Each) => GlyphStack);
 }
 
 /** A line of text drawn as one path per glyph. No font is embedded; the outlines are the drawing. */
@@ -87,7 +89,9 @@ export function Glyphs({
           glyph.d && (
             <path
               d={glyph.d}
-              animation={isPerGlyph(animation) ? animation(glyph, index) : animation}
+              animation={
+                isPerGlyph(animation) ? animation(glyph, eachOf(index, glyphs.length)) : animation
+              }
             />
           ),
       )}

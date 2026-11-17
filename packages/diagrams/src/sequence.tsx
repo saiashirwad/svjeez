@@ -5,7 +5,7 @@ import {
   motion,
   type Seconds,
   type Span,
-  beats,
+  type Spanned,
   type Beats,
 } from "svjeez";
 import { sequence as layout } from "./layout/sequence.ts";
@@ -16,13 +16,14 @@ import {
   labelOf,
   labelSize,
   look,
-  lookup,
+  partsOf,
   placer,
   sizeOf,
+  slots,
   spanOfReveals,
   type DiagramOptions,
+  type Diagram,
   type Labelled,
-  type PlayedDiagram,
 } from "./kit.tsx";
 
 /** `[from, to, label]`, dashed with `{ reply: true }`; a message to its own sender loops on the right. */
@@ -39,7 +40,8 @@ export interface SequenceOptions extends DiagramOptions {
   readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
-export interface Sequence<A extends string> extends PlayedDiagram<A> {
+/** Its parts are the actor heads, there from the start. */
+export interface Sequence<A extends string> extends Diagram<A> {
   /** Message or note `i` in the order given: its slot on the `play` timeline (from 0 without `play`), and its arrow or, for a note, its center. */
   message(i: number): { readonly span: Span; readonly points: Point[] };
 }
@@ -87,18 +89,15 @@ export function sequence<const A extends Record<string, Labelled>>(
   const heads = new Map([...out.heads].map(([id, b]) => [id, at.box(b)]));
   const placed = out.rows.map((r) => ({ points: r.points.map(at.point), box: at.box(r.box) }));
   const step = play?.step ?? 0.8;
-  const times = beats(play?.at ?? 0, rows.length, step, "sequence() play");
+  const slotted = slots(play?.at ?? 0, rows.length, step, "sequence() play");
 
   /** Until the next row starts. */
-  const span = (i: number): Span => ({
-    at: times[i]!,
-    over: i + 1 < times.length ? times[i + 1]! - times[i]! : step,
-  });
+  const span = (i: number): Spanned => slotted[i]!;
 
   const FADE = 0.25;
 
   const fade = (i: number) =>
-    play && motion({ opacity: 0 }).at(span(i).at).to({ opacity: 1 }, FADE);
+    play && motion({ opacity: 0 }).to({ opacity: 1 }, span(i).first(FADE));
 
   /** How long row `i`'s arrow draws. */
   const drawOver = (i: number) => Math.min(0.5, span(i).over * 0.7) || 0.3;
@@ -168,7 +167,7 @@ export function sequence<const A extends Record<string, Labelled>>(
     node,
     span: spanOfReveals(reveals),
     bounds: at.bounds,
-    get: lookup("sequence()", heads),
+    ...partsOf<keyof A & string>("sequence()", heads),
     message: (i) => {
       const row = placed[i];
 

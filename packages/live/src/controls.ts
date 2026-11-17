@@ -1,5 +1,5 @@
-// What each literal in a scene is as a control: a number with the range a drag moves it through, a color, an ease, or
-// one of a choice param's options. A declared param says exactly; any other literal is read from where it sits, so a
+// What each literal in a scene is as a control: a number with the range a drag moves it through, a color, an ease,
+// one of a choice param's options, or a text param's line. A declared param says exactly; any other literal is read from where it sits, so a
 // scene nobody annotated still gets sensible controls.
 import { ease, easeAt, type Ease, type Hex, type Point } from "svjeez";
 import type { NumberParam, Schema } from "svjeez/params";
@@ -17,7 +17,8 @@ export type Value =
   | (Base<"number"> & { readonly kind: "number"; readonly param: NumberParam })
   | (Base<"color"> & { readonly kind: "color" })
   | (Base<"ease"> & { readonly kind: "ease" })
-  | (Base<"string"> & { readonly kind: "choice"; readonly options: readonly string[] });
+  | (Base<"string"> & { readonly kind: "choice"; readonly options: readonly string[] })
+  | (Base<"string"> & { readonly kind: "text"; readonly maxLength?: number });
 
 export type ValueOf<K extends Value["kind"]> = Extract<Value, { kind: K }>;
 
@@ -27,6 +28,7 @@ export interface Settable {
   readonly color: Hex;
   readonly ease: Ease;
   readonly choice: string;
+  readonly text: string;
 }
 
 const nameOf = (role: Role) => {
@@ -111,7 +113,7 @@ export const paramFor = (literal: LiteralOf<"number">, schema: Schema = {}): Num
 
 /**
  * Every literal a control can edit, in source order. A param's own options (`min`, `max`, `step`) are left out, and a
- * string is a value only when it declares a choice param.
+ * string is a value only when it declares a choice or text param.
  */
 export const valuesOf = (source: Source, schema: Schema = {}): Value[] =>
   source.literals.flatMap((literal): Value[] => {
@@ -128,8 +130,19 @@ export const valuesOf = (source: Source, schema: Schema = {}): Value[] =>
       case "ease":
         return [{ kind: "ease", key, literal, label }];
       case "string":
-        return declared?.kind === "choice"
-          ? [{ kind: "choice", key, literal, label, options: declared.options }]
+        if (declared?.kind === "choice")
+          return [{ kind: "choice", key, literal, label, options: declared.options }];
+
+        return declared?.kind === "text"
+          ? [
+              {
+                kind: "text",
+                key,
+                literal,
+                label,
+                ...(declared.maxLength !== undefined && { maxLength: declared.maxLength }),
+              },
+            ]
           : [];
     }
   });

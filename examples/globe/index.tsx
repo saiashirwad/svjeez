@@ -111,7 +111,7 @@ export default function build(): string {
           </text>
         </g>
       ))}
-      <g fontFamily={geist} animation={enter({ at: 0.2, over: 1 }, { y: 10 })}>
+      <g fontFamily={geist} animation={enter({ at: 0.2, over: 1 }, { opacity: 0, y: 10 })}>
         <text x={64} y={210} fontFamily={geistMono} fontSize={11} letterSpacing={2.4} fill={C.dawn}>
           21 JUNE 2026
         </text>

@@ -1,6 +1,6 @@
-import { Ink, def, enter, tool, type Point, type SvgNode } from "svjeez";
+import { Ink, def, enter, random, tool, type Point, type SvgNode, span, stagger } from "svjeez";
 import { pts, smooth, trace } from "./curve";
-import { C, H, W, Y, n, pathSymbol, random, type Play } from "./kit";
+import { C, H, W, Y, n, pathSymbol, type Play } from "./kit";
 import { CINDER } from "./places";
 
 /** A coastline: an ellipse pushed in and out by a few seeded waves. */
@@ -56,6 +56,9 @@ const RIPPLES = [
   { width: 13, color: C.faded, opacity: 0.35 },
   { width: 9, color: C.sea, opacity: 1 },
 ];
+/** The shallows ripple in from the outermost ring. */
+
+const RIPPLED = stagger(span(0.2, 0.8), RIPPLES.length, 0.15);
 
 /** The sea, the rippled shallows, the land and its inked shore. */
 function Coast({ play }: { play: Play }): SvgNode {
@@ -71,7 +74,7 @@ function Coast({ play }: { play: Play }): SvgNode {
             strokeWidth={width}
             strokeLinejoin="round"
             opacity={opacity}
-            animation={play(enter({ at: 0.2 + i * 0.15, over: 0.8 }))}
+            animation={play(enter(RIPPLED[i]!))}
           />
         ))}
       </g>
@@ -87,6 +90,8 @@ const RIVERS: Point[][] = [
   pts([470, 230, 440, 270, 395, 300, 352, 304]),
 ];
 
+const FLOWING = stagger(span(1.8, 1.4), RIVERS.length, 0.3);
+
 /** Rivers, and the lake where two of them meet, kept inside the coast. */
 function Rivers({ play }: { play: Play }): SvgNode {
   return (
@@ -96,7 +101,7 @@ function Rivers({ play }: { play: Play }): SvgNode {
           d={smooth(river)}
           tool={i === 2 ? CREEK : RIVER}
           fill={C.river}
-          draw={play({ at: 1.8 + i * 0.3, over: 1.4 })}
+          draw={play(FLOWING[i]!)}
         />
       ))}
     </g>

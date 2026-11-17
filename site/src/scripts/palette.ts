@@ -104,7 +104,9 @@ export const pinned = (img: HTMLImageElement) => {
 /** The scene at `live` playing from `at` seconds in, in the current palette. */
 export const playing = async (img: HTMLImageElement, live: string, at = 0): Promise<Frame> => {
   const scheme = pinned(img);
-  const url = recolors(img) || scheme ? await paint(live, { at, scheme, always: !!scheme }) : undefined;
+
+  const url =
+    recolors(img) || scheme ? await paint(live, { at, scheme, always: !!scheme }) : undefined;
 
   return url ? { url, live, at } : { url: live, live, at: 0 };
 };

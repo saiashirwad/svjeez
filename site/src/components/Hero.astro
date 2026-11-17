@@ -6,6 +6,7 @@ import LiveScene from "./LiveScene.astro";
 
 <section class="wrap hero">
   <h1>This is a <span class="ul">{hero.size}</span> SVG in an <code>&lt;img&gt;</code> tag.</h1>
+  <p class="lede">Written in TypeScript, compiled to one file. No player, no JavaScript.</p>
   <div class="hero-stage">
     <LiveScene class="hero-scene" scene={heroImage} cost={hero.cost} alt={hero.alt} />
   </div>

@@ -1,5 +1,5 @@
 import { tex } from "@svjeez/math";
-import { draw, ease, enter, exit, motion, render, type Color } from "svjeez";
+import { draw, ease, enter, exit, motion, render, type Color, span, stagger } from "svjeez";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
@@ -81,6 +81,8 @@ const triangles: readonly Triangle[] = [
   },
 ];
 
+const arrive = stagger(span(1, 0.6), triangles.length, 0.25);
+
 const label = (source: string, x: number, y: number, color: Color, fontSize = 20) =>
   tex(source, { x: X0 + x, y: Y0 + y, fontSize, color, anchor: [0.5, 0.5], display: false });
 
@@ -110,7 +112,7 @@ const plusEquals = tex(String.raw`\phantom{a^2} + \phantom{b^2} = \phantom{c^2}`
 
 /** A copy of an area label lifts off and settles into its place in the equation. */
 const fly = (from: ReturnType<typeof label>, id: string, start: number) => {
-  const to = equation.get(id);
+  const to = equation.part(id).box;
   const dx = to.x + to.w / 2 - (from.bounds.x + from.bounds.w / 2);
   const dy = to.y + to.h / 2 - (from.bounds.y + from.bounds.h / 2);
 
@@ -201,7 +203,7 @@ export default function build(): string {
             <g transform={`translate(${X0 + cx} ${Y0 + cy})`}>
               <g
                 animation={[
-                  enter({ at: 1 + i * 0.25, over: 0.6 }, { opacity: 0, scale: 0.6 }, ease.pop),
+                  enter(arrive[i]!, { opacity: 0, scale: 0.6 }, ease.pop),
                   t.at > 0 &&
                     motion({ x: 0, y: 0 })
                       .at(t.at)
@@ -221,17 +223,17 @@ export default function build(): string {
           );
         })}
         <g animation={exit({ at: 4.8, over: 0.4 })}>
-          {legA.write({ at: 2.2, over: 0.5 })}
-          {legB.write({ at: 2.5, over: 0.5 })}
-          {hyp.write({ at: 2.8, over: 0.5 })}
+          {legA.write({ at: 2.2, over: 0.5 }).node}
+          {legB.write({ at: 2.5, over: 0.5 }).node}
+          {hyp.write({ at: 2.8, over: 0.5 }).node}
         </g>
-        <g animation={exit({ at: 5.1, over: 0.5 })}>{c2.write({ at: 3.5, over: 0.7 })}</g>
-        {a2.write({ at: 7.8, over: 0.6 })}
-        {b2.write({ at: 8.0, over: 0.6 })}
+        <g animation={exit({ at: 5.1, over: 0.5 })}>{c2.write({ at: 3.5, over: 0.7 }).node}</g>
+        {a2.write({ at: 7.8, over: 0.6 }).node}
+        {b2.write({ at: 8.0, over: 0.6 }).node}
         {fly(c2, "c", 4.1)}
         {fly(a2, "a", 8.7)}
         {fly(b2, "b", 8.9)}
-        {plusEquals.write({ at: 9.9, over: 0.6 })}
+        {plusEquals.write({ at: 9.9, over: 0.6 }).node}
         <g class="sans" animation={enter({ at: 1.8, over: 0.6 })}>
           <text x={EX} y={H - 30} fontSize={12} fill={theme.base03} textAnchor="middle">
             {"c2.write({ at: 3.5, over: 0.7 })"}

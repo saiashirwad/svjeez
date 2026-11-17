@@ -1,5 +1,5 @@
 import { bell, bolt, cloud, heartFilled, mail, moon, rocket, search } from "@svjeez/icons/tabler";
-import { draw, ease, Icon, motion, render, type IconData, variables } from "svjeez";
+import { draw, ease, Icon, motion, render, span, type IconData, variables } from "svjeez";
 
 const W = 640;
 const H = 360;
@@ -72,7 +72,7 @@ export default function build(): string {
           size={SIZE}
           stroke={C.ink}
           strokeWidth={1.75}
-          animation={(_, path) => draw({ at: 0.3 + index * 0.3 + path * 0.25, over: 0.7 })}
+          animation={(_, each) => draw(each.stagger(span(0.3 + index * 0.3, 0.7), 0.25))}
         />
       ))}
       <Pop icon={heartFilled} index={outlines.length} />

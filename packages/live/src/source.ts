@@ -72,7 +72,9 @@ interface LiteralBase {
   /**
    * Where the literal is, as a name that survives edits to other values and mostly survives rewrites elsewhere in the
    * file: `params.swing` for a param, the path from its top-level const as in `legs.1.over`, else the top-level
-   * declaration it sits in and its place among the other literals there, as in `default#3`. No two literals share one.
+   * declaration it sits in and what holds it there, as in `default:circle.cx` (an attribute), `default:enter.0.at` (a
+   * call's argument) or `default:r` (a local const). A second literal held the same way in that declaration gets `#1`,
+   * and one held by nothing nameable is counted among those, as in `default#3`. No two literals share one.
    */
   readonly key: string;
   readonly range: Range;
@@ -260,6 +262,45 @@ const numberOf = (text: string) => Number(text.replaceAll("_", ""));
 
 const COMMENTS = new Set(["LineComment", "BlockComment"]);
 
+/** A name as a key can hold it: what an identifier, a property name or an index is written with. */
+const NAMEABLE = /^[\w$]+(?:\.[\w$]+)*$/;
+
+/**
+ * What holds a literal inside its declaration, from the nearest call argument, JSX attribute or const down through any
+ * objects and arrays: `enter.0.at` for `enter({ at: 1 })`, `circle.cx` for `<circle cx={40}>`, `to.1` for
+ * `.to(values, 0.5)`, `r` for `const r = 5`. Empty when the literal sits anywhere else, a return value or a ternary,
+ * say, since a name made from those would change with code around it as easily as an ordinal does.
+ */
+const anchorOf = (src: string, literal: SyntaxNode): string => {
+  const path: PathStep[] = [];
+  let at = outer(literal);
+
+  for (let up = at.parent; up; at = up, up = up.parent) {
+    if (up.name === "ArrayExpression") path.unshift(items(up).findIndex((n) => n.from === at.from));
+    else if (up.name === "Property") path.unshift(nameOfProperty(src, up));
+    else if (up.name === "ObjectExpression" || up.name === "JSXEscape") continue;
+    else {
+      if (up.name === "ArgList")
+        path.unshift(
+          calleeOf(src, up.parent!),
+          items(up).findIndex((n) => n.from === at.from),
+        );
+      else if (up.name === "JSXAttribute") {
+        const role = attributeRole(src, up);
+
+        if (role.kind === "attribute") path.unshift(...[role.tag, role.name].filter(Boolean));
+      } else if (up.name === "VariableDeclaration")
+        path.unshift(textOf(src, up.getChild("VariableDefinition")));
+      else return "";
+      const anchor = path.join(".");
+
+      return NAMEABLE.test(anchor) ? anchor : "";
+    }
+  }
+
+  return "";
+};
+
 /** How many statements come before this top-level one, comments aside. */
 const placeOf = (statement: SyntaxNode) => {
   let n = 0;
@@ -287,18 +328,25 @@ const scopeOf = (src: string, node: SyntaxNode): string => {
 
 type Unkeyed = Literal extends infer L ? (L extends Literal ? Omit<L, "key"> : never) : never;
 
-/** Each literal's key: its param, its path, else its scope and how many unnamed literals in that scope came before it. */
-const keyed = (literals: readonly (Unkeyed & { readonly scope: string })[]): Literal[] => {
+type Placed = Unkeyed & { readonly scope: string; readonly anchor: string };
+
+/**
+ * Each literal's key: its param, its path, else its scope and what holds it there, with how many literals held the same
+ * way in that scope came before it. Counting within the anchor, not the whole scope, means adding a literal renumbers
+ * only the ones held exactly as it is.
+ */
+const keyed = (literals: readonly Placed[]): Literal[] => {
   const seen = new Map<string, number>();
 
-  const keyOf = ({ scope, param, path }: { scope: string } & Omit<LiteralBase, "key">) => {
+  const keyOf = ({ scope, anchor, param, path }: Placed) => {
     if (param) return ["params", param.key, param.option].filter(Boolean).join(".");
 
     if (path) return path.join(".");
-    const n = seen.get(scope) ?? 0;
-    seen.set(scope, n + 1);
+    const named = anchor ? `${scope}:${anchor}` : scope;
+    const n = seen.get(named) ?? 0;
+    seen.set(named, n + 1);
 
-    return `${scope}#${n}`;
+    return anchor ? (n ? `${named}#${n}` : named) : `${named}#${n}`;
   };
 
   const taken = new Set<string>();
@@ -313,23 +361,27 @@ const keyed = (literals: readonly (Unkeyed & { readonly scope: string })[]): Lit
     return free;
   };
 
-  return literals.map(({ scope, ...literal }): Literal => ({
-    ...literal,
-    key: unique(keyOf({ scope, ...literal })),
-  }));
+  return literals.map((placed): Literal => {
+    const { scope: _scope, anchor: _anchor, ...literal } = placed;
+
+    return { ...literal, key: unique(keyOf(placed)) };
+  });
 };
 
 /** Every literal in the file, in order. An ease call is one literal, so its numbers are not also numbers. */
 const literalsOf = (src: string, tree: Tree): Literal[] => {
-  const out: (Unkeyed & { readonly scope: string })[] = [];
+  const out: Placed[] = [];
   const params = paramsObject(src, tree);
 
-  const base = (node: SyntaxNode): Omit<LiteralBase, "key"> & { readonly scope: string } => {
+  const base = (
+    node: SyntaxNode,
+  ): Omit<LiteralBase, "key"> & { readonly scope: string; readonly anchor: string } => {
     const path = pathOf(src, node);
     const param = paramOf(src, node, params);
 
     return {
       scope: scopeOf(src, node),
+      anchor: path || param ? "" : anchorOf(src, node),
       range: [node.from, node.to],
       text: textOf(src, node),
       role: roleOf(src, node),

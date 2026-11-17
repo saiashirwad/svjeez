@@ -276,7 +276,7 @@ describe("mermaid", () => {
     for (const text of ["Start", "OK?", "yes", "no", "Ship", "Cache", "Release"])
       expect(out).toContain(`>${text}<`);
     expect(d.route("A", "C").length).toBeGreaterThan(2);
-    expect(d.get("C").y).toBeGreaterThan(d.get("A").y);
+    expect(d.part("C").box.y).toBeGreaterThan(d.part("A").box.y);
     expect(d.doc.nodes).toHaveLength(4);
   });
 
@@ -285,9 +285,9 @@ describe("mermaid", () => {
     const down = mermaid(text);
     const across = mermaid(text, { direction: "LR" });
 
-    expect(down.get("B").y).toBeGreaterThan(down.get("A").y);
-    expect(across.get("B").x).toBeGreaterThan(across.get("A").x);
-    expect(mermaid("graph LR\nA --> B").get("B").x).toBeGreaterThan(0);
+    expect(down.part("B").box.y).toBeGreaterThan(down.part("A").box.y);
+    expect(across.part("B").box.x).toBeGreaterThan(across.part("A").box.x);
+    expect(mermaid("graph LR\nA --> B").part("B").box.x).toBeGreaterThan(0);
   });
 
   test("BT and RL throw with the fix, unless a direction overrides them", () => {
@@ -318,7 +318,7 @@ describe("mermaid", () => {
     for (const text of ["Browser", "API", "GET /", "200", "cached"])
       expect(out).toContain(`>${text}<`);
     expect(d.message(1).span.at).toBe(1);
-    expect(d.get("B").x).toBeLessThan(d.get("API").x);
+    expect(d.part("B").box.x).toBeLessThan(d.part("API").box.x);
   });
 
   test("draws a state diagram that can walk", () => {
@@ -337,7 +337,7 @@ describe("mermaid", () => {
 
     expect(walk.span.end).toBeGreaterThan(0.5);
     expect(svg([d.node, walk.node])).toContain(">go<");
-    expect(d.get("Step").y).toBeGreaterThan(d.get("Run").y);
+    expect(d.part("Step").box.y).toBeGreaterThan(d.part("Run").box.y);
   });
 
   test("narrows on kind", () => {

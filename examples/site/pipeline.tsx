@@ -103,7 +103,7 @@ export const make = (tall = false): string => {
 
   // Blip follows the flow: up the chart node by node, puzzled at the decision the first time, back round the
   // "no" line to try again, and the second time it nods and walks the "yes" line to the finished SVG.
-  const top = (id: "prompt" | "agent" | "frames" | "ok" | "ship"): Point => chart.get(id).top;
+  const top = (id: "prompt" | "agent" | "frames" | "ok" | "ship"): Point => chart.part(id).box.top;
   const no = chart.edge("ok", "agent");
   const yes = chart.edge("ok", "ship");
   const HOP = 0.55;

@@ -25,7 +25,7 @@ const tiles: [string, (cx: number) => Child][] = [
         cy={50}
         r={18}
         fill={theme.base0C}
-        animation={enter({ at: 0.5, over: 0.8 }, { y: 20, blur: 6 })}
+        animation={enter({ at: 0.5, over: 0.8 }, { opacity: 0, y: 20, blur: 6 })}
       />
     ),
   ],

@@ -1,6 +1,6 @@
 import { project, type LonLat, type Topology } from "@svjeez/geo";
 import { google } from "@svjeez/fonts";
-import { draw, ease, enter, render, type Point, flow } from "svjeez";
+import { draw, ease, enter, render, type Point, flow, span, stagger } from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
@@ -33,11 +33,14 @@ const band = (x: number) =>
   Math.min(BANDS - 1, Math.floor(((x - map.frame.x) / map.frame.w) * BANDS));
 
 const bands = Array.from({ length: BANDS }, (_, i) =>
-  map.regions
+  map.parts
     .filter((r) => band(r.centroid.x) === i)
     .map((r) => r.d)
     .join(""),
 );
+/** The countries fill in from west to east, a band at a time. */
+
+const filled = stagger(span(0.3, 0.6), bands.length, 0.08);
 
 const ROUTE = theme.base09;
 const HOME: LonLat = [-0.13, 51.5];
@@ -114,7 +117,7 @@ export default function build(): string {
       <g animation={outro(D)}>
         <g fill={theme.base02} stroke={theme.base00} strokeWidth={0.6} strokeLinejoin="round">
           {bands.map((d, i) => (
-            <path d={d} animation={enter({ at: 0.3 + i * 0.08, over: 0.6 })} />
+            <path d={d} animation={enter(filled[i]!)} />
           ))}
         </g>
         {flights.map(({ route, leave }) => (

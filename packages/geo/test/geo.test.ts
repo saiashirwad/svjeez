@@ -17,22 +17,22 @@ const numbers = (d: string) => d.match(/-?\d*\.?\d+/g)!.map(Number);
 
 describe("project()", () => {
   test("reads every country from the topology's first object", () => {
-    expect(map.regions).toHaveLength(177);
-    expect(map.region("France").id).toBe("250");
-    expect(map.region(250).properties?.name).toBe("France");
+    expect(map.parts).toHaveLength(177);
+    expect(map.part("France").id).toBe("250");
+    expect(map.part(250).properties?.name).toBe("France");
   });
 
   test("names the regions it has when one is missing", () => {
-    expect(() => map.region("Atlantis")).toThrow(/no region "Atlantis".*"242"/);
+    expect(() => map.part("Atlantis")).toThrow(/no region "Atlantis".*"242"/);
   });
 
   test("rounds every coordinate to a tenth of a pixel", () => {
-    for (const r of map.regions)
+    for (const r of map.parts)
       for (const n of numbers(r.d)) expect(Math.round(n * 10)).toBe(n * 10);
   });
 
   test("fits the regions inside the frame", () => {
-    const all = map.bounds(map.regions);
+    const all = map.bounds(map.parts);
 
     expect(all.x).toBeGreaterThanOrEqual(frame.x - 0.5);
     expect(all.y).toBeGreaterThanOrEqual(frame.y - 0.5);
@@ -42,14 +42,14 @@ describe("project()", () => {
 
   test("a larger tolerance writes less path data", () => {
     const size = (tolerance: number) =>
-      project(world, { frame, tolerance }).regions.reduce((n, r) => n + r.d.length, 0);
+      project(world, { frame, tolerance }).parts.reduce((n, r) => n + r.d.length, 0);
 
     expect(size(2)).toBeLessThan(size(0.5));
     expect(size(0.5)).toBeLessThan(size(0));
   });
 
   test("draws each shared border once in lines", () => {
-    const outlines = map.regions.reduce((n, r) => n + r.d.length, 0);
+    const outlines = map.parts.reduce((n, r) => n + r.d.length, 0);
 
     expect(map.lines.length).toBeLessThan(outlines * 0.85);
     expect(map.land.length).toBeLessThan(map.lines.length);
@@ -58,19 +58,19 @@ describe("project()", () => {
   test("filters before fitting, and builds land and lines from what it kept", () => {
     const france = project(world, { frame, filter: (f) => f.properties?.name === "France" });
 
-    expect(france.regions.map((r) => r.id)).toEqual(["250"]);
-    const all = france.bounds(france.region("France").feature);
+    expect(france.parts.map((r) => r.id)).toEqual(["250"]);
+    const all = france.bounds(france.part("France").feature);
 
     expect(Math.max(all.w / frame.w, all.h / frame.h)).toBeCloseTo(1, 2);
     expect(france.lines.length).toBeLessThan(map.lines.length / 20);
   });
 
   test("centers a region on its largest piece", () => {
-    const france = map.region("France");
+    const france = map.part("France");
     const { x, y } = map.point([2.35, 46.6]);
 
     expect(Math.hypot(france.centroid.x - x, france.centroid.y - y)).toBeLessThan(6);
-    expect(map.bounds(france.feature).w).toBeGreaterThan(france.bounds.w * 3);
+    expect(map.bounds(france.feature).w).toBeGreaterThan(france.box.w * 3);
   });
 
   test("takes GeoJSON as well as TopoJSON", () => {
@@ -95,7 +95,7 @@ describe("project()", () => {
       { frame },
     );
 
-    expect(square.region("square").d).toMatch(/^M[\d.]+ [\d.]+l.*z$/);
+    expect(square.part("square").d).toMatch(/^M[\d.]+ [\d.]+l.*z$/);
   });
 });
 
@@ -165,7 +165,7 @@ describe("bounds()", () => {
   });
 
   test("of one region is its main piece", () => {
-    expect(map.bounds(map.region("Italy"))).toEqual(map.region("Italy").bounds);
+    expect(map.bounds(map.part("Italy"))).toEqual(map.part("Italy").box);
   });
 });
 
@@ -176,7 +176,7 @@ describe("dots()", () => {
     expect(dots.length).toBeGreaterThan(1000);
 
     for (const dot of dots.slice(0, 200))
-      expect(geoContains(map.region(dot.id).feature, [...dot.at])).toBe(true);
+      expect(geoContains(map.part(dot.id).feature, [...dot.at])).toBe(true);
   });
 
   test("spaces dots by arc, so rows near the poles hold fewer", () => {

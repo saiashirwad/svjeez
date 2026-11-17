@@ -38,11 +38,12 @@ export interface Reprojection {
 }
 
 export interface Reprojected {
-  readonly regions: readonly Reprojection[];
+  /** Every region, one per feature, in the data's order. */
+  readonly parts: readonly Reprojection[];
   /** Every region as one path per projection. From TopoJSON the shared borders are gone, leaving the land. */
   readonly land: readonly PathData[];
   /** The region whose id or `properties.name` is `key`. */
-  region(key: string | number): Reprojection;
+  part(key: string | number): Reprojection;
 }
 
 type Ring = [number, number][];
@@ -233,9 +234,9 @@ export function reproject(
       : ready(collection);
 
   return {
-    regions,
+    parts: regions,
     land: draw("the land", land),
-    region(key) {
+    part(key) {
       const found = regions.find((r) => r.id === String(key) || r.properties?.name === key);
 
       if (!found)

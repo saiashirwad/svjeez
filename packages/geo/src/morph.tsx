@@ -2,8 +2,11 @@
 import {
   ease,
   motion,
+  span as spanOf,
   type Color,
+  type Drawn,
   type Ease,
+  type Part,
   type Point,
   type Rect,
   type Seconds,
@@ -37,7 +40,8 @@ export interface Morphed {
   readonly rest: string;
 }
 
-export interface Bubble {
+/** A region's circle, by the region's id. `box` is the circle's and `span` when the region morphs into it. */
+export interface Bubble extends Part {
   readonly region: Region;
   readonly value: number;
   readonly x: number;
@@ -52,9 +56,8 @@ export interface CartogramOptions extends MorphOptions {
   readonly gap?: number;
 }
 
-export interface Cartogram extends Morphed {
-  readonly bubbles: readonly Bubble[];
-}
+/** The parts are the circles, in the order of `values`. `span` is the span passed. */
+export interface Cartogram extends Morphed, Drawn<Bubble> {}
 
 export interface GeoBarsOptions extends MorphOptions {
   /** Where the bars go. The longest reaches its right edge; the bars share its height. */
@@ -69,16 +72,14 @@ export interface GeoBarsOptions extends MorphOptions {
   readonly max?: number;
 }
 
-export interface GeoBar {
+/** A region's bar, by the region's id. `box` is where the bar lands, to put a label beside, and `span` when the region morphs into it. */
+export interface GeoBar extends Part {
   readonly region: Region;
   readonly value: number;
-  /** Where the bar lands in the scene, to put a label beside. */
-  readonly rect: Rect;
 }
 
-export interface GeoBars extends Morphed {
-  readonly bars: readonly GeoBar[];
-}
+/** The parts are the bars, top to bottom. `span` is the span passed. */
+export interface GeoBars extends Morphed, Drawn<GeoBar> {}
 
 const NUMBER = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
 
@@ -138,22 +139,27 @@ const circle = ({ x, y }: Point, r: number) =>
 
 const rectangle = ({ x, y, w, h }: Rect) => `M${x} ${y}H${x + w}V${y + h}H${x}Z`;
 
-interface Target {
+/** What a morph turns a region into: a part that knows its region. */
+type Morphing = Part & { readonly region: Region };
+
+interface Target<P extends Morphing> {
   readonly region: Region;
   readonly value: number;
   /** The one closed shape the mainland becomes. */
   readonly to: string;
   /** Where the region's other pieces shrink to. */
   readonly center: Point;
+  /** The part the region becomes, before the morph gives it a span. */
+  readonly part: Omit<P, "span">;
 }
 
 /** Each region as its outline, then as its target: the pieces other than the mainland shrink into the target's center. */
-function morphs(
+function morphs<P extends Morphing>(
   when: Span,
-  targets: readonly Target[],
+  targets: readonly Target<P>[],
   map: GeoMap,
   options: MorphOptions,
-): Morphed {
+): Morphed & Drawn<P> {
   const { at, over } = when;
 
   const { stagger = 0, ease: curve = ease.inOut, fill = "#6b7280", detail = 2.5 } = options;
@@ -183,13 +189,34 @@ function morphs(
     );
   });
 
+  // SAFETY: each target's part is a P without its span, and this adds the span back.
+  const parts = targets.map(
+    ({ part }, i): P => ({ ...part, span: spanOf(at + i * stagger, each) }) as P,
+  );
+
   return {
+    span: spanOf(at, over),
+    bounds: parts.map((p) => p.box).reduce((a, b) => a.union(b)),
+    parts,
+    part: (id) => {
+      const found = parts.find((p) => p.id === id || p.region.properties?.name === id);
+
+      if (!found)
+        throw new Error(
+          `A morph has no part ${JSON.stringify(id)}. Its parts are the regions it drew, by id or properties.name, as in ${parts
+            .slice(0, 3)
+            .map((p) => JSON.stringify(p.id))
+            .join(", ")}.`,
+        );
+
+      return found;
+    },
     node: (
       <g class={options.class} animation={motion({ opacity: 0 }).at(at).set({ opacity: 1 })}>
         {paths}
       </g>
     ),
-    rest: map.regions
+    rest: map.parts
       .filter((r) => !used.has(r))
       .map((r) => r.d)
       .join(""),
@@ -300,28 +327,29 @@ export function cartogram(
 
   relax(discs, gap, map.frame);
 
-  const bubbles = items.map(([region, value], i): Bubble => ({
-    region,
-    value,
-    x: tenth(discs[i]!.x),
-    y: tenth(discs[i]!.y),
-    r: tenth(discs[i]!.r),
-  }));
+  const bubbles = items.map(([region, value], i): Omit<Bubble, "span"> => {
+    const [x, y, r] = [tenth(discs[i]!.x), tenth(discs[i]!.y), tenth(discs[i]!.r)];
 
-  return {
-    bubbles,
-    ...morphs(
-      when,
-      bubbles.map((b) => ({ region: b.region, value: b.value, to: circle(b, b.r), center: b })),
-      map,
-      options,
-    ),
-  };
+    return { id: region.id, region, value, x, y, r, box: rect(x - r, y - r, r * 2, r * 2) };
+  });
+
+  return morphs<Bubble>(
+    when,
+    bubbles.map((b) => ({
+      region: b.region,
+      value: b.value,
+      to: circle(b, b.r),
+      center: b,
+      part: b,
+    })),
+    map,
+    options,
+  );
 }
 
 /**
  * Regions fly from the map into a bar chart: the largest `top` values, sorted, each outline morphing into its bar.
- * The longest bar reaches the right edge of `frame`, or `max` does. Draw the labels from the returned `bars`.
+ * The longest bar reaches the right edge of `frame`, or `max` does. Draw the labels from the returned `parts`.
  */
 export function toBars(
   when: Span,
@@ -343,10 +371,11 @@ export function toBars(
   const slot = frame.h / shown.length;
   const gap = options.gap ?? slot * 0.2;
 
-  const bars = shown.map(([region, value], i): GeoBar => ({
+  const bars = shown.map(([region, value], i): Omit<GeoBar, "span"> => ({
+    id: region.id,
     region,
     value,
-    rect: rect(
+    box: rect(
       frame.x,
       tenth(frame.y + i * slot + gap / 2),
       tenth(Math.max(1, (frame.w * value) / max)),
@@ -354,18 +383,16 @@ export function toBars(
     ),
   }));
 
-  return {
-    bars,
-    ...morphs(
-      when,
-      bars.map((b) => ({
-        region: b.region,
-        value: b.value,
-        to: rectangle(b.rect),
-        center: { x: b.rect.x + b.rect.w / 2, y: b.rect.y + b.rect.h / 2 },
-      })),
-      map,
-      options,
-    ),
-  };
+  return morphs<GeoBar>(
+    when,
+    bars.map((b) => ({
+      region: b.region,
+      value: b.value,
+      to: rectangle(b.box),
+      center: { x: b.box.x + b.box.w / 2, y: b.box.y + b.box.h / 2 },
+      part: b,
+    })),
+    map,
+    options,
+  );
 }

@@ -37,7 +37,7 @@ export default () =>
   );
 ```
 
-`mermaid(text, options)` returns the svjeez diagram, plus `kind` and the parsed `doc`. Narrow on `kind` to reach what only one diagram has:
+`mermaid(text, options)` returns the svjeez diagram, plus `kind` and the parsed `doc`. Every kind has `span`, `bounds`, `parts` and `part(id)`, where a part is a node by its Mermaid id, with its `box` and the `span` it appears in. Narrow on `kind` to reach what only one diagram has:
 
 ```ts
 const d = mermaid(text);

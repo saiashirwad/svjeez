@@ -30,6 +30,9 @@ const NAMES: readonly (readonly [string, Span])[] = [
   ["effects", 4],
   ["fonts", 6],
   ["images", 6],
+  ["metrics", 4],
+  ["leaderboard", 4],
+  ["release-card", 4],
 ];
 
 /** How many of the twelve columns a card takes on a wide screen. */
@@ -44,10 +47,13 @@ export interface Example {
 }
 
 // The dom example is not in the gallery, and it imports Tailwind, whose native binary the site's bundle cannot load.
-const modules = import.meta.glob<() => string>(["../../examples/*/index.tsx", "!../../examples/dom/index.tsx"], {
-  eager: true,
-  import: "default",
-});
+const modules = import.meta.glob<() => string>(
+  ["../../examples/*/index.tsx", "!../../examples/dom/index.tsx"],
+  {
+    eager: true,
+    import: "default",
+  },
+);
 
 const example = ([name, span]: readonly [string, Span]): Example => {
   const build = modules[`../../examples/${name}/index.tsx`];

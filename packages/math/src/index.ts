@@ -3,7 +3,9 @@ export {
   type Glyph,
   type Matrix,
   type Tex,
+  type TexDrawn,
   type TexOptions,
+  type TexPart,
   type WriteOptions,
 } from "./tex.tsx";
 

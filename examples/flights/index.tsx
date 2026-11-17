@@ -1,6 +1,17 @@
 import { arc, project, traffic, type LonLat, type Topology } from "@svjeez/geo";
 import { plane } from "@svjeez/icons/tabler";
-import { Icon, draw, ease, motion, render, type SvgNode, travel, variables } from "svjeez";
+import {
+  Icon,
+  draw,
+  ease,
+  motion,
+  render,
+  type SvgNode,
+  travel,
+  variables,
+  span,
+  stagger,
+} from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
@@ -148,6 +159,9 @@ const LABEL: Record<Hub["side"], readonly [number, number, "start" | "middle" | 
   below: [0, 17, "middle"],
 };
 
+/** The hubs' labels come up one after another once the map has faded in. */
+const labelled = stagger(span(FADE + 0.2, 0.5), Object.keys(HUBS).length, 0.12);
+
 function Hubs(): SvgNode {
   return (
     <g fontFamily={SANS} fontSize={11.5} fontWeight={600} fill={C.text}>
@@ -156,11 +170,7 @@ function Hubs(): SvgNode {
         const [dx, dy, anchor] = LABEL[side];
 
         return (
-          <g
-            animation={motion({ opacity: 0 })
-              .at(FADE + 0.2 + i * 0.12)
-              .to({ opacity: 1 }, 0.5)}
-          >
+          <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, labelled[i]!)}>
             <circle cx={x} cy={y} r={6} fill={C.hub} opacity={0.2} />
             <circle cx={x} cy={y} r={2.8} fill={C.hub} stroke={C.night} strokeWidth={0.8} />
             <text

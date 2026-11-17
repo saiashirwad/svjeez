@@ -1,4 +1,4 @@
-import { Ink, Once, Pivot, css as cssTag, ease, motion, render } from "svjeez";
+import { Ink, Once, Pivot, css as cssTag, ease, motion, render, span, stagger } from "svjeez";
 import { css, theme } from "../style";
 import { lettering, marker } from "./cue";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
@@ -37,11 +37,11 @@ const PICTURES = [
 export default function build(): string {
   const strokes = lettering("browse examples");
   const fans = [-24, 0, 24];
+  const dealt = stagger(span(0.5, 0.4), PICTURES.length, 0.25);
 
   const cards = PICTURES.map((picture, i) => {
     const fan = motion({ rotate: 0, x: 0 })
-      .at(0.5 + i * 0.25)
-      .to({ rotate: fans[i]!, x: (i - 1) * 26 }, 0.4, ease.pop)
+      .to({ rotate: fans[i]!, x: (i - 1) * 26 }, dealt[i]!, ease.pop)
       .at(4.9)
       .to({ rotate: 0, x: 0 }, 0.45, ease.inOut);
 

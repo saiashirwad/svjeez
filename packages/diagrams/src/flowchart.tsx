@@ -9,8 +9,7 @@ import {
   type Span,
   enter,
   type SvgNode,
-  beats,
-  type Beats,
+  span as spanOf,
 } from "svjeez";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
@@ -20,18 +19,21 @@ import {
   drawNode,
   labelOf,
   labelSize,
+  INSTANT,
   look,
-  lookup,
   onOutline,
+  partsOf,
   placer,
   POP,
   popIn,
+  schedule,
   sizeOf,
   spanOfReveals,
+  type Diagram,
   type DiagramOptions,
   type Labelled,
   type NodeRole,
-  type PlayedDiagram,
+  type PlayAt,
 } from "./kit.tsx";
 
 export type FlowchartEdge<N extends string> =
@@ -43,17 +45,20 @@ export interface FlowchartGroup<N extends string> {
   readonly nodes: readonly N[];
 }
 
-export interface FlowchartOptions extends DiagramOptions {
+export interface FlowchartOptions<N extends string = string> extends DiagramOptions {
   /** Default `"TB"`. */
   readonly direction?: Direction;
   /**
-   * Nodes appear in rank order after the first rank; each edge draws on as its target appears; a group fades in with its
-   * first member. From a start `at` they follow `step` apart (default 0.4), or each comes at its own time.
+   * Nodes appear in rank order after the first rank; each edge draws on as the later of its ends appears; a group fades
+   * in with its first member. From a start `at` they follow `step` apart (default 0.4), or each comes at its own time.
+   * A record such as `{ build: 1, test: 2.5 }` schedules nodes by id instead, and the ones it leaves out are there from
+   * the start.
    */
-  readonly play?: { readonly at: Beats; readonly step?: Seconds };
+  readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
 }
 
-export interface Flowchart<N extends string, G extends string> extends PlayedDiagram<N | G> {
+/** Its parts are the nodes, then the groups. */
+export interface Flowchart<N extends string, G extends string> extends Diagram<N | G> {
   /** The drawn line of the first edge `from` → `to`. */
   edge(from: N, to: N): Point[];
   /** The shortest directed path through edges, as one polyline through each node on the way. */
@@ -85,7 +90,7 @@ export function flowchart<
     readonly groups?: G;
     readonly edges: readonly FlowchartEdge<NoInfer<keyof N & string>>[];
   },
-  options: FlowchartOptions = {},
+  options: FlowchartOptions<NoInfer<keyof N & string>> = {},
 ): Flowchart<keyof N & string, keyof G & string> {
   type Id = keyof N & string;
 
@@ -135,11 +140,7 @@ export function flowchart<
   const step = play?.step ?? 0.4;
   /** The first rank is there from the start, so no frame is empty; the rest follow in order. */
   const later = order.filter((id) => laid.rank.get(id)! > 0);
-  const times = beats(play?.at ?? 0, later.length, step, "flowchart() play");
-
-  const shown = new Map(
-    order.map((id) => [id, later.includes(id) ? times[later.indexOf(id)]! : -Infinity]),
-  );
+  const shown = schedule(play?.at ?? 0, later, order, step, "flowchart() play");
 
   const appear = (id: string) => (play && shown.get(id)! >= 0 ? popIn(shown.get(id)!) : undefined);
   const drawOver = Math.min(0.4, step);
@@ -199,6 +200,16 @@ export function flowchart<
     ),
   ]);
 
+  /** When the group fades in with its first member, or -Infinity when one is there from the start. */
+  const groupAt = (g: FlowchartGroup<Id>) => Math.min(...g.nodes.map((n) => shown.get(n)!));
+
+  const appears = (id: string) => {
+    const group = groups.find(([gid]) => gid === id)?.[1];
+    const at = group ? groupAt(group) : shown.get(id)!;
+
+    return play && at >= 0 ? spanOf(at, group ? 0.4 : POP) : INSTANT;
+  };
+
   const reveals: Span[] = play
     ? [
         ...[...shown.values()].flatMap((at) => (at >= 0 ? [{ at, over: POP }] : [])),
@@ -228,7 +239,11 @@ export function flowchart<
     ),
     layers: { under, over },
     bounds: laid.bounds,
-    get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])),
+    ...partsOf<Id | (keyof G & string)>(
+      "flowchart()",
+      new Map([...laid.boxes, ...laid.groups]),
+      appears,
+    ),
     ...paths(laid.lines, laid.boxes),
   };
 }

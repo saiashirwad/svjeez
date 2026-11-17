@@ -28,8 +28,8 @@ const svg = render(
   }),
 );
 
-assert.equal(map.regions.length, 177);
+assert.equal(map.parts.length, 177);
 
 assert.match(svg, /^<svg[\s\S]*@keyframes[\s\S]*<path d="M/);
 
-console.log(`rendered ${map.regions.length} countries into ${(svg.length / 1024).toFixed(0)} KB`);
+console.log(`rendered ${map.parts.length} countries into ${(svg.length / 1024).toFixed(0)} KB`);

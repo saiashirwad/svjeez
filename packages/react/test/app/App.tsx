@@ -3,6 +3,7 @@ import { Activity, memo as memoized, useState } from "react";
 import { Code, Picture, Stats, Transport, useEditor } from "../../src/index.ts";
 import handled from "./handles.tsx?raw";
 import plain from "./scene.tsx?raw";
+import titled from "./text.tsx?raw";
 
 const Memo = memoized(Picture);
 
@@ -33,7 +34,7 @@ export function App(props: Props) {
 }
 
 function Editor({ scene, wrap, memo }: Props) {
-  const editor = useEditor(scene === "handles" ? handled : plain);
+  const editor = useEditor(scene === "handles" ? handled : scene === "text" ? titled : plain);
 
   return (
     <main>

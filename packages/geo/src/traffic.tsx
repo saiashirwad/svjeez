@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
 import type { Color, Point, Span, SvgNode } from "svjeez";
-import { span as spanOf, type Spanned } from "svjeez";
+import { random, span as spanOf, type Spanned } from "svjeez";
 import { flow, type FlowOptions } from "svjeez";
 import type { GeoMap, LonLat } from "./index.ts";
 
@@ -32,20 +32,6 @@ export interface Traffic {
   readonly span: Spanned;
 }
 
-/** A small seeded generator (mulberry32), so a scene builds the same every time. */
-const generator = (seed: number) => {
-  let state = seed >>> 0;
-
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-};
-
 /**
  * Many particles along many routes: flights, trade, migration. `rate` departures a second over the span `during`, each on a
  * route picked by weight, at a moment jittered inside its own slot so they spread out evenly without lining up. Each
@@ -73,16 +59,16 @@ export function traffic(
       `traffic() needs weights that are not negative and not all zero, got ${weights.join(", ")}.`,
     );
   const sum = weights.reduce((a, b) => a + b, 0);
-  const random = generator(seed);
+  const next = random(seed);
   const count = Math.max(1, Math.round(rate * during.over));
   let end = during.at;
 
   const nodes = Array.from({ length: count }, (_, k) => {
-    const at = during.at + ((k + random()) / count) * during.over;
-    let pick = random() * sum;
+    const at = during.at + ((k + next()) / count) * during.over;
+    let pick = next() * sum;
     const index = weights.findIndex((w) => (pick -= w) < 0);
     const route = routes[index < 0 ? routes.length - 1 : index]!;
-    const points = random() < back ? [...route.points].reverse() : route.points;
+    const points = next() < back ? [...route.points].reverse() : route.points;
     const run = flow(points, { ...token, color: route.color ?? token.color, at });
     end = Math.max(end, run.span.end);
 

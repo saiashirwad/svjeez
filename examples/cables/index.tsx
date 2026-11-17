@@ -9,6 +9,7 @@ import {
   enter,
   Icon,
   motion,
+  random,
   render,
   type IconData,
   type Point,
@@ -16,6 +17,8 @@ import {
   type SvgNode,
   flow,
   travel,
+  span,
+  stagger,
 } from "svjeez";
 import { rect } from "svjeez/geometry";
 
@@ -351,15 +354,7 @@ const packetCss = css`
 `;
 
 /** A seeded random number, so the traffic is the same on every build. */
-const random = (() => {
-  let seed = 11;
-
-  return () => {
-    seed = (seed * 16807) % 2147483647;
-
-    return seed / 2147483647;
-  };
-})();
+const rand = random(11);
 
 const SPEED = 140;
 const TAIL = 56;
@@ -418,7 +413,7 @@ function Traffic(): SvgNode {
         const count = Math.max(3, Math.round(total / 180));
 
         return Array.from({ length: count }, (_, k) => {
-          let at = TRAFFIC + ((k + random() * 0.8) / count) * (OUT - TRAFFIC - trip);
+          let at = TRAFFIC + ((k + rand() * 0.8) / count) * (OUT - TRAFFIC - trip);
 
           return pieces.map((piece, p) => {
             const node = <Packet piece={piece} track={tracks[p]!} at={at} color={color} />;
@@ -433,6 +428,7 @@ function Traffic(): SvgNode {
 }
 
 const stations = [...new Set(CABLES.flatMap((c) => [c.from, c.to]))];
+const landings = stagger(span(1.2, 0.45), stations.length, 0.04);
 
 const LABEL = {
   left: { dx: -8, dy: 3, anchor: "end" },
@@ -454,7 +450,7 @@ function Stations(): SvgNode {
         return (
           <g
             style={{ transformOrigin: `${x}px ${y}px` }}
-            animation={enter({ at: 1.2 + i * 0.04, over: 0.45 }, { scale: 0 }, ease.pop)}
+            animation={enter(landings[i]!, { scale: 0 }, ease.pop)}
           >
             <circle cx={x} cy={y} r={3.6} fill={C.sea} stroke={C.text} strokeWidth={1} />
             <circle cx={x} cy={y} r={1.3} fill={C.text} />

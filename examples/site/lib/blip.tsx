@@ -3,10 +3,12 @@ import {
   ease,
   motion,
   Pivot,
+  span,
   type Color,
   type Motion,
   type PathData,
   type Span,
+  type Spanned,
   type Stack,
   type TagChannels,
 } from "svjeez";
@@ -166,6 +168,10 @@ export interface Jumps {
 /** How long a hop of `height` takes from the start of the crouch to the landing. */
 export const hopTime = (height: number) =>
   0.3 + 0.4 * Math.sqrt(Math.min(1, Math.max(0.25, height / 64)));
+
+/** When a hop is in the air: from leaving the ground, after the crouch, to the landing. */
+export const flight = ({ land, height }: Hop): Spanned =>
+  span(land - hopTime(height) + 0.3).until(land);
 
 /**
  * Hops, each landing at its own time: a crouch, a launch, a little air and a squashy landing with a rebound. A hop

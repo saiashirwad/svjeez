@@ -23,7 +23,7 @@ editor.subscribe((state) => {
   // state.text is the file, state.values its controls, state.picture.url the picture to show
 });
 
-editor.send({ type: "set", key: "default#0", value: 64 }); // a dial, a drag or an agent
+editor.send({ type: "set", key: "default:circle.cx", value: 64 }); // a dial, a drag or an agent
 editor.send({ type: "replace", text: rewritten }); // typing, or an AI rewrite
 editor.send({ type: "undo" });
 ```
@@ -32,7 +32,7 @@ The editor compiles nothing until something subscribes, so a server can render t
 
 ### Values
 
-`state.values` lists every literal a control can edit, in source order. Each has a `key` that stays with its literal as other values change: `params.swing` for a param, `legs.1.over` for a literal inside a top-level const, else its top-level declaration and its place there, as in `default#3`. No two literals share a key.
+`state.values` lists every literal a control can edit, in source order. Each has a `key` that stays with its literal as other values change: `params.swing` for a param, `legs.1.over` for a literal inside a top-level const, else its top-level declaration and what holds it there: `default:circle.cx` for an attribute, `default:enter.0.at` for `at` in the first argument of `enter(…)`, `default:r` for a local const. A second literal held the same way gets `#1`, and one nothing nameable holds (a ternary's branch, say) is counted as in `default#3`. Adding a literal renumbers only those held the same way after it. No two literals share a key.
 
 A number's `param` gives the range a drag moves it through. A scene can declare it with `export const params` from `svjeez/params`; otherwise it is read from where the number sits, so `opacity` runs 0 to 1, `rotate` −360 to 360, and an `at`, an `over` or the length passed to `.to()` is in seconds.
 
@@ -59,6 +59,10 @@ A scene that exports `handles` from `svjeez/params` gets a handle on its picture
 ### Gestures
 
 `scrubbing`, `following`, `bending`, `arrowNumber` and `arrowEase` turn a drag or an arrow key into `set` messages that make one undo step, and `selection(editor, key)` selects a value while its control has focus. Each framework's controls only read the DOM events and call these. `stroke(editor, key)` is the primitive under them, for a control of your own.
+
+### From a shell
+
+`svjeez values <scene.tsx>` and `svjeez set <scene.tsx> key=value …` are these values for an agent or a script, with no browser: `values` lists each key with its kind, value, range and `file:line:column` (`--json`, `--filter text`), and `set` writes through the same splice a `set` message makes, checks each value against its kind, and prints the lines it changed (`--dry-run` writes nothing). svjeez's CLI loads them from `@svjeez/live/commands`, so install this package beside it. `listValues`, `setValues` and `readSetting` there are the same steps as functions. `editFor(value, v)` from `@svjeez/live` is the edit a `set` message makes.
 
 ### Styles
 

@@ -2,6 +2,7 @@
 // components bind it, and the control math here is what they share.
 export {
   createEditor,
+  editFor,
   handleAt,
   init,
   timeAt,

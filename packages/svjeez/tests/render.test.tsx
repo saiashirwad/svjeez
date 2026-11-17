@@ -47,6 +47,21 @@ describe("motion timing", () => {
     expect(keyframes(svg)).toEqual(["0%,20%{opacity:0}30%,100%{opacity:1}"]);
   });
 
+  test("a span places a transition: it moves the cursor to the start and plays for the length", () => {
+    const placed = motion({ opacity: 0 }).to({ opacity: 1 }, { at: 2, over: 1 }).to({ x: 5 }, 1);
+    const cursor = motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1).to({ x: 5 }, 1);
+
+    expect(scene(<rect width={10} height={10} animation={placed} />)).toBe(
+      scene(<rect width={10} height={10} animation={cursor} />),
+    );
+    expect(() => motion().to({ x: 1 }, { at: -1, over: 1 })).toThrow(
+      "to() needs a finite, non-negative number of seconds, got -1.",
+    );
+    expect(() => motion().to({ x: 1 }, { at: 1, over: 0 })).toThrow(
+      "to() needs a positive duration, got 0. Use set() for a cut.",
+    );
+  });
+
   test("a cut right after a transition that ends the scene lands on 100%", () => {
     const svg = scene(
       <rect width={10} height={10} animation={motion({ x: 0 }).to({ x: 50 }, 10).set({ x: 0 })} />,

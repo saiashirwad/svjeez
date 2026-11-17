@@ -10,6 +10,7 @@ import {
   render,
   sampled,
   show,
+  span,
   type Rect,
   type SvgNode,
 } from "svjeez";
@@ -512,7 +513,7 @@ const TOUR = [
 ] as const;
 
 const stops = TOUR.map(({ at: when, move, target }, i) => ({
-  show: { at: when, over: (TOUR[i + 1]?.at ?? D) - when },
+  show: span(when).until(TOUR[i + 1]?.at ?? D),
   target,
   over: move || undefined,
 }));
@@ -552,7 +553,7 @@ const Label = ({ name, note, at: [x, y], to, view: width, stop, after = 0, end }
     : [x + (end ? -1 : 1) * (far ? wide + size * 0.35 : -size * 0.35), y - size * 0.32];
 
   return (
-    <g animation={show({ at: from, over: until - from }, { fade: 0.8 })}>
+    <g animation={show(span(from).until(until), { fade: 0.8 })}>
       <path
         d={"M" + at(tail, 2) + "L" + at(to, 2)}
         fill="none"

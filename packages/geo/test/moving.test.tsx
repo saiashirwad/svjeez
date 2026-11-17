@@ -194,13 +194,13 @@ describe("reproject()", () => {
   });
 
   test("writes each region with the same commands under every projection", () => {
-    for (const region of maps.regions) expect(new Set(region.d.map(commands)).size).toBe(1);
+    for (const region of maps.parts) expect(new Set(region.d.map(commands)).size).toBe(1);
 
     expect(new Set(maps.land.map(commands)).size).toBe(1);
   });
 
   test("morphs through the d channel", () => {
-    const [a, b] = maps.region("Greenland").d;
+    const [a, b] = maps.part("Greenland").d;
 
     const svg = render(
       { width: 400, height: 400, duration: 2, title: "Morph" },
@@ -211,7 +211,7 @@ describe("reproject()", () => {
   });
 
   test("shrinks Greenland from Mercator to equal area", () => {
-    const [mercator, equal] = maps.region("Greenland").d;
+    const [mercator, equal] = maps.part("Greenland").d;
 
     expect(area(equal!)).toBeLessThan(area(mercator!) / 3);
   });
@@ -231,7 +231,7 @@ describe("trueSize()", () => {
       filter: (f) => f.properties?.name !== "Antarctica",
     });
 
-    const slide = trueSize({ at: 0, over: 2 }, map, map.region("Greenland"), [-20, 0]);
+    const slide = trueSize({ at: 0, over: 2 }, map, map.part("Greenland"), [-20, 0]);
 
     const svg = render(
       { width: 400, height: 400, duration: 2, title: "Slide" },

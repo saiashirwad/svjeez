@@ -1,12 +1,14 @@
-// A scene's editable parameters as plain data. A scene exports a schema and stays a pure function of the values:
+// A scene's params as plain data. A scene exports a schema and stays a pure function of the values, so it is a
+// template: the CLI, the editor and the author's own build each call it with values of their own.
 //
-//   export const params = { flowers: count(5, { min: 1, max: 12 }), petal: color("#FF5D8F") };
+//   export const params = { title: text("Launch"), flowers: count(5, { min: 1, max: 12 }) };
 //   export default (p = defaults(params)) => render(...);
 //
-// The schema crosses a worker boundary as is, and a page reads it to draw controls and to keep values in range.
+// The schema crosses a worker boundary as is, a page reads it to draw controls, and `parse` reads untrusted JSON
+// through it.
 import { hexOf, type Hex } from "./color";
 import type { Point } from "./layout/box";
-import type { Ease } from "./motion";
+import { ease, type Ease } from "./motion";
 
 interface Labelled {
   /** What a control calls the value, when the key alone does not say. */
@@ -41,7 +43,36 @@ export interface ChoiceParam<T extends string = string> extends Labelled {
   readonly options: readonly T[];
 }
 
-export type Param = NumberParam | ColorParam | EasingParam | ChoiceParam;
+export interface TextParam extends Labelled {
+  readonly kind: "text";
+  readonly value: string;
+  /** The most characters a value may have, so a template's layout can count on it. */
+  readonly maxLength?: number;
+}
+
+/** A param that holds one value: everything but a list. */
+export type ScalarParam = NumberParam | ColorParam | EasingParam | ChoiceParam | TextParam;
+
+/** A list item's fields, each a scalar param whose value is the field's default. */
+export type Fields = { readonly [key: string]: ScalarParam };
+
+/** What one item of a list holds: a scalar's value, or a record of its fields' values. */
+export type ItemValue<I extends ScalarParam | Fields> = I extends ScalarParam
+  ? I["value"]
+  : { readonly [K in keyof I]: I[K] extends ScalarParam ? I[K]["value"] : never };
+
+export interface ListParam<I extends ScalarParam | Fields = ScalarParam | Fields> extends Labelled {
+  readonly kind: "list";
+  /** One item's schema: a scalar param, or a record of them. */
+  readonly item: I;
+  readonly value: readonly ItemValue<I>[];
+  /** The fewest items, 0 by default. */
+  readonly min: number;
+  /** The most items, unbounded when absent. */
+  readonly max?: number;
+}
+
+export type Param = ScalarParam | ListParam;
 
 export type Schema = { readonly [key: string]: Param };
 
@@ -123,6 +154,54 @@ export const choice = <const T extends string>(
   return { kind: "choice", value, options, ...extras };
 };
 
+/** A line of text, at most `maxLength` characters when given. */
+export const text = (
+  value: string,
+  options: Labelled & Pick<TextParam, "maxLength"> = {},
+): TextParam => {
+  const { maxLength } = options;
+
+  if (maxLength !== undefined && !(Number.isInteger(maxLength) && maxLength > 0))
+    throw new Error(`text(${show(value)}) needs a whole maxLength of 1 or more, got ${maxLength}.`);
+
+  valueOf({ kind: "text", value, maxLength }, value, "text()");
+
+  return { kind: "text", value, ...options };
+};
+
+/**
+ * A list of items, each a scalar or a record of scalars: `list(text(""), ["a", "b"])`, or
+ * `list({ label: text("Q1"), value: number(4, { min: 0, max: 100 }) }, [{ label: "Q1", value: 4 }])`. A record's
+ * field values are what a partial item from `parse` falls back to. `min` (default 0) and `max` bound the length.
+ */
+export const list = <const I extends ScalarParam | Fields>(
+  item: I,
+  value: readonly NoInfer<ItemValue<I>>[],
+  options: Labelled & { readonly min?: number; readonly max?: number } = {},
+): ListParam<I> => {
+  const { min = 0, max } = options;
+
+  if (
+    !(Number.isInteger(min) && min >= 0) ||
+    (max !== undefined && !(Number.isInteger(max) && max >= min))
+  )
+    throw new Error(
+      `list() needs a whole min of 0 or more and a whole max no smaller, got ${min} and ${max}.`,
+    );
+
+  if (!isScalar(item))
+    for (const [key, field] of Object.entries(item))
+      if (!isScalar(field))
+        throw new Error(
+          `list() items are scalars or records of scalars, so field "${key}" cannot be a list. Make it a list param of its own.`,
+        );
+
+  const declared: ListParam<I> = { kind: "list", item, value, min, ...options };
+
+  // SAFETY: valueOf returns a list param's value with each item checked against `item`, which is ItemValue<I>[].
+  return { ...declared, value: valueOf(declared, value, "list()") as ListParam<I>["value"] };
+};
+
 /** Every param's declared value: what the scene draws when nobody has touched a control. */
 export const defaults = <S extends Schema>(schema: S): Values<S> =>
   // SAFETY: the entries are exactly the schema's keys, each mapped to that param's own value.
@@ -135,4 +214,169 @@ type NumberKeys<S extends Schema> = {
 /** Where the handle for each number param sits in the picture, in scene coordinates, given every value. */
 export type Handles<S extends Schema> = (values: Values<S>) => {
   readonly [K in NumberKeys<S>]?: Point;
+};
+
+// ----- reading untrusted values
+
+/** What JSON.parse returns: the shape untrusted values arrive in. */
+export type Json = null | boolean | number | string | readonly Json[] | JsonObject;
+
+export type JsonObject = { readonly [key: string]: Json };
+
+const show = (v: Json | undefined): string => {
+  if (v === undefined) return "nothing";
+  const json = JSON.stringify(v) ?? String(v);
+
+  return json.length > 40 ? `${json.slice(0, 37)}...` : json;
+};
+
+const isScalar = (p: Param | Fields): p is ScalarParam =>
+  typeof p.kind === "string" && p.kind !== "list";
+
+const isRecord = (v: Json | undefined): v is JsonObject =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+const isNumber = (v: Json | undefined): v is number => typeof v === "number";
+
+const isString = (v: Json | undefined): v is string => typeof v === "string";
+
+const NAMED_EASES = ["linear", "in", "out", "inOut", "pop", "hold"] as const;
+
+const easeOf = (v: Json | undefined, path: string): Ease => {
+  const named = NAMED_EASES.find((name) => name === v);
+
+  if (named) return ease[named];
+
+  if (isRecord(v)) {
+    if (v.kind === "linear") return ease.linear;
+
+    if (v.kind === "bezier" && Array.isArray(v.points) && v.points.length === 4)
+      return ease.bezier(
+        Number(v.points[0]),
+        Number(v.points[1]),
+        Number(v.points[2]),
+        Number(v.points[3]),
+      );
+
+    if (v.kind === "steps") return ease.steps(Number(v.count));
+  }
+
+  throw new Error(
+    `${path} needs an ease: ${NAMED_EASES.map((n) => `"${n}"`).join(", ")}, or { "kind": "bezier", "points": [x1, y1, x2, y2] }, got ${show(v)}.`,
+  );
+};
+
+/** `v` read as a value of `p`, or an error naming `path` and what to fix. A record item's missing fields take their defaults. */
+const valueOf = (p: Param, v: Json | undefined, path: string): Param["value"] => {
+  switch (p.kind) {
+    case "number": {
+      if (!isNumber(v) || !Number.isFinite(v) || v < p.min || v > p.max)
+        throw new Error(`${path} needs a number from ${p.min} to ${p.max}, got ${show(v)}.`);
+
+      if (p.step === 1 && Number.isInteger(p.min) && !Number.isInteger(v))
+        throw new Error(`${path} needs a whole number, got ${show(v)}.`);
+
+      return v;
+    }
+
+    case "color":
+      if (!isString(v))
+        throw new Error(`${path} needs a hex color such as "#FF5D8F", got ${show(v)}.`);
+
+      // SAFETY: hexOf throws unless the string is a hex color, so what it returns is one.
+      return hexOf(v as Hex, path);
+    case "easing":
+      return easeOf(v, path);
+    case "choice": {
+      const option = p.options.find((o) => o === v);
+
+      if (option === undefined)
+        throw new Error(
+          `${path} is one of ${p.options.map((o) => `"${o}"`).join(", ")}, got ${show(v)}.`,
+        );
+
+      return option;
+    }
+
+    case "text":
+      if (!isString(v)) throw new Error(`${path} needs text, got ${show(v)}.`);
+
+      if (p.maxLength !== undefined && v.length > p.maxLength)
+        throw new Error(
+          `${path} is ${v.length} characters, over its maxLength of ${p.maxLength}. Shorten it to fit.`,
+        );
+
+      return v;
+    case "list": {
+      if (!Array.isArray(v)) throw new Error(`${path} needs a list, got ${show(v)}.`);
+
+      if (v.length < p.min || (p.max !== undefined && v.length > p.max))
+        throw new Error(
+          `${path} has ${v.length} items, and needs ${p.max === undefined ? `at least ${p.min}` : `${p.min} to ${p.max}`}.`,
+        );
+
+      const { item } = p;
+
+      // SAFETY: each entry is read through the item's schema, so the list holds ItemValues of it.
+      return v.map((entry, i) =>
+        isScalar(item)
+          ? valueOf(item, entry, `${path}[${i}]`)
+          : fieldsOf(item, entry, `${path}[${i}]`),
+      ) as ListParam["value"];
+    }
+  }
+};
+
+const fieldsOf = (fields: Fields, v: Json | undefined, path: string) => {
+  if (!isRecord(v))
+    throw new Error(
+      `${path} needs an object with ${Object.keys(fields).join(", ")}, got ${show(v)}.`,
+    );
+
+  for (const key of Object.keys(v))
+    if (!Object.hasOwn(fields, key))
+      throw new Error(
+        `${path}.${key} is not a field. An item has ${Object.keys(fields).join(", ")}.`,
+      );
+
+  return Object.fromEntries(
+    Object.entries(fields).map(([key, field]) => [
+      key,
+      v[key] === undefined ? field.value : valueOf(field, v[key], `${path}.${key}`),
+    ]),
+  );
+};
+
+/**
+ * Values for `schema` read from untrusted input: a JSON string, or what `JSON.parse` returned. Every value is checked
+ * against its param (type, range, options, length), a key the schema does not declare throws, and a param the input
+ * leaves out keeps its default. Errors name the path, as in `highlights[2].label`.
+ */
+export const parse = <S extends Schema>(schema: S, json: Json): Values<S> => {
+  let input = json;
+
+  if (isString(json))
+    try {
+      input = JSON.parse(json);
+    } catch (error) {
+      throw new Error(`The params are not JSON: ${error instanceof Error ? error.message : error}`);
+    }
+
+  if (!isRecord(input))
+    throw new Error(`The params need a JSON object keyed by param name, got ${show(input)}.`);
+  const keys = Object.keys(schema);
+
+  for (const key of Object.keys(input))
+    if (!Object.hasOwn(schema, key))
+      throw new Error(
+        `"${key}" is not a param of this scene. It declares ${keys.length ? keys.join(", ") : "none"}.`,
+      );
+
+  // SAFETY: the entries are exactly the schema's keys, each read through that param.
+  return Object.fromEntries(
+    Object.entries(schema).map(([key, p]) => [
+      key,
+      input[key] === undefined ? p.value : valueOf(p, input[key], key),
+    ]),
+  ) as Values<S>;
 };

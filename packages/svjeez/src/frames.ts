@@ -5,6 +5,14 @@ import { systemColorScheme } from "./scheme";
 
 export { validateSvg, type ValidationResult } from "./validate";
 
+export {
+  checkScene,
+  type CheckOptions,
+  type CheckReport,
+  type CheckRule,
+  type Finding,
+} from "./check";
+
 export type ColorScheme = "light" | "dark";
 
 /** When to capture: exact scene times, or `count` frames spread evenly over one loop. */

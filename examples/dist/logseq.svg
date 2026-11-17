@@ -276,67 +276,63 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
 .m4{animation-name:k4,k5;animation-timing-function:steps(1),steps(1)}
 @keyframes k6{0%,30%,100%{visibility:hidden}12.222%{visibility:visible}}
 .m5{animation-name:k6;animation-timing-function:steps(1)}
-@keyframes k7{0%,32.222%{opacity:1}33.889%,100%{opacity:0}}
+@keyframes k7{0%,32.222%{translate:0px -2px}35.556%,100%{translate:0px 0px}}
 .m6{animation-name:k7;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k8{0%,33.889%{opacity:0}35.556%,100%{opacity:1}}
-.m7{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k9{0%,32.222%{translate:0px -2px}35.556%,100%{translate:0px 0px}}
+@keyframes k8{0%,37.222%,100%{visibility:hidden}30%{visibility:visible}}
+.m7{animation-name:k8;animation-timing-function:steps(1)}
+@keyframes k9{0%,38.889%{translate:-200px 0px}46.667%,100%{translate:0px 0px}}
 .m8{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k10{0%,37.222%,100%{visibility:hidden}30%{visibility:visible}}
-.m9{animation-name:k10;animation-timing-function:steps(1)}
-@keyframes k11{0%,38.889%{translate:-200px 0px}46.667%,100%{translate:0px 0px}}
+@keyframes k10{0%,38.889%{translate:-46px 0px}46.667%,100%{translate:0px 0px}}
+.m9{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k11{0%,42.778%{opacity:0}46.667%,100%{opacity:1}}
 .m10{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k12{0%,38.889%{translate:-46px 0px}46.667%,100%{translate:0px 0px}}
+@keyframes k12{0%,38.889%{fill:var(--dom-ku1fcr)}46.667%,100%{fill:var(--dom-4f2k5)}}
 .m11{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k13{0%,42.778%{opacity:0}46.667%,100%{opacity:1}}
+@keyframes k13{0%,38.889%{opacity:0.7}46.667%,100%{opacity:1}}
 .m12{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k14{0%,38.889%{fill:var(--dom-ku1fcr)}46.667%,100%{fill:var(--dom-4f2k5)}}
-.m13{animation-name:k14;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k15{0%,38.889%{opacity:0.7}46.667%,100%{opacity:1}}
+@keyframes k14{0%,51.111%,100%{visibility:hidden}37.222%{visibility:visible}}
+.m13{animation-name:k14;animation-timing-function:steps(1)}
+@keyframes k15{0%,55.556%{fill:var(--dom-4f2k5)}60%,100%{fill:var(--dom-ku1fcr)}}
 .m14{animation-name:k15;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k16{0%,51.111%,100%{visibility:hidden}37.222%{visibility:visible}}
-.m15{animation-name:k16;animation-timing-function:steps(1)}
-@keyframes k17{0%,57.778%{opacity:0}60%,100%{opacity:1}}
+@keyframes k16{0%,55.556%{opacity:1}60%,100%{opacity:0.7}}
+.m15{animation-name:k16;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k17{0%,55.556%{fill:var(--dom-1fm7r1t)}60%,100%{fill:var(--dom-z5gn29)}}
 .m16{animation-name:k17;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k18{0%,55.556%{fill:var(--dom-4f2k5)}60%,100%{fill:var(--dom-ku1fcr)}}
+@keyframes k18{0%,57.778%{opacity:0}60%,100%{opacity:1}}
 .m17{animation-name:k18;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k19{0%,55.556%{opacity:1}60%,100%{opacity:0.7}}
-.m18{animation-name:k19;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k20{0%,55.556%{fill:var(--dom-1fm7r1t)}60%,100%{fill:var(--dom-z5gn29)}}
-.m19{animation-name:k20;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k21{0%,60%,100%{visibility:hidden}51.111%{visibility:visible}}
-.m20{animation-name:k21;animation-timing-function:steps(1)}
-@keyframes k22{0%{opacity:1}60%,100%{opacity:0}}
-.m21{animation-name:k22;animation-timing-function:steps(1)}
-@keyframes k23{0%{translate:0px 0px}60%{translate:10.56px 0px}61.667%{translate:21.8px 0px}63.333%{translate:26.64px 0px}65%{translate:38.31px 0px}66.667%{translate:49.67px 0px}68.333%,100%{translate:60.72px 0px}}
-@keyframes k24{0%,70%,100%{opacity:0}60%,61.667%,63.333%,65%,66.667%,68.333%{opacity:1}}
-.m22{animation-name:k23,k24;animation-timing-function:steps(1),steps(1)}
-@keyframes k25{0%,60%{fill:var(--dom-9cx12p)}70%,100%{fill:var(--dom-37ffwz)}}
+@keyframes k19{0%,60%,100%{visibility:hidden}51.111%{visibility:visible}}
+.m18{animation-name:k19;animation-timing-function:steps(1)}
+@keyframes k20{0%{opacity:1}60%,100%{opacity:0}}
+.m19{animation-name:k20;animation-timing-function:steps(1)}
+@keyframes k21{0%{translate:0px 0px}60%{translate:10.56px 0px}61.667%{translate:21.8px 0px}63.333%{translate:26.64px 0px}65%{translate:38.31px 0px}66.667%{translate:49.67px 0px}68.333%,100%{translate:60.72px 0px}}
+@keyframes k22{0%,70%,100%{opacity:0}60%,61.667%,63.333%,65%,66.667%,68.333%{opacity:1}}
+.m20{animation-name:k21,k22;animation-timing-function:steps(1),steps(1)}
+@keyframes k23{0%,60%{fill:var(--dom-9cx12p)}70%,100%{fill:var(--dom-37ffwz)}}
+.m21{animation-name:k23;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k24{0%,65%{opacity:0}70%,100%{opacity:1}}
+.m22{animation-name:k24;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k25{0%,60%{opacity:0.5}70%,100%{opacity:1}}
 .m23{animation-name:k25;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k26{0%,65%{opacity:0}70%,100%{opacity:1}}
-.m24{animation-name:k26;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k27{0%,60%{opacity:0.5}70%,100%{opacity:1}}
-.m25{animation-name:k27;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k28{0%,60%{opacity:1}64.5%,100%{opacity:0}}
-@keyframes k29{0%,60%{translate:0px 0px}70%,100%{translate:-319.41px 0px}}
-.m26{animation-name:k28,k29;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k30{0%,64.5%{opacity:0}70%,100%{opacity:1}}
-@keyframes k31{0%,60%{translate:319.41px 0px}70%,100%{translate:0px 0px}}
-.m27{animation-name:k30,k31;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k32{0%,60%{translate:317.14px 0px}70%,100%{translate:0px 0px}}
+@keyframes k26{0%,60%{opacity:1}64.5%,100%{opacity:0}}
+@keyframes k27{0%,60%{translate:0px 0px}70%,100%{translate:-319.41px 0px}}
+.m24{animation-name:k26,k27;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k28{0%,64.5%{opacity:0}70%,100%{opacity:1}}
+@keyframes k29{0%,60%{translate:319.41px 0px}70%,100%{translate:0px 0px}}
+.m25{animation-name:k28,k29;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k30{0%,60%{translate:317.14px 0px}70%,100%{translate:0px 0px}}
+.m26{animation-name:k30;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k31{0%,77.778%,100%{visibility:hidden}60%{visibility:visible}}
+.m27{animation-name:k31;animation-timing-function:steps(1)}
+@keyframes k32{0%,85.556%{fill:var(--dom-ku1fcr)}91.111%,100%{fill:var(--dom-4f2k5)}}
 .m28{animation-name:k32;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k33{0%,77.778%,100%{visibility:hidden}60%{visibility:visible}}
-.m29{animation-name:k33;animation-timing-function:steps(1)}
-@keyframes k34{0%,85.556%{opacity:1}88.333%,100%{opacity:0}}
+@keyframes k33{0%,85.556%{opacity:0.7}91.111%,100%{opacity:1}}
+.m29{animation-name:k33;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k34{0%,85.556%{fill:var(--dom-z5gn29)}91.111%,100%{fill:var(--dom-1fm7r1t)}}
 .m30{animation-name:k34;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k35{0%,85.556%{fill:var(--dom-ku1fcr)}91.111%,100%{fill:var(--dom-4f2k5)}}
+@keyframes k35{0%,85.556%{opacity:1}88.333%,100%{opacity:0}}
 .m31{animation-name:k35;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k36{0%,85.556%{opacity:0.7}91.111%,100%{opacity:1}}
-.m32{animation-name:k36;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k37{0%,85.556%{fill:var(--dom-z5gn29)}91.111%,100%{fill:var(--dom-1fm7r1t)}}
-.m33{animation-name:k37;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k38{0%{visibility:hidden}77.778%,100%{visibility:visible}}
-.m34{animation-name:k38;animation-timing-function:steps(1)}
+@keyframes k36{0%{visibility:hidden}77.778%,100%{visibility:visible}}
+.m32{animation-name:k36;animation-timing-function:steps(1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.65s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g>
@@ -345,13 +341,11 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
       <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
       <g clip-path="url(#c1)">
         <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
-        <g opacity="0.4"/>
         <g opacity="0">
           <text x="96" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
           <text x="170.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
         </g>
         <text x="88" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.7">
             <text x="963.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
@@ -363,11 +357,9 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
         </g>
         <g class="a m1">
-          <g opacity="0.4"/>
           <g opacity="0.8">
             <path d="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" fill="var(--dom-1ocl0q)"/>
           </g>
-          <g opacity="0.7"/>
         </g>
         <g class="a m2">
           <g opacity="0.8">
@@ -431,13 +423,11 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
       <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
       <g clip-path="url(#c3)">
         <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
-        <g opacity="0.4"/>
         <g opacity="0">
           <text x="96" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
           <text x="170.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
         </g>
         <text x="88" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.7">
             <text x="963.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
@@ -448,7 +438,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g opacity="0.4"/>
         <g opacity="0.8">
           <path d="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" fill="var(--dom-1ocl0q)"/>
         </g>
@@ -460,7 +449,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             <rect x="108" y="189.6" width="1.143" height="18.4" fill="var(--dom-15juv12)" class="a m4"/>
           </g>
         </g>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.8">
             <path d="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" fill="var(--dom-1ocl0q)"/>
@@ -515,17 +503,15 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
     </g>
-    <g class="a m9">
+    <g class="a m7">
       <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
       <g clip-path="url(#c7)">
         <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
-        <g opacity="0.4"/>
         <g opacity="0">
           <text x="96" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
           <text x="170.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
         </g>
         <text x="88" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.7">
             <text x="963.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
@@ -536,16 +522,10 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g opacity="0.4"/>
         <g opacity="0.8">
           <path d="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" fill="var(--dom-1ocl0q)"/>
         </g>
-        <g class="a m6"/>
-        <g class="a m7"/>
-        <text x="108" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)" style="fill:var(--dom-15juv12)" class="a m8">Drawing Logseq with svjeez</text>
-        <g class="a m6"/>
-        <g class="a m7"/>
-        <g opacity="0.7"/>
+        <text x="108" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)" style="fill:var(--dom-15juv12)" class="a m6">Drawing Logseq with svjeez</text>
         <g opacity="0">
           <g opacity="0.8">
             <path d="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" fill="var(--dom-1ocl0q)"/>
@@ -600,28 +580,25 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
     </g>
-    <g class="a m15">
+    <g class="a m13">
       <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
       <g clip-path="url(#c9)">
         <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
-        <g opacity="0.4"/>
         <g opacity="0">
-          <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)" style="fill:var(--dom-7u6b9n)" class="a m10">Add icon</text>
-          <text x="370.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)" style="fill:var(--dom-7u6b9n)" class="a m10">Set property</text>
+          <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)" style="fill:var(--dom-7u6b9n)" class="a m8">Add icon</text>
+          <text x="370.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)" style="fill:var(--dom-7u6b9n)" class="a m8">Set property</text>
         </g>
-        <text x="288" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)" style="fill:var(--dom-1gq50us)" class="a m10">Nov 16th, 2026</text>
-        <g opacity="0.7"/>
+        <text x="288" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)" style="fill:var(--dom-1gq50us)" class="a m8">Nov 16th, 2026</text>
         <g opacity="0">
           <g opacity="0.7">
-            <text x="1009.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)" style="fill:var(--dom-qr7qt7)" class="a m11">#</text>
+            <text x="1009.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)" style="fill:var(--dom-qr7qt7)" class="a m9">#</text>
           </g>
           <g opacity="0.7">
             <g clip-path="url(#c10)">
-              <text x="1018.31" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)" style="fill:var(--dom-qr7qt7)" class="a m11">Journal</text>
+              <text x="1018.31" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)" style="fill:var(--dom-qr7qt7)" class="a m9">Journal</text>
             </g>
           </g>
         </g>
-        <g opacity="0.4"/>
         <g opacity="0.8">
           <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="dm">
             <animate id="w4" attributeName="d" values="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z;M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.5s;w4.begin+9s" dur="0.7s" fill="freeze" data-loop="9s"/>
@@ -629,8 +606,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </path>
           <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="ds" display="none"/>
         </g>
-        <text x="308" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)" style="fill:var(--dom-15juv12)" class="a m10">Drawing Logseq with svjeez</text>
-        <g opacity="0.7"/>
+        <text x="308" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)" style="fill:var(--dom-15juv12)" class="a m8">Drawing Logseq with svjeez</text>
         <g opacity="0">
           <g opacity="0.8">
             <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="dm">
@@ -640,7 +616,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)" style="fill:var(--dom-1ocl0q)" class="ds" display="none"/>
           </g>
         </g>
-        <g class="a m12">
+        <g class="a m10">
           <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-ynzzz)"/>
           <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0ZM0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1vt1yoq)" fill-rule="evenodd"/>
           <g opacity="0.9">
@@ -685,7 +661,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               </g>
             </g>
             <text x="42" y="145" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Journals</text>
-            <g opacity="0"/>
           </g>
           <g opacity="0.8">
             <g opacity="0.7">
@@ -696,7 +671,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               </g>
             </g>
             <text x="42" y="179" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Flashcards</text>
-            <g opacity="0"/>
           </g>
           <g opacity="0.8">
             <g opacity="0.7">
@@ -719,7 +693,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               </g>
             </g>
             <text x="42" y="247" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Graph view</text>
-            <g opacity="0"/>
           </g>
           <path d="M18 88H227A6 6 0 0 1 233 94V114A6 6 0 0 1 227 120H18A6 6 0 0 1 12 114V94A6 6 0 0 1 18 88Z" fill="var(--dom-ynzzz)"/>
           <g opacity="0.5">
@@ -759,9 +732,8 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
         </g>
         <path d="M0 0H0A0 0 0 0 1 0 0V48A0 0 0 0 1 0 48H0A0 0 0 0 1 0 48V0A0 0 0 0 1 0 0Z" fill="var(--dom-apupsx)"/>
-        <g class="a m12"/>
-        <g class="a m14">
-          <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m13"/>
+        <g class="a m12">
+          <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m11"/>
           <g>
             <g transform="translate(14 14) scale(0.833 0.833) translate(0 0)">
               <path d="M4 6l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -809,17 +781,15 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
     </g>
-    <g class="a m20">
+    <g class="a m18">
       <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
       <g clip-path="url(#c13)">
         <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
-        <g opacity="0.4"/>
         <g opacity="0">
           <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
           <text x="370.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
         </g>
         <text x="288" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.7">
             <text x="1009.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
@@ -830,19 +800,15 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g opacity="0.4"/>
         <g opacity="0.8">
           <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)"/>
         </g>
         <text x="308" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)">Drawing Logseq with svjeez</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.8">
             <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)"/>
           </g>
         </g>
-        <g class="a m16"/>
-        <g class="a m16"/>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-ynzzz)"/>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0ZM0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1vt1yoq)" fill-rule="evenodd"/>
         <g opacity="0.9">
@@ -893,7 +859,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="145" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Journals</text>
-          <g opacity="0"/>
         </g>
         <g opacity="0.8">
           <g opacity="0.7">
@@ -906,7 +871,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="179" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Flashcards</text>
-          <g opacity="0"/>
         </g>
         <g opacity="0.8">
           <g opacity="0.7">
@@ -933,7 +897,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="247" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Graph view</text>
-          <g opacity="0"/>
         </g>
         <path d="M18 88H227A6 6 0 0 1 233 94V114A6 6 0 0 1 227 120H18A6 6 0 0 1 12 114V94A6 6 0 0 1 18 88Z" fill="var(--dom-ynzzz)"/>
         <g opacity="0.5">
@@ -978,8 +941,8 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
         </g>
         <path d="M0 0H0A0 0 0 0 1 0 0V48A0 0 0 0 1 0 48H0A0 0 0 0 1 0 48V0A0 0 0 0 1 0 0Z" fill="var(--dom-apupsx)"/>
-        <g class="a m18">
-          <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-4f2k5)" class="a m17"/>
+        <g class="a m15">
+          <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-4f2k5)" class="a m14"/>
           <g>
             <g transform="translate(14 14) scale(0.833 0.833) translate(0 0)">
               <path d="M4 6l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1025,12 +988,12 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1fm7r1t)" class="a m19 dm">
+        <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1fm7r1t)" class="a m16 dm">
           <animate id="w6" attributeName="d" values="M708 48H1068A0 0 0 0 1 1068 48V48A0 0 0 0 1 1068 48H708A0 0 0 0 1 708 48V48A0 0 0 0 1 708 48Z;M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5s;w6.begin+9s" dur="0.4s" fill="freeze" data-loop="9s"/>
           <set attributeName="d" to="M708 48H1068A0 0 0 0 1 1068 48V48A0 0 0 0 1 1068 48H708A0 0 0 0 1 708 48V48A0 0 0 0 1 708 48Z" begin="0s;w6.begin+4s" dur="5s" fill="freeze" data-loop="9s"/>
         </path>
-        <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1fm7r1t)" class="a m19 ds" display="none"/>
-        <g class="a m16">
+        <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1fm7r1t)" class="a m16 ds" display="none"/>
+        <g class="a m17">
           <path d="M99 74H111V86H99Z" fill="url(#g1)"/>
           <path d="M989 74H1001V86H989Z" fill="url(#g2)"/>
           <path d="M989 86H1001V622H989Z" fill="url(#g3)"/>
@@ -1055,7 +1018,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               <text x="115" y="107" font-family="'Inter', sans-serif" font-size="20" font-weight="400" fill="rgb(106,114,130)">What are you looking for?</text>
             </g>
             <path d="M102 127H998A0 0 0 0 1 998 127V582A0 0 0 0 1 998 582H102A0 0 0 0 1 102 582V127A0 0 0 0 1 102 127Z" fill="var(--dom-ynzzz)"/>
-            <g opacity="0.5"/>
             <path d="M102 582H998A0 0 0 0 1 998 582V627A0 0 0 0 1 998 627H102A0 0 0 0 1 102 627V582A0 0 0 0 1 102 582Z" fill="var(--dom-1ssyk5m)"/>
             <path d="M102 582H998A0 0 0 0 1 998 582V627A0 0 0 0 1 998 627H102A0 0 0 0 1 102 627V582A0 0 0 0 1 102 582ZM102 583H998A0 0 0 0 1 998 583V627A0 0 0 0 1 998 627H102A0 0 0 0 1 102 627V583A0 0 0 0 1 102 583Z" fill="var(--dom-13cbzl3)" fill-rule="evenodd"/>
             <text x="114" y="608" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-jgam8a)">Tip:</text>
@@ -1084,20 +1046,17 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g class="a m16"/>
       </g>
     </g>
-    <g class="a m29">
+    <g class="a m27">
       <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
       <g clip-path="url(#c20)">
         <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
-        <g opacity="0.4"/>
         <g opacity="0">
           <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
           <text x="370.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
         </g>
         <text x="288" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.7">
             <text x="1009.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
@@ -1108,12 +1067,10 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g opacity="0.4"/>
         <g opacity="0.8">
           <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)"/>
         </g>
         <text x="308" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)">Drawing Logseq with svjeez</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.8">
             <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)"/>
@@ -1169,7 +1126,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="145" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Journals</text>
-          <g opacity="0"/>
         </g>
         <g opacity="0.8">
           <g opacity="0.7">
@@ -1182,7 +1138,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="179" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Flashcards</text>
-          <g opacity="0"/>
         </g>
         <g opacity="0.8">
           <g opacity="0.7">
@@ -1209,7 +1164,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="247" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Graph view</text>
-          <g opacity="0"/>
         </g>
         <path d="M18 88H227A6 6 0 0 1 233 94V114A6 6 0 0 1 227 120H18A6 6 0 0 1 12 114V94A6 6 0 0 1 18 88Z" fill="var(--dom-ynzzz)"/>
         <g opacity="0.5">
@@ -1322,27 +1276,27 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <g opacity="var(--dom-13drd9g)">
             <path d="M102 73H998A0 0 0 0 1 998 73V127A0 0 0 0 1 998 127H102A0 0 0 0 1 102 127V73A0 0 0 0 1 102 73Z" fill="var(--dom-ynzzz)"/>
             <path d="M102 73H998A0 0 0 0 1 998 73V127A0 0 0 0 1 998 127H102A0 0 0 0 1 102 127V73A0 0 0 0 1 102 73ZM103 74H997A0 0 0 0 1 997 74V126A0 0 0 0 1 997 126H103A0 0 0 0 1 103 126V74A0 0 0 0 1 103 74Z" fill="var(--dom-37ffwz)" fill-rule="evenodd"/>
-            <text x="115" y="107" font-family="'Inter', sans-serif" font-size="20" font-weight="400" fill="rgb(106,114,130)" class="a m21">What are you looking for?</text>
+            <text x="115" y="107" font-family="'Inter', sans-serif" font-size="20" font-weight="400" fill="rgb(106,114,130)" class="a m19">What are you looking for?</text>
             <g>
               <g clip-path="url(#c25)">
                 <text x="115" y="107" font-family="'Inter', sans-serif" font-size="20" font-weight="400" fill="var(--dom-15juv12)">svjeez</text>
               </g>
-              <rect x="115" y="89" width="1.429" height="23" fill="var(--dom-15juv12)" class="a m22"/>
+              <rect x="115" y="89" width="1.429" height="23" fill="var(--dom-15juv12)" class="a m20"/>
             </g>
           </g>
           <path d="M102 127H998A0 0 0 0 1 998 127V582A0 0 0 0 1 998 582H102A0 0 0 0 1 102 582V127A0 0 0 0 1 102 127Z" fill="var(--dom-ynzzz)"/>
-          <g class="a m25">
-            <path d="M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m23 dm">
+          <g class="a m23">
+            <path d="M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m21 dm">
               <animate id="w8" attributeName="d" values="M102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127Z;M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w8.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
               <set attributeName="d" to="M102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127Z" begin="0s;w8.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
             </path>
-            <path d="M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m23 ds" display="none"/>
-            <g class="a m24">
+            <path d="M102 127H998A0 0 0 0 1 998 127V241.98A0 0 0 0 1 998 241.98H102A0 0 0 0 1 102 241.98V127A0 0 0 0 1 102 127ZM102 127H998A0 0 0 0 1 998 127V240.98A0 0 0 0 1 998 240.98H102A0 0 0 0 1 102 240.98V127A0 0 0 0 1 102 127Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m21 ds" display="none"/>
+            <g class="a m22">
               <path d="M102 127H998A0 0 0 0 1 998 127V159A0 0 0 0 1 998 159H102A0 0 0 0 1 102 159V127A0 0 0 0 1 102 127Z" fill="var(--dom-ynzzz)"/>
               <text x="116" y="147" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="var(--dom-1wn6jdp)">Nodes</text>
               <text x="167.95" y="146.53" font-family="'Inter', sans-serif" font-size="11.2" font-weight="400" fill="var(--dom-jgam8a)">1</text>
             </g>
-            <g class="a m24">
+            <g class="a m22">
               <path d="M112 159H988A8 8 0 0 1 996 167V196.98A8 8 0 0 1 988 204.98H112A8 8 0 0 1 104 196.98V167A8 8 0 0 1 112 159Z" fill="var(--dom-19cca6u)"/>
               <g clip-path="url(#c26)">
                 <path d="M112 159H988A8 8 0 0 1 996 167V196.98A8 8 0 0 1 988 204.98H112A8 8 0 0 1 104 196.98V167A8 8 0 0 1 112 159ZM10103 10158H10103A0 0 0 0 1 10103 10158V10158A0 0 0 0 1 10103 10158H10103A0 0 0 0 1 10103 10158V10158A0 0 0 0 1 10103 10158Z" fill="var(--dom-xq11sk)" fill-rule="evenodd"/>
@@ -1371,7 +1325,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               </g>
             </g>
           </g>
-          <g class="a m24">
+          <g class="a m22">
             <g opacity="var(--dom-13drd9g)">
               <path d="M102 241.98H998A0 0 0 0 1 998 241.98V273.98A0 0 0 0 1 998 273.98H102A0 0 0 0 1 102 273.98V241.98A0 0 0 0 1 102 241.98Z" fill="var(--dom-ynzzz)"/>
               <text x="116" y="261.98" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="var(--dom-1wn6jdp)">Filters</text>
@@ -1446,10 +1400,10 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
           <g opacity="0.4">
             <g opacity="0.6">
-              <g class="a m26">
+              <g class="a m24">
                 <text x="922.22" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Filter</text>
               </g>
-              <g class="a m27">
+              <g class="a m25">
                 <text x="602.81" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Open</text>
               </g>
             </g>
@@ -1470,9 +1424,9 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               </path>
               <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd" style="fill:var(--dom-1hcrc6)" class="ds" display="none"/>
             </g>
-            <text x="647.17" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)" style="fill:var(--dom-jgam8a)" class="a m28">⏎</text>
+            <text x="647.17" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)" style="fill:var(--dom-jgam8a)" class="a m26">⏎</text>
           </g>
-          <g class="a m24">
+          <g class="a m22">
             <g opacity="0.4">
               <g opacity="0.6">
                 <text x="694.86" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Open in sidebar</text>
@@ -1487,7 +1441,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
               <text x="829.72" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⏎</text>
             </g>
           </g>
-          <g class="a m24">
+          <g class="a m22">
             <g opacity="0.4">
               <g opacity="0.6">
                 <text x="877.41" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Copy ref</text>
@@ -1505,17 +1459,15 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
     </g>
-    <g class="a m34">
+    <g class="a m32">
       <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
       <g clip-path="url(#c39)">
         <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1sn25ac)"/>
-        <g opacity="0.4"/>
         <g opacity="0">
           <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
           <text x="370.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
         </g>
         <text x="288" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.7">
             <text x="1009.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
@@ -1526,19 +1478,15 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g opacity="0.4"/>
         <g opacity="0.8">
           <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)"/>
         </g>
         <text x="308" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)">Drawing Logseq with svjeez</text>
-        <g opacity="0.7"/>
         <g opacity="0">
           <g opacity="0.8">
             <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)"/>
           </g>
         </g>
-        <g class="a m30"/>
-        <g class="a m30"/>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-ynzzz)"/>
         <path d="M0 0H246A0 0 0 0 1 246 0V700A0 0 0 0 1 246 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0ZM0 0H245A0 0 0 0 1 245 0V700A0 0 0 0 1 245 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-1vt1yoq)" fill-rule="evenodd"/>
         <g opacity="0.9">
@@ -1589,7 +1537,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="145" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Journals</text>
-          <g opacity="0"/>
         </g>
         <g opacity="0.8">
           <g opacity="0.7">
@@ -1602,7 +1549,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="179" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Flashcards</text>
-          <g opacity="0"/>
         </g>
         <g opacity="0.8">
           <g opacity="0.7">
@@ -1629,7 +1575,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
           <text x="42" y="247" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-28u7ya)">Graph view</text>
-          <g opacity="0"/>
         </g>
         <path d="M18 88H227A6 6 0 0 1 233 94V114A6 6 0 0 1 227 120H18A6 6 0 0 1 12 114V94A6 6 0 0 1 18 88Z" fill="var(--dom-ynzzz)"/>
         <g opacity="0.5">
@@ -1674,8 +1619,8 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
         </g>
         <path d="M0 0H0A0 0 0 0 1 0 0V48A0 0 0 0 1 0 48H0A0 0 0 0 1 0 48V0A0 0 0 0 1 0 0Z" fill="var(--dom-apupsx)"/>
-        <g class="a m32">
-          <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m31"/>
+        <g class="a m29">
+          <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m28"/>
           <g>
             <g transform="translate(14 14) scale(0.833 0.833) translate(0 0)">
               <path d="M4 6l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1721,12 +1666,12 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <path d="M708 48H1068A0 0 0 0 1 1068 48V48A0 0 0 0 1 1068 48H708A0 0 0 0 1 708 48V48A0 0 0 0 1 708 48Z" fill="var(--dom-z5gn29)" class="a m33 dm">
+        <path d="M708 48H1068A0 0 0 0 1 1068 48V48A0 0 0 0 1 1068 48H708A0 0 0 0 1 708 48V48A0 0 0 0 1 708 48Z" fill="var(--dom-z5gn29)" class="a m30 dm">
           <animate id="w13" attributeName="d" values="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z;M708 48H1068A0 0 0 0 1 1068 48V48A0 0 0 0 1 1068 48H708A0 0 0 0 1 708 48V48A0 0 0 0 1 708 48Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.7s;w13.begin+9s" dur="0.5s" fill="freeze" data-loop="9s"/>
           <set attributeName="d" to="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" begin="0s;w13.begin+1.3s" dur="7.7s" fill="freeze" data-loop="9s"/>
         </path>
-        <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-z5gn29)" class="a m33 ds" display="none"/>
-        <g class="a m30">
+        <path d="M0 0H1100A0 0 0 0 1 1100 0V700A0 0 0 0 1 1100 700H0A0 0 0 0 1 0 700V0A0 0 0 0 1 0 0Z" fill="var(--dom-z5gn29)" class="a m30 ds" display="none"/>
+        <g class="a m31">
           <path d="M99 74H111V86H99Z" fill="url(#g1)"/>
           <path d="M989 74H1001V86H989Z" fill="url(#g2)"/>
           <path d="M989 86H1001V622H989Z" fill="url(#g3)"/>
@@ -1893,7 +1838,6 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g class="a m30"/>
       </g>
     </g>
   </g>

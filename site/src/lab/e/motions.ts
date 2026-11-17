@@ -1,27 +1,22 @@
-import { ease, motion, sampled, wiggle, css } from "svjeez";
+import { ease, motion, sampled, span, wiggle, css } from "svjeez";
 import { clamp } from "../util";
 import { DURATION, sub, type Pt } from "./geometry";
 import type { Genome } from "./genome";
 import type { Layout } from "./layout";
 import { r1, type Cx } from "./look";
 
-/** When the melt starts, how long it takes, when it reverses and how long the rebound is. */
-export const MELT = { at: 0.6, over: 2.4, back: 5.2, rebound: 1.4 };
+/** When the specimen melts, and when it springs back. */
+export const MELT = span(0.6, 2.4);
+const REBOUND = span(5.2, 1.4);
 
 export const meltMotion = (d: Pt) =>
   motion({ x: 0, y: 0 })
-    .at(MELT.at)
-    .to({ x: r1(d.x), y: r1(d.y) }, MELT.over, ease.inOut)
-    .at(MELT.back)
-    .to({ x: 0, y: 0 }, MELT.rebound, ease.pop);
+    .to({ x: r1(d.x), y: r1(d.y) }, MELT, ease.inOut)
+    .to({ x: 0, y: 0 }, REBOUND, ease.pop);
 
 /** A scale that shrinks while the specimen melts and comes back with the rebound. */
 export const meltScale = (to: number) =>
-  motion({ scale: 1 })
-    .at(MELT.at)
-    .to({ scale: to }, MELT.over, ease.inOut)
-    .at(MELT.back)
-    .to({ scale: 1 }, MELT.rebound, ease.pop);
+  motion({ scale: 1 }).to({ scale: to }, MELT, ease.inOut).to({ scale: 1 }, REBOUND, ease.pop);
 
 /** Visibility of a part at w in the fourth dimension as the slice sweeps through it. */
 export const sliceAt = (slice: number, w: number, t: number) => {
@@ -75,10 +70,8 @@ export const breathing = (cx: Cx) => {
       )
     : f.liquid
       ? motion({ [breath]: 1 })
-          .at(MELT.at)
-          .to({ [breath]: 1.3 }, MELT.over, ease.inOut)
-          .at(MELT.back)
-          .to({ [breath]: 1 }, MELT.rebound, ease.pop)
+          .to({ [breath]: 1.3 }, MELT, ease.inOut)
+          .to({ [breath]: 1 }, REBOUND, ease.pop)
       : motion({ [breath]: 1 })
           .to({ [breath]: 1.07 }, 2, ease.inOut)
           .to({ [breath]: 1 }, 2, ease.inOut)

@@ -8,6 +8,7 @@ import {
   motion,
   type Base16,
   type Color,
+  type Part,
   type Point,
   type Rect,
   type Span,
@@ -22,6 +23,7 @@ import type {
   ChartAreaOptions,
   ChartBar,
   ChartBars,
+  ChartPoint,
   ChartBarsOptions,
   Curve,
   Datum,
@@ -63,11 +65,35 @@ const curveOf = (what: string, curve: Curve = "linear") => {
 
 const EPSILON = 1e-9;
 
+/** Seconds a line's dot takes to pop in. */
+const DOT_POP = 0.3;
+
 const within = (v: number, [low, high]: readonly [number, number]): boolean => {
   const slack = (high - low) * EPSILON;
 
   return v >= low - slack && v <= high + slack;
 };
+
+/** `part(id)` over `parts`, throwing with some ids that do exist. */
+const finder =
+  <P extends Part>(what: string, parts: readonly P[]) =>
+  (id: string): P => {
+    const found = parts.find((p) => p.id === id);
+
+    if (!found)
+      throw new Error(
+        `${what} has no part ${JSON.stringify(id)}. Its parts are ${parts
+          .slice(0, 5)
+          .map((p) => JSON.stringify(p.id))
+          .join(", ")}${parts.length > 5 ? ", …" : ""}.`,
+      );
+
+    return found;
+  };
+
+/** The box around every part. */
+const around = (parts: readonly Part[]): Rect =>
+  parts.map((p) => p.box).reduce((a, b) => a.union(b));
 
 const timing = (what: string, { at, over }: Span) => {
   if (!Number.isFinite(at) || at < 0)
@@ -210,7 +236,12 @@ export function buildSeries(f: Frame) {
         const up = value >= 0;
         const long = length + radiusPx;
 
-        placed.push({ key, value, bounds: rect(x, Math.min(tip, zero), barWidth, length) });
+        placed.push({
+          id: key,
+          value,
+          box: rect(x, Math.min(tip, zero), barWidth, length),
+          span: spanOf(start, growth),
+        });
 
         const from = up ? motion({ height: 0, y: long }) : motion({ height: 0 });
         const to = up ? { height: long, y: 0 } : { height: long };
@@ -254,8 +285,10 @@ export function buildSeries(f: Frame) {
           {labels}
         </g>
       ),
-      bars: placed,
       span: spanOf(at, over),
+      bounds: around(placed),
+      parts: placed,
+      part: finder("bars()", placed),
     };
   }
 
@@ -313,7 +346,7 @@ export function buildSeries(f: Frame) {
                 stroke={theme.base00}
                 strokeWidth={2}
                 animation={enter(
-                  { at: at + (over * reached[i]!) / total, over: 0.3 },
+                  { at: at + (over * reached[i]!) / total, over: DOT_POP },
                   { scale: 0 },
                   ease.pop,
                 )}
@@ -335,17 +368,42 @@ export function buildSeries(f: Frame) {
       </g>
     );
 
-    return { d, node };
+    /** When the stroke reaches each point, which is when its dot pops in. */
+    const reaches = reached.map((length) => at + (over * length) / total);
+
+    return { d, node, radius, reaches };
   }
+
+  /** Each placed point as a part: its dot, and from when the line reaches it while the dot pops in. */
+  const pointParts = (
+    raw: Raw,
+    placed: readonly Point[],
+    { radius, reaches }: { radius: number; reaches: readonly number[] },
+  ): ChartPoint[] =>
+    placed.map((point, i) => ({
+      id: String(raw[i]![0]),
+      value: raw[i]![1],
+      point,
+      box: rect(point.x - radius, point.y - radius, radius * 2, radius * 2),
+      span: spanOf(reaches[i]!, radius > 0 ? DOT_POP : 0),
+    }));
 
   function line(when: Span, points: Raw, options: ChartLineOptions = {}): ChartLine {
     const span = timing("line()", when);
     const placed = place("line()", points);
-    const { d, node } = trace("line()", placed, options, options.color ?? f.nextColor(), span);
+    const traced = trace("line()", placed, options, options.color ?? f.nextColor(), span);
+    const parts = pointParts(points, placed, traced);
 
     const end = span.at + span.over + (options.label ? 0.4 : 0);
 
-    return { node, d, points: placed, span: spanOf(span.at, end - span.at) };
+    return {
+      node: traced.node,
+      d: traced.d,
+      span: spanOf(span.at, end - span.at),
+      bounds: around(parts),
+      parts,
+      part: finder("line()", parts),
+    };
   }
 
   function area(when: Span, points: Raw, options: ChartAreaOptions = {}): ChartArea {
@@ -385,7 +443,8 @@ export function buildSeries(f: Frame) {
       />,
     );
 
-    const { d, node } = trace("area()", placed, options, color, span, options.line !== false);
+    const traced = trace("area()", placed, options, color, span, options.line !== false);
+    const parts = pointParts(points, placed, traced);
 
     return {
       node: (
@@ -393,13 +452,15 @@ export function buildSeries(f: Frame) {
           <g clipPath={wipe}>
             <path d={fill} fill={shade} />
           </g>
-          {node}
+          {traced.node}
         </g>
       ),
-      d,
+      d: traced.d,
       fill,
-      points: placed,
       span: spanOf(at, over + (options.label ? 0.4 : 0)),
+      bounds: around(parts),
+      parts,
+      part: finder("area()", parts),
     };
   }
 

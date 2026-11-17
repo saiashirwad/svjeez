@@ -1,5 +1,14 @@
 /** @jsxImportSource svjeez */
-import { ease, motion, type Color, type Ease, type Span, type SvgNode } from "svjeez";
+import {
+  ease,
+  motion,
+  span as spanOf,
+  type Color,
+  type Drawn,
+  type Ease,
+  type Span,
+  type Spanned,
+} from "svjeez";
 import type { GeoMap, Region } from "./index.ts";
 import type { ColorScale, Hex } from "./scale.tsx";
 
@@ -16,8 +25,16 @@ export interface ChoroplethOptions {
   readonly class?: string;
 }
 
-export interface Choropleth {
-  readonly node: SvgNode;
+/** A region `values` names, with when it fills: from the first span that changes its color to the end of the last. */
+export interface ChoroplethRegion extends Region {
+  readonly span: Spanned;
+}
+
+/**
+ * The colored map. Its parts are the regions `values` names, found by id or `properties.name` as `map.part()` finds
+ * them; `span` covers every span passed, and `bounds` every region drawn.
+ */
+export interface Choropleth extends Drawn<ChoroplethRegion> {
   /** The keys in `values` that no region answers to, so a mismatch between the data and the map is visible. */
   readonly unmatched: readonly string[];
   /** How many animated paths the map came to: regions whose colors follow the same course share one. */
@@ -30,7 +47,7 @@ const isName = (name: unknown): name is string => typeof name === "string";
 export const resolveRegions = (map: GeoMap, values: RegionValues) => {
   const byKey = new Map<string, Region>();
 
-  for (const region of map.regions) {
+  for (const region of map.parts) {
     byKey.set(region.id, region);
     const name = region.properties?.name;
 
@@ -119,7 +136,7 @@ export function choropleth(
   }
 
   const named = new Set(found.map(([region]) => region));
-  const rest = map.regions.filter((region) => !named.has(region)).map((region) => region.d);
+  const rest = map.parts.filter((region) => !named.has(region)).map((region) => region.d);
 
   // A first span with no length is a cut: from its `at` the map has its first colors, and from 0 it never shows `empty`.
   const cut = spans[0]!.over === 0;
@@ -139,7 +156,47 @@ export function choropleth(
           motion({ fill: fromStart ? colors[0]! : scale.empty }),
         );
 
+  /** From the first span that changes the region's color to the end of the last; the instant it cuts to them otherwise. */
+  const fills = (colors: readonly Hex[]): Spanned => {
+    let shown: Hex = fromStart ? colors[0]! : scale.empty;
+
+    const changes = spans.filter((_, i) => {
+      const changed = colors[i] !== shown;
+      shown = colors[i]!;
+
+      return changed;
+    });
+
+    const [first, last] = [changes[0] ?? spans[0]!, changes.at(-1) ?? spans[0]!];
+
+    return spanOf(first.at, last.at + last.over - first.at);
+  };
+
+  const parts = courses.map(({ region, colors }): ChoroplethRegion => ({
+    ...region,
+    span: fills(colors),
+  }));
+
+  const first = spans[0]!;
+  const last = spans.at(-1)!;
+
   return {
+    span: spanOf(first.at, last.at + last.over - first.at),
+    bounds: map.bounds({ type: "FeatureCollection", features: map.parts.map((r) => r.feature) }),
+    parts,
+    part: (key) => {
+      const found = parts.find((r) => r.id === String(key) || r.properties?.name === key);
+
+      if (!found)
+        throw new Error(
+          `choropleth() has no value for ${JSON.stringify(key)}. Its regions are those \`values\` names, as in ${parts
+            .slice(0, 3)
+            .map((r) => JSON.stringify(r.properties?.name ?? r.id))
+            .join(", ")}.`,
+        );
+
+      return found;
+    },
     node: (
       <g class={options.class}>
         {[...groups.values()].map(({ colors, d }) => (

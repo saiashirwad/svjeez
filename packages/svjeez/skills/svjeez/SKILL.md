@@ -37,44 +37,48 @@ Imports:
 | --- | --- |
 | `svjeez` | `render`, `motion`, `ease`, the recipes, spans, `<Clip>`, `show`, `def`, `css`, fonts, pictures, and the explainer parts |
 | `svjeez/geometry` | `rect`, `matchPaths`, `polylinePath`, `resample`, `pathLength`, `num`. The types `Rect`, `Point`, `Edge` and `PathData` come from `svjeez` |
-| `svjeez/frames` | `renderFrames`, `validateSvg` |
+| `svjeez/frames` | `renderFrames`, `checkScene`, `validateSvg` |
 | `svjeez/page` | `restyle`, `seek`, `loopLength`, for a page that holds a rendered SVG |
-| `svjeez/params` | values a page or editor can change |
+| `svjeez/params` | the params that make a scene a template: what the CLI, an editor or your build passes in |
 | `svjeez/jsx-runtime` | `jsx(tag, props)`, for `.ts` files |
 
 Packages that place something on the canvas take a `frame: Rect`, built with `rect(x, y, w, h)`.
 
 ## Render, look, fix
 
-Never call a scene done from its source. Timing bugs only show in frames.
+Never call a scene done from its source. Timing bugs only show in frames, and most of them show in numbers first.
 
 ```sh
+npx tsc --noEmit
+npx svjeez check scene.tsx
 npx svjeez frames scene.tsx --times 0,0.5,1.2,3 --sheet --out frames/
 ```
 
-Times are scene seconds, the clock your motions are written on, even when `playbackRate` is not 1. The command writes one PNG per time plus `sheet.png`, a labelled grid. Open `sheet.png` first. Without `--times` you get `--count` frames (default 6) over one loop. Add `--scale 2` for small text and `--color-scheme light` or `dark` for adaptive themes. `svjeez svg scene.tsx --out scene.svg` writes the SVG. Frames need `npm i -D playwright-core` and `npx playwright-core install chromium-headless-shell`. On Node, `.tsx` needs `npm i -D tsx`. Under Bun use `bunx --bun svjeez`.
+`svjeez check` measures the scene in headless Chromium and prints one finding per line, `file:line:column  rule  severity: message`: parts off the canvas, text running past the canvas or the box it sits on, text over text, animations that change nothing, entrances visible at 0, and jumps at the loop seam. It exits 1 on an error. Its rules, and what it cannot see, are in [`references/check.md`](references/check.md).
+
+`frames` writes one PNG per time plus `sheet.png`, a labelled grid. Open `sheet.png` first. Times are scene seconds, the clock your motions are written on, even when `playbackRate` is not 1. Without `--times` you get `--count` frames (default 6) over one loop. Add `--scale 2` for small text and `--color-scheme light` or `dark` for adaptive themes. `svjeez svg scene.tsx --out scene.svg` writes the SVG. `svjeez dev scene.tsx` serves a page that plays the scene with a scrubber and rebuilds it on every save. Every command takes `--params data.json` and `--param key=value` for a scene that exports `params` ([`references/params.md`](references/params.md)). `frames` and `check` need `npm i -D playwright-core` and `npx playwright-core install chromium-headless-shell`. On Node, `.tsx` needs `npm i -D tsx`. Under Bun use `bunx --bun svjeez`.
 
 1. Pick `duration` first and plan the beats as spans.
 2. Run `tsc --noEmit`. Fix type errors with the table below.
-3. Render a sheet at each beat's start, middle and end, plus `0` and just before `duration`.
-4. Check: nothing visible at `t = 0` that should be hidden; each element arrives and leaves on cue; nothing clipped or off center; text legible in both color schemes; the last frame close to the first.
-5. Fix, render again, and report only after a sheet shows the intended motion. Name the times you checked. Two times that should differ but render identically mean the motion is not attached or starts later than you think.
+3. Run `svjeez check`. Fix every error. For each warning, look at a frame at the times it names, and fix it unless the frame shows what you meant.
+4. Render a sheet at each beat's start, middle and end, plus `0` and just before `duration`. Check what a number cannot: each element arrives and leaves on cue, nothing off center, text legible in both color schemes, the picture reads, and the last frame close to the first when the scene should not cut.
+5. Fix, run check and render again, and report only after check has no errors and a sheet shows the intended motion. Name the times you checked. Two times that should differ but render identically mean the motion is not attached or starts later than you think.
 
 ## Time
 
 Every motion is written on a clock that starts at 0. The scene is the root clock, `0` to `duration`; a `<Clip>` starts another. A span is a plain `{ at, over }` on the clock around it, and a span without `over` runs to the end. Recipes, `show`, `<Clip>` and the results of `typewriter`, `terminal`, `reveal`, `morph` and `flow` take or return spans. Attach motions with the `animation` prop.
 
 ```tsx
-motion({ opacity: 0 })          // initial values, held until the first transition
-  .at(1)                        // move the cursor to 1s
-  .to({ opacity: 1 }, 0.5)      // transition over 0.5s; cursor is now 1.5
-  .wait(2)                      // values hold; cursor is now 3.5
-  .to({ opacity: 0, scale: 0.8 }, 0.4, ease.in)
-  .set({ scale: 1 })            // hard cut at the cursor
-  .loop(6);                     // repeat every 6s, forever; snapped to divide duration
+motion({ opacity: 0 })              // initial values, held until the first transition
+  .to({ opacity: 1 }, span(1, 0.5)) // during the span, 1s to 1.5s; the cursor is now 1.5
+  .wait(2)                          // values hold; the cursor is now 3.5
+  .to({ opacity: 0, scale: 0.8 }, 0.4, ease.in) // a number: from the cursor, this long
+  .set({ scale: 1 })                // hard cut at the cursor
+  .loop(6);                         // repeat every 6s, forever; snapped to divide duration
 ```
 
-- `.to(values, over, ease?)`: `over` is a length, never an end time. `.at(t).to(values, over)` places a transition on the clock. Default ease is `ease.out`. Between transitions every value holds.
+- `.to(values, when, ease?)`: a span places the transition on the clock and plays it during the span. A number is a length from the cursor, never an end time, for transitions that follow each other. Default ease is `ease.out`. Between transitions every value holds.
+- `.at(t)` moves the cursor, for a `.set()` cut at a time.
 - `.repeat(3)` plays the passage written so far three times in all; `.repeat({ until: 10 })` repeats it until 10s, cutting the last pass short, then holds. Each pass starts from the initial values. Passes become keyframes, so a spin that never stops is `.loop()`, and a long repeat hits the key cap.
 - `.rewind(0.8)` glides every channel back to its initial value, ending at the end of the clock: the scene's, a `<Clip>`'s, or a loop's period. It is how a loop closes without a hand-written reset. Nothing can follow it.
 - `.label(name)` names the keyframes. It changes nothing else.
@@ -101,17 +105,21 @@ Custom properties from `css.property` animate on every tag above except filter p
 
 ### Spans
 
-`span()` helps when a beat is placed relative to another.
+A span is how to say when. Build each one from the spans it follows, so moving one beat moves everything placed after it, and no time is written twice or added up by hand.
 
 ```tsx
 const reach = span(0, 0.7);
 const grab = reach.next(1, 0.2); // the next span: 1s long, starting 0.2s after reach ends
 const down = grab.pad(0.15);     // grown 0.15s each side; negative shrinks
 reach.end; reach.shift(2);       // 0.7; the same span 2s later
+span(2).until(3.5);              // from a start to an end: 2s to 3.5s
+grab.until(down.end);            // starts with grab, ends when down ends
+grab.first(0.3); grab.last(0.3); // the first and the last 0.3s of grab
 span(5);                         // from 5s to the end of the clock; its end is Infinity
+stagger(span(1, 0.5), 4, 0.1);   // a cascade: four 0.5s spans, each 0.1s after the one before
 ```
 
-A `span` is a plain `{ at, over }` that also has `.end`, `.shift(dt)`, `.next(over, gap?)` and `.pad(before, after?)`. `at` is 0 or later and `over` is positive; `span(at, 0)` is allowed as a point to chain from. `typewriter`, `terminal`, `reveal`, `morph` and `flow` return `.span`, so `typed.span.next(1)` is the next beat and `typed.span.end` is when it lands. `timeline({ intro: 4, demo: 6 }, { gap, pace, at })` lays out named scenes as spans, with `.end` for the total.
+A `span` is a plain `{ at, over }` that also has `.end`, `.shift(dt)`, `.next(over, gap?)`, `.pad(before, after?)`, `.until(end)`, `.first(over)` and `.last(over)`. A span without `over` has `.shift`, `.pad`, `.until` and `.first`. `at` is 0 or later and `over` is positive; `span(at, 0)` is allowed as a point to chain from. `stagger(first, count, step)` returns `count` spans as long as `first`, `step` apart: map items over it, as in `items.map((item, i) => <g animation={enter(cascade[i]!)}>…</g>)`, and `cascade.at(-1)!.end` is when the last one settles. `typewriter`, `terminal`, `reveal`, `morph` and `flow` return `.span`, so `typed.span.next(1)` is the next beat and `typed.span.end` is when it lands. `timeline({ intro: 4, demo: 6 }, { gap, pace, at })` lays out named scenes as spans, with `.end` for the total.
 
 ### Clips
 
@@ -177,7 +185,7 @@ sampled({ at: 0, over: 12 }, (t) => ({ x: 100 * Math.cos(t) }), { tolerance: { t
 import { matchPaths } from "svjeez/geometry";
 
 const [square, star] = matchPaths([squareD, starD]);
-<path d={square} animation={motion({ d: square }).at(1).to({ d: star }, 0.8, ease.inOut)} />;
+<path d={square} animation={motion({ d: square }).to({ d: star }, span(1, 0.8), ease.inOut)} />;
 sampled.path({ at: 0, over: 6 }, (t) => wavePath(t), { tolerance: 0.5 });
 ```
 
@@ -186,6 +194,24 @@ Reduced motion shows a still copy of the path at `reducedMotion.at`.
 Also in `svjeez/geometry`: `polylinePath(points, { closed?, precision? })` writes path data for straight runs through points (one decimal place by default), `resample(points, count)` spaces `count` points evenly along them, and `pathLength(points)` is their total length.
 
 `sampled.path` takes `slack: (x, y) => px`, which lets points that nobody sees stray further and saves keys. `@svjeez/geo`'s turning globes use it for the side folded out past the clip.
+
+## Drawn results
+
+Charts, maps, formulas and diagrams (`@svjeez/charts`, `geo`, `math`, `diagrams`, `mermaid`) all return a `Drawn`: `node` to put in the scene, `span` for when it all plays, `bounds`, `parts` and `part(id)`. A part is a bar, region, node or glyph run with an `id`, a `box` (a `Rect`, where it rests) and its own `span`. Time what comes after a part from `part.span` and place it with `part.box`, so a callout follows the chart when the chart's timing changes:
+
+```tsx
+const bars = c.bars({ at: 0.8, over: 1.5 }, sales);
+const q3 = bars.part("Q3"); // throws, naming ids that exist, when there is none
+
+<>
+  {bars.node}
+  <text x={q3.box.top.x} y={q3.box.top.y - 8} textAnchor="middle" animation={enter(q3.span.next(0.4))}>
+    {q3.value}
+  </text>
+</>;
+```
+
+Each package adds its own fields to its parts (a bar's `value`, a line point's `point`). Their references say which, and what a part's `span` means there. `span.end` of the whole result is where the next beat starts.
 
 ## Errors and fixes
 
@@ -197,7 +223,7 @@ Type errors from `tsc`:
 | `Motion<"draw"> is not assignable to type 'Stack<TagChannels<"g">>` | The tag cannot animate that channel. See the table |
 | `Ref<"linearGradient"> is not assignable to type 'Ref<"clipPath">'` | A def in the wrong slot. Use `def.clipPath` or `def.mask` |
 | `'duration' does not exist in type 'Span'` | Recipes take `{ at, over }` |
-| `Argument of type '{ at: number; over: number; }' is not assignable to parameter of type 'number'` on `.to` | `.to` takes a length: `.at(span.at).to(values, span.over)` |
+| `Argument of type 'OpenSpanned' is not assignable to parameter of type 'number \| Span'` on `.to` | A transition needs an end: `span(a, over)` or `span(a).until(b)`, not `span(a)` |
 | `No overload matches this call` on `enter` or `exit` | A non-rest channel such as `fill`. Use `motion().to()` |
 | `Expected 2 arguments` on `wiggle` | `wiggle(amplitude, { seed: "name" })` |
 | `Property 'title' is missing` | `render` needs `title` |
@@ -250,9 +276,11 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Syntax highlighting for `code()` and `terminal()`, themed by role (`@svjeez/code`) | [`references/code.md`](references/code.md) |
 | Bar, line and area charts that animate in (`@svjeez/charts`) | [`references/charts.md`](references/charts.md) |
 | Mermaid text drawn as a flowchart, sequence or state diagram (`@svjeez/mermaid`) | [`references/mermaid.md`](references/mermaid.md) |
+| Lint a scene by measuring it: off-canvas parts, text overflow and overlap, dead motions, loop seams (`svjeez check`) | [`references/check.md`](references/check.md) |
+| Small revisions to a scene ("slow the second beat", "a warmer orange"): list its values by key and set them, then check and look (`svjeez values`, `svjeez set`) | [`references/edit.md`](references/edit.md) |
 | MP4 or WebM video of a finished scene (`@svjeez/video`) | [`references/video.md`](references/video.md) |
 | `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
-| Values a page or editor can change: counts, times, colors, eases, choices (`svjeez/params`) | [`references/params.md`](references/params.md) |
+| A scene as a template: text, lists, counts, times, colors, eases and choices it takes from `--params data.json`, an editor or your build (`svjeez/params`) | [`references/params.md`](references/params.md) |
 
 ## Examples
 

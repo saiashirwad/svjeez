@@ -29,3 +29,5 @@ export const svg: string = render({ width: 440, height: 240, duration: 4, title:
 ]);
 
 export const end: number = sales.span.end;
+
+export const q2: number = sales.part("Q2").span.end;

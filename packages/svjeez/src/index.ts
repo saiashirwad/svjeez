@@ -2,7 +2,15 @@ export { render, type RenderOptions } from "./render";
 
 export { motion, ease, type Motion, type Stack, type Seconds, type Ease } from "./motion";
 
-export { span, type Span, type OpenSpan, type Spanned, type OpenSpanned, type When } from "./span";
+export {
+  span,
+  stagger,
+  type Span,
+  type OpenSpan,
+  type Spanned,
+  type OpenSpanned,
+  type When,
+} from "./span";
 
 export { Clip, type ClipProps } from "./clip";
 
@@ -48,7 +56,11 @@ export {
   textWidth,
 } from "./font/font";
 
+export { fitText, type FitTextOptions } from "./font/fit";
+
 export { strokeFont, type StrokeFont } from "./font/stroke";
+
+export type { Each } from "./each";
 
 export { Glyphs, type GlyphsProps } from "./glyphs";
 
@@ -85,6 +97,8 @@ export type { SvgNode, Child } from "./svg";
 
 export type { Point, Rect, Edge } from "./geometry";
 
+export type { Drawn, Part } from "./drawn";
+
 export type { PathData } from "./paths";
 
 export type { Box, Size } from "./layout/box";
@@ -107,7 +121,6 @@ export {
   type TravelOptions,
   type Timeline,
   type TimelineOptions,
-  beats,
 } from "./extras/timeline";
 
 export {

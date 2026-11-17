@@ -38,7 +38,7 @@ const maps = reproject(countries, [mercator, geoEqualEarth()], { frame, filter }
 /** The same Mercator projection, left as reproject() fitted it, so the sliding outline lands on the map. */
 const flat = project(countries, { frame, projection: mercator, fit: false, filter });
 
-const greenland = maps.region("Greenland");
+const greenland = maps.part("Greenland");
 
 /** Seconds: the morph to equal area, the morph back, then the slide to the equator. */
 const TO_AREA = 1.6;
@@ -55,7 +55,7 @@ const morph = (a: PathData, b: PathData) =>
     .at(BACK)
     .to({ d: a }, MORPH, ease.inOut);
 
-const slide = trueSize({ at: SLIDE, over: OVER }, flat, flat.region("Greenland"), [-12, -3]);
+const slide = trueSize({ at: SLIDE, over: OVER }, flat, flat.part("Greenland"), [-12, -3]);
 
 const shown = (from: number, until: number) =>
   motion({ opacity: 0 })

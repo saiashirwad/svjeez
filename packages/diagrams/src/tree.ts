@@ -1,4 +1,4 @@
-import { type Point, type Direction, type Seconds, beats, type Beats } from "svjeez";
+import { type Point, type Direction, type Seconds, span as spanOf } from "svjeez";
 import { tree as layout } from "./layout/tree.ts";
 import { curve } from "./curve.ts";
 import {
@@ -6,16 +6,19 @@ import {
   drawNode,
   isBareLabel,
   labelOf,
+  INSTANT,
   look,
-  lookup,
+  partsOf,
   placer,
   POP,
   popIn,
+  schedule,
   sizeOf,
   spanOfReveals,
+  type Diagram,
   type DiagramOptions,
   type NodeRole,
-  type PlayedDiagram,
+  type PlayAt,
 } from "./kit.tsx";
 
 /** A label, or a node naming its `parent`. Exactly one node has no parent. */
@@ -23,21 +26,25 @@ export type TreeSpec<N extends string> =
   | string
   | { readonly label: string; readonly parent?: N; readonly role?: NodeRole };
 
-export interface TreeOptions extends DiagramOptions {
+export interface TreeOptions<N extends string = string> extends DiagramOptions {
   /** Default `"TB"`. */
   readonly direction?: Direction;
-  /** Nodes appear breadth-first after the root, each edge drawing on as its child appears. From a start `at` they follow `step` apart (default 0.3), or each comes at its own time. */
-  readonly play?: { readonly at: Beats; readonly step?: Seconds };
+  /**
+   * Nodes appear breadth-first after the root, each edge drawing on as the later of its ends appears. From a start `at`
+   * they follow `step` apart (default 0.3), or each comes at its own time. A record such as `{ a: 1, b: 2 }` schedules
+   * nodes by id instead, and the ones it leaves out are there from the start.
+   */
+  readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
 }
 
-export interface Tree<N extends string> extends PlayedDiagram<N> {
+export interface Tree<N extends string> extends Diagram<N> {
   /** Up from `from` to the nearest common ancestor, then down to `to`, along the drawn edges. */
   route(from: N, to: N): Point[];
 }
 
 export function tree<const N extends Record<string, TreeSpec<string>>>(
   spec: { readonly nodes: N & { readonly [K in keyof N]: TreeSpec<Exclude<keyof N & string, K>> } },
-  options: TreeOptions = {},
+  options: TreeOptions<NoInfer<keyof N & string>> = {},
 ): Tree<keyof N & string> {
   type Id = keyof N & string;
 
@@ -64,9 +71,8 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
   const edges = new Map(out.edges.map((e) => [e.to, e.points.map(at.point)]));
   const step = play?.step ?? 0.3;
-  const times = beats(play?.at ?? 0, out.order.length - 1, step, "tree() play");
   /** The root is there from the start, so no frame is empty. */
-  const shown = new Map(out.order.map((id, i) => [id, i === 0 ? -Infinity : times[i - 1]!]));
+  const shown = schedule(play?.at ?? 0, out.order.slice(1), out.order, step, "tree() play");
   const over = Math.min(POP, step);
 
   const drawAt = (e: { from: string; to: string }) =>
@@ -114,7 +120,9 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
     node,
     span,
     bounds: at.bounds,
-    get: lookup("tree()", boxes),
+    ...partsOf<Id>("tree()", boxes, (id) =>
+      play && shown.get(id)! >= 0 ? spanOf(shown.get(id)!, POP) : INSTANT,
+    ),
     route: (from: Id, to: Id): Point[] => {
       const [a, b] = [up(from), up(to)];
       const meet = a.find((id) => b.includes(id))!;

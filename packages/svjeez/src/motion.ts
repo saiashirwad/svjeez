@@ -90,8 +90,9 @@ export type Exact<V, Allowed extends PropertyKey> = V & {
  * One layer of animation for one element. Immutable. `K` is the set of channels it touches, so the
  * JSX `animation` prop rejects channels the tag cannot animate.
  *
- * Time is a cursor: `at` moves it, `to` and `set` start at it and advance it. Between transitions
- * every channel holds its value. Times are on the clock the motion sits in: the scene's, or a `<Clip>`'s.
+ * Time is a cursor: `at` moves it, `to` and `set` start at it and advance it, and `to` given a span moves it to the
+ * span's start first. Between transitions every channel holds its value. Times are on the clock the motion sits in: the
+ * scene's, or a `<Clip>`'s.
  */
 export interface Motion<K extends Target = Target> {
   readonly [motionChannels]?: K;
@@ -99,12 +100,12 @@ export interface Motion<K extends Target = Target> {
   at(time: Seconds): Motion<K>;
   wait(duration: Seconds): Motion<K>;
   /**
-   * Transition from the current values to `values`. It starts at the cursor and takes `over` seconds. `ease` (default
-   * `ease.out`) shapes this transition.
+   * Transition from the current values to `values`. Given a span it plays during the span; given a number it starts at
+   * the cursor and takes that many seconds. `ease` (default `ease.out`) shapes this transition.
    */
   to<const V extends TargetValues>(
     values: Exact<V, Target>,
-    over: Seconds,
+    when: Span | Seconds,
     curve?: Ease,
   ): Motion<K | (keyof V & Target)>;
   /** Hard cut at the cursor. */
@@ -141,6 +142,8 @@ const isUntil = (
 ): value is { readonly until: Seconds } => typeof value === "object";
 
 const isNumeric = (value: TargetValue | undefined): value is number => typeof value === "number";
+
+const isSpan = (when: Span | Seconds): when is Span => typeof when === "object";
 
 const checkValues = (values: TargetValues, what = "A transition"): TargetValues => {
   const keys = Object.keys(values);
@@ -194,11 +197,14 @@ class Track implements Motion {
     return this.with({ cursor: this.data.cursor + time(duration, "wait()") });
   }
 
-  to(values: TargetValues, over: Seconds, curve: Ease = ease.out): Track {
+  to(values: TargetValues, when: Span | Seconds, curve: Ease = ease.out): Track {
+    const start = isSpan(when) ? time(when.at, "to()") : this.data.cursor;
+    const over = isSpan(when) ? when.over : when;
+
     if (!(time(over, "to()") > 0))
       throw new Error(`to() needs a positive duration, got ${over}. Use set() for a cut.`);
 
-    return this.push({ start: this.data.cursor, over, ease: curve, values: checkValues(values) });
+    return this.push({ start, over, ease: curve, values: checkValues(values) });
   }
 
   set(values: TargetValues): Track {

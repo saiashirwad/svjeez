@@ -22,7 +22,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @keyframes k1{0%,10%{opacity:0}26%,100%{opacity:1}}
 .m1{animation-name:k1}
 @keyframes k2{0%,10%{translate:0px 20px}26%,100%{translate:0px 0px}}
-.m2{animation-name:k2}
+.m2{animation-name:k1,k2}
 @keyframes k3{0%,60%{opacity:1}68%,100%{opacity:0}}
 .m3{animation-name:k3}
 @keyframes k4{0%,10%{stroke-dashoffset:1;visibility:hidden}34%,100%{stroke-dashoffset:0;visibility:visible}}

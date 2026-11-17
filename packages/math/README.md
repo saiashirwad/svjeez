@@ -31,7 +31,7 @@ export default () =>
     <>
       {m.node}
       <Brace
-        target={expanded.get("mid")}
+        target={expanded.part("mid").box}
         side="below"
         label="cross term"
         show={{ at: 2.5, over: 1.5 }}
@@ -54,10 +54,10 @@ The formula it returns has:
 - `node`, the formula as one group of glyphs.
 - `bounds`, `width` and `height`, the formula's box.
 - `words`, every glyph and bar in reading order. Each has `char`, `size`, `d`, `matrix`, `fill`, `bounds` and the `text`, `x`, `y` and `id` that `morph()` pairs by.
-- `get(id)`, the box of everything under `\cssId{id}{…}`.
-- `find(text, nth)`, the box of the `nth` run of consecutive glyphs that spell `text`, such as `find("2ab")`.
+- `span`, `parts` and `part(id)`, the shape every svjeez package returns. The parts are what `\cssId{id}{…}` wraps, each with its `glyphs`, the `box` around them and a `span`, the instant 0 for a formula drawn at once.
+- `find(text, nth)`, a part for the `nth` run of consecutive glyphs that spell `text`, such as `find("2ab")`.
 - `draw(glyph, animation)`, one glyph in a group that carries the animation.
-- `write({ at, over }, { stroke })`, the formula written on in reading order like Manim's `Write`: each glyph's outline draws, then fills. Glyphs start one after another across `over`, and each takes `stroke` seconds, 0.6 by default.
+- `write({ at, over }, { stroke })`, the formula written on in reading order like Manim's `Write`: each glyph's outline draws, then fills. Glyphs start one after another across `over`, and each takes `stroke` seconds, 0.6 by default. It returns `node` to draw and the same `span`, `parts`, `part(id)` and `find()`, where a part's `span` is when its glyphs write.
 
 ## How glyphs pair
 

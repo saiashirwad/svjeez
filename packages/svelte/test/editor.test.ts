@@ -191,3 +191,22 @@ describe("a scene that declares handles", () => {
     await page.close();
   });
 });
+
+describe("a scene with a text param", () => {
+  test("typing in the text control rewrites the title and recompiles the picture", async () => {
+    const page = await open("text");
+    const field = page.locator('.sj-text[aria-label="title"]');
+    await field.waitFor();
+    expect(await field.inputValue()).toBe("Launch");
+    expect(await field.getAttribute("maxlength")).toBe("12");
+
+    const before = await picture(page);
+    await field.fill("Hello");
+    expect(await field.inputValue()).toBe("Hello");
+    await repainted(page, before);
+
+    await page.getByRole("button", { name: "Undo" }).click();
+    expect(await field.inputValue()).toBe("Launch");
+    await page.close();
+  });
+});

@@ -2,6 +2,7 @@ import { google } from "@svjeez/fonts";
 import {
   Glyphs,
   Ink,
+  fitText,
   Pivot,
   def,
   motion,
@@ -114,14 +115,7 @@ const set = (
   const last = lines.length - 1;
 
   // The last line carries Blip, about one em wide with its gap.
-  const widest = (size: number) =>
-    Math.max(
-      ...lines.map((line, i) => display.measure(line, size) + (i === last ? size * 0.98 : 0)),
-    );
-
-  let size = max;
-
-  while (widest(size) > W - 2 * X) size -= 2;
+  const size = fitText(display, lines, { width: W - 2 * X, max, tail: 0.98 });
 
   // From the cap height of the first line down to the baseline of the last.
   const block = size * 0.72 + last * size * LEAD;
@@ -196,11 +190,7 @@ const CARDS: Record<Mood, () => string> = {
       "svjeez",
       t.draw,
       <Hand text="that's one <img>!" x={t.blip.x - 330} y={t.top - 40} />,
-      <Arrow
-        from={[t.blip.x - 40, t.top - 52]}
-        to={[t.blip.x + 14, t.blip.head - 10]}
-        bow={-40}
-      />,
+      <Arrow from={[t.blip.x - 40, t.top - 52]} to={[t.blip.x + 14, t.blip.head - 10]} bow={-40} />,
     );
   },
   intro: () => {

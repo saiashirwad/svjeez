@@ -40,7 +40,7 @@ export const valid = [
 export const syntax: SyntaxOf<typeof yaw> = "angle";
 
 export const invalid = [
-  // @ts-expect-error a transition takes a length, not a span
+  // @ts-expect-error a transition takes a length or a span with an end, not an open span
   <rect animation={motion({ x: 0 }).to({ x: 5 }, span(1))} />,
   // @ts-expect-error misspelled attribute
   <path strokeLineCap="round" />,

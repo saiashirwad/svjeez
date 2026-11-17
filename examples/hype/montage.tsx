@@ -12,7 +12,7 @@ export const SHOTS = timeline(
   { at: CODE.at + CODE.over },
 );
 
-export const MONTAGE = { at: SHOTS.map.at, over: SHOTS.end - SHOTS.map.at };
+export const MONTAGE = SHOTS.map.until(SHOTS.end);
 
 export const montage = (
   <>

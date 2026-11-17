@@ -9,7 +9,7 @@ import {
   vectorField,
   type VectorField,
 } from "@svjeez/math";
-import { draw, enter, flow, motion, render, tint } from "svjeez";
+import { draw, enter, flow, motion, render, tint, span, stagger } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { css, mono, theme } from "../style";
 
@@ -97,6 +97,8 @@ const solutions = [
   { x: -3, y: -3 },
 ].map((start) => slopeSolution(slope, slopes, start));
 
+const traced = stagger(span(8.6, 1.2), solutions.length, 0.5);
+
 const label = (x: number, y: number, text: string, at: number) => (
   <text
     x={x}
@@ -179,7 +181,7 @@ export default function build(): string {
             stroke={green}
             strokeWidth={2.2}
             strokeLinecap="round"
-            animation={draw({ at: 8.6 + i * 0.5, over: 1.2 })}
+            animation={draw(traced[i]!)}
           />
         ))}
       </g>

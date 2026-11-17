@@ -5,7 +5,7 @@ import { enter } from "../recipes";
 import { span as spanOf, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
 import { number, text, type Code } from "./code";
-import { beats, type Beats } from "./timeline";
+import { spansOf, type Beats } from "./timeline";
 
 export interface RevealOptions {
   /** A start, from which blocks follow `step` apart, or one time per block. */
@@ -71,7 +71,7 @@ export function reveal(
       owner.set(line, k);
     }
   });
-  const spans = beats(at, ranges.length, step, "reveal()").map((t): Span => ({ at: t, over }));
+  const spans = spansOf(at, ranges.length, step, over, "reveal()");
 
   const lines = (k: number | undefined) =>
     Array.from({ length: code.lineCount }, (_, i) => i + 1).filter((line) => owner.get(line) === k);

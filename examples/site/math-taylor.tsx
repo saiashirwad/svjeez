@@ -154,7 +154,7 @@ export default function build(): string {
           />
         </g>
         <g animation={motion({ opacity: 1 }).at(handoff).set({ opacity: 0 })}>
-          {versions[0]!.write(WRITE)}
+          {versions[0]!.write(WRITE).node}
         </g>
         <g class="sans" animation={enter({ at: 2.6, over: 0.6 })}>
           <text x={W / 2} y={H - 18} fontSize={12} textAnchor="middle" fill={theme.base03}>

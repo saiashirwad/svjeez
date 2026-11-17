@@ -28,8 +28,8 @@ Preconditions:
 
 ## Gotchas
 
-- `bun run dev` without `--out` writes `packages/svjeez/.preview/<name>.svg`. `$V preview start` passes `--out` into scratch instead.
+- `bun run dev` keeps the build in memory and writes a file only with `--out`. `$V preview start` passes `--out` into scratch.
 - The watcher ignores `.svg` files and dotfiles. Saving them doesn't rebuild.
 - A scene with no animations has a loop length of 0, which the page shows as `1.00s`.
 - The scrubber's `max` is the loop length, so `--at` past it clamps to the end.
-- `PORT` in use makes the server fail to start. `$V preview start` picks a free port.
+- A port in use moves the server to the next free one, up to 20 on; read the printed URL. `$V preview start` picks a free port.

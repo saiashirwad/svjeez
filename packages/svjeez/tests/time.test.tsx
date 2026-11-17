@@ -13,6 +13,7 @@ import {
   sampled,
   show,
   span,
+  stagger,
   terminal,
   typewriter,
   type Motion,
@@ -82,6 +83,29 @@ describe("span()", () => {
     expect(open.end).toBe(Infinity);
     expect(open.shift(1).at).toBe(3);
     expect(open.pad(1).at).toBe(1);
+  });
+
+  test("until runs a span to an end time; first and last start or end with another", () => {
+    expect(span(2).until(3.5)).toMatchObject({ at: 2, over: 1.5 });
+    expect(span(1, 4).until(2)).toMatchObject({ at: 1, over: 1 });
+    expect(span(1, 4).first(0.5)).toMatchObject({ at: 1, over: 0.5 });
+    expect(span(2).first(0.5)).toMatchObject({ at: 2, over: 0.5 });
+    expect(span(1, 4).last(0.5)).toMatchObject({ at: 4.5, over: 0.5 });
+    expect(() => span(2).until(1)).toThrow("until() needs a length of 0 or more, got -1.");
+    expect(() => span(1, 1).until(Infinity)).toThrow("until() needs a finite number of seconds");
+    expect(() => span(1, 1).last(3)).toThrow("last() needs a start of 0 or later, got -1.");
+  });
+
+  test("stagger lays out spans step apart, each as long as the first", () => {
+    const cascade = stagger(span(1, 0.5), 3, 0.25);
+
+    expect(cascade.map((s) => [s.at, s.over])).toEqual([
+      [1, 0.5],
+      [1.25, 0.5],
+      [1.5, 0.5],
+    ]);
+    expect(cascade.at(-1)!.end).toBe(2);
+    expect(stagger({ at: 0, over: 1 }, 2, 0)[1]).toMatchObject({ at: 0, over: 1 });
   });
 
   test("a span before 0, with a negative or infinite length, or padded out of the clock throws", () => {

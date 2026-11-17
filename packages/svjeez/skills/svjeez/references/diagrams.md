@@ -1,6 +1,6 @@
 # Diagrams
 
-`flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. They are in `@svjeez/diagrams`, a separate package: `npm i -D @svjeez/diagrams`. `flow` and `travel` are in `svjeez`. Each returns `{ node, get(id), bounds }` plus helpers.
+`flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. They are in `@svjeez/diagrams`, a separate package: `npm i -D @svjeez/diagrams`. `flow` and `travel` are in `svjeez`. Each returns `{ node, span, bounds, parts, part(id) }`, the shape every svjeez package returns, plus helpers. The parts are the nodes (and a flowchart's groups, a sequence's actor heads, the lanes of `lanes()`): `part("build").box` is where one sits and `part("build").span` when it appears, the instant 0 for one there from the start. `part` takes only the spec's ids.
 
 Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`. `tints: { tool: theme.base09 }` recolors a role, so a scene can hold to two or three hues. A `stateMachine` state takes a `role` too, which tints its box and stroke.
 
@@ -10,13 +10,13 @@ A labelled edge is `[from, to, label?]` in a flowchart and a state machine, with
 
 | Diagram | How it plays |
 | --- | --- |
-| `flowchart` | `play: { at, step? }`. Nodes appear rank by rank, each edge draws as its target appears. Default step 0.4 |
+| `flowchart` | `play: { at, step? }`. Nodes appear rank by rank after the first, each edge draws as the later of its ends appears. Default step 0.4 |
 | `tree` | `play: { at, step? }`. Breadth first. Default step 0.3 |
 | `sequence` | `play: { at, step? }`. One message or note per step, default 0.8 |
 | `lanes` | `play: { at }`. Real time: a playhead sweeps, spans grow, events pop |
 | `stateMachine` | No `play`. Call `walk(ids, { at })` |
 
-`at` is a `Beats`: a start time, or an array with one time per item, to keep two diagrams in sync. `lanes` takes a plain start time, because its spans already play in real time. Without `play`, everything is there from the start. `flowchart`, `tree`, `sequence` and `lanes` return `span`, from the first reveal to the end of the last, to time what comes next: `chart.span.end`, or `chart.span.next(1)`. Without `play` it is the instant 0.
+`at` is a start time, or an array with one time per item, to keep two diagrams in sync. A `flowchart` and a `tree` also take a time per node id, `play: { at: { plan: 0.5, build: 1.4, ship: 3 } }`, to show nodes in an order of your own; the nodes it leaves out are there from the start, and a misspelled id is a compile error. `lanes` takes a plain start time, because its spans already play in real time. Without `play`, everything is there from the start. `span` runs from the first reveal to the end of the last, to time what comes next: `chart.span.end`, or `chart.span.next(1)`. Without `play`, and on a `stateMachine`, it is the instant 0. A node's own span places a callout right after it lands: `enter(chart.part("build").span.next(0.4))`. A lane's span runs from the first of its bars, events and links to the end of the last.
 
 ## Flowchart
 

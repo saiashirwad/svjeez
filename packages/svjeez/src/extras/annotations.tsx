@@ -29,11 +29,21 @@ export function Arrow({
   from,
   to,
   bend = 0,
+  width = 1.5,
+  head = 8,
   show,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
-}: Common & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
+}: Common & {
+  readonly from: Point;
+  readonly to: Point;
+  readonly bend?: number;
+  /** Stroke width in px. Default 1.5. */
+  readonly width?: number;
+  /** Length of the head's barbs in px. Default 8. */
+  readonly head?: number;
+}): SvgNode {
   const span = show;
 
   const [cx, cy] = [
@@ -42,7 +52,10 @@ export function Arrow({
   ];
 
   const angle = Math.atan2(to.y - cy, to.x - cx);
-  const barb = (a: number) => `${to.x - 8 * Math.cos(angle + a)} ${to.y - 8 * Math.sin(angle + a)}`;
+
+  const barb = (a: number) =>
+    `${to.x - head * Math.cos(angle + a)} ${to.y - head * Math.sin(angle + a)}`;
+
   const stroke = Math.min(0.6, span.over / 2);
 
   return (
@@ -50,11 +63,13 @@ export function Arrow({
       <path
         d={`M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`}
         {...ink(color)}
+        strokeWidth={width}
         animation={draw({ at: span.at, over: stroke })}
       />
       <path
         d={`M${barb(0.45)}L${to.x} ${to.y}L${barb(-0.45)}`}
         {...ink(color)}
+        strokeWidth={width}
         animation={motion({ opacity: 0, scale: 0.5 })
           .at(span.at + stroke)
           .to({ opacity: 1, scale: 1 }, Math.min(0.15, span.over - stroke))}

@@ -102,7 +102,10 @@ export function walk({
       };
 
   const outside = (r: { left: number; top: number; right: number; bottom: number }): boolean =>
-    r.right <= frame.left || r.left >= frame.right || r.bottom <= frame.top || r.top >= frame.bottom;
+    r.right <= frame.left ||
+    r.left >= frame.right ||
+    r.bottom <= frame.top ||
+    r.top >= frame.bottom;
 
   const px = (value: string): number => parseFloat(value) || 0;
   const round = (n: number): number => Math.round(n * 100) / 100;
@@ -695,7 +698,11 @@ export function walk({
         return c && alpha(c) > 0 ? (line as TextRun["decoration"]) : undefined;
       }
 
-      if (s.display.startsWith('inline-') || s.cssFloat !== "none" || /absolute|fixed/.test(s.position))
+      if (
+        s.display.startsWith("inline-") ||
+        s.cssFloat !== "none" ||
+        /absolute|fixed/.test(s.position)
+      )
         return undefined;
     }
 
@@ -827,7 +834,14 @@ export function walk({
 
       const text = l.text.trimEnd();
 
-      if (outside({ left: l.left, top: l.top, right: l.left + (l.ends.at(-1) ?? 0), bottom: l.top + px(s.fontSize) * 2 }))
+      if (
+        outside({
+          left: l.left,
+          top: l.top,
+          right: l.left + (l.ends.at(-1) ?? 0),
+          bottom: l.top + px(s.fontSize) * 2,
+        })
+      )
         continue;
 
       if (text.trim())
@@ -883,11 +897,21 @@ export function walk({
     const ends = measure(s, text);
     const width = ends.at(-1) ?? 0;
     const { ascent, area } = probe(s);
-    const x = box.left + at("x", extent[0]) * kx - (s.textAnchor === "middle" ? width / 2 : s.textAnchor === "end" ? width : 0);
+
+    const x =
+      box.left +
+      at("x", extent[0]) * kx -
+      (s.textAnchor === "middle" ? width / 2 : s.textAnchor === "end" ? width : 0);
+
     const y = box.top + (at("y", extent[1]) + at("dy", extent[1])) * ky;
     const centered = /central|middle/.test(s.dominantBaseline);
 
-    return { tag: "text", attrs: {}, children: [], run: run(s, text, x, centered ? y - area / 2 : y - ascent, c, ends) };
+    return {
+      tag: "text",
+      attrs: {},
+      children: [],
+      run: run(s, text, x, centered ? y - area / 2 : y - ascent, c, ends),
+    };
   };
 
   /**
@@ -912,12 +936,18 @@ export function walk({
 
       // A share of the `<svg>`'s own box, not of the picture the drawing ends up in.
       attrs[name] = v.trim().endsWith("%")
-        ? String(round((px(v) / 100) * (/^(x|cx|rx|width|x1|x2)$/.test(name) ? extent[0] : extent[1])))
+        ? String(
+            round((px(v) / 100) * (/^(x|cx|rx|width|x1|x2)$/.test(name) ? extent[0] : extent[1])),
+          )
         : v;
     }
 
     if (tag === "use") {
-      const id = (el.getAttribute("href") ?? el.getAttribute("xlink:href") ?? "").replace(/^.*#/, "");
+      const id = (el.getAttribute("href") ?? el.getAttribute("xlink:href") ?? "").replace(
+        /^.*#/,
+        "",
+      );
+
       const target = id ? el.ownerDocument.getElementById(id) : null;
 
       if (!target) return undefined;
@@ -948,7 +978,9 @@ export function walk({
     } else {
       // A paint the shape doesn't write itself is the `<use>`'s.
       // SAFETY: only the elements in DRAWN get this far, and they are SVG elements.
-      const own = (name: string) => el.hasAttribute(name) || (el as SVGElement).style.getPropertyValue(name) !== "";
+      const own = (name: string) =>
+        el.hasAttribute(name) || (el as SVGElement).style.getPropertyValue(name) !== "";
+
       const paint = (name: "fill" | "stroke") => (via && !own(name) ? via : s)[name];
 
       attrs.fill = paint("fill") === "none" ? "none" : (color(paint("fill")) ?? "none");
@@ -1054,7 +1086,11 @@ export function walk({
     // An inline box says nothing of where a block inside it (a <picture> around an <img>) lies.
     if (getComputedStyle(el).display === "inline") return false;
 
-    return !(el instanceof HTMLElement) || (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1) || el.clientWidth === 0;
+    return (
+      !(el instanceof HTMLElement) ||
+      (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1) ||
+      el.clientWidth === 0
+    );
   };
 
   /**
@@ -1223,7 +1259,12 @@ export function walk({
 
       extent = [viewBox[2], viewBox[3]];
 
-      return { kind: "graphic", box: rel(r), viewBox, children: [...el.children].flatMap((c) => vector(c) ?? []) };
+      return {
+        kind: "graphic",
+        box: rel(r),
+        viewBox,
+        children: [...el.children].flatMap((c) => vector(c) ?? []),
+      };
     }
 
     if (el instanceof HTMLImageElement || el instanceof HTMLCanvasElement) {
@@ -1277,10 +1318,19 @@ export function walk({
 
       // A border, background or shadow on the image itself is a box around it, which the picture fills inside.
       const own = surface(s, r, rel(r));
-      const chrome = own.background || own.border || own.gradients || own.insets || own.shadows.length > 0 || own.opacity < 1 || own.blend;
+
+      const chrome =
+        own.background ||
+        own.border ||
+        own.gradients ||
+        own.insets ||
+        own.shadows.length > 0 ||
+        own.opacity < 1 ||
+        own.blend;
 
       // A screenshot holds only the part of the canvas the viewport shows, at its own scale.
-      if (still?.at) fit = rel(new DOMRect(still.at.x, still.at.y, still.at.width, still.at.height));
+      if (still?.at)
+        fit = rel(new DOMRect(still.at.x, still.at.y, still.at.width, still.at.height));
 
       if (!chrome) return { kind: "image", box: rel(r), radii: own.radii, href, fit };
 
@@ -1462,7 +1512,10 @@ export function walk({
       box: rel(r),
       ...surface(s, r, rel(r)),
       // A mask, even one drawn as a gradient, shows nothing outside the border box.
-      clip: s.overflowX !== "visible" || s.overflowY !== "visible" || (s.maskImage || "none") !== "none",
+      clip:
+        s.overflowX !== "visible" ||
+        s.overflowY !== "visible" ||
+        (s.maskImage || "none") !== "none",
       children,
     };
 

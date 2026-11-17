@@ -19,8 +19,10 @@ import {
   render,
   shake,
   type Color,
+  type Each,
   type IconData,
   type Stack,
+  span,
 } from "svjeez";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
@@ -46,7 +48,7 @@ interface Cell {
   /** Moves the whole icon. */
   readonly motion?: Rest;
   /** Runs on each path of the icon. */
-  readonly paths?: (d: string, index: number) => Stack<"opacity" | "draw">;
+  readonly paths?: (d: string, each: Each) => Stack<"opacity" | "draw">;
 }
 
 const cells: readonly (readonly Cell[])[] = [
@@ -55,7 +57,7 @@ const cells: readonly (readonly Cell[])[] = [
       label: "draw",
       icon: rocket,
       color: theme.base0D,
-      paths: (_, i) => draw({ at: at(0) + i * 0.14, over: 0.55 }),
+      paths: (_, each) => draw(each.stagger(span(at(0), 0.55), 0.14)),
     },
     {
       label: "pop",
@@ -88,9 +90,7 @@ const cells: readonly (readonly Cell[])[] = [
       color: theme.base0E,
       motion: [
         enter({ at: at(3), over: 1 }, { opacity: 0, scale: 0.2, rotate: -270 }),
-        motion({ rotate: 0 })
-          .at(at(3) + 1)
-          .to({ rotate: 120 }, D - at(3) - 1, ease.linear),
+        motion({ rotate: 0 }).to({ rotate: 120 }, span(at(3) + 1).until(D), ease.linear),
       ],
     },
   ],
@@ -105,14 +105,15 @@ const cells: readonly (readonly Cell[])[] = [
       label: "cascade",
       icon: wifi,
       color: theme.base0B,
-      paths: (_, i) =>
-        motion({ opacity: 0 })
-          .at(at(5) + i * 0.18)
-          .to({ opacity: 1 }, 0.2)
+      paths: (_, each) => {
+        const lit = each.stagger(span(at(5), 0.2), 0.18);
+
+        return motion({ opacity: 0 })
+          .to({ opacity: 1 }, lit)
           .at(4.6)
-          .to({ opacity: i ? 0.15 : 1 }, 0.25)
-          .at(5 + i * 0.18)
-          .to({ opacity: 1 }, 0.2),
+          .to({ opacity: each.index ? 0.15 : 1 }, 0.25)
+          .to({ opacity: 1 }, span(5 + each.index * 0.18, 0.2));
+      },
     },
     {
       label: "swap",
@@ -127,7 +128,7 @@ const cells: readonly (readonly Cell[])[] = [
       label: "ring",
       icon: bell,
       color: theme.base06,
-      paths: (_, i) => draw({ at: at(7) + i * 0.2, over: 0.5 }),
+      paths: (_, each) => draw(each.stagger(span(at(7), 0.5), 0.2)),
       motion: shake({ at: 3.6, over: 1 }, { rotate: 16 }),
     },
   ],
@@ -198,7 +199,9 @@ export default function build(): string {
         )}
         <g class="sans" animation={enter({ at: 2.8, over: 0.6 }, { opacity: 0, y: 6 })}>
           <text x={W / 2} y={H - 26} fontSize={12} textAnchor="middle" fill={theme.base03}>
-            {"<Icon icon={rocket} animation={(d, i) => draw({ at: i * 0.14, over: 0.5 })} />"}
+            {
+              "<Icon icon={rocket} animation={(d, each) => draw(each.stagger(span(0, 0.5), 0.14))} />"
+            }
           </text>
         </g>
       </g>

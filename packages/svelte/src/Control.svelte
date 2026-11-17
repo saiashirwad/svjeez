@@ -5,6 +5,7 @@
   import EaseControl from "./EaseControl.svelte";
   import type { SceneEditor } from "./editor.js";
   import NumberControl from "./NumberControl.svelte";
+  import TextControl from "./TextControl.svelte";
 
   let { editor, value }: { editor: SceneEditor; value: Value } = $props();
 </script>
@@ -15,6 +16,8 @@
   <ColorControl {editor} {value} />
 {:else if value.kind === "ease"}
   <EaseControl {editor} {value} />
-{:else}
+{:else if value.kind === "choice"}
   <ChoiceControl {editor} {value} />
+{:else}
+  <TextControl {editor} {value} />
 {/if}

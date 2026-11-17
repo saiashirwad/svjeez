@@ -1,6 +1,6 @@
 import { night, project, sun, type LonLat, type Topology } from "@svjeez/geo";
 import { geoOrthographic } from "d3-geo";
-import { css, def, ease, fx, motion, render, type SvgNode } from "svjeez";
+import { css, def, ease, fx, motion, random, render, type SvgNode } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { createRequire } from "node:module";
 import {
@@ -269,22 +269,16 @@ function Globe(): SvgNode {
 
 /** A seeded scatter of stars, a few of them breathing. */
 function Stars(): SvgNode {
-  let seed = 7;
-
-  const random = () => {
-    seed = (seed * 16807) % 2147483647;
-
-    return seed / 2147483647;
-  };
+  const rand = random(7);
 
   return (
     <g fill={C.star}>
       {Array.from({ length: 90 }, (_, i) => {
-        const x = random() * W;
-        const y = random() * H;
+        const x = rand() * W;
+        const y = rand() * H;
         const far = Math.hypot(x - cx, y - cy) > R * 1.15;
-        const size = 0.4 + random() * 0.9;
-        const shine = 0.25 + random() * 0.5;
+        const size = 0.4 + rand() * 0.9;
+        const shine = 0.25 + rand() * 0.5;
 
         return far ? (
           <circle
@@ -295,7 +289,7 @@ function Stars(): SvgNode {
             animation={
               i % 6 === 0
                 ? motion({ opacity: shine })
-                    .at(random() * 10)
+                    .at(rand() * 10)
                     .to({ opacity: 0.08 }, 1.2, ease.inOut)
                     .to({ opacity: shine }, 1.2, ease.inOut)
                 : undefined

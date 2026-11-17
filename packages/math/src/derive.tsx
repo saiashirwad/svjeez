@@ -68,9 +68,9 @@ const alignPoint = (line: Tex, align: string, index: number): number => {
     return sign.bounds.x + sign.bounds.w / 2;
   }
 
-  const part = line.get(align);
+  const { box } = line.part(align);
 
-  return part.x + part.w / 2;
+  return box.x + box.w / 2;
 };
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { draw, Icon, render, type Child, type IconData } from "svjeez";
+import { draw, Icon, render, span, type Child, type IconData } from "svjeez";
 
 const scene = (child: Child) =>
   render({ width: 100, height: 100, duration: 2, title: "Icon" }, child);
@@ -65,7 +65,7 @@ describe("Icon", () => {
 
   test("a function animation runs per path, so pieces draw one after another", () => {
     const svg = scene(
-      <Icon icon={arrow} animation={(_, i) => draw({ at: 0.2 + i * 0.5, over: 0.5 })} />,
+      <Icon icon={arrow} animation={(_, each) => draw(each.stagger(span(0.2, 0.5), 0.5))} />,
     );
 
     expect(svg.match(/<path [^>]*pathLength="1"/g)).toHaveLength(2);

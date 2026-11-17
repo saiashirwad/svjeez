@@ -61,7 +61,7 @@ export default function build(): string {
         <g animation={motion({ opacity: 0 }).at(0.2).to({ opacity: 1 }, 0.5)}>{m.node}</g>
         <Brace
           theme={theme}
-          target={expanded.get("cross")}
+          target={expanded.part("cross").box}
           side="below"
           label="cross term"
           fontSize={18}

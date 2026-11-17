@@ -1,5 +1,5 @@
 import { google } from "@svjeez/fonts";
-import { Glyphs, draw, ease, enter, render } from "svjeez";
+import { Glyphs, draw, ease, enter, render, span } from "svjeez";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
@@ -39,7 +39,7 @@ export default function build(): string {
           fill="none"
           stroke={theme.base0D}
           strokeWidth={1.5}
-          animation={(_, i) => draw({ at: 0.3 + i * 0.12, over: 0.9 }, ease.inOut)}
+          animation={(_, each) => draw(each.stagger(span(0.3, 0.9), 0.12), ease.inOut)}
         />
         <Glyphs
           font={display}
@@ -49,7 +49,7 @@ export default function build(): string {
           y={BAR + 112}
           fill={theme.base06}
           alt=""
-          animation={(_, i) => enter({ at: 1.3 + i * 0.08, over: 0.5 }, { opacity: 0, y: 10 })}
+          animation={(_, each) => enter(each.stagger(span(1.3, 0.5), 0.08), { opacity: 0, y: 10 })}
         />
         <g animation={enter({ at: 2.4, over: 0.6 }, { opacity: 0, y: 8 })}>
           <text x={left} y={BAR + 168} fontFamily={italic} fontSize={26} fill={theme.base05}>

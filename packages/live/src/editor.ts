@@ -14,6 +14,7 @@ import {
   linesOf,
   parse,
   write,
+  type Edit,
   type Line,
   type Literal,
   type Source,
@@ -149,6 +150,38 @@ export const handleAt = (grip: GripState, v: number): Point => ({
 
 /** `v` written as a literal's text, to six places at most. */
 const placesOf = (v: number) => Math.min(6, decimalsOf(String(v)));
+
+/**
+ * The edit that writes `v` into `value`'s literal, as the editor's `set` message does: a number as precise as `v`
+ * and its own text, and with `step`, its control's step too, so a drag from `0.9` up to `1.0` keeps the tenths the
+ * next step is read from. Undefined for what has no code: a number that is not finite, or an ease that is neither named
+ * nor a bezier.
+ */
+export const editFor = <V extends Value>(
+  value: V,
+  v: Settable[V["kind"]],
+  { step = true }: { readonly step?: boolean } = {},
+): Edit | undefined => {
+  if (value.kind === "number" && !Number.isFinite(v)) return undefined;
+
+  // SAFETY: `v` is typed by the value's kind, and `kind` names that same kind on the literal.
+  const literal = { ...value.literal, value: v } as Literal;
+
+  const places =
+    value.kind === "number"
+      ? Math.max(
+          placesOf(Number(v)),
+          step ? placesOf(value.param.step) : 0,
+          decimalsOf(value.literal.text),
+        )
+      : undefined;
+
+  try {
+    return { range: value.literal.range, text: write(literal, places) };
+  } catch {
+    return undefined;
+  }
+};
 
 const isEditable = (literal: Literal, values: readonly Value[]) =>
   values.some((v) => v.literal === literal);
@@ -320,37 +353,11 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
     case "set": {
       const value = valueOf(state, msg.key);
 
-      if (!value) return [state, []];
+      // SAFETY: a message's value is typed by its key's kind, which is the kind of the value found by that key.
+      const edit = value && editFor(value, msg.value as Settable[typeof value.kind]);
 
-      // A number that is not finite is not written.
-      if (value.kind === "number" && !Number.isFinite(msg.value)) return [state, []];
-
-      // SAFETY: a message's value is typed by its key's kind, and `kind` names that same kind on the literal.
-      const literal = { ...value.literal, value: msg.value } as Literal;
-
-      // A number goes in as precise as it was sent, its step or its text, whichever is finest, so `0.9` up to `1.0`
-      // keeps the tenths that the next step is read from.
-      const places =
-        value.kind === "number"
-          ? Math.max(
-              placesOf(Number(msg.value)),
-              placesOf(value.param.step),
-              decimalsOf(value.literal.text),
-            )
-          : undefined;
-
-      // An ease that is neither named nor a bezier has no code to write, so the file stays as it is.
-      let written: string;
-
-      try {
-        written = write(literal, places);
-      } catch {
-        return [state, []];
-      }
-
-      const text = apply(state.text, [{ range: value.literal.range, text: written }]);
-
-      return edited(state, text, msg.continues);
+      // What has no code to write leaves the file as it is.
+      return edit ? edited(state, apply(state.text, [edit]), msg.continues) : [state, []];
     }
 
     case "replace":

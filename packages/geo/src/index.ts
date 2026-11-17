@@ -51,13 +51,13 @@ export interface Region {
   readonly d: string;
   /** The center of the region's largest piece, so France's sits in France rather than out at sea toward French Guiana. */
   readonly centroid: Point;
-  /** The bounds of the region's largest piece. `map.bounds(region.feature)` covers every piece. */
-  readonly bounds: Rect;
+  /** The box around the region's largest piece. `map.bounds(region.feature)` covers every piece. */
+  readonly box: Rect;
 }
 
 export interface Dot {
   readonly at: LonLat;
-  /** The id of the feature the dot sits in, as `map.region()` takes it. */
+  /** The id of the feature the dot sits in, as `map.part()` takes it. */
   readonly id: string;
   readonly properties: GeoJsonProperties;
   /** Where the dot lands in the scene, or undefined when the projection clips it, as on the far side of a globe. */
@@ -67,7 +67,8 @@ export interface Dot {
 export interface GeoMap {
   readonly frame: Rect;
   readonly projection: GeoProjection;
-  readonly regions: readonly Region[];
+  /** Every region, one per feature, in the data's order. Nothing is drawn yet, so a region has no `span`; `choropleth()` gives it one. */
+  readonly parts: readonly Region[];
   /** Every region filled as one path. From TopoJSON the shared borders are gone, leaving the land. */
   readonly land: string;
   /** Every region's outline as one path, each shared border drawn once when the data is TopoJSON. */
@@ -75,7 +76,7 @@ export interface GeoMap {
   /** The outline of the globe. */
   readonly sphere: string;
   /** The region whose id or `properties.name` is `key`. */
-  region(key: string | number): Region;
+  part(key: string | number): Region;
   /** Path data for any GeoJSON, simplified like the regions. */
   path(object: GeoPermissibleObjects): string;
   /** Lines of longitude and latitude every `step` degrees. Default 10. */
@@ -239,7 +240,7 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
         feature: f,
         d,
         centroid: { x, y },
-        bounds: toRect(measure.bounds(main)),
+        box: toRect(measure.bounds(main)),
       },
     ];
   });
@@ -273,7 +274,7 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
   return {
     frame,
     projection,
-    regions,
+    parts: regions,
     land: topology
       ? path(
           merge(
@@ -289,7 +290,7 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
       ? path(mesh(topology.data, { type: "GeometryCollection", geometries: topology.geometries }))
       : path(collection),
     sphere: path({ type: "Sphere" }),
-    region(key) {
+    part(key) {
       const found = regions.find((r) => r.id === String(key) || r.properties?.name === key);
 
       if (!found)
@@ -361,7 +362,7 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
     },
     bounds(target, pad = 0) {
       const box = (() => {
-        if ("feature" in target) return target.bounds;
+        if ("feature" in target) return target.box;
 
         if ("type" in target) return toRect(measure.bounds(target));
 
@@ -369,7 +370,7 @@ export function project(data: GeoData, options: ProjectOptions): GeoMap {
 
         return target
           .map((item) => {
-            if ("bounds" in item) return item.bounds;
+            if ("box" in item) return item.box;
             const { x, y } = point(item);
 
             return rect(x, y, 0, 0);
@@ -390,6 +391,7 @@ export {
   choropleth,
   type Choropleth,
   type ChoroplethOptions,
+  type ChoroplethRegion,
   type RegionValues,
 } from "./choropleth.tsx";
 
@@ -446,4 +448,3 @@ export {
   type ReprojectOptions,
   type TrueSizeOptions,
 } from "./reproject.ts";
-

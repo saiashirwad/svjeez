@@ -13,6 +13,7 @@
  *       span.sj-ease                         wraps button.sj-glyph (an svg curve) and span.sj-ease-text, the literal,
  *                                            then span.sj-pop[popover=manual] while the curve editor is open
  *       select.sj-choice                     a choice control
+ *       input.sj-text[type=text]             a text control
  *     p.sj-error[role=status]                the newest compile's error; hidden while there is none
  *   Every control carries data-sj-key (the value's key) and data-selected while its value is selected. A number carries
  *   data-dragging while it is held.
@@ -275,6 +276,19 @@
   scale: 0.95;
 }
 
+/* A text control grows with what is typed, where the browser can. */
+.sj-text {
+  field-sizing: content;
+  min-inline-size: 4ch;
+  max-inline-size: 100%;
+  padding: 0 0.2em;
+  border: 1px solid color-mix(in oklch, var(--_string) 40%, transparent);
+  border-radius: 0.25rem;
+  background: color-mix(in oklch, var(--_string) 10%, transparent);
+  color: var(--_string);
+  font: inherit;
+}
+
 .sj-choice {
   padding: 0 0.2em;
   border: 1px solid color-mix(in oklch, var(--_string) 40%, transparent);
@@ -288,13 +302,23 @@
 .sj-num[data-selected],
 .sj-color[data-selected],
 .sj-ease[data-selected],
-.sj-choice[data-selected] {
+.sj-choice[data-selected],
+.sj-text[data-selected] {
   box-shadow:
     0 0 0 1px color-mix(in oklch, var(--_tone, var(--_accent)) 70%, transparent),
     0 0 0 4px color-mix(in oklch, var(--_tone, var(--_accent)) 20%, transparent);
 }
 
-:where(.sj-num, .sj-glyph, .sj-swatch, .sj-choice, .sj-grip, .sj-play, .sj-scrub):focus-visible {
+:where(
+  .sj-num,
+  .sj-glyph,
+  .sj-swatch,
+  .sj-choice,
+  .sj-text,
+  .sj-grip,
+  .sj-play,
+  .sj-scrub
+):focus-visible {
   outline: 2px solid var(--_accent);
   outline-offset: 2px;
 }

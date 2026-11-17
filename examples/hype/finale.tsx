@@ -10,7 +10,7 @@ import {
   video,
   world,
 } from "@svjeez/icons/tabler";
-import { Clip, Glyphs, Icon, draw, ease, enter, motion, code, typewriter } from "svjeez";
+import { Clip, Glyphs, Icon, draw, ease, enter, motion, code, span, typewriter } from "svjeez";
 
 import { mono, theme } from "../style";
 import { hopAcross, jumps } from "../site/lib/blip";
@@ -172,7 +172,7 @@ export const finale = (size: string) => (
         fill="none"
         stroke={C.ink}
         strokeWidth={2}
-        animation={(_, i) => draw({ at: 0.1 + i * 0.1, over: 0.8 }, ease.inOut)}
+        animation={(_, each) => draw(each.stagger(span(0.1, 0.8), 0.1), ease.inOut)}
       />
       <Glyphs
         font={display}
@@ -182,7 +182,7 @@ export const finale = (size: string) => (
         y={320}
         fill={C.ink}
         alt=""
-        animation={(_, i) => enter({ at: 0.75 + i * 0.07, over: 0.45 }, { opacity: 0 })}
+        animation={(_, each) => enter(each.stagger(span(0.75, 0.45), 0.07), { opacity: 0 })}
       />
       <rect
         x={logoX}

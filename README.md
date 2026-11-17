@@ -3,24 +3,31 @@
 </p>
 
 <p align="center">
-  <strong>Write scenes in TypeScript. Compile them into a single animated SVG. Zero runtime JavaScript.</strong>
+  <strong>Write motion in TypeScript. Ship it as one SVG file.</strong><br />
+  No player and no runtime JavaScript. It plays wherever an <code>&lt;img&gt;</code> does, this README included.
 </p>
 
 <p align="center">
   <a href="https://svjeez.texoport.in">Website</a> ·
   <a href="https://svjeez.texoport.in/examples/">Examples</a> ·
-  <a href="https://svjeez.texoport.in/intro">45s intro</a> ·
-  <a href="https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/SKILL.md">Docs &amp; agent skill</a> ·
+  <a href="https://svjeez.texoport.in/intro">One-minute intro</a> ·
+  <a href="https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/SKILL.md">Agent skill</a> ·
   <a href="https://www.npmjs.com/package/svjeez">npm</a>
 </p>
 
----
+## What it's for
 
-- Write a scene in TypeScript, get one self-contained SVG.
-- Motions become CSS `@keyframes`, or SMIL on filter primitives, `d`, `width` and `height`.
-- Fonts are subset and embedded.
-- Follows `prefers-color-scheme` and `prefers-reduced-motion` by itself.
-- Nothing runs in the viewer's browser, so it plays anywhere an `<img>` works, this README included.
+**Film your real UI.** Write a demo that clicks and types into a React or Svelte component, and [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/main/packages/dom) records it in Chromium as an animated SVG. The recording is kept in a JSON file and made again only when the demo or a file it imports changes.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/zoom.svg" width="480" alt="A sign-in form, filmed: the camera follows the email and password as they are typed, then pulls back to show the error from the server." />
+
+**Explain how something works.** Code, terminal sessions, diagrams and math go on one timeline. This one walks a circuit breaker through its code, its state machine and a sequence diagram, in one file.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/breaker.svg" width="640" alt="A six-slide explainer on circuit breakers combining code morphs, a state machine, a sequence diagram, and a flowchart." />
+
+**Tell a story with data.** Charts and maps are drawn from your data at build time. A scene with params is a template: `svjeez svg scene.tsx --params data.json` draws this week's numbers.
+
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/metrics.svg" width="640" alt="A row of four KPI tiles counts up, then a bar chart of eight weeks of signups grows." />
 
 ## Quickstart
 
@@ -55,88 +62,48 @@ export default () =>
   );
 ```
 
-Compile it, and check the timing on a contact sheet:
+Preview it, check it, and compile it:
 
 ```sh
-npx svjeez svg scene.tsx --out hello.svg
+npx svjeez dev scene.tsx                       # plays with a scrubber, reloads on save
+npx svjeez check scene.tsx                     # layout and timing faults, one per line
 npx svjeez frames scene.tsx --times 0,1,2 --sheet
+npx svjeez svg scene.tsx --out hello.svg
 ```
 
 <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/readme/basic.svg" width="200" alt="A curve draws on, then a dot pops in" />
 
-svjeez runs on Node 20+ or Bun and has no runtime dependencies. On Node, install `tsx` so it can load `.tsx`. Frames need `playwright-core`. Using a coding agent? `npx svjeez skill --install` gives it the scene-writing skill.
+svjeez runs on Node 20+ or Bun and has no runtime dependencies. On Node, install `tsx` so it can load `.tsx`. `frames`, `check` and `video` need `playwright-core` and Chromium.
 
-## What's in the box
+## Working with an agent
 
-- `motion()` timelines, spans and `<Clip>` clocks so a component is written from 0, `show()`, recipes like `enter`, `draw` and `wiggle`, and `sampled()` to bake physics into keyframes
-- Code walkthroughs with token `morph()`, markers, callouts and terminals
-- Flowcharts, sequence diagrams, state machines, trees and lanes from `@svjeez/diagrams`, with node IDs checked by TypeScript
-- Variable-width `<Ink>`, embedded fonts and images, filters, and typed CSS `@property`
-
-[`SKILL.md`](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/SKILL.md) covers all of it.
+- `npx svjeez skill --install` gives a coding agent the scene-writing skill, its references and worked examples.
+- Scenes are typed TypeScript, and errors say what to fix.
+- `svjeez check` reports layout and timing faults as text, and `svjeez frames --sheet` shows the agent its work.
 
 ## Packages
 
 Each package runs while the scene compiles, so the SVG still carries no script.
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/charts"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/charts.svg" width="100%" alt="Six bars grow from the baseline, then a line draws across them." /></a><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/charts"><b><code>@svjeez/charts</code></b></a> · Bar, line and area charts
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/geo"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/geo.svg" width="100%" alt="Countries fill in, then great-circle routes arc out of London to six cities." /></a><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/geo"><b><code>@svjeez/geo</code></b></a> · Maps, routes and globes from GeoJSON
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/math"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/math.svg" width="100%" alt="A point circles the unit circle while Euler's formula becomes e^(iπ) + 1 = 0." /></a><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/math"><b><code>@svjeez/math</code></b></a> · TeX that <code>morph()</code> can animate
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/code"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/explainer.svg" width="100%" alt="Highlighted TSX types out while notes explain draw() and enter()." /></a><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/code"><b><code>@svjeez/code</code></b></a> · Shiki highlighting in the scene's theme
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/fonts"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/fonts.svg" width="100%" alt="Display type draws on as outlines and fills, above embedded italic and mono text." /></a><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/fonts"><b><code>@svjeez/fonts</code></b></a> · Google Fonts by name, subset and embedded
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/icons"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/icons.svg" width="100%" alt="Eight icons arrive eight ways: drawn, popped, dropped, spun, focused, cascaded, swapped and rung." /></a><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/icons"><b><code>@svjeez/icons</code></b></a> · Tabler and Lucide icons for <code>&lt;Icon&gt;</code>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/mermaid"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/site/mermaid.svg" width="100%" alt="A Mermaid flowchart builds node by node, then a token traces push to ship." /></a><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/mermaid"><b><code>@svjeez/mermaid</code></b></a> · Mermaid text as svjeez diagrams
-    </td>
-    <td width="50%" valign="middle">
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/vite"><b><code>@svjeez/vite</code></b></a> · Import <code>./scene.tsx?svjeez</code> in any Vite app<br /><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/astro"><b><code>@svjeez/astro</code></b></a> · <code>&lt;Scene&gt;</code> and <code>getScene()</code> for Astro pages<br /><br />
-      <a href="https://github.com/saiashirwad/svjeez/tree/main/packages/video"><b><code>@svjeez/video</code></b></a> · MP4 or WebM for places that don't take SVG
-    </td>
-  </tr>
-</table>
+- [`svjeez`](https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez): the compiler, timelines, recipes, text, ink and the CLI
+- [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/main/packages/charts): bar, line and area charts
+- [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/main/packages/geo): maps, routes and globes from GeoJSON and TopoJSON
+- [`@svjeez/diagrams`](https://github.com/saiashirwad/svjeez/tree/main/packages/diagrams): flowcharts, sequence diagrams, state machines, trees and swimlanes
+- [`@svjeez/mermaid`](https://github.com/saiashirwad/svjeez/tree/main/packages/mermaid): Mermaid text as svjeez diagrams
+- [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/main/packages/math): TeX, coordinate planes and plots
+- [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/main/packages/code): Shiki highlighting in the scene's theme
+- [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/main/packages/dom): real HTML, React and Svelte, filmed in Chromium
+- [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/main/packages/fonts): Google Fonts by name, subset and embedded
+- [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/main/packages/icons): Tabler and Lucide icons
+- [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/main/packages/video): MP4 or WebM from a scene
+- [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/main/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/main/packages/astro): scenes compiled into a Vite app or Astro site
+- [`@svjeez/live`](https://github.com/saiashirwad/svjeez/tree/main/packages/live), [`@svjeez/react`](https://github.com/saiashirwad/svjeez/tree/main/packages/react), [`@svjeez/svelte`](https://github.com/saiashirwad/svjeez/tree/main/packages/svelte): the scene editor, with a control on every value
 
-## Made with svjeez
+## Where it plays
 
-<table>
-  <tr>
-    <td width="50%"><a href="https://svjeez.texoport.in/examples/horizon"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/horizon.svg" width="100%" alt="A cinematic black hole with a glowing accretion disk, lensed photon ring, relativistic jets, and HUD telemetry." /></a></td>
-    <td width="50%"><a href="https://github.com/saiashirwad/svjeez/tree/main/examples/breaker"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/breaker.svg" width="100%" alt="A six-slide explainer on circuit breakers combining code morphs, a state machine, a sequence diagram, and a flowchart." /></a></td>
-  </tr>
-</table>
+Anywhere an `<img>` takes an SVG: GitHub READMEs, docs sites and any web page. For everywhere else, `svjeez video scene.tsx` writes MP4 or WebM.
 
-More in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for each in [`examples/`](https://github.com/saiashirwad/svjeez/tree/main/examples).
-
-## Upgrading
-
-From 0.5 or 0.6, see [`UPGRADING.md`](UPGRADING.md).
+More scenes are in the [gallery](https://svjeez.texoport.in/examples/), with the TSX for each in [`examples/`](https://github.com/saiashirwad/svjeez/tree/main/examples).
 
 ## Contributing
 
@@ -147,4 +114,4 @@ bun run build                        # rebuild examples/dist/
 cd .. && bun run test && bun run typecheck
 ```
 
-See [`AGENTS.md`](https://github.com/saiashirwad/svjeez/blob/main/AGENTS.md) for the layout and release process. MIT licensed.
+See [`AGENTS.md`](https://github.com/saiashirwad/svjeez/blob/main/AGENTS.md) for the layout and release process, and [`UPGRADING.md`](https://github.com/saiashirwad/svjeez/blob/main/UPGRADING.md) to move a project from 0.5, 0.6 or 0.7. MIT licensed.

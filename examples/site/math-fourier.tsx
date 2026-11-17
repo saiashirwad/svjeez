@@ -249,7 +249,7 @@ export default function build(): string {
           </text>
         </g>
         <g animation={motion({ opacity: 1 }).at(WRITTEN).set({ opacity: 0 })}>
-          {versions[0]!.write({ at: 0.25, over: 1.2 })}
+          {versions[0]!.write({ at: 0.25, over: 1.2 }).node}
         </g>
         <g animation={motion({ opacity: 0 }).at(WRITTEN).set({ opacity: 1 })}>{m.node}</g>
       </g>
