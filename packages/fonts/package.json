@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/fonts",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "Google Fonts for svjeez: a family name in, an embeddable Font out, cached on disk.",
   "license": "MIT",

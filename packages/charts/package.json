@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/charts",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "Animated bar, line and area charts for svjeez: scales and paths computed while the scene builds, drawn on by the timeline.",
   "license": "MIT",

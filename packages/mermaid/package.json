@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/mermaid",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "Mermaid text to animated svjeez diagrams: flowcharts, sequence diagrams and state diagrams, parsed by hand with no dependencies.",
   "license": "MIT",

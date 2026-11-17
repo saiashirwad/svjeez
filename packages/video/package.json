@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/video",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "MP4 and WebM video from an svjeez SVG, encoded in headless Chromium with Mediabunny.",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/svelte",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "Svelte components for editing a svjeez scene: its source with a control on every value, and its picture with handles, bound to an @svjeez/live editor.",
   "license": "MIT",

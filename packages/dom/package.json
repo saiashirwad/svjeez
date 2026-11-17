@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/dom",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "Snapshot real HTML and CSS in headless Chromium into svjeez nodes you can animate.",
   "license": "MIT",
