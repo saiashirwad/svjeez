@@ -40,6 +40,7 @@ Keep the default argument `p = defaults(params)`, so the module still renders wh
 
 - **The CLI.** `svjeez svg|frames|check|video|dev scene.tsx --params data.json` reads the JSON, checks it against the module's `params` and calls the default export with the result. `--param key=value` (repeatable) sets one value that is not a list, over the file; a number param reads the text as a number. A key the JSON or a flag leaves out keeps its default. A scene without a `params` export given either flag is an error that says so. With neither flag the CLI calls the default export with the defaults.
 - **Your build.** `parse(params, json)` does what the CLI does: `build(parse(params, await readFile("data.json", "utf8")))`.
+- **Text entries.** A URL's query, string form data and `--param` carry every value as text. `fromEntries(params, entries)` turns them into what `parse` reads, as the CLI does: a number param's text becomes a number when it is one, a list takes every entry with its key (`?tags=a&tags=b`), any other key its last. A list of records cannot be written as text; `parse` says so. `parse(params, fromEntries(params, new URL(request.url).searchParams))`.
 - **The editor.** `@svjeez/live` reads the schema to draw a control for each value and calls the scene with them.
 
 ```sh
@@ -71,6 +72,7 @@ A bad declaration throws when the module loads: a number kind when `min` is not 
 
 - `defaults(params)` returns every declared value. `Values<typeof params>` is its type: a `count` is a `number`, a `choice` the union of its options, a `text` a `string`, and a `list` a readonly array of its items, a record list's items typed field by field.
 - `parse(params, json)` reads untrusted input, a JSON string or what `JSON.parse` returned, into `Values<typeof params>`. It throws on a value of the wrong type, out of range, not an option, too long, a list too short or too long, and a key the schema does not declare, naming the path: `bars[2].value needs a number from 0 to 100, got 140.`, `"colour" is not a param of this scene. It declares title, bars.` A param the input leaves out keeps its default, and so does a record item's field. An ease reads as a name from `ease` (`"pop"`) or as `{ "kind": "bezier", "points": [x1, y1, x2, y2] }`.
+- `jsonSchema(params)` returns a JSON Schema for what `parse` accepts, with each param's range, options, length and default, and no required keys. Hand it to a model or a form.
 
 A page that draws controls uses the helpers in `@svjeez/live/fit`, so the scene's bundle never carries them:
 

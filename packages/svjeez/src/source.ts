@@ -1,8 +1,20 @@
+const readLocal = async (file: string | URL): Promise<Uint8Array> => {
+  let fs: typeof import("node:fs/promises");
+
+  try {
+    fs = await import("node:fs/promises");
+  } catch {
+    throw new Error(
+      `Cannot read ${file}: this runtime has no file system. Pass the bytes, or an http(s) URL.`,
+    );
+  }
+
+  return fs.readFile(file);
+};
+
 export const readSource = async (source: string | URL): Promise<Uint8Array> => {
   if (!(source instanceof URL) && !/^[a-z][a-z0-9+.-]*:\/\//i.test(source)) {
-    const { readFile } = await import("node:fs/promises");
-
-    return readFile(source);
+    return readLocal(source);
   }
 
   const url = source instanceof URL ? source : new URL(source);
@@ -18,8 +30,6 @@ export const readSource = async (source: string | URL): Promise<Uint8Array> => {
 
   if (url.protocol !== "file:")
     throw new Error(`Cannot load ${url}. Use an http(s) or file: URL, or a path.`);
-  const { readFile } = await import("node:fs/promises");
-  const { fileURLToPath } = await import("node:url");
 
-  return readFile(fileURLToPath(url));
+  return readLocal(url);
 };

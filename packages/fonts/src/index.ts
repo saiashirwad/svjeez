@@ -1,7 +1,3 @@
-import { createHash } from "node:crypto";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
 import { font, type Font, type FontFamily, type FontOptions, type FontStyle } from "svjeez";
 
 export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
@@ -10,7 +6,29 @@ export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
   readonly style?: FontStyle;
 };
 
-const cacheDir = (): string => {
+type Disk = typeof import("node:fs/promises") &
+  typeof import("node:path") &
+  Pick<typeof import("node:crypto"), "createHash"> &
+  Pick<typeof import("node:os"), "homedir">;
+
+const loadDisk = async (): Promise<Disk | undefined> => {
+  try {
+    const [crypto, fs, os, path] = await Promise.all([
+      import("node:crypto"),
+      import("node:fs/promises"),
+      import("node:os"),
+      import("node:path"),
+    ]);
+
+    return { ...path, ...fs, createHash: crypto.createHash, homedir: os.homedir };
+  } catch {}
+};
+
+let disk: Promise<Disk | undefined> | undefined;
+
+const memory = new Map<string, Uint8Array>();
+
+const cacheDir = ({ homedir, join }: Disk): string => {
   const { SVJEEZ_FONTS_CACHE, XDG_CACHE_HOME } = process.env;
 
   if (SVJEEZ_FONTS_CACHE) return SVJEEZ_FONTS_CACHE;
@@ -21,7 +39,7 @@ const cacheDir = (): string => {
 // Google serves WOFF2 to browsers and static TTF to a user agent it doesn't recognize.
 const HEADERS = { "user-agent": "svjeez-fonts" };
 
-const slug = (family: string): string => {
+const slug = ({ createHash }: Disk, family: string): string => {
   const plain = family.replace(/[^A-Za-z0-9]+/g, "-");
 
   if (/^[A-Za-z0-9]+( [A-Za-z0-9]+)*$/.test(family)) return plain;
@@ -89,29 +107,42 @@ const download = async (family: string, weight: number, style: FontStyle): Promi
 
 const pending = new Map<string, Promise<Uint8Array>>();
 
-const bytesOf = (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
-  const path = join(cacheDir(), `${slug(family)}-${weight}-${style}.ttf`);
-  let bytes = pending.get(path);
+const bytesOf = async (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
+  disk ??= loadDisk();
+
+  const files = await disk;
+
+  const key = files
+    ? files.join(cacheDir(files), `${slug(files, family)}-${weight}-${style}.ttf`)
+    : `${family} ${weight} ${style}`;
+
+  let bytes = pending.get(key);
 
   if (!bytes) {
-    bytes = load(path, family, weight, style).finally(() => pending.delete(path));
-    pending.set(path, bytes);
+    bytes = load(files, key, family, weight, style).finally(() => pending.delete(key));
+    pending.set(key, bytes);
   }
 
   return bytes;
 };
 
 const load = async (
-  path: string,
+  files: Disk | undefined,
+  key: string,
   family: string,
   weight: number,
   style: FontStyle,
 ): Promise<Uint8Array> => {
-  try {
-    const cached = await readFile(path);
+  const known = memory.get(key);
 
-    if (isFont(cached)) return cached;
-  } catch {}
+  if (known) return known;
+
+  if (files)
+    try {
+      const cached = await files.readFile(key);
+
+      if (isFont(cached)) return cached;
+    } catch {}
 
   let bytes: Uint8Array;
 
@@ -121,7 +152,9 @@ const load = async (
     if (error instanceof GoogleError) throw error;
 
     throw new Error(
-      `Could not load "${family}" ${weight} ${style} from Google Fonts, and ${path} is not cached. Run once with a network connection.`,
+      files
+        ? `Could not load "${family}" ${weight} ${style} from Google Fonts, and ${key} is not cached. Run once with a network connection.`
+        : `Could not load "${family}" ${weight} ${style} from Google Fonts.`,
       { cause: error },
     );
   }
@@ -131,18 +164,25 @@ const load = async (
       `Google Fonts answered for ${family} ${weight} ${style} with a file that is not a font.`,
     );
 
-  const temp = `${path}.${process.pid}.${Date.now()}.tmp`;
+  if (!files) {
+    memory.set(key, bytes);
 
-  await mkdir(dirname(path), { recursive: true });
-  await writeFile(temp, bytes);
-  await rename(temp, path);
+    return bytes;
+  }
+
+  const temp = `${key}.${process.pid}.${Date.now()}.tmp`;
+
+  await files.mkdir(files.dirname(key), { recursive: true });
+  await files.writeFile(temp, bytes);
+  await files.rename(temp, key);
 
   return bytes;
 };
 
 /**
  * Loads a Google Fonts family at one weight and style as a svjeez `Font`. The file is cached on disk, so only the first
- * run on a machine needs the network. Remaining options go to `font()`.
+ * run on a machine needs the network. Where there is no file system, as in a Worker, the font is fetched once per
+ * isolate and kept in memory. Remaining options go to `font()`.
  */
 export const google = Object.assign(
   async (family: string, options: GoogleOptions = {}): Promise<Font> => {

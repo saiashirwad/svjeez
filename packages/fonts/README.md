@@ -30,7 +30,7 @@ Google serves a static TTF at the exact weight, even for a variable font, so `me
 
 ## Cache
 
-Each file is downloaded once and kept in a folder shared by every project on the machine: `$SVJEEZ_FONTS_CACHE`, else `$XDG_CACHE_HOME/svjeez/fonts`, else `~/.cache/svjeez/fonts`. A cached font needs no network. Files are written through a temporary name and renamed, so an interrupted or parallel build never leaves a partial file.
+Each file is downloaded once and kept in a folder shared by every project on the machine: `$SVJEEZ_FONTS_CACHE`, else `$XDG_CACHE_HOME/svjeez/fonts`, else `~/.cache/svjeez/fonts`. A cached font needs no network. Files are written through a temporary name and renamed, so an interrupted or parallel build never leaves a partial file. Where there is no file system, as in a Cloudflare Worker, the font is fetched once per isolate and kept in memory.
 
 ## Errors
 

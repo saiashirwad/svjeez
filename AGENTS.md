@@ -25,6 +25,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
 - `site/` is the Astro site at svjeez.texoport.in.
+- `worker/` is a Cloudflare Worker that renders the gallery's example scenes on request at svjeez-worker.texoport.in, with params from the query or from a prompt. It is private and never published.
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, `bun run build:examples` rebuilds `examples/dist/`, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 
@@ -76,6 +77,10 @@ Each package's source explains its own internals. These are the rules that aren'
 ## Site
 
 `site/` imports scenes straight from `examples/` through the `@examples/*` path. Run `bun run dev`, `bun run build`, `bun run typecheck` and `bun run test` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
+
+## Worker
+
+`worker/` imports scenes from `examples/` lazily (`src/scenes.ts`), because their fonts load with top-level await and a Worker may not fetch outside a request. `bun run build` bundles it into `dist/worker.js` with the `@svjeez/source` condition, and `bun run test` runs that file in workerd through Miniflare and checks every scene against its `build()` byte for byte. `bun run deploy` builds and deploys through Alchemy (`worker/alchemy.run.ts`); set `DEEPSEEK_API_KEY` to turn on `?prompt=`. The examples `world` and `choropleth` stay out: they read world-atlas through `createRequire`, which a Worker does not have.
 
 ## Rules
 

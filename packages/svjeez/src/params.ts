@@ -360,3 +360,134 @@ export const parse = <S extends Schema>(schema: S, json: Json): Values<S> => {
     ]),
   ) as Values<S>;
 };
+
+const fromText = (p: Param | Fields | undefined, text: string): Json => {
+  const asNumber = text.trim() === "" ? NaN : Number(text);
+
+  return p?.kind === "number" && Number.isFinite(asNumber) ? asNumber : text;
+};
+
+/**
+ * The Json that `parse(schema, …)` reads from entries that carry every value as text: a URL's query, string form data
+ * or the CLI's `--param key=value`. A number param, or a list of numbers, reads its text as a number when it is one. A
+ * list takes every entry with its key; any other key takes its last. Everything else stays text for `parse` to check,
+ * so an unknown key, a number that is not one or a list of records fails there with its usual message.
+ */
+export const fromEntries = (
+  schema: Schema,
+  entries: Iterable<readonly [string, string]>,
+): JsonObject => {
+  const texts = new Map<string, string[]>();
+
+  for (const [key, text] of entries) {
+    const known = texts.get(key);
+
+    if (known) known.push(text);
+    else texts.set(key, [text]);
+  }
+
+  return Object.fromEntries(
+    [...texts].map(([key, all]) => {
+      const p = Object.hasOwn(schema, key) ? schema[key] : undefined;
+
+      return [
+        key,
+        p?.kind === "list" ? all.map((text) => fromText(p.item, text)) : fromText(p, all.at(-1)!),
+      ];
+    }),
+  );
+};
+
+const labelled = <T extends JsonObject>(schema: T, { label }: Labelled) =>
+  label === undefined ? schema : { ...schema, description: label };
+
+const scalarSchema = (p: ScalarParam) => {
+  switch (p.kind) {
+    case "number":
+      return labelled(
+        {
+          type: p.step === 1 && Number.isInteger(p.min) ? "integer" : "number",
+          minimum: p.min,
+          maximum: p.max,
+        },
+        p,
+      );
+    case "color":
+      return labelled({ type: "string", pattern: "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" }, p);
+    case "easing":
+      return labelled(
+        {
+          anyOf: [
+            { enum: NAMED_EASES },
+            {
+              type: "object",
+              properties: { kind: { const: "linear" } },
+              required: ["kind"],
+              additionalProperties: false,
+            },
+            {
+              type: "object",
+              properties: {
+                kind: { const: "bezier" },
+                points: { type: "array", items: { type: "number" }, minItems: 4, maxItems: 4 },
+              },
+              required: ["kind", "points"],
+              additionalProperties: false,
+            },
+            {
+              type: "object",
+              properties: { kind: { const: "steps" }, count: { type: "integer", minimum: 1 } },
+              required: ["kind", "count"],
+              additionalProperties: false,
+            },
+          ],
+        },
+        p,
+      );
+    case "choice":
+      return labelled({ type: "string", enum: p.options }, p);
+    case "text":
+      return labelled(
+        p.maxLength === undefined ? { type: "string" } : { type: "string", maxLength: p.maxLength },
+        p,
+      );
+  }
+};
+
+const defaulted = (p: ScalarParam) =>
+  p.kind === "easing" ? scalarSchema(p) : { ...scalarSchema(p), default: p.value };
+
+const listSchema = (p: ListParam) => {
+  const { item } = p;
+
+  const items = isScalar(item)
+    ? scalarSchema(item)
+    : {
+        type: "object",
+        properties: Object.fromEntries(
+          Object.entries(item).map(([key, field]) => [key, defaulted(field)]),
+        ),
+        additionalProperties: false,
+      };
+
+  // SAFETY: a list's value holds only what its items' kinds read from JSON.
+  const schema = { type: "array", items, minItems: p.min, default: p.value as Json };
+
+  return labelled(p.max === undefined ? schema : { ...schema, maxItems: p.max }, p);
+};
+
+/**
+ * A JSON Schema describing what `parse(schema, json)` accepts, to hand to a model or a form. No key is required: a
+ * param the input leaves out keeps its default.
+ */
+export const jsonSchema = (schema: Schema) =>
+  ({
+    type: "object",
+    properties: Object.fromEntries(
+      Object.entries(schema).map(([key, p]) => [
+        key,
+        p.kind === "list" ? listSchema(p) : defaulted(p),
+      ]),
+    ),
+    additionalProperties: false,
+  }) satisfies JsonObject;

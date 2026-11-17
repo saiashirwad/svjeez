@@ -4,7 +4,8 @@
   "workspaces": [
     "packages/*",
     "examples",
-    "site"
+    "site",
+    "worker"
   ],
   "type": "module",
   "scripts": {

@@ -5,7 +5,15 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { checkScene, renderFrames, type FrameTimes } from "./frames";
-import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
+import {
+  fromEntries,
+  parse,
+  type Json,
+  type JsonObject,
+  type Param,
+  type Schema,
+  type Values,
+} from "./params";
 import { startTrace } from "./traced";
 import { validateSvg } from "./validate";
 
@@ -105,19 +113,17 @@ const valuesFor = async (
     }
   })();
 
-  const pairs = (flags.param ?? []).map((pair): [string, Json] => {
+  const pairs = (flags.param ?? []).map((pair): [string, string] => {
     const equals = pair.indexOf("=");
 
     if (equals < 1) fail(`--param needs key=value, got "${pair}".`);
     const key = pair.slice(0, equals);
-    const raw = pair.slice(equals + 1);
     const declared = Object.hasOwn(schema, key) ? schema[key] : undefined;
 
     if (declared?.kind === "list")
       fail(`--param ${key} is a list. Put lists in a JSON file and pass it with --params.`);
-    const asNumber = raw.trim() === "" ? NaN : Number(raw);
 
-    return [key, declared?.kind === "number" && Number.isFinite(asNumber) ? asNumber : raw];
+    return [key, pair.slice(equals + 1)];
   });
 
   const given = isJsonObject(json)
@@ -125,7 +131,7 @@ const valuesFor = async (
     : fail(`--params ${flags.params} needs a JSON object keyed by param name.`);
 
   try {
-    return parse(schema, { ...given, ...Object.fromEntries(pairs) });
+    return parse(schema, { ...given, ...fromEntries(schema, pairs) });
   } catch (error) {
     return fail(`${file}: ${error instanceof Error ? error.message : String(error)}`);
   }
