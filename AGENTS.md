@@ -99,7 +99,9 @@ Every package shares one version. To release, bump them together and push. `bun 
 
 ```sh
 for p in svjeez vite astro charts code diagrams dom fonts geo icons live math mermaid react svelte video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
-bun install && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
+bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
+
+The version is part of `@svjeez/dom`'s recording hash, so a bump re-records every `snapshots.json`; `build:examples` above commits them, or CI fails on a stale `examples/dist/`.
 
 A new package needs one publish from a maintainer's machine before the workflow can release it. The header of `scripts/release.ts` describes `claim` and `plan`.

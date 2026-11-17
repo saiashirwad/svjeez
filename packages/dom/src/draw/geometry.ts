@@ -28,13 +28,19 @@ const SHARP = /M(-?[\d.]+) (-?[\d.]+)H(-?[\d.]+)V(-?[\d.]+)H(-?[\d.]+)Z/g;
 
 export const commands = (d: string): string => d.replace(/[^A-Za-z]/g, "");
 
+// WebKit reads an arc of radius 0 as a line, so a sharp corner gets a radius too small to see.
+const HAIRLINE = 0.01;
+
 const arced = (d: PathData): PathData =>
   // SAFETY: the replacement is a path again, the same rectangle in other commands.
-  (d as string).replace(SHARP, (_, x: string, y: string, r: string, b: string) => {
-    const arc = (ex: string, ey: string) => `A0 0 0 0 1 ${ex} ${ey}`;
-
-    return `M${x} ${y}H${r}${arc(r, y)}V${b}${arc(r, b)}H${x}${arc(x, b)}V${y}${arc(x, y)}Z`;
-  }) as PathData;
+  (d as string).replace(SHARP, (_, x: string, y: string, r: string, b: string) =>
+    rounded({ x: +x, y: +y, width: +r - +x, height: +b - +y }, [
+      HAIRLINE,
+      HAIRLINE,
+      HAIRLINE,
+      HAIRLINE,
+    ]),
+  ) as PathData;
 
 export const morphable = (a: PathData, b: PathData): [PathData, PathData] =>
   commands(a) === commands(b) ? [a, b] : [arced(a), arced(b)];
