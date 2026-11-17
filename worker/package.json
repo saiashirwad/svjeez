@@ -22,13 +22,16 @@
     "@svjeez/mermaid": "workspace:*",
     "ai": "^7.0.173",
     "alchemy": "2.0.0-beta.87",
+    "d3-array": "3.2.4",
     "effect": "^4.1.4",
     "hono": "^4.13.19",
+    "mathjs": "15.2.0",
     "svjeez": "workspace:*",
     "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/d3-array": "^3.2.2",
     "miniflare": "4.20260730.0",
     "typescript": "latest"
   }

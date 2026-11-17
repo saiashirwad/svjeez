@@ -24,8 +24,8 @@ export const params = {
     ],
     {
       min: 1,
-      max: 8,
-      label: "The steps in order, 1 to 8. Each is written out under the one before.",
+      max: 12,
+      label: "The steps in order, 1 to 12. Each is written out under the one before.",
     },
   ),
 };

@@ -12,9 +12,9 @@ export const params = {
     ok -->|yes| post([Post review])
     ok -->|no| fix[Draft fixes] --> lint`,
     {
-      maxLength: 2000,
+      maxLength: 4000,
       label:
-        "Mermaid source for one diagram: a flowchart (first line flowchart TD or flowchart LR), a sequenceDiagram, or a stateDiagram-v2. Use short labels. Not supported: classDef, class, style, linkStyle, click, :::, BT or RL directions, notes left or right of actors, activate, loop, alt, opt, par, autonumber, choice, fork, join and concurrency.",
+        "Mermaid source for one diagram, at most 4000 characters: a flowchart (first line flowchart TD or flowchart LR), a sequenceDiagram, or a stateDiagram-v2. Use short labels. Not supported: classDef, class, style, linkStyle, click, :::, BT or RL directions, notes left or right of actors, activate, loop, alt, opt, par, autonumber, choice, fork, join and concurrency.",
     },
   ),
 };

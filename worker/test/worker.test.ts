@@ -3,13 +3,16 @@ import { join } from "node:path";
 import { Miniflare } from "miniflare";
 import { defaults, fromEntries, jsonSchema, parse, text, type Json } from "svjeez/params";
 
-import { fill } from "../src/ai";
+import { fill, TRIES, Unfit } from "../src/ai";
 import { draw, load, names, type Name } from "../src/scenes";
 
 const ROOT = join(import.meta.dir, "..");
 
 let worker: Miniflare;
 let keyed: Miniflare;
+
+/** An answer that makes the stubbed DeepSeek fail as a service. */
+const DOWN = "down";
 
 /** What the stubbed DeepSeek answers next, in order, and the messages it was sent. */
 const answers: string[] = [];
@@ -49,7 +52,11 @@ beforeAll(() => {
 
       asked.push((await request.json()).messages);
 
-      return completion(answers.shift() ?? "");
+      const answer = answers.shift() ?? "";
+
+      return answer === DOWN
+        ? new Response("upstream exploded", { status: 500 })
+        : completion(answer);
     },
   });
 });
@@ -165,6 +172,7 @@ describe("in workerd", () => {
       )}`,
     ],
     ["math", "title=Pythagoras&steps=a%5E2%20%2B%20b%5E2%20%3D%20c%5E2&steps=c%20%3D%205"],
+    ["plot", "kind=function&expression=sin(x)%2Fx&y=&tex=y%20%3D%20%5Csin%20x%20%2F%20x"],
   ];
 
   for (const [name, query] of queries)
@@ -183,7 +191,28 @@ describe("in workerd", () => {
     const response = await get(`/diagram.svg?source=${encodeURIComponent(MERMAID_ERROR)}`);
 
     expect(response.status).toBe(400);
-    expect(await response.text()).toBe(failure(() => draw(scene, { source: MERMAID_ERROR })));
+    expect(await response.text()).toContain(failure(() => draw(scene, { source: MERMAID_ERROR })));
+  });
+
+  test("a bad expression is a 400 that says what is wrong", async () => {
+    const response = await get("/plot.svg?kind=function&expression=foo(x)&y=");
+
+    expect(response.status).toBe(400);
+    expect(await response.text()).toContain(
+      'expression "foo(x)" cannot be evaluated: Undefined function foo',
+    );
+  });
+
+  test("the index puts the build on every thumbnail, and ?v= alone renders the defaults", async () => {
+    const html = await (await get("/")).text();
+    const srcs = [...html.matchAll(/class="thumb" src="([^"]+)"/g)].map(([, src]) => src ?? "");
+
+    expect(srcs.length).toBeGreaterThan(0);
+
+    for (const src of srcs)
+      expect(new URL(src, "http://localhost").searchParams.get("v")).toBeTruthy();
+
+    expect(await (await get("/card.svg?v=anything")).text()).toBe((await load("card")).default());
   });
 
   test("/generate redirects to the template's prompt URL", async () => {
@@ -204,7 +233,9 @@ describe("in workerd", () => {
     const response = await get(`/card.svg?tag=${tag}`);
 
     expect(response.status).toBe(400);
-    expect(await response.text()).toBe(failure(() => parse(params, { tag })));
+    expect(await response.text()).toBe(
+      `These values do not fit the card template: ${failure(() => parse(params, { tag }))} Fix the value in the URL; /card.json lists what each param takes.`,
+    );
   });
 
   test("/<name>.json is the schema and the defaults", async () => {
@@ -221,7 +252,12 @@ describe("in workerd", () => {
   });
 
   test("?prompt= fills the params through the model, asking once more after a bad answer", async () => {
-    answers.push('{"tag": "far too long a tag here"}', '{"tag": "v2.0.0"}');
+    const rest = { title: "A major release", bullets: ["Faster"] };
+
+    answers.push(
+      JSON.stringify({ tag: "far too long a tag here", ...rest }),
+      JSON.stringify({ tag: "v2.0.0", ...rest }),
+    );
 
     const response = await keyed.dispatchFetch(
       "http://localhost/card.svg?prompt=a%20major%20release",
@@ -248,16 +284,31 @@ describe("in workerd", () => {
     );
   }, 60_000);
 
-  test("?prompt= is a 502 with parse's message when the second answer is bad too", async () => {
+  test("?prompt= is a 502 that tells the person what happened when every answer is bad", async () => {
     const { params } = await load("card");
-    const tag = "far too long a tag here";
+    const answer = { tag: "far too long a tag here", title: "Again", bullets: ["One"] };
 
-    answers.push(JSON.stringify({ tag }), JSON.stringify({ tag }));
+    answers.push(...Array.from({ length: TRIES }, () => JSON.stringify(answer)));
     const response = await keyed.dispatchFetch("http://localhost/card.svg?prompt=again");
 
     expect(response.status).toBe(502);
-    expect(await response.text()).toBe(failure(() => parse(params, { tag })));
+    expect(await response.text()).toBe(
+      `The model's answer did not fit the card template after ${TRIES} tries: ${failure(() => parse(params, answer))} Try asking for something shorter or simpler, or pick another template.`,
+    );
   });
+
+  test("?prompt= is a 502 that says the model could not be reached when it fails as a service", async () => {
+    answers.length = 0;
+    answers.push(DOWN, DOWN, DOWN);
+    const response = await keyed.dispatchFetch("http://localhost/card.svg?prompt=down");
+    const text = await response.text();
+
+    answers.length = 0;
+    expect(response.status).toBe(502);
+    expect(text).toBe(
+      "The model could not be reached, or did not answer in time. Try again in a minute.",
+    );
+  }, 60_000);
 
   test("a prompt over 600 characters is a 400", async () => {
     const prompt = "a".repeat(601);
@@ -277,7 +328,7 @@ describe("in workerd", () => {
   test("the index shows every scene", async () => {
     const html = await (await get("/")).text();
 
-    for (const name of names) expect(html).toContain(`src="/${name}.svg"`);
+    for (const name of names) expect(html).toContain(`src="/${name}.svg?v=`);
   }, 60_000);
 });
 
@@ -312,11 +363,29 @@ describe("fill", () => {
     );
   });
 
-  test("a second bad answer throws parse's message", async () => {
+  test("an answer that leaves a param out is sent back, naming it", async () => {
+    const sent: { readonly role: string; readonly content: string }[][] = [];
+    const replies = ["{}", '{"version": "2.0.0"}'];
+
+    const fetch = stub((body) => {
+      sent.push(JSON.parse(body).messages);
+
+      return replies[sent.length - 1]!;
+    });
+
+    await fill(schema, "a major release", accept, { key: "test", fetch });
+
+    expect(sent[1]?.at(-1)?.content).toStartWith(
+      "Write every param yourself. These are missing: version.",
+    );
+  });
+
+  test("every answer bad throws Unfit with parse's message", async () => {
     const fetch = stub(() => '{"version": "far too long"}');
 
-    await expect(fill(schema, "x", accept, { key: "test", fetch })).rejects.toThrow(
-      failure(() => parse(schema, { version: "far too long" })),
-    );
+    const failed = fill(schema, "x", accept, { key: "test", fetch });
+
+    await expect(failed).rejects.toBeInstanceOf(Unfit);
+    await expect(failed).rejects.toThrow(failure(() => parse(schema, { version: "far too long" })));
   });
 });

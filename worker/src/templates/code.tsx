@@ -23,8 +23,8 @@ const LANGUAGES = [
   "diff",
 ] as const;
 
-const MAX_LINES = 30;
-const MAX_COLUMNS = 110;
+const MAX_LINES = 80;
+const MAX_COLUMNS = 120;
 
 export const params = {
   title: text("fib.ts", {
@@ -41,8 +41,8 @@ export const params = {
   return fib(n - 1) + fib(n - 2);
 }`,
     {
-      maxLength: 2400,
-      label: `The code itself, with real newlines and spaces for indentation. At most ${MAX_LINES} lines of at most ${MAX_COLUMNS} characters; keep it to what the snippet needs.`,
+      maxLength: 8000,
+      label: `The code itself, with real newlines and spaces for indentation. Aim for 50 lines or fewer: more than ${MAX_LINES} lines, or a line over ${MAX_COLUMNS} characters, is rejected. Cut comments and blank lines before cutting code.`,
     },
   ),
 };

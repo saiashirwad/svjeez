@@ -15,24 +15,30 @@ const example = (name: string, params: Schema): string => {
   return `/${name}.svg?${query}`;
 };
 
-const thumbnail = (name: string) =>
-  html`<img class="thumb" src="/${name}.svg" alt="${name}, as it renders with its defaults" loading="lazy">`;
+const thumbnail = (name: string, build: string) =>
+  html`<img class="thumb" src="/${name}.svg?${new URLSearchParams({ v: build })}" alt="${name}, as it renders with its defaults" loading="lazy">`;
 
-const option = ({ name }: Entry, i: number) => html`<label class="option">
+const option =
+  (build: string) =>
+  ({ name }: Entry, i: number) =>
+    html`<label class="option">
   <input type="radio" name="template" value="${name}" ${i === 0 ? "checked" : ""}>
-  ${thumbnail(name)}
+  ${thumbnail(name, build)}
   <span>${name}</span>
 </label>`;
 
-const card = ({ name, params }: Entry) => html`<li>
-  <a href="/${name}.svg">${thumbnail(name)}</a>
+const card =
+  (build: string) =>
+  ({ name, params }: Entry) =>
+    html`<li>
+  <a href="/${name}.svg">${thumbnail(name, build)}</a>
   <h3>${name}</h3>
   <p><a href="/${name}.json">params</a> · <a href="${example(name, params)}">example query</a></p>
 </li>`;
 
 const STYLE = `
-:root { color-scheme: light dark; --bg: #fafafa; --panel: #fff; --ink: #1d1d1f; --muted: #6e6e73; --line: #e2e2e5; --accent: #0a66ff; }
-@media (prefers-color-scheme: dark) { :root { --bg: #111113; --panel: #1a1a1d; --ink: #f2f2f4; --muted: #9a9aa2; --line: #2a2a2e; --accent: #5ea0ff; } }
+:root { color-scheme: light dark; --bg: #fafafa; --panel: #fff; --ink: #1d1d1f; --muted: #6e6e73; --line: #e2e2e5; --accent: #0a66ff; --error: #d93025; --error-bg: #fdecea; }
+@media (prefers-color-scheme: dark) { :root { --bg: #111113; --panel: #1a1a1d; --ink: #f2f2f4; --muted: #9a9aa2; --line: #2a2a2e; --accent: #5ea0ff; --error: #ff6b5e; --error-bg: #2c1614; } }
 body { margin: 0 auto; max-width: 1200px; padding: 32px; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
 h1 { font-size: 22px; margin: 0 0 20px; }
 h2 { font-size: 16px; margin: 40px 0 12px; }
@@ -52,7 +58,8 @@ button { padding: 6px 16px; cursor: pointer; }
 button:disabled { opacity: 0.6; cursor: progress; }
 #result { margin-top: 24px; }
 #result img { max-width: 100%; }
-#error { color: inherit; white-space: pre-wrap; }
+#status { color: var(--muted); }
+#error { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--error); border-radius: 8px; background: var(--error-bg); color: var(--ink); white-space: pre-wrap; }
 ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 `;
 
@@ -62,18 +69,21 @@ const result = document.getElementById("result");
 const image = document.getElementById("image");
 const link = document.getElementById("link");
 const schema = document.getElementById("schema");
+const note = document.getElementById("status");
 const error = document.getElementById("error");
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const data = new FormData(form);
   const name = data.get("template");
-  const url = "/" + name + ".svg?" + new URLSearchParams({ prompt: data.get("prompt") });
+  const prompt = data.get("prompt").trim();
+  const url = "/" + name + ".svg?" + new URLSearchParams({ prompt });
 
   form.querySelector("button").disabled = true;
   result.hidden = false;
   image.hidden = true;
-  error.textContent = "Generating…";
+  error.hidden = true;
+  note.textContent = "Generating…";
   link.href = url;
   link.textContent = location.origin + url;
   schema.href = "/" + name + ".json";
@@ -84,17 +94,21 @@ form.addEventListener("submit", async (event) => {
     if (!response.ok) throw new Error(await response.text());
     image.src = URL.createObjectURL(await response.blob());
     image.hidden = false;
-    error.textContent = "";
   } catch (failure) {
     error.textContent = failure.message;
+    error.hidden = false;
   } finally {
+    note.textContent = "";
     form.querySelector("button").disabled = false;
   }
 });
 `;
 
-/** The index: one prompt for any template, then every template with its schema and an example query. */
-export const page = (entries: readonly Entry[]) => html`<!doctype html>
+/**
+ * The index: one prompt for any template, then every template with its schema and an example query. `build` goes on
+ * each thumbnail's URL, so a new deploy's renders replace the ones a browser cached.
+ */
+export const page = (entries: readonly Entry[], build: string) => html`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -107,7 +121,7 @@ export const page = (entries: readonly Entry[]) => html`<!doctype html>
 <form action="/generate" method="get">
   <fieldset>
     <legend>Template</legend>
-    ${entries.map(option)}
+    ${entries.map(option(build))}
   </fieldset>
   <textarea name="prompt" rows="3" maxlength="600" required placeholder="Describe what to draw: a state machine for a vending machine, a bar chart of rainfall by month, a Rust function that parses a date…"></textarea>
   <button>Generate</button>
@@ -115,10 +129,11 @@ export const page = (entries: readonly Entry[]) => html`<!doctype html>
 <section id="result" hidden>
   <img id="image" alt="The generated scene" hidden>
   <p><a id="link"></a> · <a id="schema">params</a></p>
-  <p id="error" role="status"></p>
+  <p id="status" role="status"></p>
+  <div id="error" role="alert" hidden></div>
 </section>
 <h2>Templates</h2>
-<ul>${entries.map(card)}</ul>
+<ul>${entries.map(card(build))}</ul>
 <script>${raw(SCRIPT)}</script>
 </body>
 </html>

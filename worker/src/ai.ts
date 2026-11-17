@@ -20,10 +20,33 @@ const reason = (error: NoObjectGeneratedError): string =>
     ? error.cause.cause.message
     : error.message;
 
+/** `value` when it names every param, so the model writes the whole scene and never leans on a default. */
+const complete = (schema: Schema, value: Json): Json => {
+  const given = Object.keys(value ?? {});
+  const missing = Object.keys(schema).filter((key) => !given.includes(key));
+
+  if (missing.length > 0)
+    throw new Error(`Write every param yourself. These are missing: ${missing.join(", ")}.`);
+
+  return value;
+};
+
+const SYSTEM = [
+  "You fill in every param of an animated SVG template from the user's description.",
+  "The defaults in the schema only show the format. Write content for this request and never reuse theirs.",
+  "When the template cannot draw exactly what is asked, draw the closest thing it can and name that honestly in the title.",
+].join(" ");
+
+/** How many answers the model gets: the first, and a retry after each that does not fit. */
+export const TRIES = 3;
+
+/** The model answered every try, and no answer fit; the message is the last answer's problem. */
+export class Unfit extends Error {}
+
 /**
  * Asks a DeepSeek model for values that match `schema`, given `prompt`, and returns what `accept` makes of them. The
- * model only writes JSON. When `accept` throws on the first answer, the model sees its message and answers once more;
- * a second failure throws with that message.
+ * model only writes JSON. When `accept` throws, the model sees its message and answers again, up to `TRIES` answers
+ * in all; then `Unfit` throws with the last message. A failure to reach the model throws as the SDK reports it.
  */
 export const fill = async <T>(
   schema: Schema,
@@ -31,44 +54,50 @@ export const fill = async <T>(
   accept: (json: Json) => T,
   { key, fetch }: FillOptions,
 ): Promise<T> => {
-  const accepted = schemaOf<T>(jsonSchema(schema), {
-    validate: (value) => {
-      try {
-        // SAFETY: value is what JSON.parse read from the model's answer.
-        return { success: true, value: accept(value as Json) };
-      } catch (error) {
-        return { success: false, error: error instanceof Error ? error : new Error(String(error)) };
-      }
+  const accepted = schemaOf<T>(
+    { ...jsonSchema(schema), required: Object.keys(schema) },
+    {
+      validate: (value) => {
+        try {
+          // SAFETY: value is what JSON.parse read from the model's answer.
+          return { success: true, value: accept(complete(schema, value as Json)) };
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error : new Error(String(error)),
+          };
+        }
+      },
     },
-  });
+  );
 
-  const ask = async (messages: ModelMessage[]) =>
-    (
-      await generateText({
-        model: createDeepSeek({ apiKey: key, fetch })("deepseek-v4-flash"),
-        system: "You fill in the params of an animated SVG scene from the user's description.",
+  const model = createDeepSeek({ apiKey: key, fetch })("deepseek-v4-flash");
+  const messages: ModelMessage[] = [{ role: "user", content: prompt }];
+  let problem = "";
+
+  for (let attempt = 1; attempt <= TRIES; attempt++) {
+    try {
+      const { output } = await generateText({
+        model,
+        system: SYSTEM,
         messages,
         output: Output.object({ schema: accepted }),
         temperature: 0.2,
-        maxOutputTokens: 1500,
+        maxOutputTokens: 4000,
+        abortSignal: AbortSignal.timeout(60_000),
         providerOptions: { deepseek: { thinking: { type: "disabled" } } },
-      })
-    ).output;
+      });
 
-  const first: ModelMessage = { role: "user", content: prompt };
-
-  try {
-    return await ask([first]);
-  } catch (error) {
-    if (!NoObjectGeneratedError.isInstance(error)) throw error;
-
-    const retry: ModelMessage = {
-      role: "user",
-      content: `${reason(error)} Answer again with one JSON object that fixes this.`,
-    };
-
-    return ask([first, { role: "assistant", content: error.text ?? "" }, retry]).catch((again) => {
-      throw NoObjectGeneratedError.isInstance(again) ? new Error(reason(again)) : again;
-    });
+      return output;
+    } catch (error) {
+      if (!NoObjectGeneratedError.isInstance(error)) throw error;
+      problem = reason(error);
+      messages.push(
+        { role: "assistant", content: error.text ?? "" },
+        { role: "user", content: `${problem} Answer again with one JSON object that fixes this.` },
+      );
+    }
   }
+
+  throw new Unfit(problem);
 };

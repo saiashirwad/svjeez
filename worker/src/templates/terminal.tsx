@@ -31,12 +31,16 @@ export const params = {
     ],
     {
       min: 1,
-      max: 12,
+      max: 24,
       label:
-        "The session from top to bottom, 1 to 12 lines. The first line is a command; each output line prints under the command before it.",
+        "The session from top to bottom, 1 to 24 lines. The first line is a command; each output line prints under the command before it.",
     },
   ),
 };
+
+/** One line's height in px: 18px type at 1.7. */
+const LINE = 30.6;
+const BAR = appWindow(rect(0, 0, 100, 100), { theme }).body.y;
 
 type Line = Values<typeof params>["lines"][number];
 
@@ -59,7 +63,9 @@ const session = (lines: readonly Line[]): TerminalCommand[] => {
 };
 
 export default function build(p: Values<typeof params> = defaults(params)): string {
-  const shell = appWindow(rect(MARGIN, MARGIN, WIDTH - 2 * MARGIN, HEIGHT - 2 * MARGIN), {
+  const height = Math.max(HEIGHT, Math.ceil(2 * MARGIN + BAR + 32 + p.lines.length * LINE));
+
+  const shell = appWindow(rect(MARGIN, MARGIN, WIDTH - 2 * MARGIN, height - 2 * MARGIN), {
     theme,
     title: p.title,
     dots: "traffic",
@@ -70,7 +76,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
     x: shell.body.x + 28,
     y: shell.body.y + 16,
     fontSize: 18,
-    lineHeight: 1.7,
+    lineHeight: LINE / 18,
     font: mono,
     cps: Math.max(24, p.lines.reduce((sum, line) => sum + line.text.length, 0) / 8),
   });
@@ -80,7 +86,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
   return render(
     {
       width: WIDTH,
-      height: HEIGHT,
+      height,
       duration: D,
       title: `Terminal session in ${p.title}`,
       desc: `A terminal session typed out line by line: ${p.lines.map((line) => line.text).join("; ")}.`,
@@ -88,7 +94,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
       css,
     },
     <>
-      <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
+      <rect width="100%" height="100%" fill={theme.base00} />
       <g fontFamily={mono}>{shell.node}</g>
       {typed.node}
     </>,

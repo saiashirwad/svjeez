@@ -20,6 +20,7 @@ const scenes = {
   list: () => import("../../examples/leaderboard/index.tsx"),
   metrics: () => import("../../examples/metrics/index.tsx"),
   math: () => import("./templates/math.tsx"),
+  plot: () => import("./templates/plot.tsx"),
 } satisfies Readonly<Record<string, () => Promise<Scene>>>;
 
 export type Name = keyof typeof scenes;

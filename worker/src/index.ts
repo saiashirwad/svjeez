@@ -4,9 +4,9 @@ import { HTTPException } from "hono/http-exception";
 import { defaults, fromEntries, jsonSchema } from "svjeez/params";
 
 import type { WorkerEnv } from "../alchemy.run.ts";
-import { fill } from "./ai";
+import { fill, TRIES, Unfit } from "./ai";
 import { page } from "./page";
-import { draw, isName, load, names, type Scene } from "./scenes";
+import { draw, isName, load, names, type Name, type Scene } from "./scenes";
 
 /** Either binding may be missing: a deploy without the key, or a test with neither. */
 type App = { Bindings: Partial<WorkerEnv> };
@@ -16,48 +16,52 @@ declare const BUILD: string;
 
 const PROMPT_LIMIT = 600;
 
-const sceneOf = async (c: Context<App>, extension: string) => {
-  const name = c.req.param("file")?.slice(0, -extension.length) ?? "";
+const nameOf = (c: Context<App>, extension: string) =>
+  c.req.param("file")?.slice(0, -extension.length) ?? "";
 
-  return isName(name) ? load(name) : undefined;
-};
+const unknown = (name: string) =>
+  `There is no template named "${name}". Pick one of: ${names.join(", ")}.`;
 
-const queried = (scene: Scene, query: URLSearchParams) => {
+const reason = (error: Error | string) => (error instanceof Error ? error.message : error);
+
+const queried = (name: Name, scene: Scene, query: URLSearchParams) => {
   try {
     return draw(scene, query.get("params") ?? fromEntries(scene.params, query));
   } catch (error) {
     throw new HTTPException(400, {
-      message: error instanceof Error ? error.message : String(error),
+      message: `These values do not fit the ${name} template: ${reason(error instanceof Error ? error : String(error))} Fix the value in the URL; /${name}.json lists what each param takes.`,
     });
   }
 };
 
-const prompted = async (scene: Scene, prompt: string, c: Context<App>) => {
+const prompted = async (name: Name, scene: Scene, prompt: string, c: Context<App>) => {
   const key = c.env.DEEPSEEK_API_KEY;
 
   if (key === undefined)
     throw new HTTPException(501, {
-      message:
-        "This Worker has no DEEPSEEK_API_KEY, so it cannot read a prompt. Pass the params in the query.",
+      message: `Prompts are turned off on this server, because it has no model key. Fill the template in the URL instead; /${name}.json lists its params.`,
     });
 
   if (prompt.length > PROMPT_LIMIT)
     throw new HTTPException(400, {
-      message: `The prompt is ${prompt.length} characters. Keep it to ${PROMPT_LIMIT}.`,
+      message: `Your prompt is ${prompt.length} characters, and the limit is ${PROMPT_LIMIT}. Shorten it and try again.`,
     });
 
   const ip = c.req.header("cf-connecting-ip") ?? "unknown";
 
   if (c.env.AI_LIMIT && !(await c.env.AI_LIMIT.limit({ key: ip })).success)
     throw new HTTPException(429, {
-      message: "Too many prompts from this address. Wait a minute and try again.",
+      message: "You have sent a lot of prompts in the last minute. Wait a minute and try again.",
     });
 
   try {
     return await fill(scene.params, prompt, (json) => draw(scene, json), { key });
   } catch (error) {
     throw new HTTPException(502, {
-      message: error instanceof Error ? error.message : String(error),
+      message:
+        error instanceof Unfit
+          ? `The model's answer did not fit the ${name} template after ${TRIES} tries: ${error.message} Try asking for something shorter or simpler, or pick another template.`
+          : "The model could not be reached, or did not answer in time. Try again in a minute.",
     });
   }
 };
@@ -68,6 +72,7 @@ app.get("/", async (c) =>
   c.html(
     page(
       await Promise.all(names.map(async (name) => ({ name, params: (await load(name)).params }))),
+      BUILD,
     ),
   ),
 );
@@ -75,10 +80,10 @@ app.get("/", async (c) =>
 app.get("/generate", (c) => {
   const template = c.req.query("template") ?? "";
 
-  if (!isName(template)) return c.notFound();
+  if (!isName(template)) return c.text(unknown(template), 404);
 
   return c.redirect(
-    `/${template}.svg?${new URLSearchParams({ prompt: c.req.query("prompt") ?? "" })}`,
+    `/${template}.svg?${new URLSearchParams({ prompt: (c.req.query("prompt") ?? "").trim() })}`,
   );
 });
 
@@ -86,21 +91,29 @@ app.get("/generate", (c) => {
 app.use(cache({ cacheName: `svjeez-worker-${BUILD}`, cacheControl: "public, max-age=3600" }));
 
 app.get("/:file{[a-z-]+\\.json}", async (c) => {
-  const scene = await sceneOf(c, ".json");
+  const name = nameOf(c, ".json");
 
-  return scene
-    ? c.json({ params: jsonSchema(scene.params), defaults: defaults(scene.params) })
-    : c.notFound();
+  if (!isName(name)) return c.text(unknown(name), 404);
+
+  const { params } = await load(name);
+
+  return c.json({ params: jsonSchema(params), defaults: defaults(params) });
 });
 
 app.get("/:file{[a-z-]+\\.svg}", async (c) => {
-  const scene = await sceneOf(c, ".svg");
+  const name = nameOf(c, ".svg");
 
-  if (!scene) return c.notFound();
+  if (!isName(name)) return c.text(unknown(name), 404);
 
+  const scene = await load(name);
   const query = new URL(c.req.url).searchParams;
   const prompt = query.get("prompt");
-  const svg = prompt === null ? queried(scene, query) : await prompted(scene, prompt, c);
+
+  // `v` is the build id the index puts on thumbnails, so a deploy is never served an old render.
+  query.delete("v");
+
+  const svg =
+    prompt === null ? queried(name, scene, query) : await prompted(name, scene, prompt.trim(), c);
 
   c.header("content-type", "image/svg+xml; charset=utf-8");
 
@@ -108,7 +121,10 @@ app.get("/:file{[a-z-]+\\.svg}", async (c) => {
 });
 
 app.notFound((c) =>
-  c.text(`No such page. Try /, or /<name>.svg for one of: ${names.join(", ")}.`, 404),
+  c.text(
+    `There is no page here. Open / to pick a template, or ask for /<name>.svg with one of: ${names.join(", ")}.`,
+    404,
+  ),
 );
 
 export default app;

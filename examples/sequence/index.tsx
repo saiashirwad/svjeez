@@ -4,16 +4,28 @@ import { choice, defaults, list, text, type Values } from "svjeez/params";
 import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
 
 export const params = {
-  title: text("Login request sequence", { maxLength: 60 }),
+  title: text("Login request sequence", {
+    maxLength: 60,
+    label: "What the sequence is, for the image title. At most 60 characters.",
+  }),
   desc: text(
     "A sequence diagram of a login: the browser posts credentials, the API checks them against Postgres, has a token signed and returns it.",
     { maxLength: 300, label: "What the diagram shows, for screen readers" },
   ),
   actors: list(
     {
-      id: text("", { maxLength: 24 }),
-      label: text("", { maxLength: 16 }),
-      role: choice("task", ["task", "input", "tool", "store"]),
+      id: text("", {
+        maxLength: 24,
+        label: "A short id that messages use. At most 24 characters.",
+      }),
+      label: text("", {
+        maxLength: 16,
+        label: "The name shown in the box. At most 16 characters.",
+      }),
+      role: choice("task", ["task", "input", "tool", "store"], {
+        label:
+          "input for a person or client, store for a database or cache, tool for a service it calls, task otherwise.",
+      }),
     },
     [
       { id: "user", label: "Browser", role: "input" },
@@ -26,15 +38,15 @@ export const params = {
     {
       min: 2,
       max: 7,
-      label: "The participants, left to right. Messages name them by id.",
+      label: "The participants left to right, 2 to 7. Messages name them by id.",
     },
   ),
   messages: list(
     {
-      from: text("", { maxLength: 24 }),
-      to: text("", { maxLength: 24 }),
-      text: text("", { maxLength: 24 }),
-      reply: choice("no", ["no", "yes"]),
+      from: text("", { maxLength: 24, label: "The sender's id." }),
+      to: text("", { maxLength: 24, label: "The receiver's id." }),
+      text: text("", { maxLength: 24, label: "The message, at most 24 characters." }),
+      reply: choice("no", ["no", "yes"], { label: "yes for a response, which draws dashed." }),
     },
     [
       { from: "user", to: "gateway", text: "POST /login", reply: "no" },
@@ -49,9 +61,9 @@ export const params = {
     ],
     {
       min: 1,
-      max: 12,
+      max: 16,
       label:
-        "The messages in order, each from one participant's id to another's. A reply draws dashed.",
+        "The messages in order, 1 to 16, each from one participant's id to another's. A reply draws dashed.",
     },
   ),
 };
