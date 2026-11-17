@@ -84,8 +84,8 @@ describe("in workerd", () => {
     }, 60_000);
 
   test("a query sets params", async () => {
-    const one = await (await get("/release-card.svg?version=9.9.9")).text();
-    const list = await (await get("/release-card.svg?highlights=First&highlights=Second")).text();
+    const one = await (await get("/card.svg?tag=v9.9.9")).text();
+    const list = await (await get("/card.svg?bullets=First&bullets=Second")).text();
 
     expect(one).toContain("v9.9.9");
     expect(list).toContain(">First<");
@@ -93,79 +93,63 @@ describe("in workerd", () => {
   });
 
   const queries: readonly [Name, string][] = [
-    ["charts", "headline=Rainfall%20doubled&mark=0&area=3&area=5&area=9"],
-    [
-      "flowchart",
-      `params=${encodeURIComponent(
-        JSON.stringify({
-          direction: "TB",
-          nodes: [
-            { id: "a", label: "Order placed", role: "input", group: "" },
-            { id: "b", label: "In stock?", role: "decision", group: "" },
-            { id: "c", label: "Ship it", role: "output", group: "" },
-          ],
-          groups: [],
-          edges: [
-            { from: "a", to: "b", label: "" },
-            { from: "b", to: "c", label: "yes" },
-          ],
-          from: "a",
-          to: "c",
-        }),
-      )}`,
-    ],
-    [
-      "sequence",
-      `params=${encodeURIComponent(
-        JSON.stringify({
-          actors: [
-            { id: "c", label: "Client", role: "input" },
-            { id: "s", label: "Server", role: "task" },
-          ],
-          messages: [
-            { from: "c", to: "s", text: "GET /", reply: "no" },
-            { from: "s", to: "c", text: "200", reply: "yes" },
-          ],
-        }),
-      )}`,
-    ],
-    [
-      "state",
-      `params=${encodeURIComponent(
-        JSON.stringify({
-          states: [
-            { id: "off", label: "Off", role: "task", final: "no", parent: "" },
-            { id: "on", label: "On", role: "output", final: "no", parent: "" },
-          ],
-          transitions: [
-            { from: "off", to: "on", label: "press" },
-            { from: "on", to: "off", label: "press" },
-          ],
-          walk: ["off", "on", "off"],
-        }),
-      )}`,
-    ],
-    [
-      "mermaid",
-      `source=${encodeURIComponent("sequenceDiagram\n  Alice->>Bob: Hello\n  Bob-->>Alice: Hi")}`,
-    ],
-    [
-      "code",
-      `params=${encodeURIComponent(JSON.stringify({ versions: [{ label: "Py", language: "python", source: 'print("hello")' }] }))}`,
-    ],
+    ["code", "language=python&title=hello.py&source=print(%22hello%22)"],
     [
       "terminal",
       `params=${encodeURIComponent(
         JSON.stringify({
           lines: [
             { kind: "command", text: "ls" },
-            { kind: "output", text: "{blue README.md}" },
+            { kind: "output", text: "README.md" },
           ],
         }),
       )}`,
     ],
-    ["math", "before=x%5E2&after=%5CcssId%7Bcross%7D%7Bx%7Dx&curve=0&curve=0&curve=1"],
-    ["icons", "outlines=star&outlines=brand-github&pop=star-filled&popLabel=Star"],
+    [
+      "diagram",
+      `source=${encodeURIComponent("sequenceDiagram\n  Alice->>Bob: Hello\n  Bob-->>Alice: Hi")}`,
+    ],
+    [
+      "chart",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          kind: "line",
+          compare: "",
+          data: [
+            { label: "Mon", value: 3, other: 0 },
+            { label: "Tue", value: 5, other: 0 },
+          ],
+        }),
+      )}`,
+    ],
+    [
+      "card",
+      "tag=NEW&title=Dark%20mode&bullets=Follows%20the%20system&bullets=Every%20chart%20adapts",
+    ],
+    [
+      "list",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          rows: [
+            { name: "esbuild", score: 1 },
+            { name: "webpack", score: 61 },
+          ],
+        }),
+      )}`,
+    ],
+    [
+      "metrics",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          kpis: [{ label: "Signups", value: 940, unit: "" }],
+          weeks: [
+            { label: "D1", value: 940 },
+            { label: "D7", value: 610 },
+          ],
+        }),
+      )}`,
+    ],
+    ["math", "title=Pythagoras&steps=a%5E2%20%2B%20b%5E2%20%3D%20c%5E2&steps=c%20%3D%205"],
   ];
 
   for (const [name, query] of queries)
@@ -180,8 +164,8 @@ describe("in workerd", () => {
     });
 
   test("a Mermaid syntax error in the query is a 400 with the parser's message", async () => {
-    const scene = await load("mermaid");
-    const response = await get(`/mermaid.svg?source=${encodeURIComponent(MERMAID_ERROR)}`);
+    const scene = await load("diagram");
+    const response = await get(`/diagram.svg?source=${encodeURIComponent(MERMAID_ERROR)}`);
 
     expect(response.status).toBe(400);
     expect(await response.text()).toBe(failure(() => draw(scene, { source: MERMAID_ERROR })));
@@ -189,43 +173,43 @@ describe("in workerd", () => {
 
   test("/generate redirects to the template's prompt URL", async () => {
     const response = await worker.dispatchFetch(
-      "http://localhost/generate?template=mermaid&prompt=a%20cat",
+      "http://localhost/generate?template=diagram&prompt=a%20cat",
       {
         redirect: "manual",
       },
     );
 
     expect(response.status).toBe(302);
-    expect(response.headers.get("location")).toBe("/mermaid.svg?prompt=a+cat");
+    expect(response.headers.get("location")).toBe("/diagram.svg?prompt=a+cat");
   });
 
   test("a bad value is a 400 with parse's message", async () => {
-    const { params } = await load("release-card");
-    const version = "9".repeat(20);
-    const response = await get(`/release-card.svg?version=${version}`);
+    const { params } = await load("card");
+    const tag = "9".repeat(20);
+    const response = await get(`/card.svg?tag=${tag}`);
 
     expect(response.status).toBe(400);
-    expect(await response.text()).toBe(failure(() => parse(params, { version })));
+    expect(await response.text()).toBe(failure(() => parse(params, { tag })));
   });
 
   test("/<name>.json is the schema and the defaults", async () => {
-    const { params } = await load("release-card");
+    const { params } = await load("card");
 
-    expect(await (await get("/release-card.json")).json()).toEqual({
+    expect(await (await get("/card.json")).json()).toEqual({
       params: jsonSchema(params),
       defaults: defaults(params),
     });
   });
 
   test("?prompt= without a key is a 501", async () => {
-    expect((await get("/release-card.svg?prompt=a%20launch")).status).toBe(501);
+    expect((await get("/card.svg?prompt=a%20launch")).status).toBe(501);
   });
 
   test("?prompt= fills the params through the model, asking once more after a bad answer", async () => {
-    answers.push('{"version": "far too long a version"}', '{"version": "2.0.0"}');
+    answers.push('{"tag": "far too long a tag here"}', '{"tag": "v2.0.0"}');
 
     const response = await keyed.dispatchFetch(
-      "http://localhost/release-card.svg?prompt=a%20major%20release",
+      "http://localhost/card.svg?prompt=a%20major%20release",
     );
 
     expect(response.status).toBe(200);
@@ -234,13 +218,13 @@ describe("in workerd", () => {
   }, 60_000);
 
   test("?prompt= sends a Mermaid syntax error back to the model, and renders its second answer", async () => {
-    const scene = await load("mermaid");
+    const scene = await load("diagram");
     const fixed = "flowchart LR\n  a --> b";
 
     asked.length = 0;
     answers.push(JSON.stringify({ source: MERMAID_ERROR }), JSON.stringify({ source: fixed }));
 
-    const response = await keyed.dispatchFetch("http://localhost/mermaid.svg?prompt=two%20boxes");
+    const response = await keyed.dispatchFetch("http://localhost/diagram.svg?prompt=two%20boxes");
 
     expect(response.status).toBe(200);
     expect(await response.text()).toBe(draw(scene, { source: fixed }));
@@ -250,29 +234,29 @@ describe("in workerd", () => {
   }, 60_000);
 
   test("?prompt= is a 502 with parse's message when the second answer is bad too", async () => {
-    const { params } = await load("release-card");
-    const version = "far too long a version";
+    const { params } = await load("card");
+    const tag = "far too long a tag here";
 
-    answers.push(JSON.stringify({ version }), JSON.stringify({ version }));
-    const response = await keyed.dispatchFetch("http://localhost/release-card.svg?prompt=again");
+    answers.push(JSON.stringify({ tag }), JSON.stringify({ tag }));
+    const response = await keyed.dispatchFetch("http://localhost/card.svg?prompt=again");
 
     expect(response.status).toBe(502);
-    expect(await response.text()).toBe(failure(() => parse(params, { version })));
+    expect(await response.text()).toBe(failure(() => parse(params, { tag })));
   });
 
   test("a prompt over 600 characters is a 400", async () => {
     const prompt = "a".repeat(601);
 
-    expect(
-      (await keyed.dispatchFetch(`http://localhost/release-card.svg?prompt=${prompt}`)).status,
-    ).toBe(400);
+    expect((await keyed.dispatchFetch(`http://localhost/card.svg?prompt=${prompt}`)).status).toBe(
+      400,
+    );
   });
 
   test("an unknown page is a 404 naming the scenes", async () => {
     const response = await get("/nope.svg");
 
     expect(response.status).toBe(404);
-    expect(await response.text()).toContain("release-card");
+    expect(await response.text()).toContain("diagram");
   });
 
   test("the index shows every scene", async () => {

@@ -1,0 +1,142 @@
+import { chart } from "@svjeez/charts";
+import { enter, render, span, type Color } from "svjeez";
+import { rect } from "svjeez/geometry";
+import { choice, defaults, list, number, text, type Values } from "svjeez/params";
+
+import {
+  HEIGHT,
+  MARGIN,
+  WIDTH,
+  Title,
+  color,
+  css,
+  geist,
+  leave,
+  mono,
+  rise,
+  theme,
+} from "../../../examples/gallery-style";
+
+const VALUE = { min: -1_000_000_000, max: 1_000_000_000 };
+
+export const params = {
+  title: text("Weekly signups doubled since March", {
+    maxLength: 50,
+    label:
+      "The headline above the chart: what the data says, not just what it is. At most 50 characters.",
+  }),
+  subtitle: text("Signups and activations, last 8 weeks", {
+    maxLength: 80,
+    label:
+      "One line under the title naming the measure, unit and period. Empty for none. At most 80 characters.",
+  }),
+  kind: choice("bar", ["bar", "line", "area"], {
+    label: "bar for categories or counts per period, line for a trend, area for a total over time.",
+  }),
+  series: text("signups", {
+    maxLength: 16,
+    label:
+      "The name of the first series, shown in the legend when there is a second. At most 16 characters.",
+  }),
+  compare: text("activated", {
+    maxLength: 16,
+    label:
+      "The name of an optional second series drawn beside the first. Empty for a single series. At most 16 characters.",
+  }),
+  data: list(
+    {
+      label: text("", {
+        maxLength: 6,
+        label: "The category or period, at most 6 characters, such as Mar or Q3 24.",
+      }),
+      value: number(0, { ...VALUE, label: "The first series' value." }),
+      other: number(0, { ...VALUE, label: "The second series' value; 0 when there is none." }),
+    },
+    [
+      { label: "W1", value: 2310, other: 1480 },
+      { label: "W2", value: 2480, other: 1610 },
+      { label: "W3", value: 2920, other: 1890 },
+      { label: "W4", value: 3150, other: 2100 },
+      { label: "W5", value: 3600, other: 2440 },
+      { label: "W6", value: 3980, other: 2710 },
+      { label: "W7", value: 4420, other: 3050 },
+      { label: "W8", value: 4812, other: 3390 },
+    ],
+    { min: 2, max: 16, label: "The points from left to right, 2 to 16, each label used once." },
+  ),
+};
+
+const D = 9;
+
+const Key = ({ x, fill, name }: { x: number; fill: Color; name: string }) => (
+  <g>
+    <rect x={x} y={136} width={10} height={10} rx={3} fill={fill} />
+    <text x={x + 16} y={145} fontFamily={geist} fontSize={13} fill={color.dim}>
+      {name}
+    </text>
+  </g>
+);
+
+export default function build(p: Values<typeof params> = defaults(params)): string {
+  const labels = p.data.map((point) => point.label);
+
+  if (new Set(labels).size !== labels.length)
+    throw new Error("data has a label more than once. Give every point its own label.");
+
+  const first = p.data.map((point) => [point.label, point.value] as const);
+  const second = p.compare ? p.data.map((point) => [point.label, point.other] as const) : [];
+  const grow = span(0.9, 1.6);
+  const [one, two] = color.series;
+
+  const plot = chart({
+    theme,
+    font: mono,
+    fontSize: 14,
+    grid: true,
+    frame: rect(MARGIN + 72, 170, WIDTH - 2 * MARGIN - 88, 300),
+    x: { kind: "band", domain: labels },
+    y: { ticks: 4 },
+    data: [...first, ...second],
+  });
+
+  const draw = (points: typeof first, fill: Color | undefined, index: number, at: number) => {
+    const over = { at, over: grow.over };
+
+    if (p.kind === "bar")
+      return plot.bars(over, points, {
+        color: fill,
+        group: second.length ? { index, count: 2 } : undefined,
+      });
+
+    return p.kind === "line"
+      ? plot.line(over, points, { color: fill, dots: 4 })
+      : plot.area(over, points, { color: fill, dots: 4 });
+  };
+
+  return render(
+    {
+      width: WIDTH,
+      height: HEIGHT,
+      duration: D,
+      title: p.title,
+      desc: `${p.subtitle} A ${p.kind} chart: ${p.data.map((point) => `${point.label} ${point.value}${second.length ? ` and ${point.other}` : ""}`).join(", ")}.`,
+      reducedMotion: { at: D - 1 },
+      css,
+    },
+    <>
+      <rect width="100%" height="100%" fill={color.bg} />
+      <g animation={leave(D)}>
+        <Title title={p.title} subtitle={p.subtitle || undefined} />
+        {second.length > 0 && (
+          <g animation={rise(0.5)}>
+            <Key x={MARGIN} fill={one!} name={p.series} />
+            <Key x={MARGIN + 40 + p.series.length * 8} fill={two!} name={p.compare} />
+          </g>
+        )}
+        <g animation={enter(span(0.6, 0.5))}>{plot.node}</g>
+        {draw(first, one, 0, grow.at)}
+        {second.length > 0 && draw(second, two, 1, grow.at + 0.2)}
+      </g>
+    </>,
+  );
+}

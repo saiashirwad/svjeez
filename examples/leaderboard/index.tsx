@@ -16,10 +16,19 @@ import {
 } from "../gallery-style";
 
 export const params = {
-  title: text("Most merged pull requests", { maxLength: 44 }),
-  subtitle: text("October, by author", { maxLength: 60 }),
+  title: text("Most merged pull requests", {
+    maxLength: 44,
+    label: "The headline: what is ranked. At most 44 characters.",
+  }),
+  subtitle: text("October, by author", {
+    maxLength: 60,
+    label: "One line naming the period and what each row is. At most 60 characters.",
+  }),
   rows: list(
-    { name: text("", { maxLength: 22 }), score: number(0, { min: 0, max: 99_999, step: 1 }) },
+    {
+      name: text("", { maxLength: 22, label: "Who or what the row is. At most 22 characters." }),
+      score: number(0, { min: 0, max: 99_999, step: 1, label: "A whole number from 0 to 99999." }),
+    },
     [
       { name: "ada", score: 48 },
       { name: "grace", score: 61 },
@@ -28,7 +37,7 @@ export const params = {
       { name: "ken", score: 29 },
       { name: "barbara", score: 22 },
     ],
-    { min: 1, max: 8 },
+    { min: 1, max: 8, label: "1 to 8 rows in any order; the scene ranks them by score." },
   ),
 };
 

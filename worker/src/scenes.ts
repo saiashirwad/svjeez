@@ -1,28 +1,24 @@
 import { parse, type Json, type Schema, type Values } from "svjeez/params";
 
-/** A scene module: `params` is what a query or a prompt may fill, and its default export draws the SVG from them. */
+/** A template: `params` is what a query or a prompt may fill, and its default export draws the SVG from them. */
 export interface Scene {
   default(values?: Values<Schema>): string;
   readonly params: Schema;
 }
 
 /**
- * Every scene the Worker serves, imported on first request. The examples load fonts with top-level await, and a Worker
- * may not fetch outside a request.
+ * Every template the Worker serves, imported on first request. They load fonts with top-level await, and a Worker may
+ * not fetch outside a request.
  */
 const scenes = {
-  "release-card": () => import("../../examples/release-card/index.tsx"),
-  leaderboard: () => import("../../examples/leaderboard/index.tsx"),
+  code: () => import("./templates/code.tsx"),
+  terminal: () => import("./templates/terminal.tsx"),
+  diagram: () => import("./templates/diagram.tsx"),
+  chart: () => import("./templates/chart.tsx"),
+  card: () => import("./templates/card.tsx"),
+  list: () => import("../../examples/leaderboard/index.tsx"),
   metrics: () => import("../../examples/metrics/index.tsx"),
-  charts: () => import("../../examples/charts/index.tsx"),
-  flowchart: () => import("../../examples/flowchart/index.tsx"),
-  sequence: () => import("../../examples/sequence/index.tsx"),
-  state: () => import("../../examples/state/index.tsx"),
-  mermaid: () => import("../../examples/mermaid/index.tsx"),
-  code: () => import("../../examples/code/index.tsx"),
-  terminal: () => import("../../examples/terminal/index.tsx"),
-  math: () => import("../../examples/math/index.tsx"),
-  icons: () => import("../../examples/icons/index.tsx"),
+  math: () => import("./templates/math.tsx"),
 } satisfies Readonly<Record<string, () => Promise<Scene>>>;
 
 export type Name = keyof typeof scenes;

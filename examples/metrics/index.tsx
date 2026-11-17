@@ -20,13 +20,27 @@ import {
 } from "../gallery-style";
 
 export const params = {
-  title: text("Weekly signups doubled since March", { maxLength: 44 }),
-  subtitle: text("Product metrics, last 8 weeks", { maxLength: 60 }),
+  title: text("Weekly signups doubled since March", {
+    maxLength: 44,
+    label: "The headline: what the numbers say. At most 44 characters.",
+  }),
+  subtitle: text("Product metrics, last 8 weeks", {
+    maxLength: 60,
+    label: "One line naming the source and period. At most 60 characters.",
+  }),
   kpis: list(
     {
-      label: text("Signups", { maxLength: 18 }),
-      value: number(0, { min: 0, max: 999_999, step: 0.1 }),
-      unit: text("", { maxLength: 3 }),
+      label: text("Signups", { maxLength: 18, label: "The figure's name. At most 18 characters." }),
+      value: number(0, {
+        min: 0,
+        max: 999_999,
+        step: 0.1,
+        label: "The figure, from 0 to 999999, one decimal at most.",
+      }),
+      unit: text("", {
+        maxLength: 3,
+        label: "A suffix such as % or ms, or empty. At most 3 characters.",
+      }),
     },
     [
       { label: "Signups", value: 4_812, unit: "" },
@@ -34,10 +48,16 @@ export const params = {
       { label: "Paid seats", value: 1_204, unit: "" },
       { label: "Churn", value: 1.8, unit: "%" },
     ],
-    { min: 1, max: 4 },
+    { min: 1, max: 4, label: "1 to 4 headline figures shown as tiles." },
   ),
   weeks: list(
-    { label: text("W1", { maxLength: 4 }), value: number(0, { min: 0, max: 999_999 }) },
+    {
+      label: text("W1", {
+        maxLength: 4,
+        label: "The period, at most 4 characters, such as W3 or Mar.",
+      }),
+      value: number(0, { min: 0, max: 999_999, label: "The bar's value, from 0 to 999999." }),
+    },
     [
       { label: "W1", value: 2_310 },
       { label: "W2", value: 2_480 },
@@ -48,7 +68,7 @@ export const params = {
       { label: "W7", value: 4_420 },
       { label: "W8", value: 4_812 },
     ],
-    { min: 2, max: 12 },
+    { min: 2, max: 12, label: "2 to 12 bars from left to right, each label used once." },
   ),
 };
 
