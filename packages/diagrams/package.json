@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/diagrams",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Animated diagrams for svjeez: flowcharts, sequence diagrams, state machines, trees and swimlanes, laid out for you and revealed step by step.",
   "license": "MIT",

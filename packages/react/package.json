@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/react",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "React components for editing a svjeez scene: its source with a control on every value, and its picture with handles, bound to an @svjeez/live editor.",
   "license": "MIT",

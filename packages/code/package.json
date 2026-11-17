@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/code",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Syntax highlighting for svjeez: source text to role-tagged runs that code() and terminal() color from the scene's theme.",
   "license": "MIT",

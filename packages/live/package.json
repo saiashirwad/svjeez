@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/live",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Edit a svjeez scene's source through controls: every number, color and ease in the file as a control, one store that compiles in a worker and keeps the picture's clock, for any framework to bind.",
   "license": "MIT",

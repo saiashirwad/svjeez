@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/icons",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Tabler and Lucide icons as plain path data for svjeez scenes. No dependencies.",
   "license": "MIT",

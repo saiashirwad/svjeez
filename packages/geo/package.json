@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/geo",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Real maps for svjeez: GeoJSON and TopoJSON projected, simplified and fitted to a scene while it compiles.",
   "license": "MIT",
