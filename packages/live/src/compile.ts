@@ -37,11 +37,9 @@ export interface SourceError {
   readonly message: string;
   readonly line?: number;
   readonly column?: number;
-  /** The scene-writing skill's fix for this message, with `code` in backticks. */
   readonly fix?: string;
 }
 
-/** What the scene passed to `render`: its size, how long one loop lasts, and its title. */
 export interface SceneSize {
   readonly width: number;
   readonly height: number;
@@ -49,7 +47,6 @@ export interface SceneSize {
   readonly title: string;
 }
 
-/** What a scene declares beyond its picture: its params and where their handles sit, when it exports them. */
 export interface Declared {
   readonly params?: Schema;
   readonly handles?: { readonly [key: string]: Move };
@@ -68,10 +65,7 @@ export type Compiled =
 
 const onNode = globalThis.process?.versions?.node !== undefined;
 
-/**
- * A JSON file as a default export that sucrase's import interop keeps as is. Node imports JSON only with
- * `with { type: "json" }`, which Node 20 before 20.10 doesn't know and Vite's dev server rejects, so Node requires it.
- */
+/** Node imports JSON only with `with { type: "json" }`, which Node 20 before 20.10 and Vite's dev server reject. */
 const json = async (name: string, load: () => Promise<{ default: unknown }>) => ({
   __esModule: true,
   default: onNode
@@ -100,7 +94,6 @@ const packages = new Map<string, () => Promise<object>>([
 
 const known = () => [...modules.keys(), ...packages.keys()].filter((name) => !name.includes("jsx"));
 
-/** Loads every package the compiled code requires that isn't loaded yet. */
 const load = async (code: string) => {
   const names = [...code.matchAll(/require\((["'])(.+?)\1\)/g)].map((match) => match[2]!);
 
@@ -129,7 +122,6 @@ const requireModule = (name: string): object => {
 const isBuild = (value: unknown): value is () => string => typeof value === "function";
 const isText = (value: unknown): value is string => typeof value === "string";
 
-/** Sucrase reports syntax errors as `message (line:column)`. */
 const parseSyntax = (error: Error): SourceError => {
   const at = /^(.*) \((\d+):(\d+)\)$/s.exec(error.message);
 
@@ -138,11 +130,9 @@ const parseSyntax = (error: Error): SourceError => {
     : { kind: "syntax", message: error.message };
 };
 
-// new Function puts two lines of its own above the code, and sucrase keeps the author's line numbers, so the first frame
-// of the scene's own code on the stack is two lines past the line in the editor.
+// new Function adds two lines above the code, so stack frames are two lines past the editor's.
 const HEADER_LINES = 2;
 
-/** Where in the author's code a runtime error was thrown, read from V8's stack, when the stack says. */
 const placeOf = (error: Error): { line?: number; column?: number } => {
   const at = /<anonymous>:(\d+):(\d+)/.exec(error.stack ?? "");
   const line = at ? Number(at[1]) - HEADER_LINES : 0;
@@ -165,7 +155,6 @@ const isSchema = (value: unknown): value is Schema =>
 
 const isHandles = (value: unknown): value is params.Handles<Schema> => typeof value === "function";
 
-/** Each number param's handle, and the way it moves, from the scene's `handles` at its values and a hair past each. */
 const handlesOf = (schema: Schema, handles: params.Handles<Schema>) => {
   const values = params.defaults(schema);
   const here: { readonly [key: string]: Point | undefined } = handles(values);
@@ -194,7 +183,6 @@ interface Built extends Declared {
   readonly scene?: SceneSize;
 }
 
-/** The scene's default export, called, with what it declares. Throws what the author's code throws. */
 const run = async (source: string, sources: boolean): Promise<Built> => {
   const { code } = transform(source, {
     transforms: ["typescript", "jsx", "imports"],
@@ -244,7 +232,6 @@ const run = async (source: string, sources: boolean): Promise<Built> => {
   };
 };
 
-/** Runs `make`, then measures the file it returns. Whatever it throws comes back as the error. */
 const outcome = async (make: () => Promise<Built>): Promise<Compiled> => {
   const start = performance.now();
 

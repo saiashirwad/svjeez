@@ -1,18 +1,15 @@
 import type { Point } from "svjeez";
 
-/** One level line, in the grid's own units: `x` runs over columns and `y` over rows. */
 export interface Polyline {
   readonly points: readonly Point[];
-  /** The last point joins the first, so the line is not repeated at its end. */
   readonly closed: boolean;
 }
 
 type Segment = readonly [number, number];
 
 /**
- * The lines where a grid of samples crosses `level`, by marching squares. `values` is row-major, `cols * rows`
- * samples on a unit lattice. Samples at or above `level` count as inside. A NaN sample leaves its cells empty.
- * Segments are joined at the edges they share, so a curve comes back as one polyline, closed when it loops.
+ * Marching squares: the lines where `values` (row-major, `cols * rows` on a unit lattice) crosses `level`. Samples at or
+ * above `level` are inside; NaN leaves its cells empty. Curves come back as one polyline, closed when they loop.
  */
 export function marchingSquares(
   values: ArrayLike<number>,
@@ -21,7 +18,6 @@ export function marchingSquares(
   level: number,
 ): Polyline[] {
   const at = (i: number, j: number): number => values[j * cols + i]!;
-  // Edge ids: 2k is the edge from sample k to its right neighbour, 2k + 1 the edge down to the next row.
   const across = (i: number, j: number): number => 2 * (j * cols + i);
   const down = (i: number, j: number): number => 2 * (j * cols + i) + 1;
   const segments: Segment[] = [];
@@ -107,7 +103,6 @@ export function marchingSquares(
 
   const used = new Set<number>();
 
-  /** Segments joined end to end from `edge`, as the edges they pass through. */
   const follow = (edge: number): number[] => {
     const out: number[] = [];
     let current = edge;

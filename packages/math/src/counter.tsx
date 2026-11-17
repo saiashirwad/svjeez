@@ -28,7 +28,6 @@ export interface CounterOptions {
   /** Decimal places shown. Default 0. */
   readonly digits?: number;
   readonly theme?: Base16;
-  /** Overrides the theme's plain color. */
   readonly color?: Color;
   /** The point of the box that `x` and `y` place, as fractions of its width and height. Default `[0, 0]`. */
   readonly anchor?: readonly [number, number];
@@ -94,9 +93,8 @@ const changes = (
 };
 
 /**
- * A number that changes over time, set in the same math font as `tex()`. Give it `[{ at, value }]` to hold each value until the next,
- * or a span and a function of the time since its start, read at every `step`. Each place holds one glyph per distinct digit it ever shows, toggled by stepped
- * keyframes, so the output stays small however often the number changes.
+ * A number that changes over time. Give it `[{ at, value }]` to hold each value until the next, or a span and a function
+ * of the seconds since its start, read every `step`.
  */
 export function counter(values: readonly CounterValue[], options?: CounterOptions): Counter;
 export function counter(span: Span, fn: (t: Seconds) => number, options?: CounterOptions): Counter;
@@ -126,7 +124,6 @@ export function counter(
   const signed = list.some((c) => c.text.startsWith(MINUS));
   const places = (signed ? 1 : 0) + whole + point;
 
-  /** The glyph each place shows for a text, or none. */
   const shown = (text: string): (string | undefined)[] => {
     const negative = text.startsWith(MINUS);
     const [integer, fraction = ""] = text.replace(MINUS, "").split(".");

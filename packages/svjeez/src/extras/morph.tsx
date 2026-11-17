@@ -12,7 +12,6 @@ export interface MorphPiece {
   readonly id?: string;
 }
 
-/** Anything morph() animates: its pieces, and how to draw one with a motion. */
 export interface Morphable<P extends MorphPiece = MorphPiece> {
   readonly words: readonly P[];
   draw(piece: P, animation?: Stack<"x" | "y" | "opacity">): SvgNode;
@@ -27,9 +26,8 @@ export interface MorphOptions {
 }
 
 /**
- * Pairs `[i, j]` of words that carry over from `a` to `b`. The longest common subsequence of contents
- * anchors the order; leftovers pair by equal content, nearest first, so swapped words cross.
- * Runs named with the same id pair first, in order, whatever their content.
+ * Pairs `[i, j]` of words carried over from `a` to `b`. Runs with the same id pair first, in order; the rest by
+ * longest common subsequence of contents.
  */
 export function match(a: readonly MorphPiece[], b: readonly MorphPiece[]): [number, number][] {
   const named = a.flatMap((w, i): [number, number][] => {
@@ -109,8 +107,10 @@ export interface MorphResult {
 }
 
 /**
- * Animate code, or any `Morphable` such as a `tex()` formula, from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
- * `spans[i]` is when the move into `versions[i + 1]` runs; `span` runs to when the last one settles, and is empty for a single version.
+ * Animate code, or any `Morphable` such as a `tex()` formula, between versions: kept words move, removed fade out,
+ * new fade in.
+ *
+ * `spans[i]` is when the move into `versions[i + 1]` runs; `span` is empty for a single version.
  */
 export function morph(versions: readonly Code[], options: MorphOptions): MorphResult;
 export function morph(

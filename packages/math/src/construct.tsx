@@ -17,7 +17,6 @@ import { rect } from "svjeez/geometry";
 
 import { tex } from "./index.ts";
 
-/** A place in the construction, in construction units with y up. Every method takes one where it needs a point. */
 export interface ConstructSpot {
   readonly kind: "point";
   readonly x: number;
@@ -25,25 +24,15 @@ export interface ConstructSpot {
   readonly label?: string;
 }
 
-/**
- * A point the construction draws, which `g.point()`, `g.midpoint()` and `g.intersect()` return. Its id is its label,
- * else its place as `(x, y)`; its box is the dot (a point with `dot: false` has an empty box where the dot would be);
- * and its span runs from the dot popping in until its label has faded in.
- */
+/** Returned by `g.point()`, `g.midpoint()` and `g.intersect()`. Id is its label, else `(x, y)`; span runs from the dot popping in to its label fading in. */
 export interface ConstructPoint extends ConstructSpot, Part {}
 
-/**
- * A segment, a ray or a full line, by two points and how far the drawing reaches past each. Its id is its label, else
- * the names of its two points, as `AB`; its box covers the stroke as drawn; and its span runs from when it starts to
- * draw until its label has faded in.
- */
+/** A segment, ray or line. Id is its label, else its two point ids as `AB`; span runs from drawing start to its label fading in. */
 export interface ConstructLine extends Part {
   readonly kind: "line";
   readonly a: ConstructSpot;
   readonly b: ConstructSpot;
-  /** Intersections treat the line as endless. A segment reaches only from `a` to `b`. */
   readonly endless: boolean;
-  /** How far the drawn line runs past `a` and past `b`, in units. */
   readonly extend: readonly [number, number];
 }
 
@@ -56,16 +45,12 @@ export interface ConstructCircle extends Part {
 
 export type ConstructCurve = ConstructLine | ConstructCircle;
 
-/** Everything a construction draws that a scene can point at. */
 export type ConstructPart = ConstructPoint | ConstructCurve;
 
-/** A line as geometry, before it is drawn. */
 type RuledLine = Omit<ConstructLine, keyof Part>;
 
-/** A circle as geometry, before it is drawn. */
 type CompassCircle = Omit<ConstructCircle, keyof Part>;
 
-/** What intersections cross: lines and circles as geometry. */
 type Figure = RuledLine | CompassCircle;
 
 /** Seconds each kind of element takes to draw. `gap` separates one element from the next and `step` is the pause a `g.step()` adds. */
@@ -98,9 +83,7 @@ export interface ConstructOptions {
 
 /** Every element takes an optional `at` and `over`. Without `at` an element starts when the one before it ends. */
 export interface ConstructLook extends Partial<Span> {
-  /** Overrides the theme's color for this element. */
   readonly color?: Color;
-  /** A construction aid: drawn in a quieter color, and `g.settle()` fades it back. */
   readonly aid?: boolean;
 }
 
@@ -110,13 +93,11 @@ export interface PointOptions extends ConstructLook {
 }
 
 export interface ConstructLineOptions extends ConstructLook {
-  /** A TeX label beside the middle of the line. */
   readonly label?: string;
   /** Units a line, parallel or perpendicular runs past each of its points. Default a quarter of the distance between them. */
   readonly extend?: number;
 }
 
-/** A segment ends where its points do. */
 export type SegmentOptions = Omit<ConstructLineOptions, "extend">;
 
 export interface CircleOptions extends ConstructLook {
@@ -128,7 +109,6 @@ export interface IntersectOptions extends ConstructLook {
   /** Which crossing to keep: line and circle give them in the order along the line, two circles give the one on the left of center 1 to center 2 first. */
   readonly pick?: 0 | 1;
   readonly label?: string;
-  /** Labels for the crossings in order, when you keep both. */
   readonly labels?: readonly [string?, string?];
   readonly dot?: boolean;
 }
@@ -140,12 +120,10 @@ export interface ConstructPolygonOptions extends ConstructLook {
   readonly opacity?: number;
   /** Also draw the outline on. Default false: lay the polygon over segments you drew. */
   readonly outline?: boolean;
-  /** A TeX label at the polygon's center. */
   readonly label?: string;
 }
 
 export interface AngleOptions extends ConstructLook {
-  /** A TeX label inside the angle. */
   readonly label?: string;
   /** Arc radius in px. Default 26. */
   readonly radius?: number;
@@ -169,40 +147,30 @@ export interface BisectOptions extends ConstructLook {
 }
 
 export interface SettleOptions extends Partial<Span> {
-  /** Overrides the construction's faint opacity. */
   readonly faint?: number;
 }
 
 /**
- * The builder, and what it has drawn so far: read `node`, `span`, `bounds` and `parts` after the last element. Its parts
- * are the points, lines and circles in the order they were made, construction aids included; `part(id)` finds the
- * first with that id. `span` runs from the start to when the last element finishes, and `bounds` covers the parts and
- * their labels.
+ * The builder: read `node`, `span`, `bounds` and `parts` after the last element. Parts are the points, lines and circles
+ * in creation order, aids included; `part(id)` finds the first with that id.
  */
 export interface Construction extends Drawn<ConstructPart> {
   /** When the next element starts, in seconds. Use it to time captions and other nodes beside the figure. */
   readonly time: number;
-  /** A point at `x`, `y` in units. */
   point(x: number, y: number, label?: string, options?: PointOptions): ConstructPoint;
-  /** A segment from `a` to `b`, drawn from `a`. */
   segment(a: ConstructSpot, b: ConstructSpot, options?: SegmentOptions): ConstructLine;
-  /** A line through `a` and `b` that runs past both, drawn outward from `a`. */
   line(a: ConstructSpot, b: ConstructSpot, options?: ConstructLineOptions): ConstructLine;
-  /** A circle about `center` that passes through a point, or has a radius in units. */
   circle(
     center: ConstructSpot,
     through: ConstructSpot | { readonly radius: number },
     options?: CircleOptions,
   ): ConstructCircle;
-  /** Where two lines cross. */
   intersect(a: ConstructLine, b: ConstructLine, options?: IntersectOptions): ConstructPoint;
-  /** One crossing of a line or circle with another. */
   intersect(
     a: ConstructCurve,
     b: ConstructCurve,
     options: IntersectOptions & { readonly pick: 0 | 1 },
   ): ConstructPoint;
-  /** Both crossings of a line or circle with another. */
   intersect(
     a: ConstructCurve,
     b: ConstructCurve,
@@ -214,7 +182,6 @@ export interface Construction extends Drawn<ConstructPart> {
     label?: string,
     options?: PointOptions,
   ): ConstructPoint;
-  /** The perpendicular bisector of `a` and `b`, found with two compass arcs unless `compass` is false. */
   perpendicularBisector(a: ConstructSpot, b: ConstructSpot, options?: BisectOptions): ConstructLine;
   /** The bisector of the angle at `b` between `a` and `c`, as a ray from `b`. */
   angleBisector(
@@ -223,24 +190,17 @@ export interface Construction extends Drawn<ConstructPart> {
     c: ConstructSpot,
     options?: BisectOptions,
   ): ConstructLine;
-  /** The line through `p` parallel to `line`. */
   parallel(line: ConstructLine, p: ConstructSpot, options?: ConstructLineOptions): ConstructLine;
-  /** The line through `p` perpendicular to `line`. */
   perpendicular(
     line: ConstructLine,
     p: ConstructSpot,
     options?: ConstructLineOptions,
   ): ConstructLine;
   polygon(points: readonly ConstructSpot[], options?: ConstructPolygonOptions): void;
-  /** Marks the angle at `b` between rays `ba` and `bc`. */
   angle(a: ConstructSpot, b: ConstructSpot, c: ConstructSpot, options?: AngleOptions): void;
-  /** Congruence ticks across a segment. */
   tick(segment: ConstructLine, options?: TickOptions): void;
-  /** Everything made inside `build` starts together; the next element waits for the slowest. */
   together(build: () => void): void;
-  /** Pauses between beats of the proof. Returns when the next beat starts. */
   step(pause?: number): number;
-  /** Fades every construction aid so far back to faint. */
   settle(options?: SettleOptions): void;
 }
 
@@ -279,7 +239,6 @@ const dist = (a: ConstructSpot, b: ConstructSpot): number => length(sub(a, b));
 
 const same = (a: ConstructSpot, b: ConstructSpot): boolean => dist(a, b) < 1e-7;
 
-/** A direction, widest-gap first, away from every ray. `away` breaks ties between equally wide gaps. */
 const clearestDirection = (rays: readonly Vec[], away: Vec): Vec => {
   if (rays.length === 0) return length(away) > EPS ? unit(away) : [0, 1];
   const angles = rays.map(([x, y]) => Math.atan2(y, x)).sort((a, b) => a - b);
@@ -357,7 +316,6 @@ const onLine = (line: RuledLine, p: ConstructSpot): boolean => {
 const onCircle = (circle: CompassCircle, p: ConstructSpot): boolean =>
   Math.abs(dist(p, circle.center) - circle.radius) < 1e-6 * Math.max(1, circle.radius);
 
-/** A drawn thing, rendered once every other thing is known so labels can steer clear of them. */
 interface Spot {
   readonly x: number;
   readonly y: number;
@@ -379,13 +337,10 @@ interface World {
   readonly lines: readonly RuledLine[];
   readonly circles: readonly CompassCircle[];
   readonly polygons: readonly (readonly ConstructSpot[])[];
-  /** Units to scene px. */
   readonly px: (p: { x: number; y: number }) => { x: number; y: number };
-  /** The middle of the figure, in units. */
   readonly center: Vec;
 }
 
-/** The directions in which drawn lines, circles and polygon edges leave `p`. */
 const raysAt = (world: World, p: ConstructSpot): Vec[] => {
   const rays: Vec[] = [];
 
@@ -427,7 +382,6 @@ const around = (points: readonly { x: number; y: number }[]): Rect => {
   return rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
 };
 
-/** Pushes a label's center out of `from` along `direction` until its box clears the point by a gap. */
 const stand = (
   from: Spot,
   direction: Vec,
@@ -441,9 +395,8 @@ const stand = (
 };
 
 /**
- * Compass-and-straightedge geometry that draws itself in the order you write it. Build points, lines and circles on
- * the builder, read the crossings back as points, then render `g.node`. Labels are `tex()` formulas the builder
- * places away from the lines that meet at their point. Construction y grows up.
+ * Compass-and-straightedge geometry that draws itself in the order you write it: build points, lines and circles,
+ * read crossings back as points, then render `g.node`. Construction y grows up.
  */
 export function construct(options: ConstructOptions = {}): Construction {
   const { theme = defaultDark, unit: scale = 1, origin = { x: 0, y: 0 }, fontSize = 20 } = options;
@@ -473,9 +426,7 @@ export function construct(options: ConstructOptions = {}): Construction {
   const firstAt = cursor;
   let end = cursor;
   let batch: { start: number; end: number } | undefined;
-  /** Every point, line and circle drawn, in order, as parts. */
   const made: ConstructPart[] = [];
-  /** Every label's size and where it lands, for `bounds`. */
   const labels: { w: number; h: number; place: (world: World) => { x: number; y: number } }[] = [];
 
   const px = (p: { x: number; y: number }) => ({
@@ -483,7 +434,6 @@ export function construct(options: ConstructOptions = {}): Construction {
     y: origin.y - p.y * scale,
   });
 
-  /** Where an element starts and how long it runs. The cursor moves on unless a `together` block holds it. */
   const slot = (kind: keyof ConstructPace, timing: Partial<Span>): Slot => {
     const at = timing.at ?? batch?.start ?? cursor;
     const over = timing.over ?? pace[kind];
@@ -507,7 +457,6 @@ export function construct(options: ConstructOptions = {}): Construction {
   const colorOf = (look: ConstructLook, main: Color): Color =>
     look.color ?? (look.aid ? palette.aid : main);
 
-  /** A stroke drawn on from nothing. It stays invisible until its turn, because a round cap shows a dot at zero length. */
   const drawOn = (span: { at: number; over: number }, curve?: typeof ease.out) =>
     motion({ draw: 0, opacity: 0 }).set({ opacity: 1 }, span.at).to({ draw: 1 }, span, curve);
 
@@ -551,7 +500,6 @@ export function construct(options: ConstructOptions = {}): Construction {
     return span.at + span.over * 0.5 + pace.label;
   };
 
-  /** From the element's slot until its label, if any, has faded in. */
   const until = (span: Slot, labelled: number | undefined): Spanned =>
     spanOf(span.at, Math.max(span.at + span.over, labelled ?? 0) - span.at);
 
@@ -623,7 +571,6 @@ export function construct(options: ConstructOptions = {}): Construction {
     if (o.pick !== undefined && o.pick !== 0 && o.pick !== 1)
       throw new Error(`intersect() pick is 0 or 1, got ${o.pick}.`);
 
-    // Only the crossings that are kept have to lie on their segments, so pick can choose the one that does.
     const checked = o.pick === undefined || found.length === 1 ? found : [found[o.pick]!];
 
     for (const s of [a, b])
@@ -692,7 +639,6 @@ export function construct(options: ConstructOptions = {}): Construction {
         );
       };
 
-      // Runs outward from `a` both ways when the line runs past it, so it grows from the first point.
       return (
         <g>
           {stroke(0, len + extend[1])}
@@ -821,7 +767,6 @@ export function construct(options: ConstructOptions = {}): Construction {
     }
   };
 
-  /** Aims the composite constructions at `o.at` and drops the timing that belongs to their last element. */
   const begin = (o: Partial<Span>): void => {
     if (o.at !== undefined && !batch) cursor = o.at;
   };

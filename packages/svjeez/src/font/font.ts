@@ -30,14 +30,13 @@ export interface FontOptions {
   /** Generic or installed families to fall back to. Default `monospace` for a fixed-pitch font, else `sans-serif`. */
   readonly fallback?: readonly string[];
   /**
-   * Embed only the glyphs the scene's text uses. Default true. Applies to TrueType outlines (most .ttf files); OTF with
-   * CFF outlines, WOFF and WOFF2 embed whole. Turn it off if text is changed after rendering.
+   * Embed only the glyphs the scene's text uses. Default true. Applies to TrueType outlines; OTF with CFF
+   * outlines, WOFF and WOFF2 embed whole. Turn off if text changes after rendering.
    */
   readonly subset?: boolean;
   /**
-   * Default true. False draws one glyph per character, with no ligatures or contextual alternates: `measure` and `path`
-   * skip them, and a subset embed carries no layout tables for the browser to apply them with. A coding font such as
-   * JetBrains Mono, whose `=>` and `--` would otherwise form ligatures, then still cuts down to the glyphs the scene uses.
+   * Default true. False draws one glyph per character, with no ligatures or contextual alternates, so a coding
+   * font such as JetBrains Mono still subsets without forming `=>` ligatures.
    */
   readonly ligatures?: boolean;
 }
@@ -51,7 +50,6 @@ export interface PathOptions {
 }
 
 export interface GlyphPath {
-  /** The text this glyph draws: one character, or several for a ligature. */
   readonly char: string;
   /** Path data in scene coordinates. Empty for a space. */
   readonly d: string;
@@ -61,7 +59,6 @@ export interface GlyphPath {
 }
 
 export interface TextPath {
-  /** Every glyph in one path. */
   readonly d: string;
   readonly width: number;
   readonly glyphs: readonly GlyphPath[];
@@ -97,7 +94,6 @@ const base64 = (bytes: Uint8Array): string => {
   return btoa(binary);
 };
 
-/** FNV-1a, to name a WOFF font whose name table is compressed. */
 const hash = (bytes: Uint8Array): string => {
   let h = 0x811c9dc5;
 
@@ -116,9 +112,7 @@ export class Font {
   readonly weight: number;
   readonly style: FontStyle;
   readonly fallback: readonly string[];
-  /** Whether embedding cuts the font down to the glyphs a scene uses. See `FontOptions.subset`. */
   readonly subset: boolean;
-  /** Whether text forms ligatures. See `FontOptions.ligatures`. */
   readonly ligatures: boolean;
   readonly format: FontFormat;
   readonly href: `data:${string}`;
@@ -160,10 +154,7 @@ export class Font {
     return this.#typesetter.layoutGlyphs(text);
   }
 
-  /**
-   * The data URI to embed for a scene whose text is `texts`: cut down to their glyphs when the font allows it, else
-   * the whole file. Each distinct text set is cut once.
-   */
+  /** The data URI to embed for text `texts`: cut down to their glyphs when the font allows, else the whole file. */
   embed(texts: readonly string[]): `data:${string}` {
     const font = this.#sfnt;
 
@@ -248,7 +239,6 @@ export class Font {
   }
 }
 
-/** Faces of one family. The browser picks among them by `font-weight` and `font-style`. */
 export class FontFamily {
   constructor(
     readonly name: string,
@@ -256,7 +246,6 @@ export class FontFamily {
     readonly fallback: readonly string[],
   ) {}
 
-  /** The face the browser would pick: the matching style, then the weight by CSS font matching. */
   face(weight = 400, style: FontStyle = "normal"): Font {
     const styled = this.faces.filter((face) => face.style === style);
     const pool = styled.length > 0 ? styled : this.faces;
@@ -283,7 +272,6 @@ export type FontValue = Font | FontFamily;
 export const isFontValue = (value: unknown): value is FontValue =>
   value instanceof Font || value instanceof FontFamily;
 
-/** The face a measuring helper should use for regular text. */
 export const regularFace = (value: FontValue): Font =>
   value instanceof Font ? value : value.face();
 
@@ -306,7 +294,6 @@ interface FontFaces {
   readonly faces: readonly { readonly name: string; readonly font: Font }[];
 }
 
-/** The faces a `fontFamily` value embeds, each under the family name it is used with, and the attribute value. */
 export const fontFaces = (value: FontValue): FontFaces => {
   const [name, faces, fallback] =
     value instanceof Font
@@ -319,7 +306,6 @@ export const fontFaces = (value: FontValue): FontFaces => {
   };
 };
 
-/** The `@font-face` rule for a face, embedding only what `texts` need when the font can be cut down. */
 export const fontFaceRule = (name: string, font: Font, texts: readonly string[] = []): string =>
   `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${font.style}}`;
 

@@ -13,7 +13,6 @@ export default function integration(): AstroIntegration {
             plugins: [
               svjeez({ cacheDir: fileURLToPath(new URL("svjeez", config.cacheDir)) }),
               {
-                // Scenes load fonts and images beside their own module, so the server build keeps each module's own location.
                 name: "svjeez:import-meta",
                 apply: "build",
                 transform(code, id) {
@@ -41,7 +40,6 @@ export default function integration(): AstroIntegration {
           content: '/// <reference types="@svjeez/astro/client" />',
         });
       },
-      // Pages call getScene() while they render, after Vite has bundled, so the integration writes what they asked for.
       "astro:build:done": async ({ dir, logger }) => {
         logger.info(`${await writeScenes(dir)} scene files in ${ROUTE}`);
       },

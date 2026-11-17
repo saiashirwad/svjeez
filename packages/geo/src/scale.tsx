@@ -11,20 +11,15 @@ import {
 } from "svjeez";
 import { rect } from "svjeez/geometry";
 
-/** A hex color such as `#1f77b4`. */
 export type Hex = `#${string}`;
 
-/** A color scale that maps numbers to a few classes of color, so a map can group regions that share one. */
 export interface ColorScale {
-  /** The class color for `value`. A value outside the domain takes the nearest end, and NaN takes `empty`. */
   (value: number): Hex;
   /** `[low, high]`, or `[low, middle, high]` for a diverging scale. */
   readonly domain: readonly number[];
-  /** The color of each class, from low to high. */
   readonly colors: readonly Hex[];
   /** The `colors.length + 1` values where one class ends and the next begins. */
   readonly edges: readonly number[];
-  /** The color for a region with no value. */
   readonly empty: Hex;
   /** Which class `value` falls in, from 0, or -1 for NaN. */
   index(value: number): number;
@@ -49,15 +44,10 @@ export interface DivergingOptions extends ScaleOptions {
 
 /** Ramps to pass to `sequential()` and `diverging()`, as stops that are blended in OKLab. */
 export const palettes = {
-  /** Dark purple to yellow. Reads well on a dark background and in greyscale. */
   viridis: ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"],
-  /** Black through purple and orange to pale yellow. */
   magma: ["#000004", "#51127c", "#b73779", "#fc8961", "#fcfdbf"],
-  /** Pale to deep blue. */
   blues: ["#eff3ff", "#bdd7e7", "#6baed6", "#3182bd", "#08519c"],
-  /** Red through near-white to blue, for a diverging scale. */
   redBlue: ["#b2182b", "#ef8a62", "#f7f7f7", "#67a9cf", "#2166ac"],
-  /** Brown through near-white to teal, for a diverging scale. */
   brownTeal: ["#8c510a", "#d8b365", "#f5f5f5", "#5ab4ac", "#01665e"],
 } as const satisfies Record<string, readonly Hex[]>;
 
@@ -109,7 +99,6 @@ const toHex = ([L, a, b]: Lab): Hex => {
     .join("")}`;
 };
 
-/** The color `t` (0 to 1) of the way along `stops`, blended in OKLab. */
 const along = (stops: readonly Lab[], t: number): Hex => {
   const x = Math.min(1, Math.max(0, t)) * (stops.length - 1);
   const i = Math.min(stops.length - 2, Math.floor(x));
@@ -119,7 +108,6 @@ const along = (stops: readonly Lab[], t: number): Hex => {
   return toHex([a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]);
 };
 
-/** Builds a scale from `ramp`, with `position(v)` giving where in 0 to 1 a value sits and `valueAt(t)` its inverse. */
 function build(
   ramp: readonly Hex[],
   position: (value: number) => number,
@@ -149,7 +137,6 @@ function build(
   });
 }
 
-/** Colors from low to high along `colors`, cut into `steps` classes. */
 export function sequential(colors: readonly Hex[], options: SequentialOptions): ColorScale {
   const [low, high] = options.domain;
 
@@ -188,13 +175,11 @@ export function diverging(colors: readonly Hex[], options: DivergingOptions): Co
 export interface LegendOptions {
   /** The bar of classes, in scene px. The title sits above it and the edge labels below. */
   readonly frame: Rect;
-  /** A line above the bar. */
   readonly title?: string;
   /** Label every n-th class edge. Default as many as fit, about one per 48px. */
   readonly every?: number;
   /** Turns an edge value into its label. Default the number to at most two decimals. */
   readonly format?: (value: number) => string;
-  /** Adds a swatch after the bar for regions with no value, labelled with this text. */
   readonly empty?: string;
   readonly fontSize?: number;
   readonly font?: Font | FontFamily | string;
@@ -211,7 +196,6 @@ export interface Legend {
   readonly bounds: Rect;
 }
 
-/** The scale as a bar of its classes, labelled at the class edges. A map's key. */
 export function legend(scale: ColorScale, options: LegendOptions): Legend {
   const {
     frame,

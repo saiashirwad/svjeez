@@ -16,13 +16,11 @@ import { span as spanOf, type Spanned } from "svjeez";
 import { apply, identity, type Matrix } from "./matrix.ts";
 import type { Vec2 } from "./warp.tsx";
 
-/** Anything with path data: a `tex()` glyph (whose `matrix` flips and places it) or `{ d }` in scene pixels. */
 export interface Outline {
   readonly d: string;
   readonly matrix?: Matrix;
 }
 
-/** What `epicycles()` draws: path data, a glyph, a list of them in order, or a closed list of points. */
 export type EpicyclesSource = string | Outline | readonly (string | Outline)[] | readonly Vec2[];
 
 export interface EpicyclesOptions {
@@ -47,11 +45,8 @@ export interface EpicyclesOptions {
 }
 
 export interface Epicycles {
-  /** Rings, arms, pen, trace and optional fill. */
   readonly node: SvgNode;
-  /** From the span's start to when the rings have faded: the scene's end for this drawing. */
   readonly span: Spanned;
-  /** The trace as path data, closed: what the chain draws. */
   readonly d: string;
 }
 
@@ -60,7 +55,6 @@ interface Complex {
   im: number;
 }
 
-/** One circle of a Fourier series: it turns `k` times per loop, with radius `r` and starting angle `phase` in radians. */
 export interface FourierTerm {
   readonly k: number;
   readonly r: number;
@@ -75,11 +69,8 @@ export interface FourierOptions {
 }
 
 export interface Fourier {
-  /** The point every circle spins around: the outline's mean, the series' constant term. */
   readonly mean: Vec2;
-  /** The circles that sum to the outline, largest first. */
   readonly terms: readonly FourierTerm[];
-  /** The samples the series was taken from. */
   readonly points: readonly Vec2[];
 }
 
@@ -106,7 +97,6 @@ const lerp = (a: Vec2, b: Vec2, u: number): Vec2 => [
   a[1] + (b[1] - a[1]) * u,
 ];
 
-/** Points along a Bezier curve of any degree, by de Casteljau, without its start. */
 const bezier = (controls: readonly Vec2[]): Vec2[] =>
   Array.from({ length: CURVE_STEPS }, (_, i) => {
     let level = controls;
@@ -117,7 +107,6 @@ const bezier = (controls: readonly Vec2[]): Vec2[] =>
     return level[0]!;
   });
 
-/** Every subpath of path data as a polyline. Curves become short chords. Arcs are not drawn. */
 function pathContours(d: string): Vec2[][] {
   const result: Vec2[][] = [];
   let line: Vec2[] = [];
@@ -228,7 +217,6 @@ const toContours = (source: EpicyclesSource): Vec2[][] => {
   });
 };
 
-/** One closed loop through every contour in order, joined by straight bridges, and back to the start. */
 const loop = (lines: readonly Vec2[][], caller: string): Vec2[] => {
   const points = lines.flat();
 
@@ -237,7 +225,6 @@ const loop = (lines: readonly Vec2[][], caller: string): Vec2[] => {
   return [...points, points[0]!];
 };
 
-/** `count` points evenly spaced by arc length along a polyline. */
 const resample = (points: readonly Vec2[], count: number, caller: string): Vec2[] => {
   const cumulative = [0];
 
@@ -261,7 +248,6 @@ const resample = (points: readonly Vec2[], count: number, caller: string): Vec2[
   });
 };
 
-/** The circles that sum to the points, largest first, and the point they all spin around. */
 const spectrum = (points: readonly Vec2[], count: number) => {
   const n = points.length;
 
@@ -312,9 +298,8 @@ export function fourier(source: EpicyclesSource, options: FourierOptions = {}): 
 const tenth = (v: number): number => Math.round(v * 10) / 10 + 0;
 
 /**
- * Draws any closed outline as a chain of spinning circles, the pen going once around it during `when`, each riding the tip of the one before, with a pen at the last tip
- * and its trace drawn in step with it. The outline is sampled by arc length and Fourier-transformed while the scene compiles.
- * A glyph from `tex()` goes in whole, not as `d`: its matrix turns the font's upright path to the screen's.
+ * Draws a closed outline as a chain of spinning circles, the pen going once around it during `when`. Pass a `tex()`
+ * glyph whole, not as `d`: its matrix turns the font's upright path to the screen's.
  */
 export function epicycles(
   when: Span,
@@ -398,7 +383,6 @@ export function epicycles(
   const ring = tint(theme, "blue");
   const ink = options.color ?? tint(theme, "yellow");
 
-  // Each circle sits inside the one before it and already turns with it, so it spins only by the difference.
   const chain = terms.reduceRight<SvgNode | undefined>((inner, { k, r, phase }, i) => {
     const arm: Vec2 = [r * Math.cos(phase), r * Math.sin(phase)];
     const previous = terms[i - 1];

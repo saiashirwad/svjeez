@@ -3,20 +3,16 @@ import { gzipSync } from "node:zlib";
 import { register, ROUTE } from "./assets.ts";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 
-/** A scene's default export, or the string render() returned. */
 export type SceneSource = string | (() => string);
 
 export interface SceneImage {
-  /** The SVG's URL, named by its content. */
   readonly src: string;
   readonly width: number;
   readonly height: number;
-  /** The SVG's <title> and <desc>, for alt text. */
   readonly title: string;
   readonly desc: string;
   readonly svg: string;
   readonly gzip: number;
-  /** A still frame per color scheme, when getScene() was asked for posters. */
   readonly posters?: Readonly<Record<Scheme, string>>;
 }
 

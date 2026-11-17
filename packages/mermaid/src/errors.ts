@@ -10,7 +10,6 @@ export class MermaidSyntaxError extends Error {
   }
 }
 
-/** One meaningful line of the text: comments and blank lines are gone, and `line` counts from 1. */
 export interface Line {
   readonly line: number;
   readonly text: string;
@@ -20,7 +19,6 @@ export function fail(l: Line, problem: string): never {
   throw new MermaidSyntaxError(l.line, l.text, problem);
 }
 
-/** Mermaid's `<br>` becomes a space, because svjeez labels are one line. */
 export const clean = (text: string): string =>
   text
     .replace(/<br\s*\/?>/gi, " ")

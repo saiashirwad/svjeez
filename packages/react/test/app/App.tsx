@@ -10,9 +10,7 @@ const Memo = memoized(Picture);
 interface Props {
   scene: string | null;
   wrap?: boolean;
-  /** Draws the picture through `memo`, which re-renders only when its props change. */
   memo?: boolean;
-  /** Puts the editor under an `<Activity>` that a button hides and shows. */
   hideable?: boolean;
 }
 

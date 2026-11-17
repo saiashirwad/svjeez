@@ -32,16 +32,13 @@ import type {
   ChartLineOptions,
 } from "./types.ts";
 
-/** What a series needs to know about the chart it joins. */
 export interface Frame {
   readonly bounds: Rect;
   readonly theme: Base16;
   readonly fontSize: number;
   readonly font: FontAttr | undefined;
   readonly bandwidth: number;
-  /** The band categories, or undefined on a linear scale. */
   readonly categories: readonly string[] | undefined;
-  /** The niced domains. `xDomain` is undefined on a band scale. */
   readonly xDomain: readonly [number, number] | undefined;
   readonly yDomain: readonly [number, number];
   x(value: string | number): number;
@@ -65,7 +62,6 @@ const curveOf = (what: string, curve: Curve = "linear") => {
 
 const EPSILON = 1e-9;
 
-/** Seconds a line's dot takes to pop in. */
 const DOT_POP = 0.3;
 
 const within = (v: number, [low, high]: readonly [number, number]): boolean => {
@@ -74,7 +70,6 @@ const within = (v: number, [low, high]: readonly [number, number]): boolean => {
   return v >= low - slack && v <= high + slack;
 };
 
-/** `part(id)` over `parts`, throwing with some ids that do exist. */
 const finder =
   <P extends Part>(what: string, parts: readonly P[]) =>
   (id: string): P => {
@@ -194,7 +189,6 @@ export function buildSeries(f: Frame) {
         );
     }
 
-    // The last bar ends with the span: each grows for what is left after the staggered starts.
     const stagger = options.stagger ?? Math.min(0.08, over / (2 * entries.length));
 
     if (!Number.isFinite(stagger) || stagger < 0)
@@ -214,7 +208,6 @@ export function buildSeries(f: Frame) {
     const barWidth = Math.max(1, slot - gap);
     const radiusPx = Math.min(radius, barWidth / 2);
 
-    // A bar is drawn radius px longer than it shows, and a clip at the baseline trims that end square.
     const above = clipTo(rect(bounds.x, bounds.y, bounds.w, zero - bounds.y));
     const below = clipTo(rect(bounds.x, zero, bounds.w, bottom - zero));
     const format = options.values === true ? f.yFormat : options.values || undefined;
@@ -291,7 +284,6 @@ export function buildSeries(f: Frame) {
     };
   }
 
-  /** The line, its dots and its label. Dots appear as the stroke reaches them, which a linear draw makes proportional to length. */
   function trace(
     what: string,
     points: Point[],
@@ -367,13 +359,11 @@ export function buildSeries(f: Frame) {
       </g>
     );
 
-    /** When the stroke reaches each point, which is when its dot pops in. */
     const reaches = reached.map((length) => at + (over * length) / total);
 
     return { d, node, radius, reaches };
   }
 
-  /** Each placed point as a part: its dot, and from when the line reaches it while the dot pops in. */
   const pointParts = (
     raw: Raw,
     placed: readonly Point[],

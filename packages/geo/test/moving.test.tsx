@@ -29,7 +29,6 @@ const rings = (d: string) =>
       return Array.from({ length: n.length / 2 }, (_, i) => [n[2 * i]!, n[2 * i + 1]!] as const);
     });
 
-/** Nonzero winding of a point against every ring of a path. */
 const filled = (d: string, x: number, y: number) =>
   rings(d).reduce((w, ring) => {
     let sum = 0;
@@ -62,7 +61,6 @@ const area = (d: string) =>
 
 const frame = rect(0, 0, 400, 400);
 
-/** Share of a grid over the visible disk where `paths` agree with `truth` at the facing `middle`. */
 const agreement = (
   paths: readonly string[],
   middle: LonLat,
@@ -195,7 +193,6 @@ describe("globe()", () => {
     expect(point.y).toBeLessThan(france.box.y + france.box.h);
     expect(france.path().length).toBeGreaterThan(0);
 
-    // Australia is behind the globe at the end, so its box is pressed onto the rim, inside the disc's box.
     const { box } = earth.part("Australia");
 
     expect(earth.locate([134, -25], 4).z).toBeLessThan(0);

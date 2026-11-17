@@ -7,7 +7,6 @@ import type { MermaidDoc } from "./types.ts";
 const KINDS =
   "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `stateDiagram` and `stateDiagram-v2`.";
 
-/** Meaningful lines only: blank lines and `%%` comments are dropped, a trailing `;` is cut, and numbering keeps the original line numbers. */
 const lines = (text: string): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
     const trimmed = raw.trim();

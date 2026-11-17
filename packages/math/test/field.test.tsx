@@ -99,7 +99,6 @@ describe("slope fields", () => {
     const low = plot.point(0, -2);
     const mid = points.find((p) => Math.abs(p.x - low.x) < 1)!;
 
-    // y = x²/2 - 2, so the curve from (-2, 0) bottoms out at (0, -2)
     expect(mid.y).toBeCloseTo(low.y, 0);
     expect(points[0]!.y).toBeCloseTo(plot.point(-2, 0).y, 0);
     expect(points.at(-1)!.y).toBeCloseTo(plot.point(2, 0).y, 0);

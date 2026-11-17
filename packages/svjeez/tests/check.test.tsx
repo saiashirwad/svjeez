@@ -129,7 +129,6 @@ describe.if(browser)("checkScene", () => {
   });
 
   test("static: CSS keyframes whose values never change", async () => {
-    // svjeez compiles a motion whose values never change to a plain visibility hold, so write the file by hand.
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100"><style>@keyframes s{0%,100%{opacity:.5}}@keyframes m{0%{opacity:1}100%{opacity:.2}}.s{animation:s 2s infinite}.m{animation:m 2s infinite}</style><rect class="s" width="20" height="20"/><rect class="m" x="40" width="20" height="20"/></svg>`;
     const still = await findings(svg, "static");
 
@@ -232,7 +231,6 @@ describe.if(browser)("checkScene", () => {
         12,
       );
 
-    // The stars of examples/horizon: a held twinkle that cycles twice in the loop. Its restart is one more of its steps.
     const stars = Array.from({ length: 12 }, (_, i) =>
       wiggle({ opacity: 0.7 }, { seed: `star-${i}`, rate: 3, ease: ease.hold, period: 6 }),
     );
@@ -244,7 +242,6 @@ describe.if(browser)("checkScene", () => {
           "loop-seam",
         ),
       ).toHaveLength(0);
-    // A step that happens once in the loop is not periodic: dim to 0.5 at 6s, then back to full at the restart.
     const once = motion({ opacity: 1 }).to({ opacity: 0.5 }, span(6, 0.1), ease.hold);
 
     expect(

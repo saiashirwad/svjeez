@@ -23,13 +23,11 @@ const B = "M4 4L16 4L16 16L4 16Z";
 const size = { width: 20, height: 20, title: "Window" };
 const attrsOf = (svg: string, tag: string) => svg.match(new RegExp(`<${tag}\\b[^>]*>`, "g")) ?? [];
 
-/** A morph that rests on A, runs to B and stays there for the rest of a 10 second loop. */
 const morph = render(
   { ...size, duration: 10 },
   <path d={A} fill="red" animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
 );
 
-/** A morph that returns to where it started. */
 const there = render(
   { ...size, duration: 10 },
   <path
@@ -67,7 +65,6 @@ describe("windowed SMIL markup", () => {
     expect(animate).toContain('dur="1s"');
     expect(animate).toContain('fill="freeze"');
     expect(animate).not.toContain("repeatCount");
-    // Past the window it holds B, so the next loop's start resets to A.
     expect(attrsOf(morph, "set")).toEqual([
       `<set attributeName="d" to="${A}" begin="0s;w1.begin+8s" dur="2s" fill="freeze" data-loop="10s"/>`,
     ]);
@@ -157,7 +154,6 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
   check("a morph that resets at the top of the loop", morph, morphPlain);
   check("a morph that comes back", there, therePlain);
 
-  // Loops 2 and 3 only: the merged set resets the first value at each loop start.
   check(
     "the merged set resets each later loop",
     morph,
@@ -177,7 +173,6 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
     for (const at of [1, 2.5, 6, 11, 12.5]) {
       for (const paused of [true, false]) {
         const options = { at, paused };
-        // A copy started `at` seconds in shows, `later` seconds on, what the scene shows at `at + later`.
         const later = paused ? [0, 3] : [0, 0.25, 3, 7];
 
         const [a, b] = await Promise.all([

@@ -8,8 +8,8 @@ import type { Shown } from "./timeline";
 import { span } from "../span";
 
 /**
- * A soft box that glides between the targets of `stops`. It appears at the first stop's `show.at` and moves at each
- * later stop's `show.at`; the `over` of a stop is not used. `color` defaults to the default dark scheme's accent.
+ * A soft box that glides between the targets of `stops`: appears at the first stop's `show.at`, moves at each
+ * later one's. A stop's `over` is not used. `color` defaults to the dark scheme's accent.
  */
 export function Marker({
   stops,

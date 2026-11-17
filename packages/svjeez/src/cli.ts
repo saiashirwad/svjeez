@@ -47,7 +47,6 @@ const fail = (message: string): never => {
 
 type Scene = (values?: Values<Schema>) => string | Promise<string>;
 
-/** A scene module as the CLI reads it. Each export is checked before use, because the module is the user's. */
 interface SceneModule {
   readonly default?: string | Scene;
   readonly params?: Schema;
@@ -67,7 +66,6 @@ const isSchema = (value: SceneModule["params"]): value is Schema =>
 const isJsonObject = (value: Json): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-/** What --params and --param say, before the scene's schema reads them. */
 interface ParamFlags {
   readonly params?: string;
   readonly param?: readonly string[];
@@ -78,13 +76,11 @@ const PARAM_OPTIONS = {
   param: { type: "string", multiple: true },
 } as const;
 
-/** The flags again, as arguments, for the child process `dev` builds in. */
 const paramArgs = ({ params, param = [] }: ParamFlags): string[] => [
   ...(params === undefined ? [] : ["--params", params]),
   ...param.flatMap((pair) => ["--param", pair]),
 ];
 
-/** The values the flags give, checked against `schema`: the --params file, then each --param over it. */
 const valuesFor = async (
   file: string,
   schema: Schema,
@@ -121,7 +117,6 @@ const valuesFor = async (
       fail(`--param ${key} is a list. Put lists in a JSON file and pass it with --params.`);
     const asNumber = raw.trim() === "" ? NaN : Number(raw);
 
-    // A number param reads the text as a number; a value that is not one stays text so the error shows it.
     return [key, declared?.kind === "number" && Number.isFinite(asNumber) ? asNumber : raw];
   });
 
@@ -132,7 +127,6 @@ const valuesFor = async (
   try {
     return parse(schema, { ...given, ...Object.fromEntries(pairs) });
   } catch (error) {
-    // A bad value is the caller's to fix, so it reads as a message, not a stack.
     return fail(`${file}: ${error instanceof Error ? error.message : String(error)}`);
   }
 };
@@ -153,7 +147,6 @@ const loadSvg = async (file: string, flags: ParamFlags = {}): Promise<string> =>
   const module: SceneModule = await import(url).catch(async (error: Error & { code?: string }) => {
     if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
 
-    // Node has no TSX loader of its own; use tsx when the project has it.
     const tsx = (() => {
       try {
         return pathToFileURL(
@@ -245,7 +238,6 @@ const parseScheme = (value: string | undefined) =>
       ? value
       : fail(`--color-scheme is system, light or dark, got "${value}".`);
 
-/** The part of @svjeez/video the CLI uses. svjeez doesn't depend on it, so it is typed here. */
 type VideoFn = (
   svg: string,
   options: {
@@ -271,7 +263,6 @@ interface VideoModule {
 
 const VIDEO = "@svjeez/video";
 
-// From the project first, so a package manager that doesn't hoist still finds it.
 const loadOptional = async (name: string, command: string, pkg = name): Promise<object> => {
   const from = (base: string) => {
     try {
@@ -291,7 +282,6 @@ const loadOptional = async (name: string, command: string, pkg = name): Promise<
 
 const loadVideo = (): Promise<VideoModule> => loadOptional(VIDEO, "video");
 
-/** The commands @svjeez/live/commands exports. svjeez doesn't depend on it, so they are typed here. */
 type LiveCommand = (args: string[]) => Promise<number>;
 
 interface LiveModule {
@@ -299,7 +289,6 @@ interface LiveModule {
   readonly set?: LiveCommand;
 }
 
-/** `values` and `set` read the source the way the editor does, so they run @svjeez/live's own parser. */
 const liveCommand =
   (name: "values" | "set") =>
   async (args: string[]): Promise<void> => {
@@ -308,7 +297,6 @@ const liveCommand =
     const run =
       live[name] ?? fail(`@svjeez/live has no ${name} command. Update it to match svjeez.`);
 
-    // A key or value to fix is the caller's, so it prints as a message, not a stack.
     process.exitCode = await run(args).catch((error: Error) =>
       error.name === "SetError" ? fail(error.message) : Promise.reject(error),
     );
@@ -416,7 +404,6 @@ const framesCommand = async (args: string[]): Promise<void> => {
   console.log(`loop ${Number(duration.toFixed(3))}s, ${colorScheme}\n${written.join("\n")}`);
 };
 
-// package-dist/cli.js and src/cli.ts both sit one level under the package root.
 const SKILL = fileURLToPath(new URL("../skills/svjeez", import.meta.url));
 
 const skillCommand = async (args: string[]): Promise<void> => {
@@ -455,7 +442,6 @@ const checkCommand = async (args: string[]): Promise<void> => {
   const scheme = parseScheme(values["color-scheme"]);
   const times = values.times === undefined ? undefined : when(values.times, undefined);
 
-  // A module renders with `data-source` on every element, so each finding names the line that wrote it.
   if (!file.endsWith(".svg")) startTrace(dirname(resolve(file)));
   const svg = await loadSvg(file, values);
   report(svg);
@@ -526,7 +512,6 @@ const devCommand = async (args: string[]): Promise<void> => {
     cli: self,
     args: paramArgs(values),
     files: values.params === undefined ? [] : [values.params],
-    // Run from the repository's source, the library's own files are part of what a scene imports.
     dirs: self.endsWith(".ts") ? [dirname(self)] : [],
     port,
     out: values.out,

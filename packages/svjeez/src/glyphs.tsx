@@ -25,9 +25,7 @@ export interface GlyphsProps {
   readonly weight?: number;
   readonly style?: FontStyle;
   readonly text: string;
-  /** Font size in px. */
   readonly size: number;
-  /** The left end of the baseline. */
   readonly x?: number;
   readonly y?: number;
   readonly fill?: Paint;
@@ -46,7 +44,6 @@ export interface GlyphsProps {
   readonly animation?: GlyphStack | ((glyph: GlyphPath, each: Each) => GlyphStack);
 }
 
-/** A line of text drawn as one path per glyph. No font is embedded; the outlines are the drawing. */
 export function Glyphs({
   font,
   weight,

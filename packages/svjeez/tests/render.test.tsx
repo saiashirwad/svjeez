@@ -70,7 +70,6 @@ describe("motion timing", () => {
   });
 
   test("a step takes a span or a time, never a length from a cursor", () => {
-    // The types stop each of these; plain JavaScript gets the same advice at run time.
     // @ts-expect-error a length is not a span
     expect(() => motion({ x: 0 }).to({ x: 1 }, 0.5)).toThrow(
       "to() takes a span, got 0.5. Write .to(values, span(at, over)); a step right after another is span.next(over).",

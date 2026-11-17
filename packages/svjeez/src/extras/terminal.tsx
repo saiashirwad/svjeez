@@ -14,7 +14,6 @@ export interface TerminalCommand {
 }
 
 export interface TerminalOptions extends Omit<CodeOptions, "gutter"> {
-  /** When the first prompt appears. */
   readonly at?: Seconds;
   readonly prompt?: string;
   readonly promptRole?: CodeRole;

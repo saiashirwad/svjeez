@@ -32,24 +32,20 @@ export interface TreeOptions<N extends string = string> extends DiagramOptions {
   /** Default `"TB"`. */
   readonly direction?: Direction;
   /**
-   * Nodes appear breadth-first after the root, each edge drawing on as the later of its ends appears. From a start `at`
-   * they follow `step` apart (default 0.3), or each comes at its own time. A record such as `{ a: 1, b: 2 }` schedules
-   * nodes by id instead, and the ones it leaves out are there from the start.
+   * Nodes appear breadth-first after the root, edges as the later of their ends does. From a start `at` they follow
+   * `step` apart (default 0.3), or each at its own time. A record such as `{ a: 1, b: 2 }` times nodes by id; omitted
+   * ones are there from the start.
    */
   readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
 }
 
-/** The id of each edge as a part, `"parent->child"`, from a spec's nodes. */
 type TreeEdges<N> = {
   [K in keyof N & string]: N[K] extends { readonly parent: infer P extends string }
     ? `${P}->${K}`
     : never;
 }[keyof N & string];
 
-/**
- * Its parts are the nodes, then the edges by ids such as `"root->leaf"`, parent first. An edge's box covers its line,
- * and its span is when it draws on.
- */
+/** Parts are the nodes, then edges by id such as `"root->leaf"`. An edge's span is when it draws on. */
 export interface Tree<N extends string, E extends string = `${N}->${N}`> extends Diagram<N | E> {
   /** Up from `from` to the nearest common ancestor, then down to `to`, along the drawn edges. */
   route(from: N, to: N): Point[];
@@ -84,7 +80,6 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
   const edges = new Map(out.edges.map((e) => [e.to, e.points.map(at.point)]));
   const step = play?.step ?? 0.3;
-  /** The root is there from the start, so no frame is empty. */
   const shown = schedule(play?.at ?? 0, out.order.slice(1), out.order, step, "tree() play");
   const over = Math.min(POP, step);
 

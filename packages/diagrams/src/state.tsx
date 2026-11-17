@@ -50,12 +50,10 @@ export type StateSpec =
       readonly initial: string;
     };
 
-/** Every state id in `S`, nested ones included. */
 type StateIds<S> = {
   [K in keyof S & string]: K | (S[K] extends { readonly states: infer I } ? StateIds<I> : never);
 }[keyof S & string];
 
-/** Holds each composite's `initial` to its own states. */
 type Checked<S> = {
   readonly [K in keyof S]: S[K] extends { readonly states: infer I }
     ? S[K] & { readonly initial: keyof I & string; readonly states: Checked<I> }
@@ -71,34 +69,27 @@ export interface StateMachineOptions extends DiagramOptions {
 }
 
 /**
- * A walk's parts are its legs, one per move along the path, by ids such as `"idle->busy"`. A leg's box covers the line
- * the token runs along, and its span is when the token is on it. A path that takes the same leg twice has two parts
- * with that id, and `part()` finds the first. `span` runs from the first state lit to when the last goes dark.
+ * Parts are the legs of the path, by id such as `"idle->busy"`; a leg's span is when the token is on it. A repeated
+ * leg makes two parts with one id; `part()` finds the first.
  */
 export interface Walk<S extends string> extends Drawn<Part<`${S}->${S}`>> {
-  /** When each state is lit. */
   readonly spans: Record<S, readonly Span[]>;
 }
 
-/** How the walk's token looks; `at` and timing come from the walk. */
 export type WalkToken = Omit<FlowOptions, "at" | "over" | "speed">;
 
 /**
- * Its parts are the states, nested ones included, then the transitions by ids such as `"idle->busy"`, all there from
- * the start: `walk()` is what plays. A transition's box covers its line and label. Two transitions between the same
- * states share an id, and `part()` finds the first.
+ * Parts are the states (nested included), then transitions by id such as `"idle->busy"`, all there from the start;
+ * `walk()` plays. Transitions between the same states share an id; `part()` finds the first.
  */
 export interface StateMachine<S extends string, T extends string = `${S}->${S}`> extends Diagram<
   S | T
 > {
-  /** The drawn line of the first transition `from` → `to`, sampled along its curve. */
   edge(from: S, to: S): Point[];
   /**
-   * An overlay that lights each state of `path` in turn, running a token to the next along a transition from it or
-   * from a composite holding it, or into a composite's initial state. Throws if there is no such way.
-   *
-   * From a start `at`, each state stays lit for `dwell` and the token moves at `speed`. With one time per state, each
-   * state lights at its time, the token arriving just then; the last stays lit for `dwell`.
+   * Lights each state of `path` in turn, running a token along a transition between them. Throws if there is no such
+   * way. From a start `at`, each state stays lit for `dwell` and the token moves at `speed`; with one time per state,
+   * each lights at its time.
    */
   walk(
     path: readonly S[],
@@ -135,16 +126,13 @@ interface Run {
   readonly depth: number;
 }
 
-/** A transition, by index, which may carry a label; or the scope's start or end marker, which never does. */
 type Line =
   | (Run & { readonly of: number; readonly label?: Box })
   | (Run & { readonly of: "start" | "end" });
 
-/** Whether a line is a transition, by index, rather than the scope's start or end marker. */
 const isTransitionLine = (l: Line): l is Run & { readonly of: number; readonly label?: Box } =>
   typeof l.of === "number";
 
-/** Whether `at` is one start time, with the walk's states following it, rather than one time per state. */
 const isSingleStart = (at: Beats): at is Seconds => typeof at === "number";
 
 const relocate = (l: Line, point: (p: Point) => Point, box: (b: Box) => Box): Line => {
@@ -175,11 +163,6 @@ const shift = (b: Box, dx: number, dy: number): Box => ({
   h: b.h,
 });
 
-/**
- * A layered state machine. A dot marks each scope's initial state; final states lead to a bullseye. A composite is
- * laid out inside first, then sized to fit and laid out with its siblings as one node; transitions attach to the
- * nearest ancestors that share a scope.
- */
 export function stateMachine<
   const S extends Record<string, StateSpec>,
   const T extends readonly StateTransition<NoInfer<StateIds<S>>>[],
@@ -248,7 +231,6 @@ export function stateMachine<
     return node.parent === undefined ? [id] : [...chain(node.parent), id];
   };
 
-  /** The scope owner a transition lives in, and its two ends as that scope's direct members. */
   const home = (from: string, to: string) => {
     const [a, b] = [chain(from), chain(to)];
     let k = 0;
@@ -446,7 +428,6 @@ export function stateMachine<
     return curve(found.points).samples;
   };
 
-  /** How a walk gets from `a` to `b`: a transition from `a` or a composite holding it, or into a composite's initial state. */
   const step = (a: string, b: string): Point[] => {
     for (const from of chain(a).reverse()) {
       const found = line(

@@ -1,10 +1,8 @@
 import type { Feature, FeatureCollection, Geometry, Polygon, Position } from "geojson";
 import type { LonLat } from "./index.ts";
 
-/** Any GeoJSON that can carry lines or rings. */
 export type Outline = Geometry | Feature | FeatureCollection;
 
-/** A point on the unit sphere: x toward 0°E on the equator, y toward 90°E, z toward the north pole. */
 export type Vec3 = readonly [number, number, number];
 
 export const RAD = Math.PI / 180;
@@ -38,7 +36,6 @@ export const unit = (a: Vec3): Vec3 => scale(a, 1 / Math.hypot(...a));
 
 export const angle = (a: Vec3, b: Vec3) => Math.atan2(Math.hypot(...cross(a, b)), dot(a, b));
 
-/** The great circle from `a` to `b`, `u` of the way along. */
 export const slerp = (a: Vec3, b: Vec3, u: number): Vec3 => {
   const theta = angle(a, b);
 
@@ -48,16 +45,13 @@ export const slerp = (a: Vec3, b: Vec3, u: number): Vec3 => {
   return scale(add(scale(a, wa), scale(b, wb)), 1 / Math.sin(theta));
 };
 
-/** One ring or line of a shape, as points on the sphere. A ring's last point joins back to its first. */
 export interface Strand {
   readonly points: readonly Vec3[];
   readonly closed: boolean;
 }
 
-/** A polygon with its holes, or one line: the strands that must be drawn together. */
 export interface Unit {
   readonly strands: readonly Strand[];
-  /** The polygon, to test what it covers. Lines have none. */
   readonly polygon?: Polygon;
 }
 
@@ -107,10 +101,6 @@ export const units = (object: Outline): Unit[] => {
   }
 };
 
-/**
- * Douglas–Peucker on the sphere: drops the points that sit within `degrees` of the great circle their neighbours
- * already draw. A ring keeps at least three points, a line two.
- */
 const simplifyPoints = (points: readonly Vec3[], degrees: number): Vec3[] => {
   if (points.length < 3 || degrees <= 0) return [...points];
   const epsilon = Math.sin(degrees * RAD);
@@ -142,7 +132,6 @@ const simplifyPoints = (points: readonly Vec3[], degrees: number): Vec3[] => {
   return points.filter((_, i) => keep[i]);
 };
 
-/** Splits every leg longer than `degrees` along its great circle. */
 const densify = (points: readonly Vec3[], closed: boolean, degrees: number): Vec3[] => {
   const out: Vec3[] = [];
   const legs = closed ? points.length : points.length - 1;
@@ -159,7 +148,6 @@ const densify = (points: readonly Vec3[], closed: boolean, degrees: number): Vec
   return out;
 };
 
-/** Points that land on the same place, as the two ends of a ring cut at the antimeridian do, or the corners of a pole. */
 const dedupe = (points: readonly Vec3[]): Vec3[] =>
   points.filter((p, i) => i === 0 || angle(p, points[i - 1]!) > 1e-7);
 
@@ -174,10 +162,8 @@ const ready = (strand: Strand, simplify: number, step: number): Strand[] => {
 };
 
 /**
- * Every polygon and line of `object` ready to turn: simplified to within `simplify` degrees, with legs split to at
- * most `step` degrees so they bend with the globe. Points at a pole and the cut a ring makes along the antimeridian
- * go, since on the sphere they draw nothing. A ring smaller than `simplify` goes too, and a polygon whose outer ring
- * goes takes its holes with it.
+ * Every polygon and line of `object` ready to turn: simplified to within `simplify` degrees, legs split to at most `step`
+ * degrees. Pole points, antimeridian cuts and rings smaller than `simplify` are dropped.
  */
 export const prepare = (object: Outline, simplify: number, step: number): Unit[] =>
   units(object).flatMap((unit): Unit[] => {

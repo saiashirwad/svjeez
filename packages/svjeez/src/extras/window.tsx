@@ -11,7 +11,6 @@ export interface WindowOptions {
   /** Title bar height. Default 40. */
   readonly bar?: number;
   readonly radius?: number;
-  /** For the title's font. */
   readonly class?: string;
 }
 

@@ -9,7 +9,6 @@ const family = font.family(regular, bold);
 const scene = (child: Child) =>
   render({ width: 200, height: 100, duration: 1, title: "Faces" }, child);
 
-/** The font each embedded face carries, by weight. */
 const embeds = (svg: string) =>
   new Map(
     [...svg.matchAll(/url\(data:font\/ttf;base64,([^)]+)\)[^}]*font-weight:(\d+)/g)].map((m) => [

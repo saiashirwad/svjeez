@@ -6,7 +6,6 @@ import { plane } from "../src/index";
 const svg = (css: Parameters<typeof render>[0]["css"], ...children: Child[]) =>
   render({ width: 400, height: 300, duration: 8, title: "plane", css }, children);
 
-/** Four units each way at 20px a unit, with (0, 0) at (200, 150). */
 const base = plane({
   xRange: [-4, 4],
   yRange: [-4, 4],

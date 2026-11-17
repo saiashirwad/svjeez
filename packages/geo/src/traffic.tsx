@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 import { flow, type FlowOptions } from "svjeez";
 import type { GeoMap, LonLat } from "./index.ts";
 
-/** A route for `traffic()`, with how much of the traffic takes it and, if it differs, its color. */
 export interface TrafficLine {
   /** The route's id as a part. Default its index in the list, `"0"`, `"1"`, … */
   readonly id?: string;
@@ -19,11 +18,8 @@ export interface TrafficOptions extends Omit<
   FlowOptions,
   "at" | "over" | "label" | "fill" | "ink"
 > {
-  /** Departures per second, across all the routes. */
   readonly rate: number;
-  /** Changes which routes and moments are picked, with the same result every build. Default 1. */
   readonly seed?: number;
-  /** Let this share of the particles, 0 to 1, run their route backward. Default 0. */
   readonly back?: number;
 }
 
@@ -33,7 +29,6 @@ export interface TrafficOptions extends Omit<
  */
 export interface TrafficRoute extends Part {
   readonly points: readonly Point[];
-  /** How many particles took this route. */
   readonly count: number;
 }
 
@@ -42,7 +37,6 @@ export interface TrafficRoute extends Part {
  * particle arrives.
  */
 export interface Traffic extends Drawn<TrafficRoute> {
-  /** How many particles leave. */
   readonly count: number;
 }
 
@@ -54,9 +48,8 @@ const boxOf = (points: readonly Point[]): Rect => {
 };
 
 /**
- * Many particles along many routes: flights, trade, migration. `rate` departures a second over the span `during`, each on a
- * route picked by weight, at a moment jittered inside its own slot so they spread out evenly without lining up. Each
- * is a `flow()` token. A list of points stands for a route of weight 1.
+ * Many particles along many routes: `rate` departures a second over `during`, each on a route picked by weight.
+ * Each is a `flow()` token. A list of points stands for a route of weight 1.
  */
 export function traffic(
   during: Span,
@@ -83,7 +76,6 @@ export function traffic(
   const next = random(seed);
   const count = Math.max(1, Math.round(rate * during.over));
   let end = during.at;
-  /** Each route's first departure, last arrival and particle count. */
   const used = routes.map(() => ({ first: Infinity, last: -Infinity, count: 0 }));
 
   const nodes = Array.from({ length: count }, (_, k) => {
@@ -163,12 +155,10 @@ export function arc(
   const height = options.height ?? chord / 4;
   const steps = options.steps ?? Math.max(8, Math.min(200, Math.ceil(chord / 6)));
 
-  // The normal that points up the page; level routes bow toward -y, vertical ones toward -x.
   let [nx, ny] = [(a.y - b.y) / chord, (b.x - a.x) / chord];
 
   if (ny > 0 || (ny === 0 && nx > 0)) [nx, ny] = [-nx, -ny];
 
-  // A quadratic Bezier peaks half way to its control point, so the control point sits at twice the height.
   const control = { x: (a.x + b.x) / 2 + nx * height * 2, y: (a.y + b.y) / 2 + ny * height * 2 };
 
   return Array.from({ length: steps + 1 }, (_, i) => {

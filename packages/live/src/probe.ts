@@ -9,19 +9,16 @@ export interface Move {
 
 const DRAWN = "path,circle,ellipse,rect,line,polyline,polygon,text,use,image,foreignObject";
 
-/** Each box's centre, then the middle of its right and bottom edges: the points a nudge can move. */
 const pointsOf = (box: DOMRect): Point[] => [
   { x: box.x + box.width / 2, y: box.y + box.height / 2 },
   { x: box.right, y: box.y + box.height / 2 },
   { x: box.x + box.width / 2, y: box.bottom },
 ];
 
-/** The boxes of every shape in `svg` held `at` seconds in, in scene units, drawn where layout runs but nothing shows. */
 const boxesOf = (svg: string, at: number): DOMRect[] => {
   const host = document.createElement("div");
   host.style.cssText =
     "position:fixed;inset-inline-start:-100000px;inset-block-start:0;visibility:hidden;pointer-events:none";
-  // Each copy gets a shadow root of its own, so the two files' keyframes, which share names, never meet.
   const root = host.attachShadow({ mode: "open" });
   root.innerHTML = restyle(svg, { at, paused: true });
   document.body.append(host);
@@ -56,11 +53,6 @@ const mean = (points: readonly Point[]): Point => ({
   y: points.reduce((sum, p) => sum + p.y, 0) / points.length,
 });
 
-/**
- * How the shapes of `before` that `after` changes move when a value grows `by`: the point that moved the most (a
- * shape's centre when it shifts, its edge when it grows), averaged over those shapes. Undefined when nothing on the
- * picture moved, or the two files draw different shapes.
- */
 export const measureMove = async (
   before: string,
   after: string,

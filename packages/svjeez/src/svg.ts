@@ -19,13 +19,10 @@ export type Child =
 
 export type AttrValue = string | AnyRef | Css | FontValue;
 
-/** CSS declarations as a JSX `style` object: property name to value. */
 export type Style = Readonly<Record<string, string | number | Css | undefined>>;
 
-/** A prop as JSX passes it. `children` and `animation` are typed in `Props`. */
 export type Prop = Child | Stack | AttrValue | Style;
 
-/** The props `node` reads. Every key but `children` and `animation` is an attribute. */
 export type Props = Readonly<Record<string, Prop>> & {
   readonly children?: Child;
   readonly animation?: Stack;
@@ -37,26 +34,20 @@ export type SvgNode =
       readonly tag: string;
       readonly attrs: Readonly<Record<string, AttrValue>>;
       readonly children: readonly SvgNode[];
-      /** The `animation` stack, outermost first. Never serialized. */
       readonly motions: readonly Motion[];
-      /** Set by `<Once>`: every motion from here down plays the timeline one time. Never serialized. */
       readonly once?: boolean;
-      /** Set by `<Ambient>`: every motion from here down stays on the clock when `restyle({ timeline })` puts the scene on a scroll timeline. Never serialized. */
       readonly ambient?: boolean;
-      /** Attributes the still frame has instead of what is written, when a windowed SMIL animation needs the last value there. Never serialized. */
       readonly still?: Readonly<Record<string, AttrValue>>;
     }
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }
   | { readonly kind: "fragment"; readonly children: readonly SvgNode[] }
-  /** `<Clip>`: no element of its own. Every motion inside it runs on a clock that starts at `at` and, if `over` is given, ends `over` later. Never serialized. */
   | {
       readonly kind: "clip";
       readonly at: number;
       readonly over?: number;
       readonly children: readonly SvgNode[];
     }
-  /** `<Style>`: a global rule that compile moves into the scene's `<style>`. Never serialized. */
   | { readonly kind: "style"; readonly css: string | Css };
 
 export type Element = Extract<SvgNode, { kind: "element" }>;
@@ -76,7 +67,6 @@ export const raw = (value: string): SvgNode => ({ kind: "raw", value });
 const isNode = (value: Child): value is SvgNode =>
   value !== null && typeof value === "object" && "kind" in value;
 
-/** A package's drawn result, which goes into the scene as its `node`. */
 const isDrawn = (value: Child): value is Drawn =>
   value !== null &&
   typeof value === "object" &&
@@ -84,7 +74,6 @@ const isDrawn = (value: Child): value is Drawn =>
   "node" in value &&
   isNode(value.node);
 
-/** Text is a string, or a number that `num` writes out. */
 const isText = (value: Prop): value is string | number =>
   typeof value === "string" || typeof value === "number";
 
@@ -98,7 +87,6 @@ export const children = (input: Child, preserveWhitespace = false): SvgNode[] =>
 
     if (Array.isArray(value)) return value.forEach(visit);
 
-    // Before nodes, because a Drawn may carry a `kind` of its own, as a Mermaid diagram does.
     if (isDrawn(value)) return visit(value.node);
 
     if (isNode(value))
@@ -126,7 +114,6 @@ const style = (value: string | Style): string | Css => {
   const parts = entries.flatMap(([name, entry], index): CssPart[] => [
     index > 0 ? ";" : "",
     ...(isProperty(name) ? [{ property: name }, ":"] : [`${kebab(name)}:`]),
-    // A css`…` value keeps its property holes, which render names.
     ...(isCss(entry)
       ? entry.parts
       : [isProperty(name) ? formatProperty(name, entry!) : String(entry)]),

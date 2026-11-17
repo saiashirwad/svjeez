@@ -44,7 +44,6 @@ export interface StreamlinesOptions {
   readonly frame: Rect;
   /** Gap between neighbouring lines in px. Default 24. */
   readonly spacing?: number;
-  /** Trace from exactly these points and do not fill the gaps. */
   readonly seeds?: readonly Point[];
   /** Integration step in px. Default 2. */
   readonly step?: number;
@@ -59,14 +58,12 @@ export interface StreamlinesOptions {
 export interface Streamlines {
   /** Each line as points in scene px, running with the field. Hand one to `flow()`. */
   readonly lines: readonly (readonly Point[])[];
-  /** Every line as one path data string, a subpath each. */
   readonly d: string;
 }
 
 /**
- * Evenly spaced streamlines of `field`, the curves that follow its arrows. `field(x, y)` takes scene px and gives
- * `[u, v]`, with y growing down the page. Only the direction matters; the length of the arrow does not.
- * Lines start at the middle of `frame` and fill outward, so earlier lines are the ones nearest the middle.
+ * Evenly spaced streamlines of `field`. `field(x, y)` takes scene px and gives `[u, v]`, y growing down; only direction
+ * matters. Lines fill outward from the middle of `frame`, so earlier lines are nearest it.
  */
 export function streamlines(field: VectorField, options: StreamlinesOptions): Streamlines {
   const { frame, spacing = 24, step = 2, maxLength = 900, tolerance = 0.25 } = options;
@@ -143,7 +140,6 @@ export interface VectorFieldOptions {
   readonly spacing?: number;
   /** px of arrow per unit of field length. Default fits the longest arrow to 0.85 of the spacing. */
   readonly scale?: number;
-  /** Give every arrow the same length, so only direction shows. */
   readonly normalize?: boolean;
 }
 
@@ -151,12 +147,10 @@ export interface FieldArrow {
   /** The arrow's tail and tip in scene px. */
   readonly from: Point;
   readonly to: Point;
-  /** The field's length there, in its own units. */
   readonly magnitude: number;
 }
 
 export interface VectorFieldResult {
-  /** All arrows as one path: shaft and open head each. Stroke it with round caps. */
   readonly d: string;
   readonly arrows: readonly FieldArrow[];
 }
@@ -230,7 +224,6 @@ export interface SlopeFieldResult {
   readonly d: string;
 }
 
-/** Graph units to px and back, read from the plane's own mapping. */
 const scaleOf = (plane: Plane) => {
   const origin = plane.point(0, 0);
   const [ex, ey] = [plane.point(1, 0), plane.point(0, 1)];
@@ -377,14 +370,12 @@ export interface ContourOptions {
 
 export interface ContourLine {
   readonly points: readonly Point[];
-  /** The last point joins the first. */
   readonly closed: boolean;
 }
 
 export interface ContourLevel {
   readonly level: number;
   readonly lines: readonly ContourLine[];
-  /** The level's lines as one path. Fill it with `fillRule="evenodd"` or stroke it. */
   readonly d: string;
 }
 
@@ -462,9 +453,8 @@ const levelOf = (grid: Grid, frame: Rect, level: number, tolerance: number): Con
 };
 
 /**
- * Level lines of a scalar field: where `source` crosses each of `levels`. `source` is a function of `(x, y)`, in graph
- * units with `plane` and in scene px with `frame`, or a `Grid` of samples you computed. Use it for implicit curves
- * (`x*x + y*y - 1` at level 0) and for elevation lines. A line that leaves the frame ends there.
+ * Level lines of a scalar field: where `source` crosses each of `levels`. `source` is `(x, y)` in graph units with `plane`,
+ * scene px with `frame`, or a `Grid` of samples. A line that leaves the frame ends there.
  */
 export function contours(
   source: ((x: number, y: number) => number) | Grid,
@@ -485,14 +475,12 @@ export interface ContourSweepOptions extends Omit<ContourOptions, "levels"> {
 export interface ContourSweep {
   /** The path data at `from`. Give it to `<path d>`. */
   readonly d: string;
-  /** Moves the path through every level. Give it to `animation`. */
   readonly animation: Motion<"d">;
 }
 
 /**
- * One path whose level line moves from `from` to `to`, as a morph: every frame is written through `matchPaths()`.
- * It reads best while the lines only grow, shrink and bend, like a circle widening. Where loops split or merge, rings
- * pair by order and one grows from a point, so draw a `contours()` level per step instead when that matters.
+ * One path whose level line moves from `from` to `to`, as a morph. Reads best while lines only grow, shrink and bend;
+ * where loops split or merge, draw a `contours()` level per step instead.
  */
 export function contourSweep(
   span: Span,

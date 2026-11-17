@@ -67,7 +67,6 @@ const MORE = 0x20;
 /** A real glyph has a handful of components. A hostile font can fan them out exponentially through nesting. */
 const MAX_COMPONENTS = 4096;
 
-/** Contours of a glyph in font units, y up. Composite glyphs are flattened through each component's offset and matrix. */
 export const contours = (
   f: Sfnt,
   glyph: number,
@@ -122,10 +121,6 @@ export const contours = (
 
 const fixed = (n: number): string => String(Math.round(n * 100) / 100);
 
-/**
- * SVG path data for contours, scaled from font units and placed with its origin at (x, y), y down.
- * TrueType curves are quadratic, with an implied on-curve point between two off-curve points.
- */
 export const pathData = (
   outlines: readonly Contour[],
   scale: number,

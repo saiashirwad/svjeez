@@ -32,7 +32,6 @@ interface Held {
   readonly value: number;
 }
 
-/** The keys of the first keyframes block that sets `property`, as seconds and the number written. */
 const keys = (svg: string, property: string, duration = DURATION): Held[] => {
   const block = [...svg.matchAll(/@keyframes [\w-]+\{(.*)\}$/gm)].find((match) =>
     match[1]!.includes(`${property}:`),
@@ -64,7 +63,6 @@ describe("span()", () => {
     expect(chain({ at: 2, over: 1 })).toHaveLength(1);
     expect(() => chain(span(1, 1), -1)).toThrow("next() needs a length of 0 or more, got -1.");
 
-    // A motion built on chain() matches one built span by span, key for key.
     const byHand = motion({ x: 0 })
       .to({ x: 5 }, span(0.1, 0.3))
       .to({ x: 9 }, span(0.1, 0.3).next(0.12))
@@ -280,7 +278,6 @@ describe("<Clip>", () => {
     const begins = [...svg.matchAll(/keyTimes="([^"]*)"/g)].map((match) => match[1]);
 
     expect([...svg.matchAll(/<filter /g)]).toHaveLength(2);
-    // Each filter animates only its own second of the loop, on the clock of the clip that uses it.
     expect(begins).toEqual(["0;1", "0;1"]);
     expect([...svg.matchAll(/<animate [^>]* begin="([\d.]+)s;/g)].map((match) => match[1])).toEqual(
       ["0", "3"],
@@ -322,7 +319,6 @@ describe(".repeat()", () => {
   test("the passage runs from the earliest step's start to the latest step's end", () => {
     const svg = scene(rect(motion({ x: 0 }).to({ x: 10 }, span(1, 1), ease.linear).repeat(2)));
 
-    // The second pass cuts back to 0 the instant the first ends, and plays from 2s to 3s.
     expect(keys(svg, "translate").map((key) => Math.round(key.t * 1000) / 1000)).toEqual([
       0, 1, 2, 2, 3, 10,
     ]);
@@ -385,7 +381,6 @@ describe(".repeat()", () => {
       10,
     );
 
-    // The cut pass runs 2s to 3s: the lane's own timing function is the head of inOut, not inOut itself.
     expect(svg).toMatch(/cubic-bezier\(/);
     expect(svg).not.toContain("cubic-bezier(.77,0,.175,1);animation-timing-function:linear");
   });
@@ -559,7 +554,6 @@ describe(".loop() inside a clip", () => {
     const svg = scene(<Clip at={1}>{rect(spin)}</Clip>);
     const held = keys(svg, "rotate", P);
 
-    // The loop starts at 1: the glide runs 1 to 3, and before 1 the loop is on the end of its last pass.
     expect(held.at(0)).toEqual({ t: 0, value: 360 });
     expect(held.find((key) => Math.abs(key.t - 1) < 1e-3 && key.value === 0)).toBeDefined();
     expect(held.find((key) => key.t === 3)?.value).toBe(360);

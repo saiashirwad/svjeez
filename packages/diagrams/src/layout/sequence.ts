@@ -7,7 +7,6 @@ type SequenceRow =
 interface SequenceInput {
   readonly actors: readonly ({ readonly id: string } & Size)[];
   readonly rows: readonly SequenceRow[];
-  /** Least space between neighbouring heads. */
   readonly actorGap?: number;
   readonly rowGap?: number;
 }
@@ -15,7 +14,6 @@ interface SequenceInput {
 export interface SequenceLayout {
   readonly heads: ReadonlyMap<string, Box>;
   readonly lifelines: ReadonlyMap<string, readonly [Point, Point]>;
-  /** Per row: a message's arrow from lifeline to lifeline (a self message loops right), or a note's center. */
   readonly rows: readonly { readonly points: readonly Point[]; readonly box: Box }[];
   readonly bounds: Box;
 }
@@ -23,7 +21,6 @@ export interface SequenceLayout {
 const LOOP = { w: 28, h: 18 };
 const PAD = 16;
 
-/** Heads in a row, spaced so every label fits between the lifelines it spans; one row per message or note, top to bottom. */
 export function sequence(input: SequenceInput): SequenceLayout {
   const { actorGap = 32, rowGap = 14, actors } = input;
 

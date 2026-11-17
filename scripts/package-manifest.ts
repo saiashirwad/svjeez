@@ -13,10 +13,8 @@ export interface Manifest<Target = unknown> {
   optionalDependencies?: Record<string, string>;
 }
 
-/** The fields that name other packages by range, and so can hold a `workspace:` one. */
 const RANGED = ["dependencies", "peerDependencies", "optionalDependencies"] as const;
 
-/** `manifest` with each `workspace:` range, in any of the fields npm installs from, as the caret of that package's version. */
 export const publishedRanges = <M extends Manifest>(
   manifest: M,
   versions: ReadonlyMap<string, string>,
@@ -50,10 +48,6 @@ export const ROOT = join(import.meta.dirname, "..");
 export const read = <Target = unknown>(dir: string): Manifest<Target> =>
   JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
 
-/**
- * Writes the workspace package at `dir` into `out` for npm: no private flag, scripts or dev dependencies, each
- * `workspace:` range, in dependencies, peer or optional, as the caret of the version that package has now, and `exports` as the build laid them out.
- */
 export const writeManifest = <Target>(
   dir: string,
   out: string,

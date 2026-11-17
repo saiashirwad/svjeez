@@ -92,7 +92,6 @@ describe("restyle({ timeline })", () => {
       expect(svg).toMatch(/<rect width="10" height="10" class="a m\d+ fb"\/>/);
       expect(svg).toMatch(/<g class="a c m\d+">/);
       expect(svg).toMatch(/<rect width="5" height="5" class="a c m\d+ fb"\/>/);
-      // The same motion in and out of it is one rule, and no rule names the mark.
       expect(svg.match(/animation-duration:1s/g)).toHaveLength(1);
       expect(svg).not.toContain(".c{");
     });
@@ -115,10 +114,8 @@ describe("restyle({ timeline })", () => {
       );
       expect(css).toMatch(/\.pm\d+:not\(\.pc\)\{animation-iteration-count:4\}/);
 
-      // Every selector the timeline adds leaves the mark out.
       for (const [selector] of css.matchAll(/\.p[\w-]+[^{}]*(?=\{animation-)/g))
         expect(selector).toContain(":not(.pc)");
-      // The scene's own rules, which give the clock's duration, loop and delay, are untouched.
       expect(
         restyle(svg, { timeline: "--story" }).startsWith(svg.slice(0, svg.lastIndexOf("</svg>"))),
       ).toBe(true);

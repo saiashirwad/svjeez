@@ -1,28 +1,22 @@
 import type { Seconds } from "./motion";
 
-/** A stretch of a clock: from `at`, for `over` seconds. A plain `{ at, over }` is a span. */
 export interface Span {
   readonly at: Seconds;
   readonly over: Seconds;
 }
 
-/** A span that runs to the end of its clock: `over` is left out. */
 export interface OpenSpan {
   readonly at: Seconds;
   readonly over?: undefined;
 }
 
-/** Anything `show()` and `<Clip>` take for "when": a span, or a start that runs to the end. */
 export interface When {
   readonly at: Seconds;
   readonly over?: Seconds;
 }
 
-/** A span with the helpers `span()` adds. */
 export interface Spanned extends Span {
-  /** When it ends: `at + over`. */
   readonly end: Seconds;
-  /** The same span `dt` seconds later. */
   shift(dt: Seconds): Spanned;
   /** The next span: `over` long, starting `gap` seconds after this one ends. */
   next(over: Seconds, gap?: Seconds): Spanned;
@@ -36,16 +30,13 @@ export interface Spanned extends Span {
   last(over: Seconds): Spanned;
 }
 
-/** A span from `at` to the end of its clock. */
 export interface OpenSpanned extends OpenSpan {
-  /** Always `Infinity`: nothing ends it. */
   readonly end: number;
   shift(dt: Seconds): OpenSpanned;
   /** Start `before` seconds earlier. Negative starts later. */
   pad(before: Seconds): OpenSpanned;
   /** From the same start to `end`: `span(a).until(b)` is the span from `a` to `b`. */
   until(end: Seconds): Spanned;
-  /** The first `over` seconds. */
   first(over: Seconds): Spanned;
 }
 

@@ -151,7 +151,6 @@ test("camera fits and centers a view in a frame away from the origin", () => {
 });
 
 describe("reduced motion", () => {
-  /** The value of `prop` that the CSS freeze shows at `percent`, read from the element's keyframes. */
   const frozen = (svg: string, element: RegExp, prop: string, percent: number): string => {
     const cls = svg.match(element)?.[1];
     const names = svg.match(new RegExp(`\\.${cls}\\{animation-name:([\\w,-]+)`))![1]!.split(",");
@@ -434,7 +433,6 @@ describe("timed components render valid SVG that moves only inside their span", 
   const scene = (node: SvgNode) =>
     render({ width: 100, height: 100, duration, title: "timing" }, node);
 
-  /** When the first and last keyframe stop fall inside the loop, in seconds. The 0% and 100% stops are the loop's own. */
   const window = (svg: string): [number, number] => {
     const stops = [...svg.matchAll(/@keyframes [\w-]+\{((?:[^{}]*\{[^}]*\})*)\}/g)]
       .flatMap(([, body]) =>
@@ -486,7 +484,6 @@ describe("timed components render valid SVG that moves only inside their span", 
 describe("time helpers", () => {
   type Held = { opacity?: number; x?: number; y?: number };
 
-  /** What the rendered keyframes hold at playback second `t` of a 100s scene: opacity, and x and y from the translate lane. */
   const at = (track: Motion<"opacity" | "x" | "y" | "scale">, t: number): Held => {
     const svg = render(
       { width: 10, height: 10, duration: 100, title: "probe" },

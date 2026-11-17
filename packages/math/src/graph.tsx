@@ -13,22 +13,16 @@ import {
 
 export type Range = readonly [number, number];
 
-/** What `plane()` works out once from its options, and every drawing reads. */
 export interface Frame {
   readonly x: Range;
   readonly y: Range;
-  /** The plot area in scene px. */
   readonly bounds: Rect;
-  /** Pixels per graph unit along each axis. */
   readonly sx: number;
   readonly sy: number;
-  /** Graph units to scene px, y up. */
   point(x: number, y: number): Point;
   /** Where (0, 0) sits in scene px, in the plot area or not. */
   readonly origin: Point;
-  /** Where the axis lines cross in graph units: zero, or the low end of a range that leaves zero out. */
   readonly cross: readonly [number, number];
-  /** The tick values on each axis. */
   readonly xs: readonly number[];
   readonly ys: readonly number[];
   readonly labels: boolean;
@@ -36,7 +30,6 @@ export interface Frame {
   readonly theme: Base16;
   readonly fontSize: number;
   readonly font: FontValue | string | undefined;
-  /** Hides what a curve does outside the plot area. */
   readonly clip: Ref<"clipPath">;
 }
 
@@ -57,7 +50,6 @@ const MAX_TICKS = 500;
 
 const round = (n: number): number => Math.round(n * 10) / 10;
 
-/** Drops float noise (0.30000000000000004) and `-0`. */
 const compact = (n: number): string => String(Number(n.toPrecision(12)) + 0);
 
 const checkRange = (name: string, [min, max]: Range): void => {
@@ -84,7 +76,6 @@ const ticksIn = (name: string, [min, max]: Range, step: number): number[] => {
 
 const isStep = (ticks: FrameOptions["ticks"]): ticks is number => typeof ticks === "number";
 
-/** Checks the options and works out the frame every drawing shares. */
 export function frameOf(options: FrameOptions): Frame {
   const { xRange: x, yRange: y, frame, theme, fontSize = 12, font } = options;
   const { w: width, h: height } = frame;
@@ -202,7 +193,6 @@ export interface SampleOptions {
 }
 
 export interface Curve {
-  /** The runs of the curve in graph units. A gap, or a jump taller than the range, starts a new run. */
   readonly runs: readonly (readonly (readonly [number, number])[])[];
   readonly d: string;
   readonly points: readonly Point[];

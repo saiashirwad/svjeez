@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 const scene = (...children: SvgNode[]) =>
   render({ width: 400, height: 300, duration: 10, title: "Test" }, <>{children}</>);
 
-/** Every `rotate:` value in the stylesheet, in degrees. */
 const rotations = (svg: string) =>
   [...svg.matchAll(/rotate:(-?[\d.]+)deg/g)].map((m) => Number(m[1]));
 
@@ -104,7 +103,6 @@ describe("Camera steady", () => {
       </Camera>,
     );
 
-    // Out from 2s to 3s, back from 5s to 7s.
     for (const out of [svg, steady]) {
       expect(out).toMatch(/0%,20%,70%,100%\{scale:1\}30%,50%\{scale:(4|0\.25)\}/);
     }

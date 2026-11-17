@@ -32,7 +32,6 @@ export interface TexOptions {
   readonly fontSize?: number;
   /** Colors the formula with its `plain` slot. Default `defaultDark`. */
   readonly theme?: Base16;
-  /** Overrides the theme's plain color. `\color{…}` in the source still wins for the part it wraps. */
   readonly color?: Color;
   /** Display style: big operators stack their limits and fractions are full size. Default true. */
   readonly display?: boolean;
@@ -45,9 +44,7 @@ export interface WriteOptions {
   readonly stroke?: number;
 }
 
-/** One glyph or bar of a formula, placed in the scene. morph() pairs glyphs by `text`. */
 export interface Glyph extends MorphPiece {
-  /** The character, NFKC-normalized (`𝑎` is `a`), or `rect` or `line` for a bar. */
   readonly char: string;
   /** Scale relative to `fontSize`: about 0.707 for a superscript. */
   readonly size: number;
@@ -55,7 +52,6 @@ export interface Glyph extends MorphPiece {
   readonly d: string;
   /** Glyph units to scene pixels, absolute. `x` and `y` are its translation. */
   readonly matrix: Matrix;
-  /** Set by `\color`. */
   readonly fill?: string;
   /** In scene pixels. */
   readonly bounds: Rect;
@@ -63,7 +59,6 @@ export interface Glyph extends MorphPiece {
 
 /** Some glyphs of a formula: `box` is around them, and `span` from when the first starts to show to when the last has. */
 export interface TexPart extends Part {
-  /** In reading order. */
   readonly glyphs: readonly Glyph[];
 }
 
@@ -80,7 +75,6 @@ export interface TexDrawn extends Drawn<TexPart> {
 export interface Tex extends TexDrawn, Morphable<Glyph> {
   readonly width: number;
   readonly height: number;
-  /** The formula written on in reading order during `span`: each glyph's outline draws, then fills. It stays once written. Each part's span is when its glyphs write. */
   write(span: Span, options?: WriteOptions): TexDrawn;
 }
 
@@ -122,7 +116,6 @@ export function tex(source: string, options: TexOptions = {}): Tex {
     const matrix = roundMatrix(placed);
 
     return {
-      // A bar's size is in its key, because morph only translates and cannot stretch one.
       text: `${mark.key}@${size}`,
       char: mark.char,
       size,
@@ -157,7 +150,6 @@ export function tex(source: string, options: TexOptions = {}): Tex {
 
   for (const g of glyphs) starts.push(starts.at(-1)! + g.char.length);
 
-  /** The glyphs from `first` up to `last`, of the `nth` run spelling `needle`. */
   const spell = (needle: string, nth: number): [number, number] => {
     let seen = 0;
 
@@ -240,7 +232,6 @@ export function tex(source: string, options: TexOptions = {}): Tex {
           const paint = (g.fill as Color | undefined) ?? ink;
           const transform = `matrix(${g.matrix.join(" ")})`;
 
-          // The outline is in glyph units, so its width undoes the matrix's scale to stay near 1px on screen.
           return (
             <g>
               <path

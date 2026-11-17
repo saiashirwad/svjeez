@@ -5,17 +5,14 @@ interface LanesInput {
   readonly spans: readonly { readonly lane: string; readonly from: number; readonly to: number }[];
   readonly events: readonly { readonly lane: string; readonly at: number; readonly label?: Size }[];
   readonly links: readonly { readonly from: string; readonly to: string; readonly at: number }[];
-  /** Pixels per second. */
   readonly scale: number;
   readonly rowHeight?: number;
   readonly bar?: number;
 }
 
 export interface LanesLayout {
-  /** Each lane's whole row, label column included. */
   readonly rows: ReadonlyMap<string, Box>;
   readonly labels: ReadonlyMap<string, Point>;
-  /** The time area: x(0) to x(end), every row. */
   readonly track: Box;
   readonly end: number;
   x(t: number): number;
@@ -28,7 +25,6 @@ export interface LanesLayout {
 
 const NICE = [0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600];
 
-/** One row per lane under a label column, time along x from 0 to the last moment. */
 export function lanes(input: LanesInput): LanesLayout {
   const { scale, rowHeight = 56, bar = 18 } = input;
 

@@ -12,7 +12,6 @@ export type CameraStop = Shown & {
   readonly over?: Seconds;
 };
 
-/** The x, y and scale that fit `target` inside `frame`, centered. */
 export const fit = (frame: Rect, target: Rect | "all") => {
   if (target === "all") return { x: 0, y: 0, scale: 1 };
 
@@ -47,12 +46,11 @@ export type CameraProps =
     });
 
 /**
- * Pan and zoom `children` to each stop's target as the stop starts; a stop at 0 is the opening view, else it opens on
- * `"all"`. A move takes the stop's own `over`, or the camera's. Clip it yourself.
+ * Pan and zoom `children` to each stop's target as the stop starts; a stop at 0 is the opening view, else it opens
+ * on `"all"`. A move takes the stop's `over`, or the camera's. Clip it yourself.
  *
- * With `steady` it holds `children` at their size on screen while a `Camera` with the same `frame`, `stops` and `over`
- * zooms: it scales them by the inverse of the camera's zoom around `origin`, the point they sit on, so a marker or
- * label stays put on the map and stays the same size. Put it inside the other `Camera`'s children.
+ * `steady` holds `children` at on-screen size inside another `Camera` with the same `frame`, `stops` and `over`,
+ * so a marker stays the same size on the map. Put it in that camera's children.
  */
 export function Camera({
   frame,

@@ -9,13 +9,11 @@ import { paramFor, valuesOf, type Settable, type Value } from "./controls.ts";
 import { editFor } from "./editor.ts";
 import { apply, parse, type Edit, type Source } from "./source.ts";
 
-/** One value as `svjeez values` lists it. */
 export interface Listed {
   readonly key: string;
   readonly kind: Value["kind"];
   /** The value: a number, a color's hex, an ease as code, a choice's option. */
   readonly value: number | string;
-  /** The literal as written in the file. */
   readonly text: string;
   readonly label: string;
   readonly line: number;
@@ -29,7 +27,6 @@ export interface Listed {
     readonly declared: boolean;
   };
   readonly options?: readonly string[];
-  /** The longest a text param's line may be, when it says. */
   readonly maxLength?: number;
 }
 
@@ -39,7 +36,6 @@ const declaredNumber = (value: Value, schema: Schema) =>
   !value.literal.param.option &&
   schema[value.literal.param.key]?.kind === "number";
 
-/** Every value the editor shows a control for, with where it is and what it can be. */
 export const listValues = (source: Source, schema: Schema = {}): Listed[] =>
   valuesOf(source, schema).map((value) => {
     const line = source.lineAt(value.literal.range[0]);
@@ -98,7 +94,6 @@ const distance = (a: string, b: string) => {
   return row[b.length]!;
 };
 
-/** The `count` keys closest to `key`: those that hold it or share its last part first, then by edit distance. */
 export const nearestKeys = (key: string, keys: readonly string[], count = 5): string[] => {
   const last = (k: string) => k.split(/[.:#]/).filter(Boolean).at(-1) ?? k;
 
@@ -119,7 +114,6 @@ type Read<T> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly why: string };
 
-/** An ease from `out`, `ease.out`, `bezier(0.2, 0, 0, 1)`, `ease.bezier(…)` or four bare numbers. */
 const readEase = (raw: string): Read<Ease> => {
   const text = raw.trim().replace(/^ease\./, "");
   const named = NAMED.find((n) => n === text);
@@ -151,7 +145,6 @@ const readEase = (raw: string): Read<Ease> => {
   return { ok: true, value: ease.bezier(x1, y1, x2, y2) };
 };
 
-/** The edit that writes `v` into `value`, to the literal's own precision rather than a drag step's. */
 const written = <V extends Value>(value: V, v: Settable[V["kind"]]): Read<Edit> => {
   const edit = editFor(value, v, { step: false });
 
@@ -159,10 +152,9 @@ const written = <V extends Value>(value: V, v: Settable[V["kind"]]): Read<Edit> 
 };
 
 /**
- * The edit that writes `raw`, the text after `key=`, into `value`'s literal, read as the kind of value it is, or why
- * it isn't one. A number a scene declares in its params must fall in the declared range, since the scene's own checks
- * would reject it. A number is written with as many decimals as it needs and its literal had, so `over: 1.2` set to 2
- * reads `over: 2.0` and set to 0.75 reads `over: 0.75`.
+ * The edit that writes `raw`, the text after `key=`, into `value`'s literal as its kind, or why it isn't one. A
+ * number a scene declares in its params must fall in the declared range. A number keeps its literal's decimals:
+ * `over: 1.2` set to 2 reads `over: 2.0`.
  */
 export const readSetting = (value: Value, raw: string, schema: Schema = {}): Read<Edit> => {
   const fails = (why: string): Read<Edit> => ({ ok: false, why });
@@ -207,7 +199,6 @@ export const readSetting = (value: Value, raw: string, schema: Schema = {}): Rea
   }
 };
 
-/** The values `set` can write: every control's, and a number param's own `min`, `max` and `step`, to widen a range. */
 const settable = (source: Source, schema: Schema): Value[] => [
   ...valuesOf(source, schema),
   ...source.literals.flatMap((literal): Value[] =>
@@ -240,7 +231,7 @@ export interface Revision {
   readonly shifted: readonly (readonly [string, string])[];
 }
 
-/** Thrown for a key or value the caller has to fix, with the message to show. */
+/** Thrown for a key or value the caller has to fix. */
 export class SetError extends Error {
   override name = "SetError";
 }
@@ -305,7 +296,6 @@ export const setValues = (
   return { text: next, changes: changes.filter((c) => c.from !== c.to), shifted };
 };
 
-/** The changed lines of `before`, each as `-` and `+` under its `file:line`. Set edits never add or remove a line. */
 export const diffOf = (
   file: string,
   before: string,
@@ -324,7 +314,6 @@ export const diffOf = (
 const isSchema = (value: unknown): value is Schema =>
   value instanceof Object && Object.values(value).every((p) => p instanceof Object && "kind" in p);
 
-/** Loads the module, through tsx on Node when the file is TypeScript, as svjeez's own CLI does. */
 const importScene = async (path: string): Promise<{ params?: unknown }> => {
   const url = pathToFileURL(path).href;
 
@@ -348,10 +337,6 @@ const importScene = async (path: string): Promise<{ params?: unknown }> => {
   });
 };
 
-/**
- * The scene's params schema, read by running the module, which is the only way to know a param's declared range. A
- * file that declares no params is not run. When the module will not load, ranges are guessed, and `note` says why.
- */
 const schemaOf = async (
   path: string,
   source: Source,

@@ -34,13 +34,12 @@ export type SequenceMessage<A extends string> =
 
 export interface SequenceOptions extends DiagramOptions {
   /**
-   * Each message or note draws on in order, its label fading in; lifelines are there from the start. From a start
-   * `at` they follow `step` apart (default 0.8), or each comes at its own time.
+   * Each message or note draws on in order; lifelines are there from the start. From a start `at` they follow `step`
+   * apart (default 0.8), or each at its own time.
    */
   readonly play?: { readonly at: Beats; readonly step?: Seconds };
 }
 
-/** Its parts are the actor heads, there from the start. */
 export interface Sequence<A extends string> extends Diagram<A> {
   /** Message or note `i` in the order given: its slot on the `play` timeline (from 0 without `play`), and its arrow or, for a note, its center. */
   message(i: number): { readonly span: Span; readonly points: Point[] };
@@ -91,7 +90,6 @@ export function sequence<const A extends Record<string, Labelled>>(
   const step = play?.step ?? 0.8;
   const slotted = slots(play?.at ?? 0, rows.length, step, "sequence() play");
 
-  /** Until the next row starts. */
   const span = (i: number): Spanned => slotted[i]!;
 
   const FADE = 0.25;
@@ -99,7 +97,6 @@ export function sequence<const A extends Record<string, Labelled>>(
   const fade = (i: number) =>
     play && motion({ opacity: 0 }).to({ opacity: 1 }, span(i).first(FADE));
 
-  /** How long row `i`'s arrow draws. */
   const drawOver = (i: number) => Math.min(0.5, span(i).over * 0.7) || 0.3;
 
   const node = l.root([

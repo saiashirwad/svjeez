@@ -22,7 +22,6 @@ export interface ReprojectOptions {
   readonly frame: Rect;
   /** The TopoJSON object to read. Default the topology's first object. */
   readonly object?: string;
-  /** Keep only the features this returns true for. Mercator needs Antarctica gone. */
   readonly filter?: (feature: Feature) => boolean;
   /** Degrees. Outlines are simplified once, in longitude and latitude, to within this. Default 0.3. */
   readonly simplify?: number;
@@ -30,7 +29,6 @@ export interface ReprojectOptions {
   readonly step?: number;
 }
 
-/** One region under every projection, `d[i]` under `projections[i]`, each written with the same commands. */
 export interface Reprojection {
   readonly id: string;
   readonly properties: GeoJsonProperties;
@@ -38,11 +36,8 @@ export interface Reprojection {
 }
 
 export interface Reprojected {
-  /** Every region, one per feature, in the data's order. */
   readonly parts: readonly Reprojection[];
-  /** Every region as one path per projection. From TopoJSON the shared borders are gone, leaving the land. */
   readonly land: readonly PathData[];
-  /** The region whose id or `properties.name` is `key`. */
   part(key: string | number): Reprojection;
 }
 
@@ -50,7 +45,6 @@ type Ring = [number, number][];
 
 const fmt = (v: number) => (Math.round(v * 10) / 10).toString();
 
-/** The rings of any GeoJSON in longitude and latitude, cut at the antimeridian the way d3-geo cuts them. */
 const rings = (object: Feature | FeatureCollection | Polygon | MultiPolygon): Ring[] => {
   const out: Ring[] = [];
   let ring: Ring = [];
@@ -79,7 +73,6 @@ const rings = (object: Feature | FeatureCollection | Polygon | MultiPolygon): Ri
   return out;
 };
 
-/** Douglas–Peucker in degrees, then legs split to at most `step` degrees. */
 const tidy = (ring: Ring, simplify: number, step: number): Ring => {
   const keep = new Uint8Array(ring.length);
   const stack: [number, number][] = [[0, ring.length - 1]];
@@ -258,7 +251,6 @@ export interface TrueSizeOptions {
   readonly step?: number;
 }
 
-/** Turns `p` about `axis` by `theta` radians. */
 const turn = (p: Vec3, axis: Vec3, theta: number): Vec3 =>
   add(
     add(scale(p, Math.cos(theta)), scale(cross(axis, p), Math.sin(theta))),

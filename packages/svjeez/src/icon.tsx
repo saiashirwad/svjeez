@@ -7,11 +7,9 @@ import { eachOf, type Each } from "./each";
 import type { Stack } from "./motion";
 import type { SvgNode } from "./svg";
 
-/** The shape of an icon from `@svjeez/icons`, or any path data of your own. */
 export interface IconData {
   /** Side of the square viewBox the paths are drawn on. */
   readonly grid: number;
-  /** "stroke" icons are outlines to stroke; "fill" icons are shapes to fill. */
   readonly kind: "stroke" | "fill";
   /** One path per drawn piece, in source order, so each can animate on its own. */
   readonly paths: readonly string[];
@@ -25,7 +23,6 @@ const isPerPath = (
 
 export interface IconProps {
   readonly icon: IconData;
-  /** The top-left corner. */
   readonly x?: number;
   readonly y?: number;
   /** Side of the icon in px. Default the icon's own grid. */
@@ -49,7 +46,6 @@ export interface IconProps {
   readonly animation?: IconStack | ((d: string, each: Each) => IconStack);
 }
 
-/** An icon drawn as one path per piece, on a group scaled from its grid to `size`. */
 export function Icon({
   icon,
   x = 0,

@@ -6,7 +6,6 @@ export type Curve = "linear" | "monotone" | "step";
 
 export interface BandX {
   readonly kind: "band";
-  /** The categories, left to right. Each is one band. */
   readonly domain: readonly string[];
   /** Gap between bands as a fraction of a band, 0 to 1. Default 0.3. */
   readonly padding?: number;
@@ -15,7 +14,7 @@ export interface BandX {
 
 export interface LinearX {
   readonly kind: "linear";
-  /** `[min, max]`, widened to round numbers. Without it the scale fits `data`. */
+  /** `[min, max]`, widened to round numbers. Default: fits `data`. */
   readonly domain?: readonly [number, number];
   /** About how many ticks. Default 6. */
   readonly ticks?: number;
@@ -25,7 +24,7 @@ export interface LinearX {
 export type XScale = BandX | LinearX;
 
 export interface YScale {
-  /** `[min, max]`, widened to round numbers. Without it the scale fits `data`. */
+  /** `[min, max]`, widened to round numbers. Default: fits `data`. */
   readonly domain?: readonly [number, number];
   /** About how many ticks. Default 5. */
   readonly ticks?: number;
@@ -34,10 +33,8 @@ export interface YScale {
   readonly format?: (value: number) => string;
 }
 
-/** The x value a point carries: a category on a band scale, a number on a linear one. */
 export type XValue<K extends XScale["kind"]> = K extends "band" ? string : number;
 
-/** One point of a series, `[x, y]`. */
 export type Datum<K extends XScale["kind"]> = readonly [x: XValue<K>, y: number];
 
 export interface ChartOptions<X extends XScale = XScale> {
@@ -61,7 +58,10 @@ export interface SeriesOptions {
 }
 
 export interface ChartBarsOptions extends SeriesOptions {
-  /** Seconds between one bar's start and the next's. The last bar ends with the span, so each bar grows for `over - (bars - 1) * stagger`. Default 0.08, or less when the span is short. */
+  /**
+   * Seconds between one bar's start and the next's; each bar grows for `over - (bars - 1) * stagger`. Default 0.08,
+   * or less when the span is short.
+   */
   readonly stagger?: number;
   /** How each bar grows. Default `ease.out`. */
   readonly ease?: Ease;
@@ -89,7 +89,7 @@ export interface ChartAreaOptions extends ChartLineOptions {
   readonly line?: boolean;
 }
 
-/** A bar, by its category. `box` is where it rests and `span` its staggered window, from starting to grow to full height. */
+/** `box` is where the bar rests; `span` is its staggered window, from starting to grow to full height. */
 export interface ChartBar extends Part {
   readonly value: number;
 }
@@ -98,23 +98,20 @@ export interface ChartBar extends Part {
 export type ChartBars = Drawn<ChartBar>;
 
 /**
- * A point of a line or area, by its x value written as a string (`"Q3"`, `"2019"`). `box` is its dot, or has no
- * size without `dots`. `span` starts when the line reaches it and lasts while its dot pops in, no time without `dots`.
+ * A point by its x value as a string (`"Q3"`, `"2019"`). `span` starts when the line reaches it and lasts while its
+ * dot pops in; both are empty without `dots`.
  */
 export interface ChartPoint extends Part {
-  /** Where the point is, in scene px. */
   readonly point: Point;
   readonly value: number;
 }
 
 /** `span` runs from `at` to when the line has drawn, with its label. `bounds` covers the points. */
 export interface ChartLine extends Drawn<ChartPoint> {
-  /** The path data of the line. */
   readonly d: string;
 }
 
 export interface ChartArea extends ChartLine {
-  /** The path data of the filled shape. */
   readonly fill: string;
 }
 

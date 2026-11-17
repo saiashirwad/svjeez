@@ -18,7 +18,6 @@ export type RegionValues = Readonly<Record<string, number | readonly number[]>>;
 export interface ChoroplethOptions {
   readonly scale: ColorScale;
   readonly ease?: Ease;
-  /** Draws the map's borders over the fill in this color. */
   readonly lines?: Color;
   /** Px. Default 0.4. */
   readonly lineWidth?: number;
@@ -35,9 +34,7 @@ export interface ChoroplethRegion extends Region {
  * them; `span` covers every span passed, and `bounds` every region drawn.
  */
 export interface Choropleth extends Drawn<ChoroplethRegion> {
-  /** The keys in `values` that no region answers to, so a mismatch between the data and the map is visible. */
   readonly unmatched: readonly string[];
-  /** How many animated paths the map came to: regions whose colors follow the same course share one. */
   readonly groups: number;
 }
 
@@ -93,11 +90,8 @@ const spansOf = (when: Span | readonly Span[], frames: number): Span[] => {
 };
 
 /**
- * Colors every region in `values` from `scale`. A list of values plays through `when`: one span per value, the map
- * changing to that value's colors during it. The first span fades the map in from the scale's `empty` color, or cuts to
- * the first colors at its start if it has no length, so `{ at: 0, over: 0 }` shows them from the start. A single value needs one span.
- * Regions whose colors follow the same course share one path, so a map of 180 countries with 9 classes stays small.
- * Regions with no value take the scale's `empty` color.
+ * Colors every region in `values` from `scale`; a list plays through `when`, one span per value. The first span fades in
+ * from `empty`, or cuts if it has no length (`{ at: 0, over: 0 }` shows the colors from the start). Regions with no value take `empty`.
  */
 export function choropleth(
   when: Span | readonly Span[],
@@ -118,7 +112,6 @@ export function choropleth(
     );
   const spans = spansOf(when, frames);
 
-  /** The region's color in each frame; a single number holds in all of them. */
   const courses = series.map(({ region, list }) => ({
     region,
     colors: Array.from({ length: frames }, (_, i) =>
@@ -138,7 +131,6 @@ export function choropleth(
   const named = new Set(found.map(([region]) => region));
   const rest = map.parts.filter((region) => !named.has(region)).map((region) => region.d);
 
-  // A first span with no length is a cut: from its `at` the map has its first colors, and from 0 it never shows `empty`.
   const cut = spans[0]!.over === 0;
   const fromStart = cut && spans[0]!.at === 0;
 
@@ -156,7 +148,6 @@ export function choropleth(
           motion({ fill: fromStart ? colors[0]! : scale.empty }),
         );
 
-  /** From the first span that changes the region's color to the end of the last; the instant it cuts to them otherwise. */
   const fills = (colors: readonly Hex[]): Spanned => {
     let shown: Hex = fromStart ? colors[0]! : scale.empty;
 

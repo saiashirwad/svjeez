@@ -14,7 +14,6 @@ import tsx from "shiki/langs/tsx.mjs";
 import typescript from "shiki/langs/typescript.mjs";
 import yaml from "shiki/langs/yaml.mjs";
 
-/** Names and aliases that `highlight()` accepts without `grammars`. */
 export type DefaultLang =
   | "ts"
   | "typescript"

@@ -25,8 +25,8 @@ export interface TypewriterResult {
 }
 
 /**
- * Type `code` out line by line, one character per step. A line costs its characters plus one for the newline.
- * `spans` holds when each line types, so other things can happen as their line lands.
+ * Type `code` out line by line, one character per step; a line costs its characters plus one for the newline.
+ * `spans` holds when each line types.
  */
 export function typewriter(
   code: Code,

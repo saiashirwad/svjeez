@@ -57,7 +57,6 @@ export interface LanesOptions extends DiagramOptions {
 
 /** Its parts are the lanes. With `play`, a lane's span runs from the first of its bars, events and links to the end of the last. */
 export interface Lanes<L extends string> extends Diagram<L> {
-  /** The x of time `t` on the lane axis. */
   x(t: Seconds): number;
 }
 
@@ -75,7 +74,6 @@ export function lanes<const L extends Record<string, Labelled>>(
   const { scale, play } = options;
   const l = look(options);
   const { theme, fontSize, font, small } = l;
-  /** Scene time of lane time `t`. */
   const when = (t: Seconds) => (play?.at ?? 0) + t;
 
   const rows = Object.entries(spec.lanes).map(([id, s]) => ({
@@ -251,7 +249,6 @@ export function lanes<const L extends Record<string, Labelled>>(
 
   const span = spanOfReveals(play ? [{ at: when(0), over: out.end }] : []);
 
-  /** What plays on `lane`, in scene time: its bars, its events popping in, and the links that start or end on it. */
   const busy = (lane: string): Spanned => {
     const times: Span[] = [
       ...spans.filter((s) => s.lane === lane).map((s) => ({ at: when(s.at), over: s.over })),

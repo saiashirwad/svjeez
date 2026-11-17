@@ -3,7 +3,6 @@ import { BEND } from "./layout/layered.ts";
 
 const CORNER = 10;
 
-/** Cubic control distance that makes a quarter circle. */
 const ROUND = 0.55;
 
 type Piece = { readonly from: Point; readonly c1: Point; readonly c2: Point; readonly to: Point };
@@ -17,10 +16,6 @@ const unit = (a: Point, b: Point): Point => {
 const along = (p: Point, d: Point, by: number): Point => ({ x: p.x + d.x * by, y: p.y + d.y * by });
 const same = (a: Point, b: Point) => Math.abs(a.x - b.x) < 1e-9 && Math.abs(a.y - b.y) < 1e-9;
 
-/**
- * Smooths an orthogonal polyline. A jog (down, across, down) becomes one S-curve whose ends leave and arrive
- * straight; any other corner is rounded. Straight runs keep their direction, so the ends stay square to the borders.
- */
 export interface Curve {
   readonly d: string;
   readonly samples: Point[];
@@ -33,7 +28,6 @@ export const curve = (points: readonly Point[]): Curve => {
     Math.hypot(points[i + 1]!.x - points[i]!.x, points[i + 1]!.y - points[i]!.y);
 
   const dir = (i: number) => unit(points[i]!, points[i + 1]!);
-  /** How much of segment `i` a curve at one end may take: half if another curve takes the other end. */
   const budget = (i: number) => (i === 0 || i === n - 2 ? length(i) - 2 : length(i) / 2);
   const pieces: Piece[] = [];
 

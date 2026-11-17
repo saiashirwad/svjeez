@@ -1,42 +1,20 @@
-// Functions `checkScene()` runs inside the page. Each is serialized on its own, so it can use only its argument, the page's
-// globals and the helpers declared inside it. `setup` leaves its state on `window` for the others.
-
-/** What `setup` learns once about each element it measures. */
 export interface PageElement {
   readonly tag: string;
   readonly source?: string;
-  /** The text an element shows, cut short, for a `<text>`. */
   readonly text?: string;
-  /** Paint order: a lower number is painted first, underneath. */
   readonly order: number;
-  /** Under a `mask`, which can hide any part of it, so its opacity says little about what shows. */
   readonly masked?: boolean;
-  /** Painted only with a gradient: a shadow or a glow, whose edge is often transparent. */
   readonly soft?: boolean;
-  /**
-   * Scene seconds of one cycle, when it or an ancestor runs a stepped CSS animation (a `hold` wiggle, a `steps` ease)
-   * on repeat: its value jumps at every step by design, so the jump where the loop restarts is one more of them when
-   * the cycle divides the loop.
-   */
   readonly cycle?: number;
 }
 
 export interface PageSetup {
   readonly width: number;
   readonly height: number;
-  /** Leaves: every shape, text, image and use outside `<defs>`, as `measure` returns them. */
   readonly leaves: readonly PageElement[];
-  /** Every element carrying a CSS animation or a SMIL target, as `sweep` returns them. */
   readonly animated: readonly PageElement[];
 }
 
-/**
- * One leaf at one time, in viewBox units: its box after any `clip-path` around it (x0, y0, x1, y1), its opacity times
- * every ancestor's, whether it paints at all (1 or 0), whether it holds still (1) or moves or fades (0) over the short
- * step before, and the middle and size of its own box (cx, cy, size). The page box of a turned element is the box
- * around its turned box, so it swells and shrinks as a gear turns; the middle and size do not, which is what lets the
- * loop seam ignore a wheel that is back at an equal angle.
- */
 export type PageBox = readonly [
   number,
   number,
@@ -50,26 +28,14 @@ export type PageBox = readonly [
   number,
 ];
 
-/** One animated element over a sweep of the loop. */
 export interface PageSeries {
-  /** Whether any animated value differs from its value at the first step, or between its keyframes. */
   readonly changes: boolean;
-  /** Its own opacity at each step. */
   readonly opacity: readonly number[];
-  /** Its stroke drawn, from 0 to 1, at each step, when a dash pattern draws it. */
   readonly drawn: readonly number[];
-  /** Opacity times every ancestor's at the first step. */
   readonly shown: number;
-  /** Whether it paints a fill at the first step, and the fill is not itself animated. */
   readonly filled: boolean;
-  /**
-   * When its opacity, shown at the first step, first cuts to hidden: how long it stays hidden before it starts back up,
-   * read at a hundredth of a second. Undefined when that is longer than `within` or never happens.
-   */
   readonly hold?: number;
-  /** Whether its animations move nothing but `visibility`, and it stays visible: a `show` that spans the loop. */
   readonly shownThroughout: boolean;
-  /** Whether it is drawn, outside `<defs>` and the like, yet has no box at any step: an animation on nothing. */
   readonly empty: boolean;
 }
 
@@ -81,24 +47,20 @@ interface State {
     readonly el: Element;
     readonly css: readonly string[];
     readonly smil: readonly string[];
-    /** Whether its CSS keyframes hold more than one value for a property. A step shorter than a sweep's can miss it. */
     readonly keyed: boolean;
   }[];
 }
 
-/** Where `setup` leaves its state, for `measure` and `sweep`. */
 interface Scope {
   readonly document: Document;
   __svjeezCheck?: State;
 }
 
-/** Finds what to measure, and keeps it on `window` with a way to seek. */
 export const setup = (): PageSetup => {
   const svg = document.querySelector("svg");
 
   if (!svg) throw new Error("checkScene() found no <svg> in the page.");
 
-  // `seek` from svjeez/page, again: a page function can import nothing, and the page holds no copy of its own.
   const seek = (time: number): void => {
     const rate = parseFloat(svg.getAttribute("data-playback-rate") ?? "") || 1;
 
@@ -177,7 +139,6 @@ export const setup = (): PageSetup => {
         const length = Number(timing?.duration) || 0;
         const keys = effect instanceof KeyframeEffect ? effect.getKeyframes() : [];
 
-        // Every keyframe but the last eases to the next with a step: a CSS animation-timing-function lands on each.
         const stepped =
           keys.length > 1 &&
           keys.slice(0, -1).every((key) => /^steps?\(|^step-/.test(String(key.easing)));
@@ -186,7 +147,6 @@ export const setup = (): PageSetup => {
           stepped &&
           timing?.iterations === Infinity &&
           length > 0 &&
-          // Started on a whole cycle, so each cycle is the same as the last from the first.
           Math.abs((((timing.delay ?? 0) / length) % 1) * length) < 1
         )
           cycle = Math.min(cycle ?? Infinity, (length / 1000) * rate);
@@ -270,7 +230,6 @@ export const setup = (): PageSetup => {
     }
   }
 
-  // Whether a SMIL animation takes more than one value: its values, from and to, or to against the attribute it sets.
   const moves = (animation: Element, target: Element, name: string): boolean => {
     const values = animation.getAttribute("values");
 
@@ -320,7 +279,6 @@ export const setup = (): PageSetup => {
   };
 };
 
-/** Every leaf's box at `time`, and whether it holds still since `before`. */
 export const measure = ({ time, before }: { time: number; before: number }): PageBox[] => {
   const scope: Scope = window;
   const state = scope.__svjeezCheck;
@@ -348,7 +306,6 @@ export const measure = ({ time, before }: { time: number; before: number }): Pag
       return found;
     };
 
-    // The region a `clip-path: url(#id)` keeps, in page pixels. Unknown shapes keep everything.
     const clipOf = (el: Element): DOMRect | undefined => {
       const id = /url\(["']?#([^"')]+)/.exec(style(el).clipPath)?.[1];
       const clip = id ? document.getElementById(id) : null;
@@ -428,7 +385,6 @@ export const measure = ({ time, before }: { time: number; before: number }): Pag
         s.visibility !== "hidden" &&
         s.display !== "none" &&
         r.width + r.height > 0 &&
-        // A clip that has not opened yet leaves a sliver.
         x1 - x0 > 0.5 &&
         y1 - y0 > 0.5 &&
         (el.localName === "image" ||
@@ -491,7 +447,6 @@ export const measure = ({ time, before }: { time: number; before: number }): Pag
   });
 };
 
-/** Each animated element across `steps` evenly spaced times of one loop. */
 export const sweep = ({
   duration,
   steps,
@@ -507,8 +462,6 @@ export const sweep = ({
   if (!state) throw new Error("checkScene() measured a page it had not set up.");
   const { seek, svg, animated } = state;
 
-  // A SMIL value: the element's place for a motion or a transform, else the attribute's computed value. A filter
-  // primitive's attribute has none, and `setup` has already read whether its values differ.
   const smilValue = (el: Element, name: string, style: CSSStyleDeclaration): string => {
     if (name !== "transform" || !(el instanceof SVGGraphicsElement))
       return style.getPropertyValue(name);
@@ -567,7 +520,6 @@ export const sweep = ({
 
       for (let at: Element | null = el; at && at !== svg; at = at.parentElement)
         product *= parseFloat(getComputedStyle(at).opacity) || 0;
-      // Nothing of it on the canvas is nothing shown.
       const box = el.getBoundingClientRect();
       const frame = svg.getBoundingClientRect();
 
@@ -588,7 +540,6 @@ export const sweep = ({
     });
   }
 
-  // A cut found between two steps, read finely: how long the element stays hidden after it.
   const holds = animated.map(({ el }, index) => {
     const values = opacity[index] ?? [];
 
@@ -609,8 +560,6 @@ export const sweep = ({
       return parseFloat(getComputedStyle(el).opacity) || 0;
     };
 
-    // The cut lies between the step before and the step that found it hidden. A fine scan can step over a hidden
-    // instant, so the step that found it stands in when none does.
     const found = (cut * duration) / steps;
     let hidden = found;
 

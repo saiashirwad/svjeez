@@ -6,7 +6,6 @@ import { decimalsOf, type Literal, type LiteralOf, type Role, type Source } from
 interface Base<K extends Literal["kind"]> {
   readonly key: string;
   readonly literal: LiteralOf<K>;
-  /** What a control calls the value: the param's label, else the attribute, property or const it sits in. */
   readonly label: string;
 }
 
@@ -19,7 +18,6 @@ export type Value =
 
 export type ValueOf<K extends Value["kind"]> = Extract<Value, { kind: K }>;
 
-/** What a value can be set to, by kind. */
 export interface Settable {
   readonly number: number;
   readonly color: Hex;
@@ -47,11 +45,6 @@ type Meaning = Partial<Omit<NumberParam, "kind" | "value">>;
 
 const span = (v: number, least: number) => Math.max(Math.abs(v) * 2, least);
 
-/**
- * What a number means, by the name it is given or the call it is passed to. svjeez's own API is the most common place a
- * literal lands, so its names say the most: `at`, `over`, both numbers of `span(at, over)`, what the span helpers
- * take and the time of a `.set(values, at)` cut are seconds, `opacity` runs 0 to 1.
- */
 const MEANINGS: readonly {
   readonly names: readonly string[];
   readonly range: (v: number) => Meaning;
@@ -101,8 +94,8 @@ const MEANINGS: readonly {
 const MEANING = new Map(MEANINGS.flatMap(({ names, range }) => names.map((n) => [n, range])));
 
 /**
- * The param a control for this number edits: the one `schema` declares for it, else a range read from where it sits,
- * else a span around its value, with a step as fine as the literal is written.
+ * The param a control for this number edits: the one `schema` declares, else a range read from where it sits, else a
+ * span around its value.
  */
 export const paramFor = (literal: LiteralOf<"number">, schema: Schema = {}): NumberParam => {
   const declared = literal.param && !literal.param.option ? schema[literal.param.key] : undefined;
@@ -113,7 +106,6 @@ export const paramFor = (literal: LiteralOf<"number">, schema: Schema = {}): Num
   const written = places ? 10 ** -places : 1;
   const role = literal.role;
 
-  // `chain(first, ...overs)` takes any number of lengths, so every place after the first means seconds.
   const range =
     (
       MEANING.get(nameOf(role)) ??
@@ -127,10 +119,7 @@ export const paramFor = (literal: LiteralOf<"number">, schema: Schema = {}): Num
   return { kind: "number", label: labelOf(literal.role), ...range, value: v, min, max, step };
 };
 
-/**
- * Every literal a control can edit, in source order. A param's own options (`min`, `max`, `step`) are left out, and a
- * string is a value only when it declares a choice or text param.
- */
+/** Every literal a control can edit, in source order. A param's own options (`min`, `max`, `step`) are left out. */
 export const valuesOf = (source: Source, schema: Schema = {}): Value[] =>
   source.literals.flatMap((literal): Value[] => {
     if (literal.param?.option !== undefined) return [];
@@ -173,7 +162,6 @@ export const nudge = (param: NumberParam, v: number, by: 1 | -1, big = false): n
 
 export type Bezier = readonly [x1: number, y1: number, x2: number, y2: number];
 
-/** An ease's control points. Every named ease but `linear` is a bezier, and `linear` is the straight one. */
 export const bezierOf = (e: Ease): Bezier => (e.kind === "bezier" ? e.points : [0, 0, 1, 1]);
 
 /** The ease's curve as `samples + 1` points from (0, 0) to (1, 1), x the time and y the progress, for drawing it. */
@@ -196,7 +184,6 @@ export const bend = (e: Ease, which: 0 | 1, x: number, y: number): Ease => {
   return ease.bezier(p[0]!, p[1]!, p[2]!, p[3]!);
 };
 
-/** `#rrggbb`, what a color input reads and writes, for any hex. */
 export const rgbOf = (hex: Hex): `#${string}` => {
   const digits = hex.slice(1);
   const full = digits.length === 3 ? [...digits].map((d) => d + d).join("") : digits.slice(0, 6);
@@ -204,7 +191,6 @@ export const rgbOf = (hex: Hex): `#${string}` => {
   return `#${full.toLowerCase()}`;
 };
 
-/** `rgb` written as the hex `was` is: in its case, keeping its alpha. */
 export const withRgb = (was: Hex, rgb: string): Hex => {
   const alpha = was.length === 9 ? was.slice(7) : "";
   const upper = was.slice(1) === was.slice(1).toUpperCase() && /[A-F]/.test(was);

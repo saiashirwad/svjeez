@@ -32,10 +32,8 @@ export type { Vec2 };
 
 type Row = readonly [number, number] | readonly [number, number, number];
 
-/** A map of the plane by rows, as written on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy). A third number in a row translates. */
 export type PlaneMatrix = readonly [Row, Row];
 
-/** A map of the plane that need not be linear, such as z ↦ z² as `(x, y) => [x * x - y * y, 2 * x * y]`. */
 export type PlaneFunction = (x: number, y: number) => Vec2;
 
 export interface StepOptions {
@@ -44,13 +42,11 @@ export interface StepOptions {
 }
 
 export interface PlaneOptions {
-  /** The plot area in scene px. The pixels per unit follow from it and the ranges, and may differ per axis. */
   readonly frame: Rect;
   /** Graph range of the x axis, `[min, max]`. */
   readonly xRange: Vec2;
   /** Graph range of the y axis, `[min, max]`. */
   readonly yRange: Vec2;
-  /** Tick step in graph units: a number for both axes, or one per axis. An axis without one has no ticks and no grid lines. */
   readonly ticks?: number | { readonly x?: number; readonly y?: number };
   /** Numbers at the ticks. Default true. */
   readonly labels?: boolean;
@@ -67,7 +63,6 @@ export interface VectorOptions {
   readonly color?: Color;
   /** Stroke width in pixels; the head scales with it. Default 3. */
   readonly width?: number;
-  /** TeX source, or a `tex()` formula, kept just past the tip. */
   readonly label?: string | Tex;
   /** The tail, in plane units. Default the origin. */
   readonly from?: Vec2;
@@ -98,65 +93,37 @@ export interface PlaneLabelOptions {
 }
 
 /**
- * What a plane draws: a plot, a vector, a polygon, a line or a label. `bounds` is where it sits after every step of the
- * plane it was drawn from, and `span` runs from when it starts to draw on to when the last step moving it ends, or is
- * the instant 0 for one that is there from the start and never moves. `basis()` has the parts `"i"` and `"j"`; the
- * others draw one thing and have no parts.
+ * What a plane draws. `bounds` is where it sits after every step; `span` runs from when it starts to draw to when the
+ * last step moving it ends, or is the instant 0 if static. Only `basis()` has parts, `"i"` and `"j"`.
  */
 export type PlaneDrawn<P extends Part = Part> = Drawn<P>;
 
-/** The curve. On a plane with steps it moves with them. */
 export interface Plot extends PlaneDrawn<never> {
-  /** The path data before any step. A gap in the curve starts a new `M`. */
   readonly d: string;
-  /** Every sampled point that was drawn before any step, in scene px. */
   readonly points: readonly Point[];
 }
 
 export type PlotOptions = SampleOptions;
 
-/**
- * Coordinate axes over a graph range that can also move. `point()` maps graph units to scene px, `plot()`
- * draws a function, and the calculus methods draw on the curve. Steps chain, each returning a new plane, and
- * what is drawn from the final plane (grid, axes, vectors, shapes, labels and plots) follows every step. When
- * every step is a matrix, the scene carries one CSS transform driven by registered properties; once a step is
- * a function, outlines are sampled and morph through `d`.
- */
 export interface Plane extends Calculus {
-  /** The axis lines, ticks and numbers, and the grid when `grid` is set. It stays put through every step. */
   readonly node: SvgNode;
   readonly bounds: Rect;
-  /** Scene pixels of a point before any step. */
   point(x: number, y: number): Point;
-  /** Scene pixels of a point after every step. */
   map(x: number, y: number): Point;
-  /** Moves the plane by `matrix` during the span, on top of the steps before it. */
   apply(span: Span, matrix: PlaneMatrix, options?: StepOptions): Plane;
-  /** Moves every point p to `f(p)` during the span, each along a straight line. */
   applyFunction(span: Span, f: PlaneFunction, options?: StepOptions): Plane;
-  /** Moves every point back to where it started. */
   reset(span: Span, options?: StepOptions): Plane;
-  /** The rules the plane's elements read. Pass it to `render`'s `css`. */
   readonly css: ReturnType<typeof css>;
-  /** The grid lines at the ticks as they were, staying put. */
   readonly background: SvgNode;
-  /** The grid lines at the ticks that move, without the axes. */
   readonly grid: SvgNode;
-  /** The two axis lines, which move. */
   readonly axes: SvgNode;
-  /** `f` across the range. Drawn from a plane with steps, the curve follows them. */
   plot(f: (x: number) => number, options?: PlotOptions): Plot;
-  /** The same curve, drawing on during `span`. Only on a plane without steps. */
   plot(span: Span, f: (x: number) => number, options?: PlotOptions): Plot;
-  /** An arrow to `to`, its head upright however the plane shears. */
   vector(to: Vec2, options?: VectorOptions): PlaneDrawn<never>;
-  /** The same arrow, its shaft growing from the tail during `span`, then the head and the label appear. */
   vector(span: Span, to: Vec2, options?: VectorOptions): PlaneDrawn<never>;
   /** î and ĵ, labelled, as the parts `"i"` and `"j"`. Given a span, they grow in it, with ĵ entering 0.2s after î. */
   basis(span?: Span): PlaneDrawn<Part<"i" | "j">>;
-  /** A filled polygon whose corners move with the plane, so its area follows the determinant. */
   polygon(points: readonly Vec2[], options?: PlanePolygonOptions): PlaneDrawn<never>;
-  /** The line through the origin along `direction`, across the grid. An eigenvector's line stays on itself. */
   line(direction: Vec2, options?: PlaneLineOptions): PlaneDrawn<never>;
   /** Content centered on a point of the plane, riding it. A node is placed with its origin there, and has an empty box. */
   label(at: Vec2, content: string | Tex | SvgNode, options?: PlaneLabelOptions): PlaneDrawn<never>;
@@ -224,7 +191,6 @@ const then = (before: Place, next: Place): Place => {
 
 const IDENTITY: Place = { kind: "matrix", m: identity };
 
-/** The grid lines at the ticks as two-point polylines in graph units, without the ones under the axes when `bare`. */
 const rules = (frame: Frame, bare: boolean): Vec2[][] => {
   const [[x0, x1], [y0, y1]] = [frame.x, frame.y];
   const [cx, cy] = frame.cross;
@@ -256,9 +222,7 @@ const axisLines = (frame: Frame): Vec2[][] => [
   ],
 ];
 
-/** How one plane draws: one CSS transform for matrices, or sampled outlines once a function moves it. */
 interface Drawing {
-  /** Polylines in plane units, as a path that moves with the plane. `grow` scales a single line from its first point. */
   path(
     polylines: readonly (readonly Vec2[])[],
     closed: boolean,
@@ -269,7 +233,6 @@ interface Drawing {
   ride(point: Vec2, direction: Vec2, push: number, content: SvgNode): SvgNode;
 }
 
-/** Path data in plane units, with H and V for the axis-aligned edges a grid is made of. */
 const plain = (polylines: readonly (readonly Vec2[])[], closed: boolean): PathData =>
   // SAFETY: every polyline starts with M, so the text is path data.
   polylines
@@ -301,7 +264,6 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
 
   const flat = `translate(${origin.x} ${origin.y})`;
 
-  /** In pixels from the origin, where heads and labels read the unit, or in plane units, where paths don't. */
   const scope = (pixels: boolean, child: SvgNode) => (
     <g transform={pixels ? flat : `${flat} scale(${sx} ${-sy})`}>
       <g animation={timeline} style={pixels ? { [UX]: sx, [UY]: sy } : undefined}>
@@ -310,7 +272,6 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
     </g>
   );
 
-  /** A point and a direction for the rules to read. Zeros are left out, since every property starts at 0. */
   const at = (x: number, y: number, dx = 0, dy = 0, k = 0) => ({
     [X]: x || undefined,
     [Y]: y || undefined,
@@ -405,7 +366,6 @@ const appear = (at: number, over: number, child: SvgNode) => (
 const isSource = (content: string | Tex | SvgNode): content is string =>
   typeof content === "string";
 
-/** Content centered on the origin, how far it reaches from there, and its size, which is 0 for a node. */
 const centered = (
   content: string | Tex | SvgNode,
   color: Color,
@@ -432,7 +392,6 @@ const around = (points: readonly Point[]): Rect => {
   return rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
 };
 
-/** The part of `box` inside `frame`, or an empty box at its nearest corner when they miss. */
 const within = (box: Rect, frame: Rect): Rect => {
   const [left, top] = [Math.max(box.x, frame.x), Math.max(box.y, frame.y)];
   const right = Math.max(left, Math.min(box.x + box.w, frame.x + frame.w));
@@ -441,7 +400,6 @@ const within = (box: Rect, frame: Rect): Rect => {
   return rect(left, top, right - left, bottom - top);
 };
 
-/** The span from the earliest start to the latest end, or the instant 0 when there is none. */
 const covering = (spans: readonly (Span | undefined)[]): Spanned => {
   const all = spans.filter((s): s is Span => s !== undefined);
 
@@ -451,7 +409,6 @@ const covering = (spans: readonly (Span | undefined)[]): Spanned => {
   return spanOf(first, Math.max(...all.map((s) => s.at + s.over)) - first);
 };
 
-/** A plane's drawing as a `Drawn`, with the parts it names. */
 const drawnOf = <P extends Part>(
   what: string,
   node: SvgNode,
@@ -508,10 +465,8 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 
   const current = steps.at(-1)?.place ?? IDENTITY;
 
-  /** Where a point of the plane sits after every step, in scene px. */
   const settled = (q: Vec2): Point => frame.point(...functionOf(current)(q[0], q[1]));
 
-  /** Polylines in plane units where they sit after every step, each edge sampled so a function step can bend it. */
   const traced = (polylines: readonly (readonly Vec2[])[], samples = 16): Rect =>
     around(
       polylines.flatMap((line) =>
@@ -530,7 +485,6 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
       ),
     );
 
-  /** When the steps move what is drawn from this plane. */
   const moving: Span | undefined =
     steps.length === 0
       ? undefined
@@ -577,7 +531,6 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     const push = (4 / 3) * width + 6 + (words?.[1] ?? 0);
     const label = words && draw().ride(to, direction, push, words[0]);
 
-    // The label sits `push` past the tip, turned LEAN off the shaft as it leaves the tip, as the rules place it.
     const [tail, end] = [
       settled([to[0] - direction[0] * 0.01, to[1] - direction[1] * 0.01]),
       settled(to),
@@ -679,7 +632,6 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     point: frame.point,
   });
 
-  // The calculus methods draw at rest, so on a plane with steps they say where to call them.
   const refuse = (name: string) => (): never => {
     throw new Error(
       `plane.${name}() draws on a plane that does not move. Call it on the plane before its first step.`,
@@ -828,9 +780,8 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 };
 
 /**
- * Axes over `xRange` and `yRange`, in a plot area of `frame`, with y up. Draw its `node`, `plot()`
- * curves, or chain `apply`, `applyFunction` and `reset` to move it and draw from the plane those calls return:
- * its grid, axes, vectors, shapes, labels and plots.
+ * Axes over `xRange` and `yRange` in a plot area `frame`, y up. Draw its `node` and `plot()`s, or chain `apply`,
+ * `applyFunction` and `reset` and draw from the plane those return.
  */
 export function plane(options: PlaneOptions): Plane {
   return make(frameOf({ ...options, theme: options.theme ?? defaultDark }), []);

@@ -16,13 +16,11 @@ export type { Span };
 
 declare const easeBrand: unique symbol;
 
-/** Structured, so CSS and SMIL each compile it. An ease always shapes the transition it is passed to. */
 export type Ease = { readonly [easeBrand]: true } & EaseBody;
 
 type EaseBody =
   | { readonly kind: "linear" }
   | { readonly kind: "bezier"; readonly points: readonly [number, number, number, number] }
-  /** `count` equal jumps, each at the end of its slice. */
   | { readonly kind: "steps"; readonly count: number };
 
 // SAFETY: easeBrand is declare-only, so no runtime value carries it. Every caller passes a finished EaseBody, and this only adds the compile-time brand.
@@ -62,9 +60,7 @@ export interface Step {
   readonly over: Seconds;
   readonly ease: Ease;
   readonly values: TargetValues;
-  /** A cut back to these channels' initial values, which each lane resolves because `initial` may come from an attribute. `values` is empty. */
   readonly restore?: readonly Target[];
-  /** `repeat({ until })` stops this transition here, partway. */
   readonly until?: Seconds;
 }
 
@@ -73,9 +69,7 @@ export interface MotionData {
   readonly steps: readonly Step[];
   readonly period?: Seconds;
   readonly label?: string;
-  /** `rewind`: glide every channel back to its initial value, ending at the end of the clock. */
   readonly rewind?: { readonly over: Seconds; readonly ease: Ease };
-  /** `repeat` unrolled passes into steps, so a lane that grows past its key cap can say why. */
   readonly repeated?: boolean;
 }
 
@@ -121,7 +115,6 @@ export interface Motion<K extends Target = Target> {
   repeat(times: number | { readonly until: Seconds }): Motion<K>;
   /** At the end of the clock, glide every channel back to its initial value over `over` seconds. Nothing can follow. */
   rewind(over: Seconds, curve?: Ease): Motion<K>;
-  /** Readable keyframe and class names. Never needs to be unique. */
   label(name: string): Motion<K>;
 }
 
@@ -170,13 +163,10 @@ const checkValues = (values: TargetValues, what = "A transition"): TargetValues 
 const end = (step: Step): Seconds =>
   step.until === undefined ? step.start + step.over : Math.min(step.start + step.over, step.until);
 
-/** Most steps `repeat` unrolls, far above any lane's key cap, so a runaway count fails before it fills memory. */
 const MAX_UNROLLED = 20000;
 
-/** Absolute slack, in seconds, when comparing times. */
 export const EPSILON = 1e-9;
 
-/** Relative to a timeline, the gap that separates two keys meant to be one instant apart. */
 export const NUDGE = 1e-5;
 
 // SAFETY: checkValues rejects every key that is not a Target before a step can store its values, so the keys of a step are Target names.
@@ -306,7 +296,6 @@ class Track implements Motion {
     return this.with({ label: name });
   }
 
-  /** Nothing can follow `rewind()`, which is pinned to the end of the clock. */
   private open(what: string): void {
     if (this.data.rewind)
       throw new Error(`${what} can't follow rewind(), which runs to the end of the clock.`);

@@ -42,7 +42,6 @@ export type MermaidState = StateMachine<string> & {
 /** A svjeez diagram plus the `kind` it was drawn as and the `doc` it was drawn from. Narrow on `kind`. */
 export type MermaidDiagram = MermaidFlowchart | MermaidSequence | MermaidState;
 
-/** Which svjeez node role draws each Mermaid form. */
 const FORM_ROLES: Record<FlowForm, NodeRole> = {
   rect: "task",
   round: "task",

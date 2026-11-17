@@ -35,7 +35,6 @@ test("a build emits the scene and its posters, and the bundle holds only their U
   expect(bundle).not.toContain("@keyframes");
 }, 120_000);
 
-// The scene sits outside the app's root, as a scene shared between projects would, so Vite watches it only through the plugin.
 test("the dev server serves a scene and reloads it when the scene or a file it imports changes", async () => {
   const app = join(scratch, "app");
   mkdirSync(app);
@@ -87,7 +86,6 @@ export default () => render({ width: ${size}, height: 100, duration: 1, title: l
 
   try {
     const first = await load();
-    // The watcher takes a moment to pick up the files the plugin asked it to watch.
     await Bun.sleep(500);
     expect(first.module).toContain(`"title": "first"`);
     expect(first.svg).toContain(">first</text>");
@@ -102,7 +100,6 @@ export default () => render({ width: ${size}, height: 100, duration: 1, title: l
   }
 }, 60_000);
 
-// Cloudflare's server environment sets ssr.resolve.noExternal to true, and scenes must still load a CommonJS package.
 test("a scene imports a CommonJS package when the server environment bundles everything", async () => {
   const dir = join(scratch, "bundled");
   mkdirSync(join(dir, "node_modules/cjs-label"), { recursive: true });

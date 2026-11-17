@@ -9,7 +9,6 @@ import {
   type PageSeries,
 } from "./check-page";
 
-/** The lints `checkScene()` runs. */
 export type CheckRule =
   | "off-canvas"
   | "text-overflow"
@@ -20,37 +19,26 @@ export type CheckRule =
 
 export interface Finding {
   readonly rule: CheckRule;
-  /** An error is a fault in any reading; a warning is likely one, worth a look at a frame. */
   readonly severity: "error" | "warning";
   readonly message: string;
-  /** The scene seconds it was seen at. */
   readonly times: readonly Seconds[];
-  /** Where the element was written, `file:line:column`, when the SVG was rendered with sources. */
   readonly source?: string;
-  /** The element, as `<tag>` or `<text "…">`. */
   readonly element: string;
 }
 
 export interface CheckOptions extends SceneOptions {
-  /** Scene seconds to measure. Default: 0, seven times spread across the loop, and just before its end. */
   readonly times?: readonly Seconds[];
 }
 
 export interface CheckReport {
-  /** One loop of the scene, in scene seconds. */
   readonly duration: Seconds;
-  /** The times measured. */
   readonly times: readonly Seconds[];
-  /** Errors first, then warnings, each in paint order. */
   readonly findings: readonly Finding[];
 }
 
-// Steps across one loop for the rules that need a value's whole course, not just the sampled times.
 const SWEEP = 96;
-// Box edges within this many viewBox units count as the same, and as inside.
 
 const SLACK = 1;
-// An entrance that starts this soon after a cut to hidden is the same motion: the element should have started hidden.
 
 const HOLD = 0.1;
 
@@ -72,7 +60,6 @@ const overlapArea = (a: PageBox, b: PageBox): number =>
 
 const visible = (b: PageBox): boolean => b[5] === 1 && b[4] > 0.05;
 
-/** Default sample times: 0, a spread across the loop, and just before its end. */
 export const sampleTimes = (duration: Seconds): Seconds[] => [
   ...Array.from({ length: 8 }, (_, i) => (i * duration) / 8),
   duration - Math.min(0.05, duration / 100),
@@ -101,14 +88,11 @@ export const checkScene = async (svg: string, options: CheckOptions = {}): Promi
     const step = Math.min(0.05, duration / 100);
     const boxes: PageBox[][] = [];
 
-    // One pass per time: each measures the step before it too, to tell a resting element from a moving one.
     for (const time of times)
       boxes.push(
         await scene.evaluate(measure, { time, before: time >= step ? time - step : time + step }),
       );
 
-    // The loop seam: just before the end against the end itself, where a looping motion is back at its start and a
-    // `<Once>` motion holds, as it does in the browser.
     const seamBefore = Math.max(0, duration - step);
 
     const seamTimes = [
@@ -140,10 +124,6 @@ export const checkScene = async (svg: string, options: CheckOptions = {}): Promi
   }
 };
 
-/**
- * One finding per rule and place in the source: a component's twenty labels share a line, and an agent fixes the line.
- * Errors come first.
- */
 const group = (findings: readonly Finding[]): Finding[] => {
   const groups = new Map<string, { first: Finding; count: number; times: Set<Seconds> }>();
 
@@ -192,13 +172,11 @@ const finding = (
   ...(element.source && { source: element.source }),
 });
 
-/** How far a box runs past each edge of another: left, top, right, bottom. */
 const past = (b: PageBox, x0: number, y0: number, x1: number, y1: number) =>
   [x0 - b[0], y0 - b[1], b[2] - x1, b[3] - y1] as const;
 
 const EDGES = ["left", "top", "right", "bottom"] as const;
 
-/** Whether a part sits in the same place at every time it is visible. */
 const placed = (seen: readonly { readonly b: PageBox }[]): boolean =>
   seen.every(({ b }) => [0, 1, 2, 3].every((i) => Math.abs(b[i]! - seen[0]!.b[i]!) < 0.5));
 
@@ -220,8 +198,6 @@ const offCanvas = (
     const outside = ({ b }: { b: PageBox }) =>
       b[2] <= 0 || b[3] <= 0 || b[0] >= width || b[1] >= height;
 
-    // Off the canvas whenever it shows, and still there: never seen. A part entering from off the canvas is on it at some
-    // time, and one that moves out there may cross the canvas between two samples.
     if (seen.every((s) => outside(s) && s.b[6] === 1))
       return [
         finding(
@@ -235,8 +211,6 @@ const offCanvas = (
 
     if (leaf.tag === "text" || leaf.soft) return [];
 
-    // Partly cut off while it rests. A shape that bleeds by more than a quarter of its size, or is as big as the
-    // canvas, bleeds on purpose: backgrounds, glows, a road running off the edge.
     const cut = seen.filter(({ b }) => {
       if (b[6] !== 1) return false;
       const w = b[2] - b[0];
@@ -250,7 +224,6 @@ const offCanvas = (
       return over > SLACK && over < size / 4;
     });
 
-    // Only a part placed there for good: one a camera carries past the edge is framing, not a layout slip.
     if (cut.length === 0 || !placed(seen)) return [];
     const b = cut[0]!.b;
     const sides = past(b, 0, 0, width, height);
@@ -293,7 +266,6 @@ const textOverflow = (
       const sides = past(b, 0, 0, width, height);
       const by = Math.max(...sides);
 
-      // Wholly off the canvas is off-canvas's to report; partly past an edge is cut text, unless a camera carries it.
       if (by > SLACK && b[2] > 0 && b[3] > 0 && b[0] < width && b[1] < height) {
         if (!placed(shown)) return;
         canvas.push(time);
@@ -303,7 +275,6 @@ const textOverflow = (
         return;
       }
 
-      // The smallest painted rect underneath that holds the text's middle: the box it reads as sitting in.
       const cx = (b[0] + b[2]) / 2;
       const cy = (b[1] + b[3]) / 2;
       let holder = -1;
@@ -316,7 +287,6 @@ const textOverflow = (
 
         if (cx < r[0] || cx > r[2] || cy < r[1] || cy > r[3]) return;
 
-        // Bigger than half the canvas is a background, not a box the text was fitted to.
         if (area(r) > (width * height) / 2 || r[3] - r[1] < (b[3] - b[1]) * 0.8) return;
         const held = boxes[t]?.[holder];
 
@@ -326,7 +296,6 @@ const textOverflow = (
       const r = boxes[t]?.[holder];
 
       if (!r) return;
-      // Glyph boxes carry the font's ascent and descent, so only the sides are a fair test, by a clear margin.
       const sides2 = past(b, r[0], r[1], r[2], r[3]);
       const side = Math.max(sides2[0], sides2[2]);
       const margin = Math.max(2, (b[3] - b[1]) * 0.25);
@@ -357,7 +326,6 @@ const textOverflow = (
         ];
   });
 
-// A text box spans the font's whole ascent and descent, far taller than the ink of most lines: keep its middle.
 const ink = (b: PageBox): PageBox => {
   const h = b[3] - b[1];
 
@@ -378,7 +346,6 @@ const overlap = (
   times.forEach((time, t) => {
     const row = boxes[t] ?? [];
 
-    // Opaque shapes, which can cover a text drawn before them: an edited value laid over the old one.
     const covers = leaves.flatMap((leaf, index) => {
       const b = row[index];
 
@@ -404,7 +371,6 @@ const overlap = (
         const b = row[texts[j]!];
 
         if (!b || !visible(b) || b[6] !== 1) continue;
-        // The same words twice in the same place is a shadow or an outline, drawn on purpose.
 
         if (leaves[texts[i]!]!.text === leaves[texts[j]!]!.text) continue;
         const shared = overlapArea(ink(a), ink(b));
@@ -475,8 +441,6 @@ const visibleAtZero = (
     const at = (step: number) => round((step * duration) / s.opacity.length);
     const { opacity, drawn } = s;
 
-    // Shown at 0, then cut to hidden and straight away brought back in: an entrance whose hidden start is missing. Hidden
-    // for longer before it comes back is a part that leaves and returns, drawn on purpose.
     const cut = opacity.findIndex(
       (value, i) => i > 0 && value <= 0.05 && (opacity[i - 1] ?? 0) > 0.5,
     );
@@ -494,7 +458,6 @@ const visibleAtZero = (
         ),
       ];
 
-    // A stroke that draws in later, with its fill already showing at 0.
     const full = drawn.findIndex((value) => value >= 0.99);
 
     if ((drawn[0] ?? 1) <= 0.01 && full > 0 && s.filled)
@@ -518,13 +481,9 @@ const seam = (
   { width, height }: Canvas,
   duration: Seconds,
 ): Finding[] => {
-  // Seen: painted, and at least partly on the canvas. A part that is gone at either side, or parked off the canvas,
-  // vanishes or pops in: a scene that builds up and starts over cuts like that on purpose, so only a part seen on both
-  // sides of the seam is judged.
   const seen = (b: PageBox | undefined): b is PageBox =>
     b !== undefined && visible(b) && b[2] > 0 && b[3] > 0 && b[0] < width && b[1] < height;
 
-  // Middle, size and opacity: the page box of a turned part swells as it turns, these do not.
   const KEYS = [7, 8, 9, 4] as const;
   const groups = new Map<string, { index: number; guess: number[] }[]>();
 
@@ -532,15 +491,11 @@ const seam = (
     const [w, e, a, z] = [first?.[index], earlier?.[index], end?.[index], start?.[index]];
 
     if (leaf.masked || !seen(w) || !seen(e) || !seen(a) || !seen(z)) return;
-    // A blink or a jitter that repeats a whole number of times (two or more) in the loop is back where it began, not a seam: the
-    // step across the restart is one of those it makes in every cycle.
     const cycles = leaf.cycle === undefined ? 0 : duration / leaf.cycle;
 
     if (cycles > 1.5 && Math.abs(cycles - Math.round(cycles)) < 0.01) return;
-    // A part that steps or jitters near the end moves unevenly anyway: its jump at the seam is one more step.
 
     if (KEYS.some((k) => Math.abs(a[k] - 2 * e[k] + w[k]) > (k === 4 ? 0.1 : 1))) return;
-    // Where it would be at the end if it kept moving as it does just before: steady motion is not a jump.
     const key = leaf.source ?? `#${index}`;
     groups.set(key, [
       ...(groups.get(key) ?? []),
@@ -553,7 +508,6 @@ const seam = (
       const z = start?.[index];
 
       if (!z) return [];
-      // Against the nearest part written at the same place: a wheel's nine equal spokes may trade places at the seam.
       let best = { shift: Infinity, fade: Infinity };
 
       for (const { guess } of group) {

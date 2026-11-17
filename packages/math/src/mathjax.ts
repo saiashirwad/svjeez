@@ -8,14 +8,10 @@ import { AllPackages } from "mathjax-full/js/input/tex/AllPackages.js";
 import { identity, multiply, parseTransform, round, type Matrix } from "./matrix.ts";
 import { boxPath, holePath } from "./path.ts";
 
-/** One filled mark of a formula, in MathJax's units: 1000 to the em, y up before `matrix` flips it. */
 export interface Mark {
-  /** The character of a glyph, NFKC-normalized; `rect` or `line` for a drawn bar. */
   readonly char: string;
-  /** What decides whether two marks are the same drawing: the character, or a bar's size. */
   readonly key: string;
   readonly d: string;
-  /** Glyph units to the SVG user space of the formula, including MathJax's flip. */
   readonly matrix: Matrix;
   /** Product of the nested `scale()`s: 0.707 for a superscript. */
   readonly size: number;
@@ -24,12 +20,10 @@ export interface Mark {
 }
 
 export interface Compiled {
-  /** The SVG viewBox: the formula's box in user space. */
   readonly box: readonly [x: number, y: number, w: number, h: number];
   readonly marks: readonly Mark[];
 }
 
-/** `noundefined` paints an unknown macro red and `noerrors` hides errors, and both turn a typo into a silent picture. */
 const PACKAGES = AllPackages.filter((name) => name !== "noundefined" && name !== "noerrors");
 
 const adaptor = liteAdaptor();
@@ -63,7 +57,6 @@ interface Outline {
   readonly key: string;
 }
 
-/** A stroked rectangle or line has no outline in the SVG, so it becomes the outline's own mark. */
 function stroked(kind: "rect" | "line", node: Node): Outline {
   const width = num(node, "stroke-width");
 

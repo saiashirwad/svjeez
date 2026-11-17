@@ -65,7 +65,6 @@ test("svjeez render is no longer a command", () => {
   expect(result.stderr.toString()).toContain("svjeez frames <file>");
 });
 
-// A module with no imports, so it loads from a temporary folder. A schema is plain data, so it can be written out.
 const TEMPLATE = `export const params = {
   title: { kind: "text", value: "Hello", maxLength: 12 },
   size: { kind: "number", value: 10, min: 1, max: 40, step: 1 },

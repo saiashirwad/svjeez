@@ -439,7 +439,6 @@ describe("Glyphs", () => {
       ["c", 3],
     ]);
     expect([...counts]).toEqual([4]);
-    // The cascade is the one written by hand: a glyph per 0.1s, spaces counting.
 
     const by = scene(
       <Glyphs

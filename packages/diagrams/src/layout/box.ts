@@ -8,7 +8,6 @@ export const flip = <T extends Box | Point>(value: T): T =>
     ? { x: value.y, y: value.x, w: value.h, h: value.w }
     : { x: value.y, y: value.x }) as T;
 
-/** The largest of `values`, or -Infinity when there are none. Unlike `Math.max(...values)`, it has no limit on the count. */
 export const maxOf = (values: readonly number[]): number => {
   let max = -Infinity;
 
@@ -39,7 +38,6 @@ export const union = (boxes: readonly Box[]): Box => {
 export const around = (points: readonly Point[]): Box =>
   union(points.map((p) => ({ ...p, w: 0, h: 0 })));
 
-/** Drops repeated points and the middle of three in a straight line. */
 export const simplify = (points: readonly Point[]): Point[] =>
   points.reduce<Point[]>((out, p) => {
     const [a, b] = [out.at(-2), out.at(-1)];
@@ -53,7 +51,6 @@ export const simplify = (points: readonly Point[]): Point[] =>
     return out;
   }, []);
 
-/** Each id's position in `ids`, and a lookup that throws `missing(id)` for an id not among them. `unique` is false when an id repeats. */
 export const indexing = (ids: readonly string[], missing: (id: string) => string) => {
   const index = new Map(ids.map((id, i) => [id, i]));
 

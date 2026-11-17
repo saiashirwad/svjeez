@@ -31,7 +31,6 @@ const ok = (svg: string, extra: Partial<Extract<Compiled, { ok: true }>> = {}): 
   ...extra,
 });
 
-/** Runs messages through `update` from a fresh state, returning the last state and every command asked for. */
 const play = (msgs: readonly Msg[], from = init({ text: scene, now: 0 })[0]) => {
   const cmds: Cmd[] = [];
   let state: State = from;
@@ -245,7 +244,6 @@ describe("update", () => {
   });
 });
 
-/** Effects that compile and show on demand, so a test decides when each finishes. */
 const manual = () => {
   const compiles: { text: string; finish: (result: Compiled) => void }[] = [];
   const released: string[] = [];

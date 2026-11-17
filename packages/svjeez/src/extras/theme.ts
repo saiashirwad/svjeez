@@ -35,10 +35,8 @@ export const base16 = (...colors: Sixteen<Color>): Base16 => {
   return Object.fromEntries(SLOTS.map((slot, i) => [slot, colors[i]])) as Base16;
 };
 
-/** What a run of code or terminal output is, so the scheme can color it. */
 export type CodeRole = keyof typeof ROLES;
 
-/** Slots follow the base16 styling guidelines; the ANSI names are for terminal output. */
 const ROLES = {
   plain: "base05",
   muted: "base03",
@@ -68,8 +66,8 @@ export interface VariablesResult<K extends string> {
 }
 
 /**
- * CSS variables with defaults. `vars.sky` is `var(--sky)`; pass `css` to `render`. With `light`, those values win under prefers-color-scheme: light.
- * With `prefix`, the same one `render` gets, the variables apply to that scene's root only, so inlined scenes keep their own.
+ * CSS variables with defaults. `vars.sky` is `var(--sky)`; pass `css` to `render`. With `light`, those values win
+ * under prefers-color-scheme: light. With `prefix` (as given to `render`), they apply to that scene's root only.
  */
 export const variables = <const K extends string>({
   dark,
@@ -102,8 +100,8 @@ export const variables = <const K extends string>({
 };
 
 /**
- * One scheme that follows the viewer's color scheme. Its colors are CSS variables; pass `css` to `render`.
- * Light wins under `prefers-color-scheme: light`, dark otherwise.
+ * One scheme that follows the viewer's color scheme, as CSS variables; pass `css` to `render`. Light wins under
+ * `prefers-color-scheme: light`.
  */
 export interface AdaptiveResult {
   readonly theme: Base16;

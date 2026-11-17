@@ -31,20 +31,17 @@ import {
 import { rect } from "svjeez/geometry";
 import { curve } from "./curve.ts";
 
-/** What a node is, so the theme can draw it. */
 export type NodeRole = "task" | "input" | "output" | "tool" | "decision" | "store";
 
 /**
- * A laid-out diagram. Its parts are its nodes, and a flowchart's groups, a sequence's actor heads and the lanes of
- * `lanes()`, by the ids the spec gave them. A part's `span` is when it appears, or the instant 0 when it is there from
- * the start, as everything is without `play`. `span` runs from the first reveal to the end of the last, and `bounds`
- * covers everything drawn, labels included.
+ * Parts are the nodes plus a flowchart's groups, a sequence's actor heads or the lanes, by spec id. A part's `span`
+ * is when it appears, or the instant 0 when there from the start; `bounds` covers everything drawn, labels included.
  */
 export type Diagram<Id extends string> = Drawn<Part<Id>>;
 
 /**
- * When a diagram's items appear: a start, after which they follow `step` apart in the diagram's own order; one time per
- * item, in that order; or a time per node id, in any order, which leaves the nodes it does not name there from the start.
+ * A start (items follow `step` apart in the diagram's order), one time per item, or a time per node id, which leaves
+ * unnamed nodes there from the start.
  */
 export type PlayAt<Id extends string> = Beats | Readonly<Partial<Record<Id, Seconds>>>;
 
@@ -116,11 +113,12 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
   }
 };
 
-/** Seconds a node takes to pop in. */
 export const POP = 0.35;
 
-/** The pop-in of a node that appears at `at`. It rises a few pixels rather than scaling, because browsers can keep a layer
- * that once animated `scale` rasterized at the smaller size, which leaves the label blurry long after it settles. */
+/**
+ * Rises a few pixels instead of scaling: browsers can keep a once-animated `scale` layer rasterized small, which
+ * blurs the label.
+ */
 export const popIn = (at: Seconds): Motion<"opacity" | "y"> =>
   enter({ at, over: POP }, { opacity: 0, y: 6 }, ease.out);
 
@@ -128,10 +126,6 @@ const isBeats = (at: PlayAt<string>): at is Beats => typeof at === "number" || A
 
 export const INSTANT: Spanned = span(0, 0);
 
-/**
- * When each node appears, `-Infinity` for one there from the start. A start or a list follows `order`, the diagram's
- * own, which leaves out the nodes there from the start; a record names its nodes from `all`.
- */
 export const schedule = (
   at: PlayAt<string>,
   order: readonly string[],
@@ -164,7 +158,6 @@ export const schedule = (
   return shown;
 };
 
-/** The span from the earliest start to the latest end of `reveals`, or the instant 0 when nothing reveals. */
 export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
   if (reveals.length === 0) return span(0, 0);
 
@@ -174,10 +167,6 @@ export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
   return span(first, last - first);
 };
 
-/**
- * Each item's slot on a `play` timeline: from when it appears until the next one does, the last one `step` long. From a
- * start the items follow `step` apart; a list gives one time each, in order, to keep two diagrams in step.
- */
 const isStart = (at: Beats): at is Seconds => typeof at === "number";
 
 export const slots = (at: Beats, count: number, step: Seconds, what: string): Spanned[] => {
@@ -198,7 +187,6 @@ export const slots = (at: Beats, count: number, step: Seconds, what: string): Sp
 const SKEW = 0.35;
 const LID = 5;
 
-/** Moves an edge's end from the box border onto the shape's own outline, along the edge's last segment. */
 export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Point => {
   const [cx, cy] = [b.x + b.w / 2, b.y + b.h / 2];
   const vertical = end.x === toward.x;
@@ -290,7 +278,6 @@ export interface Look {
   readonly tints?: Partial<Record<NodeRole, Color>>;
 }
 
-/** What every diagram reads from its options: the theme and sizes with defaults applied, a `Look` at both sizes, and the root group that carries the class and font. */
 export const look = (options: DiagramOptions) => {
   const { theme = defaultDark, fontSize = 14, font, class: cls, tints } = options;
   const small = fontSize * 0.85;
@@ -310,7 +297,6 @@ export const look = (options: DiagramOptions) => {
   };
 };
 
-/** A role's shape with its label centered inside. `extra` draws over the fill, under the label. */
 export const drawNode = (
   role: NodeRole,
   b: Box,
@@ -361,7 +347,6 @@ export const drawNode = (
 
 const HEAD = 8;
 
-/** An orthogonal route drawn as a smooth curve ending in a filled arrowhead along its last run. With `at`, the line draws on over `over` and the head lands as it finishes. */
 export const arrow = (
   points: readonly Point[],
   look: Look & {
@@ -409,7 +394,6 @@ export const arrow = (
   );
 };
 
-/** A text label on a knockout of the background color, so the line it sits on breaks around it. */
 export const chip = (
   b: Box,
   text: string,
@@ -468,10 +452,7 @@ export const placer = (
   };
 };
 
-/**
- * The id of the edge from `F` to `T` as a part, such as `"pr->post"`. An edge from a list of edges in the spec gets
- * one id per pair, so TypeScript checks `part("pr->post")` against the edges written.
- */
+/** Id of the edge `F` to `T`, such as `"pr->post"`; an edge list in the spec gets one id per pair. */
 export type EdgeId<E> = E extends readonly [
   infer F extends string,
   infer T extends string,
@@ -482,7 +463,6 @@ export type EdgeId<E> = E extends readonly [
 
 export const edgeId = (from: string, to: string): string => `${from}->${to}`;
 
-/** The box around a line's points, and around its label when it has one. */
 export const lineBox = (points: readonly Point[], label?: Box): Rect => {
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);
@@ -492,10 +472,6 @@ export const lineBox = (points: readonly Point[], label?: Box): Rect => {
   return label ? box.union(rect(label.x, label.y, label.w, label.h)) : box;
 };
 
-/**
- * A part for each box, in order, appearing during `when(id)`, and `part(id)` over them. Two parts may share an id, as
- * two edges between the same nodes do; `part(id)` finds the first.
- */
 export const partsOf = <Id extends string>(
   what: string,
   boxes: Iterable<readonly [string, Rect]>,

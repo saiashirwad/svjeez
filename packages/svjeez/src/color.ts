@@ -1,6 +1,5 @@
 import type { Color } from "./attributes";
 
-/** A hex color: `#rgb`, `#rrggbb` or `#rrggbbaa`. The type fixes only the leading `#`. */
 export type Hex = Extract<Color, `#${string}`>;
 
 const SOLID = /^#(?:[\da-f]{3}|[\da-f]{6})$/i;
@@ -16,7 +15,6 @@ export const hexOf = (color: Hex, caller: string, alpha = false): Hex => {
   return color;
 };
 
-/** Red, green, blue and alpha bytes of `#rgb`, `#rrggbb` or `#rrggbbaa`. The caller has checked the shape. */
 export const hexBytes = (hex: Hex): readonly [number, number, number, number] => {
   const digits = hex.slice(1);
   const full = digits.length === 3 ? [...digits].map((digit) => digit + digit).join("") : digits;

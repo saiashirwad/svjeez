@@ -7,7 +7,6 @@ const parser = js.configure({ dialect: "jsx ts" });
 
 export type Range = readonly [from: number, to: number];
 
-/** The highlight classes, with the Lezer tags each covers. The most specific tag on a token wins. */
 export const KINDS = {
   keyword: [
     tags.keyword,
@@ -49,7 +48,6 @@ const runsOf = (tree: Tree): Run[] => {
   return out;
 };
 
-/** Where a literal sits, read from the node around it. Arithmetic around it (`-70`, `0.8 + i`) still sits there. */
 export type Role =
   | { readonly kind: "attribute"; readonly name: string; readonly tag: string }
   | { readonly kind: "argument"; readonly callee: string; readonly index: number }
@@ -57,30 +55,16 @@ export type Role =
   | { readonly kind: "const"; readonly name: string }
   | { readonly kind: "other" };
 
-/** One step from a const's name down to a literal inside its value: a property name or an array index. */
 export type PathStep = string | number;
 
 export type EaseName = "linear" | "in" | "out" | "inOut" | "pop";
 
 interface LiteralBase {
-  /**
-   * Where the literal is, as a name that survives edits to other values and mostly survives rewrites elsewhere in the
-   * file: `params.swing` for a param, the path from its top-level const as in `legs.1.over`, else the top-level
-   * declaration it sits in and what holds it there, as in `default:circle.cx` (an attribute), `default:enter.0.at` (a
-   * call's argument) or `default:r` (a local const). A second literal held the same way in that declaration gets `#1`,
-   * and one held by nothing nameable is counted among those, as in `default#3`. No two literals share one.
-   */
   readonly key: string;
   readonly range: Range;
-  /** The literal as written, quotes and sign included. */
   readonly text: string;
   readonly role: Role;
-  /**
-   * From the top-level const it sits in down to it, as in `["legs", 0, "over"]`, when only objects and arrays are in
-   * between.
-   */
   readonly path?: readonly PathStep[];
-  /** The `export const params` entry it declares: its value, or `option` for one of its options. */
   readonly param?: { readonly key: string; readonly option?: string };
 }
 
@@ -97,7 +81,6 @@ export type Literal =
   | (LiteralBase & {
       readonly kind: "ease";
       readonly value: Ease;
-      /** `bezier` for `ease.bezier(…)`, or the named ease. */
       readonly name: EaseName | "bezier";
     });
 
@@ -112,7 +95,6 @@ const isNamedEase = (name: string): name is EaseName => NAMED_EASES.has(name);
 const textOf = (src: string, node: SyntaxNode | null | undefined) =>
   node ? src.slice(node.from, node.to) : "";
 
-/** The children of a list node that are values, not brackets or commas. */
 const items = (list: SyntaxNode): SyntaxNode[] => {
   const out: SyntaxNode[] = [];
 
@@ -122,14 +104,12 @@ const items = (list: SyntaxNode): SyntaxNode[] => {
   return out;
 };
 
-/** The name a call is to: `to` for `motion(…).to(…)`, `count` for `count(…)`. */
 const calleeOf = (src: string, call: SyntaxNode) => {
   const callee = call.firstChild;
 
   return callee?.name === "MemberExpression" ? textOf(src, callee.lastChild) : textOf(src, callee);
 };
 
-/** The node a literal stands in for: itself, or the arithmetic it is part of. */
 const outer = (node: SyntaxNode) => {
   let at = node;
 
@@ -177,7 +157,6 @@ const roleOf = (src: string, literal: SyntaxNode): Role => {
   }
 };
 
-/** Whether a statement sits at the top of the file, exported or not. */
 const isTopLevel = (node: SyntaxNode) => {
   const up = node.parent?.name === "ExportDeclaration" ? node.parent : node;
 
@@ -205,7 +184,6 @@ const pathOf = (src: string, literal: SyntaxNode): PathStep[] | undefined => {
   }
 };
 
-/** The object `export const params = {…}` declares, if the file has one. */
 const paramsObject = (src: string, tree: Tree): SyntaxNode | undefined => {
   for (const exported of tree.topNode.getChildren("ExportDeclaration")) {
     const declaration = exported.getChild("VariableDeclaration");
@@ -217,7 +195,6 @@ const paramsObject = (src: string, tree: Tree): SyntaxNode | undefined => {
   return undefined;
 };
 
-/** Which params entry a literal declares: the first argument of the entry's call, or a property of its options. */
 const paramOf = (src: string, literal: SyntaxNode, params: SyntaxNode | undefined) => {
   if (!params) return undefined;
   const at = outer(literal);
@@ -242,7 +219,6 @@ const paramOf = (src: string, literal: SyntaxNode, params: SyntaxNode | undefine
   return option === undefined ? { key } : { key, option };
 };
 
-/** A number with its sign, so `-70` is one literal. */
 const signed = (src: string, num: SyntaxNode) =>
   num.parent?.name === "UnaryExpression" && textOf(src, num.parent.firstChild) === "-"
     ? num.parent
@@ -250,20 +226,12 @@ const signed = (src: string, num: SyntaxNode) =>
 
 const COLOR = /^(["'])#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\1$/;
 
-/** A number as written, `30_000` and `0xff` included. */
 const numberOf = (text: string) => Number(text.replaceAll("_", ""));
 
 const COMMENTS = new Set(["LineComment", "BlockComment"]);
 
-/** A name as a key can hold it: what an identifier, a property name or an index is written with. */
 const NAMEABLE = /^[\w$]+(?:\.[\w$]+)*$/;
 
-/**
- * What holds a literal inside its declaration, from the nearest call argument, JSX attribute or const down through any
- * objects and arrays: `enter.0.at` for `enter({ at: 1 })`, `circle.cx` for `<circle cx={40}>`, `to.1` for
- * `.to(values, 0.5)`, `r` for `const r = 5`. Empty when the literal sits anywhere else, a return value or a ternary,
- * say, since a name made from those would change with code around it as easily as an ordinal does.
- */
 const anchorOf = (src: string, literal: SyntaxNode): string => {
   const path: PathStep[] = [];
   let at = outer(literal);
@@ -294,7 +262,6 @@ const anchorOf = (src: string, literal: SyntaxNode): string => {
   return "";
 };
 
-/** How many statements come before this top-level one, comments aside. */
 const placeOf = (statement: SyntaxNode) => {
   let n = 0;
 
@@ -303,10 +270,6 @@ const placeOf = (statement: SyntaxNode) => {
   return n;
 };
 
-/**
- * The name of the top-level statement a node sits in: a const or function name, `default`, or its place among the
- * file's statements, which no edit inside another statement moves.
- */
 const scopeOf = (src: string, node: SyntaxNode): string => {
   let at = node;
 
@@ -323,11 +286,6 @@ type Unkeyed = Literal extends infer L ? (L extends Literal ? Omit<L, "key"> : n
 
 type Placed = Unkeyed & { readonly scope: string; readonly anchor: string };
 
-/**
- * Each literal's key: its param, its path, else its scope and what holds it there, with how many literals held the same
- * way in that scope came before it. Counting within the anchor, not the whole scope, means adding a literal renumbers
- * only the ones held exactly as it is.
- */
 const keyed = (literals: readonly Placed[]): Literal[] => {
   const seen = new Map<string, number>();
 
@@ -344,7 +302,6 @@ const keyed = (literals: readonly Placed[]): Literal[] => {
 
   const taken = new Set<string>();
 
-  /** The key, or for a file that names one thing twice, the key with the first free ordinal after it. */
   const unique = (key: string) => {
     let free = key;
 
@@ -361,7 +318,6 @@ const keyed = (literals: readonly Placed[]): Literal[] => {
   });
 };
 
-/** Every literal in the file, in order. An ease call is one literal, so its numbers are not also numbers. */
 const literalsOf = (src: string, tree: Tree): Literal[] => {
   const out: Placed[] = [];
   const params = paramsObject(src, tree);
@@ -455,9 +411,7 @@ const literalsOf = (src: string, tree: Tree): Literal[] => {
 export interface Attribute {
   readonly name: string;
   readonly range: Range;
-  /** What `{…}` holds, without the braces. */
   readonly value?: Range;
-  /** The last name in a `{name}` or `{p.name}` value. */
   readonly ref?: string;
 }
 
@@ -465,11 +419,9 @@ export interface Attribute {
 export interface Element {
   readonly key: string;
   readonly tag: string;
-  /** An SVG tag, which writes an element of its own, rather than a component or a fragment. */
   readonly builtin: boolean;
   readonly range: Range;
   readonly open: Range;
-  /** The first and last line of the opening tag. */
   readonly openLines: readonly [number, number];
   readonly attributes: readonly Attribute[];
 }
@@ -477,7 +429,6 @@ export interface Element {
 export interface Const {
   readonly name: string;
   readonly range: Range;
-  /** Every other place the name is read. One file, no shadowing: a name means the const. */
   readonly uses: readonly Range[];
 }
 
@@ -488,9 +439,7 @@ export interface Source {
   readonly elements: readonly Element[];
   readonly consts: readonly Const[];
   readonly runs: readonly Run[];
-  /** The line, from 1, that `offset` is on. */
   readonly lineAt: (offset: number) => number;
-  /** Where line `n` starts. */
   readonly lineStart: (n: number) => number;
 }
 
@@ -598,10 +547,7 @@ export interface Line {
   readonly pieces: readonly Piece[];
 }
 
-/**
- * The file as highlighted lines. Each literal `live` picks is one piece of its own, so a panel can make it a control;
- * the rest is highlighting runs with unhighlighted gaps as plain text.
- */
+/** The file as highlighted lines. Each literal `live` picks is a piece of its own, so a panel can make it a control. */
 export const linesOf = (
   source: Source,
   live: (literal: Literal) => boolean = () => false,
@@ -651,7 +597,6 @@ export const linesOf = (
   return lines;
 };
 
-/** `v` to `decimals` places, with trailing zeros kept when `exact`. */
 const numberText = (v: number, decimals: number, exact = false) => {
   const fixed = v.toFixed(decimals);
   const text = exact ? fixed : String(Number(fixed));
@@ -659,7 +604,6 @@ const numberText = (v: number, decimals: number, exact = false) => {
   return Number(text) === 0 ? text.replace("-", "") : text;
 };
 
-/** How many decimals a number is written with, as in `2` for `0.50`, and none for `1.5e3` or `0xff`. */
 export const decimalsOf = (text: string) => {
   const plain = text.replaceAll("_", "");
 
@@ -678,7 +622,6 @@ const ESCAPES = new Map(
   }),
 );
 
-/** What the body of a quoted JavaScript string holds: `\n`, `\'`, `\\`, `\xHH`, `\uHHHH` and `\u{H…}` read as their characters. */
 export const unescape = (body: string) =>
   body.replace(
     /\\(?:u\{([0-9a-fA-F]+)\}|u([0-9a-fA-F]{4})|x([0-9a-fA-F]{2})|([\s\S]))/g,
@@ -695,7 +638,6 @@ export const unescape = (body: string) =>
     },
   );
 
-/** `value` as the body of a JavaScript string quoted with `quote`, so that reading it back gives `value`. */
 const escape = (value: string, quote: string) =>
   value.replace(/[\\\n\r\u2028\u2029'"]/g, (c) =>
     c === quote || c === "\\"
@@ -709,7 +651,6 @@ const escape = (value: string, quote: string) =>
             : c,
   );
 
-/** A string or color as code, in the quotes it had: escaped in JavaScript, and in a JSX attribute, which has no escapes, in the other quotes, or in braces when it holds both. */
 const quoted = (literal: LiteralOf<"string" | "color">) => {
   const value: string = literal.value;
   const quote = literal.text[0]!;
@@ -735,9 +676,8 @@ export const easeText = (value: Ease): string => {
 };
 
 /**
- * How a literal is written with the value it holds: a number to as many decimals as its text had with trailing zeros
- * dropped (or to exactly `decimals`, zeros kept), a color or string in its own quotes, an ease through `easeText`. Pass
- * `{ ...literal, value }` to write a new value.
+ * How a literal is written with its value: a number to its own decimals (or exactly `decimals`), a color or string in
+ * its own quotes, an ease through `easeText`. Pass `{ ...literal, value }` to write a new value.
  */
 export const write = (literal: Literal, decimals?: number): string => {
   switch (literal.kind) {
@@ -778,14 +718,12 @@ export const literalAt = (source: Source, path: readonly PathStep[]): Literal | 
     (l) => l.path?.length === path.length && l.path.every((step, i) => step === path[i]),
   );
 
-/** The literal that declares `params[key]`. */
 export const paramLiteral = (source: Source, key: string): Literal | undefined =>
   source.literals.find((l) => l.param?.key === key && l.param.option === undefined);
 
 const own = (source: Source, node: SyntaxNode) =>
   source.elements.filter((e) => e.builtin && e.range[0] >= node.from && e.range[1] <= node.to);
 
-/** The built-in elements inside `node` that no other built-in element inside it holds. */
 const outermost = (source: Source, node: SyntaxNode) => {
   const inside = own(source, node);
 
@@ -794,7 +732,6 @@ const outermost = (source: Source, node: SyntaxNode) => {
   );
 };
 
-/** The `params` entry a node sits in, if it does. */
 const paramEntry = (source: Source, node: SyntaxNode, params: SyntaxNode | undefined) => {
   if (!params) return undefined;
 
@@ -856,18 +793,12 @@ const made = (source: Source, node: SyntaxNode, seen: Set<string>): Element[] =>
   return [];
 };
 
-/**
- * The built-in elements the code at `offset` shapes: the element whose tag or body it is in, the elements an arrow
- * function or a `{…}` child makes, or, for a const or a param, whatever every use of it shapes.
- */
 export const madeBy = (source: Source, offset: number): Element[] => [
   ...new Set(made(source, source.tree.resolveInner(offset, 1), new Set())),
 ];
 
-/** Where a call's name sits: every call in a chain starts where the chain does, so this orders them. */
 const nameAt = (call: SyntaxNode) => call.firstChild!.lastChild!.from;
 
-/** The calls to `.method(…)` in the element's `animation`, following `animation={name}` to its const, in source order. */
 export const callsIn = (source: Source, element: Element, method: string): Range[] => {
   const attr = element.attributes.find((a) => a.name === "animation");
 

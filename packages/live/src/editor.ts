@@ -17,7 +17,6 @@ import {
   type Source,
 } from "./source.ts";
 
-/** The picture on screen: an image URL, and the file it shows when it came from a compile rather than the build. */
 export interface PictureState {
   readonly url: string;
   readonly scene: SceneSize;
@@ -26,25 +25,20 @@ export interface PictureState {
   readonly text?: string;
 }
 
-/** A compiled file, before it has a URL to show it by. */
 export type CompiledFile = Required<Omit<PictureState, "url">>;
 
 /**
  * A handle on the picture for a number: where it sat when the value was `from`, and how far it moves per unit of the
- * value. A scene's `handles` declare some; the editor measures one for the selected number in any scene.
+ * value.
  */
 export interface GripState extends Move {
   readonly from: number;
   readonly declared: boolean;
 }
 
-/** What the newest good compile measured about its file. */
 export interface PictureStats {
-  /** Bytes gzipped, as a browser sends it. */
   readonly gzip: number;
-  /** How many `@keyframes` rules it holds. */
   readonly keyframes: number;
-  /** Bytes of script inside it. Zero for every svjeez scene. */
   readonly scriptBytes: number;
   /** Milliseconds the compile took, or null for the stats of a picture built ahead of time. */
   readonly ms: number | null;
@@ -56,25 +50,16 @@ export type Clock =
   | { readonly playing: false; readonly at: number };
 
 export interface State {
-  /** The file. Every edit is to this text, and everything else here is read from it or made from it. */
   readonly text: string;
   readonly source: Source;
-  /** Every literal a control can edit, in source order. */
   readonly values: readonly Value[];
-  /** The file as highlighted lines, each value a piece of its own. */
   readonly lines: readonly Line[];
-  /** The params the scene declares, as of its last good compile. */
   readonly schema: Schema;
-  /** The value whose control has focus, by key. */
   readonly selected: string | null;
   readonly picture: PictureState | null;
-  /** The newest good compile, which a play, pause or seek shows again. It runs ahead of `picture` while it decodes. */
   readonly compiled: CompiledFile | null;
-  /** What the newest good compile measured, or `first.stats` until there is one. */
   readonly stats: PictureStats | null;
-  /** The handles on the picture, by value key. */
   readonly grips: { readonly [key: string]: GripState };
-  /** Why the newest compile failed, until one succeeds. The picture stays the last good one. */
   readonly error: SourceError | null;
   readonly clock: Clock;
   readonly history: { readonly past: readonly string[]; readonly future: readonly string[] };
@@ -87,7 +72,6 @@ type Valued = {
 export type Msg =
   /** Writes a value into the file. `continues` marks a step of a drag already under way, so undo takes the drag whole. */
   | ({ readonly type: "set"; readonly continues?: boolean } & Valued)
-  /** Replaces the file: typing, or an agent's rewrite. */
   | { readonly type: "replace"; readonly text: string }
   | { readonly type: "undo" }
   | { readonly type: "redo" }
@@ -111,7 +95,6 @@ export type Msg =
 
 export type Cmd =
   | { readonly type: "compile"; readonly text: string }
-  /** Show `svg` from `at` seconds in, playing on or held there. */
   | {
       readonly type: "show";
       readonly svg: string;
@@ -119,7 +102,6 @@ export type Cmd =
       readonly playing: boolean;
       readonly picture: Omit<PictureState, "url">;
     }
-  /** Find what the number at `key` moves: compile `nudged`, the file with it `by` more, and compare it with `svg`. */
   | {
       readonly type: "probe";
       readonly key: string;
@@ -135,24 +117,19 @@ export type Cmd =
 export const timeAt = (clock: Clock, now: number): number =>
   clock.playing ? Math.max(0, (now - clock.origin) / 1000) : clock.at;
 
-/** The value with this key, if the file still has it. */
 export const valueOf = (state: State, key: string): Value | undefined =>
   state.values.find((v) => v.key === key);
 
-/** Where a handle sits with its value at `v`, along the way it moves. */
 export const handleAt = (grip: GripState, v: number): Point => ({
   x: grip.at.x + grip.way.x * (v - grip.from),
   y: grip.at.y + grip.way.y * (v - grip.from),
 });
 
-/** `v` written as a literal's text, to six places at most. */
 const placesOf = (v: number) => Math.min(6, decimalsOf(String(v)));
 
 /**
- * The edit that writes `v` into `value`'s literal, as the editor's `set` message does: a number as precise as `v`
- * and its own text, and with `step`, its control's step too, so a drag from `0.9` up to `1.0` keeps the tenths the
- * next step is read from. Undefined for what has no code: a number that is not finite, or an ease that is neither named
- * nor a bezier.
+ * The edit that writes `v` into `value`'s literal, as the editor's `set` message does. Undefined for what has no
+ * code: a non-finite number, or an ease that is neither named nor a bezier.
  */
 export const editFor = <V extends Value>(
   value: V,
@@ -183,7 +160,6 @@ export const editFor = <V extends Value>(
 const isEditable = (literal: Literal, values: readonly Value[]) =>
   values.some((v) => v.literal === literal);
 
-/** The state for `text`, read through `schema`, with everything else carried over. */
 const read = (state: Omit<State, "source" | "values" | "lines">): State => {
   const source = parse(state.text);
   const values = valuesOf(source, state.schema);
@@ -210,7 +186,6 @@ export interface First {
   readonly height: number;
   readonly title: string;
   readonly duration?: number;
-  /** The file's size and keyframes, if the page measured them, so a readout has numbers before the first compile. */
   readonly stats?: Omit<PictureStats, "ms">;
 }
 
@@ -247,7 +222,6 @@ export const init = ({ text, first, now }: Init): [State, Cmd[]] => [
   [{ type: "compile", text }],
 ];
 
-/** The state with `text` as the file, the old one remembered for undo unless `continues`, and a compile asked for. */
 const edited = (state: State, text: string, continues = false): [State, Cmd[]] => {
   if (text === state.text) return [state, []];
   const past = continues ? state.history.past : [...state.history.past, state.text];
@@ -255,7 +229,6 @@ const edited = (state: State, text: string, continues = false): [State, Cmd[]] =
   return [read({ ...state, text, history: { past, future: [] } }), [{ type: "compile", text }]];
 };
 
-/** Shows a compiled file under `clock`, from where it reads at `now`. */
 const showOf = (picture: CompiledFile, clock: Clock, now: number): Cmd => ({
   type: "show",
   svg: picture.svg,
@@ -264,7 +237,6 @@ const showOf = (picture: CompiledFile, clock: Clock, now: number): Cmd => ({
   picture,
 });
 
-/** The newest compiled file shown again under a new clock, once there is one. */
 const reshown = (state: State, clock: Clock, now: number): [State, Cmd[]] => {
   const next = { ...state, clock };
   const { compiled } = state;
@@ -272,7 +244,6 @@ const reshown = (state: State, clock: Clock, now: number): [State, Cmd[]] => {
   return [next, compiled ? [showOf(compiled, clock, now)] : []];
 };
 
-/** The grips a compile of `text` declares, keyed by value: a param's value key is `params.<key>`. */
 const declaredGrips = (text: string, handles: { readonly [key: string]: Move } = {}) => {
   const keys = Object.keys(handles);
 
@@ -293,16 +264,11 @@ const declaredGrips = (text: string, handles: { readonly [key: string]: Move } =
 const onlyDeclared = (grips: State["grips"]) =>
   Object.fromEntries(Object.entries(grips).filter(([, g]) => g.declared));
 
-/** The probed grip, if any, kept beside a fresh set of declared ones. */
 const withDeclared = (grips: State["grips"], declared: State["grips"]) => ({
   ...Object.fromEntries(Object.entries(grips).filter(([, g]) => !g.declared)),
   ...declared,
 });
 
-/**
- * A probe of the selected number when it has no declared grip and the picture shows the file as it stands. The nudge
- * is a two-hundredth of the number's range, never less than a step.
- */
 const probeOf = (state: State, now: number): Cmd[] => {
   const value = state.selected ? valueOf(state, state.selected) : undefined;
   const { picture } = state;
@@ -330,10 +296,6 @@ const probeOf = (state: State, now: number): Cmd[] => {
   ];
 };
 
-/**
- * Whether a grip measured on `text` still fits the file: it is the file, or differs from it only in the value at `key`,
- * which the grip extrapolates from. Any other change may have moved what the value moves.
- */
 const measures = (state: State, key: string, text: string) => {
   const now = valueOf(state, key)?.literal;
 
@@ -411,7 +373,6 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
     }
 
     case "compiled": {
-      // The error of a file the editor has since left is not the current file's.
       if (!msg.result.ok)
         return msg.text === state.text ? [{ ...state, error: msg.result.error }, []] : [state, []];
 
@@ -467,15 +428,13 @@ export type Input =
 /** The work the runtime does for `update`. A page swaps one out to compile elsewhere, or a test to run without a browser. */
 export interface Effects {
   /**
-   * Compiles the file. A `stop` on it is called whenever the editor goes idle, when its last listener leaves or it is
-   * destroyed, and a compile after a stop must start the compiler again, which `createCompiler` alone does not.
+   * Compiles the file. `stop` is called whenever the editor goes idle, and a compile after a stop must start the
+   * compiler again, which `createCompiler` alone does not.
    */
   readonly compile: ((text: string) => Promise<Compiled>) & { readonly stop?: () => void };
   /** An image URL for `svg` started `at` seconds in, playing on or held, once it is ready to draw. */
   readonly show: (svg: string, at: number, playing: boolean) => Promise<string>;
-  /** Frees a URL `show` made, once nothing shows it. */
   readonly release: (url: string) => void;
-  /** How the parts of `before` that differ in `after` moved, per unit of a value nudged `by`, held `at` seconds in. */
   readonly measure: (
     before: string,
     after: string,
@@ -488,20 +447,18 @@ export interface Effects {
 export interface Editor {
   readonly getState: () => State;
   /**
-   * Calls `listener` after every change, and returns the call that stops it. The editor compiles nothing until its first
-   * subscriber, so a page rendered on a server reads the state without starting a worker.
+   * Calls `listener` after every change; returns the call that stops it. Nothing compiles until the first subscriber,
+   * so a server render starts no worker.
    */
   readonly subscribe: (listener: (state: State) => void) => () => void;
   readonly send: (input: Input) => void;
   /**
-   * Stops the compiler and frees every URL the editor made, for good. An editor whose last listener unsubscribes only
-   * pauses: it stops its compiler and holds its commands, and the next subscribe picks up where it left off, as a
-   * component hidden and shown again needs.
+   * Stops the compiler and frees every URL, for good. Unsubscribing the last listener only pauses; the next subscribe
+   * picks up again.
    */
   readonly destroy: () => void;
 }
 
-/** Decodes the image before handing back its URL, so swapping it in never shows a blank frame. */
 const showInBrowser = async (svg: string, at: number, playing: boolean) => {
   const url = URL.createObjectURL(
     new Blob([restyle(svg, { at, paused: !playing })], { type: "image/svg+xml" }),
@@ -514,7 +471,6 @@ const showInBrowser = async (svg: string, at: number, playing: boolean) => {
   return url;
 };
 
-/** The worker compiler, started on the first compile after it was made or stopped. */
 const lazyCompiler = (): Effects["compile"] => {
   let compiler: ReturnType<typeof createCompiler> | undefined;
 
@@ -526,11 +482,8 @@ const lazyCompiler = (): Effects["compile"] => {
   });
 };
 
-/** What a framework binding takes after the scene source `text`. */
 export interface EditorOptions {
-  /** Shown until the first compile finishes: a `?svjeez` import, with a `duration` if the page knows it. */
   readonly first?: First;
-  /** Swaps how the editor compiles and shows pictures, such as a test running without a worker. */
   readonly effects?: Partial<Effects>;
 }
 
@@ -549,13 +502,10 @@ export const createEditor = (
 
   const listeners = new Set<(state: State) => void>();
   const made = new Set<string>();
-  /** Commands asked for while nothing listens, run when something subscribes. */
   let waiting: Cmd[] | null = [];
   let alive = true;
-  /** Bumped on every pause, so a compile the pause cut short is not mistaken for the file's error. */
   let epoch = 0;
 
-  /** A compile that throws, a page's fetch say, fails like a scene that does. */
   const compiling = async (text: string): Promise<Compiled> => {
     try {
       return await run.compile(text);
@@ -570,7 +520,6 @@ export const createEditor = (
     if (made.delete(url)) run.release(url);
   };
 
-  // A compile or probe that a pause stopped, or that was queued behind one, waits with the rest for the next subscribe.
   const compile = latestWins(async (text: string) => {
     const started = epoch;
     const result = waiting ? undefined : await compiling(text);

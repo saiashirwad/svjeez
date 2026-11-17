@@ -83,7 +83,6 @@ describe("sampled", () => {
       PERIOD,
     );
 
-    // A lane that never moves is a declaration, not an animation.
     expect(lane(svg, "opacity")).toEqual([]);
     expect(svg).toMatch(/style="[^"]*opacity:0\.5/);
     expect(translateKeys(svg, PERIOD).length).toBeGreaterThan(2);

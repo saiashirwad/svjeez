@@ -1,4 +1,3 @@
-// Each build runs `svjeez svg` in a fresh process: Node keeps every module it has imported, so only a new process rereads the scene.
 import { spawn } from "node:child_process";
 import { watch } from "node:fs";
 import { writeFile } from "node:fs/promises";
@@ -7,19 +6,12 @@ import { basename, dirname, resolve } from "node:path";
 import { loopLength, seek } from "./page";
 
 export interface DevOptions {
-  /** The scene module, or an .svg. */
   readonly file: string;
-  /** The CLI to build with, run as `<cli> svg <file> …args`. */
   readonly cli: string;
-  /** Passed to every build after the file: the --params and --param flags. */
   readonly args?: readonly string[];
-  /** Files outside the scene's folder that a change to should rebuild, such as a --params file. */
   readonly files?: readonly string[];
-  /** Folders watched as well as the scene's, recursively. */
   readonly dirs?: readonly string[];
-  /** The first port to try. A busy port moves on to the next, up to 20 more; 0 lets the system pick. */
   readonly port?: number;
-  /** Also write each good build here. */
   readonly out?: string;
 }
 
@@ -78,10 +70,8 @@ const page = (title: string) => `<!doctype html>
   requestAnimationFrame(frame);
 </script>`;
 
-/** Runs `cli svg file …args` in a new process: the SVG it printed, or what it said on failing. */
 const buildOnce = (cli: string, file: string, args: readonly string[]) =>
   new Promise<{ svg?: string; log: string }>((done) => {
-    // execArgv carries a loader such as tsx's, so a build runs the way this process does.
     const child = spawn(process.execPath, [...process.execArgv, cli, "svg", file, ...args], {
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -104,7 +94,6 @@ const buildOnce = (cli: string, file: string, args: readonly string[]) =>
 
 const IGNORED = /(^|[\\/])(node_modules|\.[^\\/]*)([\\/]|$)|\.svg$/;
 
-/** Serves the preview until the process ends. Resolves the URL once the server listens and the first build is done. */
 export const dev = async (options: DevOptions): Promise<string> => {
   const source = resolve(options.file);
   const out = options.out === undefined ? undefined : resolve(options.out);
@@ -132,7 +121,6 @@ export const dev = async (options: DevOptions): Promise<string> => {
     for (const client of clients) client.write(`data: ${state.version}\n\n`);
   };
 
-  // One build at a time; a change during a build queues exactly one more.
   let building: Promise<void> | undefined;
   let again = false;
 
@@ -158,7 +146,6 @@ export const dev = async (options: DevOptions): Promise<string> => {
   const rebuild = (name: string | Buffer | null) => {
     if (name && IGNORED.test(String(name))) return;
     clearTimeout(pending);
-    // Editors write a file in more than one event; wait for the last.
     pending = setTimeout(() => void build(), 60);
   };
 
@@ -224,7 +211,6 @@ export const dev = async (options: DevOptions): Promise<string> => {
       server.listen(port, () => {
         server.off("error", busy);
         const address = server.address();
-        // A TCP server's address is an object; only a pipe or socket path gives a string.
         done(address instanceof Object ? address.port : port);
       });
     });

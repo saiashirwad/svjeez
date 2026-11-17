@@ -3,7 +3,6 @@ import { fit, follow } from "./fit.ts";
 import { bend, bezierOf, nudge, scrub, type Settable, type ValueOf } from "./controls.ts";
 import { handleAt, type Editor, type GripState } from "./editor.ts";
 
-/** Where each arrow key points, up and right being positive. */
 const ARROWS: ReadonlyMap<string, Point> = new Map([
   ["ArrowRight", { x: 1, y: 0 }],
   ["ArrowLeft", { x: -1, y: 0 }],
@@ -11,7 +10,6 @@ const ARROWS: ReadonlyMap<string, Point> = new Map([
   ["ArrowDown", { x: 0, y: -1 }],
 ]);
 
-/** One gesture's writes to the value at `key`: the first is an undo step, and every later one continues it. */
 export const stroke = <K extends keyof Settable>(editor: Editor, key: string) => {
   let going = false;
 
@@ -19,18 +17,15 @@ export const stroke = <K extends keyof Settable>(editor: Editor, key: string) =>
     const was = editor.getState().text;
     // SAFETY: `K` is the kind of the value at `key`, so `value` is what a set of that key carries.
     editor.send({ type: "set", key, value, continues: going } as never);
-    // A write that changed nothing is in no undo step, so the next one must start the step.
     going ||= editor.getState().text !== was;
   };
 };
 
-/** A sideways drag on a number's text from page x `x`. It keeps the range it began with, which the value would widen. */
 export const scrubbing = (editor: Editor, value: ValueOf<"number">, x: number) => {
   const set = stroke<"number">(editor, value.key);
   const { param } = value;
   const from = value.literal.value;
 
-  /** The pointer at page x `to`; `fine` goes a fifth as far. */
   return (to: number, fine = false) => set(scrub(param, from, to - x, fine));
 };
 
@@ -58,7 +53,6 @@ export const following = (
   };
 };
 
-/** A drag on one of an ease's control points, to points in the curve's unit square. */
 export const bending = (editor: Editor, value: ValueOf<"ease">, which: 0 | 1) => {
   const set = stroke<"ease">(editor, value.key);
   const from = value.literal.value;
@@ -66,7 +60,6 @@ export const bending = (editor: Editor, value: ValueOf<"ease">, which: 0 | 1) =>
   return (to: Point) => set(bend(from, which, to.x, to.y));
 };
 
-/** Steps a number for an arrow key, ten steps with `big`, as an undo step of its own. Whether `key` was an arrow. */
 export const arrowNumber = (
   editor: Editor,
   value: ValueOf<"number">,
@@ -84,7 +77,6 @@ export const arrowNumber = (
   return !!way;
 };
 
-/** Moves an ease's control point for an arrow key, further with `big`, as an undo step of its own. Whether it was one. */
 export const arrowEase = (
   editor: Editor,
   value: ValueOf<"ease">,
@@ -105,9 +97,8 @@ export const arrowEase = (
 };
 
 /**
- * Focus on a value's control selects it, and focus leaving deselects it unless it moves inside the control or to
- * another control of the same value: a number and its grip on the picture hand focus to each other without
- * deselecting, which would drop the grip that was just measured. Controls carry their value's key as `data-sj-key`.
+ * Focus on a control selects its value; leaving deselects unless focus moves to another control of the same value.
+ * Controls carry the value's key as `data-sj-key`.
  */
 export const selection = (editor: Editor, key: string) => ({
   focus: () => editor.send({ type: "select", key }),

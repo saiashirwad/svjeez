@@ -16,7 +16,6 @@ import { rect } from "svjeez/geometry";
 import { span as spanOf } from "svjeez";
 import { tex, type Tex } from "./index.ts";
 
-/** One line of a derivation: TeX, and what was done to reach it. */
 export interface DeriveStep {
   readonly tex: string;
   /** TeX typeset small beside the line with an arrow, such as `\div 2 \text{ both sides}`. Ignored on the first line. */
@@ -45,9 +44,7 @@ export interface DeriveOptions {
 
 /** One line of a derivation, by its TeX. Its box is where it sits, and its span runs from when it appears to when its change settles. */
 export interface DeriveLine extends Part {
-  /** The line's TeX. Two lines with the same TeX share an id, and `part()` finds the first. */
   readonly id: string;
-  /** The line as typeset and aligned, to find a glyph or a `\cssId` part inside it. */
   readonly tex: Tex;
 }
 
@@ -74,9 +71,8 @@ const alignPoint = (line: Tex, align: string, index: number): number => {
 };
 
 /**
- * A step-by-step derivation over `when`. Every line sits with its alignment point (the `=` by default) on the same x, so the
- * equals sign stays put while the sides change. By default one line transforms into the next with `morph()`; with
- * `stack` each new line appears below the last.
+ * A step-by-step derivation over `when`, every line aligned on the same x. One line morphs into the next with
+ * `morph()`; with `stack` each new line appears below the last.
  */
 export function derive(
   when: Span,

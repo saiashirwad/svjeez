@@ -10,8 +10,8 @@ export type ReadoutOptions = Attrs<"text"> & {
 };
 
 /**
- * Text that changes with time: `text(t)` sampled across the span, each distinct string shown while it holds. The
- * options other than `step` are attributes of every `<text>`, such as `x`, `y`, `fill` and `textAnchor`.
+ * Text that changes with time: `text(t)` sampled across the span, each distinct string shown while it holds. Other
+ * options are attributes of every `<text>`, such as `x`, `y`, `fill`.
  */
 export function readout(
   { at, over }: Span,

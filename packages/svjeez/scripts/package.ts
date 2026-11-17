@@ -42,5 +42,4 @@ for (const file of await readdir("package-dist", { recursive: true })) {
   await writeFile(path, contents.replace(/(from\s+["'])(\.\.?\/[^"']+)(["'])/g, "$1$2.js$3"));
 }
 
-// The README and license live at the repository root, where GitHub shows them; npm wants them beside package.json.
 for (const file of ["README.md", "LICENSE"]) await copyFile(`../../${file}`, file);

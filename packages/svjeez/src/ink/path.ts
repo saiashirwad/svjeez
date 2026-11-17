@@ -2,7 +2,6 @@ import { pathLength } from "../geometry";
 import { segments } from "../pathTokens";
 import type { Point } from "../layout/box";
 
-/** One continuous run of a path, flattened to points. `closed` when it ended in Z. */
 interface Polyline {
   readonly points: readonly Point[];
   readonly closed: boolean;
@@ -32,7 +31,6 @@ const tokens = (d: string): (string | number)[] =>
     letter === "" ? numbers : letter.toLowerCase() in ARGS ? [letter, ...numbers] : [],
   );
 
-/** Points per curve: enough that no chord strays far from the curve, judged from the control polygon's length. */
 const steps = (...pts: Point[]): number =>
   Math.max(2, Math.min(64, Math.ceil(pathLength(pts) / 3)));
 
@@ -63,7 +61,6 @@ const quadratic = (p0: Point, p1: Point, p2: Point, out: Point[]): void => {
   }
 };
 
-/** SVG arc, endpoint form, flattened through its center form (SVG 1.1 appendix F.6). */
 const arc = (
   p0: Point,
   rx: number,
@@ -117,7 +114,6 @@ const arc = (
   }
 };
 
-/** Flatten SVG path data, every command absolute or relative, into polylines. */
 export const flatten = (d: string): Polyline[] => {
   const list = tokens(d);
   const lines: Polyline[] = [];

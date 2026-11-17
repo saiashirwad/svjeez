@@ -32,7 +32,6 @@ interface Spec {
   readonly wrapsOn?: readonly Tag[];
   /** How the lane is animated when CSS would not do: `blur` through a filter, `d`, `width` and `height` through SMIL, since CSS `d` is not animated in Safari and CSS geometry is not applied in Firefox. */
   readonly backend?: "blur" | "smil";
-  /** A hard 0/1 cut compiles to `visibility` when the element sets none of these attributes. */
   readonly toggles?: readonly string[];
 }
 
@@ -103,8 +102,6 @@ export const CHANNELS = {
     lane: "draw",
     composition: "replace",
     range: [0, 1],
-    // A gap of 2 keeps the next dash off the path. With a gap of 1 it starts at the path's end while the draw is
-    // near 0, and a round cap paints that zero-length dash as a dot.
     pins: { pathLength: "1", "stroke-dasharray": "1 2" },
   },
   d: {
@@ -221,7 +218,6 @@ export type TargetValue = number | Color | PathData;
 export const valueOf = (values: TargetValues, target: Target): TargetValue | undefined =>
   values[target];
 
-/** Filter primitives animate through SMIL, which cannot reach a custom property. */
 type StyledTag = Exclude<AnimatedTag, `fe${string}`>;
 
 export type TagChannels<T extends Tag> =
@@ -241,7 +237,6 @@ export const spec = (target: Target): Spec => {
 
 export const isChannel = (name: string): name is Channel => Object.hasOwn(CHANNELS, name);
 
-/** Filter primitives cannot take CSS, so every fe* lane is a SMIL attribute lane. */
 export type Backend = "css" | "smil" | "blur";
 
 export const backendOf = (tag: string, channel: Target): Backend =>

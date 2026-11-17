@@ -11,7 +11,6 @@ import { dataOf, type Motion, type Seconds, type Stack } from "./motion";
 import type { NumericProperty } from "./properties";
 
 export interface ValuesAtOptions {
-  /** The scene's `duration`, as passed to `render()`. */
   readonly duration: Seconds;
   /** The scene's `loop`, as passed to `render()`. False holds the last frame after `duration`. Default true. */
   readonly loop?: boolean;
@@ -19,7 +18,6 @@ export interface ValuesAtOptions {
 
 type NumericTarget = NumericChannel | NumericProperty;
 
-/** How two layers of a stack add up on one channel, for the channels that stack. */
 const STACKED: Partial<Record<Target, (outer: number, inner: number) => number>> = {
   opacity: (a, b) => a * b,
   scale: (a, b) => a * b,
@@ -82,7 +80,6 @@ export function valuesAt<K extends Target>(
   t: Seconds,
   options: ValuesAtOptions,
 ): { readonly [P in Extract<K, NumericTarget>]: number };
-/** A stack's channels are optional, since a falsy layer adds none. */
 export function valuesAt<K extends Target>(
   stack: Stack<K>,
   t: Seconds,

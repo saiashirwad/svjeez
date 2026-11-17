@@ -17,7 +17,6 @@ export interface CodeToken {
 /** `[role, text]` colored by the theme, or `[role, text, id]` to name it for `get()` and exact morphs. */
 export type CodeRun = readonly [role: CodeRole, text: string, id?: string];
 
-/** Plain text, a role-tagged run, or a Shiki-style token. */
 export type CodePiece = string | CodeRun | CodeToken;
 
 export type CodeTokens = readonly (readonly CodePiece[])[];
@@ -56,7 +55,6 @@ export interface CodeMetrics {
   readonly origin: number;
   readonly y: number;
   readonly fontSize: number;
-  /** Line height in px. */
   readonly height: number;
   readonly advance: number;
   readonly fontFamily: string | FontValue;
@@ -73,16 +71,13 @@ export interface Code extends Morphable<CodeWord> {
   readonly bounds: Rect;
   lines(first: number, last?: number): Rect;
   find(text: string, nth?: number): Rect;
-  /** Bounds of every run named `id`. */
   get(id: string): Rect;
   at(line: number, column: number): Point;
-  /** One word as a <text>, optionally animated. morph() draws with it. */
   draw(word: CodeWord, animation?: Stack<"x" | "y" | "opacity">): SvgNode;
 }
 
 const baseline = (m: CodeMetrics, top: number): number => top + m.height / 2 + m.fontSize * 0.35;
 
-/** One word as a <text>. Shared by `code`, `morph` and `typewriter` so they render identically. */
 export const text = (
   { text, x, y, color, fontStyle = 0 }: CodeWord,
   m: CodeMetrics,
@@ -120,7 +115,6 @@ export const number = (
   </text>
 );
 
-/** Columns, typewriter and morph all step by one advance, so every glyph must share it. */
 const monospaceAdvance = (face: Font, fontSize: number): number => {
   const [narrow, wide] = [face.measure("i", fontSize), face.measure("W", fontSize)];
 
@@ -223,7 +217,6 @@ export function code(input: string | CodeTokens, options: CodeOptions = {}): Cod
     )
       throw new Error(`code.lines(${first}, ${last}) is outside lines 1-${rows.length}.`);
 
-    // From the first character any of the lines shows, past their shared indent, to the end of the longest.
     const shown = texts.slice(first - 1, last);
     const written = shown.filter((t) => t.trim() !== "");
 

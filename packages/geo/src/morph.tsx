@@ -36,7 +36,6 @@ export interface MorphOptions {
 export interface Morphed {
   /** The shapes. Hidden until `at`, where each is its region's outline exactly, so a map under it can be hidden then. */
   readonly node: SvgNode;
-  /** Path data for the regions that don't become a shape, to fade out as the others leave. */
   readonly rest: string;
 }
 
@@ -60,7 +59,6 @@ export interface CartogramOptions extends MorphOptions {
 export interface Cartogram extends Morphed, Drawn<Bubble> {}
 
 export interface GeoBarsOptions extends MorphOptions {
-  /** Where the bars go. The longest reaches its right edge; the bars share its height. */
   readonly frame: Rect;
   /** Biggest first (default) or smallest first. */
   readonly order?: "desc" | "asc";
@@ -83,7 +81,6 @@ export interface GeoBars extends Morphed, Drawn<GeoBar> {}
 
 const NUMBER = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
 
-/** A ring's points, from the absolute first point and the relative steps `project()` writes. */
 const points = (ring: string): [number, number][] => {
   const n = ring.match(NUMBER)!.map(Number);
   let [x, y] = [n[0]!, n[1]!];
@@ -105,11 +102,6 @@ const boxArea = (line: readonly (readonly [number, number])[]): number => {
   return (Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys));
 };
 
-/**
- * A region's outline for a morph: its rings, the biggest first so the mainland is the piece that becomes the shape,
- * thinned to `detail` px and without the pieces smaller than a few px. A morph stores every point several times as a
- * curve, and the map stays under it while it starts, so what it drops is not missed.
- */
 const rings = (region: Region, detail: number): string[] =>
   (region.d.match(/M[^M]*/g) ?? [])
     .map(points)
@@ -128,10 +120,8 @@ const rings = (region: Region, detail: number): string[] =>
       return `${kept.map(([x, y], i) => `${i ? "L" : "M"}${x / 10} ${y / 10}`).join("")}Z`;
     });
 
-/** A piece may also be thinned by this share of its own diagonal, so a continent keeps no more points than its size can show. */
 const RELATIVE = 0.012;
 
-/** Px squared of bounding box below which a piece of a region isn't morphed. */
 const MIN_PIECE = 150;
 
 const circle = ({ x, y }: Point, r: number) =>
@@ -139,21 +129,16 @@ const circle = ({ x, y }: Point, r: number) =>
 
 const rectangle = ({ x, y, w, h }: Rect) => `M${x} ${y}H${x + w}V${y + h}H${x}Z`;
 
-/** What a morph turns a region into: a part that knows its region. */
 type Morphing = Part & { readonly region: Region };
 
 interface Target<P extends Morphing> {
   readonly region: Region;
   readonly value: number;
-  /** The one closed shape the mainland becomes. */
   readonly to: string;
-  /** Where the region's other pieces shrink to. */
   readonly center: Point;
-  /** The part the region becomes, before the morph gives it a span. */
   readonly part: Omit<P, "span">;
 }
 
-/** Each region as its outline, then as its target: the pieces other than the mainland shrink into the target's center. */
 function morphs<P extends Morphing>(
   when: Span,
   targets: readonly Target<P>[],
@@ -221,7 +206,6 @@ function morphs<P extends Morphing>(
   };
 }
 
-/** The keys that carry a single positive number each, as `[region, value]`. */
 const singles = (map: GeoMap, values: RegionValues, what: string): [Region, number][] => {
   const { found } = resolveRegions(map, values);
 
@@ -257,10 +241,6 @@ interface Disc {
   readonly oy: number;
 }
 
-/**
- * Pushes circles apart until none overlap. Each is pulled gently back toward its origin, and each overlapping pair
- * moves apart along the line between them, the smaller one further. Deterministic, and kept inside `frame`.
- */
 function relax(discs: Disc[], gap: number, frame: Rect): void {
   for (let pass = 0; pass < 400; pass++) {
     const pull = 0.04 * (1 - pass / 400);
@@ -302,9 +282,8 @@ function relax(discs: Disc[], gap: number, frame: Rect): void {
 const tenth = (v: number) => Math.round(v * 10) / 10;
 
 /**
- * A Dorling cartogram: a circle per region with its area in proportion to its value, at the region's centroid and
- * nudged apart until none overlap. Each region morphs from its outline into its circle during `when`. Worked out while the
- * scene compiles. Regions in `values` need a positive number; the others come back in `rest`.
+ * A Dorling cartogram: a circle per region, area proportional to its value, morphing from its outline during `when`.
+ * Regions in `values` need a positive number; the others come back in `rest`.
  */
 export function cartogram(
   when: Span,

@@ -1,17 +1,8 @@
-// A scene's params as plain data. A scene exports a schema and stays a pure function of the values, so it is a
-// template: the CLI, the editor and the author's own build each call it with values of their own.
-//
-//   export const params = { title: text("Launch"), flowers: count(5, { min: 1, max: 12 }) };
-//   export default (p = defaults(params)) => render(...);
-//
-// The schema crosses a worker boundary as is, a page reads it to draw controls, and `parse` reads untrusted JSON
-// through it.
 import { hexOf, type Hex } from "./color";
 import type { Point } from "./layout/box";
 import { ease, type Ease } from "./motion";
 
 interface Labelled {
-  /** What a control calls the value, when the key alone does not say. */
   readonly label?: string;
 }
 
@@ -50,25 +41,20 @@ export interface TextParam extends Labelled {
   readonly maxLength?: number;
 }
 
-/** A param that holds one value: everything but a list. */
 export type ScalarParam = NumberParam | ColorParam | EasingParam | ChoiceParam | TextParam;
 
-/** A list item's fields, each a scalar param whose value is the field's default. */
 export type Fields = { readonly [key: string]: ScalarParam };
 
-/** What one item of a list holds: a scalar's value, or a record of its fields' values. */
 export type ItemValue<I extends ScalarParam | Fields> = I extends ScalarParam
   ? I["value"]
   : { readonly [K in keyof I]: I[K] extends ScalarParam ? I[K]["value"] : never };
 
 export interface ListParam<I extends ScalarParam | Fields = ScalarParam | Fields> extends Labelled {
   readonly kind: "list";
-  /** One item's schema: a scalar param, or a record of them. */
   readonly item: I;
   readonly value: readonly ItemValue<I>[];
   /** The fewest items, 0 by default. */
   readonly min: number;
-  /** The most items, unbounded when absent. */
   readonly max?: number;
 }
 
@@ -202,7 +188,6 @@ export const list = <const I extends ScalarParam | Fields>(
   return { ...declared, value: valueOf(declared, value, "list()") as ListParam<I>["value"] };
 };
 
-/** Every param's declared value: what the scene draws when nobody has touched a control. */
 export const defaults = <S extends Schema>(schema: S): Values<S> =>
   // SAFETY: the entries are exactly the schema's keys, each mapped to that param's own value.
   Object.fromEntries(Object.entries(schema).map(([key, p]) => [key, p.value])) as Values<S>;
@@ -211,12 +196,10 @@ type NumberKeys<S extends Schema> = {
   [K in keyof S]: S[K] extends NumberParam ? K : never;
 }[keyof S];
 
-/** Where the handle for each number param sits in the picture, in scene coordinates, given every value. */
 export type Handles<S extends Schema> = (values: Values<S>) => {
   readonly [K in NumberKeys<S>]?: Point;
 };
 
-/** What JSON.parse returns: the shape untrusted values arrive in. */
 export type Json = null | boolean | number | string | readonly Json[] | JsonObject;
 
 export type JsonObject = { readonly [key: string]: Json };
@@ -264,7 +247,6 @@ const easeOf = (v: Json | undefined, path: string): Ease => {
   );
 };
 
-/** `v` read as a value of `p`, or an error naming `path` and what to fix. A record item's missing fields take their defaults. */
 const valueOf = (p: Param, v: Json | undefined, path: string): Param["value"] => {
   switch (p.kind) {
     case "number": {

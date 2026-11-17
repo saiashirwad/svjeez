@@ -118,9 +118,6 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("a curve starting to draw shows no round-cap dot at its far end", async () => {
-    // With a gap as long as the path, the dash after the visible one starts at the path's end while the offset is
-    // near 1, and a curve's measured length leaves it there as a zero-length dash that a round cap paints as a dot.
-    // The rect hides the curve's start, so anything painted in the draw's first frames is that dot.
     const curve = render(
       { width: 70, height: 40, duration: 1, title: "Curve" },
       <>
@@ -630,7 +627,6 @@ describe("restyle", () => {
       expect(await opacityAfter(restyle(own, { still: true }))).toBe(0);
     });
 
-    /** Screenshots of the SVG shown as an `<img>`, the way a page shows it, after each wait in milliseconds. */
     const asImage = async (
       svg: string,
       waits: readonly number[],

@@ -46,7 +46,10 @@ export function Arrow({
   readonly width?: number;
   /** Length of the head's barbs in px. Default 8. */
   readonly head?: number;
-  /** When the shaft draws; the head lands as it ends. Must lie inside `show`. Default: from the start of `show`, over 0.6s or half of it, whichever is shorter. */
+  /**
+   * When the shaft draws; the head lands as it ends. Must lie inside `show`. Default: start of `show`, over
+   * min(0.6, half of `show`) seconds.
+   */
   readonly draw?: Span;
   /** The shaft's ease. Default `ease.out`, as `draw()`. */
   readonly ease?: Ease;
@@ -54,7 +57,6 @@ export function Arrow({
   const span = show;
   const shaft = drawing ?? { at: span.at, over: Math.min(0.6, span.over / 2) };
 
-  // A shaft that outlives `show` would be cut off mid-stroke, so say so rather than clip it.
   if (shaft.at < span.at - 1e-9 || shaft.at + shaft.over > span.at + span.over + 1e-9)
     throw new Error(
       `Arrow draw must lie inside show: draw runs ${shaft.at} to ${shaft.at + shaft.over}s, show runs ${span.at} to ${span.at + span.over}s. Start draw no earlier than show and end it no later.`,
@@ -94,7 +96,10 @@ export function Arrow({
   );
 }
 
-/** A note box beside `target`, joined to it by a short leader. `columns` is the line length in characters. With `font`, the box fits the measured lines. */
+/**
+ * A note box beside `target` with a short leader. `columns` is the line length in characters; with `font`, the box
+ * fits the measured lines.
+ */
 export function Callout({
   target,
   side = "right",

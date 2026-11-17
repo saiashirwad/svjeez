@@ -10,7 +10,6 @@ export function ColorControl({ editor, value }: { editor: Editor; value: ValueOf
   const input = useRef<HTMLInputElement>(null);
   const pick = useRef<ReturnType<typeof stroke<"color">> | null>(null);
 
-  // React's onChange is the native input event, so the end of a pick is only seen on the native change event.
   useEffect(() => {
     const el = input.current;
 

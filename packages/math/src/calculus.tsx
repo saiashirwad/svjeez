@@ -31,7 +31,6 @@ export interface Sweep extends Span {
   readonly ease?: Ease;
 }
 
-/** A graph value over time: a number holds still, a sweep moves it, and sweeps in a row chain, holding between them. */
 export type Moving = number | Sweep | readonly Sweep[];
 
 export interface CalculusDotOptions {
@@ -43,7 +42,6 @@ export interface CalculusDotOptions {
 
 export interface CalculusDot {
   readonly node: SvgNode;
-  /** The dot's travel as `x`/`y`. Put it on a `<g>` to carry a label with the dot. */
   readonly motion: Motion<"x" | "y">;
   /** Where the dot is at scene time `t`, in scene px. */
   point(t: Seconds): Point;
@@ -86,7 +84,6 @@ export interface RiemannOptions {
   /** Default the x range. */
   readonly from?: number;
   readonly to?: number;
-  /** Rectangle counts, one per stage. */
   readonly n: number | readonly number[];
   /** Default `ease.inOut`. */
   readonly ease?: Ease;
@@ -100,7 +97,6 @@ export interface RiemannOptions {
 
 export interface Riemann {
   readonly node: SvgNode;
-  /** The Riemann sum of each stage, in graph units. */
   readonly sums: readonly number[];
 }
 
@@ -125,25 +121,18 @@ export interface CalculusMorphOptions extends Omit<CalculusCurveOptions, "color"
 
 export interface CalculusCurve {
   readonly node: SvgNode;
-  /** The path data. A gap in the curve starts a new `M`. */
   readonly d: PathData;
-  /** Every sampled point that was drawn, in scene px. */
   readonly points: readonly Point[];
 }
 
-/** Calculus on a set of axes: values that move along a function, lines that touch it, areas under it, curves that bend. */
 export interface Calculus {
-  /** A dot on `f` at `x`, which rides the curve as `x` moves. */
   dot(f: Fn, x: Moving, options?: CalculusDotOptions): CalculusDot;
   /** The tangent to `f` at `x`, sliding along the curve as `x` moves. */
   tangent(f: Fn, x: Moving, options?: CalculusLineOptions): CalculusLine;
   /** The line through `f` at `x` and `x + h`. Move `h` to 0 and it settles onto the tangent. */
   secant(f: Fn, x: Moving, h: Moving, options?: CalculusLineOptions): CalculusLine;
-  /** The region between `f` and `base` from `from` to `to`; either bound can move. */
   area(f: Fn, from: Moving, to: Moving, options?: CalculusAreaOptions): CalculusArea;
-  /** Riemann rectangles under `f` that split into the next stage's count, as one path whose `d` morphs. */
   riemann(stages: readonly Span[], f: Fn, options: RiemannOptions): Riemann;
-  /** One curve that bends from each function into the next, sampled on one grid so its `d` morphs. */
   morph(stages: readonly Span[], fs: readonly Fn[], options?: CalculusMorphOptions): CalculusCurve;
   /** The curve `(t) => [x, y]` for `t` across `range`. */
   parametric(
@@ -159,7 +148,6 @@ export interface Calculus {
   ): CalculusCurve;
 }
 
-/** What `axes()` hands the calculus methods. */
 export interface GraphContext {
   readonly x: readonly [number, number];
   readonly y: readonly [number, number];
@@ -212,7 +200,6 @@ const valueOf = (m: Moving, what: string): ((t: Seconds) => number) => {
   };
 };
 
-/** When the last sweep among `ms` ends, or 0 when none moves. */
 const endOf = (...ms: Moving[]): Seconds =>
   Math.max(0, ...ms.flatMap(sweepsOf).map((s) => s.at + s.over));
 
@@ -240,7 +227,6 @@ const checkStages = (what: string, count: number, spans: readonly Span[]): void 
   });
 };
 
-/** A motion over stages of path data, each later stage reached during its own span. */
 const stagesOf = (
   ds: readonly PathData[],
   spans: readonly Span[],
@@ -263,11 +249,9 @@ export function calculus(graph: GraphContext): Calculus {
   const { x: xr, y: yr, bounds, theme, clip, point } = graph;
   const [xSpan, ySpan] = [xr[1] - xr[0], yr[1] - yr[0]];
   const [low, high] = [yr[0] - ySpan, yr[1] + ySpan];
-  // Just past the plot, so a point leaving it bends at a steady speed and the clip hides the rest.
   const clamp = (y: number) => Math.min(yr[1] + ySpan * 0.1, Math.max(yr[0] - ySpan * 0.1, y));
   const [sx, sy] = [bounds.w / xSpan, bounds.h / ySpan];
 
-  /** A path whose data `at(t)` writes, baked into a `d` motion when it moves before `end`. */
   const movingPath = (
     end: Seconds,
     at: (t: Seconds) => PathData,
@@ -325,7 +309,6 @@ export function calculus(graph: GraphContext): Calculus {
     return (f(x + h) - f(x - h)) / (2 * h);
   };
 
-  /** A segment through `p` along graph slope `m`, `length` px long, centered on `center`. */
   const segment = (center: Point, m: number, length: number): PathData => {
     const [dx, dy] = [sx, -m * sy];
     const norm = Math.hypot(dx, dy);
@@ -501,7 +484,6 @@ export function calculus(graph: GraphContext): Calculus {
 
     const sums = heights.map((hs) => (hs.reduce((s, h) => s + h, 0) * (to - from)) / hs.length);
 
-    /** `most` rectangles per stage, each a copy of the stage rectangle it lies in, so every stage has the same commands. */
     const ds = ns.map((n, s) => {
       const rects = Array.from({ length: most }, (_, k) => {
         const j = Math.floor((k * n) / most);
@@ -532,7 +514,6 @@ export function calculus(graph: GraphContext): Calculus {
     };
   }
 
-  /** Graph points to path data, breaking where a point is missing, leaves the range well behind, or jumps by more than the range. */
   const trace = (
     what: string,
     samples: readonly (readonly [number, number])[],

@@ -27,7 +27,7 @@ export function Focus({
   if (!(fade >= 0 && Number.isFinite(fade)))
     throw new Error(`Focus() needs a fade of 0 or more, got ${fade}.`);
 
-  /** Stops that touch merge, so back-to-back stops keep the dim instead of flashing bright between them. With `fade: 0` the dim cuts, as `show()` does. */
+  /** Stops that touch merge, so back-to-back stops keep the dim. With `fade: 0` the dim cuts. */
   const shade = mergeSpans(stops.map((stop) => stop.show)).reduce(
     (track, [at, end]) => {
       if (fade === 0) {

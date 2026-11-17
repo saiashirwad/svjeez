@@ -4,7 +4,6 @@ import type { LonLat } from "./index.ts";
 
 const RAD = Math.PI / 180;
 
-/** Wraps a longitude into -180 to 180. */
 const wrap = (lon: number) => ((((lon + 180) % 360) + 360) % 360) - 180;
 
 /**

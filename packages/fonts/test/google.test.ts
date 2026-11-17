@@ -13,7 +13,6 @@ import { google } from "../src/index.ts";
 
 const fixture = new URL("../../svjeez/tests/fixtures/ABeeZee-Regular.ttf", import.meta.url);
 
-// The tests that reach Google need a network, and skip when there is none.
 const online = await fetch("https://fonts.googleapis.com/", {
   method: "HEAD",
   signal: AbortSignal.timeout(3000),

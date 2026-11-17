@@ -1,10 +1,8 @@
 import { advance, i16, required, table, u16, u32, type Sfnt } from "./sfnt";
 
-/** One glyph placed on the line. `chars` is the text it draws, more than one character for a ligature. */
 interface Placed {
   readonly glyph: number;
   readonly chars: string;
-  /** In font units, kerning included. */
   readonly advance: number;
 }
 
@@ -57,7 +55,6 @@ const format12 = (f: Sfnt, at: number): CharMap => {
   };
 };
 
-/** The Unicode subtable: full repertoire (format 12) before BMP (format 4). */
 const charMap = (f: Sfnt): CharMap => {
   const cmap = required(f, "cmap");
 
@@ -81,7 +78,6 @@ const charMap = (f: Sfnt): CharMap => {
   throw new Error("This font has no Unicode character map (cmap format 4 or 12).");
 };
 
-/** Coverage index of a glyph, or -1. */
 const coverage = (f: Sfnt, at: number, glyph: number): number => {
   const count = u16(f, at + 2);
 
@@ -124,7 +120,6 @@ interface Lookup {
   readonly subtables: readonly number[];
 }
 
-/** A lookup's type, flag and subtables, with an extension lookup (GSUB 7, GPOS 9) unwrapped to its real type. */
 const lookupAt = (f: Sfnt, lookupList: number, index: number, extension: number): Lookup => {
   const lookup = lookupList + u16(f, lookupList + 2 + 2 * index);
   const type = u16(f, lookup);
@@ -148,7 +143,6 @@ const lookupAt = (f: Sfnt, lookupList: number, index: number, extension: number)
 const tagAt = (f: Sfnt, at: number): string =>
   String.fromCharCode(...[0, 1, 2, 3].map((k) => f.view.getUint8(at + k)));
 
-/** Indices of the lookups that a language system's features turn on, for the features `wanted` accepts. */
 const langSysLookups = (
   f: Sfnt,
   featureList: number,
@@ -166,7 +160,6 @@ const langSysLookups = (
   }
 };
 
-/** Subtables of the lookups that the given features turn on, in lookup order, for the Latin script or the default. */
 const lookups = (
   f: Sfnt,
   tag: "GSUB" | "GPOS",
@@ -203,14 +196,12 @@ const lookups = (
     .map((index) => lookupAt(f, at + u16(f, at + 8), index, extension));
 };
 
-/** Features a browser applies without being asked, in some script. */
 const DEFAULT_FEATURES = new Set(
   "abvf abvm abvs akhn blwf blwm blws calt ccmp cfar cjct clig curs dist fin2 fin3 fina half haln init isol kern liga ljmo locl ltra ltrm mark med2 medi mkmk nukt pref pres pstf psts rclt rkrf rlig rphf rtla rtlm rvrn stch tjmo vatu vjmo".split(
     " ",
   ),
 );
 
-/** Every lookup a default feature turns on in any script's default language system, which is what text without `lang` gets. */
 const defaultLookups = (f: Sfnt, tag: "GSUB" | "GPOS", extension: number): Lookup[] => {
   const at = table(f, tag);
 
@@ -235,14 +226,8 @@ const defaultLookups = (f: Sfnt, tag: "GSUB" | "GPOS", extension: number): Looku
   return [...indices].map((index) => lookupAt(f, at + u16(f, at + 8), index, extension));
 };
 
-/** Lookup flags that make a rule skip glyphs by their GDEF class, so its sequence need not be contiguous in the text. */
 const SKIPS = 0xff1e;
 
-/**
- * Whether a subtable could apply somewhere in these runs of glyphs. Format 3 contextual rules and reverse chaining are
- * matched in place. Other contextual formats are judged by their first glyph, and rules that skip glyphs by every
- * coverage meeting some glyph, which errs toward yes.
- */
 const mayApply = (
   f: Sfnt,
   tag: "GSUB" | "GPOS",
@@ -291,7 +276,6 @@ const mayApply = (
   );
 };
 
-/** GSUB type 4: replace a run of glyphs with one ligature glyph. */
 const ligate = (f: Sfnt, subtable: number, run: Placed[], i: number): number => {
   const index = coverage(f, subtable + u16(f, subtable + 2), run[i]!.glyph);
 
@@ -331,11 +315,9 @@ const bits = (n: number): number => {
   return count;
 };
 
-/** The XAdvance of a ValueRecord, which is all that horizontal Latin kerning uses. */
 const xAdvance = (f: Sfnt, record: number, format: number): number =>
   format & 4 ? i16(f, record + 2 * bits(format & 3)) : 0;
 
-/** GPOS type 2: the kerning between two glyphs, or undefined when this subtable does not cover the pair. */
 const kern = (f: Sfnt, subtable: number, first: number, second: number): number | undefined => {
   const index = coverage(f, subtable + u16(f, subtable + 2), first);
 
@@ -371,20 +353,11 @@ const kern = (f: Sfnt, subtable: number, first: number, second: number): number 
 export interface Typesetter {
   readonly layoutGlyphs: (text: string) => readonly Placed[];
   readonly glyph: (char: string) => number;
-  /** Pair kerning between two glyphs in font units. */
   readonly kern: (left: number, right: number) => number;
-  /**
-   * Whether a browser could substitute or position these runs of glyphs, one per text, through a lookup this typesetter
-   * does not apply: contextual alternates, mark positioning, the forms of another script. Errs toward yes.
-   */
   readonly beyond: (runs: readonly (readonly number[])[]) => boolean;
 }
 
-/**
- * Glyphs for a line of text with the features a browser turns on by default for Latin: standard ligatures and pair kerning.
- * No bidi, no contextual alternates, no mark positioning, so complex scripts will not match the browser.
- * Without `withLigatures`, one glyph per character and pair kerning only.
- */
+/** No bidi, contextual alternates or mark positioning, so complex scripts will not match the browser. */
 export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
   const map = charMap(f);
 
@@ -450,7 +423,6 @@ export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
   };
 };
 
-/** The kerning between two glyphs from the old `kern` table, format 0, for fonts without GPOS kerning. */
 const legacyKern = (f: Sfnt, at: number, left: number, right: number): number => {
   if (u16(f, at) !== 0) return 0;
   const key = left * 65536 + right;

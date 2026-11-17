@@ -1,4 +1,3 @@
-// Scenes run in their own Vite environment because the app may compile .tsx as React; getScene() runs inside it too.
 import { fileURLToPath } from "node:url";
 import {
   createRunnableDevEnvironment,
@@ -11,17 +10,14 @@ import type { PosterOptions } from "./posters.ts";
 import type { SceneImage, SceneSource } from "./scene.ts";
 
 export interface Runner {
-  /** Runs a scene module and compiles it. `dependencies` are its file and the files it imports, directly or not. */
   load(
     file: string,
     posters: boolean | PosterOptions,
   ): Promise<{ image: SceneImage; dependencies: string[] }>;
-  /** Forgets a changed file and every module that imports it, so the next load runs them again. */
   invalidate(file: string): void;
   close(): Promise<void>;
 }
 
-// Without an extension, so it resolves to scene.ts in this repository and to scene.js in the published package.
 const SCENE = fileURLToPath(new URL("./scene", import.meta.url));
 
 const files = (node: EnvironmentModuleNode, found = new Set([node.file!])): Set<string> => {
@@ -38,7 +34,6 @@ export const createRunner = (app: ResolvedConfig): Runner => {
   let environment: RunnableDevEnvironment | undefined;
 
   const ready = (async () => {
-    // A client-only build has no server environment, and then the scene environment keeps Vite's defaults.
     const { conditions, externalConditions, noExternal, external } =
       app.environments.ssr?.resolve ?? {};
 
@@ -57,9 +52,7 @@ export const createRunner = (app: ResolvedConfig): Runner => {
             resolve: {
               conditions,
               externalConditions,
-              // A runtime that bundles everything (Cloudflare's server environment) sets noExternal: true. Scenes run in
-              // Node's module runner, which cannot evaluate a CommonJS dependency such as MathJax, so they keep Vite's
-              // default: linked workspace packages compile and installed packages load through Node.
+              // Node's module runner cannot evaluate CommonJS such as MathJax, so `noExternal: true` is not passed through.
               noExternal: noExternal === true ? undefined : noExternal,
               external,
             },

@@ -14,7 +14,6 @@ beforeAll(async () => {
     root: `${import.meta.dirname}/app`,
     configFile: false,
     logLevel: "warn",
-    // The compile worker runs svjeez's own .tsx, which is not React and has no window for the refresh runtime.
     plugins: [react({ include: /packages\/react\/(src|test)\/.*\.tsx$/ })],
     resolve: { conditions: ["@svjeez/source", ...defaultClientConditions] },
     server: { port: 0, fs: { allow: [`${import.meta.dirname}/../../..`] } },
@@ -30,7 +29,6 @@ afterAll(async () => {
   await server?.close();
 });
 
-/** The app on a scene, once its first compile has put a picture on screen. */
 const open = async (scene = "", extra = "") => {
   const page = await browser.newPage({ viewport: { width: 1000, height: 1100 } });
   await page.goto(`${origin}?scene=${scene}${extra}`);
@@ -49,7 +47,6 @@ const shot = async (page: Page, name: string) => {
 const source = (page: Page) => page.locator(".sj-source").evaluate((el) => el.textContent ?? "");
 const picture = (page: Page) => page.locator("img.sj-img").getAttribute("src");
 
-/** Waits for the picture to be swapped for a newer one, which happens only after a compile and decode. */
 const repainted = (page: Page, was: string | null) =>
   page.waitForFunction(
     (url) => document.querySelector("img.sj-img")?.getAttribute("src") !== url,

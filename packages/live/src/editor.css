@@ -75,7 +75,6 @@
   color: var(--_muted);
 }
 
-/* Long lines scroll sideways rather than wrap, and the right edge fades while there is more to the right. */
 @property --sj-more {
   syntax: "<length>";
   inherits: false;
@@ -165,8 +164,6 @@
 .sj-punct {
   color: var(--_punct);
 }
-
-/* ----- controls */
 
 .sj-num,
 .sj-ease,
@@ -359,8 +356,6 @@
   display: none;
 }
 
-/* ----- curve editor */
-
 .sj-pop {
   position: fixed;
   inset: auto;
@@ -431,8 +426,6 @@
   color: var(--_fn);
 }
 
-/* ----- picture */
-
 .sj-picture {
   position: relative;
   margin: 0;
@@ -469,8 +462,6 @@
   outline: none;
 }
 
-/* A grip is a bright knob in the accent color that pings now and then to say it can be dragged, grows under the
-   pointer, and squashes when it is grabbed. */
 .sj-grip::before {
   content: "";
   position: absolute;
@@ -498,7 +489,6 @@
     0 0.2rem 0.6rem oklch(0% 0 0 / 0.35);
 }
 
-/* A grip says what it holds while it is held or selected. */
 .sj-grip::after {
   content: attr(data-text);
   position: absolute;
@@ -530,7 +520,6 @@
     animation: sj-ping 2.4s var(--_out) infinite;
   }
 
-  /* Grips take turns to ping, and stop once one is in hand. */
   .sj-grip:nth-of-type(2n)::before {
     animation-delay: 1.2s;
   }
@@ -564,8 +553,6 @@
       translate 0.15s var(--_out);
   }
 }
-
-/* ----- transport */
 
 .sj-transport {
   display: flex;
@@ -605,7 +592,6 @@
   fill: currentColor;
 }
 
-/* A thin track filled up to the playhead (--sj-p, set by the component), and a small round thumb that grows when held. */
 .sj-scrub {
   --_track: 0.25rem;
   --_thumb: 0.875rem;
@@ -692,8 +678,6 @@
   text-align: end;
   font-variant-numeric: tabular-nums;
 }
-
-/* ----- stats */
 
 .sj-stats {
   display: flex;

@@ -1,6 +1,5 @@
 import { round } from "./matrix.ts";
 
-/** The number of coordinates each absolute command takes. MathJax's font only uses the first six. */
 const ARITY = new Map([
   ["M", 2],
   ["L", 2],
@@ -46,7 +45,6 @@ export function pathPoints(d: string): [number, number][] {
   return points;
 }
 
-/** A closed box as path data. */
 export const boxPath = (x: number, y: number, w: number, h: number): string =>
   `M${round(x)} ${round(y)}H${round(x + w)}V${round(y + h)}H${round(x)}Z`;
 

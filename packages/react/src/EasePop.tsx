@@ -26,7 +26,6 @@ export function EasePop({
 }: {
   editor: Editor;
   value: ValueOf<"ease">;
-  /** The glyph the popover opened from, which it sits under and returns focus to. */
   anchor: HTMLElement;
   onClose: () => void;
 }) {
@@ -62,8 +61,7 @@ export function EasePop({
 
       if (!(hit instanceof Node) || pop.current?.contains(hit) || anchor.contains(hit)) return;
 
-      // Unmounting a focused handle sends no blur, which would leave the ease selected; the pointer's own focus change
-      // then blurs the glyph instead.
+      // Unmounting a focused handle sends no blur; the pointer's focus change then blurs the glyph.
       if (pop.current?.contains(document.activeElement)) anchor.focus();
       close.current();
     };

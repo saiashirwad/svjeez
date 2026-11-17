@@ -12,8 +12,8 @@ export interface FitTextOptions {
 }
 
 /**
- * The largest whole-pixel font size, up to `max`, at which every line of `text` fits in `width`. Widths scale
- * with size, so one measurement settles it; no search. `tail` reserves ems of room after the last line.
+ * The largest whole-pixel font size, up to `max`, at which every line of `text` fits in `width`. `tail` reserves
+ * ems of room after the last line.
  */
 export const fitText = (
   font: Font,
@@ -27,7 +27,6 @@ export const fitText = (
       `fitText() needs at least one line, a positive width and a max of at least min, got ${lines.length} lines, width ${width}, max ${max} and min ${min}.`,
     );
 
-  // Measured at 1px, so each width is its line's advance in ems.
   const ems = Math.max(
     ...lines.map((line, i) => font.measure(line, 1) + (i === lines.length - 1 ? tail : 0)),
   );

@@ -1,9 +1,7 @@
-/** An SVG `matrix(a b c d e f)`: x' = a·x + c·y + e, y' = b·x + d·y + f. */
 export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
 
 export const identity: Matrix = [1, 0, 0, 1, 0, 0];
 
-/** `m` applied after `n`. */
 export const multiply = (m: Matrix, n: Matrix): Matrix => [
   m[0] * n[0] + m[2] * n[1],
   m[1] * n[0] + m[3] * n[1],

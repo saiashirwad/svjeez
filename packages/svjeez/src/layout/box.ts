@@ -7,5 +7,4 @@ export interface Size {
 
 export interface Box extends Point, Size {}
 
-/** Rank axis down the page (`TB`) or across it (`LR`). */
 export type Direction = "TB" | "LR";

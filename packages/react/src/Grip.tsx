@@ -30,7 +30,6 @@ export function Grip({
 
   const down = (e: PointerEvent<HTMLElement>) => {
     if (e.button !== 0) return;
-    // No text selection or native drag starts under the pointer, which would cancel this one.
     e.preventDefault();
     e.currentTarget.focus();
     e.currentTarget.setPointerCapture(e.pointerId);

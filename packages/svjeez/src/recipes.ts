@@ -31,7 +31,6 @@ const closed = ({ at, over }: Span, what: string): Span => {
   return { at, over };
 };
 
-/** A positive finite `rate`, or the default when left out. */
 const rateOf = (rate: number | undefined, fallback: number, what: string): number => {
   const value = rate ?? fallback;
 
@@ -168,10 +167,6 @@ type LaneOf<C extends NumericChannel> = (typeof CHANNELS)[C]["lane"];
 
 type Sampled = NumericChannel | NumericProperty;
 
-/**
- * Per lane, the most the replay may stray from the samples, in the lane's own units. `x` and `y` share `translate`,
- * measured as px distance. A property is its own lane.
- */
 type Tolerance = { readonly [L in LaneOf<NumericChannel> | NumericProperty]?: number };
 
 type Covered<T extends Tolerance> = {
@@ -229,10 +224,6 @@ interface Point {
 const distance = (a: Point, b: Point): number =>
   Math.hypot(...a.values.map((value, c) => value - b.values[c]!));
 
-/**
- * The two points either side of a jump between `a` and `b`, or undefined if the lane moves smoothly between them.
- * Halving the span shrinks a smooth change with it, so a change that survives every halving is a jump.
- */
 const jump = (
   a: Point,
   b: Point,
@@ -374,8 +365,4 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   return track as Motion<keyof V & Sampled>;
 }
 
-/**
- * Sample `(t) => d` densely, then keep only the keys the shape needs. `tolerance` is one number of px, and
- * `precision` the decimal places of the path data. Every sample must have the same commands, as `matchPaths()` writes them.
- */
 sampled.path = samplePath;

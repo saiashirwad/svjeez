@@ -9,13 +9,10 @@ export { ROUTE, writeScenes } from "./assets.ts";
 
 export type { PosterOptions } from "./posters.ts";
 
-/** What a `?svjeez` import gives. */
 export interface SceneModule {
-  /** The SVG's URL. */
   readonly src: string;
   readonly width: number;
   readonly height: number;
-  /** The SVG's <title> and <desc>, for alt text. */
   readonly title: string;
   readonly desc: string;
   /** A still frame per color scheme, for `?svjeez&posters`. */
@@ -23,7 +20,6 @@ export interface SceneModule {
 }
 
 export interface SvjeezOptions {
-  /** How `?svjeez&posters` renders its stills. */
   readonly posters?: PosterOptions;
   /** Where posters are kept between runs. Default `svjeez/` in Vite's cache directory. */
   readonly cacheDir?: string;
@@ -33,7 +29,6 @@ const QUERY = /\?svjeez(&posters)?$/;
 
 export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let config: ResolvedConfig;
-  // One runner per environment, since a build closes each environment on its own.
   const runners = new Map<string, Runner>();
 
   return {
@@ -44,7 +39,6 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       assets.cache = pathToFileURL(`${options.cacheDir ?? join(config.cacheDir, "svjeez")}/`);
     },
     configureServer(server) {
-      // Every edit of a scene registers a new hash, so a long session keeps only the newest.
       assets.limit = 500;
 
       server.middlewares.use(ROUTE, async (request, response, next) => {

@@ -4,7 +4,6 @@ import type { Seconds } from "./motion";
 import { rateOf } from "./rate";
 
 export interface RestyleOptions {
-  /** CSS added after the scene's own, so its rules win: a scheme's `--base00`…`--base0F`, for one. */
   readonly css?: string;
   /** Start this many scene seconds in, as if the copy had been playing that long. */
   readonly at?: Seconds;
@@ -40,7 +39,6 @@ const PAUSE = "*{animation-play-state:paused!important}";
  */
 const HOLD = 0.001;
 
-/** How long an `<animate>` runs: `dur` times a numeric `repeatCount`, or forever. */
 const activeDuration = (tag: string): Seconds => {
   const dur = parseFloat(/\sdur="([\d.]+)s"/.exec(tag)?.[1] ?? "");
   const repeats = parseFloat(/\srepeatCount="([\d.]+)"/.exec(tag)?.[1] ?? "");
@@ -54,11 +52,6 @@ const WINDOWED =
 const attr = (tag: string, name: string): string =>
   new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1] ?? "";
 
-/**
- * A windowed `<animate>` (see `windowed` in smil.ts) with its `<set>`, seen `clock` seconds into the loop. Paused, it holds
- * the frame at the clock. Otherwise it starts there. The attribute holds the window's last value, so the first value is
- * set before the window, and the last again once the clock is past it.
- */
 const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean) => {
   const loop = parseFloat(attr(tag, "data-loop"));
   const start = parseFloat(attr(tag, "begin"));
@@ -83,7 +76,6 @@ const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean)
 
   const over = clock >= start + length;
   const begin = `${num(start - clock + (over ? loop : 0))}s;${id}.begin+${num(loop)}s`;
-  // The compiler's reset for the loops after the first, when the window leaves a different value behind.
   const again = /\sbegin="[^"]*;([^"]*\.begin\+[^"]*)"/.exec(sets)?.[1];
 
   return (
@@ -96,14 +88,8 @@ const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean)
 
 const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** The seconds in a comma list of `s` durations. */
 const secondsOf = (list: string): number[] => list.split(",").map((one) => parseFloat(one));
 
-/**
- * CSS that makes every animation of the scene run once over a timeline. The timeline stretches an animation's whole run
- * over its range, so each rule's time durations stay as the weights they are and a finite count of loop / duration makes
- * every one end with the loop.
- */
 const timelineCss = (svg: string, timeline: string, range: string | undefined): string => {
   if (!/^(--[\w-]+|[a-z-]+\(.*\))$/.test(timeline))
     throw new Error(
@@ -122,7 +108,6 @@ const timelineCss = (svg: string, timeline: string, range: string | undefined): 
   if (!base) return "";
 
   const loop = parseFloat(base[1]!);
-  // Parts inside <Ambient> carry this class and keep the clock, so no rule here may reach them.
   const scrubbed = `:not(.${root}c)`;
   const rules: string[] = [];
 
@@ -173,7 +158,6 @@ export const restyle = (
 
   if (still) out = out.replace(REDUCED_MOTION, "@media all{");
   else if (at || paused || onceAt !== undefined) {
-    // The tools take scene seconds, and the animations run in playback seconds.
     const loop = (at ?? 0) / rate;
     const once = (onceAt ?? at ?? 0) / rate;
     const clocks = `--t0:-${num(loop)}s${onceAt === undefined ? "" : `;--t1:-${num(once)}s`}`;
@@ -191,7 +175,6 @@ export const restyle = (
       // repeats a set number of times ends no earlier than just after the start.
       const runs = activeDuration(tag);
 
-      // Held, an animation runs from `clock` seconds before the end to the end, and so freezes on the frame at `clock`.
       const begin = paused
         ? HOLD - Math.max(Math.min(clock, runs), HOLD)
         : -Math.min(clock, runs - HOLD);

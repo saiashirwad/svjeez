@@ -1,10 +1,6 @@
 import { i16, required, table, u16, u32, type Sfnt } from "./sfnt";
 import type { Typesetter } from "./shape";
 
-/**
- * Tables that go: variation data (the subset is the default instance), layout tables (kerning is rebuilt as a `kern`
- * table, and a scene whose text could meet any other lookup embeds the whole font instead), per-glyph device metrics, and the signature.
- */
 const DROP = new Set([
   "GSUB",
   "GPOS",
@@ -37,7 +33,6 @@ const glyphRange = (f: Sfnt, glyph: number): readonly [number, number] => {
   return [at(glyph), at(glyph + 1)];
 };
 
-/** The glyphs a composite glyph is built from, all the way down. */
 const withComponents = (f: Sfnt, glyphs: Set<number>): Set<number> => {
   const glyf = required(f, "glyf");
   const queue = [...glyphs];
@@ -84,14 +79,12 @@ class Writer {
   }
 }
 
-/** binarySearchHeader fields for `count` entries of `size` bytes. */
 const search = (count: number, size: number) => {
   const power = 2 ** Math.floor(Math.log2(Math.max(1, count)));
 
   return { range: power * size, selector: Math.log2(power), shift: count * size - power * size };
 };
 
-/** A format 4 cmap for the BMP characters, plus a format 12 one when any character lies beyond it. */
 const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
   const sorted = [...pairs].sort((a, b) => a[0] - b[0]);
   const segments = sorted.filter(([code]) => code < 0xffff);
@@ -155,10 +148,7 @@ const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
   return Uint8Array.from([...head, ...bmp, ...full.done()]);
 };
 
-/**
- * A version 0 `kern` table of format 0 subtables. Browsers fall back to it when a font has no GPOS. A subtable's length is
- * a u16, so it holds at most 10920 pairs, and more pairs go into further subtables in sorted order, none dropped.
- */
+/** A subtable's length is a u16, so it holds at most 10920 pairs; more go into further subtables. */
 export const kernTable = (
   pairs: readonly (readonly [number, number, number])[],
   perSubtable = 10000,
@@ -233,13 +223,6 @@ const assemble = (tables: Map<string, Uint8Array>): Uint8Array => {
   return out;
 };
 
-/**
- * The font cut down to the glyphs that `texts` use. Glyph ids stay as they are, so only the outlines of every other glyph
- * are dropped, the character map is rebuilt for these characters, and pair kerning among them moves to a `kern` table.
- * Returns undefined when the text forms ligatures or could meet any other layout lookup, such as contextual alternates
- * or mark positioning, which a subset without GSUB and GPOS would no longer apply. With `layout` false the caller has
- * opted out of those lookups, so dropping them is the point and the text always cuts.
- */
 export const subset = (
   bytes: Uint8Array,
   f: Sfnt,

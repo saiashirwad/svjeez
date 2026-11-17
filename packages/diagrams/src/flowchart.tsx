@@ -52,25 +52,22 @@ export interface FlowchartOptions<N extends string = string> extends DiagramOpti
   /** Default `"TB"`. */
   readonly direction?: Direction;
   /**
-   * Nodes appear in rank order after the first rank; each edge draws on as the later of its ends appears; a group fades
-   * in with its first member. From a start `at` they follow `step` apart (default 0.4), or each comes at its own time.
-   * A record such as `{ build: 1, test: 2.5 }` schedules nodes by id instead, and the ones it leaves out are there from
-   * the start.
+   * Nodes appear in rank order, edges as the later of their ends does, groups with their first member. From a start
+   * `at` they follow `step` apart (default 0.4), or each at its own time. A record such as `{ build: 1, test: 2.5 }`
+   * times nodes by id; omitted ones are there from the start.
    */
   readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
 }
 
 /**
- * Its parts are the nodes, then the groups, then the edges, by ids such as `"pr->post"`. An edge's box covers its line
- * and label, and its span is when it draws on, label included. Two edges between the same nodes share an id, and
- * `part()` finds the first.
+ * Parts are the nodes, groups, then edges by id such as `"pr->post"`. An edge's span is when it draws on, label
+ * included. Edges between the same nodes share an id; `part()` finds the first.
  */
 export interface Flowchart<
   N extends string,
   G extends string,
   E extends string = `${N}->${N}`,
 > extends Diagram<N | G | E> {
-  /** The drawn line of the first edge `from` → `to`. */
   edge(from: N, to: N): Point[];
   /** The shortest directed path through edges, as one polyline through each node on the way. */
   route(from: N, to: N): Point[];
@@ -149,7 +146,6 @@ export function flowchart<
     );
 
   const step = play?.step ?? 0.4;
-  /** The first rank is there from the start, so no frame is empty; the rest follow in order. */
   const later = order.filter((id) => laid.rank.get(id)! > 0);
   const shown = schedule(play?.at ?? 0, later, order, step, "flowchart() play");
 
@@ -212,7 +208,6 @@ export function flowchart<
     ),
   ]);
 
-  /** When the group fades in with its first member, or -Infinity when one is there from the start. */
   const groupAt = (g: FlowchartGroup<Id>) => Math.min(...g.nodes.map((n) => shown.get(n)!));
 
   const appears = (id: string) => {

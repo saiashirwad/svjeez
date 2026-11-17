@@ -10,9 +10,7 @@
     onclose,
   }: {
     editor: SceneEditor;
-    value: ValueOf<"ease">;
-    /** The glyph the popover opened from, which it sits under and returns focus to. */
-    anchor: HTMLElement;
+    value: ValueOf<"ease">;    anchor: HTMLElement;
     onclose: () => void;
   } = $props();
 

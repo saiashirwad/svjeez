@@ -98,14 +98,12 @@ export const propertyRule = (name: string, key: Property): string => {
 
 export type CssPart = string | { readonly property: Property };
 
-/** CSS text that names properties before render has named them. */
 export class Css {
   constructor(readonly parts: readonly CssPart[]) {}
 }
 
 export const isCss = (value: unknown): value is Css => value instanceof Css;
 
-/** `` css`.dot{translate:calc(${px} * 1px) 0}` ``: a property hole becomes `var(--pN)`. */
 const cssTag = (
   strings: TemplateStringsArray,
   ...holes: readonly (Property | Css | number)[]

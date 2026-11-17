@@ -3,12 +3,10 @@ import { segments } from "./pathTokens";
 import { span, checkWindow, type Span } from "./span";
 import { NUDGE, ease, motion, type Motion, type Seconds } from "./motion";
 
-/** SVG path data, as a `<path d>` takes it. */
 export type PathData = `M${string}` | `m${string}`;
 
 type Vec = readonly [number, number];
 
-/** A cubic from the previous end: two controls and an end. */
 type Cubic = readonly [Vec, Vec, Vec];
 
 interface Ring {
@@ -37,7 +35,6 @@ const lerp = (a: Vec, b: Vec, u: number): Vec => [
 
 const line = (a: Vec, b: Vec): Cubic => [lerp(a, b, 1 / 3), lerp(a, b, 2 / 3), b];
 
-/** Arc to cubics, after the SVG implementation notes' endpoint-to-center conversion. */
 const arc = (
   from: Vec,
   rx: number,
@@ -102,7 +99,6 @@ const arc = (
   });
 };
 
-/** Every subpath of `d` as absolute cubics. */
 const parse = (d: string): Ring[] => {
   const rings: Ring[] = [];
   let curves: Cubic[] = [];
@@ -220,7 +216,6 @@ const parse = (d: string): Ring[] => {
   return rings;
 };
 
-/** The curve split at its middle, by de Casteljau. */
 const halve = (from: Vec, [c1, c2, to]: Cubic): [Cubic, Cubic] => {
   const a = lerp(from, c1, 0.5);
   const b = lerp(c1, c2, 0.5);
@@ -237,7 +232,6 @@ const halve = (from: Vec, [c1, c2, to]: Cubic): [Cubic, Cubic] => {
 
 const chord = (from: Vec, curve: Cubic) => Math.hypot(curve[2][0] - from[0], curve[2][1] - from[1]);
 
-/** Split the longest curves in half until the ring has `count` of them. */
 const split = (ring: Ring, count: number): Ring => {
   const curves = ring.curves.length > 0 ? [...ring.curves] : [line(ring.start, ring.start)];
 
@@ -257,7 +251,6 @@ const split = (ring: Ring, count: number): Ring => {
   return { ...ring, curves };
 };
 
-/** The same closed ring, starting `by` curves later. */
 const rotate = (ring: Ring, by: number): Ring => {
   if (by === 0) return ring;
   const curves = [...ring.curves.slice(by), ...ring.curves.slice(0, by)];
@@ -267,7 +260,6 @@ const rotate = (ring: Ring, by: number): Ring => {
 
 const ends = (ring: Ring): Vec[] => ring.curves.map((curve) => curve[2]);
 
-/** Turn a closed ring to start where it lies closest to `target`, point for point. */
 const align = (ring: Ring, target: Ring): Ring => {
   if (!ring.closed || !target.closed) return ring;
   const [a, b] = [ends(ring), ends(target)];
@@ -309,15 +301,9 @@ const write = (rings: readonly Ring[], places: number): PathData =>
     .join("") as PathData;
 
 export interface MatchOptions {
-  /** Decimal places in the output. Default 2. */
   readonly precision?: number;
 }
 
-/**
- * The same shapes rewritten so each has the same commands, ready for `motion({ d })`. Subpaths pair by order, and a
- * shape with fewer grows its missing ones from a point. Each closed ring starts where it lies closest to the
- * ring before it, so a morph doesn't twist.
- */
 export function matchPaths(paths: readonly string[], options: MatchOptions = {}): PathData[] {
   const places = options.precision ?? 2;
 
@@ -361,10 +347,6 @@ export function matchPaths(paths: readonly string[], options: MatchOptions = {})
   return even.map((rings) => write(rings, places));
 }
 
-/**
- * The path `a` eased `amount` of the way to `b`, number for number. Both must carry the same commands, as
- * `matchPaths()` writes them, so their numbers pair up one to one.
- */
 export const blendPaths = (a: string, b: string, amount: number): PathData => {
   const to = segments(b).flatMap((s) => s.numbers);
   let k = 0;
@@ -377,7 +359,6 @@ export const blendPaths = (a: string, b: string, amount: number): PathData => {
     .join("") as PathData;
 };
 
-/** The commands of a path with every number taken out, so two paths can be checked for a smooth morph. */
 export const commandsOf = (d: string): string =>
   segments(d)
     .map((s) => s.letter + "#".repeat(s.numbers.length))
@@ -386,20 +367,12 @@ export const commandsOf = (d: string): string =>
 const numbers = (d: string): number[] => segments(d).flatMap((s) => s.numbers);
 
 export type SampledPathOptions = {
-  /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
-  /** How far, in px, any point of the replay may stray from the samples. */
   readonly tolerance: number;
-  /** Decimal places in the path data. Default 1. */
   readonly precision?: number;
-  /**
-   * Px beyond `tolerance` that a point may stray, given where it sits in a sample, for points nobody sees, such as
-   * the hidden side of a globe folded out past its clip. Numbers are read in pairs as points. Default none.
-   */
   readonly slack?: (x: number, y: number) => number;
 };
 
-/** What `sampled.path()` does when `sample` returns path data and `tolerance` is a number of px. */
 export function samplePath(
   window: Span,
   sample: (t: Seconds) => string,
@@ -439,7 +412,6 @@ export function samplePath(
       )
     : undefined;
 
-  /** The worst point distance between frame i and the straight blend of frames a and b, less the slack it has. */
   const miss = (a: number, b: number, i: number) => {
     const u = (times[i]! - times[a]!) / (times[b]! - times[a]!);
     let worst = 0;

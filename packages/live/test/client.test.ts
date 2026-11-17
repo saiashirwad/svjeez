@@ -30,7 +30,6 @@ describe("createCompiler", () => {
   });
 });
 
-/** A stand-in worker that answers each compile after `ms`, and never answers a source of `loop`. */
 const fakeWorkers = (ms: number) => {
   const made = { spawned: 0, terminated: 0 };
   const real = globalThis.Worker;

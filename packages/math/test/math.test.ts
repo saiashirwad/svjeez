@@ -106,7 +106,6 @@ describe("tex", () => {
     const out = svg(f.write({ at: 0.5, over: 2 }).node);
     expect(out.match(/<path /g)).toHaveLength(f.words.length * 2);
     expect(out.match(/stroke-dasharray="1 2"/g)).toHaveLength(f.words.length);
-    // Outline, its fade and the fill, at times of each glyph's own, so no two glyphs share keyframes.
     expect(out.match(/@keyframes/g)).toHaveLength(f.words.length * 3);
   });
 
@@ -158,7 +157,6 @@ describe("morph over equations", () => {
 
   test("glyphs of the same character and size carry over, and the rest fade", () => {
     const out = svg(morph([a, b], { at: [1], over: 1 }).node);
-    // a, +, b and the superscript 2 carry over. The full-size 2 is new, since a 2 cannot scale.
     expect(out.match(/<path /g)).toHaveLength(a.words.length + b.words.length - 4);
   });
 

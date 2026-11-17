@@ -16,7 +16,6 @@ export interface PosterOptions {
 
 assets.close = close;
 
-/** The frame the scene itself holds under prefers-reduced-motion, else most of the way through. */
 const stillAt = (svg: string, duration: number) => {
   const held = /animation-delay:-([\d.]+)s!important/.exec(svg);
 
@@ -40,7 +39,6 @@ const render = async (
   return encode(frames[0]!.png, "webp", quality);
 };
 
-// Each render launches Chromium, so a page full of new scenes renders a few at a time.
 const LANES = 4;
 let running = 0;
 const queue: (() => void)[] = [];
@@ -59,7 +57,6 @@ const limit = async <T>(task: () => Promise<T>): Promise<T> => {
 
 const pending = new Map<string, Promise<Uint8Array>>();
 
-/** The poster `file` of `svg`, from the disk cache or freshly rendered. */
 export const poster = (
   file: string,
   svg: string,
@@ -85,7 +82,6 @@ export const poster = (
     pending.set(file, job);
     job.catch(() => pending.delete(file));
 
-    // A rendered poster is on disk, so the oldest jobs go once there are more than the dev server keeps.
     for (const old of pending.keys()) {
       if (pending.size <= (assets.limit ?? Infinity)) break;
       pending.delete(old);
