@@ -214,14 +214,14 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     <Hero />
 
     <section class="wrap sec g" id="film">
-      <h2 class="c1-8 xl"><a class="anchor" href="#film">Recorded UI</a></h2>
+      <h2 class="c1-12 xl"><a class="anchor" href="#film">Recorded UI</a></h2>
       <p class="sub c1-8">A real React app, recorded by <a href={pkg("dom")}>@svjeez/dom</a>.</p>
       <figure class="c1-8"><div class="win"><LiveScene scene={s.board} cost={40} name="board" bar={0} alt="A project board, filmed from its React demo. A command palette opens and narrows to New issue as it is typed into, then turns into a dialog where a title is typed and a label and assignee are picked. The new card lands in Todo, is dragged to In progress and marked done, while the counts, the cycle's progress and the sidebar update and a toast confirms." /></div></figure>
       <Code class="code side c9-12" code={demo} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="play">
-      <h2 class="c1-8"><a class="anchor" href="#play">Live editor</a></h2>
+      <h2 class="c1-12"><a class="anchor" href="#play">Live editor</a></h2>
       <p class="sub c1-8">Drag any value in the code.</p>
       <div class="c1-12">
         <Editor client:visible first={first} />
@@ -237,7 +237,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <div class="tint">
       <section class="wrap sec g" id="explain">
-        <h2 class="c1-8 xl"><a class="anchor" href="#explain">Code, diagrams and math</a></h2>
+        <h2 class="c1-12 xl"><a class="anchor" href="#explain">Code, diagrams and math</a></h2>
         <p class="sub c1-8"><a href={pkg("code")}>@svjeez/code</a> · <a href={pkg("diagrams")}>diagrams</a> · <a href={pkg("mermaid")}>mermaid</a> · <a href={pkg("math")}>math</a></p>
         <div class="big c1-12">
           <div class="win">
@@ -269,7 +269,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </div>
 
     <section class="wrap sec g" id="data">
-      <h2 class="c1-8 xl"><a class="anchor" href="#data">Charts and maps</a></h2>
+      <h2 class="c1-12 xl"><a class="anchor" href="#data">Charts and maps</a></h2>
       <p class="sub c1-8"><code>svjeez svg scene.tsx --params data.json</code></p>
       <div class="wall c1-12">
         <figure class="tile strip">
@@ -292,7 +292,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </section>
 
     <section class="wrap sec g" id="light-dark">
-      <h2 class="c1-8"><a class="anchor" href="#light-dark">Light and dark</a></h2>
+      <h2 class="c1-12"><a class="anchor" href="#light-dark">Light and dark</a></h2>
       <div class="stagewrap c1-8">
         <DayNight scene={s.dayNight} alt="Blip by day and by night, from one file. In light it bounces beside an open flower under the sun while a butterfly loops around. In dark it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking." />
       </div>
@@ -300,7 +300,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </section>
 
     <section class="wrap sec g" id="where">
-      <h2 class="c1-8"><a class="anchor" href="#where">Where it plays</a></h2>
+      <h2 class="c1-12"><a class="anchor" href="#where">Where it plays</a></h2>
       <p class="sub c1-8">READMEs, docs, any web page. <code>svjeez video</code> for the rest.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.whereReadme} cost={8} name="readme" bar={36} alt="A README page with an animated dot-matrix image in the middle." /></div><h3>READMEs</h3></figure>
       <figure class="c7-12"><div class="win"><LiveScene scene={s.whereDocs} cost={4} name="docs" bar={36} alt="A docs page with a diagram in which a packet travels between two boxes." /></div><h3>Docs and blogs</h3></figure>
@@ -308,7 +308,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <div class="tint">
       <section class="wrap sec g" id="agents">
-        <h2 class="c1-8"><a class="anchor" href="#agents">Agent skill</a></h2>
+        <h2 class="c1-12"><a class="anchor" href="#agents">Agent skill</a></h2>
         <p class="sub c1-8"><code>npx svjeez skill --install</code></p>
         <div class="big c1-12">
           <div class="win desk">
@@ -320,7 +320,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </div>
 
     <section class="wrap sec g" id="more">
-      <h2 class="c1-8"><a class="anchor" href="#more">Also included</a></h2>
+      <h2 class="c1-12"><a class="anchor" href="#more">Also included</a></h2>
       <div class="wall small c1-12">
         {
           more.map((tile) => (
@@ -336,7 +336,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </section>
 
     <section class="wrap close" id="start">
-      <h2><a class="anchor" href="#start">Everything you just watched was an <code>&lt;img&gt;</code>.</a></h2>
+      <h2><a class="anchor" href="#start">Get started</a></h2>
       <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped, <b>{total("script")}</b> bytes of JavaScript.</p>
       <div class="ways">
         <div class="way">
