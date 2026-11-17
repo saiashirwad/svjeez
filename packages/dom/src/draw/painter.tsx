@@ -41,6 +41,7 @@ import {
   borderRing,
   morphable,
   offset,
+  shifted,
   outlineRing,
   matrix,
   paddingBox,
@@ -150,6 +151,9 @@ export const painter = (
   const seen = new Map<string, number>();
   // Whether a box that only moved is slid whole; off, it is drawn shape by shape as before `hold` existed.
   let rigid = true;
+  // Whether a box that moved is slid as one group even when it changed too; off only to count what drawing every
+  // shape on its own would run.
+  let slide = true;
   // Keyed elements that change parent in the transition being drawn.
   let carry: Carried = { carried: new Map(), left: new Set(), above: new Set() };
   // Text that moves between elements in the transition being drawn.
@@ -843,6 +847,46 @@ export const painter = (
       );
     }
 
+    // A box that moved and changed too, or any box that moved when drawing shape by shape, is still slid whole: one group carries everything in it from `a`'s place to
+    // `b`'s, and inside it `a`, drawn where `b` is, turns into `b`. Moving each shape on its own would put the
+    // outline on SMIL's clock and the text on CSS's, and browsers start those apart (WebKit by ~50ms), so the
+    // contents would drift off the box while it moves.
+    const dx = a && b.box.x - a.box.x;
+    const dy = a && b.box.y - a.box.y;
+
+    if (
+      slide &&
+      a &&
+      tween &&
+      !textMotion &&
+      (dx || dy) &&
+      !runsOf(b).some((r) => moves.moved.has(r)) &&
+      !runsOf(a).some((r) => moves.gone.has(r)) &&
+      // A keyed element that changed parent inside it moves on its own; `a` and `b` themselves may be one.
+      a.children.every((c) => insideOf(c, carry.left).length === 0) &&
+      b.children.every((c) => insideOf(c, new Set(carry.carried.keys())).length === 0)
+    ) {
+      // A box that is see-through at one end can't be followed there, so it fades where it can be seen instead of
+      // sliding: Logseq's add button drops below the new block as it hides, and drawn sliding it reads as the bullet
+      // jumping down.
+      if (a.opacity === 0 || b.opacity === 0) {
+        const there = a.opacity === 0 ? b.box : a.box;
+
+        return a.opacity === 0
+          ? box(b, { a: shifted(a, there.x - a.box.x, there.y - a.box.y), tween })
+          : box(shifted(b, there.x - b.box.x, there.y - b.box.y), { a, tween });
+      }
+
+      const turned = box(b, { a: shifted(a, dx!, dy!), tween });
+
+      if (drawsNothing(turned)) return turned;
+
+      const node = <g animation={slideIn(tween, -dx!, -dy!)}>{turned}</g>;
+
+      // Drawing `b` again would count its parts twice.
+      return Object.keys(parts).length === 0 ? settles(node, undefined, box(b)) : node;
+    }
+
     const inner = paddingBox(b);
     const innerFrom = a && paddingBox(a);
     const clipD = rounded(inner.rect, inner.radii);
@@ -926,9 +970,16 @@ export const painter = (
   };
 
   /** A whole tree, as `b`, or as `a` turning into `b`. */
-  const root = (b: Box, from?: { a: Box; tween: Tween }, textMotion?: TextMotion, whole = true) => {
+  const root = (
+    b: Box,
+    from?: { a: Box; tween: Tween },
+    textMotion?: TextMotion,
+    whole = true,
+    slides = true,
+  ) => {
     seen.clear();
     rigid = whole;
+    slide = slides;
 
     carry = from
       ? carriedOf(from.a, b, pairBy)

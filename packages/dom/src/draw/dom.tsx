@@ -97,6 +97,11 @@ export function Dom({
       paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween }, undefined, false),
     );
 
+    // Every shape moved on its own, as before boxes slid as groups: the most animations holding may run.
+    const ceiling = tweens.map((tween, i) =>
+      paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween }, undefined, false, false),
+    );
+
     segments = hold(
       drawings,
       plain,
@@ -108,6 +113,7 @@ export function Dom({
         return { at: start, over: cuts[to]! - start };
       },
       duration(states),
+      ceiling,
     );
   }
 

@@ -12,10 +12,7 @@
       <path d="M108 188H1022V212H108Z" fill="#000"/>
     </clipPath>
     <clipPath id="c4">
-      <rect x="92" y="172" width="244.55" height="48" class="dm">
-        <animate id="w1" attributeName="width" values="16;27.55;33.58;42.56;55.66;59.53;68.98;78.8;83.3;92.34;101.94;111.75;120.19;129.52;139.31;143.81;156.91;160.78;166.02;175.48;179.98;188.42;197.42;201.3;210.63;219.72;244.55" keyTimes="0;0.44969;0.47172;0.49373;0.51573;0.53773;0.55977;0.58177;0.60377;0.62581;0.64782;0.66982;0.69182;0.71386;0.73586;0.75786;0.7799;0.80191;0.82391;0.84591;0.86795;0.88995;0.91195;0.93399;0.956;0.978;1" calcMode="discrete" begin="0s;w1.begin+9s" dur="2.4461s" fill="freeze" data-loop="9s"/>
-      </rect>
-      <rect x="92" y="172" width="244.55" height="48" class="ds" display="none"/>
+      <rect x="-152.55" y="172" width="244.55" height="48" class="a m4"/>
     </clipPath>
     <clipPath id="c5">
       <path d="M1018.31 99H1068V118.98H1018.31Z" fill="#000"/>
@@ -108,10 +105,7 @@
       <path d="M964 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H964A4 4 0 0 1 960 611V599A4 4 0 0 1 964 595Z" fill="#000"/>
     </clipPath>
     <clipPath id="c11">
-      <rect x="95" y="67" width="100.72" height="60" class="dm">
-        <animate id="w3" attributeName="width" values="20;30.56;41.8;46.64;58.31;69.67;100.72" keyTimes="0;0.87805;0.90245;0.92683;0.95122;0.97562;1" calcMode="discrete" begin="0s;w3.begin+9s" dur="6.15s" fill="freeze" data-loop="9s"/>
-      </rect>
-      <rect x="95" y="67" width="100.72" height="60" class="ds" display="none"/>
+      <rect x="-5.72" y="67" width="100.72" height="60" class="a m25"/>
     </clipPath>
     <clipPath id="c12">
       <path d="M112 159H988A8 8 0 0 1 996 167V196.98A8 8 0 0 1 988 204.98H112A8 8 0 0 1 104 196.98V167A8 8 0 0 1 112 159Z" fill="#000"/>
@@ -160,11 +154,11 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
 .a{animation-duration:9s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,10.556%{opacity:0}12.222%,100%{opacity:1}}
 .m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k2{0%,8.889%{translate:0px -28px}12.222%,100%{translate:0px 0px}}
+@keyframes k2{0%,8.889%{opacity:0.5}12.222%,100%{opacity:0}}
 .m2{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k3{0%,8.889%{opacity:0.5}12.222%,100%{opacity:0}}
-.m3{animation-name:k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k4{0%{visibility:visible}12.222%,100%{visibility:hidden}}
+@keyframes k3{0%{visibility:visible}12.222%,100%{visibility:hidden}}
+.m3{animation-name:k3;animation-timing-function:steps(1)}
+@keyframes k4{0%{translate:16px 0px}12.222%{translate:27.55px 0px}12.821%{translate:33.58px 0px}13.419%{translate:42.56px 0px}14.017%{translate:55.66px 0px}14.615%{translate:59.53px 0px}15.214%{translate:68.98px 0px}15.812%{translate:78.8px 0px}16.41%{translate:83.3px 0px}17.009%{translate:92.34px 0px}17.607%{translate:101.94px 0px}18.205%{translate:111.75px 0px}18.803%{translate:120.19px 0px}19.402%{translate:129.52px 0px}20%{translate:139.31px 0px}20.598%{translate:143.81px 0px}21.197%{translate:156.91px 0px}21.795%{translate:160.78px 0px}22.393%{translate:166.02px 0px}22.991%{translate:175.48px 0px}23.59%{translate:179.98px 0px}24.188%{translate:188.42px 0px}24.786%{translate:197.42px 0px}25.385%{translate:201.3px 0px}25.983%{translate:210.63px 0px}26.581%{translate:219.72px 0px}27.179%,100%{translate:244.55px 0px}}
 .m4{animation-name:k4;animation-timing-function:steps(1)}
 @keyframes k5{0%{translate:0px 0px}12.222%{translate:11.55px 0px}12.821%{translate:17.58px 0px}13.419%{translate:26.56px 0px}14.017%{translate:39.66px 0px}14.615%{translate:43.53px 0px}15.214%{translate:52.98px 0px}15.812%{translate:62.8px 0px}16.41%{translate:67.3px 0px}17.009%{translate:76.34px 0px}17.607%{translate:85.94px 0px}18.205%{translate:95.75px 0px}18.803%{translate:104.19px 0px}19.402%{translate:113.52px 0px}20%{translate:123.31px 0px}20.598%{translate:127.81px 0px}21.197%{translate:140.91px 0px}21.795%{translate:144.78px 0px}22.393%{translate:150.02px 0px}22.991%{translate:159.48px 0px}23.59%{translate:163.98px 0px}24.188%{translate:172.42px 0px}24.786%{translate:181.42px 0px}25.385%{translate:185.3px 0px}25.983%{translate:194.63px 0px}26.581%{translate:203.72px 0px}27.179%,100%{translate:212.55px 0px}}
 @keyframes k6{0%,27.778%,100%{opacity:0}12.222%,12.821%,13.419%,14.017%,14.615%,15.214%,15.812%,16.41%,17.009%,17.607%,18.205%,18.803%,19.402%,20%,20.598%,21.197%,21.795%,22.393%,22.991%,23.59%,24.188%,24.786%,25.385%,25.983%,26.581%,27.179%{opacity:1}}
@@ -175,65 +169,77 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
 .m7{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k9{0%,37.222%,100%{visibility:hidden}30%{visibility:visible}}
 .m8{animation-name:k9;animation-timing-function:steps(1)}
-@keyframes k10{0%,38.889%{translate:-200px 0px}46.667%,100%{translate:0px 0px}}
+@keyframes k10{0%,38.889%{translate:154px 0px}46.667%,100%{translate:0px 0px}}
 .m9{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k11{0%,38.889%{translate:-46px 0px}46.667%,100%{translate:0px 0px}}
+@keyframes k11{0%,38.889%{translate:46px 0px}46.667%,100%{translate:0px 0px}}
 .m10{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k12{0%,42.778%{opacity:0}46.667%,100%{opacity:1}}
+@keyframes k12{0%,38.889%{translate:-246px 0px}46.667%,100%{translate:0px 0px}}
 .m11{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k13{0%,38.889%{fill:var(--dom-ku1fcr)}46.667%,100%{fill:var(--dom-4f2k5)}}
+@keyframes k13{0%,42.778%{opacity:0}46.667%,100%{opacity:1}}
 .m12{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k14{0%,38.889%{opacity:0.7}46.667%,100%{opacity:1}}
+@keyframes k14{0%,38.889%{fill:var(--dom-ku1fcr)}46.667%,100%{fill:var(--dom-4f2k5)}}
 .m13{animation-name:k14;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k15{0%,51.111%,100%{visibility:hidden}37.222%{visibility:visible}}
-.m14{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%,55.556%{fill:var(--dom-4f2k5)}60%,100%{fill:var(--dom-ku1fcr)}}
+@keyframes k15{0%,38.889%{opacity:0.7}46.667%,100%{opacity:1}}
+.m14{animation-name:k15;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k16{0%,38.889%{translate:174px 0px}46.667%,100%{translate:0px 0px}}
 .m15{animation-name:k16;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k17{0%,55.556%{opacity:1}60%,100%{opacity:0.7}}
+@keyframes k17{0%,38.889%{translate:-174px 0px}46.667%,100%{translate:0px 0px}}
 .m16{animation-name:k17;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k18{0%,55.556%{fill:var(--dom-1fm7r1t)}60%,100%{fill:var(--dom-z5gn29)}}
-.m17{animation-name:k18;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k19{0%,57.778%{opacity:0}60%,100%{opacity:1}}
+@keyframes k18{0%,51.111%,100%{visibility:hidden}37.222%{visibility:visible}}
+.m17{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%,55.556%{fill:var(--dom-4f2k5)}60%,100%{fill:var(--dom-ku1fcr)}}
 .m18{animation-name:k19;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k20{0%,60%,100%{visibility:hidden}51.111%{visibility:visible}}
-.m19{animation-name:k20;animation-timing-function:steps(1)}
-@keyframes k21{0%{opacity:1}60%,100%{opacity:0}}
-.m20{animation-name:k21;animation-timing-function:steps(1)}
-@keyframes k22{0%{translate:0px 0px}60%{translate:10.56px 0px}61.667%{translate:21.8px 0px}63.333%{translate:26.64px 0px}65%{translate:38.31px 0px}66.667%{translate:49.67px 0px}68.333%,100%{translate:60.72px 0px}}
-@keyframes k23{0%,70%,100%{opacity:0}60%,61.667%,63.333%,65%,66.667%,68.333%{opacity:1}}
-.m21{animation-name:k22,k23;animation-timing-function:steps(1),steps(1)}
-@keyframes k24{0%,60%{fill:var(--dom-9cx12p)}70%,100%{fill:var(--dom-37ffwz)}}
-.m22{animation-name:k24;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k25{0%,65%{opacity:0}70%,100%{opacity:1}}
-.m23{animation-name:k25;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k26{0%,60%{opacity:0.5}70%,100%{opacity:1}}
-.m24{animation-name:k26;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k27{0%,60%{opacity:1}64.5%,100%{opacity:0}}
-@keyframes k28{0%,60%{translate:0px 0px}70%,100%{translate:-319.41px 0px}}
-.m25{animation-name:k27,k28;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k29{0%,64.5%{opacity:0}70%,100%{opacity:1}}
-@keyframes k30{0%,60%{translate:319.41px 0px}70%,100%{translate:0px 0px}}
-.m26{animation-name:k29,k30;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k31{0%,60%{translate:317.14px 0px}70%,100%{translate:0px 0px}}
-.m27{animation-name:k31;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k32{0%,77.778%,100%{visibility:hidden}60%{visibility:visible}}
-.m28{animation-name:k32;animation-timing-function:steps(1)}
-@keyframes k33{0%,85.556%{fill:var(--dom-ku1fcr)}91.111%,100%{fill:var(--dom-4f2k5)}}
-.m29{animation-name:k33;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k34{0%,85.556%{opacity:0.7}91.111%,100%{opacity:1}}
-.m30{animation-name:k34;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k35{0%,85.556%{fill:var(--dom-z5gn29)}91.111%,100%{fill:var(--dom-1fm7r1t)}}
-.m31{animation-name:k35;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k36{0%,85.556%{opacity:1}88.333%,100%{opacity:0}}
-.m32{animation-name:k36;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k37{0%{visibility:hidden}77.778%,100%{visibility:visible}}
-.m33{animation-name:k37;animation-timing-function:steps(1)}
+@keyframes k20{0%,55.556%{opacity:1}60%,100%{opacity:0.7}}
+.m19{animation-name:k20;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k21{0%,55.556%{fill:var(--dom-1fm7r1t)}60%,100%{fill:var(--dom-z5gn29)}}
+.m20{animation-name:k21;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k22{0%,55.556%{translate:708px 48px}60%,100%{translate:0px 0px}}
+.m21{animation-name:k22;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k23{0%,57.778%{opacity:0}60%,100%{opacity:1}}
+.m22{animation-name:k23;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k24{0%,60%,100%{visibility:hidden}51.111%{visibility:visible}}
+.m23{animation-name:k24;animation-timing-function:steps(1)}
+@keyframes k25{0%{opacity:1}60%,100%{opacity:0}}
+.m24{animation-name:k25;animation-timing-function:steps(1)}
+@keyframes k26{0%{translate:20px 0px}60%{translate:30.56px 0px}61.667%{translate:41.8px 0px}63.333%{translate:46.64px 0px}65%{translate:58.31px 0px}66.667%{translate:69.67px 0px}68.333%,100%{translate:100.72px 0px}}
+.m25{animation-name:k26;animation-timing-function:steps(1)}
+@keyframes k27{0%{translate:0px 0px}60%{translate:10.56px 0px}61.667%{translate:21.8px 0px}63.333%{translate:26.64px 0px}65%{translate:38.31px 0px}66.667%{translate:49.67px 0px}68.333%,100%{translate:60.72px 0px}}
+@keyframes k28{0%,70%,100%{opacity:0}60%,61.667%,63.333%,65%,66.667%,68.333%{opacity:1}}
+.m26{animation-name:k27,k28;animation-timing-function:steps(1),steps(1)}
+@keyframes k29{0%,60%{fill:var(--dom-9cx12p)}70%,100%{fill:var(--dom-37ffwz)}}
+.m27{animation-name:k29;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k30{0%,65%{opacity:0}70%,100%{opacity:1}}
+.m28{animation-name:k30;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k31{0%,60%{opacity:0.5}70%,100%{opacity:1}}
+.m29{animation-name:k31;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k32{0%,60%{opacity:1}64.5%,100%{opacity:0}}
+.m30{animation-name:k32;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k33{0%,64.5%{opacity:0}70%,100%{opacity:1}}
+.m31{animation-name:k33;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k34{0%,60%{translate:-2.27px 0px}70%,100%{translate:0px 0px}}
+.m32{animation-name:k34;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k35{0%,60%{translate:319.41px 0px}70%,100%{translate:0px 0px}}
+.m33{animation-name:k35;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k36{0%,77.778%,100%{visibility:hidden}60%{visibility:visible}}
+.m34{animation-name:k36;animation-timing-function:steps(1)}
+@keyframes k37{0%,85.556%{fill:var(--dom-ku1fcr)}91.111%,100%{fill:var(--dom-4f2k5)}}
+.m35{animation-name:k37;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k38{0%,85.556%{opacity:0.7}91.111%,100%{opacity:1}}
+.m36{animation-name:k38;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k39{0%,85.556%{fill:var(--dom-z5gn29)}91.111%,100%{fill:var(--dom-1fm7r1t)}}
+.m37{animation-name:k39;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k40{0%,85.556%{translate:-708px -48px}91.111%,100%{translate:0px 0px}}
+.m38{animation-name:k40;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k41{0%,85.556%{opacity:1}88.333%,100%{opacity:0}}
+.m39{animation-name:k41;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k42{0%{visibility:hidden}77.778%,100%{visibility:visible}}
+.m40{animation-name:k42;animation-timing-function:steps(1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.65s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g>
 
     <path d="M0 0H1100V700H0Z" fill="var(--dom-1sn25ac)"/>
-    <g clip-path="url(#c1)" class="a m4">
+    <g clip-path="url(#c1)" class="a m3">
       <path d="M0 0H1100V700H0Z" fill="var(--dom-1sn25ac)"/>
       <g opacity="0">
         <text x="96" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
@@ -255,11 +261,9 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <path d="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" fill="var(--dom-1ocl0q)"/>
         </g>
       </g>
-      <g class="a m3">
-        <g class="a m2">
-          <g opacity="0.8">
-            <path d="M96 224.8H95.99A3.2 3.2 0 0 1 99.19 228V227.99A3.2 3.2 0 0 1 95.99 231.19H96A3.2 3.2 0 0 1 92.8 227.99V228A3.2 3.2 0 0 1 96 224.8Z" fill="var(--dom-1ocl0q)"/>
-          </g>
+      <g class="a m2">
+        <g opacity="0.8">
+          <path d="M96 196.8H95.99A3.2 3.2 0 0 1 99.19 200V199.99A3.2 3.2 0 0 1 95.99 203.19H96A3.2 3.2 0 0 1 92.8 199.99V200A3.2 3.2 0 0 1 96 196.8Z" fill="var(--dom-1ocl0q)"/>
         </g>
       </g>
       <path d="M0 0H0V48H0Z" fill="var(--dom-apupsx)"/>
@@ -435,45 +439,39 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
     </g>
-    <g clip-path="url(#c1)" class="a m14">
+    <g clip-path="url(#c1)" class="a m17">
       <path d="M0 0H1100V700H0Z" fill="var(--dom-1sn25ac)"/>
-      <g class="a m9">
-        <g opacity="0">
-          <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
-          <text x="370.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
-        </g>
-      </g>
-      <g class="a m9">
-        <text x="288" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
-      </g>
-      <g class="a m10">
-        <g opacity="0">
-          <g opacity="0.7">
-            <text x="1009.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
+      <g class="a m11">
+        <g class="a m10">
+          <g opacity="0">
+            <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
+            <text x="370.88" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Set property</text>
           </g>
-          <g opacity="0.7">
-            <g clip-path="url(#c5)">
-              <text x="1018.31" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">Journal</text>
+          <text x="288" y="122" font-family="'Inter', sans-serif" font-size="36" font-weight="500" fill="var(--dom-1gq50us)">Nov 16th, 2026</text>
+          <g class="a m9">
+            <g opacity="0">
+              <g opacity="0.7">
+                <text x="1009.44" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">#</text>
+              </g>
+              <g opacity="0.7">
+                <g clip-path="url(#c5)">
+                  <text x="1018.31" y="114" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-qr7qt7)">Journal</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g opacity="0.8">
+            <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)"/>
+          </g>
+          <text x="308" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)">Drawing Logseq with svjeez</text>
+          <g opacity="0">
+            <g opacity="0.8">
+              <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)"/>
             </g>
           </g>
         </g>
       </g>
-      <g class="a m9">
-        <g opacity="0.8">
-          <path d="M296 196.8H295.99A3.2 3.2 0 0 1 299.19 200V199.99A3.2 3.2 0 0 1 295.99 203.19H296A3.2 3.2 0 0 1 292.8 199.99V200A3.2 3.2 0 0 1 296 196.8Z" fill="var(--dom-1ocl0q)"/>
-        </g>
-      </g>
-      <g class="a m9">
-        <text x="308" y="206" font-family="'Inter', sans-serif" font-size="16" font-weight="400" fill="var(--dom-15juv12)">Drawing Logseq with svjeez</text>
-      </g>
-      <g opacity="0">
-        <g class="a m9">
-          <g opacity="0.8">
-            <path d="M296 224.8H295.99A3.2 3.2 0 0 1 299.19 228V227.99A3.2 3.2 0 0 1 295.99 231.19H296A3.2 3.2 0 0 1 292.8 227.99V228A3.2 3.2 0 0 1 296 224.8Z" fill="var(--dom-1ocl0q)"/>
-          </g>
-        </g>
-      </g>
-      <g class="a m11">
+      <g class="a m12">
         <path d="M0 0H246V700H0Z" fill="var(--dom-ynzzz)"/>
         <path d="M0 0H246V700H0ZM0 0H245V700H0Z" fill="var(--dom-1vt1yoq)" fill-rule="evenodd"/>
         <g opacity="0.9">
@@ -589,8 +587,8 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
       <path d="M0 0H0V48H0Z" fill="var(--dom-apupsx)"/>
-      <g class="a m13">
-        <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m12"/>
+      <g class="a m14">
+        <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m13"/>
         <g transform="translate(14 14) scale(0.833 0.833) translate(0 0)">
           <path d="M4 6l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M4 12l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -603,17 +601,21 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <path d="M21 21l-6 -6" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
       </g>
-      <g opacity="var(--dom-1d6fmhg)">
-        <g transform="translate(1036 14) scale(0.833 0.833) translate(0 0)">
-          <path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </g>
-      </g>
-      <g opacity="var(--dom-1d6fmhg)">
-        <g transform="translate(1068 14) scale(0.833 0.833) translate(0 0)">
-          <path d="M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -12" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M15 4l0 16" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <g class="a m16">
+        <g class="a m15">
+          <g opacity="var(--dom-1d6fmhg)">
+            <g transform="translate(1036 14) scale(0.833 0.833) translate(0 0)">
+              <path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+          </g>
+          <g opacity="var(--dom-1d6fmhg)">
+            <g transform="translate(1068 14) scale(0.833 0.833) translate(0 0)">
+              <path d="M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -12" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 4l0 16" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+          </g>
         </g>
       </g>
       <g opacity="0.7">
@@ -627,7 +629,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
     </g>
-    <g clip-path="url(#c1)" class="a m19">
+    <g clip-path="url(#c1)" class="a m23">
       <path d="M0 0H1100V700H0Z" fill="var(--dom-1sn25ac)"/>
       <g opacity="0">
         <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
@@ -767,8 +769,8 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
       <path d="M0 0H0V48H0Z" fill="var(--dom-apupsx)"/>
-      <g class="a m16">
-        <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-4f2k5)" class="a m15"/>
+      <g class="a m19">
+        <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-4f2k5)" class="a m18"/>
         <g transform="translate(14 14) scale(0.833 0.833) translate(0 0)">
           <path d="M4 6l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M4 12l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -804,12 +806,14 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
         </g>
       </g>
-      <path d="M0 0H1100V700H0Z" fill="var(--dom-1fm7r1t)" class="a m17 dm">
-        <animate id="w2" attributeName="d" values="M708 48H1068V48H708Z;M0 0H1100V700H0Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5s;w2.begin+9s" dur="0.4s" fill="freeze" data-loop="9s"/>
-        <set attributeName="d" to="M708 48H1068V48H708Z" begin="0s;w2.begin+4s" dur="5s" fill="freeze" data-loop="9s"/>
-      </path>
-      <path d="M0 0H1100V700H0Z" fill="var(--dom-1fm7r1t)" class="a m17 ds" display="none"/>
-      <g class="a m18">
+      <g class="a m21">
+        <path d="M0 0H1100V700H0Z" fill="var(--dom-1fm7r1t)" class="a m20 dm">
+          <animate id="w1" attributeName="d" values="M0 0H360V0H0Z;M0 0H1100V700H0Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5s;w1.begin+9s" dur="0.4s" fill="freeze" data-loop="9s"/>
+          <set attributeName="d" to="M0 0H360V0H0Z" begin="0s;w1.begin+4s" dur="5s" fill="freeze" data-loop="9s"/>
+        </path>
+        <path d="M0 0H1100V700H0Z" fill="var(--dom-1fm7r1t)" class="a m20 ds" display="none"/>
+      </g>
+      <g class="a m22">
         <path d="M99 74H111V86H99Z" fill="url(#g1)"/>
         <path d="M989 74H1001V86H989Z" fill="url(#g2)"/>
         <path d="M989 86H1001V622H989Z" fill="url(#g3)"/>
@@ -863,7 +867,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
     </g>
-    <g clip-path="url(#c1)" class="a m28">
+    <g clip-path="url(#c1)" class="a m34">
       <path d="M0 0H1100V700H0Z" fill="var(--dom-1sn25ac)"/>
       <g opacity="0">
         <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
@@ -1061,27 +1065,27 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         <g opacity="var(--dom-13drd9g)">
           <path d="M102 73H998V127H102Z" fill="var(--dom-ynzzz)"/>
           <path d="M102 73H998V127H102ZM103 74H997V126H103Z" fill="var(--dom-37ffwz)" fill-rule="evenodd"/>
-          <text x="115" y="107" font-family="'Inter', sans-serif" font-size="20" font-weight="400" fill="rgb(106,114,130)" class="a m20">What are you looking for?</text>
+          <text x="115" y="107" font-family="'Inter', sans-serif" font-size="20" font-weight="400" fill="rgb(106,114,130)" class="a m24">What are you looking for?</text>
           <g>
             <g clip-path="url(#c11)">
               <text x="115" y="107" font-family="'Inter', sans-serif" font-size="20" font-weight="400" fill="var(--dom-15juv12)">svjeez</text>
             </g>
-            <rect x="115" y="89" width="1.429" height="23" fill="var(--dom-15juv12)" class="a m21"/>
+            <rect x="115" y="89" width="1.429" height="23" fill="var(--dom-15juv12)" class="a m26"/>
           </g>
         </g>
         <path d="M102 127H998V582H102Z" fill="var(--dom-ynzzz)"/>
-        <g class="a m24">
-          <path d="M102 127H998V241.98H102ZM102 127H998V240.98H102Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m22 dm">
-            <animate id="w4" attributeName="d" values="M102 127H998V159H102ZM102 127H998V159H102Z;M102 127H998V241.98H102ZM102 127H998V240.98H102Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w4.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
-            <set attributeName="d" to="M102 127H998V159H102ZM102 127H998V159H102Z" begin="0s;w4.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
+        <g class="a m29">
+          <path d="M102 127H998V241.98H102ZM102 127H998V240.98H102Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m27 dm">
+            <animate id="w2" attributeName="d" values="M102 127H998V159H102ZM102 127H998V159H102Z;M102 127H998V241.98H102ZM102 127H998V240.98H102Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.4s;w2.begin+9s" dur="0.9s" fill="freeze" data-loop="9s"/>
+            <set attributeName="d" to="M102 127H998V159H102ZM102 127H998V159H102Z" begin="0s;w2.begin+3.6s" dur="5.4s" fill="freeze" data-loop="9s"/>
           </path>
-          <path d="M102 127H998V241.98H102ZM102 127H998V240.98H102Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m22 ds" display="none"/>
-          <g class="a m23">
+          <path d="M102 127H998V241.98H102ZM102 127H998V240.98H102Z" fill="var(--dom-9cx12p)" fill-rule="evenodd" class="a m27 ds" display="none"/>
+          <g class="a m28">
             <path d="M102 127H998V159H102Z" fill="var(--dom-ynzzz)"/>
             <text x="116" y="147" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="var(--dom-1wn6jdp)">Nodes</text>
             <text x="167.95" y="146.53" font-family="'Inter', sans-serif" font-size="11.2" font-weight="400" fill="var(--dom-jgam8a)">1</text>
           </g>
-          <g class="a m23">
+          <g class="a m28">
             <path d="M112 159H988A8 8 0 0 1 996 167V196.98A8 8 0 0 1 988 204.98H112A8 8 0 0 1 104 196.98V167A8 8 0 0 1 112 159Z" fill="var(--dom-19cca6u)"/>
             <g clip-path="url(#c12)">
               <path d="M112 159H988A8 8 0 0 1 996 167V196.98A8 8 0 0 1 988 204.98H112A8 8 0 0 1 104 196.98V167A8 8 0 0 1 112 159ZM10103 10158H10103V10158H10103Z" fill="var(--dom-xq11sk)" fill-rule="evenodd"/>
@@ -1110,7 +1114,7 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
             </g>
           </g>
         </g>
-        <g class="a m23">
+        <g class="a m28">
           <g opacity="var(--dom-13drd9g)">
             <path d="M102 241.98H998V273.98H102Z" fill="var(--dom-ynzzz)"/>
             <text x="116" y="261.98" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="var(--dom-1wn6jdp)">Filters</text>
@@ -1183,57 +1187,59 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           <text x="209.81" y="607" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⏎</text>
           <text x="229.5" y="608" font-family="'Inter', sans-serif" font-size="14" font-weight="400" fill="var(--dom-15juv12)">to open search in the sidebar</text>
         </g>
-        <g opacity="0.4">
-          <g opacity="0.6">
-            <g class="a m25">
-              <text x="922.22" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Filter</text>
-            </g>
-            <g class="a m26">
-              <text x="602.81" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Open</text>
-            </g>
-          </g>
-          <g class="a m27">
-            <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" fill="var(--dom-4sz2vv)"/>
-            <g clip-path="url(#c21)">
-              <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd"/>
-              <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd"/>
-            </g>
-            <text x="647.17" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⏎</text>
-          </g>
-        </g>
-        <g class="a m23">
+        <g class="a m33">
           <g opacity="0.4">
             <g opacity="0.6">
-              <text x="694.86" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Open in sidebar</text>
+              <g class="a m30">
+                <text x="602.81" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Filter</text>
+              </g>
+              <g class="a m31">
+                <text x="602.81" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Open</text>
+              </g>
             </g>
-            <path d="M808.41 595H841.41A4 4 0 0 1 845.41 599V611A4 4 0 0 1 841.41 615H808.41A4 4 0 0 1 804.41 611V599A4 4 0 0 1 808.41 595Z" fill="var(--dom-4sz2vv)"/>
-            <g clip-path="url(#c22)">
-              <path d="M808.41 595H841.41A4 4 0 0 1 845.41 599V611A4 4 0 0 1 841.41 615H808.41A4 4 0 0 1 804.41 611V599A4 4 0 0 1 808.41 595ZM808.41 594H841.41A4 4 0 0 1 845.41 598V610A4 4 0 0 1 841.41 614H808.41A4 4 0 0 1 804.41 610V598A4 4 0 0 1 808.41 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd"/>
-              <path d="M808.41 595H841.41A4 4 0 0 1 845.41 599V611A4 4 0 0 1 841.41 615H808.41A4 4 0 0 1 804.41 611V599A4 4 0 0 1 808.41 595ZM808.41 594H841.41A4 4 0 0 1 845.41 598V610A4 4 0 0 1 841.41 614H808.41A4 4 0 0 1 804.41 610V598A4 4 0 0 1 808.41 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd"/>
+            <g class="a m32">
+              <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595Z" fill="var(--dom-4sz2vv)"/>
+              <g clip-path="url(#c21)">
+                <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd"/>
+                <path d="M646.86 595H658.86A4 4 0 0 1 662.86 599V611A4 4 0 0 1 658.86 615H646.86A4 4 0 0 1 642.86 611V599A4 4 0 0 1 646.86 595ZM646.86 594H658.86A4 4 0 0 1 662.86 598V610A4 4 0 0 1 658.86 614H646.86A4 4 0 0 1 642.86 610V598A4 4 0 0 1 646.86 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd"/>
+              </g>
+              <text x="647.17" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⏎</text>
             </g>
-            <text x="808.47" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⇧</text>
-            <path d="M824.41 595H825.41V615H824.41Z" fill="var(--dom-3jq0qk)"/>
-            <text x="829.72" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⏎</text>
           </g>
-        </g>
-        <g class="a m23">
-          <g opacity="0.4">
-            <g opacity="0.6">
-              <text x="877.41" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Copy ref</text>
+          <g class="a m28">
+            <g opacity="0.4">
+              <g opacity="0.6">
+                <text x="694.86" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Open in sidebar</text>
+              </g>
+              <path d="M808.41 595H841.41A4 4 0 0 1 845.41 599V611A4 4 0 0 1 841.41 615H808.41A4 4 0 0 1 804.41 611V599A4 4 0 0 1 808.41 595Z" fill="var(--dom-4sz2vv)"/>
+              <g clip-path="url(#c22)">
+                <path d="M808.41 595H841.41A4 4 0 0 1 845.41 599V611A4 4 0 0 1 841.41 615H808.41A4 4 0 0 1 804.41 611V599A4 4 0 0 1 808.41 595ZM808.41 594H841.41A4 4 0 0 1 845.41 598V610A4 4 0 0 1 841.41 614H808.41A4 4 0 0 1 804.41 610V598A4 4 0 0 1 808.41 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd"/>
+                <path d="M808.41 595H841.41A4 4 0 0 1 845.41 599V611A4 4 0 0 1 841.41 615H808.41A4 4 0 0 1 804.41 611V599A4 4 0 0 1 808.41 595ZM808.41 594H841.41A4 4 0 0 1 845.41 598V610A4 4 0 0 1 841.41 614H808.41A4 4 0 0 1 804.41 610V598A4 4 0 0 1 808.41 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd"/>
+              </g>
+              <text x="808.47" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⇧</text>
+              <path d="M824.41 595H825.41V615H824.41Z" fill="var(--dom-3jq0qk)"/>
+              <text x="829.72" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⏎</text>
             </g>
-            <path d="M943 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H943A4 4 0 0 1 939 611V599A4 4 0 0 1 943 595Z" fill="var(--dom-4sz2vv)"/>
-            <g clip-path="url(#c23)">
-              <path d="M943 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H943A4 4 0 0 1 939 611V599A4 4 0 0 1 943 595ZM943 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H943A4 4 0 0 1 939 610V598A4 4 0 0 1 943 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd"/>
-              <path d="M943 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H943A4 4 0 0 1 939 611V599A4 4 0 0 1 943 595ZM943 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H943A4 4 0 0 1 939 610V598A4 4 0 0 1 943 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd"/>
+          </g>
+          <g class="a m28">
+            <g opacity="0.4">
+              <g opacity="0.6">
+                <text x="877.41" y="610" font-family="'Inter', sans-serif" font-size="14" font-weight="500" fill="var(--dom-15juv12)">Copy ref</text>
+              </g>
+              <path d="M943 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H943A4 4 0 0 1 939 611V599A4 4 0 0 1 943 595Z" fill="var(--dom-4sz2vv)"/>
+              <g clip-path="url(#c23)">
+                <path d="M943 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H943A4 4 0 0 1 939 611V599A4 4 0 0 1 943 595ZM943 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H943A4 4 0 0 1 939 610V598A4 4 0 0 1 943 594Z" fill="var(--dom-td3va2)" fill-rule="evenodd"/>
+                <path d="M943 595H976A4 4 0 0 1 980 599V611A4 4 0 0 1 976 615H943A4 4 0 0 1 939 611V599A4 4 0 0 1 943 595ZM943 594H976A4 4 0 0 1 980 598V610A4 4 0 0 1 976 614H943A4 4 0 0 1 939 610V598A4 4 0 0 1 943 594Z" fill="var(--dom-1hcrc6)" fill-rule="evenodd"/>
+              </g>
+              <text x="943.23" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⌘</text>
+              <path d="M959 595H960V615H959Z" fill="var(--dom-3jq0qk)"/>
+              <text x="965.86" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">C</text>
             </g>
-            <text x="943.23" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">⌘</text>
-            <path d="M959 595H960V615H959Z" fill="var(--dom-3jq0qk)"/>
-            <text x="965.86" y="609" font-family="'Inter', sans-serif" font-size="12" font-weight="400" letter-spacing="-0.5" fill="var(--dom-jgam8a)">C</text>
           </g>
         </g>
       </g>
     </g>
-    <g clip-path="url(#c1)" class="a m33">
+    <g clip-path="url(#c1)" class="a m40">
       <path d="M0 0H1100V700H0Z" fill="var(--dom-1sn25ac)"/>
       <g opacity="0">
         <text x="296" y="76" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-7u6b9n)">Add icon</text>
@@ -1373,8 +1379,8 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
         </g>
       </g>
       <path d="M0 0H0V48H0Z" fill="var(--dom-apupsx)"/>
-      <g class="a m30">
-        <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m29"/>
+      <g class="a m36">
+        <path d="M14 8H34A6 6 0 0 1 40 14V34A6 6 0 0 1 34 40H14A6 6 0 0 1 8 34V14A6 6 0 0 1 14 8Z" fill="var(--dom-ku1fcr)" class="a m35"/>
         <g transform="translate(14 14) scale(0.833 0.833) translate(0 0)">
           <path d="M4 6l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M4 12l16 0" fill="none" stroke="var(--dom-15juv12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1410,12 +1416,14 @@ svg{--dom-12emmhe:rgb(23,23,23);--dom-13cbzl3:rgb(232,232,232);--dom-13drd9g:1;-
           </g>
         </g>
       </g>
-      <path d="M708 48H1068V48H708Z" fill="var(--dom-z5gn29)" class="a m31 dm">
-        <animate id="w5" attributeName="d" values="M0 0H1100V700H0Z;M708 48H1068V48H708Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.7s;w5.begin+9s" dur="0.5s" fill="freeze" data-loop="9s"/>
-        <set attributeName="d" to="M0 0H1100V700H0Z" begin="0s;w5.begin+1.3s" dur="7.7s" fill="freeze" data-loop="9s"/>
-      </path>
-      <path d="M0 0H1100V700H0Z" fill="var(--dom-z5gn29)" class="a m31 ds" display="none"/>
-      <g class="a m32">
+      <g class="a m38">
+        <path d="M708 48H1068V48H708Z" fill="var(--dom-z5gn29)" class="a m37 dm">
+          <animate id="w3" attributeName="d" values="M708 48H1808V748H708Z;M708 48H1068V48H708Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.7s;w3.begin+9s" dur="0.5s" fill="freeze" data-loop="9s"/>
+          <set attributeName="d" to="M708 48H1808V748H708Z" begin="0s;w3.begin+1.3s" dur="7.7s" fill="freeze" data-loop="9s"/>
+        </path>
+        <path d="M708 48H1808V748H708Z" fill="var(--dom-z5gn29)" class="a m37 ds" display="none"/>
+      </g>
+      <g class="a m39">
         <path d="M99 74H111V86H99Z" fill="url(#g1)"/>
         <path d="M989 74H1001V86H989Z" fill="url(#g2)"/>
         <path d="M989 86H1001V622H989Z" fill="url(#g3)"/>

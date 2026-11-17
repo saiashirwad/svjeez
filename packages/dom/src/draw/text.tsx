@@ -71,9 +71,13 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
   const times = Array.from({ length: count }, (_, i) => tween.at + i * step);
   const lengths = times.map((_, i) => (to > from ? from + i + 1 : from - i - 1));
 
+  // The clip is a wide rect whose right edge is slid along by translate, as the caret is: `width` animates through
+  // SMIL, and browsers start SMIL's clock apart from CSS's (WebKit by ~50ms), so the caret would trail the text.
+  const wide = width(chars(long.text).length);
+
   const reveal = times.reduce(
-    (m, t, i) => m.set({ width: width(lengths[i]!) }, t),
-    motion({ width: width(from) }),
+    (m, t, i) => m.set({ x: width(lengths[i]!) }, t),
+    motion({ x: width(from) }),
   );
 
   const caret = times
@@ -90,9 +94,9 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
   const clip = def.clipPath(
     {},
     jsx("rect", {
-      x: num(b.x - pad),
+      x: num(b.x - pad - wide),
       y: num(b.y - 2 * pad),
-      width: num(width(from)),
+      width: num(wide),
       height: num(3 * pad),
       animation: reveal,
     }),

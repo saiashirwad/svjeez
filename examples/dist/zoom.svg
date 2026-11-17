@@ -113,12 +113,8 @@
       <stop offset="0.9412" stop-color="rgba(0,0,0,0.1)" stop-opacity="0.072"/>
       <stop offset="1" stop-color="rgba(0,0,0,0.1)" stop-opacity="0"/>
     </radialGradient>
-    <mask id="m6" maskUnits="userSpaceOnUse" x="37" y="132" width="318" height="128">
-      <path d="M37 132H355V260H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="dm">
-        <animate id="w15" attributeName="d" values="M37 132H355V260H37ZM49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219Z;M37 132H355V260H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w15.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-        <set attributeName="d" to="M37 132H355V260H37ZM49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219Z" begin="0s;w15.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-      </path>
-      <path d="M37 132H355V260H37ZM49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="ds" display="none"/>
+    <mask id="m2" maskUnits="userSpaceOnUse" x="37" y="131" width="318" height="45">
+      <path d="M37 131H355V176H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z" fill="#fff" fill-rule="evenodd"/>
     </mask>
     <radialGradient id="g13" cx="1" cy="1" r="1">
       <stop offset="0.6" stop-color="rgba(0,0,0,0.05)" stop-opacity="1"/>
@@ -192,52 +188,29 @@
       <stop offset="0.8333" stop-color="rgba(0,0,0,0.05)" stop-opacity="0.072"/>
       <stop offset="1" stop-color="rgba(0,0,0,0.05)" stop-opacity="0"/>
     </linearGradient>
-    <mask id="m8" maskUnits="userSpaceOnUse" x="37" y="132" width="318" height="128">
-      <path d="M37 132H355V260H37ZM49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="dm">
-        <animate id="w26" attributeName="d" values="M37 132H355V260H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z;M37 132H355V260H37ZM49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w26.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-        <set attributeName="d" to="M37 132H355V260H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z" begin="0s;w26.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-      </path>
-      <path d="M37 132H355V260H37ZM49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="ds" display="none"/>
-    </mask>
     <clipPath id="c2">
-      <path d="M49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="#000" style="fill:#000" class="dm">
-        <animate id="w38" attributeName="d" values="M49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z;M49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w38.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-        <set attributeName="d" to="M49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" begin="0s;w38.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-      </path>
-      <path d="M49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" fill="#000" style="fill:#000" class="ds" display="none"/>
+      <path d="M49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="#000"/>
     </clipPath>
     <clipPath id="c3">
-      <rect x="40" y="130" width="146.58" height="42" class="dm">
-        <animate attributeName="width" values="146.58;120.19;112.09;104.34;101.38;93.3;89.45;81.02;68.88;61;53.19;45.88;32.92;29.34;21.55;14;14" keyTimes="0;0.86441;0.87345;0.88249;0.89153;0.90056;0.9096;0.91864;0.92768;0.93672;0.94576;0.9548;0.96384;0.97288;0.98192;0.99096;1" calcMode="discrete" dur="5.9s" repeatCount="indefinite"/>
-      </rect>
-      <rect x="40" y="130" width="146.58" height="42" class="ds" display="none"/>
+      <rect x="-106.58" y="130" width="146.58" height="42" class="a m5"/>
     </clipPath>
-    <mask id="m14" maskUnits="userSpaceOnUse" x="37" y="212" width="318" height="128">
-      <path d="M37 212H355V340H37ZM49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="dm">
-        <animate id="w39" attributeName="d" values="M37 212H355V340H37ZM49 299H343A8 8 0 0 1 351 307V327A8 8 0 0 1 343 335H49A8 8 0 0 1 41 327V307A8 8 0 0 1 49 299Z;M37 212H355V340H37ZM49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w39.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-        <set attributeName="d" to="M37 212H355V340H37ZM49 299H343A8 8 0 0 1 351 307V327A8 8 0 0 1 343 335H49A8 8 0 0 1 41 327V307A8 8 0 0 1 49 299Z" begin="0s;w39.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-      </path>
-      <path d="M37 212H355V340H37ZM49 299H343A8 8 0 0 1 351 307V327A8 8 0 0 1 343 335H49A8 8 0 0 1 41 327V307A8 8 0 0 1 49 299Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="ds" display="none"/>
+    <mask id="m8" maskUnits="userSpaceOnUse" x="37" y="211" width="318" height="45">
+      <path d="M37 211H355V256H37ZM49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215Z" fill="#fff" fill-rule="evenodd"/>
     </mask>
     <clipPath id="c4">
-      <path d="M49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" fill="#000" style="fill:#000" class="dm">
-        <animate id="w51" attributeName="d" values="M49 300H343A7 7 0 0 1 350 307V327A7 7 0 0 1 343 334H49A7 7 0 0 1 42 327V307A7 7 0 0 1 49 300Z;M49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w51.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-        <set attributeName="d" to="M49 300H343A7 7 0 0 1 350 307V327A7 7 0 0 1 343 334H49A7 7 0 0 1 42 327V307A7 7 0 0 1 49 300Z" begin="0s;w51.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-      </path>
-      <path d="M49 300H343A7 7 0 0 1 350 307V327A7 7 0 0 1 343 334H49A7 7 0 0 1 42 327V307A7 7 0 0 1 49 300Z" fill="#000" style="fill:#000" class="ds" display="none"/>
+      <path d="M49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" fill="#000"/>
     </clipPath>
     <clipPath id="c5">
-      <rect x="40" y="210" width="92.48" height="42" class="dm">
-        <animate attributeName="width" values="92.48;73.89;69.28;64.67;60.06;55.47;50.86;46.25;41.64;37.03;32.44;27.83;23.22;18.61;14;14" keyTimes="0;0.86441;0.87409;0.88378;0.89346;0.90315;0.91283;0.92252;0.9322;0.94189;0.95157;0.96126;0.97094;0.98063;0.99031;1" calcMode="discrete" dur="5.9s" repeatCount="indefinite"/>
-      </rect>
-      <rect x="40" y="210" width="92.48" height="42" class="ds" display="none"/>
+      <rect x="-52.48" y="210" width="92.48" height="42" class="a m11"/>
     </clipPath>
+    <mask id="m16" maskUnits="userSpaceOnUse" x="37" y="316" width="318" height="44">
+      <path d="M37 316H355V360H37ZM49 319H343A8 8 0 0 1 351 327V347A8 8 0 0 1 343 355H49A8 8 0 0 1 41 347V327A8 8 0 0 1 49 319Z" fill="#fff" fill-rule="evenodd"/>
+    </mask>
+    <mask id="m19" maskUnits="userSpaceOnUse" x="37" y="215" width="318" height="45">
+      <path d="M37 215H355V260H37ZM49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219Z" fill="#fff" fill-rule="evenodd"/>
+    </mask>
     <clipPath id="c6">
-      <path d="M49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" fill="#000" style="fill:#000" class="dm">
-        <animate id="w62" attributeName="d" values="M49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z;M49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w62.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-        <set attributeName="d" to="M49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" begin="0s;w62.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-      </path>
-      <path d="M49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" fill="#000" style="fill:#000" class="ds" display="none"/>
+      <path d="M49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" fill="#000"/>
     </clipPath>
     <mask id="m22" maskUnits="userSpaceOnUse" x="37" y="295" width="318" height="45">
       <path d="M37 295H355V340H37ZM49 299H343A8 8 0 0 1 351 307V327A8 8 0 0 1 343 335H49A8 8 0 0 1 41 327V307A8 8 0 0 1 49 299Z" fill="#fff" fill-rule="evenodd"/>
@@ -245,51 +218,26 @@
     <clipPath id="c7">
       <path d="M49 300H343A7 7 0 0 1 350 307V327A7 7 0 0 1 343 334H49A7 7 0 0 1 42 327V307A7 7 0 0 1 49 300Z" fill="#000"/>
     </clipPath>
-    <mask id="m23" maskUnits="userSpaceOnUse" x="37" y="272" width="318" height="128">
-      <path d="M37 272H355V400H37ZM49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="dm">
-        <animate id="w63" attributeName="d" values="M37 272H355V400H37ZM49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z;M37 272H355V400H37ZM49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w63.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-        <set attributeName="d" to="M37 272H355V400H37ZM49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" begin="0s;w63.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-      </path>
-      <path d="M37 272H355V400H37ZM49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" fill="#fff" fill-rule="evenodd" style="fill:#fff" class="ds" display="none"/>
+    <mask id="m23" maskUnits="userSpaceOnUse" x="37" y="356" width="318" height="44">
+      <path d="M37 356H355V400H37ZM49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" fill="#fff" fill-rule="evenodd"/>
     </mask>
-    <mask id="m27" maskUnits="userSpaceOnUse" x="37" y="132" width="318" height="44">
-      <path d="M37 132H355V176H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z" fill="#fff" fill-rule="evenodd"/>
-    </mask>
-    <mask id="m29" maskUnits="userSpaceOnUse" x="37" y="131" width="318" height="45">
-      <path d="M37 131H355V176H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z" fill="#fff" fill-rule="evenodd"/>
-    </mask>
-    <clipPath id="c8">
-      <path d="M49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="#000"/>
-    </clipPath>
-    <clipPath id="c9">
-      <rect x="40" y="130" width="146.58" height="42" class="dm">
-        <animate id="w74" attributeName="width" values="14;21.55;29.34;32.92;45.88;53.19;61;68.88;81.02;89.45;93.3;101.38;104.34;112.09;120.19;146.58" keyTimes="0;0.37315;0.41793;0.46266;0.50744;0.55222;0.597;0.64178;0.68655;0.73133;0.77611;0.82089;0.86567;0.91044;0.95522;1" calcMode="discrete" begin="0s;w74.begin+5.9s" dur="1.34s" fill="freeze" data-loop="5.9s"/>
-      </rect>
-      <rect x="40" y="130" width="146.58" height="42" class="ds" display="none"/>
-    </clipPath>
-    <mask id="m42" maskUnits="userSpaceOnUse" x="37" y="211" width="318" height="45">
-      <path d="M37 211H355V256H37ZM49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215Z" fill="#fff" fill-rule="evenodd"/>
-    </mask>
-    <mask id="m44" maskUnits="userSpaceOnUse" x="37" y="212" width="318" height="44">
-      <path d="M37 212H355V256H37ZM49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215Z" fill="#fff" fill-rule="evenodd"/>
-    </mask>
-    <clipPath id="c10">
-      <path d="M49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" fill="#000"/>
-    </clipPath>
-    <clipPath id="c11">
-      <rect x="40" y="210" width="92.48" height="42" class="dm">
-        <animate id="w75" attributeName="width" values="14;18.61;23.22;27.83;32.44;37.03;41.64;46.25;50.86;55.47;60.06;64.67;69.28;73.89;92.48" keyTimes="0;0.71111;0.73332;0.75556;0.77777;0.79998;0.82222;0.84443;0.86666;0.88887;0.91111;0.93332;0.95555;0.97776;1" calcMode="discrete" begin="0s;w75.begin+5.9s" dur="2.25s" fill="freeze" data-loop="5.9s"/>
-      </rect>
-      <rect x="40" y="210" width="92.48" height="42" class="ds" display="none"/>
-    </clipPath>
-    <mask id="m48" maskUnits="userSpaceOnUse" x="37" y="272" width="318" height="44">
-      <path d="M37 272H355V316H37ZM49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" fill="#fff" fill-rule="evenodd"/>
-    </mask>
-    <mask id="m52" maskUnits="userSpaceOnUse" x="37" y="400" width="318" height="44">
+    <mask id="m28" maskUnits="userSpaceOnUse" x="37" y="400" width="318" height="44">
       <path d="M37 400H355V444H37ZM49 403H343A8 8 0 0 1 351 411V431A8 8 0 0 1 343 439H49A8 8 0 0 1 41 431V411A8 8 0 0 1 49 403Z" fill="#fff" fill-rule="evenodd"/>
     </mask>
-    <mask id="m53" maskUnits="userSpaceOnUse" x="37" y="316" width="318" height="44">
-      <path d="M37 316H355V360H37ZM49 319H343A8 8 0 0 1 351 327V347A8 8 0 0 1 343 355H49A8 8 0 0 1 41 347V327A8 8 0 0 1 49 319Z" fill="#fff" fill-rule="evenodd"/>
+    <mask id="m31" maskUnits="userSpaceOnUse" x="37" y="132" width="318" height="44">
+      <path d="M37 132H355V176H37ZM49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135Z" fill="#fff" fill-rule="evenodd"/>
+    </mask>
+    <clipPath id="c8">
+      <rect x="-106.58" y="130" width="146.58" height="42" class="a m42"/>
+    </clipPath>
+    <mask id="m46" maskUnits="userSpaceOnUse" x="37" y="212" width="318" height="44">
+      <path d="M37 212H355V256H37ZM49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215Z" fill="#fff" fill-rule="evenodd"/>
+    </mask>
+    <clipPath id="c9">
+      <rect x="-52.48" y="210" width="92.48" height="42" class="a m48"/>
+    </clipPath>
+    <mask id="m51" maskUnits="userSpaceOnUse" x="37" y="272" width="318" height="44">
+      <path d="M37 272H355V316H37ZM49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" fill="#fff" fill-rule="evenodd"/>
     </mask>
   </defs>
   <style><![CDATA[
@@ -304,102 +252,104 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1g5brvd:rgb(10,10,10);--dom-1g6ow9i:rgb
 .a{animation-duration:5.9s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,86.441%{opacity:1}93.22%,100%{opacity:0}}
 .m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k2{0%{visibility:hidden}71.186%,100%{visibility:visible}}
-.m2{animation-name:k2;animation-timing-function:steps(1)}
-@keyframes k3{0%,53.814%{opacity:0}55.932%,100%{opacity:1}}
-.m3{animation-name:k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k4{0%,71.186%,100%{visibility:hidden}49.153%{visibility:visible}}
-.m4{animation-name:k4;animation-timing-function:steps(1)}
-@keyframes k5{0%,51.695%,100%{translate:0px -84px}55.932%,86.441%{translate:0px 0px}}
-.m5{animation-name:k5;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k6{0%,86.441%{fill:var(--dom-fmowhy)}100%{fill:var(--dom-vix8qm)}}
-.m7{animation-name:k6;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k7{0%,51.695%{fill:var(--dom-vix8qm)}55.932%,100%{fill:var(--dom-fmowhy)}}
-.m9{animation-name:k7;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k8{0%{visibility:hidden}49.153%,100%{visibility:visible}}
-.m10{animation-name:k8;animation-timing-function:steps(1)}
-@keyframes k9{0%{opacity:0}99.096%,100%{opacity:1}}
-.m11{animation-name:k9;animation-timing-function:steps(1)}
-@keyframes k10{0%{translate:118.58px 0px}86.441%{translate:106.19px 0px}87.345%{translate:98.09px 0px}88.249%{translate:90.34px 0px}89.153%{translate:87.38px 0px}90.056%{translate:79.3px 0px}90.96%{translate:75.45px 0px}91.864%{translate:67.02px 0px}92.768%{translate:54.88px 0px}93.672%{translate:47px 0px}94.576%{translate:39.19px 0px}95.48%{translate:31.88px 0px}96.384%{translate:18.92px 0px}97.288%{translate:15.34px 0px}98.192%{translate:7.55px 0px}99.096%,100%{translate:0px 0px}}
-@keyframes k11{0%,100%{opacity:0}86.441%,87.345%,88.249%,89.153%,90.056%,90.96%,91.864%,92.768%,93.672%,94.576%,95.48%,96.384%,97.288%,98.192%,99.096%{opacity:1}}
-.m12{animation-name:k10,k11;animation-timing-function:steps(1),steps(1)}
-@keyframes k12{0%,86.441%{translate:0px 84px}100%{translate:0px 0px}}
-.m13{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k13{0%,86.441%{fill:var(--dom-2ed41t)}100%{fill:var(--dom-8r3ttl)}}
-.m15{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k14{0%,86.441%{fill:var(--dom-1g6ow9i)}100%{fill:var(--dom-1rtlzkr)}}
-.m16{animation-name:k14;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k15{0%{translate:64.48px 0px}86.441%{translate:59.89px 0px}87.409%{translate:55.28px 0px}88.378%{translate:50.67px 0px}89.346%{translate:46.06px 0px}90.315%{translate:41.47px 0px}91.283%{translate:36.86px 0px}92.252%{translate:32.25px 0px}93.22%{translate:27.64px 0px}94.189%{translate:23.03px 0px}95.157%{translate:18.44px 0px}96.126%{translate:13.83px 0px}97.094%{translate:9.22px 0px}98.063%{translate:4.61px 0px}99.031%,100%{translate:0px 0px}}
-@keyframes k16{0%,100%{opacity:0}86.441%,87.409%,88.378%,89.346%,90.315%,91.283%,92.252%,93.22%,94.189%,95.157%,96.126%,97.094%,98.063%,99.031%{opacity:1}}
-.m17{animation-name:k15,k16;animation-timing-function:steps(1),steps(1)}
-@keyframes k17{0%,86.441%{opacity:1}92.542%,100%{opacity:0}}
-@keyframes k18{0%,86.441%{translate:0px 0px}100%{translate:7.39px -84px}}
-.m18{animation-name:k17,k18;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k19{0%,92.542%{opacity:0}100%{opacity:1}}
-@keyframes k20{0%,86.441%{translate:-7.39px 84px}100%{translate:0px 0px}}
-.m19{animation-name:k19,k20;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k21{0%,86.441%{translate:7.41px 84px}100%{translate:0px 0px}}
-.m20{animation-name:k21;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k22{0%,51.695%{translate:0px -84px}55.932%,100%{translate:0px 0px}}
-.m21{animation-name:k22;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k23{0%,51.695%{fill:var(--dom-5ark4d)}55.932%,100%{fill:var(--dom-erbksj)}}
-.m24{animation-name:k23;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k24{0%,51.695%{opacity:1}53.602%,100%{opacity:0}}
-@keyframes k25{0%,51.695%{translate:0px 0px}55.932%,100%{translate:-7.39px 84px}}
-.m25{animation-name:k24,k25;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k26{0%,53.602%{opacity:0}55.932%,100%{opacity:1}}
-@keyframes k27{0%,51.695%{translate:7.39px -84px}55.932%,100%{translate:0px 0px}}
-.m26{animation-name:k26,k27;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k28{0%,49.153%,100%{visibility:hidden}41.525%{visibility:visible}}
-.m28{animation-name:k28;animation-timing-function:steps(1)}
-@keyframes k29{0%,27.119%{fill:var(--dom-2ed41t)}38.983%,100%{fill:var(--dom-8r3ttl)}}
-.m30{animation-name:k29;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k30{0%,41.525%,100%{opacity:0}25.424%{opacity:1}}
-.m31{animation-name:k30;animation-timing-function:steps(1)}
-@keyframes k31{0%,8.475%{fill:var(--dom-8r3ttl)}23.729%,100%{fill:var(--dom-2ed41t)}}
-.m32{animation-name:k31;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k32{0%{opacity:1}25.424%,100%{opacity:0}}
-.m33{animation-name:k32;animation-timing-function:steps(1)}
-@keyframes k33{0%{visibility:visible}41.525%,100%{visibility:hidden}}
-.m34{animation-name:k33;animation-timing-function:steps(1)}
-@keyframes k34{0%,27.119%{fill:var(--dom-1g6ow9i)}38.983%,100%{fill:var(--dom-1rtlzkr)}}
-.m35{animation-name:k34;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k35{0%,49.153%,100%{visibility:hidden}25.424%{visibility:visible}}
-.m36{animation-name:k35;animation-timing-function:steps(1)}
-@keyframes k36{0%,8.475%{fill:var(--dom-1rtlzkr)}23.729%,100%{fill:var(--dom-1g6ow9i)}}
-.m37{animation-name:k36;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k37{0%{opacity:1}8.475%,100%{opacity:0}}
-.m38{animation-name:k37;animation-timing-function:steps(1)}
-@keyframes k38{0%{translate:0px 0px}8.475%{translate:7.55px 0px}9.492%{translate:15.34px 0px}10.508%{translate:18.92px 0px}11.525%{translate:31.88px 0px}12.542%{translate:39.19px 0px}13.559%{translate:47px 0px}14.576%{translate:54.88px 0px}15.593%{translate:67.02px 0px}16.61%{translate:75.45px 0px}17.627%{translate:79.3px 0px}18.644%{translate:87.38px 0px}19.661%{translate:90.34px 0px}20.678%{translate:98.09px 0px}21.695%{translate:106.19px 0px}22.712%,100%{translate:118.58px 0px}}
-@keyframes k39{0%,23.729%,100%{opacity:0}8.475%,9.492%,10.508%,11.525%,12.542%,13.559%,14.576%,15.593%,16.61%,17.627%,18.644%,19.661%,20.678%,21.695%,22.712%{opacity:1}}
-.m39{animation-name:k38,k39;animation-timing-function:steps(1),steps(1)}
-@keyframes k40{0%{visibility:visible}25.424%,100%{visibility:hidden}}
-.m40{animation-name:k40;animation-timing-function:steps(1)}
-@keyframes k41{0%{visibility:visible}49.153%,100%{visibility:hidden}}
-.m41{animation-name:k41;animation-timing-function:steps(1)}
-@keyframes k42{0%,27.119%{fill:var(--dom-8r3ttl)}38.983%,100%{fill:var(--dom-2ed41t)}}
-.m43{animation-name:k42;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k43{0%,27.119%{fill:var(--dom-1rtlzkr)}38.983%,100%{fill:var(--dom-1g6ow9i)}}
-.m45{animation-name:k43;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k44{0%{translate:0px 0px}27.119%{translate:4.61px 0px}27.966%{translate:9.22px 0px}28.814%{translate:13.83px 0px}29.661%{translate:18.44px 0px}30.508%{translate:23.03px 0px}31.356%{translate:27.64px 0px}32.203%{translate:32.25px 0px}33.051%{translate:36.86px 0px}33.898%{translate:41.47px 0px}34.746%{translate:46.06px 0px}35.593%{translate:50.67px 0px}36.441%{translate:55.28px 0px}37.288%{translate:59.89px 0px}38.136%,100%{translate:64.48px 0px}}
-@keyframes k45{0%,38.983%,100%{opacity:0}27.119%,27.966%,28.814%,29.661%,30.508%,31.356%,32.203%,33.051%,33.898%,34.746%,35.593%,36.441%,37.288%,38.136%{opacity:1}}
-.m46{animation-name:k44,k45;animation-timing-function:steps(1),steps(1)}
-@keyframes k46{0%,41.525%,100%{visibility:hidden}25.424%{visibility:visible}}
-.m47{animation-name:k46;animation-timing-function:steps(1)}
-@keyframes k47{0%,44.068%{fill:var(--dom-erbksj)}46.61%,100%{fill:var(--dom-5ark4d)}}
-.m49{animation-name:k47;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k48{0%,51.695%{translate:-7.41px -84px}55.932%,100%{translate:0px 0px}}
-.m50{animation-name:k48;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k49{0%{visibility:visible}71.186%,100%{visibility:hidden}}
-.m51{animation-name:k49;animation-timing-function:steps(1)}
-@keyframes k50{0%,8.475%,94.068%,100%{translate:47.515px 0px}16.102%,27.119%{translate:-28.655px -9.322px}34.746%,44.068%{translate:-28.655px -101.018px}51.695%{translate:-28.655px -185.836px}59.322%,86.441%{translate:73.5px 0px}}
-@keyframes k51{0%,8.475%,94.068%,100%{scale:0.758}16.102%,27.119%,34.746%,44.068%,51.695%{scale:1.146}59.322%,86.441%{scale:0.625}}
-.m54{animation-name:k50,k51;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k2{0%,86.441%{fill:var(--dom-fmowhy)}100%{fill:var(--dom-vix8qm)}}
+.m3{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k3{0%{opacity:0}99.096%,100%{opacity:1}}
+.m4{animation-name:k3;animation-timing-function:steps(1)}
+@keyframes k4{0%{translate:146.58px 0px}86.441%{translate:120.19px 0px}87.345%{translate:112.09px 0px}88.249%{translate:104.34px 0px}89.153%{translate:101.38px 0px}90.056%{translate:93.3px 0px}90.96%{translate:89.45px 0px}91.864%{translate:81.02px 0px}92.768%{translate:68.88px 0px}93.672%{translate:61px 0px}94.576%{translate:53.19px 0px}95.48%{translate:45.88px 0px}96.384%{translate:32.92px 0px}97.288%{translate:29.34px 0px}98.192%{translate:21.55px 0px}99.096%,100%{translate:14px 0px}}
+.m5{animation-name:k4;animation-timing-function:steps(1)}
+@keyframes k5{0%{translate:118.58px 0px}86.441%{translate:106.19px 0px}87.345%{translate:98.09px 0px}88.249%{translate:90.34px 0px}89.153%{translate:87.38px 0px}90.056%{translate:79.3px 0px}90.96%{translate:75.45px 0px}91.864%{translate:67.02px 0px}92.768%{translate:54.88px 0px}93.672%{translate:47px 0px}94.576%{translate:39.19px 0px}95.48%{translate:31.88px 0px}96.384%{translate:18.92px 0px}97.288%{translate:15.34px 0px}98.192%{translate:7.55px 0px}99.096%,100%{translate:0px 0px}}
+@keyframes k6{0%,100%{opacity:0}86.441%,87.345%,88.249%,89.153%,90.056%,90.96%,91.864%,92.768%,93.672%,94.576%,95.48%,96.384%,97.288%,98.192%,99.096%{opacity:1}}
+.m6{animation-name:k5,k6;animation-timing-function:steps(1),steps(1)}
+@keyframes k7{0%,86.441%{translate:0px 84px}100%{translate:0px 0px}}
+.m7{animation-name:k7;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k8{0%,86.441%{fill:var(--dom-2ed41t)}100%{fill:var(--dom-8r3ttl)}}
+.m9{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k9{0%,86.441%{fill:var(--dom-1g6ow9i)}100%{fill:var(--dom-1rtlzkr)}}
+.m10{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k10{0%{translate:92.48px 0px}86.441%{translate:73.89px 0px}87.409%{translate:69.28px 0px}88.378%{translate:64.67px 0px}89.346%{translate:60.06px 0px}90.315%{translate:55.47px 0px}91.283%{translate:50.86px 0px}92.252%{translate:46.25px 0px}93.22%{translate:41.64px 0px}94.189%{translate:37.03px 0px}95.157%{translate:32.44px 0px}96.126%{translate:27.83px 0px}97.094%{translate:23.22px 0px}98.063%{translate:18.61px 0px}99.031%,100%{translate:14px 0px}}
+.m11{animation-name:k10;animation-timing-function:steps(1)}
+@keyframes k11{0%{translate:64.48px 0px}86.441%{translate:59.89px 0px}87.409%{translate:55.28px 0px}88.378%{translate:50.67px 0px}89.346%{translate:46.06px 0px}90.315%{translate:41.47px 0px}91.283%{translate:36.86px 0px}92.252%{translate:32.25px 0px}93.22%{translate:27.64px 0px}94.189%{translate:23.03px 0px}95.157%{translate:18.44px 0px}96.126%{translate:13.83px 0px}97.094%{translate:9.22px 0px}98.063%{translate:4.61px 0px}99.031%,100%{translate:0px 0px}}
+@keyframes k12{0%,100%{opacity:0}86.441%,87.409%,88.378%,89.346%,90.315%,91.283%,92.252%,93.22%,94.189%,95.157%,96.126%,97.094%,98.063%,99.031%{opacity:1}}
+.m12{animation-name:k11,k12;animation-timing-function:steps(1),steps(1)}
+@keyframes k13{0%,86.441%{opacity:1}92.542%,100%{opacity:0}}
+@keyframes k14{0%,86.441%{translate:0px 0px}100%{translate:7.39px 0px}}
+.m13{animation-name:k13,k14;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k15{0%,92.542%{opacity:0}100%{opacity:1}}
+@keyframes k16{0%,86.441%{translate:-7.39px 0px}100%{translate:0px 0px}}
+.m14{animation-name:k15,k16;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k17{0%,86.441%{translate:7.41px 0px}100%{translate:0px 0px}}
+.m15{animation-name:k17;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k18{0%{visibility:hidden}71.186%,100%{visibility:visible}}
+.m17{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%,53.814%{opacity:0}55.932%,100%{opacity:1}}
+.m18{animation-name:k19;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k20{0%,51.695%{fill:var(--dom-vix8qm)}55.932%,100%{fill:var(--dom-fmowhy)}}
+.m20{animation-name:k20;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k21{0%,51.695%{translate:0px -84px}55.932%,100%{translate:0px 0px}}
+.m21{animation-name:k21;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k22{0%,51.695%{fill:var(--dom-5ark4d)}55.932%,100%{fill:var(--dom-erbksj)}}
+.m24{animation-name:k22;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k23{0%,51.695%{opacity:1}53.602%,100%{opacity:0}}
+@keyframes k24{0%,51.695%{translate:0px 0px}55.932%,100%{translate:-7.39px 0px}}
+.m25{animation-name:k23,k24;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k25{0%,53.602%{opacity:0}55.932%,100%{opacity:1}}
+@keyframes k26{0%,51.695%{translate:7.39px 0px}55.932%,100%{translate:0px 0px}}
+.m26{animation-name:k25,k26;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k27{0%,51.695%{translate:-7.41px 0px}55.932%,100%{translate:0px 0px}}
+.m27{animation-name:k27;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k28{0%,71.186%,100%{visibility:hidden}49.153%{visibility:visible}}
+.m29{animation-name:k28;animation-timing-function:steps(1)}
+@keyframes k29{0%{visibility:visible}49.153%,100%{visibility:hidden}}
+.m30{animation-name:k29;animation-timing-function:steps(1)}
+@keyframes k30{0%,49.153%,100%{visibility:hidden}41.525%{visibility:visible}}
+.m32{animation-name:k30;animation-timing-function:steps(1)}
+@keyframes k31{0%,27.119%{fill:var(--dom-2ed41t)}38.983%,100%{fill:var(--dom-8r3ttl)}}
+.m33{animation-name:k31;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k32{0%,41.525%,100%{opacity:0}25.424%{opacity:1}}
+.m34{animation-name:k32;animation-timing-function:steps(1)}
+@keyframes k33{0%,8.475%{fill:var(--dom-8r3ttl)}23.729%,100%{fill:var(--dom-2ed41t)}}
+.m35{animation-name:k33;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k34{0%{opacity:1}25.424%,100%{opacity:0}}
+.m36{animation-name:k34;animation-timing-function:steps(1)}
+@keyframes k35{0%{visibility:visible}41.525%,100%{visibility:hidden}}
+.m37{animation-name:k35;animation-timing-function:steps(1)}
+@keyframes k36{0%,27.119%{fill:var(--dom-1g6ow9i)}38.983%,100%{fill:var(--dom-1rtlzkr)}}
+.m38{animation-name:k36;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k37{0%,49.153%,100%{visibility:hidden}25.424%{visibility:visible}}
+.m39{animation-name:k37;animation-timing-function:steps(1)}
+@keyframes k38{0%,8.475%{fill:var(--dom-1rtlzkr)}23.729%,100%{fill:var(--dom-1g6ow9i)}}
+.m40{animation-name:k38;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k39{0%{opacity:1}8.475%,100%{opacity:0}}
+.m41{animation-name:k39;animation-timing-function:steps(1)}
+@keyframes k40{0%{translate:14px 0px}8.475%{translate:21.55px 0px}9.492%{translate:29.34px 0px}10.508%{translate:32.92px 0px}11.525%{translate:45.88px 0px}12.542%{translate:53.19px 0px}13.559%{translate:61px 0px}14.576%{translate:68.88px 0px}15.593%{translate:81.02px 0px}16.61%{translate:89.45px 0px}17.627%{translate:93.3px 0px}18.644%{translate:101.38px 0px}19.661%{translate:104.34px 0px}20.678%{translate:112.09px 0px}21.695%{translate:120.19px 0px}22.712%,100%{translate:146.58px 0px}}
+.m42{animation-name:k40;animation-timing-function:steps(1)}
+@keyframes k41{0%{translate:0px 0px}8.475%{translate:7.55px 0px}9.492%{translate:15.34px 0px}10.508%{translate:18.92px 0px}11.525%{translate:31.88px 0px}12.542%{translate:39.19px 0px}13.559%{translate:47px 0px}14.576%{translate:54.88px 0px}15.593%{translate:67.02px 0px}16.61%{translate:75.45px 0px}17.627%{translate:79.3px 0px}18.644%{translate:87.38px 0px}19.661%{translate:90.34px 0px}20.678%{translate:98.09px 0px}21.695%{translate:106.19px 0px}22.712%,100%{translate:118.58px 0px}}
+@keyframes k42{0%,23.729%,100%{opacity:0}8.475%,9.492%,10.508%,11.525%,12.542%,13.559%,14.576%,15.593%,16.61%,17.627%,18.644%,19.661%,20.678%,21.695%,22.712%{opacity:1}}
+.m43{animation-name:k41,k42;animation-timing-function:steps(1),steps(1)}
+@keyframes k43{0%{visibility:visible}25.424%,100%{visibility:hidden}}
+.m44{animation-name:k43;animation-timing-function:steps(1)}
+@keyframes k44{0%,27.119%{fill:var(--dom-8r3ttl)}38.983%,100%{fill:var(--dom-2ed41t)}}
+.m45{animation-name:k44;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k45{0%,27.119%{fill:var(--dom-1rtlzkr)}38.983%,100%{fill:var(--dom-1g6ow9i)}}
+.m47{animation-name:k45;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k46{0%{translate:14px 0px}27.119%{translate:18.61px 0px}27.966%{translate:23.22px 0px}28.814%{translate:27.83px 0px}29.661%{translate:32.44px 0px}30.508%{translate:37.03px 0px}31.356%{translate:41.64px 0px}32.203%{translate:46.25px 0px}33.051%{translate:50.86px 0px}33.898%{translate:55.47px 0px}34.746%{translate:60.06px 0px}35.593%{translate:64.67px 0px}36.441%{translate:69.28px 0px}37.288%{translate:73.89px 0px}38.136%,100%{translate:92.48px 0px}}
+.m48{animation-name:k46;animation-timing-function:steps(1)}
+@keyframes k47{0%{translate:0px 0px}27.119%{translate:4.61px 0px}27.966%{translate:9.22px 0px}28.814%{translate:13.83px 0px}29.661%{translate:18.44px 0px}30.508%{translate:23.03px 0px}31.356%{translate:27.64px 0px}32.203%{translate:32.25px 0px}33.051%{translate:36.86px 0px}33.898%{translate:41.47px 0px}34.746%{translate:46.06px 0px}35.593%{translate:50.67px 0px}36.441%{translate:55.28px 0px}37.288%{translate:59.89px 0px}38.136%,100%{translate:64.48px 0px}}
+@keyframes k48{0%,38.983%,100%{opacity:0}27.119%,27.966%,28.814%,29.661%,30.508%,31.356%,32.203%,33.051%,33.898%,34.746%,35.593%,36.441%,37.288%,38.136%{opacity:1}}
+.m49{animation-name:k47,k48;animation-timing-function:steps(1),steps(1)}
+@keyframes k49{0%,41.525%,100%{visibility:hidden}25.424%{visibility:visible}}
+.m50{animation-name:k49;animation-timing-function:steps(1)}
+@keyframes k50{0%,44.068%{fill:var(--dom-erbksj)}46.61%,100%{fill:var(--dom-5ark4d)}}
+.m52{animation-name:k50;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k51{0%,8.475%,94.068%,100%{translate:47.515px 0px}16.102%,27.119%{translate:-28.655px -9.322px}34.746%,44.068%{translate:-28.655px -101.018px}51.695%{translate:-28.655px -185.836px}59.322%,86.441%{translate:73.5px 0px}}
+@keyframes k52{0%,8.475%,94.068%,100%{scale:0.758}16.102%,27.119%,34.746%,44.068%,51.695%{scale:1.146}59.322%,86.441%{scale:0.625}}
+.m53{animation-name:k51,k52;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-5.015s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g clip-path="url(#c1)">
     <rect width="392" height="300" fill="var(--backdrop)"/>
-    <g style="transform-origin:0 0;transform-box:view-box" class="a m54">
+    <g style="transform-origin:0 0;transform-box:view-box" class="a m53">
       <g>
 
         <path d="M15 16H30V31H15Z" fill="url(#g1)"/>
@@ -479,7 +429,7 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1g5brvd:rgb(10,10,10);--dom-1g6ow9i:rgb
         <path d="M30 16H362A14 14 0 0 1 376 30V450A14 14 0 0 1 362 464H30A14 14 0 0 1 16 450V30A14 14 0 0 1 30 16ZM30 17H362A13 13 0 0 1 375 30V450A13 13 0 0 1 362 463H30A13 13 0 0 1 17 450V30A13 13 0 0 1 30 17Z" fill="var(--dom-1bb6nlz)" fill-rule="evenodd" style="fill:var(--dom-1bb6nlz)" class="ds" display="none"/>
         <text x="41" y="54" font-family="'Geist', sans-serif" font-size="16" font-weight="600" fill="var(--dom-1g5brvd)">Sign in to your account</text>
         <text x="41" y="78" font-family="'Geist', sans-serif" font-size="14" font-weight="400" fill="var(--dom-4hezww)">Enter your email below to sign in.</text>
-        <g class="a m2">
+        <g class="a m17">
           <g class="a m1">
             <path d="M51 107H341A10 10 0 0 1 351 117V165A10 10 0 0 1 341 175H51A10 10 0 0 1 41 165V117A10 10 0 0 1 51 107Z" fill="var(--dom-t90jc0)"/>
             <path d="M51 107H341A10 10 0 0 1 351 117V165A10 10 0 0 1 341 175H51A10 10 0 0 1 41 165V117A10 10 0 0 1 51 107ZM51 108H341A9 9 0 0 1 350 117V165A9 9 0 0 1 341 174H51A9 9 0 0 1 42 165V117A9 9 0 0 1 51 108Z" fill="var(--dom-1bb6nlz)" fill-rule="evenodd"/>
@@ -491,9 +441,96 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1g5brvd:rgb(10,10,10);--dom-1g6ow9i:rgb
             <text x="86" y="135" font-family="'Geist', sans-serif" font-size="14" font-weight="500" letter-spacing="-0.35" fill="var(--dom-1i5aobs)">Unable to sign in.</text>
             <text x="86" y="157" font-family="'Geist', sans-serif" font-size="14" font-weight="400" fill="var(--dom-q2rtbe)">Check your email and password.</text>
           </g>
+          <g class="a m7">
+            <text x="41" y="122" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Email</text>
+            <g mask="url(#m2)">
+              <path d="M39 134H49V144H39Z" fill="url(#g13)"/>
+              <path d="M49 134H343V138H49Z" fill="url(#g14)"/>
+              <path d="M343 134H353V144H343Z" fill="url(#g15)"/>
+              <path d="M349 144H353V164H349Z" fill="url(#g16)"/>
+              <path d="M343 164H353V174H343Z" fill="url(#g17)"/>
+              <path d="M49 170H343V174H49Z" fill="url(#g18)"/>
+              <path d="M39 164H49V174H39Z" fill="url(#g19)"/>
+              <path d="M39 144H43V164H39Z" fill="url(#g20)"/>
+              <path d="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" fill="rgba(0,0,0,0.05)"/>
+              <path d="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" fill="var(--dom-fmowhy)" class="a m3"/>
+            </g>
+            <path d="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd"/>
+            <g clip-path="url(#c2)">
+              <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-4hezww)" class="a m4">m@example.com</text>
+              <g>
+                <g clip-path="url(#c3)">
+                  <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">sai@example.com</text>
+                </g>
+                <rect x="54" y="145.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m6"/>
+              </g>
+            </g>
+          </g>
+          <g class="a m7">
+            <text x="41" y="202" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Password</text>
+            <g mask="url(#m8)">
+              <path d="M39 214H49V224H39Z" fill="url(#g13)"/>
+              <path d="M49 214H343V218H49Z" fill="url(#g14)"/>
+              <path d="M343 214H353V224H343Z" fill="url(#g15)"/>
+              <path d="M349 224H353V244H349Z" fill="url(#g16)"/>
+              <path d="M343 244H353V254H343Z" fill="url(#g17)"/>
+              <path d="M49 250H343V254H49Z" fill="url(#g18)"/>
+              <path d="M39 244H49V254H39Z" fill="url(#g19)"/>
+              <path d="M39 224H43V244H39Z" fill="url(#g20)"/>
+              <path d="M49 218L343 218L343 224L349 224L349 244L343 244L343 250L49 250L49 244L43 244L43 224L49 224Z" fill="rgba(0,0,0,0.05)"/>
+              <path d="M49 212H343A11 11 0 0 1 354 223V243A11 11 0 0 1 343 254H49A11 11 0 0 1 38 243V223A11 11 0 0 1 49 212Z" fill="var(--dom-2ed41t)" class="a m9"/>
+            </g>
+            <path d="M49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215ZM49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" fill="var(--dom-1g6ow9i)" fill-rule="evenodd" class="a m10"/>
+            <g clip-path="url(#c4)">
+              <g>
+                <g clip-path="url(#c5)">
+                  <text x="54" y="238" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">••••••••••••••</text>
+                </g>
+                <rect x="54" y="225.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m12"/>
+              </g>
+            </g>
+          </g>
+          <g class="a m7">
+            <path d="M39 274H49V284H39Z" fill="url(#g13)"/>
+            <path d="M49 274H343V278H49Z" fill="url(#g14)"/>
+            <path d="M343 274H353V284H343Z" fill="url(#g15)"/>
+            <path d="M349 284H353V304H349Z" fill="url(#g16)"/>
+            <path d="M343 304H353V314H343Z" fill="url(#g17)"/>
+            <path d="M49 310H343V314H49Z" fill="url(#g18)"/>
+            <path d="M39 304H49V314H39Z" fill="url(#g19)"/>
+            <path d="M39 284H43V304H39Z" fill="url(#g20)"/>
+            <path d="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" fill="rgba(0,0,0,0.05)"/>
+            <path d="M49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" fill="var(--dom-erbksj)"/>
+            <g class="a m13">
+              <text x="154.17" y="298" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Try again</text>
+            </g>
+            <g class="a m14">
+              <text x="161.56" y="298" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Sign in</text>
+            </g>
+            <g class="a m15">
+              <g transform="translate(214.42 285) scale(0.667 0.667) translate(0 0)">
+                <path d="M5 12h14" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="m12 5 7 7-7 7" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </g>
+            <g mask="url(#m16)">
+              <path d="M39 318H49V328H39Z" fill="url(#g13)"/>
+              <path d="M49 318H343V322H49Z" fill="url(#g14)"/>
+              <path d="M343 318H353V328H343Z" fill="url(#g15)"/>
+              <path d="M349 328H353V348H349Z" fill="url(#g16)"/>
+              <path d="M343 348H353V358H343Z" fill="url(#g17)"/>
+              <path d="M49 354H343V358H49Z" fill="url(#g18)"/>
+              <path d="M39 348H49V358H39Z" fill="url(#g19)"/>
+              <path d="M39 328H43V348H39Z" fill="url(#g20)"/>
+              <path d="M49 322L343 322L343 328L349 328L349 348L343 348L343 354L49 354L49 348L43 348L43 328L49 328Z" fill="rgba(0,0,0,0.05)"/>
+            </g>
+            <path d="M49 319H343A8 8 0 0 1 351 327V347A8 8 0 0 1 343 355H49A8 8 0 0 1 41 347V327A8 8 0 0 1 49 319Z" fill="var(--dom-1n7p05i)"/>
+            <path d="M49 319H343A8 8 0 0 1 351 327V347A8 8 0 0 1 343 355H49A8 8 0 0 1 41 347V327A8 8 0 0 1 49 319ZM49 320H343A7 7 0 0 1 350 327V347A7 7 0 0 1 343 354H49A7 7 0 0 1 42 347V327A7 7 0 0 1 49 320Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd"/>
+            <text x="133.53" y="342" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Sign in with GitHub</text>
+          </g>
         </g>
-        <g class="a m4">
-          <g class="a m3">
+        <g class="a m29">
+          <g class="a m18">
             <path d="M51 107H341A10 10 0 0 1 351 117V165A10 10 0 0 1 341 175H51A10 10 0 0 1 41 165V117A10 10 0 0 1 51 107Z" fill="var(--dom-t90jc0)"/>
             <path d="M51 107H341A10 10 0 0 1 351 117V165A10 10 0 0 1 341 175H51A10 10 0 0 1 41 165V117A10 10 0 0 1 51 107ZM51 108H341A9 9 0 0 1 350 117V165A9 9 0 0 1 341 174H51A9 9 0 0 1 42 165V117A9 9 0 0 1 51 108Z" fill="var(--dom-1bb6nlz)" fill-rule="evenodd"/>
             <g transform="translate(58 122) scale(0.667 0.667) translate(0 0)">
@@ -504,261 +541,24 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1g5brvd:rgb(10,10,10);--dom-1g6ow9i:rgb
             <text x="86" y="135" font-family="'Geist', sans-serif" font-size="14" font-weight="500" letter-spacing="-0.35" fill="var(--dom-1i5aobs)">Unable to sign in.</text>
             <text x="86" y="157" font-family="'Geist', sans-serif" font-size="14" font-weight="400" fill="var(--dom-q2rtbe)">Check your email and password.</text>
           </g>
-        </g>
-        <text x="41" y="206" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)" style="fill:var(--dom-1g5brvd)" class="a m5">Email</text>
-        <g mask="url(#m6)" class="a m2">
-          <path d="M39 134H49V144H39Z" fill="url(#g13)" class="dm">
-            <animate id="w16" attributeName="d" values="M39 218H49V228H39Z;M39 134H49V144H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w16.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 218H49V228H39Z" begin="0s;w16.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 218H49V228H39Z" fill="url(#g13)" class="ds" display="none"/>
-          <path d="M49 134H343V138H49Z" fill="url(#g14)" class="dm">
-            <animate id="w17" attributeName="d" values="M49 218H343V222H49Z;M49 134H343V138H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w17.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 218H343V222H49Z" begin="0s;w17.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 218H343V222H49Z" fill="url(#g14)" class="ds" display="none"/>
-          <path d="M343 134H353V144H343Z" fill="url(#g15)" class="dm">
-            <animate id="w18" attributeName="d" values="M343 218H353V228H343Z;M343 134H353V144H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w18.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M343 218H353V228H343Z" begin="0s;w18.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M343 218H353V228H343Z" fill="url(#g15)" class="ds" display="none"/>
-          <path d="M349 144H353V164H349Z" fill="url(#g16)" class="dm">
-            <animate id="w19" attributeName="d" values="M349 228H353V248H349Z;M349 144H353V164H349Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w19.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M349 228H353V248H349Z" begin="0s;w19.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M349 228H353V248H349Z" fill="url(#g16)" class="ds" display="none"/>
-          <path d="M343 164H353V174H343Z" fill="url(#g17)" class="dm">
-            <animate id="w20" attributeName="d" values="M343 248H353V258H343Z;M343 164H353V174H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w20.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M343 248H353V258H343Z" begin="0s;w20.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M343 248H353V258H343Z" fill="url(#g17)" class="ds" display="none"/>
-          <path d="M49 170H343V174H49Z" fill="url(#g18)" class="dm">
-            <animate id="w21" attributeName="d" values="M49 254H343V258H49Z;M49 170H343V174H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w21.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 254H343V258H49Z" begin="0s;w21.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 254H343V258H49Z" fill="url(#g18)" class="ds" display="none"/>
-          <path d="M39 164H49V174H39Z" fill="url(#g19)" class="dm">
-            <animate id="w22" attributeName="d" values="M39 248H49V258H39Z;M39 164H49V174H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w22.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 248H49V258H39Z" begin="0s;w22.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 248H49V258H39Z" fill="url(#g19)" class="ds" display="none"/>
-          <path d="M39 144H43V164H39Z" fill="url(#g20)" class="dm">
-            <animate id="w23" attributeName="d" values="M39 228H43V248H39Z;M39 144H43V164H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w23.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 228H43V248H39Z" begin="0s;w23.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 228H43V248H39Z" fill="url(#g20)" class="ds" display="none"/>
-          <path d="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="dm">
-            <animate id="w24" attributeName="d" values="M49 222L343 222L343 228L349 228L349 248L343 248L343 254L49 254L49 248L43 248L43 228L49 228Z;M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w24.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 222L343 222L343 228L349 228L349 248L343 248L343 254L49 254L49 248L43 248L43 228L49 228Z" begin="0s;w24.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 222L343 222L343 228L349 228L349 248L343 248L343 254L49 254L49 248L43 248L43 228L49 228Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="ds" display="none"/>
-          <path d="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" fill="var(--dom-fmowhy)" class="a m7 dm">
-            <animate id="w25" attributeName="d" values="M49 216H343A11 11 0 0 1 354 227V247A11 11 0 0 1 343 258H49A11 11 0 0 1 38 247V227A11 11 0 0 1 49 216Z;M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w25.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 216H343A11 11 0 0 1 354 227V247A11 11 0 0 1 343 258H49A11 11 0 0 1 38 247V227A11 11 0 0 1 49 216Z" begin="0s;w25.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 216H343A11 11 0 0 1 354 227V247A11 11 0 0 1 343 258H49A11 11 0 0 1 38 247V227A11 11 0 0 1 49 216Z" fill="var(--dom-fmowhy)" class="a m7 ds" display="none"/>
-        </g>
-        <g mask="url(#m8)" class="a m4">
-          <path d="M39 218H49V228H39Z" fill="url(#g13)" class="dm">
-            <animate id="w27" attributeName="d" values="M39 134H49V144H39Z;M39 218H49V228H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w27.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 134H49V144H39Z" begin="0s;w27.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 218H49V228H39Z" fill="url(#g13)" class="ds" display="none"/>
-          <path d="M49 218H343V222H49Z" fill="url(#g14)" class="dm">
-            <animate id="w28" attributeName="d" values="M49 134H343V138H49Z;M49 218H343V222H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w28.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 134H343V138H49Z" begin="0s;w28.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 218H343V222H49Z" fill="url(#g14)" class="ds" display="none"/>
-          <path d="M343 218H353V228H343Z" fill="url(#g15)" class="dm">
-            <animate id="w29" attributeName="d" values="M343 134H353V144H343Z;M343 218H353V228H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w29.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M343 134H353V144H343Z" begin="0s;w29.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M343 218H353V228H343Z" fill="url(#g15)" class="ds" display="none"/>
-          <path d="M349 228H353V248H349Z" fill="url(#g16)" class="dm">
-            <animate id="w30" attributeName="d" values="M349 144H353V164H349Z;M349 228H353V248H349Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w30.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M349 144H353V164H349Z" begin="0s;w30.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M349 228H353V248H349Z" fill="url(#g16)" class="ds" display="none"/>
-          <path d="M343 248H353V258H343Z" fill="url(#g17)" class="dm">
-            <animate id="w31" attributeName="d" values="M343 164H353V174H343Z;M343 248H353V258H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w31.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M343 164H353V174H343Z" begin="0s;w31.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M343 248H353V258H343Z" fill="url(#g17)" class="ds" display="none"/>
-          <path d="M49 254H343V258H49Z" fill="url(#g18)" class="dm">
-            <animate id="w32" attributeName="d" values="M49 170H343V174H49Z;M49 254H343V258H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w32.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 170H343V174H49Z" begin="0s;w32.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 254H343V258H49Z" fill="url(#g18)" class="ds" display="none"/>
-          <path d="M39 248H49V258H39Z" fill="url(#g19)" class="dm">
-            <animate id="w33" attributeName="d" values="M39 164H49V174H39Z;M39 248H49V258H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w33.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 164H49V174H39Z" begin="0s;w33.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 248H49V258H39Z" fill="url(#g19)" class="ds" display="none"/>
-          <path d="M39 228H43V248H39Z" fill="url(#g20)" class="dm">
-            <animate id="w34" attributeName="d" values="M39 144H43V164H39Z;M39 228H43V248H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w34.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 144H43V164H39Z" begin="0s;w34.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 228H43V248H39Z" fill="url(#g20)" class="ds" display="none"/>
-          <path d="M49 222L343 222L343 228L349 228L349 248L343 248L343 254L49 254L49 248L43 248L43 228L49 228Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="dm">
-            <animate id="w35" attributeName="d" values="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z;M49 222L343 222L343 228L349 228L349 248L343 248L343 254L49 254L49 248L43 248L43 228L49 228Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w35.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" begin="0s;w35.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 222L343 222L343 228L349 228L349 248L343 248L343 254L49 254L49 248L43 248L43 228L49 228Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="ds" display="none"/>
-          <path d="M49 216H343A11 11 0 0 1 354 227V247A11 11 0 0 1 343 258H49A11 11 0 0 1 38 247V227A11 11 0 0 1 49 216Z" fill="var(--dom-vix8qm)" class="a m9 dm">
-            <animate id="w36" attributeName="d" values="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z;M49 216H343A11 11 0 0 1 354 227V247A11 11 0 0 1 343 258H49A11 11 0 0 1 38 247V227A11 11 0 0 1 49 216Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w36.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" begin="0s;w36.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 216H343A11 11 0 0 1 354 227V247A11 11 0 0 1 343 258H49A11 11 0 0 1 38 247V227A11 11 0 0 1 49 216Z" fill="var(--dom-vix8qm)" class="a m9 ds" display="none"/>
-        </g>
-        <g class="a m10">
-          <path d="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd" style="fill:var(--dom-1rtlzkr)" class="dm">
-            <animate id="w37" attributeName="d" values="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z;M49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219ZM49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z;M49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219ZM49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z;M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" keyTimes="0;0.08771;0.7193;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="3.05s;w37.begin+5.9s" dur="2.85s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" begin="0s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219ZM49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd" style="fill:var(--dom-1rtlzkr)" class="ds" display="none"/>
-        </g>
-        <g class="a m2">
-          <g clip-path="url(#c2)">
-            <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-4hezww)" class="a m11">m@example.com</text>
-            <g class="a m13">
-              <g clip-path="url(#c3)">
-                <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">sai@example.com</text>
-              </g>
-              <rect x="54" y="145.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m12"/>
+          <g class="a m21">
+            <text x="41" y="206" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Email</text>
+            <g mask="url(#m19)">
+              <path d="M39 218H49V228H39Z" fill="url(#g13)"/>
+              <path d="M49 218H343V222H49Z" fill="url(#g14)"/>
+              <path d="M343 218H353V228H343Z" fill="url(#g15)"/>
+              <path d="M349 228H353V248H349Z" fill="url(#g16)"/>
+              <path d="M343 248H353V258H343Z" fill="url(#g17)"/>
+              <path d="M49 254H343V258H49Z" fill="url(#g18)"/>
+              <path d="M39 248H49V258H39Z" fill="url(#g19)"/>
+              <path d="M39 228H43V248H39Z" fill="url(#g20)"/>
+              <path d="M49 222L343 222L343 228L349 228L349 248L343 248L343 254L49 254L49 248L43 248L43 228L49 228Z" fill="rgba(0,0,0,0.05)"/>
+              <path d="M49 216H343A11 11 0 0 1 354 227V247A11 11 0 0 1 343 258H49A11 11 0 0 1 38 247V227A11 11 0 0 1 49 216Z" fill="var(--dom-vix8qm)" class="a m20"/>
             </g>
-          </g>
-          <text x="41" y="202" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)" style="fill:var(--dom-1g5brvd)" class="a m13">Password</text>
-          <g mask="url(#m14)">
-            <path d="M39 214H49V224H39Z" fill="url(#g13)" class="dm">
-              <animate id="w40" attributeName="d" values="M39 298H49V308H39Z;M39 214H49V224H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w40.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M39 298H49V308H39Z" begin="0s;w40.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M39 298H49V308H39Z" fill="url(#g13)" class="ds" display="none"/>
-            <path d="M49 214H343V218H49Z" fill="url(#g14)" class="dm">
-              <animate id="w41" attributeName="d" values="M49 298H343V302H49Z;M49 214H343V218H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w41.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M49 298H343V302H49Z" begin="0s;w41.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M49 298H343V302H49Z" fill="url(#g14)" class="ds" display="none"/>
-            <path d="M343 214H353V224H343Z" fill="url(#g15)" class="dm">
-              <animate id="w42" attributeName="d" values="M343 298H353V308H343Z;M343 214H353V224H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w42.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M343 298H353V308H343Z" begin="0s;w42.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M343 298H353V308H343Z" fill="url(#g15)" class="ds" display="none"/>
-            <path d="M349 224H353V244H349Z" fill="url(#g16)" class="dm">
-              <animate id="w43" attributeName="d" values="M349 308H353V328H349Z;M349 224H353V244H349Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w43.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M349 308H353V328H349Z" begin="0s;w43.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M349 308H353V328H349Z" fill="url(#g16)" class="ds" display="none"/>
-            <path d="M343 244H353V254H343Z" fill="url(#g17)" class="dm">
-              <animate id="w44" attributeName="d" values="M343 328H353V338H343Z;M343 244H353V254H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w44.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M343 328H353V338H343Z" begin="0s;w44.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M343 328H353V338H343Z" fill="url(#g17)" class="ds" display="none"/>
-            <path d="M49 250H343V254H49Z" fill="url(#g18)" class="dm">
-              <animate id="w45" attributeName="d" values="M49 334H343V338H49Z;M49 250H343V254H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w45.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M49 334H343V338H49Z" begin="0s;w45.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M49 334H343V338H49Z" fill="url(#g18)" class="ds" display="none"/>
-            <path d="M39 244H49V254H39Z" fill="url(#g19)" class="dm">
-              <animate id="w46" attributeName="d" values="M39 328H49V338H39Z;M39 244H49V254H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w46.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M39 328H49V338H39Z" begin="0s;w46.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M39 328H49V338H39Z" fill="url(#g19)" class="ds" display="none"/>
-            <path d="M39 224H43V244H39Z" fill="url(#g20)" class="dm">
-              <animate id="w47" attributeName="d" values="M39 308H43V328H39Z;M39 224H43V244H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w47.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M39 308H43V328H39Z" begin="0s;w47.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M39 308H43V328H39Z" fill="url(#g20)" class="ds" display="none"/>
-            <path d="M49 218L343 218L343 224L349 224L349 244L343 244L343 250L49 250L49 244L43 244L43 224L49 224Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="dm">
-              <animate id="w48" attributeName="d" values="M49 302L343 302L343 308L349 308L349 328L343 328L343 334L49 334L49 328L43 328L43 308L49 308Z;M49 218L343 218L343 224L349 224L349 244L343 244L343 250L49 250L49 244L43 244L43 224L49 224Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w48.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M49 302L343 302L343 308L349 308L349 328L343 328L343 334L49 334L49 328L43 328L43 308L49 308Z" begin="0s;w48.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M49 302L343 302L343 308L349 308L349 328L343 328L343 334L49 334L49 328L43 328L43 308L49 308Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="ds" display="none"/>
-            <path d="M49 212H343A11 11 0 0 1 354 223V243A11 11 0 0 1 343 254H49A11 11 0 0 1 38 243V223A11 11 0 0 1 49 212Z" fill="var(--dom-2ed41t)" class="a m15 dm">
-              <animate id="w49" attributeName="d" values="M49 296H343A11 11 0 0 1 354 307V327A11 11 0 0 1 343 338H49A11 11 0 0 1 38 327V307A11 11 0 0 1 49 296Z;M49 212H343A11 11 0 0 1 354 223V243A11 11 0 0 1 343 254H49A11 11 0 0 1 38 243V223A11 11 0 0 1 49 212Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w49.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M49 296H343A11 11 0 0 1 354 307V327A11 11 0 0 1 343 338H49A11 11 0 0 1 38 327V307A11 11 0 0 1 49 296Z" begin="0s;w49.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M49 296H343A11 11 0 0 1 354 307V327A11 11 0 0 1 343 338H49A11 11 0 0 1 38 327V307A11 11 0 0 1 49 296Z" fill="var(--dom-2ed41t)" class="a m15 ds" display="none"/>
-          </g>
-          <path d="M49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215ZM49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" fill="var(--dom-1g6ow9i)" fill-rule="evenodd" class="a m16 dm">
-            <animate id="w50" attributeName="d" values="M49 299H343A8 8 0 0 1 351 307V327A8 8 0 0 1 343 335H49A8 8 0 0 1 41 327V307A8 8 0 0 1 49 299ZM49 300H343A7 7 0 0 1 350 307V327A7 7 0 0 1 343 334H49A7 7 0 0 1 42 327V307A7 7 0 0 1 49 300Z;M49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215ZM49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w50.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 299H343A8 8 0 0 1 351 307V327A8 8 0 0 1 343 335H49A8 8 0 0 1 41 327V307A8 8 0 0 1 49 299ZM49 300H343A7 7 0 0 1 350 307V327A7 7 0 0 1 343 334H49A7 7 0 0 1 42 327V307A7 7 0 0 1 49 300Z" begin="0s;w50.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 299H343A8 8 0 0 1 351 307V327A8 8 0 0 1 343 335H49A8 8 0 0 1 41 327V307A8 8 0 0 1 49 299ZM49 300H343A7 7 0 0 1 350 307V327A7 7 0 0 1 343 334H49A7 7 0 0 1 42 327V307A7 7 0 0 1 49 300Z" fill="var(--dom-1g6ow9i)" fill-rule="evenodd" class="a m16 ds" display="none"/>
-          <g clip-path="url(#c4)">
-            <g class="a m13">
-              <g clip-path="url(#c5)">
-                <text x="54" y="238" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">••••••••••••••</text>
-              </g>
-              <rect x="54" y="225.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m17"/>
+            <path d="M49 219H343A8 8 0 0 1 351 227V247A8 8 0 0 1 343 255H49A8 8 0 0 1 41 247V227A8 8 0 0 1 49 219ZM49 220H343A7 7 0 0 1 350 227V247A7 7 0 0 1 343 254H49A7 7 0 0 1 42 247V227A7 7 0 0 1 49 220Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd"/>
+            <g clip-path="url(#c6)">
+              <text x="54" y="242" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">sai@example.com</text>
             </g>
-          </g>
-          <path d="M39 274H49V284H39Z" fill="url(#g13)" class="dm">
-            <animate id="w52" attributeName="d" values="M39 358H49V368H39Z;M39 274H49V284H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w52.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 358H49V368H39Z" begin="0s;w52.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 358H49V368H39Z" fill="url(#g13)" class="ds" display="none"/>
-          <path d="M49 274H343V278H49Z" fill="url(#g14)" class="dm">
-            <animate id="w53" attributeName="d" values="M49 358H343V362H49Z;M49 274H343V278H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w53.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 358H343V362H49Z" begin="0s;w53.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 358H343V362H49Z" fill="url(#g14)" class="ds" display="none"/>
-          <path d="M343 274H353V284H343Z" fill="url(#g15)" class="dm">
-            <animate id="w54" attributeName="d" values="M343 358H353V368H343Z;M343 274H353V284H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w54.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M343 358H353V368H343Z" begin="0s;w54.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M343 358H353V368H343Z" fill="url(#g15)" class="ds" display="none"/>
-          <path d="M349 284H353V304H349Z" fill="url(#g16)" class="dm">
-            <animate id="w55" attributeName="d" values="M349 368H353V388H349Z;M349 284H353V304H349Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w55.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M349 368H353V388H349Z" begin="0s;w55.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M349 368H353V388H349Z" fill="url(#g16)" class="ds" display="none"/>
-          <path d="M343 304H353V314H343Z" fill="url(#g17)" class="dm">
-            <animate id="w56" attributeName="d" values="M343 388H353V398H343Z;M343 304H353V314H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w56.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M343 388H353V398H343Z" begin="0s;w56.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M343 388H353V398H343Z" fill="url(#g17)" class="ds" display="none"/>
-          <path d="M49 310H343V314H49Z" fill="url(#g18)" class="dm">
-            <animate id="w57" attributeName="d" values="M49 394H343V398H49Z;M49 310H343V314H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w57.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 394H343V398H49Z" begin="0s;w57.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 394H343V398H49Z" fill="url(#g18)" class="ds" display="none"/>
-          <path d="M39 304H49V314H39Z" fill="url(#g19)" class="dm">
-            <animate id="w58" attributeName="d" values="M39 388H49V398H39Z;M39 304H49V314H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w58.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 388H49V398H39Z" begin="0s;w58.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 388H49V398H39Z" fill="url(#g19)" class="ds" display="none"/>
-          <path d="M39 284H43V304H39Z" fill="url(#g20)" class="dm">
-            <animate id="w59" attributeName="d" values="M39 368H43V388H39Z;M39 284H43V304H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w59.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M39 368H43V388H39Z" begin="0s;w59.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M39 368H43V388H39Z" fill="url(#g20)" class="ds" display="none"/>
-          <path d="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="dm">
-            <animate id="w60" attributeName="d" values="M49 362L343 362L343 368L349 368L349 388L343 388L343 394L49 394L49 388L43 388L43 368L49 368Z;M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w60.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 362L343 362L343 368L349 368L349 388L343 388L343 394L49 394L49 388L43 388L43 368L49 368Z" begin="0s;w60.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 362L343 362L343 368L349 368L349 388L343 388L343 394L49 394L49 388L43 388L43 368L49 368Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="ds" display="none"/>
-          <path d="M49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" fill="var(--dom-erbksj)" style="fill:var(--dom-erbksj)" class="dm">
-            <animate id="w61" attributeName="d" values="M49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z;M49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.1s;w61.begin+5.9s" dur="0.8s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" begin="0s;w61.begin+0.8s" dur="5.1s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" fill="var(--dom-erbksj)" style="fill:var(--dom-erbksj)" class="ds" display="none"/>
-          <g class="a m18">
-            <text x="154.17" y="382" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Try again</text>
-          </g>
-          <g class="a m19">
-            <text x="161.56" y="298" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Sign in</text>
-          </g>
-          <g class="a m20">
-            <g transform="translate(214.42 285) scale(0.667 0.667) translate(0 0)">
-              <path d="M5 12h14" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="m12 5 7 7-7 7" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-          </g>
-        </g>
-        <g class="a m4">
-          <g clip-path="url(#c6)">
-            <text x="54" y="242" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)" style="fill:var(--dom-1g5brvd)" class="a m21">sai@example.com</text>
           </g>
           <g class="a m21">
             <text x="41" y="286" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Password</text>
@@ -779,190 +579,32 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1g5brvd:rgb(10,10,10);--dom-1g6ow9i:rgb
               <text x="54" y="322" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">••••••••••••••</text>
             </g>
           </g>
-          <g mask="url(#m23)">
-            <path d="M39 358H49V368H39Z" fill="url(#g13)" class="dm">
-              <animate id="w64" attributeName="d" values="M39 274H49V284H39Z;M39 358H49V368H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w64.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M39 274H49V284H39Z" begin="0s;w64.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M39 358H49V368H39Z" fill="url(#g13)" class="ds" display="none"/>
-            <path d="M49 358H343V362H49Z" fill="url(#g14)" class="dm">
-              <animate id="w65" attributeName="d" values="M49 274H343V278H49Z;M49 358H343V362H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w65.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M49 274H343V278H49Z" begin="0s;w65.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M49 358H343V362H49Z" fill="url(#g14)" class="ds" display="none"/>
-            <path d="M343 358H353V368H343Z" fill="url(#g15)" class="dm">
-              <animate id="w66" attributeName="d" values="M343 274H353V284H343Z;M343 358H353V368H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w66.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M343 274H353V284H343Z" begin="0s;w66.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M343 358H353V368H343Z" fill="url(#g15)" class="ds" display="none"/>
-            <path d="M349 368H353V388H349Z" fill="url(#g16)" class="dm">
-              <animate id="w67" attributeName="d" values="M349 284H353V304H349Z;M349 368H353V388H349Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w67.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M349 284H353V304H349Z" begin="0s;w67.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M349 368H353V388H349Z" fill="url(#g16)" class="ds" display="none"/>
-            <path d="M343 388H353V398H343Z" fill="url(#g17)" class="dm">
-              <animate id="w68" attributeName="d" values="M343 304H353V314H343Z;M343 388H353V398H343Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w68.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M343 304H353V314H343Z" begin="0s;w68.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M343 388H353V398H343Z" fill="url(#g17)" class="ds" display="none"/>
-            <path d="M49 394H343V398H49Z" fill="url(#g18)" class="dm">
-              <animate id="w69" attributeName="d" values="M49 310H343V314H49Z;M49 394H343V398H49Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w69.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M49 310H343V314H49Z" begin="0s;w69.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M49 394H343V398H49Z" fill="url(#g18)" class="ds" display="none"/>
-            <path d="M39 388H49V398H39Z" fill="url(#g19)" class="dm">
-              <animate id="w70" attributeName="d" values="M39 304H49V314H39Z;M39 388H49V398H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w70.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M39 304H49V314H39Z" begin="0s;w70.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M39 388H49V398H39Z" fill="url(#g19)" class="ds" display="none"/>
-            <path d="M39 368H43V388H39Z" fill="url(#g20)" class="dm">
-              <animate id="w71" attributeName="d" values="M39 284H43V304H39Z;M39 368H43V388H39Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w71.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M39 284H43V304H39Z" begin="0s;w71.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M39 368H43V388H39Z" fill="url(#g20)" class="ds" display="none"/>
-            <path d="M49 362L343 362L343 368L349 368L349 388L343 388L343 394L49 394L49 388L43 388L43 368L49 368Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="dm">
-              <animate id="w72" attributeName="d" values="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z;M49 362L343 362L343 368L349 368L349 388L343 388L343 394L49 394L49 388L43 388L43 368L49 368Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w72.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-              <set attributeName="d" to="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" begin="0s;w72.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-            </path>
-            <path d="M49 362L343 362L343 368L349 368L349 388L343 388L343 394L49 394L49 388L43 388L43 368L49 368Z" fill="rgba(0,0,0,0.05)" style="fill:rgba(0,0,0,0.05)" class="ds" display="none"/>
-          </g>
-          <path d="M49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" fill="var(--dom-5ark4d)" class="a m24 dm">
-            <animate id="w73" attributeName="d" values="M49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z;M49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="3.05s;w73.begin+5.9s" dur="0.25s" fill="freeze" data-loop="5.9s"/>
-            <set attributeName="d" to="M49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" begin="0s;w73.begin+2.85s" dur="3.05s" fill="freeze" data-loop="5.9s"/>
-          </path>
-          <path d="M49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" fill="var(--dom-5ark4d)" class="a m24 ds" display="none"/>
-          <g class="a m25">
-            <text x="161.56" y="298" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Sign in</text>
-          </g>
-          <g class="a m26">
-            <text x="154.17" y="382" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Try again</text>
-          </g>
-        </g>
-        <g mask="url(#m27)" class="a m28">
-          <path d="M39 134H49V144H39Z" fill="url(#g13)"/>
-          <path d="M49 134H343V138H49Z" fill="url(#g14)"/>
-          <path d="M343 134H353V144H343Z" fill="url(#g15)"/>
-          <path d="M349 144H353V164H349Z" fill="url(#g16)"/>
-          <path d="M343 164H353V174H343Z" fill="url(#g17)"/>
-          <path d="M49 170H343V174H49Z" fill="url(#g18)"/>
-          <path d="M39 164H49V174H39Z" fill="url(#g19)"/>
-          <path d="M39 144H43V164H39Z" fill="url(#g20)"/>
-          <path d="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" fill="rgba(0,0,0,0.05)"/>
-        </g>
-        <g mask="url(#m29)" class="a m34">
-          <path d="M39 134H49V144H39Z" fill="url(#g13)"/>
-          <path d="M49 134H343V138H49Z" fill="url(#g14)"/>
-          <path d="M343 134H353V144H343Z" fill="url(#g15)"/>
-          <path d="M349 144H353V164H349Z" fill="url(#g16)"/>
-          <path d="M343 164H353V174H343Z" fill="url(#g17)"/>
-          <path d="M49 170H343V174H49Z" fill="url(#g18)"/>
-          <path d="M39 164H49V174H39Z" fill="url(#g19)"/>
-          <path d="M39 144H43V164H39Z" fill="url(#g20)"/>
-          <path d="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" fill="rgba(0,0,0,0.05)"/>
-          <g class="a m31">
-            <path d="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" fill="var(--dom-2ed41t)" class="a m30"/>
-          </g>
-          <g class="a m33">
-            <path d="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" fill="var(--dom-8r3ttl)" class="a m32"/>
-          </g>
-        </g>
-        <g class="a m36">
-          <path d="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="var(--dom-1g6ow9i)" fill-rule="evenodd" class="a m35"/>
-        </g>
-        <g class="a m40">
-          <path d="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd" class="a m37"/>
-          <g clip-path="url(#c8)">
-            <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-4hezww)" class="a m38">m@example.com</text>
-            <g>
-              <g clip-path="url(#c9)">
-                <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">sai@example.com</text>
+          <g class="a m21">
+            <g mask="url(#m23)">
+              <path d="M39 358H49V368H39Z" fill="url(#g13)"/>
+              <path d="M49 358H343V362H49Z" fill="url(#g14)"/>
+              <path d="M343 358H353V368H343Z" fill="url(#g15)"/>
+              <path d="M349 368H353V388H349Z" fill="url(#g16)"/>
+              <path d="M343 388H353V398H343Z" fill="url(#g17)"/>
+              <path d="M49 394H343V398H49Z" fill="url(#g18)"/>
+              <path d="M39 388H49V398H39Z" fill="url(#g19)"/>
+              <path d="M39 368H43V388H39Z" fill="url(#g20)"/>
+              <path d="M49 362L343 362L343 368L349 368L349 388L343 388L343 394L49 394L49 388L43 388L43 368L49 368Z" fill="rgba(0,0,0,0.05)"/>
+            </g>
+            <path d="M49 359H343A8 8 0 0 1 351 367V387A8 8 0 0 1 343 395H49A8 8 0 0 1 41 387V367A8 8 0 0 1 49 359Z" fill="var(--dom-5ark4d)" class="a m24"/>
+            <g class="a m25">
+              <text x="161.56" y="382" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Sign in</text>
+            </g>
+            <g class="a m26">
+              <text x="154.17" y="382" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Try again</text>
+            </g>
+            <g class="a m27">
+              <g transform="translate(221.83 369) scale(0.667 0.667) translate(0 0)">
+                <path d="M5 12h14" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="m12 5 7 7-7 7" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
-              <rect x="54" y="145.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m39"/>
             </g>
-          </g>
-        </g>
-        <g clip-path="url(#c8)" class="a m36">
-          <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">sai@example.com</text>
-        </g>
-        <g class="a m41">
-          <text x="41" y="202" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Password</text>
-        </g>
-        <g mask="url(#m42)" class="a m36">
-          <path d="M39 214H49V224H39Z" fill="url(#g13)"/>
-          <path d="M49 214H343V218H49Z" fill="url(#g14)"/>
-          <path d="M343 214H353V224H343Z" fill="url(#g15)"/>
-          <path d="M349 224H353V244H349Z" fill="url(#g16)"/>
-          <path d="M343 244H353V254H343Z" fill="url(#g17)"/>
-          <path d="M49 250H343V254H49Z" fill="url(#g18)"/>
-          <path d="M39 244H49V254H39Z" fill="url(#g19)"/>
-          <path d="M39 224H43V244H39Z" fill="url(#g20)"/>
-          <path d="M49 218L343 218L343 224L349 224L349 244L343 244L343 250L49 250L49 244L43 244L43 224L49 224Z" fill="rgba(0,0,0,0.05)"/>
-          <path d="M49 212H343A11 11 0 0 1 354 223V243A11 11 0 0 1 343 254H49A11 11 0 0 1 38 243V223A11 11 0 0 1 49 212Z" fill="var(--dom-8r3ttl)" class="a m43"/>
-        </g>
-        <g mask="url(#m44)" class="a m40">
-          <path d="M39 214H49V224H39Z" fill="url(#g13)"/>
-          <path d="M49 214H343V218H49Z" fill="url(#g14)"/>
-          <path d="M343 214H353V224H343Z" fill="url(#g15)"/>
-          <path d="M349 224H353V244H349Z" fill="url(#g16)"/>
-          <path d="M343 244H353V254H343Z" fill="url(#g17)"/>
-          <path d="M49 250H343V254H49Z" fill="url(#g18)"/>
-          <path d="M39 244H49V254H39Z" fill="url(#g19)"/>
-          <path d="M39 224H43V244H39Z" fill="url(#g20)"/>
-          <path d="M49 218L343 218L343 224L349 224L349 244L343 244L343 250L49 250L49 244L43 244L43 224L49 224Z" fill="rgba(0,0,0,0.05)"/>
-        </g>
-        <g class="a m41">
-          <path d="M49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215ZM49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd" class="a m45"/>
-        </g>
-        <g clip-path="url(#c10)" class="a m47">
-          <g>
-            <g clip-path="url(#c11)">
-              <text x="54" y="238" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">••••••••••••••</text>
-            </g>
-            <rect x="54" y="225.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m46"/>
-          </g>
-        </g>
-        <g class="a m28">
-          <g clip-path="url(#c10)">
-            <text x="54" y="238" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">••••••••••••••</text>
-          </g>
-          <g mask="url(#m48)">
-            <path d="M39 274H49V284H39Z" fill="url(#g13)"/>
-            <path d="M49 274H343V278H49Z" fill="url(#g14)"/>
-            <path d="M343 274H353V284H343Z" fill="url(#g15)"/>
-            <path d="M349 284H353V304H349Z" fill="url(#g16)"/>
-            <path d="M343 304H353V314H343Z" fill="url(#g17)"/>
-            <path d="M49 310H343V314H49Z" fill="url(#g18)"/>
-            <path d="M39 304H49V314H39Z" fill="url(#g19)"/>
-            <path d="M39 284H43V304H39Z" fill="url(#g20)"/>
-            <path d="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" fill="rgba(0,0,0,0.05)"/>
-          </g>
-        </g>
-        <g class="a m34">
-          <path d="M39 274H49V284H39Z" fill="url(#g13)"/>
-          <path d="M49 274H343V278H49Z" fill="url(#g14)"/>
-          <path d="M343 274H353V284H343Z" fill="url(#g15)"/>
-          <path d="M349 284H353V304H349Z" fill="url(#g16)"/>
-          <path d="M343 304H353V314H343Z" fill="url(#g17)"/>
-          <path d="M49 310H343V314H49Z" fill="url(#g18)"/>
-          <path d="M39 304H49V314H39Z" fill="url(#g19)"/>
-          <path d="M39 284H43V304H39Z" fill="url(#g20)"/>
-          <path d="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" fill="rgba(0,0,0,0.05)"/>
-        </g>
-        <g class="a m41">
-          <path d="M49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" fill="var(--dom-erbksj)" class="a m49"/>
-          <text x="161.56" y="298" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Sign in</text>
-        </g>
-        <g class="a m51">
-          <g class="a m50">
-            <g transform="translate(221.83 369) scale(0.667 0.667) translate(0 0)">
-              <path d="M5 12h14" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="m12 5 7 7-7 7" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-          </g>
-        </g>
-        <g class="a m10">
-          <g class="a m5">
-            <g mask="url(#m52)">
+            <g mask="url(#m28)">
               <path d="M39 402H49V412H39Z" fill="url(#g13)"/>
               <path d="M49 402H343V406H49Z" fill="url(#g14)"/>
               <path d="M343 402H353V412H343Z" fill="url(#g15)"/>
@@ -978,8 +620,127 @@ svg{--dom-1bb6nlz:rgb(229,229,229);--dom-1g5brvd:rgb(10,10,10);--dom-1g6ow9i:rgb
             <text x="133.53" y="426" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Sign in with GitHub</text>
           </g>
         </g>
-        <g class="a m41">
-          <g mask="url(#m53)">
+        <g class="a m30">
+          <text x="41" y="122" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Email</text>
+        </g>
+        <g mask="url(#m31)" class="a m32">
+          <path d="M39 134H49V144H39Z" fill="url(#g13)"/>
+          <path d="M49 134H343V138H49Z" fill="url(#g14)"/>
+          <path d="M343 134H353V144H343Z" fill="url(#g15)"/>
+          <path d="M349 144H353V164H349Z" fill="url(#g16)"/>
+          <path d="M343 164H353V174H343Z" fill="url(#g17)"/>
+          <path d="M49 170H343V174H49Z" fill="url(#g18)"/>
+          <path d="M39 164H49V174H39Z" fill="url(#g19)"/>
+          <path d="M39 144H43V164H39Z" fill="url(#g20)"/>
+          <path d="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" fill="rgba(0,0,0,0.05)"/>
+        </g>
+        <g mask="url(#m2)" class="a m37">
+          <path d="M39 134H49V144H39Z" fill="url(#g13)"/>
+          <path d="M49 134H343V138H49Z" fill="url(#g14)"/>
+          <path d="M343 134H353V144H343Z" fill="url(#g15)"/>
+          <path d="M349 144H353V164H349Z" fill="url(#g16)"/>
+          <path d="M343 164H353V174H343Z" fill="url(#g17)"/>
+          <path d="M49 170H343V174H49Z" fill="url(#g18)"/>
+          <path d="M39 164H49V174H39Z" fill="url(#g19)"/>
+          <path d="M39 144H43V164H39Z" fill="url(#g20)"/>
+          <path d="M49 138L343 138L343 144L349 144L349 164L343 164L343 170L49 170L49 164L43 164L43 144L49 144Z" fill="rgba(0,0,0,0.05)"/>
+          <g class="a m34">
+            <path d="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" fill="var(--dom-2ed41t)" class="a m33"/>
+          </g>
+          <g class="a m36">
+            <path d="M49 132H343A11 11 0 0 1 354 143V163A11 11 0 0 1 343 174H49A11 11 0 0 1 38 163V143A11 11 0 0 1 49 132Z" fill="var(--dom-8r3ttl)" class="a m35"/>
+          </g>
+        </g>
+        <g class="a m39">
+          <path d="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="var(--dom-1g6ow9i)" fill-rule="evenodd" class="a m38"/>
+        </g>
+        <g class="a m44">
+          <path d="M49 135H343A8 8 0 0 1 351 143V163A8 8 0 0 1 343 171H49A8 8 0 0 1 41 163V143A8 8 0 0 1 49 135ZM49 136H343A7 7 0 0 1 350 143V163A7 7 0 0 1 343 170H49A7 7 0 0 1 42 163V143A7 7 0 0 1 49 136Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd" class="a m40"/>
+          <g clip-path="url(#c2)">
+            <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-4hezww)" class="a m41">m@example.com</text>
+            <g>
+              <g clip-path="url(#c8)">
+                <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">sai@example.com</text>
+              </g>
+              <rect x="54" y="145.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m43"/>
+            </g>
+          </g>
+        </g>
+        <g clip-path="url(#c2)" class="a m39">
+          <text x="54" y="158" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">sai@example.com</text>
+        </g>
+        <g class="a m30">
+          <text x="41" y="202" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">Password</text>
+        </g>
+        <g mask="url(#m8)" class="a m39">
+          <path d="M39 214H49V224H39Z" fill="url(#g13)"/>
+          <path d="M49 214H343V218H49Z" fill="url(#g14)"/>
+          <path d="M343 214H353V224H343Z" fill="url(#g15)"/>
+          <path d="M349 224H353V244H349Z" fill="url(#g16)"/>
+          <path d="M343 244H353V254H343Z" fill="url(#g17)"/>
+          <path d="M49 250H343V254H49Z" fill="url(#g18)"/>
+          <path d="M39 244H49V254H39Z" fill="url(#g19)"/>
+          <path d="M39 224H43V244H39Z" fill="url(#g20)"/>
+          <path d="M49 218L343 218L343 224L349 224L349 244L343 244L343 250L49 250L49 244L43 244L43 224L49 224Z" fill="rgba(0,0,0,0.05)"/>
+          <path d="M49 212H343A11 11 0 0 1 354 223V243A11 11 0 0 1 343 254H49A11 11 0 0 1 38 243V223A11 11 0 0 1 49 212Z" fill="var(--dom-8r3ttl)" class="a m45"/>
+        </g>
+        <g mask="url(#m46)" class="a m44">
+          <path d="M39 214H49V224H39Z" fill="url(#g13)"/>
+          <path d="M49 214H343V218H49Z" fill="url(#g14)"/>
+          <path d="M343 214H353V224H343Z" fill="url(#g15)"/>
+          <path d="M349 224H353V244H349Z" fill="url(#g16)"/>
+          <path d="M343 244H353V254H343Z" fill="url(#g17)"/>
+          <path d="M49 250H343V254H49Z" fill="url(#g18)"/>
+          <path d="M39 244H49V254H39Z" fill="url(#g19)"/>
+          <path d="M39 224H43V244H39Z" fill="url(#g20)"/>
+          <path d="M49 218L343 218L343 224L349 224L349 244L343 244L343 250L49 250L49 244L43 244L43 224L49 224Z" fill="rgba(0,0,0,0.05)"/>
+        </g>
+        <g class="a m30">
+          <path d="M49 215H343A8 8 0 0 1 351 223V243A8 8 0 0 1 343 251H49A8 8 0 0 1 41 243V223A8 8 0 0 1 49 215ZM49 216H343A7 7 0 0 1 350 223V243A7 7 0 0 1 343 250H49A7 7 0 0 1 42 243V223A7 7 0 0 1 49 216Z" fill="var(--dom-1rtlzkr)" fill-rule="evenodd" class="a m47"/>
+        </g>
+        <g clip-path="url(#c4)" class="a m50">
+          <g>
+            <g clip-path="url(#c9)">
+              <text x="54" y="238" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">••••••••••••••</text>
+            </g>
+            <rect x="54" y="225.4" width="1" height="16.1" fill="var(--dom-1g5brvd)" class="a m49"/>
+          </g>
+        </g>
+        <g class="a m32">
+          <g clip-path="url(#c4)">
+            <text x="54" y="238" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-1g5brvd)">••••••••••••••</text>
+          </g>
+          <g mask="url(#m51)">
+            <path d="M39 274H49V284H39Z" fill="url(#g13)"/>
+            <path d="M49 274H343V278H49Z" fill="url(#g14)"/>
+            <path d="M343 274H353V284H343Z" fill="url(#g15)"/>
+            <path d="M349 284H353V304H349Z" fill="url(#g16)"/>
+            <path d="M343 304H353V314H343Z" fill="url(#g17)"/>
+            <path d="M49 310H343V314H49Z" fill="url(#g18)"/>
+            <path d="M39 304H49V314H39Z" fill="url(#g19)"/>
+            <path d="M39 284H43V304H39Z" fill="url(#g20)"/>
+            <path d="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" fill="rgba(0,0,0,0.05)"/>
+          </g>
+        </g>
+        <g class="a m37">
+          <path d="M39 274H49V284H39Z" fill="url(#g13)"/>
+          <path d="M49 274H343V278H49Z" fill="url(#g14)"/>
+          <path d="M343 274H353V284H343Z" fill="url(#g15)"/>
+          <path d="M349 284H353V304H349Z" fill="url(#g16)"/>
+          <path d="M343 304H353V314H343Z" fill="url(#g17)"/>
+          <path d="M49 310H343V314H49Z" fill="url(#g18)"/>
+          <path d="M39 304H49V314H39Z" fill="url(#g19)"/>
+          <path d="M39 284H43V304H39Z" fill="url(#g20)"/>
+          <path d="M49 278L343 278L343 284L349 284L349 304L343 304L343 310L49 310L49 304L43 304L43 284L49 284Z" fill="rgba(0,0,0,0.05)"/>
+        </g>
+        <g class="a m30">
+          <path d="M49 275H343A8 8 0 0 1 351 283V303A8 8 0 0 1 343 311H49A8 8 0 0 1 41 303V283A8 8 0 0 1 49 275Z" fill="var(--dom-erbksj)" class="a m52"/>
+          <text x="161.56" y="298" font-family="'Geist', sans-serif" font-size="14" font-weight="500" fill="var(--dom-ca084x)">Sign in</text>
+          <g transform="translate(214.42 285) scale(0.667 0.667) translate(0 0)">
+            <path d="M5 12h14" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m12 5 7 7-7 7" fill="none" stroke="var(--dom-ca084x)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g mask="url(#m16)">
             <path d="M39 318H49V328H39Z" fill="url(#g13)"/>
             <path d="M49 318H343V322H49Z" fill="url(#g14)"/>
             <path d="M343 318H353V328H343Z" fill="url(#g15)"/>

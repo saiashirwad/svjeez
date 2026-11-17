@@ -516,11 +516,12 @@ describe("Dom", () => {
     const svg = draw([idle, wait(0.5), [typed, { over: 0.8 }]]);
 
     expect(validateSvg(svg).errors).toEqual([]);
-    // Drawn once, behind a clip that widens in steps; the placeholder is drawn once and cut.
+    // Drawn once, behind a clip whose edge slides in steps with the caret, on CSS's clock; the placeholder is drawn
+    // once and cut.
     expect(svg.match(/>hi there</g)).toHaveLength(1);
     expect(svg.match(/>email</g)).toHaveLength(1);
     expect(svg).toContain("<clipPath");
-    expect(svg).toMatch(/attributeName="width"/);
+    expect(svg).not.toMatch(/attributeName="width"/);
 
     // Deleting un-types the same text backwards, and the placeholder returns.
     const back = draw([typed, wait(0.5), [idle, { over: 0.8 }]]);

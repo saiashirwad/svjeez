@@ -564,6 +564,7 @@ export const hold = (
   plain: readonly SvgNode[],
   window: Window,
   length: number,
+  ceiling: readonly SvgNode[] = plain,
 ): SvgNode[] => {
   const list: Held[] = [];
 
@@ -582,9 +583,10 @@ export const hold = (
   // Never more animations than the plain drawings run. The count above steers the search; the compiled file, which
   // knows how long each SMIL animation runs, decides.
   const before = one(plain);
-  const budget = running(before);
+  const most = one(ceiling);
+  const budget = Math.max(running(before), running(most));
   const real = (nodes: readonly SvgNode[]) => costOf(nodes, length);
-  const limit = real(before);
+  const limit = Math.max(real(before), real(most));
   const at = (price: number) => emit(list, 0, last, window, price);
   let price = 0;
   let best = at(price);

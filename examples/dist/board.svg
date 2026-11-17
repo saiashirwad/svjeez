@@ -344,48 +344,42 @@
       <path d="M184 102.8H616V127.99H184Z" fill="#000"/>
     </clipPath>
     <clipPath id="c22">
-      <rect x="166" y="85.89" width="190.53" height="54" class="dm">
-        <animate id="w4" attributeName="width" values="18;29.53;39.39;49.44;59.91;64.27;75.31;82.11;92.27;98.41;104.44;114.14;118.5;129.28;135.36;142.17;146.7;151.23;162.06;190.53" keyTimes="0;0.74843;0.76239;0.77638;0.79034;0.80433;0.81833;0.83229;0.84628;0.86024;0.87423;0.88819;0.90218;0.91614;0.93014;0.9441;0.95809;0.97205;0.98604;1" calcMode="discrete" begin="0s;w4.begin+14s" dur="4.142s" fill="freeze" data-loop="14s"/>
-      </rect>
-      <rect x="166" y="85.89" width="190.53" height="54" class="ds" display="none"/>
+      <rect x="-24.53" y="85.89" width="190.53" height="54" class="a m76"/>
     </clipPath>
     <clipPath id="c23">
       <path d="M179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="#000" style="fill:#000" class="dm">
-        <animate id="w6" attributeName="d" values="M204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z;M179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="2.8s;w6.begin+14s" dur="0.3s" fill="freeze" data-loop="14s"/>
-        <set attributeName="d" to="M204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" begin="0s;w6.begin+11.2s" dur="2.8s" fill="freeze" data-loop="14s"/>
+        <animate id="w5" attributeName="d" values="M179 54H571A13 13 0 0 1 584 67V162.39A13 13 0 0 1 571 175.39H179A13 13 0 0 1 166 162.39V67A13 13 0 0 1 179 54Z;M179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="2.8s;w5.begin+14s" dur="0.3s" fill="freeze" data-loop="14s"/>
+        <set attributeName="d" to="M179 54H571A13 13 0 0 1 584 67V162.39A13 13 0 0 1 571 175.39H179A13 13 0 0 1 166 162.39V67A13 13 0 0 1 179 54Z" begin="0s;w5.begin+11.2s" dur="2.8s" fill="freeze" data-loop="14s"/>
       </path>
       <path d="M179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
     <clipPath id="c24">
-      <path d="M233 79H557.11V100H233Z" fill="#000"/>
+      <path d="M208 67H532.11V88H208Z" fill="#000"/>
     </clipPath>
     <clipPath id="c25">
       <path d="M204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" fill="#000" style="fill:#000" class="dm">
-        <animate id="w7" attributeName="d" values="M204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z;M204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="2s;w7.begin+14s" dur="0.4s" fill="freeze" data-loop="14s"/>
-        <set attributeName="d" to="M204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z" begin="0s;w7.begin+12s" dur="2s" fill="freeze" data-loop="14s"/>
+        <animate id="w8" attributeName="d" values="M204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z;M204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="2s;w8.begin+14s" dur="0.4s" fill="freeze" data-loop="14s"/>
+        <set attributeName="d" to="M204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z" begin="0s;w8.begin+12s" dur="2s" fill="freeze" data-loop="14s"/>
       </path>
       <path d="M204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
     <clipPath id="c26">
-      <rect x="218" y="65" width="83.97" height="45" class="dm">
-        <animate id="w8" attributeName="width" values="45.03;49.03;52.81;60.89;83.97" keyTimes="0;0.86956;0.91302;0.95648;1" calcMode="discrete" begin="0s;w8.begin+14s" dur="2.3001s" fill="freeze" data-loop="14s"/>
-      </rect>
-      <rect x="218" y="65" width="83.97" height="45" class="ds" display="none"/>
+      <path d="M233 79H557.11V100H233Z" fill="#000"/>
     </clipPath>
     <clipPath id="c27">
+      <rect x="134.03" y="65" width="83.97" height="45" class="a m94"/>
+    </clipPath>
+    <clipPath id="c28">
       <path d="M204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z" fill="#000" style="fill:#000" class="dm">
         <animate id="w9" attributeName="d" values="M204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z;M204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="1.5499s;w9.begin+14s" dur="0.4501s" fill="freeze" data-loop="14s"/>
         <set attributeName="d" to="M204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z" begin="0s;w9.begin+12.4501s" dur="1.5499s" fill="freeze" data-loop="14s"/>
       </path>
       <path d="M204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z" fill="#000" style="fill:#000" class="ds" display="none"/>
     </clipPath>
-    <clipPath id="c28">
-      <rect x="218" y="65" width="60.03" height="45" class="dm">
-        <animate id="w10" attributeName="width" values="15;24.03;32.59;60.03" keyTimes="0;0.83782;0.91895;1" calcMode="discrete" begin="0s;w10.begin+14s" dur="1.85s" fill="freeze" data-loop="14s"/>
-      </rect>
-      <rect x="218" y="65" width="60.03" height="45" class="ds" display="none"/>
-    </clipPath>
     <clipPath id="c29">
+      <rect x="157.97" y="65" width="60.03" height="45" class="a m99"/>
+    </clipPath>
+    <clipPath id="c30">
       <path d="M204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z" fill="#000"/>
     </clipPath>
     <radialGradient id="g33" cx="1" cy="1" r="1">
@@ -543,206 +537,220 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
 .m26{animation-name:k26;animation-timing-function:steps(1)}
 @keyframes k27{0%{opacity:0}96.786%,100%{opacity:1}}
 .m27{animation-name:k27;animation-timing-function:steps(1)}
-@keyframes k28{0%,90.714%{translate:-0.17px 0px}97.143%,100%{translate:0px 0px}}
+@keyframes k28{0%,90.714%{translate:0.17px 0px}97.143%,100%{translate:0px 0px}}
 .m28{animation-name:k28;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k29{0%{opacity:1}65.907%,100%{opacity:0}}
-.m29{animation-name:k29;animation-timing-function:steps(1)}
-@keyframes k30{0%,66.291%,100%{opacity:0}65.907%{opacity:1}}
+@keyframes k29{0%,90.714%{translate:-0.17px 0px}97.143%,100%{translate:0px 0px}}
+.m29{animation-name:k29;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k30{0%{opacity:1}65.907%,100%{opacity:0}}
 .m30{animation-name:k30;animation-timing-function:steps(1)}
-@keyframes k31{0%,66.676%,100%{opacity:0}66.291%{opacity:1}}
+@keyframes k31{0%,66.291%,100%{opacity:0}65.907%{opacity:1}}
 .m31{animation-name:k31;animation-timing-function:steps(1)}
-@keyframes k32{0%,67.06%,100%{opacity:0}66.676%{opacity:1}}
+@keyframes k32{0%,66.676%,100%{opacity:0}66.291%{opacity:1}}
 .m32{animation-name:k32;animation-timing-function:steps(1)}
-@keyframes k33{0%,67.445%,100%{opacity:0}67.06%{opacity:1}}
+@keyframes k33{0%,67.06%,100%{opacity:0}66.676%{opacity:1}}
 .m33{animation-name:k33;animation-timing-function:steps(1)}
-@keyframes k34{0%,67.83%,100%{opacity:0}67.445%{opacity:1}}
+@keyframes k34{0%,67.445%,100%{opacity:0}67.06%{opacity:1}}
 .m34{animation-name:k34;animation-timing-function:steps(1)}
-@keyframes k35{0%,68.214%,100%{opacity:0}67.83%{opacity:1}}
+@keyframes k35{0%,67.83%,100%{opacity:0}67.445%{opacity:1}}
 .m35{animation-name:k35;animation-timing-function:steps(1)}
-@keyframes k36{0%,68.599%,100%{opacity:0}68.214%{opacity:1}}
+@keyframes k36{0%,68.214%,100%{opacity:0}67.83%{opacity:1}}
 .m36{animation-name:k36;animation-timing-function:steps(1)}
-@keyframes k37{0%,68.984%,100%{opacity:0}68.599%{opacity:1}}
+@keyframes k37{0%,68.599%,100%{opacity:0}68.214%{opacity:1}}
 .m37{animation-name:k37;animation-timing-function:steps(1)}
-@keyframes k38{0%,69.368%,100%{opacity:0}68.984%{opacity:1}}
+@keyframes k38{0%,68.984%,100%{opacity:0}68.599%{opacity:1}}
 .m38{animation-name:k38;animation-timing-function:steps(1)}
-@keyframes k39{0%,69.753%,100%{opacity:0}69.368%{opacity:1}}
+@keyframes k39{0%,69.368%,100%{opacity:0}68.984%{opacity:1}}
 .m39{animation-name:k39;animation-timing-function:steps(1)}
-@keyframes k40{0%,70.137%,100%{opacity:0}69.753%{opacity:1}}
+@keyframes k40{0%,69.753%,100%{opacity:0}69.368%{opacity:1}}
 .m40{animation-name:k40;animation-timing-function:steps(1)}
-@keyframes k41{0%,70.522%,100%{opacity:0}70.137%{opacity:1}}
+@keyframes k41{0%,70.137%,100%{opacity:0}69.753%{opacity:1}}
 .m41{animation-name:k41;animation-timing-function:steps(1)}
-@keyframes k42{0%{opacity:0}70.522%,100%{opacity:1}}
+@keyframes k42{0%,70.522%,100%{opacity:0}70.137%{opacity:1}}
 .m42{animation-name:k42;animation-timing-function:steps(1)}
-@keyframes k43{0%,65.714%{translate:0.5px 0px}70.714%,100%{translate:0px 0px}}
-.m43{animation-name:k43;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k44{0%{opacity:1}40.893%,100%{opacity:0}}
-.m44{animation-name:k44;animation-timing-function:steps(1)}
-@keyframes k45{0%,41.964%,100%{opacity:0}40.893%{opacity:1}}
-.m45{animation-name:k45;animation-timing-function:steps(1)}
-@keyframes k46{0%,43.036%,100%{opacity:0}41.964%{opacity:1}}
+@keyframes k43{0%{opacity:0}70.522%,100%{opacity:1}}
+.m43{animation-name:k43;animation-timing-function:steps(1)}
+@keyframes k44{0%,65.714%{translate:-0.5px 0px}70.714%,100%{translate:0px 0px}}
+.m44{animation-name:k44;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k45{0%,65.714%{translate:0.5px 0px}70.714%,100%{translate:0px 0px}}
+.m45{animation-name:k45;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k46{0%{opacity:1}40.893%,100%{opacity:0}}
 .m46{animation-name:k46;animation-timing-function:steps(1)}
-@keyframes k47{0%,44.107%,100%{opacity:0}43.036%{opacity:1}}
+@keyframes k47{0%,41.964%,100%{opacity:0}40.893%{opacity:1}}
 .m47{animation-name:k47;animation-timing-function:steps(1)}
-@keyframes k48{0%{opacity:0}44.107%,100%{opacity:1}}
+@keyframes k48{0%,43.036%,100%{opacity:0}41.964%{opacity:1}}
 .m48{animation-name:k48;animation-timing-function:steps(1)}
-@keyframes k49{0%,40.357%{translate:-0.33px 0px}44.643%,100%{translate:0px 0px}}
-.m49{animation-name:k49;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k50{0%,55.357%{fill:var(--dom-iyl6g5)}56.786%,100%{fill:var(--dom-1eempnt)}}
-.m50{animation-name:k50;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k51{0%{visibility:hidden}55.357%,100%{visibility:visible}}
-.m51{animation-name:k51;animation-timing-function:steps(1)}
-@keyframes k52{0%{opacity:1}53.214%,100%{opacity:0}}
-.m52{animation-name:k52;animation-timing-function:steps(1)}
-@keyframes k53{0%{opacity:0}53.214%,100%{opacity:1}}
-.m53{animation-name:k53;animation-timing-function:steps(1)}
-@keyframes k54{0%,55.357%,100%{visibility:hidden}47.857%{visibility:visible}}
+@keyframes k49{0%,44.107%,100%{opacity:0}43.036%{opacity:1}}
+.m49{animation-name:k49;animation-timing-function:steps(1)}
+@keyframes k50{0%{opacity:0}44.107%,100%{opacity:1}}
+.m50{animation-name:k50;animation-timing-function:steps(1)}
+@keyframes k51{0%,40.357%{translate:0.33px 0px}44.643%,100%{translate:0px 0px}}
+.m51{animation-name:k51;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k52{0%,40.357%{translate:-0.33px 0px}44.643%,100%{translate:0px 0px}}
+.m52{animation-name:k52;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k53{0%,55.357%{fill:var(--dom-iyl6g5)}56.786%,100%{fill:var(--dom-1eempnt)}}
+.m53{animation-name:k53;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k54{0%{visibility:hidden}55.357%,100%{visibility:visible}}
 .m54{animation-name:k54;animation-timing-function:steps(1)}
-@keyframes k55{0%,42.5%{opacity:0}44.643%,100%{opacity:1}}
-.m55{animation-name:k55;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k56{0%,40.357%,55.357%,100%{translate:0px -68px}44.643%,51.071%{translate:0px 0px}}
-.m56{animation-name:k56;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k57{0%,55.357%,100%{visibility:hidden}38.929%{visibility:visible}}
+@keyframes k55{0%{opacity:1}53.214%,100%{opacity:0}}
+.m55{animation-name:k55;animation-timing-function:steps(1)}
+@keyframes k56{0%{opacity:0}53.214%,100%{opacity:1}}
+.m56{animation-name:k56;animation-timing-function:steps(1)}
+@keyframes k57{0%,55.357%,100%{visibility:hidden}47.857%{visibility:visible}}
 .m57{animation-name:k57;animation-timing-function:steps(1)}
-@keyframes k58{0%,51.071%{fill:var(--dom-1eempnt)}55.357%,100%{fill:var(--dom-iyl6g5)}}
+@keyframes k58{0%,42.5%{opacity:0}44.643%,100%{opacity:1}}
 .m58{animation-name:k58;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k59{0%{visibility:visible}55.357%,100%{visibility:hidden}}
-.m59{animation-name:k59;animation-timing-function:steps(1)}
-@keyframes k60{0%,65.714%{translate:0px 68px}70.714%,100%{translate:0px 0px}}
-.m60{animation-name:k60;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k61{0%,64.286%,100%{visibility:hidden}55.357%{visibility:visible}}
-.m61{animation-name:k61;animation-timing-function:steps(1)}
-@keyframes k62{0%,55.357%{opacity:1}56.786%,100%{opacity:0}}
-.m62{animation-name:k62;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k63{0%,58.929%,100%{visibility:hidden}55.357%{visibility:visible}}
-.m63{animation-name:k63;animation-timing-function:steps(1)}
-@keyframes k64{0%,51.071%{translate:0px -68px}55.357%,100%{translate:0px 0px}}
-.m64{animation-name:k64;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k65{0%{visibility:visible}47.857%,100%{visibility:hidden}}
-.m65{animation-name:k65;animation-timing-function:steps(1)}
-@keyframes k66{0%,90.714%{opacity:1}93.929%,100%{opacity:0}}
-.m66{animation-name:k66;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k67{0%,65.714%,97.143%,100%{translate:0px -68px}70.714%,90.714%{translate:0px 0px}}
+@keyframes k59{0%,40.357%,55.357%,100%{translate:0px -68px}44.643%,51.071%{translate:0px 0px}}
+.m59{animation-name:k59;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k60{0%,55.357%,100%{visibility:hidden}38.929%{visibility:visible}}
+.m60{animation-name:k60;animation-timing-function:steps(1)}
+@keyframes k61{0%,51.071%{fill:var(--dom-1eempnt)}55.357%,100%{fill:var(--dom-iyl6g5)}}
+.m61{animation-name:k61;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k62{0%{visibility:visible}55.357%,100%{visibility:hidden}}
+.m62{animation-name:k62;animation-timing-function:steps(1)}
+@keyframes k63{0%,65.714%{translate:0px 68px}70.714%,100%{translate:0px 0px}}
+.m63{animation-name:k63;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k64{0%,64.286%,100%{visibility:hidden}55.357%{visibility:visible}}
+.m64{animation-name:k64;animation-timing-function:steps(1)}
+@keyframes k65{0%,55.357%{opacity:1}56.786%,100%{opacity:0}}
+.m65{animation-name:k65;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k66{0%,58.929%,100%{visibility:hidden}55.357%{visibility:visible}}
+.m66{animation-name:k66;animation-timing-function:steps(1)}
+@keyframes k67{0%,51.071%{translate:0px -68px}55.357%,100%{translate:0px 0px}}
 .m67{animation-name:k67;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k68{0%{visibility:hidden}64.286%,100%{visibility:visible}}
+@keyframes k68{0%{visibility:visible}47.857%,100%{visibility:hidden}}
 .m68{animation-name:k68;animation-timing-function:steps(1)}
-@keyframes k69{0%,68.214%{opacity:0}70.714%,100%{opacity:1}}
+@keyframes k69{0%,90.714%{opacity:1}93.929%,100%{opacity:0}}
 .m69{animation-name:k69;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k70{0%,40.357%{opacity:1}42.5%,100%{opacity:0}}
+@keyframes k70{0%,65.714%,97.143%,100%{translate:0px -68px}70.714%,90.714%{translate:0px 0px}}
 .m70{animation-name:k70;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k71{0%,38.929%,100%{visibility:hidden}11.071%{visibility:visible}}
+@keyframes k71{0%{visibility:hidden}64.286%,100%{visibility:visible}}
 .m71{animation-name:k71;animation-timing-function:steps(1)}
-@keyframes k72{0%{opacity:1}22.143%,100%{opacity:0}}
-.m72{animation-name:k72;animation-timing-function:steps(1)}
-@keyframes k73{0%{translate:0px 0px}22.143%{translate:11.53px 0px}22.556%{translate:21.39px 0px}22.97%{translate:31.44px 0px}23.383%{translate:41.91px 0px}23.797%{translate:46.27px 0px}24.211%{translate:57.31px 0px}24.624%{translate:64.11px 0px}25.038%{translate:74.27px 0px}25.451%{translate:80.41px 0px}25.865%{translate:86.44px 0px}26.278%{translate:96.14px 0px}26.692%{translate:100.5px 0px}27.105%{translate:111.28px 0px}27.519%{translate:117.36px 0px}27.932%{translate:124.17px 0px}28.346%{translate:128.7px 0px}28.759%{translate:133.23px 0px}29.173%{translate:144.06px 0px}29.586%,100%{translate:154.53px 0px}}
-@keyframes k74{0%,30%,100%{opacity:0}22.143%,22.556%,22.97%,23.383%,23.797%,24.211%,24.624%,25.038%,25.451%,25.865%,26.278%,26.692%,27.105%,27.519%,27.932%,28.346%,28.759%,29.173%,29.586%{opacity:1}}
-.m73{animation-name:k73,k74;animation-timing-function:steps(1),steps(1)}
-@keyframes k75{0%,31.071%,100%{opacity:0}22.143%{opacity:1}}
-.m74{animation-name:k75;animation-timing-function:steps(1)}
-@keyframes k76{0%,38.929%,100%{opacity:0}31.071%{opacity:1}}
-.m75{animation-name:k76;animation-timing-function:steps(1)}
-@keyframes k77{0%,32.143%{fill:var(--dom-16j6uh)}33.571%,100%{fill:var(--dom-iyl6g5)}}
-.m76{animation-name:k77;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k78{0%,32.143%{fill:var(--dom-1yiaox7)}33.571%,100%{fill:var(--dom-fyplpb)}}
-.m77{animation-name:k78;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k79{0%,32.143%{fill:var(--dom-1sguzt4)}33.571%,100%{fill:var(--dom-t6c6mt)}}
-.m78{animation-name:k79;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k80{0%,36.071%{fill:var(--dom-r4k8vd)}37.5%,100%{fill:var(--dom-fyplpb)}}
-.m79{animation-name:k80;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k81{0%,38.929%,100%{opacity:0}34.821%{opacity:1}}
-.m80{animation-name:k81;animation-timing-function:steps(1)}
-@keyframes k82{0%,36.071%{opacity:1}36.714%,100%{opacity:0}}
+@keyframes k72{0%,68.214%{opacity:0}70.714%,100%{opacity:1}}
+.m72{animation-name:k72;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k73{0%,40.357%{opacity:1}42.5%,100%{opacity:0}}
+.m73{animation-name:k73;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k74{0%,38.929%,100%{visibility:hidden}11.071%{visibility:visible}}
+.m74{animation-name:k74;animation-timing-function:steps(1)}
+@keyframes k75{0%{opacity:1}22.143%,100%{opacity:0}}
+.m75{animation-name:k75;animation-timing-function:steps(1)}
+@keyframes k76{0%{translate:18px 0px}22.143%{translate:29.53px 0px}22.556%{translate:39.39px 0px}22.97%{translate:49.44px 0px}23.383%{translate:59.91px 0px}23.797%{translate:64.27px 0px}24.211%{translate:75.31px 0px}24.624%{translate:82.11px 0px}25.038%{translate:92.27px 0px}25.451%{translate:98.41px 0px}25.865%{translate:104.44px 0px}26.278%{translate:114.14px 0px}26.692%{translate:118.5px 0px}27.105%{translate:129.28px 0px}27.519%{translate:135.36px 0px}27.932%{translate:142.17px 0px}28.346%{translate:146.7px 0px}28.759%{translate:151.23px 0px}29.173%{translate:162.06px 0px}29.586%,100%{translate:190.53px 0px}}
+.m76{animation-name:k76;animation-timing-function:steps(1)}
+@keyframes k77{0%{translate:0px 0px}22.143%{translate:11.53px 0px}22.556%{translate:21.39px 0px}22.97%{translate:31.44px 0px}23.383%{translate:41.91px 0px}23.797%{translate:46.27px 0px}24.211%{translate:57.31px 0px}24.624%{translate:64.11px 0px}25.038%{translate:74.27px 0px}25.451%{translate:80.41px 0px}25.865%{translate:86.44px 0px}26.278%{translate:96.14px 0px}26.692%{translate:100.5px 0px}27.105%{translate:111.28px 0px}27.519%{translate:117.36px 0px}27.932%{translate:124.17px 0px}28.346%{translate:128.7px 0px}28.759%{translate:133.23px 0px}29.173%{translate:144.06px 0px}29.586%,100%{translate:154.53px 0px}}
+@keyframes k78{0%,30%,100%{opacity:0}22.143%,22.556%,22.97%,23.383%,23.797%,24.211%,24.624%,25.038%,25.451%,25.865%,26.278%,26.692%,27.105%,27.519%,27.932%,28.346%,28.759%,29.173%,29.586%{opacity:1}}
+.m77{animation-name:k77,k78;animation-timing-function:steps(1),steps(1)}
+@keyframes k79{0%,31.071%,100%{opacity:0}22.143%{opacity:1}}
+.m78{animation-name:k79;animation-timing-function:steps(1)}
+@keyframes k80{0%,38.929%,100%{opacity:0}31.071%{opacity:1}}
+.m79{animation-name:k80;animation-timing-function:steps(1)}
+@keyframes k81{0%,32.143%{fill:var(--dom-16j6uh)}33.571%,100%{fill:var(--dom-iyl6g5)}}
+.m80{animation-name:k81;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k82{0%,32.143%{fill:var(--dom-1yiaox7)}33.571%,100%{fill:var(--dom-fyplpb)}}
 .m81{animation-name:k82;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k83{0%,36.714%{opacity:0}37.5%,100%{opacity:1}}
+@keyframes k83{0%,32.143%{fill:var(--dom-1sguzt4)}33.571%,100%{fill:var(--dom-t6c6mt)}}
 .m82{animation-name:k83;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k84{0%,34.821%,100%{opacity:0}22.143%{opacity:1}}
-.m83{animation-name:k84;animation-timing-function:steps(1)}
-@keyframes k85{0%,38.929%,100%{visibility:hidden}22.143%{visibility:visible}}
+@keyframes k84{0%,36.071%{fill:var(--dom-r4k8vd)}37.5%,100%{fill:var(--dom-fyplpb)}}
+.m83{animation-name:k84;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k85{0%,38.929%,100%{opacity:0}34.821%{opacity:1}}
 .m84{animation-name:k85;animation-timing-function:steps(1)}
-@keyframes k86{0%,20.321%{opacity:0}21.5%,100%{opacity:1}}
+@keyframes k86{0%,36.071%{opacity:1}36.714%,100%{opacity:0}}
 .m85{animation-name:k86;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k87{0%,20%{opacity:1}21.5%,100%{opacity:0}}
+@keyframes k87{0%,36.714%{opacity:0}37.5%,100%{opacity:1}}
 .m86{animation-name:k87;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k88{0%,22.143%,100%{visibility:hidden}18.571%{visibility:visible}}
+@keyframes k88{0%,34.821%,100%{opacity:0}22.143%{opacity:1}}
 .m87{animation-name:k88;animation-timing-function:steps(1)}
-@keyframes k89{0%{translate:30.03px 0px}14.286%{translate:34.03px 0px}15%{translate:37.81px 0px}15.714%{translate:45.89px 0px}16.429%,100%{translate:53.97px 0px}}
-@keyframes k90{0%,17.143%,100%{opacity:0}14.286%,15%,15.714%,16.429%{opacity:1}}
-.m88{animation-name:k89,k90;animation-timing-function:steps(1),steps(1)}
-@keyframes k91{0%,14.286%{opacity:1}15.714%,100%{opacity:0}}
-.m89{animation-name:k91;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k92{0%,18.571%,100%{visibility:hidden}14.286%{visibility:visible}}
-.m90{animation-name:k92;animation-timing-function:steps(1)}
-@keyframes k93{0%{opacity:1}11.071%,100%{opacity:0}}
-.m91{animation-name:k93;animation-timing-function:steps(1)}
-@keyframes k94{0%{translate:0px 0px}11.071%{translate:9.03px 0px}12.143%{translate:17.59px 0px}13.214%,100%{translate:30.03px 0px}}
-@keyframes k95{0%,14.286%,100%{opacity:0}11.071%,12.143%,13.214%{opacity:1}}
-.m92{animation-name:k94,k95;animation-timing-function:steps(1),steps(1)}
-@keyframes k96{0%,11.071%{opacity:1}12.679%,100%{opacity:0}}
-.m93{animation-name:k96;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k97{0%,14.286%,100%{visibility:hidden}11.071%{visibility:visible}}
-.m94{animation-name:k97;animation-timing-function:steps(1)}
-@keyframes k98{0%,9.821%{opacity:0}11.071%,100%{opacity:1}}
-.m95{animation-name:k98;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k99{0%{visibility:visible}11.071%,100%{visibility:hidden}}
-.m96{animation-name:k99;animation-timing-function:steps(1)}
-@keyframes k100{0%,80.714%,100%{visibility:hidden}58.929%{visibility:visible}}
-.m97{animation-name:k100;animation-timing-function:steps(1)}
-@keyframes k101{0%,65.714%{fill:var(--dom-r4k8vd)}70.714%,100%{fill:var(--dom-fyplpb)}}
-.m98{animation-name:k101;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k102{0%,67.964%{opacity:1}69.964%,100%{opacity:0}}
-.m99{animation-name:k102;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k103{0%,64.286%,100%{visibility:hidden}58.929%{visibility:visible}}
-.m100{animation-name:k103;animation-timing-function:steps(1)}
-@keyframes k104{0%,65.714%{translate:-210.67px 0px}70.714%,100%{translate:0px 0px}}
+@keyframes k89{0%,38.929%,100%{visibility:hidden}22.143%{visibility:visible}}
+.m88{animation-name:k89;animation-timing-function:steps(1)}
+@keyframes k90{0%,20.321%{opacity:0}21.5%,100%{opacity:1}}
+.m89{animation-name:k90;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k91{0%,20%{opacity:1}21.5%,100%{opacity:0}}
+.m90{animation-name:k91;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k92{0%,20%{translate:25px 12px}22.143%,100%{translate:0px 0px}}
+.m91{animation-name:k92;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k93{0%,22.143%,100%{visibility:hidden}18.571%{visibility:visible}}
+.m92{animation-name:k93;animation-timing-function:steps(1)}
+@keyframes k94{0%,18.571%,100%{visibility:hidden}11.071%{visibility:visible}}
+.m93{animation-name:k94;animation-timing-function:steps(1)}
+@keyframes k95{0%{translate:45.03px 0px}14.286%{translate:49.03px 0px}15%{translate:52.81px 0px}15.714%{translate:60.89px 0px}16.429%,100%{translate:83.97px 0px}}
+.m94{animation-name:k95;animation-timing-function:steps(1)}
+@keyframes k96{0%{translate:30.03px 0px}14.286%{translate:34.03px 0px}15%{translate:37.81px 0px}15.714%{translate:45.89px 0px}16.429%,100%{translate:53.97px 0px}}
+@keyframes k97{0%,17.143%,100%{opacity:0}14.286%,15%,15.714%,16.429%{opacity:1}}
+.m95{animation-name:k96,k97;animation-timing-function:steps(1),steps(1)}
+@keyframes k98{0%,14.286%{opacity:1}15.714%,100%{opacity:0}}
+.m96{animation-name:k98;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k99{0%,18.571%,100%{visibility:hidden}14.286%{visibility:visible}}
+.m97{animation-name:k99;animation-timing-function:steps(1)}
+@keyframes k100{0%{opacity:1}11.071%,100%{opacity:0}}
+.m98{animation-name:k100;animation-timing-function:steps(1)}
+@keyframes k101{0%{translate:15px 0px}11.071%{translate:24.03px 0px}12.143%{translate:32.59px 0px}13.214%,100%{translate:60.03px 0px}}
+.m99{animation-name:k101;animation-timing-function:steps(1)}
+@keyframes k102{0%{translate:0px 0px}11.071%{translate:9.03px 0px}12.143%{translate:17.59px 0px}13.214%,100%{translate:30.03px 0px}}
+@keyframes k103{0%,14.286%,100%{opacity:0}11.071%,12.143%,13.214%{opacity:1}}
+.m100{animation-name:k102,k103;animation-timing-function:steps(1),steps(1)}
+@keyframes k104{0%,11.071%{opacity:1}12.679%,100%{opacity:0}}
 .m101{animation-name:k104;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k105{0%,65.714%{translate:-210.68px 0px}70.714%,100%{translate:0px 0px}}
-.m102{animation-name:k105;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k106{0%,65.714%{opacity:1}68.214%,100%{opacity:0}}
+@keyframes k105{0%,14.286%,100%{visibility:hidden}11.071%{visibility:visible}}
+.m102{animation-name:k105;animation-timing-function:steps(1)}
+@keyframes k106{0%,9.821%{opacity:0}11.071%,100%{opacity:1}}
 .m103{animation-name:k106;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k107{0%,61.964%{opacity:0}62.857%,100%{opacity:1}}
-.m104{animation-name:k107;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k108{0%,51.071%{opacity:0}55.357%,100%{opacity:1}}
+@keyframes k107{0%{visibility:visible}11.071%,100%{visibility:hidden}}
+.m104{animation-name:k107;animation-timing-function:steps(1)}
+@keyframes k108{0%,65.714%{fill:var(--dom-r4k8vd)}70.714%,100%{fill:var(--dom-fyplpb)}}
 .m105{animation-name:k108;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k109{0%,51.714%{opacity:0}53.429%,100%{opacity:1}}
+@keyframes k109{0%,67.964%{opacity:1}69.964%,100%{opacity:0}}
 .m106{animation-name:k109;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k110{0%,51.071%{fill:var(--dom-fm3plr)}55.357%,100%{fill:var(--dom-fyplpb)}}
+@keyframes k110{0%,65.714%{translate:-0.01px 0px}70.714%,100%{translate:0px 0px}}
 .m107{animation-name:k110;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k111{0%,51.071%{translate:-210.66px 0px}55.357%,100%{translate:0px 0px}}
+@keyframes k111{0%,65.714%{opacity:1}68.214%,100%{opacity:0}}
 .m108{animation-name:k111;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k112{0%,51.071%{translate:-210.65px 0px}55.357%,100%{translate:0px 0px}}
+@keyframes k112{0%,65.714%{translate:-210.67px 0px}70.714%,100%{translate:0px 0px}}
 .m109{animation-name:k112;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k113{0%,51.071%{translate:-210.67px 0px}55.357%,100%{translate:0px 0px}}
+@keyframes k113{0%,61.964%{opacity:0}62.857%,100%{opacity:1}}
 .m110{animation-name:k113;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k114{0%,19.643%,23.071%,100%{opacity:0}20.214%{opacity:0.9}}
-@keyframes k115{0%,19.643%{scale:0.3}20.214%{scale:0.6}23.071%,100%{scale:1.3}}
-.m111{animation-name:k114,k115}
-@keyframes k116{0%,31.786%,35.214%,100%{opacity:0}32.357%{opacity:0.9}}
-@keyframes k117{0%,31.786%{scale:0.3}32.357%{scale:0.6}35.214%,100%{scale:1.3}}
-.m112{animation-name:k116,k117}
-@keyframes k118{0%,35.714%,39.143%,100%{opacity:0}36.286%{opacity:0.9}}
-@keyframes k119{0%,35.714%{scale:0.3}36.286%{scale:0.6}39.143%,100%{scale:1.3}}
-.m113{animation-name:k118,k119}
-@keyframes k120{0%,40%,43.429%,100%{opacity:0}40.571%{opacity:0.9}}
-@keyframes k121{0%,40%{scale:0.3}40.571%{scale:0.6}43.429%,100%{scale:1.3}}
-.m114{animation-name:k120,k121}
-@keyframes k122{0%,50.714%,54.143%,100%{opacity:0}51.286%{opacity:0.9}}
-@keyframes k123{0%,50.714%{scale:0.3}51.286%{scale:0.6}54.143%,100%{scale:1.3}}
-.m115{animation-name:k122,k123}
-@keyframes k124{0%,60.714%,64.143%,100%{opacity:0}61.286%{opacity:0.9}}
-@keyframes k125{0%,60.714%{scale:0.3}61.286%{scale:0.6}64.143%,100%{scale:1.3}}
-.m116{animation-name:k124,k125}
-@keyframes k126{0%,65.357%,68.786%,100%{opacity:0}65.929%{opacity:0.9}}
-@keyframes k127{0%,65.357%{scale:0.3}65.929%{scale:0.6}68.786%,100%{scale:1.3}}
-.m117{animation-name:k126,k127}
-@keyframes k128{0%,15.714%,97.143%,100%{translate:680px 410px}20%,27.857%{translate:318.8px 164.39px}32.143%,33.214%{translate:357.245px 179.17px}36.071%,37.143%{translate:271px 219.17px}40.357%,46.786%{translate:570.205px 278.17px}51.071%{translate:270.763px 158px}55.357%,56.786%{translate:481.429px 158px}61.071%,62.143%{translate:394.16px 155.09px}65.714%,90.714%{translate:435.66px 238px}}
-.m118{animation-name:k128;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k129{0%,8.571%,44.643%,51.071%,70%,90.714%,95%,100%{translate:0px 0px}12.857%,20%{translate:-110.233px -62.504px}24.286%,40.357%{translate:-231.202px -58.386px}55.357%,65.714%{translate:-132.945px -79.373px}}
-@keyframes k130{0%,8.571%,44.643%,51.071%,70%,90.714%,95%,100%{scale:1}12.857%,20%{scale:1.276}24.286%,40.357%{scale:1.578}55.357%,65.714%{scale:1.166}}
-.m119{animation-name:k129,k130;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k114{0%,64.286%,100%{visibility:hidden}58.929%{visibility:visible}}
+.m111{animation-name:k114;animation-timing-function:steps(1)}
+@keyframes k115{0%,51.071%{opacity:0}55.357%,100%{opacity:1}}
+.m112{animation-name:k115;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k116{0%,51.714%{opacity:0}53.429%,100%{opacity:1}}
+.m113{animation-name:k116;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k117{0%,51.071%{fill:var(--dom-fm3plr)}55.357%,100%{fill:var(--dom-fyplpb)}}
+.m114{animation-name:k117;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k118{0%,51.071%{translate:0.01px 0px}55.357%,100%{translate:0px 0px}}
+.m115{animation-name:k118;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k119{0%,51.071%{translate:-0.01px 0px}55.357%,100%{translate:0px 0px}}
+.m116{animation-name:k119;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k120{0%,51.071%{translate:-210.66px 0px}55.357%,100%{translate:0px 0px}}
+.m117{animation-name:k120;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k121{0%,19.643%,23.071%,100%{opacity:0}20.214%{opacity:0.9}}
+@keyframes k122{0%,19.643%{scale:0.3}20.214%{scale:0.6}23.071%,100%{scale:1.3}}
+.m118{animation-name:k121,k122}
+@keyframes k123{0%,31.786%,35.214%,100%{opacity:0}32.357%{opacity:0.9}}
+@keyframes k124{0%,31.786%{scale:0.3}32.357%{scale:0.6}35.214%,100%{scale:1.3}}
+.m119{animation-name:k123,k124}
+@keyframes k125{0%,35.714%,39.143%,100%{opacity:0}36.286%{opacity:0.9}}
+@keyframes k126{0%,35.714%{scale:0.3}36.286%{scale:0.6}39.143%,100%{scale:1.3}}
+.m120{animation-name:k125,k126}
+@keyframes k127{0%,40%,43.429%,100%{opacity:0}40.571%{opacity:0.9}}
+@keyframes k128{0%,40%{scale:0.3}40.571%{scale:0.6}43.429%,100%{scale:1.3}}
+.m121{animation-name:k127,k128}
+@keyframes k129{0%,50.714%,54.143%,100%{opacity:0}51.286%{opacity:0.9}}
+@keyframes k130{0%,50.714%{scale:0.3}51.286%{scale:0.6}54.143%,100%{scale:1.3}}
+.m122{animation-name:k129,k130}
+@keyframes k131{0%,60.714%,64.143%,100%{opacity:0}61.286%{opacity:0.9}}
+@keyframes k132{0%,60.714%{scale:0.3}61.286%{scale:0.6}64.143%,100%{scale:1.3}}
+.m123{animation-name:k131,k132}
+@keyframes k133{0%,65.357%,68.786%,100%{opacity:0}65.929%{opacity:0.9}}
+@keyframes k134{0%,65.357%{scale:0.3}65.929%{scale:0.6}68.786%,100%{scale:1.3}}
+.m124{animation-name:k133,k134}
+@keyframes k135{0%,15.714%,97.143%,100%{translate:680px 410px}20%,27.857%{translate:318.8px 164.39px}32.143%,33.214%{translate:357.245px 179.17px}36.071%,37.143%{translate:271px 219.17px}40.357%,46.786%{translate:570.205px 278.17px}51.071%{translate:270.763px 158px}55.357%,56.786%{translate:481.429px 158px}61.071%,62.143%{translate:394.16px 155.09px}65.714%,90.714%{translate:435.66px 238px}}
+.m125{animation-name:k135;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k136{0%,8.571%,44.643%,51.071%,70%,90.714%,95%,100%{translate:0px 0px}12.857%,20%{translate:-110.233px -62.504px}24.286%,40.357%{translate:-231.202px -58.386px}55.357%,65.714%{translate:-132.945px -79.373px}}
+@keyframes k137{0%,8.571%,44.643%,51.071%,70%,90.714%,95%,100%{scale:1}12.857%,20%{scale:1.276}24.286%,40.357%{scale:1.578}55.357%,65.714%{scale:1.166}}
+.m126{animation-name:k136,k137;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-11.9s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <g clip-path="url(#c1)">
     <rect width="800" height="450" fill="var(--backdrop)"/>
-    <g style="transform-origin:0 0;transform-box:view-box" class="a m119">
+    <g style="transform-origin:0 0;transform-box:view-box" class="a m126">
       <g>
 
         <path d="M12 0H788A12 12 0 0 1 800 12V438A12 12 0 0 1 788 450H12A12 12 0 0 1 0 438V12A12 12 0 0 1 12 0Z" fill="var(--dom-1vuslj1)"/>
@@ -861,57 +869,67 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
           </g>
           <text x="463.25" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)" style="fill:var(--dom-1sguzt4)" class="a m17">done</text>
           <g class="a m1">
-            <g class="a m28">
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m18">38</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m19">37</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m20">36</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m21">35</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m22">34</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m23">33</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m24">32</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m25">31</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m26">30</text>
-              <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m27">29</text>
+            <g class="a m29">
+              <g>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m18">38</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m19">37</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m20">36</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m21">35</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m22">34</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m23">33</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m24">32</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m25">31</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m26">30</text>
+                <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m27">29</text>
+              </g>
+              <text x="768.94" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" style="fill:var(--dom-fyplpb)" class="a m28">%</text>
             </g>
           </g>
           <g class="a m4">
-            <g class="a m43">
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m29">25</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m30">26</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m31">27</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m32">28</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m33">29</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m34">30</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m35">31</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m36">32</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m37">33</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m38">34</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m39">35</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m40">36</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m41">37</text>
-              <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m42">38</text>
+            <g class="a m45">
+              <g>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m30">25</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m31">26</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m32">27</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m33">28</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m34">29</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m35">30</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m36">31</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m37">32</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m38">33</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m39">34</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m40">35</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m41">36</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m42">37</text>
+                <text x="753.61" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m43">38</text>
+              </g>
+              <text x="768.94" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" style="fill:var(--dom-fyplpb)" class="a m44">%</text>
             </g>
           </g>
           <g class="a m5">
             <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)">25</text>
+            <text x="768.94" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)">%</text>
           </g>
           <g class="a m8">
-            <g class="a m49">
-              <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m44">29</text>
-              <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m45">28</text>
-              <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m46">27</text>
-              <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m47">26</text>
-              <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m48">25</text>
+            <g class="a m52">
+              <g>
+                <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m46">29</text>
+                <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m47">28</text>
+                <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m48">27</text>
+                <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m49">26</text>
+                <text x="754.11" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" class="a m50">25</text>
+              </g>
+              <text x="768.94" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)" style="fill:var(--dom-fyplpb)" class="a m51">%</text>
             </g>
           </g>
           <g class="a m9">
             <text x="753.78" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)">29</text>
+            <text x="768.94" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)">%</text>
           </g>
-          <text x="768.94" y="77.59" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-fyplpb)">%</text>
           <path d="M171 97H351.66A10 10 0 0 1 361.66 107V399A10 10 0 0 1 351.66 409H171A10 10 0 0 1 161 399V107A10 10 0 0 1 171 97Z" fill="var(--dom-1eempnt)"/>
           <path d="M179.5 111.5H179.5A6.5 6.5 0 0 1 186 118V118A6.5 6.5 0 0 1 179.5 124.5H179.5A6.5 6.5 0 0 1 173 118V118A6.5 6.5 0 0 1 179.5 111.5ZM179.5 112.5H179.5A5.5 5.5 0 0 1 185 118V118A5.5 5.5 0 0 1 179.5 123.5H179.5A5.5 5.5 0 0 1 174 118V118A5.5 5.5 0 0 1 179.5 112.5Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
           <text x="193" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="600" fill="var(--dom-t6c6mt)">Todo</text>
-          <g class="a m51">
+          <g class="a m54">
             <text x="230.31" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)">3</text>
             <path d="M175 137H347.66A8 8 0 0 1 355.66 145V189A8 8 0 0 1 347.66 197H175A8 8 0 0 1 167 189V145A8 8 0 0 1 175 137Z" fill="var(--dom-1ungin5)"/>
             <path d="M183.5 148.59H183.5A6.5 6.5 0 0 1 190 155.09V155.09A6.5 6.5 0 0 1 183.5 161.59H183.5A6.5 6.5 0 0 1 177 155.09V155.09A6.5 6.5 0 0 1 183.5 148.59ZM183.5 149.59H183.5A5.5 5.5 0 0 1 189 155.09V155.09A5.5 5.5 0 0 1 183.5 160.59H183.5A5.5 5.5 0 0 1 178 155.09V155.09A5.5 5.5 0 0 1 183.5 149.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
@@ -946,18 +964,18 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             <text x="252.69" y="319.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
             <path d="M336.66 307.19H336.66A9 9 0 0 1 345.66 316.19V316.19A9 9 0 0 1 336.66 325.19H336.66A9 9 0 0 1 327.66 316.19V316.19A9 9 0 0 1 336.66 307.19Z" fill="var(--dom-10lseaa)"/>
             <text x="331.59" y="317.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-n8vcml)">PR</text>
-            <path d="M381.66 97H562.33A10 10 0 0 1 572.33 107V399A10 10 0 0 1 562.33 409H381.66A10 10 0 0 1 371.66 399V107A10 10 0 0 1 381.66 97Z" fill="var(--dom-iyl6g5)" class="a m50"/>
+            <path d="M381.66 97H562.33A10 10 0 0 1 572.33 107V399A10 10 0 0 1 562.33 409H381.66A10 10 0 0 1 371.66 399V107A10 10 0 0 1 381.66 97Z" fill="var(--dom-iyl6g5)" class="a m53"/>
           </g>
           <g class="a m8">
             <text x="230.31" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m6">3</text>
             <text x="230.31" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m7">4</text>
           </g>
-          <g class="a m54">
-            <text x="230.31" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m52">4</text>
-            <text x="230.31" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m53">3</text>
+          <g class="a m57">
+            <text x="230.31" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m55">4</text>
+            <text x="230.31" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m56">3</text>
           </g>
           <g class="a m8">
-            <g class="a m55">
+            <g class="a m58">
               <path d="M175 137H347.66A8 8 0 0 1 355.66 145V189A8 8 0 0 1 347.66 197H175A8 8 0 0 1 167 189V145A8 8 0 0 1 175 137Z" fill="var(--dom-1ungin5)"/>
               <path d="M183.5 148.59H183.5A6.5 6.5 0 0 1 190 155.09V155.09A6.5 6.5 0 0 1 183.5 161.59H183.5A6.5 6.5 0 0 1 177 155.09V155.09A6.5 6.5 0 0 1 183.5 148.59ZM183.5 149.59H183.5A5.5 5.5 0 0 1 189 155.09V155.09A5.5 5.5 0 0 1 183.5 160.59H183.5A5.5 5.5 0 0 1 178 155.09V155.09A5.5 5.5 0 0 1 183.5 149.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
               <g clip-path="url(#c6)">
@@ -971,8 +989,8 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="330.27" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
             </g>
           </g>
-          <g class="a m57">
-            <g class="a m56">
+          <g class="a m60">
+            <g class="a m59">
               <path d="M175 205H347.66A8 8 0 0 1 355.66 213V257A8 8 0 0 1 347.66 265H175A8 8 0 0 1 167 257V213A8 8 0 0 1 175 205Z" fill="var(--dom-1ungin5)"/>
               <path d="M183.5 216.59H183.5A6.5 6.5 0 0 1 190 223.09V223.09A6.5 6.5 0 0 1 183.5 229.59H183.5A6.5 6.5 0 0 1 177 223.09V223.09A6.5 6.5 0 0 1 183.5 216.59ZM183.5 217.59H183.5A5.5 5.5 0 0 1 189 223.09V223.09A5.5 5.5 0 0 1 183.5 228.59H183.5A5.5 5.5 0 0 1 178 223.09V223.09A5.5 5.5 0 0 1 183.5 217.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
               <g clip-path="url(#c7)">
@@ -985,7 +1003,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <path d="M336.66 239.19H336.66A9 9 0 0 1 345.66 248.19V248.19A9 9 0 0 1 336.66 257.19H336.66A9 9 0 0 1 327.66 248.19V248.19A9 9 0 0 1 336.66 239.19Z" fill="var(--dom-inpbrf)"/>
               <text x="331.41" y="249.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-dc9b0c)">JO</text>
             </g>
-            <g class="a m56">
+            <g class="a m59">
               <path d="M175 273H347.66A8 8 0 0 1 355.66 281V325A8 8 0 0 1 347.66 333H175A8 8 0 0 1 167 325V281A8 8 0 0 1 175 273Z" fill="var(--dom-1ungin5)"/>
               <path d="M183.5 284.59H183.5A6.5 6.5 0 0 1 190 291.09V291.09A6.5 6.5 0 0 1 183.5 297.59H183.5A6.5 6.5 0 0 1 177 291.09V291.09A6.5 6.5 0 0 1 183.5 284.59ZM183.5 285.59H183.5A5.5 5.5 0 0 1 189 291.09V291.09A5.5 5.5 0 0 1 183.5 296.59H183.5A5.5 5.5 0 0 1 178 291.09V291.09A5.5 5.5 0 0 1 183.5 285.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
               <g clip-path="url(#c8)">
@@ -998,7 +1016,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <path d="M336.66 307.19H336.66A9 9 0 0 1 345.66 316.19V316.19A9 9 0 0 1 336.66 325.19H336.66A9 9 0 0 1 327.66 316.19V316.19A9 9 0 0 1 336.66 307.19Z" fill="var(--dom-dj3jdt)"/>
               <text x="331.34" y="317.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1cdvzkt)">KT</text>
             </g>
-            <g class="a m56">
+            <g class="a m59">
               <path d="M175 341H347.66A8 8 0 0 1 355.66 349V393A8 8 0 0 1 347.66 401H175A8 8 0 0 1 167 393V349A8 8 0 0 1 175 341Z" fill="var(--dom-1ungin5)"/>
               <path d="M183.5 352.59H183.5A6.5 6.5 0 0 1 190 359.09V359.09A6.5 6.5 0 0 1 183.5 365.59H183.5A6.5 6.5 0 0 1 177 359.09V359.09A6.5 6.5 0 0 1 183.5 352.59ZM183.5 353.59H183.5A5.5 5.5 0 0 1 189 359.09V359.09A5.5 5.5 0 0 1 183.5 364.59H183.5A5.5 5.5 0 0 1 178 359.09V359.09A5.5 5.5 0 0 1 183.5 353.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
               <g clip-path="url(#c9)">
@@ -1048,8 +1066,8 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             <path d="M336.66 307.19H336.66A9 9 0 0 1 345.66 316.19V316.19A9 9 0 0 1 336.66 325.19H336.66A9 9 0 0 1 327.66 316.19V316.19A9 9 0 0 1 336.66 307.19Z" fill="var(--dom-10lseaa)"/>
             <text x="331.59" y="317.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-n8vcml)">PR</text>
           </g>
-          <g class="a m59">
-            <path d="M381.66 97H562.33A10 10 0 0 1 572.33 107V399A10 10 0 0 1 562.33 409H381.66A10 10 0 0 1 371.66 399V107A10 10 0 0 1 381.66 97Z" fill="var(--dom-1eempnt)" class="a m58"/>
+          <g class="a m62">
+            <path d="M381.66 97H562.33A10 10 0 0 1 572.33 107V399A10 10 0 0 1 562.33 409H381.66A10 10 0 0 1 371.66 399V107A10 10 0 0 1 381.66 97Z" fill="var(--dom-1eempnt)" class="a m61"/>
           </g>
           <path d="M390.16 111.5H390.16A6.5 6.5 0 0 1 396.66 118V118A6.5 6.5 0 0 1 390.16 124.5H390.16A6.5 6.5 0 0 1 383.66 118V118A6.5 6.5 0 0 1 390.16 111.5Z" fill="url(#g2)"/>
           <path d="M390.16 111.5H390.16A6.5 6.5 0 0 1 396.66 118V118A6.5 6.5 0 0 1 390.16 124.5H390.16A6.5 6.5 0 0 1 383.66 118V118A6.5 6.5 0 0 1 390.16 111.5ZM390.16 112.5H390.16A5.5 5.5 0 0 1 395.66 118V118A5.5 5.5 0 0 1 390.16 123.5H390.16A5.5 5.5 0 0 1 384.66 118V118A5.5 5.5 0 0 1 390.16 112.5Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1086,7 +1104,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m2">3</text>
               <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m3">2</text>
             </g>
-            <g class="a m60">
+            <g class="a m63">
               <path d="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" fill="var(--dom-1ungin5)"/>
               <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" fill="url(#g2)"/>
               <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1100,7 +1118,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <path d="M547.33 171.19H547.33A9 9 0 0 1 556.33 180.19V180.19A9 9 0 0 1 547.33 189.19H547.33A9 9 0 0 1 538.33 180.19V180.19A9 9 0 0 1 547.33 171.19Z" fill="var(--dom-1kdbgbb)"/>
               <text x="540.94" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
             </g>
-            <g class="a m60">
+            <g class="a m63">
               <path d="M385.66 205H558.33A8 8 0 0 1 566.33 213V257A8 8 0 0 1 558.33 265H385.66A8 8 0 0 1 377.66 257V213A8 8 0 0 1 385.66 205Z" fill="var(--dom-1ungin5)"/>
               <path d="M394.16 216.59H394.16A6.5 6.5 0 0 1 400.66 223.09V223.09A6.5 6.5 0 0 1 394.16 229.59H394.16A6.5 6.5 0 0 1 387.66 223.09V223.09A6.5 6.5 0 0 1 394.16 216.59Z" fill="url(#g2)"/>
               <path d="M394.16 216.59H394.16A6.5 6.5 0 0 1 400.66 223.09V223.09A6.5 6.5 0 0 1 394.16 229.59H394.16A6.5 6.5 0 0 1 387.66 223.09V223.09A6.5 6.5 0 0 1 394.16 216.59ZM394.16 217.59H394.16A5.5 5.5 0 0 1 399.66 223.09V223.09A5.5 5.5 0 0 1 394.16 228.59H394.16A5.5 5.5 0 0 1 388.66 223.09V223.09A5.5 5.5 0 0 1 394.16 217.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1115,11 +1133,11 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="542.08" y="249.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-dc9b0c)">JO</text>
             </g>
           </g>
-          <g class="a m61">
+          <g class="a m64">
             <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)">3</text>
           </g>
-          <g class="a m63">
-            <g class="a m62">
+          <g class="a m66">
+            <g class="a m65">
               <path d="M371.66 133H385.66V147H371.66Z" fill="url(#g3)"/>
               <path d="M385.66 133H558.33V145H385.66Z" fill="url(#g4)"/>
               <path d="M558.33 133H572.33V147H558.33Z" fill="url(#g5)"/>
@@ -1129,7 +1147,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <path d="M371.66 191H385.66V205H371.66Z" fill="url(#g9)"/>
               <path d="M371.66 147H383.66V191H371.66Z" fill="url(#g10)"/>
             </g>
-            <g class="a m62">
+            <g class="a m65">
               <path d="M349.66 121H405.66V177H349.66Z" fill="url(#g11)"/>
               <path d="M405.66 121H538.33V177H405.66Z" fill="url(#g12)"/>
               <path d="M538.33 121H594.33V177H538.33Z" fill="url(#g13)"/>
@@ -1152,7 +1170,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             <path d="M547.33 171.19H547.33A9 9 0 0 1 556.33 180.19V180.19A9 9 0 0 1 547.33 189.19H547.33A9 9 0 0 1 538.33 180.19V180.19A9 9 0 0 1 547.33 171.19Z" fill="var(--dom-1kdbgbb)"/>
             <text x="540.94" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
           </g>
-          <g class="a m61">
+          <g class="a m64">
             <path d="M385.66 205H558.33A8 8 0 0 1 566.33 213V257A8 8 0 0 1 558.33 265H385.66A8 8 0 0 1 377.66 257V213A8 8 0 0 1 385.66 205Z" fill="var(--dom-1ungin5)"/>
             <path d="M394.16 216.59H394.16A6.5 6.5 0 0 1 400.66 223.09V223.09A6.5 6.5 0 0 1 394.16 229.59H394.16A6.5 6.5 0 0 1 387.66 223.09V223.09A6.5 6.5 0 0 1 394.16 216.59Z" fill="url(#g2)"/>
             <path d="M394.16 216.59H394.16A6.5 6.5 0 0 1 400.66 223.09V223.09A6.5 6.5 0 0 1 394.16 229.59H394.16A6.5 6.5 0 0 1 387.66 223.09V223.09A6.5 6.5 0 0 1 394.16 216.59ZM394.16 217.59H394.16A5.5 5.5 0 0 1 399.66 223.09V223.09A5.5 5.5 0 0 1 394.16 228.59H394.16A5.5 5.5 0 0 1 388.66 223.09V223.09A5.5 5.5 0 0 1 394.16 217.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1178,12 +1196,12 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             <path d="M547.33 307.19H547.33A9 9 0 0 1 556.33 316.19V316.19A9 9 0 0 1 547.33 325.19H547.33A9 9 0 0 1 538.33 316.19V316.19A9 9 0 0 1 547.33 307.19Z" fill="var(--dom-inpbrf)"/>
             <text x="542.08" y="317.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-dc9b0c)">JO</text>
           </g>
-          <g class="a m54">
+          <g class="a m57">
             <g>
-              <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m52">2</text>
-              <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m53">3</text>
+              <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m55">2</text>
+              <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m56">3</text>
             </g>
-            <g class="a m64">
+            <g class="a m67">
               <path d="M385.66 205H558.33A8 8 0 0 1 566.33 213V257A8 8 0 0 1 558.33 265H385.66A8 8 0 0 1 377.66 257V213A8 8 0 0 1 385.66 205Z" fill="var(--dom-1ungin5)"/>
               <path d="M394.16 216.59H394.16A6.5 6.5 0 0 1 400.66 223.09V223.09A6.5 6.5 0 0 1 394.16 229.59H394.16A6.5 6.5 0 0 1 387.66 223.09V223.09A6.5 6.5 0 0 1 394.16 216.59Z" fill="url(#g2)"/>
               <path d="M394.16 216.59H394.16A6.5 6.5 0 0 1 400.66 223.09V223.09A6.5 6.5 0 0 1 394.16 229.59H394.16A6.5 6.5 0 0 1 387.66 223.09V223.09A6.5 6.5 0 0 1 394.16 216.59ZM394.16 217.59H394.16A5.5 5.5 0 0 1 399.66 223.09V223.09A5.5 5.5 0 0 1 394.16 228.59H394.16A5.5 5.5 0 0 1 388.66 223.09V223.09A5.5 5.5 0 0 1 394.16 217.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1197,7 +1215,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <path d="M547.33 239.19H547.33A9 9 0 0 1 556.33 248.19V248.19A9 9 0 0 1 547.33 257.19H547.33A9 9 0 0 1 538.33 248.19V248.19A9 9 0 0 1 547.33 239.19Z" fill="var(--dom-1kdbgbb)"/>
               <text x="540.94" y="249.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
             </g>
-            <g class="a m64">
+            <g class="a m67">
               <path d="M385.66 273H558.33A8 8 0 0 1 566.33 281V325A8 8 0 0 1 558.33 333H385.66A8 8 0 0 1 377.66 325V281A8 8 0 0 1 385.66 273Z" fill="var(--dom-1ungin5)"/>
               <path d="M394.16 284.59H394.16A6.5 6.5 0 0 1 400.66 291.09V291.09A6.5 6.5 0 0 1 394.16 297.59H394.16A6.5 6.5 0 0 1 387.66 291.09V291.09A6.5 6.5 0 0 1 394.16 284.59Z" fill="url(#g2)"/>
               <path d="M394.16 284.59H394.16A6.5 6.5 0 0 1 400.66 291.09V291.09A6.5 6.5 0 0 1 394.16 297.59H394.16A6.5 6.5 0 0 1 387.66 291.09V291.09A6.5 6.5 0 0 1 394.16 284.59ZM394.16 285.59H394.16A5.5 5.5 0 0 1 399.66 291.09V291.09A5.5 5.5 0 0 1 394.16 296.59H394.16A5.5 5.5 0 0 1 388.66 291.09V291.09A5.5 5.5 0 0 1 394.16 285.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1212,7 +1230,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="542.08" y="317.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-dc9b0c)">JO</text>
             </g>
           </g>
-          <g class="a m65">
+          <g class="a m68">
             <text x="478.66" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)">2</text>
             <path d="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" fill="var(--dom-1ungin5)"/>
             <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" fill="url(#g2)"/>
@@ -1255,7 +1273,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="653.02" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m10">3</text>
               <text x="653.02" y="122.25" font-family="'Inter', sans-serif" font-size="12.5" font-weight="500" fill="var(--dom-fm3plr)" class="a m11">2</text>
             </g>
-            <g class="a m66">
+            <g class="a m69">
               <path d="M596.33 137H769A8 8 0 0 1 777 145V189A8 8 0 0 1 769 197H596.33A8 8 0 0 1 588.33 189V145A8 8 0 0 1 596.33 137Z" fill="var(--dom-1ungin5)"/>
               <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" fill="var(--dom-fyplpb)"/>
               <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59ZM604.83 149.59H604.83A5.5 5.5 0 0 1 610.33 155.09V155.09A5.5 5.5 0 0 1 604.83 160.59H604.83A5.5 5.5 0 0 1 599.33 155.09V155.09A5.5 5.5 0 0 1 604.83 149.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1273,8 +1291,8 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="751.61" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
             </g>
           </g>
-          <g class="a m68">
-            <g class="a m67">
+          <g class="a m71">
+            <g class="a m70">
               <path d="M596.33 205H769A8 8 0 0 1 777 213V257A8 8 0 0 1 769 265H596.33A8 8 0 0 1 588.33 257V213A8 8 0 0 1 596.33 205Z" fill="var(--dom-1ungin5)"/>
               <path d="M604.83 216.59H604.83A6.5 6.5 0 0 1 611.33 223.09V223.09A6.5 6.5 0 0 1 604.83 229.59H604.83A6.5 6.5 0 0 1 598.33 223.09V223.09A6.5 6.5 0 0 1 604.83 216.59Z" fill="var(--dom-fyplpb)"/>
               <path d="M604.83 216.59H604.83A6.5 6.5 0 0 1 611.33 223.09V223.09A6.5 6.5 0 0 1 604.83 229.59H604.83A6.5 6.5 0 0 1 598.33 223.09V223.09A6.5 6.5 0 0 1 604.83 216.59ZM604.83 217.59H604.83A5.5 5.5 0 0 1 610.33 223.09V223.09A5.5 5.5 0 0 1 604.83 228.59H604.83A5.5 5.5 0 0 1 599.33 223.09V223.09A5.5 5.5 0 0 1 604.83 217.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1291,7 +1309,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <path d="M758 239.19H758A9 9 0 0 1 767 248.19V248.19A9 9 0 0 1 758 257.19H758A9 9 0 0 1 749 248.19V248.19A9 9 0 0 1 758 239.19Z" fill="var(--dom-10lseaa)"/>
               <text x="752.94" y="249.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-n8vcml)">PR</text>
             </g>
-            <g class="a m67">
+            <g class="a m70">
               <path d="M596.33 273H769A8 8 0 0 1 777 281V325A8 8 0 0 1 769 333H596.33A8 8 0 0 1 588.33 325V281A8 8 0 0 1 596.33 273Z" fill="var(--dom-1ungin5)"/>
               <path d="M604.83 284.59H604.83A6.5 6.5 0 0 1 611.33 291.09V291.09A6.5 6.5 0 0 1 604.83 297.59H604.83A6.5 6.5 0 0 1 598.33 291.09V291.09A6.5 6.5 0 0 1 604.83 284.59Z" fill="var(--dom-fyplpb)"/>
               <path d="M604.83 284.59H604.83A6.5 6.5 0 0 1 611.33 291.09V291.09A6.5 6.5 0 0 1 604.83 297.59H604.83A6.5 6.5 0 0 1 598.33 291.09V291.09A6.5 6.5 0 0 1 604.83 284.59ZM604.83 285.59H604.83A5.5 5.5 0 0 1 610.33 291.09V291.09A5.5 5.5 0 0 1 604.83 296.59H604.83A5.5 5.5 0 0 1 599.33 291.09V291.09A5.5 5.5 0 0 1 604.83 285.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
@@ -1310,7 +1328,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             </g>
           </g>
           <g class="a m1">
-            <g class="a m66">
+            <g class="a m69">
               <path d="M517.67 387H541.67V411H517.67Z" fill="url(#g19)"/>
               <path d="M541.67 387H771V411H541.67Z" fill="url(#g20)"/>
               <path d="M771 387H795V411H771Z" fill="url(#g21)"/>
@@ -1336,7 +1354,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             </g>
           </g>
           <g class="a m4">
-            <g class="a m69">
+            <g class="a m72">
               <path d="M517.67 387H541.67V411H517.67Z" fill="url(#g19)"/>
               <path d="M541.67 387H771V411H541.67Z" fill="url(#g20)"/>
               <path d="M771 387H795V411H771Z" fill="url(#g21)"/>
@@ -1395,7 +1413,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             <text x="752.69" y="249.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1cdvzkt)">KT</text>
           </g>
           <g class="a m8">
-            <g class="a m70">
+            <g class="a m73">
               <path d="M1 1H799V449H1Z" fill="var(--dom-1u0v432)"/>
               <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" fill="var(--dom-1ungin5)"/>
               <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="var(--dom-80xktw)" fill-rule="evenodd"/>
@@ -1441,108 +1459,52 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               </g>
             </g>
           </g>
-          <g class="a m71">
+          <g class="a m74">
             <path d="M1 1H799V449H1Z" fill="var(--dom-1u0v432)"/>
-            <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="dm">
-              <animate id="w2" attributeName="d" values="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65Z;M204 65H596A14 14 0 0 1 610 79V242.39A14 14 0 0 1 596 256.39H204A14 14 0 0 1 190 242.39V79A14 14 0 0 1 204 65Z;M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65Z;M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65Z;M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" keyTimes="0;0.29037;0.54841;0.80645;1" calcMode="spline" keySplines="0.77 0 0.175 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="1.5499s;w2.begin+14s" dur="1.5501s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65Z" begin="0s;w2.begin+12.4501s" dur="1.5499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="ds" display="none"/>
-            <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="var(--dom-80xktw)" fill-rule="evenodd" style="fill:var(--dom-80xktw)" class="dm">
-              <animate id="w3" attributeName="d" values="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z;M204 65H596A14 14 0 0 1 610 79V242.39A14 14 0 0 1 596 256.39H204A14 14 0 0 1 190 242.39V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z;M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z;M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z;M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" keyTimes="0;0.29037;0.54841;0.80645;1" calcMode="spline" keySplines="0.77 0 0.175 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="1.5499s;w3.begin+14s" dur="1.5501s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z" begin="0s;w3.begin+12.4501s" dur="1.5499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="var(--dom-80xktw)" fill-rule="evenodd" style="fill:var(--dom-80xktw)" class="ds" display="none"/>
           </g>
-          <g clip-path="url(#c20)" class="a m84">
-            <path d="M189 70H216.38A5 5 0 0 1 221.38 75V85.8A5 5 0 0 1 216.38 90.8H189A5 5 0 0 1 184 85.8V75A5 5 0 0 1 189 70Z" fill="var(--dom-1eempnt)"/>
-            <text x="190" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-1sguzt4)">ENG</text>
-            <text x="229.38" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">›</text>
-            <text x="242.19" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">New issue</text>
-            <text x="559.61" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">ENG-143</text>
-            <g clip-path="url(#c21)" class="a m74">
-              <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-fm3plr)" class="a m72">Issue title</text>
-              <g>
-                <g clip-path="url(#c22)">
-                  <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-t6c6mt)">Save drafts offline</text>
-                </g>
-                <rect x="184" y="105.69" width="1.286" height="20.7" fill="var(--dom-t6c6mt)" class="a m73"/>
-              </g>
-            </g>
-            <g clip-path="url(#c21)" class="a m75">
-              <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-t6c6mt)">Save drafts offline</text>
-            </g>
-            <text x="184" y="149.98" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-fm3plr)">Add a description…</text>
-            <text x="184" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">Label</text>
-            <path d="M269 166.17H299.55A13 13 0 0 1 312.55 179.17V179.17A13 13 0 0 1 299.55 192.17H269A13 13 0 0 1 256 179.17V179.17A13 13 0 0 1 269 166.17ZM269 167.17H299.55A12 12 0 0 1 311.55 179.17V179.17A12 12 0 0 1 299.55 191.17H269A12 12 0 0 1 257 179.17V179.17A12 12 0 0 1 269 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
-            <path d="M270 176.17H270A3 3 0 0 1 273 179.17V179.17A3 3 0 0 1 270 182.17H270A3 3 0 0 1 267 179.17V179.17A3 3 0 0 1 270 176.17Z" fill="rgb(229,72,77)"/>
-            <text x="279" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Bug</text>
-            <g class="a m75">
-              <path d="M331.55 166.17H382.94A13 13 0 0 1 395.94 179.17V179.17A13 13 0 0 1 382.94 192.17H331.55A13 13 0 0 1 318.55 179.17V179.17A13 13 0 0 1 331.55 166.17Z" fill="var(--dom-16j6uh)" class="a m76"/>
-            </g>
-            <path d="M331.55 166.17H382.94A13 13 0 0 1 395.94 179.17V179.17A13 13 0 0 1 382.94 192.17H331.55A13 13 0 0 1 318.55 179.17V179.17A13 13 0 0 1 331.55 166.17ZM331.55 167.17H382.94A12 12 0 0 1 394.94 179.17V179.17A12 12 0 0 1 382.94 191.17H331.55A12 12 0 0 1 319.55 179.17V179.17A12 12 0 0 1 331.55 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd" class="a m77"/>
-            <path d="M332.55 176.17H332.55A3 3 0 0 1 335.55 179.17V179.17A3 3 0 0 1 332.55 182.17H332.55A3 3 0 0 1 329.55 179.17V179.17A3 3 0 0 1 332.55 176.17Z" fill="rgb(62,123,250)"/>
-            <text x="341.55" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-t6c6mt)" class="a m78">Feature</text>
-            <path d="M414.94 166.17H457.55A13 13 0 0 1 470.55 179.17V179.17A13 13 0 0 1 457.55 192.17H414.94A13 13 0 0 1 401.94 179.17V179.17A13 13 0 0 1 414.94 166.17ZM414.94 167.17H457.55A12 12 0 0 1 469.55 179.17V179.17A12 12 0 0 1 457.55 191.17H414.94A12 12 0 0 1 402.94 179.17V179.17A12 12 0 0 1 414.94 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
-            <path d="M415.94 176.17H415.94A3 3 0 0 1 418.94 179.17V179.17A3 3 0 0 1 415.94 182.17H415.94A3 3 0 0 1 412.94 179.17V179.17A3 3 0 0 1 415.94 176.17Z" fill="rgb(163,91,240)"/>
-            <text x="424.94" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Polish</text>
-            <text x="184" y="222.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">Assignee</text>
-            <g class="a m80">
-              <path d="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 205.17H271A14 14 0 0 1 285 219.17V219.17A14 14 0 0 1 271 233.17H271A14 14 0 0 1 257 219.17V219.17A14 14 0 0 1 271 205.17Z" fill="var(--dom-r4k8vd)" fill-rule="evenodd" class="a m79 dm">
-                <animate id="w5" attributeName="d" values="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17Z;M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 205.17H271A14 14 0 0 1 285 219.17V219.17A14 14 0 0 1 271 233.17H271A14 14 0 0 1 257 219.17V219.17A14 14 0 0 1 271 205.17Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.0499s;w5.begin+14s" dur="0.2001s" fill="freeze" data-loop="14s"/>
-                <set attributeName="d" to="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17Z" begin="0s;w5.begin+8.9501s" dur="5.0499s" fill="freeze" data-loop="14s"/>
-              </path>
-              <path d="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 205.17H271A14 14 0 0 1 285 219.17V219.17A14 14 0 0 1 271 233.17H271A14 14 0 0 1 257 219.17V219.17A14 14 0 0 1 271 205.17Z" fill="var(--dom-r4k8vd)" fill-rule="evenodd" class="a m79 ds" display="none"/>
-            </g>
-            <path d="M271 207.17H271A12 12 0 0 1 283 219.17V219.17A12 12 0 0 1 271 231.17H271A12 12 0 0 1 259 219.17V219.17A12 12 0 0 1 271 207.17Z" fill="var(--dom-1kdbgbb)"/>
-            <text x="262.47" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-1a6v6v1)">MA</text>
-            <path d="M307 207.17H307A12 12 0 0 1 319 219.17V219.17A12 12 0 0 1 307 231.17H307A12 12 0 0 1 295 219.17V219.17A12 12 0 0 1 307 207.17Z" fill="var(--dom-inpbrf)"/>
-            <text x="300" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-dc9b0c)">JO</text>
-            <path d="M343 207.17H343A12 12 0 0 1 355 219.17V219.17A12 12 0 0 1 343 231.17H343A12 12 0 0 1 331 219.17V219.17A12 12 0 0 1 343 207.17Z" fill="var(--dom-10lseaa)"/>
-            <text x="336.25" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-n8vcml)">PR</text>
-            <path d="M379 207.17H379A12 12 0 0 1 391 219.17V219.17A12 12 0 0 1 379 231.17H379A12 12 0 0 1 367 219.17V219.17A12 12 0 0 1 379 207.17Z" fill="var(--dom-dj3jdt)"/>
-            <text x="371.92" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-1cdvzkt)">KT</text>
-            <g class="a m80">
-              <g class="a m81">
-                <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Unassigned</text>
-              </g>
-              <g class="a m82">
-                <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Mara</text>
-              </g>
-            </g>
-            <g class="a m83">
-              <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Unassigned</text>
-            </g>
-            <path d="M166 250.17H634V305.17H166ZM166 251.17H634V305.17H166Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
-            <path d="M193 269.17H233.42A9 9 0 0 1 242.42 278.17V278.17A9 9 0 0 1 233.42 287.17H193A9 9 0 0 1 184 278.17V278.17A9 9 0 0 1 193 269.17Z" fill="var(--dom-1eempnt)"/>
-            <path d="M197.5 271.67H197.5A6.5 6.5 0 0 1 204 278.17V278.17A6.5 6.5 0 0 1 197.5 284.67H197.5A6.5 6.5 0 0 1 191 278.17V278.17A6.5 6.5 0 0 1 197.5 271.67ZM197.5 272.67H197.5A5.5 5.5 0 0 1 203 278.17V278.17A5.5 5.5 0 0 1 197.5 283.67H197.5A5.5 5.5 0 0 1 192 278.17V278.17A5.5 5.5 0 0 1 197.5 272.67Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
-            <text x="209" y="281.47" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Todo</text>
-            <text x="458.25" y="283.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Cancel</text>
-            <path d="M527.41 263.17H613A7 7 0 0 1 620 270.17V286.17A7 7 0 0 1 613 293.17H527.41A7 7 0 0 1 520.41 286.17V270.17A7 7 0 0 1 527.41 263.17Z" fill="var(--dom-fyplpb)"/>
-            <text x="531.41" y="283.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1g60vl4)">Create issue</text>
-          </g>
-          <g clip-path="url(#c23)" class="a m87">
-            <g class="a m85">
+          <g class="a m88">
+            <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" fill="var(--dom-1ungin5)"/>
+            <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="var(--dom-80xktw)" fill-rule="evenodd"/>
+            <g clip-path="url(#c20)">
               <path d="M189 70H216.38A5 5 0 0 1 221.38 75V85.8A5 5 0 0 1 216.38 90.8H189A5 5 0 0 1 184 85.8V75A5 5 0 0 1 189 70Z" fill="var(--dom-1eempnt)"/>
               <text x="190" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-1sguzt4)">ENG</text>
               <text x="229.38" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">›</text>
               <text x="242.19" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">New issue</text>
               <text x="559.61" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">ENG-143</text>
-              <g clip-path="url(#c21)">
-                <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-fm3plr)">Issue title</text>
+              <g clip-path="url(#c21)" class="a m78">
+                <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-fm3plr)" class="a m75">Issue title</text>
+                <g>
+                  <g clip-path="url(#c22)">
+                    <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-t6c6mt)">Save drafts offline</text>
+                  </g>
+                  <rect x="184" y="105.69" width="1.286" height="20.7" fill="var(--dom-t6c6mt)" class="a m77"/>
+                </g>
+              </g>
+              <g clip-path="url(#c21)" class="a m79">
+                <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-t6c6mt)">Save drafts offline</text>
               </g>
               <text x="184" y="149.98" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-fm3plr)">Add a description…</text>
               <text x="184" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">Label</text>
               <path d="M269 166.17H299.55A13 13 0 0 1 312.55 179.17V179.17A13 13 0 0 1 299.55 192.17H269A13 13 0 0 1 256 179.17V179.17A13 13 0 0 1 269 166.17ZM269 167.17H299.55A12 12 0 0 1 311.55 179.17V179.17A12 12 0 0 1 299.55 191.17H269A12 12 0 0 1 257 179.17V179.17A12 12 0 0 1 269 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
               <path d="M270 176.17H270A3 3 0 0 1 273 179.17V179.17A3 3 0 0 1 270 182.17H270A3 3 0 0 1 267 179.17V179.17A3 3 0 0 1 270 176.17Z" fill="rgb(229,72,77)"/>
               <text x="279" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Bug</text>
-              <path d="M331.55 166.17H382.94A13 13 0 0 1 395.94 179.17V179.17A13 13 0 0 1 382.94 192.17H331.55A13 13 0 0 1 318.55 179.17V179.17A13 13 0 0 1 331.55 166.17ZM331.55 167.17H382.94A12 12 0 0 1 394.94 179.17V179.17A12 12 0 0 1 382.94 191.17H331.55A12 12 0 0 1 319.55 179.17V179.17A12 12 0 0 1 331.55 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+              <g class="a m79">
+                <path d="M331.55 166.17H382.94A13 13 0 0 1 395.94 179.17V179.17A13 13 0 0 1 382.94 192.17H331.55A13 13 0 0 1 318.55 179.17V179.17A13 13 0 0 1 331.55 166.17Z" fill="var(--dom-16j6uh)" class="a m80"/>
+              </g>
+              <path d="M331.55 166.17H382.94A13 13 0 0 1 395.94 179.17V179.17A13 13 0 0 1 382.94 192.17H331.55A13 13 0 0 1 318.55 179.17V179.17A13 13 0 0 1 331.55 166.17ZM331.55 167.17H382.94A12 12 0 0 1 394.94 179.17V179.17A12 12 0 0 1 382.94 191.17H331.55A12 12 0 0 1 319.55 179.17V179.17A12 12 0 0 1 331.55 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd" class="a m81"/>
               <path d="M332.55 176.17H332.55A3 3 0 0 1 335.55 179.17V179.17A3 3 0 0 1 332.55 182.17H332.55A3 3 0 0 1 329.55 179.17V179.17A3 3 0 0 1 332.55 176.17Z" fill="rgb(62,123,250)"/>
-              <text x="341.55" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
+              <text x="341.55" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-t6c6mt)" class="a m82">Feature</text>
               <path d="M414.94 166.17H457.55A13 13 0 0 1 470.55 179.17V179.17A13 13 0 0 1 457.55 192.17H414.94A13 13 0 0 1 401.94 179.17V179.17A13 13 0 0 1 414.94 166.17ZM414.94 167.17H457.55A12 12 0 0 1 469.55 179.17V179.17A12 12 0 0 1 457.55 191.17H414.94A12 12 0 0 1 402.94 179.17V179.17A12 12 0 0 1 414.94 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
               <path d="M415.94 176.17H415.94A3 3 0 0 1 418.94 179.17V179.17A3 3 0 0 1 415.94 182.17H415.94A3 3 0 0 1 412.94 179.17V179.17A3 3 0 0 1 415.94 176.17Z" fill="rgb(163,91,240)"/>
               <text x="424.94" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Polish</text>
               <text x="184" y="222.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">Assignee</text>
+              <g class="a m84">
+                <path d="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 205.17H271A14 14 0 0 1 285 219.17V219.17A14 14 0 0 1 271 233.17H271A14 14 0 0 1 257 219.17V219.17A14 14 0 0 1 271 205.17Z" fill="var(--dom-r4k8vd)" fill-rule="evenodd" class="a m83 dm">
+                  <animate id="w2" attributeName="d" values="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17Z;M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 205.17H271A14 14 0 0 1 285 219.17V219.17A14 14 0 0 1 271 233.17H271A14 14 0 0 1 257 219.17V219.17A14 14 0 0 1 271 205.17Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="5.0499s;w2.begin+14s" dur="0.2001s" fill="freeze" data-loop="14s"/>
+                  <set attributeName="d" to="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17Z" begin="0s;w2.begin+8.9501s" dur="5.0499s" fill="freeze" data-loop="14s"/>
+                </path>
+                <path d="M271 204.17H271A15 15 0 0 1 286 219.17V219.17A15 15 0 0 1 271 234.17H271A15 15 0 0 1 256 219.17V219.17A15 15 0 0 1 271 204.17ZM271 205.17H271A14 14 0 0 1 285 219.17V219.17A14 14 0 0 1 271 233.17H271A14 14 0 0 1 257 219.17V219.17A14 14 0 0 1 271 205.17Z" fill="var(--dom-r4k8vd)" fill-rule="evenodd" class="a m83 ds" display="none"/>
+              </g>
               <path d="M271 207.17H271A12 12 0 0 1 283 219.17V219.17A12 12 0 0 1 271 231.17H271A12 12 0 0 1 259 219.17V219.17A12 12 0 0 1 271 207.17Z" fill="var(--dom-1kdbgbb)"/>
               <text x="262.47" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-1a6v6v1)">MA</text>
               <path d="M307 207.17H307A12 12 0 0 1 319 219.17V219.17A12 12 0 0 1 307 231.17H307A12 12 0 0 1 295 219.17V219.17A12 12 0 0 1 307 207.17Z" fill="var(--dom-inpbrf)"/>
@@ -1551,7 +1513,17 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="336.25" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-n8vcml)">PR</text>
               <path d="M379 207.17H379A12 12 0 0 1 391 219.17V219.17A12 12 0 0 1 379 231.17H379A12 12 0 0 1 367 219.17V219.17A12 12 0 0 1 379 207.17Z" fill="var(--dom-dj3jdt)"/>
               <text x="371.92" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-1cdvzkt)">KT</text>
-              <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Unassigned</text>
+              <g class="a m84">
+                <g class="a m85">
+                  <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Unassigned</text>
+                </g>
+                <g class="a m86">
+                  <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Mara</text>
+                </g>
+              </g>
+              <g class="a m87">
+                <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Unassigned</text>
+              </g>
               <path d="M166 250.17H634V305.17H166ZM166 251.17H634V305.17H166Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
               <path d="M193 269.17H233.42A9 9 0 0 1 242.42 278.17V278.17A9 9 0 0 1 233.42 287.17H193A9 9 0 0 1 184 278.17V278.17A9 9 0 0 1 193 269.17Z" fill="var(--dom-1eempnt)"/>
               <path d="M197.5 271.67H197.5A6.5 6.5 0 0 1 204 278.17V278.17A6.5 6.5 0 0 1 197.5 284.67H197.5A6.5 6.5 0 0 1 191 278.17V278.17A6.5 6.5 0 0 1 197.5 271.67ZM197.5 272.67H197.5A5.5 5.5 0 0 1 203 278.17V278.17A5.5 5.5 0 0 1 197.5 283.67H197.5A5.5 5.5 0 0 1 192 278.17V278.17A5.5 5.5 0 0 1 197.5 272.67Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
@@ -1560,42 +1532,108 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <path d="M527.41 263.17H613A7 7 0 0 1 620 270.17V286.17A7 7 0 0 1 613 293.17H527.41A7 7 0 0 1 520.41 286.17V270.17A7 7 0 0 1 527.41 263.17Z" fill="var(--dom-fyplpb)"/>
               <text x="531.41" y="283.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1g60vl4)">Create issue</text>
             </g>
-            <g class="a m86">
-              <path d="M191 66H609V114H191ZM191 66H609V113H191Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
-              <g transform="translate(207 81.5) scale(0.667 0.667) translate(0 0)">
-                <path d="m21 21-4.34-4.34" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="11" cy="11" r="8" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g class="a m92">
+            <g class="a m91">
+              <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="dm">
+                <animate id="w3" attributeName="d" values="M179 53H571A14 14 0 0 1 585 67V162.39A14 14 0 0 1 571 176.39H179A14 14 0 0 1 165 162.39V67A14 14 0 0 1 179 53Z;M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="2.8s;w3.begin+14s" dur="0.3s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M179 53H571A14 14 0 0 1 585 67V162.39A14 14 0 0 1 571 176.39H179A14 14 0 0 1 165 162.39V67A14 14 0 0 1 179 53Z" begin="0s;w3.begin+11.2s" dur="2.8s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="ds" display="none"/>
+              <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="var(--dom-80xktw)" fill-rule="evenodd" style="fill:var(--dom-80xktw)" class="dm">
+                <animate id="w4" attributeName="d" values="M179 53H571A14 14 0 0 1 585 67V162.39A14 14 0 0 1 571 176.39H179A14 14 0 0 1 165 162.39V67A14 14 0 0 1 179 53ZM179 54H571A13 13 0 0 1 584 67V162.39A13 13 0 0 1 571 175.39H179A13 13 0 0 1 166 162.39V67A13 13 0 0 1 179 54Z;M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="2.8s;w4.begin+14s" dur="0.3s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M179 53H571A14 14 0 0 1 585 67V162.39A14 14 0 0 1 571 176.39H179A14 14 0 0 1 165 162.39V67A14 14 0 0 1 179 53ZM179 54H571A13 13 0 0 1 584 67V162.39A13 13 0 0 1 571 175.39H179A13 13 0 0 1 166 162.39V67A13 13 0 0 1 179 54Z" begin="0s;w4.begin+11.2s" dur="2.8s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M179 53H621A14 14 0 0 1 635 67V292.17A14 14 0 0 1 621 306.17H179A14 14 0 0 1 165 292.17V67A14 14 0 0 1 179 53ZM179 54H621A13 13 0 0 1 634 67V292.17A13 13 0 0 1 621 305.17H179A13 13 0 0 1 166 292.17V67A13 13 0 0 1 179 54Z" fill="var(--dom-80xktw)" fill-rule="evenodd" style="fill:var(--dom-80xktw)" class="ds" display="none"/>
+              <g clip-path="url(#c23)">
+                <g class="a m89">
+                  <path d="M189 70H216.38A5 5 0 0 1 221.38 75V85.8A5 5 0 0 1 216.38 90.8H189A5 5 0 0 1 184 85.8V75A5 5 0 0 1 189 70Z" fill="var(--dom-1eempnt)"/>
+                  <text x="190" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="var(--dom-1sguzt4)">ENG</text>
+                  <text x="229.38" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">›</text>
+                  <text x="242.19" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">New issue</text>
+                  <text x="559.61" y="84" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">ENG-143</text>
+                  <g clip-path="url(#c21)">
+                    <text x="184" y="121.89" font-family="'Inter', sans-serif" font-size="18" font-weight="600" letter-spacing="-0.18" fill="var(--dom-fm3plr)">Issue title</text>
+                  </g>
+                  <text x="184" y="149.98" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-fm3plr)">Add a description…</text>
+                  <text x="184" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">Label</text>
+                  <path d="M269 166.17H299.55A13 13 0 0 1 312.55 179.17V179.17A13 13 0 0 1 299.55 192.17H269A13 13 0 0 1 256 179.17V179.17A13 13 0 0 1 269 166.17ZM269 167.17H299.55A12 12 0 0 1 311.55 179.17V179.17A12 12 0 0 1 299.55 191.17H269A12 12 0 0 1 257 179.17V179.17A12 12 0 0 1 269 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+                  <path d="M270 176.17H270A3 3 0 0 1 273 179.17V179.17A3 3 0 0 1 270 182.17H270A3 3 0 0 1 267 179.17V179.17A3 3 0 0 1 270 176.17Z" fill="rgb(229,72,77)"/>
+                  <text x="279" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Bug</text>
+                  <path d="M331.55 166.17H382.94A13 13 0 0 1 395.94 179.17V179.17A13 13 0 0 1 382.94 192.17H331.55A13 13 0 0 1 318.55 179.17V179.17A13 13 0 0 1 331.55 166.17ZM331.55 167.17H382.94A12 12 0 0 1 394.94 179.17V179.17A12 12 0 0 1 382.94 191.17H331.55A12 12 0 0 1 319.55 179.17V179.17A12 12 0 0 1 331.55 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+                  <path d="M332.55 176.17H332.55A3 3 0 0 1 335.55 179.17V179.17A3 3 0 0 1 332.55 182.17H332.55A3 3 0 0 1 329.55 179.17V179.17A3 3 0 0 1 332.55 176.17Z" fill="rgb(62,123,250)"/>
+                  <text x="341.55" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
+                  <path d="M414.94 166.17H457.55A13 13 0 0 1 470.55 179.17V179.17A13 13 0 0 1 457.55 192.17H414.94A13 13 0 0 1 401.94 179.17V179.17A13 13 0 0 1 414.94 166.17ZM414.94 167.17H457.55A12 12 0 0 1 469.55 179.17V179.17A12 12 0 0 1 457.55 191.17H414.94A12 12 0 0 1 402.94 179.17V179.17A12 12 0 0 1 414.94 167.17Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+                  <path d="M415.94 176.17H415.94A3 3 0 0 1 418.94 179.17V179.17A3 3 0 0 1 415.94 182.17H415.94A3 3 0 0 1 412.94 179.17V179.17A3 3 0 0 1 415.94 176.17Z" fill="rgb(163,91,240)"/>
+                  <text x="424.94" y="182.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-1sguzt4)">Polish</text>
+                  <text x="184" y="222.77" font-family="'Inter', sans-serif" font-size="12" font-weight="500" fill="var(--dom-fm3plr)">Assignee</text>
+                  <path d="M271 207.17H271A12 12 0 0 1 283 219.17V219.17A12 12 0 0 1 271 231.17H271A12 12 0 0 1 259 219.17V219.17A12 12 0 0 1 271 207.17Z" fill="var(--dom-1kdbgbb)"/>
+                  <text x="262.47" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-1a6v6v1)">MA</text>
+                  <path d="M307 207.17H307A12 12 0 0 1 319 219.17V219.17A12 12 0 0 1 307 231.17H307A12 12 0 0 1 295 219.17V219.17A12 12 0 0 1 307 207.17Z" fill="var(--dom-inpbrf)"/>
+                  <text x="300" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-dc9b0c)">JO</text>
+                  <path d="M343 207.17H343A12 12 0 0 1 355 219.17V219.17A12 12 0 0 1 343 231.17H343A12 12 0 0 1 331 219.17V219.17A12 12 0 0 1 343 207.17Z" fill="var(--dom-10lseaa)"/>
+                  <text x="336.25" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-n8vcml)">PR</text>
+                  <path d="M379 207.17H379A12 12 0 0 1 391 219.17V219.17A12 12 0 0 1 379 231.17H379A12 12 0 0 1 367 219.17V219.17A12 12 0 0 1 379 207.17Z" fill="var(--dom-dj3jdt)"/>
+                  <text x="371.92" y="223.11" font-family="'Inter', sans-serif" font-size="10.08" font-weight="600" letter-spacing="0.202" fill="var(--dom-1cdvzkt)">KT</text>
+                  <text x="406" y="224.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Unassigned</text>
+                  <path d="M166 250.17H634V305.17H166ZM166 251.17H634V305.17H166Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+                  <path d="M193 269.17H233.42A9 9 0 0 1 242.42 278.17V278.17A9 9 0 0 1 233.42 287.17H193A9 9 0 0 1 184 278.17V278.17A9 9 0 0 1 193 269.17Z" fill="var(--dom-1eempnt)"/>
+                  <path d="M197.5 271.67H197.5A6.5 6.5 0 0 1 204 278.17V278.17A6.5 6.5 0 0 1 197.5 284.67H197.5A6.5 6.5 0 0 1 191 278.17V278.17A6.5 6.5 0 0 1 197.5 271.67ZM197.5 272.67H197.5A5.5 5.5 0 0 1 203 278.17V278.17A5.5 5.5 0 0 1 197.5 283.67H197.5A5.5 5.5 0 0 1 192 278.17V278.17A5.5 5.5 0 0 1 197.5 272.67Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
+                  <text x="209" y="281.47" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Todo</text>
+                  <text x="458.25" y="283.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Cancel</text>
+                  <path d="M527.41 263.17H613A7 7 0 0 1 620 270.17V286.17A7 7 0 0 1 613 293.17H527.41A7 7 0 0 1 520.41 286.17V270.17A7 7 0 0 1 527.41 263.17Z" fill="var(--dom-fyplpb)"/>
+                  <text x="531.41" y="283.08" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1g60vl4)">Create issue</text>
+                </g>
+                <g class="a m90">
+                  <path d="M166 54H584V102H166ZM166 54H584V101H166Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+                  <g transform="translate(182 69.5) scale(0.667 0.667) translate(0 0)">
+                    <path d="m21 21-4.34-4.34" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="11" cy="11" r="8" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </g>
+                  <g clip-path="url(#c24)">
+                    <text x="208" y="83" font-family="'Inter', sans-serif" font-size="15" font-weight="500" fill="var(--dom-t6c6mt)">new iss</text>
+                  </g>
+                  <path d="M546.11 68.25H568A4 4 0 0 1 572 72.25V82.75A4 4 0 0 1 568 86.75H546.11A4 4 0 0 1 542.11 82.75V72.25A4 4 0 0 1 546.11 68.25Z" fill="var(--dom-1ungin5)"/>
+                  <path d="M546.11 68.25H568A4 4 0 0 1 572 72.25V82.75A4 4 0 0 1 568 86.75H546.11A4 4 0 0 1 542.11 82.75V72.25A4 4 0 0 1 546.11 68.25ZM546.11 69.25H568A3 3 0 0 1 571 72.25V82.75A3 3 0 0 1 568 85.75H546.11A3 3 0 0 1 543.11 82.75V72.25A3 3 0 0 1 546.11 69.25Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+                  <text x="548.11" y="80.25" font-family="'Inter', sans-serif" font-size="10.5" font-weight="500" fill="var(--dom-fm3plr)">esc</text>
+                  <text x="182" y="127" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="var(--dom-fm3plr)">Create</text>
+                  <path d="M180 135.39H570A8 8 0 0 1 578 143.39V161.39A8 8 0 0 1 570 169.39H180A8 8 0 0 1 172 161.39V143.39A8 8 0 0 1 180 135.39Z" fill="var(--dom-iyl6g5)"/>
+                  <g transform="translate(182 144.89) scale(0.625 0.625) translate(0 0)">
+                    <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" fill="none" stroke="var(--dom-fyplpb)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" fill="none" stroke="var(--dom-fyplpb)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </g>
+                  <text x="207" y="157.3" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">New issue</text>
+                  <path d="M552.3 143.14H564A4 4 0 0 1 568 147.14V157.64A4 4 0 0 1 564 161.64H552.3A4 4 0 0 1 548.3 157.64V147.14A4 4 0 0 1 552.3 143.14Z" fill="var(--dom-1ungin5)"/>
+                  <path d="M552.3 143.14H564A4 4 0 0 1 568 147.14V157.64A4 4 0 0 1 564 161.64H552.3A4 4 0 0 1 548.3 157.64V147.14A4 4 0 0 1 552.3 143.14ZM552.3 144.14H564A3 3 0 0 1 567 147.14V157.64A3 3 0 0 1 564 160.64H552.3A3 3 0 0 1 549.3 157.64V147.14A3 3 0 0 1 552.3 144.14Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+                  <text x="554.3" y="155.14" font-family="'Inter', sans-serif" font-size="10.5" font-weight="500" fill="var(--dom-fm3plr)">C</text>
+                </g>
               </g>
-              <g clip-path="url(#c24)">
-                <text x="233" y="95" font-family="'Inter', sans-serif" font-size="15" font-weight="500" fill="var(--dom-t6c6mt)">new iss</text>
-              </g>
-              <path d="M571.11 80.25H593A4 4 0 0 1 597 84.25V94.75A4 4 0 0 1 593 98.75H571.11A4 4 0 0 1 567.11 94.75V84.25A4 4 0 0 1 571.11 80.25Z" fill="var(--dom-1ungin5)"/>
-              <path d="M571.11 80.25H593A4 4 0 0 1 597 84.25V94.75A4 4 0 0 1 593 98.75H571.11A4 4 0 0 1 567.11 94.75V84.25A4 4 0 0 1 571.11 80.25ZM571.11 81.25H593A3 3 0 0 1 596 84.25V94.75A3 3 0 0 1 593 97.75H571.11A3 3 0 0 1 568.11 94.75V84.25A3 3 0 0 1 571.11 81.25Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
-              <text x="573.11" y="92.25" font-family="'Inter', sans-serif" font-size="10.5" font-weight="500" fill="var(--dom-fm3plr)">esc</text>
-              <text x="207" y="139" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="var(--dom-fm3plr)">Create</text>
-              <path d="M205 147.39H595A8 8 0 0 1 603 155.39V173.39A8 8 0 0 1 595 181.39H205A8 8 0 0 1 197 173.39V155.39A8 8 0 0 1 205 147.39Z" fill="var(--dom-iyl6g5)"/>
-              <g transform="translate(207 156.89) scale(0.625 0.625) translate(0 0)">
-                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" fill="none" stroke="var(--dom-fyplpb)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" fill="none" stroke="var(--dom-fyplpb)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </g>
-              <text x="232" y="169.3" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">New issue</text>
-              <path d="M577.3 155.14H589A4 4 0 0 1 593 159.14V169.64A4 4 0 0 1 589 173.64H577.3A4 4 0 0 1 573.3 169.64V159.14A4 4 0 0 1 577.3 155.14Z" fill="var(--dom-1ungin5)"/>
-              <path d="M577.3 155.14H589A4 4 0 0 1 593 159.14V169.64A4 4 0 0 1 589 173.64H577.3A4 4 0 0 1 573.3 169.64V159.14A4 4 0 0 1 577.3 155.14ZM577.3 156.14H589A3 3 0 0 1 592 159.14V169.64A3 3 0 0 1 589 172.64H577.3A3 3 0 0 1 574.3 169.64V159.14A3 3 0 0 1 577.3 156.14Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
-              <text x="579.3" y="167.14" font-family="'Inter', sans-serif" font-size="10.5" font-weight="500" fill="var(--dom-fm3plr)">C</text>
             </g>
           </g>
-          <g clip-path="url(#c25)" class="a m90">
+          <g class="a m93">
+            <path d="M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="dm">
+              <animate id="w6" attributeName="d" values="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65Z;M204 65H596A14 14 0 0 1 610 79V242.39A14 14 0 0 1 596 256.39H204A14 14 0 0 1 190 242.39V79A14 14 0 0 1 204 65Z;M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65Z" keyTimes="0;0.52948;1" calcMode="spline" keySplines="0.77 0 0.175 1;0.77 0 0.175 1" begin="1.5499s;w6.begin+14s" dur="0.8501s" fill="freeze" data-loop="14s"/>
+              <set attributeName="d" to="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65Z" begin="0s;w6.begin+12.4501s" dur="1.5499s" fill="freeze" data-loop="14s"/>
+            </path>
+            <path d="M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="ds" display="none"/>
+            <path d="M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" fill="var(--dom-80xktw)" fill-rule="evenodd" style="fill:var(--dom-80xktw)" class="dm">
+              <animate id="w7" attributeName="d" values="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z;M204 65H596A14 14 0 0 1 610 79V242.39A14 14 0 0 1 596 256.39H204A14 14 0 0 1 190 242.39V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V242.39A13 13 0 0 1 596 255.39H204A13 13 0 0 1 191 242.39V79A13 13 0 0 1 204 66Z;M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" keyTimes="0;0.52948;1" calcMode="spline" keySplines="0.77 0 0.175 1;0.77 0 0.175 1" begin="1.5499s;w7.begin+14s" dur="0.8501s" fill="freeze" data-loop="14s"/>
+              <set attributeName="d" to="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z" begin="0s;w7.begin+12.4501s" dur="1.5499s" fill="freeze" data-loop="14s"/>
+            </path>
+            <path d="M204 65H596A14 14 0 0 1 610 79V174.39A14 14 0 0 1 596 188.39H204A14 14 0 0 1 190 174.39V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V174.39A13 13 0 0 1 596 187.39H204A13 13 0 0 1 191 174.39V79A13 13 0 0 1 204 66Z" fill="var(--dom-80xktw)" fill-rule="evenodd" style="fill:var(--dom-80xktw)" class="ds" display="none"/>
+          </g>
+          <g clip-path="url(#c25)" class="a m97">
             <path d="M191 66H609V114H191ZM191 66H609V113H191Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
             <g transform="translate(207 81.5) scale(0.667 0.667) translate(0 0)">
               <path d="m21 21-4.34-4.34" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="11" cy="11" r="8" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </g>
-            <g clip-path="url(#c24)">
+            <g clip-path="url(#c26)">
               <g>
-                <g clip-path="url(#c26)">
+                <g clip-path="url(#c27)">
                   <text x="233" y="95" font-family="'Inter', sans-serif" font-size="15" font-weight="500" fill="var(--dom-t6c6mt)">new iss</text>
                 </g>
-                <rect x="233" y="81.5" width="1.071" height="17.25" fill="var(--dom-t6c6mt)" class="a m88"/>
+                <rect x="233" y="81.5" width="1.071" height="17.25" fill="var(--dom-t6c6mt)" class="a m95"/>
               </g>
             </g>
             <path d="M571.11 80.25H593A4 4 0 0 1 597 84.25V94.75A4 4 0 0 1 593 98.75H571.11A4 4 0 0 1 567.11 94.75V84.25A4 4 0 0 1 571.11 80.25Z" fill="var(--dom-1ungin5)"/>
@@ -1611,7 +1649,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             <path d="M577.3 155.14H589A4 4 0 0 1 593 159.14V169.64A4 4 0 0 1 589 173.64H577.3A4 4 0 0 1 573.3 169.64V159.14A4 4 0 0 1 577.3 155.14Z" fill="var(--dom-1ungin5)"/>
             <path d="M577.3 155.14H589A4 4 0 0 1 593 159.14V169.64A4 4 0 0 1 589 173.64H577.3A4 4 0 0 1 573.3 169.64V159.14A4 4 0 0 1 577.3 155.14ZM577.3 156.14H589A3 3 0 0 1 592 159.14V169.64A3 3 0 0 1 589 172.64H577.3A3 3 0 0 1 574.3 169.64V159.14A3 3 0 0 1 577.3 156.14Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
             <text x="579.3" y="167.14" font-family="'Inter', sans-serif" font-size="10.5" font-weight="500" fill="var(--dom-fm3plr)">C</text>
-            <g class="a m89">
+            <g class="a m96">
               <g transform="translate(207 190.89) scale(0.625 0.625) translate(0 0)">
                 <path d="M12 10v6" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M9 13h6" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1619,7 +1657,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               </g>
               <text x="232" y="203.3" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">New project</text>
             </g>
-            <g class="a m89">
+            <g class="a m96">
               <g transform="translate(207 224.89) scale(0.625 0.625) translate(0 0)">
                 <rect rx="1" x="3" y="3" width="7" height="7" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <rect rx="1" x="14" y="3" width="7" height="7" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1629,19 +1667,19 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="232" y="237.3" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">New view</text>
             </g>
           </g>
-          <g clip-path="url(#c27)" class="a m94">
+          <g clip-path="url(#c28)" class="a m102">
             <path d="M191 66H609V114H191ZM191 66H609V113H191Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
             <g transform="translate(207 81.5) scale(0.667 0.667) translate(0 0)">
               <path d="m21 21-4.34-4.34" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="11" cy="11" r="8" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </g>
-            <g clip-path="url(#c24)">
-              <text x="233" y="95" font-family="'Inter', sans-serif" font-size="15" font-weight="500" fill="var(--dom-fm3plr)" class="a m91">Type a command or search…</text>
+            <g clip-path="url(#c26)">
+              <text x="233" y="95" font-family="'Inter', sans-serif" font-size="15" font-weight="500" fill="var(--dom-fm3plr)" class="a m98">Type a command or search…</text>
               <g>
-                <g clip-path="url(#c28)">
+                <g clip-path="url(#c29)">
                   <text x="233" y="95" font-family="'Inter', sans-serif" font-size="15" font-weight="500" fill="var(--dom-t6c6mt)">new</text>
                 </g>
-                <rect x="233" y="81.5" width="1.071" height="17.25" fill="var(--dom-t6c6mt)" class="a m92"/>
+                <rect x="233" y="81.5" width="1.071" height="17.25" fill="var(--dom-t6c6mt)" class="a m100"/>
               </g>
             </g>
             <path d="M571.11 80.25H593A4 4 0 0 1 597 84.25V94.75A4 4 0 0 1 593 98.75H571.11A4 4 0 0 1 567.11 94.75V84.25A4 4 0 0 1 571.11 80.25Z" fill="var(--dom-1ungin5)"/>
@@ -1670,7 +1708,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <rect rx="1" x="3" y="14" width="7" height="7" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </g>
             <text x="232" y="237.3" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">New view</text>
-            <g class="a m93">
+            <g class="a m101">
               <text x="207" y="268.39" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="var(--dom-fm3plr)">Go to</text>
               <g transform="translate(207 286.28) scale(0.625 0.625) translate(0 0)">
                 <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1697,18 +1735,18 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
               <text x="232" y="366.69" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-1sguzt4)">Invite a teammate</text>
             </g>
           </g>
-          <g class="a m96">
-            <g class="a m95">
+          <g class="a m104">
+            <g class="a m103">
               <path d="M1 1H799V449H1Z" fill="var(--dom-1u0v432)"/>
               <path d="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65Z" fill="var(--dom-1ungin5)"/>
               <path d="M204 65H596A14 14 0 0 1 610 79V371.78A14 14 0 0 1 596 385.78H204A14 14 0 0 1 190 371.78V79A14 14 0 0 1 204 65ZM204 66H596A13 13 0 0 1 609 79V371.78A13 13 0 0 1 596 384.78H204A13 13 0 0 1 191 371.78V79A13 13 0 0 1 204 66Z" fill="var(--dom-80xktw)" fill-rule="evenodd"/>
-              <g clip-path="url(#c29)">
+              <g clip-path="url(#c30)">
                 <path d="M191 66H609V114H191ZM191 66H609V113H191Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
                 <g transform="translate(207 81.5) scale(0.667 0.667) translate(0 0)">
                   <path d="m21 21-4.34-4.34" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <circle cx="11" cy="11" r="8" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </g>
-                <g clip-path="url(#c24)">
+                <g clip-path="url(#c26)">
                   <text x="233" y="95" font-family="'Inter', sans-serif" font-size="15" font-weight="500" fill="var(--dom-fm3plr)">Type a command or search…</text>
                 </g>
                 <path d="M571.11 80.25H593A4 4 0 0 1 597 84.25V94.75A4 4 0 0 1 593 98.75H571.11A4 4 0 0 1 567.11 94.75V84.25A4 4 0 0 1 571.11 80.25Z" fill="var(--dom-1ungin5)"/>
@@ -1765,93 +1803,67 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             </g>
           </g>
         </g>
-        <g class="a m97">
-          <path d="M596.33 137H769A8 8 0 0 1 777 145V189A8 8 0 0 1 769 197H596.33A8 8 0 0 1 588.33 189V145A8 8 0 0 1 596.33 137Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="dm">
-            <animate id="w11" attributeName="d" values="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z;M596.33 137H769A8 8 0 0 1 777 145V189A8 8 0 0 1 769 197H596.33A8 8 0 0 1 588.33 189V145A8 8 0 0 1 596.33 137Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="9.2s;w11.begin+14s" dur="0.7s" fill="freeze" data-loop="14s"/>
-            <set attributeName="d" to="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" begin="0s;w11.begin+4.8s" dur="9.2s" fill="freeze" data-loop="14s"/>
-          </path>
-          <path d="M596.33 137H769A8 8 0 0 1 777 145V189A8 8 0 0 1 769 197H596.33A8 8 0 0 1 588.33 189V145A8 8 0 0 1 596.33 137Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="ds" display="none"/>
-        </g>
         <g class="a m4">
-          <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" fill="var(--dom-r4k8vd)" class="a m98 dm">
-            <animate id="w12" attributeName="d" values="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z;M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="9.2s;w12.begin+14s" dur="0.7s" fill="freeze" data-loop="14s"/>
-            <set attributeName="d" to="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" begin="0s;w12.begin+4.8s" dur="9.2s" fill="freeze" data-loop="14s"/>
-          </path>
-          <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" fill="var(--dom-r4k8vd)" class="a m98 ds" display="none"/>
-          <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" fill="url(#g2)" class="a m99 dm">
-            <animate id="w13" attributeName="d" values="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z;M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="9.2s;w13.begin+14s" dur="0.7s" fill="freeze" data-loop="14s"/>
-            <set attributeName="d" to="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" begin="0s;w13.begin+4.8s" dur="9.2s" fill="freeze" data-loop="14s"/>
-          </path>
-          <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" fill="url(#g2)" class="a m99 ds" display="none"/>
-        </g>
-        <g class="a m100">
-          <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" fill="url(#g2)"/>
-        </g>
-        <g class="a m97">
-          <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59ZM604.83 149.59H604.83A5.5 5.5 0 0 1 610.33 155.09V155.09A5.5 5.5 0 0 1 604.83 160.59H604.83A5.5 5.5 0 0 1 599.33 155.09V155.09A5.5 5.5 0 0 1 604.83 149.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd" style="fill:var(--dom-fyplpb)" class="dm">
-            <animate id="w14" attributeName="d" values="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z;M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59ZM604.83 149.59H604.83A5.5 5.5 0 0 1 610.33 155.09V155.09A5.5 5.5 0 0 1 604.83 160.59H604.83A5.5 5.5 0 0 1 599.33 155.09V155.09A5.5 5.5 0 0 1 604.83 149.59Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="9.2s;w14.begin+14s" dur="0.7s" fill="freeze" data-loop="14s"/>
-            <set attributeName="d" to="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z" begin="0s;w14.begin+4.8s" dur="9.2s" fill="freeze" data-loop="14s"/>
-          </path>
-          <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59ZM604.83 149.59H604.83A5.5 5.5 0 0 1 610.33 155.09V155.09A5.5 5.5 0 0 1 604.83 160.59H604.83A5.5 5.5 0 0 1 599.33 155.09V155.09A5.5 5.5 0 0 1 604.83 149.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd" style="fill:var(--dom-fyplpb)" class="ds" display="none"/>
-        </g>
-        <g class="a m4">
-          <g class="a m69">
-            <g transform="translate(600.33 150.59) scale(0.375 0.375) translate(0 0)">
-              <path d="M20 6 9 17l-5-5" fill="none" stroke="var(--dom-1g60vl4)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <g class="a m109">
+            <path d="M596.33 137H769A8 8 0 0 1 777 145V189A8 8 0 0 1 769 197H596.33A8 8 0 0 1 588.33 189V145A8 8 0 0 1 596.33 137Z" fill="var(--dom-1ungin5)"/>
+            <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" fill="var(--dom-r4k8vd)" class="a m105"/>
+            <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59Z" fill="url(#g2)" class="a m106"/>
+            <path d="M604.83 148.59H604.83A6.5 6.5 0 0 1 611.33 155.09V155.09A6.5 6.5 0 0 1 604.83 161.59H604.83A6.5 6.5 0 0 1 598.33 155.09V155.09A6.5 6.5 0 0 1 604.83 148.59ZM604.83 149.59H604.83A5.5 5.5 0 0 1 610.33 155.09V155.09A5.5 5.5 0 0 1 604.83 160.59H604.83A5.5 5.5 0 0 1 599.33 155.09V155.09A5.5 5.5 0 0 1 604.83 149.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
+            <g class="a m72">
+              <g transform="translate(600.33 150.59) scale(0.375 0.375) translate(0 0)">
+                <path d="M20 6 9 17l-5-5" fill="none" stroke="var(--dom-1g60vl4)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
             </g>
-          </g>
-          <g class="a m101">
             <g clip-path="url(#c15)">
               <text x="618.33" y="160" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Save drafts offline</text>
             </g>
-          </g>
-          <g class="a m101">
             <text x="598.33" y="183.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-fm3plr)">ENG-143</text>
-          </g>
-          <g class="a m102">
-            <path d="M665.02 171.19H711.8A9 9 0 0 1 720.8 180.19V180.19A9 9 0 0 1 711.8 189.19H665.02A9 9 0 0 1 656.02 180.19V180.19A9 9 0 0 1 665.02 171.19Z" fill="var(--dom-1eempnt)"/>
-            <path d="M666.02 177.19H666.02A3 3 0 0 1 669.02 180.19V180.19A3 3 0 0 1 666.02 183.19H666.02A3 3 0 0 1 663.02 180.19V180.19A3 3 0 0 1 666.02 177.19Z" fill="rgb(62,123,250)"/>
-            <text x="674.02" y="183.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
-          </g>
-          <g class="a m101">
+            <g class="a m107">
+              <path d="M665.02 171.19H711.8A9 9 0 0 1 720.8 180.19V180.19A9 9 0 0 1 711.8 189.19H665.02A9 9 0 0 1 656.02 180.19V180.19A9 9 0 0 1 665.02 171.19Z" fill="var(--dom-1eempnt)"/>
+              <path d="M666.02 177.19H666.02A3 3 0 0 1 669.02 180.19V180.19A3 3 0 0 1 666.02 183.19H666.02A3 3 0 0 1 663.02 180.19V180.19A3 3 0 0 1 666.02 177.19Z" fill="rgb(62,123,250)"/>
+              <text x="674.02" y="183.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
+            </g>
             <path d="M758 171.19H758A9 9 0 0 1 767 180.19V180.19A9 9 0 0 1 758 189.19H758A9 9 0 0 1 749 180.19V180.19A9 9 0 0 1 758 171.19Z" fill="var(--dom-1kdbgbb)"/>
             <text x="751.61" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
-          </g>
-          <g class="a m103">
-            <path d="M369.66 155H393.66V179H369.66Z" fill="url(#g33)"/>
-            <path d="M393.66 155H519.66V179H393.66Z" fill="url(#g4)"/>
-            <path d="M519.66 155H543.66V179H519.66Z" fill="url(#g34)"/>
-            <path d="M519.66 179H543.66V249H519.66Z" fill="url(#g6)"/>
-            <path d="M519.66 249H543.66V273H519.66Z" fill="url(#g35)"/>
-            <path d="M393.66 249H519.66V273H393.66Z" fill="url(#g8)"/>
-            <path d="M369.66 249H393.66V273H369.66Z" fill="url(#g36)"/>
-            <path d="M369.66 179H393.66V249H369.66Z" fill="url(#g10)"/>
-            <path d="M321.66 127H428.66V234H321.66Z" fill="url(#g37)"/>
-            <path d="M428.66 127H484.66V234H428.66Z" fill="url(#g38)"/>
-            <path d="M484.66 127H591.66V234H484.66Z" fill="url(#g39)"/>
-            <path d="M484.66 234H591.66V341H484.66Z" fill="url(#g40)"/>
-            <path d="M428.66 234H484.66V341H428.66Z" fill="url(#g41)"/>
-            <path d="M321.66 234H428.66V341H321.66Z" fill="url(#g42)"/>
-            <path d="M390.66 163H522.66A9 9 0 0 1 531.66 172V248A9 9 0 0 1 522.66 257H390.66A9 9 0 0 1 381.66 248V172A9 9 0 0 1 390.66 163Z" fill="var(--dom-1ungin5)"/>
-            <path d="M390.66 163H522.66A9 9 0 0 1 531.66 172V248A9 9 0 0 1 522.66 257H390.66A9 9 0 0 1 381.66 248V172A9 9 0 0 1 390.66 163ZM390.66 164H522.66A8 8 0 0 1 530.66 172V248A8 8 0 0 1 522.66 256H390.66A8 8 0 0 1 382.66 248V172A8 8 0 0 1 390.66 164Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
-            <path d="M401.16 175.5H401.16A6.5 6.5 0 0 1 407.66 182V182A6.5 6.5 0 0 1 401.16 188.5H401.16A6.5 6.5 0 0 1 394.66 182V182A6.5 6.5 0 0 1 401.16 175.5ZM401.16 176.5H401.16A5.5 5.5 0 0 1 406.66 182V182A5.5 5.5 0 0 1 401.16 187.5H401.16A5.5 5.5 0 0 1 395.66 182V182A5.5 5.5 0 0 1 401.16 176.5Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
-            <text x="415.66" y="186.91" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Todo</text>
-            <path d="M392.66 196H520.66A6 6 0 0 1 526.66 202V218A6 6 0 0 1 520.66 224H392.66A6 6 0 0 1 386.66 218V202A6 6 0 0 1 392.66 196Z" fill="var(--dom-1eempnt)"/>
-            <path d="M401.16 203.5H401.16A6.5 6.5 0 0 1 407.66 210V210A6.5 6.5 0 0 1 401.16 216.5H401.16A6.5 6.5 0 0 1 394.66 210V210A6.5 6.5 0 0 1 401.16 203.5Z" fill="url(#g2)"/>
-            <path d="M401.16 203.5H401.16A6.5 6.5 0 0 1 407.66 210V210A6.5 6.5 0 0 1 401.16 216.5H401.16A6.5 6.5 0 0 1 394.66 210V210A6.5 6.5 0 0 1 401.16 203.5ZM401.16 204.5H401.16A5.5 5.5 0 0 1 406.66 210V210A5.5 5.5 0 0 1 401.16 215.5H401.16A5.5 5.5 0 0 1 395.66 210V210A5.5 5.5 0 0 1 401.16 204.5Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
-            <text x="415.66" y="214.91" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">In progress</text>
-            <g transform="translate(505.66 203.5) scale(0.542 0.542) translate(0 0)">
-              <path d="M20 6 9 17l-5-5" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <g class="a m108">
+              <path d="M580.33 155H604.33V179H580.33Z" fill="url(#g33)"/>
+              <path d="M604.33 155H730.33V179H604.33Z" fill="url(#g4)"/>
+              <path d="M730.33 155H754.33V179H730.33Z" fill="url(#g34)"/>
+              <path d="M730.33 179H754.33V249H730.33Z" fill="url(#g6)"/>
+              <path d="M730.33 249H754.33V273H730.33Z" fill="url(#g35)"/>
+              <path d="M604.33 249H730.33V273H604.33Z" fill="url(#g8)"/>
+              <path d="M580.33 249H604.33V273H580.33Z" fill="url(#g36)"/>
+              <path d="M580.33 179H604.33V249H580.33Z" fill="url(#g10)"/>
+              <path d="M532.33 127H639.33V234H532.33Z" fill="url(#g37)"/>
+              <path d="M639.33 127H695.33V234H639.33Z" fill="url(#g38)"/>
+              <path d="M695.33 127H802.33V234H695.33Z" fill="url(#g39)"/>
+              <path d="M695.33 234H802.33V341H695.33Z" fill="url(#g40)"/>
+              <path d="M639.33 234H695.33V341H639.33Z" fill="url(#g41)"/>
+              <path d="M532.33 234H639.33V341H532.33Z" fill="url(#g42)"/>
+              <path d="M601.33 163H733.33A9 9 0 0 1 742.33 172V248A9 9 0 0 1 733.33 257H601.33A9 9 0 0 1 592.33 248V172A9 9 0 0 1 601.33 163Z" fill="var(--dom-1ungin5)"/>
+              <path d="M601.33 163H733.33A9 9 0 0 1 742.33 172V248A9 9 0 0 1 733.33 257H601.33A9 9 0 0 1 592.33 248V172A9 9 0 0 1 601.33 163ZM601.33 164H733.33A8 8 0 0 1 741.33 172V248A8 8 0 0 1 733.33 256H601.33A8 8 0 0 1 593.33 248V172A8 8 0 0 1 601.33 164Z" fill="var(--dom-1yiaox7)" fill-rule="evenodd"/>
+              <path d="M611.83 175.5H611.83A6.5 6.5 0 0 1 618.33 182V182A6.5 6.5 0 0 1 611.83 188.5H611.83A6.5 6.5 0 0 1 605.33 182V182A6.5 6.5 0 0 1 611.83 175.5ZM611.83 176.5H611.83A5.5 5.5 0 0 1 617.33 182V182A5.5 5.5 0 0 1 611.83 187.5H611.83A5.5 5.5 0 0 1 606.33 182V182A5.5 5.5 0 0 1 611.83 176.5Z" fill="var(--dom-fm3plr)" fill-rule="evenodd"/>
+              <text x="626.33" y="186.91" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Todo</text>
+              <path d="M603.33 196H731.33A6 6 0 0 1 737.33 202V218A6 6 0 0 1 731.33 224H603.33A6 6 0 0 1 597.33 218V202A6 6 0 0 1 603.33 196Z" fill="var(--dom-1eempnt)"/>
+              <path d="M611.83 203.5H611.83A6.5 6.5 0 0 1 618.33 210V210A6.5 6.5 0 0 1 611.83 216.5H611.83A6.5 6.5 0 0 1 605.33 210V210A6.5 6.5 0 0 1 611.83 203.5Z" fill="url(#g2)"/>
+              <path d="M611.83 203.5H611.83A6.5 6.5 0 0 1 618.33 210V210A6.5 6.5 0 0 1 611.83 216.5H611.83A6.5 6.5 0 0 1 605.33 210V210A6.5 6.5 0 0 1 611.83 203.5ZM611.83 204.5H611.83A5.5 5.5 0 0 1 617.33 210V210A5.5 5.5 0 0 1 611.83 215.5H611.83A5.5 5.5 0 0 1 606.33 210V210A5.5 5.5 0 0 1 611.83 204.5Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
+              <text x="626.33" y="214.91" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">In progress</text>
+              <g transform="translate(716.33 203.5) scale(0.542 0.542) translate(0 0)">
+                <path d="M20 6 9 17l-5-5" fill="none" stroke="var(--dom-fm3plr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+              <path d="M611.83 231.5H611.83A6.5 6.5 0 0 1 618.33 238V238A6.5 6.5 0 0 1 611.83 244.5H611.83A6.5 6.5 0 0 1 605.33 238V238A6.5 6.5 0 0 1 611.83 231.5Z" fill="var(--dom-fyplpb)"/>
+              <path d="M611.83 231.5H611.83A6.5 6.5 0 0 1 618.33 238V238A6.5 6.5 0 0 1 611.83 244.5H611.83A6.5 6.5 0 0 1 605.33 238V238A6.5 6.5 0 0 1 611.83 231.5ZM611.83 232.5H611.83A5.5 5.5 0 0 1 617.33 238V238A5.5 5.5 0 0 1 611.83 243.5H611.83A5.5 5.5 0 0 1 606.33 238V238A5.5 5.5 0 0 1 611.83 232.5Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
+              <g transform="translate(607.33 233.5) scale(0.375 0.375) translate(0 0)">
+                <path d="M20 6 9 17l-5-5" fill="none" stroke="var(--dom-1g60vl4)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+              <text x="626.33" y="242.91" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Done</text>
             </g>
-            <path d="M401.16 231.5H401.16A6.5 6.5 0 0 1 407.66 238V238A6.5 6.5 0 0 1 401.16 244.5H401.16A6.5 6.5 0 0 1 394.66 238V238A6.5 6.5 0 0 1 401.16 231.5Z" fill="var(--dom-fyplpb)"/>
-            <path d="M401.16 231.5H401.16A6.5 6.5 0 0 1 407.66 238V238A6.5 6.5 0 0 1 401.16 244.5H401.16A6.5 6.5 0 0 1 394.66 238V238A6.5 6.5 0 0 1 401.16 231.5ZM401.16 232.5H401.16A5.5 5.5 0 0 1 406.66 238V238A5.5 5.5 0 0 1 401.16 243.5H401.16A5.5 5.5 0 0 1 395.66 238V238A5.5 5.5 0 0 1 401.16 232.5Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
-            <g transform="translate(396.66 233.5) scale(0.375 0.375) translate(0 0)">
-              <path d="M20 6 9 17l-5-5" fill="none" stroke="var(--dom-1g60vl4)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <text x="415.66" y="242.91" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Done</text>
           </g>
         </g>
-        <g class="a m100">
+        <g class="a m111">
+          <path d="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" fill="var(--dom-1ungin5)"/>
+          <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" fill="url(#g2)"/>
+          <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z" fill="var(--dom-fyplpb)" fill-rule="evenodd"/>
           <g clip-path="url(#c12)">
             <text x="407.66" y="160" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Save drafts offline</text>
           </g>
@@ -1861,7 +1873,7 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
           <text x="463.34" y="183.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
           <path d="M547.33 171.19H547.33A9 9 0 0 1 556.33 180.19V180.19A9 9 0 0 1 547.33 189.19H547.33A9 9 0 0 1 538.33 180.19V180.19A9 9 0 0 1 547.33 171.19Z" fill="var(--dom-1kdbgbb)"/>
           <text x="540.94" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
-          <g class="a m104">
+          <g class="a m110">
             <path d="M369.66 155H393.66V179H369.66Z" fill="url(#g33)"/>
             <path d="M393.66 155H519.66V179H393.66Z" fill="url(#g4)"/>
             <path d="M519.66 155H543.66V179H519.66Z" fill="url(#g34)"/>
@@ -1895,147 +1907,113 @@ svg{--dom-10lseaa:rgb(244,194,219);--dom-16j6uh:rgba(253,238,230,0);--dom-1a6v6v
             <text x="415.66" y="242.91" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Done</text>
           </g>
         </g>
-        <g class="a m54">
-          <g class="a m105">
-            <path d="M371.66 133H385.66V147H371.66Z" fill="url(#g3)" class="dm">
-              <animate id="w15" attributeName="d" values="M161 133H175V147H161Z;M371.66 133H385.66V147H371.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w15.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M161 133H175V147H161Z" begin="0s;w15.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+        <g class="a m57">
+          <g class="a m117">
+            <g class="a m112">
+              <path d="M371.66 133H385.66V147H371.66Z" fill="url(#g3)"/>
+              <path d="M385.66 133H558.33V145H385.66Z" fill="url(#g4)" class="dm">
+                <animate id="w10" attributeName="d" values="M385.66 133H558.32V145H385.66Z;M385.66 133H558.33V145H385.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w10.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M385.66 133H558.32V145H385.66Z" begin="0s;w10.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M385.66 133H558.33V145H385.66Z" fill="url(#g4)" class="ds" display="none"/>
+              <path d="M558.33 133H572.33V147H558.33Z" fill="url(#g5)" class="dm">
+                <animate id="w11" attributeName="d" values="M558.32 133H572.32V147H558.32Z;M558.33 133H572.33V147H558.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w11.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M558.32 133H572.32V147H558.32Z" begin="0s;w11.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M558.33 133H572.33V147H558.33Z" fill="url(#g5)" class="ds" display="none"/>
+              <path d="M560.33 147H572.33V191H560.33Z" fill="url(#g6)" class="dm">
+                <animate id="w12" attributeName="d" values="M560.32 147H572.32V191H560.32Z;M560.33 147H572.33V191H560.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w12.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M560.32 147H572.32V191H560.32Z" begin="0s;w12.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M560.33 147H572.33V191H560.33Z" fill="url(#g6)" class="ds" display="none"/>
+              <path d="M558.33 191H572.33V205H558.33Z" fill="url(#g7)" class="dm">
+                <animate id="w13" attributeName="d" values="M558.32 191H572.32V205H558.32Z;M558.33 191H572.33V205H558.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w13.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M558.32 191H572.32V205H558.32Z" begin="0s;w13.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M558.33 191H572.33V205H558.33Z" fill="url(#g7)" class="ds" display="none"/>
+              <path d="M385.66 193H558.33V205H385.66Z" fill="url(#g8)" class="dm">
+                <animate id="w14" attributeName="d" values="M385.66 193H558.32V205H385.66Z;M385.66 193H558.33V205H385.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w14.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M385.66 193H558.32V205H385.66Z" begin="0s;w14.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M385.66 193H558.33V205H385.66Z" fill="url(#g8)" class="ds" display="none"/>
+              <path d="M371.66 191H385.66V205H371.66Z" fill="url(#g9)"/>
+              <path d="M371.66 147H383.66V191H371.66Z" fill="url(#g10)"/>
+            </g>
+            <g class="a m112">
+              <path d="M349.66 121H405.66V177H349.66Z" fill="url(#g11)"/>
+              <path d="M405.66 121H538.33V177H405.66Z" fill="url(#g12)" class="dm">
+                <animate id="w15" attributeName="d" values="M405.66 121H538.32V177H405.66Z;M405.66 121H538.33V177H405.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w15.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M405.66 121H538.32V177H405.66Z" begin="0s;w15.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M405.66 121H538.33V177H405.66Z" fill="url(#g12)" class="ds" display="none"/>
+              <path d="M538.33 121H594.33V177H538.33Z" fill="url(#g13)" class="dm">
+                <animate id="w16" attributeName="d" values="M538.32 121H594.32V177H538.32Z;M538.33 121H594.33V177H538.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w16.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M538.32 121H594.32V177H538.32Z" begin="0s;w16.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M538.33 121H594.33V177H538.33Z" fill="url(#g13)" class="ds" display="none"/>
+              <path d="M538.33 177H594.33V181H538.33Z" fill="url(#g14)" class="dm">
+                <animate id="w17" attributeName="d" values="M538.32 177H594.32V181H538.32Z;M538.33 177H594.33V181H538.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w17.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M538.32 177H594.32V181H538.32Z" begin="0s;w17.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M538.33 177H594.33V181H538.33Z" fill="url(#g14)" class="ds" display="none"/>
+              <path d="M538.33 181H594.33V237H538.33Z" fill="url(#g15)" class="dm">
+                <animate id="w18" attributeName="d" values="M538.32 181H594.32V237H538.32Z;M538.33 181H594.33V237H538.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w18.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M538.32 181H594.32V237H538.32Z" begin="0s;w18.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M538.33 181H594.33V237H538.33Z" fill="url(#g15)" class="ds" display="none"/>
+              <path d="M405.66 181H538.33V237H405.66Z" fill="url(#g16)" class="dm">
+                <animate id="w19" attributeName="d" values="M405.66 181H538.32V237H405.66Z;M405.66 181H538.33V237H405.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w19.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+                <set attributeName="d" to="M405.66 181H538.32V237H405.66Z" begin="0s;w19.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
+              </path>
+              <path d="M405.66 181H538.33V237H405.66Z" fill="url(#g16)" class="ds" display="none"/>
+              <path d="M349.66 181H405.66V237H349.66Z" fill="url(#g17)"/>
+              <path d="M349.66 177H405.66V181H349.66Z" fill="url(#g18)"/>
+            </g>
+            <path d="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="dm">
+              <animate id="w20" attributeName="d" values="M385.66 137H558.32A8 8 0 0 1 566.32 145V189A8 8 0 0 1 558.32 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z;M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w20.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
+              <set attributeName="d" to="M385.66 137H558.32A8 8 0 0 1 566.32 145V189A8 8 0 0 1 558.32 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" begin="0s;w20.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
             </path>
-            <path d="M371.66 133H385.66V147H371.66Z" fill="url(#g3)" class="ds" display="none"/>
-            <path d="M385.66 133H558.33V145H385.66Z" fill="url(#g4)" class="dm">
-              <animate id="w16" attributeName="d" values="M175 133H347.66V145H175Z;M385.66 133H558.33V145H385.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w16.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M175 133H347.66V145H175Z" begin="0s;w16.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M385.66 133H558.33V145H385.66Z" fill="url(#g4)" class="ds" display="none"/>
-            <path d="M558.33 133H572.33V147H558.33Z" fill="url(#g5)" class="dm">
-              <animate id="w17" attributeName="d" values="M347.66 133H361.66V147H347.66Z;M558.33 133H572.33V147H558.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w17.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M347.66 133H361.66V147H347.66Z" begin="0s;w17.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M558.33 133H572.33V147H558.33Z" fill="url(#g5)" class="ds" display="none"/>
-            <path d="M560.33 147H572.33V191H560.33Z" fill="url(#g6)" class="dm">
-              <animate id="w18" attributeName="d" values="M349.66 147H361.66V191H349.66Z;M560.33 147H572.33V191H560.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w18.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M349.66 147H361.66V191H349.66Z" begin="0s;w18.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M560.33 147H572.33V191H560.33Z" fill="url(#g6)" class="ds" display="none"/>
-            <path d="M558.33 191H572.33V205H558.33Z" fill="url(#g7)" class="dm">
-              <animate id="w19" attributeName="d" values="M347.66 191H361.66V205H347.66Z;M558.33 191H572.33V205H558.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w19.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M347.66 191H361.66V205H347.66Z" begin="0s;w19.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M558.33 191H572.33V205H558.33Z" fill="url(#g7)" class="ds" display="none"/>
-            <path d="M385.66 193H558.33V205H385.66Z" fill="url(#g8)" class="dm">
-              <animate id="w20" attributeName="d" values="M175 193H347.66V205H175Z;M385.66 193H558.33V205H385.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w20.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M175 193H347.66V205H175Z" begin="0s;w20.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M385.66 193H558.33V205H385.66Z" fill="url(#g8)" class="ds" display="none"/>
-            <path d="M371.66 191H385.66V205H371.66Z" fill="url(#g9)" class="dm">
-              <animate id="w21" attributeName="d" values="M161 191H175V205H161Z;M371.66 191H385.66V205H371.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w21.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M161 191H175V205H161Z" begin="0s;w21.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M371.66 191H385.66V205H371.66Z" fill="url(#g9)" class="ds" display="none"/>
-            <path d="M371.66 147H383.66V191H371.66Z" fill="url(#g10)" class="dm">
-              <animate id="w22" attributeName="d" values="M161 147H173V191H161Z;M371.66 147H383.66V191H371.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w22.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M161 147H173V191H161Z" begin="0s;w22.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M371.66 147H383.66V191H371.66Z" fill="url(#g10)" class="ds" display="none"/>
-          </g>
-          <g class="a m105">
-            <path d="M349.66 121H405.66V177H349.66Z" fill="url(#g11)" class="dm">
-              <animate id="w23" attributeName="d" values="M139 121H195V177H139Z;M349.66 121H405.66V177H349.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w23.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M139 121H195V177H139Z" begin="0s;w23.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M349.66 121H405.66V177H349.66Z" fill="url(#g11)" class="ds" display="none"/>
-            <path d="M405.66 121H538.33V177H405.66Z" fill="url(#g12)" class="dm">
-              <animate id="w24" attributeName="d" values="M195 121H327.66V177H195Z;M405.66 121H538.33V177H405.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w24.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M195 121H327.66V177H195Z" begin="0s;w24.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M405.66 121H538.33V177H405.66Z" fill="url(#g12)" class="ds" display="none"/>
-            <path d="M538.33 121H594.33V177H538.33Z" fill="url(#g13)" class="dm">
-              <animate id="w25" attributeName="d" values="M327.66 121H383.66V177H327.66Z;M538.33 121H594.33V177H538.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w25.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M327.66 121H383.66V177H327.66Z" begin="0s;w25.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M538.33 121H594.33V177H538.33Z" fill="url(#g13)" class="ds" display="none"/>
-            <path d="M538.33 177H594.33V181H538.33Z" fill="url(#g14)" class="dm">
-              <animate id="w26" attributeName="d" values="M327.66 177H383.66V181H327.66Z;M538.33 177H594.33V181H538.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w26.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M327.66 177H383.66V181H327.66Z" begin="0s;w26.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M538.33 177H594.33V181H538.33Z" fill="url(#g14)" class="ds" display="none"/>
-            <path d="M538.33 181H594.33V237H538.33Z" fill="url(#g15)" class="dm">
-              <animate id="w27" attributeName="d" values="M327.66 181H383.66V237H327.66Z;M538.33 181H594.33V237H538.33Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w27.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M327.66 181H383.66V237H327.66Z" begin="0s;w27.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M538.33 181H594.33V237H538.33Z" fill="url(#g15)" class="ds" display="none"/>
-            <path d="M405.66 181H538.33V237H405.66Z" fill="url(#g16)" class="dm">
-              <animate id="w28" attributeName="d" values="M195 181H327.66V237H195Z;M405.66 181H538.33V237H405.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w28.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M195 181H327.66V237H195Z" begin="0s;w28.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M405.66 181H538.33V237H405.66Z" fill="url(#g16)" class="ds" display="none"/>
-            <path d="M349.66 181H405.66V237H349.66Z" fill="url(#g17)" class="dm">
-              <animate id="w29" attributeName="d" values="M139 181H195V237H139Z;M349.66 181H405.66V237H349.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w29.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M139 181H195V237H139Z" begin="0s;w29.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M349.66 181H405.66V237H349.66Z" fill="url(#g17)" class="ds" display="none"/>
-            <path d="M349.66 177H405.66V181H349.66Z" fill="url(#g18)" class="dm">
-              <animate id="w30" attributeName="d" values="M139 177H195V181H139Z;M349.66 177H405.66V181H349.66Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w30.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-              <set attributeName="d" to="M139 177H195V181H139Z" begin="0s;w30.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-            </path>
-            <path d="M349.66 177H405.66V181H349.66Z" fill="url(#g18)" class="ds" display="none"/>
-          </g>
-          <path d="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="dm">
-            <animate id="w31" attributeName="d" values="M175 137H347.66A8 8 0 0 1 355.66 145V189A8 8 0 0 1 347.66 197H175A8 8 0 0 1 167 189V145A8 8 0 0 1 175 137Z;M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w31.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-            <set attributeName="d" to="M175 137H347.66A8 8 0 0 1 355.66 145V189A8 8 0 0 1 347.66 197H175A8 8 0 0 1 167 189V145A8 8 0 0 1 175 137Z" begin="0s;w31.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-          </path>
-          <path d="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="ds" display="none"/>
-          <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" fill="url(#g2)" class="a m106 dm">
-            <animate id="w32" attributeName="d" values="M183.5 148.59H183.5A6.5 6.5 0 0 1 190 155.09V155.09A6.5 6.5 0 0 1 183.5 161.59H183.5A6.5 6.5 0 0 1 177 155.09V155.09A6.5 6.5 0 0 1 183.5 148.59Z;M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w32.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-            <set attributeName="d" to="M183.5 148.59H183.5A6.5 6.5 0 0 1 190 155.09V155.09A6.5 6.5 0 0 1 183.5 161.59H183.5A6.5 6.5 0 0 1 177 155.09V155.09A6.5 6.5 0 0 1 183.5 148.59Z" begin="0s;w32.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-          </path>
-          <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" fill="url(#g2)" class="a m106 ds" display="none"/>
-          <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd" class="a m107 dm">
-            <animate id="w33" attributeName="d" values="M183.5 148.59H183.5A6.5 6.5 0 0 1 190 155.09V155.09A6.5 6.5 0 0 1 183.5 161.59H183.5A6.5 6.5 0 0 1 177 155.09V155.09A6.5 6.5 0 0 1 183.5 148.59ZM183.5 149.59H183.5A5.5 5.5 0 0 1 189 155.09V155.09A5.5 5.5 0 0 1 183.5 160.59H183.5A5.5 5.5 0 0 1 178 155.09V155.09A5.5 5.5 0 0 1 183.5 149.59Z;M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="7.1499s;w33.begin+14s" dur="0.6s" fill="freeze" data-loop="14s"/>
-            <set attributeName="d" to="M183.5 148.59H183.5A6.5 6.5 0 0 1 190 155.09V155.09A6.5 6.5 0 0 1 183.5 161.59H183.5A6.5 6.5 0 0 1 177 155.09V155.09A6.5 6.5 0 0 1 183.5 148.59ZM183.5 149.59H183.5A5.5 5.5 0 0 1 189 155.09V155.09A5.5 5.5 0 0 1 183.5 160.59H183.5A5.5 5.5 0 0 1 178 155.09V155.09A5.5 5.5 0 0 1 183.5 149.59Z" begin="0s;w33.begin+6.8501s" dur="7.1499s" fill="freeze" data-loop="14s"/>
-          </path>
-          <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd" class="a m107 ds" display="none"/>
-          <g class="a m108">
+            <path d="M385.66 137H558.33A8 8 0 0 1 566.33 145V189A8 8 0 0 1 558.33 197H385.66A8 8 0 0 1 377.66 189V145A8 8 0 0 1 385.66 137Z" fill="var(--dom-1ungin5)" style="fill:var(--dom-1ungin5)" class="ds" display="none"/>
+            <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59Z" fill="url(#g2)" class="a m113"/>
+            <path d="M394.16 148.59H394.16A6.5 6.5 0 0 1 400.66 155.09V155.09A6.5 6.5 0 0 1 394.16 161.59H394.16A6.5 6.5 0 0 1 387.66 155.09V155.09A6.5 6.5 0 0 1 394.16 148.59ZM394.16 149.59H394.16A5.5 5.5 0 0 1 399.66 155.09V155.09A5.5 5.5 0 0 1 394.16 160.59H394.16A5.5 5.5 0 0 1 388.66 155.09V155.09A5.5 5.5 0 0 1 394.16 149.59Z" fill="var(--dom-fm3plr)" fill-rule="evenodd" class="a m114"/>
             <g clip-path="url(#c12)">
               <text x="407.66" y="160" font-family="'Inter', sans-serif" font-size="13" font-weight="500" fill="var(--dom-t6c6mt)">Save drafts offline</text>
             </g>
-          </g>
-          <g class="a m108">
             <text x="387.66" y="183.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-fm3plr)">ENG-143</text>
-          </g>
-          <g class="a m109">
-            <path d="M454.34 171.19H501.12A9 9 0 0 1 510.12 180.19V180.19A9 9 0 0 1 501.12 189.19H454.34A9 9 0 0 1 445.34 180.19V180.19A9 9 0 0 1 454.34 171.19Z" fill="var(--dom-1eempnt)"/>
-            <path d="M455.34 177.19H455.34A3 3 0 0 1 458.34 180.19V180.19A3 3 0 0 1 455.34 183.19H455.34A3 3 0 0 1 452.34 180.19V180.19A3 3 0 0 1 455.34 177.19Z" fill="rgb(62,123,250)"/>
-            <text x="463.34" y="183.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
-          </g>
-          <g class="a m110">
-            <path d="M547.33 171.19H547.33A9 9 0 0 1 556.33 180.19V180.19A9 9 0 0 1 547.33 189.19H547.33A9 9 0 0 1 538.33 180.19V180.19A9 9 0 0 1 547.33 171.19Z" fill="var(--dom-1kdbgbb)"/>
-            <text x="540.94" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
+            <g class="a m115">
+              <path d="M454.34 171.19H501.12A9 9 0 0 1 510.12 180.19V180.19A9 9 0 0 1 501.12 189.19H454.34A9 9 0 0 1 445.34 180.19V180.19A9 9 0 0 1 454.34 171.19Z" fill="var(--dom-1eempnt)"/>
+              <path d="M455.34 177.19H455.34A3 3 0 0 1 458.34 180.19V180.19A3 3 0 0 1 455.34 183.19H455.34A3 3 0 0 1 452.34 180.19V180.19A3 3 0 0 1 455.34 177.19Z" fill="rgb(62,123,250)"/>
+              <text x="463.34" y="183.48" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="var(--dom-1sguzt4)">Feature</text>
+            </g>
+            <g class="a m116">
+              <path d="M547.33 171.19H547.33A9 9 0 0 1 556.33 180.19V180.19A9 9 0 0 1 547.33 189.19H547.33A9 9 0 0 1 538.33 180.19V180.19A9 9 0 0 1 547.33 171.19Z" fill="var(--dom-1kdbgbb)"/>
+              <text x="540.94" y="181.89" font-family="'Inter', sans-serif" font-size="7.56" font-weight="600" letter-spacing="0.151" fill="var(--dom-1a6v6v1)">MA</text>
+            </g>
           </g>
         </g>
       </g>
-      <g class="a m111 fb">
+      <g class="a m118 fb">
         <circle cx="318.8" cy="164.39" r="14" fill="none" stroke="var(--ring)" stroke-width="2" opacity="0"/>
       </g>
-      <g class="a m112 fb">
+      <g class="a m119 fb">
         <circle cx="357.245" cy="179.17" r="14" fill="none" stroke="var(--ring)" stroke-width="2" opacity="0"/>
       </g>
-      <g class="a m113 fb">
+      <g class="a m120 fb">
         <circle cx="271" cy="219.17" r="14" fill="none" stroke="var(--ring)" stroke-width="2" opacity="0"/>
       </g>
-      <g class="a m114 fb">
+      <g class="a m121 fb">
         <circle cx="570.205" cy="278.17" r="14" fill="none" stroke="var(--ring)" stroke-width="2" opacity="0"/>
       </g>
-      <g class="a m115 fb">
+      <g class="a m122 fb">
         <circle cx="270.763" cy="158" r="14" fill="none" stroke="var(--ring)" stroke-width="2" opacity="0"/>
       </g>
-      <g class="a m116 fb">
+      <g class="a m123 fb">
         <circle cx="394.16" cy="155.09" r="14" fill="none" stroke="var(--ring)" stroke-width="2" opacity="0"/>
       </g>
-      <g class="a m117 fb">
+      <g class="a m124 fb">
         <circle cx="435.66" cy="238" r="14" fill="none" stroke="var(--ring)" stroke-width="2" opacity="0"/>
       </g>
-      <path d="M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" fill="#ffffff" stroke="#1c1917" stroke-width="1.2" stroke-linejoin="round" class="a m118"/>
+      <path d="M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" fill="#ffffff" stroke="#1c1917" stroke-width="1.2" stroke-linejoin="round" class="a m125"/>
     </g>
   </g>
 </svg>

@@ -114,6 +114,14 @@ const moved = (it: Item, s: Shift): Item => {
   }
 };
 
+/** `b` moved by `(dx, dy)`: every position in it, to the hundredth as the snapshot writes them. */
+export const shifted = (b: Box, dx: number, dy: number): Box => {
+  const out = moved(b, shiftBy(dx, dy));
+
+  // SAFETY: `moved` keeps an item's kind, and `b` is a box.
+  return out as Box;
+};
+
 /** How far `b` lies from `a` when it is `a` moved and nothing else, or undefined. */
 export const offset = (a: Box, b: Box): { dx: number; dy: number } | undefined => {
   const dx = b.box.x - a.box.x;
