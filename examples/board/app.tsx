@@ -19,11 +19,15 @@ type Status = "todo" | "progress" | "done";
 
 type Label = "Bug" | "Feature" | "Polish";
 
+/** The palette's hues, named in board.css. */
+type Hue = "orange" | "blue" | "purple" | "green";
+
 interface Person {
   readonly id: string;
   readonly name: string;
   readonly initials: string;
-  readonly hue: number;
+  /** The palette slot the person is drawn in, so the avatar follows the page's palette. */
+  readonly hue: Hue;
 }
 
 interface Issue {
@@ -36,10 +40,10 @@ interface Issue {
 }
 
 const PEOPLE: readonly Person[] = [
-  { id: "mara", name: "Mara", initials: "MA", hue: 28 },
-  { id: "jonas", name: "Jonas", initials: "JO", hue: 200 },
-  { id: "priya", name: "Priya", initials: "PR", hue: 330 },
-  { id: "kit", name: "Kit", initials: "KT", hue: 140 },
+  { id: "mara", name: "Mara", initials: "MA", hue: "orange" },
+  { id: "jonas", name: "Jonas", initials: "JO", hue: "blue" },
+  { id: "priya", name: "Priya", initials: "PR", hue: "purple" },
+  { id: "kit", name: "Kit", initials: "KT", hue: "green" },
 ];
 
 const COLUMNS: readonly { readonly status: Status; readonly name: string }[] = [
@@ -251,8 +255,8 @@ const Avatar = ({ who, size = 20 }: { who: string; size?: number }) => {
         width: size,
         height: size,
         fontSize: size * 0.42,
-        background: `hsl(${p.hue} 70% var(--avatar-l))`,
-        color: `hsl(${p.hue} 60% var(--avatar-t))`,
+        background: `color-mix(in srgb, var(--${p.hue}) 18%, transparent)`,
+        color: `var(--${p.hue})`,
       }}
     >
       {p.initials}
@@ -474,12 +478,12 @@ const Project = ({
   current,
 }: {
   name: string;
-  hue: number;
+  hue: Hue;
   count: number;
   current?: boolean;
 }) => (
   <div className={cn("nav", current && "current")} data-part={`project-${name.toLowerCase()}`}>
-    <span className="swatch" style={{ background: `hsl(${hue} 75% 55%)` }} />
+    <span className="swatch" style={{ background: `var(--${hue})` }} />
     <span>{name}</span>
     <span className="count">{count}</span>
   </div>
@@ -554,10 +558,10 @@ export function Board(): ReactNode {
         <Nav icon={Inbox} name="Inbox" count={3} />
         <Nav icon={CircleDashed} name="My issues" count={4} />
         <div className="section">Projects</div>
-        <Project name="Editor" hue={28} count={open} current />
-        <Project name="Sync" hue={200} count={9} />
-        <Project name="Mobile" hue={330} count={4} />
-        <Project name="Billing" hue={140} count={2} />
+        <Project name="Editor" hue="orange" count={open} current />
+        <Project name="Sync" hue="blue" count={9} />
+        <Project name="Mobile" hue="purple" count={4} />
+        <Project name="Billing" hue="green" count={2} />
         <div className="me">
           <Avatar who="mara" size={22} />
           <span>Mara Lind</span>
@@ -566,7 +570,7 @@ export function Board(): ReactNode {
       <main className="main">
         <header className="top">
           <div className="crumbs">
-            <span className="swatch" style={{ background: "hsl(28 75% 55%)" }} />
+            <span className="swatch" style={{ background: "var(--orange)" }} />
             <strong>Editor</strong>
             <span>›</span>
             <span>Cycle 14</span>

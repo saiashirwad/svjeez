@@ -224,7 +224,14 @@ export const snapshots = async <T>(
   run: (dom: Browser) => Promise<T>,
 ): Promise<T> => {
   const hash = sha256(
-    JSON.stringify([inputs, isCssText(options.css) ? options.css : null, await version(), FORMAT]),
+    JSON.stringify([
+      inputs,
+      isCssText(options.css) ? options.css : null,
+      await version(),
+      FORMAT,
+      // Only when given, so recordings made without one stay valid.
+      ...(options.palette ? [options.palette] : []),
+    ]),
   );
 
   if (!process.env.SVJEEZ_DOM_REFRESH && !screenshots) {

@@ -18,6 +18,7 @@ import {
 import { num } from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import { clear, invisible, isPair, opaque, schemeCss, variable } from "../paint.ts";
+import { roles, type Palette } from "../palette.ts";
 import type {
   Box,
   Face,
@@ -121,10 +122,27 @@ export const painter = (
   parts: Parts,
   pairBy?: PairBy,
   drawn?: ReadonlyMap<string, readonly TextRun[]>,
+  palette?: Palette,
 ) => {
   const used = new Map<string, Pair<string>>();
+  const role = palette && roles(palette);
+  const mixed = new Map<string, string>();
 
   const v = <C extends string>(color: Paint<C>): C | `var(--${string})` => {
+    const found = role?.(color);
+
+    if (found?.alpha === 1) return `var(--${found.slot})`;
+
+    // The slot at an alpha follows the slot, so a faded accent stays the accent of whatever palette the viewer picks.
+    if (found) {
+      const percent = Math.round(found.alpha * 1000) / 10;
+      const name = `dom-${found.slot}-${String(percent).replace(".", "_")}`;
+
+      mixed.set(name, `color-mix(in srgb,var(--${found.slot}) ${percent}%,transparent)`);
+
+      return `var(--${name})`;
+    }
+
     if (!isPair(color)) return color;
 
     const name = variable(color);
@@ -885,7 +903,10 @@ export const painter = (
   };
 
   const style = (): SvgNode | null => {
-    const css = rules.join("") + schemeCss(used);
+    const mixes = [...mixed].map(([name, value]) => `--${name}:${value}`);
+
+    const css =
+      rules.join("") + schemeCss(used) + (mixes.length > 0 ? `svg{${mixes.sort().join(";")}}` : "");
 
     return css ? <Style css={css} /> : null;
   };

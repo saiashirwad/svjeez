@@ -21,6 +21,7 @@ import {
   type Fetched,
   type Size,
 } from "./images.ts";
+import { paletteCss } from "./palette.ts";
 import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { shoot } from "./shot.ts";
@@ -311,6 +312,9 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       ),
     )
     .join("\n");
+
+  // After the page's own CSS in an opened app too, so the recording's palette wins over one the app defines.
+  const head = faces + (options.palette ? paletteCss(options.palette) : "");
 
   const schemes = options.schemes ?? "both";
   const darkClass = options.dark?.class ?? "dark";
@@ -613,7 +617,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       const wrap = width === undefined ? "display:inline-block" : `width:${width}px`;
 
       await page.setContent(
-        `<!doctype html><html class="${root?.class ?? ""}"><head><meta charset="utf-8"><style>${faces}</style><style id="svjeez-css">${await sheet(html)}</style></head><body style="margin:0;background:none"><div id="svjeez-dom" style="${wrap}">${html}</div></body></html>`,
+        `<!doctype html><html class="${root?.class ?? ""}"><head><meta charset="utf-8"><style>${head}</style><style id="svjeez-css">${await sheet(html)}</style></head><body style="margin:0;background:none"><div id="svjeez-dom" style="${wrap}">${html}</div></body></html>`,
       );
 
       return io(page, "#svjeez-dom > *", rest, async (next) => {
@@ -643,7 +647,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       });
       await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => undefined);
 
-      if (faces) await page.addStyleTag({ content: faces });
+      if (head) await page.addStyleTag({ content: head });
 
       await page.waitForSelector(ready ?? root);
 

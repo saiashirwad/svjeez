@@ -190,7 +190,7 @@ describe("a resized box", () => {
     expect((svg.match(/<animate [^>]*attributeName="d"/g) ?? []).length).toBeGreaterThanOrEqual(16);
   });
 
-  test("content replaced whole hands over, so the box is never empty", () => {
+  test("content replaced whole hands over: the old is nearly gone before the new is legible", () => {
     const sheet = (child: Item) => page([box(40, 40, 300, 200, [child], { key: "sheet" })]);
 
     const node = (
@@ -202,10 +202,14 @@ describe("a resized box", () => {
       />
     );
 
-    for (const t of [0.3, 0.4, 0.5, 0.6, 0.7]) {
-      const shown = [...inkOf(node, "Palette", t, 2), ...inkOf(node, "Dialog", t, 2)];
+    const ink = (text: string, t: number) => Math.max(0, ...inkOf(node, text, t, 2));
 
-      expect(shown.reduce((a, b) => a + b, 0)).toBeGreaterThan(0.5);
+    expect(ink("Palette", 0)).toBe(1);
+    expect(ink("Dialog", 1)).toBe(1);
+
+    for (let t = 0; t <= 1; t += 0.025) {
+      // Never both legible: the fainter of the two is always under a tenth.
+      expect(Math.min(ink("Palette", t), ink("Dialog", t))).toBeLessThan(0.1);
     }
   });
 });

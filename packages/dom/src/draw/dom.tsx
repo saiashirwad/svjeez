@@ -10,6 +10,7 @@ import {
 } from "svjeez";
 import { num } from "svjeez/geometry";
 import { duration, timeline, type Step } from "../timeline.ts";
+import type { Palette } from "../palette.ts";
 import type { Snapshot, TextRun } from "../tree.ts";
 import type { PairBy } from "./pairing.ts";
 import { painter, type GroupStack, type Parts } from "./painter.tsx";
@@ -29,6 +30,12 @@ export interface DomProps {
   readonly text?: (run: TextRun, index: number) => Stack<TagChannels<"text">> | undefined;
   /** Overrides how elements pair across states: boxes that get the same string pair, whatever their tag. */
   readonly pair?: PairBy;
+  /**
+   * The palette the page was recorded in (`recordings`' or `snapshots`' `palette`). A color that is one of its slots in
+   * both schemes draws as `var(--base0X)`, at its alpha when see-through, so the drawing follows the palette `render` is
+   * given and any the viewer switches to. Other colors stay as recorded.
+   */
+  readonly palette?: Palette;
   readonly x?: number;
   readonly y?: number;
   readonly animation?: GroupStack;
@@ -43,6 +50,7 @@ export function Dom({
   parts = {},
   text,
   pair,
+  palette,
   x = 0,
   y = 0,
   animation,
@@ -59,6 +67,7 @@ export function Dom({
     parts,
     pair,
     drawn,
+    palette,
   );
 
   if (snaps.length === 0) throw new Error("<Dom> needs at least one state.");

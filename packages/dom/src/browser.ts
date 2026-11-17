@@ -1,5 +1,6 @@
 import type { FontValue } from "svjeez";
 import { chromiumPages } from "./chromium.ts";
+import type { Palette } from "./palette.ts";
 import type { Action, Flow, Instruction, PageAction } from "./flow.ts";
 import type { Step } from "./timeline.ts";
 import type { Snapshot } from "./tree.ts";
@@ -13,6 +14,11 @@ export interface BrowserOptions {
   readonly css?: Css;
   /** Fonts the page uses, embedded as @font-face so layout and the drawn text match. Pass the same ones to `<Dom fonts>`. */
   readonly fonts?: readonly FontValue[];
+  /**
+   * Defines `--base00` to `--base0F` on every page, light and dark, for CSS written against a base16 palette. Pass the
+   * same palette to `<Dom palette>` to draw those colors as the variables again.
+   */
+  readonly palette?: Palette;
   /**
    * Which schemes a snapshot reads: `"both"` reads light and dark, and the drawing's colors follow the viewer's. Default `"both"`.
    */

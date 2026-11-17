@@ -1,51 +1,34 @@
-/* One accent, warm neutrals, Inter. Light by default; the recorder's dark pass adds .dark to <html>. */
+/* Written against the site's base16 palette: the recording defines --base00 to --base0F in both schemes, and
+   <Dom palette> draws each color that is a slot (or a slot at an alpha) as that variable again, so the film follows
+   whichever palette and scheme the page shows. Only the shadows stay black. Light by default; the dark pass adds .dark. */
 :root {
-  --bg: #fbfaf8;
-  --side: #f3f1ed;
-  --panel: #ffffff;
-  --lane: #f3f1ed;
-  --line: #e6e2db;
-  --line-strong: #d6d0c6;
-  --text: #1c1917;
-  --soft: #57534e;
-  --muted: #8a847c;
-  --accent: #e2531a;
-  --accent-text: #ffffff;
-  --accent-tint: #fdeee6;
-  --accent-line: #f3b392;
-  --scrim: rgba(28, 25, 23, 0.28);
-  --lift: 0 12px 28px rgba(28, 25, 23, 0.16), 0 2px 6px rgba(28, 25, 23, 0.08);
-  --float: 0 24px 60px rgba(28, 25, 23, 0.22), 0 4px 12px rgba(28, 25, 23, 0.08);
-  --toast: #1c1917;
-  --toast-text: #fafaf9;
-  --avatar-l: 86%;
-  --avatar-t: 32%;
-  --bug: #e5484d;
-  --feature: #3e7bfa;
-  --polish: #a35bf0;
+  --bg: var(--base00);
+  --side: var(--base01);
+  --panel: var(--base00);
+  --lane: var(--base01);
+  --line: var(--base02);
+  --text: var(--base05);
+  --soft: var(--base04);
+  --muted: var(--base03);
+  --accent: var(--base0D);
+  --accent-text: var(--base00);
+  --accent-tint: color-mix(in srgb, var(--base0D) 14%, transparent);
+  --scrim: color-mix(in srgb, var(--base00) 55%, transparent);
+  --done: var(--base0B);
+  --orange: var(--base09);
+  --blue: var(--base0D);
+  --purple: var(--base0E);
+  --green: var(--base0B);
+  --bug: var(--base08);
+  --feature: var(--base0C);
+  --polish: var(--base0E);
+  --lift: 0 12px 28px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --float: 0 24px 60px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .dark {
-  --bg: #161412;
-  --side: #1c1a17;
-  --panel: #282420;
-  --lane: #1b1916;
-  --line: #2e2a26;
-  --line-strong: #3d3833;
-  --text: #f5f3f0;
-  --soft: #c9c3bb;
-  --muted: #8f8880;
-  --accent: #f26a2e;
-  --accent-text: #1c1105;
-  --accent-tint: #3a2216;
-  --accent-line: #8a3d1c;
-  --scrim: rgba(0, 0, 0, 0.5);
   --lift: 0 12px 28px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
   --float: 0 24px 60px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --toast: #f5f3f0;
-  --toast-text: #1c1917;
-  --avatar-l: 34%;
-  --avatar-t: 88%;
 }
 
 * {
@@ -64,7 +47,7 @@ input {
 
 kbd {
   font:
-    500 10.5px/1 "Inter",
+    400 11px/1 "Geist",
     sans-serif;
   color: var(--muted);
   border: 1px solid var(--line);
@@ -80,7 +63,7 @@ kbd {
   height: 450px;
   overflow: hidden;
   font:
-    500 13px/1.4 "Inter",
+    400 13px/1.4 "Geist",
     sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -118,7 +101,7 @@ kbd {
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  background: linear-gradient(135deg, var(--accent), #f59e0b);
+  background: linear-gradient(135deg, var(--blue), var(--purple));
 }
 
 .nav {
@@ -129,7 +112,7 @@ kbd {
   padding: 0 8px;
   border-radius: 6px;
   color: var(--soft);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .nav svg {
@@ -167,7 +150,7 @@ kbd {
   align-items: center;
   gap: 8px;
   padding: 6px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--soft);
 }
 
@@ -235,7 +218,7 @@ kbd {
   height: 30px;
   padding: 0 11px;
   border-radius: 7px;
-  font-weight: 500;
+  font-weight: 400;
   white-space: nowrap;
 }
 
@@ -277,7 +260,7 @@ kbd {
 .cycle-count {
   color: var(--soft);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .percent {
@@ -320,7 +303,7 @@ kbd {
 
 .lane-head .count {
   color: var(--muted);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .card {
@@ -332,6 +315,7 @@ kbd {
   flex-direction: column;
   gap: 7px;
   border-radius: 8px;
+  border: 1px solid var(--line);
   background: var(--panel);
 }
 
@@ -349,7 +333,7 @@ kbd {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-weight: 500;
+  font-weight: 400;
   white-space: nowrap;
 }
 
@@ -394,8 +378,8 @@ kbd {
 }
 
 .status.done {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: var(--done);
+  background: var(--done);
   color: var(--accent-text);
 }
 
@@ -414,7 +398,7 @@ kbd {
   background: var(--lane);
   color: var(--soft);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .dot {
@@ -455,7 +439,7 @@ kbd {
   height: 28px;
   padding: 0 8px;
   border-radius: 6px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .menu-item .tick {
@@ -479,9 +463,10 @@ kbd {
   height: 38px;
   padding: 0 14px;
   border-radius: 10px;
-  background: var(--toast);
-  color: var(--toast-text);
-  font-weight: 500;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 400;
   box-shadow: var(--float);
 }
 
@@ -504,7 +489,7 @@ kbd {
   margin: 0 auto;
   border-radius: 14px;
   background: var(--panel);
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
   overflow: hidden;
 }
 
@@ -559,7 +544,7 @@ kbd {
   padding: 0 10px;
   border-radius: 8px;
   color: var(--soft);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .command svg {
@@ -588,7 +573,7 @@ kbd {
 
 .dialog-body .crumbs {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .team {
@@ -625,7 +610,7 @@ kbd {
   width: 66px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .pick {
@@ -637,7 +622,7 @@ kbd {
   border-radius: 13px;
   border: 1px solid var(--line);
   color: var(--soft);
-  font-weight: 500;
+  font-weight: 400;
   font-size: 12px;
 }
 
@@ -661,7 +646,7 @@ kbd {
 .who-name {
   margin-left: 6px;
   color: var(--soft);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .dialog-foot {

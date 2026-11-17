@@ -35,6 +35,8 @@ export { snapshots, shotsDir, type SnapshotsOptions } from "./snapshots.ts";
 
 export { Dom, type DomProps } from "./draw/dom.tsx";
 
+export type { Palette } from "./palette.ts";
+
 export { duration, loop, size, type Step } from "./timeline.ts";
 
 export { find, rect } from "./find.ts";

@@ -12,8 +12,10 @@ const WINDOWS = {
   swapOut: [0.45, 0.4, 1, 0],
   swapIn: [0.15, 0.4, 0, 1],
   textOut: [0, 0.45, 1, 0],
-  handOut: [0, 0.7, 1, 0],
-  handIn: [0.15, 0.55, 0, 1],
+  // Content a box swaps whole goes before the new is legible, overlapping only where both are faint: the box's own fill
+  // morphs throughout, so it is never empty, and its two contents never read as a double exposure.
+  handOut: [0, 0.45, 1, 0],
+  handIn: [0.35, 0.6, 0, 1],
   textIn: [0.45, 0.55, 0, 1],
   in: [0, 1, 0, 1],
   out: [0, 1, 1, 0],

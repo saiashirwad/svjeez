@@ -1,17 +1,18 @@
-import { google } from "@svjeez/fonts";
 import { Dom, duration, find, loop, rect as partRect, shots, size, type Step } from "@svjeez/dom";
 import { recordings } from "@svjeez/dom/vite";
 import { fileURLToPath } from "node:url";
-import { Camera, def, ease, motion, render, span, variables, type Point } from "svjeez";
+import { Camera, def, ease, motion, render, span, type Point } from "svjeez";
 import { rect } from "svjeez/geometry";
+import { geist } from "../fonts/faces.ts";
+import { css, palette, theme } from "../style.ts";
 
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 
-const inter = await google.family("Inter", [{ weight: 500 }, { weight: 600 }]);
-
 const demos = await recordings<typeof import("./board.demo.tsx")>(here("board.demo.tsx"), {
   cache: here("snapshots.json"),
-  fonts: [inter],
+  fonts: [geist],
+  // The app's CSS paints with --base00 to --base0F; <Dom palette> turns those colors back into the variables.
+  palette,
 });
 
 const steps = loop(demos.board, { over: 0.9, wait: 0.4 });
@@ -72,16 +73,11 @@ const path = clicks.reduce(
   motion({ x: REST.x, y: REST.y }),
 );
 
-const { vars, css } = variables({
-  dark: { backdrop: "#0c0b0a", ring: "#f26a2e" },
-  light: { backdrop: "#ece9e4", ring: "#e2531a" },
-});
-
 const Cursor = () => (
   <path
     d="M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z"
-    fill="#ffffff"
-    stroke="#1c1917"
+    fill={theme.base00}
+    stroke={theme.base07}
     strokeWidth={1.2}
     strokeLinejoin="round"
     animation={path.to(REST, span(home, 0.9), ease.inOut)}
@@ -94,7 +90,7 @@ const Ripple = ({ at, to }: { at: number; to: Point }) => (
     cy={to.y}
     r={14}
     fill="none"
-    stroke={vars.ring}
+    stroke={theme.base0D}
     strokeWidth={2}
     opacity={0}
     animation={motion({ opacity: 0, scale: 0.3 })
@@ -114,9 +110,9 @@ export default function build(): string {
       desc: "A command palette opens and narrows to New issue as it is typed into, then turns into a dialog where a title is typed and a label and assignee picked. The new card lands in Todo, is dragged to In progress and marked done; the counts, the cycle's progress and the sidebar update, and a toast confirms.",
     },
     <g clipPath={def.clipPath({}, <rect width={frame.w} height={frame.h} rx={12} />)}>
-      <rect width={frame.w} height={frame.h} fill={vars.backdrop} />
+      <rect width={frame.w} height={frame.h} fill={theme.base00} />
       <Camera {...camera}>
-        <Dom states={steps} fonts={[inter]} />
+        <Dom states={steps} fonts={[geist]} palette={palette} />
         {clicks.map((click) => (
           <Ripple {...click} />
         ))}
