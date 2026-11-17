@@ -7,6 +7,8 @@ export interface Backdrop {
   readonly svg: string;
   readonly width: number;
   readonly height: number;
+  /** The side of one art pixel, for a pixel art world. The stage then zooms only to sizes that keep every pixel square. */
+  readonly grid?: number;
 }
 
 /** How much of the world the camera shows, in world px. The stage scales it to cover the host. */
@@ -70,11 +72,13 @@ export const createStage = (host: HTMLElement, backdrop: Backdrop, view: View): 
     const x = Math.max(half.x, Math.min(backdrop.width - half.x, camera.x));
     const y = Math.max(half.y, Math.min(backdrop.height - half.y, camera.y));
 
-    root.style.transform = `translate(${((half.x - x) * zoom).toFixed(1)}px, ${((half.y - y) * zoom).toFixed(1)}px)`;
+    root.style.transform = `translate(${Math.round((half.x - x) * zoom)}px, ${Math.round((half.y - y) * zoom)}px)`;
   };
 
   const fit = (): void => {
-    zoom = Math.max(host.clientWidth / view.width, host.clientHeight / view.height);
+    const cover = Math.max(host.clientWidth / view.width, host.clientHeight / view.height);
+
+    zoom = backdrop.grid ? Math.max(1, Math.round(cover * backdrop.grid)) / backdrop.grid : cover;
     root.setAttribute("width", String(backdrop.width * zoom));
     root.setAttribute("height", String(backdrop.height * zoom));
     frame();

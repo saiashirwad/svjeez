@@ -57,7 +57,7 @@ export const openWardrobe = (
   const dress = (): void => {
     sprite = createSprite(villagerSheet(look));
     pose();
-    stand.replaceChildren(frameOf(sprite.node, "-34 -80 68 88"));
+    stand.replaceChildren(frameOf(sprite.node, "-42 -99 84 111"));
 
     for (const [button, key, value] of buttons)
       button.classList.toggle("picked", look[key] === value);

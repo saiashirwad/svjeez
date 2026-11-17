@@ -9,24 +9,24 @@ import {
   sampled,
   span,
   spline,
+  type Color,
   type Point,
   type SvgNode,
 } from "svjeez";
 import type { Area } from "../play/walk";
-import type { Hex } from "./color";
+import { shade, type Hex } from "./color";
 import { DAY, daylight } from "./daylight";
+import { canvas, Flipbook, Pixels, PX, sketch, type Canvas } from "./pixel";
 import {
   Bench,
   Bush,
   Cottage,
   FenceAcross,
   FenceDown,
-  Flower,
   Glint,
   Glow,
   HayBale,
   Lamp,
-  LilyPad,
   Mailbox,
   Reeds,
   Rock,
@@ -34,6 +34,7 @@ import {
   ShippingBin,
   Sign,
   Stump,
+  Sunflower,
   Tree,
   Well,
   Windmill,
@@ -115,6 +116,9 @@ export interface World {
   };
 }
 
+/** Pixels to a map square. */
+const CELL = TILE / PX;
+
 const squareAt = (column: number, row: number): string => MAP[row]?.[column] ?? ".";
 
 const squares = (kinds: string): Point[] => {
@@ -127,163 +131,256 @@ const squares = (kinds: string): Point[] => {
   return found;
 };
 
-const outline = (at: readonly Point[]): string =>
-  at.map(({ x, y }) => `M${x} ${y}h${TILE}v${TILE}h${-TILE}z`).join("");
+/** Squares that join into one shape: planks lie over water, so the pond runs on under them. */
+const family = (kind: string): string => (kind === "b" ? "w" : kind);
 
-/** Squares drawn as one blob: a stroke in the fill's color rounds the outer corners. */
-const Blob = ({
-  d,
-  fill,
-  grow,
-}: {
-  readonly d: string;
-  readonly fill: Hex;
-  readonly grow: number;
-}): SvgNode => <path d={d} fill={fill} stroke={fill} strokeWidth={grow} strokeLinejoin="round" />;
+/**
+ * What the ground is at one pixel. It is the square's kind, except in the outer corners of a shape, where a few pixels
+ * go back to grass so ponds, paths and plots have rounded corners.
+ */
+const groundAt = (x: number, y: number): string => {
+  const column = Math.floor(x / CELL);
+  const row = Math.floor(y / CELL);
+  const kind = squareAt(column, row);
 
-const Ground = (): SvgNode => {
-  const next = random("ground");
-  const grass = squares(".,");
-  const water = outline(squares("wb"));
-  const path = outline(squares("p"));
-  const soil = squares("s");
-  const tufts: string[] = [];
-  const pebbles: string[] = [];
+  if (kind === ".") return kind;
+  const lx = x - column * CELL;
+  const ly = y - row * CELL;
+  const dx = lx < 3 ? -1 : lx > CELL - 4 ? 1 : 0;
+  const dy = ly < 3 ? -1 : ly > CELL - 4 ? 1 : 0;
 
-  for (let i = 0; i < 520; i++) {
-    const square = grass[Math.floor(next() * grass.length)];
+  const joins = (dc: number, dr: number): boolean =>
+    column + dc < 0 ||
+    column + dc >= COLUMNS ||
+    row + dr < 0 ||
+    row + dr >= ROWS ||
+    family(squareAt(column + dc, row + dr)) === family(kind);
 
-    if (!square) continue;
-    const x = Math.round(square.x + 6 + next() * (TILE - 16));
-    const y = Math.round(square.y + 10 + next() * (TILE - 12));
-    tufts.push(`M${x} ${y}l-2 -5M${x + 3} ${y}l1 -7M${x + 6} ${y}l3 -4`);
+  if (dx === 0 || dy === 0 || joins(dx, 0) || joins(0, dy)) return kind;
+  const fromCorner = (dx < 0 ? lx : CELL - 1 - lx) + (dy < 0 ? ly : CELL - 1 - ly);
+
+  return fromCorner < 3 ? "." : kind;
+};
+
+/** True when a pixel within `reach` of this one, straight across or up and down, is ground of another family. */
+const edge = (x: number, y: number, reach: number, kind: string): boolean => {
+  for (let by = 1; by <= reach; by++)
+    if (AROUND.some(([dx, dy]) => family(groundAt(x + dx * by, y + dy * by)) !== kind)) return true;
+
+  return false;
+};
+
+/** A number from 0 up to 1 that is always the same for the same pixel. */
+const noise = (x: number, y: number): number => {
+  const mixed = Math.imul(x * 374761393 + y * 668265263, 1274126177);
+
+  return ((mixed ^ (mixed >>> 13)) >>> 0) / 4294967296;
+};
+
+const GRASS: Hex = "#86c25a";
+
+const AROUND = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+] as const;
+
+const waterWithin = (x: number, y: number, reach: number): boolean => {
+  for (let by = 1; by <= reach; by++)
+    if (AROUND.some(([dx, dy]) => family(groundAt(x + dx * by, y + dy * by)) === "w")) return true;
+
+  return false;
+};
+
+const inkAt = (x: number, y: number): Color | undefined => {
+  const kind = groundAt(x, y);
+  const lx = x % CELL;
+  const ly = y % CELL;
+  const roll = noise(x, y);
+
+  if (kind === "." || kind === ",") {
+    if (waterWithin(x, y, 1)) return "#b89a66";
+
+    if (waterWithin(x, y, 3)) return "#e6d49a";
+
+    if (kind === ",") return edge(x, y, 2, ",") && (x + y) % 2 === 0 ? undefined : "#9ed46f";
+
+    return undefined;
   }
 
-  for (const square of squares("p"))
-    for (let i = 0; i < 2; i++) {
-      const x = Math.round(square.x + 6 + next() * (TILE - 12));
-      const y = Math.round(square.y + 6 + next() * (TILE - 12));
-      pebbles.push(`M${x} ${y}h3`);
+  if (kind === "w") {
+    if ([1, 2, 3].some((by) => family(groundAt(x, y - by)) !== "w")) return "#3f8fc2";
+
+    if (edge(x, y, 1, "w")) return "#a6dcee";
+
+    return noise(Math.floor(x / 3), y) < 0.035 ? "#8fd0ea" : "#4fa8dc";
+  }
+
+  if (kind === "b") {
+    if (ly < 2 || ly > CELL - 3) return "#8b5a3c";
+
+    return ly === 2 ? "#a8683f" : lx % 4 === 3 ? "#a8683f" : "#c79a63";
+  }
+
+  if (kind === "p") {
+    if (edge(x, y, 1, "p") && groundAt(x + 1, y) !== "b" && groundAt(x - 1, y) !== "b")
+      return "#c49a5c";
+
+    return roll < 0.03 ? "#cfa96c" : roll > 0.975 ? "#ecd09a" : "#e0bf85";
+  }
+
+  if (edge(x, y, 1, "s")) return "#5a3823";
+
+  return ly % 5 === 4 ? "#6a4329" : ly % 5 === 0 ? "#946a44" : "#80553a";
+};
+
+const FLOWERS: readonly Hex[] = ["#f8f4ec", "#f7a8c4", "#f6d55c", "#b99be8", "#ff8f6b"];
+
+/** Wildflowers, a few pixels each: a daisy, a tulip, bells and a bud. */
+const BLOOMS: readonly (readonly string[])[] = [
+  [".p.p.", "ppypp", ".q.q.", "..g..", ".Gg.."],
+  ["p.p.p", "ppppp", "qpppq", ".qqq.", "..g..", "G.g..", ".Gg.."],
+  ["..p..", ".pq..", "..g.p", ".pg.q", ".qg..", "..gG."],
+  [".p.", "pyp", ".q.", ".g."],
+];
+
+const PADS: readonly (readonly [number, number])[] = [
+  [383, 257],
+  [430, 266],
+  [461, 247],
+  [407, 287],
+  [445, 294],
+  [420, 241],
+  [473, 273],
+];
+
+/** The whole ground as one canvas: terrain, then tufts, flowers and lily pads on top. Grass itself is left empty. */
+const ground = (): Canvas => {
+  const wide = COLUMNS * CELL;
+  const tall = ROWS * CELL;
+  const c = canvas(wide, tall);
+  const next = random("ground");
+
+  for (let y = 0; y < tall; y++)
+    for (let x = 0; x < wide; x++) {
+      const ink = inkAt(x, y);
+
+      if (ink) c.dot(x, y, ink);
     }
 
-  return (
-    <>
-      <rect width={WORLD.width} height={WORLD.height} fill="#8fc46a" />
-      <Blob d={outline(squares(","))} fill="#a3d277" grow={26} />
-      <path
-        d={tufts.slice(0, 300).join("")}
-        fill="none"
-        stroke="#74b05a"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-      />
-      <path
-        d={tufts.slice(300).join("")}
-        fill="none"
-        stroke="#b5df8c"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-      />
-      <Blob d={water} fill="#e9d8a6" grow={24} />
-      <Blob d={water} fill="#8fd0e2" grow={10} />
-      <path d={water} fill="#62b5d1" />
-      <Blob d={path} fill="#c9a871" grow={18} />
-      <Blob d={path} fill="#e2c48d" grow={10} />
-      <path d={pebbles.join("")} stroke="#cfae78" strokeWidth={3} strokeLinecap="round" />
-      <Blob d={outline(soil)} fill="#6f4a30" grow={14} />
-      <Blob d={outline(soil)} fill="#8a5f3f" grow={6} />
-      <path
-        d={soil
-          .map(({ x, y }) => `M${x + 5} ${y + 12}h38M${x + 5} ${y + 24}h38M${x + 5} ${y + 36}h38`)
-          .join("")}
-        stroke="#7a5236"
-        strokeWidth={2.4}
-        strokeLinecap="round"
-      />
-      {squares("b").map(({ x, y }) => (
-        <>
-          <rect x={x} y={y + 3} width={TILE} height={TILE - 6} fill="#c79a63" />
-          <path
-            d={`M${x + 12} ${y + 3}v42M${x + 24} ${y + 3}v42M${x + 36} ${y + 3}v42`}
-            stroke="#a8683f"
-            strokeWidth={1.6}
-          />
-          <rect x={x} y={y + 1} width={TILE} height={5} fill="#8b5a3c" />
-          <rect x={x} y={y + TILE - 6} width={TILE} height={5} fill="#8b5a3c" />
-        </>
-      ))}
-    </>
-  );
+  const grassy = (x: number, y: number): boolean =>
+    [-2, 0, 2].every(
+      (by) => ".,".includes(groundAt(x + by, y)) && ".,".includes(groundAt(x, y + by)),
+    ) && c.at(x, y) !== "#e6d49a";
+
+  for (let i = 0; i < 1500; i++) {
+    const x = Math.floor(next() * (wide - 4)) + 1;
+    const y = Math.floor(next() * (tall - 4)) + 2;
+    const ink = next() < 0.6 ? "#6fae4e" : "#a8dc7c";
+
+    if (grassy(x, y))
+      c.dot(x, y, ink)
+        .dot(x + 1, y - 1, ink)
+        .dot(x + 2, y, ink);
+  }
+
+  for (let i = 0; i < 230; i++) {
+    const meadow = i < 110;
+    const x = Math.floor(next() * (wide - 8)) + 1;
+    const y = Math.floor(next() * (tall - 10)) + 2;
+    const petal = FLOWERS[Math.floor(next() * FLOWERS.length)] ?? "#f8f4ec";
+    const rows = BLOOMS[Math.floor(next() * BLOOMS.length)] ?? [];
+
+    if (
+      [0, 4].every((dx) => [0, 6].every((dy) => grassy(x + dx, y + dy))) &&
+      (!meadow || groundAt(x, y) === ",")
+    )
+      c.stamp(
+        sketch(
+          rows,
+          new Map<string, Color>([
+            ["p", petal],
+            ["q", shade(petal, -0.18)],
+            ["y", petal === "#f6d55c" ? "#e4572e" : "#f6d55c"],
+            ["g", "#3f8a45"],
+            ["G", "#74bd63"],
+          ]),
+        ),
+        x,
+        y,
+      );
+  }
+
+  for (const [i, [x, y]] of PADS.entries()) {
+    c.oval(x, y, 3.5, 2.5, "#4f9a6a")
+      .oval(x - 0.5, y - 0.5, 2, 1.2, "#6fb884")
+      .dot(x + 2, y, "#4fa8dc");
+
+    if (i % 2 === 0) c.dot(x - 1, y - 1, "#f8d7e3").dot(x, y - 1, "#f6d55c");
+  }
+
+  return c;
 };
 
-const FLOWER_COLORS: readonly Hex[] = ["#f8f4ec", "#f7a8c4", "#f6d55c", "#b99be8", "#ff8f6b"];
+const Glints = (): SvgNode => {
+  const next = random("glints");
 
-/** Flowers, lily pads and glints: decor that lies flat, so nothing walks behind it. */
-const Decor = (): SvgNode => {
-  const next = random("decor");
-  const grass = squares(".,");
-  const meadow = squares(",");
-
-  const water = squares("w").filter(
+  const open = squares("w").filter(
     ({ x, y }) =>
-      squareAt(x / TILE - 1, y / TILE) !== "." && squareAt(x / TILE + 1, y / TILE) !== ".",
+      squareAt(x / TILE, y / TILE - 1) === "w" && squareAt(x / TILE - 1, y / TILE) !== ".",
   );
-
-  const flowers: SvgNode[] = [];
-  const glints: SvgNode[] = [];
-
-  for (let i = 0; i < 110; i++) {
-    const from = i < 50 ? meadow : grass;
-    const square = from[Math.floor(next() * from.length)];
-    const color = FLOWER_COLORS[Math.floor(next() * FLOWER_COLORS.length)];
-
-    if (!square || !color) continue;
-    const x = Math.round(square.x + 6 + next() * 36);
-    const y = Math.round(square.y + 14 + next() * 30);
-
-    flowers.push(
-      <g transform={`translate(${x} ${y})`}>
-        <Flower color={color} seed={`flower-${i % 7}`} />
-      </g>,
-    );
-  }
-
-  for (let i = 0; i < 16; i++) {
-    const square = water[Math.floor(next() * water.length)];
-
-    if (!square) continue;
-
-    glints.push(
-      <g
-        transform={`translate(${Math.round(square.x + 8 + next() * 32)} ${Math.round(square.y + 8 + next() * 32)})`}
-      >
-        <Glint at={Math.round(next() * 5)} period={i % 2 === 0 ? 4 : 6} />
-      </g>,
-    );
-  }
-
-  const pads: readonly (readonly [number, number])[] = [
-    [1150, 772],
-    [1290, 800],
-    [1385, 742],
-    [1222, 862],
-    [1335, 884],
-    [1262, 724],
-    [1420, 820],
-  ];
 
   return (
     <>
-      {flowers}
-      {glints}
-      {pads.map(([x, y], i) => (
-        <g transform={`translate(${x} ${y})`}>
-          <LilyPad seed={`pad-${i}`} bloom={i % 2 === 0} />
-        </g>
-      ))}
+      {Array.from({ length: 18 }, (_, i) => {
+        const square = open[Math.floor(next() * open.length)] ?? { x: 0, y: 0 };
+        const x = square.x + (2 + Math.floor(next() * 12)) * PX;
+        const y = square.y + (2 + Math.floor(next() * 12)) * PX;
+
+        return (
+          <g transform={`translate(${x} ${y})`}>
+            <Glint at={Math.round(next() * 5)} period={i % 2 === 0 ? 4 : 6} />
+          </g>
+        );
+      })}
     </>
   );
 };
+
+/** Something standing on the ground. The stage draws things in order of `y`, so a villager can walk behind one. */
+interface Thing {
+  readonly x: number;
+  /** Where it meets the ground. */
+  readonly y: number;
+  readonly node: SvgNode;
+  /** What cannot be walked through, measured from `x, y`. */
+  readonly solid?: Area;
+  /** Lights it carries: where each is, from `x, y`, and how far it reaches, in pixels. */
+  readonly lights?: readonly (readonly [x: number, y: number, r: number])[];
+}
+
+/** A rendered world and what the game needs to know about it. */
+export interface World {
+  readonly svg: string;
+  readonly width: number;
+  readonly height: number;
+  /** The side of one art pixel, in world px. */
+  readonly grid: number;
+  /** Everything that blocks walking: water and the foot of each thing. */
+  readonly solids: readonly Area[];
+  /** The top left corner of every square of soil. */
+  readonly soil: readonly Point[];
+  readonly places: {
+    readonly spawn: Point;
+    readonly door: Point;
+    readonly bin: Point;
+    readonly well: Point;
+    readonly mill: Point;
+    readonly dock: Point;
+    readonly pen: Point;
+  };
+}
 
 const foot = (x: number, y: number, width: number, height: number): Area => ({
   x,
@@ -292,15 +389,24 @@ const foot = (x: number, y: number, width: number, height: number): Area => ({
   height,
 });
 
-const TRUNK = foot(-9, -10, 18, 12);
-const POST = foot(-4, -5, 8, 7);
+/** The nearest whole pixel. */
+const snap = (value: number): number => Math.round(value / PX) * PX;
 
-const tree = (x: number, y: number, kind: TreeKind, size = 1): Thing => ({
-  x,
-  y,
-  node: <Tree kind={kind} size={size} seed={`tree-${(x + y) % 5}`} still={(x + y) % 3 === 0} />,
+const TRUNK = foot(-9, -10, 18, 12);
+const POST = foot(-5, -5, 10, 7);
+const LOW = foot(-18, -10, 36, 12);
+
+const tree = (x: number, y: number, kind: TreeKind): Thing => ({
+  x: snap(x),
+  y: snap(y),
+  node: <Tree kind={kind} pick={x + y} />,
   solid: TRUNK,
 });
+
+const at = (
+  spots: readonly (readonly [number, number])[],
+  make: () => Omit<Thing, "x" | "y">,
+): Thing[] => spots.map(([x, y]) => ({ x: snap(x), y: snap(y), ...make() }));
 
 const things = (): Thing[] => {
   const next = random("forest");
@@ -309,13 +415,12 @@ const things = (): Thing[] => {
 
   for (let row = 0; row < ROWS; row++)
     for (let column = 0; column < COLUMNS; column++) {
-      const edge = Math.min(column, row, COLUMNS - 1 - column, ROWS - 1 - row);
-      const chance = edge < 2 ? 0.62 : edge === 2 ? 0.22 : 0;
+      const fromEdge = Math.min(column, row, COLUMNS - 1 - column, ROWS - 1 - row);
+      const chance = fromEdge < 2 ? 0.62 : fromEdge === 2 ? 0.22 : 0;
       const roll = next();
       const kind = kinds[Math.floor(next() * kinds.length)] ?? "oak";
       const dx = next() * 24 - 12;
       const dy = next() * 16;
-      const size = 0.85 + next() * 0.3;
 
       if (roll >= chance) continue;
 
@@ -323,10 +428,7 @@ const things = (): Thing[] => {
         (by) => squareAt(column + by, row) === "." && squareAt(column, row + by) === ".",
       );
 
-      if (clear)
-        placed.push(
-          tree(Math.round(column * TILE + 24 + dx), Math.round(row * TILE + 30 + dy), kind, size),
-        );
+      if (clear) placed.push(tree(column * TILE + 24 + dx, row * TILE + 34 + dy, kind));
     }
 
   const fence: Thing[] = [];
@@ -334,114 +436,139 @@ const things = (): Thing[] => {
   for (let x = 216; x < 552; x += TILE) {
     const gate = x + TILE > 384 && x < 432;
 
-    if (!gate)
-      fence.push({ x, y: 510, node: <FenceAcross width={TILE} />, solid: foot(0, -6, TILE, 6) });
-    fence.push({ x, y: 750, node: <FenceAcross width={TILE} />, solid: foot(0, -6, TILE, 6) });
+    if (!gate) fence.push({ x, y: 510, node: <FenceAcross />, solid: foot(0, -6, TILE, 6) });
+    fence.push({ x, y: 750, node: <FenceAcross />, solid: foot(0, -6, TILE, 6) });
   }
 
   for (let y = 558; y <= 750; y += TILE)
     for (const x of [216, 552])
-      fence.push({ x, y, node: <FenceDown height={TILE} />, solid: foot(-3, -TILE, 6, TILE) });
-
-  const sunflowers: Thing[] = [0, 1, 2, 3, 4, 5].map((i) => ({
-    x: 792 + i * 34,
-    y: 566 + (i % 2) * 12,
-    node: <Flower color="#f6c445" seed={`sun-${i}`} tall />,
-  }));
-
-  const reeds: Thing[] = [
-    [1034, 770],
-    [1012, 812],
-    [1478, 716],
-    [1404, 936],
-    [1096, 906],
-    [1196, 690],
-  ].map(([x = 0, y = 0], i) => ({ x, y, node: <Reeds seed={`reeds-${i}`} /> }));
+      fence.push({ x, y, node: <FenceDown />, solid: foot(-3, -TILE, 6, TILE) });
 
   return [
     ...placed,
     ...fence,
-    ...sunflowers,
-    ...reeds,
+    ...at(
+      [
+        [792, 566],
+        [826, 578],
+        [860, 566],
+        [894, 578],
+        [928, 566],
+        [962, 578],
+      ],
+      () => ({ node: <Sunflower /> }),
+    ),
+    ...at(
+      [
+        [1034, 770],
+        [1012, 812],
+        [1478, 716],
+        [1404, 936],
+        [1096, 906],
+        [1196, 690],
+      ],
+      () => ({ node: <Reeds /> }),
+    ),
     {
       x: 408,
       y: 336,
       node: <Cottage />,
-      solid: foot(-112, -84, 224, 84),
+      solid: foot(-114, -84, 228, 84),
       lights: [
-        [-74, -52, 54],
-        [74, -52, 54],
+        [-72, -57, 20],
+        [72, -57, 20],
       ],
     },
-    { x: 1464, y: 288, node: <Windmill />, solid: foot(-42, -34, 84, 34), lights: [[0, -84, 40]] },
-    { x: 792, y: 270, node: <Well />, solid: foot(-25, -20, 50, 24) },
-    { x: 300, y: 356, node: <Mailbox />, solid: POST },
-    { x: 566, y: 352, node: <ShippingBin />, solid: foot(-23, -16, 46, 18) },
-    { x: 180, y: 650, node: <Scarecrow />, solid: POST },
-    { x: 888, y: 492, node: <Bench />, solid: foot(-28, -12, 56, 14) },
-    { x: 1150, y: 474, node: <Sign text="POND" />, solid: POST },
-    { x: 760, y: 1010, node: <Sign text="SOUTH" />, solid: POST },
-    { x: 1340, y: 566, node: <HayBale />, solid: foot(-21, -16, 42, 18) },
-    { x: 1388, y: 584, node: <HayBale />, solid: foot(-21, -16, 42, 18) },
-    { x: 1366, y: 548, node: <HayBale />, solid: foot(-21, -16, 42, 18) },
-    ...[
-      [600, 378],
-      [984, 378],
-      [1380, 378],
-      [748, 600],
-    ].map(([x = 0, y = 0]): Thing => ({
-      x,
-      y,
-      node: <Lamp />,
-      solid: POST,
-      lights: [[0, -66, 84]],
-    })),
-    tree(190, 304, "blossom", 1.05),
-    tree(646, 262, "blossom", 0.95),
-    tree(800, 716, "apple", 1),
-    tree(900, 900, "apple", 1.1),
-    tree(560, 140, "oak", 1.15),
-    tree(250, 180, "oak", 1),
-    tree(1000, 200, "oak", 1.2),
-    tree(1090, 150, "pine", 1),
-    tree(1380, 150, "pine", 1.1),
-    tree(1560, 440, "oak", 1),
-    tree(420, 920, "oak", 1.15),
-    tree(540, 1000, "pine", 1),
-    tree(1130, 1040, "oak", 1.1),
-    tree(1500, 900, "blossom", 1),
-    ...[
-      [620, 474],
-      [1044, 300],
-      [470, 830],
-      [1506, 760],
-    ].map(([x = 0, y = 0]) => ({ x, y, node: <Bush />, solid: foot(-14, -9, 28, 11) })),
-    ...[
-      [1568, 620],
-      [120, 486],
-      [900, 1060],
-    ].map(([x = 0, y = 0]) => ({ x, y, node: <Bush berries />, solid: foot(-14, -9, 28, 11) })),
-    ...[
-      [1164, 640],
-      [1330, 1010],
-      [690, 980],
-      [96, 800],
-    ].map(([x = 0, y = 0]) => ({ x, y, node: <Rock />, solid: foot(-14, -9, 28, 11) })),
-    ...[
-      [968, 560],
-      [300, 900],
-    ].map(([x = 0, y = 0]) => ({ x, y, node: <Stump />, solid: foot(-12, -9, 24, 11) })),
+    { x: 1464, y: 288, node: <Windmill />, solid: foot(-42, -34, 84, 34), lights: [[0, -90, 14]] },
+    { x: 792, y: 270, node: <Well />, solid: foot(-27, -22, 54, 26) },
+    { x: 300, y: 357, node: <Mailbox />, solid: POST },
+    { x: 567, y: 351, node: <ShippingBin />, solid: foot(-26, -18, 52, 20) },
+    { x: 180, y: 651, node: <Scarecrow />, solid: POST },
+    { x: 888, y: 492, node: <Bench />, solid: foot(-33, -12, 66, 14) },
+    { x: 1149, y: 474, node: <Sign text="POND" />, solid: POST },
+    { x: 759, y: 930, node: <Sign text="SOUTH" />, solid: POST },
+    ...at(
+      [
+        [1341, 567],
+        [1389, 585],
+        [1365, 549],
+      ],
+      () => ({ node: <HayBale />, solid: foot(-24, -16, 48, 18) }),
+    ),
+    ...at(
+      [
+        [600, 378],
+        [984, 378],
+        [1380, 378],
+        [747, 600],
+      ],
+      () => ({ node: <Lamp />, solid: POST, lights: [[0, -66, 30]] }),
+    ),
+    tree(190, 304, "blossom"),
+    tree(646, 262, "blossom"),
+    tree(800, 716, "apple"),
+    tree(900, 900, "apple"),
+    tree(560, 140, "oak"),
+    tree(250, 180, "oak"),
+    tree(1000, 200, "oak"),
+    tree(1090, 150, "pine"),
+    tree(1380, 150, "pine"),
+    tree(1560, 440, "oak"),
+    tree(420, 920, "oak"),
+    tree(540, 1000, "pine"),
+    tree(1130, 1040, "oak"),
+    tree(1500, 900, "blossom"),
+    ...at(
+      [
+        [620, 474],
+        [1044, 300],
+        [470, 830],
+        [1506, 760],
+      ],
+      () => ({ node: <Bush />, solid: LOW }),
+    ),
+    ...at(
+      [
+        [1568, 620],
+        [120, 486],
+        [900, 1060],
+      ],
+      () => ({ node: <Bush berries />, solid: LOW }),
+    ),
+    ...at(
+      [
+        [1164, 640],
+        [1330, 1010],
+        [690, 980],
+        [96, 800],
+      ],
+      () => ({ node: <Rock />, solid: LOW }),
+    ),
+    ...at(
+      [
+        [968, 560],
+        [300, 900],
+      ],
+      () => ({ node: <Stump />, solid: LOW }),
+    ),
   ];
 };
 
-const cloud = def.radialGradient(
-  { cx: 0.5, cy: 0.5, r: 0.5 },
-  <>
-    <stop offset={0} stopColor="#274060" stopOpacity={0.16} />
-    <stop offset={0.7} stopColor="#274060" stopOpacity={0.1} />
-    <stop offset={1} stopColor="#274060" stopOpacity={0} />
-  </>,
-);
+const butterfly = (color: Hex): readonly [SvgNode, SvgNode] => [
+  <Pixels
+    of={canvas(7, 5)
+      .box(0, 0, 3, 3, color)
+      .box(4, 0, 3, 3, color)
+      .dot(1, 3, color)
+      .dot(5, 3, color)
+      .box(3, 0, 1, 4, "#3a2a26")}
+    anchor={[3, 2]}
+  />,
+  <Pixels
+    of={canvas(7, 5).box(2, 0, 1, 3, color).box(4, 0, 1, 3, color).box(3, 0, 1, 4, "#3a2a26")}
+    anchor={[3, 2]}
+  />,
+];
 
 const Butterfly = ({
   around,
@@ -475,23 +602,29 @@ const Butterfly = ({
     { tolerance: { translate: 1.5 }, precision: 1 },
   ).loop(lap);
 
-  const flap = motion({ opacity: 1 })
-    .set({ opacity: 0 }, 0.12)
-    .set({ opacity: 1 }, 0.24)
-    .loop(0.24);
+  const [open, shut] = butterfly(color);
 
   return (
     <g animation={flight}>
-      <g animation={flap}>
-        <ellipse cx={-4} cy={-2} rx={4.5} ry={5.5} fill={color} />
-        <ellipse cx={4} cy={-2} rx={4.5} ry={5.5} fill={color} />
-      </g>
-      <ellipse cx={-1.5} cy={-2} rx={1.6} ry={5} fill={color} />
-      <ellipse cx={1.5} cy={-2} rx={1.6} ry={5} fill={color} />
-      <rect x={-0.8} y={-6} width={1.6} height={8} rx={0.8} fill="#3a2a26" />
+      <Flipbook
+        cells={[
+          [open, 0.12],
+          [shut, 0.12],
+        ]}
+      />
     </g>
   );
 };
+
+const CLOUD = def.symbol(
+  { style: "overflow:visible" },
+  <Pixels
+    of={canvas(180, 80)
+      .oval(90, 40, 88, 36, "rgba(39,64,96,0.1)")
+      .oval(70, 36, 50, 22, "rgba(39,64,96,0.07)")}
+    anchor={[90, 40]}
+  />,
+);
 
 const Sky = (): SvgNode => (
   <>
@@ -504,18 +637,16 @@ const Sky = (): SvgNode => (
       [0, 260, 80],
       [34, 700, 120],
       [70, 980, 80],
-    ].map(([at = 0, y = 0, lap = 80]) => (
-      <Clip at={at}>
-        <ellipse
-          cx={0}
-          cy={y}
-          rx={260}
-          ry={110}
-          fill={cloud}
-          animation={motion({ x: -320 })
-            .to({ x: WORLD.width + 320 }, span(0, lap), ease.linear)
-            .loop(lap)}
-        />
+    ].map(([start = 0, y = 0, lap = 80]) => (
+      <Clip at={start}>
+        <g transform={`translate(0 ${y})`}>
+          <use
+            href={CLOUD}
+            animation={motion({ x: -330 })
+              .to({ x: WORLD.width + 330 }, span(0, lap), ease.linear)
+              .loop(lap)}
+          />
+        </g>
       </Clip>
     ))}
   </>
@@ -534,14 +665,15 @@ export const buildWorld = (): World => {
       height: WORLD.height,
       duration: DAY,
       title: "Mossbell",
-      desc: "A valley farm: a cottage, a fenced plot, a stream that runs into a pond, and a windmill past the bridge.",
+      desc: "A valley farm in pixels: a cottage, a fenced plot, a stream that runs into a pond, and a windmill past the bridge.",
       prefix: "world-",
       reducedMotion: false,
     },
     <>
       <g data-layer="ground">
-        <Ground />
-        <Decor />
+        <rect width={WORLD.width} height={WORLD.height} fill={GRASS} />
+        <Pixels of={ground()} />
+        <Glints />
       </g>
       <g data-layer="things">
         {standing.map(({ x, y, node }) => (
@@ -585,12 +717,13 @@ export const buildWorld = (): World => {
     svg,
     width: WORLD.width,
     height: WORLD.height,
+    grid: PX,
     solids,
     soil: squares("s"),
     places: {
-      spawn: { x: 408, y: 404 },
+      spawn: { x: 408, y: 405 },
       door: { x: 408, y: 340 },
-      bin: { x: 566, y: 352 },
+      bin: { x: 567, y: 351 },
       well: { x: 792, y: 270 },
       mill: { x: 1464, y: 292 },
       dock: { x: 1040, y: 792 },

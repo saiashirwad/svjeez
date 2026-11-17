@@ -157,7 +157,7 @@ export const createHud = (host: HTMLElement, actions: HudActions): Hud => {
       const portrait = createSprite(villagerSheet(look));
 
       portrait.show("idle-down");
-      face.replaceChildren(frameOf(portrait.node, "-22 -72 44 44"));
+      face.replaceChildren(frameOf(portrait.node, "-27 -96 54 54"));
       who.textContent = name;
       lines = said;
       dialog.classList.add("shown");

@@ -42,10 +42,13 @@ export const createSprite = (sheet: Sheet): Sprite => {
   picture.setAttribute("overflow", "visible");
   node.append(picture);
 
+  const snap = (value: number): string =>
+    sheet.grid ? String(Math.round(value / sheet.grid) * sheet.grid) : value.toFixed(1);
+
   const place = (): void => {
     node.setAttribute(
       "transform",
-      `translate(${at.x.toFixed(1)} ${at.y.toFixed(1)})${flipped ? " scale(-1 1)" : ""}`,
+      `translate(${snap(at.x)} ${snap(at.y)})${flipped ? " scale(-1 1)" : ""}`,
     );
   };
 

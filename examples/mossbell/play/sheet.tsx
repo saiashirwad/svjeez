@@ -11,6 +11,8 @@ export interface Sheet {
   readonly height: number;
   /** The point of the picture that sits on the sprite's position: the feet of a villager, the root of a crop. */
   readonly anchor: Point;
+  /** The side of one art pixel, for pixel art: a sprite of this sheet only ever stands on whole pixels. */
+  readonly grid?: number;
 }
 
 export interface SheetOptions {
@@ -23,18 +25,21 @@ export interface SheetOptions {
   readonly duration: number;
   /** False plays once and holds: an effect. Default true. */
   readonly loop?: boolean;
+  /** The side of one art pixel, when the pictures are pixel art. */
+  readonly grid?: number;
 }
 
 export type States = readonly (readonly [name: string, picture: Child])[];
 
 /** Render states into one sheet. A sprite shows the first state until told otherwise. */
 export const sheet = (
-  { prefix, width, height, anchor, duration, loop }: SheetOptions,
+  { prefix, width, height, anchor, duration, loop, grid }: SheetOptions,
   states: States,
 ): Sheet => ({
   width,
   height,
   anchor,
+  grid,
   svg: render(
     { width, height, duration, prefix, loop, title: prefix, reducedMotion: false },
     states.map(([name, picture]) => <g data-state={name}>{picture}</g>),

@@ -12,6 +12,7 @@ import { Chicken, CHICKEN } from "../art/chicken";
 import type { Hex } from "../art/color";
 import { Crop, CROP, CropIcon, type CropKind, type Growth } from "../art/crops";
 import { Burst, BURST, FLOAT, Floater, Heart, HEART } from "../art/effects";
+import { PX } from "../art/pixel";
 import { sheet, type Sheet } from "../play/sheet";
 
 let made = 0;
@@ -31,6 +32,7 @@ export const villagerSheet = (look: Look): Sheet =>
       height: CHARACTER.height,
       anchor: CHARACTER.feet,
       duration: CHARACTER_LOOP,
+      grid: PX,
     },
     GAITS.flatMap((gait) =>
       FACINGS.map(
@@ -48,13 +50,21 @@ export const chickenSheet = (): Sheet =>
       height: CHICKEN.height,
       anchor: CHICKEN.feet,
       duration: 6,
+      grid: PX,
     },
     GAITS.map((gait) => [gait, <Chicken gait={gait} />] as const),
   );
 
 export const cropSheet = (kind: CropKind, growth: Growth): Sheet =>
   sheet(
-    { prefix: unique("c"), width: CROP.width, height: CROP.height, anchor: CROP.root, duration: 6 },
+    {
+      prefix: unique("c"),
+      width: CROP.width,
+      height: CROP.height,
+      anchor: CROP.root,
+      duration: 6,
+      grid: PX,
+    },
     [["crop", <Crop kind={kind} growth={growth} />]],
   );
 
@@ -79,6 +89,7 @@ const once = (seconds: number, picture: Child): Effect => ({
       anchor: { x: 0, y: 0 },
       duration: seconds,
       loop: false,
+      grid: PX,
     },
     [["effect", picture]],
   ),

@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
-import { ease, enter, Once, Pivot, span, wiggle, type SvgNode } from "svjeez";
-import type { Hex } from "./color";
+import { ease, motion, Once, span, type SvgNode } from "svjeez";
+import { canvas, Pixels, PX, type Canvas } from "./pixel";
 
 export type CropKind = "turnip" | "carrot" | "pumpkin";
 
@@ -20,79 +20,79 @@ export const CROPS = {
   };
 };
 
+const GRID = { width: 18, height: 20, root: [9, 16] } as const;
+
 /** The box a crop is drawn in, and the point where it meets the soil. */
-export const CROP = { width: 48, height: 60, root: { x: 24, y: 48 } } as const;
+export const CROP = {
+  width: GRID.width * PX,
+  height: GRID.height * PX,
+  root: { x: GRID.root[0] * PX, y: GRID.root[1] * PX },
+} as const;
 
-const Seeds = (): SvgNode => (
-  <>
-    {[-10, 0, 10].map((x) => (
-      <>
-        <ellipse cx={x} cy={-2} rx={5.5} ry={3} fill="#a8774f" />
-        <ellipse cx={x} cy={-3.2} rx={1.8} ry={1.2} fill="#f0d9a8" />
-      </>
-    ))}
-  </>
-);
+const LEAF = "#5fb85a";
+const LEAF_LIT = "#8fd66a";
+const RIM = "#2f4a2a";
 
-const Sprout = (): SvgNode => (
-  <>
-    {[-10, 0, 10].map((x) => (
-      <path
-        d={`M${x} 0V-7M${x} -7Q${x - 6} -12 ${x - 7} -6Q${x - 3} -5 ${x} -7Q${x + 6} -12 ${x + 7} -6Q${x + 3} -5 ${x} -7`}
-        fill="#7ac74f"
-        stroke="#4f9a3a"
-        strokeWidth={1.4}
-        strokeLinejoin="round"
-      />
-    ))}
-  </>
-);
+/** A tuft of leaves that fans out from `x`, `tall` pixels high, standing on row `y`. */
+const tuft = (c: Canvas, x: number, y: number, tall: number): Canvas => {
+  c.box(x, y - tall, 2, tall, LEAF).dot(x, y - tall, LEAF_LIT);
 
-const Leaves = ({ fill, tall }: { readonly fill: Hex; readonly tall: number }): SvgNode => (
-  <>
-    {[-13, -6, 0, 6, 13].map((x, i) => (
-      <path
-        d={`M0 0Q${x * 0.6} ${-tall * 0.6} ${x} ${-tall + Math.abs(x) * 0.5}Q${x * 0.2} ${-tall * 0.5} 0 0`}
-        fill={i % 2 === 0 ? fill : "#4f9a3a"}
-      />
-    ))}
-  </>
-);
+  for (let i = 1; i <= Math.min(3, tall - 1); i++)
+    c.box(x - i, y - tall + i, 1, 2, i === 1 ? LEAF_LIT : LEAF).box(
+      x + 1 + i,
+      y - tall + i,
+      1,
+      2,
+      LEAF,
+    );
 
-const Ripe = ({ kind }: { readonly kind: CropKind }): SvgNode =>
-  kind === "turnip" ? (
-    <>
-      <g transform="translate(0 -9)">
-        <Leaves fill="#7ac74f" tall={20} />
-      </g>
-      <path d="M-10 -8C-10 -15 10 -15 10 -8C10 -1 4 3 0 5C-4 3 -10 -1 -10 -8Z" fill="#f6efe6" />
-      <path d="M-10 -8C-10 -15 10 -15 10 -8C4 -6 -4 -6 -10 -8Z" fill="#c77dba" />
-    </>
-  ) : kind === "carrot" ? (
-    <>
-      <g transform="translate(0 -8)">
-        <Leaves fill="#5fb85a" tall={24} />
-      </g>
-      <path d="M-7.5 -9C-7.5 -13 7.5 -13 7.5 -9L1.5 4C0.8 5.5 -0.8 5.5 -1.5 4Z" fill="#f08a3c" />
-      <path d="M-4 -6H1M-1 -1H3" stroke="#d96f24" strokeWidth={1.4} strokeLinecap="round" />
-    </>
-  ) : (
-    <>
-      <ellipse cx={0} cy={-9} rx={17} ry={12} fill="#f08a3c" />
-      <ellipse cx={0} cy={-9} rx={9} ry={12} fill="#f6a04e" />
-      <ellipse cx={0} cy={-9} rx={3} ry={12} fill="#f08a3c" />
-      <path
-        d="M0 -20Q-1 -26 4 -27"
-        fill="none"
-        stroke="#4f9a3a"
-        strokeWidth={3}
-        strokeLinecap="round"
-      />
-      <path d="M2 -22Q10 -27 13 -21Q8 -19 2 -22" fill="#5fb85a" />
-    </>
-  );
+  return c;
+};
 
-/** A crop at one stage: it pops out of the soil once, then sways for as long as it stands. */
+const drawn = (kind: CropKind, growth: Growth): Canvas => {
+  const c = canvas(GRID.width, GRID.height).from(1, 1);
+
+  if (growth === 0) {
+    for (const x of [2, 7, 12]) c.box(x, 13, 3, 2, "#a8774f").dot(x + 1, 13, "#f0d9a8");
+
+    return c;
+  }
+
+  if (growth === 1) return tuft(c, 7, 15, 3).rim(RIM);
+
+  if (growth === 2) return tuft(c, 7, 15, kind === "carrot" ? 8 : 6).rim(RIM);
+
+  if (kind === "turnip")
+    return tuft(c, 7, 10, 6)
+      .oval(8, 12, 4.5, 3.5, "#f6efe6")
+      .box(4, 9, 8, 2, "#c77dba")
+      .box(5, 9, 3, 1, "#dba3d1")
+      .box(7, 15, 2, 1, "#f6efe6")
+      .rim("#4a3340");
+
+  if (kind === "carrot")
+    return tuft(c, 7, 9, 8)
+      .box(5, 9, 6, 3, "#f08a3c")
+      .box(6, 12, 4, 2, "#f08a3c")
+      .box(7, 14, 2, 2, "#e0762a")
+      .box(5, 9, 2, 1, "#f6a65e")
+      .dot(8, 11, "#d96f24")
+      .dot(7, 13, "#d96f24")
+      .rim("#4a3328");
+
+  return c
+    .oval(8, 11, 7.5, 5, "#f08a3c")
+    .oval(8, 11, 4, 5, "#f6a04e")
+    .box(7, 7, 2, 9, "#f08a3c")
+    .box(1, 12, 2, 2, "#d96f24")
+    .box(13, 12, 2, 2, "#d96f24")
+    .box(5, 7, 2, 1, "#fbc07a")
+    .box(7, 3, 2, 3, "#4f9a3a")
+    .box(9, 3, 3, 1, LEAF)
+    .rim("#4a3328");
+};
+
+/** A crop at one stage. It hops out of the soil once, then stands. */
 export const Crop = ({
   kind,
   growth,
@@ -100,41 +100,18 @@ export const Crop = ({
   readonly kind: CropKind;
   readonly growth: Growth;
 }): SvgNode => (
-  <g transform={`translate(${CROP.root.x} ${CROP.root.y})`}>
-    <Pivot
-      origin={{ x: 0, y: 0 }}
-      animation={
-        growth > 0
-          ? wiggle({ rotate: 3 }, { seed: `${kind}-${growth}`, rate: 1, period: 6 })
-          : undefined
-      }
+  <Once>
+    <g
+      animation={motion({ y: PX * 2 })
+        .to({ y: -PX }, span(0, 0.12), ease.steps(3))
+        .to({ y: 0 }, span(0.12, 0.1), ease.steps(1))}
     >
-      <Once>
-        <Pivot
-          origin={{ x: 0, y: 0 }}
-          animation={enter(span(0, 0.45), { scale: 0.2, opacity: 0 }, ease.pop)}
-        >
-          {growth === 0 ? (
-            <Seeds />
-          ) : growth === 1 ? (
-            <Sprout />
-          ) : growth === 2 ? (
-            <Leaves
-              fill={kind === "pumpkin" ? "#5fb85a" : "#7ac74f"}
-              tall={kind === "carrot" ? 22 : 17}
-            />
-          ) : (
-            <Ripe kind={kind} />
-          )}
-        </Pivot>
-      </Once>
-    </Pivot>
-  </g>
+      <Pixels of={drawn(kind, growth)} />
+    </g>
+  </Once>
 );
 
-/** A crop as it looks in the pack: ripe, and holding still. */
+/** A crop as it looks in the pack: ripe, in a 16 pixel square. */
 export const CropIcon = ({ kind }: { readonly kind: CropKind }): SvgNode => (
-  <g transform="translate(24 34)">
-    <Ripe kind={kind} />
-  </g>
+  <Pixels of={drawn(kind, 3)} anchor={[1, 2]} />
 );
