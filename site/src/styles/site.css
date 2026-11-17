@@ -1056,18 +1056,10 @@ pre.side {
     grid-column: 1 / -1;
   }
 }
-/* "Also in the box": four small tiles, two by two on phones and in a row from 56rem. */
 .wall.small {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-@media (min-width: 56rem) {
-  .wall.small {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-/* The no-JSX scene is a phone cut, taller than the rest, so these tiles keep their captions under their own scene
-   rather than sharing a baseline. */
-.wall.small .tile {
+.tile {
   grid-row: auto;
   grid-template-rows: none;
   align-content: start;

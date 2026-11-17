@@ -15,7 +15,6 @@ import icons from "@examples/site/icons.tsx";
 import ink from "@examples/site/ink.tsx";
 import math from "@examples/site/math.tsx";
 import mathFourier from "@examples/site/math-fourier.tsx";
-import nojsxTall from "@examples/site/nojsx-tall.tsx";
 import pipeline from "@examples/site/pipeline.tsx";
 import pipelineTall from "@examples/site/pipeline-tall.tsx";
 import recording from "@examples/site/recording.tsx";
@@ -147,15 +146,6 @@ const more = [
     from: "@svjeez/fonts",
     href: pkg("fonts"),
     alt: "The words Aa Type draw on as outlines in an embedded display font, with real italic text below.",
-  },
-  {
-    name: "no-jsx",
-    scene: live(nojsxTall),
-    cost: 30,
-    label: "No JSX",
-    from: "svjeez",
-    href: reference("without-jsx"),
-    alt: "A scene written with jsx() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it.",
   },
 ] as const;
 
