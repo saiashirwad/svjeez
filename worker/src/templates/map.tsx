@@ -53,7 +53,7 @@ export const params = {
   ),
   markers: list(
     {
-      label: text("", { maxLength: 24, label: "The place's name, at most 24 characters." }),
+      label: text("", { maxLength: 40, label: "The place's name, at most 40 characters." }),
       lat: number(0, { min: -90, max: 90, label: "Latitude in degrees, north positive." }),
       lon: number(0, { min: -180, max: 180, label: "Longitude in degrees, east positive." }),
     },
@@ -67,8 +67,8 @@ export const params = {
   ),
   routes: list(
     {
-      from: text("", { maxLength: 24, label: "A marker's label, exactly as written in markers." }),
-      to: text("", { maxLength: 24, label: "Another marker's label." }),
+      from: text("", { maxLength: 40, label: "A marker's label, exactly as written in markers." }),
+      to: text("", { maxLength: 40, label: "Another marker's label." }),
     },
     [
       { from: "London", to: "New York" },
@@ -85,7 +85,7 @@ const AREA = rect(MARGIN, 104, WIDTH - 2 * MARGIN, HEIGHT - 104 - 56);
 
 /** How much room is left around what the view fits, as a share of the area. */
 const PAD = 0.1;
-const LABEL = { size: 13, char: 7.4, height: 16 };
+const LABEL = { size: 13, height: 16 };
 
 const base = project(atlas, { frame: AREA });
 const NAMES = base.parts.map((part) => String(part.properties?.name ?? part.id));
@@ -147,7 +147,7 @@ const placeLabels = (points: readonly { x: number; y: number; label: string }[])
   const placed: Rect[] = points.map(({ x, y }) => rect(x - 4, y - 4, 8, 8));
 
   return points.map(({ x, y, label }) => {
-    const w = label.length * LABEL.char;
+    const w = geist.face(600).measure(label, LABEL.size);
 
     const options = [
       { box: rect(x + 8, y - 11, w, LABEL.height), at: [x + 8, y + 4], anchor: "start" },

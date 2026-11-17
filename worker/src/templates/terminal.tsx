@@ -3,7 +3,7 @@ import { rect, type Rect } from "svjeez/geometry";
 import { choice, defaults, list, text, type Values } from "svjeez/params";
 
 import { HEIGHT, MARGIN, WIDTH, css, mono, theme } from "../../../examples/gallery-style";
-import { block } from "../block";
+import { block, charsIn, fitSize } from "../block";
 
 export const params = {
   title: text("~/app", {
@@ -17,8 +17,9 @@ export const params = {
         label: "command for something typed at the prompt, output for a line it prints.",
       }),
       text: text("", {
-        maxLength: 72,
-        label: "The line, without the prompt sign. At most 72 characters.",
+        maxLength: 110,
+        label:
+          "The line, without the prompt sign. At most 110 characters; up to about 70 show at full size, longer ones set the session smaller.",
       }),
     },
     [
@@ -39,8 +40,10 @@ export const params = {
   ),
 };
 
-/** One line's height in px: 18px type at 1.7. */
-const LINE = 30.6;
+/** The type size, its readable floor, and the line height as a multiple of it. */
+const SIZE = 18;
+const SMALLEST = 12;
+const LEADING = 1.7;
 const BAR = appWindow(rect(0, 0, 100, 100), { theme }).body.y;
 
 type Line = Values<typeof params>["lines"][number];
@@ -65,11 +68,22 @@ const session = (lines: readonly Line[]): TerminalCommand[] => {
 
 /** The session typed into a window that fills `box`, growing taller when it has more lines. */
 export const terminalBlock = (p: Values<typeof params>, box: Rect): Drawn => {
+  const room = box.w - 56;
+  const shown = p.lines.map((line) => (line.kind === "command" ? `❯ ${line.text}` : line.text));
+  const fontSize = fitSize(mono, shown, SIZE, room, SMALLEST);
+
+  if (fontSize === undefined)
+    throw new Error(
+      `a line is too long for the window; about ${charsIn(mono, room, SMALLEST)} characters fit. Shorten the longest line, or break it in two.`,
+    );
+
+  const line = fontSize * LEADING;
+
   const frame = rect(
     box.x,
     box.y,
     box.w,
-    Math.max(box.h, Math.ceil(BAR + 32 + p.lines.length * LINE)),
+    Math.max(box.h, Math.ceil(BAR + 32 + p.lines.length * line)),
   );
 
   const shell = appWindow(frame, { theme, title: p.title, dots: "traffic" });
@@ -78,8 +92,8 @@ export const terminalBlock = (p: Values<typeof params>, box: Rect): Drawn => {
     theme,
     x: shell.body.x + 28,
     y: shell.body.y + 16,
-    fontSize: 18,
-    lineHeight: LINE / 18,
+    fontSize,
+    lineHeight: LEADING,
     font: mono,
     cps: Math.max(24, p.lines.reduce((sum, line) => sum + line.text.length, 0) / 8),
   });

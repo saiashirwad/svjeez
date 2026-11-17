@@ -19,8 +19,8 @@ export const params = {
         label: "A short id that messages use. At most 24 characters.",
       }),
       label: text("", {
-        maxLength: 16,
-        label: "The name shown in the box. At most 16 characters.",
+        maxLength: 24,
+        label: "The name shown in the box. At most 24 characters.",
       }),
       role: choice("task", ["task", "input", "tool", "store"], {
         label:
@@ -45,7 +45,7 @@ export const params = {
     {
       from: text("", { maxLength: 24, label: "The sender's id." }),
       to: text("", { maxLength: 24, label: "The receiver's id." }),
-      text: text("", { maxLength: 24, label: "The message, at most 24 characters." }),
+      text: text("", { maxLength: 40, label: "The message, at most 40 characters." }),
       reply: choice("no", ["no", "yes"], { label: "yes for a response, which draws dashed." }),
     },
     [

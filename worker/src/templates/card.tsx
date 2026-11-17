@@ -13,22 +13,24 @@ import {
   rise,
   WIDTH,
 } from "../../../examples/gallery-style";
-import { block } from "../block";
+import { block, charsIn, fitSize } from "../block";
 
 export const params = {
   tag: text("v0.8.0", {
-    maxLength: 16,
+    maxLength: 40,
     label:
-      "A short pill above the title: a version, a date or a category such as NEW. At most 16 characters.",
+      "A short pill above the title: a version, a date or a category such as NEW. At most 40 characters; empty for none.",
   }),
   title: text("Every scene is a template", {
-    maxLength: 32,
-    label: "The card's headline. At most 32 characters.",
+    maxLength: 60,
+    label:
+      "The card's headline. At most 60 characters; up to about 30 show at full size, longer ones are set smaller.",
   }),
   bullets: list(
     text("", {
-      maxLength: 64,
-      label: "One point, a short sentence without a trailing period. At most 64 characters.",
+      maxLength: 110,
+      label:
+        "One point, a short sentence without a trailing period. At most 110 characters; up to about 60 show at full size, longer ones set all the points smaller.",
     }),
     [
       "Text and list params, checked against the schema",
@@ -53,7 +55,27 @@ export const cardBlock = (p: Values<typeof params>, box: Rect): Drawn => {
   const rows = stagger(heading.next(0.5, 0.1), p.bullets.length, 0.18);
   const tagWidth = 28 + p.tag.length * 13;
   const row = Math.min(54, (box.h - FIRST - PAD) / Math.max(1, p.bullets.length - 1));
-  const size = Math.min(24, Math.floor(row * 0.6));
+  const width = box.w - 2 * PAD;
+  const titleSize = fitSize(geist.face(600), [p.title], 44, width, 22);
+
+  const size = fitSize(
+    geist.face(400),
+    p.bullets,
+    Math.min(24, Math.floor(row * 0.6)),
+    width - 26,
+    14,
+  );
+
+  if (titleSize === undefined)
+    throw new Error(
+      `title "${p.title}" is too long to fit across the card; about ${charsIn(geist.face(600), width, 22)} characters fit. Shorten it.`,
+    );
+
+  if (size === undefined)
+    throw new Error(
+      `a bullet is too long to fit across the card; about ${charsIn(geist.face(400), width - 26, 14)} characters fit. Shorten the longest, or split it in two.`,
+    );
+
   const height = FIRST + (p.bullets.length - 1) * row + PAD;
   const CARD = { x: box.x, y: box.y + (box.h - height) / 2, width: box.w, height };
   const top = CARD.y + FIRST;
@@ -95,7 +117,7 @@ export const cardBlock = (p: Values<typeof params>, box: Rect): Drawn => {
         x={CARD.x + PAD}
         y={CARD.y + PAD + 112}
         fontFamily={geist}
-        fontSize={44}
+        fontSize={titleSize}
         fontWeight={600}
         fill={color.ink}
         animation={rise(heading.at, heading.over)}

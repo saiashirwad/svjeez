@@ -23,14 +23,22 @@ export const params = {
 
 const M = 40;
 
-/** The diagram laid out at its own size with its top-left at `box`'s, played in. A state diagram rises in at once. */
-export const diagramBlock = (p: Values<typeof params>, box: Rect): Drawn & { kind: string } => {
+/**
+ * The diagram laid out at its own size with its top-left at `box`'s, played in. A state diagram rises in at once.
+ * `direction` overrides the one a flowchart or state diagram's text names.
+ */
+export const diagramBlock = (
+  p: Values<typeof params>,
+  box: Rect,
+  direction?: "TB" | "LR",
+): Drawn & { kind: string } => {
   const chart = mermaid(p.source, {
     theme,
     x: box.x,
     y: box.y,
     font: mono,
     play: { at: 0.4, step: 0.35 },
+    ...(direction && { direction }),
   });
 
   const drawn =

@@ -85,7 +85,10 @@ export const fill = async <T>(
         temperature: 0.2,
         maxOutputTokens: 4000,
         abortSignal: AbortSignal.timeout(60_000),
-        providerOptions: { deepseek: { thinking: { type: "disabled" } } },
+        // The first answer is quick. An answer that did not fit is worth thinking about.
+        providerOptions: {
+          deepseek: { thinking: { type: attempt === 1 ? "disabled" : "enabled" } },
+        },
       });
 
       return output;

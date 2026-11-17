@@ -16,7 +16,7 @@ import {
   rise,
   theme,
 } from "../../../examples/gallery-style";
-import { block } from "../block";
+import { block, charsIn, fitSize } from "../block";
 
 const VALUE = { min: -1_000_000_000, max: 1_000_000_000 };
 
@@ -47,8 +47,9 @@ export const params = {
   data: list(
     {
       label: text("", {
-        maxLength: 6,
-        label: "The category or period, at most 6 characters, such as Mar or Q3 24.",
+        maxLength: 20,
+        label:
+          "The category or period, such as Mar, Q3 24 or JavaScript. At most 20 characters, and shorter with many points: with 8 points about 13 characters fit under each, with 16 about 6.",
       }),
       value: number(0, { ...VALUE, label: "The first series' value." }),
       other: number(0, { ...VALUE, label: "The second series' value; 0 when there is none." }),
@@ -68,6 +69,10 @@ export const params = {
 };
 
 const D = 9;
+
+/** The readable floor for the axis labels, and the room kept between neighbors. */
+const SMALLEST = 11;
+const LABEL_GAP = 8;
 
 const Key = ({ x, y, fill, name }: { x: number; y: number; fill: Color; name: string }) => (
   <g>
@@ -93,12 +98,24 @@ export const chartBlock = (p: ChartValues, box: Rect): Drawn => {
   const grow = span(0.9, 1.6);
   const [one, two] = color.series;
 
+  const frame = rect(box.x + 72, box.y + 34, box.w - 88, box.h - 34);
+  const room = frame.w / labels.length - LABEL_GAP;
+  const fontSize = fitSize(mono, labels, 14, room, SMALLEST);
+
+  if (fontSize === undefined) {
+    const longest = labels.reduce((a, b) => (b.length > a.length ? b : a));
+
+    throw new Error(
+      `data labels must fit under their points: with ${labels.length} points about ${charsIn(mono, room, SMALLEST)} characters fit, and "${longest}" has ${longest.length}. Use shorter labels (abbreviate, such as Mar or JS) or fewer points.`,
+    );
+  }
+
   const plot = chart({
     theme,
     font: mono,
-    fontSize: 14,
+    fontSize,
     grid: true,
-    frame: rect(box.x + 72, box.y + 34, box.w - 88, box.h - 34),
+    frame,
     x: { kind: "band", domain: labels },
     y: { ticks: 4 },
     data: [...first, ...second],

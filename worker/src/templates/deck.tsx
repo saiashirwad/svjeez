@@ -6,13 +6,14 @@ import {
   HEIGHT,
   MARGIN,
   WIDTH,
-  Title,
+  TITLE,
   color,
   css,
   geist,
+  motions,
   rise,
 } from "../../../examples/gallery-style";
-import { block } from "../block";
+import { block, fitSize } from "../block";
 import { cardBlock, params as cardParams } from "./card";
 import { chartBlock, params as chartParams } from "./chart";
 import { codeBlock, LANGUAGES, params as codeParams } from "./code";
@@ -34,20 +35,20 @@ export const params = {
       }),
       heading: text("", {
         maxLength: 60,
-        label: "The slide's heading. At most 60 characters.",
+        label: "The slide's heading. At most 60 characters; up to about 40 show at full size.",
       }),
       body: text("", {
         maxLength: 3000,
         label: [
           "The slide's content as text, read by kind. At most 3000 characters.",
           "title: one line under the heading, or empty.",
-          "bullets: 1 to 6 points, one per line, each at most 64 characters.",
+          "bullets: 1 to 6 points, one per line, each at most 110 characters (up to about 60 show at full size).",
           "code: the source, with real newlines; at most about 15 lines of 60 characters fit on a slide.",
           "diagram: Mermaid source, a flowchart TD or LR, a sequenceDiagram or a stateDiagram-v2, about 10 nodes at most.",
-          'chart: one "label: value" per line, such as "Q1: 42", 2 to 16 lines, each label at most 6 characters; the first line may be just bar, line or area (bar when left out).',
+          'chart: one "label: value" per line, such as "Q1: 42" or "JavaScript: 3", 2 to 16 lines; each label at most 20 characters, and shorter with many points (about 13 with 8 points, 6 with 16); the first line may be just bar, line or area (bar when left out).',
           "math: one TeX step per line, without dollar signs, 1 to 6 steps.",
           'plot: a first line "kind; expression" or, for parametric, "parametric; x(t); y(t)", where kind is function (in x), parametric (in t), polar (in theta) or implicit (F(x, y) = 0), in plain math syntax such as sin(x)/x; an optional second line is TeX to typeset above the graph.',
-          'terminal: one line per row; a command starts with "$ ", output does not. The first line is a command. At most 10 lines.',
+          'terminal: one line per row; a command starts with "$ ", output does not. The first line is a command. At most 10 lines of up to about 70 characters.',
         ].join(" "),
       }),
       language: choice("typescript", LANGUAGES, {
@@ -139,51 +140,68 @@ const terminalOf = (body: string): Json => ({
   ),
 });
 
-/** The slide's block, laid out in `box` at its own size. */
-const blockOf = ({ kind, heading, body, language }: Slide, box: Rect): Drawn => {
+/** The title slide: the heading large and centered with a line under it, both set smaller when they are long. */
+const titleOf = (heading: string, subtitle: string, box: Rect): Drawn => {
+  const big = fitSize(geist.face(600), [heading], 52, box.w, 28);
+  const small = fitSize(geist.face(400), [subtitle], 24, box.w, 16);
+
+  if (big === undefined || small === undefined)
+    throw new Error(
+      `the ${big === undefined ? "heading" : "line under it"} is too long to fit; keep the heading to about 45 characters and the line to about 90.`,
+    );
+
+  return block(
+    <g animation={rise(0.2)}>
+      <text
+        x={WIDTH / 2}
+        y={HEIGHT / 2 - 10}
+        textAnchor="middle"
+        fontFamily={geist}
+        fontSize={big}
+        fontWeight={600}
+        fill={color.ink}
+      >
+        {heading}
+      </text>
+      <text
+        x={WIDTH / 2}
+        y={HEIGHT / 2 + 40}
+        textAnchor="middle"
+        fontFamily={geist}
+        fontSize={small}
+        fill={color.dim}
+      >
+        {subtitle}
+      </text>
+    </g>,
+    span(0.2, 0.5),
+    box,
+  );
+};
+
+/** The slide's block laid out in `box` at its own size: one way, or for a diagram both ways, to pick the larger. */
+const blocksOf = ({ kind, heading, body, language }: Slide, box: Rect): Drawn[] => {
   switch (kind) {
     case "title":
-      return block(
-        <g animation={rise(0.2)}>
-          <text
-            x={WIDTH / 2}
-            y={HEIGHT / 2 - 10}
-            textAnchor="middle"
-            fontFamily={geist}
-            fontSize={52}
-            fontWeight={600}
-            fill={color.ink}
-          >
-            {heading}
-          </text>
-          <text
-            x={WIDTH / 2}
-            y={HEIGHT / 2 + 40}
-            textAnchor="middle"
-            fontFamily={geist}
-            fontSize={24}
-            fill={color.dim}
-          >
-            {body.trim()}
-          </text>
-        </g>,
-        span(0.2, 0.5),
-        box,
-      );
+      return [titleOf(heading, body.trim(), box)];
     case "bullets":
-      return cardBlock(parse(cardParams, { tag: "", title: heading, bullets: lines(body) }), box);
+      return [cardBlock(parse(cardParams, { tag: "", title: heading, bullets: lines(body) }), box)];
     case "code":
-      return codeBlock(parse(codeParams, { title: "", language, source: body }), box);
-    case "diagram":
-      return diagramBlock(parse(diagramParams, { source: body }), box);
+      return [codeBlock(parse(codeParams, { title: "", language, source: body }), box)];
+    case "diagram": {
+      const values = parse(diagramParams, { source: body });
+
+      return [diagramBlock(values, box, "TB"), diagramBlock(values, box, "LR")];
+    }
+
     case "chart":
-      return chartBlock(parse(chartParams, chartOf(body)), box);
+      return [chartBlock(parse(chartParams, chartOf(body)), box)];
     case "math":
-      return mathBlock(parse(mathParams, { title: heading, steps: lines(body) }).steps, box);
+      return [mathBlock(parse(mathParams, { title: heading, steps: lines(body) }).steps, box)];
     case "plot":
-      return plotBlock(parse(plotParams, plotOf(heading, body)), box);
+      return [plotBlock(parse(plotParams, plotOf(heading, body)), box)];
     case "terminal":
-      return terminalBlock(parse(terminalParams, terminalOf(body)), box);
+      return [terminalBlock(parse(terminalParams, terminalOf(body)), box)];
   }
 };
 
@@ -202,18 +220,22 @@ const hint: Record<Kind, string> = {
 const slideOf = (slide: Slide, n: number) => {
   const fills = slide.kind === "title" || slide.kind === "bullets";
   const box = fills ? FULL : BODY;
-  let drawn: Drawn;
+  let candidates: Drawn[];
 
   try {
-    drawn = blockOf(slide, box);
+    candidates = blocksOf(slide, box);
   } catch (error) {
     throw new Error(
       `Slide ${n} (${slide.kind}): ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
+  const scaleOf = ({ bounds }: Drawn) =>
+    Math.min(slide.kind === "diagram" ? 1.5 : 1, box.w / bounds.w, box.h / bounds.h);
+
+  const drawn = candidates.reduce((a, b) => (scaleOf(b) > scaleOf(a) ? b : a));
   const { bounds } = drawn;
-  const scale = Math.min(slide.kind === "diagram" ? 1.5 : 1, box.w / bounds.w, box.h / bounds.h);
+  const scale = scaleOf(drawn);
 
   if (scale < SMALLEST)
     throw new Error(
@@ -228,18 +250,39 @@ const slideOf = (slide: Slide, n: number) => {
     duration,
     node: (
       <g animation={show(span(0, duration), { fade: FADE })}>
-        {!fills && <Title title={slide.heading} />}
+        {!fills && <Heading text={slide.heading} n={n} />}
         <g transform={`translate(${x} ${y}) scale(${scale})`}>{drawn.node}</g>
       </g>
     ),
   };
 };
 
+/** The slide's heading in the place and style of the gallery's titles, set smaller when it is long. */
+const Heading = ({ text: heading, n }: { text: string; n: number }) => {
+  const size = fitSize(geist.face(TITLE.weight), [heading], TITLE.size, WIDTH - 2 * MARGIN, 18);
+
+  if (size === undefined)
+    throw new Error(`Slide ${n}'s heading is too long to fit; keep it to about 60 characters.`);
+
+  return (
+    <g animation={rise(motions.lead)} fontFamily={geist}>
+      <text x={TITLE.x} y={TITLE.y} fontSize={size} fontWeight={TITLE.weight} fill={color.ink}>
+        {heading}
+      </text>
+    </g>
+  );
+};
+
 const DOT = { gap: 16, r: 4, y: HEIGHT - 28 };
 
 export default function build(p: Values<typeof params> = defaults(params)): string {
   const slides = p.slides.map((slide, i) => slideOf(slide, i + 1));
-  const starts = slides.map((_, i) => slides.slice(0, i).reduce((sum, s) => sum + s.duration, 0));
+
+  // Each slide starts as the one before fades out, so they cross-fade.
+  const starts = slides.map((_, i) =>
+    slides.slice(0, i).reduce((sum, s) => sum + s.duration - FADE, 0),
+  );
+
   const D = starts.at(-1)! + slides.at(-1)!.duration;
   const dot = (i: number) => WIDTH / 2 + (i - (slides.length - 1) / 2) * DOT.gap;
 

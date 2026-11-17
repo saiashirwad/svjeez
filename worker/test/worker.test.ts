@@ -218,6 +218,38 @@ describe("in workerd", () => {
     );
   });
 
+  test("a chart with a few long labels renders them under their bars", async () => {
+    const data = ["JavaScript", "Rust", "C++"].map((label, i) => ({
+      label,
+      value: i + 1,
+      other: 0,
+    }));
+
+    const scene = await load("chart");
+    const json = { kind: "bar", compare: "", data };
+    const response = await get(`/chart.svg?params=${encodeURIComponent(JSON.stringify(json))}`);
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe(draw(scene, json));
+  });
+
+  test("a chart whose labels cannot fit says how many characters fit for that many points", async () => {
+    const data = Array.from({ length: 16 }, (_, i) => ({
+      label: `Category ${i + 10}`,
+      value: i,
+      other: 0,
+    }));
+
+    const response = await get(
+      `/chart.svg?params=${encodeURIComponent(JSON.stringify({ compare: "", data }))}`,
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.text()).toContain(
+      'data labels must fit under their points: with 16 points about 6 characters fit, and "Category 10" has 11.',
+    );
+  });
+
   test("a malformed deck slide is a 400 that names the slide and the format", async () => {
     const slides = [
       { kind: "title", heading: "Bad", body: "", language: "typescript" },
@@ -271,7 +303,7 @@ describe("in workerd", () => {
 
   test("a bad value is a 400 with parse's message", async () => {
     const { params } = await load("card");
-    const tag = "9".repeat(20);
+    const tag = "9".repeat(50);
     const response = await get(`/card.svg?tag=${tag}`);
 
     expect(response.status).toBe(400);
@@ -297,7 +329,7 @@ describe("in workerd", () => {
     const rest = { title: "A major release", bullets: ["Faster"] };
 
     answers.push(
-      JSON.stringify({ tag: "far too long a tag here", ...rest }),
+      JSON.stringify({ tag: "a tag far too long to fit in the pill above it", ...rest }),
       JSON.stringify({ tag: "v2.0.0", ...rest }),
     );
 
@@ -328,7 +360,12 @@ describe("in workerd", () => {
 
   test("?prompt= is a 502 that tells the person what happened when every answer is bad", async () => {
     const { params } = await load("card");
-    const answer = { tag: "far too long a tag here", title: "Again", bullets: ["One"] };
+
+    const answer = {
+      tag: "a tag far too long to fit in the pill above it",
+      title: "Again",
+      bullets: ["One"],
+    };
 
     answers.push(...Array.from({ length: TRIES }, () => JSON.stringify(answer)));
     const response = await keyed.dispatchFetch("http://localhost/card.svg?prompt=again");
