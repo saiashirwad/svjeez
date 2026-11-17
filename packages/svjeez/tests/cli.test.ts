@@ -43,7 +43,8 @@ test("svjeez video names the package to install when @svjeez/video is missing", 
   writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
 
   const result = Bun.spawnSync(
-    [process.execPath, join(import.meta.dir, "../src/cli.ts"), "video", file],
+    // --no-install: Bun would otherwise fetch @svjeez/video from npm into this empty folder.
+    [process.execPath, "--no-install", join(import.meta.dir, "../src/cli.ts"), "video", file],
     { cwd: dir },
   );
 
