@@ -1,4 +1,3 @@
-// Re-encodes PNG frames as WebP or JPEG in headless Chromium, so the site builds the same on macOS and Linux with no extra tools.
 import type { Browser, Page } from "playwright-core";
 
 export type Format = "webp" | "jpeg";

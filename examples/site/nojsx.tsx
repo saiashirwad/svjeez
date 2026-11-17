@@ -6,7 +6,6 @@ import { highlight } from "@svjeez/code";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// Without JSX: the same scene built from jsx() calls, shown from the real file so it type-checks.
 const BAR = 40;
 const D = 11;
 
@@ -15,7 +14,6 @@ const read = (name: string) =>
 
 const T0 = 0.9;
 
-/** `tall` stacks the code above the preview for a phone, and shows the part of the file that builds the scene, set in a narrower measure. */
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
   const H = tall ? 596 : 580;

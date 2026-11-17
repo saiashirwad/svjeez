@@ -10,9 +10,7 @@
   let drag: ReturnType<typeof scrubbing> | null = $state.raw(null);
 
   const down = (e: PointerEvent & { currentTarget: HTMLElement }) => {
-    if (e.button !== 0) return;
-    // No text selection starts under the pointer, which would end the drag.
-    e.preventDefault();
+    if (e.button !== 0) return;    e.preventDefault();
     e.currentTarget.focus();
     e.currentTarget.setPointerCapture(e.pointerId);
     drag = scrubbing(editor, value, e.clientX);

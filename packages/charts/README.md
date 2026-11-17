@@ -41,8 +41,8 @@ export default () =>
     { width: 440, height: 260, duration: 6, title: "Sales by quarter" },
     <>
       {c.node}
-      {bars.node}
-      {trend.node}
+      {bars}
+      {trend}
     </>,
   );
 ```
@@ -62,10 +62,10 @@ The chart has:
 - `bars(span, values, options)`, which grows each bar up from the baseline over `span`. `values` is a record or `[key, value]` pairs. Band scales only.
 - `line(span, points, options)` and `area(span, points, options)`, with points as `[x, y]` pairs.
 
-Every series plays in the `{ at, over }` span you pass first, and takes a `color` that defaults to the next accent of the theme: blue, orange, green, magenta, cyan, yellow, red. Each returns its `node` and a `span`, so the next series can start at `span.end`.
+Every series plays in the `{ at, over }` span you pass first, and takes a `color` that defaults to the next accent of the theme: blue, orange, green, magenta, cyan, yellow, red. Each returns its `node`, a `span` (so the next series can start at `span.end`), its `bounds`, and its `parts` with `part(id)`, the shape every svjeez package returns. A part has an `id`, a `box` in scene px and a `span` of its own, so a callout can land right after one bar: `enter(bars.part("Q3").span.next(0.4))`.
 
-- `bars` also takes `stagger` (seconds between one bar's start and the next, 0.08, or less when the span is short), `ease` (default `ease.out`), `group: { index, count }` to put series side by side in each band, `radius` and `values` to write each number at its bar. It returns `bars`, one `{ key, value, bounds }` per bar.
-- `line` also takes `curve` (`"linear"`, `"monotone"` or `"step"`), `dots` (`true` or a radius), `strokeWidth` and `label`, the series name written past the last point. It returns `d` and `points` in scene px. The dots pop in as the stroke reaches them.
+- `bars` also takes `stagger` (seconds between one bar's start and the next, 0.08, or less when the span is short), `ease` (default `ease.out`), `group: { index, count }` to put series side by side in each band, `radius` and `values` to write each number at its bar. Its parts are the bars, `{ id, value, box, span }` with the category as `id` and the bar's staggered window as `span`.
+- `line` also takes `curve` (`"linear"`, `"monotone"` or `"step"`), `dots` (`true` or a radius), `strokeWidth` and `label`, the series name written past the last point. It returns `d`, and its parts are the points, `{ id, value, point, box, span }`, with the x value as a string for `id` and the dot as `box`. The dots pop in as the stroke reaches them, which is when each point's `span` starts.
 - `area` takes the options of `line`, plus `baseline` (default 0) and `line: false` to leave the top edge unstroked. A gradient fill wipes in from the left in step with the line.
 
 ## Errors

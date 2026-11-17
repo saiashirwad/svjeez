@@ -65,13 +65,17 @@ describe("literals", () => {
   });
 
   test("call arguments know the method and their place", () => {
-    const at = numbers("motion({ y: 1 }).at(0.8 + i).to({ y: 0 }, 0.6);").map((l) => l.role);
+    const at = numbers("motion({ y: 1 }).to({ y: 0 }, span(0.8 + i, 0.6)).set({ y: 1 }, 2);").map(
+      (l) => l.role,
+    );
 
     expect(at).toEqual([
       { kind: "property", name: "y" },
-      { kind: "argument", callee: "at", index: 0 },
       { kind: "property", name: "y" },
-      { kind: "argument", callee: "to", index: 1 },
+      { kind: "argument", callee: "span", index: 0 },
+      { kind: "argument", callee: "span", index: 1 },
+      { kind: "property", name: "y" },
+      { kind: "argument", callee: "set", index: 1 },
     ]);
   });
 
@@ -144,7 +148,6 @@ describe("edits", () => {
 
         const text = set(source, { ...literal, value });
 
-        // The file is valid JavaScript and holds the string.
         expect(new Function(`${text.replace("const s =", "return")}`)()).toBe(value);
         expect(parse(text).literals[0]).toMatchObject({ kind: "string", value });
       }
@@ -237,10 +240,15 @@ describe("linking", () => {
 
     const steps = callsIn(source, sun, "to").map(([from]) => source.lineAt(from));
 
+    const lines = source.text.split("\n");
+
+    const [from, to] = [
+      lines.findIndex((l) => l.includes("const sunrise")) + 1,
+      lines.findIndex((l) => l.includes("const pulse")) + 1,
+    ];
+
     expect(steps.length).toBe(2);
-    expect(steps.every((n) => source.text.split("\n")[n - 1]!.includes("const sunrise"))).toBe(
-      true,
-    );
+    expect(steps.every((n) => n >= from && n < to)).toBe(true);
 
     const flower = source.elements.find(
       (e) => e.tag === "g" && e.attributes.some((a) => a.name === "animation"),
@@ -266,27 +274,59 @@ export default function build() {
       "params.swing.max",
       "legs.0.over",
       "legs.1.over",
-      "default#0",
-      "default#1",
-      "default#2",
-      "default#3",
-      "default#4",
+      "default:rect.fill",
+      "default:rect.stroke",
+      "default:rect.x",
+      "default:rect.width",
+      "default:rect.opacity",
     ]);
+  });
+
+  test("an unnamed literal is keyed by what holds it, so adding one renumbers only those held the same way", () => {
+    const text = `export default function build() {
+  const r = 5;
+  return (
+    <g>
+      <circle cx={40} r={r} animation={enter({ at: 1.2, over: 0.5 }).to({ x: 9 }, span(1.7, 0.4))} />
+      <circle cx={80} />
+      {cond ? 1 : 2}
+    </g>
+  );
+}
+`;
+
+    const keys = (t: string) => parse(t).literals.map((l) => [l.key, l.text]);
+
+    expect(keys(text)).toEqual([
+      ["default:r", "5"],
+      ["default:circle.cx", "40"],
+      ["default:enter.0.at", "1.2"],
+      ["default:enter.0.over", "0.5"],
+      ["default:to.0.x", "9"],
+      ["default:span.0", "1.7"],
+      ["default:span.1", "0.4"],
+      ["default:circle.cx#1", "80"],
+      ["default#0", "1"],
+      ["default#1", "2"],
+    ]);
+
+    const added = keys(text.replace("<g>", "<g>\n      <rect width={4} opacity={0.5} />"));
+    expect(added.filter(([key]) => !key!.startsWith("default:rect."))).toEqual(keys(text));
   });
 
   test("a key stays with its literal when another value changes length", () => {
     const before = parse(scene);
-    const x = before.literals.find((l) => l.key === "default#2")!;
+    const x = before.literals.find((l) => l.key === "default:rect.x")!;
     const after = parse(set(before, { ...numberOf(x), value: -12.25 }));
 
     expect(after.literals.map((l) => l.key)).toEqual(before.literals.map((l) => l.key));
-    expect(after.literals.find((l) => l.key === "default#3")).toMatchObject({ value: 4 });
+    expect(after.literals.find((l) => l.key === "default:rect.width")).toMatchObject({ value: 4 });
   });
 
   test("a key survives an edit to another declaration", () => {
     const rewritten = scene.replace("const legs", "const speed = 2;\nconst legs");
 
-    expect(parse(rewritten).literals.find((l) => l.key === "default#3")).toMatchObject({
+    expect(parse(rewritten).literals.find((l) => l.key === "default:rect.width")).toMatchObject({
       value: 4,
     });
   });

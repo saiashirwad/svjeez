@@ -4,6 +4,7 @@ import {
   type Motion,
   type Point,
   sampled,
+  span,
   type Color,
   type Paint,
   type Ease,
@@ -14,7 +15,6 @@ import { round } from "./matrix.ts";
 
 export type Vec2 = readonly [x: number, y: number];
 
-/** Where every point of the plane sits after some steps, in scene pixels. */
 export type Placement = (p: Vec2) => Vec2;
 
 /** One move of the plane: from the previous placement to `place` during `at`…`at + over`. */
@@ -25,7 +25,6 @@ export interface Move {
   readonly ease: Ease;
 }
 
-/** The share of a transition done at `u` of its time, as CSS and SMIL compute it. */
 const progress = (e: Ease, u: number): number => {
   if (e.kind === "linear") return u;
 
@@ -52,7 +51,6 @@ const lerp = (a: Vec2, b: Vec2, u: number): Vec2 => [
   a[1] + (b[1] - a[1]) * u,
 ];
 
-/** Which placements a time falls between, and how far: before the first move, `[0, 0, 0]`. */
 const phase = (moves: readonly Move[], t: number): readonly [number, number, number] => {
   let done = 0;
 
@@ -69,10 +67,6 @@ const TOLERANCE = 0.5;
 /** A label sits off its arrow's line, turned this far counterclockwise from straight ahead. */
 export const LEAN = (35 * Math.PI) / 180;
 
-/**
- * The points of the segment a→b that every placement needs so its image reads as a smooth curve: a midpoint
- * stays only where some placement bends the segment more than the tolerance from a straight chord.
- */
 const refine = (a: Vec2, b: Vec2, places: readonly Placement[], spacing: number): Vec2[] => {
   const pieces = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / spacing));
   const out: Vec2[] = [a];
@@ -107,11 +101,8 @@ const write = (rings: readonly (readonly Vec2[])[], closed: boolean): PathData =
     )
     .join("") as PathData;
 
-/** Draws a plane whose moves include a function: every outline is sampled, and each move is one `d` key. */
 export interface Warp {
-  /** Polylines in plane units, each edge refined so its images stay smooth. */
   rings(polylines: readonly (readonly Vec2[])[], closed: boolean): Vec2[][];
-  /** A path whose `d` follows the rings through every move. */
   path(rings: readonly (readonly Vec2[])[], closed: boolean, attrs: PathAttrs): SvgNode;
   /** An arrowhead at the end of `shaft`, upright at every frame. */
   head(shaft: readonly Vec2[], polygon: readonly Vec2[], fill: Color): SvgNode;
@@ -134,13 +125,13 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
 
   const morph = (ds: readonly PathData[]): Motion<"d"> =>
     moves.reduce(
-      (m, step, i) => m.at(step.at).to({ d: ds[i + 1]! }, step.over, step.ease),
+      (m, step, i) => m.to({ d: ds[i + 1]! }, span(step.at, step.over), step.ease),
       motion({ d: ds[0]! }),
     );
 
   const travel = (spots: readonly Point[]): Motion<"x" | "y"> =>
     moves.reduce(
-      (m, step, i) => m.at(step.at).to(spots[i + 1]!, step.over, step.ease),
+      (m, step, i) => m.to(spots[i + 1]!, span(step.at, step.over), step.ease),
       motion({ x: spots[0]!.x, y: spots[0]!.y }),
     );
 

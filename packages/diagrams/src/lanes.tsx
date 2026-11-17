@@ -1,20 +1,31 @@
 /** @jsxImportSource svjeez */
-import { textWidth, ease, motion, type Seconds, type Span, enter, travel } from "svjeez";
+import {
+  textWidth,
+  ease,
+  motion,
+  type Seconds,
+  type Span,
+  type Spanned,
+  enter,
+  travel,
+  span as spanOf,
+} from "svjeez";
 import { lanes as layout } from "./layout/lanes.ts";
 import {
   arrow,
   chip,
   labelOf,
   labelSize,
+  INSTANT,
   look,
-  lookup,
+  partsOf,
   placer,
   spanOfReveals,
   tintOf,
   type DiagramOptions,
   type Labelled,
   type NodeRole,
-  type PlayedDiagram,
+  type Diagram,
 } from "./kit.tsx";
 
 /** A bar on a lane for the span `{ at, over }`, in lane time. */
@@ -44,8 +55,8 @@ export interface LanesOptions extends DiagramOptions {
   readonly play?: { readonly at: Seconds };
 }
 
-export interface Lanes<L extends string> extends PlayedDiagram<L> {
-  /** The x of time `t` on the lane axis. */
+/** Its parts are the lanes. With `play`, a lane's span runs from the first of its bars, events and links to the end of the last. */
+export interface Lanes<L extends string> extends Diagram<L> {
   x(t: Seconds): number;
 }
 
@@ -63,7 +74,6 @@ export function lanes<const L extends Record<string, Labelled>>(
   const { scale, play } = options;
   const l = look(options);
   const { theme, fontSize, font, small } = l;
-  /** Scene time of lane time `t`. */
   const when = (t: Seconds) => (play?.at ?? 0) + t;
 
   const rows = Object.entries(spec.lanes).map(([id, s]) => ({
@@ -160,7 +170,11 @@ export function lanes<const L extends Record<string, Labelled>>(
             stroke={tint}
             animation={
               play
-                ? motion({ width: 0 }).at(when(s.at)).to({ width: b.w }, s.over, ease.linear)
+                ? motion({ width: 0 }).to(
+                    { width: b.w },
+                    { at: when(s.at), over: s.over },
+                    ease.linear,
+                  )
                 : undefined
             }
           />
@@ -228,13 +242,30 @@ export function lanes<const L extends Record<string, Labelled>>(
         d={`M${track.x} ${track.y}V${track.y + track.h}`}
         stroke={theme.base09}
         strokeWidth={1.5}
-        animation={motion({ x: 0 }).at(when(0)).to({ x: track.w }, out.end, ease.linear)}
+        animation={motion({ x: 0 }).to({ x: track.w }, { at: when(0), over: out.end }, ease.linear)}
       />
     ),
   ]);
 
-  // The playhead crosses the whole track, so it is the last thing to finish.
   const span = spanOfReveals(play ? [{ at: when(0), over: out.end }] : []);
 
-  return { node, span, bounds: at.bounds, get: lookup("lanes()", boxes), x };
+  const busy = (lane: string): Spanned => {
+    const times: Span[] = [
+      ...spans.filter((s) => s.lane === lane).map((s) => ({ at: when(s.at), over: s.over })),
+      ...events.filter((e) => e.lane === lane).map((e) => ({ at: when(e.at), over: 0.3 })),
+      ...links
+        .filter((k) => k.from === lane || k.to === lane)
+        .map((k) => ({ at: when(k.at), over: 0.3 })),
+    ];
+
+    return times.length > 0 ? spanOfReveals(times) : spanOf(when(0), 0);
+  };
+
+  return {
+    node,
+    span,
+    bounds: at.bounds,
+    ...partsOf<keyof L & string>("lanes()", boxes, (lane) => (play ? busy(lane) : INSTANT)),
+    x,
+  };
 }

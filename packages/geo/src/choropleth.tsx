@@ -1,5 +1,14 @@
 /** @jsxImportSource svjeez */
-import { ease, motion, type Color, type Ease, type Span, type SvgNode } from "svjeez";
+import {
+  ease,
+  motion,
+  span as spanOf,
+  type Color,
+  type Drawn,
+  type Ease,
+  type Span,
+  type Spanned,
+} from "svjeez";
 import type { GeoMap, Region } from "./index.ts";
 import type { ColorScale, Hex } from "./scale.tsx";
 
@@ -9,18 +18,23 @@ export type RegionValues = Readonly<Record<string, number | readonly number[]>>;
 export interface ChoroplethOptions {
   readonly scale: ColorScale;
   readonly ease?: Ease;
-  /** Draws the map's borders over the fill in this color. */
   readonly lines?: Color;
   /** Px. Default 0.4. */
   readonly lineWidth?: number;
   readonly class?: string;
 }
 
-export interface Choropleth {
-  readonly node: SvgNode;
-  /** The keys in `values` that no region answers to, so a mismatch between the data and the map is visible. */
+/** A region `values` names, with when it fills: from the first span that changes its color to the end of the last. */
+export interface ChoroplethRegion extends Region {
+  readonly span: Spanned;
+}
+
+/**
+ * The colored map. Its parts are the regions `values` names, found by id or `properties.name` as `map.part()` finds
+ * them; `span` covers every span passed, and `bounds` every region drawn.
+ */
+export interface Choropleth extends Drawn<ChoroplethRegion> {
   readonly unmatched: readonly string[];
-  /** How many animated paths the map came to: regions whose colors follow the same course share one. */
   readonly groups: number;
 }
 
@@ -30,7 +44,7 @@ const isName = (name: unknown): name is string => typeof name === "string";
 export const resolveRegions = (map: GeoMap, values: RegionValues) => {
   const byKey = new Map<string, Region>();
 
-  for (const region of map.regions) {
+  for (const region of map.parts) {
     byKey.set(region.id, region);
     const name = region.properties?.name;
 
@@ -76,11 +90,8 @@ const spansOf = (when: Span | readonly Span[], frames: number): Span[] => {
 };
 
 /**
- * Colors every region in `values` from `scale`. A list of values plays through `when`: one span per value, the map
- * changing to that value's colors during it. The first span fades the map in from the scale's `empty` color, or cuts to
- * the first colors at its start if it has no length, so `{ at: 0, over: 0 }` shows them from the start. A single value needs one span.
- * Regions whose colors follow the same course share one path, so a map of 180 countries with 9 classes stays small.
- * Regions with no value take the scale's `empty` color.
+ * Colors every region in `values` from `scale`; a list plays through `when`, one span per value. The first span fades in
+ * from `empty`, or cuts if it has no length (`{ at: 0, over: 0 }` shows the colors from the start). Regions with no value take `empty`.
  */
 export function choropleth(
   when: Span | readonly Span[],
@@ -101,7 +112,6 @@ export function choropleth(
     );
   const spans = spansOf(when, frames);
 
-  /** The region's color in each frame; a single number holds in all of them. */
   const courses = series.map(({ region, list }) => ({
     region,
     colors: Array.from({ length: frames }, (_, i) =>
@@ -119,9 +129,8 @@ export function choropleth(
   }
 
   const named = new Set(found.map(([region]) => region));
-  const rest = map.regions.filter((region) => !named.has(region)).map((region) => region.d);
+  const rest = map.parts.filter((region) => !named.has(region)).map((region) => region.d);
 
-  // A first span with no length is a cut: from its `at` the map has its first colors, and from 0 it never shows `empty`.
   const cut = spans[0]!.over === 0;
   const fromStart = cut && spans[0]!.at === 0;
 
@@ -133,13 +142,52 @@ export function choropleth(
             if (i === 0 && fromStart) return m;
 
             return i === 0 && cut
-              ? m.at(spans[0]!.at).set({ fill: color })
-              : m.at(spans[i]!.at).to({ fill: color }, spans[i]!.over, curve);
+              ? m.set({ fill: color }, spans[0]!.at)
+              : m.to({ fill: color }, spanOf(spans[i]!.at, spans[i]!.over), curve);
           },
           motion({ fill: fromStart ? colors[0]! : scale.empty }),
         );
 
+  const fills = (colors: readonly Hex[]): Spanned => {
+    let shown: Hex = fromStart ? colors[0]! : scale.empty;
+
+    const changes = spans.filter((_, i) => {
+      const changed = colors[i] !== shown;
+      shown = colors[i]!;
+
+      return changed;
+    });
+
+    const [first, last] = [changes[0] ?? spans[0]!, changes.at(-1) ?? spans[0]!];
+
+    return spanOf(first.at, last.at + last.over - first.at);
+  };
+
+  const parts = courses.map(({ region, colors }): ChoroplethRegion => ({
+    ...region,
+    span: fills(colors),
+  }));
+
+  const first = spans[0]!;
+  const last = spans.at(-1)!;
+
   return {
+    span: spanOf(first.at, last.at + last.over - first.at),
+    bounds: map.bounds({ type: "FeatureCollection", features: map.parts.map((r) => r.feature) }),
+    parts,
+    part: (key) => {
+      const found = parts.find((r) => r.id === String(key) || r.properties?.name === key);
+
+      if (!found)
+        throw new Error(
+          `choropleth() has no value for ${JSON.stringify(key)}. Its regions are those \`values\` names, as in ${parts
+            .slice(0, 3)
+            .map((r) => JSON.stringify(r.properties?.name ?? r.id))
+            .join(", ")}.`,
+        );
+
+      return found;
+    },
     node: (
       <g class={options.class}>
         {[...groups.values()].map(({ colors, d }) => (

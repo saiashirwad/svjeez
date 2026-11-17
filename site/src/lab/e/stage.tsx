@@ -1,10 +1,13 @@
-import { def, ease, motion, type Child } from "svjeez";
+import { def, ease, motion, span, type Child } from "svjeez";
 import { Speech } from "./bits";
 import { H, W } from "./geometry";
 import { CAT } from "./layout";
 import { r1, type Cx } from "./look";
 import { INK } from "./palette";
 import { QUIRK, QUIRK_AT } from "./quirk";
+
+/** The wrap quirk: the creature walks off the right edge and back in from the left. */
+const WRAP = span(QUIRK_AT.at, 1.9);
 
 /** The quirk: the one odd thing this specimen does each loop, as motion on a wrapper around the whole creature. */
 export const stage = (cx: Cx, creature: () => Child): Child => {
@@ -13,7 +16,7 @@ export const stage = (cx: Cx, creature: () => Child): Child => {
 
   if (g.quirk === "wrap")
     return (
-      <g animation={motion({ x: 0 }).at(QUIRK_AT.at).to({ x: W }, 1.9, ease.inOut).set({ x: 0 })}>
+      <g animation={motion({ x: 0 }).to({ x: W }, WRAP, ease.inOut).set({ x: 0 }, WRAP.end)}>
         {creature()}
         <g transform={`translate(${-W} 0)`}>{creature()}</g>
       </g>
@@ -23,10 +26,8 @@ export const stage = (cx: Cx, creature: () => Child): Child => {
     const half = (left: boolean) => (
       <g
         animation={motion({ x: 0, rotate: 0 })
-          .at(QUIRK_AT.at)
-          .to({ x: left ? -36 : 36, rotate: left ? -6 : 6 }, 0.7, ease.pop)
-          .at(QUIRK_AT.at + 1.5)
-          .to({ x: 0, rotate: 0 }, 0.5, ease.in)}
+          .to({ x: left ? -36 : 36, rotate: left ? -6 : 6 }, span(QUIRK_AT.at, 0.7), ease.pop)
+          .to({ x: 0, rotate: 0 }, span(QUIRK_AT.at + 1.5, 0.5), ease.in)}
       >
         <g
           clipPath={def.clipPath(
@@ -51,9 +52,8 @@ export const stage = (cx: Cx, creature: () => Child): Child => {
     return (
       <g
         animation={motion({ y: 0, rotate: 0 })
-          .at(QUIRK_AT.at)
-          .to({ y: -26, rotate: 360 }, 1.8, ease.inOut)
-          .to({ y: 0 }, 0.6, ease.pop)}
+          .to({ y: -26, rotate: 360 }, span(QUIRK_AT.at, 1.8), ease.inOut)
+          .to({ y: 0 }, span(QUIRK_AT.at, 1.8).next(0.6), ease.pop)}
       >
         {creature()}
       </g>
@@ -61,7 +61,7 @@ export const stage = (cx: Cx, creature: () => Child): Child => {
 
   if (g.quirk === "spin" && lay.heads.length === 0)
     return (
-      <g animation={motion({ rotate: 0 }).at(QUIRK_AT.at).to({ rotate: 360 }, 1.2, ease.inOut)}>
+      <g animation={motion({ rotate: 0 }).to({ rotate: 360 }, span(QUIRK_AT.at, 1.2), ease.inOut)}>
         {creature()}
       </g>
     );
@@ -69,7 +69,6 @@ export const stage = (cx: Cx, creature: () => Child): Child => {
   return creature();
 };
 
-/** The hat that drops over the first head. */
 export const magicHat = (cx: Cx) => {
   const { g, lay } = cx;
   const first = lay.heads[0];
@@ -85,10 +84,8 @@ export const magicHat = (cx: Cx) => {
       <g transform={`translate(${r1(at.x)} ${r1(at.y)})`}>
         <g
           animation={motion({ y: -H, rotate: 0 })
-            .at(QUIRK_AT.at)
-            .to({ y: 0 }, 0.6, ease.in)
-            .at(QUIRK_AT.hatLift)
-            .to({ y: -H, rotate: 24 }, 0.9, ease.in)}
+            .to({ y: 0 }, span(QUIRK_AT.at, 0.6), ease.in)
+            .to({ y: -H, rotate: 24 }, span(QUIRK_AT.hatLift, 0.9), ease.in)}
         >
           <rect
             x={r1(-hr * 1.1)}
@@ -135,7 +132,6 @@ export const quirkWord = (cx: Cx) => {
   );
 };
 
-/** The scale bar in the corner. */
 export const unitBar = (cx: Cx) => {
   const bar = CAT * cx.lay.scale;
   const x = W - 22 - bar;

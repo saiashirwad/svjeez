@@ -1,27 +1,31 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { def, motion, show, type Color, type Stack, type SvgNode, type TagChannels } from "svjeez";
+import {
+  def,
+  motion,
+  show,
+  span,
+  type Color,
+  type Stack,
+  type SvgNode,
+  type TagChannels,
+} from "svjeez";
 import { num } from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import type { Paint, Rect, TextRun } from "../tree.ts";
 import { slideIn, type Tween } from "./tween.ts";
 
-/** What the text transitions draw with: a paint as CSS, and a run as a `<text>`. */
 export interface Ink {
   readonly v: (color: Paint) => Color;
   readonly text: (run: TextRun, animation?: Stack<TagChannels<"text">>) => SvgNode;
 }
 
-/** Tags whose text appears or leaves by typing. */
 export const FIELDS = new Set(["input", "textarea"]);
 
-/** Code points, so a character outside the BMP types as one keystroke. */
 const chars = (s: string): string[] => Array.from(s);
 
-/** What a field shows as typed: a placeholder is an empty field. */
 const shown = (run: TextRun): string => (run.placeholder ? "" : run.text);
 
-/** One text grew from or shrank to the other, and the longer one knows where its characters end. */
 export const typable = (a: TextRun, b: TextRun): boolean => {
   const from = shown(a);
   const to = shown(b);
@@ -34,7 +38,6 @@ export const typable = (a: TextRun, b: TextRun): boolean => {
   );
 };
 
-/** An empty run in `run`'s place, moved as its field moved, so text that appears in a field types in from nothing. */
 export const blank = (run: TextRun, from: Rect, to: Rect): TextRun => ({
   ...run,
   x: run.x + to.x - from.x,
@@ -44,10 +47,6 @@ export const blank = (run: TextRun, from: Rect, to: Rect): TextRun => ({
   placeholder: false,
 });
 
-/**
- * One run typed into or deleted from: the longer text drawn once behind a clip whose width steps from character to
- * character, with a caret at its edge. A placeholder leaves at the first keystroke and comes back at the last.
- */
 export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode => {
   const { v, text } = ink;
   const from = chars(shown(a)).length;
@@ -57,23 +56,24 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
   const step = tween.over / count;
   const pad = long.size;
   const edge = (k: number) => (k === 0 ? 0 : long.advances[k - 1]!);
-  // Past the last character the clip opens wide, so a glyph that overhangs its advance isn't cut.
   const width = (k: number) => pad + edge(k) + (k === chars(long.text).length ? pad : 0);
   const times = Array.from({ length: count }, (_, i) => tween.at + i * step);
   const lengths = times.map((_, i) => (to > from ? from + i + 1 : from - i - 1));
 
+  // The clip's edge slides by CSS translate with the caret: `width` runs on SMIL's clock, which WebKit starts ~50ms apart from CSS's.
+  const wide = width(chars(long.text).length);
+
   const reveal = times.reduce(
-    (m, t, i) => m.at(t).set({ width: width(lengths[i]!) }),
-    motion({ width: width(from) }),
+    (m, t, i) => m.set({ x: width(lengths[i]!) }, t),
+    motion({ x: width(from) }),
   );
 
   const caret = times
     .reduce(
-      (m, t, i) => m.at(t).set({ x: edge(lengths[i]!), opacity: 1 }),
+      (m, t, i) => m.set({ x: edge(lengths[i]!), opacity: 1 }, t),
       motion({ x: edge(from), opacity: 0 }),
     )
-    .at(tween.at + tween.over)
-    .set({ opacity: 0 });
+    .set({ opacity: 0 }, tween.at + tween.over);
 
   const dx = a.x - b.x;
   const dy = a.y - b.y;
@@ -82,9 +82,9 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
   const clip = def.clipPath(
     {},
     jsx("rect", {
-      x: num(b.x - pad),
+      x: num(b.x - pad - wide),
       y: num(b.y - 2 * pad),
-      width: num(width(from)),
+      width: num(wide),
       height: num(3 * pad),
       animation: reveal,
     }),
@@ -92,16 +92,18 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
 
   return (
     <>
-      {a.placeholder && text(a, motion({ opacity: 1 }).at(tween.at).set({ opacity: 0 }))}
-      {b.placeholder && text(b, motion({ opacity: 0 }).at(times.at(-1)!).set({ opacity: 1 }))}
+      {a.placeholder && text(a, motion({ opacity: 1 }).set({ opacity: 0 }, tween.at))}
+      {b.placeholder && text(b, motion({ opacity: 0 }).set({ opacity: 1 }, times.at(-1)!))}
       <g animation={dx || dy ? slideIn(tween, dx, dy) : undefined}>
         <g clipPath={clip}>
           {text(
             { ...long, x: b.x, y: b.y },
             recolor
-              ? motion({ fill: v(a.color) })
-                  .at(tween.at)
-                  .to({ fill: v(b.color) }, tween.over, tween.ease)
+              ? motion({ fill: v(a.color) }).to(
+                  { fill: v(b.color) },
+                  span(tween.at, tween.over),
+                  tween.ease,
+                )
               : undefined,
           )}
         </g>
@@ -118,10 +120,8 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
   );
 };
 
-/** At most this many values between two counted numbers, so a big jump stays a few keyframes. */
 const MAX_COUNTS = 20;
 
-/** Two texts the same but for one number, split around it. */
 interface Count {
   readonly before: string;
   readonly after: string;
@@ -132,7 +132,6 @@ interface Count {
 
 const NUMBER = /(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)/;
 
-/** The one number that differs between two texts that are otherwise the same, written as the texts write it. */
 export const countOf = (a: string, b: string): Count | undefined => {
   const pa = a.split(NUMBER);
   const pb = b.split(NUMBER);
@@ -141,7 +140,6 @@ export const countOf = (a: string, b: string): Count | undefined => {
 
   const changed = pa.flatMap((p, i) => (p === pb[i] ? [] : [i]));
 
-  // Odd pieces are the numbers split matched.
   if (changed.length !== 1 || changed[0]! % 2 === 0) return undefined;
 
   const i = changed[0]!;
@@ -161,7 +159,6 @@ export const countOf = (a: string, b: string): Count | undefined => {
   };
 };
 
-/** One run whose only change is a number: the in-between values, each shown for its slice of the tween. */
 export const counting = (
   ink: Ink,
   a: TextRun,
@@ -182,8 +179,6 @@ export const counting = (
   const dx = a.x - b.x;
   const dy = a.y - b.y;
 
-  // Every value is drawn in the new place and the group slides in with the same ease as the box that holds it, so the
-  // text never trails or leads its background.
   return (
     <g animation={dx || dy ? slideIn(tween, dx, dy) : undefined}>
       {Array.from({ length: n + 2 }, (_, k) => {

@@ -54,166 +54,177 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 @property --p2{syntax:'\3c angle\3e ';inherits:false;initial-value:0deg}
 @property --p3{syntax:'\3c angle\3e ';inherits:true;initial-value:0deg}
 .a{animation-duration:24s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
-@keyframes k1{0%,30.39%,40.39%,100%{opacity:0.355}35.39%{opacity:0.08}}
+@keyframes k1{0%,21.727%,31.727%,100%{opacity:0.6}26.727%{opacity:0.08}}
 .m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k2{0%,38.514%,48.514%,100%{opacity:0.582}43.514%{opacity:0.08}}
+@keyframes k2{0%,38.039%,48.039%,100%{opacity:0.287}43.039%{opacity:0.08}}
 .m2{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k3{0%,0.437%,10.437%,100%{opacity:0.388}5.437%{opacity:0.08}}
+@keyframes k3{0%,38.043%,48.043%,100%{opacity:0.317}43.043%{opacity:0.08}}
 .m3{animation-name:k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k4{0%,28.307%,38.307%,100%{opacity:0.533}33.307%{opacity:0.08}}
+@keyframes k4{0%,35.58%,45.58%,100%{opacity:0.648}40.58%{opacity:0.08}}
 .m4{animation-name:k4;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k5{0%,32.142%,42.142%,100%{opacity:0.529}37.142%{opacity:0.08}}
+@keyframes k5{0%,33.338%,43.338%,100%{opacity:0.605}38.338%{opacity:0.08}}
 .m5{animation-name:k5;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k6{0%,38.144%,48.144%,100%{opacity:0.661}43.144%{opacity:0.08}}
+@keyframes k6{0%,22.377%,32.377%,100%{opacity:0.419}27.377%{opacity:0.08}}
 .m6{animation-name:k6;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k7{0%,28.073%,38.073%,100%{opacity:0.461}33.073%{opacity:0.08}}
+@keyframes k7{0%,2.809%,12.809%,100%{opacity:0.38}7.809%{opacity:0.08}}
 .m7{animation-name:k7;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k8{0%,0.256%,10.256%,100%{opacity:0.252}5.256%{opacity:0.08}}
+@keyframes k8{0%,3.438%,13.438%,100%{opacity:0.302}8.438%{opacity:0.08}}
 .m8{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k9{0%,10.455%,20.455%,100%{opacity:0.541}15.455%{opacity:0.08}}
+@keyframes k9{0%,34.686%,44.686%,100%{opacity:0.596}39.686%{opacity:0.08}}
 .m9{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k10{0%{--p3:107.571deg}100%{--p3:467.571deg}}
-.m10{animation-name:k10;animation-timing-function:linear}
-@keyframes k11{0%{opacity:0}2.083%,100%{opacity:1}}
-@keyframes k12{0%{translate:0px 8px}2.083%,100%{translate:0px 0px}}
-.m11{animation-name:k11,k12}
-@keyframes k13{0%{visibility:visible}4.167%,100%{visibility:hidden}}
-.m12{animation-name:k13;animation-timing-function:steps(1)}
-@keyframes k14{0%,8.333%,100%{visibility:hidden}4.167%{visibility:visible}}
-.m13{animation-name:k14;animation-timing-function:steps(1)}
-@keyframes k15{0%,12.5%,100%{visibility:hidden}8.333%{visibility:visible}}
-.m14{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%,16.667%,100%{visibility:hidden}12.5%{visibility:visible}}
+@keyframes k10{0%,1.283%,11.283%,100%{opacity:0.69}6.283%{opacity:0.08}}
+.m10{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k11{0%,32.232%,42.232%,100%{opacity:0.683}37.232%{opacity:0.08}}
+.m11{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k12{0%,27.479%,37.479%,100%{opacity:0.52}32.479%{opacity:0.08}}
+.m12{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k13{0%{--p3:107.571deg}100%{--p3:467.571deg}}
+.m13{animation-name:k13;animation-timing-function:linear}
+@keyframes k14{0%{opacity:0}2.083%,100%{opacity:1}}
+@keyframes k15{0%{translate:0px 8px}2.083%,100%{translate:0px 0px}}
+.m14{animation-name:k14,k15}
+@keyframes k16{0%{visibility:visible}4.167%,100%{visibility:hidden}}
 .m15{animation-name:k16;animation-timing-function:steps(1)}
-@keyframes k17{0%,20.833%,100%{visibility:hidden}16.667%{visibility:visible}}
+@keyframes k17{0%,8.333%,100%{visibility:hidden}4.167%{visibility:visible}}
 .m16{animation-name:k17;animation-timing-function:steps(1)}
-@keyframes k18{0%,25%,100%{visibility:hidden}20.833%{visibility:visible}}
+@keyframes k18{0%,12.5%,100%{visibility:hidden}8.333%{visibility:visible}}
 .m17{animation-name:k18;animation-timing-function:steps(1)}
-@keyframes k19{0%,29.167%,100%{visibility:hidden}25%{visibility:visible}}
+@keyframes k19{0%,16.667%,100%{visibility:hidden}12.5%{visibility:visible}}
 .m18{animation-name:k19;animation-timing-function:steps(1)}
-@keyframes k20{0%,33.333%,100%{visibility:hidden}29.167%{visibility:visible}}
+@keyframes k20{0%,20.833%,100%{visibility:hidden}16.667%{visibility:visible}}
 .m19{animation-name:k20;animation-timing-function:steps(1)}
-@keyframes k21{0%,37.5%,100%{visibility:hidden}33.333%{visibility:visible}}
+@keyframes k21{0%,25%,100%{visibility:hidden}20.833%{visibility:visible}}
 .m20{animation-name:k21;animation-timing-function:steps(1)}
-@keyframes k22{0%,41.667%,100%{visibility:hidden}37.5%{visibility:visible}}
+@keyframes k22{0%,29.167%,100%{visibility:hidden}25%{visibility:visible}}
 .m21{animation-name:k22;animation-timing-function:steps(1)}
-@keyframes k23{0%,45.833%,100%{visibility:hidden}41.667%{visibility:visible}}
+@keyframes k23{0%,33.333%,100%{visibility:hidden}29.167%{visibility:visible}}
 .m22{animation-name:k23;animation-timing-function:steps(1)}
-@keyframes k24{0%,50%,100%{visibility:hidden}45.833%{visibility:visible}}
+@keyframes k24{0%,37.5%,100%{visibility:hidden}33.333%{visibility:visible}}
 .m23{animation-name:k24;animation-timing-function:steps(1)}
-@keyframes k25{0%,54.167%,100%{visibility:hidden}50%{visibility:visible}}
+@keyframes k25{0%,41.667%,100%{visibility:hidden}37.5%{visibility:visible}}
 .m24{animation-name:k25;animation-timing-function:steps(1)}
-@keyframes k26{0%,58.333%,100%{visibility:hidden}54.167%{visibility:visible}}
+@keyframes k26{0%,45.833%,100%{visibility:hidden}41.667%{visibility:visible}}
 .m25{animation-name:k26;animation-timing-function:steps(1)}
-@keyframes k27{0%,62.5%,100%{visibility:hidden}58.333%{visibility:visible}}
+@keyframes k27{0%,50%,100%{visibility:hidden}45.833%{visibility:visible}}
 .m26{animation-name:k27;animation-timing-function:steps(1)}
-@keyframes k28{0%,66.667%,100%{visibility:hidden}62.5%{visibility:visible}}
+@keyframes k28{0%,54.167%,100%{visibility:hidden}50%{visibility:visible}}
 .m27{animation-name:k28;animation-timing-function:steps(1)}
-@keyframes k29{0%,70.833%,100%{visibility:hidden}66.667%{visibility:visible}}
+@keyframes k29{0%,58.333%,100%{visibility:hidden}54.167%{visibility:visible}}
 .m28{animation-name:k29;animation-timing-function:steps(1)}
-@keyframes k30{0%,75%,100%{visibility:hidden}70.833%{visibility:visible}}
+@keyframes k30{0%,62.5%,100%{visibility:hidden}58.333%{visibility:visible}}
 .m29{animation-name:k30;animation-timing-function:steps(1)}
-@keyframes k31{0%,79.167%,100%{visibility:hidden}75%{visibility:visible}}
+@keyframes k31{0%,66.667%,100%{visibility:hidden}62.5%{visibility:visible}}
 .m30{animation-name:k31;animation-timing-function:steps(1)}
-@keyframes k32{0%,83.333%,100%{visibility:hidden}79.167%{visibility:visible}}
+@keyframes k32{0%,70.833%,100%{visibility:hidden}66.667%{visibility:visible}}
 .m31{animation-name:k32;animation-timing-function:steps(1)}
-@keyframes k33{0%,87.5%,100%{visibility:hidden}83.333%{visibility:visible}}
+@keyframes k33{0%,75%,100%{visibility:hidden}70.833%{visibility:visible}}
 .m32{animation-name:k33;animation-timing-function:steps(1)}
-@keyframes k34{0%,91.667%,100%{visibility:hidden}87.5%{visibility:visible}}
+@keyframes k34{0%,79.167%,100%{visibility:hidden}75%{visibility:visible}}
 .m33{animation-name:k34;animation-timing-function:steps(1)}
-@keyframes k35{0%,95.833%,100%{visibility:hidden}91.667%{visibility:visible}}
+@keyframes k35{0%,83.333%,100%{visibility:hidden}79.167%{visibility:visible}}
 .m34{animation-name:k35;animation-timing-function:steps(1)}
-@keyframes k36{0%{visibility:hidden}95.833%,99.996%,100%{visibility:visible}}
+@keyframes k36{0%,87.5%,100%{visibility:hidden}83.333%{visibility:visible}}
 .m35{animation-name:k36;animation-timing-function:steps(1)}
-@keyframes k37{0%,0.833%{opacity:0}2.917%,100%{opacity:1}}
-@keyframes k38{0%,0.833%{translate:0px 8px}2.917%,100%{translate:0px 0px}}
-.m36{animation-name:k37,k38}
+@keyframes k37{0%,91.667%,100%{visibility:hidden}87.5%{visibility:visible}}
+.m36{animation-name:k37;animation-timing-function:steps(1)}
+@keyframes k38{0%,95.833%,100%{visibility:hidden}91.667%{visibility:visible}}
+.m37{animation-name:k38;animation-timing-function:steps(1)}
+@keyframes k39{0%{visibility:hidden}95.833%,99.996%,100%{visibility:visible}}
+.m38{animation-name:k39;animation-timing-function:steps(1)}
+@keyframes k40{0%,0.833%{opacity:0}2.917%,100%{opacity:1}}
+@keyframes k41{0%,0.833%{translate:0px 8px}2.917%,100%{translate:0px 0px}}
+.m39{animation-name:k40,k41}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-12s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="960" height="540" fill="var(--base00)"/>
   <g fill="var(--base04)">
     <g class="a m1">
-      <circle cx="0.053" cy="497.213" r="0.66" opacity="0.355"/>
+      <circle cx="11.237" cy="33.457" r="1.279" opacity="0.6"/>
     </g>
-    <circle cx="232.325" cy="202.085" r="1.037" opacity="0.599"/>
-    <circle cx="51.732" cy="369.311" r="0.821" opacity="0.711"/>
-    <circle cx="775.113" cy="66.332" r="0.862" opacity="0.712"/>
-    <circle cx="872.001" cy="201.013" r="0.702" opacity="0.669"/>
-    <circle cx="318.962" cy="82.39" r="0.668" opacity="0.464"/>
-    <circle cx="283.078" cy="506.121" r="0.902" opacity="0.615"/>
-    <circle cx="842.738" cy="31.656" r="0.646" opacity="0.53"/>
+    <circle cx="389.301" cy="251.766" r="0.616" opacity="0.527"/>
+    <circle cx="497.666" cy="106.454" r="0.731" opacity="0.397"/>
+    <circle cx="842.668" cy="103.028" r="0.529" opacity="0.327"/>
     <g class="a m2">
-      <circle cx="52.685" cy="197.35" r="0.71" opacity="0.582"/>
+      <circle cx="279.313" cy="295.867" r="1.086" opacity="0.287"/>
     </g>
-    <circle cx="494.261" cy="89.397" r="0.765" opacity="0.392"/>
-    <circle cx="349.878" cy="228.933" r="0.699" opacity="0.516"/>
-    <circle cx="317.376" cy="211.373" r="1.115" opacity="0.689"/>
-    <circle cx="106.631" cy="442.361" r="0.47" opacity="0.453"/>
-    <circle cx="147.429" cy="42.057" r="1.297" opacity="0.36"/>
-    <circle cx="132.283" cy="497.81" r="1.196" opacity="0.695"/>
+    <circle cx="167.944" cy="192.77" r="0.783" opacity="0.26"/>
+    <circle cx="84.582" cy="414.729" r="0.732" opacity="0.463"/>
+    <circle cx="449.916" cy="510.959" r="1.033" opacity="0.594"/>
     <g class="a m3">
-      <circle cx="849.812" cy="490.192" r="1.085" opacity="0.388"/>
+      <circle cx="317.422" cy="192.421" r="0.525" opacity="0.317"/>
     </g>
-    <circle cx="238.362" cy="41.062" r="0.401" opacity="0.558"/>
-    <circle cx="222.121" cy="400.22" r="0.84" opacity="0.594"/>
-    <circle cx="228.527" cy="476.327" r="0.612" opacity="0.437"/>
-    <circle cx="858.506" cy="63.921" r="0.84" opacity="0.251"/>
-    <circle cx="876.471" cy="343.943" r="1.23" opacity="0.26"/>
+    <circle cx="309.53" cy="102.803" r="0.969" opacity="0.418"/>
+    <circle cx="41.886" cy="369.497" r="1.229" opacity="0.524"/>
+    <circle cx="314.934" cy="391.107" r="0.895" opacity="0.628"/>
+    <circle cx="937.857" cy="301.079" r="1.141" opacity="0.465"/>
+    <circle cx="227.362" cy="5.03" r="0.422" opacity="0.722"/>
+    <circle cx="946.824" cy="350.984" r="1.124" opacity="0.562"/>
+    <circle cx="796.933" cy="75.095" r="1.295" opacity="0.503"/>
+    <circle cx="544.214" cy="86.876" r="0.757" opacity="0.355"/>
+    <circle cx="781.001" cy="465.246" r="1.062" opacity="0.579"/>
+    <circle cx="950.633" cy="329.027" r="1.063" opacity="0.728"/>
     <g class="a m4">
-      <circle cx="864.051" cy="101.592" r="1.272" opacity="0.533"/>
+      <circle cx="469.651" cy="124.078" r="0.926" opacity="0.648"/>
     </g>
-    <circle cx="255.621" cy="120.299" r="0.588" opacity="0.532"/>
-    <circle cx="50.252" cy="415.489" r="1.031" opacity="0.607"/>
-    <circle cx="478.26" cy="17.675" r="0.499" opacity="0.71"/>
-    <circle cx="125.53" cy="371.445" r="1.204" opacity="0.269"/>
-    <circle cx="847.81" cy="465.138" r="1.293" opacity="0.727"/>
-    <circle cx="846.927" cy="215.082" r="0.611" opacity="0.452"/>
-    <circle cx="851.506" cy="301.739" r="0.716" opacity="0.561"/>
-    <circle cx="190.681" cy="168.326" r="1.287" opacity="0.747"/>
+    <circle cx="182.323" cy="299.644" r="0.83" opacity="0.513"/>
+    <circle cx="172.998" cy="135.342" r="0.795" opacity="0.489"/>
+    <circle cx="164.007" cy="1.734" r="0.556" opacity="0.262"/>
+    <circle cx="102.939" cy="473.205" r="1.285" opacity="0.28"/>
+    <circle cx="167.477" cy="218.72" r="0.849" opacity="0.616"/>
     <g class="a m5">
-      <circle cx="619.407" cy="73.111" r="0.848" opacity="0.529"/>
+      <circle cx="353.518" cy="194.409" r="1.112" opacity="0.605"/>
     </g>
-    <circle cx="907.935" cy="260.319" r="0.568" opacity="0.473"/>
-    <circle cx="159.457" cy="357.811" r="0.87" opacity="0.531"/>
-    <circle cx="24.978" cy="161.372" r="0.888" opacity="0.351"/>
+    <circle cx="280.94" cy="284.72" r="1.099" opacity="0.29"/>
+    <circle cx="242.11" cy="446.495" r="1.145" opacity="0.637"/>
+    <circle cx="412.637" cy="192.732" r="1.228" opacity="0.376"/>
+    <circle cx="346.954" cy="257.561" r="1.147" opacity="0.452"/>
     <g class="a m6">
-      <circle cx="412.004" cy="40.669" r="1.096" opacity="0.661"/>
+      <circle cx="935.584" cy="297.692" r="0.793" opacity="0.419"/>
     </g>
-    <circle cx="873.618" cy="367.688" r="1.263" opacity="0.263"/>
-    <circle cx="35.536" cy="73.418" r="0.472" opacity="0.304"/>
-    <circle cx="81.452" cy="5.128" r="0.945" opacity="0.723"/>
-    <circle cx="184.331" cy="72.169" r="0.582" opacity="0.587"/>
+    <circle cx="281.525" cy="477.463" r="0.915" opacity="0.743"/>
+    <circle cx="893.823" cy="297.353" r="0.992" opacity="0.331"/>
+    <circle cx="368.465" cy="159.507" r="0.481" opacity="0.592"/>
     <g class="a m7">
-      <circle cx="233.529" cy="246.433" r="1.295" opacity="0.461"/>
+      <circle cx="702.843" cy="520.9" r="0.686" opacity="0.38"/>
     </g>
-    <circle cx="220.926" cy="436.125" r="1.277" opacity="0.326"/>
-    <circle cx="888.516" cy="274.711" r="0.51" opacity="0.355"/>
+    <circle cx="924.229" cy="122.316" r="1.281" opacity="0.391"/>
+    <circle cx="261.04" cy="449.25" r="0.834" opacity="0.32"/>
+    <circle cx="852.508" cy="514.638" r="0.538" opacity="0.301"/>
+    <circle cx="275.436" cy="282.888" r="0.753" opacity="0.705"/>
+    <circle cx="473.398" cy="500.006" r="1.008" opacity="0.648"/>
+    <circle cx="320.193" cy="491.168" r="1.273" opacity="0.671"/>
     <g class="a m8">
-      <circle cx="72.222" cy="223.246" r="0.683" opacity="0.252"/>
+      <circle cx="2.569" cy="90.44" r="1.077" opacity="0.302"/>
     </g>
-    <circle cx="396.926" cy="49.326" r="0.611" opacity="0.712"/>
-    <circle cx="923.947" cy="432.516" r="0.996" opacity="0.536"/>
-    <circle cx="334.113" cy="219.782" r="0.847" opacity="0.497"/>
-    <circle cx="343.461" cy="42.775" r="0.708" opacity="0.691"/>
-    <circle cx="198.788" cy="128.608" r="1.119" opacity="0.302"/>
-    <circle cx="878.937" cy="432.098" r="0.972" opacity="0.606"/>
-    <circle cx="838.752" cy="146.115" r="1.018" opacity="0.467"/>
-    <circle cx="379.281" cy="101.259" r="0.93" opacity="0.366"/>
-    <circle cx="862.887" cy="443.912" r="0.704" opacity="0.591"/>
-    <circle cx="842.284" cy="62.598" r="0.677" opacity="0.71"/>
-    <circle cx="1.264" cy="71.18" r="0.758" opacity="0.261"/>
-    <circle cx="909.432" cy="377.912" r="0.558" opacity="0.308"/>
-    <circle cx="601.522" cy="8.605" r="1.131" opacity="0.546"/>
-    <circle cx="721.078" cy="69.153" r="0.698" opacity="0.607"/>
-    <circle cx="916.849" cy="295.835" r="0.929" opacity="0.639"/>
+    <circle cx="875.35" cy="146.486" r="0.93" opacity="0.381"/>
+    <circle cx="940.327" cy="44.482" r="0.477" opacity="0.441"/>
+    <circle cx="102.099" cy="260.648" r="0.793" opacity="0.522"/>
     <g class="a m9">
-      <circle cx="43.56" cy="331.166" r="0.602" opacity="0.541"/>
+      <circle cx="161.285" cy="417.028" r="0.673" opacity="0.596"/>
     </g>
-    <circle cx="214.118" cy="334.809" r="0.967" opacity="0.656"/>
-    <circle cx="229.899" cy="488.98" r="0.447" opacity="0.595"/>
-    <circle cx="390.454" cy="427.664" r="0.994" opacity="0.652"/>
-    <circle cx="100.468" cy="496.513" r="0.851" opacity="0.661"/>
-    <circle cx="407.937" cy="467.798" r="1.112" opacity="0.614"/>
+    <circle cx="35.469" cy="98.307" r="1.045" opacity="0.696"/>
+    <circle cx="270.614" cy="453.518" r="0.98" opacity="0.411"/>
+    <circle cx="90.983" cy="57.638" r="1.29" opacity="0.597"/>
+    <circle cx="247.455" cy="279.687" r="0.464" opacity="0.508"/>
+    <circle cx="409.426" cy="420.767" r="0.546" opacity="0.621"/>
+    <g class="a m10">
+      <circle cx="163.64" cy="128.993" r="0.584" opacity="0.69"/>
+    </g>
+    <circle cx="32.103" cy="507.747" r="1.229" opacity="0.492"/>
+    <circle cx="71.511" cy="321.446" r="1.049" opacity="0.673"/>
+    <circle cx="66.961" cy="307.894" r="0.733" opacity="0.278"/>
+    <circle cx="883.621" cy="147.318" r="0.54" opacity="0.392"/>
+    <g class="a m11">
+      <circle cx="333.675" cy="428.383" r="1.141" opacity="0.683"/>
+    </g>
+    <circle cx="314.288" cy="130.534" r="0.847" opacity="0.549"/>
+    <g class="a m12">
+      <circle cx="782.913" cy="67.31" r="0.899" opacity="0.52"/>
+    </g>
+    <circle cx="601.937" cy="41.98" r="0.777" opacity="0.723"/>
+    <circle cx="936.622" cy="34.022" r="1.086" opacity="0.473"/>
+    <circle cx="215.532" cy="265.795" r="0.603" opacity="0.677"/>
+    <circle cx="959.703" cy="288.668" r="1.25" opacity="0.333"/>
   </g>
   <circle cx="630" cy="292" r="231.8" fill="url(#g1)"/>
   <path d="M630 482l-19.9-1-13.1-1.9-13-2.7-6.4-1.8-18.8-6.4-18-8.4-11.5-6.7-16.3-11.4-15-13-4.7-4.7-8.8-9.9-4.2-5.1-7.8-10.8-10.3-17-8.4-18-6.4-18.8-1.8-6.4-2.7-13-1.9-13.1-1-19.9 1-19.9 1.9-13.1 2.7-13 1.8-6.4 6.4-18.8 8.4-18 6.7-11.5 11.4-16.3 13-15 4.7-4.7 9.9-8.8 5.1-4.2 10.8-7.8 17-10.3 18-8.4 18.8-6.4 6.4-1.8 13-2.7 13.1-1.9 19.9-1 19.9 1 13.1 1.9 13 2.7 6.4 1.8 18.8 6.4 18 8.4 11.5 6.7 16.3 11.4 15 13 4.7 4.7 8.8 9.9 4.2 5.1 7.8 10.8 10.3 17 8.4 18 6.4 18.8 1.8 6.4 2.7 13 1.9 13.1 1 19.9-1 19.9-1.9 13.1-2.7 13-1.8 6.4-6.4 18.8-8.4 18-6.7 11.5-11.4 16.3-13 15-4.7 4.7-9.9 8.8-5.1 4.2-10.8 7.8-17 10.3-18 8.4-18.8 6.4-6.4 1.8-13 2.7-13.1 1.9-19.9 1z" fill="url(#g2)"/>
@@ -221,7 +232,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
   <path d="M575.3 473.9l7.2 1.4 8.6-.5 9.1-2.4 6.2-2.8 9.5-5.7 9.6-7.6 9.8-9.4 9.6-11.1 6.4-8.3 9.3-13.6 9-15 11.3-21.8 5.3-11.5 7.4-18 6.7-18.5 4.1-12.6 5.4-19.2 3.1-12.8 2.7-12.7 3.3-19 2.3-18.5 1.3-17.8 .3-17.1-.7-16-1.8-14.9-2.7-13.5-2.3-8.1-4.3-10.9-5.2-9.2-6-7.4-6.8-5.5-7.5-3.6 18 6.5 6 2.6 11.9 6 11.4 6.8 16.1 11.6 10.1 8.7 9.4 9.3 4.4 4.9 12.4 15.6 10.6 16.8 8.8 17.9 4.8 12.3 5.5 19.1 3.6 19.6 1.5 19.8-.2 13.3-.5 6.6-.6 6.6-2 13.1-4.8 19.3-4.2 12.6-8 18.2-9.9 17.3-11.6 16.1-8.7 10.1-9.3 9.4-4.9 4.4-15.6 12.4-16.8 10.6-17.9 8.8-12.3 4.8-19.1 5.5-19.6 3.6-19.8 1.5-13.3-.2-6.6-.5-6.6-.6-13.1-2-19.3-4.8z" fill="var(--base00)" opacity="0.75" filter="url(#f1)"/>
   <path d="M562.2 469.5l16.9 5.1 14.7 2.9 15.8 1.8 16.4 .8 8.3 0 16.4-.8 15.8-1.9 14.6-2.8 6.8-1.8 9.9-3.3M473.1 398.7l5 5 6 4.9 7.2 4.7 8.3 4.4 9.2 4.1 10.2 3.8 11 3.4 11.8 3.1 12.4 2.7 13 2.3 27.4 3.2 28.4 1.4 14.4 0 14.3-.5 14.1-1 27.4-3.2 13-2.3 12.4-2.7 22.7-6.5 10.2-3.8 9.2-4.2 8.2-4.4 7.1-4.6 6.1-4.9 4.9-5.1 3-4M470 394.5l3.1 4.2M448.9 313.5l5.7 5.8 7 5.6 8.3 5.4 9.5 5.1 10.7 4.8 11.7 4.3 12.7 4 13.6 3.6 14.4 3.1 15 2.6 15.6 2.1 16 1.6 16.3 1.1 16.5 .5 16.6 0 16.5-.5 16.4-1.1 16-1.6 30.5-4.8 14.4-3.1 13.6-3.6 12.6-4 11.7-4.4 10.7-4.7 9.5-5.1 8.2-5.4 7-5.6 5.7-5.9 4.2-6 2.9-6.1 1.4-6.2 .2-3M440 292l.2 3.2 1.5 6.2 2.9 6.1 4.3 6M473.1 222.5l5 5.1 6 4.8 7.2 4.7 8.3 4.4 9.2 4.1 10.2 3.8 11 3.5 24.2 5.7 13 2.3 27.4 3.2 28.4 1.4 14.4 0 14.3-.5 14.1-.9 13.9-1.4 26.5-4.1 12.4-2.7 11.7-3.1 11-3.5 10.2-3.8 9.2-4.1 8.2-4.4 7.1-4.7 6.1-4.9 4.9-5 3.7-5.2 2.5-5.3 1.2-5.4 0-5.3-1.3-5.4-3.1-6.3M470 189.5l-3.2 6.4-1.2 5.4 0 5.4 1.3 5.3 2.5 5.3 3.7 5.2M539.4 150.2l2.9 2.9 7.6 5.5 10.1 4.9 5.9 2.2 13.2 3.8 7.1 1.5 15.3 2.4 8.1 .8 16.4 .8 16.5-.3 16.2-1.3 15.3-2.4 7.1-1.6 13.2-3.8 11.1-4.5 4.8-2.6 7.6-5.5 2.8-2.9 2.2-3 1.4-3.1 .7-3.1 0-3.1-.7-3.1-1.5-3-2.1-3-2.9-2.9-7.6-5.5-4.8-2.6-7.5-3.2M562.2 114.5l-7.6 3.3-8.9 5.2-3.5 2.9-2.8 2.9-2.2 3-1.4 3-.7 3.1 0 3.1 .7 3.1 1.5 3.1 2.1 3" fill="none" stroke="var(--base05)" stroke-opacity="0.08" stroke-width="1"/>
   <path d="M575.3 473.9l7.2 1.4 8.6-.5 9.1-2.4 6.2-2.8 9.5-5.7 9.6-7.6 9.8-9.4 9.6-11.1 6.4-8.3 9.3-13.6 9-15 11.3-21.8 5.3-11.5 7.4-18 6.7-18.5 4.1-12.6 5.4-19.2 3.1-12.8 2.7-12.7 3.3-19 2.3-18.5 1.3-17.8 .3-17.1-.7-16-1.8-14.9-2.7-13.5-2.3-8.1-4.3-10.9-5.2-9.2-6-7.4-6.8-5.5-4.9-2.6-3.4-1.2" fill="none" stroke="var(--base0E)" stroke-width="14" opacity="0.28" filter="url(#f2)"/>
-  <g transform="translate(630 292)" class="a m10">
+  <g transform="translate(630 292)" class="a m13">
     <g style="--p1:-54.844deg" fill="var(--base0C)">
       <circle class="g d" r="2.1" style="--p2:-70.541deg"/>
       <circle class="g d" r="2.1" style="--p2:-65.676deg"/>
@@ -1930,36 +1941,36 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
     <text class="g n" style="--p1:-33.87deg;--p2:151.21deg" x="7" y="-6" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--base06)">Sydney</text>
   </g>
   <path d="M630 482l-19.9-1-13.1-1.9-13-2.7-6.4-1.8-18.8-6.4-18-8.4-11.5-6.7-16.3-11.4-15-13-4.7-4.7-8.8-9.9-4.2-5.1-7.8-10.8-10.3-17-8.4-18-6.4-18.8-1.8-6.4-2.7-13-1.9-13.1-1-19.9 1-19.9 1.9-13.1 2.7-13 1.8-6.4 6.4-18.8 8.4-18 6.7-11.5 11.4-16.3 13-15 4.7-4.7 9.9-8.8 5.1-4.2 10.8-7.8 17-10.3 18-8.4 18.8-6.4 6.4-1.8 13-2.7 13.1-1.9 19.9-1 19.9 1 13.1 1.9 13 2.7 6.4 1.8 18.8 6.4 18 8.4 11.5 6.7 16.3 11.4 15 13 4.7 4.7 8.8 9.9 4.2 5.1 7.8 10.8 10.3 17 8.4 18 6.4 18.8 1.8 6.4 2.7 13 1.9 13.1 1 19.9-1 19.9-1.9 13.1-2.7 13-1.8 6.4-6.4 18.8-8.4 18-6.7 11.5-11.4 16.3-13 15-4.7 4.7-9.9 8.8-5.1 4.2-10.8 7.8-17 10.3-18 8.4-18.8 6.4-6.4 1.8-13 2.7-13.1 1.9-19.9 1z" fill="none" stroke="var(--base05)" stroke-opacity="0.25" stroke-width="0.8"/>
-  <g class="a m36">
-    <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m11">
+  <g class="a m39">
+    <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" class="a m14">
       <text x="48" y="76" font-size="30" font-weight="600" fill="var(--base06)">Sunset across the June solstice</text>
     </g>
     <text x="48" y="102" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="15" fill="var(--base04)">The 50 largest cities light up as the sun sets on them.</text>
     <g font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" fill="var(--base06)">
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m12">00:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m13">01:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m14">02:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m15">03:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m16">04:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m17">05:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m18">06:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m19">07:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m20">08:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m21">09:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m22">10:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m23">11:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m24">12:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m25">13:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m26">14:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m27">15:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m28">16:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m29">17:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m30">18:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m31">19:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m32">20:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m33">21:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m34">22:00</text>
-      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m35">23:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m15">00:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m16">01:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m17">02:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m18">03:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m19">04:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m20">05:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m21">06:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m22">07:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m23">08:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m24">09:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m25">10:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m26">11:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m27">12:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m28">13:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m29">14:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m30">15:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m31">16:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m32">17:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m33">18:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m34">19:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m35">20:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m36">21:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m37">22:00</text>
+      <text x="48" y="468" font-size="44" letter-spacing="-1" class="a m38">23:00</text>
       <text x="48" y="492" font-size="13" fill="var(--base04)">21 June 2026 UTC</text>
     </g>
   </g>

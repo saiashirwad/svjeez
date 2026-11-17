@@ -1,18 +1,12 @@
-// What a scene's proof chip says and hands out: its size, a friendly download name, and an <img> tag to paste. The page
-// builds it at build time, and the hero rebuilds it in the browser when a knob swaps its file.
-
-/** The facts about one scene file that the chip needs, small enough to ship to the browser for every hero variant. */
 export interface FileFacts {
   readonly src: string;
   readonly width: number;
   readonly height: number;
   readonly gzip: number;
-  /** Bytes of script inside the SVG. Zero for every svjeez scene, and counted rather than claimed. */
   readonly script: number;
 }
 
 export interface SceneFile {
-  /** Gzipped size, as the chip shows it. */
   readonly size: string;
   readonly download: string;
   /** Pixel size, gzipped size and script, for the menu's first line. */

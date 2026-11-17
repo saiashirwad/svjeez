@@ -8,7 +8,7 @@ import {
   toBars,
   type Topology,
 } from "@svjeez/geo";
-import { motion, render, show, type SvgNode } from "svjeez";
+import { motion, render, show, span, type SvgNode } from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
@@ -29,7 +29,6 @@ const map = project(countries, {
   filter: (f) => f.properties?.name !== "Antarctica",
 });
 
-/** Classes five years wide from 35 to 85, so each edge of the legend is a round number. */
 const scale = sequential(palettes.viridis, { domain: [35, 85], steps: 10, empty: "#2a343f" });
 
 const FIRST = 0.6;
@@ -58,7 +57,6 @@ const circles = cartogram({ at: CARTOGRAM, over: MORPH }, map, POPULATION, {
   fill: (region) => scale(lifeNow[region.id] ?? NaN),
 });
 
-// Ten bars start 0.07s apart, each taking MORPH, so the last lands 9 * 0.07s after the first.
 const bars = toBars({ at: BARS, over: MORPH + 9 * 0.07 }, map, POPULATION, {
   stagger: 0.07,
   frame: rect(580, 150, 300, 300),
@@ -66,33 +64,29 @@ const bars = toBars({ at: BARS, over: MORPH + 9 * 0.07 }, map, POPULATION, {
   fill: (region) => scale(lifeNow[region.id] ?? NaN),
 });
 
-/** The map stays under the shapes and fades while they take over, so no region pops. */
 const mapShown = motion({ opacity: 1 })
-  .at(CARTOGRAM)
-  .to({ opacity: 0 }, MORPH * 0.6)
-  .at(BARS - 0.8)
-  .to({ opacity: 1 }, 0.6)
-  .at(BARS)
-  .to({ opacity: 0 }, MORPH * 0.6);
+  .to({ opacity: 0 }, span(CARTOGRAM, MORPH * 0.6))
+  .to({ opacity: 1 }, span(BARS - 0.8, 0.6))
+  .to({ opacity: 0 }, span(BARS, MORPH * 0.6));
 
-const fadeOut = motion({ opacity: 1 }).at(OUT).to({ opacity: 0 }, 0.7);
+const fadeOut = motion({ opacity: 1 }).to({ opacity: 0 }, span(OUT, 0.7));
 
 const Heading = (): SvgNode => (
   <g fontFamily={SANS}>
     <text x={40} y={54} fontSize={26} fontWeight={700} fill={INK}>
       Life expectancy at birth
     </text>
-    <g animation={show({ at: 0, over: CARTOGRAM - 0.2 }, { fade: 0.5 })}>
+    <g animation={show(span(0).until(CARTOGRAM - 0.2), { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         Years a newborn can expect to live, 1960 to 2020
       </text>
     </g>
-    <g animation={show({ at: CARTOGRAM - 0.2, over: BARS - CARTOGRAM }, { fade: 0.5 })}>
+    <g animation={show(span(CARTOGRAM - 0.2).until(BARS - 0.2), { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         Circle area is population in 2020. Color is life expectancy in 2020.
       </text>
     </g>
-    <g animation={show({ at: BARS - 0.2, over: OUT - BARS + 0.2 }, { fade: 0.5 })}>
+    <g animation={show(span(BARS - 0.2).until(OUT), { fade: 0.5 })}>
       <text x={40} y={78} fontSize={13} fill={DIM}>
         The ten most populous countries, 2020 (millions of people)
       </text>
@@ -126,16 +120,15 @@ const Year = (): SvgNode => (
   </g>
 );
 
-/** Names on the biggest circles, once they have landed. */
 const Names = (): SvgNode => (
   <g
     fontFamily={SANS}
     fontSize={11}
     fontWeight={650}
     fill="#0b1118"
-    animation={show({ at: CARTOGRAM + MORPH, over: BARS - CARTOGRAM - MORPH - 0.4 }, { fade: 0.5 })}
+    animation={show(span(CARTOGRAM + MORPH).until(BARS - 0.4), { fade: 0.5 })}
   >
-    {[...circles.bubbles]
+    {[...circles.parts]
       .sort((a, b) => b.value - a.value)
       .slice(0, 7)
       .filter((b) => String(b.region.properties?.name).length * 6.5 < 2 * b.r)
@@ -151,11 +144,9 @@ const Labels = (): SvgNode => (
   <g
     fontFamily={SANS}
     fontSize={12}
-    animation={motion({ opacity: 0 })
-      .at(BARS + MORPH + 0.7)
-      .to({ opacity: 1 }, 0.5)}
+    animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(BARS + MORPH + 0.7, 0.5))}
   >
-    {bars.bars.map(({ region, value, rect: r }) => (
+    {bars.parts.map(({ region, value, box: r }) => (
       <>
         <text x={r.x - 8} y={r.y + r.h / 2 + 4} textAnchor="end" fill={INK}>
           {String(region.properties?.name)}
@@ -183,18 +174,9 @@ export default function build(): string {
       <rect width={W} height={H} fill="#0b1118" />
       <Heading />
       <Year />
-      <g animation={[mapShown, fadeOut]}>{years.node}</g>
-      <g
-        animation={[
-          fadeOut,
-          motion()
-            .at(BARS - 1)
-            .to({ opacity: 0 }, 0.7),
-        ]}
-      >
-        {circles.node}
-      </g>
-      <g animation={fadeOut}>{bars.node}</g>
+      <g animation={[mapShown, fadeOut]}>{years}</g>
+      <g animation={[fadeOut, motion().to({ opacity: 0 }, span(BARS - 1, 0.7))]}>{circles}</g>
+      <g animation={fadeOut}>{bars}</g>
       <Names />
       <Labels />
       <g animation={show({ at: 0, over: OUT + 0.7 }, { fade: 0.5 })}>

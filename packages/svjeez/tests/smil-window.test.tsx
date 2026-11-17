@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span } from "svjeez";
 import { renderFrames } from "svjeez/frames";
 import { restyle } from "svjeez/page";
 
@@ -23,34 +23,29 @@ const B = "M4 4L16 4L16 16L4 16Z";
 const size = { width: 20, height: 20, title: "Window" };
 const attrsOf = (svg: string, tag: string) => svg.match(new RegExp(`<${tag}\\b[^>]*>`, "g")) ?? [];
 
-/** A morph that rests on A, runs to B and stays there for the rest of a 10 second loop. */
 const morph = render(
   { ...size, duration: 10 },
-  <path d={A} fill="red" animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />,
+  <path d={A} fill="red" animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
 );
 
-/** A morph that returns to where it started. */
 const there = render(
   { ...size, duration: 10 },
   <path
     d={A}
     fill="red"
     animation={motion({ d: A })
-      .at(2)
-      .to({ d: B }, 1, ease.linear)
-      .at(8)
-      .to({ d: A }, 1, ease.linear)}
+      .to({ d: B }, span(2, 1), ease.linear)
+      .to({ d: A }, span(8, 1), ease.linear)}
   />,
 );
 
 const blur = render(
   { ...size, duration: 10, playbackRate: 2 },
-  <g animation={motion({ blur: 6 }).at(1).to({ blur: 0 }, 2, ease.linear)}>
+  <g animation={motion({ blur: 6 }).to({ blur: 0 }, span(1, 2), ease.linear)}>
     <rect width={9} height={9} />
   </g>,
 );
 
-/** The same scene with the plain looping `<animate>` the compiler used to write. */
 const plain = (svg: string, values: string, keyTimes: string, dur: string, attribute = "d") =>
   svg.replace(
     /<animate id="[^"]*"[^>]*\/>(?:\s*<set[^>]*\/>)*/,
@@ -70,7 +65,6 @@ describe("windowed SMIL markup", () => {
     expect(animate).toContain('dur="1s"');
     expect(animate).toContain('fill="freeze"');
     expect(animate).not.toContain("repeatCount");
-    // Past the window it holds B, so the next loop's start resets to A.
     expect(attrsOf(morph, "set")).toEqual([
       `<set attributeName="d" to="${A}" begin="0s;w1.begin+8s" dur="2s" fill="freeze" data-loop="10s"/>`,
     ]);
@@ -85,7 +79,7 @@ describe("windowed SMIL markup", () => {
   test("the element holds the last value and the reduced-motion twin keeps the still frame", () => {
     const svg = render(
       { ...size, duration: 10, reducedMotion: { at: 0.5 } },
-      <path d={A} animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />,
+      <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
     );
 
     expect(svg).toContain(`<path d="${B}" class="dm">`);
@@ -93,7 +87,7 @@ describe("windowed SMIL markup", () => {
 
     const filter = render(
       { ...size, duration: 10, reducedMotion: { at: 0.5 } },
-      <g animation={motion({ blur: 6 }).at(2).to({ blur: 0 }, 1, ease.linear)} />,
+      <g animation={motion({ blur: 6 }).to({ blur: 0 }, span(2, 1), ease.linear)} />,
     );
 
     expect(filter).toContain('<feGaussianBlur stdDeviation="0">');
@@ -109,8 +103,8 @@ describe("windowed SMIL markup", () => {
     const svg = render(
       { ...size, duration: 10, prefix: "x" },
       <>
-        <path d={A} animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />
-        <path d={A} animation={motion({ d: A }).at(3).to({ d: B }, 1, ease.linear)} />
+        <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />
+        <path d={A} animation={motion({ d: A }).to({ d: B }, span(3, 1), ease.linear)} />
       </>,
     );
 
@@ -122,7 +116,7 @@ describe("windowed SMIL markup", () => {
   test("a motion that fills the loop is left as it was", () => {
     const svg = render(
       { ...size, duration: 10 },
-      <path d={A} animation={motion({ d: A }).at(1).to({ d: B }, 8, ease.linear)} />,
+      <path d={A} animation={motion({ d: A }).to({ d: B }, span(1, 8), ease.linear)} />,
     );
 
     expect(attrsOf(svg, "animate")[0]).toContain('repeatCount="indefinite"');
@@ -132,7 +126,7 @@ describe("windowed SMIL markup", () => {
   test("loop: false and Once keep the plain animate", () => {
     const still = render(
       { ...size, duration: 10, loop: false },
-      <path d={A} animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />,
+      <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
     );
 
     expect(attrsOf(still, "animate")[0]).not.toContain("w1");
@@ -154,14 +148,12 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
         expect(same(a.frames[index]!.png, b.frames[index]!.png), `at ${time}s`).toBe(true);
       });
 
-      // The scene moves, so the check compares pictures that differ.
       expect(a.frames.some((frame) => !same(frame.png, a.frames[0]!.png))).toBe(true);
     });
 
   check("a morph that resets at the top of the loop", morph, morphPlain);
   check("a morph that comes back", there, therePlain);
 
-  // Loops 2 and 3 only: the merged set resets the first value at each loop start.
   check(
     "the merged set resets each later loop",
     morph,
@@ -181,7 +173,6 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
     for (const at of [1, 2.5, 6, 11, 12.5]) {
       for (const paused of [true, false]) {
         const options = { at, paused };
-        // A copy started `at` seconds in shows, `later` seconds on, what the scene shows at `at + later`.
         const later = paused ? [0, 3] : [0, 0.25, 3, 7];
 
         const [a, b] = await Promise.all([

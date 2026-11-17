@@ -21,7 +21,6 @@ const plot = chart({
   fontSize: 12,
 });
 
-/** The data shot, written from 0. */
 export const dataShot = () => {
   const grow = 0.5;
 
@@ -37,7 +36,6 @@ export const dataShot = () => {
     label: "stars",
   });
 
-  // Blip pops up on the second tallest bar once the bars are in, and cheers when the trend line lands.
   const last = pairs.at(-2)!;
   const perch = { x: plot.x(last[0]), y: plot.y(last[1]) };
 
@@ -49,8 +47,8 @@ export const dataShot = () => {
   return (
     <>
       <g animation={enter({ at: 0.15, over: 0.5 }, { opacity: 0 })}>{plot.node}</g>
-      {bars.node}
-      {trend.node}
+      {bars}
+      {trend}
       <Blip
         x={perch.x}
         y={perch.y}

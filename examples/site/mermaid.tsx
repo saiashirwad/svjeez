@@ -4,7 +4,6 @@ import { enter, render, flow } from "svjeez";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// A Mermaid flowchart builds node by node, then a token traces the happy path.
 const W = 504;
 const H = 340;
 const BAR = 40;
@@ -19,7 +18,6 @@ const SOURCE = `flowchart LR
 
 const chart = mermaid(SOURCE, { theme, font: mono, fontSize: 13, play: { at: 0.4, step: 0.35 } });
 
-/** Mermaid's left-to-right ranks are wider than the card, so the chart is drawn at its own size and scaled down to fit. */
 const k = (W - 56) / chart.bounds.w;
 const place = `translate(${(W - chart.bounds.w * k) / 2} ${BAR + (H - BAR - 40 - chart.bounds.h * k) / 2}) scale(${k})`;
 

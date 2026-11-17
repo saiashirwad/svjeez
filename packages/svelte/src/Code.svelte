@@ -9,9 +9,7 @@
     file,
     control,
   }: {
-    editor: SceneEditor;
-    /** A file name for the header. */
-    file?: string;
+    editor: SceneEditor;    file?: string;
     /** Draws a value's control in place of the built-in one. Render `plain` to keep the built-in one. */
     control?: Snippet<[value: Value, plain: Snippet]>;
   } = $props();

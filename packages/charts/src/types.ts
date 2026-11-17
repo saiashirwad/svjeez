@@ -1,4 +1,4 @@
-import type { Attrs, Base16, Color, Ease, Point, Rect, Span, Spanned, SvgNode } from "svjeez";
+import type { Attrs, Base16, Color, Drawn, Ease, Part, Point, Rect, Span, SvgNode } from "svjeez";
 
 export type FontAttr = NonNullable<Attrs<"text">["fontFamily"]>;
 
@@ -6,7 +6,6 @@ export type Curve = "linear" | "monotone" | "step";
 
 export interface BandX {
   readonly kind: "band";
-  /** The categories, left to right. Each is one band. */
   readonly domain: readonly string[];
   /** Gap between bands as a fraction of a band, 0 to 1. Default 0.3. */
   readonly padding?: number;
@@ -15,7 +14,7 @@ export interface BandX {
 
 export interface LinearX {
   readonly kind: "linear";
-  /** `[min, max]`, widened to round numbers. Without it the scale fits `data`. */
+  /** `[min, max]`, widened to round numbers. Default: fits `data`. */
   readonly domain?: readonly [number, number];
   /** About how many ticks. Default 6. */
   readonly ticks?: number;
@@ -25,7 +24,7 @@ export interface LinearX {
 export type XScale = BandX | LinearX;
 
 export interface YScale {
-  /** `[min, max]`, widened to round numbers. Without it the scale fits `data`. */
+  /** `[min, max]`, widened to round numbers. Default: fits `data`. */
   readonly domain?: readonly [number, number];
   /** About how many ticks. Default 5. */
   readonly ticks?: number;
@@ -34,10 +33,8 @@ export interface YScale {
   readonly format?: (value: number) => string;
 }
 
-/** The x value a point carries: a category on a band scale, a number on a linear one. */
 export type XValue<K extends XScale["kind"]> = K extends "band" ? string : number;
 
-/** One point of a series, `[x, y]`. */
 export type Datum<K extends XScale["kind"]> = readonly [x: XValue<K>, y: number];
 
 export interface ChartOptions<X extends XScale = XScale> {
@@ -61,7 +58,10 @@ export interface SeriesOptions {
 }
 
 export interface ChartBarsOptions extends SeriesOptions {
-  /** Seconds between one bar's start and the next's. The last bar ends with the span, so each bar grows for `over - (bars - 1) * stagger`. Default 0.08, or less when the span is short. */
+  /**
+   * Seconds between one bar's start and the next's; each bar grows for `over - (bars - 1) * stagger`. Default 0.08,
+   * or less when the span is short.
+   */
   readonly stagger?: number;
   /** How each bar grows. Default `ease.out`. */
   readonly ease?: Ease;
@@ -89,39 +89,35 @@ export interface ChartAreaOptions extends ChartLineOptions {
   readonly line?: boolean;
 }
 
-export interface ChartBar {
-  readonly key: string;
+/** `box` is where the bar rests; `span` is its staggered window, from starting to grow to full height. */
+export interface ChartBar extends Part {
   readonly value: number;
-  /** Where the bar rests, in scene px. */
-  readonly bounds: Rect;
 }
 
-export interface ChartBars {
-  readonly node: SvgNode;
-  readonly bars: readonly ChartBar[];
-  /** The span you passed: the last bar has grown at its end. */
-  readonly span: Spanned;
+/** `span` is the span you passed: the last bar has grown at its end. `bounds` covers the bars. */
+export type ChartBars = Drawn<ChartBar>;
+
+/**
+ * A point by its x value as a string (`"Q3"`, `"2019"`). `span` starts when the line reaches it and lasts while its
+ * dot pops in; both are empty without `dots`.
+ */
+export interface ChartPoint extends Part {
+  readonly point: Point;
+  readonly value: number;
 }
 
-export interface ChartLine {
-  readonly node: SvgNode;
-  /** The path data of the line. */
+/** `span` runs from `at` to when the line has drawn, with its label. `bounds` covers the points. */
+export interface ChartLine extends Drawn<ChartPoint> {
   readonly d: string;
-  /** Every point, in scene px. */
-  readonly points: readonly Point[];
-  /** From `at` to when the line has drawn, with its label. */
-  readonly span: Spanned;
 }
 
 export interface ChartArea extends ChartLine {
-  /** The path data of the filled shape. */
   readonly fill: string;
 }
 
 export interface Chart<K extends XScale["kind"] = XScale["kind"]> {
   /** The axes, ticks, labels and grid. They are drawn at once; wrap them in a motion to fade them in. */
   readonly node: SvgNode;
-  /** The plot area. */
   readonly bounds: Rect;
   /** A band's center, or a linear value, in scene px. */
   x(value: XValue<K>): number;

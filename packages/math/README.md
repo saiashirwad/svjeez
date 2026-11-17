@@ -31,7 +31,7 @@ export default () =>
     <>
       {m.node}
       <Brace
-        target={expanded.get("mid")}
+        target={expanded.part("mid").box}
         side="below"
         label="cross term"
         show={{ at: 2.5, over: 1.5 }}
@@ -51,13 +51,13 @@ export default () =>
 
 The formula it returns has:
 
-- `node`, the formula as one group of glyphs.
+- `node`, the formula as one group of glyphs. The formula is a `Drawn`, so put it in the scene as it is, `{f}`.
 - `bounds`, `width` and `height`, the formula's box.
 - `words`, every glyph and bar in reading order. Each has `char`, `size`, `d`, `matrix`, `fill`, `bounds` and the `text`, `x`, `y` and `id` that `morph()` pairs by.
-- `get(id)`, the box of everything under `\cssId{id}{…}`.
-- `find(text, nth)`, the box of the `nth` run of consecutive glyphs that spell `text`, such as `find("2ab")`.
+- `span`, `parts` and `part(id)`, the shape every svjeez package returns. The parts are what `\cssId{id}{…}` wraps, each with its `glyphs`, the `box` around them and a `span`, the instant 0 for a formula drawn at once.
+- `find(text, nth)`, a part for the `nth` run of consecutive glyphs that spell `text`, such as `find("2ab")`.
 - `draw(glyph, animation)`, one glyph in a group that carries the animation.
-- `write({ at, over }, { stroke })`, the formula written on in reading order like Manim's `Write`: each glyph's outline draws, then fills. Glyphs start one after another across `over`, and each takes `stroke` seconds, 0.6 by default.
+- `write({ at, over }, { stroke })`, the formula written on in reading order like Manim's `Write`: each glyph's outline draws, then fills. Glyphs start one after another across `over`, and each takes `stroke` seconds, 0.6 by default. It returns a `Drawn` to put in the scene, `{f.write({ at: 1, over: 2 })}`, with the same `span`, `parts`, `part(id)` and `find()`, where a part's `span` is when its glyphs write.
 
 ## How glyphs pair
 
@@ -106,7 +106,7 @@ const d = derive(
 - By default one line transforms into the next with `morph()`, so glyphs the lines share slide into place and the rest fade. Wrap a part in `\cssId{name}{…}` in both lines to pair it by name. With `stack: true` every line stays and each new one fades in below, `lineHeight` pixels lower.
 - `align` is what the lines line up on: `"="`, the first equals sign, or the id of a `\cssId` in each line. `x` is where that point sits.
 - A step's `note` is TeX set small beside the line after an arrow, such as `\div 2 \text{ both sides}`. In place it fades with the next change, and in a stack it stays.
-- The span covers the whole derivation. The changes are spaced evenly so the last one ends with it, and `change` is how long each takes, default 0.9. The span must give every line its `change`, so at least `change` times the number of lines. The result has `node`, `span`, `lines` (every line as a `tex()`, aligned) and `bounds`.
+- The span covers the whole derivation. The changes are spaced evenly so the last one ends with it, and `change` is how long each takes, default 0.9. The span must give every line its `change`, so at least `change` times the number of lines. The result is a `Drawn`, `{d}` in the scene, whose `bounds` covers the notes too. Its parts are the lines, by their TeX: `d.part("x = 3")` has the line's `box`, its `span`, from when it appears to when its change settles, and `tex`, the line as a `tex()`, aligned.
 
 ## Counters
 
@@ -126,7 +126,7 @@ const counting = counter({ at: 0, over: 10 }, (t) => 144 * Math.min(1, t / 3), {
 - Each place holds one glyph per distinct digit it ever shows, toggled by stepped keyframes, so a number that changes every tenth of a second for ten seconds is still a few dozen paths. `width` and `height` give the box.
 ## Constructions
 
-`construct()` draws compass-and-straightedge geometry in the order you write it. Build the figure on the builder, then render `g.node`. Every element draws on in turn: compass circles sweep from the point they pass through, lines grow from their first point, points pop and labels fade in.
+`construct()` draws compass-and-straightedge geometry in the order you write it. Build the figure on the builder, then put `g` in the scene. Every element draws on in turn: compass circles sweep from the point they pass through, lines grow from their first point, points pop and labels fade in.
 
 ```tsx
 import { construct } from "@svjeez/math";
@@ -145,7 +145,7 @@ g.settle(); // the compass circles fade back to faint
 g.polygon([A, B, C]);
 g.angle(B, A, C, { label: "60^\\circ" });
 
-<>{g.node}</>;
+<>{g}</>;
 ```
 
 - `construct({ theme, unit, origin, fontSize, start, pace, faint })`. `unit` is pixels per unit and `origin` is where the origin sits in the scene. Coordinates have y up. `pace` overrides the seconds each kind of element takes.
@@ -156,6 +156,7 @@ g.angle(B, A, C, { label: "60^\\circ" });
 - Labels are `tex()` formulas. Each sits off its point, away from the lines and circles that meet there, and away from the figure's center when nothing does. Segment and line labels sit beside the middle on the outer side.
 - Every element takes `at` and `over`, `color`, and `aid`. Without `at` it starts when the one before it ends. `together(() => { … })` starts what it holds at once. `step(pause?)` waits and returns when the next beat starts, as does reading `g.time`. `g.span.end` is when the last element finishes, so `duration` can follow it.
 - `settle()` fades every aid made so far, to `faint` opacity. Mark compass arcs and helper points with `aid: true`.
+- The builder is a `Drawn` once the last element is made. Its parts are the points, lines and circles, which are also what `point()`, `segment()`, `circle()`, `intersect()` and the rest return, each with a `box` and a `span` from when it starts to draw until its label is in. A point's id is its label, else `(x, y)`; a line's is its label, else its two points' names, as `AB`; a circle's is `circle A`.
 
 Time the text beside the figure from `g.time`, read before the elements it explains. `examples/construct/index.tsx` does so with `tex().write()`.
 ## Planes, axes and transformations
@@ -179,7 +180,8 @@ const p = plane({ xRange: [-10, 10], yRange: [-10, 10], frame: rect(-180, -100, 
 ```
 
 - A matrix is written by rows: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy). A third number in a row translates. Each step applies on top of the ones before it.
-- `background` and `node` stay put. `grid` and `axes` move, and so does a `plot()` drawn from a plane with steps. The calculus methods draw at rest, so call them before the first step.
+- `background` and `node` stay put. `grid` and `axes` move, and so does a `plot()` drawn from a plane with steps. `plot(span, f)` draws the curve on during `span`, on a plane without steps. The calculus methods draw at rest, so call them before the first step.
+- `plot()`, `vector()`, `basis()`, `polygon()`, `line()` and `label()` each return a `Drawn` to put in the scene as it is. Its `bounds` is where it sits after every step and its `span` runs from when it starts to draw on to when the last step moving it ends. `basis()` has the parts `"i"` and `"j"`.
 - `vector(to, { color, width, label, from })` is an arrow whose head stays upright under any shear and whose TeX label rides past its tip. Put a span first, `vector(span, to, options)`, and the shaft grows over it, then the head and label appear. `basis()` draws î and ĵ, and `basis(span)` grows them in it, ĵ starting 0.2s after î.
 - `polygon(points)`, `line(direction)` and `label(at, content)` move with the plane. An eigenvector's line stays on itself.
 - `point(x, y)` and `map(x, y)` give scene pixels before and after every step.

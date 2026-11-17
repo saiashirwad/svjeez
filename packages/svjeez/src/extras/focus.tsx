@@ -4,6 +4,7 @@ import type { Rect } from "../geometry";
 import { motion, type Seconds } from "../motion";
 import type { Child, SvgNode } from "../svg";
 import { mergeSpans, show, type Shown } from "./timeline";
+import { span } from "../span";
 
 export type FocusStop = Shown & {
   readonly target: Rect | readonly Rect[];
@@ -26,19 +27,19 @@ export function Focus({
   if (!(fade >= 0 && Number.isFinite(fade)))
     throw new Error(`Focus() needs a fade of 0 or more, got ${fade}.`);
 
-  /** Stops that touch merge, so back-to-back stops keep the dim instead of flashing bright between them. With `fade: 0` the dim cuts, as `show()` does. */
+  /** Stops that touch merge, so back-to-back stops keep the dim. With `fade: 0` the dim cuts. */
   const shade = mergeSpans(stops.map((stop) => stop.show)).reduce(
     (track, [at, end]) => {
       if (fade === 0) {
-        const on = track.at(at).set({ opacity: dim });
+        const on = track.set({ opacity: dim }, at);
 
-        return end === Infinity ? on : on.at(end).set({ opacity: 1 });
+        return end === Infinity ? on : on.set({ opacity: 1 }, end);
       }
 
       const f = Math.min(fade, (end - at) / 2);
-      const on = track.at(at).to({ opacity: dim }, f);
+      const on = track.to({ opacity: dim }, span(at, f));
 
-      return end === Infinity ? on : on.at(end - f).to({ opacity: 1 }, f);
+      return end === Infinity ? on : on.to({ opacity: 1 }, span(end - f, f));
     },
     motion({ opacity: 1 }),
   );

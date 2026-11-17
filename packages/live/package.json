@@ -16,6 +16,7 @@
     "./source": "./src/source.ts",
     "./compile": "./src/compile.ts",
     "./client": "./src/client.ts",
+    "./commands": "./src/commands.ts",
     "./editor.css": "./src/editor.css"
   },
   "scripts": {

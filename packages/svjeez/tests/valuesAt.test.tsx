@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { css, ease, motion, render, valuesAt } from "svjeez";
+import { css, ease, motion, render, span, valuesAt } from "svjeez";
 import { openScene, renderFrames } from "svjeez/frames";
 
 const browser = await renderFrames(
@@ -15,14 +15,14 @@ const browser = await renderFrames(
   },
 );
 
-const slide = motion({ x: 0 }).to({ x: 10 }, 1, ease.linear);
+const slide = motion({ x: 0 }).to({ x: 10 }, span(0, 1), ease.linear);
 
 describe("valuesAt", () => {
   test("blends between keys with the transition's ease", () => {
     expect(valuesAt(slide, 0.5, { duration: 2 })).toEqual({ x: 5 });
     expect(valuesAt(slide, 1.5, { duration: 2 })).toEqual({ x: 10 });
 
-    const popped = valuesAt(motion({ scale: 1 }).to({ scale: 2 }, 1, ease.pop), 0.6, {
+    const popped = valuesAt(motion({ scale: 1 }).to({ scale: 2 }, span(0, 1), ease.pop), 0.6, {
       duration: 1,
     });
 
@@ -30,7 +30,7 @@ describe("valuesAt", () => {
   });
 
   test("a cut holds the old value up to it", () => {
-    const cut = motion({ opacity: 1 }).at(1).set({ opacity: 0 });
+    const cut = motion({ opacity: 1 }).set({ opacity: 0 }, 1);
 
     expect(valuesAt(cut, 0.99, { duration: 2 })).toEqual({ opacity: 1 });
     expect(valuesAt(cut, 1.01, { duration: 2 })).toEqual({ opacity: 0 });
@@ -43,7 +43,7 @@ describe("valuesAt", () => {
   });
 
   test("a loop snaps to divide the scene, as render runs it", () => {
-    const spin = motion({ rotate: 0 }).to({ rotate: 360 }, 0.9, ease.linear).loop(0.9);
+    const spin = motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 0.9), ease.linear).loop(0.9);
 
     expect(valuesAt(spin, 1.5, { duration: 3 }).rotate).toBeCloseTo(180);
   });
@@ -68,7 +68,7 @@ describe("valuesAt", () => {
 
     const lit = motion({ [glow]: 0, fill: "#000000" }).to(
       { [glow]: 1, fill: "#ffffff" },
-      1,
+      span(0, 1),
       ease.linear,
     );
 
@@ -76,7 +76,7 @@ describe("valuesAt", () => {
   });
 
   test("errors name what is missing", () => {
-    expect(() => valuesAt(motion().to({ width: 10 }, 1), 0, { duration: 1 })).toThrow(
+    expect(() => valuesAt(motion().to({ width: 10 }, span(0, 1)), 0, { duration: 1 })).toThrow(
       "valuesAt() needs a starting value for width. Pass it to motion({ width: … }).",
     );
     expect(() =>
@@ -87,10 +87,9 @@ describe("valuesAt", () => {
   test.if(browser)("matches where the browser draws the element", async () => {
     const stack = [
       motion({ x: 0, y: 0 })
-        .at(0.2)
-        .to({ x: 60, y: 20 }, 1, ease.inOut)
-        .to({ x: 10 }, 0.5, ease.pop),
-      motion({ opacity: 1 }).to({ opacity: 0.2 }, 0.6, ease.in).loop(0.9),
+        .to({ x: 60, y: 20 }, span(0.2, 1), ease.inOut)
+        .to({ x: 10 }, span(0.2, 1).next(0.5), ease.pop),
+      motion({ opacity: 1 }).to({ opacity: 0.2 }, span(0, 0.6), ease.in).loop(0.9),
     ];
 
     const svg = render(

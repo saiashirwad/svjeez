@@ -13,7 +13,6 @@ import { validateSvg } from "svjeez/frames";
 
 assert.ok(fidelity.fidelity);
 
-// A story runs a program's messages into a flow, and the flow runs in Chromium.
 const counter = {
   update: (n, by) => [n + by, []],
   view: (n) => `<p data-part="count" style="font: 20px sans-serif">${n}</p>`,
@@ -33,14 +32,10 @@ try {
 
 assert.equal(steps.length, 3);
 
-const svg = render(
-  { ...size(steps), duration: duration(steps) },
-  jsx(Dom, { states: steps }),
-);
+const svg = render({ ...size(steps), duration: duration(steps) }, jsx(Dom, { states: steps }));
 
 assert.deepEqual(validateSvg(svg).errors, []);
 
-// A demo of a real component runs through the app's own Vite, for each framework.
 const dir = await mkdtemp(join(tmpdir(), "svjeez-dom-"));
 
 const texts = (steps) =>
@@ -65,7 +60,11 @@ const texts = (steps) =>
 try {
   for (const framework of ["react", "svelte"]) {
     const file = fileURLToPath(new URL(`./${framework}.demo.js`, import.meta.url));
-    const demos = await recordings(file, { cache: join(dir, `${framework}.json`), schemes: "light" });
+
+    const demos = await recordings(file, {
+      cache: join(dir, `${framework}.json`),
+      schemes: "light",
+    });
 
     assert.deepEqual(texts(demos.counter), ["Count: 0", "Count: 1", "Total: 1"], framework);
   }

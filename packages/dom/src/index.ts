@@ -11,6 +11,7 @@ export {
 export {
   act,
   click,
+  drag,
   fill,
   hover,
   html,
@@ -21,6 +22,7 @@ export {
   wait,
   type Act,
   type Action,
+  type DragOptions,
   type Flow,
   type Instruction,
   type PageAction,
@@ -32,6 +34,8 @@ export {
 export { snapshots, shotsDir, type SnapshotsOptions } from "./snapshots.ts";
 
 export { Dom, type DomProps } from "./draw/dom.tsx";
+
+export type { Palette } from "./palette.ts";
 
 export { duration, loop, size, type Step } from "./timeline.ts";
 

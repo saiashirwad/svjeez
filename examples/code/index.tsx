@@ -1,13 +1,11 @@
 import { highlight } from "@svjeez/code";
-import { ease, motion, render, code, morph } from "svjeez";
+import { ease, motion, render, code, morph, span } from "svjeez";
 
 import { HEIGHT, MARGIN, WIDTH, RADIUS, boxed, css, hue, mono, theme } from "../gallery-style";
 
 const W = WIDTH;
 const H = HEIGHT;
 
-// One function in four languages. @svjeez/code gives every token a role, so the colors below come from
-// style.ts and the scene still follows the viewer between light and dark.
 const SOURCES = [
   {
     label: "TS",
@@ -47,7 +45,6 @@ const SOURCES = [
   },
 ] as const;
 
-// The code block is the whole canvas: tabs on the top margin, then the code at a large size.
 const CHIP = { w: 108, gap: 10, h: 36 };
 const chipX = (i: number) => MARGIN + i * (CHIP.w + CHIP.gap);
 const chipY = MARGIN;
@@ -68,12 +65,13 @@ const OVER = 0.9;
 const at = [HOLD, HOLD * 2 + OVER, HOLD * 3 + OVER * 2, HOLD * 4 + OVER * 3];
 const m = morph([...versions, versions[0]!], { at, over: OVER });
 
-/** The active chip's background, sliding to each language as its code morphs in. */
 const slide = at.reduce(
   (chain, start, i) =>
-    chain
-      .at(start)
-      .to({ x: chipX(i + 1 === SOURCES.length ? 0 : i + 1) - chipX(0) }, OVER, ease.inOut),
+    chain.to(
+      { x: chipX(i + 1 === SOURCES.length ? 0 : i + 1) - chipX(0) },
+      span(start, OVER),
+      ease.inOut,
+    ),
   motion({ x: 0 }),
 );
 

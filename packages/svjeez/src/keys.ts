@@ -3,7 +3,6 @@ import { easeAt, splitEase } from "./ease-at";
 import { EPSILON, NUDGE, ease, type Ease, type Seconds, type Step } from "./motion";
 import { blendPaths } from "./paths";
 
-/** Most keys one lane may carry. */
 export const MAX_KEYS = 2000;
 
 export interface Key {
@@ -40,7 +39,6 @@ export const keysOf = (
     } else if (keys.length === 1 && segment.start === 0) {
       keys[0] = { ...last, values: next };
     } else if (contiguous && last.t + nudge > period + EPSILON) {
-      // A cut at the very end: hold one nudge early so the new value still lands on the period.
       keys[keys.length - 1] = { ...last, t: last.t - nudge, ease: ease.hold };
       keys.push({ t: period, values: next, ease: ease.out });
     } else {
@@ -59,11 +57,6 @@ export const keysOf = (
 const FOLD_LANES = new Set(["translate", "rotate", "width", "height"]);
 const FOLD_TOLERANCE = 0.1;
 
-/**
- * `keys` without the interior stops a browser would interpolate to the same value: both neighbouring segments are linear
- * and every number of the stop lies within a small tolerance of the line, in time, between the kept stops around it.
- * Only the numeric lanes `translate`, `rotate`, `width` and `height` fold; anything else is returned as is.
- */
 export const foldKeys = (lane: string, keys: readonly Key[]): readonly Key[] => {
   if (!FOLD_LANES.has(lane) || keys.length < 3) return keys;
   // SAFETY: Object.keys of a key's values lists its targets, and the values are keyed by Target.
@@ -123,7 +116,6 @@ export const moving = (keys: readonly Key[], index: number): boolean => {
 export const isNumber = (value: TargetValue | undefined): value is number =>
   typeof value === "number";
 
-/** `blend`, but a value it cannot compute (a colour mid-transition) throws instead of holding. `where` starts the error. */
 export const blendStrict = (
   target: Target,
   a: TargetValue,
@@ -142,7 +134,6 @@ export const blendStrict = (
   );
 };
 
-/** `target` eased from `a` toward `b` by `amount`, as SMIL interpolates numbers and path data. Colors hold. */
 const blend = (
   target: Target,
   a: TargetValue,
@@ -156,7 +147,6 @@ const blend = (
   return blendPaths(String(a), String(b), amount);
 };
 
-/** What the keys draw at `t`, as the browser plays them: the last key's values eased toward the next key's. */
 export const valueAt = (keys: readonly Key[], t: Seconds): TargetValues => {
   const index = keys.findLastIndex((key) => key.t <= t + EPSILON);
   const [from, to] = [keys[index]!, keys[index + 1]];
@@ -173,7 +163,6 @@ export const valueAt = (keys: readonly Key[], t: Seconds): TargetValues => {
   ) as TargetValues;
 };
 
-/** `keys` with one at `t`, where the lane's own curve passes through it. The two halves of a cut transition draw the whole. */
 const splitAt = (keys: readonly Key[], t: Seconds, where: string): Key[] => {
   const index = keys.findLastIndex((key) => key.t <= t + EPSILON);
   const from = keys[index]!;
@@ -202,10 +191,6 @@ const splitAt = (keys: readonly Key[], t: Seconds, where: string): Key[] => {
   ];
 };
 
-/**
- * The same keys played `shift` later, wrapping around the end of the `period`: what a loop does when the clip that holds
- * it starts `shift` into the loop. A jump where the loop closes moves to the wrap.
- */
 export const rotateKeys = (
   keys: readonly Key[],
   shift: Seconds,

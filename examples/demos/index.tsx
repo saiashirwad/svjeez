@@ -15,7 +15,6 @@ const demos = await recordings<typeof import("./cards.demo.tsx")>(here("cards.de
   fonts: [geist],
 });
 
-// Each flow ends back in its first state, so the loop has no jump.
 const signIn = loop(demos.signIn);
 const pullRequest = loop(demos.pullRequest);
 

@@ -10,10 +10,8 @@
 
   let now = $state(0);
 
-  /** The time under the thumb while it is held, so the playhead does not fight the drag. */
   let scrubbing = $state<number | null>(null);
 
-  // The playhead reads the clock on every frame while it runs, and once when it stops.
   $effect(() => {
     now = performance.now();
 

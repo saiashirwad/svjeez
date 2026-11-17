@@ -1,6 +1,3 @@
-// The palette on the page, and the scenes that follow it. A scene that paints with the base16 variables (marked
-// data-themed) gets a recolored copy as a Blob URL, started where the copy it replaces had got to, so a switch never
-// restarts it. Every live `src` goes through `show`, which remembers how far in each img's scene is.
 import { adaptive } from "svjeez";
 import { restyle } from "svjeez/page";
 
@@ -9,13 +6,11 @@ import { calm, pinScheme, scheme as pageScheme, systemScheme, type Scheme } from
 
 export type { PaletteId };
 
-/** Fired on window when the picker changes the palette. */
 export const PALETTECHANGE = "palettechange";
 
 const FADE = 200;
 const CSS = new Map<PaletteId, string>(PALETTES.map((p) => [p.id, adaptive(p).css]));
 
-/** The palette the page shows. */
 export const palette = (): PaletteId =>
   PALETTES.find(({ id }) => id === document.documentElement.dataset.palette)?.id ?? DEFAULT_PALETTE;
 
@@ -104,15 +99,13 @@ export const pinned = (img: HTMLImageElement) => {
 /** The scene at `live` playing from `at` seconds in, in the current palette. */
 export const playing = async (img: HTMLImageElement, live: string, at = 0): Promise<Frame> => {
   const scheme = pinned(img);
-  const url = recolors(img) || scheme ? await paint(live, { at, scheme, always: !!scheme }) : undefined;
+
+  const url =
+    recolors(img) || scheme ? await paint(live, { at, scheme, always: !!scheme }) : undefined;
 
   return url ? { url, live, at } : { url: live, live, at: 0 };
 };
 
-/**
- * The scene at `live` held at its still frame in the current palette, or `poster` when that already shows it. A scene
- * with no poster, like a hero variant, is held by restyling its own file.
- */
 export const frozen = async (
   img: HTMLImageElement,
   live: string,
@@ -139,7 +132,6 @@ export const elapsed = (img: HTMLImageElement) => {
 
 export const isPlaying = (img: HTMLImageElement) => clocks.has(img);
 
-/** Track an img that plays from the `src` in its HTML. */
 export const adopt = (img: HTMLImageElement) => {
   const start = (started: number) =>
     clocks.set(img, { live: img.getAttribute("src")!, at: 0, started });
@@ -150,8 +142,6 @@ export const adopt = (img: HTMLImageElement) => {
   start(entry instanceof PerformanceResourceTiming ? entry.responseEnd : performance.now());
 };
 
-// An SVG's clock is shared by every <img> and probe that loads its URL, and a new one restarts it. A background image
-// shares it without restarting it, so the copy fading out over the img is a background.
 const FIT = new Map([
   ["fill", "100% 100%"],
   ["cover", "cover"],
@@ -185,10 +175,6 @@ const crossfade = (img: HTMLImageElement, old: string) => {
     });
 };
 
-/**
- * Show `next` in `img` once it has decoded, so the swap never flashes empty. A newer call for the same img wins over
- * one still on its way. With `fade`, the old picture fades out over the new one, unless the reader wants less motion.
- */
 export const show = async (
   img: HTMLImageElement,
   next: Frame | Promise<Frame>,
@@ -226,11 +212,8 @@ export const show = async (
   return true;
 };
 
-// A copy starts at the `at` asked for once it has been restyled and decoded, a frame or so after it was asked for. It
-// asks for that much more, judged by the last swap.
 let lead = 0;
 
-/** Show a playing img again in the current palette, from where it has got to. */
 export const replay = async (img: HTMLImageElement) => {
   const clock = clocks.get(img);
 

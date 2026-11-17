@@ -5,9 +5,6 @@ import { fileURLToPath } from "node:url";
 import { Camera, def, render, variables } from "svjeez";
 import { rect } from "svjeez/geometry";
 
-// The sign-in demo from examples/demos, filmed like a screen recording: a camera follows whatever is changing. It
-// frames the email field while it's typed, then the password and the button, pulls back for the error, and stays back
-// while the form resets.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 const geist = await google.family("Geist", [{ weight: 400 }, { weight: 500 }, { weight: 600 }]);
 
@@ -19,7 +16,6 @@ const demos = await recordings<typeof import("../demos/cards.demo.tsx")>(
   },
 );
 
-// It ends back where it started, typing deleted, so the loop has no jump.
 const signIn = loop(demos.signIn, { over: 0.8 });
 const card = size(signIn);
 const frame = rect(0, 0, card.width, 300);

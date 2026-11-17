@@ -1,9 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
 
-// The files getScene() hands out URLs for. Scenes fill it as they compile, and the dev server and the build read it.
-// It lives on globalThis because the plugin and the pages that call getScene() load this module through different module graphs.
-// Each file carries its own way to make its bytes, so a poster renders only when something asks for it.
-
 export interface Asset {
   readonly type: string;
   readonly bytes: () => Promise<Uint8Array>;
@@ -11,11 +7,8 @@ export interface Asset {
 
 export interface Assets {
   readonly files: Map<string, Asset>;
-  /** Where rendered posters are kept between runs. The plugin sets it. */
   cache?: URL;
-  /** The most files to keep. The dev server sets it, so a long session drops the oldest hashes. A build keeps every file. */
   limit?: number;
-  /** Releases what rendering held open, such as a browser. */
   close?: () => Promise<void>;
 }
 
@@ -26,7 +19,6 @@ const key = Symbol.for("svjeez.vite.assets");
 // SAFETY: only this module writes the symbol, always with an Assets, so whatever is stored under it is one.
 export const assets: Assets = ((globalThis as { [key]?: Assets })[key] ??= { files: new Map() });
 
-/** Adds a file, newest last, and drops the oldest ones past `assets.limit`. */
 export const register = (file: string, asset: Asset): void => {
   assets.files.delete(file);
   assets.files.set(file, asset);
@@ -37,7 +29,6 @@ export const register = (file: string, asset: Asset): void => {
   }
 };
 
-/** Writes every file getScene() handed out a URL for under `dir`, at the path of its URL, and returns how many it wrote. */
 export const writeScenes = async (dir: URL): Promise<number> => {
   const out = new URL(ROUTE.slice(1), dir);
   await mkdir(out, { recursive: true });

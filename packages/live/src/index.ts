@@ -1,7 +1,6 @@
-// Edit a svjeez scene's source through controls. `createEditor` holds the file and its picture; every framework's
-// components bind it, and the control math here is what they share.
 export {
   createEditor,
+  editFor,
   handleAt,
   init,
   timeAt,

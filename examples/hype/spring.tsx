@@ -1,5 +1,5 @@
 import { tex } from "@svjeez/math";
-import { def, ease, motion, sampled, Brace } from "svjeez";
+import { def, ease, motion, sampled, span, Brace } from "svjeez";
 
 import { theme } from "../style";
 import { C, Caption, Blip, H } from "./kit";
@@ -12,11 +12,10 @@ const REST = 400;
 const BOB = 300;
 const PLOT = { x: 450, w: 700 };
 
-/** The spring and its plot share one function of time, so the weight and the playhead never drift apart. */
 /** The spring shot, written from 0 and lasting `over` seconds. */
 export const springShot = (over: number) => {
-  const written = { at: 0.25, over: 0.9 };
-  const run = { at: written.at + written.over + 0.2, over: over - 1.9 };
+  const written = span(0.25, 0.9);
+  const run = written.next(over - 1.9, 0.2);
   const clamp = (t: number) => Math.min(Math.max(t - run.at, 0), run.over);
 
   const spring = (t: number) =>
@@ -29,18 +28,18 @@ export const springShot = (over: number) => {
     .map((t, i) => `${i ? "L" : "M"}${plotX(t).toFixed(1)} ${(REST + spring(t)).toFixed(1)}`)
     .join("");
 
-  const weight = sampled({ at: 0, over: run.at + run.over + 0.05 }, (t) => ({ y: spring(t) }), {
+  const swing = span(0).until(run.end + 0.05);
+
+  const weight = sampled(swing, (t) => ({ y: spring(t) }), {
     step: 1 / 60,
     tolerance,
   });
 
-  const playhead = sampled(
-    { at: 0, over: run.at + run.over + 0.05 },
-    (t) => ({ x: plotX(t), y: REST + spring(t) }),
-    { step: 1 / 60, tolerance },
-  );
+  const playhead = sampled(swing, (t) => ({ x: plotX(t), y: REST + spring(t) }), {
+    step: 1 / 60,
+    tolerance,
+  });
 
-  // The plot reveals left to right with time, so its tip stays under the playhead.
   const traced = def.clipPath(
     {},
     <rect
@@ -48,20 +47,18 @@ export const springShot = (over: number) => {
       y={0}
       width={4}
       height={H}
-      animation={motion({ width: 4 })
-        .at(run.at)
-        .to({ width: PLOT.w + 8 }, run.over, ease.linear)}
+      animation={motion({ width: 4 }).to({ width: PLOT.w + 8 }, run, ease.linear)}
     />,
   );
 
   const hung = def.clipPath({}, <rect x={BOB - 60} y={230} width={120} height={400} />);
-  const notes = { at: written.at + written.over, over: over - written.over - 0.6 };
+  const notes = written.next(over - written.over - 0.6);
 
   return (
     <>
       {formula.write(written)}
       <Brace
-        target={formula.get("decay")}
+        target={formula.part("decay").box}
         side="below"
         label="damping"
         fontSize={15}
@@ -70,7 +67,7 @@ export const springShot = (over: number) => {
         show={notes}
       />
       <Brace
-        target={formula.get("wobble")}
+        target={formula.part("wobble").box}
         side="below"
         label="oscillation"
         fontSize={15}
@@ -82,13 +79,12 @@ export const springShot = (over: number) => {
       <g clipPath={hung}>
         <g animation={weight}>
           <path d={`M${BOB} ${REST - 400}V${REST - 30}`} stroke={C.muted} strokeWidth={2} />
-          {/* The weight is Blip, bungee-jumping by its antenna. */}
           <Blip
             x={BOB}
             y={REST - 32 + 139 * 0.45}
             size={0.45}
             blinks={[run.at + 1.6]}
-            look={motion({ x: 0, y: 0 }).at(run.at).to({ x: 0, y: 6 }, 0.3)}
+            look={motion({ x: 0, y: 0 }).to({ x: 0, y: 6 }, span(run.at, 0.3))}
           />
         </g>
       </g>

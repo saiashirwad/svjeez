@@ -6,7 +6,6 @@ import { flatten } from "../src/ink/path";
 const scene = (child: Child) =>
   render({ width: 200, height: 100, duration: 2, title: "Ink" }, child);
 
-/** Width of an outline across its middle, measured perpendicular to a horizontal stroke. */
 const thickness = (d: string, x: number): number => {
   const ys: number[] = [];
   let [px, py] = [0, 0];

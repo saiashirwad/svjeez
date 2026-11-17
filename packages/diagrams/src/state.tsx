@@ -10,12 +10,13 @@ import {
   type SvgNode,
   flow,
   type FlowOptions,
-  beats,
   show,
   type Beats,
+  type Drawn,
+  type Part,
 } from "svjeez";
 import { pathLength } from "svjeez/geometry";
-import { span as spanOf, type Spanned } from "svjeez";
+import { span as spanOf } from "svjeez";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
 import {
@@ -23,12 +24,17 @@ import {
   chip,
   isBareLabel,
   labelSize,
+  edgeId,
+  INSTANT,
+  lineBox,
   look,
-  lookup,
+  partsOf,
   placer,
+  slots,
   tintOf,
   type Diagram,
   type DiagramOptions,
+  type EdgeId,
   type NodeRole,
 } from "./kit.tsx";
 
@@ -44,12 +50,10 @@ export type StateSpec =
       readonly initial: string;
     };
 
-/** Every state id in `S`, nested ones included. */
 type StateIds<S> = {
   [K in keyof S & string]: K | (S[K] extends { readonly states: infer I } ? StateIds<I> : never);
 }[keyof S & string];
 
-/** Holds each composite's `initial` to its own states. */
 type Checked<S> = {
   readonly [K in keyof S]: S[K] extends { readonly states: infer I }
     ? S[K] & { readonly initial: keyof I & string; readonly states: Checked<I> }
@@ -64,26 +68,28 @@ export interface StateMachineOptions extends DiagramOptions {
   readonly direction?: Direction;
 }
 
-export interface Walk<S extends string> {
-  readonly node: SvgNode;
-  /** When each state is lit. */
+/**
+ * Parts are the legs of the path, by id such as `"idle->busy"`; a leg's span is when the token is on it. A repeated
+ * leg makes two parts with one id; `part()` finds the first.
+ */
+export interface Walk<S extends string> extends Drawn<Part<`${S}->${S}`>> {
   readonly spans: Record<S, readonly Span[]>;
-  /** From the first state lit to when the last goes dark. */
-  readonly span: Spanned;
 }
 
-/** How the walk's token looks; `at` and timing come from the walk. */
 export type WalkToken = Omit<FlowOptions, "at" | "over" | "speed">;
 
-export interface StateMachine<S extends string> extends Diagram<S> {
-  /** The drawn line of the first transition `from` → `to`, sampled along its curve. */
+/**
+ * Parts are the states (nested included), then transitions by id such as `"idle->busy"`, all there from the start;
+ * `walk()` plays. Transitions between the same states share an id; `part()` finds the first.
+ */
+export interface StateMachine<S extends string, T extends string = `${S}->${S}`> extends Diagram<
+  S | T
+> {
   edge(from: S, to: S): Point[];
   /**
-   * An overlay that lights each state of `path` in turn, running a token to the next along a transition from it or
-   * from a composite holding it, or into a composite's initial state. Throws if there is no such way.
-   *
-   * From a start `at`, each state stays lit for `dwell` and the token moves at `speed`. With one time per state, each
-   * state lights at its time, the token arriving just then; the last stays lit for `dwell`.
+   * Lights each state of `path` in turn, running a token along a transition between them. Throws if there is no such
+   * way. From a start `at`, each state stays lit for `dwell` and the token moves at `speed`; with one time per state,
+   * each lights at its time.
    */
   walk(
     path: readonly S[],
@@ -120,16 +126,13 @@ interface Run {
   readonly depth: number;
 }
 
-/** A transition, by index, which may carry a label; or the scope's start or end marker, which never does. */
 type Line =
   | (Run & { readonly of: number; readonly label?: Box })
   | (Run & { readonly of: "start" | "end" });
 
-/** Whether a line is a transition, by index, rather than the scope's start or end marker. */
 const isTransitionLine = (l: Line): l is Run & { readonly of: number; readonly label?: Box } =>
   typeof l.of === "number";
 
-/** Whether `at` is one start time, with the walk's states following it, rather than one time per state. */
 const isSingleStart = (at: Beats): at is Seconds => typeof at === "number";
 
 const relocate = (l: Line, point: (p: Point) => Point, box: (b: Box) => Box): Line => {
@@ -160,19 +163,17 @@ const shift = (b: Box, dx: number, dy: number): Box => ({
   h: b.h,
 });
 
-/**
- * A layered state machine. A dot marks each scope's initial state; final states lead to a bullseye. A composite is
- * laid out inside first, then sized to fit and laid out with its siblings as one node; transitions attach to the
- * nearest ancestors that share a scope.
- */
-export function stateMachine<const S extends Record<string, StateSpec>>(
+export function stateMachine<
+  const S extends Record<string, StateSpec>,
+  const T extends readonly StateTransition<NoInfer<StateIds<S>>>[],
+>(
   spec: {
     readonly states: Checked<S>;
     readonly initial: NoInfer<keyof S & string>;
-    readonly transitions: readonly StateTransition<NoInfer<StateIds<S>>>[];
+    readonly transitions: T;
   },
   options: StateMachineOptions = {},
-): StateMachine<StateIds<S>> {
+): StateMachine<StateIds<S>, EdgeId<T[number]>> {
   type Id = StateIds<S>;
 
   const { direction } = options;
@@ -230,7 +231,6 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     return node.parent === undefined ? [id] : [...chain(node.parent), id];
   };
 
-  /** The scope owner a transition lives in, and its two ends as that scope's direct members. */
   const home = (from: string, to: string) => {
     const [a, b] = [chain(from), chain(to)];
     let k = 0;
@@ -428,7 +428,6 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
     return curve(found.points).samples;
   };
 
-  /** How a walk gets from `a` to `b`: a transition from `a` or a composite holding it, or into a composite's initial state. */
   const step = (a: string, b: string): Point[] => {
     for (const from of chain(a).reverse()) {
       const found = line(
@@ -454,8 +453,19 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
 
   return {
     node,
+    span: INSTANT,
     bounds: at.bounds,
-    get: lookup("stateMachine()", boxes),
+    ...partsOf<Id | EdgeId<T[number]>>("stateMachine()", [
+      ...boxes,
+      ...transitions.map((t) => {
+        const drawn = lines.find((l) => isTransitionLine(l) && l.of === t.i)!;
+
+        return [
+          edgeId(t.source, t.target),
+          lineBox(drawn.points, isTransitionLine(drawn) ? drawn.label : undefined),
+        ] as const;
+      }),
+    ]),
     edge,
     walk: (path, { at, dwell = 1, speed = 220, token = {} }) => {
       if (path.length === 0) throw new Error("walk() needs at least one state, got none.");
@@ -476,7 +486,7 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
         ? path.map(
             (_, k) => at + k * dwell + legs.slice(0, k).reduce((sum, leg) => sum + leg.over, 0),
           )
-        : beats(at, path.length, 0, "walk()");
+        : slots(at, path.length, 0, "walk()").map((s) => s.at);
 
       const runs = legs.map((leg, k) => {
         const over = isSingleStart(at)
@@ -529,7 +539,31 @@ export function stateMachine<const S extends Record<string, StateSpec>>(
 
       const end = arrive.at(-1)! + dwell;
 
-      return { node: overlay, spans, span: spanOf(arrive[0]!, end - arrive[0]!) };
+      const glows = [...lit.keys()].map((s) => boxes.get(s)!.pad(5));
+
+      const moves = runs.map((run, k): Part<`${Id}->${Id}`> => ({
+        id: `${path[k]!}->${path[k + 1]!}`,
+        box: lineBox(run.points),
+        span: spanOf(run.at, run.over),
+      }));
+
+      return {
+        node: overlay,
+        spans,
+        span: spanOf(arrive[0]!, end - arrive[0]!),
+        bounds: [...glows, ...moves.map((l) => l.box)].reduce((a, b) => a.union(b)),
+        parts: moves,
+        part: (id) => {
+          const found = moves.find((l) => l.id === id);
+
+          if (!found)
+            throw new Error(
+              `walk() has no leg ${JSON.stringify(id)}. Its legs are ${moves.map((l) => JSON.stringify(l.id)).join(", ") || "none: the path has one state"}.`,
+            );
+
+          return found;
+        },
+      };
     },
   };
 }

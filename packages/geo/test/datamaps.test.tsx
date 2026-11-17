@@ -111,6 +111,33 @@ describe("choropleth()", () => {
     expect(svg.match(/@keyframes/g)!.length).toBeGreaterThan(0);
   });
 
+  test("its parts are the regions values names, each with when it fills", () => {
+    const result = choropleth(
+      [
+        { at: 1, over: 1 },
+        { at: 3, over: 1 },
+        { at: 5, over: 1 },
+      ],
+      map,
+      { France: [10, 10, 90], Germany: 10, Spain: [10, 90, 90] },
+      { scale },
+    );
+
+    expect(result.parts.map((r) => r.properties?.name)).toEqual(["France", "Germany", "Spain"]);
+    expect(result.part("France").span).toMatchObject({ at: 1, over: 5 });
+    expect(result.part("Germany").span).toMatchObject({ at: 1, over: 1 });
+    expect(result.part("724").span).toMatchObject({ at: 1, over: 3 });
+    expect(result.span).toMatchObject({ at: 1, over: 5 });
+    expect(result.part("France").box).toEqual(map.part("France").box);
+    expect(() => result.part("Canada")).toThrow('choropleth() has no value for "Canada".');
+  });
+
+  test("a region cut to its color from the start fills at the instant 0", () => {
+    const result = choropleth({ at: 0, over: 0 }, map, { France: 10 }, { scale });
+
+    expect(result.part("France").span).toMatchObject({ at: 0, over: 0 });
+  });
+
   test("names the fix when the spans don't match the values", () => {
     expect(() =>
       choropleth(
@@ -132,31 +159,48 @@ describe("cartogram()", () => {
 
   test("sizes circles by area and keeps them apart", () => {
     const [de, pt] = ["Germany", "Portugal"].map((n) =>
-      result.bubbles.find((b) => b.region.properties?.name === n)!,
+      result.parts.find((b) => b.region.properties?.name === n)!,
     );
 
     expect((de!.r / pt!.r) ** 2).toBeCloseTo(83 / 10, 0);
 
-    for (const [i, a] of result.bubbles.entries())
-      for (const b of result.bubbles.slice(i + 1))
+    for (const [i, a] of result.parts.entries())
+      for (const b of result.parts.slice(i + 1))
         expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThanOrEqual(a.r + b.r - 0.5);
   });
 
+  test("each circle is a part, with its box and the span its region morphs in", () => {
+    const de = result.part("Germany");
+    const staggered = cartogram({ at: 2, over: 2 }, map, people, { stagger: 0.3 });
+
+    expect(de.box).toMatchObject({ x: de.x - de.r, w: de.r * 2 });
+    expect(de.span).toMatchObject({ at: 2, over: 1 });
+    expect(staggered.parts.map((p) => p.span.at)).toEqual(
+      [2, 2.3, 2.6, 2.9, 3.2, 3.5].map((t) => expect.closeTo(t, 6)),
+    );
+    expect(staggered.part("Portugal").span.end).toBeCloseTo(4, 6);
+  });
+
   test("is the same every time", () => {
-    expect(cartogram({ at: 2, over: 1 }, map, people).bubbles).toEqual(result.bubbles);
+    const circles = (c: typeof result) => c.parts.map(({ id, x, y, r }) => ({ id, x, y, r }));
+
+    expect(circles(cartogram({ at: 2, over: 1 }, map, people))).toEqual(circles(result));
   });
 
   test("morphs each outline into a circle through the d channel, and returns the rest of the map", () => {
     const svg = scene(result.node);
 
     expect(svg.match(/<animate\b[^>]*attributeName="d"/g)).toHaveLength(6);
-    expect(result.rest).toContain(map.region("Canada").d);
-    expect(result.rest).not.toContain(map.region("France").d);
+    expect(result.rest).toContain(map.part("Canada").d);
+    expect(result.rest).not.toContain(map.part("France").d);
   });
 
   test("a stagger spreads the starts inside the span, so the last shape lands with it", () => {
     const svg = scene(cartogram({ at: 2, over: 2 }, map, people, { stagger: 0.3 }).node);
-    const durations = [...svg.matchAll(/<animate\b[^>]*attributeName="d"[^>]*dur="([\d.]+)s"/g)].map((m) => +m[1]!);
+
+    const durations = [
+      ...svg.matchAll(/<animate\b[^>]*attributeName="d"[^>]*dur="([\d.]+)s"/g),
+    ].map((m) => +m[1]!);
 
     expect(durations).toHaveLength(6);
 
@@ -186,7 +230,7 @@ describe("toBars()", () => {
 
   const people = { France: 67, Germany: 83, Spain: 47, Italy: 60 };
   const frame = rect(600, 100, 300, 200);
-  const { bars } = toBars({ at: 1, over: 1 }, map, people, { frame });
+  const { parts: bars } = toBars({ at: 1, over: 1 }, map, people, { frame });
 
   test("sorts the biggest first and scales width to value", () => {
     expect(bars.map((b) => b.region.properties?.name)).toEqual([
@@ -195,22 +239,24 @@ describe("toBars()", () => {
       "Italy",
       "Spain",
     ]);
-    expect(bars[0]!.rect.w).toBe(300);
-    expect(bars[1]!.rect.w).toBeCloseTo((300 * 67) / 83, 0);
-    expect(bars[0]!.rect.y).toBeLessThan(bars[1]!.rect.y);
-    expect(bars.at(-1)!.rect.y + bars.at(-1)!.rect.h).toBeLessThanOrEqual(300);
+    expect(bars[0]!.box.w).toBe(300);
+    expect(bars[1]!.box.w).toBeCloseTo((300 * 67) / 83, 0);
+    expect(bars[0]!.box.y).toBeLessThan(bars[1]!.box.y);
+    expect(bars.at(-1)!.box.y + bars.at(-1)!.box.h).toBeLessThanOrEqual(300);
   });
 
   test("keeps only the top few and can run smallest first", () => {
     const two = toBars({ at: 1, over: 1 }, map, people, { frame, top: 2, order: "asc" });
 
-    expect(two.bars.map((b) => b.region.properties?.name)).toEqual(["France", "Germany"]);
-    expect(two.rest).toContain(map.region("Spain").d);
+    expect(two.parts.map((b) => b.region.properties?.name)).toEqual(["France", "Germany"]);
+    expect(two.rest).toContain(map.part("Spain").d);
   });
 
   test("morphs through the d channel", () => {
     expect(
-      scene(toBars({ at: 1, over: 1 }, map, people, { frame }).node).match(/<animate\b[^>]*attributeName="d"/g),
+      scene(toBars({ at: 1, over: 1 }, map, people, { frame }).node).match(
+        /<animate\b[^>]*attributeName="d"/g,
+      ),
     ).toHaveLength(4);
   });
 });
@@ -253,6 +299,22 @@ describe("traffic()", () => {
 
   test("rejects a rate it can't use", () => {
     expect(() => traffic({ at: 0, over: 1 }, lines, { rate: 0 })).toThrow("positive rate");
+  });
+
+  test("its parts are the routes, each spanning its first departure to its last arrival", () => {
+    const idle = { id: "idle", points: [{ x: 0, y: 0 }], weight: 0 };
+    const run = traffic({ at: 1, over: 4 }, [...lines, idle], { rate: 5, seed: 7 });
+
+    expect(run.parts.map((p) => p.id)).toEqual(["0", "1", "idle"]);
+    expect(run.parts.reduce((sum, p) => sum + p.count, 0)).toBe(run.count);
+    expect(Math.min(...run.parts.slice(0, 2).map((p) => p.span.at))).toBeGreaterThanOrEqual(1);
+    expect(Math.max(...run.parts.map((p) => p.span.end))).toBeCloseTo(run.span.end, 9);
+    expect(run.part("1").box).toMatchObject({ x: 0, y: 50, w: 100, h: 30 });
+    expect(run.part("idle")).toMatchObject({ count: 0, span: { at: 0, over: 0 } });
+    expect(run.bounds).toMatchObject({ x: 0, y: 0, w: 100, h: 80 });
+    expect(() => run.part("2")).toThrow(
+      'traffic() has no route "2". Its routes are "0", "1", "idle".',
+    );
   });
 });
 

@@ -1,18 +1,13 @@
-import { def, ease, motion, render } from "svjeez";
-import { CSS, chrome, random } from "./lib/kit";
+import { chain, def, ease, motion, random, render, span, stagger } from "svjeez";
+import { CSS, chrome } from "./lib/kit";
 import { BLIP, blip } from "./lib/blip";
 import { theme } from "../style";
-
-// The 404 page: Blip hops along a timeline behind its playhead. The track ends, Blip skids to a stop at the
-// edge, and the playhead sails on into the empty space past it. Blip looks around, lights its antenna bulb like a
-// flashlight, and finds the playhead out in the dark, parked at 404s. `tall` is the same story on a shorter track.
 
 const D = 10;
 const BAR = 40;
 
-// Beats, in seconds.
-const WALK = { at: 0.4, over: 3.6 };
-const STOP = WALK.at + WALK.over;
+const WALK = span(0.4, 3.6);
+const STOP = WALK.end;
 const LIGHT = 6;
 const FOUND = 6.6;
 const DARK = 8.6;
@@ -26,7 +21,6 @@ interface Stage {
   readonly x0: number;
   readonly gap: number;
   readonly seconds: number;
-  /** Where the playhead ends up, out past the track. */
   readonly lost: number;
   readonly scale: number;
   readonly fontSize: number;
@@ -59,73 +53,61 @@ export const make = (tall = false): string => {
   const y = Math.round(BAR + (H - BAR) * 0.63);
   const x1 = x0 + gap * seconds;
 
-  // Blip starts behind the 0s tick and stops with its toes over the end of the track.
   const start = x0 - 66 * s - 6;
   const stop = x1 - 50 * s;
   const bulb = { x: stop, y: y + (38 - 162) * s };
 
-  const walk = motion({ x: 0 })
-    .at(WALK.at)
-    .to({ x: stop - start }, WALK.over, ease.linear);
+  const walk = motion({ x: 0 }).to({ x: stop - start }, WALK, ease.linear);
 
   const hop = WALK.over / HOPS;
-  let hops = motion({ y: 0 }).at(WALK.at);
+  let hops = motion({ y: 0 });
 
-  for (let i = 0; i < HOPS; i++)
-    hops = hops.to({ y: -10 }, hop / 2, ease.out).to({ y: 0 }, hop / 2, ease.in);
+  for (const beat of stagger(WALK.first(hop), HOPS, hop))
+    hops = hops
+      .to({ y: -10 }, beat.first(hop / 2), ease.out)
+      .to({ y: 0 }, beat.last(hop / 2), ease.in);
   hops = hops
-    .at(FOUND + 0.15)
-    .to({ y: -14 }, 0.16, ease.out)
-    .to({ y: 0 }, 0.18, ease.in);
+    .to({ y: -14 }, span(FOUND + 0.15, 0.16), ease.out)
+    .to({ y: 0 }, span(FOUND + 0.15, 0.16).next(0.18), ease.in);
 
-  // A lean forward as it brakes, then upright.
+  const lean = span(STOP, 0.12);
+
   const brake = motion({ rotate: 0 })
-    .at(STOP)
-    .to({ rotate: 12 }, 0.12, ease.out)
-    .to({ rotate: 0 }, 0.6, ease.pop);
+    .to({ rotate: 12 }, lean, ease.out)
+    .to({ rotate: 0 }, lean.next(0.6), ease.pop);
+
+  const right = span(4.7, 0.2);
+  const left = right.next(0.3, 0.4);
 
   const look = motion({ x: 0 })
-    .at(4.7)
-    .to({ x: 5 }, 0.2)
-    .wait(0.4)
-    .to({ x: -5 }, 0.3)
-    .wait(0.4)
-    .to({ x: 5 }, 0.25)
-    .at(DARK + 0.3)
-    .to({ x: 0 }, 0.3);
+    .to({ x: 5 }, right)
+    .to({ x: -5 }, left)
+    .to({ x: 5 }, left.next(0.25, 0.4))
+    .to({ x: 0 }, span(DARK + 0.3, 0.3));
+
+  const [sag, rise, drop, settle] = chain(span(FOUND + 0.15, 0.12), 0.18, 0.1, 0.4);
 
   const wobble = motion({ y: 0 })
-    .at(FOUND + 0.15)
-    .to({ y: 3 }, 0.12)
-    .to({ y: -2 }, 0.18, ease.inOut)
-    .to({ y: 3 }, 0.1, ease.in)
-    .to({ y: 0 }, 0.4, ease.pop);
+    .to({ y: 3 }, sag)
+    .to({ y: -2 }, rise, ease.inOut)
+    .to({ y: 3 }, drop, ease.in)
+    .to({ y: 0 }, settle, ease.pop);
 
   const glow = motion({ fill: BLIP.yellow })
-    .at(LIGHT)
-    .to({ fill: "#FFF6C2" }, 0.2)
-    .at(DARK)
-    .to({ fill: BLIP.yellow }, 0.4);
+    .to({ fill: "#FFF6C2" }, span(LIGHT, 0.2))
+    .to({ fill: BLIP.yellow }, span(DARK, 0.4));
 
-  // The playhead keeps going past the end, slows, and fades into the dark until the beam finds it.
   const playhead = motion({ x: 0 })
-    .at(WALK.at)
-    .to({ x: x1 - x0 }, WALK.over, ease.linear)
-    .to({ x: lost - x0 }, 1.6, ease.out);
+    .to({ x: x1 - x0 }, WALK, ease.linear)
+    .to({ x: lost - x0 }, WALK.next(1.6), ease.out);
 
   const dim = motion({ opacity: 1 })
-    .at(STOP)
-    .to({ opacity: 0.18 }, 1)
-    .at(FOUND)
-    .to({ opacity: 1 }, 0.3);
+    .to({ opacity: 0.18 }, span(STOP, 1))
+    .to({ opacity: 1 }, span(FOUND, 0.3));
 
-  // The 404s label waits in the tick labels' gray, and turns orange when the beam finds it.
-  const unlit = motion({ opacity: 1 }).at(FOUND).to({ opacity: 0 }, 0.3);
-  const found = motion({ opacity: 0 }).at(FOUND).to({ opacity: 1 }, 0.3);
+  const unlit = motion({ opacity: 1 }).to({ opacity: 0 }, span(FOUND, 0.3));
+  const found = motion({ opacity: 0 }).to({ opacity: 1 }, span(FOUND, 0.3));
 
-  // The beam is drawn along +x from the bulb and sweeps down onto the playhead. A mirrored copy with no paint makes the
-  // group's box centered on the bulb, so it turns about the bulb. It reaches past the playhead but stops short of the
-  // window's right edge.
   const target = { x: lost, y: y - 30 };
   const angle = (Math.atan2(target.y - bulb.y, target.x - bulb.x) * 180) / Math.PI;
 
@@ -147,11 +129,9 @@ export const make = (tall = false): string => {
   );
 
   const sweep = motion({ rotate: -22, opacity: 0 })
-    .at(LIGHT)
-    .to({ opacity: 1 }, 0.2)
-    .to({ rotate: 0 }, FOUND - LIGHT - 0.2, ease.inOut)
-    .at(DARK)
-    .to({ opacity: 0 }, 0.4);
+    .to({ opacity: 1 }, span(LIGHT, 0.2))
+    .to({ rotate: 0 }, span(LIGHT, 0.2).next(FOUND - LIGHT - 0.2), ease.inOut)
+    .to({ opacity: 0 }, span(DARK, 0.4));
 
   const rnd = random(404);
 
@@ -171,19 +151,16 @@ export const make = (tall = false): string => {
       textAnchor="middle"
       fill={theme.base0D}
       animation={motion({ opacity: 0, scale: 0 })
-        .at(at)
-        .to({ opacity: 1, scale: 1 }, 0.35, ease.pop)
-        .at(at + over - 0.2)
-        .to({ opacity: 0 }, 0.2)}
+        .to({ opacity: 1, scale: 1 }, span(at, 0.35), ease.pop)
+        .to({ opacity: 0 }, span(at + over - 0.2, 0.2))}
     >
       {glyph}
     </text>
   );
 
   const fade = motion({ opacity: 0 })
-    .to({ opacity: 1 }, 0.3)
-    .at(D - 0.5)
-    .to({ opacity: 0 }, 0.5);
+    .to({ opacity: 1 }, span(0, 0.3))
+    .to({ opacity: 0 }, span(D - 0.5, 0.5));
 
   return render(
     {

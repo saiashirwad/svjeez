@@ -1,23 +1,38 @@
 #!/usr/bin/env node
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { basename, extname, join, relative, resolve } from "node:path";
+import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { renderFrames, type FrameTimes } from "./frames";
+import { checkScene, renderFrames, type FrameTimes } from "./frames";
+import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
+import { startTrace } from "./traced";
 import { validateSvg } from "./validate";
 
 const USAGE = `usage:
-  svjeez svg <file> [--out file.svg]
+  svjeez svg <file> [--out file.svg] [params]
+  svjeez dev <file> [--port 5173] [--out file.svg] [params]
+  svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
+  svjeez check <file> [--times 0,0.5,1] [--json] [--color-scheme system|light|dark] [params]
+  svjeez values <file> [--json] [--filter text]
+  svjeez set <file> key=value [key=value ...] [--dry-run]
+  svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
-  svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css]
-  svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css]
 
 <file> is an .svg, or a module whose default export is an SVG string or a function returning one.
+[params] is --params data.json and any number of --param key=value. They fill the module's exported \`params\` schema
+(from svjeez/params), are checked against it, and are passed to the default export; a key left out keeps its default.
+--param sets one value that is not a list, and wins over the file.
 Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop.
+dev serves a page that plays the scene with a scrubber and rebuilds it when a file beside it changes.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
 --background transparent keeps alpha, in webm only.
 On Node, .tsx files load through tsx when it is installed.
+check measures the scene in headless Chromium and prints one finding per line, file:line:column  rule  severity: message.
+It exits 1 when any finding is an error. Without --times it measures 0, seven times across the loop, and just before the end.
+values lists every number, color, ease and param in the scene's source that the editor shows a control for, with its key;
+set writes key=value into those literals and changes nothing else. Both read the source without running a browser,
+through @svjeez/live.
 skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.`;
 
 const SCHEMES = ["system", "light", "dark"] as const;
@@ -30,47 +45,141 @@ const fail = (message: string): never => {
   process.exit(1);
 };
 
-type SceneExport = string | (() => string | Promise<string>);
+type Scene = (values?: Values<Schema>) => string | Promise<string>;
 
-const isSceneFunction = (value: SceneExport | undefined): value is () => string | Promise<string> =>
+interface SceneModule {
+  readonly default?: string | Scene;
+  readonly params?: Schema;
+}
+
+const isSceneFunction = (value: SceneModule["default"]): value is Scene =>
   typeof value === "function";
 
 const isText = (value: string | undefined): value is string => typeof value === "string";
 
-const loadSvg = async (file: string): Promise<string> => {
-  const path = resolve(file);
+const isParam = (p: Param | undefined): p is Param =>
+  typeof p === "object" && p !== null && "kind" in p;
 
-  if (path.endsWith(".svg")) return readFile(path, "utf8");
+const isSchema = (value: SceneModule["params"]): value is Schema =>
+  typeof value === "object" && value !== null && Object.values(value).every(isParam);
+
+const isJsonObject = (value: Json): value is JsonObject =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+interface ParamFlags {
+  readonly params?: string;
+  readonly param?: readonly string[];
+}
+
+const PARAM_OPTIONS = {
+  params: { type: "string" },
+  param: { type: "string", multiple: true },
+} as const;
+
+const paramArgs = ({ params, param = [] }: ParamFlags): string[] => [
+  ...(params === undefined ? [] : ["--params", params]),
+  ...param.flatMap((pair) => ["--param", pair]),
+];
+
+const valuesFor = async (
+  file: string,
+  schema: Schema,
+  flags: ParamFlags,
+): Promise<Values<Schema>> => {
+  const text =
+    flags.params === undefined
+      ? "{}"
+      : await readFile(flags.params, "utf8").catch(() =>
+          fail(
+            `--params ${flags.params}: no such file. Pass a JSON file of values for ${file}'s params.`,
+          ),
+        );
+
+  const json = ((): Json => {
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      return fail(
+        `--params ${flags.params} is not JSON: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  })();
+
+  const pairs = (flags.param ?? []).map((pair): [string, Json] => {
+    const equals = pair.indexOf("=");
+
+    if (equals < 1) fail(`--param needs key=value, got "${pair}".`);
+    const key = pair.slice(0, equals);
+    const raw = pair.slice(equals + 1);
+    const declared = Object.hasOwn(schema, key) ? schema[key] : undefined;
+
+    if (declared?.kind === "list")
+      fail(`--param ${key} is a list. Put lists in a JSON file and pass it with --params.`);
+    const asNumber = raw.trim() === "" ? NaN : Number(raw);
+
+    return [key, declared?.kind === "number" && Number.isFinite(asNumber) ? asNumber : raw];
+  });
+
+  const given = isJsonObject(json)
+    ? json
+    : fail(`--params ${flags.params} needs a JSON object keyed by param name.`);
+
+  try {
+    return parse(schema, { ...given, ...Object.fromEntries(pairs) });
+  } catch (error) {
+    return fail(`${file}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+};
+
+const loadSvg = async (file: string, flags: ParamFlags = {}): Promise<string> => {
+  const path = resolve(file);
+  const given = flags.params !== undefined || (flags.param?.length ?? 0) > 0;
+
+  if (path.endsWith(".svg")) {
+    if (given)
+      fail(`${file} is an SVG, so it has no params to fill. Pass the scene module instead.`);
+
+    return readFile(path, "utf8");
+  }
+
   const url = pathToFileURL(path).href;
 
-  const module: { default?: SceneExport } = await import(url).catch(
-    async (error: Error & { code?: string }) => {
-      if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
+  const module: SceneModule = await import(url).catch(async (error: Error & { code?: string }) => {
+    if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
 
-      // Node has no TSX loader of its own; use tsx when the project has it.
-      const tsx = (() => {
-        try {
-          return pathToFileURL(
-            createRequire(join(process.cwd(), "package.json")).resolve("tsx/esm/api"),
-          ).href;
-        } catch {
-          return "tsx/esm/api";
-        }
-      })();
+    const tsx = (() => {
+      try {
+        return pathToFileURL(
+          createRequire(join(process.cwd(), "package.json")).resolve("tsx/esm/api"),
+        ).href;
+      } catch {
+        return "tsx/esm/api";
+      }
+    })();
 
-      const { register }: { register: () => void } = await import(tsx).catch(() =>
-        fail(
-          `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
-        ),
-      );
+    const { register }: { register: () => void } = await import(tsx).catch(() =>
+      fail(
+        `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
+      ),
+    );
 
-      register();
+    register();
 
-      return import(url);
-    },
-  );
+    return import(url);
+  });
 
-  const value = isSceneFunction(module.default) ? await module.default() : module.default;
+  const schema = isSchema(module.params) ? module.params : undefined;
+
+  if (given && !schema)
+    fail(
+      `${file} has no \`export const params\` schema, so --params and --param have nothing to fill. Declare one with svjeez/params, or drop the flags.`,
+    );
+
+  const values = schema ? await valuesFor(file, schema, flags) : undefined;
+
+  const value = isSceneFunction(module.default)
+    ? await (values === undefined ? module.default() : module.default(values))
+    : module.default;
 
   if (isText(value)) return value;
 
@@ -112,10 +221,10 @@ const svgCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
-    options: { out: { type: "string", short: "o" } },
+    options: { out: { type: "string", short: "o" }, ...PARAM_OPTIONS },
   });
 
-  const svg = await loadSvg(positionals[0] ?? fail(USAGE));
+  const svg = await loadSvg(positionals[0] ?? fail(USAGE), values);
   report(svg);
 
   if (values.out) await writeFile(values.out, svg);
@@ -129,7 +238,6 @@ const parseScheme = (value: string | undefined) =>
       ? value
       : fail(`--color-scheme is system, light or dark, got "${value}".`);
 
-/** The part of @svjeez/video the CLI uses. svjeez doesn't depend on it, so it is typed here. */
 type VideoFn = (
   svg: string,
   options: {
@@ -155,11 +263,10 @@ interface VideoModule {
 
 const VIDEO = "@svjeez/video";
 
-// From the project first, so a package manager that doesn't hoist still finds it.
-const loadVideo = async (): Promise<VideoModule> => {
+const loadOptional = async (name: string, command: string, pkg = name): Promise<object> => {
   const from = (base: string) => {
     try {
-      return pathToFileURL(createRequire(base).resolve(VIDEO)).href;
+      return pathToFileURL(createRequire(base).resolve(name)).href;
     } catch {
       return undefined;
     }
@@ -168,10 +275,32 @@ const loadVideo = async (): Promise<VideoModule> => {
   const url =
     from(join(process.cwd(), "package.json")) ??
     from(fileURLToPath(import.meta.url)) ??
-    fail(`svjeez video needs ${VIDEO}. Install it with \`npm i -D ${VIDEO}\`.`);
+    fail(`svjeez ${command} needs ${pkg}. Install it with \`npm i -D ${pkg}\`.`);
 
   return import(url);
 };
+
+const loadVideo = (): Promise<VideoModule> => loadOptional(VIDEO, "video");
+
+type LiveCommand = (args: string[]) => Promise<number>;
+
+interface LiveModule {
+  readonly values?: LiveCommand;
+  readonly set?: LiveCommand;
+}
+
+const liveCommand =
+  (name: "values" | "set") =>
+  async (args: string[]): Promise<void> => {
+    const live: LiveModule = await loadOptional("@svjeez/live/commands", name, "@svjeez/live");
+
+    const run =
+      live[name] ?? fail(`@svjeez/live has no ${name} command. Update it to match svjeez.`);
+
+    process.exitCode = await run(args).catch((error: Error) =>
+      error.name === "SetError" ? fail(error.message) : Promise.reject(error),
+    );
+  };
 
 const videoCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
@@ -186,6 +315,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
       scale: { type: "string" },
       "color-scheme": { type: "string" },
       background: { type: "string" },
+      ...PARAM_OPTIONS,
     },
   });
 
@@ -200,7 +330,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
   const colorScheme = parseScheme(values["color-scheme"]);
   const loaded = await loadVideo();
   const encode = loaded.video ?? fail(`${VIDEO} has no video().`);
-  const svg = await loadSvg(file);
+  const svg = await loadSvg(file, values);
   report(svg);
 
   const video = await encode(svg, {
@@ -232,11 +362,12 @@ const framesCommand = async (args: string[]): Promise<void> => {
       scale: { type: "string" },
       "color-scheme": { type: "string" },
       background: { type: "string" },
+      ...PARAM_OPTIONS,
     },
   });
 
   const scheme = parseScheme(values["color-scheme"]);
-  const svg = await loadSvg(positionals[0] ?? fail(USAGE));
+  const svg = await loadSvg(positionals[0] ?? fail(USAGE), values);
   report(svg);
 
   const { duration, colorScheme, frames, sheet } = await renderFrames(svg, {
@@ -273,7 +404,6 @@ const framesCommand = async (args: string[]): Promise<void> => {
   console.log(`loop ${Number(duration.toFixed(3))}s, ${colorScheme}\n${written.join("\n")}`);
 };
 
-// package-dist/cli.js and src/cli.ts both sit one level under the package root.
 const SKILL = fileURLToPath(new URL("../skills/svjeez", import.meta.url));
 
 const skillCommand = async (args: string[]): Promise<void> => {
@@ -296,9 +426,105 @@ const skillCommand = async (args: string[]): Promise<void> => {
   console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
 };
 
+const checkCommand = async (args: string[]): Promise<void> => {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: {
+      times: { type: "string", short: "t" },
+      json: { type: "boolean" },
+      "color-scheme": { type: "string" },
+      ...PARAM_OPTIONS,
+    },
+  });
+
+  const file = positionals[0] ?? fail(USAGE);
+  const scheme = parseScheme(values["color-scheme"]);
+  const times = values.times === undefined ? undefined : when(values.times, undefined);
+
+  if (!file.endsWith(".svg")) startTrace(dirname(resolve(file)));
+  const svg = await loadSvg(file, values);
+  report(svg);
+
+  const {
+    duration,
+    times: measured,
+    findings,
+  } = await checkScene(svg, {
+    times: times && "times" in times ? times.times : undefined,
+    colorScheme: scheme,
+  });
+
+  const where = (source: string | undefined): string => {
+    if (!source) return file;
+    const match = /^(.*?)((?::\d+){1,2})$/.exec(source);
+
+    return match?.[1]
+      ? `${relative(process.cwd(), match[1]) || match[1]}${match[2]}`
+      : `${file}:${source}`;
+  };
+
+  const errors = findings.filter((found) => found.severity === "error").length;
+
+  if (values.json)
+    console.log(
+      JSON.stringify(
+        {
+          duration,
+          times: measured,
+          findings: findings.map((found) => ({ ...found, source: where(found.source) })),
+        },
+        null,
+        2,
+      ),
+    );
+  else {
+    for (const found of findings)
+      console.log(`${where(found.source)}  ${found.rule}  ${found.severity}: ${found.message}`);
+
+    const warnings = findings.length - errors;
+    const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+    console.log(
+      `${plural(errors, "error")}, ${plural(warnings, "warning")}; loop ${Number(duration.toFixed(3))}s, measured at ${measured.map((time) => Number(time.toFixed(3))).join(", ")}`,
+    );
+  }
+
+  if (errors > 0) process.exitCode = 1;
+};
+
+const devCommand = async (args: string[]): Promise<void> => {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: { port: { type: "string" }, out: { type: "string", short: "o" }, ...PARAM_OPTIONS },
+  });
+
+  const file = positionals[0] ?? fail(USAGE);
+  const port = number("port", values.port ?? process.env.PORT);
+
+  if (port !== undefined && !(Number.isInteger(port) && port >= 0 && port < 65536))
+    fail(`--port needs a whole number from 0 to 65535, got ${port}.`);
+  const self = fileURLToPath(import.meta.url);
+  const { dev } = await import("./dev");
+
+  await dev({
+    file,
+    cli: self,
+    args: paramArgs(values),
+    files: values.params === undefined ? [] : [values.params],
+    dirs: self.endsWith(".ts") ? [dirname(self)] : [],
+    port,
+    out: values.out,
+  });
+};
+
 const COMMANDS = new Map([
   ["svg", svgCommand],
+  ["dev", devCommand],
+  ["check", checkCommand],
   ["frames", framesCommand],
+  ["values", liveCommand("values")],
+  ["set", liveCommand("set")],
   ["video", videoCommand],
   ["skill", skillCommand],
 ]);

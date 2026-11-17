@@ -14,7 +14,6 @@ import {
   type CodeTokens,
 } from "svjeez";
 
-// A code explainer: two versions of a function, a timeline that names the beats, and annotations aimed at runs by id.
 const kw = (text: string): CodeRun => ["keyword", text];
 const fn = (text: string, id?: string): CodeRun => ["fn", text, id];
 const p = (text: string, id?: string): CodeRun => ["punct", text, id];

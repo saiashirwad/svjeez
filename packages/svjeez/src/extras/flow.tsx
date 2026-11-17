@@ -28,12 +28,9 @@ export interface FlowOptions {
   readonly color?: Color;
   /** Head radius. Default 4.5, or 2.5 along several lines. */
   readonly size?: number;
-  /** A ring that ripples out where the trip ends. */
   readonly arrive?: boolean;
-  /** The packet's text. */
   readonly label?: string;
   readonly fontSize?: number;
-  /** Embedded for the packet label, which is sized by measuring it. */
   readonly font?: FontValue;
   /** Packet text color; defaults to `color`. */
   readonly ink?: Color;
@@ -52,7 +49,6 @@ export interface FlowOptions {
 
 const TAIL = 8;
 
-/** Px of path the comet's tail covers. */
 const REACH = 36;
 
 export interface FlowResult {
@@ -128,9 +124,7 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
             strokeLinecap="round"
             strokeLinejoin="round"
             animation={[
-              motion()
-                .at(end + 0.15)
-                .to({ opacity: 0 }, 0.6),
+              motion().to({ opacity: 0 }, span(end + 0.15, 0.6)),
               draw({ at, over }, ease.linear),
             ]}
           />,
@@ -180,9 +174,8 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
       stroke={color}
       strokeWidth={1.5}
       animation={motion({ opacity: 0, scale: 0.5 })
-        .at(end)
-        .set({ opacity: 0.9 })
-        .to({ opacity: 0, scale: 3 }, 0.7)}
+        .set({ opacity: 0.9 }, end)
+        .to({ opacity: 0, scale: 3 }, span(end, 0.7))}
     />
   );
 
@@ -199,10 +192,8 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
   };
 };
 
-/** Same as the golden angle on a circle: consecutive indices land far apart, and the sequence never repeats. */
 const GOLDEN = 0.6180339887498949;
 
-/** The line cut `distance` along its length: the point of the cut belongs to both halves. */
 const cut = (points: readonly Point[], distance: number): [Point[], Point[]] => {
   let left = distance;
 
@@ -226,7 +217,6 @@ const cut = (points: readonly Point[], distance: number): [Point[], Point[]] => 
   return [[...points], [points.at(-1)!]];
 };
 
-/** Seconds the group of particles takes to fade in. */
 const FADE_IN = 0.6;
 
 const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowResult => {
@@ -243,7 +233,7 @@ const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowR
     );
 
   const node = (
-    <g class={cls} animation={motion({ opacity: 0 }).at(at).to({ opacity: 1 }, FADE_IN)}>
+    <g class={cls} animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(at, FADE_IN))}>
       {lines.flatMap((line, i) => {
         const points = simplify(line, tolerance);
         const length = pathLength(points);
@@ -285,11 +275,9 @@ const isLines = (
 /**
  * Something running `points` from `at`. `span` runs until it arrives.
  *
- * Give it a list of lines, such as the `lines` of `streamlines()`, and one particle runs along every line, again and
- * again. Every line has its own length and so its own period, and the particle starts a different way along it, set by
- * the line's index, so the field flows without pulsing in unison. A particle that starts part way runs as two pieces,
- * so a comet's tail is cut where its line starts over. Costs one or two animated elements per line for `dot`, four to
- * eight for `comet`. `span` is then the time the particles take to fade in.
+ * Given a list of lines, such as the `lines` of `streamlines()`, one particle runs along every line, repeating;
+ * `span` is then the time the particles take to fade in. Costs one or two animated elements per line for `dot`,
+ * four to eight for `comet`.
  */
 export function flow(
   points: readonly Point[] | readonly (readonly Point[])[],

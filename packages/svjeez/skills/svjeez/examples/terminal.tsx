@@ -3,7 +3,6 @@
 import { render, adaptive, appWindow, terminal, systemDark, systemLight } from "svjeez";
 import { rect } from "svjeez/geometry";
 
-// A shell session typed out in a window, in a theme that follows the viewer's light or dark mode.
 const { theme, css: colors } = adaptive({ dark: systemDark, light: systemLight });
 const css = `${colors}\n.mono,.mono text{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-ligatures:none}`;
 

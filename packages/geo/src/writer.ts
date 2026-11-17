@@ -1,4 +1,3 @@
-/** Tenths of a pixel, the grid every coordinate is rounded to. */
 const tenth = (v: number) => Math.round(v * 10);
 
 const number = (t: number) => (t / 10).toString().replace(/^(-?)0\./, "$1.");
@@ -39,7 +38,6 @@ export class Writer {
     this.#closed = true;
   }
 
-  /** d3 draws Point geometries as arcs. Places go through `point()` instead, so these are skipped. */
   arc(): void {}
 
   toString(): string {
@@ -49,7 +47,6 @@ export class Writer {
   }
 
   #flush(): void {
-    // An open line keeps its last point, so a route still ends where it ends.
     if (!this.#closed && this.#tail) this.#line.push(this.#tail);
     const line = straighten(this.#line, this.#min / 2);
 
@@ -75,7 +72,6 @@ const join = (n: string) => (n.startsWith("-") ? n : ` ${n}`);
 
 type Tenths = readonly [number, number];
 
-/** Douglas–Peucker: drops the points that sit within `epsilon` of the straight line their neighbours already draw. */
 export const straighten = (line: readonly Tenths[], epsilon: number): Tenths[] => {
   if (line.length < 3) return [...line];
   const keep = new Uint8Array(line.length);

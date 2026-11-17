@@ -15,7 +15,7 @@ const map = project(world, {
 ```
 
 - `frame` is a `Rect` in scene px, as in every `@svjeez/geo` function. `projection` takes any d3-geo projection; the default is `geoNaturalEarth1()`. `fit: "sphere"` fits the whole globe instead of the regions, any GeoJSON fits that, and `fit: false` keeps the projection as it is. `object` names the TopoJSON object to read, default the first.
-- `map.regions` holds `{ id, properties, feature, d, centroid, bounds }` per feature. `map.region("France")` finds one by `id` or `properties.name`. `centroid` and `bounds` describe the largest piece, so labels and zooms land on the mainland.
+- `map.parts` holds `{ id, properties, feature, d, centroid, box }` per feature. `map.part("France")` finds one by `id` or `properties.name`. `centroid` and `box` describe the largest piece, so labels and zooms land on the mainland. Nothing is drawn yet, so a region has no `span`; `choropleth()` gives it one.
 - `map.land` fills every region in one path. `map.lines` strokes every border once. `map.sphere` and `map.graticule(15)` draw the globe and its grid.
 - `map.point([lon, lat])` places a marker or label. Longitude comes first.
 - `map.dots(step)` returns evenly spaced places on land, `{ at, id, properties, point }`, for a dot map. On a globe, far-side dots keep their `at` and have no `point`.
@@ -29,7 +29,7 @@ const map = project(world, {
 
 Don't zoom a camera over one animated path per country: Chromium flashes blank tiles. Animate the per-region paths for the intro, then at a fixed time hide them and show a still copy of `map.land` and `map.lines` inside the `Camera`. Put markers and routes in a second `Camera` with the same stops. `examples/world` in the svjeez repository does this.
 
-Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, 0.6)`; `fillOpacity` is not a channel.
+Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, span(1, 0.6))`; `fillOpacity` is not a channel.
 
 ## Turning dots
 
@@ -55,18 +55,19 @@ const clip = def.clipPath({}, <path d={earth.sphere} />);
 - `route(from, to)`, `circle(center, degrees)`, `night(date)` and `terminator(date)` return one path each. `date` is a `Date` or a function of the seconds since the span starts.
 - `place(at)` gives a `<g>` a moving `x`, `y` and `opacity`, so a marker rides the globe and fades out at the horizon. Draw its content at the origin.
 - `simplify` (default 0.6 degrees) and `tolerance` (default 1px) set the file size. One turn of 110m land in 24s with a 226px radius is about 500 KB at `simplify: 0.8`. Tilt the globe 20 degrees or more so its hidden pole holds the fold; an upright globe needs more keys.
+- `earth.parts` are the regions, as `project()` gives them, and `earth.part("France")` finds one by id or name. Its `box` is where it sits when the turn ends, a region behind the globe pressed onto the rim; its `span` is the globe's; and `path()` returns the region alone as turning pieces, to fill or outline it over the land. `earth.bounds` is the disc.
 - `spin` also takes `(t) => [lon, lat]`, with `t` in seconds since the span starts. `facing(t)` and `locate(at, t)` read the same clock, and `earth.span` is the span.
 
 `examples/globe` in the svjeez repository turns a day this way. The dot globe stays smaller for a long loop.
 
 ## Changing projection
 
-`reproject(data, [geoMercator(), geoEqualEarth()], { frame, filter })` writes every region under each projection from the same points, so `motion({ d })` morphs between them. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` fills everything. Outlines are cut at the antimeridian and simplified once, in degrees. Filter out Antarctica for Mercator.
+`reproject(data, [geoMercator(), geoEqualEarth()], { frame, filter })` writes every region under each projection from the same points, so `motion({ d })` morphs between them. `parts[i].d[k]` is region `i` under projection `k`, `part("Greenland")` finds one, and `land[k]` fills everything. Outlines are cut at the antimeridian and simplified once, in degrees. Filter out Antarctica for Mercator.
 
 ```tsx
 const maps = reproject(world, [geoMercator(), geoEqualEarth()], { frame, filter });
 const [a, b] = maps.land;
-<path d={a} animation={motion({ d: a }).at(1).to({ d: b }, 1.8, ease.inOut)} />;
+<path d={a} animation={motion({ d: a }).to({ d: b }, span(1, 1.8), ease.inOut)} />;
 ```
 
 `trueSize(span, map, region, [lon, lat], { ease, tolerance, step })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. `ease` defaults to `ease.inOut`. It returns `{ d, animation }`, so spread it onto a `<path>`. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `examples/projections` does the Mercator morph and the slide.
@@ -83,7 +84,7 @@ const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
 const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectancy (years)", empty: "No data" }); // key.node, key.bounds
 ```
 
-`choropleth(spans, map, values, { scale, ease, lines, lineWidth })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
+`choropleth(spans, map, values, { scale, ease, lines, lineWidth })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, span, bounds, parts, part, unmatched, groups }`. `unmatched` lists keys that match no region. `parts` are the regions `values` names, and `part("France")` finds one by id or name, with its `span` from the first span that changes its color to the end of the last, so a label can follow it in: `enter(years.part("France").span.next(0.4))`.
 
 ```tsx
 const years = choropleth(
@@ -94,13 +95,13 @@ const years = choropleth(
 );
 ```
 
-`cartogram(span, map, values, { ease, fill, coverage, gap, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` (default 0, all together) the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max, gap })` morphs the biggest `top` regions (default 12) into horizontal bars in `frame`, a `Rect`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` (each `{ region, value, x, y, r }`) or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
+`cartogram(span, map, values, { ease, fill, coverage, gap, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` (default 0, all together) the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max, gap })` morphs the biggest `top` regions (default 12) into horizontal bars in `frame`, a `Rect`. Both take one positive number per region and return `{ node, rest }` and the shapes as `parts`, each `{ id, region, value, box, span }` with `x`, `y` and `r` on a circle, to place labels from. `part("France")` finds one by id or name, and its `span` is when that region morphs. `fill` is a color or `(region, value) => color`.
 
 The shapes start as the outline and hide until the span starts. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
 
 ## Traffic
 
-`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
+`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns a `Drawn` with `count`, the particles sent; put it in the scene as it is. Its parts are the routes, by `id` (a line takes `{ points, id }`, and the default is its index, `"0"`), each with its `points`, `count`, `box` and a `span` from the first departure on it to the last arrival.
 
 `arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
 

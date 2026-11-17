@@ -1,10 +1,8 @@
 import { inflateSync } from "node:zlib";
 import type { Face, Item, Vector } from "./tree.ts";
 
-/** A face the page loaded, with the URL its `@font-face` rule points at, before the bytes are fetched. */
 type Source = Omit<Face, "src"> & { readonly url: string };
 
-/** The first family of every text run in a tree: the ones whose faces a snapshot needs. */
 export const families = (item: Item, out = new Set<string>()): Set<string> => {
   if (item.kind === "text") out.add(item.family);
   else if (item.kind === "box") for (const child of item.children) families(child, out);
@@ -21,15 +19,9 @@ export const families = (item: Item, out = new Set<string>()): Set<string> => {
   return out;
 };
 
-/**
- * The `@font-face` rules behind the faces of `used` that the page actually loaded. A face added from script, or from
- * a stylesheet the page can't read, has no rule to find, and its text draws in a fallback. Runs inside the page, so
- * it must not reference anything outside its own body.
- */
 export function sources(used: string[]): Source[] {
   const unquote = (s: string) => s.trim().replace(/^["']|["']$/g, "");
 
-  // "U+0000-00FF" and "U+0-FF" are one range.
   const range = (s: string) =>
     (s || "U+0-10FFFF")
       .toUpperCase()
@@ -92,7 +84,6 @@ export function sources(used: string[]): Source[] {
   });
 }
 
-/** A WOFF file's tables, inflated back into the TrueType or OpenType file it wraps. */
 const woff = (bytes: Uint8Array): Uint8Array => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const count = view.getUint16(12);
@@ -136,10 +127,6 @@ const woff = (bytes: Uint8Array): Uint8Array => {
   return out;
 };
 
-/**
- * The TrueType or OpenType file inside a WOFF or WOFF2, so the drawing can cut the font down to the characters it
- * draws: svjeez subsets only a plain font file, and a page's whole woff2 is most of a picture's size.
- */
 export const unwrap = async (bytes: Uint8Array): Promise<Uint8Array> => {
   const tag = String.fromCharCode(...bytes.subarray(0, 4));
 
@@ -151,7 +138,6 @@ export const unwrap = async (bytes: Uint8Array): Promise<Uint8Array> => {
   return decompress(bytes);
 };
 
-/** The type a font file's first four bytes say it is. */
 const mime = (tag: string): string =>
   tag === "wOF2"
     ? "font/woff2"
@@ -161,19 +147,15 @@ const mime = (tag: string): string =>
         ? "font/otf"
         : "font/ttf";
 
-/** A face the drawing can't cut down (a variable weight, a width, a range of characters) is embedded whole. */
 export const isWholeFile = (face: Pick<Face, "weight" | "stretch" | "unicodeRange">): boolean =>
   !/^\d+$/.test(face.weight) || !!face.stretch || !!face.unicodeRange;
 
-/** A font file as a data URI, its type read from the bytes. */
 export const dataUri = (bytes: Uint8Array): string =>
   `data:${mime(String.fromCharCode(...bytes.subarray(0, 4)))};base64,${Buffer.from(bytes).toString("base64")}`;
 
-/** The `format()` hint for a font file of this type: `woff2`, `woff`, `otf` or `ttf`. */
 export const formatOf = (type: string): string =>
   type === "woff2" ? "woff2" : type === "woff" ? "woff" : type === "otf" ? "opentype" : "truetype";
 
-/** An `@font-face` rule, for the page that lays text out and for a drawing that embeds a page's own file. */
 export const fontFace = (face: Omit<Face, "src">, url: string, format: string): string =>
   `@font-face{font-family:${JSON.stringify(face.family)};src:url(${url}) format("${format}");` +
   `font-weight:${face.weight};font-style:${face.style}${face.stretch ? `;font-stretch:${face.stretch}` : ""}${face.unicodeRange ? `;unicode-range:${face.unicodeRange}` : ""}}`;

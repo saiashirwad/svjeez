@@ -1,9 +1,8 @@
-// The page side of a compile worker: one promise per job, and a queue that keeps only the newest job.
 import type { Compiled } from "./compile.ts";
 
 /**
  * A client for a worker that answers `{ id, ...Compiled }` to `{ id, ...message(job) }`. A worker that fails to load
- * fails every compile with the reason, so the page can show it.
+ * fails every compile with the reason.
  */
 export const compilerFor = <Job>(worker: Worker, message: (job: Job) => object) => {
   const waiting = new Map<number, (r: Compiled) => void>();
@@ -37,14 +36,12 @@ export const compilerFor = <Job>(worker: Worker, message: (job: Job) => object) 
         });
 };
 
-/** A worker that compiles scene source with `compileScene`. */
 export const sceneWorker = () =>
   new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
 
 /**
- * Scene source in, compiled file out, on a worker of its own. `sources` marks every element with the line that made it.
- * A scene that runs past `timeout` milliseconds, an endless loop say, fails with that reason, and a fresh worker takes
- * the next job. `stop` ends the worker for good.
+ * Scene source in, compiled file out, on a worker. A scene running past `timeout` milliseconds fails with that reason
+ * and a fresh worker takes the next job. `stop` ends the worker for good.
  */
 export const createCompiler = ({ sources = false, timeout = 10_000 } = {}) => {
   const start = () => {
@@ -58,7 +55,6 @@ export const createCompiler = ({ sources = false, timeout = 10_000 } = {}) => {
 
   let worker = start();
   let stopped = false;
-  /** Every job the current worker owes an answer, with the timer that gives up on it. */
   const waiting = new Map<(result: Compiled) => void, ReturnType<typeof setTimeout>>();
 
   const settleAll = (result: Compiled) => {
@@ -74,8 +70,6 @@ export const createCompiler = ({ sources = false, timeout = 10_000 } = {}) => {
     new Promise<Compiled>((resolve) => {
       if (stopped) return resolve(STOPPED);
 
-      // A stuck job holds up every job behind it on the same worker, so they all fail with it and a fresh worker
-      // takes the next.
       const timer = setTimeout(() => {
         worker.terminate();
         worker = start();
@@ -115,10 +109,7 @@ const STOPPED: Compiled = {
   ms: 0,
 };
 
-/**
- * Runs jobs one at a time, and while one runs keeps only the newest of the jobs that arrive, so a drag never builds a
- * backlog.
- */
+/** Runs jobs one at a time, keeping only the newest of those that arrive meanwhile. */
 export const latestWins = <T>(run: (job: T) => Promise<void>) => {
   let busy = false;
   let queued: { readonly job: T } | undefined;
@@ -132,7 +123,6 @@ export const latestWins = <T>(run: (job: T) => Promise<void>) => {
     try {
       await run(job);
     } catch (error) {
-      // The queue outlives a failed job: the next one still runs.
       console.error(error);
     } finally {
       busy = false;

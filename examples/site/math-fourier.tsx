@@ -1,10 +1,9 @@
 import { tex } from "@svjeez/math";
-import { enter, motion, render, sampled, morph } from "svjeez";
+import { enter, motion, render, sampled, morph, span } from "svjeez";
 
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
-// A square wave from epicycles: circles for the odd harmonics join one at a time, each spinning on the tip of the last, and the tip's height traces a partial Fourier sum that grows squarer with every circle.
 const W = 504;
 const H = 340;
 const D = 12;
@@ -26,7 +25,6 @@ const HARMONICS = [
 
 const PEN = theme.base0A;
 
-/** Each circle spins one base period while the pen crosses the plot, then rests while the pen returns and the next circle grows. */
 const PERIOD = 1.8;
 const GAP = 0.45;
 const RUNS = [1.2, 3.45, 5.7, 7.95, 10.2];
@@ -37,7 +35,6 @@ const smooth = (u: number) => {
   return v * v * (3 - 2 * v);
 };
 
-/** Where the story is at time t: how far each circle has grown, the base angle, and the pen's x. */
 const state = (t: number) => {
   const grow = HARMONICS.map((_, i) =>
     i === 0 ? smooth((t - 0.5) / 0.6) : smooth((t - RUNS[i - 1]! - PERIOD) / GAP),
@@ -53,7 +50,6 @@ const state = (t: number) => {
   return { grow, theta: 0, pen: X1 - (X1 - X0) * smooth((t - run - PERIOD) / GAP) };
 };
 
-/** The center of circle i, or the chain's tip for i = HARMONICS.length. */
 const center = (t: number, i: number) => {
   const { grow, theta } = state(t);
   let x = CX;
@@ -105,7 +101,6 @@ const connector = sampled(
   { ...FINE, tolerance: { translate: 0.5, width: 0.5 } },
 );
 
-/** The partial sum with the first k harmonics, as a path across the plot, and how much of its length lies before each base angle. */
 const trace = (k: number) => {
   const points = Array.from({ length: 241 }, (_, i) => {
     const theta = (2 * Math.PI * i) / 240;
@@ -192,9 +187,7 @@ export default function build(): string {
             stroke={theme.base03}
             strokeWidth={1.25}
             strokeDasharray="3 4"
-            animation={motion({ opacity: 0.6 })
-              .at(RUNS[4]! - GAP)
-              .to({ opacity: 1 }, 0.6)}
+            animation={motion({ opacity: 0.6 }).to({ opacity: 1 }, span(RUNS[4]! - GAP, 0.6))}
           />
         </g>
         {traces.map(({ d, progress, dim }) => (
@@ -202,7 +195,7 @@ export default function build(): string {
             animation={
               dim === undefined
                 ? undefined
-                : motion({ opacity: 1 }).at(dim).to({ opacity: 0.24 }, GAP)
+                : motion({ opacity: 1 }).to({ opacity: 0.24 }, span(dim, GAP))
             }
           >
             <path
@@ -248,10 +241,10 @@ export default function build(): string {
             {"sampled(span, (t) => tip(t))"}
           </text>
         </g>
-        <g animation={motion({ opacity: 1 }).at(WRITTEN).set({ opacity: 0 })}>
+        <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, WRITTEN)}>
           {versions[0]!.write({ at: 0.25, over: 1.2 })}
         </g>
-        <g animation={motion({ opacity: 0 }).at(WRITTEN).set({ opacity: 1 })}>{m.node}</g>
+        <g animation={motion({ opacity: 0 }).set({ opacity: 1 }, WRITTEN)}>{m.node}</g>
       </g>
     </>,
   );

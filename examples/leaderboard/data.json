@@ -1,0 +1,38 @@
+{
+  "title": "Running club standings",
+  "subtitle": "Points after eight time trials",
+  "rows": [
+    {
+      "name": "Priya Raman",
+      "score": 940
+    },
+    {
+      "name": "Tomás Ortega",
+      "score": 1210
+    },
+    {
+      "name": "Wen Li",
+      "score": 1085
+    },
+    {
+      "name": "Amara Okafor",
+      "score": 1302
+    },
+    {
+      "name": "Jonas Berg",
+      "score": 870
+    },
+    {
+      "name": "Sofia Rossi",
+      "score": 1150
+    },
+    {
+      "name": "Kenji Sato",
+      "score": 760
+    },
+    {
+      "name": "Lena Novak",
+      "score": 1004
+    }
+  ]
+}

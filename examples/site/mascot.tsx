@@ -1,4 +1,4 @@
-import { ease, motion, render } from "svjeez";
+import { chain, ease, motion, render, span } from "svjeez";
 import { BLIP, blip } from "./lib/blip";
 
 // Blip in the header, alive. It sits exactly as the favicon draws it for most of a 12 second loop, blinks, hops once
@@ -7,26 +7,26 @@ import { BLIP, blip } from "./lib/blip";
 
 const D = 12;
 
-// A crouch, up, and down.
-const body = motion({ y: 0 })
-  .at(5.8)
-  .to({ y: 2 }, 0.14, ease.out)
-  .to({ y: -5 }, 0.2, ease.out)
-  .to({ y: 0 }, 0.2, ease.in);
+const [crouch, up, down] = chain(span(5.8, 0.14), 0.2, 0.2);
 
-// The bulb lags a beat behind the body on its stem and wobbles to rest after the landing.
+const body = motion({ y: 0 })
+  .to({ y: 2 }, crouch, ease.out)
+  .to({ y: -5 }, up, ease.out)
+  .to({ y: 0 }, down, ease.in);
+
+const [sag, rise, drop, settle] = chain(span(5.94, 0.16), 0.22, 0.12, 0.45);
+
 const bulb = motion({ y: 0 })
-  .at(5.94)
-  .to({ y: 3 }, 0.16)
-  .to({ y: -2 }, 0.22, ease.inOut)
-  .to({ y: 3 }, 0.12, ease.in)
-  .to({ y: 0 }, 0.45, ease.pop);
+  .to({ y: 3 }, sag)
+  .to({ y: -2 }, rise, ease.inOut)
+  .to({ y: 3 }, drop, ease.in)
+  .to({ y: 0 }, settle, ease.pop);
+
+const light = span(10.8, 0.15);
 
 const glow = motion({ fill: BLIP.yellow })
-  .at(10.8)
-  .to({ fill: "#FFEC99" }, 0.15)
-  .wait(0.25)
-  .to({ fill: BLIP.yellow }, 0.6);
+  .to({ fill: "#FFEC99" }, light)
+  .to({ fill: BLIP.yellow }, light.next(0.6, 0.25));
 
 export default () =>
   render(

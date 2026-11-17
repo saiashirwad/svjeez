@@ -1,4 +1,3 @@
-/** A path command letter and the numbers that follow it. */
 export interface PathSegment {
   readonly letter: string;
   readonly numbers: number[];
@@ -8,10 +7,6 @@ const NUMBER = /-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/iy;
 const FLAG = /[01]/y;
 const LETTER = /[A-Za-z]/;
 
-/**
- * Split path data into commands with their numbers. An arc's third and fourth numbers are flags of one digit each,
- * so minified data like `a5 5 0 1010 0` reads as `5 5 0 1 0 10 0`.
- */
 export const segments = (d: string): PathSegment[] => {
   const out: PathSegment[] = [];
   let at = 0;

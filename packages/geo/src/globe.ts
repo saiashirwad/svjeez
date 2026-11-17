@@ -1,11 +1,12 @@
 import { geoContains } from "d3-geo";
-import type { Feature, FeatureCollection } from "geojson";
+import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import { feature, merge, mesh } from "topojson-client";
 import type { GeometryObject, MultiPolygon, Polygon } from "topojson-specification";
 import {
   sampled,
   span as spanOf,
   type Motion,
+  type Part,
   type PathData,
   type Point,
   type Rect,
@@ -13,6 +14,7 @@ import {
   type Span,
   type Spanned,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import type { GeoData, LonLat } from "./index.ts";
 import { sun } from "./sun.ts";
 import {
@@ -39,7 +41,6 @@ export interface Spin {
 }
 
 export interface GlobeOptions {
-  /** The globe is the largest circle centered in `frame`. */
   readonly frame: Rect;
   /** Degrees the north pole leans toward the viewer: the latitude at the globe's middle. Default 0. */
   readonly tilt?: number;
@@ -47,7 +48,6 @@ export interface GlobeOptions {
   readonly spin: Spin | ((t: Seconds) => LonLat);
   /** The TopoJSON object to read. Default the topology's first object. */
   readonly object?: string;
-  /** Keep only the features this returns true for. */
   readonly filter?: (feature: Feature) => boolean;
   /** Degrees. Outlines are simplified on the sphere to within this before they turn. Default 0.6. */
   readonly simplify?: number;
@@ -57,7 +57,6 @@ export interface GlobeOptions {
   readonly tolerance?: number;
 }
 
-/** A path that moves, ready to spread onto a `<path>`: `<path {...globe.land()} fill="…" />`. */
 export interface Turning {
   readonly d: PathData;
   readonly animation: Motion<"d">;
@@ -68,31 +67,36 @@ export interface Riding {
   readonly animation: Motion<"x" | "y" | "opacity">;
 }
 
+/**
+ * One region of a globe, as `project()` gives them. Its box is where the region sits when the turn ends: what faces the
+ * viewer then, with anything behind pressed onto the rim. Its span is the globe's, since it turns all along.
+ */
+export interface GlobeRegion extends Part {
+  readonly id: string;
+  readonly properties: GeoJsonProperties;
+  readonly feature: Feature;
+  path(): Turning[];
+}
+
 export interface Globe {
   readonly center: Point;
   readonly radius: number;
-  /** When every motion on the globe runs: the span `globe()` was given. */
+  readonly bounds: Rect;
+  readonly parts: readonly GlobeRegion[];
+  part(key: string | number): GlobeRegion;
   readonly span: Spanned;
-  /** The outline of the globe, for the sea, a rim, and the clip every turning path needs. */
   readonly sphere: string;
   /** The `[lon, lat]` at the globe's middle `t` seconds after the span starts. */
   facing(t: Seconds): LonLat;
   /** Where a place is `t` seconds after the span starts, and how far it faces the viewer, from 1 at the middle through 0 on the horizon to -1 behind. */
   locate(at: LonLat, t: Seconds): { readonly point: Point; readonly z: number };
-  /**
-   * Every region filled, as turning paths. From TopoJSON the shared borders are gone, leaving the land. Layers come
-   * back in pieces a band of longitude wide, so a piece behind the globe holds still and costs no keys.
-   */
   land(): Turning[];
-  /** The borders between regions, each drawn once, in pieces. TopoJSON only. */
   borders(): Turning[];
-  /** Any GeoJSON polygons and lines, turning, in pieces. */
   path(object: Outline): Turning[];
   /** Lines of longitude and latitude every `step` degrees, one path each. Default 15. */
   graticule(step?: number): Turning[];
   /** The circle `radius` degrees around `center`, as a line. */
   circle(center: LonLat, radius: number): Turning;
-  /** The great-circle arc from `from` to `to`, as a line. */
   route(from: LonLat, to: LonLat): Turning;
   /** The half of the globe in darkness, at one date or at a date that changes with time. */
   night(date: Date | ((t: Seconds) => Date)): Turning;
@@ -102,13 +106,11 @@ export interface Globe {
   place(at: LonLat, options?: { readonly fade?: number }): Riding;
 }
 
-/** The point the hidden side folds around, at each time, and the parallel it rides. */
 interface Pivot {
   readonly at: (t: Seconds) => Vec3;
   readonly lat: number;
 }
 
-/** The screen basis at a facing: right, up, and toward the viewer, all on the sphere. */
 interface View {
   readonly right: Vec3;
   readonly up: Vec3;
@@ -125,15 +127,12 @@ const viewOf = ([lon, lat]: LonLat): View => {
   };
 };
 
-/** How far the hidden side reaches past the rim, as a share of the radius. */
 const BEYOND = 1;
 
-/** Degrees between a hidden point's home and the antipode at most, so the far side keeps room around it. */
 const REACH = 80;
 
 const SAMPLE = 0.05;
 
-/** Degrees of longitude per path when a layer is split. */
 const BAND = 30;
 
 const fmt = (v: number) => (Math.round(v * 10) / 10).toString();
@@ -166,10 +165,32 @@ const features = (data: GeoData, object: string | undefined): Feature[] => {
   return "features" in read ? read.features : [read];
 };
 
+/** A feature's id as `project()` and `globe()` give it: its `id`, else its `properties.name`, else its index. */
+export const idOf = (f: Feature, index: number): string =>
+  String(f.id ?? f.properties?.name ?? index);
+
+const positions = (g: Geometry | null): Position[] => {
+  if (!g) return [];
+
+  switch (g.type) {
+    case "Point":
+      return [g.coordinates];
+    case "MultiPoint":
+    case "LineString":
+      return g.coordinates;
+    case "MultiLineString":
+    case "Polygon":
+      return g.coordinates.flat();
+    case "MultiPolygon":
+      return g.coordinates.flat(2);
+    case "GeometryCollection":
+      return g.geometries.flatMap(positions);
+  }
+};
+
 /**
- * A turning globe whose land, borders, grid, routes and night are real paths, each a `sampled.path()` with a fixed point count.
- * Every motion runs during `when`, and every time a function here takes, such as `facing(t)` and a `night` date function, is
- * seconds since `when.at`.
+ * A turning globe whose land, borders, grid, routes and night are paths. Every motion runs during `when`, and every time a
+ * function here takes, such as `facing(t)`, is seconds since `when.at`.
  */
 export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
   const { at: start, over } = when;
@@ -210,7 +231,9 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     center.y - radius * y,
   ];
 
-  const all = features(data, options.object).filter((f) => options.filter?.(f) ?? true);
+  const listed = features(data, options.object).map((f, index) => ({ f, id: idOf(f, index) }));
+  const chosen = listed.filter(({ f }) => options.filter?.(f) ?? true);
+  const all = chosen.map(({ f }) => f);
 
   const collection: FeatureCollection = { type: "FeatureCollection", features: all };
 
@@ -223,7 +246,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
           if (source.type !== "GeometryCollection") return undefined;
           const read = feature(data, source);
           const list = "features" in read ? read.features : [read];
-          // topojson-client turns a GeometryCollection into features in order, so geometry i is feature i.
           const kept = source.geometries.filter((_, i) => options.filter?.(list[i]!) ?? true);
 
           // SAFETY: topojson-client's merge and mesh read only each geometry's type and arcs, never its properties.
@@ -231,11 +253,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
         })()
       : undefined;
 
-  /**
-   * The point behind the globe that the hidden side is folded around. It rides a parallel under the antipode of the
-   * middle: the hidden pole when it stays hidden, else the parallel that clears every outline by the most, so nothing
-   * passes close to it.
-   */
   const pivot = (lines: readonly Strand[]): Pivot => {
     const lats = times.map((t) => facing(t)[1]);
 
@@ -283,7 +300,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     return { at: (t) => vec([facing(t)[0] + 180, best.lat]), lat: best.lat };
   };
 
-  /** A point in the scene: true orthographic in front, folded out past the rim behind, around `hole`. */
   const place = (p: Vec3, v: View, hole: readonly [number, number]): [number, number] => {
     const [x, y, z] = [dot(p, v.right), dot(p, v.up), dot(p, v.toward)];
 
@@ -302,7 +318,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     return screen((sx + reach * ux) * out, (sy + reach * uy) * out);
   };
 
-  /** A point folded out past the rim may stray half its distance past the rim, which keeps it out of sight. */
   const slack = (x: number, y: number) =>
     Math.max(0, (Math.hypot(x - center.x, y - center.y) - radius - 1) / 2);
 
@@ -313,7 +328,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     return { d: sample(0) as PathData, animation };
   };
 
-  /** Signed area in the scene, to tell which way a ring runs. */
   const area = (ring: readonly (readonly [number, number])[]) =>
     ring.reduce((sum, [x, y], i) => {
       const [nx, ny] = ring[(i + 1) % ring.length]!;
@@ -321,7 +335,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
       return sum + x * ny - nx * y;
     }, 0);
 
-  /** Units whose middles share a band of longitude go in one path, so a path behind the globe holds still and costs no keys. */
   const pieces = (list: readonly Unit[]): Unit[][] => {
     const bands = new Map<number, Unit[]>();
 
@@ -356,7 +369,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
 
       if (!inside) return turning((t) => write(rings(t), closed));
 
-      // Folded around a point inside the area, a polygon fills its outside, so one ring past the fold turns it back.
       const sign = Math.sign(
         rings(0).reduce((sum, ring, i) => sum + (closed[i] ? area(ring) : 0), 0),
       );
@@ -375,7 +387,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     });
   };
 
-  /** A circle on the sphere, `axis` at its middle and `spread` radians out, from angle `start` to `end` measured from `zero`. */
   interface Arc {
     readonly axis: Vec3;
     readonly spread: number;
@@ -384,7 +395,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     readonly end: number;
   }
 
-  /** Points along the part of an arc that faces the viewer. A hidden arc shrinks to the point where it will appear. */
   const visible = (arc: Arc, v: View, count: number): [number, number][] => {
     const side = cross(arc.axis, arc.zero);
 
@@ -428,7 +438,6 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     });
   };
 
-  /** One arc as a turning line, a point every 3 degrees of its length. */
   const arcs = (arcAt: (t: Seconds) => Arc): Turning => {
     const first = arcAt(0);
     const count = Math.max(2, Math.ceil((first.end - first.start) / (3 * RAD)) + 1);
@@ -453,9 +462,53 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     return vec([lon + 180, -lat]);
   };
 
+  const settled = (f: Feature): Rect => {
+    const v = view(over);
+
+    const points = positions(f.geometry).map((at) => {
+      const p = vec([at[0]!, at[1]!]);
+      const [x, y, z] = [dot(p, v.right), dot(p, v.up), dot(p, v.toward)];
+      const r = z >= 0 ? 1 : Math.hypot(x, y) || 1;
+
+      return screen(x / r, y / r);
+    });
+
+    if (points.length === 0) return rect(center.x, center.y, 0, 0);
+    const [xs, ys] = [points.map(([x]) => x), points.map(([, y]) => y)];
+    const [left, top] = [Math.min(...xs), Math.min(...ys)];
+
+    return rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
+  };
+
+  const regions = chosen.map(({ f, id }): GlobeRegion => ({
+    id,
+    properties: f.properties,
+    feature: f,
+    get box() {
+      return settled(f);
+    },
+    span: spanOf(start, over),
+    path: () => path(f),
+  }));
+
   return {
     center,
     radius,
+    bounds: rect(center.x - radius, center.y - radius, 2 * radius, 2 * radius),
+    parts: regions,
+    part(key) {
+      const found = regions.find((r) => r.id === String(key) || r.properties?.name === key);
+
+      if (!found)
+        throw new Error(
+          `globe() has no region ${JSON.stringify(key)}. Regions are found by id or properties.name, as in ${regions
+            .slice(0, 3)
+            .map((r) => JSON.stringify(r.id))
+            .join(", ")}.`,
+        );
+
+      return found;
+    },
     span: spanOf(start, over),
     sphere: `M${fmt(center.x - radius)} ${fmt(center.y)}a${fmt(radius)} ${fmt(radius)} 0 1 0 ${fmt(2 * radius)} 0a${fmt(radius)} ${fmt(radius)} 0 1 0 ${fmt(-2 * radius)} 0Z`,
     facing,

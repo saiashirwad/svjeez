@@ -3,7 +3,6 @@
   import { flashOnChange } from "./flash";
   import { codeLines, legColor, type CodeLine } from "./view";
 
-  // The scene source, with the values the lab edits flashing as they change.
   const bench = getBench();
   const lines = $derived(codeLines(bench.source));
 </script>
@@ -23,8 +22,6 @@
 <div class="frame"><pre class="source"><code>{#each lines as line, i (i)}{#if i}{"\n"}{/if}{#if line.leg === undefined}{@render parts(line)}{:else}<span class={["leg", { hot: bench.hot === line.leg }]} style:--leg={legColor(line.leg)}>{@render parts(line)}</span>{/if}{/each}</code></pre></div>
 
 <style>
-  /* Long lines scroll sideways rather than wrap, so each leg's lines stay whole. An edge fades while there is more
-     source past it, and the code box is as wide as its longest line so a leg's band spans every line it marks. */
   @property --lc-before {
     syntax: "<length>";
     inherits: false;

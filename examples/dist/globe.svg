@@ -45,8 +45,9 @@ svg{--space:#04060C;--sea:#0B1A2C;--land:#9FCBEA;--night:#02050B;--dawn:#FF9D5C;
 @keyframes k15{0%,30.625%,75.417%,100%{opacity:1}32.292%{opacity:0.043}32.5%,73.542%{opacity:0}75.208%{opacity:0.968}}
 @keyframes k16{0%,100%{translate:621.332px 221.606px}4.792%{translate:677.46px 222.357px}9.167%{translate:727.147px 217.559px}13.125%{translate:767.594px 209.002px}16.667%{translate:798.028px 198.387px}20.208%{translate:821.457px 185.517px}23.542%{translate:836.071px 171.913px}25.208%{translate:840.453px 164.757px}26.875%{translate:842.814px 157.468px}30%{translate:841.722px 143.723px}31.875%{translate:837.626px 135.608px}33.958%{translate:830.126px 126.873px}35.833%{translate:820.824px 119.385px}37.917%{translate:807.815px 111.61px}40%{translate:792.208px 104.539px}42.083%{translate:774.271px 98.29px}44.375%{translate:752.216px 92.496px}46.667%{translate:728.169px 87.946px}50.417%{translate:685.839px 83.424px}54.375%{translate:639.417px 82.803px}58.125%{translate:596.334px 86.184px}61.458%{translate:560.735px 92.284px}64.375%{translate:532.953px 99.798px}67.083%{translate:510.827px 108.368px}69.792%{translate:492.894px 118.218px}72.5%{translate:479.674px 129.063px}74.167%{translate:474.052px 136.096px}75.833%{translate:470.423px 143.312px}78.958%{translate:469.113px 157.054px}82.083%{translate:474.986px 170.628px}85.417%{translate:488.907px 184.334px}88.75%{translate:510.13px 196.656px}92.292%{translate:539.639px 207.631px}96.042%{translate:577.103px 216.289px}}
 .m8{animation-name:k15,k16;animation-timing-function:linear,linear}
-@keyframes k17{0%,0.833%{translate:0px 10px}5%,100%{translate:0px 0px}}
-.m9{animation-name:k17}
+@keyframes k17{0%,0.833%{opacity:0}5%,100%{opacity:1}}
+@keyframes k18{0%,0.833%{translate:0px 10px}5%,100%{translate:0px 0px}}
+.m9{animation-name:k17,k18}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-12s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <rect width="960" height="540" fill="var(--space)"/>

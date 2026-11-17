@@ -13,10 +13,8 @@ import {
 import { placeLabels, tracks, type Crossing } from "./route.ts";
 
 export interface LayeredInput {
-  /** In order; the order seeds the left-to-right order within ranks. */
   readonly nodes: readonly ({ readonly id: string } & Size)[];
   readonly edges: readonly { readonly from: string; readonly to: string; readonly label?: Size }[];
-  /** A node belongs to at most one group. The label sits inside the box, top-left, inset by `groupPad`. */
   readonly groups?: readonly {
     readonly id: string;
     readonly members: readonly string[];
@@ -31,7 +29,6 @@ export interface LayeredInput {
 interface LayeredEdge {
   readonly from: string;
   readonly to: string;
-  /** Orthogonal, from the border of `from` to the border of `to`. */
   readonly points: readonly Point[];
   readonly label?: Box;
 }
@@ -39,14 +36,12 @@ interface LayeredEdge {
 export interface LayeredLayout {
   readonly nodes: ReadonlyMap<string, Box>;
   readonly rank: ReadonlyMap<string, number>;
-  /** Same order as the input edges. */
   readonly edges: readonly LayeredEdge[];
   readonly groups: ReadonlyMap<string, Box>;
   readonly bounds: Box;
 }
 
 interface Vertex {
-  /** Index of the input node; undefined for a dummy on a long or backward edge. */
   readonly node?: number;
   readonly rank: number;
   readonly w: number;
@@ -54,15 +49,11 @@ interface Vertex {
   group: number;
   readonly up: number[];
   readonly down: number[];
-  /** Segment ids, parallel to `up` and `down`. */
   readonly ins: number[];
   readonly outs: number[];
-  /** A backward edge's dummy in its end's own rank, beside that end. */
   readonly anchor?: number;
-  /** For a backward edge's dummies: the edge, and once routed, the side its channel runs on. */
   readonly back?: number;
   outer?: "left" | "right";
-  /** Room on the right for a self loop and its label. */
   loop: number;
 }
 
@@ -70,22 +61,12 @@ const LOOP = 20;
 const PORT = 12;
 const TRACK = 14;
 
-/** Edges this close to straight are drawn straight. */
 const SNAP = 6;
 
-/** How far above its node a merging edge joins the others. */
 const MERGE = 16;
 
-/** Room a renderer may round off at each end of a straight run; labels stay clear of it. */
 export const BEND = 16;
 
-/**
- * Sugiyama-lite in TB space; LR is the same layout transposed. DFS back edges are reversed for ranking, ranks are
- * longest paths, a long edge gets a dummy vertex in every rank it crosses, barycenter sweeps order each rank with
- * groups kept contiguous, then x positions relax toward neighbours under separation constraints. Every edge gets its
- * own ports and its own horizontal track in each gap; a backward edge leaves and enters its nodes on the right and
- * climbs in its own channel.
- */
 export function layered(input: LayeredInput): LayeredLayout {
   const { direction = "TB", rankGap = 48, nodeGap = 36, groupPad = 12 } = input;
   const lr = direction === "LR";
@@ -159,7 +140,6 @@ export function layered(input: LayeredInput): LayeredLayout {
       back,
     }) - 1;
 
-  /** Per edge, its vertices top to bottom and, per consecutive pair, the segment id between ranks (none beside an anchor). */
   const chains = new Map<number, { chain: number[]; segments: (number | undefined)[] }>();
   const crossing: { a: number; b: number }[] = [];
 
@@ -200,7 +180,6 @@ export function layered(input: LayeredInput): LayeredLayout {
     [...reversed].map((i) => chains.get(i)!),
   );
 
-  /** Per node, the backward edges leaving or entering each side. */
   const sides: Record<"left" | "right", number[]>[] = input.nodes.map(() => ({
     left: [],
     right: [],
@@ -220,7 +199,6 @@ export function layered(input: LayeredInput): LayeredLayout {
     lr,
   });
 
-  /** Each outgoing segment's x on the bottom of `v`, ordered by where its other end sits so they do not cross. */
   const ports = (v: number): Map<number, number> => {
     const { node, down, outs } = vertices[v]!;
 
@@ -232,7 +210,6 @@ export function layered(input: LayeredInput): LayeredLayout {
 
     const step = Math.min(PORT, vertices[v]!.w / (sorted.length + 1));
     const packed = sorted.map((_, k) => xs.center[v]! + (k - (sorted.length - 1) / 2) * step);
-    /** Two or more edges leave from above their targets as far as the node reaches, inset from its corners, in order and `step` apart. */
     const reach = sorted.length < 2 ? 0 : Math.max(0, vertices[v]!.w / 2 - PORT * 1.5);
 
     const [lo, hi] = [
@@ -254,7 +231,6 @@ export function layered(input: LayeredInput): LayeredLayout {
 
   const outPorts = vertices.map((_, v) => ports(v));
 
-  /** Incoming edges share one port at the top center and merge just above it; one that would arrive within SNAP of straight comes in straight. */
   const ends = crossing.map(({ a, b }, id): Crossing => {
     const [xa, center] = [outPorts[a]!.get(id)!, xs.center[b]!];
 
@@ -319,7 +295,6 @@ export function layered(input: LayeredInput): LayeredLayout {
   thick.forEach((_, r) => top.push(r === 0 ? 0 : top[r - 1]! + thick[r - 1]! + gaps[r - 1]!));
   const bottom = (r: number) => top[r]! + thick[r]!;
 
-  /** Tracks sit centered in the gap, or with merges, the lowest one MERGE above the next rank. */
   const trackY = (id: number) => {
     const r = vertices[crossing[id]!.a]!.rank;
     const { track, count } = lanes[r]!;
@@ -456,7 +431,6 @@ export function layered(input: LayeredInput): LayeredLayout {
   };
 }
 
-/** Edges that close a cycle in a DFS from each node in input order. */
 const backEdges = (
   count: number,
   edges: readonly { i: number; u: number; v: number }[],
@@ -514,11 +488,6 @@ const longestPath = (count: number, edges: readonly { u: number; v: number }[]):
 const mean = (values: readonly number[]): number | undefined =>
   values.length === 0 ? undefined : values.reduce((a, b) => a + b, 0) / values.length;
 
-/**
- * Barycenter sweeps down and up, a group's members sorted together so they stay contiguous, and each anchored dummy
- * put back just right of its node. The final key gives each group one value in every rank, so groups keep the same
- * left-to-right order throughout.
- */
 const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
   const layers = Array.from({ length: ranks }, (): number[] => []);
   vertices.forEach((v, i) => layers[v.rank]!.push(i));
@@ -597,11 +566,6 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
   return { layers, groupKey, base };
 };
 
-/**
- * Sends each backward edge round the outside when both its ends sit at the same end of their ranks: its dummies move
- * to that end of every rank it spans, shorter edges inside longer ones. Otherwise its dummies stay just right of its
- * ends. Returns each vertex's sort key for placement.
- */
 const outside = (
   vertices: Vertex[],
   layers: number[][],
@@ -650,18 +614,12 @@ const outside = (
 interface Item {
   readonly kind: "v" | "g";
   readonly id: number;
-  /** Extent left and right of its x. */
   readonly l: number;
   readonly r: number;
   readonly gap: number;
   readonly key: number;
 }
 
-/**
- * Each rank is a row of items: an ungrouped vertex, or a group column with its members packed and centered inside.
- * A group keeps one column through every rank it spans, so no other vertex can sit inside its box.
- * Items start packed left, then each moves toward the mean of its neighbours, clamped between the items beside it.
- */
 const place = (
   vertices: readonly Vertex[],
   layers: readonly number[][],
@@ -778,7 +736,6 @@ const place = (
     ...(vertices[v]!.anchor === undefined ? [] : [vertices[v]!.anchor!]),
   ];
 
-  /** Long edges and one-to-one links pull hardest, so chains line up and run straight. */
   const weight = (v: number, n: number) => {
     const [a, b] = [vertices[v]!, vertices[n]!];
 
@@ -801,7 +758,6 @@ const place = (
       ]),
     );
   const items = [...occurrences.values()].map((list) => list[0]!.row[list[0]!.k]!);
-  /** An outer channel's dummies take no part in the relaxation, so they never fence nodes in; they hug the row ends after. */
   const outer = (it: Item) => it.kind === "v" && vertices[it.id]!.outer !== undefined;
 
   for (let sweep = 0; sweep < 60; sweep++) {
@@ -839,7 +795,6 @@ const place = (
     }
   }
 
-  /** Innermost channels first: each backward edge's dummies share one x, just clear of everything inside them in every rank. */
   const channels = groupBy(
     rows.flatMap((row) => row.flatMap((it, k) => (outer(it) ? [{ it, row, k }] : []))),
     ({ it }) => vertices[it.id]!.back!,

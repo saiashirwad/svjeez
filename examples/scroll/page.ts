@@ -1,5 +1,3 @@
-// Prints the demo page: a scene whose camera follows the scroll through a CSS scroll timeline, while the mechanism it
-// shows keeps running on the clock. No script drives it.
 import { restyle } from "svjeez/page";
 import escapement, { D, GROUND, moments } from "../escapement/index.tsx";
 
@@ -22,7 +20,6 @@ const words: Record<keyof typeof moments, string> = {
   all: "18,000 beats an hour, 432,000 a day.",
 };
 
-// Each caption holds for its span of the scene, on the same timeline: its range is the span as a share of the scroll.
 const share = (seconds: number) => ((seconds / D) * 100).toFixed(2) + "%";
 
 // SAFETY: `moments` is a plain object literal, so its keys are exactly its own named keys.

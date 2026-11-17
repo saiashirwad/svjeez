@@ -8,7 +8,6 @@ export { restyle, type RestyleOptions } from "./restyle";
  * `time / playbackRate` seconds of playback. Pass an inline `<svg>` to scrub that picture alone.
  */
 export const seek = (time: Seconds, root: Document | Element = document): void => {
-  // The helper lives in here because the function is serialized into the page.
   const rateAt = (element: Element | null | undefined): number =>
     parseFloat(element?.closest("svg")?.getAttribute("data-playback-rate") ?? "") || 1;
 
@@ -49,10 +48,6 @@ export const loopLength = (root: Document | Element = document): Seconds => {
       0,
   );
 
-  // Emitted durations are rounded to a millisecond, so a period such as 12 / 7 = 1714.2857ms
-  // arrives as 1714ms. Each of the `loop / period` cycles then drifts by up to half a
-  // millisecond, and `loop` fits the period when the whole drift stays inside that budget.
-  // The helper lives in here because the function is serialized into the page.
   const fits = (loop: number, period: number): boolean => {
     const cycles = Math.round(loop / period);
 

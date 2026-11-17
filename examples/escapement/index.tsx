@@ -10,6 +10,7 @@ import {
   render,
   sampled,
   show,
+  span,
   type Rect,
   type SvgNode,
 } from "svjeez";
@@ -34,18 +35,9 @@ import {
   type P,
 } from "./mechanism.ts";
 
-// A watch movement from the mainspring barrel to the balance, running ten times slower than life: a beat every two
-// seconds, with the wheels turning at gentler ratios than a real train. The mechanism is on the clock and never stops. The camera's tour
-// of it is the scene's timeline, so a page can hand that to the scroll with restyle({ timeline }) while everything
-// inside <Ambient> plays on.
-// Three numbers move every part: the balance's angle, the escape wheel's steady advance and its stepping about that
-// advance. The train's wheels and the hairspring's turns read them through calc(), so the whole movement is a handful of
-// short keyframes however many parts follow.
-
 const SIZE = 1000;
 const FRAME = rect(0, 0, SIZE, SIZE);
 
-/** One loop: thirty beats, which turn the escape wheel once, and the camera's tour of the movement. */
 export const D = 60;
 const BEATS = 30;
 
@@ -62,8 +54,6 @@ const along = ([x, y]: P, distance: number, deg: number): P => [
 const n = (v: number, places = 1) => String(Number(v.toFixed(places)));
 const at = (p: P, places = 1) => n(p[0], places) + " " + n(p[1], places);
 
-// ---- Where everything sits. The escapement stands upright; the train runs down and to the left of it.
-
 const ESCAPE: P = [761, 474];
 const PIVOT = add(ESCAPE, FORK);
 const STAFF = add(ESCAPE, BALANCE);
@@ -71,13 +61,11 @@ const STAFF = add(ESCAPE, BALANCE);
 interface Gear {
   readonly c: P;
   readonly teeth: number;
-  /** Pitch radius. */
   readonly r: number;
   /** Where one tooth points, in degrees clockwise from up. */
   readonly a: number;
 }
 
-/** The angle that sets a gear's teeth into the gaps of the one driving it. */
 const mesh = (from: Gear, c: P, teeth: number): number => {
   const toward = (Math.atan2(c[0] - from.c[0], -(c[1] - from.c[1])) * 180) / Math.PI;
   const pitch = 360 / from.teeth;
@@ -86,7 +74,6 @@ const mesh = (from: Gear, c: P, teeth: number): number => {
   return toward + 180 - (0.5 - f) * (360 / teeth);
 };
 
-/** Every mesh shares one tooth size, so a gear's radius follows from its tooth count. */
 const MODULE = 4.5;
 
 /** The gear driven by `from`, set `deg` degrees clockwise from the horizontal and touching it. */
@@ -97,15 +84,12 @@ const driven = (from: Gear, teeth: number, deg: number): Gear => {
   return { c, teeth, r, a: mesh(from, c, teeth) };
 };
 
-/** The pinion on the same arbor as a wheel. */
 const pinionOf = (wheel: Gear, teeth: number): Gear => ({
   ...wheel,
   teeth,
   r: (MODULE * teeth) / 2,
 });
 
-// Built backwards from the escape wheel, whose angle the kinematics give.
-/** The beat count the loop starts on: the balance at the end of its swing and the wheel locked. */
 const BEAT0 = 0.5;
 const escapePinion: Gear = { c: ESCAPE, teeth: 16, r: 36, a: WHEEL0 + wheelAt(BEAT0) };
 const fourth = driven(escapePinion, 32, 110);
@@ -120,11 +104,8 @@ const thirdAt = third.c;
 const fourthAt = fourth.c;
 const centerAt = center.c;
 
-// ---- The three numbers.
-
 const theta = css.property("theta", { syntax: "angle", inherits: true, initial: 0 });
 
-/** The escape wheel's angle is its steady advance plus how far its stepping is ahead of or behind that. */
 const advance = css.property("advance", { syntax: "angle", inherits: true, initial: 0 });
 const stepping = css.property("stepping", { syntax: "angle", inherits: true, initial: 0 });
 
@@ -143,7 +124,11 @@ const steps = sampled(
   { step: STEP, tolerance: { [stepping]: 0.04 }, precision: 2 },
 ).loop(SWING_TIME);
 
-const advancing = motion({ [advance]: 0 }).to({ [advance]: (PITCH / 2) * BEATS }, D, ease.linear);
+const advancing = motion({ [advance]: 0 }).to(
+  { [advance]: (PITCH / 2) * BEATS },
+  span(0, D),
+  ease.linear,
+);
 
 const rocking = sampled(
   { at: 0, over: SWING_TIME },
@@ -151,7 +136,6 @@ const rocking = sampled(
   { step: STEP, tolerance: { rotate: 0.04 }, precision: 2 },
 ).loop(SWING_TIME);
 
-/** A part that turns about a point by a multiple of the balance's angle or the escape wheel's. */
 const Turns = ({
   about,
   by,
@@ -180,8 +164,6 @@ const Turns = ({
   );
 };
 
-// ---- Shapes.
-
 type Hex = `#${string}`;
 
 const BRASS: Hex = "#C39A52";
@@ -196,7 +178,6 @@ const DIM = "#96928A";
 export const GROUND = "#0E1014";
 const FONT = "system-ui, -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
-/** The outline of a gear's teeth: straight flanks to the pitch circle and an ogive above it, as watch wheels are cut. */
 const teethOf = ({ c, teeth, r, a }: Gear, places = 1) => {
   const m = (2 * r) / teeth;
   const pitch = 360 / teeth;
@@ -222,7 +203,6 @@ const teethOf = ({ c, teeth, r, a }: Gear, places = 1) => {
   return d + "Z";
 };
 
-/** The windows between a wheel's spokes, to cut out of its disk. */
 const windows = (
   c: P,
   inner: number,
@@ -290,7 +270,6 @@ const Wheel = ({
   );
 };
 
-/** A fine light line just inside a wheel's teeth, where the rim is bevelled. */
 const Bevel = ({ gear }: { gear: Gear }) => (
   <circle
     cx={gear.c[0]}
@@ -316,7 +295,6 @@ const Pinion = ({ gear }: { gear: Gear }) => (
   </>
 );
 
-/** A ring of shadow under a wheel's rim, which stays put while the wheel turns. */
 const Shade = ({ gear }: { gear: Gear }) => (
   <circle
     cx={gear.c[0] + 2.5}
@@ -336,7 +314,6 @@ const Jewel = ({ c, r = 4.2 }: { c: P; r?: number }) => (
   </>
 );
 
-/** An Archimedean spiral from one radius to another around a center, as arcs of 30° that each take the radius they pass. */
 const spiral = (c: P, from: number, to: number, a0: number, a1: number, places = 1) => {
   const count = Math.max(1, Math.ceil(Math.abs(a1 - a0) / 30));
   const radius = (u: number) => from + (to - from) * u;
@@ -396,7 +373,6 @@ const escapeWheel = (() => {
   return d + "Z" + windows(ESCAPE, 8.5, 36.5, 5, 4.2, 0, 2);
 })();
 
-/** The hairspring in slices from the stud inward. Slice j turns j / SLICES of the balance's angle, so the coils open and close. */
 const SLICES = 10;
 const COILS = 8.5;
 
@@ -441,7 +417,6 @@ const balanceWheel = (() => {
   return ring(88) + windows(STAFF, 9, 77, 3, 7, 30, 2);
 })();
 
-/** The fork with the lever on the line of centers: the lever with its slot for the pin, and the anchor that holds the stones. */
 const fork = (() => {
   const top = FORK[1] - (REACH - PIN);
   const q = (x: number, y: number) => at(add(ESCAPE, [x, y]), 2);
@@ -493,14 +468,11 @@ const fork = (() => {
 
 const stoneD = (s: readonly P[]) => "M" + s.map((p) => at(add(ESCAPE, p), 2)).join("L") + "Z";
 
-// ---- The camera's tour, and what is said at each stop.
-
 const view = (cx: number, cy: number, size: number): Rect =>
   rect(cx - size / 2, cy - size / 2, size, size);
 
 const WIDE = view(487, 505, 790);
 
-/** Each stop: when the camera sets off for it, how long the move takes, and how long it then stays. */
 const TOUR = [
   { name: "open", at: 0, move: 0, target: WIDE },
   { name: "barrel", at: 4, move: 5, target: view(424, 556, 560) },
@@ -512,12 +484,11 @@ const TOUR = [
 ] as const;
 
 const stops = TOUR.map(({ at: when, move, target }, i) => ({
-  show: { at: when, over: (TOUR[i + 1]?.at ?? D) - when },
+  show: span(when).until(TOUR[i + 1]?.at ?? D),
   target,
   over: move || undefined,
 }));
 
-/** The span a stop is held for, once the camera has arrived, with a little of the moves either side. */
 const held = (name: (typeof TOUR)[number]["name"], lead = 1): readonly [number, number] => {
   const i = TOUR.findIndex((stop) => stop.name === name);
 
@@ -527,12 +498,9 @@ const held = (name: (typeof TOUR)[number]["name"], lead = 1): readonly [number, 
 interface Note {
   readonly name: string;
   readonly note?: string;
-  /** Where the words start, and the part they point at. */
   readonly at: P;
   readonly to: P;
-  /** The width of the view it is read in, which sets its size. */
   readonly view: number;
-  /** The stop it is read at, and how long after the first words of that stop it comes in. */
   readonly stop: (typeof TOUR)[number]["name"];
   readonly after?: number;
   readonly end?: boolean;
@@ -542,7 +510,6 @@ const Label = ({ name, note, at: [x, y], to, view: width, stop, after = 0, end }
   const [start, until] = held(stop);
   const from = start + after;
   const size = (width / SIZE) * 30;
-  // The line leaves the words on the side the part is on. Nothing here measures text, so their width is a guess.
   const wide = name.length * size * 0.56;
   const far = end ? to[0] < x - wide / 2 : to[0] > x + wide / 2;
   const under = note !== undefined && to[1] > y + size * 1.6;
@@ -552,7 +519,7 @@ const Label = ({ name, note, at: [x, y], to, view: width, stop, after = 0, end }
     : [x + (end ? -1 : 1) * (far ? wide + size * 0.35 : -size * 0.35), y - size * 0.32];
 
   return (
-    <g animation={show({ at: from, over: until - from }, { fade: 0.8 })}>
+    <g animation={show(span(from).until(until), { fade: 0.8 })}>
       <path
         d={"M" + at(tail, 2) + "L" + at(to, 2)}
         fill="none"
@@ -696,9 +663,6 @@ export const moments = {
 
 export default function build(options: { prefix?: string } = {}): string {
   const lean = WHEEL0 + wheelAt(BEAT0);
-  // Each arbor turns by the tooth ratio of the mesh before it, the other way. The escape wheel's 360° a loop gives the
-  // fourth 180°, the third 90°, the centre wheel 60° and the barrel 40°: gentler than a real train, which gears up
-  // 10, 7.5, 8 and 6 times, and each a whole number of teeth and spokes, so the loop closes on the picture it began on.
   const fourthBy = -escapePinion.teeth / fourth.teeth;
   const thirdBy = (-fourthBy * fourthPinion.teeth) / third.teeth;
   const centerBy = (-thirdBy * thirdPinion.teeth) / center.teeth;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { draw, render, type Child } from "svjeez";
+import { render, type Child } from "svjeez";
 import { validateSvg } from "svjeez/frames";
 import { rect } from "svjeez/geometry";
 import { plane } from "../src/index.ts";
@@ -59,7 +59,7 @@ describe("plane()", () => {
 
   test("plot() draws a parabola inside the plot area, as valid SVG with a draw-on", () => {
     const ax = plane({ ...base, ticks: { x: 1, y: 2 } });
-    const parabola = ax.plot((x) => x * x, { samples: 120, animation: draw({ at: 1, over: 1.5 }) });
+    const parabola = ax.plot({ at: 1, over: 1.5 }, (x) => x * x, { samples: 120 });
     const svg = svgOf(ax.node, parabola.node);
 
     expect(validateSvg(svg).errors).toEqual([]);

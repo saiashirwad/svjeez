@@ -40,10 +40,10 @@ const svgOf = async (text: string) => {
   return result.svg;
 };
 
-const scene = (cx: number, r: number, at = 0) => `import { render, motion } from "svjeez";
+const scene = (cx: number, r: number, at = 0) => `import { render, motion, span } from "svjeez";
 export default () => render({ width: 400, height: 200, duration: 2, title: "t" }, <>
   <rect width={400} height={200} fill="#111111" />
-  <circle cx={${cx}} cy={100} r={${r}} fill="#FF0000" animation={motion({ x: 0 }).at(${at}).to({ x: 100 }, 1)} />
+  <circle cx={${cx}} cy={100} r={${r}} fill="#FF0000" animation={motion({ x: 0 }).to({ x: 100 }, span(${at}, 1))} />
 </>);`;
 
 const measure = (before: string, after: string, by: number, at: number) =>

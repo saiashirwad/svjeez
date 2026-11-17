@@ -1,4 +1,4 @@
-import { ease, motion, render, sampled, show, type Color } from "svjeez";
+import { chain, ease, motion, render, sampled, show, span, type Color } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
@@ -8,7 +8,6 @@ const BAR = 40;
 
 type Point = { readonly x: number; readonly y: number };
 
-/** One leg of Blip's trip: a hop in an arc, a walk along a line, or a pause. */
 type Leg =
   | { readonly kind: "hop"; readonly to: Point; readonly over: number }
   | { readonly kind: "walk"; readonly along: readonly Point[]; readonly over: number }
@@ -39,7 +38,6 @@ const placeOf =
         return { x: at.x + (leg.to.x - at.x) * e, y: at.y + (leg.to.y - at.y) * u - lift };
       }
 
-      // A walk keeps an even pace along the line and bobs with each step.
       const runs = leg.along.slice(1).map((p, i) => ({
         a: leg.along[i]!,
         b: p,
@@ -67,7 +65,6 @@ const placeOf =
     return at;
   };
 
-/** `tall` stacks the chart top to bottom for a phone. */
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
   const H = tall ? 560 : 300;
@@ -101,9 +98,7 @@ export const make = (tall = false): string => {
     },
   );
 
-  // Blip follows the flow: up the chart node by node, puzzled at the decision the first time, back round the
-  // "no" line to try again, and the second time it nods and walks the "yes" line to the finished SVG.
-  const top = (id: "prompt" | "agent" | "frames" | "ok" | "ship"): Point => chart.get(id).top;
+  const top = (id: "prompt" | "agent" | "frames" | "ok" | "ship"): Point => chart.part(id).box.top;
   const no = chart.edge("ok", "agent");
   const yes = chart.edge("ok", "ship");
   const HOP = 0.55;
@@ -142,7 +137,6 @@ export const make = (tall = false): string => {
 
   const D = Math.ceil(START + length) + 3;
 
-  // The bubbles over the decision: "???" the first time, "yes!" the second.
   const bubble = (text: string, at: number, over: number, color: Color) => {
     const w = text.length * 8 + 22;
     const { x, y } = top("ok");
@@ -152,7 +146,7 @@ export const make = (tall = false): string => {
         <g
           animation={[
             show({ at, over }, { fade: 0.15 }),
-            motion({ scale: 0.4 }).at(at).to({ scale: 1 }, 0.35, ease.pop),
+            motion({ scale: 0.4 }).to({ scale: 1 }, span(at, 0.35), ease.pop),
           ]}
         >
           <rect x={0} y={0} width={w} height={26} rx={13} fill={color} />
@@ -173,23 +167,21 @@ export const make = (tall = false): string => {
     );
   };
 
-  // A puzzled wobble at the first visit, and a happy bounce at the second.
   const puzzled = until(5);
   const sure = until(13);
 
-  const tilt = motion({ rotate: 0 })
-    .at(puzzled + 0.1)
-    .to({ rotate: -12 }, 0.2, ease.out)
-    .to({ rotate: 10 }, 0.3, ease.inOut)
-    .to({ rotate: -6 }, 0.3, ease.inOut)
-    .to({ rotate: 0 }, 0.25, ease.inOut);
+  const tilt = chain(span(puzzled + 0.1, 0.2), 0.3, 0.3, 0.25).reduce(
+    (m, swing, i) => m.to({ rotate: [-12, 10, -6, 0][i]! }, swing, i ? ease.inOut : ease.out),
+    motion({ rotate: 0 }),
+  );
+
+  const [hop, land, again, down] = chain(span(sure + 0.1, 0.15), 0.15, 0.12, 0.12);
 
   const bounce = motion({ y: 0 })
-    .at(sure + 0.1)
-    .to({ y: -10 }, 0.15, ease.out)
-    .to({ y: 0 }, 0.15, ease.in)
-    .to({ y: -6 }, 0.12, ease.out)
-    .to({ y: 0 }, 0.12, ease.in);
+    .to({ y: -10 }, hop, ease.out)
+    .to({ y: 0 }, land, ease.in)
+    .to({ y: -6 }, again, ease.out)
+    .to({ y: 0 }, down, ease.in);
 
   return render(
     {

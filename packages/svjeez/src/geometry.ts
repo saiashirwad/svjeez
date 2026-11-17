@@ -8,13 +8,11 @@ export { matchPaths, type MatchOptions, type PathData, type SampledPathOptions }
 
 export { num } from "./format";
 
-/** The total length of the straight runs between consecutive points. */
 export const pathLength = (points: readonly Point[]): number =>
   points
     .slice(1)
     .reduce((sum, p, i) => sum + Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y), 0);
 
-/** `count` points evenly spaced along the straight runs between `points`, from the first point to the last. */
 export const resample = (points: readonly Point[], count: number): Point[] => {
   if (points.length < 2)
     throw new Error(`resample() needs at least two points, got ${points.length}.`);
@@ -48,7 +46,6 @@ export interface PolylinePathOptions {
   readonly precision?: number;
 }
 
-/** Path data for the straight runs between `points`: `M` to the first, `L` to each after. */
 export const polylinePath = (
   points: readonly Point[],
   { closed = false, precision = 1 }: PolylinePathOptions = {},
@@ -74,7 +71,6 @@ export interface Rect {
   readonly center: Point;
   pad(n: number): Rect;
   union(other: Rect): Rect;
-  /** The point `t` of the way along `edge`, left to right or top to bottom. */
   side(edge: Edge, t: number): Point;
 }
 

@@ -4,13 +4,13 @@ import {
   Camera,
   Focus,
   Marker,
-  beats,
   fx,
   readingTime,
   render,
   shake,
   sampled,
   span,
+  stagger,
   valuesAt,
   motion,
   timeline,
@@ -51,10 +51,19 @@ describe("params", () => {
   });
 });
 
-describe("timeline and beats", () => {
-  test("beats names itself when no label is given", () => {
-    expect(() => beats(-1, 2, 1)).toThrow("beats() needs a non-negative start, got -1.");
-    expect(beats(1, 3, 0.5)).toEqual([1, 1.5, 2]);
+describe("timeline and stagger", () => {
+  test("stagger checks its count, step and starts", () => {
+    expect(() => stagger(span(1, 1), 1.5, 1)).toThrow(
+      "stagger() needs a whole count of 0 or more and a finite step, got count 1.5 and step 1.",
+    );
+    expect(() => stagger(span(1, 1), 2, Number.NaN)).toThrow("stagger() needs a whole count");
+    expect(() => stagger(span(1, 1), 3, -1)).toThrow(
+      "stagger() needs a start of 0 or later, got -1.",
+    );
+    expect(() => stagger({ at: 0, over: -1 }, 2, 1)).toThrow(
+      "stagger() needs a length of 0 or more",
+    );
+    expect(stagger(span(1, 1), 0, 1)).toEqual([]);
   });
 
   test("timeline has no duration; end is the last scene's end", () => {

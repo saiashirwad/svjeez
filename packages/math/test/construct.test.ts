@@ -117,6 +117,39 @@ describe("construct", () => {
   });
 });
 
+describe("parts", () => {
+  test("points, lines and circles are parts, each spanning its construction and its label", () => {
+    const g = construct({ unit: 10, origin: { x: 100, y: 100 } });
+    const [a, b] = [g.point(0, 0, "A"), g.point(10, 0, "B")];
+    const ab = g.segment(a, b);
+    const ring = g.circle(a, b);
+
+    expect(g.parts.map((p) => p.id)).toEqual(["A", "B", "AB", "circle A"]);
+    expect(g.part("B")).toBe(b);
+    expect([a.span.at, a.span.end]).toEqual([0, 0.5]);
+    expect([ab.span.at, ab.span.end]).toEqual([0.9, expect.closeTo(1.6, 9)]);
+    expect([ring.span.at, ring.span.end]).toEqual([1.75, 2.75]);
+    expect(ab.box).toMatchObject({ x: 100, y: 100, w: 100, h: 0 });
+    expect(ring.box).toMatchObject({ x: 0, y: 0, w: 200, h: 200 });
+    expect(a.box.center).toEqual({ x: 100, y: 100 });
+    expect(g.bounds.w).toBeGreaterThanOrEqual(200);
+    expect(() => g.part("C")).toThrow(
+      'construct() has no "C". Its parts are "A", "B", "AB", "circle A".',
+    );
+  });
+
+  test("a crossing is a part, and a line takes its label as its id", () => {
+    const g = construct();
+    const [a, b] = [g.point(0, 0, "A"), g.point(10, 0, "B")];
+    const m = g.perpendicularBisector(a, b, { label: "m" });
+    const c = g.intersect(g.line(a, b), m, { label: "M" });
+
+    expect(m.id).toBe("m");
+    expect(g.part("M")).toBe(c);
+    expect(c.span.at).toBeGreaterThanOrEqual(m.span.end);
+  });
+});
+
 describe("intersect on segments", () => {
   test("pick keeps the crossing that lies on the segment", () => {
     const g = construct();

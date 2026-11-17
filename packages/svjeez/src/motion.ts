@@ -16,13 +16,11 @@ export type { Span };
 
 declare const easeBrand: unique symbol;
 
-/** Structured, so CSS and SMIL each compile it. An ease always shapes the transition it is passed to. */
 export type Ease = { readonly [easeBrand]: true } & EaseBody;
 
 type EaseBody =
   | { readonly kind: "linear" }
   | { readonly kind: "bezier"; readonly points: readonly [number, number, number, number] }
-  /** `count` equal jumps, each at the end of its slice. */
   | { readonly kind: "steps"; readonly count: number };
 
 // SAFETY: easeBrand is declare-only, so no runtime value carries it. Every caller passes a finished EaseBody, and this only adds the compile-time brand.
@@ -62,21 +60,16 @@ export interface Step {
   readonly over: Seconds;
   readonly ease: Ease;
   readonly values: TargetValues;
-  /** A cut back to these channels' initial values, which each lane resolves because `initial` may come from an attribute. `values` is empty. */
   readonly restore?: readonly Target[];
-  /** `repeat({ until })` stops this transition here, partway. */
   readonly until?: Seconds;
 }
 
 export interface MotionData {
   readonly initial: TargetValues;
   readonly steps: readonly Step[];
-  readonly cursor: Seconds;
   readonly period?: Seconds;
   readonly label?: string;
-  /** `rewind`: glide every channel back to its initial value, ending at the end of the clock. */
   readonly rewind?: { readonly over: Seconds; readonly ease: Ease };
-  /** `repeat` unrolled passes into steps, so a lane that grows past its key cap can say why. */
   readonly repeated?: boolean;
 }
 
@@ -90,37 +83,38 @@ export type Exact<V, Allowed extends PropertyKey> = V & {
  * One layer of animation for one element. Immutable. `K` is the set of channels it touches, so the
  * JSX `animation` prop rejects channels the tag cannot animate.
  *
- * Time is a cursor: `at` moves it, `to` and `set` start at it and advance it. Between transitions
- * every channel holds its value. Times are on the clock the motion sits in: the scene's, or a `<Clip>`'s.
+ * Every step says when it plays: `to` takes a span and `set` a time, on the clock the motion sits in (the scene's, a
+ * `<Clip>`'s, or the loop's after `.loop`). Steps may be written in any order; each lane plays them in time order, and
+ * two that move one lane at once throw. Between transitions every channel holds its value. Steps one after another are
+ * spans one after another: `const up = span(0.4, 0.4)`, then `up.next(0.4)`.
  */
 export interface Motion<K extends Target = Target> {
   readonly [motionChannels]?: K;
-  /** Move the cursor to a time on the clock the motion sits in, or on the loop after `.loop`. */
-  at(time: Seconds): Motion<K>;
-  wait(duration: Seconds): Motion<K>;
   /**
-   * Transition from the current values to `values`. It starts at the cursor and takes `over` seconds. `ease` (default
+   * Transition from the values held when `when` starts to `values`, playing during `when`. `ease` (default
    * `ease.out`) shapes this transition.
    */
   to<const V extends TargetValues>(
     values: Exact<V, Target>,
-    over: Seconds,
+    when: Span,
     curve?: Ease,
   ): Motion<K | (keyof V & Target)>;
-  /** Hard cut at the cursor. */
-  set<const V extends TargetValues>(values: Exact<V, Target>): Motion<K | (keyof V & Target)>;
+  /** Hard cut to `values` at `at` seconds. A cut has no length, so it takes a time, not a span. */
+  set<const V extends TargetValues>(
+    values: Exact<V, Target>,
+    at: Seconds,
+  ): Motion<K | (keyof V & Target)>;
   /** Repeat every `period` seconds, forever. Render snaps the period so it divides the scene duration. */
   loop(period: Seconds): Motion<K>;
   /**
    * Play the passage written so far again, then hold. A count is how many times it plays in all; `{ until }` repeats it
-   * until that time, cutting the last pass short. The passage runs from the first transition to the cursor, and each
-   * pass starts from the channels' initial values. The passes become keyframes, so a long repeat costs keys: for a spin
-   * that never stops use `.loop()`.
+   * until that time, cutting the last pass short. The passage runs from the start of the earliest step to the end of the
+   * latest, so the next pass starts as the last step ends, and each pass starts from the channels' initial values. The
+   * passes become keyframes, so a long repeat costs keys: for a spin that never stops use `.loop()`.
    */
   repeat(times: number | { readonly until: Seconds }): Motion<K>;
   /** At the end of the clock, glide every channel back to its initial value over `over` seconds. Nothing can follow. */
   rewind(over: Seconds, curve?: Ease): Motion<K>;
-  /** Readable keyframe and class names. Never needs to be unique. */
   label(name: string): Motion<K>;
 }
 
@@ -141,6 +135,11 @@ const isUntil = (
 ): value is { readonly until: Seconds } => typeof value === "object";
 
 const isNumeric = (value: TargetValue | undefined): value is number => typeof value === "number";
+
+const isSpan = (when: Span | Seconds | null | undefined): when is Span =>
+  typeof when === "object" && when !== null;
+
+const isTime = (at: Seconds | Span | undefined): at is Seconds => typeof at === "number";
 
 const checkValues = (values: TargetValues, what = "A transition"): TargetValues => {
   const keys = Object.keys(values);
@@ -164,13 +163,10 @@ const checkValues = (values: TargetValues, what = "A transition"): TargetValues 
 const end = (step: Step): Seconds =>
   step.until === undefined ? step.start + step.over : Math.min(step.start + step.over, step.until);
 
-/** Most steps `repeat` unrolls, far above any lane's key cap, so a runaway count fails before it fills memory. */
 const MAX_UNROLLED = 20000;
 
-/** Absolute slack, in seconds, when comparing times. */
 export const EPSILON = 1e-9;
 
-/** Relative to a timeline, the gap that separates two keys meant to be one instant apart. */
 export const NUDGE = 1e-5;
 
 // SAFETY: checkValues rejects every key that is not a Target before a step can store its values, so the keys of a step are Target names.
@@ -186,24 +182,28 @@ class Track implements Motion {
     return new Track({ ...this.data, ...patch });
   }
 
-  at(when: Seconds): Track {
-    return this.with({ cursor: time(when, "at()") });
-  }
+  to(values: TargetValues, when: Span, curve: Ease = ease.out): Track {
+    if (!isSpan(when))
+      throw new Error(
+        `to() takes a span, got ${String(when)}. Write .to(values, span(at, over)); a step right after another is span.next(over).`,
+      );
+    const start = time(when.at, "to()");
+    const over = when.over;
 
-  wait(duration: Seconds): Track {
-    return this.with({ cursor: this.data.cursor + time(duration, "wait()") });
-  }
-
-  to(values: TargetValues, over: Seconds, curve: Ease = ease.out): Track {
     if (!(time(over, "to()") > 0))
       throw new Error(`to() needs a positive duration, got ${over}. Use set() for a cut.`);
 
-    return this.push({ start: this.data.cursor, over, ease: curve, values: checkValues(values) });
+    return this.push({ start, over, ease: curve, values: checkValues(values) });
   }
 
-  set(values: TargetValues): Track {
+  set(values: TargetValues, at: Seconds): Track {
+    if (!isTime(at))
+      throw new Error(
+        `set() takes the time of the cut in seconds, got ${at === undefined ? "none" : JSON.stringify(at)}. Write .set(values, at).`,
+      );
+
     return this.push({
-      start: this.data.cursor,
+      start: time(at, "set()"),
       over: 0,
       ease: ease.hold,
       values: checkValues(values),
@@ -236,13 +236,13 @@ class Track implements Motion {
       throw new Error(`repeat() needs a whole number of plays of 1 or more, got ${times}.`);
 
     const from = Math.min(...steps.map((step) => step.start));
-    const to = Math.max(this.data.cursor, ...steps.map(end));
+    const to = Math.max(...steps.map(end));
     const length = to - from;
     const limit = isUntil(times) ? times.until : Infinity;
 
     if (!(length > 0))
       throw new Error(
-        `repeat() needs a passage with a length, from the first transition at ${from}s to the cursor at ${to}s. Add a transition or a wait().`,
+        `repeat() needs a passage with a length, but its steps start and end at ${from}s. Add a transition.`,
       );
 
     if (limit !== Infinity && !(limit > to + EPSILON))
@@ -277,11 +277,7 @@ class Track implements Motion {
       }
     }
 
-    return this.with({
-      steps: copies,
-      cursor: limit === Infinity ? from + passes * length : limit,
-      repeated: true,
-    });
+    return this.with({ steps: copies, repeated: true });
   }
 
   rewind(over: Seconds, curve: Ease = ease.out): Track {
@@ -300,7 +296,6 @@ class Track implements Motion {
     return this.with({ label: name });
   }
 
-  /** Nothing can follow `rewind()`, which is pinned to the end of the clock. */
   private open(what: string): void {
     if (this.data.rewind)
       throw new Error(`${what} can't follow rewind(), which runs to the end of the clock.`);
@@ -324,7 +319,7 @@ class Track implements Motion {
       }
     }
 
-    return this.with({ steps: [...this.data.steps, step], cursor: end(step) });
+    return this.with({ steps: [...this.data.steps, step] });
   }
 }
 
@@ -335,7 +330,6 @@ export function motion<const V extends TargetValues = {}>(
   return new Track({
     initial: initial ? checkValues(initial, "motion()") : {},
     steps: [],
-    cursor: 0,
   });
 }
 

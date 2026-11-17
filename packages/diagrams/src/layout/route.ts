@@ -1,6 +1,5 @@
 import type { Box, Point, Size } from "./box.ts";
 
-/** A run of edge between two ranks: it leaves the upper rank at `xa` and enters the lower one at `xb`. */
 export interface Crossing {
   readonly id: number;
   readonly xa: number;
@@ -14,11 +13,6 @@ const overlaps = (c: Crossing, d: Crossing) =>
   Math.min(c.xa, c.xb) - CLEAR < Math.max(d.xa, d.xb) + CLEAR &&
   Math.min(d.xa, d.xb) - CLEAR < Math.max(c.xa, c.xb) + CLEAR;
 
-/**
- * Whether `d` must run above `c` so neither crosses the other: of two jogs heading the same way, the one that starts
- * further along turns first; and a jog that leaves at the x where another enters runs above it, or their verticals
- * would overlap.
- */
 const over = (c: Crossing, d: Crossing): boolean => {
   if (Math.abs(d.xa - c.xb) <= SAME) return true;
 
@@ -33,11 +27,6 @@ interface Tracks {
   readonly count: number;
 }
 
-/**
- * Gives each bent crossing a horizontal track in the gap, numbered top to bottom: interval colouring in an order that
- * keeps fans from crossing. Crossings in `merging` share an entry with another edge; they take the lowest tracks so
- * they join it just above the arrowhead, and two meeting from opposite sides share a track.
- */
 export const tracks = (crossings: readonly Crossing[], merging: ReadonlySet<number>): Tracks => {
   const track = new Map<number, number>();
   const used: Crossing[][] = [];
@@ -80,18 +69,12 @@ export const tracks = (crossings: readonly Crossing[], merging: ReadonlySet<numb
 const hits = (a: Box, b: Box) =>
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
-/** Whether the segment `p`–`q` runs through the inside of `b`. */
 const crosses = (p: Point, q: Point, b: Box): boolean =>
   Math.max(p.x, q.x) > b.x &&
   Math.min(p.x, q.x) < b.x + b.w &&
   Math.max(p.y, q.y) > b.y &&
   Math.min(p.y, q.y) < b.y + b.h;
 
-/**
- * Centers each label on its own edge, on the longest straight run first, sliding along it (clear of `bend` at each
- * end) until the box clears every node, every label already placed and every other line. With no clear spot, the
- * spot with the fewest collisions wins.
- */
 export const placeLabels = (
   edges: readonly { readonly points: readonly Point[]; readonly label?: Size }[],
   obstacles: readonly Box[],
@@ -112,7 +95,6 @@ export const placeLabels = (
       return `${Math.sign(q.x - p.x)},${Math.sign(q.y - p.y)}`;
     };
 
-    /** The middle of a jog, which a renderer turns into one S-curve, so nothing there stays straight. */
     const jog = (k: number) => k > 0 && k < own.length - 1 && heading(k - 1) === heading(k + 1);
     const straight = own.map((_, k) => k).filter((k) => !jog(k));
 

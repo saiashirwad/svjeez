@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { ease } from "svjeez";
-import { choice, count } from "svjeez/params";
+import { choice, count, list, number as numberParam, text } from "svjeez/params";
 import { bend, nudge, paramFor, rgbOf, scrub, valuesOf, withRgb } from "../src/controls";
 import { paramLiteral, parse } from "../src/source";
 
@@ -14,6 +14,28 @@ const number = (text: string, at = 0) => {
 
   return found;
 };
+
+const template =
+  'import { render } from "svjeez";\nimport { defaults, list, number, text, type Values } from "svjeez/params";\n\nexport const params = {\n  title: text("Launch", { maxLength: 24 }),\n  bars: list(\n    { label: text("Q1"), value: number(4, { min: 0, max: 100 }) },\n    [{ label: "Q1", value: 40 }, { label: "Q2", value: 70 }],\n    { min: 1, max: 8 },\n  ),\n};\n\nexport default (p: Values<typeof params> = defaults(params)) =>\n  render(\n    { width: 200, height: 100, duration: 1, title: p.title },\n    <>{p.bars.map((bar, i) => <rect x={i * 20} y={100 - bar.value} width={16} height={bar.value} />)}</>,\n  );\n';
+
+describe("data params", () => {
+  test("a text param is a text value, a list draws no control, and the numbers in a list's data still drag", () => {
+    const values = valuesOf(parse(template), {
+      title: text("Launch", { maxLength: 24 }),
+      bars: list(
+        { label: text("Q1"), value: numberParam(4, { min: 0, max: 100 }) },
+        [{ label: "Q1", value: 4 }],
+        { min: 1, max: 8 },
+      ),
+    });
+
+    expect(values.filter((v) => v.kind !== "number")).toMatchObject([
+      { kind: "text", key: "params.title", label: "title", maxLength: 24 },
+    ]);
+    expect(values.filter((v) => v.label === "value").map((v) => v.literal.value)).toEqual([40, 70]);
+    expect(values.some((v) => v.literal.value === 8)).toBe(false);
+  });
+});
 
 describe("paramFor", () => {
   test("a declared number drags in its declared range", () => {
@@ -34,11 +56,31 @@ describe("paramFor", () => {
       unit: "°",
     });
     expect(paramFor(number("draw({ at: 0.2, over: 1.2 })", 1))).toMatchObject({
+      min: 0.05,
+      unit: "s",
+    });
+    expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 1))).toMatchObject({
       min: 0,
       unit: "s",
     });
-    expect(paramFor(number("m.at(2).to({ x: 9 }, 0.6)", 2))).toMatchObject({ min: 0, unit: "s" });
+    expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 2))).toMatchObject({
+      min: 0.05,
+      unit: "s",
+    });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 1))).toMatchObject({ unit: "s" });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 2))).toMatchObject({ unit: "s" });
+    expect(paramFor(number("m.set({ x: 9 }, 3.5)", 1))).toMatchObject({ min: 0, unit: "s" });
+    expect(paramFor(number("chain(up, 0.2, 0.4, 0.3)", 2))).toMatchObject({ min: 0.05, unit: "s" });
+    expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 0)).unit).toBeUndefined();
     expect(paramFor(number("<circle r={16.5} />"))).toMatchObject({ min: 0, max: 33, step: 0.1 });
+  });
+
+  test("no drag reaches a value svjeez throws on", () => {
+    expect(paramFor(number("stagger(up, 12, 0.1)", 0))).toMatchObject({ min: 1, max: 24, step: 1 });
+    expect(paramFor(number("motion({ draw: 0.2 })"))).toMatchObject({ min: 0, max: 1, step: 0.01 });
+    expect(paramFor(number("render({ width: 480, height: 280 })"))).toMatchObject({ min: 1 });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 1))).toMatchObject({ min: 0.05 });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 2))).toMatchObject({ min: 0 });
   });
 
   test("any other number gets room on both sides, zero and negatives included", () => {
@@ -69,10 +111,10 @@ export default () => <rect fill="#3EE6D6" opacity={0.5} label="hi" animation={en
     expect(valuesOf(parse(scene), schema).map((v) => [v.key, v.kind])).toEqual([
       ["params.look", "choice"],
       ["params.n", "number"],
-      ["default#0", "color"],
-      ["default#1", "number"],
-      ["default#3", "number"],
-      ["default#4", "ease"],
+      ["default:rect.fill", "color"],
+      ["default:rect.opacity", "number"],
+      ["default:enter.0.at", "number"],
+      ["default:enter.2", "ease"],
     ]);
   });
 

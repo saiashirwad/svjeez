@@ -6,7 +6,11 @@ function Counter({ label = "Count" }: { label?: string }) {
   const [n, setN] = useState(0);
 
   return (
-    <button data-part="add" onClick={() => setN(n + 1)} style={{ font: "16px sans-serif", padding: 8 }}>
+    <button
+      data-part="add"
+      onClick={() => setN(n + 1)}
+      style={{ font: "16px sans-serif", padding: 8 }}
+    >
       {label}: {n}
     </button>
   );
@@ -20,7 +24,6 @@ export const counter = demo(Counter, { width: 200 }, ({ props }) => [
   snap("renamed", { over: 0.2 }),
 ]);
 
-// Type checks: props() takes only the component's props, with their types, and required props must be given.
 function Labelled({ label }: { label: string }) {
   return <span>{label}</span>;
 }

@@ -1,6 +1,3 @@
-// Checks the plugin package in the current directory the way users install it. It builds and lints package-dist/,
-// packs it with svjeez and every workspace package it depends on, directly or through another, installs the tarballs into a copy of
-// test/consumer/, and runs that project's `check` script, which builds the project and reads what the build wrote.
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -42,12 +39,10 @@ try {
   const workspace = (name: string) => join(ROOT, "packages", name.replace(/^@svjeez\//, ""));
   const tarball = pack(join(dir, "package-dist"));
 
-  // Only compiled entry points: .astro files and type-only entries reach into other packages, which the consumer covers.
   const compiled = Object.entries(manifest(dir).exports).filter(
     ([, target]) => isPath(target) && /\.tsx?$/.test(target),
   );
 
-  // A component package exports its source for the app's compiler, so only packages with compiled entries are checked.
   if (compiled.length) {
     run(join(ROOT, "packages/svjeez/node_modules/.bin/attw"), [
       tarball,
@@ -75,7 +70,6 @@ try {
 
   packWorkspace(dir);
 
-  // Posters launch the Chromium that this repository's playwright-core installed, so the consumer uses the same version.
   const playwright = manifest(join(ROOT, "packages/svjeez/node_modules/playwright-core")).version;
   const consumer = join(tmp, "consumer");
   cpSync(join(dir, "test/consumer"), consumer, { recursive: true });

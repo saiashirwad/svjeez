@@ -3,15 +3,10 @@ import { Ink, Once, ease, render } from "svjeez";
 import earth from "../earth/index";
 import { lettering, marker } from "./cue";
 
-// The lead scene's size, handwritten above the gallery's second card with an arrow back at the globe. The site passes
-// the size it measured, so the note stays true; built on its own, it measures the lead itself. The ink is
-// `currentColor`, and the site colors it with the accent. It writes once, after "your agent" in the headline is done.
-
 const W = 160;
 const H = 76;
 const DELAY = 1.9;
 
-/** Pen strokes for an arrow along `d`, ending at `tip` and heading the way `from` to `tip` does. */
 const arrow = (d: string, from: [number, number], tip: [number, number], arm = 9) => {
   const back = Math.atan2(from[1] - tip[1], from[0] - tip[0]);
 
@@ -46,7 +41,6 @@ export const note = (size: string): string => {
       height: H,
       duration: D,
       title: size,
-      // Inlined beside "your agent", so its ids and classes keep to their own names.
       prefix: "gn",
       desc: `${size}, handwritten, with an arrow pointing left.`,
       reducedMotion: { at: D },
@@ -54,7 +48,13 @@ export const note = (size: string): string => {
     <Once>
       {strokes.map((s) => (
         <g transform={`translate(${s.dx} 0)`}>
-          <Ink d={s.d} tool={marker} fill="currentColor" draw={{ at: s.at, over: s.over }} ease={ease.linear} />
+          <Ink
+            d={s.d}
+            tool={marker}
+            fill="currentColor"
+            draw={{ at: s.at, over: s.over }}
+            ease={ease.linear}
+          />
         </g>
       ))}
     </Once>,

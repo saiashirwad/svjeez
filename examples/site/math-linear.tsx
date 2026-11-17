@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
-// A linear transformation, 3Blue1Brown style: the grid, î and ĵ and the unit square move as one under A, and the square's area becomes det A.
 const W = 504;
 const H = 340;
 const BAR = 40;
@@ -16,7 +15,6 @@ const I = theme.base0B;
 const J = theme.base08;
 const AREA = theme.base0A;
 
-// 34px a unit, with (0, 0) at (126, 238).
 const p = plane({
   xRange: [-12, 12],
   yRange: [-12, 12],

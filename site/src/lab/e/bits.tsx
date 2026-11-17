@@ -2,7 +2,6 @@ import { ease, enter, exit, motion, type Stack } from "svjeez";
 import { r1, type Cx } from "./look";
 import { INK } from "./palette";
 
-/** When an eye closes for its two blinks of the loop. */
 export type Blink = readonly [number, number];
 
 export const blinkAt = (cx: Cx): Blink => {
@@ -13,25 +12,17 @@ export const blinkAt = (cx: Cx): Blink => {
 
 const blinkOpen = ([a, b]: Blink) =>
   motion({ opacity: 1 })
-    .at(a)
-    .set({ opacity: 0 })
-    .at(a + 0.16)
-    .set({ opacity: 1 })
-    .at(b)
-    .set({ opacity: 0 })
-    .at(b + 0.16)
-    .set({ opacity: 1 });
+    .set({ opacity: 0 }, a)
+    .set({ opacity: 1 }, a + 0.16)
+    .set({ opacity: 0 }, b)
+    .set({ opacity: 1 }, b + 0.16);
 
 const blinkShut = ([a, b]: Blink) =>
   motion({ opacity: 0 })
-    .at(a)
-    .set({ opacity: 1 })
-    .at(a + 0.16)
-    .set({ opacity: 0 })
-    .at(b)
-    .set({ opacity: 1 })
-    .at(b + 0.16)
-    .set({ opacity: 0 });
+    .set({ opacity: 1 }, a)
+    .set({ opacity: 0 }, a + 0.16)
+    .set({ opacity: 1 }, b)
+    .set({ opacity: 0 }, b + 0.16);
 
 export const Eye = ({
   cx,

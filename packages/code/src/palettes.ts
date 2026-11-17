@@ -1,6 +1,6 @@
 import { base16, type Base16 } from "svjeez";
 
-/** Tomorrow Night, the dark ramp. Pairs with `tomorrow` in `adaptive`. */
+/** Dark ramp. Pairs with `tomorrow` in `adaptive`. */
 export const tomorrowNight: Base16 = /* @__PURE__ */ base16(
   "#1d1f21",
   "#282a2e",
@@ -20,7 +20,7 @@ export const tomorrowNight: Base16 = /* @__PURE__ */ base16(
   "#a3685a",
 );
 
-/** Tomorrow, the light ramp. Pairs with `tomorrowNight` in `adaptive`. */
+/** Light ramp. Pairs with `tomorrowNight` in `adaptive`. */
 export const tomorrow: Base16 = /* @__PURE__ */ base16(
   "#ffffff",
   "#e0e0e0",
@@ -40,7 +40,7 @@ export const tomorrow: Base16 = /* @__PURE__ */ base16(
   "#a3685a",
 );
 
-/** Solarized by night. Pairs with `solarizedLight` in `adaptive`. */
+/** Dark ramp. Pairs with `solarizedLight` in `adaptive`. */
 export const solarizedDark: Base16 = /* @__PURE__ */ base16(
   "#002b36",
   "#073642",
@@ -60,7 +60,7 @@ export const solarizedDark: Base16 = /* @__PURE__ */ base16(
   "#d33682",
 );
 
-/** Solarized by day: the dark ramp reversed, the same accents. Pairs with `solarizedDark` in `adaptive`. */
+/** Light ramp. Pairs with `solarizedDark` in `adaptive`. */
 export const solarizedLight: Base16 = /* @__PURE__ */ base16(
   "#fdf6e3",
   "#eee8d5",
@@ -80,7 +80,7 @@ export const solarizedLight: Base16 = /* @__PURE__ */ base16(
   "#d33682",
 );
 
-/** Gruvbox medium by night. Pairs with `gruvboxLight` in `adaptive`. */
+/** Dark ramp. Pairs with `gruvboxLight` in `adaptive`. */
 export const gruvboxDark: Base16 = /* @__PURE__ */ base16(
   "#282828",
   "#3c3836",
@@ -100,7 +100,7 @@ export const gruvboxDark: Base16 = /* @__PURE__ */ base16(
   "#d65d0e",
 );
 
-/** Gruvbox medium by day. Pairs with `gruvboxDark` in `adaptive`. */
+/** Light ramp. Pairs with `gruvboxDark` in `adaptive`. */
 export const gruvboxLight: Base16 = /* @__PURE__ */ base16(
   "#fbf1c7",
   "#ebdbb2",
@@ -120,7 +120,7 @@ export const gruvboxLight: Base16 = /* @__PURE__ */ base16(
   "#d65d0e",
 );
 
-/** Rosé Pine, soho vibes after dark: muted violets, pinks and gold. Pairs with `rosePineDawn` in `adaptive`. */
+/** Dark ramp. Pairs with `rosePineDawn` in `adaptive`. */
 export const rosePine: Base16 = /* @__PURE__ */ base16(
   "#191724",
   "#1f1d2e",
@@ -140,7 +140,7 @@ export const rosePine: Base16 = /* @__PURE__ */ base16(
   "#524f67",
 );
 
-/** Rosé Pine Dawn, the same palette by day on warm paper. Pairs with `rosePine` in `adaptive`. */
+/** Light ramp. Pairs with `rosePine` in `adaptive`. */
 export const rosePineDawn: Base16 = /* @__PURE__ */ base16(
   "#faf4ed",
   "#fffaf3",

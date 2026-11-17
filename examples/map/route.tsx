@@ -8,6 +8,7 @@ import {
   type Rect,
   type SvgNode,
   Camera,
+  span,
   travel,
   type CameraStop,
 } from "svjeez";
@@ -36,7 +37,6 @@ const POINTS: Point[] = [
 const ROUTE = trace(POINTS, STEPS);
 const JOURNEY = { at: 6, over: 9.5 };
 
-/** When the traveller reaches one of the route's points. */
 const reach = (p: Point) =>
   JOURNEY.at + (JOURNEY.over * ROUTE.len[POINTS.indexOf(p) * STEPS]!) / ROUTE.total;
 
@@ -58,7 +58,6 @@ const STOPS: CameraStop[] = [
   { show: { at: 18.2, over: PAN }, target: "all" },
 ];
 
-/** The camera. The map and what moves over it each ride one, so they zoom together. */
 export const Follow = ({ children }: { children: Child }): SvgNode => (
   <Camera frame={rect(0, 0, W, H)} stops={STOPS} over={PAN}>
     {children}
@@ -82,16 +81,16 @@ function Route(): SvgNode {
             .map((p, i) => `${i ? "L" : "M"}${n(p.x)} ${n(p.y)}`)
             .join("")}
           strokeDashoffset={-n(len[k * piece]!)}
-          animation={motion({ opacity: 0 })
-            .at(JOURNEY.at + (JOURNEY.over * len[k * piece]!) / total)
-            .set({ opacity: 1 })}
+          animation={motion({ opacity: 0 }).set(
+            { opacity: 1 },
+            JOURNEY.at + (JOURNEY.over * len[k * piece]!) / total,
+          )}
         />
       ))}
     </g>
   );
 }
 
-/** The glow and smoke over Mount Cinder, which loop forever. */
 function Smoke(): SvgNode {
   const { x, y } = CINDER;
   const top = y - 54;
@@ -113,8 +112,8 @@ function Smoke(): SvgNode {
         ry={52}
         fill={glow}
         animation={motion({ opacity: 0.55 })
-          .to({ opacity: 1 }, 1.1, ease.inOut)
-          .to({ opacity: 0.55 }, 1.1, ease.inOut)
+          .to({ opacity: 1 }, span(0, 1.1), ease.inOut)
+          .to({ opacity: 0.55 }, span(0, 1.1).next(1.1), ease.inOut)
           .loop(2.2)}
       />
       {[0, 1, 2].map((i) => (
@@ -124,9 +123,12 @@ function Smoke(): SvgNode {
           r={6}
           fill={C.faded}
           animation={motion({ opacity: 0, y: 0, x: 0, scale: 0.5 })
-            .at(i * 1.1)
-            .to({ opacity: 0.55 }, 0.3)
-            .to({ opacity: 0, y: -38, x: 12 + i * 3, scale: 2 }, 1.8, ease.out)
+            .to({ opacity: 0.55 }, span(i * 1.1, 0.3))
+            .to(
+              { opacity: 0, y: -38, x: 12 + i * 3, scale: 2 },
+              span(i * 1.1, 0.3).next(1.8),
+              ease.out,
+            )
             .loop(4.4)}
         />
       ))}
@@ -158,9 +160,11 @@ export function Live(): SvgNode {
         stroke={C.red}
         strokeWidth={2.6}
         strokeLinecap="round"
-        animation={motion({ opacity: 0, scale: 0.3 })
-          .at(reach(CINDER))
-          .to({ opacity: 1, scale: 1 }, 0.5, ease.pop)}
+        animation={motion({ opacity: 0, scale: 0.3 }).to(
+          { opacity: 1, scale: 1 },
+          span(reach(CINDER), 0.5),
+          ease.pop,
+        )}
       />
     </Follow>
   );

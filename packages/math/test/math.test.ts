@@ -44,13 +44,18 @@ describe("tex", () => {
     }
   });
 
-  test("get() and find() return the rect of the part they name", () => {
+  test("part() and find() return the part they name, with its box", () => {
     const g = tex(String.raw`a^2 + \cssId{mid}{2ab} + b^2`, { x: 40, y: 80, fontSize: 40 });
-    const mid = g.get("mid");
+    const mid = g.part("mid").box;
     const box = ({ x, y, w, h }: typeof mid) => ({ x, y, w, h });
-    expect(box(g.find("2ab"))).toEqual(box(mid));
-    expect(g.find("b2").x).toBeGreaterThan(mid.x + mid.w);
-    expect(g.find("2", 2)).toMatchObject({ x: g.words.filter((w) => w.char === "2")[1]!.bounds.x });
+    expect(g.parts.map((p) => p.id)).toEqual(["mid"]);
+    expect(box(g.find("2ab").box)).toEqual(box(mid));
+    expect(g.find("2ab").id).toBe("2ab");
+    expect(g.find("b2").box.x).toBeGreaterThan(mid.x + mid.w);
+    expect(g.find("2", 2).box).toMatchObject({
+      x: g.words.filter((w) => w.char === "2")[1]!.bounds.x,
+    });
+    expect(g.part("mid").span).toMatchObject({ at: 0, over: 0 });
     expect(g.words.filter((w) => w.id === "mid").map((w) => w.char)).toEqual(["2", "a", "b"]);
   });
 
@@ -58,7 +63,9 @@ describe("tex", () => {
     expect(() => f.find("(a+")).not.toThrow();
     expect(() => f.find("zz")).toThrow(`tex.find() found 0 of "zz", not 1.`);
     expect(() => f.find("a", 2)).toThrow(`tex.find() found 1 of "a", not 2.`);
-    expect(() => f.get("x")).toThrow(`tex.get() found no part named "x".`);
+    expect(() => f.part("x")).toThrow(
+      `tex.part() found no part named "x". Wrap it in \\cssId{x}{…}.`,
+    );
   });
 
   test("a TeX error throws with MathJax's message instead of drawing red text", () => {
@@ -81,11 +88,24 @@ describe("tex", () => {
     expect(centered.width).toBe(f.width);
   });
 
+  test("write() gives each part the span its glyphs write in", () => {
+    const g = tex(String.raw`\cssId{lhs}{a} = \cssId{rhs}{b + c}`);
+    const written = g.write({ at: 1, over: 2.6 }, { stroke: 0.6 });
+    const step = 2 / (g.words.length - 1);
+
+    expect(written.span).toMatchObject({ at: 1, over: 2.6 });
+    expect(written.part("lhs").span.at).toBe(1);
+    expect(written.part("lhs").span.over).toBeCloseTo(0.6, 6);
+    expect(written.part("rhs").span.end).toBeCloseTo(3.6, 6);
+    expect(written.part("rhs").span.at).toBeCloseTo(1 + 2 * step, 6);
+    expect(written.find("=").span.at).toBeCloseTo(1 + step, 6);
+    expect(written.part("rhs").box).toMatchObject({ ...g.part("rhs").box });
+  });
+
   test("write() draws each glyph's outline, then its fill, one glyph after another", () => {
-    const out = svg(f.write({ at: 0.5, over: 2 }));
+    const out = svg(f.write({ at: 0.5, over: 2 }).node);
     expect(out.match(/<path /g)).toHaveLength(f.words.length * 2);
     expect(out.match(/stroke-dasharray="1 2"/g)).toHaveLength(f.words.length);
-    // Outline, its fade and the fill, at times of each glyph's own, so no two glyphs share keyframes.
     expect(out.match(/@keyframes/g)).toHaveLength(f.words.length * 3);
   });
 
@@ -137,7 +157,6 @@ describe("morph over equations", () => {
 
   test("glyphs of the same character and size carry over, and the rest fade", () => {
     const out = svg(morph([a, b], { at: [1], over: 1 }).node);
-    // a, +, b and the superscript 2 carry over. The full-size 2 is new, since a 2 cannot scale.
     expect(out.match(/<path /g)).toHaveLength(a.words.length + b.words.length - 4);
   });
 

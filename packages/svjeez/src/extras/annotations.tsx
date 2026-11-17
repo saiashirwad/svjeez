@@ -1,9 +1,10 @@
 /** @jsxImportSource svjeez */
 import type { Color } from "../attributes";
 import type { Edge, Point, Rect } from "../geometry";
-import { motion } from "../motion";
+import { motion, type Ease } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
+import type { Span } from "../span";
 import type { SvgNode } from "../svg";
 import { defaultDark, type Base16 } from "./theme";
 import { show as showing, type Shown } from "./timeline";
@@ -29,12 +30,37 @@ export function Arrow({
   from,
   to,
   bend = 0,
+  width = 1.5,
+  head = 8,
+  draw: drawing,
+  ease: shaftEase,
   show,
   theme = defaultDark,
   color = theme.base09,
   class: cls,
-}: Common & { readonly from: Point; readonly to: Point; readonly bend?: number }): SvgNode {
+}: Common & {
+  readonly from: Point;
+  readonly to: Point;
+  readonly bend?: number;
+  /** Stroke width in px. Default 1.5. */
+  readonly width?: number;
+  /** Length of the head's barbs in px. Default 8. */
+  readonly head?: number;
+  /**
+   * When the shaft draws; the head lands as it ends. Must lie inside `show`. Default: start of `show`, over
+   * min(0.6, half of `show`) seconds.
+   */
+  readonly draw?: Span;
+  /** The shaft's ease. Default `ease.out`, as `draw()`. */
+  readonly ease?: Ease;
+}): SvgNode {
   const span = show;
+  const shaft = drawing ?? { at: span.at, over: Math.min(0.6, span.over / 2) };
+
+  if (shaft.at < span.at - 1e-9 || shaft.at + shaft.over > span.at + span.over + 1e-9)
+    throw new Error(
+      `Arrow draw must lie inside show: draw runs ${shaft.at} to ${shaft.at + shaft.over}s, show runs ${span.at} to ${span.at + span.over}s. Start draw no earlier than show and end it no later.`,
+    );
 
   const [cx, cy] = [
     (from.x + to.x) / 2 - (to.y - from.y) * bend,
@@ -42,28 +68,38 @@ export function Arrow({
   ];
 
   const angle = Math.atan2(to.y - cy, to.x - cx);
-  const barb = (a: number) => `${to.x - 8 * Math.cos(angle + a)} ${to.y - 8 * Math.sin(angle + a)}`;
-  const stroke = Math.min(0.6, span.over / 2);
+
+  const barb = (a: number) =>
+    `${to.x - head * Math.cos(angle + a)} ${to.y - head * Math.sin(angle + a)}`;
 
   return (
     <g class={cls} animation={showing(span, { fade: 0.2 })}>
       <path
         d={`M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`}
         {...ink(color)}
-        animation={draw({ at: span.at, over: stroke })}
+        strokeWidth={width}
+        animation={draw(shaft, shaftEase)}
       />
       <path
         d={`M${barb(0.45)}L${to.x} ${to.y}L${barb(-0.45)}`}
         {...ink(color)}
-        animation={motion({ opacity: 0, scale: 0.5 })
-          .at(span.at + stroke)
-          .to({ opacity: 1, scale: 1 }, Math.min(0.15, span.over - stroke))}
+        strokeWidth={width}
+        animation={motion({ opacity: 0, scale: 0.5 }).to(
+          { opacity: 1, scale: 1 },
+          {
+            at: shaft.at + shaft.over,
+            over: Math.min(0.15, span.at + span.over - shaft.at - shaft.over),
+          },
+        )}
       />
     </g>
   );
 }
 
-/** A note box beside `target`, joined to it by a short leader. `columns` is the line length in characters. With `font`, the box fits the measured lines. */
+/**
+ * A note box beside `target` with a short leader. `columns` is the line length in characters; with `font`, the box
+ * fits the measured lines.
+ */
 export function Callout({
   target,
   side = "right",

@@ -1,10 +1,9 @@
 import { pathLength, type Point } from "../geometry";
 import type { ChannelValues } from "../channels";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
-import { span as makeSpan, type Spanned, type When } from "../span";
+import { chain, span as makeSpan, stagger, type Spanned, type When } from "../span";
 
 export type Timeline<K extends string> = { readonly [P in K]: Spanned } & {
-  /** When the last scene ends. */
   readonly end: Seconds;
 };
 
@@ -13,7 +12,6 @@ export interface TimelineOptions {
   readonly at?: Seconds;
   /** Seconds between scenes. Not scaled by `pace`. */
   readonly gap?: Seconds;
-  /** Multiplies every scene length. */
   readonly pace?: number;
 }
 
@@ -25,9 +23,8 @@ export interface ShowOptions {
 const isList = (spans: When | readonly When[]): spans is readonly When[] => Array.isArray(spans);
 
 /**
- * On during each span, off outside. Fades sit inside the span: in over its first `fade` seconds and out over its last.
- * Spans that overlap or touch merge, so fades never collide, and a span shorter than two fades shrinks them. `fade: 0`
- * cuts: a shot in an edit. A span without `over` stays to the end and never fades out. No spans, never shown.
+ * On during each span, off outside. Fades sit inside the span. Overlapping or touching spans merge; a span shorter
+ * than two fades shrinks them. `fade: 0` cuts. A span without `over` stays to the end. No spans, never shown.
  */
 export const show = (
   spans: When | readonly When[],
@@ -53,9 +50,9 @@ export const show = (
   if (fade === 0)
     return merged.reduce(
       (track, [a, b], i) => {
-        const on = i === 0 && a === 0 ? track : track.at(a).set({ opacity: 1 });
+        const on = i === 0 && a === 0 ? track : track.set({ opacity: 1 }, a);
 
-        return b === Infinity ? on : on.at(b).set({ opacity: 0 });
+        return b === Infinity ? on : on.set({ opacity: 0 }, b);
       },
       motion({ opacity: merged[0]![0] === 0 ? 1 : 0 }),
     );
@@ -63,20 +60,22 @@ export const show = (
   return merged.reduce(
     (track, [a, b]) => {
       const f = Math.min(fade, (b - a) / 2);
-      const on = track.at(a).to({ opacity: 1 }, f);
+      const on = track.to({ opacity: 1 }, makeSpan(a, f));
 
-      return b === Infinity ? on : on.at(b - f).to({ opacity: 0 }, f);
+      return b === Infinity ? on : on.to({ opacity: 0 }, makeSpan(b - f, f));
     },
     motion({ opacity: 0 }),
   );
 };
 
-/** When a thing is on screen. */
 export interface Shown {
   readonly show: Span;
 }
 
-/** How a shot arrives or leaves. Each move but `cut` passes through these values while transparent. No blur: a shot holds many animated elements, and a filter over them repaints every frame. */
+/**
+ * How a shot arrives or leaves; every move but `cut` passes through these values while transparent. No blur, since
+ * a filter over many animated elements repaints every frame.
+ */
 const MOVES = {
   cut: {},
   fade: {},
@@ -99,8 +98,8 @@ export interface ShotOptions {
 type ShotChannel = "opacity" | "x" | "y" | "scale";
 
 /**
- * A shot in an edit that moves in and out. Both moves happen inside the span, so shots laid end to end hand over
- * through the background: put each one on the `<g>` that holds the shot.
+ * A shot that moves in and out, both inside the span, so shots laid end to end hand over through the background.
+ * Put each on the `<g>` that holds the shot.
  */
 export const shot = (
   { at, over }: Span,
@@ -126,29 +125,37 @@ export const shot = (
     start.opacity === 1
       ? track
       : enter === "cut"
-        ? track.at(at).set({ opacity: 1 })
-        : track.at(at).to({ ...still, opacity: 1 }, f, ease.out);
+        ? track.set({ opacity: 1 }, at)
+        : track.to({ ...still, opacity: 1 }, makeSpan(at, f), ease.out);
 
   return exit === "cut"
-    ? shown.at(at + over).set({ opacity: 0 })
-    : shown.at(at + over - f).to(to, f, ease.in);
+    ? shown.set({ opacity: 0 }, at + over)
+    : shown.to(to, makeSpan(at + over - f, f), ease.in);
 };
 
-/** The leaving side of a move: what rose in from below lifts away above, what grew in keeps growing. */
 const mirror = (values: ChannelValues<"x" | "y" | "scale">): ChannelValues<"x" | "y" | "scale"> =>
   Object.fromEntries(Object.entries(values).map(([c, v]) => [c, c === "scale" ? 2 - v : -v]));
 
-/** When each of several things happens: a start, from which they follow `step` apart, or one time each. */
+/** When each of several things starts: a start, from which they follow `step` apart, or one time each, in order. */
 export type Beats = Seconds | readonly Seconds[];
 
 const isStart = (at: Beats): at is Seconds => typeof at === "number";
 
-/** `count` times from `at`. A list must have one time per thing, in order. */
-export const beats = (at: Beats, count: number, step: Seconds, what = "beats()"): Seconds[] => {
+/**
+ * A span `over` long for each of `count` things given as `Beats`, checked: a start of 0 or later, staggered `step`
+ * apart, or exactly `count` times in order. `what` names the caller in errors.
+ */
+export const spansOf = (
+  at: Beats,
+  count: number,
+  step: Seconds,
+  over: Seconds,
+  what: string,
+): Spanned[] => {
   if (isStart(at)) {
     if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
 
-    return Array.from({ length: count }, (_, i) => at + i * step);
+    return stagger(makeSpan(at, over), count, step);
   }
 
   if (at.length !== count) throw new Error(`${what} needs ${count} times, got ${at.length}.`);
@@ -156,7 +163,7 @@ export const beats = (at: Beats, count: number, step: Seconds, what = "beats()")
   if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!)))
     throw new Error(`${what} needs non-negative times in order, got ${at.join(", ")}.`);
 
-  return [...at];
+  return at.map((t) => makeSpan(t, over));
 };
 
 /** Spans as `[start, end]` pairs in order, with those that overlap, touch or sit closer than `gap` joined into one. */
@@ -181,16 +188,15 @@ export interface TravelOptions {
 
 export interface HeadingOptions extends TravelOptions {
   /**
-   * Turn the token to face the way it moves. `true` points its +x axis along the path. A number adds that many degrees,
-   * so an icon drawn pointing up takes 90.
+   * Turn the token to face its motion. `true` points +x along the path; a number adds that many degrees (an icon
+   * drawn pointing up takes 90).
    */
   readonly heading: true | number;
 }
 
 /**
- * A token that appears at `at`, runs `points` at constant speed and vanishes at the end. Draw it at the origin.
- * `over` fixes the trip's duration; otherwise `speed` in px/s sets it. With `heading` it also turns to follow the
- * path, easing between the directions of consecutive legs, and the motion gains a `rotate` channel.
+ * A token that appears at `at`, runs `points` at constant speed and vanishes. Draw it at the origin. `over` fixes
+ * the duration, else `speed` in px/s. With `heading` it turns to follow the path and gains a `rotate` channel.
  */
 export function travel(points: readonly Point[], options: HeadingOptions): Motion<Heading>;
 export function travel(points: readonly Point[], options: TravelOptions): Motion<Travel>;
@@ -233,7 +239,9 @@ export function travel(
 
   if (heading !== undefined) first.rotate = turns[0]!;
 
-  const start: Motion<Heading> = motion<TokenStart>(first).at(at).set({ opacity: 1 });
+  const start: Motion<Heading> = motion<TokenStart>(first).set({ opacity: 1 }, at);
+
+  const [, ...runs] = chain(makeSpan(at, 0), ...legs.map((leg) => (duration * leg.length) / total));
 
   return legs
     .reduce((track, leg, i) => {
@@ -241,18 +249,17 @@ export function travel(
 
       return track.to(
         heading === undefined ? to : { ...to, rotate: turns[i + 1]! },
-        (duration * leg.length) / total,
+        runs[i]!,
         ease.linear,
       );
     }, start)
-    .set({ opacity: 0 });
+    .set({ opacity: 0 }, runs.at(-1)?.end ?? at);
 }
 
 export type Travel = "x" | "y" | "opacity";
 
 export type Heading = Travel | "rotate";
 
-/** Where a travelling token starts, hidden: `rotate` only when it follows a heading. */
 type TokenStart = {
   opacity: number;
   x: number;
@@ -260,11 +267,6 @@ type TokenStart = {
   rotate?: number;
 };
 
-/**
- * The heading at each vertex of a path whose legs point `angles` degrees: the mean of the two legs that meet there,
- * the first and last leg's own at the ends. Each is shifted by multiples of 360 to sit within 180 of the one before,
- * so the token turns the short way and never spins.
- */
 const facings = (angles: readonly number[], offset: true | number): number[] => {
   const shift = offset === true ? 0 : offset;
   const turned: number[] = [];
@@ -286,7 +288,6 @@ const facings = (angles: readonly number[], offset: true | number): number[] => 
   return turned.map((angle) => angle + shift);
 };
 
-/** `angle` brought into -180 to 180. */
 const wrap = (angle: number) => angle - 360 * Math.round(angle / 360);
 
 export interface ReadingOptions {
@@ -320,7 +321,6 @@ export const readingTime = (
   return Math.max(min, [text].flat().join(" ").split(/\s+/).filter(Boolean).length / wps + settle);
 };
 
-/** Consecutive named scenes, `gap` apart. */
 export function timeline<const T extends Record<string, Seconds>>(
   durations: T,
   options: TimelineOptions = {},

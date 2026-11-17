@@ -53,7 +53,6 @@ describe("skill docs", () => {
   test("every runtime error in the error table is thrown somewhere in src", () => {
     const section = /\nRuntime errors[^\n]*\n([\s\S]*?)\n## /.exec(read("SKILL.md"))?.[1] ?? "";
 
-    // `…` stands for a value the message fills in. A message with backticks is wrapped in double backticks.
     const quoted = [...section.matchAll(/^\| (`+) ?(.+?) ?\1 \|/gm)].flatMap((match) =>
       match[2] === "Message" ? [] : [match[2]!],
     );

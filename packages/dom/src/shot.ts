@@ -1,6 +1,5 @@
 import type { Page } from "playwright-core";
 
-/** Pastes a PNG onto a transparent canvas, in the page, and gives back the result as base64. */
 const pasteAt = async ([png, width, height, dx, dy]: readonly [
   string,
   number,
@@ -25,7 +24,6 @@ const pasteAt = async ([png, width, height, dx, dy]: readonly [
   return done;
 };
 
-/** A PNG of the element's box with `pad` all round, transparent where the page paints nothing. */
 export const shoot = async (
   page: Page,
   selector: string,

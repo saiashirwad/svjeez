@@ -6,18 +6,14 @@ import type { Point } from "./layout/box";
  * spans `i` to `i + 1`, so `i + u` is `u` of the way along leg `i` by its own parameter.
  */
 export interface Spline {
-  /** Path data for the whole curve, one cubic Bézier per leg. */
   readonly d: string;
-  /** How many legs: one fewer than the points. */
   readonly legs: number;
   point(at: number): Point;
   /** How the point moves per unit of position at `at`: its direction is the way of travel, its length the speed. */
   tangent(at: number): Point;
   /** The direction of travel at `at`, in degrees as `rotate` takes them: 0 along +x, 90 along +y. */
   angle(at: number): number;
-  /** Path data from `from` to `to`, cut exactly from the legs it crosses. */
   path(from?: number, to?: number): string;
-  /** The position between `from` and `to` closest to `p`. */
   nearest(p: Point, from?: number, to?: number): number;
 }
 
@@ -28,7 +24,6 @@ const mix = (a: Point, b: Point, t: number): Point => ({
   y: a.y + (b.y - a.y) * t,
 });
 
-/** The part of a cubic between parameters `u0` and `u1`, by de Casteljau. */
 const cut = ([a, b, c, d]: Cubic, u0: number, u1: number): Cubic => {
   const left = (q: Cubic, t: number): Cubic => {
     const ab = mix(q[0], q[1], t);
@@ -74,7 +69,6 @@ export const spline = (points: readonly Point[]): Spline => {
 
   const clamp = (position: number) => Math.max(0, Math.min(legs, position));
 
-  /** The leg a position falls on, and how far along it. The last point belongs to the last leg. */
   const locate = (position: number) => {
     const leg = Math.min(legs - 1, Math.floor(clamp(position)));
 

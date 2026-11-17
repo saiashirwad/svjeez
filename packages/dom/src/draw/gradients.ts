@@ -3,16 +3,13 @@ import { num } from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import type { Gradient, Paint, Rect } from "../tree.ts";
 
-/** A gradient's paint server, and the key two equal ones share. */
 interface Server {
   readonly key: string;
   readonly ref: Ref<"linearGradient" | "radialGradient">;
 }
 
-/** Five places: bounding-box units span 0 to 1, so svjeez's usual three would shift a stripe. */
 const fine = (k: number) => num(k, 5);
 
-/** A linear gradient's line, rewritten in its box's units. */
 const linear = (g: Extract<Gradient, { kind: "linear" }>, { x, y, width: w, height: h }: Rect) => {
   const ex = g.x2 - g.x1;
   const ey = g.y2 - g.y1;
@@ -20,7 +17,6 @@ const linear = (g: Extract<Gradient, { kind: "linear" }>, { x, y, width: w, heig
 
   if (!e) return undefined;
 
-  // Where along the line a point falls, written over the box's units: a gradient with that slope and start.
   const a = (w * ex) / e;
   const b = (h * ey) / e;
   const c = ((x - g.x1) * ex + (y - g.y1) * ey) / e;
@@ -37,7 +33,6 @@ const linear = (g: Extract<Gradient, { kind: "linear" }>, { x, y, width: w, heig
   };
 };
 
-/** A radial gradient's center and radius in its box's units, stretched to an ellipse when its radii differ. */
 const radial = (g: Extract<Gradient, { kind: "radial" }>, { x, y, width: w, height: h }: Rect) => {
   const cx = (g.cx - x) / w;
   const cy = (g.cy - y) / h;
@@ -55,11 +50,6 @@ const radial = (g: Extract<Gradient, { kind: "radial" }>, { x, y, width: w, heig
   };
 };
 
-/**
- * Gradients as paint servers in their box's bounding-box units, so they ride along as the box moves and resizes. A
- * linear one is turned into those units whole, so its stripes stay square to its line however the box stretches.
- * Equal ones are one server.
- */
 export const paintServers = (v: (color: Paint) => Color) => {
   const servers = new Map<string, Server["ref"]>();
 

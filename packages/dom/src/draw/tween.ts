@@ -1,27 +1,22 @@
-import { motion, type Ease } from "svjeez";
+import { motion, span, type Ease } from "svjeez";
 
-/** One transition: when it starts, how long it lasts, and its ease. */
 export interface Tween {
   readonly at: number;
   readonly over: number;
   readonly ease: Ease;
 }
 
-/**
- * Opacity over part of the tween, as `[start, length, from, to]`. An element that leaves goes in the first half and
- * one that arrives comes in the second, so neither overlaps siblings still sliding. Two versions of one element swap
- * in the middle: the new one comes in over the old before the old goes, so where they overlap the two never add up
- * to much less than one. Text and icons can't do that, since two glyphs on top of each other read as noise: the old one
- * is gone by 45% and the new one comes in after.
- */
 const WINDOWS = {
   exit: [0, 0.5, 1, 0],
   enter: [0.5, 0.5, 0, 1],
   swapOut: [0.45, 0.4, 1, 0],
   swapIn: [0.15, 0.4, 0, 1],
   textOut: [0, 0.45, 1, 0],
+  // Content a box swaps whole goes before the new is legible, overlapping only where both are faint: the box's own fill
+  // morphs throughout, so it is never empty, and its two contents never read as a double exposure.
+  handOut: [0, 0.45, 1, 0],
+  handIn: [0.35, 0.6, 0, 1],
   textIn: [0.45, 0.55, 0, 1],
-  // A shadow only one side has comes or goes over the whole tween, as a color fading would.
   in: [0, 1, 0, 1],
   out: [0, 1, 1, 0],
 } as const;
@@ -29,11 +24,12 @@ const WINDOWS = {
 export const fade = (tween: Tween, mode: keyof typeof WINDOWS) => {
   const [start, length, from, to] = WINDOWS[mode];
 
-  return motion({ opacity: from })
-    .at(tween.at + start * tween.over)
-    .to({ opacity: to }, length * tween.over, tween.ease);
+  return motion({ opacity: from }).to(
+    { opacity: to },
+    span(tween.at + start * tween.over, length * tween.over),
+    tween.ease,
+  );
 };
 
-/** A slide by `(dx, dy)` into place. */
 export const slideIn = (tween: Tween, dx: number, dy: number) =>
-  motion({ x: dx, y: dy }).at(tween.at).to({ x: 0, y: 0 }, tween.over, tween.ease);
+  motion({ x: dx, y: dy }).to({ x: 0, y: 0 }, span(tween.at, tween.over), tween.ease);

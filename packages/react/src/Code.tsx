@@ -11,7 +11,6 @@ export function Code({
   control,
 }: {
   editor: Editor;
-  /** A file name for the header. */
   file?: string;
   /** Draws a value's control in place of the built-in one. Render `plain` to keep the built-in one. */
   control?: (value: Value, plain: ReactNode) => ReactNode;

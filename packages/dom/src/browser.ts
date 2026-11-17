@@ -1,5 +1,6 @@
 import type { FontValue } from "svjeez";
 import { chromiumPages } from "./chromium.ts";
+import type { Palette } from "./palette.ts";
 import type { Action, Flow, Instruction, PageAction } from "./flow.ts";
 import type { Step } from "./timeline.ts";
 import type { Snapshot } from "./tree.ts";
@@ -10,29 +11,29 @@ export type Css = string | ((html: string) => string | Promise<string>);
 export const isCssText = (css: Css | undefined): css is string => typeof css === "string";
 
 export interface BrowserOptions {
-  /** CSS for every mounted card, unless a mount brings its own. */
   readonly css?: Css;
   /** Fonts the page uses, embedded as @font-face so layout and the drawn text match. Pass the same ones to `<Dom fonts>`. */
   readonly fonts?: readonly FontValue[];
   /**
-   * Which schemes a snapshot reads. `"both"` reads the page in light and dark, and the drawing's colors follow the
-   * viewer's. Default `"both"`.
+   * Defines `--base00` to `--base0F` on every page, light and dark, for CSS written against a base16 palette. Pass the
+   * same palette to `<Dom palette>` to draw those colors as the variables again.
+   */
+  readonly palette?: Palette;
+  /**
+   * Which schemes a snapshot reads: `"both"` reads light and dark, and the drawing's colors follow the viewer's. Default `"both"`.
    */
   readonly schemes?: "both" | "light" | "dark";
   /**
-   * The dark pass emulates `prefers-color-scheme: dark` and adds this class to `<html>`, so media-query and class-based
-   * themes both work. Default `"dark"`, as shadcn and Tailwind's class strategy use.
+   * Class added to `<html>` in the dark pass, which also emulates `prefers-color-scheme: dark`. Default `"dark"`.
    */
   readonly dark?: { readonly class?: string };
   readonly executablePath?: string;
   /**
-   * Also screenshot the card at every read, in each scheme read, over the same box and padding the snapshot covers.
-   * The PNGs come from `Io.shots`; `snapshots()` writes them out for the fidelity check.
+   * Also screenshot the card at every read, in each scheme read. The PNGs come from `Io.shots`; `snapshots()` writes them for the fidelity check.
    */
   readonly screenshots?: boolean;
   /**
-   * Where a relative `open()` URL points, such as a dev server on a port picked at random. It isn't part of what
-   * `snapshots()` records, so the recording still matches when the port changes.
+   * Where a relative `open()` URL points, such as a dev server on a random port. Not part of what `snapshots()` records.
    */
   readonly base?: string;
 }
@@ -42,19 +43,15 @@ export interface PageOptions {
   readonly parts?: Readonly<Record<string, string>>;
   /** Room around the element for shadows and rings, in px. Default 16. */
   readonly pad?: number;
-  /** Width the page lays out at. */
   readonly width?: number;
 }
 
 export interface MountOptions extends PageOptions {
-  /** Overrides the browser's `css` for this card. */
   readonly css?: Css;
-  /** Classes on `<html>`. */
   readonly root?: { readonly class?: string };
 }
 
 export interface OpenOptions extends PageOptions {
-  /** The element to snapshot. */
   readonly root: string;
   /** Height of the viewport the app lays out in. Default 1000. */
   readonly height?: number;
@@ -62,18 +59,15 @@ export interface OpenOptions extends PageOptions {
   readonly ready?: string;
 }
 
-/** A running app to open, as `open` takes it. */
 export interface Url extends OpenOptions {
   readonly url: string;
 }
 
 /** One live page, kept open so state (typed text, focus, hover) carries from one snapshot to the next. */
 export interface Card {
-  /** Run `action` on the page, if given, then read the page into a snapshot. */
   readonly snap: (action?: PageAction) => Promise<Snapshot>;
   /**
-   * Runs a flow on this page, so state carries from one instruction to the next, and resolves to a step per snap
-   * and wait, in order, ready for `<Dom states>`.
+   * Runs a flow on this page, carrying state between instructions. Resolves to a step per snap and wait, for `<Dom states>`.
    */
   readonly run: (flow: Flow) => Promise<Step[]>;
   /** Swap the markup of a mounted card, running its `css` again if that is a function. Hover and focus are cleared. */
@@ -82,11 +76,8 @@ export interface Card {
 }
 
 export interface Browser {
-  /** Lay `html` out in a page of its own. The element at its root is what gets snapshotted. */
   readonly mount: (html: string, options?: MountOptions) => Promise<Card>;
-  /** Open a running app (a dev server, Storybook) and snapshot the element at `options.root`. */
   readonly open: (url: string, options: OpenOptions) => Promise<Card>;
-  /** Mount `html` (or open a `{ url, root }`), run `flow` on it and close it again. */
   readonly run: {
     (html: string, flow: Flow, options?: MountOptions): Promise<Step[]>;
     (app: Url, flow: Flow): Promise<Step[]>;
@@ -95,29 +86,23 @@ export interface Browser {
   readonly [Symbol.asyncDispose]: () => Promise<void>;
 }
 
-/** The card as Chromium painted it at the last read, one PNG per scheme read. */
 export type Shots = Partial<Record<"light" | "dark", Uint8Array>>;
 
-/** What a card does to its page. A card is built on these, so `snapshots()` can record and replay them. */
 export interface Io {
   readonly read: () => Promise<Snapshot>;
-  /** The screenshots of the last read, when the browser takes them. */
   readonly shots?: () => Shots;
-  /** Told the steps a `run` gave back, for whoever keeps them. */
   readonly ran?: (steps: Step[]) => void;
   readonly act: (action: Action) => Promise<void>;
   readonly drive: (fn: PageAction) => Promise<void>;
   readonly close: () => Promise<void>;
 }
 
-/** Where cards come from: Chromium, or a recording of it. */
 export interface Pages {
   readonly mount: (html: string, options?: MountOptions) => Promise<Io>;
   readonly open: (url: string, options: OpenOptions) => Promise<Io>;
   readonly close: () => Promise<void>;
 }
 
-/** Checks an instruction's timing where it stands. `first` says no snapshot has been read yet. */
 const check = (step: Instruction, first: boolean) => {
   if ("wait" in step && first)
     throw new Error("run(): a wait comes before the first snap, but nothing is drawn yet.");
@@ -135,7 +120,6 @@ const cardOf = (io: Io): Card => ({
     return io.read();
   },
   run: async (flow) => {
-    // Checked before anything runs, so a mistake never costs a page's worth of instructions.
     flow.forEach((step, i) => check(step, !flow.slice(0, i).some((s) => "snap" in s)));
 
     const steps: Step[] = [];
@@ -173,7 +157,6 @@ const cardOf = (io: Io): Card => ({
 
 const isUrl = (page: string | Url): page is Url => typeof page !== "string";
 
-/** A Browser over any pages. */
 export const browserOf = (pages: Pages): Browser => {
   const mount = async (html: string, options?: MountOptions) =>
     cardOf(await pages.mount(html, options));

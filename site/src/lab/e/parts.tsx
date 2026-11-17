@@ -1,4 +1,4 @@
-import { ease, motion, Pivot, sampled, wiggle } from "svjeez";
+import { ease, motion, Pivot, sampled, span, wiggle } from "svjeez";
 import { clamp } from "../util";
 import { blinkAt, Eye, Speech } from "./bits";
 import { Face } from "./face";
@@ -85,7 +85,7 @@ export const heads = (cx: Cx) => {
 
   const spin =
     g.quirk === "spin"
-      ? motion({ rotate: 0 }).at(QUIRK_AT.spin).to({ rotate: 360 }, 1, ease.inOut)
+      ? motion({ rotate: 0 }).to({ rotate: 360 }, span(QUIRK_AT.spin, 1), ease.inOut)
       : undefined;
 
   return lay.heads.map((h, i) => {
@@ -106,10 +106,8 @@ export const heads = (cx: Cx) => {
     const vanish =
       g.quirk === "hat" && i === 0
         ? motion({ scale: 1 })
-            .at(QUIRK_AT.at + 0.75)
-            .set({ scale: 0.001 })
-            .at(QUIRK_AT.back)
-            .to({ scale: 1 }, 0.5, ease.pop)
+            .set({ scale: 0.001 }, QUIRK_AT.at + 0.75)
+            .to({ scale: 1 }, span(QUIRK_AT.back, 0.5), ease.pop)
         : undefined;
 
     const meow = 0.9 + i * 0.45;
@@ -146,7 +144,6 @@ export const heads = (cx: Cx) => {
   });
 };
 
-/** A headless specimen still has something to say. */
 export const headless = (cx: Cx) => {
   const { g, lay } = cx;
   const mid = lay.frames[Math.floor(lay.frames.length / 2)]!;

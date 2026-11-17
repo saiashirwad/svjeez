@@ -2,7 +2,6 @@ import type { Attachment } from "svelte/attachments";
 
 const shown = new WeakMap<Element, string>();
 
-/** Flashes the element's background whenever `value` changes, not when it first appears unless `onFirst`. */
 export const flashOnChange =
   (value: string, onFirst = false): Attachment<HTMLElement> =>
   (el) => {

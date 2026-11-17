@@ -1,6 +1,17 @@
 import { night, project, sun, type LonLat, type Topology } from "@svjeez/geo";
 import { geoOrthographic } from "d3-geo";
-import { css, def, ease, fx, motion, render, type SvgNode } from "svjeez";
+import {
+  css,
+  def,
+  ease,
+  fx,
+  motion,
+  random,
+  render,
+  span,
+  type Spanned,
+  type SvgNode,
+} from "svjeez";
 import { rect } from "svjeez/geometry";
 import { createRequire } from "node:module";
 import {
@@ -33,7 +44,6 @@ const TILT = 22;
 /** Where the sun sits from the middle of the globe, in degrees of longitude. Negative is west, so night falls on the right. */
 const SUN_OFFSET = -72;
 
-/** The June solstice, at midnight UTC. */
 const DAY = Date.UTC(2026, 5, 21);
 const R = 190;
 
@@ -54,16 +64,11 @@ const RAD = Math.PI / 180;
 const SIN_T = Math.sin(TILT * RAD);
 const COS_T = Math.cos(TILT * RAD);
 
-/**
- * The globe turns through one custom property. `yaw` runs a full turn on the group that holds every dot, and each dot
- * reads it with its own `lat` and `lon` to find where it is, how far it faces the viewer and how much sun it gets.
- * The sun stays put relative to the viewer, so the night shading and the terminator below never move.
- */
 const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
 const lat = css.property("lat", { syntax: "angle", inherits: true, initial: 0 });
 const lon = css.property("lon", { syntax: "angle", inherits: false, initial: 0 });
 
-const spin = motion({ [yaw]: -middle }).to({ [yaw]: 360 - middle }, D, ease.linear);
+const spin = motion({ [yaw]: -middle }).to({ [yaw]: 360 - middle }, span(0, D), ease.linear);
 
 const style = css`
   ${paletteCss}
@@ -93,7 +98,6 @@ const C = {
   space: theme.base00,
   sea: theme.base01,
   deep: theme.base00,
-  /** Land is cyan, the dusk band is purple and the city lights are orange. Graticule and rim stay neutral. */
   land: hue.cyan,
   grid: theme.base05,
   dawn: hue.purple,
@@ -114,7 +118,6 @@ interface City {
   readonly label?: true;
 }
 
-/** The fifty largest cities by metro population, give or take. The labelled ones name themselves as night reaches them. */
 const CITIES: readonly City[] = [
   { name: "Tokyo", at: [139.69, 35.69], label: true },
   { name: "Delhi", at: [77.21, 28.61], label: true },
@@ -179,7 +182,6 @@ const glow = def.radialGradient(
   </>,
 );
 
-/** The sun's direction on screen, from the globe's middle, so the ocean can be lit from that side. */
 const light = map.point([sunLon, sunLat]);
 
 const ocean = def.radialGradient(
@@ -267,24 +269,22 @@ function Globe(): SvgNode {
   );
 }
 
-/** A seeded scatter of stars, a few of them breathing. */
 function Stars(): SvgNode {
-  let seed = 7;
-
-  const random = () => {
-    seed = (seed * 16807) % 2147483647;
-
-    return seed / 2147483647;
-  };
+  const rand = random(7);
 
   return (
     <g fill={C.star}>
       {Array.from({ length: 90 }, (_, i) => {
-        const x = random() * W;
-        const y = random() * H;
+        const x = rand() * W;
+        const y = rand() * H;
         const far = Math.hypot(x - cx, y - cy) > R * 1.15;
-        const size = 0.4 + random() * 0.9;
-        const shine = 0.25 + random() * 0.5;
+        const size = 0.4 + rand() * 0.9;
+        const shine = 0.25 + rand() * 0.5;
+
+        const twinkle = (dim: Spanned) =>
+          motion({ opacity: shine })
+            .to({ opacity: 0.08 }, dim, ease.inOut)
+            .to({ opacity: shine }, dim.next(1.2), ease.inOut);
 
         return far ? (
           <circle
@@ -292,14 +292,7 @@ function Stars(): SvgNode {
             cy={y}
             r={size}
             opacity={shine}
-            animation={
-              i % 6 === 0
-                ? motion({ opacity: shine })
-                    .at(random() * 10)
-                    .to({ opacity: 0.08 }, 1.2, ease.inOut)
-                    .to({ opacity: shine }, 1.2, ease.inOut)
-                : undefined
-            }
+            animation={i % 6 === 0 ? twinkle(span(rand() * 10, 1.2)) : undefined}
           />
         ) : null;
       })}
@@ -321,12 +314,10 @@ function Clock(): SvgNode {
           letterSpacing={-1}
           animation={
             h === 0
-              ? motion({ opacity: 1 }).at(1).set({ opacity: 0 })
+              ? motion({ opacity: 1 }).set({ opacity: 0 }, 1)
               : motion({ opacity: 0 })
-                  .at(h)
-                  .set({ opacity: 1 })
-                  .at(Math.min(h + 1, D - 0.001))
-                  .set({ opacity: h === 23 ? 1 : 0 })
+                  .set({ opacity: 1 }, h)
+                  .set({ opacity: h === 23 ? 1 : 0 }, Math.min(h + 1, D - 0.001))
           }
         >
           {label}

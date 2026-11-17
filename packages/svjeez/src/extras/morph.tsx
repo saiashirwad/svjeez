@@ -12,7 +12,6 @@ export interface MorphPiece {
   readonly id?: string;
 }
 
-/** Anything morph() animates: its pieces, and how to draw one with a motion. */
 export interface Morphable<P extends MorphPiece = MorphPiece> {
   readonly words: readonly P[];
   draw(piece: P, animation?: Stack<"x" | "y" | "opacity">): SvgNode;
@@ -27,9 +26,8 @@ export interface MorphOptions {
 }
 
 /**
- * Pairs `[i, j]` of words that carry over from `a` to `b`. The longest common subsequence of contents
- * anchors the order; leftovers pair by equal content, nearest first, so swapped words cross.
- * Runs named with the same id pair first, in order, whatever their content.
+ * Pairs `[i, j]` of words carried over from `a` to `b`. Runs with the same id pair first, in order; the rest by
+ * longest common subsequence of contents.
  */
 export function match(a: readonly MorphPiece[], b: readonly MorphPiece[]): [number, number][] {
   const named = a.flatMap((w, i): [number, number][] => {
@@ -109,8 +107,10 @@ export interface MorphResult {
 }
 
 /**
- * Animate code, or any `Morphable` such as a `tex()` formula, from version to version: kept words move, removed words fade out, new words fade in. Runs paired by id with new text cross-fade as they move.
- * `spans[i]` is when the move into `versions[i + 1]` runs; `span` runs to when the last one settles, and is empty for a single version.
+ * Animate code, or any `Morphable` such as a `tex()` formula, between versions: kept words move, removed fade out,
+ * new fade in.
+ *
+ * `spans[i]` is when the move into `versions[i + 1]` runs; `span` is empty for a single version.
  */
 export function morph(versions: readonly Code[], options: MorphOptions): MorphResult;
 export function morph(
@@ -142,9 +142,7 @@ export function morph(
     track:
       start === undefined
         ? undefined
-        : motion({ opacity: 0 })
-            .at(start + half)
-            .to({ opacity: 1 }, half),
+        : motion({ opacity: 0 }).to({ opacity: 1 }, spanOf(start + half, half)),
   });
 
   const chains = versions[0]!.words.map((word) => born(word, versions[0]!));
@@ -157,7 +155,7 @@ export function morph(
     const gone = live.filter((_, a) => !stays.has(a));
 
     for (const chain of gone)
-      chain.track = (chain.track ?? motion<{}>()).at(start).to({ opacity: 0 }, half);
+      chain.track = (chain.track ?? motion<{}>()).to({ opacity: 0 }, spanOf(start, half));
     live = after.words.map((word, j) => {
       const a = kept.get(j);
 
@@ -166,21 +164,25 @@ export function morph(
       const to = { x: word.x - chain.word.x, y: word.y - chain.word.y };
 
       if (from.text === word.text) {
-        chain.track = (chain.track ?? motion<{}>()).at(start).to(to, over, ease.inOut);
+        chain.track = (chain.track ?? motion<{}>()).to(to, spanOf(start, over), ease.inOut);
 
         return chain;
       }
 
-      chain.track = (chain.track ?? motion<{}>())
-        .at(start)
-        .to({ ...to, opacity: 0 }, over, ease.inOut);
+      chain.track = (chain.track ?? motion<{}>()).to(
+        { ...to, opacity: 0 },
+        spanOf(start, over),
+        ease.inOut,
+      );
 
       const next: Chain = {
         word,
         source: after,
-        track: motion({ x: from.x - word.x, y: from.y - word.y, opacity: 0 })
-          .at(start)
-          .to({ x: 0, y: 0, opacity: 1 }, over, ease.inOut),
+        track: motion({ x: from.x - word.x, y: from.y - word.y, opacity: 0 }).to(
+          { x: 0, y: 0, opacity: 1 },
+          spanOf(start, over),
+          ease.inOut,
+        ),
       };
 
       return chains[chains.push(next) - 1]!;
@@ -210,7 +212,7 @@ const lineNumbers = (versions: readonly Code[], at: readonly Seconds[], over: Se
       const [was, is] = [shown(versions[k]!), shown(versions[k + 1]!)];
 
       if (was !== is)
-        track = track.at(is ? start + over / 2 : start).to({ opacity: is ? 1 : 0 }, over / 2);
+        track = track.to({ opacity: is ? 1 : 0 }, spanOf(is ? start + over / 2 : start, over / 2));
     });
 
     return number(i + 1, versions[0]!.metrics, track);

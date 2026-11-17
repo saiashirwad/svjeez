@@ -1,6 +1,5 @@
 import type { Point } from "./layout/box";
 
-/** Douglas-Peucker: the fewest of `points` that keep every dropped point within `tolerance` of the line. */
 export const simplify = (points: readonly Point[], tolerance: number): Point[] => {
   if (points.length < 3 || tolerance <= 0) return [...points];
 

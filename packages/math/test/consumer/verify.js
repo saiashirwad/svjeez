@@ -15,7 +15,7 @@ assert.match(svg, /^<svg[\s\S]*@keyframes[\s\S]*<path d="M/);
 
 assert.equal(expanded.words[0].text, "a@1");
 
-assert.ok(expanded.get("mid").w > 0);
+assert.ok(expanded.part("mid").box.w > 0);
 
 assert.throws(() => tex(String.raw`\frac{`), /could not parse/);
 

@@ -10,7 +10,6 @@ import {
 } from "./box.ts";
 
 interface TreeInput {
-  /** In order; siblings keep this order. Exactly one node has no parent. */
   readonly nodes: readonly ({ readonly id: string; readonly parent?: string } & Size)[];
   readonly direction?: Direction;
   readonly levelGap?: number;
@@ -20,9 +19,7 @@ interface TreeInput {
 export interface TreeLayout {
   readonly nodes: ReadonlyMap<string, Box>;
   readonly parent: ReadonlyMap<string, string>;
-  /** Breadth-first, siblings in input order. */
   readonly order: readonly string[];
-  /** One per child, parent to child, in breadth-first order of the child. */
   readonly edges: readonly {
     readonly from: string;
     readonly to: string;
@@ -33,7 +30,6 @@ export interface TreeLayout {
 
 type Contour = [number, number][];
 
-/** A tidy tree: each subtree packed beside its siblings as close as their contours allow, each parent centered over its children. */
 export function tree(input: TreeInput): TreeLayout {
   const { direction = "TB", levelGap = 40, siblingGap = 24 } = input;
   const lr = direction === "LR";

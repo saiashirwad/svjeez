@@ -42,8 +42,9 @@ bun test                          # every test, including frame tests in headles
 bun run test:node                 # renders the skill's examples on the current Node through tsx
 bun run test:package              # packs the tarball, lints it, and type-checks and loads it as a consumer
 bun run build:package             # the npm build into package-dist/, with the root README and LICENSE beside it
-bun run dev <file.tsx>            # live preview with reload and a scrubber
-bun run render-png <file> --times 0,1,2 --sheet --out frames/
+bun run dev <file.tsx>            # svjeez dev: live preview with reload and a scrubber (--port, --params data.json)
+bun run render-png <file> --sheet  # svjeez frames: frames/ with sheet.png (--times 0,1,2, --out dir)
+bun run svjeez <command> ...      # any CLI command from source: svg, dev, frames, check, values, set, video, skill
 ```
 
 `examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/hero`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
@@ -57,7 +58,7 @@ Paths in this section are relative to `packages/svjeez/`.
 - `src/` holds the core: `motion.ts` (timeline), `span.ts` and `clip.ts` (spans, and `<Clip>`, a clock of its own), `recipes.ts`, `channels.ts` (the channel table), `keys.ts` (keyframe math, including cutting and rotating keys), `resolve.ts` (a lane's `.repeat` and `.rewind` steps written out), `css.ts` and `smil.ts` (emit CSS and SMIL), `compile.ts` and `render.ts` (orchestrate them; compile adds a clip's offset to every motion inside it, so the output stays on one clock), `validate.ts`.
 - `src/extras/` holds timeline, code, terminal, annotations and themes, all exported from the root `svjeez` entry.
 - `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this. The diagram layouts (layered, route, tree, sequence, lanes) are in `packages/diagrams/src/layout/`.
-- `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
+- `src/cli.ts` is the `svjeez` CLI, and `src/dev.ts` its `dev` server (node:http and fs.watch, no dependencies). `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
 ## Packages
@@ -85,7 +86,8 @@ Each package's source explains its own internals. These are the rules that aren'
 - Keep the library free of Astro. Astro code belongs in `packages/astro/`.
 - Scenes that show code, an explainer or a terminal take `theme`, `css` and `mono` from `examples/style.ts`, and the site's code blocks and playground read the same palette through `site/src/styles/code.ts`. `examples/tests/style.test.ts` fails on a scene that brings its own code palette or mono font.
 - Time is spans on clocks: write `show`, `<Clip>` and `{ at, over }`, never absolute seconds inside a component. `frames`, `restyle` and `seek` take scene seconds, so `render` writes `data-playback-rate` on the root and they read it.
-- Check visual changes by looking at frames: run `bun run render-png <file> --sheet`, then open `sheet.png`. Passing tests don't show timing or layout bugs.
+- Check visual changes with `bun run svjeez check <file>`, which reports layout and timing faults as text, then by looking at frames: run `bun run render-png <file> --sheet` and open `sheet.png`. Passing tests don't show timing or layout bugs.
+- A package that lays something out returns a `Drawn` (`src/drawn.ts`): `node`, `span`, `bounds`, `parts` and `part(id)`, where each part has a `box` and its own `span`. Don't add another name for the same thing.
 
 ## Releasing
 

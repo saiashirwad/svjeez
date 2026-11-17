@@ -22,7 +22,6 @@ const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 
 const app = {
   url: "https://app.logseq.com/",
-  // The whole page, so the search dialog, which Logseq portals onto <body>, is in the picture.
   root: "body",
   ready: "#journals .ls-block",
   width: 1100,
@@ -31,8 +30,6 @@ const app = {
 };
 
 const flow: Flow = [
-  // Logseq indexes the graph for search a moment after it opens, behind a progress badge in the header. The picture
-  // starts once that's done, so the badge never shows.
   act(async (page) => {
     const badge = ".search-index-progress";
 
@@ -46,8 +43,6 @@ const flow: Flow = [
   fill("textarea", "Drawing Logseq with svjeez"),
   snap("typed", { over: 1.4 }),
   wait(0.4),
-  // Escape leaves the editor and selects the block; a second one clears the selection, so the block draws as text
-  // again, in place, before anything moves.
   press("Escape"),
   press("Escape"),
   snap("saved", { over: 0.3 }),
@@ -60,7 +55,6 @@ const flow: Flow = [
   fill("input.cp__cmdk-search-input", "svjeez"),
   snap("found", { over: 0.9 }),
   wait(1.4),
-  // The first Escape clears the query, the second closes the dialog.
   press("Escape"),
   press("Escape"),
   snap("journal", { over: 0.5 }),

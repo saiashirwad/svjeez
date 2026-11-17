@@ -6,13 +6,11 @@ import { jumps } from "../site/lib/blip";
 import { C, Caption, Blip, H, Shot, W, hand } from "./kit";
 import { MONTAGE } from "./montage";
 
-// Everything here is written from 0, on the clock of a <Shot> that starts when the montage ends.
 const WRITTEN = "Write anything.";
 const HAND_SIZE = 150;
 const handX = (W - hand.measure(WRITTEN, HAND_SIZE)) / 2;
 const SPEED = 1500;
 
-/** Roughly how far the pen travels: along the control polygon, close enough to pace the writing. */
 const lengthOf = (d: string) => {
   const xy = (d.match(/-?[\d.]+/g) ?? []).map(Number);
   let sum = 0;
@@ -23,7 +21,6 @@ const lengthOf = (d: string) => {
   return sum;
 };
 
-/** Each stroke of the pen in turn, at one speed, with a breath between lifts. */
 const strokePaths = hand.path(WRITTEN, { size: HAND_SIZE, x: handX, y: 360 }).d.split(/(?=M)/);
 const strokes: { d: string; at: number; over: number }[] = [];
 
@@ -39,7 +36,6 @@ export const HAND = { at: MONTAGE.at + MONTAGE.over, over: inked + 1.8 };
 const cheer = jumps([{ land: inked + 1.35, height: 40 }]);
 const nibTool = tool.nib({ size: 6, angle: 35, thin: 0.25 });
 
-// Wind that curls around the word, drawn on behind it as the pen starts.
 const { lines: wind } = streamlines(
   (x, y) => [1, 0.45 * Math.sin(x / 140 + y / 90) - 0.25 * Math.cos(y / 60)],
   { frame: rect(0, 40, W, H - 200), spacing: 44, minLength: 140, tolerance: 0.8 },
@@ -57,7 +53,6 @@ export const handwriting = (
       fill={C.accent}
       draw={{ at: inked + 0.1, over: 0.5 }}
     />
-    {/* Blip pops up at the end of the swoosh and admires the lettering. */}
     <Blip
       x={W - handX - 6}
       y={440}

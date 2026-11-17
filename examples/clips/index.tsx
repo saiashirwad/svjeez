@@ -15,8 +15,6 @@ const W = 640;
 const H = 300;
 const D = 9;
 
-// One gesture, written from 0 on a clock of its own: the cursor reaches for the title bar, grabs the window and drags
-// it while a key is held. Every part reads the same three spans, so moving a span moves all of them.
 const reach = span(0, 0.7);
 const grab = reach.next(1, 0.2);
 const down = grab.pad(0.15);
@@ -24,7 +22,6 @@ const leave = span(down.end + 0.1, 0.5);
 
 const IDLE: Point = { x: 244, y: 196 };
 
-/** The title bar's middle, where the cursor takes hold. */
 const grip = (window: Point): Point => ({ x: window.x + 52, y: window.y + 9 });
 
 interface WindowProps {
@@ -33,12 +30,10 @@ interface WindowProps {
   readonly drag: Span;
 }
 
-/** Drags from `from` to `to` during `drag`, and rewinds to `from` at the end of the clock, so the loop closes. */
 const Window = ({ from, to, drag }: WindowProps): SvgNode => (
   <g
     animation={motion({ x: from.x, y: from.y })
-      .at(drag.at)
-      .to({ x: to.x, y: to.y }, drag.over, ease.inOut)
+      .to({ x: to.x, y: to.y }, drag, ease.inOut)
       .rewind(0.8)}
   >
     <rect
@@ -63,7 +58,6 @@ interface KeyProps {
   readonly held: readonly Span[];
 }
 
-/** A keycap that lights while any span in `held` runs. Spans that overlap merge, so the fades never collide. */
 const Key = ({ label, held }: KeyProps): SvgNode => (
   <g>
     <rect
@@ -95,8 +89,7 @@ interface CursorProps {
 const Cursor = ({ from, moves }: CursorProps): SvgNode => {
   let track = motion({ x: from.x, y: from.y });
 
-  for (const [to, when] of moves)
-    track = track.at(when.at).to({ x: to.x, y: to.y }, when.over, ease.inOut);
+  for (const [to, when] of moves) track = track.to({ x: to.x, y: to.y }, when, ease.inOut);
 
   return (
     <path
@@ -117,7 +110,6 @@ interface GestureProps {
   readonly to: Point;
 }
 
-/** A desktop with the gesture placed on it at `at`: the same clip, two places on the clock. */
 const Desktop = ({ x, at, from, to }: GestureProps): SvgNode => (
   <g transform={`translate(${x} 30)`}>
     <rect

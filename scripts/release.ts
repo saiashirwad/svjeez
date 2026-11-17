@@ -1,12 +1,6 @@
-// Releases every package under packages/ whose version isn't out yet. A version is out once npm has it and GitHub has a
-// release for it, so a rerun after a failure finishes the job without repeating the steps that worked.
-//
 //   bun scripts/release.ts plan           names the packages that have something to release
 //   bun scripts/release.ts publish        releases them; release.yml runs this with npm's trusted publishing
 //   bun scripts/release.ts claim <dir>    a new package's first publish, from a maintainer's machine
-//
-// npm trusts a workflow one package at a time, and only for a package it already has. So a new package's first version
-// goes out through `claim`, which publishes it with the maintainer's npm login and then trusts release.yml with the rest.
 import { execFileSync, spawn } from "node:child_process";
 import { appendFileSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -23,7 +17,6 @@ interface Manifest {
 
 interface Package {
   readonly dir: string;
-  /** The folder npm packs. A private workspace manifest isn't the one npm sees: build:package writes that into package-dist/. */
   readonly out: string;
   readonly manifest: Manifest;
 }
@@ -57,7 +50,6 @@ const load = (dir: string): Package | undefined => {
   if (manifest.scripts?.["build:package"]) return { dir, out: join(dir, "package-dist"), manifest };
 };
 
-/** Dependencies first, so a push that bumps @svjeez/vite and @svjeez/astro together publishes the vite that astro installs. */
 const packages = (): Package[] => {
   const all = readdirSync(join(ROOT, "packages")).flatMap(
     (name) => load(join(ROOT, "packages", name)) ?? [],
@@ -82,14 +74,9 @@ const packages = (): Package[] => {
   return sorted;
 };
 
-/** svjeez keeps the v1.2.3 tags it has always had. Every other package tags name@version, as in @svjeez/vite@0.1.0. */
 const tagFor = (name: string, version: string) =>
   name === "svjeez" ? `v${version}` : `${name}@${version}`;
 
-/**
- * The versions npm has, or undefined when npm has never had the package. This reads the full document, because npm's
- * cache kept answering 404 for the abbreviated one after @svjeez/vite appeared.
- */
 const published = async (name: string): Promise<ReadonlySet<string> | undefined> => {
   const response = await fetch(`https://registry.npmjs.org/${name.replace("/", "%2f")}`);
 
@@ -103,7 +90,6 @@ const published = async (name: string): Promise<ReadonlySet<string> | undefined>
   return new Set(Object.keys(versions));
 };
 
-/** Every release's tag. The API is paged, so --paginate reads them all and no package's tag falls outside a fixed count. */
 const releases = (): readonly string[] =>
   run("gh", [
     "api",
@@ -139,7 +125,6 @@ const pending = async (): Promise<Pending[]> => {
   return out;
 };
 
-/** This package's release before `version`, so the generated notes start there and not at another package's release. */
 const previous = (name: string, version: string, tags: readonly string[]) => {
   const prefix = tagFor(name, "");
 
@@ -156,10 +141,6 @@ const previous = (name: string, version: string, tags: readonly string[]) => {
   return earlier.length ? tagFor(name, earlier.at(-1)!) : undefined;
 };
 
-/**
- * The commits since `start` that touched this package. GitHub's generated notes list every pull request merged in that
- * range, so an @svjeez/astro release would also list svjeez and site changes.
- */
 const notes = (pkg: Package, start: string | undefined, target: string) => {
   const range = start ? `${start}..${target}` : target;
 
@@ -228,7 +209,6 @@ const publish = async () => {
           `${name} ${version}`,
           "--notes",
           notes(pkg, start, target),
-          // The repository's latest release stays svjeez's.
           `--latest=${name === "svjeez" && !prerelease}`,
           ...(prerelease ? ["--prerelease"] : []),
         ]);
@@ -241,10 +221,6 @@ const publish = async () => {
   }
 };
 
-/**
- * Runs `npm publish` with its output and login prompts shown live. A version staged by an earlier claim is not on the
- * registry yet, so `published()` misses it and npm refuses the second publish. That refusal resolves to true.
- */
 const stage = (args: readonly string[], cwd: string) =>
   new Promise<boolean>((done, fail) => {
     const child = spawn("npm", args, { cwd, stdio: ["inherit", "inherit", "pipe"] });
@@ -262,7 +238,6 @@ const stage = (args: readonly string[], cwd: string) =>
     });
   });
 
-/** Whether release.yml in `repo` already publishes `name`. npm lists one publisher as an object, several as an array. */
 const trusted = (name: string, repo: string): boolean => {
   // SAFETY: `npm trust list --json` prints a trusted publisher, or an array of them.
   const listed = JSON.parse(run("npm", ["trust", "list", name, "--json"]) || "[]") as

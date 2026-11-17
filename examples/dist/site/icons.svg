@@ -189,7 +189,7 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
       <text x="441" y="264" font-size="12" text-anchor="middle" fill="var(--base03)">ring</text>
     </g>
     <g class="sans a m28">
-      <text x="252" y="314" font-size="12" text-anchor="middle" fill="var(--base03)">&lt;Icon icon={rocket} animation={(d, i) =&gt; draw({ at: i * 0.14, over: 0.5 })} /&gt;</text>
+      <text x="252" y="314" font-size="12" text-anchor="middle" fill="var(--base03)">&lt;Icon icon={rocket} animation={(d, each) =&gt; draw(each.stagger(span(0, 0.5), 0.14))} /&gt;</text>
     </g>
   </g>
 </svg>

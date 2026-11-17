@@ -1,22 +1,17 @@
-import { css, ease, motion, Pivot, render, show, type Color } from "svjeez";
+import { css, ease, motion, Pivot, render, show, type Color, span, stagger } from "svjeez";
 import { sequence } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 import { GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// A sequence diagram on one side, and on the other Blip acting it out: it opens a README, asks a sleepy
-// CDN cloud for hello.svg, catches the file as it drops, watches it play, and cheers. `tall` stacks the two.
-
 const BAR = 40;
 const STEP = 1.25;
 const AT = 0.6;
 
-/** When the diagram plays its `i`th message or note. */
 const beat = (i: number) => AT + i * STEP;
 
 const D = Math.ceil(beat(4) + 3);
 
-/** The stage, in its own coordinates: 440 wide, 280 tall, with the floor at 250. */
 const FLOOR = 250;
 const PAGE = { x: 150, y: 96, w: 150, h: 154 };
 const FRAME = { x: 166, y: 150, w: 118, h: 80 };
@@ -33,11 +28,10 @@ const arc = (
   over: number,
   lift: number,
 ) => [
-  motion({ x: from.x, y: from.y }).at(at).to({ x: to.x, y: to.y }, over, ease.inOut),
+  motion({ x: from.x, y: from.y }).to({ x: to.x, y: to.y }, span(at, over), ease.inOut),
   motion({ y: 0 })
-    .at(at)
-    .to({ y: -lift }, over / 2, ease.out)
-    .to({ y: 0 }, over / 2, ease.in),
+    .to({ y: -lift }, span(at, over / 2), ease.out)
+    .to({ y: 0 }, span(at, over / 2).next(over / 2), ease.in),
 ];
 
 const stage = () => {
@@ -49,39 +43,24 @@ const stage = () => {
   ]);
 
   const look = motion({ x: 0, y: 0 })
-    .at(beat(0) + 0.1)
-    .to({ x: 6, y: 2 }, 0.25)
-    .at(beat(1))
-    .to({ x: 6, y: -6 }, 0.25)
-    .at(beat(2) + 0.3)
-    .to({ x: 6, y: 2 }, 0.25)
-    .at(beat(4))
-    .to({ x: 0, y: 0 }, 0.25);
+    .to({ x: 6, y: 2 }, span(beat(0) + 0.1, 0.25))
+    .to({ x: 6, y: -6 }, span(beat(1), 0.25))
+    .to({ x: 6, y: 2 }, span(beat(2) + 0.3, 0.25))
+    .to({ x: 0, y: 0 }, span(beat(4), 0.25));
 
   const glow = motion({ fill: "#FFC21A" })
-    .at(beat(3) + 0.2)
-    .to({ fill: "#FFF3B0" }, 0.15)
-    .wait(0.6)
-    .to({ fill: "#FFC21A" }, 0.4);
+    .to({ fill: "#FFF3B0" }, span(beat(3) + 0.2, 0.15))
+    .to({ fill: "#FFC21A" }, span(beat(3) + 0.2, 0.15).next(0.4, 0.6));
 
-  // The README unfolds from the floor.
-  const unfold = motion({ scale: 0 })
-    .at(beat(0) + 0.05)
-    .to({ scale: 1 }, 0.45, ease.pop);
+  const unfold = motion({ scale: 0 }).to({ scale: 1 }, span(beat(0) + 0.05, 0.45), ease.pop);
 
-  // The cloud dozes until it is asked, then wakes.
-  const asleep = motion({ opacity: 1 })
-    .at(beat(1) + 0.75)
-    .to({ opacity: 0 }, 0.1);
+  const asleep = motion({ opacity: 1 }).to({ opacity: 0 }, span(beat(1) + 0.75, 0.1));
 
-  const awake = motion({ opacity: 0 })
-    .at(beat(1) + 0.75)
-    .to({ opacity: 1 }, 0.1);
+  const awake = motion({ opacity: 0 }).to({ opacity: 1 }, span(beat(1) + 0.75, 0.1));
 
   const startle = motion({ y: 0 })
-    .at(beat(1) + 0.75)
-    .to({ y: -8 }, 0.12, ease.out)
-    .to({ y: 0 }, 0.35, ease.pop);
+    .to({ y: -8 }, span(beat(1) + 0.75, 0.12), ease.out)
+    .to({ y: 0 }, span(beat(1) + 0.75, 0.12).next(0.35), ease.pop);
 
   const request = [
     show({ at: beat(1) + 0.1, over: 0.75 }, { fade: 0.1 }),
@@ -93,23 +72,16 @@ const stage = () => {
     ...arc(CDN, SLOT, beat(2) + 0.1, 0.8, 30),
   ];
 
-  // Once the file lands it plays: a sun turns and a ball bounces inside the frame.
-  const playing = show({ at: beat(3) + 0.1, over: D - beat(3) - 0.6 }, { fade: 0.2 });
+  const PLAY = span(beat(3) + 0.1).until(D - 0.5);
+  const playing = show(PLAY, { fade: 0.2 });
 
-  const spin = motion({ rotate: 0 })
-    .at(beat(3) + 0.1)
-    .to({ rotate: 180 }, D - beat(3) - 0.7, ease.linear);
+  const spin = motion({ rotate: 0 }).to({ rotate: 180 }, PLAY.pad(0, -0.1), ease.linear);
 
-  const ball = [0, 1, 2, 3].reduce(
-    (m, i) =>
-      m
-        .at(beat(3) + 0.2 + i * 0.6)
-        .to({ y: -26 }, 0.3, ease.out)
-        .to({ y: 0 }, 0.3, ease.in),
+  const ball = stagger(span(PLAY.at + 0.1, 0.3), 4, 0.6).reduce(
+    (m, bounce) => m.to({ y: -26 }, bounce, ease.out).to({ y: 0 }, bounce.next(0.3), ease.in),
     motion({ y: 0 }),
   );
 
-  // Sparks when it cheers.
   const sparks = [-150, -110, -70, -30].map((deg, i) => {
     const a = (deg * Math.PI) / 180;
 
@@ -120,11 +92,10 @@ const stage = () => {
         r={4}
         fill={i % 2 ? theme.base0A : theme.base0B}
         animation={motion({ x: 0, y: 0, opacity: 0 })
-          .at(beat(4) + 0.4)
-          .set({ opacity: 1 })
+          .set({ opacity: 1 }, beat(4) + 0.4)
           .to(
             { x: +(44 * Math.cos(a)).toFixed(1), y: +(44 * Math.sin(a)).toFixed(1), opacity: 0 },
-            0.5,
+            span(beat(4) + 0.4, 0.5),
             ease.out,
           )}
       />
@@ -149,7 +120,6 @@ const stage = () => {
 
   return (
     <>
-      {/* The CDN, a cloud that naps until it is asked for a file. */}
       <g transform={`translate(${CDN.x} ${CDN.y})`}>
         <g animation={startle}>
           <path d={CLOUD} fill={theme.base0C} fillOpacity={0.22} />
@@ -172,7 +142,6 @@ const stage = () => {
         </g>
       </g>
 
-      {/* The README, unfolding with an empty image frame in it. */}
       <Pivot origin={{ x: PAGE.x + PAGE.w / 2, y: FLOOR }} animation={unfold}>
         <rect x={PAGE.x} y={PAGE.y} width={PAGE.w} height={PAGE.h} rx={10} fill={theme.base01} />
         <text x={PAGE.x + 14} y={PAGE.y + 22} fontFamily={mono} fontSize={11} fill={theme.base04}>
@@ -211,7 +180,6 @@ const stage = () => {
         </g>
       </Pivot>
 
-      {/* The request flies up to the cloud, and the file drops back down into the frame. */}
       <g animation={request}>{chip("GET", theme.base0D, 46)}</g>
       <g animation={reply}>{chip("hello.svg", theme.base0B, 88)}</g>
 
@@ -231,7 +199,6 @@ const stage = () => {
   );
 };
 
-/** `tall` stacks the diagram over the stage for a phone. */
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
   const H = tall ? 640 : 360;
@@ -278,7 +245,7 @@ export const make = (tall = false): string => {
       {win.node}
       <path d={tall ? `M0 ${BAR + 300}H${W}` : `M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
       <g animation={outro(D)}>
-        {login.node}
+        {login}
         <g transform={place}>{stage()}</g>
       </g>
     </>,

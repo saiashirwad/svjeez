@@ -12,7 +12,6 @@
   const lab = getLab();
   const feel = $derived(lab.feel);
 
-  // Sun angle: π at 6:00 (left horizon), π/2 at noon, 0 at 18:00.
   const angle = $derived(Math.PI - ((feel.hour - 6) / 12) * Math.PI);
 
   const time = $derived.by(() => {

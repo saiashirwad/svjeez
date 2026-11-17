@@ -1,10 +1,17 @@
-import { Pivot, css as cssTag, ease, motion, render, sampled, variables, wiggle } from "svjeez";
+import {
+  Pivot,
+  chain,
+  css as cssTag,
+  ease,
+  motion,
+  render,
+  sampled,
+  span,
+  variables,
+  wiggle,
+} from "svjeez";
 import { mono } from "../style";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
-
-// One file, two moods. By day Blip bounces beside a flower that has opened to the sun, and a butterfly loops
-// around it. By night, in the very same file, Blip is fast asleep with its antenna bulb as a night-light, the
-// flower has closed, and fireflies drift where the butterfly was. The viewer's colour scheme picks which one shows.
 
 const W = 1280;
 const H = 720;
@@ -18,10 +25,8 @@ const { vars, css: paint } = variables({
   light: { sky: "#d6ecf5", hill: "#8fcf9a", far: "#b4e0bb", stem: "#4f9e66", glow: "#FFE58A" },
 });
 
-/** Day shows in light mode, night in dark. */
 const MOODS = `.night{display:none}@media (prefers-color-scheme:dark){.day{display:none}.night{display:inline}}`;
 
-/** A point on Blip, in page coordinates. */
 const at = (x: number, y: number) => ({
   x: SPOT.x + (x - GROUND.x) * S,
   y: SPOT.y + (y - GROUND.y) * S,
@@ -30,7 +35,6 @@ const at = (x: number, y: number) => ({
 const placed = `translate(${SPOT.x} ${SPOT.y}) scale(${S}) translate(${-GROUND.x} ${-GROUND.y})`;
 
 export default function build(): string {
-  // Day: Blip bounces, and the flower sways in the breeze.
   const hops = jumps([
     { land: 1.0, height: 50 },
     { land: 2.2, height: 30 },
@@ -39,7 +43,6 @@ export default function build(): string {
 
   const sway = wiggle({ rotate: 5 }, { seed: "flower", rate: 0.8 });
 
-  // A butterfly flies a figure eight around the flower, flapping as it goes.
   const butterfly = sampled(
     { at: 0, over: D },
     (t) => {
@@ -51,16 +54,17 @@ export default function build(): string {
   );
 
   const flap = motion({ scale: 1 })
-    .to({ scale: 0.3 }, 0.12, ease.inOut)
-    .to({ scale: 1 }, 0.12, ease.inOut)
+    .to({ scale: 0.3 }, span(0, 0.12), ease.inOut)
+    .to({ scale: 1 }, span(0, 0.12).next(0.12), ease.inOut)
     .loop(0.24);
 
-  // Night: Blip breathes slowly in its sleep, and Zs drift up from it.
+  const [inhale, exhale, again, out] = chain(span(0, D / 4), D / 4, D / 4, D / 4);
+
   const breathe = motion({ scale: 1 })
-    .to({ scale: 1.035 }, D / 4, ease.inOut)
-    .to({ scale: 1 }, D / 4, ease.inOut)
-    .to({ scale: 1.035 }, D / 4, ease.inOut)
-    .to({ scale: 1 }, D / 4, ease.inOut);
+    .to({ scale: 1.035 }, inhale, ease.inOut)
+    .to({ scale: 1 }, exhale, ease.inOut)
+    .to({ scale: 1.035 }, again, ease.inOut)
+    .to({ scale: 1 }, out, ease.inOut);
 
   const head = at(150, 70);
 
@@ -76,9 +80,8 @@ export default function build(): string {
         fontWeight={700}
         fill="#cfd8ff"
         animation={motion({ x: 0, y: 0, opacity: 0 })
-          .at(t)
-          .to({ x: 30, y: -50, opacity: 1 }, 0.8, ease.out)
-          .to({ x: 70, y: -130, opacity: 0 }, 1.2, ease.in)}
+          .to({ x: 30, y: -50, opacity: 1 }, span(t, 0.8), ease.out)
+          .to({ x: 70, y: -130, opacity: 0 }, span(t, 0.8).next(1.2), ease.in)}
       >
         z
       </text>
@@ -88,8 +91,8 @@ export default function build(): string {
   const bulb = at(104, 38);
 
   const halo = motion({ opacity: 0.25, scale: 0.9 })
-    .to({ opacity: 0.5, scale: 1.1 }, D / 2, ease.inOut)
-    .to({ opacity: 0.25, scale: 0.9 }, D / 2, ease.inOut);
+    .to({ opacity: 0.5, scale: 1.1 }, span(0, D / 2), ease.inOut)
+    .to({ opacity: 0.25, scale: 0.9 }, span(0, D / 2).next(D / 2), ease.inOut);
 
   const fireflies = [
     [700, 330],
@@ -106,9 +109,8 @@ export default function build(): string {
       animation={[
         wiggle({ x: 30, y: 24 }, { seed: `fly-${i}`, rate: 0.5 }),
         motion({ opacity: 0.2 })
-          .at(i * 0.8)
-          .to({ opacity: 1 }, 0.6, ease.inOut)
-          .to({ opacity: 0.2 }, 0.9, ease.inOut),
+          .to({ opacity: 1 }, span(i * 0.8, 0.6), ease.inOut)
+          .to({ opacity: 0.2 }, span(i * 0.8, 0.6).next(0.9), ease.inOut),
       ]}
     />
   ));
@@ -128,9 +130,8 @@ export default function build(): string {
       r={2.5}
       fill="#eef1ff"
       animation={motion({ opacity: 1 })
-        .at(i * 0.7)
-        .to({ opacity: 0.3 }, 0.4)
-        .to({ opacity: 1 }, 0.6)}
+        .to({ opacity: 0.3 }, span(i * 0.7, 0.4))
+        .to({ opacity: 1 }, span(i * 0.7, 0.4).next(0.6))}
     />
   ));
 
@@ -161,7 +162,6 @@ export default function build(): string {
       <path d={`M0 520C260 450 520 470 760 500S1100 470 ${W} 480V${H}H0Z`} fill={vars.far} />
       <path d={`M0 600C300 560 700 570 ${W} 600V${H}H0Z`} fill={vars.hill} />
 
-      {/* The flower: open by day, a closed bud by night. */}
       <Pivot origin={{ x: FLOWER.x, y: FLOWER.base }} animation={sway}>
         <path
           d={`M${FLOWER.x} ${FLOWER.base}C${FLOWER.x - 20} 500 ${FLOWER.x + 20} 440 ${FLOWER.x} ${FLOWER.head}`}
@@ -187,7 +187,6 @@ export default function build(): string {
         </g>
       </Pivot>
 
-      {/* Day: awake and bouncing, with a butterfly about. */}
       <g class="day">
         <g transform={placed}>
           {blip({
@@ -208,7 +207,6 @@ export default function build(): string {
         </g>
       </g>
 
-      {/* Night: asleep, breathing, with its bulb glowing as a night-light. */}
       <g class="night">
         <g transform={`translate(${bulb.x} ${bulb.y})`}>
           <g animation={halo}>

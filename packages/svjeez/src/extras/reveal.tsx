@@ -5,14 +5,14 @@ import { enter } from "../recipes";
 import { span as spanOf, type Spanned } from "../span";
 import type { SvgNode } from "../svg";
 import { number, text, type Code } from "./code";
-import { beats, type Beats } from "./timeline";
+import { spansOf, type Beats } from "./timeline";
 
 export interface RevealOptions {
   /** A start, from which blocks follow `step` apart, or one time per block. */
   readonly at: Beats;
   /**
-   * Line ranges, shown in order. Lines in no block are there from the start, so a skeleton can stay put while its
-   * bodies arrive. `"line"` shows one line at a time. Default: paragraphs, split at blank lines.
+   * Line ranges, shown in order. Lines in no block are there from the start. `"line"` shows one line at a time.
+   * Default: paragraphs split at blank lines.
    */
   readonly blocks?: readonly (readonly [first: number, last?: number])[] | "line";
   /** Seconds from one block to the next. Default 0.6. */
@@ -71,7 +71,7 @@ export function reveal(
       owner.set(line, k);
     }
   });
-  const spans = beats(at, ranges.length, step, "reveal()").map((t): Span => ({ at: t, over }));
+  const spans = spansOf(at, ranges.length, step, over, "reveal()");
 
   const lines = (k: number | undefined) =>
     Array.from({ length: code.lineCount }, (_, i) => i + 1).filter((line) => owner.get(line) === k);
@@ -99,7 +99,6 @@ export function reveal(
   };
 }
 
-/** Runs of lines split at blank lines; each blank line joins the block after it. */
 const paragraphs = (code: Code): [number, number][] => {
   const filled = new Set(code.words.map((w) => w.line));
   const out: [number, number][] = [];

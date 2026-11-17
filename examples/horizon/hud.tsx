@@ -1,14 +1,12 @@
-import { def, draw, ease, enter, motion, type SvgNode } from "svjeez";
+import { def, draw, ease, enter, motion, type SvgNode, span, stagger } from "svjeez";
 import { geist, mono } from "../gallery-style";
 import { C, D, H, T, W, envelope, on } from "./kit";
 
-/** The HUD is 12px JetBrains Mono, which advances 0.6em. */
 const SIZE = 12;
 const ADVANCE = 7.2;
 const LINE = 17;
 const EDGE = 48;
 
-/** The right-hand readouts are one block, left-aligned at the width of the longest line. */
 const RIGHT = W - EDGE - 29 * ADVANCE;
 
 function Typed({
@@ -56,7 +54,7 @@ function Wheel({
     <g clipPath={window}>
       <g
         animation={motion({ y: 0 })
-          .to({ y: -count * LINE }, period, ease.steps(count))
+          .to({ y: -count * LINE }, span(0, period), ease.steps(count))
           .loop(period)}
       >
         {[...labels, labels[0]!].map((label, k) => (
@@ -102,10 +100,12 @@ function Brackets(): SvgNode {
     `M${inset + arm} ${H - inset}H${inset}V${H - inset - arm}`,
   ];
 
+  const drawn = stagger(span(T.hud, 0.4), corners.length, 0.06);
+
   return (
     <g fill="none" stroke={C.hud} strokeWidth={1.2}>
       {corners.map((d, i) => (
-        <path d={d} animation={draw({ at: T.hud + i * 0.06, over: 0.4 })} />
+        <path d={d} animation={draw(drawn[i]!)} />
       ))}
     </g>
   );
@@ -127,12 +127,9 @@ function Scan(): SvgNode {
       height={1.5}
       fill={sweep}
       animation={motion({ y: 0, opacity: 0 })
-        .at(T.hud - 0.1)
-        .to({ y: H }, 0.8, ease.inOut)
-        .at(T.hud - 0.1)
-        .to({ opacity: 1 }, 0.1)
-        .at(T.hud + 0.55)
-        .to({ opacity: 0 }, 0.15)}
+        .to({ y: H }, span(T.hud - 0.1, 0.8), ease.inOut)
+        .to({ opacity: 1 }, span(T.hud - 0.1, 0.1))
+        .to({ opacity: 0 }, span(T.hud + 0.55, 0.15))}
     />
   );
 }
@@ -166,6 +163,8 @@ export function Reticle(): SvgNode {
     return `M${Math.cos(a) * 160} ${Math.sin(a) * 160}L${Math.cos(a) * 172} ${Math.sin(a) * 172}`;
   });
 
+  const ticked = stagger(span(T.hud + 0.4, 0.3), ticks.length, 0.08);
+
   const arc = (from: number, to: number, r: number) => {
     const p = (deg: number) =>
       `${(Math.cos((deg * Math.PI) / 180) * r).toFixed(2)} ${(Math.sin((deg * Math.PI) / 180) * r).toFixed(2)}`;
@@ -180,17 +179,17 @@ export function Reticle(): SvgNode {
         strokeWidth={1}
         strokeDasharray="1 5"
         opacity={0.5}
-        animation={motion({ rotate: 0 }).to({ rotate: 90 }, D, ease.linear)}
+        animation={motion({ rotate: 0 }).to({ rotate: 90 }, span(0, D), ease.linear)}
       />
       <circle
         r={190}
         strokeWidth={0.6}
         strokeDasharray="40 8 2 8"
         opacity={0.3}
-        animation={motion({ rotate: 0 }).to({ rotate: -60 }, D, ease.linear)}
+        animation={motion({ rotate: 0 }).to({ rotate: -60 }, span(0, D), ease.linear)}
       />
       {ticks.map((d, i) => (
-        <path d={d} strokeWidth={1.2} animation={draw({ at: T.hud + 0.4 + i * 0.08, over: 0.3 })} />
+        <path d={d} strokeWidth={1.2} animation={draw(ticked[i]!)} />
       ))}
       <path
         d={arc(-40, 40, 178)}
@@ -225,9 +224,14 @@ export function Title(): SvgNode {
             fontSize={30}
             fill={C.white}
             textAnchor="middle"
-            animation={enter({ at: T.title + spread, over: 1.1 }, { opacity: 0, blur: 12, y: 10 })
-              .at(T.collapse - 0.3 + spread / 2)
-              .to({ opacity: 0, blur: 14, y: -6 }, 0.6, ease.in)}
+            animation={enter(
+              { at: T.title + spread, over: 1.1 },
+              { opacity: 0, blur: 12, y: 10 },
+            ).to(
+              { opacity: 0, blur: 14, y: -6 },
+              span(T.collapse - 0.3 + spread / 2, 0.6),
+              ease.in,
+            )}
           >
             {letter}
           </text>
@@ -244,9 +248,8 @@ export function Flash(): SvgNode {
       height={H}
       fill={C.white}
       animation={motion({ opacity: 0 })
-        .at(T.ignite)
-        .to({ opacity: 0.3 }, 0.04)
-        .to({ opacity: 0 }, 0.6)}
+        .to({ opacity: 0.3 }, span(T.ignite, 0.04))
+        .to({ opacity: 0 }, span(T.ignite, 0.04).next(0.6))}
     />
   );
 }

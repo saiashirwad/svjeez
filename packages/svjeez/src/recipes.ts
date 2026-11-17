@@ -11,7 +11,7 @@ import {
 import { samplePath } from "./paths";
 import type { NumericProperty } from "./properties";
 import { random } from "./random";
-import { checkWindow } from "./span";
+import { checkWindow, span } from "./span";
 import {
   NUDGE,
   ease,
@@ -31,7 +31,6 @@ const closed = ({ at, over }: Span, what: string): Span => {
   return { at, over };
 };
 
-/** A positive finite `rate`, or the default when left out. */
 const rateOf = (rate: number | undefined, fallback: number, what: string): number => {
   const value = rate ?? fallback;
 
@@ -61,7 +60,7 @@ export function enter(
 ): Motion {
   const { at: start, over } = closed(at, "enter()");
 
-  return motion(from).at(start).to(rest(from), over, curve);
+  return motion(from).to(rest(from), span(start, over), curve);
 }
 
 /** Leave rest for `to`. Without `to` it is a fade-out. */
@@ -78,14 +77,14 @@ export function exit(
 ): Motion {
   const { at: start, over } = closed(at, "exit()");
 
-  return motion().at(start).to(to, over, curve);
+  return motion().to(to, span(start, over), curve);
 }
 
 /** Stroke a shape on, 0 → 1. Render adds pathLength/dasharray and hides the round-cap dot at 0. */
 export const draw = (at: Span, curve: Ease = ease.out): Motion<"draw"> => {
   const { at: start, over } = closed(at, "draw()");
 
-  return motion({ draw: 0 }).at(start).to({ draw: 1 }, over, curve);
+  return motion({ draw: 0 }).to({ draw: 1 }, span(start, over), curve);
 };
 
 /** Damped oscillation around rest. Deterministic. `rate` is direction changes per second. */
@@ -109,7 +108,7 @@ export function shake<V extends ChannelValues<Shake>>(
   let track: Motion = motion();
 
   for (let k = 1; k <= count; k++)
-    track = track.at(start + ((k - 1) * over) / count).to(swing(k), over / count, ease.linear);
+    track = track.to(swing(k), span(start + ((k - 1) * over) / count, over / count), ease.linear);
 
   // SAFETY: every step was built from amplitude's keys, so track only moves channels in keyof V & Shake.
   return track as Motion<keyof V & Shake>;
@@ -154,9 +153,11 @@ export function wiggle<V extends ChannelValues<RestChannel>>(
   let track: Motion = motion(at(0));
 
   for (let i = 1; i <= count; i++)
-    track = track
-      .at(((i - 1) * period) / count)
-      .to(at(i), period / count, options.ease ?? ease.inOut);
+    track = track.to(
+      at(i),
+      span(((i - 1) * period) / count, period / count),
+      options.ease ?? ease.inOut,
+    );
 
   // SAFETY: every step was built from amplitude's keys, so the loop only moves keyof V & RestChannel.
   return track.loop(period) as Motion<keyof V & RestChannel>;
@@ -166,10 +167,6 @@ type LaneOf<C extends NumericChannel> = (typeof CHANNELS)[C]["lane"];
 
 type Sampled = NumericChannel | NumericProperty;
 
-/**
- * Per lane, the most the replay may stray from the samples, in the lane's own units. `x` and `y` share `translate`,
- * measured as px distance. A property is its own lane.
- */
 type Tolerance = { readonly [L in LaneOf<NumericChannel> | NumericProperty]?: number };
 
 type Covered<T extends Tolerance> = {
@@ -227,10 +224,6 @@ interface Point {
 const distance = (a: Point, b: Point): number =>
   Math.hypot(...a.values.map((value, c) => value - b.values[c]!));
 
-/**
- * The two points either side of a jump between `a` and `b`, or undefined if the lane moves smoothly between them.
- * Halving the span shrinks a smooth change with it, so a change that survives every halving is a jump.
- */
 const jump = (
   a: Point,
   b: Point,
@@ -351,7 +344,7 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
     }
 
     runs.forEach((run, r) => {
-      if (r > 0) track = track.at(from + run[0]!.t).set(valuesOf(run[0]!));
+      if (r > 0) track = track.set(valuesOf(run[0]!), from + run[0]!.t);
 
       const kept =
         run.length > 1
@@ -363,7 +356,7 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
 
       for (let j = 1; j < kept.length; j++) {
         const [a, b] = [run[kept[j - 1]!]!, run[kept[j]!]!];
-        track = track.at(from + a.t).to(valuesOf(b), b.t - a.t, ease.linear);
+        track = track.to(valuesOf(b), span(from + a.t, b.t - a.t), ease.linear);
       }
     });
   }
@@ -372,8 +365,4 @@ export function sampled<T extends Tolerance, V extends Covered<T>>(
   return track as Motion<keyof V & Sampled>;
 }
 
-/**
- * Sample `(t) => d` densely, then keep only the keys the shape needs. `tolerance` is one number of px, and
- * `precision` the decimal places of the path data. Every sample must have the same commands, as `matchPaths()` writes them.
- */
 sampled.path = samplePath;

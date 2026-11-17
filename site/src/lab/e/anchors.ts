@@ -12,11 +12,9 @@ export interface Anchor {
   readonly part: Part;
   readonly at: Pt;
   readonly r: number;
-  /** An eye on the body, not on a head. */
   readonly eyeOnBody: boolean;
 }
 
-/** The file's timeline, as `sample` reads it. */
 const FILE = { duration: DURATION };
 
 /** `local` turned `angle` degrees about `from`, then moved there. */

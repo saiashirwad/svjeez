@@ -6,7 +6,11 @@ const Counter = ({ label = "Count" }) => {
 
   return createElement(
     "button",
-    { "data-part": "add", onClick: () => setN(n + 1), style: { font: "16px sans-serif", padding: 8 } },
+    {
+      "data-part": "add",
+      onClick: () => setN(n + 1),
+      style: { font: "16px sans-serif", padding: 8 },
+    },
     `${label}: ${n}`,
   );
 };

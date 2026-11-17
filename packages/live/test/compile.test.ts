@@ -18,6 +18,17 @@ describe("compileScene", () => {
     expect(result.stats.gzip).toBeLessThan(result.stats.bytes);
   });
 
+  test("a template with text and list params compiles with its defaults and reports its schema", async () => {
+    const result = await compileScene(
+      'import { render } from "svjeez";\nimport { defaults, list, number, text, type Values } from "svjeez/params";\n\nexport const params = {\n  title: text("Launch", { maxLength: 24 }),\n  bars: list(\n    { label: text("Q1"), value: number(4, { min: 0, max: 100 }) },\n    [{ label: "Q1", value: 40 }, { label: "Q2", value: 70 }],\n    { min: 1, max: 8 },\n  ),\n};\n\nexport default (p: Values<typeof params> = defaults(params)) =>\n  render(\n    { width: 200, height: 100, duration: 1, title: p.title },\n    <>{p.bars.map((bar, i) => <rect x={i * 20} y={100 - bar.value} width={16} height={bar.value} />)}</>,\n  );\n',
+    );
+
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.svg).toContain(">Launch</title>");
+    expect(result.params?.bars).toMatchObject({ kind: "list", min: 1, max: 8 });
+    expect(structuredClone(result.params)).toEqual(result.params);
+  });
+
   test("sources marks each element with the line that made it", async () => {
     const result = await compileScene(
       `import { render } from "svjeez";\nexport default () => render({ width: 10, height: 10, duration: 1, title: "x" },\n  <rect width={1} height={1} />);`,
@@ -43,12 +54,12 @@ describe("compileScene", () => {
 
   test("a runtime error keeps svjeez's message and carries the skill's fix", async () => {
     const result = await compileScene(
-      `import { motion, render } from "svjeez";\nexport default () => render({ width: 10, height: 10, duration: 1, title: "x" }, <rect width={1} height={1} animation={motion({ x: 0 }).to({ x: 1 }, 0)} />);`,
+      `import { motion, render } from "svjeez";\nexport default () => render({ width: 10, height: 10, duration: 1, title: "x" }, <rect width={1} height={1} animation={motion({ x: 0 }).to({ x: 1 }, { at: 0, over: 0 })} />);`,
     );
 
     expect(result.ok ? undefined : result.error).toMatchObject({
       kind: "runtime",
-      fix: "Use `.set()` for an instant change",
+      fix: "Use `.set(values, at)` for an instant change",
     });
     expect(result.ok ? "" : result.error.message).toContain("to() needs a positive duration");
   });

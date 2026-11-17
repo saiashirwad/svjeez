@@ -31,7 +31,6 @@ const login = sequence(
     font: mono,
     fontSize: 16,
     play: { at: 0.2, step: 0.8 },
-    // Blue for the request path, purple for what it reads and signs with.
     tints: { task: hue.blue, input: hue.blue, tool: hue.purple, store: hue.purple },
   },
 );
@@ -53,7 +52,7 @@ export default function build(): string {
     <>
       <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
       <g transform={fit(login.bounds.w, login.bounds.h)}>
-        {login.node}
+        {login}
         <circle
           r={4}
           fill={theme.base09}

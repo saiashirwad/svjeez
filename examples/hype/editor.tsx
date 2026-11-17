@@ -1,4 +1,4 @@
-import { ease, enter, motion, Marker, appWindow, code, typewriter } from "svjeez";
+import { ease, enter, motion, Marker, appWindow, code, typewriter, span } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { highlight } from "@svjeez/code";
 
@@ -23,7 +23,6 @@ const SOURCE = [
   `);`,
 ];
 
-// Everything here is written from 0, on the clock of a <Shot> that starts when the terminal ends.
 const editor = appWindow(rect(40, 96, 810, 568), { theme, title: "launch.tsx" });
 const preview = appWindow(rect(870, 96, 370, 568), { theme, title: "dist/launch.svg" });
 
@@ -40,7 +39,6 @@ const typed = typewriter(src, { at: 0.45, cps: 150, cursor: C.accent, blink: fal
 const landed = (n: number) => typed.spans[n - 1]!.at + typed.spans[n - 1]!.over;
 const runAt = typed.span.end + 0.25;
 
-/** Live edits after the first run: each swaps one value in the source, and the preview follows a beat later. */
 const EDITS = [
   { from: "18", to: "32", role: "number" },
   { from: "ink", to: "sky", role: "plain" },
@@ -82,10 +80,8 @@ const edit = ({ from, to, role }: (typeof EDITS)[number], i: number) => {
         rx={4}
         fill={C.accent}
         animation={motion({ opacity: 0 })
-          .at(at)
-          .to({ opacity: 0.3 }, 0.12)
-          .at(applied(i))
-          .set({ opacity: 0 })}
+          .to({ opacity: 0.3 }, span(at, 0.12))
+          .set({ opacity: 0 }, applied(i))}
       />
       <rect
         x={box.x}
@@ -95,9 +91,8 @@ const edit = ({ from, to, role }: (typeof EDITS)[number], i: number) => {
         rx={4}
         fill={C.green}
         animation={motion({ opacity: 0 })
-          .at(applied(i))
-          .set({ opacity: 0.3 })
-          .to({ opacity: 0 }, 0.8)}
+          .set({ opacity: 0.3 }, applied(i))
+          .to({ opacity: 0 }, span(applied(i), 0.8))}
       />
     </>
   );
@@ -109,13 +104,13 @@ const RING = 60;
 const spinAt = landed(9);
 const react = (i: number) => applied(i) + 0.1;
 
-// The ring turns at 180°/s until the edit doubles it, then at 360°/s to the cut.
-const turned = 180 * (react(2) - spinAt);
+const slow = span(spinAt).until(react(2));
+const fast = span(react(2)).until(OVER);
+const turned = 180 * slow.over;
 
 const spin = motion({ rotate: 0 })
-  .at(spinAt)
-  .to({ rotate: turned }, react(2) - spinAt, ease.linear)
-  .to({ rotate: turned + 360 * (OVER - react(2)) }, OVER - react(2), ease.linear);
+  .to({ rotate: turned }, slow, ease.linear)
+  .to({ rotate: turned + 360 * fast.over }, fast, ease.linear);
 
 const previewArt = (
   <>
@@ -126,18 +121,12 @@ const previewArt = (
       strokeWidth={4}
       strokeLinecap="round"
       animation={motion({ draw: 0 })
-        .at(landed(6))
-        .to({ draw: 1 }, 1.2, ease.inOut)
-        .at(react(3))
-        .set({ draw: 0 })
-        .to({ draw: 1 }, 0.4, ease.inOut)}
+        .to({ draw: 1 }, span(landed(6), 1.2), ease.inOut)
+        .set({ draw: 0 }, react(3))
+        .to({ draw: 1 }, span(react(3), 0.4), ease.inOut)}
     />
     <g transform={`translate(${P.x} ${P.y - 50})`}>
-      <g
-        animation={motion({ scale: 1 })
-          .at(react(0))
-          .to({ scale: 32 / 18 }, 0.45, ease.pop)}
-      >
+      <g animation={motion({ scale: 1 }).to({ scale: 32 / 18 }, span(react(0), 0.45), ease.pop)}>
         <circle
           r={16}
           fill={C.ink}
@@ -146,7 +135,7 @@ const previewArt = (
         <circle
           r={16}
           fill={theme.base0D}
-          animation={motion({ opacity: 0 }).at(react(1)).to({ opacity: 1 }, 0.3)}
+          animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(react(1), 0.3))}
         />
       </g>
       <g animation={[enter({ at: spinAt, over: 0.5 }, { opacity: 0, scale: 0.6 }), spin]}>
@@ -181,10 +170,8 @@ export const codeShot = (
       {editor.node}
       <g
         animation={motion({ opacity: 0 })
-          .at(landed(6) - 0.05)
-          .set({ opacity: 1 })
-          .at(runAt)
-          .to({ opacity: 0 }, 0.3)}
+          .set({ opacity: 1 }, landed(6) - 0.05)
+          .to({ opacity: 0 }, span(runAt, 0.3))}
       >
         <Marker
           color={C.accent}
@@ -209,7 +196,8 @@ export const codeShot = (
         r={4}
         fill={C.green}
         animation={EDITS.reduce(
-          (m, _, i) => m.at(applied(i)).set({ opacity: 0.15 }).to({ opacity: 1 }, 0.5),
+          (m, _, i) =>
+            m.set({ opacity: 0.15 }, applied(i)).to({ opacity: 1 }, span(applied(i), 0.5)),
           motion({ opacity: 1 }),
         )}
       />
@@ -223,7 +211,6 @@ export const codeShot = (
         CSS keyframes · no runtime · 2.1 KB
       </text>
     </g>
-    {/* Blip sits in the preview's corner and hops every time an edit lands. */}
     <Blip
       x={preview.body.right.x - 40}
       y={preview.body.bottom.y - 54}

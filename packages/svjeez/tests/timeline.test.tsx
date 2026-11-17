@@ -1,11 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { Ambient, Clip, ease, motion, render } from "svjeez";
+import { Ambient, Clip, ease, motion, render, span } from "svjeez";
 import { restyle } from "svjeez/page";
 
 const scene = (content: Parameters<typeof render>[1], prefix?: string) =>
   render({ width: 20, height: 20, duration: 4, title: "Scroll", prefix }, content);
 
-const fade = (seconds = 1) => motion({ opacity: 0 }).to({ opacity: 1 }, seconds, ease.linear);
+const fade = (seconds = 1) =>
+  motion({ opacity: 0 }).to({ opacity: 1 }, span(0, seconds), ease.linear);
 
 const tail = (svg: string) => svg.slice(svg.lastIndexOf("<style>"));
 
@@ -34,7 +35,10 @@ describe("restyle({ timeline })", () => {
       <rect
         width={5}
         height={5}
-        animation={[fade(0.5).loop(1), motion({ x: 0 }).to({ x: 5 }, 1, ease.linear).loop(2)]}
+        animation={[
+          fade(0.5).loop(1),
+          motion({ x: 0 }).to({ x: 5 }, span(0, 1), ease.linear).loop(2),
+        ]}
       />,
       "p",
     );
@@ -56,7 +60,7 @@ describe("restyle({ timeline })", () => {
       <filter id="f">
         <feGaussianBlur
           stdDeviation={0}
-          animation={motion({ stdDeviation: 0 }).to({ stdDeviation: 4 }, 1, ease.linear)}
+          animation={motion({ stdDeviation: 0 }).to({ stdDeviation: 4 }, span(0, 1), ease.linear)}
         />
       </filter>,
     );
@@ -71,7 +75,7 @@ describe("restyle({ timeline })", () => {
   });
 
   describe("<Ambient>", () => {
-    const spin = () => motion({ rotate: 0 }).to({ rotate: 360 }, 1, ease.linear).loop(1);
+    const spin = () => motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 1), ease.linear).loop(1);
 
     test("marks its motions and those inside it, and changes nothing else in the scene", () => {
       const svg = scene(
@@ -88,7 +92,6 @@ describe("restyle({ timeline })", () => {
       expect(svg).toMatch(/<rect width="10" height="10" class="a m\d+ fb"\/>/);
       expect(svg).toMatch(/<g class="a c m\d+">/);
       expect(svg).toMatch(/<rect width="5" height="5" class="a c m\d+ fb"\/>/);
-      // The same motion in and out of it is one rule, and no rule names the mark.
       expect(svg.match(/animation-duration:1s/g)).toHaveLength(1);
       expect(svg).not.toContain(".c{");
     });
@@ -111,10 +114,8 @@ describe("restyle({ timeline })", () => {
       );
       expect(css).toMatch(/\.pm\d+:not\(\.pc\)\{animation-iteration-count:4\}/);
 
-      // Every selector the timeline adds leaves the mark out.
       for (const [selector] of css.matchAll(/\.p[\w-]+[^{}]*(?=\{animation-)/g))
         expect(selector).toContain(":not(.pc)");
-      // The scene's own rules, which give the clock's duration, loop and delay, are untouched.
       expect(
         restyle(svg, { timeline: "--story" }).startsWith(svg.slice(0, svg.lastIndexOf("</svg>"))),
       ).toBe(true);
@@ -146,7 +147,7 @@ describe("restyle({ timeline })", () => {
     });
 
     test("SMIL inside it is allowed under a timeline, and SMIL outside still throws", () => {
-      const blur = () => motion({ blur: 0 }).to({ blur: 4 }, 2, ease.linear);
+      const blur = () => motion({ blur: 0 }).to({ blur: 4 }, span(0, 2), ease.linear);
 
       const inside = scene(
         <>

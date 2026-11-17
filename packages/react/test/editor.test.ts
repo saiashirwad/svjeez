@@ -14,7 +14,6 @@ beforeAll(async () => {
     root: `${import.meta.dirname}/app`,
     configFile: false,
     logLevel: "warn",
-    // The compile worker runs svjeez's own .tsx, which is not React and has no window for the refresh runtime.
     plugins: [react({ include: /packages\/react\/(src|test)\/.*\.tsx$/ })],
     resolve: { conditions: ["@svjeez/source", ...defaultClientConditions] },
     server: { port: 0, fs: { allow: [`${import.meta.dirname}/../../..`] } },
@@ -30,7 +29,6 @@ afterAll(async () => {
   await server?.close();
 });
 
-/** The app on a scene, once its first compile has put a picture on screen. */
 const open = async (scene = "", extra = "") => {
   const page = await browser.newPage({ viewport: { width: 1000, height: 1100 } });
   await page.goto(`${origin}?scene=${scene}${extra}`);
@@ -49,7 +47,6 @@ const shot = async (page: Page, name: string) => {
 const source = (page: Page) => page.locator(".sj-source").evaluate((el) => el.textContent ?? "");
 const picture = (page: Page) => page.locator("img.sj-img").getAttribute("src");
 
-/** Waits for the picture to be swapped for a newer one, which happens only after a compile and decode. */
 const repainted = (page: Page, was: string | null) =>
   page.waitForFunction(
     (url) => document.querySelector("img.sj-img")?.getAttribute("src") !== url,
@@ -132,7 +129,7 @@ describe("editing a scene with no annotations", () => {
     await page.mouse.up();
 
     expect(await page.locator(".sj-pop-text").textContent()).toMatch(/^ease\.bezier\(/);
-    expect(await source(page)).toMatch(/to\(\{ rotate: 90 \}, 1\.5, ease\.bezier\(/);
+    expect(await source(page)).toMatch(/to\(\{ rotate: 90 \}, span\(0\.5, 1\.5\), ease\.bezier\(/);
     await shot(page, "ease-bent");
 
     await page.keyboard.press("Escape");
@@ -241,4 +238,23 @@ describe("React's rendering rules", () => {
     await repainted(page, before);
     await page.close();
   }, 40_000);
+});
+
+describe("a scene with a text param", () => {
+  test("typing in the text control rewrites the title and recompiles the picture", async () => {
+    const page = await open("text");
+    const field = page.locator('.sj-text[aria-label="title"]');
+    await field.waitFor();
+    expect(await field.inputValue()).toBe("Launch");
+    expect(await field.getAttribute("maxlength")).toBe("12");
+
+    const before = await picture(page);
+    await field.fill("Hello");
+    expect(await field.inputValue()).toBe("Hello");
+    await repainted(page, before);
+
+    await page.getByRole("button", { name: "Undo" }).click();
+    expect(await field.inputValue()).toBe("Launch");
+    await page.close();
+  });
 });

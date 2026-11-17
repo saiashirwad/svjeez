@@ -8,18 +8,16 @@ import type { Point } from "../layout/box";
 import { flatten } from "./path";
 
 /**
- * A drawing tool: how wide the mark is at each point. `t` runs 0 to 1 along one stroke, `s` is px along it,
- * `angle` is the direction of travel in radians. Widths are in px.
+ * A drawing tool: how wide the mark is at each point. `t` runs 0 to 1 along a stroke, `s` is px along it, `angle`
+ * is the direction of travel in radians. Widths in px.
  */
 export interface Tool {
   readonly width: (t: number, s: number, angle: number) => number;
   /** Sideways drift of the line in px, for a hand that does not quite follow the path. */
   readonly drift?: (s: number) => number;
-  /** The widest the tool ever draws, for reveal masks. */
   readonly size: number;
 }
 
-/** Seeded 1D value noise in -1..1, smooth between integer knots. */
 const noise = (seed: number) => {
   const knot = (i: number) => {
     let h = Math.imul(i ^ (seed * 0x9e3779b1), 0x85ebca6b);
@@ -39,7 +37,6 @@ const noise = (seed: number) => {
 
 const smoothstep = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
-/** 1 in the middle of a stroke, easing toward `tip` at both ends over `taper` of its length. */
 const envelope = (t: number, taper: number, tip: number) =>
   taper <= 0 ? 1 : tip + (1 - tip) * Math.min(smoothstep(t / taper), smoothstep((1 - t) / taper));
 
@@ -51,7 +48,6 @@ export interface PenOptions {
   readonly seed?: number;
 }
 
-/** A technical or ballpoint pen: an even line with slightly thinned ends. */
 const pen = ({ size = 1.5, taper = 0.08, seed = 1 }: PenOptions = {}): Tool => {
   const wobble = noise(seed);
 
@@ -73,7 +69,6 @@ export interface BrushOptions {
   readonly seed?: number;
 }
 
-/** A round brush: pressed down in the middle, lifting to a point at both ends, uneven along the way. */
 const brush = ({
   size = 6,
   taper = 0.3,
@@ -101,7 +96,6 @@ export interface NibOptions {
   readonly thin?: number;
 }
 
-/** A broad calligraphy nib: thick across the nib's edge, thin along it. Downstrokes swell and crossbars stay fine. */
 const nib = ({ size = 5, angle = 35, thin = 0.12 }: NibOptions = {}): Tool => {
   const edge = (angle * Math.PI) / 180;
 
@@ -117,7 +111,6 @@ export interface PencilOptions {
   readonly seed?: number;
 }
 
-/** A pencil: a fine line whose width flickers with the grain of the paper. */
 const pencil = ({ size = 1.2, seed = 1 }: PencilOptions = {}): Tool => {
   const grain = noise(seed);
   const shake = noise(seed + 7);
@@ -129,12 +122,10 @@ const pencil = ({ size = 1.2, seed = 1 }: PencilOptions = {}): Tool => {
   };
 };
 
-/** The four drawing tools: `tool.pen()`, `tool.brush()`, `tool.nib()` and `tool.pencil()`. */
 export const tool = { pen, brush, nib, pencil } as const;
 
 const SPACING = 1.5;
 
-/** Evenly spaced points along a polyline, so width changes stay smooth however the path was drawn. */
 const resample = (points: readonly Point[]): Point[] => {
   const out: Point[] = [points[0]!];
   let carry = 0;
@@ -159,7 +150,6 @@ const resample = (points: readonly Point[]): Point[] => {
   return out;
 };
 
-/** Path data in tenths of a px, written as relative moves from rounded points, so it is short and never drifts. */
 const writer = (first: Point) => {
   const tenth = (v: number) => Math.round(v * 10);
   let at = { x: tenth(first.x), y: tenth(first.y) };
@@ -185,7 +175,6 @@ const writer = (first: Point) => {
   };
 };
 
-/** The filled outline of one stroke: the left edge out, a round cap, the right edge back, a round cap. */
 const outline = (points: readonly Point[], tool: Tool): string => {
   const line = resample(points);
 
@@ -208,7 +197,6 @@ const outline = (points: readonly Point[], tool: Tool): string => {
   });
   const end = line.length - 1;
 
-  /** A rounded end: one quadratic from one edge, out past the tip, to the other edge. */
   const cap = (i: number, sign: 1 | -1, from: Point, to: Point) => {
     const { half, normal } = caps[i]!;
     const out = { x: sign * normal.y * half * 2, y: -sign * normal.x * half * 2 };
@@ -237,10 +225,8 @@ export const inkPath = (d: string, tool: Tool): string =>
     .join("");
 
 export interface InkProps {
-  /** The path the hand follows: the centerline of the mark. */
   readonly d: string;
   readonly tool: Tool;
-  /** Ink color. */
   readonly fill?: Paint;
   readonly opacity?: number;
   readonly class?: string;
@@ -248,11 +234,9 @@ export interface InkProps {
   readonly draw?: Span;
   /** Shapes the `draw` reveal. Default `ease.inOut`. */
   readonly ease?: Ease;
-  /** Moves, scales or fades the whole mark. */
   readonly animation?: Stack<"x" | "y" | "scale" | "rotate" | "opacity">;
 }
 
-/** One symbol per path and tool, so a stroke drawn twice, or revealed and then shown plain, embeds its outline once. */
 const outlines = new WeakMap<Tool, Map<string, Ref<"symbol">>>();
 
 const outlineOf = (d: string, tool: Tool): Ref<"symbol"> => {
@@ -270,8 +254,8 @@ const outlineOf = (d: string, tool: Tool): Ref<"symbol"> => {
 };
 
 /**
- * A path inked with a pen, brush, nib or pencil. With `draw`, a mask with the path drawing on reveals the ink. A masked
- * shape costs a mask raster on every repaint, so once the reveal ends a plain copy takes over and the masked one hides.
+ * A path inked with a pen, brush, nib or pencil. With `draw`, a mask reveals the ink; a masked shape costs a
+ * raster per repaint, so a plain copy takes over once the reveal ends.
  */
 export function Ink({
   d,
@@ -309,9 +293,9 @@ export function Ink({
       <use
         href={symbol}
         mask={reveal}
-        animation={motion({ opacity: 1 }).at(end).set({ opacity: 0 })}
+        animation={motion({ opacity: 1 }).set({ opacity: 0 }, end)}
       />
-      <use href={symbol} animation={motion({ opacity: 0 }).at(end).set({ opacity: 1 })} />
+      <use href={symbol} animation={motion({ opacity: 0 }).set({ opacity: 1 }, end)} />
     </g>
   );
 }

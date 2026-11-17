@@ -4,7 +4,6 @@
   const lab = getLab();
   const stage = new Stage();
 
-  // The page arrives with the default feel already drawn, so only an edit compiles.
   $effect(() => {
     if (lab.feel !== DEFAULT_FEEL) stage.build(lab.feel);
   });

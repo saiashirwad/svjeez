@@ -13,6 +13,7 @@ import {
   type Child,
   type SvgNode,
   adaptive,
+  span,
   systemDark,
   systemLight,
 } from "svjeez";
@@ -95,7 +96,7 @@ const fade = render(
     width={40}
     height={20}
     fill="#3EE6D6"
-    animation={motion({ opacity: 0 }).at(1).to({ opacity: 1 }, 1, ease.linear)}
+    animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(1, 1), ease.linear)}
   />,
 );
 
@@ -117,9 +118,6 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("a curve starting to draw shows no round-cap dot at its far end", async () => {
-    // With a gap as long as the path, the dash after the visible one starts at the path's end while the offset is
-    // near 1, and a curve's measured length leaves it there as a zero-length dash that a round cap paints as a dot.
-    // The rect hides the curve's start, so anything painted in the draw's first frames is that dot.
     const curve = render(
       { width: 70, height: 40, duration: 1, title: "Curve" },
       <>
@@ -155,7 +153,7 @@ describe.if(browser)("renderFrames", () => {
       {},
       <feFlood
         floodColor="#ff0000"
-        animation={motion({ floodColor: "#ff0000" }).at(1).set({ floodColor: "#0000ff" })}
+        animation={motion({ floodColor: "#ff0000" }).set({ floodColor: "#0000ff" }, 1)}
       />,
     );
 
@@ -175,7 +173,7 @@ describe.if(browser)("renderFrames", () => {
       {},
       <feFlood
         floodColor="#ff0000"
-        animation={motion({ floodColor: "#ff0000" }).at(1).set({ floodColor: "#0000ff" })}
+        animation={motion({ floodColor: "#ff0000" }).set({ floodColor: "#0000ff" }, 1)}
       />,
     );
 
@@ -189,7 +187,7 @@ describe.if(browser)("renderFrames", () => {
             width={10}
             height={10}
             fill="#3EE6D6"
-            animation={motion({ x: 20 }).to({ x: 30 }, 0.5, ease.linear).loop(0.5)}
+            animation={motion({ x: 20 }).to({ x: 30 }, span(0, 0.5), ease.linear).loop(0.5)}
           />
         </>,
       );
@@ -223,9 +221,9 @@ describe.if(browser)("renderFrames", () => {
         <rect
           width={10}
           height={10}
-          animation={motion({ x: 0 }).to({ x: 10 }, 2, ease.linear).loop(2)}
+          animation={motion({ x: 0 }).to({ x: 10 }, span(0, 2), ease.linear).loop(2)}
         />
-        <circle r={4} animation={motion({ y: 0 }).to({ y: 10 }, 3, ease.linear).loop(3)} />
+        <circle r={4} animation={motion({ y: 0 }).to({ y: 10 }, span(0, 3), ease.linear).loop(3)} />
       </>,
     );
 
@@ -237,7 +235,7 @@ describe.if(browser)("renderFrames", () => {
       <circle
         r={4}
         animation={motion({ rotate: 0 })
-          .to({ rotate: 360 }, 12 / laps, ease.linear)
+          .to({ rotate: 360 }, span(0, 12 / laps), ease.linear)
           .loop(12 / laps)}
       />
     );
@@ -245,7 +243,11 @@ describe.if(browser)("renderFrames", () => {
     const svg = render(
       { width: 20, height: 20, duration: 12, title: "Rings" },
       <>
-        <rect width={10} height={10} animation={motion({ x: 0 }).to({ x: 10 }, 12, ease.linear)} />
+        <rect
+          width={10}
+          height={10}
+          animation={motion({ x: 0 }).to({ x: 10 }, span(0, 12), ease.linear)}
+        />
         {[2, 3, 5, 7, 8].map(ring)}
       </>,
     );
@@ -475,7 +477,7 @@ describe.if(browser)("prefix in one page", () => {
   const slide = (prefix?: string) =>
     render(
       { width: 100, height: 40, duration: 2, title: "A", prefix },
-      <rect id="a" width={10} height={10} animation={motion({ x: 0 }).at(0).to({ x: 50 }, 2)} />,
+      <rect id="a" width={10} height={10} animation={motion({ x: 0 }).to({ x: 50 }, span(0, 2))} />,
     );
 
   const fade = (prefix?: string) =>
@@ -485,7 +487,7 @@ describe.if(browser)("prefix in one page", () => {
         id="b"
         width={10}
         height={10}
-        animation={motion({ opacity: 0 }).at(0).to({ opacity: 1 }, 2)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, 2))}
       />,
     );
 
@@ -538,14 +540,14 @@ describe("restyle", () => {
           width={40}
           height={20}
           fill="#3EE6D6"
-          animation={motion({ opacity: 0 }).to({ opacity: 1 }, 4, ease.linear)}
+          animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, 4), ease.linear)}
         />
         <rect
           x={10}
           width={10}
           height={10}
           fill="#E64"
-          animation={motion({ blur: 0 }).to({ blur: 4 }, 2, ease.linear)}
+          animation={motion({ blur: 0 }).to({ blur: 4 }, span(0, 2), ease.linear)}
         />
       </>,
     );
@@ -625,7 +627,6 @@ describe("restyle", () => {
       expect(await opacityAfter(restyle(own, { still: true }))).toBe(0);
     });
 
-    /** Screenshots of the SVG shown as an `<img>`, the way a page shows it, after each wait in milliseconds. */
     const asImage = async (
       svg: string,
       waits: readonly number[],
@@ -687,8 +688,10 @@ describe("restyle", () => {
     });
 
     test("<Once> parts hold their end on the loop clock, and onceAt gives them a clock of their own", async () => {
-      const fade = (over: number) => motion({ opacity: 0 }).to({ opacity: 1 }, over, ease.linear);
-      const blur = motion({ blur: 0 }).to({ blur: 4 }, 2, ease.linear);
+      const fade = (over: number) =>
+        motion({ opacity: 0 }).to({ opacity: 1 }, span(0, over), ease.linear);
+
+      const blur = motion({ blur: 0 }).to({ blur: 4 }, span(0, 2), ease.linear);
 
       const svg = render(
         { width: 40, height: 20, duration: 2, title: "Once" },
@@ -738,7 +741,7 @@ describe("restyle", () => {
         <rect
           width={10}
           height={10}
-          animation={motion({ blur: 0 }).to({ blur: 4 }, 4, ease.linear)}
+          animation={motion({ blur: 0 }).to({ blur: 4 }, span(0, 4), ease.linear)}
         />,
       );
 
@@ -782,7 +785,7 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       <rect
         width={20}
         height={20}
-        animation={motion({ opacity: 0 }).to({ opacity: 1 }, duration, ease.linear)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, duration), ease.linear)}
       />,
     );
 
@@ -826,7 +829,7 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       <rect
         width={20}
         height={20}
-        animation={motion({ opacity: 0 }).to({ opacity: 1 }, 4, ease.linear)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, 4), ease.linear)}
       />,
     );
 

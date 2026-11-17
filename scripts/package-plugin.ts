@@ -1,6 +1,3 @@
-// Builds the plugin package in the current directory into package-dist/, the folder npm packs and publishes.
-// The workspace's package.json points its exports at TypeScript source, because Astro loads the integrations in a
-// config through Vite without the @svjeez/source condition. The published package.json points them at JavaScript.
 import { execFileSync } from "node:child_process";
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -20,8 +17,7 @@ execFileSync(join(dir, "node_modules/.bin/tsc"), ["-p", "tsconfig.package.json"]
   stdio: "inherit",
 });
 
-// tsc rewrites `./x.ts` in imports to `./x.js` but leaves strings alone, so a worker started with
-// `new URL("./worker.ts", import.meta.url)` would point at a file the package does not have.
+// tsc rewrites `./x.ts` imports to `./x.js` but not strings, so `new URL("./worker.ts", import.meta.url)` would point at a missing file.
 for (const entry of readdirSync(out, { recursive: true, encoding: "utf8" }))
   if (entry.endsWith(".js")) {
     const file = join(out, entry);
@@ -40,7 +36,6 @@ const copy = (from: string, to: string) => {
   copyFileSync(join(dir, from), join(out, to));
 };
 
-// "./src/scene.ts" (or .tsx) is compiled to "./scene.js" and "./scene.d.ts"; any other file is copied as it is.
 const exports = Object.fromEntries(
   Object.entries(read<Target>(dir).exports ?? {}).map(([key, target]) => {
     if (!isPath(target)) return (copy(target.types, target.types), [key, target]);
@@ -48,7 +43,10 @@ const exports = Object.fromEntries(
 
     if (!/\.tsx?$/.test(path)) return (copy(target, path), [key, path]);
 
-    return [key, { types: path.replace(/\.tsx?$/, ".d.ts"), default: path.replace(/\.tsx?$/, ".js") }];
+    return [
+      key,
+      { types: path.replace(/\.tsx?$/, ".d.ts"), default: path.replace(/\.tsx?$/, ".js") },
+    ];
   }),
 );
 

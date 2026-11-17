@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// An area wipes on from the left, then a marker shows where the curve turned.
 const W = 504;
 const H = 340;
 const BAR = 40;
@@ -49,7 +48,7 @@ export default function build(): string {
       {win.node}
       <g animation={outro(D)}>
         <g animation={enter({ at: 0.2, over: 0.5 })}>{c.node}</g>
-        {wait.node}
+        {wait}
         <g animation={enter({ at: wait.span.end, over: 0.6 }, { opacity: 0, y: -6 })}>
           <line
             x1={ships}

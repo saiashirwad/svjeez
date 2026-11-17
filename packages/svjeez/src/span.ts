@@ -1,42 +1,43 @@
 import type { Seconds } from "./motion";
 
-/** A stretch of a clock: from `at`, for `over` seconds. A plain `{ at, over }` is a span. */
 export interface Span {
   readonly at: Seconds;
   readonly over: Seconds;
 }
 
-/** A span that runs to the end of its clock: `over` is left out. */
 export interface OpenSpan {
   readonly at: Seconds;
   readonly over?: undefined;
 }
 
-/** Anything `show()` and `<Clip>` take for "when": a span, or a start that runs to the end. */
 export interface When {
   readonly at: Seconds;
   readonly over?: Seconds;
 }
 
-/** A span with the helpers `span()` adds. */
 export interface Spanned extends Span {
-  /** When it ends: `at + over`. */
   readonly end: Seconds;
-  /** The same span `dt` seconds later. */
   shift(dt: Seconds): Spanned;
   /** The next span: `over` long, starting `gap` seconds after this one ends. */
   next(over: Seconds, gap?: Seconds): Spanned;
   /** Grow it `before` seconds earlier and `after` (default `before`) seconds later. Negative shrinks. */
   pad(before: Seconds, after?: Seconds): Spanned;
+  /** From the same start to `end`, a time on the same clock: `a.until(b.end)` ends when `b` does. */
+  until(end: Seconds): Spanned;
+  /** The first `over` seconds: a span that starts with this one. `over` may run past its end. */
+  first(over: Seconds): Spanned;
+  /** The last `over` seconds: a span that ends with this one. */
+  last(over: Seconds): Spanned;
 }
 
-/** A span from `at` to the end of its clock. */
 export interface OpenSpanned extends OpenSpan {
-  /** Always `Infinity`: nothing ends it. */
   readonly end: number;
   shift(dt: Seconds): OpenSpanned;
   /** Start `before` seconds earlier. Negative starts later. */
   pad(before: Seconds): OpenSpanned;
+  /** From the same start to `end`: `span(a).until(b)` is the span from `a` to `b`. */
+  until(end: Seconds): Spanned;
+  first(over: Seconds): Spanned;
 }
 
 const finite = (value: number, what: string): void => {
@@ -72,6 +73,22 @@ class Range implements Span {
 
     return build(this.at - before, this.over + before + after, "pad()");
   }
+
+  until(end: Seconds): Range {
+    finite(end, "until()");
+
+    return build(this.at, end - this.at, "until()");
+  }
+
+  first(over: Seconds): Range {
+    return build(this.at, over, "first()");
+  }
+
+  last(over: Seconds): Range {
+    finite(over, "last()");
+
+    return build(this.end - over, over, "last()");
+  }
 }
 
 class Tail implements OpenSpan {
@@ -90,6 +107,16 @@ class Tail implements OpenSpan {
     finite(before, "pad()");
 
     return build(this.at - before, undefined, "pad()");
+  }
+
+  until(end: Seconds): Range {
+    finite(end, "until()");
+
+    return build(this.at, end - this.at, "until()");
+  }
+
+  first(over: Seconds): Range {
+    return build(this.at, over, "first()");
   }
 }
 
@@ -126,10 +153,43 @@ export const checkWindow = (at: Seconds, over: Seconds, what: string, empty = fa
 
 /**
  * A span of a clock, `over` seconds long from `at`. Without `over` it runs to the end. Spans chain:
- * `span(0, 0.7).next(1, 0.2)` starts a gap after the first ends, and `.pad(0.15)` grows one on both sides.
+ * `span(0, 0.7).next(1, 0.2)` starts a gap after the first ends, `.pad(0.15)` grows one on both sides, and
+ * `span(2).until(3.5)` runs from a start to an end.
  */
 export function span(at: Seconds, over: Seconds): Spanned;
 export function span(at: Seconds): OpenSpanned;
 export function span(at: Seconds, over?: Seconds): Spanned | OpenSpanned {
   return over === undefined ? build(at, undefined, "span()") : build(at, over, "span()");
 }
+
+/**
+ * Spans end to end: `first`, then one span for each length in `overs`, each starting when the one before ends. The
+ * steps of a motion that play one after another: `const [crouch, leap, land] = chain(span(0.1, 0.3), 0.12, 0.25)`.
+ * A pause between two is `.next(over, gap)` on the one before.
+ */
+export function chain<const O extends readonly Seconds[]>(
+  first: Span,
+  ...overs: O
+): [Spanned, ...{ -readonly [K in keyof O]: Spanned }] {
+  const out: Spanned[] = [build(first.at, first.over, "chain()")];
+
+  for (const over of overs) out.push(out[out.length - 1]!.next(over));
+
+  // SAFETY: out holds first and one span per entry of overs, in order, which is the tuple the signature names.
+  return out as [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
+}
+
+/**
+ * `count` spans as long as `first`, each starting `step` seconds after the one before: a cascade of entrances. The
+ * last one's `end` is when the cascade settles.
+ */
+export const stagger = (first: Span, count: number, step: Seconds): Spanned[] => {
+  if (!Number.isInteger(count) || count < 0 || !Number.isFinite(step))
+    throw new Error(
+      `stagger() needs a whole count of 0 or more and a finite step, got count ${count} and step ${step}.`,
+    );
+
+  return Array.from({ length: count }, (_, i) =>
+    build(first.at + i * step, first.over, "stagger()"),
+  );
+};

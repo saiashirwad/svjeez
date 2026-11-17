@@ -10,7 +10,6 @@ import { SCOPES } from "./scopes.ts";
 
 export type { DefaultLang } from "./langs.ts";
 
-/** What `highlight()` returns: a `CodeTokens` whose pieces are all plain strings or `[role, text]` runs. */
 export type Highlighted = readonly (readonly (string | CodeRun)[])[];
 
 /** A language this package bundles, an alias of one, or the name of a grammar passed in `grammars`. */
@@ -23,7 +22,6 @@ export interface HighlightOptions {
   readonly grammars?: readonly (LanguageRegistration | LanguageRegistration[])[];
 }
 
-/** Each role gets a color no theme would use, so a token's color names its role. */
 const ROLES: readonly CodeRole[] = ["plain", ...new Set<CodeRole>(Object.values(SCOPES))];
 const sentinel = (role: CodeRole) => `#${(ROLES.indexOf(role) + 1).toString(16).padStart(6, "0")}`;
 const roleOf = new Map(ROLES.map((role) => [sentinel(role), role]));
@@ -42,7 +40,6 @@ const THEME: ThemeRegistration & { name: string } = {
   ],
 };
 
-// Built on the first highlight() so that importing the package costs nothing.
 let shiki: ReturnType<typeof createHighlighterCoreSync> | undefined;
 
 const highlighterOf = () =>
@@ -60,7 +57,6 @@ const expandTabs = (line: string, tabSize: number): string => {
   let out = "";
   let column = 0;
 
-  // code() lays out one column per character, so a column counts code points, not UTF-16 units.
   for (const ch of line) {
     if (ch === "\t") {
       const pad = tabSize - (column % tabSize);
@@ -110,8 +106,7 @@ export function highlight(source: string, lang: Lang, options: HighlightOptions 
     .map((line) => expandTabs(line, tabSize))
     .join("\n");
 
-  // Past Shiki's default 500ms per line, the rest of the line comes back as one token in the current color. The
-  // first call compiles the grammar's regexes, which can take that long on a slow machine.
+  // Shiki's default 500ms-per-line limit returns the rest of the line as one token; the first call can exceed it.
   const lines = highlighter.codeToTokensBase(text, {
     lang,
     theme: THEME.name,

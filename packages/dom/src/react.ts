@@ -2,13 +2,32 @@ import type { ComponentType } from "react";
 import { demoOf, type Demo, type DemoOptions, type Script } from "./demo.ts";
 import type { Flow } from "./flow.ts";
 
-export { click, fill, hover, move, press, snap, wait, type Demo, type DemoOptions, type Flow, type Script } from "./demo.ts";
+export {
+  act,
+  click,
+  drag,
+  fill,
+  hover,
+  move,
+  press,
+  snap,
+  wait,
+  type Act,
+  type Action,
+  type Demo,
+  type DemoOptions,
+  type DragOptions,
+  type Flow,
+  type Instruction,
+  type PageAction,
+  type Script,
+  type Snap,
+  type Timing,
+  type Wait,
+} from "./demo.ts";
 
 /**
- * A demo of a real React component: the component, where it starts, and a script of what happens to it. The script
- * is the flow `dom.run` takes; `props` from its argument re-renders the component with new props and is typed to it.
- * Export it from a `.demo.tsx` file next to the component; `recordings()` renders it through your Vite config, so
- * your CSS, fonts and imports are the app's own.
+ * A demo of a real React component: the component, its starting props and a script (the flow `dom.run` takes; `props` re-renders it, typed to it). Export it from a `.demo.tsx` file; `recordings()` renders it through your Vite config.
  *
  * ```tsx
  * export const signIn = demo(SignIn, { width: 360 }, ({ props }) => [

@@ -31,7 +31,6 @@ const html = {
   merged: pieces.pr(true),
 };
 
-// A sub-flow any sign-in card can reuse: each field types in over about a second.
 const login = (email: string, password: string): Flow => [
   fill("email", email),
   snap("typed", { over: 1.1 }),
@@ -48,17 +47,14 @@ const signIn: Flow = [
   hover("submit"),
   snap("hovered", { over: 0.35 }),
   wait(0.55),
-  // The server says no: the same card, re-rendered, which leaves hover and focus behind.
   rerender(html.failed),
   snap("failed", { over: 0.7 }),
   wait(1.8),
-  // Then back to the start, and both fields delete.
   rerender(html.signIn),
   snap("idle", { over: 0.8 }),
   wait(1.6),
 ];
 
-// The pull request card as data: it turns merged, then opens again.
 const pr = [
   { snap: "open" },
   { wait: 2 },
@@ -69,8 +65,6 @@ const pr = [
   { snap: "open", over: 0.7 },
 ] as const satisfies Flow;
 
-// snapshots.json records the markup and every instruction, so changing one reads the pages again. The theme is
-// read by Tailwind, out of its sight.
 const cards = await snapshots(
   here("snapshots.json"),
   {

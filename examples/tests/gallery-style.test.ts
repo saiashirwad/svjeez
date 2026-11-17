@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-// The gallery's scenes share examples/gallery-style.ts: one canvas ratio, one set of fonts, one palette, a type floor.
 const EXAMPLES = join(import.meta.dir, "..");
 const SITE = join(EXAMPLES, "..", "site", "src", "examples.ts");
 
@@ -10,10 +9,8 @@ const names = [...readFileSync(SITE, "utf8").matchAll(/^\s+\["([\w-]+)", \d+\],$
   (match) => match[1]!,
 );
 
-// Scenes whose material is the point: they keep their own palette. Everything else paints with var(--base0X).
 const OWN_PALETTE = ["horizon", "map", "newspaper"];
 
-// Scenes that show specimen faces or embed their own art keep their own fonts.
 const OWN_FONTS = ["fonts", "map", "newspaper"];
 
 const sources = (name: string) =>

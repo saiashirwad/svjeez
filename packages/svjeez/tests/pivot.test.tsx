@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ease, motion, Pivot, render, type Child } from "svjeez";
+import { ease, motion, Pivot, render, span, type Child } from "svjeez";
 import { openScene, renderFrames } from "svjeez/frames";
 
 const browser = await renderFrames(
@@ -15,12 +15,11 @@ const browser = await renderFrames(
   },
 );
 
-const quarter = motion({ rotate: 0 }).to({ rotate: 90 }, 1, ease.linear);
+const quarter = motion({ rotate: 0 }).to({ rotate: 90 }, span(0, 1), ease.linear);
 
 const scene = (child: Child) =>
   render({ width: 100, height: 100, duration: 2, title: "Pivot" }, child);
 
-/** Where the box's center lands at `time`, in the scene's px. */
 const centerAt = async (svg: string, time: number) => {
   const page = await openScene(svg);
 

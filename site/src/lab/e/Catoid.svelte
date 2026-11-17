@@ -70,7 +70,6 @@
     min-block-size: 0;
   }
 
-  /* One screen on a desktop: the stage takes whatever height the shelf and the header leave, and keeps 16:10 inside it. */
   @media (width >= 64rem) {
     .lab-e {
       block-size: calc(100dvh - 78px);
@@ -118,7 +117,6 @@
     box-shadow: 0 8px 24px -8px var(--shadow);
   }
 
-  /* While anything is carried, the whole page shows the closed hand. */
   :global(body:has(.le-ghost), body:has(.le-ghost) *) {
     cursor: grabbing;
   }

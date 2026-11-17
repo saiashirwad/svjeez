@@ -23,15 +23,6 @@ export const C = {
 export const roman = await google("Cinzel");
 export const uncial = await google("Uncial Antiqua");
 
-/** Mulberry32, so every tree and peak lands in the same place on every build. */
-export const random = (seed: number) => () => {
-  seed = (seed + 0x6d2b79f5) | 0;
-  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
-
 export const n = (v: number) => Math.round(v * 10) / 10;
 
 /** Passes a motion or a span through for the intro copy of the map, and drops it for the still copy. */

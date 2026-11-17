@@ -12,13 +12,14 @@ import {
   type ElementProps,
   type Font,
   type SvgNode,
+  span,
+  stagger,
 } from "svjeez";
 
 const W = 1280;
 const H = 720;
 const D = 9;
 
-/** The page fills the canvas, inside a 64px margin (48px at 960 wide). */
 const EDGE = 64;
 
 const blackletter = await google("UnifrakturMaguntia", { fallback: ["serif"] });
@@ -37,7 +38,6 @@ const INNER = { x: EDGE, w: W - 2 * EDGE };
 const centered = (face: Font, text: string, size: number) =>
   INNER.x + (INNER.w - face.measure(text, size)) / 2;
 
-/** A ruled line that draws on from the left. */
 const rule = (y: number, at: number, weight = 1, x1 = INNER.x, x2 = INNER.x + INNER.w): Child => (
   <path
     d={`M${x1} ${y}H${x2}`}
@@ -49,7 +49,6 @@ const rule = (y: number, at: number, weight = 1, x1 = INNER.x, x2 = INNER.x + IN
 
 type Line = { text: string; x: number }[];
 
-/** Greedy line breaking measured in the real font, justified by spreading words across the column. A paragraph's last line stays ragged. */
 const justify = (text: string, width: number, size: number): Line[] => {
   const space = body.measure(" ", size);
   const indent = size * 1.2;
@@ -112,7 +111,6 @@ The astronauts are to lift off from the Moon later today and return to Earth for
 Continued on page A2.
 `;
 
-// Five columns: the story runs down the first four under the headline, and the photo stands in the fifth.
 const COLUMN = { y: 318, gap: 22, size: 14, leading: 21.5 };
 const BOTTOM = H - EDGE;
 const columnWidth = (INNER.w - 4 * COLUMN.gap) / 5;
@@ -138,7 +136,9 @@ const MAST = "The Daily Chronicle";
 const MAST_SIZE = 64;
 const HEAD = "ASTRONAUTS LAND ON THE MOON";
 const HEAD_SIZE = Math.min(64, STORY.w / fat.measure(HEAD, 1));
-const DECK = "Armstrong and Aldrin spend two and a half hours on the surface; Collins waits in orbit.";
+
+const DECK =
+  "Armstrong and Aldrin spend two and a half hours on the surface; Collins waits in orbit.";
 
 function Masthead(): SvgNode {
   const x = centered(blackletter, MAST, MAST_SIZE);
@@ -156,7 +156,7 @@ function Masthead(): SvgNode {
         stroke={C.ink}
         strokeWidth={1.1}
         alt=""
-        animation={(_, i) => draw({ at: 0.2 + i * 0.07, over: 0.9 }, ease.inOut)}
+        animation={(_, each) => draw(each.stagger(span(0.2, 0.9), 0.07), ease.inOut)}
       />
       <Glyphs
         font={blackletter}
@@ -165,10 +165,8 @@ function Masthead(): SvgNode {
         x={x}
         y={y}
         fill={C.ink}
-        animation={(_, i) =>
-          motion({ opacity: 0 })
-            .at(0.8 + i * 0.07)
-            .to({ opacity: 1 }, 0.5)
+        animation={(_, each) =>
+          motion({ opacity: 0 }).to({ opacity: 1 }, each.stagger(span(0.8, 0.5), 0.07))
         }
       />
     </>
@@ -211,8 +209,8 @@ function Headline(): SvgNode {
       x={STORY.x + (STORY.w - fat.measure(HEAD, HEAD_SIZE)) / 2}
       y={252}
       fill={C.ink}
-      animation={(_, i) =>
-        enter({ at: 1.3 + i * 0.04, over: 0.45 }, { opacity: 0, y: -16 }, ease.out)
+      animation={(_, each) =>
+        enter(each.stagger(span(1.3, 0.45), 0.04), { opacity: 0, y: -16 }, ease.out)
       }
     />
   );
@@ -282,9 +280,11 @@ function Photo(): SvgNode {
           strokeWidth={0.75}
         />
         <g
-          animation={motion({ scale: 0.8, opacity: 0 })
-            .at(2.9)
-            .to({ scale: 1, opacity: 1 }, 0.8, ease.out)}
+          animation={motion({ scale: 0.8, opacity: 0 }).to(
+            { scale: 1, opacity: 1 },
+            span(2.9, 0.8),
+            ease.out,
+          )}
         >
           <circle cx={cx} cy={cy} r={r} fill={C.paper} />
           <circle cx={cx} cy={cy} r={r} fill={halftone} />
@@ -329,12 +329,12 @@ export default function build(): string {
         strokeWidth={0.5}
         animation={draw({ at: 2.4, over: 0.8 })}
       />
-      {[1, 2, 3].map((i) => (
+      {stagger(span(2.6, 0.8), 3, 0.1).map((rule, i) => (
         <path
-          d={`M${columnX(i) - COLUMN.gap / 2} ${COLUMN.y + 2}V${BOTTOM}`}
+          d={`M${columnX(i + 1) - COLUMN.gap / 2} ${COLUMN.y + 2}V${BOTTOM}`}
           stroke={C.ink}
           strokeWidth={0.5}
-          animation={draw({ at: 2.5 + i * 0.1, over: 0.8 })}
+          animation={draw(rule)}
         />
       ))}
       <Columns />

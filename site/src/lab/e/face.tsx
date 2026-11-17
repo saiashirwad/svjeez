@@ -191,10 +191,8 @@ export const Face = ({
           stroke={ink}
           strokeWidth={1}
           animation={motion({ opacity: 0 })
-            .at(blink[1] - 1.6)
-            .set({ opacity: 1 })
-            .at(blink[1] - 0.5)
-            .set({ opacity: 0 })}
+            .set({ opacity: 1 }, blink[1] - 1.6)
+            .set({ opacity: 0 }, blink[1] - 0.5)}
         />
       )}
       {f.floppy && (

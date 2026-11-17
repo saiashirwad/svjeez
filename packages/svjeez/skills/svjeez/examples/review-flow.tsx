@@ -1,6 +1,16 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { render, adaptive, draw, enter, flow, systemDark, systemLight } from "svjeez";
+import {
+  render,
+  adaptive,
+  draw,
+  enter,
+  flow,
+  systemDark,
+  systemLight,
+  span,
+  stagger,
+} from "svjeez";
 
 const { theme, css: colors } = adaptive({ dark: systemDark, light: systemLight });
 const css = `${colors}\n.sans text{font-family:system-ui,sans-serif}`;
@@ -9,6 +19,10 @@ const [M, W, H, GAP] = [24, 96, 40, 40];
 const steps = ["git push", "Run CI", "Green?", "Deploy"];
 const x = (i: number) => M + i * (W + GAP);
 const y = M + H / 2;
+
+// The boxes arrive 0.4s apart, and each link draws on as the box after it arrives.
+const boxes = stagger(span(0.4, 0.4), steps.length, 0.4);
+const links = stagger(span(0.6, 0.3), steps.length - 1, 0.4);
 
 // The comet runs a list of points. Here they are the box centers, left to right.
 const trip = flow(
@@ -34,11 +48,11 @@ export default function build(): string {
           d={`M${x(i) + W} ${y}H${x(i + 1)}`}
           stroke={theme.base03}
           strokeWidth={1.5}
-          animation={draw({ at: 0.6 + i * 0.4, over: 0.3 })}
+          animation={draw(links[i]!)}
         />
       ))}
       {steps.map((label, i) => (
-        <g class="sans" animation={enter({ at: 0.4 + i * 0.4, over: 0.4 })}>
+        <g class="sans" animation={enter(boxes[i]!)}>
           <rect
             x={x(i)}
             y={M}

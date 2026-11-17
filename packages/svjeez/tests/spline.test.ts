@@ -8,7 +8,6 @@ const points = [
   { x: 450, y: 70 },
 ];
 
-/** Uniform Catmull-Rom written out, with the ends repeated, to check the Béziers against. */
 const catmullRom = (i: number, u: number) => {
   const pick = (k: number) => points[Math.max(0, Math.min(points.length - 1, k))]!;
   const [a, b, c, d] = [pick(i - 1), pick(i), pick(i + 1), pick(i + 2)];

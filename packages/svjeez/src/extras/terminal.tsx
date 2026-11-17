@@ -14,7 +14,6 @@ export interface TerminalCommand {
 }
 
 export interface TerminalOptions extends Omit<CodeOptions, "gutter"> {
-  /** When the first prompt appears. */
   readonly at?: Seconds;
   readonly prompt?: string;
   readonly promptRole?: CodeRole;
@@ -67,7 +66,7 @@ export function terminal(
   let clock = at;
 
   const nodes = session.map(({ cmd, output = [] }, n) => {
-    const shown = motion({ opacity: 0 }).at(clock).set({ opacity: 1 });
+    const shown = motion({ opacity: 0 }).set({ opacity: 1 }, clock);
 
     const typed = typewriter(line([[promptRole, prompt], " ", cmd]), {
       at: clock,
@@ -79,11 +78,7 @@ export function terminal(
     const printed = typed.span.end + think;
 
     const lines = output.map((out, i) => (
-      <g
-        animation={motion({ opacity: 0 })
-          .at(printed + i * 0.06)
-          .set({ opacity: 1 })}
-      >
+      <g animation={motion({ opacity: 0 }).set({ opacity: 1 }, printed + i * 0.06)}>
         {line(isPlainOutput(out) ? [out] : out).node}
       </g>
     ));

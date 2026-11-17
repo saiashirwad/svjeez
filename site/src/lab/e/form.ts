@@ -1,28 +1,20 @@
 import { clamp } from "../util";
 import type { Genome } from "./genome";
 
-/** What a genome's oid and dimension mean for how a specimen is built and drawn. */
 export interface Form {
-  /** How far along toward each oid, 0 for a cat. Oidness under 0.15 is still a cat. */
   readonly dog: number;
   readonly horse: number;
   readonly loaf: number;
-  /** The longer of the dog's and the horse's snout. */
   readonly snout: number;
-  /** A top hat's height in head radii, 0 without one. */
   readonly hat: number;
-  /** Multipliers on the lengths of legs and tails, from the unramped oidness. */
   readonly legGrowth: number;
   readonly legShrink: number;
   readonly tailGrowth: number;
-  /** The coat turns to bread. */
   readonly bread: boolean;
   readonly floppy: boolean;
-  /** The head is a rounded box. */
   readonly boxy: boolean;
   readonly snouted: boolean;
   readonly maned: boolean;
-  /** Paws turn dark. */
   readonly hoofed: boolean;
   readonly liquid: boolean;
   readonly four: boolean;

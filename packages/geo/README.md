@@ -59,8 +59,8 @@ export default () =>
 
 The map it returns has:
 
-- `regions`, one per feature, each with `id`, `properties`, `feature`, its path data `d`, and the `centroid` and `bounds` of its largest piece. France's centroid sits in France, not out toward French Guiana.
-- `region(key)`, a region by `id` or `properties.name`.
+- `parts`, one region per feature, each with `id`, `properties`, `feature`, its path data `d`, and the `centroid` and `box` of its largest piece. France's centroid sits in France, not out toward French Guiana.
+- `part(key)`, a region by `id` or `properties.name`. These are the names every svjeez package uses for what it laid out; nothing is drawn yet, so a region has no `span` until `choropleth()` gives it one.
 - `land`, every region filled as one path. From TopoJSON the shared borders are merged away.
 - `lines`, every outline as one path. From TopoJSON each shared border is drawn once.
 - `sphere`, the outline of the globe, and `graticule(step)`, lines of longitude and latitude.
@@ -82,10 +82,10 @@ Every path is written for the scene, not the source data. Coordinates round to 0
 Chromium keeps each animated element on its own raster, and when a camera scales hundreds of them it falls behind and flashes blank tiles. Draw a map in with one animated path per region, then hand over to a still copy built from `land` and `lines`, two paths that the camera zooms:
 
 ```tsx
-<g animation={motion({ opacity: 1 }).at(SWAP).set({ opacity: 0 })}>
-  {map.regions.map((r) => <path d={r.d} animation={draw({ at: 0.5, over: 1 })} />)}
+<g animation={motion({ opacity: 1 }).set({ opacity: 0 }, SWAP)}>
+  {map.parts.map((r) => <path d={r.d} animation={draw({ at: 0.5, over: 1 })} />)}
 </g>
-<g animation={motion({ opacity: 0 }).at(SWAP).set({ opacity: 1 })}>
+<g animation={motion({ opacity: 0 }).set({ opacity: 1 }, SWAP)}>
   <Camera frame={frame} stops={stops}>
     <path d={map.land} />
     <path d={map.lines} />
@@ -107,7 +107,7 @@ const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
 const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectancy (years)", empty: "No data" }); // key.node, key.bounds
 ```
 
-`choropleth(spans, map, values, { scale, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, unmatched, groups }`. `unmatched` lists keys that match no region.
+`choropleth(spans, map, values, { scale, lines })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, span, bounds, parts, part, unmatched, groups }`. `unmatched` lists keys that match no region. `parts` are the regions `values` names, and `part("France")` finds one by id or name, with its `span` from the first span that changes its color to the end of the last, so a label can follow it in: `enter(years.part("France").span.next(0.4))`.
 
 ```tsx
 const years = choropleth(
@@ -118,13 +118,13 @@ const years = choropleth(
 );
 ```
 
-`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }`, with `bubbles` (each `{ region, value, x, y, r }`) or `bars` (each `{ region, value, rect }`) to place labels from. `fill` is a color or `(region, value) => color`.
+`cartogram(span, map, values, { ease, fill, coverage, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max })` morphs the biggest `top` regions into horizontal bars in `frame`. Both take one positive number per region and return `{ node, rest }` and the shapes as `parts`, each `{ id, region, value, box, span }` with `x`, `y` and `r` on a circle, to place labels from. `part("France")` finds one by id or name, and its `span` is when that region morphs. `fill` is a color or `(region, value) => color`.
 
 The shapes start as the outline and hide until the span starts. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
 
 ## Traffic
 
-`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
+`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns a `Drawn` with `count`, the particles sent. Its parts are the routes, by `id` (a line takes `{ points, id }`, and the default is its index, `"0"`), each with its `points`, `count`, `box` and a `span` from the first departure on it to the last arrival.
 
 `arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
 
@@ -149,11 +149,11 @@ const earth = globe({ at: 0, over: 24 }, world, { frame, tilt: 22, spin: { from:
 <g {...earth.place([-0.13, 51.5])}><circle r={3} /></g>
 ```
 
-`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `spin` turns across the whole span; give it `(t) => [lon, lat]` instead to hold or ease, with `t` in seconds since the span starts (as in `facing(t)`, `locate(at, t)` and a `night` date function). `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
+`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `spin` turns across the whole span; give it `(t) => [lon, lat]` instead to hold or ease, with `t` in seconds since the span starts (as in `facing(t)`, `locate(at, t)` and a `night` date function). `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. `parts` are the regions, as `project()` gives them, and `part("France")` finds one by id or name: its `box` is where it sits when the turn ends, its `span` the globe's, and `path()` the region alone as turning pieces, to light it up. `bounds` is the disc. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
 
 ## Changing projection
 
-`reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `regions[i].d[k]` is region `i` under projection `k`, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
+`reproject(data, projections, { frame, filter })` writes each region under every projection from the same points, simplified once in degrees and cut at the antimeridian, so `motion({ d })` morphs from one to the next. `parts[i].d[k]` is region `i` under projection `k`, `part("Greenland")` finds one, and `land[k]` is every region in one path. Mercator can't fit Antarctica; filter it out.
 
 `trueSize(span, map, region, to, { ease })` slides a region's real outline across the globe to `to` and draws it through the map's projection at every step. On Mercator, Greenland shrinks as it reaches the equator. [`examples/projections`](https://github.com/saiashirwad/svjeez/tree/main/examples/projections) morphs Mercator to Equal Earth and slides Greenland to Africa.
 

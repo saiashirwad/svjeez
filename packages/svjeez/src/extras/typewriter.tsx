@@ -25,8 +25,8 @@ export interface TypewriterResult {
 }
 
 /**
- * Type `code` out line by line, one character per step. A line costs its characters plus one for the newline.
- * `spans` holds when each line types, so other things can happen as their line lands.
+ * Type `code` out line by line, one character per step; a line costs its characters plus one for the newline.
+ * `spans` holds when each line types.
  */
 export function typewriter(
   code: Code,
@@ -52,13 +52,15 @@ export function typewriter(
 
   const rows = lines.map(({ words, start, chars, from, top }, i) => {
     const numbered =
-      code.gutter && number(i + 1, m, motion({ opacity: 0 }).at(start).set({ opacity: 1 }));
+      code.gutter && number(i + 1, m, motion({ opacity: 0 }).set({ opacity: 1 }, start));
 
     if (chars === 0) return numbered;
 
-    const reveal = motion({ width: 0 })
-      .at(start)
-      .to({ width: chars * m.advance }, chars / cps, ease.steps(chars));
+    const reveal = motion({ width: 0 }).to(
+      { width: chars * m.advance },
+      span(start, chars / cps),
+      ease.steps(chars),
+    );
 
     const clip = def.clipPath(
       {},
@@ -101,10 +103,14 @@ const caret = (
 
   const path = lines.reduce<Motion<"x" | "y">>(
     (track, { start, chars, from, top }) => {
-      const placed = track.at(start).set({ x: from - x, y: top - y });
+      const placed = track.set({ x: from - x, y: top - y }, start);
 
       return chars > 0
-        ? placed.to({ x: from - x + chars * m.advance }, chars / cps, ease.steps(chars))
+        ? placed.to(
+            { x: from - x + chars * m.advance },
+            span(start, chars / cps),
+            ease.steps(chars),
+          )
         : placed;
     },
     motion({ x: 0, y: 0 }),
@@ -124,12 +130,12 @@ const caret = (
     />
   );
 
-  const shown = motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+  const shown = motion({ opacity: 0 }).set({ opacity: 1 }, at);
 
   return (
-    <g animation={[path, blink ? shown : shown.at(end).set({ opacity: 0 })]}>
-      {block(motion({ opacity: 1 }).at(0.5).set({ opacity: 0 }).loop(1))}
-      {block(motion({ opacity: 0 }).at(at).set({ opacity: 1 }).at(end).set({ opacity: 0 }))}
+    <g animation={[path, blink ? shown : shown.set({ opacity: 0 }, end)]}>
+      {block(motion({ opacity: 1 }).set({ opacity: 0 }, 0.5).loop(1))}
+      {block(motion({ opacity: 0 }).set({ opacity: 1 }, at).set({ opacity: 0 }, end))}
     </g>
   );
 };

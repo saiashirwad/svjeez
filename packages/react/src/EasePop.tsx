@@ -11,7 +11,6 @@ import {
 } from "@svjeez/live";
 import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type PointerEvent } from "react";
 
-// The unit square sits low in the box so a curve can overshoot above and below it.
 const W = 200;
 const H = 240;
 const X = (u: number) => 20 + u * (W - 60);
@@ -27,7 +26,6 @@ export function EasePop({
 }: {
   editor: Editor;
   value: ValueOf<"ease">;
-  /** The glyph the popover opened from, which it sits under and returns focus to. */
   anchor: HTMLElement;
   onClose: () => void;
 }) {
@@ -43,7 +41,6 @@ export function EasePop({
   const close = useRef(onClose);
   close.current = onClose;
 
-  // The popover sits in the top layer, so the code panel's scrolling never clips it.
   useLayoutEffect(() => {
     const el = pop.current;
 
@@ -64,8 +61,7 @@ export function EasePop({
 
       if (!(hit instanceof Node) || pop.current?.contains(hit) || anchor.contains(hit)) return;
 
-      // Unmounting a focused handle sends no blur, which would leave the ease selected; the pointer's own focus change
-      // then blurs the glyph instead.
+      // Unmounting a focused handle sends no blur; the pointer's focus change then blurs the glyph.
       if (pop.current?.contains(document.activeElement)) anchor.focus();
       close.current();
     };

@@ -23,12 +23,9 @@
   let drag: ReturnType<typeof following> | null = null;
 
   const down = (e: PointerEvent & { currentTarget: HTMLElement }) => {
-    if (e.button !== 0) return;
-    // No text selection or native drag starts under the pointer, which would cancel this one.
-    e.preventDefault();
+    if (e.button !== 0) return;    e.preventDefault();
     e.currentTarget.focus();
     e.currentTarget.setPointerCapture(e.pointerId);
-    // The picture keeps its size for the drag, so measure it once rather than on every move.
     const picture = e.currentTarget.parentElement;
     const scale = picture ? scene.width / picture.clientWidth : 1;
     drag = following(editor, value, grip, { x: e.clientX, y: e.clientY }, scale);

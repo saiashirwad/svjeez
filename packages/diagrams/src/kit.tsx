@@ -7,6 +7,8 @@ import {
   type Point,
   type Rect,
   type Box,
+  type Drawn,
+  type Part,
   type Size,
   ease,
   motion,
@@ -15,6 +17,8 @@ import {
   type Span,
   type Spanned,
   span,
+  stagger,
+  type Beats,
   type Stack,
   draw,
   enter,
@@ -27,22 +31,19 @@ import {
 import { rect } from "svjeez/geometry";
 import { curve } from "./curve.ts";
 
-/** What a node is, so the theme can draw it. */
 export type NodeRole = "task" | "input" | "output" | "tool" | "decision" | "store";
 
-export interface Diagram<Id extends string> {
-  readonly node: SvgNode;
-  /** A node's box; for a group, a lane or an actor head, its box. */
-  get(id: Id): Rect;
-  /** Everything drawn, labels included. */
-  readonly bounds: Rect;
-}
+/**
+ * Parts are the nodes plus a flowchart's groups, a sequence's actor heads or the lanes, by spec id. A part's `span`
+ * is when it appears, or the instant 0 when there from the start; `bounds` covers everything drawn, labels included.
+ */
+export type Diagram<Id extends string> = Drawn<Part<Id>>;
 
-/** A diagram whose `play` option reveals it over time. */
-export interface PlayedDiagram<Id extends string> extends Diagram<Id> {
-  /** From the first reveal to the end of the last, in scene time. The instant 0 when the diagram has no `play`. */
-  readonly span: Spanned;
-}
+/**
+ * A start (items follow `step` apart in the diagram's order), one time per item, or a time per node id, which leaves
+ * unnamed nodes there from the start.
+ */
+export type PlayAt<Id extends string> = Beats | Readonly<Partial<Record<Id, Seconds>>>;
 
 /** Which point of `bounds` lands on `x`, `y`: a corner, the center, or the middle of an edge. */
 export type Anchor = "top-left" | "center" | Edge;
@@ -67,7 +68,6 @@ export interface DiagramOptions {
 
 export type Labelled = string | { readonly label: string; readonly role?: NodeRole };
 
-/** Whether a spec is a bare label, with no options to read. */
 export const isBareLabel = (spec: string | { readonly label: string }): spec is string =>
   typeof spec === "string";
 
@@ -91,7 +91,6 @@ export const tintOf = (
   tints?: Partial<Record<NodeRole, Color>>,
 ): Color => tints?.[role] ?? theme[SLOT[role]];
 
-/** The box a role needs around `label`. */
 export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: FontValue): Size => {
   const [w, h] = [textWidth(label, fontSize, font) + fontSize * 2.2, Math.round(fontSize * 2.8)];
 
@@ -114,15 +113,51 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
   }
 };
 
-/** Seconds a node takes to pop in. */
 export const POP = 0.35;
 
-/** The pop-in of a node that appears at `at`. It rises a few pixels rather than scaling, because browsers can keep a layer
- * that once animated `scale` rasterized at the smaller size, which leaves the label blurry long after it settles. */
+/**
+ * Rises a few pixels instead of scaling: browsers can keep a once-animated `scale` layer rasterized small, which
+ * blurs the label.
+ */
 export const popIn = (at: Seconds): Motion<"opacity" | "y"> =>
   enter({ at, over: POP }, { opacity: 0, y: 6 }, ease.out);
 
-/** The span from the earliest start to the latest end of `reveals`, or the instant 0 when nothing reveals. */
+const isBeats = (at: PlayAt<string>): at is Beats => typeof at === "number" || Array.isArray(at);
+
+export const INSTANT: Spanned = span(0, 0);
+
+export const schedule = (
+  at: PlayAt<string>,
+  order: readonly string[],
+  all: readonly string[],
+  step: Seconds,
+  what: string,
+): Map<string, Seconds> => {
+  const shown = new Map(all.map((id) => [id, -Infinity]));
+
+  if (isBeats(at)) {
+    slots(at, order.length, step, what).forEach((s, i) => shown.set(order[i]!, s.at));
+
+    return shown;
+  }
+
+  for (const [id, t] of Object.entries(at)) {
+    if (!shown.has(id))
+      throw new Error(
+        `${what} names ${JSON.stringify(id)}, which is not a node. Its nodes are ${all.map((n) => JSON.stringify(n)).join(", ")}.`,
+      );
+
+    if (t === undefined) continue;
+
+    if (!(Number.isFinite(t) && t >= 0))
+      throw new Error(`${what} needs a time of 0 or later for ${JSON.stringify(id)}, got ${t}.`);
+
+    shown.set(id, t);
+  }
+
+  return shown;
+};
+
 export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
   if (reveals.length === 0) return span(0, 0);
 
@@ -132,10 +167,26 @@ export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
   return span(first, last - first);
 };
 
+const isStart = (at: Beats): at is Seconds => typeof at === "number";
+
+export const slots = (at: Beats, count: number, step: Seconds, what: string): Spanned[] => {
+  if (isStart(at)) {
+    if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
+
+    return stagger(span(at, step), count, step);
+  }
+
+  if (at.length !== count) throw new Error(`${what} needs ${count} times, got ${at.length}.`);
+
+  if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!)))
+    throw new Error(`${what} needs non-negative times in order, got ${at.join(", ")}.`);
+
+  return at.map((t, i) => span(t, i + 1 < at.length ? at[i + 1]! - t : step));
+};
+
 const SKEW = 0.35;
 const LID = 5;
 
-/** Moves an edge's end from the box border onto the shape's own outline, along the edge's last segment. */
 export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Point => {
   const [cx, cy] = [b.x + b.w / 2, b.y + b.h / 2];
   const vertical = end.x === toward.x;
@@ -227,7 +278,6 @@ export interface Look {
   readonly tints?: Partial<Record<NodeRole, Color>>;
 }
 
-/** What every diagram reads from its options: the theme and sizes with defaults applied, a `Look` at both sizes, and the root group that carries the class and font. */
 export const look = (options: DiagramOptions) => {
   const { theme = defaultDark, fontSize = 14, font, class: cls, tints } = options;
   const small = fontSize * 0.85;
@@ -247,7 +297,6 @@ export const look = (options: DiagramOptions) => {
   };
 };
 
-/** A role's shape with its label centered inside. `extra` draws over the fill, under the label. */
 export const drawNode = (
   role: NodeRole,
   b: Box,
@@ -298,7 +347,6 @@ export const drawNode = (
 
 const HEAD = 8;
 
-/** An orthogonal route drawn as a smooth curve ending in a filled arrowhead along its last run. With `at`, the line draws on over `over` and the head lands as it finishes. */
 export const arrow = (
   points: readonly Point[],
   look: Look & {
@@ -329,7 +377,7 @@ export const arrow = (
           at === undefined
             ? undefined
             : look.dashed
-              ? motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)
+              ? motion({ opacity: 0 }).to({ opacity: 1 }, span(at, over))
               : draw({ at, over })
         }
       />
@@ -339,16 +387,13 @@ export const arrow = (
         animation={
           at === undefined
             ? undefined
-            : motion({ opacity: 0 })
-                .at(at + over * 0.85)
-                .to({ opacity: 1 }, over * 0.15)
+            : motion({ opacity: 0 }).to({ opacity: 1 }, span(at + over * 0.85, over * 0.15))
         }
       />
     </g>
   );
 };
 
-/** A text label on a knockout of the background color, so the line it sits on breaks around it. */
 export const chip = (
   b: Box,
   text: string,
@@ -369,13 +414,11 @@ export const chip = (
   </g>
 );
 
-/** The knockout box an inline edge label needs. */
 export const labelSize = (text: string, fontSize: number, font?: FontValue): Size => ({
   w: textWidth(text, fontSize, font) + 10,
   h: Math.round(fontSize * 1.5),
 });
 
-/** The top-left corner that puts `anchor` of a `w` by `h` box on `(x, y)`. */
 export const corner = (
   w: number,
   h: number,
@@ -395,7 +438,6 @@ export const corner = (
   return { x: x - point.x, y: y - point.y };
 };
 
-/** Shifts layout geometry so `bounds` lands where `options` place it. */
 export const placer = (
   bounds: Box,
   options: { readonly x?: number; readonly y?: number; readonly anchor?: Anchor },
@@ -410,12 +452,52 @@ export const placer = (
   };
 };
 
-export const lookup =
-  <Id extends string>(what: string, boxes: ReadonlyMap<string, Rect>) =>
-  (id: Id): Rect => {
-    const b = boxes.get(id);
+/** Id of the edge `F` to `T`, such as `"pr->post"`; an edge list in the spec gets one id per pair. */
+export type EdgeId<E> = E extends readonly [
+  infer F extends string,
+  infer T extends string,
+  ...unknown[],
+]
+  ? `${F}->${T}`
+  : never;
 
-    if (!b) throw new Error(`${what} has no ${JSON.stringify(id)}.`);
+export const edgeId = (from: string, to: string): string => `${from}->${to}`;
 
-    return b;
+export const lineBox = (points: readonly Point[], label?: Box): Rect => {
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  const [left, top] = [Math.min(...xs), Math.min(...ys)];
+  const box = rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
+
+  return label ? box.union(rect(label.x, label.y, label.w, label.h)) : box;
+};
+
+export const partsOf = <Id extends string>(
+  what: string,
+  boxes: Iterable<readonly [string, Rect]>,
+  when: (id: string, index: number) => Spanned = () => INSTANT,
+) => {
+  // SAFETY: the boxes are keyed by the spec's ids, which the diagram's signature types as Id
+  const parts = [...boxes].map(([id, box], i): Part<Id> => ({
+    id: id as Id,
+    box,
+    span: when(id, i),
+  }));
+
+  return {
+    parts,
+    part: (id: Id): Part<Id> => {
+      const found = parts.find((p) => p.id === id);
+
+      if (!found)
+        throw new Error(
+          `${what} has no ${JSON.stringify(id)}. Its parts are ${parts
+            .slice(0, 6)
+            .map((p) => JSON.stringify(p.id))
+            .join(", ")}${parts.length > 6 ? ", …" : ""}.`,
+        );
+
+      return found;
+    },
   };
+};

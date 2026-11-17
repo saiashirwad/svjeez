@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { def, font, fx, motion, render } from "svjeez";
+import { def, font, fx, motion, render, span } from "svjeez";
 import { validateSvg } from "svjeez/frames";
 
 const scene = (prefix?: string) =>
@@ -18,10 +18,10 @@ const scene = (prefix?: string) =>
         width={10}
         height={10}
         fill={def.linearGradient({}, [<stop offset={0} stopColor="#fff" />])}
-        animation={motion({ opacity: 0, rotate: 0 }).at(1).to({ opacity: 1, rotate: 90 }, 1)}
+        animation={motion({ opacity: 0, rotate: 0 }).to({ opacity: 1, rotate: 90 }, span(1, 1))}
       />
-      <circle r={4} animation={motion({ blur: 0 }).at(2).to({ blur: 4 }, 1)} />
-      <circle r={4} animation={motion({ scale: 1 }).at(2).to({ scale: 2 }, 1)} />
+      <circle r={4} animation={motion({ blur: 0 }).to({ blur: 4 }, span(2, 1))} />
+      <circle r={4} animation={motion({ scale: 1 }).to({ scale: 2 }, span(2, 1))} />
     </>,
   );
 
@@ -91,9 +91,7 @@ test("a prefixed scene still warns about a filter over many animated elements", 
             cx={i}
             cy={50}
             r={1}
-            animation={motion({ opacity: 0 })
-              .at(i / 45)
-              .to({ opacity: 1 }, 0.5)}
+            animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(i / 45, 0.5))}
           />
         ))}
       </g>,

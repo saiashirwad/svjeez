@@ -70,7 +70,6 @@ describe("fidelity", () => {
     const file = join(dir, "recording.json");
     const original = readFileSync(file, "utf8");
 
-    // The drawing says the card is another color than the page painted it.
     const wrong = original
       .replaceAll("rgb(255,255,255)", "rgb(255,0,0)")
       .replaceAll("rgb(17,17,17)", "rgb(0,0,255)");

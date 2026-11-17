@@ -8,6 +8,7 @@ import {
   type SvgNode,
   appWindow,
   code,
+  span,
   typewriter,
   type CodePiece,
 } from "svjeez";
@@ -17,7 +18,6 @@ import { mono, theme } from "../style";
 import { COLD } from "./cold";
 import { C, Blip, Shot, show } from "./kit";
 
-// Everything here is written from 0, on the clock of a <Shot> that starts when the cold open ends.
 const FS = 15;
 const ROW = FS * 1.6;
 
@@ -51,7 +51,6 @@ const bold = (content: string, color: Color = C.ink): CodePiece => ({
 
 const width = (text: string) => mono.measure(text, FS);
 
-/** Claude's spinner glyph: a six-spoke asterisk that breathes as it turns. */
 const asterisk = (x: number, y: number, animation?: Stack<"rotate" | "scale">) => (
   <g transform={`translate(${x} ${y})`}>
     <path
@@ -70,7 +69,6 @@ const split = BOX.x + BOX.w * 0.56;
 const centerAt = (text: string, row: number, piece: (text: string) => CodePiece = (t) => t) =>
   sayAt([piece(text)], row, BOX.x + (split - BOX.x) / 2 - width(text) / 2);
 
-/** The welcome card's mascot is Blip, blinking up at the reader. */
 const mascot = (row: number) => (
   <Blip
     x={BOX.x + (split - BOX.x) / 2}
@@ -152,7 +150,6 @@ const ask = typewriter(
 
 const SENT = ask.span.end + 0.3;
 
-/** One transcript line: where it sits, when it shows, what it draws. */
 type Line = { row: number; at: number; node: SvgNode };
 
 const lines: Line[] = [];
@@ -167,8 +164,8 @@ const dot = (row: number, color: Color, pending?: { until: number }) =>
         r={4}
         fill={C.muted}
         animation={motion({ opacity: 1 })
-          .to({ opacity: 0.25 }, 0.25)
-          .to({ opacity: 1 }, 0.25)
+          .to({ opacity: 0.25 }, span(0, 0.25))
+          .to({ opacity: 1 }, span(0, 0.25).next(0.25))
           .loop(0.5)}
       />
       <circle cx={left + 4} cy={mid(row)} r={4} fill={color} animation={show(pending.until)} />
@@ -291,7 +288,6 @@ reply(R + 14.2, DONE_AT, [
 
 export const TERM = { at: COLD.at + COLD.over, over: DONE_AT + 1.6 };
 
-// The input box follows the transcript down, and the whole session scrolls once it outgrows the window.
 const spinning = (t: number) => t >= SENT && t < DONE_AT;
 
 const bottom = (t: number) =>
@@ -305,14 +301,15 @@ const beats = [...new Set([welcomeAt, SENT, ...lines.map((l) => l.at), DONE_AT])
   .filter((t) => t >= welcomeAt)
   .sort((a, b) => a - b);
 
-// Every follower eases over the same span, so the input box holds still on screen while the session scrolls under it.
 const follow = (y: (t: number) => number, over = 0.25): Motion<"y"> =>
   beats.reduce(
     (track, t, i) =>
       i > 0 && y(t) !== y(beats[i - 1]!)
-        ? track
-            .at(t)
-            .to({ y: y(t) }, Math.min(over, (beats[i + 1] ?? Infinity) - t - 0.02), ease.out)
+        ? track.to(
+            { y: y(t) },
+            span(t, Math.min(over, (beats[i + 1] ?? Infinity) - t - 0.02)),
+            ease.out,
+          )
         : track,
     motion({ y: y(welcomeAt) }),
   );
@@ -325,7 +322,7 @@ const inputBox = (
       strokeOpacity={0.7}
     />
     <g transform={`translate(0 ${ROW * 0.25})`}>
-      <g animation={motion({ opacity: 1 }).at(SENT).set({ opacity: 0 })}>{ask.node}</g>
+      <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, SENT)}>{ask.node}</g>
       <g animation={show(SENT)}>{sayAt([["muted", ">"]], -(shell.body.y + 12) / ROW, left)}</g>
     </g>
     {sayAt([["muted", "? for shortcuts"]], 1.6 - (shell.body.y + 12) / ROW, left + 2)}
@@ -335,15 +332,15 @@ const inputBox = (
 const spinner = (
   <g
     animation={[
-      show(SENT).at(DONE_AT).set({ opacity: 0 }),
+      show(SENT).set({ opacity: 0 }, DONE_AT),
       follow((t) => top(spinnerRow(t)) - top(0)),
     ]}
   >
     {asterisk(left + 4, mid(0), [
-      motion({ rotate: 0 }).to({ rotate: 180 }, 1.5, ease.linear).loop(1.5),
+      motion({ rotate: 0 }).to({ rotate: 180 }, span(0, 1.5), ease.linear).loop(1.5),
       motion({ scale: 1 })
-        .to({ scale: 0.6 }, 0.375, ease.inOut)
-        .to({ scale: 1 }, 0.375, ease.inOut)
+        .to({ scale: 0.6 }, span(0, 0.375), ease.inOut)
+        .to({ scale: 1 }, span(0, 0.375).next(0.375), ease.inOut)
         .loop(0.75),
     ])}
     {say(

@@ -1,5 +1,3 @@
-// Copies text and says how it went. data-copied="ok" draws the check on the button's icon; "failed" says so in words and
-// selects the text, so a reader whose clipboard is blocked can copy it by hand.
 const HOLD = 1600;
 const timers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
 
@@ -13,7 +11,6 @@ const select = (element: Element) => {
   selection?.addRange(range);
 };
 
-/** Copies `text`, marks `button`, and writes the outcome into `say`. On failure `fallback` is selected. */
 export const copy = async (
   button: HTMLElement,
   text: string,

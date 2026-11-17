@@ -1,5 +1,5 @@
 import { construct, tex } from "@svjeez/math";
-import { motion, render, tint } from "svjeez";
+import { motion, render, span, tint } from "svjeez";
 
 import { css, theme } from "../style";
 
@@ -7,7 +7,6 @@ const W = 960;
 const H = 540;
 const SIDE = 200;
 
-// Euclid I.1, then the bisector of the angle at C: the construction below is the whole figure.
 const g = construct({ theme, origin: { x: 235, y: 300 }, fontSize: 24 });
 
 const A = g.point(0, 0, "A", { at: 0.4 });
@@ -15,7 +14,6 @@ const B = g.point(SIDE, 0, "B", { at: 0.4 });
 
 const AB = g.segment(A, B, { at: 0.9 });
 
-// Both compass circles pass through the other end of AB. They meet where every side of the triangle is the same length.
 const tCircles = g.time;
 const circleA = g.circle(A, B, { aid: true });
 const circleB = g.circle(B, A, { aid: true });
@@ -73,20 +71,18 @@ export default function build(): string {
       <rect width="100%" height="100%" fill={theme.base00} />
       <g
         fill={tint(theme, "muted")}
-        animation={motion({ opacity: 0 }).at(0.2).to({ opacity: 1 }, 0.6)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0.2, 0.6))}
       >
-        {
-          tex(String.raw`\text{Euclid I.1}`, {
-            x: 690,
-            y: 100,
-            fontSize: 28,
-            theme,
-            color: tint(theme, "blue"),
-            display: false,
-          }).node
-        }
+        {tex(String.raw`\text{Euclid I.1}`, {
+          x: 690,
+          y: 100,
+          fontSize: 28,
+          theme,
+          color: tint(theme, "blue"),
+          display: false,
+        })}
       </g>
-      {g.node}
+      {g}
       {note(String.raw`AC = AB \quad (\text{circle } A)`, 190).write({
         at: tCircles + 1.4,
         over: 1,

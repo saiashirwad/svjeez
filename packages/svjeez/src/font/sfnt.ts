@@ -1,4 +1,3 @@
-/** A parsed OpenType or TrueType file: its tables, read on demand. */
 export interface Sfnt {
   readonly view: DataView;
   readonly tables: ReadonlyMap<string, number>;
@@ -6,7 +5,7 @@ export interface Sfnt {
 }
 
 export const SFNT_TRUETYPE = 0x00010000;
-export const SFNT_CFF = 0x4f54544f; // "OTTO"
+export const SFNT_CFF = 0x4f54544f;
 
 export const u8 = (f: Sfnt, at: number): number => f.view.getUint8(at);
 export const i8 = (f: Sfnt, at: number): number => f.view.getInt8(at);
@@ -14,7 +13,6 @@ export const u16 = (f: Sfnt, at: number): number => f.view.getUint16(at);
 export const i16 = (f: Sfnt, at: number): number => f.view.getInt16(at);
 export const u32 = (f: Sfnt, at: number): number => f.view.getUint32(at);
 
-/** F2Dot14, the fixed-point scale in composite glyphs. */
 export const f2dot14 = (f: Sfnt, at: number): number => i16(f, at) / 16384;
 
 export const table = (f: Sfnt, tag: string): number | undefined => f.tables.get(tag);
@@ -52,9 +50,7 @@ export const sfnt = (bytes: Uint8Array): Sfnt => {
 
 export interface Metrics {
   readonly unitsPerEm: number;
-  /** Above the baseline, in em. */
   readonly ascent: number;
-  /** Below the baseline, in em, as a positive number. */
   readonly descent: number;
   readonly lineGap: number;
   readonly capHeight?: number;
@@ -78,7 +74,6 @@ export const metrics = (f: Sfnt): Metrics => {
   };
 };
 
-/** Advance width of a glyph in font units. Glyphs past numberOfHMetrics share the last advance. */
 export const advance = (f: Sfnt, glyph: number): number => {
   const hmtx = required(f, "hmtx");
   const count = u16(f, required(f, "hhea") + 34);
@@ -92,7 +87,6 @@ const utf16be = (f: Sfnt, at: number, length: number): string =>
 const latin1 = (f: Sfnt, at: number, length: number): string =>
   String.fromCharCode(...Array.from({ length }, (_, i) => u8(f, at + i)));
 
-/** A name record: the typographic family (16) before the legacy family (1); Windows English before Mac Roman. */
 export const name = (f: Sfnt, ...ids: readonly number[]): string | undefined => {
   const at = table(f, "name");
 
@@ -131,7 +125,6 @@ export const weightOf = (f: Sfnt): number => {
   return os2 === undefined ? 400 : u16(f, os2 + 4);
 };
 
-/** OS/2 fsSelection bit 0 or 9, or head macStyle bit 1. */
 export const isItalic = (f: Sfnt): boolean => {
   const os2 = table(f, "OS/2");
 

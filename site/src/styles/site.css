@@ -790,8 +790,9 @@ kbd {
   inline-size: 100%;
   block-size: auto;
 }
-/* The editor right under the hero, and the way out to a page where the whole file can be typed. */
-#play {
+/* The first section sits right under the hero, without a hairline. The editor's way out is to a page where the whole
+   file can be typed. */
+#film {
   margin-block-start: clamp(3.5rem, 9vw, 6.5rem);
   padding-block-start: 0;
   border-block-start: 0;
@@ -1054,6 +1055,19 @@ pre.side {
   .tile.strip {
     grid-column: 1 / -1;
   }
+}
+.wall.small {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 40rem) {
+  .wall.small {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.tile {
+  grid-row: auto;
+  grid-template-rows: none;
+  align-content: start;
 }
 .tile {
   display: grid;

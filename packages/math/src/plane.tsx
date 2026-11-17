@@ -1,14 +1,18 @@
 /** @jsxImportSource svjeez */
 import {
   css,
+  draw as drawOn,
   ease,
   motion,
+  span as spanOf,
+  type Drawn,
+  type Part,
+  type Spanned,
   tint,
   type Base16,
   type Color,
   type Ease,
   type FontValue,
-  type Motion,
   type PathData,
   type Point,
   type Rect,
@@ -16,6 +20,7 @@ import {
   type SvgNode,
   defaultDark,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 
 import { calculus, type Calculus } from "./calculus.tsx";
 import { faintGrid, frameOf, furniture, sample, type Frame, type SampleOptions } from "./graph.tsx";
@@ -27,10 +32,8 @@ export type { Vec2 };
 
 type Row = readonly [number, number] | readonly [number, number, number];
 
-/** A map of the plane by rows, as written on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy). A third number in a row translates. */
 export type PlaneMatrix = readonly [Row, Row];
 
-/** A map of the plane that need not be linear, such as z ↦ z² as `(x, y) => [x * x - y * y, 2 * x * y]`. */
 export type PlaneFunction = (x: number, y: number) => Vec2;
 
 export interface StepOptions {
@@ -39,13 +42,11 @@ export interface StepOptions {
 }
 
 export interface PlaneOptions {
-  /** The plot area in scene px. The pixels per unit follow from it and the ranges, and may differ per axis. */
   readonly frame: Rect;
   /** Graph range of the x axis, `[min, max]`. */
   readonly xRange: Vec2;
   /** Graph range of the y axis, `[min, max]`. */
   readonly yRange: Vec2;
-  /** Tick step in graph units: a number for both axes, or one per axis. An axis without one has no ticks and no grid lines. */
   readonly ticks?: number | { readonly x?: number; readonly y?: number };
   /** Numbers at the ticks. Default true. */
   readonly labels?: boolean;
@@ -62,7 +63,6 @@ export interface VectorOptions {
   readonly color?: Color;
   /** Stroke width in pixels; the head scales with it. Default 3. */
   readonly width?: number;
-  /** TeX source, or a `tex()` formula, kept just past the tip. */
   readonly label?: string | Tex;
   /** The tail, in plane units. Default the origin. */
   readonly from?: Vec2;
@@ -92,63 +92,41 @@ export interface PlaneLabelOptions {
   readonly fontSize?: number;
 }
 
-export interface Plot {
-  /** The curve. On a plane with steps it moves with them. */
-  readonly node: SvgNode;
-  /** The path data before any step. A gap in the curve starts a new `M`. */
+/**
+ * What a plane draws. `bounds` is where it sits after every step; `span` runs from when it starts to draw to when the
+ * last step moving it ends, or is the instant 0 if static. Only `basis()` has parts, `"i"` and `"j"`.
+ */
+export type PlaneDrawn<P extends Part = Part> = Drawn<P>;
+
+export interface Plot extends PlaneDrawn<never> {
   readonly d: string;
-  /** Every sampled point that was drawn before any step, in scene px. */
   readonly points: readonly Point[];
 }
 
-export interface PlotOptions extends SampleOptions {
-  readonly animation?: Motion<"draw">;
-}
+export type PlotOptions = SampleOptions;
 
-/**
- * Coordinate axes over a graph range that can also move. `point()` maps graph units to scene px, `plot()`
- * draws a function, and the calculus methods draw on the curve. Steps chain, each returning a new plane, and
- * what is drawn from the final plane (grid, axes, vectors, shapes, labels and plots) follows every step. When
- * every step is a matrix, the scene carries one CSS transform driven by registered properties; once a step is
- * a function, outlines are sampled and morph through `d`.
- */
 export interface Plane extends Calculus {
-  /** The axis lines, ticks and numbers, and the grid when `grid` is set. It stays put through every step. */
   readonly node: SvgNode;
-  /** The plot area. */
   readonly bounds: Rect;
-  /** Scene pixels of a point before any step. */
   point(x: number, y: number): Point;
-  /** Scene pixels of a point after every step. */
   map(x: number, y: number): Point;
-  /** Moves the plane by `matrix` during the span, on top of the steps before it. */
   apply(span: Span, matrix: PlaneMatrix, options?: StepOptions): Plane;
-  /** Moves every point p to `f(p)` during the span, each along a straight line. */
   applyFunction(span: Span, f: PlaneFunction, options?: StepOptions): Plane;
-  /** Moves every point back to where it started. */
   reset(span: Span, options?: StepOptions): Plane;
-  /** The rules the plane's elements read. Pass it to `render`'s `css`. */
   readonly css: ReturnType<typeof css>;
-  /** The grid lines at the ticks as they were, staying put. */
   readonly background: SvgNode;
-  /** The grid lines at the ticks that move, without the axes. */
   readonly grid: SvgNode;
-  /** The two axis lines, which move. */
   readonly axes: SvgNode;
-  /** `f` across the range. Drawn from a plane with steps, the curve follows them and takes no `animation`. */
   plot(f: (x: number) => number, options?: PlotOptions): Plot;
-  /** An arrow to `to`, its head upright however the plane shears. */
-  vector(to: Vec2, options?: VectorOptions): SvgNode;
-  /** The same arrow, its shaft growing from the tail during `span`, then the head and the label appear. */
-  vector(span: Span, to: Vec2, options?: VectorOptions): SvgNode;
-  /** î and ĵ, labelled. Given a span, they grow in it, with ĵ entering 0.2s after î. */
-  basis(span?: Span): SvgNode;
-  /** A filled polygon whose corners move with the plane, so its area follows the determinant. */
-  polygon(points: readonly Vec2[], options?: PlanePolygonOptions): SvgNode;
-  /** The line through the origin along `direction`, across the grid. An eigenvector's line stays on itself. */
-  line(direction: Vec2, options?: PlaneLineOptions): SvgNode;
-  /** Content centered on a point of the plane, riding it. A node is placed with its origin there. */
-  label(at: Vec2, content: string | Tex | SvgNode, options?: PlaneLabelOptions): SvgNode;
+  plot(span: Span, f: (x: number) => number, options?: PlotOptions): Plot;
+  vector(to: Vec2, options?: VectorOptions): PlaneDrawn<never>;
+  vector(span: Span, to: Vec2, options?: VectorOptions): PlaneDrawn<never>;
+  /** î and ĵ, labelled, as the parts `"i"` and `"j"`. Given a span, they grow in it, with ĵ entering 0.2s after î. */
+  basis(span?: Span): PlaneDrawn<Part<"i" | "j">>;
+  polygon(points: readonly Vec2[], options?: PlanePolygonOptions): PlaneDrawn<never>;
+  line(direction: Vec2, options?: PlaneLineOptions): PlaneDrawn<never>;
+  /** Content centered on a point of the plane, riding it. A node is placed with its origin there, and has an empty box. */
+  label(at: Vec2, content: string | Tex | SvgNode, options?: PlaneLabelOptions): PlaneDrawn<never>;
 }
 
 type Place =
@@ -213,7 +191,6 @@ const then = (before: Place, next: Place): Place => {
 
 const IDENTITY: Place = { kind: "matrix", m: identity };
 
-/** The grid lines at the ticks as two-point polylines in graph units, without the ones under the axes when `bare`. */
 const rules = (frame: Frame, bare: boolean): Vec2[][] => {
   const [[x0, x1], [y0, y1]] = [frame.x, frame.y];
   const [cx, cy] = frame.cross;
@@ -234,7 +211,6 @@ const rules = (frame: Frame, bare: boolean): Vec2[][] => {
   ];
 };
 
-/** The two axis lines in graph units. */
 const axisLines = (frame: Frame): Vec2[][] => [
   [
     [frame.cross[0], frame.y[0]],
@@ -246,9 +222,7 @@ const axisLines = (frame: Frame): Vec2[][] => [
   ],
 ];
 
-/** How one plane draws: one CSS transform for matrices, or sampled outlines once a function moves it. */
 interface Drawing {
-  /** Polylines in plane units, as a path that moves with the plane. `grow` scales a single line from its first point. */
   path(
     polylines: readonly (readonly Vec2[])[],
     closed: boolean,
@@ -259,7 +233,6 @@ interface Drawing {
   ride(point: Vec2, direction: Vec2, push: number, content: SvgNode): SvgNode;
 }
 
-/** Path data in plane units, with H and V for the axis-aligned edges a grid is made of. */
 const plain = (polylines: readonly (readonly Vec2[])[], closed: boolean): PathData =>
   // SAFETY: every polyline starts with M, so the text is path data.
   polylines
@@ -287,11 +260,10 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
   let timeline = moving.length > 0 ? motion(values(identity)) : undefined;
 
   for (const [i, s] of steps.entries())
-    timeline = timeline?.at(s.at).to(values(matrices[i + 1]!), s.over, s.ease);
+    timeline = timeline?.to(values(matrices[i + 1]!), s, s.ease);
 
   const flat = `translate(${origin.x} ${origin.y})`;
 
-  /** In pixels from the origin, where heads and labels read the unit, or in plane units, where paths don't. */
   const scope = (pixels: boolean, child: SvgNode) => (
     <g transform={pixels ? flat : `${flat} scale(${sx} ${-sy})`}>
       <g animation={timeline} style={pixels ? { [UX]: sx, [UY]: sy } : undefined}>
@@ -300,7 +272,6 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
     </g>
   );
 
-  /** A point and a direction for the rules to read. Zeros are left out, since every property starts at 0. */
   const at = (x: number, y: number, dx = 0, dy = 0, k = 0) => ({
     [X]: x || undefined,
     [Y]: y || undefined,
@@ -323,9 +294,7 @@ const cssDrawing = (frame: Frame, steps: readonly Step[], placed: readonly Matri
             style={grow ? at(x, y) : undefined}
             animation={
               grow
-                ? motion({ [GROW]: 0 })
-                    .at(grow.at)
-                    .to({ [GROW]: 1 }, grow.over, ease.inOut)
+                ? motion({ [GROW]: 0 }).to({ [GROW]: 1 }, spanOf(grow.at, grow.over), ease.inOut)
                 : undefined
             }
           />
@@ -376,7 +345,9 @@ const warpDrawing = (frame: Frame, steps: readonly Step[]): Drawing => {
       const node = w.path(w.rings(polylines, closed), closed, attrs);
 
       return grow ? (
-        <g animation={motion({ opacity: 0 }).at(grow.at).to({ opacity: 1 }, grow.over)}>{node}</g>
+        <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, spanOf(grow.at, grow.over))}>
+          {node}
+        </g>
       ) : (
         node
       );
@@ -389,7 +360,7 @@ const warpDrawing = (frame: Frame, steps: readonly Step[]): Drawing => {
 };
 
 const appear = (at: number, over: number, child: SvgNode) => (
-  <g animation={motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)}>{child}</g>
+  <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, spanOf(at, over))}>{child}</g>
 );
 
 const isSource = (content: string | Tex | SvgNode): content is string =>
@@ -399,19 +370,67 @@ const centered = (
   content: string | Tex | SvgNode,
   color: Color,
   fontSize: number,
-): readonly [SvgNode, number] => {
+): readonly [SvgNode, number, { readonly w: number; readonly h: number }] => {
   const formula = isSource(content)
     ? tex(content, { fontSize, color, anchor: [0.5, 0.5] })
     : content;
 
-  if (!("write" in formula)) return [formula, 8];
+  if (!("write" in formula)) return [formula, 8, { w: 0, h: 0 }];
   const { x, y, w, h } = formula.bounds;
 
   return [
     <g transform={`translate(${round(-x - w / 2)} ${round(-y - h / 2)})`}>{formula.node}</g>,
     Math.hypot(w, h) / 2,
+    { w, h },
   ];
 };
+
+const around = (points: readonly Point[]): Rect => {
+  const [xs, ys] = [points.map((p) => p.x), points.map((p) => p.y)];
+  const [left, top] = [Math.min(...xs), Math.min(...ys)];
+
+  return rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
+};
+
+const within = (box: Rect, frame: Rect): Rect => {
+  const [left, top] = [Math.max(box.x, frame.x), Math.max(box.y, frame.y)];
+  const right = Math.max(left, Math.min(box.x + box.w, frame.x + frame.w));
+  const bottom = Math.max(top, Math.min(box.y + box.h, frame.y + frame.h));
+
+  return rect(left, top, right - left, bottom - top);
+};
+
+const covering = (spans: readonly (Span | undefined)[]): Spanned => {
+  const all = spans.filter((s): s is Span => s !== undefined);
+
+  if (all.length === 0) return spanOf(0, 0);
+  const first = Math.min(...all.map((s) => s.at));
+
+  return spanOf(first, Math.max(...all.map((s) => s.at + s.over)) - first);
+};
+
+const drawnOf = <P extends Part>(
+  what: string,
+  node: SvgNode,
+  bounds: Rect,
+  span: Spanned,
+  parts: readonly P[] = [],
+): Drawn<P> => ({
+  node,
+  bounds,
+  span,
+  parts,
+  part(id) {
+    const found = parts.find((p) => p.id === id);
+
+    if (!found)
+      throw new Error(
+        `${what} has no part ${JSON.stringify(id)}.${parts.length > 0 ? ` Its parts are ${parts.map((p) => JSON.stringify(p.id)).join(", ")}.` : " It draws one thing, so read its bounds and span."}`,
+      );
+
+    return found;
+  },
+});
 
 const make = (frame: Frame, steps: readonly Step[]): Plane => {
   const { theme } = frame;
@@ -446,13 +465,41 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
 
   const current = steps.at(-1)?.place ?? IDENTITY;
 
-  function vector(to: Vec2, options?: VectorOptions): SvgNode;
-  function vector(span: Span, to: Vec2, options?: VectorOptions): SvgNode;
+  const settled = (q: Vec2): Point => frame.point(...functionOf(current)(q[0], q[1]));
+
+  const traced = (polylines: readonly (readonly Vec2[])[], samples = 16): Rect =>
+    around(
+      polylines.flatMap((line) =>
+        line.length === 1
+          ? [settled(line[0]!)]
+          : line.slice(1).flatMap((q, i) => {
+              const from = line[i]!;
+
+              return Array.from({ length: samples + 1 }, (_, k) =>
+                settled([
+                  from[0] + ((q[0] - from[0]) * k) / samples,
+                  from[1] + ((q[1] - from[1]) * k) / samples,
+                ]),
+              );
+            }),
+      ),
+    );
+
+  const moving: Span | undefined =
+    steps.length === 0
+      ? undefined
+      : {
+          at: steps[0]!.at,
+          over: steps.at(-1)!.at + steps.at(-1)!.over - steps[0]!.at,
+        };
+
+  function vector(to: Vec2, options?: VectorOptions): PlaneDrawn<never>;
+  function vector(span: Span, to: Vec2, options?: VectorOptions): PlaneDrawn<never>;
   function vector(
     first: Span | Vec2,
     second?: Vec2 | VectorOptions,
     third?: VectorOptions,
-  ): SvgNode {
+  ): PlaneDrawn<never> {
     // SAFETY: the overloads pair a span with a tip and options, or a tip alone with options.
     const [enter, to, options = {}] = Array.isArray(first)
       ? [undefined, first as Vec2, second as VectorOptions | undefined]
@@ -481,25 +528,99 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     const tip = draw().head(from, to, head, color);
     const direction: Vec2 = [to[0] - from[0], to[1] - from[1]];
     const words = options.label === undefined ? undefined : centered(options.label, color, 17);
-    const label = words && draw().ride(to, direction, (4 / 3) * width + 6 + words[1], words[0]);
+    const push = (4 / 3) * width + 6 + (words?.[1] ?? 0);
+    const label = words && draw().ride(to, direction, push, words[0]);
+
+    const [tail, end] = [
+      settled([to[0] - direction[0] * 0.01, to[1] - direction[1] * 0.01]),
+      settled(to),
+    ];
+
+    const angle = Math.atan2(end.y - tail.y, end.x - tail.x) - LEAN;
+    const box = traced([[from, to]]).pad((8 / 3) * width);
+
+    const bounds = words
+      ? box.union(
+          rect(
+            end.x + push * Math.cos(angle) - words[2].w / 2,
+            end.y + push * Math.sin(angle) - words[2].h / 2,
+            words[2].w,
+            words[2].h,
+          ),
+        )
+      : box;
 
     if (!enter)
-      return (
+      return drawnOf(
+        "plane.vector()",
         <g>
           {shaft}
           {tip}
           {label}
-        </g>
+        </g>,
+        bounds,
+        covering([moving]),
       );
     const { at, over } = enter;
 
-    return (
+    return drawnOf(
+      "plane.vector()",
       <g>
         {shaft}
         {appear(at + over * 0.8, over * 0.4, tip)}
         {label && appear(at + over, over * 0.8, label)}
-      </g>
+      </g>,
+      bounds,
+      covering([{ at, over: over * (label ? 1.8 : 1.2) }, moving]),
     );
+  }
+
+  function plot(f: (x: number) => number, options?: PlotOptions): Plot;
+  function plot(span: Span, f: (x: number) => number, options?: PlotOptions): Plot;
+  function plot(
+    first: Span | ((x: number) => number),
+    second?: ((x: number) => number) | PlotOptions,
+    third?: PlotOptions,
+  ): Plot {
+    // SAFETY: the overloads pair a span with a function and options, or a function alone with options.
+    const [on, f, options = {}] =
+      first instanceof Function
+        ? [undefined, first, second as PlotOptions | undefined]
+        : [first, second as (x: number) => number, third];
+
+    const curve = sample(frame, f, options);
+    const { color = tint(theme, "blue"), strokeWidth = 2.5 } = options;
+    const look = { fill: "none", stroke: color, strokeWidth } as const;
+    const joins = { strokeLinejoin: "round", strokeLinecap: "round" } as const;
+
+    if (steps.length > 0 && on)
+      throw new Error(
+        `plot() cannot draw on a plane that has steps. Plot on the plane before its first step, or leave out the span.`,
+      );
+
+    const runs = curve.runs.filter((run) => run.length > 1);
+
+    const box = within(
+      steps.length > 0 && runs.length > 0 ? traced(runs, 1) : around(curve.points),
+      frame.bounds,
+    );
+
+    return {
+      d: curve.d,
+      points: curve.points,
+      ...drawnOf<never>(
+        "plot()",
+        <g clipPath={frame.clip}>
+          {steps.length > 0 ? (
+            draw().path(runs, false, { ...look, ...joins })
+          ) : (
+            <path d={curve.d} {...look} {...joins} animation={on && drawOn(on)} />
+          )}
+        </g>,
+        box,
+        covering([on, moving]),
+      ),
+    };
   }
 
   const graph = calculus({
@@ -511,7 +632,6 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
     point: frame.point,
   });
 
-  // The calculus methods draw at rest, so on a plane with steps they say where to call them.
   const refuse = (name: string) => (): never => {
     throw new Error(
       `plane.${name}() draws on a plane that does not move. Call it on the plane before its first step.`,
@@ -576,57 +696,49 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
         strokeWidth: 1.5,
       });
     },
-    plot(f, options = {}) {
-      const curve = sample(frame, f, options);
-      const { color = tint(theme, "blue"), strokeWidth = 2.5 } = options;
-      const look = { fill: "none", stroke: color, strokeWidth } as const;
-      const joins = { strokeLinejoin: "round", strokeLinecap: "round" } as const;
-
-      if (steps.length > 0 && options.animation)
-        throw new Error(
-          `plot() cannot draw on a plane that has steps. Plot on the plane before its first step, or leave out animation.`,
-        );
-
-      return {
-        d: curve.d,
-        points: curve.points,
-        node: (
-          <g clipPath={frame.clip}>
-            {steps.length > 0 ? (
-              draw().path(
-                curve.runs.filter((run) => run.length > 1),
-                false,
-                { ...look, ...joins },
-              )
-            ) : (
-              <path d={curve.d} {...look} {...joins} animation={options.animation} />
-            )}
-          </g>
-        ),
-      };
-    },
+    plot,
     ...still,
     vector,
-    basis: (enter) => (
-      <g>
-        {enter
-          ? vector(enter, [1, 0], { color: theme.base0B, label: String.raw`\hat\imath` })
-          : vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath` })}
-        {enter
-          ? vector({ at: enter.at + 0.2, over: enter.over }, [0, 1], {
-              color: theme.base08,
-              label: String.raw`\hat\jmath`,
-            })
-          : vector([0, 1], { color: theme.base08, label: String.raw`\hat\jmath` })}
-      </g>
-    ),
+    basis: (enter) => {
+      const i = enter
+        ? vector(enter, [1, 0], { color: theme.base0B, label: String.raw`\hat\imath` })
+        : vector([1, 0], { color: theme.base0B, label: String.raw`\hat\imath` });
+
+      const j = enter
+        ? vector({ at: enter.at + 0.2, over: enter.over }, [0, 1], {
+            color: theme.base08,
+            label: String.raw`\hat\jmath`,
+          })
+        : vector([0, 1], { color: theme.base08, label: String.raw`\hat\jmath` });
+
+      const parts = [
+        { id: "i", box: i.bounds, span: i.span },
+        { id: "j", box: j.bounds, span: j.span },
+      ] as const;
+
+      return drawnOf(
+        "plane.basis()",
+        <g>
+          {i}
+          {j}
+        </g>,
+        i.bounds.union(j.bounds),
+        covering([i.span, j.span]),
+        parts,
+      );
+    },
     polygon: (points, { color = theme.base0A, fillOpacity = 0.22, strokeWidth = 1.5 } = {}) =>
-      draw().path([points], true, {
-        fill: color,
-        fillOpacity,
-        stroke: strokeWidth > 0 ? color : undefined,
-        strokeWidth: strokeWidth > 0 ? strokeWidth : undefined,
-      }),
+      drawnOf(
+        "plane.polygon()",
+        draw().path([points], true, {
+          fill: color,
+          fillOpacity,
+          stroke: strokeWidth > 0 ? color : undefined,
+          strokeWidth: strokeWidth > 0 ? strokeWidth : undefined,
+        }),
+        traced([[...points, points[0]!]]),
+        covering([moving]),
+      ),
     line: ([dx, dy], { color = theme.base0E, width = 1.5, opacity } = {}) => {
       const len = Math.hypot(dx, dy);
 
@@ -636,26 +748,40 @@ const make = (frame: Frame, steps: readonly Step[]): Plane => {
       const reach =
         (Math.max(...frame.x.map(Math.abs), ...frame.y.map(Math.abs)) * Math.SQRT2) / len;
 
-      return draw().path(
-        [
-          [
-            [-dx * reach, -dy * reach],
-            [dx * reach, dy * reach],
-          ],
-        ],
-        false,
-        { fill: "none", stroke: color, strokeWidth: width, strokeOpacity: opacity },
+      const ends: Vec2[] = [
+        [-dx * reach, -dy * reach],
+        [dx * reach, dy * reach],
+      ];
+
+      return drawnOf(
+        "plane.line()",
+        draw().path([ends], false, {
+          fill: "none",
+          stroke: color,
+          strokeWidth: width,
+          strokeOpacity: opacity,
+        }),
+        traced([ends]),
+        covering([moving]),
       );
     },
-    label: (at, content, { color = theme.base05, fontSize = 17 } = {}) =>
-      draw().ride(at, [0, 0], 0, centered(content, color, fontSize)[0]),
+    label: (at, content, { color = theme.base05, fontSize = 17 } = {}) => {
+      const [node, , { w, h }] = centered(content, color, fontSize);
+      const { x, y } = settled(at);
+
+      return drawnOf(
+        "plane.label()",
+        draw().ride(at, [0, 0], 0, node),
+        rect(x - w / 2, y - h / 2, w, h),
+        covering([moving]),
+      );
+    },
   };
 };
 
 /**
- * Axes over `xRange` and `yRange`, in a plot area of `frame`, with y up. Draw its `node`, `plot()`
- * curves, or chain `apply`, `applyFunction` and `reset` to move it and draw from the plane those calls return:
- * its grid, axes, vectors, shapes, labels and plots.
+ * Axes over `xRange` and `yRange` in a plot area `frame`, y up. Draw its `node` and `plot()`s, or chain `apply`,
+ * `applyFunction` and `reset` and draw from the plane those return.
  */
 export function plane(options: PlaneOptions): Plane {
   return make(frameOf({ ...options, theme: options.theme ?? defaultDark }), []);

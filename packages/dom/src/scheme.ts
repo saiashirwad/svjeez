@@ -1,19 +1,15 @@
 import { isPair, paint, transparent } from "./paint.ts";
 import type { Box, Gradient, Item, Paint, Shadow, Vector } from "./tree.ts";
 
-/** Called where the two passes read different markup: that subtree keeps the light scheme's read, colors and all. */
 type Differ = (where: string) => void;
 
-/** The color one pass read. A single pass never pairs, so this is the color itself. */
 const plain = <C extends string>(color: Paint<C>): C => (isPair(color) ? color.light : color);
 
-/** Both passes' color, where one may lack it: the missing side is the other's, clear. */
 const pick = (light?: Paint, dark?: Paint): Paint | undefined =>
   light || dark
     ? paint(plain(light ?? transparent(plain(dark!))), plain(dark ?? transparent(plain(light!))))
     : undefined;
 
-/** Where the passes differ, `light` stands: say where, then keep it. */
 const keep = <T>(light: T, where: string, differ: Differ): T => {
   differ(where);
 
@@ -29,7 +25,10 @@ const mergeVector = (light: Vector, dark: Vector, differ: Differ): Vector =>
           Object.entries(light.attrs).map(([k, v]) => {
             const other = dark.attrs[k];
 
-            return [k, (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v];
+            return [
+              k,
+              (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v,
+            ];
           }),
         ),
         children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
@@ -64,10 +63,6 @@ const mergeShadows = (light: readonly Shadow[], dark: readonly Shadow[]): Shadow
     color: pick(light[i]?.color, dark[i]?.color)!,
   }));
 
-/**
- * A layer one scheme lacks is there but clear in it, as a fill is. Where the stops differ in number, light's shape
- * holds and each scheme keeps its own colors by position.
- */
 const mergeGradients = (light: readonly Gradient[], dark: readonly Gradient[]): Gradient[] =>
   Array.from({ length: Math.max(light.length, dark.length) }, (_, i) => {
     const own = (light[i] ?? dark[i])!;
@@ -85,7 +80,6 @@ const mergeGradients = (light: readonly Gradient[], dark: readonly Gradient[]): 
     };
   });
 
-/** One box tree whose colors follow the viewer's scheme, from a light and a dark read of the same page. */
 export const merge = (light: Box, dark: Box, differ: Differ): Box => {
   const same = light.children.length === dark.children.length;
 
@@ -116,6 +110,8 @@ export const merge = (light: Box, dark: Box, differ: Differ): Box => {
     shadows: mergeShadows(light.shadows, dark.shadows),
     gradients: gradients.length > 0 ? gradients : undefined,
     insets: insets.length > 0 ? insets : undefined,
-    children: same ? light.children.map((c, i) => mergeItem(c, dark.children[i]!, differ)) : light.children,
+    children: same
+      ? light.children.map((c, i) => mergeItem(c, dark.children[i]!, differ))
+      : light.children,
   };
 };

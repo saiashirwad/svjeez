@@ -27,9 +27,7 @@ export type Pattern = (typeof PATTERNS)[number];
 export type Quirk = (typeof QUIRKS)[number];
 
 export interface Genome {
-  /** Rerolls every seeded detail: blink times, spot places, which way each head looks. */
   readonly seed: number;
-  /** Body length in cats. One cat is a normal cat. */
   readonly length: number;
   readonly girth: number;
   readonly plan: Plan;
@@ -43,18 +41,15 @@ export interface Genome {
   readonly legLength: number;
   readonly tails: number;
   readonly tailLength: number;
-  /** Where along the body the tails sprout, 0 the rear end and 1 the front. */
   readonly tailAt: number;
   readonly tip: Tip;
   readonly dimension: Dimension;
-  /** Where the 3D slice sits in the fourth dimension. */
   readonly slice: number;
   readonly oid: Oid;
   readonly oidness: number;
   readonly fur: Fur;
   readonly pattern: Pattern;
   readonly quirk: Quirk;
-  /** How much the line boils, 0 for a steady line. */
   readonly ink: number;
 }
 
@@ -65,9 +60,7 @@ export interface NumberSpec {
   readonly min: number;
   readonly max: number;
   readonly step: number;
-  /** A random value is drawn toward `min` by this exponent. */
   readonly skew?: number;
-  /** The most a mutation that goes too far may push this gene to. */
   readonly extremeCap?: number;
 }
 
@@ -82,10 +75,6 @@ type SpecOf<K extends GeneKey> = [Genome[K]] extends [number]
     ? ChoiceSpec<V>
     : never;
 
-/**
- * Every gene but the seed: its range and step, or its options. Clamping, mutation, breeding and the controls all read
- * it. Numbers come first, in the order mutation draws them.
- */
 export const SPEC = {
   length: { kind: "number", min: 0.4, max: 12, step: 0.1, skew: 2.2, extremeCap: 9 },
   girth: { kind: "number", min: 16, max: 72, step: 1 },
@@ -151,7 +140,6 @@ export const CAT: Genome = {
   ink: 1,
 };
 
-/** The first specimen: a long tube with a head at both ends and a tail from the middle. */
 export const FIRST: Genome = { ...CAT, length: 3.4, heads: 2, tailAt: 0.5, legs: 6 };
 
 const roundTo = (v: number, step: number) => Number((Math.round(v / step) * step).toFixed(4));
@@ -174,10 +162,8 @@ export const withGene = <K extends keyof Genome>(g: Genome, key: K, value: Genom
 const oneOf = <T extends string>(options: readonly T[], v: string | undefined): v is T =>
   options.some((o) => o === v);
 
-/** A value read back from storage as JSON, before anything about it is checked. */
 export type Stored = string | number | boolean | null | readonly Stored[] | StoredGenome;
 
-/** A stored object: any gene may be missing or hold anything. */
 export type StoredGenome = { readonly [K in keyof Genome]?: Stored };
 
 const isStoredGenome = (raw: Stored): raw is StoredGenome =>
@@ -213,7 +199,6 @@ export const parseGenome = (raw: Stored): Genome | undefined => {
   return g;
 };
 
-/** Sets the choice gene a control names to one of its options. */
 export const withChoice = (
   g: Genome,
   name: string | undefined,
@@ -251,12 +236,10 @@ export const random = (): Genome => {
 
 export interface Mutation {
   readonly genome: Genome;
-  /** The mutation went too far: every gene moved, and toward its extreme. */
   readonly tooFar: boolean;
   readonly changed: readonly (keyof Genome)[];
 }
 
-/** Nudges one to three genes. One time in seven it pushes every gene to an end of its range. */
 export const mutate = (g: Genome): Mutation => {
   if (Math.random() < 1 / 7) {
     const extreme = { ...g };
@@ -305,7 +288,6 @@ export const mutate = (g: Genome): Mutation => {
   };
 };
 
-/** Each gene from one parent or the other; numbers sometimes land between them. */
 export const breed = (a: Genome, b: Genome): Genome => {
   const child = { ...a, seed: reseed() };
 
@@ -320,7 +302,6 @@ export const breed = (a: Genome, b: Genome): Genome => {
   return child;
 };
 
-/** How far a genome strays from a cat, one point per oddity. */
 export const oddities = (g: Genome): string[] => {
   const out: string[] = [];
 
@@ -402,7 +383,6 @@ const species = (g: Genome) => {
   return "interminabilis";
 };
 
-/** A deadpan binomial that grows clauses as the genome strays further from a cat. */
 export const taxon = (g: Genome): string => {
   const genus = g.oidness > 0.35 ? GENERA[g.oid] : "Felis";
   const odd = oddities(g);
@@ -418,7 +398,6 @@ export const taxon = (g: Genome): string => {
   return `${base} ${odd[0]} var. ${rest}${odd.length > 6 ? " (incertae sedis)" : odd.length > 4 ? " sensu lato" : ""}`;
 };
 
-/** Specimen number, stable for a genome. */
 export const specimenNo = (g: Genome): string => {
   const text = JSON.stringify(g);
   let h = 0x811c9dc5;

@@ -18,7 +18,6 @@ describe("scoped theme variables", () => {
     expect(a).toContain("@media (prefers-color-scheme:light){svg.a-root{--sky:#fff}}");
     expect(b).toContain("svg.b-root{--sky:#222}");
 
-    // Inlined together, no rule from one scene selects the other's root.
     expect(a).not.toContain("b-root");
     expect(b).not.toContain("a-root");
     expect(/(^|[,}\n])svg\{/.test(a + b)).toBe(false);

@@ -70,8 +70,6 @@
     flex: 1;
   }
 
-  /* Long lines scroll sideways rather than wrap, so each row stays one source line for the line-linked highlights. The
-     numbers stay put while the text scrolls under them, and the right edge fades while there is more to the right. */
   @property --la-more {
     syntax: "<length>";
     inherits: false;

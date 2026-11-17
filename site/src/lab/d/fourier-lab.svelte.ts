@@ -8,7 +8,6 @@ import first from "./first.tsx?svjeez";
 import type { Frame } from "./scene";
 import { FIRST, LOOP, PRESETS } from "./shapes";
 
-/** Counts the picture passes through when a new shape arrives, so it grows from one circle to the chosen count. */
 const sweep = (to: number) => {
   const steps = [
     1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 19, 24, 30, 38, 48, 60, 80, 110, 150, 200, 270, 400,
@@ -17,7 +16,6 @@ const sweep = (to: number) => {
   return [...steps.filter((n) => n < to), to];
 };
 
-/** A preview of an outline, thinned to about 128 points. */
 const thumbPath = (outline: Outline) => {
   const step = Math.max(1, Math.floor(outline.length / 128));
 
@@ -54,14 +52,12 @@ declare global {
 }
 
 export class Lab {
-  /** The circle count the picture has reached, which trails the slider while a new shape sweeps up. */
   count = $state<number>(FIRST.n);
   picked = $state<string>(FIRST.preset);
   drawing = $state(false);
   inking = $state(false);
   landing = $state(false);
   inkPath = $state("");
-  /** The build's picture of the first shape until the first edit compiles. */
   src = $state(first.src);
   saveHref = $state(first.src);
   gzip = $state("");
@@ -89,10 +85,6 @@ export class Lab {
   #epoch = 0;
   #telemetry: Telemetry = { compiles: [], shown: 0 };
 
-  /**
-   * Computes the presets in the browser and returns the cleanup that frees the object URLs. The first shape is already
-   * on screen at its count, drawn when the site was built, so it does not sweep up from one circle.
-   */
   start = () =>
     untrack(() => {
       this.#epoch = performance.now();
@@ -186,7 +178,6 @@ export class Lab {
     };
   }
 
-  /** Starts the new file at the loop's current moment, so the circles never rewind, while its `<Once>` parts pop in from the top. */
   #paint(svg: string) {
     return new Promise<void>((resolve) => {
       const at = ((performance.now() - this.#epoch) / 1000) % LOOP;

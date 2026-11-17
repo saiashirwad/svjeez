@@ -2,9 +2,7 @@ import { Css } from "./properties";
 import type { SvgNode } from "./svg";
 
 export interface StyleProps {
-  /** The rule, as text or as `css` so it can name registered properties. */
   readonly css?: string | Css;
-  /** The rule as plain text, in place of `css`. */
   readonly children?: string;
 }
 

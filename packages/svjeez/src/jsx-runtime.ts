@@ -2,8 +2,8 @@ import type { Attrs, Tag } from "./attributes";
 import type { AnimatedTag, TagChannels } from "./channels";
 import type { Stack } from "./motion";
 import { children, node, type Child, type Props, type SvgNode } from "./svg";
+import { traced } from "./traced";
 
-/** The props of an element: its attributes, plus `animation` on the tags that animate. */
 export type ElementProps<T extends Tag> = Attrs<T> &
   (T extends AnimatedTag ? { readonly animation?: Stack<TagChannels<T>> } : {});
 
@@ -14,7 +14,6 @@ type Component = (props: Props) => SvgNode | null;
 const isComponent = (type: string | typeof Fragment | Component): type is Component =>
   typeof type === "function";
 
-/** The automatic JSX runtime. Elements compile to the svjeez AST; components are pure functions of props. */
 export const jsx = (type: string | typeof Fragment | Component, props: Props | null): SvgNode => {
   const values = props ?? {};
 
@@ -22,7 +21,7 @@ export const jsx = (type: string | typeof Fragment | Component, props: Props | n
 
   if (isComponent(type)) return type(values) ?? { kind: "fragment", children: [] };
 
-  return node(type, values);
+  return traced(node(type, values));
 };
 
 export const jsxs = jsx;

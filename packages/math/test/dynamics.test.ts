@@ -83,7 +83,7 @@ describe("derive", () => {
   test("every line puts its equals sign on the same x", () => {
     const d = derive({ at: 0, over: 3.4 }, steps, { x: 200 });
 
-    for (const line of d.lines) {
+    for (const { tex: line } of d.parts) {
       const sign = line.words.find((g) => g.char === "=")!;
       expect(sign.bounds.x + sign.bounds.w / 2).toBeCloseTo(200, 0);
     }
@@ -91,9 +91,9 @@ describe("derive", () => {
 
   test("stack puts each line lower, in place keeps them level", () => {
     const stacked = derive({ at: 0, over: 3.4 }, steps, { stack: true, lineHeight: 70 });
-    expect(stacked.lines[1]!.bounds.y - stacked.lines[0]!.bounds.y).toBeCloseTo(70, 0);
+    expect(stacked.parts[1]!.box.y - stacked.parts[0]!.box.y).toBeCloseTo(70, 0);
     const level = derive({ at: 0, over: 3.4 }, steps);
-    expect(level.lines[1]!.bounds.y).toBeCloseTo(level.lines[0]!.bounds.y, 0);
+    expect(level.parts[1]!.box.y).toBeCloseTo(level.parts[0]!.box.y, 0);
     expect(level.span.end).toBeCloseTo(2.5 + 0.9, 5);
   });
 
@@ -109,10 +109,23 @@ describe("derive", () => {
       { align: "k", x: 100 },
     );
 
-    for (const line of d.lines) {
-      const part = line.get("k");
-      expect(part.x + part.w / 2).toBeCloseTo(100, 0);
+    for (const { tex: line } of d.parts) {
+      const { box } = line.part("k");
+      expect(box.x + box.w / 2).toBeCloseTo(100, 0);
     }
+  });
+
+  test("its parts are the lines by TeX, each from when it appears to when its change settles", () => {
+    const d = derive({ at: 1, over: 3.4 }, steps);
+
+    expect(d.parts.map((p) => p.id)).toEqual(["2x + 4 = 10", "x + 2 = 5"]);
+    expect(d.part("2x + 4 = 10").span).toMatchObject({ at: 1, over: 0.9 });
+    expect(d.part("x + 2 = 5").span).toMatchObject({ at: 1 + 2.5, over: 0.9 });
+    expect(d.part("x + 2 = 5").span.end).toBeCloseTo(d.span.end, 9);
+    expect(d.part("x + 2 = 5").box).toEqual(d.part("x + 2 = 5").tex.bounds);
+    expect(() => d.part("x = 3")).toThrow(
+      'derive() has no line "x = 3". Its lines are "2x + 4 = 10", "x + 2 = 5".',
+    );
   });
 
   test("errors", () => {

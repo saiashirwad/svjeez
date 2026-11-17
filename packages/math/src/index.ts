@@ -3,7 +3,9 @@ export {
   type Glyph,
   type Matrix,
   type Tex,
+  type TexDrawn,
   type TexOptions,
+  type TexPart,
   type WriteOptions,
 } from "./tex.tsx";
 
@@ -19,7 +21,13 @@ export {
   type Outline,
 } from "./epicycles.tsx";
 
-export { derive, type Derivation, type DeriveOptions, type DeriveStep } from "./derive.tsx";
+export {
+  derive,
+  type Derivation,
+  type DeriveLine,
+  type DeriveOptions,
+  type DeriveStep,
+} from "./derive.tsx";
 
 export { counter, type Counter, type CounterOptions, type CounterValue } from "./counter.tsx";
 
@@ -36,7 +44,9 @@ export {
   type ConstructLineOptions,
   type ConstructLook,
   type ConstructPace,
+  type ConstructPart,
   type ConstructPoint,
+  type ConstructSpot,
   type ConstructPolygonOptions,
   type IntersectOptions,
   type PointOptions,

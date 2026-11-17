@@ -1,6 +1,6 @@
 import { project, reproject, trueSize, type Topology } from "@svjeez/geo";
 import { geoEqualEarth, geoMercator } from "d3-geo";
-import { def, ease, motion, render, type PathData, variables } from "svjeez";
+import { def, ease, motion, render, type PathData, span, variables } from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
@@ -35,10 +35,9 @@ const mercator = geoMercator();
 
 const maps = reproject(countries, [mercator, geoEqualEarth()], { frame, filter });
 
-/** The same Mercator projection, left as reproject() fitted it, so the sliding outline lands on the map. */
 const flat = project(countries, { frame, projection: mercator, fit: false, filter });
 
-const greenland = maps.region("Greenland");
+const greenland = maps.part("Greenland");
 
 /** Seconds: the morph to equal area, the morph back, then the slide to the equator. */
 const TO_AREA = 1.6;
@@ -50,19 +49,15 @@ const FADE = 14.6;
 
 const morph = (a: PathData, b: PathData) =>
   motion({ d: a })
-    .at(TO_AREA)
-    .to({ d: b }, MORPH, ease.inOut)
-    .at(BACK)
-    .to({ d: a }, MORPH, ease.inOut);
+    .to({ d: b }, span(TO_AREA, MORPH), ease.inOut)
+    .to({ d: a }, span(BACK, MORPH), ease.inOut);
 
-const slide = trueSize({ at: SLIDE, over: OVER }, flat, flat.region("Greenland"), [-12, -3]);
+const slide = trueSize({ at: SLIDE, over: OVER }, flat, flat.part("Greenland"), [-12, -3]);
 
 const shown = (from: number, until: number) =>
   motion({ opacity: 0 })
-    .at(from)
-    .to({ opacity: 1 }, 0.5, ease.out)
-    .at(until)
-    .to({ opacity: 0 }, 0.4, ease.in);
+    .to({ opacity: 1 }, span(from, 0.5), ease.out)
+    .to({ opacity: 0 }, span(until, 0.4), ease.in);
 
 const clip = def.clipPath({}, <rect x={frame.x} y={frame.y} width={frame.w} height={frame.h} />);
 
@@ -108,7 +103,7 @@ function Caption({ note }: { note: Note }) {
       fontFamily={geist}
       animation={
         note.from === 0
-          ? motion({ opacity: 1 }).at(note.until).to({ opacity: 0 }, 0.4, ease.in)
+          ? motion({ opacity: 1 }).to({ opacity: 0 }, span(note.until, 0.4), ease.in)
           : shown(note.from, note.until)
       }
     >

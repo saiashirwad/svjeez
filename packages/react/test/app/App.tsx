@@ -3,15 +3,14 @@ import { Activity, memo as memoized, useState } from "react";
 import { Code, Picture, Stats, Transport, useEditor } from "../../src/index.ts";
 import handled from "./handles.tsx?raw";
 import plain from "./scene.tsx?raw";
+import titled from "./text.tsx?raw";
 
 const Memo = memoized(Picture);
 
 interface Props {
   scene: string | null;
   wrap?: boolean;
-  /** Draws the picture through `memo`, which re-renders only when its props change. */
   memo?: boolean;
-  /** Puts the editor under an `<Activity>` that a button hides and shows. */
   hideable?: boolean;
 }
 
@@ -33,7 +32,7 @@ export function App(props: Props) {
 }
 
 function Editor({ scene, wrap, memo }: Props) {
-  const editor = useEditor(scene === "handles" ? handled : plain);
+  const editor = useEditor(scene === "handles" ? handled : scene === "text" ? titled : plain);
 
   return (
     <main>

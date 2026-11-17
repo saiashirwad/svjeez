@@ -51,7 +51,6 @@ describe("soft shadows", () => {
       "solid",
     ]);
 
-    // Each fade runs from full strength inside to nothing outside, falling all the way.
     for (const p of pieces)
       if (p.fill.kind !== "solid") {
         expect(p.fill.stops[0]).toBe(1);
@@ -59,7 +58,6 @@ describe("soft shadows", () => {
         expect(p.fill.stops.every((s, i, all) => i === 0 || s <= all[i - 1]!)).toBe(true);
       }
 
-    // It reaches the blur past the shape on every side.
     const xs = pieces.flatMap((p) => [p.bounds.x, p.bounds.x + p.bounds.width]);
 
     expect(Math.min(...xs)).toBe(-10);
@@ -70,7 +68,6 @@ describe("soft shadows", () => {
     const pieces = softPieces({ x: 0, y: 0, width: 100, height: 60 }, [0, 0, 0, 0], 10);
     const area = pieces.reduce((sum, p) => sum + p.bounds.width * p.bounds.height, 0);
 
-    // Corners 20 x 20, strips 80 x 20 and 40 x 20, and a middle of 80 x 40 with no notches: all of 120 x 80, once.
     expect(area).toBe(120 * 80);
   });
 
@@ -123,7 +120,6 @@ describe("soft shadows", () => {
     expect(validateSvg(svg).errors).toEqual([]);
     expect(svg).not.toContain("<filter");
     expect(svg).toContain("<radialGradient");
-    // Two boxes of one size and shadow: four strips and four corners, drawn twice from the same eight servers.
     expect(svg.match(/<(linear|radial)Gradient/g)).toHaveLength(8);
   });
 

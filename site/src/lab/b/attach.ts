@@ -11,7 +11,6 @@ const localPoint = (svg: SVGSVGElement, e: PointerEvent): Point => {
   return { x: p.x, y: p.y };
 };
 
-/** Pointer drag on the element, reported in the instrument's own coordinates. */
 export const drag =
   (handlers: {
     start?: (p: Point) => void;

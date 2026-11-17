@@ -1,7 +1,7 @@
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span } from "svjeez";
 
-const rise = motion({ y: 40 }).to({ y: 0 }, 1.2, ease.bezier(0.2, 0.8, 0.2, 1));
-const spin = motion({ rotate: 0 }).at(0.5).to({ rotate: 90 }, 1.5, ease.out);
+const rise = motion({ y: 40 }).to({ y: 0 }, span(0, 1.2), ease.bezier(0.2, 0.8, 0.2, 1));
+const spin = motion({ rotate: 0 }).to({ rotate: 90 }, span(0.5, 1.5), ease.out);
 
 export default () =>
   render(

@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ALL_FORMATS, BufferSource, Input } from "mediabunny";
-import { motion, render } from "svjeez";
+import { motion, render, span } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { video } from "@svjeez/video";
 
@@ -13,7 +13,7 @@ const svg = render({ width: 64, height: 48, duration: 1, title: "Slide" }, [
     width: 16,
     height: 48,
     fill: "#3EE6D6",
-    animation: motion({ x: 0 }).to({ x: 48 }, 1),
+    animation: motion({ x: 0 }).to({ x: 48 }, span(0, 1)),
   }),
 ]);
 

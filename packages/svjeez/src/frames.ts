@@ -5,6 +5,14 @@ import { systemColorScheme } from "./scheme";
 
 export { validateSvg, type ValidationResult } from "./validate";
 
+export {
+  checkScene,
+  type CheckOptions,
+  type CheckReport,
+  type CheckRule,
+  type Finding,
+} from "./check";
+
 export type ColorScheme = "light" | "dark";
 
 /** When to capture: exact scene times, or `count` frames spread evenly over one loop. */
@@ -25,7 +33,6 @@ export interface SceneOptions {
 
 export type FrameOptions = FrameTimes &
   SceneOptions & {
-    /** Also lay the frames out on one labelled contact sheet. */
     readonly sheet?: boolean | { readonly columns?: number };
   };
 
@@ -35,17 +42,14 @@ export interface Scene {
   readonly width: number;
   readonly height: number;
   readonly scale: number;
-  /** The longest animation in the SVG, in scene seconds: one loop of the scene. */
   readonly duration: Seconds;
   /** The `playbackRate` the scene was rendered with. One loop takes `duration / playbackRate` seconds to play. */
   readonly playbackRate: number;
-  /** The scheme the scene renders in, after resolving "system". */
   readonly colorScheme: ColorScheme;
   /** Seek every animation to scene second `time` and return a PNG of the SVG. */
   capture(time: Seconds): Promise<Uint8Array>;
   /** Run `fn` in the page. It is serialized, so it can use only `arg` and the page's globals. */
   evaluate<A, R>(fn: (arg: A) => R | Promise<R>, arg: A): Promise<R>;
-  /** Load a classic script file into the page. */
   addScript(path: string): Promise<void>;
   close(): Promise<void>;
 }
@@ -56,9 +60,7 @@ export interface Frame {
 }
 
 export interface Frames {
-  /** The scheme the frames were rendered in, after resolving "system". */
   readonly colorScheme: ColorScheme;
-  /** The longest animation in the SVG, in scene seconds: one loop of the scene. */
   readonly duration: Seconds;
   readonly frames: readonly Frame[];
   readonly sheet?: Uint8Array;
@@ -125,7 +127,6 @@ type Stage = Pick<Scene, "width" | "height" | "scale" | "colorScheme" | "playbac
   readonly background: string;
 };
 
-/** Validates what every caller shares, before any browser starts, so a bad option fails fast. */
 const resolve = (caller: string, svg: string, options: SceneOptions): Stage => {
   const { width, height } = size(caller, svg);
   const scale = options.scale ?? 1;
@@ -151,7 +152,6 @@ const resolve = (caller: string, svg: string, options: SceneOptions): Stage => {
   };
 };
 
-// WebCodecs, which @svjeez/video encodes with, exists only in a secure context, and about:blank is not one.
 const ORIGIN = "https://svjeez.local/";
 
 const stage = async (

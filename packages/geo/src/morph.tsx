@@ -2,8 +2,11 @@
 import {
   ease,
   motion,
+  span as spanOf,
   type Color,
+  type Drawn,
   type Ease,
+  type Part,
   type Point,
   type Rect,
   type Seconds,
@@ -33,11 +36,11 @@ export interface MorphOptions {
 export interface Morphed {
   /** The shapes. Hidden until `at`, where each is its region's outline exactly, so a map under it can be hidden then. */
   readonly node: SvgNode;
-  /** Path data for the regions that don't become a shape, to fade out as the others leave. */
   readonly rest: string;
 }
 
-export interface Bubble {
+/** A region's circle, by the region's id. `box` is the circle's and `span` when the region morphs into it. */
+export interface Bubble extends Part {
   readonly region: Region;
   readonly value: number;
   readonly x: number;
@@ -52,12 +55,10 @@ export interface CartogramOptions extends MorphOptions {
   readonly gap?: number;
 }
 
-export interface Cartogram extends Morphed {
-  readonly bubbles: readonly Bubble[];
-}
+/** The parts are the circles, in the order of `values`. `span` is the span passed. */
+export interface Cartogram extends Morphed, Drawn<Bubble> {}
 
 export interface GeoBarsOptions extends MorphOptions {
-  /** Where the bars go. The longest reaches its right edge; the bars share its height. */
   readonly frame: Rect;
   /** Biggest first (default) or smallest first. */
   readonly order?: "desc" | "asc";
@@ -69,20 +70,17 @@ export interface GeoBarsOptions extends MorphOptions {
   readonly max?: number;
 }
 
-export interface GeoBar {
+/** A region's bar, by the region's id. `box` is where the bar lands, to put a label beside, and `span` when the region morphs into it. */
+export interface GeoBar extends Part {
   readonly region: Region;
   readonly value: number;
-  /** Where the bar lands in the scene, to put a label beside. */
-  readonly rect: Rect;
 }
 
-export interface GeoBars extends Morphed {
-  readonly bars: readonly GeoBar[];
-}
+/** The parts are the bars, top to bottom. `span` is the span passed. */
+export interface GeoBars extends Morphed, Drawn<GeoBar> {}
 
 const NUMBER = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
 
-/** A ring's points, from the absolute first point and the relative steps `project()` writes. */
 const points = (ring: string): [number, number][] => {
   const n = ring.match(NUMBER)!.map(Number);
   let [x, y] = [n[0]!, n[1]!];
@@ -104,11 +102,6 @@ const boxArea = (line: readonly (readonly [number, number])[]): number => {
   return (Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys));
 };
 
-/**
- * A region's outline for a morph: its rings, the biggest first so the mainland is the piece that becomes the shape,
- * thinned to `detail` px and without the pieces smaller than a few px. A morph stores every point several times as a
- * curve, and the map stays under it while it starts, so what it drops is not missed.
- */
 const rings = (region: Region, detail: number): string[] =>
   (region.d.match(/M[^M]*/g) ?? [])
     .map(points)
@@ -127,10 +120,8 @@ const rings = (region: Region, detail: number): string[] =>
       return `${kept.map(([x, y], i) => `${i ? "L" : "M"}${x / 10} ${y / 10}`).join("")}Z`;
     });
 
-/** A piece may also be thinned by this share of its own diagonal, so a continent keeps no more points than its size can show. */
 const RELATIVE = 0.012;
 
-/** Px squared of bounding box below which a piece of a region isn't morphed. */
 const MIN_PIECE = 150;
 
 const circle = ({ x, y }: Point, r: number) =>
@@ -138,22 +129,22 @@ const circle = ({ x, y }: Point, r: number) =>
 
 const rectangle = ({ x, y, w, h }: Rect) => `M${x} ${y}H${x + w}V${y + h}H${x}Z`;
 
-interface Target {
+type Morphing = Part & { readonly region: Region };
+
+interface Target<P extends Morphing> {
   readonly region: Region;
   readonly value: number;
-  /** The one closed shape the mainland becomes. */
   readonly to: string;
-  /** Where the region's other pieces shrink to. */
   readonly center: Point;
+  readonly part: Omit<P, "span">;
 }
 
-/** Each region as its outline, then as its target: the pieces other than the mainland shrink into the target's center. */
-function morphs(
+function morphs<P extends Morphing>(
   when: Span,
-  targets: readonly Target[],
+  targets: readonly Target<P>[],
   map: GeoMap,
   options: MorphOptions,
-): Morphed {
+): Morphed & Drawn<P> {
   const { at, over } = when;
 
   const { stagger = 0, ease: curve = ease.inOut, fill = "#6b7280", detail = 2.5 } = options;
@@ -176,27 +167,45 @@ function morphs(
       <path
         d={start}
         fill={isPainter(fill) ? fill(region, value) : fill}
-        animation={motion({ d: start })
-          .at(at + i * stagger)
-          .to({ d: end }, each, curve)}
+        animation={motion({ d: start }).to({ d: end }, spanOf(at + i * stagger, each), curve)}
       />
     );
   });
 
+  // SAFETY: each target's part is a P without its span, and this adds the span back.
+  const parts = targets.map(
+    ({ part }, i): P => ({ ...part, span: spanOf(at + i * stagger, each) }) as P,
+  );
+
   return {
+    span: spanOf(at, over),
+    bounds: parts.map((p) => p.box).reduce((a, b) => a.union(b)),
+    parts,
+    part: (id) => {
+      const found = parts.find((p) => p.id === id || p.region.properties?.name === id);
+
+      if (!found)
+        throw new Error(
+          `A morph has no part ${JSON.stringify(id)}. Its parts are the regions it drew, by id or properties.name, as in ${parts
+            .slice(0, 3)
+            .map((p) => JSON.stringify(p.id))
+            .join(", ")}.`,
+        );
+
+      return found;
+    },
     node: (
-      <g class={options.class} animation={motion({ opacity: 0 }).at(at).set({ opacity: 1 })}>
+      <g class={options.class} animation={motion({ opacity: 0 }).set({ opacity: 1 }, at)}>
         {paths}
       </g>
     ),
-    rest: map.regions
+    rest: map.parts
       .filter((r) => !used.has(r))
       .map((r) => r.d)
       .join(""),
   };
 }
 
-/** The keys that carry a single positive number each, as `[region, value]`. */
 const singles = (map: GeoMap, values: RegionValues, what: string): [Region, number][] => {
   const { found } = resolveRegions(map, values);
 
@@ -232,10 +241,6 @@ interface Disc {
   readonly oy: number;
 }
 
-/**
- * Pushes circles apart until none overlap. Each is pulled gently back toward its origin, and each overlapping pair
- * moves apart along the line between them, the smaller one further. Deterministic, and kept inside `frame`.
- */
 function relax(discs: Disc[], gap: number, frame: Rect): void {
   for (let pass = 0; pass < 400; pass++) {
     const pull = 0.04 * (1 - pass / 400);
@@ -277,9 +282,8 @@ function relax(discs: Disc[], gap: number, frame: Rect): void {
 const tenth = (v: number) => Math.round(v * 10) / 10;
 
 /**
- * A Dorling cartogram: a circle per region with its area in proportion to its value, at the region's centroid and
- * nudged apart until none overlap. Each region morphs from its outline into its circle during `when`. Worked out while the
- * scene compiles. Regions in `values` need a positive number; the others come back in `rest`.
+ * A Dorling cartogram: a circle per region, area proportional to its value, morphing from its outline during `when`.
+ * Regions in `values` need a positive number; the others come back in `rest`.
  */
 export function cartogram(
   when: Span,
@@ -300,28 +304,29 @@ export function cartogram(
 
   relax(discs, gap, map.frame);
 
-  const bubbles = items.map(([region, value], i): Bubble => ({
-    region,
-    value,
-    x: tenth(discs[i]!.x),
-    y: tenth(discs[i]!.y),
-    r: tenth(discs[i]!.r),
-  }));
+  const bubbles = items.map(([region, value], i): Omit<Bubble, "span"> => {
+    const [x, y, r] = [tenth(discs[i]!.x), tenth(discs[i]!.y), tenth(discs[i]!.r)];
 
-  return {
-    bubbles,
-    ...morphs(
-      when,
-      bubbles.map((b) => ({ region: b.region, value: b.value, to: circle(b, b.r), center: b })),
-      map,
-      options,
-    ),
-  };
+    return { id: region.id, region, value, x, y, r, box: rect(x - r, y - r, r * 2, r * 2) };
+  });
+
+  return morphs<Bubble>(
+    when,
+    bubbles.map((b) => ({
+      region: b.region,
+      value: b.value,
+      to: circle(b, b.r),
+      center: b,
+      part: b,
+    })),
+    map,
+    options,
+  );
 }
 
 /**
  * Regions fly from the map into a bar chart: the largest `top` values, sorted, each outline morphing into its bar.
- * The longest bar reaches the right edge of `frame`, or `max` does. Draw the labels from the returned `bars`.
+ * The longest bar reaches the right edge of `frame`, or `max` does. Draw the labels from the returned `parts`.
  */
 export function toBars(
   when: Span,
@@ -343,10 +348,11 @@ export function toBars(
   const slot = frame.h / shown.length;
   const gap = options.gap ?? slot * 0.2;
 
-  const bars = shown.map(([region, value], i): GeoBar => ({
+  const bars = shown.map(([region, value], i): Omit<GeoBar, "span"> => ({
+    id: region.id,
     region,
     value,
-    rect: rect(
+    box: rect(
       frame.x,
       tenth(frame.y + i * slot + gap / 2),
       tenth(Math.max(1, (frame.w * value) / max)),
@@ -354,18 +360,16 @@ export function toBars(
     ),
   }));
 
-  return {
-    bars,
-    ...morphs(
-      when,
-      bars.map((b) => ({
-        region: b.region,
-        value: b.value,
-        to: rectangle(b.rect),
-        center: { x: b.rect.x + b.rect.w / 2, y: b.rect.y + b.rect.h / 2 },
-      })),
-      map,
-      options,
-    ),
-  };
+  return morphs<GeoBar>(
+    when,
+    bars.map((b) => ({
+      region: b.region,
+      value: b.value,
+      to: rectangle(b.box),
+      center: { x: b.box.x + b.box.w / 2, y: b.box.y + b.box.h / 2 },
+      part: b,
+    })),
+    map,
+    options,
+  );
 }

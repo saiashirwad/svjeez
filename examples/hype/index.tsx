@@ -1,4 +1,4 @@
-import { css as cssTag, ease, motion, render, type SvgNode } from "svjeez";
+import { css as cssTag, ease, motion, render, span, type SvgNode } from "svjeez";
 import { SQUASH } from "../site/lib/blip";
 import { css, mono } from "../style";
 import { coldOpen } from "./cold";
@@ -9,7 +9,6 @@ import { montage, SHOTS } from "./montage";
 import { TERM, terminalShot } from "./session";
 import { HAND, handwriting } from "./write";
 
-/** A hairline progress bar along the bottom edge, one tick per shot. */
 const progress = (): SvgNode => {
   const ticks = [
     TERM.at,
@@ -24,7 +23,7 @@ const progress = (): SvgNode => {
   ];
 
   return (
-    <g animation={motion({ opacity: 0 }).at(TERM.at).to({ opacity: 1 }, 0.4)}>
+    <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(TERM.at, 0.4))}>
       <rect x={0} y={H - 3} width={W} height={3} fill={C.hairline} />
       <rect
         x={0}
@@ -32,7 +31,7 @@ const progress = (): SvgNode => {
         width={0}
         height={3}
         fill={C.accent}
-        animation={motion({ width: 0 }).to({ width: W }, D, ease.linear)}
+        animation={motion({ width: 0 }).to({ width: W }, span(0, D), ease.linear)}
       />
       {ticks.map((t) => (
         <rect x={(t / D) * W - 1} y={H - 9} width={2} height={6} fill={C.muted} />
@@ -67,14 +66,11 @@ const scene = (size: string) =>
         width={W}
         height={H}
         fill={C.page}
-        animation={motion({ opacity: 0 })
-          .at(D - 0.7)
-          .to({ opacity: 1 }, 0.6, ease.in)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(D - 0.7, 0.6), ease.in)}
       />
     </g>,
   );
 
-/** The finale names the file's own size, so render to measure it. */
 export default function build(): string {
   const kb = (svg: string) => `${Math.round(new TextEncoder().encode(svg).length / 1024)} KB`;
 

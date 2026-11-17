@@ -1,7 +1,17 @@
 // A scene that plays from the `src` in its HTML: an example's own page and the intro. Under another palette it shows a
 // recolored copy instead, held at its still frame under reduced motion in place of the posters its <picture> offers.
 import { DEFAULT_PALETTE } from "../palettes";
-import { adopt, frozen, isPlaying, palette, PALETTECHANGE, pinned, playing, replay, show } from "./palette";
+import {
+  adopt,
+  frozen,
+  isPlaying,
+  palette,
+  PALETTECHANGE,
+  pinned,
+  playing,
+  replay,
+  show,
+} from "./palette";
 import { calm, THEMECHANGE } from "./scheme";
 
 export const follow = (img: HTMLImageElement) => {

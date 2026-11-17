@@ -10,13 +10,10 @@
     onclose,
   }: {
     editor: SceneEditor;
-    value: ValueOf<"ease">;
-    /** The glyph the popover opened from, which it sits under and returns focus to. */
-    anchor: HTMLElement;
+    value: ValueOf<"ease">;    anchor: HTMLElement;
     onclose: () => void;
   } = $props();
 
-  // The unit square sits low in the box so a curve can overshoot above and below it.
   const W = 200;
   const H = 240;
   const X = (u: number) => 20 + u * (W - 60);
@@ -36,7 +33,6 @@
   let svg: SVGSVGElement | undefined = $state();
   let drag: ReturnType<typeof bending> | null = null;
 
-  /** The popover sits in the top layer, so the code panel's scrolling never clips it. */
   const place: Attachment<HTMLElement> = (el) => {
     el.showPopover();
     const at = anchor.getBoundingClientRect();

@@ -10,8 +10,8 @@ export type ReadoutOptions = Attrs<"text"> & {
 };
 
 /**
- * Text that changes with time: `text(t)` sampled across the span, each distinct string shown while it holds. The
- * options other than `step` are attributes of every `<text>`, such as `x`, `y`, `fill` and `textAnchor`.
+ * Text that changes with time: `text(t)` sampled across the span, each distinct string shown while it holds. Other
+ * options are attributes of every `<text>`, such as `x`, `y`, `fill`.
  */
 export function readout(
   { at, over }: Span,
@@ -45,9 +45,9 @@ export function readout(
 
         const track = spans.reduce<Motion<"opacity">>(
           (m, [on, off], i) => {
-            const lit = i === 0 && shown ? m : m.at(on).set({ opacity: 1 });
+            const lit = i === 0 && shown ? m : m.set({ opacity: 1 }, on);
 
-            return off === undefined ? lit : lit.at(off).set({ opacity: 0 });
+            return off === undefined ? lit : lit.set({ opacity: 0 }, off);
           },
           motion({ opacity: shown ? 1 : 0 }),
         );

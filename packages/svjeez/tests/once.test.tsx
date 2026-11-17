@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { Once, ease, motion, render } from "svjeez";
+import { Once, ease, motion, render, span } from "svjeez";
 import { restyle } from "svjeez/page";
 
 const scene = (content: Parameters<typeof render>[1], prefix?: string) =>
   render({ width: 20, height: 20, duration: 4, title: "Once", prefix }, content);
 
-const fade = () => motion({ opacity: 0 }).to({ opacity: 1 }, 1, ease.linear);
+const fade = () => motion({ opacity: 0 }).to({ opacity: 1 }, span(0, 1), ease.linear);
 
 describe("<Once>", () => {
   test("a once part plays one time on its own clock while the rest loops", () => {
@@ -38,7 +38,7 @@ describe("<Once>", () => {
   });
 
   test("SMIL inside plays one time and is marked for restyle, SMIL outside keeps looping", () => {
-    const blur = () => motion({ blur: 0 }).to({ blur: 4 }, 3.5, ease.linear);
+    const blur = () => motion({ blur: 0 }).to({ blur: 4 }, span(0, 3.5), ease.linear);
 
     const svg = scene(
       <>

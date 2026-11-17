@@ -40,12 +40,9 @@ export interface At {
 export interface Carrying {
   /** How far the pointer moves before the copy lifts, in px. 0 lifts it at once. */
   readonly slop: number;
-  /** Where the floating copy sits, from the moment it lifts; undefined once it is put down. */
   readonly float: (at: At | undefined) => void;
   readonly over: (m: PointerEvent, lifted: boolean) => void;
-  /** The pointer lifted. `lifted` is whether the copy had come off. A cancel never reaches this. */
   readonly end: (u: PointerEvent, lifted: boolean) => void;
-  /** Undoes whatever `over` showed, on lift and on cancel alike. */
   readonly clear: () => void;
 }
 

@@ -13,7 +13,6 @@ import { google } from "../src/index.ts";
 
 const fixture = new URL("../../svjeez/tests/fixtures/ABeeZee-Regular.ttf", import.meta.url);
 
-// The tests that reach Google need a network, and skip when there is none.
 const online = await fetch("https://fonts.googleapis.com/", {
   method: "HEAD",
   signal: AbortSignal.timeout(3000),
@@ -68,7 +67,6 @@ describe("google", () => {
     for (const family of ["Open Sans", "Open-Sans", "Open_Sans"])
       await google(family).catch(() => {});
 
-    // Each family's error names its own path
     const paths = new Set<string>();
 
     for (const family of ["Open Sans", "Open-Sans", "Open_Sans"])

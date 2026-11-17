@@ -1,5 +1,3 @@
-// Direction C: time as a material. The flight is shown all at once over the compiled picture, and every drag rewrites
-// the scene source, recompiles it in the playground's worker and shows the real SVG.
 import { createContext } from "svelte";
 import { restyle } from "svjeez/page";
 import { createCompiler, latestWins } from "@svjeez/live/client";
@@ -52,30 +50,23 @@ const DEFAULT_HINT =
 
 export class Bench {
   flight = $state.raw<Flight>(INITIAL);
-  /** The leg under the pointer or being dragged. */
   hot = $state<number>();
-  /** The moment time is held at, or undefined while the plane flies. */
   frozen = $state<number>();
   hint = $state(DEFAULT_HINT);
   drag = $state.raw<Drag>();
-  /** The most recent file that compiled. */
   svg = $state.raw("");
   status = $state.raw<Status>();
-  /** The picture on show, playing or held at `frozen`: the build's own file until the first compile answers. */
   imgUrl = $state(first.src);
-  /** The clock: the held moment, or where the playing picture is. */
   time = $state(0);
   label = $state.raw<{ at: Pt; text: string }>();
   source = $derived(sourceOf(this.flight));
 
-  /** Set by the components that own these elements. */
   over: SVGSVGElement | undefined;
   track: HTMLElement | undefined;
 
   telemetry: Telemetry = { compiles: [], svg: "", frozen: false, now: 0 };
 
   #playStart = performance.now();
-  /** The picture waiting for the one being decoded, so a scrub only ever decodes the latest moment. */
   #nextPicture: { at: number; paused: boolean } | undefined;
   #painting = false;
   #compiler: ReturnType<typeof createCompiler> | undefined;
@@ -83,7 +74,6 @@ export class Bench {
 
   build = (text: string) => this.#queue(text);
 
-  /** Starts the clock. Attach it to an element; it stops when the element goes. */
   run = () => {
     window.__labC = this.telemetry;
     this.#playStart = performance.now();
@@ -185,13 +175,11 @@ export class Bench {
     else this.resume();
   };
 
-  /** When the plane reaches point `index`. */
   arrival = (index: number) =>
     index === 0
       ? this.flight.launch
       : starts(this.flight)[index - 1]! + this.flight.legs[index - 1]!.over;
 
-  // Hovering.
   hoverTrail = (leg: number) => {
     if (this.drag) return;
     this.hot = leg;
@@ -223,7 +211,6 @@ export class Bench {
     if (!this.drag) this.say();
   };
 
-  // Pressing starts a drag.
   #begin(event: PointerEvent, next: Drag) {
     event.preventDefault();
     this.drag = next;
@@ -245,7 +232,6 @@ export class Bench {
     const u = this.#nearestU(i, this.#toScene(event));
     const legStarts = starts(this.flight);
     const leg = this.flight.legs[i]!;
-    // The dot nearest the pointer along the path: its moment in time is what the drag holds still.
     let best = legStarts[i]!;
     let bestD = Infinity;
 
@@ -297,7 +283,6 @@ export class Bench {
       );
   };
 
-  // Dragging.
   move = (event: PointerEvent) => {
     const d = this.drag;
 
@@ -390,7 +375,6 @@ export class Bench {
     this.hot = undefined;
     this.say();
 
-    // A plain click on the trail, or a scrub, leaves time paused there; an edit plays the new flight from the top.
     if (d.kind === "scrub" || (d.kind === "trail" && !d.moved)) return;
     this.resume(0);
   };

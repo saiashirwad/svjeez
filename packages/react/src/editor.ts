@@ -3,9 +3,7 @@ import { useState, useSyncExternalStore } from "react";
 
 /**
  * An `@svjeez/live` editor for the scene source `text`, made once per component; later `text` and `options` are
- * ignored, so send a `replace` message to change the file. Components read it through `useEditorState`. The editor
- * pauses, its worker stopped, whenever no component reads it, as under a hidden `<Activity>` or after an unmount, and
- * picks up again when one does. Call `destroy` to free its last picture for good.
+ * ignored, so send a `replace` message to change the file. The editor pauses while no component reads it.
  */
 export const useEditor = (text: string, options: EditorOptions = {}): Editor => {
   const [editor] = useState(() => createEditor({ text, first: options.first }, options.effects));

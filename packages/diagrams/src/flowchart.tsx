@@ -9,8 +9,7 @@ import {
   type Span,
   enter,
   type SvgNode,
-  beats,
-  type Beats,
+  span as spanOf,
 } from "svjeez";
 import { layered } from "./layout/layered.ts";
 import { curve } from "./curve.ts";
@@ -20,18 +19,24 @@ import {
   drawNode,
   labelOf,
   labelSize,
+  edgeId,
+  INSTANT,
+  lineBox,
   look,
-  lookup,
   onOutline,
+  partsOf,
   placer,
   POP,
   popIn,
+  schedule,
   sizeOf,
   spanOfReveals,
+  type Diagram,
   type DiagramOptions,
+  type EdgeId,
   type Labelled,
   type NodeRole,
-  type PlayedDiagram,
+  type PlayAt,
 } from "./kit.tsx";
 
 export type FlowchartEdge<N extends string> =
@@ -43,18 +48,26 @@ export interface FlowchartGroup<N extends string> {
   readonly nodes: readonly N[];
 }
 
-export interface FlowchartOptions extends DiagramOptions {
+export interface FlowchartOptions<N extends string = string> extends DiagramOptions {
   /** Default `"TB"`. */
   readonly direction?: Direction;
   /**
-   * Nodes appear in rank order after the first rank; each edge draws on as its target appears; a group fades in with its
-   * first member. From a start `at` they follow `step` apart (default 0.4), or each comes at its own time.
+   * Nodes appear in rank order, edges as the later of their ends does, groups with their first member. From a start
+   * `at` they follow `step` apart (default 0.4), or each at its own time. A record such as `{ build: 1, test: 2.5 }`
+   * times nodes by id; omitted ones are there from the start.
    */
-  readonly play?: { readonly at: Beats; readonly step?: Seconds };
+  readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
 }
 
-export interface Flowchart<N extends string, G extends string> extends PlayedDiagram<N | G> {
-  /** The drawn line of the first edge `from` → `to`. */
+/**
+ * Parts are the nodes, groups, then edges by id such as `"pr->post"`. An edge's span is when it draws on, label
+ * included. Edges between the same nodes share an id; `part()` finds the first.
+ */
+export interface Flowchart<
+  N extends string,
+  G extends string,
+  E extends string = `${N}->${N}`,
+> extends Diagram<N | G | E> {
   edge(from: N, to: N): Point[];
   /** The shortest directed path through edges, as one polyline through each node on the way. */
   route(from: N, to: N): Point[];
@@ -62,7 +75,6 @@ export interface Flowchart<N extends string, G extends string> extends PlayedDia
   readonly layers: { readonly under: SvgNode; readonly over: SvgNode };
 }
 
-/** Laid-out boxes and lines, shifted into place. */
 interface Laid<N extends string> {
   readonly boxes: ReadonlyMap<string, Rect>;
   readonly lines: readonly {
@@ -78,15 +90,16 @@ interface Laid<N extends string> {
 
 export function flowchart<
   const N extends Record<string, Labelled>,
+  const E extends readonly FlowchartEdge<NoInfer<keyof N & string>>[],
   const G extends Record<string, FlowchartGroup<NoInfer<keyof N & string>>> = {},
 >(
   spec: {
     readonly nodes: N;
     readonly groups?: G;
-    readonly edges: readonly FlowchartEdge<NoInfer<keyof N & string>>[];
+    readonly edges: E;
   },
-  options: FlowchartOptions = {},
-): Flowchart<keyof N & string, keyof G & string> {
+  options: FlowchartOptions<NoInfer<keyof N & string>> = {},
+): Flowchart<keyof N & string, keyof G & string, EdgeId<E[number]>> {
   type Id = keyof N & string;
 
   const { direction, play } = options;
@@ -133,13 +146,8 @@ export function flowchart<
     );
 
   const step = play?.step ?? 0.4;
-  /** The first rank is there from the start, so no frame is empty; the rest follow in order. */
   const later = order.filter((id) => laid.rank.get(id)! > 0);
-  const times = beats(play?.at ?? 0, later.length, step, "flowchart() play");
-
-  const shown = new Map(
-    order.map((id) => [id, later.includes(id) ? times[later.indexOf(id)]! : -Infinity]),
-  );
+  const shown = schedule(play?.at ?? 0, later, order, step, "flowchart() play");
 
   const appear = (id: string) => (play && shown.get(id)! >= 0 ? popIn(shown.get(id)!) : undefined);
   const drawOver = Math.min(0.4, step);
@@ -192,12 +200,22 @@ export function flowchart<
           edges[i]!.label!,
           small,
           play &&
-            motion({ opacity: 0 })
-              .at(drawAt(line.from, line.to) + drawOver)
-              .to({ opacity: 1 }, labelOver),
+            motion({ opacity: 0 }).to(
+              { opacity: 1 },
+              spanOf(drawAt(line.from, line.to) + drawOver, labelOver),
+            ),
         ),
     ),
   ]);
+
+  const groupAt = (g: FlowchartGroup<Id>) => Math.min(...g.nodes.map((n) => shown.get(n)!));
+
+  const appears = (id: string) => {
+    const group = groups.find(([gid]) => gid === id)?.[1];
+    const at = group ? groupAt(group) : shown.get(id)!;
+
+    return play && at >= 0 ? spanOf(at, group ? 0.4 : POP) : INSTANT;
+  };
 
   const reveals: Span[] = play
     ? [
@@ -228,14 +246,31 @@ export function flowchart<
     ),
     layers: { under, over },
     bounds: laid.bounds,
-    get: lookup("flowchart()", new Map([...laid.boxes, ...laid.groups])),
+    ...partsOf<Id | (keyof G & string) | EdgeId<E[number]>>(
+      "flowchart()",
+      [
+        ...laid.boxes,
+        ...laid.groups,
+        ...laid.lines.map(
+          (line) => [edgeId(line.from, line.to), lineBox(line.points, line.label)] as const,
+        ),
+      ],
+      (id, i) => {
+        const line = laid.lines[i - laid.boxes.size - laid.groups.size];
+
+        if (!line) return appears(id);
+
+        if (!play) return INSTANT;
+
+        return spanOf(drawAt(line.from, line.to), drawOver + (line.label ? labelOver : 0));
+      },
+    ),
     ...paths(laid.lines, laid.boxes),
   };
 }
 
 const cross = (b: Rect, direction: Direction = "TB") => (direction === "TB" ? b.x : b.y);
 
-/** Layered layout, shifted to `x`/`y`, with each edge's ends moved onto its nodes' outlines. */
 const lay = <N extends string>(
   input: Parameters<typeof layered>[0],
   roles: ReadonlyMap<string, NodeRole>,
@@ -269,7 +304,6 @@ const lay = <N extends string>(
   };
 };
 
-/** `edge` and `route` over laid-out lines. */
 const paths = <N extends string>(lines: Laid<N>["lines"], boxes: ReadonlyMap<string, Rect>) => {
   const edge = (from: N, to: N): Point[] => {
     const line = lines.find((l) => l.from === from && l.to === to);

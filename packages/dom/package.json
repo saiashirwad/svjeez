@@ -42,14 +42,11 @@
   },
   "peerDependencies": {
     "playwright-core": ">=1.49",
-    "svjeez": ">=0.6.0 <1",
     "react": ">=18",
     "react-dom": ">=18",
-    "vite": ">=8",
-    "svelte": ">=5"
-  },
-  "engines": {
-    "node": ">=20"
+    "svelte": ">=5",
+    "svjeez": ">=0.6.0 <1",
+    "vite": ">=8"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -64,5 +61,8 @@
     "svelte": {
       "optional": true
     }
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

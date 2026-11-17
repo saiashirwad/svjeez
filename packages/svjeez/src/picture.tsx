@@ -8,14 +8,12 @@ import { readSource } from "./source";
 
 export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
-/** An image ready to embed: a data URI plus the intrinsic size read from its header. */
 export interface PictureData {
   readonly href: `data:${string}`;
   /** Intrinsic width in px, after EXIF rotation. For SVG, the root width, else derived from the viewBox. */
   readonly width: number;
   readonly height: number;
   readonly format: ImageFormat;
-  /** Length of `href`, which is what the output pays. */
   readonly bytes: number;
 }
 
@@ -53,7 +51,6 @@ const isSof = (marker: number): boolean =>
 const hasNoLength = (marker: number): boolean =>
   marker === 0x01 || (marker >= 0xd0 && marker <= 0xd9);
 
-/** EXIF Orientation (tag 0x0112) from an APP1 segment spanning `start` to `end`. Browsers apply it, and 5 to 8 turn the image a quarter. */
 const exifOrientation = (b: Uint8Array, start: number, end: number): number | undefined => {
   if (end > b.length || !ascii(b, start, "Exif\0\0")) return undefined;
   const tiff = start + 6;
@@ -137,7 +134,6 @@ const webp: Codec = {
   },
 };
 
-/** The root `<svg ...>` tag, after any BOM, XML declaration, comments, doctype and whitespace. Anything else before it is not an SVG file. */
 const SVG_ROOT =
   /^\uFEFF?(?:\s+|<\?xml[\s\S]*?\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>[]*(?:\[[\s\S]*?\])?\s*>)*<svg\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/i;
 
@@ -193,10 +189,6 @@ const base64 = (bytes: Uint8Array): string => {
   return btoa(binary);
 };
 
-/**
- * Percent-encode only what a data URI inside a double-quoted attribute cannot carry. Smaller than base64 and it gzips well.
- * Line breaks and tabs are encoded too, since attribute normalization would turn them into spaces.
- */
 const svgHref = (markup: string): `data:${string}` =>
   `data:image/svg+xml,${markup.trim().replace(/[%#<>"\r\n\t]/g, encodeURIComponent)}`;
 
@@ -259,7 +251,6 @@ export interface PictureProps {
   readonly height?: number;
   /** How the image meets the frame. Default "cover". */
   readonly fit?: (typeof FITS)[number];
-  /** Corner radius of the frame in px. */
   readonly radius?: number;
   readonly filter?: Ref<"filter">;
   readonly opacity?: number;
@@ -270,7 +261,6 @@ export interface PictureProps {
   readonly animation?: Stack<TagChannels<"g">>;
 }
 
-/** One symbol per picture, so drawing an image many times embeds its bytes once. Overflow stays visible, or the symbol would crop an image larger than the canvas. */
 const symbols = new WeakMap<PictureData, Ref<"symbol">>();
 
 const symbolOf = (src: PictureData): Ref<"symbol"> => {

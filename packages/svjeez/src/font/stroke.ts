@@ -4,14 +4,12 @@ import type { GlyphPath, PathOptions, TextPath } from "./font";
 import { readSource } from "../source";
 
 /**
- * A single-line font: each glyph is a centerline, as a plotter or an engraver draws it, instead of a filled outline.
- * Read from an SVG font, the format Hershey and EMS fonts ship in. Its paths suit `<Ink>`, which inks a centerline
- * with a pen, brush or nib, and `draw`, which writes it on in order, so text can appear as handwriting.
+ * A single-line font: each glyph is a centerline, read from an SVG font (Hershey, EMS). Suits `<Ink>` and `draw`,
+ * so text can appear as handwriting.
  */
 export interface StrokeFont {
   readonly family: string;
   readonly unitsPerEm: number;
-  /** Whether the font draws this character. */
   has(char: string): boolean;
   /** Advance width of `text` in px. */
   measure(text: string, size: number): number;
@@ -67,10 +65,6 @@ const number = (value: string | undefined, fallback: number): number => {
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
-/**
- * A curve through every point: Catmull-Rom, as cubic Béziers. Single-line fonts store their strokes as short polylines,
- * which a wide nib would show as facets; a corner sharper than a right angle stays a corner.
- */
 const smooth = (points: readonly Point[]): string => {
   const at = (p: Point) => `${round(p.x)} ${round(p.y)}`;
 

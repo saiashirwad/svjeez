@@ -1,12 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { motion, render, type SvgNode } from "svjeez";
+import { render, type Child } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { plane } from "../src/index";
 
-const svg = (css: Parameters<typeof render>[0]["css"], ...children: SvgNode[]) =>
+const svg = (css: Parameters<typeof render>[0]["css"], ...children: Child[]) =>
   render({ width: 400, height: 300, duration: 8, title: "plane", css }, children);
 
-/** Four units each way at 20px a unit, with (0, 0) at (200, 150). */
 const base = plane({
   xRange: [-4, 4],
   yRange: [-4, 4],
@@ -79,9 +78,9 @@ describe("plane", () => {
   test("a plot follows the steps, and calculus asks to be called before them", () => {
     const moving = svg(shear.css, shear.plot((x) => x).node);
     expect(moving).toContain("plane-map");
-    expect(() =>
-      shear.plot((x) => x, { animation: motion({ draw: 0 }).at(0).to({ draw: 1 }, 1) }),
-    ).toThrow("plot() cannot draw on a plane that has steps");
+    expect(() => shear.plot({ at: 0, over: 1 }, (x) => x)).toThrow(
+      "plot() cannot draw on a plane that has steps",
+    );
     expect(() => shear.dot((x) => x, 1)).toThrow(
       "plane.dot() draws on a plane that does not move. Call it on the plane before its first step.",
     );
@@ -170,5 +169,61 @@ describe("plane", () => {
 
     const broken = base.applyFunction({ at: 0, over: 1 }, (x) => [1 / x, 0]);
     expect(() => broken.grid).toThrow("plane.applyFunction() sent (0, -4) to (Infinity, 0)");
+  });
+});
+
+describe("what a plane draws", () => {
+  const near = (r: { x: number; y: number; w: number; h: number }, p: { x: number; y: number }) =>
+    p.x >= r.x - 0.01 && p.x <= r.x + r.w + 0.01 && p.y >= r.y - 0.01 && p.y <= r.y + r.h + 0.01;
+
+  test("a vector's bounds cover it where the steps leave it, and its span runs through them", () => {
+    const still = base.vector([1, 1]);
+    const moved = shear.vector([0, 1]);
+    const grown = base.vector({ at: 1, over: 2 }, [1, 1], { label: "v" });
+
+    expect(near(still.bounds, base.point(1, 1))).toBe(true);
+    expect([still.span.at, still.span.over]).toEqual([0, 0]);
+    expect(near(moved.bounds, shear.map(0, 1))).toBe(true);
+    expect([moved.span.at, moved.span.end]).toEqual([1, 3]);
+    expect([grown.span.at, grown.span.end]).toEqual([1, expect.closeTo(4.6, 9)]);
+    expect(grown.bounds.y).toBeLessThan(still.bounds.y);
+    expect(still.parts).toEqual([]);
+  });
+
+  test("basis has the parts i and j, each when its arrow grows", () => {
+    const b = base.basis({ at: 1, over: 1 });
+
+    expect(b.parts.map((p) => p.id)).toEqual(["i", "j"]);
+    expect(b.part("j").span.at).toBeCloseTo(1.2, 9);
+    expect(near(b.part("i").box, base.point(1, 0))).toBe(true);
+    // @ts-expect-error: basis has only i and j
+    expect(() => b.part("k")).toThrow('plane.basis() has no part "k". Its parts are "i", "j".');
+  });
+
+  test("a plot draws on during a leading span and stays inside the plot area", () => {
+    const parabola = base.plot({ at: 1, over: 1.5 }, (x) => x * x);
+
+    expect([parabola.span.at, parabola.span.end]).toEqual([1, 2.5]);
+    expect(near(rect(120, 70, 160, 160), parabola.bounds.side("top", 0))).toBe(true);
+    expect(parabola.bounds.y + parabola.bounds.h).toBeCloseTo(base.point(0, 0).y, 6);
+    expect(svg(base.css, parabola)).toContain("@keyframes");
+  });
+
+  test("a polygon, a line and a label sit where the steps leave them", () => {
+    const square = shear.polygon([
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ]);
+
+    expect(near(square.bounds, shear.map(1, 1))).toBe(true);
+    expect(square.bounds.x + square.bounds.w).toBeCloseTo(shear.map(1, 1).x, 6);
+    expect([square.span.at, square.span.end]).toEqual([1, 3]);
+    expect(near(base.line([1, 0]).bounds, base.point(3, 0))).toBe(true);
+
+    const label = shear.label([0, 1], "x");
+    expect(label.bounds.center.x).toBeCloseTo(shear.map(0, 1).x, 6);
+    expect(label.bounds.w).toBeGreaterThan(0);
   });
 });

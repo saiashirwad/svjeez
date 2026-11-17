@@ -17,6 +17,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run lint
+      - run: bun run format:check
       # The locked playwright-core, since bunx fetches the latest and its Chromium build isn't the one the tests launch.
       - run: bun run playwright-core install --with-deps chromium-headless-shell
         working-directory: packages/svjeez

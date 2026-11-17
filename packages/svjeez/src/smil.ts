@@ -98,15 +98,8 @@ export const smilAttributes = (
   };
 };
 
-/** A loop whose motion fits in less of the loop than this plays as a window. */
 const WINDOW_SHARE = 0.8;
 
-/**
- * An indefinite `<animate>` costs the browser work every frame, even while its value holds. When the value only changes
- * inside a short stretch of the loop, the `<animate>` covers just that stretch and restarts itself every loop, freezing
- * on its last value. The element's attribute holds that last value too, and a `<set>` puts the first one back before the
- * window opens. `data-loop` keeps the full loop length for `loopLength`.
- */
 const windowed = (
   points: readonly Point[],
   discrete: boolean,
@@ -157,8 +150,6 @@ const windowed = (
 
   if (from === 0) return [animate];
 
-  // The first value is set at the start, and again at the start of each later loop when the window leaves a different
-  // value behind.
   const again =
     values[0] === values[values.length - 1] ? "" : `;${id}.begin+${num((1 - from) * duration, 4)}s`;
 
@@ -178,7 +169,6 @@ const windowed = (
   ];
 };
 
-/** The `<animate>` for a lane on `attribute`, playing at the canvas's rate. `name` makes a fresh id when it is windowed. */
 export const animate = (
   canvas: Canvas,
   attribute: string,
@@ -197,7 +187,6 @@ export const animate = (
   const { points, discrete } = smilPoints(lane.keys, channel);
   const first = formatValue(points[0]!.value);
 
-  // A lane that never leaves its first value is the attribute itself, so it needs no animation.
   if (points.every((point) => formatValue(point.value) === first)) return [];
 
   if (canvas.loop) {

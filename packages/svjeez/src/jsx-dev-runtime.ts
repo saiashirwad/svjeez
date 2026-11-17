@@ -4,7 +4,6 @@ import type { Props, SvgNode } from "./svg";
 
 export { Fragment };
 
-/** The development JSX runtime: `jsx`, and it records where each element was written for `render({ sources: true })`. */
 export const jsxDEV = (
   type: Parameters<typeof jsx>[0],
   props: Props | null,

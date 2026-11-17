@@ -9,10 +9,7 @@ import { shotName, type Recording } from "./snapshots.ts";
 import { duration, size, steady, timeline } from "./timeline.ts";
 
 export interface FidelityOptions {
-  /**
-   * How far a pixel's channel may be off (0 to 255) before it counts as different. Antialiasing and font rasterizing
-   * differ a little between an SVG and HTML, so this is generous. Default 16.
-   */
+  /** How far a pixel's channel may be off (0 to 255) before it counts as different. Default 16. */
   readonly tolerance?: number;
   /** A pixel also matches if the other picture has a match within this many px, for text a hair off. Default 1. */
   readonly reach?: number;
@@ -23,18 +20,14 @@ export interface FidelityOptions {
   readonly executablePath?: string;
 }
 
-/** One state of one card, drawn and photographed at rest. */
 export interface StateFidelity {
   readonly card: number;
   readonly name: string;
   readonly scheme: "light" | "dark";
-  /** The moment the drawing was captured, in seconds. */
   readonly time: number;
-  /** Pixels either picture paints, and the share of them that differ. */
   readonly painted: number;
   readonly mismatch: number;
   readonly failed: boolean;
-  /** The side-by-side image, when `out` was given and the state failed. */
   readonly image?: string;
 }
 
@@ -48,10 +41,6 @@ interface Compare {
   readonly image: boolean;
 }
 
-/**
- * Compares two PNGs in the page, over white and over black so see-through differences show too. A pixel is wrong when
- * neither picture has one within `reach` of it that is within `tolerance` in every channel.
- */
 const compare = async ({
   a,
   b,
@@ -85,7 +74,6 @@ const compare = async ({
   const alphaB = pixels(ib);
   const layers = ["#fff", "#000"].map((bg) => [pixels(ia, bg), pixels(ib, bg)] as const);
 
-  // How far the pixel at (x, y) of `src` is from the nearest pixel of `dst` within reach, worst over the layers.
   const off = (side: 0 | 1, x: number, y: number) =>
     Math.max(
       ...layers.map((layer) => {
@@ -125,7 +113,6 @@ const compare = async ({
 
   if (!image) return { painted, wrong: wrong.length };
 
-  // Screenshot, drawing and diff side by side: the diff is the screenshot, faded, with every wrong pixel in red.
   const gap = 8;
   const canvas = new OffscreenCanvas(w * 3 + gap * 4, h + gap * 2);
   const g = canvas.getContext("2d")!;
@@ -162,12 +149,6 @@ const fontOf = ({ href, ...face }: Recording["fonts"][number]): FontValue => {
   return font(Buffer.from(base64, "base64"), face);
 };
 
-/**
- * Draws each state of a recording the way `<Dom>` does, at the end of its hold, and compares it pixel by pixel with
- * the screenshot Chromium took of the real card then. `dir` is what `snapshots({ screenshots })` (or
- * `SVJEEZ_DOM_SHOTS`) wrote. The card is drawn on its own: its `<Dom>` props and the clip it plays in aren't
- * recorded, but the fonts are.
- */
 export const fidelity = async (
   dir: string,
   { tolerance = 16, reach = 1, threshold = 0.01, out, executablePath }: FidelityOptions = {},
@@ -201,7 +182,7 @@ export const fidelity = async (
             snaps.map((_, i) => readFile(join(dir, shotName(card, i, scheme)))),
           );
         } catch {
-          continue; // a scheme the recording didn't read
+          continue;
         }
 
         const { frames } = await renderFrames(svg, {

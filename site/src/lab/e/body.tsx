@@ -9,10 +9,8 @@ type Layer = "co" | "cf" | "ct";
 
 type Cap = "round" | "butt";
 
-/** Melting moves the body in short segments, each to where its middle melts. */
 const SEGMENT = 6;
 
-/** The body: one outline and one fill, then the pieces that cross over themselves drawn again on top. */
 export const body = (cx: Cx) => {
   const { g, f, lay, pal, ink } = cx;
   const { G, spine } = lay;
@@ -101,16 +99,12 @@ export const body = (cx: Cx) => {
   );
 
   return {
-    /** The outline as path data, for the 4D ghost. */
     d: polylinePath(spine),
-    /** The whole body. Built on each call because the file may hold it twice. */
     whole: () => (f.liquid ? melted : stretch(0, spine.length - 1, "round")),
-    /** The stretches that cross over themselves, drawn again on top. */
     crossings: () => crossings.map(([a, b]) => stretch(a, b, "butt")),
   };
 };
 
-/** Spots on the coat, drawn after the body so they sit on it. */
 export const spots = (cx: Cx) => {
   const { g, lay, pal, rand } = cx;
   const { G, frames } = lay;

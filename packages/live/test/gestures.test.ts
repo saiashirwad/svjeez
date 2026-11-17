@@ -10,7 +10,6 @@ const curve = ease.linear;
 export default () => x;
 `;
 
-/** An editor that compiles nothing, so only the messages its gestures send change it. */
 const editing = (text = scene) =>
   createEditor({ text }, { compile: () => new Promise<Compiled>(() => {}) });
 

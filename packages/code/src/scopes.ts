@@ -1,10 +1,5 @@
 import type { CodeRole } from "svjeez";
 
-/**
- * TextMate scope prefix to role. A token takes the role of its longest matching prefix, so `keyword.operator`
- * beats `keyword`, and a scope that no row matches stays plain. Shiki does the matching, through a theme built
- * from this table.
- */
 export const SCOPES = {
   comment: "comment",
   punctuation: "punct",

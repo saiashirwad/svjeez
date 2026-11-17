@@ -1,25 +1,18 @@
 import type { Box, Point } from "svjeez";
 
-/** A 2D vector field: the arrow `[u, v]` at `(x, y)`. */
 export type VectorField = (x: number, y: number) => readonly [number, number];
 
 export interface TraceOptions {
   readonly bounds: Box;
-  /** Gap kept between neighbouring lines, in the field's units. */
   readonly spacing: number;
-  /** Length of one integration step. */
   readonly step: number;
-  /** Longest a line may run, in length units. */
   readonly maxLength: number;
-  /** Lines shorter than this are dropped. */
   readonly minLength: number;
-  /** Trace from exactly these points and do not fill the gaps. */
   readonly seeds?: readonly Point[];
 }
 
 interface Sample extends Point {
   readonly line: number;
-  /** Steps from the seed: positive going with the field, negative going against it. */
   readonly index: number;
 }
 
@@ -59,9 +52,8 @@ export function simplify(points: readonly Point[], tolerance: number): Point[] {
 }
 
 /**
- * Streamlines of `field` that keep `spacing` between neighbours (Jobard and Lefer): trace one line both ways from a
- * seed by Runge-Kutta, then seed the next lines a spacing to either side of it. A line ends at the bounds, at a
- * stagnation point, near another line, or at `maxLength`. Each line runs with the field.
+ * Streamlines of `field` that keep `spacing` between neighbours. A line ends at the bounds, a stagnation point, near
+ * another line, or at `maxLength`. Each runs with the field.
  */
 export function traceStreamlines(field: VectorField, options: TraceOptions): Point[][] {
   const { bounds, spacing, step, maxLength, minLength } = options;
@@ -73,7 +65,6 @@ export function traceStreamlines(field: VectorField, options: TraceOptions): Poi
   const inside = ({ x, y }: Point): boolean =>
     x >= bounds.x && x <= bounds.x + bounds.w && y >= bounds.y && y <= bounds.y + bounds.h;
 
-  /** A sample of an earlier line, or a sample of this one that is not just behind the head, within `radius`. */
   const crowded = (p: Point, radius: number, mine: readonly Sample[], index = 0): boolean => {
     const [cx, cy] = [Math.floor(p.x / test), Math.floor(p.y / test)];
     const reach = Math.ceil(radius / test);
@@ -95,7 +86,6 @@ export function traceStreamlines(field: VectorField, options: TraceOptions): Poi
     return m > STILL && Number.isFinite(m) ? [(sign * u) / m, (sign * v) / m] : undefined;
   };
 
-  /** One Runge-Kutta step of the normalised field. */
   const advance = (p: Point, sign: number): Point | undefined => {
     const k1 = direction(p, sign);
 
@@ -189,7 +179,6 @@ export function traceStreamlines(field: VectorField, options: TraceOptions): Poi
 
   queue.push({ x: bounds.x + bounds.w / 2, y: bounds.y + bounds.h / 2 });
 
-  // When the queue runs dry a scan over the bounds reaches any region no line has crossed.
   const columns = Math.ceil(bounds.w / spacing) + 1;
   const total = columns * (Math.ceil(bounds.h / spacing) + 1);
   let scanned = 0;

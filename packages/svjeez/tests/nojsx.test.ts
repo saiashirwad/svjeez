@@ -8,6 +8,7 @@ import {
   shake,
   adaptive,
   flow,
+  span,
   systemDark,
   systemLight,
 } from "svjeez";
@@ -48,10 +49,8 @@ const toast = (): string => {
       g(
         {
           animation: motion({ opacity: 0, y: 24 })
-            .at(0.3)
-            .to({ opacity: 1, y: 0 }, 0.5, ease.pop)
-            .at(4)
-            .to({ opacity: 0, y: -12 }, 0.4, ease.in),
+            .to({ opacity: 1, y: 0 }, span(0.3, 0.5), ease.pop)
+            .to({ opacity: 0, y: -12 }, span(4, 0.4), ease.in),
         },
         [
           rect({

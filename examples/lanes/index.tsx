@@ -33,7 +33,8 @@ const run = lanes(
       { from: "lead", to: "search", at: 1 },
       { from: "lead", to: "build", at: 2.6 },
       { from: "search", to: "lead", at: 4.6 },
-      { from: "build", to: "lead", at: 7.2 },    ],
+      { from: "build", to: "lead", at: 7.2 },
+    ],
   },
   {
     theme,
@@ -43,7 +44,6 @@ const run = lanes(
     scale: 100,
     fontSize: 16,
     play: { at: 0.2 },
-    // The lead is blue, the workers purple and cyan, and the test lane's checks orange.
     tints: {
       input: hue.blue,
       task: hue.purple,
@@ -70,7 +70,7 @@ export default function build(): string {
     },
     <>
       <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
-      <g transform={fit(run.bounds.w, run.bounds.h)}>{run.node}</g>
+      <g transform={fit(run.bounds.w, run.bounds.h)}>{run}</g>
     </>,
   );
 }

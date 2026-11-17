@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { ALL_FORMATS, BufferSource, EncodedPacketSink, Input } from "mediabunny";
-import { motion, render } from "svjeez";
+import { motion, render, span } from "svjeez";
 import { video } from "@svjeez/video";
 
 const scene = (width: number, height: number) =>
@@ -10,7 +10,7 @@ const scene = (width: number, height: number) =>
       width={16}
       height={height}
       fill="#3EE6D6"
-      animation={motion({ x: 0 }).to({ x: width - 16 }, 1)}
+      animation={motion({ x: 0 }).to({ x: width - 16 }, span(0, 1))}
     />,
   );
 

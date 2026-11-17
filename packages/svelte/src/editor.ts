@@ -1,10 +1,15 @@
-import { createEditor, type Editor, type EditorOptions, type Input, type State } from "@svjeez/live";
+import {
+  createEditor,
+  type Editor,
+  type EditorOptions,
+  type Input,
+  type State,
+} from "@svjeez/live";
 import { createSubscriber } from "svelte/reactivity";
 
 /**
- * An `@svjeez/live` editor whose state is reactive: read `state` in a template or an effect and it updates on every
- * change. The compile worker starts when `state` is first read in an effect, so a server render starts none, and the
- * editor pauses whenever no effect reads it.
+ * An `@svjeez/live` editor with reactive `state`. The compile worker starts when `state` is first read in an effect,
+ * so a server render starts none.
  */
 export class SceneEditor implements Editor {
   readonly #store: Editor;

@@ -1,11 +1,11 @@
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span } from "svjeez";
 import { SQUASH, blip } from "../site/lib/blip";
 
 export const frame = { width: 208, height: 300, duration: 1.5, title: "Blip hops", css: SQUASH };
 
 export const hop = motion({ y: 100 })
-  .at(0.4).to({ y: 10 }, 0.4, ease.out)
-  .to({ y: 100 }, 0.4, ease.in);
+  .to({ y: 10 }, span(0.4, 0.4), ease.out)
+  .to({ y: 100 }, span(0.8, 0.4), ease.in);
 
 export default () =>
   render(frame, blip({

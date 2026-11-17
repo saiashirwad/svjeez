@@ -5,6 +5,7 @@ import type { Seconds } from "./motion";
 import type { Css } from "./properties";
 import { children, element, raw, serialize, type Child } from "./svg";
 import { withSources } from "./sources";
+import { tracing } from "./traced";
 import { validateSvg } from "./validate";
 
 export interface RenderOptions {
@@ -12,9 +13,7 @@ export interface RenderOptions {
   readonly height: number;
   readonly title: string;
   readonly desc?: string;
-  /** One loop in seconds. Every motion lives on this timeline, or on a loop that divides it. */
   readonly duration: Seconds;
-  /** Fonts and page classes. Build it with `css` to read declared properties. */
   readonly css?: string | Css;
   /** Playback rate: 2 plays twice as fast. `duration` and `reducedMotion.at` stay in scene seconds. Default 1. */
   readonly playbackRate?: number;
@@ -27,7 +26,6 @@ export interface RenderOptions {
   readonly reducedMotion?: { readonly at: Seconds } | false;
   /** False plays the scene once and holds its last frame. Default true. */
   readonly loop?: boolean;
-  /** Comment above the root element. */
   readonly comment?: string;
   /**
    * Write `data-source` on every element made by the development JSX runtime (`svjeez/jsx-dev-runtime`): where it was
@@ -68,7 +66,7 @@ export const render = (options: RenderOptions, content: Child): string => {
   const nodes = children(content);
 
   const { css, ...compiled } = compile(
-    options.sources ? nodes.map(withSources) : nodes,
+    (options.sources ?? tracing()) ? nodes.map(withSources) : nodes,
     { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
     options.css,
   );
@@ -85,7 +83,6 @@ export const render = (options: RenderOptions, content: Child): string => {
   const rated =
     playbackRate === 1 ? rootAttributes : { ...rootAttributes, [RATE_ATTR]: num(playbackRate) };
 
-  // The class lets `variables({ prefix })` scope its rule to this scene.
   const root = element("svg", prefix ? { ...rated, class: `${prefix}root` } : rated, [
     element("title", { id: `${prefix}t` }, children(options.title, true)),
     ...(options.desc ? [element("desc", { id: `${prefix}d` }, children(options.desc, true))] : []),

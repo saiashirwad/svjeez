@@ -3,31 +3,23 @@ import type { Timing, Wait } from "./flow.ts";
 import type { Snapshot } from "./tree.ts";
 
 /**
- * A state, with how the timeline moves into it if not the default, or a wait. What `card.run` gives, and what
- * `<Dom states>` plays.
+ * A state with how the timeline moves into it, or a wait. What `card.run` gives and `<Dom states>` plays.
  */
 export type Step = Snapshot | readonly [Snapshot, Timing] | Wait;
 
-/** A move from one state into the next, in seconds on the clock around the `Dom`. */
 interface Move {
   readonly at: number;
   readonly over: number;
   readonly ease?: Ease;
 }
 
-/** Default length of a move into a snapshot. */
 const OVER = 0.6;
 
 const isWait = (step: Step): step is Wait => "wait" in step;
 
-/** The snapshot a step shows, or nothing for a wait. */
 export const snapshotOf = (step: Step): Snapshot | undefined =>
   isWait(step) ? undefined : "root" in step ? step : step[0];
 
-/**
- * Walks a cursor over the steps: the first snapshot holds from 0, each later one moves in from where the cursor is
- * and leaves it at the move's end, and a wait pushes it on.
- */
 export const timeline = (states: Snapshot | readonly Step[]) => {
   const snaps: Snapshot[] = [];
   const moves: Move[] = [];
@@ -68,8 +60,7 @@ export const timeline = (states: Snapshot | readonly Step[]) => {
 };
 
 /**
- * When each state is at rest, in seconds: the end of its hold, just before the next move starts (or the end of the
- * move into it when nothing waits). The last state's moment is held a hair inside the end, so a loop hasn't wrapped.
+ * When each state is at rest, in seconds: the end of its hold, before the next move starts. The last is held a hair inside the end so a loop hasn't wrapped.
  */
 export const steady = (states: Snapshot | readonly Step[]): number[] => {
   const { snaps, moves, length } = timeline(states);
@@ -83,8 +74,7 @@ export const steady = (states: Snapshot | readonly Step[]): number[] => {
 };
 
 /**
- * A flow that ends where it began: the steps, then a move back into the first snapshot, so the picture loops
- * without a jump. The return takes `over` seconds (default 0.6) and may hold `wait` seconds after.
+ * A flow that ends where it began: the steps, then a move back into the first snapshot over `over` seconds (default 0.6), optionally holding `wait` seconds after.
  */
 export const loop = (
   steps: readonly Step[],
@@ -96,11 +86,7 @@ export const loop = (
 
   const { wait, ...move } = timing;
 
-  return [
-    ...steps,
-    [first, move],
-    ...(wait ? [{ wait }] : []),
-  ];
+  return [...steps, [first, move], ...(wait ? [{ wait }] : [])];
 };
 
 /** The picture's size: the largest of the states, so one frame holds them all. */

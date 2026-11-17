@@ -9,6 +9,7 @@ import {
   enter,
   Icon,
   motion,
+  random,
   render,
   type IconData,
   type Point,
@@ -16,6 +17,8 @@ import {
   type SvgNode,
   flow,
   travel,
+  span,
+  stagger,
 } from "svjeez";
 import { rect } from "svjeez/geometry";
 
@@ -41,7 +44,6 @@ const W = WIDTH;
 const H = HEIGHT;
 const D = 18;
 
-/** When the map lets go of the loop: everything fades, and the cables draw in again from the start. */
 const OUT = D - 1;
 
 const map = project(countries, {
@@ -60,7 +62,6 @@ const C = {
   dim: theme.base04,
 } as const;
 
-/** The five cable colors, in a fixed order: the palette's own hues, so each cable stays its own and the land stays quiet. */
 const HUES = [hue.blue, hue.orange, hue.purple, hue.cyan, hue.red] as const;
 
 const cableHue = (i: number) => HUES[i % HUES.length]!;
@@ -68,7 +69,6 @@ const cableHue = (i: number) => HUES[i % HUES.length]!;
 interface Station {
   readonly name: string;
   readonly at: LonLat;
-  /** Which side of the dot its name sits on, if it shows one. */
   readonly label?: keyof typeof LABEL;
 }
 
@@ -104,12 +104,10 @@ const BOCA_RATON = station("Boca Raton", [-80.1, 26.35]);
 interface Cable {
   readonly name: string;
   readonly from: Station;
-  /** The turns the cable takes at sea, between its landings. */
   readonly via: readonly LonLat[];
   readonly to: Station;
 }
 
-/** Real systems, simplified to a few turns each. */
 const CABLES: readonly Cable[] = [
   { name: "MAREA", from: VIRGINIA_BEACH, via: [[-40, 41]], to: BILBAO },
   { name: "Grace Hopper", from: NEW_YORK, via: [[-30, 47.5]], to: BUDE },
@@ -257,12 +255,9 @@ const length = (points: readonly Point[]) =>
 interface Laid {
   readonly cable: Cable;
   readonly color: (typeof HUES)[number];
-  /** One list of points per piece: a cable across the Pacific leaves one edge of the map and comes back at the other. */
   readonly pieces: Point[][];
-  /** Each piece once, for the packets to `<use>`, with a path length of 1 so a dash is a fraction of it. */
   readonly tracks: Ref<"symbol">[];
   readonly length: number;
-  /** When it starts to draw. */
   readonly at: number;
 }
 
@@ -283,8 +278,7 @@ const laid: Laid[] = CABLES.map((cable, i) => {
 
 const DRAW = 1.4;
 
-/** The whole map leaves together before the loop starts over. */
-const leave = motion().at(OUT).to({ opacity: 0 }, 0.8, ease.inOut);
+const leave = motion().to({ opacity: 0 }, span(OUT, 0.8), ease.inOut);
 
 const grain = def.pattern(
   { width: 5.5, height: 5.5, patternUnits: "userSpaceOnUse" },
@@ -303,7 +297,6 @@ function Land(): SvgNode {
   );
 }
 
-/** Each cable draws on along its whole length, piece after piece, with a soft glow under it. */
 function Cables(): SvgNode {
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round" animation={leave}>
@@ -338,10 +331,6 @@ function Cables(): SvgNode {
   );
 }
 
-/**
- * Packets are dashes on a copy of the cable. With `pathLength` 1 a dash is a fraction of the piece, and moving its
- * offset from the start to past the end runs it along. The head and its tail share a timing and an end point.
- */
 const offset = css.property("offset", { syntax: "number", inherits: false, initial: 0 });
 
 const packetCss = css`
@@ -350,16 +339,7 @@ const packetCss = css`
   }
 `;
 
-/** A seeded random number, so the traffic is the same on every build. */
-const random = (() => {
-  let seed = 11;
-
-  return () => {
-    seed = (seed * 16807) % 2147483647;
-
-    return seed / 2147483647;
-  };
-})();
+const rand = random(11);
 
 const SPEED = 140;
 const TAIL = 56;
@@ -378,13 +358,14 @@ function Packet({ piece, track, at, color }: PacketProps): SvgNode {
   const tail = TAIL / total;
   const head = HEAD / total;
 
-  // A round cap pokes past its dash, so each dash starts and ends a cap's width off the piece.
   const cap = 2 / total;
 
   const run = (dash: number) =>
-    motion({ [offset]: dash + cap })
-      .at(at)
-      .to({ [offset]: dash - 1 - tail - cap }, total / SPEED, ease.linear);
+    motion({ [offset]: dash + cap }).to(
+      { [offset]: dash - 1 - tail - cap },
+      span(at, total / SPEED),
+      ease.linear,
+    );
 
   return (
     <>
@@ -409,7 +390,6 @@ function Packet({ piece, track, at, color }: PacketProps): SvgNode {
   );
 }
 
-/** Traffic on every cable: a packet crosses each piece in turn, and a few leave each cable while the map is up. */
 function Traffic(): SvgNode {
   return (
     <g fill="none" strokeLinecap="round" animation={leave}>
@@ -418,7 +398,7 @@ function Traffic(): SvgNode {
         const count = Math.max(3, Math.round(total / 180));
 
         return Array.from({ length: count }, (_, k) => {
-          let at = TRAFFIC + ((k + random() * 0.8) / count) * (OUT - TRAFFIC - trip);
+          let at = TRAFFIC + ((k + rand() * 0.8) / count) * (OUT - TRAFFIC - trip);
 
           return pieces.map((piece, p) => {
             const node = <Packet piece={piece} track={tracks[p]!} at={at} color={color} />;
@@ -433,6 +413,7 @@ function Traffic(): SvgNode {
 }
 
 const stations = [...new Set(CABLES.flatMap((c) => [c.from, c.to]))];
+const landings = stagger(span(1.2, 0.45), stations.length, 0.04);
 
 const LABEL = {
   left: { dx: -8, dy: 3, anchor: "end" },
@@ -454,7 +435,7 @@ function Stations(): SvgNode {
         return (
           <g
             style={{ transformOrigin: `${x}px ${y}px` }}
-            animation={enter({ at: 1.2 + i * 0.04, over: 0.45 }, { scale: 0 }, ease.pop)}
+            animation={enter(landings[i]!, { scale: 0 }, ease.pop)}
           >
             <circle cx={x} cy={y} r={3.6} fill={C.sea} stroke={C.text} strokeWidth={1} />
             <circle cx={x} cy={y} r={1.3} fill={C.text} />
@@ -487,7 +468,6 @@ interface Journey {
   readonly icon: IconData;
   readonly cable: string;
   readonly at: number;
-  /** Runs the cable from its last landing to its first. */
   readonly reverse?: true;
 }
 
@@ -501,7 +481,7 @@ const TRIP = 2.8;
 
 /** A ring of the token's own color that breathes out from it twice a second while it rides. */
 const pulse = motion({ opacity: 0.55, scale: 1 })
-  .to({ opacity: 0, scale: 2.1 }, 0.5, ease.out)
+  .to({ opacity: 0, scale: 2.1 }, span(0, 0.5), ease.out)
   .loop(0.5);
 
 /** Light in glass covers about 204,000 km a second. */
@@ -522,7 +502,6 @@ const ride = (journey: Journey) => {
   };
 };
 
-/** A journey's own trip: the cable lights up behind an icon that rides it, piece by piece, and rings where it lands. */
 function Ride({ journey }: { journey: Journey }): SvgNode {
   const { pieces, length: total, color, to } = ride(journey);
   const end = map.point(to.at);
@@ -555,18 +534,15 @@ function Ride({ journey }: { journey: Journey }): SvgNode {
         strokeWidth={2}
         style={{ transformOrigin: `${end.x}px ${end.y}px` }}
         animation={motion({ opacity: 0, scale: 1 })
-          .at(at)
-          .set({ opacity: 1 })
-          .to({ opacity: 0, scale: 4 }, 0.9, ease.out)}
+          .set({ opacity: 1 }, at)
+          .to({ opacity: 0, scale: 4 }, span(at, 0.9), ease.out)}
       />
     </g>
   );
 }
 
-/** Where the readout for the journey under way sits, under the map on the right. */
 const READOUT = rect(W - MARGIN - 348, MARGIN, 348, 64);
 
-/** The journey under way: a colored rule, what it carries and where, and the time light takes, set large. */
 function Readout({ journey, until }: { journey: Journey; until: number }): SvgNode {
   const { color, from, to, km } = ride(journey);
   const { x, y, w, h } = READOUT;
@@ -575,10 +551,8 @@ function Readout({ journey, until }: { journey: Journey; until: number }): SvgNo
   return (
     <g
       animation={motion({ opacity: 0, x: -6 })
-        .at(journey.at - 0.3)
-        .to({ opacity: 1, x: 0 }, 0.5, ease.out)
-        .at(until - 0.4)
-        .to({ opacity: 0 }, 0.4)}
+        .to({ opacity: 1, x: 0 }, span(journey.at - 0.3, 0.5), ease.out)
+        .to({ opacity: 0 }, span(until - 0.4, 0.4))}
     >
       <rect x={x} y={y} width={2} height={h} fill={color} />
       <Icon icon={journey.icon} x={x + 16} y={y + 1} size={14} stroke={color} strokeWidth={2} />

@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// Three lines draw one after another, each in its own curve, and write their names at the end.
 const W = 504;
 const H = 340;
 const BAR = 40;
@@ -67,9 +66,9 @@ export default function build(): string {
       {win.node}
       <g animation={outro(D)}>
         <g animation={enter({ at: 0.2, over: 0.5 })}>{c.node}</g>
-        {linux.node}
-        {macos.node}
-        {windows.node}
+        {linux}
+        {macos}
+        {windows}
         <g animation={enter({ at: windows.span.end, over: 0.6 }, { opacity: 0, y: 6 })}>
           <text
             x={W / 2}

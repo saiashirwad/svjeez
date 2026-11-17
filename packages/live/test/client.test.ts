@@ -30,7 +30,6 @@ describe("createCompiler", () => {
   });
 });
 
-/** A stand-in worker that answers each compile after `ms`, and never answers a source of `loop`. */
 const fakeWorkers = (ms: number) => {
   const made = { spawned: 0, terminated: 0 };
   const real = globalThis.Worker;
@@ -58,7 +57,6 @@ const fakeWorkers = (ms: number) => {
   }
 
   const swap = { configurable: true, writable: true };
-  // createCompiler only constructs, posts to, listens on and terminates its worker, which Fake does.
   Object.defineProperty(globalThis, "Worker", { ...swap, value: Fake });
 
   return {

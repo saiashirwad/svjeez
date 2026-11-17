@@ -1,5 +1,5 @@
 import { google } from "@svjeez/fonts";
-import { Glyphs, draw, ease, enter, motion, render } from "svjeez";
+import { Glyphs, draw, ease, enter, motion, render, span } from "svjeez";
 
 import { HEIGHT, WIDTH, color, css, hue, leave, mono, size } from "../gallery-style";
 
@@ -21,7 +21,6 @@ const regular = body.face(400);
 const lineWidth = regular.measure(LINE, LINE_SIZE);
 const italicWidth = body.face(400, "italic").measure(ITALIC, LINE_SIZE);
 
-/** A face's name, small and centered under what is set in it. */
 const Name = ({ name, y, at }: { name: string; y: number; at: number }) => (
   <text
     x={W / 2}
@@ -58,7 +57,7 @@ export default function build(): string {
           fill="none"
           stroke={hue.orange}
           strokeWidth={2}
-          animation={(_, i) => draw({ at: 0.2 + i * 0.1, over: 1 }, ease.inOut)}
+          animation={(_, each) => draw(each.stagger(span(0.2, 1), 0.1), ease.inOut)}
         />
         <Glyphs
           font={display}
@@ -68,8 +67,8 @@ export default function build(): string {
           y={210}
           fill={hue.blue}
           alt=""
-          animation={(_, i) =>
-            enter({ at: 1 + i * 0.08, over: 0.5 }, { opacity: 0, y: 8 }, ease.out)
+          animation={(_, each) =>
+            enter(each.stagger(span(1, 0.5), 0.08), { opacity: 0, y: 8 }, ease.out)
           }
         />
         <Name name="Archivo Black" y={270} at={1.8} />
@@ -101,7 +100,7 @@ export default function build(): string {
           height={2}
           rx={1}
           fill={hue.orange}
-          animation={motion({ scale: 0 }).at(2.6).to({ scale: 1 }, 0.6, ease.out)}
+          animation={motion({ scale: 0 }).to({ scale: 1 }, span(2.6, 0.6), ease.out)}
         />
         <Name name="ABeeZee" y={420} at={2.8} />
       </g>

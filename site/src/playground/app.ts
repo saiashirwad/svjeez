@@ -9,7 +9,6 @@ const WATCHDOG_MS = 5000;
 
 type Scheme = "light" | "dark";
 
-/** Compiles in a worker. A scene that never returns costs the worker, not the page. */
 const createCompiler = () => {
   let worker: Worker;
   let waiting = new Map<number, (result: Compiled) => void>();
@@ -83,11 +82,9 @@ const pageScheme = (): Scheme => {
 const stat = (label: string, value: string) =>
   h("span", { class: "pg-stat" }, h("b", {}, value), ` ${label}`);
 
-/** Text with `code` in backticks, as the skill writes it, turned into nodes. */
 const inline = (text: string) =>
   text.split(/`([^`]+)`/).map((part, i) => (i % 2 ? h("code", {}, part) : part));
 
-/** One plain sentence on what went wrong, before the compiler's or the library's own words. */
 const headline = (error: SourceError) =>
   !error.line
     ? "The scene didn't build."
@@ -95,7 +92,6 @@ const headline = (error: SourceError) =>
       ? `TypeScript can't read line ${error.line}.`
       : `svjeez stopped the build at line ${error.line}.`;
 
-/** Upgrades `host` into an editor beside a live preview. `initial` names the first example. */
 export const mount = (host: HTMLElement, initial: string, only?: readonly string[]) => {
   const choices = only?.length ? examples.filter((e) => only.includes(e.id)) : examples;
   let current: PlaygroundExample = choices.find((e) => e.id === initial) ?? choices[0]!;
@@ -112,8 +108,6 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
   const stats = h("p", { class: "pg-stats", "aria-live": "off" });
   const error = h("div", { class: "pg-error", role: "status", hidden: "" });
 
-  // The line the error points at, a caret under its column when the error knows it, then the message and, when the
-  // scene-writing skill has one for it, the fix.
   const explain = (problem: SourceError) => {
     const parts: Node[] = [h("p", { class: "pg-error-head" }, h("b", {}, headline(problem)))];
 
@@ -158,7 +152,9 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
     svg = nextSvg;
     // Safari shows an <img> SVG in the OS's scheme whatever the stage's color-scheme says, so the other one is pinned.
     url = URL.createObjectURL(
-      new Blob([scheme === systemScheme() ? svg : pinScheme(svg, scheme)], { type: "image/svg+xml" }),
+      new Blob([scheme === systemScheme() ? svg : pinScheme(svg, scheme)], {
+        type: "image/svg+xml",
+      }),
     );
     img.src = url;
 
@@ -201,7 +197,6 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
 
   const view = new EditorView({ state: editorState(current.source, schedule), parent: editorHost });
 
-  // One menu of examples, the core first and then one per package, so the title bar stays as quiet as a window's.
   const picker = h("select", { class: "pg-pick", "aria-label": "Example" });
 
   for (const from of new Set(choices.map((e) => e.from)))

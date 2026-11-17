@@ -4,6 +4,7 @@ import {
   ease,
   motion,
   render,
+  span,
   type Child,
   type Rect,
   type SvgNode,
@@ -22,7 +23,6 @@ const W = 960;
 const H = 540;
 const D = 22;
 
-/** Each color is a CSS variable, so the map follows the viewer's light or dark mode. */
 const { vars: C, css } = variables({
   dark: {
     night: "#08121C",
@@ -57,11 +57,9 @@ interface Stop {
   readonly city: string;
   readonly country: string;
   readonly at: LonLat;
-  /** Which side of the dot the label sits on. */
   readonly side: 1 | -1;
 }
 
-/** The Kangaroo Route, Qantas and Imperial Airways' London to Sydney service, by its classic stops. */
 const STOPS: readonly Stop[] = [
   { city: "London", country: "United Kingdom", at: [-0.13, 51.5], side: -1 },
   { city: "Cairo", country: "Egypt", at: [31.24, 30.04], side: -1 },
@@ -75,7 +73,6 @@ const PAN = 1.2;
 const FLIGHT = 2.1;
 const PAUSE = 0.5;
 
-/** Each leg: where the camera frames it, how far it zooms, and when the flight leaves and lands. */
 const legs = STOPS.slice(1).map((to, i) => {
   const from = STOPS[i]!;
   const target = map.bounds([from.at, to.at], 46);
@@ -105,7 +102,7 @@ const stops: CameraStop[] = [
     show: { at: camera, over: PAN + FLIGHT + PAUSE },
     target,
   })),
-  { show: { at: BACK, over: D - BACK }, target: "all" },
+  { show: span(BACK).until(D), target: "all" },
 ];
 
 const Follow = ({ children }: { children: Child }): SvgNode => (
@@ -114,9 +111,8 @@ const Follow = ({ children }: { children: Child }): SvgNode => (
   </Camera>
 );
 
-/** West to east, the order each country starts to draw. */
-const west = Math.min(...map.regions.map((r) => r.centroid.x));
-const east = Math.max(...map.regions.map((r) => r.centroid.x));
+const west = Math.min(...map.parts.map((r) => r.centroid.x));
+const east = Math.max(...map.parts.map((r) => r.centroid.x));
 const start = (x: number) => 0.2 + (2 * (x - west)) / (east - west);
 
 /**
@@ -127,14 +123,12 @@ const start = (x: number) => 0.2 + (2 * (x - west)) / (east - west);
 function Intro(): SvgNode {
   return (
     <g strokeWidth={0.5} strokeLinejoin="round">
-      {map.regions.map((r) => (
+      {map.parts.map((r) => (
         <path
           d={r.d}
           stroke={C.line}
           animation={[
-            motion({ fill: C.sea })
-              .at(start(r.centroid.x) + 0.4)
-              .to({ fill: C.land }, 0.6),
+            motion({ fill: C.sea }).to({ fill: C.land }, span(start(r.centroid.x) + 0.4, 0.6)),
             draw({ at: start(r.centroid.x), over: 0.8 }),
           ]}
         />
@@ -143,7 +137,6 @@ function Intro(): SvgNode {
   );
 }
 
-/** Each country on the route lights up as the plane lands in it. */
 function Visited(): SvgNode {
   const when = new Map(legs.map((leg) => [leg.to.country, leg.land]));
 
@@ -151,18 +144,18 @@ function Visited(): SvgNode {
     <g stroke={C.line} strokeWidth={0.25}>
       {STOPS.map(({ country }) => (
         <path
-          d={map.region(country).d}
+          d={map.part(country).d}
           fill={C.lit}
-          animation={motion({ opacity: 0 })
-            .at(when.get(country) ?? INTRO)
-            .to({ opacity: 1 }, 0.5)}
+          animation={motion({ opacity: 0 }).to(
+            { opacity: 1 },
+            span(when.get(country) ?? INTRO, 0.5),
+          )}
         />
       ))}
     </g>
   );
 }
 
-/** A dot and name that keep their size on screen while the camera zooms, gone by the time it pulls back. */
 function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
   const { x, y } = map.point(stop.at);
   const origin = { transformOrigin: `${x}px ${y}px` };
@@ -171,10 +164,8 @@ function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
     <Camera frame={rect(0, 0, W, H)} stops={stops} over={PAN} steady origin={{ x, y }}>
       <g
         animation={motion({ opacity: 0, scale: 0.4 })
-          .at(at)
-          .to({ opacity: 1, scale: 1 }, 0.4, ease.pop)
-          .at(BACK - 0.2)
-          .to({ opacity: 0 }, 0.5)}
+          .to({ opacity: 1, scale: 1 }, span(at, 0.4), ease.pop)
+          .to({ opacity: 0 }, span(BACK - 0.2, 0.5))}
         style={origin}
       >
         <circle cx={x} cy={y} r={8} fill={C.route} opacity={0.22} />
@@ -211,9 +202,7 @@ function Flights(): SvgNode {
           opacity={0.75}
           animation={[
             draw({ at: leave, over: FLIGHT }, ease.inOut),
-            motion()
-              .at(BACK - 0.2)
-              .to({ opacity: 0 }, 0.5),
+            motion().to({ opacity: 0 }, span(BACK - 0.2, 0.5)),
           ]}
         />
       ))}
@@ -235,11 +224,8 @@ function Flights(): SvgNode {
   );
 }
 
-/** The whole route at world scale, once the camera has pulled back. */
 function Summary(): SvgNode {
-  const appear = motion({ opacity: 0 })
-    .at(BACK + 0.3)
-    .to({ opacity: 1 }, 0.8);
+  const appear = motion({ opacity: 0 }).to({ opacity: 1 }, span(BACK + 0.3, 0.8));
 
   return (
     <g animation={appear}>
@@ -265,9 +251,11 @@ function Caption(): SvgNode {
   return (
     <g
       fontFamily="system-ui, sans-serif"
-      animation={motion({ opacity: 0, y: 8 })
-        .at(BACK + 0.8)
-        .to({ opacity: 1, y: 0 }, 0.6, ease.out)}
+      animation={motion({ opacity: 0, y: 8 }).to(
+        { opacity: 1, y: 0 },
+        span(BACK + 0.8, 0.6),
+        ease.out,
+      )}
     >
       <text x={40} y={H - 66} fontSize={24} fontWeight={700} fill={C.text}>
         The Kangaroo Route
@@ -297,10 +285,10 @@ export default function build(): string {
         <path d={map.sphere} fill={C.sea} />
         <path d={map.graticule(15)} fill="none" stroke={C.grid} strokeWidth={0.4} />
       </Follow>
-      <g animation={motion({ opacity: 1 }).at(INTRO).set({ opacity: 0 })}>
+      <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, INTRO)}>
         <Intro />
       </g>
-      <g animation={motion({ opacity: 0 }).at(INTRO).set({ opacity: 1 })}>
+      <g animation={motion({ opacity: 0 }).set({ opacity: 1 }, INTRO)}>
         <Follow>
           <path d={map.land} fill={C.land} />
           <path

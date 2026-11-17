@@ -9,7 +9,6 @@ const end = (step: Step): Seconds =>
 // SAFETY: a and b are TargetValues, so their keys are Target names.
 const keysOf = (values: TargetValues): Target[] => Object.keys(values) as Target[];
 
-/** The part of a transition that plays before `until`, from the values the lane holds when it starts. */
 const head = (current: TargetValues, step: Step & { readonly until: Seconds }): Step => {
   const progress = (step.until - step.start) / step.over;
   const amount = easeAt(step.ease, progress);
@@ -32,11 +31,6 @@ const head = (current: TargetValues, step: Step & { readonly until: Seconds }): 
   return { start: step.start, over: step.until - step.start, ease: curve, values };
 };
 
-/**
- * A lane's steps in time order, with the deferred ones written out: a `repeat` pass restarts from the initial values,
- * a transition `repeat({ until })` stops ends where it stops, and `rewind` glides back to the initial values so that
- * it ends at `clockEnd`. A restart that would change nothing is dropped.
- */
 export const resolveSteps = (
   initial: TargetValues,
   steps: readonly Step[],

@@ -1,6 +1,17 @@
 import { arc, project, traffic, type LonLat, type Topology } from "@svjeez/geo";
 import { plane } from "@svjeez/icons/tabler";
-import { Icon, draw, ease, motion, render, type SvgNode, travel, variables } from "svjeez";
+import {
+  Icon,
+  draw,
+  ease,
+  motion,
+  render,
+  type SvgNode,
+  travel,
+  variables,
+  span,
+  stagger,
+} from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
@@ -12,7 +23,6 @@ const H = 540;
 const D = 18;
 const SANS = "system-ui, sans-serif";
 
-/** Each color is a CSS variable, so the map follows the viewer's light or dark mode. */
 const { vars: C, css } = variables({
   dark: {
     night: "#08121C",
@@ -60,7 +70,6 @@ type Code =
 interface Hub {
   readonly city: string;
   readonly at: LonLat;
-  /** Which way the label sits from the dot. */
   readonly side: "left" | "right" | "above" | "below";
 }
 
@@ -79,7 +88,6 @@ const HUBS: Record<Code, Hub> = {
   SYD: { city: "Sydney", at: [151.18, -33.94], side: "left" },
 };
 
-/** Illustrative routes between the hubs, with how busy each is drawn: the share of the comets it gets. */
 const ROUTES: readonly (readonly [Code, Code, number])[] = [
   ["JFK", "LHR", 4],
   ["JFK", "FRA", 2],
@@ -121,7 +129,6 @@ const FADE = 1;
 const DRAW = 3.2;
 const FLOW = { at: 2.6, over: 10.4 };
 
-/** The one plane: London to Singapore, turning with its arc. */
 const flight = arc(map, HUBS.LHR.at, HUBS.SIN.at, { height: 90 });
 const PLANE_AT = 5;
 const PLANE_OVER = 8;
@@ -148,6 +155,8 @@ const LABEL: Record<Hub["side"], readonly [number, number, "start" | "middle" | 
   below: [0, 17, "middle"],
 };
 
+const labelled = stagger(span(FADE + 0.2, 0.5), Object.keys(HUBS).length, 0.12);
+
 function Hubs(): SvgNode {
   return (
     <g fontFamily={SANS} fontSize={11.5} fontWeight={600} fill={C.text}>
@@ -156,11 +165,7 @@ function Hubs(): SvgNode {
         const [dx, dy, anchor] = LABEL[side];
 
         return (
-          <g
-            animation={motion({ opacity: 0 })
-              .at(FADE + 0.2 + i * 0.12)
-              .to({ opacity: 1 }, 0.5)}
-          >
+          <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, labelled[i]!)}>
             <circle cx={x} cy={y} r={6} fill={C.hub} opacity={0.2} />
             <circle cx={x} cy={y} r={2.8} fill={C.hub} stroke={C.night} strokeWidth={0.8} />
             <text
@@ -229,7 +234,7 @@ export default function build(): string {
       <Plane />
       <g
         fontFamily={SANS}
-        animation={motion({ opacity: 0, y: 6 }).at(0.3).to({ opacity: 1, y: 0 }, 0.7, ease.out)}
+        animation={motion({ opacity: 0, y: 6 }).to({ opacity: 1, y: 0 }, span(0.3, 0.7), ease.out)}
       >
         <text x={40} y={50} fontSize={24} fontWeight={700} fill={C.text}>
           Twelve hubs, one sky

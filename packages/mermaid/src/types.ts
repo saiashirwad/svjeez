@@ -20,14 +20,12 @@ export interface MermaidFlowEdge {
   readonly label?: string;
   /** `-->` and `---` are solid, `-.->` dotted, `==>` thick. */
   readonly line: "solid" | "dotted" | "thick";
-  /** Whether the edge ends in an arrowhead: `-->` does, `---` does not. */
   readonly arrow: boolean;
 }
 
 export interface FlowSubgraph {
   readonly id: string;
   readonly title: string;
-  /** The nodes mentioned inside it that no earlier subgraph took, in order. */
   readonly nodes: readonly string[];
 }
 
@@ -72,9 +70,7 @@ export interface SequenceDoc {
 export interface StateNode {
   readonly id: string;
   readonly label: string;
-  /** Whether a transition leads from it to `[*]`. */
   readonly final: boolean;
-  /** Set for a composite state: its own start and states. */
   readonly inner?: { readonly initial: string; readonly states: readonly StateNode[] };
 }
 
@@ -87,7 +83,6 @@ export interface MermaidStateTransition {
 export interface StateDoc {
   readonly kind: "state";
   readonly direction?: "TB" | "LR";
-  /** The state `[*] -->` leads to. */
   readonly initial: string;
   readonly states: readonly StateNode[];
   /** Every transition, with ids from any depth. `[*]` ends are in `initial` and `final`, not here. */

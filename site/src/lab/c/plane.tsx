@@ -1,9 +1,7 @@
-import { ease, motion, render, sampled, shake, spline } from "svjeez";
+import { ease, motion, render, sampled, shake, span, spline } from "svjeez";
 
 type Point = [x: number, y: number];
 
-// A paper plane's flight, leg by leg: fly to `to` in `over` seconds.
-// feel > 0 leaves fast and lands slow; feel < 0 leaves slow and lands fast.
 const launch = 0.4;
 const from: Point = [-30, 215];
 
@@ -25,7 +23,6 @@ const trees: Point[] = [
 
 const curve = (u: number, f: number) => (f < 0 ? u ** (1 - 3 * f) : 1 - (1 - u) ** (1 + 3 * f));
 
-// A smooth route through the points: leg i runs from position i to i + 1.
 const route = spline([from, ...legs.map((leg) => leg.to)].map(([x, y]) => ({ x, y })));
 
 const fly = (t: number) => {
@@ -40,7 +37,6 @@ const fly = (t: number) => {
   return { x, y, rotate: route.angle(i + u) };
 };
 
-/** When the plane first reaches `x`, if it does. */
 const when = (x: number) => {
   for (let t = 0; t < duration - 2; t += 0.02) if (fly(t).x >= x) return t;
 
@@ -94,11 +90,9 @@ export default () =>
               t === undefined
                 ? undefined
                 : motion({ opacity: 1 })
-                    .at(t)
-                    .to({ x: 40 + 20 * k, y: -110 - 14 * k, opacity: 0 }, 1.2, ease.in)
-                    .at(duration - 0.5)
-                    .set({ x: 0, y: 0 })
-                    .to({ opacity: 1 }, 0.4)
+                    .to({ x: 40 + 20 * k, y: -110 - 14 * k, opacity: 0 }, span(t, 1.2), ease.in)
+                    .set({ x: 0, y: 0 }, duration - 0.5)
+                    .to({ opacity: 1 }, span(duration - 0.5, 0.4))
             }
           />
         );
@@ -110,9 +104,8 @@ export default () =>
           r={5}
           fill="#FFFFFF"
           animation={motion({ opacity: 0, scale: 0.5 })
-            .at(t)
-            .to({ opacity: 0.9, scale: 1 }, 0.1)
-            .to({ opacity: 0, scale: 2.4 }, 1)}
+            .to({ opacity: 0.9, scale: 1 }, span(t, 0.1))
+            .to({ opacity: 0, scale: 2.4 }, span(t, 0.1).next(1))}
         />
       ))}
       <g

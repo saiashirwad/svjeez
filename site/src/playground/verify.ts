@@ -39,7 +39,6 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
   const source = await page.evaluate(() => document.querySelector(".cm-content")!.textContent!);
   assert(source.includes('title: "Saved"'), "toast source is in the editor");
 
-  // Replace the title and the duration through real typing into the document.
   await page.evaluate(() => document.querySelector<HTMLElement>(".cm-content")!.focus());
 
   const edit = async (find: string, replace: string) => {
@@ -166,7 +165,6 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
   await edit("y: 0 }, 0, ease.pop", "y: 0 }, 0.5, ease.pop");
   await page.waitForSelector(".pg-error[hidden]", { state: "attached" });
 
-  // Restart gives the img a fresh URL.
   const beforeRestart = await page.getAttribute(".pg-img", "src");
   await page.getByRole("button", { name: "Restart" }).click();
   assert(
@@ -174,7 +172,6 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
     "restart reloads the image",
   );
 
-  // Every example in the menu compiles.
   const ids = await page
     .locator(".pg-pick option")
     .evaluateAll((options) => options.map((option) => option.getAttribute("value") ?? ""));
@@ -189,7 +186,6 @@ const visit = async (scheme: "light" | "dark", width: number, height: number) =>
     assert((await page.locator(".pg-error[hidden]").count()) === 1, `example "${id}" builds`);
   }
 
-  // Recompile timing for the toast example, as reported by the worker.
   await page.selectOption(".pg-pick", "toast");
   await page.waitForTimeout(400);
 
@@ -225,7 +221,6 @@ for (const [scheme, width, height] of [
 }
 
 {
-  // A short window keeps the home page's playground more than 600px below the fold.
   const { page, context } = await visit("light", 1440, 400);
   await page.goto(origin);
   await page.waitForTimeout(500);

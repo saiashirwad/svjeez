@@ -6,6 +6,7 @@ import {
   enter,
   motion,
   shot,
+  span,
   strokeFont,
   type Child,
   type ShotOptions,
@@ -39,7 +40,7 @@ export const rise = (at: number, over = 0.45, y = 16) =>
   enter({ at, over }, { opacity: 0, y, blur: 6 }, ease.out);
 
 /** A hard cut from hidden to shown. */
-export const show = (at: number) => motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+export const show = (at: number) => motion({ opacity: 0 }).set({ opacity: 1 }, at);
 
 export const centered = (text: string, size: number) => (W - display.measure(text, size)) / 2;
 
@@ -96,7 +97,7 @@ export const Blip = ({
       animation={
         pop === undefined
           ? undefined
-          : motion({ scale: 0 }).at(pop).to({ scale: 1 }, 0.45, ease.pop)
+          : motion({ scale: 0 }).to({ scale: 1 }, span(pop, 0.45), ease.pop)
       }
     >
       {blip({ feet: {}, ...motions })}

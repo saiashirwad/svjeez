@@ -50,7 +50,6 @@
           <span><b>{lab.stats.files}</b> {lab.stats.files === 1 ? "file" : "files"} written</span>
         {/if}
       </p>
-      <!-- svelte-ignore a11y_missing_attribute (fileLink sets the href once a file has compiled) -->
       <a class="la-download" download="meadow.svg" {@attach fileLink}>Download this file</a>
     </section>
   </div>

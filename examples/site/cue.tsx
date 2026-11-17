@@ -2,6 +2,7 @@ import {
   Ink,
   Once,
   Pivot,
+  chain,
   css as cssTag,
   ease,
   motion,
@@ -12,10 +13,6 @@ import {
 } from "svjeez";
 import { css, theme } from "../style";
 import { BLIP, GROUND, SQUASH, blip, jumps, waddle } from "./lib/blip";
-
-// The way down from the home page's hero to its editor. Blip plays on top, "play with svjeez" is hand-lettered
-// once under it. Blip: it waddles off, hops and spins,
-// waddles the other way, trips on nothing and picks itself up, hops again and waddles home, in an 8 second loop.
 
 const W = 420;
 const H = 148;
@@ -39,7 +36,6 @@ const lengthOf = (d: string) => {
   return sum;
 };
 
-/** The words, centered in `width`, split into pen strokes one after another, paced by length. */
 export const lettering = (text: string, width = W, y = 128) => {
   const probe = casual.path(text, { size: 40, x: 0, y: 0 }).d;
   const xs = (probe.match(/-?[\d.]+/g) ?? []).map(Number).filter((_, i) => i % 2 === 0);
@@ -76,39 +72,30 @@ export default function build(): string {
     { land: 6.0, height: 36 },
   ]);
 
-  // A full turn at the top of the first hop.
+  const turn = span(2.15, 0.42);
+
   const spin = motion({ rotate: 0 })
-    .at(2.15)
-    .to({ rotate: 360 }, 0.42, ease.inOut)
-    .set({ rotate: 0 });
+    .to({ rotate: 360 }, turn, ease.inOut)
+    .set({ rotate: 0 }, turn.end);
 
-  // Trips over nothing, face down, and bounces back up.
+  const [fall, bounce] = chain(span(4.55, 0.2), 0.1);
+
   const trip = motion({ rotate: 0 })
-    .at(4.55)
-    .to({ rotate: -72 }, 0.2, ease.in)
-    .to({ rotate: -64 }, 0.1, ease.out)
-    .wait(0.35)
-    .to({ rotate: 0 }, 0.45, ease.pop);
+    .to({ rotate: -72 }, fall, ease.in)
+    .to({ rotate: -64 }, bounce, ease.out)
+    .to({ rotate: 0 }, bounce.next(0.45, 0.35), ease.pop);
 
-  // It looks where it is going, down at the words when it stops, and down at the ground after the trip.
   const look = motion({ x: 0, y: 0 })
-    .at(0.2)
-    .to({ x: 6, y: 0 }, 0.2)
-    .at(1.6)
-    .to({ x: -2, y: 5 }, 0.2)
-    .at(3.0)
-    .to({ x: -6, y: 0 }, 0.2)
-    .at(5.3)
-    .to({ x: 0, y: 4 }, 0.2)
-    .at(6.7)
-    .to({ x: 6, y: 0 }, 0.2)
-    .at(7.6)
-    .to({ x: 0, y: 0 }, 0.3);
+    .to({ x: 6, y: 0 }, span(0.2, 0.2))
+    .to({ x: -2, y: 5 }, span(1.6, 0.2))
+    .to({ x: -6, y: 0 }, span(3.0, 0.2))
+    .to({ x: 0, y: 4 }, span(5.3, 0.2))
+    .to({ x: 6, y: 0 }, span(6.7, 0.2))
+    .to({ x: 0, y: 0 }, span(7.6, 0.3));
 
   const glow = motion({ fill: BLIP.yellow })
-    .at(2.3)
-    .to({ fill: "#FFF3B0" }, 0.1)
-    .to({ fill: BLIP.yellow }, 0.5);
+    .to({ fill: "#FFF3B0" }, span(2.3, 0.1))
+    .to({ fill: BLIP.yellow }, span(2.3, 0.1).next(0.5));
 
   const travel = walks.map((w) => w.body[0]!);
   const steps = walks.flatMap((w) => w.body.slice(1));

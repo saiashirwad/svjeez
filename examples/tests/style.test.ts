@@ -2,13 +2,10 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// Every scene that shows code, a code explainer or a terminal takes its palette and mono font from examples/style.ts.
 const EXAMPLES = join(import.meta.dir, "..");
 
-// Scenes that only label things in a monospace face, with no code on screen, keep their own look.
 const OWN_LOOK = ["effects", "fonts", "horizon", "images"];
 
-// Not scenes.
 const SKIP = ["dist", "node_modules", "scripts", "tests"];
 
 const RULES: [RegExp, string][] = [

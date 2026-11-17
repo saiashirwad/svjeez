@@ -23,20 +23,16 @@ import { loopTime, preload } from "./preview";
 const SHELF_SIZE = 18;
 const STORE = "svjeez-lab-e-shelf";
 
-/** The moment of the loop a jar's thumbnail shows. */
 const THUMB_AT = 1.4;
 
 /** How long hand edits must rest before the specimen goes on the shelf, in ms. */
 const SETTLE = 1400;
 
 export interface SetOptions {
-  /** Where the specimen came from, shown under its number. */
   readonly lineage?: string;
-  /** Put it on the shelf as soon as it's drawn, instead of once the edits stop. */
   readonly shelve?: boolean;
 }
 
-/** What `set` last put on the stage. */
 interface Staged {
   readonly genome: Genome;
   readonly lineage: string;
@@ -49,7 +45,6 @@ export interface Specimen {
   readonly thumb?: string;
 }
 
-/** The file on the stage, as the picture shows it and the save link hands it out. */
 interface Drawn {
   readonly src: string;
   readonly href: string;
@@ -59,14 +54,11 @@ interface Drawn {
   readonly ms: string;
 }
 
-/** What floats under the pointer while something is carried. */
 export type Ghost =
   | { readonly kind: "part"; readonly part: Part }
   | { readonly kind: "jar"; readonly thumb: string };
 
-/** The catoid maker: the specimen on the stage, the shelf, and the file the worker last drew. */
 export class Lab {
-  /** `set` is the only writer. */
   staged = $state.raw<Staged>({ genome: FIRST, lineage: "", shelve: true });
   genome = $derived(this.staged.genome);
   lay = $derived(layout(this.genome));
@@ -76,20 +68,15 @@ export class Lab {
   drawn = $state.raw<Drawn>();
   error = $state("");
 
-  /** The stage's overlay, which every pointer on the stage is measured against. */
   overlay = $state.raw<SVGSVGElement>();
-  /** The ring where a carried part would land. */
   drop = $state.raw<{ readonly x: number; readonly y: number; readonly r: number }>();
   carried = $state.raw<{ readonly ghost: Ghost; readonly at: At }>();
-  /** A jar is held over the stage. */
   mating = $state(false);
   stretching = $state(false);
-  /** Bumped to replay the certificate's stamp, and to shake the frame. */
   stamps = $state(0);
   shakes = $state(0);
 
   #worker?: Worker;
-  /** Starts the worker on first use, so nothing reaches for one while the page renders on the server. */
   #compile = lazy(() => {
     this.#worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
 
@@ -112,7 +99,6 @@ export class Lab {
     this.restamp();
   }
 
-  /** Breeds with one of the five newest jars, or with a stray when the shelf holds no other. */
   breedAny() {
     const mates = this.shelf.filter((s) => s.no !== this.no);
     this.breedWith(
@@ -127,7 +113,6 @@ export class Lab {
     this.restamp();
   }
 
-  /** A pointer in the stage's 640×400 frame, and whether it is over the stage at all. */
   viewPoint(e: PointerEvent) {
     const r = this.overlay!.getBoundingClientRect();
 
@@ -139,7 +124,6 @@ export class Lab {
     };
   }
 
-  /** Shows where `part` would land under the pointer. No pointer, or one off the stage, hides the ring. */
   showDrop(m?: PointerEvent, part?: Part) {
     const vp = m && this.viewPoint(m);
 
@@ -161,7 +145,6 @@ export class Lab {
     this.drop = { x: at.x, y: at.y, r: Math.max(10, lay.G * lay.scale * 0.6) };
   }
 
-  /** A drag that floats `ghost` under the pointer. */
   carry(down: PointerEvent, ghost: Ghost, o: Omit<Carrying, "float">) {
     carryDrag(down, { ...o, float: (at) => (this.carried = at && { ghost, at }) });
   }
@@ -177,7 +160,6 @@ export class Lab {
       return;
     }
 
-    // Start the new file at the loop's current moment, so swapping it in rewinds nothing.
     const src = await preload(svgUrl(restyle(result.svg, { at: loopTime() })));
     const old = this.drawn;
     const no = specimenNo(genome);
@@ -208,7 +190,6 @@ export class Lab {
     this.#push({ genome, shelve });
   }
 
-  /** Compiles what was staged. Hand edits go on the shelf once they stop changing; the returned cleanup cancels that. */
   compileStaged({ genome, shelve }: Staged) {
     this.#request(genome, shelve);
 
@@ -241,7 +222,6 @@ export class Lab {
     } catch {}
   }
 
-  /** Restores shelved genomes from an earlier visit and compiles their thumbnails one by one. */
   async restoreShelf() {
     let saved: Stored = [];
 
@@ -273,7 +253,6 @@ export class Lab {
     }
   }
 
-  /** Stops the worker and lets go of every file the page still holds. */
   dispose() {
     this.#worker?.terminate();
 

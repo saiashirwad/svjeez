@@ -9,7 +9,6 @@ import { recordings } from "../src/vite.ts";
 const fixture = fileURLToPath(new URL("./fixtures/counter.demo.tsx", import.meta.url));
 const svelteFixture = fileURLToPath(new URL("./fixtures/svelte/counter.demo.ts", import.meta.url));
 
-// Each text node is a run of its own, with its edge spaces trimmed.
 const texts = (snapshot: Snapshot): string[] => {
   const out: string[] = [];
 
@@ -32,41 +31,44 @@ const states = (steps: readonly unknown[]) =>
     return "root" in state ? [state] : [];
   });
 
-test(
-  "a demo keeps state across clicks and re-renders with new props",
-  async () => {
-    const dir = await mkdtemp(join(tmpdir(), "svjeez-demo-"));
+test("a demo keeps state across clicks and re-renders with new props", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "svjeez-demo-"));
 
-    try {
-      const demos = await recordings<typeof import("./fixtures/counter.demo.tsx")>(fixture, {
+  try {
+    const demos = await recordings<typeof import("./fixtures/counter.demo.tsx")>(fixture, {
+      cache: join(dir, "snapshots.json"),
+      schemes: "light",
+    });
+
+    expect(Object.keys(demos).sort()).toEqual(["counter", "labelled"]);
+    expect(states(demos.counter).map((s) => texts(s).join(""))).toEqual([
+      "Count:0",
+      "Count:1",
+      "Total:1",
+    ]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}, 60_000);
+
+test("a Svelte demo keeps state across clicks and updates its props in place", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "svjeez-demo-"));
+
+  try {
+    const demos = await recordings<typeof import("./fixtures/svelte/counter.demo.ts")>(
+      svelteFixture,
+      {
         cache: join(dir, "snapshots.json"),
         schemes: "light",
-      });
+      },
+    );
 
-      expect(Object.keys(demos).sort()).toEqual(["counter", "labelled"]);
-      expect(states(demos.counter).map((s) => texts(s).join(""))).toEqual(["Count:0", "Count:1", "Total:1"]);
-    } finally {
-      await rm(dir, { recursive: true, force: true });
-    }
-  },
-  60_000,
-);
-
-test(
-  "a Svelte demo keeps state across clicks and updates its props in place",
-  async () => {
-    const dir = await mkdtemp(join(tmpdir(), "svjeez-demo-"));
-
-    try {
-      const demos = await recordings<typeof import("./fixtures/svelte/counter.demo.ts")>(svelteFixture, {
-        cache: join(dir, "snapshots.json"),
-        schemes: "light",
-      });
-
-      expect(states(demos.counter).map((s) => texts(s).join(""))).toEqual(["Count: 0", "Count: 1", "Total: 1"]);
-    } finally {
-      await rm(dir, { recursive: true, force: true });
-    }
-  },
-  60_000,
-);
+    expect(states(demos.counter).map((s) => texts(s).join(""))).toEqual([
+      "Count: 0",
+      "Count: 1",
+      "Total: 1",
+    ]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}, 60_000);

@@ -69,12 +69,10 @@ interface Lane {
   readonly period: number;
   readonly snapped: number;
   readonly nest: boolean;
-  /** `visibility` for a hard 0/1 cut; `dash` or `value` once an outer element or shell toggles visibility, which a descendant's `visible` would override. */
   readonly emit: Emit;
   readonly label?: string;
 }
 
-/** A `<Clip>` a motion sits in, in scene seconds. An open clip runs to the end of the clip around it. */
 interface ClipFrame {
   readonly label: string;
   readonly start: number;
@@ -82,7 +80,6 @@ interface ClipFrame {
   readonly open: boolean;
 }
 
-/** The clock a motion's times are on: scene seconds minus `offset`. `end` is when it stops, in scene seconds. */
 interface Clock {
   readonly offset: number;
   readonly end: number;
@@ -91,23 +88,19 @@ interface Clock {
 
 interface State {
   readonly canvas: Canvas;
-  /** Each def's ids by the clock offset it was walked at, since a def with motions plays on the clock of the clip that first uses it. */
   readonly ids: Map<AnyRef, Map<number, string>>;
   clock: Clock;
   readonly blurs: Map<string, string>;
   readonly properties: Map<Property, string>;
   readonly registrations: string[];
-  /** Embedded faces by family name, weight and style, so two different files never claim one slot. */
   readonly fonts: Map<string, Font>;
   readonly faces: { readonly name: string; readonly font: Font }[];
-  /** The text and CSS of the scene, so embedded fonts can be cut down to the glyphs they use. */
   readonly fontUse: FontUse;
   readonly counters: Map<string, number>;
   readonly defs: SvgNode[];
   readonly keyframes: Map<string, string>;
   readonly classes: Map<string, string>;
   readonly rules: string[];
-  /** The rules of every `<Style>`, in document order. */
   readonly styles: string[];
   readonly stills: string[];
   pivot: boolean;
@@ -147,7 +140,6 @@ const withoutSmil = ({ still, ...node }: Element): Element => ({
     .map((child) => (child.kind === "element" ? withoutSmil(child) : child)),
 });
 
-/** Emit a def. A filter animated by SMIL gets a still twin that reduced motion swaps in, since CSS cannot pause SMIL. */
 const addDef = (state: State, def: Element): void => {
   state.defs.push(def);
 
@@ -196,7 +188,6 @@ const propertyName = (state: State, key: Property): string => {
   return name;
 };
 
-/** Embed each face the first time a family uses it, whole if any font with its bytes asks to, and return the `font-family` value. */
 const fontFamily = (state: State, value: FontValue): string => {
   const { family: plain, faces: named } = fontFaces(value);
   const { prefix } = state.canvas;
@@ -296,7 +287,6 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   const { duration } = state.canvas;
   const { clock } = state;
   const period = data.period ?? duration;
-  // A loop repeats on a clock of its own, which a clip only moves by a phase. Anything else plays on the clip's clock.
   const offset = data.period === undefined ? clock.offset : 0;
   const clockEnd = data.period === undefined ? clock.end - clock.offset : period;
   const snapped = data.period === undefined ? duration : snapPeriod(data.period, duration);
@@ -399,7 +389,6 @@ const lanesOf = (state: State, el: Element, value: Motion): Lane[] => {
   });
 };
 
-/** Throws when a motion that ends at `until` scene seconds runs past the scene or the clip it sits in. A loop only has to fit its own period. */
 const reach = (
   el: Element,
   clock: Clock,
@@ -483,17 +472,13 @@ const keyframesName = (state: State, body: string, label?: string): string => {
   return name;
 };
 
-/** The canvas a lane plays on: inside `<Once>`, a looping scene's timeline plays one time. */
 const canvasOf = (state: State, once: boolean): Canvas =>
   once ? { ...state.canvas, loop: false } : state.canvas;
 
-/** SMIL inside `<Once>` carries this, so `restyle` can start it on the once clock. */
 const ONCE_ATTR = "data-once";
 
-/** SMIL inside `<Ambient>` carries this, so `restyle({ timeline })` knows it stays on the clock. */
 const AMBIENT_ATTR = "data-ambient";
 
-/** Where an element sits: inside `<Once>`, inside `<Ambient>`, both or neither. */
 interface Within {
   readonly once: boolean;
   readonly ambient: boolean;
@@ -501,7 +486,6 @@ interface Within {
 
 const NOWHERE: Within = { once: false, ambient: false };
 
-/** The value a windowed animation ends on, which its element holds as the attribute so that a seek past the window shows it. */
 const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
   const first = nodes[0];
 
@@ -599,7 +583,6 @@ const pin = (attrs: Record<string, AttrValue>, el: Element, lane: Lane): void =>
   }
 };
 
-/** A CSS lane whose every key holds one value, so it can be written as a declaration. */
 const isHeld = (lane: Lane): boolean =>
   lane.backend === "css" &&
   lane.emit === "value" &&
@@ -608,7 +591,6 @@ const isHeld = (lane: Lane): boolean =>
   !lane.channels.some((channel) => spec(channel).pivot) &&
   !lane.keys.some((_, index) => moving(lane.keys, index));
 
-/** A translate resting at zero, which needs no declaration. */
 const isRest = (lane: Lane): boolean =>
   lane.key === "translate" &&
   lane.channels.every(
@@ -636,7 +618,6 @@ const emitShell = (
   state.pivot ||= pivot;
   state.once ||= once && css.length > 0;
 
-  // A CSS lane that never moves is a plain declaration. Animating it would cost style work on every frame.
   const declared = held.flatMap((lane) =>
     isRest(lane) ? [] : [cssDeclarations(lane.key, lane.emit, lane.keys[0]!.values)],
   );
@@ -679,7 +660,6 @@ const emitShell = (
   const shell = element(target.tag, attrs, children);
   const emitted = Object.keys(still).length > 0 ? { ...shell, still } : shell;
 
-  // Filter primitives are swapped with the filter as a whole.
   if (
     !animated ||
     state.canvas.stillAt === undefined ||
@@ -691,7 +671,6 @@ const emitShell = (
   return stillTwin(state, emitted);
 };
 
-/** An element whose `d`, `width` or `height` moves through SMIL, beside a still twin that reduced motion shows instead, since CSS cannot pause SMIL. */
 const stillTwin = (state: State, moving: Element): SvgNode => {
   const { prefix } = state.canvas;
   const rule = `.${prefix}dm{display:none}.${prefix}ds{display:inline}`;
@@ -715,10 +694,6 @@ const stillTwin = (state: State, moving: Element): SvgNode => {
   };
 };
 
-/**
- * A hard 0/1 opacity cut compiles to `visibility`, which a descendant's `visibility:visible` overrides.
- * Inside an element or shell that toggles visibility, cuts fall back to opacity and draw keeps only its dash.
- */
 const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
   shells.map((lanes, index) => {
     const outer =
@@ -824,7 +799,6 @@ const walk = (
         children: node.children.map((child) => walk(state, child, hides, inside, inherited)),
       };
 
-      // A wrapper layer turns about the point the element asked for, not the centre of its box.
       const pivot = String(bare.attrs.style ?? "").match(/transform-(?:box|origin)\s*:[^;]*/g);
       const wrapper: Record<string, AttrValue> = pivot ? { style: pivot.join(";") } : {};
 

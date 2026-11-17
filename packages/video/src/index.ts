@@ -4,7 +4,6 @@ import type * as Mediabunny from "mediabunny";
 import type { Seconds } from "svjeez";
 import { openScene, type ColorScheme, type SceneOptions } from "svjeez/frames";
 
-/** Each container, the codecs it can hold, in order of preference, and whether it can carry alpha. */
 const FORMATS = {
   mp4: { mime: "video/mp4", codecs: ["avc", "hevc", "vp9", "av1"], alpha: false },
   webm: { mime: "video/webm", codecs: ["vp9", "vp8", "av1"], alpha: true },
@@ -50,7 +49,6 @@ const isQuality = (quality: string): quality is VideoQuality => Object.hasOwn(QU
 const allows = (format: VideoFormat, codec: string): codec is VideoCodec =>
   FORMATS[format].codecs.some((allowed) => allowed === codec);
 
-// mediabunny exports only ".", so its browser bundle is found next to the file "." resolves to.
 const BUNDLE = join(
   dirname(createRequire(import.meta.url).resolve("mediabunny")),
   "mediabunny.min.cjs",
@@ -100,14 +98,12 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
       throw new Error(
         "video() needs an animated scene, got one whose loop lasts 0s. Use renderFrames() for a still.",
       );
-    // A loop lasts `duration` scene seconds, which play in `duration / playbackRate` seconds of video.
     const { playbackRate } = scene;
     const frames = Math.max(1, Math.round((scene.duration / playbackRate) * loops * fps));
     await scene.addScript(BUNDLE);
     const first = await scene.capture(0);
     const view = new DataView(first.buffer, first.byteOffset);
-    // 4:2:0 chroma covers pixels in pairs, so H.264 rejects an odd side and players mishandle one.
-    // Dropping the last row or column costs one device pixel at the edge.
+    // 4:2:0 chroma covers pixels in pairs, so H.264 rejects an odd side.
     const width = view.getUint32(16) & ~1;
     const height = view.getUint32(20) & ~1;
 

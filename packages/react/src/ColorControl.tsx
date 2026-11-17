@@ -8,10 +8,8 @@ import { focusing } from "./selection.ts";
 export function ColorControl({ editor, value }: { editor: Editor; value: ValueOf<"color"> }) {
   const selected = useEditorState(editor, (s) => s.selected === value.key);
   const input = useRef<HTMLInputElement>(null);
-  /** The pick under way, so undo takes it whole. */
   const pick = useRef<ReturnType<typeof stroke<"color">> | null>(null);
 
-  // React's onChange is the native input event, so the end of a pick is only seen on the native change event.
   useEffect(() => {
     const el = input.current;
 

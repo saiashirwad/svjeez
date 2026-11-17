@@ -17,7 +17,6 @@ import {
 } from "@codemirror/view";
 import { KINDS } from "@svjeez/live/source";
 
-// Colors come from custom properties in playground.css, so one theme serves light and dark.
 const chrome = EditorView.theme({
   "&": {
     color: "var(--pg-ink)",
@@ -37,7 +36,6 @@ const chrome = EditorView.theme({
   ".cm-cursor": { borderLeftColor: "var(--pg-accent)", borderLeftWidth: "2px" },
   ".cm-gutters": { backgroundColor: "transparent", color: "var(--pg-faint)", border: "none" },
   ".cm-lineNumbers .cm-gutterElement": { paddingInline: "0.75rem 0.25rem", minInlineSize: "2.5ch" },
-  // The current line shows only while the editor has focus, so a page that just loaded shows plain code.
   "&.cm-focused .cm-activeLine": { backgroundColor: "var(--pg-hover)" },
   "&.cm-focused .cm-activeLineGutter": {
     backgroundColor: "var(--pg-hover)",
@@ -49,7 +47,6 @@ const chrome = EditorView.theme({
   "&.cm-focused .cm-matchingBracket": { backgroundColor: "var(--pg-select)", outline: "none" },
 });
 
-// The same highlight classes the labs' code panels read from @svjeez/live, each with its playground color.
 const color = (kind: keyof typeof KINDS, value: string, style: { fontStyle?: "italic" } = {}) => ({
   tag: [...KINDS[kind]],
   color: value,

@@ -29,7 +29,8 @@ export const agent = stateMachine(
       ["waiting", "working", "reply"],
       ["working", "done", "finish"],
       ["working", "failed", "error"],
-      ["working", "cancelled", "cancel"],    ],
+      ["working", "cancelled", "cancel"],
+    ],
   },
   {
     theme,
@@ -38,7 +39,6 @@ export const agent = stateMachine(
     direction: "LR",
     font: mono,
     fontSize: 16,
-    // Blue and purple for the run, orange where it acts or waits on someone, cyan for done and red for failed.
     tints: {
       task: hue.blue,
       store: hue.purple,
@@ -82,8 +82,8 @@ export default function build(): string {
     <>
       <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
       <g transform={fit(agent.bounds.w, agent.bounds.h)}>
-        {agent.node}
-        {walk.node}
+        {agent}
+        {walk}
       </g>
     </>,
   );

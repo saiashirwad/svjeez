@@ -1,20 +1,18 @@
 import { project, type LonLat, type Topology } from "@svjeez/geo";
 import { google } from "@svjeez/fonts";
-import { draw, ease, enter, render, type Point, flow } from "svjeez";
+import { draw, ease, enter, render, type Point, flow, span, stagger } from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { createRequire } from "node:module";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// The world's countries fill in from west to east, then great-circle flights leave London for six cities.
 const W = 504;
 const H = 340;
 const BAR = 40;
 const D = 10;
 const win = chrome(W, H, "map.tsx");
 
-/** Geist SemiBold alone, since every label is bold: the family would embed the regular face too. */
 const geist = await google("Geist", { weight: 600, ligatures: false });
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
@@ -22,22 +20,22 @@ const countries: Topology = createRequire(import.meta.url)("world-atlas/countrie
 const map = project(countries, {
   frame: rect(28, BAR + 22, W - 56, H - BAR - 84),
   tolerance: 1,
-  // Fiji straddles the antimeridian and would stretch the fit across the whole frame.
   filter: (f) => !["Antarctica", "Fiji"].includes(f.properties?.name),
 });
 
-/** Countries fade in by band of longitude, one path and one animation per band. */
 const BANDS = 14;
 
 const band = (x: number) =>
   Math.min(BANDS - 1, Math.floor(((x - map.frame.x) / map.frame.w) * BANDS));
 
 const bands = Array.from({ length: BANDS }, (_, i) =>
-  map.regions
+  map.parts
     .filter((r) => band(r.centroid.x) === i)
     .map((r) => r.d)
     .join(""),
 );
+
+const filled = stagger(span(0.3, 0.6), bands.length, 0.08);
 
 const ROUTE = theme.base09;
 const HOME: LonLat = [-0.13, 51.5];
@@ -45,7 +43,6 @@ const HOME: LonLat = [-0.13, 51.5];
 interface City {
   readonly name: string;
   readonly at: LonLat;
-  /** Where the label sits, from the dot. */
   readonly dx: number;
   readonly dy: number;
   readonly anchor: "start" | "middle" | "end";
@@ -76,7 +73,6 @@ const line = (points: readonly Point[]) =>
 
 const home = map.point(HOME);
 
-/** A label with a halo in the window's color, so it stays legible over land and routes. */
 function Label(props: { x: number; y: number; anchor: City["anchor"]; children: string }) {
   return (
     <text
@@ -114,7 +110,7 @@ export default function build(): string {
       <g animation={outro(D)}>
         <g fill={theme.base02} stroke={theme.base00} strokeWidth={0.6} strokeLinejoin="round">
           {bands.map((d, i) => (
-            <path d={d} animation={enter({ at: 0.3 + i * 0.08, over: 0.6 })} />
+            <path d={d} animation={enter(filled[i]!)} />
           ))}
         </g>
         {flights.map(({ route, leave }) => (

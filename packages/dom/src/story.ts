@@ -1,17 +1,14 @@
 import { html, snap, wait, type Flow, type Instruction, type Timing } from "./flow.ts";
 
 /**
- * An Elm-shaped program, by shape alone: a pure `update` that returns the next model with the work it asks for, and a
- * `view` that renders a model to HTML with any framework.
+ * An Elm-shaped program, by shape alone: a pure `update` returning the next model and the work it asks for, and a `view` rendering a model to HTML.
  */
 export interface Program<Model, Msg, Cmd> {
   readonly update: (model: Model, msg: Msg) => readonly [Model, readonly Cmd[]];
   readonly view: (model: Model) => string;
-  /** The messages the runtime would send back for a command, so a story runs a program's effects as more messages. */
   readonly resolve?: (cmd: Cmd, model: Model) => readonly Msg[] | Promise<readonly Msg[]>;
 }
 
-/** How a beat moves in, and how long the picture holds after it. */
 export interface Pace extends Timing {
   readonly hold?: number;
 }
@@ -28,16 +25,13 @@ export const given = <Model, Cmd>(model: Model, cmds: readonly Cmd[] = []) => ({
 
 export const message = <Msg>(msg: Msg) => ({ message: msg });
 
-/** A message or given with its own move and hold. */
 export const timed = <B extends { readonly message: unknown } | { readonly given: unknown }>(
   beat: B,
   pace: Pace,
 ): B & { readonly pace: Pace } => ({ ...beat, pace });
 
 /**
- * Runs messages through a program and reads the view after each, as a flow for `dom.run`: the first view is the
- * markup to mount, and each later one that differs is an `html()` and a `snap()`. A view that didn't change adds
- * nothing, so a message with no visible effect costs no time.
+ * Runs messages through a program and reads the view after each, as a flow for `dom.run`: the first view is the markup to mount, each later changed one an `html()` and a `snap()`. An unchanged view adds nothing.
  */
 export const story = async <Model, Msg, Cmd>(
   { update, view, resolve = () => [] }: Program<Model, Msg, Cmd>,
@@ -55,7 +49,6 @@ export const story = async <Model, Msg, Cmd>(
     await settle(cmds);
   };
 
-  // A command's answers go in as messages, and theirs in turn, until nothing more is asked for.
   const settle = async (cmds: readonly Cmd[]) => {
     for (const cmd of cmds)
       for (const msg of await resolve(cmd, model!.value)) await step(model!.value, msg);

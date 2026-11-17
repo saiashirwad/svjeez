@@ -2,7 +2,11 @@
 import {
   ease,
   motion,
+  span as spanOf,
   type Color,
+  type Drawn,
+  type Part,
+  type Spanned,
   type Rect,
   type Span,
   type Stack,
@@ -28,7 +32,6 @@ export interface TexOptions {
   readonly fontSize?: number;
   /** Colors the formula with its `plain` slot. Default `defaultDark`. */
   readonly theme?: Base16;
-  /** Overrides the theme's plain color. `\color{…}` in the source still wins for the part it wraps. */
   readonly color?: Color;
   /** Display style: big operators stack their limits and fractions are full size. Default true. */
   readonly display?: boolean;
@@ -41,9 +44,7 @@ export interface WriteOptions {
   readonly stroke?: number;
 }
 
-/** One glyph or bar of a formula, placed in the scene. morph() pairs glyphs by `text`. */
 export interface Glyph extends MorphPiece {
-  /** The character, NFKC-normalized (`𝑎` is `a`), or `rect` or `line` for a bar. */
   readonly char: string;
   /** Scale relative to `fontSize`: about 0.707 for a superscript. */
   readonly size: number;
@@ -51,24 +52,30 @@ export interface Glyph extends MorphPiece {
   readonly d: string;
   /** Glyph units to scene pixels, absolute. `x` and `y` are its translation. */
   readonly matrix: Matrix;
-  /** Set by `\color`. */
   readonly fill?: string;
   /** In scene pixels. */
   readonly bounds: Rect;
 }
 
-/** A typeset formula. Lines up with code(): `get` and `find` return rects for annotations. */
-export interface Tex extends Morphable<Glyph> {
-  readonly node: SvgNode;
-  readonly bounds: Rect;
+/** Some glyphs of a formula: `box` is around them, and `span` from when the first starts to show to when the last has. */
+export interface TexPart extends Part {
+  readonly glyphs: readonly Glyph[];
+}
+
+/**
+ * A formula as drawn, at once or written on. Its parts are what `\cssId{id}{…}` names, in reading order. Point an
+ * annotation at `part(id).box` and time it from `part(id).span`.
+ */
+export interface TexDrawn extends Drawn<TexPart> {
+  /** The `nth` run of consecutive glyphs spelling `text`, such as `2ab`, as a part with `text` for its id. */
+  find(text: string, nth?: number): TexPart;
+}
+
+/** A typeset formula. `node` draws it at once, so it and its parts have the span `span(0, 0)`. */
+export interface Tex extends TexDrawn, Morphable<Glyph> {
   readonly width: number;
   readonly height: number;
-  /** Bounds of every glyph under `\cssId{id}{…}`. */
-  get(id: string): Rect;
-  /** Bounds of the `nth` run of consecutive glyphs spelling `text`, such as `2ab`. */
-  find(text: string, nth?: number): Rect;
-  /** The formula written on in reading order during `span`: each glyph's outline draws, then fills. It stays once written. */
-  write(span: Span, options?: WriteOptions): SvgNode;
+  write(span: Span, options?: WriteOptions): TexDrawn;
 }
 
 export type { Matrix };
@@ -109,7 +116,6 @@ export function tex(source: string, options: TexOptions = {}): Tex {
     const matrix = roundMatrix(placed);
 
     return {
-      // A bar's size is in its key, because morph only translates and cannot stretch one.
       text: `${mark.key}@${size}`,
       char: mark.char,
       size,
@@ -138,21 +144,13 @@ export function tex(source: string, options: TexOptions = {}): Tex {
 
   const bounds = rect(x, y, round(boxW * k), round(boxH * k));
 
-  const get = (id: string): Rect => {
-    const named = glyphs.filter((g) => g.id === id);
-
-    if (named.length === 0) throw new Error(`tex.get() found no part named ${JSON.stringify(id)}.`);
-
-    return named.map((g) => g.bounds).reduce((a, b) => a.union(b));
-  };
-
   const spelled = glyphs.map((g) => g.char).join("");
 
   const starts = [0];
 
   for (const g of glyphs) starts.push(starts.at(-1)! + g.char.length);
 
-  const find = (needle: string, nth = 1): Rect => {
+  const spell = (needle: string, nth: number): [number, number] => {
     let seen = 0;
 
     for (
@@ -164,23 +162,69 @@ export function tex(source: string, options: TexOptions = {}): Tex {
 
       if (first < 0 || last < 0 || ++seen !== nth) continue;
 
-      return glyphs
-        .slice(first, last)
-        .map((g) => g.bounds)
-        .reduce((a, b) => a.union(b));
+      return [first, last];
     }
 
     throw new Error(`tex.find() found ${seen} of ${JSON.stringify(needle)}, not ${nth}.`);
   };
 
-  const write = ({ at, over }: Span, { stroke = 0.6 }: WriteOptions = {}): SvgNode => {
+  const ids = [...new Set(glyphs.flatMap((g) => (g.id === undefined ? [] : [g.id])))];
+
+  /** The formula as `node` draws it, glyph `i` showing during `shows[i]`. */
+  const drawn = (node: SvgNode, shows: readonly Spanned[], whole: Spanned): TexDrawn => {
+    const partOf = (id: string, picked: readonly number[]): TexPart => {
+      const start = Math.min(...picked.map((i) => shows[i]!.at));
+
+      return {
+        id,
+        glyphs: picked.map((i) => glyphs[i]!),
+        box: picked.map((i) => glyphs[i]!.bounds).reduce((a, b) => a.union(b)),
+        span: spanOf(start, Math.max(...picked.map((i) => shows[i]!.end)) - start),
+      };
+    };
+
+    const indices = (id: string) => glyphs.flatMap((g, i) => (g.id === id ? [i] : []));
+    const parts = ids.map((id) => partOf(id, indices(id)));
+
+    return {
+      node,
+      span: whole,
+      bounds,
+      parts,
+      part: (id) => {
+        const found = parts.find((p) => p.id === id);
+
+        if (!found)
+          throw new Error(
+            `tex.part() found no part named ${JSON.stringify(id)}. Wrap it in \\cssId{${id}}{…}${
+              ids.length > 0
+                ? `; the parts are ${ids.map((i) => JSON.stringify(i)).join(", ")}`
+                : ""
+            }.`,
+          );
+
+        return found;
+      },
+      find: (needle, nth = 1) => {
+        const [first, last] = spell(needle, nth);
+
+        return partOf(
+          needle,
+          Array.from({ length: last - first }, (_, k) => first + k),
+        );
+      },
+    };
+  };
+
+  const write = ({ at, over }: Span, { stroke = 0.6 }: WriteOptions = {}): TexDrawn => {
     if (!(over >= 0 && stroke > 0))
       throw new Error(
         `tex.write() needs a non-negative span and a positive stroke time, got over ${over} and stroke ${stroke}.`,
       );
     const step = glyphs.length > 1 ? Math.max(0, over - stroke) / (glyphs.length - 1) : 0;
+    const shows = glyphs.map((_, i) => spanOf(at + i * step, stroke));
 
-    return (
+    const node = (
       <g>
         {glyphs.map((g, i) => {
           const start = at + i * step;
@@ -188,7 +232,6 @@ export function tex(source: string, options: TexOptions = {}): Tex {
           const paint = (g.fill as Color | undefined) ?? ink;
           const transform = `matrix(${g.matrix.join(" ")})`;
 
-          // The outline is in glyph units, so its width undoes the matrix's scale to stay near 1px on screen.
           return (
             <g>
               <path
@@ -199,34 +242,43 @@ export function tex(source: string, options: TexOptions = {}): Tex {
                 strokeWidth={round(1.2 / Math.hypot(g.matrix[0], g.matrix[1]))}
                 strokeLinejoin="round"
                 animation={motion({ draw: 0, opacity: 1 })
-                  .at(start)
-                  .to({ draw: 1 }, stroke * 0.7, ease.inOut)
-                  .to({ opacity: 0 }, stroke * 0.3)}
+                  .to({ draw: 1 }, spanOf(start, stroke * 0.7), ease.inOut)
+                  .to({ opacity: 0 }, spanOf(start, stroke * 0.7).next(stroke * 0.3))}
               />
               <path
                 d={g.d}
                 transform={transform}
                 fill={paint}
-                animation={motion({ opacity: 0 })
-                  .at(start + stroke * 0.5)
-                  .to({ opacity: 1 }, stroke * 0.5)}
+                animation={motion({ opacity: 0 }).to(
+                  { opacity: 1 },
+                  spanOf(start + stroke * 0.5, stroke * 0.5),
+                )}
               />
             </g>
           );
         })}
       </g>
     );
+
+    return drawn(
+      node,
+      shows,
+      shows.length > 0 ? shows[0]!.until(shows.at(-1)!.end) : spanOf(at, over),
+    );
   };
 
+  const still = spanOf(0, 0);
+
   return {
-    node: <g>{glyphs.map((g) => draw(g))}</g>,
+    ...drawn(
+      <g>{glyphs.map((g) => draw(g))}</g>,
+      glyphs.map(() => still),
+      still,
+    ),
     write,
     words: glyphs,
-    bounds,
     width: bounds.w,
     height: bounds.h,
-    get,
-    find,
     draw,
   };
 }

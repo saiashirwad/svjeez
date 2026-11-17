@@ -8,11 +8,9 @@ import first from "./scene.tsx?svjeez";
 
 export const DEFAULT_FEEL: Feel = defaults(params);
 
-/** The feel the instruments edit. Each replacement of `feel` recompiles the scene. */
 export class Lab {
   feel = $state.raw<Feel>(DEFAULT_FEEL);
 
-  /** Sets what `patch` carries, each number fitted to its param's range and step. */
   update(patch: Partial<Feel>) {
     this.feel = { ...this.feel, ...fitValues(params, patch) };
   }
@@ -30,13 +28,11 @@ export class Stage {
 
   #push?: (feel: Feel) => void;
 
-  /** Compiles `feel` on the lab's worker; only the newest feel waiting behind a running compile survives. */
   build(feel: Feel) {
     this.#push ??= latestWins(this.#draw);
     this.#push(feel);
   }
 
-  /** The worker starts on first use, so nothing reaches for one while the page renders on the server. */
   #compile = lazy(() =>
     compilerFor<Feel>(
       new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }),

@@ -3,7 +3,6 @@ import type { Plan } from "./genome";
 
 type Centerline = (L: number, G: number, reach: number) => Pt[];
 
-/** The longest a straight row runs before the tube folds back. */
 const ROW = 470;
 
 const line: Centerline = (L, G, reach) => {
@@ -20,7 +19,6 @@ const line: Centerline = (L, G, reach) => {
     return pts;
   }
 
-  // Too long for one row: the tube folds back on itself, row under row.
   const gap = Math.max(G * 1.9, G + reach * 1.6 + 16);
   let left = L;
   let y = 0;
@@ -102,5 +100,4 @@ const knot: Centerline = (L, G) => {
   return raw.map((p) => ({ x: p.x * k, y: p.y * k }));
 };
 
-/** The body's centerline before resampling, dense enough that its length is its arc length. */
 export const CENTERLINES: Record<Plan, Centerline> = { line, loop, spiral, knot };

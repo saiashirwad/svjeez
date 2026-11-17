@@ -1,5 +1,3 @@
-// The math a control shares with a scene's params: where a value sits on a slider, how far a drag moves it, and
-// keeping a value in its range. The scene-facing kinds are in svjeez/params.
 import type { Point } from "svjeez";
 import type { NumberParam, Param, Schema, Values } from "svjeez/params";
 
@@ -38,7 +36,6 @@ export const fitValues = <S extends Schema>(
     }),
   ) as Partial<Values<S>>;
 
-/** The schema with each param holding its value from `values`, so a control reads kind and value off one param. */
 export const withValues = <S extends Schema>(schema: S, values: Values<S>): S => {
   const current: { readonly [key: string]: Param["value"] } = values;
 
@@ -49,9 +46,8 @@ export const withValues = <S extends Schema>(schema: S, values: Values<S>): S =>
 };
 
 /**
- * `v` moved as far as a drag `by` carries a handle that sits at `at(v)`. The drag counts only along the way the handle
- * travels as `v` grows, so a handle on an arc follows the arc. The result is clamped to the range but not rounded, so a
- * slow drag still adds up: `fit` it for the value to write.
+ * `v` moved as far as a drag `by` carries a handle that sits at `at(v)`, counted only along the way the handle
+ * travels as `v` grows. Clamped to the range but not rounded, so slow drags add up: `fit` it before writing.
  */
 export const follow = (p: NumberParam, at: (v: number) => Point, v: number, by: Point): number => {
   const h = (p.max - p.min) / 10_000;

@@ -1,5 +1,3 @@
-// What the lab draws from a flight: legend colors, wording, the overlay's trails and dots, the timeline's speed hills
-// and the scene source split into highlighted lines.
 import { linesOf, literalAt, parse, type Piece } from "@svjeez/live/source";
 import type { Spline } from "svjeez";
 import { clamp } from "../util";
@@ -27,7 +25,6 @@ export const feelWords = (f: number) =>
         ? "creeps, then dives"
         : "leaves slow, lands fast";
 
-/** The moments the overlay drops a dot at, along the whole flight. */
 export const ghostTimes = (flight: Flight) => {
   const out: number[] = [];
 
@@ -38,7 +35,6 @@ export const ghostTimes = (flight: Flight) => {
 
 export const trailPath = (path: Spline, leg: number) => path.path(leg, leg + 1);
 
-/** How fast the plane moves through the leg, sampled across its duration. */
 const speedProfile = (flight: Flight, i: number) => {
   const path = route(flight);
   const leg = flight.legs[i]!;
@@ -55,7 +51,6 @@ const speedProfile = (flight: Flight, i: number) => {
   });
 };
 
-/** One filled hill per leg, in a 100 by 40 box, all scaled to the tallest speed. */
 export const speedHills = (flight: Flight) => {
   const profiles = flight.legs.map((_, i) => speedProfile(flight, i));
   const top = Math.max(...profiles.flat(), 1);
@@ -71,11 +66,9 @@ export const speedHills = (flight: Flight) => {
 
 export interface CodeLine {
   readonly pieces: readonly Piece[];
-  /** The index of the leg this line spells out, for the colored bar and the hover highlight. */
   readonly leg: number | undefined;
 }
 
-/** The scene source as highlighted lines, with the values the lab edits as pieces of their own. */
 export const codeLines = (source: string): CodeLine[] => {
   const scene = parse(source);
 

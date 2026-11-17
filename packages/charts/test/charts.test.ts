@@ -108,10 +108,20 @@ describe("chart frame", () => {
 describe("bars", () => {
   test("each bar rests with its top at y(value) and its foot on the baseline", () => {
     const c = band();
-    const { bars } = c.bars(when, { Q1: 12, Q4: 87 });
-    expect(bars.map((b) => b.key)).toEqual(["Q1", "Q4"]);
-    expect(bars[1]!.bounds.y).toBeCloseTo(c.y(87), 1);
-    expect(bars[1]!.bounds.y + bars[1]!.bounds.h).toBeCloseTo(c.y(0), 1);
+    const { parts } = c.bars(when, { Q1: 12, Q4: 87 });
+    expect(parts.map((b) => b.id)).toEqual(["Q1", "Q4"]);
+    expect(parts[1]!.box.y).toBeCloseTo(c.y(87), 1);
+    expect(parts[1]!.box.y + parts[1]!.box.h).toBeCloseTo(c.y(0), 1);
+  });
+
+  test("part(key) is a bar, with its staggered window as its span", () => {
+    const result = band().bars({ at: 1, over: 2 }, { Q1: 12, Q2: 48, Q4: 87 }, { stagger: 0.5 });
+    expect(result.part("Q2")).toMatchObject({ id: "Q2", value: 48, span: { at: 1.5, over: 1 } });
+    expect(result.part("Q4").span.end).toBe(3);
+    expect(result.bounds.x).toBe(result.part("Q1").box.x);
+    expect(() => result.part("Q3")).toThrow(
+      'bars() has no part "Q3". Its parts are "Q1", "Q2", "Q4".',
+    );
   });
 
   test("bars grow with a stagger and report when the last one lands", () => {
@@ -143,7 +153,7 @@ describe("bars", () => {
 
     const svg = scene(result.node);
     expect(result.span).toMatchObject({ at: 1, over: 2 });
-    expect(result.bars.map((b) => b.key)).toEqual(["Q1", "Q4"]);
+    expect(result.parts.map((b) => b.id)).toEqual(["Q1", "Q4"]);
     expect(svg).toContain('begin="1s;');
     expect(svg).toContain('begin="1.5s;');
     expect(svg).toContain('dur="1.5s"');
@@ -151,8 +161,8 @@ describe("bars", () => {
 
   test("grouped series sit side by side inside a band", () => {
     const c = band();
-    const a = c.bars(when, { Q1: 10 }, { group: { index: 0, count: 2 } }).bars[0]!.bounds;
-    const b = c.bars(when, { Q1: 20 }, { group: { index: 1, count: 2 } }).bars[0]!.bounds;
+    const a = c.bars(when, { Q1: 10 }, { group: { index: 0, count: 2 } }).parts[0]!.box;
+    const b = c.bars(when, { Q1: 20 }, { group: { index: 1, count: 2 } }).parts[0]!.box;
     expect(b.x).toBeGreaterThanOrEqual(a.x + a.w);
     expect(a.w).toBeLessThan(c.bandwidth / 2);
   });
@@ -178,10 +188,10 @@ describe("bars", () => {
       y: { domain: [-50, 50] },
     });
 
-    const [up, down] = c.bars(when, { a: 25, b: -25 }).bars;
-    expect(up!.bounds.y + up!.bounds.h).toBeCloseTo(c.y(0), 1);
-    expect(down!.bounds.y).toBeCloseTo(c.y(0), 1);
-    expect(down!.bounds.y + down!.bounds.h).toBeCloseTo(c.y(-25), 1);
+    const [up, down] = c.bars(when, { a: 25, b: -25 }).parts;
+    expect(up!.box.y + up!.box.h).toBeCloseTo(c.y(0), 1);
+    expect(down!.box.y).toBeCloseTo(c.y(0), 1);
+    expect(down!.box.y + down!.box.h).toBeCloseTo(c.y(-25), 1);
   });
 });
 
@@ -200,8 +210,8 @@ describe("line and area", () => {
 
   test("a line has one scene point per datum and draws on over its span", () => {
     const line = c.line({ at: 1, over: 2 }, points);
-    expect(line.points).toHaveLength(3);
-    expect(line.points[1]).toEqual({ x: c.x(5), y: c.y(60) });
+    expect(line.parts).toHaveLength(3);
+    expect(line.part("5").point).toEqual({ x: c.x(5), y: c.y(60) });
     expect(line.span.end).toBe(3);
     expect(line.d).toMatch(/^M/);
     expect(scene(line.node)).toContain("stroke-dasharray");
@@ -215,6 +225,14 @@ describe("line and area", () => {
     expect(new Set([linear, smooth, step]).size).toBe(3);
     expect(linear).not.toContain("C");
     expect(smooth).toContain("C");
+  });
+
+  test("a point's span starts when the line reaches it, and its box is its dot", () => {
+    const line = c.line({ at: 1, over: 2 }, points, { dots: 4 });
+    expect(line.part("0").span).toMatchObject({ at: 1, over: 0.3 });
+    expect(line.part("10").span.at).toBeCloseTo(3, 6);
+    expect(line.part("5").box).toMatchObject({ x: c.x(5) - 4, y: c.y(60) - 4, w: 8, h: 8 });
+    expect(c.line(when, points).part("5").span.over).toBe(0);
   });
 
   test("dots add one circle per point", () => {
@@ -249,7 +267,7 @@ describe("line and area", () => {
       ["Q4", 70],
     ]);
 
-    expect(line.points.map((p) => p.x)).toEqual([b.x("Q1"), b.x("Q2"), b.x("Q4")]);
+    expect(line.parts.map((p) => p.point.x)).toEqual([b.x("Q1"), b.x("Q2"), b.x("Q4")]);
   });
 });
 
@@ -368,10 +386,10 @@ describe("band keys", () => {
       y: { domain: [0, 10] },
     });
 
-    const { bars } = c.bars(when, { a: 5 });
+    const { parts } = c.bars(when, { a: 5 });
 
-    expect(bars.map((b) => b.key)).toEqual(["a"]);
-    expect(Number.isNaN(bars[0]!.value)).toBe(false);
+    expect(parts.map((b) => b.id)).toEqual(["a"]);
+    expect(Number.isNaN(parts[0]!.value)).toBe(false);
   });
 
   test("data for a key missing from x.domain is rejected up front", () => {

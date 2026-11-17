@@ -1,11 +1,7 @@
-import { Ink, Once, Pivot, css as cssTag, ease, motion, render } from "svjeez";
+import { Ink, Once, Pivot, css as cssTag, ease, motion, render, span, stagger } from "svjeez";
 import { css, theme } from "../style";
 import { lettering, marker } from "./cue";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
-
-// The way from the home page's hero to the examples. "browse examples" is hand-lettered once, and above it Blip
-// deals out a little hand of picture cards: they fan out one by one, Blip hops onto the middle one, and the fan
-// folds back up for the next round.
 
 const W = 420;
 const H = 148;
@@ -14,7 +10,6 @@ const S = 0.38;
 const HOME = { x: 120, y: 84 };
 const DECK = { x: 270, y: 80 };
 
-/** Each card's picture: a little sun, a wave and a bar chart. */
 const PICTURES = [
   <>
     <circle cx={0} cy={-26} r={8} fill={BLIP.yellow} />
@@ -37,13 +32,12 @@ const PICTURES = [
 export default function build(): string {
   const strokes = lettering("browse examples");
   const fans = [-24, 0, 24];
+  const dealt = stagger(span(0.5, 0.4), PICTURES.length, 0.25);
 
   const cards = PICTURES.map((picture, i) => {
     const fan = motion({ rotate: 0, x: 0 })
-      .at(0.5 + i * 0.25)
-      .to({ rotate: fans[i]!, x: (i - 1) * 26 }, 0.4, ease.pop)
-      .at(4.9)
-      .to({ rotate: 0, x: 0 }, 0.45, ease.inOut);
+      .to({ rotate: fans[i]!, x: (i - 1) * 26 }, dealt[i]!, ease.pop)
+      .to({ rotate: 0, x: 0 }, span(4.9, 0.45), ease.inOut);
 
     return (
       <Pivot origin={{ x: DECK.x, y: DECK.y }} animation={fan}>
@@ -70,10 +64,8 @@ export default function build(): string {
   ]);
 
   const look = motion({ x: 0, y: 0 })
-    .at(0.4)
-    .to({ x: 6, y: -3 }, 0.3)
-    .at(4.8)
-    .to({ x: 0, y: 0 }, 0.3);
+    .to({ x: 6, y: -3 }, span(0.4, 0.3))
+    .to({ x: 0, y: 0 }, span(4.8, 0.3));
 
   return render(
     {

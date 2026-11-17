@@ -7,6 +7,7 @@ import {
   type Motion,
   type Ref,
   type ChannelValues,
+  span,
 } from "svjeez";
 
 export const W = 960;
@@ -41,14 +42,6 @@ export const C = {
   jet: "#9DB8FF",
   violet: "#6A5CFF",
 } as const;
-
-export const random = (seed: number) => () => {
-  seed = (seed + 0x6d2b79f5) | 0;
-  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
 
 const rgb = (color: string) => [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16));
 
@@ -108,11 +101,12 @@ export const glow = (
     </>,
   );
 
-export const on = (at: number): Motion<"opacity"> =>
-  motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+export const on = (at: number): Motion<"opacity"> => motion({ opacity: 0 }).set({ opacity: 1 }, at);
 
 export const envelope = (at: number, off: number, over = 0.4): Motion<"opacity"> =>
-  motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over).at(off).to({ opacity: 0 }, over, ease.in);
+  motion({ opacity: 0 })
+    .to({ opacity: 1 }, span(at, over))
+    .to({ opacity: 0 }, span(off, over), ease.in);
 
 export const phased = <K extends Channel>(
   period: number,
@@ -137,11 +131,15 @@ export const phased = <K extends Channel>(
     const [from, to] = [times[j - 1]!, times[j]!];
     const cut = to === wrap;
     // SAFETY: same ChannelValues<K> to Target widening as the first frame, since at() returns K values
-    track = track.at(from).to(at(cut ? 1 : progress(to)) as ChannelValues, to - from, ease.linear);
+    track = track.to(
+      at(cut ? 1 : progress(to)) as ChannelValues,
+      span(from).until(to),
+      ease.linear,
+    );
 
     if (cut && wrap < period) {
       // SAFETY: same ChannelValues<K> to Target widening as the first frame
-      track = track.set(at(0) as ChannelValues);
+      track = track.set(at(0) as ChannelValues, to);
     }
   }
 

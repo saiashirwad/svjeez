@@ -10,7 +10,6 @@ export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
   readonly style?: FontStyle;
 };
 
-/** The folder shared by every project on this machine: `$SVJEEZ_FONTS_CACHE`, `$XDG_CACHE_HOME/svjeez/fonts` or `~/.cache/svjeez/fonts`. */
 const cacheDir = (): string => {
   const { SVJEEZ_FONTS_CACHE, XDG_CACHE_HOME } = process.env;
 
@@ -19,10 +18,9 @@ const cacheDir = (): string => {
   return join(XDG_CACHE_HOME || join(homedir(), ".cache"), "svjeez", "fonts");
 };
 
-// Google serves WOFF2 to browsers and static TTF to a user agent it doesn't recognize. Fetch's own differs by runtime.
+// Google serves WOFF2 to browsers and static TTF to a user agent it doesn't recognize.
 const HEADERS = { "user-agent": "svjeez-fonts" };
 
-/** Open Sans keeps its plain name. A family that needed other characters turned into dashes gets a hash of its exact name, so Open-Sans and Open_Sans don't share a file. */
 const slug = (family: string): string => {
   const plain = family.replace(/[^A-Za-z0-9]+/g, "-");
 
@@ -31,7 +29,6 @@ const slug = (family: string): string => {
   return `${plain}-${createHash("sha256").update(family).digest("hex").slice(0, 8)}`;
 };
 
-/** Whether `bytes` is a font file whose table directory fits inside it, which a torn write is not. */
 const isFont = (bytes: Uint8Array): boolean => {
   if (bytes.length < 12) return false;
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -58,14 +55,12 @@ const cssUrl = (family: string, weight: number, style: FontStyle): string => {
   return `https://fonts.googleapis.com/css2?family=${name}:${axes}`;
 };
 
-/** Google's error pages are HTML, and the `<title>` holds the message, such as "400: Font family not found". */
 const message = (page: string): string => {
   const title = /<title>([^<]*)<\/title>/.exec(page)?.[1];
 
   return (title ?? page.replace(/<[^>]*>/g, " ")).replace(/\s+/g, " ").trim().slice(0, 200);
 };
 
-/** Google answered, so the network works and retrying offline advice would mislead. */
 class GoogleError extends Error {}
 
 const download = async (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
@@ -92,7 +87,6 @@ const download = async (family: string, weight: number, style: FontStyle): Promi
   return new Uint8Array(await file.arrayBuffer());
 };
 
-// Scenes load their fonts side by side, so one process often asks for the same file twice before either lands.
 const pending = new Map<string, Promise<Uint8Array>>();
 
 const bytesOf = (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
@@ -117,10 +111,7 @@ const load = async (
     const cached = await readFile(path);
 
     if (isFont(cached)) return cached;
-    // A torn or corrupt file: fetch it again and write it over.
-  } catch {
-    // Cold cache: fall through to the network.
-  }
+  } catch {}
 
   let bytes: Uint8Array;
 
@@ -140,7 +131,6 @@ const load = async (
       `Google Fonts answered for ${family} ${weight} ${style} with a file that is not a font.`,
     );
 
-  // Rename is atomic, so a crashed or concurrent run never leaves a torn file where readFile looks.
   const temp = `${path}.${process.pid}.${Date.now()}.tmp`;
 
   await mkdir(dirname(path), { recursive: true });
@@ -162,8 +152,8 @@ export const google = Object.assign(
   },
   {
     /**
-     * Several weights and styles grouped under one family name, as `font.family()` groups them. `faces` says which, each with
-     * the options `google()` takes. `options` applies to every face, and a face's own options win. The first face's `fallback` is the family's.
+     * Several weights and styles under one family name. `faces` lists them, each with the options `google()` takes;
+     * `options` applies to every face and a face's own win. The first face's `fallback` is the family's.
      */
     family: async (
       family: string,

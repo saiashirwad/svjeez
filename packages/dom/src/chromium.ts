@@ -11,7 +11,17 @@ import {
 import { PAD } from "./demo.ts";
 import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, isWholeFile, sources, unwrap } from "./fonts.ts";
-import { embed, preload, shrink, stills, svgUri, unpack, type Fetched, type Size } from "./images.ts";
+import {
+  embed,
+  preload,
+  shrink,
+  stills,
+  svgUri,
+  unpack,
+  type Fetched,
+  type Size,
+} from "./images.ts";
+import { paletteCss } from "./palette.ts";
 import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { shoot } from "./shot.ts";
@@ -38,14 +48,8 @@ export const launch = async (executablePath?: string): Promise<Chromium> => {
   }
 };
 
-/** tsx and esbuild's keepNames wrap named functions in __name(), which the page doesn't have. */
 const shim = (page: Page) => page.evaluate("globalThis.__name ??= (fn) => fn");
 
-/**
- * Transitions and finite animations that an action or a scheme change started must land before the page is read.
- * An app that answers an action from script (search results arriving) changes the DOM a little later, so before a
- * read the page must go `quiet` for a moment, or a few seconds pass. A scheme change only needs two frames.
- */
 const settle = (page: Page, quiet: boolean) =>
   page.evaluate(async (quiet) => {
     const frames = () =>
@@ -54,8 +58,6 @@ const settle = (page: Page, quiet: boolean) =>
     if (!quiet) await frames();
     else
       await new Promise<void>((done) => {
-        // Two frames with no change and the page is done. A page that changes is live, so it must then stay
-        // still for a longer moment, which lets a script's answer land.
         let timer: ReturnType<typeof setTimeout> | undefined;
 
         const observer = new MutationObserver(() => {
@@ -76,8 +78,6 @@ const settle = (page: Page, quiet: boolean) =>
         void frames().then(() => timer === undefined && finish());
       });
 
-    // None of these waits may outlast three seconds in all: a font that never loads, or an animation with a long delay or
-    // a huge duration, must not hold the read.
     const deadline = new Promise((done) => setTimeout(done, 3000));
     const within = (wait: Promise<unknown>) => Promise.race([wait, deadline]);
 
@@ -97,7 +97,6 @@ const settle = (page: Page, quiet: boolean) =>
     );
   }, quiet);
 
-/** The text each pseudo-element laid out, by backend node: a counter or `attr()` is only known once it is. */
 const pseudoTexts = async (session: CDPSession) => {
   const { documents, strings } = await session.send("DOMSnapshot.captureSnapshot", {
     computedStyles: [],
@@ -117,10 +116,6 @@ const pseudoTexts = async (session: CDPSession) => {
   return texts;
 };
 
-/**
- * Chromium knows where it laid out each ::before and ::after, but the page has no node to ask. The DevTools protocol
- * does: their border quads and laid-out text are handed to the page by element, in a map `walk` reads.
- */
 const markPseudos = async (session: CDPSession, page: Page) => {
   const { root } = await session.send("DOM.getDocument", { depth: -1, pierce: true });
   const texts = await pseudoTexts(session);
@@ -181,7 +176,6 @@ const markPseudos = async (session: CDPSession, page: Page) => {
   );
 };
 
-/** The properties of a range input's track and thumb that `surface` reads, to carry from the protocol into the page. */
 const RANGE_STYLE = new Set([
   "background-color",
   "background-image",
@@ -201,11 +195,6 @@ const RANGE_STYLE = new Set([
   ]),
 ]);
 
-/**
- * A range input's track and thumb are parts of a user-agent shadow tree: the page can't address them, but the
- * DevTools protocol shows the tree. Their boxes (after any transform) and styles are handed to the page by input,
- * in a map `walk` reads.
- */
 const markRanges = async (session: CDPSession, page: Page) => {
   const { root } = await session.send("DOM.getDocument", { depth: -1, pierce: true });
 
@@ -289,7 +278,6 @@ const markRanges = async (session: CDPSession, page: Page) => {
   await session.send("CSS.disable");
 };
 
-/** A part name, by the `parts` option or `data-part`, found in the page under the root; else a CSS selector. */
 const target = async (
   page: Page,
   root: string,
@@ -311,7 +299,6 @@ const target = async (
   return handle.asElement() ?? undefined;
 };
 
-/** Pages in one Chromium. */
 export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages> => {
   const chromium = await launch(options.executablePath);
   const given = (options.fonts ?? []).flatMap(facesOf);
@@ -326,19 +313,18 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     )
     .join("\n");
 
+  // After the page's own CSS in an opened app too, so the recording's palette wins over one the app defines.
+  const head = faces + (options.palette ? paletteCss(options.palette) : "");
+
   const schemes = options.schemes ?? "both";
   const darkClass = options.dark?.class ?? "dark";
-  // The scheme a card rests in between snapshots, so actions run in the scheme the page was written for.
   const resting = schemes === "dark" ? "dark" : "light";
   const givenFamilies = new Set(given.map((f) => f.family));
-  // Font files by URL, fetched once for every card.
   const files = new Map<string, Promise<string | undefined>>();
 
-  // Image files by URL, fetched once for every card, and what each is cut down to by size.
   const fetched = new Map<string, Promise<Fetched | undefined>>();
   const pictures = new Map<string, Promise<string | undefined>>();
 
-  /** An image's file, fetched from Node so a cross-origin one needs no CORS. */
   const fetchImage = async (page: Page, url: string): Promise<Fetched | undefined> => {
     if (url.startsWith("data:")) return unpack(url);
 
@@ -357,10 +343,6 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     return mime ? { mime, bytes: await response.body() } : undefined;
   };
 
-  /**
-   * An image the page's CSS or markup names, as a data URI cut down to what the drawing needs: a raster is scaled to
-   * at most twice the size it is drawn at and re-encoded, and an SVG is given a size.
-   */
   const picture = (page: Page) => (url: string, size: Size) => {
     const key = `${Math.ceil(size[0])}x${Math.ceil(size[1])} ${url}`;
     let file = pictures.get(key);
@@ -380,7 +362,6 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
         const data = image.bytes.toString("base64");
 
-        // A file the page can't decode is kept as it came.
         const small = await page
           .evaluate(shrink, { data, mime: image.mime, width: size[0], height: size[1] })
           .catch(() => undefined);
@@ -393,23 +374,18 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     return file;
   };
 
-  /** A still of each canvas the page shows: what the page can't read from one, a screenshot of it alone can. */
   const canvases = async (page: Page) => {
     const need = await page.evaluate(stills);
 
     if (need.length === 0) return;
 
-    const list = await page.evaluateHandle(
-      () => globalThis.__svjeezCanvases ?? [],
-    );
+    const list = await page.evaluateHandle(() => globalThis.__svjeezCanvases ?? []);
 
     for (const i of need) {
       const handle = (await list.evaluateHandle((all, i) => all[i]!, i)).asElement();
 
       if (!handle) continue;
 
-      // The part of the canvas the viewport shows. Everything but the canvas is hidden for the shot, so its picture
-      // carries none of the text and boxes drawn over it.
       const at = await page.evaluate((el) => {
         const r = el.getBoundingClientRect();
         const x = Math.max(r.left, 0);
@@ -449,7 +425,6 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     }
   };
 
-  /** The page's own web fonts, fetched from Node so a cross-origin file needs no CORS. */
   const capture = async (page: Page, used: string[]): Promise<Face[]> => {
     if (used.length === 0) return [];
 
@@ -468,9 +443,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         let file = files.get(url);
 
         if (!file) {
-          // A file that won't download leaves its text to a fallback font, as a page without it would.
-          // A face the drawing can't cut down stays as the page had it, WOFF2 and all: a variable font's TTF is
-          // several times the size.
+          // A face that can't be cut down stays as the page had it; a variable font's TTF is several times the WOFF2.
           const whole = isWholeFile(face);
 
           file = download(url).then(
@@ -522,9 +495,6 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       return root;
     };
 
-    // Light goes last, so the page ends in the scheme it rests in. A live app may still be changing between the two
-    // passes (a progress badge, results arriving), so a mismatch reads both again. A page that lays the schemes out
-    // differently for good (a theme toggle's icon, an image for one scheme) keeps its light read where they differ.
     const both = async (tries = 3): Promise<Box> => {
       const dark = schemes === "light" ? undefined : await pass("dark");
       const light = schemes === "dark" ? undefined : await pass("light");
@@ -590,6 +560,25 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
       if ("move" in action) return page.mouse.move(...action.move);
 
+      if ("pointer" in action) {
+        const { to, at = [0.5, 0.5], steps = 1, button } = action.pointer;
+
+        if (to !== undefined) {
+          const el = await target(page, selector, parts, to);
+          const box = await (el ?? page.locator(to).first()).boundingBox();
+
+          if (!box) throw new Error(`drag(): "${to}" isn't on the page, or isn't drawn.`);
+
+          await page.mouse.move(box.x + box.width * at[0], box.y + box.height * at[1], { steps });
+        }
+
+        if (button === "down") await page.mouse.down();
+
+        if (button === "up") await page.mouse.up();
+
+        return;
+      }
+
       if ("html" in action) return render(action.html);
 
       if ("props" in action)
@@ -628,7 +617,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       const wrap = width === undefined ? "display:inline-block" : `width:${width}px`;
 
       await page.setContent(
-        `<!doctype html><html class="${root?.class ?? ""}"><head><meta charset="utf-8"><style>${faces}</style><style id="svjeez-css">${await sheet(html)}</style></head><body style="margin:0;background:none"><div id="svjeez-dom" style="${wrap}">${html}</div></body></html>`,
+        `<!doctype html><html class="${root?.class ?? ""}"><head><meta charset="utf-8"><style>${head}</style><style id="svjeez-css">${await sheet(html)}</style></head><body style="margin:0;background:none"><div id="svjeez-dom" style="${wrap}">${html}</div></body></html>`,
       );
 
       return io(page, "#svjeez-dom > *", rest, async (next) => {
@@ -645,7 +634,6 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
           },
           [next, css] as const,
         );
-        // New markup starts as a fresh render would: nothing under the pointer.
         await page.mouse.move(-1, -1);
       });
     },
@@ -654,13 +642,12 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         viewport: { width: Math.ceil(width ?? 1280), height: Math.ceil(height ?? 1000) },
       });
 
-      // A page whose load never ends (a stream, a slow tracker) is read as it stands after a few seconds.
       await page.goto(options.base ? new URL(url, options.base).href : url, {
         waitUntil: "domcontentloaded",
       });
       await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => undefined);
 
-      if (faces) await page.addStyleTag({ content: faces });
+      if (head) await page.addStyleTag({ content: head });
 
       await page.waitForSelector(ready ?? root);
 

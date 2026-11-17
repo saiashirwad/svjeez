@@ -3,7 +3,6 @@ import { Y, n } from "./kit";
 
 type Cubic = readonly [Point, Point, Point, Point];
 
-/** A Catmull-Rom spline through the points, as cubic Béziers. */
 const cubics = (pts: readonly Point[], closed: boolean): Cubic[] => {
   const at = (i: number) =>
     pts[closed ? (i + pts.length) % pts.length : Math.max(0, Math.min(pts.length - 1, i))]!;
@@ -20,7 +19,6 @@ const cubics = (pts: readonly Point[], closed: boolean): Cubic[] => {
   });
 };
 
-/** Points from a flat list: `pts([x0, y0, x1, y1])`, with y as laid out on the original 3:2 sheet. */
 export const pts = (xy: number[]): Point[] =>
   Array.from({ length: xy.length / 2 }, (_, i) => ({ x: xy[i * 2]!, y: Y(xy[i * 2 + 1]!) }));
 
@@ -34,14 +32,12 @@ export const smooth = (pts: readonly Point[], closed = false): string => {
 
 export interface Trace {
   readonly pts: Point[];
-  /** Arc length at each point. */
   readonly len: number[];
   readonly total: number;
   /** The point `s` px along, with the heading there in degrees. */
   at(s: number): Point & { readonly angle: number };
 }
 
-/** The open spline through `points`, sampled `steps` times per span, with lengths. */
 export const trace = (points: readonly Point[], steps = 16): Trace => {
   const pts = [points[0]!];
 

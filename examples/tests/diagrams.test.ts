@@ -10,7 +10,6 @@ describe("the examples' drawn edges never cross", () => {
     return side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0;
   };
 
-  /** Proper crossings between two sampled curves, ignoring the last 20px before a shared end, where merges join. */
   const crossings = (p: readonly P[], q: readonly P[]) => {
     const [end, other] = [p.at(-1)!, q.at(-1)!];
 

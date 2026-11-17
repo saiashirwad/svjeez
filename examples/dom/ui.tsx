@@ -1,13 +1,11 @@
 /** @jsxImportSource react */
 /** @jsxRuntime automatic */
-// shadcn/ui components (MIT), trimmed to plain class strings so the example needs no cva or tailwind-merge.
 import { AlertCircle, ArrowRight, Check, GitPullRequest } from "lucide-react";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const cn = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" ");
 
-// The hover and focus classes are shadcn's, so a real pointer or keyboard in the live page restyles them.
 const BUTTON = {
   base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium shrink-0 [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
   default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
@@ -186,7 +184,6 @@ const Avatar = ({ initials, part }: { initials: string; part?: string }) => (
   </span>
 );
 
-/** The pieces the scene snapshots, each as static HTML. Any framework that renders HTML works the same way. */
 export const pieces = {
   login: (error: boolean) =>
     renderToStaticMarkup(

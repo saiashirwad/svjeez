@@ -42,8 +42,8 @@ export default function build(): string {
     <>
       <rect width={330} height={190} fill={theme.base00} />
       {c.node}
-      {bars.node}
-      {trend.node}
+      {bars}
+      {trend}
     </>,
   );
 }

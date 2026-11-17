@@ -10,6 +10,7 @@ import {
   type StateMachine,
   type StateMachineOptions,
   type StateSpec,
+  type StateTransition,
 } from "@svjeez/diagrams";
 import { parseMermaid } from "./parse.ts";
 import type { FlowchartDoc, FlowForm, SequenceDoc, StateDoc, StateNode } from "./types.ts";
@@ -41,7 +42,6 @@ export type MermaidState = StateMachine<string> & {
 /** A svjeez diagram plus the `kind` it was drawn as and the `doc` it was drawn from. Narrow on `kind`. */
 export type MermaidDiagram = MermaidFlowchart | MermaidSequence | MermaidState;
 
-/** Which svjeez node role draws each Mermaid form. */
 const FORM_ROLES: Record<FlowForm, NodeRole> = {
   rect: "task",
   round: "task",
@@ -120,7 +120,9 @@ const stateOf = (doc: StateDoc, options: MermaidOptions): MermaidState => {
       transitions: doc.transitions.map((t) =>
         t.label === undefined ? ([t.from, t.to] as const) : ([t.from, t.to, t.label] as const),
       ),
-    } as Parameters<typeof stateMachine<Record<string, StateSpec>>>[0],
+    } as Parameters<
+      typeof stateMachine<Record<string, StateSpec>, readonly StateTransition<string>[]>
+    >[0],
     { ...options, direction: options.direction ?? doc.direction },
   );
 

@@ -129,7 +129,7 @@ const shown2 = reveal(src, { at: 1, step: 0.6 });                      // { node
 
 ## Annotations
 
-A `show` is a `Span`, given on the component or, for `Focus`, `Marker` and `Camera`, on each stop. All but `Arrow` aim at a `Rect` with `target`; `Arrow` takes `from` and `to` points. `Arrow`, `Callout`, `Brace` and `Underline` also take `theme`, `color` and `class`.
+A `show` is a `Span`, given on the component or, for `Focus`, `Marker` and `Camera`, on each stop. All but `Arrow` aim at a `Rect` with `target`; `Arrow` takes `from` and `to` points, a `bend`, a stroke `width` (default 1.5) and the barbs' `head` length (default 8). `draw` is a `Span` inside `show` for when the shaft draws, the head landing as it ends, and `ease` is the shaft's ease; by default it draws from the start of `show` over 0.6s or half of it. `Arrow`, `Callout`, `Brace` and `Underline` also take `theme`, `color` and `class`.
 
 ```tsx
 import { Arrow, Brace, Callout, Focus, Marker, Underline } from "svjeez";
@@ -193,8 +193,8 @@ const Atlas = ({ still }: { still: boolean }) => (
 const SWAP = 4;
 const swapped = (
   <>
-    <g animation={motion({ opacity: 1 }).at(SWAP).set({ opacity: 0 })}><Atlas still={false} /></g>
-    <g animation={motion({ opacity: 0 }).at(SWAP).set({ opacity: 1 })}>
+    <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, SWAP)}><Atlas still={false} /></g>
+    <g animation={motion({ opacity: 0 }).set({ opacity: 1 }, SWAP)}>
       <Camera frame={FRAME} stops={stops}><Atlas still /></Camera>
     </g>
   </>
@@ -231,18 +231,18 @@ import { Icon, travel } from "svjeez";
 
 ```tsx
 import { plane } from "@svjeez/math";
-import { draw, tint } from "svjeez";
+import { tint } from "svjeez";
 import { rect } from "svjeez/geometry";
 
 const theme = tomorrowNight;
 const ax = plane({ xRange: [-3, 3], yRange: [-1, 9], frame: rect(300, 60, 400, 260), theme, ticks: { x: 1, y: 2 } });
-const parabola = ax.plot((x) => x * x, { samples: 120, color: tint(theme, "blue"), animation: draw({ at: 1, over: 1.5 }) });
+const parabola = ax.plot({ at: 1, over: 1.5 }, (x) => x * x, { samples: 120, color: tint(theme, "blue") });
 const dot = ax.point(2, 4); // graph coordinates to a scene Point
 
-const parabolaScene = <g>{ax.node}{parabola.node}<circle cx={dot.x} cy={dot.y} r={4} fill={tint(theme, "yellow")} /></g>;
+const parabolaScene = <g>{ax.node}{parabola}<circle cx={dot.x} cy={dot.y} r={4} fill={tint(theme, "yellow")} /></g>;
 ```
 
-`plot(f, options)` samples `f` evenly (`samples`, default 200, over `from`..`to`, default the x range) and returns `{ node, d, points }`. The curve breaks where `f` is not finite, leaves the y range by more than one range height, or jumps by more than the range, so `1 / x` and `Math.tan` draw no vertical spikes. Clipping to the plot area is built in. `color`, `strokeWidth` and `animation` (such as `draw()`) style the path. `plane()` and `plot()` throw on empty ranges, non-positive sizes, steps or sample counts.
+`plot(f, options)` samples `f` evenly (`samples`, default 200, over `from`..`to`, default the x range) and returns a `Drawn` with `d` and `points`; `plot(span, f, options)` draws it on during `span`. The curve breaks where `f` is not finite, leaves the y range by more than one range height, or jumps by more than the range, so `1 / x` and `Math.tan` draw no vertical spikes. Clipping to the plot area is built in. `color` and `strokeWidth` style the path. `plane()` and `plot()` throw on empty ranges, non-positive sizes, steps or sample counts.
 
 ## Calculus on a plane
 

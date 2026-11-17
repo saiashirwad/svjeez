@@ -10,10 +10,8 @@ export interface Rect {
 /** Top-left, top-right, bottom-right, bottom-left. */
 export type Radii = readonly [number, number, number, number];
 
-/** A color as the page computed it, in sRGB. */
 export type Rgb = `rgb(${string})` | `rgba(${string})`;
 
-/** The light and dark scheme's colors, where they differ. */
 export interface Pair<C extends string = Rgb> {
   readonly light: C;
   readonly dark: C;
@@ -37,7 +35,6 @@ export interface TextRun {
   readonly x: number;
   readonly y: number;
   readonly family: string;
-  /** The rest of the page's font stack, ending in a generic family, for when `family` isn't embedded. */
   readonly fallback?: string;
   readonly weight: number;
   readonly style: "normal" | "italic";
@@ -45,12 +42,10 @@ export interface TextRun {
   readonly color: Paint;
   /** `font-stretch` as a percentage, left out at the normal 100. */
   readonly stretch?: number;
-  /** A line drawn along the text: a link's underline. */
   readonly decoration?: "underline" | "line-through" | "overline";
   readonly letterSpacing: number;
   /** Where each character ends, in px from `x`, one per code point. Typing reveals the text up to these. */
   readonly advances: readonly number[];
-  /** An empty input's placeholder: typing into the field hides it. */
   readonly placeholder?: boolean;
 }
 
@@ -60,12 +55,10 @@ export interface Transform {
   readonly origin: readonly [number, number];
 }
 
-/** A shape inside an inline `<svg>`: its geometry attributes as written, and fill and stroke resolved from the page's CSS. */
 export interface Vector {
   readonly tag: string;
   readonly attrs: Readonly<Record<string, Paint<string>>>;
   readonly children: readonly Vector[];
-  /** What this shape shows only where the mask's shapes are light. */
   readonly mask?: readonly Vector[];
   /** A `<text>` in a mask, as a run in the page's coordinates (not the drawing's). */
   readonly run?: TextRun;
@@ -79,7 +72,6 @@ export interface Graphic {
   readonly transform?: Transform;
 }
 
-/** An image from `background-image` or `mask-image`: its file, and every tile of it the page paints. */
 export interface Placement {
   readonly href: string;
   readonly tiles: readonly Rect[];
@@ -90,18 +82,15 @@ export interface Picture {
   readonly box: Rect;
   readonly radii: Radii;
   readonly href: string;
-  /** Where the image is drawn when `object-fit` or `object-position` move it off the box; the box clips it. */
   readonly fit?: Rect;
   readonly transform?: Transform;
 }
 
-/** A color at a fraction of the way along a gradient. */
 export interface Stop {
   readonly offset: number;
   readonly color: Paint;
 }
 
-/** A CSS linear gradient, as the line its stops run along, in the snapshot's coordinates. */
 export interface LinearGradient {
   readonly kind: "linear";
   readonly x1: number;
@@ -109,11 +98,9 @@ export interface LinearGradient {
   readonly x2: number;
   readonly y2: number;
   readonly stops: readonly Stop[];
-  /** A `repeating-` gradient: the stops repeat past both ends. */
   readonly repeat?: boolean;
 }
 
-/** A CSS radial gradient: its center and the radii its last stop reaches, in the snapshot's coordinates. */
 export interface RadialGradient {
   readonly kind: "radial";
   readonly cx: number;
@@ -155,14 +142,10 @@ export interface Box {
     readonly color: Paint;
   };
   readonly shadows: readonly Shadow[];
-  /** Inset shadows, drawn inside the padding box over the background. */
   readonly insets?: readonly Shadow[];
   readonly opacity: number;
-  /** The dark scheme's opacity, where an element is faded in one scheme and not the other. */
   readonly darkOpacity?: number;
-  /** `mix-blend-mode`, when it isn't `normal`: the box blends with what is drawn under it. */
   readonly blend?: string;
-  /** `isolation: isolate`: a blend inside the box stays inside it. */
   readonly isolate?: boolean;
   readonly clip: boolean;
   readonly transform?: Transform;
@@ -171,30 +154,23 @@ export interface Box {
 
 export type Item = Box | TextRun | Graphic | Picture;
 
-/** A web font the page loaded for its text, so the drawing can embed the same one. */
 export interface Face {
   readonly family: string;
   /** A CSS weight: one number, or a range for a variable font. */
   readonly weight: string;
-  /** A CSS `font-stretch` range, for a face that isn't the normal width. */
   readonly stretch?: string;
   readonly style: "normal" | "italic";
-  /** The characters this file covers, when the page split the family across files. */
   readonly unicodeRange?: string;
-  /** The file, as a data URI. */
   readonly src: string;
 }
 
-/** One state of a component, read from a live page. Plain data: it survives `JSON.stringify`. */
 export interface Snapshot {
-  /** The name `snap(name)` gave it. */
   readonly name?: string;
   /** Size of the picture: the element plus `pad` on every side. */
   readonly width: number;
   readonly height: number;
   /** Room around the element for shadows and rings, in px. */
   readonly pad: number;
-  /** The root's border box, in the snapshot's coordinates. */
   readonly box: Rect;
   readonly root: Box;
   /** The page's own web fonts that its text used. Fonts given to `browser()` aren't repeated here. */

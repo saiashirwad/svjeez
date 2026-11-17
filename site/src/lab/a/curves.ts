@@ -1,4 +1,3 @@
-// Easing and color math for the panel's handles.
 import { ease, easeAt, type Hex } from "svjeez";
 
 export const bez = (p: readonly number[]) => {
@@ -24,8 +23,6 @@ export const curvePath = (
 };
 
 export const fmt = (n: number, d: number) => String(Number(n.toFixed(d)));
-
-// ----- color math (HSL is enough for a sketch)
 
 export const hexToHsl = (hex: string): [number, number, number] => {
   const n = parseInt(hex.slice(1), 16);

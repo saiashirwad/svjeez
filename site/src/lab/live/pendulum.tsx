@@ -15,7 +15,6 @@ const along = (r: number, deg: number) => ({
   y: pivot.y + r * Math.cos((deg * Math.PI) / 180),
 });
 
-/** Each handle sits on the thing its value draws: the bottom of the arc, its far end, the rim of the bob. */
 export const handles: Handles<typeof params> = (p) => ({
   length: along(p.length, 0),
   swing: along(p.length, -p.swing),
@@ -23,7 +22,6 @@ export const handles: Handles<typeof params> = (p) => ({
 });
 
 export default (p: Values<typeof params> = defaults(params)) => {
-  // A real pendulum's period, so a longer rod swings slower.
   const period = 2 * Math.PI * Math.sqrt(p.length / 2000);
 
   const swinging = sampled(

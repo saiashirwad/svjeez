@@ -3,7 +3,6 @@
   import { DURATION, end, starts } from "./flight";
   import { legColor, pct, speedHills } from "./view";
 
-  // The legs as blocks on a time ruler, each with a hill for how fast the plane goes through it.
   const bench = getBench();
   const flight = $derived(bench.flight);
   const legStarts = $derived(starts(flight));

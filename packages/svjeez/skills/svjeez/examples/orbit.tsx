@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { ease, motion, render, sampled, wiggle } from "svjeez";
+import { ease, motion, render, sampled, span, wiggle } from "svjeez";
 
 const D = 6;
 const R = 70;
@@ -37,7 +37,7 @@ export default function build(): string {
           height={4}
           rx={2}
           fill="#FFD166"
-          animation={motion({ rotate: 0 }).to({ rotate: 360 }, 3, ease.linear).loop(3)}
+          animation={motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 3), ease.linear).loop(3)}
         />
         <circle r={7} fill="#3EE6D6" animation={moon} />
       </g>

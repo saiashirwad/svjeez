@@ -34,7 +34,7 @@ export default function build(): string {
     <>
       <rect width={w + 40} height={h + 40} fill={theme.base00} />
       <g transform={`translate(${20 - x} ${20 - y})`} fontFamily="system-ui, sans-serif">
-        {diagram.node}
+        {diagram}
       </g>
     </>,
   );

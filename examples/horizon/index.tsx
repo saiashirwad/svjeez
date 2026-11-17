@@ -1,4 +1,4 @@
-import { ease, motion, render, shake } from "svjeez";
+import { ease, motion, render, shake, span } from "svjeez";
 import { Aura, Disk, Shock } from "./disk";
 import { Flash, Hud, Lens, Reticle, Title } from "./hud";
 import { D, H, T, W } from "./kit";
@@ -6,10 +6,8 @@ import { Jets, Shadow } from "./shadow";
 import { Backdrop, Nebula, Stars, Warp } from "./sky";
 
 const push = motion({ scale: 1 })
-  .at(T.hud)
-  .to({ scale: 1.1 }, T.collapse - T.hud, ease.inOut)
-  .at(T.black)
-  .set({ scale: 1 });
+  .to({ scale: 1.1 }, span(T.hud).until(T.collapse), ease.inOut)
+  .set({ scale: 1 }, T.black);
 
 const kick = shake({ at: T.ignite, over: 0.9 }, { x: 9, y: 6, rotate: 0.8 }, { rate: 22 });
 

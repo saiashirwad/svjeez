@@ -1,20 +1,19 @@
 import {
+  chain,
   css,
   ease,
   motion,
   Pivot,
+  span,
   type Color,
+  type Ease,
   type Motion,
   type PathData,
   type Span,
+  type Spanned,
   type Stack,
   type TagChannels,
 } from "svjeez";
-
-// Blip, from the site's favicon (site/public/favicon.svg), in the favicon's own coordinates: the body sits on y 162
-// and is centered on x 104, the antenna bulb on 104,38. Scenes place it with a transform and bring their own motions,
-// written on the clock around Blip, so a scene starts it with <Clip at> and never counts seconds inside it.
-// Feet are drawn only when a scene gives them motions.
 
 export const BLIP = {
   yellow: "#FFC21A",
@@ -82,14 +81,15 @@ export const blip = ({
   feet,
   cheek = BLIP.cheek,
 }: BlipMotions = {}) => {
-  // A blink swaps the open eye for a shut one, which costs a few bytes of keyframes where a morph costs a kilobyte.
   const open = blinks.reduce(
-    (m, at) => m.at(at).to({ opacity: 0 }, 0.04).wait(0.12).to({ opacity: 1 }, 0.08),
+    (m, at) =>
+      m.to({ opacity: 0 }, span(at, 0.04)).to({ opacity: 1 }, span(at, 0.04).next(0.08, 0.12)),
     motion({ opacity: 1 }),
   );
 
   const shut = blinks.reduce(
-    (m, at) => m.at(at).to({ opacity: 1 }, 0.04).wait(0.12).to({ opacity: 0 }, 0.08),
+    (m, at) =>
+      m.to({ opacity: 1 }, span(at, 0.04)).to({ opacity: 0 }, span(at, 0.04).next(0.08, 0.12)),
     motion({ opacity: 0 }),
   );
 
@@ -167,6 +167,10 @@ export interface Jumps {
 export const hopTime = (height: number) =>
   0.3 + 0.4 * Math.sqrt(Math.min(1, Math.max(0.25, height / 64)));
 
+/** When a hop is in the air: from leaving the ground, after the crouch, to the landing. */
+export const flight = ({ land, height }: Hop): Spanned =>
+  span(land - hopTime(height) + 0.3).until(land);
+
 /**
  * Hops, each landing at its own time: a crouch, a launch, a little air and a squashy landing with a rebound. A hop
  * starts and ends at rest, so Blip standing still can hand over to one that hops, and the hops must be at least
@@ -182,44 +186,42 @@ export const jumps = (hops: readonly Hop[]): Jumps => {
     const air = 0.2 * Math.sqrt(Math.min(1, Math.max(0.25, height / 64)));
     const start = land - hopTime(height);
 
-    body = body
-      .at(start + 0.3)
-      .to({ y: -height }, air, ease.out)
-      .to({ y: 0 }, air, ease.in);
+    const rise = span(start + 0.3, air);
+    const crouch = span(start, 0.22);
+    const push = crouch.next(0.08);
+
+    body = body.to({ y: -height }, rise, ease.out).to({ y: 0 }, rise.next(air), ease.in);
+
+    const [, up, top] = chain(push, air / 2, air / 2);
+    const [brace, squash, rebound, settle] = chain(span(land - 0.08, 0.08), 0.06, 0.12, 0.14);
 
     stretch = stretch
-      .at(start)
-      .to({ [sx]: 1.14, [sy]: 0.8 }, 0.22, ease.out)
-      .to({ [sx]: 0.86, [sy]: 1.22 }, 0.08, ease.out)
-      .to({ [sx]: 0.96, [sy]: 1.06 }, air / 2)
-      .to({ [sx]: 1, [sy]: 1 }, air / 2)
-      .at(land - 0.08)
-      .to({ [sx]: 0.92, [sy]: 1.1 }, 0.08)
-      .to({ [sx]: 1.26, [sy]: 0.74 }, 0.06, ease.out)
-      .to({ [sx]: 0.95, [sy]: 1.07 }, 0.12, ease.out)
-      .to({ [sx]: 1, [sy]: 1 }, 0.14, ease.pop);
+      .to({ [sx]: 1.14, [sy]: 0.8 }, crouch, ease.out)
+      .to({ [sx]: 0.86, [sy]: 1.22 }, push, ease.out)
+      .to({ [sx]: 0.96, [sy]: 1.06 }, up)
+      .to({ [sx]: 1, [sy]: 1 }, top)
+      .to({ [sx]: 0.92, [sy]: 1.1 }, brace)
+      .to({ [sx]: 1.26, [sy]: 0.74 }, squash, ease.out)
+      .to({ [sx]: 0.95, [sy]: 1.07 }, rebound, ease.out)
+      .to({ [sx]: 1, [sy]: 1 }, settle, ease.pop);
 
-    bulb = bulb
-      .at(start + 0.22)
-      .to({ y: 5 }, 0.08)
-      .to({ y: -5 }, air, ease.inOut)
-      .at(land - 0.06)
-      .to({ y: -2 }, 0.06)
-      .to({ y: 6 }, 0.05, ease.out)
-      .to({ y: -4 }, 0.08, ease.inOut)
-      .to({ y: 2.5 }, 0.08, ease.inOut)
-      .to({ y: -1 }, 0.08, ease.inOut)
-      .to({ y: 0 }, 0.08, ease.inOut);
+    const lag = span(start + 0.22, 0.08);
+    const wobble = chain(span(land - 0.06, 0.06), 0.05, 0.08, 0.08, 0.08, 0.08);
+
+    bulb = wobble.reduce(
+      (m, beat, i) => m.to({ y: [-2, 6, -4, 2.5, -1, 0][i]! }, beat, i < 2 ? ease.out : ease.inOut),
+      bulb.to({ y: 5 }, lag).to({ y: -5 }, lag.next(air), ease.inOut),
+    );
+
+    const [hit, recoil, still] = chain(span(land, 0.06), 0.12, 0.1);
 
     press = press
-      .at(start)
-      .to({ y: 3.5 }, 0.22, ease.out)
-      .to({ y: -2 }, 0.08, ease.out)
-      .to({ y: 0 }, 0.1)
-      .at(land)
-      .to({ y: 7 }, 0.06, ease.out)
-      .to({ y: -1.5 }, 0.12, ease.out)
-      .to({ y: 0 }, 0.1, ease.inOut);
+      .to({ y: 3.5 }, crouch, ease.out)
+      .to({ y: -2 }, push, ease.out)
+      .to({ y: 0 }, push.next(0.1))
+      .to({ y: 7 }, hit, ease.out)
+      .to({ y: -1.5 }, recoil, ease.out)
+      .to({ y: 0 }, still, ease.inOut);
   }
 
   return { body, stretch, bulb, press };
@@ -232,30 +234,51 @@ export interface Walk {
 
 /** A waddle by (`dx`, `dy`) over `span`: a bob and a rock on each step, and the feet taking turns. */
 export const waddle = (span: Span, dx: number, dy: number, steps: number): Walk => {
-  const { at, over } = span;
-  const step = over / steps;
+  const step = span.over / steps;
+  const half = step / 2;
+  const each = Array.from({ length: steps }, (_, i) => i);
 
-  const travel = motion({ x: 0, y: 0 }).at(at).to({ x: dx, y: dy }, over, ease.linear);
+  /** Spans end to end from the start of the walk, one per length. */
+  const from = (lengths: readonly number[]) =>
+    chain({ at: span.at, over: lengths[0]! }, ...lengths.slice(1));
 
-  let bob = motion({ y: 0 }).at(at);
-  let rock = motion({ rotate: 0 }).at(at);
-  let left = motion({ y: 0 }).at(at);
-  let right = motion({ y: 0 }).at(at);
+  const travel = motion({ x: 0, y: 0 }).to({ x: dx, y: dy }, span, ease.linear);
 
-  const lift = (m: Motion<"y">, mine: boolean) =>
-    mine ? m.to({ y: -7 }, step / 2, ease.out).to({ y: 0 }, step / 2, ease.in) : m.wait(step);
+  const halves = from(each.flatMap(() => [half, half]));
 
-  for (let i = 0; i < steps; i++) {
-    bob = bob.to({ y: -5 }, step / 2, ease.out).to({ y: 0 }, step / 2, ease.in);
-    rock = rock.to({ rotate: i % 2 ? 5 : -5 }, step, ease.inOut);
+  const bob = each.reduce(
+    (m, i) => m.to({ y: -5 }, halves[2 * i]!, ease.out).to({ y: 0 }, halves[2 * i + 1]!, ease.in),
+    motion({ y: 0 }),
+  );
 
-    left = lift(left, i % 2 === 0);
-    right = lift(right, i % 2 === 1);
-  }
+  const strides = from(each.map(() => step));
 
-  rock = rock.to({ rotate: 0 }, 0.15);
+  const rock = strides
+    .reduce(
+      (m, stride, i) => m.to({ rotate: i % 2 ? 5 : -5 }, stride, ease.inOut),
+      motion({ rotate: 0 }),
+    )
+    .to({ rotate: 0 }, strides[steps - 1]!.next(0.15));
 
-  return { body: [travel, bob, rock], feet: { left, right } };
+  const foot = (side: number) => {
+    const moves = each.flatMap((i): { over: number; y?: number; curve?: Ease }[] =>
+      i % 2 === side
+        ? [
+            { y: -7, over: half, curve: ease.out },
+            { y: 0, over: half, curve: ease.in },
+          ]
+        : [{ over: step }],
+    );
+
+    const beats = from(moves.map((move) => move.over));
+
+    return moves.reduce(
+      (m, move, k) => (move.y === undefined ? m : m.to({ y: move.y }, beats[k]!, move.curve)),
+      motion({ y: 0 }),
+    );
+  };
+
+  return { body: [travel, bob, rock], feet: { left: foot(0), right: foot(1) } };
 };
 
 /** Hops from the top of one box to the top of the next, landing a beat on each: x glides, y arcs over. */
@@ -272,11 +295,10 @@ export const hopAcross = (
   for (let i = 1; i < tops.length; i++) {
     const [a, b] = [tops[i - 1]!, tops[i]!];
     const apex = Math.min(a.y, b.y) - 36;
-    x = x.at(t).to({ x: b.x }, flight, ease.inOut);
+    x = x.to({ x: b.x }, span(t, flight), ease.inOut);
     y = y
-      .at(t)
-      .to({ y: apex }, flight / 2, ease.out)
-      .to({ y: b.y }, flight / 2, ease.in);
+      .to({ y: apex }, span(t, flight / 2), ease.out)
+      .to({ y: b.y }, span(t, flight / 2).next(flight / 2), ease.in);
     t += flight + rest;
   }
 

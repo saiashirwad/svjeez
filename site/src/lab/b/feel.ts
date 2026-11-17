@@ -1,4 +1,3 @@
-// The colors of the gummies, and the sky and light an hour gives the scene.
 import type { Hex } from "svjeez";
 
 export const COLORS = [
@@ -46,7 +45,6 @@ export const isDay = (hour: number) => {
   return h >= 6 && h < 18;
 };
 
-/** Where the sun (by day) or moon (by night) sits in the 640×360 scene. */
 export const lightAt = (hour: number) => {
   const h = ((hour % 24) + 24) % 24;
   const day = isDay(h);

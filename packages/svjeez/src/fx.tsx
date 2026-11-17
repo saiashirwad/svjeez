@@ -4,8 +4,8 @@ import { hexBytes, hexOf, type Hex } from "./color";
 import { def, type Ref } from "./defs";
 import { num } from "./format";
 import { ease, motion } from "./motion";
+import { span } from "./span";
 
-/** Neon bloom: a blurred copy merged under the source. */
 const glow = ({ blur = 5 }: { readonly blur?: number } = {}): Ref<"filter"> =>
   def.filter(
     {},
@@ -31,7 +31,6 @@ export interface BoilOptions {
 
 const BOIL_FRAMES = 4;
 
-/** Hand-drawn boil: turbulence whose seed steps `rate` times a second, displacing the source by `strength` px. */
 const boil = ({
   strength = 3,
   rate = 10,
@@ -56,7 +55,7 @@ const boil = ({
         numOctaves={2}
         result="noise"
         animation={motion({ seed: start })
-          .to({ seed: start + BOIL_FRAMES }, period, ease.steps(BOIL_FRAMES))
+          .to({ seed: start + BOIL_FRAMES }, span(0, period), ease.steps(BOIL_FRAMES))
           .loop(period)}
       />
       <feDisplacementMap
@@ -70,7 +69,6 @@ const boil = ({
   );
 };
 
-/** Desaturate toward gray: 1 is fully gray, 0 leaves the source alone. */
 const grayscale = ({ amount = 1 }: { readonly amount?: number } = {}): Ref<"filter"> => {
   if (!(amount >= 0 && amount <= 1))
     throw new Error(`fx.grayscale() needs an amount between 0 and 1, got ${amount}.`);
@@ -87,7 +85,6 @@ const channels = (color: Hex): [number, number, number] => {
   return [r / 255, g / 255, b / 255];
 };
 
-/** Map luminance (Rec. 709) onto a ramp from `dark` to `light`. Hex colors only; others throw. */
 const duotone = ({ dark, light }: { readonly dark: Hex; readonly light: Hex }): Ref<"filter"> => {
   const [from, to] = [channels(dark), channels(light)];
 
@@ -111,7 +108,6 @@ export interface BlurOptions {
   readonly by?: number;
 }
 
-/** Gaussian blur by `by` px, 4 by default. */
 const blur = ({ by = 4 }: BlurOptions = {}): Ref<"filter"> =>
   def.filter({}, <feGaussianBlur stdDeviation={by} />);
 

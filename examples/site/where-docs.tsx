@@ -1,8 +1,7 @@
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span } from "svjeez";
 import { CSS, chrome, skeleton } from "./lib/kit";
 import { theme } from "../style";
 
-// A docs page: sidebar, text, and a diagram image whose packet keeps travelling.
 const W = 328;
 const H = 264;
 const D = 4;
@@ -74,9 +73,7 @@ export default function build(): string {
         cy={172}
         r={5}
         fill={theme.base0D}
-        animation={motion({ x: 0 })
-          .at(0.4)
-          .to({ x: to - from - 24 }, 2.4, ease.inOut)}
+        animation={motion({ x: 0 }).to({ x: to - from - 24 }, span(0.4, 2.4), ease.inOut)}
       />
       {skeleton(SIDE + 20, 236, [150])}
     </>,

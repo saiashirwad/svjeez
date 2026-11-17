@@ -84,7 +84,7 @@ cmd_preview() {
       out="$SCRATCH/preview.svg"
       log="$EVIDENCE/preview-server.log"
       tmux new-session -d -s "$session" -c "$LIB" \
-        "PORT=$port bun run scripts/preview.ts '$scene' --out '$out' 2>&1 | tee '$log'"
+        "bun run src/cli.ts dev '$scene' --port $port --out '$out' 2>&1 | tee '$log'"
       local url="http://localhost:$port" pid=""
       for _ in $(seq 1 100); do
         pid="$(lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null | head -1 || true)"

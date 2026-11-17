@@ -1,5 +1,3 @@
-// Reads the upstream SVG files of @tabler/icons and lucide-static from node_modules and writes src/tabler.ts and
-// src/lucide.ts, one `export const name: IconData` per icon. Rerunning it produces no diff.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { IconData } from "svjeez";
@@ -24,9 +22,6 @@ const RESERVED = new Set(
   ).split(" "),
 );
 
-/**
- * `arrow-left` is `arrowLeft`. A hyphen between two digits is an underscore, so `arrow-up-1-0` is `arrowUp1_0` and
- * stays apart from `arrow-up-10`. A name that is not an identifier, or is reserved, gets an `icon` prefix: `iconDelete`. */
 export const exportName = (file: string): string => {
   const camel = file
     .replace(/(?<=\d)-(?=\d)/g, "_")
@@ -41,7 +36,6 @@ const num = (value: number): string => String(Math.round(value * 1000) / 1000);
 
 type Attrs = Readonly<Record<string, string>>;
 
-/** The only attributes an element may carry, besides the paint attributes every element may. */
 const GEOMETRY = new Map([
   ["path", ["d"]],
   ["circle", ["cx", "cy", "r"]],
@@ -54,7 +48,6 @@ const GEOMETRY = new Map([
 
 const PAINT = ["fill", "stroke"];
 
-/** Attributes that change how an icon looks but not its shape, accepted for one icon and dropped. */
 const DROPPED = new Map([["brand-parsinta", ["opacity"]]]);
 
 const points = (attrs: Attrs): readonly (readonly [number, number])[] => {
@@ -135,11 +128,9 @@ const attributes = (source: string): Attrs =>
 
 interface Parsed {
   readonly icon: IconData;
-  /** The icon draws a solid piece inside an outline icon; it is stroked like the rest. */
   readonly mixed: boolean;
 }
 
-/** `root` is what the file's <svg> must say: the paint of the whole icon. */
 function parse(file: string, svg: string, kind: IconData["kind"]): Parsed {
   const clean = svg.replace(/<!--[\s\S]*?-->/g, "");
   const root = clean.match(/<svg\b([^>]*)>/);
@@ -187,10 +178,8 @@ function parse(file: string, svg: string, kind: IconData["kind"]): Parsed {
 }
 
 interface Source {
-  /** The upstream npm package, which names the generated header. */
   readonly pkg: string;
   readonly out: string;
-  /** Folders of SVG files and the kind of icon each holds, with the suffix their names take. */
   readonly folders: readonly {
     readonly dir: string;
     readonly kind: IconData["kind"];

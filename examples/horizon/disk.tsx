@@ -1,5 +1,5 @@
-import { def, draw, ease, motion, type SvgNode } from "svjeez";
-import { C, D, T, TILT, heat, phased, pivot, random } from "./kit";
+import { def, draw, ease, motion, random, span, type SvgNode } from "svjeez";
+import { C, D, T, TILT, heat, phased, pivot } from "./kit";
 
 const INNER = 78;
 const OUTER = 330;
@@ -92,9 +92,7 @@ const band = ({ r, t, width, dash, laps }: Ring): SvgNode[] => {
       stroke={color}
       strokeWidth={width * 0.6}
       opacity={fade * 0.45}
-      animation={draw({ at: arrive(t), over: 1 })
-        .at(T.black)
-        .set({ draw: 0 })}
+      animation={draw({ at: arrive(t), over: 1 }).set({ draw: 0 }, T.black)}
     />,
     <circle
       r={r}
@@ -105,12 +103,10 @@ const band = ({ r, t, width, dash, laps }: Ring): SvgNode[] => {
       strokeLinecap="round"
       animation={[
         motion({ opacity: 0 })
-          .at(arrive(t) + 0.3)
-          .to({ opacity: fade }, 0.9)
-          .at(T.black)
-          .set({ opacity: 0 }),
+          .to({ opacity: fade }, span(arrive(t) + 0.3, 0.9))
+          .set({ opacity: 0 }, T.black),
         motion({ rotate: 0 })
-          .to({ rotate: 360 }, D / laps, ease.linear)
+          .to({ rotate: 360 }, span(0, D / laps), ease.linear)
           .loop(D / laps),
       ]}
     />,
@@ -150,11 +146,9 @@ function Debris(): SvgNode {
 }
 
 const swallow = motion({ opacity: 1, scale: 1, rotate: 0 })
-  .at(T.collapse)
-  .to({ opacity: 0, scale: 0.25, rotate: 160 }, 0.9, ease.in)
-  .at(T.dawn)
-  .set({ scale: 1, rotate: 0 })
-  .to({ opacity: 1 }, 1);
+  .to({ opacity: 0, scale: 0.25, rotate: 160 }, span(T.collapse, 0.9), ease.in)
+  .set({ scale: 1, rotate: 0 }, T.dawn)
+  .to({ opacity: 1 }, span(T.dawn, 1));
 
 export function Disk({ half }: { half: "far" | "near" }): SvgNode {
   return (
@@ -175,10 +169,8 @@ export function Aura(): SvgNode {
           fill={haze}
           mask={doppler}
           animation={motion({ opacity: 0 })
-            .at(T.accrete + 0.4)
-            .to({ opacity: 1 }, 1.6)
-            .at(T.black)
-            .set({ opacity: 0 })}
+            .to({ opacity: 1 }, span(T.accrete + 0.4, 1.6))
+            .set({ opacity: 0 }, T.black)}
         />
         <Debris />
       </g>
@@ -189,11 +181,9 @@ export function Aura(): SvgNode {
 export function Shock(): SvgNode {
   const burst = (scale: number, over: number) =>
     motion({ scale: 1, opacity: 0 })
-      .at(T.ignite)
-      .to({ scale }, over, ease.out)
-      .at(T.ignite)
-      .to({ opacity: 1 }, 0.05)
-      .to({ opacity: 0 }, over - 0.05, ease.out);
+      .to({ scale }, span(T.ignite, over), ease.out)
+      .to({ opacity: 1 }, span(T.ignite, 0.05))
+      .to({ opacity: 0 }, span(T.ignite, 0.05).next(over - 0.05), ease.out);
 
   return (
     <g fill="none" stroke={C.white}>

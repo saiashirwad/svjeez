@@ -247,3 +247,104 @@ Smaller breaking changes, in the order a typecheck will find them.
 - `@svjeez/svelte`: `editor(text, options)` is `new SceneEditor(text, options)`. The `Options` type of `@svjeez/react` and `@svjeez/svelte` is `EditorOptions`, defined in `@svjeez/live`.
 - New exports, for typing what functions return: `FlowResult`, `TerminalResult`, `RevealResult`, `TypewriterResult`, `AppWindowResult`, `MorphResult`, `AdaptiveResult`, `VariablesResult`, `Shown`, `Heading` and `Travel`.
 - These now throw: NaN or infinite `number`, `count` and `seconds` values and bounds; non-integer `count` bounds; duplicate `choice` options; a `color()` that is not hex; a `shake` or `wiggle` `rate` that is not positive; `restyle` `at` or `onceAt` below 0 or not finite; a non-finite `valuesAt` `duration`; `<Camera>` with no stops; `fx.boil` with a `seed` that is not a whole number of 1 or more or a `rate` that is not positive; `fx.grayscale` outside 0 to 1; `readingTime` with a non-positive `wps`. `recipes` and `sampled` say `needs a positive over` where they said `positive duration`.
+
+## From 0.7 to the next release
+
+### Time is spans, and motions have no cursor
+
+A span is the one way to say when. A motion step is placed by a span or a time, never by a cursor: `.at()` and `.wait()` are gone, `.to(values, span, ease?)` takes a span and nothing else, and `.set(values, at)` takes the time of the cut. Every old form is a type error, and in plain JavaScript a runtime error that says what to write. Search the project for each identifier below, rewrite, then run the typecheck until it is clean.
+
+- `.at(t).to(values, d, ease)` is `.to(values, span(t, d), ease)`. Search `.at(`. Where both numbers come from one span, `.at(s.at).to(values, s.over, ease)` is `.to(values, s, ease)`; where the length is an end minus a start, `.at(a).to(values, b - a, ease)` is `.to(values, span(a).until(b), ease)`.
+- `.at(t).set(values)` is `.set(values, t)`. A `.set(values)` with no `.at` before it cut at the end of the step before it: write that span's `.end`, as in `.to(v, s).set(w, s.end)`, or `0` when it came first.
+- A `.to(values, d)` with a number and no `.at` right before it started where the step before it ended. Search `.to(` whose second argument is a number or a length variable. After `.to(v, s)` it is `.to(values, s.next(d))`; first in the chain it is `.to(values, span(0, d))`. A run of them is `chain(first, ...lengths)`, new in `svjeez`, which returns `first` and one span per length, end to end: `.at(0.1).to(a, 0.3).to(b, 0.12).to(c, 0.25)` is `const [crouch, launch, rise] = chain(span(0.1, 0.3), 0.12, 0.25)` and `.to(a, crouch).to(b, launch).to(c, rise)`.
+- `.wait(w)` between two steps is the gap of the next span: `.to(a, s).wait(w).to(b, d)` is `.to(a, s).to(b, s.next(d, w))`. A `.wait` before `.set` adds to the time: `.to(a, s).wait(w).set(b)` is `.set(b, s.end + w)`.
+- A step built in a loop or a `reduce` that leaned on the cursor (`m = m.to(v, d)` with no `.at`) needs its spans made first: `chain(span(start, d1), d2, …)` when the lengths differ, or `stagger(span(start, d), n, d)` when they are equal. `chain` adds one length at a time as the cursor did, so the keyframes come out the same to the last digit; `stagger` multiplies, which can move a keyframe percentage in its last printed digit.
+- Steps may be written in any order; each lane plays them in time order. Two steps that move one lane at once still throw `Two transitions move …`.
+- `.repeat()` repeats the passage from the earliest step's start to the latest step's end. A trailing `.wait(w)` before `.repeat()` used to add a pause to every pass; there is no way to say that now, so the passes run back to back. Make the pause part of the passage with a step that holds a value, `.to(last, s.next(w))`, which costs a key per pass.
+- `MotionData.cursor` is gone, for code that read a motion's data.
+- `beats()` is gone. Use `stagger(first, count, step)` from `svjeez`, which returns `count` spans as long as `first`, each `step` after the one before. Where the code turned the times into spans, drop that step: `beats(1, n, 0.2).map((at) => ({ at, over: 0.5 }))` is `stagger(span(1, 0.5), n, 0.2)`. The `Beats` type stays, as what `reveal` and the diagrams' `play` take.
+- Write stagger arithmetic as spans. Search `i * ` inside `at:` and `span(`: `items.map((item, i) => enter({ at: 1 + i * 0.08, over: 0.5 }))` is `const cascade = stagger(span(1, 0.5), items.length, 0.08)` and `items.map((item, i) => enter(cascade[i]!))`. A per-glyph or per-path callback is covered in the next section.
+- Spans have `.until(end)` (same start, ends at `end`), `.first(over)` (starts with it) and `.last(over)` (ends with it). `{ at: a, over: b - a }` is `span(a).until(b)`, and `{ at: s.at + s.over - f, over: f }` is `s.last(f)`.
+- `sequence().message(i).span` is a `Spanned`, so `.next()` and `.end` work on it.
+- `@svjeez/live` reads both numbers of `span(at, over)`, the lengths given to `.next`, `.until`, `.first`, `.last` and `chain`, and the time of a `.set`, as seconds. A key that named the length of `.to(values, 0.5)`, `default:to.1`, is now the `over` of the span there, `default:span.1`.
+
+A scene rewritten this way renders the same keyframes. A scene that still uses `.at`, `.wait`, `.to` with a number, `.set` with one argument or `beats` fails to typecheck.
+
+### Per-glyph and per-path callbacks take `each`
+
+`<Glyphs animation={fn}>` and `<Icon animation={fn}>` call `fn(piece, each)` where they used to call `fn(piece, index)`. `each` is `{ index, count, stagger(first, step) }` (type `Each`), so a cascade needs no arithmetic and no count. Search `<Glyphs` and `<Icon` for an `animation` that is a function:
+
+- `(glyph, i) => draw({ at: i * 0.1, over: 1 })` is `(glyph, each) => draw(each.stagger(span(0, 1), 0.1))`.
+- A callback that only needs the number is `(glyph, { index }) => …`.
+- `each.count` counts every glyph of `text`, spaces included, the same numbering `index` always had. `<Icon>` counts paths.
+
+### Seeded random and text fitting are in the library
+
+- `random(seed)` from `svjeez` is the one seeded generator (mulberry32 for a whole number, hashed for a string). Delete a scene's own copy and import it. A hand-rolled Lehmer generator (`seed * 16807 % 2147483647`) gives different numbers than `random(seed)`; scatters built from one move when switched, so re-check the picture.
+- `fitText(font, text, { width, max, min?, tail? })` returns the largest whole-pixel size, at most `max`, at which every line fits in `width`. `text` is a line or an array of lines, and `tail` is ems of extra room after the last line. Replace `while (font.measure(text, size) > width) size -= 2` loops with it; the result is exact to the pixel, not to a step of 2.
+- `<Arrow>` takes `width` (stroke, default 1.5) and `head` (barb length, default 8). Replace a hand-built arrowhead made with `Math.atan2` by `<Arrow from to bend width head show />`.
+
+### Params make a scene a template
+
+`svjeez/params` gains `text(value, { maxLength? })`, `list(item, value, { min?, max? })` and `parse(schema, json)`, and every CLI command takes `--params data.json` and `--param key=value` (see `references/params.md`).
+
+- `Param` is now `ScalarParam | ListParam`, and `ScalarParam` includes `TextParam`. Search `.kind` on a `Param` or a schema entry (`switch (p.kind)`, `p.kind === "choice"`): handle `"text"` (a string value) and `"list"` (an array of items, `p.item` the item schema), or skip them. Code that typed `Param["value"]` as a scalar now also sees `readonly ItemValue[]`.
+- A scene module that exports `params` is now called with `defaults(params)` by the CLI, where it was called with nothing. A default export written `(p = defaults(params)) => …` renders the same. One that ignores its argument is unaffected.
+- `packages/svjeez/scripts/preview.ts` is gone; the preview ships as `svjeez dev <file>`, and `bun run dev <file>` in `packages/svjeez/` and `examples/` runs it. Search `scripts/preview.ts` in scripts and replace `bun run scripts/preview.ts <file>` with `bun run src/cli.ts dev <file>`. It keeps the build in memory and writes `--out` only when given, so nothing lands in `.preview/`. `PORT` still works; `--port` is the flag, and a busy port moves to the next free one, so read the printed URL.
+
+### Drawn results have parts
+
+Every package that lays out at compile time now returns the same shape, `Drawn` from `svjeez`: `node`, `span`, `bounds`, `parts` and `part(id)`. A `Part` has `id`, `box` (a `Rect`) and `span`, when it plays. The old accessors for the same things are gone. Search each identifier below and run the typecheck after; every one is a type error.
+
+- `@svjeez/charts`: `bars().bars` is `bars().parts`, and a bar's `key` is `id` and its `bounds` is `box`: `bars.bars.map((b) => b.bounds)` is `bars.parts.map((b) => b.box)`, and `bars.part("Q3")` finds one. `line().points` and `area().points` are gone; the points are `parts`, each with `point`, so `line.points` is `line.parts.map((p) => p.point)`. `ChartPoint` is the new type.
+- `@svjeez/geo`: `map.regions` is `map.parts`, `map.region(key)` is `map.part(key)`, and a region's `bounds` is `box` (`map.bounds(region)` stays). `reproject()` renames the same way: `.regions` is `.parts`, `.region(key)` is `.part(key)`. `cartogram().bubbles` and `toBars().bars` are `.parts`, and a geo bar's `rect` is `box`. `choropleth()` now also returns `span`, `bounds`, `parts` (the regions `values` names) and `part(key)`.
+- `@svjeez/math`: `tex().get(id)` is `tex().part(id).box`, and `tex().find(text, nth)` returns a part, so add `.box` where it was used as a `Rect`. `tex().write(span)` returns a `TexDrawn`, not a node: `{f.write(s)}` is `{f.write(s).node}`. Search `.write(` on formulas; a JSX child that is an object fails to typecheck.
+- `@svjeez/diagrams` and `@svjeez/mermaid`: `diagram.get(id)` is `diagram.part(id).box`. Search `.get(` on anything a diagram or `mermaid()` returned; `chart.get("a").top` is `chart.part("a").box.top`. The `PlayedDiagram` type is gone: `Diagram<Id>` has `span` now, and so does `stateMachine()`, the instant 0.
+
+New, nothing to migrate: each part has a real `span`. A bar's is its staggered window, a line point's starts when the stroke reaches it, a choropleth region's runs from the first span that changes its color to the end of the last, a written formula's part is when its glyphs write, and a diagram node's is when it pops in (the instant 0 for one there from the start). Place a callout after one lands with `enter(chart.part("q3").span.next(0.4))`. `flowchart()` and `tree()` also take a time per node id, `play: { at: { plan: 0.5, build: 1.4 } }`, besides a start or a list; the nodes it leaves out are there from the start.
+
+Nothing renders differently.
+
+### JSX takes a `Drawn` as a child, and more results are one
+
+A `Drawn` goes into JSX as it is: `{bars}` draws `bars.node`, in JSX, in `jsx()` and as `render()`'s content. `.node` stays, so nothing has to change for this, but drop it where a chart, diagram, formula or map is placed as a child: search `.node}` and `.node,` and remove `.node` wherever the value came from `@svjeez/charts`, `diagrams`, `math`, `geo` or `mermaid` (including `tex().write(…).node`). Leave it on `flow()`, `appWindow()`, `code()`, `terminal()`, `typewriter()`, `morph()`, `legend()`, `epicycles()` and `chart()` itself, which are not a `Drawn`; inside `<g>` the typecheck says so, but fragment children are not checked.
+
+These now return a `Drawn` too. Search each identifier and run the typecheck after:
+
+- `@svjeez/diagrams` and `@svjeez/mermaid`: edges are parts, by `"from->to"`. `flowchart()`'s and `stateMachine()`'s edges come after the nodes (and groups) in `parts`, and a tree's edges are `"parent->child"`. Code that assumed `parts` held only nodes (`parts.length`, `parts.map` into node boxes) now sees the edges: filter with `!p.id.includes("->")`, or use the node ids you have. `Flowchart<N, G>` takes the edge ids as a third type parameter and `Tree<N>` and `StateMachine<S>` as a second, each with a default, so annotations keep compiling. A cast through `Parameters<typeof stateMachine<…>>` needs the transitions type as a second argument: `typeof stateMachine<Record<string, StateSpec>, readonly StateTransition<string>[]>`.
+- `walk()` is a `Drawn` whose parts are its legs, by `"from->to"`, each spanning when the token is on it. `node`, `span` and `spans` are unchanged.
+- `@svjeez/math` `derive()`: `lines` is gone. Its parts are the lines, by their TeX, each with `box` (was `lines[i].bounds`), `span` and `tex` (the aligned `tex()` that `lines[i]` was). `d.lines[i]` is `d.parts[i]!.tex`, and `d.lines.map((l) => l.bounds)` is `d.parts.map((p) => p.box)`.
+- `plot(f, { animation: draw(s) })` is `plot(s, f)`: search `.plot(` with `animation`. The `animation` option is gone, since the span is how the plot knows when it plays; a plot with any other motion goes in a `<g animation={…}>`. `plot()`, `vector()`, `basis()`, `polygon()`, `line()` and `label()` on a plane return a `Drawn` (`PlaneDrawn`), not an `SvgNode`: in JSX nothing changes, but code that typed one as `SvgNode` or passed it where a node is required takes `.node`. `basis()` has the parts `"i"` and `"j"`. `PlotOptions` is `SampleOptions`.
+- `construct()` is a `Drawn`: add nothing, but `g.parts`, `g.part(id)` and `g.bounds` exist. What `point()`, `segment()`, `line()`, `circle()`, `intersect()` and the bisectors return are its parts, with `id`, `box` and `span`. The plain `{ kind: "point", x, y }` type is now `ConstructSpot`; a `ConstructPoint` is a drawn point. Code that built a `ConstructPoint`, `ConstructLine` or `ConstructCircle` literal by hand to pass in takes `ConstructSpot` (points), or builds the line or circle with the builder.
+- `@svjeez/geo` `traffic()`: a `Drawn` whose parts are the routes, by a line's new `id` or its index as a string. `node`, `count` and `span` are unchanged. `globe()` gains `parts`, `part(key)` and `bounds`, the regions as `project()` gives them, each with `path()` for its turning outline; it draws nothing of its own, so it has no `node` and is not a `Drawn`.
+
+Nothing renders differently.
+
+### Text params have a control in the editor
+
+`@svjeez/live`'s `Value` gains `{ kind: "text", maxLength? }`, and `Settable` gains `text: string`, for a `text()` param declared in `export const params`. `@svjeez/react` and `@svjeez/svelte` draw it as `input.sj-text`; a `set` message with a string writes the new text into the file. Search `switch (value.kind)`, `value.kind ===` and `Value["kind"]` over editor values in your own controls: add a `"text"` case (an exhaustive switch or a `Record<Value["kind"], …>` is now a type error), or skip it. A list's strings stay data, edited in the source.
+
+### `traffic()` takes a whole-number seed
+
+`traffic({ seed })` in `@svjeez/geo` now draws from `random(seed)`, the library's one generator. Whole-number seeds give the same picture as before; a fractional seed used to be truncated silently and now throws `random() needs a whole number or a string seed`. Pass `Math.trunc(seed)`, or a string.
+
+### Editor value keys name what holds the literal
+
+`@svjeez/live` keys a literal that is neither a param nor inside a top-level const by what holds it, where it used to number it within its declaration. `default#0` for `<circle cx={40}>` is now `default:circle.cx`, `at` inside `enter({ at: 1.2 })` is `default:enter.0.at`, the `over` in `.to(values, span(1, 0.5))` is `default:span.1`, and a local `const r = 5` is `default:r`. A second literal held the same way gets `#1`. Only a literal nothing nameable holds (a ternary's branch, a returned number) keeps the `default#N` form, numbered among those alone. `params.*` and top-level paths such as `legs.1.over` are unchanged.
+
+Search the project for `#` followed by a digit inside quotes next to `key`: in `editor.send({ type: "set", key: … })`, `select` messages, `state.grips[…]`, `valueOf(state, …)`, and any saved selection or test. Replace each with the key `svjeez values <scene>` now prints for that literal, or look the key up by its literal instead of writing it, as in `state.values.find((v) => v.literal.text === "40")!.key`. Keys read from `state.values` at run time need nothing.
+
+New, nothing to migrate: `svjeez values <scene>` lists those keys with each value's kind, value, range and `file:line:column`, and `svjeez set <scene> key=value …` writes values into the file the way the editor does (see `references/edit.md`). Both need `@svjeez/live` installed. `editFor(value, v)` from `@svjeez/live` is the edit a `set` message makes.
+
+### `@svjeez/dom`: keys pair page-wide, and a recording draws once what doesn't change
+
+A `data-key` now names one element across the whole snapshot, not among its siblings. Most recordings need nothing; search for these:
+
+- A key used by elements in different parents that are not the same thing (a `data-key="title"` in every card, say) used to pair only within each parent. It still does when the key appears more than once in a state. A key that appears once in each of two states and moves to another parent now slides there instead of fading; if that is wrong for the element, drop its `data-key` or make it unique to what it names.
+- Markup arranged to keep moving elements siblings (cards placed in one CSS grid by `gridColumn` and `gridRow` so a card that changes column keeps its element) can go back to its natural structure, each element inside its own parent. Rebuild the recording and look at the frames.
+- `<Dom states>` no longer draws one `<g>` per transition. What a run of transitions draws the same is written once and shown across them, and a box that only moves is one group with one motion. Code or tests that read the drawn tree (counting groups, or expecting each transition's drawing under its own `<g>`) must look for the elements themselves. The picture is the same at every time, and it never runs more animations per frame than before.
+- A box whose content is replaced whole (nothing in it pairs) now hands over: the new content fades in while the old fades out, where the old used to be gone before the new came. Tests that read opacities at the middle of such a transition see both.
+- `Action` has a new member, `{ pointer: { to?, at?, steps?, button? } }`, which `drag()` writes. A `switch` over `Action` keys that must be exhaustive needs a `"pointer"` case.
+- A given font loaded with `{ ligatures: false }` only to make it cut down no longer needs it: a proportional face in which no ligature forms in the drawn text embeds only its drawn glyphs. Search `ligatures: false` next to fonts passed to `recordings()`, `browser()` or `<Dom fonts>` and remove it. Keep it on a monospaced coding font.
+
+New, nothing to migrate: `drag(from, to, options?)` presses the real mouse on one target, moves onto another and lets go, with snaps between. A demo that wrote `{ act: async (page: Page) => { ...page.mouse... } }` for a drag becomes `...drag("card-42", "lane-done", { carried: snap("carried"), dropped: snap("dropped") })`, and its `import type { Page } from "playwright-core"` goes. `@svjeez/dom/react` and `@svjeez/dom/svelte` now export `act`, `drag` and the instruction types, so a demo imports them from there.

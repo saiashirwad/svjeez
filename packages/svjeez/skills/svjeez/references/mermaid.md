@@ -28,7 +28,7 @@ const trip = flow(chart.route("push", "ship"), { at: 3, speed: 160, style: "trac
 ```
 
 - `mermaid(text, options)` takes svjeez's own options: `theme`, `font`, `fontSize`, `x`, `y`, `anchor`, `class`, `tints`, `direction` (flowcharts and state diagrams) and `play` (flowcharts and sequence diagrams). Each kind reads the ones it knows. `direction` in the options beats the text.
-- It returns the svjeez diagram plus `kind` (`"flowchart"`, `"sequence"` or `"state"`) and `doc`. Narrow on `kind` to get `layers`, `route()` and `edge()` on a flowchart, `message(i)` on a sequence diagram, and `walk()` on a state diagram. Ids are the Mermaid ids, as plain strings, so there is no compile-time check on them.
+- It returns the svjeez diagram, with `span`, `bounds`, `parts` and `part(id)` whatever the kind (a flowchart's edges and a state diagram's transitions are parts too, by `"A->B"`), plus `kind` (`"flowchart"`, `"sequence"` or `"state"`) and `doc`. Narrow on `kind` to get `layers`, `route()` and `edge()` on a flowchart, `message(i)` on a sequence diagram, and `walk()` on a state diagram. Ids are the Mermaid ids, as plain strings, so there is no compile-time check on them.
 - `parseMermaid(text)` returns the plain model (`FlowchartDoc`, `SequenceDoc` or `StateDoc`, told apart by `kind`) without importing svjeez.
 
 ## What it reads

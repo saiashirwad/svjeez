@@ -10,24 +10,21 @@ import {
   type Hex,
   type SvgNode,
   morph,
+  span,
 } from "svjeez";
 import { polylinePath } from "svjeez/geometry";
 
 import type { Outline } from "./outline";
 
-/** What one compile draws: the first `n` circles of a drawing's Fourier series, and the formula it morphs from. */
 export interface Frame {
   readonly outline: Outline;
   readonly n: number;
-  /** The formula on screen before this file: its drawing and count. The same outline object when only the count changed. */
   readonly before: { readonly outline: Outline; readonly n: number };
-  /** Circles from this index on are new in this file and pop in. */
   readonly freshFrom: number;
   /** Seconds the pen takes to go once around. */
   readonly loop: number;
 }
 
-/** Terms written out in the formula; the rest hide behind a ⋯. */
 const SHOWN = 10;
 
 const W = 960;
@@ -39,10 +36,8 @@ const CX = 300;
 const CY = 270;
 const STEPS = 720;
 
-/** Points the series is taken from, evenly around the drawing. */
 const SAMPLES = 512;
 
-/** Where the spectrum's zero frequency sits on its axis. */
 const SX = 770;
 const SY = 500;
 
@@ -107,7 +102,6 @@ const formula = (terms: readonly FourierTerm[], count: number) => {
   return `\\begin{aligned}z(t)&=\\sum_{n=1}^{${count}}c_n\\,e^{ik_nt}\\\\${rows.join("\\\\")}\\end{aligned}`;
 };
 
-/** The circles, each spinning on the tip of the last, the pen they steer, the sum, and the spectrum. */
 export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string => {
   const series = fourier(outline, { samples: SAMPLES });
   const terms = series.terms.slice(0, n);
@@ -154,7 +148,6 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
     { step: D / 240, tolerance: { draw: 0.001 } },
   );
 
-  /** Each circle turns relative to the one it rides, so its own arm points at its true angle. */
   const chain = terms.reduceRight<SvgNode | undefined>((inner, { k, r, phase }, i) => {
     const ride = i ? terms[i - 1]! : undefined;
 
@@ -172,7 +165,7 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
       <g transform={`translate(${from[0]!.toFixed(2)} ${from[1]!.toFixed(2)})`}>
         <g
           style={{ transformOrigin: "0 0", transformBox: "view-box" }}
-          animation={motion({ rotate: 0 }).to({ rotate: -360 * turns }, D, ease.linear)}
+          animation={motion({ rotate: 0 }).to({ rotate: -360 * turns }, span(0, D), ease.linear)}
         >
           {big && (
             <Once
@@ -213,7 +206,6 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
   const now = tex(formula(terms, terms.length), at);
   const swap = morph([was, now], { at: [0.05], over: 0.55 });
 
-  /** One bar per circle at its frequency, height by radius, frequencies squeezed by a square root. */
   const biggest = terms[0]!.r;
 
   const bars = terms.map(({ k, r }, i) => {
@@ -274,8 +266,8 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
       <Once>{swap.node}</Once>
       <line x1={606} x2={934} y1={SY + 0.5} y2={SY + 0.5} stroke="#ffffff" strokeOpacity={0.18} />
       {bars}
-      {zero.node}
-      {kLabel.node}
+      {zero}
+      {kLabel}
     </>,
   );
 };
