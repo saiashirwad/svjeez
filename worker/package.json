@@ -25,14 +25,12 @@
     "d3-array": "3.2.4",
     "d3-geo": "^3.1.1",
     "effect": "^4.1.4",
-    "fastest-levenshtein": "^1.0.16",
     "hono": "^4.13.19",
     "mathjs": "15.2.0",
     "svjeez": "workspace:*",
     "world-atlas": "^2.0.2"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261115.1",
     "@types/bun": "latest",
     "@types/d3-array": "^3.2.2",
     "@types/d3-geo": "^3.1.1",

@@ -1,0 +1,3 @@
+[test]
+# Gives the tests that import src/ the module the build otherwise writes in.
+preload = ["./test/library.ts"]

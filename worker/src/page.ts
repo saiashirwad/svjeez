@@ -118,7 +118,6 @@ export const page = (entries: readonly Entry[], build: string) => html`<!doctype
 </head>
 <body>
 <h1>svjeez scenes</h1>
-<p class="lead"><a href="/new">Build a deck by conversation</a>: describe a presentation and watch an agent add, check and fix its slides. Needs an invitation code.</p>
 <form action="/generate" method="get">
   <fieldset>
     <legend>Template</legend>

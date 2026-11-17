@@ -7,6 +7,9 @@ site/.alchemy
 worker/dist
 worker/.alchemy
 worker/.env
+agent/dist
+agent/.alchemy
+agent/.env
 packages/svjeez/README.md
 packages/svjeez/LICENSE
 packages/vite/test/.scratch-*

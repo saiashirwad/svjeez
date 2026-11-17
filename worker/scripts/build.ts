@@ -9,8 +9,6 @@ const result = await Bun.build({
   target: "browser",
   format: "esm",
   conditions: ["@svjeez/source"],
-  // The Workers runtime provides it; the Session class extends its DurableObject.
-  external: ["cloudflare:workers"],
   minify: true,
   // A deploy starts a new cache, so the last build's responses are not served for this one.
   define: { BUILD: JSON.stringify(Date.now().toString(36)) },

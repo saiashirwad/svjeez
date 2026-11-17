@@ -5,7 +5,8 @@
     "packages/*",
     "examples",
     "site",
-    "worker"
+    "worker",
+    "agent"
   ],
   "type": "module",
   "scripts": {

@@ -5,12 +5,8 @@ import { defaults, fromEntries, jsonSchema } from "svjeez/params";
 
 import type { WorkerEnv } from "../alchemy.run.ts";
 import { fill, TRIES, Unfit } from "./ai";
-import { admit, enter, gatePage } from "./gate";
 import { page } from "./page";
 import { draw, isName, load, names, type Name, type Scene } from "./scenes";
-import { studio } from "./studio";
-
-export { Session } from "./session";
 
 /** Either binding may be missing: a deploy without the key, or a test with neither. */
 type App = { Bindings: Partial<WorkerEnv> };
@@ -19,7 +15,6 @@ type App = { Bindings: Partial<WorkerEnv> };
 declare const BUILD: string;
 
 const PROMPT_LIMIT = 600;
-const MESSAGE_LIMIT = 2000;
 
 const nameOf = (c: Context<App>, extension: string) =>
   c.req.param("file")?.slice(0, -extension.length) ?? "";
@@ -39,28 +34,6 @@ const queried = (name: Name, scene: Scene, query: URLSearchParams) => {
   }
 };
 
-/** The request's invitation code, or the gate's answer thrown: 501, or 401 for an API call. */
-const admitted = async (c: Context<App>) => {
-  const answer = await admit(c, false);
-
-  if (answer instanceof Response)
-    throw new HTTPException(answer.status === 501 ? 501 : 401, { res: answer });
-
-  return answer.code;
-};
-
-/** Throws a 429 when this address, or this invitation code, has sent too many model requests this minute. */
-const limited = async (c: Context<App>, code: string) => {
-  const ip = c.req.header("cf-connecting-ip") ?? "unknown";
-  const byAddress = (await c.env.AI_LIMIT?.limit({ key: ip }))?.success ?? true;
-  const byCode = (await c.env.CODE_LIMIT?.limit({ key: code }))?.success ?? true;
-
-  if (!byAddress || !byCode)
-    throw new HTTPException(429, {
-      message: "You have sent a lot of requests in the last minute. Wait a minute and try again.",
-    });
-};
-
 const prompted = async (name: Name, scene: Scene, prompt: string, c: Context<App>) => {
   const key = c.env.DEEPSEEK_API_KEY;
 
@@ -74,7 +47,12 @@ const prompted = async (name: Name, scene: Scene, prompt: string, c: Context<App
       message: `Your prompt is ${prompt.length} characters, and the limit is ${PROMPT_LIMIT}. Shorten it and try again.`,
     });
 
-  await limited(c, await admitted(c));
+  const ip = c.req.header("cf-connecting-ip") ?? "unknown";
+
+  if (c.env.AI_LIMIT && !(await c.env.AI_LIMIT.limit({ key: ip })).success)
+    throw new HTTPException(429, {
+      message: "You have sent a lot of prompts in the last minute. Wait a minute and try again.",
+    });
 
   try {
     return await fill(scene.params, prompt, (json) => draw(scene, json), { key });
@@ -90,76 +68,6 @@ const prompted = async (name: Name, scene: Scene, prompt: string, c: Context<App
 
 const app = new Hono<App>();
 
-app.get("/gate", (c) => c.html(gatePage(c.req.query("next") ?? "/")));
-
-app.post("/gate", (c) => enter(c));
-
-/** The session named in the path, when the deploy has the SESSIONS binding. */
-const session = (c: Context<App>, id: string) => {
-  if (!c.env.SESSIONS)
-    throw new HTTPException(501, { message: "Sessions are not set up on this server." });
-
-  return c.env.SESSIONS.getByName(id);
-};
-
-const SESSION = "[0-9a-f-]{36}";
-
-app.get("/new", async (c) => {
-  const answer = await admit(c, true);
-
-  return answer instanceof Response ? answer : c.redirect(`/s/${crypto.randomUUID()}`);
-});
-
-// Public: an id is a random UUID, so a deck's URL is as private as the person keeps it, and it can be embedded.
-app.get(`/s/:file{${SESSION}\\.svg}`, async (c) => {
-  c.header("content-type", "image/svg+xml; charset=utf-8");
-  c.header("cache-control", "no-store");
-
-  return c.body(await session(c, c.req.param("file").slice(0, -4)).svg());
-});
-
-app.get(`/s/:id{${SESSION}}`, async (c) => {
-  const answer = await admit(c, true);
-
-  return answer instanceof Response ? answer : c.html(studio(c.req.param("id")));
-});
-
-app.get(`/s/:id{${SESSION}}/state`, async (c) => {
-  await admitted(c);
-
-  return c.json(await session(c, c.req.param("id")).state());
-});
-
-app.post(`/s/:id{${SESSION}}/undo`, async (c) => {
-  await admitted(c);
-
-  const outcome = await session(c, c.req.param("id")).undo();
-
-  return outcome.status === 200 ? c.json(outcome.value) : c.text(outcome.error, outcome.status);
-});
-
-app.post(`/s/:id{${SESSION}}/message`, async (c) => {
-  await limited(c, await admitted(c));
-
-  // SAFETY: the page posts JSON; a missing or odd text reads as empty and is refused below.
-  const { text = "" } = (await c.req.json().catch(() => ({}))) as { text?: unknown };
-  const message = String(text);
-
-  if (message.length > MESSAGE_LIMIT)
-    return c.text(
-      `Your message is ${message.length} characters, and the limit is ${MESSAGE_LIMIT}.`,
-      400,
-    );
-
-  const outcome = await session(c, c.req.param("id")).message(message);
-
-  if (outcome.status !== 200) return c.text(outcome.error, outcome.status);
-
-  return new Response(outcome.value, {
-    headers: { "content-type": "application/x-ndjson; charset=utf-8", "cache-control": "no-store" },
-  });
-});
-
 app.get("/", async (c) =>
   c.html(
     page(
@@ -169,11 +77,7 @@ app.get("/", async (c) =>
   ),
 );
 
-app.get("/generate", async (c) => {
-  const answer = await admit(c, true);
-
-  if (answer instanceof Response) return answer;
-
+app.get("/generate", (c) => {
   const template = c.req.query("template") ?? "";
 
   if (!isName(template)) return c.text(unknown(template), 404);
