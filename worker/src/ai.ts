@@ -21,7 +21,7 @@ const reason = (error: NoObjectGeneratedError): string =>
     : error.message;
 
 /** `value` when it names every param, so the model writes the whole scene and never leans on a default. */
-const complete = (schema: Schema, value: Json): Json => {
+export const complete = (schema: Schema, value: Json): Json => {
   const given = Object.keys(value ?? {});
   const missing = Object.keys(schema).filter((key) => !given.includes(key));
 

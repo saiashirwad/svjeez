@@ -1,6 +1,7 @@
 import { arc, choropleth, legend, palettes, project, sequential } from "@svjeez/geo";
 import { geoArea, geoCircle } from "d3-geo";
-import { def, draw, enter, render, span, stagger, type Span } from "svjeez";
+import { distance } from "fastest-levenshtein";
+import { def, draw, enter, render, span, stagger, type Drawn, type Span } from "svjeez";
 import { rect, type Rect } from "svjeez/geometry";
 import { defaults, list, number, text, type Values } from "svjeez/params";
 import world from "world-atlas/countries-110m.json";
@@ -16,6 +17,7 @@ import {
   leave,
   theme,
 } from "../../../examples/gallery-style";
+import { block } from "../block";
 
 const atlas = world;
 
@@ -48,7 +50,7 @@ export const params = {
     {
       max: 60,
       label:
-        "Countries to highlight or shade, 0 to 60. The map zooms to them and the markers; with none and no markers it shows the world.",
+        "Countries to highlight or shade, 0 to 60. The map zooms to them and the markers, so list only the countries the map is about: one large country such as Russia or the United States of America zooms it out to most of the world. With none and no markers it shows the world.",
     },
   ),
   markers: list(
@@ -90,7 +92,7 @@ const LABEL = { size: 13, height: 16 };
 const base = project(atlas, { frame: AREA });
 const NAMES = base.parts.map((part) => String(part.properties?.name ?? part.id));
 
-/** Atlas names that look like `name`: containing it, sharing its start, or sharing a word with it. */
+/** Atlas names that look like `name`: containing it, sharing its start or a word, or a few typos away. */
 const nearest = (name: string): string[] => {
   const wanted = name.toLowerCase();
   const words = wanted.split(/\W+/).filter((word) => word.length > 2);
@@ -101,7 +103,8 @@ const nearest = (name: string): string[] => {
     const score =
       (lower.includes(wanted) || wanted.includes(lower) ? 3 : 0) +
       (lower.slice(0, 3) === wanted.slice(0, 3) ? 2 : 0) +
-      words.filter((word) => lower.includes(word)).length;
+      words.filter((word) => lower.includes(word)).length +
+      (distance(lower, wanted) <= Math.max(2, wanted.length / 4) ? 3 : 0);
 
     return { candidate, score };
   });
@@ -156,12 +159,19 @@ const placeLabels = (points: readonly { x: number; y: number; label: string }[])
       { box: rect(x - w / 2, y + 7, w, LABEL.height), at: [x, y + 20], anchor: "middle" },
     ] as const;
 
-    const clear = (box: Rect) =>
-      placed.every(
-        (o) => box.x + box.w < o.x || o.x + o.w < box.x || box.y + box.h < o.y || o.y + o.h < box.y,
+    const overlap = (box: Rect) =>
+      placed.reduce(
+        (sum, o) =>
+          sum +
+          Math.max(0, Math.min(box.x + box.w, o.x + o.w) - Math.max(box.x, o.x)) *
+            Math.max(0, Math.min(box.y + box.h, o.y + o.h) - Math.max(box.y, o.y)),
+        0,
       );
 
-    const chosen = options.find(({ box }) => clear(box)) ?? options[0];
+    // The first side that overlaps nothing, or else the one that overlaps least.
+    const chosen = options.reduce((best, option) =>
+      overlap(option.box) < overlap(best.box) ? option : best,
+    );
 
     placed.push(chosen.box);
 
@@ -194,7 +204,12 @@ const shade = (
 const path = (points: readonly { x: number; y: number }[]) =>
   points.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("");
 
-export default function build(p: Values<typeof params> = defaults(params)): string {
+/** The map's values: everything but the heading above it. */
+export type MapValues = Omit<Values<typeof params>, "title">;
+
+/** The map filling `box` above a strip for its legend: the base map, the countries, the routes and the labelled places. */
+export const mapBlock = (p: MapValues, box: Rect): Drawn => {
+  const AREA = rect(box.x, box.y, box.w, box.h - 56);
   const features = p.countries.map(({ name }, i) => featureOf(name, i));
   const places = p.markers.map(({ lat, lon }): LonLat => [lon, lat]);
 
@@ -253,7 +268,6 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
   const pops = stagger(span(1.2, 0.4), points.length, 0.15);
   const routeAt = (pops.at(-1)?.end ?? shading.end) + 0.2;
   const drawn = stagger(span(routeAt, 1.2), lines.length, 0.4);
-  const D = Math.max(6, (drawn.at(-1)?.end ?? routeAt) + 3);
 
   // The shaded countries alone, on the same projection, so the scale's empty color fills nothing else.
   const shaded =
@@ -272,13 +286,70 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
   const key =
     shaded &&
     legend(shaded.scale, {
-      frame: rect(MARGIN, HEIGHT - 40, 320, 10),
+      frame: rect(box.x, box.y + box.h - 40, 320, 10),
       title: p.measure,
       theme,
       font: geist,
       fontSize: 12,
       color: color.dim,
     });
+
+  return block(
+    <>
+      <g
+        clipPath={def.clipPath(
+          {},
+          <rect x={AREA.x} y={AREA.y} width={AREA.w} height={AREA.h} rx={8} />,
+        )}
+      >
+        <g animation={enter(span(0.2, 0.6))}>
+          <rect x={AREA.x} y={AREA.y} width={AREA.w} height={AREA.h} rx={8} fill={color.panel} />
+          <path d={map.land} fill={color.edge} />
+          <path d={map.lines} fill="none" stroke={color.bg} strokeWidth={0.6} />
+        </g>
+        {shaded && <g animation={enter(shading)}>{shaded.drawn.node}</g>}
+        {!p.measure &&
+          p.countries.map(({ name }) => (
+            <path
+              d={map.part(name).d}
+              fill={color.accent}
+              fillOpacity={0.45}
+              animation={enter(shading)}
+            />
+          ))}
+        <g fill="none" stroke={color.series[1]} strokeWidth={2} strokeLinecap="round">
+          {lines.map((line, i) => (
+            <path d={path(line)} animation={draw(drawn[i]!)} />
+          ))}
+        </g>
+      </g>
+      {key && <g animation={enter(shading.next(0.5))}>{key.node}</g>}
+      <g fontFamily={geist} fontSize={LABEL.size} fontWeight={600} fill={color.ink}>
+        {points.map(({ x, y, label }, i) => (
+          <g animation={enter(pops[i]!, { opacity: 0, scale: 0.6 })}>
+            <circle cx={x} cy={y} r={4.5} fill={color.accent} stroke={color.bg} strokeWidth={1.5} />
+            <text
+              x={labels[i]!.at[0]}
+              y={labels[i]!.at[1]}
+              textAnchor={labels[i]!.anchor}
+              style={{ paintOrder: "stroke" }}
+              stroke={color.bg}
+              strokeWidth={3}
+            >
+              {label}
+            </text>
+          </g>
+        ))}
+      </g>
+    </>,
+    span(0.2, (drawn.at(-1)?.end ?? routeAt) - 0.2),
+    box,
+  );
+};
+
+export default function build(p: Values<typeof params> = defaults(params)): string {
+  const drawn = mapBlock(p, rect(MARGIN, 104, WIDTH - 2 * MARGIN, HEIGHT - 104));
+  const D = Math.max(6, drawn.span.end + 3);
 
   return render(
     {
@@ -294,58 +365,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
       <rect width="100%" height="100%" fill={color.bg} />
       <g animation={leave(D)}>
         <Title title={p.title} />
-        <g
-          clipPath={def.clipPath(
-            {},
-            <rect x={AREA.x} y={AREA.y} width={AREA.w} height={AREA.h} rx={8} />,
-          )}
-        >
-          <g animation={enter(span(0.2, 0.6))}>
-            <rect x={AREA.x} y={AREA.y} width={AREA.w} height={AREA.h} rx={8} fill={color.panel} />
-            <path d={map.land} fill={color.edge} />
-            <path d={map.lines} fill="none" stroke={color.bg} strokeWidth={0.6} />
-          </g>
-          {shaded && <g animation={enter(shading)}>{shaded.drawn.node}</g>}
-          {!p.measure &&
-            p.countries.map(({ name }) => (
-              <path
-                d={map.part(name).d}
-                fill={color.accent}
-                fillOpacity={0.45}
-                animation={enter(shading)}
-              />
-            ))}
-          <g fill="none" stroke={color.series[1]} strokeWidth={2} strokeLinecap="round">
-            {lines.map((line, i) => (
-              <path d={path(line)} animation={draw(drawn[i]!)} />
-            ))}
-          </g>
-        </g>
-        {key && <g animation={enter(shading.next(0.5))}>{key.node}</g>}
-        <g fontFamily={geist} fontSize={LABEL.size} fontWeight={600} fill={color.ink}>
-          {points.map(({ x, y, label }, i) => (
-            <g animation={enter(pops[i]!, { opacity: 0, scale: 0.6 })}>
-              <circle
-                cx={x}
-                cy={y}
-                r={4.5}
-                fill={color.accent}
-                stroke={color.bg}
-                strokeWidth={1.5}
-              />
-              <text
-                x={labels[i]!.at[0]}
-                y={labels[i]!.at[1]}
-                textAnchor={labels[i]!.anchor}
-                style={{ paintOrder: "stroke" }}
-                stroke={color.bg}
-                strokeWidth={3}
-              >
-                {label}
-              </text>
-            </g>
-          ))}
-        </g>
+        {drawn.node}
       </g>
     </>,
   );

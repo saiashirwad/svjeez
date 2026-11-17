@@ -1,30 +1,9 @@
-import { Clip, render, show, span, type Drawn } from "svjeez";
-import { rect, type Rect } from "svjeez/geometry";
-import { choice, defaults, list, parse, text, type Json, type Values } from "svjeez/params";
+import { choice, defaults, list, text, type Json, type Values } from "svjeez/params";
 
-import {
-  HEIGHT,
-  MARGIN,
-  WIDTH,
-  TITLE,
-  color,
-  css,
-  geist,
-  motions,
-  rise,
-} from "../../../examples/gallery-style";
-import { block, fitSize } from "../block";
-import { cardBlock, params as cardParams } from "./card";
-import { chartBlock, params as chartParams } from "./chart";
-import { codeBlock, LANGUAGES, params as codeParams } from "./code";
-import { diagramBlock, params as diagramParams } from "./diagram";
-import { mathBlock, params as mathParams } from "./math";
-import { plotBlock, params as plotParams } from "./plot";
-import { terminalBlock, params as terminalParams } from "./terminal";
+import { place, renderSlides } from "../slides";
+import { LANGUAGES } from "./code";
 
 const KINDS = ["title", "bullets", "code", "diagram", "chart", "math", "plot", "terminal"] as const;
-
-type Kind = (typeof KINDS)[number];
 
 export const params = {
   slides: list(
@@ -87,14 +66,6 @@ export const params = {
 
 type Slide = Values<typeof params>["slides"][number];
 
-const BODY = rect(MARGIN, 124, WIDTH - 2 * MARGIN, HEIGHT - 124 - 64);
-const FULL = rect(MARGIN, MARGIN, WIDTH - 2 * MARGIN, HEIGHT - 2 * MARGIN - 24);
-const HOLD = 2.5;
-const FADE = 0.4;
-
-/** Below this a slide's text gets too small to read. */
-const SMALLEST = 0.65;
-
 const lines = (body: string) =>
   body
     .split("\n")
@@ -103,7 +74,7 @@ const lines = (body: string) =>
 
 const CHART = /^(.+?):\s*(-?\d[\d,]*(?:\.\d+)?)$/;
 
-const chartOf = (body: string): Json => {
+const chartOf = (body: string) => {
   const rows = lines(body);
   const kind = ["bar", "line", "area"].includes(rows[0] ?? "") ? rows.shift()! : "bar";
 
@@ -121,7 +92,7 @@ const chartOf = (body: string): Json => {
   return { kind, series: "", compare: "", data };
 };
 
-const plotOf = (heading: string, body: string): Json => {
+const plotOf = (body: string) => {
   const [first = "", tex = ""] = lines(body);
   const [kind = "", expression = "", y = ""] = first.split(";").map((part) => part.trim());
 
@@ -130,191 +101,55 @@ const plotOf = (heading: string, body: string): Json => {
       `the first line "${first}" is not "kind; expression". Write such as "function; sin(x)/x" or "parametric; 16*sin(t)^3; 13*cos(t)".`,
     );
 
-  return { title: heading, tex, kind, expression, y };
+  return { tex, kind, expression, y };
 };
 
-const terminalOf = (body: string): Json => ({
-  title: "",
-  lines: lines(body).map((row) =>
-    row.startsWith("$ ") ? { kind: "command", text: row.slice(2) } : { kind: "output", text: row },
-  ),
-});
-
-/** The title slide: the heading large and centered with a line under it, both set smaller when they are long. */
-const titleOf = (heading: string, subtitle: string, box: Rect): Drawn => {
-  const big = fitSize(geist.face(600), [heading], 52, box.w, 28);
-  const small = fitSize(geist.face(400), [subtitle], 24, box.w, 16);
-
-  if (big === undefined || small === undefined)
-    throw new Error(
-      `the ${big === undefined ? "heading" : "line under it"} is too long to fit; keep the heading to about 45 characters and the line to about 90.`,
-    );
-
-  return block(
-    <g animation={rise(0.2)}>
-      <text
-        x={WIDTH / 2}
-        y={HEIGHT / 2 - 10}
-        textAnchor="middle"
-        fontFamily={geist}
-        fontSize={big}
-        fontWeight={600}
-        fill={color.ink}
-      >
-        {heading}
-      </text>
-      <text
-        x={WIDTH / 2}
-        y={HEIGHT / 2 + 40}
-        textAnchor="middle"
-        fontFamily={geist}
-        fontSize={small}
-        fill={color.dim}
-      >
-        {subtitle}
-      </text>
-    </g>,
-    span(0.2, 0.5),
-    box,
-  );
-};
-
-/** The slide's block laid out in `box` at its own size: one way, or for a diagram both ways, to pick the larger. */
-const blocksOf = ({ kind, heading, body, language }: Slide, box: Rect): Drawn[] => {
+/** The values of the slide's kind, read from its body by the format its label describes. */
+const valuesOf = ({ kind, heading, body, language }: Slide): Json => {
   switch (kind) {
     case "title":
-      return [titleOf(heading, body.trim(), box)];
+      return { heading, subtitle: body.trim() };
     case "bullets":
-      return [cardBlock(parse(cardParams, { tag: "", title: heading, bullets: lines(body) }), box)];
+      return { heading, bullets: lines(body) };
     case "code":
-      return [codeBlock(parse(codeParams, { title: "", language, source: body }), box)];
-    case "diagram": {
-      const values = parse(diagramParams, { source: body });
-
-      return [diagramBlock(values, box, "TB"), diagramBlock(values, box, "LR")];
-    }
-
+      return { heading, language, source: body };
+    case "diagram":
+      return { heading, source: body };
     case "chart":
-      return [chartBlock(parse(chartParams, chartOf(body)), box)];
+      return { heading, ...chartOf(body) };
     case "math":
-      return [mathBlock(parse(mathParams, { title: heading, steps: lines(body) }).steps, box)];
+      return { heading, steps: lines(body) };
     case "plot":
-      return [plotBlock(parse(plotParams, plotOf(heading, body)), box)];
+      return { heading, ...plotOf(body) };
     case "terminal":
-      return [terminalBlock(parse(terminalParams, terminalOf(body)), box)];
+      return {
+        heading,
+        lines: lines(body).map((row) =>
+          row.startsWith("$ ")
+            ? { kind: "command", text: row.slice(2) }
+            : { kind: "output", text: row },
+        ),
+      };
   }
 };
 
-const hint: Record<Kind, string> = {
-  title: "Shorten it",
-  bullets: "Use fewer or shorter points",
-  code: "Show about 15 lines or fewer, or split it across two slides",
-  diagram: "Use fewer nodes, or split it across two slides",
-  chart: "Use fewer points",
-  math: "Use fewer steps, or split them across two slides",
-  plot: "Shorten the TeX line",
-  terminal: "Show about 10 lines or fewer, or split it across two slides",
-};
-
-/** The slide drawn and scaled to fit its area; a slide that would shrink past reading size throws. */
 const slideOf = (slide: Slide, n: number) => {
-  const fills = slide.kind === "title" || slide.kind === "bullets";
-  const box = fills ? FULL : BODY;
-  let candidates: Drawn[];
+  let json: Json;
 
   try {
-    candidates = blocksOf(slide, box);
+    json = valuesOf(slide);
   } catch (error) {
     throw new Error(
       `Slide ${n} (${slide.kind}): ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
-  const scaleOf = ({ bounds }: Drawn) =>
-    Math.min(slide.kind === "diagram" ? 1.5 : 1, box.w / bounds.w, box.h / bounds.h);
-
-  const drawn = candidates.reduce((a, b) => (scaleOf(b) > scaleOf(a) ? b : a));
-  const { bounds } = drawn;
-  const scale = scaleOf(drawn);
-
-  if (scale < SMALLEST)
-    throw new Error(
-      `Slide ${n} (${slide.kind}) is too big for a slide: it would shrink to ${Math.round(scale * 100)}% and be hard to read. ${hint[slide.kind]}.`,
-    );
-
-  const x = box.x + (box.w - scale * bounds.w) / 2 - scale * bounds.x;
-  const y = box.y + (box.h - scale * bounds.h) / 2 - scale * bounds.y;
-  const duration = Math.max(4, drawn.span.end + HOLD);
-
-  return {
-    duration,
-    node: (
-      <g animation={show(span(0, duration), { fade: FADE })}>
-        {!fills && <Heading text={slide.heading} n={n} />}
-        <g transform={`translate(${x} ${y}) scale(${scale})`}>{drawn.node}</g>
-      </g>
-    ),
-  };
+  return place(slide.kind, json, n);
 };
-
-/** The slide's heading in the place and style of the gallery's titles, set smaller when it is long. */
-const Heading = ({ text: heading, n }: { text: string; n: number }) => {
-  const size = fitSize(geist.face(TITLE.weight), [heading], TITLE.size, WIDTH - 2 * MARGIN, 18);
-
-  if (size === undefined)
-    throw new Error(`Slide ${n}'s heading is too long to fit; keep it to about 60 characters.`);
-
-  return (
-    <g animation={rise(motions.lead)} fontFamily={geist}>
-      <text x={TITLE.x} y={TITLE.y} fontSize={size} fontWeight={TITLE.weight} fill={color.ink}>
-        {heading}
-      </text>
-    </g>
-  );
-};
-
-const DOT = { gap: 16, r: 4, y: HEIGHT - 28 };
 
 export default function build(p: Values<typeof params> = defaults(params)): string {
-  const slides = p.slides.map((slide, i) => slideOf(slide, i + 1));
-
-  // Each slide starts as the one before fades out, so they cross-fade.
-  const starts = slides.map((_, i) =>
-    slides.slice(0, i).reduce((sum, s) => sum + s.duration - FADE, 0),
-  );
-
-  const D = starts.at(-1)! + slides.at(-1)!.duration;
-  const dot = (i: number) => WIDTH / 2 + (i - (slides.length - 1) / 2) * DOT.gap;
-
-  return render(
-    {
-      width: WIDTH,
-      height: HEIGHT,
-      duration: D,
-      title: p.slides[0]?.heading ?? "Slides",
-      desc: `A deck of ${p.slides.length} slides: ${p.slides.map((slide) => slide.heading).join("; ")}.`,
-      reducedMotion: { at: slides[0]!.duration - FADE - 0.1 },
-      css,
-    },
-    <>
-      <rect width="100%" height="100%" fill={color.bg} />
-      {slides.map((slide, i) => (
-        <Clip at={starts[i]!} over={slide.duration}>
-          {slide.node}
-        </Clip>
-      ))}
-      {slides.map((slide, i) => (
-        <>
-          <circle cx={dot(i)} cy={DOT.y} r={DOT.r} fill={color.edge} />
-          <circle
-            cx={dot(i)}
-            cy={DOT.y}
-            r={DOT.r}
-            fill={color.accent}
-            animation={show(span(starts[i]!, slide.duration), { fade: 0.2 })}
-          />
-        </>
-      ))}
-    </>,
+  return renderSlides(
+    p.slides[0]?.heading ?? "Slides",
+    p.slides.map((slide, i) => slideOf(slide, i + 1)),
   );
 }

@@ -4,6 +4,8 @@ import { Miniflare } from "miniflare";
 import { defaults, fromEntries, jsonSchema, parse, text, type Json } from "svjeez/params";
 
 import { fill, TRIES, Unfit } from "../src/ai";
+import type { Deck } from "../src/document";
+import { renderDeck } from "../src/slides";
 import { draw, load, names, type Name } from "../src/scenes";
 
 const ROOT = join(import.meta.dir, "..");
@@ -14,21 +16,48 @@ let keyed: Miniflare;
 /** An answer that makes the stubbed DeepSeek fail as a service. */
 const DOWN = "down";
 
+/** A model answer that calls tools instead of writing text. */
+interface Calls {
+  readonly calls: readonly { readonly name: string; readonly args: Json }[];
+}
+
 /** What the stubbed DeepSeek answers next, in order, and the messages it was sent. */
-const answers: string[] = [];
+const answers: (string | Calls)[] = [];
 const asked: { readonly role: string; readonly content: string }[][] = [];
 
-const completion = (content: string) =>
+const isCalls = (answer: string | Calls): answer is Calls => typeof answer !== "string";
+
+const completion = (answer: string | Calls) =>
   Response.json({
     id: "test",
     object: "chat.completion",
     created: 0,
     model: "deepseek-v4-flash",
-    choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }],
+    choices: [
+      !isCalls(answer)
+        ? { index: 0, message: { role: "assistant", content: answer }, finish_reason: "stop" }
+        : {
+            index: 0,
+            message: {
+              role: "assistant",
+              content: null,
+              reasoning_content: "",
+              tool_calls: answer.calls.map(({ name, args }, i) => ({
+                id: `call_${asked.length}_${i}`,
+                type: "function",
+                function: { name, arguments: JSON.stringify(args) },
+              })),
+            },
+            finish_reason: "tool_calls",
+          },
+    ],
     usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
   });
 
-beforeAll(() => {
+/** The invitation cookie the keyed Worker sets for a known code. */
+let cookie = "";
+
+beforeAll(async () => {
   const build = Bun.spawnSync([process.execPath, "scripts/build.ts"], {
     cwd: ROOT,
     stderr: "pipe",
@@ -39,13 +68,18 @@ beforeAll(() => {
   const options = {
     modules: [{ type: "ESModule" as const, path: join(ROOT, "dist/worker.js") }],
     compatibilityDate: "2026-07-30",
+    durableObjects: { SESSIONS: { className: "Session", useSQLite: true } },
   };
 
   worker = new Miniflare(options);
 
   keyed = new Miniflare({
     ...options,
-    bindings: { DEEPSEEK_API_KEY: "test" },
+    bindings: {
+      DEEPSEEK_API_KEY: "test",
+      INVITE_CODES: "alpha, beta",
+      SESSION_SECRET: "test-secret",
+    },
     outboundService: async (request: Request) => {
       if (new URL(request.url).hostname !== "api.deepseek.com")
         return fetch(request.url, { headers: Object.fromEntries(request.headers) });
@@ -59,6 +93,14 @@ beforeAll(() => {
         : completion(answer);
     },
   });
+
+  const entered = await keyed.dispatchFetch("http://localhost/gate", {
+    method: "POST",
+    body: new URLSearchParams({ code: "beta", next: "/" }),
+    redirect: "manual",
+  });
+
+  cookie = (entered.headers.get("set-cookie") ?? "").split(";")[0] ?? "";
 });
 
 afterAll(() => Promise.all([worker.dispose(), keyed.dispose()]));
@@ -72,6 +114,21 @@ const failure = (run: () => void): string => {
 
   throw new Error("Expected it to throw.");
 };
+
+/** A request to the keyed Worker carrying the invitation cookie. */
+const invited = (
+  path: string,
+  init: {
+    readonly method?: string;
+    readonly body?: string;
+    readonly headers?: Record<string, string>;
+  } = {},
+) =>
+  keyed.dispatchFetch(`http://localhost${path}`, {
+    ...init,
+    headers: { ...init.headers, cookie },
+    redirect: "manual",
+  });
 
 const get = (path: string) => worker.dispatchFetch(`http://localhost${path}`);
 
@@ -289,13 +346,8 @@ describe("in workerd", () => {
     expect(await (await get("/card.svg?v=anything")).text()).toBe((await load("card")).default());
   });
 
-  test("/generate redirects to the template's prompt URL", async () => {
-    const response = await worker.dispatchFetch(
-      "http://localhost/generate?template=diagram&prompt=a%20cat",
-      {
-        redirect: "manual",
-      },
-    );
+  test("/generate, with an invitation, redirects to the template's prompt URL", async () => {
+    const response = await invited("/generate?template=diagram&prompt=a%20cat");
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/diagram.svg?prompt=a+cat");
@@ -333,9 +385,7 @@ describe("in workerd", () => {
       JSON.stringify({ tag: "v2.0.0", ...rest }),
     );
 
-    const response = await keyed.dispatchFetch(
-      "http://localhost/card.svg?prompt=a%20major%20release",
-    );
+    const response = await invited("/card.svg?prompt=a%20major%20release");
 
     expect(response.status).toBe(200);
     expect(await response.text()).toContain("v2.0.0");
@@ -349,7 +399,7 @@ describe("in workerd", () => {
     asked.length = 0;
     answers.push(JSON.stringify({ source: MERMAID_ERROR }), JSON.stringify({ source: fixed }));
 
-    const response = await keyed.dispatchFetch("http://localhost/diagram.svg?prompt=two%20boxes");
+    const response = await invited("/diagram.svg?prompt=two%20boxes");
 
     expect(response.status).toBe(200);
     expect(await response.text()).toBe(draw(scene, { source: fixed }));
@@ -368,7 +418,7 @@ describe("in workerd", () => {
     };
 
     answers.push(...Array.from({ length: TRIES }, () => JSON.stringify(answer)));
-    const response = await keyed.dispatchFetch("http://localhost/card.svg?prompt=again");
+    const response = await invited("/card.svg?prompt=again");
 
     expect(response.status).toBe(502);
     expect(await response.text()).toBe(
@@ -379,7 +429,7 @@ describe("in workerd", () => {
   test("?prompt= is a 502 that says the model could not be reached when it fails as a service", async () => {
     answers.length = 0;
     answers.push(DOWN, DOWN, DOWN);
-    const response = await keyed.dispatchFetch("http://localhost/card.svg?prompt=down");
+    const response = await invited("/card.svg?prompt=down");
     const text = await response.text();
 
     answers.length = 0;
@@ -392,9 +442,7 @@ describe("in workerd", () => {
   test("a prompt over 600 characters is a 400", async () => {
     const prompt = "a".repeat(601);
 
-    expect((await keyed.dispatchFetch(`http://localhost/card.svg?prompt=${prompt}`)).status).toBe(
-      400,
-    );
+    expect((await invited(`/card.svg?prompt=${prompt}`)).status).toBe(400);
   });
 
   test("an unknown page is a 404 naming the scenes", async () => {
@@ -409,6 +457,164 @@ describe("in workerd", () => {
 
     for (const name of names) expect(html).toContain(`src="/${name}.svg?v=`);
   }, 60_000);
+});
+
+describe("sessions", () => {
+  const add = (kind: string, values: Json) => ({
+    calls: [{ name: "add_slide", args: { kind, values } }],
+  });
+
+  const MAP = {
+    heading: "Where it happened",
+    measure: "",
+    countries: [{ name: "France", value: 0 }],
+    markers: [{ label: "Paris", lat: 48.86, lon: 2.35 }],
+    routes: [],
+  };
+
+  const TITLE = { heading: "A short history", subtitle: "Three slides" };
+  const BULLETS = { heading: "What to know", bullets: ["One", "Two"] };
+
+  /** A fresh session's id, through /new with the invitation cookie. */
+  const fresh = async () => {
+    const response = await invited("/new");
+
+    expect(response.status).toBe(302);
+
+    return (response.headers.get("location") ?? "").slice("/s/".length);
+  };
+
+  /** Sends a message and reads the turn's lines of progress to the end. */
+  const say = async (id: string, text: string) => {
+    const response = await invited(`/s/${id}/message`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+
+    expect(response.status).toBe(200);
+
+    // SAFETY: the session writes one JSON event per line.
+    return (await response.text())
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { type: string; text: string; version?: number });
+  };
+
+  // SAFETY: the state route answers with the session's state, whose deck and version these are.
+  const state = async (id: string) =>
+    (await (await invited(`/s/${id}/state`)).json()) as {
+      deck: Deck;
+      version: number;
+    };
+
+  test("a turn adds three slides, one of them a map, and its SVG is the stored deck rendered", async () => {
+    const id = await fresh();
+
+    answers.push(add("title", TITLE), add("bullets", BULLETS), add("map", MAP), {
+      calls: [{ name: "finish", args: { summary: "Three slides are ready." } }],
+    });
+
+    const events = await say(id, "Three slides about Paris");
+
+    expect(events.map((e) => e.text)).toEqual([
+      "added slide 1: title",
+      "added slide 2: bullets",
+      "added slide 3: map",
+      "Three slides are ready.",
+    ]);
+
+    const { deck } = await state(id);
+
+    expect(deck.slides.map((slide) => slide.kind)).toEqual(["title", "bullets", "map"]);
+    expect(await (await invited(`/s/${id}.svg`)).text()).toBe(renderDeck(deck));
+  }, 60_000);
+
+  test("a bad slide's error goes back to the model, and its second call fixes it", async () => {
+    const id = await fresh();
+    const wrong = { ...MAP, countries: [{ name: "Frnace", value: 0 }] };
+
+    asked.length = 0;
+    answers.push(add("map", wrong), add("map", MAP), {
+      calls: [{ name: "finish", args: { summary: "Fixed." } }],
+    });
+
+    const events = await say(id, "A map of France");
+    const reply = String(asked[1]?.at(-1)?.content);
+
+    expect(reply).toContain('is not a country in the atlas. Did you mean \\"France\\"?');
+    expect(events[0]?.text).toStartWith("Slide 1 (map): countries[0].name");
+    expect(events.map((e) => e.text).slice(1)).toEqual(["added slide 1: map", "Fixed."]);
+  }, 60_000);
+
+  test("the step limit ends a runaway turn with a plain message", async () => {
+    const id = await fresh();
+    const outline = { calls: [{ name: "outline", args: {} }] };
+
+    answers.push(...Array.from({ length: 40 }, () => outline));
+
+    const events = await say(id, "Keep looking");
+
+    expect(answers).toHaveLength(0);
+    expect(events.at(-1)?.text).toBe(
+      "I stopped after 40 steps without finishing. Send another message to continue.",
+    );
+  }, 60_000);
+
+  test("undo goes back one accepted change", async () => {
+    const id = await fresh();
+
+    answers.push(add("title", TITLE), add("bullets", BULLETS), {
+      calls: [{ name: "finish", args: { summary: "Two." } }],
+    });
+
+    await say(id, "Two slides");
+
+    const before = await state(id);
+    const undone = await invited(`/s/${id}/undo`, { method: "POST" });
+    const after = await state(id);
+
+    expect(undone.status).toBe(200);
+    expect(before.deck.slides).toHaveLength(2);
+    expect(after.deck.slides.map((slide) => slide.kind)).toEqual(["title"]);
+    expect(after.version).toBeLessThan(before.version);
+  }, 60_000);
+
+  test("the gate turns away a missing or wrong code and lets a known one in", async () => {
+    const page = await keyed.dispatchFetch("http://localhost/new", { redirect: "manual" });
+    const id = crypto.randomUUID();
+
+    const api = await keyed.dispatchFetch(`http://localhost/s/${id}/message`, {
+      method: "POST",
+      body: "{}",
+    });
+
+    const wrong = await keyed.dispatchFetch("http://localhost/gate", {
+      method: "POST",
+      body: new URLSearchParams({ code: "gamma", next: "/new" }),
+      redirect: "manual",
+    });
+
+    const right = await keyed.dispatchFetch("http://localhost/gate", {
+      method: "POST",
+      body: new URLSearchParams({ code: "alpha", next: "/new" }),
+      redirect: "manual",
+    });
+
+    expect(page.status).toBe(302);
+    expect(page.headers.get("location")).toBe("/gate?next=%2Fnew");
+    expect(api.status).toBe(401);
+    expect(wrong.status).toBe(403);
+    expect(right.status).toBe(303);
+    expect(right.headers.get("location")).toBe("/new");
+    expect(right.headers.get("set-cookie")).toContain("HttpOnly");
+  });
+
+  test("without the gate's secrets, gated routes answer 501 and never open", async () => {
+    const response = await get("/new");
+
+    expect(response.status).toBe(501);
+  });
 });
 
 describe("fill", () => {

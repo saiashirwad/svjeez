@@ -6,6 +6,7 @@ site/.astro
 site/.alchemy
 worker/dist
 worker/.alchemy
+worker/.env
 packages/svjeez/README.md
 packages/svjeez/LICENSE
 packages/vite/test/.scratch-*
