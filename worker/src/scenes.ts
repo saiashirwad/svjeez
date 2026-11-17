@@ -1,9 +1,9 @@
-import type { Schema, Values } from "svjeez/params";
+import { parse, type Json, type Schema, type Values } from "svjeez/params";
 
-/** A scene module: its default export draws the SVG, and `params`, when it has one, is what a request may fill. */
+/** A scene module: `params` is what a query or a prompt may fill, and its default export draws the SVG from them. */
 export interface Scene {
   default(values?: Values<Schema>): string;
-  readonly params?: Schema;
+  readonly params: Schema;
 }
 
 /**
@@ -32,3 +32,6 @@ export const isName = (name: string): name is Name => Object.hasOwn(scenes, name
 export const names = Object.keys(scenes).filter(isName);
 
 export const load = (name: Name): Promise<Scene> => scenes[name]();
+
+/** The SVG for `json`, read by `parse` and then built. Either step throws with a message that says what to fix. */
+export const draw = (scene: Scene, json: Json): string => scene.default(parse(scene.params, json));

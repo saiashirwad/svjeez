@@ -80,7 +80,7 @@ Each package's source explains its own internals. These are the rules that aren'
 
 ## Worker
 
-`worker/` imports scenes from `examples/` lazily (`src/scenes.ts`), because their fonts load with top-level await and a Worker may not fetch outside a request. `bun run build` bundles it into `dist/worker.js` with the `@svjeez/source` condition, and `bun run test` runs that file in workerd through Miniflare and checks every scene against its `build()` byte for byte. `bun run deploy` builds and deploys through Alchemy (`worker/alchemy.run.ts`); set `DEEPSEEK_API_KEY` to turn on `?prompt=`. The examples `world` and `choropleth` stay out: they read world-atlas through `createRequire`, which a Worker does not have.
+`worker/` imports scenes from `examples/` lazily (`src/scenes.ts`), because their fonts load with top-level await and a Worker may not fetch outside a request. `bun run build` bundles it into `dist/worker.js` with the `@svjeez/source` condition, and `bun run test` runs that file in workerd through Miniflare and checks every scene against its `build()` byte for byte. `bun run deploy` builds and deploys through Alchemy (`worker/alchemy.run.ts`); set `DEEPSEEK_API_KEY` to turn on `?prompt=`. Every scene it serves is a template: the example exports `params` with its gallery content as the defaults, and a query or a model's answer to a prompt fills them, counting only when they parse and build. The examples `world` and `choropleth` stay out: they read world-atlas through `createRequire`, which a Worker does not have.
 
 ## Rules
 

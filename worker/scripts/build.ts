@@ -10,6 +10,8 @@ const result = await Bun.build({
   format: "esm",
   conditions: ["@svjeez/source"],
   minify: true,
+  // A deploy starts a new cache, so the last build's responses are not served for this one.
+  define: { BUILD: JSON.stringify(Date.now().toString(36)) },
   throw: false,
 });
 

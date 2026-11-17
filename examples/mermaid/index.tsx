@@ -1,12 +1,17 @@
 import { mermaid } from "@svjeez/mermaid";
 import { render, flow } from "svjeez";
+import { defaults, text, type Values } from "svjeez/params";
 
 import { css, mono, theme } from "../style";
 
-const M = 40;
-
-export const chart = mermaid(
-  `flowchart TD
+export const params = {
+  title: text("Deploy pipeline from Mermaid", { maxLength: 60 }),
+  desc: text(
+    "A deploy pipeline written as Mermaid text appears node by node as a svjeez flowchart, then a token runs from the push to the live release.",
+    { maxLength: 300, label: "What the diagram shows, for screen readers" },
+  ),
+  source: text(
+    `flowchart TD
     %% A deploy pipeline, written the way it would sit in a README
     push([Push to main]) --> build[Build image]
     build --> test{Tests pass?}
@@ -22,39 +27,61 @@ export const chart = mermaid(
     end
 
     prod --> done((Live))`,
-  { theme, x: M, y: M, font: mono, play: { at: 0.4, step: 0.35 } },
-);
+    {
+      maxLength: 1500,
+      label:
+        "Mermaid source: a flowchart (TD or LR), a sequenceDiagram or a stateDiagram-v2. No classDef, style, click, notes beside actors, or loop, alt and opt blocks.",
+    },
+  ),
+  from: text("push", {
+    maxLength: 40,
+    label:
+      "In a flowchart, the node id a token starts from once the diagram is drawn. Empty, or an id the diagram does not have, for none.",
+  }),
+  to: text("done", { maxLength: 40, label: "The node id the token runs to." }),
+};
 
-if (chart.kind !== "flowchart") throw new Error("the pipeline is a flowchart");
+const M = 40;
+const HOLD = 1;
 
-const { under, over } = chart.layers;
+export default function build(p: Values<typeof params> = defaults(params)): string {
+  const chart = mermaid(p.source, { theme, x: M, y: M, font: mono, play: { at: 0.4, step: 0.35 } });
 
-const trip = flow(chart.route("push", "done"), {
-  at: 5,
-  speed: 170,
-  style: "trace",
-  color: theme.base09,
-  arrive: true,
-});
+  const trip =
+    chart.kind === "flowchart" &&
+    [p.from, p.to].every((id) => chart.parts.some((part) => part.id === id))
+      ? flow(chart.route(p.from, p.to), {
+          at: Math.max(5, chart.span.end + 0.5),
+          speed: 170,
+          style: "trace",
+          color: theme.base09,
+          arrive: true,
+        })
+      : undefined;
 
-const D = 12;
+  const D = Math.max(12, Math.ceil((trip ?? chart).span.end + HOLD));
 
-export default function build(): string {
   return render(
     {
       width: chart.bounds.w + 2 * M,
       height: chart.bounds.h + 2 * M,
       duration: D,
-      title: "Deploy pipeline from Mermaid",
-      desc: "A deploy pipeline written as Mermaid text appears node by node as a svjeez flowchart, then a token runs from the push to the live release.",
+      title: p.title,
+      desc: p.desc,
       reducedMotion: { at: D - 1 },
       css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      {under}
-      {trip.node}
-      {over}
+      {chart.kind === "flowchart" ? (
+        <>
+          {chart.layers.under}
+          {trip?.node}
+          {chart.layers.over}
+        </>
+      ) : (
+        chart
+      )}
     </>,
   );
 }

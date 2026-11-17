@@ -7,7 +7,7 @@ import {
   TypeValidationError,
   type ModelMessage,
 } from "ai";
-import { jsonSchema, parse, type Json, type Schema, type Values } from "svjeez/params";
+import { jsonSchema, type Json, type Schema } from "svjeez/params";
 
 export interface FillOptions {
   /** A DeepSeek API key. */
@@ -21,20 +21,21 @@ const reason = (error: NoObjectGeneratedError): string =>
     : error.message;
 
 /**
- * Values for `schema` that a DeepSeek model picks from `prompt`. The model only writes JSON, and `parse` checks it.
- * When the first answer does not parse, the model sees parse's message and answers once more; a second failure throws
- * with that message.
+ * Asks a DeepSeek model for values that match `schema`, given `prompt`, and returns what `accept` makes of them. The
+ * model only writes JSON. When `accept` throws on the first answer, the model sees its message and answers once more;
+ * a second failure throws with that message.
  */
-export const fill = async <S extends Schema>(
-  schema: S,
+export const fill = async <T>(
+  schema: Schema,
   prompt: string,
+  accept: (json: Json) => T,
   { key, fetch }: FillOptions,
-): Promise<Values<S>> => {
-  const values = schemaOf<Values<S>>(jsonSchema(schema), {
+): Promise<T> => {
+  const accepted = schemaOf<T>(jsonSchema(schema), {
     validate: (value) => {
       try {
         // SAFETY: value is what JSON.parse read from the model's answer.
-        return { success: true, value: parse(schema, value as Json) };
+        return { success: true, value: accept(value as Json) };
       } catch (error) {
         return { success: false, error: error instanceof Error ? error : new Error(String(error)) };
       }
@@ -47,9 +48,9 @@ export const fill = async <S extends Schema>(
         model: createDeepSeek({ apiKey: key, fetch })("deepseek-v4-flash"),
         system: "You fill in the params of an animated SVG scene from the user's description.",
         messages,
-        output: Output.object({ schema: values }),
+        output: Output.object({ schema: accepted }),
         temperature: 0.2,
-        maxOutputTokens: 800,
+        maxOutputTokens: 1500,
         providerOptions: { deepseek: { thinking: { type: "disabled" } } },
       })
     ).output;

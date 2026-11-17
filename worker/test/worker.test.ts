@@ -1,18 +1,19 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { Miniflare } from "miniflare";
-import { defaults, jsonSchema, parse, text } from "svjeez/params";
+import { defaults, fromEntries, jsonSchema, parse, text, type Json } from "svjeez/params";
 
 import { fill } from "../src/ai";
-import { load, names } from "../src/scenes";
+import { draw, load, names, type Name } from "../src/scenes";
 
 const ROOT = join(import.meta.dir, "..");
 
 let worker: Miniflare;
 let keyed: Miniflare;
 
-/** What the stubbed DeepSeek answers next, in order. */
+/** What the stubbed DeepSeek answers next, in order, and the messages it was sent. */
 const answers: string[] = [];
+const asked: { readonly role: string; readonly content: string }[][] = [];
 
 const completion = (content: string) =>
   Response.json({
@@ -42,10 +43,14 @@ beforeAll(() => {
   keyed = new Miniflare({
     ...options,
     bindings: { DEEPSEEK_API_KEY: "test" },
-    outboundService: (request: Request) =>
-      new URL(request.url).hostname === "api.deepseek.com"
-        ? completion(answers.shift() ?? "")
-        : fetch(request.url, { headers: Object.fromEntries(request.headers) }),
+    outboundService: async (request: Request) => {
+      if (new URL(request.url).hostname !== "api.deepseek.com")
+        return fetch(request.url, { headers: Object.fromEntries(request.headers) });
+
+      asked.push((await request.json()).messages);
+
+      return completion(answers.shift() ?? "");
+    },
   });
 });
 
@@ -62,6 +67,8 @@ const failure = (run: () => void): string => {
 };
 
 const get = (path: string) => worker.dispatchFetch(`http://localhost${path}`);
+
+const MERMAID_ERROR = "flowchart LR\n  a --> b\n  classDef red fill:#f00";
 
 describe("in workerd", () => {
   for (const name of names)
@@ -85,21 +92,128 @@ describe("in workerd", () => {
     expect(list).toContain(">Second<");
   });
 
+  const queries: readonly [Name, string][] = [
+    ["charts", "headline=Rainfall%20doubled&mark=0&area=3&area=5&area=9"],
+    [
+      "flowchart",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          direction: "TB",
+          nodes: [
+            { id: "a", label: "Order placed", role: "input", group: "" },
+            { id: "b", label: "In stock?", role: "decision", group: "" },
+            { id: "c", label: "Ship it", role: "output", group: "" },
+          ],
+          groups: [],
+          edges: [
+            { from: "a", to: "b", label: "" },
+            { from: "b", to: "c", label: "yes" },
+          ],
+          from: "a",
+          to: "c",
+        }),
+      )}`,
+    ],
+    [
+      "sequence",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          actors: [
+            { id: "c", label: "Client", role: "input" },
+            { id: "s", label: "Server", role: "task" },
+          ],
+          messages: [
+            { from: "c", to: "s", text: "GET /", reply: "no" },
+            { from: "s", to: "c", text: "200", reply: "yes" },
+          ],
+        }),
+      )}`,
+    ],
+    [
+      "state",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          states: [
+            { id: "off", label: "Off", role: "task", final: "no", parent: "" },
+            { id: "on", label: "On", role: "output", final: "no", parent: "" },
+          ],
+          transitions: [
+            { from: "off", to: "on", label: "press" },
+            { from: "on", to: "off", label: "press" },
+          ],
+          walk: ["off", "on", "off"],
+        }),
+      )}`,
+    ],
+    [
+      "mermaid",
+      `source=${encodeURIComponent("sequenceDiagram\n  Alice->>Bob: Hello\n  Bob-->>Alice: Hi")}`,
+    ],
+    [
+      "code",
+      `params=${encodeURIComponent(JSON.stringify({ versions: [{ label: "Py", language: "python", source: 'print("hello")' }] }))}`,
+    ],
+    [
+      "terminal",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          lines: [
+            { kind: "command", text: "ls" },
+            { kind: "output", text: "{blue README.md}" },
+          ],
+        }),
+      )}`,
+    ],
+    ["math", "before=x%5E2&after=%5CcssId%7Bcross%7D%7Bx%7Dx&curve=0&curve=0&curve=1"],
+    ["icons", "outlines=star&outlines=brand-github&pop=star-filled&popLabel=Star"],
+  ];
+
+  for (const [name, query] of queries)
+    test(`/${name}.svg?${query.slice(0, 24)}… renders what build() returns for it`, async () => {
+      const search = new URLSearchParams(query);
+      const scene = await load(name);
+      const json: Json = search.get("params") ?? fromEntries(scene.params, search);
+      const response = await get(`/${name}.svg?${query}`);
+
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe(draw(scene, json));
+    });
+
+  test("a Mermaid syntax error in the query is a 400 with the parser's message", async () => {
+    const scene = await load("mermaid");
+    const response = await get(`/mermaid.svg?source=${encodeURIComponent(MERMAID_ERROR)}`);
+
+    expect(response.status).toBe(400);
+    expect(await response.text()).toBe(failure(() => draw(scene, { source: MERMAID_ERROR })));
+  });
+
+  test("/generate redirects to the template's prompt URL", async () => {
+    const response = await worker.dispatchFetch(
+      "http://localhost/generate?template=mermaid&prompt=a%20cat",
+      {
+        redirect: "manual",
+      },
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/mermaid.svg?prompt=a+cat");
+  });
+
   test("a bad value is a 400 with parse's message", async () => {
     const { params } = await load("release-card");
     const version = "9".repeat(20);
     const response = await get(`/release-card.svg?version=${version}`);
 
     expect(response.status).toBe(400);
-    expect(await response.text()).toBe(failure(() => parse(params!, { version })));
+    expect(await response.text()).toBe(failure(() => parse(params, { version })));
   });
 
   test("/<name>.json is the schema and the defaults", async () => {
     const { params } = await load("release-card");
 
     expect(await (await get("/release-card.json")).json()).toEqual({
-      params: jsonSchema(params!),
-      defaults: defaults(params!),
+      params: jsonSchema(params),
+      defaults: defaults(params),
     });
   });
 
@@ -119,6 +233,22 @@ describe("in workerd", () => {
     expect(answers).toHaveLength(0);
   }, 60_000);
 
+  test("?prompt= sends a Mermaid syntax error back to the model, and renders its second answer", async () => {
+    const scene = await load("mermaid");
+    const fixed = "flowchart LR\n  a --> b";
+
+    asked.length = 0;
+    answers.push(JSON.stringify({ source: MERMAID_ERROR }), JSON.stringify({ source: fixed }));
+
+    const response = await keyed.dispatchFetch("http://localhost/mermaid.svg?prompt=two%20boxes");
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe(draw(scene, { source: fixed }));
+    expect(asked[1]?.at(-1)?.content).toStartWith(
+      failure(() => draw(scene, { source: MERMAID_ERROR })),
+    );
+  }, 60_000);
+
   test("?prompt= is a 502 with parse's message when the second answer is bad too", async () => {
     const { params } = await load("release-card");
     const version = "far too long a version";
@@ -127,11 +257,11 @@ describe("in workerd", () => {
     const response = await keyed.dispatchFetch("http://localhost/release-card.svg?prompt=again");
 
     expect(response.status).toBe(502);
-    expect(await response.text()).toBe(failure(() => parse(params!, { version })));
+    expect(await response.text()).toBe(failure(() => parse(params, { version })));
   });
 
-  test("a prompt over 300 characters is a 400", async () => {
-    const prompt = "a".repeat(301);
+  test("a prompt over 600 characters is a 400", async () => {
+    const prompt = "a".repeat(601);
 
     expect(
       (await keyed.dispatchFetch(`http://localhost/release-card.svg?prompt=${prompt}`)).status,
@@ -154,6 +284,7 @@ describe("in workerd", () => {
 
 describe("fill", () => {
   const schema = { version: text("0.1.0", { maxLength: 8 }) };
+  const accept = (json: Json) => parse(schema, json);
 
   const stub = (answer: (body: string) => string): typeof fetch =>
     Object.assign(
@@ -162,22 +293,22 @@ describe("fill", () => {
     );
 
   test("asks again once with parse's message, then returns the values", async () => {
-    const asked: { readonly role: string; readonly content: string }[][] = [];
+    const sent: { readonly role: string; readonly content: string }[][] = [];
     const replies = ['{"version": "far too long"}', '{"version": "2.0.0"}'];
 
     const fetch = stub((body) => {
-      asked.push(JSON.parse(body).messages);
+      sent.push(JSON.parse(body).messages);
 
-      return replies[asked.length - 1]!;
+      return replies[sent.length - 1]!;
     });
 
-    expect(await fill(schema, "a major release", { key: "test", fetch })).toEqual({
+    expect(await fill(schema, "a major release", accept, { key: "test", fetch })).toEqual({
       version: "2.0.0",
     });
-    expect(asked).toHaveLength(2);
-    expect(asked[0]?.[0]?.content).toContain('"maxLength":8');
-    expect(asked[1]?.at(-2)?.content).toBe('{"version": "far too long"}');
-    expect(asked[1]?.at(-1)?.content).toStartWith(
+    expect(sent).toHaveLength(2);
+    expect(sent[0]?.[0]?.content).toContain('"maxLength":8');
+    expect(sent[1]?.at(-2)?.content).toBe('{"version": "far too long"}');
+    expect(sent[1]?.at(-1)?.content).toStartWith(
       failure(() => parse(schema, { version: "far too long" })),
     );
   });
@@ -185,7 +316,7 @@ describe("fill", () => {
   test("a second bad answer throws parse's message", async () => {
     const fetch = stub(() => '{"version": "far too long"}');
 
-    await expect(fill(schema, "x", { key: "test", fetch })).rejects.toThrow(
+    await expect(fill(schema, "x", accept, { key: "test", fetch })).rejects.toThrow(
       failure(() => parse(schema, { version: "far too long" })),
     );
   });
