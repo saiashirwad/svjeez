@@ -1,14 +1,11 @@
 import { valuesAt, type SvgNode } from "svjeez";
 
-/** Opacity above which a text counts as seen. */
 const SEEN = 0.1;
 
-/** A glyph's estimated width, per em. */
 const WIDTH = 0.6;
 
 const STEP = 0.02;
 
-/** A text drawn at one moment: what it says, how visible it is and the box it covers. */
 interface Seen {
   readonly text: string;
   readonly opacity: number;
@@ -18,7 +15,6 @@ interface Seen {
   readonly y1: number;
 }
 
-/** A pair of different texts whose boxes overlap while both show. */
 interface Clash {
   readonly t: number;
   readonly a: Seen;
@@ -28,7 +24,6 @@ interface Clash {
 const attr = (node: SvgNode & { kind: "element" }, name: string): number =>
   Number(node.attrs[name] ?? 0) || 0;
 
-/** Every text drawn at `t` with its opacity and box, after every ancestor's slide and fade. */
 const textsAt = (node: SvgNode, t: number, duration: number): Seen[] => {
   const walk = (n: SvgNode, dx: number, dy: number, o: number): Seen[] => {
     if (n.kind !== "element")
@@ -74,7 +69,6 @@ const textsAt = (node: SvgNode, t: number, duration: number): Seen[] => {
   return walk(node, 0, 0, 1);
 };
 
-/** Moments in `[from, to]` where two different texts that both show cover the same ground. */
 export const clashes = (node: SvgNode, duration: number, from = 0, to = duration): Clash[] => {
   const found: Clash[] = [];
 

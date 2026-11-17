@@ -13,7 +13,6 @@ import { validateSvg } from "svjeez/frames";
 
 assert.ok(fidelity.fidelity);
 
-// A story runs a program's messages into a flow, and the flow runs in Chromium.
 const counter = {
   update: (n, by) => [n + by, []],
   view: (n) => `<p data-part="count" style="font: 20px sans-serif">${n}</p>`,
@@ -37,7 +36,6 @@ const svg = render({ ...size(steps), duration: duration(steps) }, jsx(Dom, { sta
 
 assert.deepEqual(validateSvg(svg).errors, []);
 
-// A demo of a real component runs through the app's own Vite, for each framework.
 const dir = await mkdtemp(join(tmpdir(), "svjeez-dom-"));
 
 const texts = (steps) =>

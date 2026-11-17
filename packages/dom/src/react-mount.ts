@@ -1,4 +1,3 @@
-// Runs in the page the recorder opens, inside the app's own Vite build.
 import { createElement, type ComponentType } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";

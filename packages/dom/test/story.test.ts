@@ -7,7 +7,6 @@ type Cmd = { type: "save"; n: number };
 
 type Model = { n: number; saved: number };
 
-// A counter that asks to save after each add; the save answers with a message, as a runtime would.
 const counter = {
   update: (m: Model, msg: Msg): [Model, Cmd[]] =>
     msg.type === "add"

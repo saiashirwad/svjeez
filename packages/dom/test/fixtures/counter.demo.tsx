@@ -24,7 +24,6 @@ export const counter = demo(Counter, { width: 200 }, ({ props }) => [
   snap("renamed", { over: 0.2 }),
 ]);
 
-// Type checks: props() takes only the component's props, with their types, and required props must be given.
 function Labelled({ label }: { label: string }) {
   return <span>{label}</span>;
 }

@@ -46,7 +46,6 @@ test("shots open on the whole snapshot and frame a part as the move into its sna
   expect(over).toBe(0.5);
   expect(stops.map((s) => s.show.at)).toEqual([0, 1]);
   expect(stops[0]!.target).toMatchObject({ x: 0, y: 0, w: 400, h: 400 });
-  // Grown to the most zoom allows (2x: 100 by 50) about the field's center.
   expect(stops[1]!.target).toMatchObject({ x: 20, y: 285, w: 100, h: 50 });
 });
 

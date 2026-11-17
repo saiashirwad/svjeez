@@ -1,11 +1,8 @@
 import { props, type Action, type Flow, type Patch } from "./flow.ts";
 
-/** Room around a demo for shadows and rings, in px, when its layout gives none. */
 export const PAD = 16;
 
-// The flow's words, from here too: a demo file runs in the browser, so it imports nothing that pulls in Chromium.
-// `props` isn't among them: a demo's script gets one typed to its component. Nor is `html`, which replaces a mounted
-// card's markup and would throw the component away.
+// A demo file runs in the browser: import nothing that pulls in Chromium.
 export {
   act,
   click,
@@ -32,7 +29,6 @@ export interface Layout {
   readonly width?: number;
   /** Room around it for shadows and rings, in px. Default 16. */
   readonly pad?: number;
-  /** Named elements, by CSS selector, besides those with a `data-part`. */
   readonly parts?: Readonly<Record<string, string>>;
 }
 
@@ -40,7 +36,6 @@ export interface Layout {
 export type DemoOptions<P> = Layout &
   ({} extends P ? { readonly props?: P } : { readonly props: P });
 
-/** What a demo's script gets: `props`, typed to the component, re-renders it with a patch merged over its props. */
 export interface Script<P> {
   /** Re-render with these props merged over the current ones, as a parent would. Values must be JSON. */
   readonly props: (patch: Partial<P>) => Action;
@@ -48,7 +43,6 @@ export interface Script<P> {
 
 export type Framework = "react" | "svelte";
 
-/** A component and what happens to it, recorded by `recordings()` from `@svjeez/dom/vite`. */
 export interface Demo<P = Patch> {
   readonly kind: "svjeez-demo";
   readonly framework: Framework;
@@ -74,10 +68,6 @@ export const demoOf = <P>(
   flow: script({ props: (patch) => props(patch as Patch) }),
 });
 
-/**
- * What a mount tells the recorder: `update` applies a patch to the props, and the host is ready to be read. Both
- * framework mounts end with this call.
- */
 export const ready = (element: HTMLElement, update: (patch: Patch) => void): void => {
   window.__svjeez = {
     props: async (patch) => {
@@ -93,7 +83,6 @@ export const isDemo = (value: unknown): value is Demo =>
 
 declare global {
   interface Window {
-    /** How the recorder re-renders the mounted demo with new props. */
     __svjeez?: { props: (patch: Patch) => Promise<void> };
   }
 }

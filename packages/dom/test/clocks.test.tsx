@@ -10,8 +10,7 @@ import {
   type TextRun,
 } from "../src/index.ts";
 
-// Browsers start SMIL's clock apart from CSS's (WebKit by ~50ms, Chromium by a frame when the page is busy), and
-// seeking hides it, since a seek sets both. So parts of one moving thing must never be split between the two.
+// SMIL and CSS clocks start apart (WebKit by ~50ms, Chromium by a frame when busy), and seeking hides it: parts of one moving thing must not be split between them.
 
 const run = (text: string, x: number, y: number): TextRun => ({
   kind: "text",
@@ -55,7 +54,6 @@ const page = (children: Item[]): Snapshot => {
 
 const lifted: Shadow = { color: "rgba(0,0,0,0.3)", x: 0, y: 6, blur: 16, spread: 0 };
 
-/** A card with a title and a pill, at `(x, y)`; lifted, it casts a shadow and tints. */
 const card = (x: number, y: number, lift: boolean) =>
   box(
     x,
@@ -75,7 +73,6 @@ const card = (x: number, y: number, lift: boolean) =>
     },
   );
 
-/** Every mark's own place and how far its groups have moved it at `t`, with whether it morphs its outline. */
 const marks = (
   node: SvgNode,
   t: number,
@@ -117,7 +114,6 @@ describe("one clock for one moving thing", () => {
       <Dom states={[page([card(20, 20, false)]), [page([card(200, 140, true)]), { over: 1 }]]} />
     );
 
-    // Whatever lands inside the card moves by the same amount at every moment.
     for (const t of [0, 0.2, 0.4, 0.5, 0.6, 0.8, 1]) {
       const inside = marks(node, t).filter(
         (m) => m.x >= 200 && m.x <= 360 && m.y >= 140 && m.y <= 200,
@@ -129,7 +125,6 @@ describe("one clock for one moving thing", () => {
       expect([...moves]).toHaveLength(1);
     }
 
-    // And no outline in it moves on SMIL's clock: a `d` that changes place would run apart from the group.
     const svg = render({ width: 400, height: 300, duration: 2, title: "card" }, node);
 
     for (const [, values] of svg.matchAll(/<animate [^>]*attributeName="d" values="([^"]*)"/g)) {
@@ -151,7 +146,6 @@ describe("one clock for one moving thing", () => {
     // The reveal doesn't animate `width`, which only SMIL can do in every browser.
     expect(svg).not.toMatch(/attributeName="width"/);
 
-    // The clip's edge and the caret are both translated, at the same moments.
     const stops = [...svg.matchAll(/@keyframes [\w-]+\{([^@]*?translate[^@]*?)\}\}/g)].map((m) =>
       [...m[1]!.matchAll(/([\d.,%]+)\{translate/g)].map((s) => s[1]).join(" "),
     );
@@ -159,7 +153,6 @@ describe("one clock for one moving thing", () => {
     expect(stops.length).toBeGreaterThanOrEqual(2);
     expect(new Set(stops).size).toBe(1);
 
-    // At every keystroke the clip's right edge is where the caret is.
     const edges = [...svg.matchAll(/@keyframes [\w-]+\{([^@]*?translate[^@]*?)\}\}/g)].map((m) =>
       [...m[1]!.matchAll(/translate:(-?[\d.]+)px/g)].map((s) => Number(s[1])),
     );

@@ -9,20 +9,13 @@ import {
   type SvgNode,
 } from "svjeez";
 
-// A recording of many states draws one picture per transition, and most of each picture is what the one before drew:
-// the sidebar, the columns, every card that didn't move. `hold` merges the pictures so a part drawn the same in a run
-// of transitions is written once and shown across all of them, and only what changes is drawn per transition.
-
 type Element = Extract<SvgNode, { kind: "element" }>;
 
-// Interned keys: a node's key is a small number, so comparing two subtrees never walks either.
 const interned = new Map<string, number>();
 const keys = new WeakMap<SvgNode, number | null>();
-// Refs, fonts and Css values by identity: the painter makes one per distinct def, so equal defs are the same object.
 
 type AttrValue = Element["attrs"][string];
 
-/** An attribute that isn't text: a def's ref, a font, a CSS value. */
 type Shared = Exclude<AttrValue, string>;
 
 const isText = (value: AttrValue): value is string => typeof value === "string";
@@ -52,11 +45,9 @@ const intern = (text: string): number => {
   return id;
 };
 
-/** Nothing that runs: no motions, and none of the flags that change how motions below run. */
 const still = (node: Element): boolean =>
   node.motions.length === 0 && !node.once && !node.ambient && !node.still;
 
-/** The attributes as one string, refs and other objects by identity. */
 const attrsKey = (node: Element): string =>
   node.tag +
   JSON.stringify(
@@ -65,10 +56,6 @@ const attrsKey = (node: Element): string =>
       .map(([k, v]) => [k, isText(v) ? v : identity(v)]),
   );
 
-/**
- * A number two nodes share exactly when they draw the same and nothing in them moves, or undefined for a node that
- * moves (its times belong to one transition) or that compile treats specially.
- */
 export const keyOf = (node: SvgNode): number | undefined => {
   const known = keys.get(node);
 
@@ -90,8 +77,6 @@ export const keyOf = (node: SvgNode): number | undefined => {
   return key;
 };
 
-/** One tween of a moving node's attributes. */
-/** The attributes a recipe moves: a path's outline and fill, or a translation. */
 export type Values = ChannelValues<"d" | "fill" | "x" | "y">;
 
 export interface Step {
@@ -101,29 +86,17 @@ export interface Step {
   readonly ease: Ease;
 }
 
-/**
- * How a moving node is drawn from its attributes' first values and a motion through its steps, so that two moves of
- * one node in consecutive transitions can be drawn as one node with both steps.
- */
 export interface Recipe {
   readonly from: Values;
   readonly steps: readonly Step[];
   readonly draw: (from: Values, animation: Motion<"d" | "fill" | "x" | "y">) => SvgNode;
-  /**
-   * Where the node sits when its `x` and `y` channels are 0, for a node that moves by translating. A later move
-   * drawn from another place chains by shifting its steps by the difference.
-   */
   readonly origin?: { readonly x: number; readonly y: number };
 }
 
-/** A recipe drawn: its first values, then each step in turn. */
-/** Motions that `cook` made which run two animations, SMIL for the shape and CSS for the color. */
 const smil = new WeakSet<Motion>();
 
-/** What a clip or mask the painter defined holds, so the animations inside it count where it is used. */
 const contents = new WeakMap<Shared, readonly SvgNode[]>();
 
-/** Records what a def holds. */
 export const defines = <R extends Shared>(ref: R, content: readonly SvgNode[]): R => {
   contents.set(ref, content);
 
@@ -135,7 +108,6 @@ export const cook = (recipe: Recipe): SvgNode => {
 
   for (const s of recipe.steps) m = m.to(s.to, span(s.at, s.over), s.ease);
 
-  // A path with a fill runs a CSS animation for the color as well.
   if ("d" in recipe.from && Object.keys(recipe.from).length > 1) smil.add(m);
 
   return recipe.draw(recipe.from, m);
@@ -147,14 +119,11 @@ interface Ends {
   readonly recipe?: Recipe;
 }
 
-/** What a moving node looks like before its motion starts and after it ends, by key. */
 const ends = new WeakMap<SvgNode, Ends>();
 
-/** The same attributes move in both, so their steps chain. */
 const chains = (a: Recipe, b: Recipe): boolean => {
   const x = Object.keys(a.from).sort().join();
 
-  // Paths tween only between the same commands, so every outline in one motion must share them.
   const outlines = [a.from, ...a.steps.map((s) => s.to), b.from, ...b.steps.map((s) => s.to)].map(
     (v) => (v.d === undefined ? "" : v.d.replace(/[^A-Za-z]/g, "")),
   );
@@ -167,7 +136,6 @@ const chains = (a: Recipe, b: Recipe): boolean => {
   );
 };
 
-/** `b`'s steps after `a`'s, moved to `a`'s origin. */
 const chain = (a: Recipe, b: Recipe): Recipe => {
   const dx = (b.origin?.x ?? 0) - (a.origin?.x ?? 0);
   const dy = (b.origin?.y ?? 0) - (a.origin?.y ?? 0);
@@ -179,12 +147,6 @@ const chain = (a: Recipe, b: Recipe): Recipe => {
   return { ...a, steps: [...a.steps, ...moved] };
 };
 
-/**
- * Marks `node`, which moves in one transition, as drawing `start` before its motion and `end` after it (either
- * left out when it draws nothing nameable there). `hold` then lets it stand in for those still drawings in the
- * transitions around its own, so a box that slides once is one element with one motion rather than three drawings
- * cut into each other.
- */
 export const settles = <N extends SvgNode>(
   node: N,
   start?: SvgNode,
@@ -196,35 +158,26 @@ export const settles = <N extends SvgNode>(
   return node;
 };
 
-/** A node drawn from `recipe`, still as `start` before and as `end` after, which can chain with the next move. */
 export const moving = (recipe: Recipe, start: SvgNode | undefined, end: SvgNode): SvgNode =>
   settles(cook(recipe), start, end, recipe);
 
-/** Children with fragments spliced in, as the SVG draws them. */
 const flat = (nodes: readonly SvgNode[]): SvgNode[] =>
   nodes.flatMap((n) => (n.kind === "fragment" ? flat(n.children) : [n]));
 
-/** A plain group, whose children can be held one by one. */
 const isGroup = (node: SvgNode): node is Element =>
   node.kind === "element" && node.tag === "g" && still(node);
 
-/** Whether `h` drew the same all through its run: a leaf, or a group none of whose children came or went. */
 const whole = (h: Held): boolean =>
   h.key === h.first && h.kids.every((kid) => kid.from === h.from && kid.to === h.to && whole(kid));
 
-/** A node over a run of transitions: a leaf drawn the same in all of them, or a group whose children are held. */
 interface Held {
   node: SvgNode;
-  /** What it draws at the end of its run: its key, or a moving node's end. */
   key: number | undefined;
-  /** What it draws at the start of its run, for a group that may give way to a moving node. */
   readonly first: number | undefined;
-  /** Carries a motion, so it can't take on another unless both chain through `recipe`. */
   moving: boolean;
   recipe: Recipe | undefined;
   group: string | undefined;
   readonly kids: Held[];
-  /** What each transition of the run drew here, so a group can be drawn whole per transition instead. */
   readonly versions: SvgNode[];
   readonly from: number;
   to: number;
@@ -253,12 +206,6 @@ const held = (node: SvgNode, k: number): Held => {
   return out;
 };
 
-/**
- * Adds transition `k`'s children to `list`, which holds those of the transitions before it. What is drawn the same
- * as in transition `k - 1` is extended, groups with the same attributes hold their children in turn, and the rest is
- * inserted where it draws. Items alive at `k` keep the order transition `k` draws them in; items that ended before
- * never show with them, so where those sit doesn't matter.
- */
 const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
   const news = flat(children);
   const alive = list.filter((h) => h.to === k - 1);
@@ -266,18 +213,15 @@ const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
   const starts = news.map((n) => ends.get(n)?.start);
   const groups = news.map((n) => (isGroup(n) ? attrsKey(n) : undefined));
 
-  /** Whether `h`, still since its run began, gives way to new child `j`, which moves from what `h` draws. */
   const yields = (h: Held, j: number): boolean =>
     !h.moving && h.key !== undefined && h.key === starts[j] && whole(h);
 
-  /** Whether `h` moved in an earlier transition and new child `j` moves on from where it ended, the same way. */
   const goesOn = (h: Held, j: number): boolean => {
     const next = ends.get(news[j]!)?.recipe;
 
     if (!h.recipe || !next || h.key === undefined || h.key !== starts[j] || !chains(h.recipe, next))
       return false;
 
-    // Moves that change a color don't chain: a fill keyed across several moves came out wrong between them.
     const fills = [
       h.recipe.from,
       ...h.recipe.steps.map((s) => s.to),
@@ -287,7 +231,6 @@ const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
     return fills.every((v) => v.fill === h.recipe!.from.fill);
   };
 
-  // What pairing an old item with a new child is worth: most for the same drawing, some for the same group.
   const worth = (i: number, j: number): number => {
     const h = alive[i]!;
 
@@ -315,7 +258,6 @@ const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
 
   let i = 0;
   let j = 0;
-  // Where the next new child goes: after the last item it drew over, or first.
   let at = 0;
 
   while (j < m) {
@@ -324,7 +266,6 @@ const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
     if (w > 0 && best[i]![j] === best[i + 1]![j + 1]! + w) {
       const h = alive[i++]!;
       const now = news[j]!;
-      // Decided before `h` grows, since whether it drew the same all through reads its run.
       const same = h.key !== undefined && h.key === keysOf[j];
       const yielded = !same && yields(h, j);
       const goes = !same && !yielded && goesOn(h, j);
@@ -333,10 +274,8 @@ const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
       h.versions.push(now);
 
       if (same) {
-        // The same drawing: a moving node holds its end, a group's children all carry on.
         if (h.group !== undefined && isGroup(now)) add(h.kids, k, now.children);
       } else if (yielded) {
-        // The moving node starts as `h` drew, so it is drawn alone across both runs.
         h.node = now;
         h.key = ends.get(now)!.end;
         h.moving = true;
@@ -344,14 +283,12 @@ const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
         h.group = undefined;
         h.kids.length = 0;
       } else if (goes) {
-        // It moves again: one node with both moves' steps.
         const next = ends.get(now)!;
 
         h.recipe = chain(h.recipe!, next.recipe!);
         h.node = cook(h.recipe);
         h.key = next.end;
       } else {
-        // A group with the same attributes: what is in it is held in turn.
         if (isGroup(now)) add(h.kids, k, now.children);
 
         h.key = keysOf[j];
@@ -364,10 +301,6 @@ const add = (list: Held[], k: number, children: readonly SvgNode[]): void => {
   }
 };
 
-/**
- * The animations a drawing asks the browser to run on every frame, as `examples/scripts/cost.ts` counts them in the
- * compiled file: each CSS animation of each element, and each SMIL one for the share of the loop it covers.
- */
 const costOf = (nodes: readonly SvgNode[], length: number): number => {
   const svg = render(
     { width: 1, height: 1, duration: length, title: "cost" },
@@ -398,34 +331,26 @@ const costOf = (nodes: readonly SvgNode[], length: number): number => {
   return n;
 };
 
-/** When a run of transitions shows, from the cut before its first to the cut after its last. */
 export type Window = (
   from: number,
   to: number,
 ) => { readonly at: number; readonly over?: number } | undefined;
 
-/** A node and the transitions it shows in. */
 interface Piece {
   readonly node: SvgNode;
   readonly from: number;
   readonly to: number;
 }
 
-/**
- * How many animations a drawing asks the browser to run: every motion on every element, cuts included. The browser
- * ticks each one on every frame whether or not it is shown, so this is what holding must not raise.
- */
 const running = (nodes: readonly SvgNode[], seen = new Set<object>()): number =>
   nodes.reduce((n, node) => {
     if (node.kind === "fragment" || node.kind === "clip") return n + running(node.children, seen);
 
     if (node.kind !== "element") return n;
 
-    // A path tweened through SMIL runs about all the time, `<animate>` while it moves and `<set>` holding it after,
-    // and one with a fill runs a CSS animation for the color too.
+    // A path tweened through SMIL runs nearly always (animate while it moves, set after); a fill adds a CSS animation.
     let own = node.motions.reduce((k, m) => k + (smil.has(m) ? 2 : 1), 0);
 
-    // A clip or mask runs what moves inside it once, however many elements use it.
     for (const value of Object.values(node.attrs)) {
       if (isText(value)) continue;
       const content = contents.get(value);
@@ -439,7 +364,6 @@ const running = (nodes: readonly SvgNode[], seen = new Set<object>()): number =>
     return n + own + running(node.children, seen);
   }, 0);
 
-/** The versions of a group per transition, one piece for each run of them that draws the same. */
 const versions = (h: Held): Piece[] => {
   const out: Piece[] = [];
 
@@ -457,10 +381,6 @@ const versions = (h: Held): Piece[] => {
 
 const cut = (window: Window, piece: Piece) => show(window(piece.from, piece.to)!, { fade: 0 });
 
-/**
- * Pieces in drawing order as nodes shown from `from` through `to`: neighbors that show over the same transitions
- * share one cut, and a plain group alone in its window carries the cut itself.
- */
 const place = (pieces: readonly Piece[], from: number, to: number, window: Window): SvgNode[] => {
   const out: SvgNode[] = [];
 
@@ -494,7 +414,6 @@ const place = (pieces: readonly Piece[], from: number, to: number, window: Windo
   return out;
 };
 
-/** About how many bytes a node writes, to weigh holding a group against drawing it whole. */
 const weights = new WeakMap<SvgNode, number>();
 
 const weight = (node: SvgNode): number => {
@@ -522,11 +441,6 @@ const weight = (node: SvgNode): number => {
   return w;
 };
 
-/**
- * The pieces of `list`. A group is held, drawn once around its children's pieces, or drawn whole per transition,
- * whichever costs less: bytes, plus `price` for every animation it runs. Holding pays in bytes; the price keeps it
- * from paying for them with work the browser does on every frame.
- */
 const pieces = (list: readonly Held[], window: Window, price: number): Piece[] =>
   list.flatMap((h): Piece[] => {
     const g = h.node;
@@ -554,11 +468,6 @@ const emit = (
   price: number,
 ): SvgNode[] => place(pieces(list, window, price), from, to, window);
 
-/**
- * One drawing per transition, merged: what is the same in consecutive transitions is drawn once and shown across them,
- * and the rest is cut in and out where its transition starts and ends. `window(from, to)` is when transitions `from`
- * through `to` show.
- */
 export const hold = (
   drawings: readonly SvgNode[],
   plain: readonly SvgNode[],
@@ -580,8 +489,6 @@ export const hold = (
       window,
     );
 
-  // Never more animations than the plain drawings run. The count above steers the search; the compiled file, which
-  // knows how long each SMIL animation runs, decides.
   const before = one(plain);
   const most = one(ceiling);
   const budget = Math.max(running(before), running(most));

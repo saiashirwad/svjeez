@@ -19,7 +19,6 @@ const css = `
   .card.held { box-shadow: 0 6px 16px rgb(0 0 0 / .3) }
 `;
 
-// A card that the mouse carries to the other lane: pressed, it lifts; let go over a lane, it lands there.
 const markup = `<div class="board">
   <div class="lane" data-part="todo" data-key="todo" onpointerup="window.held && (this.append(window.held), window.held.classList.remove('held'), window.held = null)">
     <div class="card" data-part="card" data-key="card" onpointerdown="window.held = this; this.classList.add('held')">Card</div>
@@ -52,14 +51,12 @@ beforeAll(async () => {
 
 afterAll(() => rmSync(root, { recursive: true, force: true }));
 
-/** A lane in the snapshot with this name, by key. */
 const lane = (name: string, key: string): Box | undefined =>
   find(steps, name)?.root.children.find((c): c is Box => c.kind === "box" && c.key === key);
 
 describe("drag", () => {
   test("presses, carries and lets go with the real mouse, and the page reacts as to a person", () => {
     expect(lane("idle", "todo")?.children).toHaveLength(1);
-    // Held, the card lifts: the page gave it a shadow.
     expect(lane("lifted", "todo")?.children[0]).toMatchObject({
       kind: "box",
       key: "card",

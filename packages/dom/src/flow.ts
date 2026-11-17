@@ -1,7 +1,6 @@
 import type { Page } from "playwright-core";
 import type { Ease } from "svjeez";
 
-/** A value that can cross into the page as JSON. */
 export type Json =
   | string
   | number
@@ -10,12 +9,10 @@ export type Json =
   | readonly Json[]
   | { readonly [key: string]: Json };
 
-/** New props for a mounted component, by name. */
 export type Patch = { readonly [prop: string]: Json };
 
 /**
- * Something to do to the page as plain data, the way Playwright's codegen writes it. A target is a part name
- * (`data-part` or the `parts` option) or, failing that, a CSS selector.
+ * Something to do to the page as plain data. A target is a part name (`data-part` or the `parts` option) or a CSS selector.
  */
 export type Action =
   | { readonly click: string }
@@ -51,7 +48,6 @@ export interface Timing {
   readonly ease?: Ease;
 }
 
-/** Read the page into a snapshot, named or `true`, and move the timeline to it. */
 export interface Snap extends Timing {
   readonly snap: string | true;
 }
@@ -74,7 +70,6 @@ export type Instruction = Action | Snap | Wait | Act;
 /** What `card.run` takes: a list of instructions. A sub-flow is a function that returns one, spread in. */
 export type Flow = readonly Instruction[];
 
-/** A snap while `snap()` builds it. */
 interface Draft {
   snap: string | true;
   over?: number;
@@ -88,7 +83,6 @@ export function snap(name?: string, timing?: Timing): Snap;
 export function snap(timing: Timing): Snap;
 export function snap(first?: string | Timing, second?: Timing): Snap {
   const [name, timing] = isTiming(first) ? [undefined, first] : [first, second];
-  // Keys for the timing given only: `card.run` reads a snap without any as untimed.
   const out: Draft = { snap: name ?? true };
 
   if (timing?.over !== undefined) out.over = timing.over;
@@ -124,8 +118,7 @@ export interface DragOptions {
 }
 
 /**
- * Drags `from` onto `to` (part names or CSS selectors) with the real mouse: down on `from`, moves to `to` in
- * steps, up. Snaps in between show the lift and the slide. Spread it into a flow: `...drag("card", "done")`.
+ * Drags `from` onto `to` (part names or CSS selectors) with the real mouse; snaps in between show the lift and the slide. Spread it into a flow.
  *
  * ```ts
  * ...drag("card-42", "lane-done", { carried: snap("carried", { over: 0.6 }), dropped: snap("dropped") })

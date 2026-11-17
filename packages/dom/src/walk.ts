@@ -14,16 +14,13 @@ import type {
   Vector,
 } from "./tree.ts";
 
-/** Border quads from Chromium, eight numbers each: an element's own, and its `::before` and `::after` when drawn. */
 export interface Marks {
   readonly own: readonly number[];
   readonly before?: readonly number[];
   readonly after?: readonly number[];
-  /** What each pseudo-element's `content` came to as laid out, counters and `attr()` filled in. */
   readonly text?: { readonly before?: string; readonly after?: string };
 }
 
-/** A range input's track and thumb: their border boxes (x, y, width, height) and the styles `surface` reads. */
 export interface RangeMarks {
   readonly track: RangePart;
   readonly thumb: RangePart;
@@ -35,19 +32,13 @@ interface RangePart {
 }
 
 declare global {
-  /** Where Chromium put each element's ::before and ::after, left by `markPseudos`: the DOM has no node to measure. */
   var __svjeezPseudo: WeakMap<Element, Marks> | undefined;
-  /** The parts of each range input's user-agent shadow tree, left by `markRanges`. */
   var __svjeezRange: WeakMap<Element, RangeMarks> | undefined;
-  /** The size of every image a page's CSS names, left by `preload`: the walk is synchronous and can't wait to load one. */
   var __svjeezImages: Map<string, readonly [number, number]> | undefined;
-  /** A still of each visible canvas as a data URI, left by `canvases`: a canvas has no file to fetch. */
   var __svjeezStills: WeakMap<Element, { href: string; at?: Rect }> | undefined;
-  /** Every visible canvas, left by `canvases` for the browser to screenshot the ones it can't read. */
   var __svjeezCanvases: HTMLCanvasElement[] | undefined;
 }
 
-/** What an element or pseudo-element paints of itself. */
 type Surface = Pick<
   Box,
   | "radii"
@@ -64,10 +55,6 @@ type Surface = Pick<
   | "isolate"
 >;
 
-/**
- * Reads the element at `selector` into a `Box` tree. `parts` names elements by CSS selector. Runs inside the page, so
- * it must not reference anything outside its own body.
- */
 export function walk({
   selector,
   pad,
@@ -78,7 +65,6 @@ export function walk({
   parts: Record<string, string>;
 }): Box {
   const found = document.querySelector(selector);
-  // The page itself is read as a screenshot would be: the viewport, from the page's origin.
   const wholePage = found === document.body || found === document.documentElement;
   const root = wholePage ? document.documentElement : found;
   const marks = globalThis.__svjeezPseudo;
@@ -91,7 +77,6 @@ export function walk({
     ? { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
     : root.getBoundingClientRect();
 
-  // The camera: what lies wholly outside it is neither read nor drawn. A page is the viewport; an element, its box and the pad.
   const frame = wholePage
     ? { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
     : {
@@ -110,7 +95,6 @@ export function walk({
   const px = (value: string): number => parseFloat(value) || 0;
   const round = (n: number): number => Math.round(n * 100) / 100;
 
-  /** Degrees in one of an angle's units. */
   const degrees = (unit: string): number =>
     unit === "rad" ? 180 / Math.PI : unit === "turn" ? 360 : unit === "grad" ? 0.9 : 1;
 
@@ -149,7 +133,6 @@ export function walk({
     return value;
   };
 
-  // Where the baseline sits inside a glyph's content area, which is what a Range's rect covers.
   const metrics = new Map<string, { ascent: number; area: number }>();
 
   const probe = (s: CSSStyleDeclaration) => {
@@ -187,7 +170,6 @@ export function walk({
     const br = corner(s.borderBottomRightRadius, w);
     const bl = corner(s.borderBottomLeftRadius, w);
 
-    // Corners that overlap shrink together, as CSS scales them.
     const f = Math.min(
       1,
       w / (tl + tr || 1),
@@ -216,7 +198,6 @@ export function walk({
             return [{ color: c, x, y, blur, spread }];
           });
 
-  /** Splits at `by` outside parentheses. */
   const split = (text: string, by: RegExp = /,/): string[] => {
     const out: string[] = [];
     let depth = 0;
@@ -241,17 +222,12 @@ export function walk({
   const alpha = (c: string): number => Number(/rgba\(.*,\s*([\d.]+)\)$/.exec(c)?.[1] ?? 1);
   const rgb = (c: string) => (c.match(/[\d.]+/g) ?? []).slice(0, 3).join(",");
 
-  /**
-   * Color stops at fractions of a gradient line `length` px long, placed as CSS places the ones without a position.
-   * A clear stop takes its neighbors' color, since CSS fades to clear without the gray an unmixed blend would pass.
-   */
   const stopsOf = (args: string[], length: number): Stop[] => {
     const raw: { color: Rgb; at?: number }[] = [];
 
     for (const arg of args) {
       const [c = "", ...at] = split(arg, /\s/);
 
-      // A lone length is a hint at where the midpoint falls; the blend stays even.
       if (/^[-\d.]/.test(c)) continue;
       const value = color(c) ?? "rgba(0,0,0,0)";
 
@@ -299,14 +275,9 @@ export function walk({
     });
   };
 
-  /** Stops renumbered from `lo`..`hi` to 0..1, for a gradient line drawn from `lo` to `hi`. */
   const span = (stops: Stop[], lo: number, hi: number): Stop[] =>
     stops.map((s) => ({ ...s, offset: round((s.offset - lo) / (hi - lo)) }));
 
-  /**
-   * `linear-gradient` and `radial-gradient` layers, bottom first, in the snapshot's coordinates, laid out over the
-   * padding box as CSS does by default. Conic gradients and images are skipped.
-   */
   const gradientsOf = (s: CSSStyleDeclaration, b: Rect): Gradient[] => {
     if (s.backgroundImage === "none" || s.visibility === "hidden") return [];
     const bt = px(s.borderTopWidth);
@@ -344,7 +315,6 @@ export function walk({
             } else if (lead.startsWith("to")) {
               const sx = /right/.test(lead) ? 1 : /left/.test(lead) ? -1 : 0;
               const sy = /bottom/.test(lead) ? 1 : /top/.test(lead) ? -1 : 0;
-              // To a corner, the line runs square to the diagonal between the other two corners.
               [dx, dy] = sx && sy ? [sx * h, sy * w] : [sx, sy];
               const n = Math.hypot(dx, dy) || 1;
               dx /= n;
@@ -468,10 +438,6 @@ export function walk({
       .reverse();
   };
 
-  /**
-   * A see-through fill under `backdrop-filter: blur()` drawn more solid instead: what shows through is blurred on the
-   * page, and blurring it here would need a filter, which makes zooming stutter.
-   */
   const frost = (c: Rgb | undefined, s: CSSStyleDeclaration): Rgb | undefined => {
     const blur = /blur\(([\d.]+)px\)/.exec(s.backdropFilter);
 
@@ -485,7 +451,6 @@ export function walk({
   const natural = (url: string): readonly [number, number] | undefined =>
     globalThis.__svjeezImages?.get(url);
 
-  /** A length or percentage of `of`; undefined for `auto` and anything else. */
   const lengthOf = (v: string | undefined, of: number): number | undefined => {
     const calc = /^calc\(\s*(-?[\d.]+)%\s*([+-])\s*([\d.]+)px\s*\)$/.exec(v ?? "");
 
@@ -496,10 +461,6 @@ export function walk({
     return !v || !Number.isFinite(n) ? undefined : v.endsWith("%") ? (n / 100) * of : n;
   };
 
-  /**
-   * The `url()` layers of `image`, bottom first, each laid out in `area` by its `size`, `position` and `repeat`:
-   * every tile it paints. `cover`, `contain`, lengths and percentages are read; `calc()` positions count as 0.
-   */
   const placements = (
     image: string,
     sizes: string,
@@ -571,7 +532,6 @@ export function walk({
       .reverse();
   };
 
-  /** What an element or pseudo-element paints of itself: corners, fill, gradients, border, shadows. */
   const surface = (s: CSSStyleDeclaration, r: DOMRect, b: Rect): Surface => {
     const visible = s.visibility !== "hidden";
 
@@ -647,7 +607,6 @@ export function walk({
 
   const family = (s: CSSStyleDeclaration) => stack(s)[0]!;
 
-  /** The rest of the font stack, ending in a generic family so an uncaptured font draws like the page, not in serif. */
   const fallback = (s: CSSStyleDeclaration): string => {
     const [first, ...rest] = stack(s);
     const generic = /^(serif|sans-serif|monospace|cursive|fantasy)$/;
@@ -667,18 +626,12 @@ export function walk({
     return names.map((f) => (/^[\w -]+$/.test(f) && !/^\d/.test(f) ? f : `'${f}'`)).join(", ");
   };
 
-  /** `font-stretch` as a percentage, when it isn't the normal width. */
   const stretch = (s: CSSStyleDeclaration): number | undefined => {
     const n = parseFloat(s.fontStretch);
 
     return Number.isFinite(n) && n !== 100 ? n : undefined;
   };
 
-  /**
-   * The line a text node is struck with. A decoration is drawn across the text of its inline descendants too, but
-   * stops at an inline-block, a float or a positioned box, so climb until one of those.
-   */
-  /** The element around a node: across a shadow root, its host. */
   const up = (node: Node): Element | null => {
     const root = node.getRootNode();
 
@@ -743,7 +696,6 @@ export function walk({
     placeholder: placeholder || undefined,
   });
 
-  // Where each character of an input's value ends: the value isn't in the DOM, so lay it out in a probe.
   const measure = (s: CSSStyleDeclaration, text: string): number[] => {
     const span = document.createElement("span");
     span.style.cssText = "position:absolute;left:0;top:0;white-space:pre;visibility:hidden";
@@ -770,7 +722,6 @@ export function walk({
     return ends;
   };
 
-  // One run per line: walk the characters, start a line where the top jumps.
   const texts = (node: Text, s: CSSStyleDeclaration, out: Item[]) => {
     const c = color(s.color);
 
@@ -809,7 +760,6 @@ export function walk({
       line.ends.push(r.right - line.left);
     }
 
-    // `text-overflow: ellipsis` shows "…" where the container cuts a line, and hides the characters after it.
     let box: Element | null = up(node);
 
     while (box && /^(inline|contents)$/.test(getComputedStyle(box).display)) box = up(box);
@@ -872,17 +822,11 @@ export function walk({
     "fill-rule",
   ];
 
-  /** The only elements that draw. defs, symbol, clipPath, mask and gradients draw nothing of themselves. */
   const DRAWN = ["path", "rect", "circle", "ellipse", "line", "polyline", "polygon"];
   const CONTAINERS = ["g", "svg", "a", "switch"];
 
-  /** The size of the `<svg>` being read, which a percentage in a shape is a share of. */
   let extent: readonly [number, number] = [0, 0];
 
-  /**
-   * A `<text>` inside a `<mask>`, which the browser doesn't lay out: set where its `x`, `y`, `dy`, `text-anchor` and
-   * `dominant-baseline` put it, in the page's coordinates, and drawn like any other run.
-   */
   const maskText = (el: Element, s: CSSStyleDeclaration): Vector | undefined => {
     // SAFETY: maskText is only called for a `<text>`, which is an SVG element.
     const svg = (el as SVGElement).ownerSVGElement;
@@ -914,11 +858,6 @@ export function walk({
     };
   };
 
-  /**
-   * A drawn element of an inline `<svg>`, or nothing when it draws nothing. `<use>` is written out in place of
-   * its target (a symbol's children, or the element), taking the paint the `<use>` gives it. `via` is that
-   * `<use>`'s style, for what the target doesn't set itself.
-   */
   const vector = (el: Element, via?: CSSStyleDeclaration, depth = 0): Vector | undefined => {
     const tag = el.tagName.toLowerCase();
     const s = getComputedStyle(el);
@@ -934,7 +873,6 @@ export function walk({
 
       if (v === null || (CONTAINERS.includes(tag) && name !== "transform")) continue;
 
-      // A share of the `<svg>`'s own box, not of the picture the drawing ends up in.
       attrs[name] = v.trim().endsWith("%")
         ? String(
             round((px(v) / 100) * (/^(x|cx|rx|width|x1|x2)$/.test(name) ? extent[0] : extent[1])),
@@ -1001,7 +939,6 @@ export function walk({
       children: container ? [...el.children].flatMap((c) => vector(c, via, depth) ?? []) : [],
     };
 
-    // `mask="url(#id)"`: the mask's shapes and text, which show the element where they are light.
     const ref = /url\(["']?#([^)"']+)/.exec(el.getAttribute("mask") ?? "");
     const mask = ref ? el.ownerDocument.getElementById(ref[1]!) : null;
 
@@ -1017,13 +954,8 @@ export function walk({
 
   const TRANSFORMS = ["transform", "rotate", "scale", "translate"] as const;
 
-  /**
-   * Elements with a z-index, and fixed ones, are painted by the nearest stacking context around them, not where they
-   * sit in the tree: each context keeps a list of the layers found under it.
-   */
   const layers: { z: number; item: Item }[][] = [];
 
-  /** The z-index an element is painted at by its stacking context, when it doesn't paint in tree order. */
   const layerOf = (s: CSSStyleDeclaration, parent: CSSStyleDeclaration): number | undefined => {
     const z = s.zIndex === "auto" ? undefined : Number(s.zIndex);
 
@@ -1044,10 +976,6 @@ export function walk({
     s.mixBlendMode !== "normal" ||
     /paint|layout|strict|content/.test(s.contain);
 
-  /**
-   * The element's own 2D transform, from `translate`, `rotate`, `scale` and `transform` in the order CSS applies
-   * them. A pure translation needs nothing: the boxes the browser reports already moved.
-   */
   const matrixOf = (s: CSSStyleDeclaration): DOMMatrix | undefined => {
     if (TRANSFORMS.every((p) => s[p] === "none")) return undefined;
     const m = new DOMMatrix();
@@ -1072,18 +1000,11 @@ export function walk({
     return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 ? undefined : m;
   };
 
-  /**
-   * An element turned, scaled or skewed is read as laid out, with its transform switched off for the moment, and the
-   * transform is kept to draw it with. Transitions are off meanwhile, so putting it back doesn't animate.
-   */
-  /** An element wholly outside the frame, whose descendants stay inside its own box, so none of them can be in it. */
   const culled = (el: Element): boolean => {
     const r = el.getBoundingClientRect();
 
-    // A box with no width or height says nothing about where its fixed or overflowing content is.
     if (!r.width || !r.height || !outside(r)) return false;
 
-    // An inline box says nothing of where a block inside it (a <picture> around an <img>) lies.
     if (getComputedStyle(el).display === "inline") return false;
 
     return (
@@ -1093,10 +1014,6 @@ export function walk({
     );
   };
 
-  /**
-   * What an element's content is made of: its children, or an open shadow root's when it has one, with a `<slot>`
-   * replaced by what is slotted into it (or its own fallback content).
-   */
   const flat = (parent: Element | ShadowRoot): Node[] =>
     [...parent.childNodes].flatMap((n) =>
       n instanceof HTMLSlotElement ? n.assignedNodes({ flatten: true }) : [n],
@@ -1136,7 +1053,6 @@ export function walk({
     };
   };
 
-  /** The text a pseudo-element's `content` puts in, when Chromium's layout didn't say: its strings, joined. */
   const contentText = (content: string): string =>
     [...content.matchAll(/"((?:[^"\\]|\\.)*)"/g)]
       .map((m) =>
@@ -1148,11 +1064,6 @@ export function walk({
       )
       .join("");
 
-  /**
-   * A `::before` or `::after`, from where Chromium laid it out (`marks`) and its computed style. The box comes moved by
-   * however far `el` moved since it was measured, so a transform switched off for reading still holds. Its text is
-   * one line, placed as the box aligns it.
-   */
   const pseudo = (el: Element, which: "before" | "after", now: DOMRect): Box | undefined => {
     const mark = marks?.get(el);
     const quad = mark?.[which];
@@ -1176,7 +1087,6 @@ export function walk({
     );
 
     if (m) {
-      // The quad is the box after its transform: its first corner, carried back through the matrix about the origin.
       const outer = s.boxSizing === "border-box" ? 0 : 1;
 
       const w =
@@ -1241,7 +1151,6 @@ export function walk({
     };
   };
 
-  /** `turned`: the element has a transform, switched off while it's read, so it is a stacking context. */
   const laid = (
     el: Element,
     s: CSSStyleDeclaration,
@@ -1268,15 +1177,12 @@ export function walk({
     }
 
     if (el instanceof HTMLImageElement || el instanceof HTMLCanvasElement) {
-      // A canvas is drawn as the still `stills` took of it.
       const still = el instanceof HTMLCanvasElement ? stills?.get(el) : undefined;
       const href = el instanceof HTMLImageElement ? el.currentSrc || el.src : still?.href;
       const loaded = el instanceof HTMLImageElement ? el.complete : true;
 
-      // An image that hasn't loaded (a lazy one below the fold) has nothing to draw.
       if (!href || !loaded || r.width === 0 || r.height === 0) return undefined;
 
-      // The content box, which `object-fit` lays the image out in.
       const cx = r.left + px(s.borderLeftWidth) + px(s.paddingLeft);
       const cy = r.top + px(s.borderTopWidth) + px(s.paddingTop);
 
@@ -1316,7 +1222,6 @@ export function walk({
         fit = rel(new DOMRect(cx + at(ox, cw - nw * k), cy + at(oy, ch - nh * k), nw * k, nh * k));
       }
 
-      // A border, background or shadow on the image itself is a box around it, which the picture fills inside.
       const own = surface(s, r, rel(r));
 
       const chrome =
@@ -1370,7 +1275,6 @@ export function walk({
 
     place(pseudo(el, "after", r), getComputedStyle(el, "::after"));
 
-    // A stacking context paints its layers below zero, then its own flow, then the rest by z-index, ties in tree order.
     if (context) {
       const raised = layers.pop()!.sort((a, b) => a.z - b.z);
 
@@ -1406,8 +1310,7 @@ export function walk({
       }
     }
 
-    // A color input paints its value in a swatch the page can't reach: its content box, inside the browser's own
-    // wrapper padding unless the page turned its appearance off.
+    // A color input's swatch is out of the page's reach: its content box, inside the browser's wrapper padding unless appearance is none.
     if (el instanceof HTMLInputElement && el.type === "color") {
       const [dy, dx] = s.appearance === "none" ? [0, 0] : [4, 2];
       const left = r.left + px(s.borderLeftWidth) + px(s.paddingLeft) + dx;
@@ -1430,9 +1333,7 @@ export function walk({
         });
     }
 
-    // A range input's track and thumb are parts of the browser's own shadow tree, so `markRanges` hands over their boxes
-    // and styles. Left to its default look the browser draws them itself, in its theme's colors: a gray groove filled
-    // with the accent up to the thumb, and an accent dot. Otherwise a probe element takes their styles to be read.
+    // A range input's track and thumb sit in the browser's own shadow tree, so `markRanges` hands over their boxes and styles.
     const range =
       el instanceof HTMLInputElement && el.type === "range" ? marked?.get(el) : undefined;
 
@@ -1459,7 +1360,6 @@ export function walk({
           children: [],
         });
 
-        // Their boxes are bigger than what's drawn: a 6px groove down the middle of the track, a 16px dot on the thumb.
         const [tx, ty, tw, th] = range.track.rect;
         const [hx, hy, hw, hh] = range.thumb.rect;
         const [groove, dot] = [6, 16];
@@ -1511,7 +1411,6 @@ export function walk({
       id: el.id || undefined,
       box: rel(r),
       ...surface(s, r, rel(r)),
-      // A mask, even one drawn as a gradient, shows nothing outside the border box.
       clip:
         s.overflowX !== "visible" ||
         s.overflowY !== "visible" ||
@@ -1531,7 +1430,6 @@ export function walk({
 
   if (!wholePage) return tree;
 
-  // A body's background paints the canvas when the page's own element has none.
   const body = color(getComputedStyle(document.body).backgroundColor);
 
   return {

@@ -1,4 +1,3 @@
-// Type-checks the published declarations of every entry point, without skipLibCheck.
 import { browser, Dom, duration, snap, snapshots, type Step } from "@svjeez/dom";
 import { fidelity } from "@svjeez/dom/fidelity";
 import { click, demo as reactDemo } from "@svjeez/dom/react";

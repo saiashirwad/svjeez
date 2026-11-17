@@ -123,7 +123,6 @@ describe("real pages", () => {
     });
 
     await card.close();
-    // An 800px canvas drawn at 800px is kept at its size, as WebP.
     expect(JSON.stringify(state.root)).toContain("data:image/webp");
   });
 

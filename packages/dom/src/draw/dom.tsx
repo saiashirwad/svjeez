@@ -20,7 +20,6 @@ import type { Tween } from "./tween.ts";
 export interface DomProps {
   /** One snapshot draws statically. Several play in order, each turning into the next, with waits between. */
   readonly states: Snapshot | readonly Step[];
-  /** The fonts the page used, so the drawn text matches the layout. */
   readonly fonts?: readonly FontValue[];
   /** The ease of a move whose step has none. Default `ease.inOut`. */
   readonly ease?: Ease;
@@ -37,14 +36,6 @@ export interface DomProps {
 
 const at = (x: number, y: number) => (x || y ? `translate(${num(x)} ${num(y)})` : undefined);
 
-/**
- * Draws snapshots as svjeez nodes: one `<g>` per element, text in the page's own fonts. With several states, each
- * turns into the next. Paired boxes reshape and recolor, paired text and icons slide (crossfading when they changed),
- * and the rest fade out or in. Time starts at 0 on the clock around it, so a `<Clip at>` places a whole flow.
- *
- * Transition `i` is one two-state drawing, shown from the middle of the gap before it to the middle of the gap after,
- * so only one is up at a time and the cut between two shows the same picture on both sides.
- */
 export function Dom({
   states,
   fonts = [],
@@ -58,7 +49,6 @@ export function Dom({
 }: DomProps): SvgNode {
   const { snaps, moves } = timeline(states);
 
-  // The runs each family draws, so a given font the page set without ligatures can cut down to its glyphs.
   const drawn = new Map<string, TextRun[]>();
 
   for (const s of snaps) runsByFamily(s.root, drawn);
@@ -84,20 +74,16 @@ export function Dom({
 
     const tweens: Tween[] = moves.map((m) => ({ at: m.at, over: m.over, ease: m.ease ?? ease }));
 
-    // Where each hand-over happens: halfway between one transition's end and the next one's start.
     const cuts = tweens.slice(1).map((next, i) => (tweens[i]!.at + tweens[i]!.over + next.at) / 2);
 
     const drawings = tweens.map((tween, i) =>
       paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween }),
     );
 
-    // Transitions `from` through `to` show from the cut before the first to the cut after the last.
-    // The same transitions drawn shape by shape, as one drawing each: what holding must not run more animations than.
     const plain = tweens.map((tween, i) =>
       paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween }, undefined, false),
     );
 
-    // Every shape moved on its own, as before boxes slid as groups: the most animations holding may run.
     const ceiling = tweens.map((tween, i) =>
       paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween }, undefined, false, false),
     );

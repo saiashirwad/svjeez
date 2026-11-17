@@ -58,7 +58,6 @@ const page = (children: Item[]): Snapshot => {
   return { width: 400, height: 300, pad: 0, box: root.box, root };
 };
 
-/** Every state turns into the next over a second, a second apart. */
 const film = (states: Snapshot[]) =>
   render(
     { width: 400, height: 300, duration: 2 * states.length, title: "hold" },
@@ -67,7 +66,6 @@ const film = (states: Snapshot[]) =>
 
 const count = (svg: string, text: string) => svg.split(`>${text}</text>`).length - 1;
 
-/** How much of `text` shows at `t`, for each copy drawn: every opacity above it, multiplied. */
 const inkOf = (node: SvgNode, text: string, t: number, duration: number): number[] => {
   if (node.kind === "fragment") return node.children.flatMap((c) => inkOf(c, text, t, duration));
 
@@ -92,7 +90,6 @@ describe("holding what doesn't change", () => {
     );
 
     expect(count(svg, "Static")).toBe(1);
-    // The word that changes fades in with one transition and out with the next.
     expect(count(svg, "two")).toBe(2);
   });
 
@@ -107,7 +104,6 @@ describe("holding what doesn't change", () => {
   test("it never runs more animations than one drawing per transition", () => {
     const cut = (k: number) => ({ at: k, over: 1 });
 
-    // Every transition moves one leaf among still ones, the worst case for holding.
     const drawings: SvgNode[] = [0, 1, 2, 3].map((k) => (
       <g>
         {[0, 1, 2, 3].map((i) => (
@@ -130,7 +126,6 @@ describe("holding what doesn't change", () => {
         0,
       );
 
-    // One drawing per transition runs each one's motion, plus a cut for each.
     expect(animations(held)).toBeLessThanOrEqual(animations(drawings) + drawings.length);
     expect(held.length).toBeGreaterThan(0);
   });
@@ -151,7 +146,6 @@ describe("keys pair across parents", () => {
   test("a keyed card that changes column slides there instead of fading", () => {
     const node = <Dom states={[lanes(0), [lanes(1), { over: 1 }]]} />;
 
-    // Halfway through, one copy shows, whole.
     for (const t of [0.2, 0.5, 0.8])
       expect(inkOf(node, "Card", t, 2).filter((o) => o > 0)).toEqual([1]);
   });
@@ -171,7 +165,6 @@ describe("keys pair across parents", () => {
 
     const node = <Dom states={[plain(0), [plain(1), { over: 1 }]]} />;
 
-    // It fades out of one column and into the other.
     expect(inkOf(node, "Card", 0.5, 2).filter((o) => o > 0).length).toBeLessThanOrEqual(1);
     expect(inkOf(node, "Card", 0.1, 2).reduce((a, b) => a + b, 0)).toBeGreaterThan(0.5);
   });
@@ -191,7 +184,6 @@ describe("a resized box", () => {
       />,
     );
 
-    // Old and new shadows each have nine pieces, and every one of them changes shape with the box.
     const pieces = svg.match(/<path[^>]*fill="url\(#g\d+\)"[^>]*>/g) ?? [];
 
     expect(pieces.length).toBeGreaterThanOrEqual(16);

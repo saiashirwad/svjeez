@@ -9,7 +9,6 @@ import { recordings } from "../src/vite.ts";
 const fixture = fileURLToPath(new URL("./fixtures/counter.demo.tsx", import.meta.url));
 const svelteFixture = fileURLToPath(new URL("./fixtures/svelte/counter.demo.ts", import.meta.url));
 
-// Each text node is a run of its own, with its edge spaces trimmed.
 const texts = (snapshot: Snapshot): string[] => {
   const out: string[] = [];
 
